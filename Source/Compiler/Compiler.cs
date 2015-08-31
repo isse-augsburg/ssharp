@@ -261,7 +261,7 @@ namespace SafetySharp.Compiler
 				var fileName = Path.GetFileNameWithoutExtension(syntaxTree.FilePath ?? String.Empty);
 				var filePath = Path.Combine(path, $"{fileName}{index}.cs");
 
-				File.WriteAllText(filePath, syntaxTree.GetRoot().NormalizeWhitespace().ToFullString());
+				File.WriteAllText(filePath, syntaxTree.GetRoot().ToFullString());
 				++index;
 			}
 		}
@@ -285,7 +285,7 @@ namespace SafetySharp.Compiler
 		/// <param name="syntaxGenerator">The syntax generator that the normalizers should use to generate syntax nodes.</param>
 		private void ApplyNormalizers([NotNull] SyntaxGenerator syntaxGenerator)
 		{
-			Compilation = Normalizer.ApplyNormalizer<DebugInfoNormalizer>(Compilation, syntaxGenerator);
+			Compilation = Normalizer.ApplyNormalizer<LineDirectiveNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<PartialNormalizer>(Compilation, syntaxGenerator);
 		}
 

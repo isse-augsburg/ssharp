@@ -56,7 +56,7 @@ extern "C"
 using namespace System;
 using namespace System::Reflection;
 using namespace System::Runtime::InteropServices;
-using namespace SafetySharp::Analysis::StateSpace;
+using namespace SafetySharp::Runtime;
 
 //---------------------------------------------------------------------------------------------------------------------------
 // Assembly metadata

@@ -23,7 +23,6 @@
 namespace PressureTank
 {
 	using SafetySharp.Modeling;
-	using SharedComponents;
 
 	/// <summary>
 	///   The software controller that enables and disables the pump.
@@ -83,33 +82,33 @@ namespace PressureTank
 			_sensor = sensor;
 			_timer = timer;
 
-			Transition(
-				from: States.Filling,
-				to: States.StoppedByTimer,
-				guard: _timer.HasElapsed,
-				action: _pump.Disable);
-
-			Transition(
-				from: States.Filling,
-				to: States.StoppedBySensor,
-				guard: _sensor.IsFull,
-				action: () =>
-				{
-					_pump.Disable();
-					_timer.Stop();
-				});
-
-			Transition(
-				from: States.StoppedByTimer | States.StoppedBySensor | States.Inactive,
-				to: States.Filling,
-				guard: _sensor.IsEmpty,
-				action: () =>
-				{
-					_timer.Start();
-					_pump.Enable();
-				});
-
-			InitialState(States.Inactive);
+//			Transition(
+//				from: States.Filling,
+//				to: States.StoppedByTimer,
+//				guard: _timer.HasElapsed,
+//				action: _pump.Disable);
+//
+//			Transition(
+//				from: States.Filling,
+//				to: States.StoppedBySensor,
+//				guard: _sensor.IsFull,
+//				action: () =>
+//				{
+//					_pump.Disable();
+//					_timer.Stop();
+//				});
+//
+//			Transition(
+//				from: States.StoppedByTimer | States.StoppedBySensor | States.Inactive,
+//				to: States.Filling,
+//				guard: _sensor.IsEmpty,
+//				action: () =>
+//				{
+//					_timer.Start();
+//					_pump.Enable();
+//				});
+//
+//			InitialState(States.Inactive);
 		}
 	}
 }

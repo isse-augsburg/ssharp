@@ -23,7 +23,6 @@
 namespace PressureTank
 {
 	using SafetySharp.Modeling;
-	using SafetySharp.Modeling.Faults;
 
 	/// <summary>
 	///   Represents the sensor that monitors the pressure within the pressure tank.
@@ -44,8 +43,6 @@ namespace PressureTank
 			_triggerPressure = triggerPressure;
 		}
 
-		//PersistentFault f2 = new PersistentFault(new SuppressIsEmpty(), new SuppressIsFull());
-
 		/// <summary>
 		///   Senses the physical pressure level within the tank.
 		/// </summary>
@@ -64,52 +61,24 @@ namespace PressureTank
 		// TODO: Consider using a property once supported by S#.
 		public bool IsEmpty() => CheckPhysicalPressure() <= 0;
 
-		/// <summary>
-		///   Represents a failure mode that prevents the sensor from triggering when the tank has reached or exceeded its
-		///   maximum allowed pressure level.
-		/// </summary>
-		[Transient]
-		public class SuppressIsFull : Fault
-		{
-			public bool IsFull() => false;
-		}
+//		[Transient]
+//		/// </summary>
+//		///   maximum allowed pressure level.
+//		///   Represents a failure mode that prevents the sensor from triggering when the tank has reached or exceeded its
 
-		/// <summary>
-		///   Represents a failure mode that prevents the sensor from triggering when the tank has become empty.
-		/// </summary>
-		[Transient]
-		public class SuppressIsEmpty : Fault
-		{
-			public bool IsEmpty() => false;
-		}
+//		/// <summary>
+//		public class SuppressIsFull : Fault
+//		{
+//			public bool IsFull() => false;
+//		}
+//
+//		/// <summary>
+//		///   Represents a failure mode that prevents the sensor from triggering when the tank has become empty.
+//		/// </summary>
+//		[Transient]
+//		public class SuppressIsEmpty : Fault
+//		{
+//			public bool IsEmpty() => false;
+//		}
 	}
 }
-
-//public class FaultEffect
-//{
-//	static public object Create<T>(string n, T t)
-//	{
-//		return null;
-//	}
-//}
-//
-//class Fault2<T>
-//{
-//	public Fault2(params FaultEffect[] f)
-//	{
-//		
-//	}
-//
-//	public OccurrencePattern OccurrencePattern { get; set; }
-//	public List<object> FaultsEffects { get; set; } = new List<object>();
-//	public Dictionary<string, object> FaultsEffectsD { get; set; } = new Dictionary<string, object>();
-//
-//}
-//
-//class PersistentFault : Fault2<Persistent>
-//{
-//	public PersistentFault(params FaultEffect[] f)
-//		: base(f)
-//	{
-//	}
-//}

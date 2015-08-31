@@ -62,7 +62,7 @@
     <Compile Include="Runtime\ChoiceResolver.cs" />
     <Compile Include="Runtime\ChoiceStack.cs" />
     <Compile Include="Runtime\CounterExample.cs" />
-    <Compile Include="Runtime\ExecuteStepGenerator.cs" />
+    <Compile Include="Runtime\StepGenerator.cs" />
     <Compile Include="Runtime\ModelInfo.cs" />
     <Compile Include="Runtime\ModelState.cs" />
     <Compile Include="Runtime\ObjectTable.cs" />

@@ -51,13 +51,13 @@ namespace PressureTank
 		// TODO: Consider using a property once supported by S#.
 		public bool IsEnabled() => _enabled;
 
-		/// <summary>
-		///   Represents a persistent failure mode that prevents the pump from pumping.
-		/// </summary>
-		[Persistent]
-		public class SuppressPumping : Fault
-		{
-			public bool IsEnabled() => false;
-		}
+//		/// <summary>
+//		///   Represents a persistent failure mode that prevents the pump from pumping.
+//		/// </summary>
+//		[Persistent]
+//		public class SuppressPumping : Fault
+//		{
+//			public bool IsEnabled() => false;
+//		}
 	}
 }

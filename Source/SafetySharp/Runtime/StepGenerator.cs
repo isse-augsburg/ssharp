@@ -31,7 +31,7 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Dynamically generates the step execution method.
 	/// </summary>
-	public sealed class ExecuteStepGenerator
+	public sealed class StepGenerator
 	{
 		/// <summary>
 		///   The IL generator of the serialization method.
@@ -52,7 +52,7 @@ namespace SafetySharp.Runtime
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="model">The model the method should be generated for.</param>
-		internal ExecuteStepGenerator(Model model)
+		internal StepGenerator(Model model)
 		{
 			Requires.NotNull(model, nameof(model));
 

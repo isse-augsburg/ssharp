@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Modeling
 {
+	using System.Runtime.CompilerServices;
 	using Runtime;
 
 	/// <summary>
@@ -40,6 +41,7 @@ namespace SafetySharp.Modeling
 		/// <param name="value1">The first value to choose.</param>
 		/// <param name="value2">The second value to choose.</param>
 		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2)
 		{
 			switch (Resolver.HandleChoice(2))
@@ -58,6 +60,7 @@ namespace SafetySharp.Modeling
 		/// <param name="value2">The second value to choose.</param>
 		/// <param name="value3">The third value to choose.</param>
 		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3)
 		{
 			switch (Resolver.HandleChoice(2))
@@ -80,6 +83,7 @@ namespace SafetySharp.Modeling
 		/// <param name="value3">The third value to choose.</param>
 		/// <param name="value4">The fourth value to choose.</param>
 		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3, T value4)
 		{
 			switch (Resolver.HandleChoice(2))
@@ -105,6 +109,7 @@ namespace SafetySharp.Modeling
 		/// <param name="value4">The fourth value to choose.</param>
 		/// <param name="value5">The fifth value to choose.</param>
 		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3, T value4, T value5)
 		{
 			switch (Resolver.HandleChoice(2))
@@ -133,6 +138,7 @@ namespace SafetySharp.Modeling
 		/// <param name="value5">The fifth value to choose.</param>
 		/// <param name="value6">The sixth value to choose.</param>
 		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3, T value4, T value5, T value6)
 		{
 			switch (Resolver.HandleChoice(2))
@@ -156,6 +162,7 @@ namespace SafetySharp.Modeling
 		///   Returns one of the <paramref name="values" /> nondeterministically.
 		/// </summary>
 		/// <param name="values">The values to choose from.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(params T[] values)
 		{
 			return values[Resolver.HandleChoice(values.Length)];

@@ -25,13 +25,11 @@ namespace SafetySharp.Compiler.Normalization
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
-	using Roslyn;
 	using Roslyn.Syntax;
 
 	/// <summary>
-	///   Ensures that all class, struct, and interface declarations are marked <c>partial</c> such that
-	///   additionally generated code can be easily added without having to consider fixing up line information
-	///   for debugging purposes.
+	///   Ensures that all class declarations are marked <c>partial</c> such that additionally generated code can be easily added
+	///   without having to consider fixing up line information for debugging purposes.
 	/// </summary>
 	public sealed class PartialNormalizer : SyntaxNormalizer
 	{
@@ -42,45 +40,11 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			classDeclaration = (ClassDeclarationSyntax)base.VisitClassDeclaration(classDeclaration);
 
-			if (!classDeclaration.Modifiers.Any(SyntaxKind.PartialKeyword))
-			{
-				var partialKeyword = SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingSpace();
-				classDeclaration = classDeclaration.WithModifiers(classDeclaration.Modifiers.Add(partialKeyword));
-			}
+			if (classDeclaration.Modifiers.Any(SyntaxKind.PartialKeyword))
+				return classDeclaration;
 
-			return classDeclaration;
-		}
-
-		/// <summary>
-		///   Normalizes the <paramref name="structDeclaration" />.
-		/// </summary>
-		public override SyntaxNode VisitStructDeclaration(StructDeclarationSyntax structDeclaration)
-		{
-			structDeclaration = (StructDeclarationSyntax)base.VisitStructDeclaration(structDeclaration);
-
-			if (!structDeclaration.Modifiers.Any(SyntaxKind.PartialKeyword))
-			{
-				var partialKeyword = SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingSpace();
-				structDeclaration = structDeclaration.WithModifiers(structDeclaration.Modifiers.Add(partialKeyword));
-			}
-
-			return structDeclaration;
-		}
-
-		/// <summary>
-		///   Normalizes the <paramref name="interfaceDeclaration" />.
-		/// </summary>
-		public override SyntaxNode VisitInterfaceDeclaration(InterfaceDeclarationSyntax interfaceDeclaration)
-		{
-			interfaceDeclaration = (InterfaceDeclarationSyntax)base.VisitInterfaceDeclaration(interfaceDeclaration);
-
-			if (!interfaceDeclaration.Modifiers.Any(SyntaxKind.PartialKeyword))
-			{
-				var partialKeyword = SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingSpace();
-				interfaceDeclaration = interfaceDeclaration.WithModifiers(interfaceDeclaration.Modifiers.Add(partialKeyword));
-			}
-
-			return interfaceDeclaration;
+			var partialKeyword = SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingSpace();
+			return classDeclaration.WithModifiers(classDeclaration.Modifiers.Add(partialKeyword));
 		}
 	}
 }

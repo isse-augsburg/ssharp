@@ -25,61 +25,75 @@ namespace PressureTank
 	using SafetySharp.Modeling;
 
 	/// <summary>
-	///   Represents a model of the pressure tank case study.
+	///   Represents a timer that signals a timeout.
 	/// </summary>
-	public class PressureTankModel : Model
+	public class Timer : Component
 	{
 		/// <summary>
-		///   The maximum allowed pressure level within the tank.
+		///   The timeout signaled by the timer.
 		/// </summary>
-		public const int MaxPressure = 60;
+		private readonly int _timeout;
 
 		/// <summary>
-		///   The pressure level that triggers the sensor.
+		///   The remaining time before the timeout is signaled. A value of -1 indicates that the timer is inactive.
 		/// </summary>
-		public const int SensorPressure = 58;
-
-		/// <summary>
-		///   The controller's timeout in seconds.
-		/// </summary>
-		public const int Timeout = 59;
+		[Range(-1, 60, OverflowBehavior.Clamp)]
+		private int _remainingTime = -1;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public PressureTankModel()
+		/// <param name="timeout">The timeout interval of the timer.</param>
+		public Timer(int timeout)
 		{
-			Controller = new Controller(Sensor, Pump, Timer);
-//
-//			AddRootComponents(Tank, Controller);
-//
-//			Bind(Sensor.RequiredPorts.CheckPhysicalPressure = Tank.ProvidedPorts.PressureLevel);
-//			Bind(Tank.RequiredPorts.IsBeingFilled = Pump.ProvidedPorts.IsEnabled);
+			_timeout = timeout;
 		}
 
 		/// <summary>
-		///   Gets the sensor that is used to determine the pressure level within the tank.
+		///   Gets a value indicating whether the timeout has elapsed. This method returns true only for the single system step where
+		///   the timeout occurs.
 		/// </summary>
-		public Sensor Sensor { get; } = new Sensor(SensorPressure);
+		public bool HasElapsed() => _remainingTime == 0;
 
 		/// <summary>
-		///   Gets the pump that fills the tank.
+		///   Starts or restarts the timer.
 		/// </summary>
-		public Pump Pump { get; } = new Pump();
+		public void Start() => _remainingTime = _timeout;
 
 		/// <summary>
-		///   Gets the tank that is being filled.
+		///   Stops the timer.
 		/// </summary>
-		public Tank Tank { get; } = new Tank(MaxPressure);
+		public void Stop() => _remainingTime = -1;
 
 		/// <summary>
-		///   The timer that is used to determine whether the pump should be disabled.
+		///   Gets a value indicating whether the timer is currently active, eventually signaling the timeout.
 		/// </summary>
-		public Timer Timer { get; } = new Timer(Timeout);
+		public bool IsActive() => _remainingTime > 0;
 
 		/// <summary>
-		///   Gets the controller that stops filling the tank when it is full.
+		///   Gets the remaining time before the timeout occurs.
 		/// </summary>
-		public Controller Controller { get; }
+		public int GetRemainingTime() => _remainingTime;
+
+		/// <summary>
+		///   Updates the timer's internal state.
+		/// </summary>
+		public override void Update()
+		{
+			// TODO: Support different system step times
+			--_remainingTime;
+
+			if (_remainingTime < -1)
+				_remainingTime = -1;
+		}
+
+//		/// <summary>
+//		///   Represents a failure mode that prevents the timer from reporting a timeout.
+//		/// </summary>
+//		[Transient]
+//		public class SuppressTimeout : Fault
+//		{
+//			public bool HasElapsed() => false;
+//		}
 	}
 }

@@ -20,24 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Compiler.Analyzers
 {
-	/// <summary>
-	///   Represents a S# component.
-	/// </summary>
-	public abstract class Component : IComponent
+	using Microsoft.CodeAnalysis;
+	using Microsoft.CodeAnalysis.Diagnostics;
+
+	[DiagnosticAnalyzer(LanguageNames.CSharp)]
+	public class DummyAnalyzer : Analyzer
 	{
 		/// <summary>
-		///   Initializes a new instance.
+		///   Called once at session start to register actions in the analysis context.
 		/// </summary>
-		protected Component()
-		{
-		}
-
-		/// <summary>
-		///   Updates the internal state of the component.
-		/// </summary>
-		public virtual void Update()
+		/// <param name="context" />
+		public override void Initialize(AnalysisContext context)
 		{
 		}
 	}

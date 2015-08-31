@@ -61,7 +61,7 @@ namespace Tests.Utilities
 		/// <summary>
 		///   Gets the output that writes to the test output stream.
 		/// </summary>
-		public TestTraceOutput Output { get; private set; }
+		public TestTraceOutput Output { get; }
 
 		/// <summary>
 		///   Gets the name of the file that calls this method.
@@ -317,8 +317,7 @@ namespace Tests.Utilities
 			var typedException = exception as T;
 			if (typedException != null)
 			{
-				if (assertion != null)
-					assertion(typedException);
+				assertion?.Invoke(typedException);
 			}
 			else
 			{

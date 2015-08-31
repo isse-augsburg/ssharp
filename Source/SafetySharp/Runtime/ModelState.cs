@@ -134,7 +134,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		private void GenerateUpdateCode()
 		{
-			var generator = new ExecuteStepGenerator(_model);
+			var generator = new StepGenerator(_model);
 			_update = generator.Compile();
 		}
 
