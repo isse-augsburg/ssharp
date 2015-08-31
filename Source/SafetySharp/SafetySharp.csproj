@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9B6C1FB4-3F1B-43AC-A0E0-EAED4088BF37}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SafetySharp</RootNamespace>
+    <AssemblyName>SafetySharp.Modeling</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Binaries\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Binaries\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="JetBrains.Annotations, Version=9.1.1.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\Packages\JetBrains.Annotations.9.1.1\lib\net20\JetBrains.Annotations.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CompilerServices\RuntimeMethodAttribute.cs" />
+    <Compile Include="CompilerServices\LiftExpressionAttribute.cs" />
+    <Compile Include="Modeling\Choice.cs" />
+    <Compile Include="Modeling\Component.cs" />
+    <Compile Include="Modeling\Faults\Fault.cs" />
+    <Compile Include="Modeling\Faults\Fault`1.cs" />
+    <Compile Include="Modeling\Faults\OccurrencePattern.cs" />
+    <Compile Include="Modeling\Faults\Persistent.cs" />
+    <Compile Include="Modeling\Faults\Transient.cs" />
+    <Compile Include="Modeling\IComponent.cs" />
+    <Compile Include="Modeling\Model.cs" />
+    <Compile Include="Modeling\OverflowBehavior.cs" />
+    <Compile Include="Modeling\PriorityAttribute.cs" />
+    <Compile Include="Modeling\ProvidedAttribute.cs" />
+    <Compile Include="Modeling\RangeAttribute.cs" />
+    <Compile Include="Modeling\RequiredAttribute.cs" />
+    <Compile Include="Runtime\CheckKind.cs" />
+    <Compile Include="Runtime\ChoiceResolver.cs" />
+    <Compile Include="Runtime\ChoiceStack.cs" />
+    <Compile Include="Runtime\CounterExample.cs" />
+    <Compile Include="Runtime\ExecuteStepGenerator.cs" />
+    <Compile Include="Runtime\ModelInfo.cs" />
+    <Compile Include="Runtime\ModelState.cs" />
+    <Compile Include="Runtime\ObjectTable.cs" />
+    <Compile Include="Runtime\SerializationDelegate.cs" />
+    <Compile Include="Runtime\SerializationGenerator.cs" />
+    <Compile Include="Runtime\SerializationRegistry.cs" />
+    <Compile Include="Runtime\StateCache.cs" />
+    <Compile Include="Runtime\StateSpaceEnumerator.cs" />
+    <Compile Include="Utilities\MemoryBuffer.cs" />
+    <Compile Include="Utilities\CodeWriter.cs" />
+    <Compile Include="Utilities\DisposableExtensions.cs" />
+    <Compile Include="Utilities\DisposableObject.cs" />
+    <Compile Include="Utilities\ExternalProcess.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\Assert.cs" />
+    <Compile Include="Utilities\ReferenceEqualityComparer.cs" />
+    <Compile Include="Utilities\ReflectionExtensions.cs" />
+    <Compile Include="Utilities\Requires.cs" />
+    <Compile Include="Utilities\TemporaryFile.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="AfterBuild">
+    <Copy SourceFiles="$(SolutionDir)Dependencies/cyggcc_s-seh-1.dll" DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="$(SolutionDir)Dependencies/cygiconv-2.dll" DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="$(SolutionDir)Dependencies/cygintl-8.dll" DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="$(SolutionDir)Dependencies/cygpopt-0.dll" DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="$(SolutionDir)Dependencies/cygstdc++-6.dll" DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="$(SolutionDir)Dependencies/cygwin1.dll" DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="$(SolutionDir)Dependencies/cygz.dll" DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="$(SolutionDir)Dependencies/ltsmin-printtrace.exe" DestinationFolder="$(OutDir)" />
+  </Target>
+</Project>

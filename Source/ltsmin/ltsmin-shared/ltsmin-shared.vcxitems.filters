@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ltsmin.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)bitvector.h">
+      <Filter>ltsmin</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)chunk-support.h">
+      <Filter>ltsmin</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)dm.h">
+      <Filter>ltsmin</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)lts-type.h">
+      <Filter>ltsmin</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)pins.h">
+      <Filter>ltsmin</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)string-map.h">
+      <Filter>ltsmin</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ltsmin-standard.h">
+      <Filter>ltsmin</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="ltsmin">
+      <UniqueIdentifier>{16a074a4-5ae7-4110-a1bd-c4c31d550740}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

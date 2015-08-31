@@ -1,0 +1,134 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+
+namespace Elbtunnel.Dcca
+{
+	using System;
+	using System.Runtime.CompilerServices;
+	using FluentAssertions;
+	using System.Linq;
+	using NUnit.Framework;
+	using SafetySharp.Analysis;
+	using SafetySharp.Runtime;
+	using SafetySharp.Simulation;
+	using Sensors;
+	using SharedComponents;
+
+	[TestFixture]
+	public class OriginalDesignDcca
+	{
+		private class Model : Design1Original
+		{
+			LtlFormula EmptySet()
+			{
+<# foreach (var fault in GetFaults()) { #>
+				<#= fault.Item1 #>.IgnoreFault<<#= fault.Item2 #>>();
+<# } #>
+
+				return GetHazard();
+			}
+
+<# foreach (var set in PowerSet(GetFaults().ToArray()).Where(s=> s.Length <= 2 && s.Length > 0)) { #>
+			LtlFormula <#= String.Join("___", set.Select(f => String.Format("{0}_{1}", f.Item1, f.Item2.Replace(".", "_")))) #>()
+			{
+<# foreach (var fault in GetFaults().Except(set)) { #>
+				<#= fault.Item1 #>.IgnoreFault<<#= fault.Item2 #>>();
+<# } #>
+
+				return GetHazard();
+			}
+<# } #>
+		}
+
+		private readonly Model _model;
+		private readonly LtsMin _ltsMin;
+
+		public OriginalDesignDcca()
+		{
+			_model = new Model();
+			_ltsMin = new LtsMin(_model);
+		}
+
+		private void Check([CallerMemberName] string factory = null)
+		{
+			_ltsMin.CheckInvariant(factory).Should().BeTrue();
+		}
+
+		[Test]
+		public void ListFaults()
+		{
+			_model.GetMetadata().RootComponent.VisitPreOrder(component =>
+			{
+				if (component.Faults.Length == 0)
+					return;
+
+				Console.WriteLine(String.Join(".", component.GetPath()));
+				foreach (var fault in component.Faults)
+					Console.WriteLine("\t{0}", fault.Name);
+			});
+		}
+
+		[Test]
+		public void EmptySet()
+		{
+			Check();
+		}
+
+<# foreach (var set in PowerSet(GetFaults().ToArray()).Where(s=> s.Length <= 2 && s.Length > 0)) { #>
+		[Test]
+		public void <#= String.Join("___", set.Select(f => String.Format("{0}_{1}", f.Item1, f.Item2.Replace(".", "_")))) #>()
+		{
+			Check();
+		}
+<# } #>
+	}
+}
+
+<#+
+
+IEnumerable<Tuple<string, string>> GetFaults()
+{
+	yield return Tuple.Create("PreLightBarrier", "LightBarrier.Misdetection");
+	yield return Tuple.Create("PreLightBarrier", "LightBarrier.FalseDetection");
+
+	yield return Tuple.Create("MainLightBarrier", "LightBarrier.Misdetection");
+	yield return Tuple.Create("MainLightBarrier", "LightBarrier.FalseDetection");
+
+	yield return Tuple.Create("MainDetectorLeft", "OverheadDetector.Misdetection");
+	yield return Tuple.Create("MainDetectorLeft", "OverheadDetector.FalseDetection");
+
+	yield return Tuple.Create("MainDetectorRight", "OverheadDetector.Misdetection");
+	yield return Tuple.Create("MainDetectorRight", "OverheadDetector.FalseDetection");
+
+	yield return Tuple.Create("EndDetectorLeft", "OverheadDetector.Misdetection");
+	yield return Tuple.Create("EndDetectorLeft", "OverheadDetector.FalseDetection");
+
+	//yield return Tuple.Create("MainControl.GetMetadata().Subcomponents.Single(c => c.Name == \"Timer\").Component", "Timer.SuppressTimeout");
+//	yield return Tuple.Create("EndControl.GetMetadata().Subcomponents.Single(c => c.Name == \"_timer\").Component", "Timer.SuppressTimeout");
+}
+
+T[][] PowerSet<T>(T[] seq)
+{
+    var powerSet = new T[1 << seq.Length][];
+    powerSet[0] = new T[0]; // starting only with empty set
+    for (int i = 0; i < seq.Length; i++)
+    {
+        var cur = seq[i];
+        int count = 1 << i; // doubling list each time
+        for (int j = 0; j < count; j++)
+        {
+            var source = powerSet[j];
+            var destination = powerSet[count + j] = new T[source.Length + 1];
+            for (int q = 0; q < source.Length; q++)
+                destination[q] = source[q];
+            destination[source.Length] = cur;
+        }
+    }
+    return powerSet;
+}
+
+#>
