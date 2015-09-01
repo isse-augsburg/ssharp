@@ -299,10 +299,13 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Checks whether <paramref name="type" /> is a reference type, i.e., a class, delegate, or interface.
+		///   Checks whether <paramref name="type" /> is a reference type, i.e., a class or interface.
 		/// </summary>
 		private static bool IsReferenceType(Type type)
 		{
+			if (type.IsSubclassOf(typeof(Delegate)))
+				throw new NotSupportedException($"Delegate types such as '{type.FullName}' are not supported.");
+
 			return type.IsClass || type.IsInterface;
 		}
 
