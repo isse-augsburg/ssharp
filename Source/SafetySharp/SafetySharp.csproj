@@ -59,7 +59,6 @@
     <Compile Include="Modeling\RangeAttribute.cs" />
     <Compile Include="Modeling\RequiredAttribute.cs" />
     <Compile Include="Modeling\Specification.cs" />
-    <Compile Include="Runtime\CheckKind.cs" />
     <Compile Include="Runtime\ChoiceResolver.cs" />
     <Compile Include="Runtime\ChoiceStack.cs" />
     <Compile Include="Runtime\Serialization\ObjectSerializer.cs" />
@@ -69,7 +68,6 @@
     <Compile Include="Runtime\Serialization\SerializationMode.cs" />
     <Compile Include="Runtime\Serialization\ISerializer.cs" />
     <Compile Include="Runtime\StepGenerator.cs" />
-    <Compile Include="Runtime\ModelInfo.cs" />
     <Compile Include="Runtime\Serialization\SerializationRegistry.cs" />
     <Compile Include="Runtime\StateCache.cs" />
     <Compile Include="Utilities\MemoryBuffer.cs" />

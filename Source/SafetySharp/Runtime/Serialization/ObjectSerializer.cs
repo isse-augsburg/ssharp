@@ -26,7 +26,6 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Reflection;
-	using System.Runtime.InteropServices;
 	using Utilities;
 
 	/// <summary>
@@ -76,13 +75,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		public int GetStateSlotCount(object obj, SerializationMode mode)
 		{
-			return GetFields(obj, mode).Sum(field =>
-			{
-				var fieldType = field.FieldType.IsEnum ? field.FieldType.GetEnumUnderlyingType() : field.FieldType;
-				Assert.That(fieldType.IsPrimitive, $"Expected a field of primitive type; type '{fieldType.FullName}' is unsupported.");
-
-				return (Marshal.SizeOf(fieldType) + sizeof(int) - 1) / sizeof(int);
-			});
+			return GetFields(obj, mode).Sum(field => SerializationGenerator.GetStateSlotCount(field.FieldType));
 		}
 
 		/// <summary>

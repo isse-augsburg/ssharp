@@ -78,7 +78,7 @@ namespace SafetySharp.Runtime.Serialization
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public object GetObject(int identifier)
 		{
-			return _objects[identifier];
+			return identifier == -1 ? null : _objects[identifier];
 		}
 
 		/// <summary>
@@ -87,7 +87,7 @@ namespace SafetySharp.Runtime.Serialization
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int GetObjectIdentifier(object obj)
 		{
-			return _objectToIdentifier[obj];
+			return obj == null ? -1 : _objectToIdentifier[obj];
 		}
 	}
 }

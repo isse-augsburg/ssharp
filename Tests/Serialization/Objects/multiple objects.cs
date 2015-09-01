@@ -20,36 +20,62 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization
+namespace Tests.Serialization.Objects
 {
-	using Microsoft.CodeAnalysis;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	public partial class SerializationTests : Tests
+	internal class MultipleObjects : SerializationObject
 	{
-		[Theory, MemberData("DiscoverTests", "PrimitiveTypes")]
-		public void PrimitiveTypes(string test, SyntaxTree code)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(code);
+			var o1 = new object();
+			var o2 = new object();
+			var o3 = new object();
+			var c = new C { O1 = o1, O2 = null, O3 = o1 };
+
+			GenerateCode(SerializationMode.Full, c, o1, o2, o3);
+			_stateSlotCount.ShouldBe(3);
+
+			Serialize();
+			c.O1 = null;
+			c.O2 = o3;
+			c.O3 = null;
+			Deserialize();
+			c.O1.ShouldBe(o1);
+			c.O2.ShouldBe(null);
+			c.O3.ShouldBe(o1);
+
+			c.O1 = null;
+			c.O2 = o2;
+			c.O3 = o3;
+			Serialize();
+			c.O1 = null;
+			c.O2 = o3;
+			c.O3 = null;
+			Deserialize();
+			c.O1.ShouldBe(null);
+			c.O2.ShouldBe(o2);
+			c.O3.ShouldBe(o3);
+
+			c.O1 = o3;
+			c.O2 = o1;
+			c.O3 = o2;
+			Serialize();
+			c.O1 = null;
+			c.O2 = null;
+			c.O3 = null;
+			Deserialize();
+			c.O1.ShouldBe(o3);
+			c.O2.ShouldBe(o1);
+			c.O3.ShouldBe(o2);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Enumerations")]
-		public void Enumerations(string test, SyntaxTree code)
+		internal class C
 		{
-			ExecuteDynamicTests(code);
-		}
-
-		[Theory, MemberData("DiscoverTests", "MixedTypes")]
-		public void MixedTypes(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Objects")]
-		public void Objects(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
+			public object O1;
+			public object O2;
+			public object O3;
 		}
 	}
 }

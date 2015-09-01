@@ -126,15 +126,25 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Serialization\Enumerations\Int16.cs" />
+    <Compile Include="Serialization\Enumerations\Int64.cs" />
     <Compile Include="Serialization\Enumerations\Int32.cs" />
     <Compile Include="Serialization\Enumerations\Int8.cs" />
     <Compile Include="Serialization\Enumerations\UInt16.cs" />
+    <Compile Include="Serialization\Enumerations\UInt64.cs" />
     <Compile Include="Serialization\Enumerations\UInt32.cs" />
     <Compile Include="Serialization\Enumerations\UInt8.cs" />
+    <Compile Include="Serialization\MixedTypes\Mixed2.cs" />
+    <Compile Include="Serialization\MixedTypes\Mixed1.cs" />
+    <Compile Include="Serialization\Objects\null.cs" />
+    <Compile Include="Serialization\Objects\multiple objects.cs" />
+    <Compile Include="Serialization\Objects\nested objects.cs" />
+    <Compile Include="Serialization\Objects\single object.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Char.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Bool.cs" />
+    <Compile Include="Serialization\PrimitiveTypes\Int64.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int8.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int16.cs" />
+    <Compile Include="Serialization\PrimitiveTypes\UInt64.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt8.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt16.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt32.cs" />

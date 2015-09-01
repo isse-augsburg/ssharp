@@ -20,36 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization
+namespace Tests.Serialization.MixedTypes
 {
-	using Microsoft.CodeAnalysis;
-	using Utilities;
-	using Xunit;
+	using System;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	public partial class SerializationTests : Tests
+	internal class Mixed1 : SerializationObject
 	{
-		[Theory, MemberData("DiscoverTests", "PrimitiveTypes")]
-		public void PrimitiveTypes(string test, SyntaxTree code)
+		public enum E : long
 		{
-			ExecuteDynamicTests(code);
+			A,
+			B = Int64.MaxValue,
+			C = 5
 		}
 
-		[Theory, MemberData("DiscoverTests", "Enumerations")]
-		public void Enumerations(string test, SyntaxTree code)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(code);
+			var c = new C { F = true, G = E.B, H = -1247 };
+
+			GenerateCode(SerializationMode.Full, c);
+			_stateSlotCount.ShouldBe(4);
+
+			Serialize();
+			c.F = false;
+			c.G = E.C;
+			c.H = 3;
+			Deserialize();
+			c.F.ShouldBe(true);
+			c.G.ShouldBe(E.B);
+			c.H.ShouldBe(-1247);
 		}
 
-		[Theory, MemberData("DiscoverTests", "MixedTypes")]
-		public void MixedTypes(string test, SyntaxTree code)
+		internal class C
 		{
-			ExecuteDynamicTests(code);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Objects")]
-		public void Objects(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
+			public bool F;
+			public E G;
+			public int H;
 		}
 	}
 }

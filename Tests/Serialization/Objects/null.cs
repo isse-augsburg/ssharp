@@ -20,26 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace Tests.Serialization.Objects
 {
-	/// <summary>
-	///   Indicates which kind of check should be performed on a model.
-	/// </summary>
-	internal enum CheckKind
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
+
+	internal class NullObject : SerializationObject
 	{
-		/// <summary>
-		///   Indicates that simple reachability analysis should be used.
-		/// </summary>
-		Invariant,
+		protected override void Check()
+		{
+			var o = new object();
+			var c = new C { O = o };
 
-		/// <summary>
-		///   Indicates that LTL model checking should be used.
-		/// </summary>
-		Ltl,
+			GenerateCode(SerializationMode.Full, c, o);
+			_stateSlotCount.ShouldBe(1);
 
-		/// <summary>
-		///   Indicates that μ-calculus model checking should be used.
-		/// </summary>
-		MuCalculus
+			Serialize();
+			c.O = null;
+			Deserialize();
+			c.O.ShouldBe(o);
+
+			c.O = null;
+			Serialize();
+			c.O = new object();
+			Deserialize();
+			c.O.ShouldBe(null);
+		}
+
+		internal class C
+		{
+			public object O;
+		}
 	}
 }

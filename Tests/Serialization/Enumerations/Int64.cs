@@ -20,36 +20,57 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization
+namespace Tests.Serialization.Enumerations
 {
-	using Microsoft.CodeAnalysis;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	public partial class SerializationTests : Tests
+	internal class Int64 : SerializationObject
 	{
-		[Theory, MemberData("DiscoverTests", "PrimitiveTypes")]
-		public void PrimitiveTypes(string test, SyntaxTree code)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(code);
+			var c = new C { F = E.B };
+
+			GenerateCode(SerializationMode.Full, c);
+			_stateSlotCount.ShouldBe(2);
+
+			Serialize();
+			c.F = E.C;
+			Deserialize();
+			c.F.ShouldBe(E.B);
+
+			c.F = E.D;
+			Serialize();
+			c.F = E.C;
+			Deserialize();
+			c.F.ShouldBe(E.D);
+
+			c.F = E.E;
+			Serialize();
+			c.F = E.C;
+			Deserialize();
+			c.F.ShouldBe(E.E);
+
+			c.F = E.F;
+			Serialize();
+			c.F = E.C;
+			Deserialize();
+			c.F.ShouldBe(E.F);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Enumerations")]
-		public void Enumerations(string test, SyntaxTree code)
+		private enum E : long
 		{
-			ExecuteDynamicTests(code);
+			A,
+			B,
+			C,
+			D = -8,
+			E = System.Int64.MaxValue,
+			F = System.Int64.MinValue,
 		}
 
-		[Theory, MemberData("DiscoverTests", "MixedTypes")]
-		public void MixedTypes(string test, SyntaxTree code)
+		private class C
 		{
-			ExecuteDynamicTests(code);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Objects")]
-		public void Objects(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
+			public E F;
 		}
 	}
 }
