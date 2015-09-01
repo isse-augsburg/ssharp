@@ -25,9 +25,9 @@ namespace PressureTank
 	using SafetySharp.Modeling;
 
 	/// <summary>
-	///   Represents a model of the pressure tank case study.
+	///   Represents the specification of the pressure tank case study.
 	/// </summary>
-	public class PressureTankModel : Model
+	public class PressureTankSpecification : Specification
 	{
 		/// <summary>
 		///   The maximum allowed pressure level within the tank.
@@ -47,9 +47,11 @@ namespace PressureTank
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public PressureTankModel()
+		public PressureTankSpecification()
 		{
 			Controller = new Controller(Sensor, Pump, Timer);
+
+			Model = new Model { RootComponents = { Tank, Controller } };
 //
 //			AddRootComponents(Tank, Controller);
 //
@@ -60,7 +62,7 @@ namespace PressureTank
 		/// <summary>
 		///   Gets the sensor that is used to determine the pressure level within the tank.
 		/// </summary>
-		public Sensor Sensor { get; } = new Sensor(SensorPressure);
+		public Sensor Sensor { get; } = new Sensor { TriggerPressure = SensorPressure };
 
 		/// <summary>
 		///   Gets the pump that fills the tank.

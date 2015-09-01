@@ -129,6 +129,7 @@ namespace Tests.Utilities
 				.AddSyntaxTrees(syntaxTrees)
 				.AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(DynamicAttribute).Assembly.Location))
+				.AddReferences(MetadataReference.CreateFromFile(typeof(Tests).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Component).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(DiagnosticIdentifier).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Should).Assembly.Location))

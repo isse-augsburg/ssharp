@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,12 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace Tests.Serialization.Enumerations
 {
-	/// <summary>
-	///   Represents a delegate to a dynamically generated serialization or deserialization method.
-	/// </summary>
-	/// <param name="state">The state that should be serialized to or deserialized from.</param>
-	/// <param name="objects">The objects that should be serialized or deserialized.</param>
-	internal unsafe delegate void SerializationDelegate(int* state, object[] objects);
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
+
+	internal class Int32 : SerializationObject
+	{
+		protected override void Check()
+		{
+			var c = new C { F = E.B };
+
+			GenerateCode(SerializationMode.Full, c);
+			_stateSlotCount.ShouldBe(1);
+
+			Serialize();
+			c.F = E.C;
+			Deserialize();
+			c.F.ShouldBe(E.B);
+
+			c.F = E.D;
+			Serialize();
+			c.F = E.C;
+			Deserialize();
+			c.F.ShouldBe(E.D);
+		}
+
+		private enum E 
+		{
+			A,
+			B,
+			C,
+			D = -8
+		}
+
+		private class C
+		{
+			public E F;
+		}
+	}
 }

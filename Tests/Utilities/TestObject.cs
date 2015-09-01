@@ -42,9 +42,6 @@ namespace Tests.Utilities
 			Check();
 		}
 
-		/// <summary>
-		///   Checks the test assertions.
-		/// </summary>
 		protected abstract void Check();
 	}
 }

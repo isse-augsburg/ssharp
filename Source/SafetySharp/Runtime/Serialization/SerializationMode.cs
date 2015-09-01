@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,20 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Faults
+namespace SafetySharp.Runtime.Serialization
 {
 	/// <summary>
-	///   Represents the persistent occurrence pattern where a fault, once active, remains active.
+	///   Indicates which mode of serialization should be used when generating serialization code.
 	/// </summary>
-	public class Persistent : OccurrencePattern
+	public enum SerializationMode
 	{
 		/// <summary>
-		///   Updates the internal state of the occurrence pattern.
+		///   Indicates that all state should be serialized.
 		/// </summary>
-		public override void UpdateOccurrenceState()
-		{
-			if (!IsOccurring)
-				IsOccurring = Choice.Choose(true, false);
-		}
+		Full,
+
+		/// <summary>
+		///   Indicates that only the absolutely necessary state should be serialized.
+		/// </summary>
+		Optimized
 	}
 }

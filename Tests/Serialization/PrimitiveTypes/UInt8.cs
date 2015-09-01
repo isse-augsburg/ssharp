@@ -20,41 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Serialization.PrimitiveTypes
 {
-	using System.Collections.Generic;
-	using Runtime.Serialization;
-	using Utilities;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	/// <summary>
-	///   Represents a model of a safety-critical system.
-	/// </summary>
-	public class Model
+	internal class UInt8 : SerializationObject
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="rootComponents">The model's root components.</param>
-		public Model(params IComponent[] rootComponents)
+		protected override void Check()
 		{
-			Requires.NotNull(rootComponents, nameof(rootComponents));
+			var c = new C { F = 77 };
 
-			RootComponents.AddRange(rootComponents);
+			GenerateCode(SerializationMode.Full, c);
+			_stateSlotCount.ShouldBe(1);
+
+			Serialize();
+			c.F = 31;
+			Deserialize();
+			c.F.ShouldBe((byte)77);
 		}
 
-		/// <summary>
-		///   Gets the model's root components.
-		/// </summary>
-		public List<IComponent> RootComponents { get; } = new List<IComponent>();
-
-		/// <summary>
-		///   Gets the <see cref="SerializationRegistry" /> that can be used to register customized state serializers.
-		/// </summary>
-		public SerializationRegistry SerializationRegistry { get; } = new SerializationRegistry();
-
-		/// <summary>
-		///   Gets the object lookup table that can be used to map between serialized objects and identifiers.
-		/// </summary>
-		internal ObjectTable ObjectTable { get; private set; }
+		internal class C
+		{
+			public byte F;
+		}
 	}
 }

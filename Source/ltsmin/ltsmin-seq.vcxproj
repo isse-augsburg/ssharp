@@ -10,8 +10,20 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="bitvector.h" />
+    <ClInclude Include="chunk-support.h" />
+    <ClInclude Include="dm.h" />
+    <ClInclude Include="lts-type.h" />
+    <ClInclude Include="ltsmin-standard.h" />
+    <ClInclude Include="pins.h" />
+    <ClInclude Include="string-map.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ltsmin.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C95B6D75-A774-4099-9A8C-428D8BF68DB2}</ProjectGuid>
+    <ProjectGuid>{96F3A853-B30A-4413-98C8-C9AAA4C084DE}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
@@ -30,15 +42,12 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>true</CLRSupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-    <Import Project="..\ltsmin-shared\ltsmin-shared.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -51,14 +60,14 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Binaries\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Binaries\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetName>SafetySharp.LtsMin.MultiCore</TargetName>
+    <TargetName>SafetySharp.LtsMin.Sequential</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Binaries\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Binaries\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetName>SafetySharp.LtsMin.MultiCore</TargetName>
+    <TargetName>SafetySharp.LtsMin.Sequential</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -77,7 +86,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies</AdditionalLibraryDirectories>
-      <AdditionalDependencies>pins2lts-mc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>pins2lts-seq.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -100,13 +109,13 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies</AdditionalLibraryDirectories>
-      <AdditionalDependencies>pins2lts-mc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>pins2lts-seq.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <Target Name="AfterBuild">
-    <Copy SourceFiles="$(SolutionDir)Dependencies/pins2lts-mc.exe" DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="$(SolutionDir)Dependencies/pins2lts-seq.exe" DestinationFolder="$(OutDir)" />
   </Target>
 </Project>

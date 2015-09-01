@@ -28,7 +28,7 @@ namespace SafetySharp.Modeling
 	public interface IComponent
 	{
 		/// <summary>
-		///   Updates the internal state of the component.
+		///   Updates the state of the component.
 		/// </summary>
 		void Update();
 	}

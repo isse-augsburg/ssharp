@@ -22,39 +22,15 @@
 
 namespace SafetySharp.Modeling
 {
-	using System.Collections.Generic;
-	using Runtime.Serialization;
-	using Utilities;
-
 	/// <summary>
-	///   Represents a model of a safety-critical system.
+	///   Represents a base class for specifications that combines a <see cref="Model" /> instance with the formulas
+	///   that should be checked.
 	/// </summary>
-	public class Model
+	public abstract class Specification
 	{
 		/// <summary>
-		///   Initializes a new instance.
+		///   Gets the <see cref="Model" /> instance used by the specification.
 		/// </summary>
-		/// <param name="rootComponents">The model's root components.</param>
-		public Model(params IComponent[] rootComponents)
-		{
-			Requires.NotNull(rootComponents, nameof(rootComponents));
-
-			RootComponents.AddRange(rootComponents);
-		}
-
-		/// <summary>
-		///   Gets the model's root components.
-		/// </summary>
-		public List<IComponent> RootComponents { get; } = new List<IComponent>();
-
-		/// <summary>
-		///   Gets the <see cref="SerializationRegistry" /> that can be used to register customized state serializers.
-		/// </summary>
-		public SerializationRegistry SerializationRegistry { get; } = new SerializationRegistry();
-
-		/// <summary>
-		///   Gets the object lookup table that can be used to map between serialized objects and identifiers.
-		/// </summary>
-		internal ObjectTable ObjectTable { get; private set; }
+		public Model Model { get; set; }
 	}
 }

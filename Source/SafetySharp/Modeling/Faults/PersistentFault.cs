@@ -20,41 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Modeling.Faults
 {
-	using System.Collections.Generic;
-	using Runtime.Serialization;
-	using Utilities;
-
 	/// <summary>
-	///   Represents a model of a safety-critical system.
+	///   Represents a persistent fault that, once active, remains active.
 	/// </summary>
-	public class Model
+	public class PersistentFault : Fault
 	{
 		/// <summary>
-		///   Initializes a new instance.
+		///   Updates the state of the fault.
 		/// </summary>
-		/// <param name="rootComponents">The model's root components.</param>
-		public Model(params IComponent[] rootComponents)
+		public override void Update()
 		{
-			Requires.NotNull(rootComponents, nameof(rootComponents));
-
-			RootComponents.AddRange(rootComponents);
+			if (!IsOccurring)
+				IsOccurring = Choice.Choose(true, false);
 		}
-
-		/// <summary>
-		///   Gets the model's root components.
-		/// </summary>
-		public List<IComponent> RootComponents { get; } = new List<IComponent>();
-
-		/// <summary>
-		///   Gets the <see cref="SerializationRegistry" /> that can be used to register customized state serializers.
-		/// </summary>
-		public SerializationRegistry SerializationRegistry { get; } = new SerializationRegistry();
-
-		/// <summary>
-		///   Gets the object lookup table that can be used to map between serialized objects and identifiers.
-		/// </summary>
-		internal ObjectTable ObjectTable { get; private set; }
 	}
 }

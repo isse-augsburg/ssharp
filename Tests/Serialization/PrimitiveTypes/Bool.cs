@@ -20,19 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Faults
+namespace Tests.Serialization.PrimitiveTypes
 {
-	/// <summary>
-	///   Represents the transient occurrence pattern where a fault can come and go at any time.
-	/// </summary>
-	public class Transient : OccurrencePattern
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
+
+	internal class Bool : SerializationObject
 	{
-		/// <summary>
-		///   Updates the internal state of the occurrence pattern.
-		/// </summary>
-		public override void UpdateOccurrenceState()
+		protected override void Check()
 		{
-			IsOccurring = Choice.Choose(true, false);
+			var c = new C { F = true };
+
+			GenerateCode(SerializationMode.Full, c);
+			_stateSlotCount.ShouldBe(1);
+
+			Serialize();
+			c.F = false;
+			Deserialize();
+			c.F.ShouldBe(true);
+		}
+
+		internal class C
+		{
+			public bool F;
 		}
 	}
 }

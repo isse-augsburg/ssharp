@@ -22,20 +22,22 @@
 
 namespace SafetySharp.Modeling
 {
+	using System.Collections.Generic;
+	using Faults;
+	using Utilities;
+
 	/// <summary>
 	///   Represents a S# component.
 	/// </summary>
 	public abstract class Component : IComponent
 	{
 		/// <summary>
-		///   Initializes a new instance.
+		///   Gets the fault effects that affect the component.
 		/// </summary>
-		protected Component()
-		{
-		}
+		internal HashSet<IFaultEffect> FaultEffects { get; } = new HashSet<IFaultEffect>(ReferenceEqualityComparer<IFaultEffect>.Instance);
 
 		/// <summary>
-		///   Updates the internal state of the component.
+		///   Updates the state of the component.
 		/// </summary>
 		public virtual void Update()
 		{

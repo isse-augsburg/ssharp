@@ -22,9 +22,10 @@
 
 namespace SafetySharp.Modeling.Faults
 {
+	using Utilities;
+
 	/// <summary>
-	///   Represents a base class for all faults affecting the behavior of <see cref="Component" />s, where the actual type of the
-	///   affected <see cref="Component" /> instance is irrelevant.
+	///   Represents a base class for all faults affecting the behavior of <see cref="Component" />s.
 	/// </summary>
 	public abstract class Fault
 	{
@@ -36,19 +37,9 @@ namespace SafetySharp.Modeling.Faults
 		}
 
 		/// <summary>
-		///   Gets the fault's occurrence pattern.
-		/// </summary>
-		internal OccurrencePattern OccurrencePattern { get; private set; }
-
-		/// <summary>
-		///   Gets the <see cref="Component" /> instance affected by the fault.
-		/// </summary>
-		protected internal Component Component { get; internal set; }
-
-		/// <summary>
 		///   Gets or sets a value indicating whether the fault is currently occurring.
 		/// </summary>
-		internal bool IsOccurring => OccurrencePattern.IsOccurring;
+		protected internal bool IsOccurring { get; set; }
 
 		/// <summary>
 		///   Gets or sets a value indicating whether the fault is ignored for a simulation or model checking run.
@@ -56,9 +47,54 @@ namespace SafetySharp.Modeling.Faults
 		internal bool IsIgnored { get; set; }
 
 		/// <summary>
-		///   Updates the internal state of the fault.
+		///   Gets the <see cref="Choice" /> instance that can be used to determine whether the fault occurs.
 		/// </summary>
-		public virtual void UpdateFaultState()
+		protected Choice Choice { get; } = new Choice();
+
+		/// <summary>
+		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault occurs.
+		/// </summary>
+		/// <typeparam name="TFaultEffect">The type of the fault effect that is added.</typeparam>
+		/// <param name="component">The component the fault effect is added for.</param>
+		public TFaultEffect AddEffect<TFaultEffect>(IComponent component)
+			where TFaultEffect : class, new()
+		{
+			Requires.NotNull(component, nameof(component));
+			Requires.That(typeof(TFaultEffect).HasAttribute<FaultEffectAttribute>(),
+				$"Expected fault effect to be marked with '{typeof(FaultEffectAttribute)}'.");
+
+			var faultEffect = new TFaultEffect();
+			var effect = ((IFaultEffect)faultEffect);
+
+			Requires.That(effect.Component == null, nameof(faultEffect), "Fault effects cannot be used with multiple components at the same time.");
+
+			effect.Component = (Component)component;
+			effect.Fault = this;
+			effect.Component.FaultEffects.Add(effect);
+
+			return faultEffect;
+		}
+
+		/// <summary>
+		///   Removes the <paramref name="faultEffect" /> from the fault.
+		/// </summary>
+		/// <param name="faultEffect">The fault effect that should be removed.</param>
+		public void RemoveEffect(object faultEffect)
+		{
+			Requires.NotNull(faultEffect, nameof(faultEffect));
+
+			var effect = faultEffect as IFaultEffect;
+			if (effect?.Component == null || !effect.Component.FaultEffects.Remove(effect))
+				return;
+
+			effect.Component = null;
+			effect.Fault = null;
+		}
+
+		/// <summary>
+		///   Updates the state of the fault.
+		/// </summary>
+		public virtual void Update()
 		{
 		}
 	}

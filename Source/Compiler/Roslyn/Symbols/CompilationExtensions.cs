@@ -103,18 +103,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		}
 
 		/// <summary>
-		///   Gets the <see cref="INamedTypeSymbol " /> representing the <see cref="Fault{TComponent}" /> class within the
-		///   context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="compilation">The compilation the class symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static INamedTypeSymbol GetGenericFaultClassSymbol([NotNull] this Compilation compilation)
-		{
-			Requires.NotNull(compilation, nameof(compilation));
-			return compilation.GetTypeSymbol(typeof(Fault<>));
-		}
-
-		/// <summary>
 		///   Gets the <see cref="INamedTypeSymbol " /> representing the <see cref="Fault" /> class within the
 		///   context of the <paramref name="compilation" />.
 		/// </summary>
@@ -124,18 +112,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		{
 			Requires.NotNull(compilation, nameof(compilation));
 			return compilation.GetTypeSymbol(typeof(Fault));
-		}
-
-		/// <summary>
-		///   Gets the <see cref="INamedTypeSymbol " /> representing the <see cref="OccurrencePattern" /> class within the
-		///   context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="compilation">The compilation the class symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static INamedTypeSymbol GetOccurrencePatternClassSymbol([NotNull] this Compilation compilation)
-		{
-			Requires.NotNull(compilation, nameof(compilation));
-			return compilation.GetTypeSymbol<OccurrencePattern>();
 		}
 
 		/// <summary>
@@ -182,24 +158,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 				.GetMembers("UpdateFaultState")
 				.OfType<IMethodSymbol>()
 				.Single(method => method.Parameters.Length == 0 && method.ReturnsVoid);
-		}
-
-		/// <summary>
-		///   Gets the <see cref="IMethodSymbol " /> representing the <see cref="OccurrencePattern.UpdateOccurrenceState" /> method
-		///   within the
-		///   context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="compilation">The compilation the attribute symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static IMethodSymbol GetOccurrencePatternUpdateMethodSymbol([NotNull] this Compilation compilation)
-		{
-			Requires.NotNull(compilation, nameof(compilation));
-
-			return compilation
-				.GetTypeSymbol<OccurrencePattern>()
-				.GetMembers("UpdateOccurrenceState")
-				.OfType<IMethodSymbol>()
-				.Single(method => method.Parameters.Length == 0 && method.ReturnType.SpecialType == SpecialType.System_Void);
 		}
 
 		/// <summary>

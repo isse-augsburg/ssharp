@@ -20,41 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Modeling.Faults
 {
-	using System.Collections.Generic;
-	using Runtime.Serialization;
-	using Utilities;
-
 	/// <summary>
-	///   Represents a model of a safety-critical system.
+	///   Represents a common interface for fault effects. This interface is implemented by the S# compiler automatically.
 	/// </summary>
-	public class Model
+	public interface IFaultEffect
 	{
 		/// <summary>
-		///   Initializes a new instance.
+		///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.
 		/// </summary>
-		/// <param name="rootComponents">The model's root components.</param>
-		public Model(params IComponent[] rootComponents)
-		{
-			Requires.NotNull(rootComponents, nameof(rootComponents));
-
-			RootComponents.AddRange(rootComponents);
-		}
+		Component Component { get; set; }
 
 		/// <summary>
-		///   Gets the model's root components.
+		///   Gets or sets the <see cref="Fault" /> instance that determines whether the fault effect is active.
 		/// </summary>
-		public List<IComponent> RootComponents { get; } = new List<IComponent>();
-
-		/// <summary>
-		///   Gets the <see cref="SerializationRegistry" /> that can be used to register customized state serializers.
-		/// </summary>
-		public SerializationRegistry SerializationRegistry { get; } = new SerializationRegistry();
-
-		/// <summary>
-		///   Gets the object lookup table that can be used to map between serialized objects and identifiers.
-		/// </summary>
-		internal ObjectTable ObjectTable { get; private set; }
+		Fault Fault { get; set; }
 	}
 }

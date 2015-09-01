@@ -55,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller.cs" />
-    <Compile Include="PressureTankModel.cs" />
+    <Compile Include="PressureTankSpecification.cs" />
     <Compile Include="Sensor.cs" />
     <Compile Include="Tank.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,9 +63,9 @@
     <Compile Include="Timer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\..\Binaries\Debug\CommandLine.dll" />
-    <Analyzer Include="..\..\Binaries\Debug\SafetySharp.Modeling.dll" />
-    <Analyzer Include="..\..\Binaries\Debug\SafetySharp.Compiler.exe" />
+    <Analyzer Include="$(OutDir)\CommandLine.dll" />
+    <Analyzer Include="$(OutDir)\SafetySharp.Modeling.dll" />
+    <Analyzer Include="$(OutDir)\SafetySharp.Compiler.exe" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">

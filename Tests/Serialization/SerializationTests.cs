@@ -20,41 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Serialization
 {
-	using System.Collections.Generic;
-	using Runtime.Serialization;
+	using Microsoft.CodeAnalysis;
 	using Utilities;
+	using Xunit;
 
-	/// <summary>
-	///   Represents a model of a safety-critical system.
-	/// </summary>
-	public class Model
+	public partial class SerializationTests : Tests
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="rootComponents">The model's root components.</param>
-		public Model(params IComponent[] rootComponents)
+		[Theory, MemberData("DiscoverTests", "PrimitiveTypes")]
+		public void PrimitiveTypes(string test, SyntaxTree code)
 		{
-			Requires.NotNull(rootComponents, nameof(rootComponents));
-
-			RootComponents.AddRange(rootComponents);
+			ExecuteDynamicTests(code);
 		}
 
-		/// <summary>
-		///   Gets the model's root components.
-		/// </summary>
-		public List<IComponent> RootComponents { get; } = new List<IComponent>();
-
-		/// <summary>
-		///   Gets the <see cref="SerializationRegistry" /> that can be used to register customized state serializers.
-		/// </summary>
-		public SerializationRegistry SerializationRegistry { get; } = new SerializationRegistry();
-
-		/// <summary>
-		///   Gets the object lookup table that can be used to map between serialized objects and identifiers.
-		/// </summary>
-		internal ObjectTable ObjectTable { get; private set; }
+		[Theory, MemberData("DiscoverTests", "Enumerations")]
+		public void Enumerations(string test, SyntaxTree code)
+		{
+			ExecuteDynamicTests(code);
+		}
 	}
 }

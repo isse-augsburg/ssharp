@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,19 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Faults
+namespace SafetySharp.Runtime.Serialization
 {
 	/// <summary>
-	///   Represents a base class for all faults affecting the behavior of <see cref="Component" />s of type
-	///   <typeparamref name="TComponent" />.
+	///   Represents a dynamically generated serialization or deserialization method.
 	/// </summary>
-	/// <typeparam name="TComponent">The type of the <see cref="Component" /> affected by the fault.</typeparam>
-	public abstract class Fault<TComponent> : Fault
-		where TComponent : Component
-	{
-		/// <summary>
-		///   Gets the <see cref="Component" /> instance affected by the fault.
-		/// </summary>
-		protected new TComponent Component => (TComponent)base.Component;
-	}
+	/// <param name="state">The state that should be serialized to or deserialized from.</param>
+	internal unsafe delegate void SerializationDelegate(int* state);
 }

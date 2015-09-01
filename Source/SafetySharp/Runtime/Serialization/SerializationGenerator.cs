@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace SafetySharp.Runtime.Serialization
 {
 	using System;
 	using System.Reflection;
@@ -44,54 +44,43 @@ namespace SafetySharp.Runtime
 		private readonly DynamicMethod _method;
 
 		/// <summary>
-		///   The objects that are serialized.
+		///   The reflection information of the <see cref="ObjectTable.GetObject" /> method.
 		/// </summary>
-		private readonly ObjectTable _objects;
+		private readonly MethodInfo _getObjectMethod = typeof(ObjectTable).GetMethod(nameof(ObjectTable.GetObject));
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="objects">The known objects that can be serialized and deserialized.</param>
 		/// <param name="name">The name of the generated method.</param>
-		internal SerializationGenerator(ObjectTable objects, string name)
+		internal SerializationGenerator(string name)
 		{
-			Requires.NotNull(objects, nameof(objects));
 			Requires.NotNullOrWhitespace(name, nameof(name));
 
 			_method = new DynamicMethod(
 				name: name,
 				returnType: typeof(void),
-				parameterTypes: new[] { typeof(int*), typeof(object[]) },
+				parameterTypes: new[] { typeof(ObjectTable), typeof(int*) },
 				m: typeof(object).Assembly.ManifestModule,
 				skipVisibility: true);
 
 			_il = _method.GetILGenerator();
-			_objects = objects;
 
 			// Store state vector in a local variable
 			_il.DeclareLocal(typeof(int*));
-			_il.Emit(OpCodes.Ldarg_0);
+			_il.Emit(OpCodes.Ldarg_1);
 			_il.Emit(OpCodes.Stloc_0);
-		}
-
-		/// <summary>
-		///   Gets the unique serialization identifier for <paramref name="obj" />.
-		/// </summary>
-		/// <param name="obj">The object the identifier should be returned for.</param>
-		public int GetObjectIdentifier(object obj)
-		{
-			return _objects[obj];
 		}
 
 		/// <summary>
 		///   Compiles the dynamic method, returning a delegate that can be used to invoke it.
 		/// </summary>
-		internal SerializationDelegate Compile()
+		/// <param name="objects">The known objects that can be serialized and deserialized.</param>
+		internal SerializationDelegate Compile(ObjectTable objects)
 		{
-			// The method must end with a ret instruction, even though no value is returned
-			_il.Emit(OpCodes.Ret);
+			Requires.NotNull(objects, nameof(objects));
 
-			return (SerializationDelegate)_method.CreateDelegate(typeof(SerializationDelegate));
+			_il.Emit(OpCodes.Ret);
+			return (SerializationDelegate)_method.CreateDelegate(typeof(SerializationDelegate), objects);
 		}
 
 		/// <summary>
@@ -105,9 +94,9 @@ namespace SafetySharp.Runtime
 			CheckIsSupportedType(field.FieldType);
 
 			// o = objs[identifier]
-			_il.Emit(OpCodes.Ldarg_1);
+			_il.Emit(OpCodes.Ldarg_0);
 			_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
-			_il.Emit(OpCodes.Ldelem_Ref);
+			_il.Emit(OpCodes.Call, _getObjectMethod);
 
 			// v = *state
 			_il.Emit(OpCodes.Ldloc_0);
@@ -133,9 +122,9 @@ namespace SafetySharp.Runtime
 			_il.Emit(OpCodes.Ldloc_0);
 
 			// o = objs[identifier]
-			_il.Emit(OpCodes.Ldarg_1);
+			_il.Emit(OpCodes.Ldarg_0);
 			_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
-			_il.Emit(OpCodes.Ldelem_Ref);
+			_il.Emit(OpCodes.Call, _getObjectMethod);
 
 			// *s = o.field
 			_il.Emit(OpCodes.Ldfld, field);

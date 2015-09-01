@@ -20,33 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Faults
+namespace SafetySharp.CompilerServices
 {
+	using System;
+	using System.Reflection;
+	using Utilities;
+
 	/// <summary>
-	///   Represents a base class for all fault occurrence patterns.
+	///   When applied to a component method, indicates the field that stores the method's fault behavior.
 	/// </summary>
-	public abstract class OccurrencePattern
+	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+	public sealed class BackingFieldAttribute : Attribute
 	{
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		protected OccurrencePattern()
+		/// <param name="fieldName">The name of the marked component method's backing field.</param>
+		public BackingFieldAttribute(string fieldName)
 		{
+			Requires.NotNullOrWhitespace(fieldName, nameof(fieldName));
+			FieldName = fieldName;
 		}
 
 		/// <summary>
-		///   Gets or sets a value indicating whether the fault is currently occurring.
+		///   Gets the name of the marked component method's backing field.
 		/// </summary>
-		protected internal bool IsOccurring { get; set; }
+		public string FieldName { get; }
 
 		/// <summary>
-		///   Gets the nondeterministic choice that should be used to determine whether the associated fault occurs.
+		///   Gets the <see cref="FieldInfo" /> object representing the marked component method's backing field.
 		/// </summary>
-		protected Choice Choice { get; } = new Choice();
+		/// <param name="type">The type that declares the marked component method.</param>
+		public FieldInfo GetFieldInfo(Type type)
+		{
+			Requires.NotNull(type, nameof(type));
 
-		/// <summary>
-		///   Updates the internal state of the occurrence pattern.
-		/// </summary>
-		public abstract void UpdateOccurrenceState();
+			var field = type.GetField(FieldName, BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic);
+			Requires.That(field != null, $"Unable to find backing field '{type.FullName}.{FieldName}'.");
+
+			return field;
+		}
 	}
 }

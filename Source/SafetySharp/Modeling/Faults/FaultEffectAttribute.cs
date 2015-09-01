@@ -20,41 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Modeling.Faults
 {
-	using System.Collections.Generic;
-	using Runtime.Serialization;
-	using Utilities;
+	using System;
 
 	/// <summary>
-	///   Represents a model of a safety-critical system.
+	///   When applied to a <see cref="Component" />-derived class, indicates that the class specifies an effect of a fault on a
+	///   port of the inherited <see cref="Component" />.
 	/// </summary>
-	public class Model
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+	public sealed class FaultEffectAttribute : Attribute
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="rootComponents">The model's root components.</param>
-		public Model(params IComponent[] rootComponents)
-		{
-			Requires.NotNull(rootComponents, nameof(rootComponents));
-
-			RootComponents.AddRange(rootComponents);
-		}
-
-		/// <summary>
-		///   Gets the model's root components.
-		/// </summary>
-		public List<IComponent> RootComponents { get; } = new List<IComponent>();
-
-		/// <summary>
-		///   Gets the <see cref="SerializationRegistry" /> that can be used to register customized state serializers.
-		/// </summary>
-		public SerializationRegistry SerializationRegistry { get; } = new SerializationRegistry();
-
-		/// <summary>
-		///   Gets the object lookup table that can be used to map between serialized objects and identifiers.
-		/// </summary>
-		internal ObjectTable ObjectTable { get; private set; }
 	}
 }

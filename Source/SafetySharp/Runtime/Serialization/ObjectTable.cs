@@ -20,19 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace SafetySharp.Runtime.Serialization
 {
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
-	using Modeling;
 	using Utilities;
 
 	/// <summary>
-	///   Maps objects to unique identifiers and vice versa.
+	///   Maps objects to unique identifiers and vice versa for serialization.
 	/// </summary>
-	internal sealed class ObjectTable
+	internal sealed class ObjectTable : IEnumerable<object>
 	{
+		/// <summary>
+		///   Gets the objects contained in the table.
+		/// </summary>
+		private readonly object[] _objects;
+
 		/// <summary>
 		///   Maps each object to its corresponding identifier.
 		/// </summary>
@@ -41,59 +46,48 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="model">The model containing the objects that should be mapped by the table.</param>
-		public ObjectTable(Model model)
+		/// <param name="objects">The objects that should be mapped by the table.</param>
+		public ObjectTable(params object[] objects)
 		{
-			Requires.NotNull(model, nameof(model));
-			CollectObjects(model);
+			Requires.NotNull(objects, nameof(objects));
+
+			_objects = objects.ToArray();
+			for (var i = 0; i < _objects.Length; ++i)
+				_objectToIdentifier.Add(_objects[i], i);
+		}
+
+		/// <summary>
+		///   Returns an enumerator that iterates through the objects stored in the table.
+		/// </summary>
+		public IEnumerator<object> GetEnumerator()
+		{
+			return ((IEnumerable<object>)_objects).GetEnumerator();
+		}
+
+		/// <summary>
+		///   Returns an enumerator that iterates through the objects stored in the table.
+		/// </summary>
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 
 		/// <summary>
 		///   Gets the object corresponding to the <paramref name="identifier" />.
 		/// </summary>
-		public object this[int identifier]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public object GetObject(int identifier)
 		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get { return Objects[identifier]; }
+			return _objects[identifier];
 		}
 
 		/// <summary>
 		///   Gets the identifier that has been assigned to <paramref name="obj" />.
 		/// </summary>
-		public int this[object obj]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int GetObjectIdentifier(object obj)
 		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get { return _objectToIdentifier[obj]; }
-		}
-
-		/// <summary>
-		///   Gets the objects contained in the table.
-		/// </summary>
-		public object[] Objects { get; private set; }
-
-		/// <summary>
-		///   Collects all objects contained in the <paramref name="model" />.
-		/// </summary>
-		// TODO: Collect other kinds of objects such as list fields, arrays, etc.
-		private void CollectObjects(Model model)
-		{
-			var objects = new List<object>();
-
-//			model.Metadata.RootComponent.VisitPreOrder(component =>
-//			{
-//				objects.Add(component.Component);
-//
-//				foreach (var fault in component.Faults)
-//				{
-//					objects.Add(fault.Fault);
-//					objects.Add(fault.OccurrencePattern.OccurrencePattern);
-//				}
-//			});
-
-			Objects = objects.OrderBy(o => o.GetType().FullName).ToArray();
-
-			for (var i = 0; i < Objects.Length; ++i)
-				_objectToIdentifier.Add(Objects[i], i);
+			return _objectToIdentifier[obj];
 		}
 	}
 }
