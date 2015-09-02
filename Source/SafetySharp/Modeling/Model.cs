@@ -38,7 +38,6 @@ namespace SafetySharp.Modeling
 		public Model(params IComponent[] rootComponents)
 		{
 			Requires.NotNull(rootComponents, nameof(rootComponents));
-
 			RootComponents.AddRange(rootComponents);
 		}
 
@@ -51,10 +50,5 @@ namespace SafetySharp.Modeling
 		///   Gets the <see cref="SerializationRegistry" /> that can be used to register customized state serializers.
 		/// </summary>
 		public SerializationRegistry SerializationRegistry { get; } = new SerializationRegistry();
-
-		/// <summary>
-		///   Gets the object lookup table that can be used to map between serialized objects and identifiers.
-		/// </summary>
-		internal ObjectTable ObjectTable { get; private set; }
 	}
 }

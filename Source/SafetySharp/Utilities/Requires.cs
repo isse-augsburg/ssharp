@@ -43,7 +43,7 @@ namespace SafetySharp.Utilities
 		///   Thrown if the value of <paramref name="argument" /> or <paramref name="argumentName" /> is <c>null</c>.
 		/// </exception>
 		[DebuggerHidden, ContractAnnotation("argument: null => halt")]
-		public static void NotNull<T>(T argument, [NotNull] string argumentName)
+		public static void NotNull<T>([NoEnumeration] T argument, [NotNull] string argumentName)
 			where T : class
 		{
 			NotNullOrWhitespace(argumentName, nameof(argumentName));

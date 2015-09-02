@@ -22,12 +22,14 @@
 
 namespace SafetySharp.Runtime.Serialization
 {
+	using System;
 	using System.Collections.Generic;
+	using System.IO;
 	using System.Linq;
 	using Utilities;
 
 	/// <summary>
-	///   Represents a registry of <see cref="ISerializer" />s.
+	///   Represents a registry of <see cref="Serializer" />s.
 	/// </summary>
 	public sealed class SerializationRegistry
 	{
@@ -39,7 +41,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   The list of registered serializers.
 		/// </summary>
-		private readonly List<ISerializer> _serializers = new List<ISerializer>();
+		private readonly List<Serializer> _serializers = new List<Serializer>();
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -52,7 +54,7 @@ namespace SafetySharp.Runtime.Serialization
 		///   Registers the <paramref name="serializer" />.
 		/// </summary>
 		/// <param name="serializer">The serializer that should be registered.</param>
-		public void RegisterSerializer(ISerializer serializer)
+		public void RegisterSerializer(Serializer serializer)
 		{
 			Requires.NotNull(serializer, nameof(serializer));
 			Requires.That(!_serializers.Contains(serializer), nameof(serializer),
@@ -62,14 +64,28 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Tries to find a serialize that is able to serialize the <paramref name="obj" />.
+		///   Tries to find a serializer that is able to serialize the <paramref name="obj" />.
 		/// </summary>
-		private ISerializer FindSerializer(object obj)
+		private Serializer GetSerializer(object obj)
+		{
+			return GetSerializer(GetSerializerIndex(obj));
+		}
+
+		/// <summary>
+		///   Gets the serializer at the <paramref name="index" />.
+		/// </summary>
+		private Serializer GetSerializer(int index)
+		{
+			return index == -1 ? _objectSerializer : _serializers[index];
+		}
+
+		/// <summary>
+		///   Tries to find the index of a serializer that is able to serialize the <paramref name="obj" />.
+		/// </summary>
+		private int GetSerializerIndex(object obj)
 		{
 			var type = obj.GetType();
-			var serializer = _serializers.FirstOrDefault(s => s.CanSerialize(type));
-
-			return serializer ?? _objectSerializer;
+			return _serializers.FindIndex(s => s.CanSerialize(type));
 		}
 
 		/// <summary>
@@ -79,7 +95,10 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		internal int GetStateSlotCount(ObjectTable objects, SerializationMode mode)
 		{
-			return objects.Select(obj => FindSerializer(obj).GetStateSlotCount(obj, mode)).Sum();
+			Requires.NotNull(objects, nameof(objects));
+			Requires.InRange(mode, nameof(mode));
+
+			return objects.Select(obj => GetSerializer(obj).GetStateSlotCount(obj, mode)).Sum();
 		}
 
 		/// <summary>
@@ -87,12 +106,15 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		/// <param name="objects">The objects consisting of state values that should be serialized.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		internal unsafe SerializationDelegate GenerateSerializationDelegate(ObjectTable objects, SerializationMode mode)
+		internal unsafe SerializationDelegate CreateStateSerializer(ObjectTable objects, SerializationMode mode)
 		{
+			Requires.NotNull(objects, nameof(objects));
+			Requires.InRange(mode, nameof(mode));
+
 			var generator = new SerializationGenerator("Serialize");
 
 			foreach (var obj in objects)
-				FindSerializer(obj).Serialize(generator, obj, objects.GetObjectIdentifier(obj), mode);
+				GetSerializer(obj).Serialize(generator, obj, objects.GetObjectIdentifier(obj), mode);
 
 			return generator.Compile(objects);
 		}
@@ -102,14 +124,97 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		/// <param name="objects">The objects consisting of state values that should be deserialized.</param>
 		/// <param name="mode">The serialization mode that should be used to deserialize the objects.</param>
-		internal unsafe SerializationDelegate GenerateDeserializationDelegate(ObjectTable objects, SerializationMode mode)
+		internal unsafe SerializationDelegate CreateStateDeserializer(ObjectTable objects, SerializationMode mode)
 		{
+			Requires.NotNull(objects, nameof(objects));
+			Requires.InRange(mode, nameof(mode));
+
 			var generator = new SerializationGenerator("Deserialize");
 
 			foreach (var obj in objects)
-				FindSerializer(obj).Deserialize(generator, obj, objects.GetObjectIdentifier(obj), mode);
+				GetSerializer(obj).Deserialize(generator, obj, objects.GetObjectIdentifier(obj), mode);
 
 			return generator.Compile(objects);
+		}
+
+		/// <summary>
+		///   Serializes the <paramref name="objectTable" /> using the <paramref name="writer" />.
+		/// </summary>
+		/// <param name="objectTable">The object table that should be serialized.</param>
+		/// <param name="writer">The writer the serialized information should be written to.</param>
+		internal void SerializeObjectTable(ObjectTable objectTable, BinaryWriter writer)
+		{
+			Requires.NotNull(objectTable, nameof(objectTable));
+			Requires.NotNull(writer, nameof(writer));
+
+			// Write the serializer types that are required to deserialize the object table
+			writer.Write(_serializers.Count);
+			foreach (var serializer in _serializers)
+			{
+				// ReSharper disable once AssignNullToNotNullAttribute
+				writer.Write(serializer.GetType().AssemblyQualifiedName);
+			}
+
+			// Serialize the object table
+			writer.Write(objectTable.Count);
+			foreach (var obj in objectTable)
+			{
+				var serializerIndex = GetSerializerIndex(obj);
+				writer.Write(serializerIndex);
+				GetSerializer(serializerIndex).SerializeType(obj, writer);
+			}
+		}
+
+		/// <summary>
+		///   Deserializes the <see cref="ObjectTable" /> from the <paramref name="reader" />.
+		/// </summary>
+		/// <param name="reader">The reader the <see cref="ObjectTable" /> should be deserialized from.</param>
+		internal ObjectTable DeserializeObjectTable(BinaryReader reader)
+		{
+			Requires.NotNull(reader, nameof(reader));
+
+			// Read the serializer types that are required to deserialize the object table
+			var serializerCount = reader.ReadInt32();
+			for (var i = 0; i < serializerCount; ++i)
+				RegisterSerializer((Serializer)Activator.CreateInstance(Type.GetType(reader.ReadString(), throwOnError: true)));
+
+			// Deserialize the objects
+			var objects = new object[reader.ReadInt32()];
+			for (var i = 0; i < objects.Length; ++i)
+			{
+				var serializer = GetSerializer(reader.ReadInt32());
+				objects[i] = serializer.InstantiateType(reader);
+			}
+
+			return new ObjectTable(objects);
+		}
+
+		/// <summary>
+		///   Gets all objects referenced by <paramref name="obj" />, including <paramref name="obj" /> itself.
+		/// </summary>
+		/// <param name="obj">The object the referenced objects should be returned for.</param>
+		internal IEnumerable<object> GetReferencedObjects(object obj)
+		{
+			Requires.NotNull(obj, nameof(obj));
+
+			var referencedObjects = new HashSet<object> { obj };
+			GetReferencedObjects(referencedObjects, obj);
+			return referencedObjects;
+		}
+
+		/// <summary>
+		///   Adds all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself, to the set of
+		///   <paramref name="referencedObjects" />.
+		/// </summary>
+		/// <param name="referencedObjects">The set of referenced objects.</param>
+		/// <param name="obj">The object the referenced objects should be returned for.</param>
+		private void GetReferencedObjects(HashSet<object> referencedObjects, object obj)
+		{
+			foreach (var referencedObject in GetSerializer(obj).GetReferencedObjects(obj))
+			{
+				if (referencedObjects.Add(referencedObject))
+					GetReferencedObjects(referencedObjects, referencedObject);
+			}
 		}
 	}
 }

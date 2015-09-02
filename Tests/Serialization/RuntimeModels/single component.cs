@@ -20,38 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Utilities
+namespace Tests.Serialization.RuntimeModels
 {
-	using System;
-	using System.IO;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	/// <summary>
-	///   Represents a temporary file on disk that is deleted once the instance is disposed or finalized.
-	/// </summary>
-	internal class TemporaryFile : DisposableObject
+	internal class SingleComponent : RuntimeModelTest
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="extension">The extension of the generated file.</param>
-		public TemporaryFile(string extension)
+		private static bool _hasConstructorRun;
+
+		protected override void Check()
 		{
-			Requires.NotNullOrWhitespace(extension, nameof(extension));
-			FilePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.{extension}");
+			var c = new C { F = 99 };
+			var m = new Model(c);
+			Create(m);
+
+			StateLabels.ShouldBeEmpty();
+			RuntimeModel.RootComponents.Count.ShouldBe(1);
+
+			var root = RuntimeModel.RootComponents[0];
+			root.ShouldBeOfType<C>();
+			((C)root).F.ShouldBe((sbyte)99);
+
+			_hasConstructorRun.ShouldBe(false);
 		}
 
-		/// <summary>
-		///   Gets the path of the temporary file.
-		/// </summary>
-		public string FilePath { get; }
-
-		/// <summary>
-		///   Disposes the object, releasing all managed and unmanaged resources.
-		/// </summary>
-		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
-		protected override void OnDisposing(bool disposing)
+		private class C : Component
 		{
-			File.Delete(FilePath);
+			public sbyte F;
+
+			public C()
+			{
+				_hasConstructorRun = true;
+			}
 		}
 	}
 }

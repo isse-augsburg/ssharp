@@ -34,7 +34,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Gets the fault effects that affect the component.
 		/// </summary>
-		internal HashSet<IFaultEffect> FaultEffects { get; } = new HashSet<IFaultEffect>(ReferenceEqualityComparer<IFaultEffect>.Instance);
+		internal HashSet<IFaultEffect> FaultEffects { get; } = new HashSet<IFaultEffect>(ReferenceEqualityComparer<IFaultEffect>.Default);
 
 		/// <summary>
 		///   Updates the state of the component.

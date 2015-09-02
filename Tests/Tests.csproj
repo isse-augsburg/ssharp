@@ -155,6 +155,7 @@
     <Compile Include="Serialization\PrimitiveTypes\UInt16.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt32.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int32.cs" />
+    <Compile Include="Serialization\RuntimeModels\single component.cs" />
     <Compile Include="Serialization\SerializationTests.cs" />
     <Compile Include="Serialization\SerializationTests.Helpers.cs">
       <DependentUpon>SerializationTests.cs</DependentUpon>

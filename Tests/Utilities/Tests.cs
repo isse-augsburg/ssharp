@@ -50,6 +50,14 @@ namespace Tests.Utilities
 	public class Tests
 	{
 		/// <summary>
+		///   Initializes the type.
+		/// </summary>
+		static Tests()
+		{
+			AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+		}
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="output">The stream that should be used to write the test output.</param>
@@ -62,6 +70,14 @@ namespace Tests.Utilities
 		///   Gets the output that writes to the test output stream.
 		/// </summary>
 		public TestTraceOutput Output { get; }
+
+		/// <summary>
+		///   Tries to resolve an already loaded assembly.
+		/// </summary>
+		private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+		{
+			return AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().FullName == args.Name);
+		}
 
 		/// <summary>
 		///   Gets the name of the file that calls this method.

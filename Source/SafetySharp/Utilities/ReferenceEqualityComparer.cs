@@ -35,7 +35,7 @@ namespace SafetySharp.Utilities
 		/// <summary>
 		///   Gets the default instance of the <see cref="ReferenceEqualityComparer{T}" /> class.
 		/// </summary>
-		public static readonly ReferenceEqualityComparer<T> Instance = new ReferenceEqualityComparer<T>();
+		public static readonly ReferenceEqualityComparer<T> Default = new ReferenceEqualityComparer<T>();
 
 		/// <inheritdoc />
 		public bool Equals(T left, T right)

@@ -47,15 +47,33 @@ namespace SafetySharp.Runtime.Serialization
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="objects">The objects that should be mapped by the table.</param>
-		public ObjectTable(params object[] objects)
+		public ObjectTable(IEnumerable<object> objects)
 		{
 			Requires.NotNull(objects, nameof(objects));
 
-			_objects = new object[] { null }.Concat(objects).ToArray();
+			// We make sure that we store each object only once and we order the objects by type
+			var objs = objects.Distinct(ReferenceEqualityComparer<object>.Default);
+			objs = objs.OrderBy(obj => obj.GetType().FullName);
+
+			_objects = new object[] { null }.Concat(objs).ToArray();
 
 			for (var i = 1; i < _objects.Length; ++i)
 				_objectToIdentifier.Add(_objects[i], i);
 		}
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="objects">The objects that should be mapped by the table.</param>
+		public ObjectTable(params object[] objects)
+			: this((IEnumerable<object>)objects)
+		{
+		}
+
+		/// <summary>
+		///   Gets the number of objects contained in the table.
+		/// </summary>
+		public int Count => _objects.Length - 1;
 
 		/// <summary>
 		///   Returns an enumerator that iterates through the objects stored in the table.

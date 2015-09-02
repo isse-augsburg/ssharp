@@ -109,5 +109,13 @@ namespace SafetySharp.Utilities
 			Requires.NotNull(member, nameof(member));
 			return member.GetCustomAttribute<T>() != null;
 		}
+
+		/// <summary>
+		///   Checks whether <paramref name="type" /> is a reference type, i.e., a class, delegate, or interface.
+		/// </summary>
+		public static bool IsReferenceType(this Type type)
+		{
+			return type.IsClass || type.IsInterface || type.IsSubclassOf(typeof(Delegate));
+		}
 	}
 }

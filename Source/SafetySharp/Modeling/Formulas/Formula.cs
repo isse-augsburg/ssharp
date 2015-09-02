@@ -20,38 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Utilities
+namespace SafetySharp.Modeling.Formulas
 {
-	using System;
-	using System.IO;
-
-	/// <summary>
-	///   Represents a temporary file on disk that is deleted once the instance is disposed or finalized.
-	/// </summary>
-	internal class TemporaryFile : DisposableObject
+	public class Formula
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="extension">The extension of the generated file.</param>
-		public TemporaryFile(string extension)
-		{
-			Requires.NotNullOrWhitespace(extension, nameof(extension));
-			FilePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.{extension}");
-		}
-
-		/// <summary>
-		///   Gets the path of the temporary file.
-		/// </summary>
-		public string FilePath { get; }
-
-		/// <summary>
-		///   Disposes the object, releasing all managed and unmanaged resources.
-		/// </summary>
-		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
-		protected override void OnDisposing(bool disposing)
-		{
-			File.Delete(FilePath);
-		}
 	}
 }

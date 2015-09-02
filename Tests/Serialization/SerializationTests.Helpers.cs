@@ -22,13 +22,36 @@
 
 namespace Tests.Serialization
 {
+	using System;
 	using System.Collections.Generic;
 	using System.IO;
 	using JetBrains.Annotations;
+	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Utilities;
 	using Xunit.Abstractions;
+
+	public abstract unsafe class RuntimeModelTest : TestObject
+	{
+		private RuntimeModel _runtimeModel;
+
+		protected Model RuntimeModel => _runtimeModel.Model;
+
+		protected Func<bool>[] StateLabels => _runtimeModel.StateLabels;
+
+		protected void Create(Model model)
+		{
+			using (var memoryStream = new MemoryStream())
+			{
+				var serializer = new RuntimeModelSerializer(model);
+				serializer.Save(memoryStream, new Func<bool>[0]);
+
+				memoryStream.Seek(0, SeekOrigin.Begin);
+				_runtimeModel = RuntimeModelSerializer.Load(memoryStream);
+			}
+		}
+	}
 
 	public abstract unsafe class SerializationObject : TestObject
 	{
@@ -43,8 +66,8 @@ namespace Tests.Serialization
 		protected void GenerateCode(SerializationMode mode, params object[] objects)
 		{
 			_objectTable = new ObjectTable(objects);
-			_serializer = _serializationRegistry.GenerateSerializationDelegate(_objectTable, mode);
-			_deserializer = _serializationRegistry.GenerateDeserializationDelegate(_objectTable, mode);
+			_serializer = _serializationRegistry.CreateStateSerializer(_objectTable, mode);
+			_deserializer = _serializationRegistry.CreateStateDeserializer(_objectTable, mode);
 
 			_stateSlotCount = _serializationRegistry.GetStateSlotCount(_objectTable, mode);
 			_stateCache = new StateCache(_stateSlotCount, 1);

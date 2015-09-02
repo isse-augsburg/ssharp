@@ -24,21 +24,23 @@ namespace SafetySharp.Runtime.Serialization
 {
 	using System;
 	using System.Collections.Generic;
+	using System.IO;
 	using System.Linq;
 	using System.Reflection;
+	using System.Runtime.Serialization;
 	using Modeling;
 	using Utilities;
 
 	/// <summary>
 	///   Serializes all kinds of objects.
 	/// </summary>
-	public sealed class ObjectSerializer : ISerializer
+	public sealed class ObjectSerializer : Serializer
 	{
 		/// <summary>
 		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
 		/// </summary>
 		/// <param name="type">The type that should be checked.</param>
-		public bool CanSerialize(Type type)
+		protected internal override bool CanSerialize(Type type)
 		{
 			return true;
 		}
@@ -50,7 +52,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="obj">The object that should be deserialized.</param>
 		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
 		/// <param name="mode">The serialization mode that should be used to deserialize the object.</param>
-		public void Deserialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
+		protected internal override void Deserialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
 		{
 			foreach (var field in GetFields(obj, mode))
 				generator.DeserializeField(objectIdentifier, field);
@@ -63,7 +65,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="obj">The object that should be serialized.</param>
 		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the object.</param>
-		public void Serialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
+		protected internal override void Serialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
 		{
 			foreach (var field in GetFields(obj, mode))
 				generator.SerializeField(objectIdentifier, field);
@@ -74,9 +76,43 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		/// <param name="obj">The object consisting of state values that should be serialized.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		public int GetStateSlotCount(object obj, SerializationMode mode)
+		protected internal override int GetStateSlotCount(object obj, SerializationMode mode)
 		{
 			return GetFields(obj, mode).Sum(field => SerializationGenerator.GetStateSlotCount(field.FieldType));
+		}
+
+		/// <summary>
+		///   Serializes the information about <paramref name="obj" />'s type using the <paramref name="writer" />.
+		/// </summary>
+		/// <param name="obj">The object whose type information should be serialized.</param>
+		/// <param name="writer">The writer the serialized information should be written to.</param>
+		protected internal override void SerializeType(object obj, BinaryWriter writer)
+		{
+			// ReSharper disable once AssignNullToNotNullAttribute
+			writer.Write(obj.GetType().AssemblyQualifiedName);
+		}
+
+		/// <summary>
+		///   Creates an instance of the serialized type stored in the <paramref name="reader" /> without running 
+		/// any of the type's constructors.
+		/// </summary>
+		/// <param name="reader">The reader the serialized type information should be read from.</param>
+		protected internal override object InstantiateType(BinaryReader reader)
+		{
+			return FormatterServices.GetUninitializedObject(Type.GetType(reader.ReadString(), throwOnError: true));
+		}
+
+		/// <summary>
+		///   Gets all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself.
+		/// </summary>
+		/// <param name="obj">The object the referenced objects should be returned for.</param>
+		protected internal override IEnumerable<object> GetReferencedObjects(object obj)
+		{
+			return from field in GetFields(obj, SerializationMode.Full)
+				   where field.FieldType.IsReferenceType()
+				   let referencedObject = field.GetValue(obj)
+				   where referencedObject != null
+				   select referencedObject;
 		}
 
 		/// <summary>
@@ -86,7 +122,11 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		private static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode)
 		{
-			var fields = obj.GetType().GetFields(typeof(object));
+			var inheritanceRoot = typeof(object);
+			if (obj.GetType().IsSubclassOf(typeof(Component)))
+				inheritanceRoot = typeof(Component);
+
+			var fields = obj.GetType().GetFields(inheritanceRoot);
 			fields = fields.Where(field => !field.IsStatic && !field.HasAttribute<HiddenAttribute>() && !field.IsLiteral);
 
 			if (mode == SerializationMode.Full)

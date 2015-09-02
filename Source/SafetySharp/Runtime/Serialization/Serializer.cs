@@ -23,17 +23,19 @@
 namespace SafetySharp.Runtime.Serialization
 {
 	using System;
+	using System.Collections.Generic;
+	using System.IO;
 
 	/// <summary>
-	///   An interface for dynamic code generators that generate the serialization code.
+	///   Represents a dynamic code generator that generate the serialization code.
 	/// </summary>
-	public interface ISerializer
+	public abstract class Serializer
 	{
 		/// <summary>
 		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
 		/// </summary>
 		/// <param name="type">The type that should be checked.</param>
-		bool CanSerialize(Type type);
+		protected internal abstract bool CanSerialize(Type type);
 
 		/// <summary>
 		///   Generates the code to deserialize the <paramref name="obj" />.
@@ -42,7 +44,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="obj">The object that should be deserialized.</param>
 		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
 		/// <param name="mode">The serialization mode that should be used to deserialize the object.</param>
-		void Deserialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode);
+		protected internal abstract void Deserialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode);
 
 		/// <summary>
 		///   Generates the code to serialize the <paramref name="obj" />.
@@ -51,13 +53,33 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="obj">The object that should be serialized.</param>
 		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the object.</param>
-		void Serialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode);
+		protected internal abstract void Serialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode);
 
 		/// <summary>
 		///   Gets the number of state slots required by the serialized data of <paramref name="obj" />.
 		/// </summary>
 		/// <param name="obj">The object consisting of state values that should be serialized.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		int GetStateSlotCount(object obj, SerializationMode mode);
+		protected internal abstract int GetStateSlotCount(object obj, SerializationMode mode);
+
+		/// <summary>
+		///   Serializes the information about <paramref name="obj" />'s type using the <paramref name="writer" />.
+		/// </summary>
+		/// <param name="obj">The object whose type information should be serialized.</param>
+		/// <param name="writer">The writer the serialized information should be written to.</param>
+		protected internal abstract void SerializeType(object obj, BinaryWriter writer);
+
+		/// <summary>
+		///   Creates an instance of the serialized type stored in the <paramref name="reader" /> without running
+		///   any of the type's constructors.
+		/// </summary>
+		/// <param name="reader">The reader the serialized type information should be read from.</param>
+		protected internal abstract object InstantiateType(BinaryReader reader);
+
+		/// <summary>
+		///   Gets all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself.
+		/// </summary>
+		/// <param name="obj">The object the referenced objects should be returned for.</param>
+		protected internal abstract IEnumerable<object> GetReferencedObjects(object obj);
 	}
 }

@@ -51,5 +51,11 @@ namespace Tests.Serialization
 		{
 			ExecuteDynamicTests(code);
 		}
+
+		[Theory, MemberData("DiscoverTests", "RuntimeModels")]
+		public void RuntimeModels(string test, SyntaxTree code)
+		{
+			ExecuteDynamicTests(code);
+		}
 	}
 }

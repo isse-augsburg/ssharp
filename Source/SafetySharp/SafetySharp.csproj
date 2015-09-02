@@ -51,6 +51,7 @@
     <Compile Include="Modeling\Faults\FaultEffect.cs" />
     <Compile Include="Modeling\Faults\PersistentFault.cs" />
     <Compile Include="Modeling\Faults\TransientFault.cs" />
+    <Compile Include="Modeling\Formulas\Formula.cs" />
     <Compile Include="Modeling\HiddenAttribute.cs" />
     <Compile Include="Modeling\IComponent.cs" />
     <Compile Include="Modeling\Model.cs" />
@@ -62,12 +63,14 @@
     <Compile Include="Modeling\Specification.cs" />
     <Compile Include="Runtime\ChoiceResolver.cs" />
     <Compile Include="Runtime\ChoiceStack.cs" />
+    <Compile Include="Runtime\RuntimeModel.cs" />
     <Compile Include="Runtime\Serialization\ObjectSerializer.cs" />
     <Compile Include="Runtime\Serialization\ObjectTable.cs" />
     <Compile Include="Runtime\Serialization\SerializationDelegate.cs" />
     <Compile Include="Runtime\Serialization\SerializationGenerator.cs" />
     <Compile Include="Runtime\Serialization\SerializationMode.cs" />
-    <Compile Include="Runtime\Serialization\ISerializer.cs" />
+    <Compile Include="Runtime\Serialization\Serializer.cs" />
+    <Compile Include="Runtime\Serialization\RuntimeModelSerializer.cs" />
     <Compile Include="Runtime\StepGenerator.cs" />
     <Compile Include="Runtime\Serialization\SerializationRegistry.cs" />
     <Compile Include="Runtime\StateCache.cs" />

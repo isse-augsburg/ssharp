@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,30 +20,55 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Utilities
+namespace SafetySharp.Runtime
 {
 	using System;
-	using System.IO;
+	using Modeling;
+	using Serialization;
+	using Utilities;
 
 	/// <summary>
-	///   Represents a temporary file on disk that is deleted once the instance is disposed or finalized.
+	///   Represents a runtime model that can be used for model checking or simulation.
 	/// </summary>
-	internal class TemporaryFile : DisposableObject
+	internal sealed class RuntimeModel : DisposableObject
 	{
+		/// <summary>
+		///   The deserializer for the model.
+		/// </summary>
+		private SerializationDelegate _deserializer;
+
+		/// <summary>
+		///   The  serializer for the model.
+		/// </summary>
+		private SerializationDelegate _serializer;
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="extension">The extension of the generated file.</param>
-		public TemporaryFile(string extension)
+		/// <param name="model">The underlying <see cref="Modeling.Model" /> instance.</param>
+		/// <param name="objectTable">The table of objects referenced by the model.</param>
+		/// <param name="stateLabels">The state labels of the model.</param>
+		public unsafe RuntimeModel(Model model, ObjectTable objectTable, Func<bool>[] stateLabels)
 		{
-			Requires.NotNullOrWhitespace(extension, nameof(extension));
-			FilePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.{extension}");
+			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(objectTable, nameof(objectTable));
+			Requires.NotNull(stateLabels, nameof(stateLabels));
+
+			Model = model;
+			StateLabels = stateLabels;
+			_deserializer = model.SerializationRegistry.CreateStateDeserializer(objectTable, SerializationMode.Optimized);
+			_serializer = model.SerializationRegistry.CreateStateSerializer(objectTable, SerializationMode.Optimized);
 		}
 
 		/// <summary>
-		///   Gets the path of the temporary file.
+		///   Gets the underlying model.
 		/// </summary>
-		public string FilePath { get; }
+		public Model Model { get; }
+
+		/// <summary>
+		///   Gets the state labels of the model.
+		/// </summary>
+		public Func<bool>[] StateLabels { get; }
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
@@ -51,7 +76,6 @@ namespace SafetySharp.Utilities
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
-			File.Delete(FilePath);
 		}
 	}
 }
