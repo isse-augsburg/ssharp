@@ -20,7 +20,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\Binaries\Debug\</OutputPath>
+    <OutputPath>..\Binaries\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -32,7 +32,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\Binaries\Release\</OutputPath>
+    <OutputPath>..\Binaries\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -155,6 +155,11 @@
     <Compile Include="Serialization\PrimitiveTypes\UInt16.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt32.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int32.cs" />
+    <Compile Include="Serialization\RuntimeModels\generic components.cs" />
+    <Compile Include="Serialization\RuntimeModels\cyclic hierarchy.cs" />
+    <Compile Include="Serialization\RuntimeModels\inherited components.cs" />
+    <Compile Include="Serialization\RuntimeModels\simple hierarchy.cs" />
+    <Compile Include="Serialization\RuntimeModels\interface components.cs" />
     <Compile Include="Serialization\RuntimeModels\single component.cs" />
     <Compile Include="Serialization\SerializationTests.cs" />
     <Compile Include="Serialization\SerializationTests.Helpers.cs">
@@ -201,4 +206,5 @@
   <Target Name="Test">
     <xunit Assemblies="$(TargetPath)" TeamCity="true" ParallelizeTestCollections="true" />
   </Target>
+  <Import Project="TestCleanup.targets" />
 </Project>

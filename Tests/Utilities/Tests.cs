@@ -140,7 +140,7 @@ namespace Tests.Utilities
 		public static Compilation CreateCompilation(params SyntaxTree[] syntaxTrees)
 		{
 			var compilation = CSharpCompilation
-				.Create("DynamicTestAssembly")
+				.Create("TestAssembly" + Guid.NewGuid())
 				.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
 				.AddSyntaxTrees(syntaxTrees)
 				.AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))

@@ -173,10 +173,10 @@ namespace SafetySharp.Compiler
 			byte[] assembly, pdb;
 			Compile(project, out assembly, out pdb);
 
-			// TODO: Hack, remove as soon as ltsmin integration is completed
-			var assemblyPath = Path.GetTempFileName();
-			File.WriteAllBytes(assemblyPath, assembly);
-			return Assembly.LoadFile(assemblyPath);
+			File.WriteAllBytes(project.AssemblyName + ".dll", assembly);
+			File.WriteAllBytes(project.AssemblyName + ".pdb", pdb);
+
+			return Assembly.Load(project.AssemblyName);
 		}
 
 		/// <summary>

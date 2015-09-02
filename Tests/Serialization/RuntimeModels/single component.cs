@@ -33,6 +33,8 @@ namespace Tests.Serialization.RuntimeModels
 		{
 			var c = new C { F = 99 };
 			var m = new Model(c);
+
+			_hasConstructorRun = false;
 			Create(m);
 
 			StateLabels.ShouldBeEmpty();

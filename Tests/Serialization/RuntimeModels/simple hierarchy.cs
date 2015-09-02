@@ -20,47 +20,59 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Utilities
+namespace Tests.Serialization.RuntimeModels
 {
-	using System;
-	using System.Diagnostics;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	/// <summary>
-	///   Base implementation for the <see cref="IDisposable" /> interface.
-	/// </summary>
-	public abstract class DisposableObject : IDisposable
+	internal class SimpleHierarchy : RuntimeModelTest
 	{
-		/// <summary>
-		///   Gets a value indicating whether the object has already been disposed.
-		/// </summary>
-		public bool IsDisposed { get; private set; }
+		private static bool _hasConstructorRun;
 
-		/// <summary>
-		///   Disposes the object, releasing all managed and unmanaged resources.
-		/// </summary>
-		[DebuggerHidden]
-		void IDisposable.Dispose()
+		protected override void Check()
 		{
-			Requires.That(!IsDisposed, "The instance has already been disposed.");
+			var c1 = new C { F = 99 };
+			var c2 = new C { F = 33 };
+			var d = new D { C1 = c1, C2 = c2 };
+			var m = new Model(d);
 
-			OnDisposing(true);
-			IsDisposed = true;
+			_hasConstructorRun = false;
+			Create(m);
 
-			GC.SuppressFinalize(this);
+			StateLabels.ShouldBeEmpty();
+			RuntimeModel.RootComponents.Count.ShouldBe(1);
+
+			var root = RuntimeModel.RootComponents[0];
+			root.ShouldBeOfType<D>();
+
+			((D)root).C1.ShouldBeOfType<C>();
+			((D)root).C2.ShouldBeOfType<C>();
+
+			((D)root).C1.F.ShouldBe(99);
+			((D)root).C2.F.ShouldBe(33);
+
+			_hasConstructorRun.ShouldBe(false);
 		}
 
-		/// <summary>
-		///   Disposes the object, releasing all managed and unmanaged resources.
-		/// </summary>
-		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
-		protected abstract void OnDisposing(bool disposing);
-
-		/// <summary>
-		///   Ensures that the instance has been disposed.
-		/// </summary>
-		~DisposableObject()
+		private class C : Component
 		{
-			OnDisposing(false);
+			public int F;
+
+			public C()
+			{
+				_hasConstructorRun = true;
+			}
+		}
+
+		private class D : Component
+		{
+			public C C1;
+			public C C2;
+
+			public D()
+			{
+				_hasConstructorRun = true;
+			}
 		}
 	}
 }

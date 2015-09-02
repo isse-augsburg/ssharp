@@ -1,0 +1,8 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Target Name="BeforeBuild">
+		<ItemGroup>
+			<FilesToDelete Include="$(OutDir)\TestAssembly*.*"/>
+		</ItemGroup> 
+		<Delete Files="@(FilesToDelete)" />   
+	</Target>
+</Project>
