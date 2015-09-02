@@ -26,6 +26,7 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Reflection;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -86,11 +87,12 @@ namespace SafetySharp.Runtime.Serialization
 		private static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode)
 		{
 			var fields = obj.GetType().GetFields(typeof(object));
+			fields = fields.Where(field => !field.IsStatic && !field.HasAttribute<HiddenAttribute>() && !field.IsLiteral);
 
 			if (mode == SerializationMode.Full)
 				return fields;
 
-			return fields.Where(field => !field.IsStatic && !field.IsInitOnly);
+			return fields.Where(field => !field.IsInitOnly);
 		}
 	}
 }

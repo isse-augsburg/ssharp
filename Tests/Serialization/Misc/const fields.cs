@@ -20,13 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.MixedTypes
+namespace Tests.Serialization.Misc
 {
 	using System;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class Mixed2 : SerializationObject
+	internal class ConstFields : SerializationObject
 	{
 		public enum E : long
 		{
@@ -37,43 +37,24 @@ namespace Tests.Serialization.MixedTypes
 
 		protected override void Check()
 		{
-			var o = new object();
-			var c = new C { D = 17, E = o,F = true, G = E.B, H = -1247 };
+			var c = new C { G = 7 };
 
-			GenerateCode(SerializationMode.Full, c, o);
-			_stateSlotCount.ShouldBe(6);
+			GenerateCode(SerializationMode.Full, c);
+			_stateSlotCount.ShouldBe(1);
 
 			Serialize();
-			c.D = 0;
-			c.E = null;
-			c.F = false;
-			c.G = E.C;
-			c.H = 3;
+			c.G = 3;
 			Deserialize();
-			c.D.ShouldBe((ushort)17);
-			c.E.ShouldBe(o);
-			c.F.ShouldBe(true);
-			c.G.ShouldBe(E.B);
-			c.H.ShouldBe(-1247);
-
-			c.E = null;
-			Serialize();
-			c.E = o;
-			Deserialize();
-			c.D.ShouldBe((ushort)17);
-			c.E.ShouldBe(null);
-			c.F.ShouldBe(true);
-			c.G.ShouldBe(E.B);
-			c.H.ShouldBe(-1247);
+			c.G.ShouldBe(7);
 		}
 
 		internal class C
 		{
-			public ushort D;
-			public object E;
-			public bool F;
-			public E G;
-			public int H;
+			public const bool F = true;
+
+			public const E H = E.B;
+
+			public int G;
 		}
 	}
 }

@@ -51,8 +51,9 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			Requires.NotNull(objects, nameof(objects));
 
-			_objects = objects.ToArray();
-			for (var i = 0; i < _objects.Length; ++i)
+			_objects = new object[] { null }.Concat(objects).ToArray();
+
+			for (var i = 1; i < _objects.Length; ++i)
 				_objectToIdentifier.Add(_objects[i], i);
 		}
 
@@ -61,7 +62,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		public IEnumerator<object> GetEnumerator()
 		{
-			return ((IEnumerable<object>)_objects).GetEnumerator();
+			return _objects.Skip(1).GetEnumerator();
 		}
 
 		/// <summary>
@@ -78,7 +79,7 @@ namespace SafetySharp.Runtime.Serialization
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public object GetObject(int identifier)
 		{
-			return identifier == -1 ? null : _objects[identifier];
+			return _objects[identifier];
 		}
 
 		/// <summary>
@@ -87,7 +88,7 @@ namespace SafetySharp.Runtime.Serialization
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int GetObjectIdentifier(object obj)
 		{
-			return obj == null ? -1 : _objectToIdentifier[obj];
+			return obj == null ? 0 : _objectToIdentifier[obj];
 		}
 	}
 }

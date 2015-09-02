@@ -20,13 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.MixedTypes
+namespace Tests.Serialization.Misc
 {
 	using System;
+	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class Mixed1 : SerializationObject
+	internal class Hidden : SerializationObject
 	{
 		public enum E : long
 		{
@@ -37,26 +38,30 @@ namespace Tests.Serialization.MixedTypes
 
 		protected override void Check()
 		{
-			var c = new C { F = true, G = E.B, H = -1247 };
+			var c = new C { F = true, G = -1247, H = E.B };
 
 			GenerateCode(SerializationMode.Full, c);
-			_stateSlotCount.ShouldBe(4);
+			_stateSlotCount.ShouldBe(1);
 
 			Serialize();
 			c.F = false;
-			c.G = E.C;
-			c.H = 3;
+			c.G = 3;
+			c.H = E.C;
 			Deserialize();
-			c.F.ShouldBe(true);
-			c.G.ShouldBe(E.B);
-			c.H.ShouldBe(-1247);
+			c.F.ShouldBe(false);
+			c.G.ShouldBe(-1247);
+			c.H.ShouldBe(E.C);
 		}
 
 		internal class C
 		{
+			[Hidden]
 			public bool F;
-			public E G;
-			public int H;
+
+			public int G;
+
+			[Hidden]
+			public E H;
 		}
 	}
 }

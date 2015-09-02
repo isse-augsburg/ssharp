@@ -20,36 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization
+namespace Tests.Serialization.Misc
 {
-	using Microsoft.CodeAnalysis;
-	using Utilities;
-	using Xunit;
+	using System;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	public partial class SerializationTests : Tests
+	internal class OptimizedSerialization : SerializationObject
 	{
-		[Theory, MemberData("DiscoverTests", "PrimitiveTypes")]
-		public void PrimitiveTypes(string test, SyntaxTree code)
+		public enum E : long
 		{
-			ExecuteDynamicTests(code);
+			A,
+			B = Int64.MaxValue,
+			C = 5
 		}
 
-		[Theory, MemberData("DiscoverTests", "Enumerations")]
-		public void Enumerations(string test, SyntaxTree code)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(code);
+			var c = new C { H = E.B };
+
+			GenerateCode(SerializationMode.Optimized, c);
+			_stateSlotCount.ShouldBe(2);
+
+			Serialize();
+			c.H = E.C;
+			Deserialize();
+			c.F.ShouldBe(true);
+			c.G.ShouldBe(-4);
+			c.H.ShouldBe(E.B);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Misc")]
-		public void Misc(string test, SyntaxTree code)
+		internal class C
 		{
-			ExecuteDynamicTests(code);
-		}
+			public readonly bool F = true;
 
-		[Theory, MemberData("DiscoverTests", "Objects")]
-		public void Objects(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
+			public readonly int G = -4;
+
+			public E H;
 		}
 	}
 }

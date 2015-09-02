@@ -51,6 +51,7 @@
     <Compile Include="Modeling\Faults\FaultEffect.cs" />
     <Compile Include="Modeling\Faults\PersistentFault.cs" />
     <Compile Include="Modeling\Faults\TransientFault.cs" />
+    <Compile Include="Modeling\HiddenAttribute.cs" />
     <Compile Include="Modeling\IComponent.cs" />
     <Compile Include="Modeling\Model.cs" />
     <Compile Include="Modeling\OverflowBehavior.cs" />

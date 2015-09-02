@@ -20,36 +20,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization
+namespace SafetySharp.Modeling
 {
-	using Microsoft.CodeAnalysis;
-	using Utilities;
-	using Xunit;
+	using System;
 
-	public partial class SerializationTests : Tests
+	/// <summary>
+	///   When a state field is marked as <c>[Hidden]</c>, its state is not preserved between different system steps.
+	///   Hiding state variables potentially increases simulation and model checking performance, but is only possible
+	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
+	///   written value could be read.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+	public sealed class HiddenAttribute : Attribute
 	{
-		[Theory, MemberData("DiscoverTests", "PrimitiveTypes")]
-		public void PrimitiveTypes(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Enumerations")]
-		public void Enumerations(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Misc")]
-		public void Misc(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Objects")]
-		public void Objects(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
-		}
 	}
 }
