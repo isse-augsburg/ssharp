@@ -38,7 +38,7 @@ namespace Tests.Serialization.RuntimeModels
 			_hasConstructorRun = false;
 			Create(m);
 
-			StateLabels.ShouldBeEmpty();
+			StateFormulas.ShouldBeEmpty();
 			RuntimeModel.RootComponents.Count.ShouldBe(2);
 
 			var root1 = RuntimeModel.RootComponents[0];

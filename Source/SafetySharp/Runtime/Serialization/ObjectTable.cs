@@ -51,12 +51,13 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			Requires.NotNull(objects, nameof(objects));
 
-			// We make sure that we store each object only once and we order the objects by type
+			// We make sure that we store each object only once
 			var objs = objects.Distinct(ReferenceEqualityComparer<object>.Default);
-			objs = objs.OrderBy(obj => obj.GetType().FullName);
 
+			// Index 0 always maps to null
 			_objects = new object[] { null }.Concat(objs).ToArray();
 
+			// Generate the object to identifier lookup table; unfortunately, we can't have null keys
 			for (var i = 1; i < _objects.Length; ++i)
 				_objectToIdentifier.Add(_objects[i], i);
 		}
@@ -106,6 +107,7 @@ namespace SafetySharp.Runtime.Serialization
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int GetObjectIdentifier(object obj)
 		{
+			// Since the map does not support null keys, we have to add a special case for a null object here...
 			return obj == null ? 0 : _objectToIdentifier[obj];
 		}
 	}

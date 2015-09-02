@@ -22,8 +22,8 @@
 
 namespace SafetySharp.Runtime
 {
-	using System;
 	using Modeling;
+	using Modeling.Formulas;
 	using Serialization;
 	using Utilities;
 
@@ -47,15 +47,15 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="model">The underlying <see cref="Modeling.Model" /> instance.</param>
 		/// <param name="objectTable">The table of objects referenced by the model.</param>
-		/// <param name="stateLabels">The state labels of the model.</param>
-		public unsafe RuntimeModel(Model model, ObjectTable objectTable, Func<bool>[] stateLabels)
+		/// <param name="stateFormulas">The state formulas of the model.</param>
+		public unsafe RuntimeModel(Model model, ObjectTable objectTable, StateFormula[] stateFormulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(objectTable, nameof(objectTable));
-			Requires.NotNull(stateLabels, nameof(stateLabels));
+			Requires.NotNull(stateFormulas, nameof(stateFormulas));
 
 			Model = model;
-			StateLabels = stateLabels;
+			StateFormulas = stateFormulas;
 			_deserializer = model.SerializationRegistry.CreateStateDeserializer(objectTable, SerializationMode.Optimized);
 			_serializer = model.SerializationRegistry.CreateStateSerializer(objectTable, SerializationMode.Optimized);
 		}
@@ -68,7 +68,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the state labels of the model.
 		/// </summary>
-		public Func<bool>[] StateLabels { get; }
+		public StateFormula[] StateFormulas { get; }
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.

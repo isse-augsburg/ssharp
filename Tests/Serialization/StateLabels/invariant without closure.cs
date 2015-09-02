@@ -20,41 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Serialization.StateLabels
 {
 	using SafetySharp.Modeling;
+	using SafetySharp.Modeling.Formulas;
 	using Shouldly;
 
-	internal class SingleComponent : RuntimeModelTest
+	internal class InvariantWithoutClosure : RuntimeModelTest
 	{
-		private static bool _hasConstructorRun;
+		private static int _x;
 
 		protected override void Check()
 		{
-			var c = new C { F = 99 };
+			var c = new C();
 			var m = new Model(c);
+			Formula l = (_x = 3) == 3;
 
-			_hasConstructorRun = false;
-			Create(m);
+			Create(m, l);
 
-			StateFormulas.ShouldBeEmpty();
+			StateFormulas.Length.ShouldBe(1);
 			RuntimeModel.RootComponents.Count.ShouldBe(1);
 
 			var root = RuntimeModel.RootComponents[0];
 			root.ShouldBeOfType<C>();
-			((C)root).F.ShouldBe((sbyte)99);
 
-			_hasConstructorRun.ShouldBe(false);
+			StateFormulas[0].Expression().ShouldBe(true);
+			_x.ShouldBe(3);
 		}
 
 		private class C : Component
 		{
-			public sbyte F;
-
-			public C()
-			{
-				_hasConstructorRun = true;
-			}
 		}
 	}
 }

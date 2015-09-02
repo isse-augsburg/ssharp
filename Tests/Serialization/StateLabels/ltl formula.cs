@@ -20,41 +20,58 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Serialization.StateLabels
 {
 	using SafetySharp.Modeling;
+	using SafetySharp.Modeling.Formulas;
 	using Shouldly;
+	using static SafetySharp.Modeling.Formulas.Operators;
 
-	internal class SingleComponent : RuntimeModelTest
+	internal class LtlFormula : RuntimeModelTest
 	{
-		private static bool _hasConstructorRun;
-
 		protected override void Check()
 		{
-			var c = new C { F = 99 };
+			var x = 3;
+			var c = new C { F = 3 };
 			var m = new Model(c);
+			Formula f = X(x > 0 && F(c.F == 7 && U(c.F < 0, c.F > 0)));
 
-			_hasConstructorRun = false;
-			Create(m);
+			Create(m, f);
 
-			StateFormulas.ShouldBeEmpty();
+			StateFormulas.Length.ShouldBe(4);
 			RuntimeModel.RootComponents.Count.ShouldBe(1);
 
 			var root = RuntimeModel.RootComponents[0];
 			root.ShouldBeOfType<C>();
-			((C)root).F.ShouldBe((sbyte)99);
 
-			_hasConstructorRun.ShouldBe(false);
+			((C)root).F = 0;
+			StateFormulas[0].Expression().ShouldBe(true);
+			StateFormulas[1].Expression().ShouldBe(false);
+			StateFormulas[2].Expression().ShouldBe(false);
+			StateFormulas[3].Expression().ShouldBe(false);
+
+			((C)root).F = 3;
+			StateFormulas[0].Expression().ShouldBe(true);
+			StateFormulas[1].Expression().ShouldBe(false);
+			StateFormulas[2].Expression().ShouldBe(false);
+			StateFormulas[3].Expression().ShouldBe(true);
+
+			((C)root).F = -3;
+			StateFormulas[0].Expression().ShouldBe(true);
+			StateFormulas[1].Expression().ShouldBe(false);
+			StateFormulas[2].Expression().ShouldBe(true);
+			StateFormulas[3].Expression().ShouldBe(false);
+
+			((C)root).F = 7;
+			StateFormulas[0].Expression().ShouldBe(true);
+			StateFormulas[1].Expression().ShouldBe(true);
+			StateFormulas[2].Expression().ShouldBe(false);
+			StateFormulas[3].Expression().ShouldBe(true);
 		}
 
 		private class C : Component
 		{
-			public sbyte F;
-
-			public C()
-			{
-				_hasConstructorRun = true;
-			}
+			public int F;
 		}
 	}
 }

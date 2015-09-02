@@ -10,7 +10,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Tests</RootNamespace>
-    <AssemblyName>SafetySharp.CSharpTests</AssemblyName>
+    <AssemblyName>SafetySharp.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>74fe3d13</NuGetPackageImportStamp>
@@ -125,6 +125,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Source\SafetySharp\Properties\InternalsVisibleTo.cs">
+      <Link>Properties\InternalsVisibleTo.cs</Link>
+    </Compile>
     <Compile Include="Formulas\StateFormulas\binary expressions.cs" />
     <Compile Include="Formulas\StateFormulas\arrays.cs" />
     <Compile Include="Formulas\StateFormulas\parameters.cs" />
@@ -190,6 +193,10 @@
     <Compile Include="SerializationTests.Helpers.cs">
       <DependentUpon>SerializationTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Serialization\StateLabels\ctl formula.cs" />
+    <Compile Include="Serialization\StateLabels\ltl formula.cs" />
+    <Compile Include="Serialization\StateLabels\invariants with closure.cs" />
+    <Compile Include="Serialization\StateLabels\invariant without closure.cs" />
     <Compile Include="Utilities\TestTraceOutput.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\CSharpErrorReporter.cs" />

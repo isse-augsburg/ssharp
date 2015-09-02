@@ -23,44 +23,34 @@
 namespace SafetySharp.Runtime.Serialization
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using System.Reflection;
+	using System.Text;
 	using Modeling;
+	using Modeling.Formulas;
 	using Utilities;
 
 	/// <summary>
 	///   Serializes a <see cref="RuntimeModel" /> instance into a <see cref="Stream" />.
 	/// </summary>
-	internal sealed class RuntimeModelSerializer
+	internal static class RuntimeModelSerializer
 	{
 		/// <summary>
-		///   The serialized information about the runtime model.
-		/// </summary>
-		private readonly byte[] _runtimeModel;
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="model">The model that should be serialized.</param>
-		public RuntimeModelSerializer(Model model)
-		{
-			Requires.NotNull(model, nameof(model));
-			_runtimeModel = SerializeModel(model);
-		}
-
-		/// <summary>
-		///   Saves the serialized model and the <paramref name="stateLabels" /> to the <paramref name="stream" />.
+		///   Saves the serialized <paramref name="model" /> and the <paramref name="formulas" /> to the <paramref name="stream" />.
 		/// </summary>
 		/// <param name="stream">The stream the serialized specification should be written to.</param>
-		/// <param name="stateLabels">The state labels that should be serialized into the <paramref name="stream" />.</param>
-		public void Save(Stream stream, Func<bool>[] stateLabels)
+		/// <param name="model">The model that should be serialized into the <paramref name="stream" />.</param>
+		/// <param name="formulas">The formulas that should be serialized into the <paramref name="stream" />.</param>
+		public static void Save(Stream stream, Model model, params Formula[] formulas)
 		{
 			Requires.NotNull(stream, nameof(stream));
-			Requires.NotNull(stateLabels, nameof(stateLabels));
+			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(formulas, nameof(formulas));
 
-			var serializedStateLabels = new byte[0]; // TODO
-			stream.Write(_runtimeModel, 0, _runtimeModel.Length);
-			stream.Write(serializedStateLabels, 0, serializedStateLabels.Length);
+			using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+				SerializeModel(writer, model, formulas);
 		}
 
 		/// <summary>
@@ -71,7 +61,7 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			Requires.NotNull(stream, nameof(stream));
 
-			using (var reader = new BinaryReader(stream))
+			using (var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
 			{
 				// Deserialize the object table
 				var model = new Model();
@@ -93,50 +83,121 @@ namespace SafetySharp.Runtime.Serialization
 				var deserializer = model.SerializationRegistry.CreateStateDeserializer(objectTable, SerializationMode.Full);
 				deserializer(serializedState);
 
-				// Deserialize the state labels
-				var stateLabels = new Func<bool>[0]; // TODO
+				// Deserialize the state formulas
+				var stateFormulas = new StateFormula[reader.ReadInt32()];
+				for (var i = 0; i < stateFormulas.Length; ++i)
+				{
+					// Deserialize the closure object and method name to generate the delegate
+					var closure = objectTable.GetObject(reader.ReadInt32());
+					var method = closure.GetType().GetMethod(reader.ReadString(), BindingFlags.NonPublic | BindingFlags.Instance);
+					var expression = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), closure, method);
+
+					// Deserialize the label name and instantiate the state formula
+					stateFormulas[i] = new StateFormula(expression, reader.ReadString());
+				}
 
 				// Instantiate the runtime model
-				return new RuntimeModel(model, objectTable, stateLabels);
+				return new RuntimeModel(model, objectTable, stateFormulas);
 			}
+		}
+
+		/// <summary>
+		///   Creates the object table for the <paramref name="model" /> and <paramref name="stateFormulas" />.
+		/// </summary>
+		private static ObjectTable CreateObjectTable(Model model, StateFormula[] stateFormulas)
+		{
+			var modelObjects = model.RootComponents.SelectMany(component => model.SerializationRegistry.GetReferencedObjects(component));
+			var formulaObjects = stateFormulas.SelectMany(formula => model.SerializationRegistry.GetReferencedObjects(formula.Expression.Target));
+
+			return new ObjectTable(modelObjects.Concat(formulaObjects));
 		}
 
 		/// <summary>
 		///   Serializes the <paramref name="model" />.
 		/// </summary>
-		private static unsafe byte[] SerializeModel(Model model)
+		private static unsafe void SerializeModel(BinaryWriter writer, Model model, Formula[] formulas)
 		{
-			// Construct the object table for the model
-			var objects = model.RootComponents.SelectMany(component => model.SerializationRegistry.GetReferencedObjects(component));
-			var objectTable = new ObjectTable(objects);
+			var stateFormulas = CollectStateFormulas(formulas);
+			var objectTable = CreateObjectTable(model, stateFormulas);
 
 			// Prepare the serialization of the model's initial state
 			var slotCount = model.SerializationRegistry.GetStateSlotCount(objectTable, SerializationMode.Full);
 			var serializer = model.SerializationRegistry.CreateStateSerializer(objectTable, SerializationMode.Full);
 
-			using (var memoryStream = new MemoryStream())
-			using (var writer = new BinaryWriter(memoryStream))
+			// Serialize the object table
+			model.SerializationRegistry.SerializeObjectTable(objectTable, writer);
+
+			// Serialize object identifiers of the root components
+			writer.Write(model.RootComponents.Count);
+			foreach (var root in model.RootComponents)
+				writer.Write(objectTable.GetObjectIdentifier(root));
+
+			// Serialize the initial state
+			var serializedState = stackalloc int[slotCount];
+			serializer(serializedState);
+
+			// Copy the serialized state to the stream
+			writer.Write(slotCount);
+			for (var i = 0; i < slotCount; ++i)
+				writer.Write(serializedState[i]);
+
+			SerializeFormulas(writer, objectTable, stateFormulas);
+		}
+
+		/// <summary>
+		///   Serializes the <paramref name="stateFormulas" />.
+		/// </summary>
+		private static void SerializeFormulas(BinaryWriter writer, ObjectTable objectTable, StateFormula[] stateFormulas)
+		{
+			writer.Write(stateFormulas.Length);
+			foreach (var formula in stateFormulas)
 			{
-				// Serialize the object table
-				model.SerializationRegistry.SerializeObjectTable(objectTable, writer);
+				// Serialize the object identifier of the closure as well as the method name
+				writer.Write(objectTable.GetObjectIdentifier(formula.Expression.Target));
+				writer.Write(formula.Expression.Method.Name);
 
-				// Serialize object identifiers of the root components
-				writer.Write(model.RootComponents.Count);
-				foreach (var root in model.RootComponents)
-					writer.Write(objectTable.GetObjectIdentifier(root));
-
-				// Serialize the initial state
-				var serializedState = stackalloc int[slotCount];
-				serializer(serializedState);
-
-				// Copy the serialized state to the stream
-				writer.Write(slotCount);
-				for (var i = 0; i < slotCount; ++i)
-					writer.Write(serializedState[i]);
-
-				// Return the serialized model
-				return memoryStream.ToArray();
+				// Serialize the state label name
+				writer.Write(formula.Label);
 			}
+		}
+
+		/// <summary>
+		///   Collects all state formulas contained in the <paramref name="formulas" />.
+		/// </summary>
+		private static StateFormula[] CollectStateFormulas(Formula[] formulas)
+		{
+			var stateFormulas = new HashSet<StateFormula>();
+
+			Action<HashSet<StateFormula>, Formula> collect = null;
+			collect = (collection, formula) =>
+			{
+				var binaryFormula = formula as BinaryFormula;
+				if (binaryFormula != null)
+				{
+					collect(collection, binaryFormula.LeftOperand);
+					collect(collection, binaryFormula.RightOperand);
+					return;
+				}
+
+				var unaryFormula = formula as UnaryFormula;
+				if (unaryFormula != null)
+				{
+					collect(collection, unaryFormula.Operand);
+					return;
+				}
+
+				// Check that the state formula has a closure -- the current version of the C# compiler 
+				// always does that, but future versions might not.
+				var stateFormula = (StateFormula)formula;
+				Assert.NotNull(stateFormula.Expression.Target, "Unexpected state formula without closure object.");
+
+				collection.Add(stateFormula);
+			};
+
+			foreach (var formula in formulas)
+				collect(stateFormulas, formula);
+
+			return stateFormulas.ToArray();
 		}
 	}
 }

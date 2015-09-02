@@ -56,5 +56,11 @@ namespace Tests
 		{
 			ExecuteDynamicTests(code);
 		}
+
+		[Theory, MemberData("DiscoverTests", "Serialization/StateLabels")]
+		public void StateLabels(string test, SyntaxTree code)
+		{
+			ExecuteDynamicTests(code);
+		}
 	}
 }

@@ -22,30 +22,29 @@
 
 namespace Tests
 {
-	using System;
 	using System.Collections.Generic;
 	using System.IO;
 	using JetBrains.Annotations;
 	using SafetySharp.Modeling;
+	using SafetySharp.Modeling.Formulas;
 	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Utilities;
 	using Xunit.Abstractions;
 
-	public abstract class RuntimeModelTest : TestObject
+	internal abstract class RuntimeModelTest : TestObject
 	{
 		private RuntimeModel _runtimeModel;
 
 		protected Model RuntimeModel => _runtimeModel.Model;
 
-		protected Func<bool>[] StateLabels => _runtimeModel.StateLabels;
+		protected StateFormula[] StateFormulas => _runtimeModel.StateFormulas;
 
-		protected void Create(Model model)
+		protected void Create(Model model, params Formula[] formulas)
 		{
 			using (var memoryStream = new MemoryStream())
 			{
-				var serializer = new RuntimeModelSerializer(model);
-				serializer.Save(memoryStream, new Func<bool>[0]);
+				RuntimeModelSerializer.Save(memoryStream, model, formulas);
 
 				memoryStream.Seek(0, SeekOrigin.Begin);
 				_runtimeModel = RuntimeModelSerializer.Load(memoryStream);
