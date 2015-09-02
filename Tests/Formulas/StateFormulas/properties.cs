@@ -20,24 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+namespace Tests.Formulas.StateFormulas
+{
+	using SafetySharp.Modeling.Formulas;
 
-[assembly: AssemblyTitle("S# Modeling")]
-[assembly: AssemblyDescription("S# Modeling")]
-[assembly: AssemblyCompany("Institute for Software & Systems Engineering")]
-[assembly: AssemblyProduct("S#")]
-[assembly: AssemblyCopyright("Copyright (c) 2014-2015, Institute for Software & Systems Engineering")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyFileVersion("0.1.0.0")]
-[assembly: ComVisible(false)]
-[assembly: InternalsVisibleTo("SafetySharp.Compiler")]
-[assembly: InternalsVisibleTo("SafetySharp.CSharpTests")]
-[assembly: InternalsVisibleTo("SafetySharp.Tests")]
-[assembly: InternalsVisibleTo("SafetySharp.Analysis")]
-[assembly: InternalsVisibleTo("SafetySharp.Simulation")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.MultiCore")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.Sequential")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.Symbolic")]
+	public class Properties : FormulaTestObject
+	{
+		private static int x;
+		public Formula f2;
+
+		public Properties()
+		{
+			f2 = x == 4;
+		}
+
+		public Formula f { get; } = x == 2;
+		public Formula f1 { get; set; } = x == 3;
+
+		protected override void Check()
+		{
+			for (var i = 0; i < 6; ++i)
+				Check(i);
+		}
+
+		private void Check(int value)
+		{
+			x = value;
+
+			Check(f, () => x == 2);
+			Check(f1, () => x == 3);
+			Check(f2, () => x == 4);
+		}
+	}
+}

@@ -50,6 +50,11 @@ namespace Tests.Utilities
 	public class Tests
 	{
 		/// <summary>
+		///   The number of dynamically generated assemblies.
+		/// </summary>
+		private static int _assemblyCount;
+
+		/// <summary>
 		///   Initializes the type.
 		/// </summary>
 		static Tests()
@@ -140,7 +145,7 @@ namespace Tests.Utilities
 		public static Compilation CreateCompilation(params SyntaxTree[] syntaxTrees)
 		{
 			var compilation = CSharpCompilation
-				.Create("TestAssembly" + Guid.NewGuid())
+				.Create("TestAssembly" + _assemblyCount++)
 				.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
 				.AddSyntaxTrees(syntaxTrees)
 				.AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))

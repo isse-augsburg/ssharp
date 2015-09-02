@@ -20,24 +20,58 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+namespace Tests.Formulas.StateFormulas
+{
+	using SafetySharp.Modeling.Formulas;
 
-[assembly: AssemblyTitle("S# Modeling")]
-[assembly: AssemblyDescription("S# Modeling")]
-[assembly: AssemblyCompany("Institute for Software & Systems Engineering")]
-[assembly: AssemblyProduct("S#")]
-[assembly: AssemblyCopyright("Copyright (c) 2014-2015, Institute for Software & Systems Engineering")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyFileVersion("0.1.0.0")]
-[assembly: ComVisible(false)]
-[assembly: InternalsVisibleTo("SafetySharp.Compiler")]
-[assembly: InternalsVisibleTo("SafetySharp.CSharpTests")]
-[assembly: InternalsVisibleTo("SafetySharp.Tests")]
-[assembly: InternalsVisibleTo("SafetySharp.Analysis")]
-[assembly: InternalsVisibleTo("SafetySharp.Simulation")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.MultiCore")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.Sequential")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.Symbolic")]
+	public class Return : FormulaTestObject
+	{
+		private static int x;
+		private readonly X1 x1 = new X1();
+		private readonly X2 x2 = new X2();
+
+		private Formula P1
+		{
+			get { return x == 2; }
+		}
+
+		private Formula P2 => x == 4;
+
+		private Formula M1()
+		{
+			return x == 1;
+		}
+
+		private Formula M2() => x == 3;
+
+		protected override void Check()
+		{
+			for (var i = 0; i < 7; ++i)
+				Check(i);
+		}
+
+		private void Check(int value)
+		{
+			x = value;
+			Check(M1(), () => x == 1);
+			Check(P1, () => x == 2);
+			Check(M2(), () => x == 3);
+			Check(P2, () => x == 4);
+			Check(x1[0], () => x == 5);
+			Check(x2[0], () => x == 6);
+		}
+
+		private class X1
+		{
+			public Formula this[int i] => x == 5;
+		}
+
+		private class X2
+		{
+			public Formula this[int i]
+			{
+				get { return x == 6; }
+			}
+		}
+	}
+}

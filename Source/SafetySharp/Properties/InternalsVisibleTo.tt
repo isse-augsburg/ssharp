@@ -1,4 +1,10 @@
-﻿// The MIT License (MIT)
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,42 +26,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization
-{
-	using Microsoft.CodeAnalysis;
-	using Utilities;
-	using Xunit;
+using System.Runtime.CompilerServices;
 
-	public partial class SerializationTests : Tests
-	{
-		[Theory, MemberData("DiscoverTests", "PrimitiveTypes")]
-		public void PrimitiveTypes(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
-		}
+// The following is annoying... the problem is that we dynamically generate a large amount of assemblies
+// when executing the tests; some of these tests need access to internals, and all of the assemblies
+// must have unique identifies for all tests to work. Hence, we make our internals visible to a large
+// amount of dynamically generated test assemblies.
 
-		[Theory, MemberData("DiscoverTests", "Enumerations")]
-		public void Enumerations(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Misc")]
-		public void Misc(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Objects")]
-		public void Objects(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
-		}
-
-		[Theory, MemberData("DiscoverTests", "RuntimeModels")]
-		public void RuntimeModels(string test, SyntaxTree code)
-		{
-			ExecuteDynamicTests(code);
-		}
-	}
-}
+<# for (var i = 0; i < 1000; ++i) { #>
+[assembly: InternalsVisibleTo("TestAssembly<#= i #>")]
+<# } #>

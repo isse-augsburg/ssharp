@@ -20,24 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+namespace Tests.Formulas.StateFormulas
+{
+	using SafetySharp.Modeling.Formulas;
 
-[assembly: AssemblyTitle("S# Modeling")]
-[assembly: AssemblyDescription("S# Modeling")]
-[assembly: AssemblyCompany("Institute for Software & Systems Engineering")]
-[assembly: AssemblyProduct("S#")]
-[assembly: AssemblyCopyright("Copyright (c) 2014-2015, Institute for Software & Systems Engineering")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyFileVersion("0.1.0.0")]
-[assembly: ComVisible(false)]
-[assembly: InternalsVisibleTo("SafetySharp.Compiler")]
-[assembly: InternalsVisibleTo("SafetySharp.CSharpTests")]
-[assembly: InternalsVisibleTo("SafetySharp.Tests")]
-[assembly: InternalsVisibleTo("SafetySharp.Analysis")]
-[assembly: InternalsVisibleTo("SafetySharp.Simulation")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.MultiCore")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.Sequential")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.Symbolic")]
+	public class Fields : FormulaTestObject
+	{
+		private static int x;
+
+		private readonly Formula f = x == 2;
+		private readonly Formula f1 = x == 3, f2 = x == 4;
+		private readonly Formula f3 = (Formula)(x == 5);
+
+		protected override void Check()
+		{
+			for (var i = 0; i < 6; ++i)
+				Check(i);
+		}
+
+		private void Check(int value)
+		{
+			x = value;
+
+			Check(f, () => x == 2);
+			Check(f1, () => x == 3);
+			Check(f2, () => x == 4);
+			Check(f3, () => x == 5);
+		}
+	}
+}

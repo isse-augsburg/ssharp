@@ -109,6 +109,7 @@
     <Compile Include="Analyzers\DummyAnalyzer.cs" />
     <Compile Include="CompilationException.cs" />
     <Compile Include="Compiler.cs" />
+    <Compile Include="Normalization\FormulaNormalizer.cs" />
     <Compile Include="Normalization\LineDirectiveNormalizer.cs" />
     <Compile Include="Normalization\PartialNormalizer.cs" />
     <Compile Include="Program.cs" />

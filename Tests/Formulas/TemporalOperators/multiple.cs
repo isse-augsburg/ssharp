@@ -20,24 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+namespace Tests.Formulas.TemporalOperators
+{
+	using SafetySharp.Modeling.Formulas;
+	using static SafetySharp.Modeling.Formulas.Operators;
 
-[assembly: AssemblyTitle("S# Modeling")]
-[assembly: AssemblyDescription("S# Modeling")]
-[assembly: AssemblyCompany("Institute for Software & Systems Engineering")]
-[assembly: AssemblyProduct("S#")]
-[assembly: AssemblyCopyright("Copyright (c) 2014-2015, Institute for Software & Systems Engineering")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyFileVersion("0.1.0.0")]
-[assembly: ComVisible(false)]
-[assembly: InternalsVisibleTo("SafetySharp.Compiler")]
-[assembly: InternalsVisibleTo("SafetySharp.CSharpTests")]
-[assembly: InternalsVisibleTo("SafetySharp.Tests")]
-[assembly: InternalsVisibleTo("SafetySharp.Analysis")]
-[assembly: InternalsVisibleTo("SafetySharp.Simulation")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.MultiCore")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.Sequential")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.Symbolic")]
+	internal class Multiple : FormulaTestObject
+	{
+		protected override void Check()
+		{
+			var intValue = 7;
+			var boolValue = false;
+
+			var actual = AF(intValue > 7 && boolValue && X(!boolValue) | intValue < 4) && AF(boolValue);
+			var expected = new BinaryFormula(
+				new UnaryFormula(
+					new UnaryFormula(
+						new BinaryFormula(
+							new StateFormula(() => intValue > 7 && boolValue),
+							BinaryOperator.And,
+							new BinaryFormula(
+								new UnaryFormula(new StateFormula(() => !boolValue), UnaryOperator.Next),
+								BinaryOperator.Or,
+								new StateFormula(() => intValue < 4))),
+						UnaryOperator.Finally),
+					UnaryOperator.All),
+				BinaryOperator.And,
+				new UnaryFormula(new UnaryFormula(new StateFormula(() => boolValue), UnaryOperator.Finally), UnaryOperator.All));
+
+			Check(actual, expected);
+		}
+	}
+}

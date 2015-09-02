@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization
+namespace Tests
 {
 	using System;
 	using System.Collections.Generic;
@@ -32,7 +32,7 @@ namespace Tests.Serialization
 	using Utilities;
 	using Xunit.Abstractions;
 
-	public abstract unsafe class RuntimeModelTest : TestObject
+	public abstract class RuntimeModelTest : TestObject
 	{
 		private RuntimeModel _runtimeModel;
 

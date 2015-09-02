@@ -125,6 +125,31 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Formulas\StateFormulas\binary expressions.cs" />
+    <Compile Include="Formulas\StateFormulas\arrays.cs" />
+    <Compile Include="Formulas\StateFormulas\parameters.cs" />
+    <Compile Include="Formulas\StateFormulas\cast.cs" />
+    <Compile Include="Formulas\StateFormulas\assignment.cs" />
+    <Compile Include="Formulas\StateFormulas\properties.cs" />
+    <Compile Include="Formulas\StateFormulas\fields.cs" />
+    <Compile Include="Formulas\StateFormulas\local.cs" />
+    <Compile Include="Formulas\StateFormulas\return.cs" />
+    <Compile Include="Formulas\TemporalOperators\multiple.cs" />
+    <Compile Include="Formulas\TemporalOperators\exists.cs" />
+    <Compile Include="Formulas\TemporalOperators\and.cs" />
+    <Compile Include="Formulas\TemporalOperators\equivalence.cs" />
+    <Compile Include="Formulas\TemporalOperators\all.cs" />
+    <Compile Include="Formulas\TemporalOperators\finally.cs" />
+    <Compile Include="Formulas\TemporalOperators\globally.cs" />
+    <Compile Include="Formulas\TemporalOperators\implies.cs" />
+    <Compile Include="Formulas\TemporalOperators\next.cs" />
+    <Compile Include="Formulas\TemporalOperators\not.cs" />
+    <Compile Include="Formulas\TemporalOperators\or.cs" />
+    <Compile Include="Formulas\TemporalOperators\until.cs" />
+    <Compile Include="FormulaTests.cs" />
+    <Compile Include="FormulaTests.Helpers.cs">
+      <DependentUpon>FormulaTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Serialization\Enumerations\Int16.cs" />
     <Compile Include="Serialization\Enumerations\Int64.cs" />
     <Compile Include="Serialization\Enumerations\Int32.cs" />
@@ -161,8 +186,8 @@
     <Compile Include="Serialization\RuntimeModels\simple hierarchy.cs" />
     <Compile Include="Serialization\RuntimeModels\interface components.cs" />
     <Compile Include="Serialization\RuntimeModels\single component.cs" />
-    <Compile Include="Serialization\SerializationTests.cs" />
-    <Compile Include="Serialization\SerializationTests.Helpers.cs">
+    <Compile Include="SerializationTests.cs" />
+    <Compile Include="SerializationTests.Helpers.cs">
       <DependentUpon>SerializationTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Utilities\TestTraceOutput.cs" />

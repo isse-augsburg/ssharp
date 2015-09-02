@@ -42,8 +42,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CompilerServices\BackingFieldAttribute.cs" />
     <Compile Include="CompilerServices\LiftExpressionAttribute.cs" />
+    <Compile Include="CompilerServices\StateFormulaFactory.cs" />
     <Compile Include="Modeling\Choice.cs" />
     <Compile Include="Modeling\Component.cs" />
     <Compile Include="Modeling\Faults\Fault.cs" />
@@ -51,7 +51,13 @@
     <Compile Include="Modeling\Faults\FaultEffect.cs" />
     <Compile Include="Modeling\Faults\PersistentFault.cs" />
     <Compile Include="Modeling\Faults\TransientFault.cs" />
+    <Compile Include="Modeling\Formulas\BinaryFormula.cs" />
+    <Compile Include="Modeling\Formulas\BinaryOperator.cs" />
     <Compile Include="Modeling\Formulas\Formula.cs" />
+    <Compile Include="Modeling\Formulas\Operators.cs" />
+    <Compile Include="Modeling\Formulas\StateFormula.cs" />
+    <Compile Include="Modeling\Formulas\UnaryFormula.cs" />
+    <Compile Include="Modeling\Formulas\UnaryOperator.cs" />
     <Compile Include="Modeling\HiddenAttribute.cs" />
     <Compile Include="Modeling\IComponent.cs" />
     <Compile Include="Modeling\Model.cs" />
@@ -61,6 +67,11 @@
     <Compile Include="Modeling\RangeAttribute.cs" />
     <Compile Include="Modeling\RequiredAttribute.cs" />
     <Compile Include="Modeling\Specification.cs" />
+    <Compile Include="Properties\InternalsVisibleTo.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InternalsVisibleTo.tt</DependentUpon>
+    </Compile>
     <Compile Include="Runtime\ChoiceResolver.cs" />
     <Compile Include="Runtime\ChoiceStack.cs" />
     <Compile Include="Runtime\RuntimeModel.cs" />
@@ -85,6 +96,15 @@
     <Compile Include="Utilities\ReflectionExtensions.cs" />
     <Compile Include="Utilities\Requires.cs" />
     <Compile Include="Utilities\TemporaryFile.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Properties\InternalsVisibleTo.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>InternalsVisibleTo.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">

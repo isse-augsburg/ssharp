@@ -287,6 +287,7 @@ namespace SafetySharp.Compiler
 		{
 			Compilation = Normalizer.ApplyNormalizer<LineDirectiveNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<PartialNormalizer>(Compilation, syntaxGenerator);
+			Compilation = Normalizer.ApplyNormalizer<FormulaNormalizer>(Compilation, syntaxGenerator);
 		}
 
 		/// <summary>

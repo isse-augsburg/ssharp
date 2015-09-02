@@ -20,45 +20,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CompilerServices
+namespace SafetySharp.Modeling.Formulas
 {
 	using System;
-	using System.Reflection;
 	using Utilities;
 
 	/// <summary>
-	///   When applied to a component method, indicates the field that stores the method's fault behavior.
+	///   Represents a state formula, i.e., a Boolean expression that is evaluated in a single system state.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-	public sealed class BackingFieldAttribute : Attribute
+	internal sealed class StateFormula : Formula
 	{
 		/// <summary>
-		///   Initializes a new instance.
+		///   Initializes a new instance of the <see cref="StateFormula" /> class.
 		/// </summary>
-		/// <param name="fieldName">The name of the marked component method's backing field.</param>
-		public BackingFieldAttribute(string fieldName)
+		/// <param name="expression">The expression that represents the state formula.</param>
+		internal StateFormula(Func<bool> expression)
 		{
-			Requires.NotNullOrWhitespace(fieldName, nameof(fieldName));
-			FieldName = fieldName;
+			Requires.NotNull(expression, nameof(expression));
+
+			Expression = expression;
+			Label = $"StateFormula" + Guid.NewGuid().ToString().Replace("-", String.Empty);
 		}
 
 		/// <summary>
-		///   Gets the name of the marked component method's backing field.
+		///   Gets the expression that represents the state formula.
 		/// </summary>
-		public string FieldName { get; }
+		public Func<bool> Expression { get; }
 
 		/// <summary>
-		///   Gets the <see cref="FieldInfo" /> object representing the marked component method's backing field.
+		///   Gets the state label that a model checker can use to determine whether the state formula holds.
 		/// </summary>
-		/// <param name="type">The type that declares the marked component method.</param>
-		public FieldInfo GetFieldInfo(Type type)
+		public string Label { get; }
+
+		/// <summary>
+		///   Gets a value indicating whether the formula is a valid linear temporal logic formula.
+		/// </summary>
+		public override bool IsLinearFormula => true;
+
+		/// <summary>
+		///   Returns a string that represents the current object.
+		/// </summary>
+		public override string ToString()
 		{
-			Requires.NotNull(type, nameof(type));
-
-			var field = type.GetField(FieldName, BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic);
-			Requires.That(field != null, $"Unable to find backing field '{type.FullName}.{FieldName}'.");
-
-			return field;
+			return Label;
 		}
 	}
 }

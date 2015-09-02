@@ -20,24 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+namespace SafetySharp.CompilerServices
+{
+	using System;
+	using Modeling.Formulas;
+	using Utilities;
 
-[assembly: AssemblyTitle("S# Modeling")]
-[assembly: AssemblyDescription("S# Modeling")]
-[assembly: AssemblyCompany("Institute for Software & Systems Engineering")]
-[assembly: AssemblyProduct("S#")]
-[assembly: AssemblyCopyright("Copyright (c) 2014-2015, Institute for Software & Systems Engineering")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyFileVersion("0.1.0.0")]
-[assembly: ComVisible(false)]
-[assembly: InternalsVisibleTo("SafetySharp.Compiler")]
-[assembly: InternalsVisibleTo("SafetySharp.CSharpTests")]
-[assembly: InternalsVisibleTo("SafetySharp.Tests")]
-[assembly: InternalsVisibleTo("SafetySharp.Analysis")]
-[assembly: InternalsVisibleTo("SafetySharp.Simulation")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.MultiCore")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.Sequential")]
-[assembly: InternalsVisibleTo("SafetySharp.LtsMin.Symbolic")]
+	/// <summary>
+	///   Provides factory methods for the creation of <see cref="Formula" /> instances from C# expressions.
+	/// </summary>
+	public static class StateFormulaFactory
+	{
+		/// <summary>
+		///   Returns a <see cref="Formula" /> that evaluates <paramref name="expression" /> within a system state.
+		/// </summary>
+		/// <param name="expression">The expression that should be evaluated.</param>
+		public static Formula Create(Func<bool> expression)
+		{
+			Requires.NotNull(expression, nameof(expression));
+			return new StateFormula(expression);
+		}
+	}
+}
