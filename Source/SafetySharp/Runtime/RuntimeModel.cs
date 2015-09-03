@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Runtime
 {
+	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Analysis;
 	using Modeling;
@@ -65,18 +66,23 @@ namespace SafetySharp.Runtime
 		{
 			Requires.NotNull(rootComponents, nameof(rootComponents));
 			Requires.NotNull(serializationRegistry, nameof(serializationRegistry));
-			Requires.NotNull(objectTable, nameof(objectTable));
 			Requires.NotNull(stateFormulas, nameof(stateFormulas));
+
+			// Create a local object table just for the objects referenced by the model; only these objects
+			// have to be serialized and deserialized. The local object table does not contain, for instance,
+			// the closure types of the state formulas
+			var objects = rootComponents.SelectMany(obj => serializationRegistry.GetReferencedObjects(obj, SerializationMode.Optimized));
+			var localObjectTable = new ObjectTable(objects);
 
 			RootComponents = rootComponents;
 			StateFormulas = stateFormulas;
-			StateSlotCount = serializationRegistry.GetStateSlotCount(objectTable, SerializationMode.Optimized);
+			StateSlotCount = serializationRegistry.GetStateSlotCount(localObjectTable, SerializationMode.Optimized);
 
-			_deserialize = serializationRegistry.CreateStateDeserializer(objectTable, SerializationMode.Optimized);
-			_serialize = serializationRegistry.CreateStateSerializer(objectTable, SerializationMode.Optimized);
+			_deserialize = serializationRegistry.CreateStateDeserializer(localObjectTable, SerializationMode.Optimized);
+			_serialize = serializationRegistry.CreateStateSerializer(localObjectTable, SerializationMode.Optimized);
 
 			_stateCache = new StateCache(StateSlotCount);
-			_choiceResolver = new ChoiceResolver();
+			_choiceResolver = new ChoiceResolver(objectTable);
 		}
 
 		/// <summary>

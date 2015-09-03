@@ -25,7 +25,7 @@ namespace Tests.LtsMin.Invariants.Violated
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class Deterministic : LtsMinTestObject
+	internal class MultipleChoices1 : LtsMinTestObject
 	{
 		protected override void Check()
 		{
@@ -33,12 +33,18 @@ namespace Tests.LtsMin.Invariants.Violated
 			var d = new D { C = c };
 			var m = new Model(d);
 
-			CheckInvariant(m, () => c.F != 17).ShouldBe(false);
+			CheckInvariant(m, () => c.F != 2).ShouldBe(false);
+			CheckInvariant(m, () => c.F != 10).ShouldBe(false);
+			CheckInvariant(m, () => c.F != 20).ShouldBe(false);
+			CheckInvariant(m, () => c.F != 12).ShouldBe(false);
+			CheckInvariant(m, () => c.F != 22).ShouldBe(false);
+			CheckInvariant(m, () => c.F == 2 || c.F == 10 || c.F == 20 || c.F == 12 || c.F == 22).ShouldBe(false);
 		}
 
 		private class C : Component
 		{
 			public int F;
+			public bool G;
 		}
 
 		private class D : Component
@@ -47,7 +53,17 @@ namespace Tests.LtsMin.Invariants.Violated
 
 			public override void Update()
 			{
-				C.F = (C.F + 1) % 20;
+				var offset = 0;
+
+				if (Choose(true, false))
+					offset += 2;
+
+				if (Choose(true, false))
+					offset += 10;
+				else if (Choose(true, false))
+					offset += 20;
+
+				C.F = offset;
 			}
 		}
 	}

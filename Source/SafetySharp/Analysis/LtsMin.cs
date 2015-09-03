@@ -215,6 +215,7 @@ namespace SafetySharp.Analysis
 			Output("==========================");
 			Output($"Elapsed time: {stopwatch.Elapsed.TotalMilliseconds}ms");
 			Output("==========================");
+			Output(String.Empty);
 		}
 	}
 }

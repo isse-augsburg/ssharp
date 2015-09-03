@@ -29,7 +29,7 @@ namespace SafetySharp.Modeling
 	/// <summary>
 	///   Represents a S# component.
 	/// </summary>
-	public abstract class Component : IComponent
+	public abstract partial class Component : IComponent
 	{
 		[Hidden(SerializationMode.Full)]
 		private readonly HashSet<IFaultEffect> _faultEffects = new HashSet<IFaultEffect>(ReferenceEqualityComparer<IFaultEffect>.Default);

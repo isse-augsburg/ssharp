@@ -22,7 +22,10 @@
 
 namespace SafetySharp.Runtime
 {
+	using System.Linq;
 	using System.Runtime.CompilerServices;
+	using Modeling;
+	using Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -54,6 +57,16 @@ namespace SafetySharp.Runtime
 		///   Indicates whether the next path is the first one of the current state.
 		/// </summary>
 		private bool _firstPath;
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="objectTable">The object table containing all objects that potentially require access to the choice resolver.</param>
+		public ChoiceResolver(ObjectTable objectTable)
+		{
+			foreach (var obj in objectTable.OfType<Choice>())
+				obj.Resolver = this;
+		}
 
 		/// <summary>
 		///   Prepares the resolver for resolving the choices of the next state.

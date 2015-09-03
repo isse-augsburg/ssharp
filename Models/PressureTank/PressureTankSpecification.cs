@@ -27,7 +27,7 @@ namespace PressureTank
 	/// <summary>
 	///   Represents the specification of the pressure tank case study.
 	/// </summary>
-	public class PressureTankSpecification : Specification
+	public class PressureTankSpecification
 	{
 		/// <summary>
 		///   The maximum allowed pressure level within the tank.
@@ -43,6 +43,8 @@ namespace PressureTank
 		///   The controller's timeout in seconds.
 		/// </summary>
 		public const int Timeout = 59;
+
+		public Model Model { get; }
 
 		/// <summary>
 		///   Initializes a new instance.

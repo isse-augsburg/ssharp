@@ -20,35 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.LtsMin.Invariants.Violated
+namespace Tests.LtsMin.Ltl.Violated
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
+	using static SafetySharp.Analysis.Ctl;
 
-	internal class Deterministic : LtsMinTestObject
+	internal class InitialState : LtsMinTestObject
 	{
 		protected override void Check()
 		{
 			var c = new C { F = 3 };
-			var d = new D { C = c };
-			var m = new Model(d);
+			var m = new Model(c);
 
-			CheckInvariant(m, () => c.F != 17).ShouldBe(false);
+			Check(m, X(c.F != 3)).ShouldBe(false);
 		}
 
 		private class C : Component
 		{
 			public int F;
-		}
-
-		private class D : Component
-		{
-			public C C;
-
-			public override void Update()
-			{
-				C.F = (C.F + 1) % 20;
-			}
 		}
 	}
 }

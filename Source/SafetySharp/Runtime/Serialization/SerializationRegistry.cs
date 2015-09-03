@@ -98,7 +98,7 @@ namespace SafetySharp.Runtime.Serialization
 			Requires.NotNull(objects, nameof(objects));
 			Requires.InRange(mode, nameof(mode));
 
-			return objects.GetSerializationObjects(mode).Select(obj => GetSerializer(obj).GetStateSlotCount(obj, mode)).Sum();
+			return objects.Select(obj => GetSerializer(obj).GetStateSlotCount(obj, mode)).Sum();
 		}
 
 		/// <summary>
@@ -113,7 +113,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			var generator = new SerializationGenerator("Serialize");
 
-			foreach (var obj in objects.GetSerializationObjects(mode))
+			foreach (var obj in objects)
 				GetSerializer(obj).Serialize(generator, obj, objects.GetObjectIdentifier(obj), mode);
 
 			return generator.Compile(objects);
@@ -131,7 +131,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			var generator = new SerializationGenerator("Deserialize");
 
-			foreach (var obj in objects.GetSerializationObjects(mode))
+			foreach (var obj in objects)
 				GetSerializer(obj).Deserialize(generator, obj, objects.GetObjectIdentifier(obj), mode);
 
 			return generator.Compile(objects);
@@ -157,21 +157,12 @@ namespace SafetySharp.Runtime.Serialization
 
 			// Serialize the objects contained in the table
 			writer.Write(objectTable.Count);
-			foreach (var obj in objectTable.GetSerializationObjects(SerializationMode.Full))
+			foreach (var obj in objectTable)
 			{
 				var serializerIndex = GetSerializerIndex(obj);
 				writer.Write(serializerIndex);
 				GetSerializer(serializerIndex).SerializeType(obj, writer);
 			}
-
-			// Serialize the objects that require serialization in full mode only
-			var allObjects = objectTable.GetSerializationObjects(SerializationMode.Full);
-			var optimizedObjects = objectTable.GetSerializationObjects(SerializationMode.Optimized);
-			var fullModeOnlyObjects = allObjects.Except(optimizedObjects, ReferenceEqualityComparer<object>.Default).ToArray();
-
-			writer.Write(fullModeOnlyObjects.Length);
-			foreach (var obj in fullModeOnlyObjects)
-				writer.Write(objectTable.GetObjectIdentifier(obj));
 		}
 
 		/// <summary>
@@ -195,25 +186,20 @@ namespace SafetySharp.Runtime.Serialization
 				objects[i] = serializer.InstantiateType(reader);
 			}
 
-			// Deserialize the objects that require serialization in full mode only
-			var fullSerializationOnly = new HashSet<object>();
-			var count = reader.ReadInt32();
-			for (var i = 0; i < count; ++i)
-				fullSerializationOnly.Add(objects[reader.ReadInt32() - 1]);
-
-			return new ObjectTable(objects, fullSerializationOnly);
+			return new ObjectTable(objects);
 		}
 
 		/// <summary>
 		///   Gets all objects referenced by <paramref name="obj" />, including <paramref name="obj" /> itself.
 		/// </summary>
 		/// <param name="obj">The object the referenced objects should be returned for.</param>
-		internal IEnumerable<object> GetReferencedObjects(object obj)
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		internal IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
 		{
 			Requires.NotNull(obj, nameof(obj));
 
 			var referencedObjects = new HashSet<object> { obj };
-			GetReferencedObjects(referencedObjects, obj);
+			GetReferencedObjects(referencedObjects, obj, mode);
 			return referencedObjects;
 		}
 
@@ -223,12 +209,13 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		/// <param name="referencedObjects">The set of referenced objects.</param>
 		/// <param name="obj">The object the referenced objects should be returned for.</param>
-		private void GetReferencedObjects(HashSet<object> referencedObjects, object obj)
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		private void GetReferencedObjects(HashSet<object> referencedObjects, object obj, SerializationMode mode)
 		{
-			foreach (var referencedObject in GetSerializer(obj).GetReferencedObjects(obj))
+			foreach (var referencedObject in GetSerializer(obj).GetReferencedObjects(obj, mode))
 			{
 				if (referencedObjects.Add(referencedObject))
-					GetReferencedObjects(referencedObjects, referencedObject);
+					GetReferencedObjects(referencedObjects, referencedObject, mode);
 			}
 		}
 	}

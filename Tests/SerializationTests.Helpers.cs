@@ -74,7 +74,7 @@ namespace Tests
 
 		private void GenerateCode(SerializationMode mode, IEnumerable<object> objects, IEnumerable<object> fullModeOnlyObjects)
 		{
-			_objectTable = new ObjectTable(objects, fullModeOnlyObjects);
+			_objectTable = new ObjectTable(objects);
 			_serializer = _serializationRegistry.CreateStateSerializer(_objectTable, mode);
 			_deserializer = _serializationRegistry.CreateStateDeserializer(_objectTable, mode);
 

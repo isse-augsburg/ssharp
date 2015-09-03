@@ -20,10 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.LtsMin.Invariants.Violated
+namespace Tests.LtsMin.Ltl.Violated
 {
+	using System;
 	using SafetySharp.Modeling;
 	using Shouldly;
+	using static SafetySharp.Analysis.Ctl;
 
 	internal class Deterministic : LtsMinTestObject
 	{
@@ -33,7 +35,7 @@ namespace Tests.LtsMin.Invariants.Violated
 			var d = new D { C = c };
 			var m = new Model(d);
 
-			CheckInvariant(m, () => c.F != 17).ShouldBe(false);
+			Check(m, G(c.F < 15)).ShouldBe(false);
 		}
 
 		private class C : Component

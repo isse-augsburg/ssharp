@@ -157,11 +157,21 @@
     <Compile Include="LtsMinTests.Helpers.cs">
       <DependentUpon>LtsMinTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="LtsMin\Invariants\Violated\multiple choices 2.cs" />
+    <Compile Include="LtsMin\Invariants\NotViolated\single choice.cs" />
     <Compile Include="LtsMin\Invariants\NotViolated\deterministic.cs" />
     <Compile Include="LtsMin\Invariants\NotViolated\initial state.cs" />
     <Compile Include="LtsMin\Invariants\Violated\deterministic.cs" />
     <Compile Include="LtsMin\Invariants\Violated\initial state.cs" />
-    <Compile Include="LtsMin\Ltl\initial state violation.cs" />
+    <Compile Include="LtsMin\Invariants\Violated\multiple choices 1.cs" />
+    <Compile Include="LtsMin\Ltl\NotViolated\deterministic.cs" />
+    <Compile Include="LtsMin\Ltl\NotViolated\initial state.cs" />
+    <Compile Include="LtsMin\Ltl\NotViolated\multiple choices.cs" />
+    <Compile Include="LtsMin\Ltl\NotViolated\single choice.cs" />
+    <Compile Include="LtsMin\Ltl\Violated\deterministic.cs" />
+    <Compile Include="LtsMin\Ltl\Violated\initial state.cs" />
+    <Compile Include="LtsMin\Ltl\Violated\multiple choices.cs" />
+    <Compile Include="LtsMin\Ltl\Violated\single choice.cs" />
     <Compile Include="Serialization\Enumerations\Int16.cs" />
     <Compile Include="Serialization\Enumerations\Int64.cs" />
     <Compile Include="Serialization\Enumerations\Int32.cs" />
@@ -170,7 +180,6 @@
     <Compile Include="Serialization\Enumerations\UInt64.cs" />
     <Compile Include="Serialization\Enumerations\UInt32.cs" />
     <Compile Include="Serialization\Enumerations\UInt8.cs" />
-    <Compile Include="Serialization\Misc\full mode only objects.cs" />
     <Compile Include="Serialization\Misc\hidden state optimized.cs" />
     <Compile Include="Serialization\Misc\optimized serialization.cs" />
     <Compile Include="Serialization\Misc\full serialization.cs" />

@@ -20,37 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Misc
+namespace Tests.LtsMin.Ltl.NotViolated
 {
-	using SafetySharp.Runtime.Serialization;
+	using SafetySharp.Modeling;
 	using Shouldly;
+	using static SafetySharp.Analysis.Ctl;
 
-	internal class FullModeOnlyObjects : SerializationObject
+	internal class SingleChoice : LtsMinTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C { F = 33 };
+			var c = new C { F = 3 };
+			var d = new D { C = c };
+			var m = new Model(d);
 
-			GenerateCodeWithFullModeObject(SerializationMode.Full, c, c);
-			_stateSlotCount.ShouldBe(1);
-
-			Serialize();
-			c.F = 1;
-			Deserialize();
-			c.F.ShouldBe(33);
-
-			GenerateCodeWithFullModeObject(SerializationMode.Optimized, c, c);
-			_stateSlotCount.ShouldBe(0);
-
-			Serialize();
-			c.F = 3;
-			Deserialize();
-			c.F.ShouldBe(3);
+			Check(m, F(c.G).Implies(F(G(c.F == 77)))).ShouldBe(true);
+			Check(m, F(c.G).Implies(U(!c.G, c.F == 77))).ShouldBe(true);
 		}
 
-		private class C
+		private class C : Component
 		{
 			public int F;
+			public bool G;
+		}
+
+		private class D : Component
+		{
+			public C C;
+
+			public override void Update()
+			{
+				C.G = Choose(true, false);
+				if (C.G)
+					C.F = 77;
+			}
 		}
 	}
 }

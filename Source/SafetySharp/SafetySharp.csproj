@@ -46,6 +46,9 @@
     <Compile Include="CompilerServices\LiftExpressionAttribute.cs" />
     <Compile Include="CompilerServices\StateFormulaFactory.cs" />
     <Compile Include="Modeling\Choice.cs" />
+    <Compile Include="Modeling\Component.Choose.cs">
+      <DependentUpon>Component.cs</DependentUpon>
+    </Compile>
     <Compile Include="Modeling\Component.cs" />
     <Compile Include="Modeling\Fault.cs" />
     <Compile Include="Modeling\FaultEffectAttribute.cs" />

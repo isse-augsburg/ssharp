@@ -106,9 +106,10 @@ namespace SafetySharp.Runtime.Serialization
 		///   Gets all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself.
 		/// </summary>
 		/// <param name="obj">The object the referenced objects should be returned for.</param>
-		protected internal override IEnumerable<object> GetReferencedObjects(object obj)
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
 		{
-			return from field in GetFields(obj, SerializationMode.Full)
+			return from field in GetFields(obj, mode)
 				   where field.FieldType.IsReferenceType()
 				   let referencedObject = field.GetValue(obj)
 				   where referencedObject != null

@@ -31,7 +31,7 @@ namespace Tests.LtsMin.Invariants.NotViolated
 		{
 			var c = new C { F = 3 };
 			var d = new D { C = c };
-			var m = new Model(c);
+			var m = new Model(d);
 
 			CheckInvariant(m, () => c.F < 21).ShouldBe(true);
 		}

@@ -80,6 +80,7 @@ namespace SafetySharp.Runtime.Serialization
 		///   Gets all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself.
 		/// </summary>
 		/// <param name="obj">The object the referenced objects should be returned for.</param>
-		protected internal abstract IEnumerable<object> GetReferencedObjects(object obj);
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		protected internal abstract IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode);
 	}
 }
