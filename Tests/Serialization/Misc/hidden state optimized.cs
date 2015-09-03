@@ -64,13 +64,13 @@ namespace Tests.Serialization.Misc
 
 			public int G;
 
-			[Hidden(SerializationMode.Optimized)]
+			[Hidden]
 			public E H;
 
-			[Hidden(SerializationMode.Full)]
+			[NonSerialized]
 			public int I;
 
-			[Hidden(SerializationMode.Full)]
+			[NonSerialized]
 			public readonly int J = 333;
 
 			[Hidden]

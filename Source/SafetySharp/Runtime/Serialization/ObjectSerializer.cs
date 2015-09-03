@@ -127,7 +127,8 @@ namespace SafetySharp.Runtime.Serialization
 				if (field.IsStatic || field.IsLiteral)
 					return false;
 
-				// Serialize read-only fields in full serialization mode only
+				// Serialize read-only fields in full serialization mode only; 
+				// that is, read-only fields are implicitely hidden
 				if (mode == SerializationMode.Optimized && field.IsInitOnly)
 					return false;
 
@@ -135,20 +136,11 @@ namespace SafetySharp.Runtime.Serialization
 				if (field.HasAttribute<NonSerializedAttribute>())
 					return false;
 
-				// If the field is not hidden, serialize it
-				var hiddenAttribute = field.GetCustomAttribute<HiddenAttribute>();
-				if (hiddenAttribute == null)
-					return true;
-
-				// If the field is hidden from full serialization, ignore it for both full and optimized serializations
-				if (hiddenAttribute.Mode == SerializationMode.Full)
+				// If the field is hidden, only ignore it in optimized serializations
+				if (mode == SerializationMode.Optimized && field.HasAttribute<HiddenAttribute>())
 					return false;
 
-				// If it is only hidden from optimized serialization, do not ignore it in full serializations
-				if (hiddenAttribute.Mode == SerializationMode.Optimized && mode == SerializationMode.Optimized)
-					return false;
-
-				// Otherwise, the hidden attribute is invalid, so let's be safe and serialize the field
+				// Otherwise, serialize the field
 				return true;
 			});
 		}
