@@ -159,7 +159,7 @@ namespace SafetySharp.Runtime.Serialization
 		private static unsafe RuntimeModel DeserializeModel(BinaryReader reader)
 		{
 			// Deserialize the object table
-			var serializationRegistry = new SerializationRegistry();
+			var serializationRegistry = new SerializationRegistry(registerDefaultSerializers: false);
 			var objectTable = serializationRegistry.DeserializeObjectTable(reader);
 
 			// Deserialize the object identifiers of the root components

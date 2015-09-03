@@ -83,6 +83,7 @@
     <Compile Include="Runtime\ChoiceResolver.cs" />
     <Compile Include="Runtime\ChoiceStack.cs" />
     <Compile Include="Runtime\RuntimeModel.cs" />
+    <Compile Include="Runtime\Serialization\ArraySerializer.cs" />
     <Compile Include="Runtime\Serialization\ObjectSerializer.cs" />
     <Compile Include="Runtime\Serialization\ObjectTable.cs" />
     <Compile Include="Runtime\Serialization\SerializationDelegate.cs" />

@@ -20,35 +20,55 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Serialization.Objects
 {
-	using System.Collections.Generic;
-	using Runtime.Serialization;
-	using Utilities;
+	using System;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	/// <summary>
-	///   Represents a model of a safety-critical system.
-	/// </summary>
-	public class Model
+	internal unsafe class Arrays : SerializationObject
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="rootComponents">The model's root components.</param>
-		public Model(params IComponent[] rootComponents)
+		protected override void Check()
 		{
-			Requires.NotNull(rootComponents, nameof(rootComponents));
-			RootComponents.AddRange(rootComponents);
+			var o1 = new object();
+			var o2 = new object();
+			var c = new C
+			{
+				I = new[] { -17, 2, 12 },
+				D = new[] { Int64.MaxValue, Int64.MinValue },
+				B = new[] { true, false, true },
+				P = new[] { (int*)17, (int*)19 },
+				O = new[] { o1, o2 }
+			};
+
+			GenerateCode(SerializationMode.Optimized, c, c.I, o1, o2, c.D, c.B, c.P, c.O);
+			_stateSlotCount.ShouldBe(21);
+
+			Serialize();
+			c.I = null;
+			c.D = null;
+			c.B = null;
+			c.P = null;
+			c.O = null;
+			Deserialize();
+			c.I.ShouldBe(new[] { -17, 2, 12 });
+			c.D.ShouldBe(new[] { Int64.MaxValue, Int64.MinValue });
+			c.B.ShouldBe(new[] { true, false, true });
+			c.O.ShouldBe(new[] { o1, o2 });
+
+			c.P.Length.ShouldBe(2);
+			((ulong)c.P[0]).ShouldBe((ulong)17);
+			((ulong)c.P[1]).ShouldBe((ulong)19);
 		}
 
-		/// <summary>
-		///   Gets the model's root components.
-		/// </summary>
-		public List<IComponent> RootComponents { get; } = new List<IComponent>();
-
-		/// <summary>
-		///   Gets the <see cref="SerializationRegistry" /> that can be used to register customized state serializers.
-		/// </summary>
-		public SerializationRegistry SerializationRegistry { get; } = new SerializationRegistry(registerDefaultSerializers: true);
+		private class C : Component
+		{
+			public bool[] B;
+			public long[] D;
+			public int[] I;
+			public object[] O;
+			public int*[] P;
+		}
 	}
 }

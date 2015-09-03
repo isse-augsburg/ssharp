@@ -20,35 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.LtsMin.Invariants.Violated
 {
-	using System.Collections.Generic;
-	using Runtime.Serialization;
-	using Utilities;
+	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   Represents a model of a safety-critical system.
-	/// </summary>
-	public class Model
+	internal class ArrayComponents : LtsMinTestObject
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="rootComponents">The model's root components.</param>
-		public Model(params IComponent[] rootComponents)
+		protected override void Check()
 		{
-			Requires.NotNull(rootComponents, nameof(rootComponents));
-			RootComponents.AddRange(rootComponents);
+			var c1 = new C();
+			var c2 = new C();
+			var d = new D { C = new[] { c1, c2 } };
+			var m = new Model(d);
+
+			CheckInvariant(m, () => c1.F != 3);
+			CheckInvariant(m, () => c2.F != 3);
 		}
 
-		/// <summary>
-		///   Gets the model's root components.
-		/// </summary>
-		public List<IComponent> RootComponents { get; } = new List<IComponent>();
+		private class C : Component
+		{
+			public int F;
+		}
 
-		/// <summary>
-		///   Gets the <see cref="SerializationRegistry" /> that can be used to register customized state serializers.
-		/// </summary>
-		public SerializationRegistry SerializationRegistry { get; } = new SerializationRegistry(registerDefaultSerializers: true);
+		private class D : Component
+		{
+			public C[] C;
+
+			public override void Update()
+			{
+				Choose(C[0], C[1]).F = 3;
+			}
+		}
 	}
 }

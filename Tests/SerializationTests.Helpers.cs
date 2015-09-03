@@ -54,7 +54,7 @@ namespace Tests
 
 	public abstract unsafe class SerializationObject : TestObject
 	{
-		private readonly SerializationRegistry _serializationRegistry = new SerializationRegistry();
+		private readonly SerializationRegistry _serializationRegistry = new SerializationRegistry(registerDefaultSerializers: true);
 		private SerializationDelegate _deserializer;
 		private ObjectTable _objectTable;
 		private int* _serializedState;

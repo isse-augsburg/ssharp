@@ -115,9 +115,16 @@ namespace SafetySharp.Runtime.Serialization
 		public void DeserializeField(int objectIdentifier, FieldInfo field)
 		{
 			if (IsPrimitiveTypeWithAtMostFourBytes(field.FieldType))
-				DeserializeFourByteField(objectIdentifier, field);
+			{
+				DeserializePrimitiveTypeField(objectIdentifier, field, OpCodes.Ldind_I4);
+				AdvanceToNextSlot();
+			}
 			else if (IsPrimitiveTypeWithAtMostEightBytes(field.FieldType))
-				DeserializeEightByteField(objectIdentifier, field);
+			{
+				DeserializePrimitiveTypeField(objectIdentifier, field, OpCodes.Ldind_I8);
+				AdvanceToNextSlot();
+				AdvanceToNextSlot();
+			}
 			else if (IsReferenceType(field.FieldType))
 				DeserializeReferenceField(objectIdentifier, field);
 			else
@@ -133,9 +140,16 @@ namespace SafetySharp.Runtime.Serialization
 		public void SerializeField(int objectIdentifier, FieldInfo field)
 		{
 			if (IsPrimitiveTypeWithAtMostFourBytes(field.FieldType))
-				SerializeFourByteField(objectIdentifier, field);
+			{
+				SerializePrimitiveTypeField(objectIdentifier, field, OpCodes.Stind_I4);
+				AdvanceToNextSlot();
+			}
 			else if (IsPrimitiveTypeWithAtMostEightBytes(field.FieldType))
-				SerializeEightByteField(objectIdentifier, field);
+			{
+				SerializePrimitiveTypeField(objectIdentifier, field, OpCodes.Stind_I8);
+				AdvanceToNextSlot();
+				AdvanceToNextSlot();
+			}
 			else if (IsReferenceType(field.FieldType))
 				SerializeReferenceField(objectIdentifier, field);
 			else
@@ -143,12 +157,150 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
+		///   Deserializes an array of the given <paramref name="length" /> and the given <paramref name="elementType" />.
+		/// </summary>
+		/// <param name="objectIdentifier">The identifier of the array that should be deserialized.</param>
+		/// <param name="elementType">The element type of the array.</param>
+		/// <param name="length">The length of the array.</param>
+		public void DeserializeArray(int objectIdentifier, Type elementType, int length)
+		{
+			var isReferenceType = elementType.IsReferenceType();
+			var isFourBytePrimitiveType = IsPrimitiveTypeWithAtMostFourBytes(elementType);
+			var advanceCount = isReferenceType || isFourBytePrimitiveType ? 1 : 2;
+			var loadCode = isFourBytePrimitiveType ? OpCodes.Ldind_I4 : OpCodes.Ldind_I8;
+			var storeCode = GetStoreArrayElementOpCode(elementType);
+
+			for (var i = 0; i < length; ++i)
+			{
+				// o = &objs.GetObject(identifier)[i]
+				_il.Emit(OpCodes.Ldarg_0);
+				_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
+				_il.Emit(OpCodes.Call, _getObjectMethod);
+				_il.Emit(OpCodes.Ldc_I4, i);
+
+				if (isReferenceType)
+				{
+					// v = objs.GetObject(*state)
+					_il.Emit(OpCodes.Ldarg_0);
+					_il.Emit(OpCodes.Ldloc_0);
+					_il.Emit(OpCodes.Ldind_I4);
+					_il.Emit(OpCodes.Call, _getObjectMethod);
+				}
+				else
+				{
+					// v = *state
+					_il.Emit(OpCodes.Ldloc_0);
+					_il.Emit(loadCode);
+				}
+
+				// *o = v
+				_il.Emit(storeCode);
+
+				for (var j = 0; j < advanceCount; ++j)
+					AdvanceToNextSlot();
+			}
+		}
+
+		/// <summary>
+		///   Serializes an array of the given <paramref name="length" /> and the given <paramref name="elementType" />.
+		/// </summary>
+		/// <param name="objectIdentifier">The identifier of the array that should be serialized.</param>
+		/// <param name="elementType">The element type of the array.</param>
+		/// <param name="length">The length of the array.</param>
+		public void SerializeArray(int objectIdentifier, Type elementType, int length)
+		{
+			var isReferenceType = elementType.IsReferenceType();
+			var isFourBytePrimitiveType = IsPrimitiveTypeWithAtMostFourBytes(elementType);
+			var advanceCount = isReferenceType || isFourBytePrimitiveType ? 1 : 2;
+			var storeCode = isFourBytePrimitiveType ? OpCodes.Stind_I4 : OpCodes.Stind_I8;
+			var loadCode = GetLoadArrayElementOpCode(elementType);
+
+			for (var i = 0; i < length; ++i)
+			{
+				// s = state
+				_il.Emit(OpCodes.Ldloc_0);
+
+				// o = objs.GetObject(identifier)
+				_il.Emit(OpCodes.Ldarg_0);
+
+				if (isReferenceType)
+					_il.Emit(OpCodes.Dup);
+
+				_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
+				_il.Emit(OpCodes.Call, _getObjectMethod);
+
+				// v = o[i]
+				_il.Emit(OpCodes.Ldc_I4, i);
+				_il.Emit(loadCode);
+
+				// v = objs.GetObjectIdentifier(o[i])
+				if (isReferenceType)
+					_il.Emit(OpCodes.Call, _getObjectIdentifierMethod);
+
+				// *s = v
+				_il.Emit(storeCode);
+
+				for (var j = 0; j < advanceCount; ++j)
+					AdvanceToNextSlot();
+			}
+		}
+
+		/// <summary>
+		///   Gets the IL instruction that can be used to store an element of the given <paramref name="type" /> into an array.
+		/// </summary>
+		private static OpCode GetStoreArrayElementOpCode(Type type)
+		{
+			if (type.IsReferenceType())
+				return OpCodes.Stelem_Ref;
+
+			switch (Marshal.SizeOf(type))
+			{
+				case 1:
+					return OpCodes.Stelem_I1;
+				case 2:
+					return OpCodes.Stelem_I2;
+				case 4:
+					return OpCodes.Stelem_I4;
+				case 8:
+					return OpCodes.Stelem_I8;
+				default:
+					Assert.NotReached("Unsupported element size.");
+					return default(OpCode);
+			}
+		}
+
+		/// <summary>
+		///   Gets the IL instruction that can be used to load an element of the given <paramref name="type" /> from an array.
+		/// </summary>
+		private static OpCode GetLoadArrayElementOpCode(Type type)
+		{
+			if (type.IsReferenceType())
+				return OpCodes.Ldelem_Ref;
+
+			switch (Marshal.SizeOf(type))
+			{
+				case 1:
+					return OpCodes.Ldelem_I1;
+				case 2:
+					return OpCodes.Ldelem_I2;
+				case 4:
+					return OpCodes.Ldelem_I4;
+				case 8:
+					return OpCodes.Ldelem_I8;
+				default:
+					Assert.NotReached("Unsupported element size.");
+					return default(OpCode);
+			}
+		}
+
+		/// <summary>
 		///   Generates the code to deserialize the <paramref name="field" /> of the object identified by
 		///   <paramref name="objectIdentifier" />.
 		/// </summary>
 		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="field" />.</param>
 		/// <param name="field">The field that should be deserialized.</param>
-		private void DeserializeFourByteField(int objectIdentifier, FieldInfo field)
+		/// <param name="loadCode">The IL instruction that should be used to load the value from the state.</param>
+		private void DeserializePrimitiveTypeField(int objectIdentifier, FieldInfo field, OpCode loadCode)
 		{
 			// o = objs.GetObject(identifier)
 			_il.Emit(OpCodes.Ldarg_0);
@@ -157,12 +309,10 @@ namespace SafetySharp.Runtime.Serialization
 
 			// v = *state
 			_il.Emit(OpCodes.Ldloc_0);
-			_il.Emit(OpCodes.Ldind_I4);
+			_il.Emit(loadCode);
 
 			// o.field = v
 			_il.Emit(OpCodes.Stfld, field);
-
-			AdvanceToNextSlot();
 		}
 
 		/// <summary>
@@ -171,7 +321,8 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="field" />.</param>
 		/// <param name="field">The field that should be serialized.</param>
-		private void SerializeFourByteField(int objectIdentifier, FieldInfo field)
+		/// <param name="storeCode">The IL instruction that should be used to write the value into the state.</param>
+		private void SerializePrimitiveTypeField(int objectIdentifier, FieldInfo field, OpCode storeCode)
 		{
 			// s = state
 			_il.Emit(OpCodes.Ldloc_0);
@@ -183,57 +334,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			// *s = o.field
 			_il.Emit(OpCodes.Ldfld, field);
-			_il.Emit(OpCodes.Stind_I4);
-
-			AdvanceToNextSlot();
-		}
-
-		/// <summary>
-		///   Generates the code to deserialize the <paramref name="field" /> of the object identified by
-		///   <paramref name="objectIdentifier" />.
-		/// </summary>
-		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="field" />.</param>
-		/// <param name="field">The field that should be deserialized.</param>
-		private void DeserializeEightByteField(int objectIdentifier, FieldInfo field)
-		{
-			// o = objs.GetObject(identifier)
-			_il.Emit(OpCodes.Ldarg_0);
-			_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
-			_il.Emit(OpCodes.Call, _getObjectMethod);
-
-			// v = *state
-			_il.Emit(OpCodes.Ldloc_0);
-			_il.Emit(OpCodes.Ldind_I8);
-
-			// o.field = v
-			_il.Emit(OpCodes.Stfld, field);
-
-			AdvanceToNextSlot();
-			AdvanceToNextSlot();
-		}
-
-		/// <summary>
-		///   Generates the code to serialize the <paramref name="field" /> of the object identified by
-		///   <paramref name="objectIdentifier" />.
-		/// </summary>
-		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="field" />.</param>
-		/// <param name="field">The field that should be serialized.</param>
-		private void SerializeEightByteField(int objectIdentifier, FieldInfo field)
-		{
-			// s = state
-			_il.Emit(OpCodes.Ldloc_0);
-
-			// o = objs.GetObject(identifier)
-			_il.Emit(OpCodes.Ldarg_0);
-			_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
-			_il.Emit(OpCodes.Call, _getObjectMethod);
-
-			// *s = o.field
-			_il.Emit(OpCodes.Ldfld, field);
-			_il.Emit(OpCodes.Stind_I8);
-
-			AdvanceToNextSlot();
-			AdvanceToNextSlot();
+			_il.Emit(storeCode);
 		}
 
 		/// <summary>

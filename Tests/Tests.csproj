@@ -157,6 +157,7 @@
     <Compile Include="LtsMinTests.Helpers.cs">
       <DependentUpon>LtsMinTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="LtsMin\Invariants\Violated\array components.cs" />
     <Compile Include="LtsMin\Invariants\Violated\multiple choices 2.cs" />
     <Compile Include="LtsMin\Invariants\NotViolated\single choice.cs" />
     <Compile Include="LtsMin\Invariants\NotViolated\deterministic.cs" />
@@ -192,6 +193,7 @@
     <Compile Include="Serialization\Objects\multiple objects.cs" />
     <Compile Include="Serialization\Objects\nested objects.cs" />
     <Compile Include="Serialization\Objects\interface field.cs" />
+    <Compile Include="Serialization\Objects\arrays.cs" />
     <Compile Include="Serialization\Objects\single object.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Char.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Bool.cs" />
@@ -204,6 +206,7 @@
     <Compile Include="Serialization\PrimitiveTypes\UInt16.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt32.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int32.cs" />
+    <Compile Include="Serialization\RuntimeModels\subcomponent array.cs" />
     <Compile Include="Serialization\RuntimeModels\generic components.cs" />
     <Compile Include="Serialization\RuntimeModels\cyclic hierarchy.cs" />
     <Compile Include="Serialization\RuntimeModels\inherited components.cs" />

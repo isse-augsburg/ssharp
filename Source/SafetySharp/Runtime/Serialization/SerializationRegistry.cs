@@ -46,8 +46,13 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		internal SerializationRegistry()
+		/// <param name="registerDefaultSerializers">Indicates whether the default serializers should be registered.</param>
+		internal SerializationRegistry(bool registerDefaultSerializers)
 		{
+			if (!registerDefaultSerializers)
+				return;
+
+			RegisterSerializer(new ArraySerializer());
 		}
 
 		/// <summary>
