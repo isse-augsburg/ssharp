@@ -22,6 +22,7 @@
 
 namespace Tests.Serialization.Objects
 {
+	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
@@ -41,7 +42,7 @@ namespace Tests.Serialization.Objects
 			c.O.ShouldBe(o);
 		}
 
-		internal class C
+		private class C : Component
 		{
 			public object O;
 		}

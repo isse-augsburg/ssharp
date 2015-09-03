@@ -34,6 +34,11 @@ namespace SafetySharp.Runtime.Serialization
 	internal sealed class ObjectTable : IEnumerable<object>
 	{
 		/// <summary>
+		///   Indicates which objects should only be serialized in full serialization mode.
+		/// </summary>
+		private readonly HashSet<object> _fullSerializationOnly;
+
+		/// <summary>
 		///   Gets the objects contained in the table.
 		/// </summary>
 		private readonly object[] _objects;
@@ -47,28 +52,22 @@ namespace SafetySharp.Runtime.Serialization
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="objects">The objects that should be mapped by the table.</param>
-		public ObjectTable(IEnumerable<object> objects)
+		/// <param name="fullSerializationOnly">Indicates which objects should only be serialized in full serialization mode.</param>
+		public ObjectTable(object[] objects, HashSet<object> fullSerializationOnly)
 		{
 			Requires.NotNull(objects, nameof(objects));
+			Requires.NotNull(fullSerializationOnly, nameof(fullSerializationOnly));
 
 			// We make sure that we store each object only once
 			var objs = objects.Distinct(ReferenceEqualityComparer<object>.Default);
 
 			// Index 0 always maps to null
 			_objects = new object[] { null }.Concat(objs).ToArray();
+			_fullSerializationOnly = fullSerializationOnly;
 
 			// Generate the object to identifier lookup table; unfortunately, we can't have null keys
 			for (var i = 1; i < _objects.Length; ++i)
 				_objectToIdentifier.Add(_objects[i], i);
-		}
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="objects">The objects that should be mapped by the table.</param>
-		public ObjectTable(params object[] objects)
-			: this((IEnumerable<object>)objects)
-		{
 		}
 
 		/// <summary>
@@ -90,6 +89,24 @@ namespace SafetySharp.Runtime.Serialization
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return GetEnumerator();
+		}
+
+		/// <summary>
+		///   Checks whether <paramref name="obj" /> is required to be serialized in the <paramref name="mode" />.
+		/// </summary>
+		/// <param name="obj">The object that should be checked.</param>
+		/// <param name="mode">The mode of the serialization.</param>
+		public bool RequiresSerialization(object obj, SerializationMode mode)
+		{
+			Requires.NotNull(obj, nameof(obj));
+			Requires.InRange(mode, nameof(mode));
+
+			// In optimized mode, do not serialize those objects that require serialization in full mode only
+			if (mode == SerializationMode.Optimized)
+				return !_fullSerializationOnly.Contains(obj);
+
+			// Otherwise, serialize everything
+			return true;
 		}
 
 		/// <summary>

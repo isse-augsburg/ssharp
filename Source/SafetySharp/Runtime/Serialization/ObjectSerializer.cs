@@ -126,10 +126,6 @@ namespace SafetySharp.Runtime.Serialization
 			var type = obj.GetType();
 			var inheritanceRoot = typeof(object);
 
-			// Special case for Component-derived types: do not report fields declared by Component
-			if (type.IsSubclassOf(typeof(Component)))
-				inheritanceRoot = typeof(Component);
-
 			// Special case for display classes: do not serialize their state in optimized mode
 			if (mode == SerializationMode.Optimized && type.Name.Contains("DisplayClass") && type.HasAttribute<CompilerGeneratedAttribute>())
 				return Enumerable.Empty<FieldInfo>();

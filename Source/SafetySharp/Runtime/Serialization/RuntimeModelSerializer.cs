@@ -106,10 +106,12 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private static ObjectTable CreateObjectTable(Model model, StateFormula[] stateFormulas)
 		{
-			var modelObjects = model.RootComponents.SelectMany(component => model.SerializationRegistry.GetReferencedObjects(component));
-			var formulaObjects = stateFormulas.SelectMany(formula => model.SerializationRegistry.GetReferencedObjects(formula.Expression.Target));
+			var registry = model.SerializationRegistry;
+			var modelObjects = model.RootComponents.SelectMany(component => registry.GetReferencedObjects(component));
+			var formulaObjects = stateFormulas.SelectMany(formula => registry.GetReferencedObjects(formula.Expression.Target)).ToArray();
 
-			return new ObjectTable(modelObjects.Concat(formulaObjects));
+			var objects = modelObjects.Concat(formulaObjects).ToArray();
+			return new ObjectTable(objects, new HashSet<object>(stateFormulas.Select(formula => formula.Expression.Target)));
 		}
 
 		/// <summary>

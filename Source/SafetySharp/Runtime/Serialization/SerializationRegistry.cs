@@ -155,7 +155,7 @@ namespace SafetySharp.Runtime.Serialization
 				writer.Write(serializer.GetType().AssemblyQualifiedName);
 			}
 
-			// Serialize the object table
+			// Serialize the objects contained in the table
 			writer.Write(objectTable.Count);
 			foreach (var obj in objectTable)
 			{
@@ -163,6 +163,13 @@ namespace SafetySharp.Runtime.Serialization
 				writer.Write(serializerIndex);
 				GetSerializer(serializerIndex).SerializeType(obj, writer);
 			}
+
+			// Serialize the objects that require serialization in full mode only
+			var fullModeOnlyObjects = objectTable.Where(obj => !objectTable.RequiresSerialization(obj, SerializationMode.Optimized)).ToArray();
+			writer.Write(fullModeOnlyObjects.Length);
+
+			foreach (var obj in fullModeOnlyObjects)
+				writer.Write(objectTable.GetObjectIdentifier(obj));
 		}
 
 		/// <summary>
@@ -178,7 +185,7 @@ namespace SafetySharp.Runtime.Serialization
 			for (var i = 0; i < serializerCount; ++i)
 				RegisterSerializer((Serializer)Activator.CreateInstance(Type.GetType(reader.ReadString(), throwOnError: true)));
 
-			// Deserialize the objects
+			// Deserialize the objects contained in the table
 			var objects = new object[reader.ReadInt32()];
 			for (var i = 0; i < objects.Length; ++i)
 			{
@@ -186,7 +193,13 @@ namespace SafetySharp.Runtime.Serialization
 				objects[i] = serializer.InstantiateType(reader);
 			}
 
-			return new ObjectTable(objects);
+			// Deserialize the objects that require serialization in full mode only
+			var fullSerializationOnly = new HashSet<object>();
+			var count = reader.ReadInt32();
+			for (var i = 0; i < count; ++i)
+				fullSerializationOnly.Add(objects[reader.ReadInt32() - 1]);
+
+			return new ObjectTable(objects, fullSerializationOnly);
 		}
 
 		/// <summary>

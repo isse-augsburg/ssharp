@@ -31,10 +31,13 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	public abstract class Component : IComponent
 	{
+		[Hidden]
+		private readonly HashSet<IFaultEffect> _faultEffects = new HashSet<IFaultEffect>(ReferenceEqualityComparer<IFaultEffect>.Default);
+
 		/// <summary>
 		///   Gets the fault effects that affect the component.
 		/// </summary>
-		internal HashSet<IFaultEffect> FaultEffects { get; } = new HashSet<IFaultEffect>(ReferenceEqualityComparer<IFaultEffect>.Default);
+		internal HashSet<IFaultEffect> FaultEffects => _faultEffects;
 
 		/// <summary>
 		///   Updates the state of the component.

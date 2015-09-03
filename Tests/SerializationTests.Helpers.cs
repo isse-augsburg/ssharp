@@ -64,7 +64,7 @@ namespace Tests
 
 		protected void GenerateCode(SerializationMode mode, params object[] objects)
 		{
-			_objectTable = new ObjectTable(objects);
+			_objectTable = new ObjectTable(objects, new HashSet<object>());
 			_serializer = _serializationRegistry.CreateStateSerializer(_objectTable, mode);
 			_deserializer = _serializationRegistry.CreateStateDeserializer(_objectTable, mode);
 
