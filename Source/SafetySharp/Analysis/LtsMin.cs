@@ -27,6 +27,7 @@ namespace SafetySharp.Analysis
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
+	using CompilerServices;
 	using FormulaVisitors;
 	using Modeling;
 	using Runtime.Serialization;
@@ -56,6 +57,17 @@ namespace SafetySharp.Analysis
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
 		/// </summary>
 		public event Action<string> OutputWritten;
+
+		/// <summary>
+		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="invariant">[LiftExpression] The invariant that should be checked.</param>
+		public bool CheckInvariant(Model model, [LiftExpression] bool invariant)
+		{
+			Requires.CompilationTransformation();
+			return false;
+		}
 
 		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />.

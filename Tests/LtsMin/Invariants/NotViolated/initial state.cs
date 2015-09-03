@@ -32,7 +32,7 @@ namespace Tests.LtsMin.Invariants.NotViolated
 			var c = new C { F = 3 };
 			var m = new Model(c);
 
-			CheckInvariant(m, () => c.F == 3).ShouldBe(true);
+			CheckInvariant(m, c.F == 3).ShouldBe(true);
 		}
 
 		private class C : Component

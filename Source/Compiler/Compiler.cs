@@ -36,7 +36,6 @@ namespace SafetySharp.Compiler
 	using Microsoft.CodeAnalysis.Editing;
 	using Microsoft.CodeAnalysis.MSBuild;
 	using Normalization;
-	using Roslyn;
 	using Utilities;
 
 	/// <summary>
@@ -288,6 +287,7 @@ namespace SafetySharp.Compiler
 			Compilation = Normalizer.ApplyNormalizer<LineDirectiveNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<PartialNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<FormulaNormalizer>(Compilation, syntaxGenerator);
+			Compilation = Normalizer.ApplyNormalizer<LiftedExpressionNormalizer>(Compilation, syntaxGenerator);
 		}
 
 		/// <summary>

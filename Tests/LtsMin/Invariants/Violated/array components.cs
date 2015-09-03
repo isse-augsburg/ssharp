@@ -33,8 +33,8 @@ namespace Tests.LtsMin.Invariants.Violated
 			var d = new D { C = new[] { c1, c2 } };
 			var m = new Model(d);
 
-			CheckInvariant(m, () => c1.F != 3);
-			CheckInvariant(m, () => c2.F != 3);
+			CheckInvariant(m, c1.F != 3);
+			CheckInvariant(m, c2.F != 3);
 		}
 
 		private class C : Component

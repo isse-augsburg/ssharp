@@ -33,7 +33,7 @@ namespace Tests.LtsMin.Invariants.Violated
 			var d = new D { C = c };
 			var m = new Model(d);
 
-			CheckInvariant(m, () => c.F != 17).ShouldBe(false);
+			CheckInvariant(m, c.F != 17).ShouldBe(false);
 		}
 
 		private class C : Component

@@ -27,12 +27,20 @@ namespace Tests
 	using System.IO;
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
+	using SafetySharp.CompilerServices;
 	using SafetySharp.Modeling;
+	using SafetySharp.Utilities;
 	using Utilities;
 	using Xunit.Abstractions;
 
 	internal abstract class LtsMinTestObject : TestObject
 	{
+		protected bool CheckInvariant(Model model, [LiftExpression] bool invariant)
+		{
+			Requires.CompilationTransformation();
+			return false;
+		}
+
 		protected bool CheckInvariant(Model model, Func<bool> invariant)
 		{
 			var ltsMin = new SafetySharp.Analysis.LtsMin();
