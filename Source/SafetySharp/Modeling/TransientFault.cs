@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,50 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas.Visitors
+namespace SafetySharp.Modeling
 {
 	/// <summary>
-	///   Determines whether a <see cref="Formula" /> is a LTL formula.
+	///   Represents a transient fault that can appear and disappear at any time.
 	/// </summary>
-	internal class IsLtlFormulaVisitor : FormulaVisitor
+	public class TransientFault : Fault
 	{
 		/// <summary>
-		///   Indicates whether the visited formula contains any invalid operators.
+		///   Updates the state of the fault.
 		/// </summary>
-		private bool _containsInvalidOperators;
-
-		/// <summary>
-		///   Gets a value indicating whether the formula is a LTL formula.
-		/// </summary>
-		public bool IsLtlFormula => !_containsInvalidOperators;
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitUnaryFormula(UnaryFormula formula)
+		public override void Update()
 		{
-			if (formula.Operator == UnaryOperator.All || formula.Operator == UnaryOperator.Exists)
-				_containsInvalidOperators = true;
-			else
-				Visit(formula.Operand);
-		}
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitBinaryFormula(BinaryFormula formula)
-		{
-			Visit(formula.LeftOperand);
-
-			if (IsLtlFormula)
-				Visit(formula.RightOperand);
-		}
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitStateFormula(StateFormula formula)
-		{
+			IsOccurring = Choice.Choose(true, false);
 		}
 	}
 }

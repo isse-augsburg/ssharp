@@ -20,20 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Faults
+namespace SafetySharp.Modeling
 {
+	using System;
+
 	/// <summary>
-	///   Represents a persistent fault that, once active, remains active.
+	///   When applied to a <see cref="Component" />-derived class, indicates that the class specifies an effect of a fault on a
+	///   port of the inherited <see cref="Component" />.
 	/// </summary>
-	public class PersistentFault : Fault
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+	public sealed class FaultEffectAttribute : Attribute
 	{
-		/// <summary>
-		///   Updates the state of the fault.
-		/// </summary>
-		public override void Update()
-		{
-			if (!IsOccurring)
-				IsOccurring = Choice.Choose(true, false);
-		}
 	}
 }

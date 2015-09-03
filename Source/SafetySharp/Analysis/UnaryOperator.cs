@@ -20,21 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Faults
+namespace SafetySharp.Analysis
 {
 	/// <summary>
-	///   Represents a common interface for fault effects. This interface is implemented by the S# compiler automatically.
+	///     Represents the operator of a <see cref="UnaryFormula" />.
 	/// </summary>
-	public interface IFaultEffect
+	internal enum UnaryOperator
 	{
-		/// <summary>
-		///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.
-		/// </summary>
-		Component Component { get; set; }
+		// Non-temporal operators
+		Not,
 
-		/// <summary>
-		///   Gets or sets the <see cref="Fault" /> instance that determines whether the fault effect is active.
-		/// </summary>
-		Fault Fault { get; set; }
+		// Temporal operators
+		Next,
+		Finally,
+		Globally,
+
+		// Path operators
+		All,
+		Exists
 	}
 }

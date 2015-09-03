@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas
+namespace SafetySharp.Analysis
 {
 	using System.Diagnostics.CodeAnalysis;
 	using Utilities;
@@ -29,7 +29,7 @@ namespace SafetySharp.Modeling.Formulas
 	///   Provides factory methods for the construction of CTL* formulas.
 	/// </summary>
 	[SuppressMessage("ReSharper", "InconsistentNaming")]
-	public static class Operators
+	public static class Ctl
 	{
 		/// <summary>
 		///   Returns a <see cref="Formula" /> that applies the 'all paths' operator to <paramref name="operand" />.

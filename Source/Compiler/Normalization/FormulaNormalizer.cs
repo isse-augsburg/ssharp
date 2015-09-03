@@ -26,7 +26,7 @@ namespace SafetySharp.Compiler.Normalization
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
-	using Modeling.Formulas;
+	using Analysis;
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
 

@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,34 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas.Visitors
+namespace SafetySharp.Analysis
 {
 	/// <summary>
-	///   Represents the base class of <see cref="Formula" /> visitors.
+	///   Represents the operator of a <see cref="BinaryFormula" />.
 	/// </summary>
-	internal abstract class FormulaVisitor
+	internal enum BinaryOperator
 	{
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public abstract void VisitUnaryFormula(UnaryFormula formula);
+		// Non-temporal operators
+		And,
+		Or,
+		Implication,
+		Equivalence,
 
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public abstract void VisitBinaryFormula(BinaryFormula formula);
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public abstract void VisitStateFormula(StateFormula formula);
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public void Visit(Formula formula)
-		{
-			formula.Visit(this);
-		}
+		// Temporal operators
+		Until
 	}
 }

@@ -22,8 +22,8 @@
 
 namespace Tests.Formulas.TemporalOperators
 {
-	using SafetySharp.Modeling.Formulas;
-	using static SafetySharp.Modeling.Formulas.Operators;
+	using SafetySharp.Analysis;
+	using static SafetySharp.Analysis.Ctl;
 
 	internal class T6 : FormulaTestObject
 	{

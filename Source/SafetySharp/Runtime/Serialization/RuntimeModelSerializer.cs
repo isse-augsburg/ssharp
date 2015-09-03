@@ -29,8 +29,8 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Reflection;
 	using System.Text;
 	using Modeling;
-	using Modeling.Formulas;
-	using Modeling.Formulas.Visitors;
+	using Analysis;
+	using Analysis.FormulaVisitors;
 	using Utilities;
 
 	/// <summary>

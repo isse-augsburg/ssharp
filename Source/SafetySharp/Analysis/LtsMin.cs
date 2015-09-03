@@ -1,0 +1,221 @@
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2014-2015, Institute for Software & Systems Engineering
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+namespace SafetySharp.Analysis
+{
+	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
+	using System.IO;
+	using System.Linq;
+	using FormulaVisitors;
+	using Modeling;
+	using Runtime.Serialization;
+	using Utilities;
+
+	/// <summary>
+	///   Represents the LtsMin model checker.
+	/// </summary>
+	public class LtsMin
+	{
+		/// <summary>
+		///   Represents the LtsMin process that is currently running.
+		/// </summary>
+		private ExternalProcess _ltsMin;
+
+		/// <summary>
+		///   Gets or sets a value indicating whether a symbolic or an explicit state model checking algorithm should be used.
+		/// </summary>
+		public bool SymbolicChecking { get; set; }
+
+		/// <summary>
+		///   Gets the outputs that occurred during the execution of LtsMin.
+		/// </summary>
+		public IEnumerable<string> Outputs { get; private set; }
+
+		/// <summary>
+		///   Gets or sets a callback that is invoked when the model checker has written an output. If no callback is set, the output is
+		///   written to the console by default.
+		/// </summary>
+		public Action<string> OutputWritten { get; set; }
+
+		/// <summary>
+		///   Gets the name of the LtsMin executable.
+		/// </summary>
+		private string GetExecutableName()
+		{
+			return SymbolicChecking ? "pins2lts-sym.exe" : "pins2lts-seq.exe";
+		}
+
+		/// <summary>
+		///   Gets the name of the S# LtsMin assembly.
+		/// </summary>
+		private string GetSafetySharpLtsMinAssemblyName()
+		{
+			return SymbolicChecking ? "SafetySharp.LtsMin.Symbolic.dll" : "SafetySharp.LtsMin.Sequential.dll";
+		}
+
+		/// <summary>
+		///   Interprets the <paramref name="exitCode" /> returned by LtsMin.
+		/// </summary>
+		/// <param name="exitCode">The exit code that should be interpreted.</param>
+		private static bool InterpretExitCode(int exitCode)
+		{
+			switch (exitCode)
+			{
+				case 0:
+					return true;
+				case 1:
+					return false;
+				case 255:
+					throw new Exception("Model checking failed due to an error.");
+				default:
+					throw new Exception($"LtsMin exited with an unexpected exit code: {exitCode}.");
+			}
+		}
+
+		/// <summary>
+		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="invariant">The invariant that should be checked.</param>
+		public bool CheckInvariant(Model model, Func<bool> invariant)
+		{
+			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(invariant, nameof(invariant));
+
+			var stateFormula = new StateFormula(invariant);
+			return Check(model, stateFormula, $"--invariant=\"{stateFormula.Label}\"");
+		}
+
+		/// <summary>
+		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="formula">The formula that should be checked.</param>
+		public bool Check(Model model, Formula formula)
+		{
+			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(formula, nameof(formula));
+
+			var visitor = new IsLtlFormulaVisitor();
+			visitor.Visit(formula);
+
+			if (!visitor.IsLtlFormula)
+				throw new NotImplementedException("CTL* model checking is not yet implemented.");
+
+			var transformationVisitor = new LtsMinLtlTransformationVisitor();
+			transformationVisitor.Visit(formula);
+
+			return Check(model, formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
+		}
+
+		/// <summary>
+		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="formula">The formula that should be checked.</param>
+		/// <param name="checkArgument">The argument passed to LtsMin that indicates which kind of check to perform.</param>
+		private bool Check(Model model, Formula formula, string checkArgument)
+		{
+			try
+			{
+				Outputs = Enumerable.Empty<string>();
+
+				using (var modelFile = new TemporaryFile("ssharp"))
+				using (var counterExampleFile = new TemporaryFile("gcf"))
+				{
+					using (var stream = new FileStream(modelFile.FilePath, FileMode.Create))
+						RuntimeModelSerializer.Save(stream, model, formula);
+
+					CreateProcess(modelFile.FilePath, counterExampleFile.FilePath, checkArgument);
+					Run();
+
+					Outputs = _ltsMin.Outputs.Select(output => output.Message).ToArray();
+					var success = InterpretExitCode(_ltsMin.ExitCode);
+
+					if (!success)
+						OutputCounterExample(counterExampleFile.FilePath);
+
+					return success;
+				}
+			}
+			finally
+			{
+				_ltsMin = null;
+			}
+		}
+
+		/// <summary>
+		///   Outputs the counter example found by the model checker.
+		/// </summary>
+		/// <param name="filePath">The path to the file that contains the counter example.</param>
+		private void OutputCounterExample(string filePath)
+		{
+		}
+
+		/// <summary>
+		///   Creates a new <see cref="_ltsMin" /> process instance that checks the <paramref name="model" />.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="counterExample">The path to the file that should store the counter example.</param>
+		/// <param name="checkArgument">The argument passed to LtsMin that indicates which kind of check to perform.</param>
+		private void CreateProcess(string model, string counterExample, string checkArgument)
+		{
+			Requires.That(_ltsMin == null, "An instance of LtsMin is already running.");
+
+			var assembly = GetSafetySharpLtsMinAssemblyName();
+			_ltsMin = new ExternalProcess(GetExecutableName(), output => Output(output.Message),
+				"--loader={0} \"{1}\" {2} --trace=\"{3}\"", assembly, model, checkArgument, counterExample);
+		}
+
+		/// <summary>
+		///   Forwards the output <paramref name="message" />.
+		/// </summary>
+		/// <param name="message">The message that should be output.</param>
+		private void Output(string message)
+		{
+			if (OutputWritten != null)
+				OutputWritten.Invoke(message);
+			else
+				Console.WriteLine(message);
+		}
+
+		/// <summary>
+		///   Runs the <see cref="_ltsMin" /> process instance.
+		/// </summary>
+		private void Run()
+		{
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
+			_ltsMin.Run();
+
+			stopwatch.Stop();
+
+			Console.WriteLine();
+			Console.WriteLine("==========================");
+			Console.WriteLine($"Elapsed time: {stopwatch.Elapsed.TotalMilliseconds}ms");
+			Console.WriteLine("==========================");
+		}
+	}
+}

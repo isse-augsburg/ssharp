@@ -48,10 +48,11 @@ namespace SafetySharp.Utilities
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="fileName">The file name of the external executable.</param>
+		/// <param name="outputCallback">The callback that is invoked when an output is generated.</param>
 		/// <param name="commandLine">The command line arguments that should be passed to the executable.</param>
 		/// <param name="arguments">The arguments that should be copied into the command line.</param>
 		[StringFormatMethod("commandLine")]
-		public ExternalProcess(string fileName, string commandLine = "", params object[] arguments)
+		public ExternalProcess(string fileName, Action<Output> outputCallback, string commandLine = "", params object[] arguments)
 		{
 			Requires.NotNullOrWhitespace(fileName, nameof(fileName));
 			Requires.NotNull(commandLine, nameof(commandLine));
@@ -71,6 +72,8 @@ namespace SafetySharp.Utilities
 
 			_process.OutputDataReceived += (o, e) => LogMessage(e.Data, isError: false);
 			_process.ErrorDataReceived += (o, e) => LogMessage(e.Data, isError: true);
+
+			OutputCallback = outputCallback;
 		}
 
 		/// <summary>
@@ -98,9 +101,9 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
-		///   Gets or sets the callback that is invoked when an output is generated.
+		///   Gets  the callback that is invoked when an output is generated.
 		/// </summary>
-		public Action<Output> OutputCallback { get; set; }
+		public Action<Output> OutputCallback { get; }
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.

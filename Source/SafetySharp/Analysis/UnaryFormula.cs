@@ -20,19 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Faults
+namespace SafetySharp.Analysis
 {
+	using Utilities;
+	using FormulaVisitors;
+
 	/// <summary>
-	///   Represents a transient fault that can appear and disappear at any time.
+	///   Represents the application of a <see cref="UnaryOperator" /> to a <see cref="Formula" /> instance.
 	/// </summary>
-	public class TransientFault : Fault
+	internal sealed class UnaryFormula : Formula
 	{
 		/// <summary>
-		///   Updates the state of the fault.
+		///   Initializes a new instance of the <see cref="UnaryFormula" /> class.
 		/// </summary>
-		public override void Update()
+		/// <param name="operand">The operand of the unary formula.</param>
+		/// <param name="unaryOperator">The operator of the unary formula.</param>
+		internal UnaryFormula(Formula operand, UnaryOperator unaryOperator)
 		{
-			IsOccurring = Choice.Choose(true, false);
+			Requires.NotNull(operand, nameof(operand));
+			Requires.InRange(unaryOperator, nameof(unaryOperator));
+
+			Operand = operand;
+			Operator = unaryOperator;
+		}
+
+		/// <summary>
+		///   Gets the operand of the unary formula.
+		/// </summary>
+		public Formula Operand { get; }
+
+		/// <summary>
+		///   Gets the operator of the unary formula.
+		/// </summary>
+		public UnaryOperator Operator { get; }
+
+		/// <summary>
+		///   Executes the <paramref name="visitor" /> for this formula.
+		/// </summary>
+		/// <param name="visitor">The visitor that should be executed.</param>
+		internal override void Visit(FormulaVisitor visitor)
+		{
+			visitor.VisitUnaryFormula(this);
 		}
 	}
 }

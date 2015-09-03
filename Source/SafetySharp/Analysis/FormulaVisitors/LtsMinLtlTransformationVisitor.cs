@@ -20,25 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas.Visitors
+namespace SafetySharp.Analysis.FormulaVisitors
 {
 	using System.Text;
 	using Utilities;
 
 	/// <summary>
-	///   Gets the string representation of a <see cref="Formula" />.
+	///   Transforms the formula to a LtsMin LTL formula.
 	/// </summary>
-	internal class ToStringVisitor : FormulaVisitor
+	internal class LtsMinLtlTransformationVisitor : FormulaVisitor
 	{
 		/// <summary>
-		///   The string builder that is used to construct the string representation.
+		///   The string builder that is used to construct the transformed formula.
 		/// </summary>
 		private readonly StringBuilder _builder = new StringBuilder();
 
 		/// <summary>
-		///   Gets the string representation of the formula.
+		///   Gets the transformed LTL formula.
 		/// </summary>
-		public string FormulaString => _builder.ToString();
+		public string TransformedFormula => _builder.ToString();
 
 		/// <summary>
 		///   Visits the <paramref name="formula." />
@@ -53,19 +53,13 @@ namespace SafetySharp.Modeling.Formulas.Visitors
 					_builder.Append("X");
 					break;
 				case UnaryOperator.Finally:
-					_builder.Append("F");
+					_builder.Append("<>");
 					break;
 				case UnaryOperator.Globally:
-					_builder.Append("G");
+					_builder.Append("[]");
 					break;
 				case UnaryOperator.Not:
 					_builder.Append("!");
-					break;
-				case UnaryOperator.All:
-					_builder.Append("A");
-					break;
-				case UnaryOperator.Exists:
-					_builder.Append("E");
 					break;
 				default:
 					Assert.NotReached($"Unknown or unsupported unary operator '{formula.Operator}'.");

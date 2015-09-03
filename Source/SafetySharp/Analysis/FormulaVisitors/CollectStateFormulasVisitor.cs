@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,20 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas
+namespace SafetySharp.Analysis.FormulaVisitors
 {
-	/// <summary>
-	///   Represents the operator of a <see cref="BinaryFormula" />.
-	/// </summary>
-	internal enum BinaryOperator
-	{
-		// Non-temporal operators
-		And,
-		Or,
-		Implication,
-		Equivalence,
+	using System.Collections.Generic;
 
-		// Temporal operators
-		Until
+	/// <summary>
+	///   Collects all <see cref="StateFormula" /> instances contained in a <see cref="Formula" />.
+	/// </summary>
+	internal class CollectStateFormulasVisitor : FormulaVisitor
+	{
+		/// <summary>
+		///   Gets the collected state formulas.
+		/// </summary>
+		public HashSet<StateFormula> StateFormulas { get; } = new HashSet<StateFormula>();
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitUnaryFormula(UnaryFormula formula)
+		{
+			Visit(formula.Operand);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBinaryFormula(BinaryFormula formula)
+		{
+			Visit(formula.LeftOperand);
+			Visit(formula.RightOperand);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitStateFormula(StateFormula formula)
+		{
+			StateFormulas.Add(formula);
+		}
 	}
 }

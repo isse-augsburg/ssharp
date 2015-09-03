@@ -20,47 +20,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas
+namespace SafetySharp.Analysis
 {
+	using System;
 	using Utilities;
-	using Visitors;
+	using FormulaVisitors;
 
 	/// <summary>
-	///   Represents the application of a <see cref="BinaryOperator" /> to two <see cref="Formula" /> instances.
+	///   Represents a state formula, i.e., a Boolean expression that is evaluated in a single system state.
 	/// </summary>
-	internal sealed class BinaryFormula : Formula
+	internal sealed class StateFormula : Formula
 	{
 		/// <summary>
-		///   Initializes a new instance of the <see cref="BinaryFormula" /> class.
+		///   Initializes a new instance of the <see cref="StateFormula" /> class.
 		/// </summary>
-		/// <param name="leftOperand">The formula on the left-hand side of the binary operator.</param>
-		/// <param name="binaryOperator">The operator of the binary formula.</param>
-		/// <param name="rightOperand">The formula on the right-hand side of the binary operator.</param>
-		internal BinaryFormula(Formula leftOperand, BinaryOperator binaryOperator, Formula rightOperand)
+		/// <param name="expression">The expression that represents the state formula.</param>
+		/// <param name="label">
+		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
+		/// </param>
+		internal StateFormula(Func<bool> expression, string label = null)
 		{
-			Requires.NotNull(leftOperand, nameof(leftOperand));
-			Requires.InRange(binaryOperator, nameof(binaryOperator));
-			Requires.NotNull(rightOperand, nameof(rightOperand));
+			Requires.NotNull(expression, nameof(expression));
 
-			LeftOperand = leftOperand;
-			Operator = binaryOperator;
-			RightOperand = rightOperand;
+			Expression = expression;
+			Label = label ?? "StateFormula" + Guid.NewGuid().ToString().Replace("-", String.Empty);
 		}
 
 		/// <summary>
-		///   Gets the formula on the left-hand side of the binary operator.
+		///   Gets the expression that represents the state formula.
 		/// </summary>
-		public Formula LeftOperand { get; }
+		public Func<bool> Expression { get; }
 
 		/// <summary>
-		///   Gets the operator of the binary formula.
+		///   Gets the state label that a model checker can use to determine whether the state formula holds.
 		/// </summary>
-		public BinaryOperator Operator { get; }
-
-		/// <summary>
-		///   Gets the formula on the right-hand side of the binary operator.
-		/// </summary>
-		public Formula RightOperand { get; }
+		public string Label { get; }
 
 		/// <summary>
 		///   Executes the <paramref name="visitor" /> for this formula.
@@ -68,7 +62,7 @@ namespace SafetySharp.Modeling.Formulas
 		/// <param name="visitor">The visitor that should be executed.</param>
 		internal override void Visit(FormulaVisitor visitor)
 		{
-			visitor.VisitBinaryFormula(this);
+			visitor.VisitStateFormula(this);
 		}
 	}
 }

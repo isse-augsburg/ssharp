@@ -23,7 +23,7 @@
 namespace Tests.Formulas.StateFormulas
 {
 	using System;
-	using SafetySharp.Modeling.Formulas;
+	using SafetySharp.Analysis;
 
 	public class Parameters : FormulaTestObject
 	{

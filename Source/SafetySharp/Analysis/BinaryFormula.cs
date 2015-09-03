@@ -20,39 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas
+namespace SafetySharp.Analysis
 {
 	using Utilities;
-	using Visitors;
+	using FormulaVisitors;
 
 	/// <summary>
-	///   Represents the application of a <see cref="UnaryOperator" /> to a <see cref="Formula" /> instance.
+	///   Represents the application of a <see cref="BinaryOperator" /> to two <see cref="Formula" /> instances.
 	/// </summary>
-	internal sealed class UnaryFormula : Formula
+	internal sealed class BinaryFormula : Formula
 	{
 		/// <summary>
-		///   Initializes a new instance of the <see cref="UnaryFormula" /> class.
+		///   Initializes a new instance of the <see cref="BinaryFormula" /> class.
 		/// </summary>
-		/// <param name="operand">The operand of the unary formula.</param>
-		/// <param name="unaryOperator">The operator of the unary formula.</param>
-		internal UnaryFormula(Formula operand, UnaryOperator unaryOperator)
+		/// <param name="leftOperand">The formula on the left-hand side of the binary operator.</param>
+		/// <param name="binaryOperator">The operator of the binary formula.</param>
+		/// <param name="rightOperand">The formula on the right-hand side of the binary operator.</param>
+		internal BinaryFormula(Formula leftOperand, BinaryOperator binaryOperator, Formula rightOperand)
 		{
-			Requires.NotNull(operand, nameof(operand));
-			Requires.InRange(unaryOperator, nameof(unaryOperator));
+			Requires.NotNull(leftOperand, nameof(leftOperand));
+			Requires.InRange(binaryOperator, nameof(binaryOperator));
+			Requires.NotNull(rightOperand, nameof(rightOperand));
 
-			Operand = operand;
-			Operator = unaryOperator;
+			LeftOperand = leftOperand;
+			Operator = binaryOperator;
+			RightOperand = rightOperand;
 		}
 
 		/// <summary>
-		///   Gets the operand of the unary formula.
+		///   Gets the formula on the left-hand side of the binary operator.
 		/// </summary>
-		public Formula Operand { get; }
+		public Formula LeftOperand { get; }
 
 		/// <summary>
-		///   Gets the operator of the unary formula.
+		///   Gets the operator of the binary formula.
 		/// </summary>
-		public UnaryOperator Operator { get; }
+		public BinaryOperator Operator { get; }
+
+		/// <summary>
+		///   Gets the formula on the right-hand side of the binary operator.
+		/// </summary>
+		public Formula RightOperand { get; }
 
 		/// <summary>
 		///   Executes the <paramref name="visitor" /> for this formula.
@@ -60,7 +68,7 @@ namespace SafetySharp.Modeling.Formulas
 		/// <param name="visitor">The visitor that should be executed.</param>
 		internal override void Visit(FormulaVisitor visitor)
 		{
-			visitor.VisitUnaryFormula(this);
+			visitor.VisitBinaryFormula(this);
 		}
 	}
 }

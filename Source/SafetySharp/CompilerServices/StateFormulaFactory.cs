@@ -23,7 +23,7 @@
 namespace SafetySharp.CompilerServices
 {
 	using System;
-	using Modeling.Formulas;
+	using Analysis;
 	using Utilities;
 
 	/// <summary>

@@ -23,7 +23,7 @@
 namespace SafetySharp.Runtime
 {
 	using Modeling;
-	using Modeling.Formulas;
+	using Analysis;
 	using Serialization;
 	using Utilities;
 

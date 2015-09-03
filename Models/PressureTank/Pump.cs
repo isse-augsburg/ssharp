@@ -23,7 +23,6 @@
 namespace PressureTank
 {
 	using SafetySharp.Modeling;
-	using SafetySharp.Modeling.Faults;
 
 	/// <summary>
 	///   Represents the pump that fills the pressure tank.

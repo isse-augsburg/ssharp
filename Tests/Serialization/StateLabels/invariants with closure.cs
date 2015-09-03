@@ -23,7 +23,7 @@
 namespace Tests.Serialization.StateLabels
 {
 	using SafetySharp.Modeling;
-	using SafetySharp.Modeling.Formulas;
+	using SafetySharp.Analysis;
 	using Shouldly;
 
 	internal class InvariantsWithClosure : RuntimeModelTest

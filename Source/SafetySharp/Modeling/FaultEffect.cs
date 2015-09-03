@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,43 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas.Visitors
+namespace SafetySharp.Modeling
 {
-	using System.Collections.Generic;
-
 	/// <summary>
-	///   Collects all <see cref="StateFormula" /> instances contained in a <see cref="Formula" />.
+	///   Represents a common interface for fault effects. This interface is implemented by the S# compiler automatically.
 	/// </summary>
-	internal class CollectStateFormulasVisitor : FormulaVisitor
+	public interface IFaultEffect
 	{
 		/// <summary>
-		///   Gets the collected state formulas.
+		///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.
 		/// </summary>
-		public HashSet<StateFormula> StateFormulas { get; } = new HashSet<StateFormula>();
+		Component Component { get; set; }
 
 		/// <summary>
-		///   Visits the <paramref name="formula." />
+		///   Gets or sets the <see cref="Fault" /> instance that determines whether the fault effect is active.
 		/// </summary>
-		public override void VisitUnaryFormula(UnaryFormula formula)
-		{
-			Visit(formula.Operand);
-		}
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitBinaryFormula(BinaryFormula formula)
-		{
-			Visit(formula.LeftOperand);
-			Visit(formula.RightOperand);
-		}
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitStateFormula(StateFormula formula)
-		{
-			StateFormulas.Add(formula);
-		}
+		Fault Fault { get; set; }
 	}
 }

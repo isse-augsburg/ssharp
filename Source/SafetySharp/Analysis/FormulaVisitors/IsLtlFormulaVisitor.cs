@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,49 +20,50 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas
+namespace SafetySharp.Analysis.FormulaVisitors
 {
-	using System;
-	using Utilities;
-	using Visitors;
-
 	/// <summary>
-	///   Represents a state formula, i.e., a Boolean expression that is evaluated in a single system state.
+	///   Determines whether a <see cref="Formula" /> is a LTL formula.
 	/// </summary>
-	internal sealed class StateFormula : Formula
+	internal class IsLtlFormulaVisitor : FormulaVisitor
 	{
 		/// <summary>
-		///   Initializes a new instance of the <see cref="StateFormula" /> class.
+		///   Indicates whether the visited formula contains any invalid operators.
 		/// </summary>
-		/// <param name="expression">The expression that represents the state formula.</param>
-		/// <param name="label">
-		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
-		/// </param>
-		internal StateFormula(Func<bool> expression, string label = null)
-		{
-			Requires.NotNull(expression, nameof(expression));
+		private bool _containsInvalidOperators;
 
-			Expression = expression;
-			Label = label ?? "StateFormula" + Guid.NewGuid().ToString().Replace("-", String.Empty);
+		/// <summary>
+		///   Gets a value indicating whether the formula is a LTL formula.
+		/// </summary>
+		public bool IsLtlFormula => !_containsInvalidOperators;
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitUnaryFormula(UnaryFormula formula)
+		{
+			if (formula.Operator == UnaryOperator.All || formula.Operator == UnaryOperator.Exists)
+				_containsInvalidOperators = true;
+			else
+				Visit(formula.Operand);
 		}
 
 		/// <summary>
-		///   Gets the expression that represents the state formula.
+		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public Func<bool> Expression { get; }
-
-		/// <summary>
-		///   Gets the state label that a model checker can use to determine whether the state formula holds.
-		/// </summary>
-		public string Label { get; }
-
-		/// <summary>
-		///   Executes the <paramref name="visitor" /> for this formula.
-		/// </summary>
-		/// <param name="visitor">The visitor that should be executed.</param>
-		internal override void Visit(FormulaVisitor visitor)
+		public override void VisitBinaryFormula(BinaryFormula formula)
 		{
-			visitor.VisitStateFormula(this);
+			Visit(formula.LeftOperand);
+
+			if (IsLtlFormula)
+				Visit(formula.RightOperand);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitStateFormula(StateFormula formula)
+		{
 		}
 	}
 }

@@ -20,10 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas
+namespace SafetySharp.Analysis
 {
 	using Utilities;
-	using Visitors;
+	using FormulaVisitors;
 
 	/// <summary>
 	///   Represents a CTL* formula.

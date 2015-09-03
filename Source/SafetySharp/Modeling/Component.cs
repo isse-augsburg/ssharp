@@ -23,7 +23,7 @@
 namespace SafetySharp.Modeling
 {
 	using System.Collections.Generic;
-	using Faults;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>

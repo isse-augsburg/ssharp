@@ -30,7 +30,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Microsoft.CodeAnalysis.Editing;
 	using Modeling;
-	using Modeling.Faults;
 	using Utilities;
 
 	/// <summary>

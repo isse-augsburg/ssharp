@@ -26,7 +26,7 @@ namespace Tests
 	using System.IO;
 	using JetBrains.Annotations;
 	using SafetySharp.Modeling;
-	using SafetySharp.Modeling.Formulas;
+	using SafetySharp.Analysis;
 	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Utilities;
