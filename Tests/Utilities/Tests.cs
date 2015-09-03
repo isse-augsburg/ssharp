@@ -109,11 +109,20 @@ namespace Tests.Utilities
 		/// <param name="file">The file that should be compiled and tested.</param>
 		protected void ExecuteDynamicTests(string file)
 		{
-			var code = File.ReadAllText(file).Replace("\t", "    ");
-			var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, path: file, encoding: Encoding.UTF8);
-
-			foreach (var obj in GetTestableObjects(syntaxTree))
+			foreach (var obj in GetTestableObjects(ParseFile(file)))
 				obj.Test(Output);
+		}
+
+		/// <summary>
+		///   Parses the <paramref name="file" /> and returns the <see cref="SyntaxTree" />.
+		/// </summary>
+		/// <param name="file">The file that should be parsed.</param>
+		protected SyntaxTree ParseFile(string file)
+		{
+			Requires.NotNullOrWhitespace(file, nameof(file));
+
+			var code = File.ReadAllText(file).Replace("\t", "    ");
+			return SyntaxFactory.ParseSyntaxTree(code, path: file, encoding: Encoding.UTF8);
 		}
 
 		/// <summary>

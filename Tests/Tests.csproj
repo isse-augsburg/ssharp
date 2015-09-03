@@ -174,6 +174,24 @@
     <Compile Include="LtsMin\Ltl\Violated\initial state.cs" />
     <Compile Include="LtsMin\Ltl\Violated\multiple choices.cs" />
     <Compile Include="LtsMin\Ltl\Violated\single choice.cs" />
+    <Compile Include="Normalization\LiftedExpressions\Lifted\named parameters.cs" />
+    <Compile Include="Normalization\LiftedExpressions\Lifted\line break preservation.cs" />
+    <Compile Include="Normalization\LiftedExpressions\Lifted\method invocation, multiple arguments.cs" />
+    <Compile Include="Normalization\LiftedExpressions\Lifted\method invocation, single argument.cs" />
+    <Compile Include="Normalization\LiftedExpressions\Lifted\nested invocations.cs" />
+    <Compile Include="Normalization\LiftedExpressions\Lifted\indexer.cs" />
+    <Compile Include="Normalization\LiftedExpressions\Lifted\object creation.cs" />
+    <Compile Include="Normalization\LiftedExpressions\Unlifted\method invocation.cs" />
+    <Compile Include="Normalization\LiftedExpressions\Unlifted\object creation.cs" />
+    <Compile Include="NormalizationTests.cs" />
+    <Compile Include="NormalizationTests.Helpers.cs">
+      <DependentUpon>NormalizationTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Normalization\Partial\Normalized\class declarations.cs" />
+    <Compile Include="Normalization\Partial\Unchanged\class declarations.cs" />
+    <Compile Include="Normalization\Partial\Unchanged\enum declaration.cs" />
+    <Compile Include="Normalization\Partial\Unchanged\interface declarations.cs" />
+    <Compile Include="Normalization\Partial\Unchanged\struct declarations.cs" />
     <Compile Include="Serialization\Enumerations\Int16.cs" />
     <Compile Include="Serialization\Enumerations\Int64.cs" />
     <Compile Include="Serialization\Enumerations\Int32.cs" />
