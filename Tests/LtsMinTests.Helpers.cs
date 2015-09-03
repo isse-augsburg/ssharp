@@ -20,36 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.StateLabels
+namespace Tests
 {
-	using SafetySharp.Modeling;
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
-	using Shouldly;
+	using SafetySharp.Modeling;
+	using Utilities;
+	using Xunit.Abstractions;
 
-	internal class InvariantWithoutClosure : RuntimeModelTest
+	internal abstract class LtsMinTestObject : TestObject
 	{
-		private static int _x;
-
-		protected override void Check()
+		protected bool CheckInvariant(Model model, Func<bool> invariant)
 		{
-			var c = new C();
-			var m = new Model(c);
-			Formula l = (_x = 3) == 3;
+			var ltsMin = new SafetySharp.Analysis.LtsMin();
+			ltsMin.OutputWritten += message => Output.Log("{0}", message);
 
-			Create(m, l);
-
-			StateFormulas.Length.ShouldBe(1);
-			RootComponents.Length.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<C>();
-
-			StateFormulas[0].Expression().ShouldBe(true);
-			_x.ShouldBe(3);
+			return ltsMin.CheckInvariant(model, invariant);
 		}
 
-		private class C : Component
+		protected bool Check(Model model, Formula formula)
 		{
+			var ltsMin = new SafetySharp.Analysis.LtsMin();
+			ltsMin.OutputWritten += message => Output.Log("{0}", message);
+
+			return ltsMin.Check(model, formula);
+		}
+	}
+
+	public partial class LtsMinTests : Tests
+	{
+		public LtsMinTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests(string directory)
+		{
+			return EnumerateTestCases(Path.Combine(Path.GetDirectoryName(GetFileName()), directory));
 		}
 	}
 }

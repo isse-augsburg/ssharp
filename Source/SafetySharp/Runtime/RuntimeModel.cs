@@ -22,48 +22,73 @@
 
 namespace SafetySharp.Runtime
 {
-	using Modeling;
+	using System.Runtime.CompilerServices;
 	using Analysis;
+	using Modeling;
 	using Serialization;
 	using Utilities;
 
 	/// <summary>
 	///   Represents a runtime model that can be used for model checking or simulation.
 	/// </summary>
-	internal sealed class RuntimeModel : DisposableObject
+	internal sealed unsafe class RuntimeModel : DisposableObject
 	{
 		/// <summary>
-		///   The deserializer for the model.
+		///   Deserializes a state of the model.
 		/// </summary>
-		private SerializationDelegate _deserializer;
+		private readonly SerializationDelegate _deserialize;
 
 		/// <summary>
-		///   The  serializer for the model.
+		///   Serializes a state of the model.
 		/// </summary>
-		private SerializationDelegate _serializer;
+		private readonly SerializationDelegate _serialize;
+
+		/// <summary>
+		///   The <see cref="ChoiceResolver" /> used by the model.
+		/// </summary>
+		private readonly ChoiceResolver _choiceResolver;
+
+		/// <summary>
+		///   The <see cref="StateCache" /> used by the model.
+		/// </summary>
+		private readonly StateCache _stateCache;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="model">The underlying <see cref="Modeling.Model" /> instance.</param>
+		/// <param name="rootComponents">The root components of the model.</param>
+		/// <param name="serializationRegistry">The serialization registry of the model.</param>
 		/// <param name="objectTable">The table of objects referenced by the model.</param>
 		/// <param name="stateFormulas">The state formulas of the model.</param>
-		public unsafe RuntimeModel(Model model, ObjectTable objectTable, StateFormula[] stateFormulas)
+		public RuntimeModel(Component[] rootComponents, SerializationRegistry serializationRegistry,
+							ObjectTable objectTable, StateFormula[] stateFormulas)
 		{
-			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(rootComponents, nameof(rootComponents));
+			Requires.NotNull(serializationRegistry, nameof(serializationRegistry));
 			Requires.NotNull(objectTable, nameof(objectTable));
 			Requires.NotNull(stateFormulas, nameof(stateFormulas));
 
-			Model = model;
+			RootComponents = rootComponents;
 			StateFormulas = stateFormulas;
-			_deserializer = model.SerializationRegistry.CreateStateDeserializer(objectTable, SerializationMode.Optimized);
-			_serializer = model.SerializationRegistry.CreateStateSerializer(objectTable, SerializationMode.Optimized);
+
+			StateSlotCount = serializationRegistry.GetStateSlotCount(objectTable, SerializationMode.Optimized);
+
+			_deserialize = serializationRegistry.CreateStateDeserializer(objectTable, SerializationMode.Optimized);
+			_serialize = serializationRegistry.CreateStateSerializer(objectTable, SerializationMode.Optimized);
+
+			_stateCache = new StateCache(StateSlotCount);
+			_choiceResolver = new ChoiceResolver();
 		}
 
 		/// <summary>
-		///   Gets the underlying model.
+		///   Gets the number of slots in the state vector.
 		/// </summary>
-		public Model Model { get; }
+		public int StateSlotCount { get; }
+
+		/// <summary>
+		///   Gets the root components of the model.
+		/// </summary>
+		public Component[] RootComponents { get; }
 
 		/// <summary>
 		///   Gets the state labels of the model.
@@ -71,11 +96,93 @@ namespace SafetySharp.Runtime
 		public StateFormula[] StateFormulas { get; }
 
 		/// <summary>
+		///   Gets the number of transition groups.
+		/// </summary>
+		public int TransitionGroupCount => 1;
+
+		/// <summary>
+		///   Deserializes the model's state from <paramref name="serializedState" />.
+		/// </summary>
+		/// <param name="serializedState">The state of the model that should be deserialized.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Deserialize(int* serializedState)
+		{
+			_deserialize(serializedState);
+		}
+
+		/// <summary>
+		///   Serializes the model's state to <paramref name="serializedState" />.
+		/// </summary>
+		/// <param name="serializedState">The memory region the model's state should be serialized into.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Serialize(int* serializedState)
+		{
+			_serialize(serializedState);
+		}
+
+		/// <summary>
+		///   Updates the state of the model by executing a single step.
+		/// </summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void ExecuteStep()
+		{
+			foreach (var component in RootComponents)
+				component.Update();
+		}
+
+		/// <summary>
+		///   Checks whether the state expression identified by the <paramref name="label" /> holds for the model's current state.
+		/// </summary>
+		/// <param name="serializedState">The state of the model that should be used to check the <paramref name="label" />.</param>
+		/// <param name="label">The label that should be checked.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool CheckStateLabel(int* serializedState, int label)
+		{
+			Deserialize(serializedState);
+			return StateFormulas[label].Expression();
+		}
+
+		/// <summary>
+		///   Gets the serialized initial state of the model.
+		/// </summary>
+		public int* GetInitialState()
+		{
+			var state = _stateCache.Allocate();
+			Serialize(state);
+
+			return state;
+		}
+
+		/// <summary>
+		///   Computes the next states for <paramref name="sourceState" />.
+		/// </summary>
+		/// <param name="sourceState">The source state the next states should be computed for.</param>
+		/// <param name="transitionGroup">The transition group the next states should be computed for.</param>
+		public StateCache ComputeNextStates(int* sourceState, int transitionGroup)
+		{
+			_stateCache.Clear();
+			_choiceResolver.PrepareNextState();
+
+			while (_choiceResolver.PrepareNextPath())
+			{
+				Deserialize(sourceState);
+				ExecuteStep();
+
+				var targetState = _stateCache.Allocate();
+				Serialize(targetState);
+			}
+
+			return _stateCache;
+		}
+
+		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
+			_stateCache.SafeDispose();
+			_choiceResolver.SafeDispose();
 		}
 	}
 }

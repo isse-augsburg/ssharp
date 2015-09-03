@@ -40,9 +40,9 @@ namespace Tests.Serialization.RuntimeModels
 			Create(m);
 
 			StateFormulas.ShouldBeEmpty();
-			RuntimeModel.RootComponents.Count.ShouldBe(1);
+			RootComponents.Length.ShouldBe(1);
 
-			var root = RuntimeModel.RootComponents[0];
+			var root = RootComponents[0];
 			root.ShouldBeOfType<D>();
 
 			((D)root).C1.ShouldBeOfType<C>();

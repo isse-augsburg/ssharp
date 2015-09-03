@@ -27,7 +27,6 @@ namespace SafetySharp.Utilities
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
-	using JetBrains.Annotations;
 
 	/// <summary>
 	///   Represents an external process.
@@ -48,19 +47,17 @@ namespace SafetySharp.Utilities
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="fileName">The file name of the external executable.</param>
+		/// <param name="commandLineArguments">The command line arguments that should be passed to the executable.</param>
 		/// <param name="outputCallback">The callback that is invoked when an output is generated.</param>
-		/// <param name="commandLine">The command line arguments that should be passed to the executable.</param>
-		/// <param name="arguments">The arguments that should be copied into the command line.</param>
-		[StringFormatMethod("commandLine")]
-		public ExternalProcess(string fileName, Action<Output> outputCallback, string commandLine = "", params object[] arguments)
+		public ExternalProcess(string fileName, string commandLineArguments, Action<Output> outputCallback)
 		{
 			Requires.NotNullOrWhitespace(fileName, nameof(fileName));
-			Requires.NotNull(commandLine, nameof(commandLine));
+			Requires.NotNull(commandLineArguments, nameof(commandLineArguments));
 
 			_process = new Process
 			{
 				EnableRaisingEvents = true,
-				StartInfo = new ProcessStartInfo(fileName, String.Format(commandLine, arguments))
+				StartInfo = new ProcessStartInfo(fileName, commandLineArguments)
 				{
 					UseShellExecute = false,
 					RedirectStandardError = true,

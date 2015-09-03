@@ -23,14 +23,13 @@
 namespace SafetySharp.Runtime.Serialization
 {
 	using System;
-	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
 	using System.Reflection;
 	using System.Text;
-	using Modeling;
 	using Analysis;
 	using Analysis.FormulaVisitors;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -65,13 +64,13 @@ namespace SafetySharp.Runtime.Serialization
 			using (var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
 			{
 				// Deserialize the object table
-				var model = new Model();
-				var objectTable = model.SerializationRegistry.DeserializeObjectTable(reader);
+				var serializationRegistry = new SerializationRegistry();
+				var objectTable = serializationRegistry.DeserializeObjectTable(reader);
 
 				// Deserialize the object identifiers of the root components
-				var rootCount = reader.ReadInt32();
-				for (var i = 0; i < rootCount; ++i)
-					model.RootComponents.Add((IComponent)objectTable.GetObject(reader.ReadInt32()));
+				var roots = new Component[reader.ReadInt32()];
+				for (var i = 0; i < roots.Length; ++i)
+					roots[i] = (Component)objectTable.GetObject(reader.ReadInt32());
 
 				// Copy the serialized initial state from the stream
 				var slotCount = reader.ReadInt32();
@@ -81,7 +80,7 @@ namespace SafetySharp.Runtime.Serialization
 					serializedState[i] = reader.ReadInt32();
 
 				// Deserialize the model's initial state
-				var deserializer = model.SerializationRegistry.CreateStateDeserializer(objectTable, SerializationMode.Full);
+				var deserializer = serializationRegistry.CreateStateDeserializer(objectTable, SerializationMode.Full);
 				deserializer(serializedState);
 
 				// Deserialize the state formulas
@@ -98,7 +97,7 @@ namespace SafetySharp.Runtime.Serialization
 				}
 
 				// Instantiate the runtime model
-				return new RuntimeModel(model, objectTable, stateFormulas);
+				return new RuntimeModel(roots, serializationRegistry, objectTable, stateFormulas);
 			}
 		}
 

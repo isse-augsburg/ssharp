@@ -55,14 +55,6 @@ namespace Tests.Utilities
 		private static int _assemblyCount;
 
 		/// <summary>
-		///   Initializes the type.
-		/// </summary>
-		static Tests()
-		{
-			AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-		}
-
-		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="output">The stream that should be used to write the test output.</param>
@@ -75,14 +67,6 @@ namespace Tests.Utilities
 		///   Gets the output that writes to the test output stream.
 		/// </summary>
 		public TestTraceOutput Output { get; }
-
-		/// <summary>
-		///   Tries to resolve an already loaded assembly.
-		/// </summary>
-		private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
-		{
-			return AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().FullName == args.Name);
-		}
 
 		/// <summary>
 		///   Gets the name of the file that calls this method.
@@ -119,12 +103,15 @@ namespace Tests.Utilities
 		}
 
 		/// <summary>
-		///   Compiles the <paramref name="syntaxTree" />, instantiates all non-abstract classes implementing
+		///   Compiles the <paramref name="file" />, instantiates all non-abstract classes implementing
 		///   <see cref="ITestableObject" />, and executes the <see cref="ITestableObject.Test" /> method for each instance.
 		/// </summary>
-		/// <param name="syntaxTree">The syntax tree that should be compiled and tested.</param>
-		protected void ExecuteDynamicTests(SyntaxTree syntaxTree)
+		/// <param name="file">The file that should be compiled and tested.</param>
+		protected void ExecuteDynamicTests(string file)
 		{
+			var code = File.ReadAllText(file).Replace("\t", "    ");
+			var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, path: file, encoding: Encoding.UTF8);
+
 			foreach (var obj in GetTestableObjects(syntaxTree))
 				obj.Test(Output);
 		}
@@ -284,10 +271,8 @@ namespace Tests.Utilities
 				var testName = String.IsNullOrWhiteSpace(prefix)
 					? Path.GetFileNameWithoutExtension(file)
 					: $"[{prefix.Substring(1)}] {Path.GetFileNameWithoutExtension(file)}";
-				var code = File.ReadAllText(file).Replace("\t", "    ");
-				var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, path: file, encoding: Encoding.UTF8);
 
-				yield return new object[] { testName, syntaxTree };
+				yield return new object[] { testName, file.Replace("\\", "/") };
 			}
 		}
 

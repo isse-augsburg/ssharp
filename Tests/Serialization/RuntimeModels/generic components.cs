@@ -39,13 +39,13 @@ namespace Tests.Serialization.RuntimeModels
 			Create(m);
 
 			StateFormulas.ShouldBeEmpty();
-			RuntimeModel.RootComponents.Count.ShouldBe(2);
+			RootComponents.Length.ShouldBe(2);
 
-			var root1 = RuntimeModel.RootComponents[0];
+			var root1 = RootComponents[0];
 			root1.ShouldBeOfType<C<int>>();
 			((C<int>)root1).F.ShouldBe(99);
 
-			var root2 = RuntimeModel.RootComponents[1];
+			var root2 = RootComponents[1];
 			root2.ShouldBeOfType<C<bool>>();
 			((C<bool>)root2).F.ShouldBe(true);
 

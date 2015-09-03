@@ -22,21 +22,20 @@
 
 namespace Tests
 {
-	using Microsoft.CodeAnalysis;
 	using Xunit;
 
 	public partial class FormulaTests
 	{
 		[Theory, MemberData("DiscoverTests", "Formulas/StateFormulas")]
-		public void StateFormulas(string test, SyntaxTree code)
+		public void StateFormulas(string test, string file)
 		{
-			ExecuteDynamicTests(code);
+			ExecuteDynamicTests(file);
 		}
 
 		[Theory, MemberData("DiscoverTests", "Formulas/TemporalOperators")]
-		public void TemporalOperators(string test, SyntaxTree code)
+		public void TemporalOperators(string test, string file)
 		{
-			ExecuteDynamicTests(code);
+			ExecuteDynamicTests(file);
 		}
 	}
 }

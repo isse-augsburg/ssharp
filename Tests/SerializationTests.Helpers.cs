@@ -36,7 +36,7 @@ namespace Tests
 	{
 		private RuntimeModel _runtimeModel;
 
-		protected Model RuntimeModel => _runtimeModel.Model;
+		protected Component[] RootComponents => _runtimeModel.RootComponents;
 
 		protected StateFormula[] StateFormulas => _runtimeModel.StateFormulas;
 

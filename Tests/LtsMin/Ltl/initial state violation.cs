@@ -20,36 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.StateLabels
+namespace Tests.LtsMin.Ltl
 {
 	using SafetySharp.Modeling;
-	using SafetySharp.Analysis;
 	using Shouldly;
+	using static SafetySharp.Analysis.Ctl;
 
-	internal class InvariantWithoutClosure : RuntimeModelTest
+	internal class InitialStateViolation : LtsMinTestObject
 	{
-		private static int _x;
-
 		protected override void Check()
 		{
-			var c = new C();
+			var c = new C { F = 3 };
 			var m = new Model(c);
-			Formula l = (_x = 3) == 3;
 
-			Create(m, l);
-
-			StateFormulas.Length.ShouldBe(1);
-			RootComponents.Length.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<C>();
-
-			StateFormulas[0].Expression().ShouldBe(true);
-			_x.ShouldBe(3);
+			Check(m, X(F(G(c.F != 3)))).ShouldBe(false);
 		}
 
 		private class C : Component
 		{
+			public int F;
 		}
 	}
 }

@@ -153,6 +153,12 @@
     <Compile Include="FormulaTests.Helpers.cs">
       <DependentUpon>FormulaTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="LtsMinTests.cs" />
+    <Compile Include="LtsMinTests.Helpers.cs">
+      <DependentUpon>LtsMinTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LtsMin\Invariants\initial state violation.cs" />
+    <Compile Include="LtsMin\Ltl\initial state violation.cs" />
     <Compile Include="Serialization\Enumerations\Int16.cs" />
     <Compile Include="Serialization\Enumerations\Int64.cs" />
     <Compile Include="Serialization\Enumerations\Int32.cs" />

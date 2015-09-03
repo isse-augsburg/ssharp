@@ -53,45 +53,9 @@ namespace SafetySharp.Analysis
 		public IEnumerable<string> Outputs { get; private set; }
 
 		/// <summary>
-		///   Gets or sets a callback that is invoked when the model checker has written an output. If no callback is set, the output is
-		///   written to the console by default.
+		///   Raised when the model checker has written an output. The output is always written to the console by default.
 		/// </summary>
-		public Action<string> OutputWritten { get; set; }
-
-		/// <summary>
-		///   Gets the name of the LtsMin executable.
-		/// </summary>
-		private string GetExecutableName()
-		{
-			return SymbolicChecking ? "pins2lts-sym.exe" : "pins2lts-seq.exe";
-		}
-
-		/// <summary>
-		///   Gets the name of the S# LtsMin assembly.
-		/// </summary>
-		private string GetSafetySharpLtsMinAssemblyName()
-		{
-			return SymbolicChecking ? "SafetySharp.LtsMin.Symbolic.dll" : "SafetySharp.LtsMin.Sequential.dll";
-		}
-
-		/// <summary>
-		///   Interprets the <paramref name="exitCode" /> returned by LtsMin.
-		/// </summary>
-		/// <param name="exitCode">The exit code that should be interpreted.</param>
-		private static bool InterpretExitCode(int exitCode)
-		{
-			switch (exitCode)
-			{
-				case 0:
-					return true;
-				case 1:
-					return false;
-				case 255:
-					throw new Exception("Model checking failed due to an error.");
-				default:
-					throw new Exception($"LtsMin exited with an unexpected exit code: {exitCode}.");
-			}
-		}
+		public event Action<string> OutputWritten;
 
 		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />.
@@ -127,6 +91,41 @@ namespace SafetySharp.Analysis
 			transformationVisitor.Visit(formula);
 
 			return Check(model, formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
+		}
+
+		/// <summary>
+		///   Gets the name of the LtsMin executable.
+		/// </summary>
+		private string GetExecutableName()
+		{
+			return SymbolicChecking ? "pins2lts-sym.exe" : "pins2lts-seq.exe";
+		}
+
+		/// <summary>
+		///   Gets the name of the S# LtsMin assembly.
+		/// </summary>
+		private string GetSafetySharpLtsMinAssemblyName()
+		{
+			return SymbolicChecking ? "SafetySharp.LtsMin.Symbolic.dll" : "SafetySharp.LtsMin.Sequential.dll";
+		}
+
+		/// <summary>
+		///   Interprets the <paramref name="exitCode" /> returned by LtsMin.
+		/// </summary>
+		/// <param name="exitCode">The exit code that should be interpreted.</param>
+		private static bool InterpretExitCode(int exitCode)
+		{
+			switch (exitCode)
+			{
+				case 0:
+					return true;
+				case 1:
+					return false;
+				case 255:
+					throw new InvalidOperationException("Model checking failed due to an error.");
+				default:
+					throw new InvalidOperationException($"LtsMin exited with an unexpected exit code: {exitCode}.");
+			}
 		}
 
 		/// <summary>
@@ -174,18 +173,20 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Creates a new <see cref="_ltsMin" /> process instance that checks the <paramref name="model" />.
+		///   Creates a new <see cref="_ltsMin" /> process instance that checks the <paramref name="modelFile" />.
 		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
-		/// <param name="counterExample">The path to the file that should store the counter example.</param>
+		/// <param name="modelFile">The model that should be checked.</param>
+		/// <param name="counterExampleFile">The path to the file that should store the counter example.</param>
 		/// <param name="checkArgument">The argument passed to LtsMin that indicates which kind of check to perform.</param>
-		private void CreateProcess(string model, string counterExample, string checkArgument)
+		private void CreateProcess(string modelFile, string counterExampleFile, string checkArgument)
 		{
 			Requires.That(_ltsMin == null, "An instance of LtsMin is already running.");
 
 			var assembly = GetSafetySharpLtsMinAssemblyName();
-			_ltsMin = new ExternalProcess(GetExecutableName(), output => Output(output.Message),
-				"--loader={0} \"{1}\" {2} --trace=\"{3}\"", assembly, model, checkArgument, counterExample);
+			_ltsMin = new ExternalProcess(
+				fileName: GetExecutableName(),
+				commandLineArguments: $"--loader={assembly} \"{modelFile}\" {checkArgument} --trace=\"{counterExampleFile}\"",
+				outputCallback: output => Output(output.Message));
 		}
 
 		/// <summary>
@@ -194,10 +195,8 @@ namespace SafetySharp.Analysis
 		/// <param name="message">The message that should be output.</param>
 		private void Output(string message)
 		{
-			if (OutputWritten != null)
-				OutputWritten.Invoke(message);
-			else
-				Console.WriteLine(message);
+			Console.WriteLine(message);
+			OutputWritten?.Invoke(message);
 		}
 
 		/// <summary>
@@ -212,10 +211,10 @@ namespace SafetySharp.Analysis
 
 			stopwatch.Stop();
 
-			Console.WriteLine();
-			Console.WriteLine("==========================");
-			Console.WriteLine($"Elapsed time: {stopwatch.Elapsed.TotalMilliseconds}ms");
-			Console.WriteLine("==========================");
+			Output(String.Empty);
+			Output("==========================");
+			Output($"Elapsed time: {stopwatch.Elapsed.TotalMilliseconds}ms");
+			Output("==========================");
 		}
 	}
 }

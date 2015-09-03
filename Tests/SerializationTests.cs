@@ -22,45 +22,44 @@
 
 namespace Tests
 {
-	using Microsoft.CodeAnalysis;
 	using Xunit;
 
 	public partial class SerializationTests
 	{
 		[Theory, MemberData("DiscoverTests", "Serialization/PrimitiveTypes")]
-		public void PrimitiveTypes(string test, SyntaxTree code)
+		public void PrimitiveTypes(string test, string file)
 		{
-			ExecuteDynamicTests(code);
+			ExecuteDynamicTests(file);
 		}
 
 		[Theory, MemberData("DiscoverTests", "Serialization/Enumerations")]
-		public void Enumerations(string test, SyntaxTree code)
+		public void Enumerations(string test, string file)
 		{
-			ExecuteDynamicTests(code);
+			ExecuteDynamicTests(file);
 		}
 
 		[Theory, MemberData("DiscoverTests", "Serialization/Misc")]
-		public void Misc(string test, SyntaxTree code)
+		public void Misc(string test, string file)
 		{
-			ExecuteDynamicTests(code);
+			ExecuteDynamicTests(file);
 		}
 
 		[Theory, MemberData("DiscoverTests", "Serialization/Objects")]
-		public void Objects(string test, SyntaxTree code)
+		public void Objects(string test, string file)
 		{
-			ExecuteDynamicTests(code);
+			ExecuteDynamicTests(file);
 		}
 
 		[Theory, MemberData("DiscoverTests", "Serialization/RuntimeModels")]
-		public void RuntimeModels(string test, SyntaxTree code)
+		public void RuntimeModels(string test, string file)
 		{
-			ExecuteDynamicTests(code);
+			ExecuteDynamicTests(file);
 		}
 
 		[Theory, MemberData("DiscoverTests", "Serialization/StateLabels")]
-		public void StateLabels(string test, SyntaxTree code)
+		public void StateLabels(string test, string file)
 		{
-			ExecuteDynamicTests(code);
+			ExecuteDynamicTests(file);
 		}
 	}
 }

@@ -20,36 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.StateLabels
+namespace Tests
 {
-	using SafetySharp.Modeling;
-	using SafetySharp.Analysis;
-	using Shouldly;
+	using Xunit;
 
-	internal class InvariantWithoutClosure : RuntimeModelTest
+	public partial class LtsMinTests
 	{
-		private static int _x;
-
-		protected override void Check()
+		[Theory, MemberData("DiscoverTests", "LtsMin/Invariants")]
+		public void Invariants(string test, string file)
 		{
-			var c = new C();
-			var m = new Model(c);
-			Formula l = (_x = 3) == 3;
-
-			Create(m, l);
-
-			StateFormulas.Length.ShouldBe(1);
-			RootComponents.Length.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<C>();
-
-			StateFormulas[0].Expression().ShouldBe(true);
-			_x.ShouldBe(3);
+			ExecuteDynamicTests(file);
 		}
 
-		private class C : Component
+		[Theory, MemberData("DiscoverTests", "LtsMin/Ltl")]
+		public void Ltl(string test, string file)
 		{
+			ExecuteDynamicTests(file);
 		}
 	}
 }
