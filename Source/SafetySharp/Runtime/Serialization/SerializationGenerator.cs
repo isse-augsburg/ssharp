@@ -315,7 +315,7 @@ namespace SafetySharp.Runtime.Serialization
 		private static bool IsPrimitiveTypeWithAtMostFourBytes(Type type)
 		{
 			type = type.IsEnum ? type.GetEnumUnderlyingType() : type;
-			return type.IsPrimitive && Marshal.SizeOf(type) <= 4;
+			return (type.IsPrimitive || type.IsPointer) && Marshal.SizeOf(type) <= 4;
 		}
 
 		/// <summary>
@@ -324,7 +324,7 @@ namespace SafetySharp.Runtime.Serialization
 		private static bool IsPrimitiveTypeWithAtMostEightBytes(Type type)
 		{
 			type = type.IsEnum ? type.GetEnumUnderlyingType() : type;
-			return type.IsPrimitive && Marshal.SizeOf(type) <= 8;
+			return (type.IsPrimitive || type.IsPointer) && Marshal.SizeOf(type) <= 8;
 		}
 	}
 }

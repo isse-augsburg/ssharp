@@ -199,6 +199,7 @@
     <Compile Include="Serialization\PrimitiveTypes\Int8.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int16.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt64.cs" />
+    <Compile Include="Serialization\PrimitiveTypes\Pointer.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt8.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt16.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt32.cs" />

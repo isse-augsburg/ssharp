@@ -133,7 +133,7 @@ namespace Tests.Utilities
 		{
 			var compilation = CSharpCompilation
 				.Create("TestAssembly" + _assemblyCount++)
-				.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+				.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true))
 				.AddSyntaxTrees(syntaxTrees)
 				.AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(DynamicAttribute).Assembly.Location))

@@ -115,6 +115,10 @@ namespace SafetySharp.Utilities
 		/// </summary>
 		public static bool IsReferenceType(this Type type)
 		{
+			// We don't treat pointers as reference types; in particular, why is IsClass true for pointers?
+			if (type.IsPointer)
+				return false;
+
 			return type.IsClass || type.IsInterface || type.IsSubclassOf(typeof(Delegate));
 		}
 	}
