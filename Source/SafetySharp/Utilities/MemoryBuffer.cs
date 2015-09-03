@@ -31,6 +31,16 @@ namespace SafetySharp.Utilities
 	internal sealed unsafe class MemoryBuffer : DisposableObject
 	{
 		/// <summary>
+		///   The garbage collector handle that pins the memory to a fixed location.
+		/// </summary>
+		private GCHandle _handle;
+
+		/// <summary>
+		///   The underlying memory.
+		/// </summary>
+		private byte[] _memory;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		public MemoryBuffer()
@@ -67,16 +77,20 @@ namespace SafetySharp.Utilities
 			if (sizeInBytes <= SizeInBytes)
 				return;
 
-			var oldBuffer = Pointer;
-			var newBuffer = Marshal.AllocHGlobal(sizeInBytes).ToPointer();
+			var oldBuffer = _memory;
+			var newBuffer = new byte[sizeInBytes];
 
 			if (oldBuffer != null)
-				Buffer.MemoryCopy(source: oldBuffer, destination: newBuffer, destinationSizeInBytes: sizeInBytes, sourceBytesToCopy: SizeInBytes);
+				Array.Copy(oldBuffer, newBuffer, SizeInBytes);
 
-			Pointer = newBuffer;
+			if (_handle.IsAllocated)
+				_handle.Free();
+
+			_memory = newBuffer;
+			_handle = GCHandle.Alloc(newBuffer, GCHandleType.Pinned);
+
+			Pointer = _handle.AddrOfPinnedObject().ToPointer();
 			SizeInBytes = sizeInBytes;
-
-			Marshal.FreeHGlobal(new IntPtr(oldBuffer));
 		}
 
 		/// <summary>
@@ -85,7 +99,8 @@ namespace SafetySharp.Utilities
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
-			Marshal.FreeHGlobal(new IntPtr(Pointer));
+			if (_handle.IsAllocated)
+				_handle.Free();
 		}
 	}
 }
