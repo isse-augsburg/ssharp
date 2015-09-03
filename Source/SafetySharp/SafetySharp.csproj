@@ -72,7 +72,6 @@
     <Compile Include="Modeling\ProvidedAttribute.cs" />
     <Compile Include="Modeling\RangeAttribute.cs" />
     <Compile Include="Modeling\RequiredAttribute.cs" />
-    <Compile Include="Modeling\Specification.cs" />
     <Compile Include="Properties\InternalsVisibleTo.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -23,6 +23,7 @@
 namespace SafetySharp.Modeling
 {
 	using System;
+	using Runtime.Serialization;
 
 	/// <summary>
 	///   When a state field is marked as <c>[Hidden]</c>, its state is not preserved between different system steps.
@@ -33,5 +34,24 @@ namespace SafetySharp.Modeling
 	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
 	public sealed class HiddenAttribute : Attribute
 	{
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="mode">
+		///   The serialization mode the state variable is hidden in. If <see cref="SerializationMode.Full" />, the state variable
+		///   is never serialized at all; otherwise, the serialization of the state variable is only skipped for optimized
+		///   serialization processes.
+		/// </param>
+		public HiddenAttribute(SerializationMode mode = SerializationMode.Optimized)
+		{
+			Mode = mode;
+		}
+
+		/// <summary>
+		///   Gets the serialization mode the state variable is hidden in. If <see cref="SerializationMode.Full" />, the state variable
+		///   is never serialized at all; otherwise, the serialization of the state variable is only skipped for optimized
+		///   serialization processes.
+		/// </summary>
+		public SerializationMode Mode { get; }
 	}
 }

@@ -20,48 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Misc
+namespace Tests.LtsMin.Invariants.Violated
 {
-	using System;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class Hidden : SerializationObject
+	internal class Deterministic : LtsMinTestObject
 	{
-		public enum E : long
-		{
-			A,
-			B = Int64.MaxValue,
-			C = 5
-		}
-
 		protected override void Check()
 		{
-			var c = new C { F = true, G = -1247, H = E.B };
+			var c = new C { F = 3 };
+			var d = new D { C = c };
+			var m = new Model(d);
 
-			GenerateCode(SerializationMode.Full, c);
-			_stateSlotCount.ShouldBe(1);
-
-			Serialize();
-			c.F = false;
-			c.G = 3;
-			c.H = E.C;
-			Deserialize();
-			c.F.ShouldBe(false);
-			c.G.ShouldBe(-1247);
-			c.H.ShouldBe(E.C);
+			CheckInvariant(m, () => c.F != 17).ShouldBe(false);
 		}
 
-		internal class C
+		private class C : Component
+		{
+			public int F;
+		}
+
+		private class D : Component
 		{
 			[Hidden]
-			public bool F;
+			public C C;
 
-			public int G;
-
-			[Hidden]
-			public E H;
+			public override void Update()
+			{
+				C.F = (C.F + 1) % 20;
+			}
 		}
 	}
 }

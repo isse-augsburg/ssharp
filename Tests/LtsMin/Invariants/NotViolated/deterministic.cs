@@ -20,17 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.LtsMin.Invariants.NotViolated
 {
-	/// <summary>
-	///   Represents a base class for specifications that combines a <see cref="Model" /> instance with the formulas
-	///   that should be checked.
-	/// </summary>
-	public abstract class Specification
+	using SafetySharp.Modeling;
+	using Shouldly;
+
+	internal class Deterministic : LtsMinTestObject
 	{
-		/// <summary>
-		///   Gets the <see cref="Model" /> instance used by the specification.
-		/// </summary>
-		public Model Model { get; set; }
+		protected override void Check()
+		{
+			var c = new C { F = 3 };
+			var d = new D { C = c };
+			var m = new Model(c);
+
+			CheckInvariant(m, () => c.F < 21).ShouldBe(true);
+		}
+
+		private class C : Component
+		{
+			public int F;
+		}
+
+		private class D : Component
+		{
+			public C C;
+
+			public override void Update()
+			{
+				C.F = (C.F + 1) % 20;
+			}
+		}
 	}
 }

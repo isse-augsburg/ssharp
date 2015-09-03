@@ -20,30 +20,61 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Serialization.Misc
 {
-	using System.Collections.Generic;
-	using Runtime.Serialization;
-	using Utilities;
+	using System;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	/// <summary>
-	///   Represents a S# component.
-	/// </summary>
-	public abstract class Component : IComponent
+	internal class HiddenOptimized : SerializationObject
 	{
-		[Hidden(SerializationMode.Full)]
-		private readonly HashSet<IFaultEffect> _faultEffects = new HashSet<IFaultEffect>(ReferenceEqualityComparer<IFaultEffect>.Default);
-
-		/// <summary>
-		///   Gets the fault effects that affect the component.
-		/// </summary>
-		internal HashSet<IFaultEffect> FaultEffects => _faultEffects;
-
-		/// <summary>
-		///   Updates the state of the component.
-		/// </summary>
-		public virtual void Update()
+		public enum E : long
 		{
+			A,
+			B = Int64.MaxValue,
+			C = 5
+		}
+
+		protected override void Check()
+		{
+			var c = new C { F = true, G = -1247, H = E.B, I = 33 };
+
+			GenerateCode(SerializationMode.Optimized, c);
+			_stateSlotCount.ShouldBe(1);
+
+			Serialize();
+			c.F = false;
+			c.G = 3;
+			c.H = E.C;
+			c.I = 88;
+			Deserialize();
+			c.F.ShouldBe(false);
+			c.G.ShouldBe(-1247);
+			c.H.ShouldBe(E.C);
+			c.I.ShouldBe(88);
+			c.J.ShouldBe(333);
+			c.K.ShouldBe(11);
+		}
+
+		internal class C
+		{
+			[Hidden]
+			public bool F;
+
+			public int G;
+
+			[Hidden(SerializationMode.Optimized)]
+			public E H;
+
+			[Hidden(SerializationMode.Full)]
+			public int I;
+
+			[Hidden(SerializationMode.Full)]
+			public readonly int J = 333;
+
+			[Hidden]
+			public readonly int K = 11;
 		}
 	}
 }

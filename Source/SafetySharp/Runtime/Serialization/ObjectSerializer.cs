@@ -27,7 +27,6 @@ namespace SafetySharp.Runtime.Serialization
 	using System.IO;
 	using System.Linq;
 	using System.Reflection;
-	using System.Runtime.CompilerServices;
 	using System.Runtime.Serialization;
 	using Modeling;
 	using Utilities;
@@ -94,8 +93,8 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Creates an instance of the serialized type stored in the <paramref name="reader" /> without running 
-		/// any of the type's constructors.
+		///   Creates an instance of the serialized type stored in the <paramref name="reader" /> without running
+		///   any of the type's constructors.
 		/// </summary>
 		/// <param name="reader">The reader the serialized type information should be read from.</param>
 		protected internal override object InstantiateType(BinaryReader reader)
@@ -123,15 +122,32 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		private static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode)
 		{
-			// Get all non-static fields that are neither hidden nor constants
-			var fields = obj.GetType().GetFields(typeof(object));
-			fields = fields.Where(field => !field.IsStatic && !field.HasAttribute<HiddenAttribute>() && !field.IsLiteral);
+			return obj.GetType().GetFields(typeof(object)).Where(field =>
+			{
+				// Ignore static or constant fields
+				if (field.IsStatic || field.IsLiteral)
+					return false;
 
-			// Serialize read-only fields in full serialization mode only
-			if (mode == SerializationMode.Full)
-				return fields;
+				// Serialize read-only fields in full serialization mode only
+				if (mode == SerializationMode.Optimized && field.IsInitOnly)
+					return false;
 
-			return fields.Where(field => !field.IsInitOnly);
+				// If the field is not hidden, serialize it
+				var hiddenAttribute = field.GetCustomAttribute<HiddenAttribute>();
+				if (hiddenAttribute == null)
+					return true;
+
+				// If the field is hidden from full serialization, ignore it for both full and optimized serializations
+				if (hiddenAttribute.Mode == SerializationMode.Full)
+					return false;
+
+				// If it is only hidden from optimized serialization, do not ignore it in full serializations
+				if (hiddenAttribute.Mode == SerializationMode.Optimized && mode == SerializationMode.Optimized)
+					return false;
+
+				// Otherwise, the hidden attribute is invalid, so let's be safe and serialize the field
+				return true;
+			});
 		}
 	}
 }

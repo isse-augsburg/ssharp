@@ -20,19 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.LtsMin.Invariants
+namespace Tests.LtsMin.Invariants.NotViolated
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class InitialStateViolation : LtsMinTestObject
+	internal class InitialState : LtsMinTestObject
 	{
 		protected override void Check()
 		{
 			var c = new C { F = 3 };
 			var m = new Model(c);
 
-			CheckInvariant(m, () => c.F != 3).ShouldBe(false);
+			CheckInvariant(m, () => c.F == 3).ShouldBe(true);
 		}
 
 		private class C : Component

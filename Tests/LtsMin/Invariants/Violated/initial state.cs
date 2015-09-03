@@ -20,30 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.LtsMin.Invariants.Violated
 {
-	using System.Collections.Generic;
-	using Runtime.Serialization;
-	using Utilities;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	/// <summary>
-	///   Represents a S# component.
-	/// </summary>
-	public abstract class Component : IComponent
+	internal class InitialState : LtsMinTestObject
 	{
-		[Hidden(SerializationMode.Full)]
-		private readonly HashSet<IFaultEffect> _faultEffects = new HashSet<IFaultEffect>(ReferenceEqualityComparer<IFaultEffect>.Default);
-
-		/// <summary>
-		///   Gets the fault effects that affect the component.
-		/// </summary>
-		internal HashSet<IFaultEffect> FaultEffects => _faultEffects;
-
-		/// <summary>
-		///   Updates the state of the component.
-		/// </summary>
-		public virtual void Update()
+		protected override void Check()
 		{
+			var c = new C { F = 3 };
+			var m = new Model(c);
+
+			CheckInvariant(m, () => c.F != 3).ShouldBe(false);
+		}
+
+		private class C : Component
+		{
+			public int F;
 		}
 	}
 }

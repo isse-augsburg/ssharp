@@ -34,6 +34,11 @@ namespace SafetySharp.Runtime
 	internal sealed unsafe class RuntimeModel : DisposableObject
 	{
 		/// <summary>
+		///   The <see cref="ChoiceResolver" /> used by the model.
+		/// </summary>
+		private readonly ChoiceResolver _choiceResolver;
+
+		/// <summary>
 		///   Deserializes a state of the model.
 		/// </summary>
 		private readonly SerializationDelegate _deserialize;
@@ -42,11 +47,6 @@ namespace SafetySharp.Runtime
 		///   Serializes a state of the model.
 		/// </summary>
 		private readonly SerializationDelegate _serialize;
-
-		/// <summary>
-		///   The <see cref="ChoiceResolver" /> used by the model.
-		/// </summary>
-		private readonly ChoiceResolver _choiceResolver;
 
 		/// <summary>
 		///   The <see cref="StateCache" /> used by the model.
