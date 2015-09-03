@@ -122,7 +122,7 @@ void LoadModel(model_t model, const char* modelFile)
 
 	auto stateSlotCount = Globals::Model->StateSlotCount;
 	auto stateLabelCount = Globals::Model->StateFormulas->Length;
-	auto transitionGroupCount = 1;
+	auto transitionGroupCount = Globals::Model->TransitionGroupCount;
 
 	// Create the LTS type and set the state vector size
 	auto ltsType = lts_type_create();
@@ -187,7 +187,7 @@ void LoadModel(model_t model, const char* modelFile)
 			dm_set(&StateLabelMatrix, i, j);
 	}
 
-	// Set the dependency matrices
+	// Set the matrices
 	GBsetDMInfo(model, &CombinedMatrix);
 	GBsetDMInfoRead(model, &ReadMatrix);
 	GBsetDMInfoMustWrite(model, &WriteMatrix);

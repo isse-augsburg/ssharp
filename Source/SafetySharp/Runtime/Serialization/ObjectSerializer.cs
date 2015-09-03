@@ -123,15 +123,8 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		private static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode)
 		{
-			var type = obj.GetType();
-			var inheritanceRoot = typeof(object);
-
-			// Special case for display classes: do not serialize their state in optimized mode
-			if (mode == SerializationMode.Optimized && type.Name.Contains("DisplayClass") && type.HasAttribute<CompilerGeneratedAttribute>())
-				return Enumerable.Empty<FieldInfo>();
-
 			// Get all non-static fields that are neither hidden nor constants
-			var fields = type.GetFields(inheritanceRoot);
+			var fields = obj.GetType().GetFields(typeof(object));
 			fields = fields.Where(field => !field.IsStatic && !field.HasAttribute<HiddenAttribute>() && !field.IsLiteral);
 
 			// Serialize read-only fields in full serialization mode only

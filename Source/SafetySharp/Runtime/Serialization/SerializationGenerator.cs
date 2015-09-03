@@ -70,7 +70,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			_il = _method.GetILGenerator();
 
-			// Store state vector in a local variable
+			// Store the state vector in a local variable
 			_il.DeclareLocal(typeof(int*));
 			_il.Emit(OpCodes.Ldarg_1);
 			_il.Emit(OpCodes.Stloc_0);

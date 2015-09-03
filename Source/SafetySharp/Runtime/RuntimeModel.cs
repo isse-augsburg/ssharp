@@ -70,7 +70,6 @@ namespace SafetySharp.Runtime
 
 			RootComponents = rootComponents;
 			StateFormulas = stateFormulas;
-
 			StateSlotCount = serializationRegistry.GetStateSlotCount(objectTable, SerializationMode.Optimized);
 
 			_deserialize = serializationRegistry.CreateStateDeserializer(objectTable, SerializationMode.Optimized);

@@ -88,7 +88,6 @@
     <Compile Include="Runtime\Serialization\SerializationMode.cs" />
     <Compile Include="Runtime\Serialization\Serializer.cs" />
     <Compile Include="Runtime\Serialization\RuntimeModelSerializer.cs" />
-    <Compile Include="Runtime\StepGenerator.cs" />
     <Compile Include="Runtime\Serialization\SerializationRegistry.cs" />
     <Compile Include="Runtime\StateCache.cs" />
     <Compile Include="Utilities\MemoryBuffer.cs" />

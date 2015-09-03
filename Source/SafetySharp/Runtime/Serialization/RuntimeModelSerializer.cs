@@ -37,6 +37,8 @@ namespace SafetySharp.Runtime.Serialization
 	/// </summary>
 	internal static class RuntimeModelSerializer
 	{
+		#region Serialization
+
 		/// <summary>
 		///   Saves the serialized <paramref name="model" /> and the <paramref name="formulas" /> to the <paramref name="stream" />.
 		/// </summary>
@@ -51,67 +53,6 @@ namespace SafetySharp.Runtime.Serialization
 
 			using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
 				SerializeModel(writer, model, formulas);
-		}
-
-		/// <summary>
-		///   Loads a <see cref="RuntimeModel" /> from the <paramref name="stream" />.
-		/// </summary>
-		/// <param name="stream">The stream the model should be loaded from.</param>
-		public static unsafe RuntimeModel Load(Stream stream)
-		{
-			Requires.NotNull(stream, nameof(stream));
-
-			using (var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
-			{
-				// Deserialize the object table
-				var serializationRegistry = new SerializationRegistry();
-				var objectTable = serializationRegistry.DeserializeObjectTable(reader);
-
-				// Deserialize the object identifiers of the root components
-				var roots = new Component[reader.ReadInt32()];
-				for (var i = 0; i < roots.Length; ++i)
-					roots[i] = (Component)objectTable.GetObject(reader.ReadInt32());
-
-				// Copy the serialized initial state from the stream
-				var slotCount = reader.ReadInt32();
-				var serializedState = stackalloc int[slotCount];
-
-				for (var i = 0; i < slotCount; ++i)
-					serializedState[i] = reader.ReadInt32();
-
-				// Deserialize the model's initial state
-				var deserializer = serializationRegistry.CreateStateDeserializer(objectTable, SerializationMode.Full);
-				deserializer(serializedState);
-
-				// Deserialize the state formulas
-				var stateFormulas = new StateFormula[reader.ReadInt32()];
-				for (var i = 0; i < stateFormulas.Length; ++i)
-				{
-					// Deserialize the closure object and method name to generate the delegate
-					var closure = objectTable.GetObject(reader.ReadInt32());
-					var method = closure.GetType().GetMethod(reader.ReadString(), BindingFlags.NonPublic | BindingFlags.Instance);
-					var expression = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), closure, method);
-
-					// Deserialize the label name and instantiate the state formula
-					stateFormulas[i] = new StateFormula(expression, reader.ReadString());
-				}
-
-				// Instantiate the runtime model
-				return new RuntimeModel(roots, serializationRegistry, objectTable, stateFormulas);
-			}
-		}
-
-		/// <summary>
-		///   Creates the object table for the <paramref name="model" /> and <paramref name="stateFormulas" />.
-		/// </summary>
-		private static ObjectTable CreateObjectTable(Model model, StateFormula[] stateFormulas)
-		{
-			var registry = model.SerializationRegistry;
-			var modelObjects = model.RootComponents.SelectMany(component => registry.GetReferencedObjects(component));
-			var formulaObjects = stateFormulas.SelectMany(formula => registry.GetReferencedObjects(formula.Expression.Target)).ToArray();
-
-			var objects = modelObjects.Concat(formulaObjects).ToArray();
-			return new ObjectTable(objects, stateFormulas.Select(formula => formula.Expression.Target));
 		}
 
 		/// <summary>
@@ -164,6 +105,19 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
+		///   Creates the object table for the <paramref name="model" /> and <paramref name="stateFormulas" />.
+		/// </summary>
+		private static ObjectTable CreateObjectTable(Model model, StateFormula[] stateFormulas)
+		{
+			var registry = model.SerializationRegistry;
+			var modelObjects = model.RootComponents.SelectMany(component => registry.GetReferencedObjects(component));
+			var formulaObjects = stateFormulas.SelectMany(formula => registry.GetReferencedObjects(formula.Expression.Target)).ToArray();
+
+			var objects = modelObjects.Concat(formulaObjects).ToArray();
+			return new ObjectTable(objects, stateFormulas.Select(formula => formula.Expression.Target));
+		}
+
+		/// <summary>
 		///   Collects all state formulas contained in the <paramref name="formulas" />.
 		/// </summary>
 		private static StateFormula[] CollectStateFormulas(Formula[] formulas)
@@ -179,5 +133,73 @@ namespace SafetySharp.Runtime.Serialization
 
 			return visitor.StateFormulas.ToArray();
 		}
+
+		#endregion
+
+		#region Deserialization
+
+		/// <summary>
+		///   Loads a <see cref="RuntimeModel" /> from the <paramref name="stream" />.
+		/// </summary>
+		/// <param name="stream">The stream the model should be loaded from.</param>
+		public static RuntimeModel Load(Stream stream)
+		{
+			Requires.NotNull(stream, nameof(stream));
+
+			using (var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
+				return DeserializeModel(reader);
+		}
+
+		/// <summary>
+		///   Deserializes a <see cref="RuntimeModel" /> from the <paramref name="reader" />.
+		/// </summary>
+		private static unsafe RuntimeModel DeserializeModel(BinaryReader reader)
+		{
+			// Deserialize the object table
+			var serializationRegistry = new SerializationRegistry();
+			var objectTable = serializationRegistry.DeserializeObjectTable(reader);
+
+			// Deserialize the object identifiers of the root components
+			var roots = new Component[reader.ReadInt32()];
+			for (var i = 0; i < roots.Length; ++i)
+				roots[i] = (Component)objectTable.GetObject(reader.ReadInt32());
+
+			// Copy the serialized initial state from the stream
+			var slotCount = reader.ReadInt32();
+			var serializedState = stackalloc int[slotCount];
+
+			for (var i = 0; i < slotCount; ++i)
+				serializedState[i] = reader.ReadInt32();
+
+			// Deserialize the model's initial state
+			var deserializer = serializationRegistry.CreateStateDeserializer(objectTable, SerializationMode.Full);
+			deserializer(serializedState);
+
+			// Deserialize the state formulas and instantiate the runtime model
+			var stateFormulas = DeserializeFormulas(reader, objectTable);
+			return new RuntimeModel(roots, serializationRegistry, objectTable, stateFormulas);
+		}
+
+		/// <summary>
+		///   Deserializes the <see cref="StateFormula" />s from the <paramref name="reader" />.
+		/// </summary>
+		private static StateFormula[] DeserializeFormulas(BinaryReader reader, ObjectTable objectTable)
+		{
+			var stateFormulas = new StateFormula[reader.ReadInt32()];
+			for (var i = 0; i < stateFormulas.Length; ++i)
+			{
+				// Deserialize the closure object and method name to generate the delegate
+				var closure = objectTable.GetObject(reader.ReadInt32());
+				var method = closure.GetType().GetMethod(reader.ReadString(), BindingFlags.NonPublic | BindingFlags.Instance);
+				var expression = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), closure, method);
+
+				// Deserialize the label name and instantiate the state formula
+				stateFormulas[i] = new StateFormula(expression, reader.ReadString());
+			}
+
+			return stateFormulas;
+		}
+
+		#endregion
 	}
 }

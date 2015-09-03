@@ -85,11 +85,12 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			Requires.InRange(mode, nameof(mode));
 
-			// In full mode, all objects have to be serialized
+			// In full mode, all objects have to be serialized, but skip the null at index 0, obviously
 			if (mode == SerializationMode.Full)
 				return _objects.Skip(1);
 
-			// In optimized mode, do not serialize those objects that require serialization in full mode only
+			// In optimized mode, do not serialize those objects that require serialization in full mode only;
+			// the null at index 0 doesn't have to be serialized, obviously
 			return _objects.Skip(1).Where(obj => !_fullSerializationOnly.Contains(obj));
 		}
 
