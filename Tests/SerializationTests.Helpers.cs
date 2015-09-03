@@ -24,9 +24,10 @@ namespace Tests
 {
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Linq;
 	using JetBrains.Annotations;
-	using SafetySharp.Modeling;
 	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Utilities;
@@ -62,18 +63,10 @@ namespace Tests
 		private StateCache _stateCache;
 		protected int _stateSlotCount;
 
-		protected void GenerateCodeWithFullModeObject(SerializationMode mode, object obj, object fullModeOnlyObject)
-		{
-			GenerateCode(mode, new[] { obj }, new[] { fullModeOnlyObject });
-		}
-
 		protected void GenerateCode(SerializationMode mode, params object[] objects)
 		{
-			GenerateCode(mode, objects, new object[0]);
-		}
+			objects = objects.SelectMany(obj => _serializationRegistry.GetReferencedObjects(obj, mode)).ToArray();
 
-		private void GenerateCode(SerializationMode mode, IEnumerable<object> objects, IEnumerable<object> fullModeOnlyObjects)
-		{
 			_objectTable = new ObjectTable(objects);
 			_serializer = _serializationRegistry.CreateStateSerializer(_objectTable, mode);
 			_deserializer = _serializationRegistry.CreateStateDeserializer(_objectTable, mode);

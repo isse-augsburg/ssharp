@@ -23,7 +23,6 @@
 namespace SafetySharp.Modeling
 {
 	using System.Collections.Generic;
-	using Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -31,13 +30,21 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	public abstract partial class Component : IComponent
 	{
-		[Hidden(SerializationMode.Full)]
+		[Hidden]
 		private readonly HashSet<IFaultEffect> _faultEffects = new HashSet<IFaultEffect>(ReferenceEqualityComparer<IFaultEffect>.Default);
+
+		[Hidden]
+		private readonly List<Component> _subcomponents = new List<Component>();
 
 		/// <summary>
 		///   Gets the fault effects that affect the component.
 		/// </summary>
 		internal HashSet<IFaultEffect> FaultEffects => _faultEffects;
+
+		/// <summary>
+		///   Gets the component's subcomponents.
+		/// </summary>
+		internal List<Component> Subcomponents => _subcomponents;
 
 		/// <summary>
 		///   Updates the state of the component.

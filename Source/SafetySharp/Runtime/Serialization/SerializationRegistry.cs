@@ -219,7 +219,7 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			foreach (var referencedObject in GetSerializer(obj).GetReferencedObjects(obj, mode))
 			{
-				if (referencedObjects.Add(referencedObject))
+				if (referencedObject != null && referencedObjects.Add(referencedObject))
 					GetReferencedObjects(referencedObjects, referencedObject, mode);
 			}
 		}

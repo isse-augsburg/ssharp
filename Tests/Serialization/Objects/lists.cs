@@ -23,11 +23,12 @@
 namespace Tests.Serialization.Objects
 {
 	using System;
+	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal unsafe class Arrays : SerializationObject
+	internal class Lists : SerializationObject
 	{
 		protected override void Check()
 		{
@@ -35,45 +36,78 @@ namespace Tests.Serialization.Objects
 			var o2 = new object();
 			var c = new C
 			{
-				I = new[] { -17, 2, 12 },
-				D = new[] { Int64.MaxValue, Int64.MinValue },
-				B = new[] { true, false, true },
-				P = new[] { (int*)17, (int*)19 },
-				O = new[] { o1, o2 }
+				I = new List<int> { -17, 2, 12 },
+				D = new List<long> { Int64.MaxValue, Int64.MinValue },
+				B = new List<bool> { true, false, true },
+				O = new List<object> { o1, o2 },
 			};
 
-			GenerateCode(SerializationMode.Optimized, c, c.I, o1, o2, c.D, c.B, c.P, c.O);
-			_stateSlotCount.ShouldBe(21);
+			GenerateCode(SerializationMode.Optimized, c, c.I, o1, o2, c.D, c.B, c.O);
 
 			Serialize();
 			c.I[1] = 33;
 			c.D[0] = Int64.MinValue;
 			c.B[2] = false;
-			c.P[0] = (int*)-1;
 			c.O[1] = null;
 			c.I = null;
 			c.D = null;
 			c.B = null;
-			c.P = null;
 			c.O = null;
 			Deserialize();
+
 			c.I.ShouldBe(new[] { -17, 2, 12 });
 			c.D.ShouldBe(new[] { Int64.MaxValue, Int64.MinValue });
 			c.B.ShouldBe(new[] { true, false, true });
 			c.O.ShouldBe(new[] { o1, o2 });
 
-			c.P.Length.ShouldBe(2);
-			((ulong)c.P[0]).ShouldBe((ulong)17);
-			((ulong)c.P[1]).ShouldBe((ulong)19);
+			c.I.RemoveAt(2);
+			c.D.RemoveAt(0);
+
+			Serialize();
+			c.I[1] = 33;
+			c.D[0] = Int64.MinValue;
+			c.B[2] = false;
+			c.O[1] = null;
+			c.I = null;
+			c.D = null;
+			c.B = null;
+			c.O = null;
+			Deserialize();
+
+			c.I.ShouldBe(new[] { -17, 2 });
+			c.D.ShouldBe(new[] { Int64.MinValue });
+			c.B.ShouldBe(new[] { true, false, true });
+			c.O.ShouldBe(new[] { o1, o2 });
+
+			c.I.Insert(0, 666);
+			c.D.Add(0);
+
+			Serialize();
+			c.I[1] = 33;
+			c.D[0] = Int64.MinValue;
+			c.B[2] = false;
+			c.O[1] = null;
+			Deserialize();
+
+			c.I.ShouldBe(new[] { 666, -17, 2 });
+			c.D.ShouldBe(new[] { Int64.MinValue, 0 });
+			c.B.ShouldBe(new[] { true, false, true });
+			c.O.ShouldBe(new[] { o1, o2 });
+
+			// List resizing is not supported but should result in a helpful error message
+			var capacity = c.I.Capacity;
+			for (var i = 0; i < capacity; ++i)
+				c.I.Add(3);
+
+			Should.Throw<InvalidOperationException>(() => Serialize());
 		}
 
 		private class C : Component
 		{
-			public bool[] B;
-			public long[] D;
-			public int[] I;
-			public object[] O;
-			public int*[] P;
+			public List<bool> B;
+			public List<long> D;
+			public List<int> I;
+			public List<object> O;
 		}
 	}
 }

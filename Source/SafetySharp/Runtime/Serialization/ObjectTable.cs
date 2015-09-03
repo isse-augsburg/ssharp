@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Runtime.Serialization
 {
+	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
@@ -100,7 +101,19 @@ namespace SafetySharp.Runtime.Serialization
 		public int GetObjectIdentifier(object obj)
 		{
 			// Since the map does not support null keys, we have to add a special case for a null object here...
-			return obj == null ? 0 : _objectToIdentifier[obj];
+			if (obj == null)
+				return 0;
+
+			int identifier;
+			if (_objectToIdentifier.TryGetValue(obj, out identifier))
+				return identifier;
+
+			throw new InvalidOperationException(
+				$"Unknown object of type '{obj.GetType().FullName}'. Creating new objects during model executions " +
+				"(i.e., simulations or model checking runs) is not supported. If you did not allocate a new object " +
+				$"yourself, the object was most likely created by a collection type such as '{typeof(List<>).FullName}'. " +
+				"Set the capacity of these collections to the maximum number of elements " +
+				"they are supposed to hold in order to prevent them from allocating during model execution.");
 		}
 	}
 }

@@ -157,6 +157,7 @@
     <Compile Include="LtsMinTests.Helpers.cs">
       <DependentUpon>LtsMinTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="LtsMin\Invariants\Violated\list components.cs" />
     <Compile Include="LtsMin\Invariants\Violated\array components.cs" />
     <Compile Include="LtsMin\Invariants\Violated\multiple choices 2.cs" />
     <Compile Include="LtsMin\Invariants\NotViolated\single choice.cs" />
@@ -188,6 +189,7 @@
     <Compile Include="Serialization\Misc\hidden state full.cs" />
     <Compile Include="Serialization\Misc\mixed 2.cs" />
     <Compile Include="Serialization\Misc\mixed 1.cs" />
+    <Compile Include="Serialization\Objects\lists.cs" />
     <Compile Include="Serialization\Objects\delegate field.cs" />
     <Compile Include="Serialization\Objects\null.cs" />
     <Compile Include="Serialization\Objects\multiple objects.cs" />

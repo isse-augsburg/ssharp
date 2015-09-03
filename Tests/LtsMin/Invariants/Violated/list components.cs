@@ -20,60 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Objects
+namespace Tests.LtsMin.Invariants.Violated
 {
-	using System;
+	using System.Collections.Generic;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Serialization;
-	using Shouldly;
 
-	internal unsafe class Arrays : SerializationObject
+	internal class ListComponents : LtsMinTestObject
 	{
 		protected override void Check()
 		{
-			var o1 = new object();
-			var o2 = new object();
-			var c = new C
-			{
-				I = new[] { -17, 2, 12 },
-				D = new[] { Int64.MaxValue, Int64.MinValue },
-				B = new[] { true, false, true },
-				P = new[] { (int*)17, (int*)19 },
-				O = new[] { o1, o2 }
-			};
+			var c1 = new C();
+			var c2 = new C();
+			var d = new D { C = new List<C> { c1, c2 } };
+			var m = new Model(d);
 
-			GenerateCode(SerializationMode.Optimized, c, c.I, o1, o2, c.D, c.B, c.P, c.O);
-			_stateSlotCount.ShouldBe(21);
-
-			Serialize();
-			c.I[1] = 33;
-			c.D[0] = Int64.MinValue;
-			c.B[2] = false;
-			c.P[0] = (int*)-1;
-			c.O[1] = null;
-			c.I = null;
-			c.D = null;
-			c.B = null;
-			c.P = null;
-			c.O = null;
-			Deserialize();
-			c.I.ShouldBe(new[] { -17, 2, 12 });
-			c.D.ShouldBe(new[] { Int64.MaxValue, Int64.MinValue });
-			c.B.ShouldBe(new[] { true, false, true });
-			c.O.ShouldBe(new[] { o1, o2 });
-
-			c.P.Length.ShouldBe(2);
-			((ulong)c.P[0]).ShouldBe((ulong)17);
-			((ulong)c.P[1]).ShouldBe((ulong)19);
+			CheckInvariant(m, c1.F != 3);
+			CheckInvariant(m, c2.F != 3);
 		}
 
 		private class C : Component
 		{
-			public bool[] B;
-			public long[] D;
-			public int[] I;
-			public object[] O;
-			public int*[] P;
+			public int F;
+		}
+
+		private class D : Component
+		{
+			public List<C> C;
+
+			public override void Update()
+			{
+				Choose(C[0], C[1]).F = 3;
+			}
 		}
 	}
 }

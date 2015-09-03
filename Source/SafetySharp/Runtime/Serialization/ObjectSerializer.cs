@@ -111,9 +111,7 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			return from field in GetFields(obj, mode)
 				   where field.FieldType.IsReferenceType()
-				   let referencedObject = field.GetValue(obj)
-				   where referencedObject != null
-				   select referencedObject;
+				   select field.GetValue(obj);
 		}
 
 		/// <summary>
@@ -131,6 +129,10 @@ namespace SafetySharp.Runtime.Serialization
 
 				// Serialize read-only fields in full serialization mode only
 				if (mode == SerializationMode.Optimized && field.IsInitOnly)
+					return false;
+
+				// Don't try to serialize fields that are explicitly marked as non-serializable
+				if (field.HasAttribute<NonSerializedAttribute>())
 					return false;
 
 				// If the field is not hidden, serialize it

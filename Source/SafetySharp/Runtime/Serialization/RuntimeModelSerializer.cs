@@ -114,8 +114,7 @@ namespace SafetySharp.Runtime.Serialization
 				.SelectMany(component => model.SerializationRegistry.GetReferencedObjects(component, SerializationMode.Full));
 
 			var formulaObjects = stateFormulas
-				.SelectMany(formula => model.SerializationRegistry.GetReferencedObjects(formula.Expression.Target, SerializationMode.Full))
-				.ToArray();
+				.SelectMany(formula => model.SerializationRegistry.GetReferencedObjects(formula.Expression.Target, SerializationMode.Full));
 
 			return new ObjectTable(modelObjects.Concat(formulaObjects));
 		}
