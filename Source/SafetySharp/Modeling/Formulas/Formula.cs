@@ -23,17 +23,13 @@
 namespace SafetySharp.Modeling.Formulas
 {
 	using Utilities;
+	using Visitors;
 
 	/// <summary>
 	///   Represents a CTL* formula.
 	/// </summary>
 	public abstract class Formula
 	{
-		/// <summary>
-		///   Gets a value indicating whether the formula is a valid linear temporal logic formula.
-		/// </summary>
-		public abstract bool IsLinearFormula { get; }
-
 		/// <summary>
 		///   Converts the <paramref name="expression" /> to an instance of <see cref="Formula" />.
 		/// </summary>
@@ -58,6 +54,22 @@ namespace SafetySharp.Modeling.Formulas
 		public static bool operator false(Formula formula)
 		{
 			return false;
+		}
+
+		/// <summary>
+		///   Executes the <paramref name="visitor" /> for this formula.
+		/// </summary>
+		/// <param name="visitor">The visitor that should be executed.</param>
+		internal abstract void Visit(FormulaVisitor visitor);
+
+		/// <summary>
+		///   Returns a string that represents the current object.
+		/// </summary>
+		public override string ToString()
+		{
+			var visitor = new ToStringVisitor();
+			visitor.Visit(this);
+			return visitor.FormulaString;
 		}
 
 		/// <summary>

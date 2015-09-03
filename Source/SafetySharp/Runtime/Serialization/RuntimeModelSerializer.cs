@@ -30,6 +30,7 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Text;
 	using Modeling;
 	using Modeling.Formulas;
+	using Modeling.Formulas.Visitors;
 	using Utilities;
 
 	/// <summary>
@@ -111,7 +112,7 @@ namespace SafetySharp.Runtime.Serialization
 			var formulaObjects = stateFormulas.SelectMany(formula => registry.GetReferencedObjects(formula.Expression.Target)).ToArray();
 
 			var objects = modelObjects.Concat(formulaObjects).ToArray();
-			return new ObjectTable(objects, new HashSet<object>(stateFormulas.Select(formula => formula.Expression.Target)));
+			return new ObjectTable(objects, stateFormulas.Select(formula => formula.Expression.Target));
 		}
 
 		/// <summary>
@@ -168,38 +169,16 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private static StateFormula[] CollectStateFormulas(Formula[] formulas)
 		{
-			var stateFormulas = new HashSet<StateFormula>();
-
-			Action<HashSet<StateFormula>, Formula> collect = null;
-			collect = (collection, formula) =>
-			{
-				var binaryFormula = formula as BinaryFormula;
-				if (binaryFormula != null)
-				{
-					collect(collection, binaryFormula.LeftOperand);
-					collect(collection, binaryFormula.RightOperand);
-					return;
-				}
-
-				var unaryFormula = formula as UnaryFormula;
-				if (unaryFormula != null)
-				{
-					collect(collection, unaryFormula.Operand);
-					return;
-				}
-
-				// Check that the state formula has a closure -- the current version of the C# compiler 
-				// always does that, but future versions might not.
-				var stateFormula = (StateFormula)formula;
-				Assert.NotNull(stateFormula.Expression.Target, "Unexpected state formula without closure object.");
-
-				collection.Add(stateFormula);
-			};
-
+			var visitor = new CollectStateFormulasVisitor();
 			foreach (var formula in formulas)
-				collect(stateFormulas, formula);
+				visitor.Visit(formula);
 
-			return stateFormulas.ToArray();
+			// Check that the state formula has a closure -- the current version of the C# compiler 
+			// always does that, but future versions might not.
+			foreach (var formula in visitor.StateFormulas)
+				Assert.NotNull(formula.Expression.Target, "Unexpected state formula without closure object.");
+
+			return visitor.StateFormulas.ToArray();
 		}
 	}
 }

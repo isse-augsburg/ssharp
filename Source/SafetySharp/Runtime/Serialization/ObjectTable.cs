@@ -22,7 +22,6 @@
 
 namespace SafetySharp.Runtime.Serialization
 {
-	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
@@ -31,7 +30,7 @@ namespace SafetySharp.Runtime.Serialization
 	/// <summary>
 	///   Maps objects to unique identifiers and vice versa for serialization.
 	/// </summary>
-	internal sealed class ObjectTable : IEnumerable<object>
+	internal sealed class ObjectTable
 	{
 		/// <summary>
 		///   Indicates which objects should only be serialized in full serialization mode.
@@ -52,8 +51,11 @@ namespace SafetySharp.Runtime.Serialization
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="objects">The objects that should be mapped by the table.</param>
-		/// <param name="fullSerializationOnly">Indicates which objects should only be serialized in full serialization mode.</param>
-		public ObjectTable(object[] objects, HashSet<object> fullSerializationOnly)
+		/// <param name="fullSerializationOnly">
+		///   A subset of the <paramref name="objects" /> that should only be serialized in full
+		///   serialization mode.
+		/// </param>
+		public ObjectTable(IEnumerable<object> objects, IEnumerable<object> fullSerializationOnly)
 		{
 			Requires.NotNull(objects, nameof(objects));
 			Requires.NotNull(fullSerializationOnly, nameof(fullSerializationOnly));
@@ -63,7 +65,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			// Index 0 always maps to null
 			_objects = new object[] { null }.Concat(objs).ToArray();
-			_fullSerializationOnly = fullSerializationOnly;
+			_fullSerializationOnly = new HashSet<object>(fullSerializationOnly, ReferenceEqualityComparer<object>.Default);
 
 			// Generate the object to identifier lookup table; unfortunately, we can't have null keys
 			for (var i = 1; i < _objects.Length; ++i)
@@ -76,37 +78,19 @@ namespace SafetySharp.Runtime.Serialization
 		public int Count => _objects.Length - 1;
 
 		/// <summary>
-		///   Returns an enumerator that iterates through the objects stored in the table.
+		///   Gets all objects that are required to be serialized in the <paramref name="mode" />.
 		/// </summary>
-		public IEnumerator<object> GetEnumerator()
-		{
-			return _objects.Skip(1).GetEnumerator();
-		}
-
-		/// <summary>
-		///   Returns an enumerator that iterates through the objects stored in the table.
-		/// </summary>
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
-
-		/// <summary>
-		///   Checks whether <paramref name="obj" /> is required to be serialized in the <paramref name="mode" />.
-		/// </summary>
-		/// <param name="obj">The object that should be checked.</param>
 		/// <param name="mode">The mode of the serialization.</param>
-		public bool RequiresSerialization(object obj, SerializationMode mode)
+		public IEnumerable<object> GetSerializationObjects(SerializationMode mode)
 		{
-			Requires.NotNull(obj, nameof(obj));
 			Requires.InRange(mode, nameof(mode));
 
-			// In optimized mode, do not serialize those objects that require serialization in full mode only
-			if (mode == SerializationMode.Optimized)
-				return !_fullSerializationOnly.Contains(obj);
+			// In full mode, all objects have to be serialized
+			if (mode == SerializationMode.Full)
+				return _objects.Skip(1);
 
-			// Otherwise, serialize everything
-			return true;
+			// In optimized mode, do not serialize those objects that require serialization in full mode only
+			return _objects.Skip(1).Where(obj => !_fullSerializationOnly.Contains(obj));
 		}
 
 		/// <summary>

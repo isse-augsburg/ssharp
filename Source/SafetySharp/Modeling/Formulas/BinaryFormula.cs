@@ -23,6 +23,7 @@
 namespace SafetySharp.Modeling.Formulas
 {
 	using Utilities;
+	using Visitors;
 
 	/// <summary>
 	///   Represents the application of a <see cref="BinaryOperator" /> to two <see cref="Formula" /> instances.
@@ -62,39 +63,12 @@ namespace SafetySharp.Modeling.Formulas
 		public Formula RightOperand { get; }
 
 		/// <summary>
-		///   Gets a value indicating whether the formula is a valid linear temporal logic formula.
+		///   Executes the <paramref name="visitor" /> for this formula.
 		/// </summary>
-		public override bool IsLinearFormula => LeftOperand.IsLinearFormula && RightOperand.IsLinearFormula;
-
-		/// <summary>
-		///   Returns a string that represents the current object.
-		/// </summary>
-		public override string ToString()
+		/// <param name="visitor">The visitor that should be executed.</param>
+		internal override void Visit(FormulaVisitor visitor)
 		{
-			var operatorSymbol = "";
-			switch (Operator)
-			{
-				case BinaryOperator.And:
-					operatorSymbol = "&&";
-					break;
-				case BinaryOperator.Or:
-					operatorSymbol = "||";
-					break;
-				case BinaryOperator.Implication:
-					operatorSymbol = "=>";
-					break;
-				case BinaryOperator.Equivalence:
-					operatorSymbol = "<=>";
-					break;
-				case BinaryOperator.Until:
-					operatorSymbol = "U";
-					break;
-				default:
-					Assert.NotReached("Unknown binary temporal operator.");
-					break;
-			}
-
-			return $"({LeftOperand} {operatorSymbol} {RightOperand})";
+			visitor.VisitBinaryFormula(this);
 		}
 	}
 }

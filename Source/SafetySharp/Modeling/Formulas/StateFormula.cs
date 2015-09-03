@@ -24,6 +24,7 @@ namespace SafetySharp.Modeling.Formulas
 {
 	using System;
 	using Utilities;
+	using Visitors;
 
 	/// <summary>
 	///   Represents a state formula, i.e., a Boolean expression that is evaluated in a single system state.
@@ -56,16 +57,12 @@ namespace SafetySharp.Modeling.Formulas
 		public string Label { get; }
 
 		/// <summary>
-		///   Gets a value indicating whether the formula is a valid linear temporal logic formula.
+		///   Executes the <paramref name="visitor" /> for this formula.
 		/// </summary>
-		public override bool IsLinearFormula => true;
-
-		/// <summary>
-		///   Returns a string that represents the current object.
-		/// </summary>
-		public override string ToString()
+		/// <param name="visitor">The visitor that should be executed.</param>
+		internal override void Visit(FormulaVisitor visitor)
 		{
-			return Label;
+			visitor.VisitStateFormula(this);
 		}
 	}
 }

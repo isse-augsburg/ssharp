@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,47 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas
+namespace SafetySharp.Modeling.Formulas.Visitors
 {
-	using Utilities;
-	using Visitors;
+	using System.Collections.Generic;
 
 	/// <summary>
-	///   Represents the application of a <see cref="UnaryOperator" /> to a <see cref="Formula" /> instance.
+	///   Collects all <see cref="StateFormula" /> instances contained in a <see cref="Formula" />.
 	/// </summary>
-	internal sealed class UnaryFormula : Formula
+	internal class CollectStateFormulasVisitor : FormulaVisitor
 	{
 		/// <summary>
-		///   Initializes a new instance of the <see cref="UnaryFormula" /> class.
+		///   Gets the collected state formulas.
 		/// </summary>
-		/// <param name="operand">The operand of the unary formula.</param>
-		/// <param name="unaryOperator">The operator of the unary formula.</param>
-		internal UnaryFormula(Formula operand, UnaryOperator unaryOperator)
-		{
-			Requires.NotNull(operand, nameof(operand));
-			Requires.InRange(unaryOperator, nameof(unaryOperator));
+		public HashSet<StateFormula> StateFormulas { get; } = new HashSet<StateFormula>();
 
-			Operand = operand;
-			Operator = unaryOperator;
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitUnaryFormula(UnaryFormula formula)
+		{
+			Visit(formula.Operand);
 		}
 
 		/// <summary>
-		///   Gets the operand of the unary formula.
+		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public Formula Operand { get; }
-
-		/// <summary>
-		///   Gets the operator of the unary formula.
-		/// </summary>
-		public UnaryOperator Operator { get; }
-
-		/// <summary>
-		///   Executes the <paramref name="visitor" /> for this formula.
-		/// </summary>
-		/// <param name="visitor">The visitor that should be executed.</param>
-		internal override void Visit(FormulaVisitor visitor)
+		public override void VisitBinaryFormula(BinaryFormula formula)
 		{
-			visitor.VisitUnaryFormula(this);
+			Visit(formula.LeftOperand);
+			Visit(formula.RightOperand);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitStateFormula(StateFormula formula)
+		{
+			StateFormulas.Add(formula);
 		}
 	}
 }

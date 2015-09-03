@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,47 +20,50 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas
+namespace SafetySharp.Modeling.Formulas.Visitors
 {
-	using Utilities;
-	using Visitors;
-
 	/// <summary>
-	///   Represents the application of a <see cref="UnaryOperator" /> to a <see cref="Formula" /> instance.
+	///   Determines whether a <see cref="Formula" /> is a LTL formula.
 	/// </summary>
-	internal sealed class UnaryFormula : Formula
+	internal class IsLtlFormulaVisitor : FormulaVisitor
 	{
 		/// <summary>
-		///   Initializes a new instance of the <see cref="UnaryFormula" /> class.
+		///   Indicates whether the visited formula contains any invalid operators.
 		/// </summary>
-		/// <param name="operand">The operand of the unary formula.</param>
-		/// <param name="unaryOperator">The operator of the unary formula.</param>
-		internal UnaryFormula(Formula operand, UnaryOperator unaryOperator)
-		{
-			Requires.NotNull(operand, nameof(operand));
-			Requires.InRange(unaryOperator, nameof(unaryOperator));
+		private bool _containsInvalidOperators;
 
-			Operand = operand;
-			Operator = unaryOperator;
+		/// <summary>
+		///   Gets a value indicating whether the formula is a LTL formula.
+		/// </summary>
+		public bool IsLtlFormula => !_containsInvalidOperators;
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitUnaryFormula(UnaryFormula formula)
+		{
+			if (formula.Operator == UnaryOperator.All || formula.Operator == UnaryOperator.Exists)
+				_containsInvalidOperators = true;
+			else
+				Visit(formula.Operand);
 		}
 
 		/// <summary>
-		///   Gets the operand of the unary formula.
+		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public Formula Operand { get; }
-
-		/// <summary>
-		///   Gets the operator of the unary formula.
-		/// </summary>
-		public UnaryOperator Operator { get; }
-
-		/// <summary>
-		///   Executes the <paramref name="visitor" /> for this formula.
-		/// </summary>
-		/// <param name="visitor">The visitor that should be executed.</param>
-		internal override void Visit(FormulaVisitor visitor)
+		public override void VisitBinaryFormula(BinaryFormula formula)
 		{
-			visitor.VisitUnaryFormula(this);
+			Visit(formula.LeftOperand);
+
+			if (IsLtlFormula)
+				Visit(formula.RightOperand);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitStateFormula(StateFormula formula)
+		{
 		}
 	}
 }

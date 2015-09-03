@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,47 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling.Formulas
+namespace SafetySharp.Modeling.Formulas.Visitors
 {
-	using Utilities;
-	using Visitors;
-
 	/// <summary>
-	///   Represents the application of a <see cref="UnaryOperator" /> to a <see cref="Formula" /> instance.
+	///   Represents the base class of <see cref="Formula" /> visitors.
 	/// </summary>
-	internal sealed class UnaryFormula : Formula
+	internal abstract class FormulaVisitor
 	{
 		/// <summary>
-		///   Initializes a new instance of the <see cref="UnaryFormula" /> class.
+		///   Visits the <paramref name="formula." />
 		/// </summary>
-		/// <param name="operand">The operand of the unary formula.</param>
-		/// <param name="unaryOperator">The operator of the unary formula.</param>
-		internal UnaryFormula(Formula operand, UnaryOperator unaryOperator)
+		public abstract void VisitUnaryFormula(UnaryFormula formula);
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public abstract void VisitBinaryFormula(BinaryFormula formula);
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public abstract void VisitStateFormula(StateFormula formula);
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public void Visit(Formula formula)
 		{
-			Requires.NotNull(operand, nameof(operand));
-			Requires.InRange(unaryOperator, nameof(unaryOperator));
-
-			Operand = operand;
-			Operator = unaryOperator;
-		}
-
-		/// <summary>
-		///   Gets the operand of the unary formula.
-		/// </summary>
-		public Formula Operand { get; }
-
-		/// <summary>
-		///   Gets the operator of the unary formula.
-		/// </summary>
-		public UnaryOperator Operator { get; }
-
-		/// <summary>
-		///   Executes the <paramref name="visitor" /> for this formula.
-		/// </summary>
-		/// <param name="visitor">The visitor that should be executed.</param>
-		internal override void Visit(FormulaVisitor visitor)
-		{
-			visitor.VisitUnaryFormula(this);
+			formula.Visit(this);
 		}
 	}
 }

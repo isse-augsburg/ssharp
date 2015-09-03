@@ -61,7 +61,7 @@ namespace SafetySharp.Utilities
 		/// </summary>
 		public void Resize(int sizeInBytes)
 		{
-			Requires.That(sizeInBytes > 0, nameof(sizeInBytes), $"Cannot allocate {sizeInBytes} bytes.");
+			Requires.That(sizeInBytes >= 0, nameof(sizeInBytes), $"Cannot allocate {sizeInBytes} bytes.");
 
 			// We don't resize if less space is requested
 			if (sizeInBytes <= SizeInBytes)

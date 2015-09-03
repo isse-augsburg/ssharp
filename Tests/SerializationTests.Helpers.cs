@@ -62,9 +62,19 @@ namespace Tests
 		private StateCache _stateCache;
 		protected int _stateSlotCount;
 
+		protected void GenerateCodeWithFullModeObject(SerializationMode mode, object obj, object fullModeOnlyObject)
+		{
+			GenerateCode(mode, new[] { obj }, new[] { fullModeOnlyObject });
+		}
+
 		protected void GenerateCode(SerializationMode mode, params object[] objects)
 		{
-			_objectTable = new ObjectTable(objects, new HashSet<object>());
+			GenerateCode(mode, objects, new object[0]);
+		}
+
+		private void GenerateCode(SerializationMode mode, IEnumerable<object> objects, IEnumerable<object> fullModeOnlyObjects)
+		{
+			_objectTable = new ObjectTable(objects, fullModeOnlyObjects);
 			_serializer = _serializationRegistry.CreateStateSerializer(_objectTable, mode);
 			_deserializer = _serializationRegistry.CreateStateDeserializer(_objectTable, mode);
 

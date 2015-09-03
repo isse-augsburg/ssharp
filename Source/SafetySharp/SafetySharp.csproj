@@ -54,10 +54,15 @@
     <Compile Include="Modeling\Formulas\BinaryFormula.cs" />
     <Compile Include="Modeling\Formulas\BinaryOperator.cs" />
     <Compile Include="Modeling\Formulas\Formula.cs" />
+    <Compile Include="Modeling\Formulas\Visitors\CollectStateFormulasVisitor.cs" />
+    <Compile Include="Modeling\Formulas\Visitors\FormulaVisitor.cs" />
     <Compile Include="Modeling\Formulas\Operators.cs" />
     <Compile Include="Modeling\Formulas\StateFormula.cs" />
     <Compile Include="Modeling\Formulas\UnaryFormula.cs" />
     <Compile Include="Modeling\Formulas\UnaryOperator.cs" />
+    <Compile Include="Modeling\Formulas\Visitors\IsLtlFormulaVisitor.cs" />
+    <Compile Include="Modeling\Formulas\Visitors\LtsMinLtlTransformationVisitor.cs" />
+    <Compile Include="Modeling\Formulas\Visitors\ToStringVisitor.cs" />
     <Compile Include="Modeling\HiddenAttribute.cs" />
     <Compile Include="Modeling\IComponent.cs" />
     <Compile Include="Modeling\Model.cs" />

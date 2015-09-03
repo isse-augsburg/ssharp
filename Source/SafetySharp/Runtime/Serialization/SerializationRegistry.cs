@@ -98,7 +98,7 @@ namespace SafetySharp.Runtime.Serialization
 			Requires.NotNull(objects, nameof(objects));
 			Requires.InRange(mode, nameof(mode));
 
-			return objects.Select(obj => GetSerializer(obj).GetStateSlotCount(obj, mode)).Sum();
+			return objects.GetSerializationObjects(mode).Select(obj => GetSerializer(obj).GetStateSlotCount(obj, mode)).Sum();
 		}
 
 		/// <summary>
@@ -113,7 +113,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			var generator = new SerializationGenerator("Serialize");
 
-			foreach (var obj in objects)
+			foreach (var obj in objects.GetSerializationObjects(mode))
 				GetSerializer(obj).Serialize(generator, obj, objects.GetObjectIdentifier(obj), mode);
 
 			return generator.Compile(objects);
@@ -131,7 +131,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			var generator = new SerializationGenerator("Deserialize");
 
-			foreach (var obj in objects)
+			foreach (var obj in objects.GetSerializationObjects(mode))
 				GetSerializer(obj).Deserialize(generator, obj, objects.GetObjectIdentifier(obj), mode);
 
 			return generator.Compile(objects);
@@ -157,7 +157,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			// Serialize the objects contained in the table
 			writer.Write(objectTable.Count);
-			foreach (var obj in objectTable)
+			foreach (var obj in objectTable.GetSerializationObjects(SerializationMode.Full))
 			{
 				var serializerIndex = GetSerializerIndex(obj);
 				writer.Write(serializerIndex);
@@ -165,9 +165,11 @@ namespace SafetySharp.Runtime.Serialization
 			}
 
 			// Serialize the objects that require serialization in full mode only
-			var fullModeOnlyObjects = objectTable.Where(obj => !objectTable.RequiresSerialization(obj, SerializationMode.Optimized)).ToArray();
-			writer.Write(fullModeOnlyObjects.Length);
+			var allObjects = objectTable.GetSerializationObjects(SerializationMode.Full);
+			var optimizedObjects = objectTable.GetSerializationObjects(SerializationMode.Optimized);
+			var fullModeOnlyObjects = allObjects.Except(optimizedObjects, ReferenceEqualityComparer<object>.Default).ToArray();
 
+			writer.Write(fullModeOnlyObjects.Length);
 			foreach (var obj in fullModeOnlyObjects)
 				writer.Write(objectTable.GetObjectIdentifier(obj));
 		}

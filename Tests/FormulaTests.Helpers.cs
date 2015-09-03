@@ -28,6 +28,7 @@ namespace Tests
 	using System.Text;
 	using JetBrains.Annotations;
 	using SafetySharp.Modeling.Formulas;
+	using SafetySharp.Modeling.Formulas.Visitors;
 	using Shouldly;
 	using Utilities;
 	using Xunit.Abstractions;
