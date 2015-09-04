@@ -23,66 +23,41 @@
 namespace Tests.Normalization.LiftedExpressions.Lifted
 {
 	using System;
-	using System.Linq.Expressions;
 	using SafetySharp.CompilerServices;
 
-	public class Test4
+	public class Test9
 	{
-		protected int M(int i)
+		public Test9 T([LiftExpression] int i)
 		{
-			return 0;
+			return this;
 		}
 
-		protected int N([LiftExpression] int i)
+		public Test9 T(Func<int> i)
 		{
-			return 0;
+			return this;
 		}
 
-		protected int N(Expression<Func<int>> i)
+		public Test9 S(int i)
 		{
-			return 0;
-		}
-
-		protected int O([LiftExpression] int i, [LiftExpression] int j)
-		{
-			return 0;
-		}
-
-		protected int O(Expression<Func<int>> i, Expression<Func<int>> j)
-		{
-			return 0;
-		}
-
-		protected int this[[LiftExpression] bool b] => 1;
-		protected int this[Func<bool> b] => 1;
-
-		public class Class
-		{
-			public Class([LiftExpression] int i)
-			{
-			}
-
-			public Class(Expression<Func<int>> i)
-			{
-			}
+			return this;
 		}
 	}
 
-	public class In4 : Test4
+	public class In9
 	{
 		private void M()
 		{
-			var a = new int[7];
-			new Class(O(M(1), N(17 + a[this[true]])));
+			var t = new Test9();
+			t.T(3).S(9).T(17 + 1 / 2);
 		}
 	}
 
-	public class Out4 : Test4
+	public class Out9
 	{
 		private void M()
 		{
-			var a = new int[7];
-			new Class(() => O(() => M(1), () => N(() => 17 + a[this[() => true]])));
+			var t = new Test9();
+			t.T(() => 3).S(9).T(() => 17 + 1 / 2);
 		}
 	}
 }

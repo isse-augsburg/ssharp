@@ -20,69 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Normalization.LiftedExpressions.Lifted
+namespace Tests.Normalization.LiftedExpressions.Unlifted
 {
 	using System;
-	using System.Linq.Expressions;
-	using SafetySharp.CompilerServices;
+	using SafetySharp.Modeling;
 
-	public class Test4
+	public class In3 : Component
 	{
-		protected int M(int i)
+		private In3(int i)
 		{
-			return 0;
-		}
-
-		protected int N([LiftExpression] int i)
-		{
-			return 0;
-		}
-
-		protected int N(Expression<Func<int>> i)
-		{
-			return 0;
-		}
-
-		protected int O([LiftExpression] int i, [LiftExpression] int j)
-		{
-			return 0;
-		}
-
-		protected int O(Expression<Func<int>> i, Expression<Func<int>> j)
-		{
-			return 0;
-		}
-
-		protected int this[[LiftExpression] bool b] => 1;
-		protected int this[Func<bool> b] => 1;
-
-		public class Class
-		{
-			public Class([LiftExpression] int i)
-			{
-			}
-
-			public Class(Expression<Func<int>> i)
-			{
-			}
-		}
-	}
-
-	public class In4 : Test4
-	{
-		private void M()
-		{
-			var a = new int[7];
-			new Class(O(M(1), N(17 + a[this[true]])));
-		}
-	}
-
-	public class Out4 : Test4
-	{
-		private void M()
-		{
-			var a = new int[7];
-			new Class(() => O(() => M(1), () => N(() => 17 + a[this[() => true]])));
+			var s = nameof(i);
+			Console.WriteLine($"{nameof(s)} {s}");
 		}
 	}
 }

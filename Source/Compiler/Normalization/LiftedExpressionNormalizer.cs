@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Compiler.Normalization
 {
+	using System.Collections.Generic;
 	using System.Linq;
 	using CompilerServices;
 	using Microsoft.CodeAnalysis;
@@ -42,21 +43,71 @@ namespace SafetySharp.Compiler.Normalization
 	public sealed class LiftedExpressionNormalizer : SyntaxNormalizer
 	{
 		/// <summary>
+		///   A stack that indicates for each method call whether the call has lifted arguments.
+		/// </summary>
+		private readonly Stack<bool> _liftedMethodStack = new Stack<bool>();
+
+		/// <summary>
 		///   Checks whether we have to lift the arguments.
 		/// </summary>
-		public override SyntaxNode VisitElementAccessExpression(ElementAccessExpressionSyntax elementAccess)
+		public override SyntaxNode VisitElementAccessExpression(ElementAccessExpressionSyntax expression)
 		{
-			if (elementAccess.Expression.GetExpressionType(SemanticModel).TypeKind == TypeKind.Array)
-				return elementAccess;
+			var isLifted = false;
 
-			var propertySymbol = elementAccess.GetReferencedSymbol(SemanticModel) as IPropertySymbol;
-			if (propertySymbol == null)
-				return base.VisitElementAccessExpression(elementAccess);
+			if (expression.Expression.GetExpressionType(SemanticModel).TypeKind != TypeKind.Array)
+			{
+				var propertySymbol = expression.GetReferencedSymbol(SemanticModel) as IPropertySymbol;
+				if (propertySymbol != null)
+				{
+					if (propertySymbol.Parameters.Any(parameter => parameter.HasAttribute<LiftExpressionAttribute>(SemanticModel)))
+						isLifted = true;
+				}
+			}
 
-			if (propertySymbol.Parameters.All(parameter => !parameter.HasAttribute<LiftExpressionAttribute>(SemanticModel)))
-				return base.VisitElementAccessExpression(elementAccess);
+			_liftedMethodStack.Push(isLifted);
+			var syntaxNode = base.VisitElementAccessExpression(expression);
+			_liftedMethodStack.Pop();
+			return syntaxNode;
+		}
 
-			return elementAccess.WithArgumentList((BracketedArgumentListSyntax)VisitBracketedArgumentList(elementAccess.ArgumentList));
+		/// <summary>
+		///   Checks whether we have to lift the arguments.
+		/// </summary>
+		public override SyntaxNode VisitInvocationExpression(InvocationExpressionSyntax expression)
+		{
+			var isLifted = false;
+
+			var methodSymbol = SemanticModel.GetSymbolInfo(expression).Symbol as IMethodSymbol;
+			if (methodSymbol != null)
+			{
+				if (methodSymbol.Parameters.Any(parameter => parameter.HasAttribute<LiftExpressionAttribute>(SemanticModel)))
+					isLifted = true;
+			}
+
+			_liftedMethodStack.Push(isLifted);
+			var syntaxNode = base.VisitInvocationExpression(expression);
+			_liftedMethodStack.Pop();
+			return syntaxNode;
+		}
+
+		/// <summary>
+		///   Checks whether we have to lift the arguments.
+		/// </summary>
+		public override SyntaxNode VisitObjectCreationExpression(ObjectCreationExpressionSyntax expression)
+		{
+			var isLifted = false;
+
+			var methodSymbol = expression.GetReferencedSymbol(SemanticModel) as IMethodSymbol;
+			if (methodSymbol != null)
+			{
+				if (methodSymbol.Parameters.Any(parameter => parameter.HasAttribute<LiftExpressionAttribute>(SemanticModel)))
+					isLifted = true;
+			}
+
+			_liftedMethodStack.Push(isLifted);
+			var syntaxNode = base.VisitObjectCreationExpression(expression);
+			_liftedMethodStack.Pop();
+			return syntaxNode;
 		}
 
 		/// <summary>
@@ -64,6 +115,9 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		public override SyntaxNode VisitArgument(ArgumentSyntax argument)
 		{
+			if (!_liftedMethodStack.Peek())
+				return base.VisitArgument(argument);
+
 			var requiresLifting = argument.HasAttribute<LiftExpressionAttribute>(SemanticModel);
 			argument = (ArgumentSyntax)base.VisitArgument(argument);
 
@@ -72,36 +126,6 @@ namespace SafetySharp.Compiler.Normalization
 
 			var expression = SyntaxBuilder.Lambda(Enumerable.Empty<ParameterSyntax>(), argument.Expression).WithTrivia(argument);
 			return argument.WithExpression(expression);
-		}
-
-		/// <summary>
-		///   Checks whether we have to lift the arguments.
-		/// </summary>
-		public override SyntaxNode VisitInvocationExpression(InvocationExpressionSyntax invocation)
-		{
-			var methodSymbol = invocation.GetReferencedSymbol(SemanticModel) as IMethodSymbol;
-			if (methodSymbol == null)
-				return base.VisitInvocationExpression(invocation);
-
-			if (methodSymbol.Parameters.All(parameter => !parameter.HasAttribute<LiftExpressionAttribute>(SemanticModel)))
-				return base.VisitInvocationExpression(invocation);
-
-			return invocation.WithArgumentList((ArgumentListSyntax)VisitArgumentList(invocation.ArgumentList));
-		}
-
-		/// <summary>
-		///   Checks whether we have to lift the arguments.
-		/// </summary>
-		public override SyntaxNode VisitObjectCreationExpression(ObjectCreationExpressionSyntax expression)
-		{
-			var methodSymbol = expression.GetReferencedSymbol(SemanticModel) as IMethodSymbol;
-			if (methodSymbol == null)
-				return base.VisitObjectCreationExpression(expression);
-
-			if (methodSymbol.Parameters.All(parameter => !parameter.HasAttribute<LiftExpressionAttribute>(SemanticModel)))
-				return base.VisitObjectCreationExpression(expression);
-
-			return expression.WithArgumentList((ArgumentListSyntax)VisitArgumentList(expression.ArgumentList));
 		}
 	}
 }

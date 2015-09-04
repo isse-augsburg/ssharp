@@ -31,9 +31,26 @@ namespace Tests.Normalization.LiftedExpressions.Unlifted
 			return 1;
 		}
 
+		private void Q(int i, bool b)
+		{
+		}
+
+		private void N()
+		{
+		}
+
+		In1 C()
+		{
+			return this;
+		}
+
 		private void Q()
 		{
 			M(1);
+			Q(1, true);
+			N();
+			C().C().C();
+			new In1 { };
 		}
 	}
 }
