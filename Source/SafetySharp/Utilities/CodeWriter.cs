@@ -61,6 +61,16 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
+		///   Appends the given format string to the current line.
+		/// </summary>
+		/// <param name="str">The string that should be appended.</param>
+		public void Append(string str)
+		{
+			AddIndentation();
+			_buffer.Append(str);
+		}
+
+		/// <summary>
 		///   Appends the given format string to the current line and starts a new line.
 		/// </summary>
 		/// <param name="format">The format string that should be appended.</param>
@@ -70,6 +80,17 @@ namespace SafetySharp.Utilities
 		{
 			AddIndentation();
 			_buffer.AppendFormat(format, arguments);
+			NewLine();
+		}
+
+		/// <summary>
+		///   Appends the given format string to the current line and starts a new line.
+		/// </summary>
+		/// <param name="str">The string that should be appended.</param>
+		public void AppendLine(string str)
+		{
+			AddIndentation();
+			_buffer.Append(str);
 			NewLine();
 		}
 
@@ -138,17 +159,6 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
-		///   Generates a visibility modifier for the class.
-		/// </summary>
-		/// <param name="modifier">The modifier that should be generated.</param>
-		public void GenerateVisibilityModifier(string modifier)
-		{
-			DecreaseIndent();
-			AppendLine("{0}:", modifier);
-			IncreaseIndent();
-		}
-
-		/// <summary>
 		///   Appends a block statement to the buffer.
 		/// </summary>
 		/// <param name="content">
@@ -163,14 +173,14 @@ namespace SafetySharp.Utilities
 			Requires.NotNull(content, nameof(content));
 
 			EnsureNewLine();
-			AppendLine("{{");
+			AppendLine("{");
 			IncreaseIndent();
 
 			content();
 
 			EnsureNewLine();
 			DecreaseIndent();
-			Append("}}");
+			Append("}");
 
 			Append(terminator, args);
 			NewLine();

@@ -28,12 +28,32 @@ namespace SafetySharp.Modeling
 	/// <summary>
 	///   Represents a nondeterministic choice.
 	/// </summary>
+	[Hidden]
 	public sealed class Choice
 	{
 		/// <summary>
 		///   Gets or sets the resolver that is used to resolve nondeterministic choices.
 		/// </summary>
 		internal ChoiceResolver Resolver { get; set; }
+
+		/// <summary>
+		///   Returns an index in the range of <paramref name="elementCount" />. Returns <c>-1</c> if <paramref name="elementCount" />
+		///   is 0.
+		/// </summary>
+		/// <param name="elementCount">The element count to choose the index from.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int ChooseIndex(int elementCount)
+		{
+			switch (elementCount)
+			{
+				case 0:
+					return -1;
+				case 1:
+					return 0;
+				default:
+					return Resolver.HandleChoice(elementCount);
+			}
+		}
 
 		/// <summary>
 		///   Returns either <paramref name="value1" /> or <paramref name="value2" /> nondeterministically.

@@ -20,81 +20,87 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Misc
+namespace Tests.Execution.StateMachines
 {
 	using System;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
+	using Utilities;
 
-	internal class HiddenOptimized : SerializationObject
+	public class MultipleTransition : TestObject
 	{
-		public enum E : long
+		private readonly StateMachine _stateMachine = StateMachine.Create(S.A);
+		private int _x;
+		private int _getCount;
+
+		private StateMachine GetStateMachine(int i)
 		{
-			A,
-			B = Int64.MaxValue,
-			C = 5
+			if (i != 17)
+				throw new InvalidOperationException();
+
+			++_getCount;
+			return _stateMachine;
+		}
+
+		private void Reset()
+		{
+			_x = 0;
 		}
 
 		protected override void Check()
 		{
-			var c = new C { F = true, G = -1247, H = E.B, I = 33, D = new D { T = 77 }, T = new F { T = 12 } };
+			for (var i = 0; i < 100; ++i)
+			{
+				var oldX = _x;
 
-			GenerateCode(SerializationMode.Optimized, c);
-			_stateSlotCount.ShouldBe(1);
+				GetStateMachine(17)
+					.Transition(
+						from: S.A,
+						to: S.B)
+					.Transition(
+						from: S.B,
+						to: S.A,
+						guard: false)
+					.Transition(
+						from: S.C,
+						to: S.A)
+					.Transition(
+						from: S.B,
+						to: S.C,
+						guard: _x < 10,
+						action: () => ++_x)
+					.Transition(
+						from: S.B,
+						to: S.C,
+						guard: _x == 10,
+						action: Reset);
 
-			Serialize();
-			c.F = false;
-			c.G = 3;
-			c.H = E.C;
-			c.I = 88;
-			c.D.T = 0;
-			c.T.T = 0;
-			Deserialize();
-			c.F.ShouldBe(false);
-			c.G.ShouldBe(-1247);
-			c.H.ShouldBe(E.C);
-			c.I.ShouldBe(88);
-			c.J.ShouldBe(333);
-			c.K.ShouldBe(11);
-			c.D.T.ShouldBe(0);
-			c.T.T.ShouldBe(0);
+				switch (i % 3)
+				{
+					case 0:
+						(_stateMachine == S.B).ShouldBe(true);
+						break;
+					case 1:
+						(_stateMachine == S.C).ShouldBe(true);
+						if (oldX < 10)
+							_x.ShouldBe(oldX + 1);
+						else
+							_x.ShouldBe(0);
+						break;
+					case 2:
+						(_stateMachine == S.A).ShouldBe(true);
+						break;
+				}
+
+				_getCount.ShouldBe(i + 1);
+			}
 		}
 
-		internal class C
+		private enum S
 		{
-			[NotSerialized]
-			public readonly int J = 333;
-
-			[Hidden]
-			public readonly int K = 11;
-
-			public D D;
-
-			[Hidden]
-			public bool F;
-
-			public int G;
-
-			[Hidden]
-			public E H;
-
-			[NotSerialized]
-			public int I;
-
-			public F T;
-		}
-
-		[Hidden]
-		internal class D
-		{
-			public int T;
-		}
-
-		[NotSerialized]
-		internal class F
-		{
-			public int T;
+			A,
+			B,
+			C
 		}
 	}
 }

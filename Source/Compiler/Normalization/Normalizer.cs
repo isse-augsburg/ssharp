@@ -96,7 +96,7 @@ namespace SafetySharp.Compiler.Normalization
 			// compilation unit and then parsing it again. However, if we do that, we can no longer use any C# 6 features
 			// in the generated code - probably some Roslyn bug.
 			var options = new CSharpParseOptions();
-			var syntaxTree = SyntaxFactory.ParseSyntaxTree(compilationUnit.ToFullString(), options, path, Encoding.UTF8);
+			var syntaxTree = SyntaxFactory.ParseSyntaxTree(compilationUnit.NormalizeWhitespace().ToFullString(), options, path, Encoding.UTF8);
 
 			Compilation = Compilation.AddSyntaxTrees(syntaxTree);
 		}

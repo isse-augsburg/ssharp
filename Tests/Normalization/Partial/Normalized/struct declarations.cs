@@ -20,81 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Misc
+namespace Tests.Normalization.Partial.Normalized
 {
-	using System;
-	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Serialization;
-	using Shouldly;
-
-	internal class HiddenOptimized : SerializationObject
+	public struct In23
 	{
-		public enum E : long
-		{
-			A,
-			B = Int64.MaxValue,
-			C = 5
-		}
+	}
 
-		protected override void Check()
-		{
-			var c = new C { F = true, G = -1247, H = E.B, I = 33, D = new D { T = 77 }, T = new F { T = 12 } };
+	struct In24
+	{
+	}
 
-			GenerateCode(SerializationMode.Optimized, c);
-			_stateSlotCount.ShouldBe(1);
+	public partial struct Out23
+	{
+	}
 
-			Serialize();
-			c.F = false;
-			c.G = 3;
-			c.H = E.C;
-			c.I = 88;
-			c.D.T = 0;
-			c.T.T = 0;
-			Deserialize();
-			c.F.ShouldBe(false);
-			c.G.ShouldBe(-1247);
-			c.H.ShouldBe(E.C);
-			c.I.ShouldBe(88);
-			c.J.ShouldBe(333);
-			c.K.ShouldBe(11);
-			c.D.T.ShouldBe(0);
-			c.T.T.ShouldBe(0);
-		}
-
-		internal class C
-		{
-			[NotSerialized]
-			public readonly int J = 333;
-
-			[Hidden]
-			public readonly int K = 11;
-
-			public D D;
-
-			[Hidden]
-			public bool F;
-
-			public int G;
-
-			[Hidden]
-			public E H;
-
-			[NotSerialized]
-			public int I;
-
-			public F T;
-		}
-
-		[Hidden]
-		internal class D
-		{
-			public int T;
-		}
-
-		[NotSerialized]
-		internal class F
-		{
-			public int T;
-		}
+	partial struct Out24
+	{
 	}
 }

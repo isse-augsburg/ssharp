@@ -31,10 +31,10 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	public abstract partial class Component : IComponent
 	{
-		[Hidden]
+		[Hidden, NonDiscoverable]
 		private readonly List<IFaultEffect> _faultEffects = new List<IFaultEffect>();
 
-		[Hidden]
+		[Hidden, NonDiscoverable]
 		private readonly List<Component> _subcomponents = new List<Component>();
 
 		/// <summary>

@@ -31,6 +31,7 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Represents a stack that is used to resolve nondeterministic choices during state space enumeration.
 	/// </summary>
+	[NotSerialized]
 	internal sealed class ChoiceResolver : DisposableObject
 	{
 		/// <summary>

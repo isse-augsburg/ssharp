@@ -24,6 +24,7 @@ namespace Tests.LtsMin.Invariants.Violated
 {
 	using System.Collections.Generic;
 	using SafetySharp.Modeling;
+	using Shouldly;
 
 	internal class ListComponents : LtsMinTestObject
 	{
@@ -34,8 +35,8 @@ namespace Tests.LtsMin.Invariants.Violated
 			var d = new D { C = new List<C> { c1, c2 } };
 			var m = new Model(d);
 
-			CheckInvariant(m, c1.F != 3);
-			CheckInvariant(m, c2.F != 3);
+			CheckInvariant(m, c1.F != 3).ShouldBe(false);
+			CheckInvariant(m, c2.F != 3).ShouldBe(false);
 		}
 
 		private class C : Component

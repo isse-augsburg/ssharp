@@ -28,8 +28,8 @@ namespace SafetySharp.Compiler.Normalization
 	using Roslyn.Syntax;
 
 	/// <summary>
-	///   Ensures that all class declarations are marked <c>partial</c> such that additionally generated code can be easily added
-	///   without having to consider fixing up line information for debugging purposes.
+	///   Ensures that all class/struct declarations are marked <c>partial</c> such that additionally generated code can be
+	///   easily added without having to consider fixing up line information for debugging purposes.
 	/// </summary>
 	public sealed class PartialNormalizer : SyntaxNormalizer
 	{
@@ -45,6 +45,20 @@ namespace SafetySharp.Compiler.Normalization
 
 			var partialKeyword = SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingSpace();
 			return classDeclaration.WithModifiers(classDeclaration.Modifiers.Add(partialKeyword));
+		}
+
+		/// <summary>
+		///   Normalizes the <paramref name="structDeclaration" />.
+		/// </summary>
+		public override SyntaxNode VisitStructDeclaration(StructDeclarationSyntax structDeclaration)
+		{
+			structDeclaration = (StructDeclarationSyntax)base.VisitStructDeclaration(structDeclaration);
+
+			if (structDeclaration.Modifiers.Any(SyntaxKind.PartialKeyword))
+				return structDeclaration;
+
+			var partialKeyword = SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingSpace();
+			return structDeclaration.WithModifiers(structDeclaration.Modifiers.Add(partialKeyword));
 		}
 	}
 }

@@ -20,18 +20,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Execution.StateMachines
 {
-	using System;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	/// <summary>
-	///   When a state field or type is marked as <c>[Unserializable]</c>, its state is not preserved between different system
-	///   steps. Hiding state variables potentially increases simulation and model checking performance, but is only possible
-	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
-	///   written value could be read.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
-	public sealed class UnserializableAttribute : Attribute
+	public class NamedParameters : TestObject
 	{
+		protected override void Check()
+		{
+			var sm = StateMachine.Create(S.A);
+
+			sm.Transition(
+				to: S.B,
+				from: S.A);
+
+			(sm == S.B).ShouldBe(true);
+
+			sm.Transition(
+				guard: false,
+				from: S.B,
+				to: S.A);
+
+			(sm == S.B).ShouldBe(true);
+
+			sm.Transition(S.A, S.A);
+
+			(sm == S.B).ShouldBe(true);
+
+			var x = 0;
+			sm.Transition(
+				S.B,
+				S.C,
+				action: () => x = 17,
+				guard: x == 0);
+
+			(sm == S.C).ShouldBe(true);
+			x.ShouldBe(17);
+		}
+
+		private enum S
+		{
+			A,
+			B,
+			C
+		}
 	}
 }

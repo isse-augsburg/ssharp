@@ -81,34 +81,42 @@ namespace PressureTank
 			_pump = pump;
 			_sensor = sensor;
 			_timer = timer;
+		}
 
-//			Transition(
-//				from: States.Filling,
-//				to: States.StoppedByTimer,
-//				guard: _timer.HasElapsed,
-//				action: _pump.Disable);
-//
-//			Transition(
-//				from: States.Filling,
-//				to: States.StoppedBySensor,
-//				guard: _sensor.IsFull,
-//				action: () =>
-//				{
-//					_pump.Disable();
-//					_timer.Stop();
-//				});
-//
-//			Transition(
-//				from: States.StoppedByTimer | States.StoppedBySensor | States.Inactive,
-//				to: States.Filling,
-//				guard: _sensor.IsEmpty,
-//				action: () =>
-//				{
-//					_timer.Start();
-//					_pump.Enable();
-//				});
-//
-//			InitialState(States.Inactive);
+		/// <summary>
+		///   Gets the state machine that manages the state of the controller.
+		/// </summary>
+		public StateMachine StateMachine { get; } = StateMachine.Create(States.Inactive);
+
+		/// <summary>
+		///   Updates the state of the component.
+		/// </summary>
+		public override void Update()
+		{
+			StateMachine
+				.Transition(
+					from: States.Filling,
+					to: States.StoppedByTimer,
+					guard: _timer.HasElapsed(),
+					action: _pump.Disable)
+				.Transition(
+					from: States.Filling,
+					to: States.StoppedBySensor,
+					guard: _sensor.IsFull,
+					action: () =>
+					{
+						_pump.Disable();
+						_timer.Stop();
+					})
+				.Transition(
+					from: States.StoppedByTimer | States.StoppedBySensor | States.Inactive,
+					to: States.Filling,
+					guard: _sensor.IsEmpty,
+					action: () =>
+					{
+						_timer.Start();
+						_pump.Enable();
+					});
 		}
 	}
 }

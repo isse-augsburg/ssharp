@@ -32,6 +32,7 @@ namespace SafetySharp.Compiler
 	using Analyzers;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
+	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.Diagnostics;
 	using Microsoft.CodeAnalysis.Editing;
 	using Microsoft.CodeAnalysis.MSBuild;
@@ -151,7 +152,9 @@ namespace SafetySharp.Compiler
 			Compilation = project.GetCompilationAsync().Result;
 
 			var diagnosticOptions = Compilation.Options.SpecificDiagnosticOptions.Add("CS0626", ReportDiagnostic.Suppress);
-			var options = Compilation.Options.WithSpecificDiagnosticOptions(diagnosticOptions);
+			var options = (CSharpCompilationOptions)Compilation.Options;
+			options = options.WithAllowUnsafe(true).WithSpecificDiagnosticOptions(diagnosticOptions);
+			;
 			var syntaxGenerator = SyntaxGenerator.GetGenerator(project.Solution.Workspace, LanguageNames.CSharp);
 
 			if (!Diagnose())
@@ -288,6 +291,8 @@ namespace SafetySharp.Compiler
 			Compilation = Normalizer.ApplyNormalizer<PartialNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<FormulaNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<LiftedExpressionNormalizer>(Compilation, syntaxGenerator);
+			Compilation = Normalizer.ApplyNormalizer<StateComparisonNormalizer>(Compilation, syntaxGenerator);
+			Compilation = Normalizer.ApplyNormalizer<TransitionNormalizer>(Compilation, syntaxGenerator);
 		}
 
 		/// <summary>

@@ -23,6 +23,7 @@
 namespace Tests.LtsMin.Invariants.Violated
 {
 	using SafetySharp.Modeling;
+	using Shouldly;
 
 	internal class MultipleChoices2 : LtsMinTestObject
 	{
@@ -32,7 +33,7 @@ namespace Tests.LtsMin.Invariants.Violated
 			var d = new D { C = c };
 			var m = new Model(d);
 
-			CheckInvariant(m, c.F != 99);
+			CheckInvariant(m, c.F != 99).ShouldBe(false);
 		}
 
 		private class C : Component

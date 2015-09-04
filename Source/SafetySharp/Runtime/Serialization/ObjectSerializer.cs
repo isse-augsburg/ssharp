@@ -88,7 +88,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="writer">The writer the serialized information should be written to.</param>
 		protected internal override void SerializeType(object obj, BinaryWriter writer)
 		{
-			if (IsHidden(obj.GetType(), SerializationMode.Full))
+			if (IsHidden(obj.GetType(), SerializationMode.Full, discoveringObjects: false))
 				return;
 
 			// ReSharper disable once AssignNullToNotNullAttribute
@@ -112,11 +112,10 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
 		{
-			return from field in GetFields(obj, mode)
+			return from field in GetFields(obj, mode, discoveringObjects: true)
 				   where field.FieldType.IsReferenceType()
 				   select field.GetValue(obj);
 		}
-	
 
 		/// <summary>
 		///   Gets the fields declared by the <paramref name="obj" /> that should be serialized.
@@ -127,10 +126,12 @@ namespace SafetySharp.Runtime.Serialization
 		///   The first base type of the <paramref name="obj" /> whose fields should be ignored. If
 		///   <c>null</c>, <see cref="object" /> is the inheritance root.
 		/// </param>
-		protected static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode, Type inheritanceRoot = null)
+		/// <param name="discoveringObjects">Indicates whether objects are being discovered.</param>
+		protected static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode, 
+			Type inheritanceRoot = null, bool discoveringObjects = false)
 		{
 			var type = obj.GetType();
-			if (IsHidden(type, mode))
+			if (IsHidden(type, mode, discoveringObjects))
 				return Enumerable.Empty<FieldInfo>();
 
 			return obj.GetType().GetFields(inheritanceRoot ?? typeof(object)).Where(field =>
@@ -139,13 +140,8 @@ namespace SafetySharp.Runtime.Serialization
 				if (field.IsStatic || field.IsLiteral)
 					return false;
 
-				// Serialize read-only fields in full serialization mode only; 
-				// that is, read-only fields are implicitely hidden
-				if (mode == SerializationMode.Optimized && field.IsInitOnly)
-					return false;
-
 				// Don't try to serialize hidden fields
-				if (IsHidden(field, mode) || IsHidden(field.FieldType, mode))
+				if (IsHidden(field, mode, discoveringObjects) || IsHidden(field.FieldType, mode, discoveringObjects))
 					return false;
 
 				// Otherwise, serialize the field
@@ -156,14 +152,22 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Checks whether the <paramref name="info" /> is hidden in the serialization <paramref name="mode" />.
 		/// </summary>
-		private static bool IsHidden(MemberInfo info, SerializationMode mode)
+		private static bool IsHidden(MemberInfo info, SerializationMode mode, bool discoveringObjects)
 		{
 			// Don't try to serialize members that are explicitly marked as non-serializable
-			if (info.HasAttribute<UnserializableAttribute>())
+			if (info.HasAttribute<NotSerialized>())
 				return true;
 
-			// If the member is hidden, only ignore it in optimized serializations
-			if (mode == SerializationMode.Optimized && info.HasAttribute<HiddenAttribute>())
+			// If we're discovering objects in optimized mode and the member is explicitly marked as non-discoverable, it is hidden
+			if (mode == SerializationMode.Optimized && discoveringObjects && info.HasAttribute<NonDiscoverable>())
+				return true;
+
+			// Read-only fields are implicitly marked with [Hidden]
+			var fieldInfo = info as FieldInfo;
+			var isHidden = info.HasAttribute<HiddenAttribute>() || (fieldInfo != null && fieldInfo.IsInitOnly);
+
+			// If the member is hidden, only ignore it in optimized serializations when we're not discovering objects
+			if (mode == SerializationMode.Optimized && !discoveringObjects && isHidden)
 				return true;
 
 			return false;

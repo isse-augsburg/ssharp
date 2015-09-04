@@ -115,11 +115,23 @@ namespace SafetySharp.Utilities
 		/// </summary>
 		public static bool IsReferenceType(this Type type)
 		{
+			Requires.NotNull(type, nameof(type));
+
 			// We don't treat pointers as reference types; in particular, why is IsClass true for pointers?
 			if (type.IsPointer)
 				return false;
 
 			return type.IsClass || type.IsInterface || type.IsSubclassOf(typeof(Delegate));
+		}
+
+		/// <summary>
+		///   Gets the global C# name of <paramref name="type" />, for instance <c>global::System.Int32</c>.
+		/// </summary>
+		/// <param name="type">The type the global name should be returned for.</param>
+		public static string GetGlobalName(this Type type)
+		{
+			Requires.NotNull(type, nameof(type));
+			return $"global::{type.FullName}";
 		}
 	}
 }

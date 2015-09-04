@@ -45,6 +45,8 @@
     <Compile Include="Analysis\LtsMin.cs" />
     <Compile Include="CompilerServices\LiftExpressionAttribute.cs" />
     <Compile Include="CompilerServices\StateFormulaFactory.cs" />
+    <Compile Include="Modeling\NonDiscoverable.cs" />
+    <Compile Include="Runtime\Reflection\StateMachineExtensions.cs" />
     <Compile Include="Modeling\Choice.cs" />
     <Compile Include="Modeling\Component.Choose.cs">
       <DependentUpon>Component.cs</DependentUpon>
@@ -53,7 +55,8 @@
     <Compile Include="Modeling\Fault.cs" />
     <Compile Include="Modeling\FaultEffectAttribute.cs" />
     <Compile Include="Modeling\IFaultEffect.cs" />
-    <Compile Include="Modeling\UnserializableAttribute.cs" />
+    <Compile Include="Modeling\StateMachine.cs" />
+    <Compile Include="Modeling\NotSerialized.cs" />
     <Compile Include="Modeling\PersistentFault.cs" />
     <Compile Include="Modeling\TransientFault.cs" />
     <Compile Include="Analysis\BinaryFormula.cs" />

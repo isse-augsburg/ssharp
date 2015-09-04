@@ -20,81 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Misc
+namespace SafetySharp.Modeling
 {
 	using System;
-	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Serialization;
-	using Shouldly;
 
-	internal class HiddenOptimized : SerializationObject
+	/// <summary>
+	///   When a state field or type is marked as <c>[NonDiscoverable]</c>, its state might not be preserved between different
+	///   system steps. The marked state is serialized at model initialization time, whether it is serialized during model
+	///   execution, however, depends on whether the marked state is reachable in a discoverable way.
+	///   Hiding state variables potentially increases simulation and model checking performance, but is only possible
+	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
+	///   written value could be read.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+	public sealed class NonDiscoverable : Attribute
 	{
-		public enum E : long
-		{
-			A,
-			B = Int64.MaxValue,
-			C = 5
-		}
-
-		protected override void Check()
-		{
-			var c = new C { F = true, G = -1247, H = E.B, I = 33, D = new D { T = 77 }, T = new F { T = 12 } };
-
-			GenerateCode(SerializationMode.Optimized, c);
-			_stateSlotCount.ShouldBe(1);
-
-			Serialize();
-			c.F = false;
-			c.G = 3;
-			c.H = E.C;
-			c.I = 88;
-			c.D.T = 0;
-			c.T.T = 0;
-			Deserialize();
-			c.F.ShouldBe(false);
-			c.G.ShouldBe(-1247);
-			c.H.ShouldBe(E.C);
-			c.I.ShouldBe(88);
-			c.J.ShouldBe(333);
-			c.K.ShouldBe(11);
-			c.D.T.ShouldBe(0);
-			c.T.T.ShouldBe(0);
-		}
-
-		internal class C
-		{
-			[NotSerialized]
-			public readonly int J = 333;
-
-			[Hidden]
-			public readonly int K = 11;
-
-			public D D;
-
-			[Hidden]
-			public bool F;
-
-			public int G;
-
-			[Hidden]
-			public E H;
-
-			[NotSerialized]
-			public int I;
-
-			public F T;
-		}
-
-		[Hidden]
-		internal class D
-		{
-			public int T;
-		}
-
-		[NotSerialized]
-		internal class F
-		{
-			public int T;
-		}
 	}
 }

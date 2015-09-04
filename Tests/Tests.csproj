@@ -128,6 +128,14 @@
     <Compile Include="..\Source\SafetySharp\Properties\InternalsVisibleTo.cs">
       <Link>Properties\InternalsVisibleTo.cs</Link>
     </Compile>
+    <Compile Include="Execution\StateMachines\comparisons.cs" />
+    <Compile Include="Execution\StateMachines\return in action.cs" />
+    <Compile Include="Execution\StateMachines\multiple transition states.cs" />
+    <Compile Include="Execution\StateMachines\initial state.cs" />
+    <Compile Include="Execution\StateMachines\conflicting variables.cs" />
+    <Compile Include="Execution\StateMachines\multiple transitions.cs" />
+    <Compile Include="Execution\StateMachines\named parameters.cs" />
+    <Compile Include="Execution\StateMachines\single transition.cs" />
     <Compile Include="Formulas\StateFormulas\binary expressions.cs" />
     <Compile Include="Formulas\StateFormulas\arrays.cs" />
     <Compile Include="Formulas\StateFormulas\parameters.cs" />
@@ -149,6 +157,10 @@
     <Compile Include="Formulas\TemporalOperators\not.cs" />
     <Compile Include="Formulas\TemporalOperators\or.cs" />
     <Compile Include="Formulas\TemporalOperators\until.cs" />
+    <Compile Include="ExecutionTests.cs" />
+    <Compile Include="ExecutionTests.Helpers.cs">
+      <DependentUpon>ExecutionTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormulaTests.cs" />
     <Compile Include="FormulaTests.Helpers.cs">
       <DependentUpon>FormulaTests.cs</DependentUpon>
@@ -166,6 +178,7 @@
     <Compile Include="LtsMin\Invariants\Violated\deterministic.cs" />
     <Compile Include="LtsMin\Invariants\Violated\initial state.cs" />
     <Compile Include="LtsMin\Invariants\Violated\multiple choices 1.cs" />
+    <Compile Include="LtsMin\Invariants\Violated\state machine.cs" />
     <Compile Include="LtsMin\Ltl\NotViolated\deterministic.cs" />
     <Compile Include="LtsMin\Ltl\NotViolated\initial state.cs" />
     <Compile Include="LtsMin\Ltl\NotViolated\multiple choices.cs" />
@@ -190,6 +203,7 @@
       <DependentUpon>NormalizationTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Normalization\Partial\Normalized\class declarations.cs" />
+    <Compile Include="Normalization\Partial\Normalized\struct declarations.cs" />
     <Compile Include="Normalization\Partial\Unchanged\class declarations.cs" />
     <Compile Include="Normalization\Partial\Unchanged\enum declaration.cs" />
     <Compile Include="Normalization\Partial\Unchanged\interface declarations.cs" />

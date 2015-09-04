@@ -464,6 +464,17 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		}
 
 		/// <summary>
+		///   Gets the line number of the <paramref name="syntaxNode" />.
+		/// </summary>
+		/// <param name="syntaxNode">The syntax node the line number should be returned for.</param>
+		[Pure]
+		public static int GetLineNumber([NotNull] this SyntaxNode syntaxNode)
+		{
+			Requires.NotNull(syntaxNode, nameof(syntaxNode));
+			return syntaxNode.GetLocation().GetMappedLineSpan().StartLinePosition.Line + 1;
+		}
+
+		/// <summary>
 		///   Gets the <see cref="ITypeSymbol" /> representing the type of <paramref name="syntaxNode" /> within the context of the
 		///   <paramref name="semanticModel" />.
 		/// </summary>

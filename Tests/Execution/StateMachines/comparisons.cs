@@ -20,81 +20,67 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Misc
+namespace Tests.Execution.StateMachines
 {
 	using System;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
+	using Utilities;
 
-	internal class HiddenOptimized : SerializationObject
+	public class Comparisons : TestObject
 	{
-		public enum E : long
-		{
-			A,
-			B = Int64.MaxValue,
-			C = 5
-		}
-
 		protected override void Check()
 		{
-			var c = new C { F = true, G = -1247, H = E.B, I = 33, D = new D { T = 77 }, T = new F { T = 12 } };
+			var sm = StateMachine.Create(17);
+			(sm == 17).ShouldBe(true);
+			(sm == 13).ShouldBe(false);
+			(sm != 17).ShouldBe(false);
+			(sm != 13).ShouldBe(true);
 
-			GenerateCode(SerializationMode.Optimized, c);
-			_stateSlotCount.ShouldBe(1);
+			(17 == sm).ShouldBe(true);
+			(13 == sm).ShouldBe(false);
+			(17 != sm).ShouldBe(false);
+			(13 != sm).ShouldBe(true);
 
-			Serialize();
-			c.F = false;
-			c.G = 3;
-			c.H = E.C;
-			c.I = 88;
-			c.D.T = 0;
-			c.T.T = 0;
-			Deserialize();
-			c.F.ShouldBe(false);
-			c.G.ShouldBe(-1247);
-			c.H.ShouldBe(E.C);
-			c.I.ShouldBe(88);
-			c.J.ShouldBe(333);
-			c.K.ShouldBe(11);
-			c.D.T.ShouldBe(0);
-			c.T.T.ShouldBe(0);
+			sm = StateMachine.Create(E.A);
+			(sm == E.A).ShouldBe(true);
+			(sm == E.B).ShouldBe(false);
+			(sm != E.A).ShouldBe(false);
+			(sm != E.B).ShouldBe(true);
+
+			(E.A == sm).ShouldBe(true);
+			(E.B == sm).ShouldBe(false);
+			(E.A != sm).ShouldBe(false);
+			(E.B != sm).ShouldBe(true);
+
+			sm = StateMachine.Create(E.B);
+			(sm == E.B).ShouldBe(true);
+			(sm == E.A).ShouldBe(false);
+			(sm != E.B).ShouldBe(false);
+			(sm != E.A).ShouldBe(true);
+
+			(E.B == sm).ShouldBe(true);
+			(E.A == sm).ShouldBe(false);
+			(E.B != sm).ShouldBe(false);
+			(E.A != sm).ShouldBe(true);
+
+			var e = E.B;
+			(sm == e).ShouldBe(true);
+			(sm != e).ShouldBe(false);
+			(e == sm).ShouldBe(true);
+			(e != sm).ShouldBe(false);
+
+			IConvertible o = E.B;
+			(sm == o).ShouldBe(true);
+			(sm != o).ShouldBe(false);
+			(o == sm).ShouldBe(true);
+			(o != sm).ShouldBe(false);
 		}
 
-		internal class C
+		private enum E
 		{
-			[NotSerialized]
-			public readonly int J = 333;
-
-			[Hidden]
-			public readonly int K = 11;
-
-			public D D;
-
-			[Hidden]
-			public bool F;
-
-			public int G;
-
-			[Hidden]
-			public E H;
-
-			[NotSerialized]
-			public int I;
-
-			public F T;
-		}
-
-		[Hidden]
-		internal class D
-		{
-			public int T;
-		}
-
-		[NotSerialized]
-		internal class F
-		{
-			public int T;
+			A,
+			B
 		}
 	}
 }

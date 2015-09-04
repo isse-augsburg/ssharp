@@ -25,6 +25,7 @@ namespace SafetySharp.Utilities
 	using System;
 	using System.Collections;
 	using System.Diagnostics;
+	using System.Runtime.CompilerServices;
 	using JetBrains.Annotations;
 
 	/// <summary>
@@ -231,9 +232,9 @@ namespace SafetySharp.Utilities
 		///   Throws a <see cref="NotSupportedException" /> indicating that a compiler transformed version of the caller should be
 		///   invoked instead.
 		/// </summary>
-		public static void CompilationTransformation()
+		public static void CompilationTransformation([CallerMemberName] string caller = null)
 		{
-			throw new NotSupportedException("This method cannot be called at runtime. Use the S# compiler to compile the assembly.");
+			throw new NotSupportedException($"{caller} cannot be called at runtime. Use the S# compiler to compile the assembly.");
 		}
 	}
 }
