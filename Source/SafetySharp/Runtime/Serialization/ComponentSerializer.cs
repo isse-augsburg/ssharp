@@ -29,7 +29,7 @@ namespace SafetySharp.Runtime.Serialization
 	using Utilities;
 
 	/// <summary>
-	///   Serializes all kinds of objects.
+	///   Serializes all kinds of <see cref="Component"/>-derived classes.
 	/// </summary>
 	internal sealed class ComponentSerializer : ObjectSerializer
 	{

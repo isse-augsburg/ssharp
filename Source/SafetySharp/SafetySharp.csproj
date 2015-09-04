@@ -52,7 +52,7 @@
     <Compile Include="Modeling\Component.cs" />
     <Compile Include="Modeling\Fault.cs" />
     <Compile Include="Modeling\FaultEffectAttribute.cs" />
-    <Compile Include="Modeling\FaultEffect.cs" />
+    <Compile Include="Modeling\IFaultEffect.cs" />
     <Compile Include="Modeling\UnserializableAttribute.cs" />
     <Compile Include="Modeling\PersistentFault.cs" />
     <Compile Include="Modeling\TransientFault.cs" />
@@ -85,6 +85,7 @@
     <Compile Include="Runtime\ChoiceStack.cs" />
     <Compile Include="Runtime\RuntimeModel.cs" />
     <Compile Include="Runtime\Serialization\ArraySerializer.cs" />
+    <Compile Include="Runtime\Serialization\FaultEffectSerializer.cs" />
     <Compile Include="Runtime\Serialization\ComponentSerializer.cs" />
     <Compile Include="Runtime\Serialization\ObjectSerializer.cs" />
     <Compile Include="Runtime\Serialization\ObjectTable.cs" />

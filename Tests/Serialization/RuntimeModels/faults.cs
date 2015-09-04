@@ -77,7 +77,7 @@ namespace Tests.Serialization.RuntimeModels
 			public virtual void M() { }
 
 			[FaultEffect]
-			public sealed class Effect1 : C, IFaultEffect
+			public sealed class Effect1 : C, IFaultEffect// Todo: Generate interface implementation automatically
 			{
 				public int F;
 
@@ -97,7 +97,7 @@ namespace Tests.Serialization.RuntimeModels
 			}
 
 			[FaultEffect]
-			public sealed class Effect2 : C, IFaultEffect
+			public sealed class Effect2 : C, IFaultEffect// Todo: Generate interface implementation automatically
 			{
 				public int F;
 
@@ -116,7 +116,7 @@ namespace Tests.Serialization.RuntimeModels
 
 			// Unused
 			[FaultEffect]
-			public sealed class Effect3 : C, IFaultEffect
+			public sealed class Effect3 : C, IFaultEffect// Todo: Generate interface implementation automatically
 			{
 				/// <summary>
 				///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.

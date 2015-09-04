@@ -116,19 +116,24 @@ namespace SafetySharp.Runtime.Serialization
 				   where field.FieldType.IsReferenceType()
 				   select field.GetValue(obj);
 		}
+	
 
 		/// <summary>
 		///   Gets the fields declared by the <paramref name="obj" /> that should be serialized.
 		/// </summary>
 		/// <param name="obj">The object that should be serialized.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		protected static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode)
+		/// <param name="inheritanceRoot">
+		///   The first base type of the <paramref name="obj" /> whose fields should be ignored. If
+		///   <c>null</c>, <see cref="object" /> is the inheritance root.
+		/// </param>
+		protected static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode, Type inheritanceRoot = null)
 		{
 			var type = obj.GetType();
 			if (IsHidden(type, mode))
 				return Enumerable.Empty<FieldInfo>();
 
-			return obj.GetType().GetFields(typeof(object)).Where(field =>
+			return obj.GetType().GetFields(inheritanceRoot ?? typeof(object)).Where(field =>
 			{
 				// Ignore static or constant fields
 				if (field.IsStatic || field.IsLiteral)

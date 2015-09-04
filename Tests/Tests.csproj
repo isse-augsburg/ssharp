@@ -216,6 +216,7 @@
     <Compile Include="Serialization\Objects\nested objects.cs" />
     <Compile Include="Serialization\Objects\interface field.cs" />
     <Compile Include="Serialization\Objects\arrays.cs" />
+    <Compile Include="Serialization\Objects\fault effect.cs" />
     <Compile Include="Serialization\Objects\single object.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Char.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Bool.cs" />

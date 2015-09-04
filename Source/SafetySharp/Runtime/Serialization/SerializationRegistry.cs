@@ -53,6 +53,7 @@ namespace SafetySharp.Runtime.Serialization
 			if (!registerDefaultSerializers)
 				return;
 
+			RegisterSerializer(new FaultEffectSerializer());
 			RegisterSerializer(new ComponentSerializer());
 			RegisterSerializer(new ArraySerializer());
 		}
