@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,36 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Runtime.Serialization
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Runtime.Serialization;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>
-	///   Represents a model of a safety-critical system.
+	///   Serializes all kinds of objects.
 	/// </summary>
-	public class Model
+	internal sealed class ComponentSerializer : ObjectSerializer
 	{
 		/// <summary>
-		///   Initializes a new instance.
+		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
 		/// </summary>
-		/// <param name="rootComponents">The model's root components.</param>
-		public Model(params IComponent[] rootComponents)
+		/// <param name="type">The type that should be checked.</param>
+		protected internal override bool CanSerialize(Type type)
 		{
-			Requires.NotNull(rootComponents, nameof(rootComponents));
-			RootComponents.AddRange(rootComponents.Cast<Component>());
+			return type.IsSubclassOf(typeof(Component));
 		}
 
 		/// <summary>
-		///   Gets the model's root components.
+		///   Gets all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself.
 		/// </summary>
-		public List<Component> RootComponents { get; } = new List<Component>();
-
-		/// <summary>
-		///   Gets the <see cref="SerializationRegistry" /> that can be used to register customized state serializers.
-		/// </summary>
-		public SerializationRegistry SerializationRegistry { get; } = new SerializationRegistry(registerDefaultSerializers: true);
+		/// <param name="obj">The object the referenced objects should be returned for.</param>
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
+		{
+			var subcomponents = obj.GetType().HasAttribute<FaultEffectAttribute>() ? Enumerable.Empty<Component>() : ((Component)obj).Subcomponents;
+			return base.GetReferencedObjects(obj, mode).Concat(subcomponents);
+		}
 	}
 }

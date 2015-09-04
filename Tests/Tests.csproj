@@ -228,6 +228,7 @@
     <Compile Include="Serialization\PrimitiveTypes\UInt16.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt32.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int32.cs" />
+    <Compile Include="Serialization\RuntimeModels\faults.cs" />
     <Compile Include="Serialization\RuntimeModels\unserializable type.cs" />
     <Compile Include="Serialization\RuntimeModels\hidden type.cs" />
     <Compile Include="Serialization\RuntimeModels\subcomponent array.cs" />

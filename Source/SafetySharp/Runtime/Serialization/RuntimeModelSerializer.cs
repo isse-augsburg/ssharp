@@ -60,6 +60,8 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private static unsafe void SerializeModel(BinaryWriter writer, Model model, Formula[] formulas)
 		{
+			ComputeSubcomponents(model);
+
 			var stateFormulas = CollectStateFormulas(formulas);
 			var objectTable = CreateObjectTable(model, stateFormulas);
 
@@ -117,6 +119,21 @@ namespace SafetySharp.Runtime.Serialization
 				.SelectMany(formula => model.SerializationRegistry.GetReferencedObjects(formula.Expression.Target, SerializationMode.Full));
 
 			return new ObjectTable(modelObjects.Concat(formulaObjects));
+		}
+
+		/// <summary>
+		///   Computes the subcomponents for each component contained in the <paramref name="model" />.
+		/// </summary>
+		private static void ComputeSubcomponents(Model model)
+		{
+			foreach (var component in model.RootComponents)
+			{
+				component.VisitPreOrder(c =>
+				{
+					c.Subcomponents.Clear();
+					c.Subcomponents.AddRange(model.SerializationRegistry.GetSubcomponents(c));
+				});
+			}
 		}
 
 		/// <summary>

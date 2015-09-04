@@ -43,6 +43,7 @@ namespace Tests.Serialization.RuntimeModels
 			var root = RootComponents[0];
 			root.ShouldBeOfType<C>();
 			((C)root).F.ShouldBe((sbyte)99);
+			root.Subcomponents.ShouldBeEmpty();
 
 			_hasConstructorRun.ShouldBe(false);
 		}

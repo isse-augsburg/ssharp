@@ -26,6 +26,7 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -52,6 +53,7 @@ namespace SafetySharp.Runtime.Serialization
 			if (!registerDefaultSerializers)
 				return;
 
+			RegisterSerializer(new ComponentSerializer());
 			RegisterSerializer(new ArraySerializer());
 		}
 
@@ -192,6 +194,44 @@ namespace SafetySharp.Runtime.Serialization
 			}
 
 			return new ObjectTable(objects);
+		}
+
+		/// <summary>
+		///   Gets all <see cref="IComponent" /> instances referenced by <paramref name="component" />, excluding
+		///   <paramref name="component" /> itself.
+		/// </summary>
+		/// <param name="component">The component the referenced subcomponent should be returned for.</param>
+		internal IEnumerable<Component> GetSubcomponents(Component component)
+		{
+			Requires.NotNull(component, nameof(component));
+
+			var subcomponents = new HashSet<Component>();
+			GetSubcomponents(subcomponents, component);
+
+			// Some objects may have backward references to the component itself, so we have to remove it here
+			subcomponents.Remove(component);
+			return subcomponents;
+		}
+
+		/// <summary>
+		///   Adds all subcomponents referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself, to the set of
+		///   <paramref name="subcomponents" />.
+		/// </summary>
+		/// <param name="subcomponents">The set of referenced objects.</param>
+		/// <param name="obj">The object the referenced objects should be returned for.</param>
+		private void GetSubcomponents(HashSet<Component> subcomponents, object obj)
+		{
+			foreach (var referencedObject in GetSerializer(obj).GetReferencedObjects(obj, SerializationMode.Full))
+			{
+				if (referencedObject == null)
+					continue;
+
+				var component = referencedObject as Component;
+				if (component != null && !component.GetType().HasAttribute<FaultEffectAttribute>())
+					subcomponents.Add(component);
+				else
+					GetSubcomponents(subcomponents, referencedObject);
+			}
 		}
 
 		/// <summary>

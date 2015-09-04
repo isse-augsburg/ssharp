@@ -55,6 +55,11 @@ namespace Tests.Serialization.RuntimeModels
 			((C2)((D)root).C[1]).L.ShouldBe(Int64.MaxValue);
 			((C1<bool>)((D)root).C[2]).F.ShouldBe(true);
 
+			root.Subcomponents.ShouldBe(new[] { ((D)root).C[0], ((D)root).C[1], ((D)root).C[2] });
+			((Component)((D)root).C[0]).Subcomponents.ShouldBeEmpty();
+			((Component)((D)root).C[1]).Subcomponents.ShouldBeEmpty();
+			((Component)((D)root).C[2]).Subcomponents.ShouldBeEmpty();
+
 			_hasConstructorRun.ShouldBe(false);
 		}
 

@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Runtime
 {
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Analysis;
@@ -67,7 +68,7 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(rootComponents, nameof(rootComponents));
 			Requires.NotNull(serializationRegistry, nameof(serializationRegistry));
 			Requires.NotNull(stateFormulas, nameof(stateFormulas));
-
+			
 			// Create a local object table just for the objects referenced by the model; only these objects
 			// have to be serialized and deserialized. The local object table does not contain, for instance,
 			// the closure types of the state formulas

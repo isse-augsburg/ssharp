@@ -29,11 +29,10 @@ namespace Tests.LtsMin.Invariants.NotViolated
 	{
 		protected override void Check()
 		{
-			var c = new C { F = 3 };
-			var d = new D { C = c };
+			var d = new D();
 			var m = new Model(d);
 
-			CheckInvariant(m, c.F < 21).ShouldBe(true);
+			CheckInvariant(m, d.C.F < 21).ShouldBe(true);
 		}
 
 		private class C : Component
@@ -43,7 +42,7 @@ namespace Tests.LtsMin.Invariants.NotViolated
 
 		private class D : Component
 		{
-			public C C;
+			public readonly C C = new C { F = 3 };
 
 			public override void Update()
 			{

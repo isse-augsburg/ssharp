@@ -32,7 +32,7 @@ namespace SafetySharp.Modeling
 	public abstract partial class Component : IComponent
 	{
 		[Hidden]
-		private readonly HashSet<IFaultEffect> _faultEffects = new HashSet<IFaultEffect>(ReferenceEqualityComparer<IFaultEffect>.Default);
+		private readonly List<IFaultEffect> _faultEffects = new List<IFaultEffect>();
 
 		[Hidden]
 		private readonly List<Component> _subcomponents = new List<Component>();
@@ -40,7 +40,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Gets the fault effects that affect the component.
 		/// </summary>
-		internal HashSet<IFaultEffect> FaultEffects => _faultEffects;
+		internal List<IFaultEffect> FaultEffects => _faultEffects;
 
 		/// <summary>
 		///   Gets the component's subcomponents.
@@ -52,6 +52,36 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		public virtual void Update()
 		{
+		}
+
+		/// <summary>
+		///   Visits the hierarchy of components in pre-order, executing the <paramref name="action" /> for each component.
+		/// </summary>
+		/// <param name="action">The action that should be executed for each component.</param>
+		internal void VisitPreOrder(Action<Component> action)
+		{
+			Requires.NotNull(action, nameof(action));
+
+			var visitedComponents = new HashSet<Component>();
+			VisitPreOrder(visitedComponents, this, action);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="component" /> and all of its subcomponents in pre-order, executing the
+		///   <paramref name="action" /> for each component.
+		/// </summary>
+		/// <param name="visitedComponents">The components that have already been visited, in case the hierarchy contains any cycles.</param>
+		/// <param name="component">The component that should be visited.</param>
+		/// <param name="action">The action that should be executed for each component.</param>
+		private static void VisitPreOrder(HashSet<Component> visitedComponents, Component component, Action<Component> action)
+		{
+			if (!visitedComponents.Add(component))
+				return;
+
+			action(component);
+
+			foreach (var subcomponent in component.Subcomponents)
+				VisitPreOrder(visitedComponents, subcomponent, action);
 		}
 	}
 }

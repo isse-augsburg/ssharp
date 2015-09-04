@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Modeling
 {
+	using System.Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -63,7 +64,7 @@ namespace SafetySharp.Modeling
 			Requires.That(typeof(TFaultEffect).HasAttribute<FaultEffectAttribute>(),
 				$"Expected fault effect to be marked with '{typeof(FaultEffectAttribute)}'.");
 
-			var faultEffect = new TFaultEffect();
+			var faultEffect = (TFaultEffect)FormatterServices.GetUninitializedObject(typeof(TFaultEffect));
 			var effect = ((IFaultEffect)faultEffect);
 
 			Requires.That(effect.Component == null, nameof(faultEffect), "Fault effects cannot be used with multiple components at the same time.");

@@ -32,7 +32,7 @@ namespace Tests.Serialization.RuntimeModels
 		protected override void Check()
 		{
 			var c = new C { F = 33 };
-			var d = new D { C = c};
+			var d = new D { C = c };
 			c.D = d;
 			var m = new Model(d);
 
@@ -50,13 +50,16 @@ namespace Tests.Serialization.RuntimeModels
 			((D)root).C.D.ShouldBe((D)root);
 			((D)root).C.F.ShouldBe(33);
 
+			root.Subcomponents.ShouldBe(new[] { ((D)root).C });
+			((D)root).C.Subcomponents.ShouldBe(new[] { root });
+
 			_hasConstructorRun.ShouldBe(false);
 		}
 
 		private class C : Component
 		{
-			public int F;
 			public D D;
+			public int F;
 
 			public C()
 			{

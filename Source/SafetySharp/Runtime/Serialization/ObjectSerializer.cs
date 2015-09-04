@@ -34,7 +34,7 @@ namespace SafetySharp.Runtime.Serialization
 	/// <summary>
 	///   Serializes all kinds of objects.
 	/// </summary>
-	internal sealed class ObjectSerializer : Serializer
+	internal class ObjectSerializer : Serializer
 	{
 		/// <summary>
 		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
@@ -122,7 +122,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		/// <param name="obj">The object that should be serialized.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		private static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode)
+		protected static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode)
 		{
 			var type = obj.GetType();
 			if (IsHidden(type, mode))
