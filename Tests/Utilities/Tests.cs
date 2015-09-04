@@ -69,12 +69,17 @@ namespace Tests.Utilities
 		public TestTraceOutput Output { get; }
 
 		/// <summary>
-		///   Gets the name of the file that calls this method.
+		///   Gets the absolute path to the directory that contains the tests.
 		/// </summary>
+		/// <param name="subdirectory">The subdirectory that contains the tests.</param>
 		/// <param name="filePath">The name of the file; passed automatically by the C# compiler.</param>
-		protected static string GetFileName([CallerFilePath] string filePath = null)
+		protected static string GetAbsoluteTestsDirectory(string subdirectory, [CallerFilePath] string filePath = null)
 		{
-			return filePath;
+			var path = Path.GetDirectoryName(filePath);
+			if (path == null)
+				throw new InvalidOperationException("Unknown path.");
+
+			return Path.Combine(path, subdirectory);
 		}
 
 		/// <summary>

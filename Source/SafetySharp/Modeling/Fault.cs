@@ -40,7 +40,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Gets or sets a value indicating whether the fault is currently occurring.
 		/// </summary>
-		protected internal bool IsOccurring { get; set; }
+		public bool IsOccurring { get; protected set; }
 
 		/// <summary>
 		///   Gets or sets a value indicating whether the fault is ignored for a simulation or model checking run.

@@ -59,22 +59,24 @@ namespace SafetySharp.Analysis
 		public event Action<string> OutputWritten;
 
 		/// <summary>
-		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />.
+		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
+		///   <see cref="CounterExample" /> if the invariant is violated, <c>null</c> otherwise.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">[LiftExpression] The invariant that should be checked.</param>
-		public bool CheckInvariant(Model model, [LiftExpression] bool invariant)
+		public CounterExample CheckInvariant(Model model, [LiftExpression] bool invariant)
 		{
 			Requires.CompilationTransformation();
-			return false;
+			return null;
 		}
 
 		/// <summary>
-		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />.
+		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
+		///   <see cref="CounterExample" /> if the invariant is violated, <c>null</c> otherwise.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public bool CheckInvariant(Model model, Func<bool> invariant)
+		public CounterExample CheckInvariant(Model model, Func<bool> invariant)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
@@ -88,7 +90,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public bool Check(Model model, Formula formula)
+		public CounterExample Check(Model model, Formula formula)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formula, nameof(formula));
@@ -146,7 +148,7 @@ namespace SafetySharp.Analysis
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
 		/// <param name="checkArgument">The argument passed to LtsMin that indicates which kind of check to perform.</param>
-		private bool Check(Model model, Formula formula, string checkArgument)
+		private CounterExample Check(Model model, Formula formula, string checkArgument)
 		{
 			try
 			{
@@ -164,10 +166,10 @@ namespace SafetySharp.Analysis
 					Outputs = _ltsMin.Outputs.Select(output => output.Message).ToArray();
 					var success = InterpretExitCode(_ltsMin.ExitCode);
 
-					if (!success)
-						OutputCounterExample(counterExampleFile.FilePath);
+					if (success)
+						return null;
 
-					return success;
+					return GetCounterExample(modelFile.FilePath, counterExampleFile.FilePath);
 				}
 			}
 			finally
@@ -179,9 +181,15 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Outputs the counter example found by the model checker.
 		/// </summary>
-		/// <param name="filePath">The path to the file that contains the counter example.</param>
-		private void OutputCounterExample(string filePath)
+		private static CounterExample GetCounterExample(string modelFile, string counterExampleFile)
 		{
+			using (var stream = new FileStream(modelFile, FileMode.Open))
+			{
+				var model = RuntimeModelSerializer.Load(stream);
+				var counterExample = new CounterExample(model);
+				counterExample.LoadLtsMin(counterExampleFile);
+				return counterExample;
+			}
 		}
 
 		/// <summary>

@@ -150,8 +150,10 @@ namespace SafetySharp.Compiler.Normalization
 			{
 				WriteLineNumber(transitions[i].GuardLineNumber);
 				_writer.AppendLine($"if ({transitions[i].Guard.ToFullString()})");
+				_writer.IncreaseIndent();
 				_writer.AppendLine("#line hidden");
 				_writer.AppendLine($"{_choiceArrayVariable}[{_choiceCountVariable}++] = {i};");
+				_writer.DecreaseIndent();
 			}
 
 			_writer.NewLine();
@@ -314,9 +316,7 @@ namespace SafetySharp.Compiler.Normalization
 				{
 					transition.SourceStateExpression = sourceState;
 					transition.TargetStateExpression = targetState;
-
 					transition.SourceState = (int)SemanticModel.GetConstantValue(sourceState).Value;
-					transition.TargetState = (int)SemanticModel.GetConstantValue(targetState).Value;
 
 					transitions.Add(transition);
 				}
@@ -329,7 +329,6 @@ namespace SafetySharp.Compiler.Normalization
 		private struct Transition
 		{
 			public int SourceState;
-			public int TargetState;
 			public ExpressionSyntax SourceStateExpression;
 			public ExpressionSyntax TargetStateExpression;
 			public ExpressionSyntax Guard;

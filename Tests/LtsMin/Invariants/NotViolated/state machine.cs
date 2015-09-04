@@ -20,50 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.LtsMin.Invariants.Violated
+namespace Tests.LtsMin.Invariants.NotViolated
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class MultipleChoices1 : LtsMinTestObject
+	internal class StateMachineTest : LtsMinTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C { F = -1 };
-			var d = new D { C = c };
+			var d = new D();
 			var m = new Model(d);
 
-			CheckInvariant(m, c.F != 2).ShouldBe(false);
-			CheckInvariant(m, c.F != 10).ShouldBe(false);
-			CheckInvariant(m, c.F != 20).ShouldBe(false);
-			CheckInvariant(m, c.F != 12).ShouldBe(false);
-			CheckInvariant(m, c.F != 22).ShouldBe(false);
-			CheckInvariant(m, c.F == -1 || c.F == 2 || c.F == 10 || c.F == 20 || c.F == 12 || c.F == 22).ShouldBe(true);
-		}
-
-		private class C : Component
-		{
-			public int F;
+			CheckInvariant(m, d.StateMachine != S.B).ShouldBe(true);
 		}
 
 		private class D : Component
 		{
-			public C C;
+			public readonly StateMachine StateMachine = StateMachine.Create(S.A);
 
 			public override void Update()
 			{
-				var offset = 0;
-
-				if (Choose(true, false))
-					offset += 2;
-
-				if (Choose(true, false))
-					offset += 10;
-				else if (Choose(true, false))
-					offset += 20;
-
-				C.F = offset;
+				StateMachine
+					.Transition(
+						from: S.A,
+						to: S.B,
+						guard: false)
+					.Transition(
+						from: S.A,
+						to: S.C);
 			}
+		}
+
+		private enum S
+		{
+			A,
+			B,
+			C
 		}
 	}
 }

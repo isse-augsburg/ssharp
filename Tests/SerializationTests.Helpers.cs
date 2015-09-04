@@ -99,7 +99,7 @@ namespace Tests
 		[UsedImplicitly]
 		public static IEnumerable<object[]> DiscoverTests(string directory)
 		{
-			return EnumerateTestCases(Path.Combine(Path.GetDirectoryName(GetFileName()), directory));
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
 		}
 	}
 }

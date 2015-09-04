@@ -46,6 +46,7 @@
     <Compile Include="CompilerServices\LiftExpressionAttribute.cs" />
     <Compile Include="CompilerServices\StateFormulaFactory.cs" />
     <Compile Include="Modeling\NonDiscoverable.cs" />
+    <Compile Include="Analysis\CounterExample.cs" />
     <Compile Include="Runtime\Reflection\StateMachineExtensions.cs" />
     <Compile Include="Modeling\Choice.cs" />
     <Compile Include="Modeling\Component.Choose.cs">
@@ -106,6 +107,7 @@
     <Compile Include="Utilities\ExternalProcess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\Assert.cs" />
+    <Compile Include="Utilities\PinnedPointer.cs" />
     <Compile Include="Utilities\ReferenceEqualityComparer.cs" />
     <Compile Include="Utilities\ReflectionExtensions.cs" />
     <Compile Include="Utilities\Requires.cs" />

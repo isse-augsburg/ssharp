@@ -23,7 +23,6 @@
 namespace SafetySharp.Utilities
 {
 	using System;
-	using System.Runtime.InteropServices;
 
 	/// <summary>
 	///   Represents a memory buffer.
@@ -31,14 +30,14 @@ namespace SafetySharp.Utilities
 	internal sealed unsafe class MemoryBuffer : DisposableObject
 	{
 		/// <summary>
-		///   The garbage collector handle that pins the memory to a fixed location.
-		/// </summary>
-		private GCHandle _handle;
-
-		/// <summary>
 		///   The underlying memory.
 		/// </summary>
 		private byte[] _memory;
+
+		/// <summary>
+		///   The pinned pointer to the underlying managed memory.
+		/// </summary>
+		private PinnedPointer _pinnedPointer;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -64,7 +63,7 @@ namespace SafetySharp.Utilities
 		/// <summary>
 		///   Gets a pointer to the underlying memory of the buffer.
 		/// </summary>
-		public void* Pointer { get; private set; }
+		public void* Pointer => _pinnedPointer;
 
 		/// <summary>
 		///   Resizes the buffer so that it can contain at least <paramref name="sizeInBytes" /> bytes.
@@ -83,13 +82,10 @@ namespace SafetySharp.Utilities
 			if (oldBuffer != null)
 				Array.Copy(oldBuffer, newBuffer, SizeInBytes);
 
-			if (_handle.IsAllocated)
-				_handle.Free();
-
+			_pinnedPointer.Dispose();
 			_memory = newBuffer;
-			_handle = GCHandle.Alloc(newBuffer, GCHandleType.Pinned);
+			_pinnedPointer = PinnedPointer.Create(newBuffer);
 
-			Pointer = _handle.AddrOfPinnedObject().ToPointer();
 			SizeInBytes = sizeInBytes;
 		}
 
@@ -99,8 +95,7 @@ namespace SafetySharp.Utilities
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
-			if (_handle.IsAllocated)
-				_handle.Free();
+			_pinnedPointer.Dispose();
 		}
 	}
 }

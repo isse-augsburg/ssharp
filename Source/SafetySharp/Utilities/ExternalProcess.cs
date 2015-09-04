@@ -49,7 +49,7 @@ namespace SafetySharp.Utilities
 		/// <param name="fileName">The file name of the external executable.</param>
 		/// <param name="commandLineArguments">The command line arguments that should be passed to the executable.</param>
 		/// <param name="outputCallback">The callback that is invoked when an output is generated.</param>
-		public ExternalProcess(string fileName, string commandLineArguments, Action<Output> outputCallback)
+		public ExternalProcess(string fileName, string commandLineArguments, Action<Output> outputCallback = null)
 		{
 			Requires.NotNullOrWhitespace(fileName, nameof(fileName));
 			Requires.NotNull(commandLineArguments, nameof(commandLineArguments));

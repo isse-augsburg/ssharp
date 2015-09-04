@@ -22,7 +22,6 @@
 
 namespace SafetySharp.Runtime
 {
-	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Analysis;
@@ -33,7 +32,7 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Represents a runtime model that can be used for model checking or simulation.
 	/// </summary>
-	internal sealed unsafe class RuntimeModel : DisposableObject
+	public sealed unsafe class RuntimeModel : DisposableObject
 	{
 		/// <summary>
 		///   The <see cref="ChoiceResolver" /> used by the model.
@@ -62,13 +61,13 @@ namespace SafetySharp.Runtime
 		/// <param name="serializationRegistry">The serialization registry of the model.</param>
 		/// <param name="objectTable">The table of objects referenced by the model.</param>
 		/// <param name="stateFormulas">The state formulas of the model.</param>
-		public RuntimeModel(Component[] rootComponents, SerializationRegistry serializationRegistry,
-							ObjectTable objectTable, StateFormula[] stateFormulas)
+		internal RuntimeModel(Component[] rootComponents, SerializationRegistry serializationRegistry,
+							  ObjectTable objectTable, StateFormula[] stateFormulas)
 		{
 			Requires.NotNull(rootComponents, nameof(rootComponents));
 			Requires.NotNull(serializationRegistry, nameof(serializationRegistry));
 			Requires.NotNull(stateFormulas, nameof(stateFormulas));
-			
+
 			// Create a local object table just for the objects referenced by the model; only these objects
 			// have to be serialized and deserialized. The local object table does not contain, for instance,
 			// the closure types of the state formulas
@@ -89,7 +88,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the number of slots in the state vector.
 		/// </summary>
-		public int StateSlotCount { get; }
+		internal int StateSlotCount { get; }
 
 		/// <summary>
 		///   Gets the root components of the model.
@@ -99,19 +98,19 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the state labels of the model.
 		/// </summary>
-		public StateFormula[] StateFormulas { get; }
+		internal StateFormula[] StateFormulas { get; }
 
 		/// <summary>
 		///   Gets the number of transition groups.
 		/// </summary>
-		public int TransitionGroupCount => 1;
+		internal int TransitionGroupCount => 1;
 
 		/// <summary>
 		///   Deserializes the model's state from <paramref name="serializedState" />.
 		/// </summary>
 		/// <param name="serializedState">The state of the model that should be deserialized.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void Deserialize(int* serializedState)
+		internal void Deserialize(int* serializedState)
 		{
 			_deserialize(serializedState);
 		}
@@ -121,7 +120,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="serializedState">The memory region the model's state should be serialized into.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void Serialize(int* serializedState)
+		internal void Serialize(int* serializedState)
 		{
 			_serialize(serializedState);
 		}
@@ -142,7 +141,7 @@ namespace SafetySharp.Runtime
 		/// <param name="serializedState">The state of the model that should be used to check the <paramref name="label" />.</param>
 		/// <param name="label">The label that should be checked.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool CheckStateLabel(int* serializedState, int label)
+		internal bool CheckStateLabel(int* serializedState, int label)
 		{
 			Deserialize(serializedState);
 			return StateFormulas[label].Expression();
@@ -151,7 +150,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the serialized initial state of the model.
 		/// </summary>
-		public int* GetInitialState()
+		internal int* GetInitialState()
 		{
 			var state = _stateCache.Allocate();
 			Serialize(state);
@@ -164,7 +163,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="sourceState">The source state the next states should be computed for.</param>
 		/// <param name="transitionGroup">The transition group the next states should be computed for.</param>
-		public StateCache ComputeNextStates(int* sourceState, int transitionGroup)
+		internal StateCache ComputeNextStates(int* sourceState, int transitionGroup)
 		{
 			_stateCache.Clear();
 			_choiceResolver.PrepareNextState();

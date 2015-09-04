@@ -46,7 +46,8 @@ namespace Tests
 			var ltsMin = new SafetySharp.Analysis.LtsMin();
 			ltsMin.OutputWritten += message => Output.Log("{0}", message);
 
-			return ltsMin.CheckInvariant(model, invariant);
+			var counterExample = ltsMin.CheckInvariant(model, invariant);
+			return counterExample == null;
 		}
 
 		protected bool Check(Model model, Formula formula)
@@ -54,7 +55,8 @@ namespace Tests
 			var ltsMin = new SafetySharp.Analysis.LtsMin();
 			ltsMin.OutputWritten += message => Output.Log("{0}", message);
 
-			return ltsMin.Check(model, formula);
+			var counterExample = ltsMin.Check(model, formula);
+			return counterExample == null;
 		}
 	}
 
@@ -68,7 +70,7 @@ namespace Tests
 		[UsedImplicitly]
 		public static IEnumerable<object[]> DiscoverTests(string directory)
 		{
-			return EnumerateTestCases(Path.Combine(Path.GetDirectoryName(GetFileName()), directory));
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
 		}
 	}
 }

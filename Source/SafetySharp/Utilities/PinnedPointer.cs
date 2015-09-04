@@ -20,50 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.LtsMin.Invariants.Violated
+namespace SafetySharp.Utilities
 {
-	using SafetySharp.Modeling;
-	using Shouldly;
+	using System;
+	using System.Runtime.InteropServices;
 
-	internal class MultipleChoices1 : LtsMinTestObject
+	/// <summary>
+	///   Provides access to a pointer to a pinned object.
+	/// </summary>
+	internal struct PinnedPointer : IDisposable
 	{
-		protected override void Check()
-		{
-			var c = new C { F = -1 };
-			var d = new D { C = c };
-			var m = new Model(d);
+		/// <summary>
+		///   The handle of the pinned object.
+		/// </summary>
+		private GCHandle _handle;
 
-			CheckInvariant(m, c.F != 2).ShouldBe(false);
-			CheckInvariant(m, c.F != 10).ShouldBe(false);
-			CheckInvariant(m, c.F != 20).ShouldBe(false);
-			CheckInvariant(m, c.F != 12).ShouldBe(false);
-			CheckInvariant(m, c.F != 22).ShouldBe(false);
-			CheckInvariant(m, c.F == -1 || c.F == 2 || c.F == 10 || c.F == 20 || c.F == 12 || c.F == 22).ShouldBe(true);
+		/// <summary>
+		///   Disposes the object, releasing all managed and unmanaged resources.
+		/// </summary>
+		public void Dispose()
+		{
+			if (_handle.IsAllocated)
+				_handle.Free();
 		}
 
-		private class C : Component
+		/// <summary>
+		///   Initializes a new instance, allowing access to a pointer to <paramref name="obj" />.
+		/// </summary>
+		internal static PinnedPointer Create<T>(T obj)
 		{
-			public int F;
+			return new PinnedPointer { _handle = GCHandle.Alloc(obj, GCHandleType.Pinned) };
 		}
 
-		private class D : Component
+		/// <summary>
+		///   Converts the pinned pointer to a <c>void*</c>.
+		/// </summary>
+		/// <param name="pointer">The pinned pointer that should be converted.</param>
+		public static unsafe implicit operator void*(PinnedPointer pointer)
 		{
-			public C C;
-
-			public override void Update()
-			{
-				var offset = 0;
-
-				if (Choose(true, false))
-					offset += 2;
-
-				if (Choose(true, false))
-					offset += 10;
-				else if (Choose(true, false))
-					offset += 20;
-
-				C.F = offset;
-			}
+			return pointer._handle.AddrOfPinnedObject().ToPointer();
 		}
 	}
 }

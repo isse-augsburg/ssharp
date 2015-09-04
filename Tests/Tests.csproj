@@ -169,6 +169,7 @@
     <Compile Include="LtsMinTests.Helpers.cs">
       <DependentUpon>LtsMinTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="LtsMin\Invariants\NotViolated\state machine.cs" />
     <Compile Include="LtsMin\Invariants\Violated\list components.cs" />
     <Compile Include="LtsMin\Invariants\Violated\array components.cs" />
     <Compile Include="LtsMin\Invariants\Violated\multiple choices 2.cs" />

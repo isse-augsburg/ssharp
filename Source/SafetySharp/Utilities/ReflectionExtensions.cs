@@ -33,6 +33,12 @@ namespace SafetySharp.Utilities
 	internal static class ReflectionExtensions
 	{
 		/// <summary>
+		///   The binding flags that are used to look up members.
+		/// </summary>
+		private const BindingFlags Flags =
+			BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+
+		/// <summary>
 		///   Gets all members of the <paramref name="type" /> recursively, going up the inheritance chain.
 		/// </summary>
 		/// <remarks>
@@ -42,8 +48,7 @@ namespace SafetySharp.Utilities
 		/// <param name="type">The type the members should be retrieved from.</param>
 		/// <param name="inheritanceRoot">The first base type of <paramref name="type" /> whose members should be ignored.</param>
 		/// <param name="selector">The selector that should be used to select the members from the <paramref name="type" />.</param>
-		private static IEnumerable<MemberInfo> GetMembers(this Type type, Type inheritanceRoot,
-														  Func<Type, BindingFlags, IEnumerable<MemberInfo>> selector)
+		private static IEnumerable<MemberInfo> GetMembers(this Type type, Type inheritanceRoot, Func<Type, IEnumerable<MemberInfo>> selector)
 		{
 			if (type.BaseType != null && type.BaseType != inheritanceRoot)
 			{
@@ -51,8 +56,7 @@ namespace SafetySharp.Utilities
 					yield return member;
 			}
 
-			var flags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
-			foreach (var member in selector(type, flags))
+			foreach (var member in selector(type))
 				yield return member;
 		}
 
@@ -66,7 +70,7 @@ namespace SafetySharp.Utilities
 			Requires.NotNull(type, nameof(type));
 			Requires.NotNull(inheritanceRoot, nameof(inheritanceRoot));
 
-			return type.GetMembers(inheritanceRoot, (t, b) => t.GetFields(b)).Cast<FieldInfo>();
+			return type.GetMembers(inheritanceRoot, t => t.GetFields(Flags)).Cast<FieldInfo>();
 		}
 
 		/// <summary>
@@ -80,7 +84,7 @@ namespace SafetySharp.Utilities
 			Requires.NotNull(type, nameof(type));
 			Requires.NotNull(inheritanceRoot, nameof(inheritanceRoot));
 
-			return type.GetMembers(inheritanceRoot, (t, b) => t.GetProperties(b)).Cast<PropertyInfo>();
+			return type.GetMembers(inheritanceRoot, t => t.GetProperties(Flags)).Cast<PropertyInfo>();
 		}
 
 		/// <summary>
@@ -94,7 +98,7 @@ namespace SafetySharp.Utilities
 			Requires.NotNull(type, nameof(type));
 			Requires.NotNull(inheritanceRoot, nameof(inheritanceRoot));
 
-			return type.GetMembers(inheritanceRoot, (t, b) => t.GetMethods(b)).Cast<MethodInfo>();
+			return type.GetMembers(inheritanceRoot, t => t.GetMethods(Flags)).Cast<MethodInfo>();
 		}
 
 		/// <summary>
