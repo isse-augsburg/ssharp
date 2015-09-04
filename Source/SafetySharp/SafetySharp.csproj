@@ -53,6 +53,7 @@
     <Compile Include="Modeling\Fault.cs" />
     <Compile Include="Modeling\FaultEffectAttribute.cs" />
     <Compile Include="Modeling\FaultEffect.cs" />
+    <Compile Include="Modeling\UnserializableAttribute.cs" />
     <Compile Include="Modeling\PersistentFault.cs" />
     <Compile Include="Modeling\TransientFault.cs" />
     <Compile Include="Analysis\BinaryFormula.cs" />

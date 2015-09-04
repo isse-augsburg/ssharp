@@ -88,6 +88,9 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="writer">The writer the serialized information should be written to.</param>
 		protected internal override void SerializeType(object obj, BinaryWriter writer)
 		{
+			if (IsHidden(obj.GetType(), SerializationMode.Full))
+				return;
+
 			// ReSharper disable once AssignNullToNotNullAttribute
 			writer.Write(obj.GetType().AssemblyQualifiedName);
 		}
@@ -121,6 +124,10 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		private static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode)
 		{
+			var type = obj.GetType();
+			if (IsHidden(type, mode))
+				return Enumerable.Empty<FieldInfo>();
+
 			return obj.GetType().GetFields(typeof(object)).Where(field =>
 			{
 				// Ignore static or constant fields
@@ -132,17 +139,29 @@ namespace SafetySharp.Runtime.Serialization
 				if (mode == SerializationMode.Optimized && field.IsInitOnly)
 					return false;
 
-				// Don't try to serialize fields that are explicitly marked as non-serializable
-				if (field.HasAttribute<NonSerializedAttribute>())
-					return false;
-
-				// If the field is hidden, only ignore it in optimized serializations
-				if (mode == SerializationMode.Optimized && field.HasAttribute<HiddenAttribute>())
+				// Don't try to serialize hidden fields
+				if (IsHidden(field, mode) || IsHidden(field.FieldType, mode))
 					return false;
 
 				// Otherwise, serialize the field
 				return true;
 			});
+		}
+
+		/// <summary>
+		///   Checks whether the <paramref name="info" /> is hidden in the serialization <paramref name="mode" />.
+		/// </summary>
+		private static bool IsHidden(MemberInfo info, SerializationMode mode)
+		{
+			// Don't try to serialize members that are explicitly marked as non-serializable
+			if (info.HasAttribute<UnserializableAttribute>())
+				return true;
+
+			// If the member is hidden, only ignore it in optimized serializations
+			if (mode == SerializationMode.Optimized && info.HasAttribute<HiddenAttribute>())
+				return true;
+
+			return false;
 		}
 	}
 }

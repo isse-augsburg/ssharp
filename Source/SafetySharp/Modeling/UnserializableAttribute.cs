@@ -23,35 +23,15 @@
 namespace SafetySharp.Modeling
 {
 	using System;
-	using System.Collections.Generic;
-	using Utilities;
 
 	/// <summary>
-	///   Represents a S# component.
+	///   When a state field or type is marked as <c>[Unserializable]</c>, its state is not preserved between different system
+	///   steps. Hiding state variables potentially increases simulation and model checking performance, but is only possible
+	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
+	///   written value could be read.
 	/// </summary>
-	public abstract partial class Component : IComponent
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+	public sealed class UnserializableAttribute : Attribute
 	{
-		[Hidden]
-		private readonly HashSet<IFaultEffect> _faultEffects = new HashSet<IFaultEffect>(ReferenceEqualityComparer<IFaultEffect>.Default);
-
-		[Hidden]
-		private readonly List<Component> _subcomponents = new List<Component>();
-
-		/// <summary>
-		///   Gets the fault effects that affect the component.
-		/// </summary>
-		internal HashSet<IFaultEffect> FaultEffects => _faultEffects;
-
-		/// <summary>
-		///   Gets the component's subcomponents.
-		/// </summary>
-		internal List<Component> Subcomponents => _subcomponents;
-
-		/// <summary>
-		///   Updates the state of the component.
-		/// </summary>
-		public virtual void Update()
-		{
-		}
 	}
 }

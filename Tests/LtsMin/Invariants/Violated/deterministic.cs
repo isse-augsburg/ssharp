@@ -43,6 +43,7 @@ namespace Tests.LtsMin.Invariants.Violated
 
 		private class D : Component
 		{
+			[Hidden]
 			public C C;
 
 			public override void Update()

@@ -41,6 +41,8 @@ namespace Tests
 
 		protected StateFormula[] StateFormulas => _runtimeModel.StateFormulas;
 
+		protected int StateSlotCount => _runtimeModel.StateSlotCount;
+
 		protected void Create(Model model, params Formula[] formulas)
 		{
 			using (var memoryStream = new MemoryStream())

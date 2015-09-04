@@ -20,38 +20,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Serialization.RuntimeModels
 {
-	using System;
-	using System.Collections.Generic;
-	using Utilities;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	/// <summary>
-	///   Represents a S# component.
-	/// </summary>
-	public abstract partial class Component : IComponent
+	internal class HiddenType : RuntimeModelTest
 	{
-		[Hidden]
-		private readonly HashSet<IFaultEffect> _faultEffects = new HashSet<IFaultEffect>(ReferenceEqualityComparer<IFaultEffect>.Default);
-
-		[Hidden]
-		private readonly List<Component> _subcomponents = new List<Component>();
-
-		/// <summary>
-		///   Gets the fault effects that affect the component.
-		/// </summary>
-		internal HashSet<IFaultEffect> FaultEffects => _faultEffects;
-
-		/// <summary>
-		///   Gets the component's subcomponents.
-		/// </summary>
-		internal List<Component> Subcomponents => _subcomponents;
-
-		/// <summary>
-		///   Updates the state of the component.
-		/// </summary>
-		public virtual void Update()
+		protected override void Check()
 		{
+			var c = new C { F = 9 };
+			var d = new D { C = c };
+			var m = new Model(d);
+
+			Create(m);
+
+			StateFormulas.ShouldBeEmpty();
+			RootComponents.Length.ShouldBe(1);
+			StateSlotCount.ShouldBe(0);
+
+			var root = RootComponents[0];
+			root.ShouldBeOfType<D>();
+
+			((D)root).C.ShouldBeOfType<C>();
+			((D)root).C.F.ShouldBe(9);
+		}
+
+		[Hidden]
+		private class C
+		{
+			public int F;
+		}
+
+		private class D : Component
+		{
+			public C C;
 		}
 	}
 }

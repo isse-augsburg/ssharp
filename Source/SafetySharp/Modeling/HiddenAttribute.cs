@@ -25,12 +25,12 @@ namespace SafetySharp.Modeling
 	using System;
 
 	/// <summary>
-	///   When a state field is marked as <c>[Hidden]</c>, its state is not preserved between different system steps.
+	///   When a state field or type is marked as <c>[Hidden]</c>, its state is not preserved between different system steps.
 	///   Hiding state variables potentially increases simulation and model checking performance, but is only possible
 	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
 	///   written value could be read.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
 	public sealed class HiddenAttribute : Attribute
 	{
 	}

@@ -38,16 +38,18 @@ namespace Tests.Serialization.Misc
 
 		protected override void Check()
 		{
-			var c = new C { F = true, G = -1247, H = E.B, I = 33 };
+			var c = new C { F = true, G = -1247, H = E.B, I = 33, D = new D { T = 77 }, T = new F { T = 12 } };
 
 			GenerateCode(SerializationMode.Full, c);
-			_stateSlotCount.ShouldBe(5);
+			_stateSlotCount.ShouldBe(7);
 
 			Serialize();
 			c.F = false;
 			c.G = 3;
 			c.H = E.C;
 			c.I = 88;
+			c.D.T = 0;
+			c.T.T = 0;
 			Deserialize();
 			c.F.ShouldBe(true);
 			c.G.ShouldBe(-1247);
@@ -55,10 +57,20 @@ namespace Tests.Serialization.Misc
 			c.I.ShouldBe(88);
 			c.J.ShouldBe(333);
 			c.K.ShouldBe(11);
+			c.D.T.ShouldBe(77);
+			c.T.T.ShouldBe(0);
 		}
 
 		internal class C
 		{
+			[Unserializable]
+			public readonly int J = 333;
+
+			[Hidden]
+			public readonly int K = 11;
+
+			public D D;
+
 			[Hidden]
 			public bool F;
 
@@ -67,14 +79,22 @@ namespace Tests.Serialization.Misc
 			[Hidden]
 			public E H;
 
-			[NonSerialized]
+			[Unserializable]
 			public int I;
 
-			[NonSerialized]
-			public readonly int J = 333;
+			public F T;
+		}
 
-			[Hidden]
-			public readonly int K = 11;
+		[Hidden]
+		internal class D
+		{
+			public int T;
+		}
+
+		[Unserializable]
+		internal class F
+		{
+			public int T;
 		}
 	}
 }
