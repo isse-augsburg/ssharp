@@ -94,11 +94,13 @@ namespace SafetySharp.Compiler.Normalization
 			var transitions = DecomposeTransitionChain((InvocationExpressionSyntax)statement.Expression, out stateMachine);
 
 			_writer.Clear();
+			_writer.AppendLine("#line hidden");
 			_writer.AppendLine("unsafe");
 			_writer.AppendBlockStatement(() =>
 			{
 				_writer.AppendLine($"#line {stateMachine.GetLineNumber()}");
 				_writer.AppendLine($"var {_stateMachineVariable} = {stateMachine.RemoveTrivia().ToFullString()};");
+				_writer.AppendLine("#line hidden");
 				_writer.AppendLine($"var {_choiceVariable} = {_extensionType}.GetChoice({_stateMachineVariable});");
 				_writer.NewLine();
 
@@ -108,7 +110,6 @@ namespace SafetySharp.Compiler.Normalization
 
 				GenerateTransitionSelection(transitions);
 
-				_writer.AppendLine("#line hidden");
 				_writer.AppendLine($"if ({_countVariable} != 0)");
 				_writer.AppendBlockStatement(() =>
 				{
@@ -131,10 +132,12 @@ namespace SafetySharp.Compiler.Normalization
 
 				WriteLineNumber(transition.SourceLineNumber);
 				_writer.AppendLine($"if ({_extensionType}.IsInState({_stateMachineVariable}, {transition.SourceState.ToFullString()}))");
+				_writer.AppendLine("#line hidden");
 				_writer.AppendBlockStatement(() =>
 				{
 					WriteLineNumber(transition.GuardLineNumber);
 					_writer.AppendLine($"if ({transition.Guard.ToFullString()})");
+					_writer.AppendLine("#line hidden");
 					_writer.AppendBlockStatement(() =>
 					{
 						_writer.AppendLine("#line hidden");
@@ -259,12 +262,15 @@ namespace SafetySharp.Compiler.Normalization
 						transition.GuardLineNumber = argument.Expression.GetLineNumber();
 						break;
 					case "action":
-						transition.ActionLineNumber = argument.Expression.GetLineNumber();
 						var lambda = argument.Expression as ParenthesizedLambdaExpressionSyntax;
 						if (lambda == null)
+						{
 							transition.Action = (StatementSyntax)Syntax.ExpressionStatement(Syntax.InvocationExpression(argument.Expression));
+							transition.ActionLineNumber = argument.Expression.GetLineNumber();
+						}
 						else
 						{
+							transition.ActionLineNumber = lambda.Body.GetLineNumber();
 							var body = lambda.Body as StatementSyntax;
 							if (body != null)
 								transition.Action = body;
