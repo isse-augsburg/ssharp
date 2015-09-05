@@ -47,6 +47,7 @@
     <Compile Include="CompilerServices\StateFormulaFactory.cs" />
     <Compile Include="Modeling\NonDiscoverable.cs" />
     <Compile Include="Analysis\CounterExample.cs" />
+    <Compile Include="Runtime\Reflection\ComponentExtensions.cs" />
     <Compile Include="Runtime\Reflection\StateMachineExtensions.cs" />
     <Compile Include="Modeling\Choice.cs" />
     <Compile Include="Modeling\Component.Choose.cs">
@@ -57,7 +58,7 @@
     <Compile Include="Modeling\FaultEffectAttribute.cs" />
     <Compile Include="Modeling\IFaultEffect.cs" />
     <Compile Include="Modeling\StateMachine.cs" />
-    <Compile Include="Modeling\NotSerialized.cs" />
+    <Compile Include="Modeling\NonSerializable.cs" />
     <Compile Include="Modeling\PersistentFault.cs" />
     <Compile Include="Modeling\TransientFault.cs" />
     <Compile Include="Analysis\BinaryFormula.cs" />
@@ -90,7 +91,6 @@
     <Compile Include="Runtime\RuntimeModel.cs" />
     <Compile Include="Runtime\Serialization\ArraySerializer.cs" />
     <Compile Include="Runtime\Serialization\FaultEffectSerializer.cs" />
-    <Compile Include="Runtime\Serialization\ComponentSerializer.cs" />
     <Compile Include="Runtime\Serialization\ObjectSerializer.cs" />
     <Compile Include="Runtime\Serialization\ObjectTable.cs" />
     <Compile Include="Runtime\Serialization\SerializationDelegate.cs" />

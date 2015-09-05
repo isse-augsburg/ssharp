@@ -20,43 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace SafetySharp.Modeling
 {
-	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Reflection;
-	using Shouldly;
+	using System;
 
-	internal class SingleComponent : RuntimeModelTest
+	/// <summary>
+	///   When a state field or type is marked as <c>[NonSerializable]</c>, its state is not preserved between different system
+	///   steps. The marked state is also completely ignore at model initialization time.
+	///   Hiding state variables potentially increases simulation and model checking performance, but is only possible
+	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
+	///   written value could be read.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+	public sealed class NonSerializable : Attribute
 	{
-		private static bool _hasConstructorRun;
-
-		protected override void Check()
-		{
-			var c = new C { F = 99 };
-			var m = new Model(c);
-
-			_hasConstructorRun = false;
-			Create(m);
-
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<C>();
-			((C)root).F.ShouldBe((sbyte)99);
-			root.GetSubcomponents().ShouldBeEmpty();
-
-			_hasConstructorRun.ShouldBe(false);
-		}
-
-		private class C : Component
-		{
-			public sbyte F;
-
-			public C()
-			{
-				_hasConstructorRun = true;
-			}
-		}
 	}
 }

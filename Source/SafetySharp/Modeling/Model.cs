@@ -24,7 +24,6 @@ namespace SafetySharp.Modeling
 {
 	using System.Collections.Generic;
 	using System.Linq;
-	using Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -46,10 +45,5 @@ namespace SafetySharp.Modeling
 		///   Gets the model's root components.
 		/// </summary>
 		public List<Component> RootComponents { get; } = new List<Component>();
-
-		/// <summary>
-		///   Gets the <see cref="SerializationRegistry" /> that can be used to register customized state serializers.
-		/// </summary>
-		public SerializationRegistry SerializationRegistry { get; } = new SerializationRegistry(registerDefaultSerializers: true);
 	}
 }

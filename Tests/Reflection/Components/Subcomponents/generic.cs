@@ -20,19 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Reflection.Components.Subcomponents
 {
-	using System;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
+	using Shouldly;
+	using Utilities;
 
-	/// <summary>
-	///   When a state field or type is marked as <c>[NotSerialized]</c>, its state is not preserved between different system
-	///   steps. The marked state is also completely ignore at model initialization time.
-	///   Hiding state variables potentially increases simulation and model checking performance, but is only possible
-	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
-	///   written value could be read.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
-	public sealed class NotSerialized : Attribute
+	internal class Generic : TestObject
 	{
+		protected override void Check()
+		{
+			var c = new C<int, D> { F = 0, Sub = new D() };
+			c.GetSubcomponents().ShouldBe(new[] { c.Sub });
+		}
+
+		private class C<T, S> : Component
+		{
+			public T F;
+			public S Sub;
+		}
+
+		private class D : Component
+		{
+		}
 	}
 }

@@ -20,43 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Reflection.Components.Subcomponents
 {
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
+	using Utilities;
 
-	internal class SingleComponent : RuntimeModelTest
+	internal class Shared : TestObject
 	{
-		private static bool _hasConstructorRun;
-
 		protected override void Check()
 		{
-			var c = new C { F = 99 };
-			var m = new Model(c);
-
-			_hasConstructorRun = false;
-			Create(m);
-
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<C>();
-			((C)root).F.ShouldBe((sbyte)99);
-			root.GetSubcomponents().ShouldBeEmpty();
-
-			_hasConstructorRun.ShouldBe(false);
+			var d = new D();
+			var c = new C { Sub1 = d, Sub3 = new D(), Sub4 = d };
+			c.GetSubcomponents().ShouldBe(new[] { c.Sub1, c.Sub3 });
 		}
 
 		private class C : Component
 		{
-			public sbyte F;
+			private int f = 0;
 
-			public C()
-			{
-				_hasConstructorRun = true;
-			}
+			public IComponent Sub1;
+			public Component Sub2;
+			public D Sub3;
+			public Component Sub4;
+		}
+
+		private class D : Component
+		{
 		}
 	}
 }

@@ -58,7 +58,6 @@ namespace Tests
 
 	public abstract unsafe class SerializationObject : TestObject
 	{
-		private readonly SerializationRegistry _serializationRegistry = new SerializationRegistry(registerDefaultSerializers: true);
 		private SerializationDelegate _deserializer;
 		private ObjectTable _objectTable;
 		private int* _serializedState;
@@ -68,13 +67,13 @@ namespace Tests
 
 		protected void GenerateCode(SerializationMode mode, params object[] objects)
 		{
-			objects = objects.SelectMany(obj => _serializationRegistry.GetReferencedObjects(obj, mode)).ToArray();
+			objects = objects.SelectMany(obj => SerializationRegistry.Default.GetReferencedObjects(obj, mode)).ToArray();
 
 			_objectTable = new ObjectTable(objects);
-			_serializer = _serializationRegistry.CreateStateSerializer(_objectTable, mode);
-			_deserializer = _serializationRegistry.CreateStateDeserializer(_objectTable, mode);
+			_serializer = SerializationRegistry.Default.CreateStateSerializer(_objectTable, mode);
+			_deserializer = SerializationRegistry.Default.CreateStateDeserializer(_objectTable, mode);
 
-			_stateSlotCount = _serializationRegistry.GetStateSlotCount(_objectTable, mode);
+			_stateSlotCount = SerializationRegistry.Default.GetStateSlotCount(_objectTable, mode);
 			_stateCache = new StateCache(_stateSlotCount + 1, 1);
 			_serializedState = _stateCache.Allocate();
 		}

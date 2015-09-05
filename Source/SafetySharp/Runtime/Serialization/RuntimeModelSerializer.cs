@@ -60,17 +60,15 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private static unsafe void SerializeModel(BinaryWriter writer, Model model, Formula[] formulas)
 		{
-			ComputeSubcomponents(model);
-
 			var stateFormulas = CollectStateFormulas(formulas);
 			var objectTable = CreateObjectTable(model, stateFormulas);
 
 			// Prepare the serialization of the model's initial state
-			var slotCount = model.SerializationRegistry.GetStateSlotCount(objectTable, SerializationMode.Full);
-			var serializer = model.SerializationRegistry.CreateStateSerializer(objectTable, SerializationMode.Full);
+			var slotCount = SerializationRegistry.Default.GetStateSlotCount(objectTable, SerializationMode.Full);
+			var serializer = SerializationRegistry.Default.CreateStateSerializer(objectTable, SerializationMode.Full);
 
 			// Serialize the object table
-			model.SerializationRegistry.SerializeObjectTable(objectTable, writer);
+			SerializationRegistry.Default.SerializeObjectTable(objectTable, writer);
 
 			// Serialize object identifiers of the root components
 			writer.Write(model.RootComponents.Count);
@@ -113,27 +111,12 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			var modelObjects = model
 				.RootComponents
-				.SelectMany(component => model.SerializationRegistry.GetReferencedObjects(component, SerializationMode.Full));
+				.SelectMany(component => SerializationRegistry.Default.GetReferencedObjects(component, SerializationMode.Full));
 
 			var formulaObjects = stateFormulas
-				.SelectMany(formula => model.SerializationRegistry.GetReferencedObjects(formula.Expression.Target, SerializationMode.Full));
+				.SelectMany(formula => SerializationRegistry.Default.GetReferencedObjects(formula.Expression.Target, SerializationMode.Full));
 
 			return new ObjectTable(modelObjects.Concat(formulaObjects));
-		}
-
-		/// <summary>
-		///   Computes the subcomponents for each component contained in the <paramref name="model" />.
-		/// </summary>
-		private static void ComputeSubcomponents(Model model)
-		{
-			foreach (var component in model.RootComponents)
-			{
-				component.VisitPreOrder(c =>
-				{
-					c.Subcomponents.Clear();
-					c.Subcomponents.AddRange(model.SerializationRegistry.GetSubcomponents(c));
-				});
-			}
 		}
 
 		/// <summary>
@@ -175,8 +158,7 @@ namespace SafetySharp.Runtime.Serialization
 		private static unsafe RuntimeModel DeserializeModel(BinaryReader reader)
 		{
 			// Deserialize the object table
-			var serializationRegistry = new SerializationRegistry(registerDefaultSerializers: false);
-			var objectTable = serializationRegistry.DeserializeObjectTable(reader);
+			var objectTable = SerializationRegistry.Default.DeserializeObjectTable(reader);
 
 			// Deserialize the object identifiers of the root components
 			var roots = new Component[reader.ReadInt32()];
@@ -191,12 +173,12 @@ namespace SafetySharp.Runtime.Serialization
 				serializedState[i] = reader.ReadInt32();
 
 			// Deserialize the model's initial state
-			var deserializer = serializationRegistry.CreateStateDeserializer(objectTable, SerializationMode.Full);
+			var deserializer = SerializationRegistry.Default.CreateStateDeserializer(objectTable, SerializationMode.Full);
 			deserializer(serializedState);
 
 			// Deserialize the state formulas and instantiate the runtime model
 			var stateFormulas = DeserializeFormulas(reader, objectTable);
-			return new RuntimeModel(roots, serializationRegistry, objectTable, stateFormulas);
+			return new RuntimeModel(roots, objectTable, stateFormulas);
 		}
 
 		/// <summary>

@@ -58,28 +58,26 @@ namespace SafetySharp.Runtime
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="rootComponents">The root components of the model.</param>
-		/// <param name="serializationRegistry">The serialization registry of the model.</param>
 		/// <param name="objectTable">The table of objects referenced by the model.</param>
 		/// <param name="stateFormulas">The state formulas of the model.</param>
-		internal RuntimeModel(Component[] rootComponents, SerializationRegistry serializationRegistry,
-							  ObjectTable objectTable, StateFormula[] stateFormulas)
+		internal RuntimeModel(Component[] rootComponents, ObjectTable objectTable, StateFormula[] stateFormulas)
 		{
 			Requires.NotNull(rootComponents, nameof(rootComponents));
-			Requires.NotNull(serializationRegistry, nameof(serializationRegistry));
+			Requires.NotNull(objectTable, nameof(objectTable));
 			Requires.NotNull(stateFormulas, nameof(stateFormulas));
 
 			// Create a local object table just for the objects referenced by the model; only these objects
 			// have to be serialized and deserialized. The local object table does not contain, for instance,
 			// the closure types of the state formulas
-			var objects = rootComponents.SelectMany(obj => serializationRegistry.GetReferencedObjects(obj, SerializationMode.Optimized));
+			var objects = rootComponents.SelectMany(obj => SerializationRegistry.Default.GetReferencedObjects(obj, SerializationMode.Optimized));
 			var localObjectTable = new ObjectTable(objects);
 
 			RootComponents = rootComponents;
 			StateFormulas = stateFormulas;
-			StateSlotCount = serializationRegistry.GetStateSlotCount(localObjectTable, SerializationMode.Optimized);
+			StateSlotCount = SerializationRegistry.Default.GetStateSlotCount(localObjectTable, SerializationMode.Optimized);
 
-			_deserialize = serializationRegistry.CreateStateDeserializer(localObjectTable, SerializationMode.Optimized);
-			_serialize = serializationRegistry.CreateStateSerializer(localObjectTable, SerializationMode.Optimized);
+			_deserialize = SerializationRegistry.Default.CreateStateDeserializer(localObjectTable, SerializationMode.Optimized);
+			_serialize = SerializationRegistry.Default.CreateStateSerializer(localObjectTable, SerializationMode.Optimized);
 
 			_stateCache = new StateCache(StateSlotCount);
 			_choiceResolver = new ChoiceResolver(objectTable);

@@ -63,7 +63,7 @@ namespace Tests.Serialization.Misc
 
 		internal class C
 		{
-			[NotSerialized]
+			[NonSerializable]
 			public readonly int J = 333;
 
 			[Hidden]
@@ -79,7 +79,7 @@ namespace Tests.Serialization.Misc
 			[Hidden]
 			public E H;
 
-			[NotSerialized]
+			[NonSerializable]
 			public int I;
 
 			public F T;
@@ -91,7 +91,7 @@ namespace Tests.Serialization.Misc
 			public int T;
 		}
 
-		[NotSerialized]
+		[NonSerializable]
 		internal class F
 		{
 			public int T;

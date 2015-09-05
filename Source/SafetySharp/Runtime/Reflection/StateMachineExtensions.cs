@@ -26,7 +26,7 @@ namespace SafetySharp.Runtime.Reflection
 	using Modeling;
 
 	/// <summary>
-	///   Provides access to the internals of <see cref="StateMachine{TState}" /> instances.
+	///   Provides access to additional methods for <see cref="StateMachine{TState}" /> instances.
 	/// </summary>
 	public static class StateMachineExtensions
 	{

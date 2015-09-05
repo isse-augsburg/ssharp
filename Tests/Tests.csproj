@@ -210,6 +210,32 @@
     <Compile Include="Normalization\Partial\Unchanged\enum declaration.cs" />
     <Compile Include="Normalization\Partial\Unchanged\interface declarations.cs" />
     <Compile Include="Normalization\Partial\Unchanged\struct declarations.cs" />
+    <Compile Include="ReflectionTests.cs" />
+    <Compile Include="ReflectionTests.Helpers.cs">
+      <DependentUpon>ReflectionTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reflection\Components\Fields\list.cs" />
+    <Compile Include="Reflection\Components\Fields\hidden.cs" />
+    <Compile Include="Reflection\Components\Fields\non-serializable.cs" />
+    <Compile Include="Reflection\Components\Fields\non-discoverable.cs" />
+    <Compile Include="Reflection\Components\Fields\readonly.cs" />
+    <Compile Include="Reflection\Components\Fields\none.cs" />
+    <Compile Include="Reflection\Components\Fields\generic.cs" />
+    <Compile Include="Reflection\Components\Fields\array.cs" />
+    <Compile Include="Reflection\Components\Fields\multiple.cs" />
+    <Compile Include="Reflection\Components\Fields\single.cs" />
+    <Compile Include="Reflection\Components\Subcomponents\list.cs" />
+    <Compile Include="Reflection\Components\Subcomponents\hidden.cs" />
+    <Compile Include="Reflection\Components\Subcomponents\array.cs" />
+    <Compile Include="Reflection\Components\Subcomponents\shared.cs" />
+    <Compile Include="Reflection\Components\Subcomponents\non-discoverable.cs" />
+    <Compile Include="Reflection\Components\Subcomponents\null.cs" />
+    <Compile Include="Reflection\Components\Subcomponents\readonly.cs" />
+    <Compile Include="Reflection\Components\Subcomponents\multiple.cs" />
+    <Compile Include="Reflection\Components\Subcomponents\generic.cs" />
+    <Compile Include="Reflection\Components\Subcomponents\single.cs" />
+    <Compile Include="Reflection\Components\Subcomponents\non-serializable.cs" />
+    <Compile Include="Reflection\Components\Subcomponents\none.cs" />
     <Compile Include="Serialization\Enumerations\Int16.cs" />
     <Compile Include="Serialization\Enumerations\Int64.cs" />
     <Compile Include="Serialization\Enumerations\Int32.cs" />

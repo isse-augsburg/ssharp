@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,37 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime.Serialization
+namespace Tests
 {
-	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using Modeling;
+	using JetBrains.Annotations;
 	using Utilities;
+	using Xunit.Abstractions;
 
-	/// <summary>
-	///   Serializes all kinds of <see cref="Component"/>-derived classes.
-	/// </summary>
-	internal sealed class ComponentSerializer : ObjectSerializer
+	public partial class ReflectionTests : Tests
 	{
-		/// <summary>
-		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
-		/// </summary>
-		/// <param name="type">The type that should be checked.</param>
-		protected internal override bool CanSerialize(Type type)
+		public ReflectionTests(ITestOutputHelper output)
+			: base(output)
 		{
-			return type.IsSubclassOf(typeof(Component));
 		}
 
-		/// <summary>
-		///   Gets all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself.
-		/// </summary>
-		/// <param name="obj">The object the referenced objects should be returned for.</param>
-		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests(string directory)
 		{
-			var subcomponents = obj.GetType().HasAttribute<FaultEffectAttribute>() ? Enumerable.Empty<Component>() : ((Component)obj).Subcomponents;
-			return base.GetReferencedObjects(obj, mode).Concat(subcomponents);
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
 		}
 	}
 }

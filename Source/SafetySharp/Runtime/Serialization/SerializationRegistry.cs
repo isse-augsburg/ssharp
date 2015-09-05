@@ -22,11 +22,9 @@
 
 namespace SafetySharp.Runtime.Serialization
 {
-	using System;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
-	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -34,6 +32,11 @@ namespace SafetySharp.Runtime.Serialization
 	/// </summary>
 	public sealed class SerializationRegistry
 	{
+		/// <summary>
+		///   The default serialization registry instance.
+		/// </summary>
+		public static readonly SerializationRegistry Default = new SerializationRegistry();
+
 		/// <summary>
 		///   The default serializer that can serialize all objects.
 		/// </summary>
@@ -47,14 +50,9 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="registerDefaultSerializers">Indicates whether the default serializers should be registered.</param>
-		internal SerializationRegistry(bool registerDefaultSerializers)
+		private SerializationRegistry()
 		{
-			if (!registerDefaultSerializers)
-				return;
-
 			RegisterSerializer(new FaultEffectSerializer());
-			RegisterSerializer(new ComponentSerializer());
 			RegisterSerializer(new ArraySerializer());
 		}
 
@@ -62,7 +60,7 @@ namespace SafetySharp.Runtime.Serialization
 		///   Registers the <paramref name="serializer" />.
 		/// </summary>
 		/// <param name="serializer">The serializer that should be registered.</param>
-		public void RegisterSerializer(Serializer serializer)
+		private void RegisterSerializer(Serializer serializer)
 		{
 			Requires.NotNull(serializer, nameof(serializer));
 			Requires.That(!_serializers.Contains(serializer), nameof(serializer),
@@ -74,7 +72,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Tries to find a serializer that is able to serialize the <paramref name="obj" />.
 		/// </summary>
-		private Serializer GetSerializer(object obj)
+		internal Serializer GetSerializer(object obj)
 		{
 			return GetSerializer(GetSerializerIndex(obj));
 		}
@@ -155,14 +153,6 @@ namespace SafetySharp.Runtime.Serialization
 			Requires.NotNull(objectTable, nameof(objectTable));
 			Requires.NotNull(writer, nameof(writer));
 
-			// Write the serializer types that are required to deserialize the object table
-			writer.Write(_serializers.Count);
-			foreach (var serializer in _serializers)
-			{
-				// ReSharper disable once AssignNullToNotNullAttribute
-				writer.Write(serializer.GetType().AssemblyQualifiedName);
-			}
-
 			// Serialize the objects contained in the table
 			writer.Write(objectTable.Count);
 			foreach (var obj in objectTable)
@@ -181,11 +171,6 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			Requires.NotNull(reader, nameof(reader));
 
-			// Read the serializer types that are required to deserialize the object table
-			var serializerCount = reader.ReadInt32();
-			for (var i = 0; i < serializerCount; ++i)
-				RegisterSerializer((Serializer)Activator.CreateInstance(Type.GetType(reader.ReadString(), throwOnError: true)));
-
 			// Deserialize the objects contained in the table
 			var objects = new object[reader.ReadInt32()];
 			for (var i = 0; i < objects.Length; ++i)
@@ -195,44 +180,6 @@ namespace SafetySharp.Runtime.Serialization
 			}
 
 			return new ObjectTable(objects);
-		}
-
-		/// <summary>
-		///   Gets all <see cref="IComponent" /> instances referenced by <paramref name="component" />, excluding
-		///   <paramref name="component" /> itself.
-		/// </summary>
-		/// <param name="component">The component the referenced subcomponent should be returned for.</param>
-		internal IEnumerable<Component> GetSubcomponents(Component component)
-		{
-			Requires.NotNull(component, nameof(component));
-
-			var subcomponents = new HashSet<Component>();
-			GetSubcomponents(subcomponents, component);
-
-			// Some objects may have backward references to the component itself, so we have to remove it here
-			subcomponents.Remove(component);
-			return subcomponents;
-		}
-
-		/// <summary>
-		///   Adds all subcomponents referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself, to the set of
-		///   <paramref name="subcomponents" />.
-		/// </summary>
-		/// <param name="subcomponents">The set of referenced objects.</param>
-		/// <param name="obj">The object the referenced objects should be returned for.</param>
-		private void GetSubcomponents(HashSet<Component> subcomponents, object obj)
-		{
-			foreach (var referencedObject in GetSerializer(obj).GetReferencedObjects(obj, SerializationMode.Full))
-			{
-				if (referencedObject == null)
-					continue;
-
-				var component = referencedObject as Component;
-				if (component != null && !component.GetType().HasAttribute<FaultEffectAttribute>())
-					subcomponents.Add(component);
-				else
-					GetSubcomponents(subcomponents, referencedObject);
-			}
 		}
 
 		/// <summary>

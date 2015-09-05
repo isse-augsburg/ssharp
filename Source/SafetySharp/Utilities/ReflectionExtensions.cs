@@ -27,6 +27,8 @@ namespace SafetySharp.Utilities
 	using System.Linq;
 	using System.Reflection;
 	using System.Runtime.InteropServices;
+	using Modeling;
+	using Runtime.Serialization;
 
 	/// <summary>
 	///   Provides extension methods for reflection scenarios.
@@ -146,11 +148,39 @@ namespace SafetySharp.Utilities
 		public static int GetUnmanagedSize(this Type type)
 		{
 			Requires.NotNull(type, nameof(type));
-			Requires.That(type.IsEnum || type.IsPrimitive || type.IsPointer, nameof(type), 
+			Requires.That(type.IsEnum || type.IsPrimitive || type.IsPointer, nameof(type),
 				$"Expected an enum or primitive type instead of '{type.FullName}'.");
 
 			type = type.IsEnum ? type.GetEnumUnderlyingType() : type;
 			return Marshal.SizeOf(type);
+		}
+
+		/// <summary>
+		///   Checks whether the <paramref name="member" /> is hidden in the serialization <paramref name="mode" />, depending on
+		///   whether <paramref name="discoveringObjects" /> is <c>true</c>.
+		/// </summary>
+		/// <param name="member">The member whose visibility should be determined.</param>
+		/// <param name="mode">The serialization mode the visibility should be determined for.</param>
+		/// <param name="discoveringObjects">Indicates whether objects are being discovered.</param>
+		public static bool IsHidden(this MemberInfo member, SerializationMode mode, bool discoveringObjects)
+		{
+			// Don't try to serialize members that are explicitly marked as non-serializable
+			if (member.HasAttribute<NonSerializable>())
+				return true;
+
+			// If we're discovering objects in optimized mode and the member is explicitly marked as non-discoverable, it is hidden
+			if (mode == SerializationMode.Optimized && discoveringObjects && member.HasAttribute<NonDiscoverable>())
+				return true;
+
+			// Read-only fields are implicitly marked with [Hidden]
+			var fieldInfo = member as FieldInfo;
+			var isHidden = member.HasAttribute<HiddenAttribute>() || (fieldInfo != null && fieldInfo.IsInitOnly);
+
+			// If the member is hidden, only ignore it in optimized serializations when we're not discovering objects
+			if (mode == SerializationMode.Optimized && !discoveringObjects && isHidden)
+				return true;
+
+			return false;
 		}
 	}
 }

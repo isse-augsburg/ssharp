@@ -24,6 +24,7 @@ namespace Tests.Serialization.RuntimeModels
 {
 	using System;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
 
 	internal class SubcomponentArray : RuntimeModelTest
@@ -55,10 +56,10 @@ namespace Tests.Serialization.RuntimeModels
 			((C2)((D)root).C[1]).L.ShouldBe(Int64.MaxValue);
 			((C1<bool>)((D)root).C[2]).F.ShouldBe(true);
 
-			root.Subcomponents.ShouldBe(new[] { ((D)root).C[0], ((D)root).C[1], ((D)root).C[2] });
-			((Component)((D)root).C[0]).Subcomponents.ShouldBeEmpty();
-			((Component)((D)root).C[1]).Subcomponents.ShouldBeEmpty();
-			((Component)((D)root).C[2]).Subcomponents.ShouldBeEmpty();
+			root.GetSubcomponents().ShouldBe(new[] { ((D)root).C[0], ((D)root).C[1], ((D)root).C[2] });
+			((Component)((D)root).C[0]).GetSubcomponents().ShouldBeEmpty();
+			((Component)((D)root).C[1]).GetSubcomponents().ShouldBeEmpty();
+			((Component)((D)root).C[2]).GetSubcomponents().ShouldBeEmpty();
 
 			_hasConstructorRun.ShouldBe(false);
 		}

@@ -45,7 +45,7 @@ namespace Tests.Serialization.RuntimeModels
 			((D)root).C.ShouldBe(null);
 		}
 
-		[NotSerialized]
+		[NonSerializable]
 		private class C
 		{
 			public int F;

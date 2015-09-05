@@ -22,8 +22,8 @@
 
 namespace Tests.Serialization.RuntimeModels
 {
-	using System.Linq;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
 
 	internal class Faults : RuntimeModelTest
@@ -32,7 +32,7 @@ namespace Tests.Serialization.RuntimeModels
 
 		protected override void Check()
 		{
-			var c = new C ();
+			var c = new C();
 			var m = new Model(c);
 
 			((C.Effect1)c.FaultEffects[0]).F = 17;
@@ -47,7 +47,7 @@ namespace Tests.Serialization.RuntimeModels
 
 			var root = RootComponents[0];
 			root.ShouldBeOfType<C>();
-			root.Subcomponents.ShouldBeEmpty();
+			root.GetSubcomponents().ShouldBeEmpty();
 
 			((C)root).F1.ShouldBeOfType<TransientFault>();
 			((C)root).F2.ShouldBeOfType<PersistentFault>();
@@ -74,16 +74,14 @@ namespace Tests.Serialization.RuntimeModels
 				F2.AddEffect<Effect2>(this);
 			}
 
-			public virtual void M() { }
+			public virtual void M()
+			{
+			}
 
 			[FaultEffect]
-			public sealed class Effect1 : C, IFaultEffect// Todo: Generate interface implementation automatically
+			public sealed class Effect1 : C, IFaultEffect // Todo: Generate interface implementation automatically
 			{
 				public int F;
-
-				public override void M()
-				{
-				}
 
 				/// <summary>
 				///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.
@@ -94,29 +92,35 @@ namespace Tests.Serialization.RuntimeModels
 				///   Gets or sets the <see cref="Fault" /> instance that determines whether the fault effect is active.
 				/// </summary>
 				public Fault Fault { get; set; }
-			}
-
-			[FaultEffect]
-			public sealed class Effect2 : C, IFaultEffect// Todo: Generate interface implementation automatically
-			{
-				public int F;
 
 				public override void M()
 				{
-				}/// <summary>
-				 ///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.
-				 /// </summary>
+				}
+			}
+
+			[FaultEffect]
+			public sealed class Effect2 : C, IFaultEffect // Todo: Generate interface implementation automatically
+			{
+				public int F;
+
+				/// <summary>
+				///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.
+				/// </summary>
 				public Component Component { get; set; }
 
 				/// <summary>
 				///   Gets or sets the <see cref="Fault" /> instance that determines whether the fault effect is active.
 				/// </summary>
 				public Fault Fault { get; set; }
+
+				public override void M()
+				{
+				}
 			}
 
 			// Unused
 			[FaultEffect]
-			public sealed class Effect3 : C, IFaultEffect// Todo: Generate interface implementation automatically
+			public sealed class Effect3 : C, IFaultEffect // Todo: Generate interface implementation automatically
 			{
 				/// <summary>
 				///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.

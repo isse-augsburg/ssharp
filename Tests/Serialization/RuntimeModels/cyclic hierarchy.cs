@@ -23,6 +23,7 @@
 namespace Tests.Serialization.RuntimeModels
 {
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
 
 	internal class CyclicHierarchy : RuntimeModelTest
@@ -50,8 +51,8 @@ namespace Tests.Serialization.RuntimeModels
 			((D)root).C.D.ShouldBe((D)root);
 			((D)root).C.F.ShouldBe(33);
 
-			root.Subcomponents.ShouldBe(new[] { ((D)root).C });
-			((D)root).C.Subcomponents.ShouldBe(new[] { root });
+			root.GetSubcomponents().ShouldBe(new[] { ((D)root).C });
+			((D)root).C.GetSubcomponents().ShouldBe(new[] { root });
 
 			_hasConstructorRun.ShouldBe(false);
 		}
