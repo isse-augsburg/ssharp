@@ -31,50 +31,44 @@ namespace Tests.Execution.StateMachines
 	{
 		protected override void Check()
 		{
-			var sm = StateMachine.Create(17);
-			(sm == 17).ShouldBe(true);
-			(sm == 13).ShouldBe(false);
-			(sm != 17).ShouldBe(false);
-			(sm != 13).ShouldBe(true);
+			var sm1 = new StateMachine<int>(17);
+			(sm1 == 17).ShouldBe(true);
+			(sm1 == 13).ShouldBe(false);
+			(sm1 != 17).ShouldBe(false);
+			(sm1 != 13).ShouldBe(true);
 
-			(17 == sm).ShouldBe(true);
-			(13 == sm).ShouldBe(false);
-			(17 != sm).ShouldBe(false);
-			(13 != sm).ShouldBe(true);
+			(17 == sm1).ShouldBe(true);
+			(13 == sm1).ShouldBe(false);
+			(17 != sm1).ShouldBe(false);
+			(13 != sm1).ShouldBe(true);
 
-			sm = StateMachine.Create(E.A);
-			(sm == E.A).ShouldBe(true);
-			(sm == E.B).ShouldBe(false);
-			(sm != E.A).ShouldBe(false);
-			(sm != E.B).ShouldBe(true);
+			var sm2 = new StateMachine<E>(E.A);
+			(sm2 == E.A).ShouldBe(true);
+			(sm2 == E.B).ShouldBe(false);
+			(sm2 != E.A).ShouldBe(false);
+			(sm2 != E.B).ShouldBe(true);
 
-			(E.A == sm).ShouldBe(true);
-			(E.B == sm).ShouldBe(false);
-			(E.A != sm).ShouldBe(false);
-			(E.B != sm).ShouldBe(true);
+			(E.A == sm2).ShouldBe(true);
+			(E.B == sm2).ShouldBe(false);
+			(E.A != sm2).ShouldBe(false);
+			(E.B != sm2).ShouldBe(true);
 
-			sm = StateMachine.Create(E.B);
-			(sm == E.B).ShouldBe(true);
-			(sm == E.A).ShouldBe(false);
-			(sm != E.B).ShouldBe(false);
-			(sm != E.A).ShouldBe(true);
+			var sm3 = new StateMachine<E>(E.B);
+			(sm3 == E.B).ShouldBe(true);
+			(sm3 == E.A).ShouldBe(false);
+			(sm3 != E.B).ShouldBe(false);
+			(sm3 != E.A).ShouldBe(true);
 
-			(E.B == sm).ShouldBe(true);
-			(E.A == sm).ShouldBe(false);
-			(E.B != sm).ShouldBe(false);
-			(E.A != sm).ShouldBe(true);
+			(E.B == sm3).ShouldBe(true);
+			(E.A == sm3).ShouldBe(false);
+			(E.B != sm3).ShouldBe(false);
+			(E.A != sm3).ShouldBe(true);
 
 			var e = E.B;
-			(sm == e).ShouldBe(true);
-			(sm != e).ShouldBe(false);
-			(e == sm).ShouldBe(true);
-			(e != sm).ShouldBe(false);
-
-			IConvertible o = E.B;
-			(sm == o).ShouldBe(true);
-			(sm != o).ShouldBe(false);
-			(o == sm).ShouldBe(true);
-			(o != sm).ShouldBe(false);
+			(sm3 == e).ShouldBe(true);
+			(sm3 != e).ShouldBe(false);
+			(e == sm3).ShouldBe(true);
+			(e != sm3).ShouldBe(false);
 		}
 
 		private enum E

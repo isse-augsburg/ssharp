@@ -37,7 +37,7 @@ namespace Tests.LtsMin.Invariants.NotViolated
 
 		private class D : Component
 		{
-			public readonly StateMachine StateMachine = StateMachine.Create(S.A);
+			public readonly StateMachine<S> StateMachine = new StateMachine<S>(S.A);
 
 			public override void Update()
 			{

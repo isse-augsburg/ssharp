@@ -54,7 +54,8 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			var isLifted = false;
 
-			if (expression.Expression.GetExpressionType(SemanticModel).TypeKind != TypeKind.Array)
+			var kind = expression.Expression.GetExpressionType(SemanticModel).TypeKind;
+			if (kind != TypeKind.Array && kind != TypeKind.Pointer)
 			{
 				var propertySymbol = expression.GetReferencedSymbol(SemanticModel) as IPropertySymbol;
 				if (propertySymbol != null)

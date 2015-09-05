@@ -40,19 +40,19 @@ namespace SafetySharp.Compiler.Normalization
 	public sealed class TransitionNormalizer : SyntaxNormalizer
 	{
 		/// <summary>
-		///   The name of the generated choice array variable.
+		///   The name of the generated choice variable.
 		/// </summary>
-		private readonly string _choiceArrayVariable = "choices".ToSynthesized();
+		private readonly string _choiceVariable = "choice".ToSynthesized();
 
 		/// <summary>
-		///   The name of the generated choice count variable.
+		///   The name of the generated transitions count variable.
 		/// </summary>
-		private readonly string _choiceCountVariable = "choiceCount".ToSynthesized();
+		private readonly string _countVariable = "transitionsCount".ToSynthesized();
 
 		/// <summary>
 		///   The global name of the <see cref="StateMachineExtensions" /> type.
 		/// </summary>
-		private readonly string _stateMachineExtensionsType = typeof(StateMachineExtensions).GetGlobalName();
+		private readonly string _extensionType = typeof(StateMachineExtensions).GetGlobalName();
 
 		/// <summary>
 		///   The name of the generated state machine variable.
@@ -60,23 +60,14 @@ namespace SafetySharp.Compiler.Normalization
 		private readonly string _stateMachineVariable = "stateMachine".ToSynthesized();
 
 		/// <summary>
+		///   The name of the generated transitions array variable.
+		/// </summary>
+		private readonly string _transitionsVariable = "transitions".ToSynthesized();
+
+		/// <summary>
 		///   The writer that is used to generate the code.
 		/// </summary>
 		private readonly CodeWriter _writer = new CodeWriter();
-
-		/// <summary>
-		///   Represents the <see cref="StateMachine" /> type.
-		/// </summary>
-		private INamedTypeSymbol _stateMachineType;
-
-		/// <summary>
-		///   Normalizes the syntax trees of the <see cref="Compilation" />.
-		/// </summary>
-		protected override Compilation Normalize()
-		{
-			_stateMachineType = Compilation.GetTypeSymbol(typeof(StateMachine));
-			return base.Normalize();
-		}
 
 		/// <summary>
 		///   Normalizes the <paramref name="statement" />.
@@ -93,10 +84,10 @@ namespace SafetySharp.Compiler.Normalization
 			// we have to replace all of that by the generated transition code
 
 			if (statement.Expression.Kind() != SyntaxKind.InvocationExpression)
-				return statement; // no nested rewritings
+				return statement; // no nested normalizations
 
 			var methodSymbol = statement.Expression.GetReferencedSymbol<IMethodSymbol>(SemanticModel);
-			if (methodSymbol.Name != nameof(StateMachine.Transition) || !methodSymbol.ContainingType.Equals(_stateMachineType))
+			if (methodSymbol.IsTransitionMethod(SemanticModel))
 				return statement;
 
 			ExpressionSyntax stateMachine;
@@ -108,82 +99,70 @@ namespace SafetySharp.Compiler.Normalization
 			{
 				_writer.AppendLine($"#line {stateMachine.GetLineNumber()}");
 				_writer.AppendLine($"var {_stateMachineVariable} = {stateMachine.RemoveTrivia().ToFullString()};");
+				_writer.AppendLine($"var {_choiceVariable} = {_extensionType}.GetChoice({_stateMachineVariable});");
+				_writer.NewLine();
+
+				_writer.AppendLine($"var {_transitionsVariable} = stackalloc int[{transitions.Count}];");
+				_writer.AppendLine($"var {_countVariable} = 0;");
+				_writer.NewLine();
+
+				GenerateTransitionSelection(transitions);
 
 				_writer.AppendLine("#line hidden");
-				_writer.AppendLine($"switch ({_stateMachineExtensionsType}.GetState({_stateMachineVariable}))");
-				_writer.AppendBlockStatement(() => GenerateTransitionSections(transitions));
+				_writer.AppendLine($"if ({_countVariable} != 0)");
+				_writer.AppendBlockStatement(() =>
+				{
+					_writer.AppendLine($"switch ({_transitionsVariable}[{_choiceVariable}.ChooseIndex({_countVariable})])");
+					_writer.AppendBlockStatement(() => GenerateTransitionSections(transitions));
+				});
 			});
 
 			return SyntaxFactory.ParseStatement(_writer.ToString()).EnsureLineCount(statement);
 		}
 
 		/// <summary>
-		///   Generates the sections of the main transition table switch statement.
+		///   Generates the code that selects the transitions.
+		/// </summary>
+		private void GenerateTransitionSelection(List<Transition> transitions)
+		{
+			for (var i = 0; i < transitions.Count; ++i)
+			{
+				var transition = transitions[i];
+
+				WriteLineNumber(transition.SourceLineNumber);
+				_writer.AppendLine($"if ({_extensionType}.IsInState({_stateMachineVariable}, {transition.SourceState.ToFullString()}))");
+				_writer.AppendBlockStatement(() =>
+				{
+					WriteLineNumber(transition.GuardLineNumber);
+					_writer.AppendLine($"if ({transition.Guard.ToFullString()})");
+					_writer.AppendBlockStatement(() =>
+					{
+						_writer.AppendLine("#line hidden");
+						_writer.AppendLine($"{_transitionsVariable}[{_countVariable}++] = {i};");
+					});
+				});
+				_writer.NewLine();
+			}
+		}
+
+		/// <summary>
+		///   Generates the transition sections.
 		/// </summary>
 		private void GenerateTransitionSections(List<Transition> transitions)
 		{
-			foreach (var transitionGroup in transitions.GroupBy(t => t.SourceState))
+			for (var i = 0; i < transitions.Count; ++i)
 			{
-				var transitionsInGroup = transitionGroup.ToArray();
-				_writer.AppendLine($"case (int){transitionsInGroup[0].SourceStateExpression}:");
+				var transition = transitions[i];
+
+				_writer.AppendLine($"case {i}:");
 				_writer.AppendBlockStatement(() =>
 				{
-					if (transitionsInGroup.Length == 1)
-						GenerateSingleTransition(transitionsInGroup[0]);
-					else
-						GenerateMultipleTransitions(transitionsInGroup);
+					GenerateTransitionEffect(transition);
+
+					_writer.AppendLine("#line hidden");
+					_writer.AppendLine("break;");
 				});
 			}
-		}
-
-		/// <summary>
-		///   Generates the code for multiple transitions from a source state.
-		/// </summary>
-		private void GenerateMultipleTransitions(Transition[] transitions)
-		{
-			_writer.AppendLine("#line hidden");
-			_writer.AppendLine($"var {_choiceArrayVariable} = stackalloc int[{transitions.Length}];");
-			_writer.AppendLine($"var {_choiceCountVariable} = 0;");
-			_writer.NewLine();
-
-			for (var i = 0; i < transitions.Length; ++i)
-			{
-				WriteLineNumber(transitions[i].GuardLineNumber);
-				_writer.AppendLine($"if ({transitions[i].Guard.ToFullString()})");
-				_writer.IncreaseIndent();
-				_writer.AppendLine("#line hidden");
-				_writer.AppendLine($"{_choiceArrayVariable}[{_choiceCountVariable}++] = {i};");
-				_writer.DecreaseIndent();
-			}
-
-			_writer.NewLine();
-			_writer.AppendLine(
-				$"switch ({_choiceArrayVariable}[{_stateMachineExtensionsType}.GetChoice({_stateMachineVariable}).ChooseIndex({_choiceCountVariable})])");
-			_writer.AppendBlockStatement(() =>
-			{
-				for (var i = 0; i < transitions.Length; ++i)
-				{
-					_writer.AppendLine($"case {i}:");
-					_writer.AppendBlockStatement(() =>
-					{
-						GenerateTransitionEffect(transitions[i]);
-						_writer.AppendLine("break;");
-					});
-				}
-			});
-
-			_writer.AppendLine("break;");
-		}
-
-		/// <summary>
-		///   Generates the code for a single transition from a source state.
-		/// </summary>
-		private void GenerateSingleTransition(Transition transition)
-		{
-			WriteLineNumber(transition.GuardLineNumber);
-			_writer.AppendLine($"if ({transition.Guard.ToFullString()})");
-			_writer.AppendBlockStatement(() => GenerateTransitionEffect(transition));
-			_writer.AppendLine("break;");
 		}
 
 		/// <summary>
@@ -191,9 +170,6 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private void GenerateTransitionEffect(Transition transition)
 		{
-			_writer.AppendLine("#line hidden");
-			_writer.AppendLine(
-				$"{_stateMachineExtensionsType}.ChangeState({_stateMachineVariable}, (int){transition.TargetStateExpression.ToFullString()});");
 			WriteLineNumber(transition.ActionLineNumber);
 
 			// We have to be careful when writing out the action: If it contains any return statements,
@@ -209,7 +185,9 @@ namespace SafetySharp.Compiler.Normalization
 			else
 				_writer.AppendLine($"{transition.Action.ToFullString()}");
 
-			_writer.AppendLine("#line hidden");
+			WriteLineNumber(transition.TargetLineNumber);
+			_writer.AppendLine(
+				$"{_extensionType}.ChangeState({_stateMachineVariable}, {_choiceVariable}.Choose({transition.TargetState.ToFullString()}));");
 		}
 
 		/// <summary>
@@ -224,7 +202,7 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Collects all calls to <see cref="StateMachine.Transition{TSourceState,TTargetState}" /> within
+		///   Collects all calls to <see cref="StateMachine{TState}.Transition" /> within
 		///   <paramref name="expression" />.
 		/// </summary>
 		private List<Transition> DecomposeTransitionChain(InvocationExpressionSyntax expression, out ExpressionSyntax stateMachine)
@@ -244,7 +222,7 @@ namespace SafetySharp.Compiler.Normalization
 
 				expression = (InvocationExpressionSyntax)memberAccess.Expression;
 				var methodSymbol = expression.GetReferencedSymbol<IMethodSymbol>(SemanticModel);
-				if (methodSymbol.Name != nameof(StateMachine.Transition) || !methodSymbol.ContainingType.Equals(_stateMachineType))
+				if (methodSymbol.IsTransitionMethod(SemanticModel))
 				{
 					stateMachine = expression;
 					break;
@@ -263,19 +241,18 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			var transition = new Transition();
 
-			ArgumentSyntax sources = null;
-			ArgumentSyntax targets = null;
-
 			foreach (var argument in arguments.Arguments)
 			{
 				var parameter = argument.GetParameterSymbol(SemanticModel);
 				switch (parameter.Name)
 				{
 					case "from":
-						sources = argument;
+						transition.SourceState = RemoveArrayCreation(argument.Expression);
+						transition.SourceLineNumber = argument.GetLineNumber();
 						break;
 					case "to":
-						targets = argument;
+						transition.TargetState = RemoveArrayCreation(argument.Expression);
+						transition.TargetLineNumber = argument.GetLineNumber();
 						break;
 					case "guard":
 						transition.Guard = argument.Expression;
@@ -307,20 +284,23 @@ namespace SafetySharp.Compiler.Normalization
 			if (transition.Action == null)
 				transition.Action = SyntaxFactory.Block();
 
-			var sourceStates = sources.Descendants<MemberAccessExpressionSyntax>();
-			var targetStates = targets.Descendants<MemberAccessExpressionSyntax>();
+			transitions.Add(transition);
+		}
 
-			foreach (var sourceState in sourceStates)
-			{
-				foreach (var targetState in targetStates)
-				{
-					transition.SourceStateExpression = sourceState;
-					transition.TargetStateExpression = targetState;
-					transition.SourceState = (int)SemanticModel.GetConstantValue(sourceState).Value;
+		/// <summary>
+		///   If the expression is an array creation expression, makes the array creation implicit to optimize the code.
+		/// </summary>
+		private static SeparatedSyntaxList<ExpressionSyntax> RemoveArrayCreation(ExpressionSyntax expression)
+		{
+			var explicitCreation = expression as ArrayCreationExpressionSyntax;
+			if (explicitCreation != null)
+				return explicitCreation.Initializer.Expressions;
 
-					transitions.Add(transition);
-				}
-			}
+			var implicitCreation = expression as ImplicitArrayCreationExpressionSyntax;
+			if (implicitCreation != null)
+				return implicitCreation.Initializer.Expressions;
+
+			return SyntaxFactory.SingletonSeparatedList(expression);
 		}
 
 		/// <summary>
@@ -328,11 +308,12 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private struct Transition
 		{
-			public int SourceState;
-			public ExpressionSyntax SourceStateExpression;
-			public ExpressionSyntax TargetStateExpression;
+			public SeparatedSyntaxList<ExpressionSyntax> SourceState;
+			public SeparatedSyntaxList<ExpressionSyntax> TargetState;
 			public ExpressionSyntax Guard;
 			public StatementSyntax Action;
+			public int SourceLineNumber;
+			public int TargetLineNumber;
 			public int GuardLineNumber;
 			public int ActionLineNumber;
 		}

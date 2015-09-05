@@ -129,6 +129,7 @@
       <Link>Properties\InternalsVisibleTo.cs</Link>
     </Compile>
     <Compile Include="Execution\StateMachines\comparisons.cs" />
+    <Compile Include="Execution\StateMachines\multiple initial states.cs" />
     <Compile Include="Execution\StateMachines\return in action.cs" />
     <Compile Include="Execution\StateMachines\multiple transition states.cs" />
     <Compile Include="Execution\StateMachines\initial state.cs" />

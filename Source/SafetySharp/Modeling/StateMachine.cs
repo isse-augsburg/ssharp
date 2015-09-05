@@ -23,21 +23,42 @@
 namespace SafetySharp.Modeling
 {
 	using System;
-	using System.Globalization;
+	using System.Collections.Generic;
+	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Utilities;
 
 	/// <summary>
 	///   Represents a state machine that transitions between various states.
 	/// </summary>
-	public sealed class StateMachine
+	/// <typeparam name="TState">The type of the state machine's states.</typeparam>
+	public sealed class StateMachine<TState>
 	{
+		/// <summary>
+		///   The initial states of the state machine.
+		/// </summary>
+		private readonly TState[] _initialStates;
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		private StateMachine()
+		/// <param name="initialStates">The initial states of the state machine.</param>
+		public StateMachine(params TState[] initialStates)
 		{
+			Requires.NotNull(initialStates, nameof(initialStates));
+			Requires.That(initialStates.Length > 0, nameof(initialStates), "The state machine must have at least one initial state.");
+
+			_initialStates = initialStates;
+
+			// Copy the initial states to the property in order to avoid external modifications
+			InitialStates = _initialStates.ToArray();
+			State = _initialStates[0]; // TODO: Nondeterministic selection of initial states
 		}
+
+		/// <summary>
+		///   Gets the initial states of the state machine.
+		/// </summary>
+		public IEnumerable<TState> InitialStates { get; }
 
 		/// <summary>
 		///   Gets the state machine's choice object that is used to resolve nondeterministic transitions.
@@ -45,16 +66,14 @@ namespace SafetySharp.Modeling
 		internal Choice Choice { get; } = new Choice();
 
 		/// <summary>
-		///   Gets or sets the current state of the state machine.
+		///   Gets the current state of the state machine.
 		/// </summary>
-		internal int State { get; set; }
+		public TState State { get; internal set; }
 
 		/// <summary>
 		///   Transitions the state machine to the target state executing the <paramref name="action" />, provided that the state
 		///   machine is in the source state and the <paramref name="guard" /> holds.
 		/// </summary>
-		/// <typeparam name="TSourceState">The type of the source state.</typeparam>
-		/// <typeparam name="TTargetState">The type of the target state.</typeparam>
 		/// <param name="from">The source state that should be left by the transition.</param>
 		/// <param name="to">The target state that should be entered by the transition.</param>
 		/// <param name="guard">
@@ -64,22 +83,67 @@ namespace SafetySharp.Modeling
 		///   The action that should be executed when the transition is taken. A value of <c>null</c> indicates that
 		///   no action should be performed when the transition is taken.
 		/// </param>
-		public StateMachine Transition<TSourceState, TTargetState>(TSourceState from, TTargetState to, bool guard = true, Action action = null)
-			where TSourceState : struct, IConvertible
-			where TTargetState : struct, IConvertible
+		public StateMachine<TState> Transition(TState from, TState to, bool guard = true, Action action = null)
 		{
 			Requires.CompilationTransformation();
 			return this;
 		}
 
 		/// <summary>
-		///   Creates a new state machine with the given <paramref name="initialState" />.
+		///   Transitions the state machine to any of the target states executing the <paramref name="action" />, provided that the
+		///   state machine is in the source state and the <paramref name="guard" /> holds.
 		/// </summary>
-		/// <param name="initialState">The initial state of the state machine.</param>
-		public static StateMachine Create<TState>(TState initialState)
-			where TState : struct, IConvertible
+		/// <param name="from">The source state that should be left by the transition.</param>
+		/// <param name="to">The target states that should be entered by the transition.</param>
+		/// <param name="guard">
+		///   The guard that determines whether the transition can be taken. <c>true</c> by default.
+		/// </param>
+		/// <param name="action">
+		///   The action that should be executed when the transition is taken. A value of <c>null</c> indicates that
+		///   no action should be performed when the transition is taken.
+		/// </param>
+		public StateMachine<TState> Transition(TState from, TState[] to, bool guard = true, Action action = null)
 		{
-			return new StateMachine { State = initialState.ToInt32(CultureInfo.InvariantCulture) };
+			Requires.CompilationTransformation();
+			return this;
+		}
+
+		/// <summary>
+		///   Transitions the state machine to the target state executing the <paramref name="action" />, provided that the state
+		///   machine is in any of the source states and the <paramref name="guard" /> holds.
+		/// </summary>
+		/// <param name="from">The source states that should be left by the transition.</param>
+		/// <param name="to">The target state that should be entered by the transition.</param>
+		/// <param name="guard">
+		///   The guard that determines whether the transition can be taken. <c>true</c> by default.
+		/// </param>
+		/// <param name="action">
+		///   The action that should be executed when the transition is taken. A value of <c>null</c> indicates that
+		///   no action should be performed when the transition is taken.
+		/// </param>
+		public StateMachine<TState> Transition(TState[] from, TState to, bool guard = true, Action action = null)
+		{
+			Requires.CompilationTransformation();
+			return this;
+		}
+
+		/// <summary>
+		///   Transitions the state machine to any of the target states executing the <paramref name="action" />, provided that the
+		///   state machine is in any of the source states and the <paramref name="guard" /> holds.
+		/// </summary>
+		/// <param name="from">The source states that should be left by the transition.</param>
+		/// <param name="to">The target states that should be entered by the transition.</param>
+		/// <param name="guard">
+		///   The guard that determines whether the transition can be taken. <c>true</c> by default.
+		/// </param>
+		/// <param name="action">
+		///   The action that should be executed when the transition is taken. A value of <c>null</c> indicates that
+		///   no action should be performed when the transition is taken.
+		/// </param>
+		public StateMachine<TState> Transition(TState[] from, TState[] to, bool guard = true, Action action = null)
+		{
+			Requires.CompilationTransformation();
+			return this;
 		}
 
 		/// <summary>
@@ -87,10 +151,10 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		/// <param name="stateMachine">The state machine that should be checked.</param>
 		/// <param name="state">The state the state machine should be in.</param>
-		public static bool operator ==(StateMachine stateMachine, IConvertible state)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool operator ==(StateMachine<TState> stateMachine, TState state)
 		{
-			Requires.CompilationTransformation();
-			return false;
+			return EqualityComparer<TState>.Default.Equals(stateMachine.State, state);
 		}
 
 		/// <summary>
@@ -98,30 +162,10 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		/// <param name="stateMachine">The state machine that should be checked.</param>
 		/// <param name="state">The state the state machine should not be in.</param>
-		public static bool operator !=(StateMachine stateMachine, IConvertible state)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool operator !=(StateMachine<TState> stateMachine, TState state)
 		{
-			Requires.CompilationTransformation();
-			return false;
-		}
-
-		/// <summary>
-		///   Gets a value indicating whether the state machine is in the given <paramref name="state" />.
-		/// </summary>
-		/// <param name="stateMachine">The state machine that should be checked.</param>
-		/// <param name="state">The state the state machine should be in.</param>
-		public static bool operator ==(StateMachine stateMachine, int state)
-		{
-			return stateMachine.State == state;
-		}
-
-		/// <summary>
-		///   Gets a value indicating whether the state machine is not in the given <paramref name="state" />.
-		/// </summary>
-		/// <param name="stateMachine">The state machine that should be checked.</param>
-		/// <param name="state">The state the state machine should not be in.</param>
-		public static bool operator !=(StateMachine stateMachine, int state)
-		{
-			return stateMachine.State != state;
+			return !(stateMachine == state);
 		}
 
 		/// <summary>
@@ -129,10 +173,10 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		/// <param name="state">The state the state machine should be in.</param>
 		/// <param name="stateMachine">The state machine that should be checked.</param>
-		public static bool operator ==(IConvertible state, StateMachine stateMachine)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool operator ==(TState state, StateMachine<TState> stateMachine)
 		{
-			Requires.CompilationTransformation();
-			return false;
+			return stateMachine == state;
 		}
 
 		/// <summary>
@@ -140,30 +184,10 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		/// <param name="state">The state the state machine should not be in.</param>
 		/// <param name="stateMachine">The state machine that should be checked.</param>
-		public static bool operator !=(IConvertible state, StateMachine stateMachine)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool operator !=(TState state, StateMachine<TState> stateMachine)
 		{
-			Requires.CompilationTransformation();
-			return false;
-		}
-
-		/// <summary>
-		///   Gets a value indicating whether the state machine is in the given <paramref name="state" />.
-		/// </summary>
-		/// <param name="state">The state the state machine should be in.</param>
-		/// <param name="stateMachine">The state machine that should be checked.</param>
-		public static bool operator ==(int state, StateMachine stateMachine)
-		{
-			return stateMachine.State == state;
-		}
-
-		/// <summary>
-		///   Gets a value indicating whether the state machine is not in the given <paramref name="state" />.
-		/// </summary>
-		/// <param name="state">The state the state machine should not be in.</param>
-		/// <param name="stateMachine">The state machine that should be checked.</param>
-		public static bool operator !=(int state, StateMachine stateMachine)
-		{
-			return stateMachine.State != state;
+			return !(stateMachine == state);
 		}
 
 		/// <summary>

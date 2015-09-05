@@ -30,7 +30,7 @@ namespace Tests.Execution.StateMachines
 	{
 		protected override void Check()
 		{
-			var sm = StateMachine.Create(S.A);
+			var sm = new StateMachine<S>(S.A);
 
 			sm.Transition(
 				from: S.A,

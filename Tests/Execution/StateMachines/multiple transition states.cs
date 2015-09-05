@@ -29,15 +29,15 @@ namespace Tests.Execution.StateMachines
 
 	public class MultipleTransitionStates : TestObject
 	{
-		private readonly StateMachine _sm = StateMachine.Create(E.A);
+		private readonly StateMachine<E> _sm = new StateMachine<E>(E.A);
 
 		protected override void Check()
 		{
-			_sm.ChangeState((int)E.A);
+			_sm.ChangeState(E.A);
 			MultipleSourceStates();
 			(_sm == E.C).ShouldBe(true);
 
-			_sm.ChangeState((int)E.B);
+			_sm.ChangeState(E.B);
 			MultipleSourceStates();
 			(_sm == E.C).ShouldBe(true);
 		}
@@ -45,7 +45,7 @@ namespace Tests.Execution.StateMachines
 		private void MultipleSourceStates()
 		{
 			_sm.Transition(
-				from: E.A | E.B,
+				from: new[] { E.A, E.B },
 				to: E.C);
 		}
 

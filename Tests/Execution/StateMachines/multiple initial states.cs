@@ -26,24 +26,22 @@ namespace Tests.Execution.StateMachines
 	using Shouldly;
 	using Utilities;
 
-	public class InitialState : TestObject
+	public class MultipleInitialStates : TestObject
 	{
 		protected override void Check()
 		{
-			var sm1 = new StateMachine<int>(17);
-			(sm1 == 17).ShouldBe(true);
+			var sm1 = new StateMachine<int>(17, 18);
+			sm1.InitialStates.ShouldBe(new[] { 17, 18 });
 
-			var sm2 = new StateMachine<E>(E.A);
-			(sm2 == E.A).ShouldBe(true);
-
-			var sm3 = new StateMachine<E>(E.B);
-			(sm3 == E.B).ShouldBe(true);
+			var sm2 = new StateMachine<E>(E.A, E.B, E.C);
+			sm2.InitialStates.ShouldBe(new[] { E.A, E.B, E.C });
 		}
 
 		private enum E
 		{
 			A,
-			B
+			B,
+			C
 		}
 	}
 }

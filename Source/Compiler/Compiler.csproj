@@ -110,7 +110,6 @@
     <Compile Include="CompilationException.cs" />
     <Compile Include="Compiler.cs" />
     <Compile Include="Normalization\TransitionNormalizer.cs" />
-    <Compile Include="Normalization\StateComparisonNormalizer.cs" />
     <Compile Include="Normalization\FormulaNormalizer.cs" />
     <Compile Include="Normalization\LiftedExpressionNormalizer.cs" />
     <Compile Include="Normalization\LineDirectiveNormalizer.cs" />
@@ -137,6 +136,7 @@
     <Compile Include="Roslyn\Syntax\MemberAccessExpressionExtensions.cs" />
     <Compile Include="Roslyn\Syntax\MethodDeclarationExtensions.cs" />
     <Compile Include="Roslyn\Syntax\SyntaxBuilder.cs" />
+    <Compile Include="Roslyn\Syntax\ExpressionSyntaxExtensions.cs" />
     <Compile Include="Roslyn\Syntax\SyntaxNodeExtensions.cs" />
     <Compile Include="Roslyn\Syntax\SyntaxTokenExtensions.cs" />
     <Compile Include="Roslyn\Syntax\SyntaxTokenListExtensions.cs" />

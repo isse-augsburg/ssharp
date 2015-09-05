@@ -38,13 +38,13 @@ namespace Tests.LtsMin.Invariants.Violated
 
 		private class D : Component
 		{
-			public readonly StateMachine StateMachine = StateMachine.Create(S.A);
+			public readonly StateMachine<S> StateMachine = new StateMachine<S>(S.A);
 
 			public override void Update()
 			{
 				StateMachine.Transition(
 					from: S.A,
-					to: S.B | S.C);
+					to: new[] { S.B, S.C });
 			}
 		}
 

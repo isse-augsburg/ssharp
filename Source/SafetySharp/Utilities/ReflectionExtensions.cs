@@ -26,6 +26,7 @@ namespace SafetySharp.Utilities
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Reflection;
+	using System.Runtime.InteropServices;
 
 	/// <summary>
 	///   Provides extension methods for reflection scenarios.
@@ -136,6 +137,20 @@ namespace SafetySharp.Utilities
 		{
 			Requires.NotNull(type, nameof(type));
 			return $"global::{type.FullName}";
+		}
+
+		/// <summary>
+		///   Gets the unmanaged size of the primitive or enum <paramref name="type" />.
+		/// </summary>
+		/// <param name="type">The type the unmanaged size should be returned for.</param>
+		public static int GetUnmanagedSize(this Type type)
+		{
+			Requires.NotNull(type, nameof(type));
+			Requires.That(type.IsEnum || type.IsPrimitive || type.IsPointer, nameof(type), 
+				$"Expected an enum or primitive type instead of '{type.FullName}'.");
+
+			type = type.IsEnum ? type.GetEnumUnderlyingType() : type;
+			return Marshal.SizeOf(type);
 		}
 	}
 }

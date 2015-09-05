@@ -146,7 +146,8 @@ namespace SafetySharp.Compiler.Normalization
 			if (argument.Parent.Parent is ElementAccessExpressionSyntax)
 			{
 				var arrayExpression = ((ElementAccessExpressionSyntax)argument.Parent.Parent).Expression;
-				if (SemanticModel.GetTypeInfo(arrayExpression).Type.TypeKind == TypeKind.Array)
+				var kind = SemanticModel.GetTypeInfo(arrayExpression).Type.TypeKind;
+                if (kind == TypeKind.Array || kind == TypeKind.Pointer)
 					return base.VisitArgument(argument);
 			}
 

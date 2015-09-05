@@ -28,7 +28,7 @@ namespace Tests.Execution.StateMachines
 
 	public class ReturnInAction : TestObject
 	{
-		private readonly StateMachine _stateMachine = StateMachine.Create(E.A);
+		private readonly StateMachine<E> _stateMachine = new StateMachine<E>(E.A);
 		private int _x;
 
 		protected override void Check()

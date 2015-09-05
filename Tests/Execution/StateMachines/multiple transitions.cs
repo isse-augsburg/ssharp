@@ -29,11 +29,11 @@ namespace Tests.Execution.StateMachines
 
 	public class MultipleTransition : TestObject
 	{
-		private readonly StateMachine _stateMachine = StateMachine.Create(S.A);
+		private readonly StateMachine<S> _stateMachine = new StateMachine<S>(S.A);
 		private int _x;
 		private int _getCount;
 
-		private StateMachine GetStateMachine(int i)
+		private StateMachine<S> GetStateMachine(int i)
 		{
 			if (i != 17)
 				throw new InvalidOperationException();
@@ -78,17 +78,17 @@ namespace Tests.Execution.StateMachines
 				switch (i % 3)
 				{
 					case 0:
-						(_stateMachine == S.B).ShouldBe(true);
+						_stateMachine.State.ShouldBe(S.B);
 						break;
 					case 1:
-						(_stateMachine == S.C).ShouldBe(true);
+						_stateMachine.State.ShouldBe(S.C);
 						if (oldX < 10)
 							_x.ShouldBe(oldX + 1);
 						else
 							_x.ShouldBe(0);
 						break;
 					case 2:
-						(_stateMachine == S.A).ShouldBe(true);
+						_stateMachine.State.ShouldBe(S.A);
 						break;
 				}
 

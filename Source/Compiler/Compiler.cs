@@ -291,7 +291,6 @@ namespace SafetySharp.Compiler
 			Compilation = Normalizer.ApplyNormalizer<PartialNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<FormulaNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<LiftedExpressionNormalizer>(Compilation, syntaxGenerator);
-			Compilation = Normalizer.ApplyNormalizer<StateComparisonNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<TransitionNormalizer>(Compilation, syntaxGenerator);
 		}
 

@@ -56,6 +56,18 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
+		///   Deterministically returns the <paramref name="value" />. This is a convenience method for generated code and should not be
+		///   used otherwise.
+		/// </summary>
+		/// <param name="value">The value to return.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(T value)
+		{
+			return value;
+		}
+
+		/// <summary>
 		///   Returns either <paramref name="value1" /> or <paramref name="value2" /> nondeterministically.
 		/// </summary>
 		/// <param name="value1">The first value to choose.</param>

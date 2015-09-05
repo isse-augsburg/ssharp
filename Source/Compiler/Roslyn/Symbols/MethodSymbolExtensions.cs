@@ -210,6 +210,21 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		}
 
 		/// <summary>
+		///   Checks whether <paramref name="methodSymbol" /> represents the <see cref="StateMachine{TState}.Transition" /> method.
+		/// </summary>
+		/// <param name="methodSymbol">The method symbol that should be checked.</param>
+		/// <param name="semanticModel">The semantic model that should be used to resolve symbol information.</param>
+		[Pure]
+		public static bool IsTransitionMethod([NotNull] this IMethodSymbol methodSymbol, [NotNull] SemanticModel semanticModel)
+		{
+			Requires.NotNull(methodSymbol, nameof(methodSymbol));
+			Requires.NotNull(semanticModel, nameof(semanticModel));
+
+			return methodSymbol.Name != nameof(StateMachine<int>.Transition) ||
+				   !methodSymbol.ContainingType.OriginalDefinition.Equals(semanticModel.GetTypeSymbol(typeof(StateMachine<>)));
+		}
+
+		/// <summary>
 		///   Checks whether <paramref name="methodSymbol" /> represents a fault effect of a S# fault.
 		/// </summary>
 		/// <param name="methodSymbol">The method symbol that should be checked.</param>

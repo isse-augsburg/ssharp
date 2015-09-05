@@ -32,7 +32,7 @@ namespace PressureTank
 		/// <summary>
 		///   Describes the state of the controller.
 		/// </summary>
-		public enum States
+		public enum State
 		{
 			/// <summary>
 			///   Indicates that the controller is inactive.
@@ -71,6 +71,11 @@ namespace PressureTank
 		private readonly Timer _timer;
 
 		/// <summary>
+		///   Gets the state machine that manages the state of the controller.
+		/// </summary>
+		public readonly StateMachine<State> StateMachine = new StateMachine<State>(State.Inactive);
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="sensor">The sensor that is used to sense the pressure level within the tank.</param>
@@ -84,24 +89,19 @@ namespace PressureTank
 		}
 
 		/// <summary>
-		///   Gets the state machine that manages the state of the controller.
-		/// </summary>
-		public StateMachine StateMachine { get; } = StateMachine.Create(States.Inactive);
-
-		/// <summary>
 		///   Updates the state of the component.
 		/// </summary>
 		public override void Update()
 		{
 			StateMachine
 				.Transition(
-					from: States.Filling,
-					to: States.StoppedByTimer,
+					from: State.Filling,
+					to: State.StoppedByTimer,
 					guard: _timer.HasElapsed(),
 					action: _pump.Disable)
 				.Transition(
-					from: States.Filling,
-					to: States.StoppedBySensor,
+					from: State.Filling,
+					to: State.StoppedBySensor,
 					guard: _sensor.IsFull,
 					action: () =>
 					{
@@ -109,8 +109,8 @@ namespace PressureTank
 						_timer.Stop();
 					})
 				.Transition(
-					from: States.StoppedByTimer | States.StoppedBySensor | States.Inactive,
-					to: States.Filling,
+					from: new[] { State.StoppedByTimer, State.StoppedBySensor, State.Inactive },
+					to: State.Filling,
 					guard: _sensor.IsEmpty,
 					action: () =>
 					{

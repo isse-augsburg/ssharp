@@ -23,6 +23,7 @@
 namespace SafetySharp.Runtime.Serialization
 {
 	using System;
+	using System.Diagnostics;
 	using System.Reflection;
 	using System.Reflection.Emit;
 	using System.Runtime.InteropServices;
@@ -253,7 +254,7 @@ namespace SafetySharp.Runtime.Serialization
 			if (type.IsReferenceType())
 				return OpCodes.Stelem_Ref;
 
-			switch (Marshal.SizeOf(type))
+			switch (type.GetUnmanagedSize())
 			{
 				case 1:
 					return OpCodes.Stelem_I1;
@@ -276,8 +277,8 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			if (type.IsReferenceType())
 				return OpCodes.Ldelem_Ref;
-
-			switch (Marshal.SizeOf(type))
+		
+			switch (type.GetUnmanagedSize())
 			{
 				case 1:
 					return OpCodes.Ldelem_I1;
@@ -415,8 +416,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private static bool IsPrimitiveTypeWithAtMostFourBytes(Type type)
 		{
-			type = type.IsEnum ? type.GetEnumUnderlyingType() : type;
-			return (type.IsPrimitive || type.IsPointer) && Marshal.SizeOf(type) <= 4;
+			return (type.IsPrimitive || type.IsPointer || type.IsEnum) && type.GetUnmanagedSize() <= 4;
 		}
 
 		/// <summary>
@@ -424,8 +424,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private static bool IsPrimitiveTypeWithAtMostEightBytes(Type type)
 		{
-			type = type.IsEnum ? type.GetEnumUnderlyingType() : type;
-			return (type.IsPrimitive || type.IsPointer) && Marshal.SizeOf(type) <= 8;
+			return (type.IsPrimitive || type.IsPointer || type.IsEnum) && type.GetUnmanagedSize() <= 8;
 		}
 	}
 }

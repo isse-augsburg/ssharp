@@ -28,7 +28,7 @@ namespace Tests.Execution.StateMachines
 
 	public class ConflictingVariables : TestObject
 	{
-		private readonly StateMachine _stateMachine = StateMachine.Create(S.A);
+		private readonly StateMachine<S> _stateMachine = new StateMachine<S>(S.A);
 		private int _x;
 		private int _y;
 

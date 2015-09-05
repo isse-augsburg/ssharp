@@ -234,7 +234,7 @@ namespace SafetySharp.Utilities
 		/// </summary>
 		public static void CompilationTransformation([CallerMemberName] string caller = null)
 		{
-			throw new NotSupportedException($"{caller} cannot be called at runtime. Use the S# compiler to compile the assembly.");
+			throw new NotSupportedException($"Member '{caller}' cannot be called at runtime. Use the S# compiler to compile the assembly.");
 		}
 	}
 }

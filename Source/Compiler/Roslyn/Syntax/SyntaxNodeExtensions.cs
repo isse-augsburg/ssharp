@@ -473,44 +473,5 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 			Requires.NotNull(syntaxNode, nameof(syntaxNode));
 			return syntaxNode.GetLocation().GetMappedLineSpan().StartLinePosition.Line + 1;
 		}
-
-		/// <summary>
-		///   Gets the <see cref="ITypeSymbol" /> representing the type of <paramref name="syntaxNode" /> within the context of the
-		///   <paramref name="semanticModel" />.
-		/// </summary>
-		/// <param name="syntaxNode">The expression the type should be returned for.</param>
-		/// <param name="semanticModel">The semantic model that should be used for semantic analysis.</param>
-		[Pure, NotNull]
-		public static ITypeSymbol GetExpressionType([NotNull] this ExpressionSyntax syntaxNode, [NotNull] SemanticModel semanticModel)
-		{
-			Requires.NotNull(syntaxNode, nameof(syntaxNode));
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-
-			var symbol = syntaxNode.GetReferencedSymbol(semanticModel);
-
-			var parameterSymbol = symbol as IParameterSymbol;
-			var localSymbol = symbol as ILocalSymbol;
-			var fieldSymbol = symbol as IFieldSymbol;
-			var propertySymbol = symbol as IPropertySymbol;
-			var methodSymbol = symbol as IMethodSymbol;
-
-			if (parameterSymbol != null)
-				return parameterSymbol.Type;
-
-			if (localSymbol != null)
-				return localSymbol.Type;
-
-			if (fieldSymbol != null)
-				return fieldSymbol.Type;
-
-			if (propertySymbol != null)
-				return propertySymbol.Type;
-
-			if (methodSymbol != null)
-				return methodSymbol.ReturnType;
-
-			Requires.That(false, "Failed to determine the type of the referenced symbol.");
-			return null;
-		}
 	}
 }
