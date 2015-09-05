@@ -40,11 +40,11 @@ namespace SafetySharp.Runtime.Reflection
 		///   Gets the <paramref name="component" />'s subcomponents.
 		/// </summary>
 		/// <param name="component">The component the subcomponents should be returned for.</param>
-		public static IEnumerable<Component> GetSubcomponents(this Component component)
+		public static IEnumerable<IComponent> GetSubcomponents(this IComponent component)
 		{
 			Requires.NotNull(component, nameof(component));
 
-			var subcomponents = new HashSet<Component>();
+			var subcomponents = new HashSet<IComponent>();
 			GetSubcomponents(subcomponents, component);
 
 			// Some objects may have backward references to the component itself, so we have to remove it here
@@ -57,7 +57,7 @@ namespace SafetySharp.Runtime.Reflection
 		///   model and whose values are preserved between different system steps.
 		/// </summary>
 		/// <param name="component">The component the state fields should be returned for.</param>
-		public static IEnumerable<FieldInfo> GetStateFields(this Component component)
+		public static IEnumerable<FieldInfo> GetStateFields(this IComponent component)
 		{
 			Requires.NotNull(component, nameof(component));
 
@@ -73,12 +73,12 @@ namespace SafetySharp.Runtime.Reflection
 		/// </summary>
 		/// <param name="component">The root component that should be visited.</param>
 		/// <param name="action">The action that should be executed for each component.</param>
-		public static void VisitPreOrder(this Component component, Action<Component> action)
+		public static void VisitPreOrder(this IComponent component, Action<IComponent> action)
 		{
 			Requires.NotNull(component, nameof(component));
 			Requires.NotNull(action, nameof(action));
 
-			var visitedComponents = new HashSet<Component>();
+			var visitedComponents = new HashSet<IComponent>();
 			VisitPreOrder(visitedComponents, component, action);
 		}
 
@@ -88,12 +88,12 @@ namespace SafetySharp.Runtime.Reflection
 		/// </summary>
 		/// <param name="component">The root component that should be visited.</param>
 		/// <param name="action">The action that should be executed for each component.</param>
-		public static void VisitPostOrder(this Component component, Action<Component> action)
+		public static void VisitPostOrder(this IComponent component, Action<IComponent> action)
 		{
 			Requires.NotNull(component, nameof(component));
 			Requires.NotNull(action, nameof(action));
 
-			var visitedComponents = new HashSet<Component>();
+			var visitedComponents = new HashSet<IComponent>();
 			VisitPostOrder(visitedComponents, component, action);
 		}
 
@@ -104,7 +104,7 @@ namespace SafetySharp.Runtime.Reflection
 		/// <param name="visitedComponents">The components that have already been visited, in case the hierarchy contains any cycles.</param>
 		/// <param name="component">The component that should be visited.</param>
 		/// <param name="action">The action that should be executed for each component.</param>
-		private static void VisitPreOrder(HashSet<Component> visitedComponents, Component component, Action<Component> action)
+		private static void VisitPreOrder(HashSet<IComponent> visitedComponents, IComponent component, Action<IComponent> action)
 		{
 			if (!visitedComponents.Add(component))
 				return;
@@ -122,7 +122,7 @@ namespace SafetySharp.Runtime.Reflection
 		/// <param name="visitedComponents">The components that have already been visited, in case the hierarchy contains any cycles.</param>
 		/// <param name="component">The component that should be visited.</param>
 		/// <param name="action">The action that should be executed for each component.</param>
-		private static void VisitPostOrder(HashSet<Component> visitedComponents, Component component, Action<Component> action)
+		private static void VisitPostOrder(HashSet<IComponent> visitedComponents, IComponent component, Action<IComponent> action)
 		{
 			if (!visitedComponents.Add(component))
 				return;
@@ -139,14 +139,14 @@ namespace SafetySharp.Runtime.Reflection
 		/// </summary>
 		/// <param name="subcomponents">The set of referenced objects.</param>
 		/// <param name="obj">The object the referenced objects should be returned for.</param>
-		private static void GetSubcomponents(HashSet<Component> subcomponents, object obj)
+		private static void GetSubcomponents(HashSet<IComponent> subcomponents, object obj)
 		{
 			foreach (var referencedObject in SerializationRegistry.Default.GetSerializer(obj).GetReferencedObjects(obj, SerializationMode.Full))
 			{
 				if (referencedObject == null)
 					continue;
 
-				var component = referencedObject as Component;
+				var component = referencedObject as IComponent;
 				if (component != null && !component.GetType().HasAttribute<FaultEffectAttribute>())
 					subcomponents.Add(component);
 				else
