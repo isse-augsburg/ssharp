@@ -24,7 +24,6 @@ namespace Tests
 {
 	using System;
 	using System.Collections.Generic;
-	using System.IO;
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
 	using SafetySharp.CompilerServices;
@@ -35,6 +34,8 @@ namespace Tests
 
 	internal abstract class LtsMinTestObject : TestObject
 	{
+		protected CounterExample CounterExample { get; set; }
+
 		protected bool CheckInvariant(Model model, [LiftExpression] bool invariant)
 		{
 			Requires.CompilationTransformation();
@@ -46,8 +47,8 @@ namespace Tests
 			var ltsMin = new SafetySharp.Analysis.LtsMin();
 			ltsMin.OutputWritten += message => Output.Log("{0}", message);
 
-			var counterExample = ltsMin.CheckInvariant(model, invariant);
-			return counterExample == null;
+			CounterExample = ltsMin.CheckInvariant(model, invariant);
+			return CounterExample == null;
 		}
 
 		protected bool Check(Model model, Formula formula)
@@ -55,8 +56,8 @@ namespace Tests
 			var ltsMin = new SafetySharp.Analysis.LtsMin();
 			ltsMin.OutputWritten += message => Output.Log("{0}", message);
 
-			var counterExample = ltsMin.Check(model, formula);
-			return counterExample == null;
+			CounterExample = ltsMin.Check(model, formula);
+			return CounterExample == null;
 		}
 	}
 

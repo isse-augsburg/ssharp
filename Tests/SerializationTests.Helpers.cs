@@ -30,6 +30,7 @@ namespace Tests
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 	using Utilities;
 	using Xunit.Abstractions;
 
@@ -74,13 +75,15 @@ namespace Tests
 			_deserializer = _serializationRegistry.CreateStateDeserializer(_objectTable, mode);
 
 			_stateSlotCount = _serializationRegistry.GetStateSlotCount(_objectTable, mode);
-			_stateCache = new StateCache(_stateSlotCount, 1);
+			_stateCache = new StateCache(_stateSlotCount + 1, 1);
 			_serializedState = _stateCache.Allocate();
 		}
 
 		protected void Serialize()
 		{
+			_serializedState[_stateSlotCount].ShouldBe(0);
 			_serializer(_serializedState);
+			_serializedState[_stateSlotCount].ShouldBe(0, "Detected out-of-bounds memory access.");
 		}
 
 		protected void Deserialize()

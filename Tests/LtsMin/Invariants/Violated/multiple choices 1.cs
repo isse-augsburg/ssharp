@@ -38,7 +38,7 @@ namespace Tests.LtsMin.Invariants.Violated
 			CheckInvariant(m, c.F != 20).ShouldBe(false);
 			CheckInvariant(m, c.F != 12).ShouldBe(false);
 			CheckInvariant(m, c.F != 22).ShouldBe(false);
-			CheckInvariant(m, c.F == -1 || c.F == 2 || c.F == 10 || c.F == 20 || c.F == 12 || c.F == 22).ShouldBe(true);
+			CheckInvariant(m, c.F == -1 || c.F == 0 || c.F == 2 || c.F == 10 || c.F == 20 || c.F == 12 || c.F == 22).ShouldBe(true);
 		}
 
 		private class C : Component

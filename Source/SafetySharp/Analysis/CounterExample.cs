@@ -87,6 +87,18 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
+		///   Executs the <paramref name="action" /> for each step of the counter example.
+		/// </summary>
+		/// <param name="action">The action that should be executed.</param>
+		public void ForEachStep(Action<RuntimeModel> action)
+		{
+			Requires.NotNull(action, nameof(action));
+
+			for (var i = 0; i < StepCount; ++i)
+				action(DeserializeState(i));
+		}
+
+		/// <summary>
 		///   Loads a LtsMin counter example from the <paramref name="file" />.
 		/// </summary>
 		/// <param name="file">The path to the file the counter example should be loaded from.</param>
