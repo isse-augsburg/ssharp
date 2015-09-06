@@ -52,13 +52,13 @@ namespace SafetySharp.Compiler
 		/// <summary>
 		///   The error reporter used by the compiler.
 		/// </summary>
-		private readonly IErrorReporter _log;
+		private readonly ErrorReporter _log;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="errorReporter">The error reporter used by the compiler.</param>
-		public Compiler(IErrorReporter errorReporter)
+		public Compiler(ErrorReporter errorReporter)
 		{
 			Requires.NotNull(errorReporter, nameof(errorReporter));
 			_log = errorReporter;

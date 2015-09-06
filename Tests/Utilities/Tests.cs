@@ -199,7 +199,7 @@ namespace Tests.Utilities
 				foreach (var syntaxTree in compilation.SyntaxTrees)
 					project = project.AddDocument(syntaxTree.FilePath, syntaxTree.GetRoot().GetText(Encoding.UTF8)).Project;
 
-				var errorReporter = new CSharpErrorReporter(output);
+				var errorReporter = new TestErrorReporter(output);
 				var compiler = new Compiler(errorReporter);
 
 				try

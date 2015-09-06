@@ -32,14 +32,21 @@ namespace Tests.Reflection.Components.Fields
 		protected override void Check()
 		{
 			var c = new C { Sub = new D() };
-			c.GetStateFields().ShouldBe(new[] { typeof(C).GetField("F") });
+			c.GetStateFields().ShouldBe(new[] { typeof(C).GetField("F"), typeof(C).GetField("StateMachine") });
 		}
 
 		private class C : Component
 		{
 			public int F = 0;
 
+			public StateMachine<E> StateMachine = new StateMachine<E>(E.A);
+
 			public D Sub;
+		}
+
+		private enum E
+		{
+			A, B, C
 		}
 
 		private class D : Component

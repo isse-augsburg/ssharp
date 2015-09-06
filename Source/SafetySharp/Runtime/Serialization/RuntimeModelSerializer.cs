@@ -68,7 +68,7 @@ namespace SafetySharp.Runtime.Serialization
 			var serializer = SerializationRegistry.Default.CreateStateSerializer(objectTable, SerializationMode.Full);
 
 			// Serialize the object table
-			SerializationRegistry.Default.SerializeObjectTable(objectTable, writer);
+			SerializeObjectTable(objectTable, writer);
 
 			// Serialize object identifiers of the root components
 			writer.Write(model.RootComponents.Count);
@@ -105,6 +105,23 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
+		///   Collects all state formulas contained in the <paramref name="formulas" />.
+		/// </summary>
+		private static StateFormula[] CollectStateFormulas(Formula[] formulas)
+		{
+			var visitor = new CollectStateFormulasVisitor();
+			foreach (var formula in formulas)
+				visitor.Visit(formula);
+
+			// Check that the state formula has a closure -- the current version of the C# compiler 
+			// always does that, but future versions might not.
+			foreach (var formula in visitor.StateFormulas)
+				Assert.NotNull(formula.Expression.Target, "Unexpected state formula without closure object.");
+
+			return visitor.StateFormulas.ToArray();
+		}
+
+		/// <summary>
 		///   Creates the object table for the <paramref name="model" /> and <paramref name="stateFormulas" />.
 		/// </summary>
 		private static ObjectTable CreateObjectTable(Model model, StateFormula[] stateFormulas)
@@ -120,20 +137,23 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Collects all state formulas contained in the <paramref name="formulas" />.
+		///   Serializes the <paramref name="objectTable" /> using the <paramref name="writer" />.
 		/// </summary>
-		private static StateFormula[] CollectStateFormulas(Formula[] formulas)
+		/// <param name="objectTable">The object table that should be serialized.</param>
+		/// <param name="writer">The writer the serialized information should be written to.</param>
+		private static void SerializeObjectTable(ObjectTable objectTable, BinaryWriter writer)
 		{
-			var visitor = new CollectStateFormulasVisitor();
-			foreach (var formula in formulas)
-				visitor.Visit(formula);
+			Requires.NotNull(objectTable, nameof(objectTable));
+			Requires.NotNull(writer, nameof(writer));
 
-			// Check that the state formula has a closure -- the current version of the C# compiler 
-			// always does that, but future versions might not.
-			foreach (var formula in visitor.StateFormulas)
-				Assert.NotNull(formula.Expression.Target, "Unexpected state formula without closure object.");
-
-			return visitor.StateFormulas.ToArray();
+			// Serialize the objects contained in the table
+			writer.Write(objectTable.Count);
+			foreach (var obj in objectTable)
+			{
+				var serializerIndex = SerializationRegistry.Default.GetSerializerIndex(obj);
+				writer.Write(serializerIndex);
+				SerializationRegistry.Default.GetSerializer(serializerIndex).SerializeType(obj, writer);
+			}
 		}
 
 		#endregion
@@ -158,7 +178,7 @@ namespace SafetySharp.Runtime.Serialization
 		private static unsafe RuntimeModel DeserializeModel(BinaryReader reader)
 		{
 			// Deserialize the object table
-			var objectTable = SerializationRegistry.Default.DeserializeObjectTable(reader);
+			var objectTable = DeserializeObjectTable(reader);
 
 			// Deserialize the object identifiers of the root components
 			var roots = new Component[reader.ReadInt32()];
@@ -199,6 +219,25 @@ namespace SafetySharp.Runtime.Serialization
 			}
 
 			return stateFormulas;
+		}
+
+		/// <summary>
+		///   Deserializes the <see cref="ObjectTable" /> from the <paramref name="reader" />.
+		/// </summary>
+		/// <param name="reader">The reader the <see cref="ObjectTable" /> should be deserialized from.</param>
+		private static ObjectTable DeserializeObjectTable(BinaryReader reader)
+		{
+			Requires.NotNull(reader, nameof(reader));
+
+			// Deserialize the objects contained in the table
+			var objects = new object[reader.ReadInt32()];
+			for (var i = 0; i < objects.Length; ++i)
+			{
+				var serializer = SerializationRegistry.Default.GetSerializer(reader.ReadInt32());
+				objects[i] = serializer.InstantiateType(reader);
+			}
+
+			return new ObjectTable(objects);
 		}
 
 		#endregion

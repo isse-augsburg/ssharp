@@ -143,8 +143,7 @@
     <Compile Include="Roslyn\Syntax\SyntaxTreeExtensions.cs" />
     <Compile Include="Roslyn\Syntax\VariableDeclaratorExtensions.cs" />
     <Compile Include="Roslyn\Syntax\Visibility.cs" />
-    <Compile Include="IErrorReporter.cs" />
-    <Compile Include="ConsoleErrorReporter.cs" />
+    <Compile Include="ErrorReporter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SafetySharp\SafetySharp.csproj">

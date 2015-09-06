@@ -291,7 +291,7 @@
     <Compile Include="Serialization\StateLabels\invariant without closure.cs" />
     <Compile Include="Utilities\TestTraceOutput.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\CSharpErrorReporter.cs" />
+    <Compile Include="Utilities\TestErrorReporter.cs" />
     <Compile Include="Utilities\CSharpException.cs" />
     <Compile Include="Utilities\ITestableObject.cs" />
     <Compile Include="Utilities\TestComponent.cs" />

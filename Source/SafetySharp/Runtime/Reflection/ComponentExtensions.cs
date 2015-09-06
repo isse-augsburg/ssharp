@@ -147,8 +147,11 @@ namespace SafetySharp.Runtime.Reflection
 					continue;
 
 				var component = referencedObject as IComponent;
-				if (component != null && !component.GetType().HasAttribute<FaultEffectAttribute>())
-					subcomponents.Add(component);
+				if (component != null)
+				{
+					if (!component.GetType().HasAttribute<FaultEffectAttribute>())
+						subcomponents.Add(component);
+				}
 				else
 					GetSubcomponents(subcomponents, referencedObject);
 			}

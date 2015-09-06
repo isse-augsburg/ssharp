@@ -84,7 +84,7 @@ namespace SafetySharp.Compiler
 		/// <param name="args">The compiler arguments passed via the command line.</param>
 		private int Compile(string[] args)
 		{
-			var log = new ConsoleErrorReporter();
+			var log = new ErrorReporter();
 
 			using (var parser = new Parser(c => c.HelpWriter = null))
 			{

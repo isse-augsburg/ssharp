@@ -29,9 +29,9 @@ namespace SafetySharp.Compiler
 	using Utilities;
 
 	/// <summary>
-	///   Reports compilation errors to the standard console.
+	///   A base class for reporting compilation errors; by default, errors are reported to the standard console.
 	/// </summary>
-	internal class ConsoleErrorReporter : IErrorReporter
+	public class ErrorReporter
 	{
 		/// <summary>
 		///   Gets or sets a value indicating whether all informational compiler output should be suppressed.
@@ -44,7 +44,7 @@ namespace SafetySharp.Compiler
 		/// <param name="message">The non-empty message that should be logged.</param>
 		/// <param name="arguments">The arguments that should be used to format <paramref name="message" />.</param>
 		[DebuggerHidden, StringFormatMethod("message"), ContractAnnotation("=> halt")]
-		public void Die([NotNull] string message, params object[] arguments)
+		public virtual void Die([NotNull] string message, params object[] arguments)
 		{
 			Requires.NotNull(message, nameof(message));
 
@@ -58,7 +58,7 @@ namespace SafetySharp.Compiler
 		/// <param name="message">The non-empty message that should be logged.</param>
 		/// <param name="arguments">The arguments that should be used to format <paramref name="message" />.</param>
 		[StringFormatMethod("message")]
-		public void Error([NotNull] string message, params object[] arguments)
+		public virtual void Error([NotNull] string message, params object[] arguments)
 		{
 			Requires.NotNull(message, nameof(message));
 			Log(DiagnosticSeverity.Error, message, arguments);
@@ -70,7 +70,7 @@ namespace SafetySharp.Compiler
 		/// <param name="message">The non-empty message that should be logged.</param>
 		/// <param name="arguments">The arguments that should be used to format <paramref name="message" />.</param>
 		[StringFormatMethod("message")]
-		public void Warn([NotNull] string message, params object[] arguments)
+		public virtual void Warn([NotNull] string message, params object[] arguments)
 		{
 			Requires.NotNull(message, nameof(message));
 			Log(DiagnosticSeverity.Warning, message, arguments);
@@ -82,7 +82,7 @@ namespace SafetySharp.Compiler
 		/// <param name="message">The non-empty message that should be logged.</param>
 		/// <param name="arguments">The arguments that should be used to format <paramref name="message" />.</param>
 		[StringFormatMethod("message")]
-		public void Info([NotNull] string message, params object[] arguments)
+		public virtual void Info([NotNull] string message, params object[] arguments)
 		{
 			Requires.NotNull(message, nameof(message));
 			Log(DiagnosticSeverity.Info, message, arguments);
@@ -107,7 +107,7 @@ namespace SafetySharp.Compiler
 		/// </summary>
 		/// <param name="severity">The severity of the message.</param>
 		/// <param name="message">The message that should be printed.</param>
-		private void PrintToDebugOutput(DiagnosticSeverity severity, string message)
+		private static void PrintToDebugOutput(DiagnosticSeverity severity, string message)
 		{
 			var type = "";
 			switch (severity)

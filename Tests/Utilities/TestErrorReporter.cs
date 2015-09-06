@@ -25,31 +25,31 @@ namespace Tests.Utilities
 	using System;
 	using SafetySharp.Compiler;
 
-	public class CSharpErrorReporter : IErrorReporter
+	public class TestErrorReporter : ErrorReporter
 	{
 		private readonly TestTraceOutput _output;
 
-		public CSharpErrorReporter(TestTraceOutput output)
+		public TestErrorReporter(TestTraceOutput output)
 		{
 			_output = output;
 		}
 
-		public void Die(string message, params object[] arguments)
+		public override void Die(string message, params object[] arguments)
 		{
 			_output.Log("{0}", String.Format(message, arguments));
 		}
 
-		public void Error(string message, params object[] arguments)
+		public override void Error(string message, params object[] arguments)
 		{
 			_output.Log("{0}", String.Format(message, arguments));
 		}
 
-		public void Warn(string message, params object[] arguments)
+		public override void Warn(string message, params object[] arguments)
 		{
 			_output.Log("{0}", String.Format(message, arguments));
 		}
 
-		public void Info(string message, params object[] arguments)
+		public override void Info(string message, params object[] arguments)
 		{
 			_output.Log("{0}", String.Format(message, arguments));
 		}
