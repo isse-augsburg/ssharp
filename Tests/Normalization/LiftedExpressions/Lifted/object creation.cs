@@ -37,8 +37,12 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 		}
 	}
 
-	public class In2
+	public class In2 : Test2
 	{
+		public In2() : base(4)
+		{
+		}
+
 		private void M()
 		{
 			new Test2(1);
@@ -46,8 +50,12 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 		}
 	}
 
-	public class Out2
+	public class Out2 : Test2
 	{
+		public Out2() : base(() => 4)
+		{
+		}
+
 		private void M()
 		{
 			new Test2(() => 1);

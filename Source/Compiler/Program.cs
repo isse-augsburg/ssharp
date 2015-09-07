@@ -23,7 +23,6 @@
 namespace SafetySharp.Compiler
 {
 	using System;
-	using System.Linq;
 	using CommandLine;
 	using CommandLine.Text;
 	using JetBrains.Annotations;
@@ -62,23 +61,6 @@ namespace SafetySharp.Compiler
 		public bool Silent { get; set; }
 
 		/// <summary>
-		///   Generates a help message about the correct usage of the compiler's command line arguments.
-		/// </summary>
-		[HelpOption('h', "help")]
-		[UsedImplicitly]
-		public string GenerateHelpMessage()
-		{
-			var help = new HelpText
-			{
-				AdditionalNewLineAfterOption = true,
-				AddDashesToOption = true
-			};
-
-			help.AddOptions(this);
-			return help.ToString();
-		}
-
-		/// <summary>
 		///   Runs the compilation process.
 		/// </summary>
 		/// <param name="args">The compiler arguments passed via the command line.</param>
@@ -86,23 +68,9 @@ namespace SafetySharp.Compiler
 		{
 			var log = new ErrorReporter();
 
-			using (var parser = new Parser(c => c.HelpWriter = null))
-			{
-				// Check the arguments for '--help' or '-h' as the command line parser library handles help in a strange
-				// way. If so, output the help screen and successfully terminate the application.
-				if (args.Any(arg => arg == "--help" || arg == "-h"))
-				{
-					log.Info("{0}", GenerateHelpMessage());
-					return 0;
-				}
-
-				// If there was an error parsing the command line, show the help screen and terminate the application.
-				if (!parser.ParseArguments(args, this))
-				{
-					log.Info("{0}", GenerateHelpMessage());
-					log.Die("Invalid command line arguments.");
-				}
-			}
+			// If there was an error parsing the command line, show the help screen and terminate the application.
+			if (!Parser.Default.ParseArguments(args, this))
+				log.Die("Invalid command line arguments.");
 
 			log.Silent = Silent;
 			log.Info("");
@@ -144,6 +112,23 @@ namespace SafetySharp.Compiler
 		{
 			var program = new Program();
 			return program.Compile(args);
+		}
+
+		/// <summary>
+		///   Generates a help message about the correct usage of the compiler's command line arguments.
+		/// </summary>
+		[HelpOption('h', "help")]
+		[UsedImplicitly]
+		public string GenerateHelpMessage()
+		{
+			var help = new HelpText
+			{
+				AdditionalNewLineAfterOption = true,
+				AddDashesToOption = true
+			};
+
+			help.AddOptions(this);
+			return help.ToString();
 		}
 	}
 }

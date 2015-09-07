@@ -74,6 +74,26 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Checks whether we have to lift the arguments.
 		/// </summary>
+		public override SyntaxNode VisitConstructorInitializer(ConstructorInitializerSyntax expression)
+		{
+			var isLifted = false;
+
+			var methodSymbol = SemanticModel.GetSymbolInfo(expression).Symbol as IMethodSymbol;
+			if (methodSymbol != null)
+			{
+				if (methodSymbol.Parameters.Any(parameter => parameter.HasAttribute<LiftExpressionAttribute>(SemanticModel)))
+					isLifted = true;
+			}
+
+			_liftedMethodStack.Push(isLifted);
+			var syntaxNode = base.VisitConstructorInitializer(expression);
+			_liftedMethodStack.Pop();
+			return syntaxNode;
+		}
+
+		/// <summary>
+		///   Checks whether we have to lift the arguments.
+		/// </summary>
 		public override SyntaxNode VisitInvocationExpression(InvocationExpressionSyntax expression)
 		{
 			var isLifted = false;
