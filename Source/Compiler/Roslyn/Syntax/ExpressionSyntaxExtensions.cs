@@ -84,7 +84,6 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 			Requires.NotNull(returnType, nameof(returnType));
 
 			StatementSyntax body;
-			var offset = 0;
 
 			if (returnType.SpecialType == SpecialType.System_Void)
 				body = SyntaxFactory.ExpressionStatement(expression);
@@ -93,12 +92,11 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 				var returnStatement = SyntaxFactory.ReturnStatement(expression);
 				var returnKeyword = returnStatement.ReturnKeyword.WithTrailingSpace();
 
-				offset = returnKeyword.ToFullString().Length;
 				body = returnStatement.WithReturnKeyword(returnKeyword);
 			}
 
 			var column = expression.GetLocation().GetLineSpan().StartLinePosition.Character;
-			body = body.WithLeadingSpace(column - offset);
+			body = body.WithLeadingSpace(column).PrependLineDirective(expression.GetLineNumber());
 			return SyntaxFactory.Block(body);
 		}
 	}

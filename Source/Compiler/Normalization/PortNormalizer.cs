@@ -24,6 +24,7 @@ namespace SafetySharp.Compiler.Normalization
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Microsoft.CodeAnalysis;
@@ -51,6 +52,11 @@ namespace SafetySharp.Compiler.Normalization
 		private AttributeListSyntax _compilerGeneratedAttribute;
 
 		/// <summary>
+		///   Represents the <c>[DebuggerHidden]</c> attribute syntax.
+		/// </summary>
+		private AttributeListSyntax _debuggerHiddenAttribute;
+
+		/// <summary>
 		///   The method symbol that is being normalized.
 		/// </summary>
 		private IMethodSymbol _methodSymbol;
@@ -66,6 +72,8 @@ namespace SafetySharp.Compiler.Normalization
 		protected override Compilation Normalize()
 		{
 			_compilerGeneratedAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(CompilerGeneratedAttribute).FullName);
+			_debuggerHiddenAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(DebuggerHiddenAttribute).FullName);
+
 			return base.Normalize();
 		}
 
@@ -78,11 +86,11 @@ namespace SafetySharp.Compiler.Normalization
 			if (!_methodSymbol.ContainingType.OriginalDefinition.IsDerivedFromComponent(SemanticModel))
 				return declaration;
 
-			var body = Normalize(declaration.GetStatements(_methodSymbol), declaration, declaration.GetBodyLineNumber());
+			var body = Normalize(declaration.Body, declaration, declaration.GetBodyLineNumber());
 			if (body == null)
 				return declaration;
 
-            return declaration.WithStatementBody(body);
+            return declaration.WithBody(body);
 		}
 
 		/// <summary>
@@ -90,40 +98,41 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax declaration)
 		{
-			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
-			if (!propertySymbol.ContainingType.OriginalDefinition.IsDerivedFromComponent(SemanticModel))
-				return declaration;
-
-			// We have to deal with expression-bodied properties explicitly
-			if (declaration.AccessorList == null)
-			{
-				_methodSymbol = propertySymbol.GetMethod;
-
-				var statementBody = declaration.ExpressionBody.Expression.AsStatementBody(_methodSymbol.ReturnType);
-				var body = Normalize(statementBody, declaration, declaration.ExpressionBody.Expression.GetLineNumber());
-				if (body == null)
-					return declaration;
-
-				var accessor = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration, body);
-				declaration = declaration.AddAccessorListAccessors(accessor);
-				return declaration.WithExpressionBody(null).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.None));
-			}
-
-			var accessors = declaration.AccessorList.Accessors.Select(accessor =>
-			{
-				_methodSymbol = accessor.GetMethodSymbol(SemanticModel);
-
-				var body = accessor.Body ?? SyntaxFactory.Block();
-				var lineNumber = accessor.Body?.GetLineNumber() ?? -1;
-				body = Normalize(body, declaration, lineNumber);
-
-				if (body == null)
-					return accessor;
-
-				return accessor.WithBody(body);
-			});
-
-			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(SyntaxFactory.List(accessors)));
+			return declaration;
+//			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
+//			if (!propertySymbol.ContainingType.OriginalDefinition.IsDerivedFromComponent(SemanticModel))
+//				return declaration;
+//
+//			// We have to deal with expression-bodied properties explicitly
+//			if (declaration.AccessorList == null)
+//			{
+//				_methodSymbol = propertySymbol.GetMethod;
+//
+//				var statementBody = declaration.ExpressionBody.Expression.AsStatementBody(_methodSymbol.ReturnType);
+//				var body = Normalize(statementBody, declaration, declaration.ExpressionBody.Expression.GetLineNumber());
+//				if (body == null)
+//					return declaration;
+//
+//				var accessor = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration, body);
+//				declaration = declaration.AddAccessorListAccessors(accessor);
+//				return declaration.WithExpressionBody(null).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.None));
+//			}
+//
+//			var accessors = declaration.AccessorList.Accessors.Select(accessor =>
+//			{
+//				_methodSymbol = accessor.GetMethodSymbol(SemanticModel);
+//
+//				var body = accessor.Body ?? SyntaxFactory.Block();
+//				var lineNumber = accessor.Body?.GetLineNumber() ?? -1;
+//				body = Normalize(body, declaration, lineNumber);
+//
+//				if (body == null)
+//					return accessor;
+//
+//				return accessor.WithBody(body);
+//			});
+//
+//			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(SyntaxFactory.List(accessors)));
 		}
 		
 		/// <summary>
@@ -154,11 +163,12 @@ namespace SafetySharp.Compiler.Normalization
 			++_portCount;
 
 			var delegateDeclaration = CreateDelegateDeclaration();
-			var fieldDeclaration = CreateFieldDeclaration(delegateDeclaration.Identifier.ValueText, CreateProvidedPortLambda());
-			AddMembers(_methodSymbol.ContainingType, delegateDeclaration, fieldDeclaration);
+			var fieldDeclaration = CreateFieldDeclaration(delegateDeclaration.Identifier.ValueText);
+			var defaultMethod = CreateDefaultProvidedPortMethod();
+			AddMembers(_methodSymbol.ContainingType, delegateDeclaration, fieldDeclaration, defaultMethod);
 
 			statements = SyntaxFactory.Block(MakeFaultEffectSensitive(statements, bodyLineNumber));
-			return statements.PrependLineDirective(-1).EnsureLineCount(originalDeclaration);
+			return statements.PrependLineDirective(-1);
 		}
 
 		/// <summary>
@@ -168,7 +178,7 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			var faultBlock = SyntaxFactory.Block(CreateFaultEffectCode()).NormalizeWhitespace().WithTrailingNewLines(1);
 			yield return faultBlock.AppendLineDirective(lineNumber);
-			yield return statements;
+			yield return statements.AppendLineDirective(-1);
 		}
 
 		/// <summary>
@@ -185,6 +195,14 @@ namespace SafetySharp.Compiler.Normalization
 		private string GetFieldName()
 		{
 			return ("backingField" + _portCount).ToSynthesized();
+		}
+
+		/// <summary>
+		///   Gets the name of the field for the current port.
+		/// </summary>
+		private string GetDefaultMethodName()
+		{
+			return ("DefaultMethod" + _portCount).ToSynthesized();
 		}
 
 		/// <summary>
@@ -215,14 +233,13 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Creates a field declaration that stores a value of the <paramref name="delegateType" />.
 		/// </summary>
-		private FieldDeclarationSyntax CreateFieldDeclaration(string delegateType, SyntaxNode initializer)
+		private FieldDeclarationSyntax CreateFieldDeclaration(string delegateType)
 		{
 			var fieldType = SyntaxFactory.ParseTypeName(delegateType);
 			var field = (FieldDeclarationSyntax)Syntax.FieldDeclaration(
 				name: GetFieldName(),
 				type: fieldType,
-				accessibility: Accessibility.Private,
-				initializer: initializer);
+				accessibility: Accessibility.Private);
 
 			return field.AddAttributeLists(_compilerGeneratedAttribute);
 		}
@@ -271,19 +288,17 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Creates the default lambda expression that is assigned to a provided port.
+		///   Creates the default fault method that is assigned to a provided port.
 		/// </summary>
-		/// <returns></returns>
-		private SyntaxNode CreateProvidedPortLambda()
+		private MethodDeclarationSyntax CreateDefaultProvidedPortMethod()
 		{
-			var parameters = _methodSymbol.Parameters.Select(parameter => Syntax.ParameterDeclaration(parameter));
-
+			var parameters = new List<SyntaxNode>(_methodSymbol.Parameters.Select(parameter => Syntax.ParameterDeclaration(parameter)));
 			if (!_methodSymbol.ReturnsVoid)
 			{
 				var parameterType = Syntax.TypeExpression(_methodSymbol.ReturnType);
 				var returnParameter = Syntax.ParameterDeclaration(_resultVariable, parameterType, refKind: RefKind.Out);
 
-				parameters = parameters.Concat(new[] { returnParameter });
+				parameters.Add(returnParameter);
 			}
 
 			var statements = new List<SyntaxNode>();
@@ -294,7 +309,17 @@ namespace SafetySharp.Compiler.Normalization
 				statements.Add(Syntax.AssignmentStatement(Syntax.IdentifierName(_resultVariable), Syntax.DefaultExpression(_methodSymbol.ReturnType)));
 
 			statements.Add(Syntax.ReturnStatement(Syntax.FalseLiteralExpression()));
-			return Syntax.ValueReturningLambdaExpression(parameters, statements);
+
+			var methodDeclaration = (MethodDeclarationSyntax)Syntax.MethodDeclaration(
+				name: GetDefaultMethodName(),
+				parameters: parameters,
+				returnType: Syntax.TypeExpression(SpecialType.System_Boolean),
+				accessibility: Accessibility.Private,
+				modifiers: DeclarationModifiers.Unsafe,
+				statements: statements);
+
+
+			return methodDeclaration.AddAttributeLists(_compilerGeneratedAttribute, _debuggerHiddenAttribute);
 		}
 	}
 }

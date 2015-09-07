@@ -22,7 +22,10 @@
 
 namespace SafetySharp.Modeling
 {
+	using System;
 	using System.Collections.Generic;
+	using System.Linq;
+	using System.Reflection;
 
 	/// <summary>
 	///   Represents a S# component.
@@ -36,6 +39,20 @@ namespace SafetySharp.Modeling
 		///   Gets the fault effects that affect the component.
 		/// </summary>
 		internal List<IFaultEffect> FaultEffects => _faultEffects;
+
+		/// <summary>
+		/// Initializes the component.
+		/// </summary>
+		protected Component()
+		{
+			var fields = GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(field=>field.Name.StartsWith("__backingField"));
+			foreach (var field in fields)
+			{
+				var method = GetType().GetMethod(field.Name.Replace("backingField", "DefaultMethod"), BindingFlags.Instance | BindingFlags.NonPublic);
+				var delegateInstance = Delegate.CreateDelegate(field.FieldType, this, method);
+				field.SetValue(this, delegateInstance);
+			}
+		}
 
 		/// <summary>
 		///   Updates the state of the component.

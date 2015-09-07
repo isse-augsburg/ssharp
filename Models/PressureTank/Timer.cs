@@ -58,7 +58,12 @@ namespace PressureTank
 		/// <summary>
 		///   Starts or restarts the timer.
 		/// </summary>
-		public void Start() => _remainingTime = _timeout;
+		public virtual void Start() => _remainingTime = _timeout;
+
+		public virtual void Start2()
+		{
+			_remainingTime = _timeout;
+		}
 
 		/// <summary>
 		///   Stops the timer.
@@ -74,6 +79,14 @@ namespace PressureTank
 		///   Gets the remaining time before the timeout occurs.
 		/// </summary>
 		public int GetRemainingTime() => _remainingTime;
+
+		static void Main()
+		{
+			var t = new Timer(32);
+			t.HasElapsed();
+			t.Start();
+			t.Start2();
+		}
 
 		/// <summary>
 		///   Updates the timer's internal state.
