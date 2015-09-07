@@ -53,7 +53,7 @@ namespace PressureTank
 		///   Gets a value indicating whether the timeout has elapsed. This method returns true only for the single system step where
 		///   the timeout occurs.
 		/// </summary>
-		public bool HasElapsed() => _remainingTime == 0;
+		public virtual bool HasElapsed() => _remainingTime == 0;
 
 		/// <summary>
 		///   Starts or restarts the timer.

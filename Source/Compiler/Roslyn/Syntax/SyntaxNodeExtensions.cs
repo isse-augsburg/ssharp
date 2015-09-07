@@ -380,12 +380,13 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		/// </summary>
 		/// <typeparam name="T">The type of the syntax node.</typeparam>
 		/// <param name="syntaxNode">The syntax node that should have its trivia replaced.</param>
+		/// <param name="count">The number of space characters to add.</param>
 		[Pure, NotNull]
-		public static T WithLeadingSpace<T>([NotNull] this T syntaxNode)
+		public static T WithLeadingSpace<T>([NotNull] this T syntaxNode, int count = 1)
 			where T : SyntaxNode
 		{
 			Requires.NotNull(syntaxNode, nameof(syntaxNode));
-			return syntaxNode.WithLeadingTrivia(SyntaxFactory.Space);
+			return syntaxNode.WithLeadingTrivia(SyntaxFactory.Whitespace(new string(' ', count)));
 		}
 
 		/// <summary>
@@ -407,9 +408,9 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		/// <param name="line">The original line number.</param>
 		/// <param name="filePath">The path of the original file; if null, only the line numbering will be affected by the directive.</param>
 		[Pure]
-		private static SyntaxTrivia CreateLineDirective(int line, [NotNull] string filePath)
+		private static SyntaxTrivia CreateLineDirective(int line, string filePath)
 		{
-			var lineToken = SyntaxFactory.Literal(line);
+			var lineToken = line == -1 ? SyntaxFactory.Token(SyntaxKind.HiddenKeyword) : SyntaxFactory.Literal(line);
 			var lineDirective = String.IsNullOrWhiteSpace(filePath)
 				? SyntaxFactory.LineDirectiveTrivia(lineToken, true).NormalizeWhitespace()
 				: SyntaxFactory.LineDirectiveTrivia(lineToken, SyntaxFactory.Literal(filePath), true).NormalizeWhitespace();

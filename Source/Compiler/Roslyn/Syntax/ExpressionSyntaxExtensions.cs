@@ -24,6 +24,7 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 {
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
+	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Utilities;
 
@@ -69,6 +70,36 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 
 			Requires.That(false, "Failed to determine the type of the referenced symbol.");
 			return null;
+		}
+
+		/// <summary>
+		///   Converts the <paramref name="expression" /> into a statement body.
+		/// </summary>
+		/// <param name="expression">The expression the statements should be returned for.</param>
+		/// <param name="returnType">The type symbol corresponding to the method's return type.</param>
+		[Pure, NotNull]
+		public static BlockSyntax AsStatementBody([NotNull] this ExpressionSyntax expression, [NotNull] ITypeSymbol returnType)
+		{
+			Requires.NotNull(expression, nameof(expression));
+			Requires.NotNull(returnType, nameof(returnType));
+
+			StatementSyntax body;
+			var offset = 0;
+
+			if (returnType.SpecialType == SpecialType.System_Void)
+				body = SyntaxFactory.ExpressionStatement(expression);
+			else
+			{
+				var returnStatement = SyntaxFactory.ReturnStatement(expression);
+				var returnKeyword = returnStatement.ReturnKeyword.WithTrailingSpace();
+
+				offset = returnKeyword.ToFullString().Length;
+				body = returnStatement.WithReturnKeyword(returnKeyword);
+			}
+
+			var column = expression.GetLocation().GetLineSpan().StartLinePosition.Character;
+			body = body.WithLeadingSpace(column - offset);
+			return SyntaxFactory.Block(body);
 		}
 	}
 }

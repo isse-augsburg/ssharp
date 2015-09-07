@@ -64,6 +64,8 @@ namespace PressureTank
 		/// </summary>
 		public virtual bool IsEmpty => CheckPhysicalPressure <= 0;
 
+		public virtual int Prop { get; set; }
+
 		/// <summary>
 		///   Senses the physical pressure level within the tank.
 		/// </summary>

@@ -154,7 +154,6 @@ namespace SafetySharp.Compiler
 			var diagnosticOptions = Compilation.Options.SpecificDiagnosticOptions.Add("CS0626", ReportDiagnostic.Suppress);
 			var options = (CSharpCompilationOptions)Compilation.Options;
 			options = options.WithAllowUnsafe(true).WithSpecificDiagnosticOptions(diagnosticOptions);
-			;
 			var syntaxGenerator = SyntaxGenerator.GetGenerator(project.Solution.Workspace, LanguageNames.CSharp);
 
 			if (!Diagnose())
@@ -292,6 +291,7 @@ namespace SafetySharp.Compiler
 			Compilation = Normalizer.ApplyNormalizer<FormulaNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<LiftedExpressionNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<TransitionNormalizer>(Compilation, syntaxGenerator);
+			//Compilation = Normalizer.ApplyNormalizer<PortNormalizer>(Compilation, syntaxGenerator);
 		}
 
 		/// <summary>

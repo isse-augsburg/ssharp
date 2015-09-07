@@ -38,6 +38,26 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 	public static class MethodSymbolExtensions
 	{
 		/// <summary>
+		///   Gets a value indicating whether the <paramref name="methodSymbol" /> can be affected by fault effects.
+		/// </summary>
+		/// <param name="methodSymbol">The symbol of the method that should be checked.</param>
+		/// <param name="semanticModel">The semantic model that is used to resolve type information;</param>
+		[Pure]
+		public static bool CanBeAffectedByFaults([NotNull] this IMethodSymbol methodSymbol, [NotNull] SemanticModel semanticModel)
+		{
+			Requires.NotNull(methodSymbol, nameof(methodSymbol));
+
+			// Faults can only affect non-abstract methods that can be overwritten
+			if (methodSymbol.IsAbstract || methodSymbol.IsSealed || (!methodSymbol.IsVirtual && !methodSymbol.IsOverride))
+				return false;
+
+			// Faults affect only component methods
+			return methodSymbol.IsProvidedPort(semanticModel) ||
+				   methodSymbol.IsRequiredPort(semanticModel) ||
+				   methodSymbol.IsUpdateMethod(semanticModel);
+		}
+
+		/// <summary>
 		///   Checks whether <paramref name="methodSymbol" /> overrides <paramref name="overriddenMethod" />.
 		/// </summary>
 		/// <param name="methodSymbol">The symbol of the methodSymbol that should be checked.</param>
@@ -87,8 +107,8 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		}
 
 		/// <summary>
-		///   Checks whether <paramref name="methodSymbol" /> overrides <see cref="Component.Update()" />,
-		///   <see cref="Fault.UpdateFaultState" />, or within the context of the <paramref name="compilation" />.
+		///   Checks whether <paramref name="methodSymbol" /> overrides <see cref="Component.Update()" />
+		///   within the context of the <paramref name="compilation" />.
 		/// </summary>
 		/// <param name="methodSymbol">The method symbol that should be checked.</param>
 		/// <param name="compilation">The compilation that should be used to resolve symbol information.</param>
@@ -98,8 +118,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(methodSymbol, nameof(methodSymbol));
 			Requires.NotNull(compilation, nameof(compilation));
 
-			return methodSymbol.Overrides(compilation.GetComponentUpdateMethodSymbol()) ||
-				   methodSymbol.Overrides(compilation.GetFaultUpdateMethodSymbol());
+			return methodSymbol.Overrides(compilation.GetComponentUpdateMethodSymbol());
 		}
 
 		/// <summary>
@@ -131,7 +150,14 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			if (methodSymbol.IsStatic)
 				return false;
 
-			if (methodSymbol.MethodKind != MethodKind.Ordinary && methodSymbol.MethodKind != MethodKind.ExplicitInterfaceImplementation)
+			var validKind = methodSymbol.MethodKind == MethodKind.Ordinary ||
+							methodSymbol.MethodKind == MethodKind.ExplicitInterfaceImplementation ||
+							methodSymbol.MethodKind == MethodKind.PropertyGet ||
+							methodSymbol.MethodKind == MethodKind.PropertySet ||
+							methodSymbol.MethodKind == MethodKind.EventAdd ||
+							methodSymbol.MethodKind == MethodKind.EventRemove;
+
+			if (!validKind)
 				return false;
 
 			if (!methodSymbol.ContainingType.ImplementsIComponent(compilation))
@@ -140,6 +166,9 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			switch (methodSymbol.ContainingType.TypeKind)
 			{
 				case TypeKind.Class:
+					if (methodSymbol.ContainingType.HasAttribute<FaultEffectAttribute>(compilation))
+						return false;
+
 					return methodSymbol.IsExtern || methodSymbol.HasAttribute<RequiredAttribute>(compilation);
 				case TypeKind.Interface:
 					return methodSymbol.HasAttribute<RequiredAttribute>(compilation);
@@ -176,7 +205,14 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			if (methodSymbol.IsStatic)
 				return false;
 
-			if (methodSymbol.MethodKind != MethodKind.Ordinary && methodSymbol.MethodKind != MethodKind.ExplicitInterfaceImplementation)
+			var validKind = methodSymbol.MethodKind == MethodKind.Ordinary ||
+							methodSymbol.MethodKind == MethodKind.ExplicitInterfaceImplementation ||
+							methodSymbol.MethodKind == MethodKind.PropertyGet ||
+							methodSymbol.MethodKind == MethodKind.PropertySet ||
+							methodSymbol.MethodKind == MethodKind.EventAdd ||
+							methodSymbol.MethodKind == MethodKind.EventRemove;
+
+			if (!validKind)
 				return false;
 
 			if (!methodSymbol.ContainingType.ImplementsIComponent(compilation))
@@ -185,6 +221,9 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			switch (methodSymbol.ContainingType.TypeKind)
 			{
 				case TypeKind.Class:
+					if (methodSymbol.ContainingType.HasAttribute<FaultEffectAttribute>(compilation))
+						return false;
+
 					return !methodSymbol.IsExtern &&
 						   !methodSymbol.HasAttribute<RequiredAttribute>(compilation) &&
 						   !methodSymbol.IsUpdateMethod(compilation);

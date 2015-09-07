@@ -23,6 +23,7 @@
 namespace SafetySharp.Compiler.Roslyn.Syntax
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
@@ -53,6 +54,45 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 			Assert.NotNull(symbol, $"Unable to determine method symbol of method declaration '{methodDeclaration}'.");
 
 			return symbol;
+		}
+
+		/// <summary>
+		///   Gets the line number where the <paramref name="methodDeclaration" />'s body begins.
+		/// </summary>
+		/// <param name="methodDeclaration">The method declaration the body line number should be returned for.</param>
+		[Pure]
+		public static int GetBodyLineNumber([NotNull] this MethodDeclarationSyntax methodDeclaration)
+		{
+			Requires.NotNull(methodDeclaration, nameof(methodDeclaration));
+
+			if (methodDeclaration.ExpressionBody != null)
+				return methodDeclaration.ExpressionBody.Expression.GetLineNumber();
+
+			if (methodDeclaration.Body != null)
+				return methodDeclaration.Body.GetLineNumber();
+
+			return -1;
+		}
+
+		/// <summary>
+		///   Gets the statements that represent the <paramref name="methodDeclaration" />'s body.
+		/// </summary>
+		/// <param name="methodDeclaration">The method declaration the body statements should be returned for.</param>
+		/// <param name="methodSymbol">The symbol corresponding to the declaration.</param>
+		[Pure, NotNull]
+		public static BlockSyntax GetStatements([NotNull] this MethodDeclarationSyntax methodDeclaration,
+												[NotNull] IMethodSymbol methodSymbol)
+		{
+			Requires.NotNull(methodDeclaration, nameof(methodDeclaration));
+			Requires.NotNull(methodSymbol, nameof(methodSymbol));
+
+			if (methodDeclaration.ExpressionBody != null)
+				return methodDeclaration.ExpressionBody.Expression.AsStatementBody(methodSymbol.ReturnType);
+
+			if (methodDeclaration.Body != null)
+				return methodDeclaration.Body;
+
+			return SyntaxFactory.Block();
 		}
 
 		/// <summary>
@@ -161,7 +201,7 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 						kind = SyntaxKind.PublicKeyword;
 						break;
 					default:
-						throw new ArgumentOutOfRangeException("accessibility", accessibility, null);
+						throw new ArgumentOutOfRangeException(nameof(accessibility), accessibility, null);
 				}
 
 				var keyword = SyntaxFactory.Token(kind).WithLeadingTrivia(leadingTrivia).WithTrailingTrivia(trailingTrivia);
@@ -169,6 +209,29 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 			}
 
 			return methodDeclaration.WithModifiers(modifiers);
+		}
+
+		/// <summary>
+		///   Replaces the <paramref name="methodDeclaration" />'s statement or expression body with the given <paramref name="statements" />.
+		/// </summary>
+		/// <param name="methodDeclaration">The method declaration whose body should be replaced.</param>
+		/// <param name="statements">The new body of the method.</param>
+		[Pure, NotNull]
+		public static MethodDeclarationSyntax WithStatementBody([NotNull] this MethodDeclarationSyntax methodDeclaration,
+																[NotNull] BlockSyntax statements)
+		{
+			Requires.NotNull(methodDeclaration, nameof(methodDeclaration));
+			Requires.NotNull(statements, nameof(statements));
+
+			statements = statements.WithOpenBraceToken(statements.OpenBraceToken.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed));
+			methodDeclaration = methodDeclaration.WithBody(statements).WithExpressionBody(null);
+
+			if (methodDeclaration.SemicolonToken.Kind() == SyntaxKind.None)
+				return methodDeclaration;
+
+			var leadingTrivia = methodDeclaration.SemicolonToken.LeadingTrivia;
+			var trailingTrivia = methodDeclaration.SemicolonToken.TrailingTrivia;
+			return methodDeclaration.WithSemicolonToken(SyntaxFactory.Token(leadingTrivia, SyntaxKind.None, trailingTrivia));
 		}
 
 		/// <summary>

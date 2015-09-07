@@ -109,6 +109,7 @@
     <Compile Include="Analyzers\DummyAnalyzer.cs" />
     <Compile Include="CompilationException.cs" />
     <Compile Include="Compiler.cs" />
+    <Compile Include="Normalization\PortNormalizer.cs" />
     <Compile Include="Normalization\TransitionNormalizer.cs" />
     <Compile Include="Normalization\FormulaNormalizer.cs" />
     <Compile Include="Normalization\LiftedExpressionNormalizer.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Analyzers\Analyzer.cs" />
     <Compile Include="Analyzers\DiagnosticInfo.cs" />
+    <Compile Include="Roslyn\Syntax\AccessorDeclarationExtensions.cs" />
     <Compile Include="Roslyn\Syntax\PropertyDeclarationExtensions.cs" />
     <Compile Include="Roslyn\Syntax\SyntaxGeneratorExtensions.cs" />
     <Compile Include="Roslyn\Syntax\IdentifierExtensions.cs" />
