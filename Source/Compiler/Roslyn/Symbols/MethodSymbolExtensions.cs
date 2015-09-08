@@ -24,6 +24,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 {
 	using System;
 	using System.Linq;
+	using CompilerServices;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
@@ -249,7 +250,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		}
 
 		/// <summary>
-		///   Checks whether <paramref name="methodSymbol" /> represents the <see cref="StateMachine{TState}.Transition" /> method.
+		///   Checks whether <paramref name="methodSymbol" /> represents a <c>StateMachine{TState}.Transition</c> method.
 		/// </summary>
 		/// <param name="methodSymbol">The method symbol that should be checked.</param>
 		/// <param name="semanticModel">The semantic model that should be used to resolve symbol information.</param>
@@ -301,6 +302,31 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
 			return methodSymbol.IsFaultEffect(semanticModel.Compilation);
+		}
+
+		/// <summary>
+		///   Checks whether <paramref name="methodSymbol" /> represents the <see cref="Component.Bind(string,string)" />,
+		///   <see cref="Component.Bind(string,string,Type)" />, <see cref="Model.Bind(string,string)" />, or 
+		///   <see cref="Model.Bind(string,string,Type)" /> method.
+		/// </summary>
+		/// <param name="methodSymbol">The method symbol that should be checked.</param>
+		/// <param name="semanticModel">The semantic model that should be used to resolve symbol information.</param>
+		[Pure]
+		public static bool IsBindMethod([NotNull] this IMethodSymbol methodSymbol, [NotNull] SemanticModel semanticModel)
+		{
+			Requires.NotNull(methodSymbol, nameof(methodSymbol));
+			Requires.NotNull(semanticModel, nameof(semanticModel));
+
+			if (methodSymbol.Name != "Bind")
+				return false;
+
+			var isComponentMethod = methodSymbol.ContainingType.Equals(semanticModel.GetComponentClassSymbol());
+			var isModelMethod = methodSymbol.ContainingType.Equals(semanticModel.GetTypeSymbol<Model>());
+
+            if (!isComponentMethod && !isModelMethod)
+				return false;
+
+			return methodSymbol.Parameters[0].Type.SpecialType == SpecialType.System_String;
 		}
 
 		/// <summary>
@@ -500,6 +526,38 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			var initialize = SyntaxFactory.InitializerExpression(SyntaxKind.ArrayInitializerExpression, arguments);
 			var arrayType = syntaxGenerator.ArrayTypeExpression(SyntaxFactory.ParseTypeName(typeof(Type).FullName));
 			return SyntaxFactory.ArrayCreationExpression((ArrayTypeSyntax)arrayType, initialize);
+		}
+
+		/// <summary>
+		///     Gets the expression that selects the <paramref name="methodSymbol" /> at runtime using reflection.
+		/// </summary>
+		/// <param name="methodSymbol">The method the code should be created for.</param>
+		/// <param name="syntaxGenerator">The syntax generator that should be used.</param>
+		/// <param name="methodName">
+		///     The name of the method that should be used; if <c>null</c>, <see cref="methodSymbol" />'s name is
+		///     used instead.
+		/// </param>
+		/// <param name="declaringType">
+		///     The declaring type that should be used; if <c>null</c>, <see cref="methodSymbol" />'s declaring
+		///     type is used instead.
+		/// </param>
+		public static ExpressionSyntax GetMethodInfoExpression([NotNull] this IMethodSymbol methodSymbol,
+															   [NotNull] SyntaxGenerator syntaxGenerator,
+															   string methodName = null,
+															   ITypeSymbol declaringType = null)
+		{
+			Requires.NotNull(methodSymbol, nameof(methodSymbol));
+			Requires.NotNull(syntaxGenerator, nameof(syntaxGenerator));
+
+			var declaringTypeArg = declaringType == null
+				? SyntaxFactory.TypeOfExpression((TypeSyntax)syntaxGenerator.TypeExpression(methodSymbol.ContainingType))
+				: syntaxGenerator.TypeOfExpression(syntaxGenerator.TypeExpression(declaringType));
+			var parameters = GetParameterTypeArray(methodSymbol, syntaxGenerator);
+			var returnType = SyntaxFactory.TypeOfExpression((TypeSyntax)syntaxGenerator.TypeExpression(methodSymbol.ReturnType));
+			var nameArg = syntaxGenerator.LiteralExpression(methodName ?? methodSymbol.Name);
+			var reflectionHelpersType = SyntaxFactory.ParseTypeName(typeof(ReflectionHelpers).GetGlobalName());
+			var getMethodMethod = syntaxGenerator.MemberAccessExpression(reflectionHelpersType, nameof(ReflectionHelpers.GetMethod));
+			return (ExpressionSyntax)syntaxGenerator.InvocationExpression(getMethodMethod, declaringTypeArg, nameArg, parameters, returnType);
 		}
 	}
 }

@@ -110,6 +110,7 @@
     <Compile Include="CompilationException.cs" />
     <Compile Include="Compiler.cs" />
     <Compile Include="Normalization\AutoPropertyNormalizer.cs" />
+    <Compile Include="Normalization\BindingNormalizer.cs" />
     <Compile Include="Normalization\ExpressionBodyNormalizer.cs" />
     <Compile Include="Normalization\PortNormalizer.cs" />
     <Compile Include="Normalization\TransitionNormalizer.cs" />
@@ -121,8 +122,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Analyzers\Analyzer.cs" />
     <Compile Include="Analyzers\DiagnosticInfo.cs" />
+    <Compile Include="Roslyn\PortSignatureMatcher.cs" />
     <Compile Include="Roslyn\Syntax\AccessorDeclarationExtensions.cs" />
     <Compile Include="Roslyn\Syntax\EventDeclarationExtensions.cs" />
+    <Compile Include="Roslyn\Syntax\InvocationExpressionExtensions.cs" />
     <Compile Include="Roslyn\Syntax\IndexerDeclarationExtensions.cs" />
     <Compile Include="Roslyn\Syntax\PropertyDeclarationExtensions.cs" />
     <Compile Include="Roslyn\Syntax\SyntaxGeneratorExtensions.cs" />

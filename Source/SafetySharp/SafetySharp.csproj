@@ -43,7 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\LtsMin.cs" />
+    <Compile Include="CompilerServices\Binder.cs" />
+    <Compile Include="CompilerServices\BindingFieldAttribute.cs" />
     <Compile Include="CompilerServices\LiftExpressionAttribute.cs" />
+    <Compile Include="CompilerServices\ReflectionHelpers.cs" />
     <Compile Include="CompilerServices\StateFormulaFactory.cs" />
     <Compile Include="Modeling\NonDiscoverableAttribute.cs" />
     <Compile Include="Analysis\CounterExample.cs" />

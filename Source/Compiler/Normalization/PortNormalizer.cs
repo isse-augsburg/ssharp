@@ -25,6 +25,7 @@ namespace SafetySharp.Compiler.Normalization
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
+	using CompilerServices;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -60,7 +61,7 @@ namespace SafetySharp.Compiler.Normalization
 		public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax declaration)
 		{
 			_methodSymbol = declaration.GetMethodSymbol(SemanticModel);
-			if (!_methodSymbol.ContainingType.IsComponent(SemanticModel) || !_methodSymbol.CanBeAffectedByFaults(SemanticModel))
+			if (!_methodSymbol.ContainingType.IsComponent(SemanticModel))
 				return declaration;
 
 			var body = Normalize(declaration.Body, declaration.GetBodyLineNumber());
@@ -71,8 +72,11 @@ namespace SafetySharp.Compiler.Normalization
 			if (_methodSymbol.IsRequiredPort(SemanticModel))
 			{
 				var index = declaration.Modifiers.IndexOf(SyntaxKind.ExternKeyword);
+				var fieldName = Syntax.LiteralExpression(GetBindingFieldName());
+
 				declaration = declaration.WithModifiers(declaration.Modifiers.RemoveAt(index)).WithSemicolonToken(default(SyntaxToken));
 				declaration = (MethodDeclarationSyntax)Syntax.MarkAsDebuggerHidden(declaration, SemanticModel);
+				declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<BindingFieldAttribute>(declaration, SemanticModel, fieldName);
 			}
 
 			return declaration.WithBody(body).EnsureLineCount(originalDeclaration);
@@ -84,7 +88,7 @@ namespace SafetySharp.Compiler.Normalization
 		public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax declaration)
 		{
 			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
-			if (!propertySymbol.ContainingType.IsComponent(SemanticModel) || !propertySymbol.CanBeAffectedByFaults(SemanticModel))
+			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
 				return declaration;
 
 			var originalDeclaration = declaration;
@@ -104,7 +108,7 @@ namespace SafetySharp.Compiler.Normalization
 		public override SyntaxNode VisitIndexerDeclaration(IndexerDeclarationSyntax declaration)
 		{
 			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
-			if (!propertySymbol.ContainingType.IsComponent(SemanticModel) || !propertySymbol.CanBeAffectedByFaults(SemanticModel))
+			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
 				return declaration;
 
 			var originalDeclaration = declaration;
@@ -138,8 +142,12 @@ namespace SafetySharp.Compiler.Normalization
 					if (_methodSymbol.IsRequiredPort(SemanticModel))
 					{
 						// Cannot use the SyntaxGenerator extension method due to a Roslyn bug
-						var attribute = (AttributeListSyntax)Syntax.Attribute(typeof(DebuggerHiddenAttribute).GetGlobalName());
-						yield return accessor.AddAttributeLists(attribute).WithBody(body).WithSemicolonToken(default(SyntaxToken));
+						var hiddenAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(DebuggerHiddenAttribute).GetGlobalName());
+						var fieldName = Syntax.LiteralExpression(GetBindingFieldName());
+						var fieldAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(BindingFieldAttribute).GetGlobalName(), fieldName);
+
+						var requiredPortAccessor = accessor.AddAttributeLists(hiddenAttribute, fieldAttribute);
+                        yield return requiredPortAccessor.WithBody(body).WithSemicolonToken(default(SyntaxToken));
 					}
 					else
 						yield return accessor.WithBody(body);

@@ -23,14 +23,24 @@
 namespace PressureTank
 {
 	using System;
-	using System.Diagnostics;
-	using System.Runtime.CompilerServices;
-	using System.Runtime.InteropServices;
+	using SafetySharp.CompilerServices;
 	using SafetySharp.Modeling;
 
 	public class T2 : Component
 	{
-		public virtual int X16 { get; } = 666;
+		public virtual bool X16()
+		{
+			Console.WriteLine("BASE");
+			return false;
+		}
+
+		private void NameOf(object i)
+		{
+		}
+
+		public void NameOf(double i)
+		{
+		}
 	}
 
 	/// <summary>
@@ -38,8 +48,6 @@ namespace PressureTank
 	/// </summary>
 	public class Timer : T2
 	{
-		public override int X16 { get; } = 68;
-
 		/// <summary>
 		///   The timeout signaled by the timer.
 		/// </summary>
@@ -60,10 +68,55 @@ namespace PressureTank
 			_timeout = timeout;
 			Y = 21;
 
-			Bind(nameof(W1), nameof(base.X16));
+			Bind(nameof(Extern), nameof(base.X16));
+			Bind(nameof(W1), nameof(X));
 		}
 
-	
+		public virtual int X
+		{
+			get { return 1; }
+			set
+			{
+				var i = 0;
+				++i;
+			}
+		}
+
+		public virtual int X2 { get; set; }
+
+		protected virtual int Y { get; } = 99;
+
+		protected virtual int Z => Y * 2;
+
+		protected virtual extern int W1 { get; }
+		protected virtual extern int W3 { set; }
+		protected virtual extern int W2 { private get; set; }
+
+		protected virtual int this[int i] => Y + Z;
+
+		protected virtual extern int this[double i] { get; set; }
+
+		protected virtual int this[float i]
+		{
+			get { return 1; }
+			set { X = value; }
+		}
+
+		public override bool X16()
+		{
+			Console.WriteLine("TIMER");
+			return true;
+		}
+
+		private extern int NameOf(double d);
+
+		private void NameOf(int i)
+		{
+		}
+
+		private void NameOf(float i)
+		{
+		}
 
 		/// <summary>
 		///   Gets a value indicating whether the timeout has elapsed. This method returns true only for the single system step where
@@ -83,7 +136,6 @@ namespace PressureTank
 
 		protected virtual extern bool Extern();
 
-
 		/// <summary>
 		///   Stops the timer.
 		/// </summary>
@@ -99,37 +151,11 @@ namespace PressureTank
 		/// </summary>
 		public int GetRemainingTime() => _remainingTime;
 
-		public virtual int X {get { return 1; }set { var i = 0;++i;
-			}
-		}
-
-		public virtual int X2 { get; set; }
-
-		protected virtual int Y { get; } = 99;
-
-		protected virtual int Z => Y * 2;
-
-		protected virtual extern int W1 { get; }
-		protected virtual extern int W3 { set; }
-		protected virtual extern int W2 { private get; set; }
-
-		protected virtual int this[int i] => Y + Z;
-
-		protected virtual extern int this[double i] { get; set; }
-
-
-		virtual protected int this[float i]
-		{
-			get { return 1; }
-			set { X = value; }
-		}
-
 		protected virtual event Action E
 		{
 			add { X = 3; }
 			remove { X = 7; }
 		}
-
 
 		private static void Main()
 		{
@@ -137,7 +163,6 @@ namespace PressureTank
 			t.HasElapsed();
 			t.Start();
 			t.Start2();
-
 
 			t.X2 = t.X2;
 			t.X = t.X;
@@ -149,7 +174,7 @@ namespace PressureTank
 			t.E += () => { };
 			t.E -= () => { };
 
-			t.Extern();
+			var val = t.Extern();
 			var x = t.W1;
 			t[3.0] = t[4.0];
 			t.W2 = x;
@@ -167,14 +192,14 @@ namespace PressureTank
 				_remainingTime = -1;
 		}
 
-//		}
-//			public bool HasElapsed() => false;
-//		{
-//		public class SuppressTimeout : Fault
-//		[Transient]
-//		/// </summary>
-//		///   Represents a failure mode that prevents the timer from reporting a timeout.
-
 //		/// <summary>
+//		///   Represents a failure mode that prevents the timer from reporting a timeout.
+//		/// </summary>
+//		[Transient]
+//		public class SuppressTimeout : Fault
+//		{
+//			public bool HasElapsed() => false;
+
+//		}
 	}
 }

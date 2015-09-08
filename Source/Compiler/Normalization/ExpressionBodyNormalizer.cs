@@ -29,7 +29,7 @@ namespace SafetySharp.Compiler.Normalization
 	using Roslyn.Syntax;
 
 	/// <summary>
-	///   Replaces all expression-bodied members with regular statement-based members.
+	///   Replaces all expression-bodied members with regular statement-based ones.
 	/// 
 	///   For instance:
 	///   <code>

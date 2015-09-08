@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Modeling
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using Utilities;
@@ -53,6 +54,18 @@ namespace SafetySharp.Modeling
 		/// <param name="requiredPort">The required port that should be bound to the <paramref name="providedPort" />.</param>
 		/// <param name="providedPort">The provided port that should be bound to the <paramref name="requiredPort" />.</param>
 		protected static void Bind(string requiredPort, string providedPort)
+		{
+			Requires.CompilationTransformation();
+		}
+
+		/// <summary>
+		///   Establishes a port binding between the <paramref name="requiredPort" /> and the <paramref name="providedPort" /> where the
+		///   actual ports that should be bound are disambiguated by the delegate <typeparamref name="T" />.
+		/// </summary>
+		/// <typeparam name="T">A delegate type that disambiguates the ports.</typeparam>
+		/// <param name="requiredPort">The required port that should be bound to the <paramref name="providedPort" />.</param>
+		/// <param name="providedPort">The provided port that should be bound to the <paramref name="requiredPort" />.</param>
+		protected static void Bind<T>(string requiredPort, string providedPort)
 		{
 			Requires.CompilationTransformation();
 		}

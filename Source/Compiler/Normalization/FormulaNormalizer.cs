@@ -138,6 +138,17 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
+		/// Does not normalize <c>nameof</c> expressions.
+		/// </summary>
+		public override SyntaxNode VisitInvocationExpression(InvocationExpressionSyntax expression)
+		{
+			if (expression.IsNameOfOperator(SemanticModel))
+				return expression;
+
+			return base.VisitInvocationExpression(expression);
+		}
+
+		/// <summary>
 		///   Normalizes the <paramref name="argument" />.
 		/// </summary>
 		public override SyntaxNode VisitArgument(ArgumentSyntax argument)

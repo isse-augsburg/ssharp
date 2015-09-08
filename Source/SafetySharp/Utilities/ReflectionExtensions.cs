@@ -26,6 +26,7 @@ namespace SafetySharp.Utilities
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Reflection;
+	using System.Reflection.Emit;
 	using System.Runtime.InteropServices;
 	using Modeling;
 	using Runtime.Serialization;
@@ -181,6 +182,48 @@ namespace SafetySharp.Utilities
 				return true;
 
 			return false;
+		}
+
+		/// <summary>
+		///   Creates a delegate of type <paramref name="delegateType" /> that invokes the <paramref name="targetMethod" /> on the
+		///   <paramref name="targetObject" /> either virtually or non-virtually, depending on the value of the
+		///   <paramref name="virtualInvocation" /> parameter.
+		/// </summary>
+		/// <param name="delegateType">The type of the delegate that should be created.</param>
+		/// <param name="targetObject">The target object the delegate should be created for.</param>
+		/// <param name="targetMethod">The target method the delegate should be created for.</param>
+		/// <param name="virtualInvocation">Indicates whether the target method should be invoked virtually.</param>
+		public static Delegate CreateDelegateInstance(this Type delegateType, object targetObject, MethodInfo targetMethod, bool virtualInvocation)
+		{
+			Requires.NotNull(delegateType, nameof(delegateType));
+			Requires.NotNull(targetObject, nameof(targetObject));
+			Requires.NotNull(targetMethod, nameof(targetMethod));
+
+			// Virtual invocations are .NET's defaults, hence we can simply use the method provided by the framework.
+			// For non-virtual invocations however, we have to generate a dynamic method ourself that non-virtually
+			// invokes the target method.
+			if (virtualInvocation)
+				return Delegate.CreateDelegate(delegateType, targetObject, targetMethod);
+
+			var parameters = new[] { targetMethod.DeclaringType }
+				.Concat(targetMethod.GetParameters().Select(parameter => parameter.ParameterType)).ToArray();
+
+			var dynamicMethod = new DynamicMethod(
+				name: targetMethod.Name + "NonVirtual",
+				returnType: targetMethod.ReturnType,
+				parameterTypes: parameters,
+				m: typeof(object).Assembly.ManifestModule,
+				skipVisibility: true);
+
+			var il = dynamicMethod.GetILGenerator();
+
+			for (var i = 0; i < parameters.Length; ++i)
+				il.Emit(OpCodes.Ldarg, i);
+
+			il.Emit(OpCodes.Call, targetMethod);
+			il.Emit(OpCodes.Ret);
+
+			return dynamicMethod.CreateDelegate(delegateType, targetObject);
 		}
 	}
 }

@@ -65,10 +65,15 @@ namespace SafetySharp.Compiler.Normalization
 				}
 			}
 
-			_liftedMethodStack.Push(isLifted);
-			var syntaxNode = base.VisitElementAccessExpression(expression);
-			_liftedMethodStack.Pop();
-			return syntaxNode;
+			try
+			{
+				_liftedMethodStack.Push(isLifted);
+				return base.VisitElementAccessExpression(expression);
+			}
+			finally
+			{
+				_liftedMethodStack.Pop();
+			}
 		}
 
 		/// <summary>
@@ -85,10 +90,15 @@ namespace SafetySharp.Compiler.Normalization
 					isLifted = true;
 			}
 
-			_liftedMethodStack.Push(isLifted);
-			var syntaxNode = base.VisitConstructorInitializer(expression);
-			_liftedMethodStack.Pop();
-			return syntaxNode;
+			try
+			{
+				_liftedMethodStack.Push(isLifted);
+				return base.VisitConstructorInitializer(expression);
+			}
+			finally
+			{
+				_liftedMethodStack.Pop();
+			}
 		}
 
 		/// <summary>
@@ -105,10 +115,15 @@ namespace SafetySharp.Compiler.Normalization
 					isLifted = true;
 			}
 
-			_liftedMethodStack.Push(isLifted);
-			var syntaxNode = base.VisitInvocationExpression(expression);
-			_liftedMethodStack.Pop();
-			return syntaxNode;
+			try
+			{
+				_liftedMethodStack.Push(isLifted);
+				return base.VisitInvocationExpression(expression);
+			}
+			finally
+			{
+				_liftedMethodStack.Pop();
+			}
 		}
 
 		/// <summary>
@@ -125,10 +140,15 @@ namespace SafetySharp.Compiler.Normalization
 					isLifted = true;
 			}
 
-			_liftedMethodStack.Push(isLifted);
-			var syntaxNode = base.VisitObjectCreationExpression(expression);
-			_liftedMethodStack.Pop();
-			return syntaxNode;
+			try
+			{
+				_liftedMethodStack.Push(isLifted);
+				return base.VisitObjectCreationExpression(expression);
+			}
+			finally
+			{
+				_liftedMethodStack.Pop();
+			}
 		}
 
 		/// <summary>
