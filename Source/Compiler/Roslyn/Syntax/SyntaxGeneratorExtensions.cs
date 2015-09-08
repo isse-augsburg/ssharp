@@ -22,8 +22,11 @@
 
 namespace SafetySharp.Compiler.Roslyn.Syntax
 {
+	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
@@ -169,6 +172,57 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 																  [NotNull] params ExpressionSyntax[] elements)
 		{
 			return syntaxGenerator.ArrayCreationExpression<T>(semanticModel, (IEnumerable<ExpressionSyntax>)elements);
+		}
+
+		/// <summary>
+		///   Marks the <paramref name="syntaxNode" /> with an attribute of type <typeparamref name="TAttribute" /> with the optional
+		///   <paramref name="attributeArguments" />.
+		/// </summary>
+		/// <typeparam name="TAttribute">The type of the attribute that should be added.</typeparam>
+		/// <param name="syntaxGenerator">The syntax generator that should be used to generate the attribute.</param>
+		/// <param name="syntaxNode">The syntax node that should be marked with the attribute.</param>
+		/// <param name="semanticModel">The semantic model that should be used to resolve type information.</param>
+		/// <param name="attributeArguments">The optional constructor arguments for the attribute.</param>
+		[Pure, NotNull]
+		public static SyntaxNode AddAttribute<TAttribute>([NotNull] this SyntaxGenerator syntaxGenerator, [NotNull] SyntaxNode syntaxNode,
+														  [NotNull] SemanticModel semanticModel, params SyntaxNode[] attributeArguments)
+			where TAttribute : Attribute
+		{
+			Requires.NotNull(syntaxGenerator, nameof(syntaxGenerator));
+			Requires.NotNull(syntaxNode, nameof(syntaxNode));
+			Requires.NotNull(semanticModel, nameof(semanticModel));
+			Requires.NotNull(attributeArguments, nameof(attributeArguments));
+
+			var attribute = (AttributeListSyntax)syntaxGenerator.Attribute(typeof(TAttribute).GetGlobalName(), attributeArguments);
+			return syntaxGenerator.AddAttributes(syntaxNode, attribute);
+		}
+
+		/// <summary>
+		///   Marks the <paramref name="syntaxNode" /> as <c>[CompilerGenerated]</c>.
+		/// </summary>
+		/// <param name="syntaxGenerator">The syntax generator that should be used to generate the attribute.</param>
+		/// <param name="syntaxNode">The syntax node that should be marked with the attribute.</param>
+		/// <param name="semanticModel">The semantic model that should be used to resolve type information.</param>
+		[Pure, NotNull]
+		public static SyntaxNode MarkAsCompilerGenerated([NotNull] this SyntaxGenerator syntaxGenerator, [NotNull] SyntaxNode syntaxNode,
+														 [NotNull] SemanticModel semanticModel)
+		{
+			return syntaxGenerator.AddAttribute<CompilerGeneratedAttribute>(syntaxNode, semanticModel);
+		}
+
+		/// <summary>
+		///   Marks the <paramref name="syntaxNode" /> as <c>[DebuggerBrowsable(DebuggerBrowsableState.Never)]</c>
+		/// </summary>
+		/// <param name="syntaxGenerator">The syntax generator that should be used to generate the attribute.</param>
+		/// <param name="syntaxNode">The syntax node that should be marked with the attribute.</param>
+		/// <param name="semanticModel">The semantic model that should be used to resolve type information.</param>
+		[Pure, NotNull]
+		public static SyntaxNode MarkAsNonDebuggerBrowsable([NotNull] this SyntaxGenerator syntaxGenerator, [NotNull] SyntaxNode syntaxNode,
+															[NotNull] SemanticModel semanticModel)
+		{
+			var attributeType = syntaxGenerator.TypeExpression<DebuggerBrowsableState>(semanticModel);
+			var never = syntaxGenerator.MemberAccessExpression(attributeType, nameof(DebuggerBrowsableState.Never));
+			return syntaxGenerator.AddAttribute<DebuggerBrowsableAttribute>(syntaxNode, semanticModel, never);
 		}
 	}
 }

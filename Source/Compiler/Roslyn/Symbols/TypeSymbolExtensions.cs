@@ -116,6 +116,24 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 
 		/// <summary>
 		///   Checks whether <paramref name="typeSymbol" /> is directly or indirectly derived from the <see cref="Component" />
+		///   class and not marked with the <see cref="FaultEffectAttribute" />.
+		/// </summary>
+		/// <param name="typeSymbol">The type symbol that should be checked.</param>
+		/// <param name="semanticModel">
+		///   The semantic model that should be used to resolve the type symbol for the <see cref="Component" /> class.
+		/// </param>
+		[Pure]
+		public static bool IsComponent([NotNull] this ITypeSymbol typeSymbol, [NotNull] SemanticModel semanticModel)
+		{
+			Requires.NotNull(typeSymbol, nameof(typeSymbol));
+			Requires.NotNull(semanticModel, nameof(semanticModel));
+
+			return !typeSymbol.HasAttribute<FaultEffectAttribute>(semanticModel) &&
+				   typeSymbol.IsDerivedFrom(semanticModel.GetComponentClassSymbol());
+		}
+
+		/// <summary>
+		///   Checks whether <paramref name="typeSymbol" /> is directly or indirectly derived from the <see cref="Component" />
 		///   class within the context of the <paramref name="semanticModel" />.
 		/// </summary>
 		/// <param name="typeSymbol">The type symbol that should be checked.</param>

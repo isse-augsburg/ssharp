@@ -22,7 +22,6 @@
 
 namespace SafetySharp.Compiler.Normalization
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
@@ -31,7 +30,6 @@ namespace SafetySharp.Compiler.Normalization
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Microsoft.CodeAnalysis.Editing;
-	using Modeling;
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
 	using Utilities;
@@ -47,16 +45,6 @@ namespace SafetySharp.Compiler.Normalization
 		private readonly string _resultVariable = "result".ToSynthesized();
 
 		/// <summary>
-		///   Represents the <c>[CompilerGenerated]</c> attribute syntax.
-		/// </summary>
-		private AttributeListSyntax _compilerGeneratedAttribute;
-
-		/// <summary>
-		///   Represents the <c>[DebuggerHidden]</c> attribute syntax.
-		/// </summary>
-		private AttributeListSyntax _debuggerHiddenAttribute;
-
-		/// <summary>
 		///   The method symbol that is being normalized.
 		/// </summary>
 		private IMethodSymbol _methodSymbol;
@@ -67,30 +55,19 @@ namespace SafetySharp.Compiler.Normalization
 		private int _portCount;
 
 		/// <summary>
-		///   Normalizes the syntax trees of the <see cref="Compilation" />.
-		/// </summary>
-		protected override Compilation Normalize()
-		{
-			_compilerGeneratedAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(CompilerGeneratedAttribute).FullName);
-			_debuggerHiddenAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(DebuggerHiddenAttribute).FullName);
-
-			return base.Normalize();
-		}
-
-		/// <summary>
 		///   Normalizes the <paramref name="declaration" />.
 		/// </summary>
 		public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax declaration)
 		{
 			_methodSymbol = declaration.GetMethodSymbol(SemanticModel);
-			if (!_methodSymbol.ContainingType.OriginalDefinition.IsDerivedFromComponent(SemanticModel))
+			if (!_methodSymbol.ContainingType.IsComponent(SemanticModel))
 				return declaration;
 
 			var body = Normalize(declaration.Body, declaration, declaration.GetBodyLineNumber());
 			if (body == null)
 				return declaration;
 
-            return declaration.WithBody(body);
+			return declaration.WithBody(body);
 		}
 
 		/// <summary>
@@ -134,7 +111,7 @@ namespace SafetySharp.Compiler.Normalization
 //
 //			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(SyntaxFactory.List(accessors)));
 		}
-		
+
 		/// <summary>
 		///   Normalizes the <paramref name="declaration" />.
 		/// </summary>
@@ -163,9 +140,8 @@ namespace SafetySharp.Compiler.Normalization
 			++_portCount;
 
 			var delegateDeclaration = CreateDelegateDeclaration();
-			var fieldDeclaration = CreateFieldDeclaration(delegateDeclaration.Identifier.ValueText);
-			var defaultMethod = CreateDefaultProvidedPortMethod();
-			AddMembers(_methodSymbol.ContainingType, delegateDeclaration, fieldDeclaration, defaultMethod);
+			var fieldDeclaration = CreateFieldDeclaration(delegateDeclaration.Identifier.ValueText, CreateProvidedPortLambda());
+			AddMembers(_methodSymbol.ContainingType, delegateDeclaration, fieldDeclaration);
 
 			statements = SyntaxFactory.Block(MakeFaultEffectSensitive(statements, bodyLineNumber));
 			return statements.PrependLineDirective(-1);
@@ -195,53 +171,6 @@ namespace SafetySharp.Compiler.Normalization
 		private string GetFieldName()
 		{
 			return ("backingField" + _portCount).ToSynthesized();
-		}
-
-		/// <summary>
-		///   Gets the name of the field for the current port.
-		/// </summary>
-		private string GetDefaultMethodName()
-		{
-			return ("DefaultMethod" + _portCount).ToSynthesized();
-		}
-
-		/// <summary>
-		///   Creates a delegate declaration that is compatible with the method.
-		/// </summary>
-		private DelegateDeclarationSyntax CreateDelegateDeclaration()
-		{
-			var parameters = _methodSymbol.Parameters.Select(parameter => Syntax.ParameterDeclaration(parameter));
-
-			if (!_methodSymbol.ReturnsVoid)
-			{
-				var parameterType = Syntax.TypeExpression(_methodSymbol.ReturnType);
-				var returnParameter = Syntax.ParameterDeclaration(_resultVariable, parameterType, refKind: RefKind.Out);
-
-				parameters = parameters.Concat(new[] { returnParameter });
-			}
-
-			var methodDelegate = (DelegateDeclarationSyntax)Syntax.DelegateDeclaration(
-				name: GetDelegateName(),
-				parameters: parameters,
-				returnType: Syntax.TypeExpression(SpecialType.System_Boolean),
-				accessibility: Accessibility.Private,
-				modifiers: DeclarationModifiers.Unsafe);
-
-			return methodDelegate.AddAttributeLists(_compilerGeneratedAttribute);
-		}
-
-		/// <summary>
-		///   Creates a field declaration that stores a value of the <paramref name="delegateType" />.
-		/// </summary>
-		private FieldDeclarationSyntax CreateFieldDeclaration(string delegateType)
-		{
-			var fieldType = SyntaxFactory.ParseTypeName(delegateType);
-			var field = (FieldDeclarationSyntax)Syntax.FieldDeclaration(
-				name: GetFieldName(),
-				type: fieldType,
-				accessibility: Accessibility.Private);
-
-			return field.AddAttributeLists(_compilerGeneratedAttribute);
 		}
 
 		/// <summary>
@@ -288,9 +217,51 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Creates the default fault method that is assigned to a provided port.
+		///   Creates a delegate declaration that is compatible with the method.
 		/// </summary>
-		private MethodDeclarationSyntax CreateDefaultProvidedPortMethod()
+		private DelegateDeclarationSyntax CreateDelegateDeclaration()
+		{
+			var parameters = _methodSymbol.Parameters.Select(parameter => Syntax.ParameterDeclaration(parameter));
+
+			if (!_methodSymbol.ReturnsVoid)
+			{
+				var parameterType = Syntax.TypeExpression(_methodSymbol.ReturnType);
+				var returnParameter = Syntax.ParameterDeclaration(_resultVariable, parameterType, refKind: RefKind.Out);
+
+				parameters = parameters.Concat(new[] { returnParameter });
+			}
+
+			var methodDelegate = Syntax.DelegateDeclaration(
+				name: GetDelegateName(),
+				parameters: parameters,
+				returnType: Syntax.TypeExpression(SpecialType.System_Boolean),
+				accessibility: Accessibility.Private,
+				modifiers: DeclarationModifiers.Unsafe);
+
+			return (DelegateDeclarationSyntax)Syntax.MarkAsCompilerGenerated(methodDelegate, SemanticModel);
+		}
+
+		/// <summary>
+		///   Creates a field declaration that stores a value of the <paramref name="delegateType" />.
+		/// </summary>
+		private FieldDeclarationSyntax CreateFieldDeclaration(string delegateType, SyntaxNode initializer)
+		{
+			var fieldType = SyntaxFactory.ParseTypeName(delegateType);
+			var field = Syntax.FieldDeclaration(
+				name: GetFieldName(),
+				type: fieldType,
+				accessibility: Accessibility.Private,
+				initializer: initializer);
+
+			field = Syntax.MarkAsCompilerGenerated(field, SemanticModel);
+			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
+			return (FieldDeclarationSyntax)field;
+		}
+
+		/// <summary>
+		///   Creates the default lambda method that is assigned to a provided port.
+		/// </summary>
+		private SyntaxNode CreateProvidedPortLambda()
 		{
 			var parameters = new List<SyntaxNode>(_methodSymbol.Parameters.Select(parameter => Syntax.ParameterDeclaration(parameter)));
 			if (!_methodSymbol.ReturnsVoid)
@@ -309,17 +280,7 @@ namespace SafetySharp.Compiler.Normalization
 				statements.Add(Syntax.AssignmentStatement(Syntax.IdentifierName(_resultVariable), Syntax.DefaultExpression(_methodSymbol.ReturnType)));
 
 			statements.Add(Syntax.ReturnStatement(Syntax.FalseLiteralExpression()));
-
-			var methodDeclaration = (MethodDeclarationSyntax)Syntax.MethodDeclaration(
-				name: GetDefaultMethodName(),
-				parameters: parameters,
-				returnType: Syntax.TypeExpression(SpecialType.System_Boolean),
-				accessibility: Accessibility.Private,
-				modifiers: DeclarationModifiers.Unsafe,
-				statements: statements);
-
-
-			return methodDeclaration.AddAttributeLists(_compilerGeneratedAttribute, _debuggerHiddenAttribute);
+			return Syntax.ValueReturningLambdaExpression(parameters, statements);
 		}
 	}
 }

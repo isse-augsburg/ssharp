@@ -22,6 +22,8 @@
 
 namespace PressureTank
 {
+	using System.Diagnostics;
+	using System.Runtime.CompilerServices;
 	using SafetySharp.Modeling;
 
 	/// <summary>
@@ -47,7 +49,10 @@ namespace PressureTank
 		public Timer(int timeout)
 		{
 			_timeout = timeout;
+			Y = 21;
 		}
+
+		public int X { get; private set; } = 33 / 3;
 
 		/// <summary>
 		///   Gets a value indicating whether the timeout has elapsed. This method returns true only for the single system step where
@@ -80,12 +85,34 @@ namespace PressureTank
 		/// </summary>
 		public int GetRemainingTime() => _remainingTime;
 
-		static void Main()
+		private int Y { get; } = 99;
+
+		private int Z => Y * 2;
+
+		//private extern int W1 { get; }
+		//private extern int W3 { set; }
+		//private extern int W2 { get; set; }
+
+		private int this[int i] => Y + Z;
+
+		private int this[float i]
+		{
+			get { return 1; }
+			set { X = value; }
+		}
+
+		private static void Main()
 		{
 			var t = new Timer(32);
 			t.HasElapsed();
 			t.Start();
 			t.Start2();
+
+			t.X = t.X;
+			t.X = t.Y;
+			t.X = t.Z;
+
+			t[0.4f] = t[1];
 		}
 
 		/// <summary>
@@ -100,13 +127,14 @@ namespace PressureTank
 				_remainingTime = -1;
 		}
 
-//		/// <summary>
-//		///   Represents a failure mode that prevents the timer from reporting a timeout.
-//		/// </summary>
-//		[Transient]
-//		public class SuppressTimeout : Fault
-//		{
-//			public bool HasElapsed() => false;
 //		}
+//			public bool HasElapsed() => false;
+//		{
+//		public class SuppressTimeout : Fault
+//		[Transient]
+//		/// </summary>
+//		///   Represents a failure mode that prevents the timer from reporting a timeout.
+
+//		/// <summary>
 	}
 }

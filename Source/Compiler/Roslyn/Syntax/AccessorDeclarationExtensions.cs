@@ -51,5 +51,28 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 
 			return symbol;
 		}
+
+		/// <summary>
+		///   Replaces the <paramref name="accessorDeclaration" />'s body with the given <paramref name="statements" />.
+		/// </summary>
+		/// <param name="accessorDeclaration">The accessor declaration whose body should be replaced.</param>
+		/// <param name="statements">The new body of the method.</param>
+		[Pure, NotNull]
+		public static AccessorDeclarationSyntax WithStatementBody([NotNull] this AccessorDeclarationSyntax accessorDeclaration,
+																  [NotNull] BlockSyntax statements)
+		{
+			Requires.NotNull(accessorDeclaration, nameof(accessorDeclaration));
+			Requires.NotNull(statements, nameof(statements));
+
+			statements = statements.WithOpenBraceToken(statements.OpenBraceToken.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed));
+			accessorDeclaration = accessorDeclaration.WithBody(statements);
+
+			if (accessorDeclaration.SemicolonToken.Kind() == SyntaxKind.None)
+				return accessorDeclaration;
+
+			var leadingTrivia = accessorDeclaration.SemicolonToken.LeadingTrivia;
+			var trailingTrivia = accessorDeclaration.SemicolonToken.TrailingTrivia;
+			return accessorDeclaration.WithSemicolonToken(SyntaxFactory.Token(leadingTrivia, SyntaxKind.None, trailingTrivia));
+		}
 	}
 }

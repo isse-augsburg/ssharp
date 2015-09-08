@@ -29,25 +29,25 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 	using Utilities;
 
 	/// <summary>
-	///   Provides extension methods for working with <see cref="PropertyDeclarationSyntax" /> instances.
+	///   Provides extension methods for working with <see cref="IndexerDeclarationSyntax" /> instances.
 	/// </summary>
-	public static class PropertyDeclarationExtensions
+	public static class IndexerDeclarationExtensions
 	{
 		/// <summary>
-		///   Gets the <see cref="IPropertySymbol" /> declared by <paramref name="propertyDeclaration" /> within the context of the
+		///   Gets the <see cref="IPropertySymbol" /> declared by <paramref name="indexerDeclaration" /> within the context of the
 		///   <paramref name="semanticModel" />.
 		/// </summary>
-		/// <param name="propertyDeclaration">The property declaration the declared symbol should be returned for.</param>
+		/// <param name="indexerDeclaration">The indexer declaration the declared symbol should be returned for.</param>
 		/// <param name="semanticModel">The semantic model that should be used to determine the declared symbol.</param>
 		[Pure, NotNull]
-		public static IPropertySymbol GetPropertySymbol([NotNull] this PropertyDeclarationSyntax propertyDeclaration,
+		public static IPropertySymbol GetPropertySymbol([NotNull] this IndexerDeclarationSyntax indexerDeclaration,
 														[NotNull] SemanticModel semanticModel)
 		{
-			Requires.NotNull(propertyDeclaration, nameof(propertyDeclaration));
+			Requires.NotNull(indexerDeclaration, nameof(indexerDeclaration));
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
-			var symbol = semanticModel.GetDeclaredSymbol(propertyDeclaration);
-			Assert.NotNull(symbol, $"Unable to determine property symbol of property declaration '{propertyDeclaration}'.");
+			var symbol = semanticModel.GetDeclaredSymbol(indexerDeclaration);
+			Assert.NotNull(symbol, $"Unable to determine property symbol of indexer declaration '{indexerDeclaration}'.");
 
 			return symbol;
 		}

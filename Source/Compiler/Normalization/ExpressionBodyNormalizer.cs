@@ -45,41 +45,84 @@ namespace SafetySharp.Compiler.Normalization
 	public class ExpressionBodyNormalizer : SyntaxNormalizer
 	{
 		/// <summary>
-		///   The symbol of the method that is being normalized.
-		/// </summary>
-		private IMethodSymbol _methodSymbol;
-
-		/// <summary>
 		///   Normalizes the <paramref name="declaration" />.
 		/// </summary>
 		public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax declaration)
 		{
-			var originalDeclaration = declaration;
+			// Nothing to do here for methods without expression bodies
 			if (declaration.ExpressionBody == null)
 				return declaration;
 
-			_methodSymbol = declaration.GetMethodSymbol(SemanticModel);
-			if (!_methodSymbol.ContainingType.OriginalDefinition.IsDerivedFromComponent(SemanticModel))
+			// Nothing to do here for methods not defined in components
+			var methodSymbol = declaration.GetMethodSymbol(SemanticModel);
+			if (!methodSymbol.ContainingType.IsComponent(SemanticModel))
 				return declaration;
 
-			var statements = AsStatementBody(declaration.ExpressionBody.Expression);
-			
-			declaration = declaration.WithBody(statements).WithExpressionBody(null);
+			var originalDeclaration = declaration;
+			var statements = AsStatementBody(methodSymbol, declaration.ExpressionBody.Expression);
 
-			var leadingTrivia = declaration.SemicolonToken.LeadingTrivia;
-			var trailingTrivia = declaration.SemicolonToken.TrailingTrivia;
-			declaration = declaration.WithSemicolonToken(default(SyntaxToken)).WithTrailingTrivia(leadingTrivia.AddRange(trailingTrivia));
+			declaration = declaration.WithSemicolonToken(default(SyntaxToken)).WithExpressionBody(null);
+			return declaration.WithBody(statements).EnsureLineCount(originalDeclaration);
+		}
+
+		/// <summary>
+		///   Normalizes the <paramref name="declaration" />.
+		/// </summary>
+		public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax declaration)
+		{
+			// Nothing to do here for properties without expression bodies
+			if (declaration.ExpressionBody == null)
+				return declaration;
+
+			// Nothing to do here for properties not defined in components
+			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
+			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
+				return declaration;
+
+			var originalDeclaration = declaration;
+			var statements = AsStatementBody(propertySymbol.GetMethod, declaration.ExpressionBody.Expression);
+
+			var getter = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration, statements);
+			var accessorList = SyntaxFactory.AccessorList(SyntaxFactory.SingletonList(getter));
+			declaration = declaration.WithAccessorList(accessorList);
+
+			declaration = declaration.WithExpressionBody(null).WithSemicolonToken(default(SyntaxToken));
+			return declaration.EnsureLineCount(originalDeclaration);
+		}
+
+		/// <summary>
+		///   Normalizes the <paramref name="declaration" />.
+		/// </summary>
+		public override SyntaxNode VisitIndexerDeclaration(IndexerDeclarationSyntax declaration)
+		{
+			// Nothing to do here for properties without expression bodies
+			if (declaration.ExpressionBody == null)
+				return declaration;
+
+			// Nothing to do here for properties not defined in components
+			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
+			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
+				return declaration;
+
+			var originalDeclaration = declaration;
+			var statements = AsStatementBody(propertySymbol.GetMethod, declaration.ExpressionBody.Expression);
+
+			var getter = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration, statements);
+			var accessorList = SyntaxFactory.AccessorList(SyntaxFactory.SingletonList(getter));
+			declaration = declaration.WithAccessorList(accessorList);
+
+			declaration = declaration.WithExpressionBody(null).WithSemicolonToken(default(SyntaxToken));
 			return declaration.EnsureLineCount(originalDeclaration);
 		}
 
 		/// <summary>
 		///   Converts the <paramref name="expression" /> into a statement body.
 		/// </summary>
-		private BlockSyntax AsStatementBody(ExpressionSyntax expression)
+		private static BlockSyntax AsStatementBody(IMethodSymbol methodSymbol, ExpressionSyntax expression)
 		{
 			StatementSyntax body;
 
-			if (_methodSymbol.ReturnsVoid)
+			if (methodSymbol.ReturnsVoid)
 				body = SyntaxFactory.ExpressionStatement(expression);
 			else
 			{

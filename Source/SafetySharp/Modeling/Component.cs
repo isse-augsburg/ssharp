@@ -22,37 +22,22 @@
 
 namespace SafetySharp.Modeling
 {
-	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using System.Reflection;
+	using System.Diagnostics;
 
 	/// <summary>
 	///   Represents a S# component.
 	/// </summary>
 	public abstract partial class Component : IComponent
 	{
-		[Hidden, NonDiscoverable]
+		[Hidden, NonDiscoverable, DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private readonly List<IFaultEffect> _faultEffects = new List<IFaultEffect>();
 
 		/// <summary>
 		///   Gets the fault effects that affect the component.
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		internal List<IFaultEffect> FaultEffects => _faultEffects;
-
-		/// <summary>
-		/// Initializes the component.
-		/// </summary>
-		protected Component()
-		{
-			var fields = GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(field=>field.Name.StartsWith("__backingField"));
-			foreach (var field in fields)
-			{
-				var method = GetType().GetMethod(field.Name.Replace("backingField", "DefaultMethod"), BindingFlags.Instance | BindingFlags.NonPublic);
-				var delegateInstance = Delegate.CreateDelegate(field.FieldType, this, method);
-				field.SetValue(this, delegateInstance);
-			}
-		}
 
 		/// <summary>
 		///   Updates the state of the component.

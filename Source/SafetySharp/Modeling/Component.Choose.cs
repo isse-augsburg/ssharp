@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Modeling
 {
+	using System.Diagnostics;
 	using System.Runtime.CompilerServices;
 
 	/// <summary>
@@ -32,7 +33,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   The default <see cref="Choice" /> instance used by the component.
 		/// </summary>
-		[Hidden]
+		[Hidden, DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private readonly Choice _defaultChoice = new Choice();
 
 		/// <summary>
