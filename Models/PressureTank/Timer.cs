@@ -28,11 +28,18 @@ namespace PressureTank
 	using System.Runtime.InteropServices;
 	using SafetySharp.Modeling;
 
+	public class T2 : Component
+	{
+		public virtual int X16 { get; } = 666;
+	}
+
 	/// <summary>
 	///   Represents a timer that signals a timeout.
 	/// </summary>
-	public class Timer : Component
+	public class Timer : T2
 	{
+		public override int X16 { get; } = 68;
+
 		/// <summary>
 		///   The timeout signaled by the timer.
 		/// </summary>
@@ -52,6 +59,8 @@ namespace PressureTank
 		{
 			_timeout = timeout;
 			Y = 21;
+
+			Bind(nameof(W1), nameof(base.X16));
 		}
 
 	
@@ -94,6 +103,8 @@ namespace PressureTank
 			}
 		}
 
+		public virtual int X2 { get; set; }
+
 		protected virtual int Y { get; } = 99;
 
 		protected virtual int Z => Y * 2;
@@ -119,7 +130,6 @@ namespace PressureTank
 			remove { X = 7; }
 		}
 
-		private extern event Action A;
 
 		private static void Main()
 		{
@@ -128,8 +138,8 @@ namespace PressureTank
 			t.Start();
 			t.Start2();
 
-			
 
+			t.X2 = t.X2;
 			t.X = t.X;
 			t.X = t.Y;
 			t.X = t.Z;

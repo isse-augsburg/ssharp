@@ -28,7 +28,7 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Raised when an unbound required port of a <see cref="Component" /> is invoked.
 	/// </summary>
-	public class UnboundPortException : Exception
+	public sealed class UnboundPortException : Exception
 	{
 		/// <summary>
 		///   Initializes a new instance.

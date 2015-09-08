@@ -32,6 +32,7 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Microsoft.CodeAnalysis.Editing;
+	using Modeling;
 	using Symbols;
 	using Utilities;
 
@@ -192,11 +193,11 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 			Requires.NotNull(syntaxNode, nameof(syntaxNode));
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 			Requires.NotNull(attributeArguments, nameof(attributeArguments));
-			
+
 			var attribute = (AttributeListSyntax)syntaxGenerator.Attribute(typeof(TAttribute).GetGlobalName(), attributeArguments);
 			return syntaxGenerator.AddAttributes(syntaxNode, attribute);
 		}
-		
+
 		/// <summary>
 		///   Marks the <paramref name="syntaxNode" /> as <c>[CompilerGenerated]</c>.
 		/// </summary>
@@ -218,7 +219,7 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		/// <param name="semanticModel">The semantic model that should be used to resolve type information.</param>
 		[Pure, NotNull]
 		public static SyntaxNode MarkAsDebuggerHidden([NotNull] this SyntaxGenerator syntaxGenerator, [NotNull] SyntaxNode syntaxNode,
-														 [NotNull] SemanticModel semanticModel)
+													  [NotNull] SemanticModel semanticModel)
 		{
 			return syntaxGenerator.AddAttribute<DebuggerHiddenAttribute>(syntaxNode, semanticModel);
 		}
@@ -236,6 +237,19 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 			var attributeType = syntaxGenerator.TypeExpression<DebuggerBrowsableState>(semanticModel);
 			var never = syntaxGenerator.MemberAccessExpression(attributeType, nameof(DebuggerBrowsableState.Never));
 			return syntaxGenerator.AddAttribute<DebuggerBrowsableAttribute>(syntaxNode, semanticModel, never);
+		}
+
+		/// <summary>
+		///   Marks the <paramref name="syntaxNode" /> as <c>[NonSerializable]</c>
+		/// </summary>
+		/// <param name="syntaxGenerator">The syntax generator that should be used to generate the attribute.</param>
+		/// <param name="syntaxNode">The syntax node that should be marked with the attribute.</param>
+		/// <param name="semanticModel">The semantic model that should be used to resolve type information.</param>
+		[Pure, NotNull]
+		public static SyntaxNode MarkAsNonSerializable([NotNull] this SyntaxGenerator syntaxGenerator, [NotNull] SyntaxNode syntaxNode,
+													   [NotNull] SemanticModel semanticModel)
+		{
+			return syntaxGenerator.AddAttribute<NonSerializableAttribute>(syntaxNode, semanticModel);
 		}
 	}
 }

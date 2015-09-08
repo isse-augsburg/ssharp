@@ -116,7 +116,7 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Converts the <paramref name="expression" /> into a statement body.
+		///   Converts the <paramref name="expression" /> body into a statement body.
 		/// </summary>
 		private static BlockSyntax AsStatementBody(IMethodSymbol methodSymbol, ExpressionSyntax expression)
 		{

@@ -31,6 +31,8 @@ namespace SafetySharp.Compiler.Normalization
 
 	/// <summary>
 	///   Replaces all automatically implemented property declarations with backing fields and a regular property declarations.
+	///   When we normalize getter-only auto properties, we also have to redirect all writes to the property within a constructor to
+	///   the backing field.
 	/// 
 	///   For instance:
 	///   <code>
@@ -38,11 +40,6 @@ namespace SafetySharp.Compiler.Normalization
 	///     	// becomes:
 	/// 		int __BackingField_X__;
 	///     	public int X { get { return __BackingField_X__; } private set { __BackingField_X__ = value; } }
-	///     	
-	///     	[A] int I.X { [B] get; set; }
-	///     	// becomes:
-	/// 		int __I_BackingField_X__;
-	///     	[A] int I.X { [B] get { return __I_BackingField_X__; } set { __I_BackingField_X__ = value; } }
 	///    	</code>
 	/// </summary>
 	public class AutoPropertyNormalizer : SyntaxNormalizer
@@ -57,17 +54,19 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		public override SyntaxNode VisitConstructorDeclaration(ConstructorDeclarationSyntax declaration)
 		{
-			// When we normalize getter-only auto properties, we also have to redirect all writes to the
-			// property within a constructor to the backing field
-
 			var methodSymbol = declaration.GetMethodSymbol(SemanticModel);
 			if (!methodSymbol.ContainingType.IsComponent(SemanticModel))
 				return declaration;
 
-			_inConstructor = true;
-			var result = base.VisitConstructorDeclaration(declaration);
-			_inConstructor = false;
-			return result;
+			try
+			{
+				_inConstructor = true;
+				return base.VisitConstructorDeclaration(declaration);
+			}
+			finally
+			{
+				_inConstructor = false;
+			}
 		}
 
 		/// <summary>
@@ -161,7 +160,7 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private static string GetBackingFieldName(IPropertySymbol propertySymbol)
 		{
-			return $"BackingField_{propertySymbol.Name.Replace(".", "_")}".ToSynthesized();
+			return $"BackingField_{propertySymbol.Name}".ToSynthesized();
 		}
 	}
 }

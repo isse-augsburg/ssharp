@@ -165,11 +165,11 @@ namespace SafetySharp.Utilities
 		public static bool IsHidden(this MemberInfo member, SerializationMode mode, bool discoveringObjects)
 		{
 			// Don't try to serialize members that are explicitly marked as non-serializable
-			if (member.HasAttribute<NonSerializable>())
+			if (member.HasAttribute<NonSerializableAttribute>())
 				return true;
 
 			// If we're discovering objects in optimized mode and the member is explicitly marked as non-discoverable, it is hidden
-			if (mode == SerializationMode.Optimized && discoveringObjects && member.HasAttribute<NonDiscoverable>())
+			if (mode == SerializationMode.Optimized && discoveringObjects && member.HasAttribute<NonDiscoverableAttribute>())
 				return true;
 
 			// Read-only fields are implicitly marked with [Hidden]

@@ -60,7 +60,7 @@ namespace SafetySharp.Compiler.Normalization
 		public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax declaration)
 		{
 			_methodSymbol = declaration.GetMethodSymbol(SemanticModel);
-			if (!_methodSymbol.ContainingType.IsComponent(SemanticModel))
+			if (!_methodSymbol.ContainingType.IsComponent(SemanticModel) || !_methodSymbol.CanBeAffectedByFaults(SemanticModel))
 				return declaration;
 
 			var body = Normalize(declaration.Body, declaration.GetBodyLineNumber());
@@ -84,7 +84,7 @@ namespace SafetySharp.Compiler.Normalization
 		public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax declaration)
 		{
 			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
-			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
+			if (!propertySymbol.ContainingType.IsComponent(SemanticModel) || !propertySymbol.CanBeAffectedByFaults(SemanticModel))
 				return declaration;
 
 			var originalDeclaration = declaration;
@@ -104,7 +104,7 @@ namespace SafetySharp.Compiler.Normalization
 		public override SyntaxNode VisitIndexerDeclaration(IndexerDeclarationSyntax declaration)
 		{
 			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
-			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
+			if (!propertySymbol.ContainingType.IsComponent(SemanticModel) || !propertySymbol.CanBeAffectedByFaults(SemanticModel))
 				return declaration;
 
 			var originalDeclaration = declaration;
@@ -334,6 +334,7 @@ namespace SafetySharp.Compiler.Normalization
 
 			field = Syntax.MarkAsCompilerGenerated(field, SemanticModel);
 			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
+			field = Syntax.MarkAsNonSerializable(field, SemanticModel);
 			return (FieldDeclarationSyntax)field;
 		}
 

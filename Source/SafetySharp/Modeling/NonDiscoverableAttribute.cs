@@ -33,7 +33,7 @@ namespace SafetySharp.Modeling
 	///   written value could be read.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
-	public sealed class NonDiscoverable : Attribute
+	public sealed class NonDiscoverableAttribute : Attribute
 	{
 	}
 }

@@ -24,6 +24,7 @@ namespace SafetySharp.Modeling
 {
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using Utilities;
 
 	/// <summary>
 	///   Represents a S# component.
@@ -44,6 +45,16 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		public virtual void Update()
 		{
+		}
+
+		/// <summary>
+		///   Establishes a port binding between the <paramref name="requiredPort" /> and the <paramref name="providedPort" />.
+		/// </summary>
+		/// <param name="requiredPort">The required port that should be bound to the <paramref name="providedPort" />.</param>
+		/// <param name="providedPort">The provided port that should be bound to the <paramref name="requiredPort" />.</param>
+		protected static void Bind(string requiredPort, string providedPort)
+		{
+			Requires.CompilationTransformation();
 		}
 	}
 }

@@ -72,7 +72,7 @@ namespace Tests.Serialization.RuntimeModels
 				_hasConstructorRun = true;
 			}
 
-			public override int F { get; set; }
+			public sealed override int F { get; set; }
 		}
 
 		private class C2 : Base
@@ -82,7 +82,7 @@ namespace Tests.Serialization.RuntimeModels
 				_hasConstructorRun = true;
 			}
 
-			public override int F { get; set; }
+			public sealed override int F { get; set; }
 		}
 
 		private abstract class Base : Component
