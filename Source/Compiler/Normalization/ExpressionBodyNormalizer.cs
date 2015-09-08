@@ -53,9 +53,9 @@ namespace SafetySharp.Compiler.Normalization
 			if (declaration.ExpressionBody == null)
 				return declaration;
 
-			// Nothing to do here for methods not defined in components
+			// Nothing to do here for methods not defined in components or for methods that are not fault sensitive
 			var methodSymbol = declaration.GetMethodSymbol(SemanticModel);
-			if (!methodSymbol.ContainingType.IsComponent(SemanticModel))
+			if (!methodSymbol.ContainingType.IsComponent(SemanticModel) || !methodSymbol.CanBeAffectedByFaults(SemanticModel))
 				return declaration;
 
 			var originalDeclaration = declaration;
@@ -74,9 +74,9 @@ namespace SafetySharp.Compiler.Normalization
 			if (declaration.ExpressionBody == null)
 				return declaration;
 
-			// Nothing to do here for properties not defined in components
+			// Nothing to do here for properties not defined in components or for properties that are not fault sensitive
 			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
-			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
+			if (!propertySymbol.ContainingType.IsComponent(SemanticModel) || !propertySymbol.CanBeAffectedByFaults(SemanticModel))
 				return declaration;
 
 			var originalDeclaration = declaration;
@@ -99,9 +99,9 @@ namespace SafetySharp.Compiler.Normalization
 			if (declaration.ExpressionBody == null)
 				return declaration;
 
-			// Nothing to do here for properties not defined in components
+			// Nothing to do here for indexers not defined in components or for indexers that are not fault sensitive
 			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
-			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
+			if (!propertySymbol.ContainingType.IsComponent(SemanticModel) || !propertySymbol.CanBeAffectedByFaults(SemanticModel))
 				return declaration;
 
 			var originalDeclaration = declaration;
@@ -132,9 +132,7 @@ namespace SafetySharp.Compiler.Normalization
 				body = returnStatement.WithReturnKeyword(returnKeyword);
 			}
 
-			var column = expression.GetLocation().GetLineSpan().StartLinePosition.Character;
-			body = body.WithLeadingSpace(column).PrependLineDirective(expression.GetLineNumber()).AppendLineDirective(-1);
-
+			body = body.EnsureIndentation(expression).PrependLineDirective(expression.GetLineNumber()).AppendLineDirective(-1);
 			var block = SyntaxFactory.Block(body).PrependLineDirective(-1).AppendLineDirective(-1);
 			block = block.WithOpenBraceToken(block.OpenBraceToken.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed));
 			block = block.WithCloseBraceToken(block.CloseBraceToken.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed));

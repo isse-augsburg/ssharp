@@ -35,6 +35,25 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 	public static class PropertySymbolExtensions
 	{
 		/// <summary>
+		///   Gets a value indicating whether the <paramref name="propertySymbol" /> can be affected by fault effects.
+		/// </summary>
+		/// <param name="propertySymbol">The symbol of the property that should be checked.</param>
+		/// <param name="semanticModel">The semantic model that is used to resolve type information;</param>
+		[Pure]
+		public static bool CanBeAffectedByFaults([NotNull] this IPropertySymbol propertySymbol, [NotNull] SemanticModel semanticModel)
+		{
+			Requires.NotNull(propertySymbol, nameof(propertySymbol));
+
+			if (propertySymbol.GetMethod == null)
+				return propertySymbol.SetMethod.CanBeAffectedByFaults(semanticModel);
+
+			if (propertySymbol.SetMethod == null)
+				return propertySymbol.GetMethod.CanBeAffectedByFaults(semanticModel);
+
+			return propertySymbol.GetMethod.CanBeAffectedByFaults(semanticModel) || propertySymbol.SetMethod.CanBeAffectedByFaults(semanticModel);
+		}
+
+		/// <summary>
 		///   Checks whether <paramref name="propertySymbol" /> overrides <paramref name="overriddenProperty" />.
 		/// </summary>
 		/// <param name="propertySymbol">The symbol of the property that should be checked.</param>

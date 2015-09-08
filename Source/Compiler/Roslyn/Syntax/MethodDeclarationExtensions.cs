@@ -23,7 +23,6 @@
 namespace SafetySharp.Compiler.Roslyn.Syntax
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
@@ -72,27 +71,6 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 				return methodDeclaration.Body.GetLineNumber();
 
 			return -1;
-		}
-
-		/// <summary>
-		///   Gets the statements that represent the <paramref name="methodDeclaration" />'s body.
-		/// </summary>
-		/// <param name="methodDeclaration">The method declaration the body statements should be returned for.</param>
-		/// <param name="methodSymbol">The symbol corresponding to the declaration.</param>
-		[Pure, NotNull]
-		public static BlockSyntax GetStatements([NotNull] this MethodDeclarationSyntax methodDeclaration,
-												[NotNull] IMethodSymbol methodSymbol)
-		{
-			Requires.NotNull(methodDeclaration, nameof(methodDeclaration));
-			Requires.NotNull(methodSymbol, nameof(methodSymbol));
-
-			if (methodDeclaration.ExpressionBody != null)
-				return methodDeclaration.ExpressionBody.Expression.AsStatementBody(methodSymbol.ReturnType);
-
-			if (methodDeclaration.Body != null)
-				return methodDeclaration.Body;
-
-			return SyntaxFactory.Block();
 		}
 
 		/// <summary>
@@ -212,7 +190,8 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		}
 
 		/// <summary>
-		///   Replaces the <paramref name="methodDeclaration" />'s statement or expression body with the given <paramref name="statements" />.
+		///   Replaces the <paramref name="methodDeclaration" />'s statement or expression body with the given
+		///   <paramref name="statements" />.
 		/// </summary>
 		/// <param name="methodDeclaration">The method declaration whose body should be replaced.</param>
 		/// <param name="statements">The new body of the method.</param>

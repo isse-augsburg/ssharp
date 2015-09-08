@@ -22,6 +22,7 @@
 
 namespace PressureTank
 {
+	using System;
 	using System.Diagnostics;
 	using System.Runtime.CompilerServices;
 	using SafetySharp.Modeling;
@@ -52,7 +53,7 @@ namespace PressureTank
 			Y = 21;
 		}
 
-		public int X { get; private set; } = 33 / 3;
+	
 
 		/// <summary>
 		///   Gets a value indicating whether the timeout has elapsed. This method returns true only for the single system step where
@@ -85,20 +86,30 @@ namespace PressureTank
 		/// </summary>
 		public int GetRemainingTime() => _remainingTime;
 
-		private int Y { get; } = 99;
+		public virtual int X {get { return 1; }set { var i = 0;++i;
+			}
+		}
 
-		private int Z => Y * 2;
+		protected virtual int Y { get; } = 99;
+
+		protected virtual int Z => Y * 2;
 
 		//private extern int W1 { get; }
 		//private extern int W3 { set; }
 		//private extern int W2 { get; set; }
 
-		private int this[int i] => Y + Z;
+		protected virtual int this[int i] => Y + Z;
 
-		private int this[float i]
+		virtual protected int this[float i]
 		{
 			get { return 1; }
 			set { X = value; }
+		}
+
+		protected virtual event Action E
+		{
+			add { X = 3; }
+			remove { X = 7; }
 		}
 
 		private static void Main()
@@ -112,7 +123,10 @@ namespace PressureTank
 			t.X = t.Y;
 			t.X = t.Z;
 
-			t[0.4f] = t[1];
+			t[0.4f] = t[1] + t[1f];
+
+			t.E += () => { };
+			t.E -= () => { };
 		}
 
 		/// <summary>

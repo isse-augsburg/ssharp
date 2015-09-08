@@ -26,7 +26,6 @@ namespace SafetySharp.Compiler.Normalization
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Microsoft.CodeAnalysis.Editing;
-	using Modeling;
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
 
@@ -49,7 +48,7 @@ namespace SafetySharp.Compiler.Normalization
 	public class AutoPropertyNormalizer : SyntaxNormalizer
 	{
 		/// <summary>
-		/// Indicates whether we're currently normalizing a constructor.
+		///   Indicates whether we're currently normalizing a constructor.
 		/// </summary>
 		private bool _inConstructor;
 
@@ -62,10 +61,7 @@ namespace SafetySharp.Compiler.Normalization
 			// property within a constructor to the backing field
 
 			var methodSymbol = declaration.GetMethodSymbol(SemanticModel);
-			if (!methodSymbol.ContainingType.OriginalDefinition.IsDerivedFromComponent(SemanticModel))
-				return declaration;
-
-			if (methodSymbol.ContainingType.HasAttribute<FaultEffectAttribute>(SemanticModel))
+			if (!methodSymbol.ContainingType.IsComponent(SemanticModel))
 				return declaration;
 
 			_inConstructor = true;
@@ -88,14 +84,17 @@ namespace SafetySharp.Compiler.Normalization
 			if (propertySymbol == null || !propertySymbol.IsAutoProperty())
 				return expression;
 
+			if (propertySymbol.GetMethod != null && !propertySymbol.GetMethod.CanBeAffectedByFaults(SemanticModel))
+				return expression;
+
 			var fieldExpression = (ExpressionSyntax)Syntax.IdentifierName(GetBackingFieldName(propertySymbol)).WithTrivia(expression.Left);
-            return expression.WithLeft(fieldExpression);
+			return expression.WithLeft(fieldExpression);
 		}
 
 		/// <summary>
-		/// Gets the name of the <paramref name="propertySymbol"/>'s generated backing field.
+		///   Gets the name of the <paramref name="propertySymbol" />'s generated backing field.
 		/// </summary>
-		static string GetBackingFieldName(IPropertySymbol propertySymbol)
+		private static string GetBackingFieldName(IPropertySymbol propertySymbol)
 		{
 			return $"BackingField_{propertySymbol.Name.Replace(".", "_")}".ToSynthesized();
 		}
@@ -109,9 +108,9 @@ namespace SafetySharp.Compiler.Normalization
 			if (declaration.ExpressionBody != null)
 				return declaration;
 
-			// Nothing to do here for properties not defined in a component class
+			// Nothing to do here for properties not defined in components or for properties that are not fault sensitive
 			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
-			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
+			if (!propertySymbol.ContainingType.IsComponent(SemanticModel) || !propertySymbol.CanBeAffectedByFaults(SemanticModel))
 				return declaration;
 
 			// Nothing to do here for required ports
@@ -126,7 +125,7 @@ namespace SafetySharp.Compiler.Normalization
 				return declaration;
 
 			var fieldName = GetBackingFieldName(propertySymbol);
-            var fieldIdentifier = (ExpressionSyntax)Syntax.IdentifierName(fieldName);
+			var fieldIdentifier = (ExpressionSyntax)Syntax.IdentifierName(fieldName);
 			var fieldModifiers = setter == null
 				? DeclarationModifiers.Unsafe | DeclarationModifiers.ReadOnly
 				: DeclarationModifiers.Unsafe;
@@ -141,22 +140,20 @@ namespace SafetySharp.Compiler.Normalization
 			fieldDeclaration = Syntax.MarkAsNonDebuggerBrowsable(fieldDeclaration, SemanticModel);
 			AddMembers(propertySymbol.ContainingType, (FieldDeclarationSyntax)fieldDeclaration);
 
-			var getterColumn = getter.GetLocation().GetLineSpan().StartLinePosition.Character;
 			var getterBody = (StatementSyntax)Syntax.ReturnStatement(fieldIdentifier).NormalizeWhitespace();
 			getterBody = getterBody.AppendLineDirective(-1).PrependLineDirective(-1);
-			var getterBlock = SyntaxFactory.Block(getterBody).WithLeadingSpace(getterColumn).PrependLineDirective(getter.GetLineNumber());
-            getter = getter.WithStatementBody(getterBlock);
+			var getterBlock = SyntaxFactory.Block(getterBody).EnsureIndentation(getter).PrependLineDirective(getter.GetLineNumber());
+			getter = getter.WithStatementBody(getterBlock);
 
 			AccessorListSyntax accessors;
 			if (setter == null)
 				accessors = declaration.AccessorList.WithAccessors(SyntaxFactory.List(new[] { getter }));
 			else
 			{
-				var setterColumn = setter.GetLocation().GetLineSpan().StartLinePosition.Character;
 				var assignment = Syntax.AssignmentStatement(fieldIdentifier, Syntax.IdentifierName("value"));
 				var setterBody = (StatementSyntax)Syntax.ExpressionStatement(assignment);
 				setterBody = setterBody.AppendLineDirective(-1).PrependLineDirective(-1);
-				var setterBlock = SyntaxFactory.Block(setterBody).WithLeadingSpace(setterColumn).PrependLineDirective(setter.GetLineNumber());
+				var setterBlock = SyntaxFactory.Block(setterBody).EnsureIndentation(setter).PrependLineDirective(setter.GetLineNumber());
 				setter = setter.WithStatementBody(setterBlock);
 
 				accessors = declaration.AccessorList.WithAccessors(SyntaxFactory.List(new[] { getter, setter }));

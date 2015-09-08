@@ -23,9 +23,7 @@
 namespace SafetySharp.Compiler.Normalization
 {
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Linq;
-	using System.Runtime.CompilerServices;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -63,11 +61,11 @@ namespace SafetySharp.Compiler.Normalization
 			if (!_methodSymbol.ContainingType.IsComponent(SemanticModel))
 				return declaration;
 
-			var body = Normalize(declaration.Body, declaration, declaration.GetBodyLineNumber());
+			var body = Normalize(declaration.Body, declaration.GetBodyLineNumber());
 			if (body == null)
 				return declaration;
 
-			return declaration.WithBody(body);
+			return declaration.WithBody(body).EnsureLineCount(declaration);
 		}
 
 		/// <summary>
@@ -75,49 +73,24 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax declaration)
 		{
-			return declaration;
-//			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
-//			if (!propertySymbol.ContainingType.OriginalDefinition.IsDerivedFromComponent(SemanticModel))
-//				return declaration;
-//
-//			// We have to deal with expression-bodied properties explicitly
-//			if (declaration.AccessorList == null)
-//			{
-//				_methodSymbol = propertySymbol.GetMethod;
-//
-//				var statementBody = declaration.ExpressionBody.Expression.AsStatementBody(_methodSymbol.ReturnType);
-//				var body = Normalize(statementBody, declaration, declaration.ExpressionBody.Expression.GetLineNumber());
-//				if (body == null)
-//					return declaration;
-//
-//				var accessor = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration, body);
-//				declaration = declaration.AddAccessorListAccessors(accessor);
-//				return declaration.WithExpressionBody(null).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.None));
-//			}
-//
-//			var accessors = declaration.AccessorList.Accessors.Select(accessor =>
-//			{
-//				_methodSymbol = accessor.GetMethodSymbol(SemanticModel);
-//
-//				var body = accessor.Body ?? SyntaxFactory.Block();
-//				var lineNumber = accessor.Body?.GetLineNumber() ?? -1;
-//				body = Normalize(body, declaration, lineNumber);
-//
-//				if (body == null)
-//					return accessor;
-//
-//				return accessor.WithBody(body);
-//			});
-//
-//			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(SyntaxFactory.List(accessors)));
-		}
+			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
+			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
+				return declaration;
+
+			var accessors = SyntaxFactory.List(NormalizerAccessors(declaration.AccessorList.Accessors));
+			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(accessors)).EnsureLineCount(declaration);	}
 
 		/// <summary>
 		///   Normalizes the <paramref name="declaration" />.
 		/// </summary>
 		public override SyntaxNode VisitIndexerDeclaration(IndexerDeclarationSyntax declaration)
 		{
-			return base.VisitIndexerDeclaration(declaration);
+			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
+			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
+				return declaration;
+
+			var accessors = SyntaxFactory.List(NormalizerAccessors(declaration.AccessorList.Accessors));
+			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(accessors)).EnsureLineCount(declaration);
 		}
 
 		/// <summary>
@@ -125,13 +98,38 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		public override SyntaxNode VisitEventDeclaration(EventDeclarationSyntax declaration)
 		{
-			return base.VisitEventDeclaration(declaration);
+			var propertySymbol = declaration.GetEventSymbol(SemanticModel);
+			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
+				return declaration;
+
+			var accessors = SyntaxFactory.List(NormalizerAccessors(declaration.AccessorList.Accessors));
+			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(accessors)).EnsureLineCount(declaration);
+		}
+
+		/// <summary>
+		///   Normalizes the <paramref name="accessors" />.
+		/// </summary>
+		private IEnumerable<AccessorDeclarationSyntax> NormalizerAccessors(IEnumerable<AccessorDeclarationSyntax> accessors)
+		{
+			foreach (var accessor in accessors)
+			{
+				_methodSymbol = accessor.GetMethodSymbol(SemanticModel);
+
+				var body = accessor.Body ?? SyntaxFactory.Block();
+				var lineNumber = accessor.Body?.GetLineNumber() ?? -1;
+                body = Normalize(body, lineNumber);
+
+				if (body == null)
+					yield return accessor;
+				else
+					yield return accessor.WithBody(body);
+			}
 		}
 
 		/// <summary>
 		///   Normalizes the <paramref name="statements" />.
 		/// </summary>
-		private BlockSyntax Normalize(BlockSyntax statements, SyntaxNode originalDeclaration, int bodyLineNumber)
+		private BlockSyntax Normalize(BlockSyntax statements, int bodyLineNumber)
 		{
 			// No need for fault normalization when the method cannot be affected by faults
 			if (!_methodSymbol.CanBeAffectedByFaults(SemanticModel))
@@ -154,7 +152,7 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			var faultBlock = SyntaxFactory.Block(CreateFaultEffectCode()).NormalizeWhitespace().WithTrailingNewLines(1);
 			yield return faultBlock.AppendLineDirective(lineNumber);
-			yield return statements.AppendLineDirective(-1);
+			yield return statements.AppendLineDirective(-1).EnsureIndentation(statements);
 		}
 
 		/// <summary>

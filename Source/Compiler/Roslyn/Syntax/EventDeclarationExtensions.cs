@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -29,47 +29,27 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 	using Utilities;
 
 	/// <summary>
-	///   Provides extension methods for working with <see cref="ExpressionSyntax" /> instances.
+	///   Provides extension methods for working with <see cref="EventDeclarationSyntax" /> instances.
 	/// </summary>
-	public static class ExpressionSyntaxExtensions
+	public static class EventDeclarationExtensions
 	{
 		/// <summary>
-		///   Gets the <see cref="ITypeSymbol" /> representing the type of <paramref name="syntaxNode" /> within the context of the
+		///   Gets the <see cref="IEventSymbol" /> declared by <paramref name="eventDeclaration" /> within the context of the
 		///   <paramref name="semanticModel" />.
 		/// </summary>
-		/// <param name="syntaxNode">The expression the type should be returned for.</param>
-		/// <param name="semanticModel">The semantic model that should be used for semantic analysis.</param>
+		/// <param name="eventDeclaration">The event declaration the declared symbol should be returned for.</param>
+		/// <param name="semanticModel">The semantic model that should be used to determine the declared symbol.</param>
 		[Pure, NotNull]
-		public static ITypeSymbol GetExpressionType([NotNull] this ExpressionSyntax syntaxNode, [NotNull] SemanticModel semanticModel)
+		public static IEventSymbol GetEventSymbol([NotNull] this EventDeclarationSyntax eventDeclaration,
+												  [NotNull] SemanticModel semanticModel)
 		{
-			Requires.NotNull(syntaxNode, nameof(syntaxNode));
+			Requires.NotNull(eventDeclaration, nameof(eventDeclaration));
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
-			var symbol = syntaxNode.GetReferencedSymbol(semanticModel);
+			var symbol = semanticModel.GetDeclaredSymbol(eventDeclaration);
+			Assert.NotNull(symbol, $"Unable to determine event symbol of event declaration '{eventDeclaration}'.");
 
-			var parameterSymbol = symbol as IParameterSymbol;
-			var localSymbol = symbol as ILocalSymbol;
-			var fieldSymbol = symbol as IFieldSymbol;
-			var propertySymbol = symbol as IPropertySymbol;
-			var methodSymbol = symbol as IMethodSymbol;
-
-			if (parameterSymbol != null)
-				return parameterSymbol.Type;
-
-			if (localSymbol != null)
-				return localSymbol.Type;
-
-			if (fieldSymbol != null)
-				return fieldSymbol.Type;
-
-			if (propertySymbol != null)
-				return propertySymbol.Type;
-
-			if (methodSymbol != null)
-				return methodSymbol.ReturnType;
-
-			Requires.That(false, "Failed to determine the type of the referenced symbol.");
-			return null;
+			return symbol;
 		}
 	}
 }

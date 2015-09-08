@@ -465,6 +465,25 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		}
 
 		/// <summary>
+		///   Ensures that <paramref name="syntaxNode" /> has the same indentation as <paramref name="templateNode" />.
+		/// </summary>
+		/// <typeparam name="T">The type of the syntax node.</typeparam>
+		/// <param name="syntaxNode">The syntax node whose indentation should be changed.</param>
+		/// <param name="templateNode">The template node that defines the original indentation.</param>
+		[Pure, NotNull]
+		public static T EnsureIndentation<T>([NotNull] this T syntaxNode, SyntaxNode templateNode)
+			where T : SyntaxNode
+		{
+			Requires.NotNull(syntaxNode, nameof(syntaxNode));
+			Requires.NotNull(templateNode, nameof(templateNode));
+
+			var expectedColumn = templateNode.GetLocation().GetLineSpan().StartLinePosition.Character;
+			var actualColumn = syntaxNode.GetLocation().GetLineSpan().StartLinePosition.Character;
+			var offset = Math.Max(0, expectedColumn - actualColumn);
+			return syntaxNode.WithLeadingTrivia(syntaxNode.GetLeadingTrivia().Add(SyntaxFactory.Whitespace(new string(' ', offset))));
+		}
+
+		/// <summary>
 		///   Gets the line number of the <paramref name="syntaxNode" />.
 		/// </summary>
 		/// <param name="syntaxNode">The syntax node the line number should be returned for.</param>
