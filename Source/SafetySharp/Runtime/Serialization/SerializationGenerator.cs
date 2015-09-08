@@ -23,10 +23,8 @@
 namespace SafetySharp.Runtime.Serialization
 {
 	using System;
-	using System.Diagnostics;
 	using System.Reflection;
 	using System.Reflection.Emit;
-	using System.Runtime.InteropServices;
 	using Utilities;
 
 	/// <summary>
@@ -265,8 +263,7 @@ namespace SafetySharp.Runtime.Serialization
 				case 8:
 					return OpCodes.Stelem_I8;
 				default:
-					Assert.NotReached("Unsupported element size.");
-					return default(OpCode);
+					return Assert.NotReached<OpCode>("Unsupported element size.");
 			}
 		}
 
@@ -277,7 +274,7 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			if (type.IsReferenceType())
 				return OpCodes.Ldelem_Ref;
-		
+
 			switch (type.GetUnmanagedSize())
 			{
 				case 1:
@@ -289,8 +286,7 @@ namespace SafetySharp.Runtime.Serialization
 				case 8:
 					return OpCodes.Ldelem_I8;
 				default:
-					Assert.NotReached("Unsupported element size.");
-					return default(OpCode);
+					return Assert.NotReached<OpCode>("Unsupported element size.");
 			}
 		}
 

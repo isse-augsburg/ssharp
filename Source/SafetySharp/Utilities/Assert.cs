@@ -106,6 +106,19 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
+		///   Throws an <see cref="InvalidOperationException" /> every time the method is invoked. This method is intended to be used
+		///   in default cases of switch statements that should never be reached, for instance. This method throws even in non-debug
+		///   builds.
+		/// </summary>
+		/// <typeparam name="T">The type of the object the caller is supposed to return.</typeparam>
+		/// <param name="message">An optional message providing further details about the assertion.</param>
+		[DebuggerHidden, ContractAnnotation("=> halt")]
+		public static T NotReached<T>(string message = null)
+		{
+			throw new InvalidOperationException(message ?? "Control flow should not have reached this point.");
+		}
+
+		/// <summary>
 		///   Throws an <see cref="InvalidOperationException" /> if <paramref name="value" /> of enumeration type
 		///   <typeparamref name="TEnum" /> is outside the range of valid enumeration literals. This method cannot be used to check
 		///   enumeration literals if the <see cref="FlagsAttribute" /> is set on <typeparamref name="TEnum" />.

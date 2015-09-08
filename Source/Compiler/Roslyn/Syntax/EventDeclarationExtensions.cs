@@ -51,5 +51,24 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 
 			return symbol;
 		}
+
+		/// <summary>
+		///   Gets the <see cref="IEventSymbol" /> declared by <paramref name="eventDeclaration" /> within the context of the
+		///   <paramref name="semanticModel" />.
+		/// </summary>
+		/// <param name="eventDeclaration">The event declaration the declared symbol should be returned for.</param>
+		/// <param name="semanticModel">The semantic model that should be used to determine the declared symbol.</param>
+		[Pure, NotNull]
+		public static IEventSymbol GetEventSymbol([NotNull] this EventFieldDeclarationSyntax eventDeclaration,
+												  [NotNull] SemanticModel semanticModel)
+		{
+			Requires.NotNull(eventDeclaration, nameof(eventDeclaration));
+			Requires.NotNull(semanticModel, nameof(semanticModel));
+
+			var symbol = semanticModel.GetDeclaredSymbol(eventDeclaration);
+			Assert.NotNull(symbol, $"Unable to determine event symbol of event declaration '{eventDeclaration}'.");
+
+			return (IEventSymbol)symbol;
+		}
 	}
 }

@@ -119,26 +119,6 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Normalizes the <paramref name="declaration" />.
-		/// </summary>
-		public override SyntaxNode VisitEventDeclaration(EventDeclarationSyntax declaration)
-		{
-			var eventSymbol = declaration.GetEventSymbol(SemanticModel);
-			if (!eventSymbol.ContainingType.IsComponent(SemanticModel))
-				return declaration;
-
-			var originalDeclaration = declaration;
-			if (eventSymbol.IsExtern)
-			{
-				var index = declaration.Modifiers.IndexOf(SyntaxKind.ExternKeyword);
-				declaration = declaration.WithModifiers(declaration.Modifiers.RemoveAt(index));
-			}
-
-			var accessors = SyntaxFactory.List(NormalizerAccessors(originalDeclaration.AccessorList.Accessors));
-			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(accessors)).EnsureLineCount(originalDeclaration);
-		}
-
-		/// <summary>
 		///   Normalizes the <paramref name="accessors" />.
 		/// </summary>
 		private IEnumerable<AccessorDeclarationSyntax> NormalizerAccessors(IEnumerable<AccessorDeclarationSyntax> accessors)
@@ -384,7 +364,7 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Creates the default lambda method that is assigned to a bindign delegate.
+		///   Creates the default lambda method that is assigned to a binding delegate.
 		/// </summary>
 		private SyntaxNode CreateDefaultBindingLambda()
 		{

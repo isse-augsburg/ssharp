@@ -119,6 +119,8 @@ namespace PressureTank
 			remove { X = 7; }
 		}
 
+		private extern event Action A;
+
 		private static void Main()
 		{
 			var t = new Timer(32);
