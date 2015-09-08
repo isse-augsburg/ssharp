@@ -92,14 +92,6 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Gets the name of the <paramref name="propertySymbol" />'s generated backing field.
-		/// </summary>
-		private static string GetBackingFieldName(IPropertySymbol propertySymbol)
-		{
-			return $"BackingField_{propertySymbol.Name.Replace(".", "_")}".ToSynthesized();
-		}
-
-		/// <summary>
 		///   Normalizes the <paramref name="declaration" />.
 		/// </summary>
 		public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax declaration)
@@ -162,6 +154,14 @@ namespace SafetySharp.Compiler.Normalization
 			var originalDeclaration = declaration;
 			declaration = declaration.WithInitializer(null).WithSemicolonToken(default(SyntaxToken));
 			return declaration.WithAccessorList(accessors).EnsureLineCount(originalDeclaration);
+		}
+
+		/// <summary>
+		///   Gets the name of the <paramref name="propertySymbol" />'s generated backing field.
+		/// </summary>
+		private static string GetBackingFieldName(IPropertySymbol propertySymbol)
+		{
+			return $"BackingField_{propertySymbol.Name.Replace(".", "_")}".ToSynthesized();
 		}
 	}
 }

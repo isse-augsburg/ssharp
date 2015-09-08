@@ -100,6 +100,7 @@
     <Compile Include="Runtime\Serialization\RuntimeModelSerializer.cs" />
     <Compile Include="Runtime\Serialization\SerializationRegistry.cs" />
     <Compile Include="Runtime\StateCache.cs" />
+    <Compile Include="Runtime\UnboundPortException.cs" />
     <Compile Include="Utilities\MemoryBuffer.cs" />
     <Compile Include="Utilities\CodeWriter.cs" />
     <Compile Include="Utilities\DisposableExtensions.cs" />

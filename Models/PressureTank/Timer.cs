@@ -25,6 +25,7 @@ namespace PressureTank
 	using System;
 	using System.Diagnostics;
 	using System.Runtime.CompilerServices;
+	using System.Runtime.InteropServices;
 	using SafetySharp.Modeling;
 
 	/// <summary>
@@ -71,6 +72,9 @@ namespace PressureTank
 			_remainingTime = _timeout;
 		}
 
+		protected virtual extern bool Extern();
+
+
 		/// <summary>
 		///   Stops the timer.
 		/// </summary>
@@ -94,11 +98,14 @@ namespace PressureTank
 
 		protected virtual int Z => Y * 2;
 
-		//private extern int W1 { get; }
-		//private extern int W3 { set; }
-		//private extern int W2 { get; set; }
+		protected virtual extern int W1 { get; }
+		protected virtual extern int W3 { set; }
+		protected virtual extern int W2 { private get; set; }
 
 		protected virtual int this[int i] => Y + Z;
+
+		protected virtual extern int this[double i] { get; set; }
+
 
 		virtual protected int this[float i]
 		{
@@ -119,6 +126,8 @@ namespace PressureTank
 			t.Start();
 			t.Start2();
 
+			
+
 			t.X = t.X;
 			t.X = t.Y;
 			t.X = t.Z;
@@ -127,6 +136,11 @@ namespace PressureTank
 
 			t.E += () => { };
 			t.E -= () => { };
+
+			t.Extern();
+			var x = t.W1;
+			t[3.0] = t[4.0];
+			t.W2 = x;
 		}
 
 		/// <summary>

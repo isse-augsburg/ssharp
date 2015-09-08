@@ -98,7 +98,7 @@ namespace SafetySharp.Compiler.Normalization
 			// in the generated code - probably some Roslyn bug.
 			var options = new CSharpParseOptions();
 			compilationUnit = compilationUnit.NormalizeWhitespace().PrependLineDirective(-1);
-            var syntaxTree = SyntaxFactory.ParseSyntaxTree(compilationUnit.ToFullString(), options, path, Encoding.UTF8);
+			var syntaxTree = SyntaxFactory.ParseSyntaxTree(compilationUnit.ToFullString(), options, path, Encoding.UTF8);
 
 			Compilation = Compilation.AddSyntaxTrees(syntaxTree);
 		}
@@ -154,7 +154,7 @@ namespace SafetySharp.Compiler.Normalization
 				name: type.Name,
 				typeParameters: type.TypeParameters.Select(t => t.Name),
 				modifiers: DeclarationModifiers.Partial,
-				members: members);
+				members: members.Where(m => m != null));
 
 			AddNamespacedAndNested(type, usings, generatedClass);
 		}

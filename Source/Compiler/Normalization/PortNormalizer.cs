@@ -23,6 +23,7 @@
 namespace SafetySharp.Compiler.Normalization
 {
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
@@ -30,6 +31,7 @@ namespace SafetySharp.Compiler.Normalization
 	using Microsoft.CodeAnalysis.Editing;
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
@@ -65,7 +67,15 @@ namespace SafetySharp.Compiler.Normalization
 			if (body == null)
 				return declaration;
 
-			return declaration.WithBody(body).EnsureLineCount(declaration);
+			var originalDeclaration = declaration;
+			if (_methodSymbol.IsRequiredPort(SemanticModel))
+			{
+				var index = declaration.Modifiers.IndexOf(SyntaxKind.ExternKeyword);
+				declaration = declaration.WithModifiers(declaration.Modifiers.RemoveAt(index)).WithSemicolonToken(default(SyntaxToken));
+				declaration = (MethodDeclarationSyntax)Syntax.MarkAsDebuggerHidden(declaration, SemanticModel);
+			}
+
+			return declaration.WithBody(body).EnsureLineCount(originalDeclaration);
 		}
 
 		/// <summary>
@@ -77,8 +87,16 @@ namespace SafetySharp.Compiler.Normalization
 			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
 				return declaration;
 
-			var accessors = SyntaxFactory.List(NormalizerAccessors(declaration.AccessorList.Accessors));
-			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(accessors)).EnsureLineCount(declaration);	}
+			var originalDeclaration = declaration;
+			if (propertySymbol.IsExtern)
+			{
+				var index = declaration.Modifiers.IndexOf(SyntaxKind.ExternKeyword);
+				declaration = declaration.WithModifiers(declaration.Modifiers.RemoveAt(index)).WithSemicolonToken(default(SyntaxToken));
+			}
+
+			var accessors = SyntaxFactory.List(NormalizerAccessors(originalDeclaration.AccessorList.Accessors));
+			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(accessors)).EnsureLineCount(originalDeclaration);
+		}
 
 		/// <summary>
 		///   Normalizes the <paramref name="declaration" />.
@@ -89,8 +107,15 @@ namespace SafetySharp.Compiler.Normalization
 			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
 				return declaration;
 
-			var accessors = SyntaxFactory.List(NormalizerAccessors(declaration.AccessorList.Accessors));
-			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(accessors)).EnsureLineCount(declaration);
+			var originalDeclaration = declaration;
+			if (propertySymbol.IsExtern)
+			{
+				var index = declaration.Modifiers.IndexOf(SyntaxKind.ExternKeyword);
+				declaration = declaration.WithModifiers(declaration.Modifiers.RemoveAt(index)).WithSemicolonToken(default(SyntaxToken));
+			}
+
+			var accessors = SyntaxFactory.List(NormalizerAccessors(originalDeclaration.AccessorList.Accessors));
+			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(accessors)).EnsureLineCount(originalDeclaration);
 		}
 
 		/// <summary>
@@ -98,12 +123,19 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		public override SyntaxNode VisitEventDeclaration(EventDeclarationSyntax declaration)
 		{
-			var propertySymbol = declaration.GetEventSymbol(SemanticModel);
-			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
+			var eventSymbol = declaration.GetEventSymbol(SemanticModel);
+			if (!eventSymbol.ContainingType.IsComponent(SemanticModel))
 				return declaration;
 
-			var accessors = SyntaxFactory.List(NormalizerAccessors(declaration.AccessorList.Accessors));
-			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(accessors)).EnsureLineCount(declaration);
+			var originalDeclaration = declaration;
+			if (eventSymbol.IsExtern)
+			{
+				var index = declaration.Modifiers.IndexOf(SyntaxKind.ExternKeyword);
+				declaration = declaration.WithModifiers(declaration.Modifiers.RemoveAt(index));
+			}
+
+			var accessors = SyntaxFactory.List(NormalizerAccessors(originalDeclaration.AccessorList.Accessors));
+			return declaration.WithAccessorList(declaration.AccessorList.WithAccessors(accessors)).EnsureLineCount(originalDeclaration);
 		}
 
 		/// <summary>
@@ -117,12 +149,21 @@ namespace SafetySharp.Compiler.Normalization
 
 				var body = accessor.Body ?? SyntaxFactory.Block();
 				var lineNumber = accessor.Body?.GetLineNumber() ?? -1;
-                body = Normalize(body, lineNumber);
+				body = Normalize(body, lineNumber);
 
 				if (body == null)
 					yield return accessor;
 				else
-					yield return accessor.WithBody(body);
+				{
+					if (_methodSymbol.IsRequiredPort(SemanticModel))
+					{
+						// Cannot use the SyntaxGenerator extension method due to a Roslyn bug
+						var attribute = (AttributeListSyntax)Syntax.Attribute(typeof(DebuggerHiddenAttribute).GetGlobalName());
+						yield return accessor.AddAttributeLists(attribute).WithBody(body).WithSemicolonToken(default(SyntaxToken));
+					}
+					else
+						yield return accessor.WithBody(body);
+				}
 			}
 		}
 
@@ -131,15 +172,30 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private BlockSyntax Normalize(BlockSyntax statements, int bodyLineNumber)
 		{
-			// No need for fault normalization when the method cannot be affected by faults
-			if (!_methodSymbol.CanBeAffectedByFaults(SemanticModel))
+			var isRequiredPort = _methodSymbol.IsRequiredPort(SemanticModel);
+			var isProvidedPort = _methodSymbol.IsProvidedPort(SemanticModel);
+
+			if (!isRequiredPort && !isProvidedPort)
 				return null;
 
 			++_portCount;
 
-			var delegateDeclaration = CreateDelegateDeclaration();
-			var fieldDeclaration = CreateFieldDeclaration(delegateDeclaration.Identifier.ValueText, CreateProvidedPortLambda());
-			AddMembers(_methodSymbol.ContainingType, delegateDeclaration, fieldDeclaration);
+			if (isRequiredPort)
+			{
+				var delegateDeclaration = CreateDelegateDeclaration(GetBindingDelegateName(), true);
+				var fieldDeclaration = CreateFieldDeclaration(GetBindingFieldName(), delegateDeclaration, CreateDefaultBindingLambda());
+				AddMembers(_methodSymbol.ContainingType, delegateDeclaration, fieldDeclaration);
+
+				statements = CreateBindingCode();
+
+				// No need for fault normalization when the required port cannot be affected by faults
+				if (!_methodSymbol.CanBeAffectedByFaults(SemanticModel))
+					return statements;
+			}
+
+			// No need for fault normalization when the provided port cannot be affected by faults
+			if (isProvidedPort && !_methodSymbol.CanBeAffectedByFaults(SemanticModel))
+				return null;
 
 			statements = SyntaxFactory.Block(MakeFaultEffectSensitive(statements, bodyLineNumber));
 			return statements.PrependLineDirective(-1);
@@ -150,36 +206,53 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private IEnumerable<StatementSyntax> MakeFaultEffectSensitive(BlockSyntax statements, int lineNumber)
 		{
+			var delegateDeclaration = CreateDelegateDeclaration(GetFaultDelegateName(), false);
+			var fieldDeclaration = CreateFieldDeclaration(GetFaultFieldName(), delegateDeclaration, CreateDefaultFaultLambda());
+			AddMembers(_methodSymbol.ContainingType, delegateDeclaration, fieldDeclaration);
+
 			var faultBlock = SyntaxFactory.Block(CreateFaultEffectCode()).NormalizeWhitespace().WithTrailingNewLines(1);
 			yield return faultBlock.AppendLineDirective(lineNumber);
 			yield return statements.AppendLineDirective(-1).EnsureIndentation(statements);
 		}
 
 		/// <summary>
-		///   Gets the name of the delegate for the current port.
+		///   Gets the name of the fault delegate for the current port.
 		/// </summary>
-		private string GetDelegateName()
+		private string GetFaultDelegateName()
 		{
-			return ("Delegate" + _portCount).ToSynthesized();
+			return ("FaultDelegate" + _portCount).ToSynthesized();
 		}
 
 		/// <summary>
-		///   Gets the name of the field for the current port.
+		///   Gets the name of the binding delegate for the current port.
 		/// </summary>
-		private string GetFieldName()
+		private string GetBindingDelegateName()
 		{
-			return ("backingField" + _portCount).ToSynthesized();
+			return ("BindingDelegate" + _portCount).ToSynthesized();
 		}
 
 		/// <summary>
-		///   Generates the code that checks for and executes active fault effects.
+		///   Gets the name of the fault field for the current port.
 		/// </summary>
-		private IEnumerable<StatementSyntax> CreateFaultEffectCode()
+		private string GetFaultFieldName()
 		{
-			var resultIdentifier = SyntaxFactory.IdentifierName(_resultVariable);
-			var fieldReference = SyntaxFactory.ParseExpression("this." + GetFieldName());
+			return ("faultField" + _portCount).ToSynthesized();
+		}
 
-			var arguments = _methodSymbol.Parameters.Select(parameter =>
+		/// <summary>
+		///   Gets the name of the binding field for the current port.
+		/// </summary>
+		private string GetBindingFieldName()
+		{
+			return ("bindingField" + _portCount).ToSynthesized();
+		}
+
+		/// <summary>
+		///   Creates the arguments for a delegate invocation.
+		/// </summary>
+		private IEnumerable<ArgumentSyntax> CreateDelegateInvocationArguments()
+		{
+			return _methodSymbol.Parameters.Select(parameter =>
 			{
 				var argument = SyntaxFactory.Argument(SyntaxFactory.IdentifierName(parameter.Name));
 
@@ -196,7 +269,17 @@ namespace SafetySharp.Compiler.Normalization
 						return null;
 				}
 			});
+		}
 
+		/// <summary>
+		///   Generates the code that checks for and executes active fault effects.
+		/// </summary>
+		private IEnumerable<StatementSyntax> CreateFaultEffectCode()
+		{
+			var resultIdentifier = SyntaxFactory.IdentifierName(_resultVariable);
+			var fieldReference = SyntaxFactory.IdentifierName(GetFaultFieldName());
+
+			var arguments = CreateDelegateInvocationArguments();
 			if (!_methodSymbol.ReturnsVoid)
 			{
 				yield return (StatementSyntax)Syntax.LocalDeclarationStatement(_methodSymbol.ReturnType, _resultVariable);
@@ -215,13 +298,31 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
+		///   Generates the code that executes a binding.
+		/// </summary>
+		private BlockSyntax CreateBindingCode()
+		{
+			var fieldReference = SyntaxFactory.IdentifierName(GetBindingFieldName());
+
+			var arguments = CreateDelegateInvocationArguments();
+			var argumentList = SyntaxFactory.SeparatedList(arguments);
+			var delegateInvocation = SyntaxFactory.InvocationExpression(fieldReference, SyntaxFactory.ArgumentList(argumentList));
+
+			var body = _methodSymbol.ReturnsVoid
+				? Syntax.ExpressionStatement(delegateInvocation)
+				: SyntaxFactory.ReturnStatement(delegateInvocation);
+
+			return SyntaxFactory.Block((StatementSyntax)body).NormalizeWhitespace();
+		}
+
+		/// <summary>
 		///   Creates a delegate declaration that is compatible with the method.
 		/// </summary>
-		private DelegateDeclarationSyntax CreateDelegateDeclaration()
+		private DelegateDeclarationSyntax CreateDelegateDeclaration(string name, bool requiredPort)
 		{
 			var parameters = _methodSymbol.Parameters.Select(parameter => Syntax.ParameterDeclaration(parameter));
 
-			if (!_methodSymbol.ReturnsVoid)
+			if (!_methodSymbol.ReturnsVoid && !requiredPort)
 			{
 				var parameterType = Syntax.TypeExpression(_methodSymbol.ReturnType);
 				var returnParameter = Syntax.ParameterDeclaration(_resultVariable, parameterType, refKind: RefKind.Out);
@@ -230,9 +331,9 @@ namespace SafetySharp.Compiler.Normalization
 			}
 
 			var methodDelegate = Syntax.DelegateDeclaration(
-				name: GetDelegateName(),
+				name: name,
 				parameters: parameters,
-				returnType: Syntax.TypeExpression(SpecialType.System_Boolean),
+				returnType: requiredPort ? Syntax.TypeExpression(_methodSymbol.ReturnType) : Syntax.TypeExpression(SpecialType.System_Boolean),
 				accessibility: Accessibility.Private,
 				modifiers: DeclarationModifiers.Unsafe);
 
@@ -242,11 +343,11 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Creates a field declaration that stores a value of the <paramref name="delegateType" />.
 		/// </summary>
-		private FieldDeclarationSyntax CreateFieldDeclaration(string delegateType, SyntaxNode initializer)
+		private FieldDeclarationSyntax CreateFieldDeclaration(string fieldName, DelegateDeclarationSyntax delegateType, SyntaxNode initializer)
 		{
-			var fieldType = SyntaxFactory.ParseTypeName(delegateType);
+			var fieldType = SyntaxFactory.ParseTypeName(delegateType.Identifier.ValueText);
 			var field = Syntax.FieldDeclaration(
-				name: GetFieldName(),
+				name: fieldName,
 				type: fieldType,
 				accessibility: Accessibility.Private,
 				initializer: initializer);
@@ -257,11 +358,12 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Creates the default lambda method that is assigned to a provided port.
+		///   Creates the default lambda method that is assigned to a fault delegate.
 		/// </summary>
-		private SyntaxNode CreateProvidedPortLambda()
+		private SyntaxNode CreateDefaultFaultLambda()
 		{
 			var parameters = new List<SyntaxNode>(_methodSymbol.Parameters.Select(parameter => Syntax.ParameterDeclaration(parameter)));
+
 			if (!_methodSymbol.ReturnsVoid)
 			{
 				var parameterType = Syntax.TypeExpression(_methodSymbol.ReturnType);
@@ -279,6 +381,17 @@ namespace SafetySharp.Compiler.Normalization
 
 			statements.Add(Syntax.ReturnStatement(Syntax.FalseLiteralExpression()));
 			return Syntax.ValueReturningLambdaExpression(parameters, statements);
+		}
+
+		/// <summary>
+		///   Creates the default lambda method that is assigned to a bindign delegate.
+		/// </summary>
+		private SyntaxNode CreateDefaultBindingLambda()
+		{
+			var parameters = _methodSymbol.Parameters.Select(parameter => Syntax.ParameterDeclaration(parameter));
+			var objectCreation = Syntax.ObjectCreationExpression(SemanticModel.GetTypeSymbol<UnboundPortException>());
+			var throwStatement = SyntaxFactory.Block((StatementSyntax)Syntax.ThrowStatement(objectCreation));
+			return Syntax.ValueReturningLambdaExpression(parameters, throwStatement);
 		}
 	}
 }
