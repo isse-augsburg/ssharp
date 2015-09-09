@@ -20,39 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Utilities
+namespace Tests.Execution.Bindings
 {
-	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	/// <summary>
-	///   Represents a base class for testable components that are compiled and instantiated dynamically during test execution.
-	/// </summary>
-	public abstract class TestComponent : Component, ITestableObject
+	internal class PropertiesAndMethods : TestComponent
 	{
-		/// <summary>
-		///   Gets the output that writes to the test output stream.
-		/// </summary>
-		public TestTraceOutput Output { get; private set; }
+		private int _x;
 
-		/// <summary>
-		///   Executes the tests of the object.
-		/// </summary>
-		/// <param name="output">The output that should be used to write test output.</param>
-		public void Test(TestTraceOutput output)
+		public extern int R { get; set; }
+
+		private int P1()
 		{
-			Output = output;
-			Check();
+			return 3;
 		}
 
-		protected abstract void Check();
-
-		/// <summary>
-		///   Executes the component's <see cref="Component.Update" /> method.
-		/// </summary>
-		/// <remarks>This method is required to work around S#'s restrictions that a component cannot call it's own Update method.</remarks>
-		protected void ExecuteUpdate()
+		private void P2(int x)
 		{
-			Update();
+			_x = x;
+		}
+
+		protected override void Check()
+		{
+			Bind(nameof(R), nameof(P1));
+			Bind(nameof(R), nameof(P2));
+
+			R = 33;
+			_x.ShouldBe(33);
+			R.ShouldBe(3);
 		}
 	}
 }

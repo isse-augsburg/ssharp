@@ -20,39 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Utilities
+namespace Tests.Execution.Bindings
 {
-	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	/// <summary>
-	///   Represents a base class for testable components that are compiled and instantiated dynamically during test execution.
-	/// </summary>
-	public abstract class TestComponent : Component, ITestableObject
+	internal abstract class X27 : TestComponent
 	{
-		/// <summary>
-		///   Gets the output that writes to the test output stream.
-		/// </summary>
-		public TestTraceOutput Output { get; private set; }
-
-		/// <summary>
-		///   Executes the tests of the object.
-		/// </summary>
-		/// <param name="output">The output that should be used to write test output.</param>
-		public void Test(TestTraceOutput output)
+		protected X27()
 		{
-			Output = output;
-			Check();
+			Bind(nameof(Q), nameof(M));
 		}
 
-		protected abstract void Check();
+		public extern int Q();
 
-		/// <summary>
-		///   Executes the component's <see cref="Component.Update" /> method.
-		/// </summary>
-		/// <remarks>This method is required to work around S#'s restrictions that a component cannot call it's own Update method.</remarks>
-		protected void ExecuteUpdate()
+		public virtual int M()
 		{
-			Update();
+			return 1;
+		}
+	}
+
+	internal class X28 : X27
+	{
+		public X28()
+		{
+			Bind(nameof(N), nameof(M));
+			Bind(nameof(L), nameof(base.M));
+		}
+
+		public extern int N();
+		public extern int L();
+
+		public override int M()
+		{
+			return 3;
+		}
+
+		protected override void Check()
+		{
+			Q().ShouldBe(3);
+			N().ShouldBe(3);
+			L().ShouldBe(1);
 		}
 	}
 }

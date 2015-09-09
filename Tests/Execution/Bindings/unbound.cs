@@ -26,7 +26,7 @@ namespace Tests.Execution.Bindings
 	using Shouldly;
 	using Utilities;
 
-	public class Unbound : TestComponent
+	internal class Unbound : TestComponent
 	{
 		private extern int X1 { get; }
 		private extern int X2 { set; get; }

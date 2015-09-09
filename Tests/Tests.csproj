@@ -128,7 +128,28 @@
     <Compile Include="..\Source\SafetySharp\Properties\InternalsVisibleTo.cs">
       <Link>Properties\InternalsVisibleTo.cs</Link>
     </Compile>
-    <None Include="Execution\Bindings\unbound.cs" />
+    <Compile Include="Execution\Bindings\properties.cs" />
+    <Compile Include="Execution\Bindings\unbound.cs" />
+    <Compile Include="Execution\Bindings\explicit interface provided port.cs" />
+    <Compile Include="Execution\Bindings\explicit interface required port.cs" />
+    <Compile Include="Execution\Bindings\generic component.cs" />
+    <Compile Include="Execution\Bindings\inaccessible ambiguous candidates.cs" />
+    <Compile Include="Execution\Bindings\interface provided port.cs" />
+    <Compile Include="Execution\Bindings\interface required port.cs" />
+    <Compile Include="Execution\Bindings\multiple candidates.cs" />
+    <Compile Include="Execution\Bindings\overridden interface provided port.cs" />
+    <Compile Include="Execution\Bindings\overridden required port.cs" />
+    <Compile Include="Execution\Bindings\overridden provided port.cs" />
+    <Compile Include="Execution\Bindings\properties and methods.cs" />
+    <Compile Include="Execution\Bindings\property ambiguity.cs" />
+    <Compile Include="Execution\Bindings\provided port replaced by required.cs" />
+    <Compile Include="Execution\Bindings\replaced provided port.cs" />
+    <Compile Include="Execution\Bindings\replaced required port.cs" />
+    <Compile Include="Execution\Bindings\required port replaced by provided.cs" />
+    <Compile Include="Execution\Bindings\resolve ambiguity.cs" />
+    <Compile Include="Execution\Bindings\same name, different kind.cs" />
+    <Compile Include="Execution\Bindings\same name.cs" />
+    <Compile Include="Execution\Bindings\single candidate.cs" />
     <Compile Include="Execution\ProvidedPorts\Indexers\generic component.cs" />
     <Compile Include="Execution\ProvidedPorts\Indexers\interface.cs" />
     <Compile Include="Execution\ProvidedPorts\Indexers\non-inherited.cs" />

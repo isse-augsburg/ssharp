@@ -68,6 +68,9 @@ namespace SafetySharp.Compiler.Normalization
 			var requiredPorts = requiredPortReferenceExpression.ResolvePortReferences(SemanticModel);
 			var providedPorts = providedPortReferenceExpression.ResolvePortReferences(SemanticModel);
 
+			requiredPorts.RemoveWhere(symbol => !symbol.IsRequiredPort(SemanticModel));
+			providedPorts.RemoveWhere(symbol => !symbol.IsProvidedPort(SemanticModel));
+
 			if (methodSymbol.Arity == 1)
 			{
 				var delegateType = (INamedTypeSymbol)methodSymbol.TypeArguments[0];
