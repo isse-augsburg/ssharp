@@ -24,6 +24,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 {
 	using System;
 	using System.Linq;
+	using Analysis;
 	using CompilerServices;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
@@ -513,49 +514,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 				   && methodSymbol1.Parameters
 								   .Zip(methodSymbol2.Parameters, (p1, p2) => p1.Type.Equals(p2.Type) && p1.RefKind == p2.RefKind)
 								   .All(b => b);
-		}
-
-		/// <summary>
-		///   Gets the parameter type array that can be used to retrieve the <paramref name="methodSymbol" /> via reflection.
-		/// </summary>
-		/// <param name="methodSymbol">The method the parameter type array should be returned for.</param>
-		/// <param name="syntaxGenerator">The syntax generator that should be used.</param>
-		private static ExpressionSyntax GetParameterTypeArray([NotNull] this IMethodSymbol methodSymbol,
-															  [NotNull] SyntaxGenerator syntaxGenerator)
-		{
-			var typeExpressions = methodSymbol.Parameters.Select(p =>
-			{
-				var typeofExpression = SyntaxFactory.TypeOfExpression((TypeSyntax)syntaxGenerator.TypeExpression(p.Type));
-				if (p.RefKind == RefKind.None)
-					return typeofExpression;
-
-				var makeRefType = syntaxGenerator.MemberAccessExpression(typeofExpression, "MakeByRefType");
-				return (ExpressionSyntax)syntaxGenerator.InvocationExpression(makeRefType);
-			});
-
-			var arguments = SyntaxFactory.SeparatedList(typeExpressions);
-			var initialize = SyntaxFactory.InitializerExpression(SyntaxKind.ArrayInitializerExpression, arguments);
-			var arrayType = syntaxGenerator.ArrayTypeExpression(SyntaxFactory.ParseTypeName(typeof(Type).FullName));
-			return SyntaxFactory.ArrayCreationExpression((ArrayTypeSyntax)arrayType, initialize);
-		}
-
-		/// <summary>
-		///   Gets the expression that selects the <paramref name="methodSymbol" /> at runtime using reflection.
-		/// </summary>
-		/// <param name="methodSymbol">The method the code should be created for.</param>
-		/// <param name="syntaxGenerator">The syntax generator that should be used.</param>
-		public static ExpressionSyntax GetMethodInfoExpression([NotNull] this IMethodSymbol methodSymbol, [NotNull] SyntaxGenerator syntaxGenerator)
-		{
-			Requires.NotNull(methodSymbol, nameof(methodSymbol));
-			Requires.NotNull(syntaxGenerator, nameof(syntaxGenerator));
-
-			var declaringTypeArg = syntaxGenerator.TypeOfExpression(syntaxGenerator.TypeExpression(methodSymbol.ContainingType));
-			var parameters = GetParameterTypeArray(methodSymbol, syntaxGenerator);
-			var returnType = SyntaxFactory.TypeOfExpression((TypeSyntax)syntaxGenerator.TypeExpression(methodSymbol.ReturnType));
-			var nameArg = syntaxGenerator.LiteralExpression(methodSymbol.Name);
-			var reflectionHelpersType = SyntaxFactory.ParseTypeName(typeof(ReflectionHelpers).GetGlobalName());
-			var getMethodMethod = syntaxGenerator.MemberAccessExpression(reflectionHelpersType, nameof(ReflectionHelpers.GetMethod));
-			return (ExpressionSyntax)syntaxGenerator.InvocationExpression(getMethodMethod, declaringTypeArg, nameArg, parameters, returnType);
 		}
 	}
 }

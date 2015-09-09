@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Compiler.Normalization
 {
+	using System;
 	using System.Linq;
 	using CompilerServices;
 	using Microsoft.CodeAnalysis;
@@ -33,8 +34,7 @@ namespace SafetySharp.Compiler.Normalization
 	using Utilities;
 
 	/// <summary>
-	///   Normalizes all calls of <see cref="Component.Bind(string,string)" />, <see cref="Component.Bind{T}(string,string)" />,
-	///   <see cref="Model.Bind(string,string)" />, and <see cref="Model.Bind{T}(string,string)" />.
+	///   Normalizes all calls of <see cref="Component.Bind(string,string)" /> and <see cref="Component.Bind{T}(string,string)" />.
 	/// 
 	///   For instance:
 	///   <code>
@@ -89,18 +89,16 @@ namespace SafetySharp.Compiler.Normalization
 			var requiredPortExpression = requiredPortReferenceExpression.ArgumentList.Arguments[0].Expression;
 			var providedPortExpression = providedPortReferenceExpression.ArgumentList.Arguments[0].Expression;
 
-			var requiredPortMethod = requiredPorts.Single().GetMethodInfoExpression(Syntax);
-			var providedPortMethod = providedPorts.Single().GetMethodInfoExpression(Syntax);
+			var requiredPortMethod = GetMethodInfoExpression(requiredPorts.Single());
+			var providedPortMethod = GetMethodInfoExpression(providedPorts.Single());
 			var requiredPortObject = CreatePortTargetExpression(requiredPortExpression);
 			var providedPortObject = CreatePortTargetExpression(providedPortExpression);
-			var requiredPortVirtual = CreatePortIsVirtualExpression(requiredPortExpression);
 			var providedPortVirtual = CreatePortIsVirtualExpression(providedPortExpression);
 
 			var binderType = Syntax.TypeExpression(SemanticModel.GetTypeSymbol(typeof(Binder)));
 			var memberAccess = Syntax.MemberAccessExpression(binderType, nameof(Binder.Bind));
 			var invocation = (ExpressionSyntax)Syntax.InvocationExpression(memberAccess,
-				requiredPortObject, requiredPortMethod, requiredPortVirtual,
-				providedPortObject, providedPortMethod, providedPortVirtual);
+				requiredPortObject, providedPortObject, requiredPortMethod, providedPortMethod, providedPortVirtual);
 
 			return statement.WithExpression(invocation).NormalizeWhitespace().WithTrivia(statement).EnsureLineCount(statement);
 		}
@@ -128,6 +126,41 @@ namespace SafetySharp.Compiler.Normalization
 			return Syntax.LiteralExpression(
 				!portExpression.IsKind(SyntaxKind.SimpleMemberAccessExpression) ||
 				!((MemberAccessExpressionSyntax)portExpression).Expression.IsKind(SyntaxKind.BaseExpression));
+		}
+
+		/// <summary>
+		///   Gets the expression that selects the <paramref name="methodSymbol" /> at runtime using reflection.
+		/// </summary>
+		private ExpressionSyntax GetMethodInfoExpression(IMethodSymbol methodSymbol)
+		{
+			var declaringTypeArg = Syntax.TypeOfExpression(Syntax.TypeExpression(methodSymbol.ContainingType));
+			var parameters = GetParameterTypeArray(methodSymbol);
+			var returnType = SyntaxFactory.TypeOfExpression((TypeSyntax)Syntax.TypeExpression(methodSymbol.ReturnType));
+			var nameArg = Syntax.LiteralExpression(methodSymbol.Name);
+			var reflectionHelpersType = SyntaxFactory.ParseTypeName(typeof(Binder).GetGlobalName());
+			var getMethodMethod = Syntax.MemberAccessExpression(reflectionHelpersType, nameof(Binder.GetMethod));
+			return (ExpressionSyntax)Syntax.InvocationExpression(getMethodMethod, declaringTypeArg, nameArg, parameters, returnType);
+		}
+
+		/// <summary>
+		///   Gets the parameter type array that can be used to retrieve the <paramref name="methodSymbol" /> via reflection.
+		/// </summary>
+		private SyntaxNode GetParameterTypeArray(IMethodSymbol methodSymbol)
+		{
+			var typeExpressions = methodSymbol.Parameters.Select(p =>
+			{
+				var typeofExpression = SyntaxFactory.TypeOfExpression((TypeSyntax)Syntax.TypeExpression(p.Type));
+				if (p.RefKind == RefKind.None)
+					return typeofExpression;
+
+				var makeRefType = Syntax.MemberAccessExpression(typeofExpression, "MakeByRefType");
+				return (ExpressionSyntax)Syntax.InvocationExpression(makeRefType);
+			});
+
+			var arguments = SyntaxFactory.SeparatedList(typeExpressions);
+			var initialize = SyntaxFactory.InitializerExpression(SyntaxKind.ArrayInitializerExpression, arguments);
+			var arrayType = Syntax.ArrayTypeExpression(SyntaxFactory.ParseTypeName(typeof(Type).FullName));
+			return SyntaxFactory.ArrayCreationExpression((ArrayTypeSyntax)arrayType, initialize);
 		}
 	}
 }

@@ -56,37 +56,24 @@ namespace PressureTank
 		}
 
 		/// <summary>
-		///   The pump that is used to fill the tank.
-		/// </summary>
-		private readonly Pump _pump;
-
-		/// <summary>
-		///   The sensor that is used to sense the pressure level within the tank.
-		/// </summary>
-		private readonly Sensor _sensor;
-
-		/// <summary>
-		///   The timer that is used to determine whether the pump should be disabled to prevent tank ruptures.
-		/// </summary>
-		private readonly Timer _timer;
-
-		/// <summary>
 		///   Gets the state machine that manages the state of the controller.
 		/// </summary>
 		public readonly StateMachine<State> StateMachine = new StateMachine<State>(State.Inactive);
 
 		/// <summary>
-		///   Initializes a new instance.
+		///   The pump that is used to fill the tank.
 		/// </summary>
-		/// <param name="sensor">The sensor that is used to sense the pressure level within the tank.</param>
-		/// <param name="pump">The pump that is used to fill the tank.</param>
-		/// <param name="timer">The timer that is used to determine whether the pump should be disabled.</param>
-		public Controller(Sensor sensor, Pump pump, Timer timer)
-		{
-			_pump = pump;
-			_sensor = sensor;
-			_timer = timer;
-		}
+		public Pump Pump;
+
+		/// <summary>
+		///   The sensor that is used to sense the pressure level within the tank.
+		/// </summary>
+		public Sensor Sensor;
+
+		/// <summary>
+		///   The timer that is used to determine whether the pump should be disabled to prevent tank ruptures.
+		/// </summary>
+		public Timer Timer;
 
 		/// <summary>
 		///   Updates the state of the component.
@@ -97,25 +84,25 @@ namespace PressureTank
 				.Transition(
 					from: State.Filling,
 					to: State.StoppedByTimer,
-					guard: _timer.HasElapsed(),
-					action: _pump.Disable)
+					guard: Timer.HasElapsed,
+					action: Pump.Disable)
 				.Transition(
 					from: State.Filling,
 					to: State.StoppedBySensor,
-					guard: _sensor.IsFull,
+					guard: Sensor.IsFull,
 					action: () =>
 					{
-						_pump.Disable();
-						_timer.Stop();
+						Pump.Disable();
+						Timer.Stop();
 					})
 				.Transition(
 					from: new[] { State.StoppedByTimer, State.StoppedBySensor, State.Inactive },
 					to: State.Filling,
-					guard: _sensor.IsEmpty,
+					guard: Sensor.IsEmpty,
 					action: () =>
 					{
-						_timer.Start();
-						_pump.Enable();
+						Timer.Start();
+						Pump.Enable();
 					});
 		}
 	}

@@ -32,7 +32,8 @@ namespace PressureTank
 		/// <summary>
 		///   The maximum allowed pressure level of the tank.
 		/// </summary>
-		private readonly int _maxPressure;
+		[Hidden]
+		public int MaxPressure;
 
 		/// <summary>
 		///   The current pressure level.
@@ -41,48 +42,36 @@ namespace PressureTank
 		private int _pressureLevel;
 
 		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="maxPressure">The maximum allowed pressure level of the tank.</param>
-		public Tank(int maxPressure)
-		{
-			_maxPressure = maxPressure;
-		}
-
-		/// <summary>
 		///   Gets a value indicating whether the pressure tank has ruptured after exceeding its maximum allowed pressure level.
 		/// </summary>
-		// TODO: Consider using a property once supported by S#.
-		public bool IsRuptured() => _pressureLevel >= _maxPressure;
+		public bool IsRuptured => _pressureLevel >= MaxPressure;
 
 		/// <summary>
 		///   Gets the current pressure level within the tank.
 		/// </summary>
-		// TODO: Consider using a property once supported by S#.
-		public int PressureLevel() => _pressureLevel;
+		public int PressureLevel => _pressureLevel;
 
 		/// <summary>
 		///   Gets a value indicating whether the pressure tank is currently being filled.
 		/// </summary>
-		// TODO: Consider using a property once supported by S#.
-		public extern bool IsBeingFilled();
+		public extern bool IsBeingFilled { get; }
 
 		/// <summary>
 		///   Updates the pressure tank's internal state.
 		/// </summary>
 		public override void Update()
 		{
-			if (IsRuptured())
+			if (IsRuptured)
 				return;
 
 			_pressureLevel -= 1;
 
-			if (IsBeingFilled())
+			if (IsBeingFilled)
 				_pressureLevel += 2;
 
 			// TODO: Remove the following lines once the simulator supports overflow behaviors
-			if (_pressureLevel > _maxPressure)
-				_pressureLevel = _maxPressure;
+			if (_pressureLevel > MaxPressure)
+				_pressureLevel = MaxPressure;
 
 			if (_pressureLevel < 0)
 				_pressureLevel = 0;

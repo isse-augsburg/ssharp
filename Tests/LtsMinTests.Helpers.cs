@@ -36,27 +36,27 @@ namespace Tests
 	{
 		protected CounterExample CounterExample { get; set; }
 
-		protected bool CheckInvariant(Model model, [LiftExpression] bool invariant)
+		protected bool CheckInvariant([LiftExpression] bool invariant, params IComponent[] components)
 		{
 			Requires.CompilationTransformation();
 			return false;
 		}
 
-		protected bool CheckInvariant(Model model, Func<bool> invariant)
+		protected bool CheckInvariant(Func<bool> invariant, params IComponent[] components)
 		{
 			var ltsMin = new SafetySharp.Analysis.LtsMin();
 			ltsMin.OutputWritten += message => Output.Log("{0}", message);
 
-			CounterExample = ltsMin.CheckInvariant(model, invariant);
+			CounterExample = ltsMin.CheckInvariant(new Model(components), invariant);
 			return CounterExample == null;
 		}
 
-		protected bool Check(Model model, Formula formula)
+		protected bool Check(Formula formula, params IComponent[] components)
 		{
 			var ltsMin = new SafetySharp.Analysis.LtsMin();
 			ltsMin.OutputWritten += message => Output.Log("{0}", message);
 
-			CounterExample = ltsMin.Check(model, formula);
+			CounterExample = ltsMin.Check(new Model(components), formula);
 			return CounterExample == null;
 		}
 	}

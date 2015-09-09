@@ -23,6 +23,7 @@
 namespace Tests.Serialization.RuntimeModels
 {
 	using System;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Reflection;
 	using Shouldly;

@@ -20,65 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace PressureTank
 {
+	using NUnit.Framework;
 	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Reflection;
-	using Shouldly;
 
-	internal class SimpleHierarchy : RuntimeModelTest
+	public class Tests
 	{
-		private static bool _hasConstructorRun;
-
-		protected override void Check()
+		[Test]
+		public void RuptureDcca()
 		{
-			var c1 = new C { F = 99 };
-			var c2 = new C { F = 33 };
-			var d = new D { C1 = c1, C2 = c2 };
-			var m = new Model(d);
+			var specification = new Specification();
+			var analysis = new SafetyAnalysis(new LtsMin(), Model.Create(specification));
 
-			_hasConstructorRun = false;
-			Create(m);
-
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<D>();
-
-			((D)root).C1.ShouldBeOfType<C>();
-			((D)root).C2.ShouldBeOfType<C>();
-
-			((D)root).C1.F.ShouldBe(99);
-			((D)root).C2.F.ShouldBe(33);
-
-			root.GetSubcomponents().ShouldBe(new[] { ((D)root).C1, ((D)root).C2 });
-			((D)root).C1.GetSubcomponents().ShouldBeEmpty();
-			((D)root).C2.GetSubcomponents().ShouldBeEmpty();
-
-			_hasConstructorRun.ShouldBe(false);
-		}
-
-		private class C : Component
-		{
-			public int F;
-
-			public C()
-			{
-				_hasConstructorRun = true;
-			}
-		}
-
-		private class D : Component
-		{
-			public C C1;
-			public C C2;
-
-			public D()
-			{
-				_hasConstructorRun = true;
-			}
+			var cutSets = analysis.ComputeMinimalCutSets(specification.Rupture);
 		}
 	}
 }

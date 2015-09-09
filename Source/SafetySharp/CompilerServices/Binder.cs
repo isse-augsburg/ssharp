@@ -23,6 +23,7 @@
 namespace SafetySharp.CompilerServices
 {
 	using System;
+	using System.Linq;
 	using System.Reflection;
 	using Utilities;
 
@@ -31,8 +32,16 @@ namespace SafetySharp.CompilerServices
 	/// </summary>
 	public static class Binder
 	{
-		public static void Bind(object requiredPortTarget, MethodInfo requiredPortMethod, bool requiredPortVirtual,
-								object providedPortTarget, MethodInfo providedPortMethod, bool providedPortVirtual)
+		/// <summary>
+		///   Binds the port methods of the port target objects either virtually or non-virtually.
+		/// </summary>
+		/// <param name="requiredPortTarget">The target object of the required port that should be bound.</param>
+		/// <param name="providedPortTarget">The target object of the provided port that should be bound.</param>
+		/// <param name="requiredPortMethod">The target method of the required port that should be bound.</param>
+		/// <param name="providedPortMethod">The target method of the provided port that should be bound.</param>
+		/// <param name="providedPortVirtual">Indicates whether the provided port method should be invoked virtually or non-virtually.</param>
+		public static void Bind(object requiredPortTarget, object providedPortTarget, MethodInfo requiredPortMethod, MethodInfo providedPortMethod,
+								bool providedPortVirtual)
 		{
 			Requires.NotNull(requiredPortTarget, nameof(requiredPortTarget));
 			Requires.NotNull(requiredPortMethod, nameof(requiredPortMethod));
@@ -52,6 +61,34 @@ namespace SafetySharp.CompilerServices
 			var providedPortDelegate = bindingField.FieldType.CreateDelegateInstance(providedPortTarget, providedPortMethod, providedPortVirtual);
 
 			bindingField.SetValue(requiredPortTarget, providedPortDelegate);
+		}
+
+		/// <summary>
+		///   Gets the instance method called <paramref name="methodName" /> declared by the <paramref name="declaringType" />,
+		///   with the signature of the method defined by the <paramref name="argumentTypes" /> and <paramref name="returnType" />.
+		/// </summary>
+		/// <param name="declaringType">The type that declares the method.</param>
+		/// <param name="methodName">The name of the method.</param>
+		/// <param name="argumentTypes">The argument types of the method.</param>
+		/// <param name="returnType">The return type of the method.</param>
+		public static MethodInfo GetMethod(Type declaringType, string methodName, Type[] argumentTypes, Type returnType)
+		{
+			Requires.NotNull(declaringType, nameof(declaringType));
+			Requires.NotNullOrWhitespace(methodName, nameof(methodName));
+			Requires.NotNull(argumentTypes, nameof(argumentTypes));
+			Requires.NotNull(returnType, nameof(returnType));
+
+			var method = declaringType
+				.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly)
+				.SingleOrDefault(m =>
+					m.Name == methodName &&
+					m.ReturnType == returnType &&
+					m.GetParameters().Select(p => p.ParameterType).SequenceEqual(argumentTypes));
+
+			Requires.That(method != null,
+				$"'{declaringType.FullName}' does not declare an instance method called '{methodName}' with the given signature.");
+
+			return method;
 		}
 	}
 }

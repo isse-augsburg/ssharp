@@ -36,7 +36,7 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents the LtsMin model checker.
 	/// </summary>
-	public class LtsMin
+	public class LtsMin : IModelChecker
 	{
 		/// <summary>
 		///   Represents the LtsMin process that is currently running.

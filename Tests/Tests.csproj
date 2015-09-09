@@ -349,7 +349,6 @@
     <Compile Include="Utilities\ITestableObject.cs" />
     <Compile Include="Utilities\TestComponent.cs" />
     <Compile Include="Utilities\TestException.cs" />
-    <Compile Include="Utilities\TestModel.cs" />
     <Compile Include="Utilities\TestObject.cs" />
     <Compile Include="Utilities\Tests.cs" />
   </ItemGroup>

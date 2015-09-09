@@ -33,10 +33,9 @@ namespace Tests.LtsMin.Invariants.Violated
 			var c1 = new C();
 			var c2 = new C();
 			var d = new D { C = new List<C> { c1, c2 } };
-			var m = new Model(d);
 
-			CheckInvariant(m, c1.F != 3).ShouldBe(false);
-			CheckInvariant(m, c2.F != 3).ShouldBe(false);
+			CheckInvariant(c1.F != 3, d).ShouldBe(false);
+			CheckInvariant(c2.F != 3, d).ShouldBe(false);
 		}
 
 		private class C : Component

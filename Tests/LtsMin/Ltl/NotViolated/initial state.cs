@@ -31,9 +31,7 @@ namespace Tests.LtsMin.Ltl.NotViolated
 		protected override void Check()
 		{
 			var c = new C { F = 3 };
-			var m = new Model(c);
-
-			Check(m, X(F(G(c.F == 3)))).ShouldBe(true);
+			Check(X(F(G(c.F == 3))), c).ShouldBe(true);
 		}
 
 		private class C : Component

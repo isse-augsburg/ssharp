@@ -42,11 +42,15 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis\HazardAttribute.cs" />
+    <Compile Include="Analysis\IModelChecker.cs" />
     <Compile Include="Analysis\LtsMin.cs" />
+    <Compile Include="Analysis\Model.cs" />
+    <Compile Include="Analysis\RootAttribute.cs" />
+    <Compile Include="Analysis\SafetyAnalysis.cs" />
     <Compile Include="CompilerServices\Binder.cs" />
     <Compile Include="CompilerServices\BindingFieldAttribute.cs" />
     <Compile Include="CompilerServices\LiftExpressionAttribute.cs" />
-    <Compile Include="CompilerServices\ReflectionHelpers.cs" />
     <Compile Include="CompilerServices\StateFormulaFactory.cs" />
     <Compile Include="Modeling\NonDiscoverableAttribute.cs" />
     <Compile Include="Analysis\CounterExample.cs" />
@@ -78,7 +82,6 @@
     <Compile Include="Analysis\FormulaVisitors\ToStringVisitor.cs" />
     <Compile Include="Modeling\HiddenAttribute.cs" />
     <Compile Include="Modeling\IComponent.cs" />
-    <Compile Include="Modeling\Model.cs" />
     <Compile Include="Modeling\OverflowBehavior.cs" />
     <Compile Include="Modeling\PriorityAttribute.cs" />
     <Compile Include="Modeling\ProvidedAttribute.cs" />

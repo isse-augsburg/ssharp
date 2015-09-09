@@ -20,63 +20,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace PressureTank
+namespace SafetySharp.Analysis
 {
-	using SafetySharp.Modeling;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Modeling;
+	using Utilities;
 
 	/// <summary>
-	///   Represents the pump that fills the pressure tank.
+	///   Performs safety analyses on a model.
 	/// </summary>
-	public class Pump : Component
+	public sealed class SafetyAnalysis
 	{
 		/// <summary>
-		///   The fault that prevents the pump from pumping.
+		///   The model that is analyzed.
 		/// </summary>
-		public readonly Fault SuppressPumping = new PersistentFault();
+		private readonly Model _model;
 
 		/// <summary>
-		///   Indicates whether the pump is currently filling the pressure tank.
+		///   The model checker that is used for the analysis.
 		/// </summary>
-		private bool _enabled;
+		private readonly IModelChecker _modelChecker;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public Pump()
+		/// <param name="modelChecker">The model checker that should be used for the analysis.</param>
+		/// <param name="model">The model that should be analyzed.</param>
+		public SafetyAnalysis(IModelChecker modelChecker, Model model)
 		{
-			//SuppressPumping.AddEffect<SuppressPumpingEffect>(this);
+			Requires.NotNull(modelChecker, nameof(modelChecker));
+			Requires.NotNull(model, nameof(model));
+
+			_modelChecker = modelChecker;
+			_model = model;
 		}
 
 		/// <summary>
-		///   Gets a value indicating whether the pump is currently enabled.
+		///   Computes the minimal cut sets for the <paramref name="hazard" />.
 		/// </summary>
-		public bool IsEnabled => _enabled;
-
-		/// <summary>
-		///   Disables the pump.
-		/// </summary>
-		public void Disable()
+		/// <param name="hazard">The hazard the minimal cut sets should be computed for.</param>
+		public IEnumerable<ISet<Fault>> ComputeMinimalCutSets(Formula hazard)
 		{
-			_enabled = false;
-		}
+			Requires.NotNull(hazard, nameof(hazard));
+			Requires.OfType<StateFormula>(hazard, nameof(hazard), "Only state formulas are supported.");
 
-		/// <summary>
-		///   Enables the pump.
-		/// </summary>
-		public virtual void Enable()
-		{
-			_enabled = true;
-		}
-
-		/// <summary>
-		///   Prevents the pump from pumping.
-		/// </summary>
-		[FaultEffect]
-		public class SuppressPumpingEffect : Pump
-		{
-			public override void Enable()
-			{
-			}
+			_modelChecker.CheckInvariant(_model, ((StateFormula)hazard).Expression);
+			return Enumerable.Empty<ISet<Fault>>();
 		}
 	}
 }

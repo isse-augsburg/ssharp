@@ -31,14 +31,13 @@ namespace Tests.LtsMin.Invariants.Violated
 		{
 			var c = new C { F = -1 };
 			var d = new D { C = c };
-			var m = new Model(d);
 
-			CheckInvariant(m, c.F != 2).ShouldBe(false);
-			CheckInvariant(m, c.F != 10).ShouldBe(false);
-			CheckInvariant(m, c.F != 20).ShouldBe(false);
-			CheckInvariant(m, c.F != 12).ShouldBe(false);
-			CheckInvariant(m, c.F != 22).ShouldBe(false);
-			CheckInvariant(m, c.F == -1 || c.F == 0 || c.F == 2 || c.F == 10 || c.F == 20 || c.F == 12 || c.F == 22).ShouldBe(true);
+			CheckInvariant(c.F != 2, d).ShouldBe(false);
+			CheckInvariant(c.F != 10, d).ShouldBe(false);
+			CheckInvariant(c.F != 20, d).ShouldBe(false);
+			CheckInvariant(c.F != 12, d).ShouldBe(false);
+			CheckInvariant(c.F != 22, d).ShouldBe(false);
+			CheckInvariant(c.F == -1 || c.F == 0 || c.F == 2 || c.F == 10 || c.F == 20 || c.F == 12 || c.F == 22, d).ShouldBe(true);
 		}
 
 		private class C : Component

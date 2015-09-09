@@ -20,41 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.LtsMin.Invariants.NotViolated
+namespace SafetySharp.Analysis
 {
-	using SafetySharp.Modeling;
-	using Shouldly;
+	using System;
+	using Modeling;
 
-	internal class StateMachineTest : LtsMinTestObject
+	/// <summary>
+	///   Indicates that the marked member holds or generates one or more root <see cref="Component" /> instances that
+	///   should be used by an analysis.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+	public sealed class RootAttribute : Attribute
 	{
-		protected override void Check()
-		{
-			var d = new D();
-			CheckInvariant(d.StateMachine != S.B, d).ShouldBe(true);
-		}
-
-		private class D : Component
-		{
-			public readonly StateMachine<S> StateMachine = new StateMachine<S>(S.A);
-
-			public override void Update()
-			{
-				StateMachine
-					.Transition(
-						from: S.A,
-						to: S.B,
-						guard: false)
-					.Transition(
-						from: S.A,
-						to: S.C);
-			}
-		}
-
-		private enum S
-		{
-			A,
-			B,
-			C
-		}
 	}
 }

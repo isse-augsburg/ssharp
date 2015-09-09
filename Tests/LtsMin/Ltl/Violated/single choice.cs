@@ -32,10 +32,9 @@ namespace Tests.LtsMin.Ltl.Violated
 		{
 			var c = new C { F = 3 };
 			var d = new D { C = c };
-			var m = new Model(d);
 
-			Check(m, F(G(c.F == 77))).ShouldBe(false);
-			Check(m, U(!c.G, c.F == 77)).ShouldBe(false);
+			Check(F(G(c.F == 77)), d).ShouldBe(false);
+			Check(U(!c.G, c.F == 77), d).ShouldBe(false);
 		}
 
 		private class C : Component

@@ -30,9 +30,7 @@ namespace Tests.LtsMin.Invariants.Violated
 		protected override void Check()
 		{
 			var c = new C { F = 3 };
-			var m = new Model(c);
-
-			CheckInvariant(m, c.F != 3).ShouldBe(false);
+			CheckInvariant(c.F != 3, c).ShouldBe(false);
 		}
 
 		private class C : Component

@@ -20,33 +20,63 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Utilities
+namespace PressureTank
 {
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 
 	/// <summary>
-	///   Represents a base class for testable models that are compiled and instantiated dynamically during test execution.
+	///   Represents the specification of the pressure tank case study.
 	/// </summary>
-	public abstract class TestModel : Model, ITestableObject
+	public class Specification
 	{
 		/// <summary>
-		///   Gets the output that writes to the test output stream.
+		///   The maximum allowed pressure level within the tank.
 		/// </summary>
-		public TestTraceOutput Output { get; private set; }
+		public const int MaxPressure = 60;
 
 		/// <summary>
-		///   Executes the tests of the object.
+		///   The pressure level that triggers the sensor.
 		/// </summary>
-		/// <param name="output">The output that should be used to write test output.</param>
-		public void Test(TestTraceOutput output)
+		public const int SensorPressure = 58;
+
+		/// <summary>
+		///   The controller's timeout in seconds.
+		/// </summary>
+		public const int Timeout = 59;
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		public Specification()
 		{
-			Output = output;
-			Check();
+			Controller = new Controller
+			{
+				Sensor = new Sensor { TriggerPressure = SensorPressure },
+				Pump = new Pump(),
+				Timer = new Timer { Timeout = Timeout }
+			};
+
+			Component.Bind(nameof(Controller.Sensor.CheckPhysicalPressure), nameof(Tank.PressureLevel));
+			Component.Bind(nameof(Tank.IsBeingFilled), nameof(Controller.Pump.IsEnabled));
 		}
 
 		/// <summary>
-		///   Checks the test assertions.
+		///   Gets the tank that is being filled.
 		/// </summary>
-		protected abstract void Check();
+		[Root]
+		public Tank Tank { get; } = new Tank { MaxPressure = MaxPressure };
+
+		/// <summary>
+		///   Gets the controller that fills the tank.
+		/// </summary>
+		[Root]
+		public Controller Controller { get; }
+
+		/// <summary>
+		///   Gets a formula representing the hazard of a tank rupture.
+		/// </summary>
+		[Hazard]
+		public Formula Rupture => Tank.IsRuptured;
 	}
 }

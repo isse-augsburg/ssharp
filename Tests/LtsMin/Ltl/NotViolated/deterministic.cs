@@ -22,9 +22,9 @@
 
 namespace Tests.LtsMin.Ltl.NotViolated
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
+	using static SafetySharp.Analysis.Ctl;
 
 	internal class Deterministic : LtsMinTestObject
 	{
@@ -32,9 +32,8 @@ namespace Tests.LtsMin.Ltl.NotViolated
 		{
 			var c = new C { F = 3 };
 			var d = new D { C = c };
-			var m = new Model(d);
 
-			Check(m, Ctl.U(c.F < 19, c.F == 19)).ShouldBe(true);
+			Check(U(c.F < 19, c.F == 19), d).ShouldBe(true);
 		}
 
 		private class C : Component

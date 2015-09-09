@@ -30,10 +30,9 @@ namespace Tests.LtsMin.Invariants.Violated
 		protected override void Check()
 		{
 			var d = new D();
-			var m = new Model(d);
 
-			CheckInvariant(m, d.StateMachine != S.B).ShouldBe(false);
-			CheckInvariant(m, d.StateMachine != S.C).ShouldBe(false);
+			CheckInvariant(d.StateMachine != S.B, d).ShouldBe(false);
+			CheckInvariant(d.StateMachine != S.C, d).ShouldBe(false);
 		}
 
 		private class D : Component

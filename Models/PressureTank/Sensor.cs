@@ -43,6 +43,7 @@ namespace PressureTank
 		/// <summary>
 		///   The pressure level the sensor is watching for.
 		/// </summary>
+		[Hidden]
 		public int TriggerPressure;
 
 		/// <summary>
@@ -50,8 +51,8 @@ namespace PressureTank
 		/// </summary>
 		public Sensor()
 		{
-			SuppressIsFull.AddEffect<SuppressIsFullEffect>(this);
-			SuppressIsEmpty.AddEffect<SuppressIsEmptyEffect>(this);
+			//SuppressIsFull.AddEffect<SuppressIsFullEffect>(this);
+			//SuppressIsEmpty.AddEffect<SuppressIsEmptyEffect>(this);
 		}
 
 		/// <summary>
@@ -63,8 +64,6 @@ namespace PressureTank
 		///   Gets a value indicating whether the tank is empty.
 		/// </summary>
 		public virtual bool IsEmpty => CheckPhysicalPressure <= 0;
-
-		public virtual int Prop { get; set; }
 
 		/// <summary>
 		///   Senses the physical pressure level within the tank.

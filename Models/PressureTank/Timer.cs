@@ -22,41 +22,23 @@
 
 namespace PressureTank
 {
-	using System;
-	using SafetySharp.CompilerServices;
 	using SafetySharp.Modeling;
 
-	public class T2 : Component,I
-	{
-		extern void I.M();
-
-		public virtual bool X16()
-		{
-			Console.WriteLine("BASE");
-			return false;
-		}
-
-		private void NameOf(object i)
-		{
-		}
-
-		public void NameOf(double i)
-		{
-		}
-	}
-	interface I
-	{
-		void M();
-	}
 	/// <summary>
 	///   Represents a timer that signals a timeout.
 	/// </summary>
-	public class Timer : T2
+	public class Timer : Component
 	{
 		/// <summary>
-		///   The timeout signaled by the timer.
+		///   The fault that prevents the timer from reporting a timeout.
 		/// </summary>
-		private readonly int _timeout;
+		public readonly Fault SuppressTimeout = new PersistentFault();
+
+		/// <summary>
+		///   The amount of time that has to pass before the timer signals a timeout.
+		/// </summary>
+		[Hidden]
+		public int Timeout;
 
 		/// <summary>
 		///   The remaining time before the timeout is signaled. A value of -1 indicates that the timer is inactive.
@@ -67,126 +49,45 @@ namespace PressureTank
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="timeout">The timeout interval of the timer.</param>
-		public Timer(int timeout)
+		public Timer()
 		{
-			_timeout = timeout;
-			Y = 21;
-
-			Bind(nameof(Extern), nameof(base.X16));
-			Bind(nameof(W1), nameof(X));
-		}
-
-		public virtual int X
-		{
-			get { return 1; }
-			set
-			{
-				var i = 0;
-				++i;
-			}
-		}
-
-		public virtual int X2 { get; set; }
-
-		protected virtual int Y { get; } = 99;
-
-		protected virtual int Z => Y * 2;
-
-		protected virtual extern int W1 { get; }
-		protected virtual extern int W3 { set; }
-		protected virtual extern int W2 { private get; set; }
-
-		protected virtual int this[int i] => Y + Z;
-
-		protected virtual extern int this[double i] { get; set; }
-
-		protected virtual int this[float i]
-		{
-			get { return 1; }
-			set { X = value; }
-		}
-
-		public override bool X16()
-		{
-			Console.WriteLine("TIMER");
-			return true;
-		}
-
-		private extern int NameOf(double d);
-
-		private void NameOf(int i)
-		{
-		}
-
-		private void NameOf(float i)
-		{
+			//SuppressTimeout.AddEffect<SuppressTimeoutEffect>(this);
 		}
 
 		/// <summary>
 		///   Gets a value indicating whether the timeout has elapsed. This method returns true only for the single system step where
 		///   the timeout occurs.
 		/// </summary>
-		public virtual bool HasElapsed() => _remainingTime == 0;
-
-		/// <summary>
-		///   Starts or restarts the timer.
-		/// </summary>
-		public virtual void Start() => _remainingTime = _timeout;
-
-		public virtual void Start2()
-		{
-			_remainingTime = _timeout;
-		}
-
-		protected virtual extern bool Extern();
-
-		/// <summary>
-		///   Stops the timer.
-		/// </summary>
-		public void Stop() => _remainingTime = -1;
+		public virtual bool HasElapsed => _remainingTime == 0;
 
 		/// <summary>
 		///   Gets a value indicating whether the timer is currently active, eventually signaling the timeout.
 		/// </summary>
-		public bool IsActive() => _remainingTime > 0;
+		public bool IsActive => _remainingTime > 0;
 
 		/// <summary>
 		///   Gets the remaining time before the timeout occurs.
 		/// </summary>
-		public int GetRemainingTime() => _remainingTime;
+		public int RemainingTime => _remainingTime;
 
-		protected virtual event Action E
+		/// <summary>
+		///   Starts or restarts the timer.
+		/// </summary>
+		public void Start()
 		{
-			add { X = 3; }
-			remove { X = 7; }
-		}
-
-		private static void Main()
-		{
-			var t = new Timer(32);
-			t.HasElapsed();
-			t.Start();
-			t.Start2();
-
-			t.X2 = t.X2;
-			t.X = t.X;
-			t.X = t.Y;
-			t.X = t.Z;
-
-			t[0.4f] = t[1] + t[1f];
-
-			t.E += () => { };
-			t.E -= () => { };
-
-			var val = t.Extern();
-			var x = t.W1;
-			t[3.0] = t[4.0];
-			t.W2 = x;
+			_remainingTime = Timeout;
 		}
 
 		/// <summary>
-		///   Updates the timer's internal state.
+		///   Stops the timer.
+		/// </summary>
+		public void Stop()
+		{
+			_remainingTime = -1;
+		}
+
+		/// <summary>
+		///   Updates the timer's state.
 		/// </summary>
 		public override void Update()
 		{
@@ -197,14 +98,13 @@ namespace PressureTank
 				_remainingTime = -1;
 		}
 
-//		/// <summary>
-//		///   Represents a failure mode that prevents the timer from reporting a timeout.
-//		/// </summary>
-//		[Transient]
-//		public class SuppressTimeout : Fault
-//		{
-//			public bool HasElapsed() => false;
-
-//		}
+		/// <summary>
+		///   Prevents the timer from reporting a timeout.
+		/// </summary>
+		[FaultEffect]
+		private sealed class SuppressTimeoutEffect : Timer
+		{
+			public override bool HasElapsed => false;
+		}
 	}
 }

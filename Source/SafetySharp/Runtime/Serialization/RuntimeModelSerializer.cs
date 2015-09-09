@@ -71,8 +71,8 @@ namespace SafetySharp.Runtime.Serialization
 			SerializeObjectTable(objectTable, writer);
 
 			// Serialize object identifiers of the root components
-			writer.Write(model.RootComponents.Count);
-			foreach (var root in model.RootComponents)
+			writer.Write(model.Count);
+			foreach (var root in model)
 				writer.Write(objectTable.GetObjectIdentifier(root));
 
 			// Serialize the initial state
@@ -127,7 +127,6 @@ namespace SafetySharp.Runtime.Serialization
 		private static ObjectTable CreateObjectTable(Model model, StateFormula[] stateFormulas)
 		{
 			var modelObjects = model
-				.RootComponents
 				.SelectMany(component => SerializationRegistry.Default.GetReferencedObjects(component, SerializationMode.Full));
 
 			var formulaObjects = stateFormulas

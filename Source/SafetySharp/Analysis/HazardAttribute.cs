@@ -20,41 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.LtsMin.Invariants.NotViolated
+namespace SafetySharp.Analysis
 {
-	using SafetySharp.Modeling;
-	using Shouldly;
+	using System;
 
-	internal class StateMachineTest : LtsMinTestObject
+	/// <summary>
+	///   Indicates that the marked members is or generates a <see cref="Formula" /> representing a safety hazard.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method)]
+	public sealed class HazardAttribute : Attribute
 	{
-		protected override void Check()
-		{
-			var d = new D();
-			CheckInvariant(d.StateMachine != S.B, d).ShouldBe(true);
-		}
-
-		private class D : Component
-		{
-			public readonly StateMachine<S> StateMachine = new StateMachine<S>(S.A);
-
-			public override void Update()
-			{
-				StateMachine
-					.Transition(
-						from: S.A,
-						to: S.B,
-						guard: false)
-					.Transition(
-						from: S.A,
-						to: S.C);
-			}
-		}
-
-		private enum S
-		{
-			A,
-			B,
-			C
-		}
 	}
 }

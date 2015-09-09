@@ -22,7 +22,6 @@
 
 namespace Tests.LtsMin.Ltl.Violated
 {
-	using System;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using static SafetySharp.Analysis.Ctl;
@@ -33,9 +32,8 @@ namespace Tests.LtsMin.Ltl.Violated
 		{
 			var c = new C { F = 3 };
 			var d = new D { C = c };
-			var m = new Model(d);
 
-			Check(m, G(c.F < 15)).ShouldBe(false);
+			Check(G(c.F < 15), d).ShouldBe(false);
 		}
 
 		private class C : Component
