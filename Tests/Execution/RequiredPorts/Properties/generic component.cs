@@ -20,40 +20,61 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.RequiredPorts.Properties
 {
-	using Xunit;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	internal class X6<T> : Component
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		protected X6(T t)
 		{
-			ExecuteDynamicTests(file);
+			P = t;
+			Bind(nameof(R), nameof(P));
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		public extern T R { get; }
+		public T P { get; }
+	}
+
+	internal class X7 : TestObject
+	{
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			var c1 = new C(17);
+			c1.R.ShouldBe(17);
+
+			var c2 = new C(44);
+			c2.R.ShouldBe(44);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
+		private class C : X6<int>
 		{
-			ExecuteDynamicTests(file);
+			public C(int t)
+				: base(t)
+			{
+			}
+		}
+	}
+
+	internal class X8 : TestObject
+	{
+		protected override void Check()
+		{
+			var c1 = new C(true);
+			c1.R.ShouldBe(true);
+
+			var c2 = new C(false);
+			c2.R.ShouldBe(false);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
+		private class C : X6<bool>
 		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			public C(bool t)
+				: base(t)
+			{
+			}
 		}
 	}
 }

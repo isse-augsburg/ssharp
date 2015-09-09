@@ -20,40 +20,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.ProvidedPorts.Properties
 {
-	using Xunit;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	interface I
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+		int M { get; set; }
+		int N { get; }
+		int Q {  set; }
+	}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+	internal abstract class BaseInterface : TestComponent, I
+	{
+		public int M { get; set; }
+		int I.N { get; } = 99;
+		virtual public int Q { get; set; }
+	}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+	internal class DerivedInterface : BaseInterface
+	{
+		public override int Q { get; set; }
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
-		}
+			M = 17;
+			M.ShouldBe(17);
 
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			Q = 33;
+			Q.ShouldBe(33);
+			base.Q.ShouldBe(0);
+
+			((I)this).N.ShouldBe(99);
+
+			I x = this;
+
+			x.M = 171;
+			x.M.ShouldBe(171);
+
+			x.Q = 331;
+			Q.ShouldBe(331);
+
+			x.N.ShouldBe(99);
 		}
 	}
 }

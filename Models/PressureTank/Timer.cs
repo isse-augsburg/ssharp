@@ -26,8 +26,10 @@ namespace PressureTank
 	using SafetySharp.CompilerServices;
 	using SafetySharp.Modeling;
 
-	public class T2 : Component
+	public class T2 : Component,I
 	{
+		extern void I.M();
+
 		public virtual bool X16()
 		{
 			Console.WriteLine("BASE");
@@ -42,7 +44,10 @@ namespace PressureTank
 		{
 		}
 	}
-
+	interface I
+	{
+		void M();
+	}
 	/// <summary>
 	///   Represents a timer that signals a timeout.
 	/// </summary>

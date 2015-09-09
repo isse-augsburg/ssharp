@@ -20,40 +20,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.RequiredPorts.Methods
 {
-	using Xunit;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	internal abstract class X4 : TestComponent
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		public int M(int i)
 		{
-			ExecuteDynamicTests(file);
+			return i * 2;
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		public extern int N(int i);
+	}
+
+	internal class X5 : X4
+	{
+		public X5()
 		{
-			ExecuteDynamicTests(file);
+			Bind(nameof(N), nameof(base.M));
+			Bind(nameof(base.N), nameof(M));
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
+		private new int M(int i)
 		{
-			ExecuteDynamicTests(file);
+			return i * i;
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+		private new extern int N(int i);
 
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			N(3).ShouldBe(6);
+			N(10).ShouldBe(20);
+
+			base.N(3).ShouldBe(9);
+			base.N(10).ShouldBe(100);
+
+			((X4)this).N(3).ShouldBe(9);
+			((X4)this).N(10).ShouldBe(100);
 		}
 	}
 }

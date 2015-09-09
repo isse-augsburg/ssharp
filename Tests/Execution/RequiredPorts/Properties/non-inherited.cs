@@ -20,40 +20,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.RequiredPorts.Properties
 {
-	using Xunit;
+	using System;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	internal class X1 : TestComponent
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		private int _x;
+
+		private extern int R1 { get; }
+		private extern int R2 { set; }
+		private extern int R3 { get; set; }
+
+		private int P1 => _x / 2;
+
+		private int P2
 		{
-			ExecuteDynamicTests(file);
+			set { _x = value * 2; }
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		private int P3
 		{
-			ExecuteDynamicTests(file);
+			get { return _x * 2; }
+			set { _x = value / 2; }
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
-		}
+			Bind(nameof(R1), nameof(P1));
+			Bind(nameof(R2), nameof(P2));
+			Bind<Action<int>>(nameof(R3), nameof(P3));
+			Bind<Func<int>>(nameof(R3), nameof(P3));
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+			_x = 10;
+			R1.ShouldBe(5);
 
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			R2 = 12;
+			_x.ShouldBe(24);
+
+			R3.ShouldBe(48);
+			R3 = 12;
+			_x.ShouldBe(6);
 		}
 	}
 }

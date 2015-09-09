@@ -225,5 +225,25 @@ namespace SafetySharp.Utilities
 
 			return dynamicMethod.CreateDelegate(delegateType, targetObject);
 		}
+
+		/// <summary>
+		///   Resolves the <paramref name="targetType" />'s implementing method for the <paramref name="interfaceMethod" />.
+		/// </summary>
+		/// <param name="targetType">The target type the implementing method should be resolved for.</param>
+		/// <param name="interfaceMethod">The interface method the implementing method should be resolved for.</param>
+		public static MethodInfo ResolveImplementingMethod(this Type targetType, MethodInfo interfaceMethod)
+		{
+			Requires.NotNull(targetType, nameof(targetType));
+			Requires.NotNull(interfaceMethod, nameof(interfaceMethod));
+			Requires.That(interfaceMethod.DeclaringType.IsInterface, nameof(interfaceMethod), "Expected a method declared by an interface.");
+			Requires.That(targetType.GetInterfaces().Contains(interfaceMethod.DeclaringType), nameof(targetType),
+				"The target type does not implement the interface.");
+
+			var interfaceMap = targetType.GetInterfaceMap(interfaceMethod.DeclaringType);
+			var index = Array.IndexOf(interfaceMap.InterfaceMethods, interfaceMethod);
+			Assert.That(index != -1, "Unable to find the interface method in the type's interface map.");
+
+			return interfaceMap.TargetMethods[index];
+		}
 	}
 }

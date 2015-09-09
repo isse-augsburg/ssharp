@@ -20,40 +20,66 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.RequiredPorts.Methods
 {
-	using Xunit;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	internal class X1 : TestComponent
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		private readonly X2 _b = new X2 { _i = 5 };
+		private int _i;
+
+		private X2 A { get; } = new X2 { _i = 4 };
+
+		private int M(int i)
 		{
-			ExecuteDynamicTests(file);
+			return i * _i;
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		private extern int N(int i);
+
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			_i = 2;
+			Bind(nameof(N), nameof(M));
+
+			N(2).ShouldBe(4);
+			N(10).ShouldBe(20);
+
+			var x = new X1 { _i = 3 };
+			Bind(nameof(x.N), nameof(x.M));
+
+			x.N(2).ShouldBe(6);
+			x.N(10).ShouldBe(30);
+
+			Bind(nameof(A.N), nameof(A.M));
+
+			A.N(2).ShouldBe(8);
+			A.N(10).ShouldBe(40);
+
+			Bind(nameof(_b.N), nameof(_b.M));
+
+			_b.N(2).ShouldBe(10);
+			_b.N(10).ShouldBe(50);
+
+			Bind(nameof(this._b.N), nameof(this.A.M));
+
+			this._b.N(2).ShouldBe(8);
+			this._b.N(10).ShouldBe(40);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
+		private class X2 : Component
 		{
-			ExecuteDynamicTests(file);
-		}
+			public int _i;
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+			public int M(int i)
+			{
+				return i * _i;
+			}
 
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			public extern int N(int i);
 		}
 	}
 }

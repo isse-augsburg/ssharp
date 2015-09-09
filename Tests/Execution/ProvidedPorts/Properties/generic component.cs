@@ -20,40 +20,82 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.ProvidedPorts.Properties
 {
-	using Xunit;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	internal class X6<T> : Component
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		public T _p3get;
+		public T _p3set;
+
+		public X6(T p1)
 		{
-			ExecuteDynamicTests(file);
+			P1 = p1;
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		public virtual T P1 { get; }
+
+		public virtual T P2 { get; set; }
+
+		public virtual T P3
 		{
-			ExecuteDynamicTests(file);
+			get { return _p3get; }
+			set { _p3set = value; }
+		}
+	}
+
+	internal class X7 : TestObject
+	{
+		protected override void Check()
+		{
+			var c = new C(7);
+			c.P1.ShouldBe(7);
+
+			c.P2 = 99;
+			c.P2.ShouldBe(99);
+
+			c._p3get = 17;
+			c.P3.ShouldBe(17);
+
+			c.P3 = 19;
+			c._p3set.ShouldBe(19);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
+		private class C : X6<int>
 		{
-			ExecuteDynamicTests(file);
+			public C(int p1)
+				: base(p1)
+			{
+			}
+		}
+	}
+
+	internal class X8 : TestObject
+	{
+		protected override void Check()
+		{
+			var c = new C(7);
+			c.P1.ShouldBe(7);
+
+			c.P2 = 99;
+			c.P2.ShouldBe(99);
+
+			c._p3get = 17;
+			c.P3.ShouldBe(17);
+
+			c.P3 = 19;
+			c._p3set.ShouldBe(19);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
+		private class C : X6<long>
 		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			public C(long p1)
+				: base(p1)
+			{
+			}
 		}
 	}
 }

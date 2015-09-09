@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CompilerServices
 {
+	using System;
 	using System.Reflection;
 	using Utilities;
 
@@ -38,11 +39,16 @@ namespace SafetySharp.CompilerServices
 			Requires.NotNull(providedPortTarget, nameof(providedPortTarget));
 			Requires.NotNull(providedPortMethod, nameof(providedPortMethod));
 
+			// If the required port is an interface method, we have to determine the actual method on the target object
+			// that will be invoked, otherwise we wouldn't be able to find the binding field
+			if (requiredPortMethod.DeclaringType.IsInterface)
+				requiredPortMethod = requiredPortTarget.GetType().ResolveImplementingMethod(requiredPortMethod);
+
 			var bindingFieldAttribute = requiredPortMethod.GetCustomAttribute<BindingFieldAttribute>();
 			Assert.NotNull(bindingFieldAttribute,
 				$"Expected required port '{requiredPortMethod}' to be marked with '{typeof(BindingFieldAttribute).FullName}'.");
 
-			var bindingField = bindingFieldAttribute.GetFieldInfo(requiredPortTarget.GetType());
+			var bindingField = bindingFieldAttribute.GetFieldInfo(requiredPortMethod.DeclaringType);
 			var providedPortDelegate = bindingField.FieldType.CreateDelegateInstance(providedPortTarget, providedPortMethod, providedPortVirtual);
 
 			bindingField.SetValue(requiredPortTarget, providedPortDelegate);

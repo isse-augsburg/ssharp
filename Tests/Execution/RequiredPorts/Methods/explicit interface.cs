@@ -20,40 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.RequiredPorts.Methods
 {
-	using Xunit;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	internal interface I1 : IComponent
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		[Required]
+		int N(int i);
+
+		[Provided]
+		int M(int i);
+	}
+
+	internal class X6 : TestComponent, I1
+	{
+		public X6()
 		{
-			ExecuteDynamicTests(file);
+			var i1 = (I1)this;
+			Bind(nameof(i1.N), nameof(i1.M));
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		extern int I1.N(int i);
+
+		int I1.M(int i)
 		{
-			ExecuteDynamicTests(file);
+			return i * 3;
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			((I1)this).N(2).ShouldBe(6);
+			((I1)this).N(10).ShouldBe(30);
 		}
 	}
 }

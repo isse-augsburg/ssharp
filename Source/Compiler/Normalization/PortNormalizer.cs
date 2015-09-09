@@ -91,6 +91,9 @@ namespace SafetySharp.Compiler.Normalization
 			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
 				return declaration;
 
+			if (!propertySymbol.IsExtern && !propertySymbol.CanBeAffectedByFaults(SemanticModel))
+				return declaration;
+
 			var originalDeclaration = declaration;
 			if (propertySymbol.IsExtern)
 			{
@@ -109,6 +112,9 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
 			if (!propertySymbol.ContainingType.IsComponent(SemanticModel))
+				return declaration;
+
+			if (!propertySymbol.IsExtern && !propertySymbol.CanBeAffectedByFaults(SemanticModel))
 				return declaration;
 
 			var originalDeclaration = declaration;

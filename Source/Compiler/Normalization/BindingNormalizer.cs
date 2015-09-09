@@ -28,7 +28,6 @@ namespace SafetySharp.Compiler.Normalization
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Modeling;
-	using Roslyn;
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
 	using Utilities;
@@ -51,11 +50,6 @@ namespace SafetySharp.Compiler.Normalization
 	public sealed class BindingNormalizer : SyntaxNormalizer
 	{
 		/// <summary>
-		///   The number of bindings that have been normalized so far.
-		/// </summary>
-		private int _bindingsCount;
-
-		/// <summary>
 		///   Normalizes the <paramref name="statement" />.
 		/// </summary>
 		public override SyntaxNode VisitExpressionStatement(ExpressionStatementSyntax statement)
@@ -76,13 +70,13 @@ namespace SafetySharp.Compiler.Normalization
 
 			if (methodSymbol.Arity == 1)
 			{
-				var delegateType = (INamedTypeSymbol) methodSymbol.TypeArguments[0];
-				PortSignatureMatcher.Filter(requiredPorts, delegateType);
-				PortSignatureMatcher.Filter(providedPorts, delegateType);
+				var delegateType = (INamedTypeSymbol)methodSymbol.TypeArguments[0];
+				MethodSymbolFilter.Filter(requiredPorts, delegateType);
+				MethodSymbolFilter.Filter(providedPorts, delegateType);
 			}
 			else
-				PortSignatureMatcher.Filter(ref requiredPorts, ref providedPorts);
-			
+				MethodSymbolFilter.Filter(requiredPorts, providedPorts);
+
 			// The analyzer guarantees that there are exactly one port in each set now, but just to be sure...
 			Assert.That(requiredPorts.Count == 1, "Expected exactly one required port at this point.");
 			Assert.That(providedPorts.Count == 1, "Expected exactly one provided port at this point.");
@@ -92,8 +86,8 @@ namespace SafetySharp.Compiler.Normalization
 			var requiredPortExpression = requiredPortReferenceExpression.ArgumentList.Arguments[0].Expression;
 			var providedPortExpression = providedPortReferenceExpression.ArgumentList.Arguments[0].Expression;
 
-			var requiredPortMethod = CreatePortMethodExpression(requiredPorts.Single());
-			var providedPortMethod = CreatePortMethodExpression(providedPorts.Single());
+			var requiredPortMethod = requiredPorts.Single().GetMethodInfoExpression(Syntax);
+			var providedPortMethod = providedPorts.Single().GetMethodInfoExpression(Syntax);
 			var requiredPortObject = CreatePortTargetExpression(requiredPortExpression);
 			var providedPortObject = CreatePortTargetExpression(providedPortExpression);
 			var requiredPortVirtual = CreatePortIsVirtualExpression(requiredPortExpression);
@@ -109,26 +103,18 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Creates the expression that gets the port method info.
-		/// </summary>
-		private SyntaxNode CreatePortMethodExpression(IMethodSymbol portSymbol)
-		{
-			return portSymbol.GetMethodInfoExpression(Syntax, portSymbol.Name, portSymbol.ContainingType);
-		}
-
-		/// <summary>
 		///   Creates the expression that refers to the port target.
 		/// </summary>
 		private SyntaxNode CreatePortTargetExpression(SyntaxNode portExpression)
 		{
 			var nestedMemberAccess = portExpression.RemoveParentheses() as MemberAccessExpressionSyntax;
-			if (nestedMemberAccess?.Expression is BaseExpressionSyntax)
+			if (nestedMemberAccess == null)
 				return Syntax.ThisExpression();
 
-			if (nestedMemberAccess != null)
-				return nestedMemberAccess.Expression;
+			if (nestedMemberAccess.Expression.IsKind(SyntaxKind.BaseExpression))
+				return Syntax.ThisExpression();
 
-			return Syntax.ThisExpression();
+			return nestedMemberAccess.Expression;
 		}
 
 		/// <summary>
@@ -139,15 +125,6 @@ namespace SafetySharp.Compiler.Normalization
 			return Syntax.LiteralExpression(
 				!portExpression.IsKind(SyntaxKind.SimpleMemberAccessExpression) ||
 				!((MemberAccessExpressionSyntax)portExpression).Expression.IsKind(SyntaxKind.BaseExpression));
-		}
-
-		/// <summary>
-		///   Gets a unique name for a synthesized binding delegate.
-		/// </summary>
-		/// <returns></returns>
-		private string GetDelegateName()
-		{
-			return $"BindingDelegate{_bindingsCount++}".ToSynthesized();
 		}
 	}
 }

@@ -20,40 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.ProvidedPorts.Indexers
 {
-	using Xunit;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	internal class X1 : TestComponent
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		private int _x;
+		private int this[int i] => i * 2;
+
+		private int this[int i, int j]
 		{
-			ExecuteDynamicTests(file);
+			get { return i + j; }
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		private int this[int i, int j, int k]
 		{
-			ExecuteDynamicTests(file);
+			set { _x = i + j + k + value; }
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
+		private int this[int i, int j, int k, int l]
 		{
-			ExecuteDynamicTests(file);
+			get { return i + j + k + l; }
+			set { _x = i + j + k + l + value; }
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
-		}
+			this[2].ShouldBe(4);
+			this[2, 3].ShouldBe(5);
 
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			this[1, 2, 4] = 23;
+			_x.ShouldBe(1 + 2 + 4 + 23);
+
+			this[1, 2, 4, 8] = 23;
+			_x.ShouldBe(1 + 2 + 4 + 8 + 23);
+			this[1, 2, 4, 8].ShouldBe(1 + 2 + 4 + 8);
 		}
 	}
 }

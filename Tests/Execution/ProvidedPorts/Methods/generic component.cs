@@ -20,40 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.ProvidedPorts.Methods
 {
-	using Xunit;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	internal abstract class X6<T> : TestComponent
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		virtual protected T M(T i)
 		{
-			ExecuteDynamicTests(file);
+			return i;
 		}
+	}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+	internal class X7 : X6<int>
+	{
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			M(2).ShouldBe(2);
+			M(10).ShouldBe(10);
 		}
+	}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
+	internal class X8 : X6<bool>
+	{
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			M(false).ShouldBe(false);
+			M(true).ShouldBe(true);
 		}
 	}
 }

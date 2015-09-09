@@ -20,40 +20,81 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.ProvidedPorts.Properties
 {
-	using Xunit;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	internal class X1 : TestComponent
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		private int _x;
+		private int P1 => _x * 2;
+		private int P2 { get; } = 77;
+
+		private int P3
 		{
-			ExecuteDynamicTests(file);
+			get { return _x / 2; }
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		private int P4 { get; set; }
+
+		private int P5
 		{
-			ExecuteDynamicTests(file);
+			set { _x = value; }
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
+		private int P6
 		{
-			ExecuteDynamicTests(file);
+			get { return _x * 2; }
+			set { _x = value / 2; }
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			_x = 2;
+			P1.ShouldBe(4);
+			P3.ShouldBe(1);
+
+			_x = 10;
+			P1.ShouldBe(20);
+			P3.ShouldBe(5);
+
+			P2.ShouldBe(77);
+
+			var c1 = new C(7);
+			c1.P.ShouldBe(7);
+
+			var c2 = new C(77);
+			c2.P.ShouldBe(77);
+
+			P4 = 9;
+			P4.ShouldBe(9);
+
+			P4 = 11;
+			P4.ShouldBe(11);
+
+			P5 = 13;
+			_x.ShouldBe(13);
+
+			P5 = 131;
+			_x.ShouldBe(131);
+
+			P6 = 16;
+			P6.ShouldBe(16);
+
+			P6 = 8;
+			P6.ShouldBe(8);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
+		private class C : Component
 		{
-			ExecuteDynamicTests(file);
+			public C(int p)
+			{
+				P = p;
+			}
+
+			public int P { get; }
 		}
 	}
 }

@@ -20,40 +20,67 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.ProvidedPorts.Indexers
 {
-	using Xunit;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	internal interface I
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		int this[int i] { get; set; }
+		int this[int i, int j] { get; }
+		int this[int i, int j, int k] { set; }
+	}
+
+	internal abstract class BaseInterface : TestComponent, I
+	{
+		public int _x;
+
+		public int this[int i]
 		{
-			ExecuteDynamicTests(file);
+			get { return i * 2; }
+			set { _x = i * value; }
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		int I.this[int i, int j] => i * j;
+
+		public virtual int this[int i, int j, int k]
 		{
-			ExecuteDynamicTests(file);
+			set { _x = i * j * k * value; }
+		}
+	}
+
+	internal class DerivedInterface : BaseInterface
+	{
+		public override int this[int i, int j, int k]
+		{
+			set { _x = i + j + k + value; }
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
-		}
+			this[4].ShouldBe(8);
+			this[4] = 8;
+			_x.ShouldBe(32);
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+			this[2, 3, 4] = 33;
+			_x.ShouldBe(2 + 3 + 4 + 33);
 
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			base[2, 3, 4] = 33;
+			_x.ShouldBe(2 * 3 * 4 * 33);
+
+			((I)this)[3, 5].ShouldBe(15);
+
+			I x = this;
+
+			x[4].ShouldBe(8);
+			x[4] = 8;
+			_x.ShouldBe(32);
+
+			x[2, 3, 4] = 33;
+			_x.ShouldBe(2 + 3 + 4 + 33);
+
+			x[3, 5].ShouldBe(15);
 		}
 	}
 }

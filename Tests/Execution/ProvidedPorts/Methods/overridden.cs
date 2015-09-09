@@ -20,40 +20,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.ProvidedPorts.Methods
 {
-	using Xunit;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	internal abstract class X2 : TestComponent
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		protected virtual int M(int i)
 		{
-			ExecuteDynamicTests(file);
+			return i * 2;
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		protected abstract bool Q(int i);
+
+		protected virtual int N(int i)
 		{
-			ExecuteDynamicTests(file);
+			return i / 2;
+		}
+	}
+
+	internal class X3 : X2
+	{
+		protected override int M(int i)
+		{
+			return i * i;
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
+		protected override bool Q(int i)
 		{
-			ExecuteDynamicTests(file);
+			return i % 2 == 0;
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
+		protected override int N(int i)
 		{
-			ExecuteDynamicTests(file);
+			return base.N(i) + 2;
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			M(4).ShouldBe(16);
+			M(10).ShouldBe(100);
+
+			Q(2).ShouldBe(true);
+			Q(3).ShouldBe(false);
+
+			N(10).ShouldBe(7);
+			N(100).ShouldBe(52);
 		}
 	}
 }

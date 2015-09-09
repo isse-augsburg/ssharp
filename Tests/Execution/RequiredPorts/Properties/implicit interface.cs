@@ -20,40 +20,77 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.RequiredPorts.Properties
 {
-	using Xunit;
+	using System;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	internal interface I2 : IComponent
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		[Required]
+		int R1 { get; }
+
+		[Required]
+		int R2 { set; }
+
+		[Required]
+		int R3 { get; set; }
+
+		[Provided]
+		int P1 { get; }
+
+		[Provided]
+		int P2 { set; }
+
+		[Provided]
+		int P3 { get; set; }
+	}
+
+	internal class ImplicitInterface : TestObject
+	{
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			var c = new C();
+			I2 i = c;
+
+			Component.Bind(nameof(i.R1), nameof(i.P1));
+			Component.Bind(nameof(i.R2), nameof(i.P2));
+			Component.Bind<Action<int>>(nameof(i.R3), nameof(i.P3));
+			Component.Bind<Func<int>>(nameof(i.R3), nameof(i.P3));
+
+			c._x = 10;
+			i.R1.ShouldBe(5);
+
+			i.R2 = 12;
+			c._x.ShouldBe(24);
+
+			i.R3.ShouldBe(48);
+			i.R3 = 12;
+			c._x.ShouldBe(6);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		private class C : Component, I2
 		{
-			ExecuteDynamicTests(file);
-		}
+			public extern int R1 { get; }
+			public extern int R2 { set; }
+			public extern int R3 { get; set; }
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+			public int _x;
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+			public int P1 => _x / 2;
 
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			public int P2
+			{
+				set { _x = value * 2; }
+			}
+
+			public int P3
+			{
+				get { return _x * 2; }
+				set { _x = value / 2; }
+			}
 		}
 	}
 }
