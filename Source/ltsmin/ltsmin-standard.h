@@ -112,3 +112,5 @@ are part of a single hyper edge.
 
 /* Guard prefixes */
 #define LTSMIN_LABEL_TYPE_GUARD_PREFIX  "guard"
+
+extern void ltsmin_abort(int code);

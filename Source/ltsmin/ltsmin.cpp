@@ -117,86 +117,94 @@ extern "C" __declspec(dllexport) void* pins_options[] = { nullptr, nullptr, null
 //---------------------------------------------------------------------------------------------------------------------------
 void LoadModel(model_t model, const char* modelFile)
 {
-	Globals::ModelStream = gcnew MemoryStream(File::ReadAllBytes(gcnew String(modelFile)));
-	Globals::RuntimeModels = gcnew ThreadLocal<RuntimeModel^>(gcnew Func<RuntimeModel^>(&CreateModel));
-
-	auto stateSlotCount = Globals::Model->StateSlotCount;
-	auto stateLabelCount = Globals::Model->StateFormulas->Length;
-	auto transitionGroupCount = Globals::Model->TransitionGroupCount;
-
-	// Models without state are invalid
-	if (stateSlotCount <= 0)
-		throw gcnew InvalidOperationException("Models without any state fields are not supported by LtsMin.");
-
-	// Create the LTS type and set the state vector size
-	auto ltsType = lts_type_create();
-	lts_type_set_state_length(ltsType, stateSlotCount);
-	Console::WriteLine("State vector has {0} slots ({1} bytes).", stateSlotCount, stateSlotCount * sizeof(int32_t));
-
-	// Set the 'int' type for state slots
-	auto intType = lts_type_put_type(ltsType, "int", LTStypeDirect, nullptr);
-	for (auto i = 0; i < stateSlotCount; ++i)
+	try
 	{
-		char name[10];
-		sprintf_s(name, "state%d", i);
-		lts_type_set_state_name(ltsType, i, name);
-		lts_type_set_state_typeno(ltsType, i, intType);
-	}
+		Globals::ModelStream = gcnew MemoryStream(File::ReadAllBytes(gcnew String(modelFile)));
+		Globals::RuntimeModels = gcnew ThreadLocal<RuntimeModel^>(gcnew Func<RuntimeModel^>(&CreateModel));
 
-	// Create the state labels
-	auto boolType = lts_type_put_type(ltsType, LTSMIN_TYPE_BOOL, LTStypeEnum, nullptr);
-	lts_type_set_state_label_count(ltsType, stateLabelCount);
+		auto stateSlotCount = Globals::Model->StateSlotCount;
+		auto stateLabelCount = Globals::Model->StateFormulas->Length;
+		auto transitionGroupCount = Globals::Model->TransitionGroupCount;
 
-	for (auto i = 0; i < stateLabelCount; ++i)
-	{
-		auto stateLabel = Marshal::StringToHGlobalAnsi(Globals::Model->StateFormulas[i]->Label);
-		lts_type_set_state_label_name(ltsType, i, (char*)stateLabel.ToPointer());
-		lts_type_set_state_label_typeno(ltsType, i, boolType);
-		Marshal::FreeHGlobal(stateLabel);
-	}
+		// Models without state are invalid
+		if (stateSlotCount <= 0)
+			throw gcnew InvalidOperationException("Models without any state fields are not supported by LtsMin.");
 
-	// Finalize the LTS type and set it for the model
-	lts_type_validate(ltsType);
-	GBsetLTStype(model, ltsType);
+		// Create the LTS type and set the state vector size
+		auto ltsType = lts_type_create();
+		lts_type_set_state_length(ltsType, stateSlotCount);
+		Console::WriteLine("State vector has {0} slots ({1} bytes).", stateSlotCount, stateSlotCount * sizeof(int32_t));
 
-	// Assign enum names
-	GBchunkPut(model, boolType, chunk_str(LTSMIN_VALUE_BOOL_FALSE));
-	GBchunkPut(model, boolType, chunk_str(LTSMIN_VALUE_BOOL_TRUE));
-
-	// Set the initial state, the user context, and the callback functions
-	GBsetInitialState(model, Globals::Model->GetInitialState());
-	GBsetNextStateLong(model, NextStatesCallback);
-	GBsetStateLabelLong(model, StateLabelCallback);
-
-	// Create the dependency matrices
-	dm_create(&CombinedMatrix, transitionGroupCount, stateSlotCount);
-	dm_create(&ReadMatrix, transitionGroupCount, stateSlotCount);
-	dm_create(&WriteMatrix, transitionGroupCount, stateSlotCount);
-	dm_create(&StateLabelMatrix, stateLabelCount, stateSlotCount);
-
-	// Initialize the dependency matrices
-	for (int i = 0; i < transitionGroupCount; i++)
-	{
-		for (int j = 0; j < stateSlotCount; j++)
+		// Set the 'int' type for state slots
+		auto intType = lts_type_put_type(ltsType, "int", LTStypeDirect, nullptr);
+		for (auto i = 0; i < stateSlotCount; ++i)
 		{
-			dm_set(&CombinedMatrix, i, j);
-			dm_set(&ReadMatrix, i, j);
-			dm_set(&WriteMatrix, i, j);
+			char name[10];
+			sprintf_s(name, "state%d", i);
+			lts_type_set_state_name(ltsType, i, name);
+			lts_type_set_state_typeno(ltsType, i, intType);
 		}
-	}
 
-	// Initialize the state label matrix
-	for (int i = 0; i < stateLabelCount; i++)
+		// Create the state labels
+		auto boolType = lts_type_put_type(ltsType, LTSMIN_TYPE_BOOL, LTStypeEnum, nullptr);
+		lts_type_set_state_label_count(ltsType, stateLabelCount);
+
+		for (auto i = 0; i < stateLabelCount; ++i)
+		{
+			auto stateLabel = Marshal::StringToHGlobalAnsi(Globals::Model->StateFormulas[i]->Label);
+			lts_type_set_state_label_name(ltsType, i, (char*)stateLabel.ToPointer());
+			lts_type_set_state_label_typeno(ltsType, i, boolType);
+			Marshal::FreeHGlobal(stateLabel);
+		}
+
+		// Finalize the LTS type and set it for the model
+		lts_type_validate(ltsType);
+		GBsetLTStype(model, ltsType);
+
+		// Assign enum names
+		GBchunkPut(model, boolType, chunk_str(LTSMIN_VALUE_BOOL_FALSE));
+		GBchunkPut(model, boolType, chunk_str(LTSMIN_VALUE_BOOL_TRUE));
+
+		// Set the initial state, the user context, and the callback functions
+		GBsetInitialState(model, Globals::Model->GetInitialState());
+		GBsetNextStateLong(model, NextStatesCallback);
+		GBsetStateLabelLong(model, StateLabelCallback);
+
+		// Create the dependency matrices
+		dm_create(&CombinedMatrix, transitionGroupCount, stateSlotCount);
+		dm_create(&ReadMatrix, transitionGroupCount, stateSlotCount);
+		dm_create(&WriteMatrix, transitionGroupCount, stateSlotCount);
+		dm_create(&StateLabelMatrix, stateLabelCount, stateSlotCount);
+
+		// Initialize the dependency matrices
+		for (int i = 0; i < transitionGroupCount; i++)
+		{
+			for (int j = 0; j < stateSlotCount; j++)
+			{
+				dm_set(&CombinedMatrix, i, j);
+				dm_set(&ReadMatrix, i, j);
+				dm_set(&WriteMatrix, i, j);
+			}
+		}
+
+		// Initialize the state label matrix
+		for (int i = 0; i < stateLabelCount; i++)
+		{
+			for (int j = 0; j < stateSlotCount; j++)
+				dm_set(&StateLabelMatrix, i, j);
+		}
+
+		// Set the matrices
+		GBsetDMInfo(model, &CombinedMatrix);
+		GBsetDMInfoRead(model, &ReadMatrix);
+		GBsetDMInfoMustWrite(model, &WriteMatrix);
+		GBsetStateLabelInfo(model, &StateLabelMatrix);
+	}
+	catch (Exception^ e)
 	{
-		for (int j = 0; j < stateSlotCount; j++)
-			dm_set(&StateLabelMatrix, i, j);
+		Console::WriteLine(e);
+		ltsmin_abort(255);
 	}
-
-	// Set the matrices
-	GBsetDMInfo(model, &CombinedMatrix);
-	GBsetDMInfoRead(model, &ReadMatrix);
-	GBsetDMInfoMustWrite(model, &WriteMatrix);
-	GBsetStateLabelInfo(model, &StateLabelMatrix);
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -206,19 +214,29 @@ int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, Transit
 {
 	(void)model;
 
-	auto stateCache = Globals::Model->ComputeNextStates(state, group);
-	auto stateCount = stateCache->StateCount;
-	auto stateSize = stateCache->SlotCount;
-	auto stateMemory = stateCache->StateMemory;
-
-	transition_info info = { nullptr, 0, 0 };
-	for (auto i = 0; i < stateCount; ++i)
+	try 
 	{
-		callback(context, &info, stateMemory, nullptr);
-		stateMemory += stateSize;
-	}
+		auto stateCache = Globals::Model->ComputeNextStates(state, group);
+		auto stateCount = stateCache->StateCount;
+		auto stateSize = stateCache->SlotCount;
+		auto stateMemory = stateCache->StateMemory;
 
-	return stateCount;
+		transition_info info = { nullptr, 0, 0 };
+		for (auto i = 0; i < stateCount; ++i)
+		{
+			callback(context, &info, stateMemory, nullptr);
+			stateMemory += stateSize;
+		}
+
+		return stateCount;
+	}
+	catch (Exception^ e)
+	{
+		Console::WriteLine(e);
+		ltsmin_abort(255);
+
+		return 0;
+	}
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -227,7 +245,18 @@ int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, Transit
 int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state)
 {
 	(void)model;
-	return Globals::Model->CheckStateLabel(state, label) ? 1 : 0;
+
+	try
+	{
+		return Globals::Model->CheckStateLabel(state, label) ? 1 : 0;
+	}
+	catch (Exception^ e)
+	{
+		Console::WriteLine(e);
+		ltsmin_abort(255);
+
+		return 0;
+	}
 }
 
 //---------------------------------------------------------------------------------------------------------------------------

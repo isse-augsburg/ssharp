@@ -20,74 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.LtsMin.Invariants.Violated
 {
+	using SafetySharp.Modeling;
 	using Shouldly;
-	using Utilities;
 
-	internal class Z1 : TestComponent
+	internal class RequiredPort : LtsMinTestObject
 	{
-		public Z1()
-		{
-			Bind(nameof(N), nameof(M));
-		}
-
-		private int M()
-		{
-			return 1;
-		}
-
-		private extern int N();
-
 		protected override void Check()
 		{
-			N().ShouldBe(1);
-		}
-	}
-
-	internal class Z1b : TestComponent
-	{
-		private Z1b _f;
-
-		public Z1b()
-		{
-			_f = this;
-			Bind(nameof(_f.N), nameof(_f.M));
+			var d = new D();
+			CheckInvariant(d.G != 4, d).ShouldBe(false);
 		}
 
-		private int M()
+		private class C : Component
 		{
-			return 1;
+			public int F;
+
+			public int P()
+			{
+				return F;
+			}
 		}
 
-		private extern int N();
-
-		protected override void Check()
+		private class D : Component
 		{
-			N().ShouldBe(1);
-		}
-	}
+			public C C = new C();
+			public int G;
 
-	internal class Z1c : TestComponent
-	{
-		private Z1c F { get; set; }
+			public D()
+			{
+				Bind(nameof(R), nameof(C.P));
+			}
 
-		public Z1c()
-		{
-			F = this;
-			Bind(nameof(F.N), nameof(F.M));
-		}
+			public extern int R();
 
-		private int M()
-		{
-			return 1;
-		}
-
-		private extern int N();
-
-		protected override void Check()
-		{
-			N().ShouldBe(1);
+			public override void Update()
+			{
+				if (Choose(true, false))
+					G = R() + 1;
+				else
+					C.F = Choose(1, 2, 3);
+			}
 		}
 	}
 }

@@ -25,42 +25,76 @@ namespace SafetySharp.CompilerServices
 	using System;
 	using System.Linq;
 	using System.Reflection;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>
 	///   Used by the S# compiler to establish port bindings.
 	/// </summary>
-	public static class Binder
+	[Hidden, NonDiscoverable]
+	public sealed class Binder
 	{
+		//private string[] _providedPortArgumentTypes;
+		//private string _providedPortDeclaringType;
+		//private string _providedPortMethodName;
+		//private string _providedPortReturnType;
+		//private bool _providedPortVirtual;
+
 		/// <summary>
 		///   Binds the port methods of the port target objects either virtually or non-virtually.
 		/// </summary>
 		/// <param name="requiredPortTarget">The target object of the required port that should be bound.</param>
 		/// <param name="providedPortTarget">The target object of the provided port that should be bound.</param>
 		/// <param name="requiredPortMethod">The target method of the required port that should be bound.</param>
-		/// <param name="providedPortMethod">The target method of the provided port that should be bound.</param>
+		/// <param name="providedPortDeclaringType">The type that declares the provided port.</param>
+		/// <param name="providedPortMethodName">The name of the provided port.</param>
+		/// <param name="providedPortArgumentTypes">The types of the provided port's arguments.</param>
+		/// <param name="providedPortReturnType">Type provided port's return type.</param>
 		/// <param name="providedPortVirtual">Indicates whether the provided port method should be invoked virtually or non-virtually.</param>
-		public static void Bind(object requiredPortTarget, object providedPortTarget, MethodInfo requiredPortMethod, MethodInfo providedPortMethod,
-								bool providedPortVirtual)
+		public static void Bind(object requiredPortTarget, object providedPortTarget, MethodInfo requiredPortMethod,
+								Type providedPortDeclaringType, string providedPortMethodName, Type[] providedPortArgumentTypes,
+								Type providedPortReturnType, bool providedPortVirtual)
 		{
 			Requires.NotNull(requiredPortTarget, nameof(requiredPortTarget));
 			Requires.NotNull(requiredPortMethod, nameof(requiredPortMethod));
 			Requires.NotNull(providedPortTarget, nameof(providedPortTarget));
-			Requires.NotNull(providedPortMethod, nameof(providedPortMethod));
+			Requires.NotNull(providedPortDeclaringType, nameof(providedPortDeclaringType));
+			Requires.NotNullOrWhitespace(providedPortMethodName, nameof(providedPortMethodName));
+			Requires.NotNull(providedPortArgumentTypes, nameof(providedPortArgumentTypes));
+			Requires.NotNull(providedPortReturnType, nameof(providedPortReturnType));
 
+			var metadataAttribute = GetPortMetadata(requiredPortTarget, requiredPortMethod);
+			var delegateField = metadataAttribute.GetDelegateField();
+			var providedPortMethod = GetMethod(providedPortDeclaringType, providedPortMethodName, providedPortArgumentTypes, providedPortReturnType);
+			var providedPortDelegate = delegateField.FieldType.CreateDelegateInstance(providedPortTarget, providedPortMethod, providedPortVirtual);
+			delegateField.SetValue(requiredPortTarget, providedPortDelegate);
+
+			//metadataAttribute.GetBinderField().SetValue(requiredPortTarget, new Binder
+			//{
+			//	_providedPortDeclaringType = providedPortDeclaringType.AssemblyQualifiedName,
+			//	_providedPortMethodName = providedPortMethodName,
+			//	_providedPortArgumentTypes = providedPortArgumentTypes.Select(type => type.AssemblyQualifiedName).ToArray(),
+			//	_providedPortReturnType = providedPortReturnType.AssemblyQualifiedName,
+			//	_providedPortVirtual = providedPortVirtual
+			//});
+		}
+
+		/// <summary>
+		///   Gets the <see cref="BindingMetadataAttribute" /> for the required port.
+		/// </summary>
+		private static BindingMetadataAttribute GetPortMetadata(object requiredPortTarget, MethodInfo requiredPortMethod)
+		{
 			// If the required port is an interface method, we have to determine the actual method on the target object
 			// that will be invoked, otherwise we wouldn't be able to find the binding field
 			if (requiredPortMethod.DeclaringType.IsInterface)
 				requiredPortMethod = requiredPortTarget.GetType().ResolveImplementingMethod(requiredPortMethod);
 
-			var bindingFieldAttribute = requiredPortMethod.GetCustomAttribute<BindingFieldAttribute>();
-			Assert.NotNull(bindingFieldAttribute,
-				$"Expected required port '{requiredPortMethod}' to be marked with '{typeof(BindingFieldAttribute).FullName}'.");
+			var metadataAttribute = requiredPortMethod.GetCustomAttribute<BindingMetadataAttribute>();
+			Assert.NotNull(metadataAttribute,
+				$"Expected required port '{requiredPortMethod}' to be marked with '{typeof(BindingMetadataAttribute).FullName}'.");
 
-			var bindingField = bindingFieldAttribute.GetFieldInfo(requiredPortMethod.DeclaringType);
-			var providedPortDelegate = bindingField.FieldType.CreateDelegateInstance(providedPortTarget, providedPortMethod, providedPortVirtual);
-
-			bindingField.SetValue(requiredPortTarget, providedPortDelegate);
+			metadataAttribute.Type = requiredPortMethod.DeclaringType;
+			return metadataAttribute;
 		}
 
 		/// <summary>

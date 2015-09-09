@@ -72,11 +72,13 @@ namespace SafetySharp.Compiler.Normalization
 			if (_methodSymbol.IsRequiredPort(SemanticModel))
 			{
 				var index = declaration.Modifiers.IndexOf(SyntaxKind.ExternKeyword);
-				var fieldName = Syntax.LiteralExpression(GetBindingFieldName());
+				var delegateFieldName = Syntax.LiteralExpression(GetBindingDelegateFieldName());
+				var infoFieldName = Syntax.LiteralExpression(GetBinderFieldName());
 
 				declaration = declaration.WithModifiers(declaration.Modifiers.RemoveAt(index)).WithSemicolonToken(default(SyntaxToken));
 				declaration = (MethodDeclarationSyntax)Syntax.MarkAsDebuggerHidden(declaration, SemanticModel);
-				declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<BindingFieldAttribute>(declaration, SemanticModel, fieldName);
+				declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<BindingMetadataAttribute>(declaration, SemanticModel, 
+					delegateFieldName, infoFieldName);
 			}
 
 			return declaration.WithBody(body).EnsureLineCount(originalDeclaration);
@@ -149,8 +151,10 @@ namespace SafetySharp.Compiler.Normalization
 					{
 						// Cannot use the SyntaxGenerator extension method due to a Roslyn bug
 						var hiddenAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(DebuggerHiddenAttribute).GetGlobalName());
-						var fieldName = Syntax.LiteralExpression(GetBindingFieldName());
-						var fieldAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(BindingFieldAttribute).GetGlobalName(), fieldName);
+						var delegateFieldName = Syntax.LiteralExpression(GetBindingDelegateFieldName());
+						var infoFieldName = Syntax.LiteralExpression(GetBinderFieldName());
+						var fieldAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(BindingMetadataAttribute).GetGlobalName(),
+							delegateFieldName, infoFieldName);
 
 						var requiredPortAccessor = accessor.AddAttributeLists(hiddenAttribute, fieldAttribute);
                         yield return requiredPortAccessor.WithBody(body).WithSemicolonToken(default(SyntaxToken));
@@ -177,8 +181,9 @@ namespace SafetySharp.Compiler.Normalization
 			if (isRequiredPort)
 			{
 				var delegateDeclaration = CreateDelegateDeclaration(GetBindingDelegateName(), true);
-				var fieldDeclaration = CreateFieldDeclaration(GetBindingFieldName(), delegateDeclaration, CreateDefaultBindingLambda());
-				AddMembers(_methodSymbol.ContainingType, delegateDeclaration, fieldDeclaration);
+				var delegateField = CreateFieldDeclaration(GetBindingDelegateFieldName(), delegateDeclaration, CreateDefaultBindingLambda());
+				var infoField = CreateBinderFieldDeclaration();
+				AddMembers(_methodSymbol.ContainingType, delegateDeclaration, delegateField, infoField);
 
 				statements = CreateBindingCode();
 
@@ -236,9 +241,17 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Gets the name of the binding field for the current port.
 		/// </summary>
-		private string GetBindingFieldName()
+		private string GetBindingDelegateFieldName()
 		{
-			return ("bindingField" + _portCount).ToSynthesized();
+			return ("bindingDelegate" + _portCount).ToSynthesized();
+		}
+
+		/// <summary>
+		///   Gets the name of the binding field for the current port.
+		/// </summary>
+		private string GetBinderFieldName()
+		{
+			return ("binder" + _portCount).ToSynthesized();
 		}
 
 		/// <summary>
@@ -296,7 +309,7 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private BlockSyntax CreateBindingCode()
 		{
-			var fieldReference = SyntaxFactory.IdentifierName(GetBindingFieldName());
+			var fieldReference = SyntaxFactory.IdentifierName(GetBindingDelegateFieldName());
 
 			var arguments = CreateDelegateInvocationArguments();
 			var argumentList = SyntaxFactory.SeparatedList(arguments);
@@ -350,6 +363,21 @@ namespace SafetySharp.Compiler.Normalization
 			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
 			field = Syntax.MarkAsNonSerializable(field, SemanticModel);
 			return (FieldDeclarationSyntax)field;
+		}
+
+		/// <summary>
+		///   Creates a field declaration that stores a <see cref="Binder"/> instance.
+		/// </summary>
+		private FieldDeclarationSyntax CreateBinderFieldDeclaration()
+		{
+			var field = Syntax.FieldDeclaration(
+				name: GetBinderFieldName(),
+				type: Syntax.TypeExpression<Binder>(SemanticModel),
+				accessibility: Accessibility.Private);
+
+			field = Syntax.MarkAsCompilerGenerated(field, SemanticModel);
+			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
+            return (FieldDeclarationSyntax)field;
 		}
 
 		/// <summary>

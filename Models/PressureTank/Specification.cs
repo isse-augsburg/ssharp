@@ -22,7 +22,9 @@
 
 namespace PressureTank
 {
+	using System;
 	using SafetySharp.Analysis;
+	using SafetySharp.CompilerServices;
 	using SafetySharp.Modeling;
 
 	/// <summary>

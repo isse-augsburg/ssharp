@@ -49,7 +49,7 @@
     <Compile Include="Analysis\RootAttribute.cs" />
     <Compile Include="Analysis\SafetyAnalysis.cs" />
     <Compile Include="CompilerServices\Binder.cs" />
-    <Compile Include="CompilerServices\BindingFieldAttribute.cs" />
+    <Compile Include="CompilerServices\BindingMetadataAttribute.cs" />
     <Compile Include="CompilerServices\LiftExpressionAttribute.cs" />
     <Compile Include="CompilerServices\StateFormulaFactory.cs" />
     <Compile Include="Modeling\NonDiscoverableAttribute.cs" />

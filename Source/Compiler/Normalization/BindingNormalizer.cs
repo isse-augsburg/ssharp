@@ -89,18 +89,25 @@ namespace SafetySharp.Compiler.Normalization
 			var requiredPortExpression = requiredPortReferenceExpression.ArgumentList.Arguments[0].Expression;
 			var providedPortExpression = providedPortReferenceExpression.ArgumentList.Arguments[0].Expression;
 
-			var requiredPortMethod = GetMethodInfoExpression(requiredPorts.Single());
-			var providedPortMethod = GetMethodInfoExpression(providedPorts.Single());
+			var requiredPort = requiredPorts.Single();
+			var providedPort = providedPorts.Single();
+
+			var requiredPortMethod = GetMethodInfoExpression(requiredPort);
 			var requiredPortObject = CreatePortTargetExpression(requiredPortExpression);
 			var providedPortObject = CreatePortTargetExpression(providedPortExpression);
 			var providedPortVirtual = CreatePortIsVirtualExpression(providedPortExpression);
+			var providedPortDeclaringType = Syntax.TypeOfExpression(providedPort.ContainingType);
+			var providedPortMethodName = Syntax.LiteralExpression(providedPort.Name);
+			var providedPortArgumentTypes = GetParameterTypeArray(providedPort);
+			var providedPortReturnType = Syntax.TypeOfExpression(providedPort.ReturnType);
 
 			var binderType = Syntax.TypeExpression(SemanticModel.GetTypeSymbol(typeof(Binder)));
-			var memberAccess = Syntax.MemberAccessExpression(binderType, nameof(Binder.Bind));
-			var invocation = (ExpressionSyntax)Syntax.InvocationExpression(memberAccess,
-				requiredPortObject, providedPortObject, requiredPortMethod, providedPortMethod, providedPortVirtual);
+			var bindMemberAccess = Syntax.MemberAccessExpression(binderType, nameof(Binder.Bind));
+			var bindInvocation = (ExpressionSyntax) Syntax.InvocationExpression(bindMemberAccess,
+				requiredPortObject, providedPortObject, requiredPortMethod,
+				providedPortDeclaringType, providedPortMethodName, providedPortArgumentTypes, providedPortReturnType, providedPortVirtual);
 
-			return statement.WithExpression(invocation).NormalizeWhitespace().WithTrivia(statement).EnsureLineCount(statement);
+			return statement.WithExpression(bindInvocation).NormalizeWhitespace().WithTrivia(statement).EnsureLineCount(statement);
 		}
 
 		/// <summary>
