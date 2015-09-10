@@ -20,20 +20,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime.Serialization
+namespace SafetySharp.Runtime.Serialization.Serializers
 {
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
-	using System.Reflection;
-	using System.Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>
-	///   Serializes all kinds of objects.
+	///   Serializes arrays of all types.
 	/// </summary>
-	internal class ObjectSerializer : Serializer
+	internal sealed class ArraySerializer : Serializer
 	{
 		/// <summary>
 		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
@@ -41,33 +39,33 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="type">The type that should be checked.</param>
 		protected internal override bool CanSerialize(Type type)
 		{
-			return true;
+			return type.IsArray;
 		}
 
 		/// <summary>
 		///   Generates the code to deserialize the <paramref name="obj" />.
 		/// </summary>
-		/// <param name="generator">The  generator that should be used to generate the code.</param>
+		/// <param name="generator">The generator that should be used to generate the code.</param>
 		/// <param name="obj">The object that should be deserialized.</param>
 		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
 		/// <param name="mode">The serialization mode that should be used to deserialize the object.</param>
 		protected internal override void Deserialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
 		{
-			foreach (var field in GetFields(obj, mode))
-				generator.DeserializeField(objectIdentifier, field);
+			Assert.That(((Array)obj).Rank == 1 && !obj.GetType().GetElementType().IsArray, "Multidimensional arrays are not supported.");
+			generator.DeserializeArray(objectIdentifier, obj.GetType().GetElementType(), ((Array)obj).GetLength(0));
 		}
 
 		/// <summary>
 		///   Generates the code to serialize the <paramref name="obj" />.
 		/// </summary>
-		/// <param name="generator">The  generator that should be used to generate the code.</param>
+		/// <param name="generator">The generator that should be used to generate the code.</param>
 		/// <param name="obj">The object that should be serialized.</param>
 		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the object.</param>
 		protected internal override void Serialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
 		{
-			foreach (var field in GetFields(obj, mode))
-				generator.SerializeField(objectIdentifier, field);
+			Assert.That(((Array)obj).Rank == 1 && !obj.GetType().GetElementType().IsArray, "Multidimensional arrays are not supported.");
+			generator.SerializeArray(objectIdentifier, obj.GetType().GetElementType(), ((Array)obj).GetLength(0));
 		}
 
 		/// <summary>
@@ -77,7 +75,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		protected internal override int GetStateSlotCount(object obj, SerializationMode mode)
 		{
-			return GetFields(obj, mode).Sum(field => SerializationGenerator.GetStateSlotCount(field.FieldType));
+			return ((Array)obj).GetLength(0) * SerializationGenerator.GetStateSlotCount(obj.GetType().GetElementType());
 		}
 
 		/// <summary>
@@ -87,11 +85,9 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="writer">The writer the serialized information should be written to.</param>
 		protected internal override void SerializeType(object obj, BinaryWriter writer)
 		{
-			if (obj.GetType().IsHidden(SerializationMode.Full, discoveringObjects: false))
-				return;
-
 			// ReSharper disable once AssignNullToNotNullAttribute
-			writer.Write(obj.GetType().AssemblyQualifiedName);
+			writer.Write(obj.GetType().GetElementType().AssemblyQualifiedName);
+			writer.Write(((Array)obj).GetLength(0));
 		}
 
 		/// <summary>
@@ -101,7 +97,8 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="reader">The reader the serialized type information should be read from.</param>
 		protected internal override object InstantiateType(BinaryReader reader)
 		{
-			return FormatterServices.GetUninitializedObject(Type.GetType(reader.ReadString(), throwOnError: true));
+			var elementType = Type.GetType(reader.ReadString(), throwOnError: true);
+			return Array.CreateInstance(elementType, reader.ReadInt32());
 		}
 
 		/// <summary>
@@ -111,41 +108,10 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
 		{
-			return from field in GetFields(obj, mode, discoveringObjects: true)
-				   where field.FieldType.IsReferenceType()
-				   select field.GetValue(obj);
-		}
+			if (!obj.GetType().GetElementType().IsReferenceType())
+				return Enumerable.Empty<object>();
 
-		/// <summary>
-		///   Gets the fields declared by the <paramref name="obj" /> that should be serialized.
-		/// </summary>
-		/// <param name="obj">The object that should be serialized.</param>
-		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		/// <param name="inheritanceRoot">
-		///   The first base type of the <paramref name="obj" /> whose fields should be ignored. If
-		///   <c>null</c>, <see cref="object" /> is the inheritance root.
-		/// </param>
-		/// <param name="discoveringObjects">Indicates whether objects are being discovered.</param>
-		protected static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode,
-														  Type inheritanceRoot = null, bool discoveringObjects = false)
-		{
-			var type = obj.GetType();
-			if (type.IsHidden(mode, discoveringObjects))
-				return Enumerable.Empty<FieldInfo>();
-
-			return obj.GetType().GetFields(inheritanceRoot ?? typeof(object)).Where(field =>
-			{
-				// Ignore static or constant fields
-				if (field.IsStatic || field.IsLiteral)
-					return false;
-
-				// Don't try to serialize hidden fields
-				if (field.IsHidden(mode, discoveringObjects) || field.FieldType.IsHidden(mode, discoveringObjects))
-					return false;
-
-				// Otherwise, serialize the field
-				return true;
-			});
+			return (object[])obj;
 		}
 	}
 }

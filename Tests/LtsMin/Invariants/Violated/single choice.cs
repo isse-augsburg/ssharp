@@ -25,47 +25,24 @@ namespace Tests.LtsMin.Invariants.Violated
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class RequiredPort : LtsMinTestObject
+	internal class SingleChoice : LtsMinTestObject
 	{
 		protected override void Check()
 		{
 			var d = new D();
-			CheckInvariant(d.G != 4, d).ShouldBe(false);
-		}
-
-		private class C : Component
-		{
-			public int F = 33;
-
-			public C()
-			{
-				Bind(nameof(R), nameof(P));
-			}
-
-			private int P()
-			{
-				return F;
-			}
-
-			public extern int R();
+			CheckInvariant(d.F != 1, d).ShouldBe(false);
+			CheckInvariant(d.F != 2, d).ShouldBe(false);
+			CheckInvariant(d.F != 3, d).ShouldBe(false);
+			CheckInvariant(d.F != 4, d).ShouldBe(false);
 		}
 
 		private class D : Component
 		{
-			public readonly C C = new C();
-			public int G;
+			public int F;
 
 			public override void Update()
 			{
-				System.Console.WriteLine($"vorher G = {G}, C.F = {C.F}");
-
-				if (Choose(true, false))
-					G = C.R() + 1;
-				else
-					C.F = Choose(1, 2, 3);
-
-				System.Console.WriteLine($"nachher G = {G}, C.F = {C.F}");
-				System.Console.WriteLine("----------------");
+				F = Choose(1, 2, 3, 4);
 			}
 		}
 	}

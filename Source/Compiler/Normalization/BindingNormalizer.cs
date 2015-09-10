@@ -89,25 +89,32 @@ namespace SafetySharp.Compiler.Normalization
 			var requiredPortExpression = requiredPortReferenceExpression.ArgumentList.Arguments[0].Expression;
 			var providedPortExpression = providedPortReferenceExpression.ArgumentList.Arguments[0].Expression;
 
-			var requiredPort = requiredPorts.Single();
-			var providedPort = providedPorts.Single();
+			var requiredPortReference = CreatePortReference(requiredPorts.Single(), requiredPortExpression);
+			var providedPortReference = CreatePortReference(providedPorts.Single(), providedPortExpression);
 
-			var requiredPortMethod = GetMethodInfoExpression(requiredPort);
-			var requiredPortObject = CreatePortTargetExpression(requiredPortExpression);
-			var providedPortObject = CreatePortTargetExpression(providedPortExpression);
-			var providedPortVirtual = CreatePortIsVirtualExpression(providedPortExpression);
-			var providedPortDeclaringType = Syntax.TypeOfExpression(providedPort.ContainingType);
-			var providedPortMethodName = Syntax.LiteralExpression(providedPort.Name);
-			var providedPortArgumentTypes = GetParameterTypeArray(providedPort);
-			var providedPortReturnType = Syntax.TypeOfExpression(providedPort.ReturnType);
+			var binderType = Syntax.TypeExpression(SemanticModel.GetTypeSymbol(typeof(PortBinding)));
+			var binderInstance = Syntax.ObjectCreationExpression(binderType, requiredPortReference, providedPortReference);
+			var bindMemberAccess = Syntax.MemberAccessExpression(binderInstance, nameof(PortBinding.Bind));
+			var invocation = (ExpressionSyntax)Syntax.InvocationExpression(bindMemberAccess);
 
-			var binderType = Syntax.TypeExpression(SemanticModel.GetTypeSymbol(typeof(Binder)));
-			var bindMemberAccess = Syntax.MemberAccessExpression(binderType, nameof(Binder.Bind));
-			var bindInvocation = (ExpressionSyntax) Syntax.InvocationExpression(bindMemberAccess,
-				requiredPortObject, providedPortObject, requiredPortMethod,
-				providedPortDeclaringType, providedPortMethodName, providedPortArgumentTypes, providedPortReturnType, providedPortVirtual);
+			return statement.WithExpression(invocation).NormalizeWhitespace().WithTrivia(statement).EnsureLineCount(statement);
+		}
 
-			return statement.WithExpression(bindInvocation).NormalizeWhitespace().WithTrivia(statement).EnsureLineCount(statement);
+		/// <summary>
+		///   Gets the expression that creates the <see cref="PortReference" /> at runtime.
+		/// </summary>
+		private ExpressionSyntax CreatePortReference(IMethodSymbol methodSymbol, SyntaxNode portExpression)
+		{
+			var componentArg = CreatePortTargetExpression(portExpression);
+			var declaringTypeArg = Syntax.TypeOfExpression(Syntax.TypeExpression(methodSymbol.ContainingType));
+			var argumentTypesArg = GetParameterTypeArray(methodSymbol);
+			var returnTypeArg = SyntaxFactory.TypeOfExpression((TypeSyntax)Syntax.TypeExpression(methodSymbol.ReturnType));
+			var nameArg = Syntax.LiteralExpression(methodSymbol.Name);
+			var isVirtualArg = CreateIsVirtualExpression(portExpression);
+
+			var portReferenceType = SyntaxFactory.ParseTypeName(typeof(PortReference).GetGlobalName());
+			return (ExpressionSyntax)Syntax.ObjectCreationExpression(portReferenceType, componentArg, declaringTypeArg,
+				nameArg, argumentTypesArg, returnTypeArg, isVirtualArg);
 		}
 
 		/// <summary>
@@ -128,25 +135,11 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Creates the expression that indicates whether the port is invoked virtually or non-virtually.
 		/// </summary>
-		private SyntaxNode CreatePortIsVirtualExpression(SyntaxNode portExpression)
+		private SyntaxNode CreateIsVirtualExpression(SyntaxNode portExpression)
 		{
 			return Syntax.LiteralExpression(
 				!portExpression.IsKind(SyntaxKind.SimpleMemberAccessExpression) ||
 				!((MemberAccessExpressionSyntax)portExpression).Expression.IsKind(SyntaxKind.BaseExpression));
-		}
-
-		/// <summary>
-		///   Gets the expression that selects the <paramref name="methodSymbol" /> at runtime using reflection.
-		/// </summary>
-		private ExpressionSyntax GetMethodInfoExpression(IMethodSymbol methodSymbol)
-		{
-			var declaringTypeArg = Syntax.TypeOfExpression(Syntax.TypeExpression(methodSymbol.ContainingType));
-			var parameters = GetParameterTypeArray(methodSymbol);
-			var returnType = SyntaxFactory.TypeOfExpression((TypeSyntax)Syntax.TypeExpression(methodSymbol.ReturnType));
-			var nameArg = Syntax.LiteralExpression(methodSymbol.Name);
-			var reflectionHelpersType = SyntaxFactory.ParseTypeName(typeof(Binder).GetGlobalName());
-			var getMethodMethod = Syntax.MemberAccessExpression(reflectionHelpersType, nameof(Binder.GetMethod));
-			return (ExpressionSyntax)Syntax.InvocationExpression(getMethodMethod, declaringTypeArg, nameArg, parameters, returnType);
 		}
 
 		/// <summary>

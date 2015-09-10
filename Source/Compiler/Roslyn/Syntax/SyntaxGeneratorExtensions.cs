@@ -225,7 +225,7 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		}
 
 		/// <summary>
-		///   Marks the <paramref name="syntaxNode" /> as <c>[DebuggerBrowsable(DebuggerBrowsableState.Never)]</c>
+		///   In release builds, marks the <paramref name="syntaxNode" /> as <c>[DebuggerBrowsable(DebuggerBrowsableState.Never)]</c>
 		/// </summary>
 		/// <param name="syntaxGenerator">The syntax generator that should be used to generate the attribute.</param>
 		/// <param name="syntaxNode">The syntax node that should be marked with the attribute.</param>
@@ -234,9 +234,13 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		public static SyntaxNode MarkAsNonDebuggerBrowsable([NotNull] this SyntaxGenerator syntaxGenerator, [NotNull] SyntaxNode syntaxNode,
 															[NotNull] SemanticModel semanticModel)
 		{
+#if DEBUG
+			return syntaxNode;
+#else
 			var attributeType = syntaxGenerator.TypeExpression<DebuggerBrowsableState>(semanticModel);
 			var never = syntaxGenerator.MemberAccessExpression(attributeType, nameof(DebuggerBrowsableState.Never));
 			return syntaxGenerator.AddAttribute<DebuggerBrowsableAttribute>(syntaxNode, semanticModel, never);
+#endif
 		}
 
 		/// <summary>

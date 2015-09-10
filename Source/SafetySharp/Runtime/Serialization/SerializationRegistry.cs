@@ -24,6 +24,7 @@ namespace SafetySharp.Runtime.Serialization
 {
 	using System.Collections.Generic;
 	using System.Linq;
+	using Serializers;
 	using Utilities;
 
 	/// <summary>
@@ -49,6 +50,8 @@ namespace SafetySharp.Runtime.Serialization
 			RegisterSerializer(new ObjectSerializer());
 			RegisterSerializer(new FaultEffectSerializer());
 			RegisterSerializer(new ArraySerializer());
+			RegisterSerializer(new StringSerializer());
+			RegisterSerializer(new TypeSerializer());
 		}
 
 		/// <summary>

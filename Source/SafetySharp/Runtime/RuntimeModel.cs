@@ -22,11 +22,10 @@
 
 namespace SafetySharp.Runtime
 {
-	using System;
-	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Analysis;
+	using CompilerServices;
 	using Modeling;
 	using Serialization;
 	using Utilities;
@@ -83,6 +82,8 @@ namespace SafetySharp.Runtime
 
 			_stateCache = new StateCache(StateSlotCount);
 			_choiceResolver = new ChoiceResolver(objectTable);
+
+			PortBinding.BindAll(objectTable);
 		}
 
 		/// <summary>

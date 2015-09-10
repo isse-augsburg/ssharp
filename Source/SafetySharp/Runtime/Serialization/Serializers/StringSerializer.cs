@@ -20,17 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime.Serialization
+namespace SafetySharp.Runtime.Serialization.Serializers
 {
 	using System;
+	using System.Collections.Generic;
+	using System.IO;
 	using System.Linq;
-	using Modeling;
-	using Utilities;
 
 	/// <summary>
-	///   Serializes all kinds of <see cref="Component" />-derived classes marked with <see cref="FaultEffectAttribute" />.
+	///   Serializes <see cref="string"/> instances.
 	/// </summary>
-	internal sealed class FaultEffectSerializer : ObjectSerializer
+	internal sealed class StringSerializer : Serializer
 	{
 		/// <summary>
 		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
@@ -38,33 +38,31 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="type">The type that should be checked.</param>
 		protected internal override bool CanSerialize(Type type)
 		{
-			return type.IsSubclassOf(typeof(Component)) && type.HasAttribute<FaultEffectAttribute>();
+			return type == typeof(string);
 		}
 
 		/// <summary>
 		///   Generates the code to deserialize the <paramref name="obj" />.
 		/// </summary>
-		/// <param name="generator">The  generator that should be used to generate the code.</param>
+		/// <param name="generator">The generator that should be used to generate the code.</param>
 		/// <param name="obj">The object that should be deserialized.</param>
 		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
 		/// <param name="mode">The serialization mode that should be used to deserialize the object.</param>
 		protected internal override void Deserialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
 		{
-			foreach (var field in GetFields(obj, mode, obj.GetType().BaseType))
-				generator.DeserializeField(objectIdentifier, field);
+			// Nothing to do for strings, as they are immutable
 		}
 
 		/// <summary>
 		///   Generates the code to serialize the <paramref name="obj" />.
 		/// </summary>
-		/// <param name="generator">The  generator that should be used to generate the code.</param>
+		/// <param name="generator">The generator that should be used to generate the code.</param>
 		/// <param name="obj">The object that should be serialized.</param>
 		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the object.</param>
 		protected internal override void Serialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
 		{
-			foreach (var field in GetFields(obj, mode, obj.GetType().BaseType))
-				generator.SerializeField(objectIdentifier, field);
+			// Nothing to do for strings, as they are immutable
 		}
 
 		/// <summary>
@@ -74,7 +72,37 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		protected internal override int GetStateSlotCount(object obj, SerializationMode mode)
 		{
-			return GetFields(obj, mode, obj.GetType().BaseType).Sum(field => SerializationGenerator.GetStateSlotCount(field.FieldType));
+			return 0;
+		}
+
+		/// <summary>
+		///   Serializes the information about <paramref name="obj" />'s type using the <paramref name="writer" />.
+		/// </summary>
+		/// <param name="obj">The object whose type information should be serialized.</param>
+		/// <param name="writer">The writer the serialized information should be written to.</param>
+		protected internal override void SerializeType(object obj, BinaryWriter writer)
+		{
+			writer.Write((string)obj);
+		}
+
+		/// <summary>
+		///   Creates an instance of the serialized type stored in the <paramref name="reader" /> without running
+		///   any of the type's constructors.
+		/// </summary>
+		/// <param name="reader">The reader the serialized type information should be read from.</param>
+		protected internal override object InstantiateType(BinaryReader reader)
+		{
+			return reader.ReadString();
+		}
+
+		/// <summary>
+		///   Gets all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself.
+		/// </summary>
+		/// <param name="obj">The object the referenced objects should be returned for.</param>
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
+		{
+			return Enumerable.Empty<object>();
 		}
 	}
 }

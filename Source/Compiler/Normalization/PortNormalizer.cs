@@ -251,7 +251,7 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private string GetBinderFieldName()
 		{
-			return ("binder" + _portCount).ToSynthesized();
+			return ("binding" + _portCount).ToSynthesized();
 		}
 
 		/// <summary>
@@ -366,13 +366,13 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Creates a field declaration that stores a <see cref="Binder"/> instance.
+		///   Creates a field declaration that stores a <see cref="PortBinding"/> instance.
 		/// </summary>
 		private FieldDeclarationSyntax CreateBinderFieldDeclaration()
 		{
 			var field = Syntax.FieldDeclaration(
 				name: GetBinderFieldName(),
-				type: Syntax.TypeExpression<Binder>(SemanticModel),
+				type: Syntax.TypeExpression<PortBinding>(SemanticModel),
 				accessibility: Accessibility.Private);
 
 			field = Syntax.MarkAsCompilerGenerated(field, SemanticModel);

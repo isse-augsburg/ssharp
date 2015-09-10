@@ -234,6 +234,7 @@
     <Compile Include="LtsMin\Invariants\Violated\deterministic.cs" />
     <Compile Include="LtsMin\Invariants\Violated\initial state.cs" />
     <Compile Include="LtsMin\Invariants\Violated\multiple choices 1.cs" />
+    <Compile Include="LtsMin\Invariants\Violated\single choice.cs" />
     <Compile Include="LtsMin\Invariants\Violated\state machine.cs" />
     <Compile Include="LtsMin\Ltl\NotViolated\deterministic.cs" />
     <Compile Include="LtsMin\Ltl\NotViolated\initial state.cs" />
@@ -326,6 +327,9 @@
     <Compile Include="Serialization\PrimitiveTypes\UInt32.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int32.cs" />
     <Compile Include="Serialization\RuntimeModels\faults.cs" />
+    <Compile Include="Serialization\RuntimeModels\binding.cs" />
+    <Compile Include="Serialization\RuntimeModels\type.cs" />
+    <Compile Include="Serialization\RuntimeModels\string.cs" />
     <Compile Include="Serialization\RuntimeModels\unserializable type.cs" />
     <Compile Include="Serialization\RuntimeModels\hidden type.cs" />
     <Compile Include="Serialization\RuntimeModels\subcomponent array.cs" />

@@ -28,7 +28,7 @@ namespace SafetySharp.Modeling
 	/// <summary>
 	///   Represents a nondeterministic choice.
 	/// </summary>
-	[Hidden]
+	[Hidden, NonDiscoverable]
 	public sealed class Choice
 	{
 		/// <summary>
@@ -95,7 +95,7 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3)
 		{
-			switch (Resolver.HandleChoice(2))
+			switch (Resolver.HandleChoice(3))
 			{
 				case 0:
 					return value1;
@@ -118,7 +118,7 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3, T value4)
 		{
-			switch (Resolver.HandleChoice(2))
+			switch (Resolver.HandleChoice(4))
 			{
 				case 0:
 					return value1;
@@ -144,7 +144,7 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3, T value4, T value5)
 		{
-			switch (Resolver.HandleChoice(2))
+			switch (Resolver.HandleChoice(5))
 			{
 				case 0:
 					return value1;
@@ -173,7 +173,7 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3, T value4, T value5, T value6)
 		{
-			switch (Resolver.HandleChoice(2))
+			switch (Resolver.HandleChoice(6))
 			{
 				case 0:
 					return value1;

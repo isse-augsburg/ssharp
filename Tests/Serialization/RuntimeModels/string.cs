@@ -20,53 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.LtsMin.Invariants.Violated
+namespace Tests.Serialization.RuntimeModels
 {
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class RequiredPort : LtsMinTestObject
+	internal class String : RuntimeModelTest
 	{
 		protected override void Check()
 		{
-			var d = new D();
-			CheckInvariant(d.G != 4, d).ShouldBe(false);
-		}
+			var d = new D { S = "Hello" };
+			var m = new Model(d);
 
-		private class C : Component
-		{
-			public int F = 33;
+			Create(m);
 
-			public C()
-			{
-				Bind(nameof(R), nameof(P));
-			}
+			StateFormulas.ShouldBeEmpty();
+			RootComponents.Length.ShouldBe(1);
+			StateSlotCount.ShouldBe(1);
 
-			private int P()
-			{
-				return F;
-			}
+			var root = RootComponents[0];
+			root.ShouldBeOfType<D>();
 
-			public extern int R();
+			((D)root).S.ShouldBe("Hello");
 		}
 
 		private class D : Component
 		{
-			public readonly C C = new C();
-			public int G;
-
-			public override void Update()
-			{
-				System.Console.WriteLine($"vorher G = {G}, C.F = {C.F}");
-
-				if (Choose(true, false))
-					G = C.R() + 1;
-				else
-					C.F = Choose(1, 2, 3);
-
-				System.Console.WriteLine($"nachher G = {G}, C.F = {C.F}");
-				System.Console.WriteLine("----------------");
-			}
+			public string S;
 		}
 	}
 }

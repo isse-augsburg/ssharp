@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime.Serialization
+namespace SafetySharp.Runtime.Serialization.Serializers
 {
 	using System;
 	using System.Collections.Generic;

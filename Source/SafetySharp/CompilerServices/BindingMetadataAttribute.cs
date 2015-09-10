@@ -33,9 +33,9 @@ namespace SafetySharp.CompilerServices
 	public sealed class BindingMetadataAttribute : Attribute
 	{
 		/// <summary>
-		///   The name of the marked required port's binder field.
+		///   The name of the marked required port's binding field.
 		/// </summary>
-		private readonly string _binderField;
+		private readonly string _bindingField;
 
 		/// <summary>
 		///   The name of the marked required port's delegate field.
@@ -43,44 +43,66 @@ namespace SafetySharp.CompilerServices
 		private readonly string _delegateField;
 
 		/// <summary>
+		///   The type that declares the marked required port.
+		/// </summary>
+		private Type _type;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="delegateField">The name of the marked required port's delegate field.</param>
-		/// <param name="binderField">The name of the marked required port's binder field.</param>
-		public BindingMetadataAttribute(string delegateField, string binderField)
+		/// <param name="bindingField">The name of the marked required port's binding field.</param>
+		public BindingMetadataAttribute(string delegateField, string bindingField)
 		{
 			Requires.NotNullOrWhitespace(delegateField, nameof(delegateField));
-			Requires.NotNullOrWhitespace(binderField, nameof(binderField));
+			Requires.NotNullOrWhitespace(bindingField, nameof(bindingField));
 
 			_delegateField = delegateField;
-			_binderField = binderField;
+			_bindingField = bindingField;
 		}
-
-		/// <summary>
-		///   Gets or sets the type that declares the marked required port.
-		/// </summary>
-		internal Type Type { get; set; }
 
 		/// <summary>
 		///   Gets the <see cref="FieldInfo" /> object representing the marked required port's delegate field.
 		/// </summary>
-		public FieldInfo GetDelegateField()
+		public FieldInfo DelegateField
 		{
-			var field = Type.GetField(_delegateField, BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic);
-			Requires.That(field != null, $"Unable to find binding delegate field '{Type.FullName}.{_delegateField}'.");
+			get
+			{
+				var field = _type.GetField(_delegateField, BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic);
+				Requires.That(field != null, $"Unable to find binding delegate field '{_type.FullName}.{_delegateField}'.");
 
-			return field;
+				return field;
+			}
 		}
 
 		/// <summary>
-		///   Gets the <see cref="FieldInfo" /> object representing the marked required port's binder field.
+		///   Gets the <see cref="FieldInfo" /> object representing the marked required port's binding field.
 		/// </summary>
-		public FieldInfo GetBinderField()
+		public FieldInfo BindingField
 		{
-			var field = Type.GetField(_binderField, BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic);
-			Requires.That(field != null, $"Unable to find binder field '{Type.FullName}.{_binderField}'.");
+			get
+			{
+				var field = _type.GetField(_bindingField, BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic);
+				Requires.That(field != null, $"Unable to find binding field '{_type.FullName}.{_bindingField}'.");
 
-			return field;
+				return field;
+			}
+		}
+
+		/// <summary>
+		///   Gets the <see cref="BindingMetadataAttribute" /> for the <paramref name="requiredPort" />.
+		/// </summary>
+		/// <param name="requiredPort">The required port he metadata should be returned for.</param>
+		public static BindingMetadataAttribute Get(MethodInfo requiredPort)
+		{
+			Requires.NotNull(requiredPort, nameof(requiredPort));
+
+			var metadataAttribute = requiredPort.GetCustomAttribute<BindingMetadataAttribute>();
+			Assert.NotNull(metadataAttribute,
+				$"Expected required port '{requiredPort}' to be marked with '{typeof(BindingMetadataAttribute).FullName}'.");
+
+			metadataAttribute._type = requiredPort.DeclaringType;
+			return metadataAttribute;
 		}
 	}
 }
