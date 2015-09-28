@@ -165,8 +165,8 @@ namespace SafetySharp.Compiler.Normalization
 			if (!requiresLifting)
 				return argument;
 
-			var expression = SyntaxBuilder.Lambda(Enumerable.Empty<ParameterSyntax>(), argument.Expression).WithTrivia(argument);
-			return argument.WithExpression(expression);
+			var lambda = Syntax.ValueReturningLambdaExpression(Enumerable.Empty<ParameterSyntax>(), argument.Expression).WithTrivia(argument);
+			return argument.WithExpression((ExpressionSyntax)lambda);
 		}
 	}
 }

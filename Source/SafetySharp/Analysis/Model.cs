@@ -24,6 +24,7 @@ namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Reflection;
 	using Modeling;
 	using Utilities;
@@ -81,7 +82,6 @@ namespace SafetySharp.Analysis
 
 		private static void CollectComponents<T>(HashSet<IComponent> components, IEnumerable<T> members, Func<T, Type> getMemberType,
 												 Func<T, object> getValue)
-			where T : MemberInfo
 		{
 			foreach (var member in members)
 			{
@@ -93,18 +93,15 @@ namespace SafetySharp.Analysis
 						components.Add(value);
 				}
 
-				if (typeof(IEnumerable<IComponent>).IsAssignableFrom(memberType))
-				{
-					var values = (IEnumerable<IComponent>)getValue(member);
-					if (values == null)
-						continue;
+				if (!typeof(IEnumerable<IComponent>).IsAssignableFrom(memberType))
+					continue;
 
-					foreach (var value in values)
-					{
-						if (value != null)
-							components.Add(value);
-					}
-				}
+				var values = (IEnumerable<IComponent>)getValue(member);
+				if (values == null)
+					continue;
+
+				foreach (var value in values.Where(value => value != null))
+					components.Add(value);
 			}
 		}
 	}

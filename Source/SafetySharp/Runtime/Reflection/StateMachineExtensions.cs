@@ -143,9 +143,10 @@ namespace SafetySharp.Runtime.Reflection
 		public static bool IsInState<TState>(this StateMachine<TState> stateMachine, params TState[] states)
 		{
 			// Not using LINQ for performance reasons
-			for (var i = 0; i < states.Length; ++i)
+			// ReSharper disable once LoopCanBeConvertedToQuery
+			foreach (var state in states)
 			{
-				if (stateMachine == states[i])
+				if (stateMachine == state)
 					return true;
 			}
 

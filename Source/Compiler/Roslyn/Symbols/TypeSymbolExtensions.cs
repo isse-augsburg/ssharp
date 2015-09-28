@@ -81,7 +81,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		}
 
 		/// <summary>
-		///   Checks whether <paramref name="typeSymbol" /> is directly or indirectly derived from the <see cref="Fault{TComponent}" />
+		///   Checks whether <paramref name="typeSymbol" /> is directly or indirectly derived from the <see cref="Fault" />
 		///   class within the context of the <paramref name="compilation" />.
 		/// </summary>
 		/// <param name="typeSymbol">The type symbol that should be checked.</param>
@@ -129,7 +129,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
 			return !typeSymbol.HasAttribute<FaultEffectAttribute>(semanticModel) &&
-				   typeSymbol.IsDerivedFrom(semanticModel.GetComponentClassSymbol());
+				   typeSymbol.IsDerivedFromComponent(semanticModel);
 		}
 
 		/// <summary>
@@ -164,160 +164,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
 			return typeSymbol.IsDerivedFrom(semanticModel.GetComponentInterfaceSymbol());
-		}
-
-		/// <summary>
-		///   Checks whether <paramref name="typeSymbol" /> represents the <see cref="int" />,
-		///   <see cref="bool" />, or <see cref="decimal" /> types.
-		/// </summary>
-		/// <param name="typeSymbol">The type symbol that should be checked.</param>
-		/// <param name="semanticModel">The semantic model that should be used to resolve symbol information.</param>
-		[Pure]
-		public static bool IsBuiltInType([NotNull] this ITypeSymbol typeSymbol, [NotNull] SemanticModel semanticModel)
-		{
-			Requires.NotNull(typeSymbol, nameof(typeSymbol));
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-
-			return typeSymbol.Equals(semanticModel.GetTypeSymbol<int>()) ||
-				   typeSymbol.Equals(semanticModel.GetTypeSymbol<bool>()) ||
-				   typeSymbol.Equals(semanticModel.GetTypeSymbol<decimal>());
-		}
-
-		/// <summary>
-		///   Gets the symbols of all accessible ports declared by <paramref name="typeSymbol" /> or any of its base types.
-		/// </summary>
-		/// <param name="typeSymbol">The type symbol that should be checked.</param>
-		/// <param name="semanticModel">The semantic model that should be used to resolve symbol information.</param>
-		/// <param name="filter">A filter that should be applied to filter the ports.</param>
-		[Pure]
-		private static IEnumerable<IMethodSymbol> GetPorts([NotNull] this ITypeSymbol typeSymbol, [NotNull] SemanticModel semanticModel,
-														   Func<ITypeSymbol, ISymbol, bool> filter)
-		{
-			Requires.NotNull(typeSymbol, nameof(typeSymbol));
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-
-			var inheritedPorts = Enumerable.Empty<IMethodSymbol>();
-			if (typeSymbol.TypeKind == TypeKind.Interface)
-				inheritedPorts = typeSymbol.AllInterfaces.SelectMany(i => i.GetPorts(semanticModel, filter));
-			else if (typeSymbol.BaseType != null && !typeSymbol.BaseType.Equals(semanticModel.GetComponentClassSymbol()))
-				inheritedPorts = typeSymbol.BaseType.GetPorts(semanticModel, filter);
-
-			var members = typeSymbol.GetMembers();
-			var ports = members
-				.OfType<IMethodSymbol>()
-				.Cast<ISymbol>()
-				.Union(members.OfType<IPropertySymbol>())
-				.Where(port => filter(typeSymbol, port))
-				.SelectMany(port =>
-				{
-					var method = port as IMethodSymbol;
-					if (method != null)
-						return new[] { method };
-
-					var property = port as IPropertySymbol;
-					if (property != null)
-						return new[] { property.GetMethod, property.SetMethod }.Where(symbol => symbol != null);
-
-					return Enumerable.Empty<IMethodSymbol>();
-				})
-				.Union(inheritedPorts)
-				.ToArray();
-
-			// Filter out all ports that are overridden or replaced by another one
-			return ports.Where(port =>
-				ports.All(derivedPort => Equals(derivedPort, port) || (!derivedPort.Overrides(port) && !derivedPort.Replaces(port))));
-		}
-
-		/// <summary>
-		///   Gets the symbols of all accessible required ports declared by <paramref name="typeSymbol" /> or any of its base types.
-		/// </summary>
-		/// <param name="typeSymbol">The type symbol that should be checked.</param>
-		/// <param name="semanticModel">The semantic model that should be used to resolve symbol information.</param>
-		[Pure]
-		public static IEnumerable<IMethodSymbol> GetRequiredPorts([NotNull] this ITypeSymbol typeSymbol, [NotNull] SemanticModel semanticModel)
-		{
-			Requires.NotNull(typeSymbol, nameof(typeSymbol));
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-
-			return typeSymbol.GetPorts(semanticModel, (type, portSymbol) =>
-			{
-				if (portSymbol.HasAttribute<RequiredAttribute>(semanticModel))
-					return true;
-
-				if (type.TypeKind == TypeKind.Interface)
-					return false;
-
-				var methodSymbol = portSymbol as IMethodSymbol;
-				if (methodSymbol != null)
-					return methodSymbol.IsExtern;
-
-				var propertySymbol = portSymbol as IPropertySymbol;
-				if (propertySymbol != null)
-					return propertySymbol.IsExtern;
-
-				return false;
-			});
-		}
-
-		/// <summary>
-		///   Gets the symbols of all accessible provided ports declared by <paramref name="typeSymbol" /> or any of its base types.
-		/// </summary>
-		/// <param name="typeSymbol">The type symbol that should be checked.</param>
-		/// <param name="semanticModel">The semantic model that should be used to resolve symbol information.</param>
-		[Pure]
-		public static IEnumerable<IMethodSymbol> GetProvidedPorts([NotNull] this ITypeSymbol typeSymbol, [NotNull] SemanticModel semanticModel)
-		{
-			Requires.NotNull(typeSymbol, nameof(typeSymbol));
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-
-			return typeSymbol.GetPorts(semanticModel, (type, portSymbol) =>
-			{
-				if (portSymbol.HasAttribute<ProvidedAttribute>(semanticModel))
-					return true;
-
-				if (type.TypeKind == TypeKind.Interface)
-					return false;
-
-				var methodSymbol = portSymbol as IMethodSymbol;
-				if (methodSymbol != null)
-					return !methodSymbol.IsExtern && !methodSymbol.IsUpdateMethod(semanticModel);
-
-				var propertySymbol = portSymbol as IPropertySymbol;
-				if (propertySymbol != null)
-					return !propertySymbol.IsExtern;
-
-				return false;
-			});
-		}
-
-		/// <summary>
-		///   Checks the accessibility of <paramref name="baseSymbol" /> to determine whether it can be accessed by
-		///   <paramref name="typeSymbol" />. This method assumes that <paramref name="baseSymbol" /> is defined by a base class of
-		///   <paramref name="typeSymbol" />; otherwise the result is meaningless.
-		/// </summary>
-		/// <param name="typeSymbol">The symbol the accessibility should be checked for.</param>
-		/// <param name="baseSymbol">
-		///   The symbol defined in one of <paramref name="typeSymbol" />'s base classes whose accessibility should be checked.
-		/// </param>
-		public static bool CanAccessBaseMember([NotNull] this ITypeSymbol typeSymbol, [NotNull] ISymbol baseSymbol)
-		{
-			Requires.NotNull(typeSymbol, nameof(typeSymbol));
-			Requires.NotNull(baseSymbol, nameof(baseSymbol));
-
-			switch (baseSymbol.DeclaredAccessibility)
-			{
-				case Accessibility.Private:
-					return false;
-				case Accessibility.ProtectedAndInternal:
-				case Accessibility.Internal:
-					return typeSymbol.ContainingAssembly.Equals(baseSymbol.ContainingAssembly);
-				case Accessibility.Protected:
-				case Accessibility.ProtectedOrInternal:
-				case Accessibility.Public:
-					return true;
-				default:
-					throw new InvalidOperationException("Invalid accessibility.");
-			}
 		}
 	}
 }

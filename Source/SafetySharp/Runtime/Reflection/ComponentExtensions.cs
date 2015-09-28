@@ -47,7 +47,8 @@ namespace SafetySharp.Runtime.Reflection
 			var subcomponents = new HashSet<IComponent>();
 			GetSubcomponents(subcomponents, component);
 
-			// Some objects may have backward references to the component itself, so we have to remove it here
+			// Some objects may have backward references to the component itself, so we have to make sure that we
+			// don't include the component in its set of subcomponents
 			subcomponents.Remove(component);
 			return subcomponents;
 		}

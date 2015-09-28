@@ -40,11 +40,11 @@ namespace SafetySharp.Compiler.Normalization
 	///   <code>
 	///    		Bind(nameof(c.X), nameof(Y));
 	///    		// becomes (for some matching delegate type D):
-	///  		Bind((D)c.X, (D)Y);
+	///  		new PortBinding(new PortReference(...), new PortReference(...).Bind();
 	/// 
 	///         Bind{D}(nameof(c.X), nameof(Y));
 	///    		// becomes:
-	///  		Bind((D)c.X, (D)Y);
+	///  		new PortBinding(new PortReference(...), new PortReference(...).Bind();
 	///   	</code>
 	/// </summary>
 	public sealed class BindingNormalizer : SyntaxNormalizer
@@ -80,7 +80,7 @@ namespace SafetySharp.Compiler.Normalization
 			else
 				MethodSymbolFilter.Filter(requiredPorts, providedPorts);
 
-			// The analyzer guarantees that there are exactly one port in each set now, but just to be sure...
+			// The analyzer guarantees that there is exactly one port of the appropriate kind in each set now, but just to be sure...
 			Assert.That(requiredPorts.Count == 1, "Expected exactly one required port at this point.");
 			Assert.That(providedPorts.Count == 1, "Expected exactly one provided port at this point.");
 			Assert.That(requiredPorts.Single().IsRequiredPort(SemanticModel), "Expected a required port at this point.");

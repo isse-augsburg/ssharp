@@ -64,33 +64,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		}
 
 		/// <summary>
-		///   Gets the <see cref="INamedTypeSymbol" /> representing the type with with name <paramref name="metadataName" /> within
-		///   the context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="compilation">The compilation the type symbol should be returned for.</param>
-		/// <param name="metadataName">The metadata name of the type the symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static INamedTypeSymbol GetTypeSymbol([NotNull] this Compilation compilation, [NotNull] string metadataName)
-		{
-			Requires.NotNull(compilation, nameof(compilation));
-			Requires.NotNullOrWhitespace(metadataName, nameof(metadataName));
-
-			return compilation.GetTypeByMetadataName(metadataName);
-		}
-
-		/// <summary>
-		///   Gets the <see cref="INamedTypeSymbol " /> representing the <see cref="Model" /> class within the
-		///   context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="compilation">The compilation the class symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static INamedTypeSymbol GetModelClassSymbol([NotNull] this Compilation compilation)
-		{
-			Requires.NotNull(compilation, nameof(compilation));
-			return compilation.GetTypeSymbol<Model>();
-		}
-
-		/// <summary>
 		///   Gets the <see cref="INamedTypeSymbol " /> representing the <see cref="Component" /> class within the
 		///   context of the <paramref name="compilation" />.
 		/// </summary>
@@ -144,7 +117,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		}
 
 		/// <summary>
-		///   Gets the <see cref="IMethodSymbol " /> representing the <see cref="Fault.UpdateFaultState" /> method within the
+		///   Gets the <see cref="IMethodSymbol " /> representing the <see cref="Fault.Update" /> method within the
 		///   context of the <paramref name="compilation" />.
 		/// </summary>
 		/// <param name="compilation">The compilation the attribute symbol should be returned for.</param>
@@ -158,40 +131,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 				.GetMembers("UpdateFaultState")
 				.OfType<IMethodSymbol>()
 				.Single(method => method.Parameters.Length == 0 && method.ReturnsVoid);
-		}
-
-		/// <summary>
-		///   Gets the <see cref="IMethodSymbol " /> representing the <see cref="Component.Bind" /> method within
-		///   the context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="compilation">The compilation the attribute symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static IMethodSymbol GetComponentBindMethodSymbol([NotNull] this Compilation compilation)
-		{
-			Requires.NotNull(compilation, nameof(compilation));
-
-			return compilation
-				.GetTypeSymbol<Component>()
-				.GetMembers("Bind")
-				.OfType<IMethodSymbol>()
-				.Single(method => method.Parameters.Length == 1);
-		}
-
-		/// <summary>
-		///   Gets the <see cref="IMethodSymbol " /> representing the <see cref="Model.Bind" /> method
-		///   within the context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="compilation">The compilation the attribute symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static IMethodSymbol GetModelBindMethodSymbol([NotNull] this Compilation compilation)
-		{
-			Requires.NotNull(compilation, nameof(compilation));
-
-			return compilation
-				.GetTypeSymbol<Model>()
-				.GetMembers("Bind")
-				.OfType<IMethodSymbol>()
-				.Single(method => method.Parameters.Length == 1);
 		}
 	}
 }

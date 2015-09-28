@@ -50,22 +50,22 @@ namespace SafetySharp.Analysis.FormulaVisitors
 			switch (formula.Operator)
 			{
 				case UnaryOperator.Next:
-					_builder.Append("X");
+					_builder.Append(" X ");
 					break;
 				case UnaryOperator.Finally:
-					_builder.Append("F");
+					_builder.Append(" F ");
 					break;
 				case UnaryOperator.Globally:
-					_builder.Append("G");
+					_builder.Append(" G ");
 					break;
 				case UnaryOperator.Not:
-					_builder.Append("!");
+					_builder.Append(" ! ");
 					break;
 				case UnaryOperator.All:
-					_builder.Append("A");
+					_builder.Append(" A ");
 					break;
 				case UnaryOperator.Exists:
-					_builder.Append("E");
+					_builder.Append(" E ");
 					break;
 				default:
 					Assert.NotReached($"Unknown or unsupported unary operator '{formula.Operator}'.");
@@ -87,19 +87,19 @@ namespace SafetySharp.Analysis.FormulaVisitors
 			switch (formula.Operator)
 			{
 				case BinaryOperator.And:
-					_builder.Append("&&");
+					_builder.Append(" && ");
 					break;
 				case BinaryOperator.Or:
-					_builder.Append("||");
+					_builder.Append(" || ");
 					break;
 				case BinaryOperator.Implication:
-					_builder.Append("->");
+					_builder.Append(" -> ");
 					break;
 				case BinaryOperator.Equivalence:
-					_builder.Append("<->");
+					_builder.Append(" <-> ");
 					break;
 				case BinaryOperator.Until:
-					_builder.Append("U");
+					_builder.Append(" U ");
 					break;
 				default:
 					Assert.NotReached($"Unknown or unsupported binary operator '{formula.Operator}'.");

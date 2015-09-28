@@ -134,7 +134,6 @@
     <Compile Include="Normalization\SyntaxNormalizer.cs" />
     <Compile Include="Normalization\Normalizer.cs" />
     <Compile Include="Roslyn\Symbols\CompilationExtensions.cs" />
-    <Compile Include="Roslyn\Symbols\FieldSymbolExtensions.cs" />
     <Compile Include="Roslyn\Symbols\MethodSymbolExtensions.cs" />
     <Compile Include="Roslyn\Symbols\PropertySymbolExtensions.cs" />
     <Compile Include="Roslyn\Symbols\SemanticModelExtensions.cs" />
@@ -142,16 +141,10 @@
     <Compile Include="Roslyn\Symbols\TypeSymbolExtensions.cs" />
     <Compile Include="Roslyn\Syntax\ArgumentExtensions.cs" />
     <Compile Include="Roslyn\Syntax\BaseTypeDeclarationExtensions.cs" />
-    <Compile Include="Roslyn\Syntax\MemberAccessExpressionExtensions.cs" />
     <Compile Include="Roslyn\Syntax\MethodDeclarationExtensions.cs" />
-    <Compile Include="Roslyn\Syntax\SyntaxBuilder.cs" />
-    <Compile Include="Roslyn\Syntax\ExpressionSyntaxExtensions.cs" />
     <Compile Include="Roslyn\Syntax\SyntaxNodeExtensions.cs" />
     <Compile Include="Roslyn\Syntax\SyntaxTokenExtensions.cs" />
-    <Compile Include="Roslyn\Syntax\SyntaxTokenListExtensions.cs" />
     <Compile Include="Roslyn\Syntax\SyntaxTreeExtensions.cs" />
-    <Compile Include="Roslyn\Syntax\VariableDeclaratorExtensions.cs" />
-    <Compile Include="Roslyn\Syntax\Visibility.cs" />
     <Compile Include="ErrorReporter.cs" />
   </ItemGroup>
   <ItemGroup>

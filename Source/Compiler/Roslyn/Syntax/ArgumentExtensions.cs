@@ -24,8 +24,6 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 {
 	using System;
 	using System.Linq;
-	using System.Linq.Expressions;
-	using CompilerServices;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -113,27 +111,9 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		}
 
 		/// <summary>
-		///   Checks whether the <paramref name="argument" /> is a Boolean expression argument, i.e., is of type
-		///   <c>Expression{Func{bool}}</c> or of type <c>bool</c> with the <see cref="LiftExpressionAttribute" />.
-		/// </summary>
-		/// <param name="argument">The argument that should be checked.</param>
-		/// <param name="semanticModel">The semantic model that should be used to resolve symbols.</param>
-		[Pure]
-		public static bool IsBooleanExpression([NotNull] this ArgumentSyntax argument, [NotNull] SemanticModel semanticModel)
-		{
-			Requires.NotNull(argument, nameof(argument));
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-
-			var funcSymbol = semanticModel.GetTypeSymbol(typeof(Func<>)).Construct(semanticModel.GetTypeSymbol<bool>());
-			var expressionSymbol = semanticModel.GetTypeSymbol(typeof(Expression<>)).Construct(funcSymbol);
-			var isExpression = argument.IsOfType(semanticModel, expressionSymbol);
-			var isLiftedBoolean = argument.IsOfType<bool>(semanticModel) && argument.HasAttribute<LiftExpressionAttribute>(semanticModel);
-			return isLiftedBoolean || isExpression;
-		}
-
-		/// <summary>
-		///   Gets the <see cref="InvocationExpressionSyntax" />, <see cref="ObjectCreationExpressionSyntax" />, or
-		///   <see cref="ConstructorInitializerSyntax" /> that contains the <paramref name="argument" />.
+		///   Gets the <see cref="InvocationExpressionSyntax" />, <see cref="ObjectCreationExpressionSyntax" />,
+		///   <see cref="ConstructorInitializerSyntax" />, or <see cref="ElementAccessExpressionSyntax" /> that contains the
+		///   <paramref name="argument" />.
 		/// </summary>
 		/// <param name="argument">The argument the method call expression should be returned for.</param>
 		[Pure, NotNull]

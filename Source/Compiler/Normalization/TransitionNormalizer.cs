@@ -131,7 +131,7 @@ namespace SafetySharp.Compiler.Normalization
 				var transition = transitions[i];
 
 				WriteLineNumber(transition.SourceLineNumber);
-				_writer.AppendLine($"if ({_extensionType}.IsInState({_stateMachineVariable}, {transition.SourceState.ToFullString()}))");
+				_writer.AppendLine($"if ({_extensionType}.IsInState({_stateMachineVariable}, {transition.SourceStates.ToFullString()}))");
 				_writer.AppendLine("#line hidden");
 				_writer.AppendBlockStatement(() =>
 				{
@@ -190,7 +190,7 @@ namespace SafetySharp.Compiler.Normalization
 
 			WriteLineNumber(transition.TargetLineNumber);
 			_writer.AppendLine(
-				$"{_extensionType}.ChangeState({_stateMachineVariable}, {_choiceVariable}.Choose({transition.TargetState.ToFullString()}));");
+				$"{_extensionType}.ChangeState({_stateMachineVariable}, {_choiceVariable}.Choose({transition.TargetStates.ToFullString()}));");
 		}
 
 		/// <summary>
@@ -205,7 +205,7 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Collects all calls to <see cref="StateMachine{TState}.Transition" /> within
+		///   Collects all calls to <see cref="StateMachine{TState}"/> <c>Transition</c> methods within
 		///   <paramref name="expression" />.
 		/// </summary>
 		private List<Transition> DecomposeTransitionChain(InvocationExpressionSyntax expression, out ExpressionSyntax stateMachine)
@@ -250,11 +250,11 @@ namespace SafetySharp.Compiler.Normalization
 				switch (parameter.Name)
 				{
 					case "from":
-						transition.SourceState = RemoveArrayCreation(argument.Expression);
+						transition.SourceStates = RemoveArrayCreation(argument.Expression);
 						transition.SourceLineNumber = argument.GetLineNumber();
 						break;
 					case "to":
-						transition.TargetState = RemoveArrayCreation(argument.Expression);
+						transition.TargetStates = RemoveArrayCreation(argument.Expression);
 						transition.TargetLineNumber = argument.GetLineNumber();
 						break;
 					case "guard":
@@ -314,8 +314,8 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private struct Transition
 		{
-			public SeparatedSyntaxList<ExpressionSyntax> SourceState;
-			public SeparatedSyntaxList<ExpressionSyntax> TargetState;
+			public SeparatedSyntaxList<ExpressionSyntax> SourceStates;
+			public SeparatedSyntaxList<ExpressionSyntax> TargetStates;
 			public ExpressionSyntax Guard;
 			public StatementSyntax Action;
 			public int SourceLineNumber;

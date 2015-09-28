@@ -64,8 +64,8 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		/// <param name="invocationExpression">The invocation expression that should be resolved.</param>
 		/// <param name="semanticModel">The semantic model that should be used to resolve the referenced port symbol.</param>
 		[Pure, NotNull]
-		public static IEnumerable<ISymbol> ResolvePortCandidates([NotNull] this InvocationExpressionSyntax invocationExpression,
-																 [NotNull] SemanticModel semanticModel)
+		private static IEnumerable<ISymbol> ResolvePortCandidates([NotNull] this InvocationExpressionSyntax invocationExpression,
+																  [NotNull] SemanticModel semanticModel)
 		{
 			Requires.NotNull(invocationExpression, nameof(invocationExpression));
 			Requires.NotNull(semanticModel, nameof(semanticModel));
@@ -73,22 +73,20 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 
 			var symbolInfo = semanticModel.GetSymbolInfo(invocationExpression.ArgumentList.Arguments[0].Expression);
 			if (symbolInfo.Symbol != null)
-				yield return symbolInfo.Symbol;
-			else
-			{
-				foreach (var symbol in symbolInfo.CandidateSymbols)
-					yield return symbol;
-			}
+				return new[] { symbolInfo.Symbol };
+
+			return symbolInfo.CandidateSymbols;
 		}
 
 		/// <summary>
-		///   Resolves a port reference, i.e., a <c>nameof(portName)</c> expression, to the set of <see cref="IMethodSymbol"/>s it binds to.
+		///   Resolves a port reference, i.e., a <c>nameof(portName)</c> expression, to the set of <see cref="IMethodSymbol" />s it
+		///   binds to.
 		/// </summary>
 		/// <param name="invocationExpression">The invocation expression that should be resolved.</param>
 		/// <param name="semanticModel">The semantic model that should be used to resolve the referenced port symbol.</param>
 		[Pure, NotNull]
 		public static HashSet<IMethodSymbol> ResolvePortReferences([NotNull] this InvocationExpressionSyntax invocationExpression,
-																 [NotNull] SemanticModel semanticModel)
+																   [NotNull] SemanticModel semanticModel)
 		{
 			var set = new HashSet<IMethodSymbol>();
 

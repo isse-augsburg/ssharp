@@ -74,39 +74,5 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 
 			return typeDeclaration.GetTypeSymbol(semanticModel).IsDerivedFrom(baseType);
 		}
-
-		/// <summary>
-		///   Checks whether <paramref name="typeDeclaration" /> is directly or indirectly derived from the <see cref="Component" />
-		///   class within the context of the <paramref name="semanticModel" />.
-		/// </summary>
-		/// <param name="typeDeclaration">The type declaration that should be checked.</param>
-		/// <param name="semanticModel">
-		///   The semantic model that should be used to resolve the type symbol for the <see cref="Component" /> class.
-		/// </param>
-		[Pure]
-		public static bool IsDerivedFromComponent([NotNull] this BaseTypeDeclarationSyntax typeDeclaration, [NotNull] SemanticModel semanticModel)
-		{
-			Requires.NotNull(typeDeclaration, nameof(typeDeclaration));
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-
-			return typeDeclaration.IsDerivedFrom(semanticModel, semanticModel.GetComponentClassSymbol());
-		}
-
-		/// <summary>
-		///   Checks whether <paramref name="typeDeclaration" /> directly or indirectly implements the <see cref="IComponent" />
-		///   interface within the context of the <paramref name="semanticModel" />.
-		/// </summary>
-		/// <param name="typeDeclaration">The type declaration that should be checked.</param>
-		/// <param name="semanticModel">
-		///   The semantic model that should be used to resolve the type symbol for the <see cref="IComponent" /> interface.
-		/// </param>
-		[Pure]
-		public static bool ImplementsIComponent([NotNull] this BaseTypeDeclarationSyntax typeDeclaration, [NotNull] SemanticModel semanticModel)
-		{
-			Requires.NotNull(typeDeclaration, nameof(typeDeclaration));
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-
-			return typeDeclaration.IsDerivedFrom(semanticModel, semanticModel.GetComponentInterfaceSymbol());
-		}
 	}
 }

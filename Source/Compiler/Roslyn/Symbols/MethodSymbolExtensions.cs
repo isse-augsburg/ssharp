@@ -83,32 +83,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		}
 
 		/// <summary>
-		///   Checks whether <paramref name="methodSymbol" /> replaces <paramref name="replacedMethod" />.
-		/// </summary>
-		/// <param name="methodSymbol">The symbol of the methodSymbol that should be checked.</param>
-		/// <param name="replacedMethod">The symbol of the methodSymbol that should be replaced.</param>
-		[Pure]
-		public static bool Replaces([NotNull] this IMethodSymbol methodSymbol, [NotNull] IMethodSymbol replacedMethod)
-		{
-			Requires.NotNull(methodSymbol, nameof(methodSymbol));
-			Requires.NotNull(replacedMethod, nameof(replacedMethod));
-
-			if (methodSymbol.Equals(replacedMethod))
-				return true;
-
-			if (methodSymbol.Name != replacedMethod.Name)
-				return false;
-
-			if (!methodSymbol.ContainingType.IsDerivedFrom(replacedMethod.ContainingType))
-				return false;
-
-			if (methodSymbol.Overrides(replacedMethod))
-				return false;
-
-			return methodSymbol.IsSignatureCompatibleTo(replacedMethod);
-		}
-
-		/// <summary>
 		///   Checks whether <paramref name="methodSymbol" /> overrides <see cref="Component.Update()" />
 		///   within the context of the <paramref name="compilation" />.
 		/// </summary>
@@ -320,9 +294,8 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		}
 
 		/// <summary>
-		///   Checks whether <paramref name="methodSymbol" /> represents the <see cref="Component.Bind(string,string)" />,
-		///   <see cref="Component.Bind{T}(string,string)" />, <see cref="Model.Bind(string,string)" />, or
-		///   <see cref="Model.Bind{T}(string,string)" /> method.
+		///   Checks whether <paramref name="methodSymbol" /> represents the <see cref="Component.Bind(string,string)" /> or
+		///   <see cref="Component.Bind{T}(string,string)" /> method.
 		/// </summary>
 		/// <param name="methodSymbol">The method symbol that should be checked.</param>
 		/// <param name="semanticModel">The semantic model that should be used to resolve symbol information.</param>
@@ -335,10 +308,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			if (methodSymbol.Name != "Bind")
 				return false;
 
-			var isComponentMethod = methodSymbol.ContainingType.Equals(semanticModel.GetComponentClassSymbol());
-			var isModelMethod = methodSymbol.ContainingType.Equals(semanticModel.GetTypeSymbol<Model>());
-
-			return isComponentMethod || isModelMethod;
+			return methodSymbol.ContainingType.Equals(semanticModel.GetComponentClassSymbol());
 		}
 
 		/// <summary>
@@ -364,112 +334,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 				   methodSymbol.ContainingType.SpecialType == SpecialType.System_Double ||
 				   methodSymbol.ContainingType.SpecialType == SpecialType.System_Boolean ||
 				   methodSymbol.ContainingType.TypeKind == TypeKind.Enum;
-		}
-
-		/// <summary>
-		///   Gets the candidate set of <see cref="IMethodSymbol" />s representing the methods declared by
-		///   <paramref name="affectedType" /> that are affected by <paramref name="faultEffect" />.
-		/// </summary>
-		/// <param name="faultEffect">The fault effect the affected method should be returned for.</param>
-		/// <param name="affectedType">The type that is affected by the fault.</param>
-		[Pure]
-		public static IMethodSymbol[] GetAffectedMethodCandidates([NotNull] this IMethodSymbol faultEffect,
-																  [NotNull] INamedTypeSymbol affectedType)
-		{
-			Requires.NotNull(faultEffect, nameof(faultEffect));
-			Requires.NotNull(affectedType, nameof(affectedType));
-
-			return affectedType
-				.GetMembers()
-				.OfType<IMethodSymbol>()
-				.Where(candidate =>
-				{
-					var associatedProperty = candidate.AssociatedSymbol as IPropertySymbol;
-					var correctKind =
-						candidate.IsPropertyAccessor() ||
-						candidate.MethodKind == MethodKind.Ordinary ||
-						candidate.MethodKind == MethodKind.ExplicitInterfaceImplementation;
-
-					if (!correctKind)
-						return false;
-
-					if (candidate.IsPropertyAccessor() != faultEffect.IsPropertyAccessor())
-						return false;
-
-					if (!candidate.IsSignatureCompatibleTo(faultEffect))
-						return false;
-
-					var name = candidate.Name;
-					if (associatedProperty != null && associatedProperty.ExplicitInterfaceImplementations.Length != 0)
-					{
-						switch (candidate.MethodKind)
-						{
-							case MethodKind.PropertyGet:
-								if (associatedProperty.ExplicitInterfaceImplementations[0].GetMethod != null)
-									name = associatedProperty.ExplicitInterfaceImplementations[0].GetMethod.Name;
-								break;
-							case MethodKind.PropertySet:
-								if (associatedProperty.ExplicitInterfaceImplementations[0].SetMethod != null)
-									name = associatedProperty.ExplicitInterfaceImplementations[0].SetMethod.Name;
-								break;
-						}
-					}
-					else if (associatedProperty == null && candidate.MethodKind == MethodKind.ExplicitInterfaceImplementation)
-						name = candidate.ExplicitInterfaceImplementations[0].Name;
-
-					return faultEffect.Name == name;
-				})
-				.ToArray();
-		}
-
-		/// <summary>
-		///   Returns a <see cref="DelegateDeclarationSyntax" /> for a delegate that can be used to invoke
-		///   <paramref name="methodSymbol" />.
-		/// </summary>
-		/// <param name="methodSymbol">The methodSymbol the delegate should be synthesized for.</param>
-		/// <param name="name">An name of the synthesized delegate.</param>
-		[Pure]
-		public static DelegateDeclarationSyntax GetSynthesizedDelegateDeclaration([NotNull] this IMethodSymbol methodSymbol, [NotNull] string name)
-		{
-			Requires.NotNull(methodSymbol, nameof(methodSymbol));
-			Requires.NotNullOrWhitespace(name, nameof(name));
-
-			var returnType = SyntaxFactory.ParseTypeName(methodSymbol.ReturnType.ToDisplayString());
-			var parameters = methodSymbol.Parameters.Select(parameter =>
-			{
-				var identifier = SyntaxFactory.Identifier(parameter.Name);
-				var type = SyntaxFactory.ParseTypeName(parameter.Type.ToDisplayString());
-
-				SyntaxKind? keyword = null;
-				if (parameter.IsParams)
-					keyword = SyntaxKind.ParamsKeyword;
-
-				switch (parameter.RefKind)
-				{
-					case RefKind.None:
-						break;
-					case RefKind.Ref:
-						keyword = SyntaxKind.RefKeyword;
-						break;
-					case RefKind.Out:
-						keyword = SyntaxKind.OutKeyword;
-						break;
-					default:
-						throw new InvalidOperationException("Unsupported ref kind.");
-				}
-
-				var declaration = SyntaxFactory.Parameter(identifier).WithType(type);
-				if (keyword != null)
-					declaration = declaration.WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(keyword.Value)));
-
-				return declaration;
-			});
-
-			return SyntaxFactory
-				.DelegateDeclaration(returnType, name)
-				.WithModifiers(SyntaxTokenList.Create(SyntaxFactory.Token(SyntaxKind.PrivateKeyword)))
-				.WithParameterList(SyntaxFactory.ParameterList(SyntaxFactory.SeparatedList(parameters)))
-				.NormalizeWhitespace();
 		}
 
 		/// <summary>

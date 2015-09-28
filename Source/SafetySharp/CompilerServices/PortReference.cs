@@ -104,8 +104,8 @@ namespace SafetySharp.CompilerServices
 			Requires.That(method != null,
 				$"'{DeclaringType.FullName}' does not declare an instance method called '{PortName}' with the given signature.");
 
-			// If the required port is an interface method, we have to determine the actual method on the target object
-			// that will be invoked, otherwise we wouldn't be able to find the binding field
+			// If the method is an interface method, we have to determine the actual method on the target object
+			// that will be invoked, otherwise we wouldn't be able to find the binding field of required ports, for instance
 			if (method.DeclaringType.IsInterface)
 				return Component.GetType().ResolveImplementingMethod(method);
 

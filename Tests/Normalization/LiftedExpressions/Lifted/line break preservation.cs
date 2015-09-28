@@ -89,15 +89,15 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 	{
 		private void M()
         {
-            new Test5(() => 1
+            new Test5(()=>1
                       + 1);
 
-            O(() => M(2 -
+            O(()=>M(2 -
                 1)
               + 0,
-                () =>                 3
+                ()=>                3
                 - N(
-                    () =>                     2 *
+                    ()=>                    2 *
                     5));
         }
 	}

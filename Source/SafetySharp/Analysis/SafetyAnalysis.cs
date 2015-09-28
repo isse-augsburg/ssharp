@@ -63,7 +63,7 @@ namespace SafetySharp.Analysis
 		public IEnumerable<ISet<Fault>> ComputeMinimalCutSets(Formula hazard)
 		{
 			Requires.NotNull(hazard, nameof(hazard));
-			Requires.OfType<StateFormula>(hazard, nameof(hazard), "Only state formulas are supported.");
+			Requires.OfType<StateFormula>(hazard, nameof(hazard), "Hazards are required to be state formulas.");
 
 			_modelChecker.CheckInvariant(_model, ((StateFormula)hazard).Expression);
 			return Enumerable.Empty<ISet<Fault>>();

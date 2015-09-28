@@ -63,21 +63,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		}
 
 		/// <summary>
-		///   Gets the <see cref="INamedTypeSymbol" /> representing the type with with name <paramref name="metadataName" /> within
-		///   the context of the <paramref name="semanticModel" />.
-		/// </summary>
-		/// <param name="semanticModel">The semantic model the type symbol should be returned for.</param>
-		/// <param name="metadataName">The metadata name of the type the symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static INamedTypeSymbol GetTypeSymbol([NotNull] this SemanticModel semanticModel, [NotNull] string metadataName)
-		{
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-			Requires.NotNullOrWhitespace(metadataName, nameof(metadataName));
-
-			return semanticModel.Compilation.GetTypeByMetadataName(metadataName);
-		}
-
-		/// <summary>
 		///   Gets the <see cref="INamedTypeSymbol " /> representing the <see cref="Component" /> class within the
 		///   context of the <paramref name="semanticModel" />.
 		/// </summary>
@@ -123,30 +108,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		{
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 			return semanticModel.Compilation.GetComponentUpdateMethodSymbol();
-		}
-
-		/// <summary>
-		///   Gets the <see cref="IMethodSymbol " /> representing the <see cref="Component.Bind(PortBinding)" /> method within
-		///   the context of the <paramref name="semanticModel" />.
-		/// </summary>
-		/// <param name="semanticModel">The semantic model the attribute symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static IMethodSymbol GetComponentBindMethodSymbol([NotNull] this SemanticModel semanticModel)
-		{
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-			return semanticModel.Compilation.GetComponentBindMethodSymbol();
-		}
-
-		/// <summary>
-		///   Gets the <see cref="IMethodSymbol " /> representing the <see cref="Model.Bind(PortBinding)" /> method within
-		///   the context of the <paramref name="semanticModel" />.
-		/// </summary>
-		/// <param name="semanticModel">The semantic model the attribute symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static IMethodSymbol GetModelBindMethodSymbol([NotNull] this SemanticModel semanticModel)
-		{
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-			return semanticModel.Compilation.GetModelBindMethodSymbol();
 		}
 	}
 }
