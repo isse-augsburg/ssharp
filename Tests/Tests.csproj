@@ -326,8 +326,9 @@
     <Compile Include="Serialization\PrimitiveTypes\UInt16.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt32.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int32.cs" />
-    <Compile Include="Serialization\RuntimeModels\faults.cs" />
     <Compile Include="Serialization\RuntimeModels\binding.cs" />
+    <Compile Include="Serialization\RuntimeModels\faults.cs" />
+    <Compile Include="Serialization\RuntimeModels\manual binding.cs" />
     <Compile Include="Serialization\RuntimeModels\type.cs" />
     <Compile Include="Serialization\RuntimeModels\string.cs" />
     <Compile Include="Serialization\RuntimeModels\unserializable type.cs" />

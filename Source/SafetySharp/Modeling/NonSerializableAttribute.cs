@@ -26,7 +26,7 @@ namespace SafetySharp.Modeling
 
 	/// <summary>
 	///   When a state field or type is marked as <c>[NonSerializable]</c>, its state is not preserved between different system
-	///   steps. The marked state is also completely ignore at model initialization time.
+	///   steps. The marked state is also completely ignored at model initialization time.
 	///   Hiding state variables potentially increases simulation and model checking performance, but is only possible
 	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
 	///   written value could be read.

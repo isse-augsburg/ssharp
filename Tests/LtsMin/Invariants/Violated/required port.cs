@@ -35,7 +35,7 @@ namespace Tests.LtsMin.Invariants.Violated
 
 		private class C : Component
 		{
-			public int F = 33;
+			public int F = -1;
 
 			public C()
 			{

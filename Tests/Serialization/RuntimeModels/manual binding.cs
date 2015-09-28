@@ -22,16 +22,22 @@
 
 namespace Tests.Serialization.RuntimeModels
 {
+	using System;
 	using SafetySharp.Analysis;
+	using SafetySharp.CompilerServices;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class Binding : RuntimeModelTest
+	internal class ManualBinding : RuntimeModelTest
 	{
 		protected override void Check()
 		{
-			var d = new D { G = 3 };
+			var d = new D { A = 7, C = 3 };
+			var r = new PortReference(d, typeof(D), "M", new[] { typeof(bool), typeof(int) }, typeof(bool), false);
+			var p = new PortReference(d, typeof(D), "Q", new[] { typeof(bool), typeof(int) }, typeof(bool), true);
+			d.B = new PortBinding(r, p);
 			var m = new Model(d);
+
 			Create(m);
 
 			StateFormulas.ShouldBeEmpty();
@@ -41,31 +47,49 @@ namespace Tests.Serialization.RuntimeModels
 			var root = RootComponents[0];
 			root.ShouldBeOfType<D>();
 
-			((D)root).G.ShouldBe(3);
-			((D)root).C.F.ShouldBe(-1);
-		}
+			r = ((D)root).B.RequiredPort;
+			p = ((D)root).B.ProvidedPort;
 
-		private class C : Component
-		{
-			public int F;
+			r.Component.ShouldBe(root);
+			r.DeclaringType.ShouldBe(typeof(D));
+			r.PortName.ShouldBe("M");
+			r.ArgumentTypes.ShouldBe(new[] { typeof(bool), typeof(int) });
+			r.ReturnType.ShouldBe(typeof(bool));
+			r.IsVirtualCall.ShouldBe(false);
 
-			public C()
-			{
-				Bind(nameof(R), nameof(P));
-			}
+			p.Component.ShouldBe(root);
+			p.DeclaringType.ShouldBe(typeof(D));
+			p.PortName.ShouldBe("Q");
+			p.ArgumentTypes.ShouldBe(new[] { typeof(bool), typeof(int) });
+			p.ReturnType.ShouldBe(typeof(bool));
+			p.IsVirtualCall.ShouldBe(true);
 
-			private int P()
-			{
-				return F;
-			}
-
-			public extern int R();
+			((D)root).A.ShouldBe(7);
+			((D)root).C.ShouldBe(3);
 		}
 
 		private class D : Component
 		{
-			public readonly C C = new C { F = -1 };
-			public int G;
+			[NonSerializable]
+			private Func<bool, int, bool> _x = null;
+
+			[NonSerializable]
+			private PortBinding _y = null;
+
+			public int A;
+			public PortBinding B;
+			public int C;
+
+			[BindingMetadata("_x", "_y")]
+			private bool M(bool b, int i)
+			{
+				return b;
+			}
+
+			private bool Q(bool b, int i)
+			{
+				return b;
+			}
 		}
 	}
 }
