@@ -51,7 +51,7 @@ namespace PressureTank
 		/// </summary>
 		public Timer()
 		{
-			//SuppressTimeout.AddEffect<SuppressTimeoutEffect>(this);
+			SuppressTimeout.AddEffect<SuppressTimeoutEffect>(this);
 		}
 
 		/// <summary>

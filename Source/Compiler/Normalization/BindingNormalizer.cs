@@ -80,11 +80,9 @@ namespace SafetySharp.Compiler.Normalization
 			else
 				MethodSymbolFilter.Filter(requiredPorts, providedPorts);
 
-			// The analyzer guarantees that there is exactly one port of the appropriate kind in each set now, but just to be sure...
+			// The analyzer guarantees that there is exactly one port in each set now, but just to be sure...
 			Assert.That(requiredPorts.Count == 1, "Expected exactly one required port at this point.");
 			Assert.That(providedPorts.Count == 1, "Expected exactly one provided port at this point.");
-			Assert.That(requiredPorts.Single().IsRequiredPort(SemanticModel), "Expected a required port at this point.");
-			Assert.That(providedPorts.Single().IsProvidedPort(SemanticModel), "Expected a provided port at this point.");
 
 			var requiredPortExpression = requiredPortReferenceExpression.ArgumentList.Arguments[0].Expression;
 			var providedPortExpression = providedPortReferenceExpression.ArgumentList.Arguments[0].Expression;

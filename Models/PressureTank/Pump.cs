@@ -44,7 +44,7 @@ namespace PressureTank
 		/// </summary>
 		public Pump()
 		{
-			//SuppressPumping.AddEffect<SuppressPumpingEffect>(this);
+			SuppressPumping.AddEffect<SuppressPumpingEffect>(this);
 		}
 
 		/// <summary>

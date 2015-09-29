@@ -61,6 +61,8 @@ namespace SafetySharp.Modeling
 			where TFaultEffect : class, new()
 		{
 			Requires.NotNull(component, nameof(component));
+			Requires.That(typeof(IFaultEffect).IsAssignableFrom(typeof(TFaultEffect)),
+				$"Expected the fault effect to implement '{typeof(IFaultEffect).FullName}'.");
 			Requires.That(typeof(TFaultEffect).HasAttribute<FaultEffectAttribute>(),
 				$"Expected fault effect to be marked with '{typeof(FaultEffectAttribute)}'.");
 

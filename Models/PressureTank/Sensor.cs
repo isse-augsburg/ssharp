@@ -51,8 +51,8 @@ namespace PressureTank
 		/// </summary>
 		public Sensor()
 		{
-			//SuppressIsFull.AddEffect<SuppressIsFullEffect>(this);
-			//SuppressIsEmpty.AddEffect<SuppressIsEmptyEffect>(this);
+			SuppressIsFull.AddEffect<SuppressIsFullEffect>(this);
+			SuppressIsEmpty.AddEffect<SuppressIsEmptyEffect>(this);
 		}
 
 		/// <summary>
