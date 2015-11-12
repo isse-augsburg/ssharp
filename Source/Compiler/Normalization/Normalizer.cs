@@ -178,5 +178,26 @@ namespace SafetySharp.Compiler.Normalization
 			generatedClass = generatedClass.AddAttributeLists(attributes);
 			AddNamespacedAndNested(type, new UsingDirectiveSyntax[0], generatedClass);
 		}
+
+		/// <summary>
+		///   Adds a compilation unit containing a part of the partial <paramref name="type" />, adding the
+		///   <paramref name="baseTypes" /> to the type.
+		/// </summary>
+		/// <param name="type">The type the part should be declared for.</param>
+		/// <param name="baseTypes">The base types that should be added to the type.</param>
+		protected void AddBaseTypes([NotNull] INamedTypeSymbol type, [NotNull] params ITypeSymbol[] baseTypes)
+		{
+			Requires.NotNull(type, nameof(type));
+			Requires.NotNull(baseTypes, nameof(baseTypes));
+
+			var generatedClass = (ClassDeclarationSyntax)Syntax.ClassDeclaration(
+				name: type.Name,
+				typeParameters: type.TypeParameters.Select(t => t.Name),
+				modifiers: DeclarationModifiers.Partial);
+
+			var baseTypeExpressions = baseTypes.Select(baseType => SyntaxFactory.SimpleBaseType((TypeSyntax)Syntax.TypeExpression(baseType)));
+			generatedClass = generatedClass.AddBaseListTypes(baseTypeExpressions.ToArray());
+			AddNamespacedAndNested(type, new UsingDirectiveSyntax[0], generatedClass);
+		}
 	}
 }

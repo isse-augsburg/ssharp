@@ -23,7 +23,7 @@
 namespace SafetySharp.Analysis
 {
 	/// <summary>
-	///     Represents the operator of a <see cref="UnaryFormula" />.
+	///   Represents the operator of a <see cref="UnaryFormula" />.
 	/// </summary>
 	internal enum UnaryOperator
 	{

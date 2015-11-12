@@ -26,13 +26,11 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
-	using System.Runtime.CompilerServices;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Microsoft.CodeAnalysis.Editing;
-	using Modeling;
 	using Symbols;
 	using Utilities;
 
@@ -199,32 +197,6 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		}
 
 		/// <summary>
-		///   Marks the <paramref name="syntaxNode" /> as <c>[CompilerGenerated]</c>.
-		/// </summary>
-		/// <param name="syntaxGenerator">The syntax generator that should be used to generate the attribute.</param>
-		/// <param name="syntaxNode">The syntax node that should be marked with the attribute.</param>
-		/// <param name="semanticModel">The semantic model that should be used to resolve type information.</param>
-		[Pure, NotNull]
-		public static SyntaxNode MarkAsCompilerGenerated([NotNull] this SyntaxGenerator syntaxGenerator, [NotNull] SyntaxNode syntaxNode,
-														 [NotNull] SemanticModel semanticModel)
-		{
-			return syntaxGenerator.AddAttribute<CompilerGeneratedAttribute>(syntaxNode, semanticModel);
-		}
-
-		/// <summary>
-		///   Marks the <paramref name="syntaxNode" /> as <c>[DebuggerHidden]</c>.
-		/// </summary>
-		/// <param name="syntaxGenerator">The syntax generator that should be used to generate the attribute.</param>
-		/// <param name="syntaxNode">The syntax node that should be marked with the attribute.</param>
-		/// <param name="semanticModel">The semantic model that should be used to resolve type information.</param>
-		[Pure, NotNull]
-		public static SyntaxNode MarkAsDebuggerHidden([NotNull] this SyntaxGenerator syntaxGenerator, [NotNull] SyntaxNode syntaxNode,
-													  [NotNull] SemanticModel semanticModel)
-		{
-			return syntaxGenerator.AddAttribute<DebuggerHiddenAttribute>(syntaxNode, semanticModel);
-		}
-
-		/// <summary>
 		///   In release builds, marks the <paramref name="syntaxNode" /> as <c>[DebuggerBrowsable(DebuggerBrowsableState.Never)]</c>
 		/// </summary>
 		/// <param name="syntaxGenerator">The syntax generator that should be used to generate the attribute.</param>
@@ -241,19 +213,6 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 			var never = syntaxGenerator.MemberAccessExpression(attributeType, nameof(DebuggerBrowsableState.Never));
 			return syntaxGenerator.AddAttribute<DebuggerBrowsableAttribute>(syntaxNode, semanticModel, never);
 #endif
-		}
-
-		/// <summary>
-		///   Marks the <paramref name="syntaxNode" /> as <c>[NonSerializable]</c>
-		/// </summary>
-		/// <param name="syntaxGenerator">The syntax generator that should be used to generate the attribute.</param>
-		/// <param name="syntaxNode">The syntax node that should be marked with the attribute.</param>
-		/// <param name="semanticModel">The semantic model that should be used to resolve type information.</param>
-		[Pure, NotNull]
-		public static SyntaxNode MarkAsNonSerializable([NotNull] this SyntaxGenerator syntaxGenerator, [NotNull] SyntaxNode syntaxNode,
-													   [NotNull] SemanticModel semanticModel)
-		{
-			return syntaxGenerator.AddAttribute<NonSerializableAttribute>(syntaxNode, semanticModel);
 		}
 	}
 }

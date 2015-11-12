@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Compiler.Normalization
 {
+	using System.Runtime.CompilerServices;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -127,7 +128,7 @@ namespace SafetySharp.Compiler.Normalization
 				modifiers: fieldModifiers,
 				initializer: declaration.Initializer?.Value);
 
-			fieldDeclaration = Syntax.MarkAsCompilerGenerated(fieldDeclaration, SemanticModel);
+			fieldDeclaration = Syntax.AddAttribute<CompilerGeneratedAttribute>(fieldDeclaration, SemanticModel);
 			fieldDeclaration = Syntax.MarkAsNonDebuggerBrowsable(fieldDeclaration, SemanticModel);
 			AddMembers(propertySymbol.ContainingType, (FieldDeclarationSyntax)fieldDeclaration);
 

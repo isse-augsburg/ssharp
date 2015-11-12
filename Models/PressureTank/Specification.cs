@@ -57,7 +57,7 @@ namespace PressureTank
 				Timer = new Timer { Timeout = Timeout }
 			};
 
-			Component.Bind(nameof(Controller.Sensor.CheckPhysicalPressure), nameof(Tank.PressureLevel));
+			Component.Bind(nameof(Controller.Sensor.PhysicalPressure), nameof(Tank.PressureLevel));
 			Component.Bind(nameof(Tank.IsBeingFilled), nameof(Controller.Pump.IsEnabled));
 		}
 

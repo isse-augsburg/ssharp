@@ -40,9 +40,9 @@
     <Reference Include="CommandLine">
       <HintPath>..\..\Dependencies\Packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
     </Reference>
-    <Reference Include="JetBrains.Annotations, Version=9.1.1.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
-      <HintPath>..\..\Dependencies\Packages\JetBrains.Annotations.9.1.1\lib\net20\JetBrains.Annotations.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="JetBrains.Annotations, Version=10.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\Packages\JetBrains.Annotations.10.0.0\lib\net20\JetBrains.Annotations.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CodeAnalysis, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\Dependencies\Packages\Microsoft.CodeAnalysis.Common.1.0.0\lib\net45\Microsoft.CodeAnalysis.dll</HintPath>
@@ -113,6 +113,7 @@
     <Compile Include="Normalization\BindingNormalizer.cs" />
     <Compile Include="Normalization\ExpressionBodyNormalizer.cs" />
     <Compile Include="Normalization\PortNormalizer.cs" />
+    <Compile Include="Normalization\FaultEffectNormalizer.cs" />
     <Compile Include="Normalization\TransitionNormalizer.cs" />
     <Compile Include="Normalization\FormulaNormalizer.cs" />
     <Compile Include="Normalization\LiftedExpressionNormalizer.cs" />

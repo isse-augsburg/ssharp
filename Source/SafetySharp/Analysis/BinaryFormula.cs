@@ -22,8 +22,8 @@
 
 namespace SafetySharp.Analysis
 {
-	using Utilities;
 	using FormulaVisitors;
+	using Utilities;
 
 	/// <summary>
 	///   Represents the application of a <see cref="BinaryOperator" /> to two <see cref="Formula" /> instances.

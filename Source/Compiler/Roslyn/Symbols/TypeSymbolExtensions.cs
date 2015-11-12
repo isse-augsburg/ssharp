@@ -22,8 +22,6 @@
 
 namespace SafetySharp.Compiler.Roslyn.Symbols
 {
-	using System;
-	using System.Collections.Generic;
 	using System.Linq;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
@@ -65,57 +63,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 
 		/// <summary>
 		///   Checks whether <paramref name="typeSymbol" /> is directly or indirectly derived from the <see cref="Component" />
-		///   class within the context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="typeSymbol">The type symbol that should be checked.</param>
-		/// <param name="compilation">
-		///   The compilation that should be used to resolve the type symbol for the <see cref="Component" /> class.
-		/// </param>
-		[Pure]
-		public static bool IsDerivedFromComponent([NotNull] this ITypeSymbol typeSymbol, [NotNull] Compilation compilation)
-		{
-			Requires.NotNull(typeSymbol, nameof(typeSymbol));
-			Requires.NotNull(compilation, nameof(compilation));
-
-			return typeSymbol.IsDerivedFrom(compilation.GetComponentClassSymbol());
-		}
-
-		/// <summary>
-		///   Checks whether <paramref name="typeSymbol" /> is directly or indirectly derived from the <see cref="Fault" />
-		///   class within the context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="typeSymbol">The type symbol that should be checked.</param>
-		/// <param name="compilation">
-		///   The compilation that should be used to resolve the type symbol for the <see cref="Component" /> class.
-		/// </param>
-		[Pure]
-		public static bool IsDerivedFromFault([NotNull] this ITypeSymbol typeSymbol, [NotNull] Compilation compilation)
-		{
-			Requires.NotNull(typeSymbol, nameof(typeSymbol));
-			Requires.NotNull(compilation, nameof(compilation));
-
-			return typeSymbol.IsDerivedFrom(compilation.GetFaultClassSymbol());
-		}
-
-		/// <summary>
-		///   Checks whether <paramref name="typeSymbol" /> directly or indirectly implements the <see cref="IComponent" />
-		///   interface within the context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="typeSymbol">The type symbol that should be checked.</param>
-		/// <param name="compilation">
-		///   The compilation that should be used to resolve the type symbol for the <see cref="IComponent" /> interface.
-		/// </param>
-		[Pure]
-		public static bool ImplementsIComponent([NotNull] this ITypeSymbol typeSymbol, [NotNull] Compilation compilation)
-		{
-			Requires.NotNull(typeSymbol, nameof(typeSymbol));
-			Requires.NotNull(compilation, nameof(compilation));
-
-			return typeSymbol.IsDerivedFrom(compilation.GetComponentInterfaceSymbol());
-		}
-
-		/// <summary>
-		///   Checks whether <paramref name="typeSymbol" /> is directly or indirectly derived from the <see cref="Component" />
 		///   class and not marked with the <see cref="FaultEffectAttribute" />.
 		/// </summary>
 		/// <param name="typeSymbol">The type symbol that should be checked.</param>
@@ -129,41 +76,23 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
 			return !typeSymbol.HasAttribute<FaultEffectAttribute>(semanticModel) &&
-				   typeSymbol.IsDerivedFromComponent(semanticModel);
+				   typeSymbol.IsDerivedFrom(semanticModel.GetTypeSymbol<Component>());
 		}
 
 		/// <summary>
-		///   Checks whether <paramref name="typeSymbol" /> is directly or indirectly derived from the <see cref="Component" />
-		///   class within the context of the <paramref name="semanticModel" />.
+		///   Checks whether <paramref name="typeSymbol" /> represents a fault effect within the context of the
+		///   <paramref name="semanticModel" />.
 		/// </summary>
 		/// <param name="typeSymbol">The type symbol that should be checked.</param>
-		/// <param name="semanticModel">
-		///   The semantic model that should be used to resolve the type symbol for the <see cref="Component" /> class.
-		/// </param>
+		/// <param name="semanticModel">The semantic model that should be used to resolve the type information.</param>
 		[Pure]
-		public static bool IsDerivedFromComponent([NotNull] this ITypeSymbol typeSymbol, [NotNull] SemanticModel semanticModel)
+		public static bool IsFaultEffect([NotNull] this ITypeSymbol typeSymbol, [NotNull] SemanticModel semanticModel)
 		{
 			Requires.NotNull(typeSymbol, nameof(typeSymbol));
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
-			return typeSymbol.IsDerivedFrom(semanticModel.GetComponentClassSymbol());
-		}
-
-		/// <summary>
-		///   Checks whether <paramref name="typeSymbol" /> directly or indirectly implements the <see cref="IComponent" />
-		///   interface within the context of the <paramref name="semanticModel" />.
-		/// </summary>
-		/// <param name="typeSymbol">The type symbol that should be checked.</param>
-		/// <param name="semanticModel">
-		///   The semantic model that should be used to resolve the type symbol for the <see cref="IComponent" /> interface.
-		/// </param>
-		[Pure]
-		public static bool ImplementsIComponent([NotNull] this ITypeSymbol typeSymbol, [NotNull] SemanticModel semanticModel)
-		{
-			Requires.NotNull(typeSymbol, nameof(typeSymbol));
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-
-			return typeSymbol.IsDerivedFrom(semanticModel.GetComponentInterfaceSymbol());
+			return typeSymbol.HasAttribute<FaultEffectAttribute>(semanticModel) &&
+				   typeSymbol.IsDerivedFrom(semanticModel.GetTypeSymbol<Component>());
 		}
 	}
 }

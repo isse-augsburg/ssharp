@@ -28,7 +28,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	using System.Linq;
 
 	/// <summary>
-	///   Serializes <see cref="string"/> instances.
+	///   Serializes <see cref="string" /> instances.
 	/// </summary>
 	internal sealed class StringSerializer : Serializer
 	{

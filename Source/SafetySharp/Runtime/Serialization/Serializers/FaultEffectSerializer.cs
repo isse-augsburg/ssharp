@@ -38,7 +38,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="type">The type that should be checked.</param>
 		protected internal override bool CanSerialize(Type type)
 		{
-			return type.IsSubclassOf(typeof(Component)) && type.HasAttribute<FaultEffectAttribute>();
+			return typeof(IFaultEffect).IsAssignableFrom(type) && type.HasAttribute<FaultEffectAttribute>();
 		}
 
 		/// <summary>

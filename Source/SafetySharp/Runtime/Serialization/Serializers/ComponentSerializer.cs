@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,21 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Runtime.Serialization.Serializers
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Modeling;
+	using Utilities;
+
 	/// <summary>
-	///   Represents a common interface for fault effects. This interface is implemented by the S# compiler automatically.
+	///   Serializes all kinds of <see cref="Component" />-derived classes that are not marked with
+	///   <see cref="FaultEffectAttribute" />.
 	/// </summary>
-	public interface IFaultEffect
+	internal sealed class ComponentSerializer : ObjectSerializer
 	{
 		/// <summary>
-		///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.
+		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
 		/// </summary>
-		IComponent Component { get; set; }
+		/// <param name="type">The type that should be checked.</param>
+		protected internal override bool CanSerialize(Type type)
+		{
+			return typeof(Component).IsAssignableFrom(type) && !type.HasAttribute<FaultEffectAttribute>();
+		}
 
 		/// <summary>
-		///   Gets or sets the <see cref="Fault" /> instance that determines whether the fault effect is active.
+		///   Gets all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself.
 		/// </summary>
-		Fault Fault { get; set; }
+		/// <param name="obj">The object the referenced objects should be returned for.</param>
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
+		{
+			return base.GetReferencedObjects(obj, mode).Concat(((Component)obj).FaultEffects);
+		}
 	}
 }

@@ -31,6 +31,12 @@ namespace SafetySharp.Modeling
 	public abstract class Fault
 	{
 		/// <summary>
+		///   Indicates whether the fault is ignored for a simulation or model checking run.
+		/// </summary>
+		[Hidden]
+		private bool _isIgnored;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		protected Fault()
@@ -45,7 +51,11 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Gets or sets a value indicating whether the fault is ignored for a simulation or model checking run.
 		/// </summary>
-		internal bool IsIgnored { get; set; }
+		internal bool IsIgnored
+		{
+			get { return _isIgnored; }
+			set { _isIgnored = value; }
+		}
 
 		/// <summary>
 		///   Gets the <see cref="Choice" /> instance that can be used to determine whether the fault occurs.
@@ -71,9 +81,9 @@ namespace SafetySharp.Modeling
 
 			Requires.That(effect.Component == null, nameof(faultEffect), "Fault effects cannot be used with multiple components at the same time.");
 
-			effect.Component = (Component)component;
+			effect.Component = component;
 			effect.Fault = this;
-			effect.Component.FaultEffects.Add(effect);
+			((Component)component).FaultEffects.Add(effect);
 
 			return faultEffect;
 		}
@@ -87,7 +97,7 @@ namespace SafetySharp.Modeling
 			Requires.NotNull(faultEffect, nameof(faultEffect));
 
 			var effect = faultEffect as IFaultEffect;
-			if (effect?.Component == null || !effect.Component.FaultEffects.Remove(effect))
+			if (effect?.Component == null || !((Component)effect.Component).FaultEffects.Remove(effect))
 				return;
 
 			effect.Component = null;

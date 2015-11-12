@@ -48,6 +48,7 @@ namespace SafetySharp.Runtime.Serialization
 		private SerializationRegistry()
 		{
 			RegisterSerializer(new ObjectSerializer());
+			RegisterSerializer(new ComponentSerializer());
 			RegisterSerializer(new FaultEffectSerializer());
 			RegisterSerializer(new ArraySerializer());
 			RegisterSerializer(new StringSerializer());
@@ -117,7 +118,7 @@ namespace SafetySharp.Runtime.Serialization
 			Requires.NotNull(objects, nameof(objects));
 			Requires.InRange(mode, nameof(mode));
 
-			var generator = new SerializationGenerator("Serialize");
+			var generator = new SerializationGenerator(methodName: "Serialize");
 
 			foreach (var obj in objects)
 				GetSerializer(obj).Serialize(generator, obj, objects.GetObjectIdentifier(obj), mode);
@@ -135,7 +136,7 @@ namespace SafetySharp.Runtime.Serialization
 			Requires.NotNull(objects, nameof(objects));
 			Requires.InRange(mode, nameof(mode));
 
-			var generator = new SerializationGenerator("Deserialize");
+			var generator = new SerializationGenerator(methodName: "Deserialize");
 
 			foreach (var obj in objects)
 				GetSerializer(obj).Deserialize(generator, obj, objects.GetObjectIdentifier(obj), mode);

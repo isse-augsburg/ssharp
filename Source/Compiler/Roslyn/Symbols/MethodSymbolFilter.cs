@@ -28,7 +28,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 	using Utilities;
 
 	/// <summary>
-	///   Filters <see cref="IMethodSymbol"/> instances.
+	///   Filters <see cref="IMethodSymbol" /> instances.
 	/// </summary>
 	public static class MethodSymbolFilter
 	{
@@ -58,9 +58,8 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			}
 		}
 
-
 		/// <summary>
-		///   Removes all methods from the set that are not compatible to the signature of the <pramref name="signature"/>.
+		///   Removes all methods from the set that are not compatible to the signature of the <pramref name="signature" />.
 		/// </summary>
 		/// <param name="methods">The set of methods that should be filtered.</param>
 		/// <param name="delegateType">The signature the methods must be compatible to.</param>

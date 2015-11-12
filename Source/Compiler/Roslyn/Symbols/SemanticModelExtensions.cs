@@ -23,10 +23,8 @@
 namespace SafetySharp.Compiler.Roslyn.Symbols
 {
 	using System;
-	using Analysis;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
-	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -60,54 +58,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(type, nameof(type));
 
 			return semanticModel.Compilation.GetTypeByMetadataName(type.FullName);
-		}
-
-		/// <summary>
-		///   Gets the <see cref="INamedTypeSymbol " /> representing the <see cref="Component" /> class within the
-		///   context of the <paramref name="semanticModel" />.
-		/// </summary>
-		/// <param name="semanticModel">The semantic model the class symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static INamedTypeSymbol GetComponentClassSymbol([NotNull] this SemanticModel semanticModel)
-		{
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-			return semanticModel.Compilation.GetTypeSymbol<Component>();
-		}
-
-		/// <summary>
-		///   Gets the <see cref="INamedTypeSymbol " /> representing the <see cref="Fault" /> class within the
-		///   context of the <paramref name="semanticModel" />.
-		/// </summary>
-		/// <param name="semanticModel">The semantic model the class symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static INamedTypeSymbol GetFaultClassSymbol([NotNull] this SemanticModel semanticModel)
-		{
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-			return semanticModel.Compilation.GetTypeSymbol<Fault>();
-		}
-
-		/// <summary>
-		///   Gets the <see cref="INamedTypeSymbol " /> representing the <see cref="IComponent" /> interface within the
-		///   context of the <paramref name="semanticModel" />.
-		/// </summary>
-		/// <param name="semanticModel">The semantic model the interface symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static INamedTypeSymbol GetComponentInterfaceSymbol([NotNull] this SemanticModel semanticModel)
-		{
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-			return semanticModel.Compilation.GetTypeSymbol<IComponent>();
-		}
-
-		/// <summary>
-		///   Gets the <see cref="IMethodSymbol " /> representing the <see cref="Component.Update()" /> method within the
-		///   context of the <paramref name="semanticModel" />.
-		/// </summary>
-		/// <param name="semanticModel">The semantic model the attribute symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static IMethodSymbol GetUpdateMethodSymbol([NotNull] this SemanticModel semanticModel)
-		{
-			Requires.NotNull(semanticModel, nameof(semanticModel));
-			return semanticModel.Compilation.GetComponentUpdateMethodSymbol();
 		}
 	}
 }

@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// ReSharper disable SuspiciousTypeConversion.Global
 namespace Tests.Serialization.RuntimeModels
 {
 	using SafetySharp.Analysis;
@@ -36,9 +37,9 @@ namespace Tests.Serialization.RuntimeModels
 			var c = new C();
 			var m = new Model(c);
 
-			((C.Effect1)c.FaultEffects[0]).F = 17;
-			((C.Effect1)c.FaultEffects[1]).F = 18;
-			((C.Effect2)c.FaultEffects[2]).F = 19;
+			((C.Effect1)(object)c.FaultEffects[0]).F = 17;
+			((C.Effect1)(object)c.FaultEffects[1]).F = 18;
+			((C.Effect2)(object)c.FaultEffects[2]).F = 19;
 
 			_hasConstructorRun = false;
 			Create(m);
@@ -54,9 +55,9 @@ namespace Tests.Serialization.RuntimeModels
 			((C)root).F2.ShouldBeOfType<PersistentFault>();
 
 			root.FaultEffects.Count.ShouldBe(3);
-			((C.Effect1)root.FaultEffects[0]).F = 17;
-			((C.Effect1)root.FaultEffects[1]).F = 18;
-			((C.Effect2)root.FaultEffects[2]).F = 19;
+			((C.Effect1)(object)root.FaultEffects[0]).F = 17;
+			((C.Effect1)(object)root.FaultEffects[1]).F = 18;
+			((C.Effect2)(object)root.FaultEffects[2]).F = 19;
 
 			_hasConstructorRun.ShouldBe(false);
 		}
@@ -80,19 +81,9 @@ namespace Tests.Serialization.RuntimeModels
 			}
 
 			[FaultEffect]
-			public sealed class Effect1 : C, IFaultEffect // Todo: Generate interface implementation automatically
+			public sealed class Effect1 : C
 			{
 				public int F;
-
-				/// <summary>
-				///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.
-				/// </summary>
-				public Component Component { get; set; }
-
-				/// <summary>
-				///   Gets or sets the <see cref="Fault" /> instance that determines whether the fault effect is active.
-				/// </summary>
-				public Fault Fault { get; set; }
 
 				public override void M()
 				{
@@ -100,19 +91,9 @@ namespace Tests.Serialization.RuntimeModels
 			}
 
 			[FaultEffect]
-			public sealed class Effect2 : C, IFaultEffect // Todo: Generate interface implementation automatically
+			public sealed class Effect2 : C
 			{
 				public int F;
-
-				/// <summary>
-				///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.
-				/// </summary>
-				public Component Component { get; set; }
-
-				/// <summary>
-				///   Gets or sets the <see cref="Fault" /> instance that determines whether the fault effect is active.
-				/// </summary>
-				public Fault Fault { get; set; }
 
 				public override void M()
 				{
@@ -121,17 +102,8 @@ namespace Tests.Serialization.RuntimeModels
 
 			// Unused
 			[FaultEffect]
-			public sealed class Effect3 : C, IFaultEffect // Todo: Generate interface implementation automatically
+			public sealed class Effect3 : C
 			{
-				/// <summary>
-				///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.
-				/// </summary>
-				public Component Component { get; set; }
-
-				/// <summary>
-				///   Gets or sets the <see cref="Fault" /> instance that determines whether the fault effect is active.
-				/// </summary>
-				public Fault Fault { get; set; }
 			}
 		}
 	}

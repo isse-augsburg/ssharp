@@ -23,13 +23,19 @@
 namespace SafetySharp.Modeling
 {
 	using System;
+	using JetBrains.Annotations;
 
 	/// <summary>
 	///   When applied to a <see cref="Component" />-derived class, indicates that the class specifies an effect of a fault on a
 	///   port of the inherited <see cref="Component" />.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+	[MeansImplicitUse]
 	public sealed class FaultEffectAttribute : Attribute
 	{
+		/// <summary>
+		///   Gets or sets the name of the fault the fault effect belongs to.
+		/// </summary>
+		public string Fault { get; set; }
 	}
 }

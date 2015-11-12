@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// ReSharper disable SuspiciousTypeConversion.Global
 namespace Tests.Serialization.Objects
 {
 	using SafetySharp.Modeling;
@@ -31,33 +32,32 @@ namespace Tests.Serialization.Objects
 		protected override void Check()
 		{
 			var c = new C { I = 1 };
-			var e = new E { R = 3 };
-			c.FaultEffects.Add(e);
+			c.F.AddEffect<E>(c).R = 3;
 
-			GenerateCode(SerializationMode.Optimized, c, e);
-			_stateSlotCount.ShouldBe(4); // fault effect should not serialize unused field I of base component type
+			GenerateCode(SerializationMode.Optimized, c);
+			_stateSlotCount.ShouldBe(3); // fault effect should not serialize unused field I of base component type
 
 			Serialize();
 			c.I = 0;
-			((E)c.FaultEffects[0]).R = -1;
+			((E)(object)c.FaultEffects[0]).R = -1;
+			((E)(object)c.FaultEffects[0]).I = -2;
 			Deserialize();
+
 			c.I.ShouldBe(1);
-			((E)c.FaultEffects[0]).R.ShouldBe(3);
+			((E)(object)c.FaultEffects[0]).R.ShouldBe(3);
+			((E)(object)c.FaultEffects[0]).I.ShouldBe(-2);
 		}
 
 		private class C : Component
 		{
 			public int I;
+			public readonly Fault F = new TransientFault();
 		}
 
 		[FaultEffect]
-		private sealed class E : C, IFaultEffect // Todo: Generate interface implementation automatically
+		private sealed class E : C
 		{
 			public int R;
-
-			public Component Component { get; set; }
-
-			public Fault Fault { get; set; }
 		}
 	}
 }

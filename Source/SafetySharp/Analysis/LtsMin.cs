@@ -29,7 +29,6 @@ namespace SafetySharp.Analysis
 	using System.Linq;
 	using CompilerServices;
 	using FormulaVisitors;
-	using Modeling;
 	using Runtime.Serialization;
 	using Utilities;
 
@@ -52,11 +51,6 @@ namespace SafetySharp.Analysis
 		///   Gets the outputs that occurred during the execution of LtsMin.
 		/// </summary>
 		public IEnumerable<string> Outputs { get; private set; }
-
-		/// <summary>
-		///   Raised when the model checker has written an output. The output is always written to the console by default.
-		/// </summary>
-		public event Action<string> OutputWritten;
 
 		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
@@ -106,6 +100,11 @@ namespace SafetySharp.Analysis
 
 			return Check(model, formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
 		}
+
+		/// <summary>
+		///   Raised when the model checker has written an output. The output is always written to the console by default.
+		/// </summary>
+		public event Action<string> OutputWritten;
 
 		/// <summary>
 		///   Gets the name of the LtsMin executable.

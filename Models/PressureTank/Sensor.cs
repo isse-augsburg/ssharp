@@ -47,33 +47,24 @@ namespace PressureTank
 		public int TriggerPressure;
 
 		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		public Sensor()
-		{
-			SuppressIsFull.AddEffect<SuppressIsFullEffect>(this);
-			SuppressIsEmpty.AddEffect<SuppressIsEmptyEffect>(this);
-		}
-
-		/// <summary>
 		///   Gets a value indicating whether the triggering pressure level has been reached or exceeded.
 		/// </summary>
-		public virtual bool IsFull => CheckPhysicalPressure >= TriggerPressure;
+		public virtual bool IsFull => PhysicalPressure >= TriggerPressure;
 
 		/// <summary>
 		///   Gets a value indicating whether the tank is empty.
 		/// </summary>
-		public virtual bool IsEmpty => CheckPhysicalPressure <= 0;
+		public virtual bool IsEmpty => PhysicalPressure <= 0;
 
 		/// <summary>
 		///   Senses the physical pressure level within the tank.
 		/// </summary>
-		public extern int CheckPhysicalPressure { get; }
+		public extern int PhysicalPressure { get; }
 
 		/// <summary>
 		///   Prevents the sensor from triggering when the tank has reached or exceeded its maximum allowed pressure level.
 		/// </summary>
-		[FaultEffect]
+		[FaultEffect(Fault = nameof(SuppressIsFull))]
 		private sealed class SuppressIsFullEffect : Sensor
 		{
 			public override bool IsFull => false;
@@ -82,7 +73,7 @@ namespace PressureTank
 		/// <summary>
 		///   Prevents the sensor from triggering when the tank has become empty.
 		/// </summary>
-		[FaultEffect]
+		[FaultEffect(Fault = nameof(SuppressIsEmpty))]
 		private sealed class SuppressIsEmptyEffect : Sensor
 		{
 			public override bool IsEmpty => false;

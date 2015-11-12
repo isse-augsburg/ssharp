@@ -264,7 +264,7 @@ int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state)
 //---------------------------------------------------------------------------------------------------------------------------
 RuntimeModel^ CreateModel()
 {
-	// Unfortunately, C++/CLI does not supported managed lambdas
+	// Unfortunately, C++/CLI does not support managed lambdas
 	auto model = RuntimeModelSerializer::Load(Globals::ModelStream);
 	Globals::ModelStream->Seek(0, SeekOrigin::Begin);
 

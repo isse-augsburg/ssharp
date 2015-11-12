@@ -205,7 +205,7 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Collects all calls to <see cref="StateMachine{TState}"/> <c>Transition</c> methods within
+		///   Collects all calls to <see cref="StateMachine{TState}" /> <c>Transition</c> methods within
 		///   <paramref name="expression" />.
 		/// </summary>
 		private List<Transition> DecomposeTransitionChain(InvocationExpressionSyntax expression, out ExpressionSyntax stateMachine)
@@ -309,9 +309,6 @@ namespace SafetySharp.Compiler.Normalization
 			return SyntaxFactory.SingletonSeparatedList(expression);
 		}
 
-		/// <summary>
-		///   Represents a transition.
-		/// </summary>
 		private struct Transition
 		{
 			public SeparatedSyntaxList<ExpressionSyntax> SourceStates;

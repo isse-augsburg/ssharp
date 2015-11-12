@@ -55,13 +55,13 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="name">The name of the generated method.</param>
-		internal SerializationGenerator(string name)
+		/// <param name="methodName">The name of the generated method.</param>
+		internal SerializationGenerator(string methodName)
 		{
-			Requires.NotNullOrWhitespace(name, nameof(name));
+			Requires.NotNullOrWhitespace(methodName, nameof(methodName));
 
 			_method = new DynamicMethod(
-				name: name,
+				name: methodName,
 				returnType: typeof(void),
 				parameterTypes: new[] { typeof(ObjectTable), typeof(int*) },
 				m: typeof(object).Assembly.ManifestModule,

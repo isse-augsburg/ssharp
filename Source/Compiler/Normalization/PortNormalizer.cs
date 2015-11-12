@@ -25,11 +25,13 @@ namespace SafetySharp.Compiler.Normalization
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using CompilerServices;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Microsoft.CodeAnalysis.Editing;
+	using Modeling;
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
 	using Runtime;
@@ -76,8 +78,8 @@ namespace SafetySharp.Compiler.Normalization
 				var infoFieldName = Syntax.LiteralExpression(GetBinderFieldName());
 
 				declaration = declaration.WithModifiers(declaration.Modifiers.RemoveAt(index)).WithSemicolonToken(default(SyntaxToken));
-				declaration = (MethodDeclarationSyntax)Syntax.MarkAsDebuggerHidden(declaration, SemanticModel);
-				declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<BindingMetadataAttribute>(declaration, SemanticModel, 
+				declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<DebuggerHiddenAttribute>(declaration, SemanticModel);
+				declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<BindingMetadataAttribute>(declaration, SemanticModel,
 					delegateFieldName, infoFieldName);
 			}
 
@@ -157,7 +159,7 @@ namespace SafetySharp.Compiler.Normalization
 							delegateFieldName, infoFieldName);
 
 						var requiredPortAccessor = accessor.AddAttributeLists(hiddenAttribute, fieldAttribute);
-                        yield return requiredPortAccessor.WithBody(body).WithSemicolonToken(default(SyntaxToken));
+						yield return requiredPortAccessor.WithBody(body).WithSemicolonToken(default(SyntaxToken));
 					}
 					else
 						yield return accessor.WithBody(body);
@@ -344,7 +346,7 @@ namespace SafetySharp.Compiler.Normalization
 				accessibility: Accessibility.Private,
 				modifiers: DeclarationModifiers.Unsafe);
 
-			return (DelegateDeclarationSyntax)Syntax.MarkAsCompilerGenerated(methodDelegate, SemanticModel);
+			return (DelegateDeclarationSyntax)Syntax.AddAttribute<CompilerGeneratedAttribute>(methodDelegate, SemanticModel);
 		}
 
 		/// <summary>
@@ -359,14 +361,14 @@ namespace SafetySharp.Compiler.Normalization
 				accessibility: Accessibility.Private,
 				initializer: initializer);
 
-			field = Syntax.MarkAsCompilerGenerated(field, SemanticModel);
+			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field, SemanticModel);
 			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
-			field = Syntax.MarkAsNonSerializable(field, SemanticModel);
+			field = Syntax.AddAttribute<NonSerializableAttribute>(field, SemanticModel);
 			return (FieldDeclarationSyntax)field;
 		}
 
 		/// <summary>
-		///   Creates a field declaration that stores a <see cref="PortBinding"/> instance.
+		///   Creates a field declaration that stores a <see cref="PortBinding" /> instance.
 		/// </summary>
 		private FieldDeclarationSyntax CreateBinderFieldDeclaration()
 		{
@@ -375,9 +377,9 @@ namespace SafetySharp.Compiler.Normalization
 				type: Syntax.TypeExpression<PortBinding>(SemanticModel),
 				accessibility: Accessibility.Private);
 
-			field = Syntax.MarkAsCompilerGenerated(field, SemanticModel);
+			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field, SemanticModel);
 			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
-            return (FieldDeclarationSyntax)field;
+			return (FieldDeclarationSyntax)field;
 		}
 
 		/// <summary>

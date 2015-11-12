@@ -22,11 +22,11 @@
 
 namespace SafetySharp.Compiler.Normalization
 {
+	using Analysis;
 	using CompilerServices;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
-	using Analysis;
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
 
@@ -138,7 +138,7 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		/// Does not normalize <c>nameof</c> expressions.
+		///   Does not normalize <c>nameof</c> expressions.
 		/// </summary>
 		public override SyntaxNode VisitInvocationExpression(InvocationExpressionSyntax expression)
 		{
@@ -158,7 +158,7 @@ namespace SafetySharp.Compiler.Normalization
 			{
 				var arrayExpression = ((ElementAccessExpressionSyntax)argument.Parent.Parent).Expression;
 				var kind = SemanticModel.GetTypeInfo(arrayExpression).Type.TypeKind;
-                if (kind == TypeKind.Array || kind == TypeKind.Pointer)
+				if (kind == TypeKind.Array || kind == TypeKind.Pointer)
 					return base.VisitArgument(argument);
 			}
 

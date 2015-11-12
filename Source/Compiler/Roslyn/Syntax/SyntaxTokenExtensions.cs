@@ -135,5 +135,15 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		{
 			return token.WithTrailingTrivia(SyntaxFactory.Space);
 		}
+
+		/// <summary>
+		///   Gets the line number of the <paramref name="token" />.
+		/// </summary>
+		/// <param name="token">The syntax token the line number should be returned for.</param>
+		[Pure]
+		public static int GetLineNumber(this SyntaxToken token)
+		{
+			return token.GetLocation().GetMappedLineSpan().StartLinePosition.Line + 1;
+		}
 	}
 }

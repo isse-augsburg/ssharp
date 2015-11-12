@@ -22,8 +22,8 @@
 
 namespace SafetySharp.Analysis
 {
-	using Utilities;
 	using FormulaVisitors;
+	using Utilities;
 
 	/// <summary>
 	///   Represents a CTL* formula.

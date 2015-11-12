@@ -22,15 +22,9 @@
 
 namespace SafetySharp.Compiler.Roslyn.Symbols
 {
-	using System;
 	using System.Linq;
-	using Analysis;
-	using CompilerServices;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
-	using Microsoft.CodeAnalysis.CSharp;
-	using Microsoft.CodeAnalysis.CSharp.Syntax;
-	using Microsoft.CodeAnalysis.Editing;
 	using Modeling;
 	using Utilities;
 
@@ -73,7 +67,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			if (methodSymbol.Equals(overriddenMethod))
 				return true;
 
-			if (!methodSymbol.IsOverride)
+			if (!methodSymbol.IsOverride || methodSymbol.OverriddenMethod == null)
 				return false;
 
 			if (methodSymbol.OverriddenMethod.OriginalDefinition.Equals(overriddenMethod))
@@ -94,7 +88,13 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(methodSymbol, nameof(methodSymbol));
 			Requires.NotNull(compilation, nameof(compilation));
 
-			return methodSymbol.Overrides(compilation.GetComponentUpdateMethodSymbol());
+			var updateMethod = compilation
+				.GetTypeSymbol<Component>()
+				.GetMembers("Update")
+				.OfType<IMethodSymbol>()
+				.Single(method => method.Parameters.Length == 0 && method.ReturnsVoid);
+
+			return methodSymbol.Overrides(updateMethod);
 		}
 
 		/// <summary>
@@ -134,7 +134,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			if (!validKind)
 				return false;
 
-			if (!methodSymbol.ContainingType.ImplementsIComponent(compilation))
+			if (!methodSymbol.ContainingType.IsDerivedFrom(compilation.GetTypeSymbol<IComponent>()))
 				return false;
 
 			switch (methodSymbol.ContainingType.TypeKind)
@@ -196,7 +196,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			if (!validKind)
 				return false;
 
-			if (!methodSymbol.ContainingType.ImplementsIComponent(compilation))
+			if (!methodSymbol.ContainingType.IsDerivedFrom(compilation.GetTypeSymbol<IComponent>()))
 				return false;
 
 			switch (methodSymbol.ContainingType.TypeKind)
@@ -270,7 +270,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			if (methodSymbol.MethodKind != MethodKind.Ordinary && methodSymbol.MethodKind != MethodKind.ExplicitInterfaceImplementation)
 				return false;
 
-			if (!methodSymbol.ContainingType.IsDerivedFromFault(compilation))
+			if (!methodSymbol.ContainingType.IsDerivedFrom(compilation.GetTypeSymbol<IComponent>()))
 				return false;
 
 			if (methodSymbol.IsUpdateMethod(compilation))
@@ -308,12 +308,11 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			if (methodSymbol.Name != "Bind")
 				return false;
 
-			return methodSymbol.ContainingType.Equals(semanticModel.GetComponentClassSymbol());
+			return methodSymbol.ContainingType.Equals(semanticModel.GetTypeSymbol<Component>());
 		}
 
 		/// <summary>
-		///   Checks whether <paramref name="methodSymbol" /> represents a built-in operator of the <see cref="int" />,
-		///   <see cref="bool" />, or <see cref="decimal" /> types.
+		///   Checks whether <paramref name="methodSymbol" /> represents a built-in operator.
 		/// </summary>
 		/// <param name="methodSymbol">The method symbol that should be checked.</param>
 		[Pure]

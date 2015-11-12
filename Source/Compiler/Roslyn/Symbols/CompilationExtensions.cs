@@ -23,11 +23,8 @@
 namespace SafetySharp.Compiler.Roslyn.Symbols
 {
 	using System;
-	using System.Linq;
-	using Analysis;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
-	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -61,76 +58,6 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(type, nameof(type));
 
 			return compilation.GetTypeByMetadataName(type.FullName);
-		}
-
-		/// <summary>
-		///   Gets the <see cref="INamedTypeSymbol " /> representing the <see cref="Component" /> class within the
-		///   context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="compilation">The compilation the class symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static INamedTypeSymbol GetComponentClassSymbol([NotNull] this Compilation compilation)
-		{
-			Requires.NotNull(compilation, nameof(compilation));
-			return compilation.GetTypeSymbol<Component>();
-		}
-
-		/// <summary>
-		///   Gets the <see cref="INamedTypeSymbol " /> representing the <see cref="Fault" /> class within the
-		///   context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="compilation">The compilation the class symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static INamedTypeSymbol GetFaultClassSymbol([NotNull] this Compilation compilation)
-		{
-			Requires.NotNull(compilation, nameof(compilation));
-			return compilation.GetTypeSymbol(typeof(Fault));
-		}
-
-		/// <summary>
-		///   Gets the <see cref="INamedTypeSymbol " /> representing the <see cref="IComponent" /> interface within the
-		///   context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="compilation">The compilation the interface symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static INamedTypeSymbol GetComponentInterfaceSymbol([NotNull] this Compilation compilation)
-		{
-			Requires.NotNull(compilation, nameof(compilation));
-			return compilation.GetTypeSymbol<IComponent>();
-		}
-
-		/// <summary>
-		///   Gets the <see cref="IMethodSymbol " /> representing the <see cref="Component.Update()" /> method within the
-		///   context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="compilation">The compilation the attribute symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static IMethodSymbol GetComponentUpdateMethodSymbol([NotNull] this Compilation compilation)
-		{
-			Requires.NotNull(compilation, nameof(compilation));
-
-			return compilation
-				.GetTypeSymbol<Component>()
-				.GetMembers("Update")
-				.OfType<IMethodSymbol>()
-				.Single(method => method.Parameters.Length == 0 && method.ReturnsVoid);
-		}
-
-		/// <summary>
-		///   Gets the <see cref="IMethodSymbol " /> representing the <see cref="Fault.Update" /> method within the
-		///   context of the <paramref name="compilation" />.
-		/// </summary>
-		/// <param name="compilation">The compilation the attribute symbol should be returned for.</param>
-		[Pure, NotNull]
-		public static IMethodSymbol GetFaultUpdateMethodSymbol([NotNull] this Compilation compilation)
-		{
-			Requires.NotNull(compilation, nameof(compilation));
-
-			return compilation
-				.GetTypeSymbol<Fault>()
-				.GetMembers("UpdateFaultState")
-				.OfType<IMethodSymbol>()
-				.Single(method => method.Parameters.Length == 0 && method.ReturnsVoid);
 		}
 	}
 }

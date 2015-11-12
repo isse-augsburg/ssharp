@@ -146,7 +146,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 				// Otherwise, serialize the field
 				return true;
 			});
-			
+
 			// It is important to sort the fields in a deterministic order; by default, .NET's reflection APIs don't
 			// return fields in any particular order at all, which obviously causes problems when we then go on to try
 			// to deserialize fields in a different order than the one that was used to serialize them

@@ -85,7 +85,7 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			var usings = _rootNode.Descendants<UsingDirectiveSyntax>().Select(usingDirective =>
 			{
-				var importedSymbol = ModelExtensions.GetSymbolInfo(SemanticModel, usingDirective.Name).Symbol;
+				var importedSymbol = SemanticModel.GetSymbolInfo(usingDirective.Name).Symbol;
 				return usingDirective.WithName(SyntaxFactory.ParseName(importedSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
 			});
 
