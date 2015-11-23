@@ -20,28 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.LtsMin.Ctl.NotViolated
 {
-	using Xunit;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	public partial class LtsMinTests
+	internal class InitialState : LtsMinTestObject
 	{
-		[Theory, MemberData("DiscoverTests", "LtsMin/Invariants")]
-		public void Invariants(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			var c = new C { F = 3 };
+			//Check(Ctl.AX(Ctl.AF(Ctl.EG(c.F == 3))), c).ShouldBe(true); // TODO
 		}
 
-		[Theory, MemberData("DiscoverTests", "LtsMin/Ltl")]
-		public void Ltl(string test, string file)
+		private class C : Component
 		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "LtsMin/Ctl")]
-		public void Ctl(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			public int F;
 		}
 	}
 }

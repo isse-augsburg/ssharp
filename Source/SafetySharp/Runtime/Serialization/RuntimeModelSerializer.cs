@@ -109,7 +109,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private static StateFormula[] CollectStateFormulas(Formula[] formulas)
 		{
-			var visitor = new CollectStateFormulasVisitor();
+			var visitor = new StateFormulaCollector();
 			foreach (var formula in formulas)
 				visitor.Visit(formula);
 

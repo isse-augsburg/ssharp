@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,43 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.FormulaVisitors
+namespace Tests.LtsMin.Ctl.Violated
 {
-	using System.Collections.Generic;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	/// <summary>
-	///   Collects all <see cref="StateFormula" /> instances contained in a <see cref="Formula" />.
-	/// </summary>
-	internal class CollectStateFormulasVisitor : FormulaVisitor
+	internal class InitialState : LtsMinTestObject
 	{
-		/// <summary>
-		///   Gets the collected state formulas.
-		/// </summary>
-		public HashSet<StateFormula> StateFormulas { get; } = new HashSet<StateFormula>();
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitUnaryFormula(UnaryFormula formula)
+		protected override void Check()
 		{
-			Visit(formula.Operand);
+			var c = new C { F = 3 };
+			//Check(Ctl.AX(c.F != 3), c).ShouldBe(false); TODO
 		}
 
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitBinaryFormula(BinaryFormula formula)
+		private class C : Component
 		{
-			Visit(formula.LeftOperand);
-			Visit(formula.RightOperand);
-		}
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitStateFormula(StateFormula formula)
-		{
-			StateFormulas.Add(formula);
+			public int F;
 		}
 	}
 }

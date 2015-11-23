@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,28 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace SafetySharp.Analysis.FormulaVisitors
 {
-	using Xunit;
+	using System.Collections.Generic;
 
-	public partial class LtsMinTests
+	/// <summary>
+	///   Collects all <see cref="StateFormula" /> instances contained in a <see cref="Formula" />.
+	/// </summary>
+	internal class StateFormulaCollector : FormulaVisitor
 	{
-		[Theory, MemberData("DiscoverTests", "LtsMin/Invariants")]
-		public void Invariants(string test, string file)
+		/// <summary>
+		///   Gets the collected state formulas.
+		/// </summary>
+		public HashSet<StateFormula> StateFormulas { get; } = new HashSet<StateFormula>();
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitUnaryFormula(UnaryFormula formula)
 		{
-			ExecuteDynamicTests(file);
+			Visit(formula.Operand);
 		}
 
-		[Theory, MemberData("DiscoverTests", "LtsMin/Ltl")]
-		public void Ltl(string test, string file)
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBinaryFormula(BinaryFormula formula)
 		{
-			ExecuteDynamicTests(file);
+			Visit(formula.LeftOperand);
+			Visit(formula.RightOperand);
 		}
 
-		[Theory, MemberData("DiscoverTests", "LtsMin/Ctl")]
-		public void Ctl(string test, string file)
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitStateFormula(StateFormula formula)
 		{
-			ExecuteDynamicTests(file);
+			StateFormulas.Add(formula);
 		}
 	}
 }

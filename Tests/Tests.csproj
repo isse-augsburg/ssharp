@@ -227,6 +227,8 @@
     <Compile Include="LtsMinTests.Helpers.cs">
       <DependentUpon>LtsMinTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="LtsMin\Ctl\NotViolated\initial state.cs" />
+    <Compile Include="LtsMin\Ctl\Violated\initial state.cs" />
     <Compile Include="LtsMin\Invariants\Violated\required port.cs" />
     <Compile Include="LtsMin\Invariants\NotViolated\state machine.cs" />
     <Compile Include="LtsMin\Invariants\Violated\list components.cs" />
@@ -372,6 +374,7 @@
       <Name>SafetySharp</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

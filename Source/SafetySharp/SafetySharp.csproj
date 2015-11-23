@@ -42,6 +42,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis\FormulaVisitors\LtsMinMuCalculusTransformer.cs" />
     <Compile Include="Analysis\HazardAttribute.cs" />
     <Compile Include="Analysis\IModelChecker.cs" />
     <Compile Include="Analysis\LtsMin.cs" />
@@ -72,14 +73,14 @@
     <Compile Include="Analysis\BinaryFormula.cs" />
     <Compile Include="Analysis\BinaryOperator.cs" />
     <Compile Include="Analysis\Formula.cs" />
-    <Compile Include="Analysis\FormulaVisitors\CollectStateFormulasVisitor.cs" />
+    <Compile Include="Analysis\FormulaVisitors\StateFormulaCollector.cs" />
     <Compile Include="Analysis\FormulaVisitors\FormulaVisitor.cs" />
     <Compile Include="Analysis\Ctl.cs" />
     <Compile Include="Analysis\StateFormula.cs" />
     <Compile Include="Analysis\UnaryFormula.cs" />
     <Compile Include="Analysis\UnaryOperator.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsLtlFormulaVisitor.cs" />
-    <Compile Include="Analysis\FormulaVisitors\LtsMinLtlTransformationVisitor.cs" />
+    <Compile Include="Analysis\FormulaVisitors\LtsMinLtlTransformer.cs" />
     <Compile Include="Analysis\FormulaVisitors\ToStringVisitor.cs" />
     <Compile Include="Modeling\HiddenAttribute.cs" />
     <Compile Include="Modeling\IComponent.cs" />

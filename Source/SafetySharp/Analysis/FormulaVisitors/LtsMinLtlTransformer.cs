@@ -28,7 +28,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 	/// <summary>
 	///   Transforms the formula to a LtsMin LTL formula.
 	/// </summary>
-	internal class LtsMinLtlTransformationVisitor : FormulaVisitor
+	internal class LtsMinLtlTransformer : FormulaVisitor
 	{
 		/// <summary>
 		///   The string builder that is used to construct the transformed formula.
@@ -41,7 +41,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		public string TransformedFormula => _builder.ToString();
 
 		/// <summary>
-		///   Visits the <paramref name="formula." />
+		///   Visits the <paramref name="formula" />.
 		/// </summary>
 		public override void VisitUnaryFormula(UnaryFormula formula)
 		{
@@ -71,7 +71,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		}
 
 		/// <summary>
-		///   Visits the <paramref name="formula." />
+		///   Visits the <paramref name="formula" />.
 		/// </summary>
 		public override void VisitBinaryFormula(BinaryFormula formula)
 		{

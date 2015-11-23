@@ -92,13 +92,22 @@ namespace SafetySharp.Analysis
 			var visitor = new IsLtlFormulaVisitor();
 			visitor.Visit(formula);
 
-			if (!visitor.IsLtlFormula)
-				throw new NotImplementedException("CTL* model checking is not yet implemented.");
+			if (visitor.IsLtlFormula)
+			{
+				var transformationVisitor = new LtsMinLtlTransformer();
+				transformationVisitor.Visit(formula);
 
-			var transformationVisitor = new LtsMinLtlTransformationVisitor();
-			transformationVisitor.Visit(formula);
+				return Check(model, formula, $"--ltl=\"{ transformationVisitor.TransformedFormula}\"");
+			}
+			else
+			{
+				var transformationVisitor = new LtsMinMuCalculusTransformer();
+				transformationVisitor.Visit(formula);
 
-			return Check(model, formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
+				return Check(model, formula, $"--ltl=\"{ transformationVisitor.TransformedFormula}\"");
+			}
+
+			
 		}
 
 		/// <summary>
