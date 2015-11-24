@@ -76,7 +76,7 @@
     <Compile Include="Analysis\Formula.cs" />
     <Compile Include="Analysis\FormulaVisitors\StateFormulaCollector.cs" />
     <Compile Include="Analysis\FormulaVisitors\FormulaVisitor.cs" />
-    <Compile Include="Analysis\Ctl.cs" />
+    <Compile Include="Analysis\Tl.cs" />
     <Compile Include="Analysis\StateFormula.cs" />
     <Compile Include="Analysis\UnaryFormula.cs" />
     <Compile Include="Analysis\UnaryOperator.cs" />

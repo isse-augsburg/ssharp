@@ -22,6 +22,7 @@
 
 namespace PressureTank
 {
+	using System.Diagnostics;
 	using SafetySharp.Modeling;
 
 	/// <summary>
@@ -80,6 +81,7 @@ namespace PressureTank
 		/// </summary>
 		public override void Update()
 		{
+			Debugger.Launch();
 			StateMachine
 				.Transition(
 					from: State.Filling,

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.LtsMin.Ctl.Violated
+namespace Tests.LtsMin.CtlStar.NotViolated
 {
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
@@ -31,7 +31,7 @@ namespace Tests.LtsMin.Ctl.Violated
 		protected override void Check()
 		{
 			var c = new C { F = 3 };
-			//Check(Ctl.AX(c.F != 3), c).ShouldBe(false); TODO
+			//Check(Ctl.AX(Ctl.AF(Ctl.EG(c.F == 3))), c).ShouldBe(true); // TODO
 		}
 
 		private class C : Component

@@ -25,7 +25,7 @@ namespace Tests.Serialization.StateLabels
 	using SafetySharp.Modeling;
 	using SafetySharp.Analysis;
 	using Shouldly;
-	using static SafetySharp.Analysis.Ctl;
+	using static SafetySharp.Analysis.Tl;
 
 	internal class CtlFormula : RuntimeModelTest
 	{

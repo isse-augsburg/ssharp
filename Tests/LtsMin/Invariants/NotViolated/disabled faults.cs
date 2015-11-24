@@ -20,23 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.LtsMin.Ctl.NotViolated
+namespace Tests.LtsMin.Invariants.NotViolated
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class InitialState : LtsMinTestObject
+	internal class DisabledFaults : LtsMinTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C { F = 3 };
-			//Check(Ctl.AX(Ctl.AF(Ctl.EG(c.F == 3))), c).ShouldBe(true); // TODO
+			var c = new C
+			{
+				X = 3,
+				F1 = { OccurrenceKind = OccurrenceKind.Never },
+				F2 = { OccurrenceKind = OccurrenceKind.Never }
+			};
+
+			CheckInvariant(c.X == 3, c).ShouldBe(true);
 		}
 
 		private class C : Component
 		{
-			public int F;
+			public readonly Fault F1 = new TransientFault();
+			public readonly Fault F2 = new TransientFault();
+			public int X;
+
+			[FaultEffect(Fault = nameof(F1))]
+			public class E1 : C
+			{
+				public override void Update()
+				{
+					X = 77;
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F2))]
+			public class E2 : C
+			{
+				public override void Update()
+				{
+					X = 717;
+				}
+			}
 		}
 	}
 }

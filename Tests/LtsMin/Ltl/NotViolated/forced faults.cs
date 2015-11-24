@@ -20,40 +20,56 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.LtsMin.Ltl.Violated
+namespace Tests.LtsMin.Ltl.NotViolated
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using static SafetySharp.Analysis.Tl;
 
-	internal class MultipleChoices : LtsMinTestObject
+	internal class ForcedFaults : LtsMinTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C { F = 3 };
-			var d = new D { C = c };
+			var c = new C
+			{
+				X = 3,
+				F1 = { OccurrenceKind = OccurrenceKind.Always },
+				F2 = { OccurrenceKind = OccurrenceKind.Always }
+			};
 
-			Check(F(G(c.F == 99)), d).ShouldBe(false);
+			Check(c.X == 3 && X(G(c.X == 119)), c).ShouldBe(true);
 		}
 
 		private class C : Component
 		{
-			public int F;
-			public bool G1;
-			public bool G2;
-		}
-
-		private class D : Component
-		{
-			public C C;
+			public readonly Fault F1 = new TransientFault();
+			public readonly Fault F2 = new TransientFault();
+			public int X;
 
 			public override void Update()
 			{
-				C.G1 = Choose(true, false);
-				C.G2 = C.G1 && Choose(true, false);
+				X = 9;
+			}
 
-				if (C.G2)
-					C.F = 99;
+			[FaultEffect(Fault = nameof(F1))]
+			[Priority(2)]
+			public class E1 : C
+			{
+				public override void Update()
+				{
+					base.Update();
+					X += 10;
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F2))]
+			public class E2 : C
+			{
+				public override void Update()
+				{
+					base.Update();
+					X += 100;
+				}
 			}
 		}
 	}

@@ -38,7 +38,7 @@ namespace Tests
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "LtsMin/Ctl")]
+		[Theory, MemberData("DiscoverTests", "LtsMin/CtlStar")]
 		public void Ctl(string test, string file)
 		{
 			ExecuteDynamicTests(file);

@@ -29,7 +29,7 @@ namespace SafetySharp.Analysis
 	///   Provides factory methods for the construction of CTL* formulas.
 	/// </summary>
 	[SuppressMessage("ReSharper", "InconsistentNaming")]
-	public static class Ctl
+	public static class Tl
 	{
 		/// <summary>
 		///   Returns a <see cref="Formula" /> that applies the 'all paths' operator to <paramref name="operand" />.

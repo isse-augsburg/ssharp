@@ -24,7 +24,7 @@ namespace Tests.LtsMin.Ltl.NotViolated
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
-	using static SafetySharp.Analysis.Ctl;
+	using static SafetySharp.Analysis.Tl;
 
 	internal class SingleChoice : LtsMinTestObject
 	{
