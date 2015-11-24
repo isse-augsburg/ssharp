@@ -59,6 +59,7 @@
     <Compile Include="Analysis\CounterExample.cs" />
     <Compile Include="Modeling\OccurrenceKind.cs" />
     <Compile Include="Runtime\Reflection\ComponentExtensions.cs" />
+    <Compile Include="Runtime\Reflection\ModelExtensions.cs" />
     <Compile Include="Runtime\Reflection\StateMachineExtensions.cs" />
     <Compile Include="Modeling\Choice.cs" />
     <Compile Include="Modeling\Component.Choose.cs">

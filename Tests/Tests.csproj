@@ -316,6 +316,14 @@
     <Compile Include="Reflection\Components\Subcomponents\single.cs" />
     <Compile Include="Reflection\Components\Subcomponents\non-serializable.cs" />
     <Compile Include="Reflection\Components\Subcomponents\none.cs" />
+    <Compile Include="Reflection\Models\Faults\multiple generic.cs" />
+    <Compile Include="Reflection\Models\Faults\multiple.cs" />
+    <Compile Include="Reflection\Models\Faults\single shared.cs" />
+    <Compile Include="Reflection\Models\Faults\single in subcomponent.cs" />
+    <Compile Include="Reflection\Models\Faults\single.cs" />
+    <Compile Include="Reflection\Models\Subcomponents\generic.cs" />
+    <Compile Include="Reflection\Models\Subcomponents\multiple.cs" />
+    <Compile Include="Reflection\Models\Subcomponents\single.cs" />
     <Compile Include="Serialization\Enumerations\Int16.cs" />
     <Compile Include="Serialization\Enumerations\Int64.cs" />
     <Compile Include="Serialization\Enumerations\Int32.cs" />

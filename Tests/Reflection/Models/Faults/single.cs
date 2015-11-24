@@ -20,22 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Reflection.Models.Faults
 {
-	using Xunit;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ReflectionTests
+	internal class Single : TestObject
 	{
-		[Theory, MemberData("DiscoverTests", "Reflection/Components")]
-		public void Components(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			var c = new C { };
+			var m = new Model(c);
+
+			m.GetFaults().ShouldBe(new[] { c.F });
 		}
 
-		[Theory, MemberData("DiscoverTests", "Reflection/Models")]
-		public void Models(string test, string file)
+		private class C : Component
 		{
-			ExecuteDynamicTests(file);
+			public readonly Fault F = new PersistentFault();
+
+			[FaultEffect(Fault = nameof(F))]
+			private class E : C
+			{
+			}
 		}
 	}
 }

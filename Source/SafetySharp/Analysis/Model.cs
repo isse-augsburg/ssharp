@@ -65,7 +65,7 @@ namespace SafetySharp.Analysis
 		{
 			Requires.NotNull(obj, nameof(obj));
 
-			var bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+			const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 			var components = new HashSet<IComponent>(ReferenceEqualityComparer<IComponent>.Default);
 
 			CollectComponents(components, obj.GetType().GetFields(bindingFlags), info => info.FieldType, info => info.GetValue(obj));
@@ -82,31 +82,11 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Visits the hierarchy of components in pre-order, executing the <paramref name="action" /> for each one.
-		/// </summary>
-		/// <param name="action">The action that should be executed for each component.</param>
-		public void VisitPreOrder(Action<IComponent> action)
-		{
-			foreach (var component in this)
-				component.VisitPreOrder(action);
-		}
-
-		/// <summary>
-		///   Visits the hierarchy of components in post-order, executing the <paramref name="action" /> for each one.
-		/// </summary>
-		/// <param name="action">The action that should be executed for each component.</param>
-		public void VisitPostOrder(Action<IComponent> action)
-		{
-			foreach (var component in this)
-				component.VisitPostOrder(action);
-		}
-
-		/// <summary>
 		///   Binds all automatically bound fault effects to their respective faults.
 		/// </summary>
 		internal void BindFaultEffects()
 		{
-			VisitPostOrder(component =>
+			this.VisitPostOrder(component =>
 			{
 				var type = component.GetRuntimeType();
 
@@ -121,13 +101,13 @@ namespace SafetySharp.Analysis
 					{
 						const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 						var fault =
-							type.DeclaringType.GetField(attribute.Fault, flags)?.GetValue(component) as Fault ??
-							type.DeclaringType.GetProperty(attribute.Fault, flags)?.GetMethod?.Invoke(component, null) as Fault;
+							component.GetType().GetField(attribute.Fault, flags)?.GetValue(component) as Fault ??
+							component.GetType().GetProperty(attribute.Fault, flags)?.GetMethod?.Invoke(component, null) as Fault;
 
 						if (fault == null)
 						{
 							throw new InvalidOperationException(
-								$"'{type.DeclaringType.FullName}' does not declare a field or property " +
+								$"'{component.GetType().FullName}' does not declare a field or property " +
 								$"called '{attribute.Fault}' of type '{typeof(Fault).FullName}' (or a type derived from it) " +
 								$"that contains a valid fault instance as expected by '{type.FullName}'.");
 						}

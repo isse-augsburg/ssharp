@@ -20,22 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Reflection.Models.Subcomponents
 {
-	using Xunit;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ReflectionTests
+	internal class Multiple : TestObject
 	{
-		[Theory, MemberData("DiscoverTests", "Reflection/Components")]
-		public void Components(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			var c = new C { Sub1 = new D(), Sub2 = new D(), Sub3 = new D(), Sub4 = new D() };
+			var m = new Model(c);
+			m.GetComponents().ShouldBe(new[] { c, c.Sub1, c.Sub2, c.Sub3, c.Sub4 });
 		}
 
-		[Theory, MemberData("DiscoverTests", "Reflection/Models")]
-		public void Models(string test, string file)
+		private class C : Component
 		{
-			ExecuteDynamicTests(file);
+			private int f = 0;
+
+			public IComponent Sub1;
+			public Component Sub2;
+			public D Sub3;
+			public Component Sub4;
+		}
+
+		private class D : Component
+		{
 		}
 	}
 }

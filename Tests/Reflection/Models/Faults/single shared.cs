@@ -20,22 +20,64 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Reflection.Models.Faults
 {
-	using Xunit;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ReflectionTests
+	internal class SharedSingleFaultInSubcomponent : TestObject
 	{
-		[Theory, MemberData("DiscoverTests", "Reflection/Components")]
-		public void Components(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			var d = new D { };
+			var m = new Model(d);
+
+			m.GetFaults().ShouldBe(new[] { d.F });
 		}
 
-		[Theory, MemberData("DiscoverTests", "Reflection/Models")]
-		public void Models(string test, string file)
+		private class D : Component
 		{
-			ExecuteDynamicTests(file);
+			public C1 C1;
+			public C2 C2;
+			public C1 C3;
+
+			public readonly Fault F = new TransientFault();
+
+			public D()
+			{
+				C1 = new C1(F);
+				C2 = new C2(F);
+				C3 = new C1(F);
+			}
+		}
+
+		private class C1 : Component
+		{
+			public C1(Fault f = null)
+			{
+				f.AddEffect<E>(this);
+			}
+
+			[FaultEffect]
+			private class E : C1
+			{
+			}
+		}
+
+		private class C2 : Component
+		{
+			public C2(Fault f = null)
+			{
+				f.AddEffect<E>(this);
+			}
+
+			[FaultEffect]
+			private class E : C2
+			{
+			}
 		}
 	}
 }

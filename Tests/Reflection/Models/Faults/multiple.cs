@@ -20,22 +20,66 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Reflection.Models.Faults
 {
-	using Xunit;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ReflectionTests
+	internal class Multiple : TestObject
 	{
-		[Theory, MemberData("DiscoverTests", "Reflection/Components")]
-		public void Components(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			var d = new D { };
+			var m = new Model(d);
+
+			m.GetFaults().ShouldBe(new[] { d.F1, d.F2, d.C2.F }, ignoreOrder: true);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Reflection/Models")]
-		public void Models(string test, string file)
+		private class D : Component
 		{
-			ExecuteDynamicTests(file);
+			public readonly Fault F1 = new TransientFault();
+			public readonly Fault F2 = new TransientFault();
+			public C1 C1;
+			public readonly C2 C2;
+			public C1 C3;
+
+			public D()
+			{
+				C1 = new C1(F1);
+				C2 = new C2();
+				C3 = new C1(F1);
+			}
+
+			[FaultEffect(Fault = nameof(F2))]
+			private class E : D
+			{
+			}
+		}
+
+		private class C1 : Component
+		{
+			public C1(Fault f = null)
+			{
+				f.AddEffect<E>(this);
+			}
+
+			[FaultEffect]
+			private class E : C1
+			{
+			}
+		}
+
+		private class C2 : Component
+		{
+			public readonly Fault F = new PersistentFault();
+
+			[FaultEffect(Fault = nameof(F))]
+			private class E : C2
+			{
+			}
 		}
 	}
 }
