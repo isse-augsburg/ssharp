@@ -42,7 +42,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Maps each object to its corresponding identifier.
 		/// </summary>
-		private readonly Dictionary<object, int> _objectToIdentifier = new Dictionary<object, int>();
+		private readonly Dictionary<object, int> _objectToIdentifier = new Dictionary<object, int>(ReferenceEqualityComparer<object>.Default);
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -114,6 +114,35 @@ namespace SafetySharp.Runtime.Serialization
 				$"yourself, the object was most likely created by a collection type such as '{typeof(List<>).FullName}'. " +
 				"Set the capacity of these collections to the maximum number of elements " +
 				"they are supposed to hold in order to prevent them from allocating during model execution.");
+		}
+
+		/// <summary>
+		///   Substitutes the <paramref name="original" /> object with the <paramref name="replacement" /> object.
+		/// </summary>
+		/// <param name="original">The original object that should be substituted.</param>
+		/// <param name="replacement">The replacement object the original one should be substituted with.</param>
+		public void Substitute(object original, object replacement)
+		{
+			Requires.NotNull(original, nameof(original));
+			Requires.NotNull(replacement, nameof(replacement));
+			Requires.That(original != replacement, "Cannot substitute and object with itself.");
+
+			for (var i = 0; i < _objects.Length; ++i)
+			{
+				if (_objects[i] != original)
+					continue;
+
+				_objects[i] = replacement;
+				break;
+			}
+
+			// It is possible that we substitute multiple objects with the same replacement object; in that case
+			// we map all of them to the same identifier
+			if (!_objectToIdentifier.ContainsKey(replacement))
+				_objectToIdentifier.Add(replacement, _objectToIdentifier[original]);
+
+			// We have to remove the original mapping in any case, though
+			_objectToIdentifier.Remove(original);
 		}
 	}
 }

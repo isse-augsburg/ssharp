@@ -48,7 +48,6 @@ namespace SafetySharp.Runtime.Serialization
 		private SerializationRegistry()
 		{
 			RegisterSerializer(new ObjectSerializer());
-			RegisterSerializer(new ComponentSerializer());
 			RegisterSerializer(new FaultEffectSerializer());
 			RegisterSerializer(new ArraySerializer());
 			RegisterSerializer(new StringSerializer());

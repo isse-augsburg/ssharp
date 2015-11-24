@@ -65,7 +65,7 @@ namespace PressureTank
 		///   Prevents the sensor from triggering when the tank has reached or exceeded its maximum allowed pressure level.
 		/// </summary>
 		[FaultEffect(Fault = nameof(SuppressIsFull))]
-		private sealed class SuppressIsFullEffect : Sensor
+		private class SuppressIsFullEffect : Sensor
 		{
 			public override bool IsFull => false;
 		}
@@ -74,7 +74,7 @@ namespace PressureTank
 		///   Prevents the sensor from triggering when the tank has become empty.
 		/// </summary>
 		[FaultEffect(Fault = nameof(SuppressIsEmpty))]
-		private sealed class SuppressIsEmptyEffect : Sensor
+		private class SuppressIsEmptyEffect : Sensor
 		{
 			public override bool IsEmpty => false;
 		}

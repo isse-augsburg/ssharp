@@ -69,6 +69,52 @@ namespace SafetySharp.Runtime.Reflection
 		}
 
 		/// <summary>
+		///   Gets the <see cref="FieldInfo" /> storing the <see cref="Fault" /> the <paramref name="faultEffect" /> belongs to.
+		/// </summary>
+		/// <param name="faultEffect">The fault effect whose <see cref="Fault" /> <see cref="FieldInfo" /> should be returned.</param>
+		public static FieldInfo GetFaultField(this IComponent faultEffect)
+		{
+			Requires.NotNull(faultEffect, nameof(faultEffect));
+			Requires.That(faultEffect.GetType().HasAttribute<FaultEffectAttribute>(), nameof(faultEffect), "Expected a fault effect.");
+
+			var faultField = faultEffect.GetType().GetField("__fault__", BindingFlags.Instance | BindingFlags.NonPublic);
+			Assert.NotNull(faultField, $"Unable to determine fault field of fault effect '{faultEffect.GetType().FullName}'.");
+
+			return faultField;
+		}
+
+		/// <summary>
+		///   Gets the <see cref="Fault" /> the <paramref name="faultEffect" /> belongs to.
+		/// </summary>
+		/// <param name="faultEffect">The fault effect whose <see cref="Fault" /> should be returned.</param>
+		public static Fault GetFault(this IComponent faultEffect)
+		{
+			return (Fault)faultEffect.GetFaultField().GetValue(faultEffect);
+		}
+
+		/// <summary>
+		///   Sets the <see cref="Fault" /> the <paramref name="faultEffect" /> belongs to.
+		/// </summary>
+		/// <param name="faultEffect">The fault effect whose <see cref="Fault" /> should be set.</param>
+		/// <param name="fault">The fault the fault effect should belong to.</param>
+		public static void SetFault(this IComponent faultEffect, Fault fault)
+		{
+			faultEffect.GetFaultField().SetValue(faultEffect, fault);
+		}
+
+		/// <summary>
+		///   Gets the <paramref name="component" />'s runtime type.
+		/// </summary>
+		/// <param name="component">The component the runtime type should be returned for.</param>
+		public static Type GetRuntimeType(this IComponent component)
+		{
+			var runtimeTypeField = component.GetType().GetField("__runtimeType__", BindingFlags.Static | BindingFlags.NonPublic);
+			Assert.NotNull(runtimeTypeField, $"Unable to determine runtime type of component '{component.GetType().FullName}'.");
+
+			return (Type)runtimeTypeField.GetValue(null);
+		}
+
+		/// <summary>
 		///   Starting with <paramref name="component" />, visits the hierarchy of components in pre-order, executing the
 		///   <paramref name="action" /> for each one.
 		/// </summary>

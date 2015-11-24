@@ -20,46 +20,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace SafetySharp.CompilerServices
 {
-	using Xunit;
+	using System;
 
-	public partial class ExecutionTests
+	/// <summary>
+	///   When applied to a component, indicates the runtime type that should be used by model checking and simulation runs.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+	public sealed class RuntimeTypeAttribute : Attribute
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="runtimeType">The runtime type that should be used for the component by model checking and simulation runs.</param>
+		public RuntimeTypeAttribute(Type runtimeType)
 		{
-			ExecuteDynamicTests(file);
+			RuntimeType = runtimeType;
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/Faults")]
-		public void Faults(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+		/// <summary>
+		///   Gets the runtime type that should be used for the component by model checking and simulation runs.
+		/// </summary>
+		public Type RuntimeType { get; }
 	}
 }

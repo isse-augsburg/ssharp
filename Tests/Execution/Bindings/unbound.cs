@@ -31,17 +31,11 @@ namespace Tests.Execution.Bindings
 		private extern int X1 { get; }
 		private extern int X2 { set; get; }
 		private extern int X3 { set; }
-		private extern int this[int i] { get; }
-		private extern int this[int i, int j] { set; get; }
-		private extern int this[int i, int j, int k] { set; }
 		private extern void N();
 
 		public virtual extern int Y1 { get; }
 		public virtual extern int Y2 { set; get; }
 		public virtual extern int Y3 { set; }
-		public virtual extern int this[double f, int i] { get; }
-		public virtual extern int this[double f, int i, int j] { set; get; }
-		public virtual extern int this[double f, int i, int j, int k] { set; }
 		public virtual extern void M();
 
 		protected override void Check()
@@ -53,20 +47,12 @@ namespace Tests.Execution.Bindings
 			Should.Throw<UnboundPortException>(() => X2 = x);
 			Should.Throw<UnboundPortException>(() => x = X2);
 			Should.Throw<UnboundPortException>(() => X3 = x);
-			Should.Throw<UnboundPortException>(() => x = this[1]);
-			Should.Throw<UnboundPortException>(() => this[1, 2] = x);
-			Should.Throw<UnboundPortException>(() => x = this[1, 2]);
-			Should.Throw<UnboundPortException>(() => this[1, 2, 3] = x);
 
 			Should.Throw<UnboundPortException>(() => M());
 			Should.Throw<UnboundPortException>(() => x = Y1);
 			Should.Throw<UnboundPortException>(() => Y2 = x);
 			Should.Throw<UnboundPortException>(() => x = Y2);
 			Should.Throw<UnboundPortException>(() => Y3 = x);
-			Should.Throw<UnboundPortException>(() => x = this[1.0, 1]);
-			Should.Throw<UnboundPortException>(() => this[1.0, 1, 2] = x);
-			Should.Throw<UnboundPortException>(() => x = this[1.0, 1, 2]);
-			Should.Throw<UnboundPortException>(() => this[1.0, 1, 2, 3] = x);
 		}
 	}
 }

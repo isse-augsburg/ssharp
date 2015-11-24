@@ -23,6 +23,8 @@
 namespace SafetySharp.Compiler.Roslyn.Symbols
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
 	using Utilities;
@@ -58,6 +60,24 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(type, nameof(type));
 
 			return compilation.GetTypeByMetadataName(type.FullName);
+		}
+
+		/// <summary>
+		///   Gets all type symbols within the <paramref name="compilation" /> for which the <paramref name="predicate" /> holds.
+		/// </summary>
+		/// <param name="compilation">The compilation the symbols should be returned for.</param>
+		/// <param name="predicate">The predicate a symbol must satisfy in order to be returned.</param>
+		[Pure, NotNull]
+		public static IEnumerable<INamedTypeSymbol> GetTypeSymbols([NotNull] this Compilation compilation,
+																   [NotNull] Func<INamedTypeSymbol, bool> predicate)
+		{
+			Requires.NotNull(compilation, nameof(compilation));
+			Requires.NotNull(predicate, nameof(predicate));
+
+			return compilation
+				.GetSymbolsWithName(_ => true, SymbolFilter.Type)
+				.OfType<INamedTypeSymbol>()
+				.Where(predicate);
 		}
 	}
 }

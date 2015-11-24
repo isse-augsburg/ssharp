@@ -25,10 +25,10 @@ namespace SafetySharp.Modeling
 	using System;
 
 	/// <summary>
-	///   When a applied to a method or property, indicates the priority of the marked member. Members with higher priority values
-	///   take precedence over members with lower values.
+	///   When a applied to a fault effect, indicates the priority of the effect. Fault effects with higher priority values
+	///   take precedence over ones with lower values. Fault effects with the same priority introduce nondeterminism.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public sealed class PriorityAttribute : Attribute
 	{
 		/// <summary>

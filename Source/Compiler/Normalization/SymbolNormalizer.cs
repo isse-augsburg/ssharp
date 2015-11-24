@@ -35,7 +35,7 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Normalizes the type symbols declared by the <see cref="Compilation" />.
 		/// </summary>
-		protected override sealed Compilation Normalize()
+		protected sealed override Compilation Normalize()
 		{
 			foreach (var type in Compilation.GetSymbolsWithName(_ => true, SymbolFilter.Type).OfType<INamedTypeSymbol>())
 				NormalizeTypeSymbol(type);

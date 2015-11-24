@@ -20,46 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace SafetySharp.Modeling
 {
-	using Xunit;
-
-	public partial class ExecutionTests
+	/// <summary>
+	///   Determines the occurrence kind of a <see cref="Fault" />.
+	/// </summary>
+	public enum OccurrenceKind
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+		/// <summary>
+		///   Indicates that the fault always occurs.
+		/// </summary>
+		Always,
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+		/// <summary>
+		///   Indicates that the fault never occurs.
+		/// </summary>
+		Never,
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/Faults")]
-		public void Faults(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+		/// <summary>
+		///   Indicates that the fault itself determines whether it occurs.
+		/// </summary>
+		SelfDetermined
 	}
 }

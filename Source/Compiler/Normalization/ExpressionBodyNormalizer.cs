@@ -29,7 +29,7 @@ namespace SafetySharp.Compiler.Normalization
 	using Roslyn.Syntax;
 
 	/// <summary>
-	///   Replaces all expression-bodied members with regular statement-based ones.
+	///   Replaces all expression-bodied members of fault effects with regular statement-based ones.
 	/// 
 	///   For instance:
 	///   <code>
@@ -53,9 +53,9 @@ namespace SafetySharp.Compiler.Normalization
 			if (declaration.ExpressionBody == null)
 				return declaration;
 
-			// Nothing to do here for methods not defined in components or for methods that are not fault sensitive
+			// Nothing to do here for methods not defined in fault effects or for methods that are no overrides of some port
 			var methodSymbol = declaration.GetMethodSymbol(SemanticModel);
-			if (!methodSymbol.ContainingType.IsComponent(SemanticModel) || !methodSymbol.CanBeAffectedByFaults(SemanticModel))
+			if (!methodSymbol.ContainingType.IsFaultEffect(SemanticModel) || !methodSymbol.IsOverride)
 				return declaration;
 
 			var originalDeclaration = declaration;
@@ -74,9 +74,9 @@ namespace SafetySharp.Compiler.Normalization
 			if (declaration.ExpressionBody == null)
 				return declaration;
 
-			// Nothing to do here for properties not defined in components or for properties that are not fault sensitive
+			// Nothing to do here for properties not defined in fault effects or for properties that are no overrides of some port
 			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
-			if (!propertySymbol.ContainingType.IsComponent(SemanticModel) || !propertySymbol.CanBeAffectedByFaults(SemanticModel))
+			if (!propertySymbol.ContainingType.IsFaultEffect(SemanticModel) || !propertySymbol.IsOverride)
 				return declaration;
 
 			var originalDeclaration = declaration;
@@ -99,9 +99,9 @@ namespace SafetySharp.Compiler.Normalization
 			if (declaration.ExpressionBody == null)
 				return declaration;
 
-			// Nothing to do here for indexers not defined in components or for indexers that are not fault sensitive
+			// Nothing to do here for indexers not defined in fault effects or for indexers that are no overrides of some port
 			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
-			if (!propertySymbol.ContainingType.IsComponent(SemanticModel) || !propertySymbol.CanBeAffectedByFaults(SemanticModel))
+			if (!propertySymbol.ContainingType.IsFaultEffect(SemanticModel) || !propertySymbol.IsOverride)
 				return declaration;
 
 			var originalDeclaration = declaration;

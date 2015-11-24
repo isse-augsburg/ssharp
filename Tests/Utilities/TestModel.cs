@@ -20,37 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime.Serialization.Serializers
+namespace Tests.Utilities
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Modeling;
-	using Utilities;
+	using System.IO;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using SafetySharp.Runtime.Serialization;
 
 	/// <summary>
-	///   Serializes all kinds of <see cref="Component" />-derived classes that are not marked with
-	///   <see cref="FaultEffectAttribute" />.
+	///   Represents a base class for testable runtime models that are compiled and instantiated dynamically during test execution.
 	/// </summary>
-	internal sealed class ComponentSerializer : ObjectSerializer
+	public abstract class TestModel : TestObject
 	{
 		/// <summary>
-		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
+		///   Gets the instantiated runtime model.
 		/// </summary>
-		/// <param name="type">The type that should be checked.</param>
-		protected internal override bool CanSerialize(Type type)
-		{
-			return typeof(Component).IsAssignableFrom(type) && !type.HasAttribute<FaultEffectAttribute>();
-		}
+		protected RuntimeModel RuntimeModel { get; private set; }
 
 		/// <summary>
-		///   Gets all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself.
+		///   Gets the model's root components once it has been instantiated.
 		/// </summary>
-		/// <param name="obj">The object the referenced objects should be returned for.</param>
-		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
+		protected Component[] RootComponents => RuntimeModel.RootComponents;
+
+		/// <summary>
+		///   Instantiates a runtime model.
+		/// </summary>
+		/// <param name="model">The model that should be instantiated.</param>
+		/// <param name="formulas">The formulas the runtime model should be instantiated with.</param>
+		protected void Create(Model model, params Formula[] formulas)
 		{
-			return base.GetReferencedObjects(obj, mode).Concat(((Component)obj).FaultEffects);
+			using (var memoryStream = new MemoryStream())
+			{
+				RuntimeModelSerializer.Save(memoryStream, model, formulas);
+
+				memoryStream.Seek(0, SeekOrigin.Begin);
+				RuntimeModel = RuntimeModelSerializer.Load(memoryStream);
+			}
 		}
 	}
 }

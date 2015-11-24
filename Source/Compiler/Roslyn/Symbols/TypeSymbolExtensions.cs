@@ -66,17 +66,46 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		///   class and not marked with the <see cref="FaultEffectAttribute" />.
 		/// </summary>
 		/// <param name="typeSymbol">The type symbol that should be checked.</param>
-		/// <param name="semanticModel">
-		///   The semantic model that should be used to resolve the type symbol for the <see cref="Component" /> class.
-		/// </param>
+		/// <param name="compilation">The compilation that should be used to resolve the type information.</param>
+		[Pure]
+		public static bool IsComponent([NotNull] this ITypeSymbol typeSymbol, [NotNull] Compilation compilation)
+		{
+			Requires.NotNull(typeSymbol, nameof(typeSymbol));
+			Requires.NotNull(compilation, nameof(compilation));
+
+			return !typeSymbol.HasAttribute<FaultEffectAttribute>(compilation) &&
+				   typeSymbol.IsDerivedFrom(compilation.GetTypeSymbol<Component>());
+		}
+
+		/// <summary>
+		///   Checks whether <paramref name="typeSymbol" /> is directly or indirectly derived from the <see cref="Component" />
+		///   class and not marked with the <see cref="FaultEffectAttribute" />.
+		/// </summary>
+		/// <param name="typeSymbol">The type symbol that should be checked.</param>
+		/// <param name="semanticModel">The semantic model that should be used to resolve the type information.</param>
 		[Pure]
 		public static bool IsComponent([NotNull] this ITypeSymbol typeSymbol, [NotNull] SemanticModel semanticModel)
 		{
 			Requires.NotNull(typeSymbol, nameof(typeSymbol));
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
-			return !typeSymbol.HasAttribute<FaultEffectAttribute>(semanticModel) &&
-				   typeSymbol.IsDerivedFrom(semanticModel.GetTypeSymbol<Component>());
+			return typeSymbol.IsComponent(semanticModel.Compilation);
+		}
+
+		/// <summary>
+		///   Checks whether <paramref name="typeSymbol" /> represents a fault effect within the context of the
+		///   <paramref name="compilation" />.
+		/// </summary>
+		/// <param name="typeSymbol">The type symbol that should be checked.</param>
+		/// <param name="compilation">The compilation that should be used to resolve the type information.</param>
+		[Pure]
+		public static bool IsFaultEffect([NotNull] this ITypeSymbol typeSymbol, [NotNull] Compilation compilation)
+		{
+			Requires.NotNull(typeSymbol, nameof(typeSymbol));
+			Requires.NotNull(compilation, nameof(compilation));
+
+			return typeSymbol.HasAttribute<FaultEffectAttribute>(compilation) &&
+				   typeSymbol.IsDerivedFrom(compilation.GetTypeSymbol<Component>());
 		}
 
 		/// <summary>
@@ -91,8 +120,25 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(typeSymbol, nameof(typeSymbol));
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
-			return typeSymbol.HasAttribute<FaultEffectAttribute>(semanticModel) &&
-				   typeSymbol.IsDerivedFrom(semanticModel.GetTypeSymbol<Component>());
+			return typeSymbol.IsFaultEffect(semanticModel.Compilation);
+		}
+
+		/// <summary>
+		/// Gets the value of the <see cref="PriorityAttribute"/> applied to the <paramref name="typeSymbol"/>. Returns <c>0</c> if the attribute is not applied to the <paramref name="typeSymbol"/>.
+		/// </summary>
+		/// <param name="typeSymbol">The type symbol the priority should be returned for.</param>
+		/// <param name="compilation">The compilation that should be used to resolve the type information.</param>
+		[Pure]
+		public static int GetPriority([NotNull] this ITypeSymbol typeSymbol, [NotNull] Compilation compilation)
+		{
+			Requires.NotNull(typeSymbol, nameof(typeSymbol));
+			Requires.NotNull(compilation, nameof(compilation));
+
+			var attribute = typeSymbol.GetAttributes<PriorityAttribute>(compilation).SingleOrDefault();
+			if (attribute == null)
+				return 0;
+
+			return (int)attribute.ConstructorArguments[0].Value;
 		}
 	}
 }

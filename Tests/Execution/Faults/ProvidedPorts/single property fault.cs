@@ -20,46 +20,70 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.Faults.ProvidedPorts
 {
-	using Xunit;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	public class X2 : TestModel
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		protected sealed override void Check()
 		{
-			ExecuteDynamicTests(file);
+			Create(new Model(new C()));
+			var c = (C)RootComponents[0];
+
+			c._f.OccurrenceKind = OccurrenceKind.Always;
+			c.M.ShouldBe(9);
+			c.N = 4;
+			c.x.ShouldBe(16);
+			c.O = 19;
+			c.O.ShouldBe(17);
+
+			c._f.OccurrenceKind = OccurrenceKind.Never;
+			c.M.ShouldBe(1);
+			c.N = 8;
+			c.x.ShouldBe(8);
+			c.O = 22;
+			c.O.ShouldBe(24);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		private class C : Component
 		{
-			ExecuteDynamicTests(file);
-		}
+			public readonly TransientFault _f = new TransientFault();
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+			public int x;
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+			public virtual int N
+			{
+				set { x = value; }
+			}
 
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+			public virtual int M => 1;
 
-		[Theory, MemberData("DiscoverTests", "Execution/Faults")]
-		public void Faults(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			public virtual int O
+			{
+				get { return x + 1; }
+				set { x = value + 1; }
+			}
+
+			[FaultEffect(Fault = nameof(_f))]
+			private class F : C
+			{
+				public override int M => 9;
+
+				public override int N
+				{
+					set { x = value * value; }
+				}
+
+				public override int O
+				{
+					get { return x - 1; }
+					set { x = value - 1; }
+				}
+			}
 		}
 	}
 }

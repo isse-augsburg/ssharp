@@ -20,15 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// ReSharper disable SuspiciousTypeConversion.Global
 namespace Tests.Serialization.RuntimeModels
 {
+	using System.Reflection;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
 
-	internal class Faults : RuntimeModelTest
+	// ReSharper disable SuspiciousTypeConversion.Global
+	// ReSharper disable PossibleInvalidCastException
+	internal class DeterministicFaults : RuntimeModelTest
 	{
 		private static bool _hasConstructorRun;
 
@@ -37,9 +39,9 @@ namespace Tests.Serialization.RuntimeModels
 			var c = new C();
 			var m = new Model(c);
 
-			((C.Effect1)(object)c.FaultEffects[0]).F = 17;
-			((C.Effect1)(object)c.FaultEffects[1]).F = 18;
-			((C.Effect2)(object)c.FaultEffects[2]).F = 19;
+			((C.Effect1)c.FaultEffects[0]).F = 17;
+			((C.Effect2)c.FaultEffects[1]).F = 18;
+			((C.Effect3)c.FaultEffects[2]).F = 19;
 
 			_hasConstructorRun = false;
 			Create(m);
@@ -48,16 +50,27 @@ namespace Tests.Serialization.RuntimeModels
 			RootComponents.Length.ShouldBe(1);
 
 			var root = RootComponents[0];
-			root.ShouldBeOfType<C>();
+			root.ShouldBeOfType<C.Effect1>();
 			root.GetSubcomponents().ShouldBeEmpty();
 
 			((C)root).F1.ShouldBeOfType<TransientFault>();
 			((C)root).F2.ShouldBeOfType<PersistentFault>();
+			((C.Effect1)root).F.ShouldBe(17);
+			((C.Effect2)root).F.ShouldBe(18);
+			((C.Effect3)root).F.ShouldBe(19);
 
 			root.FaultEffects.Count.ShouldBe(3);
-			((C.Effect1)(object)root.FaultEffects[0]).F = 17;
-			((C.Effect1)(object)root.FaultEffects[1]).F = 18;
-			((C.Effect2)(object)root.FaultEffects[2]).F = 19;
+			((C.Effect1)root.FaultEffects[0]).F.ShouldBe(17);
+			((C.Effect2)root.FaultEffects[1]).F.ShouldBe(18);
+			((C.Effect3)root.FaultEffects[2]).F.ShouldBe(19);
+
+			typeof(C.Effect1).BaseType.ShouldBe(typeof(C.Effect2));
+			typeof(C.Effect2).BaseType.ShouldBe(typeof(C.Effect3));
+			typeof(C.Effect3).BaseType.ShouldBe(typeof(C));
+
+			typeof(C.Effect1).GetField("__fault__", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root).ShouldBe(((C)root).F1);
+			typeof(C.Effect2).GetField("__fault__", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root).ShouldBe(((C)root).F2);
+			typeof(C.Effect3).GetField("__fault__", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root).ShouldBe(((C)root).F1);
 
 			_hasConstructorRun.ShouldBe(false);
 		}
@@ -72,8 +85,8 @@ namespace Tests.Serialization.RuntimeModels
 				_hasConstructorRun = true;
 
 				F1.AddEffect<Effect1>(this);
-				F2.AddEffect<Effect1>(this);
 				F2.AddEffect<Effect2>(this);
+				F1.AddEffect<Effect3>(this);
 			}
 
 			public virtual void M()
@@ -81,7 +94,8 @@ namespace Tests.Serialization.RuntimeModels
 			}
 
 			[FaultEffect]
-			public sealed class Effect1 : C
+			[Priority(100)]
+			public class Effect1 : C
 			{
 				public int F;
 
@@ -91,7 +105,8 @@ namespace Tests.Serialization.RuntimeModels
 			}
 
 			[FaultEffect]
-			public sealed class Effect2 : C
+			[Priority(10)]
+			public class Effect2 : C
 			{
 				public int F;
 
@@ -100,10 +115,14 @@ namespace Tests.Serialization.RuntimeModels
 				}
 			}
 
-			// Unused
 			[FaultEffect]
-			public sealed class Effect3 : C
+			public class Effect3 : C
 			{
+				public int F;
+
+				public override void M()
+				{
+				}
 			}
 		}
 	}

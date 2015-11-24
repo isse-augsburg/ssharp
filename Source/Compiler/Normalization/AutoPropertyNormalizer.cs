@@ -31,9 +31,9 @@ namespace SafetySharp.Compiler.Normalization
 	using Roslyn.Syntax;
 
 	/// <summary>
-	///   Replaces all automatically implemented property declarations with backing fields and a regular property declarations.
-	///   When we normalize getter-only auto properties, we also have to redirect all writes to the property within a constructor to
-	///   the backing field.
+	///   Replaces all automatically implemented property declarations with backing fields and a regular property declarations of
+	///   fault effects. When we normalize getter-only auto properties, we also have to redirect all writes to the property within a
+	///   constructor to the backing field.
 	/// 
 	///   For instance:
 	///   <code>
@@ -56,7 +56,7 @@ namespace SafetySharp.Compiler.Normalization
 		public override SyntaxNode VisitConstructorDeclaration(ConstructorDeclarationSyntax declaration)
 		{
 			var methodSymbol = declaration.GetMethodSymbol(SemanticModel);
-			if (!methodSymbol.ContainingType.IsComponent(SemanticModel))
+			if (!methodSymbol.ContainingType.IsFaultEffect(SemanticModel))
 				return declaration;
 
 			try
@@ -100,9 +100,9 @@ namespace SafetySharp.Compiler.Normalization
 			if (declaration.ExpressionBody != null)
 				return declaration;
 
-			// Nothing to do here for properties not defined in components or for properties that are not fault sensitive
+			// Nothing to do here for properties not defined in fault effects or for properties that are no overrides of some port
 			var propertySymbol = declaration.GetPropertySymbol(SemanticModel);
-			if (!propertySymbol.ContainingType.IsComponent(SemanticModel) || !propertySymbol.CanBeAffectedByFaults(SemanticModel))
+			if (!propertySymbol.ContainingType.IsFaultEffect(SemanticModel) || !propertySymbol.IsOverride)
 				return declaration;
 
 			// Nothing to do here for required ports

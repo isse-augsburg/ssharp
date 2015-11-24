@@ -28,12 +28,14 @@ namespace SafetySharp.Modeling
 	public class PersistentFault : Fault
 	{
 		/// <summary>
-		///   Updates the state of the fault.
+		///   Gets the updated occurrence state of the fault.
 		/// </summary>
-		public override void Update()
+		protected override bool GetUpdatedOccurrenceState()
 		{
 			if (!IsOccurring)
-				IsOccurring = Choice.Choose(true, false);
+				return Choice.Choose(true, false);
+
+			return true;
 		}
 	}
 }

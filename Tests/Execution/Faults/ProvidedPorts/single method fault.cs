@@ -20,46 +20,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.Faults.ProvidedPorts
 {
-	using Xunit;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	public class X1 : TestModel
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		protected sealed override void Check()
 		{
-			ExecuteDynamicTests(file);
+			Create(new Model(new C()));
+			var c = (C)RootComponents[0];
+
+			int r;
+			c._f.OccurrenceKind = OccurrenceKind.Always;
+			c.M().ShouldBe(9);
+
+			c.M(out r);
+			r.ShouldBe(4);
+
+			c._f.OccurrenceKind = OccurrenceKind.Never;
+			c.M().ShouldBe(1);
+
+			c.M(out r);
+			r.ShouldBe(2);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		private class C : Component
 		{
-			ExecuteDynamicTests(file);
-		}
+			public readonly TransientFault _f = new TransientFault();
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+			public virtual int M() => 1;
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+			public virtual void M(out int r) => r = 2;
 
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/Faults")]
-		public void Faults(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			[FaultEffect(Fault = nameof(_f))]
+			private class F : C
+			{
+				public override int M() => 9;
+				public override void M(out int r)
+				{
+					base.M(out r);
+					r += 2;
+				}
+			}
 		}
 	}
 }

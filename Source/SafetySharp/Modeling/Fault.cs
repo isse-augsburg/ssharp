@@ -22,7 +22,9 @@
 
 namespace SafetySharp.Modeling
 {
+	using System;
 	using System.Runtime.Serialization;
+	using Runtime.Reflection;
 	using Utilities;
 
 	/// <summary>
@@ -30,32 +32,13 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	public abstract class Fault
 	{
-		/// <summary>
-		///   Indicates whether the fault is ignored for a simulation or model checking run.
-		/// </summary>
 		[Hidden]
-		private bool _isIgnored;
+		private OccurrenceKind _occurrenceKind;
 
 		/// <summary>
-		///   Initializes a new instance.
+		///   Gets a value indicating whether the fault is currently occurring.
 		/// </summary>
-		protected Fault()
-		{
-		}
-
-		/// <summary>
-		///   Gets or sets a value indicating whether the fault is currently occurring.
-		/// </summary>
-		public bool IsOccurring { get; protected set; }
-
-		/// <summary>
-		///   Gets or sets a value indicating whether the fault is ignored for a simulation or model checking run.
-		/// </summary>
-		internal bool IsIgnored
-		{
-			get { return _isIgnored; }
-			set { _isIgnored = value; }
-		}
+		public bool IsOccurring { get; private set; }
 
 		/// <summary>
 		///   Gets the <see cref="Choice" /> instance that can be used to determine whether the fault occurs.
@@ -63,52 +46,64 @@ namespace SafetySharp.Modeling
 		protected Choice Choice { get; } = new Choice();
 
 		/// <summary>
+		///   Gets or sets the fault's forced occurrence kind.
+		/// </summary>
+		public OccurrenceKind OccurrenceKind
+		{
+			get { return _occurrenceKind; }
+			set
+			{
+				_occurrenceKind = value;
+
+				if (value == OccurrenceKind.SelfDetermined)
+					IsOccurring = false;
+				else
+					IsOccurring = value == OccurrenceKind.Always;
+			}
+		}
+
+		/// <summary>
 		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault occurs.
 		/// </summary>
-		/// <typeparam name="TFaultEffect">The type of the fault effect that is added.</typeparam>
+		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
 		/// <param name="component">The component the fault effect is added for.</param>
 		public TFaultEffect AddEffect<TFaultEffect>(IComponent component)
-			where TFaultEffect : class, new()
+			where TFaultEffect : Component, new()
+		{
+			return (TFaultEffect)AddEffect(component, typeof(TFaultEffect));
+		}
+
+		/// <summary>
+		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault occurs.
+		/// </summary>
+		/// <param name="component">The component the fault effect is added for.</param>
+		/// <param name="faultEffectType">The type of the fault effect that should be added.</param>
+		public IComponent AddEffect(IComponent component, Type faultEffectType)
 		{
 			Requires.NotNull(component, nameof(component));
-			Requires.That(typeof(IFaultEffect).IsAssignableFrom(typeof(TFaultEffect)),
-				$"Expected the fault effect to implement '{typeof(IFaultEffect).FullName}'.");
-			Requires.That(typeof(TFaultEffect).HasAttribute<FaultEffectAttribute>(),
+			Requires.That(faultEffectType.HasAttribute<FaultEffectAttribute>(),
 				$"Expected fault effect to be marked with '{typeof(FaultEffectAttribute)}'.");
 
-			var faultEffect = (TFaultEffect)FormatterServices.GetUninitializedObject(typeof(TFaultEffect));
-			var effect = ((IFaultEffect)faultEffect);
+			var faultEffect = (Component)FormatterServices.GetUninitializedObject(faultEffectType);
 
-			Requires.That(effect.Component == null, nameof(faultEffect), "Fault effects cannot be used with multiple components at the same time.");
-
-			effect.Component = component;
-			effect.Fault = this;
-			((Component)component).FaultEffects.Add(effect);
+			faultEffect.SetFault(this);
+			((Component)component).FaultEffects.Add(faultEffect);
 
 			return faultEffect;
 		}
 
 		/// <summary>
-		///   Removes the <paramref name="faultEffect" /> from the fault.
+		///   Updates the state of the fault.
 		/// </summary>
-		/// <param name="faultEffect">The fault effect that should be removed.</param>
-		public void RemoveEffect(object faultEffect)
+		public void Update()
 		{
-			Requires.NotNull(faultEffect, nameof(faultEffect));
-
-			var effect = faultEffect as IFaultEffect;
-			if (effect?.Component == null || !((Component)effect.Component).FaultEffects.Remove(effect))
-				return;
-
-			effect.Component = null;
-			effect.Fault = null;
+			if (_occurrenceKind == OccurrenceKind.SelfDetermined)
+				IsOccurring = GetUpdatedOccurrenceState();
 		}
 
 		/// <summary>
-		///   Updates the state of the fault.
+		///   Gets the updated occurrence state of the fault.
 		/// </summary>
-		public virtual void Update()
-		{
-		}
+		protected abstract bool GetUpdatedOccurrenceState();
 	}
 }

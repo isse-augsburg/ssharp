@@ -21,43 +21,70 @@
 // THE SOFTWARE.
 
 // ReSharper disable SuspiciousTypeConversion.Global
-namespace Tests.Serialization.Objects
+namespace Tests.Serialization.RuntimeModels
 {
+	using System.Reflection;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Serialization;
+	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
 
-	internal class FaultEffect : SerializationObject
+	internal class SingleFault : RuntimeModelTest
 	{
+		private static bool _hasConstructorRun;
+
 		protected override void Check()
 		{
-			var c = new C { I = 1 };
-			c.F.AddEffect<E>(c).R = 3;
+			var c = new C();
+			var m = new Model(c);
 
-			GenerateCode(SerializationMode.Optimized, c);
-			_stateSlotCount.ShouldBe(2); // original fault effect should not be serialized
+			((C.Effect1)c.FaultEffects[0]).F = 17;
 
-			Serialize();
-			c.I = 0;
-			((E)c.FaultEffects[0]).R = -1;
-			((E)c.FaultEffects[0]).I = -2;
-			Deserialize();
+			_hasConstructorRun = false;
+			Create(m);
 
-			c.I.ShouldBe(1);
-			((E)c.FaultEffects[0]).R.ShouldBe(-1);
-			((E)c.FaultEffects[0]).I.ShouldBe(-2);
+			StateFormulas.ShouldBeEmpty();
+			RootComponents.Length.ShouldBe(1);
+
+			var root = RootComponents[0];
+			root.ShouldBeOfType<C.Effect1>();
+			root.GetSubcomponents().ShouldBeEmpty();
+
+			((C)root).F1.ShouldBeOfType<TransientFault>();
+			((C.Effect1)root).F.ShouldBe(17);
+
+			root.FaultEffects.Count.ShouldBe(1);
+			((C.Effect1)root.FaultEffects[0]).F.ShouldBe(17);
+
+			typeof(C.Effect1).GetField("__fault__", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root).ShouldBe(((C)root).F1);
+
+			_hasConstructorRun.ShouldBe(false);
 		}
 
 		private class C : Component
 		{
-			public int I;
-			public readonly Fault F = new TransientFault();
-		}
+			public readonly Fault F1 = new TransientFault();
 
-		[FaultEffect]
-		private class E : C
-		{
-			public int R;
+			public C()
+			{
+				_hasConstructorRun = true;
+
+				F1.AddEffect<Effect1>(this);
+			}
+
+			public virtual void M()
+			{
+			}
+
+			[FaultEffect]
+			public sealed class Effect1 : C
+			{
+				public int F;
+
+				public override void M()
+				{
+				}
+			}
 		}
 	}
 }

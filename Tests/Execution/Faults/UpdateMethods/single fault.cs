@@ -20,46 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.Faults.UpdateMethods
 {
-	using Xunit;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	public partial class ExecutionTests
+	public class X1 : TestModel
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
-		public void StateMachines(string test, string file)
+		protected sealed override void Check()
 		{
-			ExecuteDynamicTests(file);
+			Create(new Model(new C()));
+			var c = (C)RootComponents[0];
+
+			c._f.OccurrenceKind = OccurrenceKind.Always;
+			c.Update();
+			c.X.ShouldBe(18);
+
+			c._f.OccurrenceKind = OccurrenceKind.Never;
+			c.Update();
+			c.X.ShouldBe(17);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
-		public void ProvidedPorts(string test, string file)
+		private class C : Component
 		{
-			ExecuteDynamicTests(file);
-		}
+			public readonly TransientFault _f = new TransientFault();
+			public int X;
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
-		public void Bindings(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+			public override void Update()
+			{
+				X = 17;
+			}
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
-		public void RequiredPorts(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
-		public void UpdateMethods(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Execution/Faults")]
-		public void Faults(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			[FaultEffect(Fault = nameof(_f))]
+			private class F : C
+			{
+				public override void Update()
+				{
+					base.Update();
+					++X;
+				}
+			}
 		}
 	}
 }

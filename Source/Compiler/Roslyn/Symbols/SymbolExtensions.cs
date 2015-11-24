@@ -111,5 +111,21 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 
 			return symbol.GetAttributes(semanticModel.GetTypeSymbol<T>());
 		}
+
+		/// <summary>
+		///   Gets all attribute instance of <typeparamref name="T" /> that <paramref name="symbol" /> is marked with.
+		/// </summary>
+		/// <typeparam name="T">The type of the attribute.</typeparam>
+		/// <param name="symbol">The symbol that should be checked.</param>
+		/// <param name="compilation">The semantic model that should be used to resolve the type symbol for <typeparamref name="T" />.</param>
+		[Pure]
+		public static IEnumerable<AttributeData> GetAttributes<T>([NotNull] this ISymbol symbol, [NotNull] Compilation compilation)
+			where T : Attribute
+		{
+			Requires.NotNull(symbol, nameof(symbol));
+			Requires.NotNull(compilation, nameof(compilation));
+
+			return symbol.GetAttributes(compilation.GetTypeSymbol<T>());
+		}
 	}
 }

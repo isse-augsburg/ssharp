@@ -154,6 +154,18 @@
     <Compile Include="Execution\Bindings\same name, different kind.cs" />
     <Compile Include="Execution\Bindings\same name.cs" />
     <Compile Include="Execution\Bindings\single candidate.cs" />
+    <Compile Include="Execution\Faults\ProvidedPorts\deterministic setter faults.cs" />
+    <Compile Include="Execution\Faults\ProvidedPorts\deterministic getter faults.cs" />
+    <Compile Include="Execution\Faults\ProvidedPorts\deterministic method faults.cs" />
+    <Compile Include="Execution\Faults\ProvidedPorts\single property fault.cs" />
+    <Compile Include="Execution\Faults\ProvidedPorts\single method fault.cs" />
+    <Compile Include="Execution\Faults\RequiredPorts\deterministic getter faults.cs" />
+    <Compile Include="Execution\Faults\RequiredPorts\deterministic method faults.cs" />
+    <Compile Include="Execution\Faults\RequiredPorts\deterministic setter faults.cs" />
+    <Compile Include="Execution\Faults\RequiredPorts\single method fault.cs" />
+    <Compile Include="Execution\Faults\RequiredPorts\single property fault.cs" />
+    <Compile Include="Execution\Faults\UpdateMethods\deterministic faults.cs" />
+    <Compile Include="Execution\Faults\UpdateMethods\single fault.cs" />
     <Compile Include="Execution\ProvidedPorts\Indexers\generic component.cs" />
     <Compile Include="Execution\ProvidedPorts\Indexers\interface.cs" />
     <Compile Include="Execution\ProvidedPorts\Indexers\non-inherited.cs" />
@@ -333,7 +345,9 @@
     <Compile Include="Serialization\PrimitiveTypes\UInt32.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int32.cs" />
     <Compile Include="Serialization\RuntimeModels\binding.cs" />
-    <Compile Include="Serialization\RuntimeModels\faults.cs" />
+    <Compile Include="Serialization\RuntimeModels\deterministic faults.cs" />
+    <Compile Include="Serialization\RuntimeModels\single fault.cs" />
+    <Compile Include="Serialization\RuntimeModels\nondeterministic faults.cs" />
     <Compile Include="Serialization\RuntimeModels\manual binding.cs" />
     <Compile Include="Serialization\RuntimeModels\type.cs" />
     <Compile Include="Serialization\RuntimeModels\string.cs" />
@@ -354,6 +368,7 @@
     <Compile Include="Serialization\StateLabels\ltl formula.cs" />
     <Compile Include="Serialization\StateLabels\invariants with closure.cs" />
     <Compile Include="Serialization\StateLabels\invariant without closure.cs" />
+    <Compile Include="Utilities\TestModel.cs" />
     <Compile Include="Utilities\TestTraceOutput.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\TestErrorReporter.cs" />

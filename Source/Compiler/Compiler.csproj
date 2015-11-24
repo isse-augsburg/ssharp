@@ -112,7 +112,7 @@
     <Compile Include="Normalization\AutoPropertyNormalizer.cs" />
     <Compile Include="Normalization\BindingNormalizer.cs" />
     <Compile Include="Normalization\ExpressionBodyNormalizer.cs" />
-    <Compile Include="Normalization\PortNormalizer.cs" />
+    <Compile Include="Normalization\RequiredPortNormalizer.cs" />
     <Compile Include="Normalization\FaultEffectNormalizer.cs" />
     <Compile Include="Normalization\TransitionNormalizer.cs" />
     <Compile Include="Normalization\FormulaNormalizer.cs" />

@@ -27,6 +27,7 @@ namespace SafetySharp.Analysis
 	using System.Linq;
 	using System.Reflection;
 	using Modeling;
+	using Runtime.Reflection;
 	using Utilities;
 
 	/// <summary>
@@ -78,6 +79,44 @@ namespace SafetySharp.Analysis
 			});
 
 			return new Model(components);
+		}
+
+		/// <summary>
+		///   Binds all automatically bound fault effects to their respective faults.
+		/// </summary>
+		internal void BindFaultEffects()
+		{
+			foreach (Component component in this)
+			{
+				var type = component.GetRuntimeType();
+
+				while (type != typeof(Component))
+				{
+					var attribute = type.GetCustomAttribute<FaultEffectAttribute>();
+					if (attribute == null)
+						break;
+
+					if (!String.IsNullOrWhiteSpace(attribute.Fault))
+					{
+						const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+						var fault =
+							type.DeclaringType.GetField(attribute.Fault, flags)?.GetValue(component) as Fault ??
+							type.DeclaringType.GetProperty(attribute.Fault, flags)?.GetMethod?.Invoke(component, null) as Fault;
+
+						if (fault == null)
+						{
+							throw new InvalidOperationException(
+								$"'{type.DeclaringType.FullName}' does not declare a field or property " +
+								$"called '{attribute.Fault}' of type '{typeof(Fault).FullName}' (or a type derived from it) " +
+								$"that contains a valid fault instance as expected by '{type.FullName}'.");
+						}
+
+						fault.AddEffect(component, type);
+					}
+
+					type = type.BaseType;
+				}
+			}
 		}
 
 		private static void CollectComponents<T>(HashSet<IComponent> components, IEnumerable<T> members, Func<T, Type> getMemberType,

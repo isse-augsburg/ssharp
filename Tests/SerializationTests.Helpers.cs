@@ -23,37 +23,19 @@
 namespace Tests
 {
 	using System.Collections.Generic;
-	using System.IO;
 	using System.Linq;
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 	using Utilities;
 	using Xunit.Abstractions;
 
-	internal abstract class RuntimeModelTest : TestObject
+	internal abstract class RuntimeModelTest : TestModel
 	{
-		private RuntimeModel _runtimeModel;
-
-		protected Component[] RootComponents => _runtimeModel.RootComponents;
-
-		protected StateFormula[] StateFormulas => _runtimeModel.StateFormulas;
-
-		protected int StateSlotCount => _runtimeModel.StateSlotCount;
-
-		protected void Create(Model model, params Formula[] formulas)
-		{
-			using (var memoryStream = new MemoryStream())
-			{
-				RuntimeModelSerializer.Save(memoryStream, model, formulas);
-
-				memoryStream.Seek(0, SeekOrigin.Begin);
-				_runtimeModel = RuntimeModelSerializer.Load(memoryStream);
-			}
-		}
+		protected StateFormula[] StateFormulas => RuntimeModel.StateFormulas;
+		protected int StateSlotCount => RuntimeModel.StateSlotCount;
 	}
 
 	public abstract unsafe class SerializationObject : TestObject

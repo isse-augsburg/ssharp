@@ -23,7 +23,9 @@
 namespace SafetySharp.Runtime.Serialization.Serializers
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
+	using System.Reflection;
 	using Modeling;
 	using Utilities;
 
@@ -38,7 +40,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="type">The type that should be checked.</param>
 		protected internal override bool CanSerialize(Type type)
 		{
-			return typeof(IFaultEffect).IsAssignableFrom(type) && type.HasAttribute<FaultEffectAttribute>();
+			return typeof(Component).IsAssignableFrom(type) && type.HasAttribute<FaultEffectAttribute>();
 		}
 
 		/// <summary>
@@ -50,7 +52,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="mode">The serialization mode that should be used to deserialize the object.</param>
 		protected internal override void Deserialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
 		{
-			foreach (var field in GetFields(obj, mode, obj.GetType().BaseType))
+			foreach (var field in GetFields(obj, mode))
 				generator.DeserializeField(objectIdentifier, field);
 		}
 
@@ -63,7 +65,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="mode">The serialization mode that should be used to serialize the object.</param>
 		protected internal override void Serialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
 		{
-			foreach (var field in GetFields(obj, mode, obj.GetType().BaseType))
+			foreach (var field in GetFields(obj, mode))
 				generator.SerializeField(objectIdentifier, field);
 		}
 
@@ -74,7 +76,18 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		protected internal override int GetStateSlotCount(object obj, SerializationMode mode)
 		{
-			return GetFields(obj, mode, obj.GetType().BaseType).Sum(field => SerializationGenerator.GetStateSlotCount(field.FieldType));
+			return GetFields(obj, mode).Sum(field => SerializationGenerator.GetStateSlotCount(field.FieldType));
+		}
+
+		/// <summary>
+		///   Gets the fields declared by the <paramref name="obj" /> that should be serialized. This only includes the fields declared
+		///   by <paramref name="obj" /> itself, not any of the fields declared by its base types.
+		/// </summary>
+		/// <param name="obj">The object that should be serialized.</param>
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		private static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode)
+		{
+			return GetFields(obj, mode, obj.GetType().BaseType);
 		}
 	}
 }

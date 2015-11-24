@@ -28,11 +28,11 @@ namespace SafetySharp.Modeling
 	public class TransientFault : Fault
 	{
 		/// <summary>
-		///   Updates the state of the fault.
+		///   Gets the updated occurrence state of the fault.
 		/// </summary>
-		public override void Update()
+		protected override bool GetUpdatedOccurrenceState()
 		{
-			IsOccurring = Choice.Choose(true, false);
+			return Choice.Choose(true, false);
 		}
 	}
 }

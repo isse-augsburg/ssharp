@@ -32,13 +32,13 @@ namespace SafetySharp.Modeling
 	public abstract partial class Component : IComponent
 	{
 		[Hidden, NonDiscoverable, DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private readonly List<IFaultEffect> _faultEffects = new List<IFaultEffect>();
+		private readonly List<Component> _faultEffects = new List<Component>();
 
 		/// <summary>
 		///   Gets the fault effects that affect the component.
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		internal List<IFaultEffect> FaultEffects => _faultEffects;
+		internal List<Component> FaultEffects => _faultEffects;
 
 		/// <summary>
 		///   Updates the state of the component.

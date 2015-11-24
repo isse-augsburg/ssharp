@@ -26,10 +26,12 @@ namespace SafetySharp.Runtime.Serialization
 	using System.IO;
 	using System.Linq;
 	using System.Reflection;
+	using System.Runtime.Serialization;
 	using System.Text;
 	using Analysis;
 	using Analysis.FormulaVisitors;
 	using Modeling;
+	using Reflection;
 	using Utilities;
 
 	/// <summary>
@@ -60,6 +62,10 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private static unsafe void SerializeModel(BinaryWriter writer, Model model, Formula[] formulas)
 		{
+			// Make sure that all auto-bound fault effects have been bound
+			model.BindFaultEffects();
+
+			// Collect all objects contained in the model
 			var stateFormulas = CollectStateFormulas(formulas);
 			var objectTable = CreateObjectTable(model, stateFormulas);
 
@@ -191,13 +197,43 @@ namespace SafetySharp.Runtime.Serialization
 			for (var i = 0; i < slotCount; ++i)
 				serializedState[i] = reader.ReadInt32();
 
-			// Deserialize the model's initial state
+			// Deserialize the state formulas and the model's initial state
 			var deserializer = SerializationRegistry.Default.CreateStateDeserializer(objectTable, SerializationMode.Full);
+			var stateFormulas = DeserializeFormulas(reader, objectTable);
 			deserializer(serializedState);
 
-			// Deserialize the state formulas and instantiate the runtime model
-			var stateFormulas = DeserializeFormulas(reader, objectTable);
+			// We instantiate the runtime type for each component and replace the original component
+			// instance with the new runtime instance; we also replace all of the component's fault effects
+			// with that instance and deserialize the initial state again. Afterwards, we have completely
+			// replaced the original instance with its runtime instance, taking over all serialized data
+			SubstituteRuntimeInstances(objectTable, roots);
+			deserializer(serializedState);
+
+			// Instantiate the runtime model
 			return new RuntimeModel(roots, objectTable, stateFormulas);
+		}
+
+		/// <summary>
+		///   Substitutes the components and fault effects in the <paramref name="objectTable" /> and <paramref name="roots" /> array
+		///   with their corresponding runtime instances.
+		/// </summary>
+		private static void SubstituteRuntimeInstances(ObjectTable objectTable, Component[] roots)
+		{
+			foreach (var component in objectTable.OfType<Component>().ToArray())
+			{
+				if (component.GetType().HasAttribute<FaultEffectAttribute>())
+					continue;
+
+				var runtimeObj = (Component)FormatterServices.GetUninitializedObject(component.GetRuntimeType());
+				var rootIndex = Array.IndexOf(roots, component);
+
+				if (rootIndex != -1)
+					roots[rootIndex] = runtimeObj;
+
+				objectTable.Substitute(component, runtimeObj);
+				foreach (var faultEffect in component.FaultEffects)
+					objectTable.Substitute(faultEffect, runtimeObj);
+			}
 		}
 
 		/// <summary>

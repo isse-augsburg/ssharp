@@ -53,9 +53,11 @@
     <Compile Include="CompilerServices\BindingMetadataAttribute.cs" />
     <Compile Include="CompilerServices\LiftExpressionAttribute.cs" />
     <Compile Include="CompilerServices\PortReference.cs" />
+    <Compile Include="CompilerServices\RuntimeTypeAttribute.cs" />
     <Compile Include="CompilerServices\StateFormulaFactory.cs" />
     <Compile Include="Modeling\NonDiscoverableAttribute.cs" />
     <Compile Include="Analysis\CounterExample.cs" />
+    <Compile Include="Modeling\OccurrenceKind.cs" />
     <Compile Include="Runtime\Reflection\ComponentExtensions.cs" />
     <Compile Include="Runtime\Reflection\StateMachineExtensions.cs" />
     <Compile Include="Modeling\Choice.cs" />
@@ -65,7 +67,6 @@
     <Compile Include="Modeling\Component.cs" />
     <Compile Include="Modeling\Fault.cs" />
     <Compile Include="Modeling\FaultEffectAttribute.cs" />
-    <Compile Include="Modeling\IFaultEffect.cs" />
     <Compile Include="Modeling\StateMachine.cs" />
     <Compile Include="Modeling\NonSerializableAttribute.cs" />
     <Compile Include="Modeling\PersistentFault.cs" />
@@ -97,7 +98,6 @@
     <Compile Include="Runtime\ChoiceResolver.cs" />
     <Compile Include="Runtime\ChoiceStack.cs" />
     <Compile Include="Runtime\RuntimeModel.cs" />
-    <Compile Include="Runtime\Serialization\Serializers\ComponentSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\TypeSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\StringSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\ArraySerializer.cs" />

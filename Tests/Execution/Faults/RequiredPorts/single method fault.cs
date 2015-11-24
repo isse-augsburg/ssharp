@@ -20,21 +20,63 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Execution.Faults.RequiredPorts
 {
-	/// <summary>
-	///   Represents a common interface for fault effects. This interface is implemented by the S# compiler automatically.
-	/// </summary>
-	public interface IFaultEffect
-	{
-		/// <summary>
-		///   Gets or sets the <see cref="Component" /> instance that is affected by the fault effect.
-		/// </summary>
-		IComponent Component { get; set; }
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-		/// <summary>
-		///   Gets or sets the <see cref="Fault" /> instance that determines whether the fault effect is active.
-		/// </summary>
-		Fault Fault { get; set; }
+	public class X1 : TestModel
+	{
+		protected sealed override void Check()
+		{
+			Create(new Model(new C()));
+			var c = (C)RootComponents[0];
+
+			int r;
+			c._f.OccurrenceKind = OccurrenceKind.Always;
+			c.M().ShouldBe(9);
+
+			c.M(out r);
+			r.ShouldBe(4);
+
+			c._f.OccurrenceKind = OccurrenceKind.Never;
+			c.M().ShouldBe(1);
+
+			c.M(out r);
+			r.ShouldBe(2);
+		}
+
+		private class C : Component
+		{
+			public readonly TransientFault _f = new TransientFault();
+
+			public C()
+			{
+				Bind(nameof(M), nameof(A));
+				Bind(nameof(M), nameof(B));
+			}
+
+			public virtual extern int M();
+
+			public virtual extern void M(out int r);
+
+			public int A() => 1;
+
+			public void B(out int r) => r = 2;
+
+			[FaultEffect(Fault = nameof(_f))]
+			private class F : C
+			{
+				public override int M() => 9;
+
+				public override void M(out int r)
+				{
+					base.M(out r);
+					r += 2;
+				}
+			}
+		}
 	}
 }
