@@ -78,7 +78,7 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		/// <param name="component">The component the fault effect is added for.</param>
 		/// <param name="faultEffectType">The type of the fault effect that should be added.</param>
-		public IComponent AddEffect(IComponent component, Type faultEffectType)
+		internal IComponent AddEffect(IComponent component, Type faultEffectType)
 		{
 			Requires.NotNull(component, nameof(component));
 			Requires.That(faultEffectType.HasAttribute<FaultEffectAttribute>(),

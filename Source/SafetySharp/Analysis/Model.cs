@@ -96,7 +96,7 @@ namespace SafetySharp.Analysis
 					if (attribute == null)
 						break;
 
-					if (!String.IsNullOrWhiteSpace(attribute.Fault))
+					if (!String.IsNullOrWhiteSpace(attribute.Fault) && component.FaultEffects.All(f => f.GetType() != type))
 					{
 						const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 						var fault =
