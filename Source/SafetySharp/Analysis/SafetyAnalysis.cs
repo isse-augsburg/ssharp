@@ -23,8 +23,8 @@
 namespace SafetySharp.Analysis
 {
 	using System.Collections.Generic;
-	using System.Linq;
 	using Modeling;
+	using Runtime.Reflection;
 	using Utilities;
 
 	/// <summary>
@@ -60,13 +60,40 @@ namespace SafetySharp.Analysis
 		///   Computes the minimal cut sets for the <paramref name="hazard" />.
 		/// </summary>
 		/// <param name="hazard">The hazard the minimal cut sets should be computed for.</param>
-		public IEnumerable<ISet<Fault>> ComputeMinimalCutSets(Formula hazard)
+		public IEnumerable<int> ComputeMinimalCutSets(Formula hazard)
 		{
 			Requires.NotNull(hazard, nameof(hazard));
 			Requires.OfType<StateFormula>(hazard, nameof(hazard), "Hazards are required to be state formulas.");
 
-			_modelChecker.CheckInvariant(_model, ((StateFormula)hazard).Expression);
-			return Enumerable.Empty<ISet<Fault>>();
+			var faults = _model.GetFaults();
+			var faultSets = new List<int>(1 << faults.Length);
+			GeneratePowerSet(faultSets, faults.Length);
+
+			var criticalSets = new List<int>();
+			foreach (var set in faultSets)
+			{
+				for (var i = 0; i < faults.Length; ++i)
+					faults[i].OccurrenceKind = (set & i) == i ? OccurrenceKind.Always : OccurrenceKind.Never;
+
+				if (_modelChecker.CheckInvariant(_model, ((StateFormula)hazard).Expression) != null)
+					criticalSets.Add(set);
+			}
+
+			return criticalSets;
+		}
+
+		public static void GeneratePowerSet(List<int> sets, int count)
+		{
+			if (count == 0)
+				sets.Add(0);
+			else
+			{
+				GeneratePowerSet(sets, count - 1);
+
+				var setsCount = sets.Count;
+				for (var i = 0; i < setsCount; ++i)
+					sets.Add(sets[i] | 1 << (count - 1));
+			}
 		}
 	}
 }
