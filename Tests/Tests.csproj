@@ -154,6 +154,7 @@
     <Compile Include="Execution\Bindings\same name, different kind.cs" />
     <Compile Include="Execution\Bindings\same name.cs" />
     <Compile Include="Execution\Bindings\single candidate.cs" />
+    <Compile Include="Execution\Faults\Binding\non root.cs" />
     <Compile Include="Execution\Faults\Binding\overwritten binding.cs" />
     <Compile Include="Execution\Faults\Binding\property bound.cs" />
     <Compile Include="Execution\Faults\Binding\field bound.cs" />

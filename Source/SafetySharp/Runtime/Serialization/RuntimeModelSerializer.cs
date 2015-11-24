@@ -184,7 +184,7 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			// Deserialize the object table
 			var objectTable = DeserializeObjectTable(reader);
-
+			
 			// Deserialize the object identifiers of the root components
 			var roots = new Component[reader.ReadInt32()];
 			for (var i = 0; i < roots.Length; ++i)
@@ -224,7 +224,11 @@ namespace SafetySharp.Runtime.Serialization
 				if (component.GetType().HasAttribute<FaultEffectAttribute>())
 					continue;
 
-				var runtimeObj = (Component)FormatterServices.GetUninitializedObject(component.GetRuntimeType());
+				var runtimeType = component.GetRuntimeType();
+				if (runtimeType == component.GetType())
+					continue;
+
+                var runtimeObj = (Component)FormatterServices.GetUninitializedObject(runtimeType);
 				var rootIndex = Array.IndexOf(roots, component);
 
 				if (rootIndex != -1)

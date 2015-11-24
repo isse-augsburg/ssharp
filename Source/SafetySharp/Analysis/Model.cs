@@ -31,7 +31,7 @@ namespace SafetySharp.Analysis
 	using Utilities;
 
 	/// <summary>
-	///   Represents a model consisting of several root <see cref="Component" /> instances.
+	///   Represents a model consisting of several root <see cref="IComponent" /> instances.
 	/// </summary>
 	public sealed class Model : List<IComponent>
 	{
@@ -82,11 +82,31 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
+		///   Visits the hierarchy of components in pre-order, executing the <paramref name="action" /> for each one.
+		/// </summary>
+		/// <param name="action">The action that should be executed for each component.</param>
+		public void VisitPreOrder(Action<IComponent> action)
+		{
+			foreach (var component in this)
+				component.VisitPreOrder(action);
+		}
+
+		/// <summary>
+		///   Visits the hierarchy of components in post-order, executing the <paramref name="action" /> for each one.
+		/// </summary>
+		/// <param name="action">The action that should be executed for each component.</param>
+		public void VisitPostOrder(Action<IComponent> action)
+		{
+			foreach (var component in this)
+				component.VisitPostOrder(action);
+		}
+
+		/// <summary>
 		///   Binds all automatically bound fault effects to their respective faults.
 		/// </summary>
 		internal void BindFaultEffects()
 		{
-			foreach (Component component in this)
+			VisitPostOrder(component =>
 			{
 				var type = component.GetRuntimeType();
 
@@ -96,7 +116,8 @@ namespace SafetySharp.Analysis
 					if (attribute == null)
 						break;
 
-					if (!String.IsNullOrWhiteSpace(attribute.Fault) && component.FaultEffects.All(f => f.GetType() != type))
+					var faultEffects = ((Component)component).FaultEffects;
+					if (!String.IsNullOrWhiteSpace(attribute.Fault) && faultEffects.All(f => f.GetType() != type))
 					{
 						const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 						var fault =
@@ -116,9 +137,12 @@ namespace SafetySharp.Analysis
 
 					type = type.BaseType;
 				}
-			}
+			});
 		}
 
+		/// <summary>
+		///   Helper method that collects <see cref="IComponent" /> instances.
+		/// </summary>
 		private static void CollectComponents<T>(HashSet<IComponent> components, IEnumerable<T> members, Func<T, Type> getMemberType,
 												 Func<T, object> getValue)
 		{
