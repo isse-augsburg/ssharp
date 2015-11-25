@@ -250,7 +250,8 @@
     </Compile>
     <Compile Include="LtsMin\CtlStar\NotViolated\initial state.cs" />
     <Compile Include="LtsMin\CtlStar\Violated\initial state.cs" />
-    <Compile Include="LtsMin\Ltl\NotViolated\faults.cs" />
+    <Compile Include="LtsMin\Ltl\NotViolated\nondeterministic faults.cs" />
+    <Compile Include="LtsMin\Ltl\NotViolated\deterministic faults.cs" />
     <Compile Include="LtsMin\Ltl\NotViolated\forced faults.cs" />
     <Compile Include="LtsMin\Invariants\NotViolated\disabled faults.cs" />
     <Compile Include="LtsMin\Invariants\Violated\required port.cs" />

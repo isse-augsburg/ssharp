@@ -128,7 +128,7 @@ namespace SafetySharp.Compiler.Normalization
 				modifiers: fieldModifiers,
 				initializer: declaration.Initializer?.Value);
 
-			fieldDeclaration = Syntax.AddAttribute<CompilerGeneratedAttribute>(fieldDeclaration, SemanticModel);
+			fieldDeclaration = Syntax.AddAttribute<CompilerGeneratedAttribute>(fieldDeclaration);
 			fieldDeclaration = Syntax.MarkAsNonDebuggerBrowsable(fieldDeclaration, SemanticModel);
 			AddMembers(propertySymbol.ContainingType, (FieldDeclarationSyntax)fieldDeclaration);
 

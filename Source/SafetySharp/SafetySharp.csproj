@@ -53,7 +53,6 @@
     <Compile Include="CompilerServices\BindingMetadataAttribute.cs" />
     <Compile Include="CompilerServices\LiftExpressionAttribute.cs" />
     <Compile Include="CompilerServices\PortReference.cs" />
-    <Compile Include="CompilerServices\RuntimeTypeAttribute.cs" />
     <Compile Include="CompilerServices\StateFormulaFactory.cs" />
     <Compile Include="Modeling\Component.Update.cs">
       <DependentUpon>Component.cs</DependentUpon>

@@ -26,7 +26,7 @@ namespace Tests.LtsMin.Ltl.NotViolated
 	using Shouldly;
 	using static SafetySharp.Analysis.Tl;
 
-	internal class Faults : LtsMinTestObject
+	internal class DeterministicFaults : LtsMinTestObject
 	{
 		protected override void Check()
 		{
@@ -53,6 +53,7 @@ namespace Tests.LtsMin.Ltl.NotViolated
 			}
 
 			[FaultEffect(Fault = nameof(F1))]
+			[Priority(1)]
 			internal class E1 : C
 			{
 				public override void Update()
@@ -62,6 +63,7 @@ namespace Tests.LtsMin.Ltl.NotViolated
 			}
 
 			[FaultEffect(Fault = nameof(F2))]
+			[Priority(2)]
 			internal class E2 : C
 			{
 				public override void Update()

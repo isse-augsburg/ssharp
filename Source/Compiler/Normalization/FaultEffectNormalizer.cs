@@ -39,22 +39,49 @@ namespace SafetySharp.Compiler.Normalization
 	/// </summary>
 	public sealed class FaultEffectNormalizer : SyntaxNormalizer
 	{
-		private readonly Dictionary<string, string[]> _faults = new Dictionary<string, string[]>();
+		private readonly Dictionary<Tuple<IMethodSymbol, int>, string> _faultChoiceFields = new Dictionary<Tuple<IMethodSymbol, int>, string>();
+		private readonly Dictionary<INamedTypeSymbol, INamedTypeSymbol[]> _faults = new Dictionary<INamedTypeSymbol, INamedTypeSymbol[]>();
+		private readonly Dictionary<string, IMethodSymbol> _methodLookup = new Dictionary<string, IMethodSymbol>();
+		private readonly Dictionary<string, INamedTypeSymbol> _typeLookup = new Dictionary<string, INamedTypeSymbol>();
 
 		/// <summary>
 		///   Normalizes the syntax trees of the <see cref="Compilation" />.
 		/// </summary>
 		protected override Compilation Normalize()
 		{
-			foreach (var component in Compilation.GetTypeSymbols(type => type.IsComponent(Compilation)))
-			{
-				var faults = Compilation
-					.GetTypeSymbols(type => type.IsFaultEffect(Compilation) && type.BaseType.Equals(component))
-					.OrderBy(type => type.GetPriority(Compilation))
-					.ThenBy(type => type.Name)
-					.Select(type => type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+			var types = Compilation.GetSymbolsWithName(_ => true, SymbolFilter.Type).OfType<INamedTypeSymbol>().ToArray();
+			var components = types.Where(type => type.IsComponent(Compilation)).ToArray();
+			var faultEffects = types.Where(type => type.IsFaultEffect(Compilation)).ToArray();
 
-				_faults.Add(component.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), faults.ToArray());
+			foreach (var type in components.Concat(faultEffects))
+				_typeLookup.Add(type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), type);
+
+			foreach (var component in components)
+			{
+				var faults = faultEffects.Where(faultEffect => faultEffect.IsDerivedFrom(component)).ToArray();
+				var faultTypes = faults.OrderBy(type => type.GetPriority(Compilation)).ThenBy(type => type.Name).ToArray();
+				var nondeterministicFaults = faults.GroupBy(fault => fault.GetPriority(Compilation)).Where(group => group.Count() > 1).ToArray();
+
+				_faults.Add(component, faultTypes);
+				foreach (var method in component.GetMembers().OfType<IMethodSymbol>())
+				{
+					_methodLookup.Add(method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat), method);
+
+					foreach (var group in nondeterministicFaults)
+					{
+						var isNondeterministic = group.Count(f => f.GetMembers().OfType<IMethodSymbol>().Any(m => m.Overrides(method))) > 1;
+						if (!isNondeterministic)
+							continue;
+
+						var key = Tuple.Create(method, group.Key);
+						var fieldName = Guid.NewGuid().ToString().Replace("-", "_").ToSynthesized();
+
+						_faultChoiceFields.Add(key, fieldName);
+						AddFaultChoiceField(method.ContainingType, fieldName);
+					}
+				}
+
+				AddRuntimeTypeField(component);
 			}
 
 			return base.Normalize();
@@ -67,12 +94,7 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			var classSymbol = declaration.GetTypeSymbol(SemanticModel);
 			if (!classSymbol.IsFaultEffect(SemanticModel))
-			{
-				if (classSymbol.IsComponent(SemanticModel))
-					AddRuntimeTypeField(classSymbol);
-
 				return base.VisitClassDeclaration(declaration);
-			}
 
 			AddFaultField(classSymbol);
 
@@ -92,7 +114,7 @@ namespace SafetySharp.Compiler.Normalization
 			var memberAccess = Syntax.MemberAccessExpression(Syntax.BaseExpression(), methodSymbol.Name);
 			var invocation = Syntax.InvocationExpression(memberAccess, CreateInvocationArguments(methodSymbol));
 
-			declaration = declaration.WithBody(CreateBody(declaration.Body, invocation, !methodSymbol.ReturnsVoid));
+			declaration = declaration.WithBody(CreateBody(methodSymbol, declaration.Body, invocation));
 			return declaration;
 		}
 
@@ -105,12 +127,11 @@ namespace SafetySharp.Compiler.Normalization
 			if (!methodSymbol.ContainingType.IsFaultEffect(SemanticModel) || !methodSymbol.IsOverride)
 				return accessor;
 
-			var isGetAccessor = accessor.Kind() == SyntaxKind.GetAccessorDeclaration;
 			var baseExpression = Syntax.MemberAccessExpression(Syntax.BaseExpression(), methodSymbol.GetPropertySymbol().Name);
-			if (!isGetAccessor)
+			if (accessor.Kind() != SyntaxKind.GetAccessorDeclaration)
 				baseExpression = Syntax.AssignmentStatement(baseExpression, Syntax.IdentifierName("value"));
 
-			accessor = accessor.WithBody(CreateBody(accessor.Body, baseExpression, isGetAccessor));
+			accessor = accessor.WithBody(CreateBody(methodSymbol, accessor.Body, baseExpression));
 			return accessor;
 		}
 
@@ -139,21 +160,83 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Creates the default lambda method that is assigned to a fault delegate.
+		///   Creates a deterministic or nondeterministic fault effect body.
 		/// </summary>
-		private BlockSyntax CreateBody(StatementSyntax originalBody, SyntaxNode baseEffect, bool hasResult)
-		{ 
+		private BlockSyntax CreateBody(IMethodSymbol method, StatementSyntax originalBody, SyntaxNode baseEffect)
+		{
 			originalBody = originalBody.AppendLineDirective(-1).PrependLineDirective(originalBody.GetLineNumber());
 
-			var faultAccess = Syntax.MemberAccessExpression(Syntax.ThisExpression(), "fault".ToSynthesized());
-			var isOccurring = Syntax.MemberAccessExpression(faultAccess, nameof(Fault.IsOccurring));
-			var notOccurring = Syntax.LogicalNotExpression(isOccurring);
-			var baseStatement = hasResult
+			var componentType = _typeLookup[method.ContainingType.BaseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)];
+			var faultEffectType = _typeLookup[method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)];
+			var faults = _faults[componentType];
+			var baseStatement = !method.ReturnsVoid
 				? new[] { Syntax.ReturnStatement(baseEffect) }
-				: new[] { Syntax.ExpressionStatement(baseEffect), Syntax.ReturnStatement()};
+				: new[] { Syntax.ExpressionStatement(baseEffect), Syntax.ReturnStatement() };
 
-			var ifStatement = Syntax.IfStatement(notOccurring, baseStatement).NormalizeWhitespace().WithTrailingNewLines(1);
-			return SyntaxFactory.Block((StatementSyntax)ifStatement, originalBody).PrependLineDirective(-1);
+			IMethodSymbol methodSymbol;
+			BlockSyntax body = null;
+
+			if (_methodLookup.TryGetValue(method.OverriddenMethod.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat), out methodSymbol))
+			{
+				var priorityFaults = faults.Where(fault => fault.GetPriority(Compilation) == method.ContainingType.GetPriority(Compilation)).ToArray();
+				var overridingEffects = priorityFaults.Where(f => f.GetMembers().OfType<IMethodSymbol>().Any(m => m.Overrides(methodSymbol))).ToArray();
+				var overrideCount = overridingEffects.Length;
+
+				if (overrideCount > 1)
+				{
+					var fieldName = _faultChoiceFields[Tuple.Create(methodSymbol, priorityFaults[0].GetPriority(Compilation))];
+					var effectIndex = Array.IndexOf(priorityFaults, faultEffectType);
+					var choiceField = Syntax.MemberAccessExpression(Syntax.ThisExpression(), fieldName);
+
+					var levelCondition = Syntax.ValueNotEqualsExpression(choiceField, Syntax.LiteralExpression(effectIndex));
+					var ifStatement = Syntax.IfStatement(levelCondition, baseStatement).NormalizeWhitespace().WithTrailingNewLines(1);
+
+					if (overridingEffects.Last().Equals(faultEffectType))
+					{
+						var levelChoiceVariable = "levelChoice".ToSynthesized();
+						var levelCountVariable = "levelCount".ToSynthesized();
+
+						var writer = new CodeWriter();
+						writer.AppendLine("unsafe");
+						writer.AppendBlockStatement(() =>
+						{
+							writer.AppendLine($"var {levelChoiceVariable} = stackalloc int[{overrideCount}];");
+							writer.AppendLine($"var {levelCountVariable} = 0;");
+
+							for (var i = 0; i < overrideCount; ++i)
+							{
+								var effectType = overridingEffects[i].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+								var index = Array.IndexOf(priorityFaults, overridingEffects[i]);
+
+								writer.AppendLine($"if ((({effectType})this).{"fault".ToSynthesized()}.IsOccurring)");
+								writer.IncreaseIndent();
+								writer.AppendLine($"{levelChoiceVariable}[{levelCountVariable}++] = {index};");
+								writer.DecreaseIndent();
+								writer.NewLine();
+							}
+
+							writer.AppendLine($"{fieldName} = {levelCountVariable} == 0 ? - 1 : {levelChoiceVariable}[ChooseIndex({levelCountVariable})];");
+						});
+
+						var selectionStatement = SyntaxFactory.ParseStatement(writer.ToString());
+						body = SyntaxFactory.Block(selectionStatement, (StatementSyntax)ifStatement, originalBody);
+					}
+					else
+						body = SyntaxFactory.Block((StatementSyntax)ifStatement, originalBody);
+				}
+			}
+
+			if (body == null)
+			{
+				var faultAccess = Syntax.MemberAccessExpression(Syntax.ThisExpression(), "fault".ToSynthesized());
+				var isOccurring = Syntax.MemberAccessExpression(faultAccess, nameof(Fault.IsOccurring));
+				var notOccurring = Syntax.LogicalNotExpression(isOccurring);
+
+				var ifStatement = Syntax.IfStatement(notOccurring, baseStatement).NormalizeWhitespace().WithTrailingNewLines(1);
+				body = SyntaxFactory.Block((StatementSyntax)ifStatement, originalBody);
+			}
+
+			return body.PrependLineDirective(-1);
 		}
 
 		/// <summary>
@@ -162,12 +245,13 @@ namespace SafetySharp.Compiler.Normalization
 		private ClassDeclarationSyntax ChangeBaseType(INamedTypeSymbol classSymbol, ClassDeclarationSyntax classDeclaration)
 		{
 			var baseTypeName = classSymbol.BaseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-			var faultIndex = Array.IndexOf(_faults[baseTypeName], classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+			var faultEffectSymbol = _typeLookup[classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)];
+			var faultIndex = Array.IndexOf(_faults[_typeLookup[baseTypeName]], faultEffectSymbol);
 			if (faultIndex == 0)
 				return classDeclaration;
 
-			var baseType = SyntaxFactory.ParseTypeName(_faults[baseTypeName][faultIndex - 1]).WithTrivia(classDeclaration.BaseList.Types[0]);
-			var baseTypes = SyntaxFactory.SingletonSeparatedList((BaseTypeSyntax)SyntaxFactory.SimpleBaseType(baseType));
+			var baseType = Syntax.TypeExpression(_faults[_typeLookup[baseTypeName]][faultIndex - 1]).WithTrivia(classDeclaration.BaseList.Types[0]);
+			var baseTypes = SyntaxFactory.SingletonSeparatedList((BaseTypeSyntax)SyntaxFactory.SimpleBaseType((TypeSyntax)baseType));
 			var baseList = SyntaxFactory.BaseList(classDeclaration.BaseList.ColonToken, baseTypes).WithTrivia(classDeclaration.BaseList);
 			return classDeclaration.WithBaseList(baseList);
 		}
@@ -178,21 +262,38 @@ namespace SafetySharp.Compiler.Normalization
 		private void AddRuntimeTypeField(INamedTypeSymbol classSymbol)
 		{
 			var className = classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-			var faults = _faults[className];
-			var runtimeType = faults.Length > 0 ? faults[faults.Length - 1] : className;
-			var typeofExpression = SyntaxFactory.TypeOfExpression(SyntaxFactory.ParseTypeName(runtimeType));
+			var faults = _faults[_typeLookup[className]];
+			var runtimeType = faults.Length > 0 ? faults[faults.Length - 1] : classSymbol;
+			var typeofExpression = SyntaxFactory.TypeOfExpression((TypeSyntax)Syntax.TypeExpression((runtimeType)));
 			var field = Syntax.FieldDeclaration(
 				name: "runtimeType".ToSynthesized(),
-				type: Syntax.TypeExpression<Type>(SemanticModel),
+				type: SyntaxFactory.ParseTypeName("System.Type"),
 				accessibility: Accessibility.Private,
 				modifiers: DeclarationModifiers.Static | DeclarationModifiers.ReadOnly,
 				initializer: typeofExpression);
 
 			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
-			field = Syntax.AddAttribute<HiddenAttribute>(field, SemanticModel);
+			field = Syntax.AddAttribute<HiddenAttribute>(field);
 			field = field.NormalizeWhitespace();
 
-			AddMembers(classSymbol, (MemberDeclarationSyntax)field);
+			AddMembers(classSymbol, new UsingDirectiveSyntax[0], (MemberDeclarationSyntax)field);
+		}
+
+		/// <summary>
+		///   Adds the fault choice field to the component symbol.
+		/// </summary>
+		private void AddFaultChoiceField(INamedTypeSymbol classSymbol, string fieldName)
+		{
+			var field = Syntax.FieldDeclaration(
+				name: fieldName,
+				type: Syntax.TypeExpression(SpecialType.System_Int32),
+				accessibility: Accessibility.Internal);
+
+			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
+			field = Syntax.AddAttribute<NonSerializableAttribute>(field);
+			field = field.NormalizeWhitespace();
+
+			AddMembers(classSymbol, new UsingDirectiveSyntax[0], (MemberDeclarationSyntax)field);
 		}
 
 		/// <summary>
@@ -203,10 +304,10 @@ namespace SafetySharp.Compiler.Normalization
 			var faultField = Syntax.FieldDeclaration(
 				name: "fault".ToSynthesized(),
 				type: Syntax.TypeExpression<Fault>(SemanticModel),
-				accessibility: Accessibility.Private);
+				accessibility: Accessibility.Internal);
 
 			faultField = Syntax.MarkAsNonDebuggerBrowsable(faultField, SemanticModel);
-			faultField = Syntax.AddAttribute<HiddenAttribute>(faultField, SemanticModel);
+			faultField = Syntax.AddAttribute<HiddenAttribute>(faultField);
 			faultField = faultField.NormalizeWhitespace();
 
 			AddMembers(classSymbol, (MemberDeclarationSyntax)faultField);

@@ -34,6 +34,17 @@ namespace SafetySharp.Modeling
 		private readonly Choice _defaultChoice = new Choice();
 
 		/// <summary>
+		///   Returns an index in the range of <paramref name="elementCount" />. Returns <c>-1</c> if <paramref name="elementCount" />
+		///   is 0.
+		/// </summary>
+		/// <param name="elementCount">The element count to choose the index from.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected int ChooseIndex(int elementCount)
+		{
+			return _defaultChoice.ChooseIndex(elementCount);
+		}
+
+		/// <summary>
 		///   Returns either <paramref name="value1" /> or <paramref name="value2" /> nondeterministically.
 		/// </summary>
 		/// <param name="value1">The first value to choose.</param>

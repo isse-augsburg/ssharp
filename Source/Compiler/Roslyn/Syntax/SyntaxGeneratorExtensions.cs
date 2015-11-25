@@ -24,7 +24,6 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Linq;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
@@ -126,7 +125,7 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		}
 
 		/// <summary>
-		///   Generates a <c>typeof(T)</c> expression for type <typeparamref name="T" />.
+		///   Generates a <c>typeof(T)</c> expression for type <paramref name="typeSymbol" />.
 		/// </summary>
 		/// <param name="syntaxGenerator">The syntax generator that should be used to generate the expression.</param>
 		/// <param name="typeSymbol">The type the expression should be generated for.</param>
@@ -180,16 +179,14 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		/// <typeparam name="TAttribute">The type of the attribute that should be added.</typeparam>
 		/// <param name="syntaxGenerator">The syntax generator that should be used to generate the attribute.</param>
 		/// <param name="syntaxNode">The syntax node that should be marked with the attribute.</param>
-		/// <param name="semanticModel">The semantic model that should be used to resolve type information.</param>
 		/// <param name="attributeArguments">The optional constructor arguments for the attribute.</param>
 		[Pure, NotNull]
 		public static SyntaxNode AddAttribute<TAttribute>([NotNull] this SyntaxGenerator syntaxGenerator, [NotNull] SyntaxNode syntaxNode,
-														  [NotNull] SemanticModel semanticModel, params SyntaxNode[] attributeArguments)
+														  params SyntaxNode[] attributeArguments)
 			where TAttribute : Attribute
 		{
 			Requires.NotNull(syntaxGenerator, nameof(syntaxGenerator));
 			Requires.NotNull(syntaxNode, nameof(syntaxNode));
-			Requires.NotNull(semanticModel, nameof(semanticModel));
 			Requires.NotNull(attributeArguments, nameof(attributeArguments));
 
 			var attribute = (AttributeListSyntax)syntaxGenerator.Attribute(typeof(TAttribute).GetGlobalName(), attributeArguments);

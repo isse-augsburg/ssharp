@@ -73,8 +73,8 @@ namespace SafetySharp.Compiler.Normalization
 			var infoFieldName = Syntax.LiteralExpression(GetBinderFieldName());
 
 			declaration = declaration.WithModifiers(declaration.Modifiers.RemoveAt(index)).WithSemicolonToken(default(SyntaxToken));
-			declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<DebuggerHiddenAttribute>(declaration, SemanticModel);
-			declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<BindingMetadataAttribute>(declaration, SemanticModel,
+			declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<DebuggerHiddenAttribute>(declaration);
+			declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<BindingMetadataAttribute>(declaration,
 				delegateFieldName, infoFieldName);
 
 			return declaration.WithBody(body).EnsureLineCount(originalDeclaration);
@@ -218,7 +218,7 @@ namespace SafetySharp.Compiler.Normalization
 				accessibility: Accessibility.Private,
 				modifiers: DeclarationModifiers.Unsafe);
 
-			return (DelegateDeclarationSyntax)Syntax.AddAttribute<CompilerGeneratedAttribute>(methodDelegate, SemanticModel);
+			return (DelegateDeclarationSyntax)Syntax.AddAttribute<CompilerGeneratedAttribute>(methodDelegate);
 		}
 
 		/// <summary>
@@ -233,9 +233,9 @@ namespace SafetySharp.Compiler.Normalization
 				accessibility: Accessibility.Private,
 				initializer: initializer);
 
-			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field, SemanticModel);
+			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field);
 			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
-			field = Syntax.AddAttribute<NonSerializableAttribute>(field, SemanticModel);
+			field = Syntax.AddAttribute<NonSerializableAttribute>(field);
 			return (FieldDeclarationSyntax)field;
 		}
 
@@ -249,7 +249,7 @@ namespace SafetySharp.Compiler.Normalization
 				type: Syntax.TypeExpression<PortBinding>(SemanticModel),
 				accessibility: Accessibility.Private);
 
-			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field, SemanticModel);
+			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field);
 			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
 			return (FieldDeclarationSyntax)field;
 		}
