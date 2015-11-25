@@ -36,8 +36,9 @@ namespace PressureTank
 			var analysis = new SafetyAnalysis(new LtsMin(), Model.Create(specification));
 
 			var result = analysis.ComputeMinimalCutSets(specification.Rupture);
+			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
 
-			Console.WriteLine("Checked Fault Sets: {0}", result.CheckedSetsCount);
+			Console.WriteLine("Checked Fault Sets: {0} ({1:F0}% of all fault sets)", result.CheckedSetsCount, percentage);
 			Console.WriteLine("Minimal Cut Sets: {0}", result.MinimalCutSetsCount);
 
 			var i = 1;

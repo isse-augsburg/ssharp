@@ -22,7 +22,6 @@
 
 namespace SafetySharp.Analysis
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
@@ -71,6 +70,8 @@ namespace SafetySharp.Analysis
 			var safeSets = new HashSet<int>();
 			var cutSets = new HashSet<int>();
 			var checkedSets = new HashSet<int>();
+
+			Assert.That(faults.Length < 32, "More than 31 faults are currently not supported.");
 
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we
@@ -163,20 +164,6 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Prints a set for debugging purposes.
-		/// </summary>
-		private void PrintSet(IEnumerable<int> set, int maxLength = 8)
-		{
-			Console.WriteLine("Cut Sets ({0}):", set.Count());
-
-			foreach (var cutSet in set)
-			{
-				var val = Convert.ToString(cutSet, 2);
-				Console.WriteLine(val.Length < maxLength ? new string('0', maxLength - val.Length) + val : val);
-			}
-		}
-
-		/// <summary>
 		///   Represents the result of a safety analysis.
 		/// </summary>
 		public struct Result
@@ -204,6 +191,16 @@ namespace SafetySharp.Analysis
 			public int CheckedSetsCount { get; }
 
 			/// <summary>
+			///   Gets the number of faults that have been checked.
+			/// </summary>
+			public int FaultCount { get; }
+
+			/// <summary>
+			///   Gets the faults that have been checked.
+			/// </summary>
+			public IEnumerable<Fault> Faults { get; }
+
+			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
 			/// <param name="cutSets">The minimal cut sets.</param>
@@ -213,9 +210,11 @@ namespace SafetySharp.Analysis
 			{
 				MinimalCutSetsCount = cutSets.Count;
 				CheckedSetsCount = checkedSets.Count;
+				FaultCount = faults.Length;
 
 				MinimalCutSets = Convert(cutSets, faults);
 				CheckedSets = Convert(checkedSets, faults);
+				Faults = faults;
 			}
 
 			/// <summary>
