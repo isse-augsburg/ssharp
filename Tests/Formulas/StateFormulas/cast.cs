@@ -24,7 +24,7 @@ namespace Tests.Formulas.StateFormulas
 {
 	using SafetySharp.Analysis;
 
-	public class Cast : FormulaTestObject
+	internal class Cast : FormulaTestObject
 	{
 		protected override void Check()
 		{

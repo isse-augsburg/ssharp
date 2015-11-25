@@ -26,7 +26,7 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 	using System.Linq.Expressions;
 	using SafetySharp.CompilerServices;
 
-	public class Test2
+	internal class Test2
 	{
 		public Test2([LiftExpression] int i)
 		{
@@ -37,7 +37,7 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 		}
 	}
 
-	public class In2 : Test2
+	internal class In2 : Test2
 	{
 		public In2() : base(4)
 		{
@@ -50,7 +50,7 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 		}
 	}
 
-	public class Out2 : Test2
+	internal class Out2 : Test2
 	{
 		public Out2() : base(() => 4)
 		{

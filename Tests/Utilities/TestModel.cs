@@ -31,7 +31,7 @@ namespace Tests.Utilities
 	/// <summary>
 	///   Represents a base class for testable runtime models that are compiled and instantiated dynamically during test execution.
 	/// </summary>
-	public abstract class TestModel : TestObject
+	internal abstract class TestModel : TestObject
 	{
 		/// <summary>
 		///   Gets the instantiated runtime model.
@@ -42,6 +42,16 @@ namespace Tests.Utilities
 		///   Gets the model's root components once it has been instantiated.
 		/// </summary>
 		protected Component[] RootComponents => RuntimeModel.RootComponents;
+
+		/// <summary>
+		///   Gets the state formulas the model was instantiated with.
+		/// </summary>
+		protected StateFormula[] StateFormulas => RuntimeModel.StateFormulas;
+
+		/// <summary>
+		///   Gets the number of state slots required to serialize the model's state.
+		/// </summary>
+		protected int StateSlotCount => RuntimeModel.StateSlotCount;
 
 		/// <summary>
 		///   Instantiates a runtime model.
@@ -57,6 +67,15 @@ namespace Tests.Utilities
 				memoryStream.Seek(0, SeekOrigin.Begin);
 				RuntimeModel = RuntimeModelSerializer.Load(memoryStream);
 			}
+		}
+
+		/// <summary>
+		///   Instantiates a runtime model.
+		/// </summary>
+		/// <param name="components">The root components of the model that should be instantiated.</param>
+		protected void Create(params IComponent[] components)
+		{
+			Create(new Model(components));
 		}
 	}
 }

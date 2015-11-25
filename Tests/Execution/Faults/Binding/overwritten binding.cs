@@ -22,17 +22,16 @@
 
 namespace Tests.Execution.Faults.Binding
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
 	using Utilities;
 
-	public class X4 : TestModel
+	internal class X4 : TestModel
 	{
 		protected override void Check()
 		{
-			Create(new Model(new C()));
+			Create(new C());
 			var c = (C)RootComponents[0];
 
 			c.FaultEffects[0].GetFault().ShouldBe(c.F2);
@@ -49,7 +48,7 @@ namespace Tests.Execution.Faults.Binding
 			}
 
 			[FaultEffect(Fault = nameof(F1))]
-			public class Effect : C
+			internal class Effect : C
 			{
 			}
 		}

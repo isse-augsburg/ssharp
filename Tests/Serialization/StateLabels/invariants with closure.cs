@@ -25,8 +25,9 @@ namespace Tests.Serialization.StateLabels
 	using SafetySharp.Modeling;
 	using SafetySharp.Analysis;
 	using Shouldly;
+	using Utilities;
 
-	internal class InvariantsWithClosure : RuntimeModelTest
+	internal class InvariantsWithClosure : TestModel
 	{
 		protected override void Check()
 		{

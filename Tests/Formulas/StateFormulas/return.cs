@@ -24,7 +24,7 @@ namespace Tests.Formulas.StateFormulas
 {
 	using SafetySharp.Analysis;
 
-	public class Return : FormulaTestObject
+	internal class Return : FormulaTestObject
 	{
 		private static int x;
 		private readonly X1 x1 = new X1();

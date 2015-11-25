@@ -27,8 +27,9 @@ namespace Tests.Serialization.RuntimeModels
 	using SafetySharp.CompilerServices;
 	using SafetySharp.Modeling;
 	using Shouldly;
+	using Utilities;
 
-	internal class ManualBinding : RuntimeModelTest
+	internal class ManualBinding : TestModel
 	{
 		protected override void Check()
 		{

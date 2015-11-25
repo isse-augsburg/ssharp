@@ -27,7 +27,7 @@ namespace Tests.Execution.StateMachines
 	using Shouldly;
 	using Utilities;
 
-	public class Comparisons : TestObject
+	internal class Comparisons : TestObject
 	{
 		protected override void Check()
 		{

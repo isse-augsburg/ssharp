@@ -25,7 +25,7 @@ namespace Tests.Normalization.LiftedExpressions.Unlifted
 	using System;
 	using SafetySharp.Modeling;
 
-	public class In3 : Component
+	internal class In3 : Component
 	{
 		private In3(int i)
 		{

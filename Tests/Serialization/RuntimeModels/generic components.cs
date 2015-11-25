@@ -25,8 +25,9 @@ namespace Tests.Serialization.RuntimeModels
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
+	using Utilities;
 
-	internal class GenericComponents : RuntimeModelTest
+	internal class GenericComponents : TestModel
 	{
 		private static bool _hasConstructorRun;
 

@@ -25,7 +25,7 @@ namespace Tests.Utilities
 	using System;
 	using SafetySharp.Compiler;
 
-	public class TestErrorReporter : ErrorReporter
+	internal class TestErrorReporter : ErrorReporter
 	{
 		private readonly TestTraceOutput _output;
 

@@ -20,32 +20,69 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Execution.Scheduling
 {
-	using System;
-	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	internal class Parameters : FormulaTestObject
+	internal class X4 : TestModel
 	{
-		private bool this[Formula actual, Func<bool> expected]
+		protected override void Check()
 		{
-			get
+			Create(new C());
+			var c = (C)RootComponents[0];
+
+			c.Update();
+			c.X.ShouldBe(3);
+		}
+
+		private class C : Component
+		{
+			public readonly D D1 = new D();
+			public readonly D D2 = new D();
+			public readonly D D3 = new D();
+			public int X;
+
+			public C()
 			{
-				Check(actual, expected);
-				return true;
+				Bind(nameof(D1.M), nameof(D1Updated));
+				Bind(nameof(D2.M), nameof(D2Updated));
+				Bind(nameof(D3.M), nameof(D3Updated));
+			}
+
+			private void D1Updated()
+			{
+				X.ShouldBe(0);
+				X += 1;
+			}
+
+			private void D2Updated()
+			{
+				X.ShouldBe(2);
+				X += 1;
+			}
+
+			private void D3Updated()
+			{
+				X.ShouldBe(1);
+				X += 1;
+			}
+
+			public override void Update()
+			{
+				Update(D1, D3, D2);
 			}
 		}
 
-		protected override void Check()
+		private class D : Component
 		{
-			var x = 2;
-			Check(x == 2, () => x == 2);
-			var ignored = this[x == 3, () => x == 3];
+			public extern void M();
 
-			x = 3;
-			Check(x == 2, () => x == 2);
-			Check(x == 2, () => x == 2);
-			ignored = this[x == 3, () => x == 3];
+			public override void Update()
+			{
+				M();
+			}
 		}
 	}
 }

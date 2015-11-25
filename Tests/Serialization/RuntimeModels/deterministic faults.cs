@@ -27,10 +27,11 @@ namespace Tests.Serialization.RuntimeModels
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
+	using Utilities;
 
 	// ReSharper disable SuspiciousTypeConversion.Global
 	// ReSharper disable PossibleInvalidCastException
-	internal class DeterministicFaults : RuntimeModelTest
+	internal class DeterministicFaults : TestModel
 	{
 		private static bool _hasConstructorRun;
 
@@ -95,7 +96,7 @@ namespace Tests.Serialization.RuntimeModels
 
 			[FaultEffect]
 			[Priority(100)]
-			public class Effect1 : C
+			internal class Effect1 : C
 			{
 				public int F;
 
@@ -106,7 +107,7 @@ namespace Tests.Serialization.RuntimeModels
 
 			[FaultEffect]
 			[Priority(10)]
-			public class Effect2 : C
+			internal class Effect2 : C
 			{
 				public int F;
 
@@ -116,7 +117,7 @@ namespace Tests.Serialization.RuntimeModels
 			}
 
 			[FaultEffect]
-			public class Effect3 : C
+			internal class Effect3 : C
 			{
 				public int F;
 

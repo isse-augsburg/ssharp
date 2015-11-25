@@ -26,7 +26,7 @@ namespace Tests.Execution.StateMachines
 	using Shouldly;
 	using Utilities;
 
-	public class MultipleInitialStates : TestObject
+	internal class MultipleInitialStates : TestObject
 	{
 		protected override void Check()
 		{

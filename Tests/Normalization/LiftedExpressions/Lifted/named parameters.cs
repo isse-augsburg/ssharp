@@ -26,7 +26,7 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 	using System.Linq.Expressions;
 	using SafetySharp.CompilerServices;
 
-	public class Test8
+	internal class Test8
 	{
 		protected void N([LiftExpression] int i, [LiftExpression] bool j, [LiftExpression] int k)
 		{
@@ -45,7 +45,7 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 		}
 	}
 
-	public class In8 : Test8
+	internal class In8 : Test8
 	{
 		private void Q(int x)
 		{
@@ -54,7 +54,7 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 		}
 	}
 
-	public class Out8 : Test8
+	internal class Out8 : Test8
 	{
 		private void Q(int x)
 		{

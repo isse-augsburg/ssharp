@@ -27,8 +27,9 @@ namespace Tests.Serialization.RuntimeModels
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
+	using Utilities;
 
-	internal class SubcomponentArray : RuntimeModelTest
+	internal class SubcomponentArray : TestModel
 	{
 		private static bool _hasConstructorRun;
 

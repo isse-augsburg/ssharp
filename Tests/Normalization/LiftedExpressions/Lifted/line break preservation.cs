@@ -26,7 +26,7 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 	using System.Linq.Expressions;
 	using SafetySharp.CompilerServices;
 
-	public class Test5
+	internal class Test5
 	{
 		public Test5()
 		{
@@ -67,7 +67,7 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 	}
 
 	[CheckTrivia(TriviaType.All)]
-	public class In5 : Test5
+	internal class In5 : Test5
 	{
 		private void M()
 		{
@@ -85,7 +85,7 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 	}
 
 	[CheckTrivia(TriviaType.All)]
-	public class Out5 : Test5
+	internal class Out5 : Test5
 	{
 		private void M()
         {

@@ -80,14 +80,18 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		}
 
 		/// <summary>
-		///   Gets the fields declared by the <paramref name="obj" /> that should be serialized. This only includes the fields declared
-		///   by <paramref name="obj" /> itself, not any of the fields declared by its base types.
+		///   Gets the fields declared by the <paramref name="obj" /> that should be serialized. In full serialization mode, this only
+		///   includes the fields declared by <paramref name="obj" /> itself, not any of the fields declared by its base types. In
+		///   optimized mode, this includes all fields. The reason is that in optimized mode, fault effects are actually treated as
+		///   components, whereas in full mode, they only serve to serialize the delta to their base class.
 		/// </summary>
 		/// <param name="obj">The object that should be serialized.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		private static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode)
 		{
-			return GetFields(obj, mode, obj.GetType().BaseType);
+			return mode == SerializationMode.Optimized
+				? GetFields(obj, mode, null)
+				: GetFields(obj, mode, obj.GetType().BaseType);
 		}
 	}
 }

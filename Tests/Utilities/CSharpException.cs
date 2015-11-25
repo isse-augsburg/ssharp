@@ -30,7 +30,7 @@ namespace Tests.Utilities
 	/// <summary>
 	///   Raised when invalid C# code is detected or compilation of a dynamic C# project failed.
 	/// </summary>
-	public class CSharpException : TestException
+	internal class CSharpException : TestException
 	{
 		/// <summary>
 		///   Initializes a new instance.

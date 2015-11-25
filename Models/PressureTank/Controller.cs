@@ -80,6 +80,8 @@ namespace PressureTank
 		/// </summary>
 		public override void Update()
 		{
+			Update(Sensor, Timer, Pump);
+
 			StateMachine
 				.Transition(
 					from: State.Filling,

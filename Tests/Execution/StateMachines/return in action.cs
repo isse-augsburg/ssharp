@@ -26,7 +26,7 @@ namespace Tests.Execution.StateMachines
 	using Shouldly;
 	using Utilities;
 
-	public class ReturnInAction : TestObject
+	internal class ReturnInAction : TestObject
 	{
 		private readonly StateMachine<E> _stateMachine = new StateMachine<E>(E.A);
 		private int _x;

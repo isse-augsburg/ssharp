@@ -74,6 +74,7 @@ namespace SafetySharp.Runtime
 			var localObjectTable = new ObjectTable(objects);
 
 			RootComponents = rootComponents;
+			Faults = localObjectTable.OfType<Fault>().ToArray();
 			StateFormulas = stateFormulas;
 			StateSlotCount = SerializationRegistry.Default.GetStateSlotCount(localObjectTable, SerializationMode.Optimized);
 
@@ -95,6 +96,11 @@ namespace SafetySharp.Runtime
 		///   Gets the root components of the model.
 		/// </summary>
 		public Component[] RootComponents { get; }
+
+		/// <summary>
+		///   Gets the faults contained in the model.
+		/// </summary>
+		public Fault[] Faults { get; }
 
 		/// <summary>
 		///   Gets the state labels of the model.
@@ -132,6 +138,9 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void ExecuteStep()
 		{
+			foreach (var fault in Faults)
+				fault.Update();
+
 			foreach (var component in RootComponents)
 				component.Update();
 		}

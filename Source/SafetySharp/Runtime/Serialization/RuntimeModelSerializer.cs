@@ -62,7 +62,8 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private static unsafe void SerializeModel(BinaryWriter writer, Model model, Formula[] formulas)
 		{
-			// Make sure that all auto-bound fault effects have been bound
+			// Validate the model and make sure that all auto-bound fault effects have been bound
+			model.Validate();
 			model.BindFaultEffects();
 
 			// Collect all objects contained in the model
@@ -184,7 +185,7 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			// Deserialize the object table
 			var objectTable = DeserializeObjectTable(reader);
-			
+
 			// Deserialize the object identifiers of the root components
 			var roots = new Component[reader.ReadInt32()];
 			for (var i = 0; i < roots.Length; ++i)
@@ -197,9 +198,8 @@ namespace SafetySharp.Runtime.Serialization
 			for (var i = 0; i < slotCount; ++i)
 				serializedState[i] = reader.ReadInt32();
 
-			// Deserialize the state formulas and the model's initial state
+			// Deserialize the model's initial state
 			var deserializer = SerializationRegistry.Default.CreateStateDeserializer(objectTable, SerializationMode.Full);
-			var stateFormulas = DeserializeFormulas(reader, objectTable);
 			deserializer(serializedState);
 
 			// We instantiate the runtime type for each component and replace the original component
@@ -209,7 +209,8 @@ namespace SafetySharp.Runtime.Serialization
 			SubstituteRuntimeInstances(objectTable, roots);
 			deserializer(serializedState);
 
-			// Instantiate the runtime model
+			// Deserialize the state formulas and instantiate the runtime model
+			var stateFormulas = DeserializeFormulas(reader, objectTable);
 			return new RuntimeModel(roots, objectTable, stateFormulas);
 		}
 
@@ -228,7 +229,7 @@ namespace SafetySharp.Runtime.Serialization
 				if (runtimeType == component.GetType())
 					continue;
 
-                var runtimeObj = (Component)FormatterServices.GetUninitializedObject(runtimeType);
+				var runtimeObj = (Component)FormatterServices.GetUninitializedObject(runtimeType);
 				var rootIndex = Array.IndexOf(roots, component);
 
 				if (rootIndex != -1)

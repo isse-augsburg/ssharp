@@ -53,7 +53,7 @@ namespace Tests.LtsMin.Ltl.NotViolated
 
 			[FaultEffect(Fault = nameof(F1))]
 			[Priority(2)]
-			public class E1 : C
+			internal class E1 : C
 			{
 				public override void Update()
 				{
@@ -63,7 +63,7 @@ namespace Tests.LtsMin.Ltl.NotViolated
 			}
 
 			[FaultEffect(Fault = nameof(F2))]
-			public class E2 : C
+			internal class E2 : C
 			{
 				public override void Update()
 				{

@@ -25,9 +25,10 @@ namespace Tests.Serialization.StateLabels
 	using SafetySharp.Modeling;
 	using SafetySharp.Analysis;
 	using Shouldly;
+	using Utilities;
 	using static SafetySharp.Analysis.Tl;
 
-	internal class LtlFormula : RuntimeModelTest
+	internal class LtlFormula : TestModel
 	{
 		protected override void Check()
 		{

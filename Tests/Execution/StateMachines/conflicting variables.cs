@@ -26,7 +26,7 @@ namespace Tests.Execution.StateMachines
 	using Shouldly;
 	using Utilities;
 
-	public class ConflictingVariables : TestObject
+	internal class ConflictingVariables : TestObject
 	{
 		private readonly StateMachine<S> _stateMachine = new StateMachine<S>(S.A);
 		private int _x;

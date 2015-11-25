@@ -25,8 +25,9 @@ namespace Tests.Serialization.RuntimeModels
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
+	using Utilities;
 
-	internal class String : RuntimeModelTest
+	internal class String : TestModel
 	{
 		protected override void Check()
 		{

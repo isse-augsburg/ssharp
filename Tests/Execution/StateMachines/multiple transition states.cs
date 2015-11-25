@@ -27,7 +27,7 @@ namespace Tests.Execution.StateMachines
 	using Shouldly;
 	using Utilities;
 
-	public class MultipleTransitionStates : TestObject
+	internal class MultipleTransitionStates : TestObject
 	{
 		private readonly StateMachine<E> _sm = new StateMachine<E>(E.A);
 

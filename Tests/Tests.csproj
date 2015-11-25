@@ -198,6 +198,10 @@
     <Compile Include="Execution\RequiredPorts\Methods\non-inherited.cs" />
     <Compile Include="Execution\RequiredPorts\Methods\overridden.cs" />
     <Compile Include="Execution\RequiredPorts\Methods\replaced.cs" />
+    <Compile Include="Execution\Scheduling\subcomponents explicit.cs" />
+    <Compile Include="Execution\Scheduling\order.cs" />
+    <Compile Include="Execution\Scheduling\subcomponents mixed.cs" />
+    <Compile Include="Execution\Scheduling\subcomponents implicit.cs" />
     <Compile Include="Execution\StateMachines\comparisons.cs" />
     <Compile Include="Execution\StateMachines\multiple initial states.cs" />
     <Compile Include="Execution\StateMachines\return in action.cs" />
@@ -246,6 +250,7 @@
     </Compile>
     <Compile Include="LtsMin\CtlStar\NotViolated\initial state.cs" />
     <Compile Include="LtsMin\CtlStar\Violated\initial state.cs" />
+    <Compile Include="LtsMin\Ltl\NotViolated\faults.cs" />
     <Compile Include="LtsMin\Ltl\NotViolated\forced faults.cs" />
     <Compile Include="LtsMin\Invariants\NotViolated\disabled faults.cs" />
     <Compile Include="LtsMin\Invariants\Violated\required port.cs" />

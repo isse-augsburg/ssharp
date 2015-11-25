@@ -28,8 +28,9 @@ namespace Tests.Serialization.RuntimeModels
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
+	using Utilities;
 
-	internal class SingleFault : RuntimeModelTest
+	internal class SingleFault : TestModel
 	{
 		private static bool _hasConstructorRun;
 

@@ -22,16 +22,15 @@
 
 namespace Tests.Execution.Faults.ProvidedPorts
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	public class X5 : TestModel
+	internal class X5 : TestModel
 	{
 		protected sealed override void Check()
 		{
-			Create(new Model(new C()));
+			Create(new C());
 			var c = (C)RootComponents[0];
 
 			c._f1.OccurrenceKind = OccurrenceKind.Never;

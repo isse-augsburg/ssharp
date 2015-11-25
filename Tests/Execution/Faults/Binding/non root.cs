@@ -28,7 +28,7 @@ namespace Tests.Execution.Faults.Binding
 	using Shouldly;
 	using Utilities;
 
-	public class X5 : TestModel
+	internal class X5 : TestModel
 	{
 		protected override void Check()
 		{
@@ -48,7 +48,7 @@ namespace Tests.Execution.Faults.Binding
 			public readonly Fault F = new TransientFault();
 
 			[FaultEffect(Fault = nameof(F))]
-			public class Effect : C
+			internal class Effect : C
 			{
 			}
 		}

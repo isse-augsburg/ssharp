@@ -28,6 +28,14 @@ namespace SafetySharp.Modeling
 	public class TransientFault : Fault
 	{
 		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		public TransientFault()
+			: base(independentOccurrence: true)
+		{
+		}
+
+		/// <summary>
 		///   Gets the updated occurrence state of the fault.
 		/// </summary>
 		protected override bool GetUpdatedOccurrenceState()

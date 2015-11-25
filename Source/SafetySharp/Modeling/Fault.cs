@@ -33,7 +33,21 @@ namespace SafetySharp.Modeling
 	public abstract class Fault
 	{
 		[Hidden]
-		private OccurrenceKind _occurrenceKind;
+		private readonly bool _independentOccurrence;
+
+		[Hidden]
+		private OccurrenceKind _occurrenceKind = OccurrenceKind.SelfDetermined;
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="independentOccurrence">
+		///   Indicates whether the fault can occur independently, i.e., regardless of other model state.
+		/// </param>
+		protected Fault(bool independentOccurrence)
+		{
+			_independentOccurrence = independentOccurrence;
+		}
 
 		/// <summary>
 		///   Gets a value indicating whether the fault is currently occurring.
@@ -44,6 +58,11 @@ namespace SafetySharp.Modeling
 		///   Gets the <see cref="Choice" /> instance that can be used to determine whether the fault occurs.
 		/// </summary>
 		protected Choice Choice { get; } = new Choice();
+
+		/// <summary>
+		///   Gets a value indicating whether the fault can occur independently, i.e., regardless of other model state.
+		/// </summary>
+		internal bool IndependentOccurrence => _independentOccurrence;
 
 		/// <summary>
 		///   Gets or sets the fault's forced occurrence kind.

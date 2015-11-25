@@ -82,6 +82,15 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
+		///   Validates the model, checking for anything unsupported.
+		/// </summary>
+		internal void Validate()
+		{
+			if (this.GetFaults().Any(fault => !fault.IndependentOccurrence))
+				throw new NotSupportedException("Faults that cannot occur independently are currently unsupported.");
+		}
+
+		/// <summary>
 		///   Binds all automatically bound fault effects to their respective faults.
 		/// </summary>
 		internal void BindFaultEffects()

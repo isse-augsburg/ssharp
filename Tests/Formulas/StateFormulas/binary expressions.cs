@@ -24,7 +24,7 @@ namespace Tests.Formulas.StateFormulas
 {
 	using SafetySharp.Analysis;
 
-	public class BinaryExpressions : FormulaTestObject
+	internal class BinaryExpressions : FormulaTestObject
 	{
 		protected override void Check()
 		{

@@ -26,8 +26,9 @@ namespace Tests.Serialization.RuntimeModels
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
+	using Utilities;
 
-	internal class SimpleHierarchy : RuntimeModelTest
+	internal class SimpleHierarchy : TestModel
 	{
 		private static bool _hasConstructorRun;
 

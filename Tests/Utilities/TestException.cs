@@ -28,7 +28,7 @@ namespace Tests.Utilities
 	/// <summary>
 	///   Raised when the test execution encounters an error.
 	/// </summary>
-	public class TestException : Exception
+	internal class TestException : Exception
 	{
 		/// <summary>
 		///   Initializes a new instance.

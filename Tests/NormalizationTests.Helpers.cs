@@ -45,7 +45,7 @@ namespace Tests
 		All
 	}
 
-	public class CheckTrivia : Attribute
+	internal class CheckTrivia : Attribute
 	{
 		public CheckTrivia(TriviaType triviaType = TriviaType.None)
 		{

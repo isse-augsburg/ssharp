@@ -20,32 +20,64 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Execution.Scheduling
 {
-	using System;
-	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	internal class Parameters : FormulaTestObject
+	internal class X2 : TestModel
 	{
-		private bool this[Formula actual, Func<bool> expected]
+		protected override void Check()
 		{
-			get
+			Create(new C());
+			var c = (C)RootComponents[0];
+
+			c.Update();
+
+			c.X.ShouldBe(2);
+			c.D1.X.ShouldBe(10);
+			c.D1.E.X.ShouldBe(21);
+			c.D2.X.ShouldBe(23);
+			c.D2.E.X.ShouldBe(21);
+		}
+
+		private class C : Component
+		{
+			public readonly D D1 = new D { X = 4 };
+			public readonly D D2 = new D { X = 17 };
+			public int X;
+
+			public override void Update()
 			{
-				Check(actual, expected);
-				return true;
+				D1.Update();
+				D2.Update();
+
+				X += 2;
 			}
 		}
 
-		protected override void Check()
+		private class D : Component
 		{
-			var x = 2;
-			Check(x == 2, () => x == 2);
-			var ignored = this[x == 3, () => x == 3];
+			public readonly E E = new E();
+			public int X;
 
-			x = 3;
-			Check(x == 2, () => x == 2);
-			Check(x == 2, () => x == 2);
-			ignored = this[x == 3, () => x == 3];
+			public override void Update()
+			{
+				E.Update();
+
+				X += 6;
+			}
+		}
+
+		private class E : Component
+		{
+			public int X;
+
+			public override void Update()
+			{
+				X += 21;
+			}
 		}
 	}
 }

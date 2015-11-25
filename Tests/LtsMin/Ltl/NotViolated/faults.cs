@@ -20,32 +20,55 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.LtsMin.Ltl.NotViolated
 {
-	using System;
-	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using static SafetySharp.Analysis.Tl;
 
-	internal class Parameters : FormulaTestObject
+	internal class Faults : LtsMinTestObject
 	{
-		private bool this[Formula actual, Func<bool> expected]
-		{
-			get
-			{
-				Check(actual, expected);
-				return true;
-			}
-		}
-
 		protected override void Check()
 		{
-			var x = 2;
-			Check(x == 2, () => x == 2);
-			var ignored = this[x == 3, () => x == 3];
+			var c = new C { X = 3 };
 
-			x = 3;
-			Check(x == 2, () => x == 2);
-			Check(x == 2, () => x == 2);
-			ignored = this[x == 3, () => x == 3];
+			Check(G(c.X != 3), c).ShouldBe(false);
+			Check(G(c.X != 77), c).ShouldBe(false);
+			Check(G(c.X != 717), c).ShouldBe(false);
+
+			Check(F(G(c.X == 3)), c).ShouldBe(false);
+			Check(F(G(c.X == 77)), c).ShouldBe(false);
+			Check(F(G(c.X == 717)), c).ShouldBe(false);
+		}
+
+		private class C : Component
+		{
+			public readonly Fault F1 = new TransientFault();
+			public readonly Fault F2 = new TransientFault();
+			public int X;
+
+			public override void Update()
+			{
+				X = 3;
+			}
+
+			[FaultEffect(Fault = nameof(F1))]
+			internal class E1 : C
+			{
+				public override void Update()
+				{
+					X = 77;
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F2))]
+			internal class E2 : C
+			{
+				public override void Update()
+				{
+					X = 717;
+				}
+			}
 		}
 	}
 }

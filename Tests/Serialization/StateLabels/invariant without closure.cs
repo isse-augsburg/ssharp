@@ -25,8 +25,9 @@ namespace Tests.Serialization.StateLabels
 	using SafetySharp.Modeling;
 	using SafetySharp.Analysis;
 	using Shouldly;
+	using Utilities;
 
-	internal class InvariantWithoutClosure : RuntimeModelTest
+	internal class InvariantWithoutClosure : TestModel
 	{
 		private static int _x;
 

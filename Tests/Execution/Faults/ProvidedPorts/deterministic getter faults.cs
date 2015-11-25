@@ -22,16 +22,15 @@
 
 namespace Tests.Execution.Faults.ProvidedPorts
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	public class X4 : TestModel
+	internal class X4 : TestModel
 	{
 		protected sealed override void Check()
 		{
-			Create(new Model(new C()));
+			Create(new C());
 			var c = (C)RootComponents[0];
 
 			c._f1.OccurrenceKind = OccurrenceKind.Never;
@@ -82,7 +81,7 @@ namespace Tests.Execution.Faults.ProvidedPorts
 			public readonly TransientFault _f3 = new TransientFault();
 
 			public virtual int M => 1;
-		
+
 			[FaultEffect(Fault = nameof(_f1))]
 			[Priority(1)]
 			private class F1 : C

@@ -61,5 +61,11 @@ namespace Tests
 		{
 			ExecuteDynamicTests(file);
 		}
+
+		[Theory, MemberData("DiscoverTests", "Execution/Scheduling")]
+		public void Scheduling(string test, string file)
+		{
+			ExecuteDynamicTests(file);
+		}
 	}
 }

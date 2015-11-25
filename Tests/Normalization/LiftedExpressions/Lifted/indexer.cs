@@ -26,14 +26,14 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 	using System.Linq.Expressions;
 	using SafetySharp.CompilerServices;
 
-	public class Test7
+	internal class Test7
 	{
 		public int this[[LiftExpression] int i] => 1;
 		public int this[Expression<Func<int>> i] => 1;
 		public int this[bool b] => 1;
 	}
 
-	public class In7
+	internal class In7
 	{
 		private void M()
 		{
@@ -47,7 +47,7 @@ namespace Tests.Normalization.LiftedExpressions.Lifted
 		}
 	}
 
-	public class Out7
+	internal class Out7
 	{
 		private void M()
 		{

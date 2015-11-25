@@ -23,16 +23,15 @@
 namespace Tests.Execution.Faults.RequiredPorts
 {
 	using System;
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	public class X2 : TestModel
+	internal class X2 : TestModel
 	{
 		protected sealed override void Check()
 		{
-			Create(new Model(new C()));
+			Create(new C());
 			var c = (C)RootComponents[0];
 
 			c._f.OccurrenceKind = OccurrenceKind.Always;

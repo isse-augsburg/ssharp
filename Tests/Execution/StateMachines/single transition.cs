@@ -26,7 +26,7 @@ namespace Tests.Execution.StateMachines
 	using Shouldly;
 	using Utilities;
 
-	public class SingleTransition : TestObject
+	internal class SingleTransition : TestObject
 	{
 		protected override void Check()
 		{

@@ -26,7 +26,7 @@ namespace Tests.Execution.StateMachines
 	using Shouldly;
 	using Utilities;
 
-	public class NamedParameters : TestObject
+	internal class NamedParameters : TestObject
 	{
 		protected override void Check()
 		{

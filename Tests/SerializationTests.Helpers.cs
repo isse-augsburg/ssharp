@@ -25,18 +25,11 @@ namespace Tests
 	using System.Collections.Generic;
 	using System.Linq;
 	using JetBrains.Annotations;
-	using SafetySharp.Analysis;
 	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 	using Utilities;
 	using Xunit.Abstractions;
-
-	internal abstract class RuntimeModelTest : TestModel
-	{
-		protected StateFormula[] StateFormulas => RuntimeModel.StateFormulas;
-		protected int StateSlotCount => RuntimeModel.StateSlotCount;
-	}
 
 	public abstract unsafe class SerializationObject : TestObject
 	{

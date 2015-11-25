@@ -24,7 +24,7 @@ namespace Tests.Formulas.StateFormulas
 {
 	using SafetySharp.Analysis;
 
-	public class Arrays : FormulaTestObject
+	internal class Arrays : FormulaTestObject
 	{
 		private static int x;
 		private readonly Formula[] _f = new Formula[2];

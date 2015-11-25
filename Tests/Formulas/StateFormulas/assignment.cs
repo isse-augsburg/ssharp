@@ -24,7 +24,7 @@ namespace Tests.Formulas.StateFormulas
 {
 	using SafetySharp.Analysis;
 
-	public class Assignment : FormulaTestObject
+	internal class Assignment : FormulaTestObject
 	{
 		private Formula f;
 		private Formula P { get; set; }

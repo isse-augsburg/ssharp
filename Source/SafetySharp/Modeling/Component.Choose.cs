@@ -25,9 +25,6 @@ namespace SafetySharp.Modeling
 	using System.Diagnostics;
 	using System.Runtime.CompilerServices;
 
-	/// <summary>
-	///   Represents a S# component.
-	/// </summary>
 	public abstract partial class Component
 	{
 		/// <summary>

@@ -55,6 +55,9 @@
     <Compile Include="CompilerServices\PortReference.cs" />
     <Compile Include="CompilerServices\RuntimeTypeAttribute.cs" />
     <Compile Include="CompilerServices\StateFormulaFactory.cs" />
+    <Compile Include="Modeling\Component.Update.cs">
+      <DependentUpon>Component.cs</DependentUpon>
+    </Compile>
     <Compile Include="Modeling\NonDiscoverableAttribute.cs" />
     <Compile Include="Analysis\CounterExample.cs" />
     <Compile Include="Modeling\OccurrenceKind.cs" />

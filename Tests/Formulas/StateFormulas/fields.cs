@@ -24,7 +24,7 @@ namespace Tests.Formulas.StateFormulas
 {
 	using SafetySharp.Analysis;
 
-	public class Fields : FormulaTestObject
+	internal class Fields : FormulaTestObject
 	{
 		private static int x;
 

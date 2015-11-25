@@ -46,7 +46,7 @@ namespace Tests.LtsMin.Invariants.NotViolated
 			public int X;
 
 			[FaultEffect(Fault = nameof(F1))]
-			public class E1 : C
+			internal class E1 : C
 			{
 				public override void Update()
 				{
@@ -55,7 +55,7 @@ namespace Tests.LtsMin.Invariants.NotViolated
 			}
 
 			[FaultEffect(Fault = nameof(F2))]
-			public class E2 : C
+			internal class E2 : C
 			{
 				public override void Update()
 				{
