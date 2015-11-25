@@ -20,34 +20,66 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.LtsMin.Dcca
 {
-	using Xunit;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	public partial class LtsMinTests
+	internal class X2 : LtsMinTestObject
 	{
-		[Theory, MemberData("DiscoverTests", "LtsMin/Invariants")]
-		public void Invariants(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			var c = new C();
+			var result = Dcca(c.X > 4, c);
+
+			result.CheckedSetsCount.ShouldBe(5);
+			result.MinimalCutSetsCount.ShouldBe(1);
+
+			ShouldContain(result.CheckedSets);
+			ShouldContain(result.CheckedSets, c.F1);
+			ShouldContain(result.CheckedSets, c.F2);
+			ShouldContain(result.CheckedSets, c.F3);
+			ShouldContain(result.CheckedSets, c.F2, c.F3);
+
+			ShouldContain(result.MinimalCutSets, c.F1);
 		}
 
-		[Theory, MemberData("DiscoverTests", "LtsMin/Ltl")]
-		public void Ltl(string test, string file)
+		private class C : Component
 		{
-			ExecuteDynamicTests(file);
-		}
+			public readonly Fault F1 = new TransientFault();
+			public readonly Fault F2 = new PersistentFault();
+			public readonly Fault F3 = new PersistentFault();
+			public int X;
 
-		[Theory, MemberData("DiscoverTests", "LtsMin/CtlStar")]
-		public void Ctl(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
+			public override void Update()
+			{
+				X = 3;
+			}
 
-		[Theory, MemberData("DiscoverTests", "LtsMin/Dcca")]
-		public void Dcca(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			[FaultEffect(Fault = nameof(F1))]
+			private class E1 : C
+			{
+				public override void Update()
+				{
+					X = 17;
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F2))]
+			private class E2 : C
+			{
+				public override void Update()
+				{
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F3))]
+			private class E3 : C
+			{
+				public override void Update()
+				{
+				}
+			}
 		}
 	}
 }

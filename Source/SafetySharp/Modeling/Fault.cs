@@ -35,6 +35,9 @@ namespace SafetySharp.Modeling
 		[Hidden]
 		private readonly bool _independentOccurrence;
 
+		[NonSerializable]
+		private string _name;
+
 		[Hidden]
 		private OccurrenceKind _occurrenceKind = OccurrenceKind.SelfDetermined;
 
@@ -58,6 +61,15 @@ namespace SafetySharp.Modeling
 		///   Gets the <see cref="Choice" /> instance that can be used to determine whether the fault occurs.
 		/// </summary>
 		protected Choice Choice { get; } = new Choice();
+
+		/// <summary>
+		///   Gets or sets the fault's name.
+		/// </summary>
+		public string Name
+		{
+			get { return _name; }
+			set { _name = value; }
+		}
 
 		/// <summary>
 		///   Gets a value indicating whether the fault can occur independently, i.e., regardless of other model state.

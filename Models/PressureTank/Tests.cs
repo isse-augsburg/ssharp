@@ -23,6 +23,7 @@
 namespace PressureTank
 {
 	using System;
+	using System.Linq;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 
@@ -34,13 +35,14 @@ namespace PressureTank
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis(new LtsMin(), Model.Create(specification));
 
-			var cutSets = analysis.ComputeMinimalCutSets(specification.Rupture);
+			var result = analysis.ComputeMinimalCutSets(specification.Rupture);
 
-			foreach (var cutSet in cutSets)
-			{
-				var val = Convert.ToString(cutSet, 2);
-				Console.WriteLine("critical: {0}", val.Length < 8 ? new string('0', 8 - val.Length) + val : val);
-			}
+			Console.WriteLine("Checked Fault Sets: {0}", result.CheckedSetsCount);
+			Console.WriteLine("Minimal Cut Sets: {0}", result.MinimalCutSetsCount);
+
+			var i = 1;
+			foreach (var cutSet in result.MinimalCutSets)
+				Console.WriteLine("   ({1}) {{ {0} }}", String.Join(", ", cutSet.Select(fault => fault.Name)), i++);
 		}
 	}
 }

@@ -20,62 +20,68 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace PressureTank
+namespace Tests.LtsMin.Dcca
 {
 	using SafetySharp.Modeling;
+	using Shouldly;
 
-	/// <summary>
-	///   Represents the pump that fills the pressure tank.
-	/// </summary>
-	public class Pump : Component
+	internal class X4 : LtsMinTestObject
 	{
-		/// <summary>
-		///   The fault that prevents the pump from pumping.
-		/// </summary>
-		public readonly Fault SuppressPumping = new PersistentFault { Name = nameof(SuppressPumping) };
-
-		/// <summary>
-		///   Indicates whether the pump is currently filling the pressure tank.
-		/// </summary>
-		private bool _enabled;
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		public Pump()
+		protected override void Check()
 		{
-			SuppressPumping.AddEffect<SuppressPumpingEffect>(this);
+			var c = new C();
+			var result = Dcca(c.X > 4, c);
+
+			result.CheckedSetsCount.ShouldBe(4);
+			result.MinimalCutSetsCount.ShouldBe(3);
+
+			ShouldContain(result.CheckedSets);
+			ShouldContain(result.CheckedSets, c.F1);
+			ShouldContain(result.CheckedSets, c.F2);
+			ShouldContain(result.CheckedSets, c.F3);
+
+			ShouldContain(result.MinimalCutSets, c.F1);
+			ShouldContain(result.MinimalCutSets, c.F2);
+			ShouldContain(result.MinimalCutSets, c.F3);
 		}
 
-		/// <summary>
-		///   Gets a value indicating whether the pump is currently enabled.
-		/// </summary>
-		public bool IsEnabled => _enabled;
-
-		/// <summary>
-		///   Disables the pump.
-		/// </summary>
-		public void Disable()
+		private class C : Component
 		{
-			_enabled = false;
-		}
+			public readonly Fault F1 = new TransientFault();
+			public readonly Fault F2 = new PersistentFault();
+			public readonly Fault F3 = new PersistentFault();
+			public int X;
 
-		/// <summary>
-		///   Enables the pump.
-		/// </summary>
-		public virtual void Enable()
-		{
-			_enabled = true;
-		}
-
-		/// <summary>
-		///   Prevents the pump from pumping.
-		/// </summary>
-		[FaultEffect]
-		public class SuppressPumpingEffect : Pump
-		{
-			public override void Enable()
+			public override void Update()
 			{
+				X = 3;
+			}
+
+			[FaultEffect(Fault = nameof(F1))]
+			private class E1 : C
+			{
+				public override void Update()
+				{
+					X = 17;
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F2))]
+			private class E2 : C
+			{
+				public override void Update()
+				{
+					X = 99;
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F3))]
+			private class E3 : C
+			{
+				public override void Update()
+				{
+					X = 21;
+				}
 			}
 		}
 	}

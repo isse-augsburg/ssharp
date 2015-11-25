@@ -22,7 +22,9 @@
 
 namespace SafetySharp.Analysis
 {
+	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using Modeling;
 	using Runtime.Reflection;
 	using Utilities;
@@ -60,39 +62,182 @@ namespace SafetySharp.Analysis
 		///   Computes the minimal cut sets for the <paramref name="hazard" />.
 		/// </summary>
 		/// <param name="hazard">The hazard the minimal cut sets should be computed for.</param>
-		public IEnumerable<int> ComputeMinimalCutSets(Formula hazard)
+		public Result ComputeMinimalCutSets(Formula hazard)
 		{
 			Requires.NotNull(hazard, nameof(hazard));
 			Requires.OfType<StateFormula>(hazard, nameof(hazard), "Hazards are required to be state formulas.");
 
 			var faults = _model.GetFaults();
-			var faultSets = new List<int>(1 << faults.Length);
-			GeneratePowerSet(faultSets, faults.Length);
+			var safeSets = new HashSet<int>();
+			var cutSets = new HashSet<int>();
+			var checkedSets = new HashSet<int>();
 
-			var criticalSets = new List<int>();
-			foreach (var set in faultSets)
+			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
+			// all singleton sets, then all sets with two elements, etc. We don't check sets that we
+			// know are going to be cut sets due to monotonicity
+			for (var cardinality = 0; cardinality <= faults.Length; ++cardinality)
 			{
-				for (var i = 0; i < faults.Length; ++i)
-					faults[i].OccurrenceKind = (set & i) == i ? OccurrenceKind.Always : OccurrenceKind.Never;
+				// Generate the sets for the current level that we'll have to check
+				var sets = GeneratePowerSetLevel(safeSets, cutSets, cardinality, faults.Length);
 
-				if (_modelChecker.CheckHazard(_model, ((StateFormula)hazard).Expression) != null)
-					criticalSets.Add(set);
+				// Clear the safe sets, we don't need the previous level to generate the next one
+				safeSets.Clear();
+
+				// If there are no sets to check, we're done; this happens when there are so many cut sets
+				// that this level does not contain any set that is not a super set of any of those cut sets
+				if (sets.Count == 0)
+					break;
+
+				// We have to check each set; if one of them is a cut set, it has no effect on the other
+				// sets we have to check
+				foreach (var set in sets)
+				{
+					// Enable or disable the faults that the set represents
+					for (var i = 1; i <= faults.Length; ++i)
+						faults[i - 1].OccurrenceKind = (set & (1 << (i - 1))) != 0 ? OccurrenceKind.SelfDetermined : OccurrenceKind.Never;
+
+					// If there was a counter example, the set is a cut set
+					if (_modelChecker.CheckHazard(_model, ((StateFormula)hazard).Expression) != null)
+						cutSets.Add(set);
+					else
+						safeSets.Add(set);
+
+					checkedSets.Add(set);
+				}
 			}
 
-			return criticalSets;
+			return new Result(cutSets, checkedSets, faults);
 		}
 
-		public static void GeneratePowerSet(List<int> sets, int count)
+		/// <summary>
+		///   Generates a level of the power set.
+		/// </summary>
+		/// <param name="safeSets">The set of safe sets generated at the previous level.</param>
+		/// <param name="cutSets">The sets that are known to be cut sets. All super sets are discarded.</param>
+		/// <param name="cardinality">The cardinality of the sets that should be generated.</param>
+		/// <param name="count">The number of elements in the set the power set is generated for.</param>
+		private static HashSet<int> GeneratePowerSetLevel(HashSet<int> safeSets, HashSet<int> cutSets, int cardinality, int count)
 		{
-			if (count == 0)
-				sets.Add(0);
-			else
-			{
-				GeneratePowerSet(sets, count - 1);
+			var result = new HashSet<int>();
 
-				var setsCount = sets.Count;
-				for (var i = 0; i < setsCount; ++i)
-					sets.Add(sets[i] | 1 << (count - 1));
+			switch (cardinality)
+			{
+				case 0:
+					// There is only the empty set with a cardinality of 0
+					result.Add(0);
+					break;
+				case 1:
+					// We have to kick things off by explicitly generating the singleton sets; at this point,
+					// we know that there are no further minimal cut sets if we've already found one (= the empty set)
+					if (cutSets.Count == 0)
+					{
+						for (var i = 0; i < count; ++i)
+							result.Add(1 << i);
+					}
+					break;
+				default:
+					// We now generate the sets with the requested cardinality based on the sets from the previous level 
+					// which had a cardinality that is one less than the sets we're going to generate now. The basic
+					// idea is that we create the union between all safe sets and all singleton sets and discard
+					// the ones we don't want
+					foreach (var safeSet in safeSets)
+					{
+						for (var i = 0; i < count; ++i)
+						{
+							// If we're trying to add an element to the set that it already contains, we get a set
+							// we've already checked before; discard it
+							if ((safeSet & (1 << i)) != 0)
+								continue;
+
+							var set = safeSet | (1 << i);
+
+							// Check if the newly generated set it a super set of any cut sets; if so, discard it
+							if (cutSets.All(s => (set & s) != s))
+								result.Add(set);
+						}
+					}
+					break;
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		///   Prints a set for debugging purposes.
+		/// </summary>
+		private void PrintSet(IEnumerable<int> set, int maxLength = 8)
+		{
+			Console.WriteLine("Cut Sets ({0}):", set.Count());
+
+			foreach (var cutSet in set)
+			{
+				var val = Convert.ToString(cutSet, 2);
+				Console.WriteLine(val.Length < maxLength ? new string('0', maxLength - val.Length) + val : val);
+			}
+		}
+
+		/// <summary>
+		///   Represents the result of a safety analysis.
+		/// </summary>
+		public struct Result
+		{
+			/// <summary>
+			///   Gets the minimal cut sets, each cut set containing the faults that potentially result in the occurrence of a hazard.
+			/// </summary>
+			public ISet<ISet<Fault>> MinimalCutSets { get; }
+
+			/// <summary>
+			///   Gets the number of minimal cut sets.
+			/// </summary>
+			public int MinimalCutSetsCount { get; }
+
+			/// <summary>
+			///   Gets all of the fault sets that were checked for criticality. Some sets might not have been checked as they were known to
+			///   be cut sets due to the monotonicity of the cut set property.
+			/// </summary>
+			public ISet<ISet<Fault>> CheckedSets { get; }
+
+			/// <summary>
+			///   Gets the number of sets that have been checked for criticality. Some sets might not have been checked as they were known
+			///   to be cut sets due to the monotonicity of the cut set property.
+			/// </summary>
+			public int CheckedSetsCount { get; }
+
+			/// <summary>
+			///   Initializes a new instance.
+			/// </summary>
+			/// <param name="cutSets">The minimal cut sets.</param>
+			/// <param name="checkedSets">The sets that have been checked.</param>
+			/// <param name="faults">The faults that have been checked.</param>
+			internal Result(HashSet<int> cutSets, HashSet<int> checkedSets, Fault[] faults)
+			{
+				MinimalCutSetsCount = cutSets.Count;
+				CheckedSetsCount = checkedSets.Count;
+
+				MinimalCutSets = Convert(cutSets, faults);
+				CheckedSets = Convert(checkedSets, faults);
+			}
+
+			/// <summary>
+			///   Converts the integer-based set to a sets of fault sets.
+			/// </summary>
+			private static ISet<ISet<Fault>> Convert(HashSet<int> sets, Fault[] faults)
+			{
+				var result = new HashSet<ISet<Fault>>();
+
+				foreach (var set in sets)
+				{
+					var faultSet = new HashSet<Fault>();
+					for (var i = 1; i <= faults.Length; ++i)
+					{
+						if ((set & (1 << (i - 1))) != 0)
+							faultSet.Add(faults[i - 1]);
+					}
+
+					result.Add(faultSet);
+				}
+
+				return result;
 			}
 		}
 	}

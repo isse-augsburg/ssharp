@@ -32,7 +32,7 @@ namespace PressureTank
 		/// <summary>
 		///   The fault that prevents the timer from reporting a timeout.
 		/// </summary>
-		public readonly Fault SuppressTimeout = new PersistentFault();
+		public readonly Fault SuppressTimeout = new PersistentFault { Name = nameof(SuppressTimeout) };
 
 		/// <summary>
 		///   The amount of time that has to pass before the timer signals a timeout.

@@ -24,6 +24,7 @@ namespace Tests
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
 	using SafetySharp.CompilerServices;
@@ -32,7 +33,7 @@ namespace Tests
 	using Utilities;
 	using Xunit.Abstractions;
 
-	internal abstract class LtsMinTestObject : TestObject
+	public abstract class LtsMinTestObject : TestObject
 	{
 		protected CounterExample CounterExample { get; set; }
 
@@ -58,6 +59,28 @@ namespace Tests
 
 			CounterExample = ltsMin.Check(new Model(components), formula);
 			return CounterExample == null;
+		}
+
+		protected SafetyAnalysis.Result Dcca(Formula hazard, params IComponent[] components)
+		{
+			var ltsMin = new SafetySharp.Analysis.LtsMin();
+			ltsMin.OutputWritten += message => Output.Log("{0}", message);
+
+			var analysis = new SafetyAnalysis(ltsMin, new Model(components));
+			return analysis.ComputeMinimalCutSets(hazard);
+		}
+
+		protected void ShouldContain(ISet<ISet<Fault>> sets, params Fault[] faults)
+		{
+			foreach (var set in sets)
+			{
+				var faultSet = new HashSet<Fault>(faults);
+
+                if (set.IsSubsetOf(faultSet) && faultSet.IsSubsetOf(set))
+					return;
+			}
+
+			throw new TestException("Fault set is not contained in set.");
 		}
 	}
 

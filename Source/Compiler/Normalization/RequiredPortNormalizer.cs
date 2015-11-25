@@ -234,7 +234,7 @@ namespace SafetySharp.Compiler.Normalization
 				initializer: initializer);
 
 			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field);
-			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
+			field = Syntax.MarkAsNonDebuggerBrowsable(field);
 			field = Syntax.AddAttribute<NonSerializableAttribute>(field);
 			return (FieldDeclarationSyntax)field;
 		}
@@ -250,7 +250,7 @@ namespace SafetySharp.Compiler.Normalization
 				accessibility: Accessibility.Private);
 
 			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field);
-			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
+			field = Syntax.MarkAsNonDebuggerBrowsable(field);
 			return (FieldDeclarationSyntax)field;
 		}
 

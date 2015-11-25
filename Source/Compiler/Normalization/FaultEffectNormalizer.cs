@@ -272,7 +272,7 @@ namespace SafetySharp.Compiler.Normalization
 				modifiers: DeclarationModifiers.Static | DeclarationModifiers.ReadOnly,
 				initializer: typeofExpression);
 
-			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
+			field = Syntax.MarkAsNonDebuggerBrowsable(field);
 			field = Syntax.AddAttribute<HiddenAttribute>(field);
 			field = field.NormalizeWhitespace();
 
@@ -289,7 +289,7 @@ namespace SafetySharp.Compiler.Normalization
 				type: Syntax.TypeExpression(SpecialType.System_Int32),
 				accessibility: Accessibility.Internal);
 
-			field = Syntax.MarkAsNonDebuggerBrowsable(field, SemanticModel);
+			field = Syntax.MarkAsNonDebuggerBrowsable(field);
 			field = Syntax.AddAttribute<NonSerializableAttribute>(field);
 			field = field.NormalizeWhitespace();
 
@@ -306,7 +306,7 @@ namespace SafetySharp.Compiler.Normalization
 				type: Syntax.TypeExpression<Fault>(SemanticModel),
 				accessibility: Accessibility.Internal);
 
-			faultField = Syntax.MarkAsNonDebuggerBrowsable(faultField, SemanticModel);
+			faultField = Syntax.MarkAsNonDebuggerBrowsable(faultField);
 			faultField = Syntax.AddAttribute<HiddenAttribute>(faultField);
 			faultField = faultField.NormalizeWhitespace();
 

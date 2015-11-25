@@ -24,6 +24,7 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
@@ -198,17 +199,15 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 		/// </summary>
 		/// <param name="syntaxGenerator">The syntax generator that should be used to generate the attribute.</param>
 		/// <param name="syntaxNode">The syntax node that should be marked with the attribute.</param>
-		/// <param name="semanticModel">The semantic model that should be used to resolve type information.</param>
 		[Pure, NotNull]
-		public static SyntaxNode MarkAsNonDebuggerBrowsable([NotNull] this SyntaxGenerator syntaxGenerator, [NotNull] SyntaxNode syntaxNode,
-															[NotNull] SemanticModel semanticModel)
+		public static SyntaxNode MarkAsNonDebuggerBrowsable([NotNull] this SyntaxGenerator syntaxGenerator, [NotNull] SyntaxNode syntaxNode)
 		{
 #if DEBUG
 			return syntaxNode;
 #else
-			var attributeType = syntaxGenerator.TypeExpression<DebuggerBrowsableState>(semanticModel);
+			var attributeType = SyntaxFactory.ParseTypeName(typeof(DebuggerBrowsableState).FullName);
 			var never = syntaxGenerator.MemberAccessExpression(attributeType, nameof(DebuggerBrowsableState.Never));
-			return syntaxGenerator.AddAttribute<DebuggerBrowsableAttribute>(syntaxNode, semanticModel, never);
+			return syntaxGenerator.AddAttribute<DebuggerBrowsableAttribute>(syntaxNode, never);
 #endif
 		}
 	}

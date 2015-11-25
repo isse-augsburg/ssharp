@@ -129,7 +129,7 @@ namespace SafetySharp.Compiler.Normalization
 				initializer: declaration.Initializer?.Value);
 
 			fieldDeclaration = Syntax.AddAttribute<CompilerGeneratedAttribute>(fieldDeclaration);
-			fieldDeclaration = Syntax.MarkAsNonDebuggerBrowsable(fieldDeclaration, SemanticModel);
+			fieldDeclaration = Syntax.MarkAsNonDebuggerBrowsable(fieldDeclaration);
 			AddMembers(propertySymbol.ContainingType, (FieldDeclarationSyntax)fieldDeclaration);
 
 			var getterBody = (StatementSyntax)Syntax.ReturnStatement(fieldIdentifier).NormalizeWhitespace();
