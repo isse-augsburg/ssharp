@@ -44,7 +44,7 @@
   <ItemGroup>
     <Compile Include="Analysis\FormulaVisitors\LtsMinMuCalculusTransformer.cs" />
     <Compile Include="Analysis\HazardAttribute.cs" />
-    <Compile Include="Analysis\IModelChecker.cs" />
+    <Compile Include="Analysis\ModelChecker.cs" />
     <Compile Include="Analysis\LtsMin.cs" />
     <Compile Include="Analysis\Model.cs" />
     <Compile Include="Analysis\RootAttribute.cs" />

@@ -40,14 +40,14 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   The model checker that is used for the analysis.
 		/// </summary>
-		private readonly IModelChecker _modelChecker;
+		private readonly ModelChecker _modelChecker;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="modelChecker">The model checker that should be used for the analysis.</param>
 		/// <param name="model">The model that should be analyzed.</param>
-		public SafetyAnalysis(IModelChecker modelChecker, Model model)
+		public SafetyAnalysis(ModelChecker modelChecker, Model model)
 		{
 			Requires.NotNull(modelChecker, nameof(modelChecker));
 			Requires.NotNull(model, nameof(model));
@@ -75,7 +75,7 @@ namespace SafetySharp.Analysis
 				for (var i = 0; i < faults.Length; ++i)
 					faults[i].OccurrenceKind = (set & i) == i ? OccurrenceKind.Always : OccurrenceKind.Never;
 
-				if (_modelChecker.CheckInvariant(_model, ((StateFormula)hazard).Expression) != null)
+				if (_modelChecker.CheckHazard(_model, ((StateFormula)hazard).Expression) != null)
 					criticalSets.Add(set);
 			}
 

@@ -24,18 +24,19 @@ namespace SafetySharp.Analysis
 {
 	using System;
 	using CompilerServices;
+	using Utilities;
 
 	/// <summary>
-	///   Represents a model checker.
+	///   Represents a base class for external model checker tools.
 	/// </summary>
-	public interface IModelChecker
+	public abstract class ModelChecker
 	{
 		/// <summary>
 		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		CounterExample Check(Model model, Formula formula);
+		public abstract CounterExample Check(Model model, Formula formula);
 
 		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
@@ -43,7 +44,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">[LiftExpression] The invariant that should be checked.</param>
-		CounterExample CheckInvariant(Model model, Func<bool> invariant);
+		public abstract CounterExample CheckInvariant(Model model, Func<bool> invariant);
 
 		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
@@ -51,6 +52,30 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">[LiftExpression] The invariant that should be checked.</param>
-		CounterExample CheckInvariant(Model model, [LiftExpression] bool invariant);
+		public CounterExample CheckInvariant(Model model, [LiftExpression] bool invariant)
+		{
+			Requires.CompilationTransformation();
+			return null;
+		}
+
+		/// <summary>
+		///   Checks whether the <paramref name="hazard" /> occurs in any state of the <paramref name="model" />. Returns a
+		///   <see cref="CounterExample" /> if the hazard occurs, <c>null</c> otherwise.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="hazard">[LiftExpression] The hazard that should be checked.</param>
+		public abstract CounterExample CheckHazard(Model model, Func<bool> hazard);
+
+		/// <summary>
+		///   Checks whether the <paramref name="hazard" /> occurs in any state of the <paramref name="model" />. Returns a
+		///   <see cref="CounterExample" /> if the hazard occurs, <c>null</c> otherwise.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="hazard">[LiftExpression] The hazard that should be checked.</param>
+		public CounterExample CheckHazard(Model model, [LiftExpression] bool hazard)
+		{
+			Requires.CompilationTransformation();
+			return null;
+		}
 	}
 }

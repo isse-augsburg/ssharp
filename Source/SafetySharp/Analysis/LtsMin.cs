@@ -27,7 +27,6 @@ namespace SafetySharp.Analysis
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
-	using CompilerServices;
 	using FormulaVisitors;
 	using Runtime.Serialization;
 	using Utilities;
@@ -35,7 +34,7 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents the LtsMin model checker.
 	/// </summary>
-	public class LtsMin : IModelChecker
+	public class LtsMin : ModelChecker
 	{
 		/// <summary>
 		///   Represents the LtsMin process that is currently running.
@@ -53,15 +52,18 @@ namespace SafetySharp.Analysis
 		public IEnumerable<string> Outputs { get; private set; }
 
 		/// <summary>
-		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
-		///   <see cref="CounterExample" /> if the invariant is violated, <c>null</c> otherwise.
+		///   Checks whether the <paramref name="hazard" /> occurs in any state of the <paramref name="model" />. Returns a
+		///   <see cref="CounterExample" /> if the hazard occurs, <c>null</c> otherwise.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
-		/// <param name="invariant">[LiftExpression] The invariant that should be checked.</param>
-		public CounterExample CheckInvariant(Model model, [LiftExpression] bool invariant)
+		/// <param name="hazard">[LiftExpression] The hazard that should be checked.</param>
+		public override CounterExample CheckHazard(Model model, Func<bool> hazard)
 		{
-			Requires.CompilationTransformation();
-			return null;
+			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(hazard, nameof(hazard));
+
+			var stateFormula = new StateFormula(hazard);
+			return Check(model, stateFormula, $"--invariant=\"!{stateFormula.Label}\"");
 		}
 
 		/// <summary>
@@ -70,7 +72,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public CounterExample CheckInvariant(Model model, Func<bool> invariant)
+		public override CounterExample CheckInvariant(Model model, Func<bool> invariant)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
@@ -84,7 +86,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public CounterExample Check(Model model, Formula formula)
+		public override CounterExample Check(Model model, Formula formula)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formula, nameof(formula));
@@ -97,17 +99,15 @@ namespace SafetySharp.Analysis
 				var transformationVisitor = new LtsMinLtlTransformer();
 				transformationVisitor.Visit(formula);
 
-				return Check(model, formula, $"--ltl=\"{ transformationVisitor.TransformedFormula}\"");
+				return Check(model, formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
 			}
 			else
 			{
 				var transformationVisitor = new LtsMinMuCalculusTransformer();
 				transformationVisitor.Visit(formula);
 
-				return Check(model, formula, $"--ltl=\"{ transformationVisitor.TransformedFormula}\"");
+				return Check(model, formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
 			}
-
-			
 		}
 
 		/// <summary>
