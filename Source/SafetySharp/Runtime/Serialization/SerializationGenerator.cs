@@ -161,12 +161,13 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="objectIdentifier">The identifier of the array that should be deserialized.</param>
 		/// <param name="elementType">The element type of the array.</param>
 		/// <param name="length">The length of the array.</param>
-		public void DeserializeArray(int objectIdentifier, Type elementType, int length)
+		public unsafe void DeserializeArray(int objectIdentifier, Type elementType, int length)
 		{
 			var isReferenceType = elementType.IsReferenceType();
+			var isReferenceTypeWith4Bytes = isReferenceType && sizeof(void*) == 4;
 			var isFourBytePrimitiveType = IsPrimitiveTypeWithAtMostFourBytes(elementType);
 			var advanceCount = isReferenceType || isFourBytePrimitiveType ? 1 : 2;
-			var loadCode = isFourBytePrimitiveType ? OpCodes.Ldind_I4 : OpCodes.Ldind_I8;
+			var loadCode = isFourBytePrimitiveType || isReferenceTypeWith4Bytes ? OpCodes.Ldind_I4 : OpCodes.Ldind_I8;
 			var storeCode = GetStoreArrayElementOpCode(elementType);
 
 			for (var i = 0; i < length; ++i)
@@ -206,12 +207,13 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="objectIdentifier">The identifier of the array that should be serialized.</param>
 		/// <param name="elementType">The element type of the array.</param>
 		/// <param name="length">The length of the array.</param>
-		public void SerializeArray(int objectIdentifier, Type elementType, int length)
+		public unsafe void SerializeArray(int objectIdentifier, Type elementType, int length)
 		{
 			var isReferenceType = elementType.IsReferenceType();
+			var isReferenceTypeWith4Bytes = isReferenceType && sizeof(void*) == 4;
 			var isFourBytePrimitiveType = IsPrimitiveTypeWithAtMostFourBytes(elementType);
 			var advanceCount = isReferenceType || isFourBytePrimitiveType ? 1 : 2;
-			var storeCode = isFourBytePrimitiveType ? OpCodes.Stind_I4 : OpCodes.Stind_I8;
+			var storeCode = isFourBytePrimitiveType || isReferenceTypeWith4Bytes ? OpCodes.Stind_I4 : OpCodes.Stind_I8;
 			var loadCode = GetLoadArrayElementOpCode(elementType);
 
 			for (var i = 0; i < length; ++i)

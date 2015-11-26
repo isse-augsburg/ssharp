@@ -60,13 +60,7 @@ namespace Tests.Utilities
 		/// <param name="formulas">The formulas the runtime model should be instantiated with.</param>
 		protected void Create(Model model, params Formula[] formulas)
 		{
-			using (var memoryStream = new MemoryStream())
-			{
-				RuntimeModelSerializer.Save(memoryStream, model, formulas);
-
-				memoryStream.Seek(0, SeekOrigin.Begin);
-				RuntimeModel = RuntimeModelSerializer.Load(memoryStream);
-			}
+			RuntimeModel = model.ToRuntimeModel(formulas);
 		}
 
 		/// <summary>

@@ -94,6 +94,16 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
+		///   Toggles the fault's <see cref="OccurrenceKind" /> between <see cref="Modeling.OccurrenceKind.Always" /> and
+		///   <see cref="Modeling.OccurrenceKind.Never" />, with <see cref="Modeling.OccurrenceKind.SelfDetermined" /> being
+		///   treated as <see cref="Modeling.OccurrenceKind.Never" />.
+		/// </summary>
+		public void ToggleOccurrence()
+		{
+			OccurrenceKind = OccurrenceKind == OccurrenceKind.Always ? OccurrenceKind.Never : OccurrenceKind.Always;
+		}
+
+		/// <summary>
 		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault occurs.
 		/// </summary>
 		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>

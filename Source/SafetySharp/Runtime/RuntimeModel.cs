@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Runtime
 {
+	using System;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Analysis;
@@ -130,6 +131,14 @@ namespace SafetySharp.Runtime
 		internal void Serialize(int* serializedState)
 		{
 			_serialize(serializedState);
+		}
+
+		/// <summary>
+		///   Resets the model to one of its initial states.
+		/// </summary>
+		public void Reset()
+		{
+			throw new NotImplementedException();
 		}
 
 		/// <summary>

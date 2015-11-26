@@ -24,10 +24,13 @@ namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Collections.Generic;
+	using System.IO;
 	using System.Linq;
 	using System.Reflection;
 	using Modeling;
+	using Runtime;
 	using Runtime.Reflection;
+	using Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -79,6 +82,23 @@ namespace SafetySharp.Analysis
 			});
 
 			return new Model(components);
+		}
+
+		/// <summary>
+		///   Creates a <see cref="RuntimeModel" /> instance from the model and the <paramref name="formulas" />.
+		/// </summary>
+		/// <param name="formulas">The formulas the model should be able to check.</param>
+		internal RuntimeModel ToRuntimeModel(params Formula[] formulas)
+		{
+			Requires.NotNull(formulas, nameof(formulas));
+
+			using (var memoryStream = new MemoryStream())
+			{
+				RuntimeModelSerializer.Save(memoryStream, this, formulas);
+
+				memoryStream.Seek(0, SeekOrigin.Begin);
+				return RuntimeModelSerializer.Load(memoryStream);
+			}
 		}
 
 		/// <summary>

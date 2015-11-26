@@ -60,6 +60,7 @@
     <Compile Include="Modeling\NonDiscoverableAttribute.cs" />
     <Compile Include="Analysis\CounterExample.cs" />
     <Compile Include="Modeling\OccurrenceKind.cs" />
+    <Compile Include="Runtime\RealTimeSimulator.cs" />
     <Compile Include="Runtime\Reflection\ComponentExtensions.cs" />
     <Compile Include="Runtime\Reflection\ModelExtensions.cs" />
     <Compile Include="Runtime\Reflection\StateMachineExtensions.cs" />
@@ -113,6 +114,8 @@
     <Compile Include="Runtime\Serialization\Serializers\Serializer.cs" />
     <Compile Include="Runtime\Serialization\RuntimeModelSerializer.cs" />
     <Compile Include="Runtime\Serialization\SerializationRegistry.cs" />
+    <Compile Include="Runtime\SimulationState.cs" />
+    <Compile Include="Runtime\Simulator.cs" />
     <Compile Include="Runtime\StateCache.cs" />
     <Compile Include="Runtime\UnboundPortException.cs" />
     <Compile Include="Utilities\MemoryBuffer.cs" />

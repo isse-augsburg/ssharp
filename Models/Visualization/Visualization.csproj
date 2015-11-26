@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -118,20 +119,13 @@
     <Resource Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Source\Modeling\Modeling.csproj">
+    <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">
       <Project>{9b6c1fb4-3f1b-43ac-a0e0-eaed4088bf37}</Project>
       <Name>Modeling</Name>
     </ProjectReference>
     <ProjectReference Include="..\PressureTank\PressureTank.csproj">
       <Project>{2834343c-5d3a-4673-9f58-f869f4e3cc01}</Project>
       <Name>PressureTank</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SharedComponents\SharedComponents.csproj">
-      <Project>{c7377ef7-e8fe-4864-802f-b2dab535d20c}</Project>
-      <Name>SharedComponents</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
