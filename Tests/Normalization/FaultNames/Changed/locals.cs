@@ -20,30 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Normalization.FaultNames.Changed
 {
-	using SafetySharp.Compiler.Normalization;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Modeling;
 
-	public partial class NormalizationTests : Tests
+	public class In1
 	{
-		[Theory, MemberData("DiscoverTests", "Normalization/LiftedExpressions")]
-		public void LiftedExpressions(string test, string file)
+		private void M()
 		{
-			CheckNormalization<LiftedExpressionNormalizer>(file);
-		}
+			var f1 = new TransientFault();
+			Fault f2 = new TransientFault();
 
-		[Theory, MemberData("DiscoverTests", "Normalization/Partial")]
-		public void Partial(string test, string file)
-		{
-			CheckNormalization<PartialNormalizer>(file);
-		}
+			TransientFault f3 = new TransientFault(), f4 = new TransientFault(), 
+				f5 = new TransientFault();
 
-		[Theory, MemberData("DiscoverTests", "Normalization/FaultNames")]
-		public void FaultNames(string test, string file)
+			var f6 = new TransientFault { OccurrenceKind = OccurrenceKind.Always };
+		}
+	}
+
+	public class Out1
+	{
+		private void M()
 		{
-			CheckNormalization<FaultNameNormalizer>(file);
+			var f1 = new TransientFault() { Name = "f1" };
+			Fault f2 = new TransientFault() { Name = "f2" };
+
+			TransientFault f3 = new TransientFault() { Name = "f3" }, f4 = new TransientFault() { Name = "f4" }, 
+				f5 = new TransientFault() { Name = "f5" };
+
+			var f6 = new TransientFault { OccurrenceKind = OccurrenceKind.Always, Name = "f6" };
 		}
 	}
 }

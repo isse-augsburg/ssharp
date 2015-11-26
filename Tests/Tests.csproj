@@ -281,6 +281,13 @@
     <Compile Include="LtsMin\Ltl\Violated\initial state.cs" />
     <Compile Include="LtsMin\Ltl\Violated\multiple choices.cs" />
     <Compile Include="LtsMin\Ltl\Violated\single choice.cs" />
+    <Compile Include="Normalization\FaultNames\Changed\properties.cs" />
+    <Compile Include="Normalization\FaultNames\Changed\fields.cs" />
+    <Compile Include="Normalization\FaultNames\Changed\locals.cs" />
+    <Compile Include="Normalization\FaultNames\Unchanged\initialized fault.cs" />
+    <Compile Include="Normalization\FaultNames\Unchanged\has name.cs" />
+    <Compile Include="Normalization\FaultNames\Unchanged\uninitialized fault.cs" />
+    <Compile Include="Normalization\FaultNames\Unchanged\no fault.cs" />
     <Compile Include="Normalization\LiftedExpressions\Lifted\method chaining.cs" />
     <Compile Include="Normalization\LiftedExpressions\Lifted\named parameters.cs" />
     <Compile Include="Normalization\LiftedExpressions\Lifted\line break preservation.cs" />

@@ -19,31 +19,24 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
-namespace Tests
+namespace Tests.Normalization.FaultNames.Unchanged
 {
-	using SafetySharp.Compiler.Normalization;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Modeling;
 
-	public partial class NormalizationTests : Tests
+	public class In3
 	{
-		[Theory, MemberData("DiscoverTests", "Normalization/LiftedExpressions")]
-		public void LiftedExpressions(string test, string file)
+		public Fault X = Create();
+
+		public Fault Y { get; set; } = Create();
+
+		void M()
 		{
-			CheckNormalization<LiftedExpressionNormalizer>(file);
+			Fault x = Create();
 		}
 
-		[Theory, MemberData("DiscoverTests", "Normalization/Partial")]
-		public void Partial(string test, string file)
+		static Fault Create()
 		{
-			CheckNormalization<PartialNormalizer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Normalization/FaultNames")]
-		public void FaultNames(string test, string file)
-		{
-			CheckNormalization<FaultNameNormalizer>(file);
+			return null;
 		}
 	}
 }

@@ -33,12 +33,12 @@ namespace PressureTank
 		///   The fault that prevents the sensor from triggering when the tank has reached or exceeded
 		///   its maximum allowed pressure level.
 		/// </summary>
-		public readonly Fault SuppressIsEmpty = new TransientFault { Name = nameof(SuppressIsEmpty) };
+		public readonly Fault SuppressIsEmpty = new TransientFault();
 
 		/// <summary>
 		///   The fault that prevents the sensor from triggering when the tank has become empty.
 		/// </summary>
-		public readonly Fault SuppressIsFull = new TransientFault { Name = nameof(SuppressIsFull) };
+		public readonly Fault SuppressIsFull = new TransientFault();
 
 		/// <summary>
 		///   The pressure level the sensor is watching for.

@@ -20,30 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Normalization.FaultNames.Changed
 {
-	using SafetySharp.Compiler.Normalization;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Modeling;
 
-	public partial class NormalizationTests : Tests
+	public class In3
 	{
-		[Theory, MemberData("DiscoverTests", "Normalization/LiftedExpressions")]
-		public void LiftedExpressions(string test, string file)
-		{
-			CheckNormalization<LiftedExpressionNormalizer>(file);
-		}
+		private PersistentFault F1 { get; set; } = new PersistentFault();
+		private Fault F2 { get; } = new TransientFault();
+		private Fault F3 { get; } = new TransientFault { OccurrenceKind = OccurrenceKind.Always };
+	}
 
-		[Theory, MemberData("DiscoverTests", "Normalization/Partial")]
-		public void Partial(string test, string file)
-		{
-			CheckNormalization<PartialNormalizer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Normalization/FaultNames")]
-		public void FaultNames(string test, string file)
-		{
-			CheckNormalization<FaultNameNormalizer>(file);
-		}
+	public class Out3
+	{
+		private PersistentFault F1 { get; set; } = new PersistentFault() { Name = "F1" };
+		private Fault F2 { get; } = new TransientFault() { Name = "F2" };
+		private Fault F3 { get; } = new TransientFault { OccurrenceKind = OccurrenceKind.Always, Name = "F3" };
 	}
 }

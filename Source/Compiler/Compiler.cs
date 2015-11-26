@@ -296,6 +296,7 @@ namespace SafetySharp.Compiler
 			Compilation = Normalizer.ApplyNormalizer<AutoPropertyNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<FaultEffectNormalizer>(Compilation, syntaxGenerator);
 			Compilation = Normalizer.ApplyNormalizer<RequiredPortNormalizer>(Compilation, syntaxGenerator);
+			Compilation = Normalizer.ApplyNormalizer<FaultNameNormalizer>(Compilation, syntaxGenerator);
 		}
 
 		/// <summary>

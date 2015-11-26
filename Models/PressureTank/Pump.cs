@@ -32,20 +32,12 @@ namespace PressureTank
 		/// <summary>
 		///   The fault that prevents the pump from pumping.
 		/// </summary>
-		public readonly Fault SuppressPumping = new PersistentFault { Name = nameof(SuppressPumping) };
+		public readonly Fault SuppressPumping = new PersistentFault();
 
 		/// <summary>
 		///   Indicates whether the pump is currently filling the pressure tank.
 		/// </summary>
 		private bool _enabled;
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		public Pump()
-		{
-			SuppressPumping.AddEffect<SuppressPumpingEffect>(this);
-		}
 
 		/// <summary>
 		///   Gets a value indicating whether the pump is currently enabled.
@@ -71,7 +63,7 @@ namespace PressureTank
 		/// <summary>
 		///   Prevents the pump from pumping.
 		/// </summary>
-		[FaultEffect]
+		[FaultEffect(Fault = nameof(SuppressPumping))]
 		public class SuppressPumpingEffect : Pump
 		{
 			public override void Enable()

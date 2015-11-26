@@ -20,30 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Normalization.FaultNames.Unchanged
 {
-	using SafetySharp.Compiler.Normalization;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Modeling;
 
-	public partial class NormalizationTests : Tests
+	internal class F : Fault
 	{
-		[Theory, MemberData("DiscoverTests", "Normalization/LiftedExpressions")]
-		public void LiftedExpressions(string test, string file)
+		public int X;
+		public int Y;
+
+		public F()
+			: base(true)
 		{
-			CheckNormalization<LiftedExpressionNormalizer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Normalization/Partial")]
-		public void Partial(string test, string file)
+		protected override bool GetUpdatedOccurrenceState()
 		{
-			CheckNormalization<PartialNormalizer>(file);
+			return false;
 		}
+	}
 
-		[Theory, MemberData("DiscoverTests", "Normalization/FaultNames")]
-		public void FaultNames(string test, string file)
+	public class In4
+	{
+		public Fault X1 = new F() { Name = "x" };
+		public Fault X2 = new F() { X = 1, Name = "x" };
+		public Fault X3 = new F() { Name = "x", X = 2 };
+		public Fault X4 = new F() { X = 2, Name = "x", Y = 3 };
+
+		public Fault Y1 { get; } = new F() { Name = "x" };
+		public Fault Y2 { get; } = new F() { X = 1, Name = "x" };
+		public Fault Y3 { get; } = new F() { Name = "x", X = 2 };
+		public Fault Y4 { get; } = new F() { X = 2, Name = "x", Y = 3 };
+
+		private void M()
 		{
-			CheckNormalization<FaultNameNormalizer>(file);
+			var x1 = new F() { Name = "x" };
+			var x2 = new F() { X = 1, Name = "x" };
+			var x3 = new F() { Name = "x", X = 2 };
+			var x4 = new F() { X = 2, Name = "x", Y = 3 };
 		}
 	}
 }

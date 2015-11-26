@@ -32,13 +32,7 @@ namespace PressureTank
 		/// <summary>
 		///   The fault that prevents the timer from reporting a timeout.
 		/// </summary>
-		public readonly Fault SuppressTimeout = new PersistentFault { Name = nameof(SuppressTimeout) };
-
-		/// <summary>
-		///   The amount of time that has to pass before the timer signals a timeout.
-		/// </summary>
-		[Hidden]
-		public int Timeout;
+		public readonly Fault SuppressTimeout = new PersistentFault();
 
 		/// <summary>
 		///   The remaining time before the timeout is signaled. A value of -1 indicates that the timer is inactive.
@@ -47,12 +41,10 @@ namespace PressureTank
 		private int _remainingTime = -1;
 
 		/// <summary>
-		///   Initializes a new instance.
+		///   The amount of time that has to pass before the timer signals a timeout.
 		/// </summary>
-		public Timer()
-		{
-			SuppressTimeout.AddEffect<SuppressTimeoutEffect>(this);
-		}
+		[Hidden]
+		public int Timeout;
 
 		/// <summary>
 		///   Gets a value indicating whether the timeout has elapsed. This method returns true only for the single system step where
@@ -101,7 +93,7 @@ namespace PressureTank
 		/// <summary>
 		///   Prevents the timer from reporting a timeout.
 		/// </summary>
-		[FaultEffect]
+		[FaultEffect(Fault = nameof(SuppressTimeout))]
 		private sealed class SuppressTimeoutEffect : Timer
 		{
 			public override bool HasElapsed => false;
