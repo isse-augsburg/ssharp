@@ -106,7 +106,7 @@ namespace SafetySharp.Runtime.Serialization
 				writer.Write(objectTable.GetObjectIdentifier(formula.Expression.Target));
 				writer.Write(formula.Expression.Method.Name);
 
-				// Serialize the state label name
+				// Serialize the formula's label name
 				writer.Write(formula.Label);
 			}
 		}

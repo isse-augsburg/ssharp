@@ -32,7 +32,7 @@ namespace SafetySharp.Modeling
 	///   Represents a state machine that transitions between various states.
 	/// </summary>
 	/// <typeparam name="TState">The type of the state machine's states.</typeparam>
-	public sealed class StateMachine<TState>
+	public sealed class StateMachine<TState> : INondeterministicInitialization
 	{
 		/// <summary>
 		///   The initial states of the state machine.
@@ -52,7 +52,7 @@ namespace SafetySharp.Modeling
 
 			// Copy the initial states to the property in order to avoid external modifications
 			InitialStates = _initialStates.ToArray();
-			State = _initialStates[0]; // TODO: Nondeterministic selection of initial states
+			State = _initialStates[0];
 		}
 
 		/// <summary>
@@ -69,6 +69,14 @@ namespace SafetySharp.Modeling
 		///   Gets the current state of the state machine.
 		/// </summary>
 		public TState State { get; internal set; }
+
+		/// <summary>
+		///   Nondeterministically chooses an initial state.
+		/// </summary>
+		void INondeterministicInitialization.Initialize()
+		{
+			State = Choice.Choose(_initialStates);
+		}
 
 		/// <summary>
 		///   Transitions the state machine to the target state executing the <paramref name="action" />, provided that the state

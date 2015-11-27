@@ -256,6 +256,8 @@
     <Compile Include="LtsMin\Dcca\single two point cut set.cs" />
     <Compile Include="LtsMin\Dcca\single singleton cut set.cs" />
     <Compile Include="LtsMin\Dcca\empty set.cs" />
+    <Compile Include="LtsMin\Invariants\Violated\multiple initial states.cs" />
+    <Compile Include="LtsMin\Ltl\NotViolated\state machine multiple initial states.cs" />
     <Compile Include="LtsMin\Ltl\NotViolated\nondeterministic faults.cs" />
     <Compile Include="LtsMin\Ltl\NotViolated\deterministic faults.cs" />
     <Compile Include="LtsMin\Ltl\NotViolated\forced faults.cs" />

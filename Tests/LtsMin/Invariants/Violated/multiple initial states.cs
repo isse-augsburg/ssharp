@@ -20,42 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.LtsMin.Invariants.Violated
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
-	using Utilities;
 
-	internal class UnserializableType : TestModel
+	internal class MultipleInitialState : LtsMinTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C { F = 9 };
-			var d = new D { C = c };
-			var m = new Model(d);
+			var c = new C();
 
-			Create(m);
+			CheckInvariant(c.F != 1, c).ShouldBe(false);
+			CheckInvariant(c.F != 2, c).ShouldBe(false);
+			CheckInvariant(c.F != 3, c).ShouldBe(false);
 
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-			StateSlotCount.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<D>();
-
-			((D)root).C.ShouldBe(null);
+			CheckInvariant(c.F > 0 && c.F < 4, c).ShouldBe(true);
 		}
 
-		[NonSerializable]
-		private class C
+		private class C : Component, INondeterministicInitialization
 		{
 			public int F;
-		}
 
-		private class D : Component
-		{
-			public C C;
+			public void Initialize()
+			{
+				F = Choose(1, 2, 3);
+			}
 		}
 	}
 }

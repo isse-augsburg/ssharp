@@ -38,7 +38,7 @@ namespace Tests.Serialization.RuntimeModels
 
 			StateFormulas.ShouldBeEmpty();
 			RootComponents.Length.ShouldBe(1);
-			StateSlotCount.ShouldBe(1);
+			StateSlotCount.ShouldBe(2);
 
 			var root = RootComponents[0];
 			root.ShouldBeOfType<D>();

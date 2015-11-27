@@ -20,42 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.LtsMin.Ltl.NotViolated
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
-	using Utilities;
+	using static SafetySharp.Analysis.Tl;
 
-	internal class UnserializableType : TestModel
+	internal class StateMachineWithMultipleInitialStatesTest : LtsMinTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C { F = 9 };
-			var d = new D { C = c };
-			var m = new Model(d);
+			var d = new D();
 
-			Create(m);
-
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-			StateSlotCount.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<D>();
-
-			((D)root).C.ShouldBe(null);
-		}
-
-		[NonSerializable]
-		private class C
-		{
-			public int F;
+			Check(d.StateMachine.State == S.A || d.StateMachine.State == S.B, d).ShouldBe(true);
+			Check(d.StateMachine.State != S.A || X(G(d.StateMachine.State == S.D)), d).ShouldBe(true);
+			Check(d.StateMachine.State != S.B || X(G(d.StateMachine.State == S.E)), d).ShouldBe(true);
 		}
 
 		private class D : Component
 		{
-			public C C;
+			public readonly StateMachine<S> StateMachine = new StateMachine<S>(S.A, S.B);
+
+			public override void Update()
+			{
+				StateMachine
+					.Transition(
+						from: S.A,
+						to: S.D)
+					.Transition(
+						from: S.B,
+						to: S.E);
+			}
+		}
+
+		private enum S
+		{
+			A,
+			B,
+			D,
+			E,
 		}
 	}
 }

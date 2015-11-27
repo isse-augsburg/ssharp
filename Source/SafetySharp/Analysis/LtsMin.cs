@@ -63,7 +63,7 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(hazard, nameof(hazard));
 
 			var stateFormula = new StateFormula(hazard);
-			return Check(model, stateFormula, $"--invariant=\"!{stateFormula.Label}\"");
+			return Check(model, stateFormula, $"--invariant=\"(isConstructionState == 1) || (!{stateFormula.Label})\"");
 		}
 
 		/// <summary>
@@ -78,7 +78,7 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(invariant, nameof(invariant));
 
 			var stateFormula = new StateFormula(invariant);
-			return Check(model, stateFormula, $"--invariant=\"{stateFormula.Label}\"");
+			return Check(model, stateFormula, $"--invariant=\"(isConstructionState == 1) || ({stateFormula.Label})\"");
 		}
 
 		/// <summary>
@@ -97,14 +97,14 @@ namespace SafetySharp.Analysis
 			if (visitor.IsLtlFormula)
 			{
 				var transformationVisitor = new LtsMinLtlTransformer();
-				transformationVisitor.Visit(formula);
+				transformationVisitor.Visit(new UnaryFormula(formula, UnaryOperator.Next));
 
 				return Check(model, formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
 			}
 			else
 			{
 				var transformationVisitor = new LtsMinMuCalculusTransformer();
-				transformationVisitor.Visit(formula);
+				transformationVisitor.Visit(new UnaryFormula(new UnaryFormula(formula, UnaryOperator.All), UnaryOperator.Next));
 
 				return Check(model, formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
 			}

@@ -22,11 +22,11 @@
 
 namespace SafetySharp.Runtime
 {
-	using System;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Analysis;
 	using CompilerServices;
+	using JetBrains.Annotations;
 	using Modeling;
 	using Serialization;
 	using Utilities;
@@ -42,9 +42,24 @@ namespace SafetySharp.Runtime
 		private readonly ChoiceResolver _choiceResolver;
 
 		/// <summary>
+		///   The construction state of the model.
+		/// </summary>
+		private readonly int[] _constructionState;
+
+		/// <summary>
+		///   Indicates whether a state is the model's construction state.
+		/// </summary>
+		private readonly ConstructionStateIndicator _constructionStateIndicator = new ConstructionStateIndicator();
+
+		/// <summary>
 		///   Deserializes a state of the model.
 		/// </summary>
 		private readonly SerializationDelegate _deserialize;
+
+		/// <summary>
+		///   The objects contained in the model that require nondeterministic initialization.
+		/// </summary>
+		private readonly INondeterministicInitialization[] _nondeterministicInitializations;
 
 		/// <summary>
 		///   Serializes a state of the model.
@@ -72,7 +87,10 @@ namespace SafetySharp.Runtime
 			// have to be serialized and deserialized. The local object table does not contain, for instance,
 			// the closure types of the state formulas
 			var objects = rootComponents.SelectMany(obj => SerializationRegistry.Default.GetReferencedObjects(obj, SerializationMode.Optimized));
-			var localObjectTable = new ObjectTable(objects);
+			objects = new[] { _constructionStateIndicator }.Concat(objects);
+
+			// The construction state indicator is the first object in the table; its corresponding state slot will be 0
+            var localObjectTable = new ObjectTable(objects);
 
 			RootComponents = rootComponents;
 			Faults = localObjectTable.OfType<Fault>().ToArray();
@@ -84,8 +102,13 @@ namespace SafetySharp.Runtime
 
 			_stateCache = new StateCache(StateSlotCount);
 			_choiceResolver = new ChoiceResolver(objectTable);
+			_nondeterministicInitializations = localObjectTable.OfType<INondeterministicInitialization>().ToArray();
 
 			PortBinding.BindAll(objectTable);
+
+			_constructionState = new int[StateSlotCount];
+			fixed (int* state = _constructionState)
+				Serialize(state);
 		}
 
 		/// <summary>
@@ -138,7 +161,13 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		public void Reset()
 		{
-			throw new NotImplementedException();
+			fixed (int* state = _constructionState)
+			{
+				Deserialize(state);
+
+				foreach (var obj in _nondeterministicInitializations)
+					obj.Initialize();
+			}
 		}
 
 		/// <summary>
@@ -167,22 +196,51 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Gets the serialized initial state of the model.
+		///   Gets the serialized construction state of the model if the model checker does not support multiple initial states.
+		///   The construction state is guaranteed to be different from all other model states.
 		/// </summary>
-		internal int* GetInitialState()
+		internal int* GetConstructionState()
 		{
-			var state = _stateCache.Allocate();
-			Serialize(state);
+			fixed (int* state = _constructionState)
+				Deserialize(state);
 
-			return state;
+			_stateCache.Clear();
+			Serialize(_stateCache.Allocate());
+
+			return _stateCache.StateMemory;
 		}
 
 		/// <summary>
-		///   Computes the next states for <paramref name="sourceState" />.
+		///   Computes the initial states of the model.
+		/// </summary>
+		internal StateCache ComputeInitialStates()
+		{
+			_stateCache.Clear();
+			_choiceResolver.PrepareNextState();
+
+			fixed (int* state = _constructionState)
+			{
+				while (_choiceResolver.PrepareNextPath())
+				{
+					Deserialize(state);
+
+					foreach (var obj in _nondeterministicInitializations)
+						obj.Initialize();
+
+					_constructionStateIndicator.RequiresInitialization = false;
+					Serialize(_stateCache.Allocate());
+				}
+			}
+
+			return _stateCache;
+		}
+
+		/// <summary>
+		///   Computes the successor states for <paramref name="sourceState" />.
 		/// </summary>
 		/// <param name="sourceState">The source state the next states should be computed for.</param>
 		/// <param name="transitionGroup">The transition group the next states should be computed for.</param>
-		internal StateCache ComputeNextStates(int* sourceState, int transitionGroup)
+		internal StateCache ComputeSuccessorStates(int* sourceState, int transitionGroup)
 		{
 			_stateCache.Clear();
 			_choiceResolver.PrepareNextState();
@@ -191,9 +249,7 @@ namespace SafetySharp.Runtime
 			{
 				Deserialize(sourceState);
 				ExecuteStep();
-
-				var targetState = _stateCache.Allocate();
-				Serialize(targetState);
+				Serialize(_stateCache.Allocate());
 			}
 
 			return _stateCache;
@@ -207,6 +263,18 @@ namespace SafetySharp.Runtime
 		{
 			_stateCache.SafeDispose();
 			_choiceResolver.SafeDispose();
+		}
+
+		/// <summary>
+		///   Represents a state value that is unique for the unique construction state of the model.
+		/// </summary>
+		private class ConstructionStateIndicator
+		{
+			/// <summary>
+			///   Indicates whether the model has not yet been initialized.
+			/// </summary>
+			[UsedImplicitly]
+			public bool RequiresInitialization = true;
 		}
 	}
 }

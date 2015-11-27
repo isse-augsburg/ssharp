@@ -81,6 +81,7 @@ void LoadModel(model_t model, const char* file);
 int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, TransitionCB callback, void* context);
 int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state);
 RuntimeModel^ CreateModel();
+bool IsConstructionState(int32_t* state);
 
 //---------------------------------------------------------------------------------------------------------------------------
 // Global variables
@@ -141,7 +142,7 @@ void LoadModel(model_t model, const char* modelFile)
 		{
 			char name[10];
 			sprintf_s(name, "state%d", i);
-			lts_type_set_state_name(ltsType, i, name);
+			lts_type_set_state_name(ltsType, i, i == 0 ? "isConstructionState" : name);
 			lts_type_set_state_typeno(ltsType, i, intType);
 		}
 
@@ -166,7 +167,7 @@ void LoadModel(model_t model, const char* modelFile)
 		GBchunkPut(model, boolType, chunk_str(LTSMIN_VALUE_BOOL_TRUE));
 
 		// Set the initial state, the user context, and the callback functions
-		GBsetInitialState(model, Globals::Model->GetInitialState());
+		GBsetInitialState(model, Globals::Model->GetConstructionState());
 		GBsetNextStateLong(model, NextStatesCallback);
 		GBsetStateLabelLong(model, StateLabelCallback);
 
@@ -208,7 +209,7 @@ void LoadModel(model_t model, const char* modelFile)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
-// Next state function
+// Next states function
 //---------------------------------------------------------------------------------------------------------------------------
 int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, TransitionCB callback, void* context)
 {
@@ -216,7 +217,10 @@ int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, Transit
 
 	try 
 	{
-		auto stateCache = Globals::Model->ComputeNextStates(state, group);
+		auto stateCache = IsConstructionState(state)
+			? Globals::Model->ComputeInitialStates()
+			: Globals::Model->ComputeSuccessorStates(state, group);
+
 		auto stateCount = stateCache->StateCount;
 		auto stateSize = stateCache->SlotCount;
 		auto stateMemory = stateCache->StateMemory;
@@ -269,4 +273,12 @@ RuntimeModel^ CreateModel()
 	Globals::ModelStream->Seek(0, SeekOrigin::Begin);
 
 	return model;
+}
+
+//---------------------------------------------------------------------------------------------------------------------------
+// Construction State Check
+//---------------------------------------------------------------------------------------------------------------------------
+bool IsConstructionState(int32_t* state)
+{
+	return state[0] == 1;
 }
