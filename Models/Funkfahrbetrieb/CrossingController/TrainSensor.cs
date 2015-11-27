@@ -23,24 +23,21 @@
 namespace Funkfahrbetrieb.CrossingController
 {
 	using SafetySharp.Modeling;
-	using SafetySharp.Modeling.Faults;
 
 	public class TrainSensor : Component
 	{
-		public readonly int Position;
+		public Fault ErroneousDetection = new TransientFault();
 
-		public TrainSensor(int position)
+		[Hidden]
+		public int Position;
+
+		public virtual bool HasTrainPassed => TrainPosition > Position;
+		public extern int TrainPosition { get; }
+
+		[FaultEffect(Fault = nameof(ErroneousDetection))]
+		public class ErroneousDetectionEffect : TrainSensor
 		{
-			Position = position;
-		}
-
-		public bool HasTrainPassed() => TrainPosition() > Position;
-		public extern int TrainPosition();
-
-		[Transient]
-		public class ErroneousDetection : Fault
-		{
-			public bool HasTrainPassed() => true;
+			public override bool HasTrainPassed => true;
 		}
 	}
 }

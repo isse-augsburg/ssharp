@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="Visualization.Infrastructure.SimulationControls"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Visualization.Infrastructure"
+             Unloaded="OnStop"
+             mc:Ignorable="d">
+    <DockPanel DockPanel.Dock="Top">
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Top">
+            <local:IconButton x:Name="StopButton" Icon="{DynamicResource appbar_debug_stop}"
+                                          ToolTip="Stops the simulation." Clicked="OnStop" />
+            <local:IconButton x:Name="StartButton" Icon="{DynamicResource appbar_control_play}"
+                                          ToolTip="Starts or continues the simulation." Clicked="OnRun" />
+            <local:IconButton x:Name="PauseButton" Icon="{DynamicResource appbar_control_pause}"
+                                          ToolTip="Pauses the simulation." Clicked="OnPause" />
+            <local:IconButton x:Name="StepButton" Icon="{DynamicResource appbar_control_resume}"
+                                          ToolTip="Executes one step of the simulation." Clicked="OnStep" />
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Right">
+            <StackPanel Orientation="Horizontal" >
+                <local:IconButton x:Name="IncreaseSpeedButton" Icon="{DynamicResource appbar_arrow_up}"
+                                              ToolTip="Doubles the speed of the simulation." Clicked="OnIncreaseSpeed" />
+                <local:IconButton x:Name="DecreaseSpeedButton" Icon="{DynamicResource appbar_arrow_down}"
+                                              ToolTip="Halves the speed of the simulation." Clicked="OnDecreaseSpeed" />
+            </StackPanel>
+            <TextBlock HorizontalAlignment="Center" Text="Speed: 1x" x:Name="SimulationSpeed" FontSize="14.667" Foreground="White" />
+        </StackPanel>
+    </DockPanel>
+</UserControl>

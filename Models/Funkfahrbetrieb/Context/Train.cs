@@ -32,13 +32,13 @@ namespace Funkfahrbetrieb.Context
 		[Range(0, 10, OverflowBehavior.Clamp)]
 		private int _speed = 10;
 
-		public int GetPosition() => _position;
-		public int GetSpeed() => _speed;
-		public extern int Acceleration();
+		public int Position => _position;
+		public int Speed => _speed;
+		public extern int Acceleration { get; }
 
 		public override void Update()
 		{
-			_speed += Acceleration();
+			_speed += Acceleration;
 
 			if (_speed < 0)
 				_speed = 0;

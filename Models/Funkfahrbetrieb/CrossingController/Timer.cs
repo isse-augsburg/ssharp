@@ -24,60 +24,28 @@ namespace Funkfahrbetrieb.CrossingController
 {
 	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   Represents a timer that signals a timeout.
-	/// </summary>
 	public class Timer : Component
 	{
-		/// <summary>
-		///   The timeout signaled by the timer.
-		/// </summary>
-		private readonly int _timeout;
-
-		/// <summary>
-		///   The remaining time before the timeout is signaled. A value of -1 indicates that the timer is inactive.
-		/// </summary>
 		[Range(-1, 60, OverflowBehavior.Clamp)]
 		private int _remainingTime = -1;
 
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="timeout">The timeout interval of the timer.</param>
-		public Timer(int timeout)
+		[Hidden]
+		public int Timeout;
+
+		public virtual bool HasElapsed => _remainingTime == 0;
+		public bool IsActive => _remainingTime > 0;
+		public int RemainingTime => _remainingTime;
+
+		public void Start()
 		{
-			_timeout = timeout;
+			_remainingTime = Timeout;
 		}
 
-		/// <summary>
-		///   Gets a value indicating whether the timeout has elapsed. This method returns true only for the single system step where
-		///   the timeout occurs.
-		/// </summary>
-		public bool HasElapsed() => _remainingTime == 0;
+		public void Stop()
+		{
+			_remainingTime = -1;
+		}
 
-		/// <summary>
-		///   Starts or restarts the timer.
-		/// </summary>
-		public void Start() => _remainingTime = _timeout;
-
-		/// <summary>
-		///   Stops the timer.
-		/// </summary>
-		public void Stop() => _remainingTime = -1;
-
-		/// <summary>
-		///   Gets a value indicating whether the timer is currently active, eventually signalling the timeout.
-		/// </summary>
-		public bool IsActive() => _remainingTime > 0;
-
-		/// <summary>
-		///   Gets the remaining time before the timeout occurs.
-		/// </summary>
-		public int GetRemainingTime() => _remainingTime;
-
-		/// <summary>
-		///   Updates the timer's internal state.
-		/// </summary>
 		public override void Update()
 		{
 			// TODO: Support different system step times

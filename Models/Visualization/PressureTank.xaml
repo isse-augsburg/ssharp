@@ -4,8 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:visualization="clr-namespace:Visualization"
+             xmlns:infrastructure="clr-namespace:Visualization.Infrastructure"
              mc:Ignorable="d"
-             Unloaded="OnStop"
              d:DesignHeight="500" d:DesignWidth="700">
     <UserControl.Resources>
         <Style x:Key="FailureIndicator" TargetType="{x:Type Rectangle}">
@@ -70,27 +70,7 @@
         </Storyboard>
     </UserControl.Resources>
     <DockPanel LastChildFill="true">
-        <DockPanel DockPanel.Dock="Top">
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                <visualization:IconButton x:Name="StopButton" Icon="{DynamicResource appbar_debug_stop}"
-                                          ToolTip="Stops the simulation." Clicked="OnStop" />
-                <visualization:IconButton x:Name="StartButton" Icon="{DynamicResource appbar_control_play}"
-                                          ToolTip="Starts or continues the simulation." Clicked="OnRun" />
-                <visualization:IconButton x:Name="PauseButton" Icon="{DynamicResource appbar_control_pause}"
-                                          ToolTip="Pauses the simulation." Clicked="OnPause" />
-                <visualization:IconButton x:Name="StepButton" Icon="{DynamicResource appbar_control_resume}"
-                                          ToolTip="Executes one step of the simulation." Clicked="OnStep" />
-            </StackPanel>
-            <StackPanel HorizontalAlignment="Right">
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                    <visualization:IconButton x:Name="IncreaseSpeedButton" Icon="{DynamicResource appbar_arrow_up}"
-                                              ToolTip="Doubles the speed of the simulation." Clicked="OnIncreaseSpeed" />
-                    <visualization:IconButton x:Name="DecreaseSpeedButton" Icon="{DynamicResource appbar_arrow_down}"
-                                              ToolTip="Halves the speed of the simulation." Clicked="OnDecreaseSpeed" />
-                </StackPanel>
-                <TextBlock HorizontalAlignment="Center" Text="Speed: 1x" x:Name="SimulationSpeed" FontSize="14.667" Foreground="White" />
-            </StackPanel>
-        </DockPanel>
+        <infrastructure:SimulationControls x:Name="SimulationControls" DockPanel.Dock="Top" />
 
         <Canvas Width="483.143" Height="316.534" HorizontalAlignment="Left" VerticalAlignment="Top">
             <Rectangle x:Name="TankFill" Height="221.667" Canvas.Left="300" Canvas.Top="49" Width="171"

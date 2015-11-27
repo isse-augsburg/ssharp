@@ -26,38 +26,31 @@ namespace Funkfahrbetrieb.TrainController
 
 	public class Odometer : Component
 	{
-		//		private readonly int _maxPositionOffset;
-		//		private readonly int _maxSpeedOffset;
-		//
-		//		public Odometer(int maxPositionOffset, int maxSpeedOffset)
-		//		{
-		//			_maxPositionOffset = maxPositionOffset;
-		//			_maxSpeedOffset = maxSpeedOffset;
-		//		}
+		[Hidden]
+		public int MaxPositionOffset;
 
-		public int GetPosition() => TrainPosition();
-		public int GetSpeed() => TrainSpeed();
+		[Hidden]
+		public int MaxSpeedOffset;
 
-		public extern int TrainPosition();
-		public extern int TrainSpeed();
+		public Fault PositionOffset = new TransientFault();
+		public Fault SpeedOffset = new TransientFault();
 
-		// TODO: Fault effects referring back to the component are not supported at the moment by the model checker transformations
-		//		[Transient]
-		//		public class PositionOffset : Fault<Odometer>
-		//		{
-		//			public decimal Position
-		//			{
-		//				get { return Component.Position + ChooseFromRange(-Component.maxPositionOffset, Component.maxPositionOffset); }
-		//			}
-		//		}
-		//
-		//		[Transient]
-		//		public class SpeedOffset : Fault<Odometer>
-		//		{
-		//			public decimal Speed
-		//			{
-		//				get { return Component.Speed + ChooseFromRange(-Component.maxSpeedOffset, Component.maxSpeedOffset); }
-		//			}
-		//		}
+		public virtual int Position => TrainPosition;
+		public virtual int Speed => TrainSpeed;
+
+		public extern int TrainPosition { get; }
+		public extern int TrainSpeed { get; }
+
+		[FaultEffect(Fault = nameof(PositionOffset))]
+		private class PositionOffsetEffect : Odometer
+		{
+			public override int Position => base.Position + MaxPositionOffset;
+		}
+
+		[FaultEffect(Fault = nameof(SpeedOffset))]
+		private class SpeedOffsetEffect : Odometer
+		{
+			public override int Speed => base.Speed + MaxSpeedOffset;
+		}
 	}
 }

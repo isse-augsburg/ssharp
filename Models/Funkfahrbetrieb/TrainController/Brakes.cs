@@ -22,26 +22,28 @@
 
 namespace Funkfahrbetrieb.TrainController
 {
-	using System;
 	using SafetySharp.Modeling;
-	using SafetySharp.Modeling.Faults;
 
 	public class Brakes : Component
 	{
-		[Range(-1, 0, OverflowBehavior.Clamp)]
+		[Hidden]
+		public int MaxAcceleration;
+
 		private int _acceleration;
 
-		public int GetAcceleration() => _acceleration;
+		public Fault Unresponsive = new PersistentFault();
+
+		public virtual int Acceleration => _acceleration;
 
 		public void Engage()
 		{
-			_acceleration = -1;
+			_acceleration = MaxAcceleration;
 		}
 
-		[Transient]
-		public class Unresponsive : Fault
+		[FaultEffect(Fault = nameof(Unresponsive))]
+		private class UnresponsiveEffect : Brakes
 		{
-			public int GetAcceleration() => 0;
+			public override int Acceleration => 0;
 		}
 	}
 }

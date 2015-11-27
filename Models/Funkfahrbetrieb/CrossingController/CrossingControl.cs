@@ -26,37 +26,52 @@ namespace Funkfahrbetrieb.CrossingController
 
 	public class CrossingControl : Component
 	{
-		private readonly BarrierMotor _motor;
-		private readonly RadioModule _radio;
-		private readonly BarrierSensor _sensor;
-		private readonly Timer _timer;
-		private readonly TrainSensor _trainSensor;
+		private readonly StateMachine<State> _stateMachine = new StateMachine<State>(State.Open);
 
-		public CrossingControl(BarrierMotor motor, BarrierSensor sensor, TrainSensor trainSensor, RadioModule radio)
-		{
-			_timer = new Timer(20);
-			_motor = motor;
-			_sensor = sensor;
-			_trainSensor = trainSensor;
-			_radio = radio;
-		}
+		public BarrierMotor Motor;
+		public RadioModule Radio;
+		public BarrierSensor Sensor;
+		public Timer Timer;
+		public TrainSensor TrainSensor;
 
 		public override void Update()
 		{
-			if (_sensor.IsOpen() || _sensor.IsClosed())
-				_motor.Stop();
+			_stateMachine
+				.Transition(
+					from: State.Open,
+					to: State.Closing,
+					guard: Radio.Receive() == Message.Close,
+					action: () =>
+					{
+						Motor.Close();
+						Timer.Start();
+					})
+				.Transition(
+					from: State.Closing,
+					to: State.Closed,
+					guard: Sensor.IsClosed,
+					action: Motor.Stop)
+				.Transition(
+					from: State.Closed,
+					to: State.Opening,
+					guard: Timer.HasElapsed || TrainSensor.HasTrainPassed,
+					action: Motor.Open)
+				.Transition(
+					from: State.Opening,
+					to: State.Open,
+					guard: Sensor.IsOpen,
+					action: Motor.Stop);
 
-			if (_timer.HasElapsed() || _trainSensor.HasTrainPassed())
-				_motor.Open();
+			if (Radio.Receive() == Message.Query && _stateMachine.State == State.Closed)
+				Radio.Send(Message.Closed);
+		}
 
-			if (_radio.Receive() == Message.Close)
-			{
-				_motor.Close();
-				_timer.Start();
-			}
-
-			if (_radio.Receive() == Message.Query && _sensor.IsClosed())
-				_radio.Send(Message.Closed);
+		private enum State
+		{
+			Open,
+			Closing,
+			Closed,
+			Opening
 		}
 	}
 }

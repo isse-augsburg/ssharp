@@ -57,33 +57,47 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
+    <ApplicationDefinition Include="Infrastructure\App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="WpfExtensions.cs" />
-    <Compile Include="IconButton.xaml.cs">
+    <Compile Include="Funkfahrbetrieb.xaml.cs">
+      <DependentUpon>Funkfahrbetrieb.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\SimulationControls.xaml.cs">
+      <DependentUpon>SimulationControls.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\WpfExtensions.cs" />
+    <Compile Include="Infrastructure\IconButton.xaml.cs">
       <DependentUpon>IconButton.xaml</DependentUpon>
     </Compile>
     <Compile Include="PressureTank.xaml.cs">
       <DependentUpon>PressureTank.xaml</DependentUpon>
     </Compile>
-    <Page Include="IconButton.xaml">
+    <Page Include="Infrastructure\IconButton.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="Infrastructure\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="App.xaml.cs">
+    <Compile Include="Infrastructure\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Infrastructure\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Funkfahrbetrieb.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Infrastructure\SimulationControls.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="PressureTank.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -122,6 +136,10 @@
     <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">
       <Project>{9b6c1fb4-3f1b-43ac-a0e0-eaed4088bf37}</Project>
       <Name>Modeling</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Funkfahrbetrieb\Funkfahrbetrieb.csproj">
+      <Project>{84c1f882-31d9-4a71-95a9-e1586740954a}</Project>
+      <Name>Funkfahrbetrieb</Name>
     </ProjectReference>
     <ProjectReference Include="..\PressureTank\PressureTank.csproj">
       <Project>{2834343c-5d3a-4673-9f58-f869f4e3cc01}</Project>

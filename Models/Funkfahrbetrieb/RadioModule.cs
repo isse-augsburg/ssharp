@@ -28,6 +28,7 @@ namespace Funkfahrbetrieb
 	{
 		public extern Message RetrieveFromChannel();
 		public extern void DeliverToChannel(Message message);
+
 		public Message Receive() => RetrieveFromChannel();
 
 		public void Send(Message message)

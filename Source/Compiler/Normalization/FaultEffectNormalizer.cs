@@ -273,7 +273,6 @@ namespace SafetySharp.Compiler.Normalization
 				initializer: typeofExpression);
 
 			field = Syntax.MarkAsNonDebuggerBrowsable(field);
-			field = Syntax.AddAttribute<HiddenAttribute>(field);
 			field = field.NormalizeWhitespace();
 
 			AddMembers(classSymbol, new UsingDirectiveSyntax[0], (MemberDeclarationSyntax)field);

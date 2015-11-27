@@ -26,25 +26,24 @@ namespace Visualization
 	using System.Windows;
 	using System.Windows.Media.Animation;
 	using global::PressureTank;
+	using Infrastructure;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
+	using SafetySharp.Runtime.Reflection;
 
 	public partial class PressureTank
 	{
-		private const double MaxSpeed = 32;
-		private const double MinSpeed = 0.25;
 		private readonly Controller _controller;
 		private readonly Storyboard _pressureLevelStoryboard;
+		private readonly Pump _pump;
 		private readonly Storyboard _pumpingStoryboard;
+		private readonly Sensor _sensor;
 		private readonly Storyboard _sensorAlertStoryboard;
 		private readonly RealTimeSimulator _simulator;
-		private readonly Storyboard _timerAlertStoryboard;
-		private readonly Pump _pump;
-		private readonly Sensor _sensor;
-		private double _speed = 1;
 		private readonly Tank _tank;
 		private readonly Timer _timer;
+		private readonly Storyboard _timerAlertStoryboard;
 
 		public PressureTank()
 		{
@@ -62,9 +61,13 @@ namespace Visualization
 			_sensorAlertStoryboard = (Storyboard)Resources["SensorEvent"];
 
 			// Initialize the simulation environment
-			_simulator = new RealTimeSimulator(Model.Create(new Specification()), stepDelay: 1000);
-			_simulator.SimulationStateChanged += (o, e) => UpdateSimulationButtonVisibilities();
+			var model = Model.Create(new Specification());
+			foreach (var fault in model.GetFaults())
+				fault.OccurrenceKind = OccurrenceKind.Never;
+
+			_simulator = new RealTimeSimulator(model, stepDelay: 1000);
 			_simulator.ModelStateChanged += (o, e) => UpdateModelState();
+			SimulationControls.SetSimulator(_simulator);
 
 			// Extract the components
 			_tank = (Tank)_simulator.Model.RootComponents[0];
@@ -73,50 +76,13 @@ namespace Visualization
 			_timer = _controller.Timer;
 			_sensor = _controller.Sensor;
 
-			_pump.SuppressPumping.OccurrenceKind = OccurrenceKind.Never;
-			_timer.SuppressTimeout.OccurrenceKind = OccurrenceKind.Never;
-			_sensor.SuppressIsFull.OccurrenceKind = OccurrenceKind.Never;
-			_sensor.SuppressIsEmpty.OccurrenceKind = OccurrenceKind.Never;
-
 			// Initialize the visualization state
-			UpdateSimulationButtonVisibilities();
 			UpdateModelState();
 
 			TimerAlert.Opacity = 0;
 			SensorAlert.Opacity = 0;
 
-			ChangeSpeed(8);
-		}
-
-		private void OnStop(object sender, RoutedEventArgs e)
-		{
-			if (_simulator.State != SimulationState.Stopped)
-				_simulator.Stop();
-		}
-
-		private void OnRun(object sender, RoutedEventArgs e)
-		{
-			_simulator.Run();
-		}
-
-		private void OnPause(object sender, RoutedEventArgs e)
-		{
-			_simulator.Pause();
-		}
-
-		private void OnStep(object sender, RoutedEventArgs e)
-		{
-			_simulator.Step();
-		}
-
-		private void OnIncreaseSpeed(object sender, RoutedEventArgs e)
-		{
-			ChangeSpeed(_speed * 2);
-		}
-
-		private void OnDecreaseSpeed(object sender, RoutedEventArgs e)
-		{
-			ChangeSpeed(_speed / 2);
+			SimulationControls.ChangeSpeed(8);
 		}
 
 		private void OnSuppressPumping(object sender, RoutedEventArgs e)
@@ -137,46 +103,6 @@ namespace Visualization
 		private void OnSuppressEmpty(object sender, RoutedEventArgs e)
 		{
 			_sensor.SuppressIsEmpty.ToggleOccurrence();
-		}
-
-		private void ChangeSpeed(double speed)
-		{
-			speed = Math.Min(MaxSpeed, Math.Max(MinSpeed, speed));
-
-			if (Math.Abs(speed - _speed) > 0.001)
-			{
-				_simulator.StepDelay = (int)Math.Round(1000 / speed);
-				_speed = speed;
-			}
-
-			SimulationSpeed.Text = $"Speed: {_speed}x";
-		}
-
-		private void UpdateSimulationButtonVisibilities()
-		{
-			switch (_simulator.State)
-			{
-				case SimulationState.Stopped:
-					StopButton.Visibility = Visibility.Collapsed;
-					StartButton.Visibility = Visibility.Visible;
-					PauseButton.Visibility = Visibility.Collapsed;
-					StepButton.Visibility = Visibility.Visible;
-					break;
-				case SimulationState.Paused:
-					StopButton.Visibility = Visibility.Visible;
-					StartButton.Visibility = Visibility.Visible;
-					PauseButton.Visibility = Visibility.Collapsed;
-					StepButton.Visibility = Visibility.Visible;
-					break;
-				case SimulationState.Running:
-					StopButton.Visibility = Visibility.Visible;
-					StartButton.Visibility = Visibility.Collapsed;
-					PauseButton.Visibility = Visibility.Visible;
-					StepButton.Visibility = Visibility.Collapsed;
-					break;
-			}
-
-			UpdateModelState();
 		}
 
 		private void UpdateModelState()

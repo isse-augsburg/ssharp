@@ -251,6 +251,7 @@ namespace SafetySharp.Compiler.Normalization
 
 			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field);
 			field = Syntax.MarkAsNonDebuggerBrowsable(field);
+			field = Syntax.AddAttribute<HiddenAttribute>(field);
 			return (FieldDeclarationSyntax)field;
 		}
 

@@ -29,12 +29,12 @@ namespace Funkfahrbetrieb.Context
 		[Range(0, 10, OverflowBehavior.Clamp)]
 		private int _angle = 10;
 
-		public int GetAngle() => _angle;
-		public extern int Speed();
+		public int Angle => _angle;
+		public extern int Speed { get; }
 
 		public override void Update()
 		{
-			_angle += Speed();
+			_angle += Speed;
 
 			if (_angle < 0)
 				_angle = 0;

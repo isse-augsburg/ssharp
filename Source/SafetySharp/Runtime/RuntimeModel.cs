@@ -90,7 +90,7 @@ namespace SafetySharp.Runtime
 			objects = new[] { _constructionStateIndicator }.Concat(objects);
 
 			// The construction state indicator is the first object in the table; its corresponding state slot will be 0
-            var localObjectTable = new ObjectTable(objects);
+			var localObjectTable = new ObjectTable(objects);
 
 			RootComponents = rootComponents;
 			Faults = localObjectTable.OfType<Fault>().ToArray();

@@ -36,7 +36,7 @@ namespace SafetySharp.Modeling
 		private readonly bool _independentOccurrence;
 
 		[NonSerializable]
-		private string _name;
+		private string _name = "<Unnamed>";
 
 		[Hidden]
 		private OccurrenceKind _occurrenceKind = OccurrenceKind.SelfDetermined;

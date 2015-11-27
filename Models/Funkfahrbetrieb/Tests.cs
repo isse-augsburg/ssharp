@@ -23,45 +23,27 @@
 namespace Funkfahrbetrieb
 {
 	using System;
-	using CrossingController;
-	using FluentAssertions;
+	using System.Linq;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
-	using SafetySharp.Simulation;
 
 	public class Tests
 	{
-		private readonly LtlFormula _hazard = null;
-		private readonly FunkfahrbetriebModel _model = new FunkfahrbetriebModel();
-		private readonly Spin _spin = null;
-
-		public Tests()
-		{
-			//_hazard = (_model.Train.GetPosition() >= 885 && _model.Train.GetPosition() <= 915) && _model.Barrier.GetAngle() != 0;
-			//_spin = new Spin(_model);
-		}
-
 		[Test]
-		public void DccaSpin()
+		public void CollisionDcca()
 		{
-			_spin.ComputeMinimalCriticalSets(_hazard);
-		}
+			var specification = new Specification();
+			var analysis = new SafetyAnalysis(new LtsMin(), Model.Create(specification));
 
-		[Test]
-		public void DccaNuSMV()
-		{
-			var nuSMV = new NuSMV(_model);
-			nuSMV.ComputeMinimalCriticalSets(_hazard);
-		}
+			var result = analysis.ComputeMinimalCutSets(specification.PossibleCollision);
+			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
 
-		[Test]
-		public void BarrierShouldCloseWhenNoFaultsOccur()
-		{
-			var simulator = new Simulator(_model);
-			simulator.Simulate(TimeSpan.FromSeconds(80));
-			_model.TrainSensor.EnableFault<TrainSensor.ErroneousDetection>();
+			Console.WriteLine("Checked Fault Sets: {0} ({1:F0}% of all fault sets)", result.CheckedSetsCount, percentage);
+			Console.WriteLine("Minimal Cut Sets: {0}", result.MinimalCutSetsCount);
 
-			_model.Barrier.GetAngle().Should().Be(0);
+			var i = 1;
+			foreach (var cutSet in result.MinimalCutSets)
+				Console.WriteLine("   ({1}) {{ {0} }}", String.Join(", ", cutSet.Select(fault => fault.Name)), i++);
 		}
 	}
 }

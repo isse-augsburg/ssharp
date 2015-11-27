@@ -23,13 +23,14 @@
 namespace Funkfahrbetrieb.Context
 {
 	using SafetySharp.Modeling;
-	using SafetySharp.Modeling.Faults;
 
 	public class RadioChannel : Component
 	{
 		private Message _currentMessage;
 
-		public Message Receive()
+		public Fault Dropped = new TransientFault();
+
+		public virtual Message Receive()
 		{
 			var message = _currentMessage;
 			_currentMessage = Message.None;
@@ -41,10 +42,10 @@ namespace Funkfahrbetrieb.Context
 			_currentMessage = message;
 		}
 
-		[Transient]
-		public class Dropped : Fault
+		[FaultEffect(Fault = nameof(Dropped))]
+		public class DroppedEffect : RadioChannel
 		{
-			public Message Receive()
+			public override Message Receive()
 			{
 				return Message.None;
 			}

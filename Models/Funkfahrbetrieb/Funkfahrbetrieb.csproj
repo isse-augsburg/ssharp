@@ -65,9 +65,8 @@
     <Compile Include="CrossingController\CrossingControl.cs" />
     <Compile Include="CrossingController\Timer.cs" />
     <Compile Include="CrossingController\TrainSensor.cs" />
-    <Compile Include="Dcca.cs" />
     <Compile Include="Message.cs" />
-    <Compile Include="FunkfahrbetriebModel.cs" />
+    <Compile Include="Specification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RadioModule.cs" />
     <Compile Include="Tests.cs" />
@@ -76,7 +75,7 @@
     <Compile Include="TrainController\TrainControl.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Modeling\Modeling.csproj">
+    <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">
       <Project>{9b6c1fb4-3f1b-43ac-a0e0-eaed4088bf37}</Project>
       <Name>Modeling</Name>
     </ProjectReference>

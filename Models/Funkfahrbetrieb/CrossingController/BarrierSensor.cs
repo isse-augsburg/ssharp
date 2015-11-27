@@ -23,19 +23,20 @@
 namespace Funkfahrbetrieb.CrossingController
 {
 	using SafetySharp.Modeling;
-	using SafetySharp.Modeling.Faults;
 
 	public class BarrierSensor : Component
 	{
-		public bool IsOpen() => BarrierAngle() == 0;
-		public bool IsClosed() => BarrierAngle() == 10;
-		public extern int BarrierAngle();
+		public Fault Broken = new TransientFault();
 
-		[Transient]
-		public class Broken : Fault
+		public virtual bool IsOpen => BarrierAngle == 0;
+		public virtual bool IsClosed => BarrierAngle == 10;
+		public extern int BarrierAngle { get; }
+
+		[FaultEffect(Fault = nameof(Broken))]
+		public class BrokenEffect : BarrierSensor
 		{
-			public bool IsOpen() => false;
-			public bool IsClosed() => false;
+			public override bool IsOpen => false;
+			public override bool IsClosed => false;
 		}
 	}
 }

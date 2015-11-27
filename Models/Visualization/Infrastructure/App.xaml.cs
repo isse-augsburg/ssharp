@@ -20,16 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Visualization
+namespace Visualization.Infrastructure
 {
-	/// <summary>
-	///   Interaction logic for MainWindow.xaml
-	/// </summary>
-	public partial class MainWindow
+	using System.Globalization;
+	using System.Threading;
+
+	public partial class App
 	{
-		public MainWindow()
+		public App()
 		{
-			InitializeComponent();
+			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+			Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 		}
 	}
 }

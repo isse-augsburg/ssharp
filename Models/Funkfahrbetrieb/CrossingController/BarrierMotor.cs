@@ -23,14 +23,15 @@
 namespace Funkfahrbetrieb.CrossingController
 {
 	using SafetySharp.Modeling;
-	using SafetySharp.Modeling.Faults;
 
 	public class BarrierMotor : Component
 	{
 		[Range(-1, 1, OverflowBehavior.Clamp)]
 		private int _currentSpeed;
 
-		public int GetSpeed() => _currentSpeed;
+		public Fault Stuck = new TransientFault();
+
+		public virtual int Speed => _currentSpeed;
 
 		public void Open()
 		{
@@ -47,10 +48,10 @@ namespace Funkfahrbetrieb.CrossingController
 			_currentSpeed = 0;
 		}
 
-		[Transient]
-		public class Stuck : Fault
+		[FaultEffect(Fault = nameof(Stuck))]
+		public class StuckEffect : BarrierMotor
 		{
-			public int GetSpeed() => 0;
+			public override int Speed => 0;
 		}
 	}
 }

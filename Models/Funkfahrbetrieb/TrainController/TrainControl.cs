@@ -26,69 +26,62 @@ namespace Funkfahrbetrieb.TrainController
 
 	public class TrainControl : Component
 	{
-		public const int CrossingPosition = 900;
-		private readonly int _brakeAcceleration = 1;
-		private readonly Brakes _brakes;
-		private readonly int _closingTime = 10;
-		private readonly int _maxCommunicationDelay = 1;
-		private readonly Odometer _odometer;
-		private readonly RadioModule _radio;
-		private readonly int _safetyMargin = 100;
+		private readonly StateMachine<State> _stateMachine = new StateMachine<State>(State.Approaching);
 
-		public TrainControl(Odometer odometer, Brakes brakes, RadioModule radio)
+		public Brakes Brakes;
+
+		[Hidden]
+		public int ClosingTime = 10;
+
+		[Hidden]
+		public int CrossingPosition = 900;
+
+		[Hidden]
+		public int MaxCommunicationDelay = 1;
+
+		public Odometer Odometer;
+		public RadioModule Radio;
+
+		[Hidden]
+		public int SafetyMargin = 100;
+
+		private int ActivatePosition => QueryPosition - Odometer.Speed * (MaxCommunicationDelay + ClosingTime);
+		private int QueryPosition => StopPosition - 2 * MaxCommunicationDelay * Odometer.Speed;
+		private int StopPosition => CrossingPosition - SafetyMargin + Odometer.Speed * Odometer.Speed / (2 * Brakes.MaxAcceleration);
+
+		public override void Update()
 		{
-			_brakes = brakes;
-			_radio = radio;
-			_odometer = odometer;
+			Update(Odometer, Radio, Brakes);
 
-			InitialState(States.Approaching);
-
-			Transition(
-				from: States.Approaching,
-				to: States.WaitingForClosure,
-				guard: () => _odometer.GetPosition() > ActivatePosition(),
-				action: () => _radio.Send(Message.Close));
-
-			Transition(
-				from: States.WaitingForClosure,
-				to: States.WaitingForResponse,
-				guard: () => _odometer.GetPosition() > QueryPosition(),
-				action: () => _radio.Send(Message.Query));
-
-			Transition(
-				from: States.WaitingForResponse,
-				to: States.Proceeding,
-				guard: () => _radio.Receive() == Message.Closed);
-
-			Transition(
-				from: States.WaitingForResponse,
-				to: States.Stopping,
-				guard: () => _odometer.GetPosition() >= StopPosition(),
-				action: _brakes.Engage);
+			_stateMachine
+				.Transition(
+					from: State.Approaching,
+					to: State.WaitingForClosure,
+					guard: Odometer.Position > ActivatePosition,
+					action: () => Radio.Send(Message.Close))
+				.Transition(
+					from: State.WaitingForClosure,
+					to: State.WaitingForResponse,
+					guard: Odometer.Position > QueryPosition,
+					action: () => Radio.Send(Message.Query))
+				.Transition(
+					from: State.WaitingForResponse,
+					to: State.Proceeding,
+					guard: Radio.Receive() == Message.Closed)
+				.Transition(
+					from: State.WaitingForResponse,
+					to: State.Stopping,
+					guard: Odometer.Position >= StopPosition,
+					action: Brakes.Engage);
 		}
 
-		private int ActivatePosition()
-		{
-			return QueryPosition() - _odometer.GetSpeed() * (_maxCommunicationDelay + _closingTime);
-		}
-
-		private int QueryPosition()
-		{
-			return StopPosition() - 2 * _maxCommunicationDelay * _odometer.GetSpeed();
-		}
-
-		private int StopPosition()
-		{
-			return CrossingPosition - _safetyMargin - _odometer.GetSpeed() * _odometer.GetSpeed() / (2 * _brakeAcceleration);
-		}
-
-		private enum States
+		private enum State
 		{
 			Approaching,
 			WaitingForClosure,
 			WaitingForResponse,
 			Stopping,
-			Proceeding,
+			Proceeding
 		}
 	}
 }

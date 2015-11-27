@@ -20,17 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Visualization
+namespace Visualization.Infrastructure
 {
-	using System.Globalization;
-	using System.Threading;
+	using System.Windows;
+	using System.Windows.Media;
 
-	public partial class App
+	public partial class IconButton
 	{
-		public App()
+		public static readonly DependencyProperty IconProperty = DependencyProperty.Register(
+			"Icon", typeof(Visual), typeof(IconButton), new PropertyMetadata(default(Visual)));
+
+		public static readonly RoutedEvent ClickedEvent = EventManager.RegisterRoutedEvent(
+			"Clicked", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(IconButton));
+
+		public IconButton()
 		{
-			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-			Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+			InitializeComponent();
+		}
+
+		public Visual Icon
+		{
+			get { return (Visual)GetValue(IconProperty); }
+			set { SetValue(IconProperty, value); }
+		}
+
+		public event RoutedEventHandler Clicked
+		{
+			add { AddHandler(ClickedEvent, value); }
+			remove { RemoveHandler(ClickedEvent, value); }
+		}
+
+		private void OnClicked(object sender, RoutedEventArgs e)
+		{
+			RaiseEvent(new RoutedEventArgs(ClickedEvent));
 		}
 	}
 }
