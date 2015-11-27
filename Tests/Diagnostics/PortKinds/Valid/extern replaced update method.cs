@@ -20,20 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Compiler.Analyzers
+namespace Tests.Diagnostics.PortKinds.Valid
 {
-	using Microsoft.CodeAnalysis;
-	using Microsoft.CodeAnalysis.Diagnostics;
+	using SafetySharp.Modeling;
 
-	[DiagnosticAnalyzer(LanguageNames.CSharp)]
-	public class DummyAnalyzer : Analyzer
+	internal class C : Component
 	{
-		/// <summary>
-		///   Called once at session start to register actions in the analysis context.
-		/// </summary>
-		/// <param name="context" />
-		public override void Initialize(AnalysisContext context)
-		{
-		}
+		public new extern void Update();
 	}
 }

@@ -132,6 +132,49 @@
     <Compile Include="..\Source\SafetySharp\Properties\InternalsVisibleTo.cs">
       <Link>Properties\InternalsVisibleTo.cs</Link>
     </Compile>
+    <Compile Include="DiagnosticsTests.cs" />
+    <Compile Include="DiagnosticsTests.Helpers.cs">
+      <DependentUpon>DiagnosticsTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Diagnostics\CustomComponents\Invalid\base type not derived from Component.cs" />
+    <Compile Include="Diagnostics\CustomComponents\Invalid\IComponent reimplementation.cs" />
+    <Compile Include="Diagnostics\CustomComponents\Invalid\IComponent reimplemention by inherited component.cs" />
+    <Compile Include="Diagnostics\CustomComponents\Invalid\inherited type not derived from Component.cs" />
+    <Compile Include="Diagnostics\CustomComponents\Invalid\nested base types not derived from Component.cs" />
+    <Compile Include="Diagnostics\CustomComponents\Valid\nested types derived from Component.cs" />
+    <Compile Include="Diagnostics\CustomComponents\Valid\type directly derived from Component.cs" />
+    <Compile Include="Diagnostics\CustomComponents\Valid\types indirectly derived from Component.cs" />
+    <Compile Include="Diagnostics\PortImplementation\Invalid\wrong base kind.cs" />
+    <Compile Include="Diagnostics\PortImplementation\Invalid\wrong kind, properties.cs" />
+    <Compile Include="Diagnostics\PortImplementation\Invalid\wrong kind, methods.cs" />
+    <Compile Include="Diagnostics\PortImplementation\Valid\no attributes.cs" />
+    <Compile Include="Diagnostics\PortImplementation\Valid\no component interface.cs" />
+    <Compile Include="Diagnostics\PortImplementation\Valid\no component.cs" />
+    <Compile Include="Diagnostics\PortImplementation\Valid\unknown port type.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\accessors with both attributes.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\accessors with single attribute.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\both attributes.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\extern update method.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\extern with Provided attribute.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\non-extern with Required attribute.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\static ports.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\update method marked as port.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\update method marked with both port attributes.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\without attributes within component interface.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\accessors with attributes outside of component.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\accessors without attributes.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\both attributes outside of component class or interface.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\extern replaced update method.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\extern with Provided attribute outside of component.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\extern with Required attribute.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\non-extern with Provided attribute.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\non-extern with Required attribute outside of component.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\only one of the attributes.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\replaced update method.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\static members.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\unmarked update methods.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\without attributes outside of component interface.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\without attributes.cs" />
     <Compile Include="Execution\Bindings\properties.cs" />
     <Compile Include="Execution\Bindings\unbound.cs" />
     <Compile Include="Execution\Bindings\explicit interface provided port.cs" />

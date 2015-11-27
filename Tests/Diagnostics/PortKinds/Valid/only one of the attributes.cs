@@ -20,77 +20,57 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Diagnostics.PortKinds.Valid
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using Shouldly;
-	using Utilities;
 
-	internal class InterfaceComponents : TestModel
+	internal class D1 : Component
 	{
-		private static bool _hasConstructorRun;
+		[Required]
+		private extern void M();
+	}
 
-		protected override void Check()
+	internal class D2 : Component
+	{
+		[Required]
+		private extern int M { get; set; }
+	}
+
+	internal class D3 : Component
+	{
+		[Provided]
+		private void M()
 		{
-			var c1 = new C1 { F = 99 };
-			var c2 = new C2 { F = 45 };
-			var c = new C { C1 = c1, C2 = c2 };
-			var m = new Model(c);
-
-			_hasConstructorRun = false;
-			Create(m);
-
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<C>();
-
-			((C)root).C1.ShouldBeOfType<C1>();
-			((C)root).C2.ShouldBeOfType<C2>();
-
-			((C)root).C1.F.ShouldBe(99);
-			((C)root).C2.F.ShouldBe(45);
-
-			_hasConstructorRun.ShouldBe(false);
 		}
+	}
 
-		private class C : Component
-		{
-			public I C1;
-			public I C2;
+	internal class D4 : Component
+	{
+		[Provided]
+		private int M { get; set; }
+	}
 
-			public C()
-			{
-				_hasConstructorRun = true;
-			}
-		}
+	internal interface I1 : IComponent
+	{
+		[Required]
+		void M();
+	}
 
-		private class C1 : Component, I
-		{
-			public C1()
-			{
-				_hasConstructorRun = true;
-			}
+	internal interface I2 : IComponent
+	{
+		[Required]
+		int M { get; set; }
+	}
 
-			public int F { get; set; }
-		}
+	internal interface I3 : IComponent
+	{
+		[Provided]
+		void M();
+	}
 
-		private class C2 : Component, I
-		{
-			public C2()
-			{
-				_hasConstructorRun = true;
-			}
-
-			public int F { get; set; }
-		}
-
-		private interface I : IComponent
-		{
-			[Provided]
-			int F { get; }
-		}
+	internal interface I4 : IComponent
+	{
+		[Provided]
+		int M { get; set; }
 	}
 }

@@ -27,5 +27,23 @@ namespace SafetySharp.Compiler.Analyzers
 	/// </summary>
 	public enum DiagnosticIdentifier
 	{
+		// Type diagnostics
+		CustomComponent = 1000,
+		ComponentInterfaceReimplementation,
+
+		// Port diagnostics
+		AmbiguousPortKind = 3000,
+		StaticPort,
+		UnmarkedInterfacePort,
+		PortPropertyAccessor,
+		ProvidedPortImplementedAsRequiredPort,
+		RequiredPortImplementedAsProvidedPort,
+		NonExternRequiredPort,
+		UpdateMethodMarkedAsPort,
+		ExternProvidedPort,
+		ExternUpdateMethod,
+
+		// Misc diagnostics
+		ReservedName = 9000,
 	}
 }

@@ -20,77 +20,84 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Diagnostics.PortImplementation.Valid
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using Shouldly;
-	using Utilities;
 
-	internal class InterfaceComponents : TestModel
+	public class X3
 	{
-		private static bool _hasConstructorRun;
-
-		protected override void Check()
-		{
-			var c1 = new C1 { F = 99 };
-			var c2 = new C2 { F = 45 };
-			var c = new C { C1 = c1, C2 = c2 };
-			var m = new Model(c);
-
-			_hasConstructorRun = false;
-			Create(m);
-
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<C>();
-
-			((C)root).C1.ShouldBeOfType<C1>();
-			((C)root).C2.ShouldBeOfType<C2>();
-
-			((C)root).C1.F.ShouldBe(99);
-			((C)root).C2.F.ShouldBe(45);
-
-			_hasConstructorRun.ShouldBe(false);
-		}
-
-		private class C : Component
-		{
-			public I C1;
-			public I C2;
-
-			public C()
-			{
-				_hasConstructorRun = true;
-			}
-		}
-
-		private class C1 : Component, I
-		{
-			public C1()
-			{
-				_hasConstructorRun = true;
-			}
-
-			public int F { get; set; }
-		}
-
-		private class C2 : Component, I
-		{
-			public C2()
-			{
-				_hasConstructorRun = true;
-			}
-
-			public int F { get; set; }
-		}
-
 		private interface I : IComponent
 		{
+			[Required]
+			void In();
+
 			[Provided]
-			int F { get; }
+			void Out();
+		}
+
+		private interface J : IComponent
+		{
+			[Required]
+			int In { get; set; }
+
+			[Provided]
+			int Out { get; set; }
+		}
+
+		private class C1 : I
+		{
+			public void Update()
+			{
+			}
+
+			[Provided]
+			public void In()
+			{
+			}
+
+			[Required]
+			public extern void Out();
+		}
+
+		private class C2 : I
+		{
+			public void Update()
+			{
+			}
+
+			[Provided]
+			void I.In()
+			{
+			}
+
+			[Required]
+			extern void I.Out();
+		}
+
+		private class C3 : J
+		{
+			[Provided]
+			public int In { get; set; }
+
+			[Required]
+			public extern int Out { get; set; }
+
+			public void Update()
+			{
+			}
+		}
+
+		private class C4 : J
+		{
+			[Provided]
+			int J.In { get; set; }
+
+			[Required]
+			extern int J.Out { get; set; }
+
+			public void Update()
+			{
+			}
 		}
 	}
 }

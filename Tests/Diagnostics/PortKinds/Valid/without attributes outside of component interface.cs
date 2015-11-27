@@ -20,77 +20,61 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Diagnostics.PortKinds.Valid
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using Shouldly;
-	using Utilities;
 
-	internal class InterfaceComponents : TestModel
+	internal interface R1
 	{
-		private static bool _hasConstructorRun;
+		void M();
+	}
 
-		protected override void Check()
+	internal interface R2
+	{
+		int M { get; set; }
+	}
+
+	internal class R3 : Component
+	{
+		private void M()
 		{
-			var c1 = new C1 { F = 99 };
-			var c2 = new C2 { F = 45 };
-			var c = new C { C1 = c1, C2 = c2 };
-			var m = new Model(c);
+		}
+	}
 
-			_hasConstructorRun = false;
-			Create(m);
+	internal class R4 : Component
+	{
+		private int M { get; set; }
+	}
 
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
+	internal class R5
+	{
+		private void M()
+		{
+		}
+	}
 
-			var root = RootComponents[0];
-			root.ShouldBeOfType<C>();
+	internal class R6
+	{
+		private int M { get; set; }
+	}
 
-			((C)root).C1.ShouldBeOfType<C1>();
-			((C)root).C2.ShouldBeOfType<C2>();
-
-			((C)root).C1.F.ShouldBe(99);
-			((C)root).C2.F.ShouldBe(45);
-
-			_hasConstructorRun.ShouldBe(false);
+	internal class R7 : IComponent
+	{
+		public void Update()
+		{
 		}
 
-		private class C : Component
+		private void M()
 		{
-			public I C1;
-			public I C2;
-
-			public C()
-			{
-				_hasConstructorRun = true;
-			}
 		}
+	}
 
-		private class C1 : Component, I
+	internal class R8 : IComponent
+	{
+		private int M { get; set; }
+
+		public void Update()
 		{
-			public C1()
-			{
-				_hasConstructorRun = true;
-			}
-
-			public int F { get; set; }
-		}
-
-		private class C2 : Component, I
-		{
-			public C2()
-			{
-				_hasConstructorRun = true;
-			}
-
-			public int F { get; set; }
-		}
-
-		private interface I : IComponent
-		{
-			[Provided]
-			int F { get; }
 		}
 	}
 }

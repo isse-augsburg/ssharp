@@ -105,8 +105,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analyzers\CustomComponentAnalyzer.cs" />
     <Compile Include="Analyzers\DiagnosticIdentifier.cs" />
-    <Compile Include="Analyzers\DummyAnalyzer.cs" />
+    <Compile Include="Analyzers\PortImplementationAnalyzer.cs" />
+    <Compile Include="Analyzers\PortKindAnalyzer.cs" />
     <Compile Include="CompilationException.cs" />
     <Compile Include="Compiler.cs" />
     <Compile Include="Normalization\AutoPropertyNormalizer.cs" />

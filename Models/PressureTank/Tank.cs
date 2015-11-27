@@ -30,16 +30,16 @@ namespace PressureTank
 	public class Tank : Component
 	{
 		/// <summary>
-		///   The maximum allowed pressure level of the tank.
-		/// </summary>
-		[Hidden]
-		public int MaxPressure;
-
-		/// <summary>
 		///   The current pressure level.
 		/// </summary>
 		[Range(-1, 60, OverflowBehavior.Clamp)]
 		private int _pressureLevel;
+
+		/// <summary>
+		///   The maximum allowed pressure level of the tank.
+		/// </summary>
+		[Hidden]
+		public int MaxPressure;
 
 		/// <summary>
 		///   Gets a value indicating whether the pressure tank has ruptured after exceeding its maximum allowed pressure level.

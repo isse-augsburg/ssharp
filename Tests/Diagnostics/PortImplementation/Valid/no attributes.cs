@@ -20,77 +20,58 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Diagnostics.PortImplementation.Valid
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using Shouldly;
-	using Utilities;
 
-	internal class InterfaceComponents : TestModel
+	public class X1
 	{
-		private static bool _hasConstructorRun;
-
-		protected override void Check()
+		private interface I : IComponent
 		{
-			var c1 = new C1 { F = 99 };
-			var c2 = new C2 { F = 45 };
-			var c = new C { C1 = c1, C2 = c2 };
-			var m = new Model(c);
+			[Required]
+			void In();
 
-			_hasConstructorRun = false;
-			Create(m);
-
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<C>();
-
-			((C)root).C1.ShouldBeOfType<C1>();
-			((C)root).C2.ShouldBeOfType<C2>();
-
-			((C)root).C1.F.ShouldBe(99);
-			((C)root).C2.F.ShouldBe(45);
-
-			_hasConstructorRun.ShouldBe(false);
+			[Provided]
+			void Out();
 		}
 
-		private class C : Component
+		private interface J : IComponent
 		{
-			public I C1;
-			public I C2;
+			[Required]
+			int In { get; set; }
 
-			public C()
-			{
-				_hasConstructorRun = true;
-			}
+			[Provided]
+			int Out { get; set; }
 		}
 
 		private class C1 : Component, I
 		{
-			public C1()
-			{
-				_hasConstructorRun = true;
-			}
+			public extern void In();
 
-			public int F { get; set; }
+			public void Out()
+			{
+			}
 		}
 
 		private class C2 : Component, I
 		{
-			public C2()
-			{
-				_hasConstructorRun = true;
-			}
+			extern void I.In();
 
-			public int F { get; set; }
+			void I.Out()
+			{
+			}
 		}
 
-		private interface I : IComponent
+		private class C3 : Component, J
 		{
-			[Provided]
-			int F { get; }
+			public extern int In { get; set; }
+			public int Out { get; set; }
+		}
+
+		private class C4 : Component, J
+		{
+			extern int J.In { get; set; }
+			int J.Out { get; set; }
 		}
 	}
 }

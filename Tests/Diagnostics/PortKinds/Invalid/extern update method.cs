@@ -20,77 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Diagnostics.PortKinds.Invalid
 {
-	using SafetySharp.Analysis;
+	using SafetySharp.Compiler.Analyzers;
 	using SafetySharp.Modeling;
-	using Shouldly;
-	using Utilities;
 
-	internal class InterfaceComponents : TestModel
+	[Diagnostic(DiagnosticIdentifier.ExternUpdateMethod, 31, 37, 6, "Tests.Diagnostics.PortKinds.Invalid.X.Update()")]
+	internal class X : Component
 	{
-		private static bool _hasConstructorRun;
-
-		protected override void Check()
-		{
-			var c1 = new C1 { F = 99 };
-			var c2 = new C2 { F = 45 };
-			var c = new C { C1 = c1, C2 = c2 };
-			var m = new Model(c);
-
-			_hasConstructorRun = false;
-			Create(m);
-
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<C>();
-
-			((C)root).C1.ShouldBeOfType<C1>();
-			((C)root).C2.ShouldBeOfType<C2>();
-
-			((C)root).C1.F.ShouldBe(99);
-			((C)root).C2.F.ShouldBe(45);
-
-			_hasConstructorRun.ShouldBe(false);
-		}
-
-		private class C : Component
-		{
-			public I C1;
-			public I C2;
-
-			public C()
-			{
-				_hasConstructorRun = true;
-			}
-		}
-
-		private class C1 : Component, I
-		{
-			public C1()
-			{
-				_hasConstructorRun = true;
-			}
-
-			public int F { get; set; }
-		}
-
-		private class C2 : Component, I
-		{
-			public C2()
-			{
-				_hasConstructorRun = true;
-			}
-
-			public int F { get; set; }
-		}
-
-		private interface I : IComponent
-		{
-			[Provided]
-			int F { get; }
-		}
+		public override extern void Update();
 	}
 }

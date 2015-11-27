@@ -20,77 +20,114 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Diagnostics.PortImplementation.Valid
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using Shouldly;
-	using Utilities;
 
-	internal class InterfaceComponents : TestModel
+	public class X4
 	{
-		private static bool _hasConstructorRun;
-
-		protected override void Check()
-		{
-			var c1 = new C1 { F = 99 };
-			var c2 = new C2 { F = 45 };
-			var c = new C { C1 = c1, C2 = c2 };
-			var m = new Model(c);
-
-			_hasConstructorRun = false;
-			Create(m);
-
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<C>();
-
-			((C)root).C1.ShouldBeOfType<C1>();
-			((C)root).C2.ShouldBeOfType<C2>();
-
-			((C)root).C1.F.ShouldBe(99);
-			((C)root).C2.F.ShouldBe(45);
-
-			_hasConstructorRun.ShouldBe(false);
-		}
-
-		private class C : Component
-		{
-			public I C1;
-			public I C2;
-
-			public C()
-			{
-				_hasConstructorRun = true;
-			}
-		}
-
-		private class C1 : Component, I
-		{
-			public C1()
-			{
-				_hasConstructorRun = true;
-			}
-
-			public int F { get; set; }
-		}
-
-		private class C2 : Component, I
-		{
-			public C2()
-			{
-				_hasConstructorRun = true;
-			}
-
-			public int F { get; set; }
-		}
-
-		private interface I : IComponent
+		private interface X1
 		{
 			[Provided]
-			int F { get; }
+			void T();
+		}
+
+		private class C1 : X1
+		{
+			[Required]
+			public void T()
+			{
+			}
+		}
+
+		private interface X2
+		{
+			[Provided]
+			void T();
+		}
+
+		private class C2 : X2
+		{
+			[Required]
+			void X2.T()
+			{
+			}
+		}
+
+		private interface X3
+		{
+			[Provided]
+			void T();
+		}
+
+		private class C3 : Component, X3
+		{
+			[Required]
+			public void T()
+			{
+			}
+		}
+
+		private interface X4b
+		{
+			[Provided]
+			void T();
+		}
+
+		private class C4 : Component, X4b
+		{
+			[Required]
+			void X4b.T()
+			{
+			}
+		}
+
+		private interface X5
+		{
+			[Provided]
+			int T { get; set; }
+		}
+
+		private class C5 : X5
+		{
+			[Required]
+			public int T { get; set; }
+		}
+
+		private interface X6
+		{
+			[Provided]
+			int T { get; set; }
+		}
+
+		private class C6 : X6
+		{
+			[Required]
+			int X6.T { get; set; }
+		}
+
+		private interface X7
+		{
+			[Provided]
+			int T { get; set; }
+		}
+
+		private class C7 : Component, X7
+		{
+			[Required]
+			public int T { get; set; }
+		}
+
+		private interface X8
+		{
+			[Provided]
+			int T { get; set; }
+		}
+
+		private class C8 : Component, X8
+		{
+			[Required]
+			int X8.T { get; set; }
 		}
 	}
 }

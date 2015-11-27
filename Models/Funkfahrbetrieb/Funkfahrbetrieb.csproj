@@ -80,8 +80,10 @@
       <Name>Modeling</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\..\Binaries\Debug\SafetySharp.Compiler.exe" />
+   <ItemGroup>
+    <Analyzer Include="$(OutDir)\CommandLine.dll" />
+    <Analyzer Include="$(OutDir)\SafetySharp.Modeling.dll" />
+    <Analyzer Include="$(OutDir)\SafetySharp.Compiler.exe" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
