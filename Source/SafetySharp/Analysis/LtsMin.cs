@@ -104,9 +104,9 @@ namespace SafetySharp.Analysis
 			else
 			{
 				var transformationVisitor = new LtsMinMuCalculusTransformer();
-				transformationVisitor.Visit(new UnaryFormula(new UnaryFormula(formula, UnaryOperator.All), UnaryOperator.Next));
+				transformationVisitor.Visit(new UnaryFormula(new UnaryFormula(formula, UnaryOperator.Next), UnaryOperator.All));
 
-				return Check(model, formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
+				return Check(model, formula, $"--mucalc=\"{transformationVisitor.TransformedFormula}\"");
 			}
 		}
 

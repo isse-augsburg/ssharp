@@ -63,8 +63,6 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitUnaryFormula(UnaryFormula formula)
 		{
-			_builder.Append("(");
-			
 			switch (formula.Operator)
 			{
 				case UnaryOperator.Next:
@@ -73,7 +71,10 @@ namespace SafetySharp.Analysis.FormulaVisitors
 					Assert.NotReached($"Path Operator only allowed in Path Formulas.");
 					break;
 				case UnaryOperator.Not:
+					_builder.Append("(");
 					_builder.Append(" ! ");
+					Visit(formula.Operand);
+					_builder.Append(")");
 					break;
 				case UnaryOperator.All:
 					VisitForAllPathFormula(formula.Operand);
@@ -85,9 +86,6 @@ namespace SafetySharp.Analysis.FormulaVisitors
 					Assert.NotReached($"Unknown or unsupported unary operator '{formula.Operator}'.");
 					break;
 			}
-
-			Visit(formula.Operand);
-			_builder.Append(")");
 		}
 
 		

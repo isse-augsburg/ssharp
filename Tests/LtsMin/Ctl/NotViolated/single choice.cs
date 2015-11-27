@@ -20,41 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.LtsMin.Ctl.NotViolated
 {
-	using Xunit;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using static SafetySharp.Analysis.Tl;
 
-	public partial class LtsMinTests
+	internal class SingleChoice : LtsMinTestObject
 	{
-		[Theory, MemberData("DiscoverTests", "LtsMin/Invariants")]
-		public void Invariants(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			var c = new C { F = 3 };
+			var d = new D { C = c };
+
+			Check(EF(c.G), d).ShouldBe(true);
+			Check(AF(c.G), d).ShouldBe(false);
 		}
 
-		[Theory, MemberData("DiscoverTests", "LtsMin/Ltl")]
-		public void Ltl(string test, string file)
+		private class C : Component
 		{
-			ExecuteDynamicTests(file);
+			public int F;
+			public bool G;
 		}
 
-		[Theory, MemberData("DiscoverTests", "LtsMin/CtlStar")]
-		public void CtlStar(string test, string file)
+		private class D : Component
 		{
-			ExecuteDynamicTests(file);
-		}
+			public C C;
 
-
-		[Theory, MemberData("DiscoverTests", "LtsMin/Ctl")]
-		public void Ctl(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "LtsMin/Dcca")]
-		public void Dcca(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			public override void Update()
+			{
+				C.G = Choose(true, false);
+				if (C.G)
+					C.F = 77;
+			}
 		}
 	}
 }
