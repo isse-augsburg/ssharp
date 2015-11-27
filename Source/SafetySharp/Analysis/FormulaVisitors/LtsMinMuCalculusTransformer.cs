@@ -258,7 +258,12 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitStateFormula(StateFormula formula)
 		{
-			_builder.Append(formula.Label);
+			_builder.Append("{");
+			_builder.Append("state1=1"); // Note: Currently, only the direct comparison with state slots is supported
+			//_builder.Append(formula.Label);
+			//var equalsTrue = "=\\\"true\\\"";
+			//_builder.Append(equalsTrue);
+			_builder.Append("}");
 		}
 	}
 }
