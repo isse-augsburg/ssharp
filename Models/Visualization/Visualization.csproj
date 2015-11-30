@@ -67,7 +67,7 @@
     <Compile Include="Infrastructure\SimulationControls.xaml.cs">
       <DependentUpon>SimulationControls.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Infrastructure\WpfExtensions.cs" />
+    <Compile Include="Infrastructure\Extensions.cs" />
     <Compile Include="Infrastructure\IconButton.xaml.cs">
       <DependentUpon>IconButton.xaml</DependentUpon>
     </Compile>

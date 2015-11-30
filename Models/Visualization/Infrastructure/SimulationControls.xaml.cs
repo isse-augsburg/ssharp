@@ -34,6 +34,8 @@ namespace Visualization.Infrastructure
 		public double MaxSpeed = 32;
 		public double MinSpeed = 0.25;
 
+		public event EventHandler Reset;
+
 		public SimulationControls()
 		{
 			InitializeComponent();
@@ -74,13 +76,17 @@ namespace Visualization.Infrastructure
 
 		private void OnStop(object sender, RoutedEventArgs e)
 		{
-			if (_simulator.State != SimulationState.Stopped)
-				_simulator.Stop();
+			if (_simulator.State == SimulationState.Stopped)
+				return;
+
+			_simulator.Stop();
+			Reset?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void OnRun(object sender, RoutedEventArgs e)
 		{
 			_simulator.Run();
+			Reset?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void OnPause(object sender, RoutedEventArgs e)

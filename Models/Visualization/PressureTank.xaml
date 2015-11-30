@@ -193,7 +193,7 @@
 
             <DockPanel Canvas.Left="22.253" Width="112" Canvas.Top="39.1" Height="65.9" IsHitTestVisible="false">
                 <TextBlock x:Name="ControllerScreen" TextWrapping="Wrap" TextAlignment="Center" Text="Pumping"
-                           Foreground="White" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                           Foreground="White" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,17" />
             </DockPanel>
         </Canvas>
     </DockPanel>

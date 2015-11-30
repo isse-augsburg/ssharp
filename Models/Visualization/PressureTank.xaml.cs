@@ -68,6 +68,7 @@ namespace Visualization
 			_simulator = new RealTimeSimulator(model, stepDelay: 1000);
 			_simulator.ModelStateChanged += (o, e) => UpdateModelState();
 			SimulationControls.SetSimulator(_simulator);
+			SimulationControls.Reset += (o, e) => OnModelStateReset();
 
 			// Extract the components
 			_tank = (Tank)_simulator.Model.RootComponents[0];
@@ -81,7 +82,6 @@ namespace Visualization
 
 			TimerAlert.Opacity = 0;
 			SensorAlert.Opacity = 0;
-
 			SimulationControls.ChangeSpeed(8);
 		}
 
@@ -103,6 +103,14 @@ namespace Visualization
 		private void OnSuppressEmpty(object sender, RoutedEventArgs e)
 		{
 			_sensor.SuppressIsEmpty.ToggleOccurrence();
+		}
+
+		private void OnModelStateReset()
+		{
+			_sensor.SuppressIsFull.OccurrenceKind = SuppressFull.IsChecked.ToOccurrenceKind();
+			_sensor.SuppressIsEmpty.OccurrenceKind = SuppressEmpty.IsChecked.ToOccurrenceKind();
+			_timer.SuppressTimeout.OccurrenceKind = SuppressTimeout.IsChecked.ToOccurrenceKind();
+			_pump.SuppressPumping.OccurrenceKind = SuppressPumping.IsChecked.ToOccurrenceKind();
 		}
 
 		private void UpdateModelState()

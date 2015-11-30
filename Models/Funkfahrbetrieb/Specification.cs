@@ -31,7 +31,7 @@ namespace Funkfahrbetrieb
 	public class Specification
 	{
 		public const int SensorPosition = 900;
-		public const int CrossingPosition = 700;
+		public const int CrossingPosition = 500;
 
 		public Specification()
 		{
@@ -47,12 +47,12 @@ namespace Funkfahrbetrieb
 			TrainControl = new TrainControl
 			{
 				Brakes = new Brakes { MaxAcceleration = -1 },
-				Odometer = new Odometer { MaxPositionOffset = 10, MaxSpeedOffset = 2 },
+				Odometer = new Odometer { MaxPositionOffset = 60, MaxSpeedOffset = 7 },
 				Radio = new RadioModule(),
 				ClosingTime = 10,
 				CrossingPosition = CrossingPosition,
 				MaxCommunicationDelay = 1,
-				SafetyMargin = 100
+				SafetyMargin = 50
 			};
 
 			Component.Bind(nameof(Barrier.Speed), nameof(CrossingControl.Motor.Speed));
@@ -61,11 +61,11 @@ namespace Funkfahrbetrieb
 			Component.Bind(nameof(Train.Acceleration), nameof(TrainControl.Brakes.Acceleration));
 			Component.Bind(nameof(CrossingControl.TrainSensor.TrainPosition), nameof(Train.Position));
 
-			Component.Bind(nameof(TrainControl.Radio.RetrieveFromChannel), nameof(Channel2.Receive));
-			Component.Bind(nameof(TrainControl.Radio.DeliverToChannel), nameof(Channel1.Send));
+			Component.Bind(nameof(TrainControl.Radio.RetrieveFromChannel), nameof(Channel.Receive));
+			Component.Bind(nameof(TrainControl.Radio.DeliverToChannel), nameof(Channel.Send));
 
-			Component.Bind(nameof(CrossingControl.Radio.RetrieveFromChannel), nameof(Channel1.Receive));
-			Component.Bind(nameof(CrossingControl.Radio.DeliverToChannel), nameof(Channel2.Send));
+			Component.Bind(nameof(CrossingControl.Radio.RetrieveFromChannel), nameof(Channel.Receive));
+			Component.Bind(nameof(CrossingControl.Radio.DeliverToChannel), nameof(Channel.Send));
 
 			Component.Bind(nameof(TrainControl.Odometer.TrainPosition), nameof(Train.Position));
 			Component.Bind(nameof(TrainControl.Odometer.TrainSpeed), nameof(Train.Speed));
@@ -84,13 +84,10 @@ namespace Funkfahrbetrieb
 		public Barrier Barrier { get; } = new Barrier();
 
 		[Root]
-		public RadioChannel Channel1 { get; } = new RadioChannel();
-
-		[Root]
-		public RadioChannel Channel2 { get; } = new RadioChannel();
+		public RadioChannel Channel { get; } = new RadioChannel();
 
 		[Hazard]
 		public Formula PossibleCollision =>
-			Barrier.Angle != 10 && Train.Position <= CrossingPosition && Train.Position + Train.Speed >= CrossingPosition;
+			Barrier.Angle != 0 && Train.Position <= CrossingPosition && Train.Position + Train.Speed >= CrossingPosition;
 	}
 }

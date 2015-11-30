@@ -184,7 +184,8 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Checks whether the state expression identified by the <paramref name="label" /> holds for the model's current state.
+		///   Checks whether the state <paramref name="label" /> identified by its zero-based index holds for the model's
+		///   <paramref name="serializedState" />.
 		/// </summary>
 		/// <param name="serializedState">The state of the model that should be used to check the <paramref name="label" />.</param>
 		/// <param name="label">The label that should be checked.</param>
@@ -192,6 +193,15 @@ namespace SafetySharp.Runtime
 		internal bool CheckStateLabel(int* serializedState, int label)
 		{
 			Deserialize(serializedState);
+			return StateFormulas[label].Expression();
+		}
+
+		/// <summary>
+		///   Checks whether the state <paramref name="label" /> identified by its zero-based index holds for the model's current state.
+		/// </summary>
+		/// <param name="label">The label that should be checked.</param>
+		public bool CheckStateLabel(int label)
+		{
 			return StateFormulas[label].Expression();
 		}
 

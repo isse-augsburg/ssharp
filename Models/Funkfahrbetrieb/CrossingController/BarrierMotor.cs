@@ -29,7 +29,7 @@ namespace Funkfahrbetrieb.CrossingController
 		[Range(-1, 1, OverflowBehavior.Clamp)]
 		private int _currentSpeed;
 
-		public Fault Stuck = new TransientFault();
+		public Fault BarrierMotorStuck = new TransientFault();
 
 		public virtual int Speed => _currentSpeed;
 
@@ -48,7 +48,7 @@ namespace Funkfahrbetrieb.CrossingController
 			_currentSpeed = 0;
 		}
 
-		[FaultEffect(Fault = nameof(Stuck))]
+		[FaultEffect(Fault = nameof(BarrierMotorStuck))]
 		public class StuckEffect : BarrierMotor
 		{
 			public override int Speed => 0;

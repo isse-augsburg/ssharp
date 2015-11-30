@@ -31,7 +31,7 @@ namespace Funkfahrbetrieb.TrainController
 
 		private int _acceleration;
 
-		public Fault Unresponsive = new PersistentFault();
+		public Fault BrakesFailure = new PersistentFault();
 
 		public virtual int Acceleration => _acceleration;
 
@@ -40,7 +40,7 @@ namespace Funkfahrbetrieb.TrainController
 			_acceleration = MaxAcceleration;
 		}
 
-		[FaultEffect(Fault = nameof(Unresponsive))]
+		[FaultEffect(Fault = nameof(BrakesFailure))]
 		private class UnresponsiveEffect : Brakes
 		{
 			public override int Acceleration => 0;

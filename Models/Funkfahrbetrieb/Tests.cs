@@ -38,8 +38,12 @@ namespace Funkfahrbetrieb
 			var result = analysis.ComputeMinimalCutSets(specification.PossibleCollision);
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
 
+			Console.WriteLine("Faults: {0}", String.Join(", ", result.Faults.Select(fault => fault.Name)));
+			Console.WriteLine();
+
 			Console.WriteLine("Checked Fault Sets: {0} ({1:F0}% of all fault sets)", result.CheckedSetsCount, percentage);
 			Console.WriteLine("Minimal Cut Sets: {0}", result.MinimalCutSetsCount);
+			Console.WriteLine();
 
 			var i = 1;
 			foreach (var cutSet in result.MinimalCutSets)

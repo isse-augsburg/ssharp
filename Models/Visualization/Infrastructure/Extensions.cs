@@ -23,15 +23,21 @@
 namespace Visualization.Infrastructure
 {
 	using System.Windows;
+	using SafetySharp.Modeling;
 
 	/// <summary>
-	///   Provides extension methods for use with WPF.
+	///   Provides extension methods.
 	/// </summary>
-	internal static class WpfExtensions
+	internal static class Extensions
 	{
 		public static Visibility ToVisibility(this bool value)
 		{
 			return value ? Visibility.Visible : Visibility.Collapsed;
+		}
+
+		public static OccurrenceKind ToOccurrenceKind(this bool value)
+		{
+			return value ? OccurrenceKind.Always : OccurrenceKind.Never;
 		}
 	}
 }

@@ -57,12 +57,14 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="model">The model that should be simulated.</param>
 		/// <param name="stepDelay">The step delay in milliseconds, i.e., time to wait between two steps in running mode.</param>
-		public RealTimeSimulator(Model model, int stepDelay)
+		/// <param name="formulas">The formulas that can be evaluated on the model.</param>
+		public RealTimeSimulator(Model model, int stepDelay, params Formula[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.That(SynchronizationContext.Current != null, "The simulator requires a valid synchronization context to be set.");
+			Requires.NotNull(formulas, nameof(formulas));
 
-			Model = model.ToRuntimeModel();
+			Model = model.ToRuntimeModel(formulas);
 			_stepDelay = stepDelay;
 			_state = SimulationState.Stopped;
 		}

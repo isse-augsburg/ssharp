@@ -26,17 +26,17 @@ namespace Funkfahrbetrieb.CrossingController
 
 	public class BarrierSensor : Component
 	{
-		public Fault Broken = new TransientFault();
+		public Fault BarrierSensorFailure = new TransientFault();
 
-		public virtual bool IsOpen => BarrierAngle == 0;
-		public virtual bool IsClosed => BarrierAngle == 10;
+		public virtual bool IsOpen => BarrierAngle == 10;
+		public virtual bool IsClosed => BarrierAngle == 0;
 		public extern int BarrierAngle { get; }
 
-		[FaultEffect(Fault = nameof(Broken))]
+		[FaultEffect(Fault = nameof(BarrierSensorFailure))]
 		public class BrokenEffect : BarrierSensor
 		{
-			public override bool IsOpen => false;
-			public override bool IsClosed => false;
+			public override bool IsOpen => true;
+			public override bool IsClosed => true;
 		}
 	}
 }

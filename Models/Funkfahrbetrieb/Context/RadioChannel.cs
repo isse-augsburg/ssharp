@@ -28,13 +28,11 @@ namespace Funkfahrbetrieb.Context
 	{
 		private Message _currentMessage;
 
-		public Fault Dropped = new TransientFault();
+		public Fault MessageDropped = new TransientFault();
 
 		public virtual Message Receive()
 		{
-			var message = _currentMessage;
-			_currentMessage = Message.None;
-			return message;
+			return _currentMessage;
 		}
 
 		public void Send(Message message)
@@ -42,7 +40,7 @@ namespace Funkfahrbetrieb.Context
 			_currentMessage = message;
 		}
 
-		[FaultEffect(Fault = nameof(Dropped))]
+		[FaultEffect(Fault = nameof(MessageDropped))]
 		public class DroppedEffect : RadioChannel
 		{
 			public override Message Receive()

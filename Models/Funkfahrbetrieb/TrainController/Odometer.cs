@@ -32,8 +32,8 @@ namespace Funkfahrbetrieb.TrainController
 		[Hidden]
 		public int MaxSpeedOffset;
 
-		public Fault PositionOffset = new TransientFault();
-		public Fault SpeedOffset = new TransientFault();
+		public Fault OdometerPositionOffset = new TransientFault();
+		public Fault OdometerSpeedOffset = new TransientFault();
 
 		public virtual int Position => TrainPosition;
 		public virtual int Speed => TrainSpeed;
@@ -41,16 +41,16 @@ namespace Funkfahrbetrieb.TrainController
 		public extern int TrainPosition { get; }
 		public extern int TrainSpeed { get; }
 
-		[FaultEffect(Fault = nameof(PositionOffset))]
+		[FaultEffect(Fault = nameof(OdometerPositionOffset))]
 		private class PositionOffsetEffect : Odometer
 		{
-			public override int Position => base.Position + MaxPositionOffset;
+			public override int Position => base.Position + MaxPositionOffset * Choose(-1, 1);
 		}
 
-		[FaultEffect(Fault = nameof(SpeedOffset))]
+		[FaultEffect(Fault = nameof(OdometerSpeedOffset))]
 		private class SpeedOffsetEffect : Odometer
 		{
-			public override int Speed => base.Speed + MaxSpeedOffset;
+			public override int Speed => base.Speed + MaxSpeedOffset * Choose(-1, 1);
 		}
 	}
 }

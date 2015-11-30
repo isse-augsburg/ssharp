@@ -26,7 +26,7 @@ namespace Funkfahrbetrieb.CrossingController
 
 	public class TrainSensor : Component
 	{
-		public Fault ErroneousDetection = new TransientFault();
+		public Fault ErroneousTrainDetection = new TransientFault();
 
 		[Hidden]
 		public int Position;
@@ -34,7 +34,7 @@ namespace Funkfahrbetrieb.CrossingController
 		public virtual bool HasTrainPassed => TrainPosition > Position;
 		public extern int TrainPosition { get; }
 
-		[FaultEffect(Fault = nameof(ErroneousDetection))]
+		[FaultEffect(Fault = nameof(ErroneousTrainDetection))]
 		public class ErroneousDetectionEffect : TrainSensor
 		{
 			public override bool HasTrainPassed => true;
