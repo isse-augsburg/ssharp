@@ -35,21 +35,16 @@ namespace PressureTank
 		public readonly Fault SuppressPumping = new PersistentFault();
 
 		/// <summary>
-		///   Indicates whether the pump is currently filling the pressure tank.
-		/// </summary>
-		private bool _enabled;
-
-		/// <summary>
 		///   Gets a value indicating whether the pump is currently enabled.
 		/// </summary>
-		public bool IsEnabled => _enabled;
+		public bool IsEnabled { get; private set; }
 
 		/// <summary>
 		///   Disables the pump.
 		/// </summary>
 		public void Disable()
 		{
-			_enabled = false;
+			IsEnabled = false;
 		}
 
 		/// <summary>
@@ -57,7 +52,7 @@ namespace PressureTank
 		/// </summary>
 		public virtual void Enable()
 		{
-			_enabled = true;
+			IsEnabled = true;
 		}
 
 		/// <summary>

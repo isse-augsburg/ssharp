@@ -26,7 +26,7 @@ namespace Funkfahrbetrieb.CrossingController
 
 	public class BarrierSensor : Component
 	{
-		public Fault BarrierSensorFailure = new TransientFault();
+		public readonly Fault BarrierSensorFailure = new TransientFault();
 
 		public virtual bool IsOpen => BarrierAngle == 10;
 		public virtual bool IsClosed => BarrierAngle == 0;

@@ -32,7 +32,7 @@ namespace SafetySharp.Modeling
 	///   Represents a state machine that transitions between various states.
 	/// </summary>
 	/// <typeparam name="TState">The type of the state machine's states.</typeparam>
-	public sealed class StateMachine<TState> : INondeterministicInitialization
+	public sealed class StateMachine<TState> : IInitializable
 	{
 		/// <summary>
 		///   The initial states of the state machine.
@@ -73,7 +73,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Nondeterministically chooses an initial state.
 		/// </summary>
-		void INondeterministicInitialization.Initialize()
+		void IInitializable.Initialize()
 		{
 			State = Choice.Choose(_initialStates);
 		}

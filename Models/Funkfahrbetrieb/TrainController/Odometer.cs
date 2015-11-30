@@ -32,8 +32,8 @@ namespace Funkfahrbetrieb.TrainController
 		[Hidden]
 		public int MaxSpeedOffset;
 
-		public Fault OdometerPositionOffset = new TransientFault();
-		public Fault OdometerSpeedOffset = new TransientFault();
+		public readonly Fault OdometerPositionOffset = new TransientFault();
+		public readonly Fault OdometerSpeedOffset = new TransientFault();
 
 		public virtual int Position => TrainPosition;
 		public virtual int Speed => TrainSpeed;

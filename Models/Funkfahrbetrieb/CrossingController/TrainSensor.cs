@@ -26,7 +26,7 @@ namespace Funkfahrbetrieb.CrossingController
 
 	public class TrainSensor : Component
 	{
-		public Fault ErroneousTrainDetection = new TransientFault();
+		public readonly Fault ErroneousTrainDetection = new TransientFault();
 
 		[Hidden]
 		public int Position;

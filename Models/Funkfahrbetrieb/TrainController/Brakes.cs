@@ -31,7 +31,7 @@ namespace Funkfahrbetrieb.TrainController
 
 		private int _acceleration;
 
-		public Fault BrakesFailure = new PersistentFault();
+		public readonly Fault BrakesFailure = new PersistentFault();
 
 		public virtual int Acceleration => _acceleration;
 

@@ -23,63 +23,66 @@
 namespace Elbtunnel.Controllers
 {
 	using SafetySharp.Modeling;
-	using Sensors;
 
 	/// <summary>
-	///   Represents the original design of the end-control.
+	///   Represents a timer that signals a timeout.
 	/// </summary>
-	public class EndControlAdditionalLightBarrier : EndControl
+	public class Timer : Component
 	{
 		/// <summary>
-		///   The number of high vehicles currently in the main-control area.
+		///   The remaining time before the timeout is signaled. A value of -1 indicates that the timer is inactive.
 		/// </summary>
-		private int _count;
+		[Range(-1, 60, OverflowBehavior.Clamp)]
+		private int _remainingTime = -1;
 
 		/// <summary>
-		///   The sensor that is used to detect vehicles in the end-control area on the left lane.
-		/// </summary>
-		[Hidden]
-		public VehicleDetector LeftLaneDetector;
-
-		/// <summary>
-		///   The sensor that is used to detect over-height vehicles in the end-control area on the right lane.
+		///   The amount of time that has to pass before the timer signals a timeout.
 		/// </summary>
 		[Hidden]
-		public VehicleDetector RightLaneDetector;
+		public int Timeout;
 
 		/// <summary>
-		///   The timer that is used to deactivate the end-control automatically.
+		///   Gets a value indicating whether the timeout has elapsed. This method returns true only for the single system step where
+		///   the timeout occurs.
 		/// </summary>
-		[Hidden]
-		public Timer Timer;
+		public virtual bool HasElapsed => _remainingTime == 0;
 
 		/// <summary>
-		///   Gets a value indicating whether a crash is potentially imminent.
+		///   Gets a value indicating whether the timer is currently active, eventually signaling the timeout.
 		/// </summary>
-		public override bool IsCrashPotentiallyImminent => _count > 0 && LeftLaneDetector.IsVehicleDetected;
+		public bool IsActive => _remainingTime > 0;
 
 		/// <summary>
-		///   Updates the internal state of the component.
+		///   Gets the remaining time before the timeout occurs.
+		/// </summary>
+		public int RemainingTime => _remainingTime;
+
+		/// <summary>
+		///   Starts or restarts the timer.
+		/// </summary>
+		public void Start()
+		{
+			_remainingTime = Timeout;
+		}
+
+		/// <summary>
+		///   Stops the timer.
+		/// </summary>
+		public void Stop()
+		{
+			_remainingTime = -1;
+		}
+
+		/// <summary>
+		///   Updates the timer's state.
 		/// </summary>
 		public override void Update()
 		{
-			if (VehicleEntering)
-			{
-				_count++;
-				Timer.Start();
-			}
+			// TODO: Support different system step times
+			--_remainingTime;
 
-			if (Timer.HasElapsed)
-				_count = 0;
-
-			if (RightLaneDetector.IsVehicleDetected && _count > 0)
-				_count--;
-
-			if (_count == 0)
-				Timer.Stop();
-
-			if (_count < 0)
-				_count = 0;
+			if (_remainingTime < -1)
+				_remainingTime = -1;
 		}
 	}
 }

@@ -58,21 +58,25 @@ namespace PressureTank
 		/// <summary>
 		///   Gets the state machine that manages the state of the controller.
 		/// </summary>
+		[Hidden]
 		public readonly StateMachine<State> StateMachine = new StateMachine<State>(State.Inactive);
 
 		/// <summary>
 		///   The pump that is used to fill the tank.
 		/// </summary>
+		[Hidden]
 		public Pump Pump;
 
 		/// <summary>
 		///   The sensor that is used to sense the pressure level within the tank.
 		/// </summary>
+		[Hidden]
 		public Sensor Sensor;
 
 		/// <summary>
 		///   The timer that is used to determine whether the pump should be disabled to prevent tank ruptures.
 		/// </summary>
+		[Hidden]
 		public Timer Timer;
 
 		/// <summary>

@@ -38,7 +38,7 @@ namespace Tests.LtsMin.Invariants.Violated
 			CheckInvariant(c.F > 0 && c.F < 4, c).ShouldBe(true);
 		}
 
-		private class C : Component, INondeterministicInitialization
+		private class C : Component, IInitializable
 		{
 			public int F;
 

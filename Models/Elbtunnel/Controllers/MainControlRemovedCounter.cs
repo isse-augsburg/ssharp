@@ -22,99 +22,25 @@
 
 namespace Elbtunnel.Controllers
 {
-	using SafetySharp.Modeling;
-	using Sensors;
-	using SharedComponents;
-
-	public class MainControlRemovedCounter : Component, IMainControl
+	public sealed class MainControlRemovedCounter : MainControl
 	{
-		/// <summary>
-		///   The sensor that detects high vehicles on the left lane.
-		/// </summary>
-		protected readonly IVehicleDetector LeftDetector;
-
-        /// <summary>
-        ///   The sensor that detects overheight vehicles on any lane.
-        /// </summary>
-        protected readonly IVehicleDetector PositionDetector;
-
-        /// <summary>
-        ///   The sensor that detects high vehicles on the right lane.
-        /// </summary>
-        protected readonly IVehicleDetector RightDetector;
-
-        /// <summary>
-        ///   The timer that is used to deactivate the main-control automatically.
-        /// </summary>
-        protected readonly Timer Timer;
-
-        /// <summary>
-        ///   Indicates whether a vehicle has been detected on the left lane.
-        /// </summary>
-        protected bool VehicleOnLeftLane;
-
-        /// <summary>
-        ///   Indicates whether a vehicle has been detected on the right lane.
-        /// </summary>
-        protected bool VehicleToMonitorPassing;
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="positionDetector">The sensor that detects overheight vehicles on any lane.</param>
-		/// <param name="leftDetector">The sensor that detects high vehicles on the left lane.</param>
-		/// <param name="rightDetector">The sensor that detects high vehicles on the right lane.</param>
-		/// <param name="timeout">The amount of time after which the main-control is deactivated.</param>
-		public MainControlRemovedCounter(IVehicleDetector positionDetector, IVehicleDetector leftDetector, IVehicleDetector rightDetector,
-								   int timeout)
-		{
-			Timer = new Timer(timeout);
-			PositionDetector = positionDetector;
-			LeftDetector = leftDetector;
-			RightDetector = rightDetector;
-		}
-
-		/// <summary>
-		///   Indicates whether an vehicle leaving the main-control area.
-		/// </summary>
-		public bool IsVehicleToMonitorPassing()
-		{
-			return VehicleToMonitorPassing;
-		}
-
-		/// <summary>
-		///   Indicates whether an vehicle leaving the main-control area on the left lane has been detected.
-		///   This might trigger the alarm.
-		/// </summary>
-		public bool IsVehicleLeavingOnLeftLane()
-		{
-			return VehicleOnLeftLane;
-		}
-
-        /// <summary>
-        ///   Gets the number of vehicles that entered the area in front of the main control during the current system step.
-        /// </summary>
-        public extern int GetNumberOfEnteringVehicles();
-
 		/// <summary>
 		///   Updates the internal state of the component.
 		/// </summary>
 		public override void Update()
 		{
+			base.Update();
+
 			if (GetNumberOfEnteringVehicles() > 0)
-			{
 				Timer.Start();
-			}
 
-			var active = ! Timer.HasElapsed();
+			var active = !Timer.HasElapsed;
+			var onlyRightTriggered = !LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected;
 
-			var onlyRightTriggered = !LeftDetector.IsVehicleDetected() && RightDetector.IsVehicleDetected();
-
-            // We assume the worst case: If the vehicle was not on the right lane, it was on the left lane
-            // (even if it was a false detection of the position detector).
-            VehicleOnLeftLane = PositionDetector.IsVehicleDetected() && !onlyRightTriggered && active;
-			VehicleToMonitorPassing = PositionDetector.IsVehicleDetected() && onlyRightTriggered && active;
-            
+			// We assume the worst case: If the vehicle was not on the right lane, it was on the left lane
+			// (even if it was a false detection of the position detector).
+			IsVehicleLeavingOnLeftLane = PositionDetector.IsVehicleDetected && !onlyRightTriggered && active;
+			IsVehicleLeavingOnRightLane = PositionDetector.IsVehicleDetected && onlyRightTriggered && active;
 		}
 	}
 }

@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{6AE088BD-212E-4F38-96A1-B16C4F95D243}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Elbtunnel</RootNamespace>
     <AssemblyName>Elbtunnel</AssemblyName>
@@ -60,9 +60,9 @@
   <ItemGroup>
     <Compile Include="Controllers\EndControlAdditionalLightBarrier.cs" />
     <Compile Include="Controllers\HeightControl.cs" />
-    <Compile Include="Controllers\IEndControl.cs" />
-    <Compile Include="Controllers\IMainControl.cs" />
-    <Compile Include="Controllers\IPreControl.cs" />
+    <Compile Include="Controllers\EndControl.cs" />
+    <Compile Include="Controllers\MainControl.cs" />
+    <Compile Include="Controllers\PreControl.cs" />
     <Compile Include="Controllers\EndControlOriginal.cs" />
     <Compile Include="Controllers\MainControlRemovedCounterTolerant.cs" />
     <Compile Include="Controllers\MainControlRemovedCounter.cs" />
@@ -71,48 +71,29 @@
     <Compile Include="Controllers\PreControlImprovedDetection.cs" />
     <Compile Include="Controllers\PreControlOriginal.cs" />
     <Compile Include="Actuators\TrafficLights.cs" />
-    <Compile Include="Dcca\LtsMinModel.cs" />
-    <Compile Include="Dcca\OriginalDesign.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>OriginalDesign.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Environment\IVehicle.cs" />
-    <Compile Include="Environment\Vehicle.cs" />
-    <Compile Include="Environment\VehicleCollection.cs" />
-    <Compile Include="Lane.cs" />
+    <Compile Include="Controllers\Timer.cs" />
+    <Compile Include="Vehicles\Vehicle.cs" />
+    <Compile Include="Vehicles\VehicleCollection.cs" />
+    <Compile Include="Vehicles\Lane.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sensors\IVehicleDetector.cs" />
+    <Compile Include="Sensors\VehicleDetector.cs" />
     <Compile Include="Sensors\SmallLightBarrier.cs" />
     <Compile Include="Sensors\OverheadDetector.cs" />
     <Compile Include="Sensors\LightBarrier.cs" />
+    <Compile Include="Specification.cs" />
     <Compile Include="Tests.cs" />
-    <Compile Include="VehicleKind.cs" />
+    <Compile Include="Vehicles\VehicleKind.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Modeling\Modeling.csproj">
+    <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">
       <Project>{9b6c1fb4-3f1b-43ac-a0e0-eaed4088bf37}</Project>
       <Name>Modeling</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SharedComponents\SharedComponents.csproj">
-      <Project>{c7377ef7-e8fe-4864-802f-b2dab535d20c}</Project>
-      <Name>SharedComponents</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\..\Binaries\Debug\CommandLine.dll" />
-    <Analyzer Include="..\..\Binaries\Debug\SafetySharp.Modeling.dll" />
-    <Analyzer Include="..\..\Binaries\Debug\SafetySharp.Analysis.dll" />
-    <Analyzer Include="..\..\Binaries\Debug\QuickGraph.dll" />
-    <Analyzer Include="..\..\Binaries\Debug\FParsec.dll" />
-    <Analyzer Include="..\..\Binaries\Debug\FParsecCS.dll" />
-    <Analyzer Include="..\..\Binaries\Debug\SafetySharp.Compiler.exe" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Dcca\OriginalDesign.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>OriginalDesign.cs</LastGenOutput>
-    </Content>
+    <Analyzer Include="$(OutDir)\CommandLine.dll" />
+    <Analyzer Include="$(OutDir)\SafetySharp.Modeling.dll" />
+    <Analyzer Include="$(OutDir)\SafetySharp.Compiler.exe" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

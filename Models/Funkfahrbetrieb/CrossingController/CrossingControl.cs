@@ -28,10 +28,19 @@ namespace Funkfahrbetrieb.CrossingController
 	{
 		private readonly StateMachine<State> _stateMachine = new StateMachine<State>(State.Open);
 
+		[Hidden]
 		public BarrierMotor Motor;
+
+		[Hidden]
 		public RadioModule Radio;
+
+		[Hidden]
 		public BarrierSensor Sensor;
+
+		[Hidden]
 		public Timer Timer;
+
+		[Hidden]
 		public TrainSensor TrainSensor;
 
 		public override void Update()

@@ -25,14 +25,18 @@ namespace Elbtunnel.Controllers
 	using SafetySharp.Modeling;
 
 	/// <summary>
-	///   A common interface for different pre-control implementations.
+	///   A common interface for different end-control implementations.
 	/// </summary>
-	public interface IPreControl : IComponent
+	public abstract class EndControl : Component
 	{
 		/// <summary>
-		///   Gets the number of vehicles that passed the pre-control during the current system step.
+		///   Gets a value indicating whether a crash is potentially imminent.
 		/// </summary>
-		[Provided]
-		int GetNumberOfPassingVehicles();
+		public abstract bool IsCrashPotentiallyImminent { get; }
+
+		/// <summary>
+		///   Gets the number of vehicles that entered the area in front of the end control during the current system step.
+		/// </summary>
+		public extern bool VehicleEntering { get; }
 	}
 }

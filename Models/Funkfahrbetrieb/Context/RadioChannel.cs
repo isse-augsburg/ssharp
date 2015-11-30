@@ -28,7 +28,7 @@ namespace Funkfahrbetrieb.Context
 	{
 		private Message _currentMessage;
 
-		public Fault MessageDropped = new TransientFault();
+		public readonly Fault MessageDropped = new TransientFault();
 
 		public virtual Message Receive()
 		{

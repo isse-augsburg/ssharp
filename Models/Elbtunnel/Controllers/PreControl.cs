@@ -25,26 +25,14 @@ namespace Elbtunnel.Controllers
 	using SafetySharp.Modeling;
 
 	/// <summary>
-	///   A common interface for different main-control implementations.
+	///   A common base component for different pre-control implementations.
 	/// </summary>
-	public interface IMainControl : IComponent
+	public abstract class PreControl : Component
 	{
 		/// <summary>
-		///   Indicates whether an vehicle leaving the main-control area on the right lane has been detected.
+		///   Gets the number of vehicles that passed the pre-control during the current system step.
 		/// </summary>
 		[Provided]
-		bool IsVehicleToMonitorPassing();
-
-		/// <summary>
-		///   Indicates whether an vehicle leaving the main-control area on the left lane has been detected.
-		/// </summary>
-		[Provided]
-		bool IsVehicleLeavingOnLeftLane();
-
-		/// <summary>
-		///   Gets the number of vehicles that entered the area in front of the main control during the current system step.
-		/// </summary>
-		[Required]
-		int GetNumberOfEnteringVehicles();
+		public abstract int GetNumberOfPassingVehicles();
 	}
 }

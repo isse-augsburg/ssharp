@@ -25,61 +25,54 @@ namespace Elbtunnel.Controllers
 	using SafetySharp.Modeling;
 	using Sensors;
 
-	/// <summary>
-	///   Represents the original design of the end-control.
-	/// </summary>
-	public class EndControlAdditionalLightBarrier : EndControl
+	public abstract class MainControl : Component
 	{
 		/// <summary>
-		///   The number of high vehicles currently in the main-control area.
-		/// </summary>
-		private int _count;
-
-		/// <summary>
-		///   The sensor that is used to detect vehicles in the end-control area on the left lane.
+		///   The sensor that detects high vehicles on the left lane.
 		/// </summary>
 		[Hidden]
-		public VehicleDetector LeftLaneDetector;
+		public VehicleDetector LeftDetector;
 
 		/// <summary>
-		///   The sensor that is used to detect over-height vehicles in the end-control area on the right lane.
+		///   The sensor that detects overheight vehicles on any lane.
 		/// </summary>
 		[Hidden]
-		public VehicleDetector RightLaneDetector;
+		public VehicleDetector PositionDetector;
 
 		/// <summary>
-		///   The timer that is used to deactivate the end-control automatically.
+		///   The sensor that detects high vehicles on the right lane.
+		/// </summary>
+		[Hidden]
+		public VehicleDetector RightDetector;
+
+		/// <summary>
+		///   The timer that is used to deactivate the main-control automatically.
 		/// </summary>
 		[Hidden]
 		public Timer Timer;
 
 		/// <summary>
-		///   Gets a value indicating whether a crash is potentially imminent.
+		///   Indicates whether an vehicle leaving the main-control area.
 		/// </summary>
-		public override bool IsCrashPotentiallyImminent => _count > 0 && LeftLaneDetector.IsVehicleDetected;
+		public bool IsVehicleLeavingOnRightLane { get; protected set; }
 
 		/// <summary>
-		///   Updates the internal state of the component.
+		///   Indicates whether an vehicle leaving the main-control area on the left lane has been detected.
+		///   This might trigger the alarm.
+		/// </summary>
+		public bool IsVehicleLeavingOnLeftLane { get; protected set; }
+
+		/// <summary>
+		///   Gets the number of vehicles that entered the area in front of the main control during the current system step.
+		/// </summary>
+		public extern int GetNumberOfEnteringVehicles();
+
+		/// <summary>
+		///   Updates the state of the component.
 		/// </summary>
 		public override void Update()
 		{
-			if (VehicleEntering)
-			{
-				_count++;
-				Timer.Start();
-			}
-
-			if (Timer.HasElapsed)
-				_count = 0;
-
-			if (RightLaneDetector.IsVehicleDetected && _count > 0)
-				_count--;
-
-			if (_count == 0)
-				Timer.Stop();
-
-			if (_count < 0)
-				_count = 0;
+			Update(LeftDetector, RightDetector, PositionDetector, Timer);
 		}
 	}
 }

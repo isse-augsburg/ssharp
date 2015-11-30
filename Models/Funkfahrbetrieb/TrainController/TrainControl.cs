@@ -28,6 +28,7 @@ namespace Funkfahrbetrieb.TrainController
 	{
 		private readonly StateMachine<State> _stateMachine = new StateMachine<State>(State.Approaching);
 
+		[Hidden]
 		public Brakes Brakes;
 
 		[Hidden]
@@ -39,7 +40,10 @@ namespace Funkfahrbetrieb.TrainController
 		[Hidden]
 		public int MaxCommunicationDelay = 1;
 
+		[Hidden]
 		public Odometer Odometer;
+
+		[Hidden]
 		public RadioModule Radio;
 
 		[Hidden]

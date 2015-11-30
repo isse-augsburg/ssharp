@@ -24,64 +24,46 @@ namespace Elbtunnel.Controllers
 {
 	using SafetySharp.Modeling;
 	using Sensors;
-	using SharedComponents;
 
 	/// <summary>
 	///   Represents the original design of the end-control.
 	/// </summary>
-	public class EndControlOriginal : Component, IEndControl
+	public class EndControlOriginal : EndControl
 	{
-		/// <summary>
-		///   The sensor that is used to detect vehicles in the end-control area.
-		/// </summary>
-		private readonly IVehicleDetector _detector;
-
-		/// <summary>
-		///   The timer that is used to deactivate the end-control automatically.
-		/// </summary>
-		private readonly Timer _timer;
-
 		/// <summary>
 		///   Indicates whether the end-control is currently active.
 		/// </summary>
 		private bool _active;
 
 		/// <summary>
-		///   Initializes a new instance.
+		///   The sensor that is used to detect vehicles in the end-control area.
 		/// </summary>
-		/// <param name="detector">The sensor that should be used to detect vehicles in the end-control area.</param>
-		/// <param name="timeout">The amount of time after which the end-control is deactivated.</param>
-		public EndControlOriginal(IVehicleDetector detector, int timeout)
-		{
-			_timer = new Timer(timeout);
-			_detector = detector;
-		}
+		[Hidden]
+		public VehicleDetector Detector;
+
+		/// <summary>
+		///   The timer that is used to deactivate the end-control automatically.
+		/// </summary>
+		[Hidden]
+		public Timer Timer;
 
 		/// <summary>
 		///   Gets a value indicating whether a crash is potentially imminent.
 		/// </summary>
-		public bool IsCrashPotentiallyImminent()
-		{
-			return _active && _detector.IsVehicleDetected();
-		}
-
-        /// <summary>
-        ///   Gets the number of vehicles that entered the area in front of the end control during the current system step.
-        /// </summary>
-        public extern bool VehicleEntering();
+		public override bool IsCrashPotentiallyImminent => _active && Detector.IsVehicleDetected;
 
 		/// <summary>
 		///   Updates the internal state of the component.
 		/// </summary>
 		public override void Update()
 		{
-			if (VehicleEntering())
+			if (VehicleEntering)
 			{
 				_active = true;
-				_timer.Start();
+				Timer.Start();
 			}
 
-			if (_timer.HasElapsed())
+			if (Timer.HasElapsed)
 				_active = false;
 		}
 	}

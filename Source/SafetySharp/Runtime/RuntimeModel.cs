@@ -57,9 +57,9 @@ namespace SafetySharp.Runtime
 		private readonly SerializationDelegate _deserialize;
 
 		/// <summary>
-		///   The objects contained in the model that require nondeterministic initialization.
+		///   The objects contained in the model that require initialization.
 		/// </summary>
-		private readonly INondeterministicInitialization[] _nondeterministicInitializations;
+		private readonly IInitializable[] _initializables;
 
 		/// <summary>
 		///   Serializes a state of the model.
@@ -102,7 +102,7 @@ namespace SafetySharp.Runtime
 
 			_stateCache = new StateCache(StateSlotCount);
 			_choiceResolver = new ChoiceResolver(objectTable);
-			_nondeterministicInitializations = localObjectTable.OfType<INondeterministicInitialization>().ToArray();
+			_initializables = localObjectTable.OfType<IInitializable>().ToArray();
 
 			PortBinding.BindAll(objectTable);
 
@@ -165,7 +165,7 @@ namespace SafetySharp.Runtime
 			{
 				Deserialize(state);
 
-				foreach (var obj in _nondeterministicInitializations)
+				foreach (var obj in _initializables)
 					obj.Initialize();
 			}
 		}
@@ -234,7 +234,7 @@ namespace SafetySharp.Runtime
 				{
 					Deserialize(state);
 
-					foreach (var obj in _nondeterministicInitializations)
+					foreach (var obj in _initializables)
 						obj.Initialize();
 
 					_constructionStateIndicator.RequiresInitialization = false;

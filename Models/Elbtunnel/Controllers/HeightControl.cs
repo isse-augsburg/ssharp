@@ -28,44 +28,39 @@ namespace Elbtunnel.Controllers
 	/// <summary>
 	///   Represents the height control of the Elbtunnel.
 	/// </summary>
-	public class HeightControl : Component
+	public class HeightControl : Component, IInitializable
 	{
 		/// <summary>
 		///   The end-control step of the height control.
 		/// </summary>
-		private readonly IEndControl _endControl;
+		[Hidden]
+		public EndControl EndControl;
 
 		/// <summary>
 		///   The main-control step of the height control.
 		/// </summary>
-		private readonly IMainControl _mainControl;
+		[Hidden]
+		public MainControl MainControl;
 
 		/// <summary>
 		///   The pre-control step of the height control.
 		/// </summary>
-		private readonly IPreControl _preControl;
+		[Hidden]
+		public PreControl PreControl;
 
 		/// <summary>
 		///   The traffic lights that are used to signal that the tunnel is closed.
 		/// </summary>
-		private readonly TrafficLights _trafficLights;
+		[Hidden]
+		public TrafficLights TrafficLights;
 
 		/// <summary>
-		///   Initializes a new instance.
+		///   Performs the nondeterministic initialization.
 		/// </summary>
-		/// <param name="preControl">The pre-control step of the height control.</param>
-		/// <param name="mainControl">The main-control step of the height control.</param>
-		/// <param name="endControl">The end-control step of the height control.</param>
-		/// <param name="trafficLights">The traffic lights that are used to signal that the tunnel is closed.</param>
-		public HeightControl(IPreControl preControl, IMainControl mainControl, IEndControl endControl, TrafficLights trafficLights)
+		void IInitializable.Initialize()
 		{
-			_preControl = preControl;
-			_mainControl = mainControl;
-			_endControl = endControl;
-			_trafficLights = trafficLights;
-
-			Bind(_mainControl.RequiredPorts.GetNumberOfEnteringVehicles = _preControl.ProvidedPorts.GetNumberOfPassingVehicles);
-			Bind(_endControl.RequiredPorts.VehicleEntering = _mainControl.ProvidedPorts.IsVehicleToMonitorPassing);
+			Bind(nameof(MainControl.GetNumberOfEnteringVehicles), nameof(PreControl.GetNumberOfPassingVehicles));
+			Bind(nameof(EndControl.VehicleEntering), nameof(MainControl.IsVehicleLeavingOnRightLane));
 		}
 
 		/// <summary>
@@ -73,8 +68,8 @@ namespace Elbtunnel.Controllers
 		/// </summary>
 		public override void Update()
 		{
-			if (_mainControl.IsVehicleLeavingOnLeftLane() || _endControl.IsCrashPotentiallyImminent())
-				_trafficLights.SwitchToRed();
+			if (MainControl.IsVehicleLeavingOnLeftLane || EndControl.IsCrashPotentiallyImminent)
+				TrafficLights.SwitchToRed();
 		}
 	}
 }

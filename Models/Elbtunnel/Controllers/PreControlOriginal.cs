@@ -29,30 +29,28 @@ namespace Elbtunnel.Controllers
 	///   Represents the simple pre-control of the Elbtunnel height control that only checks incoming overheight vehicles using a
 	///   single detector.
 	/// </summary>
-	public class PreControlOriginal : Component, IPreControl
+	public sealed class PreControlOriginal : PreControl
 	{
 		/// <summary>
 		///   The vehicle detector that is used to detect vehicles entering the pre-control area.
 		/// </summary>
-		private readonly IVehicleDetector _positionDetector;
+		[Hidden]
+		public VehicleDetector Detector;
 
 		/// <summary>
-		///   Initializes a new instance.
+		///   Gets the number of vehicles that passed the pre-control during the current system step.
 		/// </summary>
-		/// <param name="positionDetector">
-		///   The vehicle detector that should be used to detect vehicles entering the pre-control area.
-		/// </param>
-		public PreControlOriginal(IVehicleDetector positionDetector)
+		public override int GetNumberOfPassingVehicles()
 		{
-			_positionDetector = positionDetector;
+			return Detector.IsVehicleDetected ? 1 : 0;
 		}
 
-        /// <summary>
-        ///   Gets the number of vehicles that passed the pre-control during the current system step.
-        /// </summary>
-        public int GetNumberOfPassingVehicles()
+		/// <summary>
+		///   Updates the state of the component.
+		/// </summary>
+		public override void Update()
 		{
-			return _positionDetector.IsVehicleDetected() ? 1 : 0;
+			Update(Detector);
 		}
 	}
 }

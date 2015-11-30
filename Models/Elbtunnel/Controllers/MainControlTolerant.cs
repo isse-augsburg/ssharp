@@ -23,70 +23,63 @@
 namespace Elbtunnel.Controllers
 {
 	using SafetySharp.Modeling;
-	using Sensors;
-	using SharedComponents;
 
-	public class MainControlTolerant : MainControlOriginal, IMainControl
-    {
-
+	public sealed class MainControlTolerant : MainControl
+	{
 		/// <summary>
-		///   Initializes a new instance.
+		///   The number of high vehicles currently in the main-control area.
 		/// </summary>
-		/// <param name="positionDetector">The sensor that detects overheight vehicles on any lane.</param>
-		/// <param name="leftDetector">The sensor that detects high vehicles on the left lane.</param>
-		/// <param name="rightDetector">The sensor that detects high vehicles on the right lane.</param>
-		/// <param name="timeout">The amount of time after which the main-control is deactivated.</param>
-		public MainControlTolerant(IVehicleDetector positionDetector, IVehicleDetector leftDetector, IVehicleDetector rightDetector,
-								   int timeout) : base(positionDetector, leftDetector, rightDetector, timeout)
-		{
-		}
-    
+		[Range(0, 4, OverflowBehavior.Clamp)]
+		private int _count;
+
 		/// <summary>
 		///   Updates the internal state of the component.
 		/// </summary>
 		public override void Update()
 		{
+			base.Update();
+
 			var numberOfHVs = GetNumberOfEnteringVehicles();
 			if (numberOfHVs > 0)
 			{
-				Count += numberOfHVs;
+				_count += numberOfHVs;
 				Timer.Start();
 			}
 
-			var active = Count != 0;
-            
-		    if (active && PositionDetector.IsVehicleDetected())
-		    {
-		        if (LeftDetector.IsVehicleDetected())
-		        {
-                    // Here we detected a vehicle on the left lane. This is one of the undesired cases.
-                    VehicleToMonitorPassing = true;
-                    VehicleOnLeftLane = true;
-                    Count--;
-                }
-                else if (RightDetector.IsVehicleDetected())
-                {
-                    // Here we detected a vehicle on the right lane.
-                    VehicleToMonitorPassing = true;
-                    VehicleOnLeftLane = false;
-                    Count--;
-                }
-                else
-                {
-                    // Here we detected a vehicle on neither the left lane nor the right lane.
-                    // Just in case we emit a signal that a vehicle to monitor might have passed.
-                    VehicleToMonitorPassing = true;
-                    VehicleOnLeftLane = false;
-                }
-		    }
-            
-			if (Timer.HasElapsed())
-				Count = 0;
+			var active = _count != 0;
 
-            if (Count < 0)
-                Count = 0;
+			if (active && PositionDetector.IsVehicleDetected)
+			{
+				if (LeftDetector.IsVehicleDetected)
+				{
+					// Here we detected a vehicle on the left lane. This is one of the undesired cases.
+					IsVehicleLeavingOnRightLane = true;
+					IsVehicleLeavingOnLeftLane = true;
+					_count--;
+				}
+				else if (RightDetector.IsVehicleDetected)
+				{
+					// Here we detected a vehicle on the right lane.
+					IsVehicleLeavingOnRightLane = true;
+					IsVehicleLeavingOnLeftLane = false;
+					_count--;
+				}
+				else
+				{
+					// Here we detected a vehicle on neither the left lane nor the right lane.
+					// Just in case we emit a signal that a vehicle to monitor might have passed.
+					IsVehicleLeavingOnRightLane = true;
+					IsVehicleLeavingOnLeftLane = false;
+				}
+			}
 
-            if (Count == 0)
+			if (Timer.HasElapsed)
+				_count = 0;
+
+			if (_count < 0)
+				_count = 0;
+
+			if (_count == 0)
 				Timer.Stop();
 		}
 	}

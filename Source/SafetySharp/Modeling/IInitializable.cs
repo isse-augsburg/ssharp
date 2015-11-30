@@ -20,15 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Elbtunnel
+namespace SafetySharp.Modeling
 {
 	/// <summary>
-	///   Identifies the kind of a vehicle.
+	///   Indicates that the implementing class participates in the initialization sequence of a model.
 	/// </summary>
-	public enum VehicleKind
+	public interface IInitializable
 	{
-		PassengerCar,
-		Truck,
-		OverheightTruck
+		/// <summary>
+		///   Performs the initialization.
+		/// </summary>
+		void Initialize();
 	}
 }

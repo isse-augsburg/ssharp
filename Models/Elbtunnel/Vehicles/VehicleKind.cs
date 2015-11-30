@@ -20,25 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Elbtunnel.Controllers
+namespace Elbtunnel.Vehicles
 {
-	using SafetySharp.Modeling;
-
 	/// <summary>
-	///   A common interface for different end-control implementations.
+	///   Identifies the kind of a vehicle.
 	/// </summary>
-	public interface IEndControl : IComponent
+	public enum VehicleKind
 	{
-		/// <summary>
-		///   Gets a value indicating whether a crash is potentially imminent.
-		/// </summary>
-		[Provided]
-		bool IsCrashPotentiallyImminent();
-
-        /// <summary>
-        ///   Gets the number of vehicles that entered the area in front of the end control during the current system step.
-        /// </summary>
-        [Required]
-		bool VehicleEntering();
+		PassengerCar,
+		Truck,
+		OverheightTruck
 	}
 }

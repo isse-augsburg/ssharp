@@ -20,66 +20,82 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Elbtunnel.Controllers
+namespace Elbtunnel.Vehicles
 {
 	using SafetySharp.Modeling;
-	using Sensors;
 
 	/// <summary>
-	///   Represents the original design of the end-control.
+	///   Represents an overheight vehicle that is not allowed to enter the tunnel on the left lane.
 	/// </summary>
-	public class EndControlAdditionalLightBarrier : EndControl
+	public class Vehicle : Component, IInitializable
 	{
-		/// <summary>
-		///   The number of high vehicles currently in the main-control area.
-		/// </summary>
-		private int _count;
-
-		/// <summary>
-		///   The sensor that is used to detect vehicles in the end-control area on the left lane.
-		/// </summary>
 		[Hidden]
-		public VehicleDetector LeftLaneDetector;
+		private readonly VehicleKind _kind;
 
 		/// <summary>
-		///   The sensor that is used to detect over-height vehicles in the end-control area on the right lane.
+		///   Initializes a new instance.
 		/// </summary>
-		[Hidden]
-		public VehicleDetector RightLaneDetector;
+		/// <param name="kind">The kind of the vehicle.</param>
+		public Vehicle(VehicleKind kind)
+		{
+			_kind = kind;
+		}
 
 		/// <summary>
-		///   The timer that is used to deactivate the end-control automatically.
+		///   Gets the current lane of the vehicle.
 		/// </summary>
-		[Hidden]
-		public Timer Timer;
+		public Lane Lane { get; private set; }
 
 		/// <summary>
-		///   Gets a value indicating whether a crash is potentially imminent.
+		///   Gets the kind the vehicle.
 		/// </summary>
-		public override bool IsCrashPotentiallyImminent => _count > 0 && LeftLaneDetector.IsVehicleDetected;
+		public VehicleKind Kind => _kind;
 
 		/// <summary>
-		///   Updates the internal state of the component.
+		///   Gets the current vehicle's position.
+		/// </summary>
+		public int Position { get; private set; }
+
+		/// <summary>
+		///   Gets the current vehicle's speed.
+		/// </summary>
+		public int Speed { get; private set; }
+
+		/// <summary>
+		///   Informs the vehicle whether the tunnel is closed.
+		/// </summary>
+		public extern bool IsTunnelClosed { get; }
+
+		/// <summary>
+		///   Performs the nondeterministic initialization.
+		/// </summary>
+		void IInitializable.Initialize()
+		{
+			Lane = Choose(Lane.Left, Lane.Right);
+		}
+
+		/// <summary>
+		///   Moves the vehicle.
 		/// </summary>
 		public override void Update()
 		{
-			if (VehicleEntering)
-			{
-				_count++;
-				Timer.Start();
-			}
+			if (IsTunnelClosed)
+				return;
 
-			if (Timer.HasElapsed)
-				_count = 0;
+			// The road layout makes lane changes impossible after position 14
+			if (Position <= 14)
+				Lane = Choose(Lane.Left, Lane.Right);
 
-			if (RightLaneDetector.IsVehicleDetected && _count > 0)
-				_count--;
+			// Vehicles are only allowed to stop at the initial position
+			if (Position == 0)
+				Speed = Choose(0, 1, 3);
+			else
+				Speed = Choose(1, 3);
 
-			if (_count == 0)
-				Timer.Stop();
+			Position += Speed;
 
-			if (_count < 0)
-				_count = 0;
+			if (Position > 20)
+				Position = 20;
 		}
 	}
 }

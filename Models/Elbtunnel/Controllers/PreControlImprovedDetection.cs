@@ -29,48 +29,46 @@ namespace Elbtunnel.Controllers
 	///   Represents a more sophisticated pre-control of the Elbtunnel height control that uses additional sensors to detect
 	///   vehicles entering the height control area.
 	/// </summary>
-	public class PreControlImprovedDetection : Component, IPreControl
+	public sealed class PreControlImprovedDetection : PreControl
 	{
 		/// <summary>
 		///   The sensor that detects vehicles on the left lane.
 		/// </summary>
-		private readonly IVehicleDetector _leftDetector;
+		[Hidden]
+		public VehicleDetector LeftDetector;
 
 		/// <summary>
 		///   The sensor that detects vehicles on any lane.
 		/// </summary>
-		private readonly IVehicleDetector _positionDetector;
+		[Hidden]
+		public VehicleDetector PositionDetector;
 
 		/// <summary>
 		///   The sensor that detects vehicles on the right lane.
 		/// </summary>
-		private readonly IVehicleDetector _rightDetector;
+		[Hidden]
+		public VehicleDetector RightDetector;
 
 		/// <summary>
-		///   Initializes a new instance.
+		///   Gets the number of vehicles that passed the pre-control during the current system step.
 		/// </summary>
-		/// <param name="positionDetector">The sensor that detects vehicles on any lane.</param>
-		/// <param name="leftDetector">The sensor that detects vehicles on the left lane.</param>
-		/// <param name="rightDetector">The sensor that detects vehicles on the right lane.</param>
-		public PreControlImprovedDetection(IVehicleDetector positionDetector, IVehicleDetector leftDetector, IVehicleDetector rightDetector)
+		public override int GetNumberOfPassingVehicles()
 		{
-			_positionDetector = positionDetector;
-			_leftDetector = leftDetector;
-			_rightDetector = rightDetector;
-		}
-
-        /// <summary>
-        ///   Gets the number of vehicles that passed the pre-control during the current system step.
-        /// </summary>
-        public int GetNumberOfPassingVehicles()
-		{
-			if (_positionDetector.IsVehicleDetected() && _leftDetector.IsVehicleDetected() && _rightDetector.IsVehicleDetected())
+			if (PositionDetector.IsVehicleDetected && LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected)
 				return 2;
 
-			if (_positionDetector.IsVehicleDetected() && (_leftDetector.IsVehicleDetected() || _rightDetector.IsVehicleDetected()))
+			if (PositionDetector.IsVehicleDetected && (LeftDetector.IsVehicleDetected || RightDetector.IsVehicleDetected))
 				return 1;
 
 			return 0;
+		}
+
+		/// <summary>
+		///   Updates the state of the component.
+		/// </summary>
+		public override void Update()
+		{
+			Update(LeftDetector, RightDetector, PositionDetector);
 		}
 	}
 }

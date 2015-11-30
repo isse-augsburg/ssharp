@@ -29,7 +29,7 @@ namespace Funkfahrbetrieb.CrossingController
 		[Range(-1, 1, OverflowBehavior.Clamp)]
 		private int _currentSpeed;
 
-		public Fault BarrierMotorStuck = new TransientFault();
+		public readonly Fault BarrierMotorStuck = new TransientFault();
 
 		public virtual int Speed => _currentSpeed;
 

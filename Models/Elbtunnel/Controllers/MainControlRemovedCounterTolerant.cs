@@ -22,60 +22,42 @@
 
 namespace Elbtunnel.Controllers
 {
-	using SafetySharp.Modeling;
-	using Sensors;
-	using SharedComponents;
-
-	public class MainControlRemovedCounterTolerant : MainControlRemovedCounter, IMainControl
+	public sealed class MainControlRemovedCounterTolerant : MainControl
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="positionDetector">The sensor that detects overheight vehicles on any lane.</param>
-		/// <param name="leftDetector">The sensor that detects high vehicles on the left lane.</param>
-		/// <param name="rightDetector">The sensor that detects high vehicles on the right lane.</param>
-		/// <param name="timeout">The amount of time after which the main-control is deactivated.</param>
-		public MainControlRemovedCounterTolerant(IVehicleDetector positionDetector, IVehicleDetector leftDetector, IVehicleDetector rightDetector,
-								   int timeout) : base(positionDetector, leftDetector, rightDetector, timeout)
-        {
-		}
-        
 		/// <summary>
 		///   Updates the internal state of the component.
 		/// </summary>
 		public override void Update()
 		{
+			base.Update();
+
 			if (GetNumberOfEnteringVehicles() > 0)
-			{
 				Timer.Start();
+
+			var active = !Timer.HasElapsed;
+			if (!active || !PositionDetector.IsVehicleDetected)
+				return;
+
+			if (LeftDetector.IsVehicleDetected)
+			{
+				// Here we detected a vehicle on the left lane. This is one of the undesired cases.
+				IsVehicleLeavingOnRightLane = true;
+				IsVehicleLeavingOnLeftLane = true;
 			}
-
-			var active = ! Timer.HasElapsed();
-            
-            if (active && PositionDetector.IsVehicleDetected())
-            {
-                if (LeftDetector.IsVehicleDetected())
-                {
-                    // Here we detected a vehicle on the left lane. This is one of the undesired cases.
-                    VehicleToMonitorPassing = true;
-                    VehicleOnLeftLane = true;
-                }
-                else if (RightDetector.IsVehicleDetected())
-                {
-                    // Here we detected a vehicle on the right lane.
-                    VehicleToMonitorPassing = true;
-                    VehicleOnLeftLane = false;
-                }
-                else
-                {
-                    // Here we detected a vehicle on neither the left lane nor the right lane.
-                    // Just in case we emit a signal that a vehicle to monitor might have passed.
-                    // Without counter this case is equivalent to the case before.
-                    VehicleToMonitorPassing = true;
-                    VehicleOnLeftLane = false;
-                }
-            }
-
-        }
+			else if (RightDetector.IsVehicleDetected)
+			{
+				// Here we detected a vehicle on the right lane.
+				IsVehicleLeavingOnRightLane = true;
+				IsVehicleLeavingOnLeftLane = false;
+			}
+			else
+			{
+				// Here we detected a vehicle on neither the left lane nor the right lane.
+				// Just in case we emit a signal that a vehicle to monitor might have passed.
+				// Without counter this case is equivalent to the case before.
+				IsVehicleLeavingOnRightLane = true;
+				IsVehicleLeavingOnLeftLane = false;
+			}
+		}
 	}
 }
