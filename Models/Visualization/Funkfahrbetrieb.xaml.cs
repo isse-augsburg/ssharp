@@ -48,8 +48,6 @@ namespace Visualization
 		{
 			InitializeComponent();
 
-			// Initialize visualization resources
-
 			// Initialize the simulation environment
 			var specification = new Specification();
 			var model = Model.Create(specification);
@@ -106,6 +104,10 @@ namespace Visualization
 
 			_hazard |= _simulator.Model.CheckStateLabel(0);
 			Collision.Visibility = _hazard.ToVisibility();
+
+			MessageFailure.Visibility = FaultMessage.IsChecked.ToVisibility();
+			TrainFailure.Visibility = (FaultBrakes.IsChecked || FaultOdometerPosition.IsChecked || FaultOdometerSpeed.IsChecked).ToVisibility();
+			CrossingFailure.Visibility = (FaultBarrierSensor.IsChecked || FaultBarrierMotor.IsChecked || FaultTrainSensor.IsChecked).ToVisibility();
 		}
 
 		private void OnBrakesFailure(object sender, RoutedEventArgs e)

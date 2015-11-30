@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:visualization="clr-namespace:Visualization"
              xmlns:infrastructure="clr-namespace:Visualization.Infrastructure"
              mc:Ignorable="d"
              Foreground="White"
@@ -51,6 +50,8 @@
                         <VisualBrush Visual="{DynamicResource appbar_train}" />
                     </Rectangle.OpacityMask>
                 </Rectangle>
+                <Rectangle x:Name="TrainFailure" Height="31" Canvas.Left="59" Canvas.Top="7" Width="17"
+                           Style="{StaticResource FailureIndicator}" />
                 <Canvas.ContextMenu>
                     <ContextMenu StaysOpen="true">
                         <MenuItem x:Name="FaultBrakes" Header="Brakes Failure" IsCheckable="true" Click="OnBrakesFailure" />
@@ -61,17 +62,19 @@
             </Canvas>
 
             <Canvas x:Name="Barrier" Width="100" Height="182" Canvas.Left="320" Canvas.Top="41" Background="#01000000">
-                <Rectangle Width="100" Height="7" Fill="Yellow" Canvas.Top="65" >
+                <Rectangle Width="100" Height="7" Fill="Yellow" Canvas.Top="65">
                     <Rectangle.RenderTransform>
                         <RotateTransform x:Name="BarrierRotation" CenterX="100" CenterY="7" />
                     </Rectangle.RenderTransform>
                 </Rectangle>
                 <Rectangle x:Name="Collision" Height="259" Canvas.Left="11" Canvas.Top="-64" Width="59"
-                       Style="{StaticResource FailureIndicator}">
+                           Style="{StaticResource FailureIndicator}">
                     <Rectangle.Effect>
                         <DropShadowEffect BlurRadius="20" />
                     </Rectangle.Effect>
                 </Rectangle>
+                <Rectangle x:Name="CrossingFailure" Height="32" Canvas.Left="86" Canvas.Top="59" Width="17"
+                           Style="{StaticResource FailureIndicator}" />
                 <Canvas.ContextMenu>
                     <ContextMenu StaysOpen="true">
                         <MenuItem x:Name="FaultBarrierSensor" Header="Sensor Failure" IsCheckable="true" Click="OnBarrierSensorFailure" />
@@ -81,14 +84,17 @@
                 </Canvas.ContextMenu>
             </Canvas>
 
+            <Rectangle x:Name="MessageFailure" Height="31" Canvas.Left="109" Canvas.Top="-5" Width="18"
+                       Style="{StaticResource FailureIndicator}" />
+
             <StackPanel Orientation="Horizontal">
                 <StackPanel.ContextMenu>
                     <ContextMenu StaysOpen="true">
                         <MenuItem x:Name="FaultMessage" Header="Drop Messages" IsCheckable="true" Click="OnDropMessages" />
                     </ContextMenu>
                 </StackPanel.ContextMenu>
-            <TextBlock>Last Message: </TextBlock>
-            <TextBlock Margin="5,0,0,0" x:Name="LastMessage">None</TextBlock>
+                <TextBlock>Last Message:</TextBlock>
+                <TextBlock Margin="5,0,0,0" x:Name="LastMessage">None</TextBlock>
             </StackPanel>
         </Canvas>
     </DockPanel>
