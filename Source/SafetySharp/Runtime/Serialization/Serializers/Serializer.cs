@@ -32,10 +32,10 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	public abstract class Serializer
 	{
 		/// <summary>
-		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
+		///   Checks whether the serialize is able to serialize the <paramref name="obj" />.
 		/// </summary>
-		/// <param name="type">The type that should be checked.</param>
-		protected internal abstract bool CanSerialize(Type type);
+		/// <param name="obj">The obj that should be checked.</param>
+		protected internal abstract bool CanSerialize(object obj);
 
 		/// <summary>
 		///   Generates the code to deserialize the <paramref name="obj" />.

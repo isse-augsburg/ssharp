@@ -104,10 +104,10 @@
     <Compile Include="Runtime\ChoiceResolver.cs" />
     <Compile Include="Runtime\ChoiceStack.cs" />
     <Compile Include="Runtime\RuntimeModel.cs" />
+    <Compile Include="Runtime\Serialization\Serializers\FaultEffectSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\TypeSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\StringSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\ArraySerializer.cs" />
-    <Compile Include="Runtime\Serialization\Serializers\FaultEffectSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\ObjectSerializer.cs" />
     <Compile Include="Runtime\Serialization\ObjectTable.cs" />
     <Compile Include="Runtime\Serialization\SerializationDelegate.cs" />

@@ -36,10 +36,10 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	internal class ObjectSerializer : Serializer
 	{
 		/// <summary>
-		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
+		///   Checks whether the serialize is able to serialize the <paramref name="obj" />.
 		/// </summary>
-		/// <param name="type">The type that should be checked.</param>
-		protected internal override bool CanSerialize(Type type)
+		/// <param name="obj">The obj that should be checked.</param>
+		protected internal override bool CanSerialize(object obj)
 		{
 			return true;
 		}
@@ -121,19 +121,25 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// </summary>
 		/// <param name="obj">The object that should be serialized.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		/// <param name="startType">
+		///   The first type in <paramref name="obj" />'s inheritance hierarchy whose fields should be returned.
+		///   If <c>null</c>, corresponds to <paramref name="obj" />'s actual type.
+		/// </param>
 		/// <param name="inheritanceRoot">
 		///   The first base type of the <paramref name="obj" /> whose fields should be ignored. If
 		///   <c>null</c>, <see cref="object" /> is the inheritance root.
 		/// </param>
 		/// <param name="discoveringObjects">Indicates whether objects are being discovered.</param>
 		protected static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode,
-														  Type inheritanceRoot = null, bool discoveringObjects = false)
+														  Type startType = null,
+														  Type inheritanceRoot = null,
+														  bool discoveringObjects = false)
 		{
-			var type = obj.GetType();
+			var type = startType ?? obj.GetType();
 			if (type.IsHidden(mode, discoveringObjects))
 				return Enumerable.Empty<FieldInfo>();
 
-			var fields = obj.GetType().GetFields(inheritanceRoot ?? typeof(object)).Where(field =>
+			var fields = type.GetFields(inheritanceRoot ?? typeof(object)).Where(field =>
 			{
 				// Ignore static or constant fields
 				if (field.IsStatic || field.IsLiteral)

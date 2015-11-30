@@ -20,37 +20,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Faults.Binding
+namespace Visualization
 {
+	using global::Elbtunnel;
+	using global::Elbtunnel.Controllers;
+	using global::Elbtunnel.Vehicles;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Reflection;
-	using Shouldly;
-	using Utilities;
 
-	internal class X4 : TestModel
+	public partial class Elbtunnel
 	{
-		protected override void Check()
-		{
-			Create(new C());
-			var c = (C)RootComponents[0];
+		private readonly RealTimeSimulator _simulator;
+		private readonly Vehicle[] _vehicles;
+		private bool _hazard;
+		private HeightControl _heightControl;
 
-			c.FaultEffects[0].GetFault(typeof(C.Effect)).ShouldBe(c.F2);
+		public Elbtunnel()
+		{
+			InitializeComponent();
+
+			// Initialize the simulation environment
+			var specification = new Specification();
+			var model = Model.Create(specification);
+			foreach (var fault in model.GetFaults())
+				fault.OccurrenceKind = OccurrenceKind.Never;
+
+			_simulator = new RealTimeSimulator(model, 1000, specification.Collision);
+			_simulator.ModelStateChanged += (o, e) => UpdateModelState();
+			SimulationControls.SetSimulator(_simulator);
+			SimulationControls.Reset += (o, e) => OnModelStateReset();
+
+			// Extract the components
+			_vehicles = ((VehicleCollection)_simulator.Model.RootComponents[1]).Vehicles;
+			_heightControl = (HeightControl)_simulator.Model.RootComponents[0];
+
+			// Initialize the visualization state
+			UpdateModelState();
+			SimulationControls.ChangeSpeed(32);
 		}
 
-		private class C : Component
+		private void OnModelStateReset()
 		{
-			public readonly Fault F1 = new TransientFault();
-			public readonly Fault F2 = new TransientFault();
+		}
 
-			public C()
-			{
-				F2.AddEffect<Effect>(this);
-			}
-
-			[FaultEffect(Fault = nameof(F1))]
-			internal class Effect : C
-			{
-			}
+		private void UpdateModelState()
+		{
 		}
 	}
 }

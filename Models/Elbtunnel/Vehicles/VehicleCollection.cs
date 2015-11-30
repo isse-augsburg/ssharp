@@ -33,7 +33,7 @@ namespace Elbtunnel.Vehicles
 		///   The vehicles contained in the collection.
 		/// </summary>
 		[Hidden]
-		public Vehicle[] Vehicles;
+		public readonly Vehicle[] Vehicles;
 
 		/// <summary>
 		///   Initializes a new instance.

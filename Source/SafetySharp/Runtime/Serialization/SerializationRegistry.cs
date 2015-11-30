@@ -90,8 +90,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		internal int GetSerializerIndex(object obj)
 		{
-			var type = obj.GetType();
-			return _serializers.FindLastIndex(s => s.CanSerialize(type));
+			return _serializers.FindLastIndex(s => s.CanSerialize(obj));
 		}
 
 		/// <summary>

@@ -54,11 +54,18 @@ namespace SafetySharp.Compiler.Normalization
 			var faultEffects = types.Where(type => type.IsFaultEffect(Compilation)).ToArray();
 
 			foreach (var type in components.Concat(faultEffects))
-				_typeLookup.Add(type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), type);
+			{
+				var t = type;
+				while (t != null && !_typeLookup.ContainsKey(t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))
+				{
+					_typeLookup.Add(t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), t);
+					t = t.BaseType;
+				}
+			}
 
 			foreach (var component in components)
 			{
-				var faults = faultEffects.Where(faultEffect => faultEffect.IsDerivedFrom(component)).ToArray();
+				var faults = faultEffects.Where(faultEffect => faultEffect.BaseType.Equals(component)).ToArray();
 				var faultTypes = faults.OrderBy(type => type.GetPriority(Compilation)).ThenBy(type => type.Name).ToArray();
 				var nondeterministicFaults = faults.GroupBy(fault => fault.GetPriority(Compilation)).Where(group => group.Count() > 1).ToArray();
 
@@ -94,12 +101,19 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			var classSymbol = declaration.GetTypeSymbol(SemanticModel);
 			if (!classSymbol.IsFaultEffect(SemanticModel))
-				return base.VisitClassDeclaration(declaration);
+			{
+				declaration = (ClassDeclarationSyntax)base.VisitClassDeclaration(declaration);
+
+				if (classSymbol.IsComponent(SemanticModel))
+					declaration = ChangeComponentBaseType(classSymbol, declaration);
+
+				return declaration;
+			}
 
 			AddFaultField(classSymbol);
 
 			declaration = (ClassDeclarationSyntax)base.VisitClassDeclaration(declaration);
-			return ChangeBaseType(classSymbol, declaration);
+			return ChangeFaultEffectBaseType(classSymbol, declaration);
 		}
 
 		/// <summary>
@@ -242,7 +256,7 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Changes the base type of the fault effect declaration based on its location in the fault effect list.
 		/// </summary>
-		private ClassDeclarationSyntax ChangeBaseType(INamedTypeSymbol classSymbol, ClassDeclarationSyntax classDeclaration)
+		private ClassDeclarationSyntax ChangeFaultEffectBaseType(INamedTypeSymbol classSymbol, ClassDeclarationSyntax classDeclaration)
 		{
 			var baseTypeName = classSymbol.BaseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 			var faultEffectSymbol = _typeLookup[classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)];
@@ -251,6 +265,26 @@ namespace SafetySharp.Compiler.Normalization
 				return classDeclaration;
 
 			var baseType = Syntax.TypeExpression(_faults[_typeLookup[baseTypeName]][faultIndex - 1]).WithTrivia(classDeclaration.BaseList.Types[0]);
+			var baseTypes = SyntaxFactory.SingletonSeparatedList((BaseTypeSyntax)SyntaxFactory.SimpleBaseType((TypeSyntax)baseType));
+			var baseList = SyntaxFactory.BaseList(classDeclaration.BaseList.ColonToken, baseTypes).WithTrivia(classDeclaration.BaseList);
+			return classDeclaration.WithBaseList(baseList);
+		}
+
+		/// <summary>
+		///   Changes the base type of the derived component declaration.
+		/// </summary>
+		private ClassDeclarationSyntax ChangeComponentBaseType(INamedTypeSymbol classSymbol, ClassDeclarationSyntax classDeclaration)
+		{
+			if (classSymbol.BaseType.Equals(SemanticModel.GetTypeSymbol<Component>()))
+				return classDeclaration;
+
+			var baseTypeName = classSymbol.BaseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+			INamedTypeSymbol[] faults;
+
+			if (!_faults.TryGetValue(_typeLookup[baseTypeName], out faults) || faults.Length == 0)
+				return classDeclaration;
+
+			var baseType = Syntax.TypeExpression(faults[faults.Length - 1]).WithTrivia(classDeclaration.BaseList.Types[0]);
 			var baseTypes = SyntaxFactory.SingletonSeparatedList((BaseTypeSyntax)SyntaxFactory.SimpleBaseType((TypeSyntax)baseType));
 			var baseList = SyntaxFactory.BaseList(classDeclaration.BaseList.ColonToken, baseTypes).WithTrivia(classDeclaration.BaseList);
 			return classDeclaration.WithBaseList(baseList);

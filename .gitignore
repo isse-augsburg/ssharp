@@ -12,6 +12,7 @@
 *.sln.docstates
 *.sln.ide
 .vs
+*.*sdf
 
 # Build results
 [Dd]ebug/

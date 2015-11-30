@@ -222,13 +222,10 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			foreach (var component in objectTable.OfType<Component>().ToArray())
 			{
-				if (component.GetType().HasAttribute<FaultEffectAttribute>())
+				if (component.IsFaultEffect())
 					continue;
 
 				var runtimeType = component.GetRuntimeType();
-				if (runtimeType == component.GetType())
-					continue;
-
 				var runtimeObj = (Component)FormatterServices.GetUninitializedObject(runtimeType);
 				var rootIndex = Array.IndexOf(roots, component);
 

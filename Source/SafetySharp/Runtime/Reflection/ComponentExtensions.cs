@@ -37,6 +37,16 @@ namespace SafetySharp.Runtime.Reflection
 	public static class ComponentExtensions
 	{
 		/// <summary>
+		///   Determines whether <paramref name="component" /> is a fault effect instance.
+		/// </summary>
+		/// <param name="component">The <see cref="IComponent" /> instance that should be checked.</param>
+		internal static bool IsFaultEffect(this IComponent component)
+		{
+			Requires.NotNull(component, nameof(component));
+			return ((Component)component).FaultEffectType != null;
+		}
+
+		/// <summary>
 		///   Gets the <paramref name="component" />'s subcomponents.
 		/// </summary>
 		/// <param name="component">The component the subcomponents should be returned for.</param>
@@ -72,12 +82,16 @@ namespace SafetySharp.Runtime.Reflection
 		///   Gets the <see cref="FieldInfo" /> storing the <see cref="Fault" /> the <paramref name="faultEffect" /> belongs to.
 		/// </summary>
 		/// <param name="faultEffect">The fault effect whose <see cref="Fault" /> <see cref="FieldInfo" /> should be returned.</param>
-		public static FieldInfo GetFaultField(this IComponent faultEffect)
+		/// <param name="actualType">
+		///   The actual fault effect type the fault field should be returned for. If <c>null</c>, the actual type is determined
+		///   by <see cref="Component.FaultEffectType" />.
+		/// </param>
+		internal static FieldInfo GetFaultField(this IComponent faultEffect, Type actualType = null)
 		{
 			Requires.NotNull(faultEffect, nameof(faultEffect));
-			Requires.That(faultEffect.GetType().HasAttribute<FaultEffectAttribute>(), nameof(faultEffect), "Expected a fault effect.");
 
-			var faultField = faultEffect.GetType().GetField("__fault__", BindingFlags.Instance | BindingFlags.NonPublic);
+			var type = actualType ?? ((Component)faultEffect).FaultEffectType;
+			var faultField = type.GetField("__fault__", BindingFlags.Instance | BindingFlags.NonPublic);
 			Assert.NotNull(faultField, $"Unable to determine fault field of fault effect '{faultEffect.GetType().FullName}'.");
 
 			return faultField;
@@ -87,9 +101,13 @@ namespace SafetySharp.Runtime.Reflection
 		///   Gets the <see cref="Fault" /> the <paramref name="faultEffect" /> belongs to.
 		/// </summary>
 		/// <param name="faultEffect">The fault effect whose <see cref="Fault" /> should be returned.</param>
-		public static Fault GetFault(this IComponent faultEffect)
+		/// <param name="actualType">
+		///   The actual fault effect type the fault field should be returned for. If <c>null</c>, the actual type is determined
+		///   by <see cref="Component.FaultEffectType" />.
+		/// </param>
+		internal static Fault GetFault(this IComponent faultEffect, Type actualType = null)
 		{
-			return (Fault)faultEffect.GetFaultField().GetValue(faultEffect);
+			return (Fault)faultEffect.GetFaultField(actualType).GetValue(faultEffect);
 		}
 
 		/// <summary>
@@ -97,8 +115,9 @@ namespace SafetySharp.Runtime.Reflection
 		/// </summary>
 		/// <param name="faultEffect">The fault effect whose <see cref="Fault" /> should be set.</param>
 		/// <param name="fault">The fault the fault effect should belong to.</param>
-		public static void SetFault(this IComponent faultEffect, Fault fault)
+		internal static void SetFault(this IComponent faultEffect, Fault fault)
 		{
+			Requires.NotNull(fault, nameof(fault));
 			faultEffect.GetFaultField().SetValue(faultEffect, fault);
 		}
 
@@ -193,10 +212,10 @@ namespace SafetySharp.Runtime.Reflection
 				if (referencedObject == null)
 					continue;
 
-				var component = referencedObject as IComponent;
+				var component = referencedObject as Component;
 				if (component != null)
 				{
-					if (!component.GetType().HasAttribute<FaultEffectAttribute>())
+					if (!component.IsFaultEffect())
 						subcomponents.Add(component);
 				}
 				else

@@ -61,6 +61,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Elbtunnel.xaml.cs">
+      <DependentUpon>Elbtunnel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Funkfahrbetrieb.xaml.cs">
       <DependentUpon>Funkfahrbetrieb.xaml</DependentUpon>
     </Compile>
@@ -74,6 +77,10 @@
     <Compile Include="PressureTank.xaml.cs">
       <DependentUpon>PressureTank.xaml</DependentUpon>
     </Compile>
+    <Page Include="Elbtunnel.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Infrastructure\IconButton.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -136,6 +143,10 @@
     <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">
       <Project>{9b6c1fb4-3f1b-43ac-a0e0-eaed4088bf37}</Project>
       <Name>Modeling</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elbtunnel\Elbtunnel.csproj">
+      <Project>{6ae088bd-212e-4f38-96a1-b16c4f95d243}</Project>
+      <Name>Elbtunnel</Name>
     </ProjectReference>
     <ProjectReference Include="..\Funkfahrbetrieb\Funkfahrbetrieb.csproj">
       <Project>{84c1f882-31d9-4a71-95a9-e1586740954a}</Project>

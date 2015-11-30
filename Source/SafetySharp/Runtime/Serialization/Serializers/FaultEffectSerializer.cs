@@ -24,10 +24,11 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 {
 	using System;
 	using System.Collections.Generic;
+	using System.IO;
 	using System.Linq;
 	using System.Reflection;
 	using Modeling;
-	using Utilities;
+	using Reflection;
 
 	/// <summary>
 	///   Serializes all kinds of <see cref="Component" />-derived classes marked with <see cref="FaultEffectAttribute" />.
@@ -35,12 +36,13 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	internal sealed class FaultEffectSerializer : ObjectSerializer
 	{
 		/// <summary>
-		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
+		///   Checks whether the serialize is able to serialize the <paramref name="obj" />.
 		/// </summary>
-		/// <param name="type">The type that should be checked.</param>
-		protected internal override bool CanSerialize(Type type)
+		/// <param name="obj">The obj that should be checked.</param>
+		protected internal override bool CanSerialize(object obj)
 		{
-			return typeof(Component).IsAssignableFrom(type) && type.HasAttribute<FaultEffectAttribute>();
+			var component = obj as Component;
+			return component != null && component.IsFaultEffect();
 		}
 
 		/// <summary>
@@ -80,6 +82,32 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		}
 
 		/// <summary>
+		///   Serializes the information about <paramref name="obj" />'s type using the <paramref name="writer" />.
+		/// </summary>
+		/// <param name="obj">The object whose type information should be serialized.</param>
+		/// <param name="writer">The writer the serialized information should be written to.</param>
+		protected internal override void SerializeType(object obj, BinaryWriter writer)
+		{
+			base.SerializeType(obj, writer);
+
+			// ReSharper disable once AssignNullToNotNullAttribute
+			writer.Write(((Component)obj).FaultEffectType.AssemblyQualifiedName);
+		}
+
+		/// <summary>
+		///   Creates an instance of the serialized type stored in the <paramref name="reader" /> without running
+		///   any of the type's constructors.
+		/// </summary>
+		/// <param name="reader">The reader the serialized type information should be read from.</param>
+		protected internal override object InstantiateType(BinaryReader reader)
+		{
+			var obj = (Component)base.InstantiateType(reader);
+			obj.FaultEffectType = Type.GetType(reader.ReadString(), throwOnError: true);
+
+			return obj;
+		}
+
+		/// <summary>
 		///   Gets the fields declared by the <paramref name="obj" /> that should be serialized. In full serialization mode, this only
 		///   includes the fields declared by <paramref name="obj" /> itself, not any of the fields declared by its base types. In
 		///   optimized mode, this includes all fields. The reason is that in optimized mode, fault effects are actually treated as
@@ -89,9 +117,10 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		private static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode)
 		{
+			var type = ((Component)obj).FaultEffectType;
 			return mode == SerializationMode.Optimized
 				? GetFields(obj, mode, null)
-				: GetFields(obj, mode, obj.GetType().BaseType);
+				: GetFields(obj, mode, type, type.BaseType);
 		}
 	}
 }

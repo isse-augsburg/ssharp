@@ -33,12 +33,12 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	internal sealed class StringSerializer : Serializer
 	{
 		/// <summary>
-		///   Checks whether the serialize is able to serialize the <paramref name="type" />.
+		///   Checks whether the serialize is able to serialize the <paramref name="obj" />.
 		/// </summary>
-		/// <param name="type">The type that should be checked.</param>
-		protected internal override bool CanSerialize(Type type)
+		/// <param name="obj">The obj that should be checked.</param>
+		protected internal override bool CanSerialize(object obj)
 		{
-			return type == typeof(string);
+			return obj is string;
 		}
 
 		/// <summary>

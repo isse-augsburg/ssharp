@@ -19,37 +19,59 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
-namespace Tests.Execution.Faults.Binding
+namespace Tests.Execution.Faults.ProvidedPorts
 {
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
 	using Utilities;
 
-	internal class X4 : TestModel
+	internal class X6 : TestModel
 	{
-		protected override void Check()
+		protected sealed override void Check()
 		{
-			Create(new C());
-			var c = (C)RootComponents[0];
+			Create(new D());
+			var d = (D)RootComponents[0];
 
-			c.FaultEffects[0].GetFault(typeof(C.Effect)).ShouldBe(c.F2);
+			d.F1.OccurrenceKind = OccurrenceKind.Always;
+			d.F2.OccurrenceKind = OccurrenceKind.Always;
+			d.M().ShouldBe(1111);
+
+			d.F1.OccurrenceKind = OccurrenceKind.Never;
+			d.F2.OccurrenceKind = OccurrenceKind.Always;
+			d.M().ShouldBe(1101);
+
+			d.F1.OccurrenceKind = OccurrenceKind.Always;
+			d.F2.OccurrenceKind = OccurrenceKind.Never;
+			d.M().ShouldBe(111);
+
+			d.F1.OccurrenceKind = OccurrenceKind.Never;
+			d.F2.OccurrenceKind = OccurrenceKind.Never;
+			d.M().ShouldBe(101);
 		}
 
 		private class C : Component
 		{
-			public readonly Fault F1 = new TransientFault();
-			public readonly Fault F2 = new TransientFault();
+			public readonly TransientFault F1 = new TransientFault();
 
-			public C()
-			{
-				F2.AddEffect<Effect>(this);
-			}
+			public virtual int M() => 1;
 
 			[FaultEffect(Fault = nameof(F1))]
-			internal class Effect : C
+			public class F1Effect : C
 			{
+				public override int M() => base.M() + 10;
+			}
+		}
+
+		class D : C
+		{
+			public readonly TransientFault F2 = new TransientFault();
+
+			public override int M() => base.M() + 100;
+
+			[FaultEffect(Fault = nameof(F2))]
+			public class F2Effect : D
+			{
+				public override int M() => base.M() + 1000;
 			}
 		}
 	}

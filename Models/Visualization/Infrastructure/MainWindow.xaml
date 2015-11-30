@@ -11,6 +11,9 @@
                       Title="S# Visualizer" Width="700" Height="500">
     <Grid>
         <TabControl>
+            <TabItem Header="Elbtunnel">
+                <visualization:Elbtunnel />
+            </TabItem>
             <TabItem Header="Funkfahrbetrieb">
                 <visualization:Funkfahrbetrieb />
             </TabItem>

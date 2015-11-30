@@ -35,7 +35,7 @@ namespace Tests.Execution.Faults.Binding
 			Create(new Model(new D { C = new C() }));
 			var d = (D)RootComponents[0];
 
-			d.C.FaultEffects[0].GetFault().ShouldBe(d.C.F);
+			d.C.FaultEffects[0].GetFault(typeof(C.Effect)).ShouldBe(d.C.F);
 		}
 
 		private class D : Component

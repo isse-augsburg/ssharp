@@ -33,14 +33,12 @@ namespace Elbtunnel.Sensors
 		/// <summary>
 		///   Represents a false detection, i.e., a vehicle is detected even though none is present.
 		/// </summary>
-		[Hidden]
-		public Fault FalseDetection;
+		public readonly Fault FalseDetection = new TransientFault();
 
 		/// <summary>
-		///   Represents a misdetection, i.e., a vehicle does not detect even though it hould have been detected.
+		///   Represents a misdetection, i.e., a vehicle does not detect even though it should have been detected.
 		/// </summary>
-		[Hidden]
-		public Fault MisDetection;
+		public readonly Fault Misdetection = new TransientFault();
 
 		/// <summary>
 		///   The number of vehicles that can potentially be detected.
@@ -104,7 +102,7 @@ namespace Elbtunnel.Sensors
 		/// <summary>
 		///   Represents a misdetection, i.e., a vehicle does not detect even though it hould have been detected.
 		/// </summary>
-		[FaultEffect(Fault = nameof(MisDetection))]
+		[FaultEffect(Fault = nameof(Misdetection))]
 		public abstract class MisdetectionEffect : VehicleDetector
 		{
 			public override bool IsVehicleDetected => false;

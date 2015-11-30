@@ -43,39 +43,44 @@ namespace Elbtunnel
 			var lightBarrier1 = new LightBarrier
 			{
 				Position = 5,
-				MisDetection = new TransientFault { Name = "MissDetectionLB1" },
-				FalseDetection = new TransientFault { Name = "FalseDetectionLB1" }
+				Misdetection = { Name = "MissDetectionLB1" },
+				FalseDetection = { Name = "FalseDetectionLB1" },
+				VehicleCount = 3
 			};
 
 			var lightBarrier2 = new LightBarrier
 			{
 				Position = 10,
-				MisDetection = new TransientFault { Name = "MissDetectionLB2" },
-				FalseDetection = new TransientFault { Name = "FalseDetectionLB2" }
+				Misdetection = { Name = "MissDetectionLB2" },
+				FalseDetection = { Name = "FalseDetectionLB2" },
+				VehicleCount = 3
 			};
 
 			var detectorLeft = new OverheadDetector
 			{
 				Lane = Lane.Left,
 				Position = 10,
-				MisDetection = new TransientFault { Name = "MissDetectionODL" },
-				FalseDetection = new TransientFault { Name = "FalseDetectionODL" }
+				Misdetection = { Name = "MissDetectionODL" },
+				FalseDetection = { Name = "FalseDetectionODL" },
+				VehicleCount = 3
 			};
 
 			var detectorRight = new OverheadDetector
 			{
 				Lane = Lane.Right,
 				Position = 10,
-				MisDetection = new TransientFault { Name = "MissDetectionODR" },
-				FalseDetection = new TransientFault { Name = "FalseDetectionODR" }
+				Misdetection = { Name = "MissDetectionODR" },
+				FalseDetection = { Name = "FalseDetectionODR" },
+				VehicleCount = 3
 			};
 
 			var detectorFinal = new OverheadDetector
 			{
 				Lane = Lane.Left,
 				Position = 15,
-				MisDetection = new TransientFault { Name = "MissDetectionODF" },
-				FalseDetection = new TransientFault { Name = "FalseDetectionODF" }
+				Misdetection = { Name = "MissDetectionODF" },
+				FalseDetection = { Name = "FalseDetectionODF" },
+				VehicleCount = 3
 			};
 
 			HeightControl = new HeightControl
@@ -99,15 +104,10 @@ namespace Elbtunnel
 				TrafficLights = new TrafficLights()
 			};
 
-			Vehicles = new VehicleCollection
-			{
-				Vehicles = new[]
-				{
-					new Vehicle(VehicleKind.OverheightTruck),
-					new Vehicle(VehicleKind.OverheightTruck),
-					new Vehicle(VehicleKind.Truck)
-				}
-			};
+			Vehicles = new VehicleCollection(
+				new Vehicle(VehicleKind.OverheightTruck),
+				new Vehicle(VehicleKind.OverheightTruck),
+				new Vehicle(VehicleKind.Truck));
 
 			Component.Bind(nameof(Vehicles.IsTunnelClosed), nameof(HeightControl.TrafficLights.IsRed));
 

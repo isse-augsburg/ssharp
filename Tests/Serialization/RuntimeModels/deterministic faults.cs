@@ -29,7 +29,6 @@ namespace Tests.Serialization.RuntimeModels
 	using Shouldly;
 	using Utilities;
 
-	// ReSharper disable SuspiciousTypeConversion.Global
 	// ReSharper disable PossibleInvalidCastException
 	internal class DeterministicFaults : TestModel
 	{

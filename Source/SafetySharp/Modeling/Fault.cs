@@ -125,8 +125,9 @@ namespace SafetySharp.Modeling
 			Requires.That(faultEffectType.HasAttribute<FaultEffectAttribute>(),
 				$"Expected fault effect to be marked with '{typeof(FaultEffectAttribute)}'.");
 
-			var faultEffect = (Component)FormatterServices.GetUninitializedObject(faultEffectType);
+			var faultEffect = (Component)FormatterServices.GetUninitializedObject(component.GetRuntimeType());
 
+			faultEffect.FaultEffectType = faultEffectType;
 			faultEffect.SetFault(this);
 			((Component)component).FaultEffects.Add(faultEffect);
 

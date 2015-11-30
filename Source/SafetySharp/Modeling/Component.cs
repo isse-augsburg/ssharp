@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Modeling
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using Utilities;
@@ -34,10 +35,27 @@ namespace SafetySharp.Modeling
 		[Hidden, NonDiscoverable, DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private readonly List<Component> _faultEffects = new List<Component>();
 
+		[Hidden, DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private Type _faultEffectType;
+
+		/// <summary>
+		///   Gets the actual type of the fault effect. 
+		/// </summary>
+#if !DEBUG
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+#endif
+		internal Type FaultEffectType
+		{
+			get { return _faultEffectType; }
+			set { _faultEffectType = value; }
+		}
+
 		/// <summary>
 		///   Gets the fault effects that affect the component.
 		/// </summary>
+#if !DEBUG
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+#endif
 		internal List<Component> FaultEffects => _faultEffects;
 
 		/// <summary>

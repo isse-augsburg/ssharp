@@ -27,14 +27,15 @@ namespace Tests.Execution.Faults.Binding
 	using Shouldly;
 	using Utilities;
 
-	internal class X4 : TestModel
+	internal class X6 : TestModel
 	{
 		protected override void Check()
 		{
 			Create(new C());
 			var c = (C)RootComponents[0];
 
-			c.FaultEffects[0].GetFault(typeof(C.Effect)).ShouldBe(c.F2);
+			c.FaultEffects[0].GetFault(typeof(C.Effect1)).ShouldBe(c.F1);
+			c.FaultEffects[1].GetFault(typeof(C.Effect2)).ShouldBe(c.F2);
 		}
 
 		private class C : Component
@@ -42,13 +43,13 @@ namespace Tests.Execution.Faults.Binding
 			public readonly Fault F1 = new TransientFault();
 			public readonly Fault F2 = new TransientFault();
 
-			public C()
+			[FaultEffect(Fault = nameof(F1))]
+			internal class Effect1 : C
 			{
-				F2.AddEffect<Effect>(this);
 			}
 
-			[FaultEffect(Fault = nameof(F1))]
-			internal class Effect : C
+			[FaultEffect(Fault = nameof(F2))]
+			internal class Effect2 : C
 			{
 			}
 		}
