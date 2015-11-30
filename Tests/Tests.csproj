@@ -291,8 +291,6 @@
     <Compile Include="LtsMinTests.Helpers.cs">
       <DependentUpon>LtsMinTests.cs</DependentUpon>
     </Compile>
-    <Compile Include="LtsMin\CtlStar\NotViolated\initial state.cs" />
-    <Compile Include="LtsMin\CtlStar\Violated\initial state.cs" />
     <Compile Include="LtsMin\Ctl\NotViolated\multiple choices.cs" />
     <Compile Include="LtsMin\Ctl\NotViolated\single choice.cs" />
     <Compile Include="LtsMin\Dcca\no cut sets.cs" />
