@@ -64,7 +64,6 @@ namespace SafetySharp.Analysis
 		public Result ComputeMinimalCutSets(Formula hazard)
 		{
 			Requires.NotNull(hazard, nameof(hazard));
-			Requires.OfType<StateFormula>(hazard, nameof(hazard), "Hazards are required to be state formulas.");
 
 			var faults = _model.GetFaults();
 			var safeSets = new HashSet<int>();
@@ -98,7 +97,7 @@ namespace SafetySharp.Analysis
 						faults[i - 1].OccurrenceKind = (set & (1 << (i - 1))) != 0 ? OccurrenceKind.SelfDetermined : OccurrenceKind.Never;
 
 					// If there was a counter example, the set is a cut set
-					if (_modelChecker.CheckHazard(_model, ((StateFormula)hazard).Expression) != null)
+					if (_modelChecker.CheckInvariant(_model, !hazard) != null)
 						cutSets.Add(set);
 					else
 						safeSets.Add(set);

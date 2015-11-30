@@ -51,20 +51,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		public IEnumerable<string> Outputs { get; private set; }
 
-		/// <summary>
-		///   Checks whether the <paramref name="hazard" /> occurs in any state of the <paramref name="model" />. Returns a
-		///   <see cref="CounterExample" /> if the hazard occurs, <c>null</c> otherwise.
-		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
-		/// <param name="hazard">[LiftExpression] The hazard that should be checked.</param>
-		public override CounterExample CheckHazard(Model model, Func<bool> hazard)
-		{
-			Requires.NotNull(model, nameof(model));
-			Requires.NotNull(hazard, nameof(hazard));
 
-			var stateFormula = new StateFormula(hazard);
-			return Check(model, stateFormula, $"--invariant=\"(isConstructionState == 1) || (!{stateFormula.Label})\"");
-		}
 
 		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
@@ -72,13 +59,21 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public override CounterExample CheckInvariant(Model model, Func<bool> invariant)
+		public override CounterExample CheckInvariant(Model model, Formula invariant)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
 
-			var stateFormula = new StateFormula(invariant);
-			return Check(model, stateFormula, $"--invariant=\"(isConstructionState == 1) || ({stateFormula.Label})\"");
+			var visitor = new IsStateFormulaVisitor();
+			visitor.Visit(invariant);
+
+			if (!visitor.IsStateFormula)
+				throw new InvalidOperationException("Invariants must be non-temporal state formulas.");
+
+			var transformationVisitor = new LtsMinLtlTransformer();
+			transformationVisitor.Visit(invariant);
+
+			return Check(model, invariant, $"--invariant=\"(isConstructionState == 1) || ({transformationVisitor.TransformedFormula})\"");
 		}
 
 		/// <summary>

@@ -42,6 +42,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis\FormulaVisitors\IsStateFormulaVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\LtsMinMuCalculusTransformer.cs" />
     <Compile Include="Analysis\HazardAttribute.cs" />
     <Compile Include="Analysis\ModelChecker.cs" />

@@ -22,14 +22,10 @@
 
 namespace Tests
 {
-	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
-	using SafetySharp.CompilerServices;
 	using SafetySharp.Modeling;
-	using SafetySharp.Utilities;
 	using Utilities;
 	using Xunit.Abstractions;
 
@@ -37,13 +33,7 @@ namespace Tests
 	{
 		protected CounterExample CounterExample { get; set; }
 
-		protected bool CheckInvariant([LiftExpression] bool invariant, params IComponent[] components)
-		{
-			Requires.CompilationTransformation();
-			return false;
-		}
-
-		protected bool CheckInvariant(Func<bool> invariant, params IComponent[] components)
+		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
 			var ltsMin = new SafetySharp.Analysis.LtsMin();
 			ltsMin.OutputWritten += message => Output.Log("{0}", message);
@@ -76,7 +66,7 @@ namespace Tests
 			{
 				var faultSet = new HashSet<Fault>(faults);
 
-                if (set.IsSubsetOf(faultSet) && faultSet.IsSubsetOf(set))
+				if (set.IsSubsetOf(faultSet) && faultSet.IsSubsetOf(set))
 					return;
 			}
 

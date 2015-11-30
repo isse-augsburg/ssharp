@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,26 +20,55 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace SafetySharp.Analysis.FormulaVisitors
 {
 	/// <summary>
-	///   Represents a base class for external model checker tools.
+	///   Determines whether a <see cref="Formula" /> is a formula that can be evaluted in a single state.
 	/// </summary>
-	public abstract class ModelChecker
+	internal class IsStateFormulaVisitor : FormulaVisitor
 	{
 		/// <summary>
-		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />.
+		///   Indicates whether the visited formula contains any invalid operators.
 		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
-		/// <param name="formula">The formula that should be checked.</param>
-		public abstract CounterExample Check(Model model, Formula formula);
+		private bool _containsInvalidOperators;
 
 		/// <summary>
-		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
-		///   <see cref="CounterExample" /> if the invariant is violated, <c>null</c> otherwise.
+		///   Gets a value indicating whether the formula is a LTL formula.
 		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
-		/// <param name="invariant">[LiftExpression] The invariant that should be checked.</param>
-		public abstract CounterExample CheckInvariant(Model model, Formula invariant);
+		public bool IsStateFormula => !_containsInvalidOperators;
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitUnaryFormula(UnaryFormula formula)
+		{
+			if (formula.Operator == UnaryOperator.Not)
+				Visit(formula.Operand);
+			else
+				_containsInvalidOperators = true;
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBinaryFormula(BinaryFormula formula)
+		{
+			if (formula.Operator == BinaryOperator.Until)
+				_containsInvalidOperators = true;
+			else
+			{
+				Visit(formula.LeftOperand);
+
+				if (IsStateFormula)
+					Visit(formula.RightOperand);
+			}
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitStateFormula(StateFormula formula)
+		{
+		}
 	}
 }
