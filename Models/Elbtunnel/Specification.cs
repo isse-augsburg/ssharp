@@ -35,17 +35,26 @@ namespace Elbtunnel
 	/// </summary>
 	public class Specification
 	{
+		public const int TunnelPosition = 19;
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public Specification()
+		public Specification(Vehicle[] vehicles = null)
 		{
+			vehicles = vehicles ?? new[]
+			{
+				new Vehicle(VehicleKind.OverheightTruck),
+				new Vehicle(VehicleKind.OverheightTruck),
+				new Vehicle(VehicleKind.Truck)
+			};
+
 			var lightBarrier1 = new LightBarrier
 			{
 				Position = 5,
 				Misdetection = { Name = "MissDetectionLB1" },
 				FalseDetection = { Name = "FalseDetectionLB1" },
-				VehicleCount = 3
+				VehicleCount = vehicles.Length
 			};
 
 			var lightBarrier2 = new LightBarrier
@@ -53,7 +62,7 @@ namespace Elbtunnel
 				Position = 10,
 				Misdetection = { Name = "MissDetectionLB2" },
 				FalseDetection = { Name = "FalseDetectionLB2" },
-				VehicleCount = 3
+				VehicleCount = vehicles.Length
 			};
 
 			var detectorLeft = new OverheadDetector
@@ -62,7 +71,7 @@ namespace Elbtunnel
 				Position = 10,
 				Misdetection = { Name = "MissDetectionODL" },
 				FalseDetection = { Name = "FalseDetectionODL" },
-				VehicleCount = 3
+				VehicleCount = vehicles.Length
 			};
 
 			var detectorRight = new OverheadDetector
@@ -71,7 +80,7 @@ namespace Elbtunnel
 				Position = 10,
 				Misdetection = { Name = "MissDetectionODR" },
 				FalseDetection = { Name = "FalseDetectionODR" },
-				VehicleCount = 3
+				VehicleCount = vehicles.Length
 			};
 
 			var detectorFinal = new OverheadDetector
@@ -80,7 +89,7 @@ namespace Elbtunnel
 				Position = 15,
 				Misdetection = { Name = "MissDetectionODF" },
 				FalseDetection = { Name = "FalseDetectionODF" },
-				VehicleCount = 3
+				VehicleCount = vehicles.Length
 			};
 
 			HeightControl = new HeightControl
@@ -104,10 +113,7 @@ namespace Elbtunnel
 				TrafficLights = new TrafficLights()
 			};
 
-			Vehicles = new VehicleCollection(
-				new Vehicle(VehicleKind.OverheightTruck),
-				new Vehicle(VehicleKind.OverheightTruck),
-				new Vehicle(VehicleKind.Truck));
+			Vehicles = new VehicleCollection(vehicles);
 
 			Component.Bind(nameof(Vehicles.IsTunnelClosed), nameof(HeightControl.TrafficLights.IsRed));
 
@@ -154,7 +160,7 @@ namespace Elbtunnel
 
 		private static Formula VehicleCollided(Vehicle vehicle)
 		{
-			return vehicle.Kind == VehicleKind.OverheightTruck && vehicle.Position > 18 && vehicle.Lane == Lane.Left;
+			return vehicle.Kind == VehicleKind.OverheightTruck && vehicle.Position >= TunnelPosition && vehicle.Lane == Lane.Left;
 		}
 	}
 }

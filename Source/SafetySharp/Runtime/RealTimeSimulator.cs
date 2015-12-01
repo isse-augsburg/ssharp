@@ -65,6 +65,8 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(formulas, nameof(formulas));
 
 			Model = model.ToRuntimeModel(formulas);
+			Model.Reset();
+
 			_stepDelay = stepDelay;
 			_state = SimulationState.Stopped;
 		}

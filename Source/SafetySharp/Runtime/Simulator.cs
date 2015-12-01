@@ -38,7 +38,9 @@ namespace SafetySharp.Runtime
 		public Simulator(Model model)
 		{
 			Requires.NotNull(model, nameof(model));
+
 			Model = model.ToRuntimeModel();
+			Model.Reset();
 		}
 
 		/// <summary>

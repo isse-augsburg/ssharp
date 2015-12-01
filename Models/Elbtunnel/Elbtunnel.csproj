@@ -72,6 +72,7 @@
     <Compile Include="Controllers\PreControlOriginal.cs" />
     <Compile Include="Actuators\TrafficLights.cs" />
     <Compile Include="Controllers\Timer.cs" />
+    <Compile Include="Vehicles\VisualizationVehicle.cs" />
     <Compile Include="Vehicles\Vehicle.cs" />
     <Compile Include="Vehicles\VehicleCollection.cs" />
     <Compile Include="Vehicles\Lane.cs" />

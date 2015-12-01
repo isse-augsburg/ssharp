@@ -68,6 +68,8 @@ namespace Elbtunnel.Controllers
 		/// </summary>
 		public override void Update()
 		{
+			Update(PreControl, MainControl, EndControl);
+
 			if (MainControl.IsVehicleLeavingOnLeftLane || EndControl.IsCrashPotentiallyImminent)
 				TrafficLights.SwitchToRed();
 		}

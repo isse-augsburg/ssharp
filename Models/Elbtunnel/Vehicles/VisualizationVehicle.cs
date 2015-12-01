@@ -20,53 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Elbtunnel.Controllers
+namespace Elbtunnel.Vehicles
 {
-	using SafetySharp.Modeling;
-	using Sensors;
-
 	/// <summary>
-	///   Represents the original design of the end-control.
+	///   Represents a vehicle that is used by visualizations.
 	/// </summary>
-	public class EndControlOriginal : EndControl
+	public class VisualizationVehicle : Vehicle
 	{
-		/// <summary>
-		///   The sensor that is used to detect vehicles in the end-control area.
-		/// </summary>
-		[Hidden]
-		public VehicleDetector Detector;
+		public Lane NextLane;
+		public int NextSpeed;
 
-		/// <summary>
-		///   The timer that is used to deactivate the end-control automatically.
-		/// </summary>
-		[Hidden]
-		public Timer Timer;
+		public VisualizationVehicle(VehicleKind kind)
+			: base(kind)
+		{
+		}
 
-		/// <summary>
-		///   Indicates whether the end-control is currently active.
-		/// </summary>
-		public bool IsActive { get; private set; }
-
-		/// <summary>
-		///   Gets a value indicating whether a crash is potentially imminent.
-		/// </summary>
-		public override bool IsCrashPotentiallyImminent => IsActive && Detector.IsVehicleDetected;
-
-		/// <summary>
-		///   Updates the internal state of the component.
-		/// </summary>
 		public override void Update()
 		{
-			Update(Timer, Detector);
+			if (IsTunnelClosed)
+				return;
 
-			if (VehicleEntering)
-			{
-				IsActive = true;
-				Timer.Start();
-			}
+			if (Position <= 14)
+				Lane = NextLane;
 
-			if (Timer.HasElapsed)
-				IsActive = false;
+			Speed = NextSpeed;
+			Position += Speed;
+
+			if (Position > 20)
+				Position = 20;
 		}
 	}
 }

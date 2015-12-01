@@ -22,15 +22,12 @@
 
 namespace Elbtunnel.Controllers
 {
-	using SafetySharp.Modeling;
-
 	public sealed class MainControlOriginal : MainControl
 	{
 		/// <summary>
-		///   The number of high vehicles currently in the main-control area.
+		///   Gets the number of high vehicles currently in the main-control area.
 		/// </summary>
-		[Range(0, 4, OverflowBehavior.Clamp)]
-		private int _count;
+		public int Count { get; private set; }
 
 		/// <summary>
 		///   Updates the internal state of the component.
@@ -42,11 +39,11 @@ namespace Elbtunnel.Controllers
 			var numberOfHVs = GetNumberOfEnteringVehicles();
 			if (numberOfHVs > 0)
 			{
-				_count += numberOfHVs;
+				Count += numberOfHVs;
 				Timer.Start();
 			}
 
-			var active = _count != 0;
+			var active = Count != 0;
 			var onlyRightTriggered = !LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected;
 
 			// We assume the worst case: If the vehicle was not on the right lane, it was on the left lane
@@ -55,22 +52,22 @@ namespace Elbtunnel.Controllers
 			IsVehicleLeavingOnRightLane = PositionDetector.IsVehicleDetected && onlyRightTriggered && active;
 
 			if (IsVehicleLeavingOnLeftLane)
-				_count--;
+				Count--;
 
-			if (IsVehicleLeavingOnRightLane && _count > 0)
-				_count--;
+			if (IsVehicleLeavingOnRightLane && Count > 0)
+				Count--;
 
 			if (Timer.HasElapsed)
-				_count = 0;
+				Count = 0;
 
-			if (_count < 0)
-				_count = 0;
+			if (Count < 0)
+				Count = 0;
 
-			if (_count == 0)
+			if (Count == 0)
 				Timer.Stop();
 
-			if (_count > 5)
-				_count = 5;
+			if (Count > 5)
+				Count = 5;
 		}
 	}
 }

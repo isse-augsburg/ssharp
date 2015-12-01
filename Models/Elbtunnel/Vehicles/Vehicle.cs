@@ -44,7 +44,7 @@ namespace Elbtunnel.Vehicles
 		/// <summary>
 		///   Gets the current lane of the vehicle.
 		/// </summary>
-		public Lane Lane { get; private set; }
+		public Lane Lane { get; protected set; }
 
 		/// <summary>
 		///   Gets the kind the vehicle.
@@ -54,12 +54,12 @@ namespace Elbtunnel.Vehicles
 		/// <summary>
 		///   Gets the current vehicle's position.
 		/// </summary>
-		public int Position { get; private set; }
+		public int Position { get; protected set; }
 
 		/// <summary>
 		///   Gets the current vehicle's speed.
 		/// </summary>
-		public int Speed { get; private set; }
+		public int Speed { get; protected set; }
 
 		/// <summary>
 		///   Informs the vehicle whether the tunnel is closed.
@@ -88,7 +88,7 @@ namespace Elbtunnel.Vehicles
 
 			// Vehicles are only allowed to stop at the initial position
 			if (Position == 0)
-				Speed = Choose(0, 1, 3);
+				Speed = Choose(1, 3, 0);
 			else
 				Speed = Choose(1, 3);
 

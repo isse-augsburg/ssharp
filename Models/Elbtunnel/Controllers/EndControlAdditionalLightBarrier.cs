@@ -63,6 +63,8 @@ namespace Elbtunnel.Controllers
 		/// </summary>
 		public override void Update()
 		{
+			Update(Timer, LeftLaneDetector, RightLaneDetector);
+
 			if (VehicleEntering)
 			{
 				_count++;

@@ -39,63 +39,68 @@
     <DockPanel LastChildFill="true">
         <infrastructure:SimulationControls x:Name="SimulationControls" DockPanel.Dock="Top" />
 
-        <Canvas Width="483.143" Height="316.534" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <Canvas x:Name="Train" Canvas.Top="65" Width="70" Height="120">
-                <TextBlock Canvas.Left="1" Canvas.Top="100">
+        <Viewbox>
+            <Canvas Width="622.143" Height="316.534" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Rectangle Width="612.143" Height="2" Canvas.Top="151" Fill="White" Stroke="White"/>
+                <Canvas x:Name="Train" Canvas.Top="65" Width="70" Height="120">
+                    <TextBlock Canvas.Left="1" Canvas.Top="100">
                     <Run Text="Position:" />
-                </TextBlock>
-                <TextBlock x:Name="TrainPosition" Canvas.Left="51" Canvas.Top="100">0</TextBlock>
-                <Rectangle Height="100" Width="70" Fill="White" ToolTip="Pressure Tank">
-                    <Rectangle.OpacityMask>
-                        <VisualBrush Visual="{DynamicResource appbar_train}" />
-                    </Rectangle.OpacityMask>
-                </Rectangle>
-                <Rectangle x:Name="TrainFailure" Height="31" Canvas.Left="59" Canvas.Top="7" Width="17"
+                    </TextBlock>
+                    <TextBlock x:Name="TrainPosition" Canvas.Left="51" Canvas.Top="100">0</TextBlock>
+                    <Rectangle Height="100" Width="70" Fill="White" ToolTip="Pressure Tank">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Visual="{DynamicResource appbar_train}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <Rectangle x:Name="TrainFailure" Height="31" Canvas.Left="59" Canvas.Top="7" Width="17"
                            Style="{StaticResource FailureIndicator}" />
-                <Canvas.ContextMenu>
-                    <ContextMenu StaysOpen="true">
-                        <MenuItem x:Name="FaultBrakes" Header="Brakes Failure" IsCheckable="true" Click="OnBrakesFailure" />
-                        <MenuItem x:Name="FaultOdometerPosition" Header="Position Offset" IsCheckable="true" Click="OnPositionOffset" />
-                        <MenuItem x:Name="FaultOdometerSpeed" Header="Speed Offset" IsCheckable="true" Click="OnSpeedOffset" />
-                    </ContextMenu>
-                </Canvas.ContextMenu>
-            </Canvas>
+                    <Canvas.ContextMenu>
+                        <ContextMenu StaysOpen="true">
+                            <MenuItem x:Name="FaultBrakes" Header="Brakes Failure" IsCheckable="true" Click="OnBrakesFailure" />
+                            <MenuItem x:Name="FaultOdometerPosition" Header="Position Offset" IsCheckable="true" Click="OnPositionOffset" />
+                            <MenuItem x:Name="FaultOdometerSpeed" Header="Speed Offset" IsCheckable="true" Click="OnSpeedOffset" />
+                        </ContextMenu>
+                    </Canvas.ContextMenu>
+                </Canvas>
 
-            <Canvas x:Name="Barrier" Width="100" Height="182" Canvas.Left="320" Canvas.Top="41" Background="#01000000">
-                <Rectangle Width="100" Height="7" Fill="Yellow" Canvas.Top="65">
-                    <Rectangle.RenderTransform>
-                        <RotateTransform x:Name="BarrierRotation" CenterX="100" CenterY="7" />
-                    </Rectangle.RenderTransform>
-                </Rectangle>
-                <Rectangle x:Name="Collision" Height="259" Canvas.Left="11" Canvas.Top="-64" Width="59"
+                <Canvas x:Name="Barrier" Width="100" Height="182" Canvas.Left="320" Canvas.Top="41" Background="#01000000">
+                    <Rectangle Width="100" Height="7" Fill="#FFFFB900" Canvas.Top="65">
+                        <Rectangle.RenderTransform>
+                            <RotateTransform x:Name="BarrierRotation" CenterX="100" CenterY="7" />
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
+                    <Rectangle x:Name="Collision" Height="259" Canvas.Left="11" Canvas.Top="-64" Width="59"
                            Style="{StaticResource FailureIndicator}">
-                    <Rectangle.Effect>
-                        <DropShadowEffect BlurRadius="20" />
-                    </Rectangle.Effect>
-                </Rectangle>
-                <Rectangle x:Name="CrossingFailure" Height="32" Canvas.Left="86" Canvas.Top="59" Width="17"
+                    </Rectangle>
+                    <Rectangle x:Name="CrossingFailure" Height="32" Canvas.Left="86" Canvas.Top="59" Width="17"
                            Style="{StaticResource FailureIndicator}" />
-                <Canvas.ContextMenu>
-                    <ContextMenu StaysOpen="true">
-                        <MenuItem x:Name="FaultBarrierSensor" Header="Sensor Failure" IsCheckable="true" Click="OnBarrierSensorFailure" />
-                        <MenuItem x:Name="FaultBarrierMotor" Header="Motor Failure" IsCheckable="true" Click="OnBarrierMotorFailure" />
-                        <MenuItem x:Name="FaultTrainSensor" Header="Train Detected" IsCheckable="true" Click="OnTrainDetected" />
-                    </ContextMenu>
-                </Canvas.ContextMenu>
-            </Canvas>
+                    <Canvas.ContextMenu>
+                        <ContextMenu StaysOpen="true">
+                            <MenuItem x:Name="FaultBarrierSensor" Header="Sensor Failure" IsCheckable="true" Click="OnBarrierSensorFailure" />
+                            <MenuItem x:Name="FaultBarrierMotor" Header="Motor Failure" IsCheckable="true" Click="OnBarrierMotorFailure" />
+                            <MenuItem x:Name="FaultTrainSensor" Header="Train Detected" IsCheckable="true" Click="OnTrainDetected" />
+                        </ContextMenu>
+                    </Canvas.ContextMenu>
+                </Canvas>
 
-            <Rectangle x:Name="MessageFailure" Height="31" Canvas.Left="109" Canvas.Top="-5" Width="18"
+                <Rectangle x:Name="MessageFailure" Height="31" Canvas.Left="109" Canvas.Top="-5" Width="18"
                        Style="{StaticResource FailureIndicator}" />
 
-            <StackPanel Orientation="Horizontal">
-                <StackPanel.ContextMenu>
-                    <ContextMenu StaysOpen="true">
-                        <MenuItem x:Name="FaultMessage" Header="Drop Messages" IsCheckable="true" Click="OnDropMessages" />
-                    </ContextMenu>
-                </StackPanel.ContextMenu>
-                <TextBlock>Last Message:</TextBlock>
-                <TextBlock Margin="5,0,0,0" x:Name="LastMessage">None</TextBlock>
-            </StackPanel>
-        </Canvas>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel.ContextMenu>
+                        <ContextMenu StaysOpen="true">
+                            <MenuItem x:Name="FaultMessage" Header="Drop Messages" IsCheckable="true" Click="OnDropMessages" />
+                        </ContextMenu>
+                    </StackPanel.ContextMenu>
+                    <TextBlock>Last Message:</TextBlock>
+                    <TextBlock Margin="5,0,0,0" x:Name="LastMessage">None</TextBlock>
+                </StackPanel>
+                <Rectangle x:Name="DangerSpot" Height="28.667" Width="34" Fill="#FFFFAE00" IsHitTestVisible="false" VerticalAlignment="Top" Canvas.Left="268" Canvas.Top="152">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Visual="{DynamicResource appbar_alert}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </Canvas>
+        </Viewbox>
     </DockPanel>
 </UserControl>

@@ -68,12 +68,13 @@ namespace Visualization
 
 			// Initialize the visualization state
 			UpdateModelState();
-			SimulationControls.ChangeSpeed(32);
+			SimulationControls.ChangeSpeed(16);
 		}
 
 		private void OnModelStateReset()
 		{
 			_hazard = false;
+			Collision.Visibility = _hazard.ToVisibility();
 			LastMessage.Text = "None";
 
 			_trainControl.Brakes.BrakesFailure.OccurrenceKind = FaultBrakes.IsChecked.ToOccurrenceKind();
@@ -89,6 +90,7 @@ namespace Visualization
 		{
 			Canvas.SetLeft(Train, _train.Position / 2.0 - Train.Width + Train.Width);
 			Canvas.SetLeft(Barrier, Specification.CrossingPosition / 2.0 + Train.Width);
+			Canvas.SetLeft(DangerSpot, Specification.CrossingPosition / 2.0 + DangerSpot.Width);
 
 			BarrierRotation.Angle = _barrier.Angle * 8;
 			TrainPosition.Text = _train.Position.ToString();

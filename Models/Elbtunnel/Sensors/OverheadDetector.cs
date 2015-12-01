@@ -24,37 +24,7 @@ namespace Elbtunnel.Sensors
 {
 	using Vehicles;
 	using SafetySharp.Modeling;
-	 class C : Component
-	{
-		public readonly TransientFault F1 = new TransientFault();
 
-		public virtual int M() => 1;
-
-		[FaultEffect(Fault = nameof(F1))]
-		public class F1Effect : C
-		{
-			public override int M()
-			{
-				return base.M() + 10;
-			}
-		}
-	}
-
-	class D : C
-	{
-		public readonly TransientFault F2 = new TransientFault();
-
-		public override int M() => base.M() + 100;
-
-		[FaultEffect(Fault = nameof(F2))]
-		public class F2Effect : D
-		{
-			public override int M()
-			{
-				return base.M() + 1000;
-			}
-		}
-	}
 	/// <summary>
 	///   Represents an overhead detector that detects overheight vehicles and non-overheight trucks for a specific
 	///   position of a lane.
