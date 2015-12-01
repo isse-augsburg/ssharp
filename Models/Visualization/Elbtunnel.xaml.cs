@@ -325,8 +325,8 @@ namespace Visualization
 
 		private static void UpdateVehicle(Tuple<VisualizationVehicle, Canvas> vehicle)
 		{
-			var leftLane = vehicle.Item1.Kind != VehicleKind.OverheightTruck ? 223 : 225;
-			var rightLane = vehicle.Item1.Kind != VehicleKind.OverheightTruck ? 302 : 304;
+			var leftLane = vehicle.Item1.Kind != VehicleKind.OverheightTruck ? 225 : 223;
+			var rightLane = vehicle.Item1.Kind != VehicleKind.OverheightTruck ? 304 : 302;
 
 			Canvas.SetLeft(vehicle.Item2, vehicle.Item1.Position * 35);
 			Canvas.SetTop(vehicle.Item2, vehicle.Item1.Lane == Lane.Left ? leftLane : rightLane);
@@ -335,7 +335,7 @@ namespace Visualization
 		private Canvas CreateVehicleUIElement(VehicleKind kind, int index)
 		{
 			var width = kind == VehicleKind.OverheightTruck ? 50 : 35;
-			var height = kind == VehicleKind.OverheightTruck ? 25 : 30;
+			var height = kind == VehicleKind.OverheightTruck ? 30 : 25;
 
 			var canvas = new Canvas
 			{
