@@ -77,20 +77,13 @@
 
         <Viewbox>
             <Canvas x:Name="LayoutRoot" Width="700" Height="422" HorizontalAlignment="Left" VerticalAlignment="Top">
-                <Rectangle Height="5" Width="800" Stroke="White" Canvas.Left="-100" Canvas.Top="50" StrokeThickness="10" Fill="White"/>
-                <Rectangle Height="5" Width="800" Stroke="White" Canvas.Left="-100" Canvas.Top="350" StrokeThickness="10" Fill="White"/>
-                <Rectangle Height="3" Width="800" Stroke="White" Canvas.Left="-100" Canvas.Top="199" StrokeThickness="10" Fill="White"/>
-                <Rectangle Canvas.Left="-100" Stroke="White" Height="1" StrokeThickness="1" StrokeDashArray="30 30" Canvas.Top="124" Width="800"/>
-                <Rectangle Canvas.Left="-100" Stroke="White" Height="1" StrokeThickness="1" StrokeDashArray="30 30" Canvas.Top="274" Width="800"/>
+                <Rectangle Height="5" Width="900" Stroke="White" Canvas.Left="-200" Canvas.Top="50" StrokeThickness="10" Fill="White"/>
+                <Rectangle Height="5" Width="900" Stroke="White" Canvas.Left="-200" Canvas.Top="350" StrokeThickness="10" Fill="White"/>
+                <Rectangle Height="3" Width="900" Stroke="White" Canvas.Left="-200" Canvas.Top="199" StrokeThickness="10" Fill="White"/>
+                <Rectangle Canvas.Left="-200" Stroke="White" Height="1" StrokeThickness="1" StrokeDashArray="40 40" Canvas.Top="124" Width="900"/>
+                <Rectangle Canvas.Left="-200" Stroke="White" Height="1" StrokeThickness="1" StrokeDashArray="40 40" Canvas.Top="274" Width="900"/>
                 <Rectangle Height="5" Canvas.Left="525" Width="175" Stroke="White" Canvas.Top="272" StrokeThickness="10" Fill="White"/>
-                <Rectangle Height="383" Canvas.Left="665" Width="197" Canvas.Top="10" StrokeThickness="10" Panel.ZIndex="1000">
-                    <Rectangle.Fill>
-                        <LinearGradientBrush EndPoint="1,.5" MappingMode="RelativeToBoundingBox" StartPoint="0,0.5">
-                            <GradientStop Color="Black" Offset="1"/>
-                            <GradientStop Color="#FF9C9C9C"/>
-                        </LinearGradientBrush>
-                    </Rectangle.Fill>
-                </Rectangle>
+                <Rectangle Height="383" Canvas.Left="665" Width="197" Canvas.Top="10" StrokeThickness="10" Panel.ZIndex="1000" Fill="#FF303030"/>
 
                 <Button Canvas.Left="10" Canvas.Top="241.51" Click="SpawnOhvLeft">OHV</Button>
                 <Button Canvas.Left="10" Canvas.Top="211.21" Click="SpawnHvLeft" Width="31.913">HV</Button>
