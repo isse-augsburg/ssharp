@@ -35,11 +35,6 @@ namespace Elbtunnel.Vehicles
 		[Hidden]
 		public int NextSpeed;
 
-		public VisualizationVehicle(VehicleKind kind)
-			: base(kind)
-		{
-		}
-
 		public override void Update()
 		{
 			if (IsTunnelClosed)

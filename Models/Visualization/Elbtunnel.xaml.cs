@@ -63,8 +63,8 @@ namespace Visualization
 
 			// Initialize the simulation environment
 			var specification = new Specification(Enumerable
-				.Range(0, 9).Select(_ => new VisualizationVehicle(VehicleKind.Truck))
-				.Concat(Enumerable.Range(0, 9).Select(_ => new VisualizationVehicle(VehicleKind.OverheightTruck)))
+				.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.Truck })
+				.Concat(Enumerable.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.OverheightTruck }))
 				.ToArray());
 
 			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
@@ -339,7 +339,7 @@ namespace Visualization
 			var leftLane = vehicle.Item1.Kind != VehicleKind.OverheightTruck ? 225 : 223;
 			var rightLane = vehicle.Item1.Kind != VehicleKind.OverheightTruck ? 304 : 302;
 
-			Canvas.SetLeft(vehicle.Item2, vehicle.Item1.Position * 35);
+			Canvas.SetLeft(vehicle.Item2, vehicle.Item1.Position * 35 - vehicle.Item2.Width);
 			Canvas.SetTop(vehicle.Item2, vehicle.Item1.Lane == Lane.Left ? leftLane : rightLane);
 		}
 

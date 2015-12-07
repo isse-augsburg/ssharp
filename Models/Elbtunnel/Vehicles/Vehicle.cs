@@ -30,16 +30,9 @@ namespace Elbtunnel.Vehicles
 	public class Vehicle : Component, IInitializable
 	{
 		[Hidden]
-		private readonly VehicleKind _kind;
+		private VehicleKind _kind;
 
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="kind">The kind of the vehicle.</param>
-		public Vehicle(VehicleKind kind)
-		{
-			_kind = kind;
-		}
+		public Fault DriveLeft = new TransientFault();
 
 		/// <summary>
 		///   Gets the current lane of the vehicle.
@@ -49,7 +42,11 @@ namespace Elbtunnel.Vehicles
 		/// <summary>
 		///   Gets the kind the vehicle.
 		/// </summary>
-		public VehicleKind Kind => _kind;
+		public VehicleKind Kind
+		{
+			get { return _kind; }
+			set { _kind = value; }
+		}
 
 		/// <summary>
 		///   Gets the current vehicle's position.
@@ -72,6 +69,7 @@ namespace Elbtunnel.Vehicles
 		void IInitializable.Initialize()
 		{
 			Lane = Choose(Lane.Left, Lane.Right);
+			Speed = Choose(0, 1, 3);
 		}
 
 		/// <summary>
@@ -82,20 +80,33 @@ namespace Elbtunnel.Vehicles
 			if (IsTunnelClosed)
 				return;
 
-			// The road layout makes lane changes impossible after position 14
-			if (Position <= 14)
-				Lane = Choose(Lane.Left, Lane.Right);
-
-			// Vehicles are only allowed to stop at the initial position
-			if (Position == 0)
-				Speed = Choose(1, 3, 0);
-			else
-				Speed = Choose(1, 3);
-
 			Position += Speed;
 
 			if (Position > 20)
 				Position = 20;
+
+			// Vehicles are only allowed to stop at the initial position
+			Speed = Choose(1, 3);
+
+			// The road layout makes lane changes impossible after position 14
+			if (Position < 14)
+				Lane = Lane.Right;
+		}
+
+		[FaultEffect(Fault = nameof(DriveLeft))]
+		public class DriveLeftEffect : Vehicle
+		{
+			/// <summary>
+			///   Moves the vehicle.
+			/// </summary>
+			public override void Update()
+			{
+				base.Update();
+
+				// The road layout makes lane changes impossible after position 14
+				if (Position < 14)
+					Lane = Lane.Left;
+			}
 		}
 	}
 }

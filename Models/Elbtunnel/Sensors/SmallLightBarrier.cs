@@ -57,7 +57,7 @@ namespace Elbtunnel.Sensors
 			int begin, end;
 			GetVehiclePosition(vehicleIndex, out begin, out end);
 
-			return begin <= Position && end >= Position;
+			return begin <= Position && end > Position;
 		}
 	}
 }

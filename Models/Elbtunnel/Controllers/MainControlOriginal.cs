@@ -48,8 +48,8 @@ namespace Elbtunnel.Controllers
 
 			// We assume the worst case: If the vehicle was not on the right lane, it was on the left lane
 			// (even if it was a false detection of the position detector).
-			IsVehicleLeavingOnLeftLane = PositionDetector.IsVehicleDetected && !onlyRightTriggered && active;
-			IsVehicleLeavingOnRightLane = PositionDetector.IsVehicleDetected && onlyRightTriggered && active;
+			IsVehicleLeavingOnLeftLane = active && !onlyRightTriggered && PositionDetector.IsVehicleDetected;
+			IsVehicleLeavingOnRightLane = active && onlyRightTriggered && PositionDetector.IsVehicleDetected;
 
 			if (IsVehicleLeavingOnLeftLane)
 				Count--;

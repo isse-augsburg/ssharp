@@ -45,7 +45,7 @@ namespace Elbtunnel.Controllers
 		/// <summary>
 		///   Indicates whether the end-control is currently active.
 		/// </summary>
-		public bool IsActive { get; private set; }
+		public bool IsActive => Timer.IsActive;
 
 		/// <summary>
 		///   Gets a value indicating whether a crash is potentially imminent.
@@ -60,13 +60,7 @@ namespace Elbtunnel.Controllers
 			Update(Timer, Detector);
 
 			if (VehicleEntering)
-			{
-				IsActive = true;
 				Timer.Start();
-			}
-
-			if (Timer.HasElapsed)
-				IsActive = false;
 		}
 	}
 }

@@ -44,9 +44,9 @@ namespace Elbtunnel
 		{
 			vehicles = vehicles ?? new[]
 			{
-				new Vehicle(VehicleKind.OverheightTruck),
-				new Vehicle(VehicleKind.OverheightTruck),
-				new Vehicle(VehicleKind.Truck)
+				new Vehicle { Kind = VehicleKind.OverheightTruck },
+				new Vehicle { Kind = VehicleKind.OverheightTruck },
+				new Vehicle { Kind = VehicleKind.Truck }
 			};
 
 			var lightBarrier1 = new LightBarrier
