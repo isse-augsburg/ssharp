@@ -24,7 +24,6 @@ namespace SafetySharp.Runtime
 {
 	using System;
 	using System.Threading;
-	using Analysis;
 	using Utilities;
 
 	/// <summary>
@@ -32,6 +31,11 @@ namespace SafetySharp.Runtime
 	/// </summary>
 	public sealed class RealTimeSimulator
 	{
+		/// <summary>
+		///   The simulator that is used to simulate the model.
+		/// </summary>
+		private readonly Simulator _simulator;
+
 		/// <summary>
 		///   The synchronization context that is used to marshal back to the main thread.
 		/// </summary>
@@ -55,26 +59,17 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="model">The model that should be simulated.</param>
+		/// <param name="simulator">The simulator that should be used to simulate the model.</param>
 		/// <param name="stepDelay">The step delay in milliseconds, i.e., time to wait between two steps in running mode.</param>
-		/// <param name="formulas">The formulas that can be evaluated on the model.</param>
-		public RealTimeSimulator(Model model, int stepDelay, params Formula[] formulas)
+		public RealTimeSimulator(Simulator simulator, int stepDelay)
 		{
-			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(simulator, nameof(simulator));
 			Requires.That(SynchronizationContext.Current != null, "The simulator requires a valid synchronization context to be set.");
-			Requires.NotNull(formulas, nameof(formulas));
 
-			Model = model.ToRuntimeModel(formulas);
-			Model.Reset();
-
+			_simulator = simulator;
 			_stepDelay = stepDelay;
 			_state = SimulationState.Stopped;
 		}
-
-		/// <summary>
-		///   Gets the <see cref="RuntimeModel" /> that is simulated.
-		/// </summary>
-		public RuntimeModel Model { get; }
 
 		/// <summary>
 		///   Gets the current state of the simulation.
@@ -118,6 +113,11 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
+		///   Gets the <see cref="RuntimeModel" /> that is simulated.
+		/// </summary>
+		public RuntimeModel Model => _simulator.Model;
+
+		/// <summary>
 		///   Raised when the simulator's simulation state has been changed.
 		/// </summary>
 		public event EventHandler SimulationStateChanged;
@@ -158,7 +158,7 @@ namespace SafetySharp.Runtime
 			Requires.That(State != SimulationState.Stopped, "The simulation is already stopped.");
 			State = SimulationState.Stopped;
 
-			Model.Reset();
+			_simulator.Reset();
 			ModelStateChanged?.Invoke(this, EventArgs.Empty);
 		}
 
@@ -176,7 +176,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		private void ExecuteStep()
 		{
-			Model.ExecuteStep();
+			_simulator.SimulateStep();
 			ModelStateChanged?.Invoke(this, EventArgs.Empty);
 		}
 	}

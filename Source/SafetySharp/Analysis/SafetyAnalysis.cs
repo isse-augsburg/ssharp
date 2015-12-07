@@ -22,7 +22,9 @@
 
 namespace SafetySharp.Analysis
 {
+	using System;
 	using System.Collections.Generic;
+	using System.IO;
 	using System.Linq;
 	using Modeling;
 	using Runtime.Reflection;
@@ -61,9 +63,16 @@ namespace SafetySharp.Analysis
 		///   Computes the minimal cut sets for the <paramref name="hazard" />.
 		/// </summary>
 		/// <param name="hazard">The hazard the minimal cut sets should be computed for.</param>
-		public Result ComputeMinimalCutSets(Formula hazard)
+		/// <param name="counterExamplePath">
+		///   The path the generated counter examples should be written to. If null, counter examples are
+		///   not written.
+		/// </param>
+		public Result ComputeMinimalCutSets(Formula hazard, string counterExamplePath = null)
 		{
 			Requires.NotNull(hazard, nameof(hazard));
+
+			if (!String.IsNullOrWhiteSpace(counterExamplePath))
+				Directory.CreateDirectory(counterExamplePath);
 
 			var faults = _model.GetFaults();
 			var safeSets = new HashSet<int>();
@@ -97,12 +106,22 @@ namespace SafetySharp.Analysis
 						faults[i - 1].OccurrenceKind = (set & (1 << (i - 1))) != 0 ? OccurrenceKind.SelfDetermined : OccurrenceKind.Never;
 
 					// If there was a counter example, the set is a cut set
-					if (_modelChecker.CheckInvariant(_model, !hazard) != null)
+					var counterExample = _modelChecker.CheckInvariant(_model, !hazard);
+					if (counterExample != null)
 						cutSets.Add(set);
 					else
 						safeSets.Add(set);
 
 					checkedSets.Add(set);
+
+					if (counterExample == null || counterExamplePath == null)
+						continue;
+
+					var fileName = String.Join("_", faults.Where(f => f.OccurrenceKind == OccurrenceKind.SelfDetermined).Select(f => f.Name));
+					if (String.IsNullOrWhiteSpace(fileName))
+						fileName = "emptyset";
+
+					counterExample.Save(Path.Combine(counterExamplePath, $"{fileName}{CounterExample.FileExtension}"));
 				}
 			}
 

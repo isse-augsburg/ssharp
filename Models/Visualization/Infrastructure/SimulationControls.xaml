@@ -5,8 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Visualization.Infrastructure"
              Unloaded="OnStop"
+             d:DesignWidth="600"
              mc:Ignorable="d">
-    <DockPanel DockPanel.Dock="Top">
+    <DockPanel>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Top">
             <local:IconButton x:Name="StopButton" Icon="{DynamicResource appbar_debug_stop}"
                                           ToolTip="Stops the simulation." Clicked="OnStop" />
@@ -19,12 +20,16 @@
         </StackPanel>
         <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Right">
             <StackPanel Orientation="Horizontal" >
-                <local:IconButton x:Name="IncreaseSpeedButton" Icon="{DynamicResource appbar_arrow_up}"
+                <local:IconButton x:Name="CounterExampleButton" Icon="{DynamicResource appbar_paper}"
+                                          ToolTip="Executes a counter example found by a model checker." Clicked="OnCounterExample"/>
+                <local:IconButton x:Name="CloseCounterExampleButton" Icon="{DynamicResource appbar_page_delete}"
+                                          ToolTip="Closes the counter example." Clicked="OnCounterExampleClosed"/>
+                <local:IconButton x:Name="IncreaseSpeedButton" Icon="{DynamicResource appbar_arrow_up}" Margin="50,0,0,0"
                                               ToolTip="Doubles the speed of the simulation." Clicked="OnIncreaseSpeed" />
                 <local:IconButton x:Name="DecreaseSpeedButton" Icon="{DynamicResource appbar_arrow_down}"
                                               ToolTip="Halves the speed of the simulation." Clicked="OnDecreaseSpeed" />
             </StackPanel>
-            <TextBlock HorizontalAlignment="Center" Text="Speed: 1x" x:Name="SimulationSpeed" FontSize="14.667" Foreground="White" />
+            <TextBlock HorizontalAlignment="Right" Margin="0,0,15,0" Text="Speed: 1x" x:Name="SimulationSpeed" FontSize="14.667" Foreground="White" />
         </StackPanel>
     </DockPanel>
 </UserControl>

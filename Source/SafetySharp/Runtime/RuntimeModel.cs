@@ -57,11 +57,6 @@ namespace SafetySharp.Runtime
 		private readonly SerializationDelegate _deserialize;
 
 		/// <summary>
-		///   The objects contained in the model that require initialization.
-		/// </summary>
-		private readonly IInitializable[] _initializables;
-
-		/// <summary>
 		///   Serializes a state of the model.
 		/// </summary>
 		private readonly SerializationDelegate _serialize;
@@ -70,6 +65,11 @@ namespace SafetySharp.Runtime
 		///   The <see cref="StateCache" /> used by the model.
 		/// </summary>
 		private readonly StateCache _stateCache;
+
+		/// <summary>
+		///   The objects contained in the model.
+		/// </summary>
+		private readonly ObjectTable _objects;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -90,19 +90,18 @@ namespace SafetySharp.Runtime
 			objects = new[] { _constructionStateIndicator }.Concat(objects);
 
 			// The construction state indicator is the first object in the table; its corresponding state slot will be 0
-			var localObjectTable = new ObjectTable(objects);
+			_objects = new ObjectTable(objects);
 
 			RootComponents = rootComponents;
-			Faults = localObjectTable.OfType<Fault>().ToArray();
+			Faults = _objects.OfType<Fault>().ToArray();
 			StateFormulas = stateFormulas;
-			StateSlotCount = SerializationRegistry.Default.GetStateSlotCount(localObjectTable, SerializationMode.Optimized);
+			StateSlotCount = SerializationRegistry.Default.GetStateSlotCount(_objects, SerializationMode.Optimized);
 
-			_deserialize = SerializationRegistry.Default.CreateStateDeserializer(localObjectTable, SerializationMode.Optimized);
-			_serialize = SerializationRegistry.Default.CreateStateSerializer(localObjectTable, SerializationMode.Optimized);
+			_deserialize = SerializationRegistry.Default.CreateStateDeserializer(_objects, SerializationMode.Optimized);
+			_serialize = SerializationRegistry.Default.CreateStateSerializer(_objects, SerializationMode.Optimized);
 
 			_stateCache = new StateCache(StateSlotCount);
 			_choiceResolver = new ChoiceResolver(objectTable);
-			_initializables = localObjectTable.OfType<IInitializable>().ToArray();
 
 			PortBinding.BindAll(objectTable);
 
@@ -165,7 +164,7 @@ namespace SafetySharp.Runtime
 			{
 				Deserialize(state);
 
-				foreach (var obj in _initializables)
+				foreach (var obj in _objects.OfType<IInitializable>())
 					obj.Initialize();
 			}
 		}
@@ -234,7 +233,7 @@ namespace SafetySharp.Runtime
 				{
 					Deserialize(state);
 
-					foreach (var obj in _initializables)
+					foreach (var obj in _objects.OfType<IInitializable>())
 						obj.Initialize();
 
 					_constructionStateIndicator.RequiresInitialization = false;

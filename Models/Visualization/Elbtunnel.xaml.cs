@@ -36,26 +36,17 @@ namespace Visualization
 	using global::Elbtunnel.Sensors;
 	using global::Elbtunnel.Vehicles;
 	using Infrastructure;
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
-	using SafetySharp.Runtime.Reflection;
 
 	public partial class Elbtunnel
 	{
-		private readonly EndControlOriginal _endControl;
-		private readonly HeightControl _heightControl;
-		private readonly Queue<Tuple<VisualizationVehicle, Canvas>> _highVehicles = new Queue<Tuple<VisualizationVehicle, Canvas>>();
 		private readonly Storyboard _lb1Storyboard;
 		private readonly Storyboard _lb2Storyboard;
-		private readonly MainControlOriginal _mainControl;
 		private readonly Storyboard _odfStoryboard;
 		private readonly Storyboard _odlStoryboard;
 		private readonly Storyboard _odrStoryboard;
-		private readonly Queue<Tuple<VisualizationVehicle, Canvas>> _overHighVehicles = new Queue<Tuple<VisualizationVehicle, Canvas>>();
-		private readonly PreControlOriginal _preControl;
-		private readonly RealTimeSimulator _simulator;
-		private readonly List<Tuple<VisualizationVehicle, Canvas>> _vehicles = new List<Tuple<VisualizationVehicle, Canvas>>();
+		private readonly List<Tuple<Vehicle, Canvas, bool>> _vehicles = new List<Tuple<Vehicle, Canvas, bool>>();
 		private Canvas _draggedVehicle;
 		private Point _position;
 
@@ -75,29 +66,10 @@ namespace Visualization
 				.Range(0, 9).Select(_ => new VisualizationVehicle(VehicleKind.Truck))
 				.Concat(Enumerable.Range(0, 9).Select(_ => new VisualizationVehicle(VehicleKind.OverheightTruck)))
 				.ToArray());
-			var model = Model.Create(specification);
-			foreach (var fault in model.GetFaults())
-				fault.OccurrenceKind = OccurrenceKind.Never;
 
-			_simulator = new RealTimeSimulator(model, 1000, specification.Collision);
-			_simulator.ModelStateChanged += (o, e) => UpdateModelState();
-			SimulationControls.SetSimulator(_simulator);
+			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
 			SimulationControls.Reset += (o, e) => OnModelStateReset();
-
-			// Extract the components
-			_heightControl = (HeightControl)_simulator.Model.RootComponents[0];
-			_preControl = (PreControlOriginal)_heightControl.PreControl;
-			_mainControl = (MainControlOriginal)_heightControl.MainControl;
-			_endControl = (EndControlOriginal)_heightControl.EndControl;
-
-			var vehicles = (VehicleCollection)_simulator.Model.RootComponents[1];
-			foreach (var vehicle in vehicles.Vehicles.Cast<VisualizationVehicle>())
-			{
-				if (vehicle.Kind == VehicleKind.Truck)
-					_highVehicles.Enqueue(Tuple.Create(vehicle, CreateVehicleUIElement(vehicle.Kind, _highVehicles.Count + 1)));
-				else
-					_overHighVehicles.Enqueue(Tuple.Create(vehicle, CreateVehicleUIElement(vehicle.Kind, _overHighVehicles.Count + 1)));
-			}
+			SimulationControls.SetSpecification(specification);
 
 			// Initialize the visualization state
 			OnModelStateReset();
@@ -111,86 +83,113 @@ namespace Visualization
 			AlertOdf.Opacity = 0;
 		}
 
+		private VehicleCollection Vehicles => (VehicleCollection)SimulationControls.Model.RootComponents[1];
+		private EndControlOriginal EndControl => (EndControlOriginal)HeightControl.EndControl;
+		private HeightControl HeightControl => (HeightControl)SimulationControls.Model.RootComponents[0];
+		private MainControlOriginal MainControl => (MainControlOriginal)HeightControl.MainControl;
+		private PreControlOriginal PreControl => (PreControlOriginal)HeightControl.PreControl;
+
 		private void OnModelStateReset()
 		{
-			_preControl.Detector.Misdetection.OccurrenceKind = MisdetectionLb1.IsChecked.ToOccurrenceKind();
-			_mainControl.PositionDetector.Misdetection.OccurrenceKind = MisdetectionLb2.IsChecked.ToOccurrenceKind();
-			_mainControl.LeftDetector.Misdetection.OccurrenceKind = MisdetectionOdl.IsChecked.ToOccurrenceKind();
-			_mainControl.RightDetector.Misdetection.OccurrenceKind = MisdetectionOdr.IsChecked.ToOccurrenceKind();
-			_endControl.Detector.Misdetection.OccurrenceKind = MisdetectionOdf.IsChecked.ToOccurrenceKind();
-
 			foreach (var vehicle in _vehicles)
-			{
-				if (vehicle.Item1.Kind == VehicleKind.Truck)
-					_highVehicles.Enqueue(vehicle);
-				else
-					_overHighVehicles.Enqueue(vehicle);
-
 				LayoutRoot.Children.Remove(vehicle.Item2);
-			}
+
+			foreach (var vehicle in _vehicles.Select(v => v.Item1).OfType<VisualizationVehicle>())
+				vehicle.NextSpeed = 0;
 
 			_vehicles.Clear();
+
+			var highCount = 0;
+			var overHighCount = 0;
+			foreach (var vehicle in Vehicles.Vehicles)
+			{
+				int count;
+				if (vehicle.Kind == VehicleKind.OverheightTruck)
+				{
+					++overHighCount;
+					count = overHighCount;
+				}
+				else
+				{
+					++highCount;
+					count = highCount;
+				}
+
+				var panel = CreateVehicleUIElement(vehicle.Kind, count);
+				var info = Tuple.Create(vehicle, panel, false);
+				_vehicles.Add(info);
+
+				LayoutRoot.Children.Add(panel);
+				UpdateVehicle(info);
+			}
+
+			PreControl.Detector.Misdetection.OccurrenceKind = MisdetectionLb1.IsChecked.ToOccurrenceKind();
+			MainControl.PositionDetector.Misdetection.OccurrenceKind = MisdetectionLb2.IsChecked.ToOccurrenceKind();
+			MainControl.LeftDetector.Misdetection.OccurrenceKind = MisdetectionOdl.IsChecked.ToOccurrenceKind();
+			MainControl.RightDetector.Misdetection.OccurrenceKind = MisdetectionOdr.IsChecked.ToOccurrenceKind();
+			EndControl.Detector.Misdetection.OccurrenceKind = MisdetectionOdf.IsChecked.ToOccurrenceKind();
+
 			Message.Text = String.Empty;
 			HazardIndicator.Visibility = Visibility.Collapsed;
 		}
 
 		private void UpdateModelState()
 		{
-			if (_preControl.Detector.IsVehicleDetected)
+			if (PreControl.Detector.IsVehicleDetected)
 				_lb1Storyboard.Begin();
 
-			if (_mainControl.PositionDetector.IsVehicleDetected)
+			if (MainControl.PositionDetector.IsVehicleDetected)
 				_lb2Storyboard.Begin();
 
-			if (_mainControl.LeftDetector.IsVehicleDetected)
+			if (MainControl.LeftDetector.IsVehicleDetected)
 				_odlStoryboard.Begin();
 
-			if (_mainControl.RightDetector.IsVehicleDetected)
+			if (MainControl.RightDetector.IsVehicleDetected)
 				_odrStoryboard.Begin();
 
-			if (_endControl.Detector.IsVehicleDetected)
+			if (EndControl.Detector.IsVehicleDetected)
 				_odfStoryboard.Begin();
 
-			MisdetectionLb1.IsChecked = _preControl.Detector.Misdetection.IsOccurring;
-			MisdetectionLb2.IsChecked = _mainControl.PositionDetector.Misdetection.IsOccurring;
-			MisdetectionOdl.IsChecked = _mainControl.LeftDetector.Misdetection.IsOccurring;
-			MisdetectionOdr.IsChecked = _mainControl.RightDetector.Misdetection.IsOccurring;
-			MisdetectionOdf.IsChecked = _endControl.Detector.Misdetection.IsOccurring;
+			MisdetectionLb1.IsChecked = PreControl.Detector.Misdetection.IsOccurring;
+			MisdetectionLb2.IsChecked = MainControl.PositionDetector.Misdetection.IsOccurring;
+			MisdetectionOdl.IsChecked = MainControl.LeftDetector.Misdetection.IsOccurring;
+			MisdetectionOdr.IsChecked = MainControl.RightDetector.Misdetection.IsOccurring;
+			MisdetectionOdf.IsChecked = EndControl.Detector.Misdetection.IsOccurring;
 
-			_preControl.Detector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
-			_mainControl.PositionDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
-			_mainControl.LeftDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
-			_mainControl.RightDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
-			_endControl.Detector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
+			PreControl.Detector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
+			MainControl.PositionDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
+			MainControl.LeftDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
+			MainControl.RightDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
+			EndControl.Detector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
 
-			SetFaultAdornment(FaultLb1, _preControl.Detector);
-			SetFaultAdornment(FaultLb2, _mainControl.PositionDetector);
-			SetFaultAdornment(FaultOdl, _mainControl.LeftDetector);
-			SetFaultAdornment(FaultOdr, _mainControl.RightDetector);
-			SetFaultAdornment(FaultOdf, _endControl.Detector);
+			SetFaultAdornment(FaultLb1, PreControl.Detector);
+			SetFaultAdornment(FaultLb2, MainControl.PositionDetector);
+			SetFaultAdornment(FaultOdl, MainControl.LeftDetector);
+			SetFaultAdornment(FaultOdr, MainControl.RightDetector);
+			SetFaultAdornment(FaultOdf, EndControl.Detector);
 
-			var isMainControlActive = _mainControl.Count > 0;
+			var isMainControlActive = MainControl.Count > 0;
 			MainControlNumOhvLabel.Visibility = isMainControlActive.ToVisibility();
 			MainControlNumOhv.Visibility = isMainControlActive.ToVisibility();
 			MainControlTimeLabel.Visibility = isMainControlActive.ToVisibility();
 			MainControlTime.Visibility = isMainControlActive.ToVisibility();
-			MainControlNumOhv.Text = _mainControl.Count.ToString();
-			MainControlTime.Text = _mainControl.Timer.RemainingTime.ToString();
+			MainControlNumOhv.Text = MainControl.Count.ToString();
+			MainControlTime.Text = MainControl.Timer.RemainingTime.ToString();
 
-			EndControlTimeLabel.Visibility = _endControl.IsActive.ToVisibility();
-			EndControlTime.Visibility = _endControl.IsActive.ToVisibility();
-			EndControlTime.Text = _endControl.Timer.RemainingTime.ToString();
+			EndControlTimeLabel.Visibility = EndControl.IsActive.ToVisibility();
+			EndControlTime.Visibility = EndControl.IsActive.ToVisibility();
+			EndControlTime.Text = EndControl.Timer.RemainingTime.ToString();
 
 			const double inactiveOpacity = 0.1;
 			Lb2.Opacity = isMainControlActive ? 1 : inactiveOpacity;
 			Odl.Opacity = isMainControlActive ? 1 : inactiveOpacity;
 			Odr.Opacity = isMainControlActive ? 1 : inactiveOpacity;
-			Odf.Opacity = _endControl.IsActive ? 1 : inactiveOpacity;
+			Odf.Opacity = EndControl.IsActive ? 1 : inactiveOpacity;
 
 			foreach (var vehicle in _vehicles)
 				UpdateVehicle(vehicle);
 
-			if (_heightControl.TrafficLights.IsRed)
+			if (HeightControl.TrafficLights.IsRed)
 			{
 				var falseAlarm = !_vehicles.Any(v => v.Item1.Lane == Lane.Left && v.Item1.Kind == VehicleKind.OverheightTruck);
 
@@ -198,7 +197,9 @@ namespace Visualization
 				HazardIndicator.Visibility = falseAlarm.ToVisibility();
 			}
 
-			if (_vehicles.Any(v => v.Item1.Lane == Lane.Left && v.Item1.Position >= Specification.TunnelPosition && v.Item1.Kind == VehicleKind.OverheightTruck))
+			if (
+				_vehicles.Any(
+					v => v.Item1.Lane == Lane.Left && v.Item1.Position >= Specification.TunnelPosition && v.Item1.Kind == VehicleKind.OverheightTruck))
 			{
 				HazardIndicator.Visibility = Visibility.Visible;
 				Message.Text = "Collision";
@@ -213,57 +214,57 @@ namespace Visualization
 
 		private void OnMisdetectionLb1(object sender, RoutedEventArgs e)
 		{
-			_preControl.Detector.Misdetection.ToggleOccurrence();
+			PreControl.Detector.Misdetection.ToggleOccurrence();
 		}
 
 		private void OnMisdetectionLb2(object sender, RoutedEventArgs e)
 		{
-			_mainControl.PositionDetector.Misdetection.ToggleOccurrence();
+			MainControl.PositionDetector.Misdetection.ToggleOccurrence();
 		}
 
 		private void OnMisdetectionOdl(object sender, RoutedEventArgs e)
 		{
-			_mainControl.LeftDetector.Misdetection.ToggleOccurrence();
+			MainControl.LeftDetector.Misdetection.ToggleOccurrence();
 		}
 
 		private void OnMisdetectionOdr(object sender, RoutedEventArgs e)
 		{
-			_mainControl.RightDetector.Misdetection.ToggleOccurrence();
+			MainControl.RightDetector.Misdetection.ToggleOccurrence();
 		}
 
 		private void OnMisdetectionOdf(object sender, RoutedEventArgs e)
 		{
-			_endControl.Detector.Misdetection.ToggleOccurrence();
+			EndControl.Detector.Misdetection.ToggleOccurrence();
 		}
 
 		private void OnFalseDetectionLb1(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				_preControl.Detector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
+				PreControl.Detector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
 		}
 
 		private void OnFalseDetectionLb2(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				_mainControl.PositionDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
+				MainControl.PositionDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
 		}
 
 		private void OnFalseDetectionOdl(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				_mainControl.LeftDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
+				MainControl.LeftDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
 		}
 
 		private void OnFalseDetectionOdr(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				_mainControl.RightDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
+				MainControl.RightDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
 		}
 
 		private void OnFalseDetectionOdf(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				_endControl.Detector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
+				EndControl.Detector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
 		}
 
 		private static void OnManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
@@ -276,55 +277,65 @@ namespace Visualization
 			e.Handled = true;
 		}
 
-		private static void HandleVehicleInput(double dx, double dy, VisualizationVehicle vehicle)
+		private static void HandleVehicleInput(double dx, double dy, Vehicle vehicle)
 		{
 			if (Math.Abs(dx) < 10 && Math.Abs(dy) < 10)
 				return;
 
+			var visualizationVehicle = (VisualizationVehicle)vehicle;
 			if (Math.Abs(dx) > Math.Abs(dy))
-				vehicle.NextSpeed += dx > 0 ? 1 : -1;
+				visualizationVehicle.NextSpeed += dx > 0 ? 1 : -1;
 			else
-				vehicle.NextLane = dy < 0 ? Lane.Left : Lane.Right;
+				visualizationVehicle.NextLane = dy < 0 ? Lane.Left : Lane.Right;
 		}
 
 		private void SpawnOhvLeft(object sender, RoutedEventArgs e)
 		{
-			Spawn(_overHighVehicles, Lane.Left);
+			Spawn(VehicleKind.OverheightTruck, Lane.Left);
 		}
 
 		private void SpawnHvLeft(object sender, RoutedEventArgs e)
 		{
-			Spawn(_highVehicles, Lane.Left);
+			Spawn(VehicleKind.Truck, Lane.Left);
 		}
 
 		private void SpawnOhvRight(object sender, RoutedEventArgs e)
 		{
-			Spawn(_overHighVehicles, Lane.Right);
+			Spawn(VehicleKind.OverheightTruck, Lane.Right);
 		}
 
 		private void SpawnHvRight(object sender, RoutedEventArgs e)
 		{
-			Spawn(_highVehicles, Lane.Right);
+			Spawn(VehicleKind.Truck, Lane.Right);
 		}
 
-		private void Spawn(Queue<Tuple<VisualizationVehicle, Canvas>> vehicles, Lane lane)
+		private void Spawn(VehicleKind kind, Lane lane)
 		{
-			if (vehicles.Count == 0 || _simulator.State == SimulationState.Stopped)
+			if (SimulationControls.State == SimulationState.Stopped)
 				return;
 
-			var vehicle = vehicles.Dequeue();
-			LayoutRoot.Children.Add(vehicle.Item2);
+			var vehicle = _vehicles.FirstOrDefault(v => v.Item1 is VisualizationVehicle && v.Item1.Kind == kind && !v.Item3);
 
-			vehicle.Item1.NextLane = lane;
-			vehicle.Item1.Update();
-			vehicle.Item1.NextSpeed = 1;
+			if (vehicle == null)
+				return;
 
-			_vehicles.Add(vehicle);
-			UpdateVehicle(vehicle);
+			var visualizationVehicle = (VisualizationVehicle)vehicle.Item1;
+			visualizationVehicle.NextLane = lane;
+			visualizationVehicle.Update();
+			visualizationVehicle.NextSpeed = 1;
+
+			_vehicles.Remove(vehicle);
+			_vehicles.Add(Tuple.Create(vehicle.Item1, vehicle.Item2, true));
 		}
 
-		private static void UpdateVehicle(Tuple<VisualizationVehicle, Canvas> vehicle)
+		private static void UpdateVehicle(Tuple<Vehicle, Canvas, bool> vehicle)
 		{
+			if (vehicle.Item1.Position == 0)
+			{
+				Canvas.SetLeft(vehicle.Item2, -100000);
+				return;
+			}
+
 			var leftLane = vehicle.Item1.Kind != VehicleKind.OverheightTruck ? 225 : 223;
 			var rightLane = vehicle.Item1.Kind != VehicleKind.OverheightTruck ? 304 : 302;
 

@@ -34,15 +34,9 @@ namespace Visualization
 
 	public partial class PressureTank
 	{
-		private readonly Controller _controller;
 		private readonly Storyboard _pressureLevelStoryboard;
-		private readonly Pump _pump;
 		private readonly Storyboard _pumpingStoryboard;
-		private readonly Sensor _sensor;
 		private readonly Storyboard _sensorAlertStoryboard;
-		private readonly RealTimeSimulator _simulator;
-		private readonly Tank _tank;
-		private readonly Timer _timer;
 		private readonly Storyboard _timerAlertStoryboard;
 
 		public PressureTank()
@@ -61,21 +55,9 @@ namespace Visualization
 			_sensorAlertStoryboard = (Storyboard)Resources["SensorEvent"];
 
 			// Initialize the simulation environment
-			var model = Model.Create(new Specification());
-			foreach (var fault in model.GetFaults())
-				fault.OccurrenceKind = OccurrenceKind.Never;
-
-			_simulator = new RealTimeSimulator(model, stepDelay: 1000);
-			_simulator.ModelStateChanged += (o, e) => UpdateModelState();
-			SimulationControls.SetSimulator(_simulator);
+			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
 			SimulationControls.Reset += (o, e) => OnModelStateReset();
-
-			// Extract the components
-			_tank = (Tank)_simulator.Model.RootComponents[0];
-			_controller = (Controller)_simulator.Model.RootComponents[1];
-			_pump = _controller.Pump;
-			_timer = _controller.Timer;
-			_sensor = _controller.Sensor;
+			SimulationControls.SetSpecification(new Specification());
 
 			// Initialize the visualization state
 			UpdateModelState();
@@ -85,84 +67,90 @@ namespace Visualization
 			SimulationControls.ChangeSpeed(8);
 		}
 
+		private Pump Pump => Controller.Pump;
+		private Sensor Sensor => Controller.Sensor;
+		private Timer Timer => Controller.Timer;
+		private Tank Tank => (Tank)SimulationControls.Model.RootComponents[0];
+		private Controller Controller => (Controller)SimulationControls.Model.RootComponents[1];
+
 		private void OnSuppressPumping(object sender, RoutedEventArgs e)
 		{
-			_pump.SuppressPumping.ToggleOccurrence();
+			Pump.SuppressPumping.ToggleOccurrence();
 		}
 
 		private void OnSuppressTimeout(object sender, RoutedEventArgs e)
 		{
-			_timer.SuppressTimeout.ToggleOccurrence();
+			Timer.SuppressTimeout.ToggleOccurrence();
 		}
 
 		private void OnSuppressFull(object sender, RoutedEventArgs e)
 		{
-			_sensor.SuppressIsFull.ToggleOccurrence();
+			Sensor.SuppressIsFull.ToggleOccurrence();
 		}
 
 		private void OnSuppressEmpty(object sender, RoutedEventArgs e)
 		{
-			_sensor.SuppressIsEmpty.ToggleOccurrence();
+			Sensor.SuppressIsEmpty.ToggleOccurrence();
 		}
 
 		private void OnModelStateReset()
 		{
-			_sensor.SuppressIsFull.OccurrenceKind = SuppressFull.IsChecked.ToOccurrenceKind();
-			_sensor.SuppressIsEmpty.OccurrenceKind = SuppressEmpty.IsChecked.ToOccurrenceKind();
-			_timer.SuppressTimeout.OccurrenceKind = SuppressTimeout.IsChecked.ToOccurrenceKind();
-			_pump.SuppressPumping.OccurrenceKind = SuppressPumping.IsChecked.ToOccurrenceKind();
+			Sensor.SuppressIsFull.OccurrenceKind = SuppressFull.IsChecked.ToOccurrenceKind();
+			Sensor.SuppressIsEmpty.OccurrenceKind = SuppressEmpty.IsChecked.ToOccurrenceKind();
+			Timer.SuppressTimeout.OccurrenceKind = SuppressTimeout.IsChecked.ToOccurrenceKind();
+			Pump.SuppressPumping.OccurrenceKind = SuppressPumping.IsChecked.ToOccurrenceKind();
 		}
 
 		private void UpdateModelState()
 		{
 			// Timer
-			CountDown.Text = _timer.RemainingTime.ToString();
-			CountDown.Visibility = _timer.IsActive.ToVisibility();
-			SuppressTimeout.IsChecked = _timer.SuppressTimeout.IsOccurring;
+			CountDown.Text = Timer.RemainingTime.ToString();
+			CountDown.Visibility = Timer.IsActive.ToVisibility();
+			SuppressTimeout.IsChecked = Timer.SuppressTimeout.IsOccurring;
 			TimerFailure.Visibility = SuppressTimeout.IsChecked.ToVisibility();
 
-			if (_timer.HasElapsed)
+			if (Timer.HasElapsed)
 				_timerAlertStoryboard.Begin();
 
 			// Tank
-			var pressureLevel = Math.Round(_tank.PressureLevel / (double)Specification.MaxPressure * 100);
+			var pressureLevel = Math.Round(Tank.PressureLevel / (double)Specification.MaxPressure * 100);
 			_pressureLevelStoryboard.Seek(TimeSpan.FromMilliseconds(10 * pressureLevel));
 			PressureLevel.Text = $"{pressureLevel}%";
-			PressureLevel.Visibility = (!_tank.IsRuptured).ToVisibility();
-			TankRupture.Visibility = _tank.IsRuptured.ToVisibility();
+			PressureLevel.Visibility = (!Tank.IsRuptured).ToVisibility();
+			TankRupture.Visibility = Tank.IsRuptured.ToVisibility();
 
 			// Sensor
-			SuppressFull.IsChecked = _sensor.SuppressIsFull.IsOccurring;
-			SuppressEmpty.IsChecked = _sensor.SuppressIsEmpty.IsOccurring;
+			SuppressFull.IsChecked = Sensor.SuppressIsFull.IsOccurring;
+			SuppressEmpty.IsChecked = Sensor.SuppressIsEmpty.IsOccurring;
 			SensorFailure.Visibility = (SuppressFull.IsChecked || SuppressEmpty.IsChecked).ToVisibility();
 
-			if ((_sensor.IsFull || _sensor.IsEmpty) && _simulator.State != SimulationState.Stopped)
+			if ((Sensor.IsFull || Sensor.IsEmpty) && SimulationControls.State != SimulationState.Stopped)
 				_sensorAlertStoryboard.Begin();
 
 			// Controller
-			switch (_controller.StateMachine.State)
+			switch (Controller.StateMachine.State)
 			{
-				case global::PressureTank.Controller.State.Inactive:
+				case Controller.State.Inactive:
 					ControllerScreen.Text = "Inactive";
 					break;
-				case global::PressureTank.Controller.State.Filling:
+				case Controller.State.Filling:
 					ControllerScreen.Text = "Filling";
 					break;
-				case global::PressureTank.Controller.State.StoppedBySensor:
+				case Controller.State.StoppedBySensor:
 					ControllerScreen.Text = "Stopped: Sensor";
 					break;
-				case global::PressureTank.Controller.State.StoppedByTimer:
+				case Controller.State.StoppedByTimer:
 					ControllerScreen.Text = "Stopped: Timer";
 					break;
 			}
 
 			// Pump
-			if (!_pump.IsEnabled || _simulator.State == SimulationState.Stopped)
+			if (!Pump.IsEnabled || SimulationControls.State == SimulationState.Stopped)
 				_pumpingStoryboard.Pause();
 			else
 				_pumpingStoryboard.Resume();
 
-			SuppressPumping.IsChecked = _pump.SuppressPumping.IsOccurring;
+			SuppressPumping.IsChecked = Pump.SuppressPumping.IsOccurring;
 			PumpFailure.Visibility = SuppressPumping.IsChecked.ToVisibility();
 		}
 	}

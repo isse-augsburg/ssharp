@@ -32,15 +32,40 @@ namespace SafetySharp.Runtime
 	public sealed class Simulator
 	{
 		/// <summary>
+		///   The counter example that is replayed by the simulator.
+		/// </summary>
+		private readonly CounterExample _counterExample;
+
+		/// <summary>
+		///   The current state number of the counter example.
+		/// </summary>
+		private int _stateNumber;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="model">The model that should be simulated.</param>
-		public Simulator(Model model)
+		/// <param name="formulas">The formulas that can be evaluated on the model.</param>
+		public Simulator(Model model, params Formula[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(formulas, nameof(formulas));
 
-			Model = model.ToRuntimeModel();
+			Model = model.ToRuntimeModel(formulas);
 			Model.Reset();
+		}
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="counterExample">The counter example that should be simulated.</param>
+		public Simulator(CounterExample counterExample)
+		{
+			Requires.NotNull(counterExample, nameof(counterExample));
+
+			Model = counterExample.Model;
+			_counterExample = counterExample;
+			_counterExample.DeserializeState(0);
 		}
 
 		/// <summary>
@@ -56,6 +81,31 @@ namespace SafetySharp.Runtime
 		{
 			for (var i = 0; i < timeSpan.TotalSeconds; ++i)
 				Model.ExecuteStep();
+		}
+
+		/// <summary>
+		///   Runs a step of the simulation.
+		/// </summary>
+		public void SimulateStep()
+		{
+			if (_counterExample == null)
+				Model.ExecuteStep();
+			else if (_stateNumber + 1 < _counterExample.StepCount)
+				_counterExample.DeserializeState(++_stateNumber);
+		}
+
+		/// <summary>
+		/// Resets the model to its initial state.
+		/// </summary>
+		public void Reset()
+		{
+			if (_counterExample == null)
+				Model.Reset();
+			else
+			{
+				_counterExample.DeserializeState(0);
+				_stateNumber = 0;
+			}
 		}
 	}
 }

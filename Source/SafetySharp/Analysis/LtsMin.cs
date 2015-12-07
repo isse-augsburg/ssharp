@@ -186,13 +186,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		private static CounterExample GetCounterExample(string modelFile, string counterExampleFile)
 		{
-			using (var stream = new FileStream(modelFile, FileMode.Open))
-			{
-				var model = RuntimeModelSerializer.Load(stream);
-				var counterExample = new CounterExample(model);
-				counterExample.LoadLtsMin(counterExampleFile);
-				return counterExample;
-			}
+			return CounterExample.LoadLtsMin(File.ReadAllBytes(modelFile), counterExampleFile);
 		}
 
 		/// <summary>

@@ -12,7 +12,7 @@
     <Grid>
         <TabControl>
             <TabItem Header="Elbtunnel">
-                <visualization:Elbtunnel />
+               <visualization:Elbtunnel />
             </TabItem>
             <TabItem Header="Funkfahrbetrieb">
                 <visualization:Funkfahrbetrieb />

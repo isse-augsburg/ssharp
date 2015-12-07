@@ -35,7 +35,7 @@ namespace Funkfahrbetrieb
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis(new LtsMin(), Model.Create(specification));
 
-			var result = analysis.ComputeMinimalCutSets(specification.PossibleCollision);
+			var result = analysis.ComputeMinimalCutSets(specification.PossibleCollision, "counter examples/ffb");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
 
 			Console.WriteLine("Faults: {0}", String.Join(", ", result.Faults.Select(fault => fault.Name)));

@@ -24,34 +24,66 @@ namespace Visualization.Infrastructure
 {
 	using System;
 	using System.Windows;
+	using Microsoft.Win32;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
+	using SafetySharp.Runtime.Reflection;
 
 	public partial class SimulationControls
 	{
-		private RealTimeSimulator _simulator;
+		private Formula[] _formulas;
+		private Model _model;
 		private double _speed;
-
 		public double MaxSpeed = 32;
 		public double MinSpeed = 0.25;
-
-		public event EventHandler Reset;
 
 		public SimulationControls()
 		{
 			InitializeComponent();
+
+			CloseCounterExampleButton.Visibility = Visibility.Collapsed;
 		}
 
-		public void SetSimulator(RealTimeSimulator simulator)
-		{
-			_simulator = simulator;
+		public RealTimeSimulator Simulator { get; private set; }
+		public RuntimeModel Model => Simulator.Model;
+		public SimulationState State => Simulator.State;
 
-			simulator.SimulationStateChanged += (o, e) => UpdateSimulationButtonVisibilities();
+		public int StepDelay { get; set; } = 1000;
+
+		public event EventHandler Reset;
+		public event EventHandler ModelStateChanged;
+
+		private void SetSimulator(Simulator simulator)
+		{
+			if (Simulator != null)
+				Simulator.ModelStateChanged -= OnModelStateChanged;
+
+			Simulator = new RealTimeSimulator(simulator, (int)Math.Round(1000 / _speed));
+			Simulator.ModelStateChanged += OnModelStateChanged;
+			Simulator.SimulationStateChanged += (o, e) => UpdateSimulationButtonVisibilities();
 			UpdateSimulationButtonVisibilities();
+		}
+
+		public void SetSpecification(object specification, params Formula[] formulas)
+		{
+			_formulas = formulas;
+			_model = SafetySharp.Analysis.Model.Create(specification);
+
+			foreach (var fault in _model.GetFaults())
+				fault.OccurrenceKind = OccurrenceKind.Never;
+
+			SetSimulator(new Simulator(_model, formulas));
+		}
+
+		private void OnModelStateChanged(object sender, EventArgs e)
+		{
+			ModelStateChanged?.Invoke(sender, e);
 		}
 
 		private void UpdateSimulationButtonVisibilities()
 		{
-			switch (_simulator.State)
+			switch (Simulator.State)
 			{
 				case SimulationState.Stopped:
 					StopButton.Visibility = Visibility.Collapsed;
@@ -76,27 +108,27 @@ namespace Visualization.Infrastructure
 
 		private void OnStop(object sender, RoutedEventArgs e)
 		{
-			if (_simulator.State == SimulationState.Stopped)
+			if (Simulator.State == SimulationState.Stopped)
 				return;
 
-			_simulator.Stop();
+			Simulator.Stop();
 			Reset?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void OnRun(object sender, RoutedEventArgs e)
 		{
-			_simulator.Run();
+			Simulator.Run();
 			Reset?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void OnPause(object sender, RoutedEventArgs e)
 		{
-			_simulator.Pause();
+			Simulator.Pause();
 		}
 
 		private void OnStep(object sender, RoutedEventArgs e)
 		{
-			_simulator.Step();
+			Simulator.Step();
 		}
 
 		private void OnIncreaseSpeed(object sender, RoutedEventArgs e)
@@ -115,11 +147,50 @@ namespace Visualization.Infrastructure
 
 			if (Math.Abs(speed - _speed) > 0.001)
 			{
-				_simulator.StepDelay = (int)Math.Round(1000 / speed);
+				Simulator.StepDelay = (int)Math.Round(1000 / speed);
 				_speed = speed;
 			}
 
 			SimulationSpeed.Text = $"Speed: {_speed}x";
+		}
+
+		private void OnCounterExample(object sender, RoutedEventArgs e)
+		{
+			var dialog = new OpenFileDialog
+			{
+				AddExtension = true,
+				CheckFileExists = true,
+				CheckPathExists = true,
+				DefaultExt = ".ltsmin",
+				Filter = $"S# Counter Examples (*{CounterExample.FileExtension})|*{CounterExample.FileExtension}",
+				Title = "Open S# Counter Example",
+				Multiselect = false
+			};
+
+			if (dialog.ShowDialog() != true)
+				return;
+
+			try
+			{
+				SetSimulator(new Simulator(CounterExample.Load(dialog.FileName)));
+				CloseCounterExampleButton.Visibility = Visibility.Visible;
+
+				ModelStateChanged?.Invoke(this, EventArgs.Empty);
+				Reset?.Invoke(this, EventArgs.Empty);
+			}
+			catch (InvalidOperationException ex)
+			{
+				MessageBox.Show(ex.Message, "Failed to Load Counter Example", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+		}
+
+		private void OnCounterExampleClosed(object sender, RoutedEventArgs e)
+		{
+			SetSimulator(new Simulator(_model, _formulas));
+			CloseCounterExampleButton.Visibility = Visibility.Hidden;
+
+			ModelStateChanged?.Invoke(this, EventArgs.Empty);
+			Reset?.Invoke(this, EventArgs.Empty);
 		}
 	}
 }

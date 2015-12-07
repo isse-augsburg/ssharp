@@ -36,7 +36,7 @@ namespace Elbtunnel
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis(new LtsMin(), Model.Create(specification));
 
-			var result = analysis.ComputeMinimalCutSets(specification.Collision);
+			var result = analysis.ComputeMinimalCutSets(specification.Collision, "counter examples/elbtunnel");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
 
 			Console.WriteLine("Faults: {0}", String.Join(", ", result.Faults.Select(fault => fault.Name)));

@@ -42,7 +42,7 @@
         <Viewbox>
             <Canvas Width="622.143" Height="316.534" HorizontalAlignment="Left" VerticalAlignment="Top">
                 <Rectangle Width="612.143" Height="2" Canvas.Top="151" Fill="White" Stroke="White"/>
-                <Canvas x:Name="Train" Canvas.Top="65" Width="70" Height="120">
+                <Canvas x:Name="TrainElement" Canvas.Top="65" Width="70" Height="120">
                     <TextBlock Canvas.Left="1" Canvas.Top="100">
                     <Run Text="Position:" />
                     </TextBlock>
@@ -63,7 +63,7 @@
                     </Canvas.ContextMenu>
                 </Canvas>
 
-                <Canvas x:Name="Barrier" Width="100" Height="182" Canvas.Left="320" Canvas.Top="41" Background="#01000000">
+                <Canvas x:Name="BarrierElement" Width="100" Height="182" Canvas.Left="320" Canvas.Top="41" Background="#01000000">
                     <Rectangle Width="100" Height="7" Fill="#FFFFB900" Canvas.Top="65">
                         <Rectangle.RenderTransform>
                             <RotateTransform x:Name="BarrierRotation" CenterX="100" CenterY="7" />

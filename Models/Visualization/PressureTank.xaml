@@ -76,7 +76,7 @@
             <Canvas Width="483.143" Height="316.534" HorizontalAlignment="Left" VerticalAlignment="Top">
                 <Rectangle x:Name="TankFill" Height="221.667" Canvas.Left="300" Canvas.Top="49" Width="171"
                        StrokeThickness="0" Fill="Black" />
-                <Rectangle x:Name="Tank" Height="306.534" Canvas.Left="300" Canvas.Top="10" Width="171" Fill="White" ToolTip="Pressure Tank">
+                <Rectangle Height="306.534" Canvas.Left="300" Canvas.Top="10" Width="171" Fill="White" ToolTip="Pressure Tank">
                     <Rectangle.OpacityMask>
                         <VisualBrush Visual="{DynamicResource appbar_database}" />
                     </Rectangle.OpacityMask>
@@ -87,13 +87,13 @@
                 <TextBlock x:Name="PressureLevel" Canvas.Left="352.253" TextWrapping="NoWrap" Width="70" TextAlignment="Center" Text="100%"
                        Canvas.Top="131.743" Foreground="Black" FontSize="24" FontWeight="Bold" />
 
-                <Rectangle x:Name="Controller" Height="134" Canvas.Top="49" Width="175" Fill="White" ToolTip="Controller">
+                <Rectangle Height="134" Canvas.Top="49" Width="175" Fill="White" ToolTip="Controller">
                     <Rectangle.OpacityMask>
                         <VisualBrush Visual="{DynamicResource appbar_tablet_windows}" />
                     </Rectangle.OpacityMask>
                 </Rectangle>
 
-                <Rectangle x:Name="Timer" Height="64" Canvas.Left="40" Canvas.Top="226" Width="64" Fill="White"
+                <Rectangle Height="64" Canvas.Left="40" Canvas.Top="226" Width="64" Fill="White"
                        ToolTip="Timer">
                     <Rectangle.OpacityMask>
                         <VisualBrush Visual="{DynamicResource appbar_timer}" />
@@ -115,7 +115,7 @@
                 <TextBlock x:Name="CountDown" Canvas.Left="93.253" TextWrapping="NoWrap" Text="45" Canvas.Top="269.983" Foreground="White"
                        FontSize="24" FontWeight="Bold" />
 
-                <Rectangle x:Name="Sensor" Height="48.667" Canvas.Left="232" Canvas.Top="102" Width="58"
+                <Rectangle Height="48.667" Canvas.Left="232" Canvas.Top="102" Width="58"
                        Fill="White" ToolTip="Pressure Sensor">
                     <Rectangle.OpacityMask>
                         <VisualBrush Visual="{DynamicResource appbar_camera}" />
@@ -137,7 +137,7 @@
                 <Rectangle x:Name="SensorFailure" Height="31.33" Canvas.Left="276.984" Canvas.Top="96.619" Width="17.169"
                        Style="{StaticResource FailureIndicator}" />
 
-                <Canvas x:Name="Pump" Width="64" Height="64" Canvas.Left="239.335" Canvas.Top="226.667" ToolTip="Pump">
+                <Canvas Width="64" Height="64" Canvas.Left="239.335" Canvas.Top="226.667" ToolTip="Pump">
                     <Rectangle x:Name="Fan" Height="50" Width="50" RenderTransformOrigin="0.5,0.5" Fill="White">
                         <Rectangle.RenderTransform>
                             <TransformGroup>

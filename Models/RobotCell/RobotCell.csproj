@@ -70,19 +70,15 @@
     <Compile Include="WorkpieceSensor.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Modeling\Modeling.csproj">
+    <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">
       <Project>{9b6c1fb4-3f1b-43ac-a0e0-eaed4088bf37}</Project>
       <Name>Modeling</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\..\Binaries\Debug\CommandLine.dll" />
-	<Analyzer Include="..\..\Binaries\Debug\SafetySharp.Modeling.dll" />
-	<Analyzer Include="..\..\Binaries\Debug\SafetySharp.Analysis.dll" />
-	<Analyzer Include="..\..\Binaries\Debug\QuickGraph.dll" />
-	<Analyzer Include="..\..\Binaries\Debug\FParsec.dll" />
-	<Analyzer Include="..\..\Binaries\Debug\FParsecCS.dll" />
-    <Analyzer Include="..\..\Binaries\Debug\SafetySharp.Compiler.exe" />
+    <Analyzer Include="$(OutDir)\CommandLine.dll" />
+    <Analyzer Include="$(OutDir)\SafetySharp.Modeling.dll" />
+    <Analyzer Include="$(OutDir)\SafetySharp.Compiler.exe" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">

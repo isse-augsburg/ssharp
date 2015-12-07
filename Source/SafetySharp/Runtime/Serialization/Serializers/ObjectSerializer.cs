@@ -130,10 +130,10 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		///   <c>null</c>, <see cref="object" /> is the inheritance root.
 		/// </param>
 		/// <param name="discoveringObjects">Indicates whether objects are being discovered.</param>
-		protected static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode,
-														  Type startType = null,
-														  Type inheritanceRoot = null,
-														  bool discoveringObjects = false)
+		protected virtual IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode,
+														   Type startType = null,
+														   Type inheritanceRoot = null,
+														   bool discoveringObjects = false)
 		{
 			var type = startType ?? obj.GetType();
 			if (type.IsHidden(mode, discoveringObjects))

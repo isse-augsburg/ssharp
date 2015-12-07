@@ -22,12 +22,17 @@
 
 namespace Elbtunnel.Vehicles
 {
+	using SafetySharp.Modeling;
+
 	/// <summary>
 	///   Represents a vehicle that is used by visualizations.
 	/// </summary>
 	public class VisualizationVehicle : Vehicle
 	{
+		[Hidden]
 		public Lane NextLane;
+
+		[Hidden]
 		public int NextSpeed;
 
 		public VisualizationVehicle(VehicleKind kind)

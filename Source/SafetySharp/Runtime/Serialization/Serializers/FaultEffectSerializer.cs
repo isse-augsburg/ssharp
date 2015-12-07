@@ -25,7 +25,6 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
-	using System.Linq;
 	using System.Reflection;
 	using Modeling;
 	using Reflection;
@@ -43,42 +42,6 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		{
 			var component = obj as Component;
 			return component != null && component.IsFaultEffect();
-		}
-
-		/// <summary>
-		///   Generates the code to deserialize the <paramref name="obj" />.
-		/// </summary>
-		/// <param name="generator">The  generator that should be used to generate the code.</param>
-		/// <param name="obj">The object that should be deserialized.</param>
-		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
-		/// <param name="mode">The serialization mode that should be used to deserialize the object.</param>
-		protected internal override void Deserialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
-		{
-			foreach (var field in GetFields(obj, mode))
-				generator.DeserializeField(objectIdentifier, field);
-		}
-
-		/// <summary>
-		///   Generates the code to serialize the <paramref name="obj" />.
-		/// </summary>
-		/// <param name="generator">The  generator that should be used to generate the code.</param>
-		/// <param name="obj">The object that should be serialized.</param>
-		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
-		/// <param name="mode">The serialization mode that should be used to serialize the object.</param>
-		protected internal override void Serialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
-		{
-			foreach (var field in GetFields(obj, mode))
-				generator.SerializeField(objectIdentifier, field);
-		}
-
-		/// <summary>
-		///   Gets the number of state slots required by the serialized data of <paramref name="obj" />.
-		/// </summary>
-		/// <param name="obj">The object consisting of state values that should be serialized.</param>
-		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		protected internal override int GetStateSlotCount(object obj, SerializationMode mode)
-		{
-			return GetFields(obj, mode).Sum(field => SerializationGenerator.GetStateSlotCount(field.FieldType));
 		}
 
 		/// <summary>
@@ -108,19 +71,33 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		}
 
 		/// <summary>
-		///   Gets the fields declared by the <paramref name="obj" /> that should be serialized. In full serialization mode, this only
-		///   includes the fields declared by <paramref name="obj" /> itself, not any of the fields declared by its base types. In
-		///   optimized mode, this includes all fields. The reason is that in optimized mode, fault effects are actually treated as
-		///   components, whereas in full mode, they only serve to serialize the delta to their base class.
+		///   Gets the fields declared by the <paramref name="obj" /> that should be serialized.
 		/// </summary>
 		/// <param name="obj">The object that should be serialized.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		private static IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode)
+		/// <param name="startType">
+		///   The first type in <paramref name="obj" />'s inheritance hierarchy whose fields should be returned.
+		///   If <c>null</c>, corresponds to <paramref name="obj" />'s actual type.
+		/// </param>
+		/// <param name="inheritanceRoot">
+		///   The first base type of the <paramref name="obj" /> whose fields should be ignored. If
+		///   <c>null</c>, <see cref="object" /> is the inheritance root.
+		/// </param>
+		/// <param name="discoveringObjects">Indicates whether objects are being discovered.</param>
+		protected override IEnumerable<FieldInfo> GetFields(object obj, SerializationMode mode,
+															Type startType = null,
+															Type inheritanceRoot = null,
+															bool discoveringObjects = false)
 		{
+			// Gets the fields declared by the obj that should be serialized. In full serialization mode, this only
+			// includes the fields declared by <paramref name="obj" /> itself, not any of the fields declared by its base types. In
+			// optimized mode, this includes all fields. The reason is that in optimized mode, fault effects are actually treated as
+			// components, whereas in full mode, they only serve to serialize the delta to their base class.
+
 			var type = ((Component)obj).FaultEffectType;
 			return mode == SerializationMode.Optimized
-				? GetFields(obj, mode, null)
-				: GetFields(obj, mode, type, type.BaseType);
+				? base.GetFields(obj, mode, null, null, false)
+				: base.GetFields(obj, mode, type, type.BaseType, false);
 		}
 	}
 }
