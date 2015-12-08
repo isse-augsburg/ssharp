@@ -1,35 +1,57 @@
 ﻿<UserControl x:Class="Visualization.Infrastructure.SimulationControls"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Visualization.Infrastructure"
              Unloaded="OnStop"
+             FontSize="15"
+             Foreground="White"
              d:DesignWidth="600"
              mc:Ignorable="d">
+    <UserControl.Resources>
+        <Storyboard x:Key="CounterExampleEnd" AutoReverse="True" RepeatBehavior="Forever">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="EndOfCounterExample">
+                <EasingDoubleKeyFrame KeyTime="0" Value="0" />
+                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1" />
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+    </UserControl.Resources>
     <DockPanel>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Top">
             <local:IconButton x:Name="StopButton" Icon="{DynamicResource appbar_debug_stop}"
-                                          ToolTip="Stops the simulation." Clicked="OnStop" />
+                              ToolTip="Stops the simulation." Clicked="OnStop" />
             <local:IconButton x:Name="StartButton" Icon="{DynamicResource appbar_control_play}"
-                                          ToolTip="Starts or continues the simulation." Clicked="OnRun" />
+                              ToolTip="Starts or continues the simulation." Clicked="OnRun" />
             <local:IconButton x:Name="PauseButton" Icon="{DynamicResource appbar_control_pause}"
-                                          ToolTip="Pauses the simulation." Clicked="OnPause" />
+                              ToolTip="Pauses the simulation." Clicked="OnPause" />
             <local:IconButton x:Name="StepButton" Icon="{DynamicResource appbar_control_resume}"
-                                          ToolTip="Executes one step of the simulation." Clicked="OnStep" />
+                              ToolTip="Executes one step of the simulation." Clicked="OnStep" />
         </StackPanel>
-        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Right">
-            <StackPanel Orientation="Horizontal" >
-                <local:IconButton x:Name="CounterExampleButton" Icon="{DynamicResource appbar_paper}"
-                                          ToolTip="Executes a counter example found by a model checker." Clicked="OnCounterExample"/>
-                <local:IconButton x:Name="CloseCounterExampleButton" Icon="{DynamicResource appbar_page_delete}"
-                                          ToolTip="Closes the counter example." Clicked="OnCounterExampleClosed"/>
-                <local:IconButton x:Name="IncreaseSpeedButton" Icon="{DynamicResource appbar_arrow_up}" Margin="50,0,0,0"
-                                              ToolTip="Doubles the speed of the simulation." Clicked="OnIncreaseSpeed" />
-                <local:IconButton x:Name="DecreaseSpeedButton" Icon="{DynamicResource appbar_arrow_down}"
-                                              ToolTip="Halves the speed of the simulation." Clicked="OnDecreaseSpeed" />
-            </StackPanel>
-            <TextBlock HorizontalAlignment="Right" Margin="0,0,15,0" Text="Speed: 1x" x:Name="SimulationSpeed" FontSize="14.667" Foreground="White" />
-        </StackPanel>
+        <Grid HorizontalAlignment="Right" DockPanel.Dock="Right">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <local:IconButton HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" x:Name="CounterExampleButton"
+                              Icon="{DynamicResource appbar_paper}"
+                              ToolTip="Executes a counter example found by a model checker." Clicked="OnCounterExample" />
+            <local:IconButton HorizontalAlignment="Left" Grid.Row="0" Grid.Column="1" x:Name="CloseCounterExampleButton"
+                              Icon="{DynamicResource appbar_page_delete}"
+                              ToolTip="Closes the counter example." Clicked="OnCounterExampleClosed" />
+            <local:IconButton Grid.Row="0" Grid.Column="2" x:Name="IncreaseSpeedButton" Icon="{DynamicResource appbar_arrow_up}"
+                              ToolTip="Doubles the speed of the simulation." Clicked="OnIncreaseSpeed" />
+            <local:IconButton Grid.Row="0" Grid.Column="3" x:Name="DecreaseSpeedButton" Icon="{DynamicResource appbar_arrow_down}"
+                              ToolTip="Halves the speed of the simulation." Clicked="OnDecreaseSpeed" />
+            <TextBlock x:Name="EndOfCounterExample" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" Grid.ColumnSpan="2" Foreground="Red">End of Counter Example</TextBlock>
+            <TextBlock Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" Grid.ColumnSpan="2" Text="Speed: 1x"
+                       x:Name="SimulationSpeed" />
+        </Grid>
     </DockPanel>
 </UserControl>

@@ -74,6 +74,11 @@ namespace SafetySharp.Runtime
 		public RuntimeModel Model { get; }
 
 		/// <summary>
+		///   Raised when the simulator has completed the simulation.
+		/// </summary>
+		public event EventHandler Completed;
+
+		/// <summary>
 		///   Runs the simulation for the <paramref name="timeSpan" />.
 		/// </summary>
 		/// <param name="timeSpan">The time span that should be simulated.</param>
@@ -81,6 +86,8 @@ namespace SafetySharp.Runtime
 		{
 			for (var i = 0; i < timeSpan.TotalSeconds; ++i)
 				Model.ExecuteStep();
+
+			Completed?.Invoke(this, EventArgs.Empty);
 		}
 
 		/// <summary>
@@ -91,11 +98,15 @@ namespace SafetySharp.Runtime
 			if (_counterExample == null)
 				Model.ExecuteStep();
 			else if (_stateNumber + 1 < _counterExample.StepCount)
+			{
 				_counterExample.DeserializeState(++_stateNumber);
+				if (_stateNumber + 1 == _counterExample.StepCount)
+					Completed?.Invoke(this, EventArgs.Empty);
+			}
 		}
 
 		/// <summary>
-		/// Resets the model to its initial state.
+		///   Resets the model to its initial state.
 		/// </summary>
 		public void Reset()
 		{

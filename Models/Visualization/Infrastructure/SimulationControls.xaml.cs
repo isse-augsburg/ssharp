@@ -24,6 +24,7 @@ namespace Visualization.Infrastructure
 {
 	using System;
 	using System.Windows;
+	using System.Windows.Media.Animation;
 	using Microsoft.Win32;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
@@ -32,6 +33,7 @@ namespace Visualization.Infrastructure
 
 	public partial class SimulationControls
 	{
+		private readonly Storyboard _counterExampleEndStoryboard;
 		private Formula[] _formulas;
 		private Model _model;
 		private double _speed;
@@ -43,6 +45,8 @@ namespace Visualization.Infrastructure
 			InitializeComponent();
 
 			CloseCounterExampleButton.Visibility = Visibility.Collapsed;
+			EndOfCounterExample.Opacity = 0;
+			_counterExampleEndStoryboard = (Storyboard)Resources["CounterExampleEnd"];
 		}
 
 		public RealTimeSimulator Simulator { get; private set; }
@@ -57,7 +61,10 @@ namespace Visualization.Infrastructure
 		private void SetSimulator(Simulator simulator)
 		{
 			if (Simulator != null)
+			{
 				Simulator.ModelStateChanged -= OnModelStateChanged;
+				Simulator.Completed -= OnSimulationCompleted;
+			}
 
 			Simulator = new RealTimeSimulator(simulator, (int)Math.Round(1000 / _speed));
 			Simulator.ModelStateChanged += OnModelStateChanged;
@@ -79,6 +86,11 @@ namespace Visualization.Infrastructure
 		private void OnModelStateChanged(object sender, EventArgs e)
 		{
 			ModelStateChanged?.Invoke(sender, e);
+		}
+
+		private void OnSimulationCompleted(object sender, EventArgs e)
+		{
+			_counterExampleEndStoryboard.Begin();
 		}
 
 		private void UpdateSimulationButtonVisibilities()
@@ -113,6 +125,7 @@ namespace Visualization.Infrastructure
 
 			Simulator.Stop();
 			Reset?.Invoke(this, EventArgs.Empty);
+			_counterExampleEndStoryboard.Stop();
 		}
 
 		private void OnRun(object sender, RoutedEventArgs e)
@@ -172,11 +185,15 @@ namespace Visualization.Infrastructure
 
 			try
 			{
-				SetSimulator(new Simulator(CounterExample.Load(dialog.FileName)));
+				var simulator = new Simulator(CounterExample.Load(dialog.FileName));
+				simulator.Completed += OnSimulationCompleted;
+
+				SetSimulator(simulator);
 				CloseCounterExampleButton.Visibility = Visibility.Visible;
 
 				ModelStateChanged?.Invoke(this, EventArgs.Empty);
 				Reset?.Invoke(this, EventArgs.Empty);
+				_counterExampleEndStoryboard.Stop();
 			}
 			catch (Exception ex)
 			{
@@ -192,6 +209,7 @@ namespace Visualization.Infrastructure
 
 			ModelStateChanged?.Invoke(this, EventArgs.Empty);
 			Reset?.Invoke(this, EventArgs.Empty);
+			_counterExampleEndStoryboard.Stop();
 		}
 	}
 }

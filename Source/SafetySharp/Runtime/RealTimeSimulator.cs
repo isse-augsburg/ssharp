@@ -118,6 +118,15 @@ namespace SafetySharp.Runtime
 		public RuntimeModel Model => _simulator.Model;
 
 		/// <summary>
+		///   Raised when the simulator has completed the simulation.
+		/// </summary>
+		public event EventHandler Completed
+		{
+			add { _simulator.Completed += value; }
+			remove { _simulator.Completed -= value; }
+		}
+
+		/// <summary>
 		///   Raised when the simulator's simulation state has been changed.
 		/// </summary>
 		public event EventHandler SimulationStateChanged;
