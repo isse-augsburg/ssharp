@@ -71,6 +71,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			// Store the state vector in a local variable
 			_il.DeclareLocal(typeof(int*));
+			_il.DeclareLocal(typeof(object));
 			_il.Emit(OpCodes.Ldarg_1);
 			_il.Emit(OpCodes.Stloc_0);
 		}
@@ -106,53 +107,71 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Generates the code to deserialize the <paramref name="field" /> of the object identified by
+		///   Generates the code to deserialize the <paramref name="fields" /> of the object identified by
 		///   <paramref name="objectIdentifier" />.
 		/// </summary>
-		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="field" />.</param>
-		/// <param name="field">The field that should be deserialized.</param>
-		public void DeserializeField(int objectIdentifier, FieldInfo field)
+		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="fields" />.</param>
+		/// <param name="fields">The fields that should be deserialized.</param>
+		public void DeserializeFields(int objectIdentifier, FieldInfo[] fields)
 		{
-			if (IsPrimitiveTypeWithAtMostFourBytes(field.FieldType))
+			Requires.NotNull(fields, nameof(fields));
+
+			if (fields.Length == 0)
+				return;
+
+			LoadObject(objectIdentifier);
+			foreach (var field in fields)
 			{
-				DeserializePrimitiveTypeField(objectIdentifier, field, OpCodes.Ldind_I4);
-				AdvanceToNextSlot();
+				if (IsPrimitiveTypeWithAtMostFourBytes(field.FieldType))
+				{
+					DeserializePrimitiveTypeField(field, OpCodes.Ldind_I4);
+					AdvanceToNextSlot();
+				}
+				else if (IsPrimitiveTypeWithAtMostEightBytes(field.FieldType))
+				{
+					DeserializePrimitiveTypeField(field, OpCodes.Ldind_I8);
+					AdvanceToNextSlot();
+					AdvanceToNextSlot();
+				}
+				else if (IsReferenceType(field.FieldType))
+					DeserializeReferenceField(field);
+				else
+					throw new NotSupportedException($"Field type '{field.FieldType.FullName}' is unsupported.");
 			}
-			else if (IsPrimitiveTypeWithAtMostEightBytes(field.FieldType))
-			{
-				DeserializePrimitiveTypeField(objectIdentifier, field, OpCodes.Ldind_I8);
-				AdvanceToNextSlot();
-				AdvanceToNextSlot();
-			}
-			else if (IsReferenceType(field.FieldType))
-				DeserializeReferenceField(objectIdentifier, field);
-			else
-				throw new NotSupportedException($"Field type '{field.FieldType.FullName}' is unsupported.");
 		}
 
 		/// <summary>
-		///   Generates the code to serialize the <paramref name="field" /> of the object identified by
+		///   Generates the code to serialize the <paramref name="fields" /> of the object identified by
 		///   <paramref name="objectIdentifier" />.
 		/// </summary>
-		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="field" />.</param>
-		/// <param name="field">The field that should be serialized.</param>
-		public void SerializeField(int objectIdentifier, FieldInfo field)
+		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="fields" />.</param>
+		/// <param name="fields">The fields that should be serialized.</param>
+		public void SerializeFields(int objectIdentifier, FieldInfo[] fields)
 		{
-			if (IsPrimitiveTypeWithAtMostFourBytes(field.FieldType))
+			Requires.NotNull(fields, nameof(fields));
+
+			if (fields.Length == 0)
+				return;
+
+			LoadObject(objectIdentifier);
+			foreach (var field in fields)
 			{
-				SerializePrimitiveTypeField(objectIdentifier, field, OpCodes.Stind_I4);
-				AdvanceToNextSlot();
+				if (IsPrimitiveTypeWithAtMostFourBytes(field.FieldType))
+				{
+					SerializePrimitiveTypeField(field, OpCodes.Stind_I4);
+					AdvanceToNextSlot();
+				}
+				else if (IsPrimitiveTypeWithAtMostEightBytes(field.FieldType))
+				{
+					SerializePrimitiveTypeField(field, OpCodes.Stind_I8);
+					AdvanceToNextSlot();
+					AdvanceToNextSlot();
+				}
+				else if (IsReferenceType(field.FieldType))
+					SerializeReferenceField(field);
+				else
+					throw new NotSupportedException($"Field type '{field.FieldType.FullName}' is unsupported.");
 			}
-			else if (IsPrimitiveTypeWithAtMostEightBytes(field.FieldType))
-			{
-				SerializePrimitiveTypeField(objectIdentifier, field, OpCodes.Stind_I8);
-				AdvanceToNextSlot();
-				AdvanceToNextSlot();
-			}
-			else if (IsReferenceType(field.FieldType))
-				SerializeReferenceField(objectIdentifier, field);
-			else
-				throw new NotSupportedException($"Field type '{field.FieldType.FullName}' is unsupported.");
 		}
 
 		/// <summary>
@@ -293,18 +312,14 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Generates the code to deserialize the <paramref name="field" /> of the object identified by
-		///   <paramref name="objectIdentifier" />.
+		///   Generates the code to deserialize the <paramref name="field" /> of the object stored in the local variable.
 		/// </summary>
-		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="field" />.</param>
 		/// <param name="field">The field that should be deserialized.</param>
 		/// <param name="loadCode">The IL instruction that should be used to load the value from the state.</param>
-		private void DeserializePrimitiveTypeField(int objectIdentifier, FieldInfo field, OpCode loadCode)
+		private void DeserializePrimitiveTypeField(FieldInfo field, OpCode loadCode)
 		{
 			// o = objs.GetObject(identifier)
-			_il.Emit(OpCodes.Ldarg_0);
-			_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
-			_il.Emit(OpCodes.Call, _getObjectMethod);
+			_il.Emit(OpCodes.Ldloc_1);
 
 			// v = *state
 			_il.Emit(OpCodes.Ldloc_0);
@@ -315,21 +330,17 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Generates the code to serialize the <paramref name="field" /> of the object identified by
-		///   <paramref name="objectIdentifier" />.
+		///   Generates the code to serialize the <paramref name="field" /> of the object stored in the local variable.
 		/// </summary>
-		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="field" />.</param>
 		/// <param name="field">The field that should be serialized.</param>
 		/// <param name="storeCode">The IL instruction that should be used to write the value into the state.</param>
-		private void SerializePrimitiveTypeField(int objectIdentifier, FieldInfo field, OpCode storeCode)
+		private void SerializePrimitiveTypeField(FieldInfo field, OpCode storeCode)
 		{
 			// s = state
 			_il.Emit(OpCodes.Ldloc_0);
 
 			// o = objs.GetObject(identifier)
-			_il.Emit(OpCodes.Ldarg_0);
-			_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
-			_il.Emit(OpCodes.Call, _getObjectMethod);
+			_il.Emit(OpCodes.Ldloc_1);
 
 			// *s = o.field
 			_il.Emit(OpCodes.Ldfld, field);
@@ -337,17 +348,13 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Generates the code to deserialize the <paramref name="field" /> of the object identified by
-		///   <paramref name="objectIdentifier" />.
+		///   Generates the code to deserialize the <paramref name="field" /> of the object stored in the local variable.
 		/// </summary>
-		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="field" />.</param>
 		/// <param name="field">The field that should be deserialized.</param>
-		private void DeserializeReferenceField(int objectIdentifier, FieldInfo field)
+		private void DeserializeReferenceField(FieldInfo field)
 		{
 			// o = objs.GetObject(identifier)
-			_il.Emit(OpCodes.Ldarg_0);
-			_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
-			_il.Emit(OpCodes.Call, _getObjectMethod);
+			_il.Emit(OpCodes.Ldloc_1);
 
 			// v = objs.GetObject(*state)
 			_il.Emit(OpCodes.Ldarg_0);
@@ -362,23 +369,17 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Generates the code to serialize the <paramref name="field" /> of the object identified by
-		///   <paramref name="objectIdentifier" />.
+		///   Generates the code to serialize the <paramref name="field" /> of the object stored in the local variable.
 		/// </summary>
-		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="field" />.</param>
 		/// <param name="field">The field that should be serialized.</param>
-		private void SerializeReferenceField(int objectIdentifier, FieldInfo field)
+		private void SerializeReferenceField(FieldInfo field)
 		{
 			// s = state
 			_il.Emit(OpCodes.Ldloc_0);
 
-			// o = objs.GetObject(identifier)
-			_il.Emit(OpCodes.Ldarg_0);
-			_il.Emit(OpCodes.Dup);
-			_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
-			_il.Emit(OpCodes.Call, _getObjectMethod);
-
 			// *s = objs.GetObjectIdentifier(o.field)
+			_il.Emit(OpCodes.Ldarg_0);
+			_il.Emit(OpCodes.Ldloc_1);
 			_il.Emit(OpCodes.Ldfld, field);
 			_il.Emit(OpCodes.Call, _getObjectIdentifierMethod);
 			_il.Emit(OpCodes.Stind_I4);
@@ -396,6 +397,18 @@ namespace SafetySharp.Runtime.Serialization
 			_il.Emit(OpCodes.Ldc_I4, 4);
 			_il.Emit(OpCodes.Add);
 			_il.Emit(OpCodes.Stloc_0);
+		}
+
+		/// <summary>
+		/// Loads the object with the <paramref name="objectIdentifier"/> into the local variable.
+		/// </summary>
+		private void LoadObject(int objectIdentifier)
+		{
+			// o = objs.GetObject(objectIdentifier)
+			_il.Emit(OpCodes.Ldarg_0);
+			_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
+			_il.Emit(OpCodes.Call, _getObjectMethod);
+			_il.Emit(OpCodes.Stloc_1);
 		}
 
 		/// <summary>

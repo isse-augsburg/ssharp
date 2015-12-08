@@ -70,8 +70,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="mode">The serialization mode that should be used to deserialize the object.</param>
 		protected internal override void Deserialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
 		{
-			foreach (var field in GetFields(obj, mode))
-				generator.DeserializeField(objectIdentifier, field);
+			generator.DeserializeFields(objectIdentifier, GetFields(obj, mode).ToArray());
 		}
 
 		/// <summary>
@@ -83,8 +82,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="mode">The serialization mode that should be used to serialize the object.</param>
 		protected internal override void Serialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
 		{
-			foreach (var field in GetFields(obj, mode))
-				generator.SerializeField(objectIdentifier, field);
+			generator.SerializeFields(objectIdentifier, GetFields(obj, mode).ToArray());
 		}
 
 		/// <summary>
