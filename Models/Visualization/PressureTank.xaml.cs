@@ -27,10 +27,7 @@ namespace Visualization
 	using System.Windows.Media.Animation;
 	using global::PressureTank;
 	using Infrastructure;
-	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
-	using SafetySharp.Runtime.Reflection;
 
 	public partial class PressureTank
 	{
@@ -64,6 +61,7 @@ namespace Visualization
 
 			TimerAlert.Opacity = 0;
 			SensorAlert.Opacity = 0;
+			SimulationControls.MaxSpeed = 64;
 			SimulationControls.ChangeSpeed(8);
 		}
 

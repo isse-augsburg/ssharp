@@ -143,6 +143,16 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
+		///   Generates the state slot metadata for the <paramref name="objects" />.
+		/// </summary>
+		/// <param name="objects">The objects consisting of state values that should be deserialized.</param>
+		internal IEnumerable<StateSlotMetadata> GetStateSlotMetadata(ObjectTable objects)
+		{
+			Requires.NotNull(objects, nameof(objects));
+			return objects.SelectMany(obj => GetSerializer(obj).GetStateSlotMetadata(obj, objects.GetObjectIdentifier(obj)));
+		}
+
+		/// <summary>
 		///   Gets all objects referenced by <paramref name="obj" />, including <paramref name="obj" /> itself.
 		/// </summary>
 		/// <param name="obj">The object the referenced objects should be returned for.</param>

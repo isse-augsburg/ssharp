@@ -32,8 +32,6 @@ namespace Elbtunnel.Vehicles
 		[Hidden]
 		private VehicleKind _kind;
 
-		public Fault DriveLeft = new TransientFault();
-
 		/// <summary>
 		///   Gets the current lane of the vehicle.
 		/// </summary>
@@ -90,23 +88,7 @@ namespace Elbtunnel.Vehicles
 
 			// The road layout makes lane changes impossible after position 14
 			if (Position < 14)
-				Lane = Lane.Right;
-		}
-
-		[FaultEffect(Fault = nameof(DriveLeft))]
-		public class DriveLeftEffect : Vehicle
-		{
-			/// <summary>
-			///   Moves the vehicle.
-			/// </summary>
-			public override void Update()
-			{
-				base.Update();
-
-				// The road layout makes lane changes impossible after position 14
-				if (Position < 14)
-					Lane = Lane.Left;
-			}
+				Lane = Choose(Lane.Left, Lane.Right);
 		}
 	}
 }

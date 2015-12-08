@@ -45,6 +45,23 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		}
 
 		/// <summary>
+		///   Generates the state slot metadata for the <paramref name="obj" />.
+		/// </summary>
+		/// <param name="obj">The object the state slot metadata should be generated for.</param>
+		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
+		protected internal override IEnumerable<StateSlotMetadata> GetStateSlotMetadata(object obj, int objectIdentifier)
+		{
+			return GetFields(obj, SerializationMode.Optimized).Select(field => new StateSlotMetadata
+			{
+				ObjectType = obj.GetType(),
+				ObjectIdentifier = objectIdentifier,
+				DataType = field.FieldType,
+				Field = field,
+				SlotCount = SerializationGenerator.GetStateSlotCount(field.FieldType)
+			});
+		}
+
+		/// <summary>
 		///   Generates the code to deserialize the <paramref name="obj" />.
 		/// </summary>
 		/// <param name="generator">The  generator that should be used to generate the code.</param>

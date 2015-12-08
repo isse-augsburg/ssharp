@@ -265,6 +265,14 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
+		///   Generates the state slot metadata for the model.
+		/// </summary>
+		internal StateSlotMetadata[] GetStateSlotMetadata()
+		{
+			return SerializationRegistry.Default.GetStateSlotMetadata(_objects).ToArray();
+		}
+
+		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>

@@ -26,6 +26,8 @@ namespace SafetySharp.Analysis
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using System.Runtime.Serialization.Formatters.Binary;
+	using System.Text;
 	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;
@@ -43,7 +45,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   The first few bytes that indicate that a file is a valid S# counter example file.
 		/// </summary>
-		private const int FileHeader = 0x3FE0DD01;
+		private const int FileHeader = 0x3FE0DD02;
 
 		/// <summary>
 		///   The character that is used to split the individual states in the counter example.
@@ -74,27 +76,6 @@ namespace SafetySharp.Analysis
 			{
 				Requires.That(_counterExample != null, "No counter example has been loaded.");
 				return _counterExample.Length;
-			}
-		}
-
-		/// <summary>
-		///   Saves the counter example to the <paramref name="file" />.
-		/// </summary>
-		/// <param name="file">The file the counter example should be saved to.</param>
-		public void Save(string file)
-		{
-			Requires.NotNullOrWhitespace(file, nameof(file));
-			Requires.That(file.EndsWith(FileExtension), nameof(file), "Invalid file extension.");
-
-			using (var writer = new BinaryWriter(File.OpenWrite(file)))
-			{
-				writer.Write(FileHeader);
-				writer.Write(_serializedRuntimeModel.Length);
-				writer.Write(_serializedRuntimeModel);
-
-				writer.Write(StepCount);
-				foreach (var slot in _counterExample.SelectMany(step => step))
-					writer.Write(slot);
 			}
 		}
 
@@ -139,6 +120,90 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
+		///   Saves the counter example to the <paramref name="file" />.
+		/// </summary>
+		/// <param name="file">The file the counter example should be saved to.</param>
+		public void Save(string file)
+		{
+			Requires.NotNullOrWhitespace(file, nameof(file));
+			Requires.That(file.EndsWith(FileExtension), nameof(file), "Invalid file extension.");
+
+			using (var writer = new BinaryWriter(File.OpenWrite(file), Encoding.UTF8))
+			{
+				writer.Write(FileHeader);
+				writer.Write(_serializedRuntimeModel.Length);
+				writer.Write(_serializedRuntimeModel);
+
+				var formatter = new BinaryFormatter();
+				var memoryStream = new MemoryStream();
+				formatter.Serialize(memoryStream, Model.GetStateSlotMetadata());
+
+				var metadata = memoryStream.ToArray();
+				writer.Write(metadata.Length);
+				writer.Write(metadata);
+
+				writer.Write(StepCount);
+				writer.Write(Model.StateSlotCount);
+
+				foreach (var slot in _counterExample.SelectMany(step => step))
+					writer.Write(slot);
+			}
+		}
+
+		/// <summary>
+		///   Loads a counter example from the <paramref name="file" />.
+		/// </summary>
+		/// <param name="file">The path to the file the counter example should be loaded from.</param>
+		public static CounterExample Load(string file)
+		{
+			Requires.NotNullOrWhitespace(file, nameof(file));
+
+			using (var reader = new BinaryReader(File.OpenRead(file), Encoding.UTF8))
+			{
+				if (reader.ReadInt32() != FileHeader)
+					throw new InvalidOperationException("The file does not contain a counter example that is compatible with this version of S#.");
+
+				var serializedRuntimeModel = reader.ReadBytes(reader.ReadInt32());
+				var model = RuntimeModelSerializer.Load(new MemoryStream(serializedRuntimeModel));
+				var metadataStream = new MemoryStream(reader.ReadBytes(reader.ReadInt32()));
+				var formatter = new BinaryFormatter();
+				var slotMetadata = (StateSlotMetadata[])formatter.Deserialize(metadataStream);
+				var modelMetadata = model.GetStateSlotMetadata();
+				var counterExample = new int[reader.ReadInt32()][];
+				var slotCount = reader.ReadInt32();
+
+				if (slotCount != model.StateSlotCount)
+				{
+					throw new InvalidOperationException(
+						$"State slot count mismatch; the instantiated model requires {model.StateSlotCount} state slots, " +
+						$"whereas the counter example uses {slotCount} state slots.");
+				}
+
+				if (slotMetadata.Length != modelMetadata.Length)
+				{
+					throw new InvalidOperationException(
+						$"State slot metadata count mismatch; the instantiated model has {modelMetadata.Length} state slot metadata entries, " +
+						$"whereas the counter example has {slotMetadata.Length} state slot entries.");
+				}
+
+				for (var i = 0; i < slotMetadata.Length; ++i)
+				{
+					if (modelMetadata[i] != slotMetadata[i])
+						throw new StateVectorMismatchException(slotMetadata, modelMetadata);
+				}
+
+				for (var i = 0; i < counterExample.Length; ++i)
+				{
+					counterExample[i] = new int[model.StateSlotCount];
+					for (var j = 0; j < model.StateSlotCount; ++j)
+						counterExample[i][j] = reader.ReadInt32();
+				}
+
+				return new CounterExample { Model = model, _serializedRuntimeModel = serializedRuntimeModel, _counterExample = counterExample };
+			}
+		}
+
+		/// <summary>
 		///   Loads a LtsMin counter example from the <paramref name="file" />.
 		/// </summary>
 		/// <param name="serializedRuntimeModel">The serialized runtime model the counter example was generated for.</param>
@@ -176,35 +241,6 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Loads a counter example from the <paramref name="file" />.
-		/// </summary>
-		/// <param name="file">The path to the file the counter example should be loaded from.</param>
-		public static CounterExample Load(string file)
-		{
-			Requires.NotNullOrWhitespace(file, nameof(file));
-
-			using (var reader = new BinaryReader(File.OpenRead(file)))
-			{
-				if (reader.ReadInt32() != FileHeader)
-					throw new InvalidOperationException("The file does not contain a counter example that is compatible with this version of S#.");
-
-				var serializedRuntimeModel = reader.ReadBytes(reader.ReadInt32());
-				var model = RuntimeModelSerializer.Load(new MemoryStream(serializedRuntimeModel));
-				var stepCount = reader.ReadInt32();
-				var counterExample = new int[stepCount][];
-
-				for (var i = 0; i < stepCount; ++i)
-				{
-					counterExample[i] = new int[model.StateSlotCount];
-					for (var j = 0; j < model.StateSlotCount; ++j)
-						counterExample[i][j] = reader.ReadInt32();
-				}
-
-				return new CounterExample { Model = model, _serializedRuntimeModel = serializedRuntimeModel, _counterExample = counterExample };
-			}
-		}
-
-		/// <summary>
 		///   Parses the comma-separated values in the <paramref name="lines" /> into state vectors.
 		/// </summary>
 		/// <param name="model">The model the counter example was generated for.</param>
@@ -231,6 +267,35 @@ namespace SafetySharp.Analysis
 		protected override void OnDisposing(bool disposing)
 		{
 			Model.SafeDispose();
+		}
+
+		/// <summary>
+		///   Raised when the state vector layout of the counter example does not match the layout of the instantiated model.
+		/// </summary>
+		public class StateVectorMismatchException : Exception
+		{
+			/// <summary>
+			///   Initializes a new instance.
+			/// </summary>
+			/// <param name="counterExampleMetadata">The state slot layout expected by the counter example.</param>
+			/// <param name="modelMetadata">The state slot layout expected by the model.</param>
+			internal StateVectorMismatchException(StateSlotMetadata[] counterExampleMetadata, StateSlotMetadata[] modelMetadata)
+				: base("Mismatch detected between the layout of the state vector as expected by the counter example and the " +
+					   "actual layout of the state vector used by the instantiated model.")
+			{
+				CounterExampleMetadata = counterExampleMetadata;
+				ModelMetadata = modelMetadata;
+			}
+
+			/// <summary>
+			///   Gets the state slot layout expected by the counter example.
+			/// </summary>
+			public StateSlotMetadata[] CounterExampleMetadata { get; }
+
+			/// <summary>
+			///   Gets the state slot layout expected by the model.
+			/// </summary>
+			public StateSlotMetadata[] ModelMetadata { get; }
 		}
 	}
 }

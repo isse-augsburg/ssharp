@@ -116,6 +116,7 @@
     <Compile Include="Runtime\Serialization\Serializers\Serializer.cs" />
     <Compile Include="Runtime\Serialization\RuntimeModelSerializer.cs" />
     <Compile Include="Runtime\Serialization\SerializationRegistry.cs" />
+    <Compile Include="Runtime\Serialization\StateSlotMetadata.cs" />
     <Compile Include="Runtime\SimulationState.cs" />
     <Compile Include="Runtime\Simulator.cs" />
     <Compile Include="Runtime\StateCache.cs" />

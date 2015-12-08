@@ -178,9 +178,10 @@ namespace Visualization.Infrastructure
 				ModelStateChanged?.Invoke(this, EventArgs.Empty);
 				Reset?.Invoke(this, EventArgs.Empty);
 			}
-			catch (InvalidOperationException ex)
+			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, "Failed to Load Counter Example", MessageBoxButton.OK, MessageBoxImage.Error);
+				var message = "An incompatible change has been made to the model since the counter example has been generated: " + ex.Message;
+				MessageBox.Show(message, "Failed to Load Counter Example", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
 		}
 

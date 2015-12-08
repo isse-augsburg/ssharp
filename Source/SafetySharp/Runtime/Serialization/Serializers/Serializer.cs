@@ -37,6 +37,13 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		protected internal abstract bool CanSerialize(object obj);
 
 		/// <summary>
+		///   Generates the state slot metadata for the <paramref name="obj" />.
+		/// </summary>
+		/// <param name="obj">The object the state slot metadata should be generated for.</param>
+		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
+		protected internal abstract IEnumerable<StateSlotMetadata> GetStateSlotMetadata(object obj, int objectIdentifier);
+
+		/// <summary>
 		///   Generates the code to deserialize the <paramref name="obj" />.
 		/// </summary>
 		/// <param name="generator">The generator that should be used to generate the code.</param>
