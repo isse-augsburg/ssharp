@@ -31,18 +31,18 @@
 //---------------------------------------------------------------------------------------------------------------------------
 // LtsMin includes
 //---------------------------------------------------------------------------------------------------------------------------
-extern "C" 
+extern "C"
 {
-	#pragma warning(push)
-	#pragma warning(disable: 4200)
-		#include "chunk-support.h"
-		#include "string-map.h"
-		#include "bitvector.h"
-		#include "dm.h"
-		#include "lts-type.h"
-		#include "ltsmin-standard.h"
-		#include "pins.h"
-	#pragma warning(pop)
+#pragma warning(push)
+#pragma warning(disable: 4200)
+#include "chunk-support.h"
+#include "string-map.h"
+#include "bitvector.h"
+#include "dm.h"
+#include "lts-type.h"
+#include "ltsmin-standard.h"
+#include "pins.h"
+#pragma warning(pop)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -64,15 +64,15 @@ using namespace SafetySharp::Runtime::Serialization;
 //---------------------------------------------------------------------------------------------------------------------------
 // Assembly metadata
 //---------------------------------------------------------------------------------------------------------------------------
-[assembly: AssemblyTitle("S# LtsMin Interop")];
-[assembly: AssemblyDescription("S# LtsMin Interop")];
-[assembly: AssemblyCompany("Institute for Software & Systems Engineering")];
-[assembly: AssemblyProduct("S#")];
-[assembly: AssemblyCopyright("Copyright (c) 2014-2015, Institute for Software & Systems Engineering")];
-[assembly: AssemblyCulture("")];
-[assembly: AssemblyVersion("0.1.0.0")];
-[assembly: AssemblyFileVersion("0.1.0.0")];
-[assembly: ComVisible(false)];
+[assembly:AssemblyTitle("S# LtsMin Interop")];
+[assembly:AssemblyDescription("S# LtsMin Interop")];
+[assembly:AssemblyCompany("Institute for Software & Systems Engineering")];
+[assembly:AssemblyProduct("S#")];
+[assembly:AssemblyCopyright("Copyright (c) 2014-2015, Institute for Software & Systems Engineering")];
+[assembly:AssemblyCulture("")];
+[assembly:AssemblyVersion("0.1.0.0")];
+[assembly:AssemblyFileVersion("0.1.0.0")];
+[assembly:ComVisible(false)];
 
 //---------------------------------------------------------------------------------------------------------------------------
 // Forward declarations
@@ -92,12 +92,12 @@ matrix_t WriteMatrix;
 matrix_t StateLabelMatrix;
 
 // Global variables of managed types must be wrapped in a class...
-ref struct Globals 
+ref struct Globals
 {
 	static MemoryStream^ ModelStream;
 	static ThreadLocal<RuntimeModel^>^ RuntimeModels;
 
-	static property RuntimeModel^ Model 
+	static property RuntimeModel^ Model
 	{
 		RuntimeModel^ get()
 		{
@@ -110,7 +110,7 @@ ref struct Globals
 // PINS exports
 //---------------------------------------------------------------------------------------------------------------------------
 extern "C" __declspec(dllexport) char pins_plugin_name[] = "S# Model";
-extern "C" __declspec(dllexport) loader_record pins_loaders[] = { {"ssharp", LoadModel}, { nullptr, nullptr } };
+extern "C" __declspec(dllexport) loader_record pins_loaders[] = { { "ssharp", LoadModel },{ nullptr, nullptr } };
 extern "C" __declspec(dllexport) void* pins_options[] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -140,10 +140,19 @@ void LoadModel(model_t model, const char* modelFile)
 		auto intType = lts_type_put_type(ltsType, "int", LTStypeDirect, nullptr);
 		for (auto i = 0; i < stateSlotCount; ++i)
 		{
-			char name[10];
-			sprintf_s(name, "state%d", i);
-			lts_type_set_state_name(ltsType, i, i == 0 ? "isConstructionState" : name);
 			lts_type_set_state_typeno(ltsType, i, intType);
+
+			if (i == 0)
+			{
+				auto name = Marshal::StringToHGlobalAnsi(RuntimeModel::ConstructionStateName);
+				lts_type_set_state_name(ltsType, i, (char*)name.ToPointer());
+				Marshal::FreeHGlobal(name);
+			}
+			else {
+				char name[10];
+				sprintf_s(name, "state%d", i);
+				lts_type_set_state_name(ltsType, i, name);
+			}
 		}
 
 		// Create the state labels
@@ -215,7 +224,7 @@ int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, Transit
 {
 	(void)model;
 
-	try 
+	try
 	{
 		auto stateCache = IsConstructionState(state)
 			? Globals::Model->ComputeInitialStates()

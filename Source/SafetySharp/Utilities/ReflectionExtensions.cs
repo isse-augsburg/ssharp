@@ -153,7 +153,7 @@ namespace SafetySharp.Utilities
 				$"Expected an enum or primitive type instead of '{type.FullName}'.");
 
 			type = type.IsEnum ? type.GetEnumUnderlyingType() : type;
-			return Marshal.SizeOf(type);
+			return type == typeof(bool) ? 1 : Marshal.SizeOf(type);
 		}
 
 		/// <summary>

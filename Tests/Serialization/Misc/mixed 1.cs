@@ -40,7 +40,7 @@ namespace Tests.Serialization.Misc
 			var c = new C { F = true, G = E.B, H = -1247 };
 
 			GenerateCode(SerializationMode.Full, c);
-			_stateSlotCount.ShouldBe(4);
+			StateSlotCount.ShouldBe(4);
 
 			Serialize();
 			c.F = false;

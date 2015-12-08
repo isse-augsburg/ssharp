@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -26,9 +26,9 @@ namespace SafetySharp.Analysis.FormulaVisitors
 	using Utilities;
 
 	/// <summary>
-	///   Transforms a linear temporal logic formula to a LtsMin LTL formula.
+	///   Transforms a computation tree logic formula to a LtsMin CTL* formula.
 	/// </summary>
-	internal class LtsMinLtlTransformer : FormulaVisitor
+	internal class LtsMinCtlTransformer : FormulaVisitor
 	{
 		/// <summary>
 		///   The string builder that is used to construct the transformed formula.
@@ -36,7 +36,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		private readonly StringBuilder _builder = new StringBuilder();
 
 		/// <summary>
-		///   Gets the transformed LTL formula.
+		///   Gets the transformed μ-calculus formula.
 		/// </summary>
 		public string TransformedFormula => _builder.ToString();
 
@@ -60,6 +60,12 @@ namespace SafetySharp.Analysis.FormulaVisitors
 					break;
 				case UnaryOperator.Not:
 					_builder.Append(" ! ");
+					break;
+				case UnaryOperator.All:
+					_builder.Append(" A ");
+					break;
+				case UnaryOperator.Exists:
+					_builder.Append(" E ");
 					break;
 				default:
 					Assert.NotReached($"Unknown or unsupported unary operator '{formula.Operator}'.");
@@ -109,7 +115,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitStateFormula(StateFormula formula)
 		{
-			_builder.Append(formula.Label);
+			_builder.Append($"({formula.Label} == 1)");
 		}
 	}
 }

@@ -20,40 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.LtsMin.Ctl.NotViolated
+namespace Tests.LtsMin.Ctl
 {
+	using System;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using static SafetySharp.Analysis.Tl;
 
-	internal class MultipleChoices : LtsMinTestObject
+	internal class AX : LtsMinTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C { F = 3 };
-			var d = new D { C = c };
+			var c = new C();
 
-			Check(F(c.G2).Implies(F(G(c.F == 99))), d).ShouldBe(true);
+			Check(AX(c.G), c).ShouldBe(true);
+			Check(AX(!c.G), c).ShouldBe(false);
 		}
 
 		private class C : Component
 		{
-			public int F;
-			public bool G1;
-			public bool G2;
-		}
-
-		private class D : Component
-		{
-			public C C;
+			public bool G;
 
 			public override void Update()
 			{
-				C.G1 = Choose(true, false);
-				C.G2 = C.G1 && Choose(true, false);
-
-				if (C.G2)
-					C.F = 99;
+				G = !G;
+				Console.WriteLine(G);
 			}
 		}
 	}

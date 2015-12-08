@@ -37,6 +37,11 @@ namespace SafetySharp.Runtime
 	public sealed unsafe class RuntimeModel : DisposableObject
 	{
 		/// <summary>
+		///   The unique name of the construction state.
+		/// </summary>
+		public const string ConstructionStateName = "constructionState259C2EE0D9884B92989DF442BA268E8E";
+
+		/// <summary>
 		///   The <see cref="ChoiceResolver" /> used by the model.
 		/// </summary>
 		private readonly ChoiceResolver _choiceResolver;
@@ -57,6 +62,11 @@ namespace SafetySharp.Runtime
 		private readonly SerializationDelegate _deserialize;
 
 		/// <summary>
+		///   The objects contained in the model.
+		/// </summary>
+		private readonly ObjectTable _objects;
+
+		/// <summary>
 		///   Serializes a state of the model.
 		/// </summary>
 		private readonly SerializationDelegate _serialize;
@@ -65,11 +75,6 @@ namespace SafetySharp.Runtime
 		///   The <see cref="StateCache" /> used by the model.
 		/// </summary>
 		private readonly StateCache _stateCache;
-
-		/// <summary>
-		///   The objects contained in the model.
-		/// </summary>
-		private readonly ObjectTable _objects;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -86,10 +91,9 @@ namespace SafetySharp.Runtime
 			// Create a local object table just for the objects referenced by the model; only these objects
 			// have to be serialized and deserialized. The local object table does not contain, for instance,
 			// the closure types of the state formulas
-			var objects = rootComponents.SelectMany(obj => SerializationRegistry.Default.GetReferencedObjects(obj, SerializationMode.Optimized));
-			objects = new[] { _constructionStateIndicator }.Concat(objects);
-
 			// The construction state indicator is the first object in the table; its corresponding state slot will be 0
+			var objects = rootComponents.SelectMany(obj => SerializationRegistry.Default.GetReferencedObjects(obj, SerializationMode.Optimized));
+			objects = new object[] { _constructionStateIndicator }.Concat(objects);
 			_objects = new ObjectTable(objects);
 
 			RootComponents = rootComponents;
@@ -183,25 +187,27 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Checks whether the state <paramref name="label" /> identified by its zero-based index holds for the model's
-		///   <paramref name="serializedState" />.
+		///   Checks whether the state formula identified by the zero-based <paramref name="formulaIndex" /> holds for the model's
+		///   current state.
 		/// </summary>
-		/// <param name="serializedState">The state of the model that should be used to check the <paramref name="label" />.</param>
-		/// <param name="label">The label that should be checked.</param>
+		/// <param name="formulaIndex">The zero-based index of the formula that should be checked.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal bool CheckStateLabel(int* serializedState, int label)
+		public bool CheckStateFormula(int formulaIndex)
 		{
-			Deserialize(serializedState);
-			return StateFormulas[label].Expression();
+			return StateFormulas[formulaIndex].Expression();
 		}
 
 		/// <summary>
-		///   Checks whether the state <paramref name="label" /> identified by its zero-based index holds for the model's current state.
+		///   Checks whether the state formula identified by the zero-based <paramref name="formulaIndex" /> holds for the model's
+		///   <paramref name="serializedState" />.
 		/// </summary>
-		/// <param name="label">The label that should be checked.</param>
-		public bool CheckStateLabel(int label)
+		/// <param name="serializedState">The state of the model that should be used to check the formula.</param>
+		/// <param name="formulaIndex">The zero-based index of the formula that should be checked.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal bool CheckStateLabel(int* serializedState, int formulaIndex)
 		{
-			return StateFormulas[label].Expression();
+			Deserialize(serializedState);
+			return StateFormulas[formulaIndex].Expression();
 		}
 
 		/// <summary>
@@ -257,6 +263,7 @@ namespace SafetySharp.Runtime
 			while (_choiceResolver.PrepareNextPath())
 			{
 				Deserialize(sourceState);
+
 				ExecuteStep();
 				Serialize(_stateCache.Allocate());
 			}

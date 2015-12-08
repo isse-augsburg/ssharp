@@ -20,35 +20,57 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.PrimitiveTypes
+namespace Tests.Serialization.Objects
 {
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class UInt64 : SerializationObject
+	internal unsafe class SerializedArrays : SerializationObject
 	{
 		protected override void Check()
 		{
-			var c = new C { F = 77 };
+			var b = new bool[] { true, false, true };
+			var c = new byte[] { 1, 0, 1 };
+			var i = new int[] { 293580239, -912994792 };
+			var s = new short[] { -30012, 30212 };
 
-			GenerateCode(SerializationMode.Full, c);
-			StateSlotCount.ShouldBe(2);
+			GenerateCode(SerializationMode.Optimized, c, b, i, s);
+			StateSlotCount.ShouldBe(10);
 
 			Serialize();
-			c.F = 31;
-			Deserialize();
-			c.F.ShouldBe(77u);
+			c[0] = 0;
+			c[1] = 0;
+			c[2] = 0;
+			b[0] = false;
+			b[1] = false;
+			b[2] = false;
+			i[0] = 0;
+			i[1] = 0;
+			s[0] = 0;
+			s[1] = 0;
 
-			c.F = System.UInt64.MaxValue;
-			Serialize();
-			c.F = 31;
 			Deserialize();
-			c.F.ShouldBe(System.UInt64.MaxValue);
-		}
+			c[0].ShouldBe((byte)1);
+			c[1].ShouldBe((byte)0);
+			c[2].ShouldBe((byte)1);
+			b[0].ShouldBe(true);
+			b[1].ShouldBe(false);
+			b[2].ShouldBe(true);
+			i[0].ShouldBe(293580239);
+			i[1].ShouldBe(-912994792);
+			s[0].ShouldBe((short)-30012);
+			s[1].ShouldBe((short)30212);
 
-		internal class C
-		{
-			public ulong F;
+			SerializedState[0].ShouldBe(1);
+			SerializedState[1].ShouldBe(0);
+			SerializedState[2].ShouldBe(1);
+			SerializedState[3].ShouldBe(1);
+			SerializedState[4].ShouldBe(0);
+			SerializedState[5].ShouldBe(1);
+			SerializedState[6].ShouldBe(293580239);
+			SerializedState[7].ShouldBe(-912994792);
+			SerializedState[8].ShouldBe(-30012);
+			SerializedState[9].ShouldBe(30212);
 		}
 	}
 }

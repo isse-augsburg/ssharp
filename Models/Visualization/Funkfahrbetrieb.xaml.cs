@@ -89,7 +89,7 @@ namespace Visualization
 			FaultTrainSensor.IsChecked = CrossingControl.TrainSensor.ErroneousTrainDetection.IsOccurring;
 			FaultMessage.IsChecked = Channel.MessageDropped.IsOccurring;
 
-			_hazard |= SimulationControls.Model.CheckStateLabel(0);
+			_hazard |= SimulationControls.Model.CheckStateFormula(0);
 			Collision.Visibility = _hazard.ToVisibility();
 
 			MessageFailure.Visibility = FaultMessage.IsChecked.ToVisibility();

@@ -32,7 +32,7 @@ namespace Tests.Serialization.Enumerations
 			var c = new C { F = E.B };
 
 			GenerateCode(SerializationMode.Full, c);
-			_stateSlotCount.ShouldBe(2);
+			StateSlotCount.ShouldBe(2);
 
 			Serialize();
 			c.F = E.C;

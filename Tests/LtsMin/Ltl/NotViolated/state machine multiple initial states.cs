@@ -22,6 +22,7 @@
 
 namespace Tests.LtsMin.Ltl.NotViolated
 {
+	using System;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using static SafetySharp.Analysis.Tl;

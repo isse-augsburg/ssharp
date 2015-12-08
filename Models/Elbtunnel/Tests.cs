@@ -26,6 +26,8 @@ namespace Elbtunnel
 	using System.Linq;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
 
 	[TestFixture]
 	public class Tests
@@ -49,6 +51,24 @@ namespace Elbtunnel
 			var i = 1;
 			foreach (var cutSet in result.MinimalCutSets)
 				Console.WriteLine("   ({1}) {{ {0} }}", String.Join(", ", cutSet.Select(fault => fault.Name)), i++);
+		}
+
+		[Test]
+		public void Test()
+		{
+			var specification = new Specification();
+			var model = Model.Create(specification);
+			var faults = model.GetFaults();
+
+			for (var i = 0; i < faults.Length; ++i)
+				faults[i].OccurrenceKind = i < 1 ? OccurrenceKind.Always : OccurrenceKind.Never;
+
+			var ltsMin = new LtsMin();
+			Formula f1 = true;
+			Formula f2 = true;
+			Formula f3 = true;
+			ltsMin.CheckInvariant(model, f1 || f2 && f3 || f1 && f2);
+			ltsMin.CheckInvariant(model, f1);
 		}
 	}
 }

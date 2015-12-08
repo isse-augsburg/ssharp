@@ -40,11 +40,12 @@ namespace Tests.Serialization.Objects
 				B = new[] { true, false, true },
 				P = new[] { (int*)17, (int*)19 },
 				O = new[] { o1, o2 },
-				E = new[] { E.A, E.C }
+				E = new[] { E.A, E.C },
+				S = new short[] { 33, 77, 29292, -22923 }
 			};
 
-			GenerateCode(SerializationMode.Optimized, c, c.I, o1, o2, c.D, c.B, c.P, c.O, c.E);
-			_stateSlotCount.ShouldBe(24);
+			GenerateCode(SerializationMode.Optimized, c, c.I, o1, o2, c.D, c.B, c.P, c.O, c.E, c.S);
+			StateSlotCount.ShouldBe(29);
 
 			Serialize();
 			c.I[1] = 33;
@@ -53,18 +54,22 @@ namespace Tests.Serialization.Objects
 			c.P[0] = (int*)-1;
 			c.O[1] = null;
 			c.E[1] = E.C;
+			c.S[0] = -3595;
+			c.S[3] = 9923;
 			c.I = null;
 			c.D = null;
 			c.B = null;
 			c.P = null;
 			c.O = null;
 			c.E = null;
+			c.S = null;
 			Deserialize();
 			c.I.ShouldBe(new[] { -17, 2, 12 });
 			c.D.ShouldBe(new[] { Int64.MaxValue, Int64.MinValue });
 			c.B.ShouldBe(new[] { true, false, true });
 			c.O.ShouldBe(new[] { o1, o2 });
 			c.E.ShouldBe(new[] { E.A, E.C });
+			c.S.ShouldBe(new short[] { 33, 77, 29292, -22923 });
 
 			c.P.Length.ShouldBe(2);
 			((ulong)c.P[0]).ShouldBe((ulong)17);
@@ -79,6 +84,7 @@ namespace Tests.Serialization.Objects
 			public int[] I;
 			public object[] O;
 			public int*[] P;
+			public short[] S;
 		}
 
 		private enum E

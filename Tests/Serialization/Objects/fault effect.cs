@@ -35,7 +35,7 @@ namespace Tests.Serialization.Objects
 			c.F.AddEffect<E>(c).R = 3;
 
 			GenerateCode(SerializationMode.Optimized, c);
-			_stateSlotCount.ShouldBe(2); // original fault effect should not be serialized
+			StateSlotCount.ShouldBe(2); // original fault effect should not be serialized
 
 			Serialize();
 			c.I = 0;

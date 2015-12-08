@@ -215,7 +215,7 @@ namespace SafetySharp.Analysis
 
 			using (var csvFile = new TemporaryFile("csv"))
 			{
-				var printTrace = new ExternalProcess("ltsmin-printtrace.exe", $"{file} {csvFile.FilePath}");
+				var printTrace = new ExternalProcess("ltsmin-printtrace.exe", $"{file} {csvFile.Path}");
 				printTrace.Run();
 
 				if (printTrace.ExitCode != 0)
@@ -225,7 +225,7 @@ namespace SafetySharp.Analysis
 					// ltsmin-printtrace segfaults when the trace has length 0
 					// So we have to try to detect this annoying situation and create an empty trace file instead
 					if (outputs.Any(output => output.Contains("length of trace is 0")))
-						File.WriteAllText(csvFile.FilePath, "");
+						File.WriteAllText(csvFile.Path, "");
 					else
 						throw new InvalidOperationException($"Failed to read LtsMin counter example:\n{String.Join("\n", outputs)}");
 				}
@@ -235,7 +235,7 @@ namespace SafetySharp.Analysis
 				{
 					_serializedRuntimeModel = serializedRuntimeModel,
 					Model = model,
-					_counterExample = ParseCsv(model, File.ReadAllLines(csvFile.FilePath).Skip(1)).ToArray()
+					_counterExample = ParseCsv(model, File.ReadAllLines(csvFile.Path).Skip(1)).ToArray()
 				};
 			}
 		}
@@ -249,8 +249,9 @@ namespace SafetySharp.Analysis
 		{
 			foreach (var serializedState in lines)
 			{
-				var values = serializedState.Split(_splitCharacter, StringSplitOptions.RemoveEmptyEntries);
-				Assert.That(values.Length > model.StateSlotCount, "Counter example contains too few slots per state.");
+				var stateVectors = serializedState.Split(_splitCharacter, StringSplitOptions.RemoveEmptyEntries);
+				var firstValue = Array.FindIndex(stateVectors, s => s == RuntimeModel.ConstructionStateName);
+				var values = stateVectors.Skip(firstValue).Take(model.StateSlotCount).ToArray();
 
 				var state = new int[model.StateSlotCount];
 				for (var i = 0; i < model.StateSlotCount; ++i)

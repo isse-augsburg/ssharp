@@ -37,13 +37,13 @@ namespace SafetySharp.Utilities
 		public TemporaryFile(string extension)
 		{
 			Requires.NotNullOrWhitespace(extension, nameof(extension));
-			FilePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.{extension}");
+			Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"{Guid.NewGuid()}.{extension}");
 		}
 
 		/// <summary>
 		///   Gets the path of the temporary file.
 		/// </summary>
-		public string FilePath { get; }
+		public string Path { get; }
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
@@ -51,7 +51,7 @@ namespace SafetySharp.Utilities
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
-			File.Delete(FilePath);
+			File.Delete(Path);
 		}
 	}
 }

@@ -295,14 +295,19 @@
     <Compile Include="LtsMinTests.Helpers.cs">
       <DependentUpon>LtsMinTests.cs</DependentUpon>
     </Compile>
-    <Compile Include="LtsMin\Ctl\NotViolated\multiple choices.cs" />
-    <Compile Include="LtsMin\Ctl\NotViolated\single choice.cs" />
+    <Compile Include="LtsMin\Ctl\AG.cs" />
+    <Compile Include="LtsMin\Ctl\AFAG.cs" />
+    <Compile Include="LtsMin\Ctl\AF.cs" />
+    <Compile Include="LtsMin\Ctl\EX.cs" />
+    <Compile Include="LtsMin\Ctl\AX.cs" />
+    <Compile Include="LtsMin\Ctl\initial state.cs" />
     <Compile Include="LtsMin\Dcca\no cut sets.cs" />
     <Compile Include="LtsMin\Dcca\multiple singleton cut sets.cs" />
     <Compile Include="LtsMin\Dcca\multiple two point cut sets.cs" />
     <Compile Include="LtsMin\Dcca\single two point cut set.cs" />
     <Compile Include="LtsMin\Dcca\single singleton cut set.cs" />
     <Compile Include="LtsMin\Dcca\empty set.cs" />
+    <Compile Include="LtsMin\Invariants\NotViolated\multiple subformulas.cs" />
     <Compile Include="LtsMin\Invariants\Violated\multiple initial states.cs" />
     <Compile Include="LtsMin\Ltl\NotViolated\state machine multiple initial states.cs" />
     <Compile Include="LtsMin\Ltl\NotViolated\nondeterministic faults.cs" />
@@ -407,6 +412,7 @@
     <Compile Include="Serialization\Misc\hidden state full.cs" />
     <Compile Include="Serialization\Misc\mixed 2.cs" />
     <Compile Include="Serialization\Misc\mixed 1.cs" />
+    <Compile Include="Serialization\Objects\serialized arrays.cs" />
     <Compile Include="Serialization\Objects\lists.cs" />
     <Compile Include="Serialization\Objects\delegate field.cs" />
     <Compile Include="Serialization\Objects\null.cs" />

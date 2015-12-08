@@ -32,7 +32,7 @@ namespace Tests.Serialization.PrimitiveTypes
 			var c = new C { F = 77 };
 
 			GenerateCode(SerializationMode.Full, c);
-			_stateSlotCount.ShouldBe(2);
+			StateSlotCount.ShouldBe(2);
 
 			Serialize();
 			c.F = 31;

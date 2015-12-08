@@ -35,10 +35,11 @@ namespace Tests
 	{
 		private SerializationDelegate _deserializer;
 		private ObjectTable _objectTable;
-		private int* _serializedState;
 		private SerializationDelegate _serializer;
 		private StateCache _stateCache;
-		protected int _stateSlotCount;
+
+		protected int* SerializedState { get; private set; }
+		protected int StateSlotCount { get; private set; }
 
 		protected void GenerateCode(SerializationMode mode, params object[] objects)
 		{
@@ -48,21 +49,21 @@ namespace Tests
 			_serializer = SerializationRegistry.Default.CreateStateSerializer(_objectTable, mode);
 			_deserializer = SerializationRegistry.Default.CreateStateDeserializer(_objectTable, mode);
 
-			_stateSlotCount = SerializationRegistry.Default.GetStateSlotCount(_objectTable, mode);
-			_stateCache = new StateCache(_stateSlotCount + 1, 1);
-			_serializedState = _stateCache.Allocate();
+			StateSlotCount = SerializationRegistry.Default.GetStateSlotCount(_objectTable, mode);
+			_stateCache = new StateCache(StateSlotCount + 1, 1);
+			SerializedState = _stateCache.Allocate();
 		}
 
 		protected void Serialize()
 		{
-			_serializedState[_stateSlotCount].ShouldBe(0);
-			_serializer(_serializedState);
-			_serializedState[_stateSlotCount].ShouldBe(0, "Detected out-of-bounds memory access.");
+			SerializedState[StateSlotCount].ShouldBe(0);
+			_serializer(SerializedState);
+			SerializedState[StateSlotCount].ShouldBe(0, "Detected out-of-bounds memory access.");
 		}
 
 		protected void Deserialize()
 		{
-			_deserializer(_serializedState);
+			_deserializer(SerializedState);
 		}
 	}
 

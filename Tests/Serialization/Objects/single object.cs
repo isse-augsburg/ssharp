@@ -34,7 +34,7 @@ namespace Tests.Serialization.Objects
 			var c = new C { O = o };
 
 			GenerateCode(SerializationMode.Optimized, c, o);
-			_stateSlotCount.ShouldBe(1);
+			StateSlotCount.ShouldBe(1);
 
 			Serialize();
 			c.O = null;

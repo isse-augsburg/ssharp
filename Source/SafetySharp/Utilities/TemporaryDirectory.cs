@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,35 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.PrimitiveTypes
+namespace SafetySharp.Utilities
 {
-	using SafetySharp.Runtime.Serialization;
-	using Shouldly;
+	using System;
+	using System.IO;
 
-	internal class UInt64 : SerializationObject
+	/// <summary>
+	///   Represents a temporary directory on disk that is deleted once the instance is disposed or finalized.
+	/// </summary>
+	internal class TemporaryDirectory : DisposableObject
 	{
-		protected override void Check()
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		public TemporaryDirectory()
 		{
-			var c = new C { F = 77 };
-
-			GenerateCode(SerializationMode.Full, c);
-			StateSlotCount.ShouldBe(2);
-
-			Serialize();
-			c.F = 31;
-			Deserialize();
-			c.F.ShouldBe(77u);
-
-			c.F = System.UInt64.MaxValue;
-			Serialize();
-			c.F = 31;
-			Deserialize();
-			c.F.ShouldBe(System.UInt64.MaxValue);
+			Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"{Guid.NewGuid()}");
 		}
 
-		internal class C
+		/// <summary>
+		///   Gets the path of the temporary file.
+		/// </summary>
+		public string Path { get; }
+
+		/// <summary>
+		///   Disposes the object, releasing all managed and unmanaged resources.
+		/// </summary>
+		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
+		protected override void OnDisposing(bool disposing)
 		{
-			public ulong F;
+			Directory.Delete(Path, recursive: true);
 		}
 	}
 }

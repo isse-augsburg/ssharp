@@ -20,35 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.PrimitiveTypes
+namespace Tests.LtsMin.Invariants.NotViolated
 {
-	using SafetySharp.Runtime.Serialization;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class UInt64 : SerializationObject
+	internal class MultipleSubformulas : LtsMinTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C { F = 77 };
+			var c = new C { F = 3 };
+			var d = new D { C = c };
 
-			GenerateCode(SerializationMode.Full, c);
-			StateSlotCount.ShouldBe(2);
-
-			Serialize();
-			c.F = 31;
-			Deserialize();
-			c.F.ShouldBe(77u);
-
-			c.F = System.UInt64.MaxValue;
-			Serialize();
-			c.F = 31;
-			Deserialize();
-			c.F.ShouldBe(System.UInt64.MaxValue);
+			Formula f1 = c.F == 3;
+			Formula f2 = c.F == 5;
+			CheckInvariant(f1 || f2, c, d).ShouldBe(true);
 		}
 
-		internal class C
+		private class C : Component
 		{
-			public ulong F;
+			public int F;
+		}
+
+		private class D : Component
+		{
+			public C C;
+
+			public override void Update()
+			{
+				if (Choose(true, false))
+					C.F = 3;
+				else
+					C.F = 5;
+			}
 		}
 	}
 }

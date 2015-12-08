@@ -35,7 +35,7 @@ namespace Tests.Serialization.Objects
 			var c = new C { O1 = o1, O2 = null, O3 = o1 };
 
 			GenerateCode(SerializationMode.Full, c, o1, o2, o3);
-			_stateSlotCount.ShouldBe(3);
+			StateSlotCount.ShouldBe(3);
 
 			Serialize();
 			c.O1 = null;

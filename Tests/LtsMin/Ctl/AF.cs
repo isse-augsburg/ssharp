@@ -20,35 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.PrimitiveTypes
+namespace Tests.LtsMin.Ctl
 {
-	using SafetySharp.Runtime.Serialization;
+	using SafetySharp.Modeling;
 	using Shouldly;
+	using static SafetySharp.Analysis.Tl;
 
-	internal class UInt64 : SerializationObject
+	internal class AF : LtsMinTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C { F = 77 };
+			var c = new C();
 
-			GenerateCode(SerializationMode.Full, c);
-			StateSlotCount.ShouldBe(2);
-
-			Serialize();
-			c.F = 31;
-			Deserialize();
-			c.F.ShouldBe(77u);
-
-			c.F = System.UInt64.MaxValue;
-			Serialize();
-			c.F = 31;
-			Deserialize();
-			c.F.ShouldBe(System.UInt64.MaxValue);
+			Check(false, c).ShouldBe(false);
+			Check(AF(c.G), c).ShouldBe(true);
+			Check(AF(!c.G), c).ShouldBe(true);
+			Check(AF(c.I > 200), c).ShouldBe(false);
 		}
 
-		internal class C
+		private class C : Component
 		{
-			public ulong F;
+			public int I;
+			public bool G;
+
+			public override void Update()
+			{
+				++I;
+				G = I == 50 || Choose(true, false);
+
+				if (I > 200)
+					I = 100;
+			}
 		}
 	}
 }

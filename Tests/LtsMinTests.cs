@@ -38,7 +38,7 @@ namespace Tests
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory(Skip = "Not implemented"), MemberData("DiscoverTests", "LtsMin/Ctl")]
+		[Theory(Skip = "Blocked by missing LtsMin support"), MemberData("DiscoverTests", "LtsMin/Ctl")]
 		public void Ctl(string test, string file)
 		{
 			ExecuteDynamicTests(file);

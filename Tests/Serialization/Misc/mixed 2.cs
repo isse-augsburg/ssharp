@@ -41,7 +41,7 @@ namespace Tests.Serialization.Misc
 			var c = new C { D = 17, E = o,F = true, G = E.B, H = -1247 };
 
 			GenerateCode(SerializationMode.Full, c, o);
-			_stateSlotCount.ShouldBe(6);
+			StateSlotCount.ShouldBe(6);
 
 			Serialize();
 			c.D = 0;

@@ -43,7 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\FormulaVisitors\IsStateFormulaVisitor.cs" />
-    <Compile Include="Analysis\FormulaVisitors\LtsMinMuCalculusTransformer.cs" />
+    <Compile Include="Analysis\FormulaVisitors\LtsMinCtlTransformer.cs" />
     <Compile Include="Analysis\HazardAttribute.cs" />
     <Compile Include="Analysis\ModelChecker.cs" />
     <Compile Include="Analysis\LtsMin.cs" />
@@ -132,6 +132,7 @@
     <Compile Include="Utilities\ReferenceEqualityComparer.cs" />
     <Compile Include="Utilities\ReflectionExtensions.cs" />
     <Compile Include="Utilities\Requires.cs" />
+    <Compile Include="Utilities\TemporaryDirectory.cs" />
     <Compile Include="Utilities\TemporaryFile.cs" />
   </ItemGroup>
   <ItemGroup>
