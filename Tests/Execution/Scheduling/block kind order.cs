@@ -20,34 +20,59 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace Tests.Execution.Scheduling
 {
-	using System;
-	using Modeling;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	/// <summary>
-	///   Indicates that the marked member holds or generates one or more root <see cref="Component" /> instances that
-	///   should be used by an analysis.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-	public sealed class RootAttribute : Attribute
+	public class BlockKindOrder : TestObject
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="role">
-		///   The component role of the root component, indicating whether the component is considered to belong to the system of
-		///   interest or to the system context.
-		/// </param>
-		public RootAttribute(Role role)
+		protected override void Check()
 		{
-			Role = role;
+			var m = Model.Create(new S());
+			var r = m.ToRuntimeModel();
+
+			r.RootComponents.Length.ShouldBe(4);
+			r.RootComponents[0].ShouldBeOfType<D>();
+			r.RootComponents[1].ShouldBeOfType<F>();
+			r.RootComponents[2].ShouldBeOfType<C>();
+			r.RootComponents[3].ShouldBeOfType<E>();
 		}
 
-		/// <summary>
-		///   Gets the component role of the root component, indicating whether the component is considered to belong to the system of
-		///   interest or to the system context.
-		/// </summary>
-		public Role Role { get; }
+		private class S
+		{
+			[Root(Role.SystemOfInterest)]
+			public C C = new C();
+
+			// Should be ignored
+			public C C1 = new C();
+
+			[Root(Role.SystemContext)]
+			public D D = new D();
+
+			[Root(Role.SystemOfInterest)]
+			public E E = new E();
+
+			[Root(Role.SystemContext)]
+			public F F = new F();
+		}
+
+		private class C : Component
+		{
+		}
+
+		private class D : Component
+		{
+		}
+
+		private class E : Component
+		{
+		}
+
+		private class F : Component
+		{
+		}
 	}
 }

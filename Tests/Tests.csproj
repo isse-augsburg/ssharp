@@ -245,8 +245,9 @@
     <Compile Include="Execution\RequiredPorts\Methods\non-inherited.cs" />
     <Compile Include="Execution\RequiredPorts\Methods\overridden.cs" />
     <Compile Include="Execution\RequiredPorts\Methods\replaced.cs" />
+    <Compile Include="Execution\Scheduling\block kind order.cs" />
     <Compile Include="Execution\Scheduling\subcomponents explicit.cs" />
-    <Compile Include="Execution\Scheduling\order.cs" />
+    <Compile Include="Execution\Scheduling\subcomponent order.cs" />
     <Compile Include="Execution\Scheduling\subcomponents mixed.cs" />
     <Compile Include="Execution\Scheduling\subcomponents implicit.cs" />
     <Compile Include="Execution\StateMachines\comparisons.cs" />

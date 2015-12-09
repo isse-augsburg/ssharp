@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -22,32 +22,19 @@
 
 namespace SafetySharp.Analysis
 {
-	using System;
-	using Modeling;
-
 	/// <summary>
-	///   Indicates that the marked member holds or generates one or more root <see cref="Component" /> instances that
-	///   should be used by an analysis.
+	///   Indicates whether a component is considered to belong to the system of interest or to the system context.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-	public sealed class RootAttribute : Attribute
+	public enum Role
 	{
 		/// <summary>
-		///   Initializes a new instance.
+		///   Indicates that the component is considered to belong to the system of interest.
 		/// </summary>
-		/// <param name="role">
-		///   The component role of the root component, indicating whether the component is considered to belong to the system of
-		///   interest or to the system context.
-		/// </param>
-		public RootAttribute(Role role)
-		{
-			Role = role;
-		}
+		SystemOfInterest,
 
 		/// <summary>
-		///   Gets the component role of the root component, indicating whether the component is considered to belong to the system of
-		///   interest or to the system context.
+		///   Indicates that the component is considered to belong to the system context.
 		/// </summary>
-		public Role Role { get; }
+		SystemContext
 	}
 }

@@ -22,6 +22,7 @@
 
 namespace Visualization
 {
+	using System.Linq;
 	using System.Windows;
 	using System.Windows.Controls;
 	using global::Funkfahrbetrieb;
@@ -50,11 +51,11 @@ namespace Visualization
 			SimulationControls.ChangeSpeed(16);
 		}
 
-		private Barrier Barrier => (Barrier)SimulationControls.Model.RootComponents[3];
-		private RadioChannel Channel => (RadioChannel)SimulationControls.Model.RootComponents[4];
-		private CrossingControl CrossingControl => (CrossingControl)SimulationControls.Model.RootComponents[0];
-		private Train Train => (Train)SimulationControls.Model.RootComponents[2];
-		private TrainControl TrainControl => (TrainControl)SimulationControls.Model.RootComponents[1];
+		private Barrier Barrier => SimulationControls.Model.RootComponents.OfType<Barrier>().Single();
+		private RadioChannel Channel => SimulationControls.Model.RootComponents.OfType<RadioChannel>().Single();
+		private CrossingControl CrossingControl => SimulationControls.Model.RootComponents.OfType<CrossingControl>().Single();
+		private Train Train => SimulationControls.Model.RootComponents.OfType<Train>().Single();
+		private TrainControl TrainControl => SimulationControls.Model.RootComponents.OfType<TrainControl>().Single();
 
 		private void OnModelStateReset()
 		{

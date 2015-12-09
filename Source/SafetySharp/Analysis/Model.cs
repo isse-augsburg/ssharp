@@ -42,7 +42,7 @@ namespace SafetySharp.Analysis
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="components">The components the model should consist of.</param>
-		public Model(params IComponent[] components)
+		internal Model(params IComponent[] components)
 			: this((IEnumerable<IComponent>)components)
 		{
 		}
@@ -51,7 +51,7 @@ namespace SafetySharp.Analysis
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="components">The components the model should consist of.</param>
-		public Model(IEnumerable<IComponent> components)
+		internal Model(IEnumerable<IComponent> components)
 		{
 			Requires.NotNull(components, nameof(components));
 
@@ -70,10 +70,11 @@ namespace SafetySharp.Analysis
 
 			const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 			var components = new HashSet<IComponent>(ReferenceEqualityComparer<IComponent>.Default);
+			var roles = new Dictionary<IComponent, Role>(ReferenceEqualityComparer<IComponent>.Default);
 
-			CollectComponents(components, obj.GetType().GetFields(bindingFlags), info => info.FieldType, info => info.GetValue(obj));
-			CollectComponents(components, obj.GetType().GetProperties(bindingFlags), info => info.PropertyType, info => info.GetValue(obj));
-			CollectComponents(components, obj.GetType().GetMethods(bindingFlags), info => info.ReturnType, info =>
+			CollectComponents(components, roles, obj.GetType().GetFields(bindingFlags), info => info.FieldType, info => info.GetValue(obj));
+			CollectComponents(components, roles, obj.GetType().GetProperties(bindingFlags), info => info.PropertyType, info => info.GetValue(obj));
+			CollectComponents(components, roles, obj.GetType().GetMethods(bindingFlags), info => info.ReturnType, info =>
 			{
 				if (info.GetParameters().Length == 0)
 					return info.Invoke(obj, new object[0]);
@@ -81,7 +82,13 @@ namespace SafetySharp.Analysis
 				return null;
 			});
 
-			return new Model(components);
+			if (components.Count == 0)
+			{
+				throw new InvalidOperationException(
+					$"Unable to determine root blocks. At least one property, field, or method must be marked with {typeof(RootAttribute).FullName}");
+			}
+
+			return new Model(components.OrderByDescending(component => roles[component]));
 		}
 
 		/// <summary>
@@ -159,17 +166,22 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Helper method that collects <see cref="IComponent" /> instances.
 		/// </summary>
-		private static void CollectComponents<T>(HashSet<IComponent> components, IEnumerable<T> members, Func<T, Type> getMemberType,
-												 Func<T, object> getValue)
+		private static void CollectComponents<T>(HashSet<IComponent> components, Dictionary<IComponent, Role> roles, IEnumerable<T> members,
+												 Func<T, Type> getMemberType, Func<T, object> getValue)
+			where T : MemberInfo
 		{
 			foreach (var member in members)
 			{
+				var rootAttribute = member.GetCustomAttribute<RootAttribute>();
+				if (rootAttribute == null)
+					continue;
+
 				var memberType = getMemberType(member);
 				if (typeof(IComponent).IsAssignableFrom(memberType))
 				{
 					var value = (IComponent)getValue(member);
-					if (value != null)
-						components.Add(value);
+					if (value != null && components.Add(value))
+						roles.Add(value, rootAttribute.Role);
 				}
 
 				if (!typeof(IEnumerable<IComponent>).IsAssignableFrom(memberType))
@@ -180,7 +192,10 @@ namespace SafetySharp.Analysis
 					continue;
 
 				foreach (var value in values.Where(value => value != null))
-					components.Add(value);
+				{
+					if (components.Add(value))
+						roles.Add(value, rootAttribute.Role);
+				}
 			}
 		}
 	}

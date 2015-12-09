@@ -83,9 +83,9 @@ namespace Visualization
 			AlertOdf.Opacity = 0;
 		}
 
-		private VehicleCollection Vehicles => (VehicleCollection)SimulationControls.Model.RootComponents[1];
+		private VehicleCollection Vehicles => SimulationControls.Model.RootComponents.OfType<VehicleCollection>().Single();
 		private EndControlOriginal EndControl => (EndControlOriginal)HeightControl.EndControl;
-		private HeightControl HeightControl => (HeightControl)SimulationControls.Model.RootComponents[0];
+		private HeightControl HeightControl => SimulationControls.Model.RootComponents.OfType<HeightControl>().Single();
 		private MainControlOriginal MainControl => (MainControlOriginal)HeightControl.MainControl;
 		private PreControlOriginal PreControl => (PreControlOriginal)HeightControl.PreControl;
 

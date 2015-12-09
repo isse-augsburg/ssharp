@@ -64,13 +64,13 @@ namespace PressureTank
 		/// <summary>
 		///   Gets the tank that is being filled.
 		/// </summary>
-		[Root]
+		[Root(Role.SystemContext)]
 		public Tank Tank { get; } = new Tank { MaxPressure = MaxPressure };
 
 		/// <summary>
 		///   Gets the controller that fills the tank.
 		/// </summary>
-		[Root]
+		[Root(Role.SystemOfInterest)]
 		public Controller Controller { get; }
 
 		/// <summary>

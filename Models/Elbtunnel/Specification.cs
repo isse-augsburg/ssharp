@@ -127,13 +127,13 @@ namespace Elbtunnel
 		/// <summary>
 		///   Gets the height control that monitors the vehicles and closes the tunnel, if necessary.
 		/// </summary>
-		[Root]
+		[Root(Role.SystemOfInterest)]
 		public HeightControl HeightControl { get; }
 
 		/// <summary>
 		///   Gets the monitored vehicles.
 		/// </summary>
-		[Root]
+		[Root(Role.SystemContext)]
 		public VehicleCollection Vehicles { get; }
 
 		/// <summary>

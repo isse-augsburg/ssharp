@@ -23,6 +23,7 @@
 namespace Visualization
 {
 	using System;
+	using System.Linq;
 	using System.Windows;
 	using System.Windows.Media.Animation;
 	using global::PressureTank;
@@ -68,8 +69,8 @@ namespace Visualization
 		private Pump Pump => Controller.Pump;
 		private Sensor Sensor => Controller.Sensor;
 		private Timer Timer => Controller.Timer;
-		private Tank Tank => (Tank)SimulationControls.Model.RootComponents[0];
-		private Controller Controller => (Controller)SimulationControls.Model.RootComponents[1];
+		private Tank Tank => SimulationControls.Model.RootComponents.OfType<Tank>().Single();
+		private Controller Controller => SimulationControls.Model.RootComponents.OfType<Controller>().Single();
 
 		private void OnSuppressPumping(object sender, RoutedEventArgs e)
 		{

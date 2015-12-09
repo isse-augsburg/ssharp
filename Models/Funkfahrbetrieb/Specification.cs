@@ -71,19 +71,19 @@ namespace Funkfahrbetrieb
 			Component.Bind(nameof(TrainControl.Odometer.TrainSpeed), nameof(Train.Speed));
 		}
 
-		[Root]
+		[Root(Role.SystemOfInterest)]
 		public CrossingControl CrossingControl { get; }
 
-		[Root]
+		[Root(Role.SystemOfInterest)]
 		public TrainControl TrainControl { get; }
 
-		[Root]
+		[Root(Role.SystemContext)]
 		public Train Train { get; } = new Train();
 
-		[Root]
+		[Root(Role.SystemContext)]
 		public Barrier Barrier { get; } = new Barrier();
 
-		[Root]
+		[Root(Role.SystemContext)]
 		public RadioChannel Channel { get; } = new RadioChannel();
 
 		[Hazard]
