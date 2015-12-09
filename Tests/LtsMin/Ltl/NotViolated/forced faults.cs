@@ -33,8 +33,8 @@ namespace Tests.LtsMin.Ltl.NotViolated
 			var c = new C
 			{
 				X = 3,
-				F1 = { OccurrenceKind = OccurrenceKind.Always },
-				F2 = { OccurrenceKind = OccurrenceKind.Always }
+				F1 = { ActivationMode = ActivationMode.Always },
+				F2 = { ActivationMode = ActivationMode.Always }
 			};
 
 			Check(c.X == 3 && X(G(c.X == 119)), c).ShouldBe(true);

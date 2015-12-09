@@ -33,11 +33,11 @@ namespace Tests.Execution.Faults.UpdateMethods
 			Create(new C());
 			var c = (C)RootComponents[0];
 
-			c._f.OccurrenceKind = OccurrenceKind.Always;
+			c._f.ActivationMode = ActivationMode.Always;
 			c.Update();
 			c.X.ShouldBe(18);
 
-			c._f.OccurrenceKind = OccurrenceKind.Never;
+			c._f.ActivationMode = ActivationMode.Never;
 			c.Update();
 			c.X.ShouldBe(17);
 		}

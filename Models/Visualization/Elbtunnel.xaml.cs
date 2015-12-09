@@ -123,11 +123,11 @@ namespace Visualization
 				UpdateVehicle(info);
 			}
 
-			PreControl.Detector.Misdetection.OccurrenceKind = MisdetectionLb1.IsChecked.ToOccurrenceKind();
-			MainControl.PositionDetector.Misdetection.OccurrenceKind = MisdetectionLb2.IsChecked.ToOccurrenceKind();
-			MainControl.LeftDetector.Misdetection.OccurrenceKind = MisdetectionOdl.IsChecked.ToOccurrenceKind();
-			MainControl.RightDetector.Misdetection.OccurrenceKind = MisdetectionOdr.IsChecked.ToOccurrenceKind();
-			EndControl.Detector.Misdetection.OccurrenceKind = MisdetectionOdf.IsChecked.ToOccurrenceKind();
+			PreControl.Detector.Misdetection.ActivationMode = MisdetectionLb1.IsChecked.ToOccurrenceKind();
+			MainControl.PositionDetector.Misdetection.ActivationMode = MisdetectionLb2.IsChecked.ToOccurrenceKind();
+			MainControl.LeftDetector.Misdetection.ActivationMode = MisdetectionOdl.IsChecked.ToOccurrenceKind();
+			MainControl.RightDetector.Misdetection.ActivationMode = MisdetectionOdr.IsChecked.ToOccurrenceKind();
+			EndControl.Detector.Misdetection.ActivationMode = MisdetectionOdf.IsChecked.ToOccurrenceKind();
 
 			Message.Text = String.Empty;
 			HazardIndicator.Visibility = Visibility.Collapsed;
@@ -150,17 +150,17 @@ namespace Visualization
 			if (EndControl.Detector.IsVehicleDetected)
 				_odfStoryboard.Begin();
 
-			MisdetectionLb1.IsChecked = PreControl.Detector.Misdetection.IsOccurring;
-			MisdetectionLb2.IsChecked = MainControl.PositionDetector.Misdetection.IsOccurring;
-			MisdetectionOdl.IsChecked = MainControl.LeftDetector.Misdetection.IsOccurring;
-			MisdetectionOdr.IsChecked = MainControl.RightDetector.Misdetection.IsOccurring;
-			MisdetectionOdf.IsChecked = EndControl.Detector.Misdetection.IsOccurring;
+			MisdetectionLb1.IsChecked = PreControl.Detector.Misdetection.IsActivated;
+			MisdetectionLb2.IsChecked = MainControl.PositionDetector.Misdetection.IsActivated;
+			MisdetectionOdl.IsChecked = MainControl.LeftDetector.Misdetection.IsActivated;
+			MisdetectionOdr.IsChecked = MainControl.RightDetector.Misdetection.IsActivated;
+			MisdetectionOdf.IsChecked = EndControl.Detector.Misdetection.IsActivated;
 
-			PreControl.Detector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
-			MainControl.PositionDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
-			MainControl.LeftDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
-			MainControl.RightDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
-			EndControl.Detector.FalseDetection.OccurrenceKind = OccurrenceKind.Never;
+			PreControl.Detector.FalseDetection.ActivationMode = ActivationMode.Never;
+			MainControl.PositionDetector.FalseDetection.ActivationMode = ActivationMode.Never;
+			MainControl.LeftDetector.FalseDetection.ActivationMode = ActivationMode.Never;
+			MainControl.RightDetector.FalseDetection.ActivationMode = ActivationMode.Never;
+			EndControl.Detector.FalseDetection.ActivationMode = ActivationMode.Never;
 
 			SetFaultAdornment(FaultLb1, PreControl.Detector);
 			SetFaultAdornment(FaultLb2, MainControl.PositionDetector);
@@ -208,63 +208,63 @@ namespace Visualization
 
 		private static void SetFaultAdornment(UIElement adornment, VehicleDetector detector)
 		{
-			var isOccurring = detector.Misdetection.IsOccurring || detector.FalseDetection.IsOccurring;
+			var isOccurring = detector.Misdetection.IsActivated || detector.FalseDetection.IsActivated;
 			adornment.Visibility = isOccurring.ToVisibility();
 		}
 
 		private void OnMisdetectionLb1(object sender, RoutedEventArgs e)
 		{
-			PreControl.Detector.Misdetection.ToggleOccurrence();
+			PreControl.Detector.Misdetection.ToggleActivationMode();
 		}
 
 		private void OnMisdetectionLb2(object sender, RoutedEventArgs e)
 		{
-			MainControl.PositionDetector.Misdetection.ToggleOccurrence();
+			MainControl.PositionDetector.Misdetection.ToggleActivationMode();
 		}
 
 		private void OnMisdetectionOdl(object sender, RoutedEventArgs e)
 		{
-			MainControl.LeftDetector.Misdetection.ToggleOccurrence();
+			MainControl.LeftDetector.Misdetection.ToggleActivationMode();
 		}
 
 		private void OnMisdetectionOdr(object sender, RoutedEventArgs e)
 		{
-			MainControl.RightDetector.Misdetection.ToggleOccurrence();
+			MainControl.RightDetector.Misdetection.ToggleActivationMode();
 		}
 
 		private void OnMisdetectionOdf(object sender, RoutedEventArgs e)
 		{
-			EndControl.Detector.Misdetection.ToggleOccurrence();
+			EndControl.Detector.Misdetection.ToggleActivationMode();
 		}
 
 		private void OnFalseDetectionLb1(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				PreControl.Detector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
+				PreControl.Detector.FalseDetection.ActivationMode = ActivationMode.Always;
 		}
 
 		private void OnFalseDetectionLb2(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				MainControl.PositionDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
+				MainControl.PositionDetector.FalseDetection.ActivationMode = ActivationMode.Always;
 		}
 
 		private void OnFalseDetectionOdl(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				MainControl.LeftDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
+				MainControl.LeftDetector.FalseDetection.ActivationMode = ActivationMode.Always;
 		}
 
 		private void OnFalseDetectionOdr(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				MainControl.RightDetector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
+				MainControl.RightDetector.FalseDetection.ActivationMode = ActivationMode.Always;
 		}
 
 		private void OnFalseDetectionOdf(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				EndControl.Detector.FalseDetection.OccurrenceKind = OccurrenceKind.Always;
+				EndControl.Detector.FalseDetection.ActivationMode = ActivationMode.Always;
 		}
 
 		private static void OnManipulationCompleted(object sender, ManipulationCompletedEventArgs e)

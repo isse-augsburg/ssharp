@@ -62,7 +62,7 @@
     <Compile Include="Modeling\IInitializable.cs" />
     <Compile Include="Modeling\NonDiscoverableAttribute.cs" />
     <Compile Include="Analysis\CounterExample.cs" />
-    <Compile Include="Modeling\OccurrenceKind.cs" />
+    <Compile Include="Modeling\ActivationMode.cs" />
     <Compile Include="Runtime\RealTimeSimulator.cs" />
     <Compile Include="Runtime\Reflection\ComponentExtensions.cs" />
     <Compile Include="Runtime\Reflection\ModelExtensions.cs" />

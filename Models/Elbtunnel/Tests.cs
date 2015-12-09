@@ -61,7 +61,7 @@ namespace Elbtunnel
 			var faults = model.GetFaults();
 
 			for (var i = 0; i < faults.Length; ++i)
-				faults[i].OccurrenceKind = i < 1 ? OccurrenceKind.Always : OccurrenceKind.Never;
+				faults[i].ActivationMode = i < 1 ? ActivationMode.Nondeterministic : ActivationMode.Never;
 
 			var ltsMin = new LtsMin();
 			Formula f1 = true;

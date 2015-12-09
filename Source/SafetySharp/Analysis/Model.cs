@@ -113,7 +113,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		internal void Validate()
 		{
-			if (this.GetFaults().Any(fault => !fault.IndependentOccurrence))
+			if (this.GetFaults().Any(fault => !fault.IndependentActivation))
 				throw new NotSupportedException("Faults that cannot occur independently are currently unsupported.");
 		}
 

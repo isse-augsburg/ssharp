@@ -33,29 +33,30 @@ namespace SafetySharp.Modeling
 	public abstract class Fault
 	{
 		[Hidden]
-		private readonly bool _independentOccurrence;
+		private readonly bool _independentActivation;
+
+		[Hidden]
+		private ActivationMode _activationMode = ActivationMode.Nondeterministic;
 
 		[NonSerializable]
 		private string _name = "<Unnamed>";
 
-		[Hidden]
-		private OccurrenceKind _occurrenceKind = OccurrenceKind.SelfDetermined;
-
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="independentOccurrence">
-		///   Indicates whether the fault can occur independently, i.e., regardless of other model state.
+		/// <param name="independentActivation">
+		///   Indicates whether the fault can be activated independently, i.e., regardless of other model state.
 		/// </param>
-		protected Fault(bool independentOccurrence)
+		protected Fault(bool independentActivation)
 		{
-			_independentOccurrence = independentOccurrence;
+			_independentActivation = independentActivation;
 		}
 
 		/// <summary>
-		///   Gets a value indicating whether the fault is currently occurring.
+		///   Gets a value indicating whether the fault is activated and has some effect on the state of the system, therefore inducing
+		///   an error or possibly a failure.
 		/// </summary>
-		public bool IsOccurring { get; private set; }
+		public bool IsActivated { get; private set; }
 
 		/// <summary>
 		///   Gets the <see cref="Choice" /> instance that can be used to determine whether the fault occurs.
@@ -72,39 +73,39 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Gets a value indicating whether the fault can occur independently, i.e., regardless of other model state.
+		///   Gets a value indicating whether the fault can be activated independently, i.e., regardless of other model state.
 		/// </summary>
-		internal bool IndependentOccurrence => _independentOccurrence;
+		internal bool IndependentActivation => _independentActivation;
 
 		/// <summary>
 		///   Gets or sets the fault's forced occurrence kind.
 		/// </summary>
-		public OccurrenceKind OccurrenceKind
+		public ActivationMode ActivationMode
 		{
-			get { return _occurrenceKind; }
+			get { return _activationMode; }
 			set
 			{
-				_occurrenceKind = value;
+				_activationMode = value;
 
-				if (value == OccurrenceKind.SelfDetermined)
-					IsOccurring = false;
+				if (value == ActivationMode.Nondeterministic)
+					IsActivated = false;
 				else
-					IsOccurring = value == OccurrenceKind.Always;
+					IsActivated = value == ActivationMode.Always;
 			}
 		}
 
 		/// <summary>
-		///   Toggles the fault's <see cref="OccurrenceKind" /> between <see cref="Modeling.OccurrenceKind.Always" /> and
-		///   <see cref="Modeling.OccurrenceKind.Never" />, with <see cref="Modeling.OccurrenceKind.SelfDetermined" /> being
-		///   treated as <see cref="Modeling.OccurrenceKind.Never" />.
+		///   Toggles the fault's <see cref="ActivationMode" /> between <see cref="Modeling.ActivationMode.Always" /> and
+		///   <see cref="Modeling.ActivationMode.Never" />, with <see cref="Modeling.ActivationMode.Nondeterministic" /> being
+		///   treated as <see cref="Modeling.ActivationMode.Never" />.
 		/// </summary>
-		public void ToggleOccurrence()
+		public void ToggleActivationMode()
 		{
-			OccurrenceKind = OccurrenceKind == OccurrenceKind.Always ? OccurrenceKind.Never : OccurrenceKind.Always;
+			ActivationMode = ActivationMode == ActivationMode.Always ? ActivationMode.Never : ActivationMode.Always;
 		}
 
 		/// <summary>
-		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault occurs.
+		///   Adds a fault effect for the <paramref name="component" /> that is enabled while the fault is activated.
 		/// </summary>
 		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
 		/// <param name="component">The component the fault effect is added for.</param>
@@ -115,7 +116,7 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault occurs.
+		///   Adds a fault effect for the <paramref name="component" /> that is enabled while the fault is activated.
 		/// </summary>
 		/// <param name="component">The component the fault effect is added for.</param>
 		/// <param name="faultEffectType">The type of the fault effect that should be added.</param>
@@ -139,8 +140,8 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		public void Update()
 		{
-			if (_occurrenceKind == OccurrenceKind.SelfDetermined)
-				IsOccurring = GetUpdatedOccurrenceState();
+			if (_activationMode == ActivationMode.Nondeterministic)
+				IsActivated = GetUpdatedOccurrenceState();
 		}
 
 		/// <summary>

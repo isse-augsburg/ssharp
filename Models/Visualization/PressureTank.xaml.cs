@@ -74,30 +74,30 @@ namespace Visualization
 
 		private void OnSuppressPumping(object sender, RoutedEventArgs e)
 		{
-			Pump.SuppressPumping.ToggleOccurrence();
+			Pump.SuppressPumping.ToggleActivationMode();
 		}
 
 		private void OnSuppressTimeout(object sender, RoutedEventArgs e)
 		{
-			Timer.SuppressTimeout.ToggleOccurrence();
+			Timer.SuppressTimeout.ToggleActivationMode();
 		}
 
 		private void OnSuppressFull(object sender, RoutedEventArgs e)
 		{
-			Sensor.SuppressIsFull.ToggleOccurrence();
+			Sensor.SuppressIsFull.ToggleActivationMode();
 		}
 
 		private void OnSuppressEmpty(object sender, RoutedEventArgs e)
 		{
-			Sensor.SuppressIsEmpty.ToggleOccurrence();
+			Sensor.SuppressIsEmpty.ToggleActivationMode();
 		}
 
 		private void OnModelStateReset()
 		{
-			Sensor.SuppressIsFull.OccurrenceKind = SuppressFull.IsChecked.ToOccurrenceKind();
-			Sensor.SuppressIsEmpty.OccurrenceKind = SuppressEmpty.IsChecked.ToOccurrenceKind();
-			Timer.SuppressTimeout.OccurrenceKind = SuppressTimeout.IsChecked.ToOccurrenceKind();
-			Pump.SuppressPumping.OccurrenceKind = SuppressPumping.IsChecked.ToOccurrenceKind();
+			Sensor.SuppressIsFull.ActivationMode = SuppressFull.IsChecked.ToOccurrenceKind();
+			Sensor.SuppressIsEmpty.ActivationMode = SuppressEmpty.IsChecked.ToOccurrenceKind();
+			Timer.SuppressTimeout.ActivationMode = SuppressTimeout.IsChecked.ToOccurrenceKind();
+			Pump.SuppressPumping.ActivationMode = SuppressPumping.IsChecked.ToOccurrenceKind();
 		}
 
 		private void UpdateModelState()
@@ -105,7 +105,7 @@ namespace Visualization
 			// Timer
 			CountDown.Text = Timer.RemainingTime.ToString();
 			CountDown.Visibility = Timer.IsActive.ToVisibility();
-			SuppressTimeout.IsChecked = Timer.SuppressTimeout.IsOccurring;
+			SuppressTimeout.IsChecked = Timer.SuppressTimeout.IsActivated;
 			TimerFailure.Visibility = SuppressTimeout.IsChecked.ToVisibility();
 
 			if (Timer.HasElapsed)
@@ -119,8 +119,8 @@ namespace Visualization
 			TankRupture.Visibility = Tank.IsRuptured.ToVisibility();
 
 			// Sensor
-			SuppressFull.IsChecked = Sensor.SuppressIsFull.IsOccurring;
-			SuppressEmpty.IsChecked = Sensor.SuppressIsEmpty.IsOccurring;
+			SuppressFull.IsChecked = Sensor.SuppressIsFull.IsActivated;
+			SuppressEmpty.IsChecked = Sensor.SuppressIsEmpty.IsActivated;
 			SensorFailure.Visibility = (SuppressFull.IsChecked || SuppressEmpty.IsChecked).ToVisibility();
 
 			if ((Sensor.IsFull || Sensor.IsEmpty) && SimulationControls.State != SimulationState.Stopped)
@@ -149,7 +149,7 @@ namespace Visualization
 			else
 				_pumpingStoryboard.Resume();
 
-			SuppressPumping.IsChecked = Pump.SuppressPumping.IsOccurring;
+			SuppressPumping.IsChecked = Pump.SuppressPumping.IsActivated;
 			PumpFailure.Visibility = SuppressPumping.IsChecked.ToVisibility();
 		}
 	}

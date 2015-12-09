@@ -26,7 +26,7 @@ namespace Tests.Normalization.FaultNames.Changed
 
 	public class In2
 	{
-		Fault f1 = new TransientFault() { OccurrenceKind = OccurrenceKind.Always };
+		Fault f1 = new TransientFault() { ActivationMode = ActivationMode.Always };
 		Fault f2 = new TransientFault();
 
 		TransientFault f3 = new TransientFault(), f4 = new TransientFault(), 
@@ -35,7 +35,7 @@ namespace Tests.Normalization.FaultNames.Changed
 
 	public class Out2
 	{
-		Fault f1 = new TransientFault() { OccurrenceKind = OccurrenceKind.Always, Name = "f1" };
+		Fault f1 = new TransientFault() { ActivationMode = ActivationMode.Always, Name = "f1" };
 		Fault f2 = new TransientFault() { Name = "f2" };
 
 		TransientFault f3 = new TransientFault() { Name = "f3" }, f4 = new TransientFault() { Name = "f4" }, 

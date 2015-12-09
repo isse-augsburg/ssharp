@@ -97,7 +97,7 @@ namespace SafetySharp.Runtime
 			_objects = new ObjectTable(objects);
 
 			RootComponents = rootComponents;
-			Faults = _objects.OfType<Fault>().ToArray();
+			Faults = _objects.OfType<Fault>().Where(fault => fault.ActivationMode == ActivationMode.Nondeterministic).ToArray();
 			StateFormulas = stateFormulas;
 			StateSlotCount = SerializationRegistry.Default.GetStateSlotCount(_objects, SerializationMode.Optimized);
 
@@ -263,7 +263,6 @@ namespace SafetySharp.Runtime
 			while (_choiceResolver.PrepareNextPath())
 			{
 				Deserialize(sourceState);
-
 				ExecuteStep();
 				Serialize(_stateCache.Allocate());
 			}

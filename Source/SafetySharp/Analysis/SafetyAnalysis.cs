@@ -103,7 +103,7 @@ namespace SafetySharp.Analysis
 				{
 					// Enable or disable the faults that the set represents
 					for (var i = 1; i <= faults.Length; ++i)
-						faults[i - 1].OccurrenceKind = (set & (1 << (i - 1))) != 0 ? OccurrenceKind.SelfDetermined : OccurrenceKind.Never;
+						faults[i - 1].ActivationMode = (set & (1 << (i - 1))) != 0 ? ActivationMode.Nondeterministic : ActivationMode.Never;
 
 					// If there was a counter example, the set is a cut set
 					var counterExample = _modelChecker.CheckInvariant(_model, !hazard);
@@ -117,7 +117,7 @@ namespace SafetySharp.Analysis
 					if (counterExample == null || counterExamplePath == null)
 						continue;
 
-					var fileName = String.Join("_", faults.Where(f => f.OccurrenceKind == OccurrenceKind.SelfDetermined).Select(f => f.Name));
+					var fileName = String.Join("_", faults.Where(f => f.ActivationMode == ActivationMode.Nondeterministic).Select(f => f.Name));
 					if (String.IsNullOrWhiteSpace(fileName))
 						fileName = "emptyset";
 

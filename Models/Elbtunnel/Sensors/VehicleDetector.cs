@@ -100,7 +100,7 @@ namespace Elbtunnel.Sensors
 		}
 
 		/// <summary>
-		///   Represents a misdetection, i.e., a vehicle does not detect even though it hould have been detected.
+		///   Represents a misdetection, i.e., a vehicle does not detect even though it should have been detected.
 		/// </summary>
 		[FaultEffect(Fault = nameof(Misdetection))]
 		public abstract class MisdetectionEffect : VehicleDetector

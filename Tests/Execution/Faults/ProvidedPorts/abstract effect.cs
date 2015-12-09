@@ -33,23 +33,23 @@ namespace Tests.Execution.Faults.ProvidedPorts
 			Create(new D());
 			var d = (D)RootComponents[0];
 
-			d.F1.OccurrenceKind = OccurrenceKind.Always;
-			d.F2.OccurrenceKind = OccurrenceKind.Always;
+			d.F1.ActivationMode = ActivationMode.Always;
+			d.F2.ActivationMode = ActivationMode.Always;
 			d.M().ShouldBe(1100);
 			d.N().ShouldBe(2222);
 
-			d.F1.OccurrenceKind = OccurrenceKind.Never;
-			d.F2.OccurrenceKind = OccurrenceKind.Always;
+			d.F1.ActivationMode = ActivationMode.Never;
+			d.F2.ActivationMode = ActivationMode.Always;
 			d.M().ShouldBe(1100);
 			d.N().ShouldBe(2202);
 
-			d.F1.OccurrenceKind = OccurrenceKind.Always;
-			d.F2.OccurrenceKind = OccurrenceKind.Never;
+			d.F1.ActivationMode = ActivationMode.Always;
+			d.F2.ActivationMode = ActivationMode.Never;
 			d.M().ShouldBe(100);
 			d.N().ShouldBe(222); 
 
-			d.F1.OccurrenceKind = OccurrenceKind.Never;
-			d.F2.OccurrenceKind = OccurrenceKind.Never;
+			d.F1.ActivationMode = ActivationMode.Never;
+			d.F2.ActivationMode = ActivationMode.Never;
 			d.M().ShouldBe(100);
 			d.N().ShouldBe(202);
 		}

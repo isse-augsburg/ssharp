@@ -33,44 +33,44 @@ namespace Tests.Execution.Faults.ProvidedPorts
 			Create(new C());
 			var c = (C)RootComponents[0];
 
-			c._f1.OccurrenceKind = OccurrenceKind.Never;
-			c._f2.OccurrenceKind = OccurrenceKind.Never;
-			c._f3.OccurrenceKind = OccurrenceKind.Never;
+			c._f1.ActivationMode = ActivationMode.Never;
+			c._f2.ActivationMode = ActivationMode.Never;
+			c._f3.ActivationMode = ActivationMode.Never;
 			c.M(1).ShouldBe(1);
 
-			c._f1.OccurrenceKind = OccurrenceKind.Always;
-			c._f2.OccurrenceKind = OccurrenceKind.Never;
-			c._f3.OccurrenceKind = OccurrenceKind.Never;
+			c._f1.ActivationMode = ActivationMode.Always;
+			c._f2.ActivationMode = ActivationMode.Never;
+			c._f3.ActivationMode = ActivationMode.Never;
 			c.M(1).ShouldBe(101);
 
-			c._f1.OccurrenceKind = OccurrenceKind.Never;
-			c._f2.OccurrenceKind = OccurrenceKind.Always;
-			c._f3.OccurrenceKind = OccurrenceKind.Never;
+			c._f1.ActivationMode = ActivationMode.Never;
+			c._f2.ActivationMode = ActivationMode.Always;
+			c._f3.ActivationMode = ActivationMode.Never;
 			c.M(1).ShouldBe(1001);
 
-			c._f1.OccurrenceKind = OccurrenceKind.Never;
-			c._f2.OccurrenceKind = OccurrenceKind.Never;
-			c._f3.OccurrenceKind = OccurrenceKind.Always;
+			c._f1.ActivationMode = ActivationMode.Never;
+			c._f2.ActivationMode = ActivationMode.Never;
+			c._f3.ActivationMode = ActivationMode.Always;
 			c.M(1).ShouldBe(10001);
 
-			c._f1.OccurrenceKind = OccurrenceKind.Always;
-			c._f2.OccurrenceKind = OccurrenceKind.Always;
-			c._f3.OccurrenceKind = OccurrenceKind.Never;
+			c._f1.ActivationMode = ActivationMode.Always;
+			c._f2.ActivationMode = ActivationMode.Always;
+			c._f3.ActivationMode = ActivationMode.Never;
 			c.M(1).ShouldBe(1101);
 
-			c._f1.OccurrenceKind = OccurrenceKind.Always;
-			c._f2.OccurrenceKind = OccurrenceKind.Never;
-			c._f3.OccurrenceKind = OccurrenceKind.Always;
+			c._f1.ActivationMode = ActivationMode.Always;
+			c._f2.ActivationMode = ActivationMode.Never;
+			c._f3.ActivationMode = ActivationMode.Always;
 			c.M(1).ShouldBe(10101);
 
-			c._f1.OccurrenceKind = OccurrenceKind.Never;
-			c._f2.OccurrenceKind = OccurrenceKind.Always;
-			c._f3.OccurrenceKind = OccurrenceKind.Always;
+			c._f1.ActivationMode = ActivationMode.Never;
+			c._f2.ActivationMode = ActivationMode.Always;
+			c._f3.ActivationMode = ActivationMode.Always;
 			c.M(1).ShouldBe(11001);
 
-			c._f1.OccurrenceKind = OccurrenceKind.Always;
-			c._f2.OccurrenceKind = OccurrenceKind.Always;
-			c._f3.OccurrenceKind = OccurrenceKind.Always;
+			c._f1.ActivationMode = ActivationMode.Always;
+			c._f2.ActivationMode = ActivationMode.Always;
+			c._f3.ActivationMode = ActivationMode.Always;
 			c.M(1).ShouldBe(11101);
 		}
 

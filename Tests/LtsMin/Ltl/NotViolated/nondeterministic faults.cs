@@ -32,17 +32,17 @@ namespace Tests.LtsMin.Ltl.NotViolated
 		{
 			var c = new C { X = 3 };
 
-			Check(G(!c.F1.IsOccurring && !c.F2.IsOccurring && !c.F3.IsOccurring).Implies(G(c.X == 3)), c).ShouldBe(true);
+			Check(G(!c.F1.IsActivated && !c.F2.IsActivated && !c.F3.IsActivated).Implies(G(c.X == 3)), c).ShouldBe(true);
 
-			Check(G(!c.F2.IsOccurring && !c.F3.IsOccurring).Implies(G(!c.F1.IsOccurring || c.X == 13)), c).ShouldBe(true);
-			Check(G(!c.F1.IsOccurring && !c.F3.IsOccurring).Implies(G(!c.F2.IsOccurring || c.X == 103)), c).ShouldBe(true);
-			Check(G(!c.F1.IsOccurring && !c.F2.IsOccurring).Implies(G(!c.F3.IsOccurring || c.X == 1003)), c).ShouldBe(true);
+			Check(G(!c.F2.IsActivated && !c.F3.IsActivated).Implies(G(!c.F1.IsActivated || c.X == 13)), c).ShouldBe(true);
+			Check(G(!c.F1.IsActivated && !c.F3.IsActivated).Implies(G(!c.F2.IsActivated || c.X == 103)), c).ShouldBe(true);
+			Check(G(!c.F1.IsActivated && !c.F2.IsActivated).Implies(G(!c.F3.IsActivated || c.X == 1003)), c).ShouldBe(true);
 
-			Check(G(!c.F3.IsOccurring).Implies(G(!c.F1.IsOccurring || !c.F2.IsOccurring || c.X == 103 || c.X == 13)), c).ShouldBe(true);
-			Check(G(!c.F1.IsOccurring).Implies(G(!c.F3.IsOccurring || !c.F2.IsOccurring || c.X == 1003 || c.X == 103)), c).ShouldBe(true);
-			Check(G(!c.F2.IsOccurring).Implies(G(!c.F1.IsOccurring || !c.F3.IsOccurring || c.X == 1003 || c.X == 13)), c).ShouldBe(true);
+			Check(G(!c.F3.IsActivated).Implies(G(!c.F1.IsActivated || !c.F2.IsActivated || c.X == 103 || c.X == 13)), c).ShouldBe(true);
+			Check(G(!c.F1.IsActivated).Implies(G(!c.F3.IsActivated || !c.F2.IsActivated || c.X == 1003 || c.X == 103)), c).ShouldBe(true);
+			Check(G(!c.F2.IsActivated).Implies(G(!c.F1.IsActivated || !c.F3.IsActivated || c.X == 1003 || c.X == 13)), c).ShouldBe(true);
 
-			Check(G(!c.F1.IsOccurring || !c.F2.IsOccurring || !c.F3.IsOccurring || c.X == 1003 || c.X == 103 || c.X == 13), c).ShouldBe(true);
+			Check(G(!c.F1.IsActivated || !c.F2.IsActivated || !c.F3.IsActivated || c.X == 1003 || c.X == 103 || c.X == 13), c).ShouldBe(true);
 		}
 
 		private class C : Component

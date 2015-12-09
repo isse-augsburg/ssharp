@@ -31,7 +31,7 @@ namespace SafetySharp.Modeling
 		///   Initializes a new instance.
 		/// </summary>
 		public TransientFault()
-			: base(independentOccurrence: true)
+			: base(independentActivation: true)
 		{
 		}
 

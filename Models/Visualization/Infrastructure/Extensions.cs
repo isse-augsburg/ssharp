@@ -35,9 +35,9 @@ namespace Visualization.Infrastructure
 			return value ? Visibility.Visible : Visibility.Collapsed;
 		}
 
-		public static OccurrenceKind ToOccurrenceKind(this bool value)
+		public static ActivationMode ToOccurrenceKind(this bool value)
 		{
-			return value ? OccurrenceKind.Always : OccurrenceKind.Never;
+			return value ? ActivationMode.Always : ActivationMode.Never;
 		}
 	}
 }

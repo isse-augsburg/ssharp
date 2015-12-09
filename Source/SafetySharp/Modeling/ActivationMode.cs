@@ -23,23 +23,23 @@
 namespace SafetySharp.Modeling
 {
 	/// <summary>
-	///   Determines the occurrence kind of a <see cref="Fault" />.
+	///   Determines the activation mode kind of a <see cref="Fault" />.
 	/// </summary>
-	public enum OccurrenceKind
+	public enum ActivationMode
 	{
 		/// <summary>
-		///   Indicates that the fault always occurs.
+		///   Indicates that the fault is always activated whenever it can cause an error.
 		/// </summary>
 		Always,
 
 		/// <summary>
-		///   Indicates that the fault never occurs.
+		///   Indicates that the fault is never activated.
 		/// </summary>
 		Never,
 
 		/// <summary>
-		///   Indicates that the fault itself determines whether it occurs.
+		///   Indicates that the fault is nondeterministically activated or not whenever it can cause an error.
 		/// </summary>
-		SelfDetermined
+		Nondeterministic
 	}
 }

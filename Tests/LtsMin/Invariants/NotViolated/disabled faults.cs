@@ -32,8 +32,8 @@ namespace Tests.LtsMin.Invariants.NotViolated
 			var c = new C
 			{
 				X = 3,
-				F1 = { OccurrenceKind = OccurrenceKind.Never },
-				F2 = { OccurrenceKind = OccurrenceKind.Never }
+				F1 = { ActivationMode = ActivationMode.Never },
+				F2 = { ActivationMode = ActivationMode.Never }
 			};
 
 			CheckInvariant(c.X == 3, c).ShouldBe(true);

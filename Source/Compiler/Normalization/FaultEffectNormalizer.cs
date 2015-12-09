@@ -222,8 +222,8 @@ namespace SafetySharp.Compiler.Normalization
 								var effectType = overridingEffects[i].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 								var index = Array.IndexOf(priorityFaults, overridingEffects[i]);
 
-								writer.AppendLine($"if ((({effectType})this).{"fault".ToSynthesized()}.IsOccurring)");
-								writer.IncreaseIndent();
+								writer.AppendLine($"if ((({effectType})this).{"fault".ToSynthesized()}.{nameof(Fault.IsActivated)})");
+                                writer.IncreaseIndent();
 								writer.AppendLine($"{levelChoiceVariable}[{levelCountVariable}++] = {index};");
 								writer.DecreaseIndent();
 								writer.NewLine();
@@ -243,7 +243,7 @@ namespace SafetySharp.Compiler.Normalization
 			if (body == null)
 			{
 				var faultAccess = Syntax.MemberAccessExpression(Syntax.ThisExpression(), "fault".ToSynthesized());
-				var isOccurring = Syntax.MemberAccessExpression(faultAccess, nameof(Fault.IsOccurring));
+				var isOccurring = Syntax.MemberAccessExpression(faultAccess, nameof(Fault.IsActivated));
 				var notOccurring = Syntax.LogicalNotExpression(isOccurring);
 
 				var ifStatement = Syntax.IfStatement(notOccurring, baseStatement).NormalizeWhitespace().WithTrailingNewLines(1);

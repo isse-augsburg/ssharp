@@ -31,7 +31,7 @@ namespace SafetySharp.Modeling
 		///   Initializes a new instance.
 		/// </summary>
 		public PersistentFault()
-			: base(independentOccurrence: true)
+			: base(independentActivation: true)
 		{
 		}
 
@@ -40,7 +40,7 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		protected override bool GetUpdatedOccurrenceState()
 		{
-			if (!IsOccurring)
+			if (!IsActivated)
 				return Choice.Choose(true, false);
 
 			return true;
