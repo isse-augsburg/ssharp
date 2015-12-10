@@ -33,16 +33,16 @@
 //---------------------------------------------------------------------------------------------------------------------------
 extern "C"
 {
-#pragma warning(push)
-#pragma warning(disable: 4200)
-#include "chunk-support.h"
-#include "string-map.h"
-#include "bitvector.h"
-#include "dm.h"
-#include "lts-type.h"
-#include "ltsmin-standard.h"
-#include "pins.h"
-#pragma warning(pop)
+	#pragma warning(push)
+	#pragma warning(disable: 4200)
+		#include "chunk-support.h"
+		#include "string-map.h"
+		#include "bitvector.h"
+		#include "dm.h"
+		#include "lts-type.h"
+		#include "ltsmin-standard.h"
+		#include "pins.h"
+	#pragma warning(pop)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -136,19 +136,21 @@ void LoadModel(model_t model, const char* modelFile)
 		lts_type_set_state_length(ltsType, stateSlotCount);
 		Console::WriteLine("State vector has {0} slots ({1} bytes).", stateSlotCount, stateSlotCount * sizeof(int32_t));
 
-		// Set the 'int' type for state slots
+		// Set the 'int' type for state slots and their names
 		auto intType = lts_type_put_type(ltsType, "int", LTStypeDirect, nullptr);
 		for (auto i = 0; i < stateSlotCount; ++i)
 		{
 			lts_type_set_state_typeno(ltsType, i, intType);
 
+			// Slot 0 is the special pseudo construction slot
 			if (i == 0)
 			{
 				auto name = Marshal::StringToHGlobalAnsi(RuntimeModel::ConstructionStateName);
 				lts_type_set_state_name(ltsType, i, (char*)name.ToPointer());
 				Marshal::FreeHGlobal(name);
 			}
-			else {
+			else 
+			{
 				char name[10];
 				sprintf_s(name, "state%d", i);
 				lts_type_set_state_name(ltsType, i, name);
