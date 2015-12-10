@@ -45,7 +45,7 @@ namespace Tests.Serialization.Objects
 			};
 
 			GenerateCode(SerializationMode.Optimized, c, c.I, o1, o2, c.D, c.B, c.P, c.O, c.E, c.S);
-			StateSlotCount.ShouldBe(29);
+			StateSlotCount.ShouldBe(29 - (IntPtr.Size == 8 ? 0 : 2));
 
 			Serialize();
 			c.I[1] = 33;

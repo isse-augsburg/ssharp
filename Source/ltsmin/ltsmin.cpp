@@ -94,7 +94,7 @@ matrix_t StateLabelMatrix;
 // Global variables of managed types must be wrapped in a class...
 ref struct Globals
 {
-	static MemoryStream^ ModelStream;
+	static String^ ModelFile;
 	static ThreadLocal<RuntimeModel^>^ RuntimeModels;
 
 	static property RuntimeModel^ Model
@@ -120,7 +120,7 @@ void LoadModel(model_t model, const char* modelFile)
 {
 	try
 	{
-		Globals::ModelStream = gcnew MemoryStream(File::ReadAllBytes(gcnew String(modelFile)));
+		Globals::ModelFile = gcnew String(modelFile);
 		Globals::RuntimeModels = gcnew ThreadLocal<RuntimeModel^>(gcnew Func<RuntimeModel^>(&CreateModel));
 
 		auto stateSlotCount = Globals::Model->StateSlotCount;
@@ -280,10 +280,7 @@ int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state)
 RuntimeModel^ CreateModel()
 {
 	// Unfortunately, C++/CLI does not support managed lambdas
-	auto model = RuntimeModelSerializer::Load(Globals::ModelStream);
-	Globals::ModelStream->Seek(0, SeekOrigin::Begin);
-
-	return model;
+	return RuntimeModelSerializer::Load(gcnew MemoryStream(File::ReadAllBytes(Globals::ModelFile)));
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
