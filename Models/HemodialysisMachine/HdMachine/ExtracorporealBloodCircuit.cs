@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace HemodialysisMachine
 {
+	using Utilities;
+
 	class ExtracorporealBloodCircuit : IBloodFlowIn, IBloodFlowOut
 	{
 		class ArterialBloodPump : DirectBloodFlow, IBloodFlowIn, IBloodFlowOut
@@ -55,6 +57,7 @@ namespace HemodialysisMachine
 		}
 
 		public Func<BloodUnit> FlowUnitBefore { get; set; }
+		public Func<BloodUnit> FlowUnitAfterwards { get; set; }
 
 		private readonly ArterialBloodPump _arterialBloodPump = new ArterialBloodPump();
 		private readonly ArteriaPressureTransducer _arteriaPressureTransducer = new ArteriaPressureTransducer();
@@ -80,9 +83,5 @@ namespace HemodialysisMachine
 			BloodFlowConnection.ConnectOutWithOut(_venousTubingValve, this);
 		}
 
-		public BloodUnit FlowUnitAfterwards()
-		{
-			throw new NotImplementedException();
-		}
 	}
 }

@@ -29,7 +29,7 @@ namespace HemodialysisMachine.HdMachine
 		//   * Two sides separated by diaphragm.
 		//     One half to the dialyzer (fresh dialyzing fluid) and the other half from the dialyzer (used dialyzing fluid)
 		//   * inlet valve and outlet valve
-		class BalanceChamber : IDialysateFlowIn, IDialysateFlowOut
+		class BalanceChamber : DirectDialyzingFluidFlow, IDialyzingFluidFlowIn, IDialyzingFluidFlowOut
 		{
 			enum State
 			{

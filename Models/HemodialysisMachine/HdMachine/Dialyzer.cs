@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HemodialysisMachine
 {
-	class Dialyzer : IBloodFlowIn, IBloodFlowOut
+	class Dialyzer : DirectBloodFlow, IBloodFlowIn, IBloodFlowOut
 	{
 		void Diffuse()
 		{
@@ -16,12 +16,6 @@ namespace HemodialysisMachine
 		void Update()
 		{
 			
-		}
-
-		public Func<BloodUnit> FlowUnitBefore { get; set; }
-		public BloodUnit FlowUnitAfterwards()
-		{
-			return FlowUnitBefore();
 		}
 	}
 }

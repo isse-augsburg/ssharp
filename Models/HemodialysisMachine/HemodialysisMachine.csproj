@@ -40,18 +40,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BloodFlowConnection.cs" />
-    <Compile Include="BloodUnit.cs" />
+    <Compile Include="BloodFlow.cs" />
     <Compile Include="DialysisRun\DialysisRun.cs" />
+    <Compile Include="DialyzingFluidFlow.cs" />
     <Compile Include="HdMachine\ControlSystem.cs" />
     <Compile Include="HdMachine\HdMachine.cs" />
+    <Compile Include="Utilities\AbstractFlow.cs" />
     <Compile Include="ValveState.cs" />
-    <Compile Include="DialyzingFluidUnit.cs" />
     <Compile Include="HdMachine\Dialyzer.cs" />
     <Compile Include="HdMachine\DialyzingFluidProvider.cs" />
     <Compile Include="HdMachine\ExtracorporealBloodCircuit.cs" />
-    <Compile Include="IBloodFlow.cs" />
-    <Compile Include="IDialyzingFluidFlow.cs" />
     <Compile Include="Patient\Patient.cs" />
     <Compile Include="Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
