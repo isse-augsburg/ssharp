@@ -23,19 +23,19 @@
 namespace SafetySharp.Modeling
 {
 	/// <summary>
-	///   Determines the activation mode kind of a <see cref="Fault" />.
+	///   Determines the activation mode of a <see cref="Fault" />.
 	/// </summary>
 	public enum ActivationMode
 	{
 		/// <summary>
 		///   Indicates that the fault is always activated whenever it can cause an error.
 		/// </summary>
-		Always,
+		Forced,
 
 		/// <summary>
 		///   Indicates that the fault is never activated.
 		/// </summary>
-		Never,
+		Suppressed,
 
 		/// <summary>
 		///   Indicates that the fault is nondeterministically activated or not whenever it can cause an error.

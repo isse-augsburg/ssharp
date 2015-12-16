@@ -55,17 +55,34 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   The serialized counter example.
 		/// </summary>
-		private int[][] _counterExample;
+		private readonly int[][] _counterExample;
 
 		/// <summary>
 		///   The serialized runtime model the counter example was generated for.
 		/// </summary>
-		private byte[] _serializedRuntimeModel;
+		private readonly byte[] _serializedModel;
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="model">The model the counter example was generated for.</param>
+		/// <param name="serializedModel">The serialized runtime model the counter example was generated for.</param>
+		/// <param name="counterExample">The serialized counter example.</param>
+		internal CounterExample(RuntimeModel model, byte[] serializedModel, int[][] counterExample)
+		{
+			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(serializedModel, nameof(serializedModel));
+			Requires.NotNull(counterExample, nameof(counterExample));
+
+			Model = model;
+			_serializedModel = serializedModel;
+			_counterExample = counterExample;
+		}
 
 		/// <summary>
 		///   Gets the model the counter example was generated for.
 		/// </summary>
-		public RuntimeModel Model { get; private set; }
+		public RuntimeModel Model { get; }
 
 		/// <summary>
 		///   Gets the number of steps the counter example consists of.
@@ -131,8 +148,8 @@ namespace SafetySharp.Analysis
 			using (var writer = new BinaryWriter(File.OpenWrite(file), Encoding.UTF8))
 			{
 				writer.Write(FileHeader);
-				writer.Write(_serializedRuntimeModel.Length);
-				writer.Write(_serializedRuntimeModel);
+				writer.Write(_serializedModel.Length);
+				writer.Write(_serializedModel);
 
 				var formatter = new BinaryFormatter();
 				var memoryStream = new MemoryStream();
@@ -199,7 +216,7 @@ namespace SafetySharp.Analysis
 						counterExample[i][j] = reader.ReadInt32();
 				}
 
-				return new CounterExample { Model = model, _serializedRuntimeModel = serializedRuntimeModel, _counterExample = counterExample };
+				return new CounterExample(model, serializedRuntimeModel, counterExample);
 			}
 		}
 
@@ -231,12 +248,7 @@ namespace SafetySharp.Analysis
 				}
 
 				var model = RuntimeModelSerializer.Load(new MemoryStream(serializedRuntimeModel));
-				return new CounterExample
-				{
-					_serializedRuntimeModel = serializedRuntimeModel,
-					Model = model,
-					_counterExample = ParseCsv(model, File.ReadAllLines(csvFile.Path).Skip(1)).ToArray()
-				};
+				return new CounterExample(model, serializedRuntimeModel, ParseCsv(model, File.ReadAllLines(csvFile.Path).Skip(1)).ToArray());
 			}
 		}
 

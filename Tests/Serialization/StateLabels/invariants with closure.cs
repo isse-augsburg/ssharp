@@ -41,6 +41,7 @@ namespace Tests.Serialization.StateLabels
 			Create(m, f1, f2, f3);
 
 			StateFormulas.Length.ShouldBe(3);
+			Formulas.Length.ShouldBe(3);
 			RootComponents.Length.ShouldBe(1);
 
 			var root = RootComponents[0];

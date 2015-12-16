@@ -28,13 +28,13 @@ namespace Tests.Normalization.FaultNames.Changed
 	{
 		private PersistentFault F1 { get; set; } = new PersistentFault();
 		private Fault F2 { get; } = new TransientFault();
-		private Fault F3 { get; } = new TransientFault { ActivationMode = ActivationMode.Always };
+		private Fault F3 { get; } = new TransientFault { ActivationMode = ActivationMode.Forced };
 	}
 
 	public class Out3
 	{
 		private PersistentFault F1 { get; set; } = new PersistentFault() { Name = "F1" };
 		private Fault F2 { get; } = new TransientFault() { Name = "F2" };
-		private Fault F3 { get; } = new TransientFault { ActivationMode = ActivationMode.Always, Name = "F3" };
+		private Fault F3 { get; } = new TransientFault { ActivationMode = ActivationMode.Forced, Name = "F3" };
 	}
 }

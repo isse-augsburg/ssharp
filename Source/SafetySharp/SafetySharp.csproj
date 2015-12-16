@@ -42,6 +42,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis\FormulaVisitors\EvaluationVisitor.cs" />
+    <Compile Include="Analysis\SSharpChecker.cs" />
     <Compile Include="Analysis\Role.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsStateFormulaVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\LtsMinCtlTransformer.cs" />
@@ -63,6 +65,7 @@
     <Compile Include="Modeling\NonDiscoverableAttribute.cs" />
     <Compile Include="Analysis\CounterExample.cs" />
     <Compile Include="Modeling\ActivationMode.cs" />
+    <Compile Include="Runtime\InvariantChecker.cs" />
     <Compile Include="Runtime\RealTimeSimulator.cs" />
     <Compile Include="Runtime\Reflection\ComponentExtensions.cs" />
     <Compile Include="Runtime\Reflection\ModelExtensions.cs" />
@@ -106,6 +109,7 @@
     <Compile Include="Runtime\ChoiceStack.cs" />
     <Compile Include="Runtime\RuntimeModel.cs" />
     <Compile Include="Runtime\Serialization\Serializers\FaultEffectSerializer.cs" />
+    <Compile Include="Runtime\Serialization\Serializers\StateFormulaSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\TypeSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\StringSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\ArraySerializer.cs" />
@@ -120,6 +124,7 @@
     <Compile Include="Runtime\Serialization\StateSlotMetadata.cs" />
     <Compile Include="Runtime\SimulationState.cs" />
     <Compile Include="Runtime\Simulator.cs" />
+    <Compile Include="Runtime\StateStorage.cs" />
     <Compile Include="Runtime\StateCache.cs" />
     <Compile Include="Runtime\UnboundPortException.cs" />
     <Compile Include="Utilities\MemoryBuffer.cs" />

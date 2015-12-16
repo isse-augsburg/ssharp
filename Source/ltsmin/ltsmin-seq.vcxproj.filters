@@ -28,4 +28,7 @@
       <Filter>ltsmin</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ltsmin.cpp" />
+  </ItemGroup>
 </Project>

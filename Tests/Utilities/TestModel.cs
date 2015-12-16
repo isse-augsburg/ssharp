@@ -22,11 +22,9 @@
 
 namespace Tests.Utilities
 {
-	using System.IO;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
-	using SafetySharp.Runtime.Serialization;
 
 	/// <summary>
 	///   Represents a base class for testable runtime models that are compiled and instantiated dynamically during test execution.
@@ -47,6 +45,11 @@ namespace Tests.Utilities
 		///   Gets the state formulas the model was instantiated with.
 		/// </summary>
 		protected StateFormula[] StateFormulas => RuntimeModel.StateFormulas;
+
+		/// <summary>
+		///   Gets the formulas the model was instantiated with.
+		/// </summary>
+		protected Formula[] Formulas => RuntimeModel.Formulas;
 
 		/// <summary>
 		///   Gets the number of state slots required to serialize the model's state.

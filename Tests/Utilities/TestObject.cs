@@ -33,12 +33,20 @@ namespace Tests.Utilities
 		public TestTraceOutput Output { get; private set; }
 
 		/// <summary>
+		///   The arguments passed to the test object.
+		/// </summary>
+		public object[] Arguments { get; private set; }
+
+		/// <summary>
 		///   Executes the tests of the object.
 		/// </summary>
 		/// <param name="output">The output that should be used to write test output.</param>
-		public void Test(TestTraceOutput output)
+		/// <param name="args">The arguments passed to the test object.</param>
+		public void Test(TestTraceOutput output, object[] args)
 		{
 			Output = output;
+			Arguments = args;
+
 			Check();
 		}
 

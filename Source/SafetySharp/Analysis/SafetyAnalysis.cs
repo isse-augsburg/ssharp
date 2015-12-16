@@ -103,7 +103,7 @@ namespace SafetySharp.Analysis
 				{
 					// Enable or disable the faults that the set represents
 					for (var i = 1; i <= faults.Length; ++i)
-						faults[i - 1].ActivationMode = (set & (1 << (i - 1))) != 0 ? ActivationMode.Nondeterministic : ActivationMode.Never;
+						faults[i - 1].ActivationMode = (set & (1 << (i - 1))) != 0 ? ActivationMode.Nondeterministic : ActivationMode.Suppressed;
 
 					// If there was a counter example, the set is a cut set
 					var counterExample = _modelChecker.CheckInvariant(_model, !hazard);

@@ -144,10 +144,16 @@ namespace SafetySharp.Utilities
 			That(lowerBound.CompareTo(upperBound) <= 0, nameof(lowerBound), $"lowerBound '{lowerBound}' does not precede upperBound '{upperBound}'.");
 
 			if (argument.CompareTo(lowerBound) < 0)
-				throw new ArgumentOutOfRangeException(argumentName, argument, "Lower bound range violation.");
+			{
+				throw new ArgumentOutOfRangeException(argumentName, argument,
+					$"Lower bound violation. Expected argument to lie between {lowerBound} and {upperBound}; actual value: {argument}.");
+			}
 
 			if (argument.CompareTo(upperBound) >= 0)
-				throw new ArgumentOutOfRangeException(argumentName, argument, "Upper bound range violation.");
+			{
+				throw new ArgumentOutOfRangeException(argumentName, argument,
+					$"Upper bound violation. Expected argument to lie between {lowerBound} and {upperBound}; actual value: {argument}.");
+			}
 		}
 
 		/// <summary>

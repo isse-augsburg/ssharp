@@ -29,11 +29,11 @@ namespace Funkfahrbetrieb
 
 	public class Tests
 	{
-		[Test]
-		public void CollisionDcca()
+		[TestCase]
+		public void CollisionDcca([Values(typeof(SSharpChecker), typeof(LtsMin))] Type modelChecker)
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(new LtsMin(), Model.Create(specification));
+			var analysis = new SafetyAnalysis((ModelChecker)Activator.CreateInstance(modelChecker), Model.Create(specification));
 
 			var result = analysis.ComputeMinimalCutSets(specification.PossibleCollision, "counter examples/ffb");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;

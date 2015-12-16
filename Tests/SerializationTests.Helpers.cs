@@ -22,24 +22,30 @@
 
 namespace Tests
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using JetBrains.Annotations;
-	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
+	using SafetySharp.Utilities;
 	using Shouldly;
 	using Utilities;
 	using Xunit.Abstractions;
 
-	public abstract unsafe class SerializationObject : TestObject
+	public abstract unsafe class SerializationObject : TestObject, IDisposable
 	{
 		private SerializationDelegate _deserializer;
 		private ObjectTable _objectTable;
 		private SerializationDelegate _serializer;
-		private StateCache _stateCache;
+		private PinnedPointer _state;
 
 		protected int* SerializedState { get; private set; }
 		protected int StateSlotCount { get; private set; }
+
+		public void Dispose()
+		{
+			_state.Dispose();
+		}
 
 		protected void GenerateCode(SerializationMode mode, params object[] objects)
 		{
@@ -50,8 +56,8 @@ namespace Tests
 			_deserializer = SerializationRegistry.Default.CreateStateDeserializer(_objectTable, mode);
 
 			StateSlotCount = SerializationRegistry.Default.GetStateSlotCount(_objectTable, mode);
-			_stateCache = new StateCache(StateSlotCount + 1, 1);
-			SerializedState = _stateCache.Allocate();
+			_state = PinnedPointer.Create(new int[StateSlotCount + 1]);
+			SerializedState = (int*)_state;
 		}
 
 		protected void Serialize()

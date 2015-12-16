@@ -142,7 +142,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">
       <Project>{9b6c1fb4-3f1b-43ac-a0e0-eaed4088bf37}</Project>
-      <Name>Modeling</Name>
+      <Name>SafetySharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elbtunnel\Elbtunnel.csproj">
       <Project>{6ae088bd-212e-4f38-96a1-b16c4f95d243}</Project>

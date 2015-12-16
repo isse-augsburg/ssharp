@@ -32,20 +32,20 @@ namespace Tests.Execution.Faults.ProvidedPorts
 			Create(new D());
 			var d = (D)RootComponents[0];
 
-			d.F1.ActivationMode = ActivationMode.Always;
-			d.F2.ActivationMode = ActivationMode.Always;
+			d.F1.ActivationMode = ActivationMode.Forced;
+			d.F2.ActivationMode = ActivationMode.Forced;
 			d.M().ShouldBe(1111);
 
-			d.F1.ActivationMode = ActivationMode.Never;
-			d.F2.ActivationMode = ActivationMode.Always;
+			d.F1.ActivationMode = ActivationMode.Suppressed;
+			d.F2.ActivationMode = ActivationMode.Forced;
 			d.M().ShouldBe(1101);
 
-			d.F1.ActivationMode = ActivationMode.Always;
-			d.F2.ActivationMode = ActivationMode.Never;
+			d.F1.ActivationMode = ActivationMode.Forced;
+			d.F2.ActivationMode = ActivationMode.Suppressed;
 			d.M().ShouldBe(111);
 
-			d.F1.ActivationMode = ActivationMode.Never;
-			d.F2.ActivationMode = ActivationMode.Never;
+			d.F1.ActivationMode = ActivationMode.Suppressed;
+			d.F2.ActivationMode = ActivationMode.Suppressed;
 			d.M().ShouldBe(101);
 		}
 

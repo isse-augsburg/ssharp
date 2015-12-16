@@ -164,10 +164,16 @@ namespace SafetySharp.Utilities
 				$"lowerBound '{lowerBound}' does not precede upperBound '{upperBound}'.");
 
 			if (value.CompareTo(lowerBound) < 0)
-				throw new InvalidOperationException($"Lower bound violation. Expected argument to lie between {lowerBound} and {upperBound}.");
+			{
+				throw new InvalidOperationException(
+					$"Lower bound violation. Expected value to lie between {lowerBound} and {upperBound}; actual value: {value}.");
+			}
 
 			if (value.CompareTo(upperBound) >= 0)
-				throw new InvalidOperationException($"Upper bound violation. Expected argument to lie between {lowerBound} and {upperBound}.");
+			{
+				throw new InvalidOperationException(
+					$"Upper bound violation. Expected value to lie between {lowerBound} and {upperBound}; actual value: {value}.");
+			}
 		}
 
 		/// <summary>

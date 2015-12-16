@@ -90,18 +90,18 @@ namespace SafetySharp.Modeling
 				if (value == ActivationMode.Nondeterministic)
 					IsActivated = false;
 				else
-					IsActivated = value == ActivationMode.Always;
+					IsActivated = value == ActivationMode.Forced;
 			}
 		}
 
 		/// <summary>
-		///   Toggles the fault's <see cref="ActivationMode" /> between <see cref="Modeling.ActivationMode.Always" /> and
-		///   <see cref="Modeling.ActivationMode.Never" />, with <see cref="Modeling.ActivationMode.Nondeterministic" /> being
-		///   treated as <see cref="Modeling.ActivationMode.Never" />.
+		///   Toggles the fault's <see cref="ActivationMode" /> between <see cref="Modeling.ActivationMode.Forced" /> and
+		///   <see cref="Modeling.ActivationMode.Suppressed" />, with <see cref="Modeling.ActivationMode.Nondeterministic" /> being
+		///   treated as <see cref="Modeling.ActivationMode.Suppressed" />.
 		/// </summary>
 		public void ToggleActivationMode()
 		{
-			ActivationMode = ActivationMode == ActivationMode.Always ? ActivationMode.Never : ActivationMode.Always;
+			ActivationMode = ActivationMode == ActivationMode.Forced ? ActivationMode.Suppressed : ActivationMode.Forced;
 		}
 
 		/// <summary>

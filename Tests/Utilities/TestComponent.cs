@@ -38,7 +38,8 @@ namespace Tests.Utilities
 		///   Executes the tests of the object.
 		/// </summary>
 		/// <param name="output">The output that should be used to write test output.</param>
-		public void Test(TestTraceOutput output)
+		/// <param name="args">The arguments passed to the test object.</param>
+		public void Test(TestTraceOutput output, object[] args)
 		{
 			Output = output;
 			Check();

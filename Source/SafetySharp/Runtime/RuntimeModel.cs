@@ -62,7 +62,7 @@ namespace SafetySharp.Runtime
 		private readonly SerializationDelegate _deserialize;
 
 		/// <summary>
-		///   The objects contained in the model.
+		///   The objects referenced by the model.
 		/// </summary>
 		private readonly ObjectTable _objects;
 
@@ -81,24 +81,25 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="rootComponents">The root components of the model.</param>
 		/// <param name="objectTable">The table of objects referenced by the model.</param>
-		/// <param name="stateFormulas">The state formulas of the model.</param>
-		internal RuntimeModel(Component[] rootComponents, ObjectTable objectTable, StateFormula[] stateFormulas)
+		/// <param name="formulas">The formulas that are checked on the model.</param>
+		/// <param name="uniqueInitialState">Indicates whether the model must have a unique initial state.</param>
+		internal RuntimeModel(Component[] rootComponents, ObjectTable objectTable, Formula[] formulas, bool uniqueInitialState)
 		{
 			Requires.NotNull(rootComponents, nameof(rootComponents));
 			Requires.NotNull(objectTable, nameof(objectTable));
-			Requires.NotNull(stateFormulas, nameof(stateFormulas));
+			Requires.NotNull(formulas, nameof(formulas));
 
 			// Create a local object table just for the objects referenced by the model; only these objects
 			// have to be serialized and deserialized. The local object table does not contain, for instance,
 			// the closure types of the state formulas
 			// The construction state indicator is the first object in the table; its corresponding state slot will be 0
 			var objects = rootComponents.SelectMany(obj => SerializationRegistry.Default.GetReferencedObjects(obj, SerializationMode.Optimized));
-			objects = new object[] { _constructionStateIndicator }.Concat(objects);
-			_objects = new ObjectTable(objects);
+			_objects = new ObjectTable(uniqueInitialState ? new object[] { _constructionStateIndicator }.Concat(objects) : objects);
 
 			RootComponents = rootComponents;
 			Faults = _objects.OfType<Fault>().Where(fault => fault.ActivationMode == ActivationMode.Nondeterministic).ToArray();
-			StateFormulas = stateFormulas;
+			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
+			Formulas = formulas;
 			StateSlotCount = SerializationRegistry.Default.GetStateSlotCount(_objects, SerializationMode.Optimized);
 
 			_deserialize = SerializationRegistry.Default.CreateStateDeserializer(_objects, SerializationMode.Optimized);
@@ -113,6 +114,11 @@ namespace SafetySharp.Runtime
 			fixed (int* state = _constructionState)
 				Serialize(state);
 		}
+
+		/// <summary>
+		///   The formulas that are checked on the model.
+		/// </summary>
+		public Formula[] Formulas { get; }
 
 		/// <summary>
 		///   Gets the number of slots in the state vector.
@@ -130,14 +136,9 @@ namespace SafetySharp.Runtime
 		public Fault[] Faults { get; }
 
 		/// <summary>
-		///   Gets the state labels of the model.
+		///   Gets the state formulas of the model.
 		/// </summary>
 		internal StateFormula[] StateFormulas { get; }
-
-		/// <summary>
-		///   Gets the number of transition groups.
-		/// </summary>
-		internal int TransitionGroupCount => 1;
 
 		/// <summary>
 		///   Deserializes the model's state from <paramref name="serializedState" />.
@@ -162,7 +163,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Resets the model to one of its initial states.
 		/// </summary>
-		public void Reset()
+		internal void Reset()
 		{
 			fixed (int* state = _constructionState)
 			{
@@ -177,7 +178,7 @@ namespace SafetySharp.Runtime
 		///   Updates the state of the model by executing a single step.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void ExecuteStep()
+		internal void ExecuteStep()
 		{
 			foreach (var fault in Faults)
 				fault.Update();
@@ -254,8 +255,7 @@ namespace SafetySharp.Runtime
 		///   Computes the successor states for <paramref name="sourceState" />.
 		/// </summary>
 		/// <param name="sourceState">The source state the next states should be computed for.</param>
-		/// <param name="transitionGroup">The transition group the next states should be computed for.</param>
-		internal StateCache ComputeSuccessorStates(int* sourceState, int transitionGroup)
+		internal StateCache ComputeSuccessorStates(int* sourceState)
 		{
 			_stateCache.Clear();
 			_choiceResolver.PrepareNextState();
@@ -284,8 +284,8 @@ namespace SafetySharp.Runtime
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
-			_stateCache.SafeDispose();
 			_choiceResolver.SafeDispose();
+			_stateCache.SafeDispose();
 		}
 
 		/// <summary>

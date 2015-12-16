@@ -112,10 +112,14 @@ namespace Tests.Utilities
 		///   <see cref="ITestableObject" />, and executes the <see cref="ITestableObject.Test" /> method for each instance.
 		/// </summary>
 		/// <param name="file">The file that should be compiled and tested.</param>
-		protected void ExecuteDynamicTests(string file)
+		/// <param name="args">The arguments that should be passed to the test.</param>
+		protected void ExecuteDynamicTests(string file, params object[] args)
 		{
 			foreach (var obj in GetTestableObjects(ParseFile(file)))
-				obj.Test(Output);
+			{
+				obj.Test(Output, args);
+				(obj as IDisposable)?.Dispose();
+			}
 		}
 
 		/// <summary>

@@ -80,7 +80,6 @@ using namespace SafetySharp::Runtime::Serialization;
 void LoadModel(model_t model, const char* file);
 int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, TransitionCB callback, void* context);
 int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state);
-RuntimeModel^ CreateModel();
 bool IsConstructionState(int32_t* state);
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -94,16 +93,7 @@ matrix_t StateLabelMatrix;
 // Global variables of managed types must be wrapped in a class...
 ref struct Globals
 {
-	static String^ ModelFile;
-	static ThreadLocal<RuntimeModel^>^ RuntimeModels;
-
-	static property RuntimeModel^ Model
-	{
-		RuntimeModel^ get()
-		{
-			return RuntimeModels->Value;
-		}
-	}
+	static RuntimeModel^ Model;
 };
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -120,12 +110,11 @@ void LoadModel(model_t model, const char* modelFile)
 {
 	try
 	{
-		Globals::ModelFile = gcnew String(modelFile);
-		Globals::RuntimeModels = gcnew ThreadLocal<RuntimeModel^>(gcnew Func<RuntimeModel^>(&CreateModel));
+		Globals::Model = RuntimeModelSerializer::Load(gcnew MemoryStream(File::ReadAllBytes(gcnew String(modelFile))));
 
 		auto stateSlotCount = Globals::Model->StateSlotCount;
 		auto stateLabelCount = Globals::Model->StateFormulas->Length;
-		auto transitionGroupCount = Globals::Model->TransitionGroupCount;
+		auto transitionGroupCount = 1;
 
 		// Models without state are invalid
 		if (stateSlotCount <= 0)
@@ -225,12 +214,13 @@ void LoadModel(model_t model, const char* modelFile)
 int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, TransitionCB callback, void* context)
 {
 	(void)model;
+	(void)group;
 
 	try
 	{
 		auto stateCache = IsConstructionState(state)
 			? Globals::Model->ComputeInitialStates()
-			: Globals::Model->ComputeSuccessorStates(state, group);
+			: Globals::Model->ComputeSuccessorStates(state);
 
 		auto stateCount = stateCache->StateCount;
 		auto stateSize = stateCache->SlotCount;
@@ -272,15 +262,6 @@ int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state)
 
 		return 0;
 	}
-}
-
-//---------------------------------------------------------------------------------------------------------------------------
-// Model creation function
-//---------------------------------------------------------------------------------------------------------------------------
-RuntimeModel^ CreateModel()
-{
-	// Unfortunately, C++/CLI does not support managed lambdas
-	return RuntimeModelSerializer::Load(gcnew MemoryStream(File::ReadAllBytes(Globals::ModelFile)));
 }
 
 //---------------------------------------------------------------------------------------------------------------------------

@@ -22,11 +22,28 @@
 
 namespace SafetySharp.Analysis
 {
+	using System;
+
 	/// <summary>
 	///   Represents a base class for external model checker tools.
 	/// </summary>
 	public abstract class ModelChecker
 	{
+		/// <summary>
+		///   Raised when the model checker has written an output. The output is always written to the console by default.
+		/// </summary>
+		public event Action<string> OutputWritten;
+
+		/// <summary>
+		///   Forwards the output <paramref name="message" />.
+		/// </summary>
+		/// <param name="message">The message that should be output.</param>
+		protected void Output(string message)
+		{
+			Console.WriteLine(message);
+			OutputWritten?.Invoke(message);
+		}
+
 		/// <summary>
 		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />.
 		/// </summary>
@@ -39,7 +56,7 @@ namespace SafetySharp.Analysis
 		///   <see cref="CounterExample" /> if the invariant is violated, <c>null</c> otherwise.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
-		/// <param name="invariant">[LiftExpression] The invariant that should be checked.</param>
+		/// <param name="invariant">The invariant that should be checked.</param>
 		public abstract CounterExample CheckInvariant(Model model, Formula invariant);
 	}
 }

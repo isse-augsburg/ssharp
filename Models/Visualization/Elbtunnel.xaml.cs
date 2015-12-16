@@ -156,11 +156,11 @@ namespace Visualization
 			MisdetectionOdr.IsChecked = MainControl.RightDetector.Misdetection.IsActivated;
 			MisdetectionOdf.IsChecked = EndControl.Detector.Misdetection.IsActivated;
 
-			PreControl.Detector.FalseDetection.ActivationMode = ActivationMode.Never;
-			MainControl.PositionDetector.FalseDetection.ActivationMode = ActivationMode.Never;
-			MainControl.LeftDetector.FalseDetection.ActivationMode = ActivationMode.Never;
-			MainControl.RightDetector.FalseDetection.ActivationMode = ActivationMode.Never;
-			EndControl.Detector.FalseDetection.ActivationMode = ActivationMode.Never;
+			PreControl.Detector.FalseDetection.ActivationMode = ActivationMode.Suppressed;
+			MainControl.PositionDetector.FalseDetection.ActivationMode = ActivationMode.Suppressed;
+			MainControl.LeftDetector.FalseDetection.ActivationMode = ActivationMode.Suppressed;
+			MainControl.RightDetector.FalseDetection.ActivationMode = ActivationMode.Suppressed;
+			EndControl.Detector.FalseDetection.ActivationMode = ActivationMode.Suppressed;
 
 			SetFaultAdornment(FaultLb1, PreControl.Detector);
 			SetFaultAdornment(FaultLb2, MainControl.PositionDetector);
@@ -240,31 +240,31 @@ namespace Visualization
 		private void OnFalseDetectionLb1(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				PreControl.Detector.FalseDetection.ActivationMode = ActivationMode.Always;
+				PreControl.Detector.FalseDetection.ActivationMode = ActivationMode.Forced;
 		}
 
 		private void OnFalseDetectionLb2(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				MainControl.PositionDetector.FalseDetection.ActivationMode = ActivationMode.Always;
+				MainControl.PositionDetector.FalseDetection.ActivationMode = ActivationMode.Forced;
 		}
 
 		private void OnFalseDetectionOdl(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				MainControl.LeftDetector.FalseDetection.ActivationMode = ActivationMode.Always;
+				MainControl.LeftDetector.FalseDetection.ActivationMode = ActivationMode.Forced;
 		}
 
 		private void OnFalseDetectionOdr(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				MainControl.RightDetector.FalseDetection.ActivationMode = ActivationMode.Always;
+				MainControl.RightDetector.FalseDetection.ActivationMode = ActivationMode.Forced;
 		}
 
 		private void OnFalseDetectionOdf(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				EndControl.Detector.FalseDetection.ActivationMode = ActivationMode.Always;
+				EndControl.Detector.FalseDetection.ActivationMode = ActivationMode.Forced;
 		}
 
 		private static void OnManipulationCompleted(object sender, ManipulationCompletedEventArgs e)

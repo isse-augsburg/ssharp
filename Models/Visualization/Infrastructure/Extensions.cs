@@ -37,7 +37,7 @@ namespace Visualization.Infrastructure
 
 		public static ActivationMode ToOccurrenceKind(this bool value)
 		{
-			return value ? ActivationMode.Always : ActivationMode.Never;
+			return value ? ActivationMode.Forced : ActivationMode.Suppressed;
 		}
 	}
 }

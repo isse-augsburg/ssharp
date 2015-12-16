@@ -23,10 +23,8 @@
 namespace SafetySharp.Analysis
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.IO;
-	using System.Linq;
 	using FormulaVisitors;
 	using Runtime;
 	using Runtime.Serialization;
@@ -41,17 +39,6 @@ namespace SafetySharp.Analysis
 		///   Represents the LtsMin process that is currently running.
 		/// </summary>
 		private ExternalProcess _ltsMin;
-
-		/// <summary>
-		///   Gets or sets a value indicating whether a symbolic or an explicit state model checking algorithm should be used.
-		/// </summary>
-		public bool SymbolicChecking { get; set; }
-
-		/// <summary>
-		///   Gets the outputs that occurred during the execution of LtsMin.
-		/// </summary>
-		public IEnumerable<string> Outputs { get; private set; }
-
 
 		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
@@ -74,7 +61,7 @@ namespace SafetySharp.Analysis
 			transformationVisitor.Visit(invariant);
 
 			return Check(model, invariant,
-				$"--invariant=\"({RuntimeModel.ConstructionStateName} == 1) || ({transformationVisitor.TransformedFormula})\"", false);
+				$"--invariant=\"({RuntimeModel.ConstructionStateName} == 1) || ({transformationVisitor.TransformedFormula})\"");
 		}
 
 		/// <summary>
@@ -96,30 +83,7 @@ namespace SafetySharp.Analysis
 			var transformationVisitor = new LtsMinLtlTransformer();
 			transformationVisitor.Visit(new UnaryFormula(formula, UnaryOperator.Next));
 
-			return Check(model, formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"", false);
-		}
-
-		/// <summary>
-		///   Raised when the model checker has written an output. The output is always written to the console by default.
-		/// </summary>
-		public event Action<string> OutputWritten;
-
-		/// <summary>
-		///   Gets the name of the LtsMin executable.
-		/// </summary>
-		/// <param name="forceSymbolic">Indicates whether symbolic model checking must be used.</param>
-		private string GetExecutableName(bool forceSymbolic)
-		{
-			return SymbolicChecking || forceSymbolic ? "pins2lts-sym.exe" : "pins2lts-seq.exe";
-		}
-
-		/// <summary>
-		///   Gets the name of the S# LtsMin assembly.
-		/// </summary>
-		/// <param name="forceSymbolic">Indicates whether symbolic model checking must be used.</param>
-		private string GetSafetySharpLtsMinAssemblyName(bool forceSymbolic)
-		{
-			return SymbolicChecking || forceSymbolic ? "SafetySharp.LtsMin.Symbolic.dll" : "SafetySharp.LtsMin.Sequential.dll";
+			return Check(model, formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
 		}
 
 		/// <summary>
@@ -147,25 +111,20 @@ namespace SafetySharp.Analysis
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
 		/// <param name="checkArgument">The argument passed to LtsMin that indicates which kind of check to perform.</param>
-		/// <param name="forceSymbolic">Indicates whether symbolic model checking must be used.</param>
-		private CounterExample Check(Model model, Formula formula, string checkArgument, bool forceSymbolic)
+		private CounterExample Check(Model model, Formula formula, string checkArgument)
 		{
 			try
 			{
-				Outputs = Enumerable.Empty<string>();
-
 				using (var modelFile = new TemporaryFile("ssharp"))
 				using (var counterExampleFile = new TemporaryFile("gcf"))
 				{
 					using (var stream = new FileStream(modelFile.Path, FileMode.Create))
-						RuntimeModelSerializer.Save(stream, model, formula);
+						RuntimeModelSerializer.Save(stream, model, true, formula);
 
-					CreateProcess(modelFile.Path, counterExampleFile.Path, checkArgument, forceSymbolic);
+					CreateProcess(modelFile.Path, counterExampleFile.Path, checkArgument);
 					Run();
 
-					Outputs = _ltsMin.Outputs.Select(output => output.Message).ToArray();
 					var success = InterpretExitCode(_ltsMin.ExitCode);
-
 					if (success)
 						return null;
 
@@ -192,26 +151,15 @@ namespace SafetySharp.Analysis
 		/// <param name="modelFile">The model that should be checked.</param>
 		/// <param name="counterExampleFile">The path to the file that should store the counter example.</param>
 		/// <param name="checkArgument">The argument passed to LtsMin that indicates which kind of check to perform.</param>
-		/// <param name="forceSymbolic">Indicates whether symbolic model checking must be used.</param>
-		private void CreateProcess(string modelFile, string counterExampleFile, string checkArgument, bool forceSymbolic)
+		private void CreateProcess(string modelFile, string counterExampleFile, string checkArgument)
 		{
 			Requires.That(_ltsMin == null, "An instance of LtsMin is already running.");
 
-			var assembly = GetSafetySharpLtsMinAssemblyName(forceSymbolic);
 			_ltsMin = new ExternalProcess(
-				fileName: GetExecutableName(forceSymbolic),
-				commandLineArguments: $"--loader={assembly} \"{modelFile}\" {checkArgument} --trace=\"{counterExampleFile}\"",
+				fileName: "pins2lts-seq.exe",
+				commandLineArguments:
+					$"--loader=SafetySharp.LtsMin.Sequential.dll \"{modelFile}\" {checkArgument} --trace=\"{counterExampleFile}\"",
 				outputCallback: output => Output(output.Message));
-		}
-
-		/// <summary>
-		///   Forwards the output <paramref name="message" />.
-		/// </summary>
-		/// <param name="message">The message that should be output.</param>
-		private void Output(string message)
-		{
-			Console.WriteLine(message);
-			OutputWritten?.Invoke(message);
 		}
 
 		/// <summary>
@@ -227,9 +175,9 @@ namespace SafetySharp.Analysis
 			stopwatch.Stop();
 
 			Output(String.Empty);
-			Output("==========================");
-			Output($"Elapsed time: {stopwatch.Elapsed.TotalMilliseconds}ms");
-			Output("==========================");
+			Output("=====================================");
+			Output($"Elapsed time: {stopwatch.Elapsed}");
+			Output("=====================================");
 			Output(String.Empty);
 		}
 	}

@@ -133,6 +133,9 @@
     <Compile Include="..\Source\SafetySharp\Properties\InternalsVisibleTo.cs">
       <Link>Properties\InternalsVisibleTo.cs</Link>
     </Compile>
+    <Compile Include="AnalysisTests.Helpers.cs">
+      <DependentUpon>AnalysisTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="DiagnosticsTests.cs" />
     <Compile Include="DiagnosticsTests.Helpers.cs">
       <DependentUpon>DiagnosticsTests.cs</DependentUpon>
@@ -293,50 +296,47 @@
     <Compile Include="FormulaTests.Helpers.cs">
       <DependentUpon>FormulaTests.cs</DependentUpon>
     </Compile>
-    <Compile Include="LtsMinTests.cs" />
-    <Compile Include="LtsMinTests.Helpers.cs">
-      <DependentUpon>LtsMinTests.cs</DependentUpon>
-    </Compile>
-    <Compile Include="LtsMin\Ctl\AG.cs" />
-    <Compile Include="LtsMin\Ctl\AFAG.cs" />
-    <Compile Include="LtsMin\Ctl\AF.cs" />
-    <Compile Include="LtsMin\Ctl\EX.cs" />
-    <Compile Include="LtsMin\Ctl\AX.cs" />
-    <Compile Include="LtsMin\Ctl\initial state.cs" />
-    <Compile Include="LtsMin\Dcca\no cut sets.cs" />
-    <Compile Include="LtsMin\Dcca\multiple singleton cut sets.cs" />
-    <Compile Include="LtsMin\Dcca\multiple two point cut sets.cs" />
-    <Compile Include="LtsMin\Dcca\single two point cut set.cs" />
-    <Compile Include="LtsMin\Dcca\single singleton cut set.cs" />
-    <Compile Include="LtsMin\Dcca\empty set.cs" />
-    <Compile Include="LtsMin\Invariants\NotViolated\multiple subformulas.cs" />
-    <Compile Include="LtsMin\Invariants\Violated\multiple initial states.cs" />
-    <Compile Include="LtsMin\Ltl\NotViolated\state machine multiple initial states.cs" />
-    <Compile Include="LtsMin\Ltl\NotViolated\nondeterministic faults.cs" />
-    <Compile Include="LtsMin\Ltl\NotViolated\deterministic faults.cs" />
-    <Compile Include="LtsMin\Ltl\NotViolated\forced faults.cs" />
-    <Compile Include="LtsMin\Invariants\NotViolated\disabled faults.cs" />
-    <Compile Include="LtsMin\Invariants\Violated\required port.cs" />
-    <Compile Include="LtsMin\Invariants\NotViolated\state machine.cs" />
-    <Compile Include="LtsMin\Invariants\Violated\list components.cs" />
-    <Compile Include="LtsMin\Invariants\Violated\array components.cs" />
-    <Compile Include="LtsMin\Invariants\Violated\multiple choices 2.cs" />
-    <Compile Include="LtsMin\Invariants\NotViolated\single choice.cs" />
-    <Compile Include="LtsMin\Invariants\NotViolated\deterministic.cs" />
-    <Compile Include="LtsMin\Invariants\NotViolated\initial state.cs" />
-    <Compile Include="LtsMin\Invariants\Violated\deterministic.cs" />
-    <Compile Include="LtsMin\Invariants\Violated\initial state.cs" />
-    <Compile Include="LtsMin\Invariants\Violated\multiple choices 1.cs" />
-    <Compile Include="LtsMin\Invariants\Violated\single choice.cs" />
-    <Compile Include="LtsMin\Invariants\Violated\state machine.cs" />
-    <Compile Include="LtsMin\Ltl\NotViolated\deterministic.cs" />
-    <Compile Include="LtsMin\Ltl\NotViolated\initial state.cs" />
-    <Compile Include="LtsMin\Ltl\NotViolated\multiple choices.cs" />
-    <Compile Include="LtsMin\Ltl\NotViolated\single choice.cs" />
-    <Compile Include="LtsMin\Ltl\Violated\deterministic.cs" />
-    <Compile Include="LtsMin\Ltl\Violated\initial state.cs" />
-    <Compile Include="LtsMin\Ltl\Violated\multiple choices.cs" />
-    <Compile Include="LtsMin\Ltl\Violated\single choice.cs" />
+    <Compile Include="AnalysisTests.cs" />
+    <Compile Include="Analysis\Ctl\AG.cs" />
+    <Compile Include="Analysis\Ctl\AFAG.cs" />
+    <Compile Include="Analysis\Ctl\AF.cs" />
+    <Compile Include="Analysis\Ctl\EX.cs" />
+    <Compile Include="Analysis\Ctl\AX.cs" />
+    <Compile Include="Analysis\Ctl\initial state.cs" />
+    <Compile Include="Analysis\Dcca\no cut sets.cs" />
+    <Compile Include="Analysis\Dcca\multiple singleton cut sets.cs" />
+    <Compile Include="Analysis\Dcca\multiple two point cut sets.cs" />
+    <Compile Include="Analysis\Dcca\single two point cut set.cs" />
+    <Compile Include="Analysis\Dcca\single singleton cut set.cs" />
+    <Compile Include="Analysis\Dcca\empty set.cs" />
+    <Compile Include="Analysis\Invariants\NotViolated\multiple subformulas.cs" />
+    <Compile Include="Analysis\Invariants\Violated\multiple initial states.cs" />
+    <Compile Include="Analysis\Ltl\NotViolated\state machine multiple initial states.cs" />
+    <Compile Include="Analysis\Ltl\NotViolated\nondeterministic faults.cs" />
+    <Compile Include="Analysis\Ltl\NotViolated\deterministic faults.cs" />
+    <Compile Include="Analysis\Ltl\NotViolated\forced faults.cs" />
+    <Compile Include="Analysis\Invariants\NotViolated\disabled faults.cs" />
+    <Compile Include="Analysis\Invariants\Violated\required port.cs" />
+    <Compile Include="Analysis\Invariants\NotViolated\state machine.cs" />
+    <Compile Include="Analysis\Invariants\Violated\list components.cs" />
+    <Compile Include="Analysis\Invariants\Violated\array components.cs" />
+    <Compile Include="Analysis\Invariants\Violated\multiple choices 2.cs" />
+    <Compile Include="Analysis\Invariants\NotViolated\single choice.cs" />
+    <Compile Include="Analysis\Invariants\NotViolated\deterministic.cs" />
+    <Compile Include="Analysis\Invariants\NotViolated\initial state.cs" />
+    <Compile Include="Analysis\Invariants\Violated\deterministic.cs" />
+    <Compile Include="Analysis\Invariants\Violated\initial state.cs" />
+    <Compile Include="Analysis\Invariants\Violated\multiple choices 1.cs" />
+    <Compile Include="Analysis\Invariants\Violated\single choice.cs" />
+    <Compile Include="Analysis\Invariants\Violated\state machine.cs" />
+    <Compile Include="Analysis\Ltl\NotViolated\deterministic.cs" />
+    <Compile Include="Analysis\Ltl\NotViolated\initial state.cs" />
+    <Compile Include="Analysis\Ltl\NotViolated\multiple choices.cs" />
+    <Compile Include="Analysis\Ltl\NotViolated\single choice.cs" />
+    <Compile Include="Analysis\Ltl\Violated\deterministic.cs" />
+    <Compile Include="Analysis\Ltl\Violated\initial state.cs" />
+    <Compile Include="Analysis\Ltl\Violated\multiple choices.cs" />
+    <Compile Include="Analysis\Ltl\Violated\single choice.cs" />
     <Compile Include="Normalization\FaultNames\Changed\properties.cs" />
     <Compile Include="Normalization\FaultNames\Changed\fields.cs" />
     <Compile Include="Normalization\FaultNames\Changed\locals.cs" />
@@ -456,6 +456,7 @@
       <DependentUpon>SerializationTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Serialization\StateLabels\ctl formula.cs" />
+    <Compile Include="Serialization\StateLabels\invariants evaluation.cs" />
     <Compile Include="Serialization\StateLabels\ltl formula.cs" />
     <Compile Include="Serialization\StateLabels\invariants with closure.cs" />
     <Compile Include="Serialization\StateLabels\invariant without closure.cs" />

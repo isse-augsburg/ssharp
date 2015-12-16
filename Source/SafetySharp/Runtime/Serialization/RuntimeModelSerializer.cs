@@ -47,14 +47,18 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="stream">The stream the serialized specification should be written to.</param>
 		/// <param name="model">The model that should be serialized into the <paramref name="stream" />.</param>
 		/// <param name="formulas">The formulas that should be serialized into the <paramref name="stream" />.</param>
-		public static void Save(Stream stream, Model model, params Formula[] formulas)
+		/// <param name="uniqueInitialState">Indicates whether the model must have a unique initial state.</param>
+		public static void Save(Stream stream, Model model, bool uniqueInitialState, params Formula[] formulas)
 		{
 			Requires.NotNull(stream, nameof(stream));
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
 
 			using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+			{
+				writer.Write(uniqueInitialState);
 				SerializeModel(writer, model, formulas);
+			}
 		}
 
 		/// <summary>
@@ -68,7 +72,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			// Collect all objects contained in the model
 			var stateFormulas = CollectStateFormulas(formulas);
-			var objectTable = CreateObjectTable(model, stateFormulas);
+			var objectTable = CreateObjectTable(model, formulas, stateFormulas);
 
 			// Prepare the serialization of the model's initial state
 			var slotCount = SerializationRegistry.Default.GetStateSlotCount(objectTable, SerializationMode.Full);
@@ -77,10 +81,15 @@ namespace SafetySharp.Runtime.Serialization
 			// Serialize the object table
 			SerializeObjectTable(objectTable, writer);
 
-			// Serialize object identifiers of the root components
+			// Serialize the object identifiers of the root components
 			writer.Write(model.Count);
 			foreach (var root in model)
 				writer.Write(objectTable.GetObjectIdentifier(root));
+
+			// Serialize the object identifiers of the root formulas
+			writer.Write(formulas.Length);
+			foreach (var formula in formulas)
+				writer.Write(objectTable.GetObjectIdentifier(formula));
 
 			// Serialize the initial state
 			var serializedState = stackalloc int[slotCount];
@@ -91,23 +100,21 @@ namespace SafetySharp.Runtime.Serialization
 			for (var i = 0; i < slotCount; ++i)
 				writer.Write(serializedState[i]);
 
-			SerializeFormulas(writer, objectTable, stateFormulas);
+			SerializeStateFormulas(writer, objectTable, stateFormulas);
 		}
 
 		/// <summary>
 		///   Serializes the <paramref name="stateFormulas" />.
 		/// </summary>
-		private static void SerializeFormulas(BinaryWriter writer, ObjectTable objectTable, StateFormula[] stateFormulas)
+		private static void SerializeStateFormulas(BinaryWriter writer, ObjectTable objectTable, StateFormula[] stateFormulas)
 		{
 			writer.Write(stateFormulas.Length);
 			foreach (var formula in stateFormulas)
 			{
 				// Serialize the object identifier of the closure as well as the method name
+				writer.Write(objectTable.GetObjectIdentifier(formula));
 				writer.Write(objectTable.GetObjectIdentifier(formula.Expression.Target));
 				writer.Write(formula.Expression.Method.Name);
-
-				// Serialize the formula's label name
-				writer.Write(formula.Label);
 			}
 		}
 
@@ -129,17 +136,19 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Creates the object table for the <paramref name="model" /> and <paramref name="stateFormulas" />.
+		///   Creates the object table for the <paramref name="model" /> and <paramref name="formulas" />.
 		/// </summary>
-		private static ObjectTable CreateObjectTable(Model model, StateFormula[] stateFormulas)
+		private static ObjectTable CreateObjectTable(Model model, Formula[] formulas, StateFormula[] stateFormulas)
 		{
 			var modelObjects = model
+				.Cast<object>()
+				.Concat(formulas)
 				.SelectMany(component => SerializationRegistry.Default.GetReferencedObjects(component, SerializationMode.Full));
 
 			var formulaObjects = stateFormulas
 				.SelectMany(formula => SerializationRegistry.Default.GetReferencedObjects(formula.Expression.Target, SerializationMode.Full));
 
-			return new ObjectTable(modelObjects.Concat(formulaObjects));
+			return new ObjectTable(modelObjects.Concat(formulaObjects).Concat(formulas));
 		}
 
 		/// <summary>
@@ -183,6 +192,8 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private static unsafe RuntimeModel DeserializeModel(BinaryReader reader)
 		{
+			var uniqueInitialState = reader.ReadBoolean();
+
 			// Deserialize the object table
 			var objectTable = DeserializeObjectTable(reader);
 
@@ -190,6 +201,11 @@ namespace SafetySharp.Runtime.Serialization
 			var roots = new Component[reader.ReadInt32()];
 			for (var i = 0; i < roots.Length; ++i)
 				roots[i] = (Component)objectTable.GetObject(reader.ReadInt32());
+
+			// Deserialize the object identifiers of the root formulas
+			var formulas = new Formula[reader.ReadInt32()];
+			for (var i = 0; i < formulas.Length; ++i)
+				formulas[i] = (Formula)objectTable.GetObject(reader.ReadInt32());
 
 			// Copy the serialized initial state from the stream
 			var slotCount = reader.ReadInt32();
@@ -210,8 +226,8 @@ namespace SafetySharp.Runtime.Serialization
 			deserializer(serializedState);
 
 			// Deserialize the state formulas and instantiate the runtime model
-			var stateFormulas = DeserializeFormulas(reader, objectTable);
-			return new RuntimeModel(roots, objectTable, stateFormulas);
+			DeserializeStateFormulas(reader, objectTable);
+			return new RuntimeModel(roots, objectTable, formulas, uniqueInitialState);
 		}
 
 		/// <summary>
@@ -241,21 +257,22 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Deserializes the <see cref="StateFormula" />s from the <paramref name="reader" />.
 		/// </summary>
-		private static StateFormula[] DeserializeFormulas(BinaryReader reader, ObjectTable objectTable)
+		private static void DeserializeStateFormulas(BinaryReader reader, ObjectTable objectTable)
 		{
-			var stateFormulas = new StateFormula[reader.ReadInt32()];
-			for (var i = 0; i < stateFormulas.Length; ++i)
+			var count = reader.ReadInt32();
+			for (var i = 0; i < count; ++i)
 			{
 				// Deserialize the closure object and method name to generate the delegate
+				var formula = (StateFormula)objectTable.GetObject(reader.ReadInt32());
 				var closure = objectTable.GetObject(reader.ReadInt32());
 				var method = closure.GetType().GetMethod(reader.ReadString(), BindingFlags.NonPublic | BindingFlags.Instance);
 				var expression = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), closure, method);
 
-				// Deserialize the label name and instantiate the state formula
-				stateFormulas[i] = new StateFormula(expression, reader.ReadString());
+				typeof(StateFormula)
+					.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
+					.Single(field => field.FieldType == typeof(Func<bool>))
+					.SetValue(formula, expression);
 			}
-
-			return stateFormulas;
 		}
 
 		/// <summary>

@@ -33,51 +33,51 @@ namespace Tests.Execution.Faults.UpdateMethods
 			Create(new C());
 			var c = (C)RootComponents[0];
 
-			c._f1.ActivationMode = ActivationMode.Never;
-			c._f2.ActivationMode = ActivationMode.Never;
-			c._f3.ActivationMode = ActivationMode.Never;
+			c._f1.ActivationMode = ActivationMode.Suppressed;
+			c._f2.ActivationMode = ActivationMode.Suppressed;
+			c._f3.ActivationMode = ActivationMode.Suppressed;
 			c.Update();
 			c.X.ShouldBe(7);
 
-			c._f1.ActivationMode = ActivationMode.Always;
-			c._f2.ActivationMode = ActivationMode.Never;
-			c._f3.ActivationMode = ActivationMode.Never;
+			c._f1.ActivationMode = ActivationMode.Forced;
+			c._f2.ActivationMode = ActivationMode.Suppressed;
+			c._f3.ActivationMode = ActivationMode.Suppressed;
 			c.Update();
 			c.X.ShouldBe(17);
 
-			c._f1.ActivationMode = ActivationMode.Never;
-			c._f2.ActivationMode = ActivationMode.Always;
-			c._f3.ActivationMode = ActivationMode.Never;
+			c._f1.ActivationMode = ActivationMode.Suppressed;
+			c._f2.ActivationMode = ActivationMode.Forced;
+			c._f3.ActivationMode = ActivationMode.Suppressed;
 			c.Update();
 			c.X.ShouldBe(107);
 
-			c._f1.ActivationMode = ActivationMode.Never;
-			c._f2.ActivationMode = ActivationMode.Never;
-			c._f3.ActivationMode = ActivationMode.Always;
+			c._f1.ActivationMode = ActivationMode.Suppressed;
+			c._f2.ActivationMode = ActivationMode.Suppressed;
+			c._f3.ActivationMode = ActivationMode.Forced;
 			c.Update();
 			c.X.ShouldBe(1007);
 
-			c._f1.ActivationMode = ActivationMode.Always;
-			c._f2.ActivationMode = ActivationMode.Always;
-			c._f3.ActivationMode = ActivationMode.Never;
+			c._f1.ActivationMode = ActivationMode.Forced;
+			c._f2.ActivationMode = ActivationMode.Forced;
+			c._f3.ActivationMode = ActivationMode.Suppressed;
 			c.Update();
 			c.X.ShouldBe(117);
 
-			c._f1.ActivationMode = ActivationMode.Always;
-			c._f2.ActivationMode = ActivationMode.Never;
-			c._f3.ActivationMode = ActivationMode.Always;
+			c._f1.ActivationMode = ActivationMode.Forced;
+			c._f2.ActivationMode = ActivationMode.Suppressed;
+			c._f3.ActivationMode = ActivationMode.Forced;
 			c.Update();
 			c.X.ShouldBe(1017);
 
-			c._f1.ActivationMode = ActivationMode.Never;
-			c._f2.ActivationMode = ActivationMode.Always;
-			c._f3.ActivationMode = ActivationMode.Always;
+			c._f1.ActivationMode = ActivationMode.Suppressed;
+			c._f2.ActivationMode = ActivationMode.Forced;
+			c._f3.ActivationMode = ActivationMode.Forced;
 			c.Update();
 			c.X.ShouldBe(1107);
 
-			c._f1.ActivationMode = ActivationMode.Always;
-			c._f2.ActivationMode = ActivationMode.Always;
-			c._f3.ActivationMode = ActivationMode.Always;
+			c._f1.ActivationMode = ActivationMode.Forced;
+			c._f2.ActivationMode = ActivationMode.Forced;
+			c._f3.ActivationMode = ActivationMode.Forced;
 			c.Update();
 			c.X.ShouldBe(1117);
 		}

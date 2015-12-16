@@ -32,11 +32,11 @@ namespace Elbtunnel
 	[TestFixture]
 	public class Tests
 	{
-		[Test]
-		public void CollisionDcca()
+		[TestCase]
+		public void CollisionDcca([Values(typeof(SSharpChecker), typeof(LtsMin))] Type modelChecker)
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(new LtsMin(), Model.Create(specification));
+			var analysis = new SafetyAnalysis((ModelChecker)Activator.CreateInstance(modelChecker), Model.Create(specification));
 
 			var result = analysis.ComputeMinimalCutSets(specification.Collision, "counter examples/elbtunnel");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
@@ -61,13 +61,17 @@ namespace Elbtunnel
 			var faults = model.GetFaults();
 
 			for (var i = 0; i < faults.Length; ++i)
-				faults[i].ActivationMode = i < 1 ? ActivationMode.Nondeterministic : ActivationMode.Never;
+				//faults[i].ActivationMode = i < 1 ? ActivationMode.Nondeterministic : ActivationMode.Suppressed;
+			faults[i].ActivationMode =  ActivationMode.Suppressed;
+
+			var checker = new SSharpChecker();
+			checker.CheckInvariant(model, true);
 
 			var ltsMin = new LtsMin();
 			Formula f1 = true;
 			Formula f2 = true;
 			Formula f3 = true;
-			ltsMin.CheckInvariant(model, f1 || f2 && f3 || f1 && f2);
+			//ltsMin.CheckInvariant(model, f1 || f2 && f3 || f1 && f2);
 			ltsMin.CheckInvariant(model, f1);
 		}
 	}

@@ -26,14 +26,16 @@ namespace PressureTank
 	using System.Linq;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
-
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
+	
 	public class Tests
 	{
-		[Test]
-		public void RuptureDcca()
+		[TestCase]
+		public void RuptureDcca([Values(typeof(SSharpChecker), typeof(LtsMin))] Type modelChecker)
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(new LtsMin(), Model.Create(specification));
+			var analysis = new SafetyAnalysis((ModelChecker)Activator.CreateInstance(modelChecker), Model.Create(specification));
 
 			var result = analysis.ComputeMinimalCutSets(specification.Rupture, "counter examples/pressure tank");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
@@ -44,6 +46,23 @@ namespace PressureTank
 			var i = 1;
 			foreach (var cutSet in result.MinimalCutSets)
 				Console.WriteLine("   ({1}) {{ {0} }}", String.Join(", ", cutSet.Select(fault => fault.Name)), i++);
+		}
+
+		[Test]
+		public void Test()
+		{
+			var specification = new Specification();
+			var model = Model.Create(specification);
+			var faults = model.GetFaults();
+
+			for (var i = 0; i < faults.Length; ++i)
+				faults[i].ActivationMode = ActivationMode.Nondeterministic;
+
+			var checker = new SSharpChecker();
+			checker.CheckInvariant(model, true);
+
+			var lchecker = new LtsMin();
+			lchecker.CheckInvariant(model, true);
 		}
 	}
 }

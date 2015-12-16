@@ -63,6 +63,17 @@ namespace SafetySharp.Analysis
 		internal abstract void Visit(FormulaVisitor visitor);
 
 		/// <summary>
+		///   Evaluates the formula.
+		/// </summary>
+		internal bool Evaluate()
+		{
+			// TODO: Optimize this (generate code?)
+			var visitor = new EvaluationVisitor();
+			visitor.Visit(this);
+			return visitor.Result;
+		}
+
+		/// <summary>
 		///   Returns a string that represents the current object.
 		/// </summary>
 		public override string ToString()
