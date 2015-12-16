@@ -5,140 +5,168 @@ namespace HemodialysisMachine.Utilities
 	using System.Linq;
 
 	// - The updates must be called in topological sorted order starting at the source.
-	// - Source elements use their Lambda-Function to generate the outgoing value
-	// - Flow elements get their incomingValue through a connection (which they retrieve by calling FlowUnitBefore)
-	// - Flow elements set their outgoingValue by setting FlowUnitAfterwards using their lambda function.
-	// - Sink elements get their incomingValue through a connection (which they retrieve by calling FlowUnitBefore)
+	// - Incoming Values of an element must be injected by setting FlowElementBefore
+	// - Source elements use their Lambda-Function to generate the outgoing value and setting ValueOfCurrentCylce
+	// - Flow elements get their incomingValue through a connection (which they retrieve by calling FlowElementBefore)
+	// - Flow elements set their outgoingValue by setting ValueOfCurrentCylce using their lambda function.
+	// - Sink elements get their incomingValue through a connection (which they retrieve by calling FlowElementBefore)
 	// Example:
 	//   We have
 	//      - a Source source
 	//      - a DirectFlow directFlow
 	//      - a Sink sink
 	//   They are connected
-	//      - directFlow.FlowUnitBefore = source.FlowUnitAfterwards (ConnectOutWithIn)
-	//      - sink.FlowUnitBefore = directFlow.FlowUnitAfterwards (ConnectOutWithIn)
-	//      - directFlow.FlowUnitAfterwards = directFlow.FlowUnitBefore (Behavior of DirectFlow)
+	//      - directFlow.FlowElementBefore = source.FlowElementAfterwards (ConnectOutWithIn)
+	//      - sink.FlowElementBefore = directFlow.FlowElementAfterwards (ConnectOutWithIn)
+	//      - directFlow.FlowElementAfterwards = directFlow.FlowElementBefore (Behavior of DirectFlow)
 	//   Scenario
 	//		- source.Update () is called
 	//			- source.SourceLambdaFunc is called
 	//			- source.ValueOfCurrentCylce is set
 	//		- directFlow.Update () is called
-	//			- directFlow.FlowUnitBefore() is called
-	//			- source.FlowUnitAfterwards() is called
+	//			- directFlow.FlowElementBefore() is called
+	//			- source.FlowElementAfterwards() is called
 	//			- directFlow.FlowLambdaFunc() is called
 	//			- directFlow.ValueOfCurrentCylce is set
 	//		- sink.Update () is called
-	//			- sink.FlowUnitBefore() is called
-	//			- sink.SinkLambdaFunc is called
+	//			- sink.FlowElementBefore() is called
+	//			//- sink.SinkLambdaFunc is called
 	//			- sink.ValueOfCurrentCylce is set
 
 
 	// Comment: Modelica solves our problems by equations.
 
-	public interface IFlowIn<TUnit>
+	public interface IFlowIn<TElement>
 	{
-		Func<TUnit> FlowUnitBefore { get; set; }
+		Func<TElement> FlowElementBefore { get; set; }
 	}
 
-	public interface IFlowOut<TUnit>
+	public interface IFlowOut<TElement>
 	{
-		Func<TUnit> FlowUnitAfterwards { get; set; }
+		TElement FlowElementAfterwards();
 	}
 
-	public class FlowConnectors
+	public static class FlowConnectors
 	{
-		static TUnit[] SplitEqual<TUnit>(TUnit source, int splitsTotal)
+		public static TElement[] SplitEqual<TElement>(TElement source, int splitsTotal)
 		{
-			return System.Linq.Enumerable.Repeat<TUnit>(source, splitsTotal).ToArray();
+			return System.Linq.Enumerable.Repeat<TElement>(source, splitsTotal).ToArray();
 		}
 
-		static TUnit MergeAny<TUnit>(TUnit[] sources)
+		public static TElement MergeAny<TElement>(TElement[] sources)
 		{
 			return sources[0];
 		}
 	}
 
-	public abstract class FlowConnector<TUnit>
+	public abstract class FlowConnector<TElement>
 	{
-		protected abstract TUnit Merger(TUnit[] sources);
+		protected abstract TElement Merger(TElement[] sources);
 
-		protected abstract TUnit[] Splitter(TUnit source,int splits);
+		protected abstract TElement[] Splitter(TElement source,int splits);
 
-		public void ConnectInWithIn(IFlowIn<TUnit> @from, IFlowIn<TUnit> to)
+		public void ConnectInWithIn(CompositeFlow<TElement> @from, IFlowIn<TElement> to)
 		{
+			// Only works for CompositeFlows
 			if (to!=null)
 				throw new Exception("to is already connected");
-			to.FlowUnitBefore = from.FlowUnitBefore;
+			to.FlowElementBefore = from.FlowElementBefore;
 		}
 
-		public void ConnectOutWithIn(IFlowOut<TUnit> @from, IFlowIn<TUnit> to)
-		{
-			// The FlowUnit the from-component returns is the FlowUnit the to-component receives.
-			if (to != null)
-				throw new Exception("to is already connected");
-			to.FlowUnitBefore = from.FlowUnitAfterwards;
-		}
 
-		public void ConnectOutWithIn(IFlowOut<TUnit>[] fromOuts, IFlowIn<TUnit> to)
+		public void ConnectInWithIn(CompositeFlow<TElement> @from, params IFlowIn<TElement>[] to)
 		{
 			if (to != null)
 				throw new Exception("to is already connected");
-			var fromOutValues = fromOuts.Select(fromOut => fromOut.FlowUnitAfterwards());
-			to.FlowUnitBefore = () => Merger(fromOutValues.ToArray());
-		}
-
-		public void ConnectOutWithIn(IFlowOut<TUnit> @from, params IFlowIn<TUnit>[] to)
-		{
-			if (to != null)
-				throw new Exception("to is already connected");
-			var fromOutValue = @from.FlowUnitAfterwards();
-			var toInValues = Splitter(fromOutValue, to.Length);
+			var fromInValue = @from.FlowElementBefore();
+			var fromInValues = Splitter(fromInValue, to.Length);
 			for (int i = 0; i < to.Length; i++)
 			{
-				to[i].FlowUnitBefore = () => toInValues[i];
+				to[i].FlowElementBefore = () => fromInValues[i];
 			}
 		}
 
-		public void ConnectOutWithOut(IFlowOut<TUnit> @from, IFlowOut<TUnit> to)
+		public void ConnectOutWithIn(IFlowOut<TElement> @from, IFlowIn<TElement> to)
+		{
+			// The FlowElement the from-component returns is the FlowElement the to-component receives.
+			if (to != null)
+				throw new Exception("to is already connected");
+			to.FlowElementBefore = from.FlowElementAfterwards;
+		}
+
+		public void ConnectOutWithIn(IFlowOut<TElement>[] fromOuts, IFlowIn<TElement> to)
 		{
 			if (to != null)
 				throw new Exception("to is already connected");
-			to.FlowUnitAfterwards = from.FlowUnitAfterwards;
+			var fromOutValues = fromOuts.Select(fromOut => fromOut.FlowElementAfterwards());
+			to.FlowElementBefore = () => Merger(fromOutValues.ToArray());
+		}
+
+		public void ConnectOutWithIn(IFlowOut<TElement> @from, params IFlowIn<TElement>[] to)
+		{
+			if (to != null)
+				throw new Exception("to is already connected");
+			var fromOutValue = @from.FlowElementAfterwards();
+			var toInValues = Splitter(fromOutValue, to.Length);
+			for (int i = 0; i < to.Length; i++)
+			{
+				to[i].FlowElementBefore = () => toInValues[i];
+			}
+		}
+
+		public void ConnectOutWithOut(IFlowOut<TElement> @from, CompositeFlow<TElement> to)
+		{
+			if (to != null)
+				throw new Exception("to is already connected");
+			to.LastOutputOfComposition = from.FlowElementAfterwards;
+		}
+
+		public void ConnectOutWithOut(IFlowOut<TElement>[] fromOuts, CompositeFlow<TElement> to)
+		{
+			if (to != null)
+				throw new Exception("to is already connected");
+			var fromOutValues = fromOuts.Select(fromOut => fromOut.FlowElementAfterwards());
+			to.LastOutputOfComposition = () => Merger(fromOutValues.ToArray());
 		}
 	}
 
-	public class Flow<TUnit> : IFlowIn<TUnit>, IFlowOut<TUnit>
+	public class Flow<TElement> : IFlowIn<TElement>, IFlowOut<TElement>
 	{
-		public Func<TUnit> FlowUnitBefore { get; set; }
-		public Func<TUnit> FlowUnitAfterwards { get; set; }
+		public Func<TElement> FlowElementBefore { get; set; }
 
-		private Func<TUnit,TUnit> FlowLambdaFunc { get; }
-		protected TUnit ValueOfCurrentCylce { get; private set; }
+		private Func<TElement,TElement> FlowLambdaFunc { get; }
+		protected TElement ValueOfCurrentCylce { get; private set; }
 
-		public Flow(Func<TUnit, TUnit> flowLambdaFunc)
+		public TElement FlowElementAfterwards()
+		{
+			return ValueOfCurrentCylce;
+		}
+
+		public Flow(Func<TElement, TElement> flowLambdaFunc)
 		{
 			FlowLambdaFunc = flowLambdaFunc;
-			FlowUnitAfterwards = () => ValueOfCurrentCylce;
 		}
 
 		public void Update()
 		{
-			var incomingValue = FlowUnitBefore();
+			var incomingValue = FlowElementBefore();
 			ValueOfCurrentCylce = FlowLambdaFunc(incomingValue);
 		}
 	}
 
-	public class FlowSource<TUnit> : IFlowOut<TUnit>
+	public class FlowSource<TElement> : IFlowOut<TElement>
 	{
-		public Func<TUnit> FlowUnitAfterwards { get; set; }
+		private Func<TElement> SourceLambdaFunc { get; }
+		protected TElement ValueOfCurrentCylce { get; private set; }
+		
+		public TElement FlowElementAfterwards()
+		{
+			return ValueOfCurrentCylce;
+		}
 
-		private Func<TUnit> SourceLambdaFunc { get; }
-		protected TUnit ValueOfCurrentCylce { get; private set; }
-
-		public FlowSource(Func<TUnit> sourceLambdaFunc)
+		public FlowSource(Func<TElement> sourceLambdaFunc)
 		{
 			SourceLambdaFunc = sourceLambdaFunc;
-			FlowUnitAfterwards = () => ValueOfCurrentCylce;
 		}
 
 		public void Update()
@@ -147,27 +175,40 @@ namespace HemodialysisMachine.Utilities
 		}
 	}
 
-	public class FlowSink<TUnit> : IFlowIn<TUnit>
+	public class FlowSink<TElement> : IFlowIn<TElement>
 	{
-		private Action<TUnit> SinkLambdaFunc { get; }
-
-		public Func<TUnit> FlowUnitBefore { get; set; }
-		protected TUnit ValueOfCurrentCylce { get; private set; }
-
-		public FlowSink(Action<TUnit> sinkLambdaFunc)
-		{
-			SinkLambdaFunc = sinkLambdaFunc;
-		}
-
+		public Func<TElement> FlowElementBefore { get; set; }
+		
+		protected TElement ValueOfCurrentCylce { get; private set; }
+		
 		public void Update()
 		{
-			var incomingValue = FlowUnitBefore();
-			SinkLambdaFunc(incomingValue);
+			var incomingValue = FlowElementBefore();
 			ValueOfCurrentCylce = incomingValue;
 		}
 	}
 
-	public class DirectFlow<TUnit> : Flow<TUnit>, IFlowIn<TUnit>, IFlowOut<TUnit>
+	public class CompositeFlow<TElement> : IFlowIn<TElement>, IFlowOut<TElement>
+	{
+		// flow declared explicitly by modeler using connections
+
+		public Func<TElement> FlowElementBefore { get; set; }
+		public Func<TElement> LastOutputOfComposition { get; set; }
+
+		public TElement ValueOfCurrentCylce { get; set; }
+		
+		public TElement FlowElementAfterwards()
+		{
+			return ValueOfCurrentCylce;
+		}
+
+		public void Update()
+		{
+			ValueOfCurrentCylce = LastOutputOfComposition();
+		}
+	}
+
+	public class DirectFlow<TElement> : Flow<TElement>, IFlowIn<TElement>, IFlowOut<TElement>
 	{
 		public DirectFlow()
 			: base( inValue => inValue)

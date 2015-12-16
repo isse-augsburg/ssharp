@@ -2,14 +2,8 @@
 {
 	class Patient
 	{
-		BloodUnit OutArterial()
-		{
-			return new BloodUnit();
-		}
-
-		void InVenous(BloodUnit blood)
-		{
-			
-		}
+		// Patient is the source and the sink of blood
+		public BloodFlowSource OutArterial;
+		public BloodFlowSink InVenous;
 	}
 }

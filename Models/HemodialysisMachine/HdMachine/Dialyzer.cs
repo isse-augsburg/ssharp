@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace HemodialysisMachine
 {
-	class Dialyzer : DirectBloodFlow, IBloodFlowIn, IBloodFlowOut
+	class Dialyzer : DirectBloodFlow
 	{
+		public DirectBloodFlow BloodFlow = new DirectBloodFlow();
+
 		void Diffuse()
 		{
 			
