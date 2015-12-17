@@ -29,12 +29,16 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Stores the serialized states of a <see cref="RuntimeModel" />.
 	/// </summary>
+	/// <remarks>
+	///   We store states in a contiguous array, indexed by the state's hash. The hashes are stored in a separate array,
+	///   using open addressing, see Laarman, "Scalable Multi-Core Model Checking", Algorithm 2.3.
+	/// </remarks>
 	internal sealed unsafe class StateStorage : DisposableObject
 	{
 		/// <summary>
 		///   The number of attempts that are made to find an empty bucket.
 		/// </summary>
-		private const int ProbeThreshold = 100000000;
+		private const int ProbeThreshold = 1000;
 
 		/// <summary>
 		///   The assumed size of a cache line in bytes.
@@ -108,11 +112,10 @@ namespace SafetySharp.Runtime
 
 		/// <summary>
 		///   Adds the <paramref name="state" /> to the cache if it is not already known. Returns <c>true</c> to indicate that the state
-		///   has been added.
+		///   has been added. This method can be called simultaneously from multiple threads.
 		/// </summary>
 		/// <param name="state">The state that should be added.</param>
 		/// <param name="index">Returns the unique index of the state.</param>
-		/// <remarks>See Laarman, "Scalable Multi-Core Model Checking", Algorithm 2.3</remarks>
 		public bool AddState(byte* state, out int index)
 		{
 			var hash = Hash(state, _stateLength, 0);
@@ -137,8 +140,6 @@ namespace SafetySharp.Runtime
 						Buffer.MemoryCopy(state, _stateMemory + offset * _stateLength, _stateLength, _stateLength);
 						Volatile.Write(ref _hashMemory[offset], (int)memoizedHash | (1 << 31));
 
-						if (i > 1)
-						Console.WriteLine($"#num probes: {i}");
 						index = offset;
 						return true;
 					}
@@ -150,8 +151,6 @@ namespace SafetySharp.Runtime
 
 						if (AreEqual(state, _stateMemory + offset * _stateLength))
 						{
-							if (i > 1)
-								Console.WriteLine($"#num probes: {i}");
 							index = offset;
 							return false;
 						}

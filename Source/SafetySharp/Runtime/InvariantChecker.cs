@@ -23,8 +23,8 @@
 namespace SafetySharp.Runtime
 {
 	using System;
-	using System.Collections.Generic;
 	using System.IO;
+	using System.Runtime.InteropServices;
 	using Analysis;
 	using Serialization;
 	using Utilities;
@@ -34,6 +34,11 @@ namespace SafetySharp.Runtime
 	/// </summary>
 	internal unsafe class InvariantChecker : DisposableObject
 	{
+		/// <summary>
+		///   The default capacity used for state storage.
+		/// </summary>
+		private const int DefaultCapacity = 1 << 24;
+
 		/// <summary>
 		///   The number of states that must be checked between two consecutive status reports.
 		/// </summary>
@@ -60,9 +65,9 @@ namespace SafetySharp.Runtime
 		private readonly StateStorage _states;
 
 		/// <summary>
-		///   The trace to the state that is currently being checked.
+		///   The trace to the states that are currently being checked.
 		/// </summary>
-		private readonly Stack<int> _stateStack = new Stack<int>();
+		private readonly StateStack _stateStack;
 
 		/// <summary>
 		///   Indicates whether the invariant is violated.
@@ -80,7 +85,8 @@ namespace SafetySharp.Runtime
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
-		public InvariantChecker(Model model, Formula invariant, Action<string> output)
+		/// <param name="capacity">The number of states that can be stored.</param>
+		public InvariantChecker(Model model, Formula invariant, Action<string> output, int capacity = DefaultCapacity)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
@@ -93,7 +99,8 @@ namespace SafetySharp.Runtime
 
 				_serializedModel = memoryStream.ToArray();
 				_model = RuntimeModelSerializer.Load(memoryStream);
-				_states = new StateStorage(_model.StateSlotCount, 1 << 24);
+				_states = new StateStorage(_model.StateSlotCount, capacity);
+				_stateStack = new StateStack(capacity);
 				_output = output;
 			}
 		}
@@ -111,7 +118,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the number of levels that have been checked.
 		/// </summary>
-		public int Levels { get; private set; }
+		public int LevelCount { get; private set; }
 
 		/// <summary>
 		///   Checks whether the model's invariant holds for all states.
@@ -119,21 +126,24 @@ namespace SafetySharp.Runtime
 		public CounterExample Check()
 		{
 			AddStates(_model.ComputeInitialStates());
-			while (!_invariantViolated && _stateStack.Count != 0)
+
+			int state;
+			while (!_invariantViolated && _stateStack.TryGetState(out state))
 			{
-				var state = _stateStack.Pop();
 				AddStates(_model.ComputeSuccessorStates((int*)_states[state]));
 
-				if (StateCount <= _nextReport)
-					continue;
+				if (StateCount >= _nextReport)
+				{
+					_nextReport += ReportStateCountDelta;
+					Report();
+				}
 
-				_nextReport += ReportStateCountDelta;
-				Report();
+				if (_stateStack.FrameCount > LevelCount)
+					LevelCount = _stateStack.FrameCount;
 			}
 
 			Report();
-			// TODO: Counter example generation
-			return _invariantViolated ? new CounterExample(_model, _serializedModel, new int[0][]) : null;
+			return _invariantViolated ? CreateCounterExample() : null;
 		}
 
 		/// <summary>
@@ -145,6 +155,7 @@ namespace SafetySharp.Runtime
 				throw new InvalidOperationException("Deadlock detected.");
 
 			TransitionCount += stateCache.StateCount;
+			_stateStack.PushFrame();
 
 			for (var i = 0; i < stateCache.StateCount; ++i)
 			{
@@ -158,8 +169,25 @@ namespace SafetySharp.Runtime
 					_invariantViolated = true;
 
 				StateCount += 1;
-				_stateStack.Push(index);
+				_stateStack.PushState(index);
 			}
+		}
+
+		/// <summary>
+		///   Creates a counter example for the current topmost state.
+		/// </summary>
+		private CounterExample CreateCounterExample()
+		{
+			var indexedTrace = _stateStack.GetTrace();
+			var trace = new int[indexedTrace.Length][];
+
+			for (var i = 0; i < indexedTrace.Length; ++i)
+			{
+				trace[i] = new int[_model.StateSlotCount];
+				Marshal.Copy(new IntPtr((int*)_states[indexedTrace[i]]), trace[i], 0, trace[i].Length);
+			}
+
+			return new CounterExample(_model, _serializedModel, trace);
 		}
 
 		/// <summary>
@@ -167,7 +195,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		private void Report()
 		{
-			_output($"explored {StateCount:n0} states, {TransitionCount:n0} transitions");
+			_output($"explored {StateCount:n0} states, {TransitionCount:n0} transitions, {LevelCount} levels");
 		}
 
 		/// <summary>

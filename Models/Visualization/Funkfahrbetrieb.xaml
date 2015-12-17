@@ -95,7 +95,7 @@
                     <TextBlock>Last Message:</TextBlock>
                     <TextBlock Margin="5,0,0,0" x:Name="LastMessage">None</TextBlock>
                 </StackPanel>
-                <Rectangle x:Name="DangerSpot" Height="28.667" Width="34" Fill="#FFFFAE00" IsHitTestVisible="false" VerticalAlignment="Top" Canvas.Left="268" Canvas.Top="152">
+                <Rectangle Panel.ZIndex="-1"  x:Name="DangerSpot" Height="28.667" Width="34" Fill="#FFFFAE00" IsHitTestVisible="false" VerticalAlignment="Top" Canvas.Left="268" Canvas.Top="152">
                     <Rectangle.OpacityMask>
                         <VisualBrush Visual="{DynamicResource appbar_alert}" />
                     </Rectangle.OpacityMask>

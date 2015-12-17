@@ -124,6 +124,7 @@
     <Compile Include="Runtime\Serialization\StateSlotMetadata.cs" />
     <Compile Include="Runtime\SimulationState.cs" />
     <Compile Include="Runtime\Simulator.cs" />
+    <Compile Include="Runtime\StateStack.cs" />
     <Compile Include="Runtime\StateStorage.cs" />
     <Compile Include="Runtime\StateCache.cs" />
     <Compile Include="Runtime\UnboundPortException.cs" />
