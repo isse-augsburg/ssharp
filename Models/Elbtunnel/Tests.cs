@@ -53,6 +53,11 @@ namespace Elbtunnel
 				Console.WriteLine("   ({1}) {{ {0} }}", String.Join(", ", cutSet.Select(fault => fault.Name)), i++);
 		}
 
+		public static void Main()
+		{
+			new Tests().Test();
+		}
+
 		[Test]
 		public void Test()
 		{
@@ -62,17 +67,19 @@ namespace Elbtunnel
 
 			for (var i = 0; i < faults.Length; ++i)
 				//faults[i].ActivationMode = i < 1 ? ActivationMode.Nondeterministic : ActivationMode.Suppressed;
-			faults[i].ActivationMode =  ActivationMode.Suppressed;
+				faults[i].ActivationMode = ActivationMode.Suppressed;
 
-			var checker = new SSharpChecker();
-			checker.CheckInvariant(model, true);
-
-			var ltsMin = new LtsMin();
 			Formula f1 = true;
 			Formula f2 = true;
 			Formula f3 = true;
+			Formula f4 = f1 && f2 && f3.Implies(f1 || f2);
+
+			var checker = new SSharpChecker();
+			checker.CheckInvariant(model, f4);
+
+			var ltsMin = new LtsMin();
 			//ltsMin.CheckInvariant(model, f1 || f2 && f3 || f1 && f2);
-			ltsMin.CheckInvariant(model, f1);
+			ltsMin.CheckInvariant(model, f4);
 		}
 	}
 }

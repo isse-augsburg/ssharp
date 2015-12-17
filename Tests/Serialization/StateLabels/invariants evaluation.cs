@@ -22,7 +22,6 @@
 
 namespace Tests.Serialization.StateLabels
 {
-	using System.Diagnostics;
 	using SafetySharp.Modeling;
 	using SafetySharp.Analysis;
 	using Shouldly;

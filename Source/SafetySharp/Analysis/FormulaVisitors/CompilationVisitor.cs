@@ -23,21 +23,32 @@
 namespace SafetySharp.Analysis.FormulaVisitors
 {
 	using System;
+	using System.Linq.Expressions;
+	using Utilities;
 
 	/// <summary>
-	///   Determines whether a <see cref="Formula" /> is a LTL formula.
+	///   Compiles a <see cref="Formula" /> if it does not contain any temporal operators.
 	/// </summary>
-	internal class EvaluationVisitor : FormulaVisitor
+	internal class CompilationVisitor : FormulaVisitor
 	{
 		/// <summary>
-		///   Indicates whether the visited formula holds.
+		///   The expression that is being generated.
 		/// </summary>
-		private bool _holds;
+		private Expression _expression;
 
 		/// <summary>
-		///   Gets a value indicating whether the formula holds.
+		///   Compiles the <paramref name="formula" />.
 		/// </summary>
-		public bool Result => _holds;
+		/// <param name="formula">The formula that should be compiled.</param>
+		public static Func<bool> Compile(Formula formula)
+		{
+			Requires.NotNull(formula, nameof(formula));
+
+			var visitor = new CompilationVisitor();
+			visitor.Visit(formula);
+
+			return Expression.Lambda<Func<bool>>(visitor._expression).Compile();
+		}
 
 		/// <summary>
 		///   Visits the <paramref name="formula." />
@@ -48,7 +59,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 			{
 				case UnaryOperator.Not:
 					Visit(formula.Operand);
-					_holds = !_holds;
+					_expression = Expression.Not(_expression);
 					break;
 				default:
 					throw new InvalidOperationException("Only state formulas can be evaluated.");
@@ -61,27 +72,24 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		public override void VisitBinaryFormula(BinaryFormula formula)
 		{
 			Visit(formula.LeftOperand);
+			var left = _expression;
+
+			Visit(formula.RightOperand);
+			var right = _expression;
 
 			switch (formula.Operator)
 			{
 				case BinaryOperator.And:
-					if (_holds)
-						Visit(formula.RightOperand);
+					_expression = Expression.AndAlso(left, right);
 					break;
 				case BinaryOperator.Or:
-					if (!_holds)
-						Visit(formula.RightOperand);
+					_expression = Expression.OrElse(left, right);
 					break;
 				case BinaryOperator.Implication:
-					if (_holds)
-						Visit(formula.RightOperand);
-					else
-						_holds = true;
+					_expression = Expression.OrElse(Expression.Not(left), right);
 					break;
 				case BinaryOperator.Equivalence:
-					var leftHolds = _holds;
-					Visit(formula.RightOperand);
-					_holds = (leftHolds && _holds) || (!leftHolds && !_holds);
+					_expression = Expression.OrElse(Expression.AndAlso(left, right), Expression.AndAlso(Expression.Not(left), Expression.Not(right)));
 					break;
 				case BinaryOperator.Until:
 					throw new InvalidOperationException("Only state formulas can be evaluated.");
@@ -93,7 +101,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitStateFormula(StateFormula formula)
 		{
-			_holds = formula.Expression();
+			_expression = Expression.Invoke(Expression.Constant(formula.Expression));
 		}
 	}
 }

@@ -26,6 +26,7 @@ namespace SafetySharp.Runtime
 	using System.IO;
 	using System.Runtime.InteropServices;
 	using Analysis;
+	using Analysis.FormulaVisitors;
 	using Serialization;
 	using Utilities;
 
@@ -70,6 +71,11 @@ namespace SafetySharp.Runtime
 		private readonly StateStack _stateStack;
 
 		/// <summary>
+		///   The invariant that is checked.
+		/// </summary>
+		private readonly Func<bool> _invariant;
+
+		/// <summary>
 		///   Indicates whether the invariant is violated.
 		/// </summary>
 		private bool _invariantViolated;
@@ -102,6 +108,7 @@ namespace SafetySharp.Runtime
 				_states = new StateStorage(_model.StateSlotCount, capacity);
 				_stateStack = new StateStack(capacity);
 				_output = output;
+				_invariant = CompilationVisitor.Compile(_model.Formulas[0]);
 			}
 		}
 
@@ -125,6 +132,8 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		public CounterExample Check()
 		{
+			Console.WriteLine($"State vector has {_model.StateSlotCount} slots ({_model.StateSlotCount * sizeof(int)} bytes).");
+
 			AddStates(_model.ComputeInitialStates());
 
 			int state;
@@ -165,7 +174,7 @@ namespace SafetySharp.Runtime
 
 				// TODO: Optimize - do not deserialize the state again, check the formula while we still have the deserialized state instead
 				_model.Deserialize(stateCache.StateMemory + i * stateCache.SlotCount);
-				if (!_model.Formulas[0].Evaluate())
+				if (!_invariant())
 					_invariantViolated = true;
 
 				StateCount += 1;
@@ -195,7 +204,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		private void Report()
 		{
-			_output($"explored {StateCount:n0} states, {TransitionCount:n0} transitions, {LevelCount} levels");
+			_output($"Explored {StateCount:n0} states, {TransitionCount:n0} transitions, {LevelCount} levels.");
 		}
 
 		/// <summary>

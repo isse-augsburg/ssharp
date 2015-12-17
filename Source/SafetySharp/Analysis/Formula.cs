@@ -63,14 +63,11 @@ namespace SafetySharp.Analysis
 		internal abstract void Visit(FormulaVisitor visitor);
 
 		/// <summary>
-		///   Evaluates the formula.
+		///   Evaluates the formula if it does not contain any temporal operators.
 		/// </summary>
 		internal bool Evaluate()
 		{
-			// TODO: Optimize this (generate code?)
-			var visitor = new EvaluationVisitor();
-			visitor.Visit(this);
-			return visitor.Result;
+			return CompilationVisitor.Compile(this)();
 		}
 
 		/// <summary>
