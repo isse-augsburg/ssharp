@@ -3,8 +3,6 @@
 namespace HemodialysisMachine.Utilities
 {
 	using System.Collections.Generic;
-	using System.Linq;
-
 
 	// Flow
 	//    - Flows consist of FlowComponents (FlowComposites, FlowSegments, FlowSources, and FlowSinks)
@@ -349,7 +347,7 @@ namespace HemodialysisMachine.Utilities
 		{
 		}
 
-		protected TElement ElementOfCurrentCycle { get; private set; }
+		public TElement ElementOfCurrentCycle { get; private set; }
 		
 		public void UpdateSuctionOfPredecessor()
 		{

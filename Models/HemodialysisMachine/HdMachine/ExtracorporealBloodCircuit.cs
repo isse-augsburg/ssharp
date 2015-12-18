@@ -60,24 +60,25 @@ namespace HemodialysisMachine
 		private readonly VenousPressureTransducer _venousPressureTransducer = new VenousPressureTransducer();
 		private readonly VenousSafetyDetector _venousSafetyDetector = new VenousSafetyDetector();
 		private readonly VenousTubingValve _venousTubingValve = new VenousTubingValve();
+		
 
-		public ExtracorporealBloodCircuit(Dialyzer dialyzer)
+		public ExtracorporealBloodCircuit(Dialyzer dialyzer, BloodFlowCombinator bloodFlowCombinator)
 		{
 			// The order of the connections matter
-			BloodFlowConnector.Instance.ConnectInWithIn(BloodFlow,
-														new IFlowIn<Blood>[] {_arterialBloodPump.BloodFlow, _arteriaPressureTransducer.BloodFlow});
-			BloodFlowConnector.Instance.ConnectOutWithIn(new IFlowOut<Blood>[]{_arterialBloodPump.BloodFlow,_heparinPump.BloodFlow},
-														 _arterialChamber.BloodFlow);
-			BloodFlowConnector.Instance.ConnectOutWithIn(_arterialChamber.BloodFlow,
-														 dialyzer.BloodFlow);
-			BloodFlowConnector.Instance.ConnectOutWithIn(dialyzer.BloodFlow,
-														 new IFlowIn<Blood>[] {_venousChamber.BloodFlow, _venousPressureTransducer.BloodFlow});
-			BloodFlowConnector.Instance.ConnectOutWithIn(_venousChamber.BloodFlow,
-														 _venousSafetyDetector.BloodFlow);
-			BloodFlowConnector.Instance.ConnectOutWithIn(_venousSafetyDetector.BloodFlow,
-														 _venousTubingValve.BloodFlow);
-			BloodFlowConnector.Instance.ConnectOutWithOut(_venousTubingValve.BloodFlow,
-														  BloodFlow);
+			bloodFlowCombinator.ConnectInWithIn(BloodFlow,
+												new IFlowIn<Blood>[] {_arterialBloodPump.BloodFlow, _arteriaPressureTransducer.BloodFlow});
+			bloodFlowCombinator.ConnectOutWithIn(new IFlowOut<Blood>[]{_arterialBloodPump.BloodFlow,_heparinPump.BloodFlow},
+												 _arterialChamber.BloodFlow);
+			bloodFlowCombinator.ConnectOutWithIn(_arterialChamber.BloodFlow,
+												 dialyzer.BloodFlow);
+			bloodFlowCombinator.ConnectOutWithIn(dialyzer.BloodFlow,
+												 new IFlowIn<Blood>[] {_venousChamber.BloodFlow, _venousPressureTransducer.BloodFlow});
+			bloodFlowCombinator.ConnectOutWithIn(_venousChamber.BloodFlow,
+												 _venousSafetyDetector.BloodFlow);
+			bloodFlowCombinator.ConnectOutWithIn(_venousSafetyDetector.BloodFlow,
+												 _venousTubingValve.BloodFlow);
+			bloodFlowCombinator.ConnectOutWithOut(_venousTubingValve.BloodFlow,
+												  BloodFlow);
 		}
 
 	}

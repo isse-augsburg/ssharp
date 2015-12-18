@@ -38,12 +38,7 @@ namespace HemodialysisMachine
 	{
 	}
 
-	class BloodPortConnector : Utilities.PortConnector<Blood>
+	class BloodFlowCombinator : Utilities.FlowCombinator<Blood>
 	{
-	}
-
-	class BloodFlowConnector : Utilities.FlowConnector<Blood>
-	{
-		public static BloodFlowConnector Instance = new BloodFlowConnector();
 	}
 }

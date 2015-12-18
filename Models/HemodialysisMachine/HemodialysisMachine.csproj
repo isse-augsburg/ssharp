@@ -30,6 +30,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FluentAssertions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\Packages\FluentAssertions.4.1.1\lib\net45\FluentAssertions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FluentAssertions.Core, Version=4.1.1.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\Packages\FluentAssertions.4.1.1\lib\net45\FluentAssertions.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\Packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,6 +58,8 @@
     <Compile Include="HdMachine\ControlSystem.cs" />
     <Compile Include="HdMachine\HdMachine.cs" />
     <Compile Include="Tests\BloodFlowTests.cs" />
+    <Compile Include="Tests\IntFlowTests.cs" />
+    <Compile Include="Utilities\IntFlow.cs" />
     <Compile Include="Utilities\AbstractFlow.cs" />
     <Compile Include="ValveState.cs" />
     <Compile Include="HdMachine\Dialyzer.cs" />
@@ -57,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Overview.cd" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Requirements\" />

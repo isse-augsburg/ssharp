@@ -42,7 +42,7 @@ namespace HemodialysisMachine
 	class DialyzingFluidFlowDirect : Utilities.FlowDirect<DialyzingFluid>
 	{
 	}
-	class DialyzingFluidConnector : Utilities.PortConnector<DialyzingFluid>
+	class DialyzingFluidFlowCombinator : Utilities.FlowCombinator<DialyzingFluid>
 	{
 	}
 }
