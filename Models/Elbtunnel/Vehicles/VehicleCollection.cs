@@ -32,7 +32,7 @@ namespace Elbtunnel.Vehicles
 		/// <summary>
 		///   The vehicles contained in the collection.
 		/// </summary>
-		[Hidden]
+		[Hidden(HideElements = true)]
 		public readonly Vehicle[] Vehicles;
 
 		/// <summary>

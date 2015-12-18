@@ -34,5 +34,10 @@ namespace SafetySharp.Modeling
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
 	public sealed class HiddenAttribute : Attribute
 	{
+		/// <summary>
+		///   Gets or sets a value indicating whether the elements of a hidden array state field are also hidden.
+		///   <c>false</c> by default.
+		/// </summary>
+		public bool HideElements { get; set; }
 	}
 }

@@ -28,6 +28,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	using System.Linq;
 	using System.Reflection;
 	using System.Runtime.Serialization;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -126,9 +127,23 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
 		{
-			return from field in GetFields(obj, mode, discoveringObjects: true)
-				   where field.FieldType.IsReferenceType()
-				   select field.GetValue(obj);
+			foreach (var field in GetFields(obj, mode, discoveringObjects: true).Where(field => field.FieldType.IsReferenceType()))
+			{
+				var value = field.GetValue(obj);
+
+				// Optimization: Skip arrays with hidden elements
+				if (mode == SerializationMode.Optimized && field.FieldType.IsArray && field.GetCustomAttribute<HiddenAttribute>()?.HideElements == true)
+				{
+					// We have to make sure the objects referenced by the array are discovered nevertheless
+					if (field.FieldType.GetElementType().IsReferenceType())
+					{
+						foreach (var element in (object[])value)
+							yield return element;
+					}
+				}
+				else
+					yield return value;
+			}
 		}
 
 		/// <summary>

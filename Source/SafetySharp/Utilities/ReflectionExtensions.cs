@@ -175,7 +175,8 @@ namespace SafetySharp.Utilities
 
 			// Read-only fields are implicitly marked with [Hidden]
 			var fieldInfo = member as FieldInfo;
-			var isHidden = member.HasAttribute<HiddenAttribute>() || (fieldInfo != null && fieldInfo.IsInitOnly);
+			var hiddenAttribute = member.GetCustomAttribute<HiddenAttribute>();
+			var isHidden = hiddenAttribute != null || (fieldInfo != null && fieldInfo.IsInitOnly);
 
 			// If the member is hidden, only ignore it in optimized serializations when we're not discovering objects
 			if (mode == SerializationMode.Optimized && !discoveringObjects && isHidden)

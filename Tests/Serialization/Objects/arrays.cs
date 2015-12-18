@@ -44,7 +44,7 @@ namespace Tests.Serialization.Objects
 				S = new short[] { 33, 77, 29292, -22923 }
 			};
 
-			GenerateCode(SerializationMode.Optimized, c, c.I, o1, o2, c.D, c.B, c.P, c.O, c.E, c.S);
+			GenerateCode(SerializationMode.Optimized, c);
 			StateSlotCount.ShouldBe(29 - (IntPtr.Size == 8 ? 0 : 2));
 
 			Serialize();

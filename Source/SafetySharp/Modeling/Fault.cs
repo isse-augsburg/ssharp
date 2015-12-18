@@ -109,7 +109,7 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
 		/// <param name="component">The component the fault effect is added for.</param>
-		public TFaultEffect AddEffect<TFaultEffect>(IComponent component)
+		internal TFaultEffect AddEffect<TFaultEffect>(IComponent component)
 			where TFaultEffect : Component, new()
 		{
 			return (TFaultEffect)AddEffect(component, typeof(TFaultEffect));
