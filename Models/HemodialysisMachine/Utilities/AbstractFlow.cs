@@ -236,7 +236,7 @@ namespace HemodialysisMachine.Utilities
 			{
 				// create virtual splitting component.
 				var flowVirtualSplitter = new FlowVirtualSplitter<TElement>(elementNos);
-				Connect(@from.Outgoing, flowVirtualSplitter.Incoming);
+				Connect(@from.IncomingProxy, flowVirtualSplitter.Incoming);
 				for (int i = 0; i < elementNos; i++)
 				{
 					Connect(flowVirtualSplitter.Outgoings[i], to[i].Incoming);
@@ -268,7 +268,7 @@ namespace HemodialysisMachine.Utilities
 					Connect(fromOuts[i].Outgoing, flowVirtualMerger.Incomings[i]);
 					UpdateElementOrder.Add(fromOuts[i]); //Every source is updated first
 				}
-				Connect(flowVirtualMerger.Outgoing, to.Incoming);
+				Connect(flowVirtualMerger.Outgoing, to.OutgoingProxy);
 				UpdateElementOrder.Add(flowVirtualMerger); //Element of FlowMerger is updated after each source
 			}
 		}
@@ -422,17 +422,18 @@ namespace HemodialysisMachine.Utilities
 		public FlowVirtualSplitter(int number)
 		{
 			Number = number;
+			Incoming = new PortFlowIn<TElement>();
+			Outgoings = new PortFlowOut<TElement>[number];
+			ElementsOfCurrentCycle = new TElement[number];
 			Incoming.SetElement = element => { ElementOfCurrentCycle = element;
 												 UpdateElementsOfSuccessors();
 			};
 			SuctionsOfCurrentCycle = new int[number];
-			Incoming = new PortFlowIn<TElement>();
-			Outgoings = new PortFlowOut<TElement>[number];
-			ElementsOfCurrentCycle = new TElement[number];
 			for (int i = 0; i < number; i++)
 			{
 				Outgoings[i] = new PortFlowOut<TElement>();
-				Outgoings[i].SetSuction = (value) => SuctionsOfCurrentCycle[i] = value;
+				var index = i; // must be added for the closure explicitly. The outer i changes.
+				Outgoings[i].SetSuction = value => SuctionsOfCurrentCycle[index] = value;
 			}
 		}
 
@@ -485,17 +486,18 @@ namespace HemodialysisMachine.Utilities
 		public FlowVirtualMerger(int number)
 		{
 			Number = number;
-			Outgoing.SetSuction = suction => { SuctionOfCurrentCycle = suction;
-												 UpdateSuctionsOfPredecessors();
-			};
 			ElementsOfCurrentCycle = new TElement[number];
 			Incomings = new PortFlowIn<TElement>[number];
 			Outgoing = new PortFlowOut<TElement>();
+			Outgoing.SetSuction = suction => { SuctionOfCurrentCycle = suction;
+												 UpdateSuctionsOfPredecessors();
+			};
 			SuctionsOfCurrentCycle = new int[number];
 			for (int i = 0; i < number; i++)
 			{
 				Incomings[i] = new PortFlowIn<TElement>();
-				Incomings[i].SetElement = (element) => ElementsOfCurrentCycle[i] = element;
+				var index = i; // must be added for the closure explicitly. The outer i changes.
+				Incomings[i].SetElement = (element) => ElementsOfCurrentCycle[index] = element;
 			}
 		}
 		
