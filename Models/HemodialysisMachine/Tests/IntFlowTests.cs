@@ -77,7 +77,7 @@ namespace HemodialysisMachine.Tests
 			combinator.UpdateFlows();
 			way1Sink.ElementOfCurrentCycle.Should().Be(7);
 			way2Sink.ElementOfCurrentCycle.Should().Be(7);
-			//source.SuctionOfCurrentCycle.Should().Be(1);
+			source.SuctionOfCurrentCycle.Should().Be(1);
 		}
 
 		[Test]

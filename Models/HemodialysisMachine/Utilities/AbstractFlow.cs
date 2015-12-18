@@ -192,13 +192,13 @@ namespace HemodialysisMachine.Utilities
 			{
 				// create virtual splitting component.
 				var flowVirtualSplitter = new FlowVirtualSplitter<TElement>(elementNos);
+				UpdateSuctionOrder.Insert(0, flowVirtualSplitter);
 				Connect(@from.Outgoing, flowVirtualSplitter.Incoming);
 				for (int i = 0; i < elementNos; i++)
 				{
 					Connect(flowVirtualSplitter.Outgoings[i], to[i].Incoming);
 					UpdateSuctionOrder.Insert(0, to[i]);
 				}
-				UpdateSuctionOrder.Insert(0, flowVirtualSplitter);
 			}
 		}
 
@@ -236,13 +236,13 @@ namespace HemodialysisMachine.Utilities
 			{
 				// create virtual splitting component.
 				var flowVirtualSplitter = new FlowVirtualSplitter<TElement>(elementNos);
+				UpdateSuctionOrder.Insert(0, flowVirtualSplitter);
 				Connect(@from.IncomingProxy, flowVirtualSplitter.Incoming);
 				for (int i = 0; i < elementNos; i++)
 				{
 					Connect(flowVirtualSplitter.Outgoings[i], to[i].Incoming);
 					UpdateSuctionOrder.Insert(0, to[i]);
 				}
-				UpdateSuctionOrder.Insert(0, flowVirtualSplitter);
 			}
 		}
 
