@@ -126,19 +126,113 @@ namespace HemodialysisMachine.Utilities
 	
 	public abstract class FlowConnector<TElement> where TElement : struct
 	{
-		public void ConnectInWithIn(FlowComposite<TElement> @from, IFlowIn<TElement> to)
-		{
-			PortConnector<TElement>.Connect(@from.Incoming,to.Incoming);
-		}
-
 		public void ConnectOutWithIn(IFlowOut<TElement> @from, IFlowIn<TElement> to)
 		{
 			PortConnector<TElement>.Connect(@from.Outgoing, to.Incoming);
 		}
 
+		public void ConnectOutWithIn(IFlowOut<TElement>[] fromOuts, IFlowIn<TElement> to)
+		{
+			var elementNos = fromOuts.Length;
+			if (elementNos == 0)
+			{
+				throw new ArgumentException("need at least one source element");
+			}
+			else if (elementNos == 1)
+			{
+				PortConnector<TElement>.Connect(fromOuts[0].Outgoing, to.Incoming);
+			}
+			else
+			{
+				// create virtual merging component. TODO: Must be scheduled
+				var flowVirtualMerger = new FlowVirtualMerger<TElement>(elementNos);
+				for (int i = 0; i < elementNos; i++)
+				{
+					PortConnector<TElement>.Connect(fromOuts[i].Outgoing, flowVirtualMerger.Incomings[i]);
+				}
+				PortConnector<TElement>.Connect(flowVirtualMerger.Outgoing, to.Incoming);
+			}
+		}
+
+		public void ConnectOutWithIn(IFlowOut<TElement> @from, params IFlowIn<TElement>[] to)
+		{
+			var elementNos = to.Length;
+			if (elementNos == 0)
+			{
+				throw new ArgumentException("need at least one source element");
+			}
+			else if (elementNos == 1)
+			{
+				PortConnector<TElement>.Connect(@from.Outgoing, to[0].Incoming);
+			}
+			else
+			{
+				// create virtual splitting component. TODO: Must be scheduled
+				var flowVirtualSplitter = new FlowVirtualSplitter<TElement>(elementNos);
+				PortConnector<TElement>.Connect(@from.Outgoing, flowVirtualSplitter.Incoming);
+				for (int i = 0; i < elementNos; i++)
+				{
+					PortConnector<TElement>.Connect(flowVirtualSplitter.Outgoings[i], to[i].Incoming);
+				}
+			}
+		}
+
+		// Special cases with FlowComposite
+
+		public void ConnectInWithIn(FlowComposite<TElement> @from, IFlowIn<TElement> to)
+		{
+			PortConnector<TElement>.Connect(@from.Incoming, to.Incoming);
+		}
+
 		public void ConnectOutWithOut(IFlowOut<TElement> @from, FlowComposite<TElement> to)
 		{
 			PortConnector<TElement>.Connect(@from.Outgoing, to.Outgoing);
+		}
+
+		public void ConnectInWithIn(FlowComposite<TElement> @from, params IFlowIn<TElement>[] to)
+		{
+			var elementNos = to.Length;
+			if (elementNos == 0)
+			{
+				throw new ArgumentException("need at least one source element");
+			}
+			else if (elementNos == 1)
+			{
+				PortConnector<TElement>.Connect(@from.Incoming, to[0].Incoming);
+			}
+			else
+			{
+				// create virtual splitting component. TODO: Must be scheduled
+				var flowVirtualSplitter = new FlowVirtualSplitter<TElement>(elementNos);
+				PortConnector<TElement>.Connect(@from.Incoming, flowVirtualSplitter.Incoming);
+				for (int i = 0; i < elementNos; i++)
+				{
+					PortConnector<TElement>.Connect(flowVirtualSplitter.Outgoings[i], to[i].Incoming);
+				}
+			}
+		}
+
+		public void ConnectOutWithOut(IFlowOut<TElement>[] fromOuts, FlowComposite<TElement> to)
+		{
+			var elementNos = fromOuts.Length;
+			if (elementNos == 0)
+			{
+				throw new ArgumentException("need at least one source element");
+			}
+			else if (elementNos == 1)
+			{
+				PortConnector<TElement>.Connect(fromOuts[0].Outgoing, to.Outgoing);
+			}
+			else
+			{
+				// create virtual merging component. TODO: Must be scheduled
+				var flowVirtualMerger = new FlowVirtualMerger<TElement>(elementNos);
+				for (int i = 0; i < elementNos; i++)
+				{
+					PortConnector<TElement>.Connect(fromOuts[i].Outgoing, flowVirtualMerger.Incomings[i]);
+				}
+				PortConnector<TElement>.Connect(flowVirtualMerger.Outgoing, to.Outgoing);
+			}
 		}
 	}
 
@@ -257,6 +351,7 @@ namespace HemodialysisMachine.Utilities
 		{
 			Number = number;
 			Incoming.SetElement = element => ElementOfCurrentCycle = element;
+			SuctionOfCurrentCycles = new int[number];
 			Incoming = new PortFlowIn<TElement>();
 			Outgoings = new PortFlowOut<TElement>[number];
 			ElementOfCurrentCycles = new TElement[number];
@@ -265,6 +360,11 @@ namespace HemodialysisMachine.Utilities
 				Outgoings[i] = new PortFlowOut<TElement>();
 				Outgoings[i].SetSuction = (value) => SuctionOfCurrentCycles[i] = value;
 			}
+		}
+
+		public static TElement[] SplitEqual(TElement source, int splitsTotal)
+		{
+			return System.Linq.Enumerable.Repeat<TElement>(source, splitsTotal).ToArray();
 		}
 
 		public void UpdateSuction()
@@ -303,6 +403,7 @@ namespace HemodialysisMachine.Utilities
 		{
 			Number = number;
 			Outgoing.SetSuction = suction => SuctionOfCurrentCycle = suction;
+			ElementOfCurrentCycles = new TElement[number];
 			Incomings = new PortFlowIn<TElement>[number];
 			Outgoing = new PortFlowOut<TElement>();
 			SuctionOfCurrentCycles = new int[number];
@@ -311,6 +412,11 @@ namespace HemodialysisMachine.Utilities
 				Incomings[i] = new PortFlowIn<TElement>();
 				Incomings[i].SetElement = (element) => ElementOfCurrentCycles[i] = element;
 			}
+		}
+
+		public static TElement MergeAny(TElement[] sources)
+		{
+			return sources[0];
 		}
 
 		public void UpdateSuction()
@@ -330,20 +436,7 @@ namespace HemodialysisMachine.Utilities
 			Outgoing.SetSuccessorElement(ElementOfCurrentCycle);
 		}
 	}
-
-	public static class FlowConnectors
-	{
-		public static TElement[] SplitEqual<TElement>(TElement source, int splitsTotal) where TElement : struct
-		{
-			return System.Linq.Enumerable.Repeat<TElement>(source, splitsTotal).ToArray();
-		}
-
-		public static TElement MergeAny<TElement>(TElement[] sources) where TElement : struct
-		{
-			return sources[0];
-		}
-	}
-
+	
 	public class FlowDirect<TElement> : FlowSegment<TElement> where TElement : struct
 	{
 		public FlowDirect()

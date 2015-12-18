@@ -12,7 +12,7 @@ namespace HemodialysisMachine
 	{
 		class ArterialBloodPump
 		{
-			public DirectBloodFlow BloodFlow = new DirectBloodFlow();
+			public BloodFlowDirect BloodFlow = new BloodFlowDirect();
 		}
 
 		class ArteriaPressureTransducer
@@ -27,12 +27,12 @@ namespace HemodialysisMachine
 
 		class ArtierialChamber
 		{
-			public DirectBloodFlow BloodFlow = new DirectBloodFlow();
+			public BloodFlowDirect BloodFlow = new BloodFlowDirect();
 		}
 
 		class VenousChamber
 		{
-			public DirectBloodFlow BloodFlow = new DirectBloodFlow();
+			public BloodFlowDirect BloodFlow = new BloodFlowDirect();
 		}
 
 		class VenousPressureTransducer
@@ -42,15 +42,15 @@ namespace HemodialysisMachine
 
 		class VenousSafetyDetector
 		{
-			public DirectBloodFlow BloodFlow = new DirectBloodFlow();
+			public BloodFlowDirect BloodFlow = new BloodFlowDirect();
 		}
 
 		class VenousTubingValve
 		{
-			public DirectBloodFlow BloodFlow = new DirectBloodFlow();
+			public BloodFlowDirect BloodFlow = new BloodFlowDirect();
 		}
 
-		public CompositeBloodFlow BloodFlow = new CompositeBloodFlow();  
+		public BloodFlowComposite BloodFlow = new BloodFlowComposite();  
 
 		private readonly ArterialBloodPump _arterialBloodPump = new ArterialBloodPump();
 		private readonly ArteriaPressureTransducer _arteriaPressureTransducer = new ArteriaPressureTransducer();
@@ -64,20 +64,20 @@ namespace HemodialysisMachine
 		public ExtracorporealBloodCircuit(Dialyzer dialyzer)
 		{
 			// The order of the connections matter
-			BloodFlowConnector.Connector.ConnectInWithIn(BloodFlow,
-				                                         new IFlowIn<Blood>[] {_arterialBloodPump.BloodFlow, _arteriaPressureTransducer.BloodFlow});
-			BloodFlowConnector.Connector.ConnectOutWithIn(new IFlowOut<Blood>[]{_arterialBloodPump.BloodFlow,_heparinPump.BloodFlow},
-				                                          _arterialChamber.BloodFlow);
-			BloodFlowConnector.Connector.ConnectOutWithIn(_arterialChamber.BloodFlow,
-														  dialyzer.BloodFlow);
-			BloodFlowConnector.Connector.ConnectOutWithIn(dialyzer.BloodFlow,
-														  new IFlowIn<Blood>[] {_venousChamber.BloodFlow, _venousPressureTransducer.BloodFlow});
-			BloodFlowConnector.Connector.ConnectOutWithIn(_venousChamber.BloodFlow,
-				                                          _venousSafetyDetector.BloodFlow);
-			BloodFlowConnector.Connector.ConnectOutWithIn(_venousSafetyDetector.BloodFlow,
-				                                          _venousTubingValve.BloodFlow);
-			BloodFlowConnector.Connector.ConnectOutWithOut(_venousTubingValve.BloodFlow,
-				                                           BloodFlow);
+			BloodFlowConnector.Instance.ConnectInWithIn(BloodFlow,
+														new IFlowIn<Blood>[] {_arterialBloodPump.BloodFlow, _arteriaPressureTransducer.BloodFlow});
+			BloodFlowConnector.Instance.ConnectOutWithIn(new IFlowOut<Blood>[]{_arterialBloodPump.BloodFlow,_heparinPump.BloodFlow},
+														 _arterialChamber.BloodFlow);
+			BloodFlowConnector.Instance.ConnectOutWithIn(_arterialChamber.BloodFlow,
+														 dialyzer.BloodFlow);
+			BloodFlowConnector.Instance.ConnectOutWithIn(dialyzer.BloodFlow,
+														 new IFlowIn<Blood>[] {_venousChamber.BloodFlow, _venousPressureTransducer.BloodFlow});
+			BloodFlowConnector.Instance.ConnectOutWithIn(_venousChamber.BloodFlow,
+														 _venousSafetyDetector.BloodFlow);
+			BloodFlowConnector.Instance.ConnectOutWithIn(_venousSafetyDetector.BloodFlow,
+														 _venousTubingValve.BloodFlow);
+			BloodFlowConnector.Instance.ConnectOutWithOut(_venousTubingValve.BloodFlow,
+														  BloodFlow);
 		}
 
 	}

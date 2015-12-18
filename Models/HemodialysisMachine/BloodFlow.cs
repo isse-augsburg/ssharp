@@ -2,45 +2,23 @@
 
 namespace HemodialysisMachine
 {
-	using Utilities;
+	using System.ComponentModel;
 
-	public class Blood
+	public struct Blood
 	{
-		public int quantity;
+		public int Quantity;
 	}
 
-	public interface IBloodFlowIn : Utilities.IFlowIn<Blood>
+
+	class BloodFlowSegment : Utilities.FlowSegment<Blood>
 	{
-	}
-
-	public interface IBloodFlowOut : Utilities.IFlowOut<Blood>
-	{
-	}
-
-	class BloodFlowConnector : Utilities.FlowConnector<Blood>
-	{
-		public static BloodFlowConnector Connector = new BloodFlowConnector();
-
-		protected override Blood Merger(Blood[] sources)
-		{
-			return FlowConnectors.MergeAny(sources);
-		}
-
-		protected override Blood[] Splitter(Blood source, int splits)
-		{
-			return FlowConnectors.SplitEqual<Blood>(source, splits);
-		}
-	}
-
-	class BloodFlow : Utilities.Flow<Blood>, IBloodFlowIn, IBloodFlowOut
-	{
-		public BloodFlow(Func<Blood, Blood> flowLambdaFunc)
+		public BloodFlowSegment(Func<Blood, Blood> flowLambdaFunc)
 			: base(flowLambdaFunc)
 		{
 		}
 	}
 
-	class BloodFlowSource : Utilities.FlowSource<Blood>, IBloodFlowOut
+	class BloodFlowSource : Utilities.FlowSource<Blood>
 	{
 		public BloodFlowSource(Func<Blood> sourceLambdaFunc)
 			: base(sourceLambdaFunc)
@@ -48,15 +26,24 @@ namespace HemodialysisMachine
 		}
 	}
 
-	class BloodFlowSink : Utilities.FlowSink<Blood>, IBloodFlowIn
+	class BloodFlowSink : Utilities.FlowSink<Blood>
 	{
 	}
 
-	class CompositeBloodFlow : Utilities.CompositeFlow<Blood>, IBloodFlowIn, IBloodFlowOut
+	class BloodFlowComposite : Utilities.FlowComposite<Blood>
 	{
 	}
 
-	class DirectBloodFlow : Utilities.DirectFlow<Blood>, IBloodFlowIn, IBloodFlowOut
+	class BloodFlowDirect : Utilities.FlowDirect<Blood>
 	{
+	}
+
+	class BloodPortConnector : Utilities.PortConnector<Blood>
+	{
+	}
+
+	class BloodFlowConnector : Utilities.FlowConnector<Blood>
+	{
+		public static BloodFlowConnector Instance = new BloodFlowConnector();
 	}
 }
