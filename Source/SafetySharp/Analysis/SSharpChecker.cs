@@ -25,6 +25,7 @@ namespace SafetySharp.Analysis
 	using System;
 	using System.Diagnostics;
 	using Runtime;
+	using Utilities;
 
 	/// <summary>
 	///   Represents a model checker specifically created to check S# models.
@@ -39,6 +40,8 @@ namespace SafetySharp.Analysis
 		/// <param name="invariant">The invariant that should be checked.</param>
 		public override CounterExample CheckInvariant(Model model, Formula invariant)
 		{
+			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
+
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
