@@ -23,6 +23,7 @@
 namespace SafetySharp.Runtime.Serialization
 {
 	using System;
+	using System.Linq;
 	using System.Reflection;
 	using System.Reflection.Emit;
 	using Modeling;
@@ -369,11 +370,17 @@ namespace SafetySharp.Runtime.Serialization
 
 						_il.Emit(OpCodes.Pop);
 						_il.Emit(OpCodes.Pop);
-						_il.ThrowException(typeof(InvalidOperationException)); // TODO: Throw helpful exception
+
+						// throw new RangeViolationException(obj, field)
+						_il.Emit(OpCodes.Ldloc_1);
+						_il.Emit(OpCodes.Ldtoken, field);
+						_il.Emit(OpCodes.Call, typeof(FieldInfo).GetMethod("GetFieldFromHandle", new[] { typeof(RuntimeFieldHandle) }));
+						_il.Emit(OpCodes.Newobj, typeof(RangeViolationException).GetConstructors(BindingFlags.Instance|BindingFlags.NonPublic).Single());
+						_il.Emit(OpCodes.Throw);
 						break;
 					case OverflowBehavior.Clamp:
 						var clamplabel = _il.DefineLabel();
-						
+
 						_il.Emit(OpCodes.Ldloc_1);
 						_il.Emit(OpCodes.Ldfld, field);
 						_il.Emit(OpCodes.Dup);

@@ -22,57 +22,61 @@
 
 namespace Tests.Serialization.Ranges
 {
+	using System;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class Char : SerializationObject
+	internal class Error : SerializationObject
 	{
 		protected override void Check()
 		{
-			var c = new C { F = 'y', G = 'y' };
+			var c = new C();
 
 			GenerateCode(SerializationMode.Full, c);
 
-			Serialize();
-			c.F = 'z';
-			c.G = 'z';
-			Deserialize();
-			c.F.ShouldBe('q');
-			c.G.ShouldBe('q');
+			c.F = 49;
+			try
+			{
+				Serialize();
+				throw new InvalidOperationException("Expected an exception.");
+			}
+			catch (RangeViolationException e)
+			{
+				e.Object.ShouldBe(c);
+				e.Field.ShouldBe(c.GetType().GetField("F"));
+				e.FieldValue.ShouldBe(49);
+				e.Range.LowerBound.ShouldBe(0);
+				e.Range.UpperBound.ShouldBe(5);
+				e.Range.OverflowBehavior.ShouldBe(OverflowBehavior.Error);
+			}
 
-			c.F = System.Char.MaxValue;
-			c.Q = System.Char.MaxValue;
-
-			Serialize();
-			Deserialize();
-
-			c.F.ShouldBe('q');
-			c.Q.ShouldBe(System.Char.MaxValue);
-
-			c.F = System.Char.MinValue;
-			c.Q = System.Char.MinValue;
-
-			Serialize();
-			Deserialize();
-
-			c.F.ShouldBe('a');
-			c.Q.ShouldBe(System.Char.MinValue);
+			c.F = 0;
+			c.G = -49;
+			try
+			{
+				Serialize();
+				throw new InvalidOperationException("Expected an exception.");
+			}
+			catch (RangeViolationException e)
+			{
+				e.Object.ShouldBe(c);
+				e.Field.ShouldBe(c.GetType().GetField("G"));
+				e.FieldValue.ShouldBe(-49);
+				e.Range.LowerBound.ShouldBe(-1);
+				e.Range.UpperBound.ShouldBe(54);
+				e.Range.OverflowBehavior.ShouldBe(OverflowBehavior.Error);
+			}
 		}
 
 		internal class C
 		{
-			public char F;
+			[Range(0, 5, OverflowBehavior.Error)]
+			public short F;
 
-			[Range('a', 'q', OverflowBehavior.Clamp)]
-			public char G;
-
-			public char Q;
-
-			public C()
-			{
-				Range.Restrict(F, 'a', 'q', OverflowBehavior.Clamp);
-			}
+			[Range(-1, 54, OverflowBehavior.Error)]
+			public short G;
 		}
 	}
 }

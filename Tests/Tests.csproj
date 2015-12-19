@@ -439,6 +439,7 @@
     <Compile Include="Serialization\Ranges\Enum.cs" />
     <Compile Include="Serialization\Ranges\Bool.cs" />
     <Compile Include="Serialization\Ranges\Char.cs" />
+    <Compile Include="Serialization\Ranges\Error.cs" />
     <Compile Include="Serialization\Ranges\Int16.cs" />
     <Compile Include="Serialization\Ranges\Int32.cs" />
     <Compile Include="Serialization\Ranges\Int64.cs" />

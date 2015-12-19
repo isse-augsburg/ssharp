@@ -24,6 +24,7 @@ namespace Tests.Serialization.Ranges
 {
 	using System;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
@@ -45,10 +46,10 @@ namespace Tests.Serialization.Ranges
 			c.H.ShouldBe((sbyte)3);
 
 			c.F = -17;
-			Should.Throw<InvalidOperationException>(() => Serialize());
+			Should.Throw<RangeViolationException>(() => Serialize());
 
 			c.F = 99;
-			Should.Throw<InvalidOperationException>(() => Serialize());
+			Should.Throw<RangeViolationException>(() => Serialize());
 
 			c.F = 1;
 			c.G = -9;

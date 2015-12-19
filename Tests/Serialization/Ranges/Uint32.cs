@@ -22,8 +22,8 @@
 
 namespace Tests.Serialization.Ranges
 {
-	using System;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
@@ -45,7 +45,7 @@ namespace Tests.Serialization.Ranges
 			c.H.ShouldBe((uint)3);
 
 			c.F = 99;
-			Should.Throw<InvalidOperationException>(() => Serialize());
+			Should.Throw<RangeViolationException>(() => Serialize());
 
 			c.F = 1;
 			c.G = 0;
@@ -130,6 +130,7 @@ namespace Tests.Serialization.Ranges
 		{
 			[Range(1, 5, OverflowBehavior.Error)]
 			public uint F;
+
 			public uint G;
 			public uint H;
 			public uint Q;

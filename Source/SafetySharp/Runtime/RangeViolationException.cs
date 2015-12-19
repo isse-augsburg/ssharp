@@ -20,30 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Runtime
 {
-	using Runtime;
+	using System;
+	using System.Reflection;
+	using Modeling;
 
 	/// <summary>
-	///   Controls the overflow semantics when field values lie outside the field's allowed range of values.
+	///   Raised when the value of a <see cref="Component" /> field exceeds its allowed range and the field's
+	///   <see cref="OverflowBehavior" /> is set to <see cref="OverflowBehavior.Error" />.
 	/// </summary>
-	public enum OverflowBehavior
+	public sealed class RangeViolationException : Exception
 	{
 		/// <summary>
-		///   Indicates that a <see cref="RangeViolationException" /> is thrown when a field contains a value outside of its allowed
-		///   range.
+		///   Initializes a new instance.
 		/// </summary>
-		Error,
+		/// <param name="obj">The object the exception should be raised for.</param>
+		/// <param name="field">The field the exception should be raised for.</param>
+		internal RangeViolationException(object obj, FieldInfo field)
+			: base("The field value lies outside of the allowed range.")
+		{
+			Object = obj;
+			Field = field;
+		}
 
 		/// <summary>
-		///   Indicates that the field value is clamped to the field's range.
+		///   Gets the object the exception was raised for.
 		/// </summary>
-		Clamp,
+		public object Object { get; }
 
 		/// <summary>
-		///   Indicates that the field value wraps around if it underflows or overflows the fields's range, i.e., if the range's upper
-		///   limit is exceeded, the value is set to the lower bound and vice versa.
+		///   Gets the field the exception was raised for.
 		/// </summary>
-		WrapClamp
+		public FieldInfo Field { get; }
+
+		/// <summary>
+		///   Gets the range metadata of the <see cref="Object" />'s <see cref="Field" />.
+		/// </summary>
+		public RangeAttribute Range => Modeling.Range.GetMetadata(Object, Field);
+
+		/// <summary>
+		///   Gets the <see cref="Object" />'s <see cref="Field" />'s value the exception was raised for.
+		/// </summary>
+		public object FieldValue => Field.GetValue(Object);
 	}
 }

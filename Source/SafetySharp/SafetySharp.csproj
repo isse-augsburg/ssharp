@@ -67,6 +67,7 @@
     <Compile Include="Modeling\ActivationMode.cs" />
     <Compile Include="Modeling\Range.cs" />
     <Compile Include="Runtime\InvariantChecker.cs" />
+    <Compile Include="Runtime\RangeViolationException.cs" />
     <Compile Include="Runtime\RealTimeSimulator.cs" />
     <Compile Include="Runtime\Reflection\ComponentExtensions.cs" />
     <Compile Include="Runtime\Reflection\ModelExtensions.cs" />
