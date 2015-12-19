@@ -83,7 +83,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="mode">The serialization mode that should be used to serialize the object.</param>
 		protected internal override void Serialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode)
 		{
-			generator.SerializeFields(objectIdentifier, GetFields(obj, mode).ToArray());
+			generator.SerializeFields(obj, objectIdentifier, GetFields(obj, mode).ToArray());
 		}
 
 		/// <summary>

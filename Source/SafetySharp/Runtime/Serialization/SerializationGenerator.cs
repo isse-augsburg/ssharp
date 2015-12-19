@@ -25,10 +25,11 @@ namespace SafetySharp.Runtime.Serialization
 	using System;
 	using System.Reflection;
 	using System.Reflection.Emit;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>
-	///   Provides methods to dynamically generate state serialization and deserialization methods.
+	///   Dynamically generates state serialization and deserialization methods.
 	/// </summary>
 	public sealed class SerializationGenerator
 	{
@@ -144,10 +145,12 @@ namespace SafetySharp.Runtime.Serialization
 		///   Generates the code to serialize the <paramref name="fields" /> of the object identified by
 		///   <paramref name="objectIdentifier" />.
 		/// </summary>
+		/// <param name="obj">The object whose fields are serialized.</param>
 		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="fields" />.</param>
 		/// <param name="fields">The fields that should be serialized.</param>
-		public void SerializeFields(int objectIdentifier, FieldInfo[] fields)
+		public void SerializeFields(object obj, int objectIdentifier, FieldInfo[] fields)
 		{
+			Requires.NotNull(obj, nameof(obj));
 			Requires.NotNull(fields, nameof(fields));
 
 			if (fields.Length == 0)
@@ -158,12 +161,12 @@ namespace SafetySharp.Runtime.Serialization
 			{
 				if (IsPrimitiveTypeWithAtMostFourBytes(field.FieldType))
 				{
-					SerializePrimitiveTypeField(field, OpCodes.Stind_I4);
+					SerializePrimitiveTypeField(obj, field, OpCodes.Stind_I4, false);
 					AdvanceToNextSlot();
 				}
 				else if (IsPrimitiveTypeWithAtMostEightBytes(field.FieldType))
 				{
-					SerializePrimitiveTypeField(field, OpCodes.Stind_I8);
+					SerializePrimitiveTypeField(obj, field, OpCodes.Stind_I8, true);
 					AdvanceToNextSlot();
 					AdvanceToNextSlot();
 				}
@@ -332,19 +335,167 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Generates the code to serialize the <paramref name="field" /> of the object stored in the local variable.
 		/// </summary>
+		/// <param name="obj">The object whose fields are serialized.</param>
 		/// <param name="field">The field that should be serialized.</param>
 		/// <param name="storeCode">The IL instruction that should be used to write the value into the state.</param>
-		private void SerializePrimitiveTypeField(FieldInfo field, OpCode storeCode)
+		/// <param name="exceedsFourBytes">Indicates whether the field requires more than 4 bytes of storage.</param>
+		private void SerializePrimitiveTypeField(object obj, FieldInfo field, OpCode storeCode, bool exceedsFourBytes)
 		{
 			// s = state
 			_il.Emit(OpCodes.Ldloc_0);
 
-			// o = objs.GetObject(identifier)
-			_il.Emit(OpCodes.Ldloc_1);
+			var rangeMetadata = Range.GetMetadata(obj, field);
+			if (rangeMetadata != null && !field.FieldType.IsEnum)
+			{
+				var continueLabel = _il.DefineLabel();
 
-			// *s = o.field
-			_il.Emit(OpCodes.Ldfld, field);
+				switch (rangeMetadata.OverflowBehavior)
+				{
+					case OverflowBehavior.Error:
+						// if (v < lower | v > upper) throw
+						_il.Emit(OpCodes.Ldloc_1);
+						_il.Emit(OpCodes.Ldfld, field);
+						_il.Emit(OpCodes.Dup);
+						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
+						_il.Emit(field.FieldType.IsUnsignedNumericType() ? OpCodes.Clt_Un : OpCodes.Clt);
+
+						_il.Emit(OpCodes.Ldloc_1);
+						_il.Emit(OpCodes.Ldfld, field);
+						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
+						_il.Emit(field.FieldType.IsUnsignedNumericType() ? OpCodes.Cgt_Un : OpCodes.Cgt);
+
+						_il.Emit(OpCodes.Or);
+						_il.Emit(OpCodes.Brfalse, continueLabel);
+
+						_il.Emit(OpCodes.Pop);
+						_il.Emit(OpCodes.Pop);
+						_il.ThrowException(typeof(InvalidOperationException)); // TODO: Throw helpful exception
+						break;
+					case OverflowBehavior.Clamp:
+						var clamplabel = _il.DefineLabel();
+						
+						_il.Emit(OpCodes.Ldloc_1);
+						_il.Emit(OpCodes.Ldfld, field);
+						_il.Emit(OpCodes.Dup);
+						_il.Emit(OpCodes.Dup);
+
+						// if (v < lower) v = lower
+						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
+						_il.Emit(field.FieldType.IsUnsignedNumericType() ? OpCodes.Bge_Un_S : OpCodes.Bge_S, clamplabel);
+						_il.Emit(OpCodes.Pop);
+						_il.Emit(OpCodes.Pop);
+						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
+						_il.Emit(OpCodes.Br, continueLabel);
+
+						// else if (v > upper) v = upper
+						_il.MarkLabel(clamplabel);
+						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
+						_il.Emit(field.FieldType.IsUnsignedNumericType() ? OpCodes.Ble_Un_S : OpCodes.Ble_S, continueLabel);
+						_il.Emit(OpCodes.Pop);
+						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
+						break;
+					case OverflowBehavior.WrapClamp:
+						var wrapLabel = _il.DefineLabel();
+
+						_il.Emit(OpCodes.Ldloc_1);
+						_il.Emit(OpCodes.Ldfld, field);
+						_il.Emit(OpCodes.Dup);
+						_il.Emit(OpCodes.Dup);
+
+						// if (v < lower) v = upper
+						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
+						_il.Emit(field.FieldType.IsUnsignedNumericType() ? OpCodes.Bge_Un_S : OpCodes.Bge_S, wrapLabel);
+						_il.Emit(OpCodes.Pop);
+						_il.Emit(OpCodes.Pop);
+						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
+						_il.Emit(OpCodes.Br, continueLabel);
+
+						// else if (v > upper) v = lower
+						_il.MarkLabel(wrapLabel);
+						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
+						_il.Emit(field.FieldType.IsUnsignedNumericType() ? OpCodes.Ble_Un_S : OpCodes.Ble_S, continueLabel);
+						_il.Emit(OpCodes.Pop);
+						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
+						break;
+					default:
+						Assert.NotReached("Unknown overflow behavior.");
+						break;
+				}
+
+				_il.MarkLabel(continueLabel);
+			}
+			else
+			{
+				// v = o.field
+				_il.Emit(OpCodes.Ldloc_1);
+				_il.Emit(OpCodes.Ldfld, field);
+			}
+
+			// *s = v
 			_il.Emit(storeCode);
+		}
+
+		/// <summary>
+		///   Loads the <paramref name="constant" /> onto the stack.
+		/// </summary>
+		private void LoadConstant(object constant, bool exceedsFourBytes)
+		{
+			if (exceedsFourBytes)
+			{
+				if (constant is double)
+					_il.Emit(OpCodes.Ldc_I8, (double)constant);
+				else
+					_il.Emit(OpCodes.Ldc_I8, NormalizeToInt64(constant));
+			}
+			else
+			{
+				if (constant is float)
+					_il.Emit(OpCodes.Ldc_I4, (float)constant);
+				else
+					_il.Emit(OpCodes.Ldc_I4, NormalizeToInt32(constant));
+			}
+		}
+
+		/// <summary>
+		///   Normalizes the type of the <paramref name="constant" /> value.
+		/// </summary>
+		private static int NormalizeToInt32(object constant)
+		{
+			switch (Type.GetTypeCode(constant.GetType()))
+			{
+				case TypeCode.Char:
+					return (char)constant;
+				case TypeCode.SByte:
+					return (sbyte)constant;
+				case TypeCode.Byte:
+					return (byte)constant;
+				case TypeCode.Int16:
+					return (short)constant;
+				case TypeCode.UInt16:
+					return (ushort)constant;
+				case TypeCode.Int32:
+					return (int)constant;
+				case TypeCode.UInt32:
+					return (int)(uint)constant;
+				default:
+					return Assert.NotReached<int>($"Cannot normalize value of type {constant.GetType().FullName}.");
+			}
+		}
+
+		/// <summary>
+		///   Normalizes the type of the <paramref name="constant" /> value.
+		/// </summary>
+		private static long NormalizeToInt64(object constant)
+		{
+			switch (Type.GetTypeCode(constant.GetType()))
+			{
+				case TypeCode.Int64:
+					return (long)constant;
+				case TypeCode.UInt64:
+					return (long)(ulong)constant;
+				default:
+					return Assert.NotReached<long>($"Cannot normalize value of type {constant.GetType().FullName}.");
+			}
 		}
 
 		/// <summary>
@@ -400,7 +551,7 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		/// Loads the object with the <paramref name="objectIdentifier"/> into the local variable.
+		///   Loads the object with the <paramref name="objectIdentifier" /> into the local variable.
 		/// </summary>
 		private void LoadObject(int objectIdentifier)
 		{

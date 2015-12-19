@@ -22,12 +22,17 @@
 
 namespace Elbtunnel.Controllers
 {
+	using SafetySharp.Modeling;
+
 	public sealed class MainControlOriginal : MainControl
 	{
+		[Range(0, 5, OverflowBehavior.Clamp)]
+		private int _count;
+
 		/// <summary>
 		///   Gets the number of high vehicles currently in the main-control area.
 		/// </summary>
-		public int Count { get; private set; }
+		public int Count => _count;
 
 		/// <summary>
 		///   Updates the internal state of the component.
@@ -39,7 +44,7 @@ namespace Elbtunnel.Controllers
 			var numberOfHVs = GetNumberOfEnteringVehicles();
 			if (numberOfHVs > 0)
 			{
-				Count += numberOfHVs;
+				_count += numberOfHVs;
 				Timer.Start();
 			}
 
@@ -52,22 +57,16 @@ namespace Elbtunnel.Controllers
 			IsVehicleLeavingOnRightLane = active && onlyRightTriggered && PositionDetector.IsVehicleDetected;
 
 			if (IsVehicleLeavingOnLeftLane)
-				Count--;
+				_count--;
 
 			if (IsVehicleLeavingOnRightLane && Count > 0)
-				Count--;
+				_count--;
 
 			if (Timer.HasElapsed)
-				Count = 0;
-
-			if (Count < 0)
-				Count = 0;
+				_count = 0;
 
 			if (Count == 0)
 				Timer.Stop();
-
-			if (Count > 5)
-				Count = 5;
 		}
 	}
 }

@@ -65,6 +65,7 @@
     <Compile Include="Modeling\NonDiscoverableAttribute.cs" />
     <Compile Include="Analysis\CounterExample.cs" />
     <Compile Include="Modeling\ActivationMode.cs" />
+    <Compile Include="Modeling\Range.cs" />
     <Compile Include="Runtime\InvariantChecker.cs" />
     <Compile Include="Runtime\RealTimeSimulator.cs" />
     <Compile Include="Runtime\Reflection\ComponentExtensions.cs" />

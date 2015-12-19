@@ -20,26 +20,58 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Funkfahrbetrieb.Context
+namespace Tests.Serialization.Ranges
 {
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	public class Train : Component
+	internal class Char : SerializationObject
 	{
-		[Range(0, 1000, OverflowBehavior.Clamp)]
-		private int _position;
-
-		[Range(0, 10, OverflowBehavior.Clamp)]
-		private int _speed = 10;
-
-		public int Position => _position;
-		public int Speed => _speed;
-		public extern int Acceleration { get; }
-
-		public override void Update()
+		protected override void Check()
 		{
-			_position += _speed;
-			_speed += Acceleration;
+			var c = new C { F = 'y', G = 'y' };
+
+			GenerateCode(SerializationMode.Full, c);
+
+			Serialize();
+			c.F = 'z';
+			c.G = 'z';
+			Deserialize();
+			c.F.ShouldBe('q');
+			c.G.ShouldBe('q');
+
+			c.F = System.Char.MaxValue;
+			c.Q = System.Char.MaxValue;
+
+			Serialize();
+			Deserialize();
+
+			c.F.ShouldBe('q');
+			c.Q.ShouldBe(System.Char.MaxValue);
+
+			c.F = System.Char.MinValue;
+			c.Q = System.Char.MinValue;
+
+			Serialize();
+			Deserialize();
+
+			c.F.ShouldBe('a');
+			c.Q.ShouldBe(System.Char.MinValue);
+		}
+
+		internal class C
+		{
+			public char F;
+			public char Q;
+
+			[Range('a', 'q', OverflowBehavior.Clamp)]
+			public char G;
+
+			public C()
+			{
+				Range.Restrict(F, 'a', 'q', OverflowBehavior.Clamp);
+			}
 		}
 	}
 }

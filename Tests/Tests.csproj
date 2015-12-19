@@ -436,6 +436,17 @@
     <Compile Include="Serialization\PrimitiveTypes\UInt16.cs" />
     <Compile Include="Serialization\PrimitiveTypes\UInt32.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int32.cs" />
+    <Compile Include="Serialization\Ranges\Enum.cs" />
+    <Compile Include="Serialization\Ranges\Bool.cs" />
+    <Compile Include="Serialization\Ranges\Char.cs" />
+    <Compile Include="Serialization\Ranges\Int16.cs" />
+    <Compile Include="Serialization\Ranges\Int32.cs" />
+    <Compile Include="Serialization\Ranges\Int64.cs" />
+    <Compile Include="Serialization\Ranges\Int8.cs" />
+    <Compile Include="Serialization\Ranges\UInt16.cs" />
+    <Compile Include="Serialization\Ranges\UInt32.cs" />
+    <Compile Include="Serialization\Ranges\UInt64.cs" />
+    <Compile Include="Serialization\Ranges\UInt8.cs" />
     <Compile Include="Serialization\RuntimeModels\binding.cs" />
     <Compile Include="Serialization\RuntimeModels\deterministic faults.cs" />
     <Compile Include="Serialization\RuntimeModels\single fault.cs" />
@@ -489,6 +500,7 @@
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -85,9 +85,6 @@ namespace PressureTank
 		{
 			// TODO: Support different system step times
 			--_remainingTime;
-
-			if (_remainingTime < -1)
-				_remainingTime = -1;
 		}
 
 		/// <summary>

@@ -133,6 +133,61 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
+		///   Checks wheter <paramref name="type" /> is a numeric type.
+		/// </summary>
+		internal static bool IsNumericType(this Type type)
+		{
+			if (type.IsEnum)
+				return false;
+
+			switch (Type.GetTypeCode(type))
+			{
+				case TypeCode.Char:
+				case TypeCode.SByte:
+				case TypeCode.Byte:
+				case TypeCode.Int16:
+				case TypeCode.UInt16:
+				case TypeCode.Int32:
+				case TypeCode.UInt32:
+				case TypeCode.Int64:
+				case TypeCode.UInt64:
+				case TypeCode.Single:
+				case TypeCode.Double:
+					return true;
+				default:
+					return false;
+			}
+		}
+
+		/// <summary>
+		///   Checks wheter <paramref name="type" /> is an unsigned numeric type.
+		/// </summary>
+		internal static bool IsUnsignedNumericType(this Type type)
+		{
+			if (type.IsEnum)
+				return false;
+
+			switch (Type.GetTypeCode(type))
+			{
+				case TypeCode.Char:
+				case TypeCode.Byte:
+				case TypeCode.UInt16:
+				case TypeCode.UInt32:
+				case TypeCode.UInt64:
+					return true;
+				case TypeCode.Single:
+				case TypeCode.Int64:
+				case TypeCode.Int32:
+				case TypeCode.Int16:
+				case TypeCode.SByte:
+				case TypeCode.Double:
+					return false;
+				default:
+					return false;
+			}
+		}
+
+		/// <summary>
 		///   Gets the global C# name of <paramref name="type" />, for instance <c>global::System.Int32</c>.
 		/// </summary>
 		/// <param name="type">The type the global name should be returned for.</param>
@@ -143,7 +198,7 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
-		///   Gets the unmanaged size of the primitive or enum <paramref name="type" />.
+		///   Gets the unmanaged size in bytes of the primitive or enum <paramref name="type" />.
 		/// </summary>
 		/// <param name="type">The type the unmanaged size should be returned for.</param>
 		public static int GetUnmanagedSize(this Type type)

@@ -20,26 +20,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Funkfahrbetrieb.Context
+namespace Tests.Serialization.Ranges
 {
+	using System;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	public class Train : Component
+	internal class Enum : SerializationObject
 	{
-		[Range(0, 1000, OverflowBehavior.Clamp)]
-		private int _position;
-
-		[Range(0, 10, OverflowBehavior.Clamp)]
-		private int _speed = 10;
-
-		public int Position => _position;
-		public int Speed => _speed;
-		public extern int Acceleration { get; }
-
-		public override void Update()
+		protected override void Check()
 		{
-			_position += _speed;
-			_speed += Acceleration;
+			var c = new C { F = F.A, E = E.B };
+
+			GenerateCode(SerializationMode.Full, c);
+
+			Serialize();
+			c.E = E.A;
+			c.F = F.B;
+			Deserialize();
+			c.E.ShouldBe(E.B);
+			c.F.ShouldBe(F.A);
+		}
+
+		internal class C
+		{
+			public E E;
+			public F F;
+
+			public C()
+			{
+				Should.Throw<ArgumentException>(() => Range.Restrict(F, F.A, F.B, OverflowBehavior.Error));
+			}
+		}
+
+		internal enum E
+		{
+			A,
+			B
+		}
+
+		[Flags]
+		internal enum F
+		{
+			A,
+			B
 		}
 	}
 }

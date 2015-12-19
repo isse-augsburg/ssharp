@@ -32,7 +32,7 @@ namespace PressureTank
 		/// <summary>
 		///   The current pressure level.
 		/// </summary>
-		[Range(-1, 60, OverflowBehavior.Clamp)]
+		[Range(0, 60, OverflowBehavior.Clamp)]
 		private int _pressureLevel;
 
 		/// <summary>
@@ -68,13 +68,6 @@ namespace PressureTank
 
 			if (IsBeingFilled)
 				_pressureLevel += 2;
-
-			// TODO: Remove the following lines once the simulator supports overflow behaviors
-			if (_pressureLevel > MaxPressure)
-				_pressureLevel = MaxPressure;
-
-			if (_pressureLevel < 0)
-				_pressureLevel = 0;
 		}
 	}
 }

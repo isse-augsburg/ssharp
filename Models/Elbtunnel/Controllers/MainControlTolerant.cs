@@ -29,7 +29,7 @@ namespace Elbtunnel.Controllers
 		/// <summary>
 		///   The number of high vehicles currently in the main-control area.
 		/// </summary>
-		[Range(0, 4, OverflowBehavior.Clamp)]
+		[Range(0, 5, OverflowBehavior.Clamp)]
 		private int _count;
 
 		/// <summary>
@@ -74,9 +74,6 @@ namespace Elbtunnel.Controllers
 			}
 
 			if (Timer.HasElapsed)
-				_count = 0;
-
-			if (_count < 0)
 				_count = 0;
 
 			if (_count == 0)

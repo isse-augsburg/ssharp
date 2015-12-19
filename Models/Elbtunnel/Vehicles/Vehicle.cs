@@ -32,6 +32,9 @@ namespace Elbtunnel.Vehicles
 		[Hidden]
 		private VehicleKind _kind;
 
+		[Range(0, 20, OverflowBehavior.Clamp)]
+		private int _position;
+
 		/// <summary>
 		///   Gets the current lane of the vehicle.
 		/// </summary>
@@ -49,7 +52,11 @@ namespace Elbtunnel.Vehicles
 		/// <summary>
 		///   Gets the current vehicle's position.
 		/// </summary>
-		public int Position { get; protected set; }
+		public int Position
+		{
+			get { return _position; }
+			protected set { _position = value; }
+		}
 
 		/// <summary>
 		///   Gets the current vehicle's speed.
@@ -79,9 +86,6 @@ namespace Elbtunnel.Vehicles
 				return;
 
 			Position += Speed;
-
-			if (Position > 20)
-				Position = 20;
 
 			// Vehicles are only allowed to stop at the initial position
 			Speed = Choose(1, 3);

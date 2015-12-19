@@ -61,5 +61,11 @@ namespace Tests
 		{
 			ExecuteDynamicTests(file);
 		}
+
+		[Theory, MemberData("DiscoverTests", "Serialization/Ranges")]
+		public void Ranges(string test, string file)
+		{
+			ExecuteDynamicTests(file);
+		}
 	}
 }

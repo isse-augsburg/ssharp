@@ -23,24 +23,24 @@
 namespace SafetySharp.Modeling
 {
 	/// <summary>
-	///   Controls the semantics of the assignment operator when the assigned value lies outside the variable's range.
+	///   Controls the overflow semantics when field values lie outside the field's allowed range of values.
 	/// </summary>
 	public enum OverflowBehavior
 	{
 		/// <summary>
-		///   Indicates that an exception is thrown when a value outside the range of the variable is assigned during
-		///   simulation. During model-checking, however, the precise behavior of this overflow behavior is undefined.
+		///   Indicates that an exception is thrown when a field contains a value outside of its allowed range.
 		/// </summary>
 		Error,
 
 		/// <summary>
-		///   Indicates the assigned value is clamped to the variable's minimum or maximum value.
+		///   Indicates that the field value is clamped to the field's range.
 		/// </summary>
 		Clamp,
 
 		/// <summary>
-		///   Indicates the assigned value wraps around if it underflows or overflows the variable's range.
+		///   Indicates that the field value wraps around if it underflows or overflows the fields's range, i.e., if the range's upper
+		///   limit is exceeded, the value is set to the lower bound and vice versa.
 		/// </summary>
-		WrapAround
+		WrapClamp
 	}
 }

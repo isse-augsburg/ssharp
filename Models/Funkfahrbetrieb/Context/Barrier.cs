@@ -35,12 +35,6 @@ namespace Funkfahrbetrieb.Context
 		public override void Update()
 		{
 			_angle += Speed;
-
-			if (_angle < 0)
-				_angle = 0;
-
-			if (_angle > 10)
-				_angle = 10;
 		}
 	}
 }
