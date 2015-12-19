@@ -64,8 +64,8 @@ namespace SafetySharp.Runtime
 		/// <param name="capacity">The maximum number of states that can be stored in the stack.</param>
 		public StateStack(int capacity)
 		{
-			_framesBuffer.Resize(capacity * sizeof(Frame));
-			_statesBuffer.Resize(capacity * sizeof(int));
+			_framesBuffer.Resize((long)capacity * sizeof(Frame));
+			_statesBuffer.Resize((long)capacity * sizeof(int));
 
 			_frames = (Frame*)_framesBuffer.Pointer;
 			_states = (int*)_statesBuffer.Pointer;
@@ -117,7 +117,9 @@ namespace SafetySharp.Runtime
 				// We're done with the frame and we can now remove the topmost state of the previous frame
 				// as we no longer need it to construct a counter example
 				--FrameCount;
-				_frames[FrameCount - 1].Count -= 1;
+
+				if (FrameCount > 0)
+					_frames[FrameCount - 1].Count -= 1;
 			}
 
 			state = 0;
@@ -148,6 +150,9 @@ namespace SafetySharp.Runtime
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
+			if (!disposing)
+				return;
+
 			_framesBuffer.SafeDispose();
 			_statesBuffer.SafeDispose();
 		}
@@ -158,7 +163,7 @@ namespace SafetySharp.Runtime
 		private struct Frame
 		{
 			/// <summary>
-			///   The offset in the <see cref="_states" /> array where the index of the frame's first state is stored.
+			///   The offset into the <see cref="_states" /> array where the index of the frame's first state is stored.
 			/// </summary>
 			public int Offset;
 

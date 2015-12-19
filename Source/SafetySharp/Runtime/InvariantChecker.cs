@@ -38,12 +38,12 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   The default capacity used for state storage.
 		/// </summary>
-		private const int DefaultCapacity = 1 << 24;
+		private const int DefaultCapacity = 1 << 27;
 
 		/// <summary>
 		///   The number of states that must be checked between two consecutive status reports.
 		/// </summary>
-		private const int ReportStateCountDelta = 100000;
+		private const int ReportStateCountDelta = 200000;
 
 		/// <summary>
 		///   The model that is checked.

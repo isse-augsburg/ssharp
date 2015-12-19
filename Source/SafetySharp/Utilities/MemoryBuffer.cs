@@ -23,6 +23,7 @@
 namespace SafetySharp.Utilities
 {
 	using System;
+	using System.Runtime.InteropServices;
 
 	/// <summary>
 	///   Represents a memory buffer.
@@ -30,14 +31,14 @@ namespace SafetySharp.Utilities
 	internal sealed unsafe class MemoryBuffer : DisposableObject
 	{
 		/// <summary>
-		///   The underlying memory.
+		///   The number of additional bytes to allocate in front of and behind the buffer to check for out of bounds writes.
 		/// </summary>
-		private byte[] _memory;
+		private const int CheckBytes = 128;
 
 		/// <summary>
-		///   The pinned pointer to the underlying managed memory.
+		///   The value that is used check for out of bounds writes.
 		/// </summary>
-		private PinnedPointer _pinnedPointer;
+		private const int CheckValue = 0xAF;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -50,7 +51,7 @@ namespace SafetySharp.Utilities
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="sizeInBytes">The size of the buffer in bytes.</param>
-		public MemoryBuffer(int sizeInBytes)
+		public MemoryBuffer(long sizeInBytes)
 		{
 			Resize(sizeInBytes);
 		}
@@ -58,17 +59,17 @@ namespace SafetySharp.Utilities
 		/// <summary>
 		///   Gets the size of the memory buffer in bytes.
 		/// </summary>
-		public int SizeInBytes { get; private set; }
+		public long SizeInBytes { get; private set; }
 
 		/// <summary>
 		///   Gets a pointer to the underlying memory of the buffer.
 		/// </summary>
-		public void* Pointer => _pinnedPointer;
+		public byte* Pointer { get; private set; }
 
 		/// <summary>
 		///   Resizes the buffer so that it can contain at least <paramref name="sizeInBytes" /> bytes.
 		/// </summary>
-		public void Resize(int sizeInBytes)
+		public void Resize(long sizeInBytes)
 		{
 			Requires.That(sizeInBytes >= 0, nameof(sizeInBytes), $"Cannot allocate {sizeInBytes} bytes.");
 
@@ -76,17 +77,23 @@ namespace SafetySharp.Utilities
 			if (sizeInBytes <= SizeInBytes)
 				return;
 
-			var oldBuffer = _memory;
-			var newBuffer = new byte[sizeInBytes];
+			var allocatedBytes = sizeInBytes + 2 * CheckBytes;
+			var oldBuffer = Pointer;
+			var newBuffer = (byte*)Marshal.AllocHGlobal(new IntPtr(allocatedBytes)).ToPointer();
+			GC.AddMemoryPressure(allocatedBytes);
 
 			if (oldBuffer != null)
-				Array.Copy(oldBuffer, newBuffer, SizeInBytes);
+				Buffer.MemoryCopy(oldBuffer, newBuffer + CheckBytes, sizeInBytes, SizeInBytes);
 
-			_pinnedPointer.Dispose();
-			_memory = newBuffer;
-			_pinnedPointer = PinnedPointer.Create(newBuffer);
-
+			OnDisposing(true);
+			Pointer = newBuffer + CheckBytes;
 			SizeInBytes = sizeInBytes;
+
+			for (var i = 0; i < CheckBytes; ++i)
+			{
+				*(newBuffer + i) = CheckValue;
+				*(Pointer + sizeInBytes + i) = CheckValue;
+			}
 		}
 
 		/// <summary>
@@ -95,7 +102,17 @@ namespace SafetySharp.Utilities
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
-			_pinnedPointer.Dispose();
+			if (Pointer == null)
+				return;
+
+			for (var i = 0; i < CheckBytes; ++i)
+			{
+				if (*(Pointer - i - 1) != CheckValue || *(Pointer + SizeInBytes + i) != CheckValue)
+					throw new InvalidOperationException("Out of bounds write detected.");
+			}
+
+			Marshal.FreeHGlobal(new IntPtr(Pointer - CheckBytes));
+			GC.RemoveMemoryPressure(SizeInBytes + 2 * CheckBytes);
 		}
 	}
 }

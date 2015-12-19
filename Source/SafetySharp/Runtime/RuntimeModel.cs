@@ -89,17 +89,19 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(objectTable, nameof(objectTable));
 			Requires.NotNull(formulas, nameof(formulas));
 
+			RootComponents = rootComponents;
+			Faults = objectTable.OfType<Fault>().Where(fault => fault.ActivationMode == ActivationMode.Nondeterministic).ToArray();
+			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
+			Formulas = formulas;
+
 			// Create a local object table just for the objects referenced by the model; only these objects
 			// have to be serialized and deserialized. The local object table does not contain, for instance,
 			// the closure types of the state formulas
 			// The construction state indicator is the first object in the table; its corresponding state slot will be 0
 			var objects = rootComponents.SelectMany(obj => SerializationRegistry.Default.GetReferencedObjects(obj, SerializationMode.Optimized));
+			objects = objects.Except(objectTable.OfType<Fault>().Where(fault => fault.ActivationMode != ActivationMode.Nondeterministic));
 			_objects = new ObjectTable(uniqueInitialState ? new object[] { _constructionStateIndicator }.Concat(objects) : objects);
 
-			RootComponents = rootComponents;
-			Faults = _objects.OfType<Fault>().Where(fault => fault.ActivationMode == ActivationMode.Nondeterministic).ToArray();
-			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
-			Formulas = formulas;
 			StateSlotCount = SerializationRegistry.Default.GetStateSlotCount(_objects, SerializationMode.Optimized);
 
 			_deserialize = SerializationRegistry.Default.CreateStateDeserializer(_objects, SerializationMode.Optimized);

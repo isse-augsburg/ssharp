@@ -90,15 +90,15 @@ namespace SafetySharp.Runtime
 			_stateLength = slotCount * sizeof(int);
 			_capacity = capacity;
 
-			_stateBuffer.Resize(_capacity * _stateLength);
-			_stateMemory = (byte*)_stateBuffer.Pointer;
+			_stateBuffer.Resize((long)_capacity * _stateLength);
+			_stateMemory = _stateBuffer.Pointer;
 
 			// We allocate enough space so that we can align the returned pointer such that index 0 is the start of a cache line
-			_hashBuffer.Resize(_capacity * sizeof(int) + CacheLineSize);
+			_hashBuffer.Resize((long)_capacity * sizeof(int) + CacheLineSize);
 			_hashMemory = (int*)_hashBuffer.Pointer;
 
 			if ((ulong)_hashMemory % CacheLineSize != 0)
-				_hashMemory = (int*)((byte*)_hashBuffer.Pointer + (CacheLineSize - (ulong)_hashBuffer.Pointer % CacheLineSize));
+				_hashMemory = (int*)(_hashBuffer.Pointer + (CacheLineSize - (ulong)_hashBuffer.Pointer % CacheLineSize));
 
 			Assert.InRange((ulong)_hashMemory - (ulong)_hashBuffer.Pointer, 0ul, (ulong)CacheLineSize);
 			Assert.That((ulong)_hashMemory % CacheLineSize == 0, "Invalid buffer alignment.");
@@ -108,7 +108,7 @@ namespace SafetySharp.Runtime
 		///   Gets the state at the given zero-based <paramref name="index" />.
 		/// </summary>
 		/// <param name="index">The index of the state that should be returned.</param>
-		public byte* this[int index] => _stateMemory + index * _stateLength;
+		public byte* this[int index] => _stateMemory + (long)index * _stateLength;
 
 		/// <summary>
 		///   Adds the <paramref name="state" /> to the cache if it is not already known. Returns <c>true</c> to indicate that the state
@@ -137,7 +137,7 @@ namespace SafetySharp.Runtime
 
 					if (currentValue == 0 && Interlocked.CompareExchange(ref _hashMemory[offset], (int)memoizedHash | (1 << 30), 0) == 0)
 					{
-						Buffer.MemoryCopy(state, _stateMemory + offset * _stateLength, _stateLength, _stateLength);
+						Buffer.MemoryCopy(state, _stateMemory + (long)offset * _stateLength, _stateLength, _stateLength);
 						Volatile.Write(ref _hashMemory[offset], (int)memoizedHash | (1 << 31));
 
 						index = offset;
@@ -149,7 +149,7 @@ namespace SafetySharp.Runtime
 						while ((currentValue & 1 << 31) == 0)
 							currentValue = Volatile.Read(ref _hashMemory[offset]);
 
-						if (AreEqual(state, _stateMemory + offset * _stateLength))
+						if (AreEqual(state, _stateMemory + (long)offset * _stateLength))
 						{
 							index = offset;
 							return false;

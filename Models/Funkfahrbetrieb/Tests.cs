@@ -26,6 +26,8 @@ namespace Funkfahrbetrieb
 	using System.Linq;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
 
 	public class Tests
 	{
@@ -48,6 +50,29 @@ namespace Funkfahrbetrieb
 			var i = 1;
 			foreach (var cutSet in result.MinimalCutSets)
 				Console.WriteLine("   ({1}) {{ {0} }}", String.Join(", ", cutSet.Select(fault => fault.Name)), i++);
+		}
+
+		[Test]
+		public void Test()
+		{
+			var specification = new Specification();
+			var model = Model.Create(specification);
+			var faults = model.GetFaults();
+
+			for (var i = 0; i < faults.Length; ++i)
+				faults[i].ActivationMode = ActivationMode.Nondeterministic;
+
+			Formula f1 = true;
+			Formula f2 = true;
+			Formula f3 = true;
+			Formula f4 = f1 && f2 && f3.Implies(f1 || f2);
+
+			var checker = new SSharpChecker();
+			checker.CheckInvariant(model, f4);
+
+			var ltsMin = new LtsMin();
+			//ltsMin.CheckInvariant(model, f1 || f2 && f3 || f1 && f2);
+			ltsMin.CheckInvariant(model, f4);
 		}
 	}
 }
