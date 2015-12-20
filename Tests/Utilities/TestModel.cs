@@ -22,14 +22,16 @@
 
 namespace Tests.Utilities
 {
+	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
+	using SafetySharp.Utilities;
 
 	/// <summary>
 	///   Represents a base class for testable runtime models that are compiled and instantiated dynamically during test execution.
 	/// </summary>
-	internal abstract class TestModel : TestObject
+	internal abstract class TestModel : TestObject, IDisposable
 	{
 		/// <summary>
 		///   Gets the instantiated runtime model.
@@ -55,6 +57,14 @@ namespace Tests.Utilities
 		///   Gets the number of state slots required to serialize the model's state.
 		/// </summary>
 		protected int StateSlotCount => RuntimeModel.StateSlotCount;
+
+		/// <summary>
+		///   Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
+		public void Dispose()
+		{
+			//RuntimeModel.SafeDispose();
+		}
 
 		/// <summary>
 		///   Instantiates a runtime model.

@@ -60,6 +60,11 @@ namespace Tests
 		{
 			var modelChecker = (ModelChecker)Activator.CreateInstance(Arguments.Length == 0 ? typeof(LtsMin) : (Type)Arguments[0]);
 			modelChecker.OutputWritten += message => Output.Log("{0}", message);
+
+			var ssharpChecker = modelChecker as SSharpChecker;
+			if (ssharpChecker != null)
+				ssharpChecker.StateCapacity = 1 << 16;
+
 			return modelChecker;
 		}
 

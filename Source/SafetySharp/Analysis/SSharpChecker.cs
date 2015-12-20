@@ -33,6 +33,16 @@ namespace SafetySharp.Analysis
 	public class SSharpChecker : ModelChecker
 	{
 		/// <summary>
+		///   The default capacity used for state storage.
+		/// </summary>
+		public const int DefaultCapacity = 1 << 26;
+
+		/// <summary>
+		///   Get number of states that can be stored during model checking.
+		/// </summary>
+		public int StateCapacity { get; set; } = DefaultCapacity;
+
+		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
 		///   <see cref="CounterExample" /> if the invariant is violated, <c>null</c> otherwise.
 		/// </summary>
@@ -45,7 +55,7 @@ namespace SafetySharp.Analysis
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			using (var checker = new InvariantChecker(model, invariant, Output))
+			using (var checker = new InvariantChecker(model, invariant, Output, StateCapacity))
 			{
 				try
 				{

@@ -36,14 +36,14 @@ namespace SafetySharp.Runtime
 	internal unsafe class InvariantChecker : DisposableObject
 	{
 		/// <summary>
-		///   The default capacity used for state storage.
-		/// </summary>
-		private const int DefaultCapacity = 1 << 27;
-
-		/// <summary>
 		///   The number of states that must be checked between two consecutive status reports.
 		/// </summary>
 		private const int ReportStateCountDelta = 200000;
+
+		/// <summary>
+		///   The invariant that is checked.
+		/// </summary>
+		private readonly Func<bool> _invariant;
 
 		/// <summary>
 		///   The model that is checked.
@@ -71,11 +71,6 @@ namespace SafetySharp.Runtime
 		private readonly StateStack _stateStack;
 
 		/// <summary>
-		///   The invariant that is checked.
-		/// </summary>
-		private readonly Func<bool> _invariant;
-
-		/// <summary>
 		///   Indicates whether the invariant is violated.
 		/// </summary>
 		private bool _invariantViolated;
@@ -92,7 +87,7 @@ namespace SafetySharp.Runtime
 		/// <param name="invariant">The invariant that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="capacity">The number of states that can be stored.</param>
-		public InvariantChecker(Model model, Formula invariant, Action<string> output, int capacity = DefaultCapacity)
+		public InvariantChecker(Model model, Formula invariant, Action<string> output, int capacity)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
@@ -213,6 +208,9 @@ namespace SafetySharp.Runtime
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
+			if (!disposing)
+				return;
+
 			_stateStack.SafeDispose();
 			_states.SafeDispose();
 			_model.SafeDispose();

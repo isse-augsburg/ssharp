@@ -279,7 +279,8 @@ namespace SafetySharp.Analysis
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
-			Model.SafeDispose();
+			if (disposing)
+				Model.SafeDispose();
 		}
 
 		/// <summary>
