@@ -41,22 +41,6 @@ namespace SafetySharp.Utilities
 		private const int CheckValue = 0xAF;
 
 		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		public MemoryBuffer()
-		{
-		}
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="sizeInBytes">The size of the buffer in bytes.</param>
-		public MemoryBuffer(long sizeInBytes)
-		{
-			Resize(sizeInBytes);
-		}
-
-		/// <summary>
 		///   Gets the size of the memory buffer in bytes.
 		/// </summary>
 		public long SizeInBytes { get; private set; }
@@ -69,7 +53,9 @@ namespace SafetySharp.Utilities
 		/// <summary>
 		///   Resizes the buffer so that it can contain at least <paramref name="sizeInBytes" /> bytes.
 		/// </summary>
-		public void Resize(long sizeInBytes)
+		/// <param name="sizeInBytes">The buffer's new size in bytes.</param>
+		/// <param name="zeroMemory">Indicates whether the buffer's contents should be initialized to zero.</param>
+		public void Resize(long sizeInBytes, bool zeroMemory)
 		{
 			Requires.That(sizeInBytes >= 0, nameof(sizeInBytes), $"Cannot allocate {sizeInBytes} bytes.");
 
@@ -81,6 +67,9 @@ namespace SafetySharp.Utilities
 			var oldBuffer = Pointer;
 			var newBuffer = (byte*)Marshal.AllocHGlobal(new IntPtr(allocatedBytes)).ToPointer();
 			GC.AddMemoryPressure(allocatedBytes);
+
+			if (zeroMemory)
+				ZeroMemory(new IntPtr(newBuffer + CheckBytes), new IntPtr(sizeInBytes));
 
 			if (oldBuffer != null)
 				Buffer.MemoryCopy(oldBuffer, newBuffer + CheckBytes, sizeInBytes, SizeInBytes);
@@ -113,6 +102,11 @@ namespace SafetySharp.Utilities
 
 			Marshal.FreeHGlobal(new IntPtr(Pointer - CheckBytes));
 			GC.RemoveMemoryPressure(SizeInBytes + 2 * CheckBytes);
+
+			Pointer = null;
 		}
+
+		[DllImport("Kernel32.dll", EntryPoint = "RtlZeroMemory", SetLastError = false)]
+		private static extern void ZeroMemory(IntPtr memory, IntPtr size);
 	}
 }

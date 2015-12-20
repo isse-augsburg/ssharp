@@ -90,11 +90,11 @@ namespace SafetySharp.Runtime
 			_stateLength = slotCount * sizeof(int);
 			_capacity = capacity;
 
-			_stateBuffer.Resize((long)_capacity * _stateLength);
+			_stateBuffer.Resize((long)_capacity * _stateLength, zeroMemory: false);
 			_stateMemory = _stateBuffer.Pointer;
 
 			// We allocate enough space so that we can align the returned pointer such that index 0 is the start of a cache line
-			_hashBuffer.Resize((long)_capacity * sizeof(int) + CacheLineSize);
+			_hashBuffer.Resize((long)_capacity * sizeof(int) + CacheLineSize, zeroMemory: true);
 			_hashMemory = (int*)_hashBuffer.Pointer;
 
 			if ((ulong)_hashMemory % CacheLineSize != 0)

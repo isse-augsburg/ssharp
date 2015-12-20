@@ -33,7 +33,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   The underlying memory of the stack.
 		/// </summary>
-		private readonly MemoryBuffer _memoryBuffer;
+		private readonly MemoryBuffer _memoryBuffer = new MemoryBuffer();
 
 		/// <summary>
 		///   The pointer to the stack's memory.
@@ -46,7 +46,7 @@ namespace SafetySharp.Runtime
 		/// <param name="initialCapacity">The initial capacity of the stack.</param>
 		public ChoiceStack(int initialCapacity)
 		{
-			_memoryBuffer = new MemoryBuffer(initialCapacity * sizeof(int));
+			_memoryBuffer.Resize(initialCapacity * sizeof(int), zeroMemory: true);
 			_buffer = (int*)_memoryBuffer.Pointer;
 		}
 
@@ -91,7 +91,7 @@ namespace SafetySharp.Runtime
 		{
 			if (_memoryBuffer.SizeInBytes <= Count * sizeof(int))
 			{
-				_memoryBuffer.Resize(_memoryBuffer.SizeInBytes * 2);
+				_memoryBuffer.Resize(_memoryBuffer.SizeInBytes * 2, zeroMemory: true);
 				_buffer = (int*)_memoryBuffer.Pointer;
 			}
 

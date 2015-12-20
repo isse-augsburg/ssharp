@@ -64,8 +64,8 @@ namespace SafetySharp.Runtime
 		/// <param name="capacity">The maximum number of states that can be stored in the stack.</param>
 		public StateStack(int capacity)
 		{
-			_framesBuffer.Resize((long)capacity * sizeof(Frame));
-			_statesBuffer.Resize((long)capacity * sizeof(int));
+			_framesBuffer.Resize((long)capacity * sizeof(Frame), zeroMemory: false);
+			_statesBuffer.Resize((long)capacity * sizeof(int), zeroMemory: false);
 
 			_frames = (Frame*)_framesBuffer.Pointer;
 			_states = (int*)_statesBuffer.Pointer;

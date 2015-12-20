@@ -63,7 +63,7 @@ namespace Tests.Utilities
 		/// </summary>
 		public void Dispose()
 		{
-			//RuntimeModel.SafeDispose();
+			RuntimeModel.SafeDispose();
 		}
 
 		/// <summary>
