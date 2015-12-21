@@ -92,6 +92,7 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
 			Requires.NotNull(output, nameof(output));
+			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
 
 			using (var memoryStream = new MemoryStream())
 			{
@@ -167,7 +168,8 @@ namespace SafetySharp.Runtime
 				if (!_states.AddState((byte*)(stateCache.StateMemory + i * stateCache.SlotCount), out index))
 					continue;
 
-				// TODO: Optimize - do not deserialize the state again, check the formula while we still have the deserialized state instead
+				// Deserialize the state in order to check the invariant; this seems inefficient, but
+				// other alternatives do not seem to perform any better
 				_model.Deserialize(stateCache.StateMemory + i * stateCache.SlotCount);
 				if (!_invariant())
 					_invariantViolated = true;

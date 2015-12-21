@@ -87,6 +87,9 @@ namespace SafetySharp.Runtime
 		/// <param name="capacity">The capacity of the cache, i.e., the number of states that can be stored in the cache.</param>
 		public StateStorage(int slotCount, int capacity)
 		{
+			Requires.InRange(slotCount, nameof(slotCount), 1, Int32.MaxValue);
+			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
+
 			_stateLength = slotCount * sizeof(int);
 			_capacity = capacity;
 
@@ -118,6 +121,8 @@ namespace SafetySharp.Runtime
 		/// <param name="index">Returns the unique index of the state.</param>
 		public bool AddState(byte* state, out int index)
 		{
+			// We don't have to do any out of bounds checks here
+
 			var hash = Hash(state, _stateLength, 0);
 			for (var i = 1; i < ProbeThreshold; ++i)
 			{
