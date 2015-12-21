@@ -20,6 +20,9 @@
             <TabItem Header="Pressure Tank">
                 <visualization:PressureTank />
             </TabItem>
+            <TabItem Header="Hemodialysis">
+                <visualization:HdMachine />
+            </TabItem>
         </TabControl>
     </Grid>
 </controls:MetroWindow>

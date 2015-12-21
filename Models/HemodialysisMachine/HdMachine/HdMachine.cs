@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HemodialysisMachine.HdMachine
 {
-	class HdMachine
+	public class HdMachine
 	{
 	}
 }

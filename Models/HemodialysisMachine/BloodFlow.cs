@@ -10,7 +10,7 @@ namespace HemodialysisMachine
 	}
 
 
-	class BloodFlowSegment : Utilities.FlowSegment<Blood>
+	public class BloodFlowSegment : Utilities.FlowSegment<Blood>
 	{
 		public BloodFlowSegment(Func<Blood, Blood> flowLambdaFunc)
 			: base(flowLambdaFunc)
@@ -18,7 +18,7 @@ namespace HemodialysisMachine
 		}
 	}
 
-	class BloodFlowSource : Utilities.FlowSource<Blood>
+	public class BloodFlowSource : Utilities.FlowSource<Blood>
 	{
 		public BloodFlowSource(Func<Blood> sourceLambdaFunc)
 			: base(sourceLambdaFunc)
@@ -26,19 +26,19 @@ namespace HemodialysisMachine
 		}
 	}
 
-	class BloodFlowSink : Utilities.FlowSink<Blood>
+	public class BloodFlowSink : Utilities.FlowSink<Blood>
 	{
 	}
 
-	class BloodFlowComposite : Utilities.FlowComposite<Blood>
+	public class BloodFlowComposite : Utilities.FlowComposite<Blood>
 	{
 	}
 
-	class BloodFlowDirect : Utilities.FlowDirect<Blood>
+	public class BloodFlowDirect : Utilities.FlowDirect<Blood>
 	{
 	}
 
-	class BloodFlowCombinator : Utilities.FlowCombinator<Blood>
+	public class BloodFlowCombinator : Utilities.FlowCombinator<Blood>
 	{
 	}
 }
