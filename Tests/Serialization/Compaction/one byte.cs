@@ -20,54 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Objects
+namespace Tests.Serialization.Compaction
 {
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class NestedObjects : SerializationObject
+	internal class OneByte : SerializationObject
 	{
 		protected override void Check()
 		{
-			var o1 = new object();
-			var o2 = new object();
-			var c1 = new C { O = o1 };
-			var c2 = new C { O = o2 };
-			var d = new D { C = c1, O = o2 };
+			var c = new C { A = 3, B = -17 };
+			var a = new [] { E.A, E.B };
 
-			GenerateCode(SerializationMode.Full, c1, c2, d, o1, o2);
-			StateSlotCount.ShouldBe(2);
+			GenerateCode(SerializationMode.Optimized, a, c);
+			StateSlotCount.ShouldBe(1);
 
 			Serialize();
-			c1.O = null;
-			d.O = null;
-			d.C = null;
-			Deserialize();
-			c1.O.ShouldBe(o1);
-			d.O.ShouldBe(o2);
-			d.C.ShouldBe(c1);
+			c.B = 2;
+			c.A = 1;
+			a[0] = 0;
+			a[1] = 0;
 
-			d.C = c2;
-			d.O = c2.O;
-			Serialize();
-			c1.O = null;
-			d.C = null;
-			d.O = null;
 			Deserialize();
-			c1.O.ShouldBe(o1);
-			d.O.ShouldBe(o2);
-			d.C.ShouldBe(c2);
+			c.B.ShouldBe((sbyte)-17);
+			c.A.ShouldBe((byte)3);
+			a.ShouldBe(new [] { E.A, E.B });
 		}
 
-		internal class C
+		private class C
 		{
-			public object O;
+			public byte A;
+			public sbyte B;
 		}
 
-		internal class D
+		private enum E : byte
 		{
-			public C C;
-			public object O;
+			A, B
 		}
 	}
 }

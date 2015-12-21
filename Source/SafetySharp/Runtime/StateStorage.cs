@@ -73,7 +73,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   The length in bytes of a state vector.
 		/// </summary>
-		private readonly int _stateLength;
+		private readonly int _stateVectorSize;
 
 		/// <summary>
 		///   The pointer to the underlying state memory.
@@ -83,17 +83,17 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="slotCount">The number of slots within the state vector.</param>
+		/// <param name="stateVectorSize">The size of the state vector in bytes.</param>
 		/// <param name="capacity">The capacity of the cache, i.e., the number of states that can be stored in the cache.</param>
-		public StateStorage(int slotCount, int capacity)
+		public StateStorage(int stateVectorSize, int capacity)
 		{
-			Requires.InRange(slotCount, nameof(slotCount), 1, Int32.MaxValue);
+			Requires.InRange(stateVectorSize, nameof(stateVectorSize), 1, Int32.MaxValue);
 			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
 
-			_stateLength = slotCount * sizeof(int);
+			_stateVectorSize = stateVectorSize;
 			_capacity = capacity;
 
-			_stateBuffer.Resize((long)_capacity * _stateLength, zeroMemory: false);
+			_stateBuffer.Resize((long)_capacity * _stateVectorSize, zeroMemory: false);
 			_stateMemory = _stateBuffer.Pointer;
 
 			// We allocate enough space so that we can align the returned pointer such that index 0 is the start of a cache line
@@ -111,7 +111,7 @@ namespace SafetySharp.Runtime
 		///   Gets the state at the given zero-based <paramref name="index" />.
 		/// </summary>
 		/// <param name="index">The index of the state that should be returned.</param>
-		public byte* this[int index] => _stateMemory + (long)index * _stateLength;
+		public byte* this[int index] => _stateMemory + (long)index * _stateVectorSize;
 
 		/// <summary>
 		///   Adds the <paramref name="state" /> to the cache if it is not already known. Returns <c>true</c> to indicate that the state
@@ -123,7 +123,7 @@ namespace SafetySharp.Runtime
 		{
 			// We don't have to do any out of bounds checks here
 
-			var hash = Hash(state, _stateLength, 0);
+			var hash = Hash(state, _stateVectorSize, 0);
 			for (var i = 1; i < ProbeThreshold; ++i)
 			{
 				// We store 30 bit hash values as 32 bit integers, with the most significant bit #31 being set
@@ -142,7 +142,7 @@ namespace SafetySharp.Runtime
 
 					if (currentValue == 0 && Interlocked.CompareExchange(ref _hashMemory[offset], (int)memoizedHash | (1 << 30), 0) == 0)
 					{
-						Buffer.MemoryCopy(state, _stateMemory + (long)offset * _stateLength, _stateLength, _stateLength);
+						Buffer.MemoryCopy(state, _stateMemory + (long)offset * _stateVectorSize, _stateVectorSize, _stateVectorSize);
 						Volatile.Write(ref _hashMemory[offset], (int)memoizedHash | (1 << 31));
 
 						index = offset;
@@ -154,7 +154,7 @@ namespace SafetySharp.Runtime
 						while ((currentValue & 1 << 31) == 0)
 							currentValue = Volatile.Read(ref _hashMemory[offset]);
 
-						if (AreEqual(state, _stateMemory + (long)offset * _stateLength))
+						if (AreEqual(state, _stateMemory + (long)offset * _stateVectorSize))
 						{
 							index = offset;
 							return false;
@@ -181,7 +181,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		private bool AreEqual(byte* state1, byte* state2)
 		{
-			for (var i = _stateLength / 8; i > 0; --i)
+			for (var i = _stateVectorSize / 8; i > 0; --i)
 			{
 				if (*(long*)state1 != *(long*)state2)
 					return false;
@@ -190,7 +190,7 @@ namespace SafetySharp.Runtime
 				state2 += 8;
 			}
 
-			for (var i = _stateLength % 8; i > 0; --i)
+			for (var i = _stateVectorSize % 8; i > 0; --i)
 			{
 				if (*state1 != *state2)
 					return false;

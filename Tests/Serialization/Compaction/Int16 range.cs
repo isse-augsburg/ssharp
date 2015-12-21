@@ -20,54 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Objects
+namespace Tests.Serialization.Compaction
 {
+	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class NestedObjects : SerializationObject
+	internal class Int16Range : SerializationObject
 	{
 		protected override void Check()
 		{
-			var o1 = new object();
-			var o2 = new object();
-			var c1 = new C { O = o1 };
-			var c2 = new C { O = o2 };
-			var d = new D { C = c1, O = o2 };
+			var x = new X { A = 1, B = 2, C = 3, D = 1001 };
 
-			GenerateCode(SerializationMode.Full, c1, c2, d, o1, o2);
+			GenerateCode(SerializationMode.Optimized, x);
 			StateSlotCount.ShouldBe(2);
 
 			Serialize();
-			c1.O = null;
-			d.O = null;
-			d.C = null;
-			Deserialize();
-			c1.O.ShouldBe(o1);
-			d.O.ShouldBe(o2);
-			d.C.ShouldBe(c1);
+			x.A = 0;
+			x.B = 0;
+			x.C = 0;
+			x.D = 0;
 
-			d.C = c2;
-			d.O = c2.O;
-			Serialize();
-			c1.O = null;
-			d.C = null;
-			d.O = null;
 			Deserialize();
-			c1.O.ShouldBe(o1);
-			d.O.ShouldBe(o2);
-			d.C.ShouldBe(c2);
+			x.A.ShouldBe((short)1);
+			x.B.ShouldBe((ushort)2);
+			x.C.ShouldBe((short)3);
+			x.D.ShouldBe((ushort)1001);
 		}
 
-		internal class C
+		private class X
 		{
-			public object O;
-		}
+			[Range(-30, 30, OverflowBehavior.Error)]
+			public short A;
 
-		internal class D
-		{
-			public C C;
-			public object O;
+			[Range(0, 30, OverflowBehavior.Error)]
+			public ushort B;
+
+			[Range(-1000, 1000, OverflowBehavior.Error)]
+			public short C;
+
+			[Range(1000, 1100, OverflowBehavior.Error)]
+			public ushort D;
 		}
 	}
 }

@@ -96,15 +96,19 @@ namespace SafetySharp.Runtime
 
 			using (var memoryStream = new MemoryStream())
 			{
-				RuntimeModelSerializer.Save(memoryStream, model, false, invariant);
+				RuntimeModelSerializer.Save(memoryStream, model, 0, invariant);
 				memoryStream.Seek(0, SeekOrigin.Begin);
 
 				_serializedModel = memoryStream.ToArray();
 				_model = RuntimeModelSerializer.Load(memoryStream);
-				_states = new StateStorage(_model.StateSlotCount, capacity);
+				_states = new StateStorage(_model.StateVectorSize, capacity);
 				_stateStack = new StateStack(capacity);
 				_output = output;
 				_invariant = CompilationVisitor.Compile(_model.Formulas[0]);
+
+#if false
+				Console.WriteLine(_model.StateVectorLayout);
+#endif
 			}
 		}
 
@@ -128,14 +132,15 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		public CounterExample Check()
 		{
-			Console.WriteLine($"State vector has {_model.StateSlotCount} slots ({_model.StateSlotCount * sizeof(int)} bytes).");
+			Console.WriteLine("Performing invariant check.");
+			Console.WriteLine($"State vector has {_model.StateVectorSize} bytes.");
 
 			AddStates(_model.ComputeInitialStates());
 
 			int state;
 			while (!_invariantViolated && _stateStack.TryGetState(out state))
 			{
-				AddStates(_model.ComputeSuccessorStates((int*)_states[state]));
+				AddStates(_model.ComputeSuccessorStates(_states[state]));
 
 				if (StateCount >= _nextReport)
 				{
@@ -165,12 +170,12 @@ namespace SafetySharp.Runtime
 			for (var i = 0; i < stateCache.StateCount; ++i)
 			{
 				int index;
-				if (!_states.AddState((byte*)(stateCache.StateMemory + i * stateCache.SlotCount), out index))
+				if (!_states.AddState(stateCache.StateMemory + i * stateCache.StateVectorSize, out index))
 					continue;
 
 				// Deserialize the state in order to check the invariant; this seems inefficient, but
 				// other alternatives do not seem to perform any better
-				_model.Deserialize(stateCache.StateMemory + i * stateCache.SlotCount);
+				_model.Deserialize(stateCache.StateMemory + i * stateCache.StateVectorSize);
 				if (!_invariant())
 					_invariantViolated = true;
 
@@ -185,11 +190,11 @@ namespace SafetySharp.Runtime
 		private CounterExample CreateCounterExample()
 		{
 			var indexedTrace = _stateStack.GetTrace();
-			var trace = new int[indexedTrace.Length][];
+			var trace = new byte[indexedTrace.Length][];
 
 			for (var i = 0; i < indexedTrace.Length; ++i)
 			{
-				trace[i] = new int[_model.StateSlotCount];
+				trace[i] = new byte[_model.StateVectorSize];
 				Marshal.Copy(new IntPtr((int*)_states[indexedTrace[i]]), trace[i], 0, trace[i].Length);
 			}
 

@@ -90,7 +90,8 @@ namespace SafetySharp.Modeling
 		/// <param name="lowerBound">The inclusive lower bound.</param>
 		/// <param name="upperBound">The inclusive upper bound.</param>
 		/// <param name="overflowBehavior">The overflow behavior.</param>
-		public static void Restrict<T>(Expression<Func<T>> fieldExpression, object lowerBound, object upperBound, OverflowBehavior overflowBehavior)
+		public static void Restrict<T>(Expression<Func<T>> fieldExpression, object lowerBound, object upperBound,
+									   OverflowBehavior overflowBehavior)
 			where T : struct, IComparable
 		{
 			Requires.NotNull(fieldExpression, nameof(fieldExpression));
@@ -155,18 +156,18 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Creates the default range when nothing is known about a field.
+		///   Creates the default range when no additional range data is available for the <paramref name="type"/>.
 		/// </summary>
-		private static RangeAttribute CreateDefaultRange(Type fieldType)
+		internal static RangeAttribute CreateDefaultRange(Type type)
 		{
 			// We can optimize enums
-			if (fieldType.IsEnum)
+			if (type.IsEnum)
 			{
-				var values = ConvertValues(fieldType, Enum.GetValues(fieldType));
+				var values = ConvertValues(type, Enum.GetValues(type));
 				if (values.Length == 0)
 					return new RangeAttribute(0, 0, OverflowBehavior.Error);
 
-				if (!fieldType.HasAttribute<FlagsAttribute>())
+				if (!type.HasAttribute<FlagsAttribute>())
 					return new RangeAttribute(values.Min(), values.Max(), OverflowBehavior.Error);
 			}
 

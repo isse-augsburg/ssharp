@@ -20,54 +20,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Objects
+namespace Tests.Serialization.Compaction
 {
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class NestedObjects : SerializationObject
+	internal class Mixed1 : SerializationObject
 	{
 		protected override void Check()
 		{
-			var o1 = new object();
-			var o2 = new object();
-			var c1 = new C { O = o1 };
-			var c2 = new C { O = o2 };
-			var d = new D { C = c1, O = o2 };
+			var c = new C { A = 3, B = -17, D = 99, E = 77, F = 9234, G = 48483 };
+			var a = new byte[] { 1, 2 };
 
-			GenerateCode(SerializationMode.Full, c1, c2, d, o1, o2);
-			StateSlotCount.ShouldBe(2);
+			GenerateCode(SerializationMode.Optimized, a, c);
+			StateSlotCount.ShouldBe(5);
 
 			Serialize();
-			c1.O = null;
-			d.O = null;
-			d.C = null;
-			Deserialize();
-			c1.O.ShouldBe(o1);
-			d.O.ShouldBe(o2);
-			d.C.ShouldBe(c1);
+			c.A = 1;
+			c.B = 2;
+			c.D = 1;
+			c.E = 9;
+			c.F = 4;
+			c.G = 9;
+			a[0] = 0;
+			a[1] = 0;
 
-			d.C = c2;
-			d.O = c2.O;
-			Serialize();
-			c1.O = null;
-			d.C = null;
-			d.O = null;
 			Deserialize();
-			c1.O.ShouldBe(o1);
-			d.O.ShouldBe(o2);
-			d.C.ShouldBe(c2);
+			c.A.ShouldBe((sbyte)3);
+			c.B.ShouldBe((sbyte)-17);
+			c.D.ShouldBe((short)99);
+			c.E.ShouldBe((short)77);
+			c.F.ShouldBe(9234);
+			c.G.ShouldBe(48483);
+			a.ShouldBe(new byte[] { 1, 2 });
 		}
 
-		internal class C
+		private class C
 		{
-			public object O;
-		}
-
-		internal class D
-		{
-			public C C;
-			public object O;
+			public sbyte A;
+			public sbyte B;
+			public short D;
+			public short E;
+			public int F;
+			public long G;
 		}
 	}
 }

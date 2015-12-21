@@ -37,6 +37,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   The initial states of the state machine.
 		/// </summary>
+		[NonDiscoverable]
 		private readonly TState[] _initialStates;
 
 		/// <summary>
@@ -48,17 +49,15 @@ namespace SafetySharp.Modeling
 			Requires.NotNull(initialStates, nameof(initialStates));
 			Requires.That(initialStates.Length > 0, nameof(initialStates), "The state machine must have at least one initial state.");
 
-			_initialStates = initialStates;
-
 			// Copy the initial states to the property in order to avoid external modifications
-			InitialStates = _initialStates.ToArray();
+			_initialStates = initialStates.ToArray();
 			State = _initialStates[0];
 		}
 
 		/// <summary>
 		///   Gets the initial states of the state machine.
 		/// </summary>
-		public IEnumerable<TState> InitialStates { get; }
+		public IEnumerable<TState> InitialStates => _initialStates;
 
 		/// <summary>
 		///   Gets the state machine's choice object that is used to resolve nondeterministic transitions.

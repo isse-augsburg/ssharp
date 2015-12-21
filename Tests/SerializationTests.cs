@@ -67,5 +67,11 @@ namespace Tests
 		{
 			ExecuteDynamicTests(file);
 		}
+
+		[Theory, MemberData("DiscoverTests", "Serialization/Compaction")]
+		public void Compaction(string test, string file)
+		{
+			ExecuteDynamicTests(file);
+		}
 	}
 }

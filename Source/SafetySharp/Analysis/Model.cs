@@ -101,7 +101,7 @@ namespace SafetySharp.Analysis
 
 			using (var memoryStream = new MemoryStream())
 			{
-				RuntimeModelSerializer.Save(memoryStream, this, false, formulas);
+				RuntimeModelSerializer.Save(memoryStream, this, 0, formulas);
 
 				memoryStream.Seek(0, SeekOrigin.Begin);
 				return RuntimeModelSerializer.Load(memoryStream);

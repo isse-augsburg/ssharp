@@ -41,32 +41,8 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// </summary>
 		/// <param name="obj">The object the state slot metadata should be generated for.</param>
 		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
-		protected internal abstract IEnumerable<StateSlotMetadata> GetStateSlotMetadata(object obj, int objectIdentifier);
-
-		/// <summary>
-		///   Generates the code to deserialize the <paramref name="obj" />.
-		/// </summary>
-		/// <param name="generator">The generator that should be used to generate the code.</param>
-		/// <param name="obj">The object that should be deserialized.</param>
-		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
-		/// <param name="mode">The serialization mode that should be used to deserialize the object.</param>
-		protected internal abstract void Deserialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode);
-
-		/// <summary>
-		///   Generates the code to serialize the <paramref name="obj" />.
-		/// </summary>
-		/// <param name="generator">The generator that should be used to generate the code.</param>
-		/// <param name="obj">The object that should be serialized.</param>
-		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
-		/// <param name="mode">The serialization mode that should be used to serialize the object.</param>
-		protected internal abstract void Serialize(SerializationGenerator generator, object obj, int objectIdentifier, SerializationMode mode);
-
-		/// <summary>
-		///   Gets the number of state slots required by the serialized data of <paramref name="obj" />.
-		/// </summary>
-		/// <param name="obj">The object consisting of state values that should be serialized.</param>
-		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		protected internal abstract int GetStateSlotCount(object obj, SerializationMode mode);
+		/// <param name="mode">The serialization mode that should be used to generate the metadata.</param>
+		protected internal abstract IEnumerable<StateSlotMetadata> GetStateSlotMetadata(object obj, int objectIdentifier, SerializationMode mode);
 
 		/// <summary>
 		///   Serializes the information about <paramref name="obj" />'s type using the <paramref name="writer" />.

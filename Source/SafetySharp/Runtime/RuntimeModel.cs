@@ -26,7 +26,6 @@ namespace SafetySharp.Runtime
 	using System.Runtime.CompilerServices;
 	using Analysis;
 	using CompilerServices;
-	using JetBrains.Annotations;
 	using Modeling;
 	using Serialization;
 	using Utilities;
@@ -49,12 +48,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   The construction state of the model.
 		/// </summary>
-		private readonly int[] _constructionState;
-
-		/// <summary>
-		///   Indicates whether a state is the model's construction state.
-		/// </summary>
-		private readonly ConstructionStateIndicator _constructionStateIndicator = new ConstructionStateIndicator();
+		private readonly byte[] _constructionState;
 
 		/// <summary>
 		///   Deserializes a state of the model.
@@ -77,17 +71,25 @@ namespace SafetySharp.Runtime
 		private readonly StateCache _stateCache;
 
 		/// <summary>
+		///   The number of bytes reserved at the beginning of each state vector by the model checker tool.
+		/// </summary>
+		private readonly int _stateHeaderBytes;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="rootComponents">The root components of the model.</param>
 		/// <param name="objectTable">The table of objects referenced by the model.</param>
 		/// <param name="formulas">The formulas that are checked on the model.</param>
-		/// <param name="uniqueInitialState">Indicates whether the model must have a unique initial state.</param>
-		internal RuntimeModel(Component[] rootComponents, ObjectTable objectTable, Formula[] formulas, bool uniqueInitialState)
+		/// <param name="stateHeaderBytes">
+		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
+		/// </param>
+		internal RuntimeModel(Component[] rootComponents, ObjectTable objectTable, Formula[] formulas, int stateHeaderBytes)
 		{
 			Requires.NotNull(rootComponents, nameof(rootComponents));
 			Requires.NotNull(objectTable, nameof(objectTable));
 			Requires.NotNull(formulas, nameof(formulas));
+			Requires.That(stateHeaderBytes % 4 == 0, nameof(stateHeaderBytes), "Expected a multiple of 4.");
 
 			RootComponents = rootComponents;
 			Faults = objectTable.OfType<Fault>().Where(fault => fault.ActivationMode == ActivationMode.Nondeterministic).ToArray();
@@ -97,25 +99,30 @@ namespace SafetySharp.Runtime
 			// Create a local object table just for the objects referenced by the model; only these objects
 			// have to be serialized and deserialized. The local object table does not contain, for instance,
 			// the closure types of the state formulas
-			// The construction state indicator is the first object in the table; its corresponding state slot will be 0
 			var objects = rootComponents.SelectMany(obj => SerializationRegistry.Default.GetReferencedObjects(obj, SerializationMode.Optimized));
 			objects = objects.Except(objectTable.OfType<Fault>().Where(fault => fault.ActivationMode != ActivationMode.Nondeterministic));
-			_objects = new ObjectTable(uniqueInitialState ? new object[] { _constructionStateIndicator }.Concat(objects) : objects);
+			_objects = new ObjectTable(objects);
 
-			StateSlotCount = SerializationRegistry.Default.GetStateSlotCount(_objects, SerializationMode.Optimized);
+			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_objects, SerializationMode.Optimized);
 
-			_deserialize = SerializationRegistry.Default.CreateStateDeserializer(_objects, SerializationMode.Optimized);
-			_serialize = SerializationRegistry.Default.CreateStateSerializer(_objects, SerializationMode.Optimized);
+			_deserialize = StateVectorLayout.CreateDeserializer();
+			_serialize = StateVectorLayout.CreateSerializer();
 
-			_stateCache = new StateCache(StateSlotCount);
+			_stateHeaderBytes = stateHeaderBytes;
+			_stateCache = new StateCache(StateVectorSize);
 			_choiceResolver = new ChoiceResolver(objectTable);
 
 			PortBinding.BindAll(objectTable);
 
-			_constructionState = new int[StateSlotCount];
-			fixed (int* state = _constructionState)
+			_constructionState = new byte[StateVectorSize];
+			fixed (byte* state = _constructionState)
 				Serialize(state);
 		}
+
+		/// <summary>
+		///   Gets the model's <see cref="StateVectorLayout" />.
+		/// </summary>
+		internal StateVectorLayout StateVectorLayout { get; }
 
 		/// <summary>
 		///   The formulas that are checked on the model.
@@ -123,9 +130,9 @@ namespace SafetySharp.Runtime
 		public Formula[] Formulas { get; }
 
 		/// <summary>
-		///   Gets the number of slots in the state vector.
+		///   Gets the size of the state vector in bytes. The size is always a multiple of 4.
 		/// </summary>
-		internal int StateSlotCount { get; }
+		internal int StateVectorSize => StateVectorLayout.SizeInBytes + _stateHeaderBytes;
 
 		/// <summary>
 		///   Gets the root components of the model.
@@ -147,9 +154,9 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="serializedState">The state of the model that should be deserialized.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal void Deserialize(int* serializedState)
+		internal void Deserialize(byte* serializedState)
 		{
-			_deserialize(serializedState);
+			_deserialize(serializedState + _stateHeaderBytes);
 		}
 
 		/// <summary>
@@ -157,9 +164,9 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="serializedState">The memory region the model's state should be serialized into.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal void Serialize(int* serializedState)
+		internal void Serialize(byte* serializedState)
 		{
-			_serialize(serializedState);
+			_serialize(serializedState + _stateHeaderBytes);
 		}
 
 		/// <summary>
@@ -167,7 +174,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		internal void Reset()
 		{
-			fixed (int* state = _constructionState)
+			fixed (byte* state = _constructionState)
 			{
 				Deserialize(state);
 
@@ -207,7 +214,7 @@ namespace SafetySharp.Runtime
 		/// <param name="serializedState">The state of the model that should be used to check the formula.</param>
 		/// <param name="formulaIndex">The zero-based index of the formula that should be checked.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal bool CheckStateLabel(int* serializedState, int formulaIndex)
+		internal bool CheckStateLabel(byte* serializedState, int formulaIndex)
 		{
 			Deserialize(serializedState);
 			return StateFormulas[formulaIndex].Expression();
@@ -217,9 +224,9 @@ namespace SafetySharp.Runtime
 		///   Gets the serialized construction state of the model if the model checker does not support multiple initial states.
 		///   The construction state is guaranteed to be different from all other model states.
 		/// </summary>
-		internal int* GetConstructionState()
+		internal byte* GetConstructionState()
 		{
-			fixed (int* state = _constructionState)
+			fixed (byte* state = _constructionState)
 				Deserialize(state);
 
 			_stateCache.Clear();
@@ -236,7 +243,7 @@ namespace SafetySharp.Runtime
 			_stateCache.Clear();
 			_choiceResolver.PrepareNextState();
 
-			fixed (int* state = _constructionState)
+			fixed (byte* state = _constructionState)
 			{
 				while (_choiceResolver.PrepareNextPath())
 				{
@@ -245,7 +252,6 @@ namespace SafetySharp.Runtime
 					foreach (var obj in _objects.OfType<IInitializable>())
 						obj.Initialize();
 
-					_constructionStateIndicator.RequiresInitialization = false;
 					Serialize(_stateCache.Allocate());
 				}
 			}
@@ -257,7 +263,7 @@ namespace SafetySharp.Runtime
 		///   Computes the successor states for <paramref name="sourceState" />.
 		/// </summary>
 		/// <param name="sourceState">The source state the next states should be computed for.</param>
-		internal StateCache ComputeSuccessorStates(int* sourceState)
+		internal StateCache ComputeSuccessorStates(byte* sourceState)
 		{
 			_stateCache.Clear();
 			_choiceResolver.PrepareNextState();
@@ -273,14 +279,6 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Generates the state slot metadata for the model.
-		/// </summary>
-		internal StateSlotMetadata[] GetStateSlotMetadata()
-		{
-			return SerializationRegistry.Default.GetStateSlotMetadata(_objects).ToArray();
-		}
-
-		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
@@ -291,18 +289,6 @@ namespace SafetySharp.Runtime
 
 			_choiceResolver.SafeDispose();
 			_stateCache.SafeDispose();
-		}
-
-		/// <summary>
-		///   Represents a state value that is unique for the unique construction state of the model.
-		/// </summary>
-		private class ConstructionStateIndicator
-		{
-			/// <summary>
-			///   Indicates whether the model has not yet been initialized.
-			/// </summary>
-			[UsedImplicitly]
-			public bool RequiresInitialization = true;
 		}
 	}
 }

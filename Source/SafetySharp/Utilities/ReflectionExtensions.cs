@@ -119,6 +119,15 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
+		///   Checks whether <paramref name="type" /> is a primitive type.
+		/// </summary>
+		public static bool IsPrimitiveType(this Type type)
+		{
+			Requires.NotNull(type, nameof(type));
+			return type.IsPrimitive || type.IsPointer || type.IsEnum;
+		}
+
+		/// <summary>
 		///   Checks whether <paramref name="type" /> is a reference type, i.e., a class, delegate, or interface.
 		/// </summary>
 		public static bool IsReferenceType(this Type type)
@@ -208,7 +217,13 @@ namespace SafetySharp.Utilities
 				$"Expected an enum or primitive type instead of '{type.FullName}'.");
 
 			type = type.IsEnum ? type.GetEnumUnderlyingType() : type;
-			return type == typeof(bool) ? 1 : Marshal.SizeOf(type);
+			if (type == typeof(bool))
+				return 1;
+
+			if (type == typeof(char))
+				return 2;
+
+			return Marshal.SizeOf(type);
 		}
 
 		/// <summary>

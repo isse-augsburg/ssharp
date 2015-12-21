@@ -77,7 +77,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;LTSMINSEQ_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;_USRDLL;LTSMINSEQ_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <DisableSpecificWarnings>4564</DisableSpecificWarnings>
       <AdditionalUsingDirectories>$(OutDir)</AdditionalUsingDirectories>

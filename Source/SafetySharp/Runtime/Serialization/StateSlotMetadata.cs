@@ -24,13 +24,45 @@ namespace SafetySharp.Runtime.Serialization
 {
 	using System;
 	using System.Reflection;
+	using Utilities;
 
 	/// <summary>
 	///   Describes the contents stored in a state slot of a state vector.
 	/// </summary>
 	[Serializable]
-	public struct StateSlotMetadata : IEquatable<StateSlotMetadata>
+	public class StateSlotMetadata : IEquatable<StateSlotMetadata>
 	{
+		/// <summary>
+		///   The uncompressed type of the data stored in the slot.
+		/// </summary>
+		public Type DataType;
+
+		/// <summary>
+		///   The compressed type of the data stored in the slot.
+		/// </summary>
+		public Type CompressedDataType;
+
+		/// <summary>
+		///   Gets the effective type of the data stored in the slot.
+		/// </summary>
+		public Type EffectiveType => CompressedDataType ?? DataType;
+
+		/// <summary>
+		///   The number of elements the data consists of.
+		/// </summary>
+		public int ElementCount;
+
+		/// <summary>
+		///   The field stored in the slot, if any.
+		/// </summary>
+		public FieldInfo Field;
+
+		/// <summary>
+		///   The object whose data is stored in the slot.
+		/// </summary>
+		[NonSerialized]
+		public object Object;
+
 		/// <summary>
 		///   The identifier of the object whose data is stored in the slot.
 		/// </summary>
@@ -42,19 +74,26 @@ namespace SafetySharp.Runtime.Serialization
 		public Type ObjectType;
 
 		/// <summary>
-		///   The number of slots occupied by the data.
+		///   Gets the total size in bytes required to store the data in the state vector.
 		/// </summary>
-		public int SlotCount;
+		public int TotalSizeInBytes => ElementSizeInBits / 8 * ElementCount;
 
 		/// <summary>
-		///   The field stored in the slot, if any.
+		///   Gets the size in bits required to store each individual element in the state vector.
 		/// </summary>
-		public FieldInfo Field;
+		public int ElementSizeInBits
+		{
+			get
+			{
+				if (DataType.IsReferenceType())
+					return sizeof(ushort) * 8;
 
-		/// <summary>
-		///   The type of the data stored in the slot.
-		/// </summary>
-		public Type DataType;
+				if (DataType == typeof(bool))
+					return 8;
+
+				return EffectiveType.GetUnmanagedSize() * 8;
+			}
+		}
 
 		/// <summary>
 		///   Indicates whether the current object is equal to <paramref name="other" />.
@@ -64,15 +103,16 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			return ObjectIdentifier == other.ObjectIdentifier &&
 				   ObjectType == other.ObjectType &&
-				   SlotCount == other.SlotCount &&
+				   ElementCount == other.ElementCount &&
 				   Equals(Field, other.Field) &&
-				   DataType == other.DataType;
+				   DataType == other.DataType &&
+				   CompressedDataType == other.CompressedDataType;
 		}
 
 		/// <summary>
 		///   Indicates whether this instance and <paramref name="obj" /> are equal.
 		/// </summary>
-		/// <param name="obj">The object to compare with the current instance. </param>
+		/// <param name="obj">The object to compare with the current instance.</param>
 		public override bool Equals(object obj)
 		{
 			if (ReferenceEquals(null, obj))

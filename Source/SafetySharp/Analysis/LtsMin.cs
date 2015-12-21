@@ -119,7 +119,7 @@ namespace SafetySharp.Analysis
 				using (var counterExampleFile = new TemporaryFile("gcf"))
 				{
 					using (var stream = new FileStream(modelFile.Path, FileMode.Create))
-						RuntimeModelSerializer.Save(stream, model, true, formula);
+						RuntimeModelSerializer.Save(stream, model, 4, formula);
 
 					CreateProcess(modelFile.Path, counterExampleFile.Path, checkArgument);
 					Run();

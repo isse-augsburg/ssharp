@@ -55,7 +55,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   The serialized counter example.
 		/// </summary>
-		private readonly int[][] _counterExample;
+		private readonly byte[][] _counterExample;
 
 		/// <summary>
 		///   The serialized runtime model the counter example was generated for.
@@ -68,7 +68,7 @@ namespace SafetySharp.Analysis
 		/// <param name="model">The model the counter example was generated for.</param>
 		/// <param name="serializedModel">The serialized runtime model the counter example was generated for.</param>
 		/// <param name="counterExample">The serialized counter example.</param>
-		internal CounterExample(RuntimeModel model, byte[] serializedModel, int[][] counterExample)
+		internal CounterExample(RuntimeModel model, byte[] serializedModel, byte[][] counterExample)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(serializedModel, nameof(serializedModel));
@@ -106,7 +106,7 @@ namespace SafetySharp.Analysis
 			Requires.InRange(position, nameof(position), _counterExample);
 
 			using (var pointer = PinnedPointer.Create(_counterExample[position]))
-				Model.Deserialize((int*)pointer);
+				Model.Deserialize((byte*)pointer);
 
 			return Model;
 		}
@@ -127,7 +127,7 @@ namespace SafetySharp.Analysis
 		///   Executs the <paramref name="action" /> for each step of the counter example.
 		/// </summary>
 		/// <param name="action">The action that should be executed on the serialized model state.</param>
-		internal void ForEachStep(Action<int[]> action)
+		internal void ForEachStep(Action<byte[]> action)
 		{
 			Requires.NotNull(action, nameof(action));
 			Requires.That(_counterExample != null, "No counter example has been loaded.");
@@ -153,14 +153,14 @@ namespace SafetySharp.Analysis
 
 				var formatter = new BinaryFormatter();
 				var memoryStream = new MemoryStream();
-				formatter.Serialize(memoryStream, Model.GetStateSlotMetadata());
+				formatter.Serialize(memoryStream, Model.StateVectorLayout.ToArray());
 
 				var metadata = memoryStream.ToArray();
 				writer.Write(metadata.Length);
 				writer.Write(metadata);
 
 				writer.Write(StepCount);
-				writer.Write(Model.StateSlotCount);
+				writer.Write(Model.StateVectorSize);
 
 				foreach (var slot in _counterExample.SelectMany(step => step))
 					writer.Write(slot);
@@ -184,26 +184,26 @@ namespace SafetySharp.Analysis
 				var model = RuntimeModelSerializer.Load(new MemoryStream(serializedRuntimeModel));
 				var metadataStream = new MemoryStream(reader.ReadBytes(reader.ReadInt32()));
 				var formatter = new BinaryFormatter();
-				var slotMetadata = (StateSlotMetadata[])formatter.Deserialize(metadataStream);
-				var modelMetadata = model.GetStateSlotMetadata();
-				var counterExample = new int[reader.ReadInt32()][];
+				var slotMetadata = new StateVectorLayout((StateSlotMetadata[])formatter.Deserialize(metadataStream));
+				var modelMetadata = model.StateVectorLayout;
+				var counterExample = new byte[reader.ReadInt32()][];
 				var slotCount = reader.ReadInt32();
 
-				if (slotCount != model.StateSlotCount)
+				if (slotCount != model.StateVectorSize)
 				{
 					throw new InvalidOperationException(
-						$"State slot count mismatch; the instantiated model requires {model.StateSlotCount} state slots, " +
+						$"State slot count mismatch; the instantiated model requires {model.StateVectorSize} state slots, " +
 						$"whereas the counter example uses {slotCount} state slots.");
 				}
 
-				if (slotMetadata.Length != modelMetadata.Length)
+				if (slotMetadata.SlotCount != modelMetadata.SlotCount)
 				{
 					throw new InvalidOperationException(
-						$"State slot metadata count mismatch; the instantiated model has {modelMetadata.Length} state slot metadata entries, " +
-						$"whereas the counter example has {slotMetadata.Length} state slot entries.");
+						$"State slot metadata count mismatch; the instantiated model has {modelMetadata.SlotCount} state slot metadata entries, " +
+						$"whereas the counter example has {slotMetadata.SlotCount} state slot entries.");
 				}
 
-				for (var i = 0; i < slotMetadata.Length; ++i)
+				for (var i = 0; i < slotMetadata.SlotCount; ++i)
 				{
 					if (modelMetadata[i] != slotMetadata[i])
 						throw new StateVectorMismatchException(slotMetadata, modelMetadata);
@@ -211,9 +211,9 @@ namespace SafetySharp.Analysis
 
 				for (var i = 0; i < counterExample.Length; ++i)
 				{
-					counterExample[i] = new int[model.StateSlotCount];
-					for (var j = 0; j < model.StateSlotCount; ++j)
-						counterExample[i][j] = reader.ReadInt32();
+					counterExample[i] = new byte[model.StateVectorSize];
+					for (var j = 0; j < model.StateVectorSize; ++j)
+						counterExample[i][j] = reader.ReadByte();
 				}
 
 				return new CounterExample(model, serializedRuntimeModel, counterExample);
@@ -248,7 +248,7 @@ namespace SafetySharp.Analysis
 				}
 
 				var model = RuntimeModelSerializer.Load(new MemoryStream(serializedRuntimeModel));
-				return new CounterExample(model, serializedRuntimeModel, ParseCsv(model, File.ReadAllLines(csvFile.Path).Skip(1)).ToArray());
+				return new CounterExample(model, serializedRuntimeModel, ParseCsv(model, File.ReadAllLines(csvFile.Path)).ToArray());
 			}
 		}
 
@@ -257,20 +257,31 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model the counter example was generated for.</param>
 		/// <param name="lines">The lines that should be parsed.</param>
-		private static IEnumerable<int[]> ParseCsv(RuntimeModel model, IEnumerable<string> lines)
+		private static unsafe IEnumerable<byte[]> ParseCsv(RuntimeModel model, string[] lines)
 		{
-			foreach (var serializedState in lines)
+			if (lines.Length == 0)
+				return new[] { new byte[model.StateVectorSize] };
+
+			var counterExample = new List<byte[]>();
+			var stateNames = lines[0].Split(_splitCharacter, StringSplitOptions.RemoveEmptyEntries);
+			var firstValue = Array.FindIndex(stateNames, s => s.Contains(RuntimeModel.ConstructionStateName));
+
+			foreach (var serializedState in lines.Skip(1))
 			{
 				var stateVectors = serializedState.Split(_splitCharacter, StringSplitOptions.RemoveEmptyEntries);
-				var firstValue = Array.FindIndex(stateVectors, s => s == RuntimeModel.ConstructionStateName);
-				var values = stateVectors.Skip(firstValue).Take(model.StateSlotCount).ToArray();
+				var values = stateVectors.Skip(firstValue).Take(model.StateVectorSize).ToArray();
 
-				var state = new int[model.StateSlotCount];
-				for (var i = 0; i < model.StateSlotCount; ++i)
-					state[i] = Int32.Parse(values[i]);
+				var byteState = new byte[model.StateVectorSize];
+				fixed (byte* state = byteState)
+				{
+					for (var i = 0; i < model.StateVectorSize / 4; ++i)
+						((int*)state)[i] = Int32.Parse(values[i]);
+				}
 
-				yield return state;
+				counterExample.Add(byteState);
 			}
+
+			return counterExample;
 		}
 
 		/// <summary>
@@ -291,9 +302,9 @@ namespace SafetySharp.Analysis
 			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
-			/// <param name="counterExampleMetadata">The state slot layout expected by the counter example.</param>
-			/// <param name="modelMetadata">The state slot layout expected by the model.</param>
-			internal StateVectorMismatchException(StateSlotMetadata[] counterExampleMetadata, StateSlotMetadata[] modelMetadata)
+			/// <param name="counterExampleMetadata">The state vector layout expected by the counter example.</param>
+			/// <param name="modelMetadata">The state vector layout expected by the model.</param>
+			internal StateVectorMismatchException(StateVectorLayout counterExampleMetadata, StateVectorLayout modelMetadata)
 				: base("Mismatch detected between the layout of the state vector as expected by the counter example and the " +
 					   "actual layout of the state vector used by the instantiated model.")
 			{
@@ -302,14 +313,14 @@ namespace SafetySharp.Analysis
 			}
 
 			/// <summary>
-			///   Gets the state slot layout expected by the counter example.
+			///   Gets the state vector layout expected by the counter example.
 			/// </summary>
-			public StateSlotMetadata[] CounterExampleMetadata { get; }
+			public StateVectorLayout CounterExampleMetadata { get; }
 
 			/// <summary>
-			///   Gets the state slot layout expected by the model.
+			///   Gets the state vector layout expected by the model.
 			/// </summary>
-			public StateSlotMetadata[] ModelMetadata { get; }
+			public StateVectorLayout ModelMetadata { get; }
 		}
 	}
 }

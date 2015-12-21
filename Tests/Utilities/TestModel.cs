@@ -56,7 +56,12 @@ namespace Tests.Utilities
 		/// <summary>
 		///   Gets the number of state slots required to serialize the model's state.
 		/// </summary>
-		protected int StateSlotCount => RuntimeModel.StateSlotCount;
+		protected int StateSlotCount => RuntimeModel.StateVectorSize / sizeof(int);
+
+		/// <summary>
+		///   Gets the the size of the model's state vector in bytes.
+		/// </summary>
+		protected int StateVectorSize => RuntimeModel.StateVectorSize;
 
 		/// <summary>
 		///   Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.

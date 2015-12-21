@@ -34,13 +34,15 @@ namespace Tests
 
 	public abstract unsafe class SerializationObject : TestObject, IDisposable
 	{
+		private const int BoundsCheck = 4;
 		private SerializationDelegate _deserializer;
 		private ObjectTable _objectTable;
 		private SerializationDelegate _serializer;
 		private PinnedPointer _state;
-
-		protected int* SerializedState { get; private set; }
+		protected byte* SerializedState { get; private set; }
 		protected int StateSlotCount { get; private set; }
+		protected int StateVectorSize { get; private set; }
+		protected StateVectorLayout StateVectorLayout { get; private set; }
 
 		public void Dispose()
 		{
@@ -52,19 +54,25 @@ namespace Tests
 			objects = objects.SelectMany(obj => SerializationRegistry.Default.GetReferencedObjects(obj, mode)).ToArray();
 
 			_objectTable = new ObjectTable(objects);
-			_serializer = SerializationRegistry.Default.CreateStateSerializer(_objectTable, mode);
-			_deserializer = SerializationRegistry.Default.CreateStateDeserializer(_objectTable, mode);
+			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_objectTable, mode);
+			_serializer = StateVectorLayout.CreateSerializer();
+			_deserializer = StateVectorLayout.CreateDeserializer();
 
-			StateSlotCount = SerializationRegistry.Default.GetStateSlotCount(_objectTable, mode);
-			_state = PinnedPointer.Create(new int[StateSlotCount + 1]);
-			SerializedState = (int*)_state;
+			StateSlotCount = StateVectorLayout.SizeInBytes / 4;
+			StateVectorSize = StateVectorLayout.SizeInBytes;
+			_state = PinnedPointer.Create(new byte[StateVectorSize + 2 * BoundsCheck]);
+			SerializedState = (byte*)_state + BoundsCheck;
 		}
 
 		protected void Serialize()
 		{
-			SerializedState[StateSlotCount].ShouldBe(0);
+			for (var i = 0; i < BoundsCheck; ++i)
+				SerializedState[-1 - i].ShouldBe((byte)0);
+
 			_serializer(SerializedState);
-			SerializedState[StateSlotCount].ShouldBe(0, "Detected out-of-bounds memory access.");
+
+			for (var i = 0; i < BoundsCheck; ++i)
+				SerializedState[StateVectorSize + i].ShouldBe((byte)0, "Detected out of bounds memory access.");
 		}
 
 		protected void Deserialize()

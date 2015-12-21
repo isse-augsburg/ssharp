@@ -110,6 +110,7 @@
     <Compile Include="Runtime\ChoiceResolver.cs" />
     <Compile Include="Runtime\ChoiceStack.cs" />
     <Compile Include="Runtime\RuntimeModel.cs" />
+    <Compile Include="Runtime\Serialization\CompactedStateGroup.cs" />
     <Compile Include="Runtime\Serialization\Serializers\FaultEffectSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\StateFormulaSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\TypeSerializer.cs" />
@@ -124,6 +125,7 @@
     <Compile Include="Runtime\Serialization\RuntimeModelSerializer.cs" />
     <Compile Include="Runtime\Serialization\SerializationRegistry.cs" />
     <Compile Include="Runtime\Serialization\StateSlotMetadata.cs" />
+    <Compile Include="Runtime\Serialization\StateVectorLayout.cs" />
     <Compile Include="Runtime\SimulationState.cs" />
     <Compile Include="Runtime\Simulator.cs" />
     <Compile Include="Runtime\StateStack.cs" />

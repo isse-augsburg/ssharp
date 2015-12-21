@@ -48,23 +48,23 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="slotCount">The number of slots within the state vector.</param>
+		/// <param name="stateVectorSize">The size of the state vector in bytes.</param>
 		/// <param name="initialCapacity">The initial capacity of the cache.</param>
-		public StateCache(int slotCount, int initialCapacity = InitialCapacity)
+		public StateCache(int stateVectorSize, int initialCapacity = InitialCapacity)
 		{
-			SlotCount = slotCount;
+			StateVectorSize = stateVectorSize;
 			_capacity = initialCapacity;
 		}
 
 		/// <summary>
-		///   Gets the number of slots within the state vector.
+		///   Gets the size of the state vector in bytes.
 		/// </summary>
-		public int SlotCount { get; }
+		public int StateVectorSize { get; }
 
 		/// <summary>
 		///   Gets a pointer to the underlying memory.
 		/// </summary>
-		public int* StateMemory { get; private set; }
+		public byte* StateMemory { get; private set; }
 
 		/// <summary>
 		///   Gets the number of cached states.
@@ -75,18 +75,18 @@ namespace SafetySharp.Runtime
 		///   Allocates a new state.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int* Allocate()
+		public byte* Allocate()
 		{
 			// Double the capacity if we are out of memory
 			if (StateCount >= _capacity || StateMemory == null)
 			{
 				_capacity *= 2;
-				_buffer.Resize(_capacity * SlotCount * sizeof(int), zeroMemory: false);
+				_buffer.Resize(_capacity * StateVectorSize, zeroMemory: false);
 
-				StateMemory = (int*)_buffer.Pointer;
+				StateMemory = _buffer.Pointer;
 			}
 
-			return StateMemory + StateCount++ * SlotCount;
+			return StateMemory + StateCount++ * StateVectorSize;
 		}
 
 		/// <summary>

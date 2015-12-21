@@ -20,54 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Objects
+namespace Tests.Serialization.Compaction
 {
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class NestedObjects : SerializationObject
+	internal class StateMachineRange : SerializationObject
 	{
 		protected override void Check()
 		{
-			var o1 = new object();
-			var o2 = new object();
-			var c1 = new C { O = o1 };
-			var c2 = new C { O = o2 };
-			var d = new D { C = c1, O = o2 };
+			var s1 = new StateMachine<E>(E.B);
+			var s2 = new StateMachine<E>(E.C);
+			var s3 = new StateMachine<E>(E.G);
 
-			GenerateCode(SerializationMode.Full, c1, c2, d, o1, o2);
-			StateSlotCount.ShouldBe(2);
+			GenerateCode(SerializationMode.Optimized, s1, s2, s3);
+			StateSlotCount.ShouldBe(1);
 
 			Serialize();
-			c1.O = null;
-			d.O = null;
-			d.C = null;
-			Deserialize();
-			c1.O.ShouldBe(o1);
-			d.O.ShouldBe(o2);
-			d.C.ShouldBe(c1);
+			s1.ChangeState(E.A);
+			s2.ChangeState(E.A);
+			s3.ChangeState(E.A);
 
-			d.C = c2;
-			d.O = c2.O;
-			Serialize();
-			c1.O = null;
-			d.C = null;
-			d.O = null;
 			Deserialize();
-			c1.O.ShouldBe(o1);
-			d.O.ShouldBe(o2);
-			d.C.ShouldBe(c2);
+			s1.State.ShouldBe(E.B);
+			s2.State.ShouldBe(E.C);
+			s3.State.ShouldBe(E.G);
 		}
 
-		internal class C
+		private enum E
 		{
-			public object O;
-		}
-
-		internal class D
-		{
-			public C C;
-			public object O;
+			A,
+			B,
+			C,
+			D,
+			F,
+			G
 		}
 	}
 }

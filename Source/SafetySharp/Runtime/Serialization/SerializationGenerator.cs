@@ -23,6 +23,7 @@
 namespace SafetySharp.Runtime.Serialization
 {
 	using System;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Reflection;
 	using System.Reflection.Emit;
@@ -55,6 +56,11 @@ namespace SafetySharp.Runtime.Serialization
 		private readonly DynamicMethod _method;
 
 		/// <summary>
+		///   The object that is currently stored in the local variable.
+		/// </summary>
+		private int _loadedObject;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="methodName">The name of the generated method.</param>
@@ -65,14 +71,14 @@ namespace SafetySharp.Runtime.Serialization
 			_method = new DynamicMethod(
 				name: methodName,
 				returnType: typeof(void),
-				parameterTypes: new[] { typeof(ObjectTable), typeof(int*) },
+				parameterTypes: new[] { typeof(ObjectTable), typeof(byte*) },
 				m: typeof(object).Assembly.ManifestModule,
 				skipVisibility: true);
 
 			_il = _method.GetILGenerator();
 
 			// Store the state vector in a local variable
-			_il.DeclareLocal(typeof(int*));
+			_il.DeclareLocal(typeof(byte*));
 			_il.DeclareLocal(typeof(object));
 			_il.Emit(OpCodes.Ldarg_1);
 			_il.Emit(OpCodes.Stloc_0);
@@ -91,113 +97,102 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Gets the number of state slots required for serialization of the <paramref name="type" />.
+		///   Generates the code for the serialization method.
 		/// </summary>
-		/// <param name="type">The type that should be checked.</param>
-		internal static int GetStateSlotCount(Type type)
+		/// <param name="stateGroups">The state groups the code should be generated for.</param>
+		internal void GenerateSerializationCode(CompactedStateGroup[] stateGroups)
 		{
-			if (IsPrimitiveTypeWithAtMostFourBytes(type))
-				return 1;
+			Requires.NotNull(stateGroups, nameof(stateGroups));
 
-			if (IsPrimitiveTypeWithAtMostEightBytes(type))
-				return 2;
-
-			if (IsReferenceType(type))
-				return 1;
-
-			throw new NotSupportedException($"Field type '{type.FullName}' is unsupported.");
-		}
-
-		/// <summary>
-		///   Generates the code to deserialize the <paramref name="fields" /> of the object identified by
-		///   <paramref name="objectIdentifier" />.
-		/// </summary>
-		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="fields" />.</param>
-		/// <param name="fields">The fields that should be deserialized.</param>
-		public void DeserializeFields(int objectIdentifier, FieldInfo[] fields)
-		{
-			Requires.NotNull(fields, nameof(fields));
-
-			if (fields.Length == 0)
-				return;
-
-			LoadObject(objectIdentifier);
-			foreach (var field in fields)
+			foreach (var group in stateGroups)
 			{
-				if (IsPrimitiveTypeWithAtMostFourBytes(field.FieldType))
+				foreach (var slot in group.Slots)
 				{
-					DeserializePrimitiveTypeField(field, OpCodes.Ldind_I4);
-					AdvanceToNextSlot();
+					if (slot.Field != null)
+					{
+						SerializeField(slot);
+						Advance(slot.ElementSizeInBits / 8);
+					}
+					else
+                        SerializeArray(slot);
 				}
-				else if (IsPrimitiveTypeWithAtMostEightBytes(field.FieldType))
-				{
-					DeserializePrimitiveTypeField(field, OpCodes.Ldind_I8);
-					AdvanceToNextSlot();
-					AdvanceToNextSlot();
-				}
-				else if (IsReferenceType(field.FieldType))
-					DeserializeReferenceField(field);
-				else
-					throw new NotSupportedException($"Field type '{field.FieldType.FullName}' is unsupported.");
+
+				WritePadding(group.PaddingBytes);
 			}
 		}
 
 		/// <summary>
-		///   Generates the code to serialize the <paramref name="fields" /> of the object identified by
-		///   <paramref name="objectIdentifier" />.
+		///   Generates the code for the deserialization method.
 		/// </summary>
-		/// <param name="obj">The object whose fields are serialized.</param>
-		/// <param name="objectIdentifier">The identifier of the object that declares the <paramref name="fields" />.</param>
-		/// <param name="fields">The fields that should be serialized.</param>
-		public void SerializeFields(object obj, int objectIdentifier, FieldInfo[] fields)
+		/// <param name="stateGroups">The state groups the code should be generated for.</param>
+		internal void GenerateDeserializationCode(CompactedStateGroup[] stateGroups)
 		{
-			Requires.NotNull(obj, nameof(obj));
-			Requires.NotNull(fields, nameof(fields));
+			Requires.NotNull(stateGroups, nameof(stateGroups));
 
-			if (fields.Length == 0)
-				return;
-
-			LoadObject(objectIdentifier);
-			foreach (var field in fields)
+			foreach (var group in stateGroups)
 			{
-				if (IsPrimitiveTypeWithAtMostFourBytes(field.FieldType))
+				foreach (var slot in group.Slots)
 				{
-					SerializePrimitiveTypeField(obj, field, OpCodes.Stind_I4, false);
-					AdvanceToNextSlot();
+					if (slot.Field != null)
+					{
+						DeserializeField(slot);
+						Advance(slot.ElementSizeInBits / 8);
+					}
+					else
+						DeserializeArray(slot);
 				}
-				else if (IsPrimitiveTypeWithAtMostEightBytes(field.FieldType))
-				{
-					SerializePrimitiveTypeField(obj, field, OpCodes.Stind_I8, true);
-					AdvanceToNextSlot();
-					AdvanceToNextSlot();
-				}
-				else if (IsReferenceType(field.FieldType))
-					SerializeReferenceField(field);
-				else
-					throw new NotSupportedException($"Field type '{field.FieldType.FullName}' is unsupported.");
+
+				WritePadding(group.PaddingBytes);
 			}
 		}
 
 		/// <summary>
-		///   Deserializes an array of the given <paramref name="length" /> and the given <paramref name="elementType" />.
+		///   Generates the code to deserialize the state slot described by the <paramref name="metadata" />.
 		/// </summary>
-		/// <param name="objectIdentifier">The identifier of the array that should be deserialized.</param>
-		/// <param name="elementType">The element type of the array.</param>
-		/// <param name="length">The length of the array.</param>
-		public unsafe void DeserializeArray(int objectIdentifier, Type elementType, int length)
+		/// <param name="metadata">The metadata of the state slot the code should be generated for.</param>
+		private void DeserializeField(StateSlotMetadata metadata)
 		{
-			var isReferenceType = elementType.IsReferenceType();
-			var isReferenceTypeWith4Bytes = isReferenceType && sizeof(void*) == 4;
-			var isFourBytePrimitiveType = IsPrimitiveTypeWithAtMostFourBytes(elementType);
-			var advanceCount = isReferenceType || isFourBytePrimitiveType ? 1 : 2;
-			var loadCode = isFourBytePrimitiveType || isReferenceTypeWith4Bytes ? OpCodes.Ldind_I4 : OpCodes.Ldind_I8;
-			var storeCode = GetStoreArrayElementOpCode(elementType);
+			LoadObject(metadata.ObjectIdentifier);
 
-			for (var i = 0; i < length; ++i)
+			if (metadata.Field.FieldType.IsPrimitiveType())
+				DeserializePrimitiveTypeField(metadata);
+			else if (IsReferenceType(metadata.Field.FieldType))
+				DeserializeReferenceField(metadata.Field);
+			else
+				throw new NotSupportedException($"Field type '{metadata.Field.FieldType.FullName}' is unsupported.");
+		}
+
+		/// <summary>
+		///   Generates the code to serialize the state slot described by the <paramref name="metadata" />.
+		/// </summary>
+		/// <param name="metadata">The metadata of the state slot the code should be generated for.</param>
+		private void SerializeField(StateSlotMetadata metadata)
+		{
+			LoadObject(metadata.ObjectIdentifier);
+
+			if (metadata.Field.FieldType.IsPrimitiveType())
+				SerializePrimitiveTypeField(metadata);
+			else if (IsReferenceType(metadata.Field.FieldType))
+				SerializeReferenceField(metadata.Field);
+			else
+				throw new NotSupportedException($"Field type '{metadata.Field.FieldType.FullName}' is unsupported.");
+		}
+
+		/// <summary>
+		///  Generates the code to deserialize the array state slot described by the <paramref name="metadata" />.
+		/// </summary>
+		/// <param name="metadata">The metadata of the state slot the code should be generated for.</param>
+		public void DeserializeArray(StateSlotMetadata metadata)
+		{
+			var isReferenceType = metadata.DataType.IsReferenceType();
+			var loadCode = GetLoadElementOpCode(metadata.ElementSizeInBits / 8, metadata.EffectiveType.IsUnsignedNumericType());
+			var storeCode = isReferenceType? OpCodes.Stelem_Ref : GetStoreArrayElementOpCode(GetUnmanagedSize(metadata.DataType));
+
+			for (var i = 0; i < metadata.ElementCount; ++i)
 			{
 				// o = &objs.GetObject(identifier)[i]
 				_il.Emit(OpCodes.Ldarg_0);
-				_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
+				_il.Emit(OpCodes.Ldc_I4, metadata.ObjectIdentifier);
 				_il.Emit(OpCodes.Call, _getObjectMethod);
 				_il.Emit(OpCodes.Ldc_I4, i);
 
@@ -206,7 +201,7 @@ namespace SafetySharp.Runtime.Serialization
 					// v = objs.GetObject(*state)
 					_il.Emit(OpCodes.Ldarg_0);
 					_il.Emit(OpCodes.Ldloc_0);
-					_il.Emit(OpCodes.Ldind_I4);
+					_il.Emit(OpCodes.Ldind_I2);
 					_il.Emit(OpCodes.Call, _getObjectMethod);
 				}
 				else
@@ -219,27 +214,23 @@ namespace SafetySharp.Runtime.Serialization
 				// *o = v
 				_il.Emit(storeCode);
 
-				for (var j = 0; j < advanceCount; ++j)
-					AdvanceToNextSlot();
+				Advance(metadata.ElementSizeInBits / 8);
 			}
 		}
 
 		/// <summary>
-		///   Serializes an array of the given <paramref name="length" /> and the given <paramref name="elementType" />.
+		///  Generates the code to serialize the array state slot described by the <paramref name="metadata" />.
 		/// </summary>
-		/// <param name="objectIdentifier">The identifier of the array that should be serialized.</param>
-		/// <param name="elementType">The element type of the array.</param>
-		/// <param name="length">The length of the array.</param>
-		public unsafe void SerializeArray(int objectIdentifier, Type elementType, int length)
+		/// <param name="metadata">The metadata of the state slot the code should be generated for.</param>
+		public void SerializeArray(StateSlotMetadata metadata)
 		{
-			var isReferenceType = elementType.IsReferenceType();
-			var isReferenceTypeWith4Bytes = isReferenceType && sizeof(void*) == 4;
-			var isFourBytePrimitiveType = IsPrimitiveTypeWithAtMostFourBytes(elementType);
-			var advanceCount = isReferenceType || isFourBytePrimitiveType ? 1 : 2;
-			var storeCode = isFourBytePrimitiveType || isReferenceTypeWith4Bytes ? OpCodes.Stind_I4 : OpCodes.Stind_I8;
-			var loadCode = GetLoadArrayElementOpCode(elementType);
+			var isReferenceType = metadata.DataType.IsReferenceType();
+			var storeCode = GetStoreElementOpCode(metadata.ElementSizeInBits / 8);
+			var loadCode = isReferenceType 
+				? OpCodes.Ldelem_Ref 
+				: GetLoadArrayElementOpCode(GetUnmanagedSize(metadata.DataType), metadata.EffectiveType.IsUnsignedNumericType());
 
-			for (var i = 0; i < length; ++i)
+			for (var i = 0; i < metadata.ElementCount; ++i)
 			{
 				// s = state
 				_il.Emit(OpCodes.Ldloc_0);
@@ -250,7 +241,7 @@ namespace SafetySharp.Runtime.Serialization
 				if (isReferenceType)
 					_il.Emit(OpCodes.Dup);
 
-				_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
+				_il.Emit(OpCodes.Ldc_I4, metadata.ObjectIdentifier);
 				_il.Emit(OpCodes.Call, _getObjectMethod);
 
 				// v = o[i]
@@ -264,20 +255,16 @@ namespace SafetySharp.Runtime.Serialization
 				// *s = v
 				_il.Emit(storeCode);
 
-				for (var j = 0; j < advanceCount; ++j)
-					AdvanceToNextSlot();
+				Advance(metadata.ElementSizeInBits / 8);
 			}
 		}
 
 		/// <summary>
-		///   Gets the IL instruction that can be used to store an element of the given <paramref name="type" /> into an array.
+		///   Gets the IL instruction that can be used to store an element of the <paramref name="sizeInBytes" /> into an array.
 		/// </summary>
-		private static OpCode GetStoreArrayElementOpCode(Type type)
+		private static OpCode GetStoreArrayElementOpCode(int sizeInBytes)
 		{
-			if (type.IsReferenceType())
-				return OpCodes.Stelem_Ref;
-
-			switch (type.GetUnmanagedSize())
+			switch (sizeInBytes)
 			{
 				case 1:
 					return OpCodes.Stelem_I1;
@@ -293,21 +280,18 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Gets the IL instruction that can be used to load an element of the given <paramref name="type" /> from an array.
+		///   Gets the IL instruction that can be used to load an element of the <paramref name="sizeInBytes" /> from an array.
 		/// </summary>
-		private static OpCode GetLoadArrayElementOpCode(Type type)
+		private static OpCode GetLoadArrayElementOpCode(int sizeInBytes, bool isUnsigned)
 		{
-			if (type.IsReferenceType())
-				return OpCodes.Ldelem_Ref;
-
-			switch (type.GetUnmanagedSize())
+			switch (sizeInBytes)
 			{
 				case 1:
-					return OpCodes.Ldelem_I1;
+					return isUnsigned ? OpCodes.Ldelem_U1 : OpCodes.Ldelem_I1;
 				case 2:
-					return OpCodes.Ldelem_I2;
+					return isUnsigned ? OpCodes.Ldelem_U2 : OpCodes.Ldelem_I2;
 				case 4:
-					return OpCodes.Ldelem_I4;
+					return isUnsigned ? OpCodes.Ldelem_U4 : OpCodes.Ldelem_I4;
 				case 8:
 					return OpCodes.Ldelem_I8;
 				default:
@@ -316,37 +300,77 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Generates the code to deserialize the <paramref name="field" /> of the object stored in the local variable.
+		///   Gets the IL instruction that can be used to store an element of the <paramref name="sizeInBytes" /> into the state vector.
 		/// </summary>
-		/// <param name="field">The field that should be deserialized.</param>
-		/// <param name="loadCode">The IL instruction that should be used to load the value from the state.</param>
-		private void DeserializePrimitiveTypeField(FieldInfo field, OpCode loadCode)
+		private static OpCode GetStoreElementOpCode(int sizeInBytes)
+		{
+			switch (sizeInBytes)
+			{
+				case 1:
+					return OpCodes.Stind_I1;
+				case 2:
+					return OpCodes.Stind_I2;
+				case 4:
+					return OpCodes.Stind_I4;
+				case 8:
+					return OpCodes.Stind_I8;
+				default:
+					return Assert.NotReached<OpCode>("Unsupported element size.");
+			}
+		}
+
+		/// <summary>
+		///   Gets the IL instruction that can be used to load an element of the <paramref name="sizeInBytes" /> from the state vector.
+		/// </summary>
+		private static OpCode GetLoadElementOpCode(int sizeInBytes, bool isUnsigned)
+		{
+			switch (sizeInBytes)
+			{
+				case 1:
+					return isUnsigned ? OpCodes.Ldind_U1 : OpCodes.Ldind_I1;
+				case 2:
+					return isUnsigned ? OpCodes.Ldind_U2 : OpCodes.Ldind_I2;
+				case 4:
+					return isUnsigned ? OpCodes.Ldind_U4 : OpCodes.Ldind_I4;
+				case 8:
+					return OpCodes.Ldind_I8;
+				default:
+					return Assert.NotReached<OpCode>("Unsupported element size.");
+			}
+		}
+
+		/// <summary>
+		///   Generates the code to deserialize the state slot described by the <paramref name="metadata" /> of the object stored in the
+		///   local variable.
+		/// </summary>
+		/// <param name="metadata">The metadata of the state slot the code should be generated for.</param>
+		private void DeserializePrimitiveTypeField(StateSlotMetadata metadata)
 		{
 			// o = objs.GetObject(identifier)
 			_il.Emit(OpCodes.Ldloc_1);
 
 			// v = *state
 			_il.Emit(OpCodes.Ldloc_0);
-			_il.Emit(loadCode);
+			_il.Emit(GetLoadElementOpCode(metadata.ElementSizeInBits / 8, metadata.EffectiveType.IsUnsignedNumericType()));
 
 			// o.field = v
-			_il.Emit(OpCodes.Stfld, field);
+			_il.Emit(OpCodes.Stfld, metadata.Field);
 		}
 
 		/// <summary>
-		///   Generates the code to serialize the <paramref name="field" /> of the object stored in the local variable.
+		///   Generates the code to serialize the state slot described by the <paramref name="metadata" /> of the object stored in the
+		///   local variable.
 		/// </summary>
-		/// <param name="obj">The object whose fields are serialized.</param>
-		/// <param name="field">The field that should be serialized.</param>
-		/// <param name="storeCode">The IL instruction that should be used to write the value into the state.</param>
-		/// <param name="exceedsFourBytes">Indicates whether the field requires more than 4 bytes of storage.</param>
-		private void SerializePrimitiveTypeField(object obj, FieldInfo field, OpCode storeCode, bool exceedsFourBytes)
+		/// <param name="metadata">The metadata of the state slot the code should be generated for.</param>
+		private void SerializePrimitiveTypeField(StateSlotMetadata metadata)
 		{
 			// s = state
 			_il.Emit(OpCodes.Ldloc_0);
 
-			var rangeMetadata = Range.GetMetadata(obj, field);
-			if (rangeMetadata != null && !field.FieldType.IsEnum)
+			var rangeMetadata = Range.GetMetadata(metadata.Object, metadata.Field);
+			var exceedsFourBytes = metadata.ElementSizeInBits > 32;
+
+			if (rangeMetadata != null && !metadata.DataType.IsEnum)
 			{
 				var continueLabel = _il.DefineLabel();
 
@@ -355,15 +379,15 @@ namespace SafetySharp.Runtime.Serialization
 					case OverflowBehavior.Error:
 						// if (v < lower | v > upper) throw
 						_il.Emit(OpCodes.Ldloc_1);
-						_il.Emit(OpCodes.Ldfld, field);
+						_il.Emit(OpCodes.Ldfld, metadata.Field);
 						_il.Emit(OpCodes.Dup);
 						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
-						_il.Emit(field.FieldType.IsUnsignedNumericType() ? OpCodes.Clt_Un : OpCodes.Clt);
+						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Clt_Un : OpCodes.Clt);
 
 						_il.Emit(OpCodes.Ldloc_1);
-						_il.Emit(OpCodes.Ldfld, field);
+						_il.Emit(OpCodes.Ldfld, metadata.Field);
 						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
-						_il.Emit(field.FieldType.IsUnsignedNumericType() ? OpCodes.Cgt_Un : OpCodes.Cgt);
+						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Cgt_Un : OpCodes.Cgt);
 
 						_il.Emit(OpCodes.Or);
 						_il.Emit(OpCodes.Brfalse, continueLabel);
@@ -373,22 +397,22 @@ namespace SafetySharp.Runtime.Serialization
 
 						// throw new RangeViolationException(obj, field)
 						_il.Emit(OpCodes.Ldloc_1);
-						_il.Emit(OpCodes.Ldtoken, field);
+						_il.Emit(OpCodes.Ldtoken, metadata.Field);
 						_il.Emit(OpCodes.Call, typeof(FieldInfo).GetMethod("GetFieldFromHandle", new[] { typeof(RuntimeFieldHandle) }));
-						_il.Emit(OpCodes.Newobj, typeof(RangeViolationException).GetConstructors(BindingFlags.Instance|BindingFlags.NonPublic).Single());
+						_il.Emit(OpCodes.Newobj, typeof(RangeViolationException).GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic).Single());
 						_il.Emit(OpCodes.Throw);
 						break;
 					case OverflowBehavior.Clamp:
 						var clamplabel = _il.DefineLabel();
 
 						_il.Emit(OpCodes.Ldloc_1);
-						_il.Emit(OpCodes.Ldfld, field);
+						_il.Emit(OpCodes.Ldfld, metadata.Field);
 						_il.Emit(OpCodes.Dup);
 						_il.Emit(OpCodes.Dup);
 
 						// if (v < lower) v = lower
 						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
-						_il.Emit(field.FieldType.IsUnsignedNumericType() ? OpCodes.Bge_Un_S : OpCodes.Bge_S, clamplabel);
+						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Bge_Un_S : OpCodes.Bge_S, clamplabel);
 						_il.Emit(OpCodes.Pop);
 						_il.Emit(OpCodes.Pop);
 						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
@@ -397,7 +421,7 @@ namespace SafetySharp.Runtime.Serialization
 						// else if (v > upper) v = upper
 						_il.MarkLabel(clamplabel);
 						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
-						_il.Emit(field.FieldType.IsUnsignedNumericType() ? OpCodes.Ble_Un_S : OpCodes.Ble_S, continueLabel);
+						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Ble_Un_S : OpCodes.Ble_S, continueLabel);
 						_il.Emit(OpCodes.Pop);
 						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
 						break;
@@ -405,13 +429,13 @@ namespace SafetySharp.Runtime.Serialization
 						var wrapLabel = _il.DefineLabel();
 
 						_il.Emit(OpCodes.Ldloc_1);
-						_il.Emit(OpCodes.Ldfld, field);
+						_il.Emit(OpCodes.Ldfld, metadata.Field);
 						_il.Emit(OpCodes.Dup);
 						_il.Emit(OpCodes.Dup);
 
 						// if (v < lower) v = upper
 						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
-						_il.Emit(field.FieldType.IsUnsignedNumericType() ? OpCodes.Bge_Un_S : OpCodes.Bge_S, wrapLabel);
+						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Bge_Un_S : OpCodes.Bge_S, wrapLabel);
 						_il.Emit(OpCodes.Pop);
 						_il.Emit(OpCodes.Pop);
 						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
@@ -420,7 +444,7 @@ namespace SafetySharp.Runtime.Serialization
 						// else if (v > upper) v = lower
 						_il.MarkLabel(wrapLabel);
 						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
-						_il.Emit(field.FieldType.IsUnsignedNumericType() ? OpCodes.Ble_Un_S : OpCodes.Ble_S, continueLabel);
+						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Ble_Un_S : OpCodes.Ble_S, continueLabel);
 						_il.Emit(OpCodes.Pop);
 						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
 						break;
@@ -435,11 +459,11 @@ namespace SafetySharp.Runtime.Serialization
 			{
 				// v = o.field
 				_il.Emit(OpCodes.Ldloc_1);
-				_il.Emit(OpCodes.Ldfld, field);
+				_il.Emit(OpCodes.Ldfld, metadata.Field);
 			}
 
 			// *s = v
-			_il.Emit(storeCode);
+			_il.Emit(GetStoreElementOpCode(metadata.ElementSizeInBits / 8));
 		}
 
 		/// <summary>
@@ -484,6 +508,10 @@ namespace SafetySharp.Runtime.Serialization
 					return (int)constant;
 				case TypeCode.UInt32:
 					return (int)(uint)constant;
+				case TypeCode.Int64:
+					return checked((int)(long)constant);
+				case TypeCode.UInt64:
+					return checked((int)(ulong)constant);
 				default:
 					return Assert.NotReached<int>($"Cannot normalize value of type {constant.GetType().FullName}.");
 			}
@@ -496,6 +524,20 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			switch (Type.GetTypeCode(constant.GetType()))
 			{
+				case TypeCode.Char:
+					return (char)constant;
+				case TypeCode.SByte:
+					return (sbyte)constant;
+				case TypeCode.Byte:
+					return (byte)constant;
+				case TypeCode.Int16:
+					return (short)constant;
+				case TypeCode.UInt16:
+					return (ushort)constant;
+				case TypeCode.Int32:
+					return (int)constant;
+				case TypeCode.UInt32:
+					return (int)(uint)constant;
 				case TypeCode.Int64:
 					return (long)constant;
 				case TypeCode.UInt64:
@@ -517,13 +559,11 @@ namespace SafetySharp.Runtime.Serialization
 			// v = objs.GetObject(*state)
 			_il.Emit(OpCodes.Ldarg_0);
 			_il.Emit(OpCodes.Ldloc_0);
-			_il.Emit(OpCodes.Ldind_I4);
+			_il.Emit(OpCodes.Ldind_I2);
 			_il.Emit(OpCodes.Call, _getObjectMethod);
 
 			// o.field = v
 			_il.Emit(OpCodes.Stfld, field);
-
-			AdvanceToNextSlot();
 		}
 
 		/// <summary>
@@ -540,19 +580,37 @@ namespace SafetySharp.Runtime.Serialization
 			_il.Emit(OpCodes.Ldloc_1);
 			_il.Emit(OpCodes.Ldfld, field);
 			_il.Emit(OpCodes.Call, _getObjectIdentifierMethod);
-			_il.Emit(OpCodes.Stind_I4);
-
-			AdvanceToNextSlot();
+			_il.Emit(OpCodes.Stind_I2);
 		}
 
 		/// <summary>
-		///   Advances the local state variable to point to the next state slot.
+		///   Writes <paramref name="paddingBytes" />-many zeros into the state vector.
 		/// </summary>
-		private void AdvanceToNextSlot()
+		private void WritePadding(int paddingBytes)
 		{
-			// state = state + 4;
+			// We have to fill the padding with zeros, otherwise two identical states might be treated differently
+
+			for (var i = 0; i < paddingBytes; ++i)
+			{
+				_il.Emit(OpCodes.Ldloc_0);
+				_il.Emit(OpCodes.Ldc_I4_0);
+				_il.Emit(OpCodes.Stind_I1);
+
+				Advance(1);
+			}
+		}
+
+		/// <summary>
+		///   Advances the local state variable by <paramref name="byteCount" /> bytes.
+		/// </summary>
+		private void Advance(int byteCount)
+		{
+			if (byteCount == 0)
+				return;
+
+			// state = state + byteCount;
 			_il.Emit(OpCodes.Ldloc_0);
-			_il.Emit(OpCodes.Ldc_I4, 4);
+			_il.Emit(OpCodes.Ldc_I4, byteCount);
 			_il.Emit(OpCodes.Add);
 			_il.Emit(OpCodes.Stloc_0);
 		}
@@ -562,11 +620,16 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private void LoadObject(int objectIdentifier)
 		{
+			if (_loadedObject == objectIdentifier)
+				return;
+
 			// o = objs.GetObject(objectIdentifier)
 			_il.Emit(OpCodes.Ldarg_0);
 			_il.Emit(OpCodes.Ldc_I4, objectIdentifier);
 			_il.Emit(OpCodes.Call, _getObjectMethod);
 			_il.Emit(OpCodes.Stloc_1);
+
+			_loadedObject = objectIdentifier;
 		}
 
 		/// <summary>
@@ -581,19 +644,14 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Checks whether <paramref name="type" /> is a primitive type with at most four bytes.
+		///   Gets the unmanaged size in bytes required to store value of the given <paramref name="type" />.
 		/// </summary>
-		private static bool IsPrimitiveTypeWithAtMostFourBytes(Type type)
+		private static int GetUnmanagedSize(Type type)
 		{
-			return (type.IsPrimitive || type.IsPointer || type.IsEnum) && type.GetUnmanagedSize() <= 4;
-		}
+			if (type.IsReferenceType())
+				return 2;
 
-		/// <summary>
-		///   Checks whether <paramref name="type" /> is a primitive type with at most eight bytes.
-		/// </summary>
-		private static bool IsPrimitiveTypeWithAtMostEightBytes(Type type)
-		{
-			return (type.IsPrimitive || type.IsPointer || type.IsEnum) && type.GetUnmanagedSize() <= 8;
+			return type.GetUnmanagedSize();
 		}
 	}
 }

@@ -112,7 +112,11 @@ void LoadModel(model_t model, const char* modelFile)
 	{
 		Globals::Model = RuntimeModelSerializer::Load(gcnew MemoryStream(File::ReadAllBytes(gcnew String(modelFile))));
 
-		auto stateSlotCount = Globals::Model->StateSlotCount;
+#if false
+		Console::WriteLine(Globals::Model->StateVectorLayout);
+#endif
+
+		auto stateSlotCount = (int32_t)(Globals::Model->StateVectorSize / sizeof(int32_t));
 		auto stateLabelCount = Globals::Model->StateFormulas->Length;
 		auto transitionGroupCount = 1;
 
@@ -165,9 +169,11 @@ void LoadModel(model_t model, const char* modelFile)
 		// Assign enum names
 		GBchunkPut(model, boolType, chunk_str(LTSMIN_VALUE_BOOL_FALSE));
 		GBchunkPut(model, boolType, chunk_str(LTSMIN_VALUE_BOOL_TRUE));
-
+		
 		// Set the initial state, the user context, and the callback functions
-		GBsetInitialState(model, Globals::Model->GetConstructionState());
+		auto initialState = (int32_t*)Globals::Model->GetConstructionState();
+		initialState[0] = 1;
+		GBsetInitialState(model, initialState);
 		GBsetNextStateLong(model, NextStatesCallback);
 		GBsetStateLabelLong(model, StateLabelCallback);
 
@@ -220,17 +226,18 @@ int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, Transit
 	{
 		auto stateCache = IsConstructionState(state)
 			? Globals::Model->ComputeInitialStates()
-			: Globals::Model->ComputeSuccessorStates(state);
+			: Globals::Model->ComputeSuccessorStates((unsigned char*)state);
 
 		auto stateCount = stateCache->StateCount;
-		auto stateSize = stateCache->SlotCount;
-		auto stateMemory = stateCache->StateMemory;
-
+		auto slotCount = stateCache->StateVectorSize / sizeof(int32_t);
+		auto stateMemory = (int32_t*)stateCache->StateMemory;
+	
 		transition_info info = { nullptr, 0, 0 };
 		for (auto i = 0; i < stateCount; ++i)
 		{
+			stateMemory[0] = 0;
 			callback(context, &info, stateMemory, nullptr);
-			stateMemory += stateSize;
+			stateMemory += slotCount;
 		}
 
 		return stateCount;
@@ -253,7 +260,7 @@ int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state)
 
 	try
 	{
-		return Globals::Model->CheckStateLabel(state, label) ? 1 : 0;
+		return Globals::Model->CheckStateLabel((unsigned char*)state, label) ? 1 : 0;
 	}
 	catch (Exception^ e)
 	{

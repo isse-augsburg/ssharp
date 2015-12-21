@@ -42,7 +42,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Maps each object to its corresponding identifier.
 		/// </summary>
-		private readonly Dictionary<object, int> _objectToIdentifier = new Dictionary<object, int>(ReferenceEqualityComparer<object>.Default);
+		private readonly Dictionary<object, ushort> _objectToIdentifier = new Dictionary<object, ushort>(ReferenceEqualityComparer<object>.Default);
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -57,10 +57,11 @@ namespace SafetySharp.Runtime.Serialization
 
 			// Index 0 always maps to null
 			_objects = new object[] { null }.Concat(objs).ToArray();
+			Requires.That(_objects.Length < UInt16.MaxValue, nameof(objects), $"At most {UInt16.MaxValue} unique objects are supported.");
 
 			// Generate the object to identifier lookup table; unfortunately, we can't have null keys
 			for (var i = 1; i < _objects.Length; ++i)
-				_objectToIdentifier.Add(_objects[i], i);
+				_objectToIdentifier.Add(_objects[i], (ushort)i);
 		}
 
 		/// <summary>
@@ -89,7 +90,7 @@ namespace SafetySharp.Runtime.Serialization
 		///   Gets the object corresponding to the <paramref name="identifier" />.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public object GetObject(int identifier)
+		public object GetObject(ushort identifier)
 		{
 			return _objects[identifier];
 		}
@@ -98,13 +99,13 @@ namespace SafetySharp.Runtime.Serialization
 		///   Gets the identifier that has been assigned to <paramref name="obj" />.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetObjectIdentifier(object obj)
+		public ushort GetObjectIdentifier(object obj)
 		{
 			// Since the map does not support null keys, we have to add a special case for a null object here...
 			if (obj == null)
 				return 0;
 
-			int identifier;
+			ushort identifier;
 			if (_objectToIdentifier.TryGetValue(obj, out identifier))
 				return identifier;
 

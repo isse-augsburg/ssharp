@@ -26,5 +26,5 @@ namespace SafetySharp.Runtime.Serialization
 	///   Represents a dynamically generated serialization or deserialization method.
 	/// </summary>
 	/// <param name="state">The state that should be serialized to or deserialized from.</param>
-	internal unsafe delegate void SerializationDelegate(int* state);
+	internal unsafe delegate void SerializationDelegate(byte* state);
 }

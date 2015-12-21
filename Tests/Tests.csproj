@@ -399,6 +399,14 @@
     <Compile Include="Reflection\Models\Subcomponents\generic.cs" />
     <Compile Include="Reflection\Models\Subcomponents\multiple.cs" />
     <Compile Include="Reflection\Models\Subcomponents\single.cs" />
+    <Compile Include="Serialization\Compaction\mixed 2.cs" />
+    <Compile Include="Serialization\Compaction\state machine.cs" />
+    <Compile Include="Serialization\Compaction\Int16 range.cs" />
+    <Compile Include="Serialization\Compaction\Int32 range.cs" />
+    <Compile Include="Serialization\Compaction\mixed 1.cs" />
+    <Compile Include="Serialization\Compaction\enum range.cs" />
+    <Compile Include="Serialization\Compaction\two bytes.cs" />
+    <Compile Include="Serialization\Compaction\one byte.cs" />
     <Compile Include="Serialization\Enumerations\Int16.cs" />
     <Compile Include="Serialization\Enumerations\Int64.cs" />
     <Compile Include="Serialization\Enumerations\Int32.cs" />

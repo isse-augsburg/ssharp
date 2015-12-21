@@ -95,62 +95,21 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Gets the number of state slots required by the serialized data of the <paramref name="objects" />.
+		///   Generates the <see cref="StateVectorLayout"/> for the <paramref name="objects" />.
 		/// </summary>
-		/// <param name="objects">The objects consisting of state values that should be serialized.</param>
-		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		internal int GetStateSlotCount(ObjectTable objects, SerializationMode mode)
+		/// <param name="objects">The objects consisting of state values the state vector layout should be generated for.</param>
+		/// <param name="mode">The serialization mode that should be used to generate the state vector layout.</param>
+		internal StateVectorLayout GetStateVectorLayout(ObjectTable objects, SerializationMode mode)
 		{
 			Requires.NotNull(objects, nameof(objects));
 			Requires.InRange(mode, nameof(mode));
 
-			return objects.Select(obj => GetSerializer(obj).GetStateSlotCount(obj, mode)).Sum();
-		}
+			var layout = new StateVectorLayout(objects);
+			foreach (var slot in objects.SelectMany(obj => GetSerializer(obj).GetStateSlotMetadata(obj, objects.GetObjectIdentifier(obj), mode)))
+				layout.Add(slot);
 
-		/// <summary>
-		///   Dynamically generates a delegate that can be used to serialize the <paramref name="objects" />.
-		/// </summary>
-		/// <param name="objects">The objects consisting of state values that should be serialized.</param>
-		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		internal unsafe SerializationDelegate CreateStateSerializer(ObjectTable objects, SerializationMode mode)
-		{
-			Requires.NotNull(objects, nameof(objects));
-			Requires.InRange(mode, nameof(mode));
-
-			var generator = new SerializationGenerator(methodName: "Serialize");
-
-			foreach (var obj in objects)
-				GetSerializer(obj).Serialize(generator, obj, objects.GetObjectIdentifier(obj), mode);
-
-			return generator.Compile(objects);
-		}
-
-		/// <summary>
-		///   Dynamically generates a delegate that can be used to deserialize the <paramref name="objects" />.
-		/// </summary>
-		/// <param name="objects">The objects consisting of state values that should be deserialized.</param>
-		/// <param name="mode">The serialization mode that should be used to deserialize the objects.</param>
-		internal unsafe SerializationDelegate CreateStateDeserializer(ObjectTable objects, SerializationMode mode)
-		{
-			Requires.NotNull(objects, nameof(objects));
-			Requires.InRange(mode, nameof(mode));
-
-			var generator = new SerializationGenerator(methodName: "Deserialize");
-
-			foreach (var obj in objects)
-				GetSerializer(obj).Deserialize(generator, obj, objects.GetObjectIdentifier(obj), mode);
-
-			return generator.Compile(objects);
-		}
-
-		/// <summary>
-		///   Generates the state slot metadata for the <paramref name="objects" />.
-		/// </summary>
-		/// <param name="objects">The objects consisting of state values that should be deserialized.</param>
-		internal IEnumerable<StateSlotMetadata> GetStateSlotMetadata(ObjectTable objects)
-		{
-			Requires.NotNull(objects, nameof(objects));
-			return objects.SelectMany(obj => GetSerializer(obj).GetStateSlotMetadata(obj, objects.GetObjectIdentifier(obj)));
+			layout.Compact();
+			return layout;
 		}
 
 		/// <summary>

@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,54 +20,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Objects
+namespace SafetySharp.Runtime.Serialization
 {
-	using SafetySharp.Runtime.Serialization;
-	using Shouldly;
+	using System.Linq;
 
-	internal class NestedObjects : SerializationObject
+	/// <summary>
+	///   Represents a group of state values of the same compacted size.
+	/// </summary>
+	internal struct CompactedStateGroup
 	{
-		protected override void Check()
+		/// <summary>
+		///   The state slots the group consists of.
+		/// </summary>
+		public StateSlotMetadata[] Slots;
+
+		/// <summary>
+		///   The number of padding bytes after the group. Each group is padded such that the next group starts at a location that is a
+		///   multiple of 4.
+		/// </summary>
+		public int PaddingBytes
 		{
-			var o1 = new object();
-			var o2 = new object();
-			var c1 = new C { O = o1 };
-			var c2 = new C { O = o2 };
-			var d = new D { C = c1, O = o2 };
-
-			GenerateCode(SerializationMode.Full, c1, c2, d, o1, o2);
-			StateSlotCount.ShouldBe(2);
-
-			Serialize();
-			c1.O = null;
-			d.O = null;
-			d.C = null;
-			Deserialize();
-			c1.O.ShouldBe(o1);
-			d.O.ShouldBe(o2);
-			d.C.ShouldBe(c1);
-
-			d.C = c2;
-			d.O = c2.O;
-			Serialize();
-			c1.O = null;
-			d.C = null;
-			d.O = null;
-			Deserialize();
-			c1.O.ShouldBe(o1);
-			d.O.ShouldBe(o2);
-			d.C.ShouldBe(c2);
+			get
+			{
+				var remainder = GroupSizeInBytes % 4;
+				return remainder == 0 ? 0 : 4 - remainder;
+			}
 		}
 
-		internal class C
-		{
-			public object O;
-		}
+		/// <summary>
+		///   Gets the size of the group in bytes.
+		/// </summary>
+		public int GroupSizeInBytes => Slots.Select(slot => slot.TotalSizeInBytes).Sum();
 
-		internal class D
-		{
-			public C C;
-			public object O;
-		}
+		/// <summary>
+		///   The size of each element in bits.
+		/// </summary>
+		public int SizeInBits => Slots[0].ElementSizeInBits;
 	}
 }
