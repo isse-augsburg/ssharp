@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace HemodialysisMachine.HdMachine
 {
-	public class HdMachine
+	using SafetySharp.Modeling;
+	public class HdMachine : Component
 	{
 	}
 }
