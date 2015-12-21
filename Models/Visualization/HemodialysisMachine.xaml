@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:infrastructure="clr-namespace:Visualization.Infrastructure"
              mc:Ignorable="d"
-             d:DesignHeight="500" d:DesignWidth="700">
+             d:DesignHeight="598.079" d:DesignWidth="833.961">
     <UserControl.Resources>
         <Style x:Key="FailureIndicator" TargetType="{x:Type Rectangle}">
             <Setter Property="Fill">

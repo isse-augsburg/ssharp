@@ -279,30 +279,33 @@ namespace HemodialysisMachine.Utilities
 		public PortFlowIn<TElement> Incoming { get; set; }
 		public PortFlowOut<TElement> Outgoing { get; set; }
 
-		public TElement ElementOfCurrentCycle { get; set; }
-		public int SuctionOfCurrentCycle { get; set; }
+		public TElement ElementInOfCurrentCycle { get; set; }
+		public TElement ElementOutOfCurrentCycle { get; set; }
+		public int SuctionInOfCurrentCycle { get; set; }
+		public int SuctionOutOfCurrentCycle { get; set; }
 		private Func<TElement, TElement> FlowLambdaFunc { get; set; }
 		
 		public FlowSegment(Func<TElement, TElement> flowLambdaFunc)
 		{
 			FlowLambdaFunc = flowLambdaFunc;
 			Incoming = new PortFlowIn<TElement>();
-			Incoming.SetElement = value => ElementOfCurrentCycle = value;
+			Incoming.SetElement = value => ElementInOfCurrentCycle = value;
 			Outgoing = new PortFlowOut<TElement>();
-			Outgoing.SetSuction = value => SuctionOfCurrentCycle = value;
+			Outgoing.SetSuction = value => SuctionInOfCurrentCycle = value;
 		}
 
 		public void UpdateSuctionOfPredecessor()
 		{
 			// Actively Update the SuctionOfCurrentCycle of the predecessor
-			Incoming.SetPredecessorSuction(SuctionOfCurrentCycle);
+			SuctionOutOfCurrentCycle = SuctionInOfCurrentCycle;
+			Incoming.SetPredecessorSuction(SuctionOutOfCurrentCycle);
 		}
 
 		public void UpdateElementOfSuccessor()
 		{
 			// Actively Update the ElementOfCurrentCycle of the successor
-			ElementOfCurrentCycle = FlowLambdaFunc(ElementOfCurrentCycle);
-			Outgoing.SetSuccessorElement(ElementOfCurrentCycle);
+			ElementOutOfCurrentCycle = FlowLambdaFunc(ElementInOfCurrentCycle);
+			Outgoing.SetSuccessorElement(ElementOutOfCurrentCycle);
 		}
 	}
 
@@ -311,21 +314,21 @@ namespace HemodialysisMachine.Utilities
 		public PortFlowOut<TElement> Outgoing { get; set; }
 
 		private Func<TElement> SourceLambdaFunc { get; }
-		public TElement ElementOfCurrentCycle { get; set; }
-		public int SuctionOfCurrentCycle { get; set; }
+		public TElement ElementOutOfCurrentCycle { get; set; } //=Element Out
+		public int SuctionInOfCurrentCycle { get; set; } //=Suction In
 
 		public FlowSource(Func<TElement> sourceLambdaFunc)
 		{
 			SourceLambdaFunc = sourceLambdaFunc;
 			Outgoing = new PortFlowOut<TElement>();
-			Outgoing.SetSuction = value => SuctionOfCurrentCycle = value;
+			Outgoing.SetSuction = value => SuctionInOfCurrentCycle = value;
 		}
 		
 		public void UpdateElementOfSuccessor()
 		{
 			// Actively Update the ElementOfCurrentCycle of the successor
-			ElementOfCurrentCycle = SourceLambdaFunc();
-			Outgoing.SetSuccessorElement(ElementOfCurrentCycle);
+			ElementOutOfCurrentCycle = SourceLambdaFunc();
+			Outgoing.SetSuccessorElement(ElementOutOfCurrentCycle);
 		}
 	}
 
@@ -333,13 +336,13 @@ namespace HemodialysisMachine.Utilities
 	{
 		public PortFlowIn<TElement> Incoming { get; set; }
 
-		public int SuctionOfCurrentCycle { get; set; }
+		public int SuctionOutOfCurrentCycle { get; set; }
 
 		public FlowSink(int initialSuction)
 		{
-			SuctionOfCurrentCycle = initialSuction;
+			SuctionOutOfCurrentCycle = initialSuction;
 			Incoming = new PortFlowIn<TElement>();
-			Incoming.SetElement = value => ElementOfCurrentCycle = value;
+			Incoming.SetElement = value => ElementInOfCurrentCycle = value;
 		}
 
 		public FlowSink()
@@ -347,12 +350,12 @@ namespace HemodialysisMachine.Utilities
 		{
 		}
 
-		public TElement ElementOfCurrentCycle { get; private set; }
+		public TElement ElementInOfCurrentCycle { get; private set; }
 		
 		public void UpdateSuctionOfPredecessor()
 		{
 			// Actively Update the SuctionOfCurrentCycle of the predecessor
-			Incoming.SetPredecessorSuction(SuctionOfCurrentCycle);
+			Incoming.SetPredecessorSuction(SuctionOutOfCurrentCycle);
 		}
 	}
 
@@ -366,10 +369,10 @@ namespace HemodialysisMachine.Utilities
 		public PortFlowIn<TElement> OutgoingProxy { get; set; } //This element is accessed from the inside
 
 
-		//public TElement IncomingElementOfCurrentCycle { get; set; } // Value pushed by the predecessor
-		public TElement OutgoingElementOfCurrentCycle { get; set; } // Value pushed to the successor
-		//public int IncomingSuctionOfCurrentCycle { get; set; } // Value pushed by the successor
-		public int OutgoingSuctionOfCurrentCycle { get; set; } // Value pushed to the predecessor
+		public TElement ElementInOfCurrentCycle { get; set; } // Value pushed by the predecessor
+		public TElement ElementOutOfCurrentCycle { get; set; } // Value pushed to the successor
+		public int SuctionInOfCurrentCycle { get; set; } // Value pushed by the successor
+		public int SuctionOutOfCurrentCycle { get; set; } // Value pushed to the predecessor
 		
 		public FlowComposite()
 		{
@@ -386,22 +389,30 @@ namespace HemodialysisMachine.Utilities
 			//    IncomingProxy.SetSuccessorElement should be set by ConnectInWithIn(Composite,Inner1) == Connect (IncomingProxy,Inner1)
 			//    OutgoingProxy.SetPredecessorSuction should be set by ConnectOutWithOut(Inner1,Composite) == Connect (Inner1,OutgoingProxy)
 
-			Incoming.SetElement = element => { IncomingProxy.SetSuccessorElement(element); };
-			Outgoing.SetSuction = suction => { OutgoingProxy.SetPredecessorSuction(suction); };
-			IncomingProxy.SetSuction = suction => { OutgoingSuctionOfCurrentCycle = suction; };
-			OutgoingProxy.SetElement = element => { OutgoingElementOfCurrentCycle = element; };
+			Incoming.SetElement = element =>
+			{
+				ElementInOfCurrentCycle = element;
+				IncomingProxy.SetSuccessorElement(ElementInOfCurrentCycle);
+			};
+			Outgoing.SetSuction = suction =>
+			{
+				SuctionInOfCurrentCycle = suction;
+				OutgoingProxy.SetPredecessorSuction(SuctionInOfCurrentCycle);
+			};
+			IncomingProxy.SetSuction = suction => { SuctionOutOfCurrentCycle = suction; };
+			OutgoingProxy.SetElement = element => { ElementOutOfCurrentCycle = element; };
 		}
 		
 		public void UpdateSuctionOfPredecessor()
 		{
 			// Actively Update the SuctionOfCurrentCycle of the predecessor
-			Incoming.SetPredecessorSuction(OutgoingSuctionOfCurrentCycle);
+			Incoming.SetPredecessorSuction(SuctionOutOfCurrentCycle);
 		}
 
 		public void UpdateElementOfSuccessor()
 		{
 			// Actively Update the ElementOfCurrentCycle of the successor
-			Outgoing.SetSuccessorElement(OutgoingElementOfCurrentCycle);
+			Outgoing.SetSuccessorElement(ElementOutOfCurrentCycle);
 		}
 	}
 	
