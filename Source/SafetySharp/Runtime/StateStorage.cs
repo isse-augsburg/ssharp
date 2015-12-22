@@ -149,6 +149,8 @@ namespace SafetySharp.Runtime
 						return true;
 					}
 
+					// We have to read the hash value again as it might have been written now where it previously was not
+					currentValue = Volatile.Read(ref _hashMemory[offset]);
 					if ((currentValue & 0x3FFFFFFF) == memoizedHash)
 					{
 						while ((currentValue & 1 << 31) == 0)

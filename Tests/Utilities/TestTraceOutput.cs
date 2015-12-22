@@ -58,7 +58,7 @@ namespace Tests.Utilities
 		[StringFormatMethod("message")]
 		public void Log(string message, params object[] args)
 		{
-			Assert.NotNull(_output, "A test output helper must be provided via the constructor.");
+			Requires.NotNull(_output, "A test output helper must be provided via the constructor.");
 			_output.WriteLine(message, args);
 		}
 
@@ -70,7 +70,7 @@ namespace Tests.Utilities
 		[StringFormatMethod("message")]
 		public void Trace(string message, params object[] args)
 		{
-			Assert.NotNull(_output, "A test output helper must be provided via the constructor.");
+			Requires.NotNull(_output, "A test output helper must be provided via the constructor.");
 
 			if (EnableTracing)
 				_output.WriteLine(message, args);

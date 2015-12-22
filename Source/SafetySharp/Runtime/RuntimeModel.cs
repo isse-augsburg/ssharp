@@ -78,19 +78,22 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
+		/// <param name="buffer">The buffer the model was deserialized from.</param>
 		/// <param name="rootComponents">The root components of the model.</param>
 		/// <param name="objectTable">The table of objects referenced by the model.</param>
 		/// <param name="formulas">The formulas that are checked on the model.</param>
 		/// <param name="stateHeaderBytes">
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
-		internal RuntimeModel(Component[] rootComponents, ObjectTable objectTable, Formula[] formulas, int stateHeaderBytes)
+		internal RuntimeModel(byte[] buffer, Component[] rootComponents, ObjectTable objectTable, Formula[] formulas, int stateHeaderBytes)
 		{
+			Requires.NotNull(buffer, nameof(buffer));
 			Requires.NotNull(rootComponents, nameof(rootComponents));
 			Requires.NotNull(objectTable, nameof(objectTable));
 			Requires.NotNull(formulas, nameof(formulas));
 			Requires.That(stateHeaderBytes % 4 == 0, nameof(stateHeaderBytes), "Expected a multiple of 4.");
 
+			SerializedModel = buffer;
 			RootComponents = rootComponents;
 			Faults = objectTable.OfType<Fault>().Where(fault => fault.ActivationMode == ActivationMode.Nondeterministic).ToArray();
 			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
@@ -118,6 +121,11 @@ namespace SafetySharp.Runtime
 			fixed (byte* state = _constructionState)
 				Serialize(state);
 		}
+
+		/// <summary>
+		///   Gets the buffer the model was deserialized from.
+		/// </summary>
+		internal byte[] SerializedModel { get; }
 
 		/// <summary>
 		///   Gets the model's <see cref="StateVectorLayout" />.

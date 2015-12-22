@@ -80,8 +80,13 @@ namespace SafetySharp.CompilerServices
 		{
 			Requires.NotNull(objects, nameof(objects));
 
+			// Set all bindings that were initialized at model construction time
 			foreach (var binding in objects.OfType<PortBinding>())
 				binding.Bind();
+
+			// Initialize all runtime bindings
+			foreach (var component in objects.OfType<Component>())
+				component.CreateBindings();
 		}
 	}
 }

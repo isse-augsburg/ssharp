@@ -131,7 +131,7 @@ namespace SafetySharp.Utilities
 		/// </summary>
 		public void Run()
 		{
-			Assert.That(!Running, "The process is already running.");
+			Requires.That(!Running, "The process is already running.");
 
 			Running = true;
 			try
@@ -155,7 +155,7 @@ namespace SafetySharp.Utilities
 		/// </summary>
 		public async Task RunAsync()
 		{
-			Assert.That(!Running, "The process is already running.");
+			Requires.That(!Running, "The process is already running.");
 
 			Running = true;
 			try

@@ -22,14 +22,13 @@
 
 namespace Elbtunnel.Controllers
 {
-	using System;
 	using Actuators;
 	using SafetySharp.Modeling;
 
 	/// <summary>
 	///   Represents the height control of the Elbtunnel.
 	/// </summary>
-	public class HeightControl : Component, IInitializable
+	public class HeightControl : Component
 	{
 		/// <summary>
 		///   The end-control step of the height control.
@@ -56,9 +55,9 @@ namespace Elbtunnel.Controllers
 		public TrafficLights TrafficLights;
 
 		/// <summary>
-		///   Performs the nondeterministic initialization.
+		///   Invoked when the component should initialize bindings between itself and its subcomponents.
 		/// </summary>
-		void IInitializable.Initialize()
+		protected override void CreateBindings()
 		{
 			Bind(nameof(MainControl.GetNumberOfEnteringVehicles), nameof(PreControl.GetNumberOfPassingVehicles));
 			Bind(nameof(EndControl.VehicleEntering), nameof(MainControl.IsVehicleLeavingOnRightLane));

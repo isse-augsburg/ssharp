@@ -39,7 +39,7 @@ namespace SafetySharp.Modeling
 		private Type _faultEffectType;
 
 		/// <summary>
-		///   Gets the actual type of the fault effect. 
+		///   Gets the actual type of the fault effect.
 		/// </summary>
 #if !DEBUG
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -62,6 +62,13 @@ namespace SafetySharp.Modeling
 		///   Updates the state of the component.
 		/// </summary>
 		public virtual void Update()
+		{
+		}
+
+		/// <summary>
+		///   Invoked when the component should initialize bindings between itself and its subcomponents.
+		/// </summary>
+		protected internal virtual void CreateBindings()
 		{
 		}
 

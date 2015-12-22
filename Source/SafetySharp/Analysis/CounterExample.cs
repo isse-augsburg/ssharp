@@ -58,24 +58,16 @@ namespace SafetySharp.Analysis
 		private readonly byte[][] _counterExample;
 
 		/// <summary>
-		///   The serialized runtime model the counter example was generated for.
-		/// </summary>
-		private readonly byte[] _serializedModel;
-
-		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="model">The model the counter example was generated for.</param>
-		/// <param name="serializedModel">The serialized runtime model the counter example was generated for.</param>
 		/// <param name="counterExample">The serialized counter example.</param>
-		internal CounterExample(RuntimeModel model, byte[] serializedModel, byte[][] counterExample)
+		internal CounterExample(RuntimeModel model, byte[][] counterExample)
 		{
 			Requires.NotNull(model, nameof(model));
-			Requires.NotNull(serializedModel, nameof(serializedModel));
 			Requires.NotNull(counterExample, nameof(counterExample));
 
 			Model = model;
-			_serializedModel = serializedModel;
 			_counterExample = counterExample;
 		}
 
@@ -148,8 +140,8 @@ namespace SafetySharp.Analysis
 			using (var writer = new BinaryWriter(File.OpenWrite(file), Encoding.UTF8))
 			{
 				writer.Write(FileHeader);
-				writer.Write(_serializedModel.Length);
-				writer.Write(_serializedModel);
+				writer.Write(Model.SerializedModel.Length);
+				writer.Write(Model.SerializedModel);
 
 				var formatter = new BinaryFormatter();
 				var memoryStream = new MemoryStream();
@@ -216,7 +208,7 @@ namespace SafetySharp.Analysis
 						counterExample[i][j] = reader.ReadByte();
 				}
 
-				return new CounterExample(model, serializedRuntimeModel, counterExample);
+				return new CounterExample(model, counterExample);
 			}
 		}
 
@@ -247,8 +239,8 @@ namespace SafetySharp.Analysis
 						throw new InvalidOperationException($"Failed to read LtsMin counter example:\n{String.Join("\n", outputs)}");
 				}
 
-				var model = RuntimeModelSerializer.Load(new MemoryStream(serializedRuntimeModel));
-				return new CounterExample(model, serializedRuntimeModel, ParseCsv(model, File.ReadAllLines(csvFile.Path)).ToArray());
+				var model = RuntimeModelSerializer.Load(serializedRuntimeModel);
+				return new CounterExample(model, ParseCsv(model, File.ReadAllLines(csvFile.Path)).ToArray());
 			}
 		}
 

@@ -28,7 +28,7 @@ namespace SafetySharp.Modeling
 	public interface IInitializable
 	{
 		/// <summary>
-		///   Performs the initialization.
+		///   Performs the runtime initialization.
 		/// </summary>
 		void Initialize();
 	}

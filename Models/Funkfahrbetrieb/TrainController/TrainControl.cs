@@ -75,7 +75,7 @@ namespace Funkfahrbetrieb.TrainController
 				.Transition(
 					from: State.WaitingForResponse,
 					to: State.Stopping,
-					guard: Odometer.Position >= StopPosition,
+					guard: Odometer.Position > StopPosition,
 					action: Brakes.Engage);
 		}
 

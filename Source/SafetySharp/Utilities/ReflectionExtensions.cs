@@ -312,7 +312,7 @@ namespace SafetySharp.Utilities
 
 			var interfaceMap = targetType.GetInterfaceMap(interfaceMethod.DeclaringType);
 			var index = Array.IndexOf(interfaceMap.InterfaceMethods, interfaceMethod);
-			Assert.That(index != -1, "Unable to find the interface method in the type's interface map.");
+			Requires.That(index != -1, "Unable to find the interface method in the type's interface map.");
 
 			return interfaceMap.TargetMethods[index];
 		}

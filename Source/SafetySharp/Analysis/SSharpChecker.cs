@@ -38,9 +38,14 @@ namespace SafetySharp.Analysis
 		public const int DefaultCapacity = 1 << 26;
 
 		/// <summary>
-		///   Get number of states that can be stored during model checking.
+		///   Gets or sets the number of states that can be stored during model checking.
 		/// </summary>
 		public int StateCapacity { get; set; } = DefaultCapacity;
+
+		/// <summary>
+		///   Gets or sets the number of CPUs that are used for model checking. The value is clamped to the interval of [1, #CPUs].
+		/// </summary>
+		public int CpuCount { get; set; } = Int32.MaxValue;
 
 		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
@@ -55,24 +60,23 @@ namespace SafetySharp.Analysis
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			using (var checker = new InvariantChecker(model, invariant, Output, StateCapacity))
+			var result = default(InvariantChecker.Result);
+			try
 			{
-				try
-				{
-					return checker.Check();
-				}
-				finally
-				{
-					stopwatch.Stop();
+				result = InvariantChecker.Check(model, invariant, Output, StateCapacity, CpuCount);
+				return result.CounterExample;
+			}
+			finally
+			{
+				stopwatch.Stop();
 
-					Output(String.Empty);
-					Output("=====================================");
-					Output($"Elapsed time: {stopwatch.Elapsed}");
-					Output($"{(int)(checker.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
-					Output($"{(int)(checker.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
-					Output("=====================================");
-					Output(String.Empty);
-				}
+				Output(String.Empty);
+				Output("=====================================");
+				Output($"Elapsed time: {stopwatch.Elapsed}");
+				Output($"{(int)(result.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
+				Output($"{(int)(result.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+				Output("=====================================");
+				Output(String.Empty);
 			}
 		}
 

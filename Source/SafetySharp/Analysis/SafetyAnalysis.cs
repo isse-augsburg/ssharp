@@ -79,7 +79,7 @@ namespace SafetySharp.Analysis
 			var cutSets = new HashSet<int>();
 			var checkedSets = new HashSet<int>();
 
-			Assert.That(faults.Length < 32, "More than 31 faults are currently not supported.");
+			Requires.That(faults.Length < 32, "More than 31 faults are currently not supported.");
 
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we

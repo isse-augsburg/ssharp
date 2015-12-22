@@ -80,6 +80,14 @@ namespace SafetySharp.Runtime
 		public int FrameCount { get; private set; }
 
 		/// <summary>
+		///   Removes all states from the stack.
+		/// </summary>
+		public void Clear()
+		{
+			FrameCount = 0;
+		}
+
+		/// <summary>
 		///   Pushes a new frame onto the stack.
 		/// </summary>
 		public void PushFrame()
@@ -135,6 +143,48 @@ namespace SafetySharp.Runtime
 
 			state = 0;
 			return false;
+		}
+
+		/// <summary>
+		///   Splits the work between this instance and the <paramref name="other" /> instance.
+		/// </summary>
+		/// <param name="other">The other instance the work should be split with.</param>
+		public void SplitWork(StateStack other)
+		{
+			Requires.That(other.FrameCount == 0, nameof(other), "Expected an empty state stack.");
+
+			// We go through each frame and split the first frame with more than two states in half
+			for (var i = 0; i < FrameCount; ++i)
+			{
+				other.PushFrame();
+
+				switch (_frames[i].Count)
+				{
+					case 0:
+						other.Clear();
+						return;
+					case 1:
+						other.PushState(_states[_frames[i].Offset]);
+						break;
+					default:
+						// Split the states of the frame
+						var otherCount = _frames[i].Count / 2;
+						var thisCount = _frames[i].Count - otherCount;
+
+						// Add the first otherCount states to the other stack
+						for (var j = 0; j < otherCount; ++j)
+							other.PushState(_states[_frames[i].Offset + j]);
+
+						// Adjust the count and offset of the frame
+						_frames[i].Offset += otherCount;
+						_frames[i].Count = thisCount;
+
+						return;
+				}
+			}
+
+			// If this stack could not be split, we clear the other's stack and let some other worker try again
+			other.Clear();
 		}
 
 		/// <summary>

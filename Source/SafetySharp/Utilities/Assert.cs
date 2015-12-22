@@ -39,7 +39,7 @@ namespace SafetySharp.Utilities
 		/// <param name="obj">The object that should be checked.</param>
 		/// <param name="message">An optional message providing further details about the assertion.</param>
 		/// <exception cref="InvalidOperationException">Thrown if <paramref name="obj" /> is not <c>null</c>.</exception>
-		[DebuggerHidden, ContractAnnotation("obj: notnull => halt")]
+		[Conditional("DEBUG"), DebuggerHidden, ContractAnnotation("obj: notnull => halt")]
 		public static void IsNull<T>(T obj, string message = null)
 			where T : class
 		{
@@ -54,7 +54,7 @@ namespace SafetySharp.Utilities
 		/// <param name="obj">The object that should be checked.</param>
 		/// <param name="message">An optional message providing further details about the assertion.</param>
 		/// <exception cref="NullReferenceException">Thrown if <paramref name="obj" /> is <c>null</c>.</exception>
-		[DebuggerHidden, ContractAnnotation("obj: null => halt")]
+		[Conditional("DEBUG"), DebuggerHidden, ContractAnnotation("obj: null => halt")]
 		public static void NotNull<T>(T obj, string message = null)
 			where T : class
 		{
@@ -69,7 +69,7 @@ namespace SafetySharp.Utilities
 		/// <param name="s">The string that should be checked.</param>
 		/// <exception cref="NullReferenceException">Thrown if <paramref name="s" /> is <c>null</c>.</exception>
 		/// <exception cref="InvalidOperationException">Thrown if <paramref name="s" /> is empty or consists of whitespace only.</exception>
-		[DebuggerHidden, ContractAnnotation("s: null => halt")]
+		[Conditional("DEBUG"), DebuggerHidden, ContractAnnotation("s: null => halt")]
 		public static void NotNullOrWhitespace(string s)
 		{
 			if (s == null)
@@ -84,7 +84,7 @@ namespace SafetySharp.Utilities
 		/// </summary>
 		/// <param name="condition">The condition that, if <c>false</c>, causes the exception to be raised.</param>
 		/// <param name="message">A message providing further details about the assertion.</param>
-		[DebuggerHidden, ContractAnnotation("condition: false => halt")]
+		[Conditional("DEBUG"), DebuggerHidden, ContractAnnotation("condition: false => halt")]
 		public static void That(bool condition, [NotNull] string message)
 		{
 			Requires.NotNullOrWhitespace(message, nameof(message));
@@ -99,7 +99,7 @@ namespace SafetySharp.Utilities
 		///   builds.
 		/// </summary>
 		/// <param name="message">An optional message providing further details about the assertion.</param>
-		[DebuggerHidden, ContractAnnotation("=> halt")]
+		[Conditional("DEBUG"), DebuggerHidden, ContractAnnotation("=> halt")]
 		public static void NotReached(string message = null)
 		{
 			throw new InvalidOperationException(message ?? "Control flow should not have reached this point.");
@@ -129,7 +129,7 @@ namespace SafetySharp.Utilities
 		///   Thrown if <typeparamref name="TEnum" /> is not an enumeration type or if the value of <paramref name="value" /> is
 		///   outside the range of valid enumeration literals.
 		/// </exception>
-		[DebuggerHidden]
+		[Conditional("DEBUG"), DebuggerHidden]
 		public static void InRange<TEnum>(TEnum value)
 			where TEnum : struct
 		{
@@ -156,7 +156,7 @@ namespace SafetySharp.Utilities
 		///   Thrown if the value of <paramref name="value" /> precedes <paramref name="lowerBound" /> or is
 		///   the same as or exceeds <paramref name="upperBound" />.
 		/// </exception>
-		[DebuggerHidden]
+		[Conditional("DEBUG"), DebuggerHidden]
 		public static void InRange<T>(T value, T lowerBound, T upperBound)
 			where T : IComparable<T>
 		{
@@ -186,7 +186,7 @@ namespace SafetySharp.Utilities
 		/// <exception cref="InvalidOperationException">
 		///   Thrown if the value of <paramref name="index" /> is smaller than 0 or exceeds <c>collection.Count</c>.
 		/// </exception>
-		[DebuggerHidden]
+		[Conditional("DEBUG"), DebuggerHidden]
 		public static void InRange(int index, ICollection collection)
 		{
 			Requires.NotNull(collection, nameof(collection));
@@ -201,7 +201,7 @@ namespace SafetySharp.Utilities
 		/// <param name="obj">The value whose type should be checked.</param>
 		/// <param name="message">An optional message providing further details about the assertion.</param>
 		/// <exception cref="InvalidCastException">Thrown if <paramref name="obj" /> is not of type <typeparamref name="T" />.</exception>
-		[DebuggerHidden]
+		[Conditional("DEBUG"), DebuggerHidden]
 		public static void OfType<T>(object obj, string message = null)
 			where T : class
 		{

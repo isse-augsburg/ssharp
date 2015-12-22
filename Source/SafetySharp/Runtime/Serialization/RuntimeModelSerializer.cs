@@ -42,6 +42,26 @@ namespace SafetySharp.Runtime.Serialization
 		#region Serialization
 
 		/// <summary>
+		///   Returns the serialized <paramref name="model" /> and the <paramref name="formulas" />.
+		/// </summary>
+		/// <param name="model">The model that should be serialized.</param>
+		/// <param name="stateHeaderBytes">
+		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
+		/// </param>
+		/// <param name="formulas">The formulas that should be serialized.</param>
+		public static byte[] Save(Model model, int stateHeaderBytes, params Formula[] formulas)
+		{
+			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(formulas, nameof(formulas));
+
+			using (var buffer = new MemoryStream())
+			{
+				Save(buffer, model, stateHeaderBytes, formulas);
+				return buffer.ToArray();
+			}
+		}
+
+		/// <summary>
 		///   Saves the serialized <paramref name="model" /> and the <paramref name="formulas" /> to the <paramref name="stream" />.
 		/// </summary>
 		/// <param name="stream">The stream the serialized specification should be written to.</param>
@@ -131,7 +151,7 @@ namespace SafetySharp.Runtime.Serialization
 			// Check that the state formula has a closure -- the current version of the C# compiler 
 			// always does that, but future versions might not.
 			foreach (var formula in visitor.StateFormulas)
-				Assert.NotNull(formula.Expression.Target, "Unexpected state formula without closure object.");
+				Requires.NotNull(formula.Expression.Target, "Unexpected state formula without closure object.");
 
 			return visitor.StateFormulas.ToArray();
 		}
@@ -177,6 +197,18 @@ namespace SafetySharp.Runtime.Serialization
 		#region Deserialization
 
 		/// <summary>
+		///   Loads a <see cref="RuntimeModel" /> from the <paramref name="buffer" />.
+		/// </summary>
+		/// <param name="buffer">The buffer the model should be loaded from.</param>
+		public static RuntimeModel Load(byte[] buffer)
+		{
+			Requires.NotNull(buffer, nameof(buffer));
+
+			using (var reader = new BinaryReader(new MemoryStream(buffer), Encoding.UTF8, leaveOpen: true))
+				return DeserializeModel(buffer, reader);
+		}
+
+		/// <summary>
 		///   Loads a <see cref="RuntimeModel" /> from the <paramref name="stream" />.
 		/// </summary>
 		/// <param name="stream">The stream the model should be loaded from.</param>
@@ -184,14 +216,17 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			Requires.NotNull(stream, nameof(stream));
 
-			using (var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
-				return DeserializeModel(reader);
+			using (var buffer = new MemoryStream())
+			{
+				stream.CopyTo(buffer);
+				return Load(buffer.ToArray());
+			}
 		}
 
 		/// <summary>
 		///   Deserializes a <see cref="RuntimeModel" /> from the <paramref name="reader" />.
 		/// </summary>
-		private static unsafe RuntimeModel DeserializeModel(BinaryReader reader)
+		private static unsafe RuntimeModel DeserializeModel(byte[] buffer, BinaryReader reader)
 		{
 			// Deserialize the object table
 			var objectTable = DeserializeObjectTable(reader);
@@ -227,7 +262,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			// Deserialize the state formulas and instantiate the runtime model
 			DeserializeStateFormulas(reader, objectTable);
-			return new RuntimeModel(roots, objectTable, formulas, reader.ReadInt32());
+			return new RuntimeModel(buffer, roots, objectTable, formulas, reader.ReadInt32());
 		}
 
 		/// <summary>

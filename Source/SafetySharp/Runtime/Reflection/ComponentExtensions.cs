@@ -92,7 +92,7 @@ namespace SafetySharp.Runtime.Reflection
 
 			var type = actualType ?? ((Component)faultEffect).FaultEffectType;
 			var faultField = type.GetField("__fault__", BindingFlags.Instance | BindingFlags.NonPublic);
-			Assert.NotNull(faultField, $"Unable to determine fault field of fault effect '{faultEffect.GetType().FullName}'.");
+			Requires.NotNull(faultField, $"Unable to determine fault field of fault effect '{faultEffect.GetType().FullName}'.");
 
 			return faultField;
 		}
@@ -128,7 +128,7 @@ namespace SafetySharp.Runtime.Reflection
 		public static Type GetRuntimeType(this IComponent component)
 		{
 			var runtimeTypeField = component.GetType().GetField("__runtimeType__", BindingFlags.Static | BindingFlags.NonPublic);
-			Assert.NotNull(runtimeTypeField, $"Unable to determine runtime type of component '{component.GetType().FullName}'.");
+			Requires.NotNull(runtimeTypeField, $"Unable to determine runtime type of component '{component.GetType().FullName}'.");
 
 			return (Type)runtimeTypeField.GetValue(null);
 		}

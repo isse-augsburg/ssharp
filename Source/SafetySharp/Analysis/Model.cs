@@ -56,7 +56,7 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(components, nameof(components));
 
 			AddRange(components);
-			Assert.That(Count != 0, "Expected at least one component.");
+			Requires.That(Count != 0, "Expected at least one component.");
 		}
 
 		/// <summary>

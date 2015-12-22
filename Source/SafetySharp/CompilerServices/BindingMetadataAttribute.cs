@@ -98,7 +98,7 @@ namespace SafetySharp.CompilerServices
 			Requires.NotNull(requiredPort, nameof(requiredPort));
 
 			var metadataAttribute = requiredPort.GetCustomAttribute<BindingMetadataAttribute>();
-			Assert.NotNull(metadataAttribute,
+			Requires.NotNull(metadataAttribute,
 				$"Expected required port '{requiredPort}' to be marked with '{typeof(BindingMetadataAttribute).FullName}'.");
 
 			metadataAttribute._type = requiredPort.DeclaringType;

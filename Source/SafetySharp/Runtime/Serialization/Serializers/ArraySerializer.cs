@@ -50,7 +50,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="mode">The serialization mode that should be used to generate the metadata.</param>
 		protected internal override IEnumerable<StateSlotMetadata> GetStateSlotMetadata(object obj, int objectIdentifier, SerializationMode mode)
 		{
-			Assert.That(((Array)obj).Rank == 1 && !obj.GetType().GetElementType().IsArray, "Multidimensional arrays are not supported.");
+			Requires.That(((Array)obj).Rank == 1 && !obj.GetType().GetElementType().IsArray, "Multidimensional arrays are not supported.");
 
 			yield return new StateSlotMetadata
 			{

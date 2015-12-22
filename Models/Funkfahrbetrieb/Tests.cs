@@ -74,5 +74,10 @@ namespace Funkfahrbetrieb
 			//ltsMin.CheckInvariant(model, f1 || f2 && f3 || f1 && f2);
 			ltsMin.CheckInvariant(model, f4);
 		}
+
+		public static void Main()
+		{
+			new Tests().Test();
+		}
 	}
 }
