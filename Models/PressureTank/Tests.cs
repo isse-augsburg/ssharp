@@ -37,7 +37,7 @@ namespace PressureTank
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis((ModelChecker)Activator.CreateInstance(modelChecker), Model.Create(specification));
 
-			var result = analysis.ComputeMinimalCutSets(specification.Rupture, "counter examples/pressure tank");
+			var result = analysis.ComputeMinimalCutSets(specification.Rupture, $"counter examples/pressure tank/{modelChecker.Name}");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
 
 			Console.WriteLine("Checked Fault Sets: {0} ({1:F0}% of all fault sets)", result.CheckedSetsCount, percentage);
