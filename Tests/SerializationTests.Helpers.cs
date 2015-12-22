@@ -62,6 +62,8 @@ namespace Tests
 			StateVectorSize = StateVectorLayout.SizeInBytes;
 			_state = PinnedPointer.Create(new byte[StateVectorSize + 2 * BoundsCheck]);
 			SerializedState = (byte*)_state + BoundsCheck;
+
+			Output.Log("{0}", StateVectorLayout);
 		}
 
 		protected void Serialize()

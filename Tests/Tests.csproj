@@ -399,7 +399,11 @@
     <Compile Include="Reflection\Models\Subcomponents\generic.cs" />
     <Compile Include="Reflection\Models\Subcomponents\multiple.cs" />
     <Compile Include="Reflection\Models\Subcomponents\single.cs" />
+    <Compile Include="Serialization\Compaction\alignment.cs" />
+    <Compile Include="Serialization\Compaction\mixed 4.cs" />
+    <Compile Include="Serialization\Compaction\mixed 3.cs" />
     <Compile Include="Serialization\Compaction\mixed 2.cs" />
+    <Compile Include="Serialization\Compaction\Boolean.cs" />
     <Compile Include="Serialization\Compaction\state machine.cs" />
     <Compile Include="Serialization\Compaction\Int16 range.cs" />
     <Compile Include="Serialization\Compaction\Int32 range.cs" />

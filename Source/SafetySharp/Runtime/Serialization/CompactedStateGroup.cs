@@ -27,34 +27,38 @@ namespace SafetySharp.Runtime.Serialization
 	/// <summary>
 	///   Represents a group of state values of the same compacted size.
 	/// </summary>
-	internal struct CompactedStateGroup
+	internal class CompactedStateGroup
 	{
+		/// <summary>
+		///   The zero-based offset in bytes into the state vector where the group's first value is stored.
+		/// </summary>
+		public int Offset;
+
+		/// <summary>
+		///   The number of padding bytes after the group.
+		/// </summary>
+		public int PaddingBytes;
+
 		/// <summary>
 		///   The state slots the group consists of.
 		/// </summary>
 		public StateSlotMetadata[] Slots;
 
 		/// <summary>
-		///   The number of padding bytes after the group. Each group is padded such that the next group starts at a location that is a
-		///   multiple of 4.
+		///   Gets the size of the group in bytes.
 		/// </summary>
-		public int PaddingBytes
+		public int GroupSizeInBytes
 		{
 			get
 			{
-				var remainder = GroupSizeInBytes % 4;
-				return remainder == 0 ? 0 : 4 - remainder;
+				var bits = Slots.Select(slot => slot.TotalSizeInBits).Sum();
+				return bits / 8 + (bits % 8 == 0 ? 0 : 1);
 			}
 		}
 
 		/// <summary>
-		///   Gets the size of the group in bytes.
-		/// </summary>
-		public int GroupSizeInBytes => Slots.Select(slot => slot.TotalSizeInBytes).Sum();
-
-		/// <summary>
 		///   The size of each element in bits.
 		/// </summary>
-		public int SizeInBits => Slots[0].ElementSizeInBits;
+		public int ElementSizeInBits => Slots[0].ElementSizeInBits;
 	}
 }

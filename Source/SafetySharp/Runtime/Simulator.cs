@@ -29,12 +29,17 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Simulates a S# model for debugging or testing purposes.
 	/// </summary>
-	public sealed class Simulator
+	public sealed unsafe class Simulator
 	{
 		/// <summary>
 		///   The counter example that is replayed by the simulator.
 		/// </summary>
 		private readonly CounterExample _counterExample;
+
+		/// <summary>
+		///   The current serialized model state.
+		/// </summary>
+		private readonly byte[] _state;
 
 		/// <summary>
 		///   The current state number of the counter example.
@@ -53,6 +58,8 @@ namespace SafetySharp.Runtime
 
 			Model = model.ToRuntimeModel(formulas);
 			Model.Reset();
+
+			_state = new byte[Model.StateVectorSize];
 		}
 
 		/// <summary>
@@ -64,8 +71,10 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(counterExample, nameof(counterExample));
 
 			Model = counterExample.Model;
+
 			_counterExample = counterExample;
 			_counterExample.DeserializeState(0);
+			_state = new byte[Model.StateVectorSize];
 		}
 
 		/// <summary>
@@ -85,7 +94,7 @@ namespace SafetySharp.Runtime
 		public void Simulate(TimeSpan timeSpan)
 		{
 			for (var i = 0; i < timeSpan.TotalSeconds; ++i)
-				Model.ExecuteStep();
+				SimulateStep();
 
 			Completed?.Invoke(this, EventArgs.Empty);
 		}
@@ -96,7 +105,16 @@ namespace SafetySharp.Runtime
 		public void SimulateStep()
 		{
 			if (_counterExample == null)
-				Model.ExecuteStep();
+			{
+				fixed (byte* state = _state)
+				{
+					Model.ExecuteStep();
+
+					// Serialize and deserialize the state to get the correct overflow behavior
+					Model.Serialize(state);
+					Model.Deserialize(state);
+				}
+			}
 			else if (_stateNumber + 1 < _counterExample.StepCount)
 			{
 				_counterExample.DeserializeState(++_stateNumber);
@@ -111,7 +129,16 @@ namespace SafetySharp.Runtime
 		public void Reset()
 		{
 			if (_counterExample == null)
+			{
 				Model.Reset();
+
+				fixed (byte* state = _state)
+				{
+					// Serialize and deserialize the state to get the correct overflow behavior
+					Model.Serialize(state);
+					Model.Deserialize(state);
+				}
+			}
 			else
 			{
 				_counterExample.DeserializeState(0);

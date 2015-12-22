@@ -23,7 +23,6 @@
 namespace SafetySharp.Runtime.Serialization
 {
 	using System;
-	using System.Diagnostics;
 	using System.Linq;
 	using System.Reflection;
 	using System.Reflection.Emit;
@@ -54,6 +53,16 @@ namespace SafetySharp.Runtime.Serialization
 		///   The method that is being generated.
 		/// </summary>
 		private readonly DynamicMethod _method;
+
+		/// <summary>
+		///   The index used to read or write a bit.
+		/// </summary>
+		private int _bitIndex;
+
+		/// <summary>
+		///   Indicates whether individual elements of the state vector are addressed by bit instead of by byte.
+		/// </summary>
+		private bool _bitLevelAddressing;
 
 		/// <summary>
 		///   The object that is currently stored in the local variable.
@@ -106,6 +115,9 @@ namespace SafetySharp.Runtime.Serialization
 
 			foreach (var group in stateGroups)
 			{
+				_bitLevelAddressing = group.ElementSizeInBits == 1;
+				_bitIndex = 0;
+
 				foreach (var slot in group.Slots)
 				{
 					if (slot.Field != null)
@@ -114,10 +126,16 @@ namespace SafetySharp.Runtime.Serialization
 						Advance(slot.ElementSizeInBits / 8);
 					}
 					else
-                        SerializeArray(slot);
+						SerializeArray(slot);
 				}
 
-				WritePadding(group.PaddingBytes);
+				if (_bitLevelAddressing)
+				{
+					_bitLevelAddressing = false;
+					Advance(1);
+				}
+				
+				Advance(group.PaddingBytes);
 			}
 		}
 
@@ -131,6 +149,9 @@ namespace SafetySharp.Runtime.Serialization
 
 			foreach (var group in stateGroups)
 			{
+				_bitLevelAddressing = group.ElementSizeInBits == 1;
+				_bitIndex = 0;
+
 				foreach (var slot in group.Slots)
 				{
 					if (slot.Field != null)
@@ -142,7 +163,13 @@ namespace SafetySharp.Runtime.Serialization
 						DeserializeArray(slot);
 				}
 
-				WritePadding(group.PaddingBytes);
+				if (_bitLevelAddressing)
+				{
+					_bitLevelAddressing = false;
+					Advance(1);
+				}
+
+				Advance(group.PaddingBytes);
 			}
 		}
 
@@ -179,14 +206,16 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///  Generates the code to deserialize the array state slot described by the <paramref name="metadata" />.
+		///   Generates the code to deserialize the array state slot described by the <paramref name="metadata" />.
 		/// </summary>
 		/// <param name="metadata">The metadata of the state slot the code should be generated for.</param>
 		public void DeserializeArray(StateSlotMetadata metadata)
 		{
 			var isReferenceType = metadata.DataType.IsReferenceType();
-			var loadCode = GetLoadElementOpCode(metadata.ElementSizeInBits / 8, metadata.EffectiveType.IsUnsignedNumericType());
-			var storeCode = isReferenceType? OpCodes.Stelem_Ref : GetStoreArrayElementOpCode(GetUnmanagedSize(metadata.DataType));
+			var loadCode = _bitLevelAddressing
+				? default(OpCode)
+				: GetLoadElementOpCode(metadata.ElementSizeInBits / 8, metadata.EffectiveType.IsUnsignedNumericType());
+			var storeCode = isReferenceType ? OpCodes.Stelem_Ref : GetStoreArrayElementOpCode(GetUnmanagedSize(metadata.DataType));
 
 			for (var i = 0; i < metadata.ElementCount; ++i)
 			{
@@ -204,6 +233,8 @@ namespace SafetySharp.Runtime.Serialization
 					_il.Emit(OpCodes.Ldind_I2);
 					_il.Emit(OpCodes.Call, _getObjectMethod);
 				}
+				else if (_bitLevelAddressing)
+					LoadBooleanValue();
 				else
 				{
 					// v = *state
@@ -219,41 +250,58 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///  Generates the code to serialize the array state slot described by the <paramref name="metadata" />.
+		///   Generates the code to serialize the array state slot described by the <paramref name="metadata" />.
 		/// </summary>
 		/// <param name="metadata">The metadata of the state slot the code should be generated for.</param>
 		public void SerializeArray(StateSlotMetadata metadata)
 		{
 			var isReferenceType = metadata.DataType.IsReferenceType();
-			var storeCode = GetStoreElementOpCode(metadata.ElementSizeInBits / 8);
-			var loadCode = isReferenceType 
-				? OpCodes.Ldelem_Ref 
+			var storeCode = _bitLevelAddressing ? default(OpCode) : GetStoreElementOpCode(metadata.ElementSizeInBits / 8);
+			var loadCode = isReferenceType
+				? OpCodes.Ldelem_Ref
 				: GetLoadArrayElementOpCode(GetUnmanagedSize(metadata.DataType), metadata.EffectiveType.IsUnsignedNumericType());
 
 			for (var i = 0; i < metadata.ElementCount; ++i)
 			{
-				// s = state
-				_il.Emit(OpCodes.Ldloc_0);
+				if (_bitLevelAddressing)
+				{
+					StoreBooleanValue(() =>
+					{
+						// o = objs.GetObject(identifier)
+						_il.Emit(OpCodes.Ldarg_0);
+						_il.Emit(OpCodes.Ldc_I4, metadata.ObjectIdentifier);
+						_il.Emit(OpCodes.Call, _getObjectMethod);
 
-				// o = objs.GetObject(identifier)
-				_il.Emit(OpCodes.Ldarg_0);
+						// v = o[i]
+						_il.Emit(OpCodes.Ldc_I4, i);
+						_il.Emit(loadCode);
+					});
+				}
+				else
+				{
+					// s = state
+					_il.Emit(OpCodes.Ldloc_0);
 
-				if (isReferenceType)
-					_il.Emit(OpCodes.Dup);
+					// o = objs.GetObject(identifier)
+					_il.Emit(OpCodes.Ldarg_0);
 
-				_il.Emit(OpCodes.Ldc_I4, metadata.ObjectIdentifier);
-				_il.Emit(OpCodes.Call, _getObjectMethod);
+					if (isReferenceType)
+						_il.Emit(OpCodes.Dup);
 
-				// v = o[i]
-				_il.Emit(OpCodes.Ldc_I4, i);
-				_il.Emit(loadCode);
+					_il.Emit(OpCodes.Ldc_I4, metadata.ObjectIdentifier);
+					_il.Emit(OpCodes.Call, _getObjectMethod);
 
-				// v = objs.GetObjectIdentifier(o[i])
-				if (isReferenceType)
-					_il.Emit(OpCodes.Call, _getObjectIdentifierMethod);
+					// v = o[i]
+					_il.Emit(OpCodes.Ldc_I4, i);
+					_il.Emit(loadCode);
 
-				// *s = v
-				_il.Emit(storeCode);
+					// v = objs.GetObjectIdentifier(o[i])
+					if (isReferenceType)
+						_il.Emit(OpCodes.Call, _getObjectIdentifierMethod);
+
+					// *s = v
+					_il.Emit(storeCode);
+				}
 
 				Advance(metadata.ElementSizeInBits / 8);
 			}
@@ -275,7 +323,7 @@ namespace SafetySharp.Runtime.Serialization
 				case 8:
 					return OpCodes.Stelem_I8;
 				default:
-					return Assert.NotReached<OpCode>("Unsupported element size.");
+					return Assert.NotReached<OpCode>($"Unsupported element size: {sizeInBytes}.");
 			}
 		}
 
@@ -295,7 +343,7 @@ namespace SafetySharp.Runtime.Serialization
 				case 8:
 					return OpCodes.Ldelem_I8;
 				default:
-					return Assert.NotReached<OpCode>("Unsupported element size.");
+					return Assert.NotReached<OpCode>($"Unsupported element size: {sizeInBytes}.");
 			}
 		}
 
@@ -315,7 +363,7 @@ namespace SafetySharp.Runtime.Serialization
 				case 8:
 					return OpCodes.Stind_I8;
 				default:
-					return Assert.NotReached<OpCode>("Unsupported element size.");
+					return Assert.NotReached<OpCode>($"Unsupported element size: {sizeInBytes}.");
 			}
 		}
 
@@ -335,7 +383,7 @@ namespace SafetySharp.Runtime.Serialization
 				case 8:
 					return OpCodes.Ldind_I8;
 				default:
-					return Assert.NotReached<OpCode>("Unsupported element size.");
+					return Assert.NotReached<OpCode>($"Unsupported element size: {sizeInBytes}.");
 			}
 		}
 
@@ -349,9 +397,14 @@ namespace SafetySharp.Runtime.Serialization
 			// o = objs.GetObject(identifier)
 			_il.Emit(OpCodes.Ldloc_1);
 
-			// v = *state
-			_il.Emit(OpCodes.Ldloc_0);
-			_il.Emit(GetLoadElementOpCode(metadata.ElementSizeInBits / 8, metadata.EffectiveType.IsUnsignedNumericType()));
+			if (_bitLevelAddressing)
+				LoadBooleanValue();
+			else
+			{
+				// v = *state
+				_il.Emit(OpCodes.Ldloc_0);
+				_il.Emit(GetLoadElementOpCode(metadata.ElementSizeInBits / 8, metadata.EffectiveType.IsUnsignedNumericType()));
+			}
 
 			// o.field = v
 			_il.Emit(OpCodes.Stfld, metadata.Field);
@@ -364,6 +417,17 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="metadata">The metadata of the state slot the code should be generated for.</param>
 		private void SerializePrimitiveTypeField(StateSlotMetadata metadata)
 		{
+			if (_bitLevelAddressing)
+			{
+				StoreBooleanValue(() =>
+				{
+					_il.Emit(OpCodes.Ldloc_1);
+					_il.Emit(OpCodes.Ldfld, metadata.Field);
+				});
+
+				return;
+			}
+
 			// s = state
 			_il.Emit(OpCodes.Ldloc_0);
 
@@ -464,6 +528,47 @@ namespace SafetySharp.Runtime.Serialization
 
 			// *s = v
 			_il.Emit(GetStoreElementOpCode(metadata.ElementSizeInBits / 8));
+		}
+
+		/// <summary>
+		///   Loads a bit-compressed Boolean value onto the stack.
+		/// </summary>
+		private void LoadBooleanValue()
+		{
+			// v = (*state >> _bitIndex) & 0x01 == 1
+			_il.Emit(OpCodes.Ldloc_0);
+			_il.Emit(OpCodes.Ldind_U1);
+			_il.Emit(OpCodes.Ldc_I4, _bitIndex);
+			_il.Emit(OpCodes.Shr_Un);
+			_il.Emit(OpCodes.Ldc_I4_1);
+			_il.Emit(OpCodes.And);
+		}
+
+		/// <summary>
+		///   Stores a bit-compressed Boolean value loaded using the <paramref name="valueLoader" />.
+		/// </summary>
+		private void StoreBooleanValue(Action valueLoader)
+		{
+			// *s |= o.field << _bitIndex;
+			_il.Emit(OpCodes.Ldloc_0);
+
+			// If we write the first bit, use the constant 0 instead of loading the previous value
+			// as otherwise a bit that is true would never be able to become false again
+			if (_bitIndex == 0)
+				_il.Emit(OpCodes.Ldc_I4_0);
+			else
+			{
+				_il.Emit(OpCodes.Dup);
+				_il.Emit(OpCodes.Ldind_U1);
+			}
+
+			valueLoader();
+
+			_il.Emit(OpCodes.Ldc_I4, _bitIndex);
+			_il.Emit(OpCodes.Shl);
+			_il.Emit(OpCodes.Or);
+
+			_il.Emit(OpCodes.Stind_I1);
 		}
 
 		/// <summary>
@@ -584,28 +689,19 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Writes <paramref name="paddingBytes" />-many zeros into the state vector.
-		/// </summary>
-		private void WritePadding(int paddingBytes)
-		{
-			// We have to fill the padding with zeros, otherwise two identical states might be treated differently
-
-			for (var i = 0; i < paddingBytes; ++i)
-			{
-				_il.Emit(OpCodes.Ldloc_0);
-				_il.Emit(OpCodes.Ldc_I4_0);
-				_il.Emit(OpCodes.Stind_I1);
-
-				Advance(1);
-			}
-		}
-
-		/// <summary>
 		///   Advances the local state variable by <paramref name="byteCount" /> bytes.
 		/// </summary>
 		private void Advance(int byteCount)
 		{
-			if (byteCount == 0)
+			if (_bitLevelAddressing)
+			{
+				_bitIndex = (_bitIndex + 1) % 8;
+				if (_bitIndex != 0)
+					return;
+
+				byteCount = 1;
+			}
+			else if (byteCount == 0)
 				return;
 
 			// state = state + byteCount;

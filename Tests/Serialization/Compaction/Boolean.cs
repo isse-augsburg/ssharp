@@ -20,31 +20,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Funkfahrbetrieb.TrainController
+namespace Tests.Serialization.Compaction
 {
-	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	public class Brakes : Component
+	internal unsafe class Boolean : SerializationObject
 	{
-		public readonly Fault BrakesFailure = new PersistentFault();
-
-		[Range(-1, 1, OverflowBehavior.Error)]
-		private int _acceleration;
-
-		[Hidden]
-		public int MaxAcceleration;
-
-		public virtual int Acceleration => _acceleration;
-
-		public void Engage()
+		protected override void Check()
 		{
-			_acceleration = MaxAcceleration;
+			var c1 = new C { A = true, B = false, D = true };
+			var a1 = new[] { true, false, true };
+			var c2 = new C { A = false, B = true, D = false };
+			var a2 = new[] { true, false };
+
+			GenerateCode(SerializationMode.Optimized, c1, a1, c2, a2);
+			StateSlotCount.ShouldBe(1);
+
+			Serialize();
+			c1.B = false;
+			c1.A = false;
+			c2.B = false;
+			c2.A = false;
+			a1[0] = false;
+			a1[1] = false;
+			a1[2] = false;
+			a2[0] = false;
+			a2[1] = false;
+
+			Deserialize();
+			SerializedState[2].ShouldBe((byte)0);
+			SerializedState[3].ShouldBe((byte)0);
+			c1.A.ShouldBe(true);
+			c1.B.ShouldBe(false);
+			c1.D.ShouldBe(true);
+			a1.ShouldBe(new[] { true, false, true });
+			c2.A.ShouldBe(false);
+			c2.B.ShouldBe(true);
+			c2.D.ShouldBe(false);
+			a2.ShouldBe(new[] { true, false });
 		}
 
-		[FaultEffect(Fault = nameof(BrakesFailure))]
-		private class UnresponsiveEffect : Brakes
+		private class C
 		{
-			public override int Acceleration => 0;
+			public bool A;
+			public bool B;
+			public bool D;
 		}
 	}
 }

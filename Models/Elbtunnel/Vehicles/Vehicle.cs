@@ -35,6 +35,9 @@ namespace Elbtunnel.Vehicles
 		[Range(0, 20, OverflowBehavior.Clamp)]
 		private int _position;
 
+		[Range(0, 3, OverflowBehavior.Error)]
+		private int _speed;
+
 		/// <summary>
 		///   Gets the current lane of the vehicle.
 		/// </summary>
@@ -61,7 +64,11 @@ namespace Elbtunnel.Vehicles
 		/// <summary>
 		///   Gets the current vehicle's speed.
 		/// </summary>
-		public int Speed { get; protected set; }
+		public int Speed
+		{
+			get { return _speed; }
+			protected set { _speed = value; }
+		}
 
 		/// <summary>
 		///   Informs the vehicle whether the tunnel is closed.

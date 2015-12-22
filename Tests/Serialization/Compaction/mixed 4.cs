@@ -20,52 +20,90 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Objects
+namespace Tests.Serialization.Compaction
 {
+	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class SerializedArrays : SerializationObject
+	internal class Mixed4 : SerializationObject
 	{
 		protected override void Check()
 		{
-			var b = new bool[] { true, false, true, false, false, true, true };
-			var c = new byte[] { 1, 0, 1, 12, 14 };
-			var i = new int[] { 293580239, -912994792 };
-			var s = new short[] { -30012, 30212 };
+			var c = new C { A = true };
+			var d1 = new D { A = -1 };
+			var d2 = new D { A = 55 };
+			var d3 = new F { E = E.B };
 
-			GenerateCode(SerializationMode.Optimized, c, b, i, s);
-			StateSlotCount.ShouldBe(5);
+			GenerateCode(SerializationMode.Optimized, d1, c, d3, d2);
+			StateSlotCount.ShouldBe(1);
 
 			Serialize();
-			c[0] = 0;
-			c[1] = 0;
-			c[2] = 0;
-			c[3] = 0;
-			c[4] = 0;
-			b[0] = false;
-			b[1] = false;
-			b[2] = false;
-			b[3] = false;
-			b[4] = false;
-			b[5] = false;
-			b[6] = false;
-			i[0] = 0;
-			i[1] = 0;
-			s[0] = 0;
-			s[1] = 0;
+			c.A = false;
+			d1.A = 0;
+			d2.A = 0;
+			d3.E = 0;
 
 			Deserialize();
-			c[0].ShouldBe((byte)1);
-			c[1].ShouldBe((byte)0);
-			c[2].ShouldBe((byte)1);
-			c[3].ShouldBe((byte)12);
-			c[4].ShouldBe((byte)14);
-			b.ShouldBe(new[] { true, false, true, false, false, true, true });
-			i[0].ShouldBe(293580239);
-			i[1].ShouldBe(-912994792);
-			s[0].ShouldBe((short)-30012);
-			s[1].ShouldBe((short)30212);
+			c.A.ShouldBe(true);
+			d1.A.ShouldBe(0);
+			d2.A.ShouldBe(55);
+			d3.E.ShouldBe(E.B);
+
+			c.A = false;
+			d1.A = 1;
+			d2.A = 2;
+			d3.E = E.A;
+
+			Serialize();
+			c.A = true;
+			d1.A = 0;
+			d2.A = 0;
+			d3.E = 0;
+
+			Deserialize();
+			c.A.ShouldBe(false);
+			d1.A.ShouldBe(1);
+			d2.A.ShouldBe(2);
+			d3.E.ShouldBe(E.A);
+
+			c.A = false;
+			d1.A = 12;
+			d2.A = 22;
+			d3.E = E.C;
+
+			Serialize();
+			c.A = true;
+			d1.A = 0;
+			d2.A = 0;
+			d3.E = 0;
+
+			Deserialize();
+			c.A.ShouldBe(false);
+			d1.A.ShouldBe(12);
+			d2.A.ShouldBe(22);
+			d3.E.ShouldBe(E.C);
+		}
+
+		private class C
+		{
+			public bool A;
+		}
+
+		private class D
+		{
+			[Range(0, 100, OverflowBehavior.Clamp)]
+			public int A;
+		}
+
+		private class F
+		{
+			public E E;
+		}
+
+		private enum E
+		{
+			A, B, C
 		}
 	}
 }

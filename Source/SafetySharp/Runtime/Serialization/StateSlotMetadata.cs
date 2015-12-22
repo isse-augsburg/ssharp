@@ -74,9 +74,9 @@ namespace SafetySharp.Runtime.Serialization
 		public Type ObjectType;
 
 		/// <summary>
-		///   Gets the total size in bytes required to store the data in the state vector.
+		///   Gets the total size in bits required to store the data in the state vector.
 		/// </summary>
-		public int TotalSizeInBytes => ElementSizeInBits / 8 * ElementCount;
+		public int TotalSizeInBits => ElementSizeInBits * ElementCount;
 
 		/// <summary>
 		///   Gets the size in bits required to store each individual element in the state vector.
@@ -89,7 +89,7 @@ namespace SafetySharp.Runtime.Serialization
 					return sizeof(ushort) * 8;
 
 				if (DataType == typeof(bool))
-					return 8;
+					return 1;
 
 				return EffectiveType.GetUnmanagedSize() * 8;
 			}

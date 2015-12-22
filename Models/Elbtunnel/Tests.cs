@@ -66,8 +66,8 @@ namespace Elbtunnel
 			var faults = model.GetFaults();
 
 			for (var i = 0; i < faults.Length; ++i)
-//				faults[i].ActivationMode = i < 1 ? ActivationMode.Nondeterministic : ActivationMode.Suppressed;
-				faults[i].ActivationMode = ActivationMode.Suppressed;
+				faults[i].ActivationMode = i < 1 ? ActivationMode.Nondeterministic : ActivationMode.Suppressed;
+//				faults[i].ActivationMode = ActivationMode.Suppressed;
 
 			Formula f1 = true;
 			Formula f2 = true;

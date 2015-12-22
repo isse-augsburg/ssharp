@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Runtime.Serialization
 {
+	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
@@ -122,6 +123,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		internal void Compact()
 		{
+			// Check if we can use the range to compress the data even further
 			foreach (var slot in _slots)
 			{
 				var range = slot.Field != null
@@ -132,6 +134,7 @@ namespace SafetySharp.Runtime.Serialization
 					slot.CompressedDataType = range.GetRangeType();
 			}
 
+			// Organize all slots with the same element size into groups
 			_groups = _slots
 				.GroupBy(slot => slot.ElementSizeInBits)
 				.OrderBy(group => group.Key)
@@ -145,7 +148,19 @@ namespace SafetySharp.Runtime.Serialization
 				})
 				.ToArray();
 
-			SizeInBytes = _groups.Select(group => group.GroupSizeInBytes + group.PaddingBytes).Sum();
+			// Compute the total state vector size and ensure alignment of the individual groups
+			// Ensure that the state vector size is a multiple of 4 for correct alignment in state vector arrays
+			for (var i = 0; i < _groups.Length; ++i)
+			{
+				_groups[i].Offset = SizeInBytes;
+				SizeInBytes += _groups[i].GroupSizeInBytes;
+
+				var alignment = i + 1 >= _groups.Length ? 4 : Math.Min(4, Math.Max(1, _groups[i + 1].ElementSizeInBits / 8));
+				var remainder = SizeInBytes % alignment;
+
+				_groups[i].PaddingBytes = remainder == 0 ? 0 : alignment - remainder;
+				SizeInBytes += _groups[i].PaddingBytes;
+			}
 		}
 
 		/// <summary>
@@ -178,16 +193,21 @@ namespace SafetySharp.Runtime.Serialization
 			if (_groups == null)
 				return base.ToString();
 
+			builder.AppendLine($"state vector size: {SizeInBytes} bytes");
 			foreach (var group in _groups)
 			{
+				builder.AppendLine($"group of {group.ElementSizeInBits} bit values, {group.Slots.Length} elements at offset {group.Offset}");
 				foreach (var slot in group.Slots)
 				{
 					if (slot.Field == null)
-						builder.AppendLine($"#{slot.ObjectIdentifier}: {slot.EffectiveType.FullName}[{slot.ElementCount}]");
+						builder.AppendLine($"\tobj#{slot.ObjectIdentifier}: {slot.EffectiveType.FullName}[{slot.ElementCount}]");
 					else
 						builder.AppendLine(
-							$"#{slot.ObjectIdentifier}: {slot.Field.DeclaringType.FullName}.{slot.Field.Name} : {slot.Field.FieldType.FullName}");
+							$"\tobj#{slot.ObjectIdentifier}: {slot.Field.DeclaringType.FullName}.{slot.Field.Name}");
 				}
+
+				if (group.PaddingBytes > 0)
+					builder.AppendLine($"padding: {group.PaddingBytes} bytes");
 			}
 
 			return builder.ToString();

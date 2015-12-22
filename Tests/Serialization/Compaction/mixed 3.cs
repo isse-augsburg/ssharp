@@ -20,31 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Funkfahrbetrieb.TrainController
+namespace Tests.Serialization.Compaction
 {
-	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	public class Brakes : Component
+	internal class Mixed3 : SerializationObject
 	{
-		public readonly Fault BrakesFailure = new PersistentFault();
-
-		[Range(-1, 1, OverflowBehavior.Error)]
-		private int _acceleration;
-
-		[Hidden]
-		public int MaxAcceleration;
-
-		public virtual int Acceleration => _acceleration;
-
-		public void Engage()
+		protected override void Check()
 		{
-			_acceleration = MaxAcceleration;
+			var c1 = new C { A = true };
+			var c2 = new C { A = false };
+			var d = new D { A = 99, B = 3 };
+			 
+			GenerateCode(SerializationMode.Optimized, c1, c2, d);
+			StateSlotCount.ShouldBe(1);
+
+			Serialize();
+			c1.A = false;
+			c2.A = false;
+			d.A = 292;
+			d.B = 9;
+
+			Deserialize();
+			c1.A.ShouldBe(true);
+			c2.A.ShouldBe(false);
+			d.A.ShouldBe((short)99);
+			d.B.ShouldBe((byte)3);
 		}
 
-		[FaultEffect(Fault = nameof(BrakesFailure))]
-		private class UnresponsiveEffect : Brakes
+		private class C
 		{
-			public override int Acceleration => 0;
+			public bool A;
+		}
+
+		private class D
+		{
+			public short A;
+			public byte B;
 		}
 	}
 }

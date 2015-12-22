@@ -81,7 +81,7 @@ namespace SafetySharp.Runtime
 			if (StateCount >= _capacity || StateMemory == null)
 			{
 				_capacity *= 2;
-				_buffer.Resize(_capacity * StateVectorSize, zeroMemory: false);
+				_buffer.Resize(_capacity * StateVectorSize, zeroMemory: true);
 
 				StateMemory = _buffer.Pointer;
 			}
