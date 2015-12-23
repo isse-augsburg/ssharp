@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,39 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Compiler.Analyzers
+namespace Tests.Diagnostics.FaultEffectAnalyzer.Invalid
 {
-	/// <summary>
-	///   Represents a unique identifier for a S# diagnostic emitted by a <see cref="Analyzer" />.
-	/// </summary>
-	public enum DiagnosticIdentifier
+	using SafetySharp.Compiler.Analyzers;
+	using SafetySharp.Modeling;
+
+	[Diagnostic(DiagnosticIdentifier.AbstractFaultEffectOverride, 41, 33, 1, 
+		"Tests.Diagnostics.FaultEffectAnalyzer.Invalid.Overrides.E.X", "Tests.Diagnostics.FaultEffectAnalyzer.Invalid.Overrides.X")]
+	[Diagnostic(DiagnosticIdentifier.AbstractFaultEffectOverride, 43, 34, 1,
+		"Tests.Diagnostics.FaultEffectAnalyzer.Invalid.Overrides.E.M()", "Tests.Diagnostics.FaultEffectAnalyzer.Invalid.Overrides.M()")]
+	public abstract class Overrides : Component
 	{
-		// Type diagnostics
-		CustomComponent = 1000,
-		ComponentInterfaceReimplementation,
+		public abstract int X { get; set; }
 
-		// Port diagnostics
-		AmbiguousPortKind = 3000,
-		StaticPort,
-		UnmarkedInterfacePort,
-		PortPropertyAccessor,
-		ProvidedPortImplementedAsRequiredPort,
-		RequiredPortImplementedAsProvidedPort,
-		NonExternRequiredPort,
-		UpdateMethodMarkedAsPort,
-		ExternProvidedPort,
-		ExternUpdateMethod,
-		GenericPort,
-		IndexerPort,
-		EventPort,
+		public abstract void M();
 
-		// Fault effect diagnostics
-		GenericFaultEffect,
-		FaultEffectAccessibility,
-		InvalidFaultEffectBaseType,
-		AbstractFaultEffectOverride,
+		[FaultEffect]
+		public class E : Overrides
+		{
+			public override int X { get; set; }
 
-		// Misc diagnostics
-		ReservedName = 9000,
+			public override void M()
+			{
+			}
+		}
 	}
 }

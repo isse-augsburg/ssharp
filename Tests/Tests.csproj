@@ -155,9 +155,11 @@
     <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\non-component base.cs" />
     <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\fault effect base.cs" />
     <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\object base.cs" />
+    <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\overrides.cs" />
     <Compile Include="Diagnostics\FaultEffectAnalyzer\Valid\internal non-nested.cs" />
     <Compile Include="Diagnostics\FaultEffectAnalyzer\Valid\non-nested.cs" />
     <Compile Include="Diagnostics\FaultEffectAnalyzer\Valid\nested.cs" />
+    <Compile Include="Diagnostics\FaultEffectAnalyzer\Valid\overrides.cs" />
     <Compile Include="Diagnostics\PortImplementation\Invalid\wrong base kind.cs" />
     <Compile Include="Diagnostics\PortImplementation\Invalid\wrong kind, properties.cs" />
     <Compile Include="Diagnostics\PortImplementation\Invalid\wrong kind, methods.cs" />

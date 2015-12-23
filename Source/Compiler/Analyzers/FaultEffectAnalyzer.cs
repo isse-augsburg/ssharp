@@ -35,6 +35,14 @@ namespace SafetySharp.Compiler.Analyzers
 	public sealed class FaultEffectAnalyzer : Analyzer
 	{
 		/// <summary>
+		///   The error diagnostic emitted by the analyzer when a fault effect overrides an abstract member.
+		/// </summary>
+		private static readonly DiagnosticInfo _abstractOverride = DiagnosticInfo.Error(
+			DiagnosticIdentifier.AbstractFaultEffectOverride,
+			"Fault effects cannot override abstract members.",
+			"'{0}' cannot override abstract member '{1}'.");
+
+		/// <summary>
 		///   The error diagnostic emitted by the analyzer when a fault effect is generic.
 		/// </summary>
 		private static readonly DiagnosticInfo _genericEffect = DiagnosticInfo.Error(
@@ -62,7 +70,7 @@ namespace SafetySharp.Compiler.Analyzers
 		///   Initializes a new instance.
 		/// </summary>
 		public FaultEffectAnalyzer()
-			: base(_genericEffect, _accessibility, _invalidBaseType)
+			: base(_genericEffect, _accessibility, _invalidBaseType, _abstractOverride)
 		{
 		}
 
@@ -72,14 +80,15 @@ namespace SafetySharp.Compiler.Analyzers
 		/// <param name="context">The analysis context that should be used to register analysis actions.</param>
 		public override void Initialize(AnalysisContext context)
 		{
-			context.RegisterSymbolAction(Analyze, SymbolKind.NamedType);
+			context.RegisterSymbolAction(AnalyzeType, SymbolKind.NamedType);
+			context.RegisterSymbolAction(AnalyzeMember, SymbolKind.Method, SymbolKind.Property);
 		}
 
 		/// <summary>
 		///   Performs the analysis.
 		/// </summary>
 		/// <param name="context">The context in which the analysis should be performed.</param>
-		private static void Analyze(SymbolAnalysisContext context)
+		private static void AnalyzeType(SymbolAnalysisContext context)
 		{
 			var compilation = context.Compilation;
 			var symbol = context.Symbol as INamedTypeSymbol;
@@ -95,6 +104,31 @@ namespace SafetySharp.Compiler.Analyzers
 
 			if (!symbol.BaseType.IsComponent(compilation))
 				_invalidBaseType.Emit(context, symbol, symbol, symbol.BaseType);
+		}
+
+		/// <summary>
+		///   Performs the analysis.
+		/// </summary>
+		/// <param name="context">The context in which the analysis should be performed.</param>
+		private static void AnalyzeMember(SymbolAnalysisContext context)
+		{
+			if (!context.Symbol.ContainingType.IsFaultEffect(context.Compilation))
+				return;
+
+			var methodSymbol = context.Symbol as IMethodSymbol;
+			var propertySymbol = context.Symbol as IPropertySymbol;
+
+			if (methodSymbol != null && !methodSymbol.IsPropertyAccessor())
+			{
+				if (methodSymbol.IsOverride && methodSymbol.OverriddenMethod.IsAbstract)
+					_abstractOverride.Emit(context, methodSymbol, methodSymbol, methodSymbol.OverriddenMethod);
+			}
+
+			if (propertySymbol != null)
+			{
+				if (propertySymbol.IsOverride && propertySymbol.OverriddenProperty.IsAbstract)
+					_abstractOverride.Emit(context, propertySymbol, propertySymbol, propertySymbol.OverriddenProperty);
+			}
 		}
 	}
 }
