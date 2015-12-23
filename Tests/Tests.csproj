@@ -228,6 +228,7 @@
     <Compile Include="Execution\Faults\ProvidedPorts\deterministic setter faults.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\deterministic getter faults.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\deterministic method faults.cs" />
+    <Compile Include="Execution\Faults\ProvidedPorts\single indexer fault.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\single property fault.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\single method fault.cs" />
     <Compile Include="Execution\Faults\RequiredPorts\deterministic getter faults.cs" />

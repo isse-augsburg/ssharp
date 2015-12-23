@@ -43,12 +43,12 @@ namespace SafetySharp.Compiler.Analyzers
 			"Event '{0}' cannot be used to declare a port.");
 
 		/// <summary>
-		///   The error diagnostic emitted by the analyzer when an indexer is a port.
+		///   The error diagnostic emitted by the analyzer when an indexer is a required port.
 		/// </summary>
 		private static readonly DiagnosticInfo _indexerPort = DiagnosticInfo.Error(
 			DiagnosticIdentifier.IndexerPort,
-			"Indexers cannot be ports.",
-			"Indexer '{0}' cannot be used to declare a port.");
+			"Indexers cannot be required ports.",
+			"Indexer '{0}' cannot be used to declare a required port.");
 
 		/// <summary>
 		///   The error diagnostic emitted by the analyzer when a port is generic.
@@ -166,7 +166,7 @@ namespace SafetySharp.Compiler.Analyzers
 				if (hasProvidedAttribute || hasRequiredAttribute)
 					_portPropertyAccessor.Emit(context, symbol, symbol.ToDisplayString());
 
-				if (propertySymbol.IsIndexer)
+				if (propertySymbol.IsIndexer && (propertySymbol.IsExtern || propertySymbol.HasAttribute<RequiredAttribute>(compilation)))
 					_indexerPort.Emit(context, propertySymbol, propertySymbol);
 
 				return;

@@ -37,17 +37,4 @@ namespace Tests.Diagnostics.PortKinds.Invalid
 		[Required]
 		int this[int i] { get; }
 	}
-
-	[Diagnostic(DiagnosticIdentifier.IndexerPort, 44, 21, 4, "Tests.Diagnostics.PortKinds.Invalid.IndexerPort2.this[int]")]
-	internal class IndexerPort2 : Component
-	{
-		private int this[int i] => 1;
-	}
-
-	[Diagnostic(DiagnosticIdentifier.IndexerPort, 51, 13, 4, "Tests.Diagnostics.PortKinds.Invalid.IIndexerPort2.this[int]")]
-	internal interface IIndexerPort2 : IComponent
-	{
-		[Provided]
-		int this[int i] { get; }
-	}
 }

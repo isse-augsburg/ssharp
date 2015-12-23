@@ -126,7 +126,7 @@ namespace SafetySharp.Compiler.Normalization
 				return declaration;
 
 			var memberAccess = Syntax.MemberAccessExpression(Syntax.BaseExpression(), methodSymbol.Name);
-			var invocation = Syntax.InvocationExpression(memberAccess, CreateInvocationArguments(methodSymbol));
+			var invocation = Syntax.InvocationExpression(memberAccess, CreateInvocationArguments(methodSymbol.Parameters));
 
 			declaration = declaration.WithBody(CreateBody(methodSymbol, declaration.Body, invocation));
 			return declaration;
@@ -141,7 +141,16 @@ namespace SafetySharp.Compiler.Normalization
 			if (!methodSymbol.ContainingType.IsFaultEffect(SemanticModel) || !methodSymbol.IsOverride)
 				return accessor;
 
-			var baseExpression = Syntax.MemberAccessExpression(Syntax.BaseExpression(), methodSymbol.GetPropertySymbol().Name);
+			SyntaxNode baseExpression;
+			if (((IPropertySymbol)methodSymbol.AssociatedSymbol).IsIndexer)
+			{
+				var parameterCount = methodSymbol.Parameters.Length - (accessor.Kind() != SyntaxKind.GetAccessorDeclaration ? 1 : 0);
+				var parameters = methodSymbol.Parameters.Take(parameterCount);
+				baseExpression = Syntax.ElementAccessExpression(Syntax.BaseExpression(), CreateInvocationArguments(parameters));
+			}
+			else
+				baseExpression = Syntax.MemberAccessExpression(Syntax.BaseExpression(), methodSymbol.GetPropertySymbol().Name);
+
 			if (accessor.Kind() != SyntaxKind.GetAccessorDeclaration)
 				baseExpression = Syntax.AssignmentStatement(baseExpression, Syntax.IdentifierName("value"));
 
@@ -152,9 +161,9 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Creates the arguments for a delegate invocation.
 		/// </summary>
-		private static IEnumerable<ArgumentSyntax> CreateInvocationArguments(IMethodSymbol methodSymbol)
+		private static IEnumerable<ArgumentSyntax> CreateInvocationArguments(IEnumerable<IParameterSymbol> parameters)
 		{
-			return methodSymbol.Parameters.Select(parameter =>
+			return parameters.Select(parameter =>
 			{
 				var argument = SyntaxFactory.Argument(SyntaxFactory.IdentifierName(parameter.Name));
 
@@ -223,7 +232,7 @@ namespace SafetySharp.Compiler.Normalization
 								var index = Array.IndexOf(priorityFaults, overridingEffects[i]);
 
 								writer.AppendLine($"if ((({effectType})this).{"fault".ToSynthesized()}.{nameof(Fault.IsActivated)})");
-                                writer.IncreaseIndent();
+								writer.IncreaseIndent();
 								writer.AppendLine($"{levelChoiceVariable}[{levelCountVariable}++] = {index};");
 								writer.DecreaseIndent();
 								writer.NewLine();
