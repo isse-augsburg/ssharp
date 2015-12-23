@@ -107,6 +107,14 @@ namespace PressureTank
 					guard: Sensor.IsEmpty,
 					action: () =>
 					{
+						StateMachine.Transition(
+							State.Filling,
+							State.StoppedBySensor,
+							Sensor.IsEmpty,
+							()=> {
+								Timer.Start()
+								;});
+
 						Timer.Start();
 						Pump.Enable();
 					});

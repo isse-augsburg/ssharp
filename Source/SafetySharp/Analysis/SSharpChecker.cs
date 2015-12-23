@@ -65,7 +65,8 @@ namespace SafetySharp.Analysis
 		/// <param name="formula">The formula that should be checked.</param>
 		public override CounterExample Check(Model model, Formula formula)
 		{
-			return null;
+			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
+			throw new NotImplementedException();
 		}
 	}
 }

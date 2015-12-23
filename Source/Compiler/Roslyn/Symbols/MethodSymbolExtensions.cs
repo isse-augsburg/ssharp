@@ -249,8 +249,8 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(methodSymbol, nameof(methodSymbol));
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
-			return methodSymbol.Name != nameof(StateMachine<int>.Transition) ||
-				   !methodSymbol.ContainingType.OriginalDefinition.Equals(semanticModel.GetTypeSymbol(typeof(StateMachine<>)));
+			return methodSymbol.Name == nameof(StateMachine<int>.Transition) &&
+				   methodSymbol.ContainingType.OriginalDefinition.Equals(semanticModel.GetTypeSymbol(typeof(StateMachine<>)));
 		}
 
 		/// <summary>

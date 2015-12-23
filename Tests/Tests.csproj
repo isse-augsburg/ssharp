@@ -262,6 +262,7 @@
     <Compile Include="Execution\StateMachines\conflicting variables.cs" />
     <Compile Include="Execution\StateMachines\multiple transitions.cs" />
     <Compile Include="Execution\StateMachines\named parameters.cs" />
+    <Compile Include="Execution\StateMachines\nested transitions.cs" />
     <Compile Include="Execution\StateMachines\single transition.cs" />
     <Compile Include="Execution\UpdateMethods\base calls.cs" />
     <Compile Include="Execution\UpdateMethods\directly overridden.cs" />

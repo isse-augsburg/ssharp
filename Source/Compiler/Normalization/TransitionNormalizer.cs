@@ -40,29 +40,14 @@ namespace SafetySharp.Compiler.Normalization
 	public sealed class TransitionNormalizer : SyntaxNormalizer
 	{
 		/// <summary>
-		///   The name of the generated choice variable.
-		/// </summary>
-		private readonly string _choiceVariable = "choice".ToSynthesized();
-
-		/// <summary>
-		///   The name of the generated transitions count variable.
-		/// </summary>
-		private readonly string _countVariable = "transitionsCount".ToSynthesized();
-
-		/// <summary>
 		///   The global name of the <see cref="StateMachineExtensions" /> type.
 		/// </summary>
 		private readonly string _extensionType = typeof(StateMachineExtensions).GetGlobalName();
 
 		/// <summary>
-		///   The name of the generated state machine variable.
+		///   The stack of variable prefixes to uniquely name local variables of nested transitions.
 		/// </summary>
-		private readonly string _stateMachineVariable = "stateMachine".ToSynthesized();
-
-		/// <summary>
-		///   The name of the generated transitions array variable.
-		/// </summary>
-		private readonly string _transitionsVariable = "transitions".ToSynthesized();
+		private readonly Stack<string> _variablePrefixes = new Stack<string>();
 
 		/// <summary>
 		///   The writer that is used to generate the code.
@@ -70,9 +55,41 @@ namespace SafetySharp.Compiler.Normalization
 		private readonly CodeWriter _writer = new CodeWriter();
 
 		/// <summary>
+		///   The name of the generated choice variable.
+		/// </summary>
+		private string ChoiceVariable => $"choice{_variablePrefixes.Peek()}".ToSynthesized();
+
+		/// <summary>
+		///   The name of the generated transitions count variable.
+		/// </summary>
+		private string CountVariable => $"transitionsCount{_variablePrefixes.Peek()}".ToSynthesized();
+
+		/// <summary>
+		///   The name of the generated state machine variable.
+		/// </summary>
+		private string StateMachineVariable => $"stateMachine{_variablePrefixes.Peek()}".ToSynthesized();
+
+		/// <summary>
+		///   The name of the generated transitions array variable.
+		/// </summary>
+		private string TransitionsVariable => $"transitions{_variablePrefixes.Peek()}".ToSynthesized();
+
+		/// <summary>
 		///   Normalizes the <paramref name="statement" />.
 		/// </summary>
 		public override SyntaxNode VisitExpressionStatement(ExpressionStatementSyntax statement)
+		{
+			var transformed = TransformExpression(statement.Expression);
+			if (transformed == null)
+				return statement;
+
+			return transformed.EnsureLineCount(statement);
+		}
+
+		/// <summary>
+		///   Normalizes the <paramref name="expression" />.
+		/// </summary>
+		private StatementSyntax TransformExpression(ExpressionSyntax expression)
 		{
 			// If the expression statement is a sequence of 
 			// invocation expressions of StateMachine.Transition() ->
@@ -83,42 +100,51 @@ namespace SafetySharp.Compiler.Normalization
 			// some other expression of type StateMachine
 			// we have to replace all of that by the generated transition code
 
-			if (statement.Expression.Kind() != SyntaxKind.InvocationExpression)
-				return statement; // no nested normalizations
+			if (expression.Kind() != SyntaxKind.InvocationExpression)
+				return null;
 
-			var methodSymbol = statement.Expression.GetReferencedSymbol<IMethodSymbol>(SemanticModel);
-			if (methodSymbol.IsTransitionMethod(SemanticModel))
-				return statement;
+			var methodSymbol = expression.GetReferencedSymbol<IMethodSymbol>(SemanticModel);
+			if (!methodSymbol.IsTransitionMethod(SemanticModel))
+				return null;
 
-			ExpressionSyntax stateMachine;
-			var transitions = DecomposeTransitionChain((InvocationExpressionSyntax)statement.Expression, out stateMachine);
-
-			_writer.Clear();
-			_writer.AppendLine("#line hidden");
-			_writer.AppendLine("unsafe");
-			_writer.AppendBlockStatement(() =>
+			try
 			{
-				_writer.AppendLine($"#line {stateMachine.GetLineNumber()}");
-				_writer.AppendLine($"var {_stateMachineVariable} = {stateMachine.RemoveTrivia().ToFullString()};");
+				_variablePrefixes.Push(Guid.NewGuid().ToString().Replace("-", "_"));
+
+				ExpressionSyntax stateMachine;
+				var transitions = DecomposeTransitionChain((InvocationExpressionSyntax)expression, out stateMachine);
+
+				_writer.Clear();
 				_writer.AppendLine("#line hidden");
-				_writer.AppendLine($"var {_choiceVariable} = {_extensionType}.GetChoice({_stateMachineVariable});");
-				_writer.NewLine();
-
-				_writer.AppendLine($"var {_transitionsVariable} = stackalloc int[{transitions.Count}];");
-				_writer.AppendLine($"var {_countVariable} = 0;");
-				_writer.NewLine();
-
-				GenerateTransitionSelection(transitions);
-
-				_writer.AppendLine($"if ({_countVariable} != 0)");
+				_writer.AppendLine("unsafe");
 				_writer.AppendBlockStatement(() =>
 				{
-					_writer.AppendLine($"switch ({_transitionsVariable}[{_choiceVariable}.ChooseIndex({_countVariable})])");
-					_writer.AppendBlockStatement(() => GenerateTransitionSections(transitions));
-				});
-			});
+					_writer.AppendLine($"#line {stateMachine.GetLineNumber()}");
+					_writer.AppendLine($"var {StateMachineVariable} = {stateMachine.RemoveTrivia().ToFullString()};");
+					_writer.AppendLine("#line hidden");
+					_writer.AppendLine($"var {ChoiceVariable} = {_extensionType}.GetChoice({StateMachineVariable});");
+					_writer.NewLine();
 
-			return SyntaxFactory.ParseStatement(_writer.ToString()).EnsureLineCount(statement);
+					_writer.AppendLine($"var {TransitionsVariable} = stackalloc int[{transitions.Count}];");
+					_writer.AppendLine($"var {CountVariable} = 0;");
+					_writer.NewLine();
+
+					GenerateTransitionSelection(transitions);
+
+					_writer.AppendLine($"if ({CountVariable} != 0)");
+					_writer.AppendBlockStatement(() =>
+					{
+						_writer.AppendLine($"switch ({TransitionsVariable}[{ChoiceVariable}.ChooseIndex({CountVariable})])");
+						_writer.AppendBlockStatement(() => GenerateTransitionSections(transitions));
+					});
+				});
+
+				return SyntaxFactory.ParseStatement(_writer.ToString()).WithLeadingNewLines(1);
+			}
+			finally
+			{
+				_variablePrefixes.Pop();
+			}
 		}
 
 		/// <summary>
@@ -131,7 +157,7 @@ namespace SafetySharp.Compiler.Normalization
 				var transition = transitions[i];
 
 				WriteLineNumber(transition.SourceLineNumber);
-				_writer.AppendLine($"if ({_extensionType}.IsInState({_stateMachineVariable}, {transition.SourceStates.ToFullString()}))");
+				_writer.AppendLine($"if ({_extensionType}.IsInState({StateMachineVariable}, {transition.SourceStates.ToFullString()}))");
 				_writer.AppendLine("#line hidden");
 				_writer.AppendBlockStatement(() =>
 				{
@@ -141,7 +167,7 @@ namespace SafetySharp.Compiler.Normalization
 					_writer.AppendBlockStatement(() =>
 					{
 						_writer.AppendLine("#line hidden");
-						_writer.AppendLine($"{_transitionsVariable}[{_countVariable}++] = {i};");
+						_writer.AppendLine($"{TransitionsVariable}[{CountVariable}++] = {i};");
 					});
 				});
 				_writer.NewLine();
@@ -173,6 +199,10 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private void GenerateTransitionEffect(Transition transition)
 		{
+			WriteLineNumber(transition.TargetLineNumber);
+			_writer.AppendLine(
+				$"{_extensionType}.ChangeState({StateMachineVariable}, {ChoiceVariable}.Choose({transition.TargetStates.ToFullString()}));");
+
 			WriteLineNumber(transition.ActionLineNumber);
 
 			// We have to be careful when writing out the action: If it contains any return statements,
@@ -187,10 +217,6 @@ namespace SafetySharp.Compiler.Normalization
 			}
 			else
 				_writer.AppendLine($"{transition.Action.ToFullString()}");
-
-			WriteLineNumber(transition.TargetLineNumber);
-			_writer.AppendLine(
-				$"{_extensionType}.ChangeState({_stateMachineVariable}, {_choiceVariable}.Choose({transition.TargetStates.ToFullString()}));");
 		}
 
 		/// <summary>
@@ -225,7 +251,7 @@ namespace SafetySharp.Compiler.Normalization
 
 				expression = (InvocationExpressionSyntax)memberAccess.Expression;
 				var methodSymbol = expression.GetReferencedSymbol<IMethodSymbol>(SemanticModel);
-				if (methodSymbol.IsTransitionMethod(SemanticModel))
+				if (!methodSymbol.IsTransitionMethod(SemanticModel))
 				{
 					stateMachine = expression;
 					break;
@@ -273,9 +299,15 @@ namespace SafetySharp.Compiler.Normalization
 							transition.ActionLineNumber = lambda.Body.GetLineNumber();
 							var body = lambda.Body as StatementSyntax;
 							if (body != null)
-								transition.Action = body;
+								transition.Action = (StatementSyntax)Visit(body);
 							else
-								transition.Action = (StatementSyntax)Syntax.ExpressionStatement(lambda.Body);
+							{
+								var transformedBody = TransformExpression((ExpressionSyntax)lambda.Body);
+								if (transformedBody == null)
+									transition.Action = (StatementSyntax)Syntax.ExpressionStatement(lambda.Body);
+								else
+									transition.Action = SyntaxFactory.Block(transformedBody);
+							}
 						}
 						break;
 					default:
