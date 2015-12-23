@@ -10,7 +10,9 @@ namespace HemodialysisMachine.HdMachine
 	// http://principlesofdialysis.weebly.com/uploads/5/6/1/3/5613613/2008ccmodule4.pdf
 	// -> Chapter "Volumetric UF Control"
 
-	class DialyzingFluidProvider
+
+	// Also called dialyzing fluid delivery system
+	class DialyzingFluidDeliverySystem
 	{
 		class DialyzingFluidWaterPreparation
 		{

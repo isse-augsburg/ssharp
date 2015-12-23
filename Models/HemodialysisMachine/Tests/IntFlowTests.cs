@@ -22,8 +22,8 @@ namespace HemodialysisMachine.Tests
 			combinator.ConnectOutWithIn(source,direct);
 			combinator.ConnectOutWithIn(direct,sink);
 			combinator.UpdateFlows();
-			sink.ElementOfCurrentCycle.Should().Be(7);
-			source.SuctionOfCurrentCycle.Should().Be(1);
+			sink.ElementInOfCurrentCycle.Should().Be(7);
+			source.SuctionInOfCurrentCycle.Should().Be(1);
 		}
 
 
@@ -39,8 +39,8 @@ namespace HemodialysisMachine.Tests
 			combinator.ConnectOutWithIn(direct1, direct2);
 			combinator.ConnectOutWithIn(direct2, sink);
 			combinator.UpdateFlows();
-			sink.ElementOfCurrentCycle.Should().Be(7);
-			source.SuctionOfCurrentCycle.Should().Be(1);
+			sink.ElementInOfCurrentCycle.Should().Be(7);
+			source.SuctionInOfCurrentCycle.Should().Be(1);
 		}
 
 		[Test]
@@ -58,8 +58,8 @@ namespace HemodialysisMachine.Tests
 			combinator.ConnectOutWithOut(secondInComposite, composite);
 			combinator.ConnectOutWithIn(composite, sink);
 			combinator.UpdateFlows();
-			sink.ElementOfCurrentCycle.Should().Be(7);
-			source.SuctionOfCurrentCycle.Should().Be(1);
+			sink.ElementInOfCurrentCycle.Should().Be(7);
+			source.SuctionInOfCurrentCycle.Should().Be(1);
 		}
 
 		[Test]
@@ -75,9 +75,9 @@ namespace HemodialysisMachine.Tests
 			combinator.ConnectOutWithIn(way1Direct, way1Sink);
 			combinator.ConnectOutWithIn(way2Direct, way2Sink);
 			combinator.UpdateFlows();
-			way1Sink.ElementOfCurrentCycle.Should().Be(7);
-			way2Sink.ElementOfCurrentCycle.Should().Be(7);
-			source.SuctionOfCurrentCycle.Should().Be(1);
+			way1Sink.ElementInOfCurrentCycle.Should().Be(7);
+			way2Sink.ElementInOfCurrentCycle.Should().Be(7);
+			source.SuctionInOfCurrentCycle.Should().Be(1);
 		}
 
 		[Test]
@@ -93,9 +93,9 @@ namespace HemodialysisMachine.Tests
 			combinator.ConnectOutWithIn(source2, way2Direct);
 			combinator.ConnectOutWithIn(new IFlowOut<int>[] { way1Direct, way2Direct },sink);
 			combinator.UpdateFlows();
-			sink.ElementOfCurrentCycle.Should().Be(7);
-			source1.SuctionOfCurrentCycle.Should().Be(1);
-			source2.SuctionOfCurrentCycle.Should().Be(1);
+			sink.ElementInOfCurrentCycle.Should().Be(7);
+			source1.SuctionInOfCurrentCycle.Should().Be(1);
+			source2.SuctionInOfCurrentCycle.Should().Be(1);
 		}
 
 		[Test]
@@ -114,9 +114,9 @@ namespace HemodialysisMachine.Tests
 			combinator.ConnectOutWithOut(way2Direct, composite);
 			combinator.ConnectOutWithIn(composite, sinkOutside);
 			combinator.UpdateFlows();
-			sinkInside.ElementOfCurrentCycle.Should().Be(7);
-			sinkOutside.ElementOfCurrentCycle.Should().Be(7);
-			source.SuctionOfCurrentCycle.Should().Be(1);
+			sinkInside.ElementInOfCurrentCycle.Should().Be(7);
+			sinkOutside.ElementInOfCurrentCycle.Should().Be(7);
+			source.SuctionInOfCurrentCycle.Should().Be(1);
 		}
 
 		[Test]
@@ -135,9 +135,9 @@ namespace HemodialysisMachine.Tests
 			combinator.ConnectOutWithOut(new IFlowOut<int>[] { way1Direct, way2Direct }, composite);
 			combinator.ConnectOutWithIn(composite, sink);
 			combinator.UpdateFlows();
-			sink.ElementOfCurrentCycle.Should().Be(7);
-			sourceOutside.SuctionOfCurrentCycle.Should().Be(1);
-			sourceInside.SuctionOfCurrentCycle.Should().Be(1);
+			sink.ElementInOfCurrentCycle.Should().Be(7);
+			sourceOutside.SuctionInOfCurrentCycle.Should().Be(1);
+			sourceInside.SuctionInOfCurrentCycle.Should().Be(1);
 		}
 	}
 }
