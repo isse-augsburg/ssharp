@@ -35,6 +35,22 @@ namespace SafetySharp.Compiler.Analyzers
 	public sealed class PortKindAnalyzer : Analyzer
 	{
 		/// <summary>
+		///   The error diagnostic emitted by the analyzer when an event is a port.
+		/// </summary>
+		private static readonly DiagnosticInfo _eventPort = DiagnosticInfo.Error(
+			DiagnosticIdentifier.EventPort,
+			"Events cannot be ports.",
+			"Event '{0}' cannot be used to declare a port.");
+
+		/// <summary>
+		///   The error diagnostic emitted by the analyzer when an indexer is a port.
+		/// </summary>
+		private static readonly DiagnosticInfo _indexerPort = DiagnosticInfo.Error(
+			DiagnosticIdentifier.IndexerPort,
+			"Indexers cannot be ports.",
+			"Indexer '{0}' cannot be used to declare a port.");
+
+		/// <summary>
 		///   The error diagnostic emitted by the analyzer when a port is generic.
 		/// </summary>
 		private static readonly DiagnosticInfo _genericPort = DiagnosticInfo.Error(
@@ -109,7 +125,7 @@ namespace SafetySharp.Compiler.Analyzers
 		/// </summary>
 		public PortKindAnalyzer()
 			: base(_externProvidedPort, _nonExternRequiredPort, _ambiguousPortKind, _updateMethodMarkedAsPort, _staticPort,
-				_externUpdateMethod, _portPropertyAccessor, _unmarkedInterfacePort, _genericPort)
+				_externUpdateMethod, _portPropertyAccessor, _unmarkedInterfacePort, _genericPort, _eventPort, _indexerPort)
 		{
 		}
 
@@ -119,7 +135,7 @@ namespace SafetySharp.Compiler.Analyzers
 		/// <param name="context">The analysis context that should be used to register analysis actions.</param>
 		public override void Initialize(AnalysisContext context)
 		{
-			context.RegisterSymbolAction(Analyze, SymbolKind.Method, SymbolKind.Property);
+			context.RegisterSymbolAction(Analyze, SymbolKind.Method, SymbolKind.Property, SymbolKind.Event);
 		}
 
 		/// <summary>
@@ -144,11 +160,14 @@ namespace SafetySharp.Compiler.Analyzers
 					_staticPort.Emit(context, symbol, symbol.ToDisplayString());
 			}
 
-			var isAccessor = methodSymbol?.AssociatedSymbol is IPropertySymbol;
-			if (isAccessor)
+			var propertySymbol = methodSymbol?.AssociatedSymbol as IPropertySymbol;
+			if (propertySymbol != null)
 			{
 				if (hasProvidedAttribute || hasRequiredAttribute)
 					_portPropertyAccessor.Emit(context, symbol, symbol.ToDisplayString());
+
+				if (propertySymbol.IsIndexer)
+					_indexerPort.Emit(context, propertySymbol, propertySymbol);
 
 				return;
 			}
@@ -184,6 +203,9 @@ namespace SafetySharp.Compiler.Analyzers
 				else if (hasRequiredAttribute && !symbol.IsExtern)
 					_nonExternRequiredPort.Emit(context, symbol, symbol.ToDisplayString());
 			}
+
+			if (symbol is IEventSymbol)
+				_eventPort.Emit(context, symbol, symbol);
 		}
 	}
 }

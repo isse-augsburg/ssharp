@@ -168,8 +168,10 @@
     <Compile Include="Diagnostics\PortKinds\Invalid\accessors with both attributes.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\accessors with single attribute.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\both attributes.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\indexer ports.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\extern update method.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\extern with Provided attribute.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\event ports.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\non-extern with Required attribute.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\generic ports.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\static ports.cs" />

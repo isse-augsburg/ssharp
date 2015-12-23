@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,38 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Compiler.Analyzers
+namespace Tests.Diagnostics.PortKinds.Invalid
 {
-	/// <summary>
-	///   Represents a unique identifier for a S# diagnostic emitted by a <see cref="Analyzer" />.
-	/// </summary>
-	public enum DiagnosticIdentifier
+	using System;
+	using SafetySharp.Compiler.Analyzers;
+	using SafetySharp.Modeling;
+
+	[Diagnostic(DiagnosticIdentifier.EventPort, 34, 37, 1, "Tests.Diagnostics.PortKinds.Invalid.EventPort.A")]
+	[Diagnostic(DiagnosticIdentifier.EventPort, 35, 30, 1, "Tests.Diagnostics.PortKinds.Invalid.EventPort.B")]
+	[Diagnostic(DiagnosticIdentifier.EventPort, 37, 30, 1, "Tests.Diagnostics.PortKinds.Invalid.EventPort.C")]
+	internal abstract class EventPort : Component
 	{
-		// Type diagnostics
-		CustomComponent = 1000,
-		ComponentInterfaceReimplementation,
+		private extern event Action A;
+		private event Action B;
 
-		// Port diagnostics
-		AmbiguousPortKind = 3000,
-		StaticPort,
-		UnmarkedInterfacePort,
-		PortPropertyAccessor,
-		ProvidedPortImplementedAsRequiredPort,
-		RequiredPortImplementedAsProvidedPort,
-		NonExternRequiredPort,
-		UpdateMethodMarkedAsPort,
-		ExternProvidedPort,
-		ExternUpdateMethod,
-		GenericPort,
-		IndexerPort,
-		EventPort,
+		private event Action C
+		{
+			add { }
+			remove { }
+		}
+	}
 
-		// Fault effect diagnostics
-		GenericFaultEffect,
-		FaultEffectAccessibility,
-		InvalidFaultEffectBaseType,
+	[Diagnostic(DiagnosticIdentifier.EventPort, 49, 22, 1, "Tests.Diagnostics.PortKinds.Invalid.IEventPort.A")]
+	[Diagnostic(DiagnosticIdentifier.EventPort, 52, 22, 1, "Tests.Diagnostics.PortKinds.Invalid.IEventPort.B")]
+	internal interface IEventPort : IComponent
+	{
+		[Required]
+		event Action A;
 
-		// Misc diagnostics
-		ReservedName = 9000,
+		[Provided]
+		event Action B;
 	}
 }
