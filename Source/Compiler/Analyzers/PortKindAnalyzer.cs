@@ -29,11 +29,19 @@ namespace SafetySharp.Compiler.Analyzers
 	using Roslyn.Symbols;
 
 	/// <summary>
-	///   Ensures that a method or property marked with the <see cref="ProvidedAttribute" /> is not <c>extern</c>.
+	///   Ensures that port declarations are valid.
 	/// </summary>
 	[DiagnosticAnalyzer(LanguageNames.CSharp), UsedImplicitly]
 	public sealed class PortKindAnalyzer : Analyzer
 	{
+		/// <summary>
+		///   The error diagnostic emitted by the analyzer when a port is generic.
+		/// </summary>
+		private static readonly DiagnosticInfo _genericPort = DiagnosticInfo.Error(
+			DiagnosticIdentifier.GenericPort,
+			"Ports are not allowed to declare any type parameters.",
+			"'{0}' is not allowed to declare any type parameters.");
+
 		/// <summary>
 		///   The error diagnostic emitted by the analyzer when the update method is extern.
 		/// </summary>
@@ -101,7 +109,7 @@ namespace SafetySharp.Compiler.Analyzers
 		/// </summary>
 		public PortKindAnalyzer()
 			: base(_externProvidedPort, _nonExternRequiredPort, _ambiguousPortKind, _updateMethodMarkedAsPort, _staticPort,
-				_externUpdateMethod, _portPropertyAccessor, _unmarkedInterfacePort)
+				_externUpdateMethod, _portPropertyAccessor, _unmarkedInterfacePort, _genericPort)
 		{
 		}
 
@@ -144,6 +152,9 @@ namespace SafetySharp.Compiler.Analyzers
 
 				return;
 			}
+
+			if (methodSymbol != null && methodSymbol.Arity != 0)
+				_genericPort.Emit(context, methodSymbol, methodSymbol);
 
 			if (methodSymbol != null && methodSymbol.IsUpdateMethod(compilation))
 			{

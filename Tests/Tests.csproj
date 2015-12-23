@@ -161,6 +161,7 @@
     <Compile Include="Diagnostics\PortKinds\Invalid\extern update method.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\extern with Provided attribute.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\non-extern with Required attribute.cs" />
+    <Compile Include="Diagnostics\PortKinds\Invalid\generic ports.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\static ports.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\update method marked as port.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\update method marked with both port attributes.cs" />

@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,31 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Compiler.Analyzers
+namespace Tests.Diagnostics.PortKinds.Invalid
 {
-	/// <summary>
-	///   Represents a unique identifier for a S# diagnostic emitted by a <see cref="Analyzer" />.
-	/// </summary>
-	public enum DiagnosticIdentifier
+	using SafetySharp.Compiler.Analyzers;
+	using SafetySharp.Modeling;
+
+	[Diagnostic(DiagnosticIdentifier.GenericPort, 33, 22, 1, "Tests.Diagnostics.PortKinds.Invalid.GenericPorts.M<T1, T2>()")]
+	[Diagnostic(DiagnosticIdentifier.GenericPort, 38, 29, 1, "Tests.Diagnostics.PortKinds.Invalid.GenericPorts.N<T>()")]
+	internal class GenericPorts : Component
 	{
-		// Type diagnostics
-		CustomComponent = 1000,
-		ComponentInterfaceReimplementation,
+		[Provided]
+		private void M<T1, T2>()
+		{
+		}
 
-		// Port diagnostics
-		AmbiguousPortKind = 3000,
-		StaticPort,
-		UnmarkedInterfacePort,
-		PortPropertyAccessor,
-		ProvidedPortImplementedAsRequiredPort,
-		RequiredPortImplementedAsProvidedPort,
-		NonExternRequiredPort,
-		UpdateMethodMarkedAsPort,
-		ExternProvidedPort,
-		ExternUpdateMethod,
-		GenericPort,
+		[Required]
+		private extern void N<T>();
+	}
 
-		// Misc diagnostics
-		ReservedName = 9000,
+	[Diagnostic(DiagnosticIdentifier.GenericPort, 46, 14, 1, "Tests.Diagnostics.PortKinds.Invalid.IGenericPorts.M<T1, T2>()")]
+	[Diagnostic(DiagnosticIdentifier.GenericPort, 49, 14, 1, "Tests.Diagnostics.PortKinds.Invalid.IGenericPorts.N<T>()")]
+	internal interface IGenericPorts : IComponent
+	{
+		[Provided]
+		void M<T1, T2>();
+
+		[Required]
+		void N<T>();
 	}
 }
