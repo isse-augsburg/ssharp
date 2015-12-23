@@ -23,7 +23,6 @@
 namespace SafetySharp.Analysis
 {
 	using System;
-	using System.Diagnostics;
 	using Runtime;
 	using Utilities;
 
@@ -56,28 +55,7 @@ namespace SafetySharp.Analysis
 		public override CounterExample CheckInvariant(Model model, Formula invariant)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
-
-			var stopwatch = new Stopwatch();
-			stopwatch.Start();
-
-			var result = default(InvariantChecker.Result);
-			try
-			{
-				result = InvariantChecker.Check(model, invariant, Output, StateCapacity, CpuCount);
-				return result.CounterExample;
-			}
-			finally
-			{
-				stopwatch.Stop();
-
-				Output(String.Empty);
-				Output("=====================================");
-				Output($"Elapsed time: {stopwatch.Elapsed}");
-				Output($"{(int)(result.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
-				Output($"{(int)(result.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
-				Output("=====================================");
-				Output(String.Empty);
-			}
+			return InvariantChecker.Check(model, invariant, Output, StateCapacity, CpuCount);
 		}
 
 		/// <summary>

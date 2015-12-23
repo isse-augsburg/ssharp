@@ -24,6 +24,7 @@ namespace SafetySharp.Runtime
 {
 	using System;
 	using System.Collections.Concurrent;
+	using System.Diagnostics;
 	using System.Runtime.ExceptionServices;
 	using System.Runtime.InteropServices;
 	using System.Threading;
@@ -100,17 +101,42 @@ namespace SafetySharp.Runtime
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="capacity">The number of states that can be stored.</param>
 		/// <param name="cpuCount">The number of CPUs that should be used.</param>
-		public static Result Check(Model model, Formula invariant, Action<string> output, int capacity, int cpuCount)
+		public static CounterExample Check(Model model, Formula invariant, Action<string> output, int capacity, int cpuCount)
 		{
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
 			cpuCount = Math.Min(Environment.ProcessorCount, Math.Max(1, cpuCount));
 			using (var checker = new InvariantChecker(model, invariant, output, capacity, cpuCount))
-				return checker.Check();
+			{
+				var initializationTime = stopwatch.Elapsed;
+				stopwatch.Restart();
+
+				try
+				{
+					checker.Check();
+					return checker._counterExample;
+				}
+				finally
+				{
+					stopwatch.Stop();
+
+					output(String.Empty);
+					output("===============================================");
+					output($"Initialization time: {initializationTime}");
+					output($"Model checking time: {stopwatch.Elapsed}");
+					output($"{(int)(checker._stateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
+					output($"{(int)(checker._transitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+					output("===============================================");
+					output(String.Empty);
+				}
+			}
 		}
 
 		/// <summary>
 		///   Checks whether the model's invariant holds for all states.
 		/// </summary>
-		public Result Check()
+		public void Check()
 		{
 			_output($"Performing invariant check with {_workers.Length} CPU cores.");
 			_output($"State vector has {_model.StateVectorSize} bytes.");
@@ -130,14 +156,6 @@ namespace SafetySharp.Runtime
 
 			if (_counterExample != null)
 				_output("Invariant violation detected.");
-
-			return new Result
-			{
-				CounterExample = _counterExample,
-				StateCount = _stateCount,
-				TransitionCount = _transitionCount,
-				LevelCount = _levelCount
-			};
 		}
 
 		/// <summary>
@@ -220,7 +238,7 @@ namespace SafetySharp.Runtime
 			{
 				try
 				{
-					while (_context._loadBalancer.LoadBalance(_index) && _context._counterExample == null)
+					while (_context._loadBalancer.LoadBalance(_index))
 					{
 						int state;
 						if (!_stateStack.TryGetState(out state))
@@ -262,8 +280,9 @@ namespace SafetySharp.Runtime
 					_model.Deserialize(stateCache.StateMemory + i * stateCache.StateVectorSize);
 					if (!_invariant())
 					{
+						_context._loadBalancer.Terminate();
 						CreateCounterExample();
-						break;
+						return;
 					}
 
 					Interlocked.Increment(ref _context._stateCount);
@@ -286,7 +305,6 @@ namespace SafetySharp.Runtime
 				}
 
 				_context._counterExample = new CounterExample(_model, trace);
-				_context._loadBalancer.Terminate();
 			}
 
 			/// <summary>
@@ -408,37 +426,6 @@ namespace SafetySharp.Runtime
 			{
 				_terminated = true;
 			}
-		}
-
-		/// <summary>
-		///   Represents the results of an invariant check.
-		/// </summary>
-		public struct Result
-		{
-			/// <summary>
-			///   Gets the number of states that have been checked.
-			/// </summary>
-			public int StateCount;
-
-			/// <summary>
-			///   Gets the number of transitions that have been checked.
-			/// </summary>
-			public int TransitionCount;
-
-			/// <summary>
-			///   Gets the number of levels that have been checked.
-			/// </summary>
-			public int LevelCount;
-
-			/// <summary>
-			///   Gets the counter example that has been found, if any.
-			/// </summary>
-			public CounterExample CounterExample;
-
-			/// <summary>
-			///   Gets a value indicating whether the invariant holds for all states of the model.
-			/// </summary>
-			public bool InvariantHolds => CounterExample == null;
 		}
 	}
 }
