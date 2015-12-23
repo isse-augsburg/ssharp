@@ -20,36 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Diagnostics.FaultEffectAnalyzer.Invalid
 {
 	using SafetySharp.Compiler.Analyzers;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Modeling;
 
-	public partial class DiagnosticsTests : Tests
+	[Diagnostic(DiagnosticIdentifier.GenericFaultEffect, 32, 22, 1, "Tests.Diagnostics.FaultEffectAnalyzer.Invalid.Nested.E<T>")]
+	public class Nested : Component
 	{
-		[Theory, MemberData("DiscoverTests", "Diagnostics/CustomComponents")]
-		public void CustomComponents(string test, string file)
+		[FaultEffect]
+		public class E<T> : Nested
 		{
-			CheckDiagnostics<CustomComponentAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortKinds")]
-		public void PortKinds(string test, string file)
-		{
-			CheckDiagnostics<PortKindAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortImplementation")]
-		public void PortImplementation(string test, string file)
-		{
-			CheckDiagnostics<PortImplementationAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/FaultEffectAnalyzer")]
-		public void FaultEffectAnalyzer(string test, string file)
-		{
-			CheckDiagnostics<FaultEffectAnalyzer>(file);
 		}
 	}
 }

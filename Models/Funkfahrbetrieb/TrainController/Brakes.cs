@@ -42,7 +42,7 @@ namespace Funkfahrbetrieb.TrainController
 		}
 
 		[FaultEffect(Fault = nameof(BrakesFailure))]
-		private class UnresponsiveEffect : Brakes
+		public class UnresponsiveEffect : Brakes
 		{
 			public override int Acceleration => 0;
 		}

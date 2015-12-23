@@ -148,6 +148,16 @@
     <Compile Include="Diagnostics\CustomComponents\Valid\nested types derived from Component.cs" />
     <Compile Include="Diagnostics\CustomComponents\Valid\type directly derived from Component.cs" />
     <Compile Include="Diagnostics\CustomComponents\Valid\types indirectly derived from Component.cs" />
+    <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\non-public nested.cs" />
+    <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\internal non-nested.cs" />
+    <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\generic non-nested.cs" />
+    <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\generic nested.cs" />
+    <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\non-component base.cs" />
+    <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\fault effect base.cs" />
+    <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\object base.cs" />
+    <Compile Include="Diagnostics\FaultEffectAnalyzer\Valid\internal non-nested.cs" />
+    <Compile Include="Diagnostics\FaultEffectAnalyzer\Valid\non-nested.cs" />
+    <Compile Include="Diagnostics\FaultEffectAnalyzer\Valid\nested.cs" />
     <Compile Include="Diagnostics\PortImplementation\Invalid\wrong base kind.cs" />
     <Compile Include="Diagnostics\PortImplementation\Invalid\wrong kind, properties.cs" />
     <Compile Include="Diagnostics\PortImplementation\Invalid\wrong kind, methods.cs" />
@@ -515,6 +525,7 @@
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

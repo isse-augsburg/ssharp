@@ -127,5 +127,39 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 
 			return symbol.GetAttributes(compilation.GetTypeSymbol<T>());
 		}
+
+		/// <summary>
+		///   Gets a value indicating whether the <paramref name="symbol" /> has effective <c>public</c> accessibility.
+		/// </summary>
+		/// <param name="symbol">The symbol that should be checked.</param>
+		[Pure]
+		public static bool HasEffectivePublicAccessibility(this ISymbol symbol)
+		{
+			switch (symbol.Kind)
+			{
+				case SymbolKind.Alias:
+					// Aliases are uber private.  They're only visible in the same file that they
+					// were declared in.
+					return false;
+
+				case SymbolKind.Parameter:
+					// Parameters are only as visible as their containing symbol
+					return HasEffectivePublicAccessibility(symbol.ContainingSymbol);
+
+				case SymbolKind.TypeParameter:
+					// Type Parameters are private.
+					return false;
+			}
+
+			while (symbol != null && symbol.Kind != SymbolKind.Namespace)
+			{
+				if (symbol.DeclaredAccessibility != Accessibility.Public)
+					return false;
+
+				symbol = symbol.ContainingSymbol;
+			}
+
+			return true;
+		}
 	}
 }

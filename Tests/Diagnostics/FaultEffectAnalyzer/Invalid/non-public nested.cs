@@ -20,36 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Diagnostics.FaultEffectAnalyzer.Invalid
 {
 	using SafetySharp.Compiler.Analyzers;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Modeling;
 
-	public partial class DiagnosticsTests : Tests
+	[Diagnostic(DiagnosticIdentifier.FaultEffectAccessibility, 35, 23, 2, "Tests.Diagnostics.FaultEffectAnalyzer.Invalid.Nested2.E1")]
+	[Diagnostic(DiagnosticIdentifier.FaultEffectAccessibility, 40, 25, 2, "Tests.Diagnostics.FaultEffectAnalyzer.Invalid.Nested2.E2")]
+	[Diagnostic(DiagnosticIdentifier.FaultEffectAccessibility, 45, 34, 2, "Tests.Diagnostics.FaultEffectAnalyzer.Invalid.Nested2.E3")]
+	[Diagnostic(DiagnosticIdentifier.FaultEffectAccessibility, 50, 24, 2, "Tests.Diagnostics.FaultEffectAnalyzer.Invalid.Nested2.E4")]
+	public class Nested2 : Component
 	{
-		[Theory, MemberData("DiscoverTests", "Diagnostics/CustomComponents")]
-		public void CustomComponents(string test, string file)
+		[FaultEffect]
+		private class E1 : Nested2
 		{
-			CheckDiagnostics<CustomComponentAnalyzer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortKinds")]
-		public void PortKinds(string test, string file)
+		[FaultEffect]
+		protected class E2 : Nested2
 		{
-			CheckDiagnostics<PortKindAnalyzer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortImplementation")]
-		public void PortImplementation(string test, string file)
+		[FaultEffect]
+		protected internal class E3 : Nested2
 		{
-			CheckDiagnostics<PortImplementationAnalyzer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/FaultEffectAnalyzer")]
-		public void FaultEffectAnalyzer(string test, string file)
+		[FaultEffect]
+		internal class E4 : Nested2
 		{
-			CheckDiagnostics<FaultEffectAnalyzer>(file);
 		}
 	}
 }

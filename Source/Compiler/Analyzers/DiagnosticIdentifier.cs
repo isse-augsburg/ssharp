@@ -44,6 +44,11 @@ namespace SafetySharp.Compiler.Analyzers
 		ExternUpdateMethod,
 		GenericPort,
 
+		// Fault effect diagnostics
+		GenericFaultEffect,
+		FaultEffectAccessibility,
+		InvalidFaultEffectBaseType,
+
 		// Misc diagnostics
 		ReservedName = 9000,
 	}

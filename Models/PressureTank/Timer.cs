@@ -91,7 +91,7 @@ namespace PressureTank
 		///   Prevents the timer from reporting a timeout.
 		/// </summary>
 		[FaultEffect(Fault = nameof(SuppressTimeout))]
-		private sealed class SuppressTimeoutEffect : Timer
+		public sealed class SuppressTimeoutEffect : Timer
 		{
 			public override bool HasElapsed => false;
 		}

@@ -42,13 +42,13 @@ namespace Funkfahrbetrieb.TrainController
 		public extern int TrainSpeed { get; }
 
 		[FaultEffect(Fault = nameof(OdometerPositionOffset))]
-		private class PositionOffsetEffect : Odometer
+		public class PositionOffsetEffect : Odometer
 		{
 			public override int Position => base.Position + MaxPositionOffset * Choose(-1, 1);
 		}
 
 		[FaultEffect(Fault = nameof(OdometerSpeedOffset))]
-		private class SpeedOffsetEffect : Odometer
+		public class SpeedOffsetEffect : Odometer
 		{
 			public override int Speed => base.Speed + MaxSpeedOffset * Choose(-1, 1);
 		}
