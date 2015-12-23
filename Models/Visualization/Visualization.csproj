@@ -75,6 +75,9 @@
     <Compile Include="Infrastructure\IconButton.xaml.cs">
       <DependentUpon>IconButton.xaml</DependentUpon>
     </Compile>
+    <Compile Include="HemodialysisMachine.xaml.cs">
+      <DependentUpon>HemodialysisMachine.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PressureTank.xaml.cs">
       <DependentUpon>PressureTank.xaml</DependentUpon>
     </Compile>
@@ -105,6 +108,10 @@
     <Page Include="Infrastructure\SimulationControls.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="HemodialysisMachine.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="PressureTank.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -152,6 +159,10 @@
     <ProjectReference Include="..\Funkfahrbetrieb\Funkfahrbetrieb.csproj">
       <Project>{84c1f882-31d9-4a71-95a9-e1586740954a}</Project>
       <Name>Funkfahrbetrieb</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HemodialysisMachine\HemodialysisMachine.csproj">
+      <Project>{1d2f1575-4473-485b-b361-ee7e76589bec}</Project>
+      <Name>HemodialysisMachine</Name>
     </ProjectReference>
     <ProjectReference Include="..\PressureTank\PressureTank.csproj">
       <Project>{2834343c-5d3a-4673-9f58-f869f4e3cc01}</Project>
