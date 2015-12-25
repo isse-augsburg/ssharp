@@ -148,6 +148,13 @@
     <Compile Include="Diagnostics\CustomComponents\Valid\nested types derived from Component.cs" />
     <Compile Include="Diagnostics\CustomComponents\Valid\type directly derived from Component.cs" />
     <Compile Include="Diagnostics\CustomComponents\Valid\types indirectly derived from Component.cs" />
+    <Compile Include="Diagnostics\FaultAnalyzer\Invalid\fault effect read.cs" />
+    <Compile Include="Diagnostics\FaultAnalyzer\Invalid\fault effect write.cs" />
+    <Compile Include="Diagnostics\FaultAnalyzer\Invalid\component write.cs" />
+    <Compile Include="Diagnostics\FaultAnalyzer\Invalid\component read.cs" />
+    <Compile Include="Diagnostics\FaultAnalyzer\Valid\component constructor.cs" />
+    <Compile Include="Diagnostics\FaultAnalyzer\Valid\non component.cs" />
+    <Compile Include="Diagnostics\FaultAnalyzer\Valid\non fault member.cs" />
     <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\non-public nested.cs" />
     <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\internal non-nested.cs" />
     <Compile Include="Diagnostics\FaultEffectAnalyzer\Invalid\generic non-nested.cs" />

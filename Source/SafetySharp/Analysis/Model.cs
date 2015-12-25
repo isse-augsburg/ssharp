@@ -183,18 +183,23 @@ namespace SafetySharp.Analysis
 					if (value != null && components.Add(value))
 						roles.Add(value, rootAttribute.Role);
 				}
-
-				if (!typeof(IEnumerable<IComponent>).IsAssignableFrom(memberType))
-					continue;
-
-				var values = (IEnumerable<IComponent>)getValue(member);
-				if (values == null)
-					continue;
-
-				foreach (var value in values.Where(value => value != null))
+				else if (typeof(IEnumerable<IComponent>).IsAssignableFrom(memberType))
 				{
-					if (components.Add(value))
-						roles.Add(value, rootAttribute.Role);
+					var values = (IEnumerable<IComponent>)getValue(member);
+					if (values == null)
+						continue;
+
+					foreach (var value in values.Where(value => value != null))
+					{
+						if (components.Add(value))
+							roles.Add(value, rootAttribute.Role);
+					}
+				}
+				else
+				{
+					throw new InvalidOperationException(
+						$"'{member.DeclaringType.FullName}.{member.Name}' is marked with '{typeof(RootAttribute).FullName}' but is not of type " +
+						$"'{typeof(IComponent)}' or '{typeof(IEnumerable<IComponent>).FullName}'.");
 				}
 			}
 		}

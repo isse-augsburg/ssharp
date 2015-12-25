@@ -51,5 +51,11 @@ namespace Tests
 		{
 			CheckDiagnostics<FaultEffectAnalyzer>(file);
 		}
+
+		[Theory, MemberData("DiscoverTests", "Diagnostics/FaultAnalyzer")]
+		public void FaultAnalyzer(string test, string file)
+		{
+			CheckDiagnostics<FaultAnalyzer>(file);
+		}
 	}
 }

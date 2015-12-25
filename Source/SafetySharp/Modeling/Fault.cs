@@ -138,7 +138,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Updates the state of the fault.
 		/// </summary>
-		public void Update()
+		internal void Update()
 		{
 			if (_activationMode == ActivationMode.Nondeterministic)
 				IsActivated = GetUpdatedOccurrenceState();

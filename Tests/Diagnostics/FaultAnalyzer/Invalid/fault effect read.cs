@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,40 +20,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Compiler.Analyzers
+namespace Tests.Diagnostics.FaultAnalyzer.Invalid
 {
-	/// <summary>
-	///   Represents a unique identifier for a S# diagnostic emitted by a <see cref="Analyzer" />.
-	/// </summary>
-	public enum DiagnosticIdentifier
+	using SafetySharp.Compiler.Analyzers;
+	using SafetySharp.Modeling;
+
+	[FaultEffect]
+	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 37, 20, 11, "SafetySharp.Modeling.Fault.IsActivated")]
+	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 44, 23, 14, "SafetySharp.Modeling.Fault.ActivationMode")]
+	public class ReadFaultEffect : Component
 	{
-		// Type diagnostics
-		CustomComponent = 1000,
-		ComponentInterfaceReimplementation,
+		private Fault _f;
 
-		// Port diagnostics
-		AmbiguousPortKind = 3000,
-		StaticPort,
-		UnmarkedInterfacePort,
-		PortPropertyAccessor,
-		ProvidedPortImplementedAsRequiredPort,
-		RequiredPortImplementedAsProvidedPort,
-		NonExternRequiredPort,
-		UpdateMethodMarkedAsPort,
-		ExternProvidedPort,
-		ExternUpdateMethod,
-		GenericPort,
-		IndexerPort,
-		EventPort,
+		private void M()
+		{
+			if (_f.IsActivated)
+			{
+			}
+		}
 
-		// Fault and fault effect diagnostics
-		InvalidFaultMemberAccess,
-		GenericFaultEffect,
-		FaultEffectAccessibility,
-		InvalidFaultEffectBaseType,
-		AbstractFaultEffectOverride,
-
-		// Misc diagnostics
-		ReservedName = 9000,
+		private bool N()
+		{
+			return _f.ActivationMode == ActivationMode.Forced;
+		}
 	}
 }

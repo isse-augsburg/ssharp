@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2015, Institute for Software & Systems Engineering
 // 
@@ -20,40 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Compiler.Analyzers
+namespace Tests.Diagnostics.FaultAnalyzer.Valid
 {
-	/// <summary>
-	///   Represents a unique identifier for a S# diagnostic emitted by a <see cref="Analyzer" />.
-	/// </summary>
-	public enum DiagnosticIdentifier
+	using System;
+	using System.Collections.Generic;
+	using SafetySharp.Modeling;
+
+	public class NonComponent
 	{
-		// Type diagnostics
-		CustomComponent = 1000,
-		ComponentInterfaceReimplementation,
+		private bool M(Fault f)
+		{
+			return f.IsActivated;
+		}
 
-		// Port diagnostics
-		AmbiguousPortKind = 3000,
-		StaticPort,
-		UnmarkedInterfacePort,
-		PortPropertyAccessor,
-		ProvidedPortImplementedAsRequiredPort,
-		RequiredPortImplementedAsProvidedPort,
-		NonExternRequiredPort,
-		UpdateMethodMarkedAsPort,
-		ExternProvidedPort,
-		ExternUpdateMethod,
-		GenericPort,
-		IndexerPort,
-		EventPort,
+		public void M(List<Fault> f)
+		{
+			N(fault => fault.IsActivated);
+		}
 
-		// Fault and fault effect diagnostics
-		InvalidFaultMemberAccess,
-		GenericFaultEffect,
-		FaultEffectAccessibility,
-		InvalidFaultEffectBaseType,
-		AbstractFaultEffectOverride,
-
-		// Misc diagnostics
-		ReservedName = 9000,
+		private void N(Func<Fault, bool> f)
+		{
+		}
 	}
 }
