@@ -20,48 +20,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Diagnostics.Bindings.Valid
 {
-	using SafetySharp.Compiler.Analyzers;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Modeling;
 
-	public partial class DiagnosticsTests : Tests
+	internal class X33 : Component
 	{
-		[Theory, MemberData("DiscoverTests", "Diagnostics/CustomComponents")]
-		public void CustomComponents(string test, string file)
+		public extern void M();
+	}
+
+	internal class X34 : X33
+	{
+		private X34()
 		{
-			CheckDiagnostics<CustomComponentAnalyzer>(file);
+			Bind(nameof(M), nameof(N));
+			Bind(nameof(base.M), nameof(N));
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortKinds")]
-		public void PortKinds(string test, string file)
+		private void N()
 		{
-			CheckDiagnostics<PortKindAnalyzer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortImplementation")]
-		public void PortImplementation(string test, string file)
-		{
-			CheckDiagnostics<PortImplementationAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/FaultEffects")]
-		public void FaultEffects(string test, string file)
-		{
-			CheckDiagnostics<FaultEffectAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/Faults")]
-		public void Faults(string test, string file)
-		{
-			CheckDiagnostics<FaultAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/Bindings")]
-		public void Bindings(string test, string file)
-		{
-			CheckDiagnostics<BindingsAnalyzer>(file);
-		}
+		public new extern void M();
 	}
 }

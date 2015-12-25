@@ -20,48 +20,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Diagnostics.Faults.Invalid
 {
 	using SafetySharp.Compiler.Analyzers;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Modeling;
 
-	public partial class DiagnosticsTests : Tests
+	[FaultEffect]
+	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 37, 20, 11, "SafetySharp.Modeling.Fault.IsActivated")]
+	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 44, 23, 14, "SafetySharp.Modeling.Fault.ActivationMode")]
+	public class ReadFaultEffect : Component
 	{
-		[Theory, MemberData("DiscoverTests", "Diagnostics/CustomComponents")]
-		public void CustomComponents(string test, string file)
+		private Fault _f;
+
+		private void M()
 		{
-			CheckDiagnostics<CustomComponentAnalyzer>(file);
+			if (_f.IsActivated)
+			{
+			}
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortKinds")]
-		public void PortKinds(string test, string file)
+		private bool N()
 		{
-			CheckDiagnostics<PortKindAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortImplementation")]
-		public void PortImplementation(string test, string file)
-		{
-			CheckDiagnostics<PortImplementationAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/FaultEffects")]
-		public void FaultEffects(string test, string file)
-		{
-			CheckDiagnostics<FaultEffectAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/Faults")]
-		public void Faults(string test, string file)
-		{
-			CheckDiagnostics<FaultAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/Bindings")]
-		public void Bindings(string test, string file)
-		{
-			CheckDiagnostics<BindingsAnalyzer>(file);
+			return _f.ActivationMode == ActivationMode.Forced;
 		}
 	}
 }

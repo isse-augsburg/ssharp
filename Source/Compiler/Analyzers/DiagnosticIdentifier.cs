@@ -47,11 +47,16 @@ namespace SafetySharp.Compiler.Analyzers
 		EventPort,
 
 		// Fault and fault effect diagnostics
-		InvalidFaultMemberAccess,
+		InvalidFaultMemberAccess = 4000,
 		GenericFaultEffect,
 		FaultEffectAccessibility,
 		InvalidFaultEffectBaseType,
 		AbstractFaultEffectOverride,
+
+		// Bindings diagnostics
+		BindingFailure = 5000,
+		AmbiguousBinding,
+		NonDelegateBinding,
 
 		// Misc diagnostics
 		ReservedName = 9000,

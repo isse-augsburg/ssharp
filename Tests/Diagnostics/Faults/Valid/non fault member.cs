@@ -20,48 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Diagnostics.Faults.Valid
 {
-	using SafetySharp.Compiler.Analyzers;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Modeling;
 
-	public partial class DiagnosticsTests : Tests
+	public class NonFaultMember
 	{
-		[Theory, MemberData("DiscoverTests", "Diagnostics/CustomComponents")]
-		public void CustomComponents(string test, string file)
+		private class C : Component
 		{
-			CheckDiagnostics<CustomComponentAnalyzer>(file);
+			public void M(F f)
+			{
+				f.IsActivated = true;
+			}
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortKinds")]
-		public void PortKinds(string test, string file)
+		private class F
 		{
-			CheckDiagnostics<PortKindAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortImplementation")]
-		public void PortImplementation(string test, string file)
-		{
-			CheckDiagnostics<PortImplementationAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/FaultEffects")]
-		public void FaultEffects(string test, string file)
-		{
-			CheckDiagnostics<FaultEffectAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/Faults")]
-		public void Faults(string test, string file)
-		{
-			CheckDiagnostics<FaultAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/Bindings")]
-		public void Bindings(string test, string file)
-		{
-			CheckDiagnostics<BindingsAnalyzer>(file);
+			public bool IsActivated { get; set; }
 		}
 	}
 }

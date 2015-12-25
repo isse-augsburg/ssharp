@@ -90,6 +90,7 @@ namespace SafetySharp.Modeling
 		/// <param name="requiredPort">The required port that should be bound to the <paramref name="providedPort" />.</param>
 		/// <param name="providedPort">The provided port that should be bound to the <paramref name="requiredPort" />.</param>
 		public static void Bind<T>(string requiredPort, string providedPort)
+			where T : class
 		{
 			Requires.CompilationTransformation();
 		}

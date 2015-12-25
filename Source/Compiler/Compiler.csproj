@@ -107,6 +107,7 @@
   <ItemGroup>
     <Compile Include="Analyzers\CustomComponentAnalyzer.cs" />
     <Compile Include="Analyzers\DiagnosticIdentifier.cs" />
+    <Compile Include="Analyzers\BindingsAnalyzer.cs" />
     <Compile Include="Analyzers\FaultAnalyzer.cs" />
     <Compile Include="Analyzers\PortImplementationAnalyzer.cs" />
     <Compile Include="Analyzers\FaultEffectAnalyzer.cs" />

@@ -20,48 +20,76 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Diagnostics.Bindings.Valid
 {
-	using SafetySharp.Compiler.Analyzers;
-	using Utilities;
-	using Xunit;
+	using System;
+	using SafetySharp.Modeling;
 
-	public partial class DiagnosticsTests : Tests
+	internal class Y1 : Component
 	{
-		[Theory, MemberData("DiscoverTests", "Diagnostics/CustomComponents")]
-		public void CustomComponents(string test, string file)
+		protected extern void N();
+		public extern void N(int i);
+	}
+
+	internal class X16 : Y1
+	{
+		private X16()
 		{
-			CheckDiagnostics<CustomComponentAnalyzer>(file);
+			Bind<Action>(nameof(N), nameof(M));
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortKinds")]
-		public void PortKinds(string test, string file)
+		private void M()
 		{
-			CheckDiagnostics<PortKindAnalyzer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortImplementation")]
-		public void PortImplementation(string test, string file)
+		private void M(int i)
 		{
-			CheckDiagnostics<PortImplementationAnalyzer>(file);
+		}
+	}
+
+	internal class Y2 : Component
+	{
+		protected extern void N();
+		public extern void N(int i);
+	}
+
+	internal class X17 : Y2
+	{
+		private X17()
+		{
+			Bind<Action<int>>(nameof(N), nameof(M));
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/FaultEffects")]
-		public void FaultEffects(string test, string file)
+		private void M()
 		{
-			CheckDiagnostics<FaultEffectAnalyzer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/Faults")]
-		public void Faults(string test, string file)
+		private void M(int i)
 		{
-			CheckDiagnostics<FaultAnalyzer>(file);
+		}
+	}
+
+	internal delegate void D1(ref int i);
+
+	internal class Y3 : Component
+	{
+		protected extern void N();
+		public extern void N(ref int i);
+	}
+
+	internal class X18 : Y3
+	{
+		private X18()
+		{
+			Bind<D1>(nameof(N), nameof(M));
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/Bindings")]
-		public void Bindings(string test, string file)
+		private void M()
 		{
-			CheckDiagnostics<BindingsAnalyzer>(file);
+		}
+
+		private void M(ref int i)
+		{
 		}
 	}
 }

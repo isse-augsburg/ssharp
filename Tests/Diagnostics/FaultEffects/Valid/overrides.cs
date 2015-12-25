@@ -20,48 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Diagnostics.FaultEffects.Valid
 {
-	using SafetySharp.Compiler.Analyzers;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Modeling;
 
-	public partial class DiagnosticsTests : Tests
+	public class Overrides : Component
 	{
-		[Theory, MemberData("DiscoverTests", "Diagnostics/CustomComponents")]
-		public void CustomComponents(string test, string file)
+		public virtual int X
 		{
-			CheckDiagnostics<CustomComponentAnalyzer>(file);
+			get { return 1; }
+			set { M(); }
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortKinds")]
-		public void PortKinds(string test, string file)
+		public virtual void M()
 		{
-			CheckDiagnostics<PortKindAnalyzer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortImplementation")]
-		public void PortImplementation(string test, string file)
+		[FaultEffect]
+		public class E : Overrides
 		{
-			CheckDiagnostics<PortImplementationAnalyzer>(file);
+			public override int X { get; set; }
+
+			public override void M()
+			{
+			}
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/FaultEffects")]
-		public void FaultEffects(string test, string file)
+		private class C : Overrides
 		{
-			CheckDiagnostics<FaultEffectAnalyzer>(file);
-		}
+			public override int X { get; set; }
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/Faults")]
-		public void Faults(string test, string file)
-		{
-			CheckDiagnostics<FaultAnalyzer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Diagnostics/Bindings")]
-		public void Bindings(string test, string file)
-		{
-			CheckDiagnostics<BindingsAnalyzer>(file);
+			public override void M()
+			{
+			}
 		}
 	}
 }
