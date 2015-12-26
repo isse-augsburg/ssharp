@@ -137,8 +137,6 @@
     <Compile Include="Roslyn\Syntax\PropertyDeclarationExtensions.cs" />
     <Compile Include="Roslyn\Syntax\SyntaxGeneratorExtensions.cs" />
     <Compile Include="Roslyn\Syntax\IdentifierExtensions.cs" />
-    <Compile Include="Normalization\SymbolNormalizer.cs" />
-    <Compile Include="Normalization\SyntaxNormalizer.cs" />
     <Compile Include="Normalization\Normalizer.cs" />
     <Compile Include="Roslyn\Symbols\CompilationExtensions.cs" />
     <Compile Include="Roslyn\Symbols\MethodSymbolExtensions.cs" />

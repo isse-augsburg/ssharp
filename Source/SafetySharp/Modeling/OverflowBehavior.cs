@@ -41,7 +41,7 @@ namespace SafetySharp.Modeling
 		Clamp,
 
 		/// <summary>
-		///   Indicates that the field value wraps around if it underflows or overflows the fields's range, i.e., if the range's upper
+		///   Indicates that the field value wraps around if it underflows or overflows the field's range, i.e., if the range's upper
 		///   limit is exceeded, the value is set to the lower bound and vice versa.
 		/// </summary>
 		WrapClamp

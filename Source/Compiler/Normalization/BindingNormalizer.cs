@@ -47,7 +47,7 @@ namespace SafetySharp.Compiler.Normalization
 	///  		new PortBinding(new PortReference(...), new PortReference(...).Bind();
 	///   	</code>
 	/// </summary>
-	public sealed class BindingNormalizer : SyntaxNormalizer
+	public sealed class BindingNormalizer : Normalizer
 	{
 		/// <summary>
 		///   Normalizes the <paramref name="statement" />.

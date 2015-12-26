@@ -34,7 +34,7 @@ namespace SafetySharp.Compiler.Normalization
 	///   Normalizes all implicit conversions from a Boolean expression to a <see cref="Formula" /> by explicitly invoking the
 	///   <see cref="StateFormulaFactory.Create" /> method.
 	/// </summary>
-	public sealed class FormulaNormalizer : SyntaxNormalizer
+	public sealed class FormulaNormalizer : Normalizer
 	{
 		/// <summary>
 		///   Represents the <see cref="StateFormulaFactory" /> type.

@@ -33,14 +33,14 @@ namespace Tests.Execution.Faults.ProvidedPorts
 			Create(new C());
 			var c = (C)RootComponents[0];
 
-			c._f.ActivationMode = ActivationMode.Forced;
+			c._f.Activation = Activation.Forced;
 			c.M.ShouldBe(9);
 			c.N = 4;
 			c.x.ShouldBe(16);
 			c.O = 19;
 			c.O.ShouldBe(17);
 
-			c._f.ActivationMode = ActivationMode.Suppressed;
+			c._f.Activation = Activation.Suppressed;
 			c.M.ShouldBe(1);
 			c.N = 8;
 			c.x.ShouldBe(8);

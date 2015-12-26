@@ -37,7 +37,7 @@ namespace SafetySharp.Compiler.Normalization
 	/// <summary>
 	///   Normalizes classes marked with <see cref="FaultEffectAttribute" />.
 	/// </summary>
-	public sealed class FaultEffectNormalizer : SyntaxNormalizer
+	public sealed class FaultEffectNormalizer : Normalizer
 	{
 		private readonly Dictionary<Tuple<IMethodSymbol, int>, string> _faultChoiceFields = new Dictionary<Tuple<IMethodSymbol, int>, string>();
 		private readonly Dictionary<INamedTypeSymbol, INamedTypeSymbol[]> _faults = new Dictionary<INamedTypeSymbol, INamedTypeSymbol[]>();

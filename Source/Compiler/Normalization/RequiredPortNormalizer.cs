@@ -40,7 +40,7 @@ namespace SafetySharp.Compiler.Normalization
 	/// <summary>
 	///   Normalizes required component ports, adding the necessary infrastructure code to support bindings.
 	/// </summary>
-	public class RequiredPortNormalizer : SyntaxNormalizer
+	public class RequiredPortNormalizer : Normalizer
 	{
 		/// <summary>
 		///   The name of the synthesized result variable.

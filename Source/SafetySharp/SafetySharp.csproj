@@ -64,7 +64,7 @@
     <Compile Include="Modeling\IInitializable.cs" />
     <Compile Include="Modeling\NonDiscoverableAttribute.cs" />
     <Compile Include="Analysis\CounterExample.cs" />
-    <Compile Include="Modeling\ActivationMode.cs" />
+    <Compile Include="Modeling\Activation.cs" />
     <Compile Include="Modeling\Range.cs" />
     <Compile Include="Runtime\InvariantChecker.cs" />
     <Compile Include="Runtime\RangeViolationException.cs" />
@@ -143,7 +143,6 @@
     <Compile Include="Utilities\ReferenceEqualityComparer.cs" />
     <Compile Include="Utilities\ReflectionExtensions.cs" />
     <Compile Include="Utilities\Requires.cs" />
-    <Compile Include="Utilities\TemporaryDirectory.cs" />
     <Compile Include="Utilities\TemporaryFile.cs" />
   </ItemGroup>
   <ItemGroup>

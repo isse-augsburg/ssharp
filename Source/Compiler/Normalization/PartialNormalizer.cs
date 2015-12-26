@@ -31,7 +31,7 @@ namespace SafetySharp.Compiler.Normalization
 	///   Ensures that all class/struct declarations are marked <c>partial</c> such that additionally generated code can be
 	///   easily added without having to consider fixing up line information for debugging purposes.
 	/// </summary>
-	public sealed class PartialNormalizer : SyntaxNormalizer
+	public sealed class PartialNormalizer : Normalizer
 	{
 		/// <summary>
 		///   Normalizes the <paramref name="classDeclaration" />.

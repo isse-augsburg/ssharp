@@ -25,14 +25,14 @@ namespace Tests.Diagnostics.Faults.Invalid
 	using SafetySharp.Compiler.Analyzers;
 	using SafetySharp.Modeling;
 
-	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 35, 16, 14, "SafetySharp.Modeling.Fault.ActivationMode")]
+	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 35, 16, 10, "SafetySharp.Modeling.Fault.Activation")]
 	public class Write : Component
 	{
 		private Fault _f;
 
 		private void N()
 		{
-			_f.ActivationMode = ActivationMode.Forced;
+			_f.Activation = Activation.Forced;
 		}
 	}
 }

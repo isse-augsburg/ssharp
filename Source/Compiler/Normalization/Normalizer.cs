@@ -39,9 +39,19 @@ namespace SafetySharp.Compiler.Normalization
 	public abstract class Normalizer : CSharpSyntaxRewriter
 	{
 		/// <summary>
+		///   The root node of the syntax tree that is currently being normalized.
+		/// </summary>
+		private SyntaxNode _rootNode;
+
+		/// <summary>
 		///   Gets or sets the compilation that is currently being normalized.
 		/// </summary>
 		protected Compilation Compilation { get; set; }
+
+		/// <summary>
+		///   Gets the semantic model that should be used for semantic analysis during normalization.
+		/// </summary>
+		protected SemanticModel SemanticModel { get; private set; }
 
 		/// <summary>
 		///   Gets the syntax generator that the normalizer can use to generate syntax nodes.
@@ -80,7 +90,50 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Normalizes the <see cref="Compilation" />.
 		/// </summary>
-		protected abstract Compilation Normalize();
+		protected virtual Compilation Normalize()
+		{
+			foreach (var syntaxTree in Compilation.SyntaxTrees)
+			{
+				var normalizedSyntaxTree = Normalize(syntaxTree);
+				Compilation = Compilation.ReplaceSyntaxTree(syntaxTree, normalizedSyntaxTree);
+			}
+
+			return Compilation;
+		}
+
+		/// <summary>
+		///   Normalizes the <paramref name="syntaxTree" /> of the <see cref="Compilation" />.
+		/// </summary>
+		/// <param name="syntaxTree">The syntax tree that should be normalized.</param>
+		protected virtual SyntaxTree Normalize(SyntaxTree syntaxTree)
+		{
+			SemanticModel = Compilation.GetSemanticModel(syntaxTree);
+
+			_rootNode = syntaxTree.GetRoot();
+			var normalizedRoot = Visit(_rootNode);
+
+			if (_rootNode == normalizedRoot)
+				return syntaxTree;
+
+			return syntaxTree.WithRoot(normalizedRoot);
+		}
+
+		/// <summary>
+		///   Adds a compilation unit containing a part of the partial <paramref name="type" /> containing the
+		///   <paramref name="members" />.
+		/// </summary>
+		/// <param name="type">The type the part should be declared for.</param>
+		/// <param name="members">The members that should be added to the type.</param>
+		protected void AddMembers([NotNull] INamedTypeSymbol type, [NotNull] params MemberDeclarationSyntax[] members)
+		{
+			var usings = _rootNode.Descendants<UsingDirectiveSyntax>().Select(usingDirective =>
+			{
+				var importedSymbol = SemanticModel.GetSymbolInfo(usingDirective.Name).Symbol;
+				return usingDirective.WithName(SyntaxFactory.ParseName(importedSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+			});
+
+			AddMembers(type, usings.ToArray(), members);
+		}
 
 		/// <summary>
 		///   Adds the <paramref name="compilationUnit" /> to the normalized compilation.

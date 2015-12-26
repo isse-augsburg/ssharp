@@ -224,7 +224,7 @@ namespace SafetySharp.Analysis
 
 			using (var csvFile = new TemporaryFile("csv"))
 			{
-				var printTrace = new ExternalProcess("ltsmin-printtrace.exe", $"{file} {csvFile.Path}");
+				var printTrace = new ExternalProcess("ltsmin-printtrace.exe", $"{file} {csvFile.FilePath}");
 				printTrace.Run();
 
 				if (printTrace.ExitCode != 0)
@@ -234,13 +234,13 @@ namespace SafetySharp.Analysis
 					// ltsmin-printtrace segfaults when the trace has length 0
 					// So we have to try to detect this annoying situation and create an empty trace file instead
 					if (outputs.Any(output => output.Contains("length of trace is 0")))
-						File.WriteAllText(csvFile.Path, "");
+						File.WriteAllText(csvFile.FilePath, "");
 					else
 						throw new InvalidOperationException($"Failed to read LtsMin counter example:\n{String.Join("\n", outputs)}");
 				}
 
 				var model = RuntimeModelSerializer.Load(serializedRuntimeModel);
-				return new CounterExample(model, ParseCsv(model, File.ReadAllLines(csvFile.Path)).ToArray());
+				return new CounterExample(model, ParseCsv(model, File.ReadAllLines(csvFile.FilePath)).ToArray());
 			}
 		}
 

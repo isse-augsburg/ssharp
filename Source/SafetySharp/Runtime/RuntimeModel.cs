@@ -95,7 +95,7 @@ namespace SafetySharp.Runtime
 
 			SerializedModel = buffer;
 			RootComponents = rootComponents;
-			Faults = objectTable.OfType<Fault>().Where(fault => fault.ActivationMode == ActivationMode.Nondeterministic).ToArray();
+			Faults = objectTable.OfType<Fault>().Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
 			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
 			Formulas = formulas;
 
@@ -103,7 +103,7 @@ namespace SafetySharp.Runtime
 			// have to be serialized and deserialized. The local object table does not contain, for instance,
 			// the closure types of the state formulas
 			var objects = rootComponents.SelectMany(obj => SerializationRegistry.Default.GetReferencedObjects(obj, SerializationMode.Optimized));
-			objects = objects.Except(objectTable.OfType<Fault>().Where(fault => fault.ActivationMode != ActivationMode.Nondeterministic));
+			objects = objects.Except(objectTable.OfType<Fault>().Where(fault => fault.Activation != Activation.Nondeterministic));
 			_objects = new ObjectTable(objects);
 
 			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_objects, SerializationMode.Optimized);

@@ -28,7 +28,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	/// <summary>
 	///   Represents a dynamic code generator that generate the serialization code.
 	/// </summary>
-	public abstract class Serializer
+	internal abstract class Serializer
 	{
 		/// <summary>
 		///   Checks whether the serialize is able to serialize the <paramref name="obj" />.

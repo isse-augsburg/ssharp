@@ -33,8 +33,8 @@ namespace Tests.Analysis.Ltl.NotViolated
 			var c = new C
 			{
 				X = 3,
-				F1 = { ActivationMode = ActivationMode.Forced },
-				F2 = { ActivationMode = ActivationMode.Forced }
+				F1 = { Activation = Activation.Forced },
+				F2 = { Activation = Activation.Forced }
 			};
 
 			Check(c.X == 3 && X(G(c.X == 119)), c).ShouldBe(true);

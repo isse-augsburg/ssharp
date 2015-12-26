@@ -34,7 +34,7 @@ namespace Tests.Normalization.FaultNames.Changed
 			TransientFault f3 = new TransientFault(), f4 = new TransientFault(), 
 				f5 = new TransientFault();
 
-			var f6 = new TransientFault { ActivationMode = ActivationMode.Forced };
+			var f6 = new TransientFault { Activation = Activation.Forced };
 		}
 	}
 
@@ -48,7 +48,7 @@ namespace Tests.Normalization.FaultNames.Changed
 			TransientFault f3 = new TransientFault() { Name = "f3" }, f4 = new TransientFault() { Name = "f4" }, 
 				f5 = new TransientFault() { Name = "f5" };
 
-			var f6 = new TransientFault { ActivationMode = ActivationMode.Forced, Name = "f6" };
+			var f6 = new TransientFault { Activation = Activation.Forced, Name = "f6" };
 		}
 	}
 }

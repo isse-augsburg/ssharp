@@ -43,7 +43,7 @@ namespace SafetySharp.Compiler.Normalization
 	///     	public int X { get { return __BackingField_X__; } private set { __BackingField_X__ = value; } }
 	///    	</code>
 	/// </summary>
-	public class AutoPropertyNormalizer : SyntaxNormalizer
+	public class AutoPropertyNormalizer : Normalizer
 	{
 		/// <summary>
 		///   Indicates whether we're currently normalizing a constructor.

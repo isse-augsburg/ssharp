@@ -31,7 +31,7 @@ namespace SafetySharp.Utilities
 	/// <summary>
 	///   Writes code with a C-like syntax to an in-memory buffer.
 	/// </summary>
-	public sealed class CodeWriter
+	internal sealed class CodeWriter
 	{
 		/// <summary>
 		///   The buffer that contains the written code.

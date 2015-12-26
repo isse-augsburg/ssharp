@@ -100,9 +100,9 @@ namespace SafetySharp.Modeling
 			Requires.OfType<MemberExpression>(fieldExpression.Body, nameof(fieldExpression), "Expected a non-nested reference to a field.");
 
 			var range = new RangeAttribute(ConvertType(typeof(T), lowerBound), ConvertType(typeof(T), upperBound), overflowBehavior);
-			var memberExpresssion = (MemberExpression)fieldExpression.Body;
-			var fieldInfo = memberExpresssion.Member as FieldInfo;
-			var objectExpression = memberExpresssion.Expression as ConstantExpression;
+			var memberExpression = (MemberExpression)fieldExpression.Body;
+			var fieldInfo = memberExpression.Member as FieldInfo;
+			var objectExpression = memberExpression.Expression as ConstantExpression;
 
 			Requires.That(fieldInfo != null, nameof(fieldExpression), "Expected a non-nested reference to a field.");
 			Requires.That(objectExpression != null, nameof(fieldExpression), "Expected a non-nested reference to non-static field.");

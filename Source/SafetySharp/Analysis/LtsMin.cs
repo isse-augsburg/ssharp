@@ -118,17 +118,17 @@ namespace SafetySharp.Analysis
 				using (var modelFile = new TemporaryFile("ssharp"))
 				using (var counterExampleFile = new TemporaryFile("gcf"))
 				{
-					using (var stream = new FileStream(modelFile.Path, FileMode.Create))
+					using (var stream = new FileStream(modelFile.FilePath, FileMode.Create))
 						RuntimeModelSerializer.Save(stream, model, 4, formula);
 
-					CreateProcess(modelFile.Path, counterExampleFile.Path, checkArgument);
+					CreateProcess(modelFile.FilePath, counterExampleFile.FilePath, checkArgument);
 					Run();
 
 					var success = InterpretExitCode(_ltsMin.ExitCode);
 					if (success)
 						return null;
 
-					return GetCounterExample(modelFile.Path, counterExampleFile.Path);
+					return GetCounterExample(modelFile.FilePath, counterExampleFile.FilePath);
 				}
 			}
 			finally

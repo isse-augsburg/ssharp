@@ -63,13 +63,13 @@ namespace Visualization
 			Collision.Visibility = _hazard.ToVisibility();
 			LastMessage.Text = "None";
 
-			TrainControl.Brakes.BrakesFailure.ActivationMode = FaultBrakes.IsChecked.ToOccurrenceKind();
-			TrainControl.Odometer.OdometerPositionOffset.ActivationMode = FaultOdometerPosition.IsChecked.ToOccurrenceKind();
-			TrainControl.Odometer.OdometerSpeedOffset.ActivationMode = FaultOdometerSpeed.IsChecked.ToOccurrenceKind();
-			CrossingControl.Sensor.BarrierSensorFailure.ActivationMode = FaultBarrierSensor.IsChecked.ToOccurrenceKind();
-			CrossingControl.Motor.BarrierMotorStuck.ActivationMode = FaultBarrierMotor.IsChecked.ToOccurrenceKind();
-			CrossingControl.TrainSensor.ErroneousTrainDetection.ActivationMode = FaultTrainSensor.IsChecked.ToOccurrenceKind();
-			Channel.MessageDropped.ActivationMode = FaultMessage.IsChecked.ToOccurrenceKind();
+			TrainControl.Brakes.BrakesFailure.Activation = FaultBrakes.IsChecked.ToOccurrenceKind();
+			TrainControl.Odometer.OdometerPositionOffset.Activation = FaultOdometerPosition.IsChecked.ToOccurrenceKind();
+			TrainControl.Odometer.OdometerSpeedOffset.Activation = FaultOdometerSpeed.IsChecked.ToOccurrenceKind();
+			CrossingControl.Sensor.BarrierSensorFailure.Activation = FaultBarrierSensor.IsChecked.ToOccurrenceKind();
+			CrossingControl.Motor.BarrierMotorStuck.Activation = FaultBarrierMotor.IsChecked.ToOccurrenceKind();
+			CrossingControl.TrainSensor.ErroneousTrainDetection.Activation = FaultTrainSensor.IsChecked.ToOccurrenceKind();
+			Channel.MessageDropped.Activation = FaultMessage.IsChecked.ToOccurrenceKind();
 		}
 
 		private void UpdateModelState()

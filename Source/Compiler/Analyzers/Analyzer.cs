@@ -55,7 +55,7 @@ namespace SafetySharp.Compiler.Analyzers
 		/// <summary>
 		///   Returns a set of descriptors for the diagnostics that this analyzer is capable of producing.
 		/// </summary>
-		public override sealed ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; }
+		public sealed override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; }
 
 		/// <summary>
 		///   Gets the <see cref="DiagnosticInfo" /> corresponding to the <paramref name="id" />.

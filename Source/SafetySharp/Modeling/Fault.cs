@@ -36,7 +36,7 @@ namespace SafetySharp.Modeling
 		private readonly bool _independentActivation;
 
 		[Hidden]
-		private ActivationMode _activationMode = ActivationMode.Nondeterministic;
+		private Activation _activation = Activation.Nondeterministic;
 
 		[NonSerializable]
 		private string _name = "<Unnamed>";
@@ -80,28 +80,28 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Gets or sets the fault's forced occurrence kind.
 		/// </summary>
-		public ActivationMode ActivationMode
+		public Activation Activation
 		{
-			get { return _activationMode; }
+			get { return _activation; }
 			set
 			{
-				_activationMode = value;
+				_activation = value;
 
-				if (value == ActivationMode.Nondeterministic)
+				if (value == Activation.Nondeterministic)
 					IsActivated = false;
 				else
-					IsActivated = value == ActivationMode.Forced;
+					IsActivated = value == Activation.Forced;
 			}
 		}
 
 		/// <summary>
-		///   Toggles the fault's <see cref="ActivationMode" /> between <see cref="Modeling.ActivationMode.Forced" /> and
-		///   <see cref="Modeling.ActivationMode.Suppressed" />, with <see cref="Modeling.ActivationMode.Nondeterministic" /> being
-		///   treated as <see cref="Modeling.ActivationMode.Suppressed" />.
+		///   Toggles the fault's <see cref="Activation" /> between <see cref="Activation.Forced" /> and
+		///   <see cref="Activation.Suppressed" />, with <see cref="Activation.Nondeterministic" /> being
+		///   treated as <see cref="Activation.Suppressed" />.
 		/// </summary>
 		public void ToggleActivationMode()
 		{
-			ActivationMode = ActivationMode == ActivationMode.Forced ? ActivationMode.Suppressed : ActivationMode.Forced;
+			Activation = Activation == Activation.Forced ? Activation.Suppressed : Activation.Forced;
 		}
 
 		/// <summary>
@@ -140,7 +140,7 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		internal void Update()
 		{
-			if (_activationMode == ActivationMode.Nondeterministic)
+			if (_activation == Activation.Nondeterministic)
 				IsActivated = GetUpdatedOccurrenceState();
 		}
 

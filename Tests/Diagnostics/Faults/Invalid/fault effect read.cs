@@ -27,7 +27,7 @@ namespace Tests.Diagnostics.Faults.Invalid
 
 	[FaultEffect]
 	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 37, 20, 11, "SafetySharp.Modeling.Fault.IsActivated")]
-	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 44, 23, 14, "SafetySharp.Modeling.Fault.ActivationMode")]
+	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 44, 23, 10, "SafetySharp.Modeling.Fault.Activation")]
 	public class ReadFaultEffect : Component
 	{
 		private Fault _f;
@@ -41,7 +41,7 @@ namespace Tests.Diagnostics.Faults.Invalid
 
 		private bool N()
 		{
-			return _f.ActivationMode == ActivationMode.Forced;
+			return _f.Activation == Activation.Forced;
 		}
 	}
 }

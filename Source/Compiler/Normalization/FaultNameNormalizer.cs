@@ -32,7 +32,7 @@ namespace SafetySharp.Compiler.Normalization
 	/// <summary>
 	///   Assigns default name to fault instantiations.
 	/// </summary>
-	public class FaultNameNormalizer : SyntaxNormalizer
+	public class FaultNameNormalizer : Normalizer
 	{
 		/// <summary>
 		///   Normalizes the <paramref name="declaration" />.

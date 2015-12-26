@@ -32,7 +32,7 @@ namespace SafetySharp.Compiler.Normalization
 	///   debugger to the original source file. Also, it changes the name of the compiled file so that the PDB does not reference
 	///   the actual file that is on-disk (there would be a checksum mismatch and debugging would not work properly).
 	/// </summary>
-	public sealed class LineDirectiveNormalizer : SyntaxNormalizer
+	public sealed class LineDirectiveNormalizer : Normalizer
 	{
 		/// <summary>
 		///   Normalizes the <paramref name="syntaxTree" /> of the <see cref="Compilation" />.

@@ -33,51 +33,51 @@ namespace Tests.Execution.Faults.RequiredPorts
 			Create(new C());
 			var c = (C)RootComponents[0];
 
-			c._f1.ActivationMode = ActivationMode.Suppressed;
-			c._f2.ActivationMode = ActivationMode.Suppressed;
-			c._f3.ActivationMode = ActivationMode.Suppressed;
+			c._f1.Activation = Activation.Suppressed;
+			c._f2.Activation = Activation.Suppressed;
+			c._f3.Activation = Activation.Suppressed;
 			c.M = 1;
 			c.x.ShouldBe(1);
 
-			c._f1.ActivationMode = ActivationMode.Forced;
-			c._f2.ActivationMode = ActivationMode.Suppressed;
-			c._f3.ActivationMode = ActivationMode.Suppressed;
+			c._f1.Activation = Activation.Forced;
+			c._f2.Activation = Activation.Suppressed;
+			c._f3.Activation = Activation.Suppressed;
 			c.M = 2;
 			c.x.ShouldBe(102);
 
-			c._f1.ActivationMode = ActivationMode.Suppressed;
-			c._f2.ActivationMode = ActivationMode.Forced;
-			c._f3.ActivationMode = ActivationMode.Suppressed;
+			c._f1.Activation = Activation.Suppressed;
+			c._f2.Activation = Activation.Forced;
+			c._f3.Activation = Activation.Suppressed;
 			c.M = 3;
 			c.x.ShouldBe(1003);
 
-			c._f1.ActivationMode = ActivationMode.Suppressed;
-			c._f2.ActivationMode = ActivationMode.Suppressed;
-			c._f3.ActivationMode = ActivationMode.Forced;
+			c._f1.Activation = Activation.Suppressed;
+			c._f2.Activation = Activation.Suppressed;
+			c._f3.Activation = Activation.Forced;
 			c.M = 4;
 			c.x.ShouldBe(10004);
 
-			c._f1.ActivationMode = ActivationMode.Forced;
-			c._f2.ActivationMode = ActivationMode.Forced;
-			c._f3.ActivationMode = ActivationMode.Suppressed;
+			c._f1.Activation = Activation.Forced;
+			c._f2.Activation = Activation.Forced;
+			c._f3.Activation = Activation.Suppressed;
 			c.M = 5;
 			c.x.ShouldBe(1105);
 
-			c._f1.ActivationMode = ActivationMode.Forced;
-			c._f2.ActivationMode = ActivationMode.Suppressed;
-			c._f3.ActivationMode = ActivationMode.Forced;
+			c._f1.Activation = Activation.Forced;
+			c._f2.Activation = Activation.Suppressed;
+			c._f3.Activation = Activation.Forced;
 			c.M = 6;
 			c.x.ShouldBe(10106);
 
-			c._f1.ActivationMode = ActivationMode.Suppressed;
-			c._f2.ActivationMode = ActivationMode.Forced;
-			c._f3.ActivationMode = ActivationMode.Forced;
+			c._f1.Activation = Activation.Suppressed;
+			c._f2.Activation = Activation.Forced;
+			c._f3.Activation = Activation.Forced;
 			c.M = 7;
 			c.x.ShouldBe(11007);
 
-			c._f1.ActivationMode = ActivationMode.Forced;
-			c._f2.ActivationMode = ActivationMode.Forced;
-			c._f3.ActivationMode = ActivationMode.Forced;
+			c._f1.Activation = Activation.Forced;
+			c._f2.Activation = Activation.Forced;
+			c._f3.Activation = Activation.Forced;
 			c.M = 8;
 			c.x.ShouldBe(11108);
 		}

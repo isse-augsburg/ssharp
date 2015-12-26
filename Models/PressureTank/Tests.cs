@@ -56,7 +56,7 @@ namespace PressureTank
 			var faults = model.GetFaults();
 
 			for (var i = 0; i < faults.Length; ++i)
-				faults[i].ActivationMode = ActivationMode.Nondeterministic;
+				faults[i].Activation = Activation.Nondeterministic;
 
 			var checker = new SSharpChecker();
 			checker.CheckInvariant(model, true);

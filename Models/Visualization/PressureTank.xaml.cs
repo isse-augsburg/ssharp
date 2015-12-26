@@ -94,10 +94,10 @@ namespace Visualization
 
 		private void OnModelStateReset()
 		{
-			Sensor.SuppressIsFull.ActivationMode = SuppressFull.IsChecked.ToOccurrenceKind();
-			Sensor.SuppressIsEmpty.ActivationMode = SuppressEmpty.IsChecked.ToOccurrenceKind();
-			Timer.SuppressTimeout.ActivationMode = SuppressTimeout.IsChecked.ToOccurrenceKind();
-			Pump.SuppressPumping.ActivationMode = SuppressPumping.IsChecked.ToOccurrenceKind();
+			Sensor.SuppressIsFull.Activation = SuppressFull.IsChecked.ToOccurrenceKind();
+			Sensor.SuppressIsEmpty.Activation = SuppressEmpty.IsChecked.ToOccurrenceKind();
+			Timer.SuppressTimeout.Activation = SuppressTimeout.IsChecked.ToOccurrenceKind();
+			Pump.SuppressPumping.Activation = SuppressPumping.IsChecked.ToOccurrenceKind();
 		}
 
 		private void UpdateModelState()

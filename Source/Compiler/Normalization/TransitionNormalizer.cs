@@ -37,7 +37,7 @@ namespace SafetySharp.Compiler.Normalization
 	/// <summary>
 	///   Normalizes transition chains <c>stateMachine.Transition(...).Transition(...)...</c>.
 	/// </summary>
-	public sealed class TransitionNormalizer : SyntaxNormalizer
+	public sealed class TransitionNormalizer : Normalizer
 	{
 		/// <summary>
 		///   The global name of the <see cref="StateMachineExtensions" /> type.

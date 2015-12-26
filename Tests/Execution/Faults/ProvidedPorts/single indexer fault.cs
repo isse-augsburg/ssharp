@@ -33,7 +33,7 @@ namespace Tests.Execution.Faults.ProvidedPorts
 			Create(new C());
 			var c = (C)RootComponents[0];
 
-			c._f.ActivationMode = ActivationMode.Forced;
+			c._f.Activation = Activation.Forced;
 			c[3] = 2;
 			c.x.ShouldBe(7);
 			c[12L].ShouldBe(24L);
@@ -41,7 +41,7 @@ namespace Tests.Execution.Faults.ProvidedPorts
 			c.y.ShouldBe((byte)12);
 			c[2, 4].ShouldBe((byte)36);
 
-			c._f.ActivationMode = ActivationMode.Suppressed;
+			c._f.Activation = Activation.Suppressed;
 			c[3] = 2;
 			c.x.ShouldBe(5);
 			c[12L].ShouldBe(12L);

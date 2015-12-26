@@ -35,9 +35,9 @@ namespace Visualization.Infrastructure
 			return value ? Visibility.Visible : Visibility.Collapsed;
 		}
 
-		public static ActivationMode ToOccurrenceKind(this bool value)
+		public static Activation ToOccurrenceKind(this bool value)
 		{
-			return value ? ActivationMode.Forced : ActivationMode.Suppressed;
+			return value ? Activation.Forced : Activation.Suppressed;
 		}
 	}
 }

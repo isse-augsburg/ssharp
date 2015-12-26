@@ -124,9 +124,6 @@ namespace Elbtunnel
 			Bind(detectorFinal);
 		}
 
-		[Root(Role.SystemContext)]
-		public object O { get; }
-
 		/// <summary>
 		///   Gets the height control that monitors the vehicles and closes the tunnel, if necessary.
 		/// </summary>

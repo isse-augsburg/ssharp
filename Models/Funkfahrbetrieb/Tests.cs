@@ -60,7 +60,7 @@ namespace Funkfahrbetrieb
 			var faults = model.GetFaults();
 
 			for (var i = 0; i < faults.Length; ++i)
-				faults[i].ActivationMode = ActivationMode.Nondeterministic;
+				faults[i].Activation = Activation.Nondeterministic;
 
 			Formula f1 = true;
 			Formula f2 = true;

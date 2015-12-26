@@ -23,7 +23,6 @@
 namespace SafetySharp.Compiler.Analyzers
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
@@ -98,7 +97,10 @@ namespace SafetySharp.Compiler.Analyzers
 				return;
 
 			if (methodSymbol.Arity == 1 && methodSymbol.TypeArguments[0].TypeKind != TypeKind.Delegate)
+			{
 				_nonDelegateBinding.Emit(context, expression);
+				return;
+			}
 
 			var requiredPortReferenceExpression = (InvocationExpressionSyntax)expression.ArgumentList.Arguments[0].Expression;
 			var providedPortReferenceExpression = (InvocationExpressionSyntax)expression.ArgumentList.Arguments[1].Expression;

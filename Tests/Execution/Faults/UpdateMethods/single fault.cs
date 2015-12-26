@@ -33,11 +33,11 @@ namespace Tests.Execution.Faults.UpdateMethods
 			Create(new C());
 			var c = (C)RootComponents[0];
 
-			c._f.ActivationMode = ActivationMode.Forced;
+			c._f.Activation = Activation.Forced;
 			c.Update();
 			c.X.ShouldBe(18);
 
-			c._f.ActivationMode = ActivationMode.Suppressed;
+			c._f.Activation = Activation.Suppressed;
 			c.Update();
 			c.X.ShouldBe(17);
 		}

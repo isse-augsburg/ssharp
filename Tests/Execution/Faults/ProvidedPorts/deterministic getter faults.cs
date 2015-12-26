@@ -33,44 +33,44 @@ namespace Tests.Execution.Faults.ProvidedPorts
 			Create(new C());
 			var c = (C)RootComponents[0];
 
-			c._f1.ActivationMode = ActivationMode.Suppressed;
-			c._f2.ActivationMode = ActivationMode.Suppressed;
-			c._f3.ActivationMode = ActivationMode.Suppressed;
+			c._f1.Activation = Activation.Suppressed;
+			c._f2.Activation = Activation.Suppressed;
+			c._f3.Activation = Activation.Suppressed;
 			c.M.ShouldBe(1);
 
-			c._f1.ActivationMode = ActivationMode.Forced;
-			c._f2.ActivationMode = ActivationMode.Suppressed;
-			c._f3.ActivationMode = ActivationMode.Suppressed;
+			c._f1.Activation = Activation.Forced;
+			c._f2.Activation = Activation.Suppressed;
+			c._f3.Activation = Activation.Suppressed;
 			c.M.ShouldBe(101);
 
-			c._f1.ActivationMode = ActivationMode.Suppressed;
-			c._f2.ActivationMode = ActivationMode.Forced;
-			c._f3.ActivationMode = ActivationMode.Suppressed;
+			c._f1.Activation = Activation.Suppressed;
+			c._f2.Activation = Activation.Forced;
+			c._f3.Activation = Activation.Suppressed;
 			c.M.ShouldBe(1001);
 
-			c._f1.ActivationMode = ActivationMode.Suppressed;
-			c._f2.ActivationMode = ActivationMode.Suppressed;
-			c._f3.ActivationMode = ActivationMode.Forced;
+			c._f1.Activation = Activation.Suppressed;
+			c._f2.Activation = Activation.Suppressed;
+			c._f3.Activation = Activation.Forced;
 			c.M.ShouldBe(10001);
 
-			c._f1.ActivationMode = ActivationMode.Forced;
-			c._f2.ActivationMode = ActivationMode.Forced;
-			c._f3.ActivationMode = ActivationMode.Suppressed;
+			c._f1.Activation = Activation.Forced;
+			c._f2.Activation = Activation.Forced;
+			c._f3.Activation = Activation.Suppressed;
 			c.M.ShouldBe(1101);
 
-			c._f1.ActivationMode = ActivationMode.Forced;
-			c._f2.ActivationMode = ActivationMode.Suppressed;
-			c._f3.ActivationMode = ActivationMode.Forced;
+			c._f1.Activation = Activation.Forced;
+			c._f2.Activation = Activation.Suppressed;
+			c._f3.Activation = Activation.Forced;
 			c.M.ShouldBe(10101);
 
-			c._f1.ActivationMode = ActivationMode.Suppressed;
-			c._f2.ActivationMode = ActivationMode.Forced;
-			c._f3.ActivationMode = ActivationMode.Forced;
+			c._f1.Activation = Activation.Suppressed;
+			c._f2.Activation = Activation.Forced;
+			c._f3.Activation = Activation.Forced;
 			c.M.ShouldBe(11001);
 
-			c._f1.ActivationMode = ActivationMode.Forced;
-			c._f2.ActivationMode = ActivationMode.Forced;
-			c._f3.ActivationMode = ActivationMode.Forced;
+			c._f1.Activation = Activation.Forced;
+			c._f2.Activation = Activation.Forced;
+			c._f3.Activation = Activation.Forced;
 			c.M.ShouldBe(11101);
 		}
 

@@ -32,8 +32,8 @@ namespace Tests.Analysis.Invariants.NotViolated
 			var c = new C
 			{
 				X = 3,
-				F1 = { ActivationMode = ActivationMode.Suppressed },
-				F2 = { ActivationMode = ActivationMode.Suppressed }
+				F1 = { Activation = Activation.Suppressed },
+				F2 = { Activation = Activation.Suppressed }
 			};
 
 			CheckInvariant(c.X == 3, c).ShouldBe(true);

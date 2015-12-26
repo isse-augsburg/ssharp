@@ -33,10 +33,10 @@ namespace Tests.Execution.Faults.ProvidedPorts
 			Create(new D());
 			var d = (D)RootComponents[0];
 
-			d.F1.ActivationMode = ActivationMode.Suppressed;
+			d.F1.Activation = Activation.Suppressed;
 			d.M().ShouldBe(101);
 
-			d.F1.ActivationMode = ActivationMode.Forced;
+			d.F1.Activation = Activation.Forced;
 			d.M().ShouldBe(111);
 		}
 

@@ -78,7 +78,7 @@ namespace Visualization.Infrastructure
 			_model = SafetySharp.Analysis.Model.Create(specification);
 
 			foreach (var fault in _model.GetFaults())
-				fault.ActivationMode = ActivationMode.Suppressed;
+				fault.Activation = Activation.Suppressed;
 
 			SetSimulator(new Simulator(_model, formulas));
 		}

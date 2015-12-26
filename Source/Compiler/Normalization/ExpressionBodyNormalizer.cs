@@ -42,7 +42,7 @@ namespace SafetySharp.Compiler.Normalization
 	///     	[A] bool I.X(bool b) { return !b; }
 	///    	</code>
 	/// </summary>
-	public class ExpressionBodyNormalizer : SyntaxNormalizer
+	public class ExpressionBodyNormalizer : Normalizer
 	{
 		/// <summary>
 		///   Normalizes the <paramref name="declaration" />.

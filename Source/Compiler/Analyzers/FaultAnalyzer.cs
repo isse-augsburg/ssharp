@@ -51,7 +51,7 @@ namespace SafetySharp.Compiler.Analyzers
 		private static readonly string[] _invalidMembers =
 		{
 			nameof(Fault.IsActivated),
-			nameof(Fault.ActivationMode),
+			nameof(Fault.Activation),
 			nameof(Fault.ToggleActivationMode)
 		};
 
