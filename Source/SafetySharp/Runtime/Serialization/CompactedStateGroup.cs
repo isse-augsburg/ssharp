@@ -32,7 +32,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   The zero-based offset in bytes into the state vector where the group's first value is stored.
 		/// </summary>
-		public int Offset;
+		public int OffsetInBytes;
 
 		/// <summary>
 		///   The number of padding bytes after the group.

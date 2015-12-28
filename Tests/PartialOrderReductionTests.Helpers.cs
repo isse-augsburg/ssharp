@@ -20,31 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Normalization.FaultNames.Changed
+namespace Tests
 {
+	using System.Collections.Generic;
+	using JetBrains.Annotations;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
+	using Utilities;
+	using Xunit.Abstractions;
 
-	public class In2
+	public abstract class PorTestObject : TestObject
 	{
-		private Fault f1 = new TransientFault() { Activation = Activation.Forced };
-		private Fault f2 = new TransientFault();
+		private AnalysisResult _result;
+		protected CounterExample CounterExample => _result.CounterExample;
+		protected int StateCount => _result.StateCount;
+		protected long TransitionCount => _result.TransitionCount;
 
-		private TransientFault f3 = new TransientFault();
-
-		private TransientFault f4 = new TransientFault();
-
-		private TransientFault f5 = new TransientFault();
+		protected void GenerateStateSpace(params IComponent[] components)
+		{
+			var checker = new InvariantChecker(new Model(components), new StateFormula(() => true), s => Output.Log("{0}", s), 10000, 1, true);
+			_result = checker.Check();
+			CounterExample.ShouldBe(null);
+		}
 	}
 
-	public class Out2
+	public partial class PartialOrderReductionTests : Tests
 	{
-		private Fault f1 = new TransientFault() { Activation = Activation.Forced, Name = "f1" };
-		private Fault f2 = new TransientFault() { Name = "f2" };
+		public PartialOrderReductionTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
 
-		private TransientFault f3 = new TransientFault() { Name = "f3" };
-
-		private TransientFault f4 = new TransientFault() { Name = "f4" };
-
-		private TransientFault f5 = new TransientFault() { Name = "f5" };
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests(string directory)
+		{
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
+		}
 	}
 }

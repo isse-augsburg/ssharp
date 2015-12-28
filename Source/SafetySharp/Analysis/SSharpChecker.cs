@@ -23,6 +23,7 @@
 namespace SafetySharp.Analysis
 {
 	using System;
+	using System.Diagnostics;
 	using Runtime;
 	using Utilities;
 
@@ -52,10 +53,38 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public override CounterExample CheckInvariant(Model model, Formula invariant)
+		public override AnalysisResult CheckInvariant(Model model, Formula invariant)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
-			return InvariantChecker.Check(model, invariant, Output, StateCapacity, CpuCount);
+
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
+			using (var checker = new InvariantChecker(model, invariant, Output, StateCapacity, CpuCount, enableFaultOptimization: false))
+			{
+				var result = default(AnalysisResult);
+				var initializationTime = stopwatch.Elapsed;
+				stopwatch.Restart();
+
+				try
+				{
+					result = checker.Check();
+					return result;
+				}
+				finally
+				{
+					stopwatch.Stop();
+
+					Output(String.Empty);
+					Output("===============================================");
+					Output($"Initialization time: {initializationTime}");
+					Output($"Model checking time: {stopwatch.Elapsed}");
+					Output($"{(int)(result.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
+					Output($"{(int)(result.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+					Output("===============================================");
+					Output(String.Empty);
+				}
+			}
 		}
 
 		/// <summary>
@@ -63,7 +92,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public override CounterExample Check(Model model, Formula formula)
+		public override AnalysisResult Check(Model model, Formula formula)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
 			throw new NotImplementedException();

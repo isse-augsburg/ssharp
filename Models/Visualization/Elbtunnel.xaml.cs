@@ -339,7 +339,7 @@ namespace Visualization
 			var leftLane = vehicle.Item1.Kind != VehicleKind.OverheightTruck ? 225 : 223;
 			var rightLane = vehicle.Item1.Kind != VehicleKind.OverheightTruck ? 304 : 302;
 
-			Canvas.SetLeft(vehicle.Item2, vehicle.Item1.Position * 35 - vehicle.Item2.Width);
+			Canvas.SetLeft(vehicle.Item2, vehicle.Item1.Position * 60 - vehicle.Item2.Width);
 			Canvas.SetTop(vehicle.Item2, vehicle.Item1.Lane == Lane.Left ? leftLane : rightLane);
 		}
 

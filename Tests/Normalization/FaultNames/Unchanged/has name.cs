@@ -29,12 +29,7 @@ namespace Tests.Normalization.FaultNames.Unchanged
 		public int X;
 		public int Y;
 
-		public F()
-			: base(true)
-		{
-		}
-
-		protected override bool GetUpdatedOccurrenceState()
+		protected override bool GetUpdatedActivationState()
 		{
 			return false;
 		}

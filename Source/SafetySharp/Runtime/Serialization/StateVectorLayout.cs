@@ -46,11 +46,6 @@ namespace SafetySharp.Runtime.Serialization
 		private readonly List<StateSlotMetadata> _slots = new List<StateSlotMetadata>();
 
 		/// <summary>
-		///   Describes the compacted state vector layout.
-		/// </summary>
-		private CompactedStateGroup[] _groups;
-
-		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="objects">The objects whose data is stored in the state vector.</param>
@@ -71,9 +66,19 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
+		///   Gets the description of the compacted state vector layout.
+		/// </summary>
+		internal CompactedStateGroup[] Groups { get; private set; }
+
+		/// <summary>
 		///   Gets the number of slots the vector consists of.
 		/// </summary>
 		public int SlotCount => _slots.Count;
+
+		/// <summary>
+		///   Gets the number of bytes at the beginning of the state vector that are used to store fault activation states.
+		/// </summary>
+		public int FaultBytes { get; private set; }
 
 		/// <summary>
 		///   Gets the metadata of the data stored at the <paramref name="index" />.
@@ -135,7 +140,8 @@ namespace SafetySharp.Runtime.Serialization
 			}
 
 			// Organize all slots with the same element size into groups
-			_groups = _slots
+			Groups = _slots
+				.Where(slot => !slot.IsFaultActivationField)
 				.GroupBy(slot => slot.ElementSizeInBits)
 				.OrderBy(group => group.Key)
 				.Select(group => new CompactedStateGroup
@@ -148,18 +154,24 @@ namespace SafetySharp.Runtime.Serialization
 				})
 				.ToArray();
 
+			// Fault activation states always occupy the first bytes
+			var faultSlots = _slots.Where(slot => slot.IsFaultActivationField).ToArray();
+			FaultBytes = faultSlots.Length / 8 + (faultSlots.Length % 8 == 0 ? 0 : 1);
+			if (faultSlots.Length > 0)
+				Groups = new[] { new CompactedStateGroup { Slots = faultSlots } }.Concat(Groups).ToArray();
+
 			// Compute the total state vector size and ensure alignment of the individual groups
 			// Ensure that the state vector size is a multiple of 4 for correct alignment in state vector arrays
-			for (var i = 0; i < _groups.Length; ++i)
+			for (var i = 0; i < Groups.Length; ++i)
 			{
-				_groups[i].Offset = SizeInBytes;
-				SizeInBytes += _groups[i].GroupSizeInBytes;
+				Groups[i].OffsetInBytes = SizeInBytes;
+				SizeInBytes += Groups[i].GroupSizeInBytes;
 
-				var alignment = i + 1 >= _groups.Length ? 4 : Math.Min(4, Math.Max(1, _groups[i + 1].ElementSizeInBits / 8));
+				var alignment = i + 1 >= Groups.Length ? 4 : Math.Min(4, Math.Max(1, Groups[i + 1].ElementSizeInBits / 8));
 				var remainder = SizeInBytes % alignment;
 
-				_groups[i].PaddingBytes = remainder == 0 ? 0 : alignment - remainder;
-				SizeInBytes += _groups[i].PaddingBytes;
+				Groups[i].PaddingBytes = remainder == 0 ? 0 : alignment - remainder;
+				SizeInBytes += Groups[i].PaddingBytes;
 			}
 		}
 
@@ -169,7 +181,7 @@ namespace SafetySharp.Runtime.Serialization
 		internal unsafe SerializationDelegate CreateSerializer()
 		{
 			var generator = new SerializationGenerator(methodName: "Serialize");
-			generator.GenerateSerializationCode(_groups);
+			generator.GenerateSerializationCode(Groups);
 			return generator.Compile(_objects);
 		}
 
@@ -179,7 +191,7 @@ namespace SafetySharp.Runtime.Serialization
 		internal unsafe SerializationDelegate CreateDeserializer()
 		{
 			var generator = new SerializationGenerator(methodName: "Deserialize");
-			generator.GenerateDeserializationCode(_groups);
+			generator.GenerateDeserializationCode(Groups);
 			return generator.Compile(_objects);
 		}
 
@@ -190,13 +202,13 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			var builder = new StringBuilder();
 
-			if (_groups == null)
+			if (Groups == null)
 				return base.ToString();
 
 			builder.AppendLine($"state vector size: {SizeInBytes} bytes");
-			foreach (var group in _groups)
+			foreach (var group in Groups)
 			{
-				builder.AppendLine($"group of {group.ElementSizeInBits} bit values, {group.Slots.Length} elements at offset {group.Offset}");
+				builder.AppendLine($"group of {group.ElementSizeInBits} bit values, {group.Slots.Length} elements at offset {group.OffsetInBytes}");
 				foreach (var slot in group.Slots)
 				{
 					if (slot.Field == null)

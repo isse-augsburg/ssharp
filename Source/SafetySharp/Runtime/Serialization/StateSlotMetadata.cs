@@ -24,6 +24,7 @@ namespace SafetySharp.Runtime.Serialization
 {
 	using System;
 	using System.Reflection;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -33,19 +34,14 @@ namespace SafetySharp.Runtime.Serialization
 	public class StateSlotMetadata : IEquatable<StateSlotMetadata>
 	{
 		/// <summary>
-		///   The uncompressed type of the data stored in the slot.
-		/// </summary>
-		public Type DataType;
-
-		/// <summary>
 		///   The compressed type of the data stored in the slot.
 		/// </summary>
 		public Type CompressedDataType;
 
 		/// <summary>
-		///   Gets the effective type of the data stored in the slot.
+		///   The uncompressed type of the data stored in the slot.
 		/// </summary>
-		public Type EffectiveType => CompressedDataType ?? DataType;
+		public Type DataType;
 
 		/// <summary>
 		///   The number of elements the data consists of.
@@ -74,9 +70,20 @@ namespace SafetySharp.Runtime.Serialization
 		public Type ObjectType;
 
 		/// <summary>
+		///   Gets the effective type of the data stored in the slot.
+		/// </summary>
+		public Type EffectiveType => CompressedDataType ?? DataType;
+
+		/// <summary>
 		///   Gets the total size in bits required to store the data in the state vector.
 		/// </summary>
 		public int TotalSizeInBits => ElementSizeInBits * ElementCount;
+
+		/// <summary>
+		///   Gets a value indicating whether the slot stores the <see cref="Fault._isActivated" /> field of a <see cref="Fault" />
+		///   instance.
+		/// </summary>
+		internal bool IsFaultActivationField => Field != null && Field.DeclaringType == typeof(Fault) && Field.Name == "_isActivated";
 
 		/// <summary>
 		///   Gets the size in bits required to store each individual element in the state vector.

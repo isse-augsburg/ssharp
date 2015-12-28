@@ -32,7 +32,7 @@ namespace Elbtunnel.Vehicles
 		[Hidden]
 		private VehicleKind _kind;
 
-		[Range(0, 20, OverflowBehavior.Clamp)]
+		[Range(0, Specification.TunnelPosition + 1, OverflowBehavior.Clamp)]
 		private int _position;
 
 		[Range(0, 3, OverflowBehavior.Error)]
@@ -81,7 +81,7 @@ namespace Elbtunnel.Vehicles
 		void IInitializable.Initialize()
 		{
 			Lane = Choose(Lane.Left, Lane.Right);
-			Speed = Choose(0, 1, 3);
+			Speed = Choose(0, 1, 2);
 		}
 
 		/// <summary>
@@ -95,10 +95,10 @@ namespace Elbtunnel.Vehicles
 			Position += Speed;
 
 			// Vehicles are only allowed to stop at the initial position
-			Speed = Choose(1, 3);
+			Speed = Choose(1, 2);
 
 			// The road layout makes lane changes impossible after position 14
-			if (Position < 14)
+			if (Position < 9)
 				Lane = Choose(Lane.Left, Lane.Right);
 		}
 	}

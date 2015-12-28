@@ -35,7 +35,7 @@ namespace Elbtunnel
 	/// </summary>
 	public class Specification
 	{
-		public const int TunnelPosition = 19;
+		public const int TunnelPosition = 12;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -51,7 +51,7 @@ namespace Elbtunnel
 
 			var lightBarrier1 = new LightBarrier
 			{
-				Position = 5,
+				Position = 3,
 				Misdetection = { Name = "MissDetectionLB1" },
 				FalseDetection = { Name = "FalseDetectionLB1" },
 				VehicleCount = vehicles.Length
@@ -59,7 +59,7 @@ namespace Elbtunnel
 
 			var lightBarrier2 = new LightBarrier
 			{
-				Position = 10,
+				Position = 6,
 				Misdetection = { Name = "MissDetectionLB2" },
 				FalseDetection = { Name = "FalseDetectionLB2" },
 				VehicleCount = vehicles.Length
@@ -68,7 +68,7 @@ namespace Elbtunnel
 			var detectorLeft = new OverheadDetector
 			{
 				Lane = Lane.Left,
-				Position = 10,
+				Position = 6,
 				Misdetection = { Name = "MissDetectionODL" },
 				FalseDetection = { Name = "FalseDetectionODL" },
 				VehicleCount = vehicles.Length
@@ -77,7 +77,7 @@ namespace Elbtunnel
 			var detectorRight = new OverheadDetector
 			{
 				Lane = Lane.Right,
-				Position = 10,
+				Position = 6,
 				Misdetection = { Name = "MissDetectionODR" },
 				FalseDetection = { Name = "FalseDetectionODR" },
 				VehicleCount = vehicles.Length
@@ -86,7 +86,7 @@ namespace Elbtunnel
 			var detectorFinal = new OverheadDetector
 			{
 				Lane = Lane.Left,
-				Position = 15,
+				Position = 9,
 				Misdetection = { Name = "MissDetectionODF" },
 				FalseDetection = { Name = "FalseDetectionODF" },
 				VehicleCount = vehicles.Length
@@ -103,12 +103,12 @@ namespace Elbtunnel
 					LeftDetector = detectorLeft,
 					RightDetector = detectorRight,
 					PositionDetector = lightBarrier2,
-					Timer = new Timer { Timeout = 6 }
+					Timer = new Timer { Timeout = 4 }
 				},
 				EndControl = new EndControlOriginal
 				{
 					Detector = detectorFinal,
-					Timer = new Timer { Timeout = 6 }
+					Timer = new Timer { Timeout = 4 }
 				},
 				TrafficLights = new TrafficLights()
 			};

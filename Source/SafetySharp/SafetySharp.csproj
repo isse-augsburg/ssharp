@@ -42,6 +42,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis\AnalysisResult.cs" />
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
     <Compile Include="Analysis\Role.cs" />

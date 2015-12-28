@@ -25,23 +25,16 @@ namespace SafetySharp.Modeling
 	/// <summary>
 	///   Represents a persistent fault that, once active, remains active.
 	/// </summary>
-	public class PersistentFault : Fault
+	public sealed class PersistentFault : Fault
 	{
 		/// <summary>
-		///   Initializes a new instance.
+		///   Gets the updated occurrence state of the fault. If the fault's activation state is chosen nondeterminisitcally,
+		///   <c>false</c> must be chosen first.
 		/// </summary>
-		public PersistentFault()
-			: base(independentActivation: true)
-		{
-		}
-
-		/// <summary>
-		///   Gets the updated occurrence state of the fault.
-		/// </summary>
-		protected override bool GetUpdatedOccurrenceState()
+		protected override bool GetUpdatedActivationState()
 		{
 			if (!IsActivated)
-				return Choice.Choose(true, false);
+				return Choice.Choose(false, true);
 
 			return true;
 		}

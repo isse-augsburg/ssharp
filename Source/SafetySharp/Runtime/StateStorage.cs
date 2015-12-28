@@ -24,6 +24,7 @@ namespace SafetySharp.Runtime
 {
 	using System;
 	using System.Threading;
+	using Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -56,6 +57,11 @@ namespace SafetySharp.Runtime
 		private readonly int _capacity;
 
 		/// <summary>
+		///   The effective length in bytes of a state vector not including the fault bytes.
+		/// </summary>
+		private readonly int _effectiveStateVectorSize;
+
+		/// <summary>
 		///   The buffer that stores the hash table information.
 		/// </summary>
 		private readonly MemoryBuffer _hashBuffer = new MemoryBuffer();
@@ -71,27 +77,35 @@ namespace SafetySharp.Runtime
 		private readonly MemoryBuffer _stateBuffer = new MemoryBuffer();
 
 		/// <summary>
-		///   The length in bytes of a state vector.
-		/// </summary>
-		private readonly int _stateVectorSize;
-
-		/// <summary>
 		///   The pointer to the underlying state memory.
 		/// </summary>
 		private readonly byte* _stateMemory;
 
 		/// <summary>
+		///   The length in bytes of a state vector.
+		/// </summary>
+		private readonly int _stateVectorSize;
+
+		/// <summary>
+		///   The number of bytes at the beginning of the state vector that are used to store fault activation states.
+		/// </summary>
+		private readonly int _faultBytes;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="stateVectorSize">The size of the state vector in bytes.</param>
+		/// <param name="layout">The layout of the state vector..</param>
 		/// <param name="capacity">The capacity of the cache, i.e., the number of states that can be stored in the cache.</param>
-		public StateStorage(int stateVectorSize, int capacity)
+		/// <param name="enableFaultOptimization">Indicates whether S#'s fault optimization technique should be used.</param>
+		public StateStorage(StateVectorLayout layout, int capacity, bool enableFaultOptimization)
 		{
-			Requires.InRange(stateVectorSize, nameof(stateVectorSize), 1, Int32.MaxValue);
+			Requires.NotNull(layout, nameof(layout));
 			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
 
-			_stateVectorSize = stateVectorSize;
+			_stateVectorSize = layout.SizeInBytes;
+			_faultBytes = enableFaultOptimization ? layout.FaultBytes : 0;
 			_capacity = capacity;
+			_effectiveStateVectorSize = _stateVectorSize - _faultBytes;
 
 			_stateBuffer.Resize((long)_capacity * _stateVectorSize, zeroMemory: false);
 			_stateMemory = _stateBuffer.Pointer;
@@ -123,7 +137,7 @@ namespace SafetySharp.Runtime
 		{
 			// We don't have to do any out of bounds checks here
 
-			var hash = Hash(state, _stateVectorSize, 0);
+			var hash = Hash(state + _faultBytes, _effectiveStateVectorSize, 0);
 			for (var i = 1; i < ProbeThreshold; ++i)
 			{
 				// We store 30 bit hash values as 32 bit integers, with the most significant bit #31 being set
@@ -183,7 +197,10 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		private bool AreEqual(byte* state1, byte* state2)
 		{
-			for (var i = _stateVectorSize / 8; i > 0; --i)
+			state1 += _faultBytes;
+			state2 += _faultBytes;
+
+			for (var i = _effectiveStateVectorSize / 8; i > 0; --i)
 			{
 				if (*(long*)state1 != *(long*)state2)
 					return false;
@@ -192,7 +209,7 @@ namespace SafetySharp.Runtime
 				state2 += 8;
 			}
 
-			for (var i = _stateVectorSize % 8; i > 0; --i)
+			for (var i = _effectiveStateVectorSize % 8; i > 0; --i)
 			{
 				if (*state1 != *state2)
 					return false;
@@ -210,12 +227,12 @@ namespace SafetySharp.Runtime
 		/// <remarks>See also https://en.wikipedia.org/wiki/MurmurHash (MurmurHash3 implementation)</remarks>
 		private static uint Hash(byte* state, int length, int seed)
 		{
-			const uint c1 = (0xcc9e2d51);
+			const uint c1 = 0xcc9e2d51;
 			const uint c2 = 0x1b873593;
 			const int r1 = 15;
 			const int r2 = 13;
 			const uint m = 5;
-			const uint n = (0xe6546b64);
+			const uint n = 0xe6546b64;
 
 			var hash = (uint)seed;
 			var numBlocks = length / 4;

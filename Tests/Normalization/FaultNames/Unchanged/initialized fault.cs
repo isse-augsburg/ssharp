@@ -19,6 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
 namespace Tests.Normalization.FaultNames.Unchanged
 {
 	using SafetySharp.Modeling;
@@ -29,12 +30,12 @@ namespace Tests.Normalization.FaultNames.Unchanged
 
 		public Fault Y { get; set; } = Create();
 
-		void M()
+		private void M()
 		{
 			Fault x = Create();
 		}
 
-		static Fault Create()
+		private static Fault Create()
 		{
 			return null;
 		}

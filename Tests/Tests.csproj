@@ -133,6 +133,7 @@
     <Compile Include="..\Source\SafetySharp\Properties\InternalsVisibleTo.cs">
       <Link>Properties\InternalsVisibleTo.cs</Link>
     </Compile>
+    <Compile Include="PartialOrderReductionTests.cs" />
     <Compile Include="AnalysisTests.Helpers.cs">
       <DependentUpon>AnalysisTests.cs</DependentUpon>
     </Compile>
@@ -406,6 +407,14 @@
     <Compile Include="Normalization\Partial\Unchanged\enum declaration.cs" />
     <Compile Include="Normalization\Partial\Unchanged\interface declarations.cs" />
     <Compile Include="Normalization\Partial\Unchanged\struct declarations.cs" />
+    <Compile Include="PartialOrderReductionTests.Helpers.cs">
+      <DependentUpon>PartialOrderReductionTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PartialOrderReduction\Invariants\single persistent fault always activated.cs" />
+    <Compile Include="PartialOrderReduction\Invariants\single transient fault activated once.cs" />
+    <Compile Include="PartialOrderReduction\Invariants\single transient fault always activated.cs" />
+    <Compile Include="PartialOrderReduction\Invariants\without faults.cs" />
+    <Compile Include="PartialOrderReduction\Invariants\fault without effect.cs" />
     <Compile Include="ReflectionTests.cs" />
     <Compile Include="ReflectionTests.Helpers.cs">
       <DependentUpon>ReflectionTests.cs</DependentUpon>
@@ -445,6 +454,7 @@
     <Compile Include="Serialization\Compaction\mixed 3.cs" />
     <Compile Include="Serialization\Compaction\mixed 2.cs" />
     <Compile Include="Serialization\Compaction\Boolean.cs" />
+    <Compile Include="Serialization\Compaction\faults.cs" />
     <Compile Include="Serialization\Compaction\state machine.cs" />
     <Compile Include="Serialization\Compaction\Int16 range.cs" />
     <Compile Include="Serialization\Compaction\Int32 range.cs" />

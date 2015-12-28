@@ -25,22 +25,15 @@ namespace SafetySharp.Modeling
 	/// <summary>
 	///   Represents a transient fault that can appear and disappear at any time.
 	/// </summary>
-	public class TransientFault : Fault
+	public sealed class TransientFault : Fault
 	{
 		/// <summary>
-		///   Initializes a new instance.
+		///   Gets the updated occurrence state of the fault. If the fault's activation state is chosen nondeterminisitcally,
+		///   <c>false</c> must be chosen first.
 		/// </summary>
-		public TransientFault()
-			: base(independentActivation: true)
+		protected override bool GetUpdatedActivationState()
 		{
-		}
-
-		/// <summary>
-		///   Gets the updated occurrence state of the fault.
-		/// </summary>
-		protected override bool GetUpdatedOccurrenceState()
-		{
-			return Choice.Choose(true, false);
+			return Choice.Choose(false, true);
 		}
 	}
 }

@@ -19,6 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
 namespace Tests.Normalization.FaultNames.Unchanged
 {
 	public class In1
@@ -27,7 +28,7 @@ namespace Tests.Normalization.FaultNames.Unchanged
 
 		public object Y { get; } = new object();
 
-		void M()
+		private void M()
 		{
 			var x = new object();
 		}

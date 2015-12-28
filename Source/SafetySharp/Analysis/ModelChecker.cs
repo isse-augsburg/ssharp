@@ -49,7 +49,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public abstract CounterExample Check(Model model, Formula formula);
+		public abstract AnalysisResult Check(Model model, Formula formula);
 
 		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
@@ -57,6 +57,6 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public abstract CounterExample CheckInvariant(Model model, Formula invariant);
+		public abstract AnalysisResult CheckInvariant(Model model, Formula invariant);
 	}
 }

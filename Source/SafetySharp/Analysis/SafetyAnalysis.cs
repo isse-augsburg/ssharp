@@ -106,22 +106,22 @@ namespace SafetySharp.Analysis
 						faults[i - 1].Activation = (set & (1 << (i - 1))) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
 
 					// If there was a counter example, the set is a cut set
-					var counterExample = _modelChecker.CheckInvariant(_model, !hazard);
-					if (counterExample != null)
+					var result = _modelChecker.CheckInvariant(_model, !hazard);
+					if (result.CounterExample != null)
 						cutSets.Add(set);
 					else
 						safeSets.Add(set);
 
 					checkedSets.Add(set);
 
-					if (counterExample == null || counterExamplePath == null)
+					if (result.CounterExample == null || counterExamplePath == null)
 						continue;
 
 					var fileName = String.Join("_", faults.Where(f => f.Activation == Activation.Nondeterministic).Select(f => f.Name));
 					if (String.IsNullOrWhiteSpace(fileName))
 						fileName = "emptyset";
 
-					counterExample.Save(Path.Combine(counterExamplePath, $"{fileName}{CounterExample.FileExtension}"));
+					result.CounterExample.Save(Path.Combine(counterExamplePath, $"{fileName}{CounterExample.FileExtension}"));
 				}
 			}
 

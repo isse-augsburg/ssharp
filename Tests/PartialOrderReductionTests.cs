@@ -20,31 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Normalization.FaultNames.Changed
+namespace Tests
 {
-	using SafetySharp.Modeling;
+	using Xunit;
 
-	public class In2
+	public partial class PartialOrderReductionTests
 	{
-		private Fault f1 = new TransientFault() { Activation = Activation.Forced };
-		private Fault f2 = new TransientFault();
-
-		private TransientFault f3 = new TransientFault();
-
-		private TransientFault f4 = new TransientFault();
-
-		private TransientFault f5 = new TransientFault();
-	}
-
-	public class Out2
-	{
-		private Fault f1 = new TransientFault() { Activation = Activation.Forced, Name = "f1" };
-		private Fault f2 = new TransientFault() { Name = "f2" };
-
-		private TransientFault f3 = new TransientFault() { Name = "f3" };
-
-		private TransientFault f4 = new TransientFault() { Name = "f4" };
-
-		private TransientFault f5 = new TransientFault() { Name = "f5" };
+		[Theory, MemberData("DiscoverTests", "PartialOrderReduction/Invariants")]
+		public void Invariants(string test, string file)
+		{
+			ExecuteDynamicTests(file);
+		}
 	}
 }

@@ -66,15 +66,16 @@ namespace Elbtunnel
 			var faults = model.GetFaults();
 
 			for (var i = 0; i < faults.Length; ++i)
-				faults[i].Activation = i < 1 ? Activation.Nondeterministic : Activation.Suppressed;
-//				faults[i].Activation = Activation.Suppressed;
+				 faults[i].Activation = i < 1 ? Activation.Nondeterministic : Activation.Suppressed;
+//				 faults[i].Activation = Activation.Suppressed;
+//				faults[i].Activation = Activation.Nondeterministic;
 
 			Formula f1 = true;
 			Formula f2 = true;
 			Formula f3 = true;
 			Formula f4 = f1 && f2 && f3.Implies(f1 || f2);
 
-			var checker = new SSharpChecker() {CpuCount=4};
+			var checker = new SSharpChecker() { CpuCount = 4 };
 			checker.CheckInvariant(model, f4);
 
 			var ltsMin = new LtsMin();

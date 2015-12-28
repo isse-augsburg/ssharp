@@ -24,7 +24,6 @@ namespace SafetySharp.Runtime
 {
 	using System;
 	using System.Collections.Concurrent;
-	using System.Diagnostics;
 	using System.Runtime.ExceptionServices;
 	using System.Runtime.InteropServices;
 	using System.Threading;
@@ -51,7 +50,7 @@ namespace SafetySharp.Runtime
 		private int _levelCount;
 		private int _nextReport = ReportStateCountDelta;
 		private int _stateCount;
-		private int _transitionCount;
+		private long _transitionCount;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -61,7 +60,8 @@ namespace SafetySharp.Runtime
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="capacity">The number of states that can be stored.</param>
 		/// <param name="cpuCount">The number of CPUs that should be used.</param>
-		private InvariantChecker(Model model, Formula invariant, Action<string> output, int capacity, int cpuCount)
+		/// <param name="enableFaultOptimization">Indicates whether S#'s fault optimization technique should be used.</param>
+		internal InvariantChecker(Model model, Formula invariant, Action<string> output, int capacity, int cpuCount, bool enableFaultOptimization)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
@@ -71,9 +71,10 @@ namespace SafetySharp.Runtime
 			var serializedModel = RuntimeModelSerializer.Save(model, 0, invariant);
 
 			_model = RuntimeModelSerializer.Load(serializedModel);
-			_states = new StateStorage(_model.StateVectorSize, capacity);
+			_states = new StateStorage(_model.StateVectorLayout, capacity, enableFaultOptimization);
 			_output = output;
 
+			cpuCount = Math.Min(Environment.ProcessorCount, Math.Max(1, cpuCount));
 			var stacks = new StateStack[cpuCount];
 
 			_workers = new Worker[cpuCount];
@@ -96,47 +97,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Checks whether the model's invariant holds for all states.
 		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
-		/// <param name="invariant">The invariant that should be checked.</param>
-		/// <param name="output">The callback that should be used to output messages.</param>
-		/// <param name="capacity">The number of states that can be stored.</param>
-		/// <param name="cpuCount">The number of CPUs that should be used.</param>
-		public static CounterExample Check(Model model, Formula invariant, Action<string> output, int capacity, int cpuCount)
-		{
-			var stopwatch = new Stopwatch();
-			stopwatch.Start();
-
-			cpuCount = Math.Min(Environment.ProcessorCount, Math.Max(1, cpuCount));
-			using (var checker = new InvariantChecker(model, invariant, output, capacity, cpuCount))
-			{
-				var initializationTime = stopwatch.Elapsed;
-				stopwatch.Restart();
-
-				try
-				{
-					checker.Check();
-					return checker._counterExample;
-				}
-				finally
-				{
-					stopwatch.Stop();
-
-					output(String.Empty);
-					output("===============================================");
-					output($"Initialization time: {initializationTime}");
-					output($"Model checking time: {stopwatch.Elapsed}");
-					output($"{(int)(checker._stateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
-					output($"{(int)(checker._transitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
-					output("===============================================");
-					output(String.Empty);
-				}
-			}
-		}
-
-		/// <summary>
-		///   Checks whether the model's invariant holds for all states.
-		/// </summary>
-		public void Check()
+		internal AnalysisResult Check()
 		{
 			_output($"Performing invariant check with {_workers.Length} CPU cores.");
 			_output($"State vector has {_model.StateVectorSize} bytes.");
@@ -156,6 +117,8 @@ namespace SafetySharp.Runtime
 
 			if (_counterExample != null)
 				_output("Invariant violation detected.");
+
+			return new AnalysisResult(_counterExample, _stateCount, _transitionCount, _levelCount);
 		}
 
 		/// <summary>
@@ -175,9 +138,9 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Reports the number of states and transitions that have been checked.
 		/// </summary>
-		public void Report()
+		private void Report()
 		{
-			_output($"Explored {_stateCount:n0} states, {_transitionCount:n0} transitions, {_levelCount} levels.");
+			_output($"Discovered {_stateCount:n0} states, {_transitionCount:n0} transitions, {_levelCount} levels.");
 		}
 
 		/// <summary>

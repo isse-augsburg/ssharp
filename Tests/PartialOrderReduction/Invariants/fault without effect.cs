@@ -20,31 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Normalization.FaultNames.Changed
+namespace Tests.PartialOrderReduction.Invariants
 {
 	using SafetySharp.Modeling;
+	using Shouldly;
 
-	public class In2
+	internal class FaultWithoutEffect : PorTestObject
 	{
-		private Fault f1 = new TransientFault() { Activation = Activation.Forced };
-		private Fault f2 = new TransientFault();
+		protected override void Check()
+		{
+			GenerateStateSpace(new C());
 
-		private TransientFault f3 = new TransientFault();
+			StateCount.ShouldBe(51);
+			TransitionCount.ShouldBe(103);
+		}
 
-		private TransientFault f4 = new TransientFault();
+		private class C : Component
+		{
+			private readonly Fault _f = new TransientFault();
 
-		private TransientFault f5 = new TransientFault();
-	}
+			[Range(0, 50, OverflowBehavior.Clamp)]
+			private int _x;
 
-	public class Out2
-	{
-		private Fault f1 = new TransientFault() { Activation = Activation.Forced, Name = "f1" };
-		private Fault f2 = new TransientFault() { Name = "f2" };
+			public override void Update()
+			{
+				++_x;
+			}
 
-		private TransientFault f3 = new TransientFault() { Name = "f3" };
-
-		private TransientFault f4 = new TransientFault() { Name = "f4" };
-
-		private TransientFault f5 = new TransientFault() { Name = "f5" };
+			[FaultEffect(Fault = nameof(_f))]
+			public class E : C
+			{
+				public override void Update()
+				{
+					++_x;
+					base.Update();
+					--_x;
+				}
+			}
+		}
 	}
 }

@@ -40,14 +40,11 @@ namespace Elbtunnel.Vehicles
 			if (IsTunnelClosed)
 				return;
 
-			if (Position <= 14)
+			if (Position < 9)
 				Lane = NextLane;
 
 			Speed = NextSpeed;
 			Position += Speed;
-
-			if (Position > 20)
-				Position = 20;
 		}
 	}
 }

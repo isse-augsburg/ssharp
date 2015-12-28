@@ -33,20 +33,18 @@ namespace Tests
 
 	public abstract class AnalysisTestObject : TestObject
 	{
-		protected CounterExample CounterExample { get; set; }
-
 		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			CounterExample = modelChecker.CheckInvariant(new Model(components), invariant);
-			return CounterExample == null;
+			var result = modelChecker.CheckInvariant(new Model(components), invariant);
+			return result.CounterExample == null;
 		}
 
 		protected bool Check(Formula formula, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			CounterExample = modelChecker.Check(new Model(components), formula);
-			return CounterExample == null;
+			var result = modelChecker.Check(new Model(components), formula);
+			return result.CounterExample == null;
 		}
 
 		protected SafetyAnalysis.Result Dcca(Formula hazard, params IComponent[] components)
