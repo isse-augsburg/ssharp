@@ -49,7 +49,7 @@ namespace Elbtunnel.Controllers
 			}
 
 			var active = Count != 0;
-			var onlyRightTriggered = !LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected;
+			var onlyRightTriggered = active && !LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected;
 
 			// We assume the worst case: If the vehicle was not on the right lane, it was on the left lane
 			// (even if it was a false detection of the position detector).

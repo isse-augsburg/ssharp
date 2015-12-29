@@ -24,6 +24,7 @@ namespace SafetySharp.Modeling
 {
 	using System;
 	using System.Runtime.Serialization;
+	using CompilerServices;
 	using Runtime.Reflection;
 	using Utilities;
 
@@ -34,6 +35,9 @@ namespace SafetySharp.Modeling
 	{
 		[Hidden]
 		private Activation _activation = Activation.Nondeterministic;
+
+		[Hidden]
+		private bool _activationIsUnknown;
 
 		private bool _isActivated;
 
@@ -51,12 +55,8 @@ namespace SafetySharp.Modeling
 		///   Gets a value indicating whether the fault is activated and has some effect on the state of the system, therefore inducing
 		///   an error or possibly a failure.
 		/// </summary>
-		// ReSharper disable once ConvertToAutoProperty
-		public bool IsActivated
-		{
-			get { return _isActivated; }
-			private set { _isActivated = value; }
-		}
+		// ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+		public bool IsActivated => _isActivated;
 
 		/// <summary>
 		///   Gets the <see cref="Choice" /> instance that can be used to determine whether the fault occurs.
@@ -83,9 +83,9 @@ namespace SafetySharp.Modeling
 				_activation = value;
 
 				if (value == Activation.Nondeterministic)
-					IsActivated = false;
+					_isActivated = false;
 				else
-					IsActivated = value == Activation.Forced;
+					_isActivated = value == Activation.Forced;
 			}
 		}
 
@@ -131,12 +131,27 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Updates the state of the fault.
+		///   Tries to activate the fault.
 		/// </summary>
-		internal void Update()
+		/// <remarks>
+		///   This method is internal to simplify the public API of the class. The method is publically exposed via
+		///   <see cref="FaultHelper.ActivateFault" /> for use by the S# compiler.
+		/// </remarks>
+		internal void TryActivate()
 		{
-			if (_activation == Activation.Nondeterministic)
-				IsActivated = GetUpdatedActivationState();
+			if (!_activationIsUnknown)
+				return;
+
+			_isActivated = GetUpdatedActivationState();
+			_activationIsUnknown = false;
+		}
+
+		/// <summary>
+		///   Resetse the fault's activation state for the current step.
+		/// </summary>
+		internal void Reset()
+		{
+			_activationIsUnknown = _activation == Activation.Nondeterministic;
 		}
 
 		/// <summary>

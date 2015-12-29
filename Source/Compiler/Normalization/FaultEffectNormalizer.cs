@@ -33,7 +33,7 @@ namespace SafetySharp.Compiler.Normalization
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
 	using Utilities;
-
+	using CompilerServices;
 	/// <summary>
 	///   Normalizes classes marked with <see cref="FaultEffectAttribute" />.
 	/// </summary>
@@ -43,6 +43,7 @@ namespace SafetySharp.Compiler.Normalization
 		private readonly Dictionary<INamedTypeSymbol, INamedTypeSymbol[]> _faults = new Dictionary<INamedTypeSymbol, INamedTypeSymbol[]>();
 		private readonly Dictionary<string, IMethodSymbol> _methodLookup = new Dictionary<string, IMethodSymbol>();
 		private readonly Dictionary<string, INamedTypeSymbol> _typeLookup = new Dictionary<string, INamedTypeSymbol>();
+		private readonly string _tryActivate = $"global::{typeof(FaultHelper).FullName}.{nameof(FaultHelper.ActivateFault)}";
 
 		/// <summary>
 		///   Normalizes the syntax trees of the <see cref="Compilation" />.
@@ -231,7 +232,7 @@ namespace SafetySharp.Compiler.Normalization
 								var effectType = overridingEffects[i].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 								var index = Array.IndexOf(priorityFaults, overridingEffects[i]);
 
-								writer.AppendLine($"if ((({effectType})this).{"fault".ToSynthesized()}.{nameof(Fault.IsActivated)})");
+								writer.AppendLine($"if ({_tryActivate}((({effectType})this).{"fault".ToSynthesized()}))");
 								writer.IncreaseIndent();
 								writer.AppendLine($"{levelChoiceVariable}[{levelCountVariable}++] = {index};");
 								writer.DecreaseIndent();
@@ -251,8 +252,9 @@ namespace SafetySharp.Compiler.Normalization
 
 			if (body == null)
 			{
-				var faultAccess = Syntax.MemberAccessExpression(Syntax.ThisExpression(), "fault".ToSynthesized());
-				var isOccurring = Syntax.MemberAccessExpression(faultAccess, nameof(Fault.IsActivated));
+				var faultHelper = Syntax.TypeExpression(SemanticModel.GetTypeSymbol(typeof(FaultHelper)));
+				var activateFault = Syntax.MemberAccessExpression(faultHelper, nameof(FaultHelper.ActivateFault));
+				var isOccurring = Syntax.InvocationExpression(activateFault, Syntax.IdentifierName("fault".ToSynthesized()));
 				var notOccurring = Syntax.LogicalNotExpression(isOccurring);
 
 				var ifStatement = Syntax.IfStatement(notOccurring, baseStatement).NormalizeWhitespace().WithTrailingNewLines(1);

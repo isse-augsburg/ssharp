@@ -103,8 +103,8 @@ namespace SafetySharp.Runtime
 			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
 
 			_stateVectorSize = layout.SizeInBytes;
-			_faultBytes = enableFaultOptimization ? layout.FaultBytes : 0;
 			_capacity = capacity;
+			_faultBytes = enableFaultOptimization ? layout.FaultBytes : 0;
 			_effectiveStateVectorSize = _stateVectorSize - _faultBytes;
 
 			_stateBuffer.Resize((long)_capacity * _stateVectorSize, zeroMemory: false);

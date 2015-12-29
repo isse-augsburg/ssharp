@@ -198,7 +198,7 @@ namespace SafetySharp.Runtime
 		internal void ExecuteStep()
 		{
 			foreach (var fault in Faults)
-				fault.Update();
+				fault.Reset();
 
 			foreach (var component in RootComponents)
 				component.Update();
