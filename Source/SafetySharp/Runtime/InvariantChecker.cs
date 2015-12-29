@@ -238,6 +238,9 @@ namespace SafetySharp.Runtime
 					if (!_states.AddState(stateCache.StateMemory + i * stateCache.StateVectorSize, out index))
 						continue;
 
+					Interlocked.Increment(ref _context._stateCount);
+					_stateStack.PushState(index);
+
 					// Deserialize the state in order to check the invariant; this seems inefficient, but
 					// other alternatives do not seem to perform any better
 					_model.Deserialize(stateCache.StateMemory + i * stateCache.StateVectorSize);
@@ -247,9 +250,6 @@ namespace SafetySharp.Runtime
 						CreateCounterExample();
 						return;
 					}
-
-					Interlocked.Increment(ref _context._stateCount);
-					_stateStack.PushState(index);
 				}
 			}
 
