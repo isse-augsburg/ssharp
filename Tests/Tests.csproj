@@ -136,6 +136,10 @@
     <Compile Include="Analysis\Invariants\NotViolated\undo nested choice.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\undo choice.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\fault activation.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Valid\deterministic effects without priorities.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Valid\effects with priorities.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Valid\explicit nondeterminism.cs" />
     <Compile Include="FaultActivationTests.cs" />
     <Compile Include="AnalysisTests.Helpers.cs">
       <DependentUpon>AnalysisTests.cs</DependentUpon>

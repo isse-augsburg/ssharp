@@ -22,6 +22,8 @@
 
 namespace SafetySharp.Compiler.Analyzers
 {
+	using System;
+	using System.Linq;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.Diagnostics;
@@ -34,6 +36,15 @@ namespace SafetySharp.Compiler.Analyzers
 	[DiagnosticAnalyzer(LanguageNames.CSharp), UsedImplicitly]
 	public sealed class FaultEffectAnalyzer : Analyzer
 	{
+		/// <summary>
+		///   The warning diagnostic emitted by the analyzer when a member is affected by multiple non-prioritized fault effects.
+		/// </summary>
+		private static readonly DiagnosticInfo _multipleEffectsWithoutPriority = DiagnosticInfo.Warning(
+			DiagnosticIdentifier.MultipleFaultEffectsWithoutPriority,
+			"Detected multiple fault effects affecting the same member.",
+			"'{0}' is affected by multiple fault effects without an explicit priority specification. Consider making priorities " +
+			$"explicit by adding the '{typeof(PriorityAttribute).FullName}' to: {{1}}.");
+
 		/// <summary>
 		///   The error diagnostic emitted by the analyzer when a fault effect overrides an abstract member.
 		/// </summary>
@@ -70,7 +81,7 @@ namespace SafetySharp.Compiler.Analyzers
 		///   Initializes a new instance.
 		/// </summary>
 		public FaultEffectAnalyzer()
-			: base(_genericEffect, _accessibility, _invalidBaseType, _abstractOverride)
+			: base(_genericEffect, _accessibility, _invalidBaseType, _abstractOverride, _multipleEffectsWithoutPriority)
 		{
 		}
 
@@ -82,6 +93,39 @@ namespace SafetySharp.Compiler.Analyzers
 		{
 			context.RegisterSymbolAction(AnalyzeType, SymbolKind.NamedType);
 			context.RegisterSymbolAction(AnalyzeMember, SymbolKind.Method, SymbolKind.Property);
+			context.RegisterCompilationAction(AnalyzeCompilation);
+		}
+
+		/// <summary>
+		///   Performs the analysis.
+		/// </summary>
+		/// <param name="context">The context in which the analysis should be performed.</param>
+		private static void AnalyzeCompilation(CompilationAnalysisContext context)
+		{
+			var compilation = context.Compilation;
+			var types = compilation.GetSymbolsWithName(_ => true, SymbolFilter.Type).OfType<INamedTypeSymbol>().ToArray();
+			var components = types.Where(type => type.IsComponent(compilation)).ToArray();
+			var faultEffects = types.Where(type => type.IsFaultEffect(compilation) && !type.HasAttribute<PriorityAttribute>(compilation)).ToArray();
+
+			foreach (var component in components)
+			{
+				var effects = faultEffects.Where(faultEffect => faultEffect.BaseType.Equals(component)).ToArray();
+				var nondeterministic = effects.GroupBy(fault => fault.GetPriority(compilation)).Where(group => group.Count() > 1).ToArray();
+
+				foreach (var method in component.GetMembers().OfType<IMethodSymbol>())
+				{
+					var unprioritizedTypes = nondeterministic
+						.Where(typeGroup => typeGroup.Count(f => f.GetMembers().OfType<IMethodSymbol>().Any(m => m.Overrides(method))) > 1)
+						.SelectMany(typeGroup => typeGroup)
+						.Where(type => type.GetMembers().OfType<IMethodSymbol>().Any(m => m.Overrides(method)))
+						.Select(type => $"'{type.ToDisplayString()}'")
+						.OrderBy(type => type)
+						.ToArray();
+
+					if (unprioritizedTypes.Length > 0)
+						_multipleEffectsWithoutPriority.Emit(context, method, method.ToDisplayString(), String.Join(", ", unprioritizedTypes));
+				}
+			}
 		}
 
 		/// <summary>

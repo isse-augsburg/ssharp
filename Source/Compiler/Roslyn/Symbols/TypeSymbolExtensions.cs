@@ -136,10 +136,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(compilation, nameof(compilation));
 
 			var attribute = typeSymbol.GetAttributes<PriorityAttribute>(compilation).SingleOrDefault();
-			if (attribute == null)
-				return 0;
-
-			return (int)attribute.ConstructorArguments[0].Value;
+			return attribute == null ? 0 : (int)attribute.ConstructorArguments[0].Value;
 		}
 	}
 }
