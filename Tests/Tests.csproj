@@ -133,6 +133,7 @@
     <Compile Include="..\Source\SafetySharp\Properties\InternalsVisibleTo.cs">
       <Link>Properties\InternalsVisibleTo.cs</Link>
     </Compile>
+    <Compile Include="Analysis\Ltl\Violated\undo fault after successful activation.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\undo nested choice.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\undo choice.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\fault activation.cs" />
