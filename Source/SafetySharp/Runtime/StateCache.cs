@@ -33,7 +33,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   The default initial capacity.
 		/// </summary>
-		private const int InitialCapacity = 64;
+		private const long InitialCapacity = 64;
 
 		/// <summary>
 		///   The underlying memory of the cache.
@@ -43,14 +43,14 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   The number of states that can be cached.
 		/// </summary>
-		private int _capacity;
+		private long _capacity;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="stateVectorSize">The size of the state vector in bytes.</param>
 		/// <param name="initialCapacity">The initial capacity of the cache.</param>
-		public StateCache(int stateVectorSize, int initialCapacity = InitialCapacity)
+		public StateCache(int stateVectorSize, long initialCapacity = InitialCapacity)
 		{
 			StateVectorSize = stateVectorSize;
 			_capacity = initialCapacity;

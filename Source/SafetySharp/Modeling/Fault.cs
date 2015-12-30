@@ -33,11 +33,19 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	public abstract class Fault
 	{
+		private readonly Choice _choice = new Choice();
+
 		[Hidden]
 		private Activation _activation = Activation.Nondeterministic;
 
-		[Hidden]
+		[NonSerializable]
 		private bool _activationIsUnknown;
+
+		[NonSerializable]
+		private bool _canUndoActivation;
+
+		[NonSerializable]
+		private int _choiceIndex;
 
 		private bool _isActivated;
 
@@ -57,11 +65,6 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		// ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
 		public bool IsActivated => _isActivated;
-
-		/// <summary>
-		///   Gets the <see cref="Choice" /> instance that can be used to determine whether the fault occurs.
-		/// </summary>
-		protected Choice Choice { get; } = new Choice();
 
 		/// <summary>
 		///   Gets or sets the fault's name.
@@ -131,19 +134,57 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
+		///   Undoes the activation of the fault when the activation is known to have no observable effect and fault activation was
+		///   nondeterministic in the current step.
+		/// </summary>
+		/// <remarks>
+		///   This method is internal to simplify the public API of the class. The method is publically exposed via
+		///   <see cref="FaultHelper.UndoActivation" /> for use by the S# compiler.
+		/// </remarks>
+		internal void UndoActivation()
+		{
+			if (!_canUndoActivation)
+				return;
+
+			_canUndoActivation = false;
+			_activationIsUnknown = true;
+			_choice.Resolver.Undo(_choiceIndex);
+		}
+
+		/// <summary>
 		///   Tries to activate the fault.
 		/// </summary>
 		/// <remarks>
 		///   This method is internal to simplify the public API of the class. The method is publically exposed via
-		///   <see cref="FaultHelper.ActivateFault" /> for use by the S# compiler.
+		///   <see cref="FaultHelper.Activate" /> for use by the S# compiler.
 		/// </remarks>
 		internal void TryActivate()
 		{
 			if (!_activationIsUnknown)
-				return;
+				_canUndoActivation = false;
+			else
+			{
+				switch (GetUpdatedActivationState())
+				{
+					case Activation.Forced:
+						_isActivated = true;
+						_canUndoActivation = false;
+						break;
+					case Activation.Suppressed:
+						_isActivated = false;
+						_canUndoActivation = false;
+						break;
+					case Activation.Nondeterministic:
+						_isActivated = _choice.Choose(false, true);
+						_choiceIndex = _choice.Resolver.LastChoiceIndex;
+						_canUndoActivation = true;
+						break;
+					default:
+						throw new InvalidOperationException("Unsupported fault activation.");
+				}
 
-			_isActivated = GetUpdatedActivationState();
-			_activationIsUnknown = false;
+				_activationIsUnknown = false;
+			}
 		}
 
 		/// <summary>
@@ -151,13 +192,13 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		internal void Reset()
 		{
-			_activationIsUnknown = _activation == Activation.Nondeterministic;
+			_activationIsUnknown = true;
+			_canUndoActivation = false;
 		}
 
 		/// <summary>
-		///   Gets the updated occurrence state of the fault. If the fault's activation state is chosen nondeterminisitcally,
-		///   <c>false</c> must be chosen first.
+		///   Gets the updated activation state of the fault.
 		/// </summary>
-		protected abstract bool GetUpdatedActivationState();
+		protected abstract Activation GetUpdatedActivationState();
 	}
 }

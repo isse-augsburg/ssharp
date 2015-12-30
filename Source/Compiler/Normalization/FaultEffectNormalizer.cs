@@ -25,6 +25,7 @@ namespace SafetySharp.Compiler.Normalization
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using CompilerServices;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,7 +34,7 @@ namespace SafetySharp.Compiler.Normalization
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
 	using Utilities;
-	using CompilerServices;
+
 	/// <summary>
 	///   Normalizes classes marked with <see cref="FaultEffectAttribute" />.
 	/// </summary>
@@ -42,8 +43,9 @@ namespace SafetySharp.Compiler.Normalization
 		private readonly Dictionary<Tuple<IMethodSymbol, int>, string> _faultChoiceFields = new Dictionary<Tuple<IMethodSymbol, int>, string>();
 		private readonly Dictionary<INamedTypeSymbol, INamedTypeSymbol[]> _faults = new Dictionary<INamedTypeSymbol, INamedTypeSymbol[]>();
 		private readonly Dictionary<string, IMethodSymbol> _methodLookup = new Dictionary<string, IMethodSymbol>();
+		private readonly string _tryActivate = $"global::{typeof(FaultHelper).FullName}.{nameof(FaultHelper.Activate)}";
 		private readonly Dictionary<string, INamedTypeSymbol> _typeLookup = new Dictionary<string, INamedTypeSymbol>();
-		private readonly string _tryActivate = $"global::{typeof(FaultHelper).FullName}.{nameof(FaultHelper.ActivateFault)}";
+		private readonly string _undoActivation = $"global::{typeof(FaultHelper).FullName}.{nameof(FaultHelper.UndoActivation)}";
 
 		/// <summary>
 		///   Normalizes the syntax trees of the <see cref="Compilation" />.
@@ -186,14 +188,13 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Creates a deterministic or nondeterministic fault effect body.
 		/// </summary>
-		private BlockSyntax CreateBody(IMethodSymbol method, StatementSyntax originalBody, SyntaxNode baseEffect)
+		private BlockSyntax CreateBody(IMethodSymbol method, BlockSyntax originalBody, SyntaxNode baseEffect)
 		{
-			originalBody = originalBody.AppendLineDirective(-1).PrependLineDirective(originalBody.GetLineNumber());
-
+			var lineAdjustedOriginalBody = originalBody.AppendLineDirective(-1).PrependLineDirective(originalBody.GetLineNumber());
 			var componentType = _typeLookup[method.ContainingType.BaseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)];
 			var faultEffectType = _typeLookup[method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)];
 			var faults = _faults[componentType];
-			var baseStatement = !method.ReturnsVoid
+			var baseStatements = !method.ReturnsVoid
 				? new[] { Syntax.ReturnStatement(baseEffect) }
 				: new[] { Syntax.ExpressionStatement(baseEffect), Syntax.ReturnStatement() };
 
@@ -213,7 +214,7 @@ namespace SafetySharp.Compiler.Normalization
 					var choiceField = Syntax.MemberAccessExpression(Syntax.ThisExpression(), fieldName);
 
 					var levelCondition = Syntax.ValueNotEqualsExpression(choiceField, Syntax.LiteralExpression(effectIndex));
-					var ifStatement = Syntax.IfStatement(levelCondition, baseStatement).NormalizeWhitespace().WithTrailingNewLines(1);
+					var ifStatement = Syntax.IfStatement(levelCondition, baseStatements).NormalizeWhitespace().WithTrailingNewLines(1);
 
 					if (overridingEffects.Last().Equals(faultEffectType))
 					{
@@ -243,25 +244,82 @@ namespace SafetySharp.Compiler.Normalization
 						});
 
 						var selectionStatement = SyntaxFactory.ParseStatement(writer.ToString());
-						body = SyntaxFactory.Block(selectionStatement, (StatementSyntax)ifStatement, originalBody);
+						body = SyntaxFactory.Block(selectionStatement, (StatementSyntax)ifStatement, lineAdjustedOriginalBody);
 					}
 					else
-						body = SyntaxFactory.Block((StatementSyntax)ifStatement, originalBody);
+						body = SyntaxFactory.Block((StatementSyntax)ifStatement, lineAdjustedOriginalBody);
 				}
 			}
 
 			if (body == null)
 			{
-				var faultHelper = Syntax.TypeExpression(SemanticModel.GetTypeSymbol(typeof(FaultHelper)));
-				var activateFault = Syntax.MemberAccessExpression(faultHelper, nameof(FaultHelper.ActivateFault));
-				var isOccurring = Syntax.InvocationExpression(activateFault, Syntax.IdentifierName("fault".ToSynthesized()));
-				var notOccurring = Syntax.LogicalNotExpression(isOccurring);
+				var writer = new CodeWriter();
+				writer.AppendLine($"if (!{_tryActivate}(this.{"fault".ToSynthesized()}))");
+				writer.AppendBlockStatement(() =>
+				{
+					// Optimization: If we're normalizing a non-void returning method without ref/out parameters and
+					// the fault effect simply returns a constant value of primitive type, we generate code to check whether the non-fault
+					// value for the case that the fault is not activated (which is always the first case) actually differs 
+					// from the constant value returned by the fault effect when the fault is activated. If both values are
+					// the same, the activation of the fault will have no effect, so we can undo it, reducing the number
+					// of transitions that have to be checked
+					var signatureAllowsOptimization =
+						!method.ReturnsVoid && CanBeCompared(method.ReturnType) && method.Parameters.All(parameter => parameter.RefKind == RefKind.None);
+					var faultEffectReturn = originalBody.Statements.Count == 1 ? originalBody.Statements[0] as ReturnStatementSyntax : null;
+					var isConstantValue = faultEffectReturn != null && SemanticModel.GetConstantValue(faultEffectReturn.Expression).HasValue;
 
-				var ifStatement = Syntax.IfStatement(notOccurring, baseStatement).NormalizeWhitespace().WithTrailingNewLines(1);
-				body = SyntaxFactory.Block((StatementSyntax)ifStatement, originalBody);
+					if (signatureAllowsOptimization && isConstantValue)
+					{
+						writer.AppendLine($"var {"tmp".ToSynthesized()} = {baseEffect.ToFullString()};");
+						writer.AppendLine($"if ({"tmp".ToSynthesized()} == {faultEffectReturn.Expression.ToFullString()})");
+						writer.AppendBlockStatement(() => { writer.AppendLine($"{_undoActivation}(this.{"fault".ToSynthesized()});"); });
+						writer.AppendLine($"return {"tmp".ToSynthesized()};");
+					}
+					else
+					{
+						foreach (var statement in baseStatements)
+							writer.AppendLine(statement.NormalizeWhitespace().ToFullString());
+					}
+				});
+
+				writer.NewLine();
+				body = SyntaxFactory.Block(SyntaxFactory.ParseStatement(writer.ToString()), lineAdjustedOriginalBody);
 			}
 
 			return body.PrependLineDirective(-1);
+		}
+
+		/// <summary>
+		///   Gets the value indicating whether <paramref name="typeSymbol" /> can be compared using the <c>==</c> operator.
+		/// </summary>
+		public static bool CanBeCompared(ITypeSymbol typeSymbol)
+		{
+			switch (typeSymbol.SpecialType)
+			{
+				case SpecialType.System_Enum:
+				case SpecialType.System_Void:
+				case SpecialType.System_Boolean:
+				case SpecialType.System_Char:
+				case SpecialType.System_SByte:
+				case SpecialType.System_Byte:
+				case SpecialType.System_Int16:
+				case SpecialType.System_UInt16:
+				case SpecialType.System_Int32:
+				case SpecialType.System_UInt32:
+				case SpecialType.System_Int64:
+				case SpecialType.System_UInt64:
+				case SpecialType.System_Decimal:
+				case SpecialType.System_Single:
+				case SpecialType.System_Double:
+				case SpecialType.System_String:
+				case SpecialType.System_IntPtr:
+				case SpecialType.System_UIntPtr:
+				case SpecialType.System_Nullable_T:
+				case SpecialType.System_DateTime:
+					return true;
+				default:
+					return false;
+			}
 		}
 
 		/// <summary>

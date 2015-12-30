@@ -28,15 +28,11 @@ namespace SafetySharp.Modeling
 	public sealed class PersistentFault : Fault
 	{
 		/// <summary>
-		///   Gets the updated occurrence state of the fault. If the fault's activation state is chosen nondeterminisitcally,
-		///   <c>false</c> must be chosen first.
+		///   Gets the updated activation state of the fault.
 		/// </summary>
-		protected override bool GetUpdatedActivationState()
+		protected override Activation GetUpdatedActivationState()
 		{
-			if (!IsActivated)
-				return Choice.Choose(false, true);
-
-			return true;
+			return IsActivated ? Activation.Forced : Activation.Nondeterministic;
 		}
 	}
 }

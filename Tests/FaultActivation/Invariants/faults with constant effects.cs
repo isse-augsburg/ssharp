@@ -20,44 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.PartialOrderReduction.Invariants
+namespace Tests.FaultActivation.Invariants
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class SingleTransientFaultActivatedOnce : PorTestObject
+	internal class FaultsWithConstantEffects : FaultActivationTestObject
 	{
 		protected override void Check()
 		{
 			GenerateStateSpace(new C());
 
-			StateCount.ShouldBe(6);
-			TransitionCount.ShouldBe(13);
+			StateCount.ShouldBe(51);
+			TransitionCount.ShouldBe(52);
 		}
 
 		private class C : Component
 		{
-			private readonly Fault _f = new TransientFault();
+			private readonly Fault _f1 = new TransientFault();
+			private readonly Fault _f2 = new TransientFault();
 
-			[Range(0, 2, OverflowBehavior.Clamp)]
+			[Range(0, 50, OverflowBehavior.Clamp)]
 			private int _x;
-
-			[Range(0, 2, OverflowBehavior.Clamp)]
-			private int _y;
 
 			public override void Update()
 			{
-				++_x;
+				if (B)
+					_x += Y;
 			}
 
-			[FaultEffect(Fault = nameof(_f))]
-			public class E : C
+			public virtual int Y => 1;
+			public virtual bool B => true;
+
+			[FaultEffect(Fault = nameof(_f1))]
+			public class E1 : C
 			{
-				public override void Update()
-				{
-					if (_x == 0)
-						_y = 1;
-				}
+				public override int Y => 1;
+			}
+
+			[FaultEffect(Fault = nameof(_f2))]
+			public class E2 : C
+			{
+				public override bool B => true;
 			}
 		}
 	}

@@ -20,12 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.PartialOrderReduction.Invariants
+namespace Tests.FaultActivation.Invariants
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class WithoutFalts : PorTestObject
+	internal class UnusedFault : FaultActivationTestObject
 	{
 		protected override void Check()
 		{
@@ -37,12 +37,22 @@ namespace Tests.PartialOrderReduction.Invariants
 
 		private class C : Component
 		{
+			private readonly Fault _f = new TransientFault();
+
 			[Range(0, 50, OverflowBehavior.Clamp)]
 			private int _x;
 
 			public override void Update()
 			{
 				++_x;
+			}
+
+			public virtual int Y => 1;
+
+			[FaultEffect(Fault = nameof(_f))]
+			public class E : C
+			{
+				public override int Y => 7;
 			}
 		}
 	}

@@ -29,9 +29,9 @@ namespace Tests.Normalization.FaultNames.Unchanged
 		public int X;
 		public int Y;
 
-		protected override bool GetUpdatedActivationState()
+		protected override Activation GetUpdatedActivationState()
 		{
-			return false;
+			return Activation.Suppressed;
 		}
 	}
 

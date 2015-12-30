@@ -76,7 +76,7 @@ namespace SafetySharp.Compiler
 			log.Info("");
 
 			log.Info("S# Compiler");
-			log.Info("Copyright (c) 2014 Institute for Software & Systems Engineering");
+			log.Info("Copyright (c) 2014-2015 Institute for Software & Systems Engineering");
 
 			log.Info("");
 			log.Info("This is free software. You may redistribute copies of it under the terms of");

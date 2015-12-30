@@ -20,43 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.PartialOrderReduction.Invariants
+namespace Tests
 {
+	using System.Collections.Generic;
+	using JetBrains.Annotations;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using Shouldly;
+	using Utilities;
+	using Xunit.Abstractions;
 
-	internal class FaultWithoutEffect : PorTestObject
+	public abstract class FaultActivationTestObject : TestObject
 	{
-		protected override void Check()
-		{
-			GenerateStateSpace(new C());
+		private AnalysisResult _result;
+		protected CounterExample CounterExample => _result.CounterExample;
+		protected int StateCount => _result.StateCount;
+		protected long TransitionCount => _result.TransitionCount;
 
-			StateCount.ShouldBe(51);
-			TransitionCount.ShouldBe(103);
+		protected void GenerateStateSpace(params IComponent[] components)
+		{
+			var checker = new InvariantChecker(new Model(components), new StateFormula(() => true), s => Output.Log("{0}", s), 10000, 1, true);
+			_result = checker.Check();
+			CounterExample.ShouldBe(null);
+		}
+	}
+
+	public partial class FaultActivationTests : Tests
+	{
+		public FaultActivationTests(ITestOutputHelper output)
+			: base(output)
+		{
 		}
 
-		private class C : Component
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests(string directory)
 		{
-			private readonly Fault _f = new TransientFault();
-
-			[Range(0, 50, OverflowBehavior.Clamp)]
-			private int _x;
-
-			public override void Update()
-			{
-				++_x;
-			}
-
-			[FaultEffect(Fault = nameof(_f))]
-			public class E : C
-			{
-				public override void Update()
-				{
-					++_x;
-					base.Update();
-					--_x;
-				}
-			}
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
 		}
 	}
 }

@@ -62,6 +62,8 @@ namespace SafetySharp.Runtime
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get { return _buffer[index]; }
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			set { _buffer[index] = value; }
 		}
 
 		/// <summary>
@@ -74,7 +76,7 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Removes the top element from the stack.
+		///   Removes the topmost element from the stack.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int Remove()

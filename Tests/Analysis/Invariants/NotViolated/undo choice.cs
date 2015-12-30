@@ -20,43 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Analysis.Invariants.NotViolated
 {
-	using System.Collections.Generic;
-	using JetBrains.Annotations;
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
-	using Utilities;
-	using Xunit.Abstractions;
 
-	public abstract class PorTestObject : TestObject
+	internal class UndoChoice : AnalysisTestObject
 	{
-		private AnalysisResult _result;
-		protected CounterExample CounterExample => _result.CounterExample;
-		protected int StateCount => _result.StateCount;
-		protected long TransitionCount => _result.TransitionCount;
-
-		protected void GenerateStateSpace(params IComponent[] components)
+		protected override void Check()
 		{
-			var checker = new InvariantChecker(new Model(components), new StateFormula(() => true), s => Output.Log("{0}", s), 10000, 1, true);
-			_result = checker.Check();
-			CounterExample.ShouldBe(null);
-		}
-	}
-
-	public partial class PartialOrderReductionTests : Tests
-	{
-		public PartialOrderReductionTests(ITestOutputHelper output)
-			: base(output)
-		{
+			var d = new D();
+			CheckInvariant(d.F != 2 && d.F != 3, d).ShouldBe(true);
 		}
 
-		[UsedImplicitly]
-		public static IEnumerable<object[]> DiscoverTests(string directory)
+		private class D : Component
 		{
-			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
+			private readonly Choice _choice = new Choice();
+			public int F;
+
+			public override void Update()
+			{
+				F = _choice.Choose(1, 2, 3);
+				_choice.Resolver.Undo(_choice.Resolver.LastChoiceIndex);
+			}
 		}
 	}
 }

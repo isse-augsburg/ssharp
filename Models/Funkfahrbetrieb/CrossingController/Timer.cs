@@ -32,7 +32,7 @@ namespace Funkfahrbetrieb.CrossingController
 		[Hidden]
 		public int Timeout;
 
-		public virtual bool HasElapsed => _remainingTime == 0;
+		public bool HasElapsed => _remainingTime == 0;
 		public bool IsActive => _remainingTime > 0;
 		public int RemainingTime => _remainingTime;
 
@@ -50,9 +50,6 @@ namespace Funkfahrbetrieb.CrossingController
 		{
 			// TODO: Support different system step times
 			--_remainingTime;
-
-			if (_remainingTime < -1)
-				_remainingTime = -1;
 		}
 	}
 }

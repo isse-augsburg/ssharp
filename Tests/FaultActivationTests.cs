@@ -20,44 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.PartialOrderReduction.Invariants
+namespace Tests
 {
-	using SafetySharp.Modeling;
-	using Shouldly;
+	using Xunit;
 
-	internal class SingleTransientFault : PorTestObject
+	public partial class FaultActivationTests
 	{
-		protected override void Check()
+		[Theory, MemberData("DiscoverTests", "FaultActivation/Invariants")]
+		public void Invariants(string test, string file)
 		{
-			GenerateStateSpace(new C());
-
-			StateCount.ShouldBe(9);
-			TransitionCount.ShouldBe(19);
-		}
-
-		private class C : Component
-		{
-			private readonly Fault _f = new TransientFault();
-
-			[Range(0, 2, OverflowBehavior.Clamp)]
-			private int _x;
-
-			[Range(0, 2, OverflowBehavior.Clamp)]
-			private int _y;
-
-			public override void Update()
-			{
-				++_x;
-			}
-
-			[FaultEffect(Fault = nameof(_f))]
-			public class E : C
-			{
-				public override void Update()
-				{
-					++_y;
-				}
-			}
+			ExecuteDynamicTests(file);
 		}
 	}
 }

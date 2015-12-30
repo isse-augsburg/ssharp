@@ -70,6 +70,12 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
+		///   Gets the index of the last choice that has been made.
+		/// </summary>
+		// ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+		internal int LastChoiceIndex => _choiceIndex;
+
+		/// <summary>
 		///   Prepares the resolver for resolving the choices of the next state.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -133,6 +139,18 @@ namespace SafetySharp.Runtime
 			_chosenValues.Push(0);
 
 			return 0;
+		}
+
+		/// <summary>
+		///   Undoes the choice identified by the <paramref name="choiceIndex" />.
+		/// </summary>
+		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal void Undo(int choiceIndex)
+		{
+			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
+			// turning the choice into a deterministic selection of the value at index 0
+			_valueCount[choiceIndex] = 0;
 		}
 
 		/// <summary>

@@ -20,43 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.PartialOrderReduction.Invariants
+namespace Tests.Analysis.Invariants.NotViolated
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class SinglePersistentFault : PorTestObject
+	internal class UndoNestedChoice : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			GenerateStateSpace(new C());
-
-			StateCount.ShouldBe(9);
-			TransitionCount.ShouldBe(13);
+			var d = new D();
+			CheckInvariant(d.F != 2 && d.F != 3 && (d.G == 0 || d.G == 7 || d.G == 8), d).ShouldBe(true);
 		}
 
-		private class C : Component
+		private class D : Component
 		{
-			private readonly Fault _f = new PersistentFault();
-
-			[Range(0, 2, OverflowBehavior.Clamp)]
-			private int _x;
-
-			[Range(0, 2, OverflowBehavior.Clamp)]
-			private int _y;
+			private readonly Choice _choice = new Choice();
+			public int F;
+			public int G;
 
 			public override void Update()
 			{
-				++_x;
-			}
+				G = _choice.Choose(3, 5);
+				F = _choice.Choose(1, 2, 3);
 
-			[FaultEffect(Fault = nameof(_f))]
-			public class E : C
-			{
-				public override void Update()
-				{
-					++_y;
-				}
+				var index = _choice.Resolver.LastChoiceIndex;
+
+				G = _choice.Choose(7, 8);
+
+				_choice.Resolver.Undo(index);
 			}
 		}
 	}

@@ -20,49 +20,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Invariants.NotViolated
+namespace Tests.FaultActivation.Invariants
 {
-	using System;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class DisabledFaults : AnalysisTestObject
+	internal class FaultWithoutEffect : FaultActivationTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C
-			{
-				X = 3,
-				F1 = { Activation = Activation.Suppressed },
-				F2 = { Activation = Activation.Suppressed }
-			};
+			GenerateStateSpace(new C());
 
-			CheckInvariant(c.X == 3, c).ShouldBe(true);
+			StateCount.ShouldBe(51);
+			TransitionCount.ShouldBe(103);
 		}
 
 		private class C : Component
 		{
-			public readonly Fault F1 = new TransientFault();
-			public readonly Fault F2 = new TransientFault();
-			public int X;
+			private readonly Fault _f = new TransientFault();
 
-			[FaultEffect(Fault = nameof(F1))]
-			internal class E1 : C
+			[Range(0, 50, OverflowBehavior.Clamp)]
+			private int _x;
+
+			public override void Update()
 			{
-				public override void Update()
-				{
-					Console.WriteLine("no ");
-					X = 77;
-				}
+				++_x;
 			}
 
-			[FaultEffect(Fault = nameof(F2))]
-			internal class E2 : C
+			[FaultEffect(Fault = nameof(_f))]
+			public class E : C
 			{
 				public override void Update()
 				{
-					Console.WriteLine("no !!");
-					X = 717;
+					++_x;
+					base.Update();
+					--_x;
 				}
 			}
 		}

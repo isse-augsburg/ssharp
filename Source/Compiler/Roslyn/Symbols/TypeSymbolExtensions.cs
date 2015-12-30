@@ -124,7 +124,8 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		}
 
 		/// <summary>
-		/// Gets the value of the <see cref="PriorityAttribute"/> applied to the <paramref name="typeSymbol"/>. Returns <c>0</c> if the attribute is not applied to the <paramref name="typeSymbol"/>.
+		///   Gets the value of the <see cref="PriorityAttribute" /> applied to the <paramref name="typeSymbol" />. Returns <c>0</c> if
+		///   the attribute is not applied to the <paramref name="typeSymbol" />.
 		/// </summary>
 		/// <param name="typeSymbol">The type symbol the priority should be returned for.</param>
 		/// <param name="compilation">The compilation that should be used to resolve the type information.</param>

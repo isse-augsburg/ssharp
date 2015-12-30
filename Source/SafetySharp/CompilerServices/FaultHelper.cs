@@ -37,10 +37,21 @@ namespace SafetySharp.CompilerServices
 		/// </summary>
 		/// <param name="fault">The fault that should be activated.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool ActivateFault(Fault fault)
+		public static bool Activate(Fault fault)
 		{
 			fault.TryActivate();
 			return fault.IsActivated;
+		}
+
+		/// <summary>
+		///   Undoes the activation of the <paramref name="fault" /> when the activation is known to have no observable effect and fault
+		///   activation was nondeterministic in the current step.
+		/// </summary>
+		/// <param name="fault">The fault whose activation should be undone.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UndoActivation(Fault fault)
+		{
+			fault.UndoActivation();
 		}
 	}
 }

@@ -28,12 +28,11 @@ namespace SafetySharp.Modeling
 	public sealed class TransientFault : Fault
 	{
 		/// <summary>
-		///   Gets the updated occurrence state of the fault. If the fault's activation state is chosen nondeterminisitcally,
-		///   <c>false</c> must be chosen first.
+		///   Gets the updated activation state of the fault.
 		/// </summary>
-		protected override bool GetUpdatedActivationState()
+		protected override Activation GetUpdatedActivationState()
 		{
-			return Choice.Choose(false, true);
+			return Activation.Nondeterministic;
 		}
 	}
 }
