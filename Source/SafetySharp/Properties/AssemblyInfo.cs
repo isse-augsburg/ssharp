@@ -1,6 +1,6 @@
 ﻿// The MIT License (MIT)
 // 
-// Copyright (c) 2014-2015, Institute for Software & Systems Engineering
+// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("S# Modeling")]
 [assembly: AssemblyCompany("Institute for Software & Systems Engineering")]
 [assembly: AssemblyProduct("S#")]
-[assembly: AssemblyCopyright("Copyright (c) 2014-2015, Institute for Software & Systems Engineering")]
+[assembly: AssemblyCopyright("Copyright (c) 2014-2016, Institute for Software & Systems Engineering")]
 [assembly: AssemblyCulture("")]
 [assembly: AssemblyVersion("0.1.0.0")]
 [assembly: AssemblyFileVersion("0.1.0.0")]

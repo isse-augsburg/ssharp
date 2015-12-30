@@ -70,7 +70,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Overview.cd" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Requirements\" />

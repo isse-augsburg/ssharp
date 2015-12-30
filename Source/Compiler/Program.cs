@@ -1,6 +1,6 @@
 ﻿// The MIT License (MIT)
 // 
-// Copyright (c) 2014-2015, Institute for Software & Systems Engineering
+// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -76,7 +76,7 @@ namespace SafetySharp.Compiler
 			log.Info("");
 
 			log.Info("S# Compiler");
-			log.Info("Copyright (c) 2014-2015 Institute for Software & Systems Engineering");
+			log.Info("Copyright (c) 2014-2016 Institute for Software & Systems Engineering");
 
 			log.Info("");
 			log.Info("This is free software. You may redistribute copies of it under the terms of");

@@ -82,7 +82,7 @@
 	<s:Boolean x:Key="/Default/CodeStyle/CSharpUsing/MandatoryImports/=System/@EntryIndexRemoved">True</s:Boolean>
 	<s:String x:Key="/Default/CodeStyle/FileHeader/FileHeaderText/@EntryValue">The MIT License (MIT)&#xD;
 &#xD;
-Copyright (c) 2014-2015, Institute for Software &amp; Systems Engineering&#xD;
+Copyright (c) 2014-2016, Institute for Software &amp; Systems Engineering&#xD;
 &#xD;
 Permission is hereby granted, free of charge, to any person obtaining a copy&#xD;
 of this software and associated documentation files (the "Software"), to deal&#xD;

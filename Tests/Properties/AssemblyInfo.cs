@@ -1,6 +1,6 @@
 ﻿// The MIT License (MIT)
 // 
-// Copyright (c) 2014-2015, Institute for Software & Systems Engineering
+// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -27,12 +27,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("CS Tests")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("CS Tests")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyTitle("S# Tests")]
+[assembly: AssemblyDescription("S# Tests")]
+[assembly: AssemblyCompany("Institute for Software & Systems Engineering")]
+[assembly: AssemblyProduct("S#")]
+[assembly: AssemblyCopyright("Copyright (c) 2014-2016, Institute for Software & Systems Engineering")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
