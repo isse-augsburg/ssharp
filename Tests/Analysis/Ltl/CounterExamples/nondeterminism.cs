@@ -20,57 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Analysis.Ltl.CounterExamples
 {
-	using System;
-	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
+	using static SafetySharp.Analysis.Tl;
 
-	internal class Arrays : FormulaTestObject
+	internal class Nondeterminism : AnalysisTestObject
 	{
-		private static int x;
-		private readonly Formula[] _f = new Formula[2];
-		private readonly Formula[] _i = new Formula[2];
-		private Formula[] F { get; } = new Formula[2];
-
-		private Formula this[int index]
-		{
-			set { _i[index] = value; }
-		}
-
 		protected override void Check()
 		{
-			var g = new Formula[2];
-
-			g[0] = x == 2;
-			g[1] = x == 3;
-			_f[0] = x == 3;
-			F[0] = x == 4;
-			this[0] = x == 5;
-
-			Check(2, g);
-			CheckParams(2, x == 2, x == 3);
+			Check(1);
+			Check(2);
+			Check(3);
 		}
 
-		private void Check(int value, Formula[] g)
+		private void Check(int value)
 		{
-			x = value;
-			
-			Check(g[0], () => x == 2);
-			Check(g[1], () => x == 3);
-			Check(_f[0], () => x == 3);
-			Check(F[0], () => x == 4);
-			Check(_i[0], () => x == 5);
+			var c = new C();
+			Check(G(c.X != value), c);
+
+			var completed = false;
+			var simulator = new Simulator(CounterExample);
+			simulator.Completed += (o, e) => completed = true;
+			c = (C)simulator.Model.RootComponents[0];
+
+			c.X.ShouldBe(0);
+
+			while (!completed)
+				simulator.SimulateStep();
+
+			c.X.ShouldBe(value);
 		}
 
-		private void CheckParams(int value, params Formula[] g)
+		private class C : Component
 		{
-			x = value;
+			public int X;
 
-			Check(g[0], () => x == 2);
-			Check(g[1], () => x == 3);
-			Check(_f[0], () => x == 3);
-			Check(F[0], () => x == 4);
-			Check(_i[0], () => x == 5);
+			public override void Update()
+			{
+				X = Choose(1, 2, 3);
+			}
 		}
 	}
 }

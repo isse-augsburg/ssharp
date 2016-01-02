@@ -121,6 +121,8 @@ namespace SafetySharp.Runtime
 				if (_stateNumber + 1 == _counterExample.StepCount)
 					Completed?.Invoke(this, EventArgs.Empty);
 			}
+			else
+				Completed?.Invoke(this, EventArgs.Empty);
 		}
 
 		/// <summary>

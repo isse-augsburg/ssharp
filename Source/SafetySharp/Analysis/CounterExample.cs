@@ -240,7 +240,7 @@ namespace SafetySharp.Analysis
 				}
 
 				var model = RuntimeModelSerializer.Load(serializedRuntimeModel);
-				return new CounterExample(model, ParseCsv(model, File.ReadAllLines(csvFile.FilePath)).ToArray());
+				return new CounterExample(model, ParseCsv(model, File.ReadAllLines(csvFile.FilePath)).Skip(1).ToArray());
 			}
 		}
 

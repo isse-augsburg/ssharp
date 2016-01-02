@@ -67,5 +67,11 @@ namespace Tests
 		{
 			ExecuteDynamicTests(file);
 		}
+
+		[Theory, MemberData("DiscoverTests", "Execution/Simulation")]
+		public void Simulation(string test, string file)
+		{
+			ExecuteDynamicTests(file);
+		}
 	}
 }

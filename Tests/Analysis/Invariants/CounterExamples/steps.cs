@@ -20,57 +20,54 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Analysis.Invariants.CounterExamples
 {
-	using System;
-	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
 
-	internal class Arrays : FormulaTestObject
+	internal class Steps : AnalysisTestObject
 	{
-		private static int x;
-		private readonly Formula[] _f = new Formula[2];
-		private readonly Formula[] _i = new Formula[2];
-		private Formula[] F { get; } = new Formula[2];
-
-		private Formula this[int index]
-		{
-			set { _i[index] = value; }
-		}
-
 		protected override void Check()
 		{
-			var g = new Formula[2];
-
-			g[0] = x == 2;
-			g[1] = x == 3;
-			_f[0] = x == 3;
-			F[0] = x == 4;
-			this[0] = x == 5;
-
-			Check(2, g);
-			CheckParams(2, x == 2, x == 3);
+			for (var i = 0; i < 10; ++i)
+				Check(i);
 		}
 
-		private void Check(int value, Formula[] g)
+		private void Check(int steps)
 		{
-			x = value;
-			
-			Check(g[0], () => x == 2);
-			Check(g[1], () => x == 3);
-			Check(_f[0], () => x == 3);
-			Check(F[0], () => x == 4);
-			Check(_i[0], () => x == 5);
+			const int start = 2;
+			var c = new C { X = start };
+			CheckInvariant(c.X != start + steps, c);
+			CounterExample.StepCount.ShouldBe(steps + 1);
+
+			var completed = false;
+			var simulator = new Simulator(CounterExample);
+			simulator.Completed += (o, e) => completed = true;
+			c = (C)simulator.Model.RootComponents[0];
+
+			c.X.ShouldBe(start);
+
+			for (var i = start + 1; i < start + steps; ++i)
+			{
+				simulator.SimulateStep();
+				c.X.ShouldBe(i);
+				completed.ShouldBe(false);
+			}
+
+			simulator.SimulateStep();
+			c.X.ShouldBe(start + steps);
+			completed.ShouldBe(true);
 		}
 
-		private void CheckParams(int value, params Formula[] g)
+		private class C : Component
 		{
-			x = value;
+			public int X;
 
-			Check(g[0], () => x == 2);
-			Check(g[1], () => x == 3);
-			Check(_f[0], () => x == 3);
-			Check(F[0], () => x == 4);
-			Check(_i[0], () => x == 5);
+			public override void Update()
+			{
+				++X;
+			}
 		}
 	}
 }

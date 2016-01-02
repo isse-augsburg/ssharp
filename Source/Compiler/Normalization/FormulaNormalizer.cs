@@ -166,7 +166,10 @@ namespace SafetySharp.Compiler.Normalization
 			if (parameterSymbol.RefKind != RefKind.None)
 				return base.VisitArgument(argument);
 
-			if (!IsFormulaType(parameterSymbol.Type))
+			var arraySymbol = parameterSymbol.Type as IArrayTypeSymbol;
+			var isParamsFormula = arraySymbol != null && parameterSymbol.IsParams && IsFormulaType(arraySymbol.ElementType);
+
+			if (!isParamsFormula && !IsFormulaType(parameterSymbol.Type))
 				return base.VisitArgument(argument);
 
 			return argument.WithExpression(ReplaceImplicitConversion(argument.Expression));

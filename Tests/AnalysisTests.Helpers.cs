@@ -33,10 +33,13 @@ namespace Tests
 
 	public abstract class AnalysisTestObject : TestObject
 	{
+		protected CounterExample CounterExample { get; private set; }
+
 		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
 			var result = modelChecker.CheckInvariant(new Model(components), invariant);
+			CounterExample = result.CounterExample;
 			return result.CounterExample == null;
 		}
 
@@ -44,6 +47,7 @@ namespace Tests
 		{
 			var modelChecker = CreateModelChecker();
 			var result = modelChecker.Check(new Model(components), formula);
+			CounterExample = result.CounterExample;
 			return result.CounterExample == null;
 		}
 

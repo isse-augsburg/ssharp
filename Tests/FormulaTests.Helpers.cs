@@ -24,11 +24,9 @@ namespace Tests
 {
 	using System;
 	using System.Collections.Generic;
-	using System.IO;
 	using System.Text;
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
-	using SafetySharp.Analysis.FormulaVisitors;
 	using Shouldly;
 	using Utilities;
 	using Xunit.Abstractions;

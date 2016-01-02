@@ -20,57 +20,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Analysis.Invariants.CounterExamples
 {
-	using System;
-	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
 
-	internal class Arrays : FormulaTestObject
+	internal class VariableRanges : AnalysisTestObject
 	{
-		private static int x;
-		private readonly Formula[] _f = new Formula[2];
-		private readonly Formula[] _i = new Formula[2];
-		private Formula[] F { get; } = new Formula[2];
-
-		private Formula this[int index]
-		{
-			set { _i[index] = value; }
-		}
-
 		protected override void Check()
 		{
-			var g = new Formula[2];
+			var c = new C();
+			CheckInvariant(c.X != 2, c);
+			CounterExample.StepCount.ShouldBe(3);
 
-			g[0] = x == 2;
-			g[1] = x == 3;
-			_f[0] = x == 3;
-			F[0] = x == 4;
-			this[0] = x == 5;
+			var completed = false;
+			var simulator = new Simulator(CounterExample);
+			simulator.Completed += (o, e) => completed = true;
+			c = (C)simulator.Model.RootComponents[0];
 
-			Check(2, g);
-			CheckParams(2, x == 2, x == 3);
+			c.X.ShouldBe(0);
+			c.Y.ShouldBe(0);
+
+			simulator.SimulateStep();
+			c.X.ShouldBe(1);
+			c.Y.ShouldBe(1);
+			completed.ShouldBe(false);
+
+			simulator.SimulateStep();
+			c.X.ShouldBe(2);
+			c.Y.ShouldBe(0);
+			completed.ShouldBe(true);
 		}
 
-		private void Check(int value, Formula[] g)
+		private class C : Component
 		{
-			x = value;
-			
-			Check(g[0], () => x == 2);
-			Check(g[1], () => x == 3);
-			Check(_f[0], () => x == 3);
-			Check(F[0], () => x == 4);
-			Check(_i[0], () => x == 5);
-		}
+			[Range(0, 2, OverflowBehavior.Clamp)]
+			public int X;
 
-		private void CheckParams(int value, params Formula[] g)
-		{
-			x = value;
+			[Range(0, 1, OverflowBehavior.WrapClamp)]
+			public int Y;
 
-			Check(g[0], () => x == 2);
-			Check(g[1], () => x == 3);
-			Check(_f[0], () => x == 3);
-			Check(F[0], () => x == 4);
-			Check(_i[0], () => x == 5);
+			public override void Update()
+			{
+				++X;
+				++Y;
+			}
 		}
 	}
 }

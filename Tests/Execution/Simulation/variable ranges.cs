@@ -20,57 +20,66 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Execution.Simulation
 {
-	using System;
 	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
+	using Utilities;
 
-	internal class Arrays : FormulaTestObject
+	internal class VariableRanges : TestObject
 	{
-		private static int x;
-		private readonly Formula[] _f = new Formula[2];
-		private readonly Formula[] _i = new Formula[2];
-		private Formula[] F { get; } = new Formula[2];
-
-		private Formula this[int index]
-		{
-			set { _i[index] = value; }
-		}
-
 		protected override void Check()
 		{
-			var g = new Formula[2];
+			var simulator = new Simulator(new Model(new C()));
+			var c = (C)simulator.Model.RootComponents[0];
 
-			g[0] = x == 2;
-			g[1] = x == 3;
-			_f[0] = x == 3;
-			F[0] = x == 4;
-			this[0] = x == 5;
+			c.X.ShouldBe(0);
+			c.Y.ShouldBe(0);
+			c.Z.ShouldBe(0);
 
-			Check(2, g);
-			CheckParams(2, x == 2, x == 3);
+			simulator.SimulateStep();
+			c.X.ShouldBe(1);
+			c.Y.ShouldBe(1);
+			c.Z.ShouldBe(1);
+
+			simulator.SimulateStep();
+			c.X.ShouldBe(2);
+			c.Y.ShouldBe(0);
+			c.Z.ShouldBe(2);
+
+			simulator.SimulateStep();
+			c.X.ShouldBe(2);
+			c.Y.ShouldBe(1);
+			c.Z.ShouldBe(3);
+
+			var exception = Should.Throw<RangeViolationException>(() => simulator.SimulateStep());
+			exception.Field.ShouldBe(typeof(C).GetField("Z"));
+			exception.Object.ShouldBe(c);
+			exception.FieldValue.ShouldBe(4);
+			exception.Range.LowerBound.ShouldBe(0);
+			exception.Range.UpperBound.ShouldBe(3);
+			exception.Range.OverflowBehavior.ShouldBe(OverflowBehavior.Error);
 		}
 
-		private void Check(int value, Formula[] g)
+		private class C : Component
 		{
-			x = value;
-			
-			Check(g[0], () => x == 2);
-			Check(g[1], () => x == 3);
-			Check(_f[0], () => x == 3);
-			Check(F[0], () => x == 4);
-			Check(_i[0], () => x == 5);
-		}
+			[Range(0, 2, OverflowBehavior.Clamp)]
+			public int X;
 
-		private void CheckParams(int value, params Formula[] g)
-		{
-			x = value;
+			[Range(0, 1, OverflowBehavior.WrapClamp)]
+			public int Y;
 
-			Check(g[0], () => x == 2);
-			Check(g[1], () => x == 3);
-			Check(_f[0], () => x == 3);
-			Check(F[0], () => x == 4);
-			Check(_i[0], () => x == 5);
+			[Range(0, 3, OverflowBehavior.Error)]
+			public int Z;
+
+			public override void Update()
+			{
+				++X;
+				++Y;
+				++Z;
+			}
 		}
 	}
 }

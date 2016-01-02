@@ -188,10 +188,13 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Resetse the fault's activation state for the current step.
+		///   Resets the fault's activation state for the current step.
 		/// </summary>
 		internal void Reset()
 		{
+			if (_activation != Activation.Nondeterministic)
+				return;
+
 			_activationIsUnknown = true;
 			_canUndoActivation = false;
 		}

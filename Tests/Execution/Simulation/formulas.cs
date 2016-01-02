@@ -20,57 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Execution.Simulation
 {
-	using System;
 	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
+	using Utilities;
 
-	internal class Arrays : FormulaTestObject
+	internal class Formulas : TestObject
 	{
-		private static int x;
-		private readonly Formula[] _f = new Formula[2];
-		private readonly Formula[] _i = new Formula[2];
-		private Formula[] F { get; } = new Formula[2];
-
-		private Formula this[int index]
-		{
-			set { _i[index] = value; }
-		}
-
 		protected override void Check()
 		{
-			var g = new Formula[2];
+			var c = new C();
+			var simulator = new Simulator(new Model(c), c.X != 1);
 
-			g[0] = x == 2;
-			g[1] = x == 3;
-			_f[0] = x == 3;
-			F[0] = x == 4;
-			this[0] = x == 5;
-
-			Check(2, g);
-			CheckParams(2, x == 2, x == 3);
+			simulator.Model.Formulas[0].Evaluate().ShouldBe(true);
+			simulator.SimulateStep();
+			simulator.Model.Formulas[0].Evaluate().ShouldBe(false);
 		}
 
-		private void Check(int value, Formula[] g)
+		private class C : Component
 		{
-			x = value;
-			
-			Check(g[0], () => x == 2);
-			Check(g[1], () => x == 3);
-			Check(_f[0], () => x == 3);
-			Check(F[0], () => x == 4);
-			Check(_i[0], () => x == 5);
-		}
+			public int X;
 
-		private void CheckParams(int value, params Formula[] g)
-		{
-			x = value;
-
-			Check(g[0], () => x == 2);
-			Check(g[1], () => x == 3);
-			Check(_f[0], () => x == 3);
-			Check(F[0], () => x == 4);
-			Check(_i[0], () => x == 5);
+			public override void Update()
+			{
+				++X;
+			}
 		}
 	}
 }
