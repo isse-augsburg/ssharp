@@ -44,6 +44,7 @@ namespace Visualization
 
 			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
 			SimulationControls.Reset += (o, e) => OnModelStateReset();
+			SimulationControls.Rewound += (o, e) => OnRewound();
 			SimulationControls.SetSpecification(specification, specification.PossibleCollision);
 
 			// Initialize the visualization state
@@ -59,9 +60,7 @@ namespace Visualization
 
 		private void OnModelStateReset()
 		{
-			_hazard = false;
-			Collision.Visibility = _hazard.ToVisibility();
-			LastMessage.Text = "None";
+			OnRewound();
 
 			TrainControl.Brakes.BrakesFailure.Activation = FaultBrakes.IsChecked.ToOccurrenceKind();
 			TrainControl.Odometer.OdometerPositionOffset.Activation = FaultOdometerPosition.IsChecked.ToOccurrenceKind();
@@ -70,6 +69,13 @@ namespace Visualization
 			CrossingControl.Motor.BarrierMotorStuck.Activation = FaultBarrierMotor.IsChecked.ToOccurrenceKind();
 			CrossingControl.TrainSensor.ErroneousTrainDetection.Activation = FaultTrainSensor.IsChecked.ToOccurrenceKind();
 			Channel.MessageDropped.Activation = FaultMessage.IsChecked.ToOccurrenceKind();
+		}
+
+		private void OnRewound()
+		{
+			_hazard = false;
+			Collision.Visibility = _hazard.ToVisibility();
+			LastMessage.Text = "None";
 		}
 
 		private void UpdateModelState()

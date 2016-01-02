@@ -42,11 +42,6 @@ namespace SafetySharp.Runtime
 		private readonly SynchronizationContext _synchronizationContext = SynchronizationContext.Current;
 
 		/// <summary>
-		///   The current state of the simulation.
-		/// </summary>
-		private SimulationState _state;
-
-		/// <summary>
 		///   The time to wait between two simulation steps.
 		/// </summary>
 		private int _stepDelay;
@@ -68,32 +63,12 @@ namespace SafetySharp.Runtime
 
 			_simulator = simulator;
 			_stepDelay = stepDelay;
-			_state = SimulationState.Stopped;
 		}
 
 		/// <summary>
-		///   Gets the current state of the simulation.
+		///   Gets a value indicating whether a simulation is currently running.
 		/// </summary>
-		public SimulationState State
-		{
-			get { return _state; }
-			set
-			{
-				if (_state == value)
-					return;
-
-				_state = value;
-				SimulationStateChanged?.Invoke(this, EventArgs.Empty);
-
-				if (_state != SimulationState.Running && _timer != null)
-				{
-					_timer.Dispose();
-					_timer = null;
-				}
-				else if (_state == SimulationState.Running)
-					_timer = new Timer(state1 => _synchronizationContext.Post(state2 => ExecuteStep(), null), null, 0, _stepDelay);
-			}
-		}
+		public bool IsRunning => _timer != null && !IsCompleted;
 
 		/// <summary>
 		///   Gets or sets the step delay in milliseconds, i.e., time to wait between two steps in running mode.
@@ -118,18 +93,24 @@ namespace SafetySharp.Runtime
 		public RuntimeModel Model => _simulator.Model;
 
 		/// <summary>
-		///   Raised when the simulator has completed the simulation.
+		///   Gets a value indicating whether the simulation is completed.
 		/// </summary>
-		public event EventHandler Completed
-		{
-			add { _simulator.Completed += value; }
-			remove { _simulator.Completed -= value; }
-		}
+		public bool IsCompleted => _simulator.IsCompleted;
 
 		/// <summary>
-		///   Raised when the simulator's simulation state has been changed.
+		///   Gets a value indicating whether the simulation can be fast-forwarded.
 		/// </summary>
-		public event EventHandler SimulationStateChanged;
+		public bool CanFastForward => _simulator.CanFastForward;
+
+		/// <summary>
+		///   Gets a value indicating whether the simulation can be rewound.
+		/// </summary>
+		public bool CanRewind => _simulator.CanRewind;
+
+		/// <summary>
+		///   Gets a value indicating whether the simulator is replaying a counter example.
+		/// </summary>
+		public bool IsReplay => _simulator.IsReplay;
 
 		/// <summary>
 		///   Raised when the simulated model state has been changed.
@@ -137,47 +118,33 @@ namespace SafetySharp.Runtime
 		public event EventHandler ModelStateChanged;
 
 		/// <summary>
-		///   Executes the next step of the simulation. This method can only be called when the simulation is paused or stopped.
-		/// </summary>
-		public void Step()
-		{
-			Requires.That(State != SimulationState.Running, "The simulation is already running.");
-
-			State = SimulationState.Paused;
-			ExecuteStep();
-		}
-
-		/// <summary>
 		///   Runs the simulation in real-time mode. This method can only be called if the simulation is not already running.
 		/// </summary>
 		public void Run()
 		{
-			Requires.That(State != SimulationState.Running, "The simulation is already running.");
 			Requires.That(SynchronizationContext.Current != null, "The simulation cannot be run without a valid SynchronizationContext.");
 
-			State = SimulationState.Running;
+			if (_timer == null)
+				_timer = new Timer(state1 => _synchronizationContext.Post(state2 => ExecuteStep(), null), null, 0, _stepDelay);
 		}
 
 		/// <summary>
-		///   Stops the simulation and resets it to its initial state. This method can only be called if the simulation is
-		///   currently running or in paused mode.
+		///   Resets the simulation to its initial state.
 		/// </summary>
-		public void Stop()
+		public void Reset()
 		{
-			Requires.That(State != SimulationState.Stopped, "The simulation is already stopped.");
-			State = SimulationState.Stopped;
-
 			_simulator.Reset();
 			ModelStateChanged?.Invoke(this, EventArgs.Empty);
 		}
 
 		/// <summary>
-		///   Pauses the simulation. This method can only be called when the simulation is currently running.
+		///   Pauses the simulation.
 		/// </summary>
 		public void Pause()
 		{
-			Requires.That(State == SimulationState.Running, "Only running simulations can be stopped.");
-			State = SimulationState.Paused;
+			_timer?.Dispose();
+			_timer = null;
+			ModelStateChanged?.Invoke(this, EventArgs.Empty);
 		}
 
 		/// <summary>
@@ -186,6 +153,35 @@ namespace SafetySharp.Runtime
 		private void ExecuteStep()
 		{
 			_simulator.SimulateStep();
+			ModelStateChanged?.Invoke(this, EventArgs.Empty);
+		}
+
+		/// <summary>
+		///   Advances the simulator by the given number of <paramref name="steps" />, if possible.
+		/// </summary>
+		/// <param name="steps">The number of steps the simulation should be advanced.</param>
+		public void FastForward(int steps)
+		{
+			_simulator.FastForward(steps);
+			ModelStateChanged?.Invoke(this, EventArgs.Empty);
+		}
+
+		/// <summary>
+		///   Rewinds the simulator by the given number of <paramref name="steps" />, if possible.
+		/// </summary>
+		/// <param name="steps">The number of steps that should be rewound.</param>
+		public void Rewind(int steps)
+		{
+			_simulator.Rewind(steps);
+			ModelStateChanged?.Invoke(this, EventArgs.Empty);
+		}
+
+		/// <summary>
+		///   Prunes all states lying in the future after a rewind.
+		/// </summary>
+		public void Prune()
+		{
+			_simulator.Prune();
 			ModelStateChanged?.Invoke(this, EventArgs.Empty);
 		}
 	}

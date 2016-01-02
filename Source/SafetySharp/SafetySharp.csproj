@@ -128,7 +128,6 @@
     <Compile Include="Runtime\Serialization\SerializationRegistry.cs" />
     <Compile Include="Runtime\Serialization\StateSlotMetadata.cs" />
     <Compile Include="Runtime\Serialization\StateVectorLayout.cs" />
-    <Compile Include="Runtime\SimulationState.cs" />
     <Compile Include="Runtime\Simulator.cs" />
     <Compile Include="Runtime\StateStack.cs" />
     <Compile Include="Runtime\StateStorage.cs" />

@@ -20,26 +20,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace Tests.Analysis.Invariants.CounterExamples
 {
-	/// <summary>
-	///   Indicates the current state of a S# model simulation.
-	/// </summary>
-	public enum SimulationState
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
+
+	internal class Stepping : AnalysisTestObject
 	{
-		/// <summary>
-		///   Indicates that the simulation is currently not running.
-		/// </summary>
-		Stopped,
+		protected override void Check()
+		{
+			const int start = 2;
+			const int steps = 40;
 
-		/// <summary>
-		///   Indicates that the simulation is currently paused and can be resumed.
-		/// </summary>
-		Paused,
+			var c = new C { X = start };
+			CheckInvariant(c.X != start + steps, c);
+			CounterExample.StepCount.ShouldBe(steps + 1);
 
-		/// <summary>
-		///   Indicates that the simulation is currently running.
-		/// </summary>
-		Running
+			var simulator = new Simulator(CounterExample);
+			c = (C)simulator.Model.RootComponents[0];
+
+			c.X.ShouldBe(start);
+
+			simulator.FastForward(10);
+			c.X.ShouldBe(start + 10);
+
+			simulator.FastForward(600);
+			c.X.ShouldBe(start + steps);
+
+			simulator.Rewind(10);
+			c.X.ShouldBe(start + steps - 10);
+
+			simulator.Rewind(100);
+			c.X.ShouldBe(start);
+		}
+
+		private class C : Component
+		{
+			public int X;
+
+			public override void Update()
+			{
+				++X;
+			}
+		}
 	}
 }

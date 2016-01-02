@@ -123,7 +123,7 @@ namespace Visualization
 			SuppressEmpty.IsChecked = Sensor.SuppressIsEmpty.IsActivated;
 			SensorFailure.Visibility = (SuppressFull.IsChecked || SuppressEmpty.IsChecked).ToVisibility();
 
-			if ((Sensor.IsFull || Sensor.IsEmpty) && SimulationControls.State != SimulationState.Stopped)
+			if ((Sensor.IsFull || Sensor.IsEmpty))
 				_sensorAlertStoryboard.Begin();
 
 			// Controller
@@ -144,7 +144,7 @@ namespace Visualization
 			}
 
 			// Pump
-			if (!Pump.IsEnabled || SimulationControls.State == SimulationState.Stopped)
+			if (!Pump.IsEnabled)
 				_pumpingStoryboard.Pause();
 			else
 				_pumpingStoryboard.Resume();

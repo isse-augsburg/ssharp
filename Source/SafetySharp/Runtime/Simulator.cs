@@ -23,6 +23,8 @@
 namespace SafetySharp.Runtime
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Runtime.InteropServices;
 	using Analysis;
 	using Utilities;
 
@@ -37,14 +39,14 @@ namespace SafetySharp.Runtime
 		private readonly CounterExample _counterExample;
 
 		/// <summary>
-		///   The current serialized model state.
+		///   The states encountered by the simulator.
 		/// </summary>
-		private readonly byte[] _state;
+		private readonly List<byte[]> _states = new List<byte[]>();
 
 		/// <summary>
-		///   The current state number of the counter example.
+		///   The current state number of the simulator.
 		/// </summary>
-		private int _stateNumber;
+		private int _stateIndex;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -57,9 +59,7 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(formulas, nameof(formulas));
 
 			Model = model.ToRuntimeModel(formulas);
-			Model.Reset();
-
-			_state = new byte[Model.StateVectorSize];
+			Reset();
 		}
 
 		/// <summary>
@@ -70,12 +70,15 @@ namespace SafetySharp.Runtime
 		{
 			Requires.NotNull(counterExample, nameof(counterExample));
 
-			Model = counterExample.Model;
-
 			_counterExample = counterExample;
-			_counterExample.DeserializeState(0);
-			_state = new byte[Model.StateVectorSize];
+			Model = counterExample.Model;
+			Reset();
 		}
+
+		/// <summary>
+		///   Gets a value indicating whether the simulator is replaying a counter example.
+		/// </summary>
+		public bool IsReplay => _counterExample != null;
 
 		/// <summary>
 		///   Gets the <see cref="RuntimeModel" /> that is simulated.
@@ -83,9 +86,19 @@ namespace SafetySharp.Runtime
 		public RuntimeModel Model { get; }
 
 		/// <summary>
-		///   Raised when the simulator has completed the simulation.
+		///   Gets a value indicating whether the simulation is completed.
 		/// </summary>
-		public event EventHandler Completed;
+		public bool IsCompleted => _counterExample != null && _stateIndex + 1 == _counterExample.StepCount;
+
+		/// <summary>
+		///   Gets a value indicating whether the simulation can be fast-forwarded.
+		/// </summary>
+		public bool CanFastForward => _counterExample == null || !IsCompleted;
+
+		/// <summary>
+		///   Gets a value indicating whether the simulation can be rewound.
+		/// </summary>
+		public bool CanRewind => _stateIndex > 0;
 
 		/// <summary>
 		///   Runs the simulation for the <paramref name="timeSpan" />.
@@ -95,34 +108,78 @@ namespace SafetySharp.Runtime
 		{
 			for (var i = 0; i < timeSpan.TotalSeconds; ++i)
 				SimulateStep();
-
-			Completed?.Invoke(this, EventArgs.Empty);
 		}
 
 		/// <summary>
-		///   Runs a step of the simulation.
+		///   Runs a step of the simulation. Returns <c>false</c> to indicate that the simulation is completed.
 		/// </summary>
 		public void SimulateStep()
 		{
+			Prune();
+
+			var state = stackalloc byte[Model.StateVectorSize];
+
 			if (_counterExample == null)
 			{
-				fixed (byte* state = _state)
-				{
-					Model.ExecuteStep();
+				Model.ExecuteStep();
 
-					// Serialize and deserialize the state to get the correct overflow behavior
-					Model.Serialize(state);
-					Model.Deserialize(state);
-				}
+				// Serialize and deserialize the state to get the correct overflow behavior
+				Model.Serialize(state);
+				Model.Deserialize(state);
+
+				AddState(state);
+				return;
 			}
-			else if (_stateNumber + 1 < _counterExample.StepCount)
+
+			if (_stateIndex + 1 >= _counterExample.StepCount)
+				return;
+
+			_counterExample.DeserializeState(_stateIndex + 1);
+
+			Model.Serialize(state);
+			AddState(state);
+		}
+
+		/// <summary>
+		///   Advances the simulator by the given number of <paramref name="steps" />, if possible.
+		/// </summary>
+		/// <param name="steps">The number of steps the simulation should be advanced.</param>
+		public void FastForward(int steps)
+		{
+			// Reuse the already discovered states after a rewind
+			var advanceCount = Math.Min(steps, _states.Count - _stateIndex - 1);
+			_stateIndex += advanceCount;
+			RestoreState(Math.Min(_stateIndex, _states.Count - 1));
+
+			// Continue the simulation once we cannot reuse previously discovered states
+			for (var i = 0; i < steps - advanceCount; ++i)
 			{
-				_counterExample.DeserializeState(++_stateNumber);
-				if (_stateNumber + 1 == _counterExample.StepCount)
-					Completed?.Invoke(this, EventArgs.Empty);
+				SimulateStep();
+
+				if (IsCompleted)
+					return;
 			}
-			else
-				Completed?.Invoke(this, EventArgs.Empty);
+		}
+
+		/// <summary>
+		///   Rewinds the simulator by the given number of <paramref name="steps" />, if possible.
+		/// </summary>
+		/// <param name="steps">The number of steps that should be rewound.</param>
+		public void Rewind(int steps)
+		{
+			_stateIndex = Math.Max(0, _stateIndex - steps);
+			RestoreState(_stateIndex);
+		}
+
+		/// <summary>
+		///   Prunes all states lying in the future after a rewind.
+		/// </summary>
+		public void Prune()
+		{
+			// Delete all previously discovered states that lie in the future if the simulation has
+			// been rewinded and is resimulated from a certain point in the past
+			for (var i = _states.Count - 1; i >= _stateIndex + 1; --i)
+				_states.RemoveAt(i);
 		}
 
 		/// <summary>
@@ -130,22 +187,50 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		public void Reset()
 		{
+			var state = stackalloc byte[Model.StateVectorSize];
+
 			if (_counterExample == null)
 			{
 				Model.Reset();
 
-				fixed (byte* state = _state)
-				{
-					// Serialize and deserialize the state to get the correct overflow behavior
-					Model.Serialize(state);
-					Model.Deserialize(state);
-				}
+				// Serialize and deserialize the state to get the correct overflow behavior
+				Model.Serialize(state);
+				Model.Deserialize(state);
+
+				_states.Clear();
+				_stateIndex = -1;
+
+				AddState(state);
 			}
 			else
 			{
 				_counterExample.DeserializeState(0);
-				_stateNumber = 0;
+				_stateIndex = -1;
+
+				Model.Serialize(state);
+				AddState(state);
 			}
+		}
+
+		/// <summary>
+		///   Adds the state to the simulator.
+		/// </summary>
+		private void AddState(byte* state)
+		{
+			var newState = new byte[Model.StateVectorSize];
+			Marshal.Copy(new IntPtr(state), newState, 0, Model.StateVectorSize);
+
+			_states.Add(newState);
+			++_stateIndex;
+		}
+
+		/// <summary>
+		///   Restores a previously discovered state.
+		/// </summary>
+		private void RestoreState(int stateNumber)
+		{
+			fixed (byte* state = _states[stateNumber])
+				Model.Deserialize(state);
 		}
 	}
 }

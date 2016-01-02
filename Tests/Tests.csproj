@@ -137,10 +137,9 @@
     <Compile Include="Analysis\Invariants\CounterExamples\faults.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\formulas.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\nondeterminism.cs" />
+    <Compile Include="Analysis\Invariants\CounterExamples\stepping.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\steps.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\variable ranges.cs" />
-    <Compile Include="Analysis\Ltl\CounterExamples\nondeterminism.cs" />
-    <Compile Include="Analysis\Ltl\CounterExamples\steps.cs" />
     <Compile Include="Analysis\Ltl\Violated\undo fault after successful activation.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\undo nested choice.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\undo choice.cs" />
@@ -153,6 +152,7 @@
     <Compile Include="Execution\Simulation\bindings.cs" />
     <Compile Include="Execution\Simulation\nondeterminism.cs" />
     <Compile Include="Execution\Simulation\formulas.cs" />
+    <Compile Include="Execution\Simulation\stepping.cs" />
     <Compile Include="Execution\Simulation\variable ranges.cs" />
     <Compile Include="Execution\Simulation\steps.cs" />
     <Compile Include="FaultActivationTests.cs" />

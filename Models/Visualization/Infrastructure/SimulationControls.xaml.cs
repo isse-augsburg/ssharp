@@ -24,7 +24,6 @@ namespace Visualization.Infrastructure
 {
 	using System;
 	using System.Windows;
-	using System.Windows.Media.Animation;
 	using Microsoft.Win32;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
@@ -33,7 +32,6 @@ namespace Visualization.Infrastructure
 
 	public partial class SimulationControls
 	{
-		private readonly Storyboard _counterExampleEndStoryboard;
 		private Formula[] _formulas;
 		private Model _model;
 		private double _speed;
@@ -43,32 +41,25 @@ namespace Visualization.Infrastructure
 		public SimulationControls()
 		{
 			InitializeComponent();
-
 			CloseCounterExampleButton.Visibility = Visibility.Collapsed;
-			EndOfCounterExample.Opacity = 0;
-			_counterExampleEndStoryboard = (Storyboard)Resources["CounterExampleEnd"];
 		}
 
 		public RealTimeSimulator Simulator { get; private set; }
 		public RuntimeModel Model => Simulator.Model;
-		public SimulationState State => Simulator.State;
 
 		public int StepDelay { get; set; } = 1000;
 
 		public event EventHandler Reset;
+		public event EventHandler Rewound;
 		public event EventHandler ModelStateChanged;
 
 		private void SetSimulator(Simulator simulator)
 		{
 			if (Simulator != null)
-			{
 				Simulator.ModelStateChanged -= OnModelStateChanged;
-				Simulator.Completed -= OnSimulationCompleted;
-			}
 
 			Simulator = new RealTimeSimulator(simulator, (int)Math.Round(1000 / _speed));
 			Simulator.ModelStateChanged += OnModelStateChanged;
-			Simulator.SimulationStateChanged += (o, e) => UpdateSimulationButtonVisibilities();
 			UpdateSimulationButtonVisibilities();
 		}
 
@@ -86,52 +77,48 @@ namespace Visualization.Infrastructure
 		private void OnModelStateChanged(object sender, EventArgs e)
 		{
 			ModelStateChanged?.Invoke(sender, e);
-		}
+			UpdateSimulationButtonVisibilities();
 
-		private void OnSimulationCompleted(object sender, EventArgs e)
-		{
-			_counterExampleEndStoryboard.Begin();
+			if (Simulator.IsCompleted)
+				EndOfCounterExample.Visibility = Visibility.Visible;
+			else
+				EndOfCounterExample.Visibility = Visibility.Hidden;
 		}
 
 		private void UpdateSimulationButtonVisibilities()
 		{
-			switch (Simulator.State)
+			if (Simulator.CanFastForward)
+				FastForwardButton.Enable();
+			else
+				FastForwardButton.Disable();
+
+			if (Simulator.CanRewind)
+				RewindButton.Enable();
+			else
+				RewindButton.Disable();
+
+			if (Simulator.IsRunning)
 			{
-				case SimulationState.Stopped:
-					StopButton.Visibility = Visibility.Collapsed;
-					StartButton.Visibility = Visibility.Visible;
-					PauseButton.Visibility = Visibility.Collapsed;
-					StepButton.Visibility = Visibility.Visible;
-					break;
-				case SimulationState.Paused:
-					StopButton.Visibility = Visibility.Visible;
-					StartButton.Visibility = Visibility.Visible;
-					PauseButton.Visibility = Visibility.Collapsed;
-					StepButton.Visibility = Visibility.Visible;
-					break;
-				case SimulationState.Running:
-					StopButton.Visibility = Visibility.Visible;
-					StartButton.Visibility = Visibility.Collapsed;
-					PauseButton.Visibility = Visibility.Visible;
-					StepButton.Visibility = Visibility.Collapsed;
-					break;
+				StartButton.Visibility = Visibility.Collapsed;
+				PauseButton.Visibility = Visibility.Visible;
+			}
+			else
+			{
+				StartButton.Visibility = Visibility.Visible;
+				PauseButton.Visibility = Visibility.Collapsed;
 			}
 		}
 
-		private void OnStop(object sender, RoutedEventArgs e)
+		private void OnReset(object sender, RoutedEventArgs e)
 		{
-			if (Simulator.State == SimulationState.Stopped)
-				return;
-
-			Simulator.Stop();
+			Simulator.Reset();
 			Reset?.Invoke(this, EventArgs.Empty);
-			_counterExampleEndStoryboard.Stop();
+			EndOfCounterExample.Visibility = Visibility.Hidden;
 		}
 
 		private void OnRun(object sender, RoutedEventArgs e)
 		{
 			Simulator.Run();
-			Reset?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void OnPause(object sender, RoutedEventArgs e)
@@ -141,7 +128,24 @@ namespace Visualization.Infrastructure
 
 		private void OnStep(object sender, RoutedEventArgs e)
 		{
-			Simulator.Step();
+			Simulator.FastForward(1);
+		}
+
+		private void OnStepBack(object sender, RoutedEventArgs e)
+		{
+			Simulator.Rewind(1);
+			Rewound?.Invoke(this, EventArgs.Empty);
+		}
+
+		private void OnRewind(object sender, RoutedEventArgs e)
+		{
+			Simulator.Rewind(10);
+			Rewound?.Invoke(this, EventArgs.Empty);
+		}
+
+		private void OnFastForward(object sender, RoutedEventArgs e)
+		{
+			Simulator.FastForward(10);
 		}
 
 		private void OnIncreaseSpeed(object sender, RoutedEventArgs e)
@@ -186,14 +190,13 @@ namespace Visualization.Infrastructure
 			try
 			{
 				var simulator = new Simulator(CounterExample.Load(dialog.FileName));
-				simulator.Completed += OnSimulationCompleted;
 
 				SetSimulator(simulator);
 				CloseCounterExampleButton.Visibility = Visibility.Visible;
 
 				ModelStateChanged?.Invoke(this, EventArgs.Empty);
 				Reset?.Invoke(this, EventArgs.Empty);
-				_counterExampleEndStoryboard.Stop();
+				EndOfCounterExample.Visibility = Visibility.Hidden;
 			}
 			catch (Exception ex)
 			{
@@ -209,7 +212,7 @@ namespace Visualization.Infrastructure
 
 			ModelStateChanged?.Invoke(this, EventArgs.Empty);
 			Reset?.Invoke(this, EventArgs.Empty);
-			_counterExampleEndStoryboard.Stop();
+			EndOfCounterExample.Visibility = Visibility.Hidden;
 		}
 	}
 }

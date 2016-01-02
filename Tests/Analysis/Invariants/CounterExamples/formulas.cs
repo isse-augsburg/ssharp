@@ -34,18 +34,16 @@ namespace Tests.Analysis.Invariants.CounterExamples
 			CheckInvariant(c.X != 1, c);
 			CounterExample.StepCount.ShouldBe(2);
 
-			var completed = false;
 			var simulator = new Simulator(CounterExample);
-			simulator.Completed += (o, e) => completed = true;
 			c = (C)simulator.Model.RootComponents[0];
 
 			c.X.ShouldBe(0);
-			completed.ShouldBe(false);
+			simulator.IsCompleted.ShouldBe(false);
 			simulator.Model.Formulas[0].Evaluate().ShouldBe(true);
 
 			simulator.SimulateStep();
 			c.X.ShouldBe(1);
-			completed.ShouldBe(true);
+			simulator.IsCompleted.ShouldBe(true);
 			simulator.Model.Formulas[0].Evaluate().ShouldBe(false);
 		}
 

@@ -30,6 +30,9 @@ namespace Visualization.Infrastructure
 		public static readonly DependencyProperty IconProperty = DependencyProperty.Register(
 			"Icon", typeof(Visual), typeof(IconButton), new PropertyMetadata(default(Visual)));
 
+		public static readonly DependencyProperty RotationProperty = DependencyProperty.Register(
+			"Rotation", typeof(double), typeof(IconButton), new PropertyMetadata(default(double)));
+
 		public static readonly RoutedEvent ClickedEvent = EventManager.RegisterRoutedEvent(
 			"Clicked", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(IconButton));
 
@@ -44,6 +47,12 @@ namespace Visualization.Infrastructure
 			set { SetValue(IconProperty, value); }
 		}
 
+		public double Rotation
+		{
+			get { return (double)GetValue(RotationProperty); }
+			set { SetValue(RotationProperty, value); }
+		}
+
 		public event RoutedEventHandler Clicked
 		{
 			add { AddHandler(ClickedEvent, value); }
@@ -53,6 +62,16 @@ namespace Visualization.Infrastructure
 		private void OnClicked(object sender, RoutedEventArgs e)
 		{
 			RaiseEvent(new RoutedEventArgs(ClickedEvent));
+		}
+
+		public void Enable()
+		{
+			IsEnabled = true;
+		}
+
+		public void Disable()
+		{
+			IsEnabled = false;
 		}
 	}
 }

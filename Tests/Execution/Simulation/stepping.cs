@@ -20,54 +20,82 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Ltl.CounterExamples
+namespace Tests.Execution.Simulation
 {
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 	using Shouldly;
-	using static SafetySharp.Analysis.Tl;
+	using Utilities;
 
-	internal class Steps : AnalysisTestObject
+	internal class Stepping : TestObject
 	{
 		protected override void Check()
 		{
+			var simulator = new Simulator(new Model(new C { X = 44 }));
+			var c = (C)simulator.Model.RootComponents[0];
+			c.F.Activation = Activation.Suppressed;
+
+			c.X.ShouldBe(44);
+
 			for (var i = 0; i < 10; ++i)
-				Check(i);
-		}
-
-		private void Check(int steps)
-		{
-			const int start = 2;
-			var c = new C { X = start };
-			Check(G(c.X != start + steps), c);
-			CounterExample.StepCount.ShouldBe(steps + 1);
-
-			var completed = false;
-			var simulator = new Simulator(CounterExample);
-			simulator.Completed += (o, e) => completed = true;
-			c = (C)simulator.Model.RootComponents[0];
-
-			c.X.ShouldBe(start);
-
-			for (var i = start + 1; i < start + steps; ++i)
 			{
-				simulator.SimulateStep();
-				c.X.ShouldBe(i);
-				completed.ShouldBe(false);
+				simulator.FastForward(10);
+				c.X.ShouldBe(44 + (i + 1) * 10);
 			}
 
+			for (var i = 0; i < 12; ++i)
+			{
+				simulator.Rewind(10);
+				if (i < 10)
+					c.X.ShouldBe(44 + (10 - i - 1) * 10);
+				else
+					c.X.ShouldBe(44);
+			}
+
+			for (var i = 0; i < 12; ++i)
+			{
+				simulator.FastForward(10);
+				c.X.ShouldBe(44 + (i + 1) * 10);
+			}
+
+			simulator.Rewind(61);
+			c.X.ShouldBe(103);
+
+			c.F.Activation = Activation.Forced;
 			simulator.SimulateStep();
-			c.X.ShouldBe(start + steps);
-			completed.ShouldBe(true);
+			c.X.ShouldBe(105);
+
+			simulator.Rewind(2);
+			c.X.ShouldBe(102);
+
+			c.F.Activation = Activation.Suppressed;
+			simulator.Prune();
+			c.X.ShouldBe(102);
+
+			simulator.SimulateStep();
+			c.X.ShouldBe(103);
+
+			simulator.FastForward(10);
+			c.X.ShouldBe(113);
 		}
 
 		private class C : Component
 		{
 			public int X;
+			public readonly Fault F = new TransientFault();
 
 			public override void Update()
 			{
-				++X;
+				X += Y;
+			}
+
+			public virtual int Y => 1;
+
+			[FaultEffect(Fault = nameof(F))]
+			public class E : C
+			{
+				public override int Y => 2;
 			}
 		}
 	}

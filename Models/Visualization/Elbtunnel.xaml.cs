@@ -37,7 +37,6 @@ namespace Visualization
 	using global::Elbtunnel.Vehicles;
 	using Infrastructure;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 
 	public partial class Elbtunnel
 	{
@@ -69,6 +68,7 @@ namespace Visualization
 
 			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
 			SimulationControls.Reset += (o, e) => OnModelStateReset();
+			SimulationControls.Rewound += (o, e) => OnRewound();
 			SimulationControls.SetSpecification(specification);
 
 			// Initialize the visualization state
@@ -129,6 +129,11 @@ namespace Visualization
 			MainControl.RightDetector.Misdetection.Activation = MisdetectionOdr.IsChecked.ToOccurrenceKind();
 			EndControl.Detector.Misdetection.Activation = MisdetectionOdf.IsChecked.ToOccurrenceKind();
 
+			OnRewound();
+		}
+
+		private void OnRewound()
+		{
 			Message.Text = String.Empty;
 			HazardIndicator.Visibility = Visibility.Collapsed;
 		}
@@ -197,9 +202,8 @@ namespace Visualization
 				HazardIndicator.Visibility = falseAlarm.ToVisibility();
 			}
 
-			if (
-				_vehicles.Any(
-					v => v.Item1.Lane == Lane.Left && v.Item1.Position >= Specification.TunnelPosition && v.Item1.Kind == VehicleKind.OverheightTruck))
+			if (_vehicles.Any(
+				v => v.Item1.Lane == Lane.Left && v.Item1.Position >= Specification.TunnelPosition && v.Item1.Kind == VehicleKind.OverheightTruck))
 			{
 				HazardIndicator.Visibility = Visibility.Visible;
 				Message.Text = "Collision";
@@ -311,9 +315,6 @@ namespace Visualization
 
 		private void Spawn(VehicleKind kind, Lane lane)
 		{
-			if (SimulationControls.State == SimulationState.Stopped)
-				return;
-
 			var vehicle = _vehicles.FirstOrDefault(v => v.Item1 is VisualizationVehicle && v.Item1.Kind == kind && !v.Item3);
 
 			if (vehicle == null)

@@ -4,29 +4,27 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Visualization.Infrastructure"
-             Unloaded="OnStop"
+             Unloaded="OnReset"
              FontSize="15"
              Foreground="White"
              d:DesignWidth="600"
              mc:Ignorable="d">
-    <UserControl.Resources>
-        <Storyboard x:Key="CounterExampleEnd" AutoReverse="True" RepeatBehavior="Forever">
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="EndOfCounterExample">
-                <EasingDoubleKeyFrame KeyTime="0" Value="0" />
-                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1" />
-            </DoubleAnimationUsingKeyFrames>
-        </Storyboard>
-    </UserControl.Resources>
     <DockPanel>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Top">
-            <local:IconButton x:Name="StopButton" Icon="{DynamicResource appbar_debug_stop}"
-                              ToolTip="Stops the simulation." Clicked="OnStop" />
+            <local:IconButton x:Name="StopButton" Icon="{DynamicResource appbar_refresh}"
+                              ToolTip="Resets the simulation." Clicked="OnReset" />
+            <local:IconButton x:Name="RewindButton" Icon="{DynamicResource appbar_control_rewind_variant}" Margin="25,0,0,0"
+                              ToolTip="Rewinds the simulation a couple of states." Clicked="OnRewind" />
+            <local:IconButton x:Name="StepBackwardButton" Icon="{DynamicResource appbar_control_resume}"
+                              ToolTip="Rewinds the last step executed by the simulation." Clicked="OnStepBack" Rotation="180" />
             <local:IconButton x:Name="StartButton" Icon="{DynamicResource appbar_control_play}"
                               ToolTip="Starts or continues the simulation." Clicked="OnRun" />
             <local:IconButton x:Name="PauseButton" Icon="{DynamicResource appbar_control_pause}"
                               ToolTip="Pauses the simulation." Clicked="OnPause" />
-            <local:IconButton x:Name="StepButton" Icon="{DynamicResource appbar_control_resume}"
+            <local:IconButton x:Name="StepForwardButton" Icon="{DynamicResource appbar_control_resume}"
                               ToolTip="Executes one step of the simulation." Clicked="OnStep" />
+            <local:IconButton x:Name="FastForwardButton" Icon="{DynamicResource appbar_control_fastforward_variant}"
+                              ToolTip="Fast forwards the simulation a couple of steps." Clicked="OnFastForward" />
         </StackPanel>
         <Grid HorizontalAlignment="Right" DockPanel.Dock="Right">
             <Grid.RowDefinitions>
