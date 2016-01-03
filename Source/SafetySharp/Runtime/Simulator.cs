@@ -220,12 +220,15 @@ namespace SafetySharp.Runtime
 			Requires.That(IsReplay, "Only counter examples can be replayed.");
 			Requires.That(!IsCompleted, "The end of the counter example has already been reached.");
 
-			fixed (byte* sourceState = _states[_stateIndex])
-				Model.Replay(sourceState, _counterExample.GetReplayInformation(_stateIndex));
+			SimulateStep();
 
-			var targetState = stackalloc byte[Model.StateVectorSize];
-			Model.Serialize(targetState);
-			AddState(targetState);
+			fixed (byte* sourceState = _states[_stateIndex - 1])
+				Model.Replay(sourceState, _counterExample.GetReplayInformation(_stateIndex - 1));
+
+			// Serialize and deserialize the state to get the correct overflow behavior
+			var state = stackalloc byte[Model.StateVectorSize];
+			Model.Serialize(state);
+			Model.Deserialize(state);
 		}
 
 		/// <summary>

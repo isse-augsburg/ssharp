@@ -62,6 +62,9 @@ namespace Visualization
 		{
 			OnRewound();
 
+			if (SimulationControls.Simulator.IsReplay)
+				return;
+
 			TrainControl.Brakes.BrakesFailure.Activation = FaultBrakes.IsChecked.ToOccurrenceKind();
 			TrainControl.Odometer.OdometerPositionOffset.Activation = FaultOdometerPosition.IsChecked.ToOccurrenceKind();
 			TrainControl.Odometer.OdometerSpeedOffset.Activation = FaultOdometerSpeed.IsChecked.ToOccurrenceKind();

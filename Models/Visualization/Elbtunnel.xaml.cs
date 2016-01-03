@@ -123,13 +123,16 @@ namespace Visualization
 				UpdateVehicle(info);
 			}
 
+			OnRewound();
+
+			if (SimulationControls.Simulator.IsReplay)
+				return;
+
 			PreControl.Detector.Misdetection.Activation = MisdetectionLb1.IsChecked.ToOccurrenceKind();
 			MainControl.PositionDetector.Misdetection.Activation = MisdetectionLb2.IsChecked.ToOccurrenceKind();
 			MainControl.LeftDetector.Misdetection.Activation = MisdetectionOdl.IsChecked.ToOccurrenceKind();
 			MainControl.RightDetector.Misdetection.Activation = MisdetectionOdr.IsChecked.ToOccurrenceKind();
 			EndControl.Detector.Misdetection.Activation = MisdetectionOdf.IsChecked.ToOccurrenceKind();
-
-			OnRewound();
 		}
 
 		private void OnRewound()

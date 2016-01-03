@@ -336,9 +336,11 @@ namespace SafetySharp.Runtime
 		/// <param name="replayInformation">The replay information required to compute the target state.</param>
 		internal void Replay(byte* state, int[] replayInformation)
 		{
-			Deserialize(state);
+			_choiceResolver.Clear();
+			_choiceResolver.PrepareNextState();
 			_choiceResolver.SetChoices(replayInformation);
 
+			Deserialize(state);
 			ExecuteStep();
 		}
 

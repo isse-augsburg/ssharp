@@ -174,6 +174,7 @@ namespace SafetySharp.Runtime
 		{
 			_chosenValues.Clear();
 			_valueCount.Clear();
+			_choiceIndex = -1;
 		}
 
 		/// <summary>

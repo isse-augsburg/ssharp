@@ -57,7 +57,10 @@ namespace Visualization.Infrastructure
 		private void SetSimulator(Simulator simulator)
 		{
 			if (Simulator != null)
+			{
 				Simulator.ModelStateChanged -= OnModelStateChanged;
+				Simulator.Pause();
+			}
 
 			Simulator = new RealTimeSimulator(simulator, (int)Math.Round(1000 / _speed));
 			Simulator.ModelStateChanged += OnModelStateChanged;

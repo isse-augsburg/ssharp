@@ -28,7 +28,6 @@ namespace Visualization
 	using System.Windows.Media.Animation;
 	using global::PressureTank;
 	using Infrastructure;
-	using SafetySharp.Runtime;
 
 	public partial class PressureTank
 	{
@@ -94,6 +93,9 @@ namespace Visualization
 
 		private void OnModelStateReset()
 		{
+			if (SimulationControls.Simulator.IsReplay)
+				return;
+
 			Sensor.SuppressIsFull.Activation = SuppressFull.IsChecked.ToOccurrenceKind();
 			Sensor.SuppressIsEmpty.Activation = SuppressEmpty.IsChecked.ToOccurrenceKind();
 			Timer.SuppressTimeout.Activation = SuppressTimeout.IsChecked.ToOccurrenceKind();
