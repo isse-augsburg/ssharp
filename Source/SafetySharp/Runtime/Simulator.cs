@@ -213,6 +213,22 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
+		///   Replays the next transition of the simulated counter example.
+		/// </summary>
+		public void Replay()
+		{
+			Requires.That(IsReplay, "Only counter examples can be replayed.");
+			Requires.That(!IsCompleted, "The end of the counter example has already been reached.");
+
+			fixed (byte* sourceState = _states[_stateIndex])
+				Model.Replay(sourceState, _counterExample.GetReplayInformation(_stateIndex));
+
+			var targetState = stackalloc byte[Model.StateVectorSize];
+			Model.Serialize(targetState);
+			AddState(targetState);
+		}
+
+		/// <summary>
 		///   Adds the state to the simulator.
 		/// </summary>
 		private void AddState(byte* state)

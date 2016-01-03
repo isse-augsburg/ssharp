@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Runtime
 {
+	using System.Collections.Generic;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Modeling;
@@ -151,6 +152,37 @@ namespace SafetySharp.Runtime
 			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
 			// turning the choice into a deterministic selection of the value at index 0
 			_valueCount[choiceIndex] = 0;
+		}
+
+		/// <summary>
+		///   Sets the choices that should be made during the next step.
+		/// </summary>
+		/// <param name="choices">The choices that should be made.</param>
+		internal void SetChoices(int[] choices)
+		{
+			foreach (var choice in choices)
+			{
+				_chosenValues.Push(choice);
+				_valueCount.Push(0);
+			}
+		}
+
+		/// <summary>
+		///   Clears all choice information.
+		/// </summary>
+		internal void Clear()
+		{
+			_chosenValues.Clear();
+			_valueCount.Clear();
+		}
+
+		/// <summary>
+		///   Gets the choices that were made to generate the last transitions.
+		/// </summary>
+		internal IEnumerable<int> GetChoices()
+		{
+			for (var i = 0; i < _chosenValues.Count; ++i)
+				yield return _chosenValues[i];
 		}
 
 		/// <summary>

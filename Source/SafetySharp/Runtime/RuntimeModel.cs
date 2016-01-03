@@ -287,6 +287,62 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
+		///   Generates the replay information for the <paramref name="trace" />.
+		/// </summary>
+		/// <param name="trace">The trace the replay information should be generated for.</param>
+		internal int[][] GenerateReplayInformation(byte[][] trace)
+		{
+			_stateCache.Clear();
+
+			var info = new int[trace.Length - 1][];
+			var targetState = _stateCache.Allocate();
+
+			// We have to generate the replay info for all transitions
+			for (var i = 0; i < trace.Length - 1; ++i)
+			{
+				_choiceResolver.Clear();
+				_choiceResolver.PrepareNextState();
+
+				// Try all transitions until we find the one that leads to the desired state
+				while (_choiceResolver.PrepareNextPath())
+				{
+					fixed (byte* sourceState = trace[i])
+						Deserialize(sourceState);
+
+					ExecuteStep();
+					Serialize(targetState);
+
+					// Compare the target states; if they match, we've found the correct transition
+					var areEqual = true;
+					for (var j = 0; j < StateVectorSize; ++j)
+						areEqual &= targetState[j] == trace[i + 1][j];
+
+					if (!areEqual)
+						continue;
+
+					info[i] = _choiceResolver.GetChoices().ToArray();
+					break;
+				}
+			}
+
+			return info;
+		}
+
+		/// <summary>
+		///   Replays the model step starting at the serialized <paramref name="state" /> using the given
+		///   <paramref name="replayInformation" />.
+		/// </summary>
+		/// <param name="state">The serialized state that the replay starts from.</param>
+		/// <param name="replayInformation">The replay information required to compute the target state.</param>
+		internal void Replay(byte* state, int[] replayInformation)
+		{
+			Deserialize(state);
+			_choiceResolver.SetChoices(replayInformation);
+
+			ExecuteStep();
+		}
+
+		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>

@@ -267,7 +267,7 @@ namespace SafetySharp.Runtime
 					Marshal.Copy(new IntPtr((int*)_states[indexedTrace[i]]), trace[i], 0, trace[i].Length);
 				}
 
-				_context._counterExample = new CounterExample(_model, trace);
+				_context._counterExample = new CounterExample(_model, trace, _model.GenerateReplayInformation(trace));
 			}
 
 			/// <summary>

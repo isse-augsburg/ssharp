@@ -8,6 +8,7 @@
                       mc:Ignorable="d"
                       GlowBrush="{DynamicResource AccentColorBrush}"
                       WindowStartupLocation="CenterScreen"
+                      MinWidth="700" MinHeight="600"
                       Title="S# Visualizer" Width="700" Height="600">
     <Grid>
         <TabControl>

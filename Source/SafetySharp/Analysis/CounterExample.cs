@@ -45,7 +45,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   The first few bytes that indicate that a file is a valid S# counter example file.
 		/// </summary>
-		private const int FileHeader = 0x3FE0DD02;
+		private const int FileHeader = 0x3FE0DD03;
 
 		/// <summary>
 		///   The character that is used to split the individual states in the counter example.
@@ -58,17 +58,25 @@ namespace SafetySharp.Analysis
 		private readonly byte[][] _counterExample;
 
 		/// <summary>
+		///   The information required to replay the counter example.
+		/// </summary>
+		private readonly int[][] _replayInfo;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="model">The model the counter example was generated for.</param>
 		/// <param name="counterExample">The serialized counter example.</param>
-		internal CounterExample(RuntimeModel model, byte[][] counterExample)
+		/// <param name="replayInfo">The replay information of the counter example.</param>
+		internal CounterExample(RuntimeModel model, byte[][] counterExample, int[][] replayInfo)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(counterExample, nameof(counterExample));
+			Requires.That(replayInfo == null || replayInfo.Length == counterExample.Length - 1, "Invalid replay info.");
 
 			Model = model;
 			_counterExample = counterExample;
+			_replayInfo = replayInfo;
 		}
 
 		/// <summary>
@@ -156,6 +164,18 @@ namespace SafetySharp.Analysis
 
 				foreach (var slot in _counterExample.SelectMany(step => step))
 					writer.Write(slot);
+
+				writer.Write(_replayInfo?.Length ?? 0);
+
+				if (_replayInfo == null)
+					return;
+
+				foreach (var choices in _replayInfo)
+				{
+					writer.Write(choices.Length);
+					foreach (var choice in choices)
+						writer.Write(choice);
+				}
 			}
 		}
 
@@ -208,7 +228,21 @@ namespace SafetySharp.Analysis
 						counterExample[i][j] = reader.ReadByte();
 				}
 
-				return new CounterExample(model, counterExample);
+				int[][] replayInfo = null;
+				var count = reader.ReadInt32();
+				if (count != 0)
+				{
+					replayInfo = new int[count][];
+
+					for (var i = 0; i < replayInfo.Length; ++i)
+					{
+						replayInfo[i] = new int[reader.ReadInt32()];
+						for (var j = 0; j < replayInfo[i].Length; ++j)
+							replayInfo[i][j] = reader.ReadInt32();
+					}
+				}
+
+				return new CounterExample(model, counterExample, replayInfo);
 			}
 		}
 
@@ -240,7 +274,7 @@ namespace SafetySharp.Analysis
 				}
 
 				var model = RuntimeModelSerializer.Load(serializedRuntimeModel);
-				return new CounterExample(model, ParseCsv(model, File.ReadAllLines(csvFile.FilePath)).Skip(1).ToArray());
+				return new CounterExample(model, ParseCsv(model, File.ReadAllLines(csvFile.FilePath)).Skip(1).ToArray(), null);
 			}
 		}
 
@@ -284,6 +318,18 @@ namespace SafetySharp.Analysis
 		{
 			if (disposing)
 				Model.SafeDispose();
+		}
+
+		/// <summary>
+		///   Gets the replay information for the state identified by the zero-based <paramref name="stateIndex" />.
+		/// </summary>
+		/// <param name="stateIndex">The index of the state the replay information should be returned for.</param>
+		internal int[] GetReplayInformation(int stateIndex)
+		{
+			Requires.That(_replayInfo != null, "The counter example cannot be replayed as it does not contain any replay information.");
+			Requires.InRange(stateIndex, nameof(stateIndex), 0, _counterExample.Length - 1);
+
+			return _replayInfo[stateIndex];
 		}
 
 		/// <summary>

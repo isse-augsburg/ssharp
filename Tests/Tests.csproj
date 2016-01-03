@@ -136,6 +136,7 @@
     <Compile Include="Analysis\Invariants\CounterExamples\bindings.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\faults.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\formulas.cs" />
+    <Compile Include="Analysis\Invariants\CounterExamples\replay.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\nondeterminism.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\stepping.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\steps.cs" />

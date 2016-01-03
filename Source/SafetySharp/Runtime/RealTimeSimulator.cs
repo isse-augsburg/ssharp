@@ -184,5 +184,14 @@ namespace SafetySharp.Runtime
 			_simulator.Prune();
 			ModelStateChanged?.Invoke(this, EventArgs.Empty);
 		}
+
+		/// <summary>
+		///   Replays the next transition of the simulated counter example.
+		/// </summary>
+		public void Replay()
+		{
+			_simulator.Replay();
+			ModelStateChanged?.Invoke(this, EventArgs.Empty);
+		}
 	}
 }

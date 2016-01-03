@@ -109,5 +109,13 @@ namespace SafetySharp.Runtime
 			if (disposing)
 				_memoryBuffer.SafeDispose();
 		}
+
+		/// <summary>
+		///   Clears all values on the stack.
+		/// </summary>
+		public void Clear()
+		{
+			Count = 0;
+		}
 	}
 }
