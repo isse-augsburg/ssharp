@@ -45,6 +45,17 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
+		///   Returns a value within the range of the given bounds.
+		/// </summary>
+		/// <param name="lowerBound">The inclusive lower bound of the range to choose from.</param>
+		/// <param name="upperBound">The inclusive upper bound of the range to choose from.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected int ChooseFromRange(int lowerBound, int upperBound)
+		{
+			return _defaultChoice.ChooseFromRange(lowerBound, upperBound);
+		}
+
+		/// <summary>
 		///   Returns either <paramref name="value1" /> or <paramref name="value2" /> nondeterministically.
 		/// </summary>
 		/// <param name="value1">The first value to choose.</param>

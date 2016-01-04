@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Modeling
 {
+	using System;
 	using System.Runtime.CompilerServices;
 	using Runtime;
 
@@ -53,6 +54,21 @@ namespace SafetySharp.Modeling
 				default:
 					return Resolver.HandleChoice(elementCount);
 			}
+		}
+
+		/// <summary>
+		///   Returns a value within the range of the given bounds.
+		/// </summary>
+		/// <param name="lowerBound">The inclusive lower bound of the range to choose from.</param>
+		/// <param name="upperBound">The inclusive upper bound of the range to choose from.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int ChooseFromRange(int lowerBound, int upperBound)
+		{
+			var range = upperBound - lowerBound + 1;
+			if (range <= 0)
+				throw new InvalidOperationException($"Invalid range [{lowerBound}, {upperBound}].");
+
+			return lowerBound + ChooseIndex(range);
 		}
 
 		/// <summary>

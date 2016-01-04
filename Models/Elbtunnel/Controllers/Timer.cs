@@ -32,14 +32,8 @@ namespace Elbtunnel.Controllers
 		/// <summary>
 		///   The remaining time before the timeout is signaled. A value of -1 indicates that the timer is inactive.
 		/// </summary>
-		[Range(-1, 60, OverflowBehavior.Clamp)]
+		[Range(-1, Specification.Timeout, OverflowBehavior.Clamp)]
 		private int _remainingTime = -1;
-
-		/// <summary>
-		///   The amount of time that has to pass before the timer signals a timeout.
-		/// </summary>
-		[Hidden]
-		public int Timeout;
 
 		/// <summary>
 		///   Gets a value indicating whether the timeout has elapsed. This method returns true only for the single system step where
@@ -62,7 +56,7 @@ namespace Elbtunnel.Controllers
 		/// </summary>
 		public void Start()
 		{
-			_remainingTime = Timeout;
+			_remainingTime = Specification.Timeout;
 		}
 
 		/// <summary>
@@ -78,7 +72,6 @@ namespace Elbtunnel.Controllers
 		/// </summary>
 		public override void Update()
 		{
-			// TODO: Support different system step times
 			--_remainingTime;
 		}
 	}

@@ -32,26 +32,19 @@ namespace Funkfahrbetrieb.TrainController
 		public Brakes Brakes;
 
 		[Hidden]
-		public int ClosingTime = 10;
-
-		[Hidden]
-		public int CrossingPosition = 900;
-
-		[Hidden]
-		public int MaxCommunicationDelay = 1;
-
-		[Hidden]
 		public Odometer Odometer;
 
 		[Hidden]
 		public RadioModule Radio;
 
-		[Hidden]
-		public int SafetyMargin = 100;
+		private int ActivatePosition
+			=> QueryPosition - Odometer.Speed * (Specification.CommunicationDelay + Specification.ClosingDelay);
 
-		private int ActivatePosition => QueryPosition - Odometer.Speed * (MaxCommunicationDelay + ClosingTime);
-		private int QueryPosition => StopPosition - 2 * MaxCommunicationDelay * Odometer.Speed;
-		private int StopPosition => CrossingPosition - SafetyMargin + Odometer.Speed * Odometer.Speed / (2 * Brakes.MaxAcceleration);
+		private int QueryPosition
+			=> StopPosition - 2 * Specification.CommunicationDelay * Odometer.Speed;
+
+		private int StopPosition
+			=> Specification.CrossingPosition - Specification.SafetyMargin + Odometer.Speed * Odometer.Speed / (2 * Specification.Decelaration);
 
 		public override void Update()
 		{

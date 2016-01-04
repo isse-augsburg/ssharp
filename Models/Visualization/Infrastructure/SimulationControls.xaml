@@ -34,7 +34,8 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
-                <ColumnDefinition Width="80" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="40" />
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
@@ -47,12 +48,12 @@
             <local:IconButton HorizontalAlignment="Left" Grid.Row="0" Grid.Column="2" x:Name="ReplayTransition"
                               Icon="{DynamicResource appbar_debug_step_into}"
                               ToolTip="Replays the next transition that was made to generate the counter example by actually executing the model, allowing to debug the transition." Clicked="OnReplayTransition" />
-            <local:IconButton Grid.Row="0" Grid.Column="3" x:Name="IncreaseSpeedButton" Icon="{DynamicResource appbar_arrow_up}"
+            <local:IconButton Grid.Row="0" Grid.Column="4" x:Name="IncreaseSpeedButton" Icon="{DynamicResource appbar_arrow_up}"
                               ToolTip="Increases the speed of the simulation." Clicked="OnIncreaseSpeed" />
-            <local:IconButton Grid.Row="0" Grid.Column="4" x:Name="DecreaseSpeedButton" Icon="{DynamicResource appbar_arrow_down}"
+            <local:IconButton Grid.Row="0" Grid.Column="5" x:Name="DecreaseSpeedButton" Icon="{DynamicResource appbar_arrow_down}"
                               ToolTip="Decreases the speed of the simulation." Clicked="OnDecreaseSpeed" />
             <TextBlock x:Name="EndOfCounterExample" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" Grid.ColumnSpan="3" Foreground="Red">End of Counter Example</TextBlock>
-            <TextBlock Grid.Row="1" Grid.Column="3" HorizontalAlignment="Center" Grid.ColumnSpan="2" Text="Speed: 1x"
+            <TextBlock Grid.Row="1" Grid.Column="4" HorizontalAlignment="Center" Grid.ColumnSpan="2" Text="Speed: 1x"
                        x:Name="SimulationSpeed" />
         </Grid>
     </DockPanel>

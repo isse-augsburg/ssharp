@@ -40,7 +40,8 @@ namespace Elbtunnel.Vehicles
 			if (IsTunnelClosed)
 				return;
 
-			if (Position < 9)
+			// The road layout makes lane changes impossible when the end control has been reached
+			if (Position < Specification.EndControlPosition)
 				Lane = NextLane;
 
 			Speed = NextSpeed;

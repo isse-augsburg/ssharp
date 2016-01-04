@@ -30,8 +30,18 @@ namespace Funkfahrbetrieb
 
 	public class Specification
 	{
+		public const int EndPosition = 1000;
 		public const int SensorPosition = 900;
 		public const int CrossingPosition = 500;
+
+		public const int SafetyMargin = 50;
+		public const int CommunicationDelay = 1;
+		public const int ClosingDelay = 10;
+		public const int CloseTimeout = 20;
+		public const int MaxSpeed = 10;
+		public const int Decelaration = -1;
+		public const int MaxSpeedOffset = 7;
+		public const int MaxPositionOffset = 60;
 
 		public Specification()
 		{
@@ -40,19 +50,15 @@ namespace Funkfahrbetrieb
 				Sensor = new BarrierSensor(),
 				Motor = new BarrierMotor(),
 				Radio = new RadioModule(),
-				Timer = new Timer { Timeout = 20 },
-				TrainSensor = new TrainSensor { Position = SensorPosition }
+				Timer = new Timer(),
+				TrainSensor = new TrainSensor()
 			};
 
 			TrainControl = new TrainControl
 			{
-				Brakes = new Brakes { MaxAcceleration = -1 },
-				Odometer = new Odometer { MaxPositionOffset = 60, MaxSpeedOffset = 7 },
-				Radio = new RadioModule(),
-				ClosingTime = 10,
-				CrossingPosition = CrossingPosition,
-				MaxCommunicationDelay = 1,
-				SafetyMargin = 50
+				Brakes = new Brakes(),
+				Odometer = new Odometer(),
+				Radio = new RadioModule()
 			};
 
 			Component.Bind(nameof(Barrier.Speed), nameof(CrossingControl.Motor.Speed));

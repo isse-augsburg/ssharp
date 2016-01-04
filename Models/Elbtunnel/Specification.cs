@@ -35,7 +35,12 @@ namespace Elbtunnel
 	/// </summary>
 	public class Specification
 	{
+		public const int PreControlPosition = 3;
+		public const int MainControlPosition = 6;
+		public const int EndControlPosition = 9;
+		public const int Timeout = 4;
 		public const int TunnelPosition = 12;
+		public const int MaxSpeed = 2;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -51,7 +56,7 @@ namespace Elbtunnel
 
 			var lightBarrier1 = new LightBarrier
 			{
-				Position = 3,
+				Position = PreControlPosition,
 				Misdetection = { Name = "MissDetectionLB1" },
 				FalseDetection = { Name = "FalseDetectionLB1" },
 				VehicleCount = vehicles.Length
@@ -59,7 +64,7 @@ namespace Elbtunnel
 
 			var lightBarrier2 = new LightBarrier
 			{
-				Position = 6,
+				Position = MainControlPosition,
 				Misdetection = { Name = "MissDetectionLB2" },
 				FalseDetection = { Name = "FalseDetectionLB2" },
 				VehicleCount = vehicles.Length
@@ -68,7 +73,7 @@ namespace Elbtunnel
 			var detectorLeft = new OverheadDetector
 			{
 				Lane = Lane.Left,
-				Position = 6,
+				Position = MainControlPosition,
 				Misdetection = { Name = "MissDetectionODL" },
 				FalseDetection = { Name = "FalseDetectionODL" },
 				VehicleCount = vehicles.Length
@@ -77,7 +82,7 @@ namespace Elbtunnel
 			var detectorRight = new OverheadDetector
 			{
 				Lane = Lane.Right,
-				Position = 6,
+				Position = MainControlPosition,
 				Misdetection = { Name = "MissDetectionODR" },
 				FalseDetection = { Name = "FalseDetectionODR" },
 				VehicleCount = vehicles.Length
@@ -86,7 +91,7 @@ namespace Elbtunnel
 			var detectorFinal = new OverheadDetector
 			{
 				Lane = Lane.Left,
-				Position = 9,
+				Position = EndControlPosition,
 				Misdetection = { Name = "MissDetectionODF" },
 				FalseDetection = { Name = "FalseDetectionODF" },
 				VehicleCount = vehicles.Length
@@ -103,12 +108,12 @@ namespace Elbtunnel
 					LeftDetector = detectorLeft,
 					RightDetector = detectorRight,
 					PositionDetector = lightBarrier2,
-					Timer = new Timer { Timeout = 4 }
+					Timer = new Timer()
 				},
 				EndControl = new EndControlOriginal
 				{
 					Detector = detectorFinal,
-					Timer = new Timer { Timeout = 4 }
+					Timer = new Timer()
 				},
 				TrafficLights = new TrafficLights()
 			};
@@ -140,27 +145,17 @@ namespace Elbtunnel
 		///   Represents the hazard of an over-height vehicle colliding with the tunnel entrance on the left lane.
 		/// </summary>
 		[Hazard]
-		public Formula Collision
-		{
-			get
-			{
-				var vehiclesAboutToCollide =
-					Vehicles.Vehicles.Skip(1).Aggregate(VehicleCollided(Vehicles.Vehicles[0]), (f, v) => f || VehicleCollided(v));
+		public Formula Collision =>
+			Vehicles.Vehicles.Skip(1).Aggregate<Vehicle, Formula>(Vehicles.Vehicles[0].IsCollided, (f, v) => f || v.IsCollided);
 
-				return vehiclesAboutToCollide && !HeightControl.TrafficLights.IsRed;
-			}
-		}
-
+		/// <summary>
+		///   Binds the <paramref name="detector" /> to the <see cref="Vehicles" />.
+		/// </summary>
 		private void Bind(VehicleDetector detector)
 		{
 			Component.Bind(nameof(detector.GetVehicleKind), nameof(Vehicles.GetVehicleKind));
 			Component.Bind(nameof(detector.GetVehiclePosition), nameof(Vehicles.GetVehiclePosition));
 			Component.Bind(nameof(detector.GetVehicleLane), nameof(Vehicles.GetVehicleLane));
-		}
-
-		private static Formula VehicleCollided(Vehicle vehicle)
-		{
-			return vehicle.Kind == VehicleKind.OverheightTruck && vehicle.Position >= TunnelPosition && vehicle.Lane == Lane.Left;
 		}
 	}
 }

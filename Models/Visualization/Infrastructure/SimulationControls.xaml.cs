@@ -84,9 +84,15 @@ namespace Visualization.Infrastructure
 			UpdateSimulationButtonVisibilities();
 
 			if (Simulator.IsCompleted)
+			{
 				EndOfCounterExample.Visibility = Visibility.Visible;
+				ReplayTransition.Disable();
+			}
 			else
+			{
 				EndOfCounterExample.Visibility = Visibility.Hidden;
+				ReplayTransition.Enable();
+			}
 		}
 
 		private void UpdateSimulationButtonVisibilities()

@@ -26,12 +26,6 @@ namespace Funkfahrbetrieb.TrainController
 
 	public class Odometer : Component
 	{
-		[Hidden]
-		public int MaxPositionOffset;
-
-		[Hidden]
-		public int MaxSpeedOffset;
-
 		public readonly Fault OdometerPositionOffset = new TransientFault();
 		public readonly Fault OdometerSpeedOffset = new TransientFault();
 
@@ -44,13 +38,13 @@ namespace Funkfahrbetrieb.TrainController
 		[FaultEffect(Fault = nameof(OdometerPositionOffset))]
 		public class PositionOffsetEffect : Odometer
 		{
-			public override int Position => base.Position + MaxPositionOffset * Choose(-1, 1);
+			public override int Position => base.Position + Specification.MaxPositionOffset * Choose(-1, 1);
 		}
 
 		[FaultEffect(Fault = nameof(OdometerSpeedOffset))]
 		public class SpeedOffsetEffect : Odometer
 		{
-			public override int Speed => base.Speed + MaxSpeedOffset * Choose(-1, 1);
+			public override int Speed => base.Speed + Specification.MaxSpeedOffset * Choose(-1, 1);
 		}
 	}
 }

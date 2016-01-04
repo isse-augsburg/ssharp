@@ -28,7 +28,7 @@ namespace Funkfahrbetrieb.CrossingController
 	{
 		public readonly Fault BarrierSensorFailure = new TransientFault();
 
-		public virtual bool IsOpen => BarrierAngle == 10;
+		public virtual bool IsOpen => BarrierAngle == Specification.ClosingDelay;
 		public virtual bool IsClosed => BarrierAngle == 0;
 		public extern int BarrierAngle { get; }
 

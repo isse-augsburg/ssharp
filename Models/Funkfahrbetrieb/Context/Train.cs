@@ -26,11 +26,11 @@ namespace Funkfahrbetrieb.Context
 
 	public class Train : Component
 	{
-		[Range(0, 1000, OverflowBehavior.Clamp)]
+		[Range(0, Specification.EndPosition, OverflowBehavior.Clamp)]
 		private int _position;
 
-		[Range(0, 10, OverflowBehavior.Clamp)]
-		private int _speed = 10;
+		[Range(0, Specification.MaxSpeed, OverflowBehavior.Clamp)]
+		private int _speed = Specification.MaxSpeed;
 
 		public int Position => _position;
 		public int Speed => _speed;

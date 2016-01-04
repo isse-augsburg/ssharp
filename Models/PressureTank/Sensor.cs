@@ -41,15 +41,9 @@ namespace PressureTank
 		public readonly Fault SuppressIsFull = new TransientFault();
 
 		/// <summary>
-		///   The pressure level the sensor is watching for.
-		/// </summary>
-		[Hidden]
-		public int TriggerPressure;
-
-		/// <summary>
 		///   Gets a value indicating whether the triggering pressure level has been reached or exceeded.
 		/// </summary>
-		public virtual bool IsFull => PhysicalPressure >= TriggerPressure;
+		public virtual bool IsFull => PhysicalPressure >= Specification.SensorPressure;
 
 		/// <summary>
 		///   Gets a value indicating whether the tank is empty.

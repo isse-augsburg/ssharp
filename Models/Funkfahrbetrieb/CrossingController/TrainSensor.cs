@@ -28,10 +28,7 @@ namespace Funkfahrbetrieb.CrossingController
 	{
 		public readonly Fault ErroneousTrainDetection = new TransientFault();
 
-		[Hidden]
-		public int Position;
-
-		public virtual bool HasTrainPassed => TrainPosition > Position;
+		public virtual bool HasTrainPassed => TrainPosition > Specification.SensorPosition;
 		public extern int TrainPosition { get; }
 
 		[FaultEffect(Fault = nameof(ErroneousTrainDetection))]

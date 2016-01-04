@@ -26,19 +26,14 @@ namespace Funkfahrbetrieb.CrossingController
 
 	public class Timer : Component
 	{
-		[Range(-1, 60, OverflowBehavior.Clamp)]
+		[Range(-1, Specification.CloseTimeout, OverflowBehavior.Clamp)]
 		private int _remainingTime = -1;
 
-		[Hidden]
-		public int Timeout;
-
 		public bool HasElapsed => _remainingTime == 0;
-		public bool IsActive => _remainingTime > 0;
-		public int RemainingTime => _remainingTime;
 
 		public void Start()
 		{
-			_remainingTime = Timeout;
+			_remainingTime = Specification.CloseTimeout;
 		}
 
 		public void Stop()
@@ -48,7 +43,6 @@ namespace Funkfahrbetrieb.CrossingController
 
 		public override void Update()
 		{
-			// TODO: Support different system step times
 			--_remainingTime;
 		}
 	}

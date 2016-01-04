@@ -26,8 +26,8 @@ namespace Funkfahrbetrieb.Context
 
 	public class Barrier : Component
 	{
-		[Range(0, 10, OverflowBehavior.Clamp)]
-		private int _angle = 10;
+		[Range(0, Specification.ClosingDelay, OverflowBehavior.Clamp)]
+		private int _angle = Specification.ClosingDelay;
 
 		public int Angle => _angle;
 		public extern int Speed { get; }

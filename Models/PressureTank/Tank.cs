@@ -32,19 +32,13 @@ namespace PressureTank
 		/// <summary>
 		///   The current pressure level.
 		/// </summary>
-		[Range(0, 60, OverflowBehavior.Clamp)]
+		[Range(0, Specification.MaxPressure, OverflowBehavior.Clamp)]
 		private int _pressureLevel;
-
-		/// <summary>
-		///   The maximum allowed pressure level of the tank.
-		/// </summary>
-		[Hidden]
-		public int MaxPressure;
 
 		/// <summary>
 		///   Gets a value indicating whether the pressure tank has ruptured after exceeding its maximum allowed pressure level.
 		/// </summary>
-		public bool IsRuptured => _pressureLevel >= MaxPressure;
+		public bool IsRuptured => _pressureLevel >= Specification.MaxPressure;
 
 		/// <summary>
 		///   Gets the current pressure level within the tank.

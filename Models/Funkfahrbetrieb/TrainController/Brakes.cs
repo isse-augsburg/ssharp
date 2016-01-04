@@ -28,17 +28,14 @@ namespace Funkfahrbetrieb.TrainController
 	{
 		public readonly Fault BrakesFailure = new PersistentFault();
 
-		[Range(-1, 1, OverflowBehavior.Error)]
+		[Range(Specification.Decelaration, 0, OverflowBehavior.Error)]
 		private int _acceleration;
-
-		[Hidden]
-		public int MaxAcceleration;
 
 		public virtual int Acceleration => _acceleration;
 
 		public void Engage()
 		{
-			_acceleration = MaxAcceleration;
+			_acceleration = Specification.Decelaration;
 		}
 
 		[FaultEffect(Fault = nameof(BrakesFailure))]

@@ -52,9 +52,9 @@ namespace PressureTank
 		{
 			Controller = new Controller
 			{
-				Sensor = new Sensor { TriggerPressure = SensorPressure },
+				Sensor = new Sensor(),
 				Pump = new Pump(),
-				Timer = new Timer { Timeout = Timeout }
+				Timer = new Timer()
 			};
 
 			Component.Bind(nameof(Controller.Sensor.PhysicalPressure), nameof(Tank.PressureLevel));
@@ -65,7 +65,7 @@ namespace PressureTank
 		///   Gets the tank that is being filled.
 		/// </summary>
 		[Root(Role.SystemContext)]
-		public Tank Tank { get; } = new Tank { MaxPressure = MaxPressure };
+		public Tank Tank { get; } = new Tank();
 
 		/// <summary>
 		///   Gets the controller that fills the tank.

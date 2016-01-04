@@ -32,10 +32,10 @@ namespace Elbtunnel.Vehicles
 		[Hidden]
 		private VehicleKind _kind;
 
-		[Range(0, Specification.TunnelPosition + 1, OverflowBehavior.Clamp)]
+		[Range(0, Specification.TunnelPosition, OverflowBehavior.Clamp)]
 		private int _position;
 
-		[Range(0, 3, OverflowBehavior.Error)]
+		[Range(0, Specification.MaxSpeed, OverflowBehavior.Error)]
 		private int _speed;
 
 		/// <summary>
@@ -71,6 +71,12 @@ namespace Elbtunnel.Vehicles
 		}
 
 		/// <summary>
+		///   Gets a value indicating whether the vehicle has collided with the tunnel.
+		/// </summary>
+		public bool IsCollided =>
+			Kind == VehicleKind.OverheightTruck && Position >= Specification.TunnelPosition && Lane == Lane.Left;
+
+		/// <summary>
 		///   Informs the vehicle whether the tunnel is closed.
 		/// </summary>
 		public extern bool IsTunnelClosed { get; }
@@ -81,7 +87,7 @@ namespace Elbtunnel.Vehicles
 		void IInitializable.Initialize()
 		{
 			Lane = Choose(Lane.Left, Lane.Right);
-			Speed = Choose(0, 1, 2);
+			Speed = ChooseFromRange(0, Specification.MaxSpeed);
 		}
 
 		/// <summary>
@@ -95,10 +101,10 @@ namespace Elbtunnel.Vehicles
 			Position += Speed;
 
 			// Vehicles are only allowed to stop at the initial position
-			Speed = Choose(1, 2);
+			Speed = ChooseFromRange(1, Specification.MaxSpeed);
 
-			// The road layout makes lane changes impossible after position 14
-			if (Position < 9)
+			// The road layout makes lane changes impossible when the end control has been reached
+			if (Position < Specification.EndControlPosition)
 				Lane = Choose(Lane.Left, Lane.Right);
 		}
 	}
