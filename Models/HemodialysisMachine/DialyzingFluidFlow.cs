@@ -30,10 +30,19 @@ namespace HemodialysisMachine
 {
 	using Utilities;
 
+	public enum DialyzingFluidQuantity
+	{
+		Nothing,
+		Full,
+		FullUltraFiltraded,
+		Some,
+		SomeUltraFiltraded
+	}
+
 	// Also called dialysate or dialyzate
 	public struct DialyzingFluid
 	{
-		public int Quantity;
+		public DialyzingFluidQuantity Quantity;
 		public bool ContaminatedByBlood; //To allow 
 	}
 

@@ -35,14 +35,14 @@ namespace HemodialysisMachine.Tests
 	class IntFlowTests
 	{
 		[Test]
-		public void SimpleFlowArrives()
+		public void SimpleFlowArrives_ExplicitPort()
 		{
 			var combinator = new IntFlowCombinator();
 			var source = new IntFlowSource(() => 7);
-			var direct = new IntFlowInToOutSegment(In=>In);
+			var direct = new IntFlowInToOutSegment(In => In);
 			var sink = new IntFlowSink();
-			combinator.Connect(source.Outgoing,direct.Incoming);
-			combinator.Connect(direct.Outgoing,sink.Incoming);
+			combinator.Connect(source.Outgoing, direct.Incoming);
+			combinator.Connect(direct.Outgoing, sink.Incoming);
 			combinator.UpdateFlows();
 			sink.ElementInOfCurrentCycle.Should().Be(7);
 			source.SuctionInOfCurrentCycle.Should().Be(1);
@@ -50,7 +50,7 @@ namespace HemodialysisMachine.Tests
 
 
 		[Test]
-		public void TwoStepFlowArrives()
+		public void TwoStepFlowArrives_ExplicitPort()
 		{
 			var combinator = new IntFlowCombinator();
 			var source = new IntFlowSource(() => 7);
@@ -65,9 +65,8 @@ namespace HemodialysisMachine.Tests
 			source.SuctionInOfCurrentCycle.Should().Be(1);
 		}
 
-		/*
 		[Test]
-		public void CompositeFlowArrives()
+		public void CompositeFlowArrives_ExplicitPort()
 		{
 			var combinator = new IntFlowCombinator();
 			var source = new IntFlowSource(() => 7);
@@ -75,19 +74,18 @@ namespace HemodialysisMachine.Tests
 			var firstInComposite = new IntFlowInToOutSegment(In => In);
 			var secondInComposite = new IntFlowInToOutSegment(In => In);
 			var sink = new IntFlowSink();
-			combinator.Connect(source.Outgoing, composite);
-			combinator.ConnectInWithIn(composite, firstInComposite);
-			combinator.ConnectOutWithIn(firstInComposite, secondInComposite);
-			combinator.ConnectOutWithOut(secondInComposite, composite);
+			combinator.Connect(source.Outgoing, composite.Incoming);
+			combinator.Connect(composite.IncomingProxy, firstInComposite.Incoming);
+			combinator.Connect(firstInComposite.Outgoing, secondInComposite.Incoming);
+			combinator.Connect(secondInComposite.Outgoing, composite.OutgoingProxy);
 			combinator.Connect(composite.Outgoing, sink.Incoming);
 			combinator.UpdateFlows();
 			sink.ElementInOfCurrentCycle.Should().Be(7);
 			source.SuctionInOfCurrentCycle.Should().Be(1);
 		}
-		*/
 
 		[Test]
-		public void SplitFlowWorks()
+		public void SplitFlowWorks_ExplicitPort()
 		{
 			var combinator = new IntFlowCombinator();
 			var source = new IntFlowSource(() => 7);
@@ -95,7 +93,7 @@ namespace HemodialysisMachine.Tests
 			var way2Direct = new IntFlowInToOutSegment(In => In);
 			var way1Sink = new IntFlowSink();
 			var way2Sink = new IntFlowSink();
-			combinator.ConnectOutWithIn(source.Outgoing, new PortFlowIn<int>[] {way1Direct.Incoming, way2Direct.Incoming});
+			combinator.Connect(source.Outgoing, new PortFlowIn<int>[] { way1Direct.Incoming, way2Direct.Incoming });
 			combinator.Connect(way1Direct.Outgoing, way1Sink.Incoming);
 			combinator.Connect(way2Direct.Outgoing, way2Sink.Incoming);
 			combinator.UpdateFlows();
@@ -105,7 +103,7 @@ namespace HemodialysisMachine.Tests
 		}
 
 		[Test]
-		public void MergeFlowWorks()
+		public void MergeFlowWorks_ExplicitPort()
 		{
 			var combinator = new IntFlowCombinator();
 			var source1 = new IntFlowSource(() => 7);
@@ -115,16 +113,15 @@ namespace HemodialysisMachine.Tests
 			var sink = new IntFlowSink();
 			combinator.Connect(source1.Outgoing, way1Direct.Incoming);
 			combinator.Connect(source2.Outgoing, way2Direct.Incoming);
-			combinator.ConnectOutWithIn(new PortFlowOut<int>[] { way1Direct.Outgoing, way2Direct.Outgoing },sink.Incoming);
+			combinator.Connect(new PortFlowOut<int>[] { way1Direct.Outgoing, way2Direct.Outgoing }, sink.Incoming);
 			combinator.UpdateFlows();
 			sink.ElementInOfCurrentCycle.Should().Be(7);
 			source1.SuctionInOfCurrentCycle.Should().Be(1);
 			source2.SuctionInOfCurrentCycle.Should().Be(1);
 		}
 
-		/*
 		[Test]
-		public void SplitFlowWorksWithComposite()
+		public void SplitFlowWorksWithComposite_ExplicitPort()
 		{
 			var combinator = new IntFlowCombinator();
 			var source = new IntFlowSource(() => 7);
@@ -133,8 +130,137 @@ namespace HemodialysisMachine.Tests
 			var way2Direct = new IntFlowInToOutSegment(In => In);
 			var sinkInside = new IntFlowSink();
 			var sinkOutside = new IntFlowSink();
-			combinator.ConnectOutWithIn(source.Outgoing, composite);
-			combinator.ConnectInWithIn(composite, new PortFlowIn<int>[] { way1Direct, way2Direct });
+			combinator.Connect(source.Outgoing, composite.Incoming);
+			combinator.Connect(composite.IncomingProxy, new PortFlowIn<int>[] { way1Direct.Incoming, way2Direct.Incoming });
+			combinator.Connect(way1Direct.Outgoing, sinkInside.Incoming);
+			combinator.Connect(way2Direct.Outgoing, composite.OutgoingProxy);
+			combinator.Connect(composite.Outgoing, sinkOutside.Incoming);
+			combinator.UpdateFlows();
+			sinkInside.ElementInOfCurrentCycle.Should().Be(7);
+			sinkOutside.ElementInOfCurrentCycle.Should().Be(7);
+			source.SuctionInOfCurrentCycle.Should().Be(1);
+		}
+
+		[Test]
+		public void MergeFlowWorksWithComposite_ExplicitPort()
+		{
+			var combinator = new IntFlowCombinator();
+			var sourceOutside = new IntFlowSource(() => 7);
+			var sourceInside = new IntFlowSource(() => 7);
+			var composite = new IntFlowComposite();
+			var way1Direct = new IntFlowInToOutSegment(In => In);
+			var way2Direct = new IntFlowInToOutSegment(In => In);
+			var sink = new IntFlowSink();
+			combinator.Connect(sourceOutside.Outgoing, composite.Incoming);
+			combinator.Connect(composite.IncomingProxy, way1Direct.Incoming);
+			combinator.Connect(sourceInside.Outgoing, way2Direct.Incoming);
+			combinator.Connect(new PortFlowOut<int>[] { way1Direct.Outgoing, way2Direct.Outgoing }, composite.OutgoingProxy);
+			combinator.Connect(composite.Outgoing, sink.Incoming);
+			combinator.UpdateFlows();
+			sink.ElementInOfCurrentCycle.Should().Be(7);
+			sourceOutside.SuctionInOfCurrentCycle.Should().Be(1);
+			sourceInside.SuctionInOfCurrentCycle.Should().Be(1);
+		}
+
+		
+		[Test]
+		public void SimpleFlowArrives_ImplicitPort()
+		{
+			var combinator = new IntFlowCombinator();
+			var source = new IntFlowSource(() => 7);
+			var direct = new IntFlowInToOutSegment(In => In);
+			var sink = new IntFlowSink();
+			combinator.ConnectOutWithIn(source, direct);
+			combinator.ConnectOutWithIn(direct, sink);
+			combinator.UpdateFlows();
+			sink.ElementInOfCurrentCycle.Should().Be(7);
+			source.SuctionInOfCurrentCycle.Should().Be(1);
+		}
+
+
+		[Test]
+		public void TwoStepFlowArrives_ImplicitPort()
+		{
+			var combinator = new IntFlowCombinator();
+			var source = new IntFlowSource(() => 7);
+			var direct1 = new IntFlowInToOutSegment(In => In);
+			var direct2 = new IntFlowInToOutSegment(In => In);
+			var sink = new IntFlowSink();
+			combinator.ConnectOutWithIn(source, direct1);
+			combinator.ConnectOutWithIn(direct1, direct2);
+			combinator.ConnectOutWithIn(direct2, sink);
+			combinator.UpdateFlows();
+			sink.ElementInOfCurrentCycle.Should().Be(7);
+			source.SuctionInOfCurrentCycle.Should().Be(1);
+		}
+
+		[Test]
+		public void CompositeFlowArrives_ImplicitPort()
+		{
+			var combinator = new IntFlowCombinator();
+			var source = new IntFlowSource(() => 7);
+			var composite = new IntFlowComposite();
+			var firstInComposite = new IntFlowInToOutSegment(In => In);
+			var secondInComposite = new IntFlowInToOutSegment(In => In);
+			var sink = new IntFlowSink();
+			combinator.ConnectOutWithIn(source, composite);
+			combinator.ConnectInWithIn(composite, firstInComposite);
+			combinator.ConnectOutWithIn(firstInComposite, secondInComposite);
+			combinator.ConnectOutWithOut(secondInComposite, composite);
+			combinator.ConnectOutWithIn(composite, sink);
+			combinator.UpdateFlows();
+			sink.ElementInOfCurrentCycle.Should().Be(7);
+			source.SuctionInOfCurrentCycle.Should().Be(1);
+		}
+
+		[Test]
+		public void SplitFlowWorks_ImplicitPort()
+		{
+			var combinator = new IntFlowCombinator();
+			var source = new IntFlowSource(() => 7);
+			var way1Direct = new IntFlowInToOutSegment(In => In);
+			var way2Direct = new IntFlowInToOutSegment(In => In);
+			var way1Sink = new IntFlowSink();
+			var way2Sink = new IntFlowSink();
+			combinator.ConnectOutWithIns(source, new IFlowComponentUniqueIncoming<int>[] { way1Direct, way2Direct });
+			combinator.ConnectOutWithIn(way1Direct, way1Sink);
+			combinator.ConnectOutWithIn(way2Direct, way2Sink);
+			combinator.UpdateFlows();
+			way1Sink.ElementInOfCurrentCycle.Should().Be(7);
+			way2Sink.ElementInOfCurrentCycle.Should().Be(7);
+			source.SuctionInOfCurrentCycle.Should().Be(1);
+		}
+
+		[Test]
+		public void MergeFlowWorks_ImplicitPort()
+		{
+			var combinator = new IntFlowCombinator();
+			var source1 = new IntFlowSource(() => 7);
+			var source2 = new IntFlowSource(() => 7);
+			var way1Direct = new IntFlowInToOutSegment(In => In);
+			var way2Direct = new IntFlowInToOutSegment(In => In);
+			var sink = new IntFlowSink();
+			combinator.ConnectOutWithIn(source1, way1Direct);
+			combinator.ConnectOutWithIn(source2, way2Direct);
+			combinator.ConnectOutsWithIn(new IFlowComponentUniqueOutgoing<int>[] { way1Direct, way2Direct }, sink);
+			combinator.UpdateFlows();
+			sink.ElementInOfCurrentCycle.Should().Be(7);
+			source1.SuctionInOfCurrentCycle.Should().Be(1);
+			source2.SuctionInOfCurrentCycle.Should().Be(1);
+		}
+
+		[Test]
+		public void SplitFlowWorksWithComposite_ImplicitPort()
+		{
+			var combinator = new IntFlowCombinator();
+			var source = new IntFlowSource(() => 7);
+			var composite = new IntFlowComposite();
+			var way1Direct = new IntFlowInToOutSegment(In => In);
+			var way2Direct = new IntFlowInToOutSegment(In => In);
+			var sinkInside = new IntFlowSink();
+			var sinkOutside = new IntFlowSink();
+			combinator.ConnectOutWithIn(source, composite);
+			combinator.ConnectInWithIns(composite, new IFlowComponentUniqueIncoming<int>[] { way1Direct, way2Direct });
 			combinator.ConnectOutWithIn(way1Direct, sinkInside);
 			combinator.ConnectOutWithOut(way2Direct, composite);
 			combinator.ConnectOutWithIn(composite, sinkOutside);
@@ -145,7 +271,7 @@ namespace HemodialysisMachine.Tests
 		}
 
 		[Test]
-		public void MergeFlowWorksWithComposite()
+		public void MergeFlowWorksWithComposite_ImplicitPort()
 		{
 			var combinator = new IntFlowCombinator();
 			var sourceOutside = new IntFlowSource(() => 7);
@@ -157,13 +283,12 @@ namespace HemodialysisMachine.Tests
 			combinator.ConnectOutWithIn(sourceOutside, composite);
 			combinator.ConnectInWithIn(composite, way1Direct);
 			combinator.ConnectOutWithIn(sourceInside, way2Direct);
-			combinator.ConnectOutWithOut(new PortFlowOut<int>[] { way1Direct, way2Direct }, composite);
+			combinator.ConnectOutsWithOut(new IFlowComponentUniqueOutgoing<int>[] { way1Direct, way2Direct }, composite);
 			combinator.ConnectOutWithIn(composite, sink);
 			combinator.UpdateFlows();
 			sink.ElementInOfCurrentCycle.Should().Be(7);
 			sourceOutside.SuctionInOfCurrentCycle.Should().Be(1);
 			sourceInside.SuctionInOfCurrentCycle.Should().Be(1);
 		}
-		*/
 	}
 }
