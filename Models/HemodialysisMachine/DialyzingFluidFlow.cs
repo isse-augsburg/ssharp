@@ -34,12 +34,13 @@ namespace HemodialysisMachine
 	public struct DialyzingFluid
 	{
 		public int Quantity;
+		public bool ContaminatedByBlood; //To allow 
 	}
 
 
-	class DialyzingFluidFlowSegment : Utilities.FlowSegment<DialyzingFluid>
+	class DialyzingFluidFlowInToOutSegment : Utilities.FlowInToOutSegment<DialyzingFluid>
 	{
-		public DialyzingFluidFlowSegment(Func<DialyzingFluid, DialyzingFluid> flowLambdaFunc)
+		public DialyzingFluidFlowInToOutSegment(Func<DialyzingFluid, DialyzingFluid> flowLambdaFunc)
 			: base(flowLambdaFunc)
 		{
 		}
@@ -61,9 +62,6 @@ namespace HemodialysisMachine
 	{
 	}
 
-	class DialyzingFluidFlowDirect : Utilities.FlowDirect<DialyzingFluid>
-	{
-	}
 	class DialyzingFluidFlowCombinator : Utilities.FlowCombinator<DialyzingFluid>
 	{
 	}

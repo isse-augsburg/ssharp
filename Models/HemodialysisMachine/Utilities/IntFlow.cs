@@ -24,9 +24,9 @@ using System;
 
 namespace HemodialysisMachine.Utilities
 {
-	class IntFlowSegment : Utilities.FlowSegment<int>
+	class IntFlowInToOutSegment : Utilities.FlowInToOutSegment<int>
 	{
-		public IntFlowSegment(Func<int, int> flowLambdaFunc)
+		public IntFlowInToOutSegment(Func<int, int> flowLambdaFunc)
 			: base(flowLambdaFunc)
 		{
 		}
@@ -48,9 +48,6 @@ namespace HemodialysisMachine.Utilities
 	{
 	}
 
-	class IntFlowDirect : Utilities.FlowDirect<int>
-	{
-	}
 	class IntFlowCombinator : Utilities.FlowCombinator<int>
 	{
 	}
