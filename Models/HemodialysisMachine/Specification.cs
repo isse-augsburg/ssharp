@@ -22,27 +22,28 @@
 
 namespace HemodialysisMachine
 {
+	using Model;
 	using SafetySharp.Analysis;
 
 	public class Specification
 	{
 		public Specification()
 		{
-			HdMachine = new HdMachine.HdMachine
+			HdMachine = new HdMachine
 			{
 			};
 
-			Patient = new Patient.Patient
+			Patient = new Patient
 			{
 			};
 		}
 		
 
 		[Root(Role.SystemOfInterest)]
-		public HdMachine.HdMachine HdMachine { get; }
+		internal HdMachine HdMachine { get; }
 
 		[Root(Role.SystemContext)]
-		public Patient.Patient Patient { get; }
+		internal Patient Patient { get; }
 
 		[Hazard]
 		public Formula PossibleCollision =>

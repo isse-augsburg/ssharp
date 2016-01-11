@@ -26,10 +26,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HemodialysisMachine.HdMachine
+namespace HemodialysisMachine.Model
 {
-	using SafetySharp.Modeling;
-	public class HdMachine : Component
+	enum ValveState
 	{
+		Open,
+		Closed
 	}
 }

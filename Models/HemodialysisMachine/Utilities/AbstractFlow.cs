@@ -92,6 +92,9 @@ namespace HemodialysisMachine.Utilities
 	//              - sink.SetElement (y2)
 	//              - sink.ElementOfCurrentCycle = y2
 
+	// TODO: Inout zu pipe umbenennen. Werte in Ports speichern. Werte in verbundenen ports sollen auf gleiche Stelle referenzieren. 
+	// TODO: SetElement: Alternatively: We could save the In-Value.
+
 	public delegate void SetElementDelegate<TElement>(TElement pushedElement);
 	public delegate void SetSuctionDelegate(int suction);
 	public delegate void UpdateSuctionDelegate();
@@ -107,8 +110,8 @@ namespace HemodialysisMachine.Utilities
 
 	public class PortFlowOut<TElement> where TElement : struct
 	{
-		public SetElementDelegate<TElement> SetSuccessorElement { get; set; }
-		public SetSuctionDelegate SetSuction { get; set; } //this is the connected successor
+		public SetElementDelegate<TElement> SetSuccessorElement { get; set; } //this is the connected successor
+		public SetSuctionDelegate SetSuction { get; set; }
 		public UpdateElementDelegate UpdateElementOfSuccessor { get; set; } // This is executed to calculate what the successor value should be (make changes). To update the successor, this.SetSuccessorElement() must be called in this method.
 	}
 
@@ -124,19 +127,6 @@ namespace HemodialysisMachine.Utilities
 
 	public abstract class FlowCombinator<TElement> where TElement : struct
 	{
-		private static void ConnectLambdas(PortFlowOut<TElement> @from, PortFlowIn<TElement> to)
-		{
-			// ConnectOutWithIn
-			// Flow goes from [@from]-->[to]
-			// Suction goes from [to]-->[@from]
-			// When from.SetSuccessorElement is called, then to.SetElement should be called.
-			// When to.SetPredecessorSuction is called, then from.SetSuction should be called.
-			if (from.SetSuccessorElement != null)
-				throw new Exception("is already connected");
-			from.SetSuccessorElement = element => to.SetElement(element);
-			to.SetPredecessorSuction = suction => from.SetSuction(suction);
-		}
-
 		private List<PortFlowIn<TElement>> UpdateSuctionOrder;
 		private List<PortFlowOut<TElement>> UpdateElementOrder;
 
@@ -157,12 +147,20 @@ namespace HemodialysisMachine.Utilities
 		protected FlowCombinator()
 		{
 			UpdateSuctionOrder=new List<PortFlowIn<TElement>>();
-			UpdateElementOrder = new List<PortFlowOut<TElement>>();
+			UpdateElementOrder=new List<PortFlowOut<TElement>>();
 		}
 		
 		public void Connect(PortFlowOut<TElement> @from, PortFlowIn<TElement> to)
 		{
-			ConnectLambdas(from, to);
+			// Flow goes from [@from]-->[to]
+			// Suction goes from [to]-->[@from]
+			// When from.SetSuccessorElement is called, then to.SetElement should be called.
+			// When to.SetPredecessorSuction is called, then from.SetSuction should be called.
+			if (from.SetSuccessorElement != null)
+				throw new Exception("is already connected");
+			from.SetSuccessorElement = element => to.SetElement(element);
+			to.SetPredecessorSuction = suction => from.SetSuction(suction);
+			// Add elements to update lists			
 			UpdateElementOrder.Add(from); //from is the active part
 			UpdateSuctionOrder.Insert(0, to); //to is the active part
 		}
@@ -217,6 +215,24 @@ namespace HemodialysisMachine.Utilities
 					Connect(flowVirtualSplitter.Outgoings[i], to[i]);
 				}
 			}
+		}
+
+		public void Replace(PortFlowIn<TElement> toReplace, PortFlowIn<TElement> replaceBy)
+		{
+			toReplace.SetElement = element => replaceBy.SetElement(element);
+			toReplace.UpdateSuctionOfPredecessor = () => replaceBy.UpdateSuctionOfPredecessor();
+			replaceBy.SetPredecessorSuction = toReplace.SetPredecessorSuction;
+			var i = UpdateSuctionOrder.FindIndex(x => x.Equals(toReplace));
+			UpdateSuctionOrder[i] = replaceBy;
+		}
+
+		public void Replace(PortFlowOut<TElement> toReplace, PortFlowOut<TElement> replaceBy)
+		{
+			toReplace.SetSuction= replaceBy.SetSuction;
+			toReplace.UpdateElementOfSuccessor = replaceBy.UpdateElementOfSuccessor;
+			replaceBy.SetSuccessorElement = toReplace.SetSuccessorElement;
+			var i = UpdateElementOrder.FindIndex(x => x.Equals(toReplace));
+			UpdateElementOrder[i] = replaceBy;
 		}
 
 
@@ -302,6 +318,11 @@ namespace HemodialysisMachine.Utilities
 			Outgoing.SetSuccessorElement(ElementOutOfCurrentCycle);
 		}
 	}
+
+	// TODO: Idea Short Circuit Components:
+	//    When flowConnector.Connect(stub.Outgoing,normalA.Incoming)
+	//     and flowConnector.Connect(normalB.Outgoing,stub.Incoming)
+	//    then flowConnector.Connect(normalB.Outgoing,normalA.Incoming)
 
 	public class FlowSource<TElement> : IFlowComponentUniqueOutgoing<TElement> where TElement : struct
 	{
@@ -541,5 +562,32 @@ namespace HemodialysisMachine.Utilities
 			Outgoing.SetSuccessorElement(ElementOfCurrentCycle);
 		}
 	}
+
+	public class FlowUniqueOutgoingStub<TElement> : IFlowComponentUniqueOutgoing<TElement> where TElement : struct
+	{
+		//   FlowUniqueOutgoingStub:
+		//    When flowConnector.Connect(stub.Outgoing,normalA.Incoming)
+		//     and flowConnector.Replace(stub.Outgoing,normalB.Outgoing)
+		//    then flowConnector.Connect(normalB.Outgoing,normalA.Incoming)
+		public PortFlowOut<TElement> Outgoing { get; set; }
+		
+		public FlowUniqueOutgoingStub()
+		{
+			Outgoing = new PortFlowOut<TElement>();
+		}
+	}
+
+	public class FlowUniqueIncomingStub<TElement> : IFlowComponentUniqueIncoming<TElement> where TElement : struct
+	{
+		//   FlowUniqueIncomingStub:
+		//    When flowConnector.Connect(normalA.Outgoing,stub.Incoming)
+		//     and flowConnector.Replace(stub.Incoming,normalB.Incoming)
+		//    then flowConnector.Connect(normalA.Outgoing,normalB.Incoming)
+		public PortFlowIn<TElement> Incoming { get; set; }
+		
+		public FlowUniqueIncomingStub()
+		{
+			Incoming = new PortFlowIn<TElement>();
+		}
+	}
 }
- 

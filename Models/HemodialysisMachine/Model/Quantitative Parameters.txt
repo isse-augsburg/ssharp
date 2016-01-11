@@ -1,0 +1,45 @@
+
+		/*
+		// RinsingParameters
+		public int FillingBloodPumpRate { get; set; } = 0; // 50-600 mL/min
+		public int FillingBloodPumpVolume { get; set; } = 0; // 0-6000 mL
+		public int RinsingBloodPumpRate { get; set; } = 0; // 50-300 mL/min
+		public int DialysingFluidRate { get; set; } = 0; // 50-300 mL/min
+		public int RinsingTime { get; set; } = 0; // 0-59 mins
+		public int UltraFiltrationRateForRinsing { get; set; } = 0; // 0-3000 mL/h
+		public int UltraFiltrationVolumeForRinsing { get; set; } = 0; // 0-2950 mL
+		public int BloodFlowForConnectingPatient { get; set; } = 0; // 50-600 mL/min
+		*/
+
+		// TreatmentParameters
+		public int Conductivity { get; set; } = 0; //12.5-16.0 mS/cm
+		public KindOfDialysate KindOfDialysateConcentrate { get; set; } = KindOfDialysate.Bicarbonate;
+		public int BicarbonateConductivity { get; set; } = 0; //2-4 mS/cm
+		public int DialysingFluidTemperature { get; set; } = 33; // 33 -40 °C
+		public int RinsingTime { get; set; } = 0; // 0-59 mins
+		public int DialysingFluidFlow1 { get; set; } = 0; // 400-800 mL/min
+		
+		// UltraFiltrationParameters
+		public int UltraFiltrationVolume { get; set; } = 0; //100 - 20000mL
+		public int TherapyTime { get; set; } = 0; //10min - 10hrs
+		public int MinUltraFiltrationRate { get; set; } = 0; // 0 - 500mL/h
+		public int MaxUltraFiltrationRate { get; set; } = 0; // 0 - 4000mL/h
+
+		// PressureParameters
+		public int AbsoluteLimitArterialPressureMin { get; set; } = -400; //-400 mmHg. Described in prosa
+		public int LimitDeltaArterialPressureMin { get; set; } = 0; //10 - 100mmHg
+		public int LimitDeltaArterialPressureMax { get; set; } = 0; //10 - 100mmHg
+		public int ActualTransMembranePressure { get; set; } = 0; //300 - 700mmHg
+		public int MaxTransMembranePressure { get; set; } = 0; //300 - 700mmHg
+		public bool LimitsTransMembranePressure { get; set; } = true; //true=On, false=OFF
+		public int LimitsTransMembranePressureLow { get; set; } =  0; // 2% - 99%
+		public int LimitsTransMembranePressureHigh { get; set; } = 0; // 2% - 99%
+		public bool LimitsTransMembranePressureExtendedRange { get; set; } = true; //true=On, false=OFF
+		public int DialysingFluidFlow2 { get; set; } = 0; // 300 - 800 mL/min
+
+		// HeparinParameters
+		public int HeparinStopTime { get; set; } = 0; //0:00 - 10:00 hrs:mins
+		public int HeparinBolusVolume { get; set; } = 0; // 0.1 - 10.0 mL
+		public int HeparinProfileRate { get; set; } = 0; // 0.1 - 10.0 mL/h
+		public bool UseHeparinInThreatment { get; set; } = true;// true=enabled, false=disabled
+		public int SyringeType { get; set; } = 0; //10 or 20 or 30 mL

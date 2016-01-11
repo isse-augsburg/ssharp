@@ -50,21 +50,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BloodFlow.cs" />
-    <Compile Include="DialysisRun\DialysisRun.cs" />
-    <Compile Include="DialyzingFluidFlow.cs" />
-    <Compile Include="HdMachine\ControlSystem.cs" />
-    <Compile Include="HdMachine\HdMachine.cs" />
+    <Compile Include="Model\BloodFlow.cs" />
+    <Compile Include="Model\RoughQuantifiers.cs" />
+    <Compile Include="Model\DialyzingFluidFlow.cs" />
+    <Compile Include="Model\HdControlSystem.cs" />
+    <Compile Include="Model\HdMachine.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="Tests\BloodFlowTests.cs" />
     <Compile Include="Tests\IntFlowTests.cs" />
     <Compile Include="Utilities\IntFlow.cs" />
     <Compile Include="Utilities\AbstractFlow.cs" />
-    <Compile Include="ValveState.cs" />
-    <Compile Include="HdMachine\Dialyzer.cs" />
-    <Compile Include="HdMachine\DialyzingFluidDeliverySystem.cs" />
-    <Compile Include="HdMachine\ExtracorporealBloodCircuit.cs" />
-    <Compile Include="Patient\Patient.cs" />
+    <Compile Include="Model\ValveState.cs" />
+    <Compile Include="Model\HdDialyzer.cs" />
+    <Compile Include="Model\HdDialyzingFluidDeliverySystem.cs" />
+    <Compile Include="Model\HdExtracorporealBloodCircuit.cs" />
+    <Compile Include="Model\Patient.cs" />
     <Compile Include="Tests\Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

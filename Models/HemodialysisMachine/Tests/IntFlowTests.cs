@@ -162,7 +162,36 @@ namespace HemodialysisMachine.Tests
 			sourceInside.SuctionInOfCurrentCycle.Should().Be(1);
 		}
 
-		
+
+
+
+		[Test]
+		public void StubsCanBeReplaced_ExplicitPort()
+		{
+			var combinator = new IntFlowCombinator();
+			var source = new IntFlowSource(() => 7);
+			var stubOut = new IntFlowUniqueOutgoingStub();
+			var stubIn = new IntFlowUniqueIncomingStub();
+			var sink = new IntFlowSink();
+			var direct = new IntFlowInToOutSegment(In => In);
+			combinator.Connect(source.Outgoing, direct.Incoming);
+			combinator.Connect(stubOut.Outgoing, stubIn.Incoming);
+
+			combinator.Replace(stubIn.Incoming, sink.Incoming);
+			combinator.Replace(stubOut.Outgoing, direct.Outgoing);
+			combinator.UpdateFlows();
+			sink.ElementInOfCurrentCycle.Should().Be(7);
+			source.SuctionInOfCurrentCycle.Should().Be(1);
+		}
+
+
+
+
+
+		// Implicit Ports
+
+
+
 		[Test]
 		public void SimpleFlowArrives_ImplicitPort()
 		{

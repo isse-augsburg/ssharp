@@ -51,4 +51,12 @@ namespace HemodialysisMachine.Utilities
 	class IntFlowCombinator : Utilities.FlowCombinator<int>
 	{
 	}
+
+	class IntFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<int>
+	{
+	}
+
+	class IntFlowUniqueIncomingStub : FlowUniqueIncomingStub<int>
+	{
+	}
 }

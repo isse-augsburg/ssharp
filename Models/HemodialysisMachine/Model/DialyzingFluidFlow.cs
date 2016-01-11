@@ -26,9 +26,60 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HemodialysisMachine.HdMachine
+namespace HemodialysisMachine.Model
 {
-	class ControlSystem
+	using Utilities;
+
+	public enum DialyzingFluidQuantity
+	{
+		Nothing,
+		Full,
+		FullUltraFiltraded,
+		Some,
+		SomeUltraFiltraded
+	}
+
+	// Also called dialysate or dialyzate
+	public struct DialyzingFluid
+	{
+		public DialyzingFluidQuantity Quantity;
+		public bool ContaminatedByBlood; //To allow 
+	}
+
+
+	class DialyzingFluidFlowInToOutSegment : Utilities.FlowInToOutSegment<DialyzingFluid>
+	{
+		public DialyzingFluidFlowInToOutSegment(Func<DialyzingFluid, DialyzingFluid> flowLambdaFunc)
+			: base(flowLambdaFunc)
+		{
+		}
+	}
+
+	class DialyzingFluidFlowSource : Utilities.FlowSource<DialyzingFluid>
+	{
+		public DialyzingFluidFlowSource(Func<DialyzingFluid> sourceLambdaFunc)
+			: base(sourceLambdaFunc)
+		{
+		}
+	}
+
+	class DialyzingFluidFlowSink : Utilities.FlowSink<DialyzingFluid>
+	{
+	}
+
+	class DialyzingFluidFlowComposite : Utilities.FlowComposite<DialyzingFluid>
+	{
+	}
+
+	class DialyzingFluidFlowCombinator : Utilities.FlowCombinator<DialyzingFluid>
+	{
+	}
+
+	class DialyzingFluidFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<DialyzingFluid>
+	{
+	}
+
+	class DialyzingFluidFlowUniqueIncomingStub : FlowUniqueIncomingStub<DialyzingFluid>
 	{
 	}
 }
