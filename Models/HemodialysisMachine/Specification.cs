@@ -27,8 +27,14 @@ namespace HemodialysisMachine
 
 	public class Specification
 	{
+		private readonly DialyzingFluidFlowCombinator _dialysingFluidFlowCombinator;
+		private readonly BloodFlowCombinator _bloodFlowCombinator;
+
 		public Specification()
 		{
+			_dialysingFluidFlowCombinator = new DialyzingFluidFlowCombinator();
+			_bloodFlowCombinator = new BloodFlowCombinator();
+
 			HdMachine = new HdMachine
 			{
 			};
@@ -36,6 +42,11 @@ namespace HemodialysisMachine
 			Patient = new Patient
 			{
 			};
+
+			HdMachine.AddFlows(_dialysingFluidFlowCombinator, _bloodFlowCombinator);
+
+			//_bloodFlowCombinator.Replace(Patient.OutArtery.Outgoing,HdMachine.FromPatientArtery.Outgoing);
+			//_bloodFlowCombinator.Replace(Patient.OutArtery.Outgoing, HdMachine.FromPatientArtery.Outgoing);
 		}
 		
 

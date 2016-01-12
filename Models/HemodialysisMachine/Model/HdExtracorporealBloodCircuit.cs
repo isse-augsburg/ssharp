@@ -20,7 +20,7 @@ namespace HemodialysisMachine.Model
 
 	class HeparinPump
 	{
-		public readonly BloodFlowSource BloodFlow = new BloodFlowSource(() => new Blood());
+		public readonly BloodFlowSource BloodFlow = new BloodFlowSource((value) => { });
 	}
 
 	class ArtierialChamber
@@ -66,7 +66,7 @@ namespace HemodialysisMachine.Model
 		public void AddFlows(BloodFlowCombinator flowCombinator)
 		{
 			// The order of the connections matter
-			flowCombinator.Connect(BloodFlow.IncomingProxy,
+			flowCombinator.Connect(BloodFlow.InternalSource.Outgoing,
 				new PortFlowIn<Blood>[] { ArterialBloodPump.BloodFlow.Incoming, ArteriaPressureTransducer.BloodFlow.Incoming });
 			flowCombinator.Connect(new PortFlowOut<Blood>[] { ArterialBloodPump.BloodFlow.Outgoing, HeparinPump.BloodFlow.Outgoing },
 				ArterialChamber.BloodFlow.Incoming);
@@ -79,7 +79,7 @@ namespace HemodialysisMachine.Model
 			flowCombinator.Connect(VenousSafetyDetector.BloodFlow.Outgoing,
 				VenousTubingValve.BloodFlow.Incoming);
 			flowCombinator.Connect(VenousTubingValve.BloodFlow.Outgoing,
-				BloodFlow.OutgoingProxy);
+				BloodFlow.InternalSink.Incoming);
 		}
 
 	}

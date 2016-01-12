@@ -5,9 +5,19 @@ namespace HemodialysisMachine.Model
 	using System.ComponentModel;
 	using Utilities;
 
-	struct Blood
+	class Blood : IElement<Blood>
 	{
 		public int Quantity;
+
+		public void CopyValuesFrom(Blood from)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Blood()
+		{
+			
+		}
 	}
 
 
@@ -21,7 +31,7 @@ namespace HemodialysisMachine.Model
 
 	class BloodFlowSource : Utilities.FlowSource<Blood>
 	{
-		public BloodFlowSource(Func<Blood> sourceLambdaFunc)
+		public BloodFlowSource(Action<Blood> sourceLambdaFunc)
 			: base(sourceLambdaFunc)
 		{
 		}

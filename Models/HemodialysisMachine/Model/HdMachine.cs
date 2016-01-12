@@ -9,58 +9,50 @@ namespace HemodialysisMachine.Model
 	using SafetySharp.Modeling;
 
 	class HdMachine : Component
-	{
-		private readonly DialyzingFluidFlowCombinator _dialysingFluidFlowCombinator;
-		private readonly BloodFlowCombinator _bloodFlowCombinator;
-
+	{/*
 		public readonly Dialyzer Dialyzer;
 		public readonly ExtracorporealBloodCircuit ExtracorporealBloodCircuit;
 		public readonly DialyzingFluidDeliverySystem DialyzingFluidDeliverySystem;
 		public readonly ControlSystem ControlSystem;
-
+		*/
+		[Hidden]
 		public readonly BloodFlowUniqueOutgoingStub FromPatientArtery;
+		[Hidden]
 		public readonly BloodFlowUniqueIncomingStub ToPatientVein;
 
 		public HdMachine()
 		{
-			_dialysingFluidFlowCombinator = new DialyzingFluidFlowCombinator();
-			_bloodFlowCombinator = new BloodFlowCombinator();
-
+			/*
 			Dialyzer = new Dialyzer();
 			ExtracorporealBloodCircuit = new ExtracorporealBloodCircuit();
 			DialyzingFluidDeliverySystem = new DialyzingFluidDeliverySystem();
 			ControlSystem = new ControlSystem(Dialyzer, ExtracorporealBloodCircuit, DialyzingFluidDeliverySystem);
+			*/
 
 			FromPatientArtery = new BloodFlowUniqueOutgoingStub();
 			ToPatientVein = new BloodFlowUniqueIncomingStub();
 		}
 
-		public void AddFlows()
-		{
+		public void AddFlows(DialyzingFluidFlowCombinator dialysingFluidFlowCombinator, BloodFlowCombinator bloodFlowCombinator)
+		{/*
 			//Dialysate
-			DialyzingFluidDeliverySystem.AddFlows(_dialysingFluidFlowCombinator);
+			DialyzingFluidDeliverySystem.AddFlows(dialysingFluidFlowCombinator);
 			//Blood
-			_bloodFlowCombinator.Connect(FromPatientArtery.Outgoing,
+			bloodFlowCombinator.Connect(FromPatientArtery.Outgoing,
 				ExtracorporealBloodCircuit.BloodFlow.Incoming);
-			ExtracorporealBloodCircuit.AddFlows(_bloodFlowCombinator);
-			_bloodFlowCombinator.Connect(ExtracorporealBloodCircuit.BloodFlow.Outgoing,
+			ExtracorporealBloodCircuit.AddFlows(bloodFlowCombinator);
+			bloodFlowCombinator.Connect(ExtracorporealBloodCircuit.BloodFlow.Outgoing,
 				ToPatientVein.Incoming);
 			//Insert Stubs
-			_bloodFlowCombinator.Replace(ExtracorporealBloodCircuit.ToDialyzer.Incoming,
+			bloodFlowCombinator.Replace(ExtracorporealBloodCircuit.ToDialyzer.Incoming,
 				Dialyzer.BloodFlow.Incoming);
-			_bloodFlowCombinator.Replace(ExtracorporealBloodCircuit.FromDialyzer.Outgoing,
+			bloodFlowCombinator.Replace(ExtracorporealBloodCircuit.FromDialyzer.Outgoing,
 				Dialyzer.BloodFlow.Outgoing);
-			_dialysingFluidFlowCombinator.Replace(DialyzingFluidDeliverySystem.ToDialyzer.Incoming,
+			dialysingFluidFlowCombinator.Replace(DialyzingFluidDeliverySystem.ToDialyzer.Incoming,
 				Dialyzer.DialyzingFluidFlow.Incoming);
-			_dialysingFluidFlowCombinator.Replace(DialyzingFluidDeliverySystem.FromDialyzer.Outgoing,
+			dialysingFluidFlowCombinator.Replace(DialyzingFluidDeliverySystem.FromDialyzer.Outgoing,
 				Dialyzer.DialyzingFluidFlow.Outgoing);
-
-		}
-
-		public override void Update()
-		{
-			_dialysingFluidFlowCombinator.UpdateFlows();
-			_bloodFlowCombinator.UpdateFlows();
+*/
 		}
 	}
 }

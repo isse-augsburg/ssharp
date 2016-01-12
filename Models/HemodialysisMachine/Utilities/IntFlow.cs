@@ -24,7 +24,7 @@ using System;
 
 namespace HemodialysisMachine.Utilities
 {
-	class Int
+	class Int : IElement<Int>
 	{
 		public int Value;
 
@@ -56,6 +56,15 @@ namespace HemodialysisMachine.Utilities
 		{
 			return Value;
 		}
+
+		public void CopyValuesFrom(Int @from)
+		{
+			this.Value = from.Value;
+		}
+		public Int()
+		{
+
+		}
 	}
 
 	class IntFlowInToOutSegment : Utilities.FlowInToOutSegment<Int>
@@ -68,7 +77,7 @@ namespace HemodialysisMachine.Utilities
 
 	class IntFlowSource : Utilities.FlowSource<Int>
 	{
-		public IntFlowSource(Func<Int> sourceLambdaFunc)
+		public IntFlowSource(Action<Int> sourceLambdaFunc)
 			: base(sourceLambdaFunc)
 		{
 		}

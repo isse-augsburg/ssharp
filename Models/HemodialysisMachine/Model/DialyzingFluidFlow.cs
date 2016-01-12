@@ -40,10 +40,19 @@ namespace HemodialysisMachine.Model
 	}
 
 	// Also called dialysate or dialyzate
-	public struct DialyzingFluid
+	public class DialyzingFluid : IElement<DialyzingFluid>
 	{
 		public DialyzingFluidQuantity Quantity;
 		public bool ContaminatedByBlood; //To allow 
+		public void CopyValuesFrom(DialyzingFluid @from)
+		{
+			throw new NotImplementedException();
+		}
+
+		public DialyzingFluid()
+		{
+
+		}
 	}
 
 
@@ -57,7 +66,7 @@ namespace HemodialysisMachine.Model
 
 	class DialyzingFluidFlowSource : Utilities.FlowSource<DialyzingFluid>
 	{
-		public DialyzingFluidFlowSource(Func<DialyzingFluid> sourceLambdaFunc)
+		public DialyzingFluidFlowSource(Action<DialyzingFluid> sourceLambdaFunc)
 			: base(sourceLambdaFunc)
 		{
 		}
