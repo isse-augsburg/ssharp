@@ -24,39 +24,73 @@ using System;
 
 namespace HemodialysisMachine.Utilities
 {
-	class IntFlowInToOutSegment : Utilities.FlowInToOutSegment<int>
+	class Int
 	{
-		public IntFlowInToOutSegment(Func<int, int> flowLambdaFunc)
+		public int Value;
+
+		public static implicit operator int(Int value)
+		{
+			return value.Value;
+		}
+		//  User-defined conversion from double to Digit
+		public static implicit operator Int(int value)
+		{
+			return new Int { Value = value };
+		}
+
+		public override bool Equals(object other)
+		{
+			if (other is int)
+			{
+				return Value == (int)other;
+			}
+			if (other is Int)
+			{
+				var otherInt = (Int)other;
+				return Value == otherInt.Value;
+			}
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			return Value;
+		}
+	}
+
+	class IntFlowInToOutSegment : Utilities.FlowInToOutSegment<Int>
+	{
+		public IntFlowInToOutSegment(Func<Int, Int> flowLambdaFunc)
 			: base(flowLambdaFunc)
 		{
 		}
 	}
 
-	class IntFlowSource : Utilities.FlowSource<int>
+	class IntFlowSource : Utilities.FlowSource<Int>
 	{
-		public IntFlowSource(Func<int> sourceLambdaFunc)
+		public IntFlowSource(Func<Int> sourceLambdaFunc)
 			: base(sourceLambdaFunc)
 		{
 		}
 	}
 
-	class IntFlowSink : Utilities.FlowSink<int>
+	class IntFlowSink : Utilities.FlowSink<Int>
 	{
 	}
 
-	class IntFlowComposite : Utilities.FlowComposite<int>
+	class IntFlowComposite : Utilities.FlowComposite<Int>
 	{
 	}
 
-	class IntFlowCombinator : Utilities.FlowCombinator<int>
+	class IntFlowCombinator : Utilities.FlowCombinator<Int>
 	{
 	}
 
-	class IntFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<int>
+	class IntFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<Int>
 	{
 	}
 
-	class IntFlowUniqueIncomingStub : FlowUniqueIncomingStub<int>
+	class IntFlowUniqueIncomingStub : FlowUniqueIncomingStub<Int>
 	{
 	}
 }
