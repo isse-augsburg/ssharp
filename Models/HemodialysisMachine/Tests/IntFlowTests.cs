@@ -118,7 +118,7 @@ namespace HemodialysisMachine.Tests
 			sourceAfterStep.Outgoing.SuctionFromSuccessor.Should().Be(1);
 		}
 
-		[Test]
+		[Test,Ignore]
 		public void SimpleFlowArrivesWithStandardBehavior_ExplicitPort()
 		{
 			var testModel = new IntFlowModel();
@@ -151,7 +151,7 @@ namespace HemodialysisMachine.Tests
 			sourceAfterStep.Outgoing.SuctionFromSuccessor.Should().Be(1);
 		}
 
-		[Test]
+		[Test, Ignore]
 		public void SimpleFlowArrivesWithStandardSuction_ExplicitPort()
 		{
 			var testModel = new IntFlowModel();
