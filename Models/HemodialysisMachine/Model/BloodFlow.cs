@@ -11,7 +11,7 @@ namespace HemodialysisMachine.Model
 
 		public void CopyValuesFrom(Blood from)
 		{
-			throw new NotImplementedException();
+			Quantity = from.Quantity;
 		}
 
 		public Blood()

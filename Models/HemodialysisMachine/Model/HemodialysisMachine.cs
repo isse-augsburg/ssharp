@@ -9,12 +9,12 @@ namespace HemodialysisMachine.Model
 	using SafetySharp.Modeling;
 
 	class HdMachine : Component
-	{/*
+	{
 		public readonly Dialyzer Dialyzer;
 		public readonly ExtracorporealBloodCircuit ExtracorporealBloodCircuit;
 		public readonly DialyzingFluidDeliverySystem DialyzingFluidDeliverySystem;
 		public readonly ControlSystem ControlSystem;
-		*/
+
 		[Hidden]
 		public readonly BloodFlowUniqueOutgoingStub FromPatientArtery;
 		[Hidden]
@@ -22,19 +22,17 @@ namespace HemodialysisMachine.Model
 
 		public HdMachine()
 		{
-			/*
 			Dialyzer = new Dialyzer();
 			ExtracorporealBloodCircuit = new ExtracorporealBloodCircuit();
 			DialyzingFluidDeliverySystem = new DialyzingFluidDeliverySystem();
 			ControlSystem = new ControlSystem(Dialyzer, ExtracorporealBloodCircuit, DialyzingFluidDeliverySystem);
-			*/
 
 			FromPatientArtery = new BloodFlowUniqueOutgoingStub();
 			ToPatientVein = new BloodFlowUniqueIncomingStub();
 		}
 
 		public void AddFlows(DialyzingFluidFlowCombinator dialysingFluidFlowCombinator, BloodFlowCombinator bloodFlowCombinator)
-		{/*
+		{
 			//Dialysate
 			DialyzingFluidDeliverySystem.AddFlows(dialysingFluidFlowCombinator);
 			//Blood
@@ -52,7 +50,6 @@ namespace HemodialysisMachine.Model
 				Dialyzer.DialyzingFluidFlow.Incoming);
 			dialysingFluidFlowCombinator.Replace(DialyzingFluidDeliverySystem.FromDialyzer.Outgoing,
 				Dialyzer.DialyzingFluidFlow.Outgoing);
-*/
 		}
 	}
 }

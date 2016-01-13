@@ -117,5 +117,4 @@ namespace HemodialysisMachine.Model
 	}
 
 
-
 }

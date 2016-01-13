@@ -46,7 +46,8 @@ namespace HemodialysisMachine.Model
 		public bool ContaminatedByBlood; //To allow 
 		public void CopyValuesFrom(DialyzingFluid @from)
 		{
-			throw new NotImplementedException();
+			Quantity = from.Quantity;
+			ContaminatedByBlood = from.ContaminatedByBlood;
 		}
 
 		public DialyzingFluid()

@@ -115,6 +115,8 @@ namespace HemodialysisMachine.Utilities
 		//[Hidden]
 		private List<PortFlowOut<TElement>> UpdateElementOrder;
 
+		private List<IComponent> VirtualFlowComponents;
+
 		// TODO: For generic non-tree like acyclic flows a topological sort is necessary (So, every Update gets executed only once)
 
 		public override void Update()
@@ -136,6 +138,7 @@ namespace HemodialysisMachine.Utilities
 		{
 			UpdateSuctionOrder=new List<PortFlowIn<TElement>>();
 			UpdateElementOrder=new List<PortFlowOut<TElement>>();
+			VirtualFlowComponents=new List<IComponent>();
 		}
 		
 		public void Connect(PortFlowOut<TElement> @from, PortFlowIn<TElement> to)
@@ -171,6 +174,7 @@ namespace HemodialysisMachine.Utilities
 			{
 				// create virtual merging component.
 				var flowVirtualMerger = new FlowVirtualMerger<TElement>(elementNos);
+				VirtualFlowComponents.Add(flowVirtualMerger);
 				for (int i = 0; i < elementNos; i++)
 				{
 					Connect(fromOuts[i], flowVirtualMerger.VirtualIncomings[i].Incoming);
@@ -195,6 +199,7 @@ namespace HemodialysisMachine.Utilities
 			{
 				// create virtual splitting component.
 				var flowVirtualSplitter = new FlowVirtualSplitter<TElement>(elementNos);
+				VirtualFlowComponents.Add(flowVirtualSplitter);
 				Connect(@from, flowVirtualSplitter.Incoming);
 				for (int i = 0; i < elementNos; i++)
 				{
@@ -295,7 +300,6 @@ namespace HemodialysisMachine.Utilities
 		{
 			Incoming = new PortFlowIn<TElement>();
 			Outgoing = new PortFlowOut<TElement>();
-			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -333,7 +337,6 @@ namespace HemodialysisMachine.Utilities
 		public FlowSource()
 		{
 			Outgoing = new PortFlowOut<TElement>();
-			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -357,7 +360,6 @@ namespace HemodialysisMachine.Utilities
 		public FlowSink()
 		{
 			Incoming = new PortFlowIn<TElement>();
-			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -391,7 +393,6 @@ namespace HemodialysisMachine.Utilities
 			Outgoing = new PortFlowOut<TElement>();
 			InternalSink = new FlowSink<TElement>();
 			InternalSource = new FlowSource<TElement>();
-			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -437,7 +438,6 @@ namespace HemodialysisMachine.Utilities
 		{
 			Index = index;
 			Outgoing = new PortFlowOut<TElement>();
-			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -474,7 +474,6 @@ namespace HemodialysisMachine.Utilities
 			{
 				VirtualOutgoings[i] = new FlowVirtualSource<TElement>(i);
 			}
-			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -533,7 +532,6 @@ namespace HemodialysisMachine.Utilities
 		{
 			Index = index;
 			Incoming = new PortFlowIn<TElement>();
-			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -570,7 +568,6 @@ namespace HemodialysisMachine.Utilities
 			{
 				VirtualIncomings[i] = new FlowVirtualSink<TElement>(i);
 			}
-			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()

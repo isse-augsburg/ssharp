@@ -28,7 +28,31 @@ using System.Threading.Tasks;
 
 namespace HemodialysisMachine.Tests
 {
-    public class Tests
-    {
-    }
+	using Model;
+	using NUnit.Framework;
+	using SafetySharp.Runtime;
+	using SafetySharp.Analysis;
+	using Utilities;
+
+	public class Tests
+	{
+		[Test]
+		public void Simulate_1Step()
+		{
+			var testModel = new Specification();
+			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			simulator.SimulateStep();
+
+			var flowCombinatorAfterStep = (DialyzingFluidFlowCombinator)simulator.Model.RootComponents[0];
+		}
+		[Test]
+		public void Simulate_10_Step()
+		{
+			var testModel = new Specification();
+			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			simulator.SimulateStep();
+
+			var flowCombinatorAfterStep = (DialyzingFluidFlowCombinator)simulator.Model.RootComponents[0];
+		}
+	}
 }
