@@ -291,6 +291,7 @@ namespace HemodialysisMachine.Utilities
 		{
 			Incoming = new PortFlowIn<TElement>();
 			Outgoing = new PortFlowOut<TElement>();
+			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -307,7 +308,7 @@ namespace HemodialysisMachine.Utilities
 
 		public void UpdateSuctionToPredecessor()
 		{
-			SetOutgoingSuction(ref Incoming.SuctionToPredecessor, Incoming.SuctionToPredecessor);
+			SetOutgoingSuction(ref Incoming.SuctionToPredecessor, Outgoing.SuctionFromSuccessor);
 		}
 
 		public void UpdateElementToSuccessor()
@@ -328,6 +329,7 @@ namespace HemodialysisMachine.Utilities
 		public FlowSource()
 		{
 			Outgoing = new PortFlowOut<TElement>();
+			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -351,6 +353,7 @@ namespace HemodialysisMachine.Utilities
 		public FlowSink()
 		{
 			Incoming = new PortFlowIn<TElement>();
+			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -384,6 +387,7 @@ namespace HemodialysisMachine.Utilities
 			Outgoing = new PortFlowOut<TElement>();
 			InternalSink = new FlowSink<TElement>();
 			InternalSource = new FlowSource<TElement>();
+			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -429,6 +433,7 @@ namespace HemodialysisMachine.Utilities
 		{
 			Index = index;
 			Outgoing = new PortFlowOut<TElement>();
+			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -465,6 +470,7 @@ namespace HemodialysisMachine.Utilities
 			{
 				VirtualOutgoings[i] = new FlowVirtualSource<TElement>(i);
 			}
+			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -523,6 +529,7 @@ namespace HemodialysisMachine.Utilities
 		{
 			Index = index;
 			Incoming = new PortFlowIn<TElement>();
+			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()
@@ -559,6 +566,7 @@ namespace HemodialysisMachine.Utilities
 			{
 				VirtualIncomings[i] = new FlowVirtualSink<TElement>(i);
 			}
+			CreateBindings(); //TODO: Seems not to be called automatically
 		}
 
 		protected override void CreateBindings()

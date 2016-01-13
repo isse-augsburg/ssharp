@@ -33,45 +33,50 @@ namespace HemodialysisMachine.Tests
 	using SafetySharp.Modeling;
 	using Utilities;
 
-	class IntFlowTests
+	class DeliverStandardValues : Component
 	{
 		[Provided]
-		void ForwardElement(Int outgoingElement, Int incomingElement)
+		public void ForwardElement(Int outgoingElement, Int incomingElement)
 		{
 			outgoingElement.Value = incomingElement.Value;
 		}
 
 		[Provided]
-		void ForwardSuction(ref int outgoingSuction,int incomingSuction)
+		public void ForwardSuction(ref int outgoingSuction, int incomingSuction)
 		{
 			outgoingSuction = incomingSuction;
 		}
 
 		[Provided]
-		void CreateElement(Int outgoingElement)
+		public void CreateElement(Int outgoingElement)
 		{
 			outgoingElement.Value = 7;
 		}
 
 		[Provided]
-		void CreateSuction(ref int outgoingSuction)
+		public void CreateSuction(ref int outgoingSuction)
 		{
 			outgoingSuction = 1;
 		}
+	}
+
+	class IntFlowTests
+	{
 
 		[Test]
 		public void SimpleFlowArrives_ExplicitPort()
 		{
+			var deliverStandardValues = new DeliverStandardValues();
+
 			var combinator = new IntFlowCombinator();
 			var source = new IntFlowSource();
 			var direct = new IntFlowInToOutSegment();
 			var sink = new IntFlowSink();
 
-
-			Component.Bind(nameof(source.SetOutgoingElement), nameof(CreateElement));
-			Component.Bind(nameof(direct.SetOutgoingElement), nameof(ForwardElement));
-			Component.Bind(nameof(sink.SetOutgoingSuction), nameof(ForwardSuction));
-			Component.Bind(nameof(sink.SetOutgoingSuction), nameof(CreateSuction));
+			Component.Bind(nameof(source.SetOutgoingElement), nameof(deliverStandardValues.CreateElement));
+			Component.Bind(nameof(direct.SetOutgoingElement), nameof(deliverStandardValues.ForwardElement));
+			Component.Bind(nameof(direct.SetOutgoingSuction), nameof(deliverStandardValues.ForwardSuction));
+			Component.Bind(nameof(sink.SetOutgoingSuction), nameof(deliverStandardValues.CreateSuction));
 
 			source.Outgoing.ElementToSuccessor = new Int();
 			direct.Incoming.ElementFromPredecessor = new Int();
@@ -85,10 +90,10 @@ namespace HemodialysisMachine.Tests
 			direct.Incoming.ElementFromPredecessor.Should().Be((Int)7);
 			direct.Outgoing.ElementToSuccessor.Should().Be((Int)7);
 			sink.Incoming.ElementFromPredecessor.Should().Be((Int)7);
-			source.Outgoing.SuctionFromSuccessor.Should().Be(1);
-			direct.Incoming.SuctionToPredecessor.Should().Be(1);
-			direct.Outgoing.SuctionFromSuccessor.Should().Be(1);
 			sink.Incoming.SuctionToPredecessor.Should().Be(1);
+			direct.Outgoing.SuctionFromSuccessor.Should().Be(1);
+			direct.Incoming.SuctionToPredecessor.Should().Be(1);
+			source.Outgoing.SuctionFromSuccessor.Should().Be(1);
 		}
 
 		/*
