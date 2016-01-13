@@ -154,6 +154,7 @@
     <Compile Include="Execution\Simulation\nondeterminism.cs" />
     <Compile Include="Execution\Simulation\formulas.cs" />
     <Compile Include="Execution\Simulation\stepping.cs" />
+    <Compile Include="Execution\Simulation\generics.cs" />
     <Compile Include="Execution\Simulation\variable ranges.cs" />
     <Compile Include="Execution\Simulation\steps.cs" />
     <Compile Include="FaultActivationTests.cs" />

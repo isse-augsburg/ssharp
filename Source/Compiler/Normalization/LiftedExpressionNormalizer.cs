@@ -133,7 +133,7 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			var isLifted = false;
 
-			var methodSymbol = expression.GetReferencedSymbol(SemanticModel) as IMethodSymbol;
+			var methodSymbol = SemanticModel.GetSymbolInfo(expression).Symbol as IMethodSymbol;
 			if (methodSymbol != null)
 			{
 				if (methodSymbol.Parameters.Any(parameter => parameter.HasAttribute<LiftExpressionAttribute>(SemanticModel)))
