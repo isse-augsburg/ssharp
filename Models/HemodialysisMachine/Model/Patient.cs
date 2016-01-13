@@ -13,7 +13,7 @@
 
 		public Patient()
 		{
-			OutArtery = new BloodFlowSource((value) => { });
+			OutArtery = new BloodFlowSource();
 			Vein = new BloodFlowSink();
 		}
 	}

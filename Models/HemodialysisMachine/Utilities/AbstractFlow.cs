@@ -54,11 +54,6 @@ namespace HemodialysisMachine.Utilities
 	}
 
 	
-	public delegate void UpdateSuctionDelegate();
-	public delegate void UpdateElementDelegate();
-	//public delegate void ResetCycleDelegate();
-
-
 	public class PortFlowIn<TElement> : Component where TElement : class, IElement<TElement>, new()
 	{
 		[Hidden]
@@ -68,8 +63,9 @@ namespace HemodialysisMachine.Utilities
 		public TElement ElementFromPredecessor;
 
 		public int SuctionToPredecessor;
-		
-		public UpdateSuctionDelegate UpdateSuctionToPredecessor { get; set; } // This is executed to calculate what the predecessor value should be (make changes). To update the predecessor, this.SetPredecessorSuction() must be called in this method.
+
+		[Required]
+		public extern void UpdateSuctionToPredecessor(); // This is executed to calculate what the predecessor value should be (make changes). To update the predecessor, this.SetPredecessorSuction() must be called in this method.
 		//public ResetCycleDelegate ResetValuesOfCurrentCycle;
 
 		public PortFlowIn()
@@ -88,8 +84,9 @@ namespace HemodialysisMachine.Utilities
 		public TElement ElementToSuccessor;
 
 		public int SuctionFromSuccessor;
-		
-		public UpdateElementDelegate UpdateElementToSuccessor { get; set; } // This is executed to calculate what the successor value should be (make changes). To update the successor, this.SetSuccessorElement() must be called in this method.
+
+		[Required]
+		public extern void UpdateElementToSuccessor(); // This is executed to calculate what the successor value should be (make changes). To update the successor, this.SetSuccessorElement() must be called in this method.
 		//public ResetCycleDelegate ResetValuesOfCurrentCycle;
 		
 		public PortFlowOut()
@@ -130,7 +127,8 @@ namespace HemodialysisMachine.Utilities
 			foreach (var flowOut in UpdateElementOrder)
 			{
 				flowOut.UpdateElementToSuccessor();
-				flowOut.ConnectedSuccessor.ElementFromPredecessor = flowOut.ElementToSuccessor;
+				//flowOut.ConnectedSuccessor.ElementFromPredecessor = flowOut.ElementToSuccessor;
+				flowOut.ConnectedSuccessor.ElementFromPredecessor.CopyValuesFrom(flowOut.ElementToSuccessor);
 			}
 		}
 
@@ -289,23 +287,32 @@ namespace HemodialysisMachine.Utilities
 		public PortFlowIn<TElement> Incoming { get; set; }
 		public PortFlowOut<TElement> Outgoing { get; set; }
 		
-		private Func<TElement, TElement> FlowLambdaFunc { get; set; }
-		
-		public FlowInToOutSegment(Func<TElement, TElement> flowLambdaFunc)
+		public FlowInToOutSegment()
 		{
-			FlowLambdaFunc = flowLambdaFunc;
-			Incoming = new PortFlowIn<TElement>() {UpdateSuctionToPredecessor = UpdateSuctionToPredecessor };
-			Outgoing = new PortFlowOut<TElement>() {UpdateElementToSuccessor = UpdateElementToSuccessor };
+			Incoming = new PortFlowIn<TElement>();
+			Outgoing = new PortFlowOut<TElement>();
 		}
+
+		protected override void CreateBindings()
+		{
+			Bind(nameof(Incoming.UpdateSuctionToPredecessor), nameof(UpdateSuctionToPredecessor));
+			Bind(nameof(Outgoing.UpdateElementToSuccessor), nameof(UpdateElementToSuccessor));
+		}
+
+		[Required]
+		public extern void SetOutgoingSuction(ref int outgoingSuction, int incomingSuction);
+
+		[Required]
+		public extern void SetOutgoingElement(TElement outgoingElement,TElement incomingElement);
 
 		public void UpdateSuctionToPredecessor()
 		{
-			Incoming.SuctionToPredecessor = Outgoing.SuctionFromSuccessor;
+			SetOutgoingSuction(ref Incoming.SuctionToPredecessor, Incoming.SuctionToPredecessor);
 		}
 
 		public void UpdateElementToSuccessor()
 		{
-			Outgoing.ElementToSuccessor = FlowLambdaFunc(Incoming.ElementFromPredecessor);
+			SetOutgoingElement(Outgoing.ElementToSuccessor,Incoming.ElementFromPredecessor);
 		}
 	}
 
@@ -317,42 +324,47 @@ namespace HemodialysisMachine.Utilities
 	public class FlowSource<TElement> : Component, IFlowComponentUniqueOutgoing<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		public PortFlowOut<TElement> Outgoing { get; set; }
-
-		private Action<TElement> SourceLambdaFunc { get; }
-
-		public FlowSource(Action<TElement> sourceLambdaFunc)
-		{
-			SourceLambdaFunc = sourceLambdaFunc;
-			Outgoing = new PortFlowOut<TElement>() {UpdateElementToSuccessor = UpdateElementToSuccessor };
-		}
 		
+		public FlowSource()
+		{
+			Outgoing = new PortFlowOut<TElement>();
+		}
+
+		protected override void CreateBindings()
+		{
+			Bind(nameof(Outgoing.UpdateElementToSuccessor), nameof(UpdateElementToSuccessor));
+		}
+
+		[Required]
+		public extern void SetOutgoingElement(TElement outgoingElement);
+
 		public void UpdateElementToSuccessor()
 		{
-			SourceLambdaFunc(Outgoing.ElementToSuccessor);
+			SetOutgoingElement(Outgoing.ElementToSuccessor);
 		}
 	}
 
 	public class FlowSink<TElement> : Component, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		public PortFlowIn<TElement> Incoming { get; set; }
-
-		private Func<int> SinkLambdaFunc { get; }
-
-		public FlowSink(Func<int> sinkLambdaFunc)
-		{
-			SinkLambdaFunc = sinkLambdaFunc;
-			Incoming = new PortFlowIn<TElement>() {UpdateSuctionToPredecessor = UpdateSuctionToPredecessor };
-		}
-
-		public FlowSink()
-			: this(()=> 1 ) //default is a sink that has a suction of 1 (to let at least anything flow)
-		{
-		}
 		
+		public FlowSink()
+		{
+			Incoming = new PortFlowIn<TElement>();
+		}
+
+		protected override void CreateBindings()
+		{
+			Bind(nameof(Incoming.UpdateSuctionToPredecessor), nameof(UpdateSuctionToPredecessor));
+		}
+
+		[Required]
+		public extern void SetOutgoingSuction(ref int outgoingSuction);
+
 		public void UpdateSuctionToPredecessor()
 		{
 			// Actively Update the SuctionOfCurrentCycle of the predecessor
-			Incoming.SuctionToPredecessor = SinkLambdaFunc();
+			SetOutgoingSuction(ref Incoming.SuctionToPredecessor);
 		}
 	}
 
@@ -368,12 +380,32 @@ namespace HemodialysisMachine.Utilities
 		public FlowComposite()
 		{
 			// Outer1 --> Incoming --> Source --> Inner1 --> Sink --> Outgoing --> Outer2
-			Incoming = new PortFlowIn<TElement>() {UpdateSuctionToPredecessor = UpdateSuctionToPredecessor };
-			Outgoing = new PortFlowOut<TElement>() {UpdateElementToSuccessor = UpdateElementToSuccessor };
-			InternalSink = new FlowSink<TElement>(() => Outgoing.SuctionFromSuccessor);
-			InternalSource = new FlowSource<TElement>( (value) => value.CopyValuesFrom(Incoming.ElementFromPredecessor) );
+			Incoming = new PortFlowIn<TElement>();
+			Outgoing = new PortFlowOut<TElement>();
+			InternalSink = new FlowSink<TElement>();
+			InternalSource = new FlowSource<TElement>();
 		}
-		
+
+		protected override void CreateBindings()
+		{
+			Bind(nameof(Incoming.UpdateSuctionToPredecessor), nameof(UpdateSuctionToPredecessor));
+			Bind(nameof(Outgoing.UpdateElementToSuccessor), nameof(UpdateElementToSuccessor));
+			Bind(nameof(InternalSink.SetOutgoingSuction), nameof(SetOutgoingSuctionOfInternalSink));
+			Bind(nameof(InternalSource.SetOutgoingElement), nameof(SetOutgoingElementOfInternalSource));
+		}
+
+		[Provided]
+		public void SetOutgoingSuctionOfInternalSink(ref int outgoingSuction)
+		{
+			outgoingSuction = Outgoing.SuctionFromSuccessor;
+		}
+
+		[Provided]
+		public void SetOutgoingElementOfInternalSource(TElement outgoingElement)
+		{
+			outgoingElement.CopyValuesFrom(Incoming.ElementFromPredecessor);
+		}
+
 		public void UpdateSuctionToPredecessor()
 		{
 			// Actively Update the SuctionOfCurrentCycle of the predecessor
@@ -386,34 +418,70 @@ namespace HemodialysisMachine.Utilities
 			Outgoing.ElementToSuccessor = InternalSink.Incoming.ElementFromPredecessor;
 		}
 	}
-	
+
+	public class FlowVirtualSource<TElement> : Component, IFlowComponentUniqueOutgoing<TElement> where TElement : class, IElement<TElement>, new()
+	{
+		// Used only by FlowVirtualSplitter
+		private int Index;
+		public PortFlowOut<TElement> Outgoing { get; set; }
+
+		public FlowVirtualSource(int index)
+		{
+			Index = index;
+			Outgoing = new PortFlowOut<TElement>();
+		}
+
+		protected override void CreateBindings()
+		{
+			Bind(nameof(Outgoing.UpdateElementToSuccessor), nameof(UpdateElementToSuccessor));
+		}
+
+		[Required]
+		public extern void SetOutgoingElement(int index, TElement outgoingElement);
+
+		public void UpdateElementToSuccessor()
+		{
+			SetOutgoingElement(Index,Outgoing.ElementToSuccessor);
+		}
+	}
+
 	public class FlowVirtualSplitter<TElement> : Component, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		private int Number { get; }
 		public PortFlowIn<TElement> Incoming { get; set; }
 
-		public FlowSource<TElement>[] VirtualOutgoings { get; set; }
+		public FlowVirtualSource<TElement>[] VirtualOutgoings { get; set; }
 
 		// Elements must be split
-		public TElement[] ElementsOfCurrentCycle { get; set; }
+		public TElement[] ElementsToCurrentCycle { get; set; }
 
 		public FlowVirtualSplitter(int number)
 		{
 			Number = number;
-			Incoming = new PortFlowIn<TElement>() {UpdateSuctionToPredecessor = UpdateSuctionOfPredecessor};
-			VirtualOutgoings = new FlowSource<TElement>[number];
-			ElementsOfCurrentCycle = new TElement[number];
+			Incoming = new PortFlowIn<TElement>();
+			VirtualOutgoings = new FlowVirtualSource<TElement>[number];
+			ElementsToCurrentCycle = new TElement[number];
 			for (int i = 0; i < number; i++)
 			{
-				var index = i; // must be added for the closure explicitly. The outer i changes.
-				VirtualOutgoings[i] = new FlowSource<TElement>( (value) => value.CopyValuesFrom(GetElementOfIndex(index)) );
+				VirtualOutgoings[i] = new FlowVirtualSource<TElement>(i);
 			}
 		}
 
-		private TElement GetElementOfIndex(int index)
+		protected override void CreateBindings()
 		{
-			UpdateElementsOfSuccessors(); // TODO: Execute only once per cycle
-			return ElementsOfCurrentCycle[index];
+			Bind(nameof(Incoming.UpdateSuctionToPredecessor), nameof(UpdateSuctionToPredecessor));
+			for (int i = 0; i < Number; i++)
+			{
+				var outgoing = VirtualOutgoings[i];
+				Bind(nameof(outgoing.SetOutgoingElement), nameof(SetOutgoingElementOfInternalSource));
+			}
+		}
+
+		[Provided]
+		public void SetOutgoingElementOfInternalSource(int index, TElement outgoingElement)
+		{
+			UpdateElementsToSuccessors(); // TODO: Execute only once per cycle
+			outgoingElement.CopyValuesFrom(ElementsToCurrentCycle[index]);
 		}
 
 		public static void SplitEqual(TElement source, TElement[] targets)
@@ -429,50 +497,85 @@ namespace HemodialysisMachine.Utilities
 			return sources[0];
 		}
 
-		public void UpdateSuctionOfPredecessor()
+		public void UpdateSuctionToPredecessor()
 		{
 			// TODO: Update with a dynamic Function
-			var suctionsOfCurrentCycle = VirtualOutgoings.Select(virtualOutgoing => virtualOutgoing.Outgoing.SuctionFromSuccessor).ToArray();
-			Incoming.SuctionToPredecessor = MergeAny(suctionsOfCurrentCycle);
+			var suctionsToCurrentCycle = VirtualOutgoings.Select(virtualOutgoing => virtualOutgoing.Outgoing.SuctionFromSuccessor).ToArray();
+			Incoming.SuctionToPredecessor = MergeAny(suctionsToCurrentCycle);
 			Incoming.ConnectedPredecessor.SuctionFromSuccessor = Incoming.SuctionToPredecessor;
 		}
 
-		public void UpdateElementsOfSuccessors()
+		public void UpdateElementsToSuccessors()
 		{
 			// TODO: Update with a dynamic Function
-			SplitEqual(Incoming.ElementFromPredecessor, ElementsOfCurrentCycle);
+			SplitEqual(Incoming.ElementFromPredecessor, ElementsToCurrentCycle);
 		}
 	}
+	
 
+	public class FlowVirtualSink<TElement> : Component, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
+	{
+		private int Index;
+		// Used only by FlowVirtualMerger
+		public PortFlowIn<TElement> Incoming { get; set; }
 
-	// Note: Merger.SetSuction (called by to) automatically calls every fromOuts[].SetPredecessorSuction().
-	//       Thus, at this point no entry in UpdateSuctionOrder necessary.
+		public FlowVirtualSink(int index)
+		{
+			Index = index;
+			Incoming = new PortFlowIn<TElement>();
+		}
+
+		protected override void CreateBindings()
+		{
+			Bind(nameof(Incoming.UpdateSuctionToPredecessor), nameof(UpdateSuctionToPredecessor));
+		}
+
+		[Required]
+		public extern void SetOutgoingSuction(int index, ref int outgoingSuction);
+
+		public void UpdateSuctionToPredecessor()
+		{
+			// Actively Update the SuctionOfCurrentCycle of the predecessor
+			SetOutgoingSuction(Index,ref Incoming.SuctionToPredecessor);
+		}
+	}
+	
 	public class FlowVirtualMerger<TElement> : Component, IFlowComponentUniqueOutgoing<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		private int Number { get; }
-		public FlowSink<TElement>[] VirtualIncomings { get; set; }
+		public FlowVirtualSink<TElement>[] VirtualIncomings { get; set; }
 		public PortFlowOut<TElement> Outgoing { get; set; }
 		
 		// Suctions must be split
-		public int[] SuctionsOfCurrentCycle { get; set; }
+		public int[] SuctionsToCurrentCycle { get; set; }
 
 		public FlowVirtualMerger(int number)
 		{
 			Number = number;
-			VirtualIncomings = new FlowSink<TElement>[number];
-			Outgoing = new PortFlowOut<TElement>() {UpdateElementToSuccessor = UpdateElementOfSuccessor};
-			SuctionsOfCurrentCycle = new int[number];
+			VirtualIncomings = new FlowVirtualSink<TElement>[number];
+			Outgoing = new PortFlowOut<TElement>();
+			SuctionsToCurrentCycle = new int[number];
 			for (int i = 0; i < number; i++)
 			{
-				var index = i; // must be added for the closure explicitly. The outer i changes.
-				VirtualIncomings[i] = new FlowSink<TElement>(() => GetSuctionOfIndex(index));
+				VirtualIncomings[i] = new FlowVirtualSink<TElement>(i);
 			}
 		}
 
-		private int GetSuctionOfIndex(int index)
+		protected override void CreateBindings()
 		{
-			UpdateSuctionsOfPredecessors(); // TODO: Execute only once per cycle
-			return SuctionsOfCurrentCycle[index];
+			Bind(nameof(Outgoing.UpdateElementToSuccessor), nameof(UpdateElementToSuccessor));
+			for (int i = 0; i < Number; i++)
+			{
+				var incoming = VirtualIncomings[i];
+				Bind(nameof(incoming.SetOutgoingSuction), nameof(SetOutgoingSuctionOfInternalSink));
+			}
+		}
+
+		[Provided]
+		public void SetOutgoingSuctionOfInternalSink(int index, ref int outgoingSuction)
+		{
+			UpdateSuctionsToPredecessors(); // TODO: Execute only once per cycle
+			outgoingSuction = SuctionsToCurrentCycle[index];
 		}
 
 		public static void SplitEqual(int source, int[] targets)
@@ -489,17 +592,17 @@ namespace HemodialysisMachine.Utilities
 			return sources[0];
 		}
 
-		public void UpdateSuctionsOfPredecessors()
+		public void UpdateSuctionsToPredecessors()
 		{
 			// TODO: Update with a dynamic Function
-			SplitEqual(Outgoing.SuctionFromSuccessor, SuctionsOfCurrentCycle);
+			SplitEqual(Outgoing.SuctionFromSuccessor, SuctionsToCurrentCycle);
 		}
 
-		public void UpdateElementOfSuccessor()
+		public void UpdateElementToSuccessor()
 		{
 			// TODO: Update with a dynamic Function
-			var elementsOfCurrentCycle = VirtualIncomings.Select(virtualIncoming => virtualIncoming.Incoming.ElementFromPredecessor).ToArray();
-			Outgoing.ElementToSuccessor = MergeAny(elementsOfCurrentCycle);
+			var elementsToCurrentCycle = VirtualIncomings.Select(virtualIncoming => virtualIncoming.Incoming.ElementFromPredecessor).ToArray();
+			Outgoing.ElementToSuccessor = MergeAny(elementsToCurrentCycle);
 			Outgoing.ConnectedSuccessor.ElementFromPredecessor = Outgoing.ElementToSuccessor;
 		}
 	}

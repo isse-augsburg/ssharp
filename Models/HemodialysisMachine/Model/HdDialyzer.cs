@@ -8,8 +8,8 @@ namespace HemodialysisMachine.Model
 {
 	class Dialyzer
 	{
-		public BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment(In => In);
-		public DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment(In => In);
+		public BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment();
+		public DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
 
 		void Diffuse()
 		{

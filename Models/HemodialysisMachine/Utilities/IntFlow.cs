@@ -69,18 +69,10 @@ namespace HemodialysisMachine.Utilities
 
 	class IntFlowInToOutSegment : Utilities.FlowInToOutSegment<Int>
 	{
-		public IntFlowInToOutSegment(Func<Int, Int> flowLambdaFunc)
-			: base(flowLambdaFunc)
-		{
-		}
 	}
 
 	class IntFlowSource : Utilities.FlowSource<Int>
 	{
-		public IntFlowSource(Action<Int> sourceLambdaFunc)
-			: base(sourceLambdaFunc)
-		{
-		}
 	}
 
 	class IntFlowSink : Utilities.FlowSink<Int>

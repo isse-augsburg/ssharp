@@ -14,28 +14,28 @@ namespace HemodialysisMachine.Model
 
 	class DialyzingFluidWaterSupply
 	{
-		public readonly DialyzingFluidFlowSource DialyzingFluidFlow = new DialyzingFluidFlowSource((value) => { });
+		public readonly DialyzingFluidFlowSource DialyzingFluidFlow = new DialyzingFluidFlowSource();
 	}
 
 	class DialyzingFluidWaterPreparation
 	{
-		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment(In => In);
+		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
 	}
 
 	class DialyzingFluidConcentrateSupply
 	{
-		public readonly DialyzingFluidFlowSource Concentrate = new DialyzingFluidFlowSource((value) => { });
+		public readonly DialyzingFluidFlowSource Concentrate = new DialyzingFluidFlowSource();
 	}
 
 	class DialyzingFluidPreparation
 	{
 		public readonly DialyzingFluidFlowSink Concentrate = new DialyzingFluidFlowSink();
-		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment(In => In);
+		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
 	}
 
 	class DialyzingUltraFiltrationPump
 	{
-		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment(In => In);
+		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
 	}
 
 	class DialyzingFluidDrain
@@ -45,8 +45,8 @@ namespace HemodialysisMachine.Model
 
 	class DialyzingFluidSafetyBypass
 	{
-		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment(In => In);
-		public readonly DialyzingFluidFlowSource ToDrain = new DialyzingFluidFlowSource((value) => { });
+		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
+		public readonly DialyzingFluidFlowSource ToDrain = new DialyzingFluidFlowSource();
 	}
 
 
@@ -62,8 +62,8 @@ namespace HemodialysisMachine.Model
 	{
 		public readonly DialyzingFluidFlowSink ProducedDialysingFluid = new DialyzingFluidFlowSink();
 		public readonly DialyzingFluidFlowSink UsedDialysingFluid = new DialyzingFluidFlowSink();
-		public readonly DialyzingFluidFlowSource StoredProducedDialysingFluid = new DialyzingFluidFlowSource((value) => { });
-		public readonly DialyzingFluidFlowSource StoredUsedDialysingFluid = new DialyzingFluidFlowSource((value) => { });
+		public readonly DialyzingFluidFlowSource StoredProducedDialysingFluid = new DialyzingFluidFlowSource();
+		public readonly DialyzingFluidFlowSource StoredUsedDialysingFluid = new DialyzingFluidFlowSource();
 
 
 		enum State

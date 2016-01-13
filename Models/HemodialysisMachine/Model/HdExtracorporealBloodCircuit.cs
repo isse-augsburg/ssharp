@@ -10,7 +10,7 @@ namespace HemodialysisMachine.Model
 
 	class ArterialBloodPump
 	{
-		public readonly BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment(In => In);
+		public readonly BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment();
 	}
 
 	class ArteriaPressureTransducer
@@ -20,17 +20,17 @@ namespace HemodialysisMachine.Model
 
 	class HeparinPump
 	{
-		public readonly BloodFlowSource BloodFlow = new BloodFlowSource((value) => { });
+		public readonly BloodFlowSource BloodFlow = new BloodFlowSource();
 	}
 
 	class ArtierialChamber
 	{
-		public readonly BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment(In => In);
+		public readonly BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment();
 	}
 
 	class VenousChamber
 	{
-		public readonly BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment(In => In);
+		public readonly BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment();
 	}
 
 	class VenousPressureTransducer
@@ -40,12 +40,12 @@ namespace HemodialysisMachine.Model
 
 	class VenousSafetyDetector
 	{
-		public readonly BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment(In => In);
+		public readonly BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment();
 	}
 
 	class VenousTubingValve
 	{
-		public readonly BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment(In => In);
+		public readonly BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment();
 	}
 
 	class ExtracorporealBloodCircuit

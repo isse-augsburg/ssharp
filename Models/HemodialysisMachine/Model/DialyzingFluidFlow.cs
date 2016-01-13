@@ -58,18 +58,10 @@ namespace HemodialysisMachine.Model
 
 	class DialyzingFluidFlowInToOutSegment : Utilities.FlowInToOutSegment<DialyzingFluid>
 	{
-		public DialyzingFluidFlowInToOutSegment(Func<DialyzingFluid, DialyzingFluid> flowLambdaFunc)
-			: base(flowLambdaFunc)
-		{
-		}
 	}
 
 	class DialyzingFluidFlowSource : Utilities.FlowSource<DialyzingFluid>
 	{
-		public DialyzingFluidFlowSource(Action<DialyzingFluid> sourceLambdaFunc)
-			: base(sourceLambdaFunc)
-		{
-		}
 	}
 
 	class DialyzingFluidFlowSink : Utilities.FlowSink<DialyzingFluid>

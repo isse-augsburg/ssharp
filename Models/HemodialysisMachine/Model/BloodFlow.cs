@@ -23,18 +23,10 @@ namespace HemodialysisMachine.Model
 
 	class BloodFlowInToOutSegment : Utilities.FlowInToOutSegment<Blood>
 	{
-		public BloodFlowInToOutSegment(Func<Blood, Blood> flowLambdaFunc)
-			: base(flowLambdaFunc)
-		{
-		}
 	}
 
 	class BloodFlowSource : Utilities.FlowSource<Blood>
 	{
-		public BloodFlowSource(Action<Blood> sourceLambdaFunc)
-			: base(sourceLambdaFunc)
-		{
-		}
 	}
 
 	class BloodFlowSink : Utilities.FlowSink<Blood>
