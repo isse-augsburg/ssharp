@@ -295,16 +295,82 @@ namespace HemodialysisMachine.Utilities
 		}
 
 		// Standard Behaviors
+		[Provided]
+		private void StandardBehaviorIgnoreReceivedSuction(int incomingSuction)
+		{
+		}
+		[Provided]
+		private void StandardBehaviorIgnoreSetOutgoingSuction(ref int outgoingSuction)
+		{
+		}
+		[Provided]
+		private void StandardBehaviorIgnoreSetOutgoingSuction(ref int outgoingSuction, int incomingSuction)
+		{
+			outgoingSuction = incomingSuction;
+		}
+
+		[Provided]
+		private void StandardBehaviorIgnoreReceivedElement(TElement incomingElement)
+		{
+		}
+		[Provided]
+		private void StandardBehaviorIgnoreSetOutgoingElement(TElement outgoingElement)
+		{
+		}
+		[Provided]
+		private void StandardBehaviorIgnoreSetOutgoingElement(TElement outgoingElement, TElement incomingElement)
+		{
+			outgoingElement.CopyValuesFrom(incomingElement);
+		}
+
 		public void SetStandardBehaviorForElement(params IFlowComponent<TElement>[] components)
 		{
+			foreach (var component in components)
+			{
+				if (component is FlowSource<TElement>)
+				{
+					var sourceComponent = (FlowSource<TElement>)component;
+					Bind(nameof(sourceComponent.SetOutgoingElement), nameof(StandardBehaviorIgnoreSetOutgoingElement));
+				}
+				if (component is FlowInToOutSegment<TElement>)
+				{
+					var directComponent = (FlowInToOutSegment<TElement>)component;
+					Bind(nameof(directComponent.SetOutgoingElement), nameof(StandardBehaviorIgnoreSetOutgoingElement));
+				}
+				if (component is FlowSink<TElement>)
+				{
+					var sinkComponent = (FlowSink<TElement>)component;
+					Bind(nameof(sinkComponent.ElementFromPredecessorWasUpdated), nameof(StandardBehaviorIgnoreReceivedElement));
+				}
+			}
 		}
 
 		public void SetStandardBehaviorForSuction(params IFlowComponent<TElement>[] components)
 		{
+			foreach (var component in components)
+			{
+				if (component is FlowSource<TElement>)
+				{
+					var sourceComponent = (FlowSource<TElement>)component;
+					Bind(nameof(sourceComponent.SuctionFromSuccessorWasUpdated), nameof(StandardBehaviorIgnoreReceivedSuction));
+				}
+				if (component is FlowInToOutSegment<TElement>)
+				{
+					var directComponent = (FlowInToOutSegment<TElement>)component;
+					Bind(nameof(directComponent.SetOutgoingSuction), nameof(StandardBehaviorIgnoreSetOutgoingSuction));
+				}
+				if (component is FlowSink<TElement>)
+				{
+					var sinkComponent = (FlowSink<TElement>)component;
+					Bind(nameof(sinkComponent.SetOutgoingSuction), nameof(StandardBehaviorIgnoreSetOutgoingSuction));
+				}
+			}
 		}
 
 		public void SetStandardBehavior(params IFlowComponent<TElement>[] components)
-		{	
+		{
+			SetStandardBehaviorForElement(components);
+			SetStandardBehaviorForSuction(components);
 		}
 	}
 

@@ -118,8 +118,38 @@ namespace HemodialysisMachine.Tests
 			sourceAfterStep.Outgoing.SuctionFromSuccessor.Should().Be(1);
 		}
 
-		[Test,Ignore]
+		[Test]
 		public void SimpleFlowArrivesWithStandardBehavior_ExplicitPort()
+		{
+			var testModel = new IntFlowModel();
+			var source = new IntFlowSource();
+			var direct = new IntFlowInToOutSegment();
+			var sink = new IntFlowSink();
+			testModel.Components = new IntFlowComponentCollection(source, direct, sink);
+			testModel.Combinator.SetStandardBehavior(source, direct, sink);
+			testModel.Combinator.Connect(source.Outgoing, direct.Incoming);
+			testModel.Combinator.Connect(direct.Outgoing, sink.Incoming);
+
+			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			simulator.SimulateStep();
+
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
+			var directAfterStep = (IntFlowInToOutSegment)flowComponentsAfterStep[1];
+			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[2];
+			sourceAfterStep.Outgoing.ElementToSuccessor.Should().Be((Int)0);
+			directAfterStep.Incoming.ElementFromPredecessor.Should().Be((Int)0);
+			directAfterStep.Outgoing.ElementToSuccessor.Should().Be((Int)0);
+			sinkAfterStep.Incoming.ElementFromPredecessor.Should().Be((Int)0);
+			sinkAfterStep.Incoming.SuctionToPredecessor.Should().Be(0);
+			directAfterStep.Outgoing.SuctionFromSuccessor.Should().Be(0);
+			directAfterStep.Incoming.SuctionToPredecessor.Should().Be(0);
+			sourceAfterStep.Outgoing.SuctionFromSuccessor.Should().Be(0);
+		}
+
+		[Test]
+		public void SimpleFlowArrivesWithStandardSuction_ExplicitPort()
 		{
 			var testModel = new IntFlowModel();
 			var source = new IntFlowSource();
@@ -129,7 +159,7 @@ namespace HemodialysisMachine.Tests
 			Component.Bind(nameof(source.SetOutgoingElement), nameof(testModel.CreateElement));
 			Component.Bind(nameof(direct.SetOutgoingElement), nameof(testModel.ForwardElement));
 			Component.Bind(nameof(sink.ElementFromPredecessorWasUpdated), nameof(testModel.PrintReceivedElement));
-			testModel.Combinator.SetStandardBehaviorForSuction(source,direct,sink); //TODO: Implement me
+			testModel.Combinator.SetStandardBehaviorForSuction(source,direct,sink);
 			testModel.Combinator.Connect(source.Outgoing, direct.Incoming);
 			testModel.Combinator.Connect(direct.Outgoing, sink.Incoming);
 
@@ -145,40 +175,10 @@ namespace HemodialysisMachine.Tests
 			directAfterStep.Incoming.ElementFromPredecessor.Should().Be((Int)7);
 			directAfterStep.Outgoing.ElementToSuccessor.Should().Be((Int)7);
 			sinkAfterStep.Incoming.ElementFromPredecessor.Should().Be((Int)7);
-			sinkAfterStep.Incoming.SuctionToPredecessor.Should().Be(1);
-			directAfterStep.Outgoing.SuctionFromSuccessor.Should().Be(1);
-			directAfterStep.Incoming.SuctionToPredecessor.Should().Be(1);
-			sourceAfterStep.Outgoing.SuctionFromSuccessor.Should().Be(1);
-		}
-
-		[Test, Ignore]
-		public void SimpleFlowArrivesWithStandardSuction_ExplicitPort()
-		{
-			var testModel = new IntFlowModel();
-			var source = new IntFlowSource();
-			var direct = new IntFlowInToOutSegment();
-			var sink = new IntFlowSink();
-			testModel.Components = new IntFlowComponentCollection(source, direct, sink);
-			testModel.Combinator.SetStandardBehavior(source, direct, sink); //TODO: Implement me
-			testModel.Combinator.Connect(source.Outgoing, direct.Incoming);
-			testModel.Combinator.Connect(direct.Outgoing, sink.Incoming);
-
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
-			simulator.SimulateStep();
-
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
-			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
-			var directAfterStep = (IntFlowInToOutSegment)flowComponentsAfterStep[1];
-			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[2];
-			sourceAfterStep.Outgoing.ElementToSuccessor.Should().Be((Int)7);
-			directAfterStep.Incoming.ElementFromPredecessor.Should().Be((Int)7);
-			directAfterStep.Outgoing.ElementToSuccessor.Should().Be((Int)7);
-			sinkAfterStep.Incoming.ElementFromPredecessor.Should().Be((Int)7);
-			sinkAfterStep.Incoming.SuctionToPredecessor.Should().Be(1);
-			directAfterStep.Outgoing.SuctionFromSuccessor.Should().Be(1);
-			directAfterStep.Incoming.SuctionToPredecessor.Should().Be(1);
-			sourceAfterStep.Outgoing.SuctionFromSuccessor.Should().Be(1);
+			sinkAfterStep.Incoming.SuctionToPredecessor.Should().Be(0);
+			directAfterStep.Outgoing.SuctionFromSuccessor.Should().Be(0);
+			directAfterStep.Incoming.SuctionToPredecessor.Should().Be(0);
+			sourceAfterStep.Outgoing.SuctionFromSuccessor.Should().Be(0);
 		}
 
 		[Test]
