@@ -121,7 +121,7 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			Requires.NotNull(obj, nameof(obj));
 
-			var referencedObjects = new HashSet<object> { obj };
+			var referencedObjects = new HashSet<object>(ReferenceEqualityComparer<object>.Default) { obj };
 			GetReferencedObjects(referencedObjects, obj, mode);
 			return referencedObjects;
 		}
