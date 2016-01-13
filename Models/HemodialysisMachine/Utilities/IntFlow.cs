@@ -24,6 +24,8 @@ using System;
 
 namespace HemodialysisMachine.Utilities
 {
+	using SafetySharp.Modeling;
+
 	class Int : IElement<Int>
 	{
 		public int Value;
@@ -52,46 +54,61 @@ namespace HemodialysisMachine.Utilities
 			return false;
 		}
 
-		public override int GetHashCode()
-		{
-			return Value;
-		}
-
 		public void CopyValuesFrom(Int @from)
 		{
 			this.Value = from.Value;
 		}
 		public Int()
 		{
-
 		}
 	}
 
-	class IntFlowInToOutSegment : Utilities.FlowInToOutSegment<Int>
+	interface IIntFlowComponent : Utilities.IFlowComponent<Int>
 	{
 	}
 
-	class IntFlowSource : Utilities.FlowSource<Int>
+	class IntFlowInToOutSegment : Utilities.FlowInToOutSegment<Int>, IIntFlowComponent
 	{
 	}
 
-	class IntFlowSink : Utilities.FlowSink<Int>
+	class IntFlowSource : Utilities.FlowSource<Int>, IIntFlowComponent
 	{
 	}
 
-	class IntFlowComposite : Utilities.FlowComposite<Int>
+	class IntFlowSink : Utilities.FlowSink<Int>, IIntFlowComponent
 	{
 	}
 
-	class IntFlowCombinator : Utilities.FlowCombinator<Int>
+	class IntFlowComposite : Utilities.FlowComposite<Int>, IIntFlowComponent
 	{
 	}
 
-	class IntFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<Int>
+	class IntFlowCombinator : Utilities.FlowCombinator<Int>, IIntFlowComponent
 	{
 	}
 
-	class IntFlowUniqueIncomingStub : FlowUniqueIncomingStub<Int>
+	class IntFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<Int>, IIntFlowComponent
 	{
+	}
+
+	class IntFlowUniqueIncomingStub : FlowUniqueIncomingStub<Int>, IIntFlowComponent
+	{
+	}
+
+	class IntFlowComponentCollection : Component
+	{
+		/// <summary>
+		///   The vehicles contained in the collection.
+		/// </summary>
+		//[Hidden(HideElements = true)]
+		public readonly IIntFlowComponent[] Components;
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		public IntFlowComponentCollection(params IIntFlowComponent[] components)
+		{
+			Components = components;
+		}
 	}
 }

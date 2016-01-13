@@ -56,10 +56,10 @@ namespace HemodialysisMachine.Utilities
 	
 	public class PortFlowIn<TElement> : Component where TElement : class, IElement<TElement>, new()
 	{
-		[Hidden]
+		//[Hidden]
 		public PortFlowOut<TElement> ConnectedPredecessor;
 
-		[Hidden] // Only save "To"-Values
+		//[Hidden] // Only save "To"-Values
 		public TElement ElementFromPredecessor;
 
 		public int SuctionToPredecessor;
@@ -77,10 +77,10 @@ namespace HemodialysisMachine.Utilities
 
 	public class PortFlowOut<TElement> : Component where TElement : class, IElement<TElement>, new()
 	{
-		[Hidden]
+		//[Hidden]
 		public PortFlowIn<TElement> ConnectedSuccessor;
 
-		[Hidden] // Only save "To"-Values
+		//[Hidden] // Only save "To"-Values
 		public TElement ElementToSuccessor;
 
 		public int SuctionFromSuccessor;
@@ -109,10 +109,10 @@ namespace HemodialysisMachine.Utilities
 
 	public abstract class FlowCombinator<TElement> : Component where TElement : class, IElement<TElement>, new()
 	{
-		[Hidden]
+		//[Hidden]
 		private List<PortFlowIn<TElement>> UpdateSuctionOrder;
 
-		[Hidden]
+		//[Hidden]
 		private List<PortFlowOut<TElement>> UpdateElementOrder;
 
 		// TODO: For generic non-tree like acyclic flows a topological sort is necessary (So, every Update gets executed only once)
@@ -282,7 +282,11 @@ namespace HemodialysisMachine.Utilities
 		}
 	}
 
-	public class FlowInToOutSegment<TElement> : Component, IFlowComponentUniqueOutgoing<TElement>, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
+	public interface IFlowComponent<TElement> where TElement : class, IElement<TElement>, new()
+	{
+	}
+
+	public class FlowInToOutSegment<TElement> : Component, IFlowComponent<TElement>, IFlowComponentUniqueOutgoing<TElement>, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		public PortFlowIn<TElement> Incoming { get; set; }
 		public PortFlowOut<TElement> Outgoing { get; set; }
@@ -322,7 +326,7 @@ namespace HemodialysisMachine.Utilities
 	//     and flowConnector.Connect(normalB.Outgoing,stub.Incoming)
 	//    then flowConnector.Connect(normalB.Outgoing,normalA.Incoming)
 
-	public class FlowSource<TElement> : Component, IFlowComponentUniqueOutgoing<TElement> where TElement : class, IElement<TElement>, new()
+	public class FlowSource<TElement> : Component, IFlowComponent<TElement>, IFlowComponentUniqueOutgoing<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		public PortFlowOut<TElement> Outgoing { get; set; }
 		
@@ -346,7 +350,7 @@ namespace HemodialysisMachine.Utilities
 		}
 	}
 
-	public class FlowSink<TElement> : Component, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
+	public class FlowSink<TElement> : Component, IFlowComponent<TElement>, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		public PortFlowIn<TElement> Incoming { get; set; }
 		
@@ -371,7 +375,7 @@ namespace HemodialysisMachine.Utilities
 		}
 	}
 
-	public class FlowComposite<TElement> : Component, IFlowComponentUniqueOutgoing<TElement>,  IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
+	public class FlowComposite<TElement> : Component, IFlowComponent<TElement>, IFlowComponentUniqueOutgoing<TElement>,  IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		// Outer1 --> Incoming --> Source --> Inner1 --> Sink --> Outgoing --> Outer2
 		public PortFlowIn<TElement> Incoming { get; set; } //This element is accessed from the outside
@@ -423,7 +427,7 @@ namespace HemodialysisMachine.Utilities
 		}
 	}
 
-	public class FlowVirtualSource<TElement> : Component, IFlowComponentUniqueOutgoing<TElement> where TElement : class, IElement<TElement>, new()
+	public class FlowVirtualSource<TElement> : Component, IFlowComponent<TElement>, IFlowComponentUniqueOutgoing<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		// Used only by FlowVirtualSplitter
 		private int Index;
@@ -450,7 +454,7 @@ namespace HemodialysisMachine.Utilities
 		}
 	}
 
-	public class FlowVirtualSplitter<TElement> : Component, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
+	public class FlowVirtualSplitter<TElement> : Component, IFlowComponent<TElement>, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		private int Number { get; }
 		public PortFlowIn<TElement> Incoming { get; set; }
@@ -519,7 +523,7 @@ namespace HemodialysisMachine.Utilities
 	}
 	
 
-	public class FlowVirtualSink<TElement> : Component, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
+	public class FlowVirtualSink<TElement> : Component, IFlowComponent<TElement>, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		private int Index;
 		// Used only by FlowVirtualMerger
@@ -547,7 +551,7 @@ namespace HemodialysisMachine.Utilities
 		}
 	}
 	
-	public class FlowVirtualMerger<TElement> : Component, IFlowComponentUniqueOutgoing<TElement> where TElement : class, IElement<TElement>, new()
+	public class FlowVirtualMerger<TElement> : Component, IFlowComponent<TElement>, IFlowComponentUniqueOutgoing<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		private int Number { get; }
 		public FlowVirtualSink<TElement>[] VirtualIncomings { get; set; }
@@ -615,7 +619,7 @@ namespace HemodialysisMachine.Utilities
 		}
 	}
 
-	public class FlowUniqueOutgoingStub<TElement> : Component, IFlowComponentUniqueOutgoing<TElement> where TElement : class, IElement<TElement>, new()
+	public class FlowUniqueOutgoingStub<TElement> : Component, IFlowComponent<TElement>, IFlowComponentUniqueOutgoing<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		//   FlowUniqueOutgoingStub:
 		//    When flowConnector.Connect(stub.Outgoing,normalA.Incoming)
@@ -629,7 +633,7 @@ namespace HemodialysisMachine.Utilities
 		}
 	}
 
-	public class FlowUniqueIncomingStub<TElement> : Component, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
+	public class FlowUniqueIncomingStub<TElement> : Component, IFlowComponent<TElement>, IFlowComponentUniqueIncoming<TElement> where TElement : class, IElement<TElement>, new()
 	{
 		//   FlowUniqueIncomingStub:
 		//    When flowConnector.Connect(normalA.Outgoing,stub.Incoming)
