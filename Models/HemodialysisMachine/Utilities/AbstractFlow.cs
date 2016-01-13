@@ -71,7 +71,7 @@ namespace HemodialysisMachine.Utilities
 		public PortFlowIn()
 		{
 			SuctionToPredecessor = 0;
-			//ElementFromPredecessor = new TElement();
+			ElementFromPredecessor = new TElement();
 		}
 	}
 
@@ -92,7 +92,7 @@ namespace HemodialysisMachine.Utilities
 		public PortFlowOut()
 		{
 			SuctionFromSuccessor = 0;
-			//ElementToSuccessor = new TElement();
+			ElementToSuccessor = new TElement();
 		}
 	}
 
