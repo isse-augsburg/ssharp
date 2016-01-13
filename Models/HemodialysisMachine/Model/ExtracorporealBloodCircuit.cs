@@ -42,9 +42,15 @@ namespace HemodialysisMachine.Model
 			outgoingSuction = 1;
 		}
 
+		[Provided]
+		public void ReceivedBlood(Blood incomingElement)
+		{
+		}
+
 		protected override void CreateBindings()
 		{
 			Bind(nameof(SenseFlow.SetOutgoingSuction), nameof(SetSenseFlowSuction));
+			Bind(nameof(SenseFlow.ElementFromPredecessorWasUpdated), nameof(ReceivedBlood));
 		}
 	}
 
@@ -58,9 +64,15 @@ namespace HemodialysisMachine.Model
 			outgoing.Quantity = 1;
 		}
 
+		[Provided]
+		public void ReceivedSuction(int incomingSuction)
+		{
+		}
+
 		protected override void CreateBindings()
 		{
 			Bind(nameof(HeparinFlow.SetOutgoingElement), nameof(SetHeparinFlow));
+			Bind(nameof(HeparinFlow.SuctionFromSuccessorWasUpdated), nameof(ReceivedSuction));
 		}
 	}
 
@@ -120,9 +132,15 @@ namespace HemodialysisMachine.Model
 			outgoingSuction = 1;
 		}
 
+		[Provided]
+		public void ReceivedBlood(Blood incomingElement)
+		{
+		}
+
 		protected override void CreateBindings()
 		{
 			Bind(nameof(SenseFlow.SetOutgoingSuction), nameof(SetSenseFlowSuction));
+			Bind(nameof(SenseFlow.ElementFromPredecessorWasUpdated), nameof(ReceivedBlood));
 		}
 	}
 

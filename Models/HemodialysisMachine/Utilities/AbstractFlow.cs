@@ -66,6 +66,10 @@ namespace HemodialysisMachine.Utilities
 
 		[Required]
 		public extern void UpdateSuctionToPredecessor(); // This is executed to calculate what the predecessor value should be (make changes). To update the predecessor, this.SetPredecessorSuction() must be called in this method.
+
+		[Required]
+		public extern void ElementFromPredecessorWasUpdated();
+
 		//public ResetCycleDelegate ResetValuesOfCurrentCycle;
 
 		public PortFlowIn()
@@ -87,8 +91,11 @@ namespace HemodialysisMachine.Utilities
 
 		[Required]
 		public extern void UpdateElementToSuccessor(); // This is executed to calculate what the successor value should be (make changes). To update the successor, this.SetSuccessorElement() must be called in this method.
-		//public ResetCycleDelegate ResetValuesOfCurrentCycle;
-		
+													   //public ResetCycleDelegate ResetValuesOfCurrentCycle;
+
+		[Required]
+		public extern void SuctionFromSuccessorWasUpdated();
+
 		public PortFlowOut()
 		{
 			SuctionFromSuccessor = 0;
@@ -125,12 +132,13 @@ namespace HemodialysisMachine.Utilities
 			{
 				flowIn.UpdateSuctionToPredecessor();
 				flowIn.ConnectedPredecessor.SuctionFromSuccessor = flowIn.SuctionToPredecessor;
+				flowIn.ConnectedPredecessor.SuctionFromSuccessorWasUpdated();
 			}
 			foreach (var flowOut in UpdateElementOrder)
 			{
 				flowOut.UpdateElementToSuccessor();
-				//flowOut.ConnectedSuccessor.ElementFromPredecessor = flowOut.ElementToSuccessor;
 				flowOut.ConnectedSuccessor.ElementFromPredecessor.CopyValuesFrom(flowOut.ElementToSuccessor);
+				flowOut.ConnectedSuccessor.ElementFromPredecessorWasUpdated();
 			}
 		}
 
@@ -285,6 +293,19 @@ namespace HemodialysisMachine.Utilities
 			var collectedPorts = fromOuts.Select(from => from.Outgoing).ToArray();
 			Connect(collectedPorts, to.InternalSink.Incoming);
 		}
+
+		// Standard Behaviors
+		public void SetStandardBehaviorForElement(params IFlowComponent<TElement>[] components)
+		{
+		}
+
+		public void SetStandardBehaviorForSuction(params IFlowComponent<TElement>[] components)
+		{
+		}
+
+		public void SetStandardBehavior(params IFlowComponent<TElement>[] components)
+		{	
+		}
 	}
 
 	public interface IFlowComponent<TElement> where TElement : class, IElement<TElement>, new()
@@ -306,6 +327,8 @@ namespace HemodialysisMachine.Utilities
 		{
 			Bind(nameof(Incoming.UpdateSuctionToPredecessor), nameof(UpdateSuctionToPredecessor));
 			Bind(nameof(Outgoing.UpdateElementToSuccessor), nameof(UpdateElementToSuccessor));
+			Bind(nameof(Incoming.ElementFromPredecessorWasUpdated), nameof(ElementFromPredecessorWasUpdated));
+			Bind(nameof(Outgoing.SuctionFromSuccessorWasUpdated), nameof(SuctionFromSuccessorWasUpdated));
 		}
 
 		[Required]
@@ -322,6 +345,14 @@ namespace HemodialysisMachine.Utilities
 		public void UpdateElementToSuccessor()
 		{
 			SetOutgoingElement(Outgoing.ElementToSuccessor,Incoming.ElementFromPredecessor);
+		}
+
+		public void SuctionFromSuccessorWasUpdated()
+		{
+		}
+
+		public void ElementFromPredecessorWasUpdated()
+		{
 		}
 	}
 
@@ -342,6 +373,7 @@ namespace HemodialysisMachine.Utilities
 		protected override void CreateBindings()
 		{
 			Bind(nameof(Outgoing.UpdateElementToSuccessor), nameof(UpdateElementToSuccessor));
+			Bind(nameof(Outgoing.SuctionFromSuccessorWasUpdated), nameof(SuctionFromSuccessorWasUpdatedIntern));
 		}
 
 		[Required]
@@ -350,6 +382,14 @@ namespace HemodialysisMachine.Utilities
 		public void UpdateElementToSuccessor()
 		{
 			SetOutgoingElement(Outgoing.ElementToSuccessor);
+		}
+
+		[Required]
+		public extern void SuctionFromSuccessorWasUpdated(int incomingSuction);
+
+		private void SuctionFromSuccessorWasUpdatedIntern()
+		{
+			SuctionFromSuccessorWasUpdated(Outgoing.SuctionFromSuccessor);
 		}
 	}
 
@@ -365,6 +405,7 @@ namespace HemodialysisMachine.Utilities
 		protected override void CreateBindings()
 		{
 			Bind(nameof(Incoming.UpdateSuctionToPredecessor), nameof(UpdateSuctionToPredecessor));
+			Bind(nameof(Incoming.ElementFromPredecessorWasUpdated), nameof(ElementFromPredecessorWasUpdatedIntern));
 		}
 
 		[Required]
@@ -374,6 +415,13 @@ namespace HemodialysisMachine.Utilities
 		{
 			// Actively Update the SuctionOfCurrentCycle of the predecessor
 			SetOutgoingSuction(ref Incoming.SuctionToPredecessor);
+		}
+
+		public extern void ElementFromPredecessorWasUpdated(TElement incomingElement);
+
+		private void ElementFromPredecessorWasUpdatedIntern()
+		{
+			ElementFromPredecessorWasUpdated(Incoming.ElementFromPredecessor);
 		}
 	}
 
@@ -401,6 +449,10 @@ namespace HemodialysisMachine.Utilities
 			Bind(nameof(Outgoing.UpdateElementToSuccessor), nameof(UpdateElementToSuccessor));
 			Bind(nameof(InternalSink.SetOutgoingSuction), nameof(SetOutgoingSuctionOfInternalSink));
 			Bind(nameof(InternalSource.SetOutgoingElement), nameof(SetOutgoingElementOfInternalSource));
+			Bind(nameof(Incoming.ElementFromPredecessorWasUpdated), nameof(ElementFromPredecessorWasUpdated));
+			Bind(nameof(Outgoing.SuctionFromSuccessorWasUpdated), nameof(SuctionFromSuccessorWasUpdated));
+			Bind(nameof(InternalSource.SuctionFromSuccessorWasUpdated), nameof(SuctionFromSuccessorWasUpdatedInternal));
+			Bind(nameof(InternalSink.ElementFromPredecessorWasUpdated), nameof(ElementFromPredecessorWasUpdatedInternal));
 		}
 
 		[Provided]
@@ -426,6 +478,24 @@ namespace HemodialysisMachine.Utilities
 			// Actively Update the ElementOfCurrentCycle of the successor
 			Outgoing.ElementToSuccessor = InternalSink.Incoming.ElementFromPredecessor;
 		}
+
+		public void SuctionFromSuccessorWasUpdated()
+		{
+		}
+
+		public void ElementFromPredecessorWasUpdated()
+		{
+		}
+
+		[Provided]
+		private void ElementFromPredecessorWasUpdatedInternal(TElement incomingElement)
+		{
+		}
+
+		[Provided]
+		private void SuctionFromSuccessorWasUpdatedInternal(int incomingSuction)
+		{
+		}
 	}
 
 	public class FlowVirtualSource<TElement> : Component, IFlowComponent<TElement>, IFlowComponentUniqueOutgoing<TElement> where TElement : class, IElement<TElement>, new()
@@ -443,6 +513,7 @@ namespace HemodialysisMachine.Utilities
 		protected override void CreateBindings()
 		{
 			Bind(nameof(Outgoing.UpdateElementToSuccessor), nameof(UpdateElementToSuccessor));
+			Bind(nameof(Outgoing.SuctionFromSuccessorWasUpdated), nameof(SuctionFromSuccessorWasUpdated));
 		}
 
 		[Required]
@@ -451,6 +522,10 @@ namespace HemodialysisMachine.Utilities
 		public void UpdateElementToSuccessor()
 		{
 			SetOutgoingElement(Index,Outgoing.ElementToSuccessor);
+		}
+
+		public void SuctionFromSuccessorWasUpdated()
+		{
 		}
 	}
 
@@ -484,6 +559,7 @@ namespace HemodialysisMachine.Utilities
 				var outgoing = VirtualOutgoings[i];
 				Bind(nameof(outgoing.SetOutgoingElement), nameof(SetOutgoingElementOfInternalSource));
 			}
+			Bind(nameof(Incoming.ElementFromPredecessorWasUpdated), nameof(ElementFromPredecessorWasUpdated));
 		}
 
 		[Provided]
@@ -519,6 +595,10 @@ namespace HemodialysisMachine.Utilities
 			// TODO: Update with a dynamic Function
 			SplitEqual(Incoming.ElementFromPredecessor, ElementsToCurrentCycle);
 		}
+
+		public void ElementFromPredecessorWasUpdated()
+		{
+		}
 	}
 	
 
@@ -537,6 +617,7 @@ namespace HemodialysisMachine.Utilities
 		protected override void CreateBindings()
 		{
 			Bind(nameof(Incoming.UpdateSuctionToPredecessor), nameof(UpdateSuctionToPredecessor));
+			Bind(nameof(Incoming.ElementFromPredecessorWasUpdated), nameof(ElementFromPredecessorWasUpdated));
 		}
 
 		[Required]
@@ -546,6 +627,10 @@ namespace HemodialysisMachine.Utilities
 		{
 			// Actively Update the SuctionOfCurrentCycle of the predecessor
 			SetOutgoingSuction(Index,ref Incoming.SuctionToPredecessor);
+		}
+
+		public void ElementFromPredecessorWasUpdated()
+		{
 		}
 	}
 	
@@ -578,6 +663,7 @@ namespace HemodialysisMachine.Utilities
 				var incoming = VirtualIncomings[i];
 				Bind(nameof(incoming.SetOutgoingSuction), nameof(SetOutgoingSuctionOfInternalSink));
 			}
+			Bind(nameof(Outgoing.SuctionFromSuccessorWasUpdated), nameof(SuctionFromSuccessorWasUpdated));
 		}
 
 		[Provided]
@@ -613,6 +699,10 @@ namespace HemodialysisMachine.Utilities
 			var elementsToCurrentCycle = VirtualIncomings.Select(virtualIncoming => virtualIncoming.Incoming.ElementFromPredecessor).ToArray();
 			Outgoing.ElementToSuccessor = MergeAny(elementsToCurrentCycle);
 			Outgoing.ConnectedSuccessor.ElementFromPredecessor = Outgoing.ElementToSuccessor;
+		}
+
+		public void SuctionFromSuccessorWasUpdated()
+		{
 		}
 	}
 
