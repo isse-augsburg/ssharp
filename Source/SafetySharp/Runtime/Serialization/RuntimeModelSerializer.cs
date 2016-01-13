@@ -85,8 +85,9 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private static unsafe void SerializeModel(BinaryWriter writer, Model model, int stateHeaderBytes, Formula[] formulas)
 		{
-			//  Make sure that all auto-bound fault effects have been bound
+			//  Make sure that all auto-bound fault effects have been bound and that all bindings have been created
 			model.BindFaultEffects();
+			model.CreateBindings();
 
 			// Collect all objects contained in the model
 			var stateFormulas = CollectStateFormulas(formulas);

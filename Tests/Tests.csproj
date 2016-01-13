@@ -149,6 +149,7 @@
     <Compile Include="Diagnostics\FaultEffects\Valid\deterministic effects without priorities.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\effects with priorities.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\explicit nondeterminism.cs" />
+    <Compile Include="Execution\Simulation\reachable by binding only.cs" />
     <Compile Include="Execution\Simulation\faults.cs" />
     <Compile Include="Execution\Simulation\bindings.cs" />
     <Compile Include="Execution\Simulation\nondeterminism.cs" />

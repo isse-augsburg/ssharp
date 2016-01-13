@@ -155,6 +155,14 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
+		///   Initializes all bindings.
+		/// </summary>
+		internal void CreateBindings()
+		{
+			this.VisitPostOrder(component => ((Component)component).CreateBindings());
+		}
+
+		/// <summary>
 		///   Helper method that collects <see cref="IComponent" /> instances.
 		/// </summary>
 		private static void CollectComponents<T>(HashSet<IComponent> components, Dictionary<IComponent, Role> roles, IEnumerable<T> members,
