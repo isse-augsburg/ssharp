@@ -22,7 +22,7 @@
 
 using System;
 
-namespace HemodialysisMachine.Utilities
+namespace HemodialysisMachine.Utilities.BidirectionalFlow
 {
 	using SafetySharp.Modeling;
 
@@ -63,35 +63,35 @@ namespace HemodialysisMachine.Utilities
 		}
 	}
 
-	interface IIntFlowComponent : Utilities.IFlowComponent<Int>
+	interface IIntFlowComponent : IFlowComponent<Int,Int>
 	{
 	}
 
-	class IntFlowInToOutSegment : Utilities.FlowInToOutSegment<Int>, IIntFlowComponent
+	class IntFlowInToOutSegment : FlowInToOutSegment<Int, Int>, IIntFlowComponent
 	{
 	}
 
-	class IntFlowSource : Utilities.FlowSource<Int>, IIntFlowComponent
+	class IntFlowSource : FlowSource<Int, Int>, IIntFlowComponent
 	{
 	}
 
-	class IntFlowSink : Utilities.FlowSink<Int>, IIntFlowComponent
+	class IntFlowSink : FlowSink<Int, Int>, IIntFlowComponent
 	{
 	}
 
-	class IntFlowComposite : Utilities.FlowComposite<Int>, IIntFlowComponent
+	class IntFlowComposite : FlowComposite<Int, Int>, IIntFlowComponent
 	{
 	}
 
-	class IntFlowCombinator : Utilities.FlowCombinator<Int>, IIntFlowComponent
+	class IntFlowCombinator : FlowCombinator<Int, Int>, IIntFlowComponent
 	{
 	}
 
-	class IntFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<Int>, IIntFlowComponent
+	class IntFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<Int, Int>, IIntFlowComponent
 	{
 	}
 
-	class IntFlowUniqueIncomingStub : FlowUniqueIncomingStub<Int>, IIntFlowComponent
+	class IntFlowUniqueIncomingStub : FlowUniqueIncomingStub<Int, Int>, IIntFlowComponent
 	{
 	}
 

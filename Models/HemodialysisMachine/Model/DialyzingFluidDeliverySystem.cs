@@ -8,6 +8,7 @@ namespace HemodialysisMachine.Model
 {
 	using SafetySharp.Modeling;
 	using Utilities;
+	using Utilities.BidirectionalFlow;
 
 	// More details on the balance chamber on the internet:
 	// http://principlesofdialysis.weebly.com/uploads/5/6/1/3/5613613/2008ccmodule4.pdf
@@ -25,14 +26,14 @@ namespace HemodialysisMachine.Model
 		}
 		
 		[Provided]
-		public void ReceivedSuction(int incomingSuction)
+		public void ReceivedSuction(Suction incomingSuction)
 		{
 		}
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(MainFlow.SetOutgoingElement), nameof(SetMainFlow));
-			Bind(nameof(MainFlow.SuctionFromSuccessorWasUpdated), nameof(ReceivedSuction));
+			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+			Bind(nameof(MainFlow.BackwardFromSuccessorWasUpdated), nameof(ReceivedSuction));
 		}
 	}
 
@@ -47,15 +48,15 @@ namespace HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(ref int outgoingSuction, int incomingSuction)
+		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
-			outgoingSuction = incomingSuction;
+			outgoingSuction.CopyValuesFrom(incomingSuction);
 		}
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(MainFlow.SetOutgoingSuction), nameof(SetMainFlowSuction));
-			Bind(nameof(MainFlow.SetOutgoingElement), nameof(SetMainFlow));
+			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
+			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
 		}
 	}
 
@@ -71,14 +72,14 @@ namespace HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void ReceivedSuction(int incomingSuction)
+		public void ReceivedSuction(Suction incomingSuction)
 		{
 		}
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(Concentrate.SetOutgoingElement), nameof(SetConcentrateFlow));
-			Bind(nameof(Concentrate.SuctionFromSuccessorWasUpdated), nameof(ReceivedSuction));
+			Bind(nameof(Concentrate.SetOutgoingForward), nameof(SetConcentrateFlow));
+			Bind(nameof(Concentrate.BackwardFromSuccessorWasUpdated), nameof(ReceivedSuction));
 		}
 	}
 
@@ -88,9 +89,9 @@ namespace HemodialysisMachine.Model
 		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
 
 		[Provided]
-		public void SetConcentrateFlowSuction(ref int outgoingSuction)
+		public void SetConcentrateFlowSuction(Suction outgoingSuction)
 		{
-			outgoingSuction = 1;
+			outgoingSuction.Value = 1;
 		}
 
 		[Provided]
@@ -100,7 +101,7 @@ namespace HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(ref int outgoingSuction, int incomingSuction)
+		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
 			outgoingSuction = incomingSuction;
 		}
@@ -112,10 +113,10 @@ namespace HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(Concentrate.SetOutgoingSuction), nameof(SetConcentrateFlowSuction));
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingSuction), nameof(SetMainFlowSuction));
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingElement), nameof(SetMainFlow));
-			Bind(nameof(Concentrate.ElementFromPredecessorWasUpdated), nameof(ReceivedConcentrate));
+			Bind(nameof(Concentrate.SetOutgoingBackward), nameof(SetConcentrateFlowSuction));
+			Bind(nameof(DialyzingFluidFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
+			Bind(nameof(DialyzingFluidFlow.SetOutgoingForward), nameof(SetMainFlow));
+			Bind(nameof(Concentrate.ForwardFromPredecessorWasUpdated), nameof(ReceivedConcentrate));
 		}
 	}
 
@@ -130,15 +131,15 @@ namespace HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(ref int outgoingSuction, int incomingSuction)
+		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
-			outgoingSuction = incomingSuction;
+			outgoingSuction.CopyValuesFrom(incomingSuction);
 		}
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingSuction), nameof(SetMainFlowSuction));
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingElement), nameof(SetMainFlow));
+			Bind(nameof(DialyzingFluidFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
+			Bind(nameof(DialyzingFluidFlow.SetOutgoingForward), nameof(SetMainFlow));
 		}
 	}
 
@@ -147,9 +148,9 @@ namespace HemodialysisMachine.Model
 		public readonly DialyzingFluidFlowSink DrainFlow = new DialyzingFluidFlowSink();
 
 		[Provided]
-		public void SetMainFlowSuction(ref int outgoingSuction)
+		public void SetMainFlowSuction(Suction outgoingSuction)
 		{
-			outgoingSuction = 1;
+			outgoingSuction.Value = 1;
 		}
 
 		[Provided]
@@ -159,8 +160,8 @@ namespace HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(DrainFlow.SetOutgoingSuction), nameof(SetMainFlowSuction));
-			Bind(nameof(DrainFlow.ElementFromPredecessorWasUpdated), nameof(ReceivedDialyzingFluid));
+			Bind(nameof(DrainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
+			Bind(nameof(DrainFlow.ForwardFromPredecessorWasUpdated), nameof(ReceivedDialyzingFluid));
 		}
 	}
 
@@ -176,9 +177,9 @@ namespace HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(ref int outgoingSuction, int incomingSuction)
+		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
-			outgoingSuction = incomingSuction;
+			outgoingSuction.CopyValuesFrom(incomingSuction);
 		}
 
 		[Provided]
@@ -189,16 +190,16 @@ namespace HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void ReceivedSuction(int incomingSuction)
+		public void ReceivedSuction(Suction incomingSuction)
 		{
 		}
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(MainFlow.SetOutgoingSuction), nameof(SetMainFlowSuction));
-			Bind(nameof(MainFlow.SetOutgoingElement), nameof(SetMainFlow));
-			Bind(nameof(DrainFlow.SetOutgoingElement), nameof(SetDrainFlow));
-			Bind(nameof(DrainFlow.SuctionFromSuccessorWasUpdated), nameof(ReceivedSuction));
+			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
+			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+			Bind(nameof(DrainFlow.SetOutgoingForward), nameof(SetDrainFlow));
+			Bind(nameof(DrainFlow.BackwardFromSuccessorWasUpdated), nameof(ReceivedSuction));
 		}
 
 	}
@@ -239,14 +240,14 @@ namespace HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void SetProducedDialysingFluidSuction(ref int outgoingSuction)
+		public void SetProducedDialysingFluidSuction(Suction outgoingSuction)
 		{
-			outgoingSuction = 1;
+			outgoingSuction.Value = 1;
 		}
 		[Provided]
-		public void SetUsedDialysingFluidSuction(ref int outgoingSuction)
+		public void SetUsedDialysingFluidSuction(Suction outgoingSuction)
 		{
-			outgoingSuction = 1;
+			outgoingSuction.Value = 1;
 		}
 		[Provided]
 		public void SetStoredProducedDialysingFluid(DialyzingFluid outgoing)
@@ -261,7 +262,7 @@ namespace HemodialysisMachine.Model
 
 
 		[Provided]
-		public void ReceivedSuctionOnStoredProducedDialyzingFluid(int incomingSuction)
+		public void ReceivedSuctionOnStoredProducedDialyzingFluid(Suction incomingSuction)
 		{
 		}
 
@@ -271,7 +272,7 @@ namespace HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void ReceivedSuctionOnStoredUsedDialyzingFluid(int incomingSuction)
+		public void ReceivedSuctionOnStoredUsedDialyzingFluid(Suction incomingSuction)
 		{
 		}
 
@@ -282,14 +283,14 @@ namespace HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(ProducedDialysingFluid.SetOutgoingSuction), nameof(SetProducedDialysingFluidSuction));
-			Bind(nameof(UsedDialysingFluid.SetOutgoingSuction), nameof(SetUsedDialysingFluidSuction));
-			Bind(nameof(StoredProducedDialysingFluid.SetOutgoingElement), nameof(SetStoredProducedDialysingFluid));
-			Bind(nameof(StoredUsedDialysingFluid.SetOutgoingElement), nameof(SetUsedDialysingFluid));
-			Bind(nameof(ProducedDialysingFluid.ElementFromPredecessorWasUpdated), nameof(ReceivedProducedDialyzingFluid));
-			Bind(nameof(UsedDialysingFluid.ElementFromPredecessorWasUpdated), nameof(ReceivedUsedDialyzingFluid));
-			Bind(nameof(StoredProducedDialysingFluid.SuctionFromSuccessorWasUpdated), nameof(ReceivedSuctionOnStoredProducedDialyzingFluid));
-			Bind(nameof(StoredUsedDialysingFluid.SuctionFromSuccessorWasUpdated), nameof(ReceivedSuctionOnStoredUsedDialyzingFluid));
+			Bind(nameof(ProducedDialysingFluid.SetOutgoingBackward), nameof(SetProducedDialysingFluidSuction));
+			Bind(nameof(UsedDialysingFluid.SetOutgoingBackward), nameof(SetUsedDialysingFluidSuction));
+			Bind(nameof(StoredProducedDialysingFluid.SetOutgoingForward), nameof(SetStoredProducedDialysingFluid));
+			Bind(nameof(StoredUsedDialysingFluid.SetOutgoingForward), nameof(SetUsedDialysingFluid));
+			Bind(nameof(ProducedDialysingFluid.ForwardFromPredecessorWasUpdated), nameof(ReceivedProducedDialyzingFluid));
+			Bind(nameof(UsedDialysingFluid.ForwardFromPredecessorWasUpdated), nameof(ReceivedUsedDialyzingFluid));
+			Bind(nameof(StoredProducedDialysingFluid.BackwardFromSuccessorWasUpdated), nameof(ReceivedSuctionOnStoredProducedDialyzingFluid));
+			Bind(nameof(StoredUsedDialysingFluid.BackwardFromSuccessorWasUpdated), nameof(ReceivedSuctionOnStoredUsedDialyzingFluid));
 		}
 	}
 
@@ -327,12 +328,12 @@ namespace HemodialysisMachine.Model
 				ToDialyzer.Incoming);
 			flowCombinator.Connect(
 				FromDialyzer.Outgoing,
-				new PortFlowIn<DialyzingFluid>[] {
+				new PortFlowIn<DialyzingFluid, Suction>[] {
 					DialyzingUltraFiltrationPump.DialyzingFluidFlow.Incoming,
 					BalanceChamber.UsedDialysingFluid.Incoming
 				});
 			flowCombinator.Connect(
-				new PortFlowOut<DialyzingFluid>[] {
+				new PortFlowOut<DialyzingFluid, Suction>[] {
 					DialyzingFluidSafetyBypass.DrainFlow.Outgoing,
 					BalanceChamber.StoredUsedDialysingFluid.Outgoing,
 					DialyzingUltraFiltrationPump.DialyzingFluidFlow.Outgoing

@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace HemodialysisMachine.Tests
 {
-	class BloodFlowTests
+	class ExtracorporealBloodCircuitTests
 	{
 	}
 }

@@ -51,15 +51,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\BloodFlow.cs" />
-    <Compile Include="Model\RoughQuantifiers.cs" />
+    <Compile Include="Model\Enumerations.cs" />
     <Compile Include="Model\DialyzingFluidFlow.cs" />
     <Compile Include="Model\ControlSystem.cs" />
     <Compile Include="Model\HemodialysisMachine.cs" />
+    <Compile Include="Model\Suction.cs" />
     <Compile Include="Specification.cs" />
-    <Compile Include="Tests\BloodFlowTests.cs" />
+    <Compile Include="Tests\DialyzingFluidDeliverySystemTests.cs" />
+    <Compile Include="Tests\ExtracorporealBloodCircuitTests.cs" />
+    <Compile Include="Tests\DialyzerTests.cs" />
     <Compile Include="Tests\IntFlowTests.cs" />
-    <Compile Include="Utilities\IntFlow.cs" />
-    <Compile Include="Utilities\AbstractFlow.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IntFlow.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\AbstractBiflow.cs" />
     <Compile Include="Model\ValveState.cs" />
     <Compile Include="Model\Dialyzer.cs" />
     <Compile Include="Model\DialyzingFluidDeliverySystem.cs" />

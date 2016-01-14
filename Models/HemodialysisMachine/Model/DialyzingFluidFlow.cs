@@ -28,60 +28,51 @@ using System.Threading.Tasks;
 
 namespace HemodialysisMachine.Model
 {
-	using Utilities;
-
-	public enum DialyzingFluidQuantity
-	{
-		Nothing,
-		Full,
-		FullUltraFiltraded,
-		Some,
-		SomeUltraFiltraded
-	}
-
+	using Utilities.BidirectionalFlow;
+	
 	// Also called dialysate or dialyzate
 	public class DialyzingFluid : IElement<DialyzingFluid>
 	{
-		public DialyzingFluidQuantity Quantity;
-		public bool ContaminatedByBlood; //To allow 
+		public int Quantity;
+		public KindOfDialysate KindOfDialysate;
+		public bool ContaminatedByBlood;
+		public QualitativeTemperature Temperature;
+
 		public void CopyValuesFrom(DialyzingFluid @from)
 		{
 			Quantity = from.Quantity;
+			KindOfDialysate = from.KindOfDialysate;
 			ContaminatedByBlood = from.ContaminatedByBlood;
-		}
-
-		public DialyzingFluid()
-		{
-
+			Temperature = from.Temperature;
 		}
 	}
 
 
-	class DialyzingFluidFlowInToOutSegment : Utilities.FlowInToOutSegment<DialyzingFluid>
+	class DialyzingFluidFlowInToOutSegment : FlowInToOutSegment<DialyzingFluid,Suction>
 	{
 	}
 
-	class DialyzingFluidFlowSource : Utilities.FlowSource<DialyzingFluid>
+	class DialyzingFluidFlowSource : FlowSource<DialyzingFluid, Suction>
 	{
 	}
 
-	class DialyzingFluidFlowSink : Utilities.FlowSink<DialyzingFluid>
+	class DialyzingFluidFlowSink : FlowSink<DialyzingFluid, Suction>
 	{
 	}
 
-	class DialyzingFluidFlowComposite : Utilities.FlowComposite<DialyzingFluid>
+	class DialyzingFluidFlowComposite : FlowComposite<DialyzingFluid, Suction>
 	{
 	}
 
-	class DialyzingFluidFlowCombinator : Utilities.FlowCombinator<DialyzingFluid>
+	class DialyzingFluidFlowCombinator : FlowCombinator<DialyzingFluid, Suction>
 	{
 	}
 
-	class DialyzingFluidFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<DialyzingFluid>
+	class DialyzingFluidFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<DialyzingFluid, Suction>
 	{
 	}
 
-	class DialyzingFluidFlowUniqueIncomingStub : FlowUniqueIncomingStub<DialyzingFluid>
+	class DialyzingFluidFlowUniqueIncomingStub : FlowUniqueIncomingStub<DialyzingFluid, Suction>
 	{
 	}
 }

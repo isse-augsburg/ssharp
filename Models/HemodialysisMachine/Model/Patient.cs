@@ -20,13 +20,13 @@
 		[Provided]
 		public void SetArteryFlow(Blood outgoing)
 		{
-			outgoing.Quantity = 1;
+			outgoing.UnfiltratedBloodUnits = 1;
 		}
 
 		[Provided]
-		public void SetVeinFlowSuction(ref int outgoingSuction)
+		public void SetVeinFlowSuction(Suction outgoingSuction)
 		{
-			outgoingSuction = 1;
+			outgoingSuction.Value = 1;
 		}
 
 
@@ -37,17 +37,17 @@
 		}
 
 		[Provided]
-		public void ArteryReceivedSuction(int incomingSuction)
+		public void ArteryReceivedSuction(Suction incomingSuction)
 		{
 			//System.Console.WriteLine("Received Suction: " + incomingSuction);
 		}
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(ArteryFlow.SetOutgoingElement), nameof(SetArteryFlow));
-			Bind(nameof(VeinFlow.SetOutgoingSuction), nameof(SetVeinFlowSuction));
-			Bind(nameof(ArteryFlow.SuctionFromSuccessorWasUpdated), nameof(ArteryReceivedSuction));
-			Bind(nameof(VeinFlow.ElementFromPredecessorWasUpdated), nameof(VeinReceivedBlood));
+			Bind(nameof(ArteryFlow.SetOutgoingForward), nameof(SetArteryFlow));
+			Bind(nameof(VeinFlow.SetOutgoingBackward), nameof(SetVeinFlowSuction));
+			Bind(nameof(ArteryFlow.BackwardFromSuccessorWasUpdated), nameof(ArteryReceivedSuction));
+			Bind(nameof(VeinFlow.ForwardFromPredecessorWasUpdated), nameof(VeinReceivedBlood));
 		}
 	}
 }

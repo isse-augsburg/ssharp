@@ -9,11 +9,6 @@ namespace HemodialysisMachine.Model
 	using System.Linq.Expressions;
 	using SafetySharp.Modeling;
 
-	enum KindOfDialysate
-	{
-		Bicarbonate = 1,
-		Acid = 2
-	}
 
 	// Simplifications:
 	// - Only main step of therapy modeled

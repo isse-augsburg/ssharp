@@ -20,9 +20,9 @@ namespace HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void SetDialyzingFluidFlowSuction(ref int outgoingSuction, int incomingSuction)
+		public void SetDialyzingFluidFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
-			outgoingSuction = incomingSuction;
+			outgoingSuction.CopyValuesFrom(incomingSuction);
 		}
 
 		[Provided]
@@ -32,27 +32,27 @@ namespace HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void SetBloodFlowSuction(ref int outgoingSuction, int incomingSuction)
+		public void SetBloodFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
-			outgoingSuction = incomingSuction;
+			outgoingSuction.CopyValuesFrom(incomingSuction);
 		}
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingSuction), nameof(SetDialyzingFluidFlowSuction));
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingElement), nameof(SetDialyzingFluidFlow));
-			Bind(nameof(BloodFlow.SetOutgoingSuction), nameof(SetBloodFlowSuction));
-			Bind(nameof(BloodFlow.SetOutgoingElement), nameof(SetBloodFlow));
+			Bind(nameof(DialyzingFluidFlow.SetOutgoingBackward), nameof(SetDialyzingFluidFlowSuction));
+			Bind(nameof(DialyzingFluidFlow.SetOutgoingForward), nameof(SetDialyzingFluidFlow));
+			Bind(nameof(BloodFlow.SetOutgoingBackward), nameof(SetBloodFlowSuction));
+			Bind(nameof(BloodFlow.SetOutgoingForward), nameof(SetBloodFlow));
 		}
 
 
 
-		void Diffuse()
+		private void Diffuse()
 		{
 			
 		}
 
-		void Update()
+		public override void Update()
 		{
 			
 		}
