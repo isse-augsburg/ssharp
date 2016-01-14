@@ -83,8 +83,53 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 	{
 	}
 
+	class IntFlowVirtualSplitter : FlowVirtualSplitter<Int, Int>, IIntFlowComponent
+	{
+		public IntFlowVirtualSplitter(int number)
+			: base(number)
+		{
+		}
+
+		public override void SplitForwards(Int source, Int[] targets)
+		{
+			StandardBehaviorSplitForwardsEqual(source,targets);
+		}
+
+		public override void MergeBackwards(Int[] sources, Int target)
+		{
+			StandardBehaviorMergeBackwardsSelectFirst(sources,target);
+		}
+	}
+
+	class IntFlowVirtualMerger : FlowVirtualMerger<Int, Int>, IIntFlowComponent
+	{
+		public IntFlowVirtualMerger(int number)
+			: base(number)
+		{
+		}
+
+		public override void SplitBackwards(Int source, Int[] targets)
+		{
+			StandardBehaviorSplitBackwardsEqual(source,targets);
+		}
+
+		public override void MergeForwards(Int[] sources, Int target)
+		{
+			StandardBehaviorMergeForwardsSelectFirst(sources,target);
+		}
+	}
+
 	class IntFlowCombinator : FlowCombinator<Int, Int>, IIntFlowComponent
 	{
+		public override FlowVirtualMerger<Int, Int> CreateFlowVirtualMerger(int elementNos)
+		{
+			return new IntFlowVirtualMerger(elementNos);
+		}
+
+		public override FlowVirtualSplitter<Int, Int> CreateFlowVirtualSplitter(int elementNos)
+		{
+			return new IntFlowVirtualSplitter(elementNos);
+		}
 	}
 
 	class IntFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<Int, Int>, IIntFlowComponent

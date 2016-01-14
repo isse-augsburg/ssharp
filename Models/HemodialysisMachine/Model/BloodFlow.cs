@@ -44,8 +44,54 @@ namespace HemodialysisMachine.Model
 	{
 	}
 
-	class BloodFlowCombinator : FlowCombinator<Blood, Suction>
+
+	class BloodFlowVirtualSplitter : FlowVirtualSplitter<Blood, Suction>, IIntFlowComponent
 	{
+		public BloodFlowVirtualSplitter(int number)
+			: base(number)
+		{
+		}
+
+		public override void SplitForwards(Blood source, Blood[] targets)
+		{
+			StandardBehaviorSplitForwardsEqual(source, targets);
+		}
+
+		public override void MergeBackwards(Suction[] sources, Suction target)
+		{
+			StandardBehaviorMergeBackwardsSelectFirst(sources, target);
+		}
+	}
+
+	class BloodFlowVirtualMerger : FlowVirtualMerger<Blood, Suction>, IIntFlowComponent
+	{
+		public BloodFlowVirtualMerger(int number)
+			: base(number)
+		{
+		}
+
+		public override void SplitBackwards(Suction source, Suction[] targets)
+		{
+			StandardBehaviorSplitBackwardsEqual(source, targets);
+		}
+
+		public override void MergeForwards(Blood[] sources, Blood target)
+		{
+			StandardBehaviorMergeForwardsSelectFirst(sources, target);
+		}
+	}
+
+	class BloodFlowCombinator : FlowCombinator<Blood, Suction>, IIntFlowComponent
+	{
+		public override FlowVirtualMerger<Blood, Suction> CreateFlowVirtualMerger(int elementNos)
+		{
+			return new BloodFlowVirtualMerger(elementNos);
+		}
+
+		public override FlowVirtualSplitter<Blood, Suction> CreateFlowVirtualSplitter(int elementNos)
+		{
+			return new BloodFlowVirtualSplitter(elementNos);
+		}
 	}
 
 	class BloodFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<Blood, Suction>

@@ -64,8 +64,54 @@ namespace HemodialysisMachine.Model
 	{
 	}
 
-	class DialyzingFluidFlowCombinator : FlowCombinator<DialyzingFluid, Suction>
+
+	class DialyzingFluidFlowVirtualSplitter : FlowVirtualSplitter<DialyzingFluid, Suction>, IIntFlowComponent
 	{
+		public DialyzingFluidFlowVirtualSplitter(int number)
+			: base(number)
+		{
+		}
+
+		public override void SplitForwards(DialyzingFluid source, DialyzingFluid[] targets)
+		{
+			StandardBehaviorSplitForwardsEqual(source, targets);
+		}
+
+		public override void MergeBackwards(Suction[] sources, Suction target)
+		{
+			StandardBehaviorMergeBackwardsSelectFirst(sources, target);
+		}
+	}
+
+	class DialyzingFluidFlowVirtualMerger : FlowVirtualMerger<DialyzingFluid, Suction>, IIntFlowComponent
+	{
+		public DialyzingFluidFlowVirtualMerger(int number)
+			: base(number)
+		{
+		}
+
+		public override void SplitBackwards(Suction source, Suction[] targets)
+		{
+			StandardBehaviorSplitBackwardsEqual(source, targets);
+		}
+
+		public override void MergeForwards(DialyzingFluid[] sources, DialyzingFluid target)
+		{
+			StandardBehaviorMergeForwardsSelectFirst(sources, target);
+		}
+	}
+
+	class DialyzingFluidFlowCombinator : FlowCombinator<DialyzingFluid, Suction>, IIntFlowComponent
+	{
+		public override FlowVirtualMerger<DialyzingFluid, Suction> CreateFlowVirtualMerger(int elementNos)
+		{
+			return new DialyzingFluidFlowVirtualMerger(elementNos);
+		}
+
+		public override FlowVirtualSplitter<DialyzingFluid, Suction> CreateFlowVirtualSplitter(int elementNos)
+		{
+			return new DialyzingFluidFlowVirtualSplitter(elementNos);
+		}
 	}
 
 	class DialyzingFluidFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<DialyzingFluid, Suction>

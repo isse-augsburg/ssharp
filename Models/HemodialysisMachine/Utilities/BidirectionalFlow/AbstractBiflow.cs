@@ -175,6 +175,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 			UpdateBackwardOrder.Insert(0, to); //to is the active part
 		}
 
+		public abstract FlowVirtualMerger<TForward, TBackward> CreateFlowVirtualMerger(int elementNos);
 
 		// Convenience (split/merge)
 		public void Connect(PortFlowOut<TForward, TBackward>[] fromOuts, PortFlowIn<TForward, TBackward> to)
@@ -192,7 +193,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 			else
 			{
 				// create virtual merging component.
-				var flowVirtualMerger = new FlowVirtualMerger<TForward, TBackward>(elementNos);
+				var flowVirtualMerger = CreateFlowVirtualMerger(elementNos);
 				VirtualFlowComponents.Add(flowVirtualMerger);
 				for (int i = 0; i < elementNos; i++)
 				{
@@ -201,6 +202,8 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 				Connect(flowVirtualMerger.Outgoing, to);
 			}
 		}
+
+		public abstract FlowVirtualSplitter<TForward, TBackward> CreateFlowVirtualSplitter(int elementNos);
 
 		public void Connect(PortFlowOut<TForward, TBackward> @from, params PortFlowIn<TForward, TBackward>[] to)
 		{
@@ -217,7 +220,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 			else
 			{
 				// create virtual splitting component.
-				var flowVirtualSplitter = new FlowVirtualSplitter<TForward, TBackward>(elementNos);
+				var flowVirtualSplitter = CreateFlowVirtualSplitter(elementNos);
 				VirtualFlowComponents.Add(flowVirtualSplitter);
 				Connect(@from, flowVirtualSplitter.Incoming);
 				for (int i = 0; i < elementNos; i++)
@@ -618,7 +621,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		}
 	}
 
-	public class FlowVirtualSplitter<TForward, TBackward> : Component, IFlowComponent<TForward, TBackward>, IFlowComponentUniqueIncoming<TForward, TBackward>
+	public abstract class FlowVirtualSplitter<TForward, TBackward> : Component, IFlowComponent<TForward, TBackward>, IFlowComponentUniqueIncoming<TForward, TBackward>
 		where TForward : class, IElement<TForward>, new()
 		where TBackward : class, IElement<TBackward>, new()
 	{
@@ -661,16 +664,22 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 			UpdateForwardsToSuccessors(); // TODO: Execute only once per cycle
 			outgoingForward.CopyValuesFrom(ForwardsToSuccessors[index]);
 		}
+		
+		public abstract void SplitForwards(TForward source, TForward[] targets);
+		
+		public abstract void MergeBackwards(TBackward[] sources, TBackward target);
+		
 
-		public static void SplitEqual(TForward source, TForward[] targets)
+		public void StandardBehaviorSplitForwardsEqual(TForward source, TForward[] targets)
 		{
 			var number = targets.Length;
-			for (int i=0; i < number; i++)
+			for (int i = 0; i < number; i++)
 			{
 				targets[i].CopyValuesFrom(source);
 			}
 		}
-		public static void MergeAny(TBackward[] sources, TBackward target)
+
+		public void StandardBehaviorMergeBackwardsSelectFirst(TBackward[] sources, TBackward target)
 		{
 			target.CopyValuesFrom(sources[0]);
 		}
@@ -678,13 +687,13 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		public void UpdateBackwardToPredecessor()
 		{
 			// TODO: Update with a dynamic Function
-			MergeAny(BackwardsFromSuccessors, Incoming.BackwardToPredecessor);
+			MergeBackwards(BackwardsFromSuccessors, Incoming.BackwardToPredecessor);
 		}
 
 		public void UpdateForwardsToSuccessors()
 		{
 			// TODO: Update with a dynamic Function
-			SplitEqual(Incoming.ForwardFromPredecessor, ForwardsToSuccessors);
+			SplitForwards(Incoming.ForwardFromPredecessor, ForwardsToSuccessors);
 		}
 
 		public void ElementFromPredecessorWasUpdated()
@@ -727,7 +736,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		}
 	}
 	
-	public class FlowVirtualMerger<TForward, TBackward> : Component, IFlowComponent<TForward, TBackward>, IFlowComponentUniqueOutgoing<TForward, TBackward>
+	public abstract class FlowVirtualMerger<TForward, TBackward> : Component, IFlowComponent<TForward, TBackward>, IFlowComponentUniqueOutgoing<TForward, TBackward>
 		where TForward : class, IElement<TForward>, new()
 		where TBackward : class, IElement<TBackward>, new()
 	{
@@ -769,8 +778,12 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 			UpdateBackwardsToPredecessors(); // TODO: Execute only once per cycle
 			outgoingBackward.CopyValuesFrom(BackwardsToPredecessors[index]);
 		}
-
-		public static void SplitEqual(TBackward source, TBackward[] targets)
+		
+		public abstract void SplitBackwards(TBackward source, TBackward[] targets);
+		
+		public abstract void MergeForwards(TForward[] sources, TForward target);
+		
+		public void StandardBehaviorSplitBackwardsEqual(TBackward source, TBackward[] targets)
 		{
 			var number = targets.Length;
 			for (int i = 0; i < number; i++)
@@ -779,21 +792,22 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 			}
 		}
 
-		public static void MergeAny(TForward[] sources,TForward target)
+		public void StandardBehaviorMergeForwardsSelectFirst(TForward[] sources, TForward target)
 		{
 			target.CopyValuesFrom(sources[0]);
 		}
 
+
 		public void UpdateBackwardsToPredecessors()
 		{
 			// TODO: Update with a dynamic Function
-			SplitEqual(Outgoing.BackwardFromSuccessor, BackwardsToPredecessors);
+			SplitBackwards(Outgoing.BackwardFromSuccessor, BackwardsToPredecessors);
 		}
 
 		public void UpdateForwardToSuccessor()
 		{
 			// TODO: Update with a dynamic Function
-			MergeAny(ForwardsFromPredecessors, Outgoing.ForwardToSuccessor);
+			MergeForwards(ForwardsFromPredecessors, Outgoing.ForwardToSuccessor);
 		}
 
 		public void BackwardsFromSuccessorWasUpdated()
