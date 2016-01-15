@@ -29,23 +29,27 @@ namespace HemodialysisMachine.Tests
 			[Provided]
 			public void CreateBlood(Blood outgoingBlood)
 			{
-				var unitsToDeliver = ArteryFlow.Outgoing.BackwardFromSuccessor;
-				outgoingBlood.Water = unitsToDeliver.CustomSuctionValue;
-				if (SmallWasteProducts > unitsToDeliver.CustomSuctionValue)
+				var totalUnitsToDeliver = ArteryFlow.Outgoing.BackwardFromSuccessor.CustomSuctionValue;
+				var bigWasteUnitsToDeliver = totalUnitsToDeliver / 2;
+				if (BigWasteProducts >= bigWasteUnitsToDeliver)
 				{
-					outgoingBlood.SmallWasteProducts = unitsToDeliver.CustomSuctionValue;
-				}
-				else
-				{
-					outgoingBlood.SmallWasteProducts = SmallWasteProducts; // Deliver rest of unfiltrated blood or none
-				}
-				if (BigWasteProducts > unitsToDeliver.CustomSuctionValue)
-				{
-					outgoingBlood.BigWasteProducts = unitsToDeliver.CustomSuctionValue;
+					outgoingBlood.BigWasteProducts = bigWasteUnitsToDeliver;
+					var waterUnitsToDeliver = totalUnitsToDeliver - bigWasteUnitsToDeliver;
+					outgoingBlood.Water = waterUnitsToDeliver;
 				}
 				else
 				{
 					outgoingBlood.BigWasteProducts = BigWasteProducts; // Deliver rest of unfiltrated blood or none
+					var waterUnitsToDeliver = totalUnitsToDeliver - outgoingBlood.BigWasteProducts;
+					outgoingBlood.Water = waterUnitsToDeliver;
+				}
+				if (SmallWasteProducts >= outgoingBlood.Water)
+				{
+					outgoingBlood.SmallWasteProducts = outgoingBlood.Water;
+				}
+				else
+				{
+					outgoingBlood.SmallWasteProducts = SmallWasteProducts; // Deliver rest of unfiltrated blood or none
 				}
 				Water -= outgoingBlood.Water;
 				SmallWasteProducts -= outgoingBlood.SmallWasteProducts;
@@ -61,7 +65,7 @@ namespace HemodialysisMachine.Tests
 			public void CreateBloodSuction(Suction outgoingSuction)
 			{
 				outgoingSuction.SuctionType = SuctionType.CustomSuction;
-				outgoingSuction.CustomSuctionValue = 2;
+				outgoingSuction.CustomSuctionValue = 4;
 			}
 
 			[Provided]

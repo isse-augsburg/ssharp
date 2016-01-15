@@ -59,7 +59,7 @@ namespace HemodialysisMachine.Model
 			}
 			else
 			{
-				outgoing.SmallWasteProducts += IncomingQuantityOfDialyzingFluid;
+				outgoing.SmallWasteProducts -= IncomingQuantityOfDialyzingFluid;
 			}
 			// Second step: Ultra Filtration
 			// To satisfy the incoming suction rate we must take the fluid from the blood.
