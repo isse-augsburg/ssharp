@@ -13,6 +13,8 @@ namespace HemodialysisMachine.Model
 	{
 		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
 
+		public int SpeedOfMotor = 0;
+
 		[Provided]
 		public void SetMainFlow(Blood outgoing, Blood incoming)
 		{

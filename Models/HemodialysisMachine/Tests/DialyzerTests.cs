@@ -13,87 +13,84 @@ namespace HemodialysisMachine.Tests
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 	using Utilities;
-	
 
-	class DialyzerTestEnvironment : Component
+
+	class DialyzerTestEnvironmentPatient : Component
 	{
-		public class DialyzerTestEnvironmentPatient : Component
+		public readonly BloodFlowSource ArteryFlow = new BloodFlowSource();
+		public readonly BloodFlowSink VeinFlow = new BloodFlowSink();
+
+		public int Water = 50;
+		public int SmallWasteProducts = 10;
+		public int BigWasteProducts = 3; //Only removable by ultrafiltration
+
+		public int TimeStepsLeft = 6;
+
+		[Provided]
+		public void CreateBlood(Blood outgoingBlood)
 		{
-			public readonly BloodFlowSource ArteryFlow = new BloodFlowSource();
-			public readonly BloodFlowSink VeinFlow = new BloodFlowSink();
-			
-			public int Water = 50;
-			public int SmallWasteProducts = 10;
-			public int BigWasteProducts = 3; //Only removable by ultrafiltration
-
-			public int TimeStepsLeft = 6;
-
-			[Provided]
-			public void CreateBlood(Blood outgoingBlood)
+			var incomingSuction = ArteryFlow.Outgoing.BackwardFromSuccessor;
+			var hasSuction = incomingSuction.SuctionType == SuctionType.CustomSuction && incomingSuction.CustomSuctionValue > 0;
+			if (hasSuction)
 			{
-				var incomingSuction = ArteryFlow.Outgoing.BackwardFromSuccessor;
-				var hasSuction = incomingSuction.SuctionType == SuctionType.CustomSuction && incomingSuction.CustomSuctionValue > 0;
-				if (hasSuction)
+				var totalUnitsToDeliver = ArteryFlow.Outgoing.BackwardFromSuccessor.CustomSuctionValue;
+				var bigWasteUnitsToDeliver = totalUnitsToDeliver / 2;
+				if (BigWasteProducts >= bigWasteUnitsToDeliver)
 				{
-					var totalUnitsToDeliver = ArteryFlow.Outgoing.BackwardFromSuccessor.CustomSuctionValue;
-					var bigWasteUnitsToDeliver = totalUnitsToDeliver / 2;
-					if (BigWasteProducts >= bigWasteUnitsToDeliver)
-					{
-						outgoingBlood.BigWasteProducts = bigWasteUnitsToDeliver;
-						var waterUnitsToDeliver = totalUnitsToDeliver - bigWasteUnitsToDeliver;
-						outgoingBlood.Water = waterUnitsToDeliver;
-					}
-					else
-					{
-						outgoingBlood.BigWasteProducts = BigWasteProducts; // Deliver rest of unfiltrated blood or none
-						var waterUnitsToDeliver = totalUnitsToDeliver - outgoingBlood.BigWasteProducts;
-						outgoingBlood.Water = waterUnitsToDeliver;
-					}
-					if (SmallWasteProducts >= outgoingBlood.Water)
-					{
-						outgoingBlood.SmallWasteProducts = outgoingBlood.Water;
-					}
-					else
-					{
-						outgoingBlood.SmallWasteProducts = SmallWasteProducts; // Deliver rest of unfiltrated blood or none
-					}
-					Water -= outgoingBlood.Water;
-					SmallWasteProducts -= outgoingBlood.SmallWasteProducts;
-					BigWasteProducts -= outgoingBlood.BigWasteProducts;
-					outgoingBlood.HasHeparin = true;
-					outgoingBlood.ChemicalCompositionOk = true;
-					outgoingBlood.GasFree = true;
-					outgoingBlood.Pressure = QualitativePressure.GoodPressure;
-					outgoingBlood.Temperature = QualitativeTemperature.BodyHeat;
+					outgoingBlood.BigWasteProducts = bigWasteUnitsToDeliver;
+					var waterUnitsToDeliver = totalUnitsToDeliver - bigWasteUnitsToDeliver;
+					outgoingBlood.Water = waterUnitsToDeliver;
 				}
 				else
 				{
-					outgoingBlood.Water = 0;
-					outgoingBlood.BigWasteProducts = 0;
-					outgoingBlood.SmallWasteProducts = 0;
-					outgoingBlood.HasHeparin = true;
-					outgoingBlood.ChemicalCompositionOk = true;
-					outgoingBlood.GasFree = true;
-					outgoingBlood.Pressure = QualitativePressure.NoPressure;
-					outgoingBlood.Temperature = QualitativeTemperature.BodyHeat;
+					outgoingBlood.BigWasteProducts = BigWasteProducts; // Deliver rest of unfiltrated blood or none
+					var waterUnitsToDeliver = totalUnitsToDeliver - outgoingBlood.BigWasteProducts;
+					outgoingBlood.Water = waterUnitsToDeliver;
 				}
-			}
-
-			[Provided]
-			public void CreateBloodSuction(Suction outgoingSuction)
-			{
-				if (TimeStepsLeft > 0)
+				if (SmallWasteProducts >= outgoingBlood.Water)
 				{
-					outgoingSuction.SuctionType = SuctionType.CustomSuction;
-					outgoingSuction.CustomSuctionValue = 4;
+					outgoingBlood.SmallWasteProducts = outgoingBlood.Water;
 				}
 				else
 				{
-					outgoingSuction.SuctionType = SuctionType.CustomSuction;
-					outgoingSuction.CustomSuctionValue = 0;
+					outgoingBlood.SmallWasteProducts = SmallWasteProducts; // Deliver rest of unfiltrated blood or none
 				}
+				Water -= outgoingBlood.Water;
+				SmallWasteProducts -= outgoingBlood.SmallWasteProducts;
+				BigWasteProducts -= outgoingBlood.BigWasteProducts;
+				outgoingBlood.HasHeparin = true;
+				outgoingBlood.ChemicalCompositionOk = true;
+				outgoingBlood.GasFree = true;
+				outgoingBlood.Pressure = QualitativePressure.GoodPressure;
+				outgoingBlood.Temperature = QualitativeTemperature.BodyHeat;
 			}
+			else
+			{
+				outgoingBlood.Water = 0;
+				outgoingBlood.BigWasteProducts = 0;
+				outgoingBlood.SmallWasteProducts = 0;
+				outgoingBlood.HasHeparin = true;
+				outgoingBlood.ChemicalCompositionOk = true;
+				outgoingBlood.GasFree = true;
+				outgoingBlood.Pressure = QualitativePressure.NoPressure;
+				outgoingBlood.Temperature = QualitativeTemperature.BodyHeat;
+			}
+		}
 
+		[Provided]
+		public void CreateBloodSuction(Suction outgoingSuction)
+		{
+			if (TimeStepsLeft > 0)
+			{
+				outgoingSuction.SuctionType = SuctionType.CustomSuction;
+				outgoingSuction.CustomSuctionValue = 4;
+			}
+			else
+			{
+				outgoingSuction.SuctionType = SuctionType.CustomSuction;
+				outgoingSuction.CustomSuctionValue = 0;
+			}
+		}
 			[Provided]
 			public void BloodReceived(Blood incomingBlood)
 			{
@@ -127,9 +124,10 @@ namespace HemodialysisMachine.Tests
 				System.Console.Out.WriteLine("\t\tSmallWasteProducts: " + SmallWasteProducts);
 				System.Console.Out.WriteLine("\t\tBigWasteProducts: " + BigWasteProducts);
 			}
-		}
+	}
 
-
+	class DialyzerTestEnvironment : Component
+	{
 		[Root(Role.SystemOfInterest)]
 		public readonly Dialyzer Dialyzer = new Dialyzer();
 
@@ -197,8 +195,8 @@ namespace HemodialysisMachine.Tests
 			var simulator = new Simulator(Model.Create(specification)); //Important: Call after all objects have been created
 			var dialyzerAfterStep0 = (Dialyzer)simulator.Model.RootComponents.OfType<Dialyzer>().First();
 			var patientAfterStep0 =
-				(DialyzerTestEnvironment.DialyzerTestEnvironmentPatient)
-					simulator.Model.RootComponents.OfType<DialyzerTestEnvironment.DialyzerTestEnvironmentPatient>().First();
+				(DialyzerTestEnvironmentPatient)
+					simulator.Model.RootComponents.OfType<DialyzerTestEnvironmentPatient>().First();
 			Console.Out.WriteLine("Initial");
 			patientAfterStep0.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			patientAfterStep0.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
@@ -207,8 +205,8 @@ namespace HemodialysisMachine.Tests
 			simulator.SimulateStep();
 			var dialyzerAfterStep1 = (Dialyzer)simulator.Model.RootComponents.OfType<Dialyzer>().First();
 			var patientAfterStep1 =
-				(DialyzerTestEnvironment.DialyzerTestEnvironmentPatient)
-					simulator.Model.RootComponents.OfType<DialyzerTestEnvironment.DialyzerTestEnvironmentPatient>().First();
+				(DialyzerTestEnvironmentPatient)
+					simulator.Model.RootComponents.OfType<DialyzerTestEnvironmentPatient>().First();
 			patientAfterStep1.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			patientAfterStep1.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
 			patientAfterStep1.PrintBloodValues("");
@@ -216,8 +214,8 @@ namespace HemodialysisMachine.Tests
 			simulator.SimulateStep();
 			var dialyzerAfterStep2 = (Dialyzer)simulator.Model.RootComponents.OfType<Dialyzer>().First();
 			var patientAfterStep2 =
-				(DialyzerTestEnvironment.DialyzerTestEnvironmentPatient)
-					simulator.Model.RootComponents.OfType<DialyzerTestEnvironment.DialyzerTestEnvironmentPatient>().First();
+				(DialyzerTestEnvironmentPatient)
+					simulator.Model.RootComponents.OfType<DialyzerTestEnvironmentPatient>().First();
 			patientAfterStep2.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			patientAfterStep2.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
 			patientAfterStep2.PrintBloodValues("");
@@ -225,8 +223,8 @@ namespace HemodialysisMachine.Tests
 			simulator.SimulateStep();
 			var dialyzerAfterStep3 = (Dialyzer)simulator.Model.RootComponents.OfType<Dialyzer>().First();
 			var patientAfterStep3 =
-				(DialyzerTestEnvironment.DialyzerTestEnvironmentPatient)
-					simulator.Model.RootComponents.OfType<DialyzerTestEnvironment.DialyzerTestEnvironmentPatient>().First();
+				(DialyzerTestEnvironmentPatient)
+					simulator.Model.RootComponents.OfType<DialyzerTestEnvironmentPatient>().First();
 			patientAfterStep3.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			patientAfterStep3.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
 			patientAfterStep3.PrintBloodValues("");
@@ -234,8 +232,8 @@ namespace HemodialysisMachine.Tests
 			simulator.SimulateStep();
 			var dialyzerAfterStep4 = (Dialyzer)simulator.Model.RootComponents.OfType<Dialyzer>().First();
 			var patientAfterStep4 =
-				(DialyzerTestEnvironment.DialyzerTestEnvironmentPatient)
-					simulator.Model.RootComponents.OfType<DialyzerTestEnvironment.DialyzerTestEnvironmentPatient>().First();
+				(DialyzerTestEnvironmentPatient)
+					simulator.Model.RootComponents.OfType<DialyzerTestEnvironmentPatient>().First();
 			patientAfterStep4.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			patientAfterStep4.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
 			patientAfterStep4.PrintBloodValues("");

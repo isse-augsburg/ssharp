@@ -64,12 +64,15 @@ namespace HemodialysisMachine.Model
 		//[Hidden]
 		//public Timer Timer;
 
+		public int TimeStepsLeft = 7; // hard code 7 time steps
+
 		//Subcomponents
 		private readonly DialyzingFluidWaterPreparation DialyzingFluidWaterPreparation;
 		private readonly DialyzingFluidPreparation DialyzingFluidPreparation;
 		private readonly DialyzingUltraFiltrationPump DialyzingUltraFiltrationPump;
 		private readonly DialyzingFluidSafetyBypass DialyzingFluidSafetyBypass;
 		private readonly HeparinPump HeparinPump;
+		private readonly ArterialBloodPump ArterialBloodPump;
 		private readonly VenousPressureTransducer VenousPressureTransducer;
 		private readonly VenousSafetyDetector VenousSafetyDetector;
 
@@ -87,12 +90,22 @@ namespace HemodialysisMachine.Model
 			DialyzingUltraFiltrationPump = dialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump;
 			DialyzingFluidSafetyBypass = dialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass;
 			HeparinPump = extracorporealBloodCircuit.HeparinPump;
+			ArterialBloodPump = extracorporealBloodCircuit.ArterialBloodPump;
 			VenousPressureTransducer = extracorporealBloodCircuit.VenousPressureTransducer;
 			VenousSafetyDetector = extracorporealBloodCircuit.VenousSafetyDetector;
-	}
+		}
 
 		public void StepOfMainTherapy()
 		{
+			TimeStepsLeft = (TimeStepsLeft > 0) ? (TimeStepsLeft - 1) : 0;
+			if (TimeStepsLeft == 0)
+			{
+				ArterialBloodPump.SpeedOfMotor = 0;
+			}
+			else
+			{
+				ArterialBloodPump.SpeedOfMotor = 4;
+			}
 			// a) Check arterial entry pressure
 			// b) Check bloodside entry pressure at the dialysator
 			// c)

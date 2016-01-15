@@ -68,7 +68,7 @@
     <Compile Include="Model\DialyzingFluidDeliverySystem.cs" />
     <Compile Include="Model\ExtracorporealBloodCircuit.cs" />
     <Compile Include="Model\Patient.cs" />
-    <Compile Include="Tests\Tests.cs" />
+    <Compile Include="Tests\SpecificationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

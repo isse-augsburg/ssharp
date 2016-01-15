@@ -64,12 +64,16 @@ namespace HemodialysisMachine.Model
 
 		public override void SplitForwards(Blood source, Blood[] targets)
 		{
-			StandardBehaviorSplitForwardsEqual(source, targets);
+			var number = targets.Length;
+			for (int i = 0; i < number; i++)
+			{
+				targets[i].CopyValuesFrom(source);
+			}
 		}
 
 		public override void MergeBackwards(Suction[] sources, Suction target)
 		{
-			StandardBehaviorMergeBackwardsSelectFirst(sources, target);
+			target.CopyValuesFrom(sources[0]);
 		}
 	}
 
@@ -82,12 +86,16 @@ namespace HemodialysisMachine.Model
 
 		public override void SplitBackwards(Suction source, Suction[] targets)
 		{
-			StandardBehaviorSplitBackwardsEqual(source, targets);
+			var number = targets.Length;
+			for (int i = 0; i < number; i++)
+			{
+				targets[i].CopyValuesFrom(source);
+			}
 		}
 
 		public override void MergeForwards(Blood[] sources, Blood target)
 		{
-			StandardBehaviorMergeForwardsSelectFirst(sources, target);
+			target.CopyValuesFrom(sources[0]);
 		}
 	}
 

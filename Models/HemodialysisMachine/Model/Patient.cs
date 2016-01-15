@@ -5,50 +5,100 @@
 	class Patient : Component
 	{
 		// Patient is the source and the sink of blood
-		[Hidden]
-		public BloodFlowSource ArteryFlow;
+		public readonly BloodFlowSource ArteryFlow = new BloodFlowSource();
+		public readonly BloodFlowSink VeinFlow = new BloodFlowSink();
+		
+		public int Water = 50;
+		public int SmallWasteProducts = 10;
+		public int BigWasteProducts = 3; //Only removable by ultrafiltration
 
-		[Hidden]
-		public BloodFlowSink VeinFlow;
+		public bool IsConnected = true;
 
-		public Patient()
+		[Provided]
+		public void CreateBlood(Blood outgoingBlood)
 		{
-			ArteryFlow = new BloodFlowSource();
-			VeinFlow = new BloodFlowSink();
+			var incomingSuction = ArteryFlow.Outgoing.BackwardFromSuccessor;
+			var hasSuction = incomingSuction.SuctionType == SuctionType.CustomSuction && incomingSuction.CustomSuctionValue > 0;
+			if (hasSuction && IsConnected)
+			{
+				var totalUnitsToDeliver = ArteryFlow.Outgoing.BackwardFromSuccessor.CustomSuctionValue;
+				var bigWasteUnitsToDeliver = totalUnitsToDeliver / 2;
+				if (BigWasteProducts >= bigWasteUnitsToDeliver)
+				{
+					outgoingBlood.BigWasteProducts = bigWasteUnitsToDeliver;
+					var waterUnitsToDeliver = totalUnitsToDeliver - bigWasteUnitsToDeliver;
+					outgoingBlood.Water = waterUnitsToDeliver;
+				}
+				else
+				{
+					outgoingBlood.BigWasteProducts = BigWasteProducts; // Deliver rest of unfiltrated blood or none
+					var waterUnitsToDeliver = totalUnitsToDeliver - outgoingBlood.BigWasteProducts;
+					outgoingBlood.Water = waterUnitsToDeliver;
+				}
+				if (SmallWasteProducts >= outgoingBlood.Water)
+				{
+					outgoingBlood.SmallWasteProducts = outgoingBlood.Water;
+				}
+				else
+				{
+					outgoingBlood.SmallWasteProducts = SmallWasteProducts; // Deliver rest of unfiltrated blood or none
+				}
+				Water -= outgoingBlood.Water;
+				SmallWasteProducts -= outgoingBlood.SmallWasteProducts;
+				BigWasteProducts -= outgoingBlood.BigWasteProducts;
+				outgoingBlood.HasHeparin = true;
+				outgoingBlood.ChemicalCompositionOk = true;
+				outgoingBlood.GasFree = true;
+				outgoingBlood.Pressure = QualitativePressure.GoodPressure;
+				outgoingBlood.Temperature = QualitativeTemperature.BodyHeat;
+			}
+			else
+			{
+				outgoingBlood.Water = 0;
+				outgoingBlood.BigWasteProducts = 0;
+				outgoingBlood.SmallWasteProducts = 0;
+				outgoingBlood.HasHeparin = true;
+				outgoingBlood.ChemicalCompositionOk = true;
+				outgoingBlood.GasFree = true;
+				outgoingBlood.Pressure = QualitativePressure.NoPressure;
+				outgoingBlood.Temperature = QualitativeTemperature.BodyHeat;
+			}
 		}
 
 		[Provided]
-		public void SetArteryFlow(Blood outgoing)
+		public void CreateBloodSuction(Suction outgoingSuction)
 		{
-			outgoing.Water = 1;
-		}
-
-		[Provided]
-		public void SetVeinFlowSuction(Suction outgoingSuction)
-		{
-			outgoingSuction.CustomSuctionValue = 0;
 			outgoingSuction.SuctionType = SuctionType.SourceDependentSuction;
-		}
-
-
-		[Provided]
-		public void VeinReceivedBlood(Blood incomingElement)
-		{
-			//System.Console.WriteLine("Patient received Blood");
+			outgoingSuction.CustomSuctionValue = 0;
 		}
 
 		[Provided]
-		public void ArteryReceivedSuction(Suction incomingSuction)
+		public void BloodReceived(Blood incomingBlood)
 		{
-			//System.Console.WriteLine("Received Suction: " + incomingSuction);
+			Water += incomingBlood.Water;
+			SmallWasteProducts += incomingBlood.SmallWasteProducts;
+			BigWasteProducts += incomingBlood.BigWasteProducts;
+		}
+
+		[Provided]
+		public void DoNothing(Suction incomingSuction)
+		{
 		}
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(ArteryFlow.SetOutgoingForward), nameof(SetArteryFlow));
-			Bind(nameof(VeinFlow.SetOutgoingBackward), nameof(SetVeinFlowSuction));
-			Bind(nameof(ArteryFlow.BackwardFromSuccessorWasUpdated), nameof(ArteryReceivedSuction));
-			Bind(nameof(VeinFlow.ForwardFromPredecessorWasUpdated), nameof(VeinReceivedBlood));
+			Bind(nameof(ArteryFlow.SetOutgoingForward), nameof(CreateBlood));
+			Bind(nameof(ArteryFlow.BackwardFromSuccessorWasUpdated), nameof(DoNothing));
+			Bind(nameof(VeinFlow.SetOutgoingBackward), nameof(CreateBloodSuction));
+			Bind(nameof(VeinFlow.ForwardFromPredecessorWasUpdated), nameof(BloodReceived));
+		}
+
+		public void PrintBloodValues(string pointOfTime)
+		{
+			System.Console.Out.WriteLine("\t" + "Patient (" + pointOfTime + ")");
+			System.Console.Out.WriteLine("\t\tWater: " + Water);
+			System.Console.Out.WriteLine("\t\tSmallWasteProducts: " + SmallWasteProducts);
+			System.Console.Out.WriteLine("\t\tBigWasteProducts: " + BigWasteProducts);
 		}
 	}
 }
