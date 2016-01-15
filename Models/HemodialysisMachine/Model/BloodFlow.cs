@@ -28,11 +28,12 @@ namespace HemodialysisMachine.Model
 			Temperature = from.Temperature;
 		}
 
-		public void PrintBloodValues()
+		public void PrintBloodValues(string description)
 		{
-			System.Console.Out.WriteLine("\tWater: " + Water);
-			System.Console.Out.WriteLine("\tSmallWasteProducts: " + SmallWasteProducts);
-			System.Console.Out.WriteLine("\tBigWasteProducts: " + BigWasteProducts);
+			System.Console.Out.WriteLine("\t"+description);
+			System.Console.Out.WriteLine("\t\tWater: " + Water);
+			System.Console.Out.WriteLine("\t\tSmallWasteProducts: " + SmallWasteProducts);
+			System.Console.Out.WriteLine("\t\tBigWasteProducts: " + BigWasteProducts);
 		}
 	}
 
