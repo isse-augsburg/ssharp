@@ -39,6 +39,7 @@ namespace HemodialysisMachine.Model
 			IncomingQuantityOfDialyzingFluid = incoming.Quantity;
 			outgoing.CopyValuesFrom(incoming);
 			outgoing.Quantity = IncomingSuctionRateOnDialyzingFluidSide;
+			outgoing.WasUsed = true;
 		}
 
 		[Provided]

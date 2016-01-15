@@ -36,6 +36,7 @@ namespace HemodialysisMachine.Model
 		public int Quantity;
 		public KindOfDialysate KindOfDialysate;
 		public bool ContaminatedByBlood;
+		public bool WasUsed;
 		public QualitativeTemperature Temperature;
 
 		public void CopyValuesFrom(DialyzingFluid @from)
@@ -43,6 +44,7 @@ namespace HemodialysisMachine.Model
 			Quantity = from.Quantity;
 			KindOfDialysate = from.KindOfDialysate;
 			ContaminatedByBlood = from.ContaminatedByBlood;
+			WasUsed = from.WasUsed;
 			Temperature = from.Temperature;
 		}
 	}
