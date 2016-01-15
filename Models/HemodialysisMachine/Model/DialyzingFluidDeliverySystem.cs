@@ -241,204 +241,63 @@ namespace HemodialysisMachine.Model
 
 	}
 	
-	// Each chamber has
-	//   * Two sides separated by diaphragm.
-	//     One half to the dialyzer (fresh dialyzing fluid) and the other half from the dialyzer (used dialyzing fluid)
-	//   * inlet valve and outlet valve
-	// - Produce Dialysing Fluid: Fresh Dialysing Fluid to store in passive chamber / used dialysate from passive chamber to drain
-	// - Use Dialysing Fluid.Stored in active chamber -> dialysator -> drain or store used in active chamber
-	class BalanceChamber : Component
+	class SimplifiedBalanceChamber : Component
 	{
-		public readonly DialyzingFluidFlowSink ProducedDialysingFluid = new DialyzingFluidFlowSink();
-		public readonly DialyzingFluidFlowSink UsedDialysingFluid = new DialyzingFluidFlowSink();
-		public readonly DialyzingFluidFlowSource StoredProducedDialysingFluid = new DialyzingFluidFlowSource();
-		public readonly DialyzingFluidFlowSource StoredUsedDialysingFluid = new DialyzingFluidFlowSource();
+		public readonly DialyzingFluidFlowUniqueIncomingStub ProducedDialysingFluid = new DialyzingFluidFlowUniqueIncomingStub();
+		public readonly DialyzingFluidFlowUniqueIncomingStub UsedDialysingFluid = new DialyzingFluidFlowUniqueIncomingStub();
+		public readonly DialyzingFluidFlowUniqueOutgoingStub StoredProducedDialysingFluid = new DialyzingFluidFlowUniqueOutgoingStub();
+		public readonly DialyzingFluidFlowUniqueOutgoingStub StoredUsedDialysingFluid = new DialyzingFluidFlowUniqueOutgoingStub();
+		
+		public readonly DialyzingFluidFlowInToOutSegment ForwardProducedFlowSegment = new DialyzingFluidFlowInToOutSegment();
+		public readonly DialyzingFluidFlowInToOutSegment ForwardUsedFlowSegment = new DialyzingFluidFlowInToOutSegment();
 
-		public enum ChamberForDialyzerEnum
-		{
-			UseChamber1ForDialyzer,
-			UseChamber2ForDialyzer
-		}
-
-		public ChamberForDialyzerEnum ChamberForDialyzer = ChamberForDialyzerEnum.UseChamber1ForDialyzer;
-
-		public class Chamber
-		{
-			/*public ValveState ValveToDialyser;
-			public ValveState ValveToDrain;
-			public ValveState ValveFromDialyzingFluidPreparation;
-			public ValveState ValveFromDialyzer;*/
-			
-			public DialyzingFluid StoredProducedDialysingFluid = new DialyzingFluid();
-			public DialyzingFluid StoredUsedProducedDialysingFluid = new DialyzingFluid();
-
-		}
-
-		public Chamber Chamber1 = new Chamber();
-		public Chamber Chamber2 = new Chamber();
-
-		public BalanceChamber()
-		{
-			// Assume we have a rinsed Balance Chamber.
-			// Chamber 1 is full of fresh DialysingFluid
-			Chamber1.StoredProducedDialysingFluid.Quantity = 12;
-			Chamber1.StoredProducedDialysingFluid.ContaminatedByBlood = false;
-			Chamber1.StoredProducedDialysingFluid.Temperature = QualitativeTemperature.BodyHeat;
-			Chamber1.StoredProducedDialysingFluid.WasUsed = false;
-			Chamber1.StoredProducedDialysingFluid.KindOfDialysate = KindOfDialysate.Bicarbonate;
-
-			Chamber1.StoredUsedProducedDialysingFluid.Quantity = 0;
-			Chamber1.StoredUsedProducedDialysingFluid.ContaminatedByBlood = false;
-			Chamber1.StoredUsedProducedDialysingFluid.Temperature = QualitativeTemperature.BodyHeat;
-			Chamber1.StoredUsedProducedDialysingFluid.WasUsed = true;
-			Chamber1.StoredUsedProducedDialysingFluid.KindOfDialysate = KindOfDialysate.Bicarbonate;
-
-			Chamber2.StoredProducedDialysingFluid.Quantity = 0;
-			Chamber2.StoredProducedDialysingFluid.ContaminatedByBlood = false;
-			Chamber2.StoredProducedDialysingFluid.Temperature = QualitativeTemperature.BodyHeat;
-			Chamber2.StoredProducedDialysingFluid.WasUsed = false;
-			Chamber2.StoredProducedDialysingFluid.KindOfDialysate = KindOfDialysate.Bicarbonate;
-
-			Chamber2.StoredUsedProducedDialysingFluid.Quantity = 12;
-			Chamber2.StoredUsedProducedDialysingFluid.ContaminatedByBlood = false;
-			Chamber2.StoredUsedProducedDialysingFluid.Temperature = QualitativeTemperature.BodyHeat;
-			Chamber2.StoredUsedProducedDialysingFluid.WasUsed = true;
-			Chamber2.StoredUsedProducedDialysingFluid.KindOfDialysate = KindOfDialysate.Bicarbonate;
-		}
-
-		[Provided]
-		public void MakeSuctionOnSource(Suction outgoingSuction)
-		{
-			outgoingSuction.SuctionType=SuctionType.SourceDependentSuction; // The suction depends on the pump before
-			outgoingSuction.CustomSuctionValue = 0;
-		}
-
-		[Provided]
-		public void MakeSuctionOnDrain(Suction outgoingSuction)
-		{
-			outgoingSuction.SuctionType = SuctionType.SourceDependentSuction; // The suction depends on the membrane
-			outgoingSuction.CustomSuctionValue = 0;
-		}
-
-		[Provided]
-		public void PushDialisateToDialysator(DialyzingFluid outgoing)
-		{
-			var quantityOfIncomingUsedDialysate = UsedDialysingFluid.Incoming.ForwardFromPredecessor.Quantity;
-			if (ChamberForDialyzer == ChamberForDialyzerEnum.UseChamber1ForDialyzer)
-			{
-				if (Chamber1.StoredProducedDialysingFluid.Quantity >= quantityOfIncomingUsedDialysate)
-				{
-					outgoing.CopyValuesFrom(Chamber1.StoredProducedDialysingFluid);
-					outgoing.Quantity = quantityOfIncomingUsedDialysate;
-					Chamber1.StoredProducedDialysingFluid.Quantity -= outgoing.Quantity;
-				}
-			}
-			else
-			{
-				if (Chamber2.StoredProducedDialysingFluid.Quantity >= quantityOfIncomingUsedDialysate)
-				{
-					outgoing.CopyValuesFrom(Chamber2.StoredProducedDialysingFluid);
-					outgoing.Quantity = quantityOfIncomingUsedDialysate;
-					Chamber2.StoredProducedDialysingFluid.Quantity -= outgoing.Quantity;
-				}
-			}
-		}
-
-		[Provided]
-		public void PushDialysateToDrain(DialyzingFluid outgoing)
-		{
-			var quantityOfFreshDialysate = ProducedDialysingFluid.Incoming.ForwardFromPredecessor.Quantity;
-			if (ChamberForDialyzer == ChamberForDialyzerEnum.UseChamber1ForDialyzer)
-			{
-				if (Chamber1.StoredUsedProducedDialysingFluid.Quantity >= quantityOfFreshDialysate)
-				{
-					outgoing.CopyValuesFrom(Chamber1.StoredUsedProducedDialysingFluid);
-					outgoing.Quantity = quantityOfFreshDialysate;
-					Chamber1.StoredUsedProducedDialysingFluid.Quantity -= outgoing.Quantity;
-				}
-			}
-			else
-			{
-				if (Chamber2.StoredUsedProducedDialysingFluid.Quantity >= quantityOfFreshDialysate)
-				{
-					outgoing.CopyValuesFrom(Chamber2.StoredUsedProducedDialysingFluid);
-					outgoing.Quantity = quantityOfFreshDialysate;
-					Chamber2.StoredUsedProducedDialysingFluid.Quantity -= outgoing.Quantity;
-				}
-			}
-		}
-
-
-		[Provided]
-		public void ReceivedSuctionOnStoredProducedDialyzingFluid(Suction incomingSuction)
+		public SimplifiedBalanceChamber()
 		{
 		}
 
 		[Provided]
-		public void ReceivedProducedDialyzingFluid(DialyzingFluid incomingElement)
+		public void ForwardProducedFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
 		{
-			if (ChamberForDialyzer == ChamberForDialyzerEnum.UseChamber1ForDialyzer)
-			{
-				if (Chamber1.StoredProducedDialysingFluid.Quantity <= 20)
-				{
-					Chamber1.StoredProducedDialysingFluid.Quantity += incomingElement.Quantity;
-				}
-			}
-			else
-			{
-				if (Chamber2.StoredProducedDialysingFluid.Quantity <= 20)
-				{
-					Chamber2.StoredProducedDialysingFluid.Quantity += incomingElement.Quantity;
-				}
-			}
+			outgoing.CopyValuesFrom(incoming);
 		}
 
 		[Provided]
-		public void ReceivedSuctionOnStoredUsedDialyzingFluid(Suction incomingSuction)
+		public void ForwardProducedFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
+			outgoingSuction.CopyValuesFrom(incomingSuction);
 		}
 
 		[Provided]
-		public void ReceivedUsedDialyzingFluid(DialyzingFluid incomingElement)
+		public void ForwardUsedFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
 		{
-			if (ChamberForDialyzer == ChamberForDialyzerEnum.UseChamber1ForDialyzer)
-			{
-				if (Chamber1.StoredUsedProducedDialysingFluid.Quantity <= 20)
-				{
-					Chamber1.StoredUsedProducedDialysingFluid.Quantity += incomingElement.Quantity;
-				}
-			}
-			else
-			{
-				if (Chamber2.StoredUsedProducedDialysingFluid.Quantity <= 20)
-				{
-					Chamber2.StoredUsedProducedDialysingFluid.Quantity += incomingElement.Quantity;
-				}
-			}
+			outgoing.CopyValuesFrom(incoming);
 		}
+
+		[Provided]
+		public void ForwardUsedFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		{
+			outgoingSuction.CopyValuesFrom(incomingSuction);
+		}
+
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(ProducedDialysingFluid.SetOutgoingBackward), nameof(MakeSuctionOnSource));
-			Bind(nameof(UsedDialysingFluid.SetOutgoingBackward), nameof(MakeSuctionOnDrain));
-			Bind(nameof(StoredProducedDialysingFluid.SetOutgoingForward), nameof(PushDialisateToDialysator));
-			Bind(nameof(StoredUsedDialysingFluid.SetOutgoingForward), nameof(PushDialysateToDrain));
-			Bind(nameof(ProducedDialysingFluid.ForwardFromPredecessorWasUpdated), nameof(ReceivedProducedDialyzingFluid));
-			Bind(nameof(UsedDialysingFluid.ForwardFromPredecessorWasUpdated), nameof(ReceivedUsedDialyzingFluid));
-			Bind(nameof(StoredProducedDialysingFluid.BackwardFromSuccessorWasUpdated), nameof(ReceivedSuctionOnStoredProducedDialyzingFluid));
-			Bind(nameof(StoredUsedDialysingFluid.BackwardFromSuccessorWasUpdated), nameof(ReceivedSuctionOnStoredUsedDialyzingFluid));
+			Bind(nameof(ForwardProducedFlowSegment.SetOutgoingForward), nameof(ForwardProducedFlow));
+			Bind(nameof(ForwardProducedFlowSegment.SetOutgoingBackward), nameof(ForwardProducedFlowSuction));
+			Bind(nameof(ForwardUsedFlowSegment.SetOutgoingForward), nameof(ForwardUsedFlow));
+			Bind(nameof(ForwardUsedFlowSegment.SetOutgoingBackward), nameof(ForwardUsedFlowSuction));
+		}
+
+		public void AddFlows(DialyzingFluidFlowCombinator flowCombinator)
+		{
+			flowCombinator.Replace(ProducedDialysingFluid.Incoming, ForwardProducedFlowSegment.Incoming);
+			flowCombinator.Replace(UsedDialysingFluid.Incoming, ForwardUsedFlowSegment.Incoming);
+			flowCombinator.Replace(StoredProducedDialysingFluid.Outgoing, ForwardProducedFlowSegment.Outgoing);
+			flowCombinator.Replace(StoredUsedDialysingFluid.Outgoing, ForwardUsedFlowSegment.Outgoing);
 		}
 
 		public override void Update()
 		{
-			if (ChamberForDialyzer==ChamberForDialyzerEnum.UseChamber1ForDialyzer && Chamber1.StoredProducedDialysingFluid.Quantity == 4)
-			{
-				ChamberForDialyzer = ChamberForDialyzerEnum.UseChamber2ForDialyzer;
-			}
-			else if (ChamberForDialyzer == ChamberForDialyzerEnum.UseChamber2ForDialyzer && Chamber2.StoredProducedDialysingFluid.Quantity == 4)
-			{
-				ChamberForDialyzer = ChamberForDialyzerEnum.UseChamber1ForDialyzer;
-			}
 		}
 	}
 
@@ -453,7 +312,7 @@ namespace HemodialysisMachine.Model
 		public readonly DialyzingFluidWaterPreparation DialyzingFluidWaterPreparation = new DialyzingFluidWaterPreparation();
 		public readonly DialyzingFluidConcentrateSupply DialyzingFluidConcentrateSupply = new DialyzingFluidConcentrateSupply();
 		public readonly DialyzingFluidPreparation DialyzingFluidPreparation = new DialyzingFluidPreparation();
-		public readonly BalanceChamber BalanceChamber = new BalanceChamber();
+		public readonly SimplifiedBalanceChamber BalanceChamber = new SimplifiedBalanceChamber();
 		public readonly DialyzingFluidDrain DialyzingFluidDrain = new DialyzingFluidDrain();
 		public readonly DialyzingFluidSafetyBypass DialyzingFluidSafetyBypass = new DialyzingFluidSafetyBypass();
 
@@ -487,6 +346,8 @@ namespace HemodialysisMachine.Model
 					DialyzingUltraFiltrationPump.DialyzingFluidFlow.Outgoing
 				},
 				DialyzingFluidDrain.DrainFlow.Incoming);
+
+			BalanceChamber.AddFlows(flowCombinator);
 		}
 
 	}
