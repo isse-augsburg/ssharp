@@ -90,9 +90,9 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		{
 		}
 
-		public override void SplitForwards(Int source, Int[] targets)
+		public override void SplitForwards(Int source, Int[] targets, Int[] dependingOn)
 		{
-			StandardBehaviorSplitForwardsEqual(source,targets);
+			StandardBehaviorSplitForwardsEqual(source,targets,dependingOn);
 		}
 
 		public override void MergeBackwards(Int[] sources, Int target)
@@ -113,9 +113,9 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 			StandardBehaviorSplitBackwardsEqual(source,targets);
 		}
 
-		public override void MergeForwards(Int[] sources, Int target)
+		public override void MergeForwards(Int[] sources, Int target, Int dependingOn)
 		{
-			StandardBehaviorMergeForwardsSelectFirst(sources,target);
+			StandardBehaviorMergeForwardsSelectFirst(sources,target,dependingOn);
 		}
 	}
 

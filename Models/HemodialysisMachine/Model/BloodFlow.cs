@@ -62,18 +62,34 @@ namespace HemodialysisMachine.Model
 		{
 		}
 
-		public override void SplitForwards(Blood source, Blood[] targets)
+		public override void SplitForwards(Blood source, Blood[] targets, Suction[] dependingOn)
 		{
 			var number = targets.Length;
+			// Copy all needed values
 			for (int i = 0; i < number; i++)
 			{
 				targets[i].CopyValuesFrom(source);
 			}
+			// TODO: No advanced splitting implemented, yet.
 		}
 
 		public override void MergeBackwards(Suction[] sources, Suction target)
 		{
 			target.CopyValuesFrom(sources[0]);
+			var number = sources.Length;
+			for (int i = 1; i < number; i++) //start with second element
+			{
+				if (target.SuctionType == SuctionType.SourceDependentSuction || sources[i].SuctionType == SuctionType.SourceDependentSuction)
+				{
+					target.SuctionType = SuctionType.SourceDependentSuction;
+					target.CustomSuctionValue = 0;
+				}
+				else
+				{
+					target.SuctionType = SuctionType.CustomSuction;
+					target.CustomSuctionValue += sources[i].CustomSuctionValue;
+				}
+			}
 		}
 	}
 
@@ -87,15 +103,43 @@ namespace HemodialysisMachine.Model
 		public override void SplitBackwards(Suction source, Suction[] targets)
 		{
 			var number = targets.Length;
-			for (int i = 0; i < number; i++)
+
+			if (source.SuctionType == SuctionType.SourceDependentSuction)
 			{
-				targets[i].CopyValuesFrom(source);
+				for (int i = 0; i < number; i++)
+				{
+					targets[i].CopyValuesFrom(source);
+				}
+			}
+			else
+			{
+				var suctionForEach = source.CustomSuctionValue / number;
+				for (int i = 0; i < number; i++)
+				{
+					targets[i].SuctionType = SuctionType.CustomSuction;
+					targets[i].CustomSuctionValue = suctionForEach;
+				}
 			}
 		}
 
-		public override void MergeForwards(Blood[] sources, Blood target)
+		public override void MergeForwards(Blood[] sources, Blood target, Suction dependingOn)
 		{
 			target.CopyValuesFrom(sources[0]);
+			var number = sources.Length;
+			for (int i = 1; i < number; i++) //start with second element
+			{
+				target.ChemicalCompositionOk |= sources[i].ChemicalCompositionOk;
+				target.GasFree |= sources[i].GasFree;
+				target.BigWasteProducts += sources[i].BigWasteProducts;
+				target.SmallWasteProducts += sources[i].SmallWasteProducts;
+				target.HasHeparin |= sources[i].HasHeparin;
+				target.GasFree |= sources[i].GasFree;
+				target.Water += sources[i].Water;
+				if (sources[i].Temperature != QualitativeTemperature.BodyHeat)
+					target.Temperature = sources[i].Temperature;
+				if (sources[i].Pressure != QualitativePressure.GoodPressure)
+					target.Pressure = sources[i].Pressure;
+			}
 		}
 	}
 

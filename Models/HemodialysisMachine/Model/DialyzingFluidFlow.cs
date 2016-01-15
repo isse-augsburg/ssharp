@@ -74,18 +74,61 @@ namespace HemodialysisMachine.Model
 		{
 		}
 
-		public override void SplitForwards(DialyzingFluid source, DialyzingFluid[] targets)
+		public override void SplitForwards(DialyzingFluid source, DialyzingFluid[] targets, Suction[] dependingOn)
 		{
 			var number = targets.Length;
+			var availableQuantity = source.Quantity;
+			// Copy all needed values
+			var countRest = 0;
 			for (int i = 0; i < number; i++)
 			{
 				targets[i].CopyValuesFrom(source);
+			}
+			// first satisfy all CustomSuctions
+			for (int i = 0; i < number; i++)
+			{
+				if (dependingOn[i].SuctionType == SuctionType.CustomSuction)
+				{
+					targets[i].Quantity = dependingOn[i].CustomSuctionValue;
+					availableQuantity -= dependingOn[i].CustomSuctionValue;
+				}
+				else
+				{
+					countRest++;
+				}
+			}
+			// then satisfy the rest
+			// (assume availableQuantity>=0)
+			if (countRest > 0)
+			{
+				var quantityForEachOfTheRest = availableQuantity / countRest;
+				for (int i = 0; i < number; i++)
+				{
+					if (dependingOn[i].SuctionType != SuctionType.CustomSuction)
+					{
+						targets[i].Quantity = quantityForEachOfTheRest;
+					}
+				}
 			}
 		}
 
 		public override void MergeBackwards(Suction[] sources, Suction target)
 		{
 			target.CopyValuesFrom(sources[0]);
+			var number = sources.Length;
+			for (int i = 1; i < number; i++) //start with second element
+			{
+				if (target.SuctionType == SuctionType.SourceDependentSuction || sources[i].SuctionType == SuctionType.SourceDependentSuction)
+				{
+					target.SuctionType = SuctionType.SourceDependentSuction;
+					target.CustomSuctionValue = 0;
+				}
+				else
+				{
+					target.SuctionType = SuctionType.CustomSuction;
+					target.CustomSuctionValue += sources[i].CustomSuctionValue;
+				}
+			}
 		}
 	}
 
@@ -99,15 +142,37 @@ namespace HemodialysisMachine.Model
 		public override void SplitBackwards(Suction source, Suction[] targets)
 		{
 			var number = targets.Length;
-			for (int i = 0; i < number; i++)
+
+			if (source.SuctionType == SuctionType.SourceDependentSuction)
 			{
-				targets[i].CopyValuesFrom(source);
+				for (int i = 0; i < number; i++)
+				{
+					targets[i].CopyValuesFrom(source);
+				}
+			}
+			else
+			{
+				var suctionForEach = source.CustomSuctionValue / number;
+				for (int i = 0; i < number; i++)
+				{
+					targets[i].SuctionType = SuctionType.CustomSuction;
+					targets[i].CustomSuctionValue = suctionForEach;
+				}
 			}
 		}
 
-		public override void MergeForwards(DialyzingFluid[] sources, DialyzingFluid target)
+		public override void MergeForwards(DialyzingFluid[] sources, DialyzingFluid target, Suction dependingOn)
 		{
 			target.CopyValuesFrom(sources[0]);
+			var number = sources.Length;
+			for (int i = 1; i < number; i++) //start with second element
+			{
+				target.Quantity += sources[i].Quantity;
+				target.ContaminatedByBlood |= sources[i].ContaminatedByBlood;
+				target.WasUsed |= sources[i].WasUsed;
+				if (sources[i].Temperature != QualitativeTemperature.BodyHeat)
+					target.Temperature = sources[i].Temperature;
+			}
 		}
 	}
 

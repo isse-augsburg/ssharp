@@ -665,12 +665,12 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 			outgoingForward.CopyValuesFrom(ForwardsToSuccessors[index]);
 		}
 		
-		public abstract void SplitForwards(TForward source, TForward[] targets);
+		public abstract void SplitForwards(TForward source, TForward[] targets, TBackward[] dependingOn);
 		
 		public abstract void MergeBackwards(TBackward[] sources, TBackward target);
 		
 
-		public void StandardBehaviorSplitForwardsEqual(TForward source, TForward[] targets)
+		public void StandardBehaviorSplitForwardsEqual(TForward source, TForward[] targets, TBackward[] dependingOn)
 		{
 			var number = targets.Length;
 			for (int i = 0; i < number; i++)
@@ -693,7 +693,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		public void UpdateForwardsToSuccessors()
 		{
 			// TODO: Update with a dynamic Function
-			SplitForwards(Incoming.ForwardFromPredecessor, ForwardsToSuccessors);
+			SplitForwards(Incoming.ForwardFromPredecessor, ForwardsToSuccessors, BackwardsFromSuccessors);
 		}
 
 		public void ElementFromPredecessorWasUpdated()
@@ -781,7 +781,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		
 		public abstract void SplitBackwards(TBackward source, TBackward[] targets);
 		
-		public abstract void MergeForwards(TForward[] sources, TForward target);
+		public abstract void MergeForwards(TForward[] sources, TForward target, TBackward dependingOn);
 		
 		public void StandardBehaviorSplitBackwardsEqual(TBackward source, TBackward[] targets)
 		{
@@ -792,7 +792,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 			}
 		}
 
-		public void StandardBehaviorMergeForwardsSelectFirst(TForward[] sources, TForward target)
+		public void StandardBehaviorMergeForwardsSelectFirst(TForward[] sources, TForward target, TBackward dependingOn)
 		{
 			target.CopyValuesFrom(sources[0]);
 		}
@@ -807,7 +807,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		public void UpdateForwardToSuccessor()
 		{
 			// TODO: Update with a dynamic Function
-			MergeForwards(ForwardsFromPredecessors, Outgoing.ForwardToSuccessor);
+			MergeForwards(ForwardsFromPredecessors, Outgoing.ForwardToSuccessor, Outgoing.BackwardFromSuccessor);
 		}
 
 		public void BackwardsFromSuccessorWasUpdated()
