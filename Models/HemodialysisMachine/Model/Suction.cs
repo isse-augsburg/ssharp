@@ -8,15 +8,21 @@ namespace HemodialysisMachine.Model
 {
 	using Utilities.BidirectionalFlow;
 
+	enum SuctionType
+	{
+		SourceDependentSuction,
+		CustomSuction
+	}
+
 	class Suction : IElement<Suction>
 	{
-		public int Value = 0;
-		public bool Anything = false;
+		public SuctionType SuctionType = SuctionType.SourceDependentSuction;
+		public int CustomSuctionValue = 0;
 
 		public void CopyValuesFrom(Suction from)
 		{
-			Value = from.Value;
-			Anything = from.Anything;
+			SuctionType = from.SuctionType;
+			CustomSuctionValue = from.CustomSuctionValue;
 		}
 	}
 }

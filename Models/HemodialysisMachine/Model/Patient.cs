@@ -20,13 +20,14 @@
 		[Provided]
 		public void SetArteryFlow(Blood outgoing)
 		{
-			outgoing.UnfiltratedBloodUnits = 1;
+			outgoing.Water = 1;
 		}
 
 		[Provided]
 		public void SetVeinFlowSuction(Suction outgoingSuction)
 		{
-			outgoingSuction.Value = 1;
+			outgoingSuction.CustomSuctionValue = 0;
+			outgoingSuction.SuctionType = SuctionType.SourceDependentSuction;
 		}
 
 

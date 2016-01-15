@@ -7,8 +7,9 @@ namespace HemodialysisMachine.Model
 
 	class Blood : IElement<Blood>
 	{
-		public int UnfiltratedBloodUnits = 0;
-		public int FiltratedBloodUnits = 0;
+		public int Water = 0;
+		public int SmallWasteProducts = 0;
+		public int BigWasteProducts = 0;
 		public bool HasHeparin = false;
 		public bool ChemicalCompositionOk = true;
 		public bool GasFree = false;
@@ -17,13 +18,21 @@ namespace HemodialysisMachine.Model
 
 		public void CopyValuesFrom(Blood from)
 		{
-			UnfiltratedBloodUnits = from.UnfiltratedBloodUnits;
-			FiltratedBloodUnits = from.FiltratedBloodUnits;
+			Water = from.Water;
+			SmallWasteProducts = from.SmallWasteProducts;
+			BigWasteProducts = from.BigWasteProducts;
 			HasHeparin = from.HasHeparin;
 			ChemicalCompositionOk = from.ChemicalCompositionOk;
 			GasFree = from.GasFree;
 			Pressure = from.Pressure;
 			Temperature = from.Temperature;
+		}
+
+		public void PrintBloodValues()
+		{
+			System.Console.Out.WriteLine("\tWater: " + Water);
+			System.Console.Out.WriteLine("\tSmallWasteProducts: " + SmallWasteProducts);
+			System.Console.Out.WriteLine("\tBigWasteProducts: " + BigWasteProducts);
 		}
 	}
 

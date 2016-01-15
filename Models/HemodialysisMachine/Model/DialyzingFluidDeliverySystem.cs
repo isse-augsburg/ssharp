@@ -91,7 +91,8 @@ namespace HemodialysisMachine.Model
 		[Provided]
 		public void SetConcentrateFlowSuction(Suction outgoingSuction)
 		{
-			outgoingSuction.Value = 1;
+			outgoingSuction.CustomSuctionValue = 1;
+			outgoingSuction.SuctionType=SuctionType.CustomSuction;
 		}
 
 		[Provided]
@@ -150,7 +151,8 @@ namespace HemodialysisMachine.Model
 		[Provided]
 		public void SetMainFlowSuction(Suction outgoingSuction)
 		{
-			outgoingSuction.Value = 1;
+			outgoingSuction.CustomSuctionValue = 1;
+			outgoingSuction.SuctionType = SuctionType.CustomSuction;
 		}
 
 		[Provided]
@@ -242,12 +244,14 @@ namespace HemodialysisMachine.Model
 		[Provided]
 		public void SetProducedDialysingFluidSuction(Suction outgoingSuction)
 		{
-			outgoingSuction.Value = 1;
+			outgoingSuction.CustomSuctionValue = 1;
+			outgoingSuction.SuctionType = SuctionType.CustomSuction;
 		}
 		[Provided]
 		public void SetUsedDialysingFluidSuction(Suction outgoingSuction)
 		{
-			outgoingSuction.Value = 1;
+			outgoingSuction.CustomSuctionValue = 1;
+			outgoingSuction.SuctionType = SuctionType.CustomSuction;
 		}
 		[Provided]
 		public void SetStoredProducedDialysingFluid(DialyzingFluid outgoing)

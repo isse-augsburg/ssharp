@@ -39,7 +39,8 @@ namespace HemodialysisMachine.Model
 		[Provided]
 		public void SetSenseFlowSuction(Suction outgoingSuction)
 		{
-			outgoingSuction.Value=1;
+			outgoingSuction.CustomSuctionValue = 0;
+			outgoingSuction.SuctionType = SuctionType.CustomSuction;
 		}
 
 		[Provided]
@@ -62,8 +63,7 @@ namespace HemodialysisMachine.Model
 		public void SetHeparinFlow(Blood outgoing)
 		{
 			outgoing.HasHeparin = true;
-			outgoing.UnfiltratedBloodUnits = 0;
-			outgoing.FiltratedBloodUnits = 0;
+			outgoing.Water = 0;
 		}
 
 		[Provided]
@@ -131,7 +131,8 @@ namespace HemodialysisMachine.Model
 		[Provided]
 		public void SetSenseFlowSuction(Suction outgoingSuction)
 		{
-			outgoingSuction.Value = 1;
+			outgoingSuction.CustomSuctionValue = 0;
+			outgoingSuction.SuctionType = SuctionType.CustomSuction;
 		}
 
 		[Provided]
