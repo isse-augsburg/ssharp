@@ -55,14 +55,6 @@ namespace HemodialysisMachine.Tests
 			var flowCombinatorAfterStep = (DialyzingFluidFlowCombinator)simulator.Model.RootComponents[0];
 		}
 
-		public bool IsIncomingBloodOk(Specification specification)
-		{
-			var incomingBlood = specification.Patient.VeinFlow.Incoming.ForwardFromPredecessor;
-			if (incomingBlood.ChemicalCompositionOk && incomingBlood.GasFree && incomingBlood.Temperature==QualitativeTemperature.BodyHeat)
-				return false;
-			return true;
-		}
-
 		[Test]
 		public void IncomingBloodIsContaminated_ModelChecking()
 		{
@@ -70,7 +62,7 @@ namespace HemodialysisMachine.Tests
 
 			var analysis = new SafetyAnalysis(new LtsMin(), Model.Create(specification));
 			
-			var result = analysis.ComputeMinimalCutSets(IsIncomingBloodOk(specification) == false, $"counter examples/hdmachine");
+			var result = analysis.ComputeMinimalCutSets(specification.IncomingBloodNotOk, $"counter examples/hdmachine");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
 
 			Console.WriteLine("Faults: {0}", String.Join(", ", result.Faults.Select(fault => fault.Name)));

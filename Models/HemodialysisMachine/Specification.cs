@@ -58,9 +58,17 @@ namespace HemodialysisMachine
 
 		[Root(Role.SystemContext)]
 		internal Patient Patient { get; }
-
+		
 		[Hazard]
-		public Formula PossibleCollision =>
-			false;
+		public Formula IncomingBloodNotOk
+		{
+			get
+			{
+				var incomingBlood = Patient.VeinFlow.Incoming.ForwardFromPredecessor;
+				if (incomingBlood.ChemicalCompositionOk && incomingBlood.GasFree && incomingBlood.Temperature == QualitativeTemperature.BodyHeat)
+					return true;
+				return false;
+			}
+		}
 	}
 }
