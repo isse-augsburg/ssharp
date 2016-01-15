@@ -326,15 +326,21 @@ namespace HemodialysisMachine.Model
 			var quantityOfIncomingUsedDialysate = UsedDialysingFluid.Incoming.ForwardFromPredecessor.Quantity;
 			if (ChamberForDialyzer == ChamberForDialyzerEnum.UseChamber1ForDialyzer)
 			{
-				outgoing.CopyValuesFrom(Chamber1.StoredProducedDialysingFluid);
-				outgoing.Quantity = quantityOfIncomingUsedDialysate;
-				Chamber1.StoredProducedDialysingFluid.Quantity -= outgoing.Quantity;
+				if (Chamber1.StoredProducedDialysingFluid.Quantity >= quantityOfIncomingUsedDialysate)
+				{
+					outgoing.CopyValuesFrom(Chamber1.StoredProducedDialysingFluid);
+					outgoing.Quantity = quantityOfIncomingUsedDialysate;
+					Chamber1.StoredProducedDialysingFluid.Quantity -= outgoing.Quantity;
+				}
 			}
 			else
 			{
-				outgoing.CopyValuesFrom(Chamber2.StoredProducedDialysingFluid);
-				outgoing.Quantity = quantityOfIncomingUsedDialysate;
-				Chamber2.StoredProducedDialysingFluid.Quantity -= outgoing.Quantity;
+				if (Chamber2.StoredProducedDialysingFluid.Quantity >= quantityOfIncomingUsedDialysate)
+				{
+					outgoing.CopyValuesFrom(Chamber2.StoredProducedDialysingFluid);
+					outgoing.Quantity = quantityOfIncomingUsedDialysate;
+					Chamber2.StoredProducedDialysingFluid.Quantity -= outgoing.Quantity;
+				}
 			}
 		}
 
@@ -344,15 +350,21 @@ namespace HemodialysisMachine.Model
 			var quantityOfFreshDialysate = ProducedDialysingFluid.Incoming.ForwardFromPredecessor.Quantity;
 			if (ChamberForDialyzer == ChamberForDialyzerEnum.UseChamber1ForDialyzer)
 			{
-				outgoing.CopyValuesFrom(Chamber1.StoredUsedProducedDialysingFluid);
-				outgoing.Quantity = quantityOfFreshDialysate;
-				Chamber1.StoredUsedProducedDialysingFluid.Quantity -= outgoing.Quantity;
+				if (Chamber1.StoredUsedProducedDialysingFluid.Quantity >= quantityOfFreshDialysate)
+				{
+					outgoing.CopyValuesFrom(Chamber1.StoredUsedProducedDialysingFluid);
+					outgoing.Quantity = quantityOfFreshDialysate;
+					Chamber1.StoredUsedProducedDialysingFluid.Quantity -= outgoing.Quantity;
+				}
 			}
 			else
 			{
-				outgoing.CopyValuesFrom(Chamber2.StoredUsedProducedDialysingFluid);
-				outgoing.Quantity = quantityOfFreshDialysate;
-				Chamber2.StoredUsedProducedDialysingFluid.Quantity -= outgoing.Quantity;
+				if (Chamber2.StoredUsedProducedDialysingFluid.Quantity >= quantityOfFreshDialysate)
+				{
+					outgoing.CopyValuesFrom(Chamber2.StoredUsedProducedDialysingFluid);
+					outgoing.Quantity = quantityOfFreshDialysate;
+					Chamber2.StoredUsedProducedDialysingFluid.Quantity -= outgoing.Quantity;
+				}
 			}
 		}
 
@@ -367,11 +379,17 @@ namespace HemodialysisMachine.Model
 		{
 			if (ChamberForDialyzer == ChamberForDialyzerEnum.UseChamber1ForDialyzer)
 			{
-				Chamber1.StoredProducedDialysingFluid.Quantity += incomingElement.Quantity;
+				if (Chamber1.StoredProducedDialysingFluid.Quantity <= 20)
+				{
+					Chamber1.StoredProducedDialysingFluid.Quantity += incomingElement.Quantity;
+				}
 			}
 			else
 			{
-				Chamber2.StoredProducedDialysingFluid.Quantity += incomingElement.Quantity;
+				if (Chamber2.StoredProducedDialysingFluid.Quantity <= 20)
+				{
+					Chamber2.StoredProducedDialysingFluid.Quantity += incomingElement.Quantity;
+				}
 			}
 		}
 
@@ -385,11 +403,17 @@ namespace HemodialysisMachine.Model
 		{
 			if (ChamberForDialyzer == ChamberForDialyzerEnum.UseChamber1ForDialyzer)
 			{
-				Chamber1.StoredUsedProducedDialysingFluid.Quantity += incomingElement.Quantity;
+				if (Chamber1.StoredUsedProducedDialysingFluid.Quantity <= 20)
+				{
+					Chamber1.StoredUsedProducedDialysingFluid.Quantity += incomingElement.Quantity;
+				}
 			}
 			else
 			{
-				Chamber2.StoredUsedProducedDialysingFluid.Quantity += incomingElement.Quantity;
+				if (Chamber2.StoredUsedProducedDialysingFluid.Quantity <= 20)
+				{
+					Chamber2.StoredUsedProducedDialysingFluid.Quantity += incomingElement.Quantity;
+				}
 			}
 		}
 
