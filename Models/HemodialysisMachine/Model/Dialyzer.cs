@@ -22,7 +22,10 @@ namespace HemodialysisMachine.Model
 		public int IncomingSuctionRateOnDialyzingFluidSide = 0;
 		public int IncomingQuantityOfDialyzingFluid = 0; //Amount of BloodUnits we can clean.
 		public QualitativeTemperature IncomingFluidTemperature;
-		
+
+		public bool MembraneIntact = true;
+
+
 		[Provided]
 		public void SetDialyzingFluidFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
@@ -51,32 +54,39 @@ namespace HemodialysisMachine.Model
 		[Provided]
 		public void SetBloodFlow(Blood outgoing, Blood incoming)
 		{
-			outgoing.CopyValuesFrom(incoming);
-			outgoing.Temperature = IncomingFluidTemperature;
-			// First step: Filtrate Blood
-			if (IncomingQuantityOfDialyzingFluid >= outgoing.SmallWasteProducts)
+			if (incoming.Water > 0 || incoming.BigWasteProducts > 0)
 			{
-				outgoing.SmallWasteProducts = 0;
+				outgoing.CopyValuesFrom(incoming);
+				outgoing.Temperature = IncomingFluidTemperature;
+				// First step: Filtrate Blood
+				if (IncomingQuantityOfDialyzingFluid >= outgoing.SmallWasteProducts)
+				{
+					outgoing.SmallWasteProducts = 0;
+				}
+				else
+				{
+					outgoing.SmallWasteProducts -= IncomingQuantityOfDialyzingFluid;
+				}
+				// Second step: Ultra Filtration
+				// To satisfy the incoming suction rate we must take the fluid from the blood.
+				// The ultrafiltrationRate is the amount of fluid we take from the blood-side.
+				var ultrafiltrationRate = IncomingSuctionRateOnDialyzingFluidSide - IncomingQuantityOfDialyzingFluid;
+
+				if (ultrafiltrationRate < outgoing.BigWasteProducts)
+				{
+					outgoing.BigWasteProducts -= ultrafiltrationRate;
+				}
+				else
+				{
+					// Remove water instead of BigWasteProducts
+					// Assume Water >= (ultrafiltrationRate - outgoing.BigWasteProducts)
+					outgoing.Water -= (ultrafiltrationRate - outgoing.BigWasteProducts);
+					outgoing.BigWasteProducts = 0;
+				}
 			}
 			else
 			{
-				outgoing.SmallWasteProducts -= IncomingQuantityOfDialyzingFluid;
-			}
-			// Second step: Ultra Filtration
-			// To satisfy the incoming suction rate we must take the fluid from the blood.
-			// The ultrafiltrationRate is the amount of fluid we take from the blood-side.
-			var ultrafiltrationRate = IncomingSuctionRateOnDialyzingFluidSide - IncomingQuantityOfDialyzingFluid;
-			
-			if (ultrafiltrationRate < outgoing.BigWasteProducts)
-			{
-				outgoing.BigWasteProducts -= ultrafiltrationRate;
-			}
-			else
-			{
-				// Remove water instead of BigWasteProducts
-				// Assume Water >= (ultrafiltrationRate - outgoing.BigWasteProducts)
-				outgoing.Water -= (ultrafiltrationRate - outgoing.BigWasteProducts);
-				outgoing.BigWasteProducts = 0;
+				outgoing.CopyValuesFrom(incoming);
 			}
 		}
 
