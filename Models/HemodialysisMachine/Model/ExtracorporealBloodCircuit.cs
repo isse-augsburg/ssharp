@@ -24,7 +24,8 @@ namespace HemodialysisMachine.Model
 		[Provided]
 		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
-			outgoingSuction.CopyValuesFrom(incomingSuction);
+			outgoingSuction.CustomSuctionValue = SpeedOfMotor; //Force suction set by motor
+			outgoingSuction.SuctionType=SuctionType.CustomSuction;
 		}
 
 		protected override void CreateBindings()
@@ -37,6 +38,8 @@ namespace HemodialysisMachine.Model
 	class ArteriaPressureTransducer : Component
 	{
 		public readonly BloodFlowSink SenseFlow = new BloodFlowSink();
+		
+		public QualitativePressure SensedPressure = QualitativePressure.NoPressure;
 
 		[Provided]
 		public void SetSenseFlowSuction(Suction outgoingSuction)
@@ -48,6 +51,7 @@ namespace HemodialysisMachine.Model
 		[Provided]
 		public void ReceivedBlood(Blood incomingElement)
 		{
+			SensedPressure = incomingElement.Pressure;
 		}
 
 		protected override void CreateBindings()
@@ -66,7 +70,13 @@ namespace HemodialysisMachine.Model
 		{
 			outgoing.HasHeparin = true;
 			outgoing.Water = 0;
-		}
+			outgoing.SmallWasteProducts = 0;
+			outgoing.BigWasteProducts = 0;
+			outgoing.ChemicalCompositionOk = true;
+			outgoing.GasFree = true;
+			outgoing.Pressure = QualitativePressure.NoPressure;
+			outgoing.Temperature = QualitativeTemperature.BodyHeat;
+	}
 
 		[Provided]
 		public void ReceivedSuction(Suction incomingSuction)
@@ -88,6 +98,7 @@ namespace HemodialysisMachine.Model
 		public void SetMainFlow(Blood outgoing, Blood incoming)
 		{
 			outgoing.CopyValuesFrom(incoming);
+			outgoing.GasFree = true;
 		}
 
 		[Provided]
@@ -111,6 +122,7 @@ namespace HemodialysisMachine.Model
 		public void SetMainFlow(Blood outgoing, Blood incoming)
 		{
 			outgoing.CopyValuesFrom(incoming);
+			outgoing.GasFree = true;
 		}
 
 		[Provided]
@@ -130,6 +142,8 @@ namespace HemodialysisMachine.Model
 	{
 		public readonly BloodFlowSink SenseFlow = new BloodFlowSink();
 
+		public QualitativePressure SensedPressure = QualitativePressure.NoPressure;
+
 		[Provided]
 		public void SetSenseFlowSuction(Suction outgoingSuction)
 		{
@@ -140,6 +154,7 @@ namespace HemodialysisMachine.Model
 		[Provided]
 		public void ReceivedBlood(Blood incomingElement)
 		{
+			SensedPressure = incomingElement.Pressure;
 		}
 
 		protected override void CreateBindings()
@@ -153,10 +168,20 @@ namespace HemodialysisMachine.Model
 	{
 		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
 
+		public bool DetectedGasOrContaminatedBlood = false;
+
 		[Provided]
 		public void SetMainFlow(Blood outgoing, Blood incoming)
 		{
 			outgoing.CopyValuesFrom(incoming);
+			if (incoming.GasFree == false || incoming.ChemicalCompositionOk != true)
+			{
+				DetectedGasOrContaminatedBlood = true;
+			}
+			else
+			{
+				DetectedGasOrContaminatedBlood = false;
+			}
 		}
 
 		[Provided]
@@ -174,18 +199,43 @@ namespace HemodialysisMachine.Model
 
 	class VenousTubingValve : Component
 	{
+		// HACK: To be able to react in time we delay the BloodFlow
 		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
+
+		public ValveState ValveState = ValveState.Open;
+
+		public Blood DelayedBlood = new Blood();
 
 		[Provided]
 		public void SetMainFlow(Blood outgoing, Blood incoming)
 		{
-			outgoing.CopyValuesFrom(incoming);
+			DelayedBlood.CopyValuesFrom(incoming);
+			if (ValveState == ValveState.Open)
+			{
+				outgoing.CopyValuesFrom(DelayedBlood);
+			}
+			else
+			{
+				outgoing.HasHeparin = true;
+				outgoing.Water = 0;
+				outgoing.SmallWasteProducts = 0;
+				outgoing.BigWasteProducts = 0;
+				outgoing.ChemicalCompositionOk = true;
+				outgoing.GasFree = true;
+				outgoing.Pressure = QualitativePressure.NoPressure;
+				outgoing.Temperature = QualitativeTemperature.BodyHeat;
+			}
 		}
 
 		[Provided]
 		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
 			outgoingSuction.CopyValuesFrom(incomingSuction);
+		}
+
+		public void CloseValve()
+		{
+			ValveState = ValveState.Closed;
 		}
 
 		protected override void CreateBindings()
