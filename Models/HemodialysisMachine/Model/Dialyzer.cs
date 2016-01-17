@@ -8,7 +8,7 @@ namespace HemodialysisMachine.Model
 {
 	using SafetySharp.Modeling;
 
-	class Dialyzer : Component
+	public class Dialyzer : Component
 	{
 		// Order of Provided Port call (determined by flowConnectors)
 		// 1. Suction of DialyzingFluid is calculated
@@ -30,6 +30,8 @@ namespace HemodialysisMachine.Model
 		public void SetDialyzingFluidFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
 			//Assume incomingSuction.SuctionType == SuctionType.CustomSuction;
+			if (incomingSuction.SuctionType==SuctionType.SourceDependentSuction)
+				throw new Exception("Model Bug");
 			IncomingSuctionRateOnDialyzingFluidSide = incomingSuction.CustomSuctionValue;
 			outgoingSuction.CustomSuctionValue = 0;
 			outgoingSuction.SuctionType = SuctionType.SourceDependentSuction;
@@ -71,17 +73,19 @@ namespace HemodialysisMachine.Model
 				// To satisfy the incoming suction rate we must take the fluid from the blood.
 				// The ultrafiltrationRate is the amount of fluid we take from the blood-side.
 				var ultrafiltrationRate = IncomingSuctionRateOnDialyzingFluidSide - IncomingQuantityOfDialyzingFluid;
-
-				if (ultrafiltrationRate < outgoing.BigWasteProducts)
+				if (ultrafiltrationRate >= 0)
 				{
-					outgoing.BigWasteProducts -= ultrafiltrationRate;
-				}
-				else
-				{
-					// Remove water instead of BigWasteProducts
-					// Assume Water >= (ultrafiltrationRate - outgoing.BigWasteProducts)
-					outgoing.Water -= (ultrafiltrationRate - outgoing.BigWasteProducts);
-					outgoing.BigWasteProducts = 0;
+					if (ultrafiltrationRate < outgoing.BigWasteProducts)
+					{
+						outgoing.BigWasteProducts -= ultrafiltrationRate;
+					}
+					else
+					{
+						// Remove water instead of BigWasteProducts
+						// Assume Water >= (ultrafiltrationRate - outgoing.BigWasteProducts)
+						outgoing.Water -= (ultrafiltrationRate - outgoing.BigWasteProducts);
+						outgoing.BigWasteProducts = 0;
+					}
 				}
 			}
 			else

@@ -9,7 +9,7 @@ namespace HemodialysisMachine.Model
 	using SafetySharp.Modeling;
 	using Utilities.BidirectionalFlow;
 
-	class ArterialBloodPump : Component
+	public class ArterialBloodPump : Component
 	{
 		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
 
@@ -48,7 +48,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class ArteriaPressureTransducer : Component
+	public class ArteriaPressureTransducer : Component
 	{
 		public readonly BloodFlowSink SenseFlow = new BloodFlowSink();
 		
@@ -74,7 +74,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class HeparinPump : Component
+	public class HeparinPump : Component
 	{
 		public readonly BloodFlowSource HeparinFlow = new BloodFlowSource();
 
@@ -103,7 +103,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class ArtierialChamber : Component
+	public class ArtierialChamber : Component
 	{
 		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
 
@@ -127,7 +127,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class VenousChamber : Component
+	public class VenousChamber : Component
 	{
 		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
 
@@ -151,7 +151,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class VenousPressureTransducer : Component
+	public class VenousPressureTransducer : Component
 	{
 		public readonly BloodFlowSink SenseFlow = new BloodFlowSink();
 
@@ -177,7 +177,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class VenousSafetyDetector : Component
+	public class VenousSafetyDetector : Component
 	{
 		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
 
@@ -222,7 +222,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class VenousTubingValve : Component
+	public class VenousTubingValve : Component
 	{
 		// HACK: To be able to react in time we delay the BloodFlow
 		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
@@ -280,7 +280,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class ExtracorporealBloodCircuit : Component
+	public class ExtracorporealBloodCircuit : Component
 	{
 		public readonly BloodFlowComposite BloodFlow = new BloodFlowComposite();
 		public readonly BloodFlowUniqueOutgoingStub FromDialyzer = new BloodFlowUniqueOutgoingStub();

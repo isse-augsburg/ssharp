@@ -2,7 +2,7 @@
 {
 	using SafetySharp.Modeling;
 	
-	class Patient : Component
+	public class Patient : Component
 	{
 		// Patient is the source and the sink of blood
 		public readonly BloodFlowSource ArteryFlow = new BloodFlowSource();

@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace HemodialysisMachine.Model
 {
-	enum ValveState
+	public enum ValveState
 	{
 		Open,
 		Closed

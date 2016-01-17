@@ -913,6 +913,8 @@
                         <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path50060653924" Fill="#FFFFFFFF" StrokeThickness="0.375" Stroke="#FFFFFFFF" StrokeLineJoin="Round" Data="m 439.5848 -66.886755 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z"/>
                     </Canvas>
                 </Canvas>
+                <Button x:Name="BloodPumpDefect" Content="Enable BloodPump Defect" Canvas.Left="535" Canvas.Top="359" Width="151" Click="BloodPumpDefect_Click"/>
+                <Button x:Name="ModelValues" Content="Print Model Values" Canvas.Left="329" Canvas.Top="359" Width="137" Click="ModelValues_Click"/>
             </Canvas>
         </Viewbox>
     </DockPanel>

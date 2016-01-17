@@ -47,27 +47,33 @@ namespace HemodialysisMachine.Model
 			WasUsed = from.WasUsed;
 			Temperature = from.Temperature;
 		}
+
+		public void PrintDialyzingFluidValues(string description)
+		{
+			System.Console.Out.WriteLine("\t" + description);
+			System.Console.Out.WriteLine("\t\tQuantity: " + Quantity.ToString());
+		}
 	}
 
 
-	class DialyzingFluidFlowInToOutSegment : FlowInToOutSegment<DialyzingFluid,Suction>
+	public class DialyzingFluidFlowInToOutSegment : FlowInToOutSegment<DialyzingFluid,Suction>
 	{
 	}
 
-	class DialyzingFluidFlowSource : FlowSource<DialyzingFluid, Suction>
+	public class DialyzingFluidFlowSource : FlowSource<DialyzingFluid, Suction>
 	{
 	}
 
-	class DialyzingFluidFlowSink : FlowSink<DialyzingFluid, Suction>
+	public class DialyzingFluidFlowSink : FlowSink<DialyzingFluid, Suction>
 	{
 	}
 
-	class DialyzingFluidFlowComposite : FlowComposite<DialyzingFluid, Suction>
+	public class DialyzingFluidFlowComposite : FlowComposite<DialyzingFluid, Suction>
 	{
 	}
 
 
-	class DialyzingFluidFlowVirtualSplitter : FlowVirtualSplitter<DialyzingFluid, Suction>, IIntFlowComponent
+	public class DialyzingFluidFlowVirtualSplitter : FlowVirtualSplitter<DialyzingFluid, Suction>, IIntFlowComponent
 	{
 		public DialyzingFluidFlowVirtualSplitter(int number)
 			: base(number)
@@ -132,7 +138,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class DialyzingFluidFlowVirtualMerger : FlowVirtualMerger<DialyzingFluid, Suction>, IIntFlowComponent
+	public class DialyzingFluidFlowVirtualMerger : FlowVirtualMerger<DialyzingFluid, Suction>, IIntFlowComponent
 	{
 		public DialyzingFluidFlowVirtualMerger(int number)
 			: base(number)
@@ -176,7 +182,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class DialyzingFluidFlowCombinator : FlowCombinator<DialyzingFluid, Suction>, IIntFlowComponent
+	public class DialyzingFluidFlowCombinator : FlowCombinator<DialyzingFluid, Suction>, IIntFlowComponent
 	{
 		public override FlowVirtualMerger<DialyzingFluid, Suction> CreateFlowVirtualMerger(int elementNos)
 		{
@@ -189,11 +195,11 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class DialyzingFluidFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<DialyzingFluid, Suction>
+	public class DialyzingFluidFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<DialyzingFluid, Suction>
 	{
 	}
 
-	class DialyzingFluidFlowUniqueIncomingStub : FlowUniqueIncomingStub<DialyzingFluid, Suction>
+	public class DialyzingFluidFlowUniqueIncomingStub : FlowUniqueIncomingStub<DialyzingFluid, Suction>
 	{
 	}
 }

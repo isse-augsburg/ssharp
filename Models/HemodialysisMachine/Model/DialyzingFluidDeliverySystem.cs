@@ -14,7 +14,7 @@ namespace HemodialysisMachine.Model
 	// http://principlesofdialysis.weebly.com/uploads/5/6/1/3/5613613/2008ccmodule4.pdf
 	// -> Chapter "Volumetric UF Control"
 
-	class DialyzingFluidWaterSupply : Component
+	public class DialyzingFluidWaterSupply : Component
 	{
 		public readonly DialyzingFluidFlowSource MainFlow = new DialyzingFluidFlowSource();
 		
@@ -42,7 +42,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class DialyzingFluidWaterPreparation : Component
+	public class DialyzingFluidWaterPreparation : Component
 	{
 		public readonly DialyzingFluidFlowInToOutSegment MainFlow = new DialyzingFluidFlowInToOutSegment();
 
@@ -66,7 +66,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class DialyzingFluidConcentrateSupply : Component
+	public class DialyzingFluidConcentrateSupply : Component
 	{
 		public readonly DialyzingFluidFlowSource Concentrate = new DialyzingFluidFlowSource();
 
@@ -95,7 +95,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class DialyzingFluidPreparation : Component
+	public class DialyzingFluidPreparation : Component
 	{
 		public readonly DialyzingFluidFlowSink Concentrate = new DialyzingFluidFlowSink();
 		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
@@ -151,11 +151,11 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class DialyzingUltraFiltrationPump : Component
+	public class DialyzingUltraFiltrationPump : Component
 	{
 		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
 
-		public int UltraFiltrationValue = 0;
+		public int UltraFiltrationValue = 1;
 
 		[Provided]
 		public void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
@@ -177,7 +177,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class DialyzingFluidDrain : Component
+	public class DialyzingFluidDrain : Component
 	{
 		public readonly DialyzingFluidFlowSink DrainFlow = new DialyzingFluidFlowSink();
 
@@ -200,7 +200,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class DialyzingFluidSafetyBypass : Component
+	public class DialyzingFluidSafetyBypass : Component
 	{
 		public readonly DialyzingFluidFlowInToOutSegment MainFlow = new DialyzingFluidFlowInToOutSegment();
 		public readonly DialyzingFluidFlowSource DrainFlow = new DialyzingFluidFlowSource();
@@ -214,15 +214,15 @@ namespace HemodialysisMachine.Model
 		{
 			if (BypassEnabled || incoming.Temperature != QualitativeTemperature.BodyHeat)
 			{
-				outgoing.CopyValuesFrom(incoming);
-			}
-			else
-			{
 				outgoing.Quantity = 0;
 				outgoing.ContaminatedByBlood = false;
 				outgoing.Temperature = QualitativeTemperature.TooCold;
 				outgoing.WasUsed = false;
 				outgoing.KindOfDialysate = KindOfDialysate.Water;
+			}
+			else
+			{
+				outgoing.CopyValuesFrom(incoming);
 			}
 		}
 
@@ -252,8 +252,8 @@ namespace HemodialysisMachine.Model
 		}
 
 	}
-	
-	class SimplifiedBalanceChamber : Component
+
+	public class SimplifiedBalanceChamber : Component
 	{
 		public readonly DialyzingFluidFlowUniqueIncomingStub ProducedDialysingFluid = new DialyzingFluidFlowUniqueIncomingStub();
 		public readonly DialyzingFluidFlowUniqueIncomingStub UsedDialysingFluid = new DialyzingFluidFlowUniqueIncomingStub();
@@ -313,9 +313,48 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
+	public class PumpToBalanceChamber : Component
+	{
+		public readonly DialyzingFluidFlowInToOutSegment MainFlow = new DialyzingFluidFlowInToOutSegment();
+		
+
+		[Provided]
+		public void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		{
+			outgoing.CopyValuesFrom(incoming);
+		}
+
+		[Provided]
+		public virtual void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		{
+			outgoingSuction.CustomSuctionValue = 4; //Force the pump
+			outgoingSuction.SuctionType = SuctionType.CustomSuction;
+		}
+		
+
+		protected override void CreateBindings()
+		{
+			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
+			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+		}
+
+		public readonly Fault PumpToBalanceChamberDefect = new TransientFault();
+
+		[FaultEffect(Fault = nameof(PumpToBalanceChamberDefect))]
+		public class PumpToBalanceChamberDefectEffect : PumpToBalanceChamber
+		{
+			[Provided]
+			public override void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+			{
+				outgoingSuction.CustomSuctionValue = 0;
+				outgoingSuction.SuctionType = SuctionType.CustomSuction;
+			}
+		}
+	}
+
 
 	// Also called dialyzing fluid delivery system
-	class DialyzingFluidDeliverySystem : Component
+	public class DialyzingFluidDeliverySystem : Component
 	{
 		public readonly DialyzingFluidFlowUniqueOutgoingStub FromDialyzer = new DialyzingFluidFlowUniqueOutgoingStub();
 		public readonly DialyzingFluidFlowUniqueIncomingStub ToDialyzer = new DialyzingFluidFlowUniqueIncomingStub();
@@ -325,6 +364,7 @@ namespace HemodialysisMachine.Model
 		public readonly DialyzingFluidConcentrateSupply DialyzingFluidConcentrateSupply = new DialyzingFluidConcentrateSupply();
 		public readonly DialyzingFluidPreparation DialyzingFluidPreparation = new DialyzingFluidPreparation();
 		public readonly SimplifiedBalanceChamber BalanceChamber = new SimplifiedBalanceChamber();
+		public readonly PumpToBalanceChamber PumpToBalanceChamber = new PumpToBalanceChamber();
 		public readonly DialyzingFluidDrain DialyzingFluidDrain = new DialyzingFluidDrain();
 		public readonly DialyzingFluidSafetyBypass DialyzingFluidSafetyBypass = new DialyzingFluidSafetyBypass();
 
@@ -349,8 +389,10 @@ namespace HemodialysisMachine.Model
 				FromDialyzer.Outgoing,
 				new PortFlowIn<DialyzingFluid, Suction>[] {
 					DialyzingUltraFiltrationPump.DialyzingFluidFlow.Incoming,
-					BalanceChamber.UsedDialysingFluid.Incoming
+					PumpToBalanceChamber.MainFlow.Incoming
 				});
+			flowCombinator.Connect(PumpToBalanceChamber.MainFlow.Outgoing,
+				BalanceChamber.UsedDialysingFluid.Incoming);
 			flowCombinator.Connect(
 				new PortFlowOut<DialyzingFluid, Suction>[] {
 					DialyzingFluidSafetyBypass.DrainFlow.Outgoing,

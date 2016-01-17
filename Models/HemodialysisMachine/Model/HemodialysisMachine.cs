@@ -8,7 +8,7 @@ namespace HemodialysisMachine.Model
 {
 	using SafetySharp.Modeling;
 
-	class HdMachine : Component
+	public class HdMachine : Component
 	{
 		public readonly Dialyzer Dialyzer;
 		public readonly ExtracorporealBloodCircuit ExtracorporealBloodCircuit;

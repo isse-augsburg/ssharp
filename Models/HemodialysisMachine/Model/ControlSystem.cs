@@ -23,7 +23,7 @@ namespace HemodialysisMachine.Model
 	//   trans membrane pressure too low).
 	// - leave out parameters which are sensed and not set by the medical staff (ActualTmp).
 
-	enum InternalTherapyPhase // the phase seen by controller
+	public enum InternalTherapyPhase // the phase seen by controller
 	{
 		//PreparationSelfTest,
 		//PreparationConnectingConcentrate,
@@ -58,7 +58,7 @@ namespace HemodialysisMachine.Model
 		public bool UseHeparinInThreatment { get; set; } = true;// true=enabled, false=disabled
 	}
 
-	class ControlSystem : Component
+	public class ControlSystem : Component
 	{
 
 		//[Hidden]

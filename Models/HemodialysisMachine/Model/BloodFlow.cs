@@ -5,7 +5,7 @@ namespace HemodialysisMachine.Model
 	using System.ComponentModel;
 	using Utilities.BidirectionalFlow;
 
-	class Blood : IElement<Blood>
+	public class Blood : IElement<Blood>
 	{
 		public int Water = 0;
 		public int SmallWasteProducts = 0;
@@ -38,24 +38,24 @@ namespace HemodialysisMachine.Model
 	}
 
 
-	class BloodFlowInToOutSegment : FlowInToOutSegment<Blood, Suction>
+	public class BloodFlowInToOutSegment : FlowInToOutSegment<Blood, Suction>
 	{
 	}
 
-	class BloodFlowSource : FlowSource<Blood, Suction>
+	public class BloodFlowSource : FlowSource<Blood, Suction>
 	{
 	}
 
-	class BloodFlowSink : FlowSink<Blood, Suction>
+	public class BloodFlowSink : FlowSink<Blood, Suction>
 	{
 	}
 
-	class BloodFlowComposite : FlowComposite<Blood, Suction>
+	public class BloodFlowComposite : FlowComposite<Blood, Suction>
 	{
 	}
 
 
-	class BloodFlowVirtualSplitter : FlowVirtualSplitter<Blood, Suction>, IIntFlowComponent
+	public class BloodFlowVirtualSplitter : FlowVirtualSplitter<Blood, Suction>, IIntFlowComponent
 	{
 		public BloodFlowVirtualSplitter(int number)
 			: base(number)
@@ -93,7 +93,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class BloodFlowVirtualMerger : FlowVirtualMerger<Blood, Suction>, IIntFlowComponent
+	public class BloodFlowVirtualMerger : FlowVirtualMerger<Blood, Suction>, IIntFlowComponent
 	{
 		public BloodFlowVirtualMerger(int number)
 			: base(number)
@@ -143,7 +143,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class BloodFlowCombinator : FlowCombinator<Blood, Suction>, IIntFlowComponent
+	public class BloodFlowCombinator : FlowCombinator<Blood, Suction>, IIntFlowComponent
 	{
 		public override FlowVirtualMerger<Blood, Suction> CreateFlowVirtualMerger(int elementNos)
 		{
@@ -156,11 +156,11 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	class BloodFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<Blood, Suction>
+	public class BloodFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<Blood, Suction>
 	{
 	}
 
-	class BloodFlowUniqueIncomingStub : FlowUniqueIncomingStub<Blood, Suction>
+	public class BloodFlowUniqueIncomingStub : FlowUniqueIncomingStub<Blood, Suction>
 	{
 	}
 }
