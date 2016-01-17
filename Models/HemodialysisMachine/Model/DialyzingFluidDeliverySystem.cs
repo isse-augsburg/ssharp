@@ -117,11 +117,10 @@ namespace HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public virtual void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
 			outgoingSuction.CustomSuctionValue=4; //Force the pump
 			outgoingSuction.SuctionType=SuctionType.CustomSuction;
-
 		}
 
 		[Provided]
@@ -136,6 +135,19 @@ namespace HemodialysisMachine.Model
 			Bind(nameof(DialyzingFluidFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
 			Bind(nameof(DialyzingFluidFlow.SetOutgoingForward), nameof(SetMainFlow));
 			Bind(nameof(Concentrate.ForwardFromPredecessorWasUpdated), nameof(ReceivedConcentrate));
+		}
+
+		public readonly Fault DialyzingFluidPreparationPumpDefect = new TransientFault();
+
+		[FaultEffect(Fault = nameof(DialyzingFluidPreparationPumpDefect))]
+		public class DialyzingFluidPreparationPumpDefectEffect : DialyzingFluidPreparation
+		{
+			[Provided]
+			public override void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+			{
+				outgoingSuction.CustomSuctionValue = 0;
+				outgoingSuction.SuctionType = SuctionType.CustomSuction;
+			}
 		}
 	}
 

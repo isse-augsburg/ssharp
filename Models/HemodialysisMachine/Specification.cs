@@ -70,5 +70,16 @@ namespace HemodialysisMachine
 				return false;
 			}
 		}
+
+		[Hazard]
+		public Formula BloodNotCleanedAndDialyzingFinished
+		{
+			get
+			{
+				var bloodIsNotCleaned = Patient.BigWasteProducts > 0 || Patient.SmallWasteProducts > 0;
+				var dialyzingFinished = HdMachine.ControlSystem.TimeStepsLeft == 0;
+				return bloodIsNotCleaned && dialyzingFinished;
+			}
+		}
 	}
 }

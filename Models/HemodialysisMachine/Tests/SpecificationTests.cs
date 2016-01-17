@@ -51,6 +51,15 @@ namespace HemodialysisMachine.Tests
 			var testModel = new Specification();
 			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (DialyzingFluidFlowCombinator)simulator.Model.RootComponents[0];
 		}
@@ -76,6 +85,30 @@ namespace HemodialysisMachine.Tests
 			foreach (var cutSet in result.MinimalCutSets)
 				Console.WriteLine("   ({1}) {{ {0} }}", String.Join(", ", cutSet.Select(fault => fault.Name)), i++);
 				
+		}
+
+
+		[Test]
+		public void DialysisFinishedAndBloodNotCleaned_ModelChecking()
+		{
+			var specification = new Specification();
+
+			var analysis = new SafetyAnalysis(new LtsMin(), Model.Create(specification));
+
+			var result = analysis.ComputeMinimalCutSets(specification.BloodNotCleanedAndDialyzingFinished, $"counter examples/hdmachine");
+			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
+
+			Console.WriteLine("Faults: {0}", String.Join(", ", result.Faults.Select(fault => fault.Name)));
+			Console.WriteLine();
+
+			Console.WriteLine("Checked Fault Sets: {0} ({1:F0}% of all fault sets)", result.CheckedSetsCount, percentage);
+			Console.WriteLine("Minimal Cut Sets: {0}", result.MinimalCutSetsCount);
+			Console.WriteLine();
+
+			var i = 1;
+			foreach (var cutSet in result.MinimalCutSets)
+				Console.WriteLine("   ({1}) {{ {0} }}", String.Join(", ", cutSet.Select(fault => fault.Name)), i++);
+
 		}
 	}
 }

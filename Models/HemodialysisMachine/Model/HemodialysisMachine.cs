@@ -17,6 +17,7 @@ namespace HemodialysisMachine.Model
 
 		[Hidden]
 		public readonly BloodFlowUniqueOutgoingStub FromPatientArtery;
+
 		[Hidden]
 		public readonly BloodFlowUniqueIncomingStub ToPatientVein;
 
@@ -52,6 +53,9 @@ namespace HemodialysisMachine.Model
 				Dialyzer.DialyzingFluidFlow.Outgoing);
 		}
 
-
+		public override void Update()
+		{
+			Update(ControlSystem);
+		}
 	}
 }

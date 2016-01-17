@@ -22,7 +22,7 @@ namespace HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public virtual void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
 			outgoingSuction.CustomSuctionValue = SpeedOfMotor; //Force suction set by motor
 			outgoingSuction.SuctionType=SuctionType.CustomSuction;
@@ -32,6 +32,19 @@ namespace HemodialysisMachine.Model
 		{
 			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
 			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+		}
+
+		public readonly Fault BloodPumpDefect = new TransientFault();
+
+		[FaultEffect(Fault = nameof(BloodPumpDefect))]
+		public class BloodPumpDefectEffect : ArterialBloodPump
+		{
+			[Provided]
+			public override void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+			{
+				outgoingSuction.CustomSuctionValue = 0; //Force suction set by motor
+				outgoingSuction.SuctionType = SuctionType.CustomSuction;
+			}
 		}
 	}
 
@@ -171,7 +184,7 @@ namespace HemodialysisMachine.Model
 		public bool DetectedGasOrContaminatedBlood = false;
 
 		[Provided]
-		public void SetMainFlow(Blood outgoing, Blood incoming)
+		public virtual void SetMainFlow(Blood outgoing, Blood incoming)
 		{
 			outgoing.CopyValuesFrom(incoming);
 			if (incoming.GasFree == false || incoming.ChemicalCompositionOk != true)
@@ -194,6 +207,18 @@ namespace HemodialysisMachine.Model
 		{
 			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
 			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+		}
+
+		public readonly Fault SafetyDetectorDefect = new TransientFault();
+
+		[FaultEffect(Fault = nameof(SafetyDetectorDefect))]
+		public class SafetyDetectorDefectEffect : VenousSafetyDetector
+		{
+			public override void SetMainFlow(Blood outgoing, Blood incoming)
+			{
+				outgoing.CopyValuesFrom(incoming);
+				DetectedGasOrContaminatedBlood = false;
+			}
 		}
 	}
 
@@ -233,7 +258,7 @@ namespace HemodialysisMachine.Model
 			outgoingSuction.CopyValuesFrom(incomingSuction);
 		}
 
-		public void CloseValve()
+		public virtual void CloseValve()
 		{
 			ValveState = ValveState.Closed;
 		}
@@ -242,6 +267,16 @@ namespace HemodialysisMachine.Model
 		{
 			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
 			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+		}
+
+		public readonly Fault ValveDoesNotClose = new TransientFault();
+
+		[FaultEffect(Fault = nameof(ValveDoesNotClose))]
+		public class ValveDoesNotCloseEffect : VenousTubingValve
+		{
+			public override void CloseValve()
+			{
+			}
 		}
 	}
 
