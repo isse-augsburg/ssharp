@@ -33,6 +33,7 @@ namespace HemodialysisMachine.Tests
 	using SafetySharp.Runtime;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
 	using Utilities;
 
 	public class SpecificationTests
@@ -94,7 +95,7 @@ namespace HemodialysisMachine.Tests
 		{
 			var specification = new Specification();
 
-			var analysis = new SafetyAnalysis(new SSharpChecker {StateCapacity = 131072}, Model.Create(specification));
+			var analysis = new SafetyAnalysis(new SSharpChecker {StateCapacity = 1310720}, Model.Create(specification));
 			
 			var result = analysis.ComputeMinimalCutSets(specification.IncomingBloodNotOk, $"counter examples/hdmachine");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
@@ -134,6 +135,21 @@ namespace HemodialysisMachine.Tests
 			foreach (var cutSet in result.MinimalCutSets)
 				Console.WriteLine("   ({1}) {{ {0} }}", String.Join(", ", cutSet.Select(fault => fault.Name)), i++);
 
+		}
+
+		[Test]
+		public void Test()
+		{
+			var specification = new Specification();
+			var model = Model.Create(specification);
+			var faults = model.GetFaults();
+
+			for (var i = 0; i < faults.Length; ++i)
+				faults[i].Activation = Activation.Nondeterministic;
+
+			var checker = new SSharpChecker { StateCapacity = 1310720, CpuCount = 1};
+			checker.CheckInvariant(model, true);
+			
 		}
 	}
 }
