@@ -62,6 +62,11 @@ namespace SafetySharp.Runtime
 		private readonly int _effectiveStateVectorSize;
 
 		/// <summary>
+		///   The number of bytes at the beginning of the state vector that are used to store fault activation states.
+		/// </summary>
+		private readonly int _faultBytes;
+
+		/// <summary>
 		///   The buffer that stores the hash table information.
 		/// </summary>
 		private readonly MemoryBuffer _hashBuffer = new MemoryBuffer();
@@ -85,11 +90,6 @@ namespace SafetySharp.Runtime
 		///   The length in bytes of a state vector.
 		/// </summary>
 		private readonly int _stateVectorSize;
-
-		/// <summary>
-		///   The number of bytes at the beginning of the state vector that are used to store fault activation states.
-		/// </summary>
-		private readonly int _faultBytes;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -179,7 +179,8 @@ namespace SafetySharp.Runtime
 				}
 			}
 
-			throw new OutOfMemoryException("Failed to find an empty hash table slot within a reasonable amount of time.");
+			throw new OutOfMemoryException(
+				"Failed to find an empty hash table slot within a reasonable amount of time. Try increasing the state capacity.");
 		}
 
 		/// <summary>
