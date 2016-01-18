@@ -124,7 +124,9 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax declaration)
 		{
+			var originalDeclaration = declaration;
 			var methodSymbol = declaration.GetMethodSymbol(SemanticModel);
+
 			if (!methodSymbol.ContainingType.IsFaultEffect(SemanticModel) || !methodSymbol.IsOverride)
 				return declaration;
 
@@ -132,7 +134,7 @@ namespace SafetySharp.Compiler.Normalization
 			var invocation = Syntax.InvocationExpression(memberAccess, CreateInvocationArguments(methodSymbol.Parameters));
 
 			declaration = declaration.WithBody(CreateBody(methodSymbol, declaration.Body, invocation));
-			return declaration;
+			return declaration.EnsureLineCount(originalDeclaration);
 		}
 
 		/// <summary>
@@ -140,7 +142,9 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		public override SyntaxNode VisitAccessorDeclaration(AccessorDeclarationSyntax accessor)
 		{
+			var originalAccessor = accessor;
 			var methodSymbol = accessor.GetMethodSymbol(SemanticModel);
+
 			if (!methodSymbol.ContainingType.IsFaultEffect(SemanticModel) || !methodSymbol.IsOverride)
 				return accessor;
 
@@ -158,7 +162,7 @@ namespace SafetySharp.Compiler.Normalization
 				baseExpression = Syntax.AssignmentStatement(baseExpression, Syntax.IdentifierName("value"));
 
 			accessor = accessor.WithBody(CreateBody(methodSymbol, accessor.Body, baseExpression));
-			return accessor;
+			return accessor.EnsureLineCount(originalAccessor);
 		}
 
 		/// <summary>

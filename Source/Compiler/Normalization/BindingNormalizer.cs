@@ -95,7 +95,7 @@ namespace SafetySharp.Compiler.Normalization
 			var bindMemberAccess = Syntax.MemberAccessExpression(binderInstance, nameof(PortBinding.Bind));
 			var invocation = (ExpressionSyntax)Syntax.InvocationExpression(bindMemberAccess);
 
-			return statement.WithExpression(invocation).NormalizeWhitespace().WithTrivia(statement).EnsureLineCount(statement);
+			return statement.WithExpression(invocation).NormalizeWhitespace().WithTrivia(statement).PrependLineDirective(statement.GetLineNumber());
 		}
 
 		/// <summary>
