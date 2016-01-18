@@ -92,6 +92,15 @@ namespace HemodialysisMachine.Model
 			{
 				outgoing.CopyValuesFrom(incoming);
 			}
+			if (!MembraneIntact)
+			{
+				outgoing.ChemicalCompositionOk = false;
+			}
+		}
+
+		public override void Update()
+		{
+			
 		}
 
 		protected override void CreateBindings()
@@ -100,6 +109,19 @@ namespace HemodialysisMachine.Model
 			Bind(nameof(DialyzingFluidFlow.SetOutgoingForward), nameof(SetDialyzingFluidFlow));
 			Bind(nameof(BloodFlow.SetOutgoingBackward), nameof(SetBloodFlowSuction));
 			Bind(nameof(BloodFlow.SetOutgoingForward), nameof(SetBloodFlow));
+		}
+
+
+		public readonly Fault DialyzerMembraneRupturesFault = new TransientFault();
+
+		[FaultEffect(Fault = nameof(DialyzerMembraneRupturesFault))]
+		public class DialyzerMembraneRupturesFaultEffect : Dialyzer
+		{
+			public override void Update()
+			{
+				base.Update();
+				MembraneIntact = false;
+			}
 		}
 	}
 }

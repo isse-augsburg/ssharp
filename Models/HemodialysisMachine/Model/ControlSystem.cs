@@ -106,6 +106,7 @@ namespace HemodialysisMachine.Model
 			{
 				ArterialBloodPump.SpeedOfMotor = 4;
 			}
+
 			// a) Check arterial entry pressure
 			// b) Check bloodside entry pressure at the dialysator
 			// c)

@@ -65,9 +65,10 @@ namespace HemodialysisMachine
 			get
 			{
 				var incomingBlood = Patient.VeinFlow.Incoming.ForwardFromPredecessor;
-				if (incomingBlood.ChemicalCompositionOk && incomingBlood.GasFree && incomingBlood.Temperature == QualitativeTemperature.BodyHeat)
-					return true;
-				return false;
+				Formula receivedSomething = incomingBlood.BigWasteProducts > 0 || incomingBlood.Water > 0;
+				Formula compositionOk = incomingBlood.ChemicalCompositionOk && incomingBlood.GasFree &&
+										(incomingBlood.Temperature == QualitativeTemperature.BodyHeat);
+				return receivedSomething && !compositionOk;
 			}
 		}
 
@@ -76,8 +77,8 @@ namespace HemodialysisMachine
 		{
 			get
 			{
-				var bloodIsNotCleaned = Patient.BigWasteProducts > 0 || Patient.SmallWasteProducts > 0;
-				var dialyzingFinished = HdMachine.ControlSystem.TimeStepsLeft == 0;
+				Formula bloodIsNotCleaned = Patient.BigWasteProducts > 0 || Patient.SmallWasteProducts > 0;
+				Formula dialyzingFinished = HdMachine.ControlSystem.TimeStepsLeft == 0;
 				return bloodIsNotCleaned && dialyzingFinished;
 			}
 		}

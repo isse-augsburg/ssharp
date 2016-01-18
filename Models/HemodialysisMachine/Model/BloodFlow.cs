@@ -128,12 +128,11 @@ namespace HemodialysisMachine.Model
 			var number = sources.Length;
 			for (int i = 1; i < number; i++) //start with second element
 			{
-				target.ChemicalCompositionOk |= sources[i].ChemicalCompositionOk;
-				target.GasFree |= sources[i].GasFree;
+				target.ChemicalCompositionOk &= sources[i].ChemicalCompositionOk;
+				target.GasFree &= sources[i].GasFree;
 				target.BigWasteProducts += sources[i].BigWasteProducts;
 				target.SmallWasteProducts += sources[i].SmallWasteProducts;
 				target.HasHeparin |= sources[i].HasHeparin;
-				target.GasFree |= sources[i].GasFree;
 				target.Water += sources[i].Water;
 				if (sources[i].Temperature != QualitativeTemperature.BodyHeat)
 					target.Temperature = sources[i].Temperature;

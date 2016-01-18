@@ -47,7 +47,7 @@ namespace HemodialysisMachine.Model
 		public readonly DialyzingFluidFlowInToOutSegment MainFlow = new DialyzingFluidFlowInToOutSegment();
 
 		[Provided]
-		public void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		public virtual void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
 		{
 			outgoing.CopyValuesFrom(incoming);
 			outgoing.Temperature = QualitativeTemperature.BodyHeat;
@@ -63,6 +63,19 @@ namespace HemodialysisMachine.Model
 		{
 			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
 			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+		}
+
+		public readonly Fault WaterHeaterDefect = new TransientFault();
+
+		[FaultEffect(Fault = nameof(WaterHeaterDefect))]
+		public class WaterHeaterDefectEffect : DialyzingFluidWaterPreparation
+		{
+			[Provided]
+			public override void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+			{
+				outgoing.CopyValuesFrom(incoming);
+				outgoing.Temperature = QualitativeTemperature.BodyHeat;
+			}
 		}
 	}
 
@@ -210,7 +223,7 @@ namespace HemodialysisMachine.Model
 		public bool BypassEnabled = false;
 
 		[Provided]
-		public void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		public virtual void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
 		{
 			if (BypassEnabled || incoming.Temperature != QualitativeTemperature.BodyHeat)
 			{
@@ -251,6 +264,18 @@ namespace HemodialysisMachine.Model
 			Bind(nameof(DrainFlow.BackwardFromSuccessorWasUpdated), nameof(ReceivedSuction));
 		}
 
+
+		public readonly Fault SafetyBypassFault = new TransientFault();
+
+		[FaultEffect(Fault = nameof(SafetyBypassFault))]
+		public class SafetyBypassFaultEffect : DialyzingFluidSafetyBypass
+		{
+			[Provided]
+			public override void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+			{
+				outgoing.CopyValuesFrom(incoming);
+			}
+		}
 	}
 
 	public class SimplifiedBalanceChamber : Component
