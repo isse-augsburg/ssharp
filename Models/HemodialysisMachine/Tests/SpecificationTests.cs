@@ -147,7 +147,7 @@ namespace HemodialysisMachine.Tests
 			for (var i = 0; i < faults.Length; ++i)
 				faults[i].Activation = Activation.Nondeterministic;
 
-			var checker = new SSharpChecker { StateCapacity = 1310720, CpuCount = 1};
+			var checker = new SSharpChecker { StateCapacity = 1310720};
 			checker.CheckInvariant(model, true);
 			
 		}

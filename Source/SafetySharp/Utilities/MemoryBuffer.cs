@@ -91,6 +91,22 @@ namespace SafetySharp.Utilities
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
+			CheckBounds();
+
+			if (Pointer == null)
+				return;
+
+			Marshal.FreeHGlobal(new IntPtr(Pointer - CheckBytes));
+			GC.RemoveMemoryPressure(SizeInBytes + 2 * CheckBytes);
+
+			Pointer = null;
+		}
+
+		/// <summary>
+		///   Checks whether any writes have been out of bounds.
+		/// </summary>
+		internal void CheckBounds()
+		{
 			if (Pointer == null)
 				return;
 
@@ -99,11 +115,6 @@ namespace SafetySharp.Utilities
 				if (*(Pointer - i - 1) != CheckValue || *(Pointer + SizeInBytes + i) != CheckValue)
 					throw new InvalidOperationException("Out of bounds write detected.");
 			}
-
-			Marshal.FreeHGlobal(new IntPtr(Pointer - CheckBytes));
-			GC.RemoveMemoryPressure(SizeInBytes + 2 * CheckBytes);
-
-			Pointer = null;
 		}
 
 		[DllImport("Kernel32.dll", EntryPoint = "RtlZeroMemory", SetLastError = false)]

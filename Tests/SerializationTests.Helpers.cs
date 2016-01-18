@@ -28,25 +28,23 @@ namespace Tests
 	using JetBrains.Annotations;
 	using SafetySharp.Runtime.Serialization;
 	using SafetySharp.Utilities;
-	using Shouldly;
 	using Utilities;
 	using Xunit.Abstractions;
 
 	public abstract unsafe class SerializationObject : TestObject, IDisposable
 	{
-		private const int BoundsCheck = 4;
 		private SerializationDelegate _deserializer;
 		private ObjectTable _objectTable;
 		private SerializationDelegate _serializer;
-		private PinnedPointer _state;
 		protected byte* SerializedState { get; private set; }
 		protected int StateSlotCount { get; private set; }
 		protected int StateVectorSize { get; private set; }
 		protected StateVectorLayout StateVectorLayout { get; private set; }
+		private MemoryBuffer _buffer;
 
 		public void Dispose()
 		{
-			_state.Dispose();
+			_buffer.SafeDispose();
 		}
 
 		protected void GenerateCode(SerializationMode mode, params object[] objects)
@@ -60,21 +58,18 @@ namespace Tests
 
 			StateSlotCount = StateVectorLayout.SizeInBytes / 4;
 			StateVectorSize = StateVectorLayout.SizeInBytes;
-			_state = PinnedPointer.Create(new byte[StateVectorSize + 2 * BoundsCheck]);
-			SerializedState = (byte*)_state + BoundsCheck;
+			_buffer = new MemoryBuffer();
+			_buffer.Resize(StateVectorSize, zeroMemory: true);
+			SerializedState = _buffer.Pointer;
 
 			Output.Log("{0}", StateVectorLayout);
 		}
 
 		protected void Serialize()
 		{
-			for (var i = 0; i < BoundsCheck; ++i)
-				SerializedState[-1 - i].ShouldBe((byte)0);
-
+			_buffer.CheckBounds();
 			_serializer(SerializedState);
-
-			for (var i = 0; i < BoundsCheck; ++i)
-				SerializedState[StateVectorSize + i].ShouldBe((byte)0, "Detected out of bounds memory access.");
+			_buffer.CheckBounds();
 		}
 
 		protected void Deserialize()

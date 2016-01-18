@@ -132,7 +132,8 @@ namespace SafetySharp.Runtime.Serialization
 				if (_bitLevelAddressing)
 				{
 					_bitLevelAddressing = false;
-					Advance(1);
+					if (_bitIndex != 0)
+						Advance(1);
 				}
 				
 				Advance(group.PaddingBytes);
@@ -166,7 +167,8 @@ namespace SafetySharp.Runtime.Serialization
 				if (_bitLevelAddressing)
 				{
 					_bitLevelAddressing = false;
-					Advance(1);
+					if (_bitIndex != 0)
+						Advance(1);
 				}
 
 				Advance(group.PaddingBytes);

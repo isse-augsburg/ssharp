@@ -480,6 +480,8 @@
     <Compile Include="Reflection\Models\Subcomponents\multiple.cs" />
     <Compile Include="Reflection\Models\Subcomponents\single.cs" />
     <Compile Include="Serialization\Compaction\alignment.cs" />
+    <Compile Include="Serialization\Compaction\Boolean 1 byte.cs" />
+    <Compile Include="Serialization\Compaction\large.cs" />
     <Compile Include="Serialization\Compaction\mixed 4.cs" />
     <Compile Include="Serialization\Compaction\mixed 3.cs" />
     <Compile Include="Serialization\Compaction\mixed 2.cs" />
