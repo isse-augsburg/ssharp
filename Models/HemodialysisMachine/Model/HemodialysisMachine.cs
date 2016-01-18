@@ -55,7 +55,7 @@ namespace HemodialysisMachine.Model
 
 		public override void Update()
 		{
-			Update(ControlSystem);
+			Update(Dialyzer,ControlSystem);
 		}
 	}
 }

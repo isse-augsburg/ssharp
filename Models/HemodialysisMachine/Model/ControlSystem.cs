@@ -71,10 +71,12 @@ namespace HemodialysisMachine.Model
 		private readonly DialyzingFluidPreparation DialyzingFluidPreparation;
 		private readonly DialyzingUltraFiltrationPump DialyzingUltraFiltrationPump;
 		private readonly DialyzingFluidSafetyBypass DialyzingFluidSafetyBypass;
+		private readonly PumpToBalanceChamber PumpToBalanceChamber;
 		private readonly HeparinPump HeparinPump;
 		private readonly ArterialBloodPump ArterialBloodPump;
 		private readonly VenousPressureTransducer VenousPressureTransducer;
 		private readonly VenousSafetyDetector VenousSafetyDetector;
+		private readonly VenousTubingValve VenousTubingValve;
 
 
 		[Hidden]
@@ -89,27 +91,37 @@ namespace HemodialysisMachine.Model
 			DialyzingFluidPreparation = dialyzingFluidDeliverySystem.DialyzingFluidPreparation;
 			DialyzingUltraFiltrationPump = dialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump;
 			DialyzingFluidSafetyBypass = dialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass;
+			PumpToBalanceChamber = dialyzingFluidDeliverySystem.PumpToBalanceChamber;
 			HeparinPump = extracorporealBloodCircuit.HeparinPump;
 			ArterialBloodPump = extracorporealBloodCircuit.ArterialBloodPump;
 			VenousPressureTransducer = extracorporealBloodCircuit.VenousPressureTransducer;
 			VenousSafetyDetector = extracorporealBloodCircuit.VenousSafetyDetector;
+			VenousTubingValve = extracorporealBloodCircuit.VenousTubingValve;
 		}
 
 		public void StepOfMainTherapy()
 		{
 			TimeStepsLeft = (TimeStepsLeft > 0) ? (TimeStepsLeft - 1) : 0;
+			if (VenousSafetyDetector.DetectedGasOrContaminatedBlood)
+			{
+				//Shutdown
+				TimeStepsLeft = 0;
+				VenousTubingValve.CloseValve();
+			}
 			if (TimeStepsLeft == 0)
 			{
 				ArterialBloodPump.SpeedOfMotor = 0;
+				DialyzingUltraFiltrationPump.UltraFiltrationPumpSpeed = 0;
+				PumpToBalanceChamber.PumpSpeed = 0;
+				DialyzingFluidPreparation.PumpSpeed = 0;
 			}
 			else
 			{
 				ArterialBloodPump.SpeedOfMotor = 4;
+				DialyzingUltraFiltrationPump.UltraFiltrationPumpSpeed = 1;
+				PumpToBalanceChamber.PumpSpeed = 4;
+				DialyzingFluidPreparation.PumpSpeed = 4;
 			}
-
-			// a) Check arterial entry pressure
-			// b) Check bloodside entry pressure at the dialysator
-			// c)
 		}
 
 		public override void Update()

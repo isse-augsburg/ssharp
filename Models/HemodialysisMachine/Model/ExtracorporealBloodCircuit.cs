@@ -214,6 +214,7 @@ namespace HemodialysisMachine.Model
 		[FaultEffect(Fault = nameof(SafetyDetectorDefect))]
 		public class SafetyDetectorDefectEffect : VenousSafetyDetector
 		{
+			[Provided]
 			public override void SetMainFlow(Blood outgoing, Blood incoming)
 			{
 				outgoing.CopyValuesFrom(incoming);
@@ -234,7 +235,7 @@ namespace HemodialysisMachine.Model
 		[Provided]
 		public void SetMainFlow(Blood outgoing, Blood incoming)
 		{
-			DelayedBlood.CopyValuesFrom(incoming);
+			//Console.Out.WriteLine("mainflow of valve");
 			if (ValveState == ValveState.Open)
 			{
 				outgoing.CopyValuesFrom(DelayedBlood);
@@ -250,6 +251,7 @@ namespace HemodialysisMachine.Model
 				outgoing.Pressure = QualitativePressure.NoPressure;
 				outgoing.Temperature = QualitativeTemperature.BodyHeat;
 			}
+			DelayedBlood.CopyValuesFrom(incoming);
 		}
 
 		[Provided]
@@ -261,6 +263,7 @@ namespace HemodialysisMachine.Model
 		public virtual void CloseValve()
 		{
 			ValveState = ValveState.Closed;
+			//Console.Out.WriteLine("valve closed");
 		}
 
 		protected override void CreateBindings()
@@ -276,6 +279,7 @@ namespace HemodialysisMachine.Model
 		{
 			public override void CloseValve()
 			{
+				//Console.Out.WriteLine("valve not closed");
 			}
 		}
 	}

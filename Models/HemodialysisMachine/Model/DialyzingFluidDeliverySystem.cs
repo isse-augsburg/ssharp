@@ -74,7 +74,6 @@ namespace HemodialysisMachine.Model
 			public override void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
 			{
 				outgoing.CopyValuesFrom(incoming);
-				outgoing.Temperature = QualitativeTemperature.BodyHeat;
 			}
 		}
 	}
@@ -115,6 +114,8 @@ namespace HemodialysisMachine.Model
 
 		public KindOfDialysate KindOfDialysate = KindOfDialysate.Water;
 
+		public int PumpSpeed = 4;
+
 		[Provided]
 		public void SetConcentrateFlowSuction(Suction outgoingSuction)
 		{
@@ -132,7 +133,7 @@ namespace HemodialysisMachine.Model
 		[Provided]
 		public virtual void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
-			outgoingSuction.CustomSuctionValue=4; //Force the pump
+			outgoingSuction.CustomSuctionValue= PumpSpeed; //Force the pump
 			outgoingSuction.SuctionType=SuctionType.CustomSuction;
 		}
 
@@ -168,7 +169,7 @@ namespace HemodialysisMachine.Model
 	{
 		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
 
-		public int UltraFiltrationValue = 1;
+		public int UltraFiltrationPumpSpeed = 1;
 
 		[Provided]
 		public void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
@@ -180,7 +181,7 @@ namespace HemodialysisMachine.Model
 		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
 			outgoingSuction.SuctionType = SuctionType.CustomSuction;
-			outgoingSuction.CustomSuctionValue = UltraFiltrationValue;
+			outgoingSuction.CustomSuctionValue = UltraFiltrationPumpSpeed;
 		}
 
 		protected override void CreateBindings()
@@ -341,7 +342,8 @@ namespace HemodialysisMachine.Model
 	public class PumpToBalanceChamber : Component
 	{
 		public readonly DialyzingFluidFlowInToOutSegment MainFlow = new DialyzingFluidFlowInToOutSegment();
-		
+
+		public int PumpSpeed = 4;
 
 		[Provided]
 		public void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
@@ -352,7 +354,7 @@ namespace HemodialysisMachine.Model
 		[Provided]
 		public virtual void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
 		{
-			outgoingSuction.CustomSuctionValue = 4; //Force the pump
+			outgoingSuction.CustomSuctionValue = PumpSpeed; //Force the pump
 			outgoingSuction.SuctionType = SuctionType.CustomSuction;
 		}
 		

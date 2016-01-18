@@ -32,6 +32,7 @@ namespace HemodialysisMachine.Tests
 	using NUnit.Framework;
 	using SafetySharp.Runtime;
 	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 	using Utilities;
 
 	public class SpecificationTests
@@ -65,11 +66,35 @@ namespace HemodialysisMachine.Tests
 		}
 
 		[Test]
+		public void Simulate_10_Step_DialyzerRuptured()
+		{
+			var testModel = new Specification();
+
+			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var patient = simulator.Model.RootComponents.OfType<Patient>().First();
+			var hdMachine = simulator.Model.RootComponents.OfType<HdMachine>().First();
+			hdMachine.Dialyzer.DialyzerMembraneRupturesFault.Activation = Activation.Forced;
+			simulator.SimulateStep();
+			patient = simulator.Model.RootComponents.OfType<Patient>().First();
+			simulator.SimulateStep();
+			patient = simulator.Model.RootComponents.OfType<Patient>().First();
+			simulator.SimulateStep();
+			patient = simulator.Model.RootComponents.OfType<Patient>().First();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+		}
+
+		[Test]
 		public void IncomingBloodIsContaminated_ModelChecking()
 		{
 			var specification = new Specification();
 
-			var analysis = new SafetyAnalysis(new SSharpChecker {StateCapacity = 16384}, Model.Create(specification));
+			var analysis = new SafetyAnalysis(new SSharpChecker {StateCapacity = 131072}, Model.Create(specification));
 			
 			var result = analysis.ComputeMinimalCutSets(specification.IncomingBloodNotOk, $"counter examples/hdmachine");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
