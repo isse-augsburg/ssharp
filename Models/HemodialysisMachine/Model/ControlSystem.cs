@@ -34,6 +34,7 @@ namespace HemodialysisMachine.Model
 		//PreparationRinsingDialyzer,
 		//InitiationConnectingPatient,
 		InitiationMainTherapy,
+		EndOfThreatment
 		//EndingReinfusion,
 		//EndingEmptyingDialyzer,
 		//EndingEmptyingCatridge,
@@ -102,26 +103,20 @@ namespace HemodialysisMachine.Model
 		public void StepOfMainTherapy()
 		{
 			TimeStepsLeft = (TimeStepsLeft > 0) ? (TimeStepsLeft - 1) : 0;
-			if (VenousSafetyDetector.DetectedGasOrContaminatedBlood)
-			{
-				//Shutdown
-				TimeStepsLeft = 0;
-				VenousTubingValve.CloseValve();
-			}
-			if (TimeStepsLeft == 0)
-			{
-				ArterialBloodPump.SpeedOfMotor = 0;
-				DialyzingUltraFiltrationPump.UltraFiltrationPumpSpeed = 0;
-				PumpToBalanceChamber.PumpSpeed = 0;
-				DialyzingFluidPreparation.PumpSpeed = 0;
-			}
-			else
-			{
-				ArterialBloodPump.SpeedOfMotor = 4;
-				DialyzingUltraFiltrationPump.UltraFiltrationPumpSpeed = 1;
-				PumpToBalanceChamber.PumpSpeed = 4;
-				DialyzingFluidPreparation.PumpSpeed = 4;
-			}
+			ArterialBloodPump.SpeedOfMotor = 4;
+			DialyzingUltraFiltrationPump.UltraFiltrationPumpSpeed = 1;
+			PumpToBalanceChamber.PumpSpeed = 4;
+			DialyzingFluidPreparation.PumpSpeed = 4;
+		}
+
+		public void ShutdownMotors()
+		{
+			VenousTubingValve.CloseValve();
+			TimeStepsLeft = 0;
+			ArterialBloodPump.SpeedOfMotor = 0;
+			DialyzingUltraFiltrationPump.UltraFiltrationPumpSpeed = 0;
+			PumpToBalanceChamber.PumpSpeed = 0;
+			DialyzingFluidPreparation.PumpSpeed = 0;
 		}
 
 		public override void Update()
@@ -131,8 +126,15 @@ namespace HemodialysisMachine.Model
 				.Transition(
 					from: InternalTherapyPhase.InitiationMainTherapy,
 					to: InternalTherapyPhase.InitiationMainTherapy,
-					guard: true,
+					guard: TimeStepsLeft>0 && !VenousSafetyDetector.DetectedGasOrContaminatedBlood,
 					action: StepOfMainTherapy
+				);
+			CurrentTherapyPhase
+				.Transition(
+					from: InternalTherapyPhase.InitiationMainTherapy,
+					to: InternalTherapyPhase.EndOfThreatment,
+					guard: TimeStepsLeft <= 0 || VenousSafetyDetector.DetectedGasOrContaminatedBlood,
+					action: ShutdownMotors
 				);
 		}
 	}

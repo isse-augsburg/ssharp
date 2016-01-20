@@ -105,6 +105,7 @@ namespace HemodialysisMachine.Model
 
 	public class ArtierialChamber : Component
 	{
+		// Drip Chamber
 		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
 
 		[Provided]
@@ -129,6 +130,7 @@ namespace HemodialysisMachine.Model
 
 	public class VenousChamber : Component
 	{
+		// Drip Chamber
 		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
 
 		[Provided]
