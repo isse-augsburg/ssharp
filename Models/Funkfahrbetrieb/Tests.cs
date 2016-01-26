@@ -62,17 +62,11 @@ namespace Funkfahrbetrieb
 			for (var i = 0; i < faults.Length; ++i)
 				faults[i].Activation = Activation.Nondeterministic;
 
-			Formula f1 = true;
-			Formula f2 = true;
-			Formula f3 = true;
-			Formula f4 = f1 && f2 && f3.Implies(f1 || f2);
-
 			var checker = new SSharpChecker();
-			checker.CheckInvariant(model, f4);
+			checker.CheckInvariant(model, true);
 
 			var ltsMin = new LtsMin();
-			//ltsMin.CheckInvariant(model, f1 || f2 && f3 || f1 && f2);
-			ltsMin.CheckInvariant(model, f4);
+			ltsMin.CheckInvariant(model, true);
 		}
 
 		public static void Main()

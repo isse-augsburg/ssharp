@@ -45,6 +45,8 @@ namespace Funkfahrbetrieb.CrossingController
 
 		public override void Update()
 		{
+			Update(Motor, Radio, Sensor, Timer);
+
 			_stateMachine
 				.Transition(
 					from: State.Open,
