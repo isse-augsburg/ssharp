@@ -65,8 +65,18 @@ namespace SafetySharp.Utilities
 
 			var allocatedBytes = sizeInBytes + 2 * CheckBytes;
 			var oldBuffer = Pointer;
-			var newBuffer = (byte*)Marshal.AllocHGlobal(new IntPtr(allocatedBytes)).ToPointer();
-			GC.AddMemoryPressure(allocatedBytes);
+			byte* newBuffer;
+
+			try
+			{
+				newBuffer = (byte*)Marshal.AllocHGlobal(new IntPtr(allocatedBytes)).ToPointer();
+				GC.AddMemoryPressure(allocatedBytes);
+			}
+			catch (OutOfMemoryException)
+			{
+				throw new InvalidOperationException(
+					$"Unable to allocate {allocatedBytes:n0} bytes. Try optimizing state vector sizes or decrease the state capacity.");
+			}
 
 			if (zeroMemory)
 				ZeroMemory(new IntPtr(newBuffer + CheckBytes), new IntPtr(sizeInBytes));

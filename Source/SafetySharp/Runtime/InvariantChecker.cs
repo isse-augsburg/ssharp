@@ -82,7 +82,7 @@ namespace SafetySharp.Runtime
 
 			for (var i = 0; i < cpuCount; ++i)
 			{
-				stacks[i] = new StateStack(capacity);
+				stacks[i] = new StateStack(Math.Max(1024, capacity / 8));
 				_workers[i] = new Worker(i, this, stacks[i], i == 0 ? _model : RuntimeModelSerializer.Load(serializedModel));
 				_threads[i] = new Thread(_workers[i].Check) { IsBackground = true, Name = $"Worker {i}" };
 			}
