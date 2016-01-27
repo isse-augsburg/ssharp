@@ -58,20 +58,23 @@ namespace SafetySharp.Runtime
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
-		/// <param name="capacity">The number of states that can be stored.</param>
+		/// <param name="stateCapacity">The number of states that can be stored.</param>
+		/// <param name="stackCapacity">The maximum number of states that can be stored on the depth first search stack.</param>
 		/// <param name="cpuCount">The number of CPUs that should be used.</param>
 		/// <param name="enableFaultOptimization">Indicates whether S#'s fault optimization technique should be used.</param>
-		internal InvariantChecker(Model model, Formula invariant, Action<string> output, int capacity, int cpuCount, bool enableFaultOptimization)
+		internal InvariantChecker(Model model, Formula invariant, Action<string> output, int stateCapacity, int stackCapacity, int cpuCount,
+								  bool enableFaultOptimization)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
 			Requires.NotNull(output, nameof(output));
-			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
+			Requires.InRange(stateCapacity, nameof(stateCapacity), 1024, Int32.MaxValue);
+			Requires.InRange(stackCapacity, nameof(stackCapacity), 1024, Int32.MaxValue);
 
 			var serializedModel = RuntimeModelSerializer.Save(model, 0, invariant);
 
 			_model = RuntimeModelSerializer.Load(serializedModel);
-			_states = new StateStorage(_model.StateVectorLayout, capacity, enableFaultOptimization);
+			_states = new StateStorage(_model.StateVectorLayout, stateCapacity, enableFaultOptimization);
 			_output = output;
 
 			cpuCount = Math.Min(Environment.ProcessorCount, Math.Max(1, cpuCount));
@@ -82,7 +85,7 @@ namespace SafetySharp.Runtime
 
 			for (var i = 0; i < cpuCount; ++i)
 			{
-				stacks[i] = new StateStack(Math.Max(1024, capacity / 8));
+				stacks[i] = new StateStack(stackCapacity);
 				_workers[i] = new Worker(i, this, stacks[i], i == 0 ? _model : RuntimeModelSerializer.Load(serializedModel));
 				_threads[i] = new Thread(_workers[i].Check) { IsBackground = true, Name = $"Worker {i}" };
 			}

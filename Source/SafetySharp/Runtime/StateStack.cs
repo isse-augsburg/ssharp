@@ -60,9 +60,14 @@ namespace SafetySharp.Runtime
 		private readonly MemoryBuffer _statesBuffer = new MemoryBuffer();
 
 		/// <summary>
+		///   The maximum number of states that can be stored on the stack.
+		/// </summary>
+		private int _capacity;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="capacity">The maximum number of states that can be stored in the stack.</param>
+		/// <param name="capacity">The maximum number of states that can be stored on the stack.</param>
 		public StateStack(int capacity)
 		{
 			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
@@ -72,6 +77,7 @@ namespace SafetySharp.Runtime
 
 			_frames = (Frame*)_framesBuffer.Pointer;
 			_states = (int*)_statesBuffer.Pointer;
+			_capacity = capacity;
 		}
 
 		/// <summary>
@@ -92,9 +98,11 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		public void PushFrame()
 		{
-			// We don't have to do any out of bounds checks here, as we only increase the frame count if we could
-			// actually store the state, and by assumption, all arrays are big enough to store at least the same
-			// number of elements as there are stored states
+			if (FrameCount >= _capacity)
+			{
+				throw new InvalidOperationException(
+					"Unable to allocate an additional depth first search frame. Try increasing the size of the state stack.");
+			}
 
 			var offset = FrameCount == 0 ? 0 : _frames[FrameCount - 1].Offset + _frames[FrameCount - 1].Count;
 			_frames[FrameCount++] = new Frame { Offset = offset };
@@ -106,13 +114,16 @@ namespace SafetySharp.Runtime
 		/// <param name="state">The state that should be pushed onto the stack.</param>
 		public void PushState(int state)
 		{
-			// We don't have to do any out of bounds checks here, as we only add a state if we could
-			// actually store the state, and by assumption, all arrays are big enough to store at least the same
-			// number of elements as there are stored states
+			var frame = _frames[FrameCount - 1];
+			var offset = frame.Offset + frame.Count;
 
-			var offset = _frames[FrameCount - 1].Offset + _frames[FrameCount - 1].Count;
+			if (offset >= _capacity)
+			{
+				throw new InvalidOperationException(
+					"Unable to allocate an additional depth first search state. Try increasing the size of the state stack.");
+			}
+			
 			_states[offset] = state;
-
 			_frames[FrameCount - 1].Count += 1;
 		}
 

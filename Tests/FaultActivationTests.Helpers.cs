@@ -40,7 +40,7 @@ namespace Tests
 
 		protected void GenerateStateSpace(params IComponent[] components)
 		{
-			var checker = new InvariantChecker(new Model(components), new StateFormula(() => true), s => Output.Log("{0}", s), 10000, 1, true);
+			var checker = new InvariantChecker(new Model(components), new StateFormula(() => true), s => Output.Log("{0}", s), 10000, 10000, 1, true);
 			_result = checker.Check();
 			CounterExample.ShouldBe(null);
 		}

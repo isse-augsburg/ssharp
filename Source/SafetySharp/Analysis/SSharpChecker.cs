@@ -35,12 +35,22 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   The default capacity used for state storage.
 		/// </summary>
-		public const int DefaultCapacity = 1 << 26;
+		public const int DefaultStateCapacity = 1 << 26;
+
+		/// <summary>
+		///   The default capacity used for the state stack during model checking.
+		/// </summary>
+		public const int DefaultStackCapacity = 1 << 16;
 
 		/// <summary>
 		///   Gets or sets the number of states that can be stored during model checking.
 		/// </summary>
-		public int StateCapacity { get; set; } = DefaultCapacity;
+		public int StateCapacity { get; set; } = DefaultStateCapacity;
+
+		/// <summary>
+		///   Gets or sets the number of states that can be stored on the stack during model checking.
+		/// </summary>
+		public int StackCapacity { get; set; } = DefaultStackCapacity;
 
 		/// <summary>
 		///   Gets or sets the number of CPUs that are used for model checking. The value is clamped to the interval of [1, #CPUs].
@@ -56,11 +66,13 @@ namespace SafetySharp.Analysis
 		public override AnalysisResult CheckInvariant(Model model, Formula invariant)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
+			Requires.That(StateCapacity > 1024, $"{nameof(StateCapacity)} must be at least 1024.");
+			Requires.That(StackCapacity > 1024, $"{nameof(StackCapacity)} must be at least 1024.");
 
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			using (var checker = new InvariantChecker(model, invariant, Output, StateCapacity, CpuCount, enableFaultOptimization: false))
+			using (var checker = new InvariantChecker(model, invariant, Output, StateCapacity, StackCapacity, CpuCount, enableFaultOptimization: false))
 			{
 				var result = default(AnalysisResult);
 				var initializationTime = stopwatch.Elapsed;
