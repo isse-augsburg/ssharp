@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Runtime
 {
+	using System;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Analysis;
@@ -56,14 +57,14 @@ namespace SafetySharp.Runtime
 		private readonly SerializationDelegate _deserialize;
 
 		/// <summary>
-		///   The objects referenced by the model.
-		/// </summary>
-		private readonly ObjectTable _objects;
-
-		/// <summary>
 		///   Serializes a state of the model.
 		/// </summary>
 		private readonly SerializationDelegate _serialize;
+
+		/// <summary>
+		///   The objects referenced by the model that participate in state serialization.
+		/// </summary>
+		private readonly ObjectTable _serializedObjects;
 
 		/// <summary>
 		///   The <see cref="StateCache" /> used by the model.
@@ -74,6 +75,11 @@ namespace SafetySharp.Runtime
 		///   The number of bytes reserved at the beginning of each state vector by the model checker tool.
 		/// </summary>
 		private readonly int _stateHeaderBytes;
+
+		/// <summary>
+		///   The objects referenced by the model.
+		/// </summary>
+		private readonly ObjectTable _objects;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -106,9 +112,10 @@ namespace SafetySharp.Runtime
 			var deterministicFaults = objectTable.OfType<Fault>().Where(fault => fault.Activation != Activation.Nondeterministic);
 
 			objects = objects.Except(deterministicFaults, ReferenceEqualityComparer<object>.Default);
-			_objects = new ObjectTable(objects);
+			_serializedObjects = new ObjectTable(objects);
+			_objects = objectTable;
 
-			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_objects, SerializationMode.Optimized);
+			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_serializedObjects, SerializationMode.Optimized);
 
 			_deserialize = StateVectorLayout.CreateDeserializer();
 			_serialize = StateVectorLayout.CreateSerializer();
@@ -188,7 +195,7 @@ namespace SafetySharp.Runtime
 			{
 				Deserialize(state);
 
-				foreach (var obj in _objects.OfType<IInitializable>())
+				foreach (var obj in _serializedObjects.OfType<IInitializable>())
 					obj.Initialize();
 			}
 		}
@@ -259,7 +266,7 @@ namespace SafetySharp.Runtime
 				{
 					Deserialize(state);
 
-					foreach (var obj in _objects.OfType<IInitializable>())
+					foreach (var obj in _serializedObjects.OfType<IInitializable>())
 						obj.Initialize();
 
 					Serialize(_stateCache.Allocate());
@@ -357,6 +364,7 @@ namespace SafetySharp.Runtime
 
 			_choiceResolver.SafeDispose();
 			_stateCache.SafeDispose();
+			_objects.OfType<IDisposable>().SafeDisposeAll();
 		}
 	}
 }
