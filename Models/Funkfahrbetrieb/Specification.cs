@@ -37,7 +37,7 @@ namespace Funkfahrbetrieb
 		public const int SafetyMargin = 50;
 		public const int CommunicationDelay = 1;
 		public const int ClosingDelay = 10;
-		public const int CloseTimeout = 20;
+		public const int CloseTimeout = 21;
 		public const int MaxSpeed = 10;
 		public const int Decelaration = -1;
 		public const int MaxSpeedOffset = 7;
