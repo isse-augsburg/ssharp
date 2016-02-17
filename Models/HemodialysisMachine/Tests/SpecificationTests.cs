@@ -90,6 +90,34 @@ namespace HemodialysisMachine.Tests
 			simulator.SimulateStep();
 		}
 
+
+
+		[Test]
+		public void Simulate_10_Step_HeaterAndPumpToBalanceChamberDefect()
+		{
+			var testModel = new Specification();
+
+			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var patient = simulator.Model.RootComponents.OfType<Patient>().First();
+			var hdMachine = simulator.Model.RootComponents.OfType<HdMachine>().First();
+			hdMachine.DialyzingFluidDeliverySystem.DialyzingFluidWaterPreparation.WaterHeaterDefect.Activation = Activation.Forced;
+			hdMachine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpToBalanceChamberDefect.Activation = Activation.Forced;
+			simulator.SimulateStep();
+			var patient2 = simulator.Model.RootComponents.OfType<Patient>().First();
+			simulator.SimulateStep();
+			var patient3 = simulator.Model.RootComponents.OfType<Patient>().First();
+			simulator.SimulateStep();
+			var patient4 = simulator.Model.RootComponents.OfType<Patient>().First();
+			var hdMachine4 = simulator.Model.RootComponents.OfType<HdMachine>().First();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+			simulator.SimulateStep();
+		}
+
 		[Test]
 		public void IncomingBloodIsContaminated_ModelChecking()
 		{

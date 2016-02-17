@@ -73,7 +73,7 @@ namespace HemodialysisMachine.Model
 	}
 
 
-	public class DialyzingFluidFlowVirtualSplitter : FlowVirtualSplitter<DialyzingFluid, Suction>, IIntFlowComponent
+	public class DialyzingFluidFlowVirtualSplitter : FlowVirtualSplitter<DialyzingFluid, Suction>
 	{
 		public DialyzingFluidFlowVirtualSplitter(int number)
 			: base(number)
@@ -138,7 +138,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	public class DialyzingFluidFlowVirtualMerger : FlowVirtualMerger<DialyzingFluid, Suction>, IIntFlowComponent
+	public class DialyzingFluidFlowVirtualMerger : FlowVirtualMerger<DialyzingFluid, Suction>
 	{
 		public DialyzingFluidFlowVirtualMerger(int number)
 			: base(number)
@@ -182,7 +182,7 @@ namespace HemodialysisMachine.Model
 		}
 	}
 
-	public class DialyzingFluidFlowCombinator : FlowCombinator<DialyzingFluid, Suction>, IIntFlowComponent
+	public class DialyzingFluidFlowCombinator : FlowCombinator<DialyzingFluid, Suction>
 	{
 		public override FlowVirtualMerger<DialyzingFluid, Suction> CreateFlowVirtualMerger(int elementNos)
 		{
