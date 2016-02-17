@@ -20,19 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using SafetySharp.Modeling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Wiper.Model
+namespace Wiper.PermissibleSequences
 {
 	using DataStructures;
+	using SafetySharp.Modeling;
 
-	public class WiperControlStalk : Component
+	public enum SlowActivationState
 	{
-		public extern void SendRequest(WiperRequest request);
+		WaitForRequest,
+		WaitForSetSpeed,
+		WaitForSetActive,
+		Failed
 	}
+
+	public class SlowActivation : Component
+	{
+		StateMachine<SlowActivationState> ValidSequenceVerifier = new StateMachine<SlowActivationState>(SlowActivationState.WaitForRequest);
+
+	}
+
+
+
 }

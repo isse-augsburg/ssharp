@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InvalidScenarioException.cs" />
+    <Compile Include="PermissibleSequences\SlowActivation.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -67,8 +68,8 @@
     <Compile Include="Model\WiperActuator.cs" />
     <Compile Include="Model\WiperEcu.cs" />
     <Compile Include="Model\WiperControlStalk.cs" />
-    <Compile Include="Model\WiperRequest.cs" />
-    <Compile Include="Model\WiperSpeedConstants.cs" />
+    <Compile Include="DataStructures\WiperRequest.cs" />
+    <Compile Include="DataStructures\WiperSpeedConstants.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">

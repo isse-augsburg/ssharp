@@ -20,19 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using SafetySharp.Modeling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Wiper.Model
+namespace Wiper.DataStructures
 {
-	using DataStructures;
-
-	public class WiperControlStalk : Component
+	public enum WiperRequest
 	{
-		public extern void SendRequest(WiperRequest request);
+		Fast,
+		Slow,
+		Increase,
+		//Decrease,
+		Off
 	}
 }
