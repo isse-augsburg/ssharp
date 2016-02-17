@@ -60,7 +60,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InvalidScenarioException.cs" />
+    <Compile Include="PermissibleSequences\CurrentState.cs" />
+    <Compile Include="PermissibleSequences\Message.cs" />
+    <Compile Include="PermissibleSequences\PermissibleSequence.cs" />
+    <Compile Include="PermissibleSequences\SequenceChecker.cs" />
     <Compile Include="PermissibleSequences\SlowActivation.cs" />
+    <Compile Include="PermissibleSequences\WiperPermissibleSequence.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

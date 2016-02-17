@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 namespace Wiper.PermissibleSequences
 {
 	using DataStructures;
+	using Model;
 	using SafetySharp.Modeling;
 
 	public enum SlowActivationState
@@ -39,10 +40,59 @@ namespace Wiper.PermissibleSequences
 		Failed
 	}
 
-	public class SlowActivation : Component
+	public class SlowActivation : WiperPermissibleSequence
 	{
 		StateMachine<SlowActivationState> ValidSequenceVerifier = new StateMachine<SlowActivationState>(SlowActivationState.WaitForRequest);
 
+		private bool IsMessageOfInterest(Message message)
+		{
+			return true;
+		}
+
+		public void Check(CurrentState state, Message message)
+		{
+			ValidSequenceVerifier
+				.Transition(
+					from: SlowActivationState.WaitForRequest,
+					to: SlowActivationState.WaitForSetSpeed,
+					guard: IsMessageFromUserToWiper(message) &&
+						   IsVehicleRunning(state) &&
+						   IsWiperInstalled(state) &&
+						   WiperControllerInErrorState(state))
+				.Transition(
+					from: SlowActivationState.WaitForSetSpeed,
+					to: SlowActivationState.WaitForSetActive,
+					guard: IsMessageOfInterest(message) &&
+						   (IsMessageFromWiperToActuator(message) &&
+							message.Method == nameof(WiperEcu.SetWiperSpeed) &&
+							message.Parameters.Equals(new[] { WiperSpeed.Slow })))
+				.Transition(
+					from: SlowActivationState.WaitForSetSpeed,
+					to: SlowActivationState.Failed,
+					guard: IsMessageOfInterest(message) &&
+						   !(IsMessageFromWiperToActuator(message) &&
+							 message.Method == nameof(WiperEcu.SetWiperSpeed) &&
+							 message.Parameters.Equals(new[] { WiperSpeed.Slow })))
+				.Transition(
+					from: SlowActivationState.WaitForSetActive,
+					to: SlowActivationState.WaitForRequest,
+					guard: IsMessageOfInterest(message) &&
+						   (IsMessageFromWiperToActuator(message) &&
+							message.Method == nameof(WiperEcu.WiperState) &&
+							message.Parameters.Equals(new[] { WiperState.Active })))
+				.Transition(
+					from: SlowActivationState.WaitForSetActive,
+					to: SlowActivationState.Failed,
+					guard: IsMessageOfInterest(message) &&
+						   !(IsMessageFromWiperToActuator(message) &&
+							 message.Method == nameof(WiperEcu.WiperState) &&
+							 message.Parameters.Equals(new[] { WiperState.Active })));
+		}
+
+		public override bool IsFailed()
+		{
+			return ValidSequenceVerifier.State == SlowActivationState.Failed;
+		}
 	}
 
 
