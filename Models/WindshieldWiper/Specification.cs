@@ -25,6 +25,7 @@ namespace Wiper
 	using System.Linq;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using Scenarios;
 	using Wiper.Model;
 
 	/// <summary>
@@ -35,7 +36,7 @@ namespace Wiper
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public Specification()
+		public Specification(WiperScenario scenario)
 		{
 			WiperActuator = new WiperActuator();
 			WiperEcu = new WiperEcu(WiperActuator)
@@ -48,7 +49,10 @@ namespace Wiper
 			WiperControlStalk = new WiperControlStalk();
 			VehicleMainEcu = new VehicleMainEcu();
 
+			Scenario = scenario ?? new IndeterministicInput();
+
 			Component.Bind(nameof(WiperEcu.GetVehicleStatus), nameof(VehicleMainEcu.GetVehicleStatus));
+			Component.Bind(nameof(Scenario.WiperControlStalkSendRequest), nameof(WiperControlStalk.ScenarioSendRequest));
 		}
 
 		[Root(Role.SystemOfInterest)]
@@ -62,6 +66,10 @@ namespace Wiper
 
 		[Root(Role.SystemContext)]
 		public VehicleMainEcu VehicleMainEcu { get; }
+
+
+		[Root(Role.SystemContext)] //TODO: Switch to Role.Scenario
+		public WiperScenario Scenario { get; }
 
 		[Hazard]
 		public Formula InvalidScenario =>

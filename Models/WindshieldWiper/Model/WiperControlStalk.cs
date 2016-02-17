@@ -34,5 +34,11 @@ namespace Wiper.Model
 	public class WiperControlStalk : Component
 	{
 		public extern void SendRequest(WiperRequest request);
+
+		public void ScenarioSendRequest(WiperRequest request)
+		{
+			// The WindshieldWiper is an open model. The model is closed by scenarios.
+			SendRequest(request);
+		}
 	}
 }

@@ -37,7 +37,7 @@ namespace Wiper
 		[TestCase]
 		public void CollisionDcca([Values(typeof(SSharpChecker), typeof(LtsMin))] Type modelChecker)
 		{
-			var specification = new Specification();
+			var specification = new Specification(null);
 			var analysis = new SafetyAnalysis((ModelChecker)Activator.CreateInstance(modelChecker), SafetySharpModel.Create(specification));
 
 			var result = analysis.ComputeMinimalCutSets(specification.InvalidScenario, $"counter examples/wiper/{modelChecker.Name}");
@@ -63,7 +63,7 @@ namespace Wiper
 		[Test]
 		public void Test()
 		{
-			var specification = new Specification();
+			var specification = new Specification(null);
 			var model = SafetySharpModel.Create(specification);
 			var faults = model.GetFaults();
 
