@@ -462,7 +462,7 @@ namespace SafetySharp.Runtime.Serialization
 						// throw new RangeViolationException(obj, field)
 						_il.Emit(OpCodes.Ldloc_1);
 						_il.Emit(OpCodes.Ldtoken, metadata.Field);
-						_il.Emit(OpCodes.Ldtoken, metadata.ObjectType);
+						_il.Emit(OpCodes.Ldtoken, metadata.Field.DeclaringType);
 						var parameters = new[] { typeof(RuntimeFieldHandle), typeof(RuntimeTypeHandle) };
 						_il.Emit(OpCodes.Call, typeof(FieldInfo).GetMethod("GetFieldFromHandle", parameters));
 						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
