@@ -27,28 +27,28 @@ namespace Tests
 
 	public partial class AnalysisTests
 	{
-		[Theory, MemberData("DiscoverTests", "Analysis/Invariants")]
+		[Theory, MemberData("DiscoverTestsBothModelCheckers", "Analysis/Invariants")]
 		public void Invariants(Type modelCheckerType, string test, string file)
 		{
 			ExecuteDynamicTests(file, modelCheckerType);
 		}
 
-		[Theory, MemberData("DiscoverTestsLtsMinOnly", "Analysis/Ltl")]
+		[Theory, MemberData("DiscoverTests", "Analysis/Ltl")]
 		public void Ltl(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory(Skip = "Blocked by missing LtsMin support"), MemberData("DiscoverTestsLtsMinOnly", "Analysis/Ctl")]
+		[Theory(Skip = "Blocked by missing LtsMin support"), MemberData("DiscoverTests", "Analysis/Ctl")]
 		public void Ctl(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
 		[Theory, MemberData("DiscoverTests", "Analysis/Dcca")]
-		public void Dcca(Type modelCheckerType, string test, string file)
+		public void Dcca(string test, string file)
 		{
-			ExecuteDynamicTests(file, modelCheckerType);
+			ExecuteDynamicTests(file);
 		}
 	}
 }

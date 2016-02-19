@@ -123,7 +123,7 @@ namespace HemodialysisMachine.Tests
 		{
 			var specification = new Specification();
 
-			var analysis = new SafetyAnalysis(new SSharpChecker {StateCapacity = 1310720}, Model.Create(specification));
+			var analysis = new SafetyAnalysis(Model.Create(specification)) {StateCapacity = 1310720 };
 			
 			var result = analysis.ComputeMinimalCutSets(specification.IncomingBloodNotOk, $"counter examples/hdmachine");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
@@ -147,7 +147,7 @@ namespace HemodialysisMachine.Tests
 		{
 			var specification = new Specification();
 
-			var analysis = new SafetyAnalysis(new SSharpChecker { StateCapacity = 1310720 }, Model.Create(specification));
+			var analysis = new SafetyAnalysis(Model.Create(specification)) { StateCapacity = 1310720 };
 
 			var result = analysis.ComputeMinimalCutSets(specification.BloodNotCleanedAndDialyzingFinished, $"counter examples/hdmachine");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;

@@ -41,8 +41,7 @@ namespace SafetySharp.Analysis
 		private ExternalProcess _ltsMin;
 
 		/// <summary>
-		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
-		///   <see cref="CounterExample" /> if the invariant is violated, <c>null</c> otherwise.
+		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>

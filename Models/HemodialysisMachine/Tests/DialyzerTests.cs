@@ -248,7 +248,7 @@ namespace HemodialysisMachine.Tests
 		{
 			var specification = new DialyzerTestEnvironment();
 
-			var analysis = new SafetyAnalysis(new SSharpChecker(), Model.Create(specification));
+			var analysis = new SafetyAnalysis(Model.Create(specification));
 
 			var result = analysis.ComputeMinimalCutSets(specification.Dialyzer.MembraneIntact==false, $"counter examples/hdmachine");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;

@@ -26,7 +26,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 {
 	using SafetySharp.Modeling;
 
-	class Int : IElement<Int>
+	internal class Int : IElement<Int>
 	{
 		public int Value;
 
@@ -52,6 +52,11 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 				return Value == otherInt.Value;
 			}
 			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			return Value.GetHashCode();
 		}
 
 		public void CopyValuesFrom(Int @from)

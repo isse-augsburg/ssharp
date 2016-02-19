@@ -84,15 +84,15 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="buffer">The buffer the model was deserialized from.</param>
-		/// <param name="rootComponents">The root components of the model.</param>
-		/// <param name="objectTable">The table of objects referenced by the model.</param>
-		/// <param name="formulas">The formulas that are checked on the model.</param>
-		/// <param name="stateHeaderBytes">
-		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
-		/// </param>
-		internal RuntimeModel(byte[] buffer, Component[] rootComponents, ObjectTable objectTable, Formula[] formulas, int stateHeaderBytes)
+		/// <param name="serializedData">The serialized data describing the model.</param>
+		internal RuntimeModel(SerializedRuntimeModel serializedData)
 		{
+			var buffer = serializedData.Buffer;
+			var rootComponents = serializedData.RootComponents;
+			var objectTable = serializedData.ObjectTable;
+			var formulas = serializedData.Formulas;
+			var stateHeaderBytes = serializedData.StateHeaderBytes;
+
 			Requires.NotNull(buffer, nameof(buffer));
 			Requires.NotNull(rootComponents, nameof(rootComponents));
 			Requires.NotNull(objectTable, nameof(objectTable));

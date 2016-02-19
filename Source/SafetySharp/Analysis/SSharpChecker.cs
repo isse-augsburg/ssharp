@@ -25,6 +25,7 @@ namespace SafetySharp.Analysis
 	using System;
 	using System.Diagnostics;
 	using Runtime;
+	using Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -58,12 +59,9 @@ namespace SafetySharp.Analysis
 		public int CpuCount { get; set; } = Int32.MaxValue;
 
 		/// <summary>
-		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. Returns a
-		///   <see cref="CounterExample" /> if the invariant is violated, <c>null</c> otherwise.
+		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
 		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
-		/// <param name="invariant">The invariant that should be checked.</param>
-		public override AnalysisResult CheckInvariant(Model model, Formula invariant)
+		internal AnalysisResult CheckInvariant(Func<RuntimeModel> createModel)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
 			Requires.That(StateCapacity > 1024, $"{nameof(StateCapacity)} must be at least 1024.");
@@ -72,7 +70,7 @@ namespace SafetySharp.Analysis
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			using (var checker = new InvariantChecker(model, invariant, Output, StateCapacity, StackCapacity, CpuCount, enableFaultOptimization: false))
+			using (var checker = new InvariantChecker(createModel, Output, StateCapacity, StackCapacity, CpuCount, enableFaultOptimization: false))
 			{
 				var result = default(AnalysisResult);
 				var initializationTime = stopwatch.Elapsed;
@@ -97,6 +95,20 @@ namespace SafetySharp.Analysis
 					Output(String.Empty);
 				}
 			}
+		}
+
+		/// <summary>
+		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="invariant">The invariant that should be checked.</param>
+		public override AnalysisResult CheckInvariant(Model model, Formula invariant)
+		{
+			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(invariant, nameof(invariant));
+
+			var serializedModel = RuntimeModelSerializer.Save(model, 0, invariant);
+			return CheckInvariant(() => RuntimeModelSerializer.Load(serializedModel));
 		}
 
 		/// <summary>

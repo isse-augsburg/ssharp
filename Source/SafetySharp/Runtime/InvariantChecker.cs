@@ -39,7 +39,7 @@ namespace SafetySharp.Runtime
 	internal unsafe class InvariantChecker : DisposableObject
 	{
 		private const int ReportStateCountDelta = 200000;
-		private readonly RuntimeModel _model;
+		private readonly LoadBalancer _loadBalancer;
 		private readonly Action<string> _output;
 		private readonly StateStorage _states;
 		private readonly Thread[] _threads;
@@ -47,7 +47,6 @@ namespace SafetySharp.Runtime
 		private CounterExample _counterExample;
 		private Exception _exception;
 		private int _levelCount;
-		private readonly LoadBalancer _loadBalancer;
 		private int _nextReport = ReportStateCountDelta;
 		private int _stateCount;
 		private long _transitionCount;
@@ -55,35 +54,27 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
-		/// <param name="invariant">The invariant that should be checked.</param>
+		/// <param name="createModel">Creates model that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="stateCapacity">The number of states that can be stored.</param>
 		/// <param name="stackCapacity">The maximum number of states that can be stored on the depth first search stack.</param>
 		/// <param name="cpuCount">The number of CPUs that should be used.</param>
 		/// <param name="enableFaultOptimization">Indicates whether S#'s fault optimization technique should be used.</param>
-		internal InvariantChecker(Model model, Formula invariant, Action<string> output, int stateCapacity, int stackCapacity, int cpuCount,
+		internal InvariantChecker(Func<RuntimeModel> createModel, Action<string> output, int stateCapacity, int stackCapacity, int cpuCount,
 								  bool enableFaultOptimization)
 		{
-			Requires.NotNull(model, nameof(model));
-			Requires.NotNull(invariant, nameof(invariant));
+			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(output, nameof(output));
-			Requires.InRange(stateCapacity, nameof(stateCapacity), 1024, Int32.MaxValue);
-			Requires.InRange(stackCapacity, nameof(stackCapacity), 1024, Int32.MaxValue);
-
-			var serializedModel = RuntimeModelSerializer.Save(model, 0, invariant);
-
-			_model = RuntimeModelSerializer.Load(serializedModel);
-			_states = new StateStorage(_model.StateVectorLayout, stateCapacity, enableFaultOptimization);
-			_output = output;
 
 			cpuCount = Math.Min(Environment.ProcessorCount, Math.Max(1, cpuCount));
 
+			_output = output;
 			_workers = new Worker[cpuCount];
 			_threads = new Thread[cpuCount];
 
 			var tasks = new Task[cpuCount];
 			var stacks = new StateStack[cpuCount];
+
 			_loadBalancer = new LoadBalancer(stacks);
 
 			for (var i = 0; i < cpuCount; ++i)
@@ -92,15 +83,14 @@ namespace SafetySharp.Runtime
 				tasks[i] = Task.Factory.StartNew(() =>
 				{
 					stacks[index] = new StateStack(stackCapacity);
-					_workers[index] = new Worker(index, this, stacks[index], index == 0 ? _model : RuntimeModelSerializer.Load(serializedModel));
+					_workers[index] = new Worker(index, this, stacks[index], createModel());
 					_threads[index] = new Thread(_workers[index].Check) { IsBackground = true, Name = $"Worker {index}" };
-
-					if (index == 0)
-						_workers[0].ComputeInitialStates();
 				});
 			}
 
 			Task.WaitAll(tasks);
+
+			_states = new StateStorage(_workers[0].StateVectorLayout, stateCapacity, enableFaultOptimization);
 
 #if false
 			Console.WriteLine(_model.StateVectorLayout);
@@ -113,7 +103,9 @@ namespace SafetySharp.Runtime
 		internal AnalysisResult Check()
 		{
 			_output($"Performing invariant check with {_workers.Length} CPU cores.");
-			_output($"State vector has {_model.StateVectorSize} bytes.");
+			_output($"State vector has {_workers[0].StateVectorLayout.SizeInBytes} bytes.");
+
+			_workers[0].ComputeInitialStates();
 
 			foreach (var thread in _threads)
 				thread.Start();
@@ -142,7 +134,6 @@ namespace SafetySharp.Runtime
 				return;
 
 			_states.SafeDispose();
-			_model.SafeDispose();
 			_workers.SafeDisposeAll();
 		}
 
@@ -180,8 +171,8 @@ namespace SafetySharp.Runtime
 			private readonly int _index;
 			private readonly Func<bool> _invariant;
 			private readonly RuntimeModel _model;
-			private readonly StateStorage _states;
 			private readonly StateStack _stateStack;
+			private StateStorage _states;
 
 			/// <summary>
 			///   Initializes a new instance.
@@ -198,10 +189,16 @@ namespace SafetySharp.Runtime
 			}
 
 			/// <summary>
+			///   Gets the state vector layout of the worker's model.
+			/// </summary>
+			public StateVectorLayout StateVectorLayout => _model.StateVectorLayout;
+
+			/// <summary>
 			///   Computes the model's initial states.
 			/// </summary>
 			public void ComputeInitialStates()
 			{
+				_states = _context._states;
 				AddStates(_model.ComputeInitialStates());
 			}
 
@@ -210,6 +207,8 @@ namespace SafetySharp.Runtime
 			/// </summary>
 			public void Check()
 			{
+				_states = _context._states;
+
 				try
 				{
 					while (_context._loadBalancer.LoadBalance(_index))

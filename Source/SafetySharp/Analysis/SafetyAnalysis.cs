@@ -27,7 +27,9 @@ namespace SafetySharp.Analysis
 	using System.IO;
 	using System.Linq;
 	using Modeling;
+	using Runtime;
 	using Runtime.Reflection;
+	using Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -43,20 +45,52 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   The model checker that is used for the analysis.
 		/// </summary>
-		private readonly ModelChecker _modelChecker;
+		private readonly SSharpChecker _modelChecker = new SSharpChecker();
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="modelChecker">The model checker that should be used for the analysis.</param>
 		/// <param name="model">The model that should be analyzed.</param>
-		public SafetyAnalysis(ModelChecker modelChecker, Model model)
+		public SafetyAnalysis(Model model)
 		{
-			Requires.NotNull(modelChecker, nameof(modelChecker));
 			Requires.NotNull(model, nameof(model));
-
-			_modelChecker = modelChecker;
 			_model = model;
+		}
+
+		/// <summary>
+		///   Gets or sets the number of states that can be stored during model checking.
+		/// </summary>
+		public int StateCapacity
+		{
+			get { return _modelChecker.StateCapacity; }
+			set { _modelChecker.StateCapacity = value; }
+		}
+
+		/// <summary>
+		///   Gets or sets the number of states that can be stored on the stack during model checking.
+		/// </summary>
+		public int StackCapacity
+		{
+			get { return _modelChecker.StackCapacity; }
+			set { _modelChecker.StackCapacity = value; }
+		}
+
+		/// <summary>
+		///   Gets or sets the number of CPUs that are used for model checking. The value is clamped to the interval of [1, #CPUs].
+		/// </summary>
+		public int CpuCount
+		{
+			get { return _modelChecker.CpuCount; }
+			set { _modelChecker.CpuCount = value; }
+		}
+
+		/// <summary>
+		///   Raised when the model checker has written an output. The output is always written to the console by default.
+		/// </summary>
+		public event Action<string> OutputWritten
+		{
+			add { _modelChecker.OutputWritten += value; }
+			remove { _modelChecker.OutputWritten += value; }
 		}
 
 		/// <summary>
@@ -75,11 +109,17 @@ namespace SafetySharp.Analysis
 				Directory.CreateDirectory(counterExamplePath);
 
 			var faults = _model.GetFaults();
+			Requires.That(faults.Length < 32, "More than 31 faults are currently not supported.");
+
+			for (var i = 0; i < faults.Length; ++i)
+				faults[i].Identifier = i;
+
 			var safeSets = new HashSet<int>();
 			var cutSets = new HashSet<int>();
 			var checkedSets = new HashSet<int>();
 
-			Requires.That(faults.Length < 32, "More than 31 faults are currently not supported.");
+			// Store the serialized model to improve performance
+			var serializedModel = RuntimeModelSerializer.Save(_model, 0, !hazard);
 
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we
@@ -106,7 +146,7 @@ namespace SafetySharp.Analysis
 						faults[i - 1].Activation = (set & (1 << (i - 1))) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
 
 					// If there was a counter example, the set is a cut set
-					var result = _modelChecker.CheckInvariant(_model, !hazard);
+					var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializedModel, faults));
 					if (result.CounterExample != null)
 						cutSets.Add(set);
 					else
@@ -126,6 +166,27 @@ namespace SafetySharp.Analysis
 			}
 
 			return new Result(cutSets, checkedSets, faults);
+		}
+
+		/// <summary>
+		///   Creates a <see cref="RuntimeModel" /> instance.
+		/// </summary>
+		private static Func<RuntimeModel> CreateRuntimeModel(byte[] serializedModel, Fault[] faultTemplates)
+		{
+			return () =>
+			{
+				var serializedData = RuntimeModelSerializer.LoadSerializedData(serializedModel);
+				var faults = serializedData.ObjectTable.OfType<Fault>().OrderBy(f => f.Identifier).ToArray();
+				Requires.That(faults.Length == faultTemplates.Length, "Unexpected fault count.");
+
+				for (var i = 0; i < faults.Length; ++i)
+				{
+					Requires.That(faults[i].Identifier == faultTemplates[i].Identifier, "Fault mismatch.");
+					faults[i].Activation = faultTemplates[i].Activation;
+				}
+
+				return new RuntimeModel(serializedData);
+			};
 		}
 
 		/// <summary>

@@ -47,6 +47,9 @@ namespace SafetySharp.Modeling
 		[NonSerializable]
 		private int _choiceIndex;
 
+		[Hidden]
+		private int _identifier;
+
 		private bool _isActivated;
 
 		[NonSerializable]
@@ -57,6 +60,15 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		internal Fault()
 		{
+		}
+
+		/// <summary>
+		///   Gets or sets an identifier for the fault.
+		/// </summary>
+		internal int Identifier
+		{
+			get { return _identifier; }
+			set { _identifier = value; }
 		}
 
 		/// <summary>

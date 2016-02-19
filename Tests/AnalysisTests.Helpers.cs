@@ -53,8 +53,8 @@ namespace Tests
 
 		protected SafetyAnalysis.Result Dcca(Formula hazard, params IComponent[] components)
 		{
-			var modelChecker = CreateModelChecker();
-			var analysis = new SafetyAnalysis(modelChecker, new Model(components));
+			var analysis = new SafetyAnalysis(new Model(components));
+			analysis.OutputWritten += message => Output.Log("{0}", message);
 			return analysis.ComputeMinimalCutSets(hazard);
 		}
 
@@ -92,13 +92,13 @@ namespace Tests
 		}
 
 		[UsedImplicitly]
-		public static IEnumerable<object[]> DiscoverTestsLtsMinOnly(string directory)
+		public static IEnumerable<object[]> DiscoverTests(string directory)
 		{
 			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
 		}
 
 		[UsedImplicitly]
-		public static IEnumerable<object[]> DiscoverTests(string directory)
+		public static IEnumerable<object[]> DiscoverTestsBothModelCheckers(string directory)
 		{
 			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
 				yield return new object[] { typeof(SSharpChecker) }.Concat(testCase).ToArray();

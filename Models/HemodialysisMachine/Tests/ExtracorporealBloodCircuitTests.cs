@@ -47,7 +47,7 @@ namespace HemodialysisMachine.Tests
 
 		public int IncomingSuctionRateOnDialyzingFluidSide = 3;
 		public int IncomingQuantityOfDialyzingFluid = 2;
-		public QualitativeTemperature IncomingFluidTemperature;
+		public QualitativeTemperature IncomingFluidTemperature = QualitativeTemperature.TooCold;
 
 		public bool MembraneIntact = true;
 		
@@ -154,7 +154,7 @@ namespace HemodialysisMachine.Tests
 		{
 			var specification = new ExtracorporealBloodCircuitTestEnvironment();
 
-			var analysis = new SafetyAnalysis(new LtsMin(), Model.Create(specification));
+			var analysis = new SafetyAnalysis(Model.Create(specification));
 
 			var result = analysis.ComputeMinimalCutSets(specification.Dialyzer.MembraneIntact == false, $"counter examples/hdmachine");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;

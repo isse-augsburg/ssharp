@@ -194,15 +194,24 @@ namespace SafetySharp.Runtime.Serialization
 		#region Deserialization
 
 		/// <summary>
-		///   Loads a <see cref="RuntimeModel" /> from the <paramref name="buffer" />.
+		///   Loads a <see cref="SerializedRuntimeModel" /> from the <paramref name="buffer" />.
 		/// </summary>
 		/// <param name="buffer">The buffer the model should be loaded from.</param>
-		public static RuntimeModel Load(byte[] buffer)
+		public static SerializedRuntimeModel LoadSerializedData(byte[] buffer)
 		{
 			Requires.NotNull(buffer, nameof(buffer));
 
 			using (var reader = new BinaryReader(new MemoryStream(buffer), Encoding.UTF8, leaveOpen: true))
 				return DeserializeModel(buffer, reader);
+		}
+
+		/// <summary>
+		///   Loads a <see cref="RuntimeModel" /> from the <paramref name="buffer" />.
+		/// </summary>
+		/// <param name="buffer">The buffer the model should be loaded from.</param>
+		public static RuntimeModel Load(byte[] buffer)
+		{
+			return new RuntimeModel(LoadSerializedData(buffer));
 		}
 
 		/// <summary>
@@ -223,7 +232,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Deserializes a <see cref="RuntimeModel" /> from the <paramref name="reader" />.
 		/// </summary>
-		private static unsafe RuntimeModel DeserializeModel(byte[] buffer, BinaryReader reader)
+		private static unsafe SerializedRuntimeModel DeserializeModel(byte[] buffer, BinaryReader reader)
 		{
 			// Deserialize the object table
 			var objectTable = DeserializeObjectTable(reader);
@@ -259,7 +268,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			// Deserialize the state formulas and instantiate the runtime model
 			DeserializeStateFormulas(reader, objectTable);
-			return new RuntimeModel(buffer, roots, objectTable, formulas, reader.ReadInt32());
+			return new SerializedRuntimeModel(buffer, roots, objectTable, formulas, reader.ReadInt32());
 		}
 
 		/// <summary>
