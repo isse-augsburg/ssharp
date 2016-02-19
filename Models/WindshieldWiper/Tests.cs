@@ -25,22 +25,20 @@ namespace Wiper
 	using System;
 	using System.Linq;
 	using NUnit.Framework;
-	using WiperModel = Wiper.Model;
-	using SafetySharpModel = SafetySharp.Analysis.Model;
 	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Reflection;
+	using WiperModel = Model;
+	using SafetySharpModel = SafetySharp.Analysis.Model;
 
 	[TestFixture]
 	public class Tests
 	{
 		[TestCase]
-		public void CollisionDcca([Values(typeof(SSharpChecker), typeof(LtsMin))] Type modelChecker)
+		public void CollisionDcca()
 		{
 			var specification = new Specification(null);
-			var analysis = new SafetyAnalysis((ModelChecker)Activator.CreateInstance(modelChecker), SafetySharpModel.Create(specification));
+			var analysis = new SafetyAnalysis(SafetySharpModel.Create(specification));
 
-			var result = analysis.ComputeMinimalCutSets(specification.InvalidScenario, $"counter examples/wiper/{modelChecker.Name}");
+			var result = analysis.ComputeMinimalCutSets(specification.InvalidScenario, "counter examples/wiper/");
 			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
 
 			Console.WriteLine("Faults: {0}", String.Join(", ", result.Faults.Select(fault => fault.Name)));
@@ -65,24 +63,9 @@ namespace Wiper
 		{
 			var specification = new Specification(null);
 			var model = SafetySharpModel.Create(specification);
-			var faults = model.GetFaults();
-
-			for (var i = 0; i < faults.Length; ++i)
-				faults[i].Activation = i < 5 ? Activation.Nondeterministic : Activation.Suppressed;
-			//				 faults[i].Activation = Activation.Suppressed;
-			//				faults[i].Activation = Activation.Nondeterministic;
-
-			Formula f1 = true;
-			Formula f2 = true;
-			Formula f3 = true;
-			Formula f4 = f1 && f2 && f3.Implies(f1 || f2);
 
 			var checker = new SSharpChecker() { CpuCount = 4 };
-			checker.CheckInvariant(model, f4);
-
-			//			var ltsMin = new LtsMin();
-			//ltsMin.CheckInvariant(model, f1 || f2 && f3 || f1 && f2);
-			//			ltsMin.CheckInvariant(model, f4);
+			checker.CheckInvariant(model, true);
 		}
 	}
 }
