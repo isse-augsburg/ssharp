@@ -70,6 +70,12 @@ namespace SafetySharp.Runtime.Serialization
 		public Type ObjectType;
 
 		/// <summary>
+		///   The range metadata of the slot, if any.
+		/// </summary>
+		[NonSerialized]
+		public RangeAttribute Range;
+
+		/// <summary>
 		///   Gets the effective type of the data stored in the slot.
 		/// </summary>
 		public Type EffectiveType => CompressedDataType ?? DataType;

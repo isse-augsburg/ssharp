@@ -91,7 +91,31 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 			if (mode == SerializationMode.Full || discoveringObjects)
 				return fields;
 
-			return fields.Where(field => field.Name == "_size" || field.Name == "_items");
+			return fields.Where(field => field.Name == "_size");
+		}
+
+		/// <summary>
+		///   Gets the range information for the <paramref name="obj" />'s <paramref name="field" /> if it cannot be determined
+		///   automatically by S#.
+		///   Returns <c>false</c> to indicate that no range information is available.
+		/// </summary>
+		/// <param name="obj">The object the range should be determined for.</param>
+		/// <param name="field">The field the range should be determined for.</param>
+		/// <param name="mode">The serialization mode the range is obtained for.</param>
+		/// <param name="range">Returns the range, if available.</param>
+		protected internal override bool TryGetRange(object obj, FieldInfo field, SerializationMode mode, out RangeAttribute range)
+		{
+			if (field.Name != "_size" || mode != SerializationMode.Optimized)
+			{
+				range = null;
+				return false;
+			}
+
+			var capacityProperty = obj.GetType().GetProperty("Capacity");
+			var capacity = (int)capacityProperty.GetValue(obj);
+
+			range = new RangeAttribute(0, capacity, OverflowBehavior.Error);
+			return true;
 		}
 	}
 }

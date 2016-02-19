@@ -37,12 +37,23 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="obj">The object the exception should be raised for.</param>
 		/// <param name="field">The field the exception should be raised for.</param>
-		internal RangeViolationException(object obj, FieldInfo field)
-			: base("The field value lies outside of the allowed range.")
+		/// <param name="range">The allowed range of the field.</param>
+		internal RangeViolationException(object obj, FieldInfo field, RangeAttribute range)
 		{
 			Object = obj;
 			Field = field;
+			Range = range;
 		}
+
+		/// <summary>
+		///   Gets a message that describes the current exception.
+		/// </summary>
+		/// <returns>
+		///   The error message that explains the reason for the exception, or an empty string ("").
+		/// </returns>
+		public override string Message =>
+			$"The value '{FieldValue}' of field '{Field.FieldType.FullName} {Field.DeclaringType.FullName}.{Field.Name}' " +
+			$"lies outside of the allowed range [{Range.LowerBound};{Range.UpperBound}[.";
 
 		/// <summary>
 		///   Gets the object the exception was raised for.
@@ -57,7 +68,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the range metadata of the <see cref="Object" />'s <see cref="Field" />.
 		/// </summary>
-		public RangeAttribute Range => Modeling.Range.GetMetadata(Object, Field);
+		public RangeAttribute Range { get; }
 
 		/// <summary>
 		///   Gets the <see cref="Object" />'s <see cref="Field" />'s value the exception was raised for.

@@ -24,7 +24,9 @@ namespace Tests.Serialization.Objects
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Reflection;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
@@ -99,7 +101,12 @@ namespace Tests.Serialization.Objects
 			for (var i = 0; i < capacity; ++i)
 				c.I.Add(3);
 
-			Should.Throw<InvalidOperationException>(() => Serialize());
+			var exception = Should.Throw<RangeViolationException>(() => Serialize());
+			exception.Field.ShouldBe(typeof(List<int>).GetField("_size", BindingFlags.Instance | BindingFlags.NonPublic));
+			exception.FieldValue.ShouldBe(c.I.Count);
+			exception.Object.ShouldBe(c.I);
+			exception.Range.LowerBound.ShouldBe(0);
+			exception.Range.UpperBound.ShouldBe(capacity);
 		}
 
 		private class C : Component

@@ -109,7 +109,7 @@ namespace SafetySharp.Runtime.Serialization
 			foreach (var slot in objects.SelectMany(obj => GetSerializer(obj).GetStateSlotMetadata(obj, objects.GetObjectIdentifier(obj), mode)))
 				layout.Add(slot);
 
-			layout.Compact();
+			layout.Compact(mode);
 			return layout;
 		}
 

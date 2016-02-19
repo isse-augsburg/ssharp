@@ -46,7 +46,8 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		/// <param name="obj">The object the range metadata should be returned for.</param>
 		/// <param name="field">The field the range metadata should be returned for.</param>
-		internal static RangeAttribute GetMetadata(object obj, FieldInfo field)
+		/// <param name="mode">The serialization mode the range is obtained for.</param>
+		internal static RangeAttribute GetMetadata(object obj, FieldInfo field, SerializationMode mode)
 		{
 			var range = field.GetCustomAttribute<RangeAttribute>();
 			if (range != null)
@@ -57,10 +58,10 @@ namespace SafetySharp.Modeling
 
 			Dictionary<FieldInfo, RangeAttribute> infos;
 			if (!_ranges.TryGetValue(obj, out infos))
-				return CreateDefaultRange(obj, field);
+				return CreateDefaultRange(obj, field, mode);
 
 			if (!infos.TryGetValue(field, out range))
-				return CreateDefaultRange(obj, field);
+				return CreateDefaultRange(obj, field, mode);
 
 			return range;
 		}
@@ -159,11 +160,11 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Creates the default range when no additional range data is available for the <paramref name="obj"/>'s <paramref name="field"/>.
 		/// </summary>
-		internal static RangeAttribute CreateDefaultRange(object obj, FieldInfo field)
+		internal static RangeAttribute CreateDefaultRange(object obj, FieldInfo field, SerializationMode mode)
 		{
 			// Check if the serializer knows a range
 			RangeAttribute range;
-			if (SerializationRegistry.Default.GetSerializer(obj).TryGetRange(obj, field, out range))
+			if (SerializationRegistry.Default.GetSerializer(obj).TryGetRange(obj, field, mode, out range))
 				return range;
 
 			// Otherwise, maybe we can deduce a range for the type

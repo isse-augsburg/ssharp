@@ -584,7 +584,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TBackward : class, IElement<TBackward>, new()
 	{
 		// Used only by FlowVirtualSplitter
-		private int Index;
+		private readonly int Index;
 		public PortFlowOut<TForward, TBackward> Outgoing { get; } = new PortFlowOut<TForward, TBackward>();
 
 		public FlowVirtualSource(int index)
@@ -696,7 +696,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TForward : class, IElement<TForward>, new()
 		where TBackward : class, IElement<TBackward>, new()
 	{
-		private int Index;
+		private readonly int Index;
 		// Used only by FlowVirtualMerger
 		public PortFlowIn<TForward, TBackward> Incoming { get; }
 

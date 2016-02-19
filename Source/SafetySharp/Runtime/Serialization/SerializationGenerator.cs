@@ -135,7 +135,7 @@ namespace SafetySharp.Runtime.Serialization
 					if (_bitIndex != 0)
 						Advance(1);
 				}
-				
+
 				Advance(group.PaddingBytes);
 			}
 		}
@@ -433,26 +433,24 @@ namespace SafetySharp.Runtime.Serialization
 			// s = state
 			_il.Emit(OpCodes.Ldloc_0);
 
-			var rangeMetadata = Range.GetMetadata(metadata.Object, metadata.Field);
 			var exceedsFourBytes = metadata.ElementSizeInBits > 32;
-
-			if (rangeMetadata != null && !metadata.DataType.IsEnum)
+			if (metadata.Range != null && !metadata.DataType.IsEnum)
 			{
 				var continueLabel = _il.DefineLabel();
 
-				switch (rangeMetadata.OverflowBehavior)
+				switch (metadata.Range.OverflowBehavior)
 				{
 					case OverflowBehavior.Error:
 						// if (v < lower | v > upper) throw
 						_il.Emit(OpCodes.Ldloc_1);
 						_il.Emit(OpCodes.Ldfld, metadata.Field);
 						_il.Emit(OpCodes.Dup);
-						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
+						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
 						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Clt_Un : OpCodes.Clt);
 
 						_il.Emit(OpCodes.Ldloc_1);
 						_il.Emit(OpCodes.Ldfld, metadata.Field);
-						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
+						LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
 						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Cgt_Un : OpCodes.Cgt);
 
 						_il.Emit(OpCodes.Or);
@@ -464,7 +462,15 @@ namespace SafetySharp.Runtime.Serialization
 						// throw new RangeViolationException(obj, field)
 						_il.Emit(OpCodes.Ldloc_1);
 						_il.Emit(OpCodes.Ldtoken, metadata.Field);
-						_il.Emit(OpCodes.Call, typeof(FieldInfo).GetMethod("GetFieldFromHandle", new[] { typeof(RuntimeFieldHandle) }));
+						_il.Emit(OpCodes.Ldtoken, metadata.ObjectType);
+						var parameters = new[] { typeof(RuntimeFieldHandle), typeof(RuntimeTypeHandle) };
+						_il.Emit(OpCodes.Call, typeof(FieldInfo).GetMethod("GetFieldFromHandle", parameters));
+						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
+						_il.Emit(OpCodes.Box, metadata.EffectiveType);
+						LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
+						_il.Emit(OpCodes.Box, metadata.EffectiveType);
+						_il.Emit(OpCodes.Ldc_I4, (int)OverflowBehavior.Error);
+						_il.Emit(OpCodes.Newobj, typeof(RangeAttribute).GetConstructors().Single());
 						_il.Emit(OpCodes.Newobj, typeof(RangeViolationException).GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic).Single());
 						_il.Emit(OpCodes.Throw);
 						break;
@@ -477,19 +483,19 @@ namespace SafetySharp.Runtime.Serialization
 						_il.Emit(OpCodes.Dup);
 
 						// if (v < lower) v = lower
-						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
+						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
 						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Bge_Un_S : OpCodes.Bge_S, clamplabel);
 						_il.Emit(OpCodes.Pop);
 						_il.Emit(OpCodes.Pop);
-						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
+						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
 						_il.Emit(OpCodes.Br, continueLabel);
 
 						// else if (v > upper) v = upper
 						_il.MarkLabel(clamplabel);
-						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
+						LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
 						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Ble_Un_S : OpCodes.Ble_S, continueLabel);
 						_il.Emit(OpCodes.Pop);
-						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
+						LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
 						break;
 					case OverflowBehavior.WrapClamp:
 						var wrapLabel = _il.DefineLabel();
@@ -500,19 +506,19 @@ namespace SafetySharp.Runtime.Serialization
 						_il.Emit(OpCodes.Dup);
 
 						// if (v < lower) v = upper
-						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
+						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
 						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Bge_Un_S : OpCodes.Bge_S, wrapLabel);
 						_il.Emit(OpCodes.Pop);
 						_il.Emit(OpCodes.Pop);
-						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
+						LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
 						_il.Emit(OpCodes.Br, continueLabel);
 
 						// else if (v > upper) v = lower
 						_il.MarkLabel(wrapLabel);
-						LoadConstant(rangeMetadata.UpperBound, exceedsFourBytes);
+						LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
 						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Ble_Un_S : OpCodes.Ble_S, continueLabel);
 						_il.Emit(OpCodes.Pop);
-						LoadConstant(rangeMetadata.LowerBound, exceedsFourBytes);
+						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
 						break;
 					default:
 						Assert.NotReached("Unknown overflow behavior.");
