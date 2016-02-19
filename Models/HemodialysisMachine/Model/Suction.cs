@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace HemodialysisMachine.Model
 {
+	using SafetySharp.Modeling;
 	using Utilities.BidirectionalFlow;
 
 	public enum SuctionType
@@ -17,6 +18,8 @@ namespace HemodialysisMachine.Model
 	public class Suction : IElement<Suction>
 	{
 		public SuctionType SuctionType = SuctionType.SourceDependentSuction;
+
+		[Range(0, 8, OverflowBehavior.Error)]
 		public int CustomSuctionValue = 0;
 
 		public void CopyValuesFrom(Suction from)

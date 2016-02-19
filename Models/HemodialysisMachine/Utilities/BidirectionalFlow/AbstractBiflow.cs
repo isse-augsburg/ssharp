@@ -63,9 +63,9 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		public PortFlowOut<TForward, TBackward> ConnectedPredecessor;
 
 		//[Hidden] // Only save "To"-Values
-		public TForward ForwardFromPredecessor;
+		public readonly TForward ForwardFromPredecessor;
 
-		public TBackward BackwardToPredecessor;
+		public readonly TBackward BackwardToPredecessor;
 
 		[Required]
 		public extern void UpdateBackwardToPredecessor(); // This is executed to calculate what the predecessor value should be (make changes). To update the predecessor, this.SetPredecessorSuction() must be called in this method.
@@ -90,9 +90,9 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		public PortFlowIn<TForward, TBackward> ConnectedSuccessor;
 
 		//[Hidden] // Only save "To"-Values
-		public TForward ForwardToSuccessor;
+		public readonly TForward ForwardToSuccessor;
 
-		public TBackward BackwardFromSuccessor;
+		public readonly TBackward BackwardFromSuccessor;
 
 		[Required]
 		public extern void UpdateForwardToSuccessor(); // This is executed to calculate what the successor value should be (make changes). To update the successor, this.SetSuccessorElement() must be called in this method.
@@ -112,7 +112,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TForward : class, IElement<TForward>, new()
 		where TBackward : class, IElement<TBackward>, new()
 	{
-		PortFlowIn<TForward, TBackward> Incoming { get; set; }
+		PortFlowIn<TForward, TBackward> Incoming { get; }
 		//void AddSubFlows(FlowCombinator<TForward> _flowCombinator);
 	}
 
@@ -120,7 +120,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TForward : class, IElement<TForward>, new()
 		where TBackward : class, IElement<TBackward>, new()
 	{
-		PortFlowOut<TForward, TBackward> Outgoing { get; set; }
+		PortFlowOut<TForward, TBackward> Outgoing { get; }
 	}
 
 	public abstract class FlowCombinator<TForward, TBackward> : Component
@@ -128,12 +128,12 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TBackward : class, IElement<TBackward>, new()
 	{
 		//[Hidden]
-		private List<PortFlowIn<TForward, TBackward>> UpdateBackwardOrder;
+		private readonly List<PortFlowIn<TForward, TBackward>> UpdateBackwardOrder;
 
 		//[Hidden]
-		private List<PortFlowOut<TForward, TBackward>> UpdateForwardOrder;
+		private readonly List<PortFlowOut<TForward, TBackward>> UpdateForwardOrder;
 
-		private List<IComponent> VirtualFlowComponents;
+		private readonly List<IComponent> VirtualFlowComponents;
 
 		// TODO: For generic non-tree like acyclic flows a topological sort is necessary (So, every Update gets executed only once)
 
@@ -398,13 +398,11 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TForward : class, IElement<TForward>, new()
 		where TBackward : class, IElement<TBackward>, new()
 	{
-		public PortFlowIn<TForward, TBackward> Incoming { get; set; }
-		public PortFlowOut<TForward, TBackward> Outgoing { get; set; }
-		
+		public PortFlowIn<TForward, TBackward> Incoming { get; } = new PortFlowIn<TForward, TBackward>();
+		public PortFlowOut<TForward, TBackward> Outgoing { get; } = new PortFlowOut<TForward, TBackward>();
+
 		public FlowInToOutSegment()
 		{
-			Incoming = new PortFlowIn<TForward, TBackward>();
-			Outgoing = new PortFlowOut<TForward, TBackward>();
 		}
 
 		protected override void CreateBindings()
@@ -449,11 +447,10 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TForward : class, IElement<TForward>, new()
 		where TBackward : class, IElement<TBackward>, new()
 	{
-		public PortFlowOut<TForward, TBackward> Outgoing { get; set; }
-		
+		public PortFlowOut<TForward, TBackward> Outgoing { get; } = new PortFlowOut<TForward, TBackward>();
+
 		public FlowSource()
 		{
-			Outgoing = new PortFlowOut<TForward, TBackward>();
 		}
 
 		protected override void CreateBindings()
@@ -518,19 +515,14 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TBackward : class, IElement<TBackward>, new()
 	{
 		// Outer1 --> Incoming --> Source --> Inner1 --> Sink --> Outgoing --> Outer2
-		public PortFlowIn<TForward, TBackward> Incoming { get; set; } //This element is accessed from the outside
-		public PortFlowOut<TForward, TBackward> Outgoing { get; set; } //This element is accessed from the outside
+		public PortFlowIn<TForward, TBackward> Incoming { get; } = new PortFlowIn<TForward, TBackward>(); //This element is accessed from the outside
+		public PortFlowOut<TForward, TBackward> Outgoing { get; } = new PortFlowOut<TForward, TBackward>(); //This element is accessed from the outside
 
-		public FlowSink<TForward, TBackward> InternalSink { get; set; } // This element is accessed from the inside
-		public FlowSource<TForward, TBackward> InternalSource { get; set; } //This element is accessed from the inside
-		
+		public FlowSink<TForward, TBackward> InternalSink { get; } = new FlowSink<TForward, TBackward>(); // This element is accessed from the inside
+		public FlowSource<TForward, TBackward> InternalSource { get; } = new FlowSource<TForward, TBackward>(); //This element is accessed from the inside
+
 		public FlowComposite()
 		{
-			// Outer1 --> Incoming --> Source --> Inner1 --> Sink --> Outgoing --> Outer2
-			Incoming = new PortFlowIn<TForward, TBackward>();
-			Outgoing = new PortFlowOut<TForward, TBackward>();
-			InternalSink = new FlowSink<TForward, TBackward>();
-			InternalSource = new FlowSource<TForward, TBackward>();
 		}
 
 		protected override void CreateBindings()
@@ -560,13 +552,13 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		public void UpdateSuctionToPredecessor()
 		{
 			// Actively Update the SuctionOfCurrentCycle of the predecessor
-			Incoming.BackwardToPredecessor = InternalSource.Outgoing.BackwardFromSuccessor;
+			Incoming.BackwardToPredecessor.CopyValuesFrom(InternalSource.Outgoing.BackwardFromSuccessor);
 		}
 		
 		public void UpdateForwardToSuccessor()
 		{
 			// Actively Update the ElementOfCurrentCycle of the successor
-			Outgoing.ForwardToSuccessor = InternalSink.Incoming.ForwardFromPredecessor;
+			Outgoing.ForwardToSuccessor.CopyValuesFrom(InternalSink.Incoming.ForwardFromPredecessor);
 		}
 
 		public void BackwardFromSuccessorWasUpdated()
@@ -594,12 +586,11 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 	{
 		// Used only by FlowVirtualSplitter
 		private int Index;
-		public PortFlowOut<TForward, TBackward> Outgoing { get; set; }
+		public PortFlowOut<TForward, TBackward> Outgoing { get; } = new PortFlowOut<TForward, TBackward>();
 
 		public FlowVirtualSource(int index)
 		{
 			Index = index;
-			Outgoing = new PortFlowOut<TForward, TBackward>();
 		}
 
 		protected override void CreateBindings()
@@ -626,13 +617,13 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TBackward : class, IElement<TBackward>, new()
 	{
 		private int Number { get; }
-		public PortFlowIn<TForward, TBackward> Incoming { get; set; }
+		public PortFlowIn<TForward, TBackward> Incoming { get; }
 
-		public FlowVirtualSource<TForward, TBackward>[] VirtualOutgoings { get; set; }
+		public FlowVirtualSource<TForward, TBackward>[] VirtualOutgoings { get; }
 
 		// Elements must be split
-		public TForward[] ForwardsToSuccessors { get; set; }
-		public TBackward[] BackwardsFromSuccessors { get; set; }
+		public TForward[] ForwardsToSuccessors { get; }
+		public TBackward[] BackwardsFromSuccessors { get; }
 
 		public FlowVirtualSplitter(int number)
 		{
@@ -708,7 +699,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 	{
 		private int Index;
 		// Used only by FlowVirtualMerger
-		public PortFlowIn<TForward, TBackward> Incoming { get; set; }
+		public PortFlowIn<TForward, TBackward> Incoming { get; }
 
 		public FlowVirtualSink(int index)
 		{
@@ -741,12 +732,12 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TBackward : class, IElement<TBackward>, new()
 	{
 		private int Number { get; }
-		public FlowVirtualSink<TForward, TBackward>[] VirtualIncomings { get; set; }
-		public PortFlowOut<TForward, TBackward> Outgoing { get; set; }
+		public FlowVirtualSink<TForward, TBackward>[] VirtualIncomings { get; }
+		public PortFlowOut<TForward, TBackward> Outgoing { get; }
 
 		// Suctions must be split
-		public TBackward[] BackwardsToPredecessors { get; set; }
-		public TForward[] ForwardsFromPredecessors { get; set; }
+		public TBackward[] BackwardsToPredecessors { get; }
+		public TForward[] ForwardsFromPredecessors { get; }
 
 		public FlowVirtualMerger(int number)
 		{
@@ -823,7 +814,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		//    When flowConnector.Connect(stub.Outgoing,normalA.Incoming)
 		//     and flowConnector.Replace(stub.Outgoing,normalB.Outgoing)
 		//    then flowConnector.Connect(normalB.Outgoing,normalA.Incoming)
-		public PortFlowOut<TForward, TBackward> Outgoing { get; set; }
+		public PortFlowOut<TForward, TBackward> Outgoing { get; }
 		
 		public FlowUniqueOutgoingStub()
 		{
@@ -839,7 +830,7 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		//    When flowConnector.Connect(normalA.Outgoing,stub.Incoming)
 		//     and flowConnector.Replace(stub.Incoming,normalB.Incoming)
 		//    then flowConnector.Connect(normalA.Outgoing,normalB.Incoming)
-		public PortFlowIn<TForward, TBackward> Incoming { get; set; }
+		public PortFlowIn<TForward, TBackward> Incoming { get; }
 		
 		public FlowUniqueIncomingStub()
 		{

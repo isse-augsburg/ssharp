@@ -28,11 +28,13 @@ using System.Threading.Tasks;
 
 namespace HemodialysisMachine.Model
 {
+	using SafetySharp.Modeling;
 	using Utilities.BidirectionalFlow;
 	
 	// Also called dialysate or dialyzate
 	public class DialyzingFluid : IElement<DialyzingFluid>
 	{
+		[Range(0, 8, OverflowBehavior.Error)]
 		public int Quantity;
 		public KindOfDialysate KindOfDialysate;
 		public bool ContaminatedByBlood;

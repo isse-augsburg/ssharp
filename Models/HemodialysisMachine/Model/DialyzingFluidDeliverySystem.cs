@@ -114,6 +114,7 @@ namespace HemodialysisMachine.Model
 
 		public KindOfDialysate KindOfDialysate = KindOfDialysate.Water;
 
+		[Range(0, 8, OverflowBehavior.Error)]
 		public int PumpSpeed = 4;
 
 		[Provided]
@@ -169,6 +170,7 @@ namespace HemodialysisMachine.Model
 	{
 		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
 
+		[Range(0, 8, OverflowBehavior.Error)]
 		public int UltraFiltrationPumpSpeed = 1;
 
 		[Provided]
@@ -219,7 +221,7 @@ namespace HemodialysisMachine.Model
 		public readonly DialyzingFluidFlowInToOutSegment MainFlow = new DialyzingFluidFlowInToOutSegment();
 		public readonly DialyzingFluidFlowSource DrainFlow = new DialyzingFluidFlowSource();
 
-		public DialyzingFluid ToDrainValue = new DialyzingFluid();
+		public readonly DialyzingFluid ToDrainValue = new DialyzingFluid();
 
 		public bool BypassEnabled = false;
 
@@ -343,6 +345,7 @@ namespace HemodialysisMachine.Model
 	{
 		public readonly DialyzingFluidFlowInToOutSegment MainFlow = new DialyzingFluidFlowInToOutSegment();
 
+		[Range(0, 8, OverflowBehavior.Error)]
 		public int PumpSpeed = 4;
 
 		[Provided]

@@ -3,13 +3,18 @@
 namespace HemodialysisMachine.Model
 {
 	using System.ComponentModel;
+	using SafetySharp.Modeling;
 	using Utilities.BidirectionalFlow;
 
 	public class Blood : IElement<Blood>
 	{
+		[Range(-1,7, OverflowBehavior.Error)]
 		public int Water = 0;
+		[Range(0, 8, OverflowBehavior.Error)]
 		public int SmallWasteProducts = 0;
+		[Range(0, 8, OverflowBehavior.Error)]
 		public int BigWasteProducts = 0;
+
 		public bool HasHeparin = false;
 		public bool ChemicalCompositionOk = true;
 		public bool GasFree = false;

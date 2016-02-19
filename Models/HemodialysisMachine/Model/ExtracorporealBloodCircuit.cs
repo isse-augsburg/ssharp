@@ -13,6 +13,7 @@ namespace HemodialysisMachine.Model
 	{
 		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
 
+		[Range(0, 8, OverflowBehavior.Error)]
 		public int SpeedOfMotor = 0;
 
 		[Provided]
@@ -232,7 +233,7 @@ namespace HemodialysisMachine.Model
 
 		public ValveState ValveState = ValveState.Open;
 
-		public Blood DelayedBlood = new Blood();
+		public readonly Blood DelayedBlood = new Blood();
 
 		[Provided]
 		public void SetMainFlow(Blood outgoing, Blood incoming)

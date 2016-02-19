@@ -45,18 +45,18 @@ namespace HemodialysisMachine.Model
 	class TherapyParameters
 	{
 		// TreatmentParameters
-		public KindOfDialysate KindOfDialysateConcentrate { get; set; } = KindOfDialysate.Bicarbonate;
-		public int DialysingFluidTemperature { get; set; } = 33; // in °C. Should be between 33°C and 40°C
-		public int DialysingFluidFlowRate { get; set; } = 0;
+		public KindOfDialysate KindOfDialysateConcentrate { get; } = KindOfDialysate.Bicarbonate;
+		public int DialysingFluidTemperature { get; } = 33; // in °C. Should be between 33°C and 40°C
+		public int DialysingFluidFlowRate { get; } = 0;
 		
 		// UltraFiltrationParameters
-		public int UltraFiltrationRate { get; set; } = 0; // 0 - 500mL/h
+		public int UltraFiltrationRate { get; } = 0; // 0 - 500mL/h
 
 		// PressureParameters
-		public bool LimitsTransMembranePressure { get; set; } = true; //true=On, false=OFF
+		public bool LimitsTransMembranePressure { get; } = true; //true=On, false=OFF
 
 		// HeparinParameters
-		public bool UseHeparinInThreatment { get; set; } = true;// true=enabled, false=disabled
+		public bool UseHeparinInThreatment { get; } = true;// true=enabled, false=disabled
 	}
 
 	public class ControlSystem : Component

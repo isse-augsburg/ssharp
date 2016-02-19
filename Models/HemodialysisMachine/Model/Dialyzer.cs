@@ -19,8 +19,11 @@ namespace HemodialysisMachine.Model
 		public BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment();
 		public DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
 
+		[Range(0, 8, OverflowBehavior.Error)]
 		public int IncomingSuctionRateOnDialyzingFluidSide = 0;
+		[Range(0, 8, OverflowBehavior.Error)]
 		public int IncomingQuantityOfDialyzingFluid = 0; //Amount of BloodUnits we can clean.
+
 		public QualitativeTemperature IncomingFluidTemperature;
 
 		public bool MembraneIntact = true;

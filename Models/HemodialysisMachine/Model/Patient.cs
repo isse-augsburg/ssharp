@@ -7,9 +7,12 @@
 		// Patient is the source and the sink of blood
 		public readonly BloodFlowSource ArteryFlow = new BloodFlowSource();
 		public readonly BloodFlowSink VeinFlow = new BloodFlowSink();
-		
+
+		[Range(0, 100, OverflowBehavior.Error)]
 		public int Water = 50;
+		[Range(0, 16, OverflowBehavior.Error)]
 		public int SmallWasteProducts = 10;
+		[Range(0, 8, OverflowBehavior.Error)]
 		public int BigWasteProducts = 3; //Only removable by ultrafiltration
 
 		public bool IsConnected = true;
