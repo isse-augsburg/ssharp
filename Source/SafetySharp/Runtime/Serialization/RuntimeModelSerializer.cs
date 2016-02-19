@@ -45,18 +45,15 @@ namespace SafetySharp.Runtime.Serialization
 		///   Returns the serialized <paramref name="model" /> and the <paramref name="formulas" />.
 		/// </summary>
 		/// <param name="model">The model that should be serialized.</param>
-		/// <param name="stateHeaderBytes">
-		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
-		/// </param>
 		/// <param name="formulas">The formulas that should be serialized.</param>
-		public static byte[] Save(Model model, int stateHeaderBytes, params Formula[] formulas)
+		public static byte[] Save(Model model, params Formula[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
 
 			using (var buffer = new MemoryStream())
 			{
-				Save(buffer, model, stateHeaderBytes, formulas);
+				Save(buffer, model, formulas);
 				return buffer.ToArray();
 			}
 		}
@@ -66,24 +63,21 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		/// <param name="stream">The stream the serialized specification should be written to.</param>
 		/// <param name="model">The model that should be serialized into the <paramref name="stream" />.</param>
-		/// <param name="stateHeaderBytes">
-		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
-		/// </param>
 		/// <param name="formulas">The formulas that should be serialized into the <paramref name="stream" />.</param>
-		public static void Save(Stream stream, Model model, int stateHeaderBytes, params Formula[] formulas)
+		public static void Save(Stream stream, Model model, params Formula[] formulas)
 		{
 			Requires.NotNull(stream, nameof(stream));
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
 
 			using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
-				SerializeModel(writer, model, stateHeaderBytes, formulas);
+				SerializeModel(writer, model, formulas);
 		}
 
 		/// <summary>
 		///   Serializes the <paramref name="model" />.
 		/// </summary>
-		private static unsafe void SerializeModel(BinaryWriter writer, Model model, int stateHeaderBytes, Formula[] formulas)
+		private static unsafe void SerializeModel(BinaryWriter writer, Model model, Formula[] formulas)
 		{
 			//  Make sure that all auto-bound fault effects have been bound and that all bindings have been created
 			model.BindFaultEffects();
@@ -121,7 +115,6 @@ namespace SafetySharp.Runtime.Serialization
 				writer.Write(serializedState[i]);
 
 			SerializeStateFormulas(writer, objectTable, stateFormulas);
-			writer.Write(stateHeaderBytes);
 		}
 
 		/// <summary>
@@ -283,7 +276,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			// Deserialize the state formulas and instantiate the runtime model
 			DeserializeStateFormulas(reader, objectTable);
-			return new SerializedRuntimeModel(buffer, roots, objectTable, formulas, reader.ReadInt32());
+			return new SerializedRuntimeModel(buffer, roots, objectTable, formulas);
 		}
 
 		/// <summary>

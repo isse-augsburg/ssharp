@@ -110,7 +110,8 @@ void LoadModel(model_t model, const char* modelFile)
 {
 	try
 	{
-		Globals::Model = RuntimeModelSerializer::Load(gcnew MemoryStream(File::ReadAllBytes(gcnew String(modelFile))));
+		auto modelData = RuntimeModelSerializer::LoadSerializedData(gcnew MemoryStream(File::ReadAllBytes(gcnew String(modelFile))));
+		Globals::Model = gcnew RuntimeModel(modelData, sizeof(int32_t));
 
 #if false
 		Console::WriteLine(Globals::Model->StateVectorLayout);

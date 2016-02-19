@@ -50,26 +50,16 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		public readonly Formula[] Formulas;
 
-		/// <summary>
-		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
-		/// </summary>
-		public readonly int StateHeaderBytes;
-
 		/// <param name="buffer">The buffer the model was deserialized from.</param>
 		/// <param name="rootComponents">The root components of the model.</param>
 		/// <param name="objectTable">The table of objects referenced by the model.</param>
 		/// <param name="formulas">The formulas that are checked on the model.</param>
-		/// <param name="stateHeaderBytes">
-		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
-		/// </param>
-		internal SerializedRuntimeModel(byte[] buffer, Component[] rootComponents, ObjectTable objectTable, Formula[] formulas,
-										int stateHeaderBytes)
+		internal SerializedRuntimeModel(byte[] buffer, Component[] rootComponents, ObjectTable objectTable, Formula[] formulas)
 		{
 			Buffer = buffer;
 			RootComponents = rootComponents;
 			ObjectTable = objectTable;
 			Formulas = formulas;
-			StateHeaderBytes = stateHeaderBytes;
 		}
 	}
 }

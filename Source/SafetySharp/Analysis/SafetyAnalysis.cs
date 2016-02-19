@@ -119,7 +119,7 @@ namespace SafetySharp.Analysis
 			var checkedSets = new HashSet<int>();
 
 			// Store the serialized model to improve performance
-			var serializedModel = RuntimeModelSerializer.Save(_model, 0, !hazard);
+			var serializedModel = RuntimeModelSerializer.Save(_model, !hazard);
 
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we

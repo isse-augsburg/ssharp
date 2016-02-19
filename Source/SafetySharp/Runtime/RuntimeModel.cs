@@ -80,13 +80,15 @@ namespace SafetySharp.Runtime
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="serializedData">The serialized data describing the model.</param>
-		internal RuntimeModel(SerializedRuntimeModel serializedData)
+		/// <param name="stateHeaderBytes">
+		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
+		/// </param>
+		internal RuntimeModel(SerializedRuntimeModel serializedData, int stateHeaderBytes = 0)
 		{
 			var buffer = serializedData.Buffer;
 			var rootComponents = serializedData.RootComponents;
 			var objectTable = serializedData.ObjectTable;
 			var formulas = serializedData.Formulas;
-			var stateHeaderBytes = serializedData.StateHeaderBytes;
 
 			Requires.NotNull(buffer, nameof(buffer));
 			Requires.NotNull(rootComponents, nameof(rootComponents));

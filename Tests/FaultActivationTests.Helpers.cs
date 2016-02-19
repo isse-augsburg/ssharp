@@ -41,7 +41,7 @@ namespace Tests
 
 		protected void GenerateStateSpace(params IComponent[] components)
 		{
-			var serializedModel = RuntimeModelSerializer.Save(new Model(components), 0, new StateFormula(() => true));
+			var serializedModel = RuntimeModelSerializer.Save(new Model(components), new StateFormula(() => true));
 			var checker = new InvariantChecker(() => RuntimeModelSerializer.Load(serializedModel), s => Output.Log("{0}", s), 10000, 10000, 1, true);
 			_result = checker.Check();
 			CounterExample.ShouldBe(null);
