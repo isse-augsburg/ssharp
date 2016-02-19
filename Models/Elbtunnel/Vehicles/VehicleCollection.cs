@@ -72,8 +72,8 @@ namespace Elbtunnel.Vehicles
 		public void GetVehiclePosition(int vehicleIndex, out int begin, out int end)
 		{
 			var vehicle = Vehicles[vehicleIndex];
-			begin = vehicle.Position;
-			end = vehicle.Position + vehicle.Speed;
+			begin = vehicle.Position - vehicle.Speed;
+			end = vehicle.Position;
 		}
 
 		/// <summary>

@@ -44,6 +44,9 @@ namespace Elbtunnel.Vehicles
 			if (Position < Specification.EndControlPosition)
 				Lane = NextLane;
 
+			if (NextSpeed < 0)
+				NextSpeed = 0;
+
 			Speed = NextSpeed;
 			Position += Speed;
 		}

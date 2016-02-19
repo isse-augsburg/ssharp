@@ -32,7 +32,7 @@ namespace Elbtunnel
 	[TestFixture]
 	public class Tests
 	{
-		[TestCase]
+		[Test]
 		public void CollisionDcca()
 		{
 			var specification = new Specification();
@@ -66,9 +66,9 @@ namespace Elbtunnel
 			var faults = model.GetFaults();
 
 			for (var i = 0; i < faults.Length; ++i)
-				 faults[i].Activation = i < 5 ? Activation.Nondeterministic : Activation.Suppressed;
+//				 faults[i].Activation = i < 5 ? Activation.Nondeterministic : Activation.Suppressed;
 //				 faults[i].Activation = Activation.Suppressed;
-//				faults[i].Activation = Activation.Nondeterministic;
+				faults[i].Activation = Activation.Nondeterministic;
 
 			var checker = new SSharpChecker();
 			checker.CheckInvariant(model, true);

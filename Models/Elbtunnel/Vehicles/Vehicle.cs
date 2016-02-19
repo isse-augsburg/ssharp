@@ -35,7 +35,7 @@ namespace Elbtunnel.Vehicles
 		[Range(0, Specification.TunnelPosition, OverflowBehavior.Clamp)]
 		private int _position;
 
-		[Range(0, Specification.MaxSpeed, OverflowBehavior.Error)]
+		[Hidden]
 		private int _speed;
 
 		/// <summary>
@@ -98,10 +98,9 @@ namespace Elbtunnel.Vehicles
 			if (IsTunnelClosed)
 				return;
 
-			Position += Speed;
-
 			// Vehicles are only allowed to stop at the initial position
 			Speed = ChooseFromRange(1, Specification.MaxSpeed);
+			Position += Speed;
 
 			// The road layout makes lane changes impossible when the end control has been reached
 			if (Position < Specification.EndControlPosition)

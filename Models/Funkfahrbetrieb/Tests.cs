@@ -31,7 +31,7 @@ namespace Funkfahrbetrieb
 
 	public class Tests
 	{
-		[TestCase]
+		[Test]
 		public void CollisionDcca()
 		{
 			var specification = new Specification();

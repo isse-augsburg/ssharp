@@ -31,7 +31,7 @@ namespace PressureTank
 	
 	public class Tests
 	{
-		[TestCase]
+		[Test]
 		public void RuptureDcca()
 		{
 			var specification = new Specification();
