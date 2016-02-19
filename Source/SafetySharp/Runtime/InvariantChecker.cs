@@ -27,6 +27,7 @@ namespace SafetySharp.Runtime
 	using System.Runtime.ExceptionServices;
 	using System.Runtime.InteropServices;
 	using System.Threading;
+	using System.Threading.Tasks;
 	using Analysis;
 	using Analysis.FormulaVisitors;
 	using Serialization;
@@ -38,8 +39,6 @@ namespace SafetySharp.Runtime
 	internal unsafe class InvariantChecker : DisposableObject
 	{
 		private const int ReportStateCountDelta = 200000;
-
-		private readonly LoadBalancer _loadBalancer;
 		private readonly RuntimeModel _model;
 		private readonly Action<string> _output;
 		private readonly StateStorage _states;
@@ -48,6 +47,7 @@ namespace SafetySharp.Runtime
 		private CounterExample _counterExample;
 		private Exception _exception;
 		private int _levelCount;
+		private readonly LoadBalancer _loadBalancer;
 		private int _nextReport = ReportStateCountDelta;
 		private int _stateCount;
 		private long _transitionCount;
@@ -78,19 +78,29 @@ namespace SafetySharp.Runtime
 			_output = output;
 
 			cpuCount = Math.Min(Environment.ProcessorCount, Math.Max(1, cpuCount));
-			var stacks = new StateStack[cpuCount];
 
 			_workers = new Worker[cpuCount];
 			_threads = new Thread[cpuCount];
 
+			var tasks = new Task[cpuCount];
+			var stacks = new StateStack[cpuCount];
+			_loadBalancer = new LoadBalancer(stacks);
+
 			for (var i = 0; i < cpuCount; ++i)
 			{
-				stacks[i] = new StateStack(stackCapacity);
-				_workers[i] = new Worker(i, this, stacks[i], i == 0 ? _model : RuntimeModelSerializer.Load(serializedModel));
-				_threads[i] = new Thread(_workers[i].Check) { IsBackground = true, Name = $"Worker {i}" };
+				var index = i;
+				tasks[i] = Task.Factory.StartNew(() =>
+				{
+					stacks[index] = new StateStack(stackCapacity);
+					_workers[index] = new Worker(index, this, stacks[index], index == 0 ? _model : RuntimeModelSerializer.Load(serializedModel));
+					_threads[index] = new Thread(_workers[index].Check) { IsBackground = true, Name = $"Worker {index}" };
+
+					if (index == 0)
+						_workers[0].ComputeInitialStates();
+				});
 			}
 
-			_loadBalancer = new LoadBalancer(stacks);
+			Task.WaitAll(tasks);
 
 #if false
 			Console.WriteLine(_model.StateVectorLayout);
@@ -104,8 +114,6 @@ namespace SafetySharp.Runtime
 		{
 			_output($"Performing invariant check with {_workers.Length} CPU cores.");
 			_output($"State vector has {_model.StateVectorSize} bytes.");
-
-			_workers[0].ComputeInitialStates();
 
 			foreach (var thread in _threads)
 				thread.Start();

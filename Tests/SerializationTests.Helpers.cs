@@ -49,7 +49,7 @@ namespace Tests
 
 		protected void GenerateCode(SerializationMode mode, params object[] objects)
 		{
-			objects = objects.SelectMany(obj => SerializationRegistry.Default.GetReferencedObjects(obj, mode)).ToArray();
+			objects = SerializationRegistry.Default.GetReferencedObjects(objects, mode).ToArray();
 
 			_objectTable = new ObjectTable(objects);
 			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_objectTable, mode);

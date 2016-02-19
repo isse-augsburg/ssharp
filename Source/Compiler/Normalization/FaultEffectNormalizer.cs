@@ -414,6 +414,7 @@ namespace SafetySharp.Compiler.Normalization
 
 			faultField = Syntax.MarkAsNonDebuggerBrowsable(faultField);
 			faultField = Syntax.AddAttribute<HiddenAttribute>(faultField);
+			faultField = Syntax.AddAttribute<NonDiscoverableAttribute>(faultField);
 			faultField = faultField.NormalizeWhitespace();
 
 			AddMembers(classSymbol, (MemberDeclarationSyntax)faultField);

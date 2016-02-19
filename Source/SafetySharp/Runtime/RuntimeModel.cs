@@ -108,7 +108,7 @@ namespace SafetySharp.Runtime
 			// Create a local object table just for the objects referenced by the model; only these objects
 			// have to be serialized and deserialized. The local object table does not contain, for instance,
 			// the closure types of the state formulas
-			var objects = rootComponents.SelectMany(obj => SerializationRegistry.Default.GetReferencedObjects(obj, SerializationMode.Optimized));
+			var objects = SerializationRegistry.Default.GetReferencedObjects(rootComponents, SerializationMode.Optimized);
 			var deterministicFaults = objectTable.OfType<Fault>().Where(fault => fault.Activation != Activation.Nondeterministic);
 
 			objects = objects.Except(deterministicFaults, ReferenceEqualityComparer<object>.Default);

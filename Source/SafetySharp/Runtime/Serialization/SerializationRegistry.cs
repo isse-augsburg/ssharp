@@ -95,7 +95,7 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Generates the <see cref="StateVectorLayout"/> for the <paramref name="objects" />.
+		///   Generates the <see cref="StateVectorLayout" /> for the <paramref name="objects" />.
 		/// </summary>
 		/// <param name="objects">The objects consisting of state values the state vector layout should be generated for.</param>
 		/// <param name="mode">The serialization mode that should be used to generate the state vector layout.</param>
@@ -113,16 +113,22 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Gets all objects referenced by <paramref name="obj" />, including <paramref name="obj" /> itself.
+		///   Gets all objects referenced by the <paramref name="objects" />, not including <paramref name="objects" /> itself.
 		/// </summary>
-		/// <param name="obj">The object the referenced objects should be returned for.</param>
+		/// <param name="objects">The objects the referenced objects should be returned for.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		internal IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
+		internal IEnumerable<object> GetReferencedObjects(object[] objects, SerializationMode mode)
 		{
-			Requires.NotNull(obj, nameof(obj));
+			Requires.NotNull(objects, nameof(objects));
 
-			var referencedObjects = new HashSet<object>(ReferenceEqualityComparer<object>.Default) { obj };
-			GetReferencedObjects(referencedObjects, obj, mode);
+			var referencedObjects = new HashSet<object>(ReferenceEqualityComparer<object>.Default);
+
+			foreach (var obj in objects)
+			{
+				referencedObjects.Add(obj);
+				GetReferencedObjects(referencedObjects, obj, mode);
+			}
+
 			return referencedObjects;
 		}
 
