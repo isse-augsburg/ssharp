@@ -34,11 +34,15 @@ namespace HemodialysisMachine.Model
 	// Also called dialysate or dialyzate
 	public class DialyzingFluid : IElement<DialyzingFluid>
 	{
-		[Range(0, 8, OverflowBehavior.Error)]
+		[Hidden,Range(0, 8, OverflowBehavior.Error)]
 		public int Quantity;
+		[Hidden]
 		public KindOfDialysate KindOfDialysate;
+		[Hidden]
 		public bool ContaminatedByBlood;
+		[Hidden]
 		public bool WasUsed;
+		[Hidden]
 		public QualitativeTemperature Temperature;
 
 		public void CopyValuesFrom(DialyzingFluid @from)

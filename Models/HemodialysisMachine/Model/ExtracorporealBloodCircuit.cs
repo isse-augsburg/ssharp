@@ -233,7 +233,7 @@ namespace HemodialysisMachine.Model
 
 		public ValveState ValveState = ValveState.Open;
 
-		public readonly Blood DelayedBlood = new Blood();
+		public readonly BufferedBlood DelayedBlood = new BufferedBlood();
 
 		[Provided]
 		public void SetMainFlow(Blood outgoing, Blood incoming)

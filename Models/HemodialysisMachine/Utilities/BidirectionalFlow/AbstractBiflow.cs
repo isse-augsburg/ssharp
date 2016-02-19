@@ -59,10 +59,9 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TForward : class, IElement<TForward>, new()
 		where TBackward : class, IElement<TBackward>, new()
 	{
-		//[Hidden]
+		[Hidden]
 		public PortFlowOut<TForward, TBackward> ConnectedPredecessor;
-
-		//[Hidden] // Only save "To"-Values
+		
 		public readonly TForward ForwardFromPredecessor;
 
 		public readonly TBackward BackwardToPredecessor;
@@ -86,10 +85,9 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TForward : class, IElement<TForward>, new()
 		where TBackward : class, IElement<TBackward>, new()
 	{
-		//[Hidden]
+		[Hidden]
 		public PortFlowIn<TForward, TBackward> ConnectedSuccessor;
-
-		//[Hidden] // Only save "To"-Values
+		
 		public readonly TForward ForwardToSuccessor;
 
 		public readonly TBackward BackwardFromSuccessor;

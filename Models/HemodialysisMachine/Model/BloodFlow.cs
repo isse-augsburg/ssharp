@@ -8,20 +8,37 @@ namespace HemodialysisMachine.Model
 
 	public class Blood : IElement<Blood>
 	{
-		[Range(-1,7, OverflowBehavior.Error)]
+		[Hidden,Range(-1,7, OverflowBehavior.Error)]
 		public int Water = 0;
-		[Range(0, 8, OverflowBehavior.Error)]
+		[Hidden, Range(0, 8, OverflowBehavior.Error)]
 		public int SmallWasteProducts = 0;
-		[Range(0, 8, OverflowBehavior.Error)]
+		[Hidden, Range(0, 8, OverflowBehavior.Error)]
 		public int BigWasteProducts = 0;
 
+		[Hidden]
 		public bool HasHeparin = false;
+		[Hidden]
 		public bool ChemicalCompositionOk = true;
+		[Hidden]
 		public bool GasFree = false;
+		[Hidden]
 		public QualitativePressure Pressure = QualitativePressure.NoPressure;
+		[Hidden]
 		public QualitativeTemperature Temperature = QualitativeTemperature.TooCold;
 
 		public void CopyValuesFrom(Blood from)
+		{
+			Water = from.Water;
+			SmallWasteProducts = from.SmallWasteProducts;
+			BigWasteProducts = from.BigWasteProducts;
+			HasHeparin = from.HasHeparin;
+			ChemicalCompositionOk = from.ChemicalCompositionOk;
+			GasFree = from.GasFree;
+			Pressure = from.Pressure;
+			Temperature = from.Temperature;
+		}
+
+		public void CopyValuesFrom(BufferedBlood from)
 		{
 			Water = from.Water;
 			SmallWasteProducts = from.SmallWasteProducts;
@@ -39,6 +56,35 @@ namespace HemodialysisMachine.Model
 			System.Console.Out.WriteLine("\t\tWater: " + Water);
 			System.Console.Out.WriteLine("\t\tSmallWasteProducts: " + SmallWasteProducts);
 			System.Console.Out.WriteLine("\t\tBigWasteProducts: " + BigWasteProducts);
+		}
+	}
+
+
+	public class BufferedBlood
+	{
+		[Range(-1, 7, OverflowBehavior.Error)]
+		public int Water = 0;
+		[Range(0, 8, OverflowBehavior.Error)]
+		public int SmallWasteProducts = 0;
+		[Range(0, 8, OverflowBehavior.Error)]
+		public int BigWasteProducts = 0;
+		
+		public bool HasHeparin = false;
+		public bool ChemicalCompositionOk = true;
+		public bool GasFree = false;
+		public QualitativePressure Pressure = QualitativePressure.NoPressure;
+		public QualitativeTemperature Temperature = QualitativeTemperature.TooCold;
+
+		public void CopyValuesFrom(Blood from)
+		{
+			Water = from.Water;
+			SmallWasteProducts = from.SmallWasteProducts;
+			BigWasteProducts = from.BigWasteProducts;
+			HasHeparin = from.HasHeparin;
+			ChemicalCompositionOk = from.ChemicalCompositionOk;
+			GasFree = from.GasFree;
+			Pressure = from.Pressure;
+			Temperature = from.Temperature;
 		}
 	}
 

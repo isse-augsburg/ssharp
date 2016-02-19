@@ -17,9 +17,10 @@ namespace HemodialysisMachine.Model
 
 	public class Suction : IElement<Suction>
 	{
+		[Hidden]
 		public SuctionType SuctionType = SuctionType.SourceDependentSuction;
 
-		[Range(0, 8, OverflowBehavior.Error)]
+		[Hidden,Range(0, 8, OverflowBehavior.Error)]
 		public int CustomSuctionValue = 0;
 
 		public void CopyValuesFrom(Suction from)
