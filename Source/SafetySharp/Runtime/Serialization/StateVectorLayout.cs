@@ -208,7 +208,9 @@ namespace SafetySharp.Runtime.Serialization
 			builder.AppendLine($"state vector size: {SizeInBytes} bytes");
 			foreach (var group in Groups)
 			{
-				builder.AppendLine($"group of {group.ElementSizeInBits} bit values, {group.Slots.Length} elements at offset {group.OffsetInBytes}");
+				var elementCount = group.Slots.Sum(slot => slot.ElementCount);
+				builder.AppendLine($"group of {group.ElementSizeInBits} bit values, {elementCount} elements at offset {group.OffsetInBytes}");
+
 				foreach (var slot in group.Slots)
 				{
 					if (slot.Field == null)

@@ -510,6 +510,7 @@
     <Compile Include="Serialization\Misc\mixed 2.cs" />
     <Compile Include="Serialization\Misc\mixed 1.cs" />
     <Compile Include="Serialization\Objects\hidden array elements.cs" />
+    <Compile Include="Serialization\Objects\hidden list elements.cs" />
     <Compile Include="Serialization\Objects\serialized arrays.cs" />
     <Compile Include="Serialization\Objects\lists.cs" />
     <Compile Include="Serialization\Objects\delegate field.cs" />

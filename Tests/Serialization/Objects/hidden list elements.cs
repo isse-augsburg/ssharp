@@ -20,25 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Serialization.Objects
 {
-	using System;
 	using System.Collections.Generic;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	/// <summary>
-	///   When a state field or type is marked as <c>[Hidden]</c>, its state is not preserved between different system steps.
-	///   However, the marked state is serialized at model initialization time.
-	///   Hiding state variables potentially increases simulation and model checking performance, but is only possible
-	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
-	///   written value could be read.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
-	public sealed class HiddenAttribute : Attribute
+	internal class HiddenListsElements : SerializationObject
 	{
-		/// <summary>
-		///   Gets or sets a value indicating whether the elements of a hidden array or <see cref="List{T}" /> state
-		///   field are also hidden. <c>false</c> by default.
-		/// </summary>
-		public bool HideElements { get; set; }
+		protected override void Check()
+		{
+			var c = new C
+			{
+				D = new List<int> { -3, 5 }
+			};
+
+			GenerateCode(SerializationMode.Optimized, c);
+			StateVectorSize.ShouldBe(0);
+		}
+
+		private class C : Component
+		{
+			[Hidden(HideElements = true)]
+			public List<int> D;
+		}
 	}
 }

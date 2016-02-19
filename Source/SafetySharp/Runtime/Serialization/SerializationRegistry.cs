@@ -50,6 +50,7 @@ namespace SafetySharp.Runtime.Serialization
 			RegisterSerializer(new ObjectSerializer());
 			RegisterSerializer(new FaultEffectSerializer());
 			RegisterSerializer(new ArraySerializer());
+			RegisterSerializer(new ListSerializer());
 			RegisterSerializer(new StringSerializer());
 			RegisterSerializer(new TypeSerializer());
 			RegisterSerializer(new StateFormulaSerializer());

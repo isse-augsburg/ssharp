@@ -113,6 +113,7 @@
     <Compile Include="Runtime\ChoiceStack.cs" />
     <Compile Include="Runtime\RuntimeModel.cs" />
     <Compile Include="Runtime\Serialization\CompactedStateGroup.cs" />
+    <Compile Include="Runtime\Serialization\Serializers\ListSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\FaultEffectSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\StateFormulaSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\TypeSerializer.cs" />

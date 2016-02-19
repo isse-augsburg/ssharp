@@ -98,19 +98,12 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 			foreach (var field in GetFields(obj, mode, discoveringObjects: true).Where(field => field.FieldType.IsReferenceType()))
 			{
 				var value = field.GetValue(obj);
+				if (value == null)
+					continue;
 
-				// Optimization: Skip arrays with hidden elements
-				if (mode == SerializationMode.Optimized && field.FieldType.IsArray && field.GetCustomAttribute<HiddenAttribute>()?.HideElements == true)
-				{
-					// We have to make sure the objects referenced by the array are discovered nevertheless
-					if (field.FieldType.GetElementType().IsReferenceType())
-					{
-						foreach (var element in (object[])value)
-							yield return element;
-					}
-				}
-				else
-					yield return value;
+				var serializer = SerializationRegistry.Default.GetSerializer(value);
+				foreach (var o in serializer.GetReferencedObjects(value, mode, field.GetCustomAttribute<HiddenAttribute>()))
+					yield return o;
 			}
 		}
 

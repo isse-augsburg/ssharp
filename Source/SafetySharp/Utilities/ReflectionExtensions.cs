@@ -236,7 +236,7 @@ namespace SafetySharp.Utilities
 		public static bool IsHidden(this MemberInfo member, SerializationMode mode, bool discoveringObjects)
 		{
 			// Don't try to serialize members that are explicitly marked as non-serializable
-			if (member.HasAttribute<NonSerializableAttribute>())
+			if (member.HasAttribute<NonSerializableAttribute>() || member.HasAttribute<NonSerializedAttribute>())
 				return true;
 
 			// If we're discovering objects in optimized mode and the member is explicitly marked as non-discoverable, it is hidden

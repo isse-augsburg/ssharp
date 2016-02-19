@@ -29,6 +29,7 @@ namespace SafetySharp.Modeling
 	using System.Reflection;
 	using System.Runtime.CompilerServices;
 	using CompilerServices;
+	using Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -56,10 +57,10 @@ namespace SafetySharp.Modeling
 
 			Dictionary<FieldInfo, RangeAttribute> infos;
 			if (!_ranges.TryGetValue(obj, out infos))
-				return CreateDefaultRange(field.FieldType);
+				return CreateDefaultRange(obj, field);
 
 			if (!infos.TryGetValue(field, out range))
-				return CreateDefaultRange(field.FieldType);
+				return CreateDefaultRange(obj, field);
 
 			return range;
 		}
@@ -153,6 +154,20 @@ namespace SafetySharp.Modeling
 				default:
 					return Assert.NotReached<object>($"Cannot convert a value of type '{valueType.FullName}' to type '{fieldType.FullName}'.");
 			}
+		}
+
+		/// <summary>
+		///   Creates the default range when no additional range data is available for the <paramref name="obj"/>'s <paramref name="field"/>.
+		/// </summary>
+		internal static RangeAttribute CreateDefaultRange(object obj, FieldInfo field)
+		{
+			// Check if the serializer knows a range
+			RangeAttribute range;
+			if (SerializationRegistry.Default.GetSerializer(obj).TryGetRange(obj, field, out range))
+				return range;
+
+			// Otherwise, maybe we can deduce a range for the type
+			return CreateDefaultRange(field.FieldType);
 		}
 
 		/// <summary>

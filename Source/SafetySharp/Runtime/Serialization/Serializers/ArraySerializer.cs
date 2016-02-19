@@ -26,6 +26,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -96,6 +97,29 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 				return Enumerable.Empty<object>();
 
 			return (object[])obj;
+		}
+
+		/// <summary>
+		///   Gets all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself, when
+		///   <paramref name="obj" /> was marked with the <paramref name="hidden" /> attribute.
+		/// </summary>
+		/// <param name="obj">The object the referenced objects should be returned for.</param>
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		/// <param name="hidden">The <see cref="HiddenAttribute" /> instance the field storing <paramref name="obj" /> was marked with.</param>
+		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode, HiddenAttribute hidden)
+		{
+			// Optimization: Skip arrays with hidden elements
+			if (mode == SerializationMode.Optimized && hidden?.HideElements == true)
+			{
+				// We have to make sure the objects referenced by the array are discovered nevertheless
+				if (!obj.GetType().GetElementType().IsReferenceType())
+					yield break;
+
+				foreach (var element in (object[])obj)
+					yield return element;
+			}
+			else
+				yield return obj;
 		}
 	}
 }

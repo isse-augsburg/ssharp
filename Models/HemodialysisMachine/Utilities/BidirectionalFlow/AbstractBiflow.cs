@@ -125,12 +125,13 @@ namespace HemodialysisMachine.Utilities.BidirectionalFlow
 		where TForward : class, IElement<TForward>, new()
 		where TBackward : class, IElement<TBackward>, new()
 	{
-		//[Hidden]
+		[Hidden(HideElements = true)]
 		private readonly List<PortFlowIn<TForward, TBackward>> UpdateBackwardOrder;
 
-		//[Hidden]
+		[Hidden(HideElements = true)]
 		private readonly List<PortFlowOut<TForward, TBackward>> UpdateForwardOrder;
 
+		[Hidden(HideElements = true)]
 		private readonly List<IComponent> VirtualFlowComponents;
 
 		// TODO: For generic non-tree like acyclic flows a topological sort is necessary (So, every Update gets executed only once)
