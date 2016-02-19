@@ -51,7 +51,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 
 			c.X.ShouldBe(0);
 
-			simulator.Replay();
+			simulator.SimulateStep();
 			c.X.ShouldBe(value);
 		}
 

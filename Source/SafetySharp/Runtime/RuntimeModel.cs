@@ -77,11 +77,6 @@ namespace SafetySharp.Runtime
 		private readonly int _stateHeaderBytes;
 
 		/// <summary>
-		///   The objects referenced by the model.
-		/// </summary>
-		private readonly ObjectTable _objects;
-
-		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="serializedData">The serialized data describing the model.</param>
@@ -113,7 +108,7 @@ namespace SafetySharp.Runtime
 
 			objects = objects.Except(deterministicFaults, ReferenceEqualityComparer<object>.Default);
 			_serializedObjects = new ObjectTable(objects);
-			_objects = objectTable;
+			Objects = objectTable;
 
 			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_serializedObjects, SerializationMode.Optimized);
 
@@ -130,6 +125,11 @@ namespace SafetySharp.Runtime
 			fixed (byte* state = _constructionState)
 				Serialize(state);
 		}
+
+		/// <summary>
+		///   Gets the objects referenced by the model.
+		/// </summary>
+		internal ObjectTable Objects { get; }
 
 		/// <summary>
 		///   Gets the buffer the model was deserialized from.
@@ -364,7 +364,7 @@ namespace SafetySharp.Runtime
 
 			_choiceResolver.SafeDispose();
 			_stateCache.SafeDispose();
-			_objects.OfType<IDisposable>().SafeDisposeAll();
+			Objects.OfType<IDisposable>().SafeDisposeAll();
 		}
 	}
 }

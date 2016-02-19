@@ -128,16 +128,19 @@ namespace SafetySharp.Runtime
 				Model.Deserialize(state);
 
 				AddState(state);
-				return;
 			}
+			else
+			{
+				if (_stateIndex + 1 >= _counterExample.StepCount)
+					return;
+				
+				_counterExample.DeserializeState(_stateIndex + 1);
 
-			if (_stateIndex + 1 >= _counterExample.StepCount)
-				return;
+				Model.Serialize(state);
+				AddState(state);
 
-			_counterExample.DeserializeState(_stateIndex + 1);
-
-			Model.Serialize(state);
-			AddState(state);
+				Replay();
+			}
 		}
 
 		/// <summary>
@@ -215,13 +218,8 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Replays the next transition of the simulated counter example.
 		/// </summary>
-		public void Replay()
+		private void Replay()
 		{
-			Requires.That(IsReplay, "Only counter examples can be replayed.");
-			Requires.That(!IsCompleted, "The end of the counter example has already been reached.");
-
-			SimulateStep();
-
 			fixed (byte* sourceState = _states[_stateIndex - 1])
 				Model.Replay(sourceState, _counterExample.GetReplayInformation(_stateIndex - 1));
 
@@ -229,6 +227,9 @@ namespace SafetySharp.Runtime
 			var state = stackalloc byte[Model.StateVectorSize];
 			Model.Serialize(state);
 			Model.Deserialize(state);
+
+			for (var i = 0; i < Model.StateVectorSize; ++i)
+				Requires.That(state[i] == _states[_stateIndex][i], "Invalid replay of counter example: Unexpected state difference.");
 		}
 
 		/// <summary>

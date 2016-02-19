@@ -28,6 +28,7 @@ namespace SafetySharp.Analysis
 	using System.Linq;
 	using System.Runtime.Serialization.Formatters.Binary;
 	using System.Text;
+	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;
@@ -151,6 +152,9 @@ namespace SafetySharp.Analysis
 				writer.Write(Model.SerializedModel.Length);
 				writer.Write(Model.SerializedModel);
 
+				foreach (var fault in Model.Objects.OfType<Fault>())
+					writer.Write((int)fault.Activation);
+
 				var formatter = new BinaryFormatter();
 				var memoryStream = new MemoryStream();
 				formatter.Serialize(memoryStream, Model.StateVectorLayout.ToArray());
@@ -193,11 +197,17 @@ namespace SafetySharp.Analysis
 					throw new InvalidOperationException("The file does not contain a counter example that is compatible with this version of S#.");
 
 				var serializedRuntimeModel = reader.ReadBytes(reader.ReadInt32());
-				var model = RuntimeModelSerializer.Load(new MemoryStream(serializedRuntimeModel));
+				var modelData = RuntimeModelSerializer.LoadSerializedData(new MemoryStream(serializedRuntimeModel));
+
+				foreach (var fault in modelData.ObjectTable.OfType<Fault>())
+					fault.Activation = (Activation)reader.ReadInt32();
+
+				var model = new RuntimeModel(modelData);
 				var metadataStream = new MemoryStream(reader.ReadBytes(reader.ReadInt32()));
 				var formatter = new BinaryFormatter();
 				var slotMetadata = new StateVectorLayout((StateSlotMetadata[])formatter.Deserialize(metadataStream));
 				var modelMetadata = model.StateVectorLayout;
+
 				var counterExample = new byte[reader.ReadInt32()][];
 				var slotCount = reader.ReadInt32();
 

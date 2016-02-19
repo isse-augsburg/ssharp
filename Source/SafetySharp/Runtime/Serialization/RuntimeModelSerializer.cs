@@ -218,6 +218,21 @@ namespace SafetySharp.Runtime.Serialization
 		///   Loads a <see cref="RuntimeModel" /> from the <paramref name="stream" />.
 		/// </summary>
 		/// <param name="stream">The stream the model should be loaded from.</param>
+		public static SerializedRuntimeModel LoadSerializedData(Stream stream)
+		{
+			Requires.NotNull(stream, nameof(stream));
+
+			using (var buffer = new MemoryStream())
+			{
+				stream.CopyTo(buffer);
+				return LoadSerializedData(buffer.ToArray());
+			}
+		}
+
+		/// <summary>
+		///   Loads a <see cref="RuntimeModel" /> from the <paramref name="stream" />.
+		/// </summary>
+		/// <param name="stream">The stream the model should be loaded from.</param>
 		public static RuntimeModel Load(Stream stream)
 		{
 			Requires.NotNull(stream, nameof(stream));

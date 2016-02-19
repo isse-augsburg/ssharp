@@ -42,7 +42,6 @@ namespace Visualization.Infrastructure
 		{
 			InitializeComponent();
 			CloseCounterExampleButton.Visibility = Visibility.Hidden;
-			ReplayTransition.Visibility = Visibility.Hidden;
 		}
 
 		public RealTimeSimulator Simulator { get; private set; }
@@ -84,15 +83,9 @@ namespace Visualization.Infrastructure
 			UpdateSimulationButtonVisibilities();
 
 			if (Simulator.IsCompleted)
-			{
 				EndOfCounterExample.Visibility = Visibility.Visible;
-				ReplayTransition.Disable();
-			}
 			else
-			{
 				EndOfCounterExample.Visibility = Visibility.Hidden;
-				ReplayTransition.Enable();
-			}
 		}
 
 		private void UpdateSimulationButtonVisibilities()
@@ -203,7 +196,6 @@ namespace Visualization.Infrastructure
 
 				SetSimulator(simulator);
 				CloseCounterExampleButton.Visibility = Visibility.Visible;
-				ReplayTransition.Visibility = Visibility.Visible;
 
 				ModelStateChanged?.Invoke(this, EventArgs.Empty);
 				Reset?.Invoke(this, EventArgs.Empty);
@@ -220,23 +212,10 @@ namespace Visualization.Infrastructure
 		{
 			SetSimulator(new Simulator(_model, _formulas));
 			CloseCounterExampleButton.Visibility = Visibility.Hidden;
-			ReplayTransition.Visibility = Visibility.Hidden;
 
 			ModelStateChanged?.Invoke(this, EventArgs.Empty);
 			Reset?.Invoke(this, EventArgs.Empty);
 			EndOfCounterExample.Visibility = Visibility.Hidden;
-		}
-
-		private void OnReplayTransition(object sender, RoutedEventArgs e)
-		{
-			try
-			{
-				Simulator.Replay();
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.Message, "Failed to Replay Transition", MessageBoxButton.OK, MessageBoxImage.Error);
-			}
 		}
 	}
 }
