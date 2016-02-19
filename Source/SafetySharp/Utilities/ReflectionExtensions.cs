@@ -119,6 +119,15 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
+		///   Gets a value indicating whether <paramref name="name" /> was compiler-generated.
+		/// </summary>
+		/// <param name="name">The name that should be checked.</param>
+		public static bool IsCompilerGeneratedName(this string name)
+		{
+			return name.StartsWith("__") && name.EndsWith("__");
+		}
+
+		/// <summary>
 		///   Checks whether <paramref name="type" /> is a primitive type.
 		/// </summary>
 		public static bool IsPrimitiveType(this Type type)

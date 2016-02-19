@@ -22,9 +22,11 @@
 
 namespace SafetySharp.CompilerServices
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
+	using Runtime.Reflection;
 	using Utilities;
 
 	/// <summary>
@@ -79,6 +81,17 @@ namespace SafetySharp.CompilerServices
 		internal static void BindAll(IEnumerable<object> objects)
 		{
 			Requires.NotNull(objects, nameof(objects));
+
+			// Set all default bindings so that we can be sure to get a helpful error message when
+			// an unbound port is called
+			foreach (var component in objects.OfType<Component>())
+			{
+				foreach (var requiredPort in component.GetRequiredPorts())
+				{
+					var metadata = BindingMetadataAttribute.Get(requiredPort);
+					metadata.DefaultMethod.Invoke(component, Array.Empty<object>());
+				}
+			}
 
 			// Set all bindings that were initialized at model construction time
 			foreach (var binding in objects.OfType<PortBinding>())

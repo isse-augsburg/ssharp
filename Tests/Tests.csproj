@@ -459,6 +459,8 @@
     <Compile Include="Reflection\Components\Fields\array.cs" />
     <Compile Include="Reflection\Components\Fields\multiple.cs" />
     <Compile Include="Reflection\Components\Fields\single.cs" />
+    <Compile Include="Reflection\Components\Ports\provided ports.cs" />
+    <Compile Include="Reflection\Components\Ports\required ports.cs" />
     <Compile Include="Reflection\Components\Subcomponents\list.cs" />
     <Compile Include="Reflection\Components\Subcomponents\hidden.cs" />
     <Compile Include="Reflection\Components\Subcomponents\array.cs" />
@@ -546,6 +548,7 @@
     <Compile Include="Serialization\Ranges\UInt32.cs" />
     <Compile Include="Serialization\Ranges\UInt64.cs" />
     <Compile Include="Serialization\Ranges\UInt8.cs" />
+    <Compile Include="Serialization\RuntimeModels\unbound.cs" />
     <Compile Include="Serialization\RuntimeModels\binding.cs" />
     <Compile Include="Serialization\RuntimeModels\deterministic faults.cs" />
     <Compile Include="Serialization\RuntimeModels\single fault.cs" />

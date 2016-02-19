@@ -71,11 +71,12 @@ namespace SafetySharp.Compiler.Normalization
 			var index = declaration.Modifiers.IndexOf(SyntaxKind.ExternKeyword);
 			var delegateFieldName = Syntax.LiteralExpression(GetBindingDelegateFieldName());
 			var infoFieldName = Syntax.LiteralExpression(GetBinderFieldName());
+			var defaultMethod = Syntax.LiteralExpression(GetDefaultMethodName());
 
 			declaration = declaration.WithModifiers(declaration.Modifiers.RemoveAt(index)).WithSemicolonToken(default(SyntaxToken));
 			declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<DebuggerHiddenAttribute>(declaration);
 			declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<BindingMetadataAttribute>(declaration,
-				delegateFieldName, infoFieldName);
+				delegateFieldName, infoFieldName, defaultMethod);
 
 			return declaration.WithBody(body).EnsureLineCount(originalDeclaration);
 		}
@@ -113,8 +114,9 @@ namespace SafetySharp.Compiler.Normalization
 					var hiddenAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(DebuggerHiddenAttribute).GetGlobalName());
 					var delegateFieldName = Syntax.LiteralExpression(GetBindingDelegateFieldName());
 					var infoFieldName = Syntax.LiteralExpression(GetBinderFieldName());
+					var defaultMethod = Syntax.LiteralExpression(GetDefaultMethodName());
 					var fieldAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(BindingMetadataAttribute).GetGlobalName(),
-						delegateFieldName, infoFieldName);
+						delegateFieldName, infoFieldName, defaultMethod);
 
 					var requiredPortAccessor = accessor.AddAttributeLists(hiddenAttribute, fieldAttribute);
 					yield return requiredPortAccessor.WithBody(body).WithSemicolonToken(default(SyntaxToken));
@@ -123,6 +125,11 @@ namespace SafetySharp.Compiler.Normalization
 					yield return accessor.WithBody(body);
 			}
 		}
+
+		/// <summary>
+		///   Gets the name of the default method bound to a required port.
+		/// </summary>
+		private string GetDefaultMethodName() => $"DefaultMethod{_portCount}".ToSynthesized();
 
 		/// <summary>
 		///   Gets the name of the binding delegate for the current port.
@@ -180,9 +187,10 @@ namespace SafetySharp.Compiler.Normalization
 			++_portCount;
 
 			var delegateDeclaration = CreateDelegateDeclaration(GetBindingDelegateName(), true);
-			var delegateField = CreateFieldDeclaration(GetBindingDelegateFieldName(), delegateDeclaration, CreateDefaultBindingLambda());
+			var delegateField = CreateFieldDeclaration(GetBindingDelegateFieldName(), delegateDeclaration);
 			var infoField = CreateBinderFieldDeclaration();
-			AddMembers(_methodSymbol.ContainingType, delegateDeclaration, delegateField, infoField);
+			var defaultMethod = CreateDefaultMethod();
+			AddMembers(_methodSymbol.ContainingType, delegateDeclaration, delegateField, infoField, defaultMethod);
 
 			var fieldReference = SyntaxFactory.IdentifierName(GetBindingDelegateFieldName());
 			var arguments = CreateDelegateInvocationArguments();
@@ -224,14 +232,14 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Creates a field declaration that stores a value of the <paramref name="delegateType" />.
 		/// </summary>
-		private FieldDeclarationSyntax CreateFieldDeclaration(string fieldName, DelegateDeclarationSyntax delegateType, SyntaxNode initializer)
+		private FieldDeclarationSyntax CreateFieldDeclaration(string fieldName, DelegateDeclarationSyntax delegateType)
 		{
 			var fieldType = SyntaxFactory.ParseTypeName(delegateType.Identifier.ValueText);
 			var field = Syntax.FieldDeclaration(
 				name: fieldName,
 				type: fieldType,
 				accessibility: Accessibility.Private,
-				initializer: initializer);
+				initializer: CreateBindingLambda());
 
 			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field);
 			field = Syntax.MarkAsNonDebuggerBrowsable(field);
@@ -256,12 +264,30 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Creates the default lambda method that is assigned to a binding delegate.
+		///   Creates the default method that is assigned to a binding delegate.
 		/// </summary>
-		private SyntaxNode CreateDefaultBindingLambda()
+		private MethodDeclarationSyntax CreateDefaultMethod()
+		{
+			var lambda = CreateBindingLambda();
+			var field = Syntax.MemberAccessExpression(Syntax.ThisExpression(), Syntax.IdentifierName(GetBindingDelegateFieldName()));
+			var assignment = Syntax.AssignmentStatement(field, lambda);
+			var method = Syntax.MethodDeclaration(
+				name: GetDefaultMethodName(),
+				accessibility: Accessibility.Private,
+				statements: new[] { assignment });
+
+			method = Syntax.AddAttribute<CompilerGeneratedAttribute>(method);
+			return (MethodDeclarationSyntax)method;
+		}
+
+		/// <summary>
+		///   Creates the default lambda that is assigned to a binding delegate.
+		/// </summary>
+		private SyntaxNode CreateBindingLambda()
 		{
 			var parameters = _methodSymbol.Parameters.Select(parameter => Syntax.ParameterDeclaration(parameter));
-			var objectCreation = Syntax.ObjectCreationExpression(SemanticModel.GetTypeSymbol<UnboundPortException>());
+			var methodName = Syntax.LiteralExpression(_methodSymbol.ToDisplayString());
+			var objectCreation = Syntax.ObjectCreationExpression(SemanticModel.GetTypeSymbol<UnboundPortException>(), methodName);
 			var throwStatement = SyntaxFactory.Block((StatementSyntax)Syntax.ThrowStatement(objectCreation));
 			return Syntax.ValueReturningLambdaExpression(parameters, throwStatement);
 		}

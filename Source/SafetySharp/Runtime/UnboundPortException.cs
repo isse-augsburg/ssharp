@@ -33,8 +33,9 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public UnboundPortException()
-			: base("The required port cannot be invoked because it is not bound to any provided port.")
+		/// <param name="portName">The name of the unbound port.</param>
+		public UnboundPortException(string portName)
+			: base($"The required port '{portName}' cannot be invoked because it is not bound to any provided port.")
 		{
 		}
 	}

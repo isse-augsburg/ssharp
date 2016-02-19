@@ -43,6 +43,11 @@ namespace SafetySharp.CompilerServices
 		private readonly string _delegateField;
 
 		/// <summary>
+		///   The name of the method that initializes the default binding.
+		/// </summary>
+		private readonly string _defaultMethod;
+
+		/// <summary>
 		///   The type that declares the marked required port.
 		/// </summary>
 		private Type _type;
@@ -52,13 +57,16 @@ namespace SafetySharp.CompilerServices
 		/// </summary>
 		/// <param name="delegateField">The name of the marked required port's delegate field.</param>
 		/// <param name="bindingField">The name of the marked required port's binding field.</param>
-		public BindingMetadataAttribute(string delegateField, string bindingField)
+		/// <param name="defaultMethod">The name of the method that initializes the default binding.</param>
+		public BindingMetadataAttribute(string delegateField, string bindingField, string defaultMethod)
 		{
 			Requires.NotNullOrWhitespace(delegateField, nameof(delegateField));
 			Requires.NotNullOrWhitespace(bindingField, nameof(bindingField));
+			Requires.NotNullOrWhitespace(defaultMethod, nameof(defaultMethod));
 
 			_delegateField = delegateField;
 			_bindingField = bindingField;
+			_defaultMethod = defaultMethod;
 		}
 
 		/// <summary>
@@ -86,6 +94,20 @@ namespace SafetySharp.CompilerServices
 				Requires.That(field != null, $"Unable to find binding field '{_type.FullName}.{_bindingField}'.");
 
 				return field;
+			}
+		}
+
+		/// <summary>
+		///   Gets the <see cref="MethodInfo" /> object representing the marked required port's default method.
+		/// </summary>
+		public MethodInfo DefaultMethod
+		{
+			get
+			{
+				var method = _type.GetMethod(_defaultMethod, BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic);
+				Requires.That(method != null, $"Unable to find default method '{_type.FullName}.{_defaultMethod}'.");
+
+				return method;
 			}
 		}
 

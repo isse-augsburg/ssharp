@@ -26,6 +26,7 @@ namespace SafetySharp.Runtime.Reflection
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Reflection;
+	using CompilerServices;
 	using Modeling;
 	using Serialization;
 	using Utilities;
@@ -61,6 +62,30 @@ namespace SafetySharp.Runtime.Reflection
 			// don't include the component in its set of subcomponents
 			subcomponents.Remove(component);
 			return subcomponents;
+		}
+
+		/// <summary>
+		///   Gets the <see cref="MethodInfo" /> instances representing the <paramref name="component" />'s required ports.
+		/// </summary>
+		/// <param name="component">The component the required ports should be returned for.</param>
+		public static IEnumerable<MethodInfo> GetRequiredPorts(this IComponent component)
+		{
+			return component
+				.GetType()
+				.GetMethods(typeof(Component))
+				.Where(method => !method.IsStatic && method.HasAttribute<BindingMetadataAttribute>());
+		}
+
+		/// <summary>
+		///   Gets the <see cref="MethodInfo" /> instances representing the <paramref name="component" />'s provided ports.
+		/// </summary>
+		/// <param name="component">The component the provided ports should be returned for.</param>
+		public static IEnumerable<MethodInfo> GetProvidedPorts(this IComponent component)
+		{
+			return component
+				.GetType()
+				.GetMethods(typeof(Component))
+				.Where(method => !method.IsStatic && !method.HasAttribute<BindingMetadataAttribute>() && !method.Name.IsCompilerGeneratedName());
 		}
 
 		/// <summary>

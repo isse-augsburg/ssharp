@@ -22,79 +22,49 @@
 
 namespace Tests.Serialization.RuntimeModels
 {
-	using System;
 	using SafetySharp.Analysis;
-	using SafetySharp.CompilerServices;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 
-	internal class ManualBinding : TestModel
+	internal class Unbound : TestModel
 	{
 		protected override void Check()
 		{
-			var d = new D { A = 7, C = 3 };
-			var r = new PortReference(d, typeof(D), "M", new[] { typeof(bool), typeof(int) }, typeof(bool), false);
-			var p = new PortReference(d, typeof(D), "Q", new[] { typeof(bool), typeof(int) }, typeof(bool), true);
-			d.B = new PortBinding(r, p);
-			var m = new Model(d);
+			var d = new D();
 
+			Should.Throw<UnboundPortException>(() => d.R());
+			Should.Throw<UnboundPortException>(() => { var x = d.A; });
+			Should.Throw<UnboundPortException>(() => d.B = 0);
+			Should.Throw<UnboundPortException>(() => { var x = d.C; });
+			Should.Throw<UnboundPortException>(() => d.C = 0);
+
+			var m = new Model(d);
 			Create(m);
 
 			StateFormulas.ShouldBeEmpty();
 			RootComponents.Length.ShouldBe(1);
-			StateSlotCount.ShouldBe(2);
+			StateSlotCount.ShouldBe(0);
 
 			var root = RootComponents[0];
 			root.ShouldBeOfType<D>();
+			d = (D)root;
 
-			r = ((D)root).B.RequiredPort;
-			p = ((D)root).B.ProvidedPort;
-
-			r.Component.ShouldBe(root);
-			r.DeclaringType.ShouldBe(typeof(D));
-			r.PortName.ShouldBe("M");
-			r.ArgumentTypes.ShouldBe(new[] { typeof(bool), typeof(int) });
-			r.ReturnType.ShouldBe(typeof(bool));
-			r.IsVirtualCall.ShouldBe(false);
-
-			p.Component.ShouldBe(root);
-			p.DeclaringType.ShouldBe(typeof(D));
-			p.PortName.ShouldBe("Q");
-			p.ArgumentTypes.ShouldBe(new[] { typeof(bool), typeof(int) });
-			p.ReturnType.ShouldBe(typeof(bool));
-			p.IsVirtualCall.ShouldBe(true);
-
-			((D)root).A.ShouldBe(7);
-			((D)root).C.ShouldBe(3);
+			Should.Throw<UnboundPortException>(() => d.R());
+			Should.Throw<UnboundPortException>(() => { var x = d.A; });
+			Should.Throw<UnboundPortException>(() => d.B = 0);
+			Should.Throw<UnboundPortException>(() => { var x = d.C; });
+			Should.Throw<UnboundPortException>(() => d.C = 0);
 		}
 
 		private class D : Component
 		{
-			[NonSerializable]
-			private Func<bool, int, bool> _x = null;
+			public extern int A { get; }
+			public extern int B { set; }
+			public extern int C { get; set; }
 
-			[NonSerializable]
-			private PortBinding _y = null;
-
-			public int A;
-			public PortBinding B;
-			public int C;
-
-			[BindingMetadata("_x", "_y", "f")]
-			private bool M(bool b, int i)
-			{
-				return b;
-			}
-
-			private bool Q(bool b, int i)
-			{
-				return b;
-			}
-
-			private void f()
-			{
-			}
+			public extern int R();
 		}
 	}
 }

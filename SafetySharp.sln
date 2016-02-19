@@ -51,6 +51,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HemodialysisMachine", "Mode
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindshieldWiper", "Models\WindshieldWiper\WindshieldWiper.csproj", "{3BEE7210-0D50-4B9D-8956-563D97C05A7C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8823091C-387F-4F4D-ABCD-8F71D1528CBB} = {8823091C-387F-4F4D-ABCD-8F71D1528CBB}
+		{96F3A853-B30A-4413-98C8-C9AAA4C084DE} = {96F3A853-B30A-4413-98C8-C9AAA4C084DE}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
