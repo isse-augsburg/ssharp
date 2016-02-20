@@ -25,7 +25,6 @@ namespace Tests.Analysis.Invariants.CounterExamples
 	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
 
 	internal class VariableRanges : AnalysisTestObject
@@ -40,21 +39,23 @@ namespace Tests.Analysis.Invariants.CounterExamples
 			CheckInvariant(c.X != 2, c);
 			CounterExample.StepCount.ShouldBe(3);
 
-			var simulator = new Simulator(CounterExample);
-			c = (C)simulator.Model.RootComponents[0];
+			SimulateCounterExample(CounterExample, simulator =>
+			{
+				c = (C)simulator.Model.RootComponents[0];
 
-			c.X.ShouldBe(0);
-			c.Y.ShouldBe(0);
+				c.X.ShouldBe(0);
+				c.Y.ShouldBe(0);
 
-			simulator.SimulateStep();
-			c.X.ShouldBe(1);
-			c.Y.ShouldBe(1);
-			simulator.IsCompleted.ShouldBe(false);
+				simulator.SimulateStep();
+				c.X.ShouldBe(1);
+				c.Y.ShouldBe(1);
+				simulator.IsCompleted.ShouldBe(false);
 
-			simulator.SimulateStep();
-			c.X.ShouldBe(2);
-			c.Y.ShouldBe(0);
-			simulator.IsCompleted.ShouldBe(true);
+				simulator.SimulateStep();
+				c.X.ShouldBe(2);
+				c.Y.ShouldBe(0);
+				simulator.IsCompleted.ShouldBe(true);
+			});
 		}
 
 		private class C : Component

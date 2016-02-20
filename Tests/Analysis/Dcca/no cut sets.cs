@@ -35,6 +35,7 @@ namespace Tests.Analysis.Dcca
 			result.CheckedSetsCount.ShouldBe(8);
 			result.MinimalCutSetsCount.ShouldBe(0);
 			result.MinimalCutSets.ShouldBeEmpty();
+			result.CounterExamples.ShouldBeEmpty();
 
 			ShouldContain(result.CheckedSets);
 			ShouldContain(result.CheckedSets, c.F1);

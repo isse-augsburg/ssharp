@@ -25,7 +25,6 @@ namespace Tests.Analysis.Invariants.CounterExamples
 	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
 
 	internal class Nondeterminism : AnalysisTestObject
@@ -46,15 +45,17 @@ namespace Tests.Analysis.Invariants.CounterExamples
 			var c = new C();
 			CheckInvariant(c.X != value, c);
 
-			var simulator = new Simulator(CounterExample);
-			c = (C)simulator.Model.RootComponents[0];
+			SimulateCounterExample(CounterExample, simulator =>
+			{
+				c = (C)simulator.Model.RootComponents[0];
 
-			c.X.ShouldBe(0);
+				c.X.ShouldBe(0);
 
-			while (!simulator.IsCompleted)
-				simulator.SimulateStep();
+				while (!simulator.IsCompleted)
+					simulator.SimulateStep();
 
-			c.X.ShouldBe(value);
+				c.X.ShouldBe(value);
+			});
 		}
 
 		private class C : Component

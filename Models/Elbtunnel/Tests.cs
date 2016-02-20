@@ -23,7 +23,6 @@
 namespace Elbtunnel
 {
 	using System;
-	using System.Linq;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
@@ -38,19 +37,10 @@ namespace Elbtunnel
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis(Model.Create(specification));
 
-			var result = analysis.ComputeMinimalCutSets(specification.Collision, $"counter examples/elbtunnel/");
-			var percentage = result.CheckedSetsCount / (float)(1 << result.FaultCount) * 100;
+			var result = analysis.ComputeMinimalCutSets(specification.Collision);
+			result.SaveCounterExamples("counter examples/elbtunnel/");
 
-			Console.WriteLine("Faults: {0}", String.Join(", ", result.Faults.Select(fault => fault.Name)));
-			Console.WriteLine();
-
-			Console.WriteLine("Checked Fault Sets: {0} ({1:F0}% of all fault sets)", result.CheckedSetsCount, percentage);
-			Console.WriteLine("Minimal Cut Sets: {0}", result.MinimalCutSetsCount);
-			Console.WriteLine();
-
-			var i = 1;
-			foreach (var cutSet in result.MinimalCutSets)
-				Console.WriteLine("   ({1}) {{ {0} }}", String.Join(", ", cutSet.Select(fault => fault.Name)), i++);
+			Console.WriteLine(result);
 		}
 
 		public static void Main()

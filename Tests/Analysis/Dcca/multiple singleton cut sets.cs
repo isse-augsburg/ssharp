@@ -43,6 +43,25 @@ namespace Tests.Analysis.Dcca
 			ShouldContain(result.MinimalCutSets, c.F1);
 			ShouldContain(result.MinimalCutSets, c.F2);
 			ShouldContain(result.MinimalCutSets, c.F3);
+
+			result.CounterExamples.Count.ShouldBe(3);
+			foreach (var set in result.MinimalCutSets)
+				result.CounterExamples.ContainsKey(set).ShouldBe(true);
+
+			foreach (var set in result.MinimalCutSets)
+			{
+				SimulateCounterExample(result.CounterExamples[set], simulator =>
+				{
+					var component = (C)simulator.Model.RootComponents[0];
+
+					component.X.ShouldBe(0);
+
+					while (!simulator.IsCompleted)
+						simulator.SimulateStep();
+
+					(component.X == 17 || component.X == 99 || component.X == 21).ShouldBe(true);
+				});
+			}
 		}
 
 		private class C : Component

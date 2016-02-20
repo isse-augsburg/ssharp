@@ -38,7 +38,7 @@ namespace SafetySharp.Analysis
 		///   Forwards the output <paramref name="message" />.
 		/// </summary>
 		/// <param name="message">The message that should be output.</param>
-		protected void Output(string message)
+		protected internal void Output(string message)
 		{
 			Console.WriteLine(message);
 			OutputWritten?.Invoke(message);

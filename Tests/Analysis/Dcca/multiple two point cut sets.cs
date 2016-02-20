@@ -31,7 +31,7 @@ namespace Tests.Analysis.Dcca
 		{
 			var c = new C();
 			var result = Dcca(c.X > 4, c);
-			
+
 			result.CheckedSetsCount.ShouldBe(7);
 			result.MinimalCutSetsCount.ShouldBe(3);
 
@@ -47,6 +47,25 @@ namespace Tests.Analysis.Dcca
 			ShouldContain(result.MinimalCutSets, c.F1, c.F2);
 			ShouldContain(result.MinimalCutSets, c.F1, c.F3);
 			ShouldContain(result.MinimalCutSets, c.F2, c.F3);
+
+			result.CounterExamples.Count.ShouldBe(3);
+			foreach (var set in result.MinimalCutSets)
+				result.CounterExamples.ContainsKey(set).ShouldBe(true);
+
+			foreach (var set in result.MinimalCutSets)
+			{
+				SimulateCounterExample(result.CounterExamples[set], simulator =>
+				{
+					var component = (C)simulator.Model.RootComponents[0];
+
+					component.X.ShouldBe(0);
+
+					while (!simulator.IsCompleted)
+						simulator.SimulateStep();
+
+					component.X.ShouldBe(5);
+				});
+			}
 		}
 
 		private class C : Component

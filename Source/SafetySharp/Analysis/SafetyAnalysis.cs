@@ -26,6 +26,7 @@ namespace SafetySharp.Analysis
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using System.Text;
 	using Modeling;
 	using Runtime;
 	using Runtime.Reflection;
@@ -97,16 +98,9 @@ namespace SafetySharp.Analysis
 		///   Computes the minimal cut sets for the <paramref name="hazard" />.
 		/// </summary>
 		/// <param name="hazard">The hazard the minimal cut sets should be computed for.</param>
-		/// <param name="counterExamplePath">
-		///   The path the generated counter examples should be written to. If null, counter examples are
-		///   not written.
-		/// </param>
-		public Result ComputeMinimalCutSets(Formula hazard, string counterExamplePath = null)
+		public Result ComputeMinimalCutSets(Formula hazard)
 		{
 			Requires.NotNull(hazard, nameof(hazard));
-
-			if (!String.IsNullOrWhiteSpace(counterExamplePath))
-				Directory.CreateDirectory(counterExamplePath);
 
 			var faults = _model.GetFaults();
 			Requires.That(faults.Length < 32, "More than 31 faults are currently not supported.");
@@ -117,6 +111,7 @@ namespace SafetySharp.Analysis
 			var safeSets = new HashSet<int>();
 			var cutSets = new HashSet<int>();
 			var checkedSets = new HashSet<int>();
+			var counterExamples = new Dictionary<int, CounterExample>();
 
 			// Store the serialized model to improve performance
 			var serializedModel = RuntimeModelSerializer.Save(_model, !hazard);
@@ -145,27 +140,38 @@ namespace SafetySharp.Analysis
 					for (var i = 1; i <= faults.Length; ++i)
 						faults[i - 1].Activation = (set & (1 << (i - 1))) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
 
+					var faultNames = faults
+						.Where(fault => fault.Activation == Activation.Nondeterministic)
+						.Select(fault => fault.Name)
+						.OrderBy(name => name)
+						.ToArray();
+					var setRepresentation = faultNames.Length == 0 ? "{}" : String.Join(", ", faultNames);
+
 					// If there was a counter example, the set is a cut set
 					var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializedModel, faults));
 					if (result.CounterExample != null)
+					{
+						_modelChecker.Output($"*** Found minimal critical fault set: {setRepresentation}.");
+						_modelChecker.Output("");
+
 						cutSets.Add(set);
+					}
 					else
+					{
+						_modelChecker.Output($"*** Found safe fault set: {setRepresentation}.");
+						_modelChecker.Output("");
+
 						safeSets.Add(set);
+					}
 
 					checkedSets.Add(set);
 
-					if (result.CounterExample == null || counterExamplePath == null)
-						continue;
-
-					var fileName = String.Join("_", faults.Where(f => f.Activation == Activation.Nondeterministic).Select(f => f.Name));
-					if (String.IsNullOrWhiteSpace(fileName))
-						fileName = "emptyset";
-
-					result.CounterExample.Save(Path.Combine(counterExamplePath, $"{fileName}{CounterExample.FileExtension}"));
+					if (result.CounterExample != null)
+						counterExamples.Add(set, result.CounterExample);
 				}
 			}
 
-			return new Result(cutSets, checkedSets, faults);
+			return new Result(cutSets, checkedSets, faults, counterExamples);
 		}
 
 		/// <summary>
@@ -280,42 +286,112 @@ namespace SafetySharp.Analysis
 			public IEnumerable<Fault> Faults { get; }
 
 			/// <summary>
+			///   Gets the counter examples that were generated for the critical fault sets.
+			/// </summary>
+			public IDictionary<ISet<Fault>, CounterExample> CounterExamples { get; }
+
+			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
 			/// <param name="cutSets">The minimal cut sets.</param>
 			/// <param name="checkedSets">The sets that have been checked.</param>
 			/// <param name="faults">The faults that have been checked.</param>
-			internal Result(HashSet<int> cutSets, HashSet<int> checkedSets, Fault[] faults)
+			/// <param name="counterExamples">The counter examples that were generated for the critical fault sets.</param>
+			internal Result(HashSet<int> cutSets, HashSet<int> checkedSets, Fault[] faults, Dictionary<int, CounterExample> counterExamples)
 			{
 				MinimalCutSetsCount = cutSets.Count;
 				CheckedSetsCount = checkedSets.Count;
 				FaultCount = faults.Length;
 
-				MinimalCutSets = Convert(cutSets, faults);
-				CheckedSets = Convert(checkedSets, faults);
+				var knownFaultSets = new Dictionary<int, ISet<Fault>>();
+
+				MinimalCutSets = Convert(knownFaultSets, cutSets, faults);
+				CheckedSets = Convert(knownFaultSets, checkedSets, faults);
 				Faults = faults;
+				CounterExamples = counterExamples.ToDictionary(pair => Convert(knownFaultSets, pair.Key, faults), pair => pair.Value);
 			}
 
 			/// <summary>
-			///   Converts the integer-based set to a sets of fault sets.
+			///   Converts the integer-based sets to a sets of fault sets.
 			/// </summary>
-			private static ISet<ISet<Fault>> Convert(HashSet<int> sets, Fault[] faults)
+			private static ISet<ISet<Fault>> Convert(Dictionary<int, ISet<Fault>> knownSets, HashSet<int> sets, Fault[] faults)
 			{
 				var result = new HashSet<ISet<Fault>>();
 
 				foreach (var set in sets)
-				{
-					var faultSet = new HashSet<Fault>();
-					for (var i = 1; i <= faults.Length; ++i)
-					{
-						if ((set & (1 << (i - 1))) != 0)
-							faultSet.Add(faults[i - 1]);
-					}
-
-					result.Add(faultSet);
-				}
+					result.Add(Convert(knownSets, set, faults));
 
 				return result;
+			}
+
+			/// <summary>
+			///   Converts the integer-based set to a set faults.
+			/// </summary>
+			private static ISet<Fault> Convert(Dictionary<int, ISet<Fault>> knownSets, int set, Fault[] faults)
+			{
+				ISet<Fault> faultSet;
+				if (knownSets.TryGetValue(set, out faultSet))
+					return faultSet;
+
+				faultSet = new HashSet<Fault>();
+				for (var i = 1; i <= faults.Length; ++i)
+				{
+					if ((set & (1 << (i - 1))) != 0)
+						faultSet.Add(faults[i - 1]);
+				}
+
+				knownSets.Add(set, faultSet);
+				return faultSet;
+			}
+
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="directory">The directory the generated counter examples should be written to.</param>
+			public void SaveCounterExamples(string directory)
+			{
+				Requires.NotNullOrWhitespace(directory, nameof(directory));
+
+				if (!String.IsNullOrWhiteSpace(directory))
+					Directory.CreateDirectory(directory);
+
+				foreach (var pair in CounterExamples)
+				{
+					var fileName = String.Join("_", pair.Key.Select(f => f.Name));
+					if (String.IsNullOrWhiteSpace(fileName))
+						fileName = "emptyset";
+
+					pair.Value.Save(Path.Combine(directory, $"{fileName}{CounterExample.FileExtension}"));
+				}
+			}
+
+			/// <summary>
+			///   Returns a string representation of the minimal critical fault sets.
+			/// </summary>
+			public override string ToString()
+			{
+				var builder = new StringBuilder();
+				var percentage = CheckedSetsCount / (float)(1 << FaultCount) * 100;
+
+				builder.AppendFormat("Faults: {0}", String.Join(", ", Faults.Select(fault => fault.Name).OrderBy(name => name)));
+				builder.AppendLine();
+				builder.AppendLine();
+
+				builder.AppendFormat("Checked Fault Sets: {0} ({1:F0}% of all fault sets)", CheckedSetsCount, percentage);
+				builder.AppendLine();
+
+				builder.AppendFormat("Minimal Cut Sets: {0}", MinimalCutSetsCount);
+				builder.AppendLine();
+				builder.AppendLine();
+
+				var i = 1;
+				foreach (var cutSet in MinimalCutSets)
+				{
+					builder.AppendFormat("   ({1}) {{ {0} }}", String.Join(", ", cutSet.Select(fault => fault.Name)), i++);
+					builder.AppendLine();
+				}
+
+				return builder.ToString();
 			}
 		}
 	}

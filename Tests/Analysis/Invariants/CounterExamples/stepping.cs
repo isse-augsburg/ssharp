@@ -25,7 +25,6 @@ namespace Tests.Analysis.Invariants.CounterExamples
 	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
 
 	internal class Stepping : AnalysisTestObject
@@ -43,22 +42,24 @@ namespace Tests.Analysis.Invariants.CounterExamples
 			CheckInvariant(c.X != start + steps, c);
 			CounterExample.StepCount.ShouldBe(steps + 1);
 
-			var simulator = new Simulator(CounterExample);
-			c = (C)simulator.Model.RootComponents[0];
+			SimulateCounterExample(CounterExample, simulator =>
+			{
+				c = (C)simulator.Model.RootComponents[0];
 
-			c.X.ShouldBe(start);
+				c.X.ShouldBe(start);
 
-			simulator.FastForward(10);
-			c.X.ShouldBe(start + 10);
+				simulator.FastForward(10);
+				c.X.ShouldBe(start + 10);
 
-			simulator.FastForward(600);
-			c.X.ShouldBe(start + steps);
+				simulator.FastForward(600);
+				c.X.ShouldBe(start + steps);
 
-			simulator.Rewind(10);
-			c.X.ShouldBe(start + steps - 10);
+				simulator.Rewind(10);
+				c.X.ShouldBe(start + steps - 10);
 
-			simulator.Rewind(100);
-			c.X.ShouldBe(start);
+				simulator.Rewind(100);
+				c.X.ShouldBe(start);
+			});
 		}
 
 		private class C : Component

@@ -24,6 +24,7 @@ namespace Tests.Analysis.Dcca
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
@@ -39,6 +40,20 @@ namespace Tests.Analysis.Dcca
 
 			result.CheckedSets.ShouldBe(new[] { new HashSet<Fault>() });
 			result.MinimalCutSets.ShouldBe(new[] { new HashSet<Fault>() });
+			result.CounterExamples.Count.ShouldBe(1);
+			result.CounterExamples.ContainsKey(result.MinimalCutSets.Single()).ShouldBe(true);
+
+			SimulateCounterExample(result.CounterExamples[result.MinimalCutSets.Single()], simulator =>
+			{
+				c = (C)simulator.Model.RootComponents[0];
+
+				c.X.ShouldBe(0);
+
+				while (!simulator.IsCompleted)
+					simulator.SimulateStep();
+
+				c.X.ShouldBe(5);
+			});
 		}
 
 		private class C : Component

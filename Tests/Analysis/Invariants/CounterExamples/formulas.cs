@@ -25,7 +25,6 @@ namespace Tests.Analysis.Invariants.CounterExamples
 	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
 
 	internal class Formulas : AnalysisTestObject
@@ -40,17 +39,19 @@ namespace Tests.Analysis.Invariants.CounterExamples
 			CheckInvariant(c.X != 1, c);
 			CounterExample.StepCount.ShouldBe(2);
 
-			var simulator = new Simulator(CounterExample);
-			c = (C)simulator.Model.RootComponents[0];
+			SimulateCounterExample(CounterExample, simulator =>
+			{
+				c = (C)simulator.Model.RootComponents[0];
 
-			c.X.ShouldBe(0);
-			simulator.IsCompleted.ShouldBe(false);
-			simulator.Model.Formulas[0].Evaluate().ShouldBe(true);
+				c.X.ShouldBe(0);
+				simulator.IsCompleted.ShouldBe(false);
+				simulator.Model.Formulas[0].Evaluate().ShouldBe(true);
 
-			simulator.SimulateStep();
-			c.X.ShouldBe(1);
-			simulator.IsCompleted.ShouldBe(true);
-			simulator.Model.Formulas[0].Evaluate().ShouldBe(false);
+				simulator.SimulateStep();
+				c.X.ShouldBe(1);
+				simulator.IsCompleted.ShouldBe(true);
+				simulator.Model.Formulas[0].Evaluate().ShouldBe(false);
+			});
 		}
 
 		private class C : Component

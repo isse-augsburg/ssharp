@@ -28,12 +28,27 @@ namespace Tests
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using SafetySharp.Utilities;
 	using Utilities;
 	using Xunit.Abstractions;
 
 	public abstract class AnalysisTestObject : TestObject
 	{
 		protected CounterExample CounterExample { get; private set; }
+
+		protected void SimulateCounterExample(CounterExample counterExample, Action<Simulator> action)
+		{
+			// Test directly
+			action(new Simulator(counterExample));
+
+			// Test persisted
+			using (var file = new TemporaryFile(".ssharp"))
+			{
+				counterExample.Save(file.FilePath);
+				action(new Simulator(CounterExample.Load(file.FilePath)));
+			}
+		}
 
 		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
@@ -55,7 +70,10 @@ namespace Tests
 		{
 			var analysis = new SafetyAnalysis(new Model(components));
 			analysis.OutputWritten += message => Output.Log("{0}", message);
-			return analysis.ComputeMinimalCutSets(hazard);
+			var result = analysis.ComputeMinimalCutSets(hazard);
+			Output.Log("{0}", result);
+
+			return result;
 		}
 
 		private ModelChecker CreateModelChecker()

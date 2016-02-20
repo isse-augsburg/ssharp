@@ -25,7 +25,6 @@ namespace Tests.Analysis.Invariants.CounterExamples
 	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
 
 	internal class Bindings : AnalysisTestObject
@@ -43,15 +42,17 @@ namespace Tests.Analysis.Invariants.CounterExamples
 			CheckInvariant(c.X != 7, c, d);
 			CounterExample.StepCount.ShouldBe(2);
 
-			var simulator = new Simulator(CounterExample);
-			c = (C)simulator.Model.RootComponents[0];
+			SimulateCounterExample(CounterExample, simulator =>
+			{
+				c = (C)simulator.Model.RootComponents[0];
 
-			c.X.ShouldBe(0);
-			simulator.IsCompleted.ShouldBe(false);
+				c.X.ShouldBe(0);
+				simulator.IsCompleted.ShouldBe(false);
 
-			simulator.SimulateStep();
-			c.X.ShouldBe(7);
-			simulator.IsCompleted.ShouldBe(true);
+				simulator.SimulateStep();
+				c.X.ShouldBe(7);
+				simulator.IsCompleted.ShouldBe(true);
+			});
 		}
 
 		private class C : Component
