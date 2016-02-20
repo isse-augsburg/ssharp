@@ -121,7 +121,7 @@ namespace SafetySharp.Runtime
 			if (_counterExample != null)
 				_output("Invariant violation detected.");
 
-			return new AnalysisResult(_counterExample, _stateCount, _transitionCount, _levelCount);
+			return new AnalysisResult(_counterExample == null, _counterExample, _stateCount, _transitionCount, _levelCount);
 		}
 
 		/// <summary>

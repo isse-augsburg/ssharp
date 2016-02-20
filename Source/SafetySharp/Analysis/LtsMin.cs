@@ -115,16 +115,15 @@ namespace SafetySharp.Analysis
 			try
 			{
 				using (var modelFile = new TemporaryFile("ssharp"))
-				using (var counterExampleFile = new TemporaryFile("gcf"))
 				{
 					using (var stream = new FileStream(modelFile.FilePath, FileMode.Create))
 						RuntimeModelSerializer.Save(stream, model, formula);
 
-					CreateProcess(modelFile.FilePath, counterExampleFile.FilePath, checkArgument);
+					CreateProcess(modelFile.FilePath, checkArgument);
 					Run();
 
 					var success = InterpretExitCode(_ltsMin.ExitCode);
-					return new AnalysisResult(success ? null : GetCounterExample(modelFile.FilePath, counterExampleFile.FilePath), 0, 0, 0);
+					return new AnalysisResult(success, null, 0, 0, 0);
 				}
 			}
 			finally
@@ -134,27 +133,17 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Outputs the counter example found by the model checker.
-		/// </summary>
-		private static CounterExample GetCounterExample(string modelFile, string counterExampleFile)
-		{
-			return CounterExample.LoadLtsMin(File.ReadAllBytes(modelFile), counterExampleFile);
-		}
-
-		/// <summary>
 		///   Creates a new <see cref="_ltsMin" /> process instance that checks the <paramref name="modelFile" />.
 		/// </summary>
 		/// <param name="modelFile">The model that should be checked.</param>
-		/// <param name="counterExampleFile">The path to the file that should store the counter example.</param>
 		/// <param name="checkArgument">The argument passed to LtsMin that indicates which kind of check to perform.</param>
-		private void CreateProcess(string modelFile, string counterExampleFile, string checkArgument)
+		private void CreateProcess(string modelFile, string checkArgument)
 		{
 			Requires.That(_ltsMin == null, "An instance of LtsMin is already running.");
 
 			_ltsMin = new ExternalProcess(
 				fileName: "pins2lts-seq.exe",
-				commandLineArguments:
-					$"--loader=SafetySharp.LtsMin.Sequential.dll \"{modelFile}\" {checkArgument} --trace=\"{counterExampleFile}\"",
+				commandLineArguments: $"--loader=SafetySharp.LtsMin.Sequential.dll \"{modelFile}\" {checkArgument}",
 				outputCallback: output => Output(output.Message));
 		}
 

@@ -55,7 +55,7 @@ namespace Tests
 			var modelChecker = CreateModelChecker();
 			var result = modelChecker.CheckInvariant(new Model(components), invariant);
 			CounterExample = result.CounterExample;
-			return result.CounterExample == null;
+			return result.FormulaHolds;
 		}
 
 		protected bool Check(Formula formula, params IComponent[] components)
@@ -63,7 +63,7 @@ namespace Tests
 			var modelChecker = CreateModelChecker();
 			var result = modelChecker.Check(new Model(components), formula);
 			CounterExample = result.CounterExample;
-			return result.CounterExample == null;
+			return result.FormulaHolds;
 		}
 
 		protected SafetyAnalysis.Result Dcca(Formula hazard, params IComponent[] components)

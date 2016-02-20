@@ -23,7 +23,6 @@
 namespace SafetySharp.Analysis
 {
 	using System;
-	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
 	using System.Runtime.Serialization.Formatters.Binary;
@@ -49,11 +48,6 @@ namespace SafetySharp.Analysis
 		private const int FileHeader = 0x3FE0DD03;
 
 		/// <summary>
-		///   The character that is used to split the individual states in the counter example.
-		/// </summary>
-		private static readonly string[] _splitCharacter = { "," };
-
-		/// <summary>
 		///   The serialized counter example.
 		/// </summary>
 		private readonly byte[][] _counterExample;
@@ -73,7 +67,8 @@ namespace SafetySharp.Analysis
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(counterExample, nameof(counterExample));
-			Requires.That(replayInfo == null || replayInfo.Length == counterExample.Length - 1, "Invalid replay info.");
+			Requires.NotNull(replayInfo, nameof(replayInfo));
+			Requires.That(replayInfo.Length == counterExample.Length - 1, "Invalid replay info.");
 
 			Model = model;
 			_counterExample = counterExample;
@@ -169,11 +164,7 @@ namespace SafetySharp.Analysis
 				foreach (var slot in _counterExample.SelectMany(step => step))
 					writer.Write(slot);
 
-				writer.Write(_replayInfo?.Length ?? 0);
-
-				if (_replayInfo == null)
-					return;
-
+				writer.Write(_replayInfo.Length);
 				foreach (var choices in _replayInfo)
 				{
 					writer.Write(choices.Length);
@@ -238,86 +229,16 @@ namespace SafetySharp.Analysis
 						counterExample[i][j] = reader.ReadByte();
 				}
 
-				int[][] replayInfo = null;
-				var count = reader.ReadInt32();
-				if (count != 0)
+				var replayInfo = new int[reader.ReadInt32()][];
+				for (var i = 0; i < replayInfo.Length; ++i)
 				{
-					replayInfo = new int[count][];
-
-					for (var i = 0; i < replayInfo.Length; ++i)
-					{
-						replayInfo[i] = new int[reader.ReadInt32()];
-						for (var j = 0; j < replayInfo[i].Length; ++j)
-							replayInfo[i][j] = reader.ReadInt32();
-					}
+					replayInfo[i] = new int[reader.ReadInt32()];
+					for (var j = 0; j < replayInfo[i].Length; ++j)
+						replayInfo[i][j] = reader.ReadInt32();
 				}
 
 				return new CounterExample(model, counterExample, replayInfo);
 			}
-		}
-
-		/// <summary>
-		///   Loads a LtsMin counter example from the <paramref name="file" />.
-		/// </summary>
-		/// <param name="serializedRuntimeModel">The serialized runtime model the counter example was generated for.</param>
-		/// <param name="file">The path to the file the counter example should be loaded from.</param>
-		internal static CounterExample LoadLtsMin(byte[] serializedRuntimeModel, string file)
-		{
-			Requires.NotNull(serializedRuntimeModel, nameof(serializedRuntimeModel));
-			Requires.NotNullOrWhitespace(file, nameof(file));
-
-			using (var csvFile = new TemporaryFile("csv"))
-			{
-				var printTrace = new ExternalProcess("ltsmin-printtrace.exe", $"{file} {csvFile.FilePath}");
-				printTrace.Run();
-
-				if (printTrace.ExitCode != 0)
-				{
-					var outputs = printTrace.Outputs.Select(output => output.Message).ToArray();
-
-					// ltsmin-printtrace segfaults when the trace has length 0
-					// So we have to try to detect this annoying situation and create an empty trace file instead
-					if (outputs.Any(output => output.Contains("length of trace is 0")))
-						File.WriteAllText(csvFile.FilePath, "");
-					else
-						throw new InvalidOperationException($"Failed to read LtsMin counter example:\n{String.Join("\n", outputs)}");
-				}
-
-				var model = RuntimeModelSerializer.Load(serializedRuntimeModel);
-				return new CounterExample(model, ParseCsv(model, File.ReadAllLines(csvFile.FilePath)).Skip(1).ToArray(), null);
-			}
-		}
-
-		/// <summary>
-		///   Parses the comma-separated values in the <paramref name="lines" /> into state vectors.
-		/// </summary>
-		/// <param name="model">The model the counter example was generated for.</param>
-		/// <param name="lines">The lines that should be parsed.</param>
-		private static unsafe IEnumerable<byte[]> ParseCsv(RuntimeModel model, string[] lines)
-		{
-			if (lines.Length == 0)
-				return new[] { new byte[model.StateVectorSize] };
-
-			var counterExample = new List<byte[]>();
-			var stateNames = lines[0].Split(_splitCharacter, StringSplitOptions.RemoveEmptyEntries);
-			var firstValue = Array.FindIndex(stateNames, s => s.Contains(RuntimeModel.ConstructionStateName));
-
-			foreach (var serializedState in lines.Skip(1))
-			{
-				var stateVectors = serializedState.Split(_splitCharacter, StringSplitOptions.RemoveEmptyEntries);
-				var values = stateVectors.Skip(firstValue).Take(model.StateVectorSize).ToArray();
-
-				var byteState = new byte[model.StateVectorSize];
-				fixed (byte* state = byteState)
-				{
-					for (var i = 0; i < model.StateVectorSize / 4; ++i)
-						((int*)state)[i] = Int32.Parse(values[i]);
-				}
-
-				counterExample.Add(byteState);
-			}
-
-			return counterExample;
 		}
 
 		/// <summary>
@@ -336,9 +257,7 @@ namespace SafetySharp.Analysis
 		/// <param name="stateIndex">The index of the state the replay information should be returned for.</param>
 		internal int[] GetReplayInformation(int stateIndex)
 		{
-			Requires.That(_replayInfo != null, "The counter example cannot be replayed as it does not contain any replay information.");
 			Requires.InRange(stateIndex, nameof(stateIndex), 0, _counterExample.Length - 1);
-
 			return _replayInfo[stateIndex];
 		}
 

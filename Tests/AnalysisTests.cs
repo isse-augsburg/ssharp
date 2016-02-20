@@ -58,8 +58,14 @@ namespace Tests
 
 	public partial class LtlTests
 	{
-		[Theory, MemberData("DiscoverTests", "Analysis/Ltl")]
-		public void Ltl(string test, string file)
+		[Theory, MemberData("DiscoverTests", "Analysis/Ltl/Violated")]
+		public void Violated(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(LtsMin));
+		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Ltl/NotViolated")]
+		public void NotViolated(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(LtsMin));
 		}

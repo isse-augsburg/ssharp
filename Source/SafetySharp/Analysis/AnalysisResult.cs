@@ -33,6 +33,11 @@ namespace SafetySharp.Analysis
 		public CounterExample CounterExample { get; }
 
 		/// <summary>
+		///   Gets a value indicating whether the analyzed formula holds.
+		/// </summary>
+		public bool FormulaHolds { get; }
+
+		/// <summary>
 		///   The number of states checked by the model checker.
 		/// </summary>
 		public int StateCount { get; }
@@ -50,8 +55,9 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		internal AnalysisResult(CounterExample counterExample, int stateCount, long transitionCount, int levelCount)
+		internal AnalysisResult(bool formulaHolds, CounterExample counterExample, int stateCount, long transitionCount, int levelCount)
 		{
+			FormulaHolds = formulaHolds;
 			CounterExample = counterExample;
 			StateCount = stateCount;
 			TransitionCount = transitionCount;
