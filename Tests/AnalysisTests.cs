@@ -23,32 +23,45 @@
 namespace Tests
 {
 	using System;
+	using SafetySharp.Analysis;
 	using Xunit;
 
-	public partial class AnalysisTests
+	public partial class DccaTests
 	{
-		[Theory, MemberData("DiscoverTestsBothModelCheckers", "Analysis/Invariants")]
-		public void Invariants(Type modelCheckerType, string test, string file)
+		[Theory, MemberData("DiscoverTests", "Analysis/Dcca")]
+		public void Dcca(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(LtsMin));
+		}
+	}
+
+	public partial class InvariantTests
+	{
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/CounterExamples")]
+		public void CounterExamples(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(SSharpChecker));
+		}
+
+		[Theory, MemberData("DiscoverTestsBothModelCheckers", "Analysis/Invariants/NotViolated")]
+		public void NotViolated(Type modelCheckerType, string test, string file)
 		{
 			ExecuteDynamicTests(file, modelCheckerType);
 		}
 
+		[Theory, MemberData("DiscoverTestsBothModelCheckers", "Analysis/Invariants/Violated")]
+		public void Violated(Type modelCheckerType, string test, string file)
+		{
+			ExecuteDynamicTests(file, modelCheckerType);
+		}
+	}
+
+	public partial class LtlTests
+	{
 		[Theory, MemberData("DiscoverTests", "Analysis/Ltl")]
 		public void Ltl(string test, string file)
 		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory(Skip = "Blocked by missing LtsMin support"), MemberData("DiscoverTests", "Analysis/Ctl")]
-		public void Ctl(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Analysis/Dcca")]
-		public void Dcca(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			ExecuteDynamicTests(file, typeof(LtsMin));
 		}
 	}
 }

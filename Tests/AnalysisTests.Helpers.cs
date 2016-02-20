@@ -78,7 +78,7 @@ namespace Tests
 
 		private ModelChecker CreateModelChecker()
 		{
-			var modelChecker = (ModelChecker)Activator.CreateInstance(Arguments.Length == 0 ? typeof(LtsMin) : (Type)Arguments[0]);
+			var modelChecker = (ModelChecker)Activator.CreateInstance((Type)Arguments[0]);
 			modelChecker.OutputWritten += message => Output.Log("{0}", message);
 
 			var ssharpChecker = modelChecker as SSharpChecker;
@@ -102,9 +102,9 @@ namespace Tests
 		}
 	}
 
-	public partial class AnalysisTests : Tests
+	public partial class InvariantTests : Tests
 	{
-		public AnalysisTests(ITestOutputHelper output)
+		public InvariantTests(ITestOutputHelper output)
 			: base(output)
 		{
 		}
@@ -123,6 +123,34 @@ namespace Tests
 
 			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
 				yield return new object[] { typeof(LtsMin) }.Concat(testCase).ToArray();
+		}
+	}
+
+	public partial class DccaTests : Tests
+	{
+		public DccaTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests(string directory)
+		{
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
+		}
+	}
+
+	public partial class LtlTests : Tests
+	{
+		public LtlTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests(string directory)
+		{
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
 		}
 	}
 }
