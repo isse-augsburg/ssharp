@@ -36,7 +36,7 @@ namespace Tests.Execution.UpdateMethods
 
 		protected override void Check()
 		{
-			ExecuteUpdate();
+			Update();
 			_i.ShouldBe(1);
 		}
 	}

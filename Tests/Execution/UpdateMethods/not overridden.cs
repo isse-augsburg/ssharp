@@ -29,7 +29,7 @@ namespace Tests.Execution.UpdateMethods
 		protected override void Check()
 		{
 			// No exception
-			ExecuteUpdate();
+			Update();
 		}
 	}
 }

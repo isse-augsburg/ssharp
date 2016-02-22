@@ -46,14 +46,5 @@ namespace Tests.Utilities
 		}
 
 		protected abstract void Check();
-
-		/// <summary>
-		///   Executes the component's <see cref="Component.Update" /> method.
-		/// </summary>
-		/// <remarks>This method is required to work around S#'s restrictions that a component cannot call it's own Update method.</remarks>
-		protected void ExecuteUpdate()
-		{
-			Update();
-		}
 	}
 }

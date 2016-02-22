@@ -48,7 +48,7 @@ namespace Tests.Execution.UpdateMethods
 
 		protected override void Check()
 		{
-			ExecuteUpdate();
+			Update();
 			_i.ShouldBe(17);
 			_j.ShouldBe(100);
 		}
