@@ -30,7 +30,7 @@ namespace Tests.Utilities
 	using System.Reflection;
 	using System.Runtime.CompilerServices;
 	using System.Text;
-	using JetBrains.Annotations;
+	using System.Threading;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -150,7 +150,7 @@ namespace Tests.Utilities
 		public static Compilation CreateCompilation(params SyntaxTree[] syntaxTrees)
 		{
 			var compilation = CSharpCompilation
-				.Create("TestAssembly" + _assemblyCount++)
+				.Create("TestAssembly" + Interlocked.Increment(ref _assemblyCount))
 				.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true))
 				.AddSyntaxTrees(syntaxTrees)
 				.AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
@@ -266,17 +266,6 @@ namespace Tests.Utilities
 		}
 
 		/// <summary>
-		///   Fails the test with the explanatory <paramref name="message" />.
-		/// </summary>
-		/// <param name="message">The explanatory format message.</param>
-		/// <param name="args">The format arguments.</param>
-		[StringFormatMethod("message")]
-		protected static void Fail(string message, params object[] args)
-		{
-			throw new TestException(message, args);
-		}
-
-		/// <summary>
 		///   Enumerates all C#-based test cases located at <paramref name="path" /> or any sub-directory.
 		/// </summary>
 		/// <param name="path">The path to the directory where C#-based tests are located.</param>
@@ -293,83 +282,6 @@ namespace Tests.Utilities
 
 				yield return new object[] { testName, file.Replace("\\", "/") };
 			}
-		}
-
-		/// <summary>
-		///   Checks that no exceptions escape unhandled during the execution of <paramref name="action" />.
-		/// </summary>
-		/// <param name="action">The action that should be checked.</param>
-		public static void NoThrow(Action action)
-		{
-			Requires.NotNull(action, nameof(action));
-
-			try
-			{
-				action();
-			}
-			catch (Exception e)
-			{
-				var message = "Expected no exception to be thrown, but an exception of type '{0}' was raised:\n{1}";
-				Fail(message, e.GetType().FullName, e.Message);
-			}
-		}
-
-		/// <summary>
-		///   Checks whether <paramref name="action" /> raises an exception of type <typeparamref name="T" /> satisfying the
-		///   <paramref name="assertion" />.
-		/// </summary>
-		/// <typeparam name="T">The type of the exception that is expected to be thrown.</typeparam>
-		/// <param name="action">The action that should be checked.</param>
-		/// <param name="assertion">The assertion that should be checked on the thrown exception.</param>
-		public static void RaisesWith<T>(Action action, Action<T> assertion)
-			where T : Exception
-		{
-			Requires.NotNull(action, nameof(action));
-
-			Exception exception = null;
-
-			try
-			{
-				action();
-			}
-			catch (Exception e)
-			{
-				exception = e;
-			}
-
-			if (exception == null)
-				Fail("Expected an exception of type '{0}', but no exception was thrown.", typeof(T).FullName);
-
-			var typedException = exception as T;
-			if (typedException != null)
-			{
-				assertion?.Invoke(typedException);
-			}
-			else
-			{
-				var message = "Expected an exception of type '{0}', but an exception of type '{1}' was thrown instead.\n\nMessage:\n{2}";
-				Fail(message, typeof(T).FullName, exception.GetType().FullName, exception.Message);
-			}
-		}
-
-		/// <summary>
-		///   Checks whether <paramref name="action" /> raises an exception of type <typeparamref name="T" />.
-		/// </summary>
-		/// <typeparam name="T">The type of the exception that is expected to be thrown.</typeparam>
-		/// <param name="action">The action that should be checked.</param>
-		public static void Raises<T>(Action action)
-			where T : Exception
-		{
-			RaisesWith<T>(action, null);
-		}
-
-		/// <summary>
-		///   Checks whether <paramref name="action" /> raises an <see cref="InvalidOperationException" />.
-		/// </summary>
-		/// <param name="action">The action that should be checked.</param>
-		public static void RaisesInvalidOpException(Action action)
-		{
-			Raises<InvalidOperationException>(action);
 		}
 	}
 }
