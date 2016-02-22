@@ -149,29 +149,38 @@ namespace SafetySharp.Analysis
 					var setRepresentation = faultNames.Length == 0 ? "{}" : String.Join(", ", faultNames);
 
 					// If there was a counter example, the set is a critical set
-					var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializedModel, faults));
-					if (!result.FormulaHolds)
+					try
 					{
-						_modelChecker.Output($"*** Found minimal critical fault set: {setRepresentation}.");
-						_modelChecker.Output("");
+						var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializedModel, faults));
 
+						if (!result.FormulaHolds)
+						{
+							_modelChecker.Output($"*** Found minimal critical fault set: {setRepresentation}.");
+							_modelChecker.Output("");
+
+							criticalSets.Add(set);
+						}
+						else
+						{
+							_modelChecker.Output($"*** Found safe fault set: {setRepresentation}.");
+							_modelChecker.Output("");
+
+							safeSets.Add(set);
+						}
+
+						checkedSets.Add(set);
+
+						if (result.CounterExample != null)
+							counterExamples.Add(set, result.CounterExample);
+					}
+					catch (AnalysisException e)
+					{
+						checkedSets.Add(set);
 						criticalSets.Add(set);
+
+						exceptions.Add(set, e.InnerException);
+						counterExamples.Add(set, e.CounterExample);
 					}
-					else
-					{
-						_modelChecker.Output($"*** Found safe fault set: {setRepresentation}.");
-						_modelChecker.Output("");
-
-						safeSets.Add(set);
-					}
-
-					checkedSets.Add(set);
-
-					if (result.CounterExample != null)
-						counterExamples.Add(set, result.CounterExample);
-
-					if (result.Exception != null)
-						exceptions.Add(set, result.Exception);
 				}
 			}
 
@@ -392,9 +401,19 @@ namespace SafetySharp.Analysis
 				builder.AppendLine();
 
 				var i = 1;
-				foreach (var criticalSet in MinimalCriticalSets.Select(set => String.Join(", ", set.Select(fault => fault.Name))).OrderBy(set => set))
+				foreach (var criticalSet in MinimalCriticalSets)
 				{
-					builder.AppendFormat("   ({1}) {{ {0} }}", criticalSet, i++);
+					builder.AppendFormat("   ({1}) {{ {0} }}", String.Join(", ", criticalSet.Select(fault => fault.Name)), i++);
+
+					Exception e;
+					if (Exceptions.TryGetValue(criticalSet, out e))
+					{
+						builder.AppendLine();
+						builder.AppendFormat(
+							"    An unhandled exception of type {0} was thrown while checking the fault set: {1}.", 
+							e.GetType().FullName, e.Message);
+					}
+
 					builder.AppendLine();
 				}
 

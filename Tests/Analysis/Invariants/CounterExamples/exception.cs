@@ -23,6 +23,7 @@
 namespace Tests.Analysis.Invariants.CounterExamples
 {
 	using System;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
@@ -31,10 +32,10 @@ namespace Tests.Analysis.Invariants.CounterExamples
 		protected override void Check()
 		{
 			var c = new C();
-			CheckInvariant(true, c);
-			CounterExample.StepCount.ShouldBe(4);
+			var e = Should.Throw<AnalysisException>(() => CheckInvariant(true, c));
+			e.CounterExample.StepCount.ShouldBe(4);
 
-			SimulateCounterExample(CounterExample, simulator =>
+			SimulateCounterExample(e.CounterExample, simulator =>
 			{
 				c = (C)simulator.Model.RootComponents[0];
 

@@ -24,7 +24,6 @@ namespace SafetySharp.Runtime
 {
 	using System;
 	using System.Collections.Concurrent;
-	using System.Runtime.ExceptionServices;
 	using System.Runtime.InteropServices;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -48,7 +47,6 @@ namespace SafetySharp.Runtime
 		private Exception _exception;
 		private int _generatingCounterExample = -1;
 		private int _levelCount;
-		private Exception _modelException;
 		private int _nextReport = ReportStateCountDelta;
 		private int _stateCount;
 		private long _transitionCount;
@@ -115,20 +113,15 @@ namespace SafetySharp.Runtime
 			foreach (var thread in _threads)
 				thread.Join();
 
-			if (_exception != null)
-				ExceptionDispatchInfo.Capture(_exception).Throw();
-
 			Report();
 
-			if (_modelException != null)
-			{
-				_output($"Error: An unhandled exception of type '{_modelException.GetType().FullName}' was " +
-						$"thrown during model checking: {_modelException.Message}.");
-			}
-			else if (_counterExample != null)
+			if (_exception != null)
+				throw new AnalysisException(_exception, _counterExample);
+
+			if (_counterExample != null)
 				_output("Invariant violation detected.");
 
-			return new AnalysisResult(_counterExample == null, _counterExample, _modelException, _stateCount, _transitionCount, _levelCount);
+			return new AnalysisResult(_counterExample == null, _counterExample, _stateCount, _transitionCount, _levelCount);
 		}
 
 		/// <summary>
@@ -234,17 +227,9 @@ namespace SafetySharp.Runtime
 				catch (Exception e)
 				{
 					_context._loadBalancer.Terminate();
-					_context._modelException = e;
+					_context._exception = e;
 
-					try
-					{
-						CreateCounterExample(endsWithException: true);
-					}
-					catch (Exception ex)
-					{
-						_context._exception = ex;
-						_context._loadBalancer.Terminate();
-					}
+					CreateCounterExample(endsWithException: true);
 				}
 			}
 
