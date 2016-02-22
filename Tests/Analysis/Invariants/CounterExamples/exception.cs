@@ -20,51 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Elbtunnel
+namespace Tests.Analysis.Invariants.CounterExamples
 {
 	using System;
-	using NUnit.Framework;
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Reflection;
+	using Shouldly;
 
-	[TestFixture]
-	public class Tests
+	internal class Exception : AnalysisTestObject
 	{
-		[Test]
-		public void CollisionDcca()
+		protected override void Check()
 		{
-			var specification = new Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var c = new C();
+			CheckInvariant(true, c);
+			CounterExample.StepCount.ShouldBe(4);
 
-			var result = analysis.ComputeMinimalCriticalSets(specification.Collision);
-			result.SaveCounterExamples("counter examples/elbtunnel/");
+			SimulateCounterExample(CounterExample, simulator =>
+			{
+				c = (C)simulator.Model.RootComponents[0];
 
-			Console.WriteLine(result);
+				c.X.ShouldBe(0);
+
+				simulator.SimulateStep();
+				c.X.ShouldBe(1);
+
+				simulator.SimulateStep();
+				c.X.ShouldBe(2);
+
+				Should.Throw<InvalidOperationException>(() => simulator.SimulateStep()).Message.ShouldBe("test");
+			});
 		}
 
-		public static void Main()
+		private class C : Component
 		{
-			new Tests().Test();
-		}
+			[Range(0, 4, OverflowBehavior.Clamp)]
+			public int X;
 
-		[Test]
-		public void Test()
-		{
-			var specification = new Specification();
-			var model = Model.Create(specification);
-			var faults = model.GetFaults();
+			public override void Update()
+			{
+				++X;
 
-			for (var i = 0; i < faults.Length; ++i)
-//				 faults[i].Activation = i < 5 ? Activation.Nondeterministic : Activation.Suppressed;
-//				 faults[i].Activation = Activation.Suppressed;
-				faults[i].Activation = Activation.Nondeterministic;
-
-			var checker = new SSharpChecker();
-			checker.CheckInvariant(model, true);
-
-//			var ltsMin = new LtsMin();
-//			ltsMin.CheckInvariant(model, true);
+				if (X == 3 && Choose(true, false))
+					throw new InvalidOperationException("test");
+			}
 		}
 	}
 }

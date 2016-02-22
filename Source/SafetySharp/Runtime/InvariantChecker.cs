@@ -46,7 +46,9 @@ namespace SafetySharp.Runtime
 		private readonly Worker[] _workers;
 		private CounterExample _counterExample;
 		private Exception _exception;
+		private int _generatingCounterExample = -1;
 		private int _levelCount;
+		private Exception _modelException;
 		private int _nextReport = ReportStateCountDelta;
 		private int _stateCount;
 		private long _transitionCount;
@@ -118,10 +120,15 @@ namespace SafetySharp.Runtime
 
 			Report();
 
-			if (_counterExample != null)
+			if (_modelException != null)
+			{
+				_output($"Error: An unhandled exception of type '{_modelException.GetType().FullName}' was " +
+						$"thrown during model checking: {_modelException.Message}.");
+			}
+			else if (_counterExample != null)
 				_output("Invariant violation detected.");
 
-			return new AnalysisResult(_counterExample == null, _counterExample, _stateCount, _transitionCount, _levelCount);
+			return new AnalysisResult(_counterExample == null, _counterExample, _modelException, _stateCount, _transitionCount, _levelCount);
 		}
 
 		/// <summary>
@@ -227,7 +234,17 @@ namespace SafetySharp.Runtime
 				catch (Exception e)
 				{
 					_context._loadBalancer.Terminate();
-					_context._exception = e;
+					_context._modelException = e;
+
+					try
+					{
+						CreateCounterExample(endsWithException: true);
+					}
+					catch (Exception ex)
+					{
+						_context._exception = ex;
+						_context._loadBalancer.Terminate();
+					}
 				}
 			}
 
@@ -257,7 +274,8 @@ namespace SafetySharp.Runtime
 					if (!_invariant())
 					{
 						_context._loadBalancer.Terminate();
-						CreateCounterExample();
+						CreateCounterExample(endsWithException: false);
+
 						return;
 					}
 				}
@@ -266,10 +284,17 @@ namespace SafetySharp.Runtime
 			/// <summary>
 			///   Creates a counter example for the current topmost state.
 			/// </summary>
-			private void CreateCounterExample()
+			private void CreateCounterExample(bool endsWithException)
 			{
+				if (Interlocked.CompareExchange(ref _context._generatingCounterExample, _index, -1) != -1)
+					return;
+
 				var indexedTrace = _stateStack.GetTrace();
-				var trace = new byte[indexedTrace.Length][];
+				var traceLength = endsWithException ? indexedTrace.Length + 1 : indexedTrace.Length;
+				var trace = new byte[traceLength][];
+
+				if (endsWithException)
+					trace[trace.Length - 1] = new byte[_model.StateVectorSize];
 
 				for (var i = 0; i < indexedTrace.Length; ++i)
 				{
@@ -277,7 +302,7 @@ namespace SafetySharp.Runtime
 					Marshal.Copy(new IntPtr((int*)_states[indexedTrace[i]]), trace[i], 0, trace[i].Length);
 				}
 
-				_context._counterExample = new CounterExample(_model, trace, _model.GenerateReplayInformation(trace));
+				_context._counterExample = new CounterExample(_model, trace, _model.GenerateReplayInformation(trace, endsWithException));
 			}
 
 			/// <summary>

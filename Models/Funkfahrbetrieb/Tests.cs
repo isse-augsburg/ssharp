@@ -36,7 +36,7 @@ namespace Funkfahrbetrieb
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis(Model.Create(specification));
 
-			var result = analysis.ComputeMinimalCutSets(specification.PossibleCollision);
+			var result = analysis.ComputeMinimalCriticalSets(specification.PossibleCollision);
 			result.SaveCounterExamples("counter examples/ffb/");
 
 			Console.WriteLine(result);

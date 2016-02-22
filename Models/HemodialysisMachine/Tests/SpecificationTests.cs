@@ -124,7 +124,7 @@ namespace HemodialysisMachine.Tests
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis(Model.Create(specification)) {StateCapacity = 1310720 };
 			
-			var result = analysis.ComputeMinimalCutSets(specification.IncomingBloodNotOk);
+			var result = analysis.ComputeMinimalCriticalSets(specification.IncomingBloodNotOk);
 			result.SaveCounterExamples("counter examples/hdmachine");
 
 			Console.WriteLine(result);	
@@ -137,7 +137,7 @@ namespace HemodialysisMachine.Tests
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis(Model.Create(specification)) { StateCapacity = 1310720 };
 
-			var result = analysis.ComputeMinimalCutSets(specification.BloodNotCleanedAndDialyzingFinished);
+			var result = analysis.ComputeMinimalCriticalSets(specification.BloodNotCleanedAndDialyzingFinished);
 			result.SaveCounterExamples("counter examples/hdmachine");
 
 			Console.WriteLine(result);

@@ -36,7 +36,7 @@ namespace PressureTank
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis(Model.Create(specification));
 
-			var result = analysis.ComputeMinimalCutSets(specification.Rupture);
+			var result = analysis.ComputeMinimalCriticalSets(specification.Rupture);
 			result.SaveCounterExamples("counter examples/pressure tank/");
 
 			Console.WriteLine(result);

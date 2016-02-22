@@ -22,50 +22,57 @@
 
 namespace Tests.Analysis.Dcca
 {
+	using System;
+	using System.Linq;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class X6 : AnalysisTestObject
+	internal class Exception : AnalysisTestObject
 	{
 		protected override void Check()
 		{
 			var c = new C();
 			var result = Dcca(c.X > 4, c);
 
-			result.CheckedSets.Count.ShouldBe(7);
+			result.Faults.Count().ShouldBe(3);
+			result.CheckedSets.Count.ShouldBe(4);
 			result.MinimalCriticalSets.Count.ShouldBe(3);
-			result.Exceptions.ShouldBeEmpty();
+			result.Exceptions.Count.ShouldBe(2);
 
 			ShouldContain(result.CheckedSets);
 			ShouldContain(result.CheckedSets, c.F1);
 			ShouldContain(result.CheckedSets, c.F2);
 			ShouldContain(result.CheckedSets, c.F3);
 
-			ShouldContain(result.CheckedSets, c.F1, c.F2);
-			ShouldContain(result.CheckedSets, c.F1, c.F3);
-			ShouldContain(result.CheckedSets, c.F2, c.F3);
-
-			ShouldContain(result.MinimalCriticalSets, c.F1, c.F2);
-			ShouldContain(result.MinimalCriticalSets, c.F1, c.F3);
-			ShouldContain(result.MinimalCriticalSets, c.F2, c.F3);
+			ShouldContain(result.MinimalCriticalSets, c.F1);
+			ShouldContain(result.MinimalCriticalSets, c.F2);
+			ShouldContain(result.MinimalCriticalSets, c.F3);
 
 			result.CounterExamples.Count.ShouldBe(3);
 			foreach (var set in result.MinimalCriticalSets)
 				result.CounterExamples.ContainsKey(set).ShouldBe(true);
 
+			foreach (var exceptionSet in result.Exceptions.Keys)
+			{
+				ShouldContain(result.CheckedSets, exceptionSet.ToArray());
+				ShouldContain(result.MinimalCriticalSets, exceptionSet.ToArray());
+			}
+
 			foreach (var set in result.MinimalCriticalSets)
 			{
-				SimulateCounterExample(result.CounterExamples[set], simulator =>
+				if (!result.Exceptions.ContainsKey(set))
+					continue;
+
+				if (set.Contains(c.F2))
 				{
-					var component = (C)simulator.Model.RootComponents[0];
-
-					component.X.ShouldBe(0);
-
-					while (!simulator.IsCompleted)
-						simulator.SimulateStep();
-
-					component.X.ShouldBe(5);
-				});
+					SimulateCounterExample(result.CounterExamples[set],
+						simulator => Should.Throw<ArgumentException>(() => simulator.FastForward(100)).Message.ShouldBe("arg"));
+				}
+				else
+				{
+					SimulateCounterExample(result.CounterExamples[set],
+						simulator => Should.Throw<InvalidOperationException>(() => simulator.FastForward(100)).Message.ShouldBe("test"));
+				}
 			}
 		}
 
@@ -88,7 +95,7 @@ namespace Tests.Analysis.Dcca
 				public override void Update()
 				{
 					base.Update();
-					X += 1;
+					X += 4;
 				}
 			}
 
@@ -100,6 +107,7 @@ namespace Tests.Analysis.Dcca
 				{
 					base.Update();
 					X += 1;
+					throw new ArgumentException("arg");
 				}
 			}
 
@@ -111,6 +119,7 @@ namespace Tests.Analysis.Dcca
 				{
 					base.Update();
 					X += 1;
+					throw new InvalidOperationException("test");
 				}
 			}
 		}

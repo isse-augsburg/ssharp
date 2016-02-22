@@ -70,7 +70,7 @@ namespace Tests
 		{
 			var analysis = new SafetyAnalysis(new Model(components));
 			analysis.OutputWritten += message => Output.Log("{0}", message);
-			var result = analysis.ComputeMinimalCutSets(hazard);
+			var result = analysis.ComputeMinimalCriticalSets(hazard);
 			Output.Log("{0}", result);
 
 			return result;

@@ -301,7 +301,8 @@ namespace SafetySharp.Runtime
 		///   Generates the replay information for the <paramref name="trace" />.
 		/// </summary>
 		/// <param name="trace">The trace the replay information should be generated for.</param>
-		internal int[][] GenerateReplayInformation(byte[][] trace)
+		/// <param name="endsWithException">Indicates whether the trace ends with an exception being thrown.</param>
+		internal int[][] GenerateReplayInformation(byte[][] trace, bool endsWithException)
 		{
 			_stateCache.Clear();
 
@@ -320,7 +321,19 @@ namespace SafetySharp.Runtime
 					fixed (byte* sourceState = trace[i])
 						Deserialize(sourceState);
 
-					ExecuteStep();
+					try
+					{
+						ExecuteStep();
+					}
+					catch (Exception)
+					{
+						Requires.That(endsWithException, "Unexpected exception.");
+						Requires.That(i == trace.Length - 2, "Unexpected exception.");
+
+						info[i] = _choiceResolver.GetChoices().ToArray();
+						break;
+					}
+
 					Serialize(targetState);
 
 					// Compare the target states; if they match, we've found the correct transition

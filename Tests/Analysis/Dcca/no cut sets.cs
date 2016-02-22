@@ -32,10 +32,11 @@ namespace Tests.Analysis.Dcca
 			var c = new C();
 			var result = Dcca(c.X > 4, c);
 
-			result.CheckedSetsCount.ShouldBe(8);
-			result.MinimalCutSetsCount.ShouldBe(0);
-			result.MinimalCutSets.ShouldBeEmpty();
+			result.CheckedSets.Count.ShouldBe(8);
+			result.MinimalCriticalSets.Count.ShouldBe(0);
+			result.MinimalCriticalSets.ShouldBeEmpty();
 			result.CounterExamples.ShouldBeEmpty();
+			result.Exceptions.ShouldBeEmpty();
 
 			ShouldContain(result.CheckedSets);
 			ShouldContain(result.CheckedSets, c.F1);

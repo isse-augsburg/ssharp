@@ -95,10 +95,10 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Computes the minimal cut sets for the <paramref name="hazard" />.
+		///   Computes the minimal critical sets for the <paramref name="hazard" />.
 		/// </summary>
-		/// <param name="hazard">The hazard the minimal cut sets should be computed for.</param>
-		public Result ComputeMinimalCutSets(Formula hazard)
+		/// <param name="hazard">The hazard the minimal critical sets should be computed for.</param>
+		public Result ComputeMinimalCriticalSets(Formula hazard)
 		{
 			Requires.NotNull(hazard, nameof(hazard));
 
@@ -109,30 +109,31 @@ namespace SafetySharp.Analysis
 				faults[i].Identifier = i;
 
 			var safeSets = new HashSet<int>();
-			var cutSets = new HashSet<int>();
+			var criticalSets = new HashSet<int>();
 			var checkedSets = new HashSet<int>();
 			var counterExamples = new Dictionary<int, CounterExample>();
+			var exceptions = new Dictionary<int, Exception>();
 
 			// Store the serialized model to improve performance
 			var serializedModel = RuntimeModelSerializer.Save(_model, !hazard);
 
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we
-			// know are going to be cut sets due to monotonicity
+			// know are going to be critical sets due to monotonicity
 			for (var cardinality = 0; cardinality <= faults.Length; ++cardinality)
 			{
 				// Generate the sets for the current level that we'll have to check
-				var sets = GeneratePowerSetLevel(safeSets, cutSets, cardinality, faults.Length);
+				var sets = GeneratePowerSetLevel(safeSets, criticalSets, cardinality, faults.Length);
 
 				// Clear the safe sets, we don't need the previous level to generate the next one
 				safeSets.Clear();
 
-				// If there are no sets to check, we're done; this happens when there are so many cut sets
-				// that this level does not contain any set that is not a super set of any of those cut sets
+				// If there are no sets to check, we're done; this happens when there are so many critical sets
+				// that this level does not contain any set that is not a super set of any of those critical sets
 				if (sets.Count == 0)
 					break;
 
-				// We have to check each set; if one of them is a cut set, it has no effect on the other
+				// We have to check each set; if one of them is a critical set, it has no effect on the other
 				// sets we have to check
 				foreach (var set in sets)
 				{
@@ -147,14 +148,14 @@ namespace SafetySharp.Analysis
 						.ToArray();
 					var setRepresentation = faultNames.Length == 0 ? "{}" : String.Join(", ", faultNames);
 
-					// If there was a counter example, the set is a cut set
+					// If there was a counter example, the set is a critical set
 					var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializedModel, faults));
-					if (result.CounterExample != null)
+					if (!result.FormulaHolds)
 					{
 						_modelChecker.Output($"*** Found minimal critical fault set: {setRepresentation}.");
 						_modelChecker.Output("");
 
-						cutSets.Add(set);
+						criticalSets.Add(set);
 					}
 					else
 					{
@@ -168,10 +169,13 @@ namespace SafetySharp.Analysis
 
 					if (result.CounterExample != null)
 						counterExamples.Add(set, result.CounterExample);
+
+					if (result.Exception != null)
+						exceptions.Add(set, result.Exception);
 				}
 			}
 
-			return new Result(cutSets, checkedSets, faults, counterExamples);
+			return new Result(criticalSets, checkedSets, faults, counterExamples, exceptions);
 		}
 
 		/// <summary>
@@ -199,10 +203,10 @@ namespace SafetySharp.Analysis
 		///   Generates a level of the power set.
 		/// </summary>
 		/// <param name="safeSets">The set of safe sets generated at the previous level.</param>
-		/// <param name="cutSets">The sets that are known to be cut sets. All super sets are discarded.</param>
+		/// <param name="criticalSets">The sets that are known to be critical sets. All super sets are discarded.</param>
 		/// <param name="cardinality">The cardinality of the sets that should be generated.</param>
 		/// <param name="count">The number of elements in the set the power set is generated for.</param>
-		private static HashSet<int> GeneratePowerSetLevel(HashSet<int> safeSets, HashSet<int> cutSets, int cardinality, int count)
+		private static HashSet<int> GeneratePowerSetLevel(HashSet<int> safeSets, HashSet<int> criticalSets, int cardinality, int count)
 		{
 			var result = new HashSet<int>();
 
@@ -214,8 +218,8 @@ namespace SafetySharp.Analysis
 					break;
 				case 1:
 					// We have to kick things off by explicitly generating the singleton sets; at this point,
-					// we know that there are no further minimal cut sets if we've already found one (= the empty set)
-					if (cutSets.Count == 0)
+					// we know that there are no further minimal critical sets if we've already found one (= the empty set)
+					if (criticalSets.Count == 0)
 					{
 						for (var i = 0; i < count; ++i)
 							result.Add(1 << i);
@@ -237,8 +241,8 @@ namespace SafetySharp.Analysis
 
 							var set = safeSet | (1 << i);
 
-							// Check if the newly generated set it a super set of any cut sets; if so, discard it
-							if (cutSets.All(s => (set & s) != s))
+							// Check if the newly generated set it a super set of any critical sets; if so, discard it
+							if (criticalSets.All(s => (set & s) != s))
 								result.Add(set);
 						}
 					}
@@ -254,31 +258,21 @@ namespace SafetySharp.Analysis
 		public struct Result
 		{
 			/// <summary>
-			///   Gets the minimal cut sets, each cut set containing the faults that potentially result in the occurrence of a hazard.
+			///   Gets the minimal critical sets, each critical set containing the faults that potentially result in the occurrence of a
+			///   hazard.
 			/// </summary>
-			public ISet<ISet<Fault>> MinimalCutSets { get; }
-
-			/// <summary>
-			///   Gets the number of minimal cut sets.
-			/// </summary>
-			public int MinimalCutSetsCount { get; }
+			public ISet<ISet<Fault>> MinimalCriticalSets { get; }
 
 			/// <summary>
 			///   Gets all of the fault sets that were checked for criticality. Some sets might not have been checked as they were known to
-			///   be cut sets due to the monotonicity of the cut set property.
+			///   be critical sets due to the monotonicity of the critical set property.
 			/// </summary>
 			public ISet<ISet<Fault>> CheckedSets { get; }
 
 			/// <summary>
-			///   Gets the number of sets that have been checked for criticality. Some sets might not have been checked as they were known
-			///   to be cut sets due to the monotonicity of the cut set property.
+			///   Gets the exception that has been thrown during the analysis, if any.
 			/// </summary>
-			public int CheckedSetsCount { get; }
-
-			/// <summary>
-			///   Gets the number of faults that have been checked.
-			/// </summary>
-			public int FaultCount { get; }
+			public IDictionary<ISet<Fault>, Exception> Exceptions { get; }
 
 			/// <summary>
 			///   Gets the faults that have been checked.
@@ -293,22 +287,21 @@ namespace SafetySharp.Analysis
 			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
-			/// <param name="cutSets">The minimal cut sets.</param>
+			/// <param name="criticalSets">The minimal critical sets.</param>
 			/// <param name="checkedSets">The sets that have been checked.</param>
 			/// <param name="faults">The faults that have been checked.</param>
 			/// <param name="counterExamples">The counter examples that were generated for the critical fault sets.</param>
-			internal Result(HashSet<int> cutSets, HashSet<int> checkedSets, Fault[] faults, Dictionary<int, CounterExample> counterExamples)
+			/// <param name="exceptions">The exceptions that have been thrown during the analysis.</param>
+			internal Result(HashSet<int> criticalSets, HashSet<int> checkedSets, Fault[] faults, Dictionary<int, CounterExample> counterExamples,
+							Dictionary<int, Exception> exceptions)
 			{
-				MinimalCutSetsCount = cutSets.Count;
-				CheckedSetsCount = checkedSets.Count;
-				FaultCount = faults.Length;
-
 				var knownFaultSets = new Dictionary<int, ISet<Fault>>();
 
-				MinimalCutSets = Convert(knownFaultSets, cutSets, faults);
+				MinimalCriticalSets = Convert(knownFaultSets, criticalSets, faults);
 				CheckedSets = Convert(knownFaultSets, checkedSets, faults);
 				Faults = faults;
 				CounterExamples = counterExamples.ToDictionary(pair => Convert(knownFaultSets, pair.Key, faults), pair => pair.Value);
+				Exceptions = exceptions.ToDictionary(pair => Convert(knownFaultSets, pair.Key, faults), pair => pair.Value);
 			}
 
 			/// <summary>
@@ -371,23 +364,37 @@ namespace SafetySharp.Analysis
 			public override string ToString()
 			{
 				var builder = new StringBuilder();
-				var percentage = CheckedSetsCount / (float)(1 << FaultCount) * 100;
+				var percentage = CheckedSets.Count / (float)(1 << Faults.Count()) * 100;
 
+				builder.AppendLine();
+				builder.AppendLine("=======================================================================");
+				builder.AppendLine("=======      Deductive Cause Consequence Analysis: Results      =======");
+				builder.AppendLine("=======================================================================");
+				builder.AppendLine();
+
+				if (Exceptions.Any())
+				{
+					builder.AppendLine("*** Warning: Unhandled exceptions have been thrown during the analysis. ***");
+					builder.AppendLine();
+				}
+
+				builder.AppendFormat("Fault Count: {0}", Faults.Count());
+				builder.AppendLine();
 				builder.AppendFormat("Faults: {0}", String.Join(", ", Faults.Select(fault => fault.Name).OrderBy(name => name)));
 				builder.AppendLine();
 				builder.AppendLine();
 
-				builder.AppendFormat("Checked Fault Sets: {0} ({1:F0}% of all fault sets)", CheckedSetsCount, percentage);
+				builder.AppendFormat("Checked Fault Sets: {0} ({1:F0}% of all fault sets)", CheckedSets.Count, percentage);
 				builder.AppendLine();
 
-				builder.AppendFormat("Minimal Cut Sets: {0}", MinimalCutSetsCount);
+				builder.AppendFormat("Minimal Critical Sets: {0}", MinimalCriticalSets.Count);
 				builder.AppendLine();
 				builder.AppendLine();
 
 				var i = 1;
-				foreach (var cutSet in MinimalCutSets)
+				foreach (var criticalSet in MinimalCriticalSets.Select(set => String.Join(", ", set.Select(fault => fault.Name))).OrderBy(set => set))
 				{
-					builder.AppendFormat("   ({1}) {{ {0} }}", String.Join(", ", cutSet.Select(fault => fault.Name)), i++);
+					builder.AppendFormat("   ({1}) {{ {0} }}", criticalSet, i++);
 					builder.AppendLine();
 				}
 

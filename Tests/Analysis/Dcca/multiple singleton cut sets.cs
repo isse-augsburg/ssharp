@@ -32,23 +32,24 @@ namespace Tests.Analysis.Dcca
 			var c = new C();
 			var result = Dcca(c.X > 4, c);
 
-			result.CheckedSetsCount.ShouldBe(4);
-			result.MinimalCutSetsCount.ShouldBe(3);
+			result.CheckedSets.Count.ShouldBe(4);
+			result.MinimalCriticalSets.Count.ShouldBe(3);
+			result.Exceptions.ShouldBeEmpty();
 
 			ShouldContain(result.CheckedSets);
 			ShouldContain(result.CheckedSets, c.F1);
 			ShouldContain(result.CheckedSets, c.F2);
 			ShouldContain(result.CheckedSets, c.F3);
 
-			ShouldContain(result.MinimalCutSets, c.F1);
-			ShouldContain(result.MinimalCutSets, c.F2);
-			ShouldContain(result.MinimalCutSets, c.F3);
+			ShouldContain(result.MinimalCriticalSets, c.F1);
+			ShouldContain(result.MinimalCriticalSets, c.F2);
+			ShouldContain(result.MinimalCriticalSets, c.F3);
 
 			result.CounterExamples.Count.ShouldBe(3);
-			foreach (var set in result.MinimalCutSets)
+			foreach (var set in result.MinimalCriticalSets)
 				result.CounterExamples.ContainsKey(set).ShouldBe(true);
 
-			foreach (var set in result.MinimalCutSets)
+			foreach (var set in result.MinimalCriticalSets)
 			{
 				SimulateCounterExample(result.CounterExamples[set], simulator =>
 				{

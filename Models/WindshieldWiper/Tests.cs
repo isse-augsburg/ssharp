@@ -42,7 +42,7 @@ namespace Wiper
 			var specification = new Specification(null);
 			var analysis = new SafetyAnalysis(SafetySharpModel.Create(specification));
 
-			var result = analysis.ComputeMinimalCutSets(specification.InvalidScenario);
+			var result = analysis.ComputeMinimalCriticalSets(specification.InvalidScenario);
 			result.SaveCounterExamples("counter examples/wiper/");
 
 			Console.WriteLine(result);

@@ -35,15 +35,16 @@ namespace Tests.Analysis.Dcca
 			var c = new C();
 			var result = Dcca(c.X > 4, c);
 
-			result.CheckedSetsCount.ShouldBe(1);
-			result.MinimalCutSetsCount.ShouldBe(1);
+			result.CheckedSets.Count.ShouldBe(1);
+			result.MinimalCriticalSets.Count.ShouldBe(1);
+			result.Exceptions.ShouldBeEmpty();
 
 			result.CheckedSets.ShouldBe(new[] { new HashSet<Fault>() });
-			result.MinimalCutSets.ShouldBe(new[] { new HashSet<Fault>() });
+			result.MinimalCriticalSets.ShouldBe(new[] { new HashSet<Fault>() });
 			result.CounterExamples.Count.ShouldBe(1);
-			result.CounterExamples.ContainsKey(result.MinimalCutSets.Single()).ShouldBe(true);
+			result.CounterExamples.ContainsKey(result.MinimalCriticalSets.Single()).ShouldBe(true);
 
-			SimulateCounterExample(result.CounterExamples[result.MinimalCutSets.Single()], simulator =>
+			SimulateCounterExample(result.CounterExamples[result.MinimalCriticalSets.Single()], simulator =>
 			{
 				c = (C)simulator.Model.RootComponents[0];
 

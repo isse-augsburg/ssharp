@@ -22,6 +22,8 @@
 
 namespace SafetySharp.Analysis
 {
+	using System;
+
 	/// <summary>
 	///   Describes the result of a model checking based analysis.
 	/// </summary>
@@ -38,27 +40,34 @@ namespace SafetySharp.Analysis
 		public bool FormulaHolds { get; }
 
 		/// <summary>
-		///   The number of states checked by the model checker.
+		///   Gets the number of states checked by the model checker.
 		/// </summary>
 		public int StateCount { get; }
 
 		/// <summary>
-		///   The number of transitions checked by the model checker.
+		///   Gets the number of transitions checked by the model checker.
 		/// </summary>
 		public long TransitionCount { get; }
 
 		/// <summary>
-		///   The number of levels checked by the model checker.
+		///   Gets the number of levels checked by the model checker.
 		/// </summary>
 		public int LevelCount { get; }
 
 		/// <summary>
+		///   Gets the unhandeled exception that terminated the model checking process, if any.
+		/// </summary>
+		public Exception Exception { get; }
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		internal AnalysisResult(bool formulaHolds, CounterExample counterExample, int stateCount, long transitionCount, int levelCount)
+		internal AnalysisResult(bool formulaHolds, CounterExample counterExample, Exception exception, int stateCount, long transitionCount,
+								int levelCount)
 		{
 			FormulaHolds = formulaHolds;
 			CounterExample = counterExample;
+			Exception = exception;
 			StateCount = stateCount;
 			TransitionCount = transitionCount;
 			LevelCount = levelCount;

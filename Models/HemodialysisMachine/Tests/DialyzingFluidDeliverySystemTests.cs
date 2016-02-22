@@ -102,7 +102,7 @@ namespace HemodialysisMachine.Tests
 			var specification = new DialyzingFluidDeliverySystemTestEnvironment();
 			var analysis = new SafetyAnalysis(Model.Create(specification));
 
-			var result = analysis.ComputeMinimalCutSets(specification.Dialyzer.MembraneIntact == false);
+			var result = analysis.ComputeMinimalCriticalSets(specification.Dialyzer.MembraneIntact == false);
 			result.SaveCounterExamples("counter examples/hdmachine");
 
 			Console.WriteLine(result);
