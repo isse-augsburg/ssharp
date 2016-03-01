@@ -66,7 +66,7 @@ namespace Visualization
 		}
 
 		private Pump Pump => Controller.Pump;
-		private Sensor Sensor => Controller.Sensor;
+		private PressureSensor Sensor => Controller.Sensor;
 		private Timer Timer => Controller.Timer;
 		private Tank Tank => SimulationControls.Model.RootComponents.OfType<Tank>().Single();
 		private Controller Controller => SimulationControls.Model.RootComponents.OfType<Controller>().Single();

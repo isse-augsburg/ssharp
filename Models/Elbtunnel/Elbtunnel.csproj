@@ -74,6 +74,12 @@
     <Compile Include="Controllers\PreControlOriginal.cs" />
     <Compile Include="Actuators\TrafficLights.cs" />
     <Compile Include="Controllers\Timer.cs" />
+    <Compile Include="DesignExploration\DesignExploration_Tests.cs" />
+    <Compile Include="DesignExploration\DesignHighTubeWithLb_Specification.cs" />
+    <Compile Include="DesignExploration\DesignImprovedDetectionOfPreControl_Specification.cs" />
+    <Compile Include="DesignExploration\DesignRemovedCounterInMainControl_Specification.cs" />
+    <Compile Include="DesignExploration\DesignRemovedCounterInTolerantMainControl_Specification.cs" />
+    <Compile Include="DesignExploration\DesignTolerantMainControl_Specification.cs" />
     <Compile Include="Vehicles\VisualizationVehicle.cs" />
     <Compile Include="Vehicles\Vehicle.cs" />
     <Compile Include="Vehicles\VehicleCollection.cs" />

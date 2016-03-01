@@ -71,7 +71,7 @@ namespace PressureTank
 		///   The sensor that is used to sense the pressure level within the tank.
 		/// </summary>
 		[Hidden]
-		public Sensor Sensor;
+		public PressureSensor Sensor;
 
 		/// <summary>
 		///   The timer that is used to determine whether the pump should be disabled to prevent tank ruptures.

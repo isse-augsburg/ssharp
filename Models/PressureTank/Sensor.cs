@@ -27,7 +27,7 @@ namespace PressureTank
 	/// <summary>
 	///   Represents the sensor that monitors the pressure within the pressure tank.
 	/// </summary>
-	public class Sensor : Component
+	public class PressureSensor : Component
 	{
 		/// <summary>
 		///   The fault that prevents the sensor from triggering when the tank has reached or exceeded
@@ -59,7 +59,7 @@ namespace PressureTank
 		///   Prevents the sensor from triggering when the tank has reached or exceeded its maximum allowed pressure level.
 		/// </summary>
 		[FaultEffect(Fault = nameof(SuppressIsFull))]
-		public class SuppressIsFullEffect : Sensor
+		public class SuppressIsFullEffect : PressureSensor
 		{
 			public override bool IsFull => false;
 		}
@@ -68,7 +68,7 @@ namespace PressureTank
 		///   Prevents the sensor from triggering when the tank has become empty.
 		/// </summary>
 		[FaultEffect(Fault = nameof(SuppressIsEmpty))]
-		public class SuppressIsEmptyEffect : Sensor
+		public class SuppressIsEmptyEffect : PressureSensor
 		{
 			public override bool IsEmpty => false;
 		}

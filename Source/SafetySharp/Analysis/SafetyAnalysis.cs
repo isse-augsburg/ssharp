@@ -209,6 +209,78 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
+		///   Checks if the system has an inherent safety flaw. If this is not the case,
+		///   computes the single points of failures for the <paramref name="hazard" />.
+		/// </summary>
+		/// <param name="hazard">The hazard the minimal cut sets should be computed for.</param>
+		/// <param name="counterExamplePath">
+		///   The path the generated counter examples should be written to. If null, counter examples are
+		///   not written.
+		/// </param>
+		public Result ComputeSinglePointsOfFailures(Formula hazard, string counterExamplePath = null)
+		{
+			Requires.NotNull(hazard, nameof(hazard));
+
+			if (!String.IsNullOrWhiteSpace(counterExamplePath))
+				Directory.CreateDirectory(counterExamplePath);
+
+			var faults = _model.GetFaults();
+			var safeSets = new HashSet<int>();
+			var cutSets = new HashSet<int>();
+			var checkedSets = new HashSet<int>();
+			
+			Requires.That(faults.Length < 32, "More than 31 faults are currently not supported.");
+
+			// Max cardinality is either 0 or 1 depending on the number of faults.
+			var maxCardinalityToCheck = Math.Min(faults.Length, 1);
+
+			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
+			// all singleton sets (SPOFs)
+			for (var cardinality = 0; cardinality <= maxCardinalityToCheck; ++cardinality)
+			{
+				// Generate the sets for the current level that we'll have to check
+				var sets = GeneratePowerSetLevel(safeSets, cutSets, cardinality, faults.Length);
+
+				// Clear the safe sets, we don't need the previous level to generate the next one
+				safeSets.Clear();
+
+				// If there are no sets to check, we're done; this happens when there are so many cut sets
+				// that this level does not contain any set that is not a super set of any of those cut sets
+				if (sets.Count == 0)
+					break;
+
+				// We have to check each set; if one of them is a cut set, it has no effect on the other
+				// sets we have to check
+				foreach (var set in sets)
+				{
+					// Enable or disable the faults that the set represents
+					for (var i = 1; i <= faults.Length; ++i)
+						faults[i - 1].Activation = (set & (1 << (i - 1))) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
+
+					// If there was a counter example, the set is a cut set
+					var result = _modelChecker.CheckInvariant(_model, !hazard);
+					if (result.CounterExample != null)
+						cutSets.Add(set);
+					else
+						safeSets.Add(set);
+
+					checkedSets.Add(set);
+
+					if (result.CounterExample == null || counterExamplePath == null)
+						continue;
+
+					var fileName = String.Join("_", faults.Where(f => f.Activation == Activation.Nondeterministic).Select(f => f.Name));
+					if (String.IsNullOrWhiteSpace(fileName))
+						fileName = "emptyset";
+
+					result.CounterExample.Save(Path.Combine(counterExamplePath, $"{fileName}{CounterExample.FileExtension}"));
+				}
+			}
+
+			return new Result(cutSets, checkedSets, faults);
+		}
+
+		/// <summary>
 		///   Generates a level of the power set.
 		/// </summary>
 		/// <param name="safeSets">The set of safe sets generated at the previous level.</param>

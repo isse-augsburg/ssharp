@@ -52,7 +52,7 @@ namespace PressureTank
 		{
 			Controller = new Controller
 			{
-				Sensor = new Sensor(),
+				Sensor = new PressureSensor(),
 				Pump = new Pump(),
 				Timer = new Timer()
 			};
