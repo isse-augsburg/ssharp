@@ -221,15 +221,20 @@ namespace SafetySharp.Analysis
 		{
 			Requires.NotNull(hazard, nameof(hazard));
 
-			if (!String.IsNullOrWhiteSpace(counterExamplePath))
-				Directory.CreateDirectory(counterExamplePath);
-
 			var faults = _model.GetFaults();
-			var safeSets = new HashSet<int>();
-			var cutSets = new HashSet<int>();
-			var checkedSets = new HashSet<int>();
-			
 			Requires.That(faults.Length < 32, "More than 31 faults are currently not supported.");
+
+			for (var i = 0; i < faults.Length; ++i)
+				faults[i].Identifier = i;
+
+			var safeSets = new HashSet<int>();
+			var criticalSets = new HashSet<int>();
+			var checkedSets = new HashSet<int>();
+			var counterExamples = new Dictionary<int, CounterExample>();
+			var exceptions = new Dictionary<int, Exception>();
+
+			// Store the serialized model to improve performance
+			var serializedModel = RuntimeModelSerializer.Save(_model, !hazard);
 
 			// Max cardinality is either 0 or 1 depending on the number of faults.
 			var maxCardinalityToCheck = Math.Min(faults.Length, 1);
@@ -239,17 +244,17 @@ namespace SafetySharp.Analysis
 			for (var cardinality = 0; cardinality <= maxCardinalityToCheck; ++cardinality)
 			{
 				// Generate the sets for the current level that we'll have to check
-				var sets = GeneratePowerSetLevel(safeSets, cutSets, cardinality, faults.Length);
+				var sets = GeneratePowerSetLevel(safeSets, criticalSets, cardinality, faults.Length);
 
 				// Clear the safe sets, we don't need the previous level to generate the next one
 				safeSets.Clear();
 
-				// If there are no sets to check, we're done; this happens when there are so many cut sets
-				// that this level does not contain any set that is not a super set of any of those cut sets
+				// If there are no sets to check, we're done; this happens when there are so many critical sets
+				// that this level does not contain any set that is not a super set of any of those critical sets
 				if (sets.Count == 0)
 					break;
 
-				// We have to check each set; if one of them is a cut set, it has no effect on the other
+				// We have to check each set; if one of them is a critical set, it has no effect on the other
 				// sets we have to check
 				foreach (var set in sets)
 				{
@@ -257,27 +262,50 @@ namespace SafetySharp.Analysis
 					for (var i = 1; i <= faults.Length; ++i)
 						faults[i - 1].Activation = (set & (1 << (i - 1))) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
 
-					// If there was a counter example, the set is a cut set
-					var result = _modelChecker.CheckInvariant(_model, !hazard);
-					if (result.CounterExample != null)
-						cutSets.Add(set);
-					else
-						safeSets.Add(set);
+					var faultNames = faults
+						.Where(fault => fault.Activation == Activation.Nondeterministic)
+						.Select(fault => fault.Name)
+						.OrderBy(name => name)
+						.ToArray();
+					var setRepresentation = faultNames.Length == 0 ? "{}" : String.Join(", ", faultNames);
 
-					checkedSets.Add(set);
+					// If there was a counter example, the set is a critical set
+					try
+					{
+						var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializedModel, faults));
 
-					if (result.CounterExample == null || counterExamplePath == null)
-						continue;
+						if (!result.FormulaHolds)
+						{
+							_modelChecker.Output($"*** Found minimal critical fault set: {setRepresentation}.");
+							_modelChecker.Output("");
 
-					var fileName = String.Join("_", faults.Where(f => f.Activation == Activation.Nondeterministic).Select(f => f.Name));
-					if (String.IsNullOrWhiteSpace(fileName))
-						fileName = "emptyset";
+							criticalSets.Add(set);
+						}
+						else
+						{
+							_modelChecker.Output($"*** Found safe fault set: {setRepresentation}.");
+							_modelChecker.Output("");
 
-					result.CounterExample.Save(Path.Combine(counterExamplePath, $"{fileName}{CounterExample.FileExtension}"));
+							safeSets.Add(set);
+						}
+
+						checkedSets.Add(set);
+
+						if (result.CounterExample != null)
+							counterExamples.Add(set, result.CounterExample);
+					}
+					catch (AnalysisException e)
+					{
+						checkedSets.Add(set);
+						criticalSets.Add(set);
+
+						exceptions.Add(set, e.InnerException);
+						counterExamples.Add(set, e.CounterExample);
+					}
 				}
 			}
 
-			return new Result(cutSets, checkedSets, faults);
+			return new Result(criticalSets, checkedSets, faults, counterExamples, exceptions);
 		}
 
 		/// <summary>
