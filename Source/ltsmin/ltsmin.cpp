@@ -123,10 +123,6 @@ void LoadModel(model_t model, const char* modelFile)
 		auto stateLabelCount = Globals::Model->StateFormulas->Length;
 		auto transitionGroupCount = 1;
 
-		// Models without state are invalid
-		if (stateSlotCount <= 0)
-			throw gcnew InvalidOperationException("Models without any state fields are not supported by LtsMin.");
-
 		// Create the LTS type and set the state vector size
 		auto ltsType = lts_type_create();
 		lts_type_set_state_length(ltsType, stateSlotCount);

@@ -27,7 +27,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class Exception : AnalysisTestObject
+	internal class NonInitialStateException : AnalysisTestObject
 	{
 		protected override void Check()
 		{
@@ -49,6 +49,16 @@ namespace Tests.Analysis.Invariants.CounterExamples
 
 				Should.Throw<InvalidOperationException>(() => simulator.SimulateStep()).Message.ShouldBe("test");
 			});
+
+			var d = new D();
+			e = Should.Throw<AnalysisException>(() => CheckInvariant(true, d));
+			e.CounterExample.StepCount.ShouldBe(2);
+
+			SimulateCounterExample(e.CounterExample, simulator =>
+			{
+				d = (D)simulator.Model.RootComponents[0];
+				Should.Throw<InvalidOperationException>(() => simulator.SimulateStep()).Message.ShouldBe("test");
+			});
 		}
 
 		private class C : Component
@@ -62,6 +72,14 @@ namespace Tests.Analysis.Invariants.CounterExamples
 
 				if (X == 3 && Choose(true, false))
 					throw new InvalidOperationException("test");
+			}
+		}
+
+		private class D : Component
+		{
+			public override void Update()
+			{
+				throw new InvalidOperationException("test");
 			}
 		}
 	}

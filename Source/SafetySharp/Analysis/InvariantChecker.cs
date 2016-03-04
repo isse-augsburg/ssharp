@@ -193,10 +193,22 @@ namespace SafetySharp.Analysis
 			/// </summary>
 			public void ComputeInitialStates()
 			{
-				_states = _context._states;
-				_model.ComputeInitialStates(_transitions);
+				try
+				{
+					_states = _context._states;
+					_model.ComputeInitialStates(_transitions);
 
-				AddStates();
+					AddStates();
+				}
+				catch (Exception e)
+				{
+					_context._loadBalancer.Terminate();
+					_context._exception = e;
+
+					var trace = new[] { _model.ConstructionState, new byte[_model.StateVectorSize] };
+					var choices = new[] { _model.GetLastChoices() };
+					_context._counterExample = new CounterExample(_model, trace, choices);
+				}
 			}
 
 			/// <summary>
@@ -242,7 +254,7 @@ namespace SafetySharp.Analysis
 				Interlocked.Add(ref _context._transitionCount, _transitions.Count);
 				_stateStack.PushFrame();
 
-				for (var i =0 ; i < _transitions.Count; ++i)
+				for (var i = 0; i < _transitions.Count; ++i)
 				{
 					var transition = _transitions[i];
 
@@ -275,16 +287,17 @@ namespace SafetySharp.Analysis
 					return;
 
 				var indexedTrace = _stateStack.GetTrace();
-				var traceLength = endsWithException ? indexedTrace.Length + 1 : indexedTrace.Length;
+				var traceLength = 1 + (endsWithException ? indexedTrace.Length + 1 : indexedTrace.Length);
 				var trace = new byte[traceLength][];
+				trace[0] = _model.ConstructionState;
 
 				if (endsWithException)
 					trace[trace.Length - 1] = new byte[_model.StateVectorSize];
 
 				for (var i = 0; i < indexedTrace.Length; ++i)
 				{
-					trace[i] = new byte[_model.StateVectorSize];
-					Marshal.Copy(new IntPtr((int*)_states[indexedTrace[i]]), trace[i], 0, trace[i].Length);
+					trace[i + 1] = new byte[_model.StateVectorSize];
+					Marshal.Copy(new IntPtr((int*)_states[indexedTrace[i]]), trace[i + 1], 0, trace[i + 1].Length);
 				}
 
 				_context._counterExample = new CounterExample(_model, trace, _model.GenerateReplayInformation(trace, endsWithException));

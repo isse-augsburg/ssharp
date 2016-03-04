@@ -192,6 +192,9 @@ namespace SafetySharp.Runtime
 		{
 			var state = stackalloc byte[Model.StateVectorSize];
 
+			_states.Clear();
+			_stateIndex = -1;
+
 			if (_counterExample == null)
 			{
 				Model.Reset();
@@ -200,15 +203,11 @@ namespace SafetySharp.Runtime
 				Model.Serialize(state);
 				Model.Deserialize(state);
 
-				_states.Clear();
-				_stateIndex = -1;
-
 				AddState(state);
 			}
 			else
 			{
-				_counterExample.DeserializeState(0);
-				_stateIndex = -1;
+				_counterExample.ReplayInitialState();
 
 				Model.Serialize(state);
 				AddState(state);
@@ -221,7 +220,7 @@ namespace SafetySharp.Runtime
 		private void Replay()
 		{
 			fixed (byte* sourceState = _states[_stateIndex - 1])
-				Model.Replay(sourceState, _counterExample.GetReplayInformation(_stateIndex - 1));
+				Model.Replay(sourceState, _counterExample.GetReplayInformation(_stateIndex - 1), initializationStep: _stateIndex == -1);
 
 			// Serialize and deserialize the state to get the correct overflow behavior
 			var state = stackalloc byte[Model.StateVectorSize];

@@ -88,7 +88,7 @@ namespace SafetySharp.Analysis
 			get
 			{
 				Requires.That(_counterExample != null, "No counter example has been loaded.");
-				return _counterExample.Length;
+				return _counterExample.Length - 1;
 			}
 		}
 
@@ -99,12 +99,32 @@ namespace SafetySharp.Analysis
 		public unsafe RuntimeModel DeserializeState(int position)
 		{
 			Requires.That(_counterExample != null, "No counter example has been loaded.");
-			Requires.InRange(position, nameof(position), _counterExample);
+			Requires.InRange(position, nameof(position), 0, StepCount);
 
-			using (var pointer = PinnedPointer.Create(_counterExample[position]))
+			using (var pointer = PinnedPointer.Create(_counterExample[position + 1]))
 				Model.Deserialize((byte*)pointer);
 
 			return Model;
+		}
+
+		/// <summary>
+		///   Gets the replay information for the state identified by the zero-based <paramref name="stateIndex" />.
+		/// </summary>
+		/// <param name="stateIndex">The index of the state the replay information should be returned for.</param>
+		internal int[] GetReplayInformation(int stateIndex)
+		{
+			Requires.InRange(stateIndex, nameof(stateIndex), 0, _counterExample.Length - 1);
+			return _replayInfo[stateIndex + 1];
+		}
+
+		/// <summary>
+		///   Replays the computation of the initial state.
+		/// </summary>
+		internal unsafe void ReplayInitialState()
+		{
+			var initialState = _counterExample[0];
+			fixed (byte* state = &initialState[0])
+				Model.Replay(state, _replayInfo[0], initializationStep: true);
 		}
 
 		/// <summary>
@@ -115,7 +135,7 @@ namespace SafetySharp.Analysis
 		{
 			Requires.NotNull(action, nameof(action));
 
-			for (var i = 0; i < StepCount; ++i)
+			for (var i = 1; i < StepCount + 1; ++i)
 				action(DeserializeState(i));
 		}
 
@@ -128,7 +148,7 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(action, nameof(action));
 			Requires.That(_counterExample != null, "No counter example has been loaded.");
 
-			for (var i = 0; i < StepCount; ++i)
+			for (var i = 1; i < StepCount + 1; ++i)
 				action(_counterExample[i]);
 		}
 
@@ -158,7 +178,7 @@ namespace SafetySharp.Analysis
 				writer.Write(metadata.Length);
 				writer.Write(metadata);
 
-				writer.Write(StepCount);
+				writer.Write(StepCount + 1);
 				writer.Write(Model.StateVectorSize);
 
 				foreach (var slot in _counterExample.SelectMany(step => step))
@@ -249,45 +269,6 @@ namespace SafetySharp.Analysis
 		{
 			if (disposing)
 				Model.SafeDispose();
-		}
-
-		/// <summary>
-		///   Gets the replay information for the state identified by the zero-based <paramref name="stateIndex" />.
-		/// </summary>
-		/// <param name="stateIndex">The index of the state the replay information should be returned for.</param>
-		internal int[] GetReplayInformation(int stateIndex)
-		{
-			Requires.InRange(stateIndex, nameof(stateIndex), 0, _counterExample.Length - 1);
-			return _replayInfo[stateIndex];
-		}
-
-		/// <summary>
-		///   Raised when the state vector layout of the counter example does not match the layout of the instantiated model.
-		/// </summary>
-		public class StateVectorMismatchException : Exception
-		{
-			/// <summary>
-			///   Initializes a new instance.
-			/// </summary>
-			/// <param name="counterExampleMetadata">The state vector layout expected by the counter example.</param>
-			/// <param name="modelMetadata">The state vector layout expected by the model.</param>
-			internal StateVectorMismatchException(StateVectorLayout counterExampleMetadata, StateVectorLayout modelMetadata)
-				: base("Mismatch detected between the layout of the state vector as expected by the counter example and the " +
-					   "actual layout of the state vector used by the instantiated model.")
-			{
-				CounterExampleMetadata = counterExampleMetadata;
-				ModelMetadata = modelMetadata;
-			}
-
-			/// <summary>
-			///   Gets the state vector layout expected by the counter example.
-			/// </summary>
-			public StateVectorLayout CounterExampleMetadata { get; }
-
-			/// <summary>
-			///   Gets the state vector layout expected by the model.
-			/// </summary>
-			public StateVectorLayout ModelMetadata { get; }
 		}
 	}
 }

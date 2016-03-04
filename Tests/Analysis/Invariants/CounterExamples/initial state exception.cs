@@ -20,51 +20,54 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Analysis.Invariants.CounterExamples
 {
+	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
-	using Utilities;
 
-	internal class Unbound : TestModel
+	internal class InitialStateException : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			var d = new D();
-
-			Should.Throw<UnboundPortException>(() => d.R());
-			Should.Throw<UnboundPortException>(() => { var x = d.A; });
-			Should.Throw<UnboundPortException>(() => d.B = 0);
-			Should.Throw<UnboundPortException>(() => { var x = d.C; });
-			Should.Throw<UnboundPortException>(() => d.C = 0);
-
-			var m = new Model(d);
-			Create(m);
-
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-			RuntimeModel.StateVectorLayout.Groups.ShouldBeEmpty();
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<D>();
-			d = (D)root;
-
-			Should.Throw<UnboundPortException>(() => d.R());
-			Should.Throw<UnboundPortException>(() => { var x = d.A; });
-			Should.Throw<UnboundPortException>(() => d.B = 0);
-			Should.Throw<UnboundPortException>(() => { var x = d.C; });
-			Should.Throw<UnboundPortException>(() => d.C = 0);
+			Check(new C());
+			Check(new D());
+			Check(new E());
 		}
 
-		private class D : Component
+		private void Check(Component c)
 		{
-			public extern int A { get; }
-			public extern int B { set; }
-			public extern int C { get; set; }
+			var e = Should.Throw<AnalysisException>(() => CheckInvariant(true, c));
+			e.CounterExample.StepCount.ShouldBe(1);
 
-			public extern int R();
+			Should.Throw<InvalidOperationException>(() => SimulateCounterExample(e.CounterExample, simulator => { })).Message.ShouldBe("test");
+		}
+
+		private class C : Component, IInitializable
+		{
+			public void Initialize()
+			{
+				throw new InvalidOperationException("test");
+			}
+		}
+
+		private class D : Component, IInitializable
+		{
+			public void Initialize()
+			{
+				if (Choose(true, false))
+					throw new InvalidOperationException("test");
+			}
+		}
+
+		private class E : Component, IInitializable
+		{
+			public void Initialize()
+			{
+				if (Choose(false, true))
+					throw new InvalidOperationException("test");
+			}
 		}
 	}
 }

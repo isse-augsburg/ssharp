@@ -37,7 +37,7 @@ namespace Tests.Serialization.Objects
 			};
 
 			GenerateCode(SerializationMode.Optimized, c);
-			StateVectorSize.ShouldBe(0);
+			StateVectorLayout.Groups.ShouldBeEmpty();
 		}
 
 		private class C : Component

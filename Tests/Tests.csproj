@@ -143,9 +143,10 @@
     <Compile Include="Analysis\Invariants\CounterExamples\bindings.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\faults.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\formulas.cs" />
+    <Compile Include="Analysis\Invariants\CounterExamples\initial state exception.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\nondeterminism.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\replay.cs" />
-    <Compile Include="Analysis\Invariants\CounterExamples\exception.cs" />
+    <Compile Include="Analysis\Invariants\CounterExamples\non-initial state exception.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\stepping.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\steps.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\variable ranges.cs" />
@@ -500,6 +501,7 @@
     <Compile Include="Serialization\Enumerations\UInt64.cs" />
     <Compile Include="Serialization\Enumerations\UInt32.cs" />
     <Compile Include="Serialization\Enumerations\UInt8.cs" />
+    <Compile Include="Serialization\Misc\empty state.cs" />
     <Compile Include="Serialization\Misc\hidden state optimized.cs" />
     <Compile Include="Serialization\Misc\optimized serialization.cs" />
     <Compile Include="Serialization\Misc\full serialization.cs" />

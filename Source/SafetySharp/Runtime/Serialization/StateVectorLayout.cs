@@ -89,7 +89,7 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Gets the size in bytes required by the state vector. The size is always a multiple of 4.
+		///   Gets the size in bytes required by the state vector. The size is always a multiple of 4 and always greater than 0.
 		/// </summary>
 		internal int SizeInBytes { get; private set; }
 
@@ -161,6 +161,10 @@ namespace SafetySharp.Runtime.Serialization
 				Groups[i].PaddingBytes = remainder == 0 ? 0 : alignment - remainder;
 				SizeInBytes += Groups[i].PaddingBytes;
 			}
+
+			// We never generate 0-sized state vectors to avoid special casing
+			if (SizeInBytes <= 0)
+				SizeInBytes = 4;
 		}
 
 		/// <summary>

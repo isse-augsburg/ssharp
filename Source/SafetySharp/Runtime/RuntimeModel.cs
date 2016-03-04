@@ -42,6 +42,11 @@ namespace SafetySharp.Runtime
 		internal const string ConstructionStateName = "constructionState259C2EE0D9884B92989DF442BA268E8E";
 
 		/// <summary>
+		///   The <see cref="Runtime.ChoiceResolver" /> used by the model.
+		/// </summary>
+		private readonly ChoiceResolver _choiceResolver;
+
+		/// <summary>
 		///   Deserializes a state of the model.
 		/// </summary>
 		private readonly SerializationDelegate _deserialize;
@@ -104,7 +109,7 @@ namespace SafetySharp.Runtime
 			_stateHeaderBytes = stateHeaderBytes;
 
 			PortBinding.BindAll(objectTable);
-			ChoiceResolver = new ChoiceResolver(objectTable);
+			_choiceResolver = new ChoiceResolver(objectTable);
 
 			ConstructionState = new byte[StateVectorSize];
 			fixed (byte* state = ConstructionState)
@@ -113,11 +118,6 @@ namespace SafetySharp.Runtime
 			Requires.That(Faults.Length < 32, "More than 32 faults are not supported.");
 			Requires.That(StateFormulas.Length < 32, "More than 32 state formulas are not supported.");
 		}
-
-		/// <summary>
-		///   Gets the <see cref="Runtime.ChoiceResolver" /> used by the model.
-		/// </summary>
-		internal ChoiceResolver ChoiceResolver { get; }
 
 		/// <summary>
 		///   Gets the construction state of the model.
@@ -199,6 +199,16 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
+		///   Computes an initial state of the model.
+		/// </summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void ExecuteInitialStep()
+		{
+			foreach (var obj in _serializedObjects.OfType<IInitializable>())
+				obj.Initialize();
+		}
+
+		/// <summary>
 		///   Updates the state of the model by executing a single step.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -227,17 +237,14 @@ namespace SafetySharp.Runtime
 		/// <param name="transitions">The set the computed transitions should be stored in.</param>
 		internal void ComputeInitialStates(TransitionSet transitions)
 		{
-			ChoiceResolver.PrepareNextState();
+			_choiceResolver.PrepareNextState();
 
 			fixed (byte* state = ConstructionState)
 			{
-				while (ChoiceResolver.PrepareNextPath())
+				while (_choiceResolver.PrepareNextPath())
 				{
 					Deserialize(state);
-
-					foreach (var obj in _serializedObjects.OfType<IInitializable>())
-						obj.Initialize();
-
+					ExecuteInitialStep();
 					transitions.Add(this);
 				}
 			}
@@ -250,9 +257,9 @@ namespace SafetySharp.Runtime
 		/// <param name="sourceState">The source state the next states should be computed for.</param>
 		internal void ComputeSuccessorStates(TransitionSet transitions, byte* sourceState)
 		{
-			ChoiceResolver.PrepareNextState();
+			_choiceResolver.PrepareNextState();
 
-			while (ChoiceResolver.PrepareNextPath())
+			while (_choiceResolver.PrepareNextPath())
 			{
 				Deserialize(sourceState);
 				ExecuteStep();
@@ -273,25 +280,28 @@ namespace SafetySharp.Runtime
 			// We have to generate the replay info for all transitions
 			for (var i = 0; i < trace.Length - 1; ++i)
 			{
-				ChoiceResolver.Clear();
-				ChoiceResolver.PrepareNextState();
+				_choiceResolver.Clear();
+				_choiceResolver.PrepareNextState();
 
 				// Try all transitions until we find the one that leads to the desired state
-				while (ChoiceResolver.PrepareNextPath())
+				while (_choiceResolver.PrepareNextPath())
 				{
 					fixed (byte* sourceState = trace[i])
 						Deserialize(sourceState);
 
 					try
 					{
-						ExecuteStep();
+						if (i == 0)
+							ExecuteInitialStep();
+						else
+							ExecuteStep();
 					}
 					catch (Exception)
 					{
 						Requires.That(endsWithException, "Unexpected exception.");
 						Requires.That(i == trace.Length - 2, "Unexpected exception.");
 
-						info[i] = ChoiceResolver.GetChoices().ToArray();
+						info[i] = _choiceResolver.GetChoices().ToArray();
 						break;
 					}
 
@@ -305,11 +315,11 @@ namespace SafetySharp.Runtime
 					if (!areEqual)
 						continue;
 
-					info[i] = ChoiceResolver.GetChoices().ToArray();
+					info[i] = _choiceResolver.GetChoices().ToArray();
 					break;
 				}
 
-				Requires.That(info[i] != null, "Unable to generate replay information.");
+				Requires.That(info[i] != null, $"Unable to generate replay information for step {i} of {trace.Length}.");
 			}
 
 			return info;
@@ -321,16 +331,29 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="state">The serialized state that the replay starts from.</param>
 		/// <param name="replayInformation">The replay information required to compute the target state.</param>
-		internal void Replay(byte* state, int[] replayInformation)
+		/// <param name="initializationStep">Indicates whether the initialization step should be replayed.</param>
+		internal void Replay(byte* state, int[] replayInformation, bool initializationStep)
 		{
 			Requires.NotNull(replayInformation, nameof(replayInformation));
 
-			ChoiceResolver.Clear();
-			ChoiceResolver.PrepareNextState();
-			ChoiceResolver.SetChoices(replayInformation);
+			_choiceResolver.Clear();
+			_choiceResolver.PrepareNextState();
+			_choiceResolver.SetChoices(replayInformation);
 
 			Deserialize(state);
-			ExecuteStep();
+
+			if (initializationStep)
+				ExecuteInitialStep();
+			else
+				ExecuteStep();
+		}
+
+		/// <summary>
+		///   Gets the choices that were made to generate the last transitions.
+		/// </summary>
+		internal int[] GetLastChoices()
+		{
+			return _choiceResolver.GetChoices().ToArray();
 		}
 
 		/// <summary>
@@ -342,7 +365,7 @@ namespace SafetySharp.Runtime
 			if (!disposing)
 				return;
 
-			ChoiceResolver.SafeDispose();
+			_choiceResolver.SafeDispose();
 			Objects.OfType<IDisposable>().SafeDisposeAll();
 		}
 	}
