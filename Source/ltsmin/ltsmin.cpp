@@ -172,7 +172,8 @@ void LoadModel(model_t model, const char* modelFile)
 		GBchunkPut(model, boolType, chunk_str(LTSMIN_VALUE_BOOL_TRUE));
 		
 		// Set the initial state, the user context, and the callback functions
-		auto initialState = (int32_t*)Globals::Model->GetConstructionState();
+		pin_ptr<unsigned char> initialStatePtr = &Globals::Model->ConstructionState[0];
+		auto initialState = (int32_t*)initialStatePtr;
 		initialState[0] = 1;
 		GBsetInitialState(model, initialState);
 		GBsetNextStateLong(model, NextStatesCallback);
@@ -261,7 +262,8 @@ int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state)
 
 	try
 	{
-		return Globals::Model->CheckStateLabel((unsigned char*)state, label) ? 1 : 0;
+		Globals::Model->Deserialize((unsigned char*)state);
+		return Globals::Model->CheckStateFormula(label) ? 1 : 0;
 	}
 	catch (Exception^ e)
 	{

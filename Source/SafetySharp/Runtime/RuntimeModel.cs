@@ -47,11 +47,6 @@ namespace SafetySharp.Runtime
 		private readonly ChoiceResolver _choiceResolver;
 
 		/// <summary>
-		///   The construction state of the model.
-		/// </summary>
-		private readonly byte[] _constructionState;
-
-		/// <summary>
 		///   Deserializes a state of the model.
 		/// </summary>
 		private readonly SerializationDelegate _deserialize;
@@ -123,10 +118,15 @@ namespace SafetySharp.Runtime
 
 			PortBinding.BindAll(objectTable);
 
-			_constructionState = new byte[StateVectorSize];
-			fixed (byte* state = _constructionState)
+			ConstructionState = new byte[StateVectorSize];
+			fixed (byte* state = ConstructionState)
 				Serialize(state);
 		}
+
+		/// <summary>
+		///   Gets the construction state of the model.
+		/// </summary>
+		internal byte[] ConstructionState { get; }
 
 		/// <summary>
 		///   Gets the objects referenced by the model.
@@ -159,7 +159,7 @@ namespace SafetySharp.Runtime
 		public Component[] RootComponents { get; }
 
 		/// <summary>
-		///   Gets the faults contained in the model.
+		///   Gets the faults contained in the model that can be activated nondeterministically.
 		/// </summary>
 		public Fault[] Faults { get; }
 
@@ -193,7 +193,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		internal void Reset()
 		{
-			fixed (byte* state = _constructionState)
+			fixed (byte* state = ConstructionState)
 			{
 				Deserialize(state);
 
@@ -227,34 +227,6 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Checks whether the state formula identified by the zero-based <paramref name="formulaIndex" /> holds for the model's
-		///   <paramref name="serializedState" />.
-		/// </summary>
-		/// <param name="serializedState">The state of the model that should be used to check the formula.</param>
-		/// <param name="formulaIndex">The zero-based index of the formula that should be checked.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal bool CheckStateLabel(byte* serializedState, int formulaIndex)
-		{
-			Deserialize(serializedState);
-			return StateFormulas[formulaIndex].Expression();
-		}
-
-		/// <summary>
-		///   Gets the serialized construction state of the model if the model checker does not support multiple initial states.
-		///   The construction state is guaranteed to be different from all other model states.
-		/// </summary>
-		internal byte* GetConstructionState()
-		{
-			fixed (byte* state = _constructionState)
-				Deserialize(state);
-
-			_stateCache.Clear();
-			Serialize(_stateCache.Allocate());
-
-			return _stateCache.StateMemory;
-		}
-
-		/// <summary>
 		///   Computes the initial states of the model.
 		/// </summary>
 		internal StateCache ComputeInitialStates()
@@ -262,7 +234,7 @@ namespace SafetySharp.Runtime
 			_stateCache.Clear();
 			_choiceResolver.PrepareNextState();
 
-			fixed (byte* state = _constructionState)
+			fixed (byte* state = ConstructionState)
 			{
 				while (_choiceResolver.PrepareNextPath())
 				{
