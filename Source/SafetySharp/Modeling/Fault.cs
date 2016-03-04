@@ -88,7 +88,7 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Gets or sets the fault's forced occurrence kind.
+		///   Gets or sets the fault's forced activation kind.
 		/// </summary>
 		public Activation Activation
 		{
@@ -176,7 +176,7 @@ namespace SafetySharp.Modeling
 				_canUndoActivation = false;
 			else
 			{
-				switch (GetUpdatedActivationState())
+				switch (CheckActivation())
 				{
 					case Activation.Forced:
 						_isActivated = true;
@@ -212,8 +212,8 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Gets the updated activation state of the fault.
+		///   Checks whether the fault can be activated nondeterministically, or whether it has to be or cannot be activated.
 		/// </summary>
-		protected abstract Activation GetUpdatedActivationState();
+		protected abstract Activation CheckActivation();
 	}
 }

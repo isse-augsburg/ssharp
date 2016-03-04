@@ -23,14 +23,15 @@
 namespace SafetySharp.Modeling
 {
 	/// <summary>
-	///   Represents a persistent fault that, once active, remains active.
+	///   Represents a permanent fault that can be activated completely nondeterministically; once activated, it is always
+	///   activated when an activation is possible.
 	/// </summary>
-	public sealed class PersistentFault : Fault
+	public sealed class PermanentFault : Fault
 	{
 		/// <summary>
-		///   Gets the updated activation state of the fault.
+		///   Checks whether the fault can be activated nondeterministically, or whether it has to be or cannot be activated.
 		/// </summary>
-		protected override Activation GetUpdatedActivationState()
+		protected override Activation CheckActivation()
 		{
 			return IsActivated ? Activation.Forced : Activation.Nondeterministic;
 		}

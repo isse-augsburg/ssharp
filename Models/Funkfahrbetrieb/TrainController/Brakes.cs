@@ -26,7 +26,7 @@ namespace Funkfahrbetrieb.TrainController
 
 	public class Brakes : Component
 	{
-		public readonly Fault BrakesFailure = new PersistentFault();
+		public readonly Fault BrakesFailure = new PermanentFault();
 
 		[Range(Specification.Decelaration, 0, OverflowBehavior.Error)]
 		private int _acceleration;

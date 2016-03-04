@@ -60,7 +60,7 @@ namespace Tests.Serialization.Compaction
 			public bool B;
 
 			public readonly Fault F1 = new TransientFault();
-			public readonly Fault F2 = new PersistentFault();
+			public readonly Fault F2 = new PermanentFault();
 		}
 
 	}

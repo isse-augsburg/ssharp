@@ -84,7 +84,7 @@
     <Compile Include="Modeling\FaultEffectAttribute.cs" />
     <Compile Include="Modeling\StateMachine.cs" />
     <Compile Include="Modeling\NonSerializableAttribute.cs" />
-    <Compile Include="Modeling\PersistentFault.cs" />
+    <Compile Include="Modeling\PermanentFault.cs" />
     <Compile Include="Modeling\TransientFault.cs" />
     <Compile Include="Analysis\BinaryFormula.cs" />
     <Compile Include="Analysis\BinaryOperator.cs" />

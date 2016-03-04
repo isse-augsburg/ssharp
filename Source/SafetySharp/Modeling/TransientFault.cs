@@ -23,14 +23,14 @@
 namespace SafetySharp.Modeling
 {
 	/// <summary>
-	///   Represents a transient fault that can appear and disappear at any time.
+	///   Represents a transient fault that can be activated completely nondeterministically.
 	/// </summary>
 	public sealed class TransientFault : Fault
 	{
 		/// <summary>
-		///   Gets the updated activation state of the fault.
+		///   Checks whether the fault can be activated nondeterministically, or whether it has to be or cannot be activated.
 		/// </summary>
-		protected override Activation GetUpdatedActivationState()
+		protected override Activation CheckActivation()
 		{
 			return Activation.Nondeterministic;
 		}

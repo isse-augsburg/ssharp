@@ -436,7 +436,7 @@
     <Compile Include="Normalization\Partial\Unchanged\enum declaration.cs" />
     <Compile Include="Normalization\Partial\Unchanged\interface declarations.cs" />
     <Compile Include="Normalization\Partial\Unchanged\struct declarations.cs" />
-    <Compile Include="FaultActivation\Invariants\single persistent fault always activated.cs" />
+    <Compile Include="FaultActivation\Invariants\single permanent fault always activated.cs" />
     <Compile Include="FaultActivation\Invariants\single transient fault activated once.cs" />
     <Compile Include="FaultActivation\Invariants\single transient fault always activated.cs" />
     <Compile Include="FaultActivation\Invariants\without faults.cs" />

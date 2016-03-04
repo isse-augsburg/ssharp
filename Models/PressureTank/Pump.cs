@@ -32,7 +32,7 @@ namespace PressureTank
 		/// <summary>
 		///   The fault that prevents the pump from pumping.
 		/// </summary>
-		public readonly Fault SuppressPumping = new PersistentFault();
+		public readonly Fault SuppressPumping = new PermanentFault();
 
 		/// <summary>
 		///   Gets a value indicating whether the pump is currently enabled.

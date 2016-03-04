@@ -74,7 +74,7 @@ namespace Tests.Reflection.Models.Faults
 
 		private class C2 : Component
 		{
-			public readonly Fault F = new PersistentFault();
+			public readonly Fault F = new PermanentFault();
 
 			[FaultEffect(Fault = nameof(F))]
 			private class E : C2

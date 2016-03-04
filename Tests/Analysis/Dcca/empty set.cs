@@ -60,8 +60,8 @@ namespace Tests.Analysis.Dcca
 		private class C : Component
 		{
 			public readonly Fault F1 = new TransientFault();
-			public readonly Fault F2 = new PersistentFault();
-			public readonly Fault F3 = new PersistentFault();
+			public readonly Fault F2 = new PermanentFault();
+			public readonly Fault F3 = new PermanentFault();
 			public int X;
 
 			public override void Update()

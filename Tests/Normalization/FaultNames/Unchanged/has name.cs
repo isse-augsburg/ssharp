@@ -29,7 +29,7 @@ namespace Tests.Normalization.FaultNames.Unchanged
 		public int X;
 		public int Y;
 
-		protected override Activation GetUpdatedActivationState()
+		protected override Activation CheckActivation()
 		{
 			return Activation.Suppressed;
 		}
