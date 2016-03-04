@@ -35,6 +35,12 @@ namespace Tests.Execution.StateMachines
 
 			var sm2 = new StateMachine<E>(E.A, E.B, E.C);
 			sm2.InitialStates.ShouldBe(new[] { E.A, E.B, E.C });
+
+			StateMachine<int> sm3 = new[] { 17, 18 };
+			sm3.InitialStates.ShouldBe(new[] { 17, 18 });
+
+			StateMachine<E> sm4 = new[] { E.A, E.B, E.C };
+			sm4.InitialStates.ShouldBe(new[] { E.A, E.B, E.C });
 		}
 
 		private enum E

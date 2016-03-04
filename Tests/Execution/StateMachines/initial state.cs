@@ -38,6 +38,15 @@ namespace Tests.Execution.StateMachines
 
 			var sm3 = new StateMachine<E>(E.B);
 			(sm3 == E.B).ShouldBe(true);
+
+			StateMachine<int> sm4 = 17;
+			(sm4 == 17).ShouldBe(true);
+
+			StateMachine<E> sm5 = E.A;
+			(sm5 == E.A).ShouldBe(true);
+
+			StateMachine<E> sm6 = E.B;
+			(sm6 == E.B).ShouldBe(true);
 		}
 
 		private enum E

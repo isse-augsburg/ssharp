@@ -26,7 +26,7 @@ namespace Funkfahrbetrieb.TrainController
 
 	public class TrainControl : Component
 	{
-		private readonly StateMachine<State> _stateMachine = new StateMachine<State>(State.Approaching);
+		private readonly StateMachine<State> _stateMachine = State.Approaching;
 
 		[Hidden]
 		public Brakes Brakes;

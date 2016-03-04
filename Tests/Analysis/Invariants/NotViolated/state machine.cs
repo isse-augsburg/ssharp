@@ -35,7 +35,7 @@ namespace Tests.Analysis.Invariants.NotViolated
 
 		private class D : Component
 		{
-			public readonly StateMachine<S> StateMachine = new StateMachine<S>(S.A);
+			public readonly StateMachine<S> StateMachine = S.A;
 
 			public override void Update()
 			{

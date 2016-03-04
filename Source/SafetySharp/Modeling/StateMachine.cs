@@ -78,6 +78,24 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
+		///   Initializes a new instance starting in the <paramref name="initialState" />
+		/// </summary>
+		/// <param name="initialState">The state machine's initial state.</param>
+		public static implicit operator StateMachine<TState>(TState initialState)
+		{
+			return new StateMachine<TState>(initialState);
+		}
+
+		/// <summary>
+		///   Initializes a new instance starting in one of the <paramref name="initialStates" />
+		/// </summary>
+		/// <param name="initialStates">The state machine's initial states.</param>
+		public static implicit operator StateMachine<TState>(TState[] initialStates)
+		{
+			return new StateMachine<TState>(initialStates);
+		}
+
+		/// <summary>
 		///   Transitions the state machine to the target state executing the <paramref name="action" />, provided that the state
 		///   machine is in the source state and the <paramref name="guard" /> holds.
 		/// </summary>
