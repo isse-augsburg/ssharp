@@ -42,6 +42,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis\AnalysisConfiguration.cs" />
     <Compile Include="Analysis\AnalysisException.cs" />
     <Compile Include="Analysis\AnalysisResult.cs" />
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
@@ -69,7 +70,7 @@
     <Compile Include="Analysis\CounterExample.cs" />
     <Compile Include="Modeling\Activation.cs" />
     <Compile Include="Modeling\Range.cs" />
-    <Compile Include="Runtime\InvariantChecker.cs" />
+    <Compile Include="Analysis\InvariantChecker.cs" />
     <Compile Include="Runtime\RangeViolationException.cs" />
     <Compile Include="Runtime\RealTimeSimulator.cs" />
     <Compile Include="Runtime\Reflection\ComponentExtensions.cs" />

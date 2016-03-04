@@ -83,7 +83,7 @@ namespace Tests
 
 			var ssharpChecker = modelChecker as SSharpChecker;
 			if (ssharpChecker != null)
-				ssharpChecker.StateCapacity = 1 << 16;
+				ssharpChecker.Configuration.StateCapacity = 1 << 16;
 
 			return modelChecker;
 		}

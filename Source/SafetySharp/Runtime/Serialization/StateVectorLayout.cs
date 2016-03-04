@@ -76,11 +76,6 @@ namespace SafetySharp.Runtime.Serialization
 		public int SlotCount => _slots.Count;
 
 		/// <summary>
-		///   Gets the number of bytes at the beginning of the state vector that are used to store fault activation states.
-		/// </summary>
-		public int FaultBytes { get; private set; }
-
-		/// <summary>
 		///   Gets the metadata of the data stored at the <paramref name="index" />.
 		/// </summary>
 		/// <param name="index">The zero-based index the slot metadata should be returned for.</param>
@@ -141,7 +136,6 @@ namespace SafetySharp.Runtime.Serialization
 
 			// Organize all slots with the same element size into groups
 			Groups = _slots
-				.Where(slot => !slot.IsFaultActivationField)
 				.GroupBy(slot => slot.ElementSizeInBits)
 				.OrderBy(group => group.Key)
 				.Select(group => new CompactedStateGroup
@@ -153,12 +147,6 @@ namespace SafetySharp.Runtime.Serialization
 						.ToArray()
 				})
 				.ToArray();
-
-			// Fault activation states always occupy the first bytes
-			var faultSlots = _slots.Where(slot => slot.IsFaultActivationField).ToArray();
-			FaultBytes = faultSlots.Length / 8 + (faultSlots.Length % 8 == 0 ? 0 : 1);
-			if (faultSlots.Length > 0)
-				Groups = new[] { new CompactedStateGroup { Slots = faultSlots } }.Concat(Groups).ToArray();
 
 			// Compute the total state vector size and ensure alignment of the individual groups
 			// Ensure that the state vector size is a multiple of 4 for correct alignment in state vector arrays

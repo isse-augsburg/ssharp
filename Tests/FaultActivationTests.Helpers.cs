@@ -26,7 +26,6 @@ namespace Tests
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 	using Utilities;
@@ -42,7 +41,12 @@ namespace Tests
 		protected void GenerateStateSpace(params IComponent[] components)
 		{
 			var serializedModel = RuntimeModelSerializer.Save(new Model(components), new StateFormula(() => true));
-			var checker = new InvariantChecker(() => RuntimeModelSerializer.Load(serializedModel), s => Output.Log("{0}", s), 10000, 10000, 1, true);
+			var configuration = AnalysisConfiguration.Default;
+			configuration.StateCapacity = 10000;
+			configuration.StackCapacity = 10000;
+			configuration.CpuCount = 1;
+
+			var checker = new InvariantChecker(() => RuntimeModelSerializer.Load(serializedModel), s => Output.Log("{0}", s), configuration);
 			_result = checker.Check();
 			CounterExample.ShouldBe(null);
 		}

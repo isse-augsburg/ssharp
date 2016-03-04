@@ -34,29 +34,9 @@ namespace SafetySharp.Analysis
 	public class SSharpChecker : ModelChecker
 	{
 		/// <summary>
-		///   The default capacity used for state storage.
+		///   The model checker's configuration that determines certain model checker settings.
 		/// </summary>
-		public const int DefaultStateCapacity = 1 << 26;
-
-		/// <summary>
-		///   The default capacity used for the state stack during model checking.
-		/// </summary>
-		public const int DefaultStackCapacity = 1 << 16;
-
-		/// <summary>
-		///   Gets or sets the number of states that can be stored during model checking.
-		/// </summary>
-		public int StateCapacity { get; set; } = DefaultStateCapacity;
-
-		/// <summary>
-		///   Gets or sets the number of states that can be stored on the stack during model checking.
-		/// </summary>
-		public int StackCapacity { get; set; } = DefaultStackCapacity;
-
-		/// <summary>
-		///   Gets or sets the number of CPUs that are used for model checking. The value is clamped to the interval of [1, #CPUs].
-		/// </summary>
-		public int CpuCount { get; set; } = Int32.MaxValue;
+		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
 
 		/// <summary>
 		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
@@ -64,13 +44,11 @@ namespace SafetySharp.Analysis
 		internal AnalysisResult CheckInvariant(Func<RuntimeModel> createModel)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
-			Requires.That(StateCapacity > 1024, $"{nameof(StateCapacity)} must be at least 1024.");
-			Requires.That(StackCapacity > 1024, $"{nameof(StackCapacity)} must be at least 1024.");
 
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			using (var checker = new InvariantChecker(createModel, Output, StateCapacity, StackCapacity, CpuCount, enableFaultOptimization: false))
+			using (var checker = new InvariantChecker(createModel, Output, Configuration))
 			{
 				var result = default(AnalysisResult);
 				var initializationTime = stopwatch.Elapsed;

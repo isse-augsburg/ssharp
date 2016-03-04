@@ -86,12 +86,6 @@ namespace SafetySharp.Runtime.Serialization
 		public int TotalSizeInBits => ElementSizeInBits * ElementCount;
 
 		/// <summary>
-		///   Gets a value indicating whether the slot stores the <see cref="Fault._isActivated" /> field of a <see cref="Fault" />
-		///   instance.
-		/// </summary>
-		internal bool IsFaultActivationField => Field != null && Field.DeclaringType == typeof(Fault) && Field.Name == "_isActivated";
-
-		/// <summary>
 		///   Gets the size in bits required to store each individual element in the state vector.
 		/// </summary>
 		public int ElementSizeInBits

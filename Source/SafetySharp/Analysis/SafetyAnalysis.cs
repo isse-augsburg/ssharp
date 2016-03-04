@@ -59,30 +59,12 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Gets or sets the number of states that can be stored during model checking.
+		///   Gets or sets the model checker's configuration.
 		/// </summary>
-		public int StateCapacity
+		public AnalysisConfiguration Configuration
 		{
-			get { return _modelChecker.StateCapacity; }
-			set { _modelChecker.StateCapacity = value; }
-		}
-
-		/// <summary>
-		///   Gets or sets the number of states that can be stored on the stack during model checking.
-		/// </summary>
-		public int StackCapacity
-		{
-			get { return _modelChecker.StackCapacity; }
-			set { _modelChecker.StackCapacity = value; }
-		}
-
-		/// <summary>
-		///   Gets or sets the number of CPUs that are used for model checking. The value is clamped to the interval of [1, #CPUs].
-		/// </summary>
-		public int CpuCount
-		{
-			get { return _modelChecker.CpuCount; }
-			set { _modelChecker.CpuCount = value; }
+			get { return _modelChecker.Configuration; }
+			set { _modelChecker.Configuration = value; }
 		}
 
 		/// <summary>
@@ -510,7 +492,7 @@ namespace SafetySharp.Analysis
 					{
 						builder.AppendLine();
 						builder.AppendFormat(
-							"    An unhandled exception of type {0} was thrown while checking the fault set: {1}.", 
+							"    An unhandled exception of type {0} was thrown while checking the fault set: {1}.",
 							e.GetType().FullName, e.Message);
 					}
 

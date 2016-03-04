@@ -20,16 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Collections.Concurrent;
 	using System.Runtime.InteropServices;
 	using System.Threading;
 	using System.Threading.Tasks;
-	using Analysis;
-	using Analysis.FormulaVisitors;
-	using Serialization;
+	using FormulaVisitors;
+	using Runtime;
+	using Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -56,33 +56,27 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="createModel">Creates model that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
-		/// <param name="stateCapacity">The number of states that can be stored.</param>
-		/// <param name="stackCapacity">The maximum number of states that can be stored on the depth first search stack.</param>
-		/// <param name="cpuCount">The number of CPUs that should be used.</param>
-		/// <param name="enableFaultOptimization">Indicates whether S#'s fault optimization technique should be used.</param>
-		internal InvariantChecker(Func<RuntimeModel> createModel, Action<string> output, int stateCapacity, int stackCapacity, int cpuCount,
-								  bool enableFaultOptimization)
+		/// <param name="configuration">The analysis configuration that should be used.</param>
+		internal InvariantChecker(Func<RuntimeModel> createModel, Action<string> output, AnalysisConfiguration configuration)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(output, nameof(output));
 
-			cpuCount = Math.Min(Environment.ProcessorCount, Math.Max(1, cpuCount));
-
 			_output = output;
-			_workers = new Worker[cpuCount];
-			_threads = new Thread[cpuCount];
+			_workers = new Worker[configuration.CpuCount];
+			_threads = new Thread[configuration.CpuCount];
 
-			var tasks = new Task[cpuCount];
-			var stacks = new StateStack[cpuCount];
+			var tasks = new Task[configuration.CpuCount];
+			var stacks = new StateStack[configuration.CpuCount];
 
 			_loadBalancer = new LoadBalancer(stacks);
 
-			for (var i = 0; i < cpuCount; ++i)
+			for (var i = 0; i < configuration.CpuCount; ++i)
 			{
 				var index = i;
 				tasks[i] = Task.Factory.StartNew(() =>
 				{
-					stacks[index] = new StateStack(stackCapacity);
+					stacks[index] = new StateStack(configuration.StackCapacity);
 					_workers[index] = new Worker(index, this, stacks[index], createModel());
 					_threads[index] = new Thread(_workers[index].Check) { IsBackground = true, Name = $"Worker {index}" };
 				});
@@ -90,7 +84,7 @@ namespace SafetySharp.Runtime
 
 			Task.WaitAll(tasks);
 
-			_states = new StateStorage(_workers[0].StateVectorLayout, stateCapacity, enableFaultOptimization);
+			_states = new StateStorage(_workers[0].StateVectorLayout, configuration.StateCapacity);
 
 #if false
 			Console.WriteLine(_model.StateVectorLayout);
