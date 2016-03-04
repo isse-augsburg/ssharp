@@ -20,21 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace HemodialysisMachine.Tests
 {
+	using System;
+	using System.Linq;
 	using Model;
 	using NUnit.Framework;
-	using SafetySharp.Runtime;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Reflection;
-	using Utilities;
 
 	public class SpecificationTests
 	{
@@ -47,6 +42,7 @@ namespace HemodialysisMachine.Tests
 
 			var flowCombinatorAfterStep = (DialyzingFluidFlowCombinator)simulator.Model.RootComponents[0];
 		}
+
 		[Test]
 		public void Simulate_10_Step()
 		{
@@ -90,8 +86,6 @@ namespace HemodialysisMachine.Tests
 			simulator.SimulateStep();
 		}
 
-
-
 		[Test]
 		public void Simulate_10_Step_HeaterAndPumpToBalanceChamberDefect()
 		{
@@ -122,20 +116,19 @@ namespace HemodialysisMachine.Tests
 		public void IncomingBloodIsContaminated_ModelChecking()
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification)) {StateCapacity = 1310720 };
-			
+			var analysis = new SafetyAnalysis(Model.Create(specification)) { Configuration = { StateCapacity = 1310720 } };
+
 			var result = analysis.ComputeMinimalCriticalSets(specification.IncomingBloodNotOk);
 			result.SaveCounterExamples("counter examples/hdmachine");
 
-			Console.WriteLine(result);	
+			Console.WriteLine(result);
 		}
-
 
 		[Test]
 		public void DialysisFinishedAndBloodNotCleaned_ModelChecking()
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification)) { StateCapacity = 1310720 };
+			var analysis = new SafetyAnalysis(Model.Create(specification)) { Configuration = { StateCapacity = 1310720 } };
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.BloodNotCleanedAndDialyzingFinished);
 			result.SaveCounterExamples("counter examples/hdmachine");
@@ -153,9 +146,8 @@ namespace HemodialysisMachine.Tests
 			for (var i = 0; i < faults.Length; ++i)
 				faults[i].Activation = Activation.Nondeterministic;
 
-			var checker = new SSharpChecker { StateCapacity = 1310720};
+			var checker = new SSharpChecker { Configuration = { StateCapacity = 1310720 } };
 			checker.CheckInvariant(model, true);
-			
 		}
 	}
 }

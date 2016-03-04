@@ -59,13 +59,9 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Gets or sets the model checker's configuration.
+		///   The model checker's configuration that determines certain model checker settings.
 		/// </summary>
-		public AnalysisConfiguration Configuration
-		{
-			get { return _modelChecker.Configuration; }
-			set { _modelChecker.Configuration = value; }
-		}
+		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
 
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
@@ -83,6 +79,8 @@ namespace SafetySharp.Analysis
 		public Result ComputeMinimalCriticalSets(Formula hazard)
 		{
 			Requires.NotNull(hazard, nameof(hazard));
+
+			_modelChecker.Configuration = Configuration;
 
 			var faults = _model.GetFaults();
 			Requires.That(faults.Length < 32, "More than 31 faults are currently not supported.");

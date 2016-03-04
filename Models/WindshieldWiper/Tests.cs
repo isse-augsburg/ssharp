@@ -54,7 +54,7 @@ namespace Wiper
 			var specification = new Specification(null);
 			var model = SafetySharpModel.Create(specification);
 
-			var checker = new SSharpChecker() { CpuCount = 4 };
+			var checker = new SSharpChecker();
 			checker.CheckInvariant(model, true);
 		}
 	}

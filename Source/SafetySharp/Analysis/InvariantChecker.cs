@@ -77,7 +77,7 @@ namespace SafetySharp.Analysis
 				tasks[i] = Task.Factory.StartNew(() =>
 				{
 					stacks[index] = new StateStack(configuration.StackCapacity);
-					_workers[index] = new Worker(index, this, stacks[index], createModel());
+					_workers[index] = new Worker(index, this, stacks[index], createModel(), configuration.SuccessorCapacity);
 					_threads[index] = new Thread(_workers[index].Check) { IsBackground = true, Name = $"Worker {index}" };
 				});
 			}
@@ -166,20 +166,21 @@ namespace SafetySharp.Analysis
 			private readonly Func<bool> _invariant;
 			private readonly RuntimeModel _model;
 			private readonly StateStack _stateStack;
+			private readonly TransitionSet _transitions;
 			private StateStorage _states;
 
 			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
-			public Worker(int index, InvariantChecker context, StateStack stateStack, RuntimeModel model)
+			public Worker(int index, InvariantChecker context, StateStack stateStack, RuntimeModel model, int successorCapacity)
 			{
 				_index = index;
 
 				_context = context;
-				_states = _context._states;
 				_model = model;
 				_invariant = CompilationVisitor.Compile(_model.Formulas[0]);
 				_stateStack = stateStack;
+				_transitions = new TransitionSet(model, successorCapacity);
 			}
 
 			/// <summary>
@@ -193,7 +194,9 @@ namespace SafetySharp.Analysis
 			public void ComputeInitialStates()
 			{
 				_states = _context._states;
-				AddStates(_model.ComputeInitialStates());
+				_model.ComputeInitialStates(_transitions);
+
+				AddStates();
 			}
 
 			/// <summary>
@@ -211,7 +214,8 @@ namespace SafetySharp.Analysis
 						if (!_stateStack.TryGetState(out state))
 							continue;
 
-						AddStates(_model.ComputeSuccessorStates(_states[state]));
+						_model.ComputeSuccessorStates(_transitions, _states[state]);
+						AddStates();
 
 						InterlockedExchangeIfGreaterThan(ref _context._levelCount, _stateStack.FrameCount, _stateStack.FrameCount);
 						if (InterlockedExchangeIfGreaterThan(ref _context._nextReport, _context._stateCount, _context._nextReport + ReportStateCountDelta))
@@ -228,20 +232,22 @@ namespace SafetySharp.Analysis
 			}
 
 			/// <summary>
-			///   Adds the states stored in the <paramref name="stateCache" />.
+			///   Adds the states stored in the <see cref="_transitions" /> cache.
 			/// </summary>
-			private void AddStates(StateCache stateCache)
+			private void AddStates()
 			{
-				if (stateCache.StateCount == 0)
+				if (_transitions.Count == 0)
 					throw new InvalidOperationException("Deadlock detected.");
 
-				Interlocked.Add(ref _context._transitionCount, stateCache.StateCount);
+				Interlocked.Add(ref _context._transitionCount, _transitions.Count);
 				_stateStack.PushFrame();
 
-				for (var i = 0; i < stateCache.StateCount; ++i)
+				for (var i =0 ; i < _transitions.Count; ++i)
 				{
+					var transition = _transitions[i];
+
 					int index;
-					if (!_states.AddState(stateCache.StateMemory + i * stateCache.StateVectorSize, out index))
+					if (!_states.AddState(transition->State, out index))
 						continue;
 
 					Interlocked.Increment(ref _context._stateCount);
@@ -249,7 +255,7 @@ namespace SafetySharp.Analysis
 
 					// Deserialize the state in order to check the invariant; this seems inefficient, but
 					// other alternatives do not seem to perform any better
-					_model.Deserialize(stateCache.StateMemory + i * stateCache.StateVectorSize);
+					_model.Deserialize(transition->State);
 					if (!_invariant())
 					{
 						_context._loadBalancer.Terminate();

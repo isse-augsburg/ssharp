@@ -94,6 +94,7 @@ matrix_t StateLabelMatrix;
 ref struct Globals
 {
 	static RuntimeModel^ Model;
+	static TransitionSet^ Transitions;
 };
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -112,6 +113,7 @@ void LoadModel(model_t model, const char* modelFile)
 	{
 		auto modelData = RuntimeModelSerializer::LoadSerializedData(gcnew MemoryStream(File::ReadAllBytes(gcnew String(modelFile))));
 		Globals::Model = gcnew RuntimeModel(modelData, sizeof(int32_t));
+		Globals::Transitions = gcnew TransitionSet(Globals::Model, 1 << 16);
 
 #if false
 		Console::WriteLine(Globals::Model->StateVectorLayout);
@@ -226,23 +228,22 @@ int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, Transit
 
 	try
 	{
-		auto stateCache = IsConstructionState(state)
-			? Globals::Model->ComputeInitialStates()
-			: Globals::Model->ComputeSuccessorStates((unsigned char*)state);
+		Globals::Transitions->Clear();
 
-		auto stateCount = stateCache->StateCount;
-		auto slotCount = stateCache->StateVectorSize / sizeof(int32_t);
-		auto stateMemory = (int32_t*)stateCache->StateMemory;
-	
+		if (IsConstructionState(state))
+			Globals::Model->ComputeInitialStates(Globals::Transitions);
+		else
+			Globals::Model->ComputeSuccessorStates(Globals::Transitions, (unsigned char*)state);
+
 		transition_info info = { nullptr, 0, 0 };
-		for (auto i = 0; i < stateCount; ++i)
+		for (auto i = 0; i < Globals::Transitions->Count; ++i)
 		{
+			auto stateMemory = (int32_t*)Globals::Transitions[i]->State;
 			stateMemory[0] = 0;
 			callback(context, &info, stateMemory, nullptr);
-			stateMemory += slotCount;
 		}
 
-		return stateCount;
+		return Globals::Transitions->Count;
 	}
 	catch (Exception^ e)
 	{

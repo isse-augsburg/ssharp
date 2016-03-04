@@ -48,7 +48,7 @@ namespace SafetySharp.Analysis
 			CpuCount = Int32.MaxValue,
 			StackCapacity = DefaultStackCapacity,
 			StateCapacity = DefaultStateCapacity,
-			SuccessorStateCapacity = DefaultSuccessorStateCapacity
+			SuccessorCapacity = DefaultSuccessorStateCapacity
 		};
 
 		/// <summary>
@@ -78,14 +78,14 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Gets or sets the number of successor states that can be stored for each state.
+		///   Gets or sets the number of successor states that can be computed for each state.
 		/// </summary>
-		public int SuccessorStateCapacity
+		public int SuccessorCapacity
 		{
 			get { return Math.Max(_successorStateCapacity, MinCapacity); }
 			set
 			{
-				Requires.That(value >= MinCapacity, $"{nameof(SuccessorStateCapacity)} must be at least {MinCapacity}.");
+				Requires.That(value >= MinCapacity, $"{nameof(SuccessorCapacity)} must be at least {MinCapacity}.");
 				_successorStateCapacity = value;
 			}
 		}

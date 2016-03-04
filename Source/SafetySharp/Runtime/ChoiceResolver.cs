@@ -160,6 +160,8 @@ namespace SafetySharp.Runtime
 		/// <param name="choices">The choices that should be made.</param>
 		internal void SetChoices(int[] choices)
 		{
+			Requires.NotNull(choices, nameof(choices));
+
 			foreach (var choice in choices)
 			{
 				_chosenValues.Push(choice);

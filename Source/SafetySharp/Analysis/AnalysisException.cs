@@ -40,13 +40,11 @@ namespace SafetySharp.Analysis
 				   $"thrown during model checking: {exception.Message}.", exception)
 		{
 			Requires.NotNull(exception, nameof(exception));
-			Requires.NotNull(counterExample, nameof(counterExample));
-
 			CounterExample = counterExample;
 		}
 
 		/// <summary>
-		///   Gets the path through the model that leads to the <see cref="Exception.InnerException" /> being thrown.
+		///   Gets the path through the model that leads to the <see cref="Exception.InnerException" /> being thrown, if any.
 		/// </summary>
 		public CounterExample CounterExample { get; }
 	}
