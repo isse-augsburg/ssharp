@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Runtime
 {
+	using System;
 	using System.Runtime.CompilerServices;
 	using Utilities;
 
@@ -30,24 +31,28 @@ namespace SafetySharp.Runtime
 	/// </summary>
 	internal sealed unsafe class TransitionSet : DisposableObject
 	{
+		private readonly Func<bool>[] _formulas;
 		private readonly MemoryBuffer _stateBuffer = new MemoryBuffer();
 		private readonly byte* _stateMemory;
 		private readonly int _stateVectorSize;
 		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
-		private readonly TransitionInfo* _transitions;
+		private readonly Transition* _transitions;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="model">The model the successors are computed for.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
-		public TransitionSet(RuntimeModel model, int capacity)
+		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
+		public TransitionSet(RuntimeModel model, int capacity, params Func<bool>[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(formulas, nameof(formulas));
 
 			_stateVectorSize = model.StateVectorSize;
-			_transitionBuffer.Resize(capacity * sizeof(TransitionInfo), zeroMemory: false);
-			_transitions = (TransitionInfo*)_transitionBuffer.Pointer;
+			_formulas = formulas;
+			_transitionBuffer.Resize(capacity * sizeof(Transition), zeroMemory: false);
+			_transitions = (Transition*)_transitionBuffer.Pointer;
 			_stateBuffer.Resize(capacity * model.StateVectorSize, zeroMemory: true);
 			_stateMemory = _stateBuffer.Pointer;
 		}
@@ -58,14 +63,9 @@ namespace SafetySharp.Runtime
 		public int Count { get; private set; }
 
 		/// <summary>
-		///   Gets the first byte of the next state that can be stored.
-		/// </summary>
-		private byte* NextState => _stateMemory + _stateVectorSize * Count;
-
-		/// <summary>
 		///   Gets the transition stored at the <paramref name="index" />.
 		/// </summary>
-		public TransitionInfo* this[int index] => &_transitions[index];
+		public Transition* this[int index] => &_transitions[index];
 
 		/// <summary>
 		///   Adds a transition to the <paramref name="model" />'s current state.
@@ -75,7 +75,8 @@ namespace SafetySharp.Runtime
 		{
 			// 1. Serialize the model's computed state; that is the successor state of the transition's source state
 			//    modulo any changes resulting from notifications of fault activations
-			var successorState = NextState;
+			var successorState = _stateMemory + _stateVectorSize * Count;
+			var activatedFaults = GetActivatedFaults(model);
 			model.Serialize(successorState);
 
 			// 2. Determine whether there already is a transition to the successor state
@@ -89,8 +90,17 @@ namespace SafetySharp.Runtime
 
 			// execute activation notifications, serialize state again, and store state
 
+			// 3. Execute fault activation notifications, serialize the updated state if necessary, and store the transition
+			if (model.NotifyFaultActivations())
+				model.Serialize(successorState);
 
-			_transitions[Count] = new TransitionInfo { State = successorState };
+			_transitions[Count] = new Transition
+			{
+				TargetState = successorState,
+				ActivatedFaults = activatedFaults,
+				Formulas = EvaluateFormulas()
+			};
+
 			++Count;
 		}
 
@@ -102,6 +112,34 @@ namespace SafetySharp.Runtime
 		{
 			// TODO: clear fault info hash table
 			Count = 0;
+		}
+
+		/// <summary>
+		///   Gets the faults that were activated by the transition. The returned bit mask has a bit n set if fault n
+		///   was activated.
+		/// </summary>
+		private static int GetActivatedFaults(RuntimeModel model)
+		{
+			var faults = model.Faults;
+			var mask = 0;
+
+			for (var i = 0; i < faults.Length; ++i)
+				mask |= faults[i].IsActivated ? 1 << i : 0;
+
+			return mask;
+		}
+
+		/// <summary>
+		///   Evaluates all of the model's state formulas. The returned bit mask has a bit n set if formula n holds.
+		/// </summary>
+		private int EvaluateFormulas()
+		{
+			var mask = 0;
+
+			for (var i = 0; i < _formulas.Length; ++i)
+				mask |= _formulas[i]() ? 1 << i : 0;
+
+			return mask;
 		}
 
 		/// <summary>
@@ -120,17 +158,17 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Represents a transition.
 		/// </summary>
-		internal struct TransitionInfo
+		internal struct Transition
 		{
 			/// <summary>
 			///   The transition's target state.
 			/// </summary>
-			public byte* State;
+			public byte* TargetState;
 
 			/// <summary>
 			///   The faults activated by the transition.
 			/// </summary>
-			public int Faults;
+			public int ActivatedFaults;
 
 			/// <summary>
 			///   The state formulas holding in the target state.

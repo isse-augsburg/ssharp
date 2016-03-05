@@ -163,7 +163,6 @@ namespace SafetySharp.Analysis
 		{
 			private readonly InvariantChecker _context;
 			private readonly int _index;
-			private readonly Func<bool> _invariant;
 			private readonly RuntimeModel _model;
 			private readonly StateStack _stateStack;
 			private readonly TransitionSet _transitions;
@@ -178,9 +177,10 @@ namespace SafetySharp.Analysis
 
 				_context = context;
 				_model = model;
-				_invariant = CompilationVisitor.Compile(_model.Formulas[0]);
 				_stateStack = stateStack;
-				_transitions = new TransitionSet(model, successorCapacity);
+
+				var invariant = CompilationVisitor.Compile(_model.Formulas[0]);
+				_transitions = new TransitionSet(model, successorCapacity, invariant);
 			}
 
 			/// <summary>
@@ -226,6 +226,7 @@ namespace SafetySharp.Analysis
 						if (!_stateStack.TryGetState(out state))
 							continue;
 
+						_transitions.Clear();
 						_model.ComputeSuccessorStates(_transitions, _states[state]);
 						AddStates();
 
@@ -259,16 +260,13 @@ namespace SafetySharp.Analysis
 					var transition = _transitions[i];
 
 					int index;
-					if (!_states.AddState(transition->State, out index))
+					if (!_states.AddState(transition->TargetState, out index))
 						continue;
 
 					Interlocked.Increment(ref _context._stateCount);
 					_stateStack.PushState(index);
 
-					// Deserialize the state in order to check the invariant; this seems inefficient, but
-					// other alternatives do not seem to perform any better
-					_model.Deserialize(transition->State);
-					if (!_invariant())
+					if (transition->Formulas == 0)
 					{
 						_context._loadBalancer.Terminate();
 						CreateCounterExample(endsWithException: false);

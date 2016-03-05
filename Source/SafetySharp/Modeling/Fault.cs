@@ -36,6 +36,9 @@ namespace SafetySharp.Modeling
 		private readonly Choice _choice = new Choice();
 
 		[Hidden]
+		private readonly bool _requiresActivationNotification;
+
+		[Hidden]
 		private Activation _activation = Activation.Nondeterministic;
 
 		[NonSerializable]
@@ -50,6 +53,7 @@ namespace SafetySharp.Modeling
 		[Hidden]
 		private int _identifier;
 
+		[Hidden]
 		private bool _isActivated;
 
 		[NonSerializable]
@@ -58,9 +62,16 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		internal Fault()
+		/// <param name="requiresActivationNotification">Indicates whether the fault must be notified about its activation.</param>
+		internal Fault(bool requiresActivationNotification)
 		{
+			_requiresActivationNotification = requiresActivationNotification;
 		}
+
+		/// <summary>
+		///   Gets a value indicating whether the fault must be notified about its activation.
+		/// </summary>
+		internal bool RequiresActivationNotification => _requiresActivationNotification;
 
 		/// <summary>
 		///   Gets or sets an identifier for the fault.
@@ -115,7 +126,7 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Adds a fault effect for the <paramref name="component" /> that is enabled while the fault is activated.
+		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault is activated.
 		/// </summary>
 		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
 		/// <param name="component">The component the fault effect is added for.</param>
@@ -126,7 +137,7 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Adds a fault effect for the <paramref name="component" /> that is enabled while the fault is activated.
+		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault is activated.
 		/// </summary>
 		/// <param name="component">The component the fault effect is added for.</param>
 		/// <param name="faultEffectType">The type of the fault effect that should be added.</param>
@@ -209,6 +220,14 @@ namespace SafetySharp.Modeling
 
 			_activationIsUnknown = true;
 			_canUndoActivation = false;
+			_isActivated = false;
+		}
+
+		/// <summary>
+		///   Invoked when the fault was activated.
+		/// </summary>
+		internal virtual void OnActivated()
+		{
 		}
 
 		/// <summary>

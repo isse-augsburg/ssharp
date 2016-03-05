@@ -28,12 +28,30 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	public sealed class PermanentFault : Fault
 	{
+		private bool _isActive;
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		public PermanentFault()
+			: base(requiresActivationNotification: true)
+		{
+		}
+
 		/// <summary>
 		///   Checks whether the fault can be activated nondeterministically, or whether it has to be or cannot be activated.
 		/// </summary>
 		protected override Activation CheckActivation()
 		{
-			return IsActivated ? Activation.Forced : Activation.Nondeterministic;
+			return _isActive ? Activation.Forced : Activation.Nondeterministic;
+		}
+
+		/// <summary>
+		///   Invoked when the fault was activated.
+		/// </summary>
+		internal override void OnActivated()
+		{
+			_isActive = true;
 		}
 	}
 }

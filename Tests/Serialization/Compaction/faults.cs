@@ -39,11 +39,10 @@ namespace Tests.Serialization.Compaction
 
 			StateVectorLayout.Groups[0].ElementSizeInBits.ShouldBe(1);
 			StateVectorLayout.Groups[0].OffsetInBytes.ShouldBe(0);
-			StateVectorLayout.Groups[0].Slots.Length.ShouldBe(3);
-			StateVectorLayout.Groups[0].Slots[1].Object.ShouldBe(c.F1);
-			StateVectorLayout.Groups[0].Slots[1].Field.ShouldBe(typeof(Fault).GetField("_isActivated", BindingFlags.Instance | BindingFlags.NonPublic));
-			StateVectorLayout.Groups[0].Slots[2].Object.ShouldBe(c.F2);
-			StateVectorLayout.Groups[0].Slots[2].Field.ShouldBe(typeof(Fault).GetField("_isActivated", BindingFlags.Instance | BindingFlags.NonPublic));
+			StateVectorLayout.Groups[0].Slots.Length.ShouldBe(2);
+			StateVectorLayout.Groups[0].Slots[1].Object.ShouldBe(c.F2);
+			StateVectorLayout.Groups[0].Slots[1].Field.ShouldBe(
+				typeof(PermanentFault).GetField("_isActive", BindingFlags.Instance | BindingFlags.NonPublic));
 			StateVectorLayout.Groups[0].Slots[0].Object.ShouldBe(c);
 			StateVectorLayout.Groups[0].Slots[0].Field.ShouldBe(typeof(C).GetField("B"));
 			StateVectorLayout.Groups[0].GroupSizeInBytes.ShouldBe(1);
@@ -51,11 +50,9 @@ namespace Tests.Serialization.Compaction
 
 		private class C
 		{
-			public bool B;
-
 			public readonly Fault F1 = new TransientFault();
 			public readonly Fault F2 = new PermanentFault();
+			public bool B;
 		}
-
 	}
 }

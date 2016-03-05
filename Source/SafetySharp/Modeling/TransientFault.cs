@@ -28,6 +28,14 @@ namespace SafetySharp.Modeling
 	public sealed class TransientFault : Fault
 	{
 		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		public TransientFault()
+			: base(requiresActivationNotification: false)
+		{
+		}
+
+		/// <summary>
 		///   Checks whether the fault can be activated nondeterministically, or whether it has to be or cannot be activated.
 		/// </summary>
 		protected override Activation CheckActivation()

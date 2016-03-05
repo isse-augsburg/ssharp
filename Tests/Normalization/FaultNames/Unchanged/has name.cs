@@ -33,6 +33,11 @@ namespace Tests.Normalization.FaultNames.Unchanged
 		{
 			return Activation.Suppressed;
 		}
+
+		public F()
+			: base(false)
+		{
+		}
 	}
 
 	public class In4

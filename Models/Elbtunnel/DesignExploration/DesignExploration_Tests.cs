@@ -70,6 +70,8 @@ namespace Elbtunnel.DesignExploration
 			var analysis = new SafetyAnalysis(Model.Create(specification));
 
 			var result = analysis.ComputeSinglePointsOfFailures(specification.Collision, $"counter examples/elbtunnel/OriginalDesign/{modelChecker.Name}");
+			result.SaveCounterExamples("counter examples/elbtunnel/");
+
 			Console.WriteLine(result);
 		}
 	}

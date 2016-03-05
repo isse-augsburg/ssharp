@@ -89,6 +89,7 @@ namespace SafetySharp.Runtime
 			SerializedModel = buffer;
 			RootComponents = rootComponents;
 			Faults = objectTable.OfType<Fault>().Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
+			ActivationSensitiveFaults = Faults.Where(fault => fault.RequiresActivationNotification).ToArray();
 			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
 			Formulas = formulas;
 
@@ -160,6 +161,12 @@ namespace SafetySharp.Runtime
 		public Fault[] Faults { get; }
 
 		/// <summary>
+		///   Gets the faults contained in the model that can be activated nondeterministically and that must be notified about their
+		///   activation.
+		/// </summary>
+		internal Fault[] ActivationSensitiveFaults { get; }
+
+		/// <summary>
 		///   Gets the state formulas of the model.
 		/// </summary>
 		internal StateFormula[] StateFormulas { get; }
@@ -204,6 +211,9 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void ExecuteInitialStep()
 		{
+			foreach (var fault in Faults)
+				fault.Reset();
+
 			foreach (var obj in _serializedObjects.OfType<IInitializable>())
 				obj.Initialize();
 		}
@@ -305,6 +315,7 @@ namespace SafetySharp.Runtime
 						break;
 					}
 
+					NotifyFaultActivations();
 					Serialize(targetState);
 
 					// Compare the target states; if they match, we've found the correct transition
@@ -346,6 +357,25 @@ namespace SafetySharp.Runtime
 				ExecuteInitialStep();
 			else
 				ExecuteStep();
+
+			NotifyFaultActivations();
+		}
+
+		/// <summary>
+		///   Notifies all activated faults of their activation.
+		/// </summary>
+		internal bool NotifyFaultActivations()
+		{
+			if (ActivationSensitiveFaults.Length == 0)
+				return false;
+
+			foreach (var fault in ActivationSensitiveFaults)
+			{
+				if (fault.IsActivated)
+					fault.OnActivated();
+			}
+
+			return true;
 		}
 
 		/// <summary>

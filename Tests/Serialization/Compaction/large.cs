@@ -72,7 +72,7 @@ namespace Tests.Serialization.Compaction
 			public short B;
 			public int D;
 			public E E;
-			public readonly Fault F = new TransientFault();
+			public readonly Fault F = new PermanentFault();
 		}
 
 		private enum E
