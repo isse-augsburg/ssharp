@@ -25,7 +25,7 @@ namespace Tests.FaultActivation.Invariants
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class WithoutFalts : FaultActivationTestObject
+	internal class WithoutFaults : FaultActivationTestObject
 	{
 		protected override void Check()
 		{

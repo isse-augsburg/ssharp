@@ -160,6 +160,7 @@
     <Compile Include="Analysis\Invariants\NotViolated\undo choice.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\undo nested choice.cs" />
     <Compile Include="Analysis\Invariants\Violated\array components.cs" />
+    <Compile Include="Analysis\Invariants\Violated\nondeterministic fault effects.cs" />
     <Compile Include="Analysis\Invariants\Violated\deterministic.cs" />
     <Compile Include="Analysis\Invariants\Violated\initial state.cs" />
     <Compile Include="Analysis\Invariants\Violated\list components.cs" />
@@ -182,10 +183,13 @@
     <Compile Include="Analysis\Ltl\Violated\multiple choices.cs" />
     <Compile Include="Analysis\Ltl\Violated\single choice.cs" />
     <Compile Include="Analysis\Ltl\Violated\undo fault after successful activation.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism double override.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\deterministic effects without priorities.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\effects with priorities.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\explicit nondeterminism.cs" />
+    <Compile Include="Execution\Faults\Binding\nested inherited fault.cs" />
+    <Compile Include="Execution\Faults\Binding\inherited fault.cs" />
     <Compile Include="Execution\Simulation\reachable by binding only.cs" />
     <Compile Include="Execution\Simulation\faults.cs" />
     <Compile Include="Execution\Simulation\bindings.cs" />
@@ -375,10 +379,15 @@
     <Compile Include="FaultActivationTests.Helpers.cs">
       <DependentUpon>FaultActivationTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="FaultActivation\Invariants\multiple faults fully minimizable.cs" />
+    <Compile Include="FaultActivation\Invariants\nondeterminism.cs" />
+    <Compile Include="FaultActivation\Invariants\single permanent fault activated once.cs" />
+    <Compile Include="FaultActivation\Invariants\multiple faults semi minimizable.cs" />
     <Compile Include="FaultActivation\Invariants\undone fault activation observable.cs" />
     <Compile Include="FaultActivation\Invariants\undone fault activation not observable.cs" />
     <Compile Include="FaultActivation\Invariants\faults with constant effects.cs" />
     <Compile Include="FaultActivation\Invariants\unused fault.cs" />
+    <Compile Include="FaultActivation\Invariants\initial state.cs" />
     <Compile Include="Formulas\StateFormulas\binary expressions.cs" />
     <Compile Include="Formulas\StateFormulas\arrays.cs" />
     <Compile Include="Formulas\StateFormulas\parameters.cs" />

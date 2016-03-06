@@ -43,9 +43,14 @@ namespace SafetySharp.Analysis
 		public int StateCount { get; }
 
 		/// <summary>
-		///   Gets the number of transitions checked by the model checker.
+		///   Gets the number of activation-minimal transitions checked by the model checker.
 		/// </summary>
 		public long TransitionCount { get; }
+
+		/// <summary>
+		///   Gets the number of computed transitions checked by the model checker.
+		/// </summary>
+		internal long ComputedTransitionCount { get; }
 
 		/// <summary>
 		///   Gets the number of levels checked by the model checker.
@@ -55,12 +60,14 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		internal AnalysisResult(bool formulaHolds, CounterExample counterExample, int stateCount, long transitionCount, int levelCount)
+		internal AnalysisResult(bool formulaHolds, CounterExample counterExample, int stateCount, long transitionCount,
+								long computedTransitionCount, int levelCount)
 		{
 			FormulaHolds = formulaHolds;
 			CounterExample = counterExample;
 			StateCount = stateCount;
 			TransitionCount = transitionCount;
+			ComputedTransitionCount = computedTransitionCount;
 			LevelCount = levelCount;
 		}
 	}

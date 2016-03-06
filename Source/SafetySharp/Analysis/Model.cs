@@ -133,12 +133,11 @@ namespace SafetySharp.Analysis
 						while (baseType.HasAttribute<FaultEffectAttribute>())
 							baseType = baseType.BaseType;
 
-						const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
-						var fault =
-							baseType.GetField(attribute.Fault, flags)?.GetValue(component) as Fault ??
-							baseType.GetProperty(attribute.Fault, flags)?.GetMethod?.Invoke(component, null) as Fault;
+						var field = baseType.GetFields(typeof(object)).SingleOrDefault(f => !f.IsStatic && f.Name == attribute.Fault);
+						var property = baseType.GetProperties(typeof(object))
+											   .SingleOrDefault(p => p.GetMethod != null && !p.GetMethod.IsStatic && p.Name == attribute.Fault);
 
-						if (fault == null)
+						if (field == null && property == null)
 						{
 							throw new InvalidOperationException(
 								$"'{baseType.FullName}' does not declare a field or property " +
@@ -146,6 +145,7 @@ namespace SafetySharp.Analysis
 								$"that contains a valid fault instance as expected by '{type.FullName}'.");
 						}
 
+						var fault = field == null ? property.GetMethod.Invoke(component, null) as Fault : field.GetValue(component) as Fault;
 						fault.AddEffect(component, type);
 					}
 

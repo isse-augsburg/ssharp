@@ -22,6 +22,8 @@
 
 namespace SafetySharp.Compiler.Roslyn.Symbols
 {
+	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
@@ -33,6 +35,31 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 	/// </summary>
 	public static class TypeSymbolExtensions
 	{
+		/// <summary>
+		///   Gets all methods declared by the <paramref name="typeSymbol" /> or one of its base types that can be affected by fault
+		///   effects.
+		/// </summary>
+		/// <param name="typeSymbol">The type symbol the declared members should be returned for.</param>
+		/// <param name="compilation">The compilation the type belongs to.</param>
+		[Pure, NotNull]
+		public static IEnumerable<IMethodSymbol> GetFaultAffectableMethods([NotNull] this ITypeSymbol typeSymbol,
+																		   [NotNull] Compilation compilation)
+		{
+			Requires.NotNull(typeSymbol, nameof(typeSymbol));
+			Requires.NotNull(compilation, nameof(compilation));
+
+			var baseMethods = typeSymbol.BaseType?.GetFaultAffectableMethods(compilation) ?? Array.Empty<IMethodSymbol>();
+			var methods = typeSymbol.GetMembers().OfType<IMethodSymbol>().Where(method => method.CanBeAffectedByFaults(compilation)).ToArray();
+
+			// Return all methods of the current type
+			foreach (var method in methods)
+				yield return method;
+
+			// Return base methods only if they're not overridden
+			foreach (var method in baseMethods.Where(method => methods.All(m => !m.Overrides(method))))
+				yield return method;
+		}
+
 		/// <summary>
 		///   Checks whether <paramref name="typeSymbol" /> is directly or indirectly derived from the <paramref name="baseType" />
 		///   interface or class.

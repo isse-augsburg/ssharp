@@ -124,7 +124,7 @@ namespace SafetySharp.Runtime
 		{
 			// We don't have to do any out of bounds checks here
 
-			var hash = Hash(state, _stateVectorSize, 0);
+			var hash = MemoryBuffer.Hash(state, _stateVectorSize, 0);
 			for (var i = 1; i < ProbeThreshold; ++i)
 			{
 				// We store 30 bit hash values as 32 bit integers, with the most significant bit #31 being set
@@ -132,7 +132,7 @@ namespace SafetySharp.Runtime
 				// 'empty' is represented by 0 
 				// We ignore two most significant bits of the original hash, which has no influence on the
 				// correctness of the algorithm, but might result in more state comparisons
-				var hashedIndex = Hash((byte*)&hash, sizeof(int), i * 8345723) % _capacity;
+				var hashedIndex = MemoryBuffer.Hash((byte*)&hash, sizeof(int), i * 8345723) % _capacity;
 				var memoizedHash = hashedIndex & 0x3FFFFFFF;
 				var cacheLineStart = (hashedIndex / BucketsPerCacheLine) * BucketsPerCacheLine;
 
@@ -157,7 +157,7 @@ namespace SafetySharp.Runtime
 						while ((currentValue & 1 << 31) == 0)
 							currentValue = Volatile.Read(ref _hashMemory[offset]);
 
-						if (AreEqual(state, _stateMemory + (long)offset * _stateVectorSize))
+						if (MemoryBuffer.AreEqual(state, _stateMemory + (long)offset * _stateVectorSize, _stateVectorSize))
 						{
 							index = offset;
 							return false;
@@ -178,90 +178,6 @@ namespace SafetySharp.Runtime
 		{
 			if (disposing)
 				_stateBuffer.SafeDispose();
-		}
-
-		/// <summary>
-		///   Compares the two states, returning <c>true</c> when the states are equivalent.
-		/// </summary>
-		private bool AreEqual(byte* state1, byte* state2)
-		{
-			for (var i = _stateVectorSize / 8; i > 0; --i)
-			{
-				if (*(long*)state1 != *(long*)state2)
-					return false;
-
-				state1 += 8;
-				state2 += 8;
-			}
-
-			for (var i = _stateVectorSize % 8; i > 0; --i)
-			{
-				if (*state1 != *state2)
-					return false;
-
-				state1 += 1;
-				state2 += 1;
-			}
-
-			return true;
-		}
-
-		/// <summary>
-		///   Hashes the <paramref name="state" /> vector.
-		/// </summary>
-		/// <remarks>See also https://en.wikipedia.org/wiki/MurmurHash (MurmurHash3 implementation)</remarks>
-		private static uint Hash(byte* state, int length, int seed)
-		{
-			const uint c1 = 0xcc9e2d51;
-			const uint c2 = 0x1b873593;
-			const int r1 = 15;
-			const int r2 = 13;
-			const uint m = 5;
-			const uint n = 0xe6546b64;
-
-			var hash = (uint)seed;
-			var numBlocks = length / 4;
-			var blocks = (uint*)state;
-
-			for (var i = 0; i < numBlocks; i++)
-			{
-				var k = blocks[i];
-				k *= c1;
-				k = (k << r1) | (k >> (32 - r1));
-				k *= c2;
-
-				hash ^= k;
-				hash = ((hash << r2) | (hash >> (32 - r2))) * m + n;
-			}
-
-			var tail = state + numBlocks * 4;
-			var k1 = 0u;
-
-			switch (length & 3)
-			{
-				case 3:
-					k1 ^= (uint)tail[2] << 16;
-					goto case 2;
-				case 2:
-					k1 ^= (uint)tail[1] << 8;
-					goto case 1;
-				case 1:
-					k1 ^= tail[0];
-					k1 *= c1;
-					k1 = (k1 << r1) | (k1 >> (32 - r1));
-					k1 *= c2;
-					hash ^= k1;
-					break;
-			}
-
-			hash ^= (uint)length;
-			hash ^= hash >> 16;
-			hash *= (0x85ebca6b);
-			hash ^= hash >> 13;
-			hash *= (0xc2b2ae35);
-			hash ^= hash >> 16;
-
-			return hash;
 		}
 	}
 }

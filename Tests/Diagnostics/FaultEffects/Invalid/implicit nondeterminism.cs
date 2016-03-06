@@ -25,14 +25,17 @@ namespace Tests.Diagnostics.FaultEffects.Invalid
 	using SafetySharp.Compiler.Analyzers;
 	using SafetySharp.Modeling;
 
-	[Diagnostic(DiagnosticIdentifier.MultipleFaultEffectsWithoutPriority, 38, 33, 1,
+	[Diagnostic(DiagnosticIdentifier.MultipleFaultEffectsWithoutPriority, 41, 33, 1,
 		"Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminism.M.get",
 		"'Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminism.E1', 'Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminism.E2', " +
 		"'Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminism.E5'")]
-	[Diagnostic(DiagnosticIdentifier.MultipleFaultEffectsWithoutPriority, 39, 28, 1,
+	[Diagnostic(DiagnosticIdentifier.MultipleFaultEffectsWithoutPriority, 42, 28, 1,
 		"Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminism.N()",
 		"'Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminism.E1', 'Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminism.E2', " +
 		"'Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminism.E6'")]
+	[Diagnostic(DiagnosticIdentifier.MultipleFaultEffectsWithoutPriority, 39, 18, 22,
+		"SafetySharp.Modeling.Component.Update()",
+		"'Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminism.E7', 'Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminism.E8'")]
 	public class ImplicitNondeterminism : Component
 	{
 		public virtual int M => 1;
@@ -76,6 +79,22 @@ namespace Tests.Diagnostics.FaultEffects.Invalid
 		public class E6 : ImplicitNondeterminism
 		{
 			public override int N() => 3;
+		}
+
+		[FaultEffect]
+		public class E7 : ImplicitNondeterminism
+		{
+			public override void Update()
+			{
+			}
+		}
+
+		[FaultEffect]
+		public class E8 : ImplicitNondeterminism
+		{
+			public override void Update()
+			{
+			}
 		}
 	}
 }

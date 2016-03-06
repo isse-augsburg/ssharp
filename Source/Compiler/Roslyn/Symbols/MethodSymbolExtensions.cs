@@ -37,7 +37,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 		///   Gets a value indicating whether the <paramref name="methodSymbol" /> can be affected by fault effects.
 		/// </summary>
 		/// <param name="methodSymbol">The symbol of the method that should be checked.</param>
-		/// <param name="semanticModel">The semantic model that is used to resolve type information;</param>
+		/// <param name="semanticModel">The semantic model that is used to resolve type information.</param>
 		[Pure]
 		public static bool CanBeAffectedByFaults([NotNull] this IMethodSymbol methodSymbol, [NotNull] SemanticModel semanticModel)
 		{
@@ -51,6 +51,26 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			return methodSymbol.IsProvidedPort(semanticModel) ||
 				   methodSymbol.IsRequiredPort(semanticModel) ||
 				   methodSymbol.IsUpdateMethod(semanticModel);
+		}
+
+		/// <summary>
+		///   Gets a value indicating whether the <paramref name="methodSymbol" /> can be affected by fault effects.
+		/// </summary>
+		/// <param name="methodSymbol">The symbol of the method that should be checked.</param>
+		/// <param name="compilation">The compilation the method belongs to.</param>
+		[Pure]
+		public static bool CanBeAffectedByFaults([NotNull] this IMethodSymbol methodSymbol, [NotNull] Compilation compilation)
+		{
+			Requires.NotNull(methodSymbol, nameof(methodSymbol));
+
+			// Faults can only affect non-abstract methods that can be overwritten
+			if (methodSymbol.IsAbstract || methodSymbol.IsSealed || (!methodSymbol.IsVirtual && !methodSymbol.IsOverride))
+				return false;
+
+			// Faults affect only component methods
+			return methodSymbol.IsProvidedPort(compilation) ||
+				   methodSymbol.IsRequiredPort(compilation) ||
+				   methodSymbol.IsUpdateMethod(compilation);
 		}
 
 		/// <summary>

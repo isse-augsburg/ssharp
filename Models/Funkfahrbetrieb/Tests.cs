@@ -54,9 +54,6 @@ namespace Funkfahrbetrieb
 
 			var checker = new SSharpChecker();
 			checker.CheckInvariant(model, true);
-
-			var ltsMin = new LtsMin();
-			ltsMin.CheckInvariant(model, true);
 		}
 
 		public static void Main()

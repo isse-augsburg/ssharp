@@ -25,42 +25,25 @@ namespace Tests.FaultActivation.Invariants
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class SingleTransientFaultActivatedOnce : FaultActivationTestObject
+	internal class Nondeterminism : FaultActivationTestObject
 	{
 		protected override void Check()
 		{
 			GenerateStateSpace(new C());
 
-			StateCount.ShouldBe(5);
-			TransitionCount.ShouldBe(7);
-			ComputedTransitionCount.ShouldBe(11);
+			StateCount.ShouldBe(3);
+			TransitionCount.ShouldBe(4);
+			ComputedTransitionCount.ShouldBe(7);
 		}
 
 		private class C : Component
 		{
-			private readonly Fault _f = new TransientFault();
-
 			[Range(0, 2, OverflowBehavior.Clamp)]
 			private int _x;
 
-			[Range(0, 2, OverflowBehavior.Clamp)]
-			private int _y;
-
 			public override void Update()
 			{
-				++_x;
-			}
-
-			[FaultEffect(Fault = nameof(_f))]
-			public class E : C
-			{
-				public override void Update()
-				{
-					if (_x == 0)
-						_y = 1;
-
-					base.Update();
-				}
+				_x += Choose(1, 1);
 			}
 		}
 	}

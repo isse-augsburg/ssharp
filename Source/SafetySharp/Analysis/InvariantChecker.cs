@@ -50,6 +50,7 @@ namespace SafetySharp.Analysis
 		private int _nextReport = ReportStateCountDelta;
 		private int _stateCount;
 		private long _transitionCount;
+		private long _computedTransitionCount;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -115,7 +116,7 @@ namespace SafetySharp.Analysis
 			if (_counterExample != null)
 				_output("Invariant violation detected.");
 
-			return new AnalysisResult(_counterExample == null, _counterExample, _stateCount, _transitionCount, _levelCount);
+			return new AnalysisResult(_counterExample == null, _counterExample, _stateCount, _transitionCount, _computedTransitionCount, _levelCount);
 		}
 
 		/// <summary>
@@ -253,6 +254,8 @@ namespace SafetySharp.Analysis
 					throw new InvalidOperationException("Deadlock detected.");
 
 				Interlocked.Add(ref _context._transitionCount, _transitions.Count);
+				Interlocked.Add(ref _context._computedTransitionCount, _transitions.ComputedTransitionCount);
+
 				_stateStack.PushFrame();
 
 				for (var i = 0; i < _transitions.Count; ++i)

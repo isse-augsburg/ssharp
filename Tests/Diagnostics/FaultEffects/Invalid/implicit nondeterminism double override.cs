@@ -20,46 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.FaultActivation.Invariants
+namespace Tests.Diagnostics.FaultEffects.Invalid
 {
+	using SafetySharp.Compiler.Analyzers;
 	using SafetySharp.Modeling;
-	using Shouldly;
 
-	internal class SingleTransientFaultActivatedOnce : FaultActivationTestObject
+	[Diagnostic(DiagnosticIdentifier.MultipleFaultEffectsWithoutPriority, 38, 23, 1,
+		"Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminismDoubleOverride.Update()",
+		"'Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminismDoubleOverride.C.E1', " +
+		"'Tests.Diagnostics.FaultEffects.Invalid.ImplicitNondeterminismDoubleOverride.C.E2'")]
+	public class ImplicitNondeterminismDoubleOverride : Component
 	{
-		protected override void Check()
+		public override void Update()
 		{
-			GenerateStateSpace(new C());
-
-			StateCount.ShouldBe(5);
-			TransitionCount.ShouldBe(7);
-			ComputedTransitionCount.ShouldBe(11);
 		}
 
-		private class C : Component
+		private class C : ImplicitNondeterminismDoubleOverride
 		{
-			private readonly Fault _f = new TransientFault();
-
-			[Range(0, 2, OverflowBehavior.Clamp)]
-			private int _x;
-
-			[Range(0, 2, OverflowBehavior.Clamp)]
-			private int _y;
-
-			public override void Update()
-			{
-				++_x;
-			}
-
-			[FaultEffect(Fault = nameof(_f))]
-			public class E : C
+			[FaultEffect]
+			public class E1 : C
 			{
 				public override void Update()
 				{
-					if (_x == 0)
-						_y = 1;
+				}
+			}
 
-					base.Update();
+			[FaultEffect]
+			public class E2 : C
+			{
+				public override void Update()
+				{
 				}
 			}
 		}

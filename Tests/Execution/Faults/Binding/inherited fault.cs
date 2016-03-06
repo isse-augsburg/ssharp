@@ -20,47 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.FaultActivation.Invariants
+namespace Tests.Execution.Faults.Binding
 {
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
+	using Utilities;
 
-	internal class SingleTransientFaultActivatedOnce : FaultActivationTestObject
+	internal class InheritedFault : TestModel
 	{
 		protected override void Check()
 		{
-			GenerateStateSpace(new C());
+			Create(new C());
+			var c = (C)RootComponents[0];
 
-			StateCount.ShouldBe(5);
-			TransitionCount.ShouldBe(7);
-			ComputedTransitionCount.ShouldBe(11);
+			c.FaultEffects[0].GetFault(typeof(C.Effect)).ShouldBe(c.F);
 		}
 
-		private class C : Component
+		private class D : Component
 		{
-			private readonly Fault _f = new TransientFault();
+			public readonly Fault F = new TransientFault();
+		}
 
-			[Range(0, 2, OverflowBehavior.Clamp)]
-			private int _x;
-
-			[Range(0, 2, OverflowBehavior.Clamp)]
-			private int _y;
-
-			public override void Update()
+		private class C : D
+		{
+			[FaultEffect(Fault = nameof(F))]
+			internal class Effect : C
 			{
-				++_x;
-			}
-
-			[FaultEffect(Fault = nameof(_f))]
-			public class E : C
-			{
-				public override void Update()
-				{
-					if (_x == 0)
-						_y = 1;
-
-					base.Update();
-				}
 			}
 		}
 	}

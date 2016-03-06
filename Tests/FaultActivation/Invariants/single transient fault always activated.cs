@@ -32,7 +32,8 @@ namespace Tests.FaultActivation.Invariants
 			GenerateStateSpace(new C());
 
 			StateCount.ShouldBe(9);
-			TransitionCount.ShouldBe(19);
+			TransitionCount.ShouldBe(18);
+			ComputedTransitionCount.ShouldBe(19);
 		}
 
 		private class C : Component

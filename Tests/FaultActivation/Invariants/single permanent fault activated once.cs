@@ -25,7 +25,7 @@ namespace Tests.FaultActivation.Invariants
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class SingleTransientFaultActivatedOnce : FaultActivationTestObject
+	internal class SinglePermanentFaultActivatedOnce : FaultActivationTestObject
 	{
 		protected override void Check()
 		{
@@ -33,12 +33,12 @@ namespace Tests.FaultActivation.Invariants
 
 			StateCount.ShouldBe(5);
 			TransitionCount.ShouldBe(7);
-			ComputedTransitionCount.ShouldBe(11);
+			ComputedTransitionCount.ShouldBe(9);
 		}
 
 		private class C : Component
 		{
-			private readonly Fault _f = new TransientFault();
+			private readonly Fault _f = new PermanentFault();
 
 			[Range(0, 2, OverflowBehavior.Clamp)]
 			private int _x;

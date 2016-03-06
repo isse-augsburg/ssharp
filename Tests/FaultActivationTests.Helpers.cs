@@ -37,6 +37,7 @@ namespace Tests
 		protected CounterExample CounterExample => _result.CounterExample;
 		protected int StateCount => _result.StateCount;
 		protected long TransitionCount => _result.TransitionCount;
+		protected long ComputedTransitionCount => _result.ComputedTransitionCount;
 
 		protected void GenerateStateSpace(params IComponent[] components)
 		{

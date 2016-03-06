@@ -26,7 +26,7 @@ namespace Tests
 
 	public partial class FaultActivationTests
 	{
-		[Theory(Skip = "Not supported at the moment"), MemberData("DiscoverTests", "FaultActivation/Invariants")]
+		[Theory, MemberData("DiscoverTests", "FaultActivation/Invariants")]
 		public void Invariants(string test, string file)
 		{
 			ExecuteDynamicTests(file);

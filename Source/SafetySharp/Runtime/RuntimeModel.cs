@@ -362,20 +362,24 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Notifies all activated faults of their activation.
+		///   Notifies all activated faults of their activation. Returns <c>false</c> to indicate that no notifications were necessary.
 		/// </summary>
 		internal bool NotifyFaultActivations()
 		{
 			if (ActivationSensitiveFaults.Length == 0)
 				return false;
 
+			var notificationsSent = false;
 			foreach (var fault in ActivationSensitiveFaults)
 			{
 				if (fault.IsActivated)
+				{
 					fault.OnActivated();
+					notificationsSent = true;
+				}
 			}
 
-			return true;
+			return notificationsSent;
 		}
 
 		/// <summary>

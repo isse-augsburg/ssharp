@@ -73,9 +73,11 @@ namespace SafetySharp.Compiler.Normalization
 				var nondeterministicFaults = faults.GroupBy(fault => fault.GetPriority(Compilation)).Where(group => group.Count() > 1).ToArray();
 
 				_faults.Add(component, faultTypes);
-				foreach (var method in component.GetMembers().OfType<IMethodSymbol>())
+				foreach (var method in component.GetFaultAffectableMethods(Compilation))
 				{
-					_methodLookup.Add(method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat), method);
+					var methodKey = method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
+					if (!_methodLookup.ContainsKey(methodKey))
+						_methodLookup.Add(methodKey, method);
 
 					foreach (var group in nondeterministicFaults)
 					{
@@ -87,7 +89,7 @@ namespace SafetySharp.Compiler.Normalization
 						var fieldName = Guid.NewGuid().ToString().Replace("-", "_").ToSynthesized();
 
 						_faultChoiceFields.Add(key, fieldName);
-						AddFaultChoiceField(method.ContainingType, fieldName);
+						AddFaultChoiceField(component, fieldName);
 					}
 				}
 

@@ -112,7 +112,7 @@ namespace SafetySharp.Compiler.Analyzers
 				var effects = faultEffects.Where(faultEffect => faultEffect.BaseType.Equals(component)).ToArray();
 				var nondeterministic = effects.GroupBy(fault => fault.GetPriority(compilation)).Where(group => group.Count() > 1).ToArray();
 
-				foreach (var method in component.GetMembers().OfType<IMethodSymbol>())
+				foreach (var method in component.GetFaultAffectableMethods(context.Compilation))
 				{
 					var unprioritizedTypes = nondeterministic
 						.Where(typeGroup => typeGroup.Count(f => f.GetMembers().OfType<IMethodSymbol>().Any(m => m.Overrides(method))) > 1)
@@ -122,8 +122,13 @@ namespace SafetySharp.Compiler.Analyzers
 						.OrderBy(type => type)
 						.ToArray();
 
-					if (unprioritizedTypes.Length > 0)
+					if (unprioritizedTypes.Length <= 0)
+						continue;
+
+					if (method.ContainingType.Equals(component))
 						_multipleEffectsWithoutPriority.Emit(context, method, method.ToDisplayString(), String.Join(", ", unprioritizedTypes));
+					else
+						_multipleEffectsWithoutPriority.Emit(context, component, method.ToDisplayString(), String.Join(", ", unprioritizedTypes));
 				}
 			}
 		}

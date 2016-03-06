@@ -96,6 +96,100 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
+		///   Compares the two buffers <paramref name="buffer1" /> and <paramref name="buffer2" />, returning <c>true</c> when the
+		///   buffers are equivalent.
+		/// </summary>
+		/// <param name="buffer1">The first buffer of memory to compare.</param>
+		/// <param name="buffer2">The second buffer of memory to compare.</param>
+		/// <param name="sizeInBytes">The size of the buffers in bytes.</param>
+		public static bool AreEqual(byte* buffer1, byte* buffer2, int sizeInBytes)
+		{
+			if (buffer1 == buffer2)
+				return true;
+
+			for (var i = sizeInBytes / 8; i > 0; --i)
+			{
+				if (*(long*)buffer1 != *(long*)buffer2)
+					return false;
+
+				buffer1 += 8;
+				buffer2 += 8;
+			}
+
+			for (var i = sizeInBytes % 8; i > 0; --i)
+			{
+				if (*buffer1 != *buffer2)
+					return false;
+
+				buffer1 += 1;
+				buffer2 += 1;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		///   Hashes the <paramref name="buffer" />.
+		/// </summary>
+		/// <param name="buffer">The buffer of memory that should be hashed.</param>
+		/// <param name="sizeInBytes">The size of the buffer in bytes.</param>
+		/// <param name="seed">The seed value for the hash.</param>
+		/// <remarks>See also https://en.wikipedia.org/wiki/MurmurHash (MurmurHash3 implementation)</remarks>
+		public static uint Hash(byte* buffer, int sizeInBytes, int seed)
+		{
+			const uint c1 = 0xcc9e2d51;
+			const uint c2 = 0x1b873593;
+			const int r1 = 15;
+			const int r2 = 13;
+			const uint m = 5;
+			const uint n = 0xe6546b64;
+
+			var hash = (uint)seed;
+			var numBlocks = sizeInBytes / 4;
+			var blocks = (uint*)buffer;
+
+			for (var i = 0; i < numBlocks; i++)
+			{
+				var k = blocks[i];
+				k *= c1;
+				k = (k << r1) | (k >> (32 - r1));
+				k *= c2;
+
+				hash ^= k;
+				hash = ((hash << r2) | (hash >> (32 - r2))) * m + n;
+			}
+
+			var tail = buffer + numBlocks * 4;
+			var k1 = 0u;
+
+			switch (sizeInBytes & 3)
+			{
+				case 3:
+					k1 ^= (uint)tail[2] << 16;
+					goto case 2;
+				case 2:
+					k1 ^= (uint)tail[1] << 8;
+					goto case 1;
+				case 1:
+					k1 ^= tail[0];
+					k1 *= c1;
+					k1 = (k1 << r1) | (k1 >> (32 - r1));
+					k1 *= c2;
+					hash ^= k1;
+					break;
+			}
+
+			hash ^= (uint)sizeInBytes;
+			hash ^= hash >> 16;
+			hash *= (0x85ebca6b);
+			hash ^= hash >> 13;
+			hash *= (0xc2b2ae35);
+			hash ^= hash >> 16;
+
+			return hash;
+		}
+
+		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
