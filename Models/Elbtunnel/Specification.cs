@@ -54,48 +54,12 @@ namespace Elbtunnel
 				new Vehicle { Kind = VehicleKind.Truck }
 			};
 
-			var lightBarrier1 = new LightBarrier
-			{
-				Position = PreControlPosition,
-				Misdetection = { Name = "MissDetectionLB1" },
-				FalseDetection = { Name = "FalseDetectionLB1" },
-				VehicleCount = vehicles.Length
-			};
+			var lightBarrier1 = new LightBarrier { Position = PreControlPosition };
+			var lightBarrier2 = new LightBarrier { Position = MainControlPosition };
 
-			var lightBarrier2 = new LightBarrier
-			{
-				Position = MainControlPosition,
-				Misdetection = { Name = "MissDetectionLB2" },
-				FalseDetection = { Name = "FalseDetectionLB2" },
-				VehicleCount = vehicles.Length
-			};
-
-			var detectorLeft = new OverheadDetector
-			{
-				Lane = Lane.Left,
-				Position = MainControlPosition,
-				Misdetection = { Name = "MissDetectionODL" },
-				FalseDetection = { Name = "FalseDetectionODL" },
-				VehicleCount = vehicles.Length
-			};
-
-			var detectorRight = new OverheadDetector
-			{
-				Lane = Lane.Right,
-				Position = MainControlPosition,
-				Misdetection = { Name = "MissDetectionODR" },
-				FalseDetection = { Name = "FalseDetectionODR" },
-				VehicleCount = vehicles.Length
-			};
-
-			var detectorFinal = new OverheadDetector
-			{
-				Lane = Lane.Left,
-				Position = EndControlPosition,
-				Misdetection = { Name = "MissDetectionODF" },
-				FalseDetection = { Name = "FalseDetectionODF" },
-				VehicleCount = vehicles.Length
-			};
+			var detectorLeft = new OverheadDetector { Lane = Lane.Left, Position = MainControlPosition };
+			var detectorRight = new OverheadDetector { Lane = Lane.Right, Position = MainControlPosition };
+			var detectorFinal = new OverheadDetector { Lane = Lane.Left, Position = EndControlPosition };
 
 			HeightControl = new HeightControl
 			{
@@ -122,11 +86,11 @@ namespace Elbtunnel
 
 			Component.Bind(nameof(Vehicles.IsTunnelClosed), nameof(HeightControl.TrafficLights.IsRed));
 
-			Bind(lightBarrier1);
-			Bind(lightBarrier2);
-			Bind(detectorLeft);
-			Bind(detectorRight);
-			Bind(detectorFinal);
+			Setup(lightBarrier1, "LB1", vehicles.Length);
+			Setup(lightBarrier2, "LB2", vehicles.Length);
+			Setup(detectorLeft, "ODL", vehicles.Length);
+			Setup(detectorRight, "ODR", vehicles.Length);
+			Setup(detectorFinal, "ODF", vehicles.Length);
 		}
 
 		/// <summary>
@@ -149,13 +113,18 @@ namespace Elbtunnel
 			Vehicles.Vehicles.Skip(1).Aggregate<Vehicle, Formula>(Vehicles.Vehicles[0].IsCollided, (f, v) => f || v.IsCollided);
 
 		/// <summary>
-		///   Binds the <paramref name="detector" /> to the <see cref="Vehicles" />.
+		///   Binds the <paramref name="detector" /> to the <see cref="Vehicles" /> and sets up the <paramref name="detector" />'s fault
+		///   names.
 		/// </summary>
-		private void Bind(VehicleDetector detector)
+		private void Setup(VehicleDetector detector, string faultSuffix, int vehicleCount)
 		{
 			Component.Bind(nameof(detector.GetVehicleKind), nameof(Vehicles.GetVehicleKind));
 			Component.Bind(nameof(detector.GetVehiclePosition), nameof(Vehicles.GetVehiclePosition));
 			Component.Bind(nameof(detector.GetVehicleLane), nameof(Vehicles.GetVehicleLane));
+
+			detector.FalseDetection.Name = $"FalseDetection{faultSuffix}";
+			detector.Misdetection.Name = $"Misdetection{faultSuffix}";
+			detector.VehicleCount = vehicleCount;
 		}
 	}
 }

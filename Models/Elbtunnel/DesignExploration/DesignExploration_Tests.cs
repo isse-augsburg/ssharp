@@ -19,7 +19,7 @@ namespace Elbtunnel.DesignExploration
 			var specification = new DesignHighTubeWithLb_Specification();
 			var analysis = new SafetyAnalysis(Model.Create(specification));
 
-			var result = analysis.ComputeSinglePointsOfFailures(specification.Collision, $"counter examples/elbtunnel/DesignHighTubeWithLb/{modelChecker.Name}");
+			var result = analysis.ComputeMinimalCriticalSets(specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
 		}
 
@@ -29,7 +29,7 @@ namespace Elbtunnel.DesignExploration
 			var specification = new DesignImprovedDetectionOfPreControl_Specification();
 			var analysis = new SafetyAnalysis(Model.Create(specification));
 
-			var result = analysis.ComputeSinglePointsOfFailures(specification.Collision, $"counter examples/elbtunnel/DesignImprovedDetectionOfPreControl/{modelChecker.Name}");
+			var result = analysis.ComputeMinimalCriticalSets(specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
 		}
 
@@ -39,7 +39,7 @@ namespace Elbtunnel.DesignExploration
 			var specification = new DesignRemovedCounterInMainControl_Specification();
 			var analysis = new SafetyAnalysis(Model.Create(specification));
 
-			var result = analysis.ComputeSinglePointsOfFailures(specification.Collision, $"counter examples/elbtunnel/DesignRemovedCounterInMainControl/{modelChecker.Name}");
+			var result = analysis.ComputeMinimalCriticalSets(specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
 		}
 
@@ -49,7 +49,7 @@ namespace Elbtunnel.DesignExploration
 			var specification = new DesignRemovedCounterInTolerantMainControl_Specification();
 			var analysis = new SafetyAnalysis(Model.Create(specification));
 
-			var result = analysis.ComputeSinglePointsOfFailures(specification.Collision, $"counter examples/elbtunnel/DesignRemovedCounterInTolerantMainControl/{modelChecker.Name}");
+			var result = analysis.ComputeMinimalCriticalSets(specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
 		}
 
@@ -59,7 +59,7 @@ namespace Elbtunnel.DesignExploration
 			var specification = new DesignTolerantMainControl_Specification();
 			var analysis = new SafetyAnalysis(Model.Create(specification));
 
-			var result = analysis.ComputeSinglePointsOfFailures(specification.Collision, $"counter examples/elbtunnel/DesignTolerantMainControl/{modelChecker.Name}");
+			var result = analysis.ComputeMinimalCriticalSets(specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
 		}
 
@@ -69,7 +69,7 @@ namespace Elbtunnel.DesignExploration
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis(Model.Create(specification));
 
-			var result = analysis.ComputeSinglePointsOfFailures(specification.Collision, $"counter examples/elbtunnel/OriginalDesign/{modelChecker.Name}");
+			var result = analysis.ComputeMinimalCriticalSets(specification.Collision, maxCardinality: 1);
 			result.SaveCounterExamples("counter examples/elbtunnel/");
 
 			Console.WriteLine(result);

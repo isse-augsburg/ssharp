@@ -49,6 +49,11 @@ namespace SafetySharp.Analysis
 		private readonly SSharpChecker _modelChecker = new SSharpChecker();
 
 		/// <summary>
+		///   The model checker's configuration that determines certain model checker settings.
+		/// </summary>
+		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="model">The model that should be analyzed.</param>
@@ -57,11 +62,6 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(model, nameof(model));
 			_model = model;
 		}
-
-		/// <summary>
-		///   The model checker's configuration that determines certain model checker settings.
-		/// </summary>
-		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
 
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
@@ -76,7 +76,11 @@ namespace SafetySharp.Analysis
 		///   Computes the minimal critical sets for the <paramref name="hazard" />.
 		/// </summary>
 		/// <param name="hazard">The hazard the minimal critical sets should be computed for.</param>
-		public Result ComputeMinimalCriticalSets(Formula hazard)
+		/// <param name="maxCardinality">
+		///   The maximum cardinality of the fault sets that should be checked. By default, all minimal
+		///   critical fault sets are determined.
+		/// </param>
+		public Result ComputeMinimalCriticalSets(Formula hazard, int maxCardinality = Int32.MaxValue)
 		{
 			Requires.NotNull(hazard, nameof(hazard));
 
@@ -88,6 +92,7 @@ namespace SafetySharp.Analysis
 			for (var i = 0; i < faults.Length; ++i)
 				faults[i].Identifier = i;
 
+			var isComplete = true;
 			var safeSets = new HashSet<int>();
 			var criticalSets = new HashSet<int>();
 			var checkedSets = new HashSet<int>();
@@ -113,6 +118,14 @@ namespace SafetySharp.Analysis
 				if (sets.Count == 0)
 					break;
 
+				// Abort if we've exceeded the maximum fault set cardinality; doing the check here allows us
+				// to report the analysis as complete if the maximum cardinality is never reached
+				if (cardinality > maxCardinality)
+				{
+					isComplete = false;
+					break;
+				}
+
 				// We have to check each set; if one of them is a critical set, it has no effect on the other
 				// sets we have to check
 				foreach (var set in sets)
@@ -164,7 +177,7 @@ namespace SafetySharp.Analysis
 				}
 			}
 
-			return new Result(criticalSets, checkedSets, faults, counterExamples, exceptions);
+			return new Result(isComplete, criticalSets, checkedSets, faults, counterExamples, exceptions);
 		}
 
 		/// <summary>
@@ -186,106 +199,6 @@ namespace SafetySharp.Analysis
 
 				return new RuntimeModel(serializedData);
 			};
-		}
-
-		/// <summary>
-		///   Checks if the system has an inherent safety flaw. If this is not the case,
-		///   computes the single points of failures for the <paramref name="hazard" />.
-		/// </summary>
-		/// <param name="hazard">The hazard the minimal cut sets should be computed for.</param>
-		/// <param name="counterExamplePath">
-		///   The path the generated counter examples should be written to. If null, counter examples are
-		///   not written.
-		/// </param>
-		public Result ComputeSinglePointsOfFailures(Formula hazard, string counterExamplePath = null)
-		{
-			Requires.NotNull(hazard, nameof(hazard));
-
-			var faults = _model.GetFaults();
-			Requires.That(faults.Length < 32, "More than 31 faults are currently not supported.");
-
-			for (var i = 0; i < faults.Length; ++i)
-				faults[i].Identifier = i;
-
-			var safeSets = new HashSet<int>();
-			var criticalSets = new HashSet<int>();
-			var checkedSets = new HashSet<int>();
-			var counterExamples = new Dictionary<int, CounterExample>();
-			var exceptions = new Dictionary<int, Exception>();
-
-			// Store the serialized model to improve performance
-			var serializedModel = RuntimeModelSerializer.Save(_model, !hazard);
-
-			// Max cardinality is either 0 or 1 depending on the number of faults.
-			var maxCardinalityToCheck = Math.Min(faults.Length, 1);
-
-			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
-			// all singleton sets (SPOFs)
-			for (var cardinality = 0; cardinality <= maxCardinalityToCheck; ++cardinality)
-			{
-				// Generate the sets for the current level that we'll have to check
-				var sets = GeneratePowerSetLevel(safeSets, criticalSets, cardinality, faults.Length);
-
-				// Clear the safe sets, we don't need the previous level to generate the next one
-				safeSets.Clear();
-
-				// If there are no sets to check, we're done; this happens when there are so many critical sets
-				// that this level does not contain any set that is not a super set of any of those critical sets
-				if (sets.Count == 0)
-					break;
-
-				// We have to check each set; if one of them is a critical set, it has no effect on the other
-				// sets we have to check
-				foreach (var set in sets)
-				{
-					// Enable or disable the faults that the set represents
-					for (var i = 1; i <= faults.Length; ++i)
-						faults[i - 1].Activation = (set & (1 << (i - 1))) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
-
-					var faultNames = faults
-						.Where(fault => fault.Activation == Activation.Nondeterministic)
-						.Select(fault => fault.Name)
-						.OrderBy(name => name)
-						.ToArray();
-					var setRepresentation = faultNames.Length == 0 ? "{}" : String.Join(", ", faultNames);
-
-					// If there was a counter example, the set is a critical set
-					try
-					{
-						var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializedModel, faults));
-
-						if (!result.FormulaHolds)
-						{
-							_modelChecker.Output($"*** Found minimal critical fault set: {setRepresentation}.");
-							_modelChecker.Output("");
-
-							criticalSets.Add(set);
-						}
-						else
-						{
-							_modelChecker.Output($"*** Found safe fault set: {setRepresentation}.");
-							_modelChecker.Output("");
-
-							safeSets.Add(set);
-						}
-
-						checkedSets.Add(set);
-
-						if (result.CounterExample != null)
-							counterExamples.Add(set, result.CounterExample);
-					}
-					catch (AnalysisException e)
-					{
-						checkedSets.Add(set);
-						criticalSets.Add(set);
-
-						exceptions.Add(set, e.InnerException);
-						counterExamples.Add(set, e.CounterExample);
-					}
-				}
-			}
-
-			return new Result(criticalSets, checkedSets, faults, counterExamples, exceptions);
 		}
 
 		/// <summary>
@@ -374,18 +287,25 @@ namespace SafetySharp.Analysis
 			public IDictionary<ISet<Fault>, CounterExample> CounterExamples { get; }
 
 			/// <summary>
+			///   Gets a value indicating whether the analysis might is complete, i.e., all fault sets have been checked for criticality.
+			/// </summary>
+			public bool IsComplete { get; }
+
+			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
+			/// <param name="isComplete">Indicates whether the analysis is complete.</param>
 			/// <param name="criticalSets">The minimal critical sets.</param>
 			/// <param name="checkedSets">The sets that have been checked.</param>
 			/// <param name="faults">The faults that have been checked.</param>
 			/// <param name="counterExamples">The counter examples that were generated for the critical fault sets.</param>
 			/// <param name="exceptions">The exceptions that have been thrown during the analysis.</param>
-			internal Result(HashSet<int> criticalSets, HashSet<int> checkedSets, Fault[] faults, Dictionary<int, CounterExample> counterExamples,
-							Dictionary<int, Exception> exceptions)
+			internal Result(bool isComplete, HashSet<int> criticalSets, HashSet<int> checkedSets, Fault[] faults,
+							Dictionary<int, CounterExample> counterExamples, Dictionary<int, Exception> exceptions)
 			{
 				var knownFaultSets = new Dictionary<int, ISet<Fault>>();
 
+				IsComplete = isComplete;
 				MinimalCriticalSets = Convert(knownFaultSets, criticalSets, faults);
 				CheckedSets = Convert(knownFaultSets, checkedSets, faults);
 				Faults = faults;
@@ -464,6 +384,12 @@ namespace SafetySharp.Analysis
 				if (Exceptions.Any())
 				{
 					builder.AppendLine("*** Warning: Unhandled exceptions have been thrown during the analysis. ***");
+					builder.AppendLine();
+				}
+
+				if (!IsComplete)
+				{
+					builder.AppendLine("*** Warning: Analysis might be incomplete; not all fault sets have been checked. ***");
 					builder.AppendLine();
 				}
 

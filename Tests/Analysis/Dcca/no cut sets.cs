@@ -37,6 +37,7 @@ namespace Tests.Analysis.Dcca
 			result.MinimalCriticalSets.ShouldBeEmpty();
 			result.CounterExamples.ShouldBeEmpty();
 			result.Exceptions.ShouldBeEmpty();
+			result.IsComplete.ShouldBe(true);
 
 			ShouldContain(result.CheckedSets);
 			ShouldContain(result.CheckedSets, c.F1);
@@ -48,6 +49,14 @@ namespace Tests.Analysis.Dcca
 			ShouldContain(result.CheckedSets, c.F2, c.F3);
 
 			ShouldContain(result.CheckedSets, c.F1, c.F2, c.F3);
+
+			result = DccaWithMaxCardinality(c.X > 4, 0, c);
+
+			result.CheckedSets.Count.ShouldBe(1);
+			result.MinimalCriticalSets.ShouldBeEmpty();
+			result.CounterExamples.ShouldBeEmpty();
+			result.Exceptions.ShouldBeEmpty();
+			result.IsComplete.ShouldBe(false);
 		}
 
 		private class C : Component

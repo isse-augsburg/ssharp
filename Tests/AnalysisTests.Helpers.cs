@@ -66,14 +66,19 @@ namespace Tests
 			return result.FormulaHolds;
 		}
 
-		protected SafetyAnalysis.Result Dcca(Formula hazard, params IComponent[] components)
+		protected SafetyAnalysis.Result DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
 		{
 			var analysis = new SafetyAnalysis(new Model(components));
 			analysis.OutputWritten += message => Output.Log("{0}", message);
-			var result = analysis.ComputeMinimalCriticalSets(hazard);
+			var result = analysis.ComputeMinimalCriticalSets(hazard, maxCardinality);
 			Output.Log("{0}", result);
 
 			return result;
+		}
+
+		protected SafetyAnalysis.Result Dcca(Formula hazard, params IComponent[] components)
+		{
+			return DccaWithMaxCardinality(hazard, Int32.MaxValue, components);
 		}
 
 		private ModelChecker CreateModelChecker()
