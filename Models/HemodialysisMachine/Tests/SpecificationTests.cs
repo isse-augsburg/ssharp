@@ -136,6 +136,11 @@ namespace HemodialysisMachine.Tests
 			Console.WriteLine(result);
 		}
 
+		private static void Main()
+		{
+			new SpecificationTests().Test();
+		}
+
 		[Test]
 		public void Test()
 		{
