@@ -20,45 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.FaultActivation.Invariants
+namespace Tests.FaultActivation.Formulas
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class MultipleFaultsFullyMinimizable : FaultActivationTestObject
+	internal class CombinedActivatedInitialState : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			GenerateStateSpace(new C());
-
-			StateCount.ShouldBe(2);
-			TransitionCount.ShouldBe(5);
-			ComputedTransitionCount.ShouldBe(11);
+			var c = new C();
+			CheckInvariant(!c.F1.IsActivated, c).ShouldBe(false);
+			CheckInvariant(!c.F2.IsActivated, c).ShouldBe(false);
+			CheckInvariant(!(c.F1.IsActivated && c.F2.IsActivated), c).ShouldBe(false);
 		}
 
-		private class C : Component
+		private class C : Component, IInitializable
 		{
-			private readonly Fault _f1 = new TransientFault();
-			private readonly Fault _f2 = new TransientFault();
+			public readonly Fault F1 = new TransientFault();
+			public readonly Fault F2 = new TransientFault();
 
 			private int _x;
 
-			[FaultEffect(Fault = nameof(_f1))]
-			public class E1 : C
+			public virtual int X => 1;
+
+			public void Initialize()
 			{
-				public override void Update()
-				{
-					_x = 1;
-				}
+				_x = X;
 			}
 
-			[FaultEffect(Fault = nameof(_f2))]
+			[FaultEffect(Fault = nameof(F1)), Priority(0)]
+			public class E1 : C
+			{
+				public override int X => base.X + 1;
+			}
+
+			[FaultEffect(Fault = nameof(F2)), Priority(1)]
 			public class E2 : C
 			{
-				public override void Update()
-				{
-					_x = 1;
-				}
+				public override int X => base.X + 2;
 			}
 		}
 	}

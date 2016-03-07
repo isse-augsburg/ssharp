@@ -20,28 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.FaultActivation.Invariants
+namespace Tests.FaultActivation.StateGraph
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class FaultWithoutEffect : FaultActivationTestObject
+	internal class SingleTransientFaultActivatedOnce : FaultActivationTestObject
 	{
 		protected override void Check()
 		{
 			GenerateStateSpace(new C());
 
-			StateCount.ShouldBe(51);
-			TransitionCount.ShouldBe(52);
-			ComputedTransitionCount.ShouldBe(103);
+			StateCount.ShouldBe(5);
+			TransitionCount.ShouldBe(7);
+			ComputedTransitionCount.ShouldBe(11);
 		}
 
 		private class C : Component
 		{
 			private readonly Fault _f = new TransientFault();
 
-			[Range(0, 50, OverflowBehavior.Clamp)]
+			[Range(0, 2, OverflowBehavior.Clamp)]
 			private int _x;
+
+			[Range(0, 2, OverflowBehavior.Clamp)]
+			private int _y;
 
 			public override void Update()
 			{
@@ -53,9 +56,10 @@ namespace Tests.FaultActivation.Invariants
 			{
 				public override void Update()
 				{
-					++_x;
+					if (_x == 0)
+						_y = 1;
+
 					base.Update();
-					--_x;
 				}
 			}
 		}

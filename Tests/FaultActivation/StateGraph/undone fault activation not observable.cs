@@ -20,23 +20,50 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.FaultActivation.StateGraph
 {
-	using SafetySharp.Analysis;
-	using Xunit;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	public partial class FaultActivationTests
+	internal class UndoneFaultActivationNotObservable : FaultActivationTestObject
 	{
-		[Theory, MemberData("DiscoverTests", "FaultActivation/StateGraph")]
-		public void StateGraph(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			GenerateStateSpace(new C());
+
+			StateCount.ShouldBe(6);
+			TransitionCount.ShouldBe(16);
+			ComputedTransitionCount.ShouldBe(25);
 		}
 
-		[Theory, MemberData("DiscoverTests", "FaultActivation/Formulas")]
-		public void Formulas(string test, string file)
+		private class C : Component
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker));
+			private readonly Fault _f = new TransientFault();
+
+			[Range(0, 5, OverflowBehavior.Clamp)]
+			private int _x;
+
+			public override void Update()
+			{
+				// When checking B, activation of _f is undone, fault might be activated again when retrieving Y
+				if (B)
+					_x += Y;
+			}
+
+			public virtual int Y => Choose(1, 2, 3, 4); 
+			public virtual bool B => true;
+
+			[FaultEffect(Fault = nameof(_f))]
+			public class E1 : C
+			{
+				public override int Y => 3;
+			}
+
+			[FaultEffect(Fault = nameof(_f))]
+			public class E2 : C
+			{
+				public override bool B => true;
+			}
 		}
 	}
 }

@@ -262,13 +262,7 @@ namespace SafetySharp.Analysis
 				{
 					var transition = _transitions[i];
 
-					int index;
-					if (!_states.AddState(transition->TargetState, out index))
-						continue;
-
-					Interlocked.Increment(ref _context._stateCount);
-					_stateStack.PushState(index);
-
+					// Check if the invariant is violated; if so, generate a counter example and abort
 					if (transition->Formulas == 0)
 					{
 						_context._loadBalancer.Terminate();
@@ -276,6 +270,14 @@ namespace SafetySharp.Analysis
 
 						return;
 					}
+
+					// Otherwise, store the state if it hasn't been discovered before
+					int index;
+					if (!_states.AddState(transition->TargetState, out index))
+						continue;
+
+					Interlocked.Increment(ref _context._stateCount);
+					_stateStack.PushState(index);
 				}
 			}
 

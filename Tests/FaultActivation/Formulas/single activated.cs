@@ -20,23 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.FaultActivation.Formulas
 {
-	using SafetySharp.Analysis;
-	using Xunit;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	public partial class FaultActivationTests
+	internal class SingleActivated : AnalysisTestObject
 	{
-		[Theory, MemberData("DiscoverTests", "FaultActivation/StateGraph")]
-		public void StateGraph(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
+			var c = new C();
+			CheckInvariant(!c.F.IsActivated, c).ShouldBe(false);
 		}
 
-		[Theory, MemberData("DiscoverTests", "FaultActivation/Formulas")]
-		public void Formulas(string test, string file)
+		private class C : Component
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker));
+			public readonly Fault F = new TransientFault();
+
+			[Range(0, 10, OverflowBehavior.Clamp)]
+			private int _x;
+
+			public override void Update()
+			{
+				_x++;
+			}
+
+			[FaultEffect(Fault = nameof(F))]
+			public class E : C
+			{
+				public override void Update()
+				{
+					if (_x == 5)
+						return;
+
+					_x++;
+				}
+			}
 		}
 	}
 }

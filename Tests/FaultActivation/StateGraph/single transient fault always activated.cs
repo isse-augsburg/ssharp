@@ -20,49 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.FaultActivation.Invariants
+namespace Tests.FaultActivation.StateGraph
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class UndoneFaultActivationNotObservable : FaultActivationTestObject
+	internal class SingleTransientFault : FaultActivationTestObject
 	{
 		protected override void Check()
 		{
 			GenerateStateSpace(new C());
 
-			StateCount.ShouldBe(6);
-			TransitionCount.ShouldBe(16);
-			ComputedTransitionCount.ShouldBe(25);
+			StateCount.ShouldBe(9);
+			TransitionCount.ShouldBe(18);
+			ComputedTransitionCount.ShouldBe(19);
 		}
 
 		private class C : Component
 		{
 			private readonly Fault _f = new TransientFault();
 
-			[Range(0, 5, OverflowBehavior.Clamp)]
+			[Range(0, 2, OverflowBehavior.Clamp)]
 			private int _x;
+
+			[Range(0, 2, OverflowBehavior.Clamp)]
+			private int _y;
 
 			public override void Update()
 			{
-				// When checking B, activation of _f is undone, fault might be activated again when retrieving Y
-				if (B)
-					_x += Y;
-			}
-
-			public virtual int Y => Choose(1, 2, 3, 4); 
-			public virtual bool B => true;
-
-			[FaultEffect(Fault = nameof(_f))]
-			public class E1 : C
-			{
-				public override int Y => 3;
+				++_x;
 			}
 
 			[FaultEffect(Fault = nameof(_f))]
-			public class E2 : C
+			public class E : C
 			{
-				public override bool B => true;
+				public override void Update()
+				{
+					++_y;
+				}
 			}
 		}
 	}

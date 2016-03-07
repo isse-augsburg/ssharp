@@ -379,15 +379,23 @@
     <Compile Include="FaultActivationTests.Helpers.cs">
       <DependentUpon>FaultActivationTests.cs</DependentUpon>
     </Compile>
-    <Compile Include="FaultActivation\Invariants\multiple faults fully minimizable.cs" />
-    <Compile Include="FaultActivation\Invariants\nondeterminism.cs" />
-    <Compile Include="FaultActivation\Invariants\single permanent fault activated once.cs" />
-    <Compile Include="FaultActivation\Invariants\multiple faults semi minimizable.cs" />
-    <Compile Include="FaultActivation\Invariants\undone fault activation observable.cs" />
-    <Compile Include="FaultActivation\Invariants\undone fault activation not observable.cs" />
-    <Compile Include="FaultActivation\Invariants\faults with constant effects.cs" />
-    <Compile Include="FaultActivation\Invariants\unused fault.cs" />
-    <Compile Include="FaultActivation\Invariants\initial state.cs" />
+    <Compile Include="FaultActivation\Formulas\combined activated initial state.cs" />
+    <Compile Include="FaultActivation\Formulas\combined activated.cs" />
+    <Compile Include="FaultActivation\Formulas\multiple activated.cs" />
+    <Compile Include="FaultActivation\Formulas\single activated.cs" />
+    <Compile Include="FaultActivation\Formulas\never activated.cs" />
+    <Compile Include="FaultActivation\Formulas\not activated initial state.cs" />
+    <Compile Include="FaultActivation\Formulas\multiple activated initial state.cs" />
+    <Compile Include="FaultActivation\Formulas\single activated initial state.cs" />
+    <Compile Include="FaultActivation\StateGraph\multiple faults fully minimizable.cs" />
+    <Compile Include="FaultActivation\StateGraph\nondeterminism.cs" />
+    <Compile Include="FaultActivation\StateGraph\single permanent fault activated once.cs" />
+    <Compile Include="FaultActivation\StateGraph\multiple faults semi minimizable.cs" />
+    <Compile Include="FaultActivation\StateGraph\undone fault activation observable.cs" />
+    <Compile Include="FaultActivation\StateGraph\undone fault activation not observable.cs" />
+    <Compile Include="FaultActivation\StateGraph\faults with constant effects.cs" />
+    <Compile Include="FaultActivation\StateGraph\unused fault.cs" />
+    <Compile Include="FaultActivation\StateGraph\initial state.cs" />
     <Compile Include="Formulas\StateFormulas\binary expressions.cs" />
     <Compile Include="Formulas\StateFormulas\arrays.cs" />
     <Compile Include="Formulas\StateFormulas\parameters.cs" />
@@ -446,11 +454,11 @@
     <Compile Include="Normalization\Partial\Unchanged\enum declaration.cs" />
     <Compile Include="Normalization\Partial\Unchanged\interface declarations.cs" />
     <Compile Include="Normalization\Partial\Unchanged\struct declarations.cs" />
-    <Compile Include="FaultActivation\Invariants\single permanent fault always activated.cs" />
-    <Compile Include="FaultActivation\Invariants\single transient fault activated once.cs" />
-    <Compile Include="FaultActivation\Invariants\single transient fault always activated.cs" />
-    <Compile Include="FaultActivation\Invariants\without faults.cs" />
-    <Compile Include="FaultActivation\Invariants\fault without observable effect.cs" />
+    <Compile Include="FaultActivation\StateGraph\single permanent fault always activated.cs" />
+    <Compile Include="FaultActivation\StateGraph\single transient fault activated once.cs" />
+    <Compile Include="FaultActivation\StateGraph\single transient fault always activated.cs" />
+    <Compile Include="FaultActivation\StateGraph\without faults.cs" />
+    <Compile Include="FaultActivation\StateGraph\fault without observable effect.cs" />
     <Compile Include="ReflectionTests.cs" />
     <Compile Include="ReflectionTests.Helpers.cs">
       <DependentUpon>ReflectionTests.cs</DependentUpon>

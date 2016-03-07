@@ -20,30 +20,56 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.FaultActivation.Invariants
+namespace Tests.FaultActivation.Formulas
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class Nondeterminism : FaultActivationTestObject
+	internal class MultipleActivated : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			GenerateStateSpace(new C());
-
-			StateCount.ShouldBe(3);
-			TransitionCount.ShouldBe(4);
-			ComputedTransitionCount.ShouldBe(7);
+			var c = new C();
+			CheckInvariant(!c.F1.IsActivated, c).ShouldBe(false);
+			CheckInvariant(!c.F2.IsActivated, c).ShouldBe(false);
+			CheckInvariant(!(c.F1.IsActivated && c.F2.IsActivated), c).ShouldBe(true);
 		}
 
 		private class C : Component
 		{
-			[Range(0, 2, OverflowBehavior.Clamp)]
+			public readonly Fault F1 = new TransientFault();
+			public readonly Fault F2 = new TransientFault();
+
+			[Range(0, 10, OverflowBehavior.Clamp)]
 			private int _x;
 
 			public override void Update()
 			{
-				_x += Choose(1, 1);
+				_x++;
+			}
+
+			[FaultEffect(Fault = nameof(F1))]
+			public class E1 : C
+			{
+				public override void Update()
+				{
+					if (_x == 5)
+						return;
+
+					_x++;
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F2))]
+			public class E2 : C
+			{
+				public override void Update()
+				{
+					if (_x == 1)
+						return;
+
+					_x++;
+				}
 			}
 		}
 	}

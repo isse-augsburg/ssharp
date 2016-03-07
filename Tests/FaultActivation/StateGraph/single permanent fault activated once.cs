@@ -20,39 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.FaultActivation.Invariants
+namespace Tests.FaultActivation.StateGraph
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class UnusedFault : FaultActivationTestObject
+	internal class SinglePermanentFaultActivatedOnce : FaultActivationTestObject
 	{
 		protected override void Check()
 		{
 			GenerateStateSpace(new C());
 
-			StateCount.ShouldBe(51);
-			TransitionCount.ShouldBe(52);
+			StateCount.ShouldBe(5);
+			TransitionCount.ShouldBe(7);
+			ComputedTransitionCount.ShouldBe(9);
 		}
 
 		private class C : Component
 		{
-			private readonly Fault _f = new TransientFault();
+			private readonly Fault _f = new PermanentFault();
 
-			[Range(0, 50, OverflowBehavior.Clamp)]
+			[Range(0, 2, OverflowBehavior.Clamp)]
 			private int _x;
+
+			[Range(0, 2, OverflowBehavior.Clamp)]
+			private int _y;
 
 			public override void Update()
 			{
 				++_x;
 			}
 
-			public virtual int Y => 1;
-
 			[FaultEffect(Fault = nameof(_f))]
 			public class E : C
 			{
-				public override int Y => 7;
+				public override void Update()
+				{
+					if (_x == 0)
+						_y = 1;
+
+					base.Update();
+				}
 			}
 		}
 	}
