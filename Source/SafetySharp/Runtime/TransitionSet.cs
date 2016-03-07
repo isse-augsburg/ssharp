@@ -242,6 +242,9 @@ namespace SafetySharp.Runtime
 					// If we don't know the state yet, set everything up
 					if (faultIndex == -1)
 					{
+						if (_nextFaultIndex >= _capacity)
+							throw new OutOfMemoryException("Out of memory. Try increasing the successor state capacity.");
+
 						_lookup[hashedIndex] = _nextFaultIndex;
 						_faults[_nextFaultIndex] = new FaultSet { ActivatedFaults = activatedFaults, NextSet = -1 };
 						_successors.Add((uint)hashedIndex);
@@ -266,6 +269,9 @@ namespace SafetySharp.Runtime
 							return false;
 					}
 
+					if (_nextFaultIndex >= _capacity)
+						throw new OutOfMemoryException("Out of memory. Try increasing the successor state capacity.");
+
 					// If we reach this point, we have to add the transition
 					_faults[_nextFaultIndex] = new FaultSet { ActivatedFaults = activatedFaults, NextSet = _lookup[hashedIndex] };
 					_lookup[hashedIndex] = _nextFaultIndex;
@@ -275,7 +281,7 @@ namespace SafetySharp.Runtime
 				}
 
 				throw new OutOfMemoryException(
-					"Failed to find an empty hash table slot within a reasonable amount of time. Try increasing the state capacity.");
+					"Failed to find an empty hash table slot within a reasonable amount of time. Try increasing the successor state capacity.");
 			}
 
 			/// <summary>
