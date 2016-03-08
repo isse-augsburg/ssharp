@@ -31,7 +31,7 @@ namespace Tests.Execution.Scheduling
 	{
 		protected override void Check()
 		{
-			var m = Model.Create(new S());
+			var m = new Model(new S());
 			var r = m.ToRuntimeModel();
 
 			r.RootComponents.Length.ShouldBe(4);

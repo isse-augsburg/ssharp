@@ -80,7 +80,7 @@ namespace HemodialysisMachine.Tests
 		{
 			var specification = new DialyzingFluidDeliverySystemTestEnvironment();
 
-			var simulator = new Simulator(Model.Create(specification)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(specification)); //Important: Call after all objects have been created
 			var dialyzerAfterStep0 = simulator.Model.RootComponents.OfType<DialyzingFluidDeliverySystemTestEnvironmentDialyzer>().First();
 			var dialyzingFluidDeliverySystemAfterStep0 = simulator.Model.RootComponents.OfType<DialyzingFluidDeliverySystem>().First();
 			Console.Out.WriteLine("Initial");
@@ -100,7 +100,7 @@ namespace HemodialysisMachine.Tests
 		public void DialyzingFluidDeliverySystemWorks_ModelChecking()
 		{
 			var specification = new DialyzingFluidDeliverySystemTestEnvironment();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var analysis = new SafetyAnalysis(new Model(specification));
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.Dialyzer.MembraneIntact == false);
 			result.SaveCounterExamples("counter examples/hdmachine");

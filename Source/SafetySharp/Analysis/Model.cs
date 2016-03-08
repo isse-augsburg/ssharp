@@ -60,24 +60,26 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Creates a <see cref="Model" /> instance for the <paramref name="obj" />. The object must have at least one member marked
-		///   with <see cref="RootAttribute" />.
+		///   Creates a <see cref="Model" /> instance for the <paramref name="specification" />.
+		///   The <paramref name="specification" /> must have at least one member marked with <see cref="RootAttribute" />.
 		/// </summary>
-		/// <param name="obj">The object the model should be created for.</param>
-		public static Model Create(object obj)
+		/// <param name="specification">The specification the model should be created for.</param>
+		public Model(object specification)
 		{
-			Requires.NotNull(obj, nameof(obj));
+			Requires.NotNull(specification, nameof(specification));
 
 			const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 			var components = new HashSet<IComponent>(ReferenceEqualityComparer<IComponent>.Default);
 			var roles = new Dictionary<IComponent, Role>(ReferenceEqualityComparer<IComponent>.Default);
 
-			CollectComponents(components, roles, obj.GetType().GetFields(bindingFlags), info => info.FieldType, info => info.GetValue(obj));
-			CollectComponents(components, roles, obj.GetType().GetProperties(bindingFlags), info => info.PropertyType, info => info.GetValue(obj));
-			CollectComponents(components, roles, obj.GetType().GetMethods(bindingFlags), info => info.ReturnType, info =>
+			CollectComponents(components, roles, specification.GetType().GetFields(bindingFlags), info => info.FieldType,
+				info => info.GetValue(specification));
+			CollectComponents(components, roles, specification.GetType().GetProperties(bindingFlags), info => info.PropertyType,
+				info => info.GetValue(specification));
+			CollectComponents(components, roles, specification.GetType().GetMethods(bindingFlags), info => info.ReturnType, info =>
 			{
 				if (info.GetParameters().Length == 0)
-					return info.Invoke(obj, new object[0]);
+					return info.Invoke(specification, new object[0]);
 
 				return null;
 			});
@@ -88,7 +90,7 @@ namespace SafetySharp.Analysis
 					$"Unable to determine root blocks. At least one property, field, or method must be marked with {typeof(RootAttribute).FullName}");
 			}
 
-			return new Model(components.OrderByDescending(component => roles[component]));
+			AddRange(components.OrderByDescending(component => roles[component]));
 		}
 
 		/// <summary>

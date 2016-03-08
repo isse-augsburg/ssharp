@@ -37,7 +37,7 @@ namespace HemodialysisMachine.Tests
 		public void Simulate_1Step()
 		{
 			var testModel = new Specification();
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (DialyzingFluidFlowCombinator)simulator.Model.RootComponents[0];
@@ -47,7 +47,7 @@ namespace HemodialysisMachine.Tests
 		public void Simulate_10_Step()
 		{
 			var testModel = new Specification();
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 			simulator.SimulateStep();
 			simulator.SimulateStep();
@@ -67,7 +67,7 @@ namespace HemodialysisMachine.Tests
 		{
 			var testModel = new Specification();
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			var patient = simulator.Model.RootComponents.OfType<Patient>().First();
 			var hdMachine = simulator.Model.RootComponents.OfType<HdMachine>().First();
 			hdMachine.Dialyzer.DialyzerMembraneRupturesFault.Activation = Activation.Forced;
@@ -91,7 +91,7 @@ namespace HemodialysisMachine.Tests
 		{
 			var testModel = new Specification();
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			var patient = simulator.Model.RootComponents.OfType<Patient>().First();
 			var hdMachine = simulator.Model.RootComponents.OfType<HdMachine>().First();
 			hdMachine.DialyzingFluidDeliverySystem.DialyzingFluidWaterPreparation.WaterHeaterDefect.Activation = Activation.Forced;
@@ -116,7 +116,7 @@ namespace HemodialysisMachine.Tests
 		public void IncomingBloodIsContaminated_ModelChecking()
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification)) { Configuration = { StateCapacity = 1310720 } };
+			var analysis = new SafetyAnalysis(new Model(specification)) { Configuration = { StateCapacity = 1310720 } };
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.IncomingBloodNotOk);
 			result.SaveCounterExamples("counter examples/hdmachine");
@@ -128,7 +128,7 @@ namespace HemodialysisMachine.Tests
 		public void DialysisFinishedAndBloodNotCleaned_ModelChecking()
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification)) { Configuration = { StateCapacity = 1310720 } };
+			var analysis = new SafetyAnalysis(new Model(specification)) { Configuration = { StateCapacity = 1310720 } };
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.BloodNotCleanedAndDialyzingFinished);
 			result.SaveCounterExamples("counter examples/hdmachine");
@@ -145,7 +145,7 @@ namespace HemodialysisMachine.Tests
 		public void Test()
 		{
 			var specification = new Specification();
-			var model = Model.Create(specification);
+			var model = new Model(specification);
 			var faults = model.GetFaults();
 
 			for (var i = 0; i < faults.Length; ++i)

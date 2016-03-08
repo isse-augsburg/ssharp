@@ -101,7 +101,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.Connect(source.Outgoing, direct.Incoming);
 			testModel.Combinator.Connect(direct.Outgoing, sink.Incoming);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator) simulator.Model.RootComponents[0];
@@ -131,7 +131,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.Connect(source.Outgoing, direct.Incoming);
 			testModel.Combinator.Connect(direct.Outgoing, sink.Incoming);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -164,7 +164,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.Connect(source.Outgoing, direct.Incoming);
 			testModel.Combinator.Connect(direct.Outgoing, sink.Incoming);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -203,7 +203,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.Connect(direct1.Outgoing, direct2.Incoming);
 			testModel.Combinator.Connect(direct2.Outgoing, sink.Incoming);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -238,7 +238,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.Connect(secondInComposite.Outgoing, composite.InternalSink.Incoming);
 			testModel.Combinator.Connect(composite.Outgoing, sink.Incoming);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -281,7 +281,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.Connect(way1Direct.Outgoing, way1Sink.Incoming);
 			testModel.Combinator.Connect(way2Direct.Outgoing, way2Sink.Incoming);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -320,7 +320,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.Connect(source2.Outgoing, way2Direct.Incoming);
 			testModel.Combinator.Connect(new PortFlowOut<Int, Int>[] { way1Direct.Outgoing, way2Direct.Outgoing }, sink.Incoming);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -360,7 +360,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.Connect(way2Direct.Outgoing, composite.InternalSink.Incoming);
 			testModel.Combinator.Connect(composite.Outgoing, sinkOutside.Incoming);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -400,7 +400,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.Connect(new PortFlowOut<Int, Int>[] { way1Direct.Outgoing, way2Direct.Outgoing }, composite.InternalSink.Incoming);
 			testModel.Combinator.Connect(composite.Outgoing, sink.Incoming);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -438,7 +438,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.Replace(stubIn.Incoming, sink.Incoming);
 			testModel.Combinator.Replace(stubOut.Outgoing, direct.Outgoing);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -473,7 +473,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutWithIn(source, direct);
 			testModel.Combinator.ConnectOutWithIn(direct, sink);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -513,7 +513,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutWithIn(direct1, direct2);
 			testModel.Combinator.ConnectOutWithIn(direct2, sink);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -548,7 +548,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutWithOut(secondInComposite, composite);
 			testModel.Combinator.ConnectOutWithIn(composite, sink);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -591,7 +591,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutWithIn(way1Direct, way1Sink);
 			testModel.Combinator.ConnectOutWithIn(way2Direct, way2Sink);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -628,7 +628,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutWithIn(source2, way2Direct);
 			testModel.Combinator.ConnectOutsWithIn(new IFlowComponentUniqueOutgoing<Int, Int>[] { way1Direct, way2Direct }, sink);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -668,7 +668,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutWithOut(way2Direct, composite);
 			testModel.Combinator.ConnectOutWithIn(composite, sinkOutside);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
@@ -708,7 +708,7 @@ namespace HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutsWithOut(new IFlowComponentUniqueOutgoing<Int, Int>[] { way1Direct, way2Direct }, composite);
 			testModel.Combinator.ConnectOutWithIn(composite, sink);
 
-			var simulator = new Simulator(Model.Create(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];

@@ -34,7 +34,7 @@ namespace PressureTank
 		public void RuptureDcca()
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var analysis = new SafetyAnalysis(new Model(specification));
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.Rupture);
 			result.SaveCounterExamples("counter examples/pressure tank/");
@@ -46,7 +46,7 @@ namespace PressureTank
 		public void Test()
 		{
 			var specification = new Specification();
-			var model = Model.Create(specification);
+			var model = new Model(specification);
 			var faults = model.GetFaults();
 
 			for (var i = 0; i < faults.Length; ++i)

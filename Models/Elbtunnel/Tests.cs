@@ -31,11 +31,16 @@ namespace Elbtunnel
 	[TestFixture]
 	public class Tests
 	{
+		public static void Main()
+		{
+			new Tests().Test();
+		}
+
 		[Test]
 		public void CollisionDcca()
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var analysis = new SafetyAnalysis(new Model(specification));
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.Collision);
 			result.SaveCounterExamples("counter examples/elbtunnel/");
@@ -43,16 +48,11 @@ namespace Elbtunnel
 			Console.WriteLine(result);
 		}
 
-		public static void Main()
-		{
-			new Tests().Test();
-		}
-
 		[Test]
 		public void Test()
 		{
 			var specification = new Specification();
-			var model = Model.Create(specification);
+			var model = new Model(specification);
 			var faults = model.GetFaults();
 
 			for (var i = 0; i < faults.Length; ++i)

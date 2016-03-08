@@ -17,7 +17,7 @@ namespace Elbtunnel.DesignExploration
 		public void DesignHighTubeWithLb_CollisionSpof([Values(typeof(SSharpChecker), typeof(LtsMin))] Type modelChecker)
 		{
 			var specification = new DesignHighTubeWithLb_Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var analysis = new SafetyAnalysis(new Model(specification));
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
@@ -27,7 +27,7 @@ namespace Elbtunnel.DesignExploration
 		public void DesignImprovedDetectionOfPreControl_CollisionSpof([Values(typeof(SSharpChecker), typeof(LtsMin))] Type modelChecker)
 		{
 			var specification = new DesignImprovedDetectionOfPreControl_Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var analysis = new SafetyAnalysis(new Model(specification));
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
@@ -37,7 +37,7 @@ namespace Elbtunnel.DesignExploration
 		public void DesignRemovedCounterInMainControl_CollisionSpof([Values(typeof(SSharpChecker), typeof(LtsMin))] Type modelChecker)
 		{
 			var specification = new DesignRemovedCounterInMainControl_Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var analysis = new SafetyAnalysis(new Model(specification));
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
@@ -47,7 +47,7 @@ namespace Elbtunnel.DesignExploration
 		public void DesignRemovedCounterInTolerantMainControl_CollisionSpof([Values(typeof(SSharpChecker), typeof(LtsMin))] Type modelChecker)
 		{
 			var specification = new DesignRemovedCounterInTolerantMainControl_Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var analysis = new SafetyAnalysis(new Model(specification));
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
@@ -57,7 +57,7 @@ namespace Elbtunnel.DesignExploration
 		public void DesignTolerantMainControl_CollisionSpof([Values(typeof(SSharpChecker), typeof(LtsMin))] Type modelChecker)
 		{
 			var specification = new DesignTolerantMainControl_Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var analysis = new SafetyAnalysis(new Model(specification));
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
@@ -67,7 +67,7 @@ namespace Elbtunnel.DesignExploration
 		public void OriginalDesign_CollisionSpof([Values(typeof(SSharpChecker), typeof(LtsMin))] Type modelChecker)
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var analysis = new SafetyAnalysis(new Model(specification));
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.Collision, maxCardinality: 1);
 			result.SaveCounterExamples("counter examples/elbtunnel/");

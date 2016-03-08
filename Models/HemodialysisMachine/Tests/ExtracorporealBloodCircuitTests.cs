@@ -133,7 +133,7 @@ namespace HemodialysisMachine.Tests
 		{
 			var specification = new ExtracorporealBloodCircuitTestEnvironment();
 
-			var simulator = new Simulator(Model.Create(specification)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(specification)); //Important: Call after all objects have been created
 			var extracorporealBloodCircuitAfterStep0 = simulator.Model.RootComponents.OfType<ExtracorporealBloodCircuit>().First();
 			var patientAfterStep0 = simulator.Model.RootComponents.OfType<Patient>().First();
 			Console.Out.WriteLine("Initial");
@@ -153,7 +153,7 @@ namespace HemodialysisMachine.Tests
 		public void ExtracorporealBloodCircuitWorks_ModelChecking()
 		{
 			var specification = new ExtracorporealBloodCircuitTestEnvironment();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var analysis = new SafetyAnalysis(new Model(specification));
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.Dialyzer.MembraneIntact == false);
 			result.SaveCounterExamples("counter examples/hdmachine");

@@ -192,7 +192,7 @@ namespace HemodialysisMachine.Tests
 		{
 			var specification = new DialyzerTestEnvironment();
 
-			var simulator = new Simulator(Model.Create(specification)); //Important: Call after all objects have been created
+			var simulator = new Simulator(new Model(specification)); //Important: Call after all objects have been created
 			var dialyzerAfterStep0 = (Dialyzer)simulator.Model.RootComponents.OfType<Dialyzer>().First();
 			var patientAfterStep0 =
 				(DialyzerTestEnvironmentPatient)
@@ -247,7 +247,7 @@ namespace HemodialysisMachine.Tests
 		public void DialyzerWorks_ModelChecking()
 		{
 			var specification = new DialyzerTestEnvironment();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var analysis = new SafetyAnalysis(new Model(specification));
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.Dialyzer.MembraneIntact==false);
 			result.SaveCounterExamples("counter examples/hdmachine");

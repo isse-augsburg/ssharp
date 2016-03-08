@@ -34,7 +34,7 @@ namespace Funkfahrbetrieb
 		public void CollisionDcca()
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(Model.Create(specification));
+			var analysis = new SafetyAnalysis(new Model(specification));
 
 			var result = analysis.ComputeMinimalCriticalSets(specification.PossibleCollision);
 			result.SaveCounterExamples("counter examples/ffb/");
@@ -46,7 +46,7 @@ namespace Funkfahrbetrieb
 		public void Test()
 		{
 			var specification = new Specification();
-			var model = Model.Create(specification);
+			var model = new Model(specification);
 			var faults = model.GetFaults();
 
 			for (var i = 0; i < faults.Length; ++i)

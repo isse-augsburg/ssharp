@@ -69,7 +69,7 @@ namespace Visualization.Infrastructure
 		public void SetSpecification(object specification, params Formula[] formulas)
 		{
 			_formulas = formulas;
-			_model = SafetySharp.Analysis.Model.Create(specification);
+			_model = new Model(specification);
 
 			foreach (var fault in _model.GetFaults())
 				fault.Activation = Activation.Suppressed;
