@@ -40,9 +40,9 @@ namespace Wiper
 		public void CollisionDcca()
 		{
 			var specification = new Specification(null);
-			var analysis = new SafetyAnalysis(new SafetySharpModel(specification));
+			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(specification.InvalidScenario);
+			var result = analysis.ComputeMinimalCriticalSets(new SafetySharpModel(specification), specification.InvalidScenario);
 			result.SaveCounterExamples("counter examples/wiper/");
 
 			Console.WriteLine(result);

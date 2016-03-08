@@ -40,9 +40,9 @@ namespace Elbtunnel
 		public void CollisionDcca()
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(new Model(specification));
+			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(specification.Collision);
+			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Collision);
 			result.SaveCounterExamples("counter examples/elbtunnel/");
 
 			Console.WriteLine(result);

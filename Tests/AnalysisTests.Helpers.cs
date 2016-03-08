@@ -30,6 +30,7 @@ namespace Tests
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 	using SafetySharp.Utilities;
+	using Shouldly;
 	using Utilities;
 	using Xunit.Abstractions;
 
@@ -68,11 +69,14 @@ namespace Tests
 
 		protected SafetyAnalysis.Result DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
 		{
-			var analysis = new SafetyAnalysis(new Model(components));
+			var model = new Model(components);
+			var analysis = new SafetyAnalysis();
 			analysis.OutputWritten += message => Output.Log("{0}", message);
-			var result = analysis.ComputeMinimalCriticalSets(hazard, maxCardinality);
+
+			var result = analysis.ComputeMinimalCriticalSets(model, hazard, maxCardinality);
 			Output.Log("{0}", result);
 
+			result.Model.ShouldBe(model);
 			return result;
 		}
 

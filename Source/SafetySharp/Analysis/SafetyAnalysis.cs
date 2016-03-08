@@ -39,11 +39,6 @@ namespace SafetySharp.Analysis
 	public sealed class SafetyAnalysis
 	{
 		/// <summary>
-		///   The model that is analyzed.
-		/// </summary>
-		private readonly Model _model;
-
-		/// <summary>
 		///   The model checker that is used for the analysis.
 		/// </summary>
 		private readonly SSharpChecker _modelChecker = new SSharpChecker();
@@ -52,16 +47,6 @@ namespace SafetySharp.Analysis
 		///   The model checker's configuration that determines certain model checker settings.
 		/// </summary>
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="model">The model that should be analyzed.</param>
-		public SafetyAnalysis(Model model)
-		{
-			Requires.NotNull(model, nameof(model));
-			_model = model;
-		}
 
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
@@ -75,18 +60,20 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Computes the minimal critical sets for the <paramref name="hazard" />.
 		/// </summary>
+		/// <param name="model">The model the safety analysis should be conducted for.</param>
 		/// <param name="hazard">The hazard the minimal critical sets should be computed for.</param>
 		/// <param name="maxCardinality">
 		///   The maximum cardinality of the fault sets that should be checked. By default, all minimal
 		///   critical fault sets are determined.
 		/// </param>
-		public Result ComputeMinimalCriticalSets(Formula hazard, int maxCardinality = Int32.MaxValue)
+		public Result ComputeMinimalCriticalSets(Model model, Formula hazard, int maxCardinality = Int32.MaxValue)
 		{
+			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(hazard, nameof(hazard));
 
 			_modelChecker.Configuration = Configuration;
 
-			var faults = _model.GetFaults();
+			var faults = model.GetFaults();
 			Requires.That(faults.Length < 32, "More than 31 faults are currently not supported.");
 
 			for (var i = 0; i < faults.Length; ++i)
@@ -100,7 +87,7 @@ namespace SafetySharp.Analysis
 			var exceptions = new Dictionary<int, Exception>();
 
 			// Store the serialized model to improve performance
-			var serializedModel = RuntimeModelSerializer.Save(_model, !hazard);
+			var serializedModel = RuntimeModelSerializer.Save(model, !hazard);
 
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we
@@ -177,7 +164,7 @@ namespace SafetySharp.Analysis
 				}
 			}
 
-			return new Result(isComplete, criticalSets, checkedSets, faults, counterExamples, exceptions);
+			return new Result(model, isComplete, criticalSets, checkedSets, faults, counterExamples, exceptions);
 		}
 
 		/// <summary>
@@ -292,19 +279,26 @@ namespace SafetySharp.Analysis
 			public bool IsComplete { get; }
 
 			/// <summary>
+			///   The <see cref="Model" /> instance the safety analysis was conducted for.
+			/// </summary>
+			public Model Model { get; }
+
+			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
+			/// <param name="model">The <see cref="Model" /> instance the safety analysis was conducted for.</param>
 			/// <param name="isComplete">Indicates whether the analysis is complete.</param>
 			/// <param name="criticalSets">The minimal critical sets.</param>
 			/// <param name="checkedSets">The sets that have been checked.</param>
 			/// <param name="faults">The faults that have been checked.</param>
 			/// <param name="counterExamples">The counter examples that were generated for the critical fault sets.</param>
 			/// <param name="exceptions">The exceptions that have been thrown during the analysis.</param>
-			internal Result(bool isComplete, HashSet<int> criticalSets, HashSet<int> checkedSets, Fault[] faults,
+			internal Result(Model model, bool isComplete, HashSet<int> criticalSets, HashSet<int> checkedSets, Fault[] faults,
 							Dictionary<int, CounterExample> counterExamples, Dictionary<int, Exception> exceptions)
 			{
 				var knownFaultSets = new Dictionary<int, ISet<Fault>>();
 
+				Model = model;
 				IsComplete = isComplete;
 				MinimalCriticalSets = Convert(knownFaultSets, criticalSets, faults);
 				CheckedSets = Convert(knownFaultSets, checkedSets, faults);

@@ -116,9 +116,9 @@ namespace HemodialysisMachine.Tests
 		public void IncomingBloodIsContaminated_ModelChecking()
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(new Model(specification)) { Configuration = { StateCapacity = 1310720 } };
+			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 } };
 
-			var result = analysis.ComputeMinimalCriticalSets(specification.IncomingBloodNotOk);
+			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.IncomingBloodNotOk);
 			result.SaveCounterExamples("counter examples/hdmachine");
 
 			Console.WriteLine(result);
@@ -128,9 +128,9 @@ namespace HemodialysisMachine.Tests
 		public void DialysisFinishedAndBloodNotCleaned_ModelChecking()
 		{
 			var specification = new Specification();
-			var analysis = new SafetyAnalysis(new Model(specification)) { Configuration = { StateCapacity = 1310720 } };
+			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 } };
 
-			var result = analysis.ComputeMinimalCriticalSets(specification.BloodNotCleanedAndDialyzingFinished);
+			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.BloodNotCleanedAndDialyzingFinished);
 			result.SaveCounterExamples("counter examples/hdmachine");
 
 			Console.WriteLine(result);

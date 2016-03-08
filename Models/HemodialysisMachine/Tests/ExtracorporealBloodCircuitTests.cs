@@ -153,9 +153,9 @@ namespace HemodialysisMachine.Tests
 		public void ExtracorporealBloodCircuitWorks_ModelChecking()
 		{
 			var specification = new ExtracorporealBloodCircuitTestEnvironment();
-			var analysis = new SafetyAnalysis(new Model(specification));
+			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(specification.Dialyzer.MembraneIntact == false);
+			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Dialyzer.MembraneIntact == false);
 			result.SaveCounterExamples("counter examples/hdmachine");
 
 			Console.WriteLine(result);
