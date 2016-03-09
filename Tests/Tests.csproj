@@ -391,6 +391,7 @@
     <Compile Include="FaultActivation\StateGraph\nondeterminism.cs" />
     <Compile Include="FaultActivation\StateGraph\single permanent fault activated once.cs" />
     <Compile Include="FaultActivation\StateGraph\multiple faults semi minimizable.cs" />
+    <Compile Include="FaultActivation\StateGraph\undone fault activation not observable enum.cs" />
     <Compile Include="FaultActivation\StateGraph\undone fault activation observable.cs" />
     <Compile Include="FaultActivation\StateGraph\undone fault activation not observable.cs" />
     <Compile Include="FaultActivation\StateGraph\faults with constant effects.cs" />

@@ -300,6 +300,9 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		public static bool CanBeCompared(ITypeSymbol typeSymbol)
 		{
+			if (typeSymbol.TypeKind == TypeKind.Enum)
+				return true;
+
 			switch (typeSymbol.SpecialType)
 			{
 				case SpecialType.System_Enum:
