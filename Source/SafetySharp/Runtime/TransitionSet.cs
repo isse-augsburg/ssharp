@@ -89,7 +89,7 @@ namespace SafetySharp.Runtime
 			// 1. Serialize the model's computed state; that is the successor successorState of the transition's source successorState
 			//    modulo any changes resulting from notifications of fault activations
 			var successorState = _stateMemory + _stateVectorSize * Count;
-			var activatedFaults = GetActivatedFaults(model);
+			var activatedFaults = FaultSet.FromActivatedFaults(model.Faults);
 			model.Serialize(successorState);
 
 			// 2. Make sure the transition we're about to add is activation-minimal
@@ -104,7 +104,7 @@ namespace SafetySharp.Runtime
 			{
 				TargetState = successorState,
 				ActivatedFaults = activatedFaults,
-				Formulas = EvaluateFormulas()
+				Formulas = new StateFormulaSet(_formulas)
 			};
 		}
 
@@ -118,34 +118,6 @@ namespace SafetySharp.Runtime
 			ComputedTransitionCount = 0;
 
 			_activationMap.Clear();
-		}
-
-		/// <summary>
-		///   Gets the faults that were activated by the transition. The returned bit mask has a bit n set if fault n
-		///   was activated.
-		/// </summary>
-		private static int GetActivatedFaults(RuntimeModel model)
-		{
-			var faults = model.Faults;
-			var mask = 0;
-
-			for (var i = 0; i < faults.Length; ++i)
-				mask |= faults[i].IsActivated ? 1 << i : 0;
-
-			return mask;
-		}
-
-		/// <summary>
-		///   Evaluates all of the model's state formulas. The returned bit mask has a bit n set if formula n holds.
-		/// </summary>
-		private int EvaluateFormulas()
-		{
-			var mask = 0;
-
-			for (var i = 0; i < _formulas.Length; ++i)
-				mask |= _formulas[i]() ? 1 << i : 0;
-
-			return mask;
 		}
 
 		/// <summary>
@@ -175,12 +147,12 @@ namespace SafetySharp.Runtime
 			/// <summary>
 			///   The faults activated by the transition.
 			/// </summary>
-			public int ActivatedFaults;
+			public FaultSet ActivatedFaults;
 
 			/// <summary>
 			///   The state formulas holding in the target successorState.
 			/// </summary>
-			public int Formulas;
+			public StateFormulaSet Formulas;
 		}
 
 		/// <summary>
@@ -190,7 +162,7 @@ namespace SafetySharp.Runtime
 		{
 			private const int ProbeThreshold = 1000;
 			private readonly int _capacity;
-			private readonly FaultSet* _faults;
+			private readonly FaultSetInfo* _faults;
 			private readonly MemoryBuffer _faultsBuffer = new MemoryBuffer();
 			private readonly int* _lookup;
 			private readonly MemoryBuffer _lookupBuffer = new MemoryBuffer();
@@ -218,7 +190,7 @@ namespace SafetySharp.Runtime
 
 				_stateVectorSize = stateVectorSize;
 				_lookup = (int*)_lookupBuffer.Pointer;
-				_faults = (FaultSet*)_faultsBuffer.Pointer;
+				_faults = (FaultSetInfo*)_faultsBuffer.Pointer;
 				_stateMemory = _stateBuffer.Pointer;
 
 				for (var i = 0; i < capacity; ++i)
@@ -231,7 +203,7 @@ namespace SafetySharp.Runtime
 			/// </summary>
 			/// <param name="successorState">The successor state that should be added.</param>
 			/// <param name="activatedFaults">The faults activated by the transition to reach the state.</param>
-			public bool Add(byte* successorState, int activatedFaults)
+			public bool Add(byte* successorState, FaultSet activatedFaults)
 			{
 				var hash = MemoryBuffer.Hash(successorState, _stateVectorSize, 0);
 				for (var i = 1; i < ProbeThreshold; ++i)
@@ -246,7 +218,7 @@ namespace SafetySharp.Runtime
 							throw new OutOfMemoryException("Out of memory. Try increasing the successor state capacity.");
 
 						_lookup[hashedIndex] = _nextFaultIndex;
-						_faults[_nextFaultIndex] = new FaultSet { ActivatedFaults = activatedFaults, NextSet = -1 };
+						_faults[_nextFaultIndex] = new FaultSetInfo { ActivatedFaults = activatedFaults, NextSet = -1 };
 						_successors.Add((uint)hashedIndex);
 						Buffer.MemoryCopy(successorState, _stateMemory + hashedIndex * _stateVectorSize, _stateVectorSize, _stateVectorSize);
 
@@ -265,7 +237,7 @@ namespace SafetySharp.Runtime
 						faultIndex = faultSet->NextSet;
 
 						// If the fault set is a subset of the activated faults, the current transition is not activation-minimal
-						if ((faultSet->ActivatedFaults & activatedFaults) == faultSet->ActivatedFaults)
+						if (faultSet->ActivatedFaults.IsSubsetOf(activatedFaults))
 							return false;
 					}
 
@@ -273,7 +245,7 @@ namespace SafetySharp.Runtime
 						throw new OutOfMemoryException("Out of memory. Try increasing the successor state capacity.");
 
 					// If we reach this point, we have to add the transition
-					_faults[_nextFaultIndex] = new FaultSet { ActivatedFaults = activatedFaults, NextSet = _lookup[hashedIndex] };
+					_faults[_nextFaultIndex] = new FaultSetInfo { ActivatedFaults = activatedFaults, NextSet = _lookup[hashedIndex] };
 					_lookup[hashedIndex] = _nextFaultIndex;
 					_nextFaultIndex++;
 
@@ -312,9 +284,9 @@ namespace SafetySharp.Runtime
 			/// <summary>
 			///   Represents an element of a linked list of activated faults.
 			/// </summary>
-			private struct FaultSet
+			private struct FaultSetInfo
 			{
-				public int ActivatedFaults;
+				public FaultSet ActivatedFaults;
 				public int NextSet;
 			}
 		}

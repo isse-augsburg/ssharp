@@ -116,8 +116,8 @@ namespace SafetySharp.Runtime
 			fixed (byte* state = ConstructionState)
 				Serialize(state);
 
-			Requires.That(Faults.Length < 32, "More than 32 faults are not supported.");
-			Requires.That(StateFormulas.Length < 32, "More than 32 state formulas are not supported.");
+			FaultSet.CheckFaultCount(Faults.Length);
+			StateFormulaSet.CheckFormulaCount(StateFormulas.Length);
 		}
 
 		/// <summary>

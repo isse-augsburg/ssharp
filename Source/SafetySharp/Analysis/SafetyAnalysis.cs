@@ -24,6 +24,7 @@ namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
 	using System.Text;
@@ -73,18 +74,21 @@ namespace SafetySharp.Analysis
 
 			_modelChecker.Configuration = Configuration;
 
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
 			var faults = model.GetFaults();
-			Requires.That(faults.Length < 32, "More than 31 faults are currently not supported.");
+			FaultSet.CheckFaultCount(faults.Length);
 
 			for (var i = 0; i < faults.Length; ++i)
 				faults[i].Identifier = i;
 
 			var isComplete = true;
-			var safeSets = new HashSet<int>();
-			var criticalSets = new HashSet<int>();
-			var checkedSets = new HashSet<int>();
-			var counterExamples = new Dictionary<int, CounterExample>();
-			var exceptions = new Dictionary<int, Exception>();
+			var safeSets = new HashSet<FaultSet>();
+			var criticalSets = new HashSet<FaultSet>();
+			var checkedSets = new HashSet<FaultSet>();
+			var counterExamples = new Dictionary<FaultSet, CounterExample>();
+			var exceptions = new Dictionary<FaultSet, Exception>();
 
 			// Store the serialized model to improve performance
 			var serializedModel = RuntimeModelSerializer.Save(model, !hazard);
@@ -95,7 +99,7 @@ namespace SafetySharp.Analysis
 			for (var cardinality = 0; cardinality <= faults.Length; ++cardinality)
 			{
 				// Generate the sets for the current level that we'll have to check
-				var sets = GeneratePowerSetLevel(safeSets, criticalSets, cardinality, faults.Length);
+				var sets = GeneratePowerSetLevel(safeSets, criticalSets, cardinality, faults);
 
 				// Clear the safe sets, we don't need the previous level to generate the next one
 				safeSets.Clear();
@@ -118,15 +122,7 @@ namespace SafetySharp.Analysis
 				foreach (var set in sets)
 				{
 					// Enable or disable the faults that the set represents
-					for (var i = 1; i <= faults.Length; ++i)
-						faults[i - 1].Activation = (set & (1 << (i - 1))) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
-
-					var faultNames = faults
-						.Where(fault => fault.Activation == Activation.Nondeterministic)
-						.Select(fault => fault.Name)
-						.OrderBy(name => name)
-						.ToArray();
-					var setRepresentation = faultNames.Length == 0 ? "{}" : String.Join(", ", faultNames);
+					set.SetActivation(faults);
 
 					// If there was a counter example, the set is a critical set
 					try
@@ -135,14 +131,14 @@ namespace SafetySharp.Analysis
 
 						if (!result.FormulaHolds)
 						{
-							_modelChecker.Output($"*** Found minimal critical fault set: {setRepresentation}.");
+							_modelChecker.Output($"*** Found minimal critical fault set: {{ {set.ToString(faults)} }}.");
 							_modelChecker.Output("");
 
 							criticalSets.Add(set);
 						}
 						else
 						{
-							_modelChecker.Output($"*** Found safe fault set: {setRepresentation}.");
+							_modelChecker.Output($"*** Found safe fault set: {{ {set.ToString(faults)} }}.");
 							_modelChecker.Output("");
 
 							safeSets.Add(set);
@@ -164,7 +160,7 @@ namespace SafetySharp.Analysis
 				}
 			}
 
-			return new Result(model, isComplete, criticalSets, checkedSets, faults, counterExamples, exceptions);
+			return new Result(model, isComplete, criticalSets, checkedSets, faults, counterExamples, exceptions, stopwatch.Elapsed);
 		}
 
 		/// <summary>
@@ -194,24 +190,25 @@ namespace SafetySharp.Analysis
 		/// <param name="safeSets">The set of safe sets generated at the previous level.</param>
 		/// <param name="criticalSets">The sets that are known to be critical sets. All super sets are discarded.</param>
 		/// <param name="cardinality">The cardinality of the sets that should be generated.</param>
-		/// <param name="count">The number of elements in the set the power set is generated for.</param>
-		private static HashSet<int> GeneratePowerSetLevel(HashSet<int> safeSets, HashSet<int> criticalSets, int cardinality, int count)
+		/// <param name="faults">The fault set the power set is generated for.</param>
+		private static HashSet<FaultSet> GeneratePowerSetLevel(HashSet<FaultSet> safeSets, HashSet<FaultSet> criticalSets, int cardinality,
+															   Fault[] faults)
 		{
-			var result = new HashSet<int>();
+			var result = new HashSet<FaultSet>();
 
 			switch (cardinality)
 			{
 				case 0:
 					// There is only the empty set with a cardinality of 0
-					result.Add(0);
+					result.Add(new FaultSet());
 					break;
 				case 1:
 					// We have to kick things off by explicitly generating the singleton sets; at this point,
 					// we know that there are no further minimal critical sets if we've already found one (= the empty set)
 					if (criticalSets.Count == 0)
 					{
-						for (var i = 0; i < count; ++i)
-							result.Add(1 << i);
+						foreach (var fault in faults)
+							result.Add(new FaultSet(fault));
 					}
 					break;
 				default:
@@ -221,17 +218,17 @@ namespace SafetySharp.Analysis
 					// the ones we don't want
 					foreach (var safeSet in safeSets)
 					{
-						for (var i = 0; i < count; ++i)
+						foreach (var fault in faults)
 						{
 							// If we're trying to add an element to the set that it already contains, we get a set
 							// we've already checked before; discard it
-							if ((safeSet & (1 << i)) != 0)
+							if (safeSet.Contains(fault))
 								continue;
 
-							var set = safeSet | (1 << i);
+							var set = safeSet.Add(fault);
 
 							// Check if the newly generated set it a super set of any critical sets; if so, discard it
-							if (criticalSets.All(s => (set & s) != s))
+							if (criticalSets.All(s => !s.IsSubsetOf(set)))
 								result.Add(set);
 						}
 					}
@@ -279,9 +276,14 @@ namespace SafetySharp.Analysis
 			public bool IsComplete { get; }
 
 			/// <summary>
-			///   The <see cref="Model" /> instance the safety analysis was conducted for.
+			///   Gets the <see cref="Model" /> instance the safety analysis was conducted for.
 			/// </summary>
 			public Model Model { get; }
+
+			/// <summary>
+			///   Gets the time it took to complete the analysis.
+			/// </summary>
+			public TimeSpan Time { get; }
 
 			/// <summary>
 			///   Initializes a new instance.
@@ -293,11 +295,13 @@ namespace SafetySharp.Analysis
 			/// <param name="faults">The faults that have been checked.</param>
 			/// <param name="counterExamples">The counter examples that were generated for the critical fault sets.</param>
 			/// <param name="exceptions">The exceptions that have been thrown during the analysis.</param>
-			internal Result(Model model, bool isComplete, HashSet<int> criticalSets, HashSet<int> checkedSets, Fault[] faults,
-							Dictionary<int, CounterExample> counterExamples, Dictionary<int, Exception> exceptions)
+			/// <param name="time">The time it took to complete the analysis.</param>
+			internal Result(Model model, bool isComplete, HashSet<FaultSet> criticalSets, HashSet<FaultSet> checkedSets, Fault[] faults,
+							Dictionary<FaultSet, CounterExample> counterExamples, Dictionary<FaultSet, Exception> exceptions, TimeSpan time)
 			{
-				var knownFaultSets = new Dictionary<int, ISet<Fault>>();
+				var knownFaultSets = new Dictionary<FaultSet, ISet<Fault>>();
 
+				Time = time;
 				Model = model;
 				IsComplete = isComplete;
 				MinimalCriticalSets = Convert(knownFaultSets, criticalSets, faults);
@@ -310,7 +314,7 @@ namespace SafetySharp.Analysis
 			/// <summary>
 			///   Converts the integer-based sets to a sets of fault sets.
 			/// </summary>
-			private static ISet<ISet<Fault>> Convert(Dictionary<int, ISet<Fault>> knownSets, HashSet<int> sets, Fault[] faults)
+			private static ISet<ISet<Fault>> Convert(Dictionary<FaultSet, ISet<Fault>> knownSets, HashSet<FaultSet> sets, Fault[] faults)
 			{
 				var result = new HashSet<ISet<Fault>>();
 
@@ -323,20 +327,15 @@ namespace SafetySharp.Analysis
 			/// <summary>
 			///   Converts the integer-based set to a set faults.
 			/// </summary>
-			private static ISet<Fault> Convert(Dictionary<int, ISet<Fault>> knownSets, int set, Fault[] faults)
+			private static ISet<Fault> Convert(Dictionary<FaultSet, ISet<Fault>> knownSets, FaultSet set, Fault[] faults)
 			{
 				ISet<Fault> faultSet;
 				if (knownSets.TryGetValue(set, out faultSet))
 					return faultSet;
 
-				faultSet = new HashSet<Fault>();
-				for (var i = 1; i <= faults.Length; ++i)
-				{
-					if ((set & (1 << (i - 1))) != 0)
-						faultSet.Add(faults[i - 1]);
-				}
-
+				faultSet = new HashSet<Fault>(set.ToFaultSequence(faults));
 				knownSets.Add(set, faultSet);
+
 				return faultSet;
 			}
 
@@ -387,6 +386,8 @@ namespace SafetySharp.Analysis
 					builder.AppendLine();
 				}
 
+				builder.AppendFormat("Elapsed Time: {0}", Time);
+				builder.AppendLine();
 				builder.AppendFormat("Fault Count: {0}", Faults.Count());
 				builder.AppendLine();
 				builder.AppendFormat("Faults: {0}", String.Join(", ", Faults.Select(fault => fault.Name).OrderBy(name => name)));
@@ -403,7 +404,7 @@ namespace SafetySharp.Analysis
 				var i = 1;
 				foreach (var criticalSet in MinimalCriticalSets)
 				{
-					builder.AppendFormat("   ({1}) {{ {0} }}", String.Join(", ", criticalSet.Select(fault => fault.Name)), i++);
+					builder.AppendFormat("   ({1}) {{ {0} }}", String.Join(", ", criticalSet.Select(fault => fault.Name).OrderBy(name => name)), i++);
 
 					Exception e;
 					if (Exceptions.TryGetValue(criticalSet, out e))

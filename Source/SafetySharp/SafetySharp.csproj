@@ -56,6 +56,7 @@
     <Compile Include="Analysis\Model.cs" />
     <Compile Include="Analysis\RootAttribute.cs" />
     <Compile Include="Analysis\SafetyAnalysis.cs" />
+    <Compile Include="Runtime\FaultSet.cs" />
     <Compile Include="Runtime\Serialization\StateVectorMismatchException.cs" />
     <Compile Include="CompilerServices\FaultHelper.cs" />
     <Compile Include="CompilerServices\PortBinding.cs" />
@@ -134,6 +135,7 @@
     <Compile Include="Runtime\Serialization\StateSlotMetadata.cs" />
     <Compile Include="Runtime\Serialization\StateVectorLayout.cs" />
     <Compile Include="Runtime\Simulator.cs" />
+    <Compile Include="Runtime\StateFormulaSet.cs" />
     <Compile Include="Runtime\StateStack.cs" />
     <Compile Include="Runtime\StateStorage.cs" />
     <Compile Include="Runtime\TransitionSet.cs" />

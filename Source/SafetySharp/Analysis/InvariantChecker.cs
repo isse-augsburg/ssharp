@@ -271,7 +271,7 @@ namespace SafetySharp.Analysis
 					}
 
 					// Check if the invariant is violated; if so, generate a counter example and abort
-					if (transition->Formulas == 0)
+					if (!transition->Formulas[0])
 					{
 						_context._loadBalancer.Terminate();
 						CreateCounterExample(endsWithException: false);

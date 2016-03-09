@@ -57,7 +57,7 @@ namespace SafetySharp.Modeling
 		private bool _isActivated;
 
 		[NonSerializable]
-		private string _name = "<Unnamed>";
+		private string _name = "UnnamedFault";
 
 		/// <summary>
 		///   Initializes a new instance.
