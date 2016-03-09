@@ -41,7 +41,6 @@ namespace SafetySharp.Analysis
 		private readonly LoadBalancer _loadBalancer;
 		private readonly Action<string> _output;
 		private readonly StateStorage _states;
-		private readonly Thread[] _threads;
 		private readonly Worker[] _workers;
 		private CounterExample _counterExample;
 		private Exception _exception;
@@ -65,7 +64,6 @@ namespace SafetySharp.Analysis
 
 			_output = output;
 			_workers = new Worker[configuration.CpuCount];
-			_threads = new Thread[configuration.CpuCount];
 
 			var tasks = new Task[configuration.CpuCount];
 			var stacks = new StateStack[configuration.CpuCount];
@@ -79,7 +77,6 @@ namespace SafetySharp.Analysis
 				{
 					stacks[index] = new StateStack(configuration.StackCapacity);
 					_workers[index] = new Worker(index, this, stacks[index], createModel(), configuration.SuccessorCapacity);
-					_threads[index] = new Thread(_workers[index].Check) { IsBackground = true, Name = $"Worker {index}" };
 				});
 			}
 
@@ -102,12 +99,11 @@ namespace SafetySharp.Analysis
 
 			_workers[0].ComputeInitialStates();
 
-			foreach (var thread in _threads)
-				thread.Start();
+			var tasks = new Task[_workers.Length];
+			for (var i = 0; i < _workers.Length; ++i)
+				tasks[i] = Task.Factory.StartNew(_workers[i].Check);
 
-			foreach (var thread in _threads)
-				thread.Join();
-
+			Task.WaitAll(tasks);
 			Report();
 
 			if (_exception != null)
