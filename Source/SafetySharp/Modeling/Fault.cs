@@ -23,6 +23,7 @@
 namespace SafetySharp.Modeling
 {
 	using System;
+	using System.Linq;
 	using System.Runtime.Serialization;
 	using CompilerServices;
 	using Runtime.Reflection;
@@ -63,7 +64,7 @@ namespace SafetySharp.Modeling
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="requiresActivationNotification">Indicates whether the fault must be notified about its activation.</param>
-		internal Fault(bool requiresActivationNotification)
+		protected Fault(bool requiresActivationNotification)
 		{
 			_requiresActivationNotification = requiresActivationNotification;
 		}
@@ -86,7 +87,6 @@ namespace SafetySharp.Modeling
 		///   Gets a value indicating whether the fault is activated and has some effect on the state of the system, therefore inducing
 		///   an error or possibly a failure.
 		/// </summary>
-		// ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
 		public bool IsActivated => _isActivated;
 
 		/// <summary>
@@ -99,7 +99,7 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Gets or sets the fault's forced activation kind.
+		///   Gets or sets the fault's forced activation kind. This property should not be changed while model checking.
 		/// </summary>
 		public Activation Activation
 		{
@@ -118,7 +118,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Toggles the fault's <see cref="Activation" /> between <see cref="Modeling.Activation.Forced" /> and
 		///   <see cref="Modeling.Activation.Suppressed" />, with <see cref="Modeling.Activation.Nondeterministic" /> being
-		///   treated as <see cref="Modeling.Activation.Suppressed" />.
+		///   treated as <see cref="Modeling.Activation.Suppressed" />. This method should not be used while model checking.
 		/// </summary>
 		public void ToggleActivationMode()
 		{
@@ -126,26 +126,30 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault is activated.
+		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault is activated. Returns the fault
+		///   effect instance that was added.
 		/// </summary>
 		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
 		/// <param name="component">The component the fault effect is added for.</param>
-		internal TFaultEffect AddEffect<TFaultEffect>(IComponent component)
+		public TFaultEffect AddEffect<TFaultEffect>(IComponent component)
 			where TFaultEffect : Component, new()
 		{
 			return (TFaultEffect)AddEffect(component, typeof(TFaultEffect));
 		}
 
 		/// <summary>
-		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault is activated.
+		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault is activated. Returns the fault
+		///   effect instance that was added.
 		/// </summary>
 		/// <param name="component">The component the fault effect is added for.</param>
 		/// <param name="faultEffectType">The type of the fault effect that should be added.</param>
-		internal IComponent AddEffect(IComponent component, Type faultEffectType)
+		public IComponent AddEffect(IComponent component, Type faultEffectType)
 		{
 			Requires.NotNull(component, nameof(component));
 			Requires.That(faultEffectType.HasAttribute<FaultEffectAttribute>(),
-				$"Expected fault effect to be marked with '{typeof(FaultEffectAttribute)}'.");
+				$"Expected fault effect '{faultEffectType.FullName}' to be marked with '{typeof(FaultEffectAttribute).FullName}'.");
+			// TODO: Requires.That(((Component)component).FaultEffects.SingleOrDefault(effect => effect.GetType() == faultEffectType) == null,
+			//	$"A fault effect of type '{faultEffectType.FullName}' has already been added.");
 
 			var faultEffect = (Component)FormatterServices.GetUninitializedObject(component.GetRuntimeType());
 
