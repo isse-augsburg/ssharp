@@ -208,7 +208,7 @@ namespace SafetySharp.Analysis
 					throw new InvalidOperationException("The file does not contain a counter example that is compatible with this version of S#.");
 
 				var serializedRuntimeModel = reader.ReadBytes(reader.ReadInt32());
-				var modelData = RuntimeModelSerializer.LoadSerializedData(new MemoryStream(serializedRuntimeModel));
+				var modelData = RuntimeModelSerializer.LoadSerializedData(serializedRuntimeModel);
 
 				foreach (var fault in modelData.ObjectTable.OfType<Fault>())
 					fault.Activation = (Activation)reader.ReadInt32();

@@ -85,8 +85,10 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
 
-			var serializedModel = RuntimeModelSerializer.Save(model, invariant);
-			return CheckInvariant(() => RuntimeModelSerializer.Load(serializedModel));
+			var serializer = new RuntimeModelSerializer();
+			serializer.Serialize(model, invariant);
+
+			return CheckInvariant(serializer.Load);
 		}
 
 		/// <summary>

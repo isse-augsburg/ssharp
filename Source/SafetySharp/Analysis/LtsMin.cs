@@ -116,8 +116,7 @@ namespace SafetySharp.Analysis
 			{
 				using (var modelFile = new TemporaryFile("ssharp"))
 				{
-					using (var stream = new FileStream(modelFile.FilePath, FileMode.Create))
-						RuntimeModelSerializer.Save(stream, model, formula);
+					File.WriteAllBytes(modelFile.FilePath, RuntimeModelSerializer.Save(model, formula));
 
 					CreateProcess(modelFile.FilePath, checkArgument);
 					Run();

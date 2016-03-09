@@ -111,7 +111,7 @@ void LoadModel(model_t model, const char* modelFile)
 {
 	try
 	{
-		auto modelData = RuntimeModelSerializer::LoadSerializedData(gcnew MemoryStream(File::ReadAllBytes(gcnew String(modelFile))));
+		auto modelData = RuntimeModelSerializer::LoadSerializedData(File::ReadAllBytes(gcnew String(modelFile)));
 		Globals::Model = gcnew RuntimeModel(modelData, sizeof(int32_t));
 		Globals::Transitions = gcnew TransitionSet(Globals::Model, 1 << 16);
 

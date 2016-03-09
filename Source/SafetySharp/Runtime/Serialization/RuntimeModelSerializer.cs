@@ -37,9 +37,31 @@ namespace SafetySharp.Runtime.Serialization
 	/// <summary>
 	///   Serializes a <see cref="RuntimeModel" /> instance into a <see cref="Stream" />.
 	/// </summary>
-	internal static class RuntimeModelSerializer
+	internal class RuntimeModelSerializer
 	{
+		private Func<ObjectTable, SerializationDelegate> _deserializerFactory;
+		private byte[] _serializedModel;
+		private StateVectorLayout _stateVector;
+
 		#region Serialization
+
+		/// <summary>
+		///   Serializes the <paramref name="model" /> and the <paramref name="formulas" />.
+		/// </summary>
+		/// <param name="model">The model that should be serialized.</param>
+		/// <param name="formulas">The formulas that should be serialized.</param>
+		public void Serialize(Model model, params Formula[] formulas)
+		{
+			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(formulas, nameof(formulas));
+
+			using (var buffer = new MemoryStream())
+			using (var writer = new BinaryWriter(buffer, Encoding.UTF8, leaveOpen: true))
+			{
+				SerializeModel(writer, model, formulas);
+				_serializedModel = buffer.ToArray();
+			}
+		}
 
 		/// <summary>
 		///   Returns the serialized <paramref name="model" /> and the <paramref name="formulas" />.
@@ -48,36 +70,15 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="formulas">The formulas that should be serialized.</param>
 		public static byte[] Save(Model model, params Formula[] formulas)
 		{
-			Requires.NotNull(model, nameof(model));
-			Requires.NotNull(formulas, nameof(formulas));
-
-			using (var buffer = new MemoryStream())
-			{
-				Save(buffer, model, formulas);
-				return buffer.ToArray();
-			}
-		}
-
-		/// <summary>
-		///   Saves the serialized <paramref name="model" /> and the <paramref name="formulas" /> to the <paramref name="stream" />.
-		/// </summary>
-		/// <param name="stream">The stream the serialized specification should be written to.</param>
-		/// <param name="model">The model that should be serialized into the <paramref name="stream" />.</param>
-		/// <param name="formulas">The formulas that should be serialized into the <paramref name="stream" />.</param>
-		public static void Save(Stream stream, Model model, params Formula[] formulas)
-		{
-			Requires.NotNull(stream, nameof(stream));
-			Requires.NotNull(model, nameof(model));
-			Requires.NotNull(formulas, nameof(formulas));
-
-			using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
-				SerializeModel(writer, model, formulas);
+			var serializer = new RuntimeModelSerializer();
+			serializer.Serialize(model, formulas);
+			return serializer._serializedModel;
 		}
 
 		/// <summary>
 		///   Serializes the <paramref name="model" />.
 		/// </summary>
-		private static unsafe void SerializeModel(BinaryWriter writer, Model model, Formula[] formulas)
+		private unsafe void SerializeModel(BinaryWriter writer, Model model, Formula[] formulas)
 		{
 			//  Make sure that all auto-bound fault effects have been bound and that all bindings have been created
 			model.AssignFaultIdentifiers();
@@ -89,9 +90,11 @@ namespace SafetySharp.Runtime.Serialization
 			var objectTable = CreateObjectTable(model, formulas, stateFormulas);
 
 			// Prepare the serialization of the model's initial state
-			var stateVector = SerializationRegistry.Default.GetStateVectorLayout(objectTable, SerializationMode.Full);
-			var stateVectorSize = stateVector.SizeInBytes;
-			var serializer = stateVector.CreateSerializer();
+			_stateVector = SerializationRegistry.Default.GetStateVectorLayout(objectTable, SerializationMode.Full);
+			_deserializerFactory = null;
+
+			var stateVectorSize = _stateVector.SizeInBytes;
+			var serializer = _stateVector.CreateSerializer(objectTable);
 
 			// Serialize the object table
 			SerializeObjectTable(objectTable, writer);
@@ -188,60 +191,38 @@ namespace SafetySharp.Runtime.Serialization
 		#region Deserialization
 
 		/// <summary>
-		///   Loads a <see cref="SerializedRuntimeModel" /> from the <paramref name="buffer" />.
+		///   Loads a <see cref="SerializedRuntimeModel" /> instance.
 		/// </summary>
-		/// <param name="buffer">The buffer the model should be loaded from.</param>
-		public static SerializedRuntimeModel LoadSerializedData(byte[] buffer)
+		/// <param name="serializedModel">The serialized model that should be loaded.</param>
+		public static SerializedRuntimeModel LoadSerializedData(byte[] serializedModel)
 		{
-			Requires.NotNull(buffer, nameof(buffer));
-
-			using (var reader = new BinaryReader(new MemoryStream(buffer), Encoding.UTF8, leaveOpen: true))
-				return DeserializeModel(buffer, reader);
+			Requires.NotNull(serializedModel, nameof(serializedModel));
+			return new RuntimeModelSerializer { _serializedModel = serializedModel }.LoadSerializedData();
 		}
 
 		/// <summary>
-		///   Loads a <see cref="RuntimeModel" /> from the <paramref name="buffer" />.
+		///   Loads a <see cref="SerializedRuntimeModel" /> instance.
 		/// </summary>
-		/// <param name="buffer">The buffer the model should be loaded from.</param>
-		public static RuntimeModel Load(byte[] buffer)
+		public SerializedRuntimeModel LoadSerializedData()
 		{
-			return new RuntimeModel(LoadSerializedData(buffer));
+			Requires.That(_serializedModel != null, "No model is loaded that could be serialized.");
+
+			using (var reader = new BinaryReader(new MemoryStream(_serializedModel), Encoding.UTF8, leaveOpen: true))
+				return DeserializeModel(_serializedModel, reader);
 		}
 
 		/// <summary>
-		///   Loads a <see cref="RuntimeModel" /> from the <paramref name="stream" />.
+		///   Loads a <see cref="RuntimeModel" /> instance.
 		/// </summary>
-		/// <param name="stream">The stream the model should be loaded from.</param>
-		public static SerializedRuntimeModel LoadSerializedData(Stream stream)
+		public RuntimeModel Load()
 		{
-			Requires.NotNull(stream, nameof(stream));
-
-			using (var buffer = new MemoryStream())
-			{
-				stream.CopyTo(buffer);
-				return LoadSerializedData(buffer.ToArray());
-			}
-		}
-
-		/// <summary>
-		///   Loads a <see cref="RuntimeModel" /> from the <paramref name="stream" />.
-		/// </summary>
-		/// <param name="stream">The stream the model should be loaded from.</param>
-		public static RuntimeModel Load(Stream stream)
-		{
-			Requires.NotNull(stream, nameof(stream));
-
-			using (var buffer = new MemoryStream())
-			{
-				stream.CopyTo(buffer);
-				return Load(buffer.ToArray());
-			}
+			return new RuntimeModel(LoadSerializedData());
 		}
 
 		/// <summary>
 		///   Deserializes a <see cref="RuntimeModel" /> from the <paramref name="reader" />.
 		/// </summary>
-		private static unsafe SerializedRuntimeModel DeserializeModel(byte[] buffer, BinaryReader reader)
+		private unsafe SerializedRuntimeModel DeserializeModel(byte[] buffer, BinaryReader reader)
 		{
 			// Deserialize the object table
 			var objectTable = DeserializeObjectTable(reader);
@@ -264,8 +245,14 @@ namespace SafetySharp.Runtime.Serialization
 				serializedState[i] = reader.ReadByte();
 
 			// Deserialize the model's initial state
-			var stateVector = SerializationRegistry.Default.GetStateVectorLayout(objectTable, SerializationMode.Full);
-			var deserializer = stateVector.CreateDeserializer();
+			if (_stateVector == null)
+				_stateVector = SerializationRegistry.Default.GetStateVectorLayout(objectTable, SerializationMode.Full);
+
+			// Generate the deserializer
+			if (_deserializerFactory == null)
+				_deserializerFactory = _stateVector.CreateDeserializerFactory();
+
+			var deserializer = _deserializerFactory(objectTable);
 			deserializer(serializedState);
 
 			// We instantiate the runtime type for each component and replace the original component

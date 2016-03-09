@@ -36,11 +36,6 @@ namespace SafetySharp.Runtime.Serialization
 	public class StateVectorLayout : IEnumerable<StateSlotMetadata>
 	{
 		/// <summary>
-		///   The objects whose data is stored in the state vector.
-		/// </summary>
-		private readonly ObjectTable _objects;
-
-		/// <summary>
 		///   Provides the metadata of the individual slots of the state vector.
 		/// </summary>
 		private readonly List<StateSlotMetadata> _slots = new List<StateSlotMetadata>();
@@ -48,11 +43,8 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="objects">The objects whose data is stored in the state vector.</param>
-		internal StateVectorLayout(ObjectTable objects)
+		internal StateVectorLayout()
 		{
-			Requires.NotNull(objects, nameof(objects));
-			_objects = objects;
 		}
 
 		/// <summary>
@@ -170,21 +162,22 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Dynamically generates a delegate that can be used to serialize the state vector.
 		/// </summary>
-		internal unsafe SerializationDelegate CreateSerializer()
+		/// <param name="objects">The objects whose data is stored in the state vector.</param>
+		internal unsafe SerializationDelegate CreateSerializer(ObjectTable objects)
 		{
 			var generator = new SerializationGenerator(methodName: "Serialize");
 			generator.GenerateSerializationCode(Groups);
-			return generator.Compile(_objects);
+			return generator.Compile(objects);
 		}
 
 		/// <summary>
-		///   Dynamically generates a delegate that can be used to deserialize the state vector.
+		///   Dynamically generates factory method for delegates that can be used to deserialize the state vector.
 		/// </summary>
-		internal unsafe SerializationDelegate CreateDeserializer()
+		internal Func<ObjectTable, SerializationDelegate> CreateDeserializerFactory()
 		{
 			var generator = new SerializationGenerator(methodName: "Deserialize");
 			generator.GenerateDeserializationCode(Groups);
-			return generator.Compile(_objects);
+			return generator.Compile;
 		}
 
 		/// <summary>

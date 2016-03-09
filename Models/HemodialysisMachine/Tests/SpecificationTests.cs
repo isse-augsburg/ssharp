@@ -138,7 +138,7 @@ namespace HemodialysisMachine.Tests
 
 		private static void Main()
 		{
-			new SpecificationTests().Test();
+			new SpecificationTests().IncomingBloodIsContaminated_ModelChecking();
 		}
 
 		[Test]

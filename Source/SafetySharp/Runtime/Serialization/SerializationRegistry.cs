@@ -105,7 +105,7 @@ namespace SafetySharp.Runtime.Serialization
 			Requires.NotNull(objects, nameof(objects));
 			Requires.InRange(mode, nameof(mode));
 
-			var layout = new StateVectorLayout(objects);
+			var layout = new StateVectorLayout();
 			foreach (var slot in objects.SelectMany(obj => GetSerializer(obj).GetStateSlotMetadata(obj, objects.GetObjectIdentifier(obj), mode)))
 				layout.Add(slot);
 

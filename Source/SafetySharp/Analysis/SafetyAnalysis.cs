@@ -88,7 +88,8 @@ namespace SafetySharp.Analysis
 			var exceptions = new Dictionary<FaultSet, Exception>();
 
 			// Store the serialized model to improve performance
-			var serializedModel = RuntimeModelSerializer.Save(model, !hazard);
+			var serializer = new RuntimeModelSerializer();
+			serializer.Serialize(model, !hazard);
 
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we
@@ -124,7 +125,7 @@ namespace SafetySharp.Analysis
 					// If there was a counter example, the set is a critical set
 					try
 					{
-						var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializedModel, faults));
+						var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializer, faults));
 
 						if (!result.FormulaHolds)
 						{
@@ -163,11 +164,11 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Creates a <see cref="RuntimeModel" /> instance.
 		/// </summary>
-		private static Func<RuntimeModel> CreateRuntimeModel(byte[] serializedModel, Fault[] faultTemplates)
+		private static Func<RuntimeModel> CreateRuntimeModel(RuntimeModelSerializer serializer, Fault[] faultTemplates)
 		{
 			return () =>
 			{
-				var serializedData = RuntimeModelSerializer.LoadSerializedData(serializedModel);
+				var serializedData = serializer.LoadSerializedData();
 				var faults = serializedData.ObjectTable.OfType<Fault>().OrderBy(f => f.Identifier).ToArray();
 				Requires.That(faults.Length == faultTemplates.Length, "Unexpected fault count.");
 

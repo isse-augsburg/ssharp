@@ -24,7 +24,6 @@ namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Collections.Generic;
-	using System.IO;
 	using System.Linq;
 	using System.Reflection;
 	using Modeling;
@@ -101,13 +100,9 @@ namespace SafetySharp.Analysis
 		{
 			Requires.NotNull(formulas, nameof(formulas));
 
-			using (var memoryStream = new MemoryStream())
-			{
-				RuntimeModelSerializer.Save(memoryStream, this, formulas);
-
-				memoryStream.Seek(0, SeekOrigin.Begin);
-				return RuntimeModelSerializer.Load(memoryStream);
-			}
+			var serializer = new RuntimeModelSerializer();
+			serializer.Serialize(this, formulas);
+			return serializer.Load();
 		}
 
 		/// <summary>
