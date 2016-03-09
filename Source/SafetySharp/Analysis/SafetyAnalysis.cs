@@ -73,6 +73,8 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(hazard, nameof(hazard));
 
 			_modelChecker.Configuration = Configuration;
+			_modelChecker.Configuration.ProgressReportsOnly = true;
+			_modelChecker.Output("Running Deductive Cause Consequence Analysis.");
 
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -129,16 +131,12 @@ namespace SafetySharp.Analysis
 
 						if (!result.FormulaHolds)
 						{
-							_modelChecker.Output($"*** Found minimal critical fault set: {{ {set.ToString(faults)} }}.");
-							_modelChecker.Output("");
-
+							_modelChecker.Output($"Found minimal critical fault set: {{ {set.ToString(faults)} }}.");
 							criticalSets.Add(set);
 						}
 						else
 						{
-							_modelChecker.Output($"*** Found safe fault set: {{ {set.ToString(faults)} }}.");
-							_modelChecker.Output("");
-
+							_modelChecker.Output($"Found safe fault set: {{ {set.ToString(faults)} }}.");
 							safeSets.Add(set);
 						}
 

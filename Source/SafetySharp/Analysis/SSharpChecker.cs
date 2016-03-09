@@ -63,14 +63,17 @@ namespace SafetySharp.Analysis
 				{
 					stopwatch.Stop();
 
-					Output(String.Empty);
-					Output("===============================================");
-					Output($"Initialization time: {initializationTime}");
-					Output($"Model checking time: {stopwatch.Elapsed}");
-					Output($"{(int)(result.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
-					Output($"{(int)(result.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
-					Output("===============================================");
-					Output(String.Empty);
+					if (!Configuration.ProgressReportsOnly)
+					{
+						Output(String.Empty);
+						Output("===============================================");
+						Output($"Initialization time: {initializationTime}");
+						Output($"Model checking time: {stopwatch.Elapsed}");
+						Output($"{(int)(result.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
+						Output($"{(int)(result.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+						Output("===============================================");
+						Output(String.Empty);
+					}
 				}
 			}
 		}

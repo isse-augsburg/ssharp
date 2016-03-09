@@ -41,11 +41,17 @@ namespace SafetySharp.Analysis
 		private int _successorStateCapacity;
 
 		/// <summary>
+		///   Gets or sets a value indicating whether only progress reports should be output.
+		/// </summary>
+		public bool ProgressReportsOnly { get; set; }
+
+		/// <summary>
 		///   The default configuration.
 		/// </summary>
 		internal static readonly AnalysisConfiguration Default = new AnalysisConfiguration
 		{
 			CpuCount = Int32.MaxValue,
+			ProgressReportsOnly = true,
 			StackCapacity = DefaultStackCapacity,
 			StateCapacity = DefaultStateCapacity,
 			SuccessorCapacity = DefaultSuccessorStateCapacity

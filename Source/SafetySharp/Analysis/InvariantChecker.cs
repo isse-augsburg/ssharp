@@ -50,6 +50,7 @@ namespace SafetySharp.Analysis
 		private int _stateCount;
 		private long _transitionCount;
 		private long _computedTransitionCount;
+		private bool _progressOnly;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -62,6 +63,7 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(output, nameof(output));
 
+			_progressOnly = configuration.ProgressReportsOnly;
 			_output = output;
 			_workers = new Worker[configuration.CpuCount];
 
@@ -94,8 +96,11 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		internal AnalysisResult Check()
 		{
-			_output($"Performing invariant check with {_workers.Length} CPU cores.");
-			_output($"State vector has {_workers[0].StateVectorLayout.SizeInBytes} bytes.");
+			if (!_progressOnly)
+			{
+				_output($"Performing invariant check with {_workers.Length} CPU cores.");
+				_output($"State vector has {_workers[0].StateVectorLayout.SizeInBytes} bytes.");
+			}
 
 			_workers[0].ComputeInitialStates();
 
@@ -104,12 +109,14 @@ namespace SafetySharp.Analysis
 				tasks[i] = Task.Factory.StartNew(_workers[i].Check);
 
 			Task.WaitAll(tasks);
-			Report();
+
+			if (!_progressOnly)
+				Report();
 
 			if (_exception != null)
 				throw new AnalysisException(_exception, _counterExample);
 
-			if (_counterExample != null)
+			if (_counterExample != null && !_progressOnly)
 				_output("Invariant violation detected.");
 
 			return new AnalysisResult(_counterExample == null, _counterExample, _stateCount, _transitionCount, _computedTransitionCount, _levelCount);
