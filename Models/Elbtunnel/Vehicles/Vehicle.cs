@@ -90,6 +90,13 @@ namespace Elbtunnel.Vehicles
 			Speed = ChooseFromRange(0, Specification.MaxSpeed);
 		}
 
+		protected virtual void SelectLane()
+		{
+			// The road layout makes lane changes impossible when the end control has been reached
+			if (Position < Specification.EndControlPosition)
+				Lane = Choose(Lane.Right);
+		}
+
 		/// <summary>
 		///   Moves the vehicle.
 		/// </summary>
@@ -102,9 +109,19 @@ namespace Elbtunnel.Vehicles
 			Speed = ChooseFromRange(1, Specification.MaxSpeed);
 			Position += Speed;
 
-			// The road layout makes lane changes impossible when the end control has been reached
-			if (Position < Specification.EndControlPosition)
-				Lane = Choose(Lane.Left, Lane.Right);
+			SelectLane();
+		}
+
+		//[FaultEffect(Fault = nameof(DisregardTrafficRules))]//, Priority(1)
+		[FaultEffect]//, Priority(1)
+		public class DisregardTrafficRulesEffect : Vehicle
+		{
+			protected override void SelectLane()
+			{
+				// The road layout makes lane changes impossible when the end control has been reached
+				if (Position < Specification.EndControlPosition)
+					Lane = Choose(Lane.Left, Lane.Right);
+			}
 		}
 	}
 }

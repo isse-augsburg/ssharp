@@ -23,6 +23,7 @@
 namespace Elbtunnel
 {
 	using System;
+	using System.Diagnostics;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
@@ -33,7 +34,13 @@ namespace Elbtunnel
 	{
 		public static void Main()
 		{
-			new Tests().Test();
+			//new Tests().Test();
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+			var tests = new DesignExploration.DesignExploration_CollisionTests();
+			tests.DesignHighTubeWithLb();
+			stopwatch.Stop();
+			Console.Out.WriteLine($"Model checking time: {stopwatch.Elapsed}");
 		}
 
 		[Test]
