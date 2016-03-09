@@ -35,6 +35,26 @@ namespace SafetySharp.Compiler.Normalization
 	public class FaultNameNormalizer : Normalizer
 	{
 		/// <summary>
+		///   Normalizes the <paramref name="assignment" />.
+		/// </summary>
+		public override SyntaxNode VisitAssignmentExpression(AssignmentExpressionSyntax assignment)
+		{
+			var objectCreation = assignment.Right as ObjectCreationExpressionSyntax;
+			if (objectCreation == null)
+				return assignment;
+
+			var fault = SemanticModel.GetTypeSymbol<Fault>();
+			if (SemanticModel.GetTypeInfo(objectCreation).Type?.IsDerivedFrom(fault) == false)
+				return assignment;
+
+			var targetSymbol = SemanticModel.GetSymbolInfo(assignment.Left).Symbol;
+			if (targetSymbol == null || (targetSymbol.Kind != SymbolKind.Field && targetSymbol.Kind != SymbolKind.Property))
+				return assignment;
+
+			return assignment.WithRight(AddNameInitializer(fault, objectCreation, targetSymbol.Name));
+		}
+
+		/// <summary>
 		///   Normalizes the <paramref name="declaration" />.
 		/// </summary>
 		public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax declaration)

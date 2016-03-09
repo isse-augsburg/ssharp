@@ -80,9 +80,6 @@ namespace SafetySharp.Analysis
 			var faults = model.GetFaults();
 			FaultSet.CheckFaultCount(faults.Length);
 
-			for (var i = 0; i < faults.Length; ++i)
-				faults[i].Identifier = i;
-
 			var isComplete = true;
 			var safeSets = new HashSet<FaultSet>();
 			var criticalSets = new HashSet<FaultSet>();

@@ -80,6 +80,7 @@ namespace SafetySharp.Runtime.Serialization
 		private static unsafe void SerializeModel(BinaryWriter writer, Model model, Formula[] formulas)
 		{
 			//  Make sure that all auto-bound fault effects have been bound and that all bindings have been created
+			model.AssignFaultIdentifiers();
 			model.BindFaultEffects();
 			model.CreateBindings();
 

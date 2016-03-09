@@ -28,23 +28,29 @@ namespace Tests.Normalization.FaultNames.Changed
 	{
 		private Fault f1 = new TransientFault() { Activation = Activation.Forced };
 		private Fault f2 = new TransientFault();
-
 		private TransientFault f3 = new TransientFault();
-
 		private TransientFault f4 = new TransientFault();
-
 		private TransientFault f5 = new TransientFault();
+		private Fault f6;
+
+		public In2()
+		{
+			f6 = new TransientFault();
+		}
 	}
 
 	public class Out2
 	{
 		private Fault f1 = new TransientFault() { Activation = Activation.Forced, Name = "f1" };
 		private Fault f2 = new TransientFault() { Name = "f2" };
-
 		private TransientFault f3 = new TransientFault() { Name = "f3" };
-
 		private TransientFault f4 = new TransientFault() { Name = "f4" };
-
 		private TransientFault f5 = new TransientFault() { Name = "f5" };
+		private Fault f6;
+
+		public Out2()
+		{
+			f6 = new TransientFault() { Name = "f6" };
+		}
 	}
 }

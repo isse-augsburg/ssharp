@@ -103,7 +103,6 @@ namespace SafetySharp.Runtime
 			_transitions[Count++] = new Transition
 			{
 				TargetState = successorState,
-				ActivatedFaults = activatedFaults,
 				Formulas = new StateFormulaSet(_formulas)
 			};
 		}
@@ -143,11 +142,6 @@ namespace SafetySharp.Runtime
 			///   The transition's target state.
 			/// </summary>
 			public byte* TargetState;
-
-			/// <summary>
-			///   The faults activated by the transition.
-			/// </summary>
-			public FaultSet ActivatedFaults;
 
 			/// <summary>
 			///   The state formulas holding in the target successorState.

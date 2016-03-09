@@ -29,6 +29,12 @@ namespace Tests.Normalization.FaultNames.Changed
 		private PermanentFault F1 { get; set; } = new PermanentFault();
 		private Fault F2 { get; } = new TransientFault();
 		private Fault F3 { get; } = new TransientFault { Activation = Activation.Forced };
+		private Fault F4 { get; }
+
+		public In3()
+		{
+			F4 = new PermanentFault();
+		}
 	}
 
 	public class Out3
@@ -36,5 +42,11 @@ namespace Tests.Normalization.FaultNames.Changed
 		private PermanentFault F1 { get; set; } = new PermanentFault() { Name = "F1" };
 		private Fault F2 { get; } = new TransientFault() { Name = "F2" };
 		private Fault F3 { get; } = new TransientFault { Activation = Activation.Forced, Name = "F3" };
+		private Fault F4 { get; }
+
+		public Out3()
+		{
+			F4 = new PermanentFault() { Name = "F4" };
+		}
 	}
 }

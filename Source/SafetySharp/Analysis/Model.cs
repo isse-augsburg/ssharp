@@ -111,6 +111,16 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
+		///   Assigns the fault identifiers to each fault.
+		/// </summary>
+		internal void AssignFaultIdentifiers()
+		{
+			var faults = this.GetFaults();
+			for (var i = 0; i < faults.Length; ++i)
+				faults[i].Identifier = i;
+		}
+
+		/// <summary>
 		///   Binds all automatically bound fault effects to their respective faults.
 		/// </summary>
 		internal void BindFaultEffects()
