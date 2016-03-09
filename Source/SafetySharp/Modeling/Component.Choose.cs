@@ -34,7 +34,7 @@ namespace SafetySharp.Modeling
 		private readonly Choice _defaultChoice = new Choice();
 
 		/// <summary>
-		///   Returns an index in the range of <paramref name="elementCount" />. Returns <c>-1</c> if <paramref name="elementCount" />
+		///   Returns an index in the range of <paramref name="elementCount" />. Returns -1 if <paramref name="elementCount" />
 		///   is 0.
 		/// </summary>
 		/// <param name="elementCount">The element count to choose the index from.</param>
@@ -53,6 +53,27 @@ namespace SafetySharp.Modeling
 		protected int ChooseFromRange(int lowerBound, int upperBound)
 		{
 			return _defaultChoice.ChooseFromRange(lowerBound, upperBound);
+		}
+
+		/// <summary>
+		///   Deterministically returns the default value for <typeparamref name="T" />.
+		/// </summary>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected T Choose<T>()
+		{
+			return default(T);
+		}
+
+		/// <summary>
+		///   Deterministically returns the <paramref name="value" />.
+		/// </summary>
+		/// <param name="value">The value to return.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected T Choose<T>(T value)
+		{
+			return value;
 		}
 
 		/// <summary>

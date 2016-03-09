@@ -72,8 +72,17 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Deterministically returns the <paramref name="value" />. This is a convenience method for generated code and should not be
-		///   used otherwise.
+		///   Deterministically returns the default value for <typeparamref name="T" />.
+		/// </summary>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>()
+		{
+			return default(T);
+		}
+
+		/// <summary>
+		///   Deterministically returns the <paramref name="value" />.
 		/// </summary>
 		/// <param name="value">The value to return.</param>
 		/// <remarks>This method is a performance optimization.</remarks>
