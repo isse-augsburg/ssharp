@@ -167,17 +167,28 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			var generator = new SerializationGenerator(methodName: "Serialize");
 			generator.GenerateSerializationCode(Groups);
-			return generator.Compile(objects);
+			return generator.Compile<SerializationDelegate>(objects);
 		}
 
 		/// <summary>
 		///   Dynamically generates factory method for delegates that can be used to deserialize the state vector.
 		/// </summary>
-		internal Func<ObjectTable, SerializationDelegate> CreateDeserializerFactory()
+		/// <param name="objects">The objects whose data is stored in the state vector.</param>
+		internal unsafe SerializationDelegate CreateDeserializer(ObjectTable objects)
 		{
 			var generator = new SerializationGenerator(methodName: "Deserialize");
 			generator.GenerateDeserializationCode(Groups);
-			return generator.Compile;
+			return generator.Compile<SerializationDelegate>(objects);
+		}
+
+		/// <summary>
+		///   Dynamically generates factory method for delegates that can be used to deserialize the state vector.
+		/// </summary>
+		internal unsafe OpenSerializationDelegate CreateDeserializer()
+		{
+			var generator = new SerializationGenerator(methodName: "Deserialize");
+			generator.GenerateDeserializationCode(Groups);
+			return generator.Compile<OpenSerializationDelegate>();
 		}
 
 		/// <summary>

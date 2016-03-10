@@ -105,7 +105,7 @@ namespace SafetySharp.Runtime
 
 			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_serializedObjects, SerializationMode.Optimized);
 
-			_deserialize = StateVectorLayout.CreateDeserializerFactory()(_serializedObjects);
+			_deserialize = StateVectorLayout.CreateDeserializer(_serializedObjects);
 			_serialize = StateVectorLayout.CreateSerializer(_serializedObjects);
 			_stateHeaderBytes = stateHeaderBytes;
 

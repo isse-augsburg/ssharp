@@ -39,7 +39,8 @@ namespace SafetySharp.Runtime.Serialization
 	/// </summary>
 	internal class RuntimeModelSerializer
 	{
-		private Func<ObjectTable, SerializationDelegate> _deserializerFactory;
+		private readonly object _syncObject = new object();
+		private OpenSerializationDelegate _deserializer;
 		private byte[] _serializedModel;
 		private StateVectorLayout _stateVector;
 
@@ -59,7 +60,9 @@ namespace SafetySharp.Runtime.Serialization
 			using (var writer = new BinaryWriter(buffer, Encoding.UTF8, leaveOpen: true))
 			{
 				SerializeModel(writer, model, formulas);
-				_serializedModel = buffer.ToArray();
+
+				lock (_syncObject)
+					_serializedModel = buffer.ToArray();
 			}
 		}
 
@@ -72,7 +75,9 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, formulas);
-			return serializer._serializedModel;
+
+			lock (serializer._syncObject)
+				return serializer._serializedModel;
 		}
 
 		/// <summary>
@@ -90,8 +95,11 @@ namespace SafetySharp.Runtime.Serialization
 			var objectTable = CreateObjectTable(model, formulas, stateFormulas);
 
 			// Prepare the serialization of the model's initial state
-			_stateVector = SerializationRegistry.Default.GetStateVectorLayout(objectTable, SerializationMode.Full);
-			_deserializerFactory = null;
+			lock (_syncObject)
+			{
+				_stateVector = SerializationRegistry.Default.GetStateVectorLayout(objectTable, SerializationMode.Full);
+				_deserializer = null;
+			}
 
 			var stateVectorSize = _stateVector.SizeInBytes;
 			var serializer = _stateVector.CreateSerializer(objectTable);
@@ -245,22 +253,26 @@ namespace SafetySharp.Runtime.Serialization
 				serializedState[i] = reader.ReadByte();
 
 			// Deserialize the model's initial state
-			if (_stateVector == null)
-				_stateVector = SerializationRegistry.Default.GetStateVectorLayout(objectTable, SerializationMode.Full);
+			OpenSerializationDelegate deserializer;
+			lock (_syncObject)
+			{
+				if (_stateVector == null)
+					_stateVector = SerializationRegistry.Default.GetStateVectorLayout(objectTable, SerializationMode.Full);
 
-			// Generate the deserializer
-			if (_deserializerFactory == null)
-				_deserializerFactory = _stateVector.CreateDeserializerFactory();
+				if (_deserializer == null)
+					_deserializer = _stateVector.CreateDeserializer();
 
-			var deserializer = _deserializerFactory(objectTable);
-			deserializer(serializedState);
+				deserializer = _deserializer;
+			}
+
+			deserializer(objectTable, serializedState);
 
 			// We instantiate the runtime type for each component and replace the original component
 			// instance with the new runtime instance; we also replace all of the component's fault effects
 			// with that instance and deserialize the initial state again. Afterwards, we have completely
 			// replaced the original instance with its runtime instance, taking over all serialized data
 			SubstituteRuntimeInstances(objectTable, roots);
-			deserializer(serializedState);
+			deserializer(objectTable, serializedState);
 
 			// Deserialize the state formulas and instantiate the runtime model
 			DeserializeStateFormulas(reader, objectTable);

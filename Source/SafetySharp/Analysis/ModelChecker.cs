@@ -38,9 +38,17 @@ namespace SafetySharp.Analysis
 		///   Forwards the output <paramref name="message" />.
 		/// </summary>
 		/// <param name="message">The message that should be output.</param>
-		protected internal void Output(string message)
+		/// <param name="color">
+		///   The color of the output that should be written. <c>null</c> indicates that the default color should be used.
+		/// </param>
+		protected internal void Output(string message, ConsoleColor? color = null)
 		{
+			if (color != null)
+				Console.ForegroundColor = color.Value;
+
 			Console.WriteLine(message);
+			Console.ResetColor();
+
 			OutputWritten?.Invoke(message);
 		}
 

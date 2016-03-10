@@ -27,4 +27,12 @@ namespace SafetySharp.Runtime.Serialization
 	/// </summary>
 	/// <param name="state">The state that should be serialized to or deserialized from.</param>
 	internal unsafe delegate void SerializationDelegate(byte* state);
+
+	/// <summary>
+	///   Represents a dynamically generated serialization or deserialization method where the serialized objects are specified
+	///   explicitly.
+	/// </summary>
+	/// <param name="objects">The objects that should be serialized or deserialized.</param>
+	/// <param name="state">The state that should be serialized to or deserialized from.</param>
+	internal unsafe delegate void OpenSerializationDelegate(ObjectTable objects, byte* state);
 }

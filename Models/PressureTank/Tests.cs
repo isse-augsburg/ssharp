@@ -58,5 +58,10 @@ namespace PressureTank
 			var lchecker = new LtsMin();
 			lchecker.CheckInvariant(model, true);
 		}
+
+		public static void Main()
+		{
+			new Tests().RuptureDcca();
+		}
 	}
 }

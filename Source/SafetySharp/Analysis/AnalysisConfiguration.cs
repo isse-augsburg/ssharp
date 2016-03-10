@@ -51,7 +51,7 @@ namespace SafetySharp.Analysis
 		internal static readonly AnalysisConfiguration Default = new AnalysisConfiguration
 		{
 			CpuCount = Int32.MaxValue,
-			ProgressReportsOnly = true,
+			ProgressReportsOnly = false,
 			StackCapacity = DefaultStackCapacity,
 			StateCapacity = DefaultStateCapacity,
 			SuccessorCapacity = DefaultSuccessorStateCapacity

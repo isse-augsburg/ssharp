@@ -48,7 +48,7 @@ namespace SafetySharp.Analysis
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			using (var checker = new InvariantChecker(createModel, Output, Configuration))
+			using (var checker = new InvariantChecker(createModel, message => Output(message), Configuration))
 			{
 				var result = default(AnalysisResult);
 				var initializationTime = stopwatch.Elapsed;

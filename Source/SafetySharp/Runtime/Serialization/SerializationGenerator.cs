@@ -97,12 +97,10 @@ namespace SafetySharp.Runtime.Serialization
 		///   Compiles the dynamic method, returning a delegate that can be used to invoke it.
 		/// </summary>
 		/// <param name="objects">The known objects that can be serialized and deserialized.</param>
-		internal SerializationDelegate Compile(ObjectTable objects)
+		internal T Compile<T>(ObjectTable objects = null)
 		{
-			Requires.NotNull(objects, nameof(objects));
-
 			_il.Emit(OpCodes.Ret);
-			return (SerializationDelegate)_method.CreateDelegate(typeof(SerializationDelegate), objects);
+			return (T)(object)_method.CreateDelegate(typeof(T), objects);
 		}
 
 		/// <summary>

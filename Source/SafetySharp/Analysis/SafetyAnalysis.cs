@@ -50,6 +50,14 @@ namespace SafetySharp.Analysis
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
 
 		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		public SafetyAnalysis()
+		{
+			Configuration.ProgressReportsOnly = true;
+		}
+
+		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
 		/// </summary>
 		public event Action<string> OutputWritten
@@ -73,7 +81,6 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(hazard, nameof(hazard));
 
 			_modelChecker.Configuration = Configuration;
-			_modelChecker.Configuration.ProgressReportsOnly = true;
 			_modelChecker.Output("Running Deductive Cause Consequence Analysis.");
 
 			var stopwatch = new Stopwatch();
@@ -131,12 +138,12 @@ namespace SafetySharp.Analysis
 
 						if (!result.FormulaHolds)
 						{
-							_modelChecker.Output($"Found minimal critical fault set: {{ {set.ToString(faults)} }}.");
+							_modelChecker.Output($"[Critical]  {{ {set.ToString(faults)} }}", ConsoleColor.DarkRed);
 							criticalSets.Add(set);
 						}
 						else
 						{
-							_modelChecker.Output($"Found safe fault set: {{ {set.ToString(faults)} }}.");
+							_modelChecker.Output($"[  Safe  ]  {{ {set.ToString(faults)} }}", ConsoleColor.DarkGreen);
 							safeSets.Add(set);
 						}
 

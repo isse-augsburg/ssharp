@@ -54,7 +54,7 @@ namespace Tests
 			_objectTable = new ObjectTable(objects);
 			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_objectTable, mode);
 			_serializer = StateVectorLayout.CreateSerializer(_objectTable);
-			_deserializer = StateVectorLayout.CreateDeserializerFactory()(_objectTable);
+			_deserializer = StateVectorLayout.CreateDeserializer(_objectTable);
 
 			StateSlotCount = StateVectorLayout.SizeInBytes / 4;
 			StateVectorSize = StateVectorLayout.SizeInBytes;
