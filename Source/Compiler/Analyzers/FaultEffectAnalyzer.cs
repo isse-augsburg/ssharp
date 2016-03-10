@@ -78,10 +78,16 @@ namespace SafetySharp.Compiler.Analyzers
 			$"'{{0}}' is not allowed to derive from '{{1}}'; only non-fault effect classes derived from '{typeof(Component).FullName}' are allowed.");
 
 		/// <summary>
+		///   The error diagnostic emitted by the analyzer when a fault effect is sealed.
+		/// </summary>
+		private static readonly DiagnosticInfo _sealedEffect = DiagnosticInfo.Error(
+			DiagnosticIdentifier.SealedFaultEffect, "Fault effects cannot be sealed.", "Fault effect '{0}' is not allowed to be sealed.");
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		public FaultEffectAnalyzer()
-			: base(_genericEffect, _accessibility, _invalidBaseType, _abstractOverride, _multipleEffectsWithoutPriority)
+			: base(_genericEffect, _accessibility, _invalidBaseType, _abstractOverride, _multipleEffectsWithoutPriority, _sealedEffect)
 		{
 		}
 
@@ -153,6 +159,9 @@ namespace SafetySharp.Compiler.Analyzers
 
 			if (!symbol.BaseType.IsComponent(compilation))
 				_invalidBaseType.Emit(context, symbol, symbol, symbol.BaseType);
+
+			if (symbol.IsSealed)
+				_sealedEffect.Emit(context, symbol, symbol.ToDisplayString());
 		}
 
 		/// <summary>

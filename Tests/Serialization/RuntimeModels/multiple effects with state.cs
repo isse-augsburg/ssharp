@@ -29,59 +29,65 @@ namespace Tests.Serialization.RuntimeModels
 	using Shouldly;
 	using Utilities;
 
-	internal class SingleFault : TestModel
+	// ReSharper disable PossibleInvalidCastException
+	internal class MultipleEffectsWithState : TestModel
 	{
-		private static bool _hasConstructorRun;
-
 		protected override void Check()
 		{
 			var c = new C();
 			var m = new Model(c);
 
-			((C.Effect1)c.FaultEffects[0]).F = 17;
+			var e1 = c.F.AddEffect<C.Effect1>(c);
+			var e2 = c.F.AddEffect<C.Effect2>(c);
 
-			_hasConstructorRun = false;
+			e1.X = 17;
+			e2.X = 18;
+			e2.Y = 19;
+
 			Create(m);
 
 			StateFormulas.ShouldBeEmpty();
 			RootComponents.Length.ShouldBe(1);
 
 			var root = RootComponents[0];
-			root.ShouldBeOfType<C.Effect1>();
+			root.ShouldBeOfType<C.Effect2>();
 			root.GetSubcomponents().ShouldBeEmpty();
 
-			((C)root).F1.ShouldBeOfType<TransientFault>();
-			((C.Effect1)root).F.ShouldBe(17);
+			((C)root).F.ShouldBeOfType<TransientFault>();
+			((C.Effect1)root).X.ShouldBe(17);
+			((C.Effect2)root).X.ShouldBe(18);
+			((C.Effect2)root).Y.ShouldBe(19);
 
-			root.FaultEffects.Count.ShouldBe(1);
-			((C.Effect1)root.FaultEffects[0]).F.ShouldBe(17);
+			root.FaultEffects.Count.ShouldBe(2);
+			((C.Effect1)root.FaultEffects[0]).X.ShouldBe(17);
+			((C.Effect2)root.FaultEffects[1]).X.ShouldBe(18);
+			((C.Effect2)root.FaultEffects[1]).Y.ShouldBe(19);
 
-			typeof(C.Effect1).GetField("__fault__", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root).ShouldBe(((C)root).F1);
-
-			_hasConstructorRun.ShouldBe(false);
+			typeof(C.Effect1).GetField("__fault__", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root).ShouldBe(((C)root).F);
+			typeof(C.Effect2).GetField("__fault__", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root).ShouldBe(((C)root).F);
 		}
 
 		private class C : Component
 		{
-			public readonly Fault F1 = new TransientFault();
-
-			public C()
-			{
-				_hasConstructorRun = true;
-
-				F1.AddEffect<Effect1>(this);
-			}
-
-			public virtual void M()
-			{
-			}
+			public readonly Fault F = new TransientFault();
 
 			[FaultEffect]
 			public class Effect1 : C
 			{
-				public int F;
+				public int X;
 
-				public override void M()
+				public override void Update()
+				{
+				}
+			}
+
+			[FaultEffect]
+			public class Effect2 : C
+			{
+				public int Y;
+				public int X;
+
+				public override void Update()
 				{
 				}
 			}

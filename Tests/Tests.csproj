@@ -185,6 +185,7 @@
     <Compile Include="Analysis\Ltl\Violated\undo fault after successful activation.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism double override.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Invalid\sealed.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\deterministic effects without priorities.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\effects with priorities.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\explicit nondeterminism.cs" />
@@ -193,6 +194,8 @@
     <Compile Include="Execution\Faults\Binding\inherited fault.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\multiple effects same type.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\multiple effects.cs" />
+    <Compile Include="Execution\Faults\ProvidedPorts\multiple inactive effects.cs" />
+    <Compile Include="Execution\Faults\ProvidedPorts\single inactive effect.cs" />
     <Compile Include="Execution\Simulation\reachable by binding only.cs" />
     <Compile Include="Execution\Simulation\faults.cs" />
     <Compile Include="Execution\Simulation\bindings.cs" />
@@ -568,6 +571,7 @@
     <Compile Include="Serialization\Ranges\UInt32.cs" />
     <Compile Include="Serialization\Ranges\UInt64.cs" />
     <Compile Include="Serialization\Ranges\UInt8.cs" />
+    <Compile Include="Serialization\RuntimeModels\multiple effects with state.cs" />
     <Compile Include="Serialization\RuntimeModels\unbound.cs" />
     <Compile Include="Serialization\RuntimeModels\binding.cs" />
     <Compile Include="Serialization\RuntimeModels\deterministic faults.cs" />

@@ -53,6 +53,7 @@ namespace SafetySharp.Compiler.Analyzers
 		InvalidFaultEffectBaseType,
 		AbstractFaultEffectOverride,
 		MultipleFaultEffectsWithoutPriority,
+		SealedFaultEffect,
 
 		// Bindings diagnostics
 		BindingFailure = 5000,

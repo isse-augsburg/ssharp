@@ -20,41 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CompilerServices
+namespace Tests.Diagnostics.FaultEffects.Invalid
 {
-	using System.Runtime.CompilerServices;
-	using Modeling;
+	using SafetySharp.Compiler.Analyzers;
+	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   Allows the compiler to check whether a fault is activated while avoiding activation of faults that are known to have no
-	///   effect.
-	/// </summary>
-	public static class FaultHelper
+	[Diagnostic(DiagnosticIdentifier.SealedFaultEffect, 32, 29, 1, "Tests.Diagnostics.FaultEffects.Invalid.Sealed.E")]
+	public class Sealed : Component
 	{
-		/// <summary>
-		///   Tries to activate the <paramref name="fault" />, if possible, returning <c>true</c> to indicate that the fault is indeed
-		///   activated.
-		/// </summary>
-		/// <param name="fault">The fault that should be activated.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool Activate(Fault fault)
+		[FaultEffect]
+		public sealed class E : Nested
 		{
-			if (fault == null)
-				return false;
-
-			fault.TryActivate();
-			return fault.IsActivated;
-		}
-
-		/// <summary>
-		///   Undoes the activation of the <paramref name="fault" /> when the activation is known to have no observable effect and fault
-		///   activation was nondeterministic in the current step.
-		/// </summary>
-		/// <param name="fault">The fault whose activation should be undone.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void UndoActivation(Fault fault)
-		{
-			fault.UndoActivation();
 		}
 	}
 }

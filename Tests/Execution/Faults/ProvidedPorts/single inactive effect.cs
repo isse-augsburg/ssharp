@@ -20,69 +20,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Execution.Faults.ProvidedPorts
 {
-	using System.Reflection;
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
 	using Utilities;
 
-	internal class SingleFault : TestModel
+	internal class InactiveEffect : TestModel
 	{
-		private static bool _hasConstructorRun;
-
-		protected override void Check()
+		protected sealed override void Check()
 		{
-			var c = new C();
-			var m = new Model(c);
+			Create(new C());
+			var c = (C)RootComponents[0];
 
-			((C.Effect1)c.FaultEffects[0]).F = 17;
+			c.M().ShouldBe(1);
 
-			_hasConstructorRun = false;
-			Create(m);
-
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<C.Effect1>();
-			root.GetSubcomponents().ShouldBeEmpty();
-
-			((C)root).F1.ShouldBeOfType<TransientFault>();
-			((C.Effect1)root).F.ShouldBe(17);
-
-			root.FaultEffects.Count.ShouldBe(1);
-			((C.Effect1)root.FaultEffects[0]).F.ShouldBe(17);
-
-			typeof(C.Effect1).GetField("__fault__", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root).ShouldBe(((C)root).F1);
-
-			_hasConstructorRun.ShouldBe(false);
+			int r;
+			c.M(out r);
+			r.ShouldBe(2);
 		}
 
 		private class C : Component
 		{
-			public readonly Fault F1 = new TransientFault();
+			public virtual int M() => 1;
 
-			public C()
-			{
-				_hasConstructorRun = true;
-
-				F1.AddEffect<Effect1>(this);
-			}
-
-			public virtual void M()
-			{
-			}
+			public virtual void M(out int r) => r = 2;
 
 			[FaultEffect]
-			public class Effect1 : C
+			private class F : C
 			{
-				public int F;
+				public override int M() => 9;
 
-				public override void M()
+				public override void M(out int r)
 				{
+					base.M(out r);
+					r += 2;
 				}
 			}
 		}

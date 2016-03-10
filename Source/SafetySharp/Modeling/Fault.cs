@@ -23,6 +23,7 @@
 namespace SafetySharp.Modeling
 {
 	using System;
+	using System.Linq;
 	using System.Runtime.Serialization;
 	using CompilerServices;
 	using Runtime.Reflection;
@@ -147,14 +148,15 @@ namespace SafetySharp.Modeling
 			Requires.NotNull(component, nameof(component));
 			Requires.That(faultEffectType.HasAttribute<FaultEffectAttribute>(),
 				$"Expected fault effect '{faultEffectType.FullName}' to be marked with '{typeof(FaultEffectAttribute).FullName}'.");
-			// TODO: Requires.That(((Component)component).FaultEffects.SingleOrDefault(effect => effect.GetType() == faultEffectType) == null,
-			//	$"A fault effect of type '{faultEffectType.FullName}' has already been added.");
+			Requires.That(((Component)component).FaultEffectTypes.SingleOrDefault(type => type == faultEffectType) == null,
+				$"A fault effect of type '{faultEffectType.FullName}' has already been added.");
 
 			var faultEffect = (Component)FormatterServices.GetUninitializedObject(component.GetRuntimeType());
 
 			faultEffect.FaultEffectType = faultEffectType;
 			faultEffect.SetFault(this);
 			((Component)component).FaultEffects.Add(faultEffect);
+			((Component)component).FaultEffectTypes.Add(faultEffectType);
 
 			return faultEffect;
 		}
