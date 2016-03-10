@@ -86,7 +86,7 @@ namespace Elbtunnel.Vehicles
 		/// </summary>
 		void IInitializable.Initialize()
 		{
-			Lane = Choose(Lane.Left, Lane.Right);
+			Lane = Lane.Right;
 			Speed = ChooseFromRange(0, Specification.MaxSpeed);
 		}
 
@@ -94,7 +94,7 @@ namespace Elbtunnel.Vehicles
 		{
 			// The road layout makes lane changes impossible when the end control has been reached
 			if (Position < Specification.EndControlPosition)
-				Lane = Choose(Lane.Right);
+				Lane = Lane.Right;
 		}
 
 		/// <summary>
