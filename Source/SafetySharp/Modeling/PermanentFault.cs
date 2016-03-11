@@ -39,7 +39,8 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Checks whether the fault can be activated nondeterministically, or whether it has to be or cannot be activated.
+		///   Checks whether the fault can be activated nondeterministically, or whether it has to be or cannot be activated. This
+		///   method has no side effects, as otherwise S#'s fault activation mechanism would be completely broken.
 		/// </summary>
 		protected override Activation CheckActivation()
 		{
@@ -49,7 +50,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Invoked when the fault was activated.
 		/// </summary>
-		internal override void OnActivated()
+		public override void OnActivated()
 		{
 			_isActive = true;
 		}

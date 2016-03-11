@@ -42,8 +42,9 @@ namespace SafetySharp.Compiler.Analyzers
 		private static readonly DiagnosticInfo _multipleEffectsWithoutPriority = DiagnosticInfo.Warning(
 			DiagnosticIdentifier.MultipleFaultEffectsWithoutPriority,
 			"Detected multiple fault effects affecting the same member.",
-			"'{0}' is affected by multiple fault effects without an explicit priority specification. Consider making priorities " +
-			$"explicit by adding the '{typeof(PriorityAttribute).FullName}' to: {{1}}.");
+			"'{0}' is affected by multiple fault effects without an explicit priority specification, resulting in possibly " +
+			"unintended additional nondeterminism. Consider making priorities explicit by adding the " +
+			$"'{typeof(PriorityAttribute).FullName}' to: {{1}}.");
 
 		/// <summary>
 		///   The error diagnostic emitted by the analyzer when a fault effect overrides an abstract member.

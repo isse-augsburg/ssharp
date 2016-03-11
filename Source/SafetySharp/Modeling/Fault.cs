@@ -229,14 +229,15 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Invoked when the fault was activated.
+		///   Invoked when the fault was activated. This method is allowed to have side effects.
 		/// </summary>
-		internal virtual void OnActivated()
+		public virtual void OnActivated()
 		{
 		}
 
 		/// <summary>
-		///   Checks whether the fault can be activated nondeterministically, or whether it has to be or cannot be activated.
+		///   Checks whether the fault can be activated nondeterministically, or whether it has to be or cannot be activated. This
+		///   method is not allowed to have any side effects, as otherwise S#'s fault activation mechanism will be completely broken.
 		/// </summary>
 		protected abstract Activation CheckActivation();
 	}
