@@ -14,7 +14,7 @@ __S# Features__
   providing model refactorings, debuggers, UI designers for visualizations, continuous
   integration with automated regression tests, etc.
 
-Download S# and the Case Studies and Get Started
+Download S# and the Case Studies to Get Started
 -------------------------
 
 To get started with S#, please consult the [Wiki](http://safetysharp.isse.de/wiki). S# and
