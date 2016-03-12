@@ -37,7 +37,8 @@
     </UserControl.Resources>
     <DockPanel LastChildFill="true">
         <infrastructure:SimulationControls x:Name="SimulationControls" DockPanel.Dock="Top" />
-
+        <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center" Foreground="Red" FontSize="36" FontWeight="bold">This visualization is not yet functional!</TextBlock>
+        
         <Viewbox>
             <Canvas xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Name="svg85211" Width="695.81952" Height="383.71689">
                 <Canvas.RenderTransform>
