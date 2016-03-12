@@ -18,9 +18,8 @@ Download S# and the Case Studies to Get Started
 -------------------------
 
 To get started with S#, please consult the [Wiki](http://safetysharp.isse.de/wiki). S# and
-the case studies are available under the liberal
-[MIT License](https://github.com/isse-augsburg/ssharp/blob/master/LICENSE.md). You can use
-S# in your own projects to analyze safety-critical systems.
+the case studies are available under the 
+[MIT License](https://github.com/isse-augsburg/ssharp/blob/master/LICENSE.md).
 
 Example: Modeling with S#
 -------------------------
