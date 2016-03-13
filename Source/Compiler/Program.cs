@@ -70,9 +70,12 @@ namespace SafetySharp.Compiler
 
 			// If there was an error parsing the command line, show the help screen and terminate the application.
 			if (!Parser.Default.ParseArguments(args, this))
-				log.Die("Invalid command line arguments.");
+			{
+				log.Error("Invalid command line arguments.");
+				return -1;
+			}
 
-			log.Silent = Silent;
+			//log.Silent = Silent;
 			log.Info("");
 
 			log.Info("S# Compiler");

@@ -1,0 +1,150 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+
+	<PropertyGroup>
+		<SSharpAssemblyDirectories>$(SSharpAssemblyDirectories);$(OutDir)</SSharpAssemblyDirectories>
+	</PropertyGroup>
+
+	<UsingTask TaskName="SSharpNormalizationTask" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+    <ParameterGroup>
+      <InputFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <IntermediateDirectory ParameterType="Microsoft.Build.Framework.ITaskItem" Required="true" />
+      <References ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <AssemblyDirectories ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <OutputFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+    </ParameterGroup>
+		<Task>
+			<Code Type="Class" Language="cs">
+<![CDATA[
+using System;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Reflection;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+
+public class SSharpNormalizationTask : Task
+{
+	public SSharpNormalizationTask()
+	{
+		AppDomain.CurrentDomain.AssemblyResolve += (s, e) => TryLoadAssembly(new AssemblyName(e.Name));
+	}
+
+	[Required]
+	public ITaskItem[] InputFiles { get; set; }
+	
+	[Required]
+	public ITaskItem[] References { get; set; }
+
+	[Required]
+	public ITaskItem IntermediateDirectory { get; set; }
+
+	[Required]
+	public ITaskItem[] AssemblyDirectories { get; set; }
+
+	[Output]
+	public ITaskItem[] OutputFiles { get; set; }
+
+	public override bool Execute()
+	{
+		try
+		{
+			var outPath = IntermediateDirectory.GetMetadata("FullPath");
+			var intermediateDirectory = Path.Combine(outPath, "ssharp");
+			Directory.CreateDirectory(intermediateDirectory);
+		
+			var compilationUnits = Normalize();
+			if (compilationUnits == null)
+				return false;
+			
+			OutputFiles = new ITaskItem[compilationUnits.Length];
+			
+			for (var i = 0; i < compilationUnits.Length; ++i)
+			{
+				var path = Path.Combine(intermediateDirectory, i + ".cs");
+
+				OutputFiles[i] = new TaskItem(path);
+				File.WriteAllText(path, compilationUnits[i]);
+			}
+
+			return true;
+		}
+		catch (Exception e)
+		{
+			Log.LogError("S# normalization failed due to an exception.");
+			Log.LogError("{0}", e.Message);
+			Log.LogError("{0}", e.StackTrace);
+			
+			return false;
+		}
+	}
+
+	private Assembly TryLoadAssembly(AssemblyName assemblyName)
+	{
+		// Load the assemblies to memory first in order to avoid locking the actual assemblies on disk
+
+		var referencePath =
+			References.FirstOrDefault(rp => string.Equals(rp.GetMetadata("FileName"), assemblyName.Name, StringComparison.OrdinalIgnoreCase));
+		if (referencePath != null)
+			return Assembly.Load(File.ReadAllBytes(referencePath.GetMetadata("FullPath")));
+
+		return LoadAssembly(assemblyName.Name + ".dll");
+	}
+	
+	private Assembly LoadAssembly(string assemblyName)
+	{
+		foreach (var directory in AssemblyDirectories)
+		{
+			string fileName = Path.Combine(directory.GetMetadata("FullPath"), assemblyName);
+
+			if (File.Exists(fileName))
+				return Assembly.Load(File.ReadAllBytes(fileName));
+		}
+		
+		return null;
+	}
+
+	private string[] Normalize()
+	{
+		var assembly = LoadAssembly("SafetySharp.Compiler.exe");
+		if (assembly == null)
+			throw new InvalidOperationException("Unable to find the S# compiler.");
+		
+		var compilerType = assembly.GetType("SafetySharp.Compiler.Compiler");
+
+		var compiler = Activator.CreateInstance(compilerType, new[] { Log });
+		var method = compilerType.GetMethod("NormalizeProject", BindingFlags.Instance | BindingFlags.Public);
+		var normalize = (Normalizer)Delegate.CreateDelegate(typeof(Normalizer), compiler, method);
+
+		return normalize(InputFiles.Select(f => f.ItemSpec).ToArray(), References.Select(r => r.ItemSpec).ToArray());
+	}
+
+	private static byte[] ComputeHash(string file)
+	{
+		using (var cryptoProvider = new MD5CryptoServiceProvider())
+		using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read))
+			return cryptoProvider.ComputeHash(stream);
+	}
+
+	private delegate string[] Normalizer(string[] files, string[] references);
+}
+]]>
+			</Code>
+		</Task>
+	</UsingTask>
+	
+    <Target Name="NormalizeSSharpCode" BeforeTargets="AfterResGen;AfterResolveReferences">
+        <SSharpNormalizationTask InputFiles="@(Compile)" References="@(ReferencePath)" IntermediateDirectory="$(IntermediateOutputPath)" AssemblyDirectories="$(SSharpAssemblyDirectories)">
+			<Output TaskParameter="OutputFiles" ItemName="SSharpCompile" />
+        </SSharpNormalizationTask>
+		
+		<ItemGroup>
+			<!-- replace the input files for the C# compiler -->
+			<Compile Remove="@(Compile)" />
+			<Compile Include="@(SSharpCompile)" />
+			
+			<!-- remove the analyzers for the C# compiler, as they are no longer valid -->
+			<Analyzer Remove="@(Analyzer)" />
+		</ItemGroup>
+    </Target>
+</Project>

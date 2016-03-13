@@ -62,10 +62,12 @@ namespace SafetySharp.Compiler.Normalization
 		///   Applies the normalizers to the <paramref name="compilation" />.
 		/// </summary>
 		/// <param name="compilation">The compilation that should be normalized.</param>
-		/// <param name="syntaxGenerator">The syntax generator that the normalizers should use to generate syntax nodes.</param>
 		[NotNull]
-		public static Compilation ApplyNormalizers([NotNull] Compilation compilation, [NotNull] SyntaxGenerator syntaxGenerator)
+		public static Compilation ApplyNormalizers([NotNull] Compilation compilation)
 		{
+			var workspace = new AdhocWorkspace();
+			var syntaxGenerator = SyntaxGenerator.GetGenerator(workspace, LanguageNames.CSharp);
+
 			compilation = ApplyNormalizer<LineDirectiveNormalizer>(compilation, syntaxGenerator);
 			compilation = ApplyNormalizer<PartialNormalizer>(compilation, syntaxGenerator);
 			compilation = ApplyNormalizer<FormulaNormalizer>(compilation, syntaxGenerator);
@@ -172,9 +174,9 @@ namespace SafetySharp.Compiler.Normalization
 			// Ideally, we'd construct the syntax tree from the compilation unit directly instead of printing out the
 			// compilation unit and then parsing it again. However, if we do that, we can no longer use any C# 6 features
 			// in the generated code - probably some Roslyn bug.
-			var options = new CSharpParseOptions();
-			compilationUnit = compilationUnit.NormalizeWhitespace().PrependLineDirective(-1);
-			var syntaxTree = SyntaxFactory.ParseSyntaxTree(compilationUnit.ToFullString(), options, path, Encoding.UTF8);
+			const string header = "#line hidden\n#pragma warning disable 0414, 0649, 0108, 0169\n";
+			var file = header + compilationUnit.NormalizeWhitespace().ToFullString();
+			var syntaxTree = SyntaxFactory.ParseSyntaxTree(file, new CSharpParseOptions(), path, Encoding.UTF8);
 
 			Compilation = Compilation.AddSyntaxTrees(syntaxTree);
 		}

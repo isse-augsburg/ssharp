@@ -27,7 +27,7 @@ namespace PressureTank
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Reflection;
-	
+
 	public class Tests
 	{
 		[Test]

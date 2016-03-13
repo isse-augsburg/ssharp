@@ -49,10 +49,8 @@ namespace Tests
 			var file = File.ReadAllText(path);
 			var syntaxTree = SyntaxFactory.ParseSyntaxTree(file, path: path, encoding: Encoding.UTF8);
 			var compilation = Tests.CreateCompilation(false, syntaxTree);
-			var workspace = new AdhocWorkspace();
-			var syntaxGenerator = SyntaxGenerator.GetGenerator(workspace, LanguageNames.CSharp);
 
-			compilation = Normalizer.ApplyNormalizers(compilation, syntaxGenerator);
+			compilation = Normalizer.ApplyNormalizers(compilation);
 			_root = compilation.SyntaxTrees.First().GetRoot();
 
 			Output.Trace("{0}", _root.ToFullString());

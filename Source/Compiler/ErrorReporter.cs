@@ -23,6 +23,7 @@
 namespace SafetySharp.Compiler
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
@@ -37,20 +38,6 @@ namespace SafetySharp.Compiler
 		///   Gets or sets a value indicating whether all informational compiler output should be suppressed.
 		/// </summary>
 		public bool Silent { get; set; }
-
-		/// <summary>
-		///   Logs a fatal application error and terminates the application.
-		/// </summary>
-		/// <param name="message">The non-empty message that should be logged.</param>
-		/// <param name="arguments">The arguments that should be used to format <paramref name="message" />.</param>
-		[DebuggerHidden, StringFormatMethod("message"), ContractAnnotation("=> halt")]
-		public virtual void Die([NotNull] string message, params object[] arguments)
-		{
-			Requires.NotNull(message, nameof(message));
-
-			Log(DiagnosticSeverity.Error, message, arguments);
-			Environment.Exit(-1);
-		}
 
 		/// <summary>
 		///   Logs an application error.
@@ -86,6 +73,53 @@ namespace SafetySharp.Compiler
 		{
 			Requires.NotNull(message, nameof(message));
 			Log(DiagnosticSeverity.Info, message, arguments);
+		}
+
+		/// <summary>
+		///   Reports <paramref name="diagnostic" /> depending on its severity. If <paramref name="errorsOnly" /> is <c>true</c>, only
+		///   error diagnostics are reported.
+		/// </summary>
+		/// <param name="diagnostic">The diagnostic that should be reported.</param>
+		/// <param name="errorsOnly">Indicates whether error diagnostics should be reported exclusively.</param>
+		internal virtual void Report(Diagnostic diagnostic, bool errorsOnly)
+		{
+			switch (diagnostic.Severity)
+			{
+				case DiagnosticSeverity.Error:
+					Error("{0}", diagnostic);
+					break;
+				case DiagnosticSeverity.Warning:
+					if (!errorsOnly)
+						Warn("{0}", diagnostic);
+					break;
+				case DiagnosticSeverity.Info:
+				case DiagnosticSeverity.Hidden:
+					if (!errorsOnly)
+						Info("{0}", diagnostic);
+					break;
+				default:
+					Assert.NotReached("Unknown diagnostic severity.");
+					break;
+			}
+		}
+
+		/// <summary>
+		///   Reports all <paramref name="diagnostics" /> depending on their severities. If <paramref name="errorsOnly" /> is
+		///   <c>true</c>, only error diagnostics are reported. The function returns <c>false</c> when at least one error diagnostic
+		///   has been reported.
+		/// </summary>
+		/// <param name="diagnostics">The diagnostics that should be reported.</param>
+		/// <param name="errorsOnly">Indicates whether error diagnostics should be reported exclusively.</param>
+		internal bool Report([NotNull] IEnumerable<Diagnostic> diagnostics, bool errorsOnly)
+		{
+			var containsError = false;
+			foreach (var diagnostic in diagnostics)
+			{
+				Report(diagnostic, errorsOnly);
+				containsError |= diagnostic.Severity == DiagnosticSeverity.Error;
+			}
+
+			return !containsError;
 		}
 
 		/// <summary>

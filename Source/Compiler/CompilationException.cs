@@ -36,5 +36,14 @@ namespace SafetySharp.Compiler
 			: base("Compilation failed.")
 		{
 		}
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="message">A message explaining the compilation failure.</param>
+		public CompilationException(string message)
+			: base(message)
+		{
+		}
 	}
 }

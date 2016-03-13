@@ -59,8 +59,8 @@ namespace Tests
 		{
 			var projectPath = Path.Combine(_directory, "TestProject.csproj");
 
-			File.Copy("End2End/TestedFiles/TestProject.csproj", projectPath, overwrite: true);
-			File.Copy(Path.Combine("End2End/TestedFiles", testFile), Path.Combine(_directory, "TestCode.cs"), overwrite: true);
+			File.Copy("End2End/Files/TestProject.csproj", projectPath, overwrite: true);
+			File.Copy(Path.Combine("End2End/Files", testFile), Path.Combine(_directory, "TestCode.cs"), overwrite: true);
 
 			return _tester.Compile(projectPath, Output);
 		}
@@ -99,7 +99,8 @@ namespace Tests
 		{
 			var msbuildPath = ToolLocationHelper.GetPathToBuildTools(ToolLocationHelper.CurrentToolsVersion);
 
-			var process = new ExternalProcess(Path.Combine(msbuildPath, "msbuild.exe"), $"\"{project}\" /p:Configuration=Release /p:Platform=AnyCPU",
+			var process = new ExternalProcess(Path.Combine(msbuildPath, "msbuild.exe"), 
+				$"\"{project}\" /p:Configuration=Release /p:Platform=AnyCPU /nr:false",
 				message => output.Log("{0}", message.Message));
 
 			process.Run();

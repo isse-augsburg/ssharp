@@ -31,11 +31,12 @@ namespace SafetySharp.Compiler
 	using System.Reflection;
 	using Analyzers;
 	using JetBrains.Annotations;
+	using Microsoft.Build.Utilities;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.Diagnostics;
-	using Microsoft.CodeAnalysis.Editing;
 	using Microsoft.CodeAnalysis.MSBuild;
+	using Microsoft.CodeAnalysis.Text;
 	using Normalization;
 	using Utilities;
 
@@ -65,6 +66,15 @@ namespace SafetySharp.Compiler
 		}
 
 		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="logger">The logger that should be used to report messages to MSBuild.</param>
+		public Compiler(TaskLoggingHelper logger)
+		{
+			_log = new MSBuildReporter(logger);
+		}
+
+		/// <summary>
 		///   Gets the diagnostic analyzers that are used to diagnose the C# code before compilation.
 		/// </summary>
 		public static ImmutableArray<DiagnosticAnalyzer> Analyzers
@@ -88,6 +98,40 @@ namespace SafetySharp.Compiler
 		///   Gets the compilation that has been compiled.
 		/// </summary>
 		public Compilation Compilation { get; private set; }
+
+		/// <summary>
+		///   Normalizes the <paramref name="files" />.
+		/// </summary>
+		/// <param name="files">The files that should be normalized.</param>
+		/// <param name="references">The references the files should be compiled with.</param>
+		public string[] NormalizeProject(string[] files, string[] references)
+		{
+			var diagnosticOptions = ImmutableDictionary
+				.Create<string, ReportDiagnostic>()
+				.Add("CS0626", ReportDiagnostic.Suppress)
+				.Add("CS1701", ReportDiagnostic.Suppress);
+
+			var workspace = new AdhocWorkspace();
+			var project = workspace
+				.CurrentSolution.AddProject("ssharp", "ssharp", "C#")
+				.WithCompilationOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true,
+					specificDiagnosticOptions: diagnosticOptions, assemblyIdentityComparer: DesktopAssemblyIdentityComparer.Default))
+				.WithMetadataReferences(references.Select(p => MetadataReference.CreateFromFile(p)));
+
+			foreach (var file in files)
+			{
+				var text = SourceText.From(File.ReadAllText(file));
+				project = project.AddDocument(file, text).Project;
+			}
+
+			Compilation = project.GetCompilationAsync().Result;
+
+			if (!Diagnose(reportAll: true))
+				return null;
+
+			Compilation = Normalizer.ApplyNormalizers(Compilation);
+			return Compilation.SyntaxTrees.Select(tree => tree.ToString()).ToArray();
+		}
 
 		/// <summary>
 		///   Compiles the S# modeling project identified by the <paramref name="projectFile" /> for the given
@@ -154,13 +198,12 @@ namespace SafetySharp.Compiler
 			var diagnosticOptions = Compilation.Options.SpecificDiagnosticOptions.Add("CS0626", ReportDiagnostic.Suppress);
 			var options = (CSharpCompilationOptions)Compilation.Options;
 			options = options.WithAllowUnsafe(true).WithSpecificDiagnosticOptions(diagnosticOptions);
-			var syntaxGenerator = SyntaxGenerator.GetGenerator(project.Solution.Workspace, LanguageNames.CSharp);
 
 			if (!Diagnose())
 				throw new CompilationException();
 
 			Compilation = Compilation.WithOptions(options);
-			Compilation = Normalizer.ApplyNormalizers(Compilation, syntaxGenerator);
+			Compilation = Normalizer.ApplyNormalizers(Compilation);
 
 			EmitInMemory(out peBytes, out pdbBytes);
 		}
@@ -181,53 +224,6 @@ namespace SafetySharp.Compiler
 		}
 
 		/// <summary>
-		///   Reports <paramref name="diagnostic" /> depending on its severity. If <paramref name="errorsOnly" /> is <c>true</c>, only
-		///   error diagnostics are reported.
-		/// </summary>
-		/// <param name="diagnostic">The diagnostic that should be reported.</param>
-		/// <param name="errorsOnly">Indicates whether error diagnostics should be reported exclusively.</param>
-		private void Report(Diagnostic diagnostic, bool errorsOnly)
-		{
-			switch (diagnostic.Severity)
-			{
-				case DiagnosticSeverity.Error:
-					_log.Error("{0}", diagnostic);
-					break;
-				case DiagnosticSeverity.Warning:
-					if (!errorsOnly)
-						_log.Warn("{0}", diagnostic);
-					break;
-				case DiagnosticSeverity.Info:
-				case DiagnosticSeverity.Hidden:
-					if (!errorsOnly)
-						_log.Info("{0}", diagnostic);
-					break;
-				default:
-					Assert.NotReached("Unknown diagnostic severity.");
-					break;
-			}
-		}
-
-		/// <summary>
-		///   Reports all <paramref name="diagnostics" /> depending on their severities. If <paramref name="errorsOnly" /> is
-		///   <c>true</c>, only error diagnostics are reported. The function returns <c>false</c> when at least one error diagnostic
-		///   has been reported.
-		/// </summary>
-		/// <param name="diagnostics">The diagnostics that should be reported.</param>
-		/// <param name="errorsOnly">Indicates whether error diagnostics should be reported exclusively.</param>
-		private bool Report([NotNull] IEnumerable<Diagnostic> diagnostics, bool errorsOnly)
-		{
-			var containsError = false;
-			foreach (var diagnostic in diagnostics)
-			{
-				Report(diagnostic, errorsOnly);
-				containsError |= diagnostic.Severity == DiagnosticSeverity.Error;
-			}
-
-			return !containsError;
-		}
-
-		/// <summary>
 		///   Reports an error diagnostic with the given <paramref name="identifier" /> and <paramref name="message" />.
 		/// </summary>
 		/// <param name="identifier">The identifier of the diagnostic that should be reported.</param>
@@ -241,7 +237,7 @@ namespace SafetySharp.Compiler
 
 			var diagnostic = Diagnostic.Create(identifier, DiagnosticInfo.Category, message, DiagnosticSeverity.Error,
 				DiagnosticSeverity.Error, true, 0);
-			Report(diagnostic, true);
+			_log.Report(diagnostic, true);
 			return false;
 		}
 
@@ -269,18 +265,15 @@ namespace SafetySharp.Compiler
 
 		/// <summary>
 		///   Runs the S# diagnostic analyzers on the <see cref="Compilation" />, reporting all generated diagnostics. The function
-		///   returns
-		///   <c>false</c> when at least one error diagnostic has been reported.
+		///   returns <c>false</c> when at least one error diagnostic has been reported.
 		/// </summary>
-		private bool Diagnose()
+		private bool Diagnose(bool reportAll = false)
 		{
-			if (!Report(Compilation.GetDiagnostics(), true))
+			if (!_log.Report(Compilation.GetDiagnostics(), errorsOnly: !reportAll))
 				return false;
 
-			return Report(Compilation.WithAnalyzers(Analyzers).GetAnalyzerDiagnosticsAsync().Result, false);
+			return _log.Report(Compilation.WithAnalyzers(Analyzers).GetAnalyzerDiagnosticsAsync().Result, false);
 		}
-
-		
 
 		/// <summary>
 		///   Emits the code for the <see cref="Compilation" /> in-memory.
@@ -295,7 +288,7 @@ namespace SafetySharp.Compiler
 				var emitResult = Compilation.Emit(peStream, pdbStream);
 				if (!emitResult.Success)
 				{
-					Report(emitResult.Diagnostics, true);
+					_log.Report(emitResult.Diagnostics, true);
 					throw new CompilationException();
 				}
 

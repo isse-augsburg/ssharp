@@ -34,11 +34,6 @@ namespace Tests.Utilities
 			_output = output;
 		}
 
-		public override void Die(string message, params object[] arguments)
-		{
-			_output.Log("{0}", String.Format(message, arguments));
-		}
-
 		public override void Error(string message, params object[] arguments)
 		{
 			_output.Log("{0}", String.Format(message, arguments));
