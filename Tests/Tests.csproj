@@ -192,6 +192,8 @@
     <Compile Include="Execution\Faults\Binding\multiple effects.cs" />
     <Compile Include="Execution\Faults\Binding\nested inherited fault.cs" />
     <Compile Include="Execution\Faults\Binding\inherited fault.cs" />
+    <Compile Include="Execution\Faults\Binding\generics.cs" />
+    <Compile Include="Execution\Faults\Binding\non nested.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\multiple effects same type.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\multiple effects.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\multiple inactive effects.cs" />
@@ -455,6 +457,11 @@
     <Compile Include="NormalizationTests.Helpers.cs">
       <DependentUpon>NormalizationTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Normalization\LineCounts\provided ports.cs" />
+    <Compile Include="Normalization\LineCounts\provided ports with faults.cs" />
+    <Compile Include="Normalization\LineCounts\state machine.cs" />
+    <Compile Include="Normalization\LineCounts\required ports with faults.cs" />
+    <Compile Include="Normalization\LineCounts\required ports.cs" />
     <Compile Include="Normalization\Partial\Normalized\class declarations.cs" />
     <Compile Include="Normalization\Partial\Normalized\struct declarations.cs" />
     <Compile Include="Normalization\Partial\Unchanged\class declarations.cs" />

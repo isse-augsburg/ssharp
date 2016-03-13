@@ -149,6 +149,16 @@ namespace Tests.Utilities
 		/// <param name="syntaxTrees">The syntax trees the compilation should contain.</param>
 		public static Compilation CreateCompilation(params SyntaxTree[] syntaxTrees)
 		{
+			return CreateCompilation(true, syntaxTrees);
+		}
+
+		/// <summary>
+		///   Creates a compilation for the <paramref name="syntaxTrees" />.
+		/// </summary>
+		/// <param name="checkErrors">Indicates whether the compilation should be checked for errors.</param>
+		/// <param name="syntaxTrees">The syntax trees the compilation should contain.</param>
+		public static Compilation CreateCompilation(bool checkErrors, params SyntaxTree[] syntaxTrees)
+		{
 			var compilation = CSharpCompilation
 				.Create("TestAssembly" + Interlocked.Increment(ref _assemblyCount))
 				.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true))
@@ -162,9 +172,12 @@ namespace Tests.Utilities
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Should).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(ImmutableArray).Assembly.Location));
 
-			var errors = compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToArray();
-			if (errors.Length != 0)
-				throw new CSharpException(errors, "Failed to create compilation.\n\n{0}", SyntaxTreesToString(compilation));
+			if (checkErrors)
+			{
+				var errors = compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToArray();
+				if (errors.Length != 0)
+					throw new CSharpException(errors, "Failed to create compilation.\n\n{0}", SyntaxTreesToString(compilation));
+			}
 
 			return compilation;
 		}

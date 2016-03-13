@@ -20,36 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Normalization.LineCounts
 {
-	using SafetySharp.Compiler.Normalization;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Modeling;
 
-	public partial class NormalizationTests : Tests
+	public class RequiredPorts : LineCountTestObject
 	{
-		[Theory, MemberData("DiscoverTests", "Normalization/LiftedExpressions")]
-		public void LiftedExpressions(string test, string file)
+		private class C : Component
 		{
-			CheckNormalization<LiftedExpressionNormalizer>(file);
+			public extern int P1 { get; }
+			public extern int P2 { get; set; }
+			public extern int P3 { set; }
+
+			public extern int M1();
+			public virtual extern void M2(int f);
+			public virtual extern int M3(int f, out int r);
+
+			public class Z
+			{
+			}
 		}
 
-		[Theory, MemberData("DiscoverTests", "Normalization/Partial")]
-		public void Partial(string test, string file)
+		protected override void CheckLines()
 		{
-			CheckNormalization<PartialNormalizer>(file);
-		}
+			CheckProperty("P1", expectedLine: 31, occurrence: 0);
+			CheckProperty("P2", expectedLine: 32, occurrence: 0);
+			CheckProperty("P3", expectedLine: 33, occurrence: 0);
 
-		[Theory, MemberData("DiscoverTests", "Normalization/FaultNames")]
-		public void FaultNames(string test, string file)
-		{
-			CheckNormalization<FaultNameNormalizer>(file);
-		}
+			CheckMethod("M1", expectedLine: 35, occurrence: 0);
+			CheckMethod("M2", expectedLine: 36, occurrence: 0);
+			CheckMethod("M3", expectedLine: 37, occurrence: 0);
 
-		[Theory, MemberData("DiscoverTests", "Normalization/LineCounts")]
-		public void LineCounts(string test, string file)
-		{
-			ExecuteDynamicTests(file, file);
+			CheckClass("Z", expectedLine: 39, occurrence: 0);
+			CheckClass("RequiredPorts", expectedLine: 27, occurrence: 0);
+			CheckClass("C", expectedLine: 29, occurrence: 0);
 		}
 	}
 }

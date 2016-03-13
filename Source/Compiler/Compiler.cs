@@ -160,7 +160,7 @@ namespace SafetySharp.Compiler
 				throw new CompilationException();
 
 			Compilation = Compilation.WithOptions(options);
-			ApplyNormalizers(syntaxGenerator);
+			Compilation = Normalizer.ApplyNormalizers(Compilation, syntaxGenerator);
 
 			EmitInMemory(out peBytes, out pdbBytes);
 		}
@@ -280,24 +280,7 @@ namespace SafetySharp.Compiler
 			return Report(Compilation.WithAnalyzers(Analyzers).GetAnalyzerDiagnosticsAsync().Result, false);
 		}
 
-		/// <summary>
-		///   Applies the normalizers to the <see cref="Compilation" />.
-		/// </summary>
-		/// <param name="syntaxGenerator">The syntax generator that the normalizers should use to generate syntax nodes.</param>
-		private void ApplyNormalizers([NotNull] SyntaxGenerator syntaxGenerator)
-		{
-			Compilation = Normalizer.ApplyNormalizer<LineDirectiveNormalizer>(Compilation, syntaxGenerator);
-			Compilation = Normalizer.ApplyNormalizer<PartialNormalizer>(Compilation, syntaxGenerator);
-			Compilation = Normalizer.ApplyNormalizer<FormulaNormalizer>(Compilation, syntaxGenerator);
-			Compilation = Normalizer.ApplyNormalizer<LiftedExpressionNormalizer>(Compilation, syntaxGenerator);
-			Compilation = Normalizer.ApplyNormalizer<BindingNormalizer>(Compilation, syntaxGenerator);
-			Compilation = Normalizer.ApplyNormalizer<TransitionNormalizer>(Compilation, syntaxGenerator);
-			Compilation = Normalizer.ApplyNormalizer<ExpressionBodyNormalizer>(Compilation, syntaxGenerator);
-			Compilation = Normalizer.ApplyNormalizer<AutoPropertyNormalizer>(Compilation, syntaxGenerator);
-			Compilation = Normalizer.ApplyNormalizer<FaultEffectNormalizer>(Compilation, syntaxGenerator);
-			Compilation = Normalizer.ApplyNormalizer<RequiredPortNormalizer>(Compilation, syntaxGenerator);
-			Compilation = Normalizer.ApplyNormalizer<FaultNameNormalizer>(Compilation, syntaxGenerator);
-		}
+		
 
 		/// <summary>
 		///   Emits the code for the <see cref="Compilation" /> in-memory.

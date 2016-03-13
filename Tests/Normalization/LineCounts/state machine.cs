@@ -20,36 +20,61 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Normalization.LineCounts
 {
-	using SafetySharp.Compiler.Normalization;
-	using Utilities;
-	using Xunit;
+	using SafetySharp.Modeling;
 
-	public partial class NormalizationTests : Tests
+	public class StateMachine : LineCountTestObject
 	{
-		[Theory, MemberData("DiscoverTests", "Normalization/LiftedExpressions")]
-		public void LiftedExpressions(string test, string file)
+		private class C : Component
 		{
-			CheckNormalization<LiftedExpressionNormalizer>(file);
+			public enum S
+			{
+				A,
+				B
+			}
+
+			private int _x;
+			private readonly StateMachine<S> _state = S.A;
+
+			public override void Update()
+			{
+				var a = 0;
+
+				_state
+					.Transition(
+						from: S.A,
+						to: S.B,
+						guard: true,
+						action: () => ++_x)
+					.Transition(
+						from: S.B,
+						to: S.A,
+						guard: true,
+						action: () => ++_x);
+
+				var b = a + 1;
+				++b;
+			}
+
+			public class Z
+			{
+			}
 		}
 
-		[Theory, MemberData("DiscoverTests", "Normalization/Partial")]
-		public void Partial(string test, string file)
+		protected override void CheckLines()
 		{
-			CheckNormalization<PartialNormalizer>(file);
-		}
+			CheckField("_x", expectedLine: 37, occurrence: 0);
+			CheckField("_state", expectedLine: 38, occurrence: 0);
 
-		[Theory, MemberData("DiscoverTests", "Normalization/FaultNames")]
-		public void FaultNames(string test, string file)
-		{
-			CheckNormalization<FaultNameNormalizer>(file);
-		}
+			CheckVariableDeclaration("a", expectedLine: 42);
+			CheckVariableDeclaration("b", expectedLine: 56);
 
-		[Theory, MemberData("DiscoverTests", "Normalization/LineCounts")]
-		public void LineCounts(string test, string file)
-		{
-			ExecuteDynamicTests(file, file);
+			CheckMethod("Update", expectedLine: 40, occurrence: 0);
+
+			CheckClass("Z", expectedLine: 60, occurrence: 0);
+			CheckClass("StateMachine", expectedLine: 27, occurrence: 0);
+			CheckClass("C", expectedLine: 29, occurrence: 0);
 		}
 	}
 }

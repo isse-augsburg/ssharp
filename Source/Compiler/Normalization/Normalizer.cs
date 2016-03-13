@@ -59,6 +59,42 @@ namespace SafetySharp.Compiler.Normalization
 		protected SyntaxGenerator Syntax { get; private set; }
 
 		/// <summary>
+		///   Applies the normalizers to the <paramref name="compilation" />.
+		/// </summary>
+		/// <param name="compilation">The compilation that should be normalized.</param>
+		/// <param name="syntaxGenerator">The syntax generator that the normalizers should use to generate syntax nodes.</param>
+		[NotNull]
+		public static Compilation ApplyNormalizers([NotNull] Compilation compilation, [NotNull] SyntaxGenerator syntaxGenerator)
+		{
+			compilation = ApplyNormalizer<LineDirectiveNormalizer>(compilation, syntaxGenerator);
+			compilation = ApplyNormalizer<PartialNormalizer>(compilation, syntaxGenerator);
+			compilation = ApplyNormalizer<FormulaNormalizer>(compilation, syntaxGenerator);
+			compilation = ApplyNormalizer<LiftedExpressionNormalizer>(compilation, syntaxGenerator);
+			compilation = ApplyNormalizer<BindingNormalizer>(compilation, syntaxGenerator);
+			compilation = ApplyNormalizer<TransitionNormalizer>(compilation, syntaxGenerator);
+			compilation = ApplyNormalizer<ExpressionBodyNormalizer>(compilation, syntaxGenerator);
+			compilation = ApplyNormalizer<AutoPropertyNormalizer>(compilation, syntaxGenerator);
+			compilation = ApplyNormalizer<FaultEffectNormalizer>(compilation, syntaxGenerator);
+			compilation = ApplyNormalizer<RequiredPortNormalizer>(compilation, syntaxGenerator);
+			compilation = ApplyNormalizer<FaultNameNormalizer>(compilation, syntaxGenerator);
+
+			return compilation;
+		}
+
+		/// <summary>
+		///   Applies a normalizer of type <typeparamref name="T" /> to the <paramref name="compilation." />
+		/// </summary>
+		/// <typeparam name="T">The type of the normalizer that should be applied to <paramref name="compilation" />.</typeparam>
+		/// <param name="compilation">The compilation that should be normalized.</param>
+		/// <param name="syntaxGenerator">The syntax generator that the normalizer should use to generate syntax nodes.</param>
+		[NotNull]
+		private static Compilation ApplyNormalizer<T>([NotNull] Compilation compilation, [NotNull] SyntaxGenerator syntaxGenerator)
+			where T : Normalizer, new()
+		{
+			return new T().Normalize(compilation, syntaxGenerator);
+		}
+
+		/// <summary>
 		///   Normalizes the <paramref name="compilation" />.
 		/// </summary>
 		/// <param name="compilation">The compilation that should be normalized.</param>
@@ -72,19 +108,6 @@ namespace SafetySharp.Compiler.Normalization
 			Compilation = compilation;
 
 			return Normalize();
-		}
-
-		/// <summary>
-		///   Applies a normalizer of type <typeparamref name="T" /> to the <paramref name="compilation." />
-		/// </summary>
-		/// <typeparam name="T">The type of the normalizer that should be applied to <paramref name="compilation" />.</typeparam>
-		/// <param name="compilation">The compilation that should be normalized.</param>
-		/// <param name="syntaxGenerator">The syntax generator that the normalizer should use to generate syntax nodes.</param>
-		[NotNull]
-		public static Compilation ApplyNormalizer<T>([NotNull] Compilation compilation, [NotNull] SyntaxGenerator syntaxGenerator)
-			where T : Normalizer, new()
-		{
-			return new T().Normalize(compilation, syntaxGenerator);
 		}
 
 		/// <summary>

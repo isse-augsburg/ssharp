@@ -35,8 +35,100 @@ namespace Tests
 	using SafetySharp.Compiler.Normalization;
 	using SafetySharp.Compiler.Roslyn.Symbols;
 	using SafetySharp.Compiler.Roslyn.Syntax;
+	using Shouldly;
 	using Utilities;
 	using Xunit.Abstractions;
+
+	public abstract class LineCountTestObject : TestObject
+	{
+		private SyntaxNode _root;
+
+		protected sealed override void Check()
+		{
+			var path = (string)Arguments[0];
+			var file = File.ReadAllText(path);
+			var syntaxTree = SyntaxFactory.ParseSyntaxTree(file, path: path, encoding: Encoding.UTF8);
+			var compilation = Tests.CreateCompilation(false, syntaxTree);
+			var workspace = new AdhocWorkspace();
+			var syntaxGenerator = SyntaxGenerator.GetGenerator(workspace, LanguageNames.CSharp);
+
+			compilation = Normalizer.ApplyNormalizers(compilation, syntaxGenerator);
+			_root = compilation.SyntaxTrees.First().GetRoot();
+
+			Output.Trace("{0}", _root.ToFullString());
+			CheckLines();
+		}
+
+		protected abstract void CheckLines();
+
+		private T FindAncestor<T>(SyntaxNode node)
+			where T : SyntaxNode
+		{
+			while (node != null && !(node is T))
+				node = node.Parent;
+
+			return (T)node;
+		}
+
+		private T Find<T>(Func<T, bool> selector, int occurrence)
+			where T : SyntaxNode
+		{
+			var identifier = _root.Descendants<T>().Where(selector).Skip(occurrence).First();
+			var result = FindAncestor<T>(identifier);
+
+			result.ShouldNotBe(null);
+			return result;
+		}
+
+		private void CheckDeclaration<T>(Func<T, bool> selector, int expectedLine, int occurrence)
+			where T : SyntaxNode
+		{
+			var declaration = Find(selector, occurrence);
+			declaration.GetLineNumber().ShouldBe(expectedLine);
+		}
+
+		protected void CheckField(string name, int expectedLine, int occurrence)
+		{
+			CheckDeclaration<FieldDeclarationSyntax>(f => f.Declaration.Variables[0].Identifier.ValueText == name, expectedLine, occurrence);
+		}
+
+		protected void CheckProperty(string name, int expectedLine, int occurrence)
+		{
+			CheckDeclaration<PropertyDeclarationSyntax>(p => p.Identifier.ValueText == name, expectedLine, occurrence);
+		}
+
+		protected void CheckGetter(string name, int expectedLine, int occurrence)
+		{
+			CheckDeclaration<AccessorDeclarationSyntax>(a =>
+				((PropertyDeclarationSyntax)a.Parent.Parent).Identifier.ValueText == name && a.Keyword.ValueText == "get", expectedLine, occurrence);
+		}
+
+		protected void CheckSetter(string name, int expectedLine, int occurrence)
+		{
+			CheckDeclaration<AccessorDeclarationSyntax>(a =>
+				((PropertyDeclarationSyntax)a.Parent.Parent).Identifier.ValueText == name && a.Keyword.ValueText == "set", expectedLine, occurrence);
+		}
+
+		protected void CheckMethod(string name, int expectedLine, int occurrence)
+		{
+			CheckDeclaration<MethodDeclarationSyntax>(m => m.Identifier.ValueText == name, expectedLine, occurrence);
+		}
+
+		protected void CheckClass(string name, int expectedLine, int occurrence)
+		{
+			CheckDeclaration<ClassDeclarationSyntax>(c => c.Identifier.ValueText == name, expectedLine, occurrence);
+		}
+
+		protected void CheckVariableDeclaration(string name, int expectedLine)
+		{
+			var variable = _root
+				 .Descendants<LocalDeclarationStatementSyntax>()
+				 .SelectMany(d => d.Declaration.Variables)
+				 .Single(v => v.Identifier.ValueText == name);
+
+			variable.GetLineNumber().ShouldBe(expectedLine);
+		}
+	}
 
 	public enum TriviaType
 	{

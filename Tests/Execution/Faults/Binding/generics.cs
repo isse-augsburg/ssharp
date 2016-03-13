@@ -20,36 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Execution.Faults.Binding
 {
-	using SafetySharp.Compiler.Normalization;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Reflection;
+	using Shouldly;
 	using Utilities;
-	using Xunit;
 
-	public partial class NormalizationTests : Tests
+	internal class Generics : TestModel
 	{
-		[Theory, MemberData("DiscoverTests", "Normalization/LiftedExpressions")]
-		public void LiftedExpressions(string test, string file)
+		protected override void Check()
 		{
-			CheckNormalization<LiftedExpressionNormalizer>(file);
+			Create(new Model(new C<int>()));
+			var c = (C<int>)RootComponents[0];
+
+			c.FaultEffects[0].GetFault(typeof(C<int>.Effect)).ShouldBe(c.F);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Normalization/Partial")]
-		public void Partial(string test, string file)
+		private class C<T> : Component
 		{
-			CheckNormalization<PartialNormalizer>(file);
-		}
+			public readonly Fault F = new TransientFault();
 
-		[Theory, MemberData("DiscoverTests", "Normalization/FaultNames")]
-		public void FaultNames(string test, string file)
-		{
-			CheckNormalization<FaultNameNormalizer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Normalization/LineCounts")]
-		public void LineCounts(string test, string file)
-		{
-			ExecuteDynamicTests(file, file);
+			[FaultEffect(Fault = nameof(F))]
+			public class Effect : C<T>
+			{
+			}
 		}
 	}
 }
