@@ -45,6 +45,7 @@
       <HintPath>..\Dependencies\Packages\JetBrains.Annotations.10.0.0\lib\net20\JetBrains.Annotations.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Build.Utilities.Core, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.CodeAnalysis, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\Dependencies\Packages\Microsoft.CodeAnalysis.Common.1.1.1\lib\net45\Microsoft.CodeAnalysis.dll</HintPath>
       <Private>True</Private>
@@ -189,6 +190,22 @@
     <Compile Include="Diagnostics\FaultEffects\Valid\deterministic effects without priorities.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\effects with priorities.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\explicit nondeterminism.cs" />
+    <Compile Include="End2EndTests.cs" />
+    <Compile Include="End2EndTests.Helpers.cs">
+      <DependentUpon>End2EndTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="End2End\TestedFiles\success.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="End2End\TestedFiles\analysis error.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="End2End\TestedFiles\compilation error.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="End2End\Tests\analysis error.cs" />
+    <Compile Include="End2End\Tests\compilation error.cs" />
+    <Compile Include="End2End\Tests\success.cs" />
     <Compile Include="Execution\Faults\Binding\multiple effects.cs" />
     <Compile Include="Execution\Faults\Binding\nested inherited fault.cs" />
     <Compile Include="Execution\Faults\Binding\inherited fault.cs" />
@@ -634,6 +651,11 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <None Include="End2End\TestedFiles\TestProject.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
