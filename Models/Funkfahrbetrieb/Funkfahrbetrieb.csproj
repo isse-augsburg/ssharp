@@ -81,11 +81,6 @@
       <Name>SafetySharp</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="$(OutDir)\CommandLine.dll" />
-    <Analyzer Include="$(OutDir)\SafetySharp.Modeling.dll" />
-    <Analyzer Include="$(OutDir)\SafetySharp.Compiler.exe" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="../../Source/SafetySharp.Build.targets" />
 </Project>

@@ -34,12 +34,9 @@ namespace Tests
 	public abstract class End2EndTestObject : TestObject
 	{
 		private string _directory;
-		private IEnd2EndTester _tester;
 
 		protected sealed override void Check()
 		{
-			_tester = (IEnd2EndTester)Arguments[0];
-
 			try
 			{
 				_directory = Guid.NewGuid().ToString();
@@ -62,7 +59,14 @@ namespace Tests
 			File.Copy("End2End/Files/TestProject.csproj", projectPath, overwrite: true);
 			File.Copy(Path.Combine("End2End/Files", testFile), Path.Combine(_directory, "TestCode.cs"), overwrite: true);
 
-			return _tester.Compile(projectPath, Output);
+			var msbuildPath = ToolLocationHelper.GetPathToBuildTools(ToolLocationHelper.CurrentToolsVersion);
+
+			var process = new ExternalProcess(Path.Combine(msbuildPath, "msbuild.exe"),
+				$"\"{projectPath}\" /p:Configuration=Release /p:Platform=AnyCPU /nr:false",
+				message => Output.Log("{0}", message.Message));
+
+			process.Run();
+			return process.ExitCode == 0;
 		}
 
 		protected bool Execute()
@@ -72,38 +76,6 @@ namespace Tests
 			var process = new ExternalProcess(Path.Combine(_directory, "Binaries/Release/Test.exe"), "");
 			process.Run();
 
-			return process.ExitCode == 0;
-		}
-	}
-
-	public interface IEnd2EndTester
-	{
-		bool Compile(string project, TestTraceOutput output);
-	}
-
-	public class StandaloneTester : IEnd2EndTester
-	{
-		public bool Compile(string project, TestTraceOutput output)
-		{
-			var process = new ExternalProcess("SafetySharp.Compiler.exe", $"--project \"{project}\" --configuration Release --platform AnyCPU",
-				message => output.Log("{0}", message.Message));
-
-			process.Run();
-			return process.ExitCode == 0;
-		}
-	}
-
-	public class MSBuildTester : IEnd2EndTester
-	{
-		public bool Compile(string project, TestTraceOutput output)
-		{
-			var msbuildPath = ToolLocationHelper.GetPathToBuildTools(ToolLocationHelper.CurrentToolsVersion);
-
-			var process = new ExternalProcess(Path.Combine(msbuildPath, "msbuild.exe"), 
-				$"\"{project}\" /p:Configuration=Release /p:Platform=AnyCPU /nr:false",
-				message => output.Log("{0}", message.Message));
-
-			process.Run();
 			return process.ExitCode == 0;
 		}
 	}

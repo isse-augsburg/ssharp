@@ -27,15 +27,9 @@ namespace Tests
 	public partial class End2EndTests
 	{
 		[Theory, MemberData("DiscoverTests", "End2End/Tests")]
-		public void Standalone(string test, string file)
-		{
-			ExecuteDynamicTests(file, new StandaloneTester());
-		}
-
-		[Theory, MemberData("DiscoverTests", "End2End/Tests")]
 		public void MSBuild(string test, string file)
 		{
-			ExecuteDynamicTests(file, new MSBuildTester());
+			ExecuteDynamicTests(file);
 		}
 	}
 }

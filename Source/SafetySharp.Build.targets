@@ -106,7 +106,7 @@ public class SSharpNormalizationTask : Task
 
 	private string[] Normalize()
 	{
-		var assembly = LoadAssembly("SafetySharp.Compiler.exe");
+		var assembly = LoadAssembly("SafetySharp.Compiler.dll");
 		if (assembly == null)
 			throw new InvalidOperationException("Unable to find the S# compiler.");
 		

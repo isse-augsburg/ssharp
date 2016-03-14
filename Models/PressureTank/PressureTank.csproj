@@ -65,11 +65,6 @@
     <Compile Include="Timer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="$(OutDir)\CommandLine.dll" />
-    <Analyzer Include="$(OutDir)\SafetySharp.Modeling.dll" />
-    <Analyzer Include="$(OutDir)\SafetySharp.Compiler.exe" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">
       <Project>{9b6c1fb4-3f1b-43ac-a0e0-eaed4088bf37}</Project>
       <Name>SafetySharp</Name>

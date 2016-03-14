@@ -71,6 +71,7 @@ namespace SafetySharp.Compiler
 		/// <param name="logger">The logger that should be used to report messages to MSBuild.</param>
 		public Compiler(TaskLoggingHelper logger)
 		{
+			Requires.NotNull(logger, nameof(logger));
 			_log = new MSBuildReporter(logger);
 		}
 
@@ -106,75 +107,33 @@ namespace SafetySharp.Compiler
 		/// <param name="references">The references the files should be compiled with.</param>
 		public string[] NormalizeProject(string[] files, string[] references)
 		{
-			var diagnosticOptions = ImmutableDictionary
-				.Create<string, ReportDiagnostic>()
-				.Add("CS0626", ReportDiagnostic.Suppress)
-				.Add("CS1701", ReportDiagnostic.Suppress);
-
-			var workspace = new AdhocWorkspace();
-			var project = workspace
-				.CurrentSolution.AddProject("ssharp", "ssharp", "C#")
-				.WithCompilationOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true,
-					specificDiagnosticOptions: diagnosticOptions, assemblyIdentityComparer: DesktopAssemblyIdentityComparer.Default))
-				.WithMetadataReferences(references.Select(p => MetadataReference.CreateFromFile(p)));
-
-			foreach (var file in files)
-			{
-				var text = SourceText.From(File.ReadAllText(file));
-				project = project.AddDocument(file, text).Project;
-			}
-
-			Compilation = project.GetCompilationAsync().Result;
-
-			if (!Diagnose(reportAll: true))
-				return null;
-
-			Compilation = Normalizer.ApplyNormalizers(Compilation);
-			return Compilation.SyntaxTrees.Select(tree => tree.ToString()).ToArray();
-		}
-
-		/// <summary>
-		///   Compiles the S# modeling project identified by the <paramref name="projectFile" /> for the given
-		///   <paramref name="configuration" /> and <paramref name="platform" />.
-		/// </summary>
-		/// <param name="projectFile">The C# project file that should be compiled.</param>
-		/// <param name="configuration">The configuration the C# project should be compiled in.</param>
-		/// <param name="platform">The platform the C# project should be compiled for.</param>
-		public bool Compile([NotNull] string projectFile, [NotNull] string configuration, [NotNull] string platform)
-		{
-			Requires.NotNullOrWhitespace(projectFile, nameof(projectFile));
-			Requires.NotNullOrWhitespace(configuration, nameof(configuration));
-			Requires.NotNullOrWhitespace(platform, nameof(platform));
-
-			if (!File.Exists(projectFile))
-				return ReportError("0001", "Project file '{0}' could not be found.", projectFile);
-
-			if (String.IsNullOrWhiteSpace(configuration))
-				return ReportError("0002", "Invalid project configuration: Configuration name cannot be the empty string.");
-
-			if (String.IsNullOrWhiteSpace(platform))
-				return ReportError("0003", "Invalid compilation platform: Platform name cannot be the empty string.");
-
-			var msBuildProperties = new Dictionary<string, string> { { "Configuration", configuration }, { "Platform", platform } };
-
-			var workspace = MSBuildWorkspace.Create(msBuildProperties);
-			var project = workspace.OpenProjectAsync(projectFile).Result;
-
 			try
 			{
-				byte[] assembly, pdb;
-				Compile(project, out assembly, out pdb);
+				var diagnosticOptions = ImmutableDictionary
+					.Create<string, ReportDiagnostic>()
+					.Add("CS0626", ReportDiagnostic.Suppress)
+					.Add("CS1701", ReportDiagnostic.Suppress);
 
-				File.WriteAllBytes(project.OutputFilePath, assembly);
-				File.WriteAllBytes(Path.ChangeExtension(project.OutputFilePath, ".pdb"), pdb);
+				var workspace = new AdhocWorkspace();
+				var project = workspace
+					.CurrentSolution.AddProject("ssharp", "ssharp", "C#")
+					.WithCompilationOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true,
+						specificDiagnosticOptions: diagnosticOptions, assemblyIdentityComparer: DesktopAssemblyIdentityComparer.Default))
+					.WithMetadataReferences(references.Select(p => MetadataReference.CreateFromFile(p)));
 
-				OutputCode("Compiled Code");
-				return true;
-			}
-			catch (CompilationException)
-			{
-				OutputCode("Failed");
-				return false;
+				foreach (var file in files)
+				{
+					var text = SourceText.From(File.ReadAllText(file));
+					project = project.AddDocument(file, text).Project;
+				}
+
+				Compilation = project.GetCompilationAsync().Result;
+
+				if (!Diagnose(reportAll: true))
+					return null;
+
+				Compilation = Normalizer.ApplyNormalizers(Compilation);
+				return Compilation.SyntaxTrees.Select(tree => tree.ToString()).ToArray();
 			}
 			catch (Exception)
 			{
