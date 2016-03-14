@@ -133,7 +133,7 @@ public class SSharpNormalizationTask : Task
 		</Task>
 	</UsingTask>
 	
-    <Target Name="NormalizeSSharpCode" BeforeTargets="AfterResGen;AfterResolveReferences">
+    <Target Name="NormalizeSSharpCode" BeforeTargets="ResolveComReferences">
         <SSharpNormalizationTask InputFiles="@(Compile)" References="@(ReferencePath)" IntermediateDirectory="$(IntermediateOutputPath)" AssemblyDirectories="$(SSharpAssemblyDirectories)">
 			<Output TaskParameter="OutputFiles" ItemName="SSharpCompile" />
         </SSharpNormalizationTask>

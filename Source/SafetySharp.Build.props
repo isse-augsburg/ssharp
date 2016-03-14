@@ -9,9 +9,4 @@
 		<NoWarn>$(NoWarn);0626</NoWarn>
     </PropertyGroup>
 	
-	<ItemGroup>
-		<Analyzer Include="$(OutDir)\SafetySharp.Modeling.dll" />
-		<Analyzer Include="$(OutDir)\SafetySharp.Compiler.exe" />
-	</ItemGroup>
-  
 </Project>

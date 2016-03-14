@@ -39,7 +39,7 @@ namespace PressureTank
 		///   The pressure level that triggers the sensor.
 		/// </summary>
 		public const int SensorPressure = 58;
-
+		 
 		/// <summary>
 		///   The controller's timeout in seconds.
 		/// </summary>
