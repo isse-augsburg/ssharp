@@ -23,7 +23,6 @@
 namespace SafetySharp.Compiler
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.Diagnostics;
 	using System.IO;
@@ -35,7 +34,6 @@ namespace SafetySharp.Compiler
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.Diagnostics;
-	using Microsoft.CodeAnalysis.MSBuild;
 	using Microsoft.CodeAnalysis.Text;
 	using Normalization;
 	using Utilities;
@@ -180,24 +178,6 @@ namespace SafetySharp.Compiler
 			File.WriteAllBytes(project.AssemblyName + ".pdb", pdb);
 
 			return Assembly.Load(project.AssemblyName);
-		}
-
-		/// <summary>
-		///   Reports an error diagnostic with the given <paramref name="identifier" /> and <paramref name="message" />.
-		/// </summary>
-		/// <param name="identifier">The identifier of the diagnostic that should be reported.</param>
-		/// <param name="message">The message of the diagnostic that should be reported.</param>
-		/// <param name="formatArgs">The format arguments of the message.</param>
-		[StringFormatMethod("message")]
-		private bool ReportError([NotNull] string identifier, [NotNull] string message, params object[] formatArgs)
-		{
-			identifier = DiagnosticInfo.Prefix + identifier;
-			message = String.Format(message, formatArgs);
-
-			var diagnostic = Diagnostic.Create(identifier, DiagnosticInfo.Category, message, DiagnosticSeverity.Error,
-				DiagnosticSeverity.Error, true, 0);
-			_log.Report(diagnostic, true);
-			return false;
 		}
 
 		/// <summary>
