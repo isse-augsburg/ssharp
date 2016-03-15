@@ -89,7 +89,7 @@ namespace SafetySharp.CompilerServices
 				foreach (var requiredPort in component.GetRequiredPorts())
 				{
 					var metadata = BindingMetadataAttribute.Get(requiredPort);
-					metadata.DefaultMethod.Invoke(component, Array.Empty<object>());
+					metadata.DefaultMethod.Invoke(component, new object[0]);
 				}
 			}
 

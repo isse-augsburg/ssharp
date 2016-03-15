@@ -27,7 +27,7 @@
     <ProjectGuid>{96F3A853-B30A-4413-98C8-C9AAA4C084DE}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <RootNamespace>ltsminseq</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <ProjectName>ltsmin</ProjectName>
@@ -62,14 +62,14 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Binaries\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Binaries\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetName>SafetySharp.LtsMin.Sequential</TargetName>
+    <TargetName>SafetySharp.LtsMin</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Binaries\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Binaries\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetName>SafetySharp.LtsMin.Sequential</TargetName>
+    <TargetName>SafetySharp.LtsMin</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

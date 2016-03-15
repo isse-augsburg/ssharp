@@ -214,7 +214,7 @@ namespace SafetySharp.Runtime
 						_lookup[hashedIndex] = _nextFaultIndex;
 						_faults[_nextFaultIndex] = new FaultSetInfo { ActivatedFaults = activatedFaults, NextSet = -1 };
 						_successors.Add((uint)hashedIndex);
-						Buffer.MemoryCopy(successorState, _stateMemory + hashedIndex * _stateVectorSize, _stateVectorSize, _stateVectorSize);
+						MemoryBuffer.Copy(successorState, _stateMemory + hashedIndex * _stateVectorSize, _stateVectorSize);
 
 						_nextFaultIndex++;
 						return true;

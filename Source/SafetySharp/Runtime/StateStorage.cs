@@ -143,7 +143,7 @@ namespace SafetySharp.Runtime
 
 					if (currentValue == 0 && Interlocked.CompareExchange(ref _hashMemory[offset], (int)memoizedHash | (1 << 30), 0) == 0)
 					{
-						Buffer.MemoryCopy(state, _stateMemory + (long)offset * _stateVectorSize, _stateVectorSize, _stateVectorSize);
+						MemoryBuffer.Copy(state, _stateMemory + (long)offset * _stateVectorSize, _stateVectorSize);
 						Volatile.Write(ref _hashMemory[offset], (int)memoizedHash | (1 << 31));
 
 						index = offset;

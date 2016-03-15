@@ -22,7 +22,6 @@
 
 namespace SafetySharp.Compiler.Roslyn.Symbols
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using JetBrains.Annotations;
@@ -48,7 +47,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			Requires.NotNull(typeSymbol, nameof(typeSymbol));
 			Requires.NotNull(compilation, nameof(compilation));
 
-			var baseMethods = typeSymbol.BaseType?.GetFaultAffectableMethods(compilation) ?? Array.Empty<IMethodSymbol>();
+			var baseMethods = typeSymbol.BaseType?.GetFaultAffectableMethods(compilation) ?? Enumerable.Empty<IMethodSymbol>();
 			var methods = typeSymbol.GetMembers().OfType<IMethodSymbol>().Where(method => method.CanBeAffectedByFaults(compilation)).ToArray();
 
 			// Return all methods of the current type

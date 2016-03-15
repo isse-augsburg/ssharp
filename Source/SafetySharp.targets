@@ -1,8 +1,22 @@
+<!-- 
+This file contains modified version of Microsoft.CSharp.Core.targets from the Microsoft.Net.Compilers NuGet package.
+The modification is required as we have to execute the CSC task twice during compilation of a S# project:
+1. The first compilation is skipped by setting SkipCompilerExecution to true; this is the CSC task that Visual Studio 
+   analyzes to initialize IntelliSense; the task therefore is passed all original C# files found in @(Compile)
+2. The NormalizeSSharpCode target is executed; it rewrites the original C# code by applying S#'s code 
+   normalizers. The generated files are stored in @(SSharpCmpile).
+3. The actual compilation is done by the following CoreCompileSSharp task; it compiles the files (@SSharpCompile),
+   integrating with the rest of the regular C# build process.
+-->
+
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
 
 	<PropertyGroup>
 		<!-- always look for S# assemblies in the $(OutDir) -->
-		<SSharpAssemblyDirectories>$(SSharpAssemblyDirectories);$(OutDir)</SSharpAssemblyDirectories>
+		<SSharpAssemblyDirectories>$(SSharpAssemblyDirectories);$(OutDir);$(MSBuildThisFileDirectory)../tools</SSharpAssemblyDirectories>
+		
+		<!-- Path to the S# LTSMin integration assembly -->
+		<SSharpLtsMinAssemblyPath>$(MSBuildThisFileDirectory)../tools/SafetySharp.LtsMin.dll</SSharpLtsMinAssemblyPath>
     </PropertyGroup>
 	
 	<UsingTask TaskName="SSharpNormalizationTask" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
@@ -127,8 +141,6 @@ public class SSharpNormalizationTask : Task
 		</Task>
 	</UsingTask>
 	
-	<Import Project="Microsoft.CSharp.SSharp.targets" />
-	
     <Target Name="NormalizeSSharpCode" AfterTargets="CoreCompile">
         <SSharpNormalizationTask InputFiles="@(Compile)" References="@(ReferencePath)" IntermediateDirectory="$(IntermediateOutputPath)" AssemblyDirectories="$(SSharpAssemblyDirectories)">
 			<Output TaskParameter="OutputFiles" ItemName="SSharpCompile" />
@@ -138,5 +150,11 @@ public class SSharpNormalizationTask : Task
 			<!-- make sure that the generated files are cleaned up -->
 			<FileWrites Include="@(SSharpCompile)" />
 		</ItemGroup>
+		
+		<Copy SourceFiles="$(SSharpLtsMinAssemblyPath)" DestinationFolder="$(OutDir)" Condition="Exists('$(SSharpLtsMinAssemblyPath)')"/>
+	  
     </Target>
+	
+	<Import Project="SafetySharp.CSharp.Core.targets" />
+  
 </Project>

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>ISSE.SafetySharp</id>
+		<title>S#</title>
+		<version>1.0.1</version>
+		<authors>Institute for Software and Systems Engineering (University of Augsburg)</authors>
+		<owners>Institute for Software and Systems Engineering (University of Augsburg)</owners>
+		<licenseUrl>https://github.com/isse-augsburg/ssharp/blob/master/LICENSE.md</licenseUrl>
+		<projectUrl>http://safetysharp.isse.de/</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>S# (&quot;safety sharp&quot;) is a formal modeling and safety analysis framework for safety-critical systems developed by the Institute for Software and Systems Engineering at the University of Augsburg. S# provides a domain specific modeling language and fully automated formal safety analysis tools based on C# and .NET.</description>
+		<summary>S# (&quot;safety sharp&quot;) is a formal modeling and safety analysis framework for safety-critical systems developed by the Institute for Software and Systems Engineering at the University of Augsburg.</summary>
+		<copyright>Copyright 2014-2016</copyright>
+		<tags>safety-critical model-checking simulation models visualization</tags>
+	</metadata>
+	<files>
+		<!-- Tools: LTSMin integration as well as S# compiler and all of its dependencies -->
+		<file src="..\Binaries\Release\SafetySharp.Compiler.dll" target="tools" />
+		<file src="..\Binaries\Release\SafetySharp.LtsMin.dll" target="tools" />
+		<file src="..\Binaries\Release\Microsoft.*.dll" target="tools" />
+		<file src="..\Binaries\Release\System.*.dll" target="tools" />
+		
+		<!-- Analyzers: S# DLLs and install/uninstall scripts -->
+		<file src="..\Binaries\Release\SafetySharp.Modeling.dll" target="analyzers/dotnet/cs" />
+		<file src="..\Binaries\Release\SafetySharp.Compiler.dll" target="analyzers/dotnet/cs" />
+		<file src="*.ps1" target="tools\" />
+		
+		<!-- Reference to S# assembly -->
+		<file src="..\Binaries\Release\SafetySharp.Modeling.dll" target="lib/net45" />
+		
+		<!-- Build scripts -->
+		<file src="..\Source\SafetySharp.props" target="build\ISSE.SafetySharp.props" />
+		<file src="..\Source\SafetySharp.targets" target="build\ISSE.SafetySharp.targets" />
+		<file src="..\Source\SafetySharp.CSharp.Core.targets" target="build" />
+		
+		<!-- Readme file that is automatically displayed -->
+		<file src="readme.txt" target="" />
+	</files>
+</package>

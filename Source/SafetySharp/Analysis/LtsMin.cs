@@ -151,7 +151,7 @@ namespace SafetySharp.Analysis
 		{
 			Requires.That(_ltsMin == null, "An instance of LtsMin is already running.");
 
-			var loaderAssembly = Path.Combine(Environment.CurrentDirectory, "SafetySharp.LtsMin.Sequential.dll");
+			var loaderAssembly = Path.Combine(Environment.CurrentDirectory, "SafetySharp.LtsMin.dll");
 
 			_ltsMin = new ExternalProcess(
 				fileName: "pins2lts-seq.exe",

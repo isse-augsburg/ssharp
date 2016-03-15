@@ -82,7 +82,7 @@ namespace SafetySharp.Utilities
 				ZeroMemory(new IntPtr(newBuffer + CheckBytes), new IntPtr(sizeInBytes));
 
 			if (oldBuffer != null)
-				Buffer.MemoryCopy(oldBuffer, newBuffer + CheckBytes, sizeInBytes, SizeInBytes);
+				Copy(oldBuffer, newBuffer + CheckBytes, SizeInBytes);
 
 			OnDisposing(true);
 			Pointer = newBuffer + CheckBytes;
@@ -123,6 +123,33 @@ namespace SafetySharp.Utilities
 
 				buffer1 += 1;
 				buffer2 += 1;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		///   Copies <paramref name="sizeInBytes" />-many bytes from <paramref name="source" /> to <see cref="destination" />.
+		/// </summary>
+		/// <param name="source">The first buffer of memory to compare.</param>
+		/// <param name="destination">The second buffer of memory to compare.</param>
+		/// <param name="sizeInBytes">The size of the buffers in bytes.</param>
+		public static bool Copy(byte* source, byte* destination, long sizeInBytes)
+		{
+			for (var i = sizeInBytes / 8; i > 0; --i)
+			{
+				*(long*)destination = *(long*)source;
+
+				source += 8;
+				destination += 8;
+			}
+
+			for (var i = sizeInBytes % 8; i > 0; --i)
+			{
+				*destination = *source;
+
+				source += 1;
+				destination += 1;
 			}
 
 			return true;

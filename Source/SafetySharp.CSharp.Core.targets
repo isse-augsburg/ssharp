@@ -1,17 +1,10 @@
-﻿<!-- 
-A modified version of Microsoft.CSharp.Core.targets from the Microsoft.Net.Compilers NuGet package.
-The modification is required as we have to execute the CSC task twice during compilation of a S# project:
-1. The first compilation is skipped by setting SkipCompilerExecution to true in SafetySharp.Build.targets;
-   This is the CSC task that Visual Studio analyzes to initialize IntelliSense; the task therefore is
-   passed all original C# files found in @(Compile)
-2. The NormalizeSSharpCode target found in SafetySharp.Build.targets is executed; it rewrites the original
-   C# code by applying S#'s code normalizers. The generated files are stored in @(SSharpCmpile).
-3. The actual compilation is done by the following CoreCompileSSharp task; it compiles the files (@SSharpCompile),
-   integrating with the rest of the regular C# build process.
--->
+<!-- ================================================================================== -->
+<!-- Begin Microsoft.CSharp.Core.targets from the Microsoft.Net.Compilers NuGet package -->
+<!-- ================================================================================== -->
 
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Target
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+
+	<Target
           Name="CoreCompileSSharp"
           Inputs="$(MSBuildAllProjects);
                 @(SSharpCompile);
@@ -145,4 +138,5 @@ The modification is required as we have to execute the CSC task twice during com
       <Output TaskParameter="CommandLineArgs" ItemName="CscCommandLineArgs" />
     </Csc>
   </Target>
+  
 </Project>
