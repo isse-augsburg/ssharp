@@ -30,5 +30,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ltsmin.cpp" />
+    <ClCompile Include="functions.cpp" />
   </ItemGroup>
 </Project>

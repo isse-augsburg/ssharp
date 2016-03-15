@@ -171,6 +171,5 @@
     <Copy SourceFiles="$(SolutionDir)Dependencies/cygstdc++-6.dll" DestinationFolder="$(OutDir)" />
     <Copy SourceFiles="$(SolutionDir)Dependencies/cygwin1.dll" DestinationFolder="$(OutDir)" />
     <Copy SourceFiles="$(SolutionDir)Dependencies/cygz.dll" DestinationFolder="$(OutDir)" />
-    <Copy SourceFiles="$(SolutionDir)Dependencies/ltsmin-printtrace.exe" DestinationFolder="$(OutDir)" />
   </Target>
 </Project>
