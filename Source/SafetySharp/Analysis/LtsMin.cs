@@ -23,6 +23,7 @@
 namespace SafetySharp.Analysis
 {
 	using System;
+	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.IO;
 	using FormulaVisitors;
@@ -118,8 +119,18 @@ namespace SafetySharp.Analysis
 				{
 					File.WriteAllBytes(modelFile.FilePath, RuntimeModelSerializer.Save(model, formula));
 
-					CreateProcess(modelFile.FilePath, checkArgument);
-					Run();
+					try
+					{
+						CreateProcess(modelFile.FilePath, checkArgument);
+						Run();
+					}
+					catch (Win32Exception e)
+					{
+						throw new InvalidOperationException(
+							"Failed to start LTSMin. Ensure that pins2lts-seq.exe can be found by either copying it next " +
+							"to the executing assembly or by adding it to the system path. The required cygwin dependencies " +
+							$"must also be available. The original error message was: {e.Message}", e);
+					}
 
 					var success = InterpretExitCode(_ltsMin.ExitCode);
 					return new AnalysisResult(success, null, 0, 0, 0, 0);
@@ -140,10 +151,15 @@ namespace SafetySharp.Analysis
 		{
 			Requires.That(_ltsMin == null, "An instance of LtsMin is already running.");
 
+			var loaderAssembly = Path.Combine(Environment.CurrentDirectory, "SafetySharp.LtsMin.Sequential.dll");
+
 			_ltsMin = new ExternalProcess(
 				fileName: "pins2lts-seq.exe",
-				commandLineArguments: $"--loader=SafetySharp.LtsMin.Sequential.dll \"{modelFile}\" {checkArgument}",
-				outputCallback: output => Output(output.Message));
+				commandLineArguments: $"--loader=\"{loaderAssembly}\" \"{modelFile}\" {checkArgument}",
+                outputCallback: output => Output(output.Message))
+			{
+				WorkingDirectory = Environment.CurrentDirectory
+			};
 		}
 
 		/// <summary>

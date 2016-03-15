@@ -163,13 +163,4 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="AfterBuild">
-    <Copy SourceFiles="$(SolutionDir)Dependencies/cyggcc_s-seh-1.dll" DestinationFolder="$(OutDir)" />
-    <Copy SourceFiles="$(SolutionDir)Dependencies/cygiconv-2.dll" DestinationFolder="$(OutDir)" />
-    <Copy SourceFiles="$(SolutionDir)Dependencies/cygintl-8.dll" DestinationFolder="$(OutDir)" />
-    <Copy SourceFiles="$(SolutionDir)Dependencies/cygpopt-0.dll" DestinationFolder="$(OutDir)" />
-    <Copy SourceFiles="$(SolutionDir)Dependencies/cygstdc++-6.dll" DestinationFolder="$(OutDir)" />
-    <Copy SourceFiles="$(SolutionDir)Dependencies/cygwin1.dll" DestinationFolder="$(OutDir)" />
-    <Copy SourceFiles="$(SolutionDir)Dependencies/cygz.dll" DestinationFolder="$(OutDir)" />
-  </Target>
 </Project>

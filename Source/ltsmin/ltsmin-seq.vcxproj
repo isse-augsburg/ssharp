@@ -117,7 +117,4 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-  <Target Name="AfterBuild">
-    <Copy SourceFiles="$(SolutionDir)Dependencies/pins2lts-seq.exe" DestinationFolder="$(OutDir)" />
-  </Target>
 </Project>

@@ -77,10 +77,12 @@ using namespace SafetySharp::Runtime::Serialization;
 //---------------------------------------------------------------------------------------------------------------------------
 // Forward declarations
 //---------------------------------------------------------------------------------------------------------------------------
+void PrepareLoadModel(model_t model, const char* file);
 void LoadModel(model_t model, const char* file);
 int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, TransitionCB callback, void* context);
 int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state);
 bool IsConstructionState(int32_t* state);
+Assembly^ OnAssemblyResolve(Object^ o, ResolveEventArgs^ e);
 
 //---------------------------------------------------------------------------------------------------------------------------
 // Global variables
@@ -101,12 +103,18 @@ ref struct Globals
 // PINS exports
 //---------------------------------------------------------------------------------------------------------------------------
 extern "C" __declspec(dllexport) char pins_plugin_name[] = "S# Model";
-extern "C" __declspec(dllexport) loader_record pins_loaders[] = { { "ssharp", LoadModel },{ nullptr, nullptr } };
+extern "C" __declspec(dllexport) loader_record pins_loaders[] = { { "ssharp", PrepareLoadModel },{ nullptr, nullptr } };
 extern "C" __declspec(dllexport) void* pins_options[] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 
 //---------------------------------------------------------------------------------------------------------------------------
 // S# model loading
 //---------------------------------------------------------------------------------------------------------------------------
+void PrepareLoadModel(model_t model, const char* modelFile)
+{
+	AppDomain::CurrentDomain->AssemblyResolve += gcnew System::ResolveEventHandler(&OnAssemblyResolve);
+	LoadModel(model, modelFile);
+}
+
 void LoadModel(model_t model, const char* modelFile)
 {
 	try
@@ -118,7 +126,7 @@ void LoadModel(model_t model, const char* modelFile)
 #if false
 		Console::WriteLine(Globals::Model->StateVectorLayout);
 #endif
-
+		
 		auto stateSlotCount = (int32_t)(Globals::Model->StateVectorSize / sizeof(int32_t));
 		auto stateLabelCount = Globals::Model->StateFormulas->Length;
 		auto transitionGroupCount = 1;
@@ -277,4 +285,20 @@ int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state)
 bool IsConstructionState(int32_t* state)
 {
 	return state[0] == 1;
+}
+
+//---------------------------------------------------------------------------------------------------------------------------
+// Assembly resolving
+//---------------------------------------------------------------------------------------------------------------------------
+Assembly^ OnAssemblyResolve(Object^, ResolveEventArgs^ e)
+{
+	auto fileName = Path::Combine(Environment::CurrentDirectory, AssemblyName(e->Name).Name);
+
+	if (File::Exists(fileName + ".dll"))
+		return Assembly::LoadFile(fileName + ".dll");
+	
+	if (File::Exists(fileName + ".exe"))
+		return Assembly::LoadFile(fileName + ".exe");
+
+	return nullptr;
 }
