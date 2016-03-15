@@ -3,10 +3,15 @@
     <PropertyGroup>
 		<!-- S# sometimes creates unsafe code -->
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		
 		<!-- model checking is only supported in 64bit processes -->
 		<Prefer32Bit>false</Prefer32Bit>
+		
 		<!-- disables warnings about the use of 'extern' for required ports -->
 		<NoWarn>$(NoWarn);0626</NoWarn>
+		
+		<!-- don't actually compile the project using the standard CSC task in the CoreCompile target -->
+		<SkipCompilerExecution>true</SkipCompilerExecution>
     </PropertyGroup>
 	
 </Project>

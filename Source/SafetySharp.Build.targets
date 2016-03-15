@@ -1,10 +1,10 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
 
 	<PropertyGroup>
+		<!-- always look for S# assemblies in the $(OutDir) -->
 		<SSharpAssemblyDirectories>$(SSharpAssemblyDirectories);$(OutDir)</SSharpAssemblyDirectories>
-		<SkipCompilerExecution>true</SkipCompilerExecution>
-	</PropertyGroup>
-
+    </PropertyGroup>
+	
 	<UsingTask TaskName="SSharpNormalizationTask" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
 		<ParameterGroup>
 		  <InputFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
@@ -120,13 +120,6 @@ public class SSharpNormalizationTask : Task
 		return normalize(InputFiles.Select(f => f.ItemSpec).ToArray(), References.Select(r => r.ItemSpec).ToArray());
 	}
 
-	private static byte[] ComputeHash(string file)
-	{
-		using (var cryptoProvider = new MD5CryptoServiceProvider())
-		using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read))
-			return cryptoProvider.ComputeHash(stream);
-	}
-
 	private delegate string[] Normalizer(string[] files, string[] references);
 }
 ]]>
@@ -142,7 +135,7 @@ public class SSharpNormalizationTask : Task
         </SSharpNormalizationTask>
 		
 		<ItemGroup>	
-			<!-- make sure that generated files are cleaned up -->
+			<!-- make sure that the generated files are cleaned up -->
 			<FileWrites Include="@(SSharpCompile)" />
 		</ItemGroup>
     </Target>
