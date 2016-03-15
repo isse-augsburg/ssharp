@@ -26,6 +26,7 @@ namespace SafetySharp.Compiler.Analyzers
 	using System.Linq;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
+	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.Diagnostics;
 	using Utilities;
 
@@ -51,6 +52,31 @@ namespace SafetySharp.Compiler.Analyzers
 			_diagnostics = diagnostics;
 			SupportedDiagnostics = diagnostics.Select(message => message.Descriptor).ToImmutableArray();
 		}
+
+		/// <summary>
+		///   Called once at session start to register actions in the analysis context.
+		/// </summary>
+		public sealed override void Initialize(AnalysisContext context)
+		{
+			context.RegisterCompilationStartAction(startContext =>
+			{
+				// Check if we compile with the CompilingSSharpCode preprocessor symbol defined; if so, deactivate all analyzers
+				// as the code has already been normalized
+				var syntaxTree = startContext.Compilation.SyntaxTrees.FirstOrDefault();
+				if (syntaxTree == null)
+					return;
+
+				if (syntaxTree.Options.PreprocessorSymbolNames.Any(symbol => symbol == "CompilingSSharpCode"))
+					return;
+
+				Initialize(startContext);
+			});
+		}
+
+		/// <summary>
+		///   Called once at session start to register actions in the analysis context.
+		/// </summary>
+		protected abstract void Initialize(CompilationStartAnalysisContext context);
 
 		/// <summary>
 		///   Returns a set of descriptors for the diagnostics that this analyzer is capable of producing.

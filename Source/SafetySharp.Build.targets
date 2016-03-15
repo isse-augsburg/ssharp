@@ -2,16 +2,17 @@
 
 	<PropertyGroup>
 		<SSharpAssemblyDirectories>$(SSharpAssemblyDirectories);$(OutDir)</SSharpAssemblyDirectories>
+		<SkipCompilerExecution>true</SkipCompilerExecution>
 	</PropertyGroup>
 
 	<UsingTask TaskName="SSharpNormalizationTask" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
-    <ParameterGroup>
-      <InputFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
-      <IntermediateDirectory ParameterType="Microsoft.Build.Framework.ITaskItem" Required="true" />
-      <References ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
-      <AssemblyDirectories ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
-      <OutputFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
-    </ParameterGroup>
+		<ParameterGroup>
+		  <InputFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+		  <IntermediateDirectory ParameterType="Microsoft.Build.Framework.ITaskItem" Required="true" />
+		  <References ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+		  <AssemblyDirectories ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+		  <OutputFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+		</ParameterGroup>
 		<Task>
 			<Code Type="Class" Language="cs">
 <![CDATA[
@@ -64,7 +65,7 @@ public class SSharpNormalizationTask : Task
 				var path = Path.Combine(intermediateDirectory, i + ".cs");
 
 				OutputFiles[i] = new TaskItem(path);
-				File.WriteAllText(path, compilationUnits[i]);
+				File.WriteAllText(path, "#if CompilingSSharpCode\n" + compilationUnits[i] + "\n#endif");
 			}
 
 			return true;
@@ -133,18 +134,16 @@ public class SSharpNormalizationTask : Task
 		</Task>
 	</UsingTask>
 	
-    <Target Name="NormalizeSSharpCode" BeforeTargets="ResolveComReferences">
+	<Import Project="Microsoft.CSharp.SSharp.targets" />
+	
+    <Target Name="NormalizeSSharpCode" AfterTargets="CoreCompile">
         <SSharpNormalizationTask InputFiles="@(Compile)" References="@(ReferencePath)" IntermediateDirectory="$(IntermediateOutputPath)" AssemblyDirectories="$(SSharpAssemblyDirectories)">
 			<Output TaskParameter="OutputFiles" ItemName="SSharpCompile" />
         </SSharpNormalizationTask>
 		
-		<ItemGroup>
-			<!-- replace the input files for the C# compiler -->
-			<Compile Remove="@(Compile)" />
-			<Compile Include="@(SSharpCompile)" />
-			
-			<!-- remove the analyzers for the C# compiler, as they are no longer valid -->
-			<Analyzer Remove="@(Analyzer)" />
+		<ItemGroup>	
+			<!-- make sure that generated files are cleaned up -->
+			<FileWrites Include="@(SSharpCompile)" />
 		</ItemGroup>
     </Target>
 </Project>

@@ -63,8 +63,7 @@ namespace SafetySharp.Compiler.Analyzers
 		/// <summary>
 		///   Called once at session start to register actions in the analysis context.
 		/// </summary>
-		/// <param name="context">The analysis context that should be used to register analysis actions.</param>
-		public override void Initialize(AnalysisContext context)
+		protected override void Initialize(CompilationStartAnalysisContext context)
 		{
 			context.RegisterSymbolAction(Analyze, SymbolKind.NamedType);
 		}
