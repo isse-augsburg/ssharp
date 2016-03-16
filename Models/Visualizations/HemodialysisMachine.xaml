@@ -40,7 +40,12 @@
                 <EasingDoubleKeyFrame KeyTime="0:0:1" Value="360"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
-        <Storyboard x:Key="HeparinPumpEnabled"/>
+        <Storyboard x:Key="HeparinPumpEnabled">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)" Storyboard.TargetName="path51538690_Copy3">
+                <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1" Value="360"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
         <Storyboard x:Key="EnableWaterPreparation">
             <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Stroke).(SolidColorBrush.Color)" Storyboard.TargetName="path5095">
                 <EasingColorKeyFrame KeyTime="0" Value="Black"/>
@@ -624,39 +629,6 @@
     </UserControl.Resources>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-            <BeginStoryboard Storyboard="{StaticResource BloodPumpEnabled}"/>
-            <BeginStoryboard Storyboard="{StaticResource HeparinPumpEnabled}"/>
-            <BeginStoryboard Storyboard="{StaticResource EnableWaterPreparation}"/>
-            <BeginStoryboard Storyboard="{StaticResource DisableWaterPreparation}"/>
-            <BeginStoryboard Storyboard="{StaticResource DialyzingFluidPreparationEnabled}"/>
-            <BeginStoryboard Storyboard="{StaticResource UltraFiltrationEnabled}"/>
-            <BeginStoryboard Storyboard="{StaticResource PumpToBalanceChamberEnabled}"/>
-            <BeginStoryboard Storyboard="{StaticResource CloseVenousTubingValve}"/>
-            <BeginStoryboard Storyboard="{StaticResource OpenVenousTubingValve}"/>
-            <BeginStoryboard Storyboard="{StaticResource ArterialChamberDripping}"/>
-            <BeginStoryboard Storyboard="{StaticResource VenousChamberDripping}"/>
-            <BeginStoryboard Storyboard="{StaticResource ArterialChamberNotDripping}"/>
-            <BeginStoryboard Storyboard="{StaticResource VenousChamberNotDripping}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowPatientToBloodPump}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowBloodPumpToMerge1}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowMerge1ToArterialChamber}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowArterialChamberToDialyzer}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowDialyzerToSplit1}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowSplit1ToVenousChamber}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowVenousChamberToSafetyDetector}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowSafetySensorToVenousValve}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowVenousValveToPatient}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowWaterSupplyToWaterPreparation}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowWaterPreparationToDialyzingFluidPreparation}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowDialyzingFluidPreparationToBalanceChamber}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowBalanceChamberToDrain}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowBalanceChamberToSafetyBypass}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowSafetyBypassToDialyzer}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowDialyzerToSplit2}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowSplit2ToPumpToBalanceChamber}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowSplit2ToUltraFiltrationPump}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowPumpToBalanceChamberToBalanceChamber}"/>
-            <BeginStoryboard Storyboard="{StaticResource FlowUltraFiltrationPumpToDrain}"/>
         </EventTrigger>
     </UserControl.Triggers>
     <DockPanel LastChildFill="true">
