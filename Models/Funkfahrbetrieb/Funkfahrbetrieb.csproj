@@ -60,6 +60,9 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+	<Compile Include="..\..\Source\SharedAssemblyInfo.cs">
+		<Link>Properties\SharedAssemblyInfo.cs</Link>
+	</Compile>
     <Compile Include="Context\Barrier.cs" />
     <Compile Include="Context\RadioChannel.cs" />
     <Compile Include="Context\Train.cs" />

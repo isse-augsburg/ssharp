@@ -22,17 +22,8 @@
 
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("S# Modeling")]
-[assembly: AssemblyDescription("S# Modeling")]
-[assembly: AssemblyCompany("Institute for Software & Systems Engineering")]
-[assembly: AssemblyProduct("S#")]
-[assembly: AssemblyCopyright("Copyright (c) 2014-2016, Institute for Software & Systems Engineering")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyFileVersion("0.1.0.0")]
-[assembly: ComVisible(false)]
+[assembly: AssemblyTitle("S# Modeling and Analysis")]
 [assembly: InternalsVisibleTo("SafetySharp.Compiler")]
 [assembly: InternalsVisibleTo("SafetySharp.Tests")]
 [assembly: InternalsVisibleTo("SafetySharp.LtsMin")]

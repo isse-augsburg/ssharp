@@ -126,6 +126,9 @@
     <Compile Include="..\Source\SafetySharp\Properties\InternalsVisibleTo.cs">
       <Link>Properties\InternalsVisibleTo.cs</Link>
     </Compile>
+	<Compile Include="..\Source\SharedAssemblyInfo.cs">
+		<Link>Properties\SharedAssemblyInfo.cs</Link>
+	</Compile>
     <Compile Include="Analysis\Dcca\empty set.cs" />
     <Compile Include="Analysis\Dcca\multiple singleton cut sets.cs" />
     <Compile Include="Analysis\Dcca\exception.cs" />

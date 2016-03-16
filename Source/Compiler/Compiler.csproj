@@ -142,6 +142,9 @@
     <Compile Include="Roslyn\Syntax\SyntaxTokenExtensions.cs" />
     <Compile Include="Roslyn\Syntax\SyntaxTreeExtensions.cs" />
     <Compile Include="ErrorReporter.cs" />
+	<Compile Include="..\SharedAssemblyInfo.cs">
+		<Link>Properties\SharedAssemblyInfo.cs</Link>
+	</Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SafetySharp\SafetySharp.csproj">

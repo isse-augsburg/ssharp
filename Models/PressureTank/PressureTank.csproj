@@ -57,6 +57,9 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+	<Compile Include="..\..\Source\SharedAssemblyInfo.cs">
+		<Link>Properties\SharedAssemblyInfo.cs</Link>
+	</Compile>
     <Compile Include="Controller.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="Sensor.cs" />

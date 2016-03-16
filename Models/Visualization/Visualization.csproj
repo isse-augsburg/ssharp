@@ -65,6 +65,9 @@
     <Compile Include="Elbtunnel.xaml.cs">
       <DependentUpon>Elbtunnel.xaml</DependentUpon>
     </Compile>
+	<Compile Include="..\..\Source\SharedAssemblyInfo.cs">
+		<Link>Properties\SharedAssemblyInfo.cs</Link>
+	</Compile>
     <Compile Include="Funkfahrbetrieb.xaml.cs">
       <DependentUpon>Funkfahrbetrieb.xaml</DependentUpon>
     </Compile>

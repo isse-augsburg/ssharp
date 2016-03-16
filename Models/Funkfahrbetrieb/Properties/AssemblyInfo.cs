@@ -21,18 +21,5 @@
 // THE SOFTWARE.
 
 using System.Reflection;
-using System.Runtime.InteropServices;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
-
-[assembly: AssemblyTitle("Funkfahrbetrieb")]
-[assembly: AssemblyDescription("Model of case study 'Funkfahrbetrieb'")]
-[assembly: AssemblyCompany("Institute for Software & Systems Engineering")]
-[assembly: AssemblyProduct("S#")]
-[assembly: AssemblyCopyright("Copyright (c) 2014-2016, Institute for Software & Systems Engineering")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyFileVersion("0.1.0.0")]
-[assembly: ComVisible(false)]
+[assembly: AssemblyTitle("S# Radio-Controlled Railroad Crossing Case Study")]
