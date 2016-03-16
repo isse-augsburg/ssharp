@@ -231,7 +231,7 @@
                 <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
-        <Storyboard x:Key="FlowDialyzerToSplit1">
+        <Storyboard x:Key="FlowDialyzerBloodSideToSplit2">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)" Storyboard.TargetName="arrowhead1_Copy6">
                 <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
                 <EasingDoubleKeyFrame KeyTime="0:0:0.14" Value="-0.25"/>
@@ -261,7 +261,7 @@
                 <EasingDoubleKeyFrame KeyTime="0:0:1" Value="1"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
-        <Storyboard x:Key="FlowSplit1ToVenousChamber">
+        <Storyboard x:Key="FlowSplit2ToVenousChamber">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)" Storyboard.TargetName="arrowhead1_Copy5">
                 <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
                 <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="-11"/>
@@ -505,7 +505,7 @@
                 <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
-        <Storyboard x:Key="FlowDialyzerToSplit2">
+        <Storyboard x:Key="FlowDialyzerDialyzingFluidSideToSplit3">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)" Storyboard.TargetName="arrowhead1_Copy">
                 <EasingDoubleKeyFrame KeyTime="0" Value="-21.25"/>
                 <EasingDoubleKeyFrame KeyTime="0:0:0.1" Value="-12.424"/>
@@ -537,7 +537,7 @@
                 <EasingDoubleKeyFrame KeyTime="0:0:0.1" Value="1"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
-        <Storyboard x:Key="FlowSplit2ToPumpToBalanceChamber">
+        <Storyboard x:Key="FlowSplit3ToPumpToBalanceChamber">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)" Storyboard.TargetName="arrowhead1_Copy8">
                 <EasingDoubleKeyFrame KeyTime="0" Value="-37.833"/>
                 <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="17.416"/>
@@ -553,7 +553,7 @@
                 <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
-        <Storyboard x:Key="FlowSplit2ToUltraFiltrationPump">
+        <Storyboard x:Key="FlowSplit3ToUltraFiltrationPump">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)" Storyboard.TargetName="arrowhead1_Copy14">
                 <EasingDoubleKeyFrame KeyTime="0" Value="-18.167"/>
                 <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0"/>
