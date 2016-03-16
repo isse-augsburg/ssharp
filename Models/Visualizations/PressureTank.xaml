@@ -1,0 +1,199 @@
+﻿<UserControl x:Name="SensorEvent" x:Class="SafetySharp.CaseStudies.Visualizations.PressureTank"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:visualization="clr-namespace:SafetySharp.CaseStudies.Visualizations"
+             xmlns:infrastructure="clr-namespace:SafetySharp.CaseStudies.Visualizations.Infrastructure"
+             mc:Ignorable="d"
+             d:DesignHeight="500" d:DesignWidth="700">
+    <UserControl.Resources>
+        <Style x:Key="FailureIndicator" TargetType="{x:Type Rectangle}">
+            <Setter Property="Fill">
+                <Setter.Value>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FF930101" Offset="0" />
+                        <GradientStop Color="#FFFF0404" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="IsHitTestVisible" Value="false" />
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TransformGroup>
+                        <ScaleTransform />
+                        <SkewTransform />
+                        <RotateTransform Angle="31.489" />
+                        <TranslateTransform />
+                    </TransformGroup>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="OpacityMask">
+                <Setter.Value>
+                    <VisualBrush Visual="{DynamicResource appbar_camera_flash}" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Storyboard x:Key="RotatePump" AutoReverse="false" RepeatBehavior="Forever">
+            <DoubleAnimationUsingKeyFrames
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)"
+                Storyboard.TargetName="Fan">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="360" />
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="PressureLevel">
+            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="TankFill">
+                <EasingColorKeyFrame KeyTime="0" Value="#00000000" />
+                <EasingColorKeyFrame KeyTime="0:0:0.7" Value="#7F68FF00" />
+                <EasingColorKeyFrame KeyTime="0:0:0.9" Value="#B2FFB900" />
+                <EasingColorKeyFrame KeyTime="0:0:1" Value="#B2FF0000" />
+            </ColorAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="SensorEvent">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="SensorAlert">
+                <EasingDoubleKeyFrame KeyTime="0" Value="1" />
+                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1" />
+                <EasingDoubleKeyFrame KeyTime="0:0:1.5" Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="TimerEvent">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="TimerAlert">
+                <EasingDoubleKeyFrame KeyTime="0" Value="1" />
+                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1" />
+                <EasingDoubleKeyFrame KeyTime="0:0:1.5" Value="0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut" />
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+    </UserControl.Resources>
+    <DockPanel LastChildFill="true">
+        <infrastructure:SimulationControls x:Name="SimulationControls" DockPanel.Dock="Top" />
+
+        <Viewbox>
+            <Canvas Width="483.143" Height="316.534" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Rectangle x:Name="TankFill" Height="221.667" Canvas.Left="300" Canvas.Top="49" Width="171"
+                           StrokeThickness="0" Fill="Black" />
+                <Rectangle Height="306.534" Canvas.Left="300" Canvas.Top="10" Width="171" Fill="White" ToolTip="Pressure Tank">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Visual="{DynamicResource appbar_database}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+                <Rectangle x:Name="TankRupture" Height="359.773" Canvas.Left="351.568" Canvas.Top="-4.602" Width="84.667"
+                           Style="{StaticResource FailureIndicator}" />
+                <TextBlock x:Name="PressureLevel" Canvas.Left="352.253" TextWrapping="NoWrap" Width="70" TextAlignment="Center" Text="100%"
+                           Canvas.Top="131.743" Foreground="Black" FontSize="24" FontWeight="Bold" />
+
+                <Rectangle Height="134" Canvas.Top="49" Width="175" Fill="White" ToolTip="Controller">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Visual="{DynamicResource appbar_tablet_windows}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+
+                <Rectangle Height="64" Canvas.Left="40" Canvas.Top="226" Width="64" Fill="White"
+                           ToolTip="Timer">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Visual="{DynamicResource appbar_timer}" />
+                    </Rectangle.OpacityMask>
+                    <Rectangle.ContextMenu>
+                        <ContextMenu StaysOpen="true">
+                            <MenuItem x:Name="SuppressTimeout" Header="Suppress 'Timeout'" IsCheckable="true" Click="OnSuppressTimeout" />
+                        </ContextMenu>
+                    </Rectangle.ContextMenu>
+                </Rectangle>
+                <Rectangle x:Name="TimerAlert" Height="28.667" Canvas.Left="25.588" Canvas.Top="269.983" Width="34" Fill="#FFFFAE00"
+                           IsHitTestVisible="false">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Visual="{DynamicResource appbar_alert}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+                <Rectangle x:Name="TimerFailure" Height="31.33" Canvas.Left="87.651" Canvas.Top="223.286" Width="17.169"
+                           Style="{StaticResource FailureIndicator}" />
+                <TextBlock x:Name="CountDown" Canvas.Left="93.253" TextWrapping="NoWrap" Text="45" Canvas.Top="269.983" Foreground="White"
+                           FontSize="24" FontWeight="Bold" />
+
+                <Rectangle Height="48.667" Canvas.Left="232" Canvas.Top="102" Width="58"
+                           Fill="White" ToolTip="Pressure Sensor">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Visual="{DynamicResource appbar_camera}" />
+                    </Rectangle.OpacityMask>
+                    <Rectangle.ContextMenu>
+                        <ContextMenu StaysOpen="true">
+                            <MenuItem x:Name="SuppressFull" Header="Suppress 'Tank Full'" IsCheckable="true" Click="OnSuppressFull" />
+                            <MenuItem x:Name="SuppressEmpty" Header="Suppress 'Tank Empty'" IsCheckable="true" Click="OnSuppressEmpty" />
+                        </ContextMenu>
+                    </Rectangle.ContextMenu>
+                </Rectangle>
+
+                <Rectangle x:Name="SensorAlert" Height="28.667" Canvas.Left="213.001" Canvas.Top="135" Width="34" Fill="#FFFFAE00"
+                           IsHitTestVisible="false">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Visual="{DynamicResource appbar_alert}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+                <Rectangle x:Name="SensorFailure" Height="31.33" Canvas.Left="276.984" Canvas.Top="96.619" Width="17.169"
+                           Style="{StaticResource FailureIndicator}" />
+
+                <Canvas Width="64" Height="64" Canvas.Left="239.335" Canvas.Top="226.667" ToolTip="Pump">
+                    <Rectangle x:Name="Fan" Height="50" Width="50" RenderTransformOrigin="0.5,0.5" Fill="White">
+                        <Rectangle.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform />
+                                <SkewTransform />
+                                <RotateTransform />
+                                <TranslateTransform />
+                            </TransformGroup>
+                        </Rectangle.RenderTransform>
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Viewport="-0.15, -0.15, 1.3, 1.3" Visual="{DynamicResource appbar_fan_box}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+
+                    <Rectangle x:Name="Casing" Height="52" Width="52" Stroke="White" StrokeThickness="2" RadiusX="12" RadiusY="12"
+                               RenderTransformOrigin="0.5,0.5" Canvas.Left="-0.666">
+                        <Rectangle.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform />
+                                <SkewTransform />
+                                <RotateTransform />
+                                <TranslateTransform />
+                            </TransformGroup>
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
+
+                    <Canvas.ContextMenu>
+                        <ContextMenu StaysOpen="true">
+                            <MenuItem x:Name="SuppressPumping" Header="Suppress 'Pumping'" IsCheckable="true" Click="OnSuppressPumping" />
+                        </ContextMenu>
+                    </Canvas.ContextMenu>
+                </Canvas>
+                <Rectangle x:Name="PumpFailure" Height="31.33" Canvas.Left="277.651" Canvas.Top="215.952" Width="17.169"
+                           Style="{StaticResource FailureIndicator}" />
+
+                <Path Data="M177,219 L177,278.03389" Height="30" Canvas.Left="66" StrokeStartLineCap="Round" Stretch="Fill"
+                      StrokeEndLineCap="Round" Stroke="White" StrokeThickness="5" Canvas.Top="191" Width="6" />
+                <Path Data="M237,180 L364.00394,180" Height="7.666" Canvas.Left="172.663" StrokeStartLineCap="Round" Stretch="Fill"
+                      StrokeEndLineCap="Round" Stroke="White" StrokeThickness="5" Canvas.Top="127.334" Width="54.337" />
+                <Path Data="M237,217 L352,303" Height="36" Canvas.Left="179.333" Stretch="Fill" Canvas.Top="189.667" Width="61"
+                      Stroke="White"
+                      StrokeThickness="5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform />
+                            <SkewTransform />
+                            <RotateTransform Angle="7.146" />
+                            <TranslateTransform />
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+
+                <DockPanel Width="137" Canvas.Top="49" Height="134" IsHitTestVisible="false" Canvas.Left="19">
+                    <TextBlock x:Name="ControllerScreen" TextWrapping="Wrap" TextAlignment="Center" Text="Stopped by Timer"
+                               Foreground="White" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </DockPanel>
+            </Canvas>
+        </Viewbox>
+    </DockPanel>
+</UserControl>
