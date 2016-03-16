@@ -81,7 +81,7 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(hazard, nameof(hazard));
 
 			_modelChecker.Configuration = Configuration;
-			_modelChecker.Output("Running Deductive Cause Consequence Analysis.");
+			ModelChecker.WriteOutput("Running Deductive Cause Consequence Analysis.");
 
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -138,12 +138,12 @@ namespace SafetySharp.Analysis
 
 						if (!result.FormulaHolds)
 						{
-							_modelChecker.Output($"[Critical]  {{ {set.ToString(faults)} }}", ConsoleColor.DarkRed);
+							ModelChecker.WriteOutput($"[Critical]  {{ {set.ToString(faults)} }}", ConsoleColor.DarkRed);
 							criticalSets.Add(set);
 						}
 						else
 						{
-							_modelChecker.Output($"[  Safe  ]  {{ {set.ToString(faults)} }}", ConsoleColor.DarkGreen);
+							ModelChecker.WriteOutput($"[  Safe  ]  {{ {set.ToString(faults)} }}", ConsoleColor.DarkGreen);
 							safeSets.Add(set);
 						}
 

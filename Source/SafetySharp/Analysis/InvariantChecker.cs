@@ -42,15 +42,15 @@ namespace SafetySharp.Analysis
 		private readonly Action<string> _output;
 		private readonly StateStorage _states;
 		private readonly Worker[] _workers;
+		private long _computedTransitionCount;
 		private CounterExample _counterExample;
 		private Exception _exception;
 		private int _generatingCounterExample = -1;
 		private int _levelCount;
 		private int _nextReport = ReportStateCountDelta;
+		private readonly bool _progressOnly;
 		private int _stateCount;
 		private long _transitionCount;
-		private long _computedTransitionCount;
-		private bool _progressOnly;
 
 		/// <summary>
 		///   Initializes a new instance.

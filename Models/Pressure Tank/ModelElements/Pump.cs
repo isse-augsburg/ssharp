@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,48 +20,50 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PressureTank
+namespace SafetySharp.CaseStudies.PressureTank.ModelElements
 {
 	using Modeling;
 
 	/// <summary>
-	///   Represents the pressure tank that is filled by the system.
+	///   Represents the pump that fills the pressure tank.
 	/// </summary>
-	public class Tank : Component
+	public class Pump : Component
 	{
 		/// <summary>
-		///   The current pressure level.
+		///   The fault that prevents the pump from pumping.
 		/// </summary>
-		[Range(0, Specification.MaxPressure, OverflowBehavior.Clamp)]
-		private int _pressureLevel;
+		public readonly Fault SuppressPumping = new PermanentFault();
 
 		/// <summary>
-		///   Gets a value indicating whether the pressure tank has ruptured after exceeding its maximum allowed pressure level.
+		///   Gets a value indicating whether the pump is currently enabled.
 		/// </summary>
-		public bool IsRuptured => _pressureLevel >= Specification.MaxPressure;
+		public bool IsEnabled { get; private set; }
 
 		/// <summary>
-		///   Gets the current pressure level within the tank.
+		///   Disables the pump.
 		/// </summary>
-		public int PressureLevel => _pressureLevel;
-
-		/// <summary>
-		///   Gets a value indicating whether the pressure tank is currently being filled.
-		/// </summary>
-		public extern bool IsBeingFilled { get; }
-
-		/// <summary>
-		///   Updates the pressure tank's internal state.
-		/// </summary>
-		public override void Update()
+		public void Disable()
 		{
-			if (IsRuptured)
-				return;
+			IsEnabled = false;
+		}
 
-			_pressureLevel -= 1;
+		/// <summary>
+		///   Enables the pump.
+		/// </summary>
+		public virtual void Enable()
+		{
+			IsEnabled = true;
+		}
 
-			if (IsBeingFilled)
-				_pressureLevel += 2;
+		/// <summary>
+		///   Prevents the pump from pumping.
+		/// </summary>
+		[FaultEffect(Fault = nameof(SuppressPumping))]
+		public class SuppressPumpingEffect : Pump
+		{
+			public override void Enable()
+			{
+			}
 		}
 	}
 }

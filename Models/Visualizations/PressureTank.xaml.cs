@@ -27,6 +27,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using System.Windows;
 	using System.Windows.Media.Animation;
 	using CaseStudies.PressureTank;
+	using CaseStudies.PressureTank.ModelElements;
 	using Infrastructure;
 
 	public partial class PressureTank

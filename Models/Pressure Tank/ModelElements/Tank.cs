@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,45 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing
+namespace SafetySharp.CaseStudies.PressureTank.ModelElements
 {
-	using System;
-	using Analysis;
 	using Modeling;
-	using NUnit.Framework;
-	using Runtime.Reflection;
 
-	public class Tests
+	/// <summary>
+	///   Represents the pressure tank that is filled by the system.
+	/// </summary>
+	public class Tank : Component
 	{
-		[Test]
-		public void CollisionDcca()
+		/// <summary>
+		///   The current pressure level.
+		/// </summary>
+		[Range(0, Specification.MaxPressure, OverflowBehavior.Clamp)]
+		private int _pressureLevel;
+
+		/// <summary>
+		///   Gets a value indicating whether the pressure tank has ruptured after exceeding its maximum allowed pressure level.
+		/// </summary>
+		public bool IsRuptured => _pressureLevel >= Specification.MaxPressure;
+
+		/// <summary>
+		///   Gets the current pressure level within the tank.
+		/// </summary>
+		public int PressureLevel => _pressureLevel;
+
+		/// <summary>
+		///   Gets a value indicating whether the pressure tank is currently being filled.
+		/// </summary>
+		public extern bool IsBeingFilled { get; }
+
+		/// <summary>
+		///   Updates the pressure tank's internal state.
+		/// </summary>
+		public override void Update()
 		{
-			var specification = new Specification();
-			var analysis = new SafetyAnalysis();
+			if (IsRuptured)
+				return;
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.PossibleCollision);
-			result.SaveCounterExamples("counter examples/ffb/");
+			_pressureLevel -= 1;
 
-			Console.WriteLine(result);
-		}
-
-		[Test]
-		public void Test()
-		{
-			var specification = new Specification();
-			var model = new Model(specification);
-			var faults = model.GetFaults();
-
-			for (var i = 0; i < faults.Length; ++i)
-				faults[i].Activation = Activation.Nondeterministic;
-
-			var checker = new SSharpChecker();
-			checker.CheckInvariant(model, true);
-		}
-
-		public static void Main()
-		{
-			new Tests().Test();
+			if (IsBeingFilled)
+				_pressureLevel += 2;
 		}
 	}
 }

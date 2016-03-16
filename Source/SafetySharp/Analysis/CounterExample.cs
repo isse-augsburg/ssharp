@@ -159,7 +159,9 @@ namespace SafetySharp.Analysis
 		public void Save(string file)
 		{
 			Requires.NotNullOrWhitespace(file, nameof(file));
-			Requires.That(file.EndsWith(FileExtension), nameof(file), "Invalid file extension.");
+
+			if (!file.EndsWith(FileExtension))
+				file += FileExtension;
 
 			using (var writer = new BinaryWriter(File.OpenWrite(file), Encoding.UTF8))
 			{

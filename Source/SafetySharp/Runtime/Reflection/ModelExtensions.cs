@@ -70,6 +70,18 @@ namespace SafetySharp.Runtime.Reflection
 		}
 
 		/// <summary>
+		///   Suppresses all potential fault activations for the <paramref name="model" />.
+		/// </summary>
+		/// <param name="model">The model the fault activations should be suppressed for.</param>
+		public static void SuppressAllFaultActivations(this Model model)
+		{
+			Requires.NotNull(model, nameof(model));
+
+			foreach (var fault in model.GetFaults())
+				fault.Activation = Activation.Suppressed;
+		}
+
+		/// <summary>
 		///   Visits the hierarchy of components in pre-order, executing the <paramref name="action" /> for each one.
 		/// </summary>
 		/// <param name="model">The model whose components should be visited.</param>

@@ -34,7 +34,7 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents the LtsMin model checker.
 	/// </summary>
-	public class LtsMin : ModelChecker
+	public class LtsMin
 	{
 		/// <summary>
 		///   Represents the LtsMin process that is currently running.
@@ -42,11 +42,16 @@ namespace SafetySharp.Analysis
 		private ExternalProcess _ltsMin;
 
 		/// <summary>
+		///   Raised when the model checker has written an output. The output is always written to the console by default.
+		/// </summary>
+		public event Action<string> OutputWritten = message => ModelChecker.WriteOutput(message);
+
+		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public override AnalysisResult CheckInvariant(Model model, Formula invariant)
+		public AnalysisResult CheckInvariant(Model model, Formula invariant)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
@@ -69,7 +74,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public override AnalysisResult Check(Model model, Formula formula)
+		public AnalysisResult Check(Model model, Formula formula)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formula, nameof(formula));
@@ -156,7 +161,7 @@ namespace SafetySharp.Analysis
 			_ltsMin = new ExternalProcess(
 				fileName: "pins2lts-seq.exe",
 				commandLineArguments: $"--loader=\"{loaderAssembly}\" \"{modelFile}\" {checkArgument}",
-                outputCallback: output => Output(output.Message))
+				outputCallback: output => OutputWritten?.Invoke(output.Message))
 			{
 				WorkingDirectory = Environment.CurrentDirectory
 			};
@@ -174,11 +179,11 @@ namespace SafetySharp.Analysis
 
 			stopwatch.Stop();
 
-			Output(String.Empty);
-			Output("=====================================");
-			Output($"Elapsed time: {stopwatch.Elapsed}");
-			Output("=====================================");
-			Output(String.Empty);
+			OutputWritten?.Invoke(String.Empty);
+			OutputWritten?.Invoke("=====================================");
+			OutputWritten?.Invoke($"Elapsed time: {stopwatch.Elapsed}");
+			OutputWritten?.Invoke("=====================================");
+			OutputWritten?.Invoke(String.Empty);
 		}
 	}
 }

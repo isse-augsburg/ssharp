@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.PressureTank
 {
 	using Analysis;
+	using ModelElements;
 	using Modeling;
 
 	/// <summary>

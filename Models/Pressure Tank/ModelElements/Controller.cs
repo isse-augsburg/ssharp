@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PressureTank
+namespace SafetySharp.CaseStudies.PressureTank.ModelElements
 {
 	using Modeling;
 
@@ -87,12 +87,12 @@ namespace SafetySharp.CaseStudies.PressureTank
 
 			StateMachine
 				.Transition(
-					from: State.Filling,
+					@from: State.Filling,
 					to: State.StoppedByTimer,
 					guard: Timer.HasElapsed,
 					action: Pump.Disable)
 				.Transition(
-					from: State.Filling,
+					@from: State.Filling,
 					to: State.StoppedBySensor,
 					guard: Sensor.IsFull,
 					action: () =>
@@ -101,7 +101,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 						Timer.Stop();
 					})
 				.Transition(
-					from: new[] { State.StoppedByTimer, State.StoppedBySensor, State.Inactive },
+					@from: new[] { State.StoppedByTimer, State.StoppedBySensor, State.Inactive },
 					to: State.Filling,
 					guard: Sensor.IsEmpty,
 					action: () =>

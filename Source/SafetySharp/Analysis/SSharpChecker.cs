@@ -31,12 +31,17 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents a model checker specifically created to check S# models.
 	/// </summary>
-	public class SSharpChecker : ModelChecker
+	public class SSharpChecker
 	{
 		/// <summary>
 		///   The model checker's configuration that determines certain model checker settings.
 		/// </summary>
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
+
+		/// <summary>
+		///   Raised when the model checker has written an output. The output is always written to the console by default.
+		/// </summary>
+		public event Action<string> OutputWritten = message => ModelChecker.WriteOutput(message);
 
 		/// <summary>
 		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
@@ -48,7 +53,7 @@ namespace SafetySharp.Analysis
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			using (var checker = new InvariantChecker(createModel, message => Output(message), Configuration))
+			using (var checker = new InvariantChecker(createModel, message => OutputWritten?.Invoke(message), Configuration))
 			{
 				var result = default(AnalysisResult);
 				var initializationTime = stopwatch.Elapsed;
@@ -65,14 +70,14 @@ namespace SafetySharp.Analysis
 
 					if (!Configuration.ProgressReportsOnly)
 					{
-						Output(String.Empty);
-						Output("===============================================");
-						Output($"Initialization time: {initializationTime}");
-						Output($"Model checking time: {stopwatch.Elapsed}");
-						Output($"{(int)(result.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
-						Output($"{(int)(result.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
-						Output("===============================================");
-						Output(String.Empty);
+						OutputWritten?.Invoke(String.Empty);
+						OutputWritten?.Invoke("===============================================");
+						OutputWritten?.Invoke($"Initialization time: {initializationTime}");
+						OutputWritten?.Invoke($"Model checking time: {stopwatch.Elapsed}");
+						OutputWritten?.Invoke($"{(int)(result.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
+						OutputWritten?.Invoke($"{(int)(result.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+						OutputWritten?.Invoke("===============================================");
+						OutputWritten?.Invoke(String.Empty);
 					}
 				}
 			}
@@ -83,7 +88,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public override AnalysisResult CheckInvariant(Model model, Formula invariant)
+		public AnalysisResult CheckInvariant(Model model, Formula invariant)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
@@ -92,17 +97,6 @@ namespace SafetySharp.Analysis
 			serializer.Serialize(model, invariant);
 
 			return CheckInvariant(serializer.Load);
-		}
-
-		/// <summary>
-		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />.
-		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
-		/// <param name="formula">The formula that should be checked.</param>
-		public override AnalysisResult Check(Model model, Formula formula)
-		{
-			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
-			throw new NotImplementedException();
 		}
 	}
 }

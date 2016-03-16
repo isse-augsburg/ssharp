@@ -20,50 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PressureTank
+namespace SafetySharp.CaseStudies.PressureTank.Tests
 {
-	using Modeling;
+	using Analysis;
+	using ModelElements;
+	using NUnit.Framework;
 
 	/// <summary>
-	///   Represents the pump that fills the pressure tank.
+	///   A base class for case study tests that makes writing the tests more convenient.
 	/// </summary>
-	public class Pump : Component
+	public abstract class TestBase
 	{
-		/// <summary>
-		///   The fault that prevents the pump from pumping.
-		/// </summary>
-		public readonly Fault SuppressPumping = new PermanentFault();
+		protected Model _model;
+		protected Pump _pump;
+		protected PressureSensor _sensor;
+		protected Specification _specification;
+		protected Tank _tank;
+		protected Timer _timer;
 
 		/// <summary>
-		///   Gets a value indicating whether the pump is currently enabled.
+		///   Sets up the specification and creates a model instance that S# uses for model checking. No
+		///   special model composition is required for this simple case study.
 		/// </summary>
-		public bool IsEnabled { get; private set; }
-
-		/// <summary>
-		///   Disables the pump.
-		/// </summary>
-		public void Disable()
+		[SetUp]
+		public void SetUp()
 		{
-			IsEnabled = false;
-		}
-
-		/// <summary>
-		///   Enables the pump.
-		/// </summary>
-		public virtual void Enable()
-		{
-			IsEnabled = true;
-		}
-
-		/// <summary>
-		///   Prevents the pump from pumping.
-		/// </summary>
-		[FaultEffect(Fault = nameof(SuppressPumping))]
-		public class SuppressPumpingEffect : Pump
-		{
-			public override void Enable()
-			{
-			}
+			_specification = new Specification();
+			_model = new Model(_specification);
+			_sensor = _specification.Controller.Sensor;
+			_timer = _specification.Controller.Timer;
+			_pump = _specification.Controller.Pump;
+			_tank = _specification.Tank;
 		}
 	}
 }

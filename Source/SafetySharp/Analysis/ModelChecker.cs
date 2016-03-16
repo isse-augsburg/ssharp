@@ -27,43 +27,44 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents a base class for external model checker tools.
 	/// </summary>
-	public abstract class ModelChecker
+	public static class ModelChecker
 	{
 		/// <summary>
-		///   Raised when the model checker has written an output. The output is always written to the console by default.
+		///   Writes the <paramref name="message" />, optionally in the given <paramref name="color" /> to the console.
 		/// </summary>
-		public event Action<string> OutputWritten;
-
-		/// <summary>
-		///   Forwards the output <paramref name="message" />.
-		/// </summary>
-		/// <param name="message">The message that should be output.</param>
+		/// <param name="message">The message that should be written.</param>
 		/// <param name="color">
 		///   The color of the output that should be written. <c>null</c> indicates that the default color should be used.
 		/// </param>
-		protected internal void Output(string message, ConsoleColor? color = null)
+		internal static void WriteOutput(string message, ConsoleColor? color = null)
 		{
 			if (color != null)
 				Console.ForegroundColor = color.Value;
 
 			Console.WriteLine(message);
 			Console.ResetColor();
-
-			OutputWritten?.Invoke(message);
 		}
 
 		/// <summary>
-		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />.
+		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />. The appropriate model
+		///   checker is chosen automatically.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public abstract AnalysisResult Check(Model model, Formula formula);
+		public static AnalysisResult Check(Model model, Formula formula)
+		{
+			return new LtsMin().Check(model, formula);
+		}
 
 		/// <summary>
-		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />.
+		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. The appropriate
+		///   model checker is chosen automatically.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public abstract AnalysisResult CheckInvariant(Model model, Formula invariant);
+		public static AnalysisResult CheckInvariant(Model model, Formula invariant)
+		{
+			return new SSharpChecker().CheckInvariant(model, invariant);
+		}
 	}
 }

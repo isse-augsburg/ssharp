@@ -20,57 +20,73 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PressureTank
+namespace SafetySharp.CaseStudies.PressureTank.ModelElements
 {
 	using Modeling;
 
 	/// <summary>
-	///   Represents the sensor that monitors the pressure within the pressure tank.
+	///   Represents a timer that signals a timeout.
 	/// </summary>
-	public class PressureSensor : Component
+	public class Timer : Component
 	{
 		/// <summary>
-		///   The fault that prevents the sensor from triggering when the tank has reached or exceeded
-		///   its maximum allowed pressure level.
+		///   The fault that prevents the timer from reporting a timeout.
 		/// </summary>
-		public readonly Fault SuppressIsEmpty = new TransientFault();
+		public readonly Fault SuppressTimeout = new PermanentFault();
 
 		/// <summary>
-		///   The fault that prevents the sensor from triggering when the tank has become empty.
+		///   The remaining time before the timeout is signaled. A value of -1 indicates that the timer is inactive.
 		/// </summary>
-		public readonly Fault SuppressIsFull = new TransientFault();
+		[Range(-1, Specification.Timeout, OverflowBehavior.Clamp)]
+		private int _remainingTime = -1;
 
 		/// <summary>
-		///   Gets a value indicating whether the triggering pressure level has been reached or exceeded.
+		///   Gets a value indicating whether the timeout has elapsed. This method returns true only for the single system step where
+		///   the timeout occurs.
 		/// </summary>
-		public virtual bool IsFull => PhysicalPressure >= Specification.SensorPressure;
+		public virtual bool HasElapsed => _remainingTime == 0;
 
 		/// <summary>
-		///   Gets a value indicating whether the tank is empty.
+		///   Gets a value indicating whether the timer is currently active, eventually signaling the timeout.
 		/// </summary>
-		public virtual bool IsEmpty => PhysicalPressure <= 0;
+		public bool IsActive => _remainingTime > 0;
 
 		/// <summary>
-		///   Senses the physical pressure level within the tank.
+		///   Gets the remaining time before the timeout occurs.
 		/// </summary>
-		public extern int PhysicalPressure { get; }
+		public int RemainingTime => _remainingTime;
 
 		/// <summary>
-		///   Prevents the sensor from triggering when the tank has reached or exceeded its maximum allowed pressure level.
+		///   Starts or restarts the timer.
 		/// </summary>
-		[FaultEffect(Fault = nameof(SuppressIsFull))]
-		public class SuppressIsFullEffect : PressureSensor
+		public void Start()
 		{
-			public override bool IsFull => false;
+			_remainingTime = Specification.Timeout;
 		}
 
 		/// <summary>
-		///   Prevents the sensor from triggering when the tank has become empty.
+		///   Stops the timer.
 		/// </summary>
-		[FaultEffect(Fault = nameof(SuppressIsEmpty))]
-		public class SuppressIsEmptyEffect : PressureSensor
+		public void Stop()
 		{
-			public override bool IsEmpty => false;
+			_remainingTime = -1;
+		}
+
+		/// <summary>
+		///   Updates the timer's state.
+		/// </summary>
+		public override void Update()
+		{
+			--_remainingTime;
+		}
+
+		/// <summary>
+		///   Prevents the timer from reporting a timeout.
+		/// </summary>
+		[FaultEffect(Fault = nameof(SuppressTimeout))]
+		public class SuppressTimeoutEffect : Timer
+		{
+			public override bool HasElapsed => false;
 		}
 	}
 }

@@ -20,48 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PressureTank
+namespace SafetySharp.CaseStudies.RailroadCrossing
 {
 	using System;
 	using Analysis;
-	using Modeling;
 	using NUnit.Framework;
-	using Runtime.Reflection;
 
-	public class Tests
+	public class ModelCheckingTests
 	{
-		[Test]
-		public void RuptureDcca()
+		private Model _model;
+		private Specification _specification;
+
+		[SetUp]
+		private void SetUp()
 		{
-			var specification = new Specification();
+			_specification = new Specification();
+			_model = new Model(_specification);
+		}
+
+		[Test]
+		public void CollisionDcca()
+		{
 			var analysis = new SafetyAnalysis();
+			var result = analysis.ComputeMinimalCriticalSets(new Model(_specification), _specification.PossibleCollision);
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Rupture);
-			result.SaveCounterExamples("counter examples/pressure tank/");
-
+			result.SaveCounterExamples("counter examples/railroad crossing/");
 			Console.WriteLine(result);
 		}
 
 		[Test]
-		public void Test()
+		public void EnumerateAllStates()
 		{
-			var specification = new Specification();
-			var model = new Model(specification);
-			var faults = model.GetFaults();
-
-			for (var i = 0; i < faults.Length; ++i)
-				faults[i].Activation = Activation.Nondeterministic;
-
 			var checker = new SSharpChecker();
-			checker.CheckInvariant(model, true);
-
-			var lchecker = new LtsMin();
-			lchecker.CheckInvariant(model, true);
-		}
-
-		public static void Main()
-		{
-			new Tests().RuptureDcca();
+			checker.CheckInvariant(_model, true);
 		}
 	}
 }

@@ -55,6 +55,7 @@ namespace Tests
 		{
 			var modelChecker = CreateModelChecker();
 			var result = modelChecker.CheckInvariant(new Model(components), invariant);
+
 			CounterExample = result.CounterExample;
 			return result.FormulaHolds;
 		}
@@ -63,6 +64,7 @@ namespace Tests
 		{
 			var modelChecker = CreateModelChecker();
 			var result = modelChecker.Check(new Model(components), formula);
+
 			CounterExample = result.CounterExample;
 			return result.FormulaHolds;
 		}
@@ -85,10 +87,10 @@ namespace Tests
 			return DccaWithMaxCardinality(hazard, Int32.MaxValue, components);
 		}
 
-		private ModelChecker CreateModelChecker()
+		private dynamic CreateModelChecker()
 		{
-			var modelChecker = (ModelChecker)Activator.CreateInstance((Type)Arguments[0]);
-			modelChecker.OutputWritten += message => Output.Log("{0}", message);
+			dynamic modelChecker = Activator.CreateInstance((Type)Arguments[0]);
+			modelChecker.OutputWritten += (Action<string>)(message => Output.Log("{0}", message));
 
 			var ssharpChecker = modelChecker as SSharpChecker;
 			if (ssharpChecker != null)
