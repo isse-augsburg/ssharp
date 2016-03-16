@@ -31,7 +31,7 @@ namespace Tests.Execution.Scheduling
 	{
 		protected override void Check()
 		{
-			var m = new Model(new S());
+			var m = new S();
 			var r = m.ToRuntimeModel();
 
 			r.RootComponents.Length.ShouldBe(4);
@@ -41,7 +41,7 @@ namespace Tests.Execution.Scheduling
 			r.RootComponents[3].ShouldBeOfType<E>();
 		}
 
-		private class S
+		private class S : Model
 		{
 			[Root(Role.SystemOfInterest)]
 			public C C = new C();

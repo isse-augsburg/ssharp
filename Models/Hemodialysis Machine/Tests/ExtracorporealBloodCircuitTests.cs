@@ -103,7 +103,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		}
 	}
 
-	class ExtracorporealBloodCircuitTestEnvironment : Component
+	class ExtracorporealBloodCircuitTestEnvironment : Model
 	{
 		[Root(Role.SystemOfInterest)]
 		public readonly ExtracorporealBloodCircuit ExtracorporealBloodCircuit = new ExtracorporealBloodCircuit();
@@ -133,7 +133,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		{
 			var specification = new ExtracorporealBloodCircuitTestEnvironment();
 
-			var simulator = new Simulator(new Model(specification)); //Important: Call after all objects have been created
+			var simulator = new Simulator(specification); //Important: Call after all objects have been created
 			var extracorporealBloodCircuitAfterStep0 = simulator.Model.RootComponents.OfType<ExtracorporealBloodCircuit>().First();
 			var patientAfterStep0 = simulator.Model.RootComponents.OfType<Patient>().First();
 			Console.Out.WriteLine("Initial");
@@ -155,7 +155,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var specification = new ExtracorporealBloodCircuitTestEnvironment();
 			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Dialyzer.MembraneIntact == false);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.Dialyzer.MembraneIntact == false);
 			result.SaveCounterExamples("counter examples/hdmachine");
 
 			Console.WriteLine(result);

@@ -33,7 +33,7 @@ namespace SafetySharp.CaseStudies.HeightControl
 	/// <summary>
 	///   Represents the specification of the Elbtunnel case study.
 	/// </summary>
-	public class DesignTolerantMainControl_Specification
+	public class DesignTolerantMainControl_Specification : Model
 	{
 		public const int PreControlPosition = 3;
 		public const int MainControlPosition = 6;
@@ -144,7 +144,6 @@ namespace SafetySharp.CaseStudies.HeightControl
 		/// <summary>
 		///   Represents the hazard of an over-height vehicle colliding with the tunnel entrance on the left lane.
 		/// </summary>
-		[Hazard]
 		public Formula Collision =>
 			Vehicles.Vehicles.Skip(1).Aggregate<Vehicle, Formula>(Vehicles.Vehicles[0].IsCollided, (f, v) => f || v.IsCollided);
 

@@ -126,7 +126,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			}
 	}
 
-	class DialyzerTestEnvironment : Component
+	class DialyzerTestEnvironment : Model
 	{
 		[Root(Role.SystemOfInterest)]
 		public readonly Dialyzer Dialyzer = new Dialyzer();
@@ -172,10 +172,11 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 
 		public DialyzerTestEnvironment()
 		{
-			Bind(nameof(DialyzingFluidFlowSource.SetOutgoingForward), nameof(CreateDialyzingFluid));
-			Bind(nameof(DialyzingFluidFlowSource.BackwardFromSuccessorWasUpdated), nameof(DoNothing));
-			Bind(nameof(DialyzingFluidFlowSink.SetOutgoingBackward), nameof(CreateDialyzingFluidSuction));
-			Bind(nameof(DialyzingFluidFlowSink.ForwardFromPredecessorWasUpdated), nameof(DoNothing));
+			// TODO: Block until provided ports of non-Component-derived classes can be bound
+			//Component.Bind(nameof(DialyzingFluidFlowSource.SetOutgoingForward), nameof(CreateDialyzingFluid));
+			//Component.Bind(nameof(DialyzingFluidFlowSource.BackwardFromSuccessorWasUpdated), nameof(DoNothing));
+			//Component.Bind(nameof(DialyzingFluidFlowSink.SetOutgoingBackward), nameof(CreateDialyzingFluidSuction));
+			//Component.Bind(nameof(DialyzingFluidFlowSink.ForwardFromPredecessorWasUpdated), nameof(DoNothing));
 
 			DialysingFluidFlowCombinator.Connect(DialyzingFluidFlowSource.Outgoing, Dialyzer.DialyzingFluidFlow.Incoming);
 			DialysingFluidFlowCombinator.Connect(Dialyzer.DialyzingFluidFlow.Outgoing, DialyzingFluidFlowSink.Incoming);
@@ -192,7 +193,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		{
 			var specification = new DialyzerTestEnvironment();
 
-			var simulator = new Simulator(new Model(specification)); //Important: Call after all objects have been created
+			var simulator = new Simulator(specification); //Important: Call after all objects have been created
 			var dialyzerAfterStep0 = (Dialyzer)simulator.Model.RootComponents.OfType<Dialyzer>().First();
 			var patientAfterStep0 =
 				(DialyzerTestEnvironmentPatient)
@@ -249,7 +250,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var specification = new DialyzerTestEnvironment();
 			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Dialyzer.MembraneIntact==false);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.Dialyzer.MembraneIntact==false);
 			result.SaveCounterExamples("counter examples/hdmachine");
 
 			Console.WriteLine(result);

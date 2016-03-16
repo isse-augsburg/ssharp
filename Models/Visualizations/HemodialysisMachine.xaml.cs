@@ -26,10 +26,9 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using System.Linq;
 	using System.Windows;
 	using System.Windows.Media.Animation;
-	using global::SafetySharp.CaseStudies.RailroadCrossing.CrossingController;
-	using global::SafetySharp.CaseStudies.RailroadCrossing.TrainController;
 	using global::SafetySharp.CaseStudies.HemodialysisMachine;
 	using Infrastructure;
+	using Modeling;
 	using SafetySharp.Runtime;
 
 	public partial class HdMachine
@@ -43,7 +42,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
 			SimulationControls.Reset += (o, e) => OnModelStateReset();
 			SimulationControls.Rewound += (o, e) => OnRewound();
-			SimulationControls.SetSpecification(specification);
+			SimulationControls.SetModel(specification);
 
 			// Initialize the visualization state
 			UpdateModelState();

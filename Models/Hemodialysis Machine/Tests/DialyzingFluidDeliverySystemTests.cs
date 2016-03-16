@@ -55,7 +55,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		}
 	}
 
-	class DialyzingFluidDeliverySystemTestEnvironment : Component
+	class DialyzingFluidDeliverySystemTestEnvironment : Model
 	{
 		[Root(Role.SystemOfInterest)]
 		public readonly DialyzingFluidDeliverySystem DialyzingFluidDeliverySystem = new DialyzingFluidDeliverySystem();
@@ -80,7 +80,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		{
 			var specification = new DialyzingFluidDeliverySystemTestEnvironment();
 
-			var simulator = new Simulator(new Model(specification)); //Important: Call after all objects have been created
+			var simulator = new Simulator(specification); //Important: Call after all objects have been created
 			var dialyzerAfterStep0 = simulator.Model.RootComponents.OfType<DialyzingFluidDeliverySystemTestEnvironmentDialyzer>().First();
 			var dialyzingFluidDeliverySystemAfterStep0 = simulator.Model.RootComponents.OfType<DialyzingFluidDeliverySystem>().First();
 			Console.Out.WriteLine("Initial");
@@ -102,7 +102,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var specification = new DialyzingFluidDeliverySystemTestEnvironment();
 			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Dialyzer.MembraneIntact == false);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.Dialyzer.MembraneIntact == false);
 			result.SaveCounterExamples("counter examples/hdmachine");
 
 			Console.WriteLine(result);

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.End2End.TestedFiles
+namespace Tests.End2End.Files
 {
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
@@ -36,7 +36,7 @@ namespace Tests.End2End.TestedFiles
 		}
 	}
 
-	internal class S3
+	internal class S3 : Model
 	{
 		[Root(Role.SystemOfInterest)]
 		public C3 C { get; } = new C3();
@@ -46,7 +46,7 @@ namespace Tests.End2End.TestedFiles
 			var s = new S3();
 			var modelChecker = new SSharpChecker();
 
-			return modelChecker.CheckInvariant(new Model(s), s.C.X < 10).FormulaHolds ? 0 : -1;
+			return modelChecker.CheckInvariant(s, s.C.X < 10).FormulaHolds ? 0 : -1;
 		}
 	}
 }

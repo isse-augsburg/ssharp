@@ -23,7 +23,7 @@
 namespace Tests.Formulas.TemporalOperators
 {
 	using SafetySharp.Analysis;
-	using static SafetySharp.Analysis.Tl;
+	using static SafetySharp.Analysis.Operators;
 
 	internal class T4 : FormulaTestObject
 	{

@@ -24,25 +24,16 @@ namespace SafetySharp.CaseStudies.RailroadCrossing
 {
 	using System;
 	using Analysis;
+	using ModelElements;
 	using NUnit.Framework;
 
 	public class ModelCheckingTests
 	{
-		private Model _model;
-		private Specification _specification;
-
-		[SetUp]
-		private void SetUp()
-		{
-			_specification = new Specification();
-			_model = new Model(_specification);
-		}
-
 		[Test]
 		public void CollisionDcca()
 		{
-			var analysis = new SafetyAnalysis();
-			var result = analysis.ComputeMinimalCriticalSets(new Model(_specification), _specification.PossibleCollision);
+			var model = new RailroadCrossingModel();
+			var result = SafetyAnalysis.AnalyzeHazard(model, Specification.PossibleCollision(model));
 
 			result.SaveCounterExamples("counter examples/railroad crossing/");
 			Console.WriteLine(result);
@@ -51,8 +42,8 @@ namespace SafetySharp.CaseStudies.RailroadCrossing
 		[Test]
 		public void EnumerateAllStates()
 		{
-			var checker = new SSharpChecker();
-			checker.CheckInvariant(_model, true);
+			var model = new RailroadCrossingModel();
+			ModelChecker.CheckInvariant(model, true);
 		}
 	}
 }

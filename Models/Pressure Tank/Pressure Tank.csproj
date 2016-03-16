@@ -60,15 +60,15 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="SimulationTests.cs" />
     <Compile Include="ModelElements\Controller.cs" />
-    <Compile Include="Specification.cs" />
+    <Compile Include="ModelElements\Pump.cs" />
     <Compile Include="ModelElements\Sensor.cs" />
     <Compile Include="ModelElements\Tank.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ModelElements\Pump.cs" />
-    <Compile Include="Tests\TestBase.cs" />
-    <Compile Include="Tests\ModelChecking.cs" />
     <Compile Include="ModelElements\Timer.cs" />
+    <Compile Include="PressureTankModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ModelCheckingTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">

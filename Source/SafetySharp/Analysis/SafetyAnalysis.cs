@@ -30,7 +30,6 @@ namespace SafetySharp.Analysis
 	using System.Text;
 	using Modeling;
 	using Runtime;
-	using Runtime.Reflection;
 	using Runtime.Serialization;
 	using Utilities;
 
@@ -75,6 +74,20 @@ namespace SafetySharp.Analysis
 		///   The maximum cardinality of the fault sets that should be checked. By default, all minimal
 		///   critical fault sets are determined.
 		/// </param>
+		public static Result AnalyzeHazard(Model model, Formula hazard, int maxCardinality = Int32.MaxValue)
+		{
+			return new SafetyAnalysis().ComputeMinimalCriticalSets(model, hazard, maxCardinality);
+		}
+
+		/// <summary>
+		///   Computes the minimal critical sets for the <paramref name="hazard" />.
+		/// </summary>
+		/// <param name="model">The model the safety analysis should be conducted for.</param>
+		/// <param name="hazard">The hazard the minimal critical sets should be computed for.</param>
+		/// <param name="maxCardinality">
+		///   The maximum cardinality of the fault sets that should be checked. By default, all minimal
+		///   critical fault sets are determined.
+		/// </param>
 		public Result ComputeMinimalCriticalSets(Model model, Formula hazard, int maxCardinality = Int32.MaxValue)
 		{
 			Requires.NotNull(model, nameof(model));
@@ -86,7 +99,7 @@ namespace SafetySharp.Analysis
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var faults = model.GetFaults();
+			var faults = model.Faults;
 			FaultSet.CheckFaultCount(faults.Length);
 
 			var isComplete = true;

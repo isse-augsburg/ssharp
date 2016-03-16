@@ -26,7 +26,7 @@ namespace SafetySharp.Modeling
 	using System.Linq;
 	using System.Runtime.Serialization;
 	using CompilerServices;
-	using Runtime.Reflection;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
@@ -113,16 +113,6 @@ namespace SafetySharp.Modeling
 				else
 					_isActivated = value == Activation.Forced;
 			}
-		}
-
-		/// <summary>
-		///   Toggles the fault's <see cref="Activation" /> between <see cref="Modeling.Activation.Forced" /> and
-		///   <see cref="Modeling.Activation.Suppressed" />, with <see cref="Modeling.Activation.Nondeterministic" /> being
-		///   treated as <see cref="Modeling.Activation.Suppressed" />. This method should not be used while model checking.
-		/// </summary>
-		public void ToggleActivationMode()
-		{
-			Activation = Activation == Activation.Forced ? Activation.Suppressed : Activation.Forced;
 		}
 
 		/// <summary>

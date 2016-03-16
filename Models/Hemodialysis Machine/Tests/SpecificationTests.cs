@@ -29,7 +29,6 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 	using Analysis;
 	using Modeling;
 	using Runtime;
-	using Runtime.Reflection;
 
 	public class SpecificationTests
 	{
@@ -37,7 +36,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		public void Simulate_1Step()
 		{
 			var testModel = new Specification();
-			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (DialyzingFluidFlowCombinator)simulator.Model.RootComponents[0];
@@ -47,7 +46,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		public void Simulate_10_Step()
 		{
 			var testModel = new Specification();
-			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 			simulator.SimulateStep();
 			simulator.SimulateStep();
@@ -67,7 +66,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		{
 			var testModel = new Specification();
 
-			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			var patient = simulator.Model.RootComponents.OfType<Patient>().First();
 			var hdMachine = simulator.Model.RootComponents.OfType<HdMachine>().First();
 			hdMachine.Dialyzer.DialyzerMembraneRupturesFault.Activation = Activation.Forced;
@@ -91,7 +90,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		{
 			var testModel = new Specification();
 
-			var simulator = new Simulator(new Model(testModel)); //Important: Call after all objects have been created
+			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			var patient = simulator.Model.RootComponents.OfType<Patient>().First();
 			var hdMachine = simulator.Model.RootComponents.OfType<HdMachine>().First();
 			hdMachine.DialyzingFluidDeliverySystem.DialyzingFluidWaterPreparation.WaterHeaterDefect.Activation = Activation.Forced;
@@ -118,7 +117,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 } };
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.IncomingBloodNotOk);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.IncomingBloodNotOk);
 			result.SaveCounterExamples("counter examples/hdmachine");
 
 			Console.WriteLine(result);
@@ -130,7 +129,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 } };
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.BloodNotCleanedAndDialyzingFinished);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.BloodNotCleanedAndDialyzingFinished);
 			result.SaveCounterExamples("counter examples/hdmachine");
 
 			Console.WriteLine(result);
@@ -145,8 +144,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		public void Test()
 		{
 			var specification = new Specification();
-			var model = new Model(specification);
-			var faults = model.GetFaults();
+			var model = specification;
+			var faults = model.Faults;
 
 			for (var i = 0; i < faults.Length; ++i)
 				faults[i].Activation = Activation.Nondeterministic;

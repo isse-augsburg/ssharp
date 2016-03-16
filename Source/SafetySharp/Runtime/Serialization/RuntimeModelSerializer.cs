@@ -31,7 +31,6 @@ namespace SafetySharp.Runtime.Serialization
 	using Analysis;
 	using Analysis.FormulaVisitors;
 	using Modeling;
-	using Reflection;
 	using Utilities;
 
 	/// <summary>
@@ -85,11 +84,6 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private unsafe void SerializeModel(BinaryWriter writer, Model model, Formula[] formulas)
 		{
-			//  Make sure that all auto-bound fault effects have been bound and that all bindings have been created
-			model.AssignFaultIdentifiers();
-			model.BindFaultEffects();
-			model.CreateBindings();
-
 			// Collect all objects contained in the model
 			var stateFormulas = CollectStateFormulas(formulas);
 			var objectTable = CreateObjectTable(model, formulas, stateFormulas);
@@ -108,8 +102,8 @@ namespace SafetySharp.Runtime.Serialization
 			SerializeObjectTable(objectTable, writer);
 
 			// Serialize the object identifiers of the root components
-			writer.Write(model.Count);
-			foreach (var root in model)
+			writer.Write(model.Roots.Length);
+			foreach (var root in model.Roots)
 				writer.Write(objectTable.GetObjectIdentifier(root));
 
 			// Serialize the object identifiers of the root formulas
@@ -167,6 +161,7 @@ namespace SafetySharp.Runtime.Serialization
 		private static ObjectTable CreateObjectTable(Model model, Formula[] formulas, StateFormula[] stateFormulas)
 		{
 			var objects = model
+				.Roots
 				.Cast<object>()
 				.Concat(formulas)
 				.Concat(stateFormulas.Select(formula => formula.Expression.Target));

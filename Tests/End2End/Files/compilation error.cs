@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.End2End.TestedFiles
+namespace Tests.End2End.Files
 {
 	using SafetySharp.Modeling;
 

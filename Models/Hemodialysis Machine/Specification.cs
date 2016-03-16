@@ -25,7 +25,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine
 	using Model;
 	using Analysis;
 
-	public class Specification
+	public class Specification : Modeling.Model
 	{
 		[Root(Role.SystemContext)]
 		private readonly DialyzingFluidFlowCombinator _dialysingFluidFlowCombinator;
@@ -59,7 +59,6 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine
 		[Root(Role.SystemContext)]
 		internal Patient Patient { get; }
 		
-		[Hazard]
 		public Formula IncomingBloodNotOk
 		{
 			get
@@ -72,7 +71,6 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine
 			}
 		}
 
-		[Hazard]
 		public Formula BloodNotCleanedAndDialyzingFinished
 		{
 			get

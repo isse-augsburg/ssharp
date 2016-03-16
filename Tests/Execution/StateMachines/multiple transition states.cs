@@ -22,8 +22,8 @@
 
 namespace Tests.Execution.StateMachines
 {
+	using SafetySharp.CompilerServices;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Reflection;
 	using Shouldly;
 	using Utilities;
 

@@ -69,7 +69,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
 			SimulationControls.Reset += (o, e) => OnModelStateReset();
 			SimulationControls.Rewound += (o, e) => OnRewound();
-			SimulationControls.SetSpecification(specification);
+			SimulationControls.SetModel(specification);
 
 			// Initialize the visualization state
 			OnModelStateReset();

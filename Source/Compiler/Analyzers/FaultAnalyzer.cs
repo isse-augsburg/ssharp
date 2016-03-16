@@ -52,7 +52,11 @@ namespace SafetySharp.Compiler.Analyzers
 		{
 			nameof(Fault.IsActivated),
 			nameof(Fault.Activation),
-			nameof(Fault.ToggleActivationMode)
+			nameof(FaultExtensions.SuppressActivations),
+			nameof(FaultExtensions.SuppressActivation),
+			nameof(FaultExtensions.ForceActivations),
+			nameof(FaultExtensions.ForceActivation),
+			nameof(FaultExtensions.ToggleActivationMode)
 		};
 
 		/// <summary>
@@ -92,7 +96,14 @@ namespace SafetySharp.Compiler.Analyzers
 				return;
 
 			var symbol = semanticModel.GetSymbolInfo(memberAccess).Symbol;
-			if (symbol?.ContainingType != null && symbol.ContainingType.Equals(semanticModel.GetTypeSymbol<Fault>()))
+			if (symbol?.ContainingType == null)
+				return;
+
+			var isFaultMethod =
+				symbol.ContainingType.Equals(semanticModel.GetTypeSymbol(typeof(Fault))) ||
+				symbol.ContainingType.Equals(semanticModel.GetTypeSymbol(typeof(FaultExtensions)));
+
+			if (isFaultMethod)
 				_invalidMemberAccess.Emit(context, memberAccess.Name, symbol.ToDisplayString());
 		}
 	}

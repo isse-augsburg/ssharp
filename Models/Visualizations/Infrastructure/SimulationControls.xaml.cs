@@ -28,7 +28,6 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 	using Microsoft.Win32;
 	using Modeling;
 	using Runtime;
-	using Runtime.Reflection;
 
 	public partial class SimulationControls
 	{
@@ -66,12 +65,12 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 			UpdateSimulationButtonVisibilities();
 		}
 
-		public void SetSpecification(object specification, params Formula[] formulas)
+		public void SetModel(Model model, params Formula[] formulas)
 		{
 			_formulas = formulas;
-			_model = new Model(specification);
+			_model = model;
 
-			foreach (var fault in _model.GetFaults())
+			foreach (var fault in _model.Faults)
 				fault.Activation = Activation.Suppressed;
 
 			SetSimulator(new Simulator(_model, formulas));

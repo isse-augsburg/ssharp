@@ -43,7 +43,7 @@ namespace SafetySharp.CaseStudies.PressureTank.ModelElements
 		/// <summary>
 		///   Gets a value indicating whether the triggering pressure level has been reached or exceeded.
 		/// </summary>
-		public virtual bool IsFull => PhysicalPressure >= Specification.SensorPressure;
+		public virtual bool IsFull => PhysicalPressure >= PressureTankModel.SensorPressure;
 
 		/// <summary>
 		///   Gets a value indicating whether the tank is empty.

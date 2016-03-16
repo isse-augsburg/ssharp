@@ -22,8 +22,8 @@
 
 namespace Tests.Serialization.Compaction
 {
+	using SafetySharp.CompilerServices;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Reflection;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 

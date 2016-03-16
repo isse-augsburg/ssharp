@@ -29,6 +29,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using CaseStudies.PressureTank;
 	using CaseStudies.PressureTank.ModelElements;
 	using Infrastructure;
+	using Modeling;
 
 	public partial class PressureTank
 	{
@@ -55,7 +56,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			// Initialize the simulation environment
 			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
 			SimulationControls.Reset += (o, e) => OnModelStateReset();
-			SimulationControls.SetSpecification(new Specification());
+			SimulationControls.SetModel(new PressureTankModel());
 
 			// Initialize the visualization state
 			UpdateModelState();
@@ -115,7 +116,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 				_timerAlertStoryboard.Begin();
 
 			// Tank
-			var pressureLevel = Math.Round(Tank.PressureLevel / (double)Specification.MaxPressure * 100);
+			var pressureLevel = Math.Round(Tank.PressureLevel / (double)PressureTankModel.MaxPressure * 100);
 			_pressureLevelStoryboard.Seek(TimeSpan.FromMilliseconds(10 * pressureLevel));
 			PressureLevel.Text = $"{pressureLevel}%";
 			PressureLevel.Visibility = (!Tank.IsRuptured).ToVisibility();

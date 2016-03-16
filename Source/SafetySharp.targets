@@ -84,14 +84,23 @@ public class SSharpNormalizationTask : Task
 
 			return true;
 		}
-		catch (Exception e)
+		catch (TargetInvocationException e)
 		{
-			Log.LogError("S# normalization failed due to an exception.");
-			Log.LogError("{0}", e.Message);
-			Log.LogError("{0}", e.StackTrace);
-			
+			ReportException(e.InnerException);
 			return false;
 		}
+		catch (Exception e)
+		{
+			ReportException(e);		
+			return false;
+		}
+	}
+	
+	private void ReportException(Exception e)
+	{
+		Log.LogError("S# normalization failed due to an exception.");
+		Log.LogError("{0}", e.Message);
+		Log.LogError("{0}", e.StackTrace);
 	}
 
 	private Assembly TryLoadAssembly(AssemblyName assemblyName)
@@ -131,10 +140,10 @@ public class SSharpNormalizationTask : Task
 		var method = compilerType.GetMethod("NormalizeProject", BindingFlags.Instance | BindingFlags.Public);
 		var normalize = (Normalizer)Delegate.CreateDelegate(typeof(Normalizer), compiler, method);
 
-		return normalize(InputFiles.Select(f => f.ItemSpec).ToArray(), References.Select(r => r.ItemSpec).ToArray());
+		return normalize(InputFiles.Select(f => f.ItemSpec).ToArray(), References.Select(r => r.ItemSpec).ToArray(), IntermediateDirectory.ItemSpec);
 	}
 
-	private delegate string[] Normalizer(string[] files, string[] references);
+	private delegate string[] Normalizer(string[] files, string[] references, string intermediateDirectory);
 }
 ]]>
 			</Code>

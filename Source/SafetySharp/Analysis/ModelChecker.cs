@@ -23,6 +23,7 @@
 namespace SafetySharp.Analysis
 {
 	using System;
+	using Modeling;
 
 	/// <summary>
 	///   Represents a base class for external model checker tools.

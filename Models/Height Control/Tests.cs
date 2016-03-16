@@ -26,7 +26,6 @@ namespace SafetySharp.CaseStudies.HeightControl
 	using Analysis;
 	using Modeling;
 	using NUnit.Framework;
-	using Runtime.Reflection;
 
 	[TestFixture]
 	public class Tests
@@ -42,7 +41,7 @@ namespace SafetySharp.CaseStudies.HeightControl
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Collision);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.Collision);
 			result.SaveCounterExamples("counter examples/elbtunnel/");
 
 			Console.WriteLine(result);
@@ -51,9 +50,8 @@ namespace SafetySharp.CaseStudies.HeightControl
 		[Test]
 		public void Test()
 		{
-			var specification = new Specification();
-			var model = new Model(specification);
-			var faults = model.GetFaults();
+			var model = new Specification();
+			var faults = model.Faults;
 
 			for (var i = 0; i < faults.Length; ++i)
 //				 faults[i].Activation = i < 5 ? Activation.Nondeterministic : Activation.Suppressed;

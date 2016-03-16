@@ -27,6 +27,7 @@ namespace SafetySharp.Analysis
 	using System.Diagnostics;
 	using System.IO;
 	using FormulaVisitors;
+	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;

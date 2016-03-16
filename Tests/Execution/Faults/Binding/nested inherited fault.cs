@@ -24,7 +24,7 @@ namespace Tests.Execution.Faults.Binding
 {
 	using System.Reflection;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime.Reflection;
+	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 

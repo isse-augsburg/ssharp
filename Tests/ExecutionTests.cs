@@ -73,5 +73,17 @@ namespace Tests
 		{
 			ExecuteDynamicTests(file);
 		}
+
+		[Theory, MemberData("DiscoverTests", "Execution/Components")]
+		public void Components(string test, string file)
+		{
+			ExecuteDynamicTests(file);
+		}
+
+		[Theory, MemberData("DiscoverTests", "Execution/Models")]
+		public void Models(string test, string file)
+		{
+			ExecuteDynamicTests(file);
+		}
 	}
 }

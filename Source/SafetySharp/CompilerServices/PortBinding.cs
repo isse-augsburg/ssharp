@@ -22,11 +22,10 @@
 
 namespace SafetySharp.CompilerServices
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
-	using Runtime.Reflection;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
@@ -95,7 +94,7 @@ namespace SafetySharp.CompilerServices
 
 			// Set all bindings that were initialized at model construction time
 			foreach (var binding in objects.OfType<PortBinding>())
-				binding.Bind();			
+				binding.Bind();
 		}
 	}
 }

@@ -23,12 +23,8 @@
 namespace SafetySharp.CaseStudies.RailroadCrossing
 {
 	using Analysis;
-	using Context;
-	using CrossingController;
-	using Modeling;
-	using TrainController;
 
-	public class Specification
+	public static class Specification
 	{
 		public const int EndPosition = 1000;
 		public const int SensorPosition = 900;
@@ -43,57 +39,9 @@ namespace SafetySharp.CaseStudies.RailroadCrossing
 		public const int MaxSpeedOffset = 7;
 		public const int MaxPositionOffset = 60;
 
-		public Specification()
-		{
-			CrossingControl = new CrossingControl
-			{
-				Sensor = new BarrierSensor(),
-				Motor = new BarrierMotor(),
-				Radio = new RadioModule(),
-				Timer = new Timer(),
-				TrainSensor = new TrainSensor()
-			};
-
-			TrainControl = new TrainControl
-			{
-				Brakes = new Brakes(),
-				Odometer = new Odometer(),
-				Radio = new RadioModule()
-			};
-
-			Component.Bind(nameof(Barrier.Speed), nameof(CrossingControl.Motor.Speed));
-			Component.Bind(nameof(CrossingControl.Sensor.BarrierAngle), nameof(Barrier.Angle));
-
-			Component.Bind(nameof(Train.Acceleration), nameof(TrainControl.Brakes.Acceleration));
-			Component.Bind(nameof(CrossingControl.TrainSensor.TrainPosition), nameof(Train.Position));
-
-			Component.Bind(nameof(TrainControl.Radio.RetrieveFromChannel), nameof(Channel.Receive));
-			Component.Bind(nameof(TrainControl.Radio.DeliverToChannel), nameof(Channel.Send));
-
-			Component.Bind(nameof(CrossingControl.Radio.RetrieveFromChannel), nameof(Channel.Receive));
-			Component.Bind(nameof(CrossingControl.Radio.DeliverToChannel), nameof(Channel.Send));
-
-			Component.Bind(nameof(TrainControl.Odometer.TrainPosition), nameof(Train.Position));
-			Component.Bind(nameof(TrainControl.Odometer.TrainSpeed), nameof(Train.Speed));
-		}
-
-		[Root(Role.SystemOfInterest)]
-		public CrossingControl CrossingControl { get; }
-
-		[Root(Role.SystemOfInterest)]
-		public TrainControl TrainControl { get; }
-
-		[Root(Role.SystemContext)]
-		public Train Train { get; } = new Train();
-
-		[Root(Role.SystemContext)]
-		public Barrier Barrier { get; } = new Barrier();
-
-		[Root(Role.SystemContext)]
-		public RadioChannel Channel { get; } = new RadioChannel();
-
-		[Hazard]
-		public Formula PossibleCollision =>
-			Barrier.Angle != 0 && Train.Position <= CrossingPosition && Train.Position + Train.Speed >= CrossingPosition;
+		public static Formula PossibleCollision(RailroadCrossingModel model) =>
+			model.Barrier.Angle != 0 &&
+			model.Train.Position <= CrossingPosition &&
+			model.Train.Position + model.Train.Speed >= CrossingPosition;
 	}
 }

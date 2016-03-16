@@ -35,7 +35,7 @@ namespace SafetySharp.CaseStudies.HeightControl.DesignExploration
 			var specification = new DesignHighTubeWithLb_Specification();
 			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Collision, maxCardinality: 1);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
 		}
 
@@ -45,7 +45,7 @@ namespace SafetySharp.CaseStudies.HeightControl.DesignExploration
 			var specification = new DesignImprovedDetectionOfPreControl_Specification();
 			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Collision, maxCardinality: 1);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
 		}
 
@@ -55,7 +55,7 @@ namespace SafetySharp.CaseStudies.HeightControl.DesignExploration
 			var specification = new DesignRemovedCounterInMainControl_Specification();
 			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Collision, maxCardinality: 1);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
 		}
 
@@ -65,7 +65,7 @@ namespace SafetySharp.CaseStudies.HeightControl.DesignExploration
 			var specification = new DesignRemovedCounterInTolerantMainControl_Specification();
 			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Collision, maxCardinality: 1);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
 		}
 
@@ -75,7 +75,7 @@ namespace SafetySharp.CaseStudies.HeightControl.DesignExploration
 			var specification = new DesignTolerantMainControl_Specification();
 			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Collision, maxCardinality: 1);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.Collision, maxCardinality: 1);
 			Console.WriteLine(result);
 		}
 
@@ -85,7 +85,7 @@ namespace SafetySharp.CaseStudies.HeightControl.DesignExploration
 			var specification = new Specification();
 			var analysis = new SafetyAnalysis();
 
-			var result = analysis.ComputeMinimalCriticalSets(new Model(specification), specification.Collision, maxCardinality: 1);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.Collision, maxCardinality: 1);
 			result.SaveCounterExamples("counter examples/elbtunnel/");
 
 			Console.WriteLine(result);

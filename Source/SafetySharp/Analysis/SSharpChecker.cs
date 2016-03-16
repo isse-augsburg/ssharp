@@ -24,6 +24,7 @@ namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Diagnostics;
+	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;

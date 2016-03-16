@@ -26,7 +26,7 @@ namespace Tests.Serialization.StateLabels
 	using SafetySharp.Analysis;
 	using Shouldly;
 	using Utilities;
-	using static SafetySharp.Analysis.Tl;
+	using static SafetySharp.Analysis.Operators;
 
 	internal class LtlFormula : TestModel
 	{

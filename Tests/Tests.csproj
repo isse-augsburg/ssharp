@@ -126,9 +126,9 @@
     <Compile Include="..\Source\SafetySharp\Properties\InternalsVisibleTo.cs">
       <Link>Properties\InternalsVisibleTo.cs</Link>
     </Compile>
-	<Compile Include="..\Source\SharedAssemblyInfo.cs">
-		<Link>Properties\SharedAssemblyInfo.cs</Link>
-	</Compile>
+    <Compile Include="..\Source\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Analysis\Dcca\empty set.cs" />
     <Compile Include="Analysis\Dcca\multiple singleton cut sets.cs" />
     <Compile Include="Analysis\Dcca\exception.cs" />
@@ -485,42 +485,38 @@
     <Compile Include="FaultActivation\StateGraph\single transient fault always activated.cs" />
     <Compile Include="FaultActivation\StateGraph\without faults.cs" />
     <Compile Include="FaultActivation\StateGraph\fault without observable effect.cs" />
-    <Compile Include="ReflectionTests.cs" />
-    <Compile Include="ReflectionTests.Helpers.cs">
-      <DependentUpon>ReflectionTests.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Reflection\Components\Fields\list.cs" />
-    <Compile Include="Reflection\Components\Fields\hidden.cs" />
-    <Compile Include="Reflection\Components\Fields\non-serializable.cs" />
-    <Compile Include="Reflection\Components\Fields\non-discoverable.cs" />
-    <Compile Include="Reflection\Components\Fields\readonly.cs" />
-    <Compile Include="Reflection\Components\Fields\none.cs" />
-    <Compile Include="Reflection\Components\Fields\generic.cs" />
-    <Compile Include="Reflection\Components\Fields\array.cs" />
-    <Compile Include="Reflection\Components\Fields\multiple.cs" />
-    <Compile Include="Reflection\Components\Fields\single.cs" />
-    <Compile Include="Reflection\Components\Ports\provided ports.cs" />
-    <Compile Include="Reflection\Components\Ports\required ports.cs" />
-    <Compile Include="Reflection\Components\Subcomponents\list.cs" />
-    <Compile Include="Reflection\Components\Subcomponents\hidden.cs" />
-    <Compile Include="Reflection\Components\Subcomponents\array.cs" />
-    <Compile Include="Reflection\Components\Subcomponents\shared.cs" />
-    <Compile Include="Reflection\Components\Subcomponents\non-discoverable.cs" />
-    <Compile Include="Reflection\Components\Subcomponents\null.cs" />
-    <Compile Include="Reflection\Components\Subcomponents\readonly.cs" />
-    <Compile Include="Reflection\Components\Subcomponents\multiple.cs" />
-    <Compile Include="Reflection\Components\Subcomponents\generic.cs" />
-    <Compile Include="Reflection\Components\Subcomponents\single.cs" />
-    <Compile Include="Reflection\Components\Subcomponents\non-serializable.cs" />
-    <Compile Include="Reflection\Components\Subcomponents\none.cs" />
-    <Compile Include="Reflection\Models\Faults\multiple generic.cs" />
-    <Compile Include="Reflection\Models\Faults\multiple.cs" />
-    <Compile Include="Reflection\Models\Faults\single shared.cs" />
-    <Compile Include="Reflection\Models\Faults\single in subcomponent.cs" />
-    <Compile Include="Reflection\Models\Faults\single.cs" />
-    <Compile Include="Reflection\Models\Subcomponents\generic.cs" />
-    <Compile Include="Reflection\Models\Subcomponents\multiple.cs" />
-    <Compile Include="Reflection\Models\Subcomponents\single.cs" />
+    <Compile Include="Execution\Components\Fields\list.cs" />
+    <Compile Include="Execution\Components\Fields\hidden.cs" />
+    <Compile Include="Execution\Components\Fields\non-serializable.cs" />
+    <Compile Include="Execution\Components\Fields\non-discoverable.cs" />
+    <Compile Include="Execution\Components\Fields\readonly.cs" />
+    <Compile Include="Execution\Components\Fields\none.cs" />
+    <Compile Include="Execution\Components\Fields\generic.cs" />
+    <Compile Include="Execution\Components\Fields\array.cs" />
+    <Compile Include="Execution\Components\Fields\multiple.cs" />
+    <Compile Include="Execution\Components\Fields\single.cs" />
+    <Compile Include="Execution\Components\Ports\provided ports.cs" />
+    <Compile Include="Execution\Components\Ports\required ports.cs" />
+    <Compile Include="Execution\Components\Subcomponents\list.cs" />
+    <Compile Include="Execution\Components\Subcomponents\hidden.cs" />
+    <Compile Include="Execution\Components\Subcomponents\array.cs" />
+    <Compile Include="Execution\Components\Subcomponents\shared.cs" />
+    <Compile Include="Execution\Components\Subcomponents\non-discoverable.cs" />
+    <Compile Include="Execution\Components\Subcomponents\null.cs" />
+    <Compile Include="Execution\Components\Subcomponents\readonly.cs" />
+    <Compile Include="Execution\Components\Subcomponents\multiple.cs" />
+    <Compile Include="Execution\Components\Subcomponents\generic.cs" />
+    <Compile Include="Execution\Components\Subcomponents\single.cs" />
+    <Compile Include="Execution\Components\Subcomponents\non-serializable.cs" />
+    <Compile Include="Execution\Components\Subcomponents\none.cs" />
+    <Compile Include="Execution\Models\Faults\multiple generic.cs" />
+    <Compile Include="Execution\Models\Faults\multiple.cs" />
+    <Compile Include="Execution\Models\Faults\single shared.cs" />
+    <Compile Include="Execution\Models\Faults\single in subcomponent.cs" />
+    <Compile Include="Execution\Models\Faults\single.cs" />
+    <Compile Include="Execution\Models\Subcomponents\generic.cs" />
+    <Compile Include="Execution\Models\Subcomponents\multiple.cs" />
+    <Compile Include="Execution\Models\Subcomponents\single.cs" />
     <Compile Include="Serialization\Compaction\alignment.cs" />
     <Compile Include="Serialization\Compaction\Boolean 1 byte.cs" />
     <Compile Include="Serialization\Compaction\faults.cs" />

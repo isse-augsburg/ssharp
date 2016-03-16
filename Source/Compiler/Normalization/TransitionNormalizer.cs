@@ -25,13 +25,13 @@ namespace SafetySharp.Compiler.Normalization
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using CompilerServices;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Modeling;
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
-	using Runtime.Reflection;
 	using Utilities;
 
 	/// <summary>
@@ -40,9 +40,9 @@ namespace SafetySharp.Compiler.Normalization
 	public sealed class TransitionNormalizer : Normalizer
 	{
 		/// <summary>
-		///   The global name of the <see cref="StateMachineExtensions" /> type.
+		///   The global name of the <see cref="StateMachineHelpers" /> type.
 		/// </summary>
-		private readonly string _extensionType = typeof(StateMachineExtensions).GetGlobalName();
+		private readonly string _helpersType = typeof(StateMachineHelpers).GetGlobalName();
 
 		/// <summary>
 		///   The stack of variable prefixes to uniquely name local variables of nested transitions.
@@ -122,7 +122,7 @@ namespace SafetySharp.Compiler.Normalization
 					_writer.AppendLine($"#line {stateMachine.GetLineNumber()}");
 					_writer.AppendLine($"var {StateMachineVariable} = {stateMachine.RemoveTrivia().ToFullString()};");
 					_writer.AppendLine("#line hidden");
-					_writer.AppendLine($"var {ChoiceVariable} = {_extensionType}.GetChoice({StateMachineVariable});");
+					_writer.AppendLine($"var {ChoiceVariable} = {_helpersType}.GetChoice({StateMachineVariable});");
 					_writer.NewLine();
 
 					_writer.AppendLine($"var {TransitionsVariable} = stackalloc int[{transitions.Count}];");
@@ -157,7 +157,7 @@ namespace SafetySharp.Compiler.Normalization
 				var transition = transitions[i];
 
 				WriteLineNumber(transition.SourceLineNumber);
-				_writer.AppendLine($"if ({_extensionType}.IsInState({StateMachineVariable}, {transition.SourceStates.ToFullString()}))");
+				_writer.AppendLine($"if ({_helpersType}.IsInState({StateMachineVariable}, {transition.SourceStates.ToFullString()}))");
 				_writer.AppendLine("#line hidden");
 				_writer.AppendBlockStatement(() =>
 				{
@@ -201,7 +201,7 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			WriteLineNumber(transition.TargetLineNumber);
 			_writer.AppendLine(
-				$"{_extensionType}.ChangeState({StateMachineVariable}, {ChoiceVariable}.Choose({transition.TargetStates.ToFullString()}));");
+				$"{_helpersType}.ChangeState({StateMachineVariable}, {ChoiceVariable}.Choose({transition.TargetStates.ToFullString()}));");
 
 			WriteLineNumber(transition.ActionLineNumber);
 

@@ -37,7 +37,7 @@ namespace SafetySharp.CaseStudies.PressureTank.ModelElements
 		/// <summary>
 		///   The remaining time before the timeout is signaled. A value of -1 indicates that the timer is inactive.
 		/// </summary>
-		[Range(-1, Specification.Timeout, OverflowBehavior.Clamp)]
+		[Range(-1, PressureTankModel.Timeout, OverflowBehavior.Clamp)]
 		private int _remainingTime = -1;
 
 		/// <summary>
@@ -61,7 +61,7 @@ namespace SafetySharp.CaseStudies.PressureTank.ModelElements
 		/// </summary>
 		public void Start()
 		{
-			_remainingTime = Specification.Timeout;
+			_remainingTime = PressureTankModel.Timeout;
 		}
 
 		/// <summary>

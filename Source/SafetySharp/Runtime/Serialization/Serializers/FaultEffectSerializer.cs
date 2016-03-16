@@ -27,7 +27,6 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	using System.IO;
 	using System.Reflection;
 	using Modeling;
-	using Reflection;
 
 	/// <summary>
 	///   Serializes all kinds of <see cref="Component" />-derived classes marked with <see cref="FaultEffectAttribute" />.

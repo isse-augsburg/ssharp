@@ -24,7 +24,7 @@ namespace Tests.Analysis.Ltl.Violated
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
-	using static SafetySharp.Analysis.Tl;
+	using static SafetySharp.Analysis.Operators;
 
 	internal class InitialState : AnalysisTestObject
 	{

@@ -25,11 +25,12 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using System.Linq;
 	using System.Windows;
 	using System.Windows.Controls;
-	using Infrastructure;
 	using CaseStudies.RailroadCrossing;
-	using CaseStudies.RailroadCrossing.Context;
-	using CaseStudies.RailroadCrossing.CrossingController;
-	using CaseStudies.RailroadCrossing.TrainController;
+	using CaseStudies.RailroadCrossing.ModelElements.ModelElements.Context;
+	using CaseStudies.RailroadCrossing.ModelElements.ModelElements.CrossingController;
+	using CaseStudies.RailroadCrossing.ModelElements.ModelElements.TrainController;
+	using Infrastructure;
+	using Modeling;
 
 	public partial class RailroadCrossing
 	{
@@ -40,12 +41,12 @@ namespace SafetySharp.CaseStudies.Visualizations
 			InitializeComponent();
 
 			// Initialize the simulation environment
-			var specification = new Specification();
+			var model = new RailroadCrossingModel();
 
 			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
 			SimulationControls.Reset += (o, e) => OnModelStateReset();
 			SimulationControls.Rewound += (o, e) => OnRewound();
-			SimulationControls.SetSpecification(specification, specification.PossibleCollision);
+			SimulationControls.SetModel(model, Specification.PossibleCollision(model));
 
 			// Initialize the visualization state
 			UpdateModelState();

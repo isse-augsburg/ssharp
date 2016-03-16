@@ -28,7 +28,6 @@ namespace SafetySharp.Compiler
 	using System.IO;
 	using System.Linq;
 	using System.Reflection;
-	using Analyzers;
 	using JetBrains.Annotations;
 	using Microsoft.Build.Utilities;
 	using Microsoft.CodeAnalysis;
@@ -103,7 +102,8 @@ namespace SafetySharp.Compiler
 		/// </summary>
 		/// <param name="files">The files that should be normalized.</param>
 		/// <param name="references">The references the files should be compiled with.</param>
-		public string[] NormalizeProject(string[] files, string[] references)
+		/// <param name="intermediateDirectory">The intermediate directory that files can be written to.</param>
+		public string[] NormalizeProject([NotNull] string[] files, [NotNull] string[] references, [NotNull] string intermediateDirectory)
 		{
 			try
 			{
@@ -135,7 +135,7 @@ namespace SafetySharp.Compiler
 			}
 			catch (Exception)
 			{
-				OutputCode("Failed");
+				OutputCode(Path.Combine(intermediateDirectory, "Failed"));
 				throw;
 			}
 		}
@@ -188,7 +188,6 @@ namespace SafetySharp.Compiler
 		[Conditional("DEBUG")]
 		private void OutputCode([NotNull] string path)
 		{
-			path = Path.Combine(Path.GetDirectoryName(typeof(Compiler).Assembly.Location), "obj", path);
 			Directory.CreateDirectory(path);
 
 			var index = 0;

@@ -50,10 +50,11 @@
     <Compile Include="Analysis\Role.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsStateFormulaVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\LtsMinCtlTransformer.cs" />
-    <Compile Include="Analysis\HazardAttribute.cs" />
     <Compile Include="Analysis\ModelChecker.cs" />
     <Compile Include="Analysis\LtsMin.cs" />
-    <Compile Include="Analysis\Model.cs" />
+    <Compile Include="Modeling\FaultExtensions.cs" />
+    <Compile Include="Modeling\ModelBinder.cs" />
+    <Compile Include="Modeling\Model.cs" />
     <Compile Include="Analysis\RootAttribute.cs" />
     <Compile Include="Analysis\SafetyAnalysis.cs" />
     <Compile Include="Runtime\FaultSet.cs" />
@@ -74,10 +75,9 @@
     <Compile Include="Modeling\Range.cs" />
     <Compile Include="Analysis\InvariantChecker.cs" />
     <Compile Include="Runtime\RangeViolationException.cs" />
-    <Compile Include="Runtime\RealTimeSimulator.cs" />
-    <Compile Include="Runtime\Reflection\ComponentExtensions.cs" />
-    <Compile Include="Runtime\Reflection\ModelExtensions.cs" />
-    <Compile Include="Runtime\Reflection\StateMachineExtensions.cs" />
+    <Compile Include="Analysis\RealTimeSimulator.cs" />
+    <Compile Include="Runtime\ComponentExtensions.cs" />
+    <Compile Include="CompilerServices\StateMachineHelpers.cs" />
     <Compile Include="Modeling\Choice.cs" />
     <Compile Include="Modeling\Component.Choose.cs">
       <DependentUpon>Component.cs</DependentUpon>
@@ -97,7 +97,7 @@
     <Compile Include="Analysis\Formula.cs" />
     <Compile Include="Analysis\FormulaVisitors\StateFormulaCollector.cs" />
     <Compile Include="Analysis\FormulaVisitors\FormulaVisitor.cs" />
-    <Compile Include="Analysis\Tl.cs" />
+    <Compile Include="Analysis\Operators.cs" />
     <Compile Include="Analysis\StateFormula.cs" />
     <Compile Include="Analysis\UnaryFormula.cs" />
     <Compile Include="Analysis\UnaryOperator.cs" />
@@ -137,7 +137,7 @@
     <Compile Include="Runtime\Serialization\SerializationRegistry.cs" />
     <Compile Include="Runtime\Serialization\StateSlotMetadata.cs" />
     <Compile Include="Runtime\Serialization\StateVectorLayout.cs" />
-    <Compile Include="Runtime\Simulator.cs" />
+    <Compile Include="Analysis\Simulator.cs" />
     <Compile Include="Runtime\StateFormulaSet.cs" />
     <Compile Include="Runtime\StateStack.cs" />
     <Compile Include="Runtime\StateStorage.cs" />
@@ -165,5 +165,6 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
