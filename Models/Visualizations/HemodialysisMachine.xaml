@@ -633,630 +633,691 @@
     </UserControl.Triggers>
     <DockPanel LastChildFill="true">
         <infrastructure:SimulationControls x:Name="SimulationControls" DockPanel.Dock="Top" />
-        <Canvas xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" x:Name="hemodialysisCanvas" Width="776.69636" Height="396.50001" RenderTransformOrigin="0.5,0.5">
-            <Canvas.Resources>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient41420" MappingMode="Absolute" StartPoint="511,281" EndPoint="511,287">
-                    <LinearGradientBrush.Transform>
-                        <TranslateTransform X="69.873546" Y="-234.59756"/>
-                    </LinearGradientBrush.Transform>
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF99BFFF" Offset="0"/>
-                            <GradientStop Color="#FF4D8FFF" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient41414" MappingMode="RelativeToBoundingBox" StartPoint="0,0" EndPoint="1,1">
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF99BFFF" Offset="0"/>
-                            <GradientStop Color="#FF4D8FFF" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient37771" MappingMode="RelativeToBoundingBox" StartPoint="0,0" EndPoint="1,1">
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF0000FF" Offset="0"/>
-                            <GradientStop Color="#FF0000FF" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="dialyzergradient-8" MappingMode="RelativeToBoundingBox" StartPoint="0,0" EndPoint="1,1">
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF0000FF" Offset="0"/>
-                            <GradientStop Color="#FF0000FF" Offset="0.24878398"/>
-                            <GradientStop Color="#FFFF0000" Offset="0.49649075"/>
-                            <GradientStop Color="#FFFF0000" Offset="0.78771901"/>
-                            <GradientStop Color="#FFFF0000" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient3816" MappingMode="Absolute" StartPoint="500,303" EndPoint="500,296">
-                    <LinearGradientBrush.Transform>
-                        <TranslateTransform X="89.872509" Y="-234.59756"/>
-                    </LinearGradientBrush.Transform>
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF0000FF" Offset="0"/>
-                            <GradientStop Color="#FF0000FF" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient3818" MappingMode="Absolute" SpreadMethod="Pad" StartPoint="500,296" EndPoint="500,264">
-                    <LinearGradientBrush.Transform>
-                        <TranslateTransform X="89.872509" Y="-234.59756"/>
-                    </LinearGradientBrush.Transform>
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF0000FF" Offset="0"/>
-                            <GradientStop Color="#FF0000FF" Offset="0.24878398"/>
-                            <GradientStop Color="#FFFF0000" Offset="0.49649075"/>
-                            <GradientStop Color="#FFFF0000" Offset="0.78771901"/>
-                            <GradientStop Color="#FFFF0000" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5583" MappingMode="Absolute" StartPoint="500,303" EndPoint="500,296">
-                    <LinearGradientBrush.Transform>
-                        <TranslateTransform X="107.09504" Y="-234.59756"/>
-                    </LinearGradientBrush.Transform>
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF0000FF" Offset="0"/>
-                            <GradientStop Color="#FF0000FF" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5585" MappingMode="Absolute" SpreadMethod="Pad" StartPoint="500,296" EndPoint="500,264">
-                    <LinearGradientBrush.Transform>
-                        <TranslateTransform X="107.09504" Y="-234.59756"/>
-                    </LinearGradientBrush.Transform>
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF0000FF" Offset="0"/>
-                            <GradientStop Color="#FF0000FF" Offset="0.24878398"/>
-                            <GradientStop Color="#FFFF0000" Offset="0.49649075"/>
-                            <GradientStop Color="#FFFF0000" Offset="0.78771901"/>
-                            <GradientStop Color="#FFFF0000" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5589" MappingMode="Absolute" StartPoint="500,303" EndPoint="500,296">
-                    <LinearGradientBrush.Transform>
-                        <TranslateTransform X="102.78941" Y="-234.59756"/>
-                    </LinearGradientBrush.Transform>
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF0000FF" Offset="0"/>
-                            <GradientStop Color="#FF0000FF" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5591" MappingMode="Absolute" SpreadMethod="Pad" StartPoint="500,296" EndPoint="500,264">
-                    <LinearGradientBrush.Transform>
-                        <TranslateTransform X="102.78941" Y="-234.59756"/>
-                    </LinearGradientBrush.Transform>
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF0000FF" Offset="0"/>
-                            <GradientStop Color="#FF0000FF" Offset="0.24878398"/>
-                            <GradientStop Color="#FFFF0000" Offset="0.49649075"/>
-                            <GradientStop Color="#FFFF0000" Offset="0.78771901"/>
-                            <GradientStop Color="#FFFF0000" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5595" MappingMode="Absolute" StartPoint="500,303" EndPoint="500,296">
-                    <LinearGradientBrush.Transform>
-                        <TranslateTransform X="98.483776" Y="-234.59756"/>
-                    </LinearGradientBrush.Transform>
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF0000FF" Offset="0"/>
-                            <GradientStop Color="#FF0000FF" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5597" MappingMode="Absolute" SpreadMethod="Pad" StartPoint="500,296" EndPoint="500,264">
-                    <LinearGradientBrush.Transform>
-                        <TranslateTransform X="98.483776" Y="-234.59756"/>
-                    </LinearGradientBrush.Transform>
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF0000FF" Offset="0"/>
-                            <GradientStop Color="#FF0000FF" Offset="0.24878398"/>
-                            <GradientStop Color="#FFFF0000" Offset="0.49649075"/>
-                            <GradientStop Color="#FFFF0000" Offset="0.78771901"/>
-                            <GradientStop Color="#FFFF0000" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5601" MappingMode="Absolute" StartPoint="500,303" EndPoint="500,296">
-                    <LinearGradientBrush.Transform>
-                        <TranslateTransform X="94.178142" Y="-234.59756"/>
-                    </LinearGradientBrush.Transform>
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF0000FF" Offset="0"/>
-                            <GradientStop Color="#FF0000FF" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5603" MappingMode="Absolute" SpreadMethod="Pad" StartPoint="500,296" EndPoint="500,264">
-                    <LinearGradientBrush.Transform>
-                        <TranslateTransform X="94.178142" Y="-234.59756"/>
-                    </LinearGradientBrush.Transform>
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStopCollection>
-                            <GradientStop Color="#FF0000FF" Offset="0"/>
-                            <GradientStop Color="#FF0000FF" Offset="0.24878398"/>
-                            <GradientStop Color="#FFFF0000" Offset="0.49649075"/>
-                            <GradientStop Color="#FFFF0000" Offset="0.78771901"/>
-                            <GradientStop Color="#FFFF0000" Offset="1"/>
-                        </GradientStopCollection>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-                <!--Tag feColorMatrix not supported, replaced with empty blur-->
-                <BlurEffect xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="filter4699" Radius="0"/>
-                <!--Tag feColorMatrix not supported, replaced with empty blur-->
-                <BlurEffect xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="filter4699-3" Radius="0"/>
-                <!--Tag feColorMatrix not supported, replaced with empty blur-->
-                <BlurEffect xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="filter4699-4" Radius="0"/>
-            </Canvas.Resources>
-            <!--Unknown tag: sodipodi:namedview-->
-            <Canvas.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform/>
-                    <RotateTransform/>
-                    <TranslateTransform/>
-                </TransformGroup>
-            </Canvas.RenderTransform>
-            <!--Unknown tag: metadata-->
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect4713" Fill="#FF4D8FFF" StrokeThickness="0.70721191" StrokeMiterLimit="4" StrokeLineJoin="Miter" Data="m 643.07157 55.63295 0 12.548829 0.0156 0 0 7.79882 20.73437 0 c 1.49414 5.55639 5.87479 9.87129 11.45313 11.28125 l 0 86.710941 c 6.83659 3e-5 43.67324 -7e-5 50.50976 0 -1.30426 2.34919 -1.99179 4.99074 -1.99804 7.67774 0.003 8.68791 6.98287 15.76236 15.66992 15.88476 l 0 0.008 0.22266 0 39.34179 0 0 -8.21484 -25.44726 0 c 1.30451 -2.34948 1.99194 -4.9904 1.99804 -7.67773 -1.6e-4 -8.77716 -7.1154 -15.89243 -15.89257 -15.89258 -0.14299 0.005 -0.28494 0.0124 -0.42774 0.0215 l 0 -0.0215 -56.27344 0 0 -78.472661 c 5.69264 -1.406 10.0219 -5.78408 11.51368 -11.23437 l 32.39648 0 0 -0.06446 1.95508 0 c -1.22985 2.21517 -1.87888 4.70458 -1.88477 7.23828 0.003 8.19226 6.5859 14.86311 14.77735 14.97852 l 0 0.01 0.20898 0 129.09766 0 0 -7.7461 -115.9961 0 c 1.23009 -2.21544 1.87902 -4.70622 1.88477 -7.24023 -1.5e-4 -8.27642 -6.7099 -14.98619 -14.98633 -14.98633 -0.13483 0.0047 -0.26769 0.01095 -0.40234 0.01953 l 0 -0.01953 -14.6543 0 0 -0.0332 -32.26953 0 c -1.65731 -7.00689 -7.93782 -12.22644 -15.45117 -12.22657 -7.18893 0.009 -13.47681 4.84221 -15.33399 11.78711 l -12.47656 0 0 -12.134759 -8.28516 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Canvas x:Name="g179183" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+        <Canvas x:Name="hemodialysisVisualization" Margin="0,100.789" Width="776.696">
+            <Canvas xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" x:Name="hemodialysisFigure" Width="776.696" Height="396.50001" RenderTransformOrigin="0.5,0.5" d:LayoutOverrides="TopMargin, BottomMargin">
+                <Canvas.Resources>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient41420" MappingMode="Absolute" StartPoint="511,281" EndPoint="511,287">
+                        <LinearGradientBrush.Transform>
+                            <TranslateTransform X="69.873546" Y="-234.59756"/>
+                        </LinearGradientBrush.Transform>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF99BFFF" Offset="0"/>
+                                <GradientStop Color="#FF4D8FFF" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient41414" MappingMode="RelativeToBoundingBox" StartPoint="0,0" EndPoint="1,1">
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF99BFFF" Offset="0"/>
+                                <GradientStop Color="#FF4D8FFF" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient37771" MappingMode="RelativeToBoundingBox" StartPoint="0,0" EndPoint="1,1">
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF0000FF" Offset="0"/>
+                                <GradientStop Color="#FF0000FF" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="dialyzergradient-8" MappingMode="RelativeToBoundingBox" StartPoint="0,0" EndPoint="1,1">
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF0000FF" Offset="0"/>
+                                <GradientStop Color="#FF0000FF" Offset="0.24878398"/>
+                                <GradientStop Color="#FFFF0000" Offset="0.49649075"/>
+                                <GradientStop Color="#FFFF0000" Offset="0.78771901"/>
+                                <GradientStop Color="#FFFF0000" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient3816" MappingMode="Absolute" StartPoint="500,303" EndPoint="500,296">
+                        <LinearGradientBrush.Transform>
+                            <TranslateTransform X="89.872509" Y="-234.59756"/>
+                        </LinearGradientBrush.Transform>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF0000FF" Offset="0"/>
+                                <GradientStop Color="#FF0000FF" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient3818" MappingMode="Absolute" SpreadMethod="Pad" StartPoint="500,296" EndPoint="500,264">
+                        <LinearGradientBrush.Transform>
+                            <TranslateTransform X="89.872509" Y="-234.59756"/>
+                        </LinearGradientBrush.Transform>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF0000FF" Offset="0"/>
+                                <GradientStop Color="#FF0000FF" Offset="0.24878398"/>
+                                <GradientStop Color="#FFFF0000" Offset="0.49649075"/>
+                                <GradientStop Color="#FFFF0000" Offset="0.78771901"/>
+                                <GradientStop Color="#FFFF0000" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5583" MappingMode="Absolute" StartPoint="500,303" EndPoint="500,296">
+                        <LinearGradientBrush.Transform>
+                            <TranslateTransform X="107.09504" Y="-234.59756"/>
+                        </LinearGradientBrush.Transform>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF0000FF" Offset="0"/>
+                                <GradientStop Color="#FF0000FF" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5585" MappingMode="Absolute" SpreadMethod="Pad" StartPoint="500,296" EndPoint="500,264">
+                        <LinearGradientBrush.Transform>
+                            <TranslateTransform X="107.09504" Y="-234.59756"/>
+                        </LinearGradientBrush.Transform>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF0000FF" Offset="0"/>
+                                <GradientStop Color="#FF0000FF" Offset="0.24878398"/>
+                                <GradientStop Color="#FFFF0000" Offset="0.49649075"/>
+                                <GradientStop Color="#FFFF0000" Offset="0.78771901"/>
+                                <GradientStop Color="#FFFF0000" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5589" MappingMode="Absolute" StartPoint="500,303" EndPoint="500,296">
+                        <LinearGradientBrush.Transform>
+                            <TranslateTransform X="102.78941" Y="-234.59756"/>
+                        </LinearGradientBrush.Transform>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF0000FF" Offset="0"/>
+                                <GradientStop Color="#FF0000FF" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5591" MappingMode="Absolute" SpreadMethod="Pad" StartPoint="500,296" EndPoint="500,264">
+                        <LinearGradientBrush.Transform>
+                            <TranslateTransform X="102.78941" Y="-234.59756"/>
+                        </LinearGradientBrush.Transform>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF0000FF" Offset="0"/>
+                                <GradientStop Color="#FF0000FF" Offset="0.24878398"/>
+                                <GradientStop Color="#FFFF0000" Offset="0.49649075"/>
+                                <GradientStop Color="#FFFF0000" Offset="0.78771901"/>
+                                <GradientStop Color="#FFFF0000" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5595" MappingMode="Absolute" StartPoint="500,303" EndPoint="500,296">
+                        <LinearGradientBrush.Transform>
+                            <TranslateTransform X="98.483776" Y="-234.59756"/>
+                        </LinearGradientBrush.Transform>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF0000FF" Offset="0"/>
+                                <GradientStop Color="#FF0000FF" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5597" MappingMode="Absolute" SpreadMethod="Pad" StartPoint="500,296" EndPoint="500,264">
+                        <LinearGradientBrush.Transform>
+                            <TranslateTransform X="98.483776" Y="-234.59756"/>
+                        </LinearGradientBrush.Transform>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF0000FF" Offset="0"/>
+                                <GradientStop Color="#FF0000FF" Offset="0.24878398"/>
+                                <GradientStop Color="#FFFF0000" Offset="0.49649075"/>
+                                <GradientStop Color="#FFFF0000" Offset="0.78771901"/>
+                                <GradientStop Color="#FFFF0000" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5601" MappingMode="Absolute" StartPoint="500,303" EndPoint="500,296">
+                        <LinearGradientBrush.Transform>
+                            <TranslateTransform X="94.178142" Y="-234.59756"/>
+                        </LinearGradientBrush.Transform>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF0000FF" Offset="0"/>
+                                <GradientStop Color="#FF0000FF" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="linearGradient5603" MappingMode="Absolute" SpreadMethod="Pad" StartPoint="500,296" EndPoint="500,264">
+                        <LinearGradientBrush.Transform>
+                            <TranslateTransform X="94.178142" Y="-234.59756"/>
+                        </LinearGradientBrush.Transform>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStopCollection>
+                                <GradientStop Color="#FF0000FF" Offset="0"/>
+                                <GradientStop Color="#FF0000FF" Offset="0.24878398"/>
+                                <GradientStop Color="#FFFF0000" Offset="0.49649075"/>
+                                <GradientStop Color="#FFFF0000" Offset="0.78771901"/>
+                                <GradientStop Color="#FFFF0000" Offset="1"/>
+                            </GradientStopCollection>
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                    <!--Tag feColorMatrix not supported, replaced with empty blur-->
+                    <BlurEffect xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="filter4699" Radius="0"/>
+                    <!--Tag feColorMatrix not supported, replaced with empty blur-->
+                    <BlurEffect xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="filter4699-3" Radius="0"/>
+                    <!--Tag feColorMatrix not supported, replaced with empty blur-->
+                    <BlurEffect xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="filter4699-4" Radius="0"/>
+                </Canvas.Resources>
+                <!--Unknown tag: sodipodi:namedview-->
                 <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="374.17257" Y="-231.73733"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-                <Ellipse xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="267" Canvas.Top="69.8" Width="51" Height="51" x:Name="path5212677" Fill="#FFFFFFFF" StrokeThickness="0.75" StrokeMiterLimit="4"/>
-            </Canvas>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect526469398" Fill="#FF99BFFF" StrokeThickness="0.75000006" StrokeMiterLimit="4" Data="m 643.50511 20.129042 0 8.04297 0.01 0 0 13.765628 7.94922 0 0 -13.765628 44.08594 0 0 -8.04297 -52.04492 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path52624829" Fill="#FFFFFFFF" StrokeThickness="0.75" Stroke="#FF000000" StrokeMiterLimit="4" Data="m 472.24357 108.29863 c -8.77717 1.5e-4 -15.89243 -0.88459 -15.89258 7.89258 l 0 47.49609 c -9.2e-4 8.77793 7.11465 7.89438 15.89258 7.89453 8.77793 -1.5e-4 15.8935 0.8834 15.89258 -7.89453 l 0 -47.49609 c -1.5e-4 -8.77717 -7.11541 -7.89243 -15.89258 -7.89258 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Canvas x:Name="g16490" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="18.10323" Y="-407.02463"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5262482" Fill="#FFFFFFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 518.79492 339.78711 c -8.77717 1.5e-4 -15.89243 -0.88459 -15.89258 7.89258 l 0 47.49609 c -9.2e-4 8.77793 7.11465 7.89438 15.89258 7.89453 8.77793 -1.5e-4 15.8935 0.8834 15.89258 -7.89453 l 0 -47.49609 c -1.5e-4 -8.77717 -7.11541 -7.89243 -15.89258 -7.89258 z"/>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path52624822" Fill="#FFFF0000" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 317.48633 145.00781 0 5.4961 c -7.7e-4 7.3329 4.99192 7.91435 11.74414 7.91015 l 0 20.02344 1.58789 0 0 0.0644 60.28711 0 0 2.31836 -6.28516 11.27344 20.78711 0 -6.28711 -11.27344 0 -10.52734 -6.35937 0 0 -0.006 -55.4336 0 0 -11.87305 c 6.75254 0.004 11.74491 -0.57702 11.74414 -7.91015 l 0 -5.4961 -31.78515 0 z">
-                    <Path.RenderTransform>
-                        <TranslateTransform X="185.41555" Y="244.67125"/>
-                    </Path.RenderTransform>
-                </Path>
-            </Canvas>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path526248866" Fill="#FF99BFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 641.44267 -132.68932 c 1.56417 11.04085 10.11919 19.78572 21.12305 21.5918 l 0 29.355468 3.125 0 0 0.05078 31.76562 0 0 -0.15625 3.34961 0 c 1.85792 6.94412 8.14561 11.776627 15.33398 11.785157 7.19272 -0.003 13.48666 -4.836827 15.34571 -11.785157 l 17.44726 0 0 0.04102 25.04102 0 c 1.85792 6.94413 8.14561 11.776156 15.33398 11.785156 7.19273 -0.003 13.48667 -4.836826 15.34571 -11.785156 l 20.31023 0 0 89.5292974 -95.14225 0 0 8.2890596 c 43.58936 -0.09274 60.37454 0.01713 103.35725 -0.01376 l 0 -106.014006 -3.59535 4.28e-4 0 -0.0059 -24.94336 0 c -1.85783 -6.943767 -8.14402 -11.776157 -15.33203 -11.785157 -7.19272 0.003 -13.48665 4.83683 -15.3457 11.785157 l -5.54688 0 0 -0.04102 -36.94336 0 c -1.8577 -6.94342 -8.14439 -11.775747 -15.33203 -11.785157 -7.19272 0.003 -13.48665 4.836827 -15.3457 11.785157 l -19.0293 0 0 0.160156 -10.98437 0 0 -21.205083 c 11.00081 -1.80495 19.55496 -10.54497 21.12305 -21.58203 l -50.46094 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect52646351" Fill="#FF0000FF" StrokeThickness="0.83181709" StrokeMiterLimit="4" Data="m 246.38281 220.27539 c -8.77717 1.5e-4 -15.89243 7.11541 -15.89258 15.89258 1.5e-4 8.77717 7.11541 15.89243 15.89258 15.89258 7.18837 -0.009 13.47607 -4.84103 15.33399 -11.78516 l 24.04101 0 0 -0.0176 17.47461 0 c -1.29872 2.35102 -1.98139 4.99186 -1.98242 7.67774 0.006 2.68741 0.69515 5.33029 2 7.67968 l -18.72266 0 0 1.94922 -0.0156 0 0 14.98243 8.42578 0 0 -8.7168 23.77734 0 0 -0.0215 c 0.1428 0.009 0.28475 0.0163 0.42774 0.0215 7.18865 -0.009 13.47644 -4.8426 15.33398 -11.78711 l 64.04102 0 0 -0.0664 22.69336 0 0 -5.30468 0.10937 0 0 -5.14454 6.28711 -11.27343 -20.78711 0 6.28516 11.27343 0 2.31641 -14.58789 0 0 -0.0137 -64.02735 0 c -1.85877 -6.94907 -8.15428 -11.78421 -15.34765 -11.78711 -0.14297 0.004 -0.28491 0.008 -0.42774 0.0156 l 0 -0.0156 -32.14257 0 0 0.0176 -22.8418 0 c -1.85923 -6.94903 -8.1542 -11.78281 -15.34766 -11.78516 z" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="183.51878" Y="-162.35338"/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5262488" Fill="#FF0000FF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 272.83203 320.58789 0 5.49609 c -7.6e-4 7.29842 4.94673 7.90864 11.65039 7.91016 l 0 9.8125 -16.01953 0 c -1.85905 -6.94833 -8.15298 -11.78193 -15.3457 -11.78516 -7.18801 0.009 -13.47616 4.84139 -15.33399 11.78516 l -21.69336 0 -3.25 0 -25.77929 0 -30.67969 0 -26.06836 0 0 8.21484 26.05664 0 30.67969 0 25.79101 0 3.25 0 21.68164 0 c 1.85904 6.94833 8.15298 11.78193 15.34571 11.78516 7.18837 -0.009 13.47606 -4.84103 15.33398 -11.78516 l 24.50977 0 0 -5.22265 0.006 0 0 -12.80469 c 6.70401 -0.001 11.65115 -0.61149 11.65039 -7.91016 l 0 -5.49609 z" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="183.51878" Y="-162.35338"/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Canvas x:Name="g3574" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="217.77433" Y="-492.1898"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-                <Ellipse xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="-58.6" Width="53" Canvas.Top="428.6" Height="58.1" x:Name="path3489" Fill="#FFFFFFFF" StrokeThickness="1.5" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat"/>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path34892" Fill="#FFFFFFFF" StrokeThickness="1.5" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 164.15039 453.81836 c -14.521 -4.8e-4 -26.29276 27.48679 -26.29297 61.39453 -3.57677 71.0269 1.10612 70.48506 82.54688 59.66895 -1.90781 8.62234 -2.92793 17.05721 -2.92969 27.458 10e-6 28.84843 1.6705 52.23505 11.13281 52.23633 9.46307 0.002 11.13476 -23.38556 11.13477 -52.23633 -0.005 -19.36451 -1.37598 -30.6926 -0.0493 -40.61017 -0.37282 -16.35919 -47.98853 -13.70482 -65.83546 -10.22855 9.10734 -25.45126 17.77212 -95.73337 -9.70708 -97.68276 z">
-                    <Path.RenderTransform>
-                        <TranslateTransform X="-197.9899" Y="33.335034"/>
-                    </Path.RenderTransform>
-                </Path>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path34890" Fill="#FFFFFFFF" StrokeThickness="1.5" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m -26.995854 495.21408 c 5.29998 0.16018 9.054359 7.99499 21.4805505 27.28616 0.09456 0.1468 0.2359234 0.25845 0.3469537 0.39574 24.5524698 30.36265 22.1137948 30.27341 15.5897018 35.97355 -6.5241044 5.70016 -8.828816 2.40197 -31.215572 -23.33151 -16.914727 -19.44341 -23.214785 -25.67983 -21.222266 -30.50625"/>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect3542" Fill="#FFFFFFFF" StrokeThickness="2" StrokeMiterLimit="4" Data="m -75.25552 489.68659 0 204.55664 12.62695 0 0 -70.26758 58.64258 0 0 70.46485 13.02148 0 0 -70.46485 0.24609 0 0 -13.00781 -71.91015 0 0 -121.28125 -12.62695 0 z"/>
-            </Canvas>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path3218" Fill="#FFC0C0C0" Data="m 221.45667 17.52956 -10.71445 10.086317 -0.52155 1.95432 11.90795 -11.329827 -0.67192 -0.71081 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect2404" Fill="#FFFF0000" StrokeThickness="0.73738003" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 237.55662 -3.1453106 5.66739 5.7843271 -15.3669 15.0562495 -5.66739 -5.784327 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect2410" Fill="#FFFF0000" StrokeThickness="0.73738003" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 224.18955 13.982387 1.68499 1.719753 -3.37643 3.30817 -1.68498 -1.719753 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path3182" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 230.14555 15.218691 c -2.66905 -2.723956 -2.62134 -2.675262 -2.62134 -2.675262" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path3200" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 232.9548 12.466302 C 230.28575 9.7423464 230.33346 9.791041 230.33346 9.791041" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path3202" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 235.76373 9.713914 233.14272 7.0386525" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path3204" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 238.57298 6.9615255 C 235.90393 4.2375694 235.95164 4.286264 235.95164 4.286264" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path32181" Fill="#FFC0C0C0" Data="m 236.34218 39.803999 -14.71463 0.112655 -1.71113 1.078631 16.4353 -0.213185 -0.01 -0.978079 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect24040" Fill="#FF0000FF" StrokeThickness="0.73738003" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 262.20491 35.587518 0.22374 8.094919 -21.50532 0.594412 -0.22375 -8.094918 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect24109" Fill="#FF0000FF" StrokeThickness="0.73738003" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 240.75789 39.060612 0.0665 2.406717 -4.72516 0.130605 -0.0665 -2.406718 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path31827" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 244.28524 44.016425 c -0.10548 -3.812171 -0.1036 -3.744022 -0.1036 -3.744022" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path32002" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 248.21662 43.907813 c -0.10548 -3.812171 -0.1036 -3.744022 -0.1036 -3.744022" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path32028" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 252.14776 43.798979 -0.10336 -3.7438" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path32043" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 256.07914 43.690367 c -0.10548 -3.812171 -0.1036 -3.744022 -0.1036 -3.744022" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5262458" Fill="#FFFF0000" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 265.24219 70.158203 0 8.214844 18.66015 0 c -1.29822 2.35082 -1.97957 4.99227 -1.98046 7.677734 0.006 2.687661 0.69338 5.329919 1.99804 7.679688 l -18.61328 0 0 -0.01563 -31.91992 0 -0.22461 0 0 0.0078 c -8.68628 0.122923 -15.66442 7.197611 -15.66797 15.884761 0.006 2.687 0.6937 5.32855 1.99805 7.67774 l -18.67774 0 0 0.0215 -30.66601 0 0 0.0156 c -0.14283 -0.008 -0.28672 -0.0116 -0.42969 -0.0156 -7.19337 0.003 -13.48693 4.83609 -15.3457 11.78516 l -24.0293 0 0 8.21484 24.04102 0 c 1.85754 6.94451 8.14533 11.77616 15.33398 11.78516 0.14299 -0.005 0.28689 -0.0125 0.42969 -0.0215 l 0 0.0215 30.5 0 0 0.0332 24.04101 0 c 1.85792 6.94413 8.14562 11.77663 15.33399 11.78516 8.77717 -1.5e-4 15.89243 -7.11541 15.89258 -15.89258 -1.5e-4 -8.77717 -7.11541 -15.89243 -15.89258 -15.89258 -7.19346 0.002 -13.48843 4.83613 -15.34766 11.78516 l -22.38476 0 0 -0.0332 -18.67774 0 c 1.30485 -2.34939 1.99205 -4.99032 1.99805 -7.67773 -0.001 -2.68588 -0.68175 -5.32867 -1.98047 -7.67969 l 18.66016 0 0 -0.0195 30.66601 0 0 -0.0215 c 0.14313 0.009 0.28637 0.0163 0.42969 0.0215 8.77717 -1.5e-4 15.89243 -7.11541 15.89258 -15.89258 -0.006 -2.687 -0.6937 -5.32854 -1.99805 -7.67773 l 17.96094 0 0 0.0156 32.14258 0 0 -0.0215 c 0.14312 0.009 0.28636 0.0163 0.42968 0.0215 7.18893 -0.009 13.47681 -4.842204 15.33399 -11.787104 l 36.01953 0 0 6.800781 8.42383 0 0 -14.982422 -8.40235 0 0 -0.03125 -36.02929 0 c -1.85831 -6.949107 -8.15242 -11.783646 -15.34571 -11.787109 -0.14329 0.0033 -0.28653 0.0085 -0.42968 0.01563 l 0 -0.01563 -32.14258 0 z" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="183.51878" Y="-162.35338"/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path51538690" Fill="#FFFFFFFF" StrokeThickness="0.27646205" Stroke="#FFFFFFFF" StrokeMiterLimit="4" Data="m 226.29883 97.449219 a 6.5726871 4.8188889 48.50121 0 0 -3.95313 4.837891 6.5726871 4.8188889 48.50121 0 0 6.32618 6.80664 6.5726871 4.8188889 48.50121 0 0 1.45898 0.0644 2.6163581 2.6163581 0 0 0 -0.14063 0.83789 2.6163581 2.6163581 0 0 0 0.10547 0.73047 4.8188888 6.5726872 18.501207 0 0 -3.125 1.02539 4.8188888 6.5726872 18.501207 0 0 -2.73242 8.88282 4.8188888 6.5726872 18.501207 0 0 6.5586 1.86718 4.8188888 6.5726872 18.501207 0 0 2.73242 -8.88281 4.8188888 6.5726872 18.501207 0 0 -0.50782 -1.04102 2.6163581 2.6163581 0 0 0 1.77735 -1.16015 4.8188889 6.5726872 78.501209 0 0 2.48242 2.25781 4.8188889 6.5726872 78.501209 0 0 9.05859 -2.07422 4.8188889 6.5726872 78.501209 0 0 -1.66211 -6.61328 4.8188889 6.5726872 78.501209 0 0 -9.05859 2.07617 4.8188889 6.5726872 78.501209 0 0 -0.86719 1.43946 2.6163581 2.6163581 0 0 0 -1.75 -1.0918 6.5726871 4.8188889 48.50121 0 0 0.56641 -3.06445 6.5726871 4.8188889 48.50121 0 0 -6.32617 -6.806644 6.5726871 4.8188889 48.50121 0 0 -0.94336 -0.0918 z" Height="25.07" Stretch="Fill" Width="24.769" RenderTransformOrigin="0.405,0.487" Canvas.Top="97.563" Canvas.Left="279.336">
-                <Path.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform/>
                         <SkewTransform/>
                         <RotateTransform/>
                         <TranslateTransform/>
                     </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path321819" Fill="#FFC0C0C0" Stroke="#FF999999" Data="m 536.09166 -49.34878 1.76983 2.80762 -0.34979 -18.45908 -1.60486 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path4160" Fill="#FFFF0000" StrokeThickness="0.21598589" Data="m 540.85771 -38.55385 c 0 1.42459 -1.29438 2.58112 -2.88808 2.58112 -1.59433 0 -2.88808 -1.15653 -2.88808 -2.58112 0 -1.42486 2.38331 -3.06827 2.9969 -6.08772 0.12259 3.04397 2.77917 4.66273 2.77917 6.08772 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path41603" Fill="#FFFF0000" StrokeThickness="0.21598589" Data="m 540.67913 -24.91709 c 0 1.42459 -1.29438 2.58112 -2.88808 2.58112 -1.59433 0 -2.88808 -1.15653 -2.88808 -2.58112 0 -1.42486 2.38331 -3.06827 2.9969 -6.08772 0.12259 3.04397 2.77917 4.66273 2.77917 6.08772 z" RenderTransformOrigin="0.5,0.5" Canvas.Left="-126.537" Canvas.Top="162.062">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path3218194" Fill="#FFC0C0C0" Stroke="#FF999999" Data="m 471.43708 126.23156 1.76983 2.80762 -0.34979 -18.45908 -1.60486 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path41605" Fill="#FF0000FF" StrokeThickness="0.21598589" Data="m 476.20313 137.02649 c 0 1.42459 -1.29438 2.58112 -2.88808 2.58112 -1.59433 0 -2.88808 -1.15653 -2.88808 -2.58112 0 -1.42486 2.38331 -3.06827 2.9969 -6.08772 0.12259 3.04397 2.77917 4.66273 2.77917 6.08772 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path416039" Fill="#FF0000FF" StrokeThickness="0.21598589" Data="m 476.02455 150.66325 c 0 1.42459 -1.29438 2.58112 -2.88808 2.58112 -1.59433 0 -2.88808 -1.15653 -2.88808 -2.58112 0 -1.42486 2.38331 -3.06827 2.9969 -6.08772 0.12259 3.04397 2.77917 4.66273 2.77917 6.08772 z" RenderTransformOrigin="0.5,0.5" Canvas.Left="-126.537" Canvas.Top="162.062">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Canvas x:Name="g17918" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="122.36269" Y="-219.65698"/>
-                    </TransformGroup>
                 </Canvas.RenderTransform>
-                <Ellipse xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="283" Canvas.Top="58.3" Width="51" Height="51" x:Name="path521267" Fill="#FFFFFFFF" StrokeThickness="0.75" StrokeMiterLimit="4"/>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5521267" Fill="#FFFF7F2A" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 284.16405 70.177734 -31.79687 0 c -0.28385 -0.27339 -0.59028 -0.522321 -0.91602 -0.74414 l 0 -17.826172 c 11.00081 -1.80495 19.55496 -10.544967 21.12305 -21.582031 l -50.46093 0 c 1.56417 11.040844 10.11919 19.785717 21.12305 21.591797 l 0 18.039062 c -1.43714 1.103014 -2.39067 2.720243 -2.66016 4.511719 -0.56973 3.823298 2.06743 7.384681 5.89063 7.955078 2.96977 0.440418 5.88969 -1.061973 7.25781 -3.734375 l 30.40234 0">
-                    <Path.RenderTransform>
-                        <TranslateTransform X="61.15615" Y="57.3036"/>
-                    </Path.RenderTransform>
-                </Path>
-                <Path x:Name="path51538690_Copy3" Fill="Black" StrokeThickness="0.27646205" StrokeMiterLimit="4" Data="m 226.29883 97.449219 a 6.5726871 4.8188889 48.50121 0 0 -3.95313 4.837891 6.5726871 4.8188889 48.50121 0 0 6.32618 6.80664 6.5726871 4.8188889 48.50121 0 0 1.45898 0.0644 2.6163581 2.6163581 0 0 0 -0.14063 0.83789 2.6163581 2.6163581 0 0 0 0.10547 0.73047 4.8188888 6.5726872 18.501207 0 0 -3.125 1.02539 4.8188888 6.5726872 18.501207 0 0 -2.73242 8.88282 4.8188888 6.5726872 18.501207 0 0 6.5586 1.86718 4.8188888 6.5726872 18.501207 0 0 2.73242 -8.88281 4.8188888 6.5726872 18.501207 0 0 -0.50782 -1.04102 2.6163581 2.6163581 0 0 0 1.77735 -1.16015 4.8188889 6.5726872 78.501209 0 0 2.48242 2.25781 4.8188889 6.5726872 78.501209 0 0 9.05859 -2.07422 4.8188889 6.5726872 78.501209 0 0 -1.66211 -6.61328 4.8188889 6.5726872 78.501209 0 0 -9.05859 2.07617 4.8188889 6.5726872 78.501209 0 0 -0.86719 1.43946 2.6163581 2.6163581 0 0 0 -1.75 -1.0918 6.5726871 4.8188889 48.50121 0 0 0.56641 -3.06445 6.5726871 4.8188889 48.50121 0 0 -6.32617 -6.806644 6.5726871 4.8188889 48.50121 0 0 -0.94336 -0.0918 z" Canvas.Left="301.497" Canvas.Top="131.616" Height="10.157" Stretch="Fill" Width="10.034" RenderTransformOrigin="0.44,0.472">
+                <!--Unknown tag: metadata-->
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect4713" Fill="#FF4D8FFF" StrokeThickness="0.70721191" StrokeMiterLimit="4" StrokeLineJoin="Miter" Data="m 643.07157 55.63295 0 12.548829 0.0156 0 0 7.79882 20.73437 0 c 1.49414 5.55639 5.87479 9.87129 11.45313 11.28125 l 0 86.710941 c 6.83659 3e-5 43.67324 -7e-5 50.50976 0 -1.30426 2.34919 -1.99179 4.99074 -1.99804 7.67774 0.003 8.68791 6.98287 15.76236 15.66992 15.88476 l 0 0.008 0.22266 0 39.34179 0 0 -8.21484 -25.44726 0 c 1.30451 -2.34948 1.99194 -4.9904 1.99804 -7.67773 -1.6e-4 -8.77716 -7.1154 -15.89243 -15.89257 -15.89258 -0.14299 0.005 -0.28494 0.0124 -0.42774 0.0215 l 0 -0.0215 -56.27344 0 0 -78.472661 c 5.69264 -1.406 10.0219 -5.78408 11.51368 -11.23437 l 32.39648 0 0 -0.06446 1.95508 0 c -1.22985 2.21517 -1.87888 4.70458 -1.88477 7.23828 0.003 8.19226 6.5859 14.86311 14.77735 14.97852 l 0 0.01 0.20898 0 129.09766 0 0 -7.7461 -115.9961 0 c 1.23009 -2.21544 1.87902 -4.70622 1.88477 -7.24023 -1.5e-4 -8.27642 -6.7099 -14.98619 -14.98633 -14.98633 -0.13483 0.0047 -0.26769 0.01095 -0.40234 0.01953 l 0 -0.01953 -14.6543 0 0 -0.0332 -32.26953 0 c -1.65731 -7.00689 -7.93782 -12.22644 -15.45117 -12.22657 -7.18893 0.009 -13.47681 4.84221 -15.33399 11.78711 l -12.47656 0 0 -12.134759 -8.28516 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Canvas x:Name="g179183" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="374.17257" Y="-231.73733"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                    <Ellipse xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="267" Canvas.Top="69.8" Width="51" Height="51" x:Name="path5212677" Fill="#FFFFFFFF" StrokeThickness="0.75" StrokeMiterLimit="4"/>
+                </Canvas>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect526469398" Fill="#FF99BFFF" StrokeThickness="0.75000006" StrokeMiterLimit="4" Data="m 643.50511 20.129042 0 8.04297 0.01 0 0 13.765628 7.94922 0 0 -13.765628 44.08594 0 0 -8.04297 -52.04492 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path52624829" Fill="#FFFFFFFF" StrokeThickness="0.75" Stroke="#FF000000" StrokeMiterLimit="4" Data="m 472.24357 108.29863 c -8.77717 1.5e-4 -15.89243 -0.88459 -15.89258 7.89258 l 0 47.49609 c -9.2e-4 8.77793 7.11465 7.89438 15.89258 7.89453 8.77793 -1.5e-4 15.8935 0.8834 15.89258 -7.89453 l 0 -47.49609 c -1.5e-4 -8.77717 -7.11541 -7.89243 -15.89258 -7.89258 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Canvas x:Name="g16490" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="18.10323" Y="-407.02463"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5262482" Fill="#FFFFFFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 518.79492 339.78711 c -8.77717 1.5e-4 -15.89243 -0.88459 -15.89258 7.89258 l 0 47.49609 c -9.2e-4 8.77793 7.11465 7.89438 15.89258 7.89453 8.77793 -1.5e-4 15.8935 0.8834 15.89258 -7.89453 l 0 -47.49609 c -1.5e-4 -8.77717 -7.11541 -7.89243 -15.89258 -7.89258 z"/>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path52624822" Fill="#FFFF0000" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 317.48633 145.00781 0 5.4961 c -7.7e-4 7.3329 4.99192 7.91435 11.74414 7.91015 l 0 20.02344 1.58789 0 0 0.0644 60.28711 0 0 2.31836 -6.28516 11.27344 20.78711 0 -6.28711 -11.27344 0 -10.52734 -6.35937 0 0 -0.006 -55.4336 0 0 -11.87305 c 6.75254 0.004 11.74491 -0.57702 11.74414 -7.91015 l 0 -5.4961 -31.78515 0 z">
+                        <Path.RenderTransform>
+                            <TranslateTransform X="185.41555" Y="244.67125"/>
+                        </Path.RenderTransform>
+                    </Path>
+                </Canvas>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path526248866" Fill="#FF99BFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 641.44267 -132.68932 c 1.56417 11.04085 10.11919 19.78572 21.12305 21.5918 l 0 29.355468 3.125 0 0 0.05078 31.76562 0 0 -0.15625 3.34961 0 c 1.85792 6.94412 8.14561 11.776627 15.33398 11.785157 7.19272 -0.003 13.48666 -4.836827 15.34571 -11.785157 l 17.44726 0 0 0.04102 25.04102 0 c 1.85792 6.94413 8.14561 11.776156 15.33398 11.785156 7.19273 -0.003 13.48667 -4.836826 15.34571 -11.785156 l 20.31023 0 0 89.5292974 -95.14225 0 0 8.2890596 c 43.58936 -0.09274 60.37454 0.01713 103.35725 -0.01376 l 0 -106.014006 -3.59535 4.28e-4 0 -0.0059 -24.94336 0 c -1.85783 -6.943767 -8.14402 -11.776157 -15.33203 -11.785157 -7.19272 0.003 -13.48665 4.83683 -15.3457 11.785157 l -5.54688 0 0 -0.04102 -36.94336 0 c -1.8577 -6.94342 -8.14439 -11.775747 -15.33203 -11.785157 -7.19272 0.003 -13.48665 4.836827 -15.3457 11.785157 l -19.0293 0 0 0.160156 -10.98437 0 0 -21.205083 c 11.00081 -1.80495 19.55496 -10.54497 21.12305 -21.58203 l -50.46094 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect52646351" Fill="#FF0000FF" StrokeThickness="0.83181709" StrokeMiterLimit="4" Data="m 246.38281 220.27539 c -8.77717 1.5e-4 -15.89243 7.11541 -15.89258 15.89258 1.5e-4 8.77717 7.11541 15.89243 15.89258 15.89258 7.18837 -0.009 13.47607 -4.84103 15.33399 -11.78516 l 24.04101 0 0 -0.0176 17.47461 0 c -1.29872 2.35102 -1.98139 4.99186 -1.98242 7.67774 0.006 2.68741 0.69515 5.33029 2 7.67968 l -18.72266 0 0 1.94922 -0.0156 0 0 14.98243 8.42578 0 0 -8.7168 23.77734 0 0 -0.0215 c 0.1428 0.009 0.28475 0.0163 0.42774 0.0215 7.18865 -0.009 13.47644 -4.8426 15.33398 -11.78711 l 64.04102 0 0 -0.0664 22.69336 0 0 -5.30468 0.10937 0 0 -5.14454 6.28711 -11.27343 -20.78711 0 6.28516 11.27343 0 2.31641 -14.58789 0 0 -0.0137 -64.02735 0 c -1.85877 -6.94907 -8.15428 -11.78421 -15.34765 -11.78711 -0.14297 0.004 -0.28491 0.008 -0.42774 0.0156 l 0 -0.0156 -32.14257 0 0 0.0176 -22.8418 0 c -1.85923 -6.94903 -8.1542 -11.78281 -15.34766 -11.78516 z" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
                     <Path.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform/>
                             <SkewTransform/>
                             <RotateTransform/>
-                            <TranslateTransform X="2.507" Y="-4.046"/>
+                            <TranslateTransform X="183.51878" Y="-162.35338"/>
                         </TransformGroup>
                     </Path.RenderTransform>
                 </Path>
-            </Canvas>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect526463" Fill="{StaticResource linearGradient41420}" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 643.51758 33.72666 -32.13036 0 0 -3.98633 -25.31055 0 0 38.16016 25.31055 0 0 -4.04688 31.6875 0 0 -8.21484 -31.6875 0 0 -13.69922 32.13036 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path569523" Fill="{StaticResource linearGradient3816}" StrokeThickness="2.25" Stroke="{StaticResource linearGradient3818}" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 590.12457 29.33879 0 38.99455" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="use37903" Fill="{StaticResource linearGradient5601}" StrokeThickness="2.25" Stroke="{StaticResource linearGradient5603}" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 594.4302 29.33879 0 38.99455" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="use37907" Fill="{StaticResource linearGradient5595}" StrokeThickness="2.25" Stroke="{StaticResource linearGradient5597}" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 598.73584 29.33879 0 38.99455" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="use37911" Fill="{StaticResource linearGradient5589}" StrokeThickness="2.25" Stroke="{StaticResource linearGradient5591}" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 603.04147 29.33879 0 38.99455" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="use37913" Fill="{StaticResource linearGradient5583}" StrokeThickness="2.25" Stroke="{StaticResource linearGradient5585}" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 607.3471 29.33879 0 38.99455" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Canvas x:Name="g38409" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleX="-1"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="1321.6088" Y="-359.34863"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-                <Canvas x:Name="g1791836">
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5262488" Fill="#FF0000FF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 272.83203 320.58789 0 5.49609 c -7.6e-4 7.29842 4.94673 7.90864 11.65039 7.91016 l 0 9.8125 -16.01953 0 c -1.85905 -6.94833 -8.15298 -11.78193 -15.3457 -11.78516 -7.18801 0.009 -13.47616 4.84139 -15.33399 11.78516 l -21.69336 0 -3.25 0 -25.77929 0 -30.67969 0 -26.06836 0 0 8.21484 26.05664 0 30.67969 0 25.79101 0 3.25 0 21.68164 0 c 1.85904 6.94833 8.15298 11.78193 15.34571 11.78516 7.18837 -0.009 13.47606 -4.84103 15.33398 -11.78516 l 24.50977 0 0 -5.22265 0.006 0 0 -12.80469 c 6.70401 -0.001 11.65115 -0.61149 11.65039 -7.91016 l 0 -5.49609 z" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="183.51878" Y="-162.35338"/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Canvas x:Name="g3574" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
                     <Canvas.RenderTransform>
-                        <TranslateTransform X="223.97885" Y="126.83464"/>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="217.77433" Y="-492.1898"/>
+                        </TransformGroup>
                     </Canvas.RenderTransform>
-                    <Canvas x:Name="g38405">
-                        <Ellipse xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="283" Canvas.Top="70.5" Width="51" Height="51" x:Name="path5212674" Fill="#FFFFFFFF" StrokeThickness="0.75" StrokeMiterLimit="4"/>
-                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5212673" Fill="#FFFF7F2A" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 312.60715 131.56055 2.6e-4 -10.40038 c 11.00081 -1.80495 19.55496 -10.54497 21.12305 -21.582035 l -50.46094 0 10e-6 -1e-5 c 1.56417 11.040845 10.11919 19.785715 21.12305 21.591795 l 0 10.39063"/>
+                    <Ellipse xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="-58.6" Width="53" Canvas.Top="428.6" Height="58.1" x:Name="path3489" Fill="#FFFFFFFF" StrokeThickness="1.5" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat"/>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path34892" Fill="#FFFFFFFF" StrokeThickness="1.5" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 164.15039 453.81836 c -14.521 -4.8e-4 -26.29276 27.48679 -26.29297 61.39453 -3.57677 71.0269 1.10612 70.48506 82.54688 59.66895 -1.90781 8.62234 -2.92793 17.05721 -2.92969 27.458 10e-6 28.84843 1.6705 52.23505 11.13281 52.23633 9.46307 0.002 11.13476 -23.38556 11.13477 -52.23633 -0.005 -19.36451 -1.37598 -30.6926 -0.0493 -40.61017 -0.37282 -16.35919 -47.98853 -13.70482 -65.83546 -10.22855 9.10734 -25.45126 17.77212 -95.73337 -9.70708 -97.68276 z">
+                        <Path.RenderTransform>
+                            <TranslateTransform X="-197.9899" Y="33.335034"/>
+                        </Path.RenderTransform>
+                    </Path>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path34890" Fill="#FFFFFFFF" StrokeThickness="1.5" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m -26.995854 495.21408 c 5.29998 0.16018 9.054359 7.99499 21.4805505 27.28616 0.09456 0.1468 0.2359234 0.25845 0.3469537 0.39574 24.5524698 30.36265 22.1137948 30.27341 15.5897018 35.97355 -6.5241044 5.70016 -8.828816 2.40197 -31.215572 -23.33151 -16.914727 -19.44341 -23.214785 -25.67983 -21.222266 -30.50625"/>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect3542" Fill="#FFFFFFFF" StrokeThickness="2" StrokeMiterLimit="4" Data="m -75.25552 489.68659 0 204.55664 12.62695 0 0 -70.26758 58.64258 0 0 70.46485 13.02148 0 0 -70.46485 0.24609 0 0 -13.00781 -71.91015 0 0 -121.28125 -12.62695 0 z"/>
+                </Canvas>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path3218" Fill="#FFC0C0C0" Data="m 221.45667 17.52956 -10.71445 10.086317 -0.52155 1.95432 11.90795 -11.329827 -0.67192 -0.71081 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect2404" Fill="#FFFF0000" StrokeThickness="0.73738003" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 237.55662 -3.1453106 5.66739 5.7843271 -15.3669 15.0562495 -5.66739 -5.784327 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect2410" Fill="#FFFF0000" StrokeThickness="0.73738003" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 224.18955 13.982387 1.68499 1.719753 -3.37643 3.30817 -1.68498 -1.719753 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path3182" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 230.14555 15.218691 c -2.66905 -2.723956 -2.62134 -2.675262 -2.62134 -2.675262" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path3200" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 232.9548 12.466302 C 230.28575 9.7423464 230.33346 9.791041 230.33346 9.791041" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path3202" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 235.76373 9.713914 233.14272 7.0386525" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path3204" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 238.57298 6.9615255 C 235.90393 4.2375694 235.95164 4.286264 235.95164 4.286264" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path32181" Fill="#FFC0C0C0" Data="m 236.34218 39.803999 -14.71463 0.112655 -1.71113 1.078631 16.4353 -0.213185 -0.01 -0.978079 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect24040" Fill="#FF0000FF" StrokeThickness="0.73738003" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 262.20491 35.587518 0.22374 8.094919 -21.50532 0.594412 -0.22375 -8.094918 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect24109" Fill="#FF0000FF" StrokeThickness="0.73738003" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 240.75789 39.060612 0.0665 2.406717 -4.72516 0.130605 -0.0665 -2.406718 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path31827" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 244.28524 44.016425 c -0.10548 -3.812171 -0.1036 -3.744022 -0.1036 -3.744022" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path32002" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 248.21662 43.907813 c -0.10548 -3.812171 -0.1036 -3.744022 -0.1036 -3.744022" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path32028" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 252.14776 43.798979 -0.10336 -3.7438" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path32043" StrokeThickness="0.73737997" Stroke="#FFFFFFFF" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 256.07914 43.690367 c -0.10548 -3.812171 -0.1036 -3.744022 -0.1036 -3.744022" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5262458" Fill="#FFFF0000" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 265.24219 70.158203 0 8.214844 18.66015 0 c -1.29822 2.35082 -1.97957 4.99227 -1.98046 7.677734 0.006 2.687661 0.69338 5.329919 1.99804 7.679688 l -18.61328 0 0 -0.01563 -31.91992 0 -0.22461 0 0 0.0078 c -8.68628 0.122923 -15.66442 7.197611 -15.66797 15.884761 0.006 2.687 0.6937 5.32855 1.99805 7.67774 l -18.67774 0 0 0.0215 -30.66601 0 0 0.0156 c -0.14283 -0.008 -0.28672 -0.0116 -0.42969 -0.0156 -7.19337 0.003 -13.48693 4.83609 -15.3457 11.78516 l -24.0293 0 0 8.21484 24.04102 0 c 1.85754 6.94451 8.14533 11.77616 15.33398 11.78516 0.14299 -0.005 0.28689 -0.0125 0.42969 -0.0215 l 0 0.0215 30.5 0 0 0.0332 24.04101 0 c 1.85792 6.94413 8.14562 11.77663 15.33399 11.78516 8.77717 -1.5e-4 15.89243 -7.11541 15.89258 -15.89258 -1.5e-4 -8.77717 -7.11541 -15.89243 -15.89258 -15.89258 -7.19346 0.002 -13.48843 4.83613 -15.34766 11.78516 l -22.38476 0 0 -0.0332 -18.67774 0 c 1.30485 -2.34939 1.99205 -4.99032 1.99805 -7.67773 -0.001 -2.68588 -0.68175 -5.32867 -1.98047 -7.67969 l 18.66016 0 0 -0.0195 30.66601 0 0 -0.0215 c 0.14313 0.009 0.28637 0.0163 0.42969 0.0215 8.77717 -1.5e-4 15.89243 -7.11541 15.89258 -15.89258 -0.006 -2.687 -0.6937 -5.32854 -1.99805 -7.67773 l 17.96094 0 0 0.0156 32.14258 0 0 -0.0215 c 0.14312 0.009 0.28636 0.0163 0.42968 0.0215 7.18893 -0.009 13.47681 -4.842204 15.33399 -11.787104 l 36.01953 0 0 6.800781 8.42383 0 0 -14.982422 -8.40235 0 0 -0.03125 -36.02929 0 c -1.85831 -6.949107 -8.15242 -11.783646 -15.34571 -11.787109 -0.14329 0.0033 -0.28653 0.0085 -0.42968 0.01563 l 0 -0.01563 -32.14258 0 z" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="183.51878" Y="-162.35338"/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path51538690" Fill="#FFFFFFFF" StrokeThickness="0.27646205" Stroke="#FFFFFFFF" StrokeMiterLimit="4" Data="m 226.29883 97.449219 a 6.5726871 4.8188889 48.50121 0 0 -3.95313 4.837891 6.5726871 4.8188889 48.50121 0 0 6.32618 6.80664 6.5726871 4.8188889 48.50121 0 0 1.45898 0.0644 2.6163581 2.6163581 0 0 0 -0.14063 0.83789 2.6163581 2.6163581 0 0 0 0.10547 0.73047 4.8188888 6.5726872 18.501207 0 0 -3.125 1.02539 4.8188888 6.5726872 18.501207 0 0 -2.73242 8.88282 4.8188888 6.5726872 18.501207 0 0 6.5586 1.86718 4.8188888 6.5726872 18.501207 0 0 2.73242 -8.88281 4.8188888 6.5726872 18.501207 0 0 -0.50782 -1.04102 2.6163581 2.6163581 0 0 0 1.77735 -1.16015 4.8188889 6.5726872 78.501209 0 0 2.48242 2.25781 4.8188889 6.5726872 78.501209 0 0 9.05859 -2.07422 4.8188889 6.5726872 78.501209 0 0 -1.66211 -6.61328 4.8188889 6.5726872 78.501209 0 0 -9.05859 2.07617 4.8188889 6.5726872 78.501209 0 0 -0.86719 1.43946 2.6163581 2.6163581 0 0 0 -1.75 -1.0918 6.5726871 4.8188889 48.50121 0 0 0.56641 -3.06445 6.5726871 4.8188889 48.50121 0 0 -6.32617 -6.806644 6.5726871 4.8188889 48.50121 0 0 -0.94336 -0.0918 z" Height="25.07" Stretch="Fill" Width="24.769" RenderTransformOrigin="0.405,0.487" Canvas.Top="97.563" Canvas.Left="279.336">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path321819" Fill="#FFC0C0C0" Stroke="#FF999999" Data="m 536.09166 -49.34878 1.76983 2.80762 -0.34979 -18.45908 -1.60486 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path4160" Fill="#FFFF0000" StrokeThickness="0.21598589" Data="m 540.85771 -38.55385 c 0 1.42459 -1.29438 2.58112 -2.88808 2.58112 -1.59433 0 -2.88808 -1.15653 -2.88808 -2.58112 0 -1.42486 2.38331 -3.06827 2.9969 -6.08772 0.12259 3.04397 2.77917 4.66273 2.77917 6.08772 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path41603" Fill="#FFFF0000" StrokeThickness="0.21598589" Data="m 540.67913 -24.91709 c 0 1.42459 -1.29438 2.58112 -2.88808 2.58112 -1.59433 0 -2.88808 -1.15653 -2.88808 -2.58112 0 -1.42486 2.38331 -3.06827 2.9969 -6.08772 0.12259 3.04397 2.77917 4.66273 2.77917 6.08772 z" RenderTransformOrigin="0.5,0.5" Canvas.Left="-126.537" Canvas.Top="162.062">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path3218194" Fill="#FFC0C0C0" Stroke="#FF999999" Data="m 471.43708 126.23156 1.76983 2.80762 -0.34979 -18.45908 -1.60486 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path41605" Fill="#FF0000FF" StrokeThickness="0.21598589" Data="m 476.20313 137.02649 c 0 1.42459 -1.29438 2.58112 -2.88808 2.58112 -1.59433 0 -2.88808 -1.15653 -2.88808 -2.58112 0 -1.42486 2.38331 -3.06827 2.9969 -6.08772 0.12259 3.04397 2.77917 4.66273 2.77917 6.08772 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path416039" Fill="#FF0000FF" StrokeThickness="0.21598589" Data="m 476.02455 150.66325 c 0 1.42459 -1.29438 2.58112 -2.88808 2.58112 -1.59433 0 -2.88808 -1.15653 -2.88808 -2.58112 0 -1.42486 2.38331 -3.06827 2.9969 -6.08772 0.12259 3.04397 2.77917 4.66273 2.77917 6.08772 z" RenderTransformOrigin="0.5,0.5" Canvas.Left="-126.537" Canvas.Top="162.062">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Canvas x:Name="g17918" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="122.36269" Y="-219.65698"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                    <Ellipse xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="283" Canvas.Top="58.3" Width="51" Height="51" x:Name="path521267" Fill="#FFFFFFFF" StrokeThickness="0.75" StrokeMiterLimit="4"/>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5521267" Fill="#FFFF7F2A" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 284.16405 70.177734 -31.79687 0 c -0.28385 -0.27339 -0.59028 -0.522321 -0.91602 -0.74414 l 0 -17.826172 c 11.00081 -1.80495 19.55496 -10.544967 21.12305 -21.582031 l -50.46093 0 c 1.56417 11.040844 10.11919 19.785717 21.12305 21.591797 l 0 18.039062 c -1.43714 1.103014 -2.39067 2.720243 -2.66016 4.511719 -0.56973 3.823298 2.06743 7.384681 5.89063 7.955078 2.96977 0.440418 5.88969 -1.061973 7.25781 -3.734375 l 30.40234 0">
+                        <Path.RenderTransform>
+                            <TranslateTransform X="61.15615" Y="57.3036"/>
+                        </Path.RenderTransform>
+                    </Path>
+                    <Path x:Name="path51538690_Copy3" Fill="Black" StrokeThickness="0.27646205" StrokeMiterLimit="4" Data="m 226.29883 97.449219 a 6.5726871 4.8188889 48.50121 0 0 -3.95313 4.837891 6.5726871 4.8188889 48.50121 0 0 6.32618 6.80664 6.5726871 4.8188889 48.50121 0 0 1.45898 0.0644 2.6163581 2.6163581 0 0 0 -0.14063 0.83789 2.6163581 2.6163581 0 0 0 0.10547 0.73047 4.8188888 6.5726872 18.501207 0 0 -3.125 1.02539 4.8188888 6.5726872 18.501207 0 0 -2.73242 8.88282 4.8188888 6.5726872 18.501207 0 0 6.5586 1.86718 4.8188888 6.5726872 18.501207 0 0 2.73242 -8.88281 4.8188888 6.5726872 18.501207 0 0 -0.50782 -1.04102 2.6163581 2.6163581 0 0 0 1.77735 -1.16015 4.8188889 6.5726872 78.501209 0 0 2.48242 2.25781 4.8188889 6.5726872 78.501209 0 0 9.05859 -2.07422 4.8188889 6.5726872 78.501209 0 0 -1.66211 -6.61328 4.8188889 6.5726872 78.501209 0 0 -9.05859 2.07617 4.8188889 6.5726872 78.501209 0 0 -0.86719 1.43946 2.6163581 2.6163581 0 0 0 -1.75 -1.0918 6.5726871 4.8188889 48.50121 0 0 0.56641 -3.06445 6.5726871 4.8188889 48.50121 0 0 -6.32617 -6.806644 6.5726871 4.8188889 48.50121 0 0 -0.94336 -0.0918 z" Canvas.Left="301.497" Canvas.Top="131.616" Height="10.157" Stretch="Fill" Width="10.034" RenderTransformOrigin="0.44,0.472">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform/>
+                                <RotateTransform/>
+                                <TranslateTransform X="2.507" Y="-4.046"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                    </Path>
+                </Canvas>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect526463" Fill="{StaticResource linearGradient41420}" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 643.51758 33.72666 -32.13036 0 0 -3.98633 -25.31055 0 0 38.16016 25.31055 0 0 -4.04688 31.6875 0 0 -8.21484 -31.6875 0 0 -13.69922 32.13036 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path569523" Fill="{StaticResource linearGradient3816}" StrokeThickness="2.25" Stroke="{StaticResource linearGradient3818}" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 590.12457 29.33879 0 38.99455" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="use37903" Fill="{StaticResource linearGradient5601}" StrokeThickness="2.25" Stroke="{StaticResource linearGradient5603}" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 594.4302 29.33879 0 38.99455" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="use37907" Fill="{StaticResource linearGradient5595}" StrokeThickness="2.25" Stroke="{StaticResource linearGradient5597}" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 598.73584 29.33879 0 38.99455" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="use37911" Fill="{StaticResource linearGradient5589}" StrokeThickness="2.25" Stroke="{StaticResource linearGradient5591}" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 603.04147 29.33879 0 38.99455" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="use37913" Fill="{StaticResource linearGradient5583}" StrokeThickness="2.25" Stroke="{StaticResource linearGradient5585}" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 607.3471 29.33879 0 38.99455" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Canvas x:Name="g38409" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="-1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="1321.6088" Y="-359.34863"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                    <Canvas x:Name="g1791836">
+                        <Canvas.RenderTransform>
+                            <TranslateTransform X="223.97885" Y="126.83464"/>
+                        </Canvas.RenderTransform>
+                        <Canvas x:Name="g38405">
+                            <Ellipse xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="283" Canvas.Top="70.5" Width="51" Height="51" x:Name="path5212674" Fill="#FFFFFFFF" StrokeThickness="0.75" StrokeMiterLimit="4"/>
+                            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5212673" Fill="#FFFF7F2A" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 312.60715 131.56055 2.6e-4 -10.40038 c 11.00081 -1.80495 19.55496 -10.54497 21.12305 -21.582035 l -50.46094 0 10e-6 -1e-5 c 1.56417 11.040845 10.11919 19.785715 21.12305 21.591795 l 0 10.39063"/>
+                        </Canvas>
                     </Canvas>
                 </Canvas>
-            </Canvas>
-            <Canvas x:Name="g5243" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleY="0.64003771" ScaleX="1.0071466"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="-4.8193166" Y="25.864169"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5208069" StrokeThickness="0.5" Stroke="#FF458FFF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 678.56968 -39.286875 c 0 0 -3.2852 14.814808 -5.05077 18.182746 -1.76557 3.367938 -2.52538 3.030458 -2.52538 3.030458"/>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5210647" StrokeThickness="0.5" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 678.0646 -36.802104 c 0 0 -0.18182 11.724168 -2.0203 15.152289 -1.83848 3.428121 -6.06092 5.3033 -6.06092 5.3033"/>
-                <Canvas x:Name="g1527218">
+                <Canvas x:Name="g5243" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
                     <Canvas.RenderTransform>
-                        <MatrixTransform Matrix="-0.5 0 0 0.5 838.34927 -65.053411"/>
+                        <TransformGroup>
+                            <ScaleTransform ScaleY="0.64003771" ScaleX="1.0071466"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="-4.8193166" Y="25.864169"/>
+                        </TransformGroup>
                     </Canvas.RenderTransform>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1527698" StrokeThickness="1" Stroke="#FF1874FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.89591 58.577066 c 0 0 4.77793 16.772266 8.57093 24.946018 1.16671 2.489676 2.36277 4.599684 3.23569 6.041186 2.22319 5.044884 2.67223 5.883364 2.67223 5.883364"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1527802" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.06426 58.058453 c 0 0 3.67437 18.441283 7.43836 26.285658 1.20067 2.474459 2.57293 4.566728 3.70559 6.053013 2.53866 4.522218 3.75581 5.542049 3.75581 5.542049"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1528060" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.23262 57.53984 c 0 0 2.5708 20.1103 6.30578 27.625297 1.23463 2.459244 2.7831 4.533772 4.17548 6.06484 2.85413 3.999554 4.83939 5.200736 4.83939 5.200736"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1528212" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.40098 57.021227 c 0 0 1.46722 21.779318 5.17319 28.964937 1.2686 2.444027 2.99328 4.500815 4.64539 6.076667 3.1696 3.476889 5.92296 4.859421 5.92296 4.859421"/>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5208069" StrokeThickness="0.5" Stroke="#FF458FFF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 678.56968 -39.286875 c 0 0 -3.2852 14.814808 -5.05077 18.182746 -1.76557 3.367938 -2.52538 3.030458 -2.52538 3.030458"/>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5210647" StrokeThickness="0.5" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 678.0646 -36.802104 c 0 0 -0.18182 11.724168 -2.0203 15.152289 -1.83848 3.428121 -6.06092 5.3033 -6.06092 5.3033"/>
+                    <Canvas x:Name="g1527218">
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="-0.5 0 0 0.5 838.34927 -65.053411"/>
+                        </Canvas.RenderTransform>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1527698" StrokeThickness="1" Stroke="#FF1874FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.89591 58.577066 c 0 0 4.77793 16.772266 8.57093 24.946018 1.16671 2.489676 2.36277 4.599684 3.23569 6.041186 2.22319 5.044884 2.67223 5.883364 2.67223 5.883364"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1527802" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.06426 58.058453 c 0 0 3.67437 18.441283 7.43836 26.285658 1.20067 2.474459 2.57293 4.566728 3.70559 6.053013 2.53866 4.522218 3.75581 5.542049 3.75581 5.542049"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1528060" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.23262 57.53984 c 0 0 2.5708 20.1103 6.30578 27.625297 1.23463 2.459244 2.7831 4.533772 4.17548 6.06484 2.85413 3.999554 4.83939 5.200736 4.83939 5.200736"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1528212" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.40098 57.021227 c 0 0 1.46722 21.779318 5.17319 28.964937 1.2686 2.444027 2.99328 4.500815 4.64539 6.076667 3.1696 3.476889 5.92296 4.859421 5.92296 4.859421"/>
+                    </Canvas>
+                    <Canvas x:Name="g1528415">
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="-0.5 0 0 0.5 838.34927 -65.053411"/>
+                        </Canvas.RenderTransform>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1528664" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.40098 55.674357 c 0 0 0.9648 22.524528 4.60006 30.094196 1.25089 2.559059 2.99468 4.699673 4.72168 6.301255 3.49006 3.579985 6.67234 4.768265 6.67234 4.768265"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1528873" StrokeThickness="1" Stroke="#FF005CE7" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.23262 54.8461 c 0 0 1.56596 21.600722 5.15951 29.883816 1.19698 2.685121 2.77937 4.924461 4.31819 6.505643 3.49827 4.211163 6.34803 5.026795 6.34803 5.026795"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1529078" StrokeThickness="1" Stroke="#FF6EA8FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.06426 54.017843 c 0 0 2.16711 20.676915 5.71896 29.673435 1.14308 2.811185 2.56405 5.149251 3.9147 6.710032 3.50649 4.842341 6.02371 5.285325 6.02371 5.285325"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1529210" StrokeThickness="1" Stroke="#FF005CE7" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.89591 53.189586 c 0 0 2.76825 19.753108 6.2784 29.463054 1.08917 2.937249 2.34874 5.374041 3.51121 6.914421 3.51471 5.47352 5.69939 5.543856 5.69939 5.543856"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1529449" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.72755 52.361329 c 0 0 3.3694 18.829302 6.83785 29.252674 1.03526 3.063311 2.13342 5.598829 3.10772 7.118809 3.52292 6.104698 5.37508 5.802386 5.37508 5.802386"/>
+                    </Canvas>
                 </Canvas>
-                <Canvas x:Name="g1528415">
+                <Canvas x:Name="g15385791" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
                     <Canvas.RenderTransform>
-                        <MatrixTransform Matrix="-0.5 0 0 0.5 838.34927 -65.053411"/>
+                        <TransformGroup>
+                            <ScaleTransform ScaleY="0.5" ScaleX="0.5"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="618.71137" Y="167.07944"/>
+                        </TransformGroup>
                     </Canvas.RenderTransform>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1528664" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.40098 55.674357 c 0 0 0.9648 22.524528 4.60006 30.094196 1.25089 2.559059 2.99468 4.699673 4.72168 6.301255 3.49006 3.579985 6.67234 4.768265 6.67234 4.768265"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1528873" StrokeThickness="1" Stroke="#FF005CE7" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.23262 54.8461 c 0 0 1.56596 21.600722 5.15951 29.883816 1.19698 2.685121 2.77937 4.924461 4.31819 6.505643 3.49827 4.211163 6.34803 5.026795 6.34803 5.026795"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1529078" StrokeThickness="1" Stroke="#FF6EA8FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.06426 54.017843 c 0 0 2.16711 20.676915 5.71896 29.673435 1.14308 2.811185 2.56405 5.149251 3.9147 6.710032 3.50649 4.842341 6.02371 5.285325 6.02371 5.285325"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1529210" StrokeThickness="1" Stroke="#FF005CE7" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.89591 53.189586 c 0 0 2.76825 19.753108 6.2784 29.463054 1.08917 2.937249 2.34874 5.374041 3.51121 6.914421 3.51471 5.47352 5.69939 5.543856 5.69939 5.543856"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1529449" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.72755 52.361329 c 0 0 3.3694 18.829302 6.83785 29.252674 1.03526 3.063311 2.13342 5.598829 3.10772 7.118809 3.52292 6.104698 5.37508 5.802386 5.37508 5.802386"/>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path520806937" StrokeThickness="1" Stroke="#FF458FFF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.55919 51.533072 c 0 0 6.57039 29.629615 10.10153 36.365491 3.53114 6.735876 5.05076 6.060916 5.05076 6.060916"/>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path521064896" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.56934 56.502614 c 0 0 0.36365 23.448335 4.04061 30.304577 3.67696 6.856242 12.12183 10.606601 12.12183 10.606601"/>
+                    <Canvas x:Name="g15272104">
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path15276944" StrokeThickness="1" Stroke="#FF1874FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.89591 58.577066 c 0 0 4.77793 16.772266 8.57093 24.946018 1.16671 2.489676 2.36277 4.599684 3.23569 6.041186 2.22319 5.044884 2.67223 5.883364 2.67223 5.883364"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152780093" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.06426 58.058453 c 0 0 3.67437 18.441283 7.43836 26.285658 1.20067 2.474459 2.57293 4.566728 3.70559 6.053013 2.53866 4.522218 3.75581 5.542049 3.75581 5.542049"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path15280656" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.23262 57.53984 c 0 0 2.5708 20.1103 6.30578 27.625297 1.23463 2.459244 2.7831 4.533772 4.17548 6.06484 2.85413 3.999554 4.83939 5.200736 4.83939 5.200736"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path15282186" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.40098 57.021227 c 0 0 1.46722 21.779318 5.17319 28.964937 1.2686 2.444027 2.99328 4.500815 4.64539 6.076667 3.1696 3.476889 5.92296 4.859421 5.92296 4.859421"/>
+                    </Canvas>
+                    <Canvas x:Name="g15284106">
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path15286650" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.40098 55.674357 c 0 0 0.9648 22.524528 4.60006 30.094196 1.25089 2.559059 2.99468 4.699673 4.72168 6.301255 3.49006 3.579985 6.67234 4.768265 6.67234 4.768265"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1528873289" StrokeThickness="1" Stroke="#FF005CE7" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.23262 54.8461 c 0 0 1.56596 21.600722 5.15951 29.883816 1.19698 2.685121 2.77937 4.924461 4.31819 6.505643 3.49827 4.211163 6.34803 5.026795 6.34803 5.026795"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152907693" StrokeThickness="1" Stroke="#FF6EA8FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.06426 54.017843 c 0 0 2.16711 20.676915 5.71896 29.673435 1.14308 2.811185 2.56405 5.149251 3.9147 6.710032 3.50649 4.842341 6.02371 5.285325 6.02371 5.285325"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path15292132" StrokeThickness="1" Stroke="#FF005CE7" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.89591 53.189586 c 0 0 2.76825 19.753108 6.2784 29.463054 1.08917 2.937249 2.34874 5.374041 3.51121 6.914421 3.51471 5.47352 5.69939 5.543856 5.69939 5.543856"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152944503" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.72755 52.361329 c 0 0 3.3694 18.829302 6.83785 29.252674 1.03526 3.063311 2.13342 5.598829 3.10772 7.118809 3.52292 6.104698 5.37508 5.802386 5.37508 5.802386"/>
+                    </Canvas>
                 </Canvas>
-            </Canvas>
-            <Canvas x:Name="g15385791" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleY="0.5" ScaleX="0.5"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="618.71137" Y="167.07944"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path520806937" StrokeThickness="1" Stroke="#FF458FFF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.55919 51.533072 c 0 0 6.57039 29.629615 10.10153 36.365491 3.53114 6.735876 5.05076 6.060916 5.05076 6.060916"/>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path521064896" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.56934 56.502614 c 0 0 0.36365 23.448335 4.04061 30.304577 3.67696 6.856242 12.12183 10.606601 12.12183 10.606601"/>
-                <Canvas x:Name="g15272104">
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path15276944" StrokeThickness="1" Stroke="#FF1874FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.89591 58.577066 c 0 0 4.77793 16.772266 8.57093 24.946018 1.16671 2.489676 2.36277 4.599684 3.23569 6.041186 2.22319 5.044884 2.67223 5.883364 2.67223 5.883364"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152780093" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.06426 58.058453 c 0 0 3.67437 18.441283 7.43836 26.285658 1.20067 2.474459 2.57293 4.566728 3.70559 6.053013 2.53866 4.522218 3.75581 5.542049 3.75581 5.542049"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path15280656" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.23262 57.53984 c 0 0 2.5708 20.1103 6.30578 27.625297 1.23463 2.459244 2.7831 4.533772 4.17548 6.06484 2.85413 3.999554 4.83939 5.200736 4.83939 5.200736"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path15282186" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.40098 57.021227 c 0 0 1.46722 21.779318 5.17319 28.964937 1.2686 2.444027 2.99328 4.500815 4.64539 6.076667 3.1696 3.476889 5.92296 4.859421 5.92296 4.859421"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5262480" StrokeThickness="0.75" Stroke="#FF000000" StrokeMiterLimit="4" Data="m 700.65028 -3.5274698 0.0469 2e-5" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Canvas x:Name="g63897" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="-1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="1097.6351" Y="-770.33606"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                    <Canvas x:Name="g63899" Opacity="1">
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path63901" Fill="#FFFFFFFF" StrokeThickness="0.75" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 367.45507 778.44429 c 15.87966 -1.85791 17.44722 -11.94329 29.41438 -11.3231 l 0.0701 7.77206 c -11.70723 -0.41224 -12.80627 8.57768 -29.00654 11.37235 z"/>
+                    </Canvas>
                 </Canvas>
-                <Canvas x:Name="g15284106">
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path15286650" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.40098 55.674357 c 0 0 0.9648 22.524528 4.60006 30.094196 1.25089 2.559059 2.99468 4.699673 4.72168 6.301255 3.49006 3.579985 6.67234 4.768265 6.67234 4.768265"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1528873289" StrokeThickness="1" Stroke="#FF005CE7" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.23262 54.8461 c 0 0 1.56596 21.600722 5.15951 29.883816 1.19698 2.685121 2.77937 4.924461 4.31819 6.505643 3.49827 4.211163 6.34803 5.026795 6.34803 5.026795"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152907693" StrokeThickness="1" Stroke="#FF6EA8FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.06426 54.017843 c 0 0 2.16711 20.676915 5.71896 29.673435 1.14308 2.811185 2.56405 5.149251 3.9147 6.710032 3.50649 4.842341 6.02371 5.285325 6.02371 5.285325"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path15292132" StrokeThickness="1" Stroke="#FF005CE7" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.89591 53.189586 c 0 0 2.76825 19.753108 6.2784 29.463054 1.08917 2.937249 2.34874 5.374041 3.51121 6.914421 3.51471 5.47352 5.69939 5.543856 5.69939 5.543856"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152944503" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.72755 52.361329 c 0 0 3.3694 18.829302 6.83785 29.252674 1.03526 3.063311 2.13342 5.598829 3.10772 7.118809 3.52292 6.104698 5.37508 5.802386 5.37508 5.802386"/>
+                <Canvas x:Name="g638979" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="180"/>
+                            <TranslateTransform X="1097.536" Y="794.2585"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                    <Canvas x:Name="g638998" Opacity="1">
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path639015" Fill="#FF99BFFF" StrokeThickness="0.75" Stroke="{x:Null}" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 403.72331 774.22679 c -11.70723 -0.41224 -13.66822 9.01331 -29.99245 12.20464 l -0.11513 -8.13963 c 15.61048 -4.31293 18.54825 -12.86122 30.38212 -12.24997 z"/>
+                    </Canvas>
                 </Canvas>
-            </Canvas>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5262480" StrokeThickness="0.75" Stroke="#FF000000" StrokeMiterLimit="4" Data="m 700.65028 -3.5274698 0.0469 2e-5" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Canvas x:Name="g63897" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleX="-1"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="1097.6351" Y="-770.33606"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-                <Canvas x:Name="g63899" Opacity="1">
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path63901" Fill="#FFFFFFFF" StrokeThickness="0.75" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 367.45507 778.44429 c 15.87966 -1.85791 17.44722 -11.94329 29.41438 -11.3231 l 0.0701 7.77206 c -11.70723 -0.41224 -12.80627 8.57768 -29.00654 11.37235 z"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect4832" Fill="#FF99BFFF" StrokeThickness="0.75" StrokeMiterLimit="4" StrokeLineJoin="Miter" Data="m 642.46235 34.102883 1.65625 0 0 7.447462 -1.65625 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect48322" Fill="#FF4D8FFF" StrokeThickness="0.75" StrokeMiterLimit="4" StrokeLineJoin="Miter" Data="m 642.5756 56.005838 1.65625 0 0 7.44746 -1.65625 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect526469565467" Fill="#FF99BFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 737.27773 15.689247 -8.20536 0 0.27275 -7.5577498 7.93261 -0.03125 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect5264695654677" Fill="#FF99BFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 695.52515 27.753405 -8.24251 0 0 -7.291361 8.24251 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect5264695654673" Fill="#FFFFFFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 703.13158 4.2538992 -5.85602 0 0 -7.448835 5.85602 0 z" Stretch="Fill" Width="23.013" Canvas.Left="552.251" Canvas.Top="158.937"/>
+                <Canvas x:Name="g50005" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="-109.8738" Y="35.877366"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
                 </Canvas>
-            </Canvas>
-            <Canvas x:Name="g638979" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="180"/>
-                        <TranslateTransform X="1097.536" Y="794.2585"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-                <Canvas x:Name="g638998" Opacity="1">
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path639015" Fill="#FF99BFFF" StrokeThickness="0.75" Stroke="{x:Null}" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 403.72331 774.22679 c -11.70723 -0.41224 -13.66822 9.01331 -29.99245 12.20464 l -0.11513 -8.13963 c 15.61048 -4.31293 18.54825 -12.86122 30.38212 -12.24997 z"/>
+                <Canvas x:Name="g50004" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="-70.604241" Y="47.130415"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
                 </Canvas>
-            </Canvas>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect4832" Fill="#FF99BFFF" StrokeThickness="0.75" StrokeMiterLimit="4" StrokeLineJoin="Miter" Data="m 642.46235 34.102883 1.65625 0 0 7.447462 -1.65625 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect48322" Fill="#FF4D8FFF" StrokeThickness="0.75" StrokeMiterLimit="4" StrokeLineJoin="Miter" Data="m 642.5756 56.005838 1.65625 0 0 7.44746 -1.65625 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect526469565467" Fill="#FF99BFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 737.27773 15.689247 -8.20536 0 0.27275 -7.5577498 7.93261 -0.03125 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect5264695654677" Fill="#FF99BFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 695.52515 27.753405 -8.24251 0 0 -7.291361 8.24251 0 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect5264695654673" Fill="#FFFFFFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 703.13158 4.2538992 -5.85602 0 0 -7.448835 5.85602 0 z" Stretch="Fill" Width="23.013" Canvas.Left="552.251" Canvas.Top="158.937"/>
-            <Canvas x:Name="g50005" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="-109.8738" Y="35.877366"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g50004" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="-70.604241" Y="47.130415"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g50008" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="-50.830376" Y="22.088783"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g50006" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="-83.35729" Y="24.917211"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g50001" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="38.01893" Y="-21.712551"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g50009" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="53.114328" Y="-13.266558"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g50000" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="35.083104" Y="-0.78127539"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g500018" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="115.67247" Y="75.828902"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g500001" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleX="-1"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="985.52217" Y="148.66091"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g5000018" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleX="-1"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="904.00388" Y="138.05433"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g5000010" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleX="-1"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="924.50998" Y="160.32817"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g5000016" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleX="-1"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="895.25344" Y="249.95396"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g5000015" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleX="-1"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="768.23937" Y="249.77718"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g50000189" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleX="-1"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="816.32263" Y="249.77718"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g5000017" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleX="-1"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="847.61211" Y="250.48429"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Canvas x:Name="g500090" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="245.8738" Y="-21.166054"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-            </Canvas>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect4708" Fill="#FF99BFFF" StrokeThickness="0.75000006" StrokeMiterLimit="4" StrokeLineJoin="Miter" Data="M 714.13437 -5.4224528 731.58894 12.241026 714.13437 29.904497 696.6798 12.241016 Z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect5264695654688" Fill="#FF99BFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 710.50709 13.08496 0 10.14286 -7.714 0 0 -10.14286 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect526469565463" Fill="#FF99BFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 738.79074 7.7024989 0 8.2867051 -15.22701 0 0 -8.2867051 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path46903" Fill="#FFFFFFFF" Data="m 419.02609 -23.311206 c 0 -1.49995 1.3589 -2.858791 2.85879 -2.858791 l 3.43055 0 c 1.49995 0 2.85879 1.358841 2.85879 2.858791 l 2.85873 5.7e-5 c 1.57885 0 2.85879 1.279938 2.85879 2.858791 l 0 8.004613 c 0 1.578852 -1.27994 2.8587899 -2.85879 2.8587899 l -14.86565 0 c -1.57891 0 -2.85879 -1.2799379 -2.85879 -2.8587899 l 0 -8.004613 c 0 -1.578853 1.27988 -2.858791 2.85879 -2.858791 l 2.85879 -5.7e-5 z m -2.57291 1.715274 c -0.47365 0 -0.85764 0.511952 -0.85764 1.143516 0 0.631564 0.38399 1.143516 0.85764 1.143516 0.47364 0 0.85763 -0.511952 0.85763 -1.143516 0 -0.631564 -0.38399 -1.143516 -0.85763 -1.143516 z m 7.14697 1.143516 c -2.21041 0 -4.0023 1.79189 -4.0023 4.002307 0 2.210417 1.79189 4.002306 4.0023 4.002306 2.21042 0 4.00231 -1.791889 4.00231 -4.002306 0 -2.210417 -1.79189 -4.002307 -4.00231 -4.002307 z m 0 1.429396 c 1.42099 0 2.57291 1.151921 2.57291 2.572911 0 1.42099 -1.15192 2.572911 -2.57291 2.572911 -1.42099 0 -2.57291 -1.151921 -2.57291 -2.572911 0 -1.42099 1.15192 -2.572911 2.57291 -2.572911 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path469030" Fill="#FFFFFFFF" Data="m 431.98897 179.41311 c 0 -1.49995 1.35889 -2.85879 2.85879 -2.85879 l 3.43054 0 c 1.49995 0 2.85879 1.35884 2.85879 2.85879 l 2.85874 6e-5 c 1.57885 0 2.85879 1.27994 2.85879 2.85879 l 0 8.00461 c 0 1.57886 -1.27994 2.85879 -2.85879 2.85879 l -14.86565 0 c -1.57891 0 -2.8588 -1.27993 -2.8588 -2.85879 l 0 -8.00461 c 0 -1.57885 1.27989 -2.85879 2.8588 -2.85879 l 1.69926 -3e-5 z m -2.57292 1.71528 c -0.47364 0 -0.85763 0.51195 -0.85763 1.14351 0 0.63157 0.38399 1.14352 0.85763 1.14352 0.47365 0 0.85764 -0.51195 0.85764 -1.14352 0 -0.63156 -0.38399 -1.14351 -0.85764 -1.14351 z m 7.14698 1.14351 c -2.21042 0 -4.00231 1.79189 -4.00231 4.00231 0 2.21042 1.79189 4.00231 4.00231 4.00231 2.21042 0 4.00231 -1.79189 4.00231 -4.00231 0 -2.21042 -1.79189 -4.00231 -4.00231 -4.00231 z m 0 1.4294 c 1.42099 0 2.57291 1.15192 2.57291 2.57291 0 1.42099 -1.15192 2.57291 -2.57291 2.57291 -1.42099 0 -2.57291 -1.15192 -2.57291 -2.57291 0 -1.42099 1.15192 -2.57291 2.57291 -2.57291 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path469031" Fill="#FFFFFFFF" Data="m 425.41451 68.038161 c 0 -1.49995 1.35889 -2.85879 2.85879 -2.85879 l 3.43054 0 c 1.49995 0 2.85879 1.35884 2.85879 2.85879 l 2.85874 5.7e-5 c 1.57885 0 2.85879 1.279938 2.85879 2.858791 l 0 8.004613 c 0 1.578853 -1.27994 2.85879 -2.85879 2.85879 l -14.86565 0 c -1.57891 0 -2.8588 -1.279937 -2.8588 -2.85879 l 0 -8.004613 c 0 -1.578853 1.27989 -2.858791 2.8588 -2.858791 l 2.85879 -5.7e-5 z m -2.57292 1.715275 c -0.47364 0 -0.85763 0.511952 -0.85763 1.143516 0 0.631564 0.38399 1.143516 0.85763 1.143516 0.47365 0 0.85764 -0.511952 0.85764 -1.143516 0 -0.631564 -0.38399 -1.143516 -0.85764 -1.143516 z m 7.14698 1.143516 c -2.21042 0 -4.00231 1.791889 -4.00231 4.002306 0 2.210417 1.79189 4.002307 4.00231 4.002307 2.21042 0 4.00231 -1.79189 4.00231 -4.002307 0 -2.210417 -1.79189 -4.002306 -4.00231 -4.002306 z m 0 1.429395 c 1.42099 0 2.57291 1.151921 2.57291 2.572911 0 1.42099 -1.15192 2.572911 -2.57291 2.572911 -1.42099 0 -2.57291 -1.151921 -2.57291 -2.572911 0 -1.42099 1.15192 -2.572911 2.57291 -2.572911 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Canvas x:Name="g4964" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="90"/>
-                        <TranslateTransform X="503.11666" Y="-175.90351"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="imagebot_319653779" Fill="#FFFFFFFF" StrokeThickness="0.75000006" Stroke="#FFFFFFFF" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 357.58593 150.61339 -8.32972 5.33223 0 -10.66425 z" RenderTransformOrigin="0.5,0.5">
+                <Canvas x:Name="g50008" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="-50.830376" Y="22.088783"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g50006" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="-83.35729" Y="24.917211"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g50001" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="38.01893" Y="-21.712551"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g50009" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="53.114328" Y="-13.266558"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g50000" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="35.083104" Y="-0.78127539"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g500018" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="115.67247" Y="75.828902"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g500001" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="-1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="985.52217" Y="148.66091"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g5000018" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="-1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="904.00388" Y="138.05433"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g5000010" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="-1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="924.50998" Y="160.32817"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g5000016" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="-1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="895.25344" Y="249.95396"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g5000015" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="-1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="768.23937" Y="249.77718"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g50000189" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="-1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="816.32263" Y="249.77718"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g5000017" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="-1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="847.61211" Y="250.48429"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Canvas x:Name="g500090" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="245.8738" Y="-21.166054"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                </Canvas>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect4708" Fill="#FF99BFFF" StrokeThickness="0.75000006" StrokeMiterLimit="4" StrokeLineJoin="Miter" Data="M 714.13437 -5.4224528 731.58894 12.241026 714.13437 29.904497 696.6798 12.241016 Z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect5264695654688" Fill="#FF99BFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 710.50709 13.08496 0 10.14286 -7.714 0 0 -10.14286 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="rect526469565463" Fill="#FF99BFFF" StrokeThickness="0.75" StrokeMiterLimit="4" Data="m 738.79074 7.7024989 0 8.2867051 -15.22701 0 0 -8.2867051 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path46903" Fill="#FFFFFFFF" Data="m 419.02609 -23.311206 c 0 -1.49995 1.3589 -2.858791 2.85879 -2.858791 l 3.43055 0 c 1.49995 0 2.85879 1.358841 2.85879 2.858791 l 2.85873 5.7e-5 c 1.57885 0 2.85879 1.279938 2.85879 2.858791 l 0 8.004613 c 0 1.578852 -1.27994 2.8587899 -2.85879 2.8587899 l -14.86565 0 c -1.57891 0 -2.85879 -1.2799379 -2.85879 -2.8587899 l 0 -8.004613 c 0 -1.578853 1.27988 -2.858791 2.85879 -2.858791 l 2.85879 -5.7e-5 z m -2.57291 1.715274 c -0.47365 0 -0.85764 0.511952 -0.85764 1.143516 0 0.631564 0.38399 1.143516 0.85764 1.143516 0.47364 0 0.85763 -0.511952 0.85763 -1.143516 0 -0.631564 -0.38399 -1.143516 -0.85763 -1.143516 z m 7.14697 1.143516 c -2.21041 0 -4.0023 1.79189 -4.0023 4.002307 0 2.210417 1.79189 4.002306 4.0023 4.002306 2.21042 0 4.00231 -1.791889 4.00231 -4.002306 0 -2.210417 -1.79189 -4.002307 -4.00231 -4.002307 z m 0 1.429396 c 1.42099 0 2.57291 1.151921 2.57291 2.572911 0 1.42099 -1.15192 2.572911 -2.57291 2.572911 -1.42099 0 -2.57291 -1.151921 -2.57291 -2.572911 0 -1.42099 1.15192 -2.572911 2.57291 -2.572911 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path469030" Fill="#FFFFFFFF" Data="m 431.98897 179.41311 c 0 -1.49995 1.35889 -2.85879 2.85879 -2.85879 l 3.43054 0 c 1.49995 0 2.85879 1.35884 2.85879 2.85879 l 2.85874 6e-5 c 1.57885 0 2.85879 1.27994 2.85879 2.85879 l 0 8.00461 c 0 1.57886 -1.27994 2.85879 -2.85879 2.85879 l -14.86565 0 c -1.57891 0 -2.8588 -1.27993 -2.8588 -2.85879 l 0 -8.00461 c 0 -1.57885 1.27989 -2.85879 2.8588 -2.85879 l 1.69926 -3e-5 z m -2.57292 1.71528 c -0.47364 0 -0.85763 0.51195 -0.85763 1.14351 0 0.63157 0.38399 1.14352 0.85763 1.14352 0.47365 0 0.85764 -0.51195 0.85764 -1.14352 0 -0.63156 -0.38399 -1.14351 -0.85764 -1.14351 z m 7.14698 1.14351 c -2.21042 0 -4.00231 1.79189 -4.00231 4.00231 0 2.21042 1.79189 4.00231 4.00231 4.00231 2.21042 0 4.00231 -1.79189 4.00231 -4.00231 0 -2.21042 -1.79189 -4.00231 -4.00231 -4.00231 z m 0 1.4294 c 1.42099 0 2.57291 1.15192 2.57291 2.57291 0 1.42099 -1.15192 2.57291 -2.57291 2.57291 -1.42099 0 -2.57291 -1.15192 -2.57291 -2.57291 0 -1.42099 1.15192 -2.57291 2.57291 -2.57291 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path469031" Fill="#FFFFFFFF" Data="m 425.41451 68.038161 c 0 -1.49995 1.35889 -2.85879 2.85879 -2.85879 l 3.43054 0 c 1.49995 0 2.85879 1.35884 2.85879 2.85879 l 2.85874 5.7e-5 c 1.57885 0 2.85879 1.279938 2.85879 2.858791 l 0 8.004613 c 0 1.578853 -1.27994 2.85879 -2.85879 2.85879 l -14.86565 0 c -1.57891 0 -2.8588 -1.279937 -2.8588 -2.85879 l 0 -8.004613 c 0 -1.578853 1.27989 -2.858791 2.8588 -2.858791 l 2.85879 -5.7e-5 z m -2.57292 1.715275 c -0.47364 0 -0.85763 0.511952 -0.85763 1.143516 0 0.631564 0.38399 1.143516 0.85763 1.143516 0.47365 0 0.85764 -0.511952 0.85764 -1.143516 0 -0.631564 -0.38399 -1.143516 -0.85764 -1.143516 z m 7.14698 1.143516 c -2.21042 0 -4.00231 1.791889 -4.00231 4.002306 0 2.210417 1.79189 4.002307 4.00231 4.002307 2.21042 0 4.00231 -1.79189 4.00231 -4.002307 0 -2.210417 -1.79189 -4.002306 -4.00231 -4.002306 z m 0 1.429395 c 1.42099 0 2.57291 1.151921 2.57291 2.572911 0 1.42099 -1.15192 2.572911 -2.57291 2.572911 -1.42099 0 -2.57291 -1.151921 -2.57291 -2.572911 0 -1.42099 1.15192 -2.572911 2.57291 -2.572911 z" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Canvas x:Name="g4964" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="90"/>
+                            <TranslateTransform X="503.11666" Y="-175.90351"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="imagebot_319653779" Fill="#FFFFFFFF" StrokeThickness="0.75000006" Stroke="#FFFFFFFF" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 357.58593 150.61339 -8.32972 5.33223 0 -10.66425 z" RenderTransformOrigin="0.5,0.5">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform/>
+                                <RotateTransform/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                    </Path>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="imagebot_319659391" Fill="#FFFFFFFF" StrokeThickness="0.75000006" Stroke="#FFFFFFFF" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 365.45165 150.61339 8.32972 5.33223 0 -10.66425 z" RenderTransformOrigin="0.5,0.5">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform/>
+                                <RotateTransform/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                    </Path>
+                </Canvas>
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5095" StrokeThickness="2" Stroke="#FF000000" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 722.28016 -98.001358 0 9.978653 c 0 -2.443867 -15.14953 -1.193198 -15.19374 0.796439 -0.0441 1.989636 15.19374 4.528042 15.19374 2.096349 0 -2.431691 -15.18042 -0.03803 -15.19374 2.598581 -0.0133 2.636623 15.19374 4.338926 15.19374 2.09635 0 -2.242577 -15.17837 0.536552 -15.19374 2.59858 -0.0153 2.062029 17.18572 2.397723 17.09742 0.186991 l -0.0688 -20.351925" Canvas.Left="-126.537" Canvas.Top="162.062"/>
+                <Canvas x:Name="g50009548342" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="180"/>
+                            <TranslateTransform X="1239.4211" Y="-53.039042"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path53246800326894" Fill="#FF000000" StrokeThickness="1" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Opacity="1" Data="m 429.66406 -64.966797 0 1 15.15235 0 0 -1 -15.15235 0 z"/>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path500606539246" Fill="#FF000000" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 439.5848 -66.886755 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z"/>
+                </Canvas>
+                <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="633.771" Canvas.Top="152.815" Width="77.782" Height="111.723" x:Name="rect5285" Fill="#FF8B8080" StrokeThickness="0.75" StrokeMiterLimit="4" StrokeLineJoin="Miter"/>
+                <Canvas x:Name="g153857918" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleY="0.5" ScaleX="0.5"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform X="710.82832" Y="68.056352"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5208069371" StrokeThickness="1" Stroke="#FF458FFF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.55919 51.533072 c 0 0 6.57039 29.629615 10.10153 36.365491 3.53114 6.735876 5.05076 6.060916 5.05076 6.060916"/>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5210648960" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.56934 56.502614 c 0 0 0.36365 23.448335 4.04061 30.304577 3.67696 6.856242 12.12183 10.606601 12.12183 10.606601"/>
+                    <Canvas x:Name="g152721041">
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152769443" StrokeThickness="1" Stroke="#FF1874FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.89591 58.577066 c 0 0 4.77793 16.772266 8.57093 24.946018 1.16671 2.489676 2.36277 4.599684 3.23569 6.041186 2.22319 5.044884 2.67223 5.883364 2.67223 5.883364"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1527800930" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.06426 58.058453 c 0 0 3.67437 18.441283 7.43836 26.285658 1.20067 2.474459 2.57293 4.566728 3.70559 6.053013 2.53866 4.522218 3.75581 5.542049 3.75581 5.542049"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152806561" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.23262 57.53984 c 0 0 2.5708 20.1103 6.30578 27.625297 1.23463 2.459244 2.7831 4.533772 4.17548 6.06484 2.85413 3.999554 4.83939 5.200736 4.83939 5.200736"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152821865" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.40098 57.021227 c 0 0 1.46722 21.779318 5.17319 28.964937 1.2686 2.444027 2.99328 4.500815 4.64539 6.076667 3.1696 3.476889 5.92296 4.859421 5.92296 4.859421"/>
+                    </Canvas>
+                    <Canvas x:Name="g152841065">
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152866505" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.40098 55.674357 c 0 0 0.9648 22.524528 4.60006 30.094196 1.25089 2.559059 2.99468 4.699673 4.72168 6.301255 3.49006 3.579985 6.67234 4.768265 6.67234 4.768265"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path15288732898" StrokeThickness="1" Stroke="#FF005CE7" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.23262 54.8461 c 0 0 1.56596 21.600722 5.15951 29.883816 1.19698 2.685121 2.77937 4.924461 4.31819 6.505643 3.49827 4.211163 6.34803 5.026795 6.34803 5.026795"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1529076938" StrokeThickness="1" Stroke="#FF6EA8FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.06426 54.017843 c 0 0 2.16711 20.676915 5.71896 29.673435 1.14308 2.811185 2.56405 5.149251 3.9147 6.710032 3.50649 4.842341 6.02371 5.285325 6.02371 5.285325"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152921329" StrokeThickness="1" Stroke="#FF005CE7" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.89591 53.189586 c 0 0 2.76825 19.753108 6.2784 29.463054 1.08917 2.937249 2.34874 5.374041 3.51121 6.914421 3.51471 5.47352 5.69939 5.543856 5.69939 5.543856"/>
+                        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1529445035" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.72755 52.361329 c 0 0 3.3694 18.829302 6.83785 29.252674 1.03526 3.063311 2.13342 5.598829 3.10772 7.118809 3.52292 6.104698 5.37508 5.802386 5.37508 5.802386"/>
+                    </Canvas>
+                </Canvas>
+                <Path x:Name="path51538690_Copy" Fill="Black" StrokeThickness="0.27646205" StrokeMiterLimit="4" Data="m 226.29883 97.449219 a 6.5726871 4.8188889 48.50121 0 0 -3.95313 4.837891 6.5726871 4.8188889 48.50121 0 0 6.32618 6.80664 6.5726871 4.8188889 48.50121 0 0 1.45898 0.0644 2.6163581 2.6163581 0 0 0 -0.14063 0.83789 2.6163581 2.6163581 0 0 0 0.10547 0.73047 4.8188888 6.5726872 18.501207 0 0 -3.125 1.02539 4.8188888 6.5726872 18.501207 0 0 -2.73242 8.88282 4.8188888 6.5726872 18.501207 0 0 6.5586 1.86718 4.8188888 6.5726872 18.501207 0 0 2.73242 -8.88281 4.8188888 6.5726872 18.501207 0 0 -0.50782 -1.04102 2.6163581 2.6163581 0 0 0 1.77735 -1.16015 4.8188889 6.5726872 78.501209 0 0 2.48242 2.25781 4.8188889 6.5726872 78.501209 0 0 9.05859 -2.07422 4.8188889 6.5726872 78.501209 0 0 -1.66211 -6.61328 4.8188889 6.5726872 78.501209 0 0 -9.05859 2.07617 4.8188889 6.5726872 78.501209 0 0 -0.86719 1.43946 2.6163581 2.6163581 0 0 0 -1.75 -1.0918 6.5726871 4.8188889 48.50121 0 0 0.56641 -3.06445 6.5726871 4.8188889 48.50121 0 0 -6.32617 -6.806644 6.5726871 4.8188889 48.50121 0 0 -0.94336 -0.0918 z" Canvas.Left="652.336" Canvas.Top="64.232" Height="25.07" Stretch="Fill" Width="24.769" RenderTransformOrigin="0.405,0.487">
                     <Path.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform/>
@@ -1266,7 +1327,237 @@
                         </TransformGroup>
                     </Path.RenderTransform>
                 </Path>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="imagebot_319659391" Fill="#FFFFFFFF" StrokeThickness="0.75000006" Stroke="#FFFFFFFF" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="m 365.45165 150.61339 8.32972 5.33223 0 -10.66425 z" RenderTransformOrigin="0.5,0.5">
+                <Path x:Name="path51538690_Copy1" Fill="Black" StrokeThickness="0.27646205" StrokeMiterLimit="4" Data="m 226.29883 97.449219 a 6.5726871 4.8188889 48.50121 0 0 -3.95313 4.837891 6.5726871 4.8188889 48.50121 0 0 6.32618 6.80664 6.5726871 4.8188889 48.50121 0 0 1.45898 0.0644 2.6163581 2.6163581 0 0 0 -0.14063 0.83789 2.6163581 2.6163581 0 0 0 0.10547 0.73047 4.8188888 6.5726872 18.501207 0 0 -3.125 1.02539 4.8188888 6.5726872 18.501207 0 0 -2.73242 8.88282 4.8188888 6.5726872 18.501207 0 0 6.5586 1.86718 4.8188888 6.5726872 18.501207 0 0 2.73242 -8.88281 4.8188888 6.5726872 18.501207 0 0 -0.50782 -1.04102 2.6163581 2.6163581 0 0 0 1.77735 -1.16015 4.8188889 6.5726872 78.501209 0 0 2.48242 2.25781 4.8188889 6.5726872 78.501209 0 0 9.05859 -2.07422 4.8188889 6.5726872 78.501209 0 0 -1.66211 -6.61328 4.8188889 6.5726872 78.501209 0 0 -9.05859 2.07617 4.8188889 6.5726872 78.501209 0 0 -0.86719 1.43946 2.6163581 2.6163581 0 0 0 -1.75 -1.0918 6.5726871 4.8188889 48.50121 0 0 0.56641 -3.06445 6.5726871 4.8188889 48.50121 0 0 -6.32617 -6.806644 6.5726871 4.8188889 48.50121 0 0 -0.94336 -0.0918 z" Canvas.Left="604.836" Canvas.Top="233.23" Height="25.07" Stretch="Fill" Width="24.769" RenderTransformOrigin="0.405,0.487">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="path51538690_Copy2" Fill="Black" StrokeThickness="0.27646205" StrokeMiterLimit="4" Data="m 226.29883 97.449219 a 6.5726871 4.8188889 48.50121 0 0 -3.95313 4.837891 6.5726871 4.8188889 48.50121 0 0 6.32618 6.80664 6.5726871 4.8188889 48.50121 0 0 1.45898 0.0644 2.6163581 2.6163581 0 0 0 -0.14063 0.83789 2.6163581 2.6163581 0 0 0 0.10547 0.73047 4.8188888 6.5726872 18.501207 0 0 -3.125 1.02539 4.8188888 6.5726872 18.501207 0 0 -2.73242 8.88282 4.8188888 6.5726872 18.501207 0 0 6.5586 1.86718 4.8188888 6.5726872 18.501207 0 0 2.73242 -8.88281 4.8188888 6.5726872 18.501207 0 0 -0.50782 -1.04102 2.6163581 2.6163581 0 0 0 1.77735 -1.16015 4.8188889 6.5726872 78.501209 0 0 2.48242 2.25781 4.8188889 6.5726872 78.501209 0 0 9.05859 -2.07422 4.8188889 6.5726872 78.501209 0 0 -1.66211 -6.61328 4.8188889 6.5726872 78.501209 0 0 -9.05859 2.07617 4.8188889 6.5726872 78.501209 0 0 -0.86719 1.43946 2.6163581 2.6163581 0 0 0 -1.75 -1.0918 6.5726871 4.8188889 48.50121 0 0 0.56641 -3.06445 6.5726871 4.8188889 48.50121 0 0 -6.32617 -6.806644 6.5726871 4.8188889 48.50121 0 0 -0.94336 -0.0918 z" Canvas.Left="602.669" Canvas.Top="332.23" Height="25.07" Stretch="Fill" Width="24.769" RenderTransformOrigin="0.405,0.487">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="189.032" Canvas.Top="130.562" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy2" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="300.799" Canvas.Top="94.98" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy4" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="407.765" Canvas.Top="150.228" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="90"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy5" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="367.931" Canvas.Top="250.003" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="130"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy6" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="468.931" Canvas.Top="234.962" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="93"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy7" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="342.61" Canvas.Top="323.128" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="90"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy10" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="285.735" Canvas.Top="345.253" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="180"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy12" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="209.11" Canvas.Top="345.003" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="180"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy13" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="549.693" Canvas.Top="313.24" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="90"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy14" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="549.193" Canvas.Top="249.407" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="90"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy16" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="723.303" Canvas.Top="253.478" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy20" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="617.048" Canvas.Top="171.827" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="180"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy22" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="540.382" Canvas.Top="73.828" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy24" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="607.882" Canvas.Top="73.828" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy26" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="679.382" Canvas.Top="73.828" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy27" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="526.548" Canvas.Top="183.584" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="180"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy28" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="583.881" Canvas.Top="172.251" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="180"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy31" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="350.855" Canvas.Top="84.48" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="495.692" Canvas.Top="219.36" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy1" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="627.438" Canvas.Top="352.478" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy3" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="620.882" Canvas.Top="253.478" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Path x:Name="arrowhead1_Copy8" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="579.584" Canvas.Top="231.24" RenderTransformOrigin="0.5,0.5">
                     <Path.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform/>
@@ -1277,295 +1568,31 @@
                     </Path.RenderTransform>
                 </Path>
             </Canvas>
-            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5095" StrokeThickness="2" Stroke="#FF000000" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 722.28016 -98.001358 0 9.978653 c 0 -2.443867 -15.14953 -1.193198 -15.19374 0.796439 -0.0441 1.989636 15.19374 4.528042 15.19374 2.096349 0 -2.431691 -15.18042 -0.03803 -15.19374 2.598581 -0.0133 2.636623 15.19374 4.338926 15.19374 2.09635 0 -2.242577 -15.17837 0.536552 -15.19374 2.59858 -0.0153 2.062029 17.18572 2.397723 17.09742 0.186991 l -0.0688 -20.351925" Canvas.Left="-126.537" Canvas.Top="162.062"/>
-            <Canvas x:Name="g50009548342" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="180"/>
-                        <TranslateTransform X="1239.4211" Y="-53.039042"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path53246800326894" Fill="#FF000000" StrokeThickness="1" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Opacity="1" Data="m 429.66406 -64.966797 0 1 15.15235 0 0 -1 -15.15235 0 z"/>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path500606539246" Fill="#FF000000" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 439.5848 -66.886755 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z"/>
+            <Canvas x:Name="information" Width="776.696" Height="396.50001" RenderTransformOrigin="0.5,0.5" d:LayoutOverrides="TopMargin, BottomMargin">
+                <TextBlock x:Name="textBlockPatientInfos" Height="79.423" TextWrapping="Wrap" Text="PatientInfos" Width="147.006" Foreground="White"/>
+                <TextBlock x:Name="textBlockSelectedElementInfos" Height="79.423" TextWrapping="Wrap" Text="SelectedElementInfos" Width="147.006" Foreground="White" Canvas.Left="377" Canvas.Top="290"/>
+                <Rectangle x:Name="selectFlowPatientToBloodPump" Height="22" Canvas.Left="212.368" Canvas.Top="108.211" Width="59" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowBloodPumpToMerge1" Height="17" Canvas.Left="308.368" Canvas.Top="86.211" Width="35" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowMerge1ToArterialChamber" Height="17" Canvas.Left="377" Canvas.Top="75.211" Width="35" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowArterialChamberToDialyzer" Height="17" Canvas.Left="420" Canvas.Top="165.211" Width="35" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowDialyzerBloodSideToSplit2" Height="17" Canvas.Left="393" Canvas.Top="236.211" Width="62" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowSplit2ToVenousChamber" Height="17" Canvas.Left="335" Canvas.Top="252.211" Width="22" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowVenousChamberToSafetyDetector" Height="17" Canvas.Left="335" Canvas.Top="340.211" Width="22" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowSafetySensorToVenousValve" Height="17" Canvas.Left="241.368" Canvas.Top="340.211" Width="52" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowVenousValveToPatient" Height="17" Canvas.Left="189.368" Canvas.Top="340.211" Width="18" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowWaterSupplyToWaterPreparation" Height="17" Canvas.Left="537.368" Canvas.Top="62.423" Width="28" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowWaterPreparationToDialyzingFluidPreparation" Height="17" Canvas.Left="615.368" Canvas.Top="62.423" Width="28" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowDialyzingFluidPreparationToBalanceChamber" Height="86.788" Canvas.Left="691.368" Canvas.Top="62.423" Width="22" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowBalanceChamberToSafetyBypass" Height="17" Canvas.Left="605.368" Canvas.Top="165.211" Width="22" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowSafetyBypassToDialyzer" Height="29" Canvas.Left="493.368" Canvas.Top="178.211" Width="72" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowPatientToBloodPump_Copy14" Height="17" Canvas.Left="543.368" Canvas.Top="178.211" Width="22" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowDialyzerDialyzingFluidSideToSplit3" Height="17" Canvas.Left="493.368" Canvas.Top="212.211" Width="30.638" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowSplit3ToUltraFiltrationPump" Height="78" Canvas.Left="537.368" Canvas.Top="265.211" Width="42" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowSplit3ToPumpToBalanceChamber" Height="17" Canvas.Left="571.368" Canvas.Top="225.211" Width="24.638" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowBalanceChamberToDrain" Height="17" Canvas.Left="714.368" Canvas.Top="252.211" Width="17.638" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowPumpToBalanceChamberToBalanceChamber" Height="17" Canvas.Left="615.368" Canvas.Top="252.211" Width="28" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowUltraFiltrationPumpToDrain" Height="17" Canvas.Left="625.73" Canvas.Top="352.423" Width="17.638" StrokeThickness="2" Fill="#00000000"/>
             </Canvas>
-            <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="633.771" Canvas.Top="152.815" Width="77.782" Height="111.723" x:Name="rect5285" Fill="#FF8B8080" StrokeThickness="0.75" StrokeMiterLimit="4" StrokeLineJoin="Miter"/>
-            <Canvas x:Name="g153857918" Canvas.Left="-126.537" RenderTransformOrigin="0.5,0.5" Canvas.Top="162.062">
-                <Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleY="0.5" ScaleX="0.5"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="710.82832" Y="68.056352"/>
-                    </TransformGroup>
-                </Canvas.RenderTransform>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5208069371" StrokeThickness="1" Stroke="#FF458FFF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.55919 51.533072 c 0 0 6.57039 29.629615 10.10153 36.365491 3.53114 6.735876 5.05076 6.060916 5.05076 6.060916"/>
-                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path5210648960" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.56934 56.502614 c 0 0 0.36365 23.448335 4.04061 30.304577 3.67696 6.856242 12.12183 10.606601 12.12183 10.606601"/>
-                <Canvas x:Name="g152721041">
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152769443" StrokeThickness="1" Stroke="#FF1874FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.89591 58.577066 c 0 0 4.77793 16.772266 8.57093 24.946018 1.16671 2.489676 2.36277 4.599684 3.23569 6.041186 2.22319 5.044884 2.67223 5.883364 2.67223 5.883364"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1527800930" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.06426 58.058453 c 0 0 3.67437 18.441283 7.43836 26.285658 1.20067 2.474459 2.57293 4.566728 3.70559 6.053013 2.53866 4.522218 3.75581 5.542049 3.75581 5.542049"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152806561" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.23262 57.53984 c 0 0 2.5708 20.1103 6.30578 27.625297 1.23463 2.459244 2.7831 4.533772 4.17548 6.06484 2.85413 3.999554 4.83939 5.200736 4.83939 5.200736"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152821865" StrokeThickness="1" Stroke="#FF0044AA" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.40098 57.021227 c 0 0 1.46722 21.779318 5.17319 28.964937 1.2686 2.444027 2.99328 4.500815 4.64539 6.076667 3.1696 3.476889 5.92296 4.859421 5.92296 4.859421"/>
-                </Canvas>
-                <Canvas x:Name="g152841065">
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152866505" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.40098 55.674357 c 0 0 0.9648 22.524528 4.60006 30.094196 1.25089 2.559059 2.99468 4.699673 4.72168 6.301255 3.49006 3.579985 6.67234 4.768265 6.67234 4.768265"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path15288732898" StrokeThickness="1" Stroke="#FF005CE7" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.23262 54.8461 c 0 0 1.56596 21.600722 5.15951 29.883816 1.19698 2.685121 2.77937 4.924461 4.31819 6.505643 3.49827 4.211163 6.34803 5.026795 6.34803 5.026795"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1529076938" StrokeThickness="1" Stroke="#FF6EA8FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 320.06426 54.017843 c 0 0 2.16711 20.676915 5.71896 29.673435 1.14308 2.811185 2.56405 5.149251 3.9147 6.710032 3.50649 4.842341 6.02371 5.285325 6.02371 5.285325"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path152921329" StrokeThickness="1" Stroke="#FF005CE7" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.89591 53.189586 c 0 0 2.76825 19.753108 6.2784 29.463054 1.08917 2.937249 2.34874 5.374041 3.51121 6.914421 3.51471 5.47352 5.69939 5.543856 5.69939 5.543856"/>
-                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="path1529445035" StrokeThickness="1" Stroke="#FF3485FF" StrokeLineJoin="Miter" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" Data="m 319.72755 52.361329 c 0 0 3.3694 18.829302 6.83785 29.252674 1.03526 3.063311 2.13342 5.598829 3.10772 7.118809 3.52292 6.104698 5.37508 5.802386 5.37508 5.802386"/>
-                </Canvas>
-            </Canvas>
-            <Path x:Name="path51538690_Copy" Fill="Black" StrokeThickness="0.27646205" StrokeMiterLimit="4" Data="m 226.29883 97.449219 a 6.5726871 4.8188889 48.50121 0 0 -3.95313 4.837891 6.5726871 4.8188889 48.50121 0 0 6.32618 6.80664 6.5726871 4.8188889 48.50121 0 0 1.45898 0.0644 2.6163581 2.6163581 0 0 0 -0.14063 0.83789 2.6163581 2.6163581 0 0 0 0.10547 0.73047 4.8188888 6.5726872 18.501207 0 0 -3.125 1.02539 4.8188888 6.5726872 18.501207 0 0 -2.73242 8.88282 4.8188888 6.5726872 18.501207 0 0 6.5586 1.86718 4.8188888 6.5726872 18.501207 0 0 2.73242 -8.88281 4.8188888 6.5726872 18.501207 0 0 -0.50782 -1.04102 2.6163581 2.6163581 0 0 0 1.77735 -1.16015 4.8188889 6.5726872 78.501209 0 0 2.48242 2.25781 4.8188889 6.5726872 78.501209 0 0 9.05859 -2.07422 4.8188889 6.5726872 78.501209 0 0 -1.66211 -6.61328 4.8188889 6.5726872 78.501209 0 0 -9.05859 2.07617 4.8188889 6.5726872 78.501209 0 0 -0.86719 1.43946 2.6163581 2.6163581 0 0 0 -1.75 -1.0918 6.5726871 4.8188889 48.50121 0 0 0.56641 -3.06445 6.5726871 4.8188889 48.50121 0 0 -6.32617 -6.806644 6.5726871 4.8188889 48.50121 0 0 -0.94336 -0.0918 z" Canvas.Left="652.336" Canvas.Top="64.232" Height="25.07" Stretch="Fill" Width="24.769" RenderTransformOrigin="0.405,0.487">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="path51538690_Copy1" Fill="Black" StrokeThickness="0.27646205" StrokeMiterLimit="4" Data="m 226.29883 97.449219 a 6.5726871 4.8188889 48.50121 0 0 -3.95313 4.837891 6.5726871 4.8188889 48.50121 0 0 6.32618 6.80664 6.5726871 4.8188889 48.50121 0 0 1.45898 0.0644 2.6163581 2.6163581 0 0 0 -0.14063 0.83789 2.6163581 2.6163581 0 0 0 0.10547 0.73047 4.8188888 6.5726872 18.501207 0 0 -3.125 1.02539 4.8188888 6.5726872 18.501207 0 0 -2.73242 8.88282 4.8188888 6.5726872 18.501207 0 0 6.5586 1.86718 4.8188888 6.5726872 18.501207 0 0 2.73242 -8.88281 4.8188888 6.5726872 18.501207 0 0 -0.50782 -1.04102 2.6163581 2.6163581 0 0 0 1.77735 -1.16015 4.8188889 6.5726872 78.501209 0 0 2.48242 2.25781 4.8188889 6.5726872 78.501209 0 0 9.05859 -2.07422 4.8188889 6.5726872 78.501209 0 0 -1.66211 -6.61328 4.8188889 6.5726872 78.501209 0 0 -9.05859 2.07617 4.8188889 6.5726872 78.501209 0 0 -0.86719 1.43946 2.6163581 2.6163581 0 0 0 -1.75 -1.0918 6.5726871 4.8188889 48.50121 0 0 0.56641 -3.06445 6.5726871 4.8188889 48.50121 0 0 -6.32617 -6.806644 6.5726871 4.8188889 48.50121 0 0 -0.94336 -0.0918 z" Canvas.Left="604.836" Canvas.Top="233.23" Height="25.07" Stretch="Fill" Width="24.769" RenderTransformOrigin="0.405,0.487">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="path51538690_Copy2" Fill="Black" StrokeThickness="0.27646205" StrokeMiterLimit="4" Data="m 226.29883 97.449219 a 6.5726871 4.8188889 48.50121 0 0 -3.95313 4.837891 6.5726871 4.8188889 48.50121 0 0 6.32618 6.80664 6.5726871 4.8188889 48.50121 0 0 1.45898 0.0644 2.6163581 2.6163581 0 0 0 -0.14063 0.83789 2.6163581 2.6163581 0 0 0 0.10547 0.73047 4.8188888 6.5726872 18.501207 0 0 -3.125 1.02539 4.8188888 6.5726872 18.501207 0 0 -2.73242 8.88282 4.8188888 6.5726872 18.501207 0 0 6.5586 1.86718 4.8188888 6.5726872 18.501207 0 0 2.73242 -8.88281 4.8188888 6.5726872 18.501207 0 0 -0.50782 -1.04102 2.6163581 2.6163581 0 0 0 1.77735 -1.16015 4.8188889 6.5726872 78.501209 0 0 2.48242 2.25781 4.8188889 6.5726872 78.501209 0 0 9.05859 -2.07422 4.8188889 6.5726872 78.501209 0 0 -1.66211 -6.61328 4.8188889 6.5726872 78.501209 0 0 -9.05859 2.07617 4.8188889 6.5726872 78.501209 0 0 -0.86719 1.43946 2.6163581 2.6163581 0 0 0 -1.75 -1.0918 6.5726871 4.8188889 48.50121 0 0 0.56641 -3.06445 6.5726871 4.8188889 48.50121 0 0 -6.32617 -6.806644 6.5726871 4.8188889 48.50121 0 0 -0.94336 -0.0918 z" Canvas.Left="602.669" Canvas.Top="332.23" Height="25.07" Stretch="Fill" Width="24.769" RenderTransformOrigin="0.405,0.487">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="189.032" Canvas.Top="130.562" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy2" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="300.799" Canvas.Top="94.98" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy4" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="407.765" Canvas.Top="150.228" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="90"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy5" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="367.931" Canvas.Top="250.003" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="130"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy6" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="468.931" Canvas.Top="234.962" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="93"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy7" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="342.61" Canvas.Top="323.128" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="90"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy10" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="285.735" Canvas.Top="345.253" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="180"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy12" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="209.11" Canvas.Top="345.003" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="180"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy13" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="549.693" Canvas.Top="313.24" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="90"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy14" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="549.193" Canvas.Top="249.407" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="90"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy16" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="723.303" Canvas.Top="253.478" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy20" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="617.048" Canvas.Top="171.827" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="180"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy22" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="540.382" Canvas.Top="73.828" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy24" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="607.882" Canvas.Top="73.828" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy26" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="679.382" Canvas.Top="73.828" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy27" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="526.548" Canvas.Top="183.584" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="180"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy28" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="583.881" Canvas.Top="172.251" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform Angle="180"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy31" Fill="#FFFFFFFF" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="350.855" Canvas.Top="84.48" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="495.692" Canvas.Top="219.36" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy1" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="627.438" Canvas.Top="352.478" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy3" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="620.882" Canvas.Top="253.478" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-            <Path x:Name="arrowhead1_Copy8" Fill="Black" StrokeThickness="0.375" StrokeLineJoin="Round" Data="m 6.55552 2.410633 -6.55552 2.410633 c 1.0473 -1.423237 1.04126 -3.370471 0 -4.821266 z" Canvas.Left="579.584" Canvas.Top="231.24" RenderTransformOrigin="0.5,0.5">
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
         </Canvas>
     </DockPanel>
 </UserControl>

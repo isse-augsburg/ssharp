@@ -26,6 +26,7 @@ namespace Visualization
 	using System.Linq;
 	using System.Windows;
 	using System.Windows.Media.Animation;
+	using System.Windows.Shapes;
 	using global::Funkfahrbetrieb.CrossingController;
 	using global::Funkfahrbetrieb.TrainController;
 	using global::HemodialysisMachine;
@@ -81,6 +82,29 @@ namespace Visualization
 			_animationFlowSplit3ToUltraFiltrationPump = (Storyboard)Resources["FlowSplit3ToUltraFiltrationPump"];
 			_animationFlowPumpToBalanceChamberToBalanceChamber = (Storyboard)Resources["FlowPumpToBalanceChamberToBalanceChamber"];
 			_animationFlowUltraFiltrationPumpToDrain = (Storyboard)Resources["FlowUltraFiltrationPumpToDrain"];
+			
+			// Add custom buttons
+			selectFlowPatientToBloodPump.MouseLeftButtonDown += SelectModelElement;
+			selectFlowBloodPumpToMerge1.MouseLeftButtonDown += SelectModelElement;
+			selectFlowMerge1ToArterialChamber.MouseLeftButtonDown += SelectModelElement;
+			selectFlowArterialChamberToDialyzer.MouseLeftButtonDown += SelectModelElement;
+			selectFlowDialyzerBloodSideToSplit2.MouseLeftButtonDown += SelectModelElement;
+			selectFlowSplit2ToVenousChamber.MouseLeftButtonDown += SelectModelElement;
+			selectFlowVenousChamberToSafetyDetector.MouseLeftButtonDown += SelectModelElement;
+			selectFlowSafetySensorToVenousValve.MouseLeftButtonDown += SelectModelElement;
+			selectFlowVenousValveToPatient.MouseLeftButtonDown += SelectModelElement;
+			selectFlowWaterSupplyToWaterPreparation.MouseLeftButtonDown += SelectModelElement;
+			selectFlowWaterPreparationToDialyzingFluidPreparation.MouseLeftButtonDown += SelectModelElement;
+			selectFlowDialyzingFluidPreparationToBalanceChamber.MouseLeftButtonDown += SelectModelElement;
+			selectFlowBalanceChamberToDrain.MouseLeftButtonDown += SelectModelElement;
+			selectFlowBalanceChamberToSafetyBypass.MouseLeftButtonDown += SelectModelElement;
+			selectFlowSafetyBypassToDialyzer.MouseLeftButtonDown += SelectModelElement;
+			selectFlowDialyzerDialyzingFluidSideToSplit3.MouseLeftButtonDown += SelectModelElement;
+			selectFlowSplit3ToPumpToBalanceChamber.MouseLeftButtonDown += SelectModelElement;
+			selectFlowSplit3ToUltraFiltrationPump.MouseLeftButtonDown += SelectModelElement;
+			selectFlowPumpToBalanceChamberToBalanceChamber.MouseLeftButtonDown += SelectModelElement;
+			selectFlowUltraFiltrationPumpToDrain.MouseLeftButtonDown += SelectModelElement;
+
 
 
 			// Initialize the simulation environment
@@ -165,6 +189,9 @@ namespace Visualization
 		private LastVisualState _visualStateFlowPumpToBalanceChamberToBalanceChamber;
 		private LastVisualState _visualStateFlowUltraFiltrationPumpToDrain;
 
+		private System.Windows.Media.Brush Highlighted = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(178, 253, 153, 53));
+		private System.Windows.Media.Brush NotHighlighted = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 253, 153, 53));
+		private Rectangle SelectedModelElement;
 
 		private void OnModelStateReset()
 		{
@@ -353,9 +380,16 @@ namespace Visualization
 
 		}
 
-		private void BloodPumpDefect_Click(object sender, RoutedEventArgs e)
+		private void SelectModelElement(object sender, RoutedEventArgs e)
 		{
-			Machine.ExtracorporealBloodCircuit.ArterialBloodPump.BloodPumpDefect.ToggleActivationMode();
+			if (SelectedModelElement!=null) SelectedModelElement.Stroke = null;
+			SelectedModelElement = (Rectangle)sender;
+			SelectedModelElement.Stroke = Highlighted;
+
+			if (sender.Equals(selectFlowPatientToBloodPump))
+				textBlockSelectedElementInfos.Text = "....";
+			
+			//Machine.ExtracorporealBloodCircuit.ArterialBloodPump.BloodPumpDefect.ToggleActivationMode();
 		}
 
 		private void ModelValues_Click(object sender, RoutedEventArgs e)
