@@ -24,6 +24,7 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
@@ -142,21 +143,7 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 			Requires.NotNull(syntax, nameof(syntax));
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
-			return syntax.TypeExpression<T>(semanticModel.Compilation);
-		}
-
-		/// <summary>
-		///   Generates a <see cref="TypeSyntax" /> for type <typeparamref name="T" />.
-		/// </summary>
-		/// <param name="syntax">The syntax generator that should be used to generate the expression.</param>
-		/// <param name="compilation">The compilation that should be used to resolve type information.</param>
-		[Pure, NotNull]
-		public static TypeSyntax TypeExpression<T>([NotNull] this SyntaxGenerator syntax, [NotNull] Compilation compilation)
-		{
-			Requires.NotNull(syntax, nameof(syntax));
-			Requires.NotNull(compilation, nameof(compilation));
-
-			return (TypeSyntax)syntax.TypeExpression(compilation.GetTypeSymbol<T>());
+			return (TypeSyntax)syntax.TypeExpression(semanticModel.GetTypeSymbol<T>());
 		}
 
 		/// <summary>
@@ -264,7 +251,7 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 #if DEBUG
 			return syntaxNode;
 #else
-			var attributeType = SyntaxFactory.ParseTypeName(typeof(DebuggerBrowsableState).FullName);
+			var attributeType = SyntaxFactory.ParseTypeName(typeof(DebuggerBrowsableState).GetGlobalName());
 			var never = syntax.MemberAccessExpression(attributeType, nameof(DebuggerBrowsableState.Never));
 			return syntax.AddAttribute<DebuggerBrowsableAttribute>(syntaxNode, never);
 #endif

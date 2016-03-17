@@ -380,7 +380,7 @@ namespace SafetySharp.Compiler.Normalization
 			var typeofExpression = SyntaxFactory.TypeOfExpression((TypeSyntax)Syntax.TypeExpression((runtimeType)));
 			var field = Syntax.FieldDeclaration(
 				name: "runtimeType".ToSynthesized(),
-				type: Syntax.TypeExpression<Type>(Compilation),
+				type: SyntaxFactory.ParseTypeName(typeof(Type).GetGlobalName()),
 				accessibility: Accessibility.Private,
 				modifiers: DeclarationModifiers.Static | DeclarationModifiers.ReadOnly,
 				initializer: typeofExpression);
