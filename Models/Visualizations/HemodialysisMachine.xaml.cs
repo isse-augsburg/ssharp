@@ -23,7 +23,9 @@
 namespace Visualization
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using System.Windows;
 	using System.Windows.Media.Animation;
 	using System.Windows.Shapes;
@@ -44,11 +46,60 @@ namespace Visualization
 			Disabled
 		}
 
-		public HdMachine()
+		public class VisualFlow
 		{
-			var specification = new Specification();
+			public string Name;
+			public Storyboard Animation;
+			public LastVisualState LastVisualState;
+			public Rectangle SelectionRectangle;
+			public Action UpdateVisualization;
+			public Func<string> GetInfoText;
 
-			InitializeComponent();
+			public VisualFlow(string _name, Storyboard _animation, Rectangle _selectionRectangle, PortFlowOut<Blood, Suction> portFlowOut)
+			{
+				Name = _name;
+				Animation = _animation;
+				SelectionRectangle = _selectionRectangle;
+
+				UpdateVisualization = () =>
+				{
+					GenericUpdateVisualization(portFlowOut.ForwardToSuccessor.HasWaterOrBigWaste());
+				};
+				GetInfoText = () => portFlowOut.ForwardToSuccessor.ValuesAsText();
+			}
+
+			public VisualFlow(string _name, Storyboard _animation, Rectangle _selectionRectangle, PortFlowOut<DialyzingFluid, Suction> portFlowOut)
+			{
+				Name = _name;
+				Animation = _animation;
+				SelectionRectangle = _selectionRectangle;
+
+				UpdateVisualization = () =>
+				{
+					GenericUpdateVisualization(portFlowOut.ForwardToSuccessor.Quantity > 0);
+				};
+				GetInfoText = () => portFlowOut.ForwardToSuccessor.ValuesAsText();
+			}
+
+			private void GenericUpdateVisualization(bool shouldBeEnabled)
+			{
+				if (shouldBeEnabled && LastVisualState != LastVisualState.Enabled)
+				{
+					LastVisualState = LastVisualState.Enabled;
+					Animation.RepeatBehavior = RepeatBehavior.Forever;
+					Animation.Begin();
+				}
+				else if (shouldBeEnabled == false && LastVisualState != LastVisualState.Disabled)
+				{
+					LastVisualState = LastVisualState.Disabled;
+					Animation.Stop();
+				}
+			}
+		}
+
+		public void InitializeElements()
+		{
+
 			_animationBloodPumpEnabled = (Storyboard)Resources["BloodPumpEnabled"];
 			_animationHeparinPumpEnabled = (Storyboard)Resources["HeparinPumpEnabled"];
 			_animationEnableWaterPreparation = (Storyboard)Resources["EnableWaterPreparation"];
@@ -62,49 +113,45 @@ namespace Visualization
 			_animationVenousChamberDripping = (Storyboard)Resources["VenousChamberDripping"];
 			_animationArterialChamberNotDripping = (Storyboard)Resources["ArterialChamberNotDripping"];
 			_animationVenousChamberNotDripping = (Storyboard)Resources["VenousChamberNotDripping"];
-			_animationFlowPatientToBloodPump = (Storyboard)Resources["FlowPatientToBloodPump"];
-			_animationFlowBloodPumpToMerge1 = (Storyboard)Resources["FlowBloodPumpToMerge1"];
-			_animationFlowMerge1ToArterialChamber = (Storyboard)Resources["FlowMerge1ToArterialChamber"];
-			_animationFlowArterialChamberToDialyzer = (Storyboard)Resources["FlowArterialChamberToDialyzer"];
-			_animationFlowDialyzerBloodSideToSplit2 = (Storyboard)Resources["FlowDialyzerBloodSideToSplit2"];
-			_animationFlowSplit2ToVenousChamber = (Storyboard)Resources["FlowSplit2ToVenousChamber"];
-			_animationFlowVenousChamberToSafetyDetector = (Storyboard)Resources["FlowVenousChamberToSafetyDetector"];
-			_animationFlowSafetySensorToVenousValve = (Storyboard)Resources["FlowSafetySensorToVenousValve"];
-			_animationFlowVenousValveToPatient = (Storyboard)Resources["FlowVenousValveToPatient"];
-			_animationFlowWaterSupplyToWaterPreparation = (Storyboard)Resources["FlowWaterSupplyToWaterPreparation"];
-			_animationFlowWaterPreparationToDialyzingFluidPreparation = (Storyboard)Resources["FlowWaterPreparationToDialyzingFluidPreparation"];
-			_animationFlowDialyzingFluidPreparationToBalanceChamber = (Storyboard)Resources["FlowDialyzingFluidPreparationToBalanceChamber"];
-			_animationFlowBalanceChamberToDrain = (Storyboard)Resources["FlowBalanceChamberToDrain"];
-			_animationFlowBalanceChamberToSafetyBypass = (Storyboard)Resources["FlowBalanceChamberToSafetyBypass"];
-			_animationFlowSafetyBypassToDialyzer = (Storyboard)Resources["FlowSafetyBypassToDialyzer"];
-			_animationFlowDialyzerDialyzingFluidSideToSplit3 = (Storyboard)Resources["FlowDialyzerDialyzingFluidSideToSplit3"];
-			_animationFlowSplit3ToPumpToBalanceChamber = (Storyboard)Resources["FlowSplit3ToPumpToBalanceChamber"];
-			_animationFlowSplit3ToUltraFiltrationPump = (Storyboard)Resources["FlowSplit3ToUltraFiltrationPump"];
-			_animationFlowPumpToBalanceChamberToBalanceChamber = (Storyboard)Resources["FlowPumpToBalanceChamberToBalanceChamber"];
-			_animationFlowUltraFiltrationPumpToDrain = (Storyboard)Resources["FlowUltraFiltrationPumpToDrain"];
 			
-			// Add custom buttons
-			selectFlowPatientToBloodPump.MouseLeftButtonDown += SelectModelElement;
-			selectFlowBloodPumpToMerge1.MouseLeftButtonDown += SelectModelElement;
-			selectFlowMerge1ToArterialChamber.MouseLeftButtonDown += SelectModelElement;
-			selectFlowArterialChamberToDialyzer.MouseLeftButtonDown += SelectModelElement;
-			selectFlowDialyzerBloodSideToSplit2.MouseLeftButtonDown += SelectModelElement;
-			selectFlowSplit2ToVenousChamber.MouseLeftButtonDown += SelectModelElement;
-			selectFlowVenousChamberToSafetyDetector.MouseLeftButtonDown += SelectModelElement;
-			selectFlowSafetySensorToVenousValve.MouseLeftButtonDown += SelectModelElement;
-			selectFlowVenousValveToPatient.MouseLeftButtonDown += SelectModelElement;
-			selectFlowWaterSupplyToWaterPreparation.MouseLeftButtonDown += SelectModelElement;
-			selectFlowWaterPreparationToDialyzingFluidPreparation.MouseLeftButtonDown += SelectModelElement;
-			selectFlowDialyzingFluidPreparationToBalanceChamber.MouseLeftButtonDown += SelectModelElement;
-			selectFlowBalanceChamberToDrain.MouseLeftButtonDown += SelectModelElement;
-			selectFlowBalanceChamberToSafetyBypass.MouseLeftButtonDown += SelectModelElement;
-			selectFlowSafetyBypassToDialyzer.MouseLeftButtonDown += SelectModelElement;
-			selectFlowDialyzerDialyzingFluidSideToSplit3.MouseLeftButtonDown += SelectModelElement;
-			selectFlowSplit3ToPumpToBalanceChamber.MouseLeftButtonDown += SelectModelElement;
-			selectFlowSplit3ToUltraFiltrationPump.MouseLeftButtonDown += SelectModelElement;
-			selectFlowPumpToBalanceChamberToBalanceChamber.MouseLeftButtonDown += SelectModelElement;
-			selectFlowUltraFiltrationPumpToDrain.MouseLeftButtonDown += SelectModelElement;
+			VisualFlows = new VisualFlow[]
+			{
+				new VisualFlow("FlowPatientToBloodPump",(Storyboard)Resources["FlowPatientToBloodPump"],selectFlowPatientToBloodPump,Patient.ArteryFlow.Outgoing),
+				new VisualFlow("FlowBloodPumpToMerge1",(Storyboard)Resources["FlowBloodPumpToMerge1"],selectFlowBloodPumpToMerge1,Machine.ExtracorporealBloodCircuit.ArterialBloodPump.MainFlow.Outgoing),
+				new VisualFlow("FlowMerge1ToArterialChamber",(Storyboard)Resources["FlowMerge1ToArterialChamber"],selectFlowMerge1ToArterialChamber,Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Incoming.ConnectedPredecessor),
+				new VisualFlow("FlowArterialChamberToDialyzer",(Storyboard)Resources["FlowArterialChamberToDialyzer"],selectFlowArterialChamberToDialyzer,Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Outgoing),
+				new VisualFlow("FlowDialyzerBloodSideToSplit2",(Storyboard)Resources["FlowDialyzerBloodSideToSplit2"],selectFlowDialyzerBloodSideToSplit2,Machine.Dialyzer.BloodFlow.Outgoing),
+				new VisualFlow("FlowSplit2ToVenousChamber",(Storyboard)Resources["FlowSplit2ToVenousChamber"],selectFlowSplit2ToVenousChamber,Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Incoming.ConnectedPredecessor),
+				new VisualFlow("FlowVenousChamberToSafetyDetector",(Storyboard)Resources["FlowVenousChamberToSafetyDetector"],selectFlowVenousChamberToSafetyDetector,Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Outgoing),
+				new VisualFlow("FlowSafetySensorToVenousValve",(Storyboard)Resources["FlowSafetySensorToVenousValve"],selectFlowSafetySensorToVenousValve,Machine.ExtracorporealBloodCircuit.VenousSafetyDetector.MainFlow.Outgoing),
+				new VisualFlow("FlowVenousValveToPatient",(Storyboard)Resources["FlowVenousValveToPatient"],selectFlowVenousValveToPatient,Machine.ExtracorporealBloodCircuit.VenousTubingValve.MainFlow.Outgoing),
+				new VisualFlow("FlowWaterSupplyToWaterPreparation",(Storyboard)Resources["FlowWaterSupplyToWaterPreparation"],selectFlowWaterSupplyToWaterPreparation,Machine.DialyzingFluidDeliverySystem.DialyzingFluidWaterSupply.MainFlow.Outgoing),
+				new VisualFlow("FlowWaterPreparationToDialyzingFluidPreparation",(Storyboard)Resources["FlowWaterPreparationToDialyzingFluidPreparation"],selectFlowWaterPreparationToDialyzingFluidPreparation,Machine.DialyzingFluidDeliverySystem.DialyzingFluidWaterPreparation.MainFlow.Outgoing),
+				new VisualFlow("FlowDialyzingFluidPreparationToBalanceChamber",(Storyboard)Resources["FlowDialyzingFluidPreparationToBalanceChamber"],selectFlowDialyzingFluidPreparationToBalanceChamber,Machine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidFlow.Outgoing),
+				new VisualFlow("FlowBalanceChamberToDrain",(Storyboard)Resources["FlowBalanceChamberToDrain"],selectFlowBalanceChamberToDrain,Machine.DialyzingFluidDeliverySystem.BalanceChamber.ForwardUsedFlowSegment.Outgoing),
+				new VisualFlow("FlowBalanceChamberToSafetyBypass",(Storyboard)Resources["FlowBalanceChamberToSafetyBypass"],selectFlowBalanceChamberToSafetyBypass,Machine.DialyzingFluidDeliverySystem.BalanceChamber.ForwardProducedFlowSegment.Outgoing),
+				new VisualFlow("FlowSafetyBypassToDialyzer",(Storyboard)Resources["FlowSafetyBypassToDialyzer"],selectFlowSafetyBypassToDialyzer,Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.MainFlow.Outgoing),
+				new VisualFlow("FlowDialyzerDialyzingFluidSideToSplit3",(Storyboard)Resources["FlowDialyzerDialyzingFluidSideToSplit3"],selectFlowDialyzerDialyzingFluidSideToSplit3,Machine.Dialyzer.DialyzingFluidFlow.Outgoing),
+				new VisualFlow("FlowSplit3ToPumpToBalanceChamber",(Storyboard)Resources["FlowSplit3ToPumpToBalanceChamber"],selectFlowSplit3ToPumpToBalanceChamber,Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Incoming.ConnectedPredecessor),
+				new VisualFlow("FlowSplit3ToUltraFiltrationPump",(Storyboard)Resources["FlowSplit3ToUltraFiltrationPump"],selectFlowSplit3ToUltraFiltrationPump,Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.DialyzingFluidFlow.Incoming.ConnectedPredecessor),
+				new VisualFlow("FlowPumpToBalanceChamberToBalanceChamber",(Storyboard)Resources["FlowPumpToBalanceChamberToBalanceChamber"],selectFlowPumpToBalanceChamberToBalanceChamber,Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Outgoing),
+				new VisualFlow("FlowUltraFiltrationPumpToDrain",(Storyboard)Resources["FlowUltraFiltrationPumpToDrain"],selectFlowUltraFiltrationPumpToDrain,Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.DialyzingFluidFlow.Outgoing),
+			};
 
+			// Add custom buttons
+			foreach (var visualFlow in VisualFlows)
+			{
+				var rectangle = visualFlow.SelectionRectangle;
+				rectangle.MouseLeftButtonDown += SelectModelElement;
+				SelectedModelElementToVisualFlow.Add(visualFlow.SelectionRectangle,visualFlow);
+			}
+		}
+
+		public HdMachine()
+		{
+			var specification = new Specification();
+
+			InitializeComponent();
 
 
 			// Initialize the simulation environment
@@ -113,6 +160,9 @@ namespace Visualization
 			SimulationControls.Rewound += (o, e) => OnRewound();
 			SimulationControls.SetSpecification(specification);
 
+
+			InitializeElements();
+
 			// Initialize the visualization state
 			UpdateModelState();
 			
@@ -120,44 +170,24 @@ namespace Visualization
 			SimulationControls.ChangeSpeed(8);
 		}
 
+
 		private HemodialysisMachine.Model.HdMachine Machine => SimulationControls.Model.RootComponents.OfType<HemodialysisMachine.Model.HdMachine>().Single();
 		private HemodialysisMachine.Model.Patient Patient => SimulationControls.Model.RootComponents.OfType<HemodialysisMachine.Model.Patient>().First();
 
-		private readonly Storyboard _animationBloodPumpEnabled;
-		private readonly Storyboard _animationHeparinPumpEnabled;
-		private readonly Storyboard _animationEnableWaterPreparation;
-		private readonly Storyboard _animationDisableWaterPreparation;
-		private readonly Storyboard _animationDialyzingFluidPreparationEnabled;
-		private readonly Storyboard _animationUltraFiltrationEnabled;
-		private readonly Storyboard _animationPumpToBalanceChamberEnabled;
-		private readonly Storyboard _animationCloseVenousTubingValve;
-		private readonly Storyboard _animationOpenVenousTubingValve;
-		private readonly Storyboard _animationArterialChamberDripping;
-		private readonly Storyboard _animationVenousChamberDripping;
-		private readonly Storyboard _animationArterialChamberNotDripping;
-		private readonly Storyboard _animationVenousChamberNotDripping;
-
-		private readonly Storyboard _animationFlowPatientToBloodPump;
-		private readonly Storyboard _animationFlowBloodPumpToMerge1;
-		private readonly Storyboard _animationFlowMerge1ToArterialChamber;
-		private readonly Storyboard _animationFlowArterialChamberToDialyzer;
-		private readonly Storyboard _animationFlowDialyzerBloodSideToSplit2;
-		private readonly Storyboard _animationFlowSplit2ToVenousChamber;
-		private readonly Storyboard _animationFlowVenousChamberToSafetyDetector;
-		private readonly Storyboard _animationFlowSafetySensorToVenousValve;
-		private readonly Storyboard _animationFlowVenousValveToPatient;
-		private readonly Storyboard _animationFlowWaterSupplyToWaterPreparation;
-		private readonly Storyboard _animationFlowWaterPreparationToDialyzingFluidPreparation;
-		private readonly Storyboard _animationFlowDialyzingFluidPreparationToBalanceChamber;
-		private readonly Storyboard _animationFlowBalanceChamberToDrain;
-		private readonly Storyboard _animationFlowBalanceChamberToSafetyBypass;
-		private readonly Storyboard _animationFlowSafetyBypassToDialyzer;
-		private readonly Storyboard _animationFlowDialyzerDialyzingFluidSideToSplit3;
-		private readonly Storyboard _animationFlowSplit3ToPumpToBalanceChamber;
-		private readonly Storyboard _animationFlowSplit3ToUltraFiltrationPump;
-		private readonly Storyboard _animationFlowPumpToBalanceChamberToBalanceChamber;
-		private readonly Storyboard _animationFlowUltraFiltrationPumpToDrain;
-
+		private Storyboard _animationBloodPumpEnabled;
+		private Storyboard _animationHeparinPumpEnabled;
+		private Storyboard _animationEnableWaterPreparation;
+		private Storyboard _animationDisableWaterPreparation;
+		private Storyboard _animationDialyzingFluidPreparationEnabled;
+		private Storyboard _animationUltraFiltrationEnabled;
+		private Storyboard _animationPumpToBalanceChamberEnabled;
+		private Storyboard _animationCloseVenousTubingValve;
+		private Storyboard _animationOpenVenousTubingValve;
+		private Storyboard _animationArterialChamberDripping;
+		private Storyboard _animationVenousChamberDripping;
+		private Storyboard _animationArterialChamberNotDripping;
+		private Storyboard _animationVenousChamberNotDripping;
+		
 		private LastVisualState _visualStateBloodPump;
 		private LastVisualState _visualStateHeparinPump;
 		private LastVisualState _visualStateWaterPreparation;
@@ -168,26 +198,8 @@ namespace Visualization
 		private LastVisualState _visualStateArterialChamber;
 		private LastVisualState _visualStateVenousChamber;
 
-		private LastVisualState _visualStateFlowPatientToBloodPump;
-		private LastVisualState _visualStateFlowBloodPumpToMerge1;
-		private LastVisualState _visualStateFlowMerge1ToArterialChamber;
-		private LastVisualState _visualStateFlowArterialChamberToDialyzer;
-		private LastVisualState _visualStateFlowDialyzerBloodSideToSplit2;
-		private LastVisualState _visualStateFlowSplit2ToVenousChamber;
-		private LastVisualState _visualStateFlowVenousChamberToSafetyDetector;
-		private LastVisualState _visualStateFlowSafetySensorToVenousValve;
-		private LastVisualState _visualStateFlowVenousValveToPatient;
-		private LastVisualState _visualStateFlowWaterSupplyToWaterPreparation;
-		private LastVisualState _visualStateFlowWaterPreparationToDialyzingFluidPreparation;
-		private LastVisualState _visualStateFlowDialyzingFluidPreparationToBalanceChamber;
-		private LastVisualState _visualStateFlowBalanceChamberToDrain;
-		private LastVisualState _visualStateFlowBalanceChamberToSafetyBypass;
-		private LastVisualState _visualStateFlowSafetyBypassToDialyzer;
-		private LastVisualState _visualStateFlowDialyzerDialyzingFluidSideToSplit3;
-		private LastVisualState _visualStateFlowSplit3ToPumpToBalanceChamber;
-		private LastVisualState _visualStateFlowSplit3ToUltraFiltrationPump;
-		private LastVisualState _visualStateFlowPumpToBalanceChamberToBalanceChamber;
-		private LastVisualState _visualStateFlowUltraFiltrationPumpToDrain;
+		private VisualFlow[] VisualFlows;
+		private readonly Dictionary<Rectangle, VisualFlow> SelectedModelElementToVisualFlow=new Dictionary<Rectangle, VisualFlow>();
 
 		private System.Windows.Media.Brush Highlighted = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(178, 253, 153, 53));
 		private System.Windows.Media.Brush NotHighlighted = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 253, 153, 53));
@@ -302,14 +314,14 @@ namespace Visualization
 			}
 
 			// ArterialChamber
-			if (Machine.ExtracorporealBloodCircuit.ArterialBloodPump.SpeedOfMotor > 0 && _visualStateArterialChamber != LastVisualState.Enabled)
+			if (Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Outgoing.ForwardToSuccessor.HasWaterOrBigWaste() && _visualStateArterialChamber != LastVisualState.Enabled)
 			{
 				_visualStateArterialChamber = LastVisualState.Enabled;
 				_animationArterialChamberDripping.RepeatBehavior = RepeatBehavior.Forever;
 				_animationArterialChamberNotDripping.Stop();
 				_animationArterialChamberDripping.Begin();
 			}
-			else if (Machine.ExtracorporealBloodCircuit.ArterialBloodPump.SpeedOfMotor == 0 && _visualStateArterialChamber != LastVisualState.Disabled)
+			else if (Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Outgoing.ForwardToSuccessor.HasWaterOrBigWaste()==false && _visualStateArterialChamber != LastVisualState.Disabled)
 			{
 				_visualStateArterialChamber = LastVisualState.Disabled;
 				_animationArterialChamberDripping.Stop();
@@ -317,81 +329,56 @@ namespace Visualization
 			}
 
 			// VenousChamber
-			if (Machine.ExtracorporealBloodCircuit.ArterialBloodPump.SpeedOfMotor > 0 && _visualStateVenousChamber != LastVisualState.Enabled)
+			if (Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Outgoing.ForwardToSuccessor.HasWaterOrBigWaste() && _visualStateVenousChamber != LastVisualState.Enabled)
 			{
 				_visualStateVenousChamber = LastVisualState.Enabled;
 				_animationVenousChamberDripping.RepeatBehavior = RepeatBehavior.Forever;
 				_animationVenousChamberNotDripping.Stop();
 				_animationVenousChamberDripping.Begin();
 			}
-			else if (Machine.ExtracorporealBloodCircuit.ArterialBloodPump.SpeedOfMotor == 0 && _visualStateVenousChamber != LastVisualState.Disabled)
+			else if (Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Outgoing.ForwardToSuccessor.HasWaterOrBigWaste() == false && _visualStateVenousChamber != LastVisualState.Disabled)
 			{
 				_visualStateVenousChamber = LastVisualState.Disabled;
 				_animationVenousChamberDripping.Stop();
 				_animationVenousChamberNotDripping.Begin();
 			}
-
-			UpdateModelStateFlowElement(Patient.ArteryFlow.Outgoing, _animationFlowPatientToBloodPump, ref _visualStateFlowPatientToBloodPump);
-			UpdateModelStateFlowElement(Machine.ExtracorporealBloodCircuit.ArterialBloodPump.MainFlow.Outgoing, _animationFlowBloodPumpToMerge1, ref _visualStateFlowBloodPumpToMerge1);
-			UpdateModelStateFlowElement(Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Incoming.ConnectedPredecessor, _animationFlowMerge1ToArterialChamber, ref _visualStateFlowMerge1ToArterialChamber);
-			UpdateModelStateFlowElement(Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Outgoing, _animationFlowArterialChamberToDialyzer, ref _visualStateFlowArterialChamberToDialyzer);
-			UpdateModelStateFlowElement(Machine.Dialyzer.BloodFlow.Outgoing, _animationFlowDialyzerBloodSideToSplit2, ref _visualStateFlowDialyzerBloodSideToSplit2);
-			UpdateModelStateFlowElement(Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Incoming.ConnectedPredecessor, _animationFlowSplit2ToVenousChamber, ref _visualStateFlowSplit2ToVenousChamber);
-			UpdateModelStateFlowElement(Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Outgoing, _animationFlowVenousChamberToSafetyDetector, ref _visualStateFlowVenousChamberToSafetyDetector);
-			UpdateModelStateFlowElement(Machine.ExtracorporealBloodCircuit.VenousSafetyDetector.MainFlow.Outgoing, _animationFlowSafetySensorToVenousValve, ref _visualStateFlowSafetySensorToVenousValve);
-			UpdateModelStateFlowElement(Machine.ExtracorporealBloodCircuit.VenousTubingValve.MainFlow.Outgoing, _animationFlowVenousValveToPatient, ref _visualStateFlowVenousValveToPatient);
-			UpdateModelStateFlowElement(Machine.DialyzingFluidDeliverySystem.DialyzingFluidWaterSupply.MainFlow.Outgoing, _animationFlowWaterSupplyToWaterPreparation, ref _visualStateFlowWaterSupplyToWaterPreparation);
-			UpdateModelStateFlowElement(Machine.DialyzingFluidDeliverySystem.DialyzingFluidWaterPreparation.MainFlow.Outgoing, _animationFlowWaterPreparationToDialyzingFluidPreparation, ref _visualStateFlowWaterPreparationToDialyzingFluidPreparation);
-			UpdateModelStateFlowElement(Machine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidFlow.Outgoing, _animationFlowDialyzingFluidPreparationToBalanceChamber, ref _visualStateFlowDialyzingFluidPreparationToBalanceChamber);
-			UpdateModelStateFlowElement(Machine.DialyzingFluidDeliverySystem.BalanceChamber.ForwardUsedFlowSegment.Outgoing, _animationFlowBalanceChamberToDrain, ref _visualStateFlowBalanceChamberToDrain); //TODO: Do not use the internal knowledge
-			UpdateModelStateFlowElement(Machine.DialyzingFluidDeliverySystem.BalanceChamber.ForwardProducedFlowSegment.Outgoing, _animationFlowBalanceChamberToSafetyBypass, ref _visualStateFlowBalanceChamberToSafetyBypass); //TODO: Do not use the internal knowledge
-			UpdateModelStateFlowElement(Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.MainFlow.Outgoing, _animationFlowSafetyBypassToDialyzer, ref _visualStateFlowSafetyBypassToDialyzer);
-			UpdateModelStateFlowElement(Machine.Dialyzer.DialyzingFluidFlow.Outgoing, _animationFlowDialyzerDialyzingFluidSideToSplit3, ref _visualStateFlowDialyzerDialyzingFluidSideToSplit3);
-			UpdateModelStateFlowElement(Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Incoming.ConnectedPredecessor, _animationFlowSplit3ToPumpToBalanceChamber, ref _visualStateFlowSplit3ToPumpToBalanceChamber);
-			UpdateModelStateFlowElement(Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.DialyzingFluidFlow.Incoming.ConnectedPredecessor, _animationFlowSplit3ToUltraFiltrationPump, ref _visualStateFlowSplit3ToUltraFiltrationPump);
-			UpdateModelStateFlowElement(Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Outgoing, _animationFlowPumpToBalanceChamberToBalanceChamber, ref _visualStateFlowPumpToBalanceChamberToBalanceChamber);
-			UpdateModelStateFlowElement(Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.DialyzingFluidFlow.Outgoing, _animationFlowUltraFiltrationPumpToDrain, ref _visualStateFlowUltraFiltrationPumpToDrain);
 			
-		}
-
-		private void UpdateModelStateFlowElement(PortFlowOut<Blood, Suction> portFlowOut, Storyboard storyboard, ref LastVisualState visualState)
-		{
-			UpdateModelStateFlowElement(portFlowOut.ForwardToSuccessor.HasWaterOrBigWaste(),storyboard,ref visualState);
-		}
-
-		private void UpdateModelStateFlowElement(PortFlowOut<DialyzingFluid, Suction> portFlowOut, Storyboard storyboard, ref LastVisualState visualState)
-		{
-			UpdateModelStateFlowElement(portFlowOut.ForwardToSuccessor.Quantity>0, storyboard, ref visualState);
-		}
-
-		private void UpdateModelStateFlowElement(bool shouldBeEnabled, Storyboard storyboard, ref LastVisualState visualState)
-		{
-			if (shouldBeEnabled && visualState != LastVisualState.Enabled)
+			foreach (var visualFlow in VisualFlows)
 			{
-				visualState = LastVisualState.Enabled;
-				storyboard.RepeatBehavior = RepeatBehavior.Forever;
-				storyboard.Begin();
+				visualFlow.UpdateVisualization();
 			}
-			else if (shouldBeEnabled == false && visualState != LastVisualState.Disabled)
-			{
-				visualState = LastVisualState.Disabled;
-				storyboard.Stop();
-			}
+			UpdateSelectedModelElementInfoText();
+			UpdatePatientInfoText();
 
 		}
-
 		private void SelectModelElement(object sender, RoutedEventArgs e)
 		{
 			if (SelectedModelElement!=null) SelectedModelElement.Stroke = null;
 			SelectedModelElement = (Rectangle)sender;
 			SelectedModelElement.Stroke = Highlighted;
 
-			if (sender.Equals(selectFlowPatientToBloodPump))
-				textBlockSelectedElementInfos.Text = "....";
-			
+			UpdateSelectedModelElementInfoText();
 			//Machine.ExtracorporealBloodCircuit.ArterialBloodPump.BloodPumpDefect.ToggleActivationMode();
 		}
 
+		public void UpdateSelectedModelElementInfoText()
+		{
+			if (SelectedModelElement != null)
+			{
+				var text = "";
+				if (SelectedModelElementToVisualFlow.ContainsKey(SelectedModelElement))
+					text = SelectedModelElementToVisualFlow[SelectedModelElement].GetInfoText();
+				textBlockSelectedElementInfos.Text = text;
+			}
+		}
+
+		public void UpdatePatientInfoText()
+		{
+			var text = Patient.ValuesAsText();
+			textBlockPatientInfos.Text = text;
+		}
+
+		/*
 		private void ModelValues_Click(object sender, RoutedEventArgs e)
 		{
 			Console.Out.WriteLine("Time Steps Left: " + Machine.ControlSystem.TimeStepsLeft);
@@ -407,5 +394,6 @@ namespace Visualization
 			Machine.Dialyzer.DialyzingFluidFlow.Outgoing.BackwardFromSuccessor.PrintSuctionValues("Dialyzing Fluid suction of Dialyzer from successor");
 			Machine.Dialyzer.DialyzingFluidFlow.Incoming.ForwardFromPredecessor.PrintDialyzingFluidValues("Dialyzing Fluid entering Dialyzer");
 		}
+		*/
 	}
 }

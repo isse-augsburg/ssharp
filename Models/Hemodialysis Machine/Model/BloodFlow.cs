@@ -50,6 +50,19 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 			Temperature = from.Temperature;
 		}
 
+		public bool HasWaterOrBigWaste()
+		{
+			return Water > 0 || BigWasteProducts > 0;
+		}
+
+		public string ValuesAsText()
+		{
+			return 
+				"Water: " + Water +
+				"\nSmallWasteProducts: " + SmallWasteProducts +
+				"\nBigWasteProducts: " + BigWasteProducts;
+		}
+
 		public void PrintBloodValues(string description)
 		{
 			System.Console.Out.WriteLine("\t"+description);

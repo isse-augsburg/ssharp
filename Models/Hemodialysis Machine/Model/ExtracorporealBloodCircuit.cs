@@ -79,6 +79,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 	{
 		public readonly BloodFlowSource HeparinFlow = new BloodFlowSource();
 
+		public readonly bool Enabled = true;
+
 		[Provided]
 		public void SetHeparinFlow(Blood outgoing)
 		{

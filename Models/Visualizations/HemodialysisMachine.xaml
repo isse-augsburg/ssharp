@@ -1570,7 +1570,7 @@
             </Canvas>
             <Canvas x:Name="information" Width="776.696" Height="396.50001" RenderTransformOrigin="0.5,0.5" d:LayoutOverrides="TopMargin, BottomMargin">
                 <TextBlock x:Name="textBlockPatientInfos" Height="79.423" TextWrapping="Wrap" Text="PatientInfos" Width="147.006" Foreground="White"/>
-                <TextBlock x:Name="textBlockSelectedElementInfos" Height="79.423" TextWrapping="Wrap" Text="SelectedElementInfos" Width="147.006" Foreground="White" Canvas.Left="377" Canvas.Top="290"/>
+                <TextBlock x:Name="textBlockSelectedElementInfos" Height="79.423" TextWrapping="Wrap" Text="SelectedElementInfos" Width="179.006" Foreground="White" Canvas.Left="367.362" Canvas.Top="290"/>
                 <Rectangle x:Name="selectFlowPatientToBloodPump" Height="22" Canvas.Left="212.368" Canvas.Top="108.211" Width="59" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowBloodPumpToMerge1" Height="17" Canvas.Left="308.368" Canvas.Top="86.211" Width="35" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowMerge1ToArterialChamber" Height="17" Canvas.Left="377" Canvas.Top="75.211" Width="35" StrokeThickness="2" Fill="#00000000"/>
@@ -1579,7 +1579,7 @@
                 <Rectangle x:Name="selectFlowSplit2ToVenousChamber" Height="17" Canvas.Left="335" Canvas.Top="252.211" Width="22" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowVenousChamberToSafetyDetector" Height="17" Canvas.Left="335" Canvas.Top="340.211" Width="22" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowSafetySensorToVenousValve" Height="17" Canvas.Left="241.368" Canvas.Top="340.211" Width="52" StrokeThickness="2" Fill="#00000000"/>
-                <Rectangle x:Name="selectFlowVenousValveToPatient" Height="17" Canvas.Left="189.368" Canvas.Top="340.211" Width="18" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="selectFlowVenousValveToPatient" Height="17" Canvas.Left="189.368" Canvas.Top="340.211" Width="31" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowWaterSupplyToWaterPreparation" Height="17" Canvas.Left="537.368" Canvas.Top="62.423" Width="28" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowWaterPreparationToDialyzingFluidPreparation" Height="17" Canvas.Left="615.368" Canvas.Top="62.423" Width="28" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowDialyzingFluidPreparationToBalanceChamber" Height="86.788" Canvas.Left="691.368" Canvas.Top="62.423" Width="22" StrokeThickness="2" Fill="#00000000"/>

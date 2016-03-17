@@ -53,6 +53,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 			WasUsed = from.WasUsed;
 			Temperature = from.Temperature;
 		}
+		public string ValuesAsText()
+		{
+			return "Quantity: " + Quantity.ToString();
+		}
 
 		public void PrintDialyzingFluidValues(string description)
 		{

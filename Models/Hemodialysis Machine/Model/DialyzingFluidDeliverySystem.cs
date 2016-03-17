@@ -46,11 +46,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 	{
 		public readonly DialyzingFluidFlowInToOutSegment MainFlow = new DialyzingFluidFlowInToOutSegment();
 
+		public virtual bool WaterHeaterEnabled()
+		{
+			return true;
+		}
+
 		[Provided]
 		public virtual void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
 		{
 			outgoing.CopyValuesFrom(incoming);
-			outgoing.Temperature = QualitativeTemperature.BodyHeat;
+			if (WaterHeaterEnabled())
+				outgoing.Temperature = QualitativeTemperature.BodyHeat;
 		}
 
 		[Provided]
@@ -70,10 +76,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		[FaultEffect(Fault = nameof(WaterHeaterDefect))]
 		public class WaterHeaterDefectEffect : DialyzingFluidWaterPreparation
 		{
-			[Provided]
-			public override void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+			public override bool WaterHeaterEnabled()
 			{
-				outgoing.CopyValuesFrom(incoming);
+				return false;
 			}
 		}
 	}

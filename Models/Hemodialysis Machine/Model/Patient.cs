@@ -103,5 +103,13 @@
 			System.Console.Out.WriteLine("\t\tSmallWasteProducts: " + SmallWasteProducts);
 			System.Console.Out.WriteLine("\t\tBigWasteProducts: " + BigWasteProducts);
 		}
+
+		public string ValuesAsText()
+		{
+			return
+			"Water: " + Water +
+			"\nSmallWasteProducts: " + SmallWasteProducts +
+			"\nBigWasteProducts: " + BigWasteProducts;
+		}
 	}
 }
