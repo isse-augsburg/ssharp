@@ -20,26 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Models
 {
-	using System;
+	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	internal class PropertyAmbiguity : TestComponent
+	internal class X3 : TestObject
 	{
-		public int P { get; set; }
-		public extern int R { get; set; }
-
 		protected override void Check()
 		{
-			Bind<Action<int>>(nameof(R), nameof(P));
-			Bind<Func<int>>(nameof(R), nameof(P));
+			var m = new M();
+			m.Y.N.ShouldBe(33);
+		}
 
-			R = 33;
-			P.ShouldBe(33);
-			P = 21;
-			R.ShouldBe(21);
+		private class M : ModelBase
+		{
+			public readonly C1 X = new C1();
+			public readonly C2 Y = new C2();
+
+			public M()
+			{
+				Bind(nameof(Y.N), nameof(X.M));
+			}
+		}
+
+		internal class C1 : Component
+		{
+			public int M => 33;
+		}
+
+		internal class C2 : Component
+		{
+			public extern int N { get; }
 		}
 	}
 }

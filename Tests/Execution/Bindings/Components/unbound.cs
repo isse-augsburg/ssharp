@@ -20,98 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Components
 {
-	using System;
 	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 
-	internal abstract class Y1 : TestComponent
+	internal class Unbound : TestComponent
 	{
-		protected extern int N();
-		public extern int N(int i);
-	}
+		private extern int X1 { get; }
+		private extern int X2 { set; get; }
+		private extern int X3 { set; }
+		private extern void N();
 
-	internal class X16 : Y1
-	{
-		public X16()
-		{
-			Bind<Func<int>>(nameof(N), nameof(M));
-		}
-
-		private int M()
-		{
-			return 17;
-		}
-
-		private int M(int i)
-		{
-			return i * 2;
-		}
+		public virtual extern int Y1 { get; }
+		public virtual extern int Y2 { set; get; }
+		public virtual extern int Y3 { set; }
+		public virtual extern void M();
 
 		protected override void Check()
 		{
-			N().ShouldBe(17);
-			Should.Throw<UnboundPortException>(() => N(1));
-		}
-	}
+			var x = 0;
 
-	internal class X17 : Y1
-	{
-		public X17()
-		{
-			Bind<Func<int, int>>(nameof(N), nameof(M));
-		}
-
-		private int M()
-		{
-			return 17;
-		}
-
-		private int M(int i)
-		{
-			return i * 2;
-		}
-
-		protected override void Check()
-		{
-			N(1).ShouldBe(2);
 			Should.Throw<UnboundPortException>(() => N());
-		}
-	}
+			Should.Throw<UnboundPortException>(() => x = X1);
+			Should.Throw<UnboundPortException>(() => X2 = x);
+			Should.Throw<UnboundPortException>(() => x = X2);
+			Should.Throw<UnboundPortException>(() => X3 = x);
 
-	internal delegate void D1(ref int i);
-
-	internal abstract class Y3 : TestComponent
-	{
-		protected extern void N();
-		public extern void N(ref int i);
-	}
-
-	internal class X18 : Y3
-	{
-		public X18()
-		{
-			Bind<D1>(nameof(N), nameof(M));
-		}
-
-		private void M(ref int i)
-		{
-			++i;
-		}
-
-		private void M()
-		{
-		}
-
-		protected override void Check()
-		{
-			var i = 3;
-			N(ref i);
-
-			i.ShouldBe(4);
-			Should.Throw<UnboundPortException>(() => N());
+			Should.Throw<UnboundPortException>(() => M());
+			Should.Throw<UnboundPortException>(() => x = Y1);
+			Should.Throw<UnboundPortException>(() => Y2 = x);
+			Should.Throw<UnboundPortException>(() => x = Y2);
+			Should.Throw<UnboundPortException>(() => Y3 = x);
 		}
 	}
 }

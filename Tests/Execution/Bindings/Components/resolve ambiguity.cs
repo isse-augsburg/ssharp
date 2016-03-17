@@ -20,48 +20,98 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Components
 {
-	using SafetySharp.Modeling;
+	using System;
+	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 
-	internal interface I3 : IComponent
+	internal abstract class Y1 : TestComponent
 	{
-		[Provided]
-		int M();
+		protected extern int N();
+		public extern int N(int i);
 	}
 
-	internal class X45 : Component, I3
+	internal class X16 : Y1
 	{
-		public virtual int M()
+		public X16()
 		{
-			return 1;
-		}
-	}
-
-	internal class X47 : X45
-	{
-		public override int M()
-		{
-			return 2;
-		}
-	}
-
-	internal class X48 : TestComponent
-	{
-		private readonly I3 _i = new X47();
-
-		public X48()
-		{
-			Bind(nameof(N), nameof(_i.M));
+			Bind<Func<int>>(nameof(N), nameof(M));
 		}
 
-		public extern int N();
+		private int M()
+		{
+			return 17;
+		}
+
+		private int M(int i)
+		{
+			return i * 2;
+		}
 
 		protected override void Check()
 		{
-			N().ShouldBe(2);
+			N().ShouldBe(17);
+			Should.Throw<UnboundPortException>(() => N(1));
+		}
+	}
+
+	internal class X17 : Y1
+	{
+		public X17()
+		{
+			Bind<Func<int, int>>(nameof(N), nameof(M));
+		}
+
+		private int M()
+		{
+			return 17;
+		}
+
+		private int M(int i)
+		{
+			return i * 2;
+		}
+
+		protected override void Check()
+		{
+			N(1).ShouldBe(2);
+			Should.Throw<UnboundPortException>(() => N());
+		}
+	}
+
+	internal delegate void D1(ref int i);
+
+	internal abstract class Y3 : TestComponent
+	{
+		protected extern void N();
+		public extern void N(ref int i);
+	}
+
+	internal class X18 : Y3
+	{
+		public X18()
+		{
+			Bind<D1>(nameof(N), nameof(M));
+		}
+
+		private void M(ref int i)
+		{
+			++i;
+		}
+
+		private void M()
+		{
+		}
+
+		protected override void Check()
+		{
+			var i = 3;
+			N(ref i);
+
+			i.ShouldBe(4);
+			Should.Throw<UnboundPortException>(() => N());
 		}
 	}
 }

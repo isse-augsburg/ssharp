@@ -20,42 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Components
 {
-	using SafetySharp.Runtime;
+	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	internal abstract class X33 : TestComponent
+	internal interface I2 : IComponent
 	{
-		public extern int M1();
-		public extern int M2();
+		[Required]
+		int M();
 	}
 
-	internal class X34 : X33
+	internal class X43 : Component, I2
 	{
-		int x;
-		public X34()
+		public extern int M();
+	}
+
+	internal class X44 : TestComponent
+	{
+		private readonly I2 _i = new X43();
+
+		public X44()
 		{
-			Bind(nameof(M1), nameof(N));
-			Bind(nameof(base.M2), nameof(N));
+			Bind(nameof(_i.M), nameof(N));
 		}
 
-		private int N()
+		public int N()
 		{
-			return ++x;
+			return 3;
 		}
-
-		public new extern int M1();
-		public new extern int M2();
 
 		protected override void Check()
 		{
-			M1().ShouldBe(1);
-			base.M2().ShouldBe(2);
-
-			Should.Throw<UnboundPortException>(() => base.M1());
-			Should.Throw<UnboundPortException>(() => M2());
+			_i.M().ShouldBe(3);
 		}
 	}
 }

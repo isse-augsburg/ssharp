@@ -20,37 +20,74 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Diagnostics.Bindings.Invalid
+namespace Tests.Execution.Bindings.Components
 {
-	using SafetySharp.Compiler.Analyzers;
-	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 36, 13, 34)]
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 37, 13, 37)]
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 52, 13, 38)]
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 53, 13, 41)]
-	internal class X9 : Component
+	internal class Z1 : TestComponent
 	{
-		public X9()
+		public Z1()
 		{
-			Bind<object>(nameof(N), nameof(M));
-			Bind<Component>(nameof(N), nameof(M));
+			Bind(nameof(N), nameof(M));
 		}
 
-		public void M()
+		private int M()
 		{
+			return 1;
 		}
 
-		public extern void N();
+		private extern int N();
+
+		protected override void Check()
+		{
+			N().ShouldBe(1);
+		}
 	}
 
-	internal class M9 : ModelBase
+	internal class Z1b : TestComponent
 	{
-		public M9()
+		private Z1b _f;
+
+		public Z1b()
 		{
-			var x = new X9();
-			Bind<object>(nameof(x.N), nameof(x.M));
-			Bind<Component>(nameof(x.N), nameof(x.M));
+			_f = this;
+			Bind(nameof(_f.N), nameof(_f.M));
+		}
+
+		private int M()
+		{
+			return 1;
+		}
+
+		private extern int N();
+
+		protected override void Check()
+		{
+			N().ShouldBe(1);
+		}
+	}
+
+	internal class Z1c : TestComponent
+	{
+		private Z1c F { get; set; }
+
+		public Z1c()
+		{
+			F = this;
+			Bind(nameof(F.N), nameof(F.M));
+		}
+
+		private int M()
+		{
+			return 1;
+		}
+
+		private extern int N();
+
+		protected override void Check()
+		{
+			N().ShouldBe(1);
 		}
 	}
 }

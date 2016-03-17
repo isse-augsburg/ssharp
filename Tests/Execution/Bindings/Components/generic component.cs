@@ -20,40 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Components
 {
-	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	internal interface I1 : IComponent
+	internal abstract class X45<T> : TestComponent
 	{
-		[Provided]
-		int M();
-	}
+		public extern T M(T i);
 
-	internal class X41 : Component, I1
-	{
-		public int M()
+		public T N(T i)
 		{
-			return 33;
+			return i;
 		}
 	}
 
-	internal class X42 : TestComponent
+	internal class X46 : X45<int>
 	{
-		private readonly I1 _i = new X41();
-
-		public X42()
+		public X46()
 		{
-			Bind(nameof(N), nameof(_i.M));
+			Bind(nameof(M), nameof(N));
 		}
-
-		public extern int N();
 
 		protected override void Check()
 		{
-			N().ShouldBe(33);
+			M(33).ShouldBe(33);
 		}
 	}
 }

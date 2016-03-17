@@ -20,40 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Components
 {
+	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	internal abstract class OverwrittenRequiredPort1 : TestComponent
+	internal interface I1 : IComponent
 	{
-		public virtual extern int Q();
+		[Provided]
+		int M();
+	}
 
+	internal class X41 : Component, I1
+	{
 		public int M()
 		{
-			return 1;
+			return 33;
 		}
 	}
 
-	internal class OverwrittenRequiredPort2 : OverwrittenRequiredPort1
+	internal class X42 : TestComponent
 	{
-		public OverwrittenRequiredPort2()
+		private readonly I1 _i = new X41();
+
+		public X42()
 		{
-			Bind(nameof(base.Q), nameof(M));
-			Bind(nameof(Q), nameof(O));
+			Bind(nameof(N), nameof(_i.M));
 		}
 
-		public extern override int Q();
-
-		public int O()
-		{
-			return 3;
-		}
+		public extern int N();
 
 		protected override void Check()
 		{
-			Q().ShouldBe(3);
-			base.Q().ShouldBe(1);
+			N().ShouldBe(33);
 		}
 	}
 }

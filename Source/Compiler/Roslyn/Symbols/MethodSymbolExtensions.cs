@@ -328,7 +328,9 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 			if (methodSymbol.Name != "Bind")
 				return false;
 
-			return methodSymbol.ContainingType.Equals(semanticModel.GetTypeSymbol<Component>());
+			return
+				methodSymbol.ContainingType.Equals(semanticModel.GetTypeSymbol<Component>()) ||
+				methodSymbol.ContainingType.Equals(semanticModel.GetTypeSymbol<ModelBase>());
 		}
 
 		/// <summary>

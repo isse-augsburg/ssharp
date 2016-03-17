@@ -25,19 +25,30 @@ namespace Tests.Diagnostics.Bindings.Invalid
 	using SafetySharp.Compiler.Analyzers;
 	using SafetySharp.Modeling;
 
-	[Diagnostic(DiagnosticIdentifier.BindingFailure, 34, 13, 26, "'Tests.Diagnostics.Bindings.Invalid.X7.N(int)'",
+	[Diagnostic(DiagnosticIdentifier.BindingFailure, 36, 13, 26, "'Tests.Diagnostics.Bindings.Invalid.X7.N(int)'",
+		"'Tests.Diagnostics.Bindings.Invalid.X7.M()'")]
+	[Diagnostic(DiagnosticIdentifier.BindingFailure, 51, 13, 30, "'Tests.Diagnostics.Bindings.Invalid.X7.N(int)'",
 		"'Tests.Diagnostics.Bindings.Invalid.X7.M()'")]
 	internal class X7 : Component
 	{
-		private X7()
+		public X7()
 		{
 			Bind(nameof(N), nameof(M));
 		}
 
-		private void M()
+		public void M()
 		{
 		}
 
-		private extern void N(int i);
+		public extern void N(int i);
+	}
+
+	internal class M7 : ModelBase
+	{
+		public M7()
+		{
+			var x = new X7();
+			Bind(nameof(x.N), nameof(x.M));
+		}
 	}
 }

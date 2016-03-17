@@ -20,38 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Components
 {
 	using Shouldly;
 	using Utilities;
 
-	internal abstract class X27 : TestComponent
+	internal abstract class OverwrittenRequiredPort1 : TestComponent
 	{
-		protected X27()
-		{
-			Bind(nameof(Q), nameof(M));
-		}
+		public virtual extern int Q();
 
-		public extern int Q();
-
-		public virtual int M()
+		public int M()
 		{
 			return 1;
 		}
 	}
 
-	internal class X28 : X27
+	internal class OverwrittenRequiredPort2 : OverwrittenRequiredPort1
 	{
-		public X28()
+		public OverwrittenRequiredPort2()
 		{
-			Bind(nameof(N), nameof(M));
-			Bind(nameof(L), nameof(base.M));
+			Bind(nameof(base.Q), nameof(M));
+			Bind(nameof(Q), nameof(O));
 		}
 
-		public extern int N();
-		public extern int L();
+		public extern override int Q();
 
-		public override int M()
+		public int O()
 		{
 			return 3;
 		}
@@ -59,8 +53,7 @@ namespace Tests.Execution.Bindings
 		protected override void Check()
 		{
 			Q().ShouldBe(3);
-			N().ShouldBe(3);
-			L().ShouldBe(1);
+			base.Q().ShouldBe(1);
 		}
 	}
 }

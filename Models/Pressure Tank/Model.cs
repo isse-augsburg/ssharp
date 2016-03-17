@@ -58,8 +58,8 @@ namespace SafetySharp.CaseStudies.PressureTank
 				Timer = new Timer()
 			};
 
-			Component.Bind(nameof(Controller.Sensor.PhysicalPressure), nameof(Tank.PressureLevel));
-			Component.Bind(nameof(Tank.IsBeingFilled), nameof(Controller.Pump.IsEnabled));
+			Bind(nameof(Sensor.PhysicalPressure), nameof(Tank.PressureLevel));
+			Bind(nameof(Tank.IsBeingFilled), nameof(Pump.IsEnabled));
 		}
 
 		[Root(Role.SystemContext)]

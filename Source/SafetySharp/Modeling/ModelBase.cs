@@ -88,14 +88,26 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Gets the <see cref="IComponent" /> instances the model consists of.
+		///   Establishes a port binding between the <paramref name="requiredPort" /> and the <paramref name="providedPort" />.
 		/// </summary>
-		private IComponent[] GetComponents()
+		/// <param name="requiredPort">The required port that should be bound to the <paramref name="providedPort" />.</param>
+		/// <param name="providedPort">The provided port that should be bound to the <paramref name="requiredPort" />.</param>
+		public static void Bind(string requiredPort, string providedPort)
 		{
-			var components = new HashSet<IComponent>();
-			VisitPreOrder(c => components.Add(c));
+			Requires.CompilationTransformation();
+		}
 
-			return components.ToArray();
+		/// <summary>
+		///   Establishes a port binding between the <paramref name="requiredPort" /> and the <paramref name="providedPort" /> where the
+		///   actual ports that should be bound are disambiguated by the delegate <typeparamref name="T" />.
+		/// </summary>
+		/// <typeparam name="T">A delegate type that disambiguates the ports.</typeparam>
+		/// <param name="requiredPort">The required port that should be bound to the <paramref name="providedPort" />.</param>
+		/// <param name="providedPort">The provided port that should be bound to the <paramref name="requiredPort" />.</param>
+		public static void Bind<T>(string requiredPort, string providedPort)
+			where T : class
+		{
+			Requires.CompilationTransformation();
 		}
 
 		/// <summary>
@@ -129,6 +141,17 @@ namespace SafetySharp.Modeling
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(this, formulas);
 			return serializer.Load();
+		}
+
+		/// <summary>
+		///   Gets the <see cref="IComponent" /> instances the model consists of.
+		/// </summary>
+		private IComponent[] GetComponents()
+		{
+			var components = new HashSet<IComponent>();
+			VisitPreOrder(c => components.Add(c));
+
+			return components.ToArray();
 		}
 
 		/// <summary>

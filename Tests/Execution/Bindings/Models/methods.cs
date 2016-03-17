@@ -20,74 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Models
 {
+	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	internal class Z1 : TestComponent
+	internal class X6 : TestObject
 	{
-		public Z1()
-		{
-			Bind(nameof(N), nameof(M));
-		}
-
-		private int M()
-		{
-			return 1;
-		}
-
-		private extern int N();
-
 		protected override void Check()
 		{
-			N().ShouldBe(1);
-		}
-	}
-
-	internal class Z1b : TestComponent
-	{
-		private Z1b _f;
-
-		public Z1b()
-		{
-			_f = this;
-			Bind(nameof(_f.N), nameof(_f.M));
+			var m = new M();
+			m.Y.N().ShouldBe(33);
 		}
 
-		private int M()
+		private class M : ModelBase
 		{
-			return 1;
+			public readonly C1 X = new C1();
+			public readonly C2 Y = new C2();
+
+			public M()
+			{
+				Bind(nameof(Y.N), nameof(X.M));
+			}
 		}
 
-		private extern int N();
-
-		protected override void Check()
+		internal class C1 : Component
 		{
-			N().ShouldBe(1);
-		}
-	}
-
-	internal class Z1c : TestComponent
-	{
-		private Z1c F { get; set; }
-
-		public Z1c()
-		{
-			F = this;
-			Bind(nameof(F.N), nameof(F.M));
+			public int M()
+			{
+				return 33;
+			}
 		}
 
-		private int M()
+		internal class C2 : Component
 		{
-			return 1;
-		}
-
-		private extern int N();
-
-		protected override void Check()
-		{
-			N().ShouldBe(1);
+			public extern int N();
 		}
 	}
 }

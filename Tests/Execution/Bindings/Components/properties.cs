@@ -20,39 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Components
 {
-	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 
-	internal class Unbound : TestComponent
+	internal class Properties : TestComponent
 	{
-		private extern int X1 { get; }
-		private extern int X2 { set; get; }
-		private extern int X3 { set; }
-		private extern void N();
+		private int _x;
+		private extern int R1 { get; }
+		private extern int R2 { set; }
 
-		public virtual extern int Y1 { get; }
-		public virtual extern int Y2 { set; get; }
-		public virtual extern int Y3 { set; }
-		public virtual extern void M();
+		private int P1 => 17;
+
+		private int P2
+		{
+			set { _x = value; }
+		}
 
 		protected override void Check()
 		{
-			var x = 0;
+			Bind(nameof(R1), nameof(P1));
+			Bind(nameof(R2), nameof(P2));
 
-			Should.Throw<UnboundPortException>(() => N());
-			Should.Throw<UnboundPortException>(() => x = X1);
-			Should.Throw<UnboundPortException>(() => X2 = x);
-			Should.Throw<UnboundPortException>(() => x = X2);
-			Should.Throw<UnboundPortException>(() => X3 = x);
-
-			Should.Throw<UnboundPortException>(() => M());
-			Should.Throw<UnboundPortException>(() => x = Y1);
-			Should.Throw<UnboundPortException>(() => Y2 = x);
-			Should.Throw<UnboundPortException>(() => x = Y2);
-			Should.Throw<UnboundPortException>(() => Y3 = x);
+			R1.ShouldBe(17);
+			R2 = 33;
+			_x.ShouldBe(33);
 		}
 	}
 }

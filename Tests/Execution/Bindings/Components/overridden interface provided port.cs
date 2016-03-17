@@ -20,37 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Diagnostics.Bindings.Invalid
+namespace Tests.Execution.Bindings.Components
 {
-	using SafetySharp.Compiler.Analyzers;
 	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 36, 13, 34)]
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 37, 13, 37)]
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 52, 13, 38)]
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 53, 13, 41)]
-	internal class X9 : Component
+	internal interface I3 : IComponent
 	{
-		public X9()
-		{
-			Bind<object>(nameof(N), nameof(M));
-			Bind<Component>(nameof(N), nameof(M));
-		}
-
-		public void M()
-		{
-		}
-
-		public extern void N();
+		[Provided]
+		int M();
 	}
 
-	internal class M9 : ModelBase
+	internal class X45 : Component, I3
 	{
-		public M9()
+		public virtual int M()
 		{
-			var x = new X9();
-			Bind<object>(nameof(x.N), nameof(x.M));
-			Bind<Component>(nameof(x.N), nameof(x.M));
+			return 1;
+		}
+	}
+
+	internal class X47 : X45
+	{
+		public override int M()
+		{
+			return 2;
+		}
+	}
+
+	internal class X48 : TestComponent
+	{
+		private readonly I3 _i = new X47();
+
+		public X48()
+		{
+			Bind(nameof(N), nameof(_i.M));
+		}
+
+		public extern int N();
+
+		protected override void Check()
+		{
+			N().ShouldBe(2);
 		}
 	}
 }

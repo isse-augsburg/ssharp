@@ -20,34 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Components
 {
-	using SafetySharp.Modeling;
+	using System.Collections.Generic;
 	using Shouldly;
 	using Utilities;
 
-	internal class X19 : Component
+	internal class NonPortBinding : TestComponent
 	{
-		public extern int M();
-	}
+		private readonly List<int> _list = new List<int> { 1, 2, 3 };
 
-	internal class X20 : TestComponent
-	{
-		private readonly X19 _y = new X19();
-
-		public X20()
+		public NonPortBinding()
 		{
-			Bind(nameof(_y.M), nameof(M));
+			Bind(nameof(N), nameof(_list.Count));
 		}
 
-		private int M()
-		{
-			return 17;
-		}
+		private extern int N { get; }
 
 		protected override void Check()
 		{
-			_y.M().ShouldBe(17);
+			N.ShouldBe(3);
+
+			_list.Add(8);
+			_list.Add(9);
+
+			N.ShouldBe(5);
 		}
 	}
 }

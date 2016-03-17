@@ -20,39 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Models
 {
+	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	internal abstract class X31 : TestComponent
+	internal class X4 : TestObject
 	{
-		public int M()
-		{
-			return 1;
-		}
-	}
-
-	internal class X32 : X31
-	{
-		public X32()
-		{
-			Bind(nameof(N1), nameof(M));
-			Bind(nameof(N2), nameof(base.M));
-		}
-
-		private extern int N1();
-		private extern int N2();
-
-		public new int M()
-		{
-			return 2;
-		}
-
 		protected override void Check()
 		{
-			N1().ShouldBe(2);
-			N2().ShouldBe(1);
+			var m = new M();
+			m.X.M(33).ShouldBe(33);
+		}
+
+		private class M : ModelBase
+		{
+			public readonly X<int> X = new X<int>();
+
+			public M()
+			{
+				Bind(nameof(X.M), nameof(X.N));
+			}
+		}
+
+		private class X<T> : Component
+		{
+			public X()
+			{
+				Bind(nameof(M), nameof(N));
+			}
+
+			public extern T M(T i);
+
+			public T N(T i)
+			{
+				return i;
+			}
 		}
 	}
 }

@@ -20,37 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Diagnostics.Bindings.Invalid
+namespace Tests.Execution.Bindings.Components
 {
-	using SafetySharp.Compiler.Analyzers;
-	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
+	using Utilities;
 
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 36, 13, 34)]
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 37, 13, 37)]
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 52, 13, 38)]
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 53, 13, 41)]
-	internal class X9 : Component
+	internal abstract class X33 : TestComponent
 	{
-		public X9()
-		{
-			Bind<object>(nameof(N), nameof(M));
-			Bind<Component>(nameof(N), nameof(M));
-		}
-
-		public void M()
-		{
-		}
-
-		public extern void N();
+		public extern int M1();
+		public extern int M2();
 	}
 
-	internal class M9 : ModelBase
+	internal class X34 : X33
 	{
-		public M9()
+		int x;
+		public X34()
 		{
-			var x = new X9();
-			Bind<object>(nameof(x.N), nameof(x.M));
-			Bind<Component>(nameof(x.N), nameof(x.M));
+			Bind(nameof(M1), nameof(N));
+			Bind(nameof(base.M2), nameof(N));
+		}
+
+		private int N()
+		{
+			return ++x;
+		}
+
+		public new extern int M1();
+		public new extern int M2();
+
+		protected override void Check()
+		{
+			M1().ShouldBe(1);
+			base.M2().ShouldBe(2);
+
+			Should.Throw<UnboundPortException>(() => base.M1());
+			Should.Throw<UnboundPortException>(() => M2());
 		}
 	}
 }

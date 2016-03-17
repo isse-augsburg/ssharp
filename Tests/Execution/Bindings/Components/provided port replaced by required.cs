@@ -20,35 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Components
 {
 	using Shouldly;
 	using Utilities;
 
-	internal class PropertiesAndMethods : TestComponent
+	internal abstract class X35 : TestComponent
 	{
-		private int _x;
-
-		public extern int R { get; set; }
-
-		private int P1()
+		public int M()
 		{
-			return 3;
+			return 0;
+		}
+	}
+
+	internal class X36 : X35
+	{
+		public X36()
+		{
+			Bind(nameof(M), nameof(N));
 		}
 
-		private void P2(int x)
+		private int N()
 		{
-			_x = x;
+			return 1;
 		}
+
+		public new extern int M();
 
 		protected override void Check()
 		{
-			Bind(nameof(R), nameof(P1));
-			Bind(nameof(R), nameof(P2));
-
-			R = 33;
-			_x.ShouldBe(33);
-			R.ShouldBe(3);
+			M().ShouldBe(1);
 		}
 	}
 }

@@ -20,40 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Bindings
+namespace Tests.Execution.Bindings.Models
 {
+	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	internal interface I5 : IComponent
+	internal class X2 : TestObject
 	{
-		[Provided]
-		int M();
-	}
-
-	internal class X52 : Component, I5
-	{
-		int I5.M()
-		{
-			return 5;
-		}
-	}
-
-	internal class X53 : TestComponent
-	{
-		private readonly I5 _i = new X52();
-
-		public X53()
-		{
-			Bind(nameof(N), nameof(_i.M));
-		}
-
-		public extern int N();
-
 		protected override void Check()
 		{
-			N().ShouldBe(5);
+			var m = new M();
+			m.Y.N.ShouldBe(3);
+		}
+
+		private class M : ModelBase
+		{
+			public readonly List<int> X = new List<int> { 1, 2, 3 };
+			public readonly C Y = new C();
+
+			public M()
+			{
+				Bind(nameof(Y.N), nameof(X.Count));
+			}
+		}
+
+		internal class C : Component
+		{
+			public extern int N { get; }
 		}
 	}
 }

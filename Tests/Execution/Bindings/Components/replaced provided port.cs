@@ -20,37 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Diagnostics.Bindings.Invalid
+namespace Tests.Execution.Bindings.Components
 {
-	using SafetySharp.Compiler.Analyzers;
-	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 36, 13, 34)]
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 37, 13, 37)]
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 52, 13, 38)]
-	[Diagnostic(DiagnosticIdentifier.NonDelegateBinding, 53, 13, 41)]
-	internal class X9 : Component
+	internal abstract class X31 : TestComponent
 	{
-		public X9()
+		public int M()
 		{
-			Bind<object>(nameof(N), nameof(M));
-			Bind<Component>(nameof(N), nameof(M));
+			return 1;
 		}
-
-		public void M()
-		{
-		}
-
-		public extern void N();
 	}
 
-	internal class M9 : ModelBase
+	internal class X32 : X31
 	{
-		public M9()
+		public X32()
 		{
-			var x = new X9();
-			Bind<object>(nameof(x.N), nameof(x.M));
-			Bind<Component>(nameof(x.N), nameof(x.M));
+			Bind(nameof(N1), nameof(M));
+			Bind(nameof(N2), nameof(base.M));
+		}
+
+		private extern int N1();
+		private extern int N2();
+
+		public new int M()
+		{
+			return 2;
+		}
+
+		protected override void Check()
+		{
+			N1().ShouldBe(2);
+			N2().ShouldBe(1);
 		}
 	}
 }
