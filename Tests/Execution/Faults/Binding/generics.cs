@@ -31,7 +31,7 @@ namespace Tests.Execution.Faults.Binding
 	{
 		protected override void Check()
 		{
-			Create(new Model(new C<int>()));
+			Create(new C<int>());
 			var c = (C<int>)RootComponents[0];
 
 			c.FaultEffects[0].GetFault(typeof(C<int>.Effect)).ShouldBe(c.F);

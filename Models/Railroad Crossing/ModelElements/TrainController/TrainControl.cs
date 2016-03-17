@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.ModelElements.TrainController
+namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.TrainController
 {
 	using Modeling;
 
@@ -38,13 +38,13 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.ModelElements.T
 		public RadioModule Radio;
 
 		private int ActivatePosition
-			=> QueryPosition - Odometer.Speed * (Specification.CommunicationDelay + Specification.ClosingDelay);
+			=> QueryPosition - Odometer.Speed * (Model.CommunicationDelay + Model.ClosingDelay);
 
 		private int QueryPosition
-			=> StopPosition - 2 * Specification.CommunicationDelay * Odometer.Speed;
+			=> StopPosition - 2 * Model.CommunicationDelay * Odometer.Speed;
 
 		private int StopPosition
-			=> Specification.CrossingPosition - Specification.SafetyMargin + Odometer.Speed * Odometer.Speed / (2 * Specification.Decelaration);
+			=> Model.CrossingPosition - Model.SafetyMargin + Odometer.Speed * Odometer.Speed / (2 * Model.Decelaration);
 
 		public override void Update()
 		{

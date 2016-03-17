@@ -36,7 +36,7 @@ namespace Tests.End2End.Files
 		}
 	}
 
-	internal class S1 : Model
+	internal class S1 : ModelBase
 	{
 		[Root(Role.SystemOfInterest)]
 		public C1 C { get; } = new C1();

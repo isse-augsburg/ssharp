@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.ModelElements.TrainController
+namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.TrainController
 {
 	using Modeling;
 
@@ -38,13 +38,13 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.ModelElements.T
 		[FaultEffect(Fault = nameof(OdometerPositionOffset))]
 		public class PositionOffsetEffect : Odometer
 		{
-			public override int Position => base.Position + Specification.MaxPositionOffset * Choose(-1, 1);
+			public override int Position => base.Position + Model.MaxPositionOffset * Choose(-1, 1);
 		}
 
 		[FaultEffect(Fault = nameof(OdometerSpeedOffset))]
 		public class SpeedOffsetEffect : Odometer
 		{
-			public override int Speed => base.Speed + Specification.MaxSpeedOffset * Choose(-1, 1);
+			public override int Speed => base.Speed + Model.MaxSpeedOffset * Choose(-1, 1);
 		}
 	}
 }

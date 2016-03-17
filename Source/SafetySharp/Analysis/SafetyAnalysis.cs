@@ -74,7 +74,7 @@ namespace SafetySharp.Analysis
 		///   The maximum cardinality of the fault sets that should be checked. By default, all minimal
 		///   critical fault sets are determined.
 		/// </param>
-		public static Result AnalyzeHazard(Model model, Formula hazard, int maxCardinality = Int32.MaxValue)
+		public static Result AnalyzeHazard(ModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue)
 		{
 			return new SafetyAnalysis().ComputeMinimalCriticalSets(model, hazard, maxCardinality);
 		}
@@ -88,7 +88,7 @@ namespace SafetySharp.Analysis
 		///   The maximum cardinality of the fault sets that should be checked. By default, all minimal
 		///   critical fault sets are determined.
 		/// </param>
-		public Result ComputeMinimalCriticalSets(Model model, Formula hazard, int maxCardinality = Int32.MaxValue)
+		public Result ComputeMinimalCriticalSets(ModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(hazard, nameof(hazard));
@@ -294,7 +294,7 @@ namespace SafetySharp.Analysis
 			/// <summary>
 			///   Gets the <see cref="Model" /> instance the safety analysis was conducted for.
 			/// </summary>
-			public Model Model { get; }
+			public ModelBase Model { get; }
 
 			/// <summary>
 			///   Gets the time it took to complete the analysis.
@@ -312,7 +312,7 @@ namespace SafetySharp.Analysis
 			/// <param name="counterExamples">The counter examples that were generated for the critical fault sets.</param>
 			/// <param name="exceptions">The exceptions that have been thrown during the analysis.</param>
 			/// <param name="time">The time it took to complete the analysis.</param>
-			internal Result(Model model, bool isComplete, HashSet<FaultSet> criticalSets, HashSet<FaultSet> checkedSets, Fault[] faults,
+			internal Result(ModelBase model, bool isComplete, HashSet<FaultSet> criticalSets, HashSet<FaultSet> checkedSets, Fault[] faults,
 							Dictionary<FaultSet, CounterExample> counterExamples, Dictionary<FaultSet, Exception> exceptions, TimeSpan time)
 			{
 				var knownFaultSets = new Dictionary<FaultSet, ISet<Fault>>();

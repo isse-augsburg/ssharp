@@ -33,7 +33,7 @@ namespace Tests.Serialization.RuntimeModels
 		{
 			var c = new C { F = 9 };
 			var d = new D { C = c };
-			var m = new Model(d);
+			var m = TestModel.New(d);
 
 			Create(m);
 

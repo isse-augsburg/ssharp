@@ -76,7 +76,7 @@ namespace Tests.Utilities
 		/// </summary>
 		/// <param name="model">The model that should be instantiated.</param>
 		/// <param name="formulas">The formulas the runtime model should be instantiated with.</param>
-		protected void Create(Model model, params Formula[] formulas)
+		protected void Create(ModelBase model, params Formula[] formulas)
 		{
 			RuntimeModel = model.ToRuntimeModel(formulas);
 		}
@@ -87,7 +87,26 @@ namespace Tests.Utilities
 		/// <param name="components">The root components of the model that should be instantiated.</param>
 		protected void Create(params IComponent[] components)
 		{
-			Create(new Model(components));
+			Create(New(components));
+		}
+
+		/// <summary>
+		///   Instantiates a runtime model.
+		/// </summary>
+		/// <param name="components">The root components of the model that should be instantiated.</param>
+		internal static ModelBase New(params IComponent[] components)
+		{
+			var model = new Model { Roots = components };
+			ModelBinder.Bind(model);
+
+			return model;
+		}
+
+		/// <summary>
+		///   Helper class to construct models with explicit root components.
+		/// </summary>
+		private class Model : ModelBase
+		{
 		}
 	}
 }

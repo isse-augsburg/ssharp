@@ -38,7 +38,7 @@ namespace Tests.Serialization.RuntimeModels
 			var c2 = new C2 { L = Int64.MaxValue };
 			var c3 = new C1<bool> { F = true };
 			var d = new D { C = new IComponent[] { c1, c2, c3 } };
-			var m = new Model(d);
+			var m = TestModel.New(d);
 
 			_hasConstructorRun = false;
 			Create(m);

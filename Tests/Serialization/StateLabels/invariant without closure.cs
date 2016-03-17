@@ -34,7 +34,7 @@ namespace Tests.Serialization.StateLabels
 		protected override void Check()
 		{
 			var c = new C();
-			var m = new Model(c);
+			var m = TestModel.New(c);
 			Formula l = (_x = 3) == 3;
 
 			Create(m, l);

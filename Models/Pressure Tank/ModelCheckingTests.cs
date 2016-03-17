@@ -40,7 +40,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		[Test]
 		public void RuptureDcca()
 		{
-			var model = new PressureTankModel();
+			var model = new Model();
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.Tank.IsRuptured);
 
 			result.SaveCounterExamples("counter examples/pressure tank/dcca");
@@ -62,7 +62,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		[Test]
 		public void EnumerateAllStates()
 		{
-			var model = new PressureTankModel();
+			var model = new Model();
 			var result = ModelChecker.CheckInvariant(model, true);
 
 			result.FormulaHolds.Should().BeTrue();
@@ -74,7 +74,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		[Test]
 		public void TankDoesNotRuptureWhenNoFaultsOccurLTL()
 		{
-			var model = new PressureTankModel();
+			var model = new Model();
 			Formula noFaults =
 				!model.Sensor.SuppressIsEmpty.IsActivated &&
 				!model.Sensor.SuppressIsFull.IsActivated &&
@@ -92,7 +92,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		[Test]
 		public void TankDoesNotRuptureWhenNoFaultsOccurModel()
 		{
-			var model = new PressureTankModel();
+			var model = new Model();
 			model.Faults.SuppressActivations();
 
 			var result = ModelChecker.CheckInvariant(model, !model.Tank.IsRuptured);
@@ -105,7 +105,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		[Test]
 		public void TankDoesNotRuptureWhenSensorDoesNotReportTankFull()
 		{
-			var model = new PressureTankModel();
+			var model = new Model();
 			model.Faults.SuppressActivations();
 			model.Sensor.SuppressIsFull.Activation = Activation.Forced;
 
@@ -128,7 +128,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		[Test]
 		public void TankRupturesWhenSensorDoesNotReportTankFullAndTimerDoesNotTimeout()
 		{
-			var model = new PressureTankModel();
+			var model = new Model();
 			model.Faults.SuppressActivations();
 			model.Sensor.SuppressIsFull.Activation = Activation.Forced;
 			model.Timer.SuppressTimeout.Activation = Activation.Forced;
@@ -147,7 +147,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		[Test]
 		public void TankRupturesShouldBePossible()
 		{
-			var model = new PressureTankModel();
+			var model = new Model();
 			var result = ModelChecker.CheckInvariant(model, !model.Tank.IsRuptured);
 
 			result.FormulaHolds.Should().BeFalse();
@@ -161,7 +161,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		[Test]
 		public void TimerNeverOpensWhenSensorIsAlwaysWorking()
 		{
-			var model = new PressureTankModel();
+			var model = new Model();
 			model.Faults.SuppressActivations();
 
 			var result = ModelChecker.CheckInvariant(model, !model.Timer.HasElapsed);
@@ -177,7 +177,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		[Test]
 		public void TimerOpensWhenSensorIsNotWorking()
 		{
-			var model = new PressureTankModel();
+			var model = new Model();
 			model.Faults.SuppressActivations();
 			model.Sensor.SuppressIsFull.Activation = Activation.Forced;
 

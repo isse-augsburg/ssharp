@@ -36,7 +36,7 @@ namespace Tests.Execution.Simulation
 			var d = new D();
 			Component.Bind(nameof(c.Y), nameof(d.Z));
 
-			var simulator = new Simulator(new Model(c, d));
+			var simulator = new Simulator(TestModel.New(c, d));
 			c = (C)simulator.Model.RootComponents[0];
 
 			simulator.SimulateStep();

@@ -72,8 +72,7 @@
     <Compile Include="ModelElements\CrossingController\Timer.cs" />
     <Compile Include="ModelElements\CrossingController\TrainSensor.cs" />
     <Compile Include="ModelElements\Message.cs" />
-    <Compile Include="RailroadCrossingModel.cs" />
-    <Compile Include="Specification.cs" />
+    <Compile Include="Model.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ModelElements\RadioModule.cs" />
     <Compile Include="ModelCheckingTests.cs" />

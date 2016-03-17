@@ -32,7 +32,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 	public partial class SimulationControls
 	{
 		private Formula[] _formulas;
-		private Model _model;
+		private ModelBase _model;
 		private double _speed;
 		public double MaxSpeed = 32;
 		public double MinSpeed = 0.25;
@@ -65,7 +65,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 			UpdateSimulationButtonVisibilities();
 		}
 
-		public void SetModel(Model model, params Formula[] formulas)
+		public void SetModel(ModelBase model, params Formula[] formulas)
 		{
 			_formulas = formulas;
 			_model = model;

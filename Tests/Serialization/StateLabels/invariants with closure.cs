@@ -33,7 +33,7 @@ namespace Tests.Serialization.StateLabels
 		{
 			var x = 3;
 			var c = new C { F = 3 };
-			var m = new Model(c);
+			var m = TestModel.New(c);
 			Formula f1 = c.F == 3;
 			Formula f2 = c.F == 7;
 			Formula f3 = c.F == x;

@@ -31,7 +31,7 @@ namespace Tests.Execution.Models.Subcomponents
 		protected override void Check()
 		{
 			var c = new C { Sub = new D() };
-			var m = new Model(c);
+			var m = TestModel.New(c);
 
 			m.Components.ShouldBe(new[] { c, c.Sub });
 		}

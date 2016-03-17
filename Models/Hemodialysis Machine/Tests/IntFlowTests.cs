@@ -36,7 +36,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 	using Utilities;
 	using Utilities.BidirectionalFlow;
 
-	class IntFlowModel : Model
+	class IntFlowModel : ModelBase
 	{
 		[Root(Role.SystemOfInterest)]
 		public readonly IntFlowCombinator Combinator = new IntFlowCombinator();

@@ -31,7 +31,7 @@ namespace Tests.Execution.Models.Faults
 		protected override void Check()
 		{
 			var d = new D { };
-			var m = new Model(d);
+			var m = TestModel.New(d);
 
 			m.Faults.ShouldBe(new[] { d.F });
 		}

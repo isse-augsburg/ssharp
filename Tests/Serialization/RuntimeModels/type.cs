@@ -33,7 +33,7 @@ namespace Tests.Serialization.RuntimeModels
 		protected override void Check()
 		{
 			var d = new D { T = typeof(object) };
-			var m = new Model(d);
+			var m = TestModel.New(d);
 
 			Create(m);
 

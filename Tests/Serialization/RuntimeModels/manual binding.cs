@@ -37,7 +37,7 @@ namespace Tests.Serialization.RuntimeModels
 			var r = new PortReference(d, typeof(D), "M", new[] { typeof(bool), typeof(int) }, typeof(bool), false);
 			var p = new PortReference(d, typeof(D), "Q", new[] { typeof(bool), typeof(int) }, typeof(bool), true);
 			d.B = new PortBinding(r, p);
-			var m = new Model(d);
+			var m = TestModel.New(d);
 
 			Create(m);
 

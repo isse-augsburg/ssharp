@@ -20,17 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.ModelElements.Context
+namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.Context
 {
 	using Modeling;
 
 	public class Train : Component
 	{
-		[Range(0, Specification.EndPosition, OverflowBehavior.Clamp)]
+		[Range(0, Model.EndPosition, OverflowBehavior.Clamp)]
 		private int _position;
 
-		[Range(0, Specification.MaxSpeed, OverflowBehavior.Clamp)]
-		private int _speed = Specification.MaxSpeed;
+		[Range(0, Model.MaxSpeed, OverflowBehavior.Clamp)]
+		private int _speed = Model.MaxSpeed;
 
 		public int Position => _position;
 		public int Speed => _speed;

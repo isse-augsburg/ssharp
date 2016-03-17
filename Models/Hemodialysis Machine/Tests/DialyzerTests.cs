@@ -126,7 +126,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			}
 	}
 
-	class DialyzerTestEnvironment : Model
+	class DialyzerTestEnvironment : ModelBase
 	{
 		[Root(Role.SystemOfInterest)]
 		public readonly Dialyzer Dialyzer = new Dialyzer();

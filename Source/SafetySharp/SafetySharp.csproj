@@ -54,7 +54,7 @@
     <Compile Include="Analysis\LtsMin.cs" />
     <Compile Include="Modeling\FaultExtensions.cs" />
     <Compile Include="Modeling\ModelBinder.cs" />
-    <Compile Include="Modeling\Model.cs" />
+    <Compile Include="Modeling\ModelBase.cs" />
     <Compile Include="Analysis\RootAttribute.cs" />
     <Compile Include="Analysis\SafetyAnalysis.cs" />
     <Compile Include="Runtime\FaultSet.cs" />

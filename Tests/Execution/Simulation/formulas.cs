@@ -33,7 +33,7 @@ namespace Tests.Execution.Simulation
 		protected override void Check()
 		{
 			var c = new C();
-			var simulator = new Simulator(new Model(c), c.X != 1);
+			var simulator = new Simulator(TestModel.New(c), c.X != 1);
 
 			simulator.Model.Formulas[0].Evaluate().ShouldBe(true);
 			simulator.SimulateStep();

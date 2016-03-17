@@ -89,7 +89,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public AnalysisResult CheckInvariant(Model model, Formula invariant)
+		public AnalysisResult CheckInvariant(ModelBase model, Formula invariant)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));

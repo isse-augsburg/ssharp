@@ -36,7 +36,7 @@ namespace Tests.End2End.Files
 		}
 	}
 
-	internal class S3 : Model
+	internal class S3 : ModelBase
 	{
 		[Root(Role.SystemOfInterest)]
 		public C3 C { get; } = new C3();

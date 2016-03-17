@@ -25,7 +25,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine
 	using Model;
 	using Analysis;
 
-	public class Specification : Modeling.Model
+	public class Specification : Modeling.ModelBase
 	{
 		[Root(Role.SystemContext)]
 		private readonly DialyzingFluidFlowCombinator _dialysingFluidFlowCombinator;

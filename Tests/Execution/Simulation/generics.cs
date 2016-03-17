@@ -32,7 +32,7 @@ namespace Tests.Execution.Simulation
 	{
 		protected override void Check()
 		{
-			var simulator = new Simulator(new Model(new C<D>()));
+			var simulator = new Simulator(TestModel.New(new C<D>()));
 			var c = (C<D>)simulator.Model.RootComponents[0];
 
 			c.Y.X.ShouldBe(0);

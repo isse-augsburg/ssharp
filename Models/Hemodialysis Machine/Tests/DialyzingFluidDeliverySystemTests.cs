@@ -55,7 +55,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		}
 	}
 
-	class DialyzingFluidDeliverySystemTestEnvironment : Model
+	class DialyzingFluidDeliverySystemTestEnvironment : ModelBase
 	{
 		[Root(Role.SystemOfInterest)]
 		public readonly DialyzingFluidDeliverySystem DialyzingFluidDeliverySystem = new DialyzingFluidDeliverySystem();

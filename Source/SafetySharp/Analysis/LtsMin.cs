@@ -52,7 +52,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public AnalysisResult CheckInvariant(Model model, Formula invariant)
+		public AnalysisResult CheckInvariant(ModelBase model, Formula invariant)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
@@ -75,7 +75,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public AnalysisResult Check(Model model, Formula formula)
+		public AnalysisResult Check(ModelBase model, Formula formula)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formula, nameof(formula));
@@ -117,7 +117,7 @@ namespace SafetySharp.Analysis
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
 		/// <param name="checkArgument">The argument passed to LtsMin that indicates which kind of check to perform.</param>
-		private AnalysisResult Check(Model model, Formula formula, string checkArgument)
+		private AnalysisResult Check(ModelBase model, Formula formula, string checkArgument)
 		{
 			try
 			{

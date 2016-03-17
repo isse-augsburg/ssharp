@@ -41,7 +41,7 @@ namespace Tests.Execution.Scheduling
 			r.RootComponents[3].ShouldBeOfType<E>();
 		}
 
-		private class S : Model
+		private class S : ModelBase
 		{
 			[Root(Role.SystemOfInterest)]
 			public C C = new C();

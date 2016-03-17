@@ -20,14 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.ModelElements.Context
+namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.Context
 {
 	using Modeling;
 
 	public class Barrier : Component
 	{
-		[Range(0, Specification.ClosingDelay, OverflowBehavior.Clamp)]
-		private int _angle = Specification.ClosingDelay;
+		[Range(0, Model.ClosingDelay, OverflowBehavior.Clamp)]
+		private int _angle = Model.ClosingDelay;
 
 		public int Angle => _angle;
 		public extern int Speed { get; }

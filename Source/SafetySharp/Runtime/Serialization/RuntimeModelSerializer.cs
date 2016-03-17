@@ -50,7 +50,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		/// <param name="model">The model that should be serialized.</param>
 		/// <param name="formulas">The formulas that should be serialized.</param>
-		public void Serialize(Model model, params Formula[] formulas)
+		public void Serialize(ModelBase model, params Formula[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
@@ -70,7 +70,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		/// <param name="model">The model that should be serialized.</param>
 		/// <param name="formulas">The formulas that should be serialized.</param>
-		public static byte[] Save(Model model, params Formula[] formulas)
+		public static byte[] Save(ModelBase model, params Formula[] formulas)
 		{
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, formulas);
@@ -82,7 +82,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Serializes the <paramref name="model" />.
 		/// </summary>
-		private unsafe void SerializeModel(BinaryWriter writer, Model model, Formula[] formulas)
+		private unsafe void SerializeModel(BinaryWriter writer, ModelBase model, Formula[] formulas)
 		{
 			// Collect all objects contained in the model
 			var stateFormulas = CollectStateFormulas(formulas);
@@ -158,7 +158,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Creates the object table for the <paramref name="model" /> and <paramref name="formulas" />.
 		/// </summary>
-		private static ObjectTable CreateObjectTable(Model model, Formula[] formulas, StateFormula[] stateFormulas)
+		private static ObjectTable CreateObjectTable(ModelBase model, Formula[] formulas, StateFormula[] stateFormulas)
 		{
 			var objects = model
 				.Roots

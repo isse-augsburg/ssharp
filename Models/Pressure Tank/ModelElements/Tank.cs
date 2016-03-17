@@ -32,13 +32,13 @@ namespace SafetySharp.CaseStudies.PressureTank.ModelElements
 		/// <summary>
 		///   The current pressure level.
 		/// </summary>
-		[Range(0, PressureTankModel.MaxPressure, OverflowBehavior.Clamp)]
+		[Range(0, Model.MaxPressure, OverflowBehavior.Clamp)]
 		private int _pressureLevel;
 
 		/// <summary>
 		///   Gets a value indicating whether the pressure tank has ruptured after exceeding its maximum allowed pressure level.
 		/// </summary>
-		public bool IsRuptured => _pressureLevel >= PressureTankModel.MaxPressure;
+		public bool IsRuptured => _pressureLevel >= Model.MaxPressure;
 
 		/// <summary>
 		///   Gets the current pressure level within the tank.

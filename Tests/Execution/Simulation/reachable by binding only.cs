@@ -34,7 +34,7 @@ namespace Tests.Execution.Simulation
 		{
 			var c = new C();
 
-			var simulator = new Simulator(new Model(c));
+			var simulator = new Simulator(TestModel.New(c));
 			c = (C)simulator.Model.RootComponents[0];
 
 			simulator.SimulateStep();

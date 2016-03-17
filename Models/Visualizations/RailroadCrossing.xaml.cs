@@ -26,9 +26,9 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using System.Windows;
 	using System.Windows.Controls;
 	using CaseStudies.RailroadCrossing;
-	using CaseStudies.RailroadCrossing.ModelElements.ModelElements.Context;
-	using CaseStudies.RailroadCrossing.ModelElements.ModelElements.CrossingController;
-	using CaseStudies.RailroadCrossing.ModelElements.ModelElements.TrainController;
+	using CaseStudies.RailroadCrossing.ModelElements.Context;
+	using CaseStudies.RailroadCrossing.ModelElements.CrossingController;
+	using CaseStudies.RailroadCrossing.ModelElements.TrainController;
 	using Infrastructure;
 	using Modeling;
 
@@ -41,12 +41,12 @@ namespace SafetySharp.CaseStudies.Visualizations
 			InitializeComponent();
 
 			// Initialize the simulation environment
-			var model = new RailroadCrossingModel();
+			var model = new Model();
 
 			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
 			SimulationControls.Reset += (o, e) => OnModelStateReset();
 			SimulationControls.Rewound += (o, e) => OnRewound();
-			SimulationControls.SetModel(model, Specification.PossibleCollision(model));
+			SimulationControls.SetModel(model, model.PossibleCollision);
 
 			// Initialize the visualization state
 			UpdateModelState();
@@ -85,8 +85,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 		private void UpdateModelState()
 		{
 			Canvas.SetLeft(TrainElement, Train.Position / 2.0 - TrainElement.Width + TrainElement.Width);
-			Canvas.SetLeft(BarrierElement, Specification.CrossingPosition / 2.0 + TrainElement.Width);
-			Canvas.SetLeft(DangerSpot, Specification.CrossingPosition / 2.0 + DangerSpot.Width);
+			Canvas.SetLeft(BarrierElement, Model.CrossingPosition / 2.0 + TrainElement.Width);
+			Canvas.SetLeft(DangerSpot, Model.CrossingPosition / 2.0 + DangerSpot.Width);
 
 			BarrierRotation.Angle = Barrier.Angle * 8;
 			TrainPosition.Text = Train.Position.ToString();

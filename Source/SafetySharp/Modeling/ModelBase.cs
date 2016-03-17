@@ -31,9 +31,10 @@ namespace SafetySharp.Modeling
 	using Utilities;
 
 	/// <summary>
-	///   Represents a model consisting of several root <see cref="IComponent" /> instances.
+	///   A base class for S# models consisting of several root <see cref="IComponent" /> instances
+	///   that can be simulator and model checked.
 	/// </summary>
-	public class Model
+	public abstract class ModelBase
 	{
 		private readonly Lazy<IComponent[]> _components;
 		private Fault[] _faults;
@@ -42,23 +43,9 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="components">The components the model should consist of.</param>
-		internal Model(params IComponent[] components)
+		protected ModelBase()
 		{
-			Requires.NotNull(components, nameof(components));
-			Requires.That(components.Length > 0, nameof(components), "Expected at least one component.");
-
-			Roots = components;
-			ModelBinder.Bind(this);
-
 			_components = new Lazy<IComponent[]>(GetComponents);
-		}
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		protected Model()
-		{
 		}
 
 		/// <summary>

@@ -35,7 +35,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public static AnalysisResult Check(Model model, Formula formula)
+		public static AnalysisResult Check(ModelBase model, Formula formula)
 		{
 			return new LtsMin().Check(model, formula);
 		}
@@ -46,7 +46,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public static AnalysisResult CheckInvariant(Model model, Formula invariant)
+		public static AnalysisResult CheckInvariant(ModelBase model, Formula invariant)
 		{
 			return new SSharpChecker().CheckInvariant(model, invariant);
 		}

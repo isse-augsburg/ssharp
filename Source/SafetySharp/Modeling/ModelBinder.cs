@@ -31,7 +31,7 @@ namespace SafetySharp.Modeling
 	using Utilities;
 
 	/// <summary>
-	///   A helper type that discovers the <see cref="IComponent" /> instances within a <see cref="Model" /> that are marked with
+	///   A helper type that discovers the <see cref="IComponent" /> instances within a <see cref="ModelBase" /> that are marked with
 	///   <see cref="RootAttribute" /> and binds the model.
 	/// </summary>
 	internal static class ModelBinder
@@ -40,7 +40,7 @@ namespace SafetySharp.Modeling
 		///   Analyzes the <paramref name="model" /> via reflection to discover all root <see cref="IComponent" /> instances.
 		/// </summary>
 		/// <param name="model">The model the roots should be discovered for.</param>
-		internal static void DiscoverRoots(Model model)
+		internal static void DiscoverRoots(ModelBase model)
 		{
 			Requires.NotNull(model, nameof(model));
 
@@ -114,7 +114,7 @@ namespace SafetySharp.Modeling
 		///   Initializes the faults and bindings of the model.
 		/// </summary>
 		/// <param name="model">The model that should be bound.</param>
-		internal static void Bind(Model model)
+		internal static void Bind(ModelBase model)
 		{
 			Requires.NotNull(model, nameof(model));
 
@@ -127,7 +127,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Discovers all faults contained in the model.
 		/// </summary>
-		private static void DiscoverFaults(Model model)
+		private static void DiscoverFaults(ModelBase model)
 		{
 			var faults = new HashSet<Fault>();
 			model.VisitPreOrder(c =>
@@ -142,7 +142,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Assigns the fault identifiers to each fault.
 		/// </summary>
-		private static void AssignFaultIdentifiers(Model model)
+		private static void AssignFaultIdentifiers(ModelBase model)
 		{
 			for (var i = 0; i < model.Faults.Length; ++i)
 				model.Faults[i].Identifier = i;
@@ -151,7 +151,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Binds all automatically bound fault effects to their respective faults.
 		/// </summary>
-		private static void BindFaultEffects(Model model)
+		private static void BindFaultEffects(ModelBase model)
 		{
 			model.VisitPostOrder(component =>
 			{
@@ -197,7 +197,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Initializes all bindings.
 		/// </summary>
-		private static void CreateBindings(Model model)
+		private static void CreateBindings(ModelBase model)
 		{
 			model.VisitPostOrder(component => ((Component)component).CreateBindings());
 		}

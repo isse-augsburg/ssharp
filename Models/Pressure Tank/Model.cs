@@ -29,7 +29,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 	/// <summary>
 	///   The model representing the pressure tank case study.
 	/// </summary>
-	public class PressureTankModel : Model
+	public class Model : ModelBase
 	{
 		/// <summary>
 		///   The maximum allowed pressure level within the tank.
@@ -49,7 +49,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public PressureTankModel()
+		public Model()
 		{
 			Controller = new Controller
 			{

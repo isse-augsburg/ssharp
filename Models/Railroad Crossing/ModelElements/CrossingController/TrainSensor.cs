@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.ModelElements.CrossingController
+namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.CrossingController
 {
 	using Modeling;
 
@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.ModelElements.C
 	{
 		public readonly Fault ErroneousTrainDetection = new TransientFault();
 
-		public virtual bool HasTrainPassed => TrainPosition > Specification.SensorPosition;
+		public virtual bool HasTrainPassed => TrainPosition > Model.SensorPosition;
 		public extern int TrainPosition { get; }
 
 		[FaultEffect(Fault = nameof(ErroneousTrainDetection))]

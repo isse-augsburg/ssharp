@@ -34,7 +34,7 @@ namespace Tests.Serialization.StateLabels
 		{
 			var x = 3;
 			var c = new C { F = 3 };
-			var m = new Model(c);
+			var m = TestModel.New(c);
 			Formula f = AX(x == c.M() && F(c.F == 7 && EU(c.F < 0, c.F > 0)));
 
 			Create(m, f);

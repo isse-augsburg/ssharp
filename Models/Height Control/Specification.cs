@@ -33,7 +33,7 @@ namespace SafetySharp.CaseStudies.HeightControl
 	/// <summary>
 	///   Represents the specification of the Elbtunnel case study.
 	/// </summary>
-	public class Specification : Model
+	public class Specification : ModelBase
 	{
 		public const int PreControlPosition = 3;
 		public const int MainControlPosition = 6;

@@ -54,7 +54,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be simulated.</param>
 		/// <param name="formulas">The formulas that can be evaluated on the model.</param>
-		public Simulator(Model model, params Formula[] formulas)
+		public Simulator(ModelBase model, params Formula[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));

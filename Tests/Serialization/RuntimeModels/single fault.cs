@@ -35,7 +35,7 @@ namespace Tests.Serialization.RuntimeModels
 		protected override void Check()
 		{
 			var c = new C();
-			var m = new Model(c);
+			var m = TestModel.New(c);
 
 			((C.Effect1)c.FaultEffects[0]).F = 17;
 

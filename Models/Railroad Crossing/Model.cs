@@ -24,14 +24,27 @@ namespace SafetySharp.CaseStudies.RailroadCrossing
 {
 	using Analysis;
 	using ModelElements;
-	using ModelElements.ModelElements.Context;
-	using ModelElements.ModelElements.CrossingController;
-	using ModelElements.ModelElements.TrainController;
+	using ModelElements.Context;
+	using ModelElements.CrossingController;
+	using ModelElements.TrainController;
 	using Modeling;
 
-	public class RailroadCrossingModel : Model
+	public class Model : ModelBase
 	{
-		public RailroadCrossingModel()
+		public const int EndPosition = 1000;
+		public const int SensorPosition = 900;
+		public const int CrossingPosition = 500;
+
+		public const int SafetyMargin = 50;
+		public const int CommunicationDelay = 1;
+		public const int ClosingDelay = 10;
+		public const int CloseTimeout = 21;
+		public const int MaxSpeed = 10;
+		public const int Decelaration = -1;
+		public const int MaxSpeedOffset = 7;
+		public const int MaxPositionOffset = 60;
+
+		public Model()
 		{
 			CrossingControl = new CrossingControl
 			{
@@ -79,5 +92,10 @@ namespace SafetySharp.CaseStudies.RailroadCrossing
 
 		[Root(Role.SystemContext)]
 		public RadioChannel Channel { get; } = new RadioChannel();
+
+		public Formula PossibleCollision =>
+			Barrier.Angle != 0 &&
+			Train.Position <= CrossingPosition &&
+			Train.Position + Train.Speed >= CrossingPosition;
 	}
 }

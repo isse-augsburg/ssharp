@@ -36,7 +36,7 @@ namespace Tests.Serialization.RuntimeModels
 			var c1 = new C1 { F = 99 };
 			var c2 = new C2 { F = 45 };
 			var c = new C { C1 = c1, C2 = c2 };
-			var m = new Model(c);
+			var m = TestModel.New(c);
 
 			_hasConstructorRun = false;
 			Create(m);

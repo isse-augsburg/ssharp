@@ -38,7 +38,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		[Test]
 		public void TankDoesNotRuptureWhenNoFaultsOccur()
 		{
-			var model = new PressureTankModel();
+			var model = new Model();
 			model.Faults.SuppressActivations();
 
 			var simulator = new Simulator(model);
@@ -53,7 +53,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		[Test]
 		public void TankDoesNotRuptureWhenSensorDoesNotReportTankFull()
 		{
-			var model = new PressureTankModel();
+			var model = new Model();
 			model.Faults.SuppressActivations();
 			model.Sensor.SuppressIsFull.ForceActivation();
 
@@ -70,7 +70,7 @@ namespace SafetySharp.CaseStudies.PressureTank
 		[Test]
 		public void TankRupturesWhenSensorDoesNotReportTankFullAndTimerDoesNotTimeout()
 		{
-			var model = new PressureTankModel();
+			var model = new Model();
 			model.Faults.SuppressActivations();
 			model.Sensor.SuppressIsFull.ForceActivation();
 			model.Timer.SuppressTimeout.ForceActivation();

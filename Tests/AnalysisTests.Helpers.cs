@@ -54,7 +54,7 @@ namespace Tests
 		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var result = modelChecker.CheckInvariant(new Model(components), invariant);
+			var result = modelChecker.CheckInvariant(TestModel.New(components), invariant);
 
 			CounterExample = result.CounterExample;
 			return result.FormulaHolds;
@@ -63,7 +63,7 @@ namespace Tests
 		protected bool Check(Formula formula, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var result = modelChecker.Check(new Model(components), formula);
+			var result = modelChecker.Check(TestModel.New(components), formula);
 
 			CounterExample = result.CounterExample;
 			return result.FormulaHolds;
@@ -71,7 +71,7 @@ namespace Tests
 
 		protected SafetyAnalysis.Result DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
 		{
-			var model = new Model(components);
+			var model = TestModel.New(components);
 			var analysis = new SafetyAnalysis();
 			analysis.OutputWritten += message => Output.Log("{0}", message);
 

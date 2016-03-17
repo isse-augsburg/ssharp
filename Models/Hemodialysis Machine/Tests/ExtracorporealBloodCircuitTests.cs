@@ -103,7 +103,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		}
 	}
 
-	class ExtracorporealBloodCircuitTestEnvironment : Model
+	class ExtracorporealBloodCircuitTestEnvironment : ModelBase
 	{
 		[Root(Role.SystemOfInterest)]
 		public readonly ExtracorporealBloodCircuit ExtracorporealBloodCircuit = new ExtracorporealBloodCircuit();
