@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis
 {
+	using System;
 	using FormulaVisitors;
 	using Utilities;
 
@@ -67,7 +68,15 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		internal bool Evaluate()
 		{
-			return CompilationVisitor.Compile(this)();
+			return Compile()();
+		}
+
+		/// <summary>
+		///   Compiles the formula if it does not contain any temporal operators.
+		/// </summary>
+		public Func<bool> Compile()
+		{
+			return CompilationVisitor.Compile(this);
 		}
 
 		/// <summary>

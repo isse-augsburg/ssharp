@@ -93,7 +93,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling
 
 		public Formula PossibleCollision => !CrossingIsSecured && TrainIsAtCrossing;
 
-		public Formula TrainIsAtCrossing => Train.Position <= CrossingPosition && Train.Position + Train.Speed >= CrossingPosition;
+		public Formula TrainIsAtCrossing => Train.Position <= CrossingPosition && Train.Position + Train.Speed > CrossingPosition;
 
 		public Formula CrossingIsSecured => Barrier.Angle == 0;
 	}

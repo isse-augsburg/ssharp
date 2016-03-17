@@ -24,7 +24,6 @@ namespace Tests.Execution.Simulation
 {
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 
@@ -36,8 +35,8 @@ namespace Tests.Execution.Simulation
 			var d = new D();
 			Component.Bind(nameof(c.Y), nameof(d.Z));
 
-			var simulator = new Simulator(TestModel.New(c, d));
-			c = (C)simulator.Model.RootComponents[0];
+			var simulator = new Simulator(TestModel.InitializeModel(c, d));
+			c = (C)simulator.Model.Roots[0];
 
 			simulator.SimulateStep();
 			c.X.ShouldBe(7);

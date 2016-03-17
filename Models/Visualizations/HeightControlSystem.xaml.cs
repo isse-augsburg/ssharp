@@ -83,9 +83,9 @@ namespace SafetySharp.CaseStudies.Visualizations
 			AlertOdf.Opacity = 0;
 		}
 
-		private VehicleCollection Vehicles => SimulationControls.Model.RootComponents.OfType<VehicleCollection>().Single();
+		private VehicleCollection Vehicles => ((Specification)SimulationControls.Model).Vehicles;
 		private EndControlOriginal EndControl => (EndControlOriginal)HeightControl.EndControl;
-		private HeightControl HeightControl => SimulationControls.Model.RootComponents.OfType<HeightControl>().Single();
+		private HeightControl HeightControl => ((Specification)SimulationControls.Model).HeightControl;
 		private MainControlOriginal MainControl => (MainControlOriginal)HeightControl.MainControl;
 		private PreControlOriginal PreControl => (PreControlOriginal)HeightControl.PreControl;
 

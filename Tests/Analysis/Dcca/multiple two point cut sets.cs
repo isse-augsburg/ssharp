@@ -58,7 +58,7 @@ namespace Tests.Analysis.Dcca
 			{
 				SimulateCounterExample(result.CounterExamples[set], simulator =>
 				{
-					var component = (C)simulator.Model.RootComponents[0];
+					var component = (C)simulator.Model.Roots[0];
 
 					component.X.ShouldBe(0);
 

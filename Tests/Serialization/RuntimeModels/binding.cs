@@ -32,7 +32,7 @@ namespace Tests.Serialization.RuntimeModels
 		protected override void Check()
 		{
 			var d = new D { G = 3 };
-			var m = TestModel.New(d);
+			var m = TestModel.InitializeModel(d);
 			Create(m);
 
 			StateFormulas.ShouldBeEmpty();

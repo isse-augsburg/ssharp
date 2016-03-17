@@ -38,7 +38,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 
 			SimulateCounterExample(CounterExample, simulator =>
 			{
-				c = (C)simulator.Model.RootComponents[0];
+				c = (C)simulator.Model.Roots[0];
 
 				c.X.ShouldBe(start);
 

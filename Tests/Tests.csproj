@@ -164,6 +164,7 @@
     <Compile Include="Analysis\Invariants\Violated\multiple choices 2.cs" />
     <Compile Include="Analysis\Invariants\Violated\multiple initial states.cs" />
     <Compile Include="Analysis\Invariants\Violated\required port.cs" />
+    <Compile Include="Analysis\Invariants\NotViolated\multi-part formula.cs" />
     <Compile Include="Analysis\Invariants\Violated\single choice.cs" />
     <Compile Include="Analysis\Invariants\Violated\state machine.cs" />
     <Compile Include="Analysis\Ltl\NotViolated\deterministic faults.cs" />
@@ -220,6 +221,25 @@
     <Compile Include="Execution\Faults\ProvidedPorts\multiple effects.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\multiple inactive effects.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\single inactive effect.cs" />
+    <Compile Include="Execution\ModelCopy\cyclic roots.cs" />
+    <Compile Include="Execution\ModelCopy\duplicated roots.cs" />
+    <Compile Include="Execution\ModelCopy\fields.cs" />
+    <Compile Include="Execution\ModelCopy\methods.cs" />
+    <Compile Include="Execution\ModelCopy\mixed.cs" />
+    <Compile Include="Execution\ModelCopy\properties.cs" />
+    <Compile Include="Execution\RootDiscovery\duplicated roots.cs" />
+    <Compile Include="Execution\RootDiscovery\cyclic roots.cs" />
+    <Compile Include="Execution\RootDiscovery\inherited model.cs" />
+    <Compile Include="Execution\RootDiscovery\generic model.cs" />
+    <Compile Include="Execution\RootDiscovery\set-only property.cs" />
+    <Compile Include="Execution\RootDiscovery\method with parameters.cs" />
+    <Compile Include="Execution\RootDiscovery\non-roots.cs" />
+    <Compile Include="Execution\RootDiscovery\mixed.cs" />
+    <Compile Include="Execution\RootDiscovery\methods.cs" />
+    <Compile Include="Execution\RootDiscovery\static.cs" />
+    <Compile Include="Execution\RootDiscovery\properties.cs" />
+    <Compile Include="Execution\RootDiscovery\none.cs" />
+    <Compile Include="Execution\RootDiscovery\fields.cs" />
     <Compile Include="Execution\Simulation\reachable by binding only.cs" />
     <Compile Include="Execution\Simulation\faults.cs" />
     <Compile Include="Execution\Simulation\bindings.cs" />
@@ -658,6 +678,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

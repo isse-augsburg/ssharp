@@ -134,8 +134,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var specification = new ExtracorporealBloodCircuitTestEnvironment();
 
 			var simulator = new Simulator(specification); //Important: Call after all objects have been created
-			var extracorporealBloodCircuitAfterStep0 = simulator.Model.RootComponents.OfType<ExtracorporealBloodCircuit>().First();
-			var patientAfterStep0 = simulator.Model.RootComponents.OfType<Patient>().First();
+			var extracorporealBloodCircuitAfterStep0 = simulator.Model.Roots.OfType<ExtracorporealBloodCircuit>().First();
+			var patientAfterStep0 = simulator.Model.Roots.OfType<Patient>().First();
 			Console.Out.WriteLine("Initial");
 			patientAfterStep0.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			patientAfterStep0.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");

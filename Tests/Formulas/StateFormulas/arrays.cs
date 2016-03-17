@@ -22,7 +22,6 @@
 
 namespace Tests.Formulas.StateFormulas
 {
-	using System;
 	using SafetySharp.Analysis;
 
 	internal class Arrays : FormulaTestObject

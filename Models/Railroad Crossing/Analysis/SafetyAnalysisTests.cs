@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 {
 	using System;
+	using FluentAssertions;
 	using Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
@@ -37,6 +38,17 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 			result.SaveCounterExamples("counter examples/railroad crossing/dcca/collision");
 			Console.WriteLine(result);
+
+			result.IsComplete.Should().BeTrue();
+			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new[]
+			{
+				new[] { model.TrainController.Odometer.OdometerPositionOffset },
+				new[] { model.TrainController.Odometer.OdometerSpeedOffset },
+				new[] { model.CrossingController.Sensor.BarrierSensorFailure },
+				new[] { model.CrossingController.TrainSensor.ErroneousTrainDetection },
+				new[] { model.CrossingController.Motor.BarrierMotorStuck, model.TrainController.Brakes.BrakesFailure },
+				new[] { model.Channel.MessageDropped, model.TrainController.Brakes.BrakesFailure }
+			});
 		}
 	}
 }

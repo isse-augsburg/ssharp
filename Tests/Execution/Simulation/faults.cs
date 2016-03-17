@@ -32,8 +32,8 @@ namespace Tests.Execution.Simulation
 	{
 		protected override void Check()
 		{
-			var simulator = new Simulator(TestModel.New(new C()));
-			var c = (C)simulator.Model.RootComponents[0];
+			var simulator = new Simulator(TestModel.InitializeModel(new C()));
+			var c = (C)simulator.Model.Roots[0];
 
 			c.F.Activation = Activation.Forced;
 			simulator.SimulateStep();

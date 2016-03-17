@@ -47,7 +47,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			Console.WriteLine(result);
 
 			result.IsComplete.Should().BeTrue();
-			result.MinimalCriticalSets.ShouldBeEquivalentTo(new[]
+			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new[]
 			{
 				// The tank rupture hazard has only one single minimial critical set consisting of the following to faults
 				new[] { model.Sensor.SuppressIsFull, model.Timer.SuppressTimeout }
@@ -68,7 +68,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			Console.WriteLine(result);
 
 			result.IsComplete.Should().BeTrue();
-			result.MinimalCriticalSets.ShouldBeEquivalentTo(new[]
+			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new[]
 			{
 				// The tank depleted hazard has two singleton minimial critical set
 				new[] { model.Sensor.SuppressIsEmpty },

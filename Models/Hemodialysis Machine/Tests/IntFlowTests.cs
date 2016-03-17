@@ -104,8 +104,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator) simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator) simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var directAfterStep = (IntFlowInToOutSegment)flowComponentsAfterStep[1];
 			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[2];
@@ -134,8 +134,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var directAfterStep = (IntFlowInToOutSegment)flowComponentsAfterStep[1];
 			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[2];
@@ -168,8 +168,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var directAfterStep = (IntFlowInToOutSegment)flowComponentsAfterStep[1];
 			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[2];
@@ -208,8 +208,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[3];
 			sinkAfterStep.Incoming.ForwardFromPredecessor.Should().Be(7);
@@ -244,8 +244,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var compositeAfterStep = (IntFlowComposite)flowComponentsAfterStep[1];
 			var firstInCompositeAfterStep = (IntFlowInToOutSegment)flowComponentsAfterStep[2];
@@ -288,8 +288,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var way1DirectAfterStep = (IntFlowInToOutSegment)flowComponentsAfterStep[1];
 			var sink1AfterStep = (IntFlowSink)flowComponentsAfterStep[3];
@@ -328,8 +328,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var source1AfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var source2AfterStep = (IntFlowSource)flowComponentsAfterStep[1];
 			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[4];
@@ -369,8 +369,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var sinkInsideAfterStep = (IntFlowSink)flowComponentsAfterStep[4];
 			var sinkOutsideAfterStep = (IntFlowSink)flowComponentsAfterStep[5];
@@ -410,8 +410,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceInsideAfterStep = (IntFlowSource)flowComponentsAfterStep[1];
 			var sourceOutsideAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[5];
@@ -449,8 +449,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[4];
 			sinkAfterStep.Incoming.ForwardFromPredecessor.Should().Be(7);
@@ -485,8 +485,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var directAfterStep = (IntFlowInToOutSegment)flowComponentsAfterStep[1];
 			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[2];
@@ -526,8 +526,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[3];
 			sinkAfterStep.Incoming.ForwardFromPredecessor.Should().Be(7);
@@ -562,8 +562,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var compositeAfterStep = (IntFlowComposite)flowComponentsAfterStep[1];
 			var firstInCompositeAfterStep = (IntFlowInToOutSegment)flowComponentsAfterStep[2];
@@ -606,8 +606,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var sink1AfterStep = (IntFlowSink)flowComponentsAfterStep[3];
 			var sink2AfterStep = (IntFlowSink)flowComponentsAfterStep[4];
@@ -644,8 +644,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var source1AfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var source2AfterStep = (IntFlowSource)flowComponentsAfterStep[1];
 			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[4];
@@ -685,8 +685,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var sinkInsideAfterStep = (IntFlowSink)flowComponentsAfterStep[4];
 			var sinkOutsideAfterStep = (IntFlowSink)flowComponentsAfterStep[5];
@@ -726,8 +726,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.RootComponents[0];
-			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.RootComponents[1]).Components;
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
 			var sourceInsideAfterStep = (IntFlowSource)flowComponentsAfterStep[1];
 			var sourceOutsideAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[5];

@@ -81,8 +81,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var specification = new DialyzingFluidDeliverySystemTestEnvironment();
 
 			var simulator = new Simulator(specification); //Important: Call after all objects have been created
-			var dialyzerAfterStep0 = simulator.Model.RootComponents.OfType<DialyzingFluidDeliverySystemTestEnvironmentDialyzer>().First();
-			var dialyzingFluidDeliverySystemAfterStep0 = simulator.Model.RootComponents.OfType<DialyzingFluidDeliverySystem>().First();
+			var dialyzerAfterStep0 = simulator.Model.Roots.OfType<DialyzingFluidDeliverySystemTestEnvironmentDialyzer>().First();
+			var dialyzingFluidDeliverySystemAfterStep0 = simulator.Model.Roots.OfType<DialyzingFluidDeliverySystem>().First();
 			Console.Out.WriteLine("Initial");
 			//dialyzingFluidDeliverySystemAfterStep0.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			//patientAfterStep0.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");

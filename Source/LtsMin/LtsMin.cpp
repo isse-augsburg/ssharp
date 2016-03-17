@@ -266,7 +266,7 @@ int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state)
 	try
 	{
 		Globals::Model->Deserialize((unsigned char*)state);
-		return Globals::Model->CheckStateFormula(label) ? 1 : 0;
+		return Globals::Model->StateFormulas[label]->Expression() ? 1 : 0;
 	}
 	catch (Exception^ e)
 	{

@@ -40,6 +40,11 @@ namespace SafetySharp.Analysis
 		private readonly CounterExample _counterExample;
 
 		/// <summary>
+		///   The runtime model that is simulated.
+		/// </summary>
+		private readonly RuntimeModel _runtimeModel;
+
+		/// <summary>
 		///   The states encountered by the simulator.
 		/// </summary>
 		private readonly List<byte[]> _states = new List<byte[]>();
@@ -59,7 +64,7 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
 
-			Model = model.ToRuntimeModel(formulas);
+			_runtimeModel = model.ToRuntimeModel(formulas);
 			Reset();
 		}
 
@@ -72,19 +77,20 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(counterExample, nameof(counterExample));
 
 			_counterExample = counterExample;
-			Model = counterExample.Model;
+			_runtimeModel = counterExample.RuntimeModel;
+
 			Reset();
 		}
+
+		/// <summary>
+		///   Gets the model that is simulated, i.e., a copy of the original model passed to the simulator.
+		/// </summary>
+		public ModelBase Model => _runtimeModel.Model;
 
 		/// <summary>
 		///   Gets a value indicating whether the simulator is replaying a counter example.
 		/// </summary>
 		public bool IsReplay => _counterExample != null;
-
-		/// <summary>
-		///   Gets the <see cref="RuntimeModel" /> that is simulated.
-		/// </summary>
-		public RuntimeModel Model { get; }
 
 		/// <summary>
 		///   Gets a value indicating whether the simulation is completed.
@@ -108,15 +114,15 @@ namespace SafetySharp.Analysis
 		{
 			Prune();
 
-			var state = stackalloc byte[Model.StateVectorSize];
+			var state = stackalloc byte[_runtimeModel.StateVectorSize];
 
 			if (_counterExample == null)
 			{
-				Model.ExecuteStep();
+				_runtimeModel.ExecuteStep();
 
 				// Serialize and deserialize the state to get the correct overflow behavior
-				Model.Serialize(state);
-				Model.Deserialize(state);
+				_runtimeModel.Serialize(state);
+				_runtimeModel.Deserialize(state);
 
 				AddState(state);
 			}
@@ -127,7 +133,7 @@ namespace SafetySharp.Analysis
 
 				_counterExample.DeserializeState(_stateIndex + 1);
 
-				Model.Serialize(state);
+				_runtimeModel.Serialize(state);
 				AddState(state);
 
 				Replay();
@@ -181,18 +187,18 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		public void Reset()
 		{
-			var state = stackalloc byte[Model.StateVectorSize];
+			var state = stackalloc byte[_runtimeModel.StateVectorSize];
 
 			_states.Clear();
 			_stateIndex = -1;
 
 			if (_counterExample == null)
 			{
-				Model.Reset();
+				_runtimeModel.Reset();
 
 				// Serialize and deserialize the state to get the correct overflow behavior
-				Model.Serialize(state);
-				Model.Deserialize(state);
+				_runtimeModel.Serialize(state);
+				_runtimeModel.Deserialize(state);
 
 				AddState(state);
 			}
@@ -200,7 +206,7 @@ namespace SafetySharp.Analysis
 			{
 				_counterExample.ReplayInitialState();
 
-				Model.Serialize(state);
+				_runtimeModel.Serialize(state);
 				AddState(state);
 			}
 		}
@@ -211,14 +217,14 @@ namespace SafetySharp.Analysis
 		private void Replay()
 		{
 			fixed (byte* sourceState = _states[_stateIndex - 1])
-				Model.Replay(sourceState, _counterExample.GetReplayInformation(_stateIndex - 1), initializationStep: _stateIndex == -1);
+				_runtimeModel.Replay(sourceState, _counterExample.GetReplayInformation(_stateIndex - 1), initializationStep: _stateIndex == -1);
 
 			// Serialize and deserialize the state to get the correct overflow behavior
-			var state = stackalloc byte[Model.StateVectorSize];
-			Model.Serialize(state);
-			Model.Deserialize(state);
+			var state = stackalloc byte[_runtimeModel.StateVectorSize];
+			_runtimeModel.Serialize(state);
+			_runtimeModel.Deserialize(state);
 
-			for (var i = 0; i < Model.StateVectorSize; ++i)
+			for (var i = 0; i < _runtimeModel.StateVectorSize; ++i)
 				Requires.That(state[i] == _states[_stateIndex][i], "Invalid replay of counter example: Unexpected state difference.");
 		}
 
@@ -227,8 +233,8 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		private void AddState(byte* state)
 		{
-			var newState = new byte[Model.StateVectorSize];
-			Marshal.Copy(new IntPtr(state), newState, 0, Model.StateVectorSize);
+			var newState = new byte[_runtimeModel.StateVectorSize];
+			Marshal.Copy(new IntPtr(state), newState, 0, _runtimeModel.StateVectorSize);
 
 			_states.Add(newState);
 			++_stateIndex;
@@ -240,7 +246,7 @@ namespace SafetySharp.Analysis
 		private void RestoreState(int stateNumber)
 		{
 			fixed (byte* state = _states[stateNumber])
-				Model.Deserialize(state);
+				_runtimeModel.Deserialize(state);
 		}
 	}
 }

@@ -42,8 +42,8 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 		public void EnumerateAllStates()
 		{
 			var model = new Model();
-			var result = ModelChecker.CheckInvariant(model, true);
 
+			var result = ModelChecker.CheckInvariant(model, true);
 			result.FormulaHolds.Should().BeTrue();
 		}
 

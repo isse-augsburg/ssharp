@@ -101,7 +101,8 @@ namespace SafetySharp.Runtime.Serialization
 			// Serialize the object table
 			SerializeObjectTable(objectTable, writer);
 
-			// Serialize the object identifiers of the root components
+			// Serialize the object identifiers of the root components and the model itself
+			writer.Write(objectTable.GetObjectIdentifier(model));
 			writer.Write(model.Roots.Length);
 			foreach (var root in model.Roots)
 				writer.Write(objectTable.GetObjectIdentifier(root));
@@ -164,7 +165,8 @@ namespace SafetySharp.Runtime.Serialization
 				.Roots
 				.Cast<object>()
 				.Concat(formulas)
-				.Concat(stateFormulas.Select(formula => formula.Expression.Target));
+				.Concat(stateFormulas.Select(formula => formula.Expression.Target))
+				.Concat(new[] { model });
 
 			return new ObjectTable(SerializationRegistry.Default.GetReferencedObjects(objects.ToArray(), SerializationMode.Full));
 		}
@@ -194,13 +196,15 @@ namespace SafetySharp.Runtime.Serialization
 		#region Deserialization
 
 		/// <summary>
-		///   Loads a <see cref="SerializedRuntimeModel" /> instance.
+		///   Loads a <see cref="SerializedRuntimeModel" /> from the <paramref name="serializedModel" />.
 		/// </summary>
 		/// <param name="serializedModel">The serialized model that should be loaded.</param>
 		public static SerializedRuntimeModel LoadSerializedData(byte[] serializedModel)
 		{
 			Requires.NotNull(serializedModel, nameof(serializedModel));
-			return new RuntimeModelSerializer { _serializedModel = serializedModel }.LoadSerializedData();
+
+			var serializer = new RuntimeModelSerializer { _serializedModel = serializedModel };
+			return serializer.LoadSerializedData();
 		}
 
 		/// <summary>
@@ -230,7 +234,8 @@ namespace SafetySharp.Runtime.Serialization
 			// Deserialize the object table
 			var objectTable = DeserializeObjectTable(reader);
 
-			// Deserialize the object identifiers of the root components
+			// Deserialize the object identifiers of the root components and the model itself
+			var model = (ModelBase)objectTable.GetObject(reader.ReadUInt16());
 			var roots = new Component[reader.ReadInt32()];
 			for (var i = 0; i < roots.Length; ++i)
 				roots[i] = (Component)objectTable.GetObject(reader.ReadUInt16());
@@ -271,7 +276,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			// Deserialize the state formulas and instantiate the runtime model
 			DeserializeStateFormulas(reader, objectTable);
-			return new SerializedRuntimeModel(buffer, roots, objectTable, formulas);
+			return new SerializedRuntimeModel(model, buffer, roots, objectTable, formulas);
 		}
 
 		/// <summary>

@@ -80,12 +80,14 @@ namespace SafetySharp.Runtime
 			var objectTable = serializedData.ObjectTable;
 			var formulas = serializedData.Formulas;
 
+			Requires.That(serializedData.Model != null, "Expected a valid model instance.");
 			Requires.NotNull(buffer, nameof(buffer));
 			Requires.NotNull(rootComponents, nameof(rootComponents));
 			Requires.NotNull(objectTable, nameof(objectTable));
 			Requires.NotNull(formulas, nameof(formulas));
 			Requires.That(stateHeaderBytes % 4 == 0, nameof(stateHeaderBytes), "Expected a multiple of 4.");
 
+			Model = serializedData.Model;
 			SerializedModel = buffer;
 			RootComponents = rootComponents;
 			Faults = objectTable.OfType<Fault>().Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
@@ -119,6 +121,11 @@ namespace SafetySharp.Runtime
 			FaultSet.CheckFaultCount(Faults.Length);
 			StateFormulaSet.CheckFormulaCount(StateFormulas.Length);
 		}
+
+		/// <summary>
+		///   Gets a copy of the original model the runtime model was generated from.
+		/// </summary>
+		internal ModelBase Model { get; }
 
 		/// <summary>
 		///   Gets the construction state of the model.
@@ -229,16 +236,6 @@ namespace SafetySharp.Runtime
 
 			foreach (var component in RootComponents)
 				component.Update();
-		}
-
-		/// <summary>
-		///   Checks whether the state formula identified by the zero-based <paramref name="formulaIndex" /> holds for the model's
-		///   current state.
-		/// </summary>
-		/// <param name="formulaIndex">The zero-based index of the formula that should be checked.</param>
-		public bool CheckStateFormula(int formulaIndex)
-		{
-			return StateFormulas[formulaIndex].Expression();
 		}
 
 		/// <summary>

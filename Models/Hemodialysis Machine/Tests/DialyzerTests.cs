@@ -193,47 +193,47 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var specification = new DialyzerTestEnvironment();
 
 			var simulator = new Simulator(specification); //Important: Call after all objects have been created
-			var dialyzerAfterStep0 = (Dialyzer)simulator.Model.RootComponents.OfType<Dialyzer>().First();
+			var dialyzerAfterStep0 = (Dialyzer)simulator.Model.Roots.OfType<Dialyzer>().First();
 			var patientAfterStep0 =
 				(DialyzerTestEnvironmentPatient)
-					simulator.Model.RootComponents.OfType<DialyzerTestEnvironmentPatient>().First();
+					simulator.Model.Roots.OfType<DialyzerTestEnvironmentPatient>().First();
 			Console.Out.WriteLine("Initial");
 			patientAfterStep0.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			patientAfterStep0.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
 			patientAfterStep0.PrintBloodValues("");
 			Console.Out.WriteLine("Step 1");
 			simulator.SimulateStep();
-			var dialyzerAfterStep1 = (Dialyzer)simulator.Model.RootComponents.OfType<Dialyzer>().First();
+			var dialyzerAfterStep1 = (Dialyzer)simulator.Model.Roots.OfType<Dialyzer>().First();
 			var patientAfterStep1 =
 				(DialyzerTestEnvironmentPatient)
-					simulator.Model.RootComponents.OfType<DialyzerTestEnvironmentPatient>().First();
+					simulator.Model.Roots.OfType<DialyzerTestEnvironmentPatient>().First();
 			patientAfterStep1.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			patientAfterStep1.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
 			patientAfterStep1.PrintBloodValues("");
 			Console.Out.WriteLine("Step 2");
 			simulator.SimulateStep();
-			var dialyzerAfterStep2 = (Dialyzer)simulator.Model.RootComponents.OfType<Dialyzer>().First();
+			var dialyzerAfterStep2 = (Dialyzer)simulator.Model.Roots.OfType<Dialyzer>().First();
 			var patientAfterStep2 =
 				(DialyzerTestEnvironmentPatient)
-					simulator.Model.RootComponents.OfType<DialyzerTestEnvironmentPatient>().First();
+					simulator.Model.Roots.OfType<DialyzerTestEnvironmentPatient>().First();
 			patientAfterStep2.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			patientAfterStep2.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
 			patientAfterStep2.PrintBloodValues("");
 			Console.Out.WriteLine("Step 3");
 			simulator.SimulateStep();
-			var dialyzerAfterStep3 = (Dialyzer)simulator.Model.RootComponents.OfType<Dialyzer>().First();
+			var dialyzerAfterStep3 = (Dialyzer)simulator.Model.Roots.OfType<Dialyzer>().First();
 			var patientAfterStep3 =
 				(DialyzerTestEnvironmentPatient)
-					simulator.Model.RootComponents.OfType<DialyzerTestEnvironmentPatient>().First();
+					simulator.Model.Roots.OfType<DialyzerTestEnvironmentPatient>().First();
 			patientAfterStep3.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			patientAfterStep3.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
 			patientAfterStep3.PrintBloodValues("");
 			Console.Out.WriteLine("Step 4");
 			simulator.SimulateStep();
-			var dialyzerAfterStep4 = (Dialyzer)simulator.Model.RootComponents.OfType<Dialyzer>().First();
+			var dialyzerAfterStep4 = (Dialyzer)simulator.Model.Roots.OfType<Dialyzer>().First();
 			var patientAfterStep4 =
 				(DialyzerTestEnvironmentPatient)
-					simulator.Model.RootComponents.OfType<DialyzerTestEnvironmentPatient>().First();
+					simulator.Model.Roots.OfType<DialyzerTestEnvironmentPatient>().First();
 			patientAfterStep4.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			patientAfterStep4.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
 			patientAfterStep4.PrintBloodValues("");
