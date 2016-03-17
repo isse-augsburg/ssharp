@@ -20,20 +20,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
 {
-	using Modeling;
+	using SafetySharp.Modeling;
 
-	public class RadioModule : Component
+	public class Brakes : Component
 	{
-		public extern Message RetrieveFromChannel();
-		public extern void DeliverToChannel(Message message);
+		public readonly Fault BrakesFailure = new PermanentFault();
 
-		public Message Receive() => RetrieveFromChannel();
+		[Range(Model.Decelaration, 0, OverflowBehavior.Error)]
+		private int _acceleration;
 
-		public void Send(Message message)
+		public virtual int Acceleration => _acceleration;
+
+		public void Engage()
 		{
-			DeliverToChannel(message);
+			_acceleration = Model.Decelaration;
+		}
+
+		[FaultEffect(Fault = nameof(BrakesFailure))]
+		public class UnresponsiveEffect : Brakes
+		{
+			public override int Acceleration => 0;
 		}
 	}
 }

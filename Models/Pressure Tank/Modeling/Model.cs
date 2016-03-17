@@ -20,11 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PressureTank
+namespace SafetySharp.CaseStudies.PressureTank.Modeling
 {
-	using Analysis;
-	using ModelElements;
-	using Modeling;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 
 	/// <summary>
 	///   The model representing the pressure tank case study.
@@ -32,14 +31,19 @@ namespace SafetySharp.CaseStudies.PressureTank
 	public class Model : ModelBase
 	{
 		/// <summary>
-		///   The maximum allowed pressure level within the tank.
+		///   The tank's pressure limit that may not be reached or exceeded.
 		/// </summary>
-		public const int MaxPressure = 60;
+		public const int PressureLimit = 60;
 
 		/// <summary>
-		///   The pressure level that triggers the sensor.
+		///   The pressure level when the sensor reports the tank to be full.
 		/// </summary>
-		public const int SensorPressure = 58;
+		public const int SensorFullPressure = 55;
+
+		/// <summary>
+		///   The pressure level when the sensor reports the tank to be empty.
+		/// </summary>
+		public const int SensorEmptyPressure = 0;
 
 		/// <summary>
 		///   The controller's timeout in seconds.

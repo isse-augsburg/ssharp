@@ -20,9 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.TrainController
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
 {
-	using Modeling;
+	using SafetySharp.Modeling;
 
 	public class Odometer : Component
 	{

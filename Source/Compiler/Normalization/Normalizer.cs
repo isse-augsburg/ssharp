@@ -144,23 +144,6 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
-		///   Adds a compilation unit containing a part of the partial <paramref name="type" /> containing the
-		///   <paramref name="members" />.
-		/// </summary>
-		/// <param name="type">The type the part should be declared for.</param>
-		/// <param name="members">The members that should be added to the type.</param>
-		protected void AddMembers([NotNull] INamedTypeSymbol type, [NotNull] params MemberDeclarationSyntax[] members)
-		{
-			var usings = _rootNode.Descendants<UsingDirectiveSyntax>().Select(usingDirective =>
-			{
-				var importedSymbol = SemanticModel.GetSymbolInfo(usingDirective.Name).Symbol;
-				return usingDirective.WithName(SyntaxFactory.ParseName(importedSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
-			});
-
-			AddMembers(type, usings.ToArray(), members);
-		}
-
-		/// <summary>
 		///   Adds the <paramref name="compilationUnit" /> to the normalized compilation.
 		/// </summary>
 		/// <param name="compilationUnit">The compilation unit that should be added.</param>
@@ -186,11 +169,9 @@ namespace SafetySharp.Compiler.Normalization
 		///   <paramref name="member" /> and adds the generated code to the <see cref="Compilation" />.
 		/// </summary>
 		/// <param name="type">The type the code should be generated for.</param>
-		/// <param name="usings">The <c>using</c> directives that should be added to the compilation unit.</param>
 		/// <param name="member">The member that should be added to the generated type.</param>
 		/// <param name="fileName">The name of the generated file.</param>
-		private void AddNamespacedAndNested([NotNull] INamedTypeSymbol type, [NotNull] UsingDirectiveSyntax[] usings,
-											MemberDeclarationSyntax member, string fileName = null)
+		private void AddNamespacedAndNested([NotNull] INamedTypeSymbol type, MemberDeclarationSyntax member, string fileName = null)
 		{
 			fileName = fileName ?? type.ToDisplayString().Replace("<", "{").Replace(">", "}");
 
@@ -202,7 +183,7 @@ namespace SafetySharp.Compiler.Normalization
 					modifiers: DeclarationModifiers.Partial,
 					members: new[] { member });
 
-				AddNamespacedAndNested(type.ContainingType, usings, generatedClass, fileName);
+				AddNamespacedAndNested(type.ContainingType, generatedClass, fileName);
 			}
 			else
 			{
@@ -211,7 +192,7 @@ namespace SafetySharp.Compiler.Normalization
 					: member;
 
 				var compilationUnit = (CompilationUnitSyntax)Syntax.CompilationUnit(code);
-				AddCompilationUnit(compilationUnit.AddUsings(usings), fileName);
+				AddCompilationUnit(compilationUnit, fileName);
 			}
 		}
 
@@ -220,10 +201,8 @@ namespace SafetySharp.Compiler.Normalization
 		///   <paramref name="members" />.
 		/// </summary>
 		/// <param name="type">The type the part should be declared for.</param>
-		/// <param name="usings">The <c>using</c> directives that should be added to the compilation unit.</param>
 		/// <param name="members">The members that should be added to the type.</param>
-		protected void AddMembers([NotNull] INamedTypeSymbol type, [NotNull] UsingDirectiveSyntax[] usings,
-								  [NotNull] params MemberDeclarationSyntax[] members)
+		protected void AddMembers([NotNull] INamedTypeSymbol type, [NotNull] params MemberDeclarationSyntax[] members)
 		{
 			Requires.NotNull(type, nameof(type));
 			Requires.NotNull(members, nameof(members));
@@ -234,7 +213,7 @@ namespace SafetySharp.Compiler.Normalization
 				modifiers: DeclarationModifiers.Partial,
 				members: members.Where(m => m != null));
 
-			AddNamespacedAndNested(type, usings, generatedClass);
+			AddNamespacedAndNested(type, generatedClass);
 		}
 
 		/// <summary>
@@ -254,7 +233,7 @@ namespace SafetySharp.Compiler.Normalization
 				modifiers: DeclarationModifiers.Partial);
 
 			generatedClass = generatedClass.AddAttributeLists(attributes);
-			AddNamespacedAndNested(type, new UsingDirectiveSyntax[0], generatedClass);
+			AddNamespacedAndNested(type, generatedClass);
 		}
 
 		/// <summary>
@@ -275,7 +254,7 @@ namespace SafetySharp.Compiler.Normalization
 
 			var baseTypeExpressions = baseTypes.Select(baseType => SyntaxFactory.SimpleBaseType((TypeSyntax)Syntax.TypeExpression(baseType)));
 			generatedClass = generatedClass.AddBaseListTypes(baseTypeExpressions.ToArray());
-			AddNamespacedAndNested(type, new UsingDirectiveSyntax[0], generatedClass);
+			AddNamespacedAndNested(type, generatedClass);
 		}
 	}
 }

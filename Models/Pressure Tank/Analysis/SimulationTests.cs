@@ -20,12 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PressureTank
+namespace SafetySharp.CaseStudies.PressureTank.Analysis
 {
-	using Analysis;
 	using FluentAssertions;
 	using Modeling;
 	using NUnit.Framework;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 
 	/// <summary>
 	///   Contains a set of tests that simulate the case study to validate certain aspects of its behavior.

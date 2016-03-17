@@ -363,9 +363,6 @@ namespace SafetySharp.Analysis
 			{
 				Requires.NotNullOrWhitespace(directory, nameof(directory));
 
-				if (!String.IsNullOrWhiteSpace(directory))
-					Directory.CreateDirectory(directory);
-
 				foreach (var pair in CounterExamples)
 				{
 					var fileName = String.Join("_", pair.Key.Select(f => f.Name));

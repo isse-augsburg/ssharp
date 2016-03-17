@@ -20,30 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.CrossingController
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Environment
 {
-	using Modeling;
+	using System;
+	using SafetySharp.Modeling;
 
-	public class Timer : Component
+	/// <summary>
+	///   Represents the radio channel that the train and crossing controllers use to communicate with each other.
+	/// </summary>
+	public class RadioChannel : Component
 	{
-		[Range(-1, Model.CloseTimeout, OverflowBehavior.Clamp)]
-		private int _remainingTime = -1;
+		public readonly Fault MessageDropped = new TransientFault();
 
-		public bool HasElapsed => _remainingTime == 0;
+		private Message _currentMessage;
 
-		public void Start()
+		/// <summary>
+		///   Receives the message that was sent last.
+		/// </summary>
+		public virtual Message Receive()
 		{
-			_remainingTime = Model.CloseTimeout;
+			return _currentMessage;
 		}
 
-		public void Stop()
+		/// <summary>
+		///   Sends the given message.
+		/// </summary>
+		public void Send(Message message)
 		{
-			_remainingTime = -1;
+			_currentMessage = message;
 		}
 
-		public override void Update()
+		[FaultEffect(Fault = nameof(MessageDropped))]
+		public class DroppedEffect : RadioChannel
 		{
-			--_remainingTime;
+			public override Message Receive()
+			{
+				return Message.None;
+			}
 		}
 	}
 }

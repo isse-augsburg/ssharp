@@ -63,22 +63,23 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="ModelElements\Context\Barrier.cs" />
-    <Compile Include="ModelElements\Context\RadioChannel.cs" />
-    <Compile Include="ModelElements\Context\Train.cs" />
-    <Compile Include="ModelElements\CrossingController\BarrierMotor.cs" />
-    <Compile Include="ModelElements\CrossingController\BarrierSensor.cs" />
-    <Compile Include="ModelElements\CrossingController\CrossingControl.cs" />
-    <Compile Include="ModelElements\CrossingController\Timer.cs" />
-    <Compile Include="ModelElements\CrossingController\TrainSensor.cs" />
-    <Compile Include="ModelElements\Message.cs" />
-    <Compile Include="Model.cs" />
+    <Compile Include="Analysis\SafetyAnalysisTests.cs" />
+    <Compile Include="Modeling\Environment\Barrier.cs" />
+    <Compile Include="Modeling\Environment\RadioChannel.cs" />
+    <Compile Include="Modeling\Environment\Train.cs" />
+    <Compile Include="Modeling\System\BarrierMotor.cs" />
+    <Compile Include="Modeling\System\BarrierSensor.cs" />
+    <Compile Include="Modeling\System\CrossingController.cs" />
+    <Compile Include="Modeling\System\Timer.cs" />
+    <Compile Include="Modeling\System\TrainSensor.cs" />
+    <Compile Include="Modeling\System\Message.cs" />
+    <Compile Include="Modeling\Model.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ModelElements\RadioModule.cs" />
-    <Compile Include="ModelCheckingTests.cs" />
-    <Compile Include="ModelElements\TrainController\Brakes.cs" />
-    <Compile Include="ModelElements\TrainController\Odometer.cs" />
-    <Compile Include="ModelElements\TrainController\TrainControl.cs" />
+    <Compile Include="Modeling\System\RadioModule.cs" />
+    <Compile Include="Analysis\ModelCheckingTests.cs" />
+    <Compile Include="Modeling\System\Brakes.cs" />
+    <Compile Include="Modeling\System\Odometer.cs" />
+    <Compile Include="Modeling\System\TrainController.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">

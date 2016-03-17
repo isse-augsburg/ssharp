@@ -20,14 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling
 {
-	using Analysis;
-	using ModelElements;
-	using ModelElements.Context;
-	using ModelElements.CrossingController;
-	using ModelElements.TrainController;
-	using Modeling;
+	using System;
+	using Environment;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 
 	public class Model : ModelBase
 	{
@@ -46,7 +44,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing
 
 		public Model()
 		{
-			CrossingControl = new CrossingControl
+			CrossingController = new CrossingController
 			{
 				Sensor = new BarrierSensor(),
 				Motor = new BarrierMotor(),
@@ -55,34 +53,34 @@ namespace SafetySharp.CaseStudies.RailroadCrossing
 				TrainSensor = new TrainSensor()
 			};
 
-			TrainControl = new TrainControl
+			TrainController = new TrainController
 			{
 				Brakes = new Brakes(),
 				Odometer = new Odometer(),
 				Radio = new RadioModule()
 			};
 
-			Component.Bind(nameof(Barrier.Speed), nameof(CrossingControl.Motor.Speed));
-			Component.Bind(nameof(CrossingControl.Sensor.BarrierAngle), nameof(Barrier.Angle));
+			Bind(nameof(Barrier.Speed), nameof(CrossingController.Motor.Speed));
+			Bind(nameof(CrossingController.Sensor.BarrierAngle), nameof(Barrier.Angle));
 
-			Component.Bind(nameof(Train.Acceleration), nameof(TrainControl.Brakes.Acceleration));
-			Component.Bind(nameof(CrossingControl.TrainSensor.TrainPosition), nameof(Train.Position));
+			Bind(nameof(Train.Acceleration), nameof(TrainController.Brakes.Acceleration));
+			Bind(nameof(CrossingController.TrainSensor.TrainPosition), nameof(Train.Position));
 
-			Component.Bind(nameof(TrainControl.Radio.RetrieveFromChannel), nameof(Channel.Receive));
-			Component.Bind(nameof(TrainControl.Radio.DeliverToChannel), nameof(Channel.Send));
+			Bind(nameof(TrainController.Radio.RetrieveFromChannel), nameof(Channel.Receive));
+			Bind(nameof(TrainController.Radio.DeliverToChannel), nameof(Channel.Send));
 
-			Component.Bind(nameof(CrossingControl.Radio.RetrieveFromChannel), nameof(Channel.Receive));
-			Component.Bind(nameof(CrossingControl.Radio.DeliverToChannel), nameof(Channel.Send));
+			Bind(nameof(CrossingController.Radio.RetrieveFromChannel), nameof(Channel.Receive));
+			Bind(nameof(CrossingController.Radio.DeliverToChannel), nameof(Channel.Send));
 
-			Component.Bind(nameof(TrainControl.Odometer.TrainPosition), nameof(Train.Position));
-			Component.Bind(nameof(TrainControl.Odometer.TrainSpeed), nameof(Train.Speed));
+			Bind(nameof(TrainController.Odometer.TrainPosition), nameof(Train.Position));
+			Bind(nameof(TrainController.Odometer.TrainSpeed), nameof(Train.Speed));
 		}
 
 		[Root(Role.SystemOfInterest)]
-		public CrossingControl CrossingControl { get; }
+		public CrossingController CrossingController { get; }
 
 		[Root(Role.SystemOfInterest)]
-		public TrainControl TrainControl { get; }
+		public TrainController TrainController { get; }
 
 		[Root(Role.SystemContext)]
 		public Train Train { get; } = new Train();
@@ -93,9 +91,10 @@ namespace SafetySharp.CaseStudies.RailroadCrossing
 		[Root(Role.SystemContext)]
 		public RadioChannel Channel { get; } = new RadioChannel();
 
-		public Formula PossibleCollision =>
-			Barrier.Angle != 0 &&
-			Train.Position <= CrossingPosition &&
-			Train.Position + Train.Speed >= CrossingPosition;
+		public Formula PossibleCollision => !CrossingIsSecured && TrainIsAtCrossing;
+
+		public Formula TrainIsAtCrossing => Train.Position <= CrossingPosition && Train.Position + Train.Speed >= CrossingPosition;
+
+		public Formula CrossingIsSecured => Barrier.Angle == 0;
 	}
 }

@@ -20,29 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Environment
 {
-	using System;
-	using Analysis;
-	using NUnit.Framework;
+	using SafetySharp.Modeling;
 
-	public class ModelCheckingTests
+	/// <summary>
+	///   Represents the actual barrier that are controlled by the crossing controller.
+	/// </summary>
+	public class Barrier : Component
 	{
-		[Test]
-		public void CollisionDcca()
-		{
-			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.PossibleCollision);
+		[Range(0, Model.ClosingDelay, OverflowBehavior.Clamp)]
+		private int _angle = Model.ClosingDelay;
 
-			result.SaveCounterExamples("counter examples/railroad crossing/");
-			Console.WriteLine(result);
-		}
+		/// <summary>
+		///   Gets the current angle of the barrier; a value of 0 means that the barrier is closed.
+		/// </summary>
+		public int Angle => _angle;
 
-		[Test]
-		public void EnumerateAllStates()
+		/// <summary>
+		///   Gets the barrier's current angular movement speed.
+		/// </summary>
+		public extern int Speed { get; }
+
+		/// <summary>
+		///   Updates the barrier's angle in accordance with its movement speed.
+		/// </summary>
+		public override void Update()
 		{
-			var model = new Model();
-			ModelChecker.CheckInvariant(model, true);
+			_angle += Speed;
 		}
 	}
 }

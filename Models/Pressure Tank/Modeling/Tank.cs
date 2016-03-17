@@ -20,9 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PressureTank.ModelElements
+namespace SafetySharp.CaseStudies.PressureTank.Modeling
 {
-	using Modeling;
+	using SafetySharp.Modeling;
 
 	/// <summary>
 	///   Represents the pressure tank that is filled by the system.
@@ -30,20 +30,31 @@ namespace SafetySharp.CaseStudies.PressureTank.ModelElements
 	public class Tank : Component
 	{
 		/// <summary>
+		///   The minimum pressure level within the tank that we assume always to be present at least. If the pressure goes down to 0,
+		///   we consider the tank to be completely depleted.
+		/// </summary>
+		private const int MinimumPressure = 2;
+
+		/// <summary>
 		///   The current pressure level.
 		/// </summary>
-		[Range(0, Model.MaxPressure, OverflowBehavior.Clamp)]
-		private int _pressureLevel;
+		[Range(0, Model.PressureLimit + MinimumPressure, OverflowBehavior.Clamp)]
+		private int _pressureLevel = MinimumPressure;
 
 		/// <summary>
 		///   Gets a value indicating whether the pressure tank has ruptured after exceeding its maximum allowed pressure level.
 		/// </summary>
-		public bool IsRuptured => _pressureLevel >= Model.MaxPressure;
+		public bool IsRuptured => _pressureLevel >= Model.PressureLimit + MinimumPressure;
+
+		/// <summary>
+		///   Gets a value indicating whether the pressure tank has ruptured after exceeding its maximum allowed pressure level.
+		/// </summary>
+		public bool IsDepleted => _pressureLevel <= 0;
 
 		/// <summary>
 		///   Gets the current pressure level within the tank.
 		/// </summary>
-		public int PressureLevel => _pressureLevel;
+		public int PressureLevel => _pressureLevel - MinimumPressure;
 
 		/// <summary>
 		///   Gets a value indicating whether the pressure tank is currently being filled.

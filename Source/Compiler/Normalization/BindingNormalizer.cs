@@ -106,7 +106,7 @@ namespace SafetySharp.Compiler.Normalization
 			var componentArg = CreatePortTargetExpression(portExpression);
 			var declaringTypeArg = Syntax.TypeOfExpression(Syntax.TypeExpression(methodSymbol.ContainingType));
 			var argumentTypesArg = GetParameterTypeArray(methodSymbol);
-			var returnTypeArg = SyntaxFactory.TypeOfExpression((TypeSyntax)Syntax.TypeExpression(methodSymbol.ReturnType));
+			var returnTypeArg = SyntaxFactory.TypeOfExpression(Syntax.GlobalTypeExpression(methodSymbol.ReturnType));
 			var nameArg = Syntax.LiteralExpression(methodSymbol.Name);
 			var isVirtualArg = CreateIsVirtualExpression(portExpression);
 
@@ -147,7 +147,7 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			var typeExpressions = methodSymbol.Parameters.Select(p =>
 			{
-				var typeofExpression = SyntaxFactory.TypeOfExpression((TypeSyntax)Syntax.TypeExpression(p.Type));
+				var typeofExpression = SyntaxFactory.TypeOfExpression(Syntax.GlobalTypeExpression(p.Type));
 				if (p.RefKind == RefKind.None)
 					return typeofExpression;
 
@@ -157,7 +157,7 @@ namespace SafetySharp.Compiler.Normalization
 
 			var arguments = SyntaxFactory.SeparatedList(typeExpressions);
 			var initialize = SyntaxFactory.InitializerExpression(SyntaxKind.ArrayInitializerExpression, arguments);
-			var arrayType = Syntax.ArrayTypeExpression(SyntaxFactory.ParseTypeName(typeof(Type).FullName));
+			var arrayType = Syntax.ArrayTypeExpression(Syntax.TypeExpression<Type>(SemanticModel));
 			return SyntaxFactory.ArrayCreationExpression((ArrayTypeSyntax)arrayType, initialize);
 		}
 	}

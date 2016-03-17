@@ -20,13 +20,50 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements
+namespace SafetySharp.CaseStudies.PressureTank.Modeling
 {
-	public enum Message
+	using SafetySharp.Modeling;
+
+	/// <summary>
+	///   Represents the pump that fills the pressure tank.
+	/// </summary>
+	public class Pump : Component
 	{
-		None,
-		Close,
-		Query,
-		Closed
+		/// <summary>
+		///   The fault that prevents the pump from pumping.
+		/// </summary>
+		public readonly Fault SuppressPumping = new PermanentFault();
+
+		/// <summary>
+		///   Gets a value indicating whether the pump is currently enabled.
+		/// </summary>
+		public bool IsEnabled { get; private set; }
+
+		/// <summary>
+		///   Disables the pump.
+		/// </summary>
+		public void Disable()
+		{
+			IsEnabled = false;
+		}
+
+		/// <summary>
+		///   Enables the pump.
+		/// </summary>
+		public virtual void Enable()
+		{
+			IsEnabled = true;
+		}
+
+		/// <summary>
+		///   Prevents the pump from pumping.
+		/// </summary>
+		[FaultEffect(Fault = nameof(SuppressPumping))]
+		public class SuppressPumpingEffect : Pump
+		{
+			public override void Enable()
+			{
+			}
+		}
 	}
 }

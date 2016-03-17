@@ -26,8 +26,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using System.Linq;
 	using System.Windows;
 	using System.Windows.Media.Animation;
-	using CaseStudies.PressureTank;
-	using CaseStudies.PressureTank.ModelElements;
+	using CaseStudies.PressureTank.Analysis;
+	using CaseStudies.PressureTank.Modeling;
 	using Infrastructure;
 	using Modeling;
 
@@ -116,8 +116,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 				_timerAlertStoryboard.Begin();
 
 			// Tank
-			var pressureLevel = Math.Round(Tank.PressureLevel / (double)Model.MaxPressure * 100);
-			_pressureLevelStoryboard.Seek(TimeSpan.FromMilliseconds(10 * pressureLevel));
+			var pressureLevel = Math.Round(Tank.PressureLevel / (double)Model.PressureLimit * 100);
+			_pressureLevelStoryboard.Seek(TimeSpan.FromMilliseconds(Math.Max(0, 10 * pressureLevel)));
 			PressureLevel.Text = $"{pressureLevel}%";
 			PressureLevel.Visibility = (!Tank.IsRuptured).ToVisibility();
 			TankRupture.Visibility = Tank.IsRuptured.ToVisibility();

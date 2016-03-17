@@ -163,6 +163,10 @@ namespace SafetySharp.Analysis
 			if (!file.EndsWith(FileExtension))
 				file += FileExtension;
 
+			var directory = Path.GetDirectoryName(file);
+			if (!String.IsNullOrWhiteSpace(directory))
+				Directory.CreateDirectory(directory);
+
 			using (var writer = new BinaryWriter(File.OpenWrite(file), Encoding.UTF8))
 			{
 				writer.Write(FileHeader);

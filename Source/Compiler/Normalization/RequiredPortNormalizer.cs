@@ -191,7 +191,7 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			++_portCount;
 
-			var delegateDeclaration = CreateDelegateDeclaration(GetBindingDelegateName(), true);
+			var delegateDeclaration = CreateDelegateDeclaration(GetBindingDelegateName());
 			var delegateField = CreateFieldDeclaration(GetBindingDelegateFieldName(), delegateDeclaration);
 			var infoField = CreateBinderFieldDeclaration();
 			var assignmentMethod = CreateUnboundPortAssignmentMethod();
@@ -213,22 +213,14 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Creates a delegate declaration that is compatible with the method.
 		/// </summary>
-		private DelegateDeclarationSyntax CreateDelegateDeclaration(string name, bool requiredPort)
+		private DelegateDeclarationSyntax CreateDelegateDeclaration(string name)
 		{
-			var parameters = _methodSymbol.Parameters.Select(parameter => Syntax.ParameterDeclaration(parameter));
-
-			if (!_methodSymbol.ReturnsVoid && !requiredPort)
-			{
-				var parameterType = Syntax.TypeExpression(_methodSymbol.ReturnType);
-				var returnParameter = Syntax.ParameterDeclaration(_resultVariable, parameterType, refKind: RefKind.Out);
-
-				parameters = parameters.Concat(new[] { returnParameter });
-			}
+			var parameters = _methodSymbol.Parameters.Select(parameter => Syntax.GlobalParameterDeclaration(parameter));
 
 			var methodDelegate = Syntax.DelegateDeclaration(
 				name: name,
 				parameters: parameters,
-				returnType: requiredPort ? Syntax.TypeExpression(_methodSymbol.ReturnType) : Syntax.TypeExpression(SpecialType.System_Boolean),
+				returnType: Syntax.GlobalTypeExpression(_methodSymbol.ReturnType),
 				accessibility: Accessibility.Private,
 				modifiers: DeclarationModifiers.Unsafe);
 
@@ -295,7 +287,7 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private MethodDeclarationSyntax CreateUnboundPortThrowMethod()
 		{
-			var parameters = _methodSymbol.Parameters.Select(parameter => Syntax.ParameterDeclaration(parameter));
+			var parameters = _methodSymbol.Parameters.Select(parameter => Syntax.GlobalParameterDeclaration(parameter));
 			var methodName = Syntax.LiteralExpression(_methodSymbol.ToDisplayString());
 			var objectCreation = Syntax.ObjectCreationExpression(SemanticModel.GetTypeSymbol<UnboundPortException>(), methodName);
 			var throwStatement = (StatementSyntax)Syntax.ThrowStatement(objectCreation);
@@ -303,7 +295,7 @@ namespace SafetySharp.Compiler.Normalization
 			var method = Syntax.MethodDeclaration(
 				name: GetUnboundPortThrowMethodName(),
 				parameters: parameters,
-				returnType: Syntax.TypeExpression(_methodSymbol.ReturnType),
+				returnType: Syntax.GlobalTypeExpression(_methodSymbol.ReturnType),
 				accessibility: Accessibility.Private,
 				modifiers: DeclarationModifiers.Static | DeclarationModifiers.Unsafe,
 				statements: new[] { throwStatement });

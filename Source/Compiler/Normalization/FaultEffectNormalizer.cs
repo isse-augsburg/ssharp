@@ -380,7 +380,7 @@ namespace SafetySharp.Compiler.Normalization
 			var typeofExpression = SyntaxFactory.TypeOfExpression((TypeSyntax)Syntax.TypeExpression((runtimeType)));
 			var field = Syntax.FieldDeclaration(
 				name: "runtimeType".ToSynthesized(),
-				type: SyntaxFactory.ParseTypeName("System.Type"),
+				type: Syntax.TypeExpression<Type>(Compilation),
 				accessibility: Accessibility.Private,
 				modifiers: DeclarationModifiers.Static | DeclarationModifiers.ReadOnly,
 				initializer: typeofExpression);
@@ -388,7 +388,7 @@ namespace SafetySharp.Compiler.Normalization
 			field = Syntax.MarkAsNonDebuggerBrowsable(field);
 			field = field.NormalizeWhitespace();
 
-			AddMembers(classSymbol, new UsingDirectiveSyntax[0], (MemberDeclarationSyntax)field);
+			AddMembers(classSymbol, (MemberDeclarationSyntax)field);
 		}
 
 		/// <summary>
@@ -406,7 +406,7 @@ namespace SafetySharp.Compiler.Normalization
 			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field);
 			field = field.NormalizeWhitespace();
 
-			AddMembers(classSymbol, new UsingDirectiveSyntax[0], (MemberDeclarationSyntax)field);
+			AddMembers(classSymbol, (MemberDeclarationSyntax)field);
 		}
 
 		/// <summary>

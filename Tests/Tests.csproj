@@ -205,6 +205,7 @@
     <Compile Include="End2End\Tests\compilation error.cs" />
     <Compile Include="End2End\Tests\success.cs" />
     <Compile Include="Execution\Bindings\Components\non port binding.cs" />
+    <Compile Include="Execution\Bindings\Components\system namespace.cs" />
     <Compile Include="Execution\Bindings\Models\generic component.cs" />
     <Compile Include="Execution\Bindings\Models\interface provided port.cs" />
     <Compile Include="Execution\Bindings\Models\non port binding.cs" />

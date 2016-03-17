@@ -20,40 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PressureTank
+namespace SafetySharp.CaseStudies.PressureTank.Analysis
 {
-	using System;
-	using Analysis;
 	using FluentAssertions;
 	using Modeling;
 	using NUnit.Framework;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 
 	/// <summary>
 	///   Contains a set of tests that model check the case study.
 	/// </summary>
 	public class ModelCheckingTests
 	{
-		/// <summary>
-		///   Conducts a safety analysis (DCCA) for the case study. It prints a summary of the analysis and writes out witnesses for
-		///   minimal critical fault sets to disk that can be replayed using the case study's visualization.
-		/// </summary>
-		[Test]
-		public void RuptureDcca()
-		{
-			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Tank.IsRuptured);
-
-			result.SaveCounterExamples("counter examples/pressure tank/dcca");
-			Console.WriteLine(result);
-
-			result.IsComplete.Should().BeTrue();
-			result.MinimalCriticalSets.ShouldBeEquivalentTo(new[]
-			{
-				// The case study has only one single minimial critical set consisting of the following to faults
-				new[] { model.Sensor.SuppressIsFull, model.Timer.SuppressTimeout }
-			});
-		}
-
 		/// <summary>
 		///   Simply enumerates all states of the case study by checking a valid formula; 'true', in this case. The test's primary
 		///   intent is to support model checking efficiency measurements: Valid formulas represent the worst case for S# as all
@@ -165,7 +144,6 @@ namespace SafetySharp.CaseStudies.PressureTank
 			model.Faults.SuppressActivations();
 
 			var result = ModelChecker.CheckInvariant(model, !model.Timer.HasElapsed);
-
 			result.FormulaHolds.Should().BeTrue();
 		}
 

@@ -20,50 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PressureTank.ModelElements
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
 {
-	using Modeling;
+	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   Represents the pump that fills the pressure tank.
-	/// </summary>
-	public class Pump : Component
+	public class BarrierMotor : Component
 	{
-		/// <summary>
-		///   The fault that prevents the pump from pumping.
-		/// </summary>
-		public readonly Fault SuppressPumping = new PermanentFault();
+		public readonly Fault BarrierMotorStuck = new TransientFault();
 
-		/// <summary>
-		///   Gets a value indicating whether the pump is currently enabled.
-		/// </summary>
-		public bool IsEnabled { get; private set; }
+		[Range(-1, 1, OverflowBehavior.Clamp)]
+		private int _currentSpeed;
 
-		/// <summary>
-		///   Disables the pump.
-		/// </summary>
-		public void Disable()
+		public virtual int Speed => _currentSpeed;
+
+		public void Open()
 		{
-			IsEnabled = false;
+			_currentSpeed = 1;
 		}
 
-		/// <summary>
-		///   Enables the pump.
-		/// </summary>
-		public virtual void Enable()
+		public void Close()
 		{
-			IsEnabled = true;
+			_currentSpeed = -1;
 		}
 
-		/// <summary>
-		///   Prevents the pump from pumping.
-		/// </summary>
-		[FaultEffect(Fault = nameof(SuppressPumping))]
-		public class SuppressPumpingEffect : Pump
+		public void Stop()
 		{
-			public override void Enable()
-			{
-			}
+			_currentSpeed = 0;
+		}
+
+		[FaultEffect(Fault = nameof(BarrierMotorStuck))]
+		public class StuckEffect : BarrierMotor
+		{
+			public override int Speed => 0;
 		}
 	}
 }

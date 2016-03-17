@@ -20,38 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.CrossingController
+namespace Tests.Execution.Bindings.Components
 {
-	using Modeling;
+	using Shouldly;
+	using Utilities;
 
-	public class BarrierMotor : Component
+	namespace NewSystemNamespaceIsProblematic.System
 	{
-		public readonly Fault BarrierMotorStuck = new TransientFault();
+		using global::System;
 
-		[Range(-1, 1, OverflowBehavior.Clamp)]
-		private int _currentSpeed;
-
-		public virtual int Speed => _currentSpeed;
-
-		public void Open()
+		internal class Properties : TestComponent
 		{
-			_currentSpeed = 1;
-		}
+			private int _x;
+			private extern int R1 { get; }
+			private extern int R2 { set; }
 
-		public void Close()
-		{
-			_currentSpeed = -1;
-		}
+			private int P1 => 17;
 
-		public void Stop()
-		{
-			_currentSpeed = 0;
-		}
+			private int P2
+			{
+				set { _x = value; }
+			}
 
-		[FaultEffect(Fault = nameof(BarrierMotorStuck))]
-		public class StuckEffect : BarrierMotor
-		{
-			public override int Speed => 0;
+			int M(object o, bool b, char c, sbyte b1, byte b2, short s1, ushort s2, int i1, uint i3, long l1, ulong l2, float f, double d, string s,
+				  decimal dec, IntPtr i)
+			{
+				return 1;
+			}
+
+			extern int N(object o, bool b, char c, sbyte b1, byte b2, short s1, ushort s2, int i1, uint i3, long l1, ulong l2, float f, double d,
+						 string s, decimal dec, IntPtr i);
+
+			protected override void Check()
+			{
+				Bind(nameof(R1), nameof(P1));
+				Bind(nameof(R2), nameof(P2));
+				Bind(nameof(N), nameof(M));
+
+				R1.ShouldBe(17);
+				R2 = 33;
+				_x.ShouldBe(33);
+			}
 		}
 	}
 }

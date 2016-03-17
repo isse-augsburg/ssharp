@@ -20,21 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.CrossingController
+namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 {
+	using System;
 	using Modeling;
+	using NUnit.Framework;
+	using SafetySharp.Analysis;
 
-	public class TrainSensor : Component
+	public class SafetyAnalysisTests
 	{
-		public readonly Fault ErroneousTrainDetection = new TransientFault();
-
-		public virtual bool HasTrainPassed => TrainPosition > Model.SensorPosition;
-		public extern int TrainPosition { get; }
-
-		[FaultEffect(Fault = nameof(ErroneousTrainDetection))]
-		public class ErroneousDetectionEffect : TrainSensor
+		[Test]
+		public void Collision()
 		{
-			public override bool HasTrainPassed => true;
+			var model = new Model();
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.PossibleCollision);
+
+			result.SaveCounterExamples("counter examples/railroad crossing/dcca/collision");
+			Console.WriteLine(result);
 		}
 	}
 }

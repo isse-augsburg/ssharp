@@ -20,9 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PressureTank.ModelElements
+namespace SafetySharp.CaseStudies.PressureTank.Modeling
 {
-	using Modeling;
+	using SafetySharp.Modeling;
 
 	/// <summary>
 	///   Represents the sensor that monitors the pressure within the pressure tank.
@@ -43,12 +43,12 @@ namespace SafetySharp.CaseStudies.PressureTank.ModelElements
 		/// <summary>
 		///   Gets a value indicating whether the triggering pressure level has been reached or exceeded.
 		/// </summary>
-		public virtual bool IsFull => PhysicalPressure >= Model.SensorPressure;
+		public virtual bool IsFull => PhysicalPressure >= Model.SensorFullPressure;
 
 		/// <summary>
 		///   Gets a value indicating whether the tank is empty.
 		/// </summary>
-		public virtual bool IsEmpty => PhysicalPressure <= 0;
+		public virtual bool IsEmpty => PhysicalPressure <= Model.SensorEmptyPressure;
 
 		/// <summary>
 		///   Senses the physical pressure level within the tank.

@@ -20,69 +20,65 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.ModelElements.CrossingController
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
 {
-	using Modeling;
+	using SafetySharp.Modeling;
 
-	public class CrossingControl : Component
+	public class TrainController : Component
 	{
-		private readonly StateMachine<State> _stateMachine = new StateMachine<State>(State.Open);
+		private readonly StateMachine<State> _stateMachine = State.Approaching;
 
 		[Hidden]
-		public BarrierMotor Motor;
+		public Brakes Brakes;
+
+		[Hidden]
+		public Odometer Odometer;
 
 		[Hidden]
 		public RadioModule Radio;
 
-		[Hidden]
-		public BarrierSensor Sensor;
+		private int ActivatePosition
+			=> QueryPosition - Odometer.Speed * (Model.CommunicationDelay + Model.ClosingDelay);
 
-		[Hidden]
-		public Timer Timer;
+		private int QueryPosition
+			=> StopPosition - 2 * Model.CommunicationDelay * Odometer.Speed;
 
-		[Hidden]
-		public TrainSensor TrainSensor;
+		private int StopPosition
+			=> Model.CrossingPosition - Model.SafetyMargin + Odometer.Speed * Odometer.Speed / (2 * Model.Decelaration);
 
 		public override void Update()
 		{
-			Update(Motor, Radio, Sensor, Timer);
+			Update(Odometer, Radio, Brakes);
 
 			_stateMachine
 				.Transition(
-					from: State.Open,
-					to: State.Closing,
-					guard: Radio.Receive() == Message.Close,
-					action: () =>
-					{
-						Motor.Close();
-						Timer.Start();
-					})
+					from: State.Approaching,
+					to: State.WaitingForClosure,
+					guard: Odometer.Position > ActivatePosition,
+					action: () => Radio.Send(Message.Close))
 				.Transition(
-					from: State.Closing,
-					to: State.Closed,
-					guard: Sensor.IsClosed,
-					action: Motor.Stop)
+					from: State.WaitingForClosure,
+					to: State.WaitingForResponse,
+					guard: Odometer.Position > QueryPosition,
+					action: () => Radio.Send(Message.Query))
 				.Transition(
-					from: State.Closed,
-					to: State.Opening,
-					guard: Timer.HasElapsed || TrainSensor.HasTrainPassed,
-					action: Motor.Open)
+					from: State.WaitingForResponse,
+					to: State.Proceeding,
+					guard: Radio.Receive() == Message.Closed)
 				.Transition(
-					from: State.Opening,
-					to: State.Open,
-					guard: Sensor.IsOpen,
-					action: Motor.Stop);
-
-			if (Radio.Receive() == Message.Query && _stateMachine.State == State.Closed)
-				Radio.Send(Message.Closed);
+					from: State.WaitingForResponse,
+					to: State.Stopping,
+					guard: Odometer.Position > StopPosition,
+					action: Brakes.Engage);
 		}
 
 		private enum State
 		{
-			Open,
-			Closing,
-			Closed,
-			Opening
+			Approaching,
+			WaitingForClosure,
+			WaitingForResponse,
+			Stopping,
+			Proceeding
 		}
 	}
 }

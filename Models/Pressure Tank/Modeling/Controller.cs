@@ -20,9 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PressureTank.ModelElements
+namespace SafetySharp.CaseStudies.PressureTank.Modeling
 {
-	using Modeling;
+	using SafetySharp.Modeling;
 
 	/// <summary>
 	///   The software controller that enables and disables the pump.
