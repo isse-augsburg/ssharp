@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Reflection.Components.Ports
+namespace Tests.Execution.Components.Ports
 {
 	using System.Linq;
 	using System.Reflection;

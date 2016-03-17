@@ -42,7 +42,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		public readonly IntFlowCombinator Combinator = new IntFlowCombinator();
 
 		[Root(Role.SystemOfInterest)]
-		public IntFlowComponentCollection Components;
+		public new IntFlowComponentCollection Components;
 
 
 		[Provided]

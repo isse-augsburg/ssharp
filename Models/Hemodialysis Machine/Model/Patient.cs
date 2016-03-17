@@ -31,7 +31,7 @@
 					outgoingBlood.BigWasteProducts = bigWasteUnitsToDeliver;
 					var waterUnitsToDeliver = totalUnitsToDeliver - bigWasteUnitsToDeliver;
 					outgoingBlood.Water = waterUnitsToDeliver;
-				}
+				} 
 				else
 				{
 					outgoingBlood.BigWasteProducts = BigWasteProducts; // Deliver rest of unfiltrated blood or none

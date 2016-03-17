@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Reflection.Models.Subcomponents
+namespace Tests.Execution.Models.Subcomponents
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
@@ -32,7 +32,7 @@ namespace Tests.Reflection.Models.Subcomponents
 		{
 			var c = new C<int, D> { F = 0, Sub = new D() };
 			var m = new Model(c);
-			m.GetComponents().ShouldBe(new IComponent[] { c, c.Sub });
+			m.Components.ShouldBe(new IComponent[] { c, c.Sub });
 		}
 
 		private class C<T, S> : Component

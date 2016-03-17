@@ -35,6 +35,7 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	public class Model
 	{
+		private readonly Lazy<IComponent[]> _components;
 		private Fault[] _faults;
 		private IComponent[] _roots;
 
@@ -49,6 +50,8 @@ namespace SafetySharp.Modeling
 
 			Roots = components;
 			ModelBinder.Bind(this);
+
+			_components = new Lazy<IComponent[]>(GetComponents);
 		}
 
 		/// <summary>
@@ -57,6 +60,11 @@ namespace SafetySharp.Modeling
 		protected Model()
 		{
 		}
+
+		/// <summary>
+		///   Gets the components contained in the model.
+		/// </summary>
+		public IComponent[] Components => _components.Value;
 
 		/// <summary>
 		///   Gets the model's root components.
@@ -95,7 +103,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Gets the <see cref="IComponent" /> instances the model consists of.
 		/// </summary>
-		public IComponent[] GetComponents()
+		private IComponent[] GetComponents()
 		{
 			var components = new HashSet<IComponent>();
 			VisitPreOrder(c => components.Add(c));

@@ -127,7 +127,7 @@ namespace SafetySharp.Compiler
 
 				Compilation = project.GetCompilationAsync().Result;
 
-				if (!Diagnose(reportAll: true))
+				if (!Diagnose())
 					return null;
 
 				Compilation = Normalizer.ApplyNormalizers(Compilation);
@@ -205,12 +205,12 @@ namespace SafetySharp.Compiler
 		///   Runs the S# diagnostic analyzers on the <see cref="Compilation" />, reporting all generated diagnostics. The function
 		///   returns <c>false</c> when at least one error diagnostic has been reported.
 		/// </summary>
-		private bool Diagnose(bool reportAll = false)
+		private bool Diagnose()
 		{
-			if (!_log.Report(Compilation.GetDiagnostics(), errorsOnly: !reportAll))
+			if (!_log.Report(Compilation.GetDiagnostics(), errorsOnly: true))
 				return false;
 
-			return _log.Report(Compilation.WithAnalyzers(Analyzers).GetAnalyzerDiagnosticsAsync().Result, false);
+			return _log.Report(Compilation.WithAnalyzers(Analyzers).GetAnalyzerDiagnosticsAsync().Result, errorsOnly: false);
 		}
 
 		/// <summary>
@@ -226,7 +226,7 @@ namespace SafetySharp.Compiler
 				var emitResult = Compilation.Emit(peStream, pdbStream);
 				if (!emitResult.Success)
 				{
-					_log.Report(emitResult.Diagnostics, true);
+					_log.Report(emitResult.Diagnostics, errorsOnly: false);
 					throw new CompilationException();
 				}
 

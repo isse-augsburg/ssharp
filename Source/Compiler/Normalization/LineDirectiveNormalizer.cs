@@ -23,6 +23,7 @@
 namespace SafetySharp.Compiler.Normalization
 {
 	using System;
+	using System.IO;
 	using Microsoft.CodeAnalysis;
 	using Roslyn.Syntax;
 
@@ -42,7 +43,7 @@ namespace SafetySharp.Compiler.Normalization
 		{
 			var root = syntaxTree.GetRoot();
 			var firstNode = root.GetFirstToken(true, true, true, true).Parent;
-			var updatedNode = firstNode.PrependLineDirective(1, syntaxTree.FilePath);
+			var updatedNode = firstNode.PrependLineDirective(1, Path.GetFullPath(syntaxTree.FilePath));
 
 			return syntaxTree.WithFilePath(syntaxTree.FilePath + Guid.NewGuid()).WithRoot(root.ReplaceNode(firstNode, updatedNode));
 		}

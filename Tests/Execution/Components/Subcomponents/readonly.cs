@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Reflection.Components.Subcomponents
+namespace Tests.Execution.Components.Subcomponents
 {
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;

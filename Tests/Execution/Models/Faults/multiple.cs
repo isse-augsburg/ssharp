@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Reflection.Models.Faults
+namespace Tests.Execution.Models.Faults
 {
 	using SafetySharp.Modeling;
 	using Shouldly;

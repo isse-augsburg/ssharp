@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Reflection.Components.Fields
+namespace Tests.Execution.Components.Fields
 {
 	using System.Collections.Generic;
 	using SafetySharp.Modeling;
