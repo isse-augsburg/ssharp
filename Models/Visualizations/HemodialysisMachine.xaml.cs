@@ -35,6 +35,7 @@ namespace Visualization
 	using HemodialysisMachine.Model;
 	using HemodialysisMachine.Utilities.BidirectionalFlow;
 	using Infrastructure;
+	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 
 	public partial class HdMachine
@@ -97,6 +98,19 @@ namespace Visualization
 			}
 		}
 
+
+		public class VisualFault
+		{
+			public Fault Fault;
+			public Rectangle FaultSymbol;
+
+			public VisualFault(Fault _fault, Rectangle _faultSymbol)
+			{
+				Fault = _fault;
+				FaultSymbol = _faultSymbol;
+			}
+		}
+
 		public void InitializeElements()
 		{
 
@@ -131,6 +145,7 @@ namespace Visualization
 				new VisualFlow("FlowBalanceChamberToDrain",(Storyboard)Resources["FlowBalanceChamberToDrain"],selectFlowBalanceChamberToDrain,Machine.DialyzingFluidDeliverySystem.BalanceChamber.ForwardUsedFlowSegment.Outgoing),
 				new VisualFlow("FlowBalanceChamberToSafetyBypass",(Storyboard)Resources["FlowBalanceChamberToSafetyBypass"],selectFlowBalanceChamberToSafetyBypass,Machine.DialyzingFluidDeliverySystem.BalanceChamber.ForwardProducedFlowSegment.Outgoing),
 				new VisualFlow("FlowSafetyBypassToDialyzer",(Storyboard)Resources["FlowSafetyBypassToDialyzer"],selectFlowSafetyBypassToDialyzer,Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.MainFlow.Outgoing),
+				new VisualFlow("FlowSafetyBypassToDrain",(Storyboard)Resources["FlowSafetyBypassToDrain"],selectFlowSafetyBypassToDrain,Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.DrainFlow.Outgoing),
 				new VisualFlow("FlowDialyzerDialyzingFluidSideToSplit3",(Storyboard)Resources["FlowDialyzerDialyzingFluidSideToSplit3"],selectFlowDialyzerDialyzingFluidSideToSplit3,Machine.Dialyzer.DialyzingFluidFlow.Outgoing),
 				new VisualFlow("FlowSplit3ToPumpToBalanceChamber",(Storyboard)Resources["FlowSplit3ToPumpToBalanceChamber"],selectFlowSplit3ToPumpToBalanceChamber,Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Incoming.ConnectedPredecessor),
 				new VisualFlow("FlowSplit3ToUltraFiltrationPump",(Storyboard)Resources["FlowSplit3ToUltraFiltrationPump"],selectFlowSplit3ToUltraFiltrationPump,Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.DialyzingFluidFlow.Incoming.ConnectedPredecessor),
@@ -145,6 +160,18 @@ namespace Visualization
 				rectangle.MouseLeftButtonDown += SelectModelElement;
 				SelectedModelElementToVisualFlow.Add(visualFlow.SelectionRectangle,visualFlow);
 			}
+
+			VisualFaults = new VisualFault[]
+			{
+				new VisualFault(Machine.Dialyzer.DialyzerMembraneRupturesFault,buttonFaultDialyzer),
+				new VisualFault(Machine.ExtracorporealBloodCircuit.VenousTubingValve.ValveDoesNotClose,buttonFaultVenousValve),
+				new VisualFault(Machine.ExtracorporealBloodCircuit.VenousSafetyDetector.SafetyDetectorDefect,buttonFaultSafetyDetector),
+				new VisualFault(Machine.DialyzingFluidDeliverySystem.DialyzingFluidWaterPreparation.WaterHeaterDefect,buttonFaultWaterPreparation),
+				new VisualFault(Machine.ExtracorporealBloodCircuit.ArterialBloodPump.BloodPumpDefect,buttonFaultBloodPump),
+				new VisualFault(Machine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidPreparationPumpDefect,buttonFaultDialyzingFluidPreparation),
+				new VisualFault(Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.SafetyBypassFault,buttonFaultSafetyBypass),
+				new VisualFault(Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpToBalanceChamberDefect,buttonFaultPumpToBalanceChamber),
+			};
 		}
 
 		public HdMachine()
@@ -200,6 +227,8 @@ namespace Visualization
 
 		private VisualFlow[] VisualFlows;
 		private readonly Dictionary<Rectangle, VisualFlow> SelectedModelElementToVisualFlow=new Dictionary<Rectangle, VisualFlow>();
+
+		private VisualFault[] VisualFaults;
 
 		private System.Windows.Media.Brush Highlighted = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(178, 253, 153, 53));
 		private System.Windows.Media.Brush NotHighlighted = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 253, 153, 53));
@@ -349,6 +378,7 @@ namespace Visualization
 			}
 			UpdateSelectedModelElementInfoText();
 			UpdatePatientInfoText();
+			UpdateFaultVisualization();
 
 		}
 		private void SelectModelElement(object sender, RoutedEventArgs e)
@@ -363,19 +393,34 @@ namespace Visualization
 
 		public void UpdateSelectedModelElementInfoText()
 		{
+			var text = "";
 			if (SelectedModelElement != null)
 			{
-				var text = "";
 				if (SelectedModelElementToVisualFlow.ContainsKey(SelectedModelElement))
 					text = SelectedModelElementToVisualFlow[SelectedModelElement].GetInfoText();
-				textBlockSelectedElementInfos.Text = text;
 			}
+			textBlockSelectedElementInfos.Text = text;
 		}
 
 		public void UpdatePatientInfoText()
 		{
 			var text = Patient.ValuesAsText();
 			textBlockPatientInfos.Text = text;
+		}
+
+		public void UpdateFaultVisualization()
+		{
+			foreach (var visualFault in VisualFaults)
+			{
+				if (visualFault.Fault.IsActivated)
+				{
+					visualFault.FaultSymbol.Style = (Style)Resources["FailureIndicator"];
+				}
+				else
+				{
+					visualFault.FaultSymbol.Style = (Style)Resources["NoFailureIndicator"];
+				}
+			}
 		}
 
 		/*

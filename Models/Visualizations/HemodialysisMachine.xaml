@@ -7,13 +7,34 @@
              mc:Ignorable="d"
              d:DesignHeight="598.079" d:DesignWidth="833.961">
     <UserControl.Resources>
+        <Style x:Key="NoFailureIndicator" TargetType="{x:Type Rectangle}">
+            <Setter Property="Fill">
+                <Setter.Value>
+                    <SolidColorBrush Color="#FF4CFF00"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="IsHitTestVisible" Value="false" />
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TransformGroup>
+                        <ScaleTransform />
+                        <SkewTransform />
+                        <RotateTransform Angle="31.489" />
+                        <TranslateTransform />
+                    </TransformGroup>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="OpacityMask">
+                <Setter.Value>
+                    <VisualBrush Visual="{DynamicResource appbar_check}" />
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="FailureIndicator" TargetType="{x:Type Rectangle}">
             <Setter Property="Fill">
                 <Setter.Value>
-                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                        <GradientStop Color="#FF930101" Offset="0" />
-                        <GradientStop Color="#FFFF0404" Offset="1" />
-                    </LinearGradientBrush>
+                    <SolidColorBrush Color="#FFCC0101"/>
                 </Setter.Value>
             </Setter>
             <Setter Property="IsHitTestVisible" Value="false" />
@@ -626,9 +647,28 @@
                 <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
+        <Storyboard x:Key="FlowSafetyBypassToDrain">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)" Storyboard.TargetName="arrowhead1_Copy28">
+                <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="-8.667"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.7" Value="-24"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1" Value="-43.667"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)" Storyboard.TargetName="arrowhead1_Copy28">
+                <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="-11.667"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.7" Value="-12.334"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1" Value="-12.667"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="arrowhead1_Copy28">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.7" Value="1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
     </UserControl.Resources>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+            <BeginStoryboard Storyboard="{StaticResource FlowSafetyBypassToDrain}"/>
         </EventTrigger>
     </UserControl.Triggers>
     <DockPanel LastChildFill="true">
@@ -1585,13 +1625,93 @@
                 <Rectangle x:Name="selectFlowDialyzingFluidPreparationToBalanceChamber" Height="86.788" Canvas.Left="691.368" Canvas.Top="62.423" Width="22" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowBalanceChamberToSafetyBypass" Height="17" Canvas.Left="605.368" Canvas.Top="165.211" Width="22" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowSafetyBypassToDialyzer" Height="29" Canvas.Left="493.368" Canvas.Top="178.211" Width="72" StrokeThickness="2" Fill="#00000000"/>
-                <Rectangle x:Name="selectFlowPatientToBloodPump_Copy14" Height="17" Canvas.Left="543.368" Canvas.Top="178.211" Width="22" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowDialyzerDialyzingFluidSideToSplit3" Height="17" Canvas.Left="493.368" Canvas.Top="212.211" Width="30.638" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowSplit3ToUltraFiltrationPump" Height="78" Canvas.Left="537.368" Canvas.Top="265.211" Width="42" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowSplit3ToPumpToBalanceChamber" Height="17" Canvas.Left="571.368" Canvas.Top="225.211" Width="24.638" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowBalanceChamberToDrain" Height="17" Canvas.Left="714.368" Canvas.Top="252.211" Width="17.638" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowPumpToBalanceChamberToBalanceChamber" Height="17" Canvas.Left="615.368" Canvas.Top="252.211" Width="28" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowUltraFiltrationPumpToDrain" Height="17" Canvas.Left="625.73" Canvas.Top="352.423" Width="17.638" StrokeThickness="2" Fill="#00000000"/>
+                <Rectangle x:Name="buttonFaultDialyzer" Height="17.409" Canvas.Left="465.639" Canvas.Top="150.177" Width="10.11" Style="{StaticResource FailureIndicator}" RenderTransformOrigin="0.884,-2.957" >
+                    <Rectangle.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="31.489"/>
+                            <TranslateTransform X="35.985" Y="12.696"/>
+                        </TransformGroup>
+                    </Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle x:Name="buttonFaultVenousValve" Height="17.409" Canvas.Left="216.639" Canvas.Top="312.177" Width="10.11" Style="{StaticResource FailureIndicator}" RenderTransformOrigin="0.884,-2.957" >
+                    <Rectangle.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="31.489"/>
+                            <TranslateTransform X="35.985" Y="12.696"/>
+                        </TransformGroup>
+                    </Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle x:Name="buttonFaultSafetyDetector" Height="17.409" Canvas.Left="298.639" Canvas.Top="315.177" Width="10.11" Style="{StaticResource FailureIndicator}" RenderTransformOrigin="0.884,-2.957" >
+                    <Rectangle.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="31.489"/>
+                            <TranslateTransform X="35.985" Y="12.696"/>
+                        </TransformGroup>
+                    </Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle x:Name="buttonFaultWaterPreparation" Height="17.409" Canvas.Left="581.639" Canvas.Top="40.177" Width="10.11" Style="{StaticResource FailureIndicator}" RenderTransformOrigin="0.884,-2.957" >
+                    <Rectangle.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="31.489"/>
+                            <TranslateTransform X="35.985" Y="12.696"/>
+                        </TransformGroup>
+                    </Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle x:Name="buttonFaultBloodPump" Height="17.409" Canvas.Left="266.639" Canvas.Top="78.177" Width="10.11" Style="{StaticResource FailureIndicator}" RenderTransformOrigin="0.884,-2.957" >
+                    <Rectangle.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="31.489"/>
+                            <TranslateTransform X="35.985" Y="12.696"/>
+                        </TransformGroup>
+                    </Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle x:Name="buttonFaultDialyzingFluidPreparation" Height="17.409" Canvas.Left="679.639" Canvas.Top="45.177" Width="10.11" Style="{StaticResource FailureIndicator}" RenderTransformOrigin="0.884,-2.957" >
+                    <Rectangle.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="31.489"/>
+                            <TranslateTransform X="35.985" Y="12.696"/>
+                        </TransformGroup>
+                    </Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle x:Name="buttonFaultSafetyBypass" Height="17.409" Canvas.Left="579.639" Canvas.Top="136.177" Width="10.11" Style="{StaticResource FailureIndicator}" RenderTransformOrigin="0.884,-2.957" >
+                    <Rectangle.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="31.489"/>
+                            <TranslateTransform X="35.985" Y="12.696"/>
+                        </TransformGroup>
+                    </Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle x:Name="buttonFaultPumpToBalanceChamber" Height="17.409" Canvas.Left="604.639" Canvas.Top="264.177" Width="10.11" Style="{StaticResource NoFailureIndicator}" RenderTransformOrigin="0.884,-2.957" >
+                    <Rectangle.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="31.489"/>
+                            <TranslateTransform X="35.985" Y="12.696"/>
+                        </TransformGroup>
+                    </Rectangle.RenderTransform>
+                </Rectangle>
+                <Rectangle x:Name="selectFlowSafetyBypassToDrain" Height="17" Canvas.Left="554.035" Canvas.Top="153.211" Width="22" StrokeThickness="2" Fill="#00000000"/>
             </Canvas>
         </Canvas>
     </DockPanel>
