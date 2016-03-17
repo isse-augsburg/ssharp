@@ -120,7 +120,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public KindOfDialysate KindOfDialysate = KindOfDialysate.Water;
 
 		[Range(0, 8, OverflowBehavior.Error)]
-		public int PumpSpeed = 4;
+		public int PumpSpeed = 0;
 
 		[Provided]
 		public void SetConcentrateFlowSuction(Suction outgoingSuction)
@@ -176,7 +176,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
 
 		[Range(0, 8, OverflowBehavior.Error)]
-		public int UltraFiltrationPumpSpeed = 1;
+		public int UltraFiltrationPumpSpeed = 0;
 
 		[Provided]
 		public void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
@@ -352,7 +352,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public readonly DialyzingFluidFlowInToOutSegment MainFlow = new DialyzingFluidFlowInToOutSegment();
 
 		[Range(0, 8, OverflowBehavior.Error)]
-		public int PumpSpeed = 4;
+		public int PumpSpeed = 0;
 
 		[Provided]
 		public void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)

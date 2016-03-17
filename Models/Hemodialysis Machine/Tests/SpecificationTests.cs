@@ -118,7 +118,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 } };
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.IncomingBloodNotOk);
-			result.SaveCounterExamples("counter examples/hdmachine");
+			result.SaveCounterExamples("counter examples/hdmachine_contamination");
 
 			Console.WriteLine(result);
 		}
@@ -130,7 +130,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 } };
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.BloodNotCleanedAndDialyzingFinished);
-			result.SaveCounterExamples("counter examples/hdmachine");
+			result.SaveCounterExamples("counter examples/hdmachine_unsuccessful");
 
 			Console.WriteLine(result);
 		}

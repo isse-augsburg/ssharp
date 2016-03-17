@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Visualization
+namespace SafetySharp.CaseStudies.Visualizations
 {
 	using System;
 	using System.Collections.Generic;
@@ -29,9 +29,6 @@ namespace Visualization
 	using System.Windows;
 	using System.Windows.Media.Animation;
 	using System.Windows.Shapes;
-	using global::Funkfahrbetrieb.CrossingController;
-	using global::Funkfahrbetrieb.TrainController;
-	using global::HemodialysisMachine;
 	using HemodialysisMachine.Model;
 	using HemodialysisMachine.Utilities.BidirectionalFlow;
 	using Infrastructure;
@@ -176,7 +173,7 @@ namespace Visualization
 
 		public HdMachine()
 		{
-			var specification = new Specification();
+			var specification = new SafetySharp.CaseStudies.HemodialysisMachine.Specification();
 
 			InitializeComponent();
 
@@ -185,7 +182,7 @@ namespace Visualization
 			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
 			SimulationControls.Reset += (o, e) => OnModelStateReset();
 			SimulationControls.Rewound += (o, e) => OnRewound();
-			SimulationControls.SetSpecification(specification);
+			SimulationControls.SetModel(specification);
 
 
 			InitializeElements();
@@ -407,7 +404,7 @@ namespace Visualization
 			var textPatient = Patient.ValuesAsText();
 			var textOutgoingBlood = Patient.ArteryFlow.Outgoing.ForwardToSuccessor.ValuesAsText();
 			var textIncomingBlood = Patient.VeinFlow.Incoming.ForwardFromPredecessor.ValuesAsText();
-			textBlockPatientInfos.Text = textPatient + "\n\nOutgoing:\n" + textOutgoingBlood + "\n\nIncoming:\n" + textIncomingBlood;
+			textBlockPatientInfos.Text = "Patient:\n" + textPatient + "\n\nOutgoing (Artery):\n" + textOutgoingBlood + "\n\nIncoming (Vein):\n" + textIncomingBlood;
 		}
 
 		public void UpdateFaultVisualization()
