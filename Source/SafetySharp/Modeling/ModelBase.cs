@@ -36,8 +36,12 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	public abstract class ModelBase
 	{
+		[NonSerializable]
 		private readonly Lazy<IComponent[]> _components;
+
+		[NonSerializable]
 		private Fault[] _faults;
+
 		private IComponent[] _roots;
 
 		/// <summary>

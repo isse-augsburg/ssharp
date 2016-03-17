@@ -36,11 +36,6 @@ namespace SafetySharp.Runtime.Serialization
 		public readonly byte[] Buffer;
 
 		/// <summary>
-		///   The root components of the model.
-		/// </summary>
-		public readonly Component[] RootComponents;
-
-		/// <summary>
 		///   The table of objects referenced by the model.
 		/// </summary>
 		public readonly ObjectTable ObjectTable;
@@ -57,14 +52,12 @@ namespace SafetySharp.Runtime.Serialization
 
 		/// <param name="model">A copy of the original model the runtime model was generated from.</param>
 		/// <param name="buffer">The buffer the model was deserialized from.</param>
-		/// <param name="rootComponents">The root components of the model.</param>
 		/// <param name="objectTable">The table of objects referenced by the model.</param>
 		/// <param name="formulas">The formulas that are checked on the model.</param>
-		internal SerializedRuntimeModel(ModelBase model, byte[] buffer, Component[] rootComponents, ObjectTable objectTable, Formula[] formulas)
+		internal SerializedRuntimeModel(ModelBase model, byte[] buffer, ObjectTable objectTable, Formula[] formulas)
 		{
 			Model = model;
 			Buffer = buffer;
-			RootComponents = rootComponents;
 			ObjectTable = objectTable;
 			Formulas = formulas;
 		}

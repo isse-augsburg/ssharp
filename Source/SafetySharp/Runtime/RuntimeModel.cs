@@ -76,7 +76,7 @@ namespace SafetySharp.Runtime
 		internal RuntimeModel(SerializedRuntimeModel serializedData, int stateHeaderBytes = 0)
 		{
 			var buffer = serializedData.Buffer;
-			var rootComponents = serializedData.RootComponents;
+			var rootComponents = serializedData.Model.Roots;
 			var objectTable = serializedData.ObjectTable;
 			var formulas = serializedData.Formulas;
 
@@ -89,7 +89,7 @@ namespace SafetySharp.Runtime
 
 			Model = serializedData.Model;
 			SerializedModel = buffer;
-			RootComponents = rootComponents;
+			RootComponents = rootComponents.Cast<Component>().ToArray();
 			Faults = objectTable.OfType<Fault>().Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
 			ActivationSensitiveFaults = Faults.Where(fault => fault.RequiresActivationNotification).ToArray();
 			StateFormulas = objectTable.OfType<StateFormula>().ToArray();

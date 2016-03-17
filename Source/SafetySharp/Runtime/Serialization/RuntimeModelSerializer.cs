@@ -22,14 +22,10 @@
 
 namespace SafetySharp.Runtime.Serialization
 {
-	using System;
 	using System.IO;
 	using System.Linq;
-	using System.Reflection;
-	using System.Runtime.Serialization;
 	using System.Text;
 	using Analysis;
-	using Analysis.FormulaVisitors;
 	using Modeling;
 	using Utilities;
 
@@ -85,8 +81,7 @@ namespace SafetySharp.Runtime.Serialization
 		private unsafe void SerializeModel(BinaryWriter writer, ModelBase model, Formula[] formulas)
 		{
 			// Collect all objects contained in the model
-			var stateFormulas = CollectStateFormulas(formulas);
-			var objectTable = CreateObjectTable(model, formulas, stateFormulas);
+			var objectTable = CreateObjectTable(model, formulas);
 
 			// Prepare the serialization of the model's initial state
 			lock (_syncObject)
@@ -101,13 +96,8 @@ namespace SafetySharp.Runtime.Serialization
 			// Serialize the object table
 			SerializeObjectTable(objectTable, writer);
 
-			// Serialize the object identifiers of the root components and the model itself
+			// Serialize the object identifier of the model itself and the formulas
 			writer.Write(objectTable.GetObjectIdentifier(model));
-			writer.Write(model.Roots.Length);
-			foreach (var root in model.Roots)
-				writer.Write(objectTable.GetObjectIdentifier(root));
-
-			// Serialize the object identifiers of the root formulas
 			writer.Write(formulas.Length);
 			foreach (var formula in formulas)
 				writer.Write(objectTable.GetObjectIdentifier(formula));
@@ -120,54 +110,14 @@ namespace SafetySharp.Runtime.Serialization
 			writer.Write(stateVectorSize);
 			for (var i = 0; i < stateVectorSize; ++i)
 				writer.Write(serializedState[i]);
-
-			SerializeStateFormulas(writer, objectTable, stateFormulas);
-		}
-
-		/// <summary>
-		///   Serializes the <paramref name="stateFormulas" />.
-		/// </summary>
-		private static void SerializeStateFormulas(BinaryWriter writer, ObjectTable objectTable, StateFormula[] stateFormulas)
-		{
-			writer.Write(stateFormulas.Length);
-			foreach (var formula in stateFormulas)
-			{
-				// Serialize the object identifier of the closure as well as the method name
-				writer.Write(objectTable.GetObjectIdentifier(formula));
-				writer.Write(objectTable.GetObjectIdentifier(formula.Expression.Target));
-				writer.Write(formula.Expression.Method.Name);
-			}
-		}
-
-		/// <summary>
-		///   Collects all state formulas contained in the <paramref name="formulas" />.
-		/// </summary>
-		private static StateFormula[] CollectStateFormulas(Formula[] formulas)
-		{
-			var visitor = new StateFormulaCollector();
-			foreach (var formula in formulas)
-				visitor.Visit(formula);
-
-			// Check that the state formula has a closure -- the current version of the C# compiler 
-			// always does that, but future versions might not.
-			foreach (var formula in visitor.StateFormulas)
-				Requires.NotNull(formula.Expression.Target, "Unexpected state formula without closure object.");
-
-			return visitor.StateFormulas.ToArray();
 		}
 
 		/// <summary>
 		///   Creates the object table for the <paramref name="model" /> and <paramref name="formulas" />.
 		/// </summary>
-		private static ObjectTable CreateObjectTable(ModelBase model, Formula[] formulas, StateFormula[] stateFormulas)
+		private static ObjectTable CreateObjectTable(ModelBase model, Formula[] formulas)
 		{
-			var objects = model
-				.Roots
-				.Cast<object>()
-				.Concat(formulas)
-				.Concat(stateFormulas.Select(formula => formula.Expression.Target))
-				.Concat(new[] { model });
-
+			var objects = model.Roots.Cast<object>().Concat(formulas).Concat(new[] { model });
 			return new ObjectTable(SerializationRegistry.Default.GetReferencedObjects(objects.ToArray(), SerializationMode.Full));
 		}
 
@@ -234,13 +184,8 @@ namespace SafetySharp.Runtime.Serialization
 			// Deserialize the object table
 			var objectTable = DeserializeObjectTable(reader);
 
-			// Deserialize the object identifiers of the root components and the model itself
+			// Deserialize the object identifiers of the model itself and the root formulas
 			var model = (ModelBase)objectTable.GetObject(reader.ReadUInt16());
-			var roots = new Component[reader.ReadInt32()];
-			for (var i = 0; i < roots.Length; ++i)
-				roots[i] = (Component)objectTable.GetObject(reader.ReadUInt16());
-
-			// Deserialize the object identifiers of the root formulas
 			var formulas = new Formula[reader.ReadInt32()];
 			for (var i = 0; i < formulas.Length; ++i)
 				formulas[i] = (Formula)objectTable.GetObject(reader.ReadUInt16());
@@ -267,67 +212,23 @@ namespace SafetySharp.Runtime.Serialization
 
 			deserializer(objectTable, serializedState);
 
-			// We instantiate the runtime type for each component and replace the original component
-			// instance with the new runtime instance; we also replace all of the component's fault effects
-			// with that instance and deserialize the initial state again. Afterwards, we have completely
-			// replaced the original instance with its runtime instance, taking over all serialized data
-			SubstituteRuntimeInstances(objectTable, roots);
+			// 1. We instantiate the runtime type for each component and replace the original component
+			//    instance with the new runtime instance; we also replace all of the component's fault effects
+			//    with that instance and deserialize the initial state again. Afterwards, we have completely
+			//    replaced the original instance with its runtime instance, taking over all serialized data
+			// 2. We substitute the dummy delegate objects with the actual instances obtained from the DelegateMetadata instances
+			objectTable.SubstituteRuntimeInstances();
+			objectTable.SubstituteDelegates();
 			deserializer(objectTable, serializedState);
 
-			// Deserialize the state formulas and instantiate the runtime model
-			DeserializeStateFormulas(reader, objectTable);
-			return new SerializedRuntimeModel(model, buffer, roots, objectTable, formulas);
-		}
-
-		/// <summary>
-		///   Substitutes the components and fault effects in the <paramref name="objectTable" /> and <paramref name="roots" /> array
-		///   with their corresponding runtime instances.
-		/// </summary>
-		private static void SubstituteRuntimeInstances(ObjectTable objectTable, Component[] roots)
-		{
-			foreach (var component in objectTable.OfType<Component>().ToArray())
-			{
-				if (component.IsFaultEffect())
-					continue;
-
-				var runtimeType = component.GetRuntimeType();
-				var runtimeObj = (Component)FormatterServices.GetUninitializedObject(runtimeType);
-				var rootIndex = Array.IndexOf(roots, component);
-
-				if (rootIndex != -1)
-					roots[rootIndex] = runtimeObj;
-
-				objectTable.Substitute(component, runtimeObj);
-				foreach (var faultEffect in component.FaultEffects)
-					objectTable.Substitute(faultEffect, runtimeObj);
-			}
-		}
-
-		/// <summary>
-		///   Deserializes the <see cref="StateFormula" />s from the <paramref name="reader" />.
-		/// </summary>
-		private static void DeserializeStateFormulas(BinaryReader reader, ObjectTable objectTable)
-		{
-			var count = reader.ReadInt32();
-			for (var i = 0; i < count; ++i)
-			{
-				// Deserialize the closure object and method name to generate the delegate
-				var formula = (StateFormula)objectTable.GetObject(reader.ReadUInt16());
-				var closure = objectTable.GetObject(reader.ReadUInt16());
-				var method = closure.GetType().GetMethod(reader.ReadString(), BindingFlags.NonPublic | BindingFlags.Instance);
-				var expression = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), closure, method);
-
-				typeof(StateFormula)
-					.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
-					.Single(field => field.FieldType == typeof(Func<bool>))
-					.SetValue(formula, expression);
-			}
+			// Return the serialized model data
+			return new SerializedRuntimeModel(model, buffer, objectTable, formulas);
 		}
 
 		/// <summary>
 		///   Deserializes the <see cref="ObjectTable" /> from the <paramref name="reader" />.
 		/// </summary>
-		/// <param name="reader">The reader the <see cref="ObjectTable" /> should be deserialized from.</param>
+		/// <param name="reader">The reader the objects should be deserialized from.</param>
 		private static ObjectTable DeserializeObjectTable(BinaryReader reader)
 		{
 			Requires.NotNull(reader, nameof(reader));

@@ -35,13 +35,23 @@ namespace Tests.Execution.Simulation
 			var simulator = new Simulator(m, m.F);
 			m = (M)simulator.Model;
 			var f = m.F.Compile();
-
+			var g = m.G.Compile();
+			
+			m.C.X.ShouldBe(0);
 			m.F.Evaluate().ShouldBe(true);
+			m.G.Evaluate().ShouldBe(true);
+
 			f().ShouldBe(true);
+			g().ShouldBe(true);
 
 			simulator.SimulateStep();
+
+			m.C.X.ShouldBe(1);
 			m.F.Evaluate().ShouldBe(false);
+			m.G.Evaluate().ShouldBe(false);
+
 			f().ShouldBe(false);
+			g().ShouldBe(false);
 		}
 
 		private class M : ModelBase
@@ -50,6 +60,13 @@ namespace Tests.Execution.Simulation
 			public readonly C C = new C();
 
 			public Formula F => C.X != 1;
+
+			public Formula G { get; }
+
+			public M()
+			{
+				G = C.X == 0;
+			}
 		}
 
 		private class C : Component

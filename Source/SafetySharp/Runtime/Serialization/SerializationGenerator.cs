@@ -739,9 +739,6 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		private static bool IsReferenceType(Type type)
 		{
-			if (type.IsSubclassOf(typeof(Delegate)))
-				throw new NotSupportedException($"Delegate types such as '{type.FullName}' are not supported.");
-
 			return type.IsReferenceType();
 		}
 

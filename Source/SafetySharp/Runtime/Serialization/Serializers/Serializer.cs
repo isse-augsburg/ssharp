@@ -68,12 +68,11 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		protected internal abstract IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode);
 
 		/// <summary>
-		///   Gets all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself, when
-		///   <paramref name="obj" /> was marked with the <paramref name="hidden" /> attribute.
+		///   Gets all objects referenced by <paramref name="obj" /> potentially marked with the <paramref name="hidden" /> attribute.
 		/// </summary>
 		/// <param name="obj">The object the referenced objects should be returned for.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		/// <param name="hidden">The <see cref="HiddenAttribute" /> instance the field storing <paramref name="obj" /> was marked with.</param>
+		/// <param name="hidden">The <see cref="HiddenAttribute" /> instance, if any, the field storing <paramref name="obj" /> was marked with.</param>
 		protected internal virtual IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode, HiddenAttribute hidden)
 		{
 			yield return obj;

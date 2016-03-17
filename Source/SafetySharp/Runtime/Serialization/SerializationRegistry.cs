@@ -53,7 +53,8 @@ namespace SafetySharp.Runtime.Serialization
 			RegisterSerializer(new ListSerializer());
 			RegisterSerializer(new StringSerializer());
 			RegisterSerializer(new TypeSerializer());
-			RegisterSerializer(new StateFormulaSerializer());
+			RegisterSerializer(new MethodInfoSerializer());
+			RegisterSerializer(new DelegateSerializer());
 		}
 
 		/// <summary>

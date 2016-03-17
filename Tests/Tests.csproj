@@ -584,7 +584,7 @@
     <Compile Include="Serialization\Objects\hidden list elements.cs" />
     <Compile Include="Serialization\Objects\serialized arrays.cs" />
     <Compile Include="Serialization\Objects\lists.cs" />
-    <Compile Include="Serialization\Objects\delegate field.cs" />
+    <Compile Include="Serialization\Objects\delegates.cs" />
     <Compile Include="Serialization\Objects\null.cs" />
     <Compile Include="Serialization\Objects\multiple objects.cs" />
     <Compile Include="Serialization\Objects\nested objects.cs" />
