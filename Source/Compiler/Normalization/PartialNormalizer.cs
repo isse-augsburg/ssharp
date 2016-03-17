@@ -44,7 +44,9 @@ namespace SafetySharp.Compiler.Normalization
 				return classDeclaration;
 
 			var partialKeyword = SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingSpace();
-			return classDeclaration.WithModifiers(classDeclaration.Modifiers.Add(partialKeyword));
+			partialKeyword = partialKeyword.WithLeadingTrivia(classDeclaration.Keyword.LeadingTrivia);
+			classDeclaration = classDeclaration.WithModifiers(classDeclaration.Modifiers.Add(partialKeyword));
+			return classDeclaration.WithKeyword(classDeclaration.Keyword.WithLeadingSpace());
 		}
 
 		/// <summary>
@@ -58,7 +60,9 @@ namespace SafetySharp.Compiler.Normalization
 				return structDeclaration;
 
 			var partialKeyword = SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingSpace();
-			return structDeclaration.WithModifiers(structDeclaration.Modifiers.Add(partialKeyword));
+			partialKeyword = partialKeyword.WithLeadingTrivia(structDeclaration.Keyword.LeadingTrivia);
+			structDeclaration = structDeclaration.WithModifiers(structDeclaration.Modifiers.Add(partialKeyword));
+			return structDeclaration.WithKeyword(structDeclaration.Keyword.WithLeadingSpace());
 		}
 	}
 }

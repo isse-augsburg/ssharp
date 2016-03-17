@@ -51,14 +51,14 @@ namespace Tests.Serialization.RuntimeModels
 			r = ((D)root).B.RequiredPort;
 			p = ((D)root).B.ProvidedPort;
 
-			r.Component.ShouldBe(root);
+			r.TargetObject.ShouldBe(root);
 			r.DeclaringType.ShouldBe(typeof(D));
 			r.PortName.ShouldBe("M");
 			r.ArgumentTypes.ShouldBe(new[] { typeof(bool), typeof(int) });
 			r.ReturnType.ShouldBe(typeof(bool));
 			r.IsVirtualCall.ShouldBe(false);
 
-			p.Component.ShouldBe(root);
+			p.TargetObject.ShouldBe(root);
 			p.DeclaringType.ShouldBe(typeof(D));
 			p.PortName.ShouldBe("Q");
 			p.ArgumentTypes.ShouldBe(new[] { typeof(bool), typeof(int) });

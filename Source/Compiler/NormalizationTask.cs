@@ -146,11 +146,6 @@ namespace SafetySharp.Compiler
 					return Assembly.Load(File.ReadAllBytes(fileName + ".exe"));
 			}
 
-			// ReSharper disable once UseStringInterpolation
-			// String interpolation is unsupported by MSBuild
-			Log.LogError(String.Format("Unable to find assembly '{0}'; search paths: {1}", assemblyName,
-				String.Join(", ", AssemblyDirectories.Select(directory => directory.GetMetadata("FullPath")))));
-
 			return null;
 		}
 

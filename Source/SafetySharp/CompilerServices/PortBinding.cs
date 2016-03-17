@@ -48,7 +48,7 @@ namespace SafetySharp.CompilerServices
 			ProvidedPort = providedPort;
 
 			var metadataAttribute = BindingMetadataAttribute.Get(RequiredPort.GetMethod());
-			metadataAttribute.BindingField.SetValue(requiredPort.Component, this);
+			metadataAttribute.BindingField.SetValue(requiredPort.TargetObject, this);
 		}
 
 		/// <summary>
@@ -70,7 +70,7 @@ namespace SafetySharp.CompilerServices
 			var delegateField = metadataAttribute.DelegateField;
 			var providedPortDelegate = ProvidedPort.CreateDelegate(delegateField.FieldType);
 
-			delegateField.SetValue(RequiredPort.Component, providedPortDelegate);
+			delegateField.SetValue(RequiredPort.TargetObject, providedPortDelegate);
 		}
 
 		/// <summary>

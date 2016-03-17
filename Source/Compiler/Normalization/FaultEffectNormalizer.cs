@@ -25,6 +25,7 @@ namespace SafetySharp.Compiler.Normalization
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using CompilerServices;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
@@ -402,6 +403,7 @@ namespace SafetySharp.Compiler.Normalization
 
 			field = Syntax.MarkAsNonDebuggerBrowsable(field);
 			field = Syntax.AddAttribute<NonSerializableAttribute>(field);
+			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field);
 			field = field.NormalizeWhitespace();
 
 			AddMembers(classSymbol, new UsingDirectiveSyntax[0], (MemberDeclarationSyntax)field);
@@ -420,6 +422,7 @@ namespace SafetySharp.Compiler.Normalization
 			faultField = Syntax.MarkAsNonDebuggerBrowsable(faultField);
 			faultField = Syntax.AddAttribute<HiddenAttribute>(faultField);
 			faultField = Syntax.AddAttribute<NonDiscoverableAttribute>(faultField);
+			faultField = Syntax.AddAttribute<CompilerGeneratedAttribute>(faultField);
 			faultField = faultField.NormalizeWhitespace();
 
 			AddMembers(classSymbol, (MemberDeclarationSyntax)faultField);

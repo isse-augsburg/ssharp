@@ -179,6 +179,8 @@
     <Compile Include="Analysis\Ltl\Violated\multiple choices.cs" />
     <Compile Include="Analysis\Ltl\Violated\single choice.cs" />
     <Compile Include="Analysis\Ltl\Violated\undo fault after successful activation.cs" />
+    <Compile Include="Diagnostics\Bindings\Invalid\non-component required port binding.cs" />
+    <Compile Include="Diagnostics\Bindings\Valid\non-component provided port binding.cs" />
     <Compile Include="Diagnostics\CustomComponents\Invalid\components cannot implement IInitializable.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism double override.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism.cs" />
@@ -202,6 +204,7 @@
     <Compile Include="End2End\Tests\analysis error.cs" />
     <Compile Include="End2End\Tests\compilation error.cs" />
     <Compile Include="End2End\Tests\success.cs" />
+    <Compile Include="Execution\Bindings\non port binding.cs" />
     <Compile Include="Execution\Faults\Binding\multiple effects.cs" />
     <Compile Include="Execution\Faults\Binding\nested inherited fault.cs" />
     <Compile Include="Execution\Faults\Binding\inherited fault.cs" />
@@ -470,6 +473,8 @@
     <Compile Include="NormalizationTests.Helpers.cs">
       <DependentUpon>NormalizationTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Normalization\LineCounts\no class accessibility modifier.cs" />
+    <None Include="Normalization\LineCounts\complex component with bindings.cs" />
     <Compile Include="Normalization\LineCounts\provided ports.cs" />
     <Compile Include="Normalization\LineCounts\provided ports with faults.cs" />
     <Compile Include="Normalization\LineCounts\state machine.cs" />

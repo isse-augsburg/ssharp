@@ -135,7 +135,7 @@ namespace SafetySharp.Compiler
 			}
 			catch (Exception)
 			{
-				OutputCode(Path.Combine(intermediateDirectory, "Failed"));
+				OutputCode(Path.Combine(intermediateDirectory, "failed"));
 				throw;
 			}
 		}

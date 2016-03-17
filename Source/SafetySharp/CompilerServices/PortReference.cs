@@ -29,7 +29,7 @@ namespace SafetySharp.CompilerServices
 	using Utilities;
 
 	/// <summary>
-	///   Represents a reference to a <see cref="Component" /> port.
+	///   Represents a reference to a <see cref="TargetObject" /> port.
 	/// </summary>
 	[Hidden, NonDiscoverable]
 	public sealed class PortReference
@@ -37,21 +37,21 @@ namespace SafetySharp.CompilerServices
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="component">The <see cref="IComponent" /> instance that declares the referenced port.</param>
+		/// <param name="targetObject">The target object that declares the referenced port.</param>
 		/// <param name="declaringType">The type that declares the referenced port.</param>
 		/// <param name="portName">The name of the referenced port.</param>
 		/// <param name="argumentTypes">The argument types of the referenced port.</param>
 		/// <param name="returnType">The return type of the referenced port.</param>
 		/// <param name="isVirtualCall">Indicates whether the referenced port is invoked virtually or non-virtually.</param>
-		public PortReference(IComponent component, Type declaringType, string portName, Type[] argumentTypes, Type returnType, bool isVirtualCall)
+		public PortReference(object targetObject, Type declaringType, string portName, Type[] argumentTypes, Type returnType, bool isVirtualCall)
 		{
-			Requires.NotNull(component, nameof(component));
+			Requires.NotNull(targetObject, nameof(targetObject));
 			Requires.NotNull(declaringType, nameof(declaringType));
 			Requires.NotNullOrWhitespace(portName, nameof(portName));
 			Requires.NotNull(argumentTypes, nameof(argumentTypes));
 			Requires.NotNull(returnType, nameof(returnType));
 
-			Component = component;
+			TargetObject = targetObject;
 			DeclaringType = declaringType;
 			PortName = portName;
 			ArgumentTypes = argumentTypes;
@@ -60,9 +60,9 @@ namespace SafetySharp.CompilerServices
 		}
 
 		/// <summary>
-		///   Gets the <see cref="IComponent" /> instance that declares the referenced port.
+		///   Gets the target object that declares the referenced port.
 		/// </summary>
-		public IComponent Component { get; }
+		public object TargetObject { get; }
 
 		/// <summary>
 		///   Gets the type that declares the referenced port.
@@ -107,7 +107,7 @@ namespace SafetySharp.CompilerServices
 			// If the method is an interface method, we have to determine the actual method on the target object
 			// that will be invoked, otherwise we wouldn't be able to find the binding field of required ports, for instance
 			if (method.DeclaringType.IsInterface)
-				return Component.GetType().ResolveImplementingMethod(method);
+				return TargetObject.GetType().ResolveImplementingMethod(method);
 
 			return method;
 		}
@@ -120,7 +120,7 @@ namespace SafetySharp.CompilerServices
 		internal Delegate CreateDelegate(Type delegateType)
 		{
 			Requires.NotNull(delegateType, nameof(delegateType));
-			return delegateType.CreateDelegateInstance(Component, GetMethod(), IsVirtualCall);
+			return delegateType.CreateDelegateInstance(TargetObject, GetMethod(), IsVirtualCall);
 		}
 	}
 }

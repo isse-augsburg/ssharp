@@ -71,7 +71,7 @@ namespace SafetySharp.Compiler.Normalization
 			var index = declaration.Modifiers.IndexOf(SyntaxKind.ExternKeyword);
 			var delegateFieldName = Syntax.LiteralExpression(GetBindingDelegateFieldName());
 			var infoFieldName = Syntax.LiteralExpression(GetBinderFieldName());
-			var defaultMethod = Syntax.LiteralExpression(GetDefaultMethodName());
+			var defaultMethod = Syntax.LiteralExpression(GetUnboundPortAssignmentMethodName());
 
 			declaration = declaration.WithModifiers(declaration.Modifiers.RemoveAt(index)).WithSemicolonToken(default(SyntaxToken));
 			declaration = (MethodDeclarationSyntax)Syntax.AddAttribute<DebuggerHiddenAttribute>(declaration);
@@ -114,7 +114,7 @@ namespace SafetySharp.Compiler.Normalization
 					var hiddenAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(DebuggerHiddenAttribute).GetGlobalName());
 					var delegateFieldName = Syntax.LiteralExpression(GetBindingDelegateFieldName());
 					var infoFieldName = Syntax.LiteralExpression(GetBinderFieldName());
-					var defaultMethod = Syntax.LiteralExpression(GetDefaultMethodName());
+					var defaultMethod = Syntax.LiteralExpression(GetUnboundPortAssignmentMethodName());
 					var fieldAttribute = (AttributeListSyntax)Syntax.Attribute(typeof(BindingMetadataAttribute).GetGlobalName(),
 						delegateFieldName, infoFieldName, defaultMethod);
 
@@ -127,9 +127,14 @@ namespace SafetySharp.Compiler.Normalization
 		}
 
 		/// <summary>
+		///   Gets the name of the method that default-binds a required port.
+		/// </summary>
+		private string GetUnboundPortAssignmentMethodName() => $"UnboundPortAssignment{_portCount}".ToSynthesized();
+
+		/// <summary>
 		///   Gets the name of the default method bound to a required port.
 		/// </summary>
-		private string GetDefaultMethodName() => $"DefaultMethod{_portCount}".ToSynthesized();
+		private string GetUnboundPortThrowMethodName() => $"UnboundPortThrow{_portCount}".ToSynthesized();
 
 		/// <summary>
 		///   Gets the name of the binding delegate for the current port.
@@ -189,8 +194,9 @@ namespace SafetySharp.Compiler.Normalization
 			var delegateDeclaration = CreateDelegateDeclaration(GetBindingDelegateName(), true);
 			var delegateField = CreateFieldDeclaration(GetBindingDelegateFieldName(), delegateDeclaration);
 			var infoField = CreateBinderFieldDeclaration();
-			var defaultMethod = CreateDefaultMethod();
-			AddMembers(_methodSymbol.ContainingType, delegateDeclaration, delegateField, infoField, defaultMethod);
+			var assignmentMethod = CreateUnboundPortAssignmentMethod();
+			var throwMethod = CreateUnboundPortThrowMethod();
+			AddMembers(_methodSymbol.ContainingType, delegateDeclaration, delegateField, infoField, assignmentMethod, throwMethod);
 
 			var fieldReference = SyntaxFactory.IdentifierName(GetBindingDelegateFieldName());
 			var arguments = CreateDelegateInvocationArguments();
@@ -201,7 +207,7 @@ namespace SafetySharp.Compiler.Normalization
 				? Syntax.ExpressionStatement(delegateInvocation)
 				: SyntaxFactory.ReturnStatement(delegateInvocation);
 
-			return SyntaxFactory.Block((StatementSyntax)body).NormalizeWhitespace();
+			return SyntaxFactory.Block((StatementSyntax)body.NormalizeWhitespace());
 		}
 
 		/// <summary>
@@ -234,12 +240,14 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private FieldDeclarationSyntax CreateFieldDeclaration(string fieldName, DelegateDeclarationSyntax delegateType)
 		{
+			var throwMethod = Syntax.IdentifierName(GetUnboundPortThrowMethodName());
+			var value = Syntax.MemberAccessExpression(Syntax.TypeExpression(_methodSymbol.ContainingType), throwMethod);
 			var fieldType = SyntaxFactory.ParseTypeName(delegateType.Identifier.ValueText);
 			var field = Syntax.FieldDeclaration(
 				name: fieldName,
 				type: fieldType,
 				accessibility: Accessibility.Private,
-				initializer: CreateBindingLambda());
+				initializer: value);
 
 			field = Syntax.AddAttribute<CompilerGeneratedAttribute>(field);
 			field = Syntax.MarkAsNonDebuggerBrowsable(field);
@@ -266,30 +274,43 @@ namespace SafetySharp.Compiler.Normalization
 		/// <summary>
 		///   Creates the default method that is assigned to a binding delegate.
 		/// </summary>
-		private MethodDeclarationSyntax CreateDefaultMethod()
+		private MethodDeclarationSyntax CreateUnboundPortAssignmentMethod()
 		{
-			var lambda = CreateBindingLambda();
+			var throwMethod = Syntax.IdentifierName(GetUnboundPortThrowMethodName());
+			var value = Syntax.MemberAccessExpression(Syntax.TypeExpression(_methodSymbol.ContainingType), throwMethod);
 			var field = Syntax.MemberAccessExpression(Syntax.ThisExpression(), Syntax.IdentifierName(GetBindingDelegateFieldName()));
-			var assignment = Syntax.AssignmentStatement(field, lambda);
+			var assignment = Syntax.AssignmentStatement(field, value);
 			var method = Syntax.MethodDeclaration(
-				name: GetDefaultMethodName(),
+				name: GetUnboundPortAssignmentMethodName(),
 				accessibility: Accessibility.Private,
 				statements: new[] { assignment });
 
 			method = Syntax.AddAttribute<CompilerGeneratedAttribute>(method);
+			method = Syntax.AddAttribute<DebuggerStepThroughAttribute>(method);
 			return (MethodDeclarationSyntax)method;
 		}
 
 		/// <summary>
-		///   Creates the default lambda that is assigned to a binding delegate.
+		///   Creates the default method that is assigned to a binding delegate that throws an <see cref="UnboundPortException"/>.
 		/// </summary>
-		private SyntaxNode CreateBindingLambda()
+		private MethodDeclarationSyntax CreateUnboundPortThrowMethod()
 		{
 			var parameters = _methodSymbol.Parameters.Select(parameter => Syntax.ParameterDeclaration(parameter));
 			var methodName = Syntax.LiteralExpression(_methodSymbol.ToDisplayString());
 			var objectCreation = Syntax.ObjectCreationExpression(SemanticModel.GetTypeSymbol<UnboundPortException>(), methodName);
-			var throwStatement = SyntaxFactory.Block((StatementSyntax)Syntax.ThrowStatement(objectCreation));
-			return Syntax.ValueReturningLambdaExpression(parameters, throwStatement);
+			var throwStatement = (StatementSyntax)Syntax.ThrowStatement(objectCreation);
+
+			var method = Syntax.MethodDeclaration(
+				name: GetUnboundPortThrowMethodName(),
+				parameters: parameters,
+				returnType: Syntax.TypeExpression(_methodSymbol.ReturnType),
+				accessibility: Accessibility.Private,
+				modifiers: DeclarationModifiers.Static | DeclarationModifiers.Unsafe,
+				statements: new[] { throwStatement });
+
+			method = Syntax.AddAttribute<CompilerGeneratedAttribute>(method);
+			method = Syntax.AddAttribute<DebuggerStepThroughAttribute>(method);
+			return (MethodDeclarationSyntax)method;
 		}
 	}
 }

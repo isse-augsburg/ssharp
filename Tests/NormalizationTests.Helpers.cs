@@ -78,51 +78,58 @@ namespace Tests
 			return result;
 		}
 
-		private void CheckDeclaration<T>(Func<T, bool> selector, int expectedLine, int occurrence)
+		private void CheckDeclaration<T>(Func<T, bool> selector, string name, int expectedLine, int occurrence)
 			where T : SyntaxNode
 		{
 			var declaration = Find(selector, occurrence);
-			declaration.GetLineNumber().ShouldBe(expectedLine);
+			declaration.GetLineNumber().ShouldBe(expectedLine, $"Expected member '{name}' to be declared on line {expectedLine}.");
 		}
 
 		protected void CheckField(string name, int expectedLine, int occurrence)
 		{
-			CheckDeclaration<FieldDeclarationSyntax>(f => f.Declaration.Variables[0].Identifier.ValueText == name, expectedLine, occurrence);
+			CheckDeclaration<FieldDeclarationSyntax>(f => f.Declaration.Variables[0].Identifier.ValueText == name, name, expectedLine, occurrence);
 		}
 
 		protected void CheckProperty(string name, int expectedLine, int occurrence)
 		{
-			CheckDeclaration<PropertyDeclarationSyntax>(p => p.Identifier.ValueText == name, expectedLine, occurrence);
+			CheckDeclaration<PropertyDeclarationSyntax>(p => p.Identifier.ValueText == name, name, expectedLine, occurrence);
 		}
 
 		protected void CheckGetter(string name, int expectedLine, int occurrence)
 		{
 			CheckDeclaration<AccessorDeclarationSyntax>(a =>
-				((PropertyDeclarationSyntax)a.Parent.Parent).Identifier.ValueText == name && a.Keyword.ValueText == "get", expectedLine, occurrence);
+				((PropertyDeclarationSyntax)a.Parent.Parent).Identifier.ValueText == name && a.Keyword.ValueText == "get", 
+				name, expectedLine, occurrence);
 		}
 
 		protected void CheckSetter(string name, int expectedLine, int occurrence)
 		{
 			CheckDeclaration<AccessorDeclarationSyntax>(a =>
-				((PropertyDeclarationSyntax)a.Parent.Parent).Identifier.ValueText == name && a.Keyword.ValueText == "set", expectedLine, occurrence);
+				((PropertyDeclarationSyntax)a.Parent.Parent).Identifier.ValueText == name && a.Keyword.ValueText == "set", 
+				name, expectedLine, occurrence);
 		}
 
 		protected void CheckMethod(string name, int expectedLine, int occurrence)
 		{
-			CheckDeclaration<MethodDeclarationSyntax>(m => m.Identifier.ValueText == name, expectedLine, occurrence);
+			CheckDeclaration<MethodDeclarationSyntax>(m => m.Identifier.ValueText == name, name, expectedLine, occurrence);
+		}
+
+		protected void CheckConstructor(string name, int expectedLine, int occurrence)
+		{
+			CheckDeclaration<ConstructorDeclarationSyntax>(m => m.Identifier.ValueText == name, name, expectedLine, occurrence);
 		}
 
 		protected void CheckClass(string name, int expectedLine, int occurrence)
 		{
-			CheckDeclaration<ClassDeclarationSyntax>(c => c.Identifier.ValueText == name, expectedLine, occurrence);
+			CheckDeclaration<ClassDeclarationSyntax>(c => c.Identifier.ValueText == name, name, expectedLine, occurrence);
 		}
 
 		protected void CheckVariableDeclaration(string name, int expectedLine)
 		{
 			var variable = _root
-				 .Descendants<LocalDeclarationStatementSyntax>()
-				 .SelectMany(d => d.Declaration.Variables)
-				 .Single(v => v.Identifier.ValueText == name);
+				.Descendants<LocalDeclarationStatementSyntax>()
+				.SelectMany(d => d.Declaration.Variables)
+				.Single(v => v.Identifier.ValueText == name);
 
 			variable.GetLineNumber().ShouldBe(expectedLine);
 		}

@@ -108,7 +108,7 @@ namespace SafetySharp.Compiler.Analyzers
 			var providedPorts = providedPortReferenceExpression.ResolvePortReferences(semanticModel);
 
 			requiredPorts.RemoveWhere(symbol => !symbol.IsRequiredPort(semanticModel));
-			providedPorts.RemoveWhere(symbol => !symbol.IsProvidedPort(semanticModel));
+			providedPorts.RemoveWhere(symbol => symbol.IsRequiredPort(semanticModel));
 
 			var requiredPortCandidates = requiredPorts.ToArray();
 			var providedPortCandidates = providedPorts.ToArray();

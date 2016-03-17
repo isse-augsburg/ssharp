@@ -92,13 +92,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var direct = new IntFlowInToOutSegment();
 			var sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source,direct,sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.Connect(source.Outgoing, direct.Incoming);
 			testModel.Combinator.Connect(direct.Outgoing, sink.Incoming);
 
@@ -158,10 +157,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var direct = new IntFlowInToOutSegment();
 			var sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source, direct, sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			
+			Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
 			testModel.Combinator.SetStandardBehaviorForBackward(source,direct,sink);
 			testModel.Combinator.Connect(source.Outgoing, direct.Incoming);
 			testModel.Combinator.Connect(direct.Outgoing, sink.Incoming);
@@ -193,15 +192,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var direct2 = new IntFlowInToOutSegment();
 			var sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source, direct1, direct2, sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(direct1.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(direct1.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(direct2.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(direct2.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(direct1.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(direct1.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(direct2.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(direct2.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.Connect(source.Outgoing, direct1.Incoming);
 			testModel.Combinator.Connect(direct1.Outgoing, direct2.Incoming);
 			testModel.Combinator.Connect(direct2.Outgoing, sink.Incoming);
@@ -227,15 +226,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var secondInComposite = new IntFlowInToOutSegment();
 			var sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source, composite, firstInComposite, secondInComposite, sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(firstInComposite.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(firstInComposite.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(secondInComposite.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(secondInComposite.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//omponent.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//omponent.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(firstInComposite.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(firstInComposite.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(secondInComposite.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(secondInComposite.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.Connect(source.Outgoing, composite.Incoming);
 			testModel.Combinator.Connect(composite.InternalSource.Outgoing, firstInComposite.Incoming);
 			testModel.Combinator.Connect(firstInComposite.Outgoing, secondInComposite.Incoming);
@@ -271,17 +270,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var way1Sink = new IntFlowSink();
 			var way2Sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source, way1Direct, way2Direct, way1Sink, way2Sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(way1Sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(way1Sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
-			//Component.Bind(nameof(way2Sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(way2Sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(way1Sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(way1Sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			Component.Bind(nameof(way2Sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(way2Sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.Connect(source.Outgoing, new PortFlowIn<Int, Int>[] { way1Direct.Incoming, way2Direct.Incoming });
 			testModel.Combinator.Connect(way1Direct.Outgoing, way1Sink.Incoming);
 			testModel.Combinator.Connect(way2Direct.Outgoing, way2Sink.Incoming);
@@ -311,17 +310,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var way2Direct = new IntFlowInToOutSegment();
 			var sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source1, source2, way1Direct, way2Direct, sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source1.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source1.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(source2.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source2.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(source1.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source1.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(source2.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source2.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.Connect(source1.Outgoing, way1Direct.Incoming);
 			testModel.Combinator.Connect(source2.Outgoing, way2Direct.Incoming);
 			testModel.Combinator.Connect(new PortFlowOut<Int, Int>[] { way1Direct.Outgoing, way2Direct.Outgoing }, sink.Incoming);
@@ -350,17 +349,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var sinkInside = new IntFlowSink();
 			var sinkOutside = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source, composite, way1Direct, way2Direct, sinkInside, sinkOutside);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(sinkInside.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sinkInside.SetOutgoingBackward), nameof(testModel.CreateBackward));
-			//Component.Bind(nameof(sinkOutside.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sinkOutside.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sinkInside.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sinkInside.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			Component.Bind(nameof(sinkOutside.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sinkOutside.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.Connect(source.Outgoing, composite.Incoming);
 			testModel.Combinator.Connect(composite.InternalSource.Outgoing, new PortFlowIn<Int, Int>[] { way1Direct.Incoming, way2Direct.Incoming });
 			testModel.Combinator.Connect(way1Direct.Outgoing, sinkInside.Incoming);
@@ -391,17 +390,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var way2Direct = new IntFlowInToOutSegment();
 			var sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(sourceOutside, sourceInside, composite, way1Direct, way2Direct, sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(sourceOutside.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(sourceOutside.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(sourceInside.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(sourceInside.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(sourceOutside.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(sourceOutside.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(sourceInside.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(sourceInside.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.Connect(sourceOutside.Outgoing, composite.Incoming);
 			testModel.Combinator.Connect(composite.InternalSource.Outgoing, way1Direct.Incoming);
 			testModel.Combinator.Connect(sourceInside.Outgoing, way2Direct.Incoming);
@@ -434,13 +433,13 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var sink = new IntFlowSink();
 			var direct = new IntFlowInToOutSegment();
 			testModel.Components = new IntFlowComponentCollection(source, stubOut, stubOut, direct, sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.Connect(source.Outgoing, direct.Incoming);
 			testModel.Combinator.Connect(stubOut.Outgoing, stubIn.Incoming);
 
@@ -473,13 +472,13 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var direct = new IntFlowInToOutSegment();
 			var sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source, direct, sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.ConnectOutWithIn(source, direct);
 			testModel.Combinator.ConnectOutWithIn(direct, sink);
 
@@ -511,15 +510,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var direct2 = new IntFlowInToOutSegment();
 			var sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source, direct1, direct2, sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(direct1.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(direct1.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(direct2.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(direct2.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(direct1.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(direct1.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(direct2.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(direct2.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.ConnectOutWithIn(source, direct1);
 			testModel.Combinator.ConnectOutWithIn(direct1, direct2);
 			testModel.Combinator.ConnectOutWithIn(direct2, sink);
@@ -545,15 +544,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var secondInComposite = new IntFlowInToOutSegment();
 			var sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source, composite, firstInComposite, secondInComposite, sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(firstInComposite.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(firstInComposite.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(secondInComposite.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(secondInComposite.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(firstInComposite.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(firstInComposite.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(secondInComposite.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(secondInComposite.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.ConnectOutWithIn(source, composite);
 			testModel.Combinator.ConnectInWithIn(composite, firstInComposite);
 			testModel.Combinator.ConnectOutWithIn(firstInComposite, secondInComposite);
@@ -589,17 +588,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var way1Sink = new IntFlowSink();
 			var way2Sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source, way1Direct, way2Direct, way1Sink, way2Sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(way1Sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(way1Sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
-			//Component.Bind(nameof(way2Sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(way2Sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(way1Sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(way1Sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			Component.Bind(nameof(way2Sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(way2Sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.ConnectOutWithIns(source, new IFlowComponentUniqueIncoming<Int, Int>[] { way1Direct, way2Direct });
 			testModel.Combinator.ConnectOutWithIn(way1Direct, way1Sink);
 			testModel.Combinator.ConnectOutWithIn(way2Direct, way2Sink);
@@ -627,17 +626,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var way2Direct = new IntFlowInToOutSegment();
 			var sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source1, source2, way1Direct, way2Direct, sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source1.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source1.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(source2.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source2.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(source1.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source1.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(source2.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source2.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.ConnectOutWithIn(source1, way1Direct);
 			testModel.Combinator.ConnectOutWithIn(source2, way2Direct);
 			testModel.Combinator.ConnectOutsWithIn(new IFlowComponentUniqueOutgoing<Int, Int>[] { way1Direct, way2Direct }, sink);
@@ -666,17 +665,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var sinkInside = new IntFlowSink();
 			var sinkOutside = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(source, composite, way1Direct, way2Direct, sinkInside, sinkOutside);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(sinkInside.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sinkInside.SetOutgoingBackward), nameof(testModel.CreateBackward));
-			//Component.Bind(nameof(sinkOutside.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sinkOutside.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(source.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(source.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sinkInside.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sinkInside.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			Component.Bind(nameof(sinkOutside.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sinkOutside.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.ConnectOutWithIn(source, composite);
 			testModel.Combinator.ConnectInWithIns(composite, new IFlowComponentUniqueIncoming<Int, Int>[] { way1Direct, way2Direct });
 			testModel.Combinator.ConnectOutWithIn(way1Direct, sinkInside);
@@ -707,17 +706,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var way2Direct = new IntFlowInToOutSegment();
 			var sink = new IntFlowSink();
 			testModel.Components = new IntFlowComponentCollection(sourceOutside, sourceInside, composite, way1Direct, way2Direct, sink);
-			// TODO: Block until provided ports of non-Component-derived classes can be bound
-			//Component.Bind(nameof(sourceOutside.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(sourceOutside.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(sourceInside.SetOutgoingForward), nameof(testModel.CreateForward));
-			//Component.Bind(nameof(sourceInside.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
-			//Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
-			//Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
-			//Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
+			
+			Component.Bind(nameof(sourceOutside.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(sourceOutside.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(sourceInside.SetOutgoingForward), nameof(testModel.CreateForward));
+			Component.Bind(nameof(sourceInside.BackwardFromSuccessorWasUpdated), nameof(testModel.PrintReceivedBackward));
+			Component.Bind(nameof(way1Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way1Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(way2Direct.SetOutgoingForward), nameof(testModel.PassForward));
+			Component.Bind(nameof(way2Direct.SetOutgoingBackward), nameof(testModel.PassBackward));
+			Component.Bind(nameof(sink.ForwardFromPredecessorWasUpdated), nameof(testModel.PrintReceivedForward));
+			Component.Bind(nameof(sink.SetOutgoingBackward), nameof(testModel.CreateBackward));
 			testModel.Combinator.ConnectOutWithIn(sourceOutside, composite);
 			testModel.Combinator.ConnectInWithIn(composite, way1Direct);
 			testModel.Combinator.ConnectOutWithIn(sourceInside, way2Direct);
