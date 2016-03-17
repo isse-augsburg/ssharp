@@ -25,7 +25,7 @@ namespace Tests.Analysis.Invariants.Violated
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class MultipleInitialState : AnalysisTestObject
+	internal class MultipleInitialStates : AnalysisTestObject
 	{
 		protected override void Check()
 		{
@@ -38,11 +38,11 @@ namespace Tests.Analysis.Invariants.Violated
 			CheckInvariant(c.F > 0 && c.F < 4, c).ShouldBe(true);
 		}
 
-		private class C : Component, IInitializable
+		private class C : Component
 		{
 			public int F;
 
-			public void Initialize()
+			protected internal override void Initialize()
 			{
 				F = Choose(1, 2, 3);
 			}

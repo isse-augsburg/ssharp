@@ -54,7 +54,7 @@ namespace Tests.FaultActivation.StateGraph
 			ComputedTransitionCount.ShouldBe(5);
 		}
 
-		private class C1 : Component, IInitializable
+		private class C1 : Component
 		{
 			private readonly Fault _f = new TransientFault();
 
@@ -62,7 +62,7 @@ namespace Tests.FaultActivation.StateGraph
 
 			public virtual int X => 1;
 
-			public void Initialize()
+			protected internal override void Initialize()
 			{
 				_x = X;
 			}
@@ -74,7 +74,7 @@ namespace Tests.FaultActivation.StateGraph
 			}
 		}
 
-		private class C2 : Component, IInitializable
+		private class C2 : Component
 		{
 			private readonly Fault _f = new TransientFault();
 
@@ -82,7 +82,7 @@ namespace Tests.FaultActivation.StateGraph
 
 			public virtual int X => 1;
 
-			public void Initialize()
+			protected internal override void Initialize()
 			{
 				_x = X;
 			}
@@ -94,7 +94,7 @@ namespace Tests.FaultActivation.StateGraph
 			}
 		}
 
-		private class C3 : Component, IInitializable
+		private class C3 : Component
 		{
 			private readonly Fault _f = new TransientFault();
 
@@ -102,7 +102,7 @@ namespace Tests.FaultActivation.StateGraph
 
 			public virtual int X => 1;
 
-			public void Initialize()
+			protected internal override void Initialize()
 			{
 				_x = X;
 			}
@@ -114,7 +114,7 @@ namespace Tests.FaultActivation.StateGraph
 			}
 		}
 
-		private class C4 : Component, IInitializable
+		private class C4 : Component
 		{
 			private readonly Fault _f = new TransientFault();
 
@@ -122,7 +122,7 @@ namespace Tests.FaultActivation.StateGraph
 
 			public virtual int X => 1;
 
-			public void Initialize()
+			protected internal override void Initialize()
 			{
 				_x = X;
 			}

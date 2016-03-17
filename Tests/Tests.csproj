@@ -179,6 +179,7 @@
     <Compile Include="Analysis\Ltl\Violated\multiple choices.cs" />
     <Compile Include="Analysis\Ltl\Violated\single choice.cs" />
     <Compile Include="Analysis\Ltl\Violated\undo fault after successful activation.cs" />
+    <Compile Include="Diagnostics\CustomComponents\Invalid\components cannot implement IInitializable.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism double override.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\sealed.cs" />

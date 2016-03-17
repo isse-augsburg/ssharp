@@ -20,7 +20,7 @@ The modification is required as we have to execute the CSC task twice during com
 		
 		<!-- Path to the S# NormalizationTask -->
 		<SSharpNormalizationTaskPath Condition="Exists('$(MSBuildThisFileDirectory)/SSharpNormalizationTask.cs')">$(MSBuildThisFileDirectory)/NormalizationTask.cs</SSharpNormalizationTaskPath>
-		<SSharpNormalizationTaskPath Condition="!Exists('$(MSBuildThisFileDirectory)/SSharpNormalizationTask.cs')">$(SolutionDir)/Source/Compiler/NormalizationTask.cs</SSharpNormalizationTaskPath>
+		<SSharpNormalizationTaskPath Condition="!Exists('$(MSBuildThisFileDirectory)/SSharpNormalizationTask.cs')">$(MSBuildThisFileDirectory)/Compiler/NormalizationTask.cs</SSharpNormalizationTaskPath>
     </PropertyGroup>
 	
 	<UsingTask TaskName="SafetySharp.Compiler.NormalizationTask" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >

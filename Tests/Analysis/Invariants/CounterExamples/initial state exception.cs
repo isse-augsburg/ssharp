@@ -44,26 +44,26 @@ namespace Tests.Analysis.Invariants.CounterExamples
 			Should.Throw<InvalidOperationException>(() => SimulateCounterExample(e.CounterExample, simulator => { })).Message.ShouldBe("test");
 		}
 
-		private class C : Component, IInitializable
+		private class C : Component
 		{
-			public void Initialize()
+			protected internal override void Initialize()
 			{
 				throw new InvalidOperationException("test");
 			}
 		}
 
-		private class D : Component, IInitializable
+		private class D : Component
 		{
-			public void Initialize()
+			protected internal override void Initialize()
 			{
 				if (Choose(true, false))
 					throw new InvalidOperationException("test");
 			}
 		}
 
-		private class E : Component, IInitializable
+		private class E : Component
 		{
-			public void Initialize()
+			protected internal override void Initialize()
 			{
 				if (Choose(false, true))
 					throw new InvalidOperationException("test");

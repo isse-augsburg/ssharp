@@ -130,18 +130,26 @@ namespace SafetySharp.Compiler
 		private Assembly LoadAssembly(string assemblyName)
 		{
 			var referencePath = References.FirstOrDefault(
-				rp => string.Equals(rp.GetMetadata("FileName"), assemblyName, StringComparison.OrdinalIgnoreCase));
+				reference => String.Equals(reference.GetMetadata("FileName"), assemblyName, StringComparison.OrdinalIgnoreCase));
 
 			if (referencePath != null)
 				return Assembly.Load(File.ReadAllBytes(referencePath.GetMetadata("FullPath")));
 
 			foreach (var directory in AssemblyDirectories)
 			{
-				string fileName = Path.Combine(directory.GetMetadata("FullPath"), assemblyName);
+				var fileName = Path.Combine(directory.GetMetadata("FullPath"), assemblyName);
 
-				if (File.Exists(fileName))
-					return Assembly.Load(File.ReadAllBytes(fileName));
+				if (File.Exists(fileName + ".dll"))
+					return Assembly.Load(File.ReadAllBytes(fileName + ".dll"));
+
+				if (File.Exists(fileName + ".exe"))
+					return Assembly.Load(File.ReadAllBytes(fileName + ".exe"));
 			}
+
+			// ReSharper disable once UseStringInterpolation
+			// String interpolation is unsupported by MSBuild
+			Log.LogError(String.Format("Unable to find assembly '{0}'; search paths: {1}", assemblyName,
+				String.Join(", ", AssemblyDirectories.Select(directory => directory.GetMetadata("FullPath")))));
 
 			return null;
 		}
@@ -152,7 +160,7 @@ namespace SafetySharp.Compiler
 		/// </summary>
 		private string[] Normalize()
 		{
-			var assembly = LoadAssembly("SafetySharp.Compiler.dll");
+			var assembly = LoadAssembly("SafetySharp.Compiler");
 			if (assembly == null)
 				throw new InvalidOperationException("Unable to find the S# compiler.");
 

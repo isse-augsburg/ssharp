@@ -27,7 +27,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Vehicles
 	/// <summary>
 	///   Represents an overheight vehicle that is not allowed to enter the tunnel on the left lane.
 	/// </summary>
-	public class Vehicle : Component, IInitializable
+	public class Vehicle : Component
 	{
 		[Hidden]
 		private VehicleKind _kind;
@@ -84,7 +84,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Vehicles
 		/// <summary>
 		///   Performs the nondeterministic initialization.
 		/// </summary>
-		void IInitializable.Initialize()
+		protected override void Initialize()
 		{
 			Lane = Choose(Lane.Left, Lane.Right);
 			Speed = ChooseFromRange(0, Specification.MaxSpeed);

@@ -30,7 +30,8 @@ namespace SafetySharp.Compiler.Analyzers
 	using Roslyn.Symbols;
 
 	/// <summary>
-	///   Ensures that no class implements <see cref="IComponent" /> without being derived from <see cref="Component" />.
+	///   Ensures that no class implements <see cref="IComponent" /> without being derived from <see cref="Component" /> and that
+	///   components do not reimplement <see cref="IInitializable" />.
 	/// </summary>
 	[DiagnosticAnalyzer(LanguageNames.CSharp), UsedImplicitly]
 	public sealed class CustomComponentAnalyzer : Analyzer
@@ -52,10 +53,19 @@ namespace SafetySharp.Compiler.Analyzers
 			$"Class '{{0}}' cannot reimplement '{typeof(IComponent).FullName}'.");
 
 		/// <summary>
+		///   The error emitted by the analyzer when the interface is reimplemented by a component class.
+		/// </summary>
+		private static readonly DiagnosticInfo _initializable = DiagnosticInfo.Error(
+			DiagnosticIdentifier.ComponentIsInitializable,
+			$"Interface '{typeof(IInitializable).FullName}' cannot be reimplemented by a class derived from '{typeof(Component).FullName}'.",
+			$"Component '{{0}}' cannot reimplement '{typeof(IInitializable).FullName}'. " +
+			$"Override '{typeof(Component).FullName}.{nameof(Component.Update)}' instead.");
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		public CustomComponentAnalyzer()
-			: base(_customComponent, _reimplementation)
+			: base(_customComponent, _reimplementation, _initializable)
 		{
 		}
 
@@ -83,10 +93,13 @@ namespace SafetySharp.Compiler.Analyzers
 			if (!symbol.AllInterfaces.Contains(interfaceSymbol))
 				return;
 
+			var initializableSymbol = context.Compilation.GetTypeSymbol<IInitializable>();
 			var isComponent = symbol.IsDerivedFrom(compilation.GetTypeSymbol<Component>());
 
 			if (isComponent && symbol.Interfaces.Any(i => i.Equals(interfaceSymbol)))
 				_reimplementation.Emit(context, symbol, symbol.ToDisplayString());
+			else if (isComponent && symbol.Interfaces.Any(i => i.Equals(initializableSymbol)))
+				_initializable.Emit(context, symbol, symbol.ToDisplayString());
 			else if (!isComponent)
 				_customComponent.Emit(context, symbol, symbol.ToDisplayString());
 		}

@@ -35,7 +35,7 @@ namespace Tests.FaultActivation.Formulas
 			CheckInvariant(!(c.F1.IsActivated && c.F2.IsActivated), c).ShouldBe(true);
 		}
 
-		private class C : Component, IInitializable
+		private class C : Component
 		{
 			public readonly Fault F1 = new TransientFault();
 			public readonly Fault F2 = new TransientFault();
@@ -44,7 +44,7 @@ namespace Tests.FaultActivation.Formulas
 
 			public virtual int X => 1;
 
-			public void Initialize()
+			protected internal override void Initialize()
 			{
 				_x = X;
 			}

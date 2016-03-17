@@ -30,7 +30,7 @@ namespace SafetySharp.Modeling
 	/// <summary>
 	///   Represents a S# component.
 	/// </summary>
-	public abstract partial class Component : IComponent
+	public abstract partial class Component : IComponent, IInitializable
 	{
 		[Hidden, NonDiscoverable, DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private readonly List<Component> _faultEffects = new List<Component>();
@@ -47,7 +47,7 @@ namespace SafetySharp.Modeling
 #if !DEBUG
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 #endif
-			internal Type FaultEffectType
+		internal Type FaultEffectType
 		{
 			get { return _faultEffectType; }
 			set { _faultEffectType = value; }
@@ -59,7 +59,7 @@ namespace SafetySharp.Modeling
 #if !DEBUG
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 #endif
-			internal List<Component> FaultEffects => _faultEffects;
+		internal List<Component> FaultEffects => _faultEffects;
 
 		/// <summary>
 		///   Gets the original types of the fault effects that affect the component.
@@ -67,12 +67,27 @@ namespace SafetySharp.Modeling
 #if !DEBUG
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 #endif
-			internal List<Type> FaultEffectTypes => _faultEffectTypes;
+		internal List<Type> FaultEffectTypes => _faultEffectTypes;
 
 		/// <summary>
 		///   Updates the state of the component.
 		/// </summary>
 		public virtual void Update()
+		{
+		}
+
+		/// <summary>
+		///   Performs the runtime initialization.
+		/// </summary>
+		void IInitializable.Initialize()
+		{
+			Initialize();
+		}
+
+		/// <summary>
+		///   Invoked when the component should initialize itself, possibly nondeterministically.
+		/// </summary>
+		protected internal virtual void Initialize()
 		{
 		}
 
