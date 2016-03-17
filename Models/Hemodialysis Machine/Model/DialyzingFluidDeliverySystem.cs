@@ -235,6 +235,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		{
 			if (BypassEnabled || incoming.Temperature != QualitativeTemperature.BodyHeat)
 			{
+				ToDrainValue.CopyValuesFrom(incoming);
 				outgoing.Quantity = 0;
 				outgoing.ContaminatedByBlood = false;
 				outgoing.Temperature = QualitativeTemperature.TooCold;

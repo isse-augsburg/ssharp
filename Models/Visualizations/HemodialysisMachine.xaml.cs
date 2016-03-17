@@ -56,7 +56,7 @@ namespace Visualization
 			public Action UpdateVisualization;
 			public Func<string> GetInfoText;
 
-			public VisualFlow(string _name, Storyboard _animation, Rectangle _selectionRectangle, PortFlowOut<Blood, Suction> portFlowOut)
+			public VisualFlow(string _name, Storyboard _animation, Rectangle _selectionRectangle, Func<PortFlowOut<Blood, Suction>> portFlowOut)
 			{
 				Name = _name;
 				Animation = _animation;
@@ -64,12 +64,12 @@ namespace Visualization
 
 				UpdateVisualization = () =>
 				{
-					GenericUpdateVisualization(portFlowOut.ForwardToSuccessor.HasWaterOrBigWaste());
+					GenericUpdateVisualization(portFlowOut().ForwardToSuccessor.HasWaterOrBigWaste());
 				};
-				GetInfoText = () => portFlowOut.ForwardToSuccessor.ValuesAsText();
+				GetInfoText = () => portFlowOut().ForwardToSuccessor.ValuesAsText();
 			}
 
-			public VisualFlow(string _name, Storyboard _animation, Rectangle _selectionRectangle, PortFlowOut<DialyzingFluid, Suction> portFlowOut)
+			public VisualFlow(string _name, Storyboard _animation, Rectangle _selectionRectangle, Func<PortFlowOut<DialyzingFluid, Suction>> portFlowOut)
 			{
 				Name = _name;
 				Animation = _animation;
@@ -77,9 +77,9 @@ namespace Visualization
 
 				UpdateVisualization = () =>
 				{
-					GenericUpdateVisualization(portFlowOut.ForwardToSuccessor.Quantity > 0);
+					GenericUpdateVisualization(portFlowOut().ForwardToSuccessor.Quantity > 0);
 				};
-				GetInfoText = () => portFlowOut.ForwardToSuccessor.ValuesAsText();
+				GetInfoText = () => portFlowOut().ForwardToSuccessor.ValuesAsText();
 			}
 
 			private void GenericUpdateVisualization(bool shouldBeEnabled)
@@ -101,10 +101,10 @@ namespace Visualization
 
 		public class VisualFault
 		{
-			public Fault Fault;
+			public Func<Fault> Fault;
 			public Rectangle FaultSymbol;
 
-			public VisualFault(Fault _fault, Rectangle _faultSymbol)
+			public VisualFault(Func<Fault> _fault, Rectangle _faultSymbol)
 			{
 				Fault = _fault;
 				FaultSymbol = _faultSymbol;
@@ -130,27 +130,27 @@ namespace Visualization
 			
 			VisualFlows = new VisualFlow[]
 			{
-				new VisualFlow("FlowPatientToBloodPump",(Storyboard)Resources["FlowPatientToBloodPump"],selectFlowPatientToBloodPump,Patient.ArteryFlow.Outgoing),
-				new VisualFlow("FlowBloodPumpToMerge1",(Storyboard)Resources["FlowBloodPumpToMerge1"],selectFlowBloodPumpToMerge1,Machine.ExtracorporealBloodCircuit.ArterialBloodPump.MainFlow.Outgoing),
-				new VisualFlow("FlowMerge1ToArterialChamber",(Storyboard)Resources["FlowMerge1ToArterialChamber"],selectFlowMerge1ToArterialChamber,Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Incoming.ConnectedPredecessor),
-				new VisualFlow("FlowArterialChamberToDialyzer",(Storyboard)Resources["FlowArterialChamberToDialyzer"],selectFlowArterialChamberToDialyzer,Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Outgoing),
-				new VisualFlow("FlowDialyzerBloodSideToSplit2",(Storyboard)Resources["FlowDialyzerBloodSideToSplit2"],selectFlowDialyzerBloodSideToSplit2,Machine.Dialyzer.BloodFlow.Outgoing),
-				new VisualFlow("FlowSplit2ToVenousChamber",(Storyboard)Resources["FlowSplit2ToVenousChamber"],selectFlowSplit2ToVenousChamber,Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Incoming.ConnectedPredecessor),
-				new VisualFlow("FlowVenousChamberToSafetyDetector",(Storyboard)Resources["FlowVenousChamberToSafetyDetector"],selectFlowVenousChamberToSafetyDetector,Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Outgoing),
-				new VisualFlow("FlowSafetySensorToVenousValve",(Storyboard)Resources["FlowSafetySensorToVenousValve"],selectFlowSafetySensorToVenousValve,Machine.ExtracorporealBloodCircuit.VenousSafetyDetector.MainFlow.Outgoing),
-				new VisualFlow("FlowVenousValveToPatient",(Storyboard)Resources["FlowVenousValveToPatient"],selectFlowVenousValveToPatient,Machine.ExtracorporealBloodCircuit.VenousTubingValve.MainFlow.Outgoing),
-				new VisualFlow("FlowWaterSupplyToWaterPreparation",(Storyboard)Resources["FlowWaterSupplyToWaterPreparation"],selectFlowWaterSupplyToWaterPreparation,Machine.DialyzingFluidDeliverySystem.DialyzingFluidWaterSupply.MainFlow.Outgoing),
-				new VisualFlow("FlowWaterPreparationToDialyzingFluidPreparation",(Storyboard)Resources["FlowWaterPreparationToDialyzingFluidPreparation"],selectFlowWaterPreparationToDialyzingFluidPreparation,Machine.DialyzingFluidDeliverySystem.DialyzingFluidWaterPreparation.MainFlow.Outgoing),
-				new VisualFlow("FlowDialyzingFluidPreparationToBalanceChamber",(Storyboard)Resources["FlowDialyzingFluidPreparationToBalanceChamber"],selectFlowDialyzingFluidPreparationToBalanceChamber,Machine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidFlow.Outgoing),
-				new VisualFlow("FlowBalanceChamberToDrain",(Storyboard)Resources["FlowBalanceChamberToDrain"],selectFlowBalanceChamberToDrain,Machine.DialyzingFluidDeliverySystem.BalanceChamber.ForwardUsedFlowSegment.Outgoing),
-				new VisualFlow("FlowBalanceChamberToSafetyBypass",(Storyboard)Resources["FlowBalanceChamberToSafetyBypass"],selectFlowBalanceChamberToSafetyBypass,Machine.DialyzingFluidDeliverySystem.BalanceChamber.ForwardProducedFlowSegment.Outgoing),
-				new VisualFlow("FlowSafetyBypassToDialyzer",(Storyboard)Resources["FlowSafetyBypassToDialyzer"],selectFlowSafetyBypassToDialyzer,Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.MainFlow.Outgoing),
-				new VisualFlow("FlowSafetyBypassToDrain",(Storyboard)Resources["FlowSafetyBypassToDrain"],selectFlowSafetyBypassToDrain,Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.DrainFlow.Outgoing),
-				new VisualFlow("FlowDialyzerDialyzingFluidSideToSplit3",(Storyboard)Resources["FlowDialyzerDialyzingFluidSideToSplit3"],selectFlowDialyzerDialyzingFluidSideToSplit3,Machine.Dialyzer.DialyzingFluidFlow.Outgoing),
-				new VisualFlow("FlowSplit3ToPumpToBalanceChamber",(Storyboard)Resources["FlowSplit3ToPumpToBalanceChamber"],selectFlowSplit3ToPumpToBalanceChamber,Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Incoming.ConnectedPredecessor),
-				new VisualFlow("FlowSplit3ToUltraFiltrationPump",(Storyboard)Resources["FlowSplit3ToUltraFiltrationPump"],selectFlowSplit3ToUltraFiltrationPump,Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.DialyzingFluidFlow.Incoming.ConnectedPredecessor),
-				new VisualFlow("FlowPumpToBalanceChamberToBalanceChamber",(Storyboard)Resources["FlowPumpToBalanceChamberToBalanceChamber"],selectFlowPumpToBalanceChamberToBalanceChamber,Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Outgoing),
-				new VisualFlow("FlowUltraFiltrationPumpToDrain",(Storyboard)Resources["FlowUltraFiltrationPumpToDrain"],selectFlowUltraFiltrationPumpToDrain,Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.DialyzingFluidFlow.Outgoing),
+				new VisualFlow("FlowPatientToBloodPump",(Storyboard)Resources["FlowPatientToBloodPump"],selectFlowPatientToBloodPump,() => Patient.ArteryFlow.Outgoing),
+				new VisualFlow("FlowBloodPumpToMerge1",(Storyboard)Resources["FlowBloodPumpToMerge1"],selectFlowBloodPumpToMerge1,() => Machine.ExtracorporealBloodCircuit.ArterialBloodPump.MainFlow.Outgoing),
+				new VisualFlow("FlowMerge1ToArterialChamber",(Storyboard)Resources["FlowMerge1ToArterialChamber"],selectFlowMerge1ToArterialChamber,() => Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Incoming.ConnectedPredecessor),
+				new VisualFlow("FlowArterialChamberToDialyzer",(Storyboard)Resources["FlowArterialChamberToDialyzer"],selectFlowArterialChamberToDialyzer,() => Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Outgoing),
+				new VisualFlow("FlowDialyzerBloodSideToSplit2",(Storyboard)Resources["FlowDialyzerBloodSideToSplit2"],selectFlowDialyzerBloodSideToSplit2,() => Machine.Dialyzer.BloodFlow.Outgoing),
+				new VisualFlow("FlowSplit2ToVenousChamber",(Storyboard)Resources["FlowSplit2ToVenousChamber"],selectFlowSplit2ToVenousChamber,() => Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Incoming.ConnectedPredecessor),
+				new VisualFlow("FlowVenousChamberToSafetyDetector",(Storyboard)Resources["FlowVenousChamberToSafetyDetector"],selectFlowVenousChamberToSafetyDetector,() => Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Outgoing),
+				new VisualFlow("FlowSafetySensorToVenousValve",(Storyboard)Resources["FlowSafetySensorToVenousValve"],selectFlowSafetySensorToVenousValve,() => Machine.ExtracorporealBloodCircuit.VenousSafetyDetector.MainFlow.Outgoing),
+				new VisualFlow("FlowVenousValveToPatient",(Storyboard)Resources["FlowVenousValveToPatient"],selectFlowVenousValveToPatient,() => Machine.ExtracorporealBloodCircuit.VenousTubingValve.MainFlow.Outgoing),
+				new VisualFlow("FlowWaterSupplyToWaterPreparation",(Storyboard)Resources["FlowWaterSupplyToWaterPreparation"],selectFlowWaterSupplyToWaterPreparation,() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidWaterSupply.MainFlow.Outgoing),
+				new VisualFlow("FlowWaterPreparationToDialyzingFluidPreparation",(Storyboard)Resources["FlowWaterPreparationToDialyzingFluidPreparation"],selectFlowWaterPreparationToDialyzingFluidPreparation,() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidWaterPreparation.MainFlow.Outgoing),
+				new VisualFlow("FlowDialyzingFluidPreparationToBalanceChamber",(Storyboard)Resources["FlowDialyzingFluidPreparationToBalanceChamber"],selectFlowDialyzingFluidPreparationToBalanceChamber,() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidFlow.Outgoing),
+				new VisualFlow("FlowBalanceChamberToDrain",(Storyboard)Resources["FlowBalanceChamberToDrain"],selectFlowBalanceChamberToDrain,() => Machine.DialyzingFluidDeliverySystem.BalanceChamber.ForwardUsedFlowSegment.Outgoing),
+				new VisualFlow("FlowBalanceChamberToSafetyBypass",(Storyboard)Resources["FlowBalanceChamberToSafetyBypass"],selectFlowBalanceChamberToSafetyBypass,() => Machine.DialyzingFluidDeliverySystem.BalanceChamber.ForwardProducedFlowSegment.Outgoing),
+				new VisualFlow("FlowSafetyBypassToDialyzer",(Storyboard)Resources["FlowSafetyBypassToDialyzer"],selectFlowSafetyBypassToDialyzer,() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.MainFlow.Outgoing),
+				new VisualFlow("FlowSafetyBypassToDrain",(Storyboard)Resources["FlowSafetyBypassToDrain"],selectFlowSafetyBypassToDrain,() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.DrainFlow.Outgoing),
+				new VisualFlow("FlowDialyzerDialyzingFluidSideToSplit3",(Storyboard)Resources["FlowDialyzerDialyzingFluidSideToSplit3"],selectFlowDialyzerDialyzingFluidSideToSplit3,() => Machine.Dialyzer.DialyzingFluidFlow.Outgoing),
+				new VisualFlow("FlowSplit3ToPumpToBalanceChamber",(Storyboard)Resources["FlowSplit3ToPumpToBalanceChamber"],selectFlowSplit3ToPumpToBalanceChamber,() => Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Incoming.ConnectedPredecessor),
+				new VisualFlow("FlowSplit3ToUltraFiltrationPump",(Storyboard)Resources["FlowSplit3ToUltraFiltrationPump"],selectFlowSplit3ToUltraFiltrationPump,() => Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.DialyzingFluidFlow.Incoming.ConnectedPredecessor),
+				new VisualFlow("FlowPumpToBalanceChamberToBalanceChamber",(Storyboard)Resources["FlowPumpToBalanceChamberToBalanceChamber"],selectFlowPumpToBalanceChamberToBalanceChamber,() => Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Outgoing),
+				new VisualFlow("FlowUltraFiltrationPumpToDrain",(Storyboard)Resources["FlowUltraFiltrationPumpToDrain"],selectFlowUltraFiltrationPumpToDrain,() => Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.DialyzingFluidFlow.Outgoing),
 			};
 
 			// Add custom buttons
@@ -163,14 +163,14 @@ namespace Visualization
 
 			VisualFaults = new VisualFault[]
 			{
-				new VisualFault(Machine.Dialyzer.DialyzerMembraneRupturesFault,buttonFaultDialyzer),
-				new VisualFault(Machine.ExtracorporealBloodCircuit.VenousTubingValve.ValveDoesNotClose,buttonFaultVenousValve),
-				new VisualFault(Machine.ExtracorporealBloodCircuit.VenousSafetyDetector.SafetyDetectorDefect,buttonFaultSafetyDetector),
-				new VisualFault(Machine.DialyzingFluidDeliverySystem.DialyzingFluidWaterPreparation.WaterHeaterDefect,buttonFaultWaterPreparation),
-				new VisualFault(Machine.ExtracorporealBloodCircuit.ArterialBloodPump.BloodPumpDefect,buttonFaultBloodPump),
-				new VisualFault(Machine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidPreparationPumpDefect,buttonFaultDialyzingFluidPreparation),
-				new VisualFault(Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.SafetyBypassFault,buttonFaultSafetyBypass),
-				new VisualFault(Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpToBalanceChamberDefect,buttonFaultPumpToBalanceChamber),
+				new VisualFault(() => Machine.Dialyzer.DialyzerMembraneRupturesFault,buttonFaultDialyzer),
+				new VisualFault(() => Machine.ExtracorporealBloodCircuit.VenousTubingValve.ValveDoesNotClose,buttonFaultVenousValve),
+				new VisualFault(() => Machine.ExtracorporealBloodCircuit.VenousSafetyDetector.SafetyDetectorDefect,buttonFaultSafetyDetector),
+				new VisualFault(() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidWaterPreparation.WaterHeaterDefect,buttonFaultWaterPreparation),
+				new VisualFault(() => Machine.ExtracorporealBloodCircuit.ArterialBloodPump.BloodPumpDefect,buttonFaultBloodPump),
+				new VisualFault(() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidPreparationPumpDefect,buttonFaultDialyzingFluidPreparation),
+				new VisualFault(() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.SafetyBypassFault,buttonFaultSafetyBypass),
+				new VisualFault(() => Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpToBalanceChamberDefect,buttonFaultPumpToBalanceChamber),
 			};
 		}
 
@@ -404,15 +404,17 @@ namespace Visualization
 
 		public void UpdatePatientInfoText()
 		{
-			var text = Patient.ValuesAsText();
-			textBlockPatientInfos.Text = text;
+			var textPatient = Patient.ValuesAsText();
+			var textOutgoingBlood = Patient.ArteryFlow.Outgoing.ForwardToSuccessor.ValuesAsText();
+			var textIncomingBlood = Patient.VeinFlow.Incoming.ForwardFromPredecessor.ValuesAsText();
+			textBlockPatientInfos.Text = textPatient + "\n\nOutgoing:\n" + textOutgoingBlood + "\n\nIncoming:\n" + textIncomingBlood;
 		}
 
 		public void UpdateFaultVisualization()
 		{
 			foreach (var visualFault in VisualFaults)
 			{
-				if (visualFault.Fault.IsActivated)
+				if (visualFault.Fault().IsActivated)
 				{
 					visualFault.FaultSymbol.Style = (Style)Resources["FailureIndicator"];
 				}
