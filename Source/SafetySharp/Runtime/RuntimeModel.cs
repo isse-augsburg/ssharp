@@ -34,7 +34,7 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Represents a runtime model that can be used for model checking or simulation.
 	/// </summary>
-	public sealed unsafe class RuntimeModel : DisposableObject
+	internal sealed unsafe class RuntimeModel : DisposableObject
 	{
 		/// <summary>
 		///   The unique name of the construction state.

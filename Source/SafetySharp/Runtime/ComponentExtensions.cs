@@ -28,7 +28,7 @@ namespace SafetySharp.Runtime
 	using System.Reflection;
 	using CompilerServices;
 	using Modeling;
-	using Runtime.Serialization;
+	using Serialization;
 	using Utilities;
 
 	/// <summary>

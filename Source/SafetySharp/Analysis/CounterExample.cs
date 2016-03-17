@@ -101,7 +101,7 @@ namespace SafetySharp.Analysis
 		///   Deserializes the state at the <paramref name="position" /> of the counter example.
 		/// </summary>
 		/// <param name="position">The position of the state within the counter example that should be deserialized.</param>
-		public unsafe RuntimeModel DeserializeState(int position)
+		public unsafe ModelBase DeserializeState(int position)
 		{
 			Requires.That(_counterExample != null, "No counter example has been loaded.");
 			Requires.InRange(position, nameof(position), 0, StepCount);
@@ -109,7 +109,7 @@ namespace SafetySharp.Analysis
 			using (var pointer = PinnedPointer.Create(_counterExample[position + 1]))
 				RuntimeModel.Deserialize((byte*)pointer);
 
-			return RuntimeModel;
+			return Model;
 		}
 
 		/// <summary>
@@ -136,7 +136,7 @@ namespace SafetySharp.Analysis
 		///   Executs the <paramref name="action" /> for each step of the counter example.
 		/// </summary>
 		/// <param name="action">The action that should be executed on the deserialized model state.</param>
-		public void ForEachStep(Action<RuntimeModel> action)
+		public void ForEachStep(Action<ModelBase> action)
 		{
 			Requires.NotNull(action, nameof(action));
 
