@@ -17,9 +17,13 @@ The modification is required as we have to execute the CSC task twice during com
 		
 		<!-- Path to the S# LTSMin integration assembly -->
 		<SSharpLtsMinAssemblyPath>$(MSBuildThisFileDirectory)../tools/SafetySharp.LtsMin.dll</SSharpLtsMinAssemblyPath>
+		
+		<!-- Path to the S# NormalizationTask -->
+		<SSharpNormalizationTaskPath Condition="Exists('$(MSBuildThisFileDirectory)/SSharpNormalizationTask.cs')">$(MSBuildThisFileDirectory)/NormalizationTask.cs</SSharpNormalizationTaskPath>
+		<SSharpNormalizationTaskPath Condition="!Exists('$(MSBuildThisFileDirectory)/SSharpNormalizationTask.cs')">$(SolutionDir)/Source/Compiler/NormalizationTask.cs</SSharpNormalizationTaskPath>
     </PropertyGroup>
 	
-	<UsingTask TaskName="SSharpNormalizationTask" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+	<UsingTask TaskName="SafetySharp.Compiler.NormalizationTask" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
 		<ParameterGroup>
 		  <InputFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
 		  <IntermediateDirectory ParameterType="Microsoft.Build.Framework.ITaskItem" Required="true" />
@@ -28,132 +32,14 @@ The modification is required as we have to execute the CSC task twice during com
 		  <OutputFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
 		</ParameterGroup>
 		<Task>
-			<Code Type="Class" Language="cs">
-<![CDATA[
-using System;
-using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Reflection;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-
-public class SSharpNormalizationTask : Task
-{
-	public SSharpNormalizationTask()
-	{
-		AppDomain.CurrentDomain.AssemblyResolve += (s, e) => TryLoadAssembly(new AssemblyName(e.Name));
-	}
-
-	[Required]
-	public ITaskItem[] InputFiles { get; set; }
-	
-	[Required]
-	public ITaskItem[] References { get; set; }
-
-	[Required]
-	public ITaskItem IntermediateDirectory { get; set; }
-
-	[Required]
-	public ITaskItem[] AssemblyDirectories { get; set; }
-
-	[Output]
-	public ITaskItem[] OutputFiles { get; set; }
-
-	public override bool Execute()
-	{
-		try
-		{
-			var outPath = IntermediateDirectory.GetMetadata("FullPath");
-			var intermediateDirectory = Path.Combine(outPath, "ssharp");
-			Directory.CreateDirectory(intermediateDirectory);
-		
-			var compilationUnits = Normalize();
-			if (compilationUnits == null)
-				return false;
-			
-			OutputFiles = new ITaskItem[compilationUnits.Length];
-			
-			for (var i = 0; i < compilationUnits.Length; ++i)
-			{
-				var path = Path.Combine(intermediateDirectory, i + ".cs");
-
-				OutputFiles[i] = new TaskItem(path);
-				File.WriteAllText(path, "#if CompilingSSharpCode\n" + compilationUnits[i] + "\n#endif");
-			}
-
-			return true;
-		}
-		catch (TargetInvocationException e)
-		{
-			ReportException(e.InnerException);
-			return false;
-		}
-		catch (Exception e)
-		{
-			ReportException(e);		
-			return false;
-		}
-	}
-	
-	private void ReportException(Exception e)
-	{
-		Log.LogError("S# normalization failed due to an exception.");
-		Log.LogError("{0}", e.Message);
-		Log.LogError("{0}", e.StackTrace);
-	}
-
-	private Assembly TryLoadAssembly(AssemblyName assemblyName)
-	{
-		// Load the assemblies to memory first in order to avoid locking the actual assemblies on disk
-
-		var referencePath =
-			References.FirstOrDefault(rp => string.Equals(rp.GetMetadata("FileName"), assemblyName.Name, StringComparison.OrdinalIgnoreCase));
-		if (referencePath != null)
-			return Assembly.Load(File.ReadAllBytes(referencePath.GetMetadata("FullPath")));
-
-		return LoadAssembly(assemblyName.Name + ".dll");
-	}
-	
-	private Assembly LoadAssembly(string assemblyName)
-	{
-		foreach (var directory in AssemblyDirectories)
-		{
-			string fileName = Path.Combine(directory.GetMetadata("FullPath"), assemblyName);
-
-			if (File.Exists(fileName))
-				return Assembly.Load(File.ReadAllBytes(fileName));
-		}
-		
-		return null;
-	}
-
-	private string[] Normalize()
-	{
-		var assembly = LoadAssembly("SafetySharp.Compiler.dll");
-		if (assembly == null)
-			throw new InvalidOperationException("Unable to find the S# compiler.");
-		
-		var compilerType = assembly.GetType("SafetySharp.Compiler.Compiler");
-
-		var compiler = Activator.CreateInstance(compilerType, new[] { Log });
-		var method = compilerType.GetMethod("NormalizeProject", BindingFlags.Instance | BindingFlags.Public);
-		var normalize = (Normalizer)Delegate.CreateDelegate(typeof(Normalizer), compiler, method);
-
-		return normalize(InputFiles.Select(f => f.ItemSpec).ToArray(), References.Select(r => r.ItemSpec).ToArray(), IntermediateDirectory.ItemSpec);
-	}
-
-	private delegate string[] Normalizer(string[] files, string[] references, string intermediateDirectory);
-}
-]]>
-			</Code>
+			<Code Type="Class" Language="cs" Source="$(SSharpNormalizationTaskPath)" />
 		</Task>
 	</UsingTask>
 	
     <Target Name="NormalizeSSharpCode" AfterTargets="CoreCompile">
-        <SSharpNormalizationTask InputFiles="@(Compile)" References="@(ReferencePath)" IntermediateDirectory="$(IntermediateOutputPath)" AssemblyDirectories="$(SSharpAssemblyDirectories)">
+        <NormalizationTask InputFiles="@(Compile)" References="@(ReferencePath)" IntermediateDirectory="$(IntermediateOutputPath)" AssemblyDirectories="$(SSharpAssemblyDirectories)">
 			<Output TaskParameter="OutputFiles" ItemName="SSharpCompile" />
-        </SSharpNormalizationTask>
+        </NormalizationTask>
 		
 		<ItemGroup>	
 			<!-- make sure that the generated files are cleaned up -->

@@ -20,35 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace SafetySharp.Utilities
 {
-	using Modeling;
+	using System;
 
 	/// <summary>
-	///   Represents a base class for external model checker tools.
+	///   Provides helper methods to write to the console.
 	/// </summary>
-	public static class ModelChecker
+	internal static class ConsoleHelpers
 	{
 		/// <summary>
-		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />. The appropriate model
-		///   checker is chosen automatically.
+		///   Writes the <paramref name="message" />, optionally in the given <paramref name="color" /> to the console.
 		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
-		/// <param name="formula">The formula that should be checked.</param>
-		public static AnalysisResult Check(Model model, Formula formula)
+		/// <param name="message">The message that should be written.</param>
+		/// <param name="color">
+		///   The color of the output that should be written. <c>null</c> indicates that the default color should be used.
+		/// </param>
+		internal static void WriteLine(string message, ConsoleColor? color = null)
 		{
-			return new LtsMin().Check(model, formula);
-		}
+			if (color != null)
+				Console.ForegroundColor = color.Value;
 
-		/// <summary>
-		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />. The appropriate
-		///   model checker is chosen automatically.
-		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
-		/// <param name="invariant">The invariant that should be checked.</param>
-		public static AnalysisResult CheckInvariant(Model model, Formula invariant)
-		{
-			return new SSharpChecker().CheckInvariant(model, invariant);
+			Console.WriteLine(message);
+			Console.ResetColor();
 		}
 	}
 }

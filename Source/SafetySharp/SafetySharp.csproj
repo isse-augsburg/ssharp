@@ -143,6 +143,7 @@
     <Compile Include="Runtime\StateStorage.cs" />
     <Compile Include="Runtime\TransitionSet.cs" />
     <Compile Include="Runtime\UnboundPortException.cs" />
+    <Compile Include="Utilities\ConsoleHelpers.cs" />
     <Compile Include="Utilities\MemoryBuffer.cs" />
     <Compile Include="Utilities\CodeWriter.cs" />
     <Compile Include="Utilities\DisposableExtensions.cs" />

@@ -3,7 +3,7 @@
 	<metadata>
 		<id>ISSE.SafetySharp</id>
 		<title>S#</title>
-		<version>1.0.1</version>
+		<version>1.1.0</version>
 		<authors>Institute for Software and Systems Engineering (University of Augsburg)</authors>
 		<owners>Institute for Software and Systems Engineering (University of Augsburg)</owners>
 		<licenseUrl>https://github.com/isse-augsburg/ssharp/blob/master/LICENSE.md</licenseUrl>
@@ -33,6 +33,7 @@
 		<file src="..\Source\SafetySharp.props" target="build\ISSE.SafetySharp.props" />
 		<file src="..\Source\SafetySharp.targets" target="build\ISSE.SafetySharp.targets" />
 		<file src="..\Source\SafetySharp.CSharp.Core.targets" target="build" />
+		<file src="..\Source\Compiler\NormalizationTask.cs" target="build" />
 		
 		<!-- Readme file that is automatically displayed -->
 		<file src="readme.txt" target="" />

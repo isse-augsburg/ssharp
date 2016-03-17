@@ -171,32 +171,18 @@ namespace SafetySharp.Compiler
 			{
 				case DiagnosticSeverity.Info:
 					if (!Silent)
-						WriteToConsole(ConsoleColor.White, message);
+						ConsoleHelpers.WriteLine(message, ConsoleColor.White);
 					break;
 				case DiagnosticSeverity.Warning:
-					WriteToConsole(ConsoleColor.Yellow, message);
+					ConsoleHelpers.WriteLine(message, ConsoleColor.Yellow);
 					break;
 				case DiagnosticSeverity.Error:
-					WriteToConsole(ConsoleColor.Red, message);
+					ConsoleHelpers.WriteLine(message, ConsoleColor.Red);
 					break;
 				default:
 					Assert.NotReached();
 					break;
 			}
-		}
-
-		/// <summary>
-		///   Writes the <paramref name="message" /> to the console using the given <paramref name="color" />.
-		/// </summary>
-		/// <param name="color">The color that should be used to write <paramref name="message" /> to the console.</param>
-		/// <param name="message">The message that should be written to the console.</param>
-		private static void WriteToConsole(ConsoleColor color, [NotNull] string message)
-		{
-			var currentColor = Console.ForegroundColor;
-
-			Console.ForegroundColor = color;
-			Console.WriteLine(message);
-			Console.ForegroundColor = currentColor;
 		}
 	}
 }

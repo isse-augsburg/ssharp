@@ -42,7 +42,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
 		/// </summary>
-		public event Action<string> OutputWritten = message => ModelChecker.WriteOutput(message);
+		public event Action<string> OutputWritten = Console.WriteLine;
 
 		/// <summary>
 		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
