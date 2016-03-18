@@ -46,6 +46,10 @@ namespace Tests.Execution.ModelCopy
 			m1.H().I.ShouldBe(m2.H().I);
 
 			m2.Formula.Evaluate().ShouldBe(false);
+
+			m2.Roots.ShouldBe(new IComponent[] { m2.A, m2.B, m2.C, m2.D() }, ignoreOrder: true);
+			m2.Components.ShouldBe(new IComponent[] { m2.A, m2.B, m2.C, m2.D() }, ignoreOrder: true);
+			m2.Faults.ShouldBeEmpty();
 		}
 
 		private class M : ModelBase

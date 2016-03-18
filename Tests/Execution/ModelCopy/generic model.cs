@@ -27,35 +27,47 @@ namespace Tests.Execution.ModelCopy
 	using Shouldly;
 	using Utilities;
 
-	internal class DuplicatedRoots : TestObject
+	internal class GenericModel : TestObject
 	{
 		protected override void Check()
 		{
-			var m1 = new M();
+			var m1 = new M<C>();
 			var s = new Simulator(m1);
-			var m2 = (M)s.Model;
+			var m2 = (M<C>)s.Model;
 
 			m2.A.I.ShouldBe(m1.A.I);
-			m2.B.I.ShouldBe(m1.B.I);
+			((C)m2.B).I.ShouldBe(((C)m1.B).I);
+			((C)m2.C).I.ShouldBe(((C)m1.C).I);
+			m2.D().I.ShouldBe(m1.D().I);
 
-			m2.Roots.ShouldBe(new IComponent[] { m2.A }, ignoreOrder: true);
-			m2.Components.ShouldBe(new IComponent[] { m2.A }, ignoreOrder: true);
+			m2.Roots.ShouldBe(new[] { m2.A, m2.B, m2.C, m2.D() }, ignoreOrder: true);
+			m2.Components.ShouldBe(new[] { m2.A, m2.B, m2.C, m2.D() }, ignoreOrder: true);
 			m2.Faults.ShouldBeEmpty();
 		}
 
-		private class M : ModelBase
+		private class M<T> : ModelBase
+			where T : Component, new()
 		{
 			[Root(Role.SystemContext)]
-			public readonly C A;
+			public readonly T A = new T();
+
+			public readonly T E = new T();
+			private readonly T _c2 = new T();
 
 			[Root(Role.SystemContext)]
-			public readonly C B;
+			public Component B { get; } = new T();
 
-			public M()
-			{
-				A = new C();
-				B = A;
-			}
+			[Root(Role.SystemContext)]
+			public IComponent C { get; } = new T();
+
+			public T F => new T();
+
+			public T G { get; } = new T();
+
+			[Root(Role.SystemContext)]
+			public T D() => _c2;
+
+			public T H() => new T();
 		}
 
 		private class C : Component

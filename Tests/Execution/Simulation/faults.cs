@@ -24,7 +24,6 @@ namespace Tests.Execution.Simulation
 {
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 
@@ -50,6 +49,8 @@ namespace Tests.Execution.Simulation
 			c.F.Activation = Activation.Nondeterministic;
 			simulator.SimulateStep();
 			c.X.ShouldBe(1);
+
+			simulator.Model.Faults.ShouldBe(new[] { ((C)simulator.Model.Roots[0]).F });
 		}
 
 		private class C : Component

@@ -224,6 +224,8 @@
     <Compile Include="Execution\ModelCopy\cyclic roots.cs" />
     <Compile Include="Execution\ModelCopy\duplicated roots.cs" />
     <Compile Include="Execution\ModelCopy\fields.cs" />
+    <Compile Include="Execution\ModelCopy\generic model.cs" />
+    <Compile Include="Execution\ModelCopy\inherited model.cs" />
     <Compile Include="Execution\ModelCopy\methods.cs" />
     <Compile Include="Execution\ModelCopy\mixed.cs" />
     <Compile Include="Execution\ModelCopy\properties.cs" />

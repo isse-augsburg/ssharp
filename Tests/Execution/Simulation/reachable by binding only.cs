@@ -22,6 +22,7 @@
 
 namespace Tests.Execution.Simulation
 {
+	using System.Linq;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
@@ -38,6 +39,10 @@ namespace Tests.Execution.Simulation
 
 			simulator.SimulateStep();
 			c.X.ShouldBe(7);
+
+			simulator.Model.Components.Length.ShouldBe(2);
+			simulator.Model.Components.OfType<C>().Count().ShouldBe(1);
+			simulator.Model.Components.OfType<D>().Count().ShouldBe(1);
 		}
 
 		private class C : Component

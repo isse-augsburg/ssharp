@@ -44,6 +44,10 @@ namespace Tests.Execution.ModelCopy
 				c2[i].I.ShouldBe(c1[i].I);
 
 			m2.E.C.I.ShouldBe(m1.E.C.I);
+
+			m2.Roots.ShouldBe(m2.GetRoots(), ignoreOrder: true);
+			m2.Components.ShouldBe(m2.GetRoots().Concat(new [] { m2.E.C }), ignoreOrder: true);
+			m2.Faults.ShouldBe(new[] { m2.E.F });
 		}
 
 		private class M : ModelBase
