@@ -16,9 +16,9 @@ S# Features
   providing model refactorings, debuggers, UI designers for visualizations, continuous
   integration with automated regression tests, etc.
 
-Get Started
+Documentation
 ===========
 
-To get startet, please take a look at the S# Wiki found at
+Documentation is available in the S# Wiki:
 
 http://safetysharp.isse.de/wiki

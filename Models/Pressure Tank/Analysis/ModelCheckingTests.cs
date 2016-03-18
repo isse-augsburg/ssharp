@@ -27,6 +27,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using static SafetySharp.Analysis.Operators;
 
 	/// <summary>
 	///   Contains a set of tests that model check the case study.
@@ -60,7 +61,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 				!model.Pump.SuppressPumping.IsActivated &&
 				!model.Timer.SuppressTimeout.IsActivated;
 
-			var result = ModelChecker.Check(model, Operators.G(noFaults).Implies(!Operators.F(model.Tank.IsRuptured)));
+			var result = ModelChecker.Check(model, G(noFaults).Implies(!F(model.Tank.IsRuptured)));
 			result.FormulaHolds.Should().BeTrue();
 		}
 
