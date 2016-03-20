@@ -121,6 +121,8 @@ namespace SafetySharp.Modeling
 			BindFaultEffects(model);
 			DiscoverFaults(model);
 			AssignFaultIdentifiers(model);
+
+			model.CreateBindings();
 			CreateBindings(model);
 		}
 

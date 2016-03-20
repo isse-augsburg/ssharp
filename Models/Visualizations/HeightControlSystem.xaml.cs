@@ -31,10 +31,11 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using System.Windows.Media;
 	using System.Windows.Media.Animation;
 	using System.Windows.Shapes;
-	using HeightControl;
-	using HeightControl.Controllers;
-	using HeightControl.Sensors;
-	using HeightControl.Vehicles;
+	using HeightControl.Modeling;
+	using HeightControl.Modeling.Controllers;
+	using HeightControl.Modeling.ModelVariants;
+	using HeightControl.Modeling.Sensors;
+	using HeightControl.Modeling.Vehicles;
 	using Infrastructure;
 	using Modeling;
 
@@ -61,7 +62,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			_odfStoryboard = (Storyboard)Resources["EventOdf"];
 
 			// Initialize the simulation environment
-			var specification = new Specification(Enumerable
+			var specification = new OriginalModel(Enumerable
 				.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.Truck })
 				.Concat(Enumerable.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.OverheightTruck }))
 				.ToArray());
@@ -83,9 +84,9 @@ namespace SafetySharp.CaseStudies.Visualizations
 			AlertOdf.Opacity = 0;
 		}
 
-		private VehicleCollection Vehicles => ((Specification)SimulationControls.Model).Vehicles;
+		private VehicleCollection Vehicles => ((OriginalModel)SimulationControls.Model).Vehicles;
 		private EndControlOriginal EndControl => (EndControlOriginal)HeightControl.EndControl;
-		private HeightControl HeightControl => ((Specification)SimulationControls.Model).HeightControl;
+		private HeightControl HeightControl => ((OriginalModel)SimulationControls.Model).HeightControl;
 		private MainControlOriginal MainControl => (MainControlOriginal)HeightControl.MainControl;
 		private PreControlOriginal PreControl => (PreControlOriginal)HeightControl.PreControl;
 
@@ -206,7 +207,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			}
 
 			if (_vehicles.Any(
-				v => v.Item1.Lane == Lane.Left && v.Item1.Position >= Specification.TunnelPosition && v.Item1.Kind == VehicleKind.OverheightTruck))
+				v => v.Item1.Lane == Lane.Left && v.Item1.Position >= Model.TunnelPosition && v.Item1.Kind == VehicleKind.OverheightTruck))
 			{
 				HazardIndicator.Visibility = Visibility.Visible;
 				Message.Text = "Collision";

@@ -130,6 +130,13 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
+		///   Invoked when the model should initialize bindings between its components.
+		/// </summary>
+		protected internal virtual void CreateBindings()
+		{
+		}
+
+		/// <summary>
 		///   Creates a <see cref="RuntimeModel" /> instance from the model and the <paramref name="formulas" />.
 		/// </summary>
 		/// <param name="formulas">The formulas the model should be able to check.</param>
