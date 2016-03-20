@@ -34,6 +34,11 @@ namespace SafetySharp.CaseStudies.HeightControl.Vehicles
 		/// </summary>
 		[Hidden(HideElements = true)]
 		public readonly Vehicle[] Vehicles;
+		
+		/// <summary>
+		///   Represents a fault where the driver disregards traffic rules
+		/// </summary>
+		public readonly Fault DisregardTrafficRules = new TransientFault();
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -43,7 +48,10 @@ namespace SafetySharp.CaseStudies.HeightControl.Vehicles
 			Vehicles = vehicles;
 
 			foreach (var vehicle in Vehicles)
+			{
+				DisregardTrafficRules.AddEffect<Vehicle.DisregardTrafficRulesEffect>(vehicle);
 				Bind(nameof(vehicle.IsTunnelClosed), nameof(ForwardIsTunnelClosed));
+			}
 		}
 
 		// TODO: Remove once port forwardings are supported

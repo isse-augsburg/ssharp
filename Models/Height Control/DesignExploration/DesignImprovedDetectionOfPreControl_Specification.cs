@@ -49,9 +49,9 @@ namespace SafetySharp.CaseStudies.HeightControl
 		{
 			vehicles = vehicles ?? new[]
 			{
-				new Vehicle { Kind = VehicleKind.OverheightTruck },
-				new Vehicle { Kind = VehicleKind.OverheightTruck },
-				new Vehicle { Kind = VehicleKind.Truck }
+				new Vehicle { Kind = VehicleKind.OverheightTruck},
+				new Vehicle { Kind = VehicleKind.OverheightTruck},
+				new Vehicle { Kind = VehicleKind.Truck}
 			};
 
 			var lightBarrier1 = new LightBarrier
@@ -168,6 +168,15 @@ namespace SafetySharp.CaseStudies.HeightControl
 		/// </summary>
 		public Formula Collision =>
 			Vehicles.Vehicles.Skip(1).Aggregate<Vehicle, Formula>(Vehicles.Vehicles[0].IsCollided, (f, v) => f || v.IsCollided);
+
+
+
+		/// <summary>
+		///   Represents the hazard of an alarm even when no over-height vehicle is on the right lane.
+		/// </summary>
+		public Formula FalseAlarm =>
+			HeightControl.TrafficLights.IsRed &&
+			Vehicles.Vehicles.All(vehicle => vehicle.Lane == Lane.Right || vehicle.Kind != VehicleKind.OverheightTruck);
 
 		/// <summary>
 		///   Binds the <paramref name="detector" /> to the <see cref="Vehicles" />.

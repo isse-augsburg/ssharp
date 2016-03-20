@@ -86,8 +86,15 @@ namespace SafetySharp.CaseStudies.HeightControl.Vehicles
 		/// </summary>
 		protected override void Initialize()
 		{
-			Lane = Choose(Lane.Left, Lane.Right);
+			Lane = Lane.Right;
 			Speed = ChooseFromRange(0, Specification.MaxSpeed);
+		}
+
+		protected virtual void SelectLane()
+		{
+			// The road layout makes lane changes impossible when the end control has been reached
+			if (Position < Specification.EndControlPosition)
+				Lane = Lane.Right;
 		}
 
 		/// <summary>
@@ -102,9 +109,19 @@ namespace SafetySharp.CaseStudies.HeightControl.Vehicles
 			Speed = ChooseFromRange(1, Specification.MaxSpeed);
 			Position += Speed;
 
-			// The road layout makes lane changes impossible when the end control has been reached
-			if (Position < Specification.EndControlPosition)
-				Lane = Choose(Lane.Left, Lane.Right);
+			SelectLane();
+		}
+
+		//[FaultEffect(Fault = nameof(DisregardTrafficRules))]//, Priority(1)
+		[FaultEffect]//, Priority(1)
+		public class DisregardTrafficRulesEffect : Vehicle
+		{
+			protected override void SelectLane()
+			{
+				// The road layout makes lane changes impossible when the end control has been reached
+				if (Position < Specification.EndControlPosition)
+					Lane = Choose(Lane.Left, Lane.Right);
+			}
 		}
 	}
 }

@@ -6,7 +6,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{6AE088BD-212E-4F38-96A1-B16C4F95D243}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SafetySharp.CaseStudies.HeightControl</RootNamespace>
     <AssemblyName>SafetySharp.CaseStudies.HeightControl</AssemblyName>
@@ -95,7 +95,6 @@
     <Compile Include="Sensors\OverheadDetector.cs" />
     <Compile Include="Sensors\LightBarrier.cs" />
     <Compile Include="Specification.cs" />
-    <Compile Include="Tests.cs" />
     <Compile Include="Vehicles\VehicleKind.cs" />
   </ItemGroup>
   <ItemGroup>
