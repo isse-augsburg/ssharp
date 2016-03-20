@@ -43,21 +43,21 @@ namespace Tests.Execution.RootDiscovery
 
 			public readonly C E = new C();
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public C C { get; } = new C();
 
 			public C F => new C();
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public C D() => _c2;
 		}
 
 		private class M2 : M
 		{
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public readonly C A = new C();
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public C B { get; } = new C();
 
 			public C G { get; } = new C();

@@ -43,19 +43,19 @@ namespace Tests.Execution.Scheduling
 
 		private class S : ModelBase
 		{
-			[Root(Role.SystemOfInterest)]
+			[Root(Role.System)]
 			public C C = new C();
 
 			// Should be ignored
 			public C C1 = new C();
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public D D = new D();
 
-			[Root(Role.SystemOfInterest)]
+			[Root(Role.System)]
 			public E E = new E();
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public F F = new F();
 		}
 

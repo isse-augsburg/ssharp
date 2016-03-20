@@ -39,10 +39,10 @@ namespace Tests.Execution.RootDiscovery
 
 		private class M : ModelBase
 		{
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public readonly C A;
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public readonly C B;
 
 			public M()

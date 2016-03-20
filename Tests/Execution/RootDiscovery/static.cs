@@ -38,16 +38,16 @@ namespace Tests.Execution.RootDiscovery
 
 		private class M : ModelBase
 		{
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public static C A = new C();
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public static C B => new C();
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public static C C { get; } = new C();
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public static C D() => new C();
 		}
 

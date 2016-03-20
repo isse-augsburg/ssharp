@@ -38,7 +38,7 @@ namespace Tests.End2End.Files
 
 	internal class S3 : ModelBase
 	{
-		[Root(Role.SystemOfInterest)]
+		[Root(Role.System)]
 		public C3 C { get; } = new C3();
 
 		public static int Main(string[] args)

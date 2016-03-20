@@ -56,7 +56,7 @@ namespace Tests.Execution.Simulation
 
 		private class M : ModelBase
 		{
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public readonly C C = new C();
 
 			public Formula F => C.X != 1;

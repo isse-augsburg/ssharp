@@ -79,7 +79,7 @@ namespace SafetySharp.Modeling
 				EnsureIsBound();
 				return _faults;
 			}
-			set
+			internal set
 			{
 				Requires.That(_faults == null, "The faults have already been set.");
 				_faults = value;

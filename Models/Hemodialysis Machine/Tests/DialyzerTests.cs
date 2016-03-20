@@ -128,18 +128,18 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 
 	class DialyzerTestEnvironment : ModelBase
 	{
-		[Root(Role.SystemOfInterest)]
+		[Root(Role.System)]
 		public readonly Dialyzer Dialyzer = new Dialyzer();
 
-		[Root(Role.SystemContext)]
+		[Root(Role.Environment)]
 		public readonly DialyzingFluidFlowCombinator DialysingFluidFlowCombinator = new DialyzingFluidFlowCombinator();
-		[Root(Role.SystemContext)]
+		[Root(Role.Environment)]
 		public readonly BloodFlowCombinator BloodFlowCombinator = new BloodFlowCombinator();
-		[Root(Role.SystemContext)]
+		[Root(Role.Environment)]
 		public readonly DialyzingFluidFlowSource DialyzingFluidFlowSource = new DialyzingFluidFlowSource();
-		[Root(Role.SystemContext)]
+		[Root(Role.Environment)]
 		public readonly DialyzingFluidFlowSink DialyzingFluidFlowSink = new DialyzingFluidFlowSink();
-		[Root(Role.SystemContext)]
+		[Root(Role.Environment)]
 		public readonly DialyzerTestEnvironmentPatient Patient = new DialyzerTestEnvironmentPatient();
 		
 		[Provided]

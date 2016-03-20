@@ -50,19 +50,19 @@ namespace Tests.Execution.RootDiscovery
 				new C()
 			};
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			private C C() => _c[0];
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			protected C D() => _c[1];
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			internal D E() => _d;
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public C F() => _c[2];
 
-			[Root(Role.SystemContext)]
+			[Root(Role.Environment)]
 			public List<C> G() => _l;
 
 			public IEnumerable<IComponent> GetRoots()
