@@ -23,12 +23,9 @@
 namespace SafetySharp.CaseStudies.HeightControl.Analysis
 {
 	using System;
-	using System.Collections.Generic;
-	using FluentAssertions;
 	using Modeling.ModelVariants;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
 
 	public class ImprovedPreControlTests
 	{
@@ -41,11 +38,11 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			result.SaveCounterExamples("counter examples/height control/dcca/collision/improved pre control");
 			Console.WriteLine(result);
 
-			result.IsComplete.Should().BeTrue();
-			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new ISet<Fault>[]
-			{
-				// Todo...
-			});
+			// TODO
+			//result.IsComplete.Should().BeTrue();
+			//result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new ISet<Fault>[]
+			//{
+			//});
 		}
 
 		[Test]
@@ -57,11 +54,11 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			result.SaveCounterExamples("counter examples/height control/dcca/false alarm/improved pre control");
 			Console.WriteLine(result);
 
-			result.IsComplete.Should().BeTrue();
-			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new ISet<Fault>[]
-			{
-				// Todo...
-			});
+			// TODO
+			//result.IsComplete.Should().BeTrue();
+			//result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new ISet<Fault>[]
+			//{
+			//});
 		}
 	}
 }
