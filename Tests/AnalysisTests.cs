@@ -70,4 +70,13 @@ namespace Tests
 			ExecuteDynamicTests(file, typeof(LtsMin));
 		}
 	}
+
+	public partial class ProbabilisticTests
+	{
+		[Theory, MemberData("DiscoverTests", "Analysis/Probabilistic")]
+		public void Probabilistic(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(LtsMin));
+		}
+	}
 }

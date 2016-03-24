@@ -25,6 +25,7 @@ namespace SafetySharp.Runtime
 	using System;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
+	using System.Threading;
 	using Analysis;
 	using CompilerServices;
 	using Modeling;
@@ -239,22 +240,66 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
+		///   Prepares the choice resolver for resolving the choices of the next state.
+		/// </summary>
+		internal void PrepareNextState()
+		{
+			_choiceResolver.PrepareNextState();
+		}
+
+		/// <summary>
+		///   Computes the next initial state of the model, storing the computed <paramref name="transitions" />.
+		///   Returns if a new path could be walked.
+		/// </summary>
+		/// <param name="transitions">The set the computed transitions should be stored in.</param>
+		internal bool ComputeNextInitialState(TransitionSet transitions)
+		{
+			fixed (byte* state = ConstructionState)
+			{
+				var newPathAvailable = _choiceResolver.PrepareNextPath();
+				if (newPathAvailable)
+				{
+					Deserialize(state);
+					ExecuteInitialStep();
+					transitions.Add(this);
+					return true;
+				}
+				return false;
+			}
+		}
+
+		/// <summary>
 		///   Computes the initial states of the model, storing the computed <paramref name="transitions" />.
 		/// </summary>
 		/// <param name="transitions">The set the computed transitions should be stored in.</param>
 		internal void ComputeInitialStates(TransitionSet transitions)
 		{
-			_choiceResolver.PrepareNextState();
+			PrepareNextState();
 
-			fixed (byte* state = ConstructionState)
+			var newPathAvailable = true;
+			while (newPathAvailable)
 			{
-				while (_choiceResolver.PrepareNextPath())
-				{
-					Deserialize(state);
-					ExecuteInitialStep();
-					transitions.Add(this);
-				}
+				newPathAvailable = ComputeNextInitialState(transitions);
 			}
+		}
+
+		/// <summary>
+		///   Computes the next successor states for <paramref name="sourceState" />, storing the computed <paramref name="transitions" />.
+		///   Returns if a new path could be walked.
+		/// </summary>
+		/// <param name="transitions">The set the computed transitions should be stored in.</param>
+		/// <param name="sourceState">The source state the next states should be computed for.</param>
+		internal bool ComputeNextSuccessorState(TransitionSet transitions, byte* sourceState)
+		{
+			var newPathAvailable = _choiceResolver.PrepareNextPath();
+			if (newPathAvailable)
+			{
+				Deserialize(sourceState);
+				ExecuteStep();
+				transitions.Add(this);
+				return true;
+			}
+			return false;
 		}
 
 		/// <summary>
@@ -264,13 +309,11 @@ namespace SafetySharp.Runtime
 		/// <param name="sourceState">The source state the next states should be computed for.</param>
 		internal void ComputeSuccessorStates(TransitionSet transitions, byte* sourceState)
 		{
-			_choiceResolver.PrepareNextState();
-
-			while (_choiceResolver.PrepareNextPath())
+			PrepareNextState();
+			var newPathAvailable = true;
+			while (newPathAvailable)
 			{
-				Deserialize(sourceState);
-				ExecuteStep();
-				transitions.Add(this);
+				newPathAvailable = ComputeNextSuccessorState(transitions,sourceState);
 			}
 		}
 
@@ -385,6 +428,15 @@ namespace SafetySharp.Runtime
 		internal int[] GetLastChoices()
 		{
 			return _choiceResolver.GetChoices().ToArray();
+		}
+
+
+		/// <summary>
+		///	  The probability to reach the current state from its predecessor from the last transition.
+		/// </summary>
+		public SafetySharp.Analysis.Probability GetProbability()
+		{
+			return _choiceResolver.Probability;
 		}
 
 		/// <summary>

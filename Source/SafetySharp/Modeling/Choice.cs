@@ -25,6 +25,7 @@ namespace SafetySharp.Modeling
 	using System;
 	using System.Runtime.CompilerServices;
 	using Runtime;
+	using Probability = Analysis.Probability;
 
 	/// <summary>
 	///   Represents a nondeterministic choice.
@@ -78,6 +79,7 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>()
 		{
+			//Resolver.Probability = Resolver.Probability;
 			return default(T);
 		}
 
@@ -89,6 +91,7 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value)
 		{
+			//TODO: State machine tests fail: (Resolver==null) Resolver.Probability /= 1;
 			return value;
 		}
 
@@ -101,6 +104,7 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2)
 		{
+			Resolver.Probability /= 2;
 			switch (Resolver.HandleChoice(2))
 			{
 				case 0:
@@ -120,6 +124,7 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3)
 		{
+			Resolver.Probability /= 3;
 			switch (Resolver.HandleChoice(3))
 			{
 				case 0:
@@ -143,6 +148,7 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3, T value4)
 		{
+			Resolver.Probability /= 4;
 			switch (Resolver.HandleChoice(4))
 			{
 				case 0:
@@ -169,6 +175,7 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3, T value4, T value5)
 		{
+			Resolver.Probability /= 5;
 			switch (Resolver.HandleChoice(5))
 			{
 				case 0:
@@ -198,6 +205,7 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3, T value4, T value5, T value6)
 		{
+			Resolver.Probability /= 6;
 			switch (Resolver.HandleChoice(6))
 			{
 				case 0:
@@ -222,7 +230,177 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(params T[] values)
 		{
+			Resolver.Probability /= values.Length;
 			return values[Resolver.HandleChoice(values.Length)];
 		}
+
+		/// <summary>
+		///   Deterministically returns the <paramref name="value" />.
+		/// </summary>
+		/// <param name="value">The value to return.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(Tuple<Probability, T> value)
+		{
+			Resolver.Probability *= value.Item1;
+			return value.Item2;
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" /> or <paramref name="value2" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The first value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(Tuple<Probability, T> value1, Tuple<Probability, T> value2)
+		{
+			switch (Resolver.HandleChoice(2))
+			{
+				case 0:
+					Resolver.Probability *= value1.Item1;
+					return value1.Item2;
+				default:
+					Resolver.Probability *= value2.Item1;
+					return value2.Item2;
+			}
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, or <paramref name="value3" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The firsTuple<Probability, T> value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <param name="value3">The third value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(Tuple<Probability, T> value1, Tuple<Probability, T> value2, Tuple<Probability, T> value3)
+		{
+			switch (Resolver.HandleChoice(3))
+			{
+				case 0:
+					Resolver.Probability *= value1.Item1;
+					return value1.Item2;
+				case 1:
+					Resolver.Probability *= value2.Item1;
+					return value2.Item2;
+				default:
+					Resolver.Probability *= value3.Item1;
+					return value3.Item2;
+			}
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />, or
+		///   <paramref name="value4" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The firsTuple<Probability, T> value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <param name="value3">The third value to choose.</param>
+		/// <param name="value4">The fourth value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(Tuple<Probability, T> value1, Tuple<Probability, T> value2, Tuple<Probability, T> value3, Tuple<Probability, T> value4)
+		{
+			switch (Resolver.HandleChoice(4))
+			{
+				case 0:
+					Resolver.Probability *= value1.Item1;
+					return value1.Item2;
+				case 1:
+					Resolver.Probability *= value2.Item1;
+					return value2.Item2;
+				case 2:
+					Resolver.Probability *= value3.Item1;
+					return value3.Item2;
+				default:
+					Resolver.Probability *= value4.Item1;
+					return value4.Item2;
+			}
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />,
+		///   <paramref name="value4" />, or <paramref name="value5" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The firsTuple<Probability, T> value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <param name="value3">The third value to choose.</param>
+		/// <param name="value4">The fourth value to choose.</param>
+		/// <param name="value5">The fifth value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(Tuple<Probability, T> value1, Tuple<Probability, T> value2, Tuple<Probability, T> value3, Tuple<Probability, T> value4, Tuple<Probability, T> value5)
+		{
+			switch (Resolver.HandleChoice(5))
+			{
+				case 0:
+					Resolver.Probability *= value1.Item1;
+					return value1.Item2;
+				case 1:
+					Resolver.Probability *= value2.Item1;
+					return value2.Item2;
+				case 2:
+					Resolver.Probability *= value3.Item1;
+					return value3.Item2;
+				case 3:
+					Resolver.Probability *= value4.Item1;
+					return value4.Item2;
+				default:
+					Resolver.Probability *= value5.Item1;
+					return value5.Item2;
+			}
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />,
+		///   <paramref name="value4" />, <paramref name="value5" />, or <paramref name="value6" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The firsTuple<Probability, T> value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <param name="value3">The third value to choose.</param>
+		/// <param name="value4">The fourth value to choose.</param>
+		/// <param name="value5">The fifth value to choose.</param>
+		/// <param name="value6">The sixth value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(Tuple<Probability, T> value1, Tuple<Probability, T> value2, Tuple<Probability, T> value3, Tuple<Probability, T> value4, Tuple<Probability, T> value5, Tuple<Probability, T> value6)
+		{
+			switch (Resolver.HandleChoice(6))
+			{
+				case 0:
+					Resolver.Probability *= value1.Item1;
+					return value1.Item2;
+				case 1:
+					Resolver.Probability *= value2.Item1;
+					return value2.Item2;
+				case 2:
+					Resolver.Probability *= value3.Item1;
+					return value3.Item2;
+				case 3:
+					Resolver.Probability *= value4.Item1;
+					return value4.Item2;
+				case 4:
+					Resolver.Probability *= value5.Item1;
+					return value5.Item2;
+				default:
+					Resolver.Probability *= value6.Item1;
+					return value6.Item2;
+			}
+		}
+
+		/// <summary>
+		///   Returns one of the <paramref name="values" /> nondeterministically.
+		/// </summary>
+		/// <param name="values">The values to choose from.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(params Tuple<Probability, T>[] values)
+		{
+			var chosen = Resolver.HandleChoice(values.Length);
+			Resolver.Probability *= values[chosen].Item1;
+			return values[chosen].Item2;
+		}
+
+
 	}
 }

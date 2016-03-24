@@ -112,6 +112,11 @@ namespace Tests
 		}
 	}
 
+	public abstract class ProbabilisticAnalysisTestObject : TestObject
+	{
+		//TODO-Probabilistic: Functions to check example
+	}
+
 	public partial class InvariantTests : Tests
 	{
 		public InvariantTests(ITestOutputHelper output)
@@ -153,6 +158,20 @@ namespace Tests
 	public partial class LtlTests : Tests
 	{
 		public LtlTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests(string directory)
+		{
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
+		}
+	}
+
+	public partial class ProbabilisticTests : Tests
+	{
+		public ProbabilisticTests(ITestOutputHelper output)
 			: base(output)
 		{
 		}

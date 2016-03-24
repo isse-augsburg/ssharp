@@ -25,6 +25,7 @@ namespace SafetySharp.Runtime
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
+	using Analysis;
 	using Modeling;
 	using Serialization;
 	using Utilities;
@@ -93,6 +94,7 @@ namespace SafetySharp.Runtime
 		{
 			// Reset the choice counter as each path starts from the beginning
 			_choiceIndex = -1;
+			Probability = Probability.One;
 
 			// If this is the first path of the state, we definitely have to enumerate it
 			if (_firstPath)
@@ -178,6 +180,11 @@ namespace SafetySharp.Runtime
 			_valueCount.Clear();
 			_choiceIndex = -1;
 		}
+		
+		/// <summary>
+		///	  The probability of the current path
+		/// </summary>
+		public SafetySharp.Analysis.Probability Probability = Probability.One;
 
 		/// <summary>
 		///   Gets the choices that were made to generate the last transitions.
