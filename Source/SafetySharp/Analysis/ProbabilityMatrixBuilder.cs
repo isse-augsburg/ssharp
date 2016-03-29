@@ -467,7 +467,7 @@ namespace SafetySharp.Analysis
 
 	internal class CompactProbabilityMatrix
 	{
-		//Note: We use index origin=1
+		//Note: We use index origin=0
 		public int States;
 		public List<TupleStateProbability> InitialStates=new List<TupleStateProbability>();
 		public List<FullTransition> Transitions = new List<FullTransition>();
@@ -506,7 +506,7 @@ namespace SafetySharp.Analysis
 				}
 				else
 				{
-					var compactId = ++compactProbabilityMatrix.States;
+					var compactId = compactProbabilityMatrix.States++;
 					sparseToCompact.Add(sparseId,compactId);
 					compactToSparse.Add(compactId,sparseId);
 					return compactId;
@@ -527,7 +527,7 @@ namespace SafetySharp.Analysis
 			}
 			
 			// Exception gets StateNumber MaxState+1
-			var exceptionState = ++compactProbabilityMatrix.States;
+			var exceptionState = compactProbabilityMatrix.States++;
 			// initial probability for an exception
 			compactProbabilityMatrix.InitialStates.Add(new TupleStateProbability(exceptionState, InitialExceptionProbability.Value));
 			// probability leading to an exception

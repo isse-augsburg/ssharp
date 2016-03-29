@@ -46,7 +46,8 @@
     <Compile Include="Analysis\AnalysisException.cs" />
     <Compile Include="Analysis\AnalysisResult.cs" />
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
-    <Compile Include="Analysis\Mrmc.cs" />
+    <Compile Include="Analysis\ProbabilisticModelChecker.cs" />
+    <Compile Include="Analysis\ProbabilityChecker.cs" />
     <Compile Include="Analysis\ProbabilityMatrixBuilder.cs" />
     <Compile Include="Analysis\Probability.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
