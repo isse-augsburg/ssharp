@@ -47,6 +47,15 @@
     <Compile Include="Analysis\AnalysisResult.cs" />
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
     <Compile Include="Analysis\ProbabilisticModelChecker.cs" />
+    <Compile Include="Analysis\ProbabilisticModelChecker.Prism.cs">
+		<DependentUpon>ProbabilisticModelChecker.cs</DependentUpon>
+	</Compile>	
+    <Compile Include="Analysis\ProbabilisticModelChecker.Mrmc.cs">
+		<DependentUpon>ProbabilisticModelChecker.cs</DependentUpon>
+	</Compile>
+    <Compile Include="Analysis\ProbabilisticModelChecker.Cadp.cs">
+		<DependentUpon>ProbabilisticModelChecker.cs</DependentUpon>
+	</Compile>
     <Compile Include="Analysis\ProbabilityChecker.cs" />
     <Compile Include="Analysis\ProbabilityMatrixBuilder.cs" />
     <Compile Include="Analysis\Probability.cs" />
@@ -172,6 +181,5 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
