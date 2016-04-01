@@ -38,4 +38,23 @@ namespace Tests.Analysis.Invariants.Violated
 			public int F;
 		}
 	}
+
+	internal class InitialState2 : AnalysisTestObject
+	{
+		protected override void Check()
+		{
+			var c = new C { F = 3 };
+			CheckInvariant(c.F != 3, c).ShouldBe(false);
+		}
+
+		private class C : Component
+		{
+			public int F;
+
+			public override void Update()
+			{
+				F = 4;
+			}
+		}
+	}
 }

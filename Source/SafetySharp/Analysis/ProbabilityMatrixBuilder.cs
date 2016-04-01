@@ -196,7 +196,7 @@ namespace SafetySharp.Analysis
 				ProbabilityMatrix = new SparseProbabilityMatrix()
 				{
 					//TODO-Probabilistic: Labels : new List<StateFormula>(),
-					OrdinaryTransitions = new List<FullTransition>(),
+					OrdinaryTransitionGroups = new Dictionary<int, List<TupleStateProbability>>(),
 					StatesLeadingToException = new List<TupleStateProbability>(),
 					//States = _context._states,
 					StateLabeling = new Dictionary<int, StateFormulaSet>(),
@@ -308,7 +308,7 @@ namespace SafetySharp.Analysis
 					else
 					{
 						// Add transition to probability matrix
-						ProbabilityMatrix.OrdinaryTransitions.Add(new FullTransition(sourceState.Value,index, transition->Probability));
+						ProbabilityMatrix.AddTransition(sourceState.Value,index, transition->Probability);
 					}
 
 					//TODO-Probabilistic: why adding again and again -> save in StateStorage and remove here
@@ -450,7 +450,7 @@ namespace SafetySharp.Analysis
 		public int State;
 		public Probability Probability;
 	}
-
+	/*
 	struct FullTransition
 	{
 		internal FullTransition(int sourceState, int targetState, Probability probability)
@@ -463,16 +463,34 @@ namespace SafetySharp.Analysis
 		public int SourceState;
 		public int TargetState;
 		public Probability Probability;
-	}
+	}*/
 
 	internal class CompactProbabilityMatrix
 	{
-		//Note: We use index origin=0
+		//Note: We use index origin=1
 		public int States;
 		public List<TupleStateProbability> InitialStates=new List<TupleStateProbability>();
-		public List<FullTransition> Transitions = new List<FullTransition>();
+		public Dictionary<int, List<TupleStateProbability>> TransitionGroups = new Dictionary<int, List<TupleStateProbability>>();
 		public int NoOfLabels=0;
+		public int NumberOfTransitions;
 		public Dictionary<int, StateFormulaSet> StateLabeling=new Dictionary<int, StateFormulaSet>();
+
+
+		public void AddTransition(int sourceState, int targetState, Probability probability)
+		{
+			List<TupleStateProbability> listOfState = null;
+			if (TransitionGroups.ContainsKey(sourceState))
+			{
+				listOfState = TransitionGroups[sourceState];
+			}
+			else
+			{
+				listOfState = new List<TupleStateProbability>();
+				TransitionGroups.Add(sourceState, listOfState);
+			}
+			NumberOfTransitions++;
+			listOfState.Add(new TupleStateProbability(targetState, probability));
+		}
 	}
 
 	internal class SparseProbabilityMatrix
@@ -482,16 +500,31 @@ namespace SafetySharp.Analysis
 
 		public List<TupleStateProbability> InitialStates;
 		public Probability? InitialExceptionProbability=null;
-		public List<FullTransition> OrdinaryTransitions;
+		public Dictionary<int,List<TupleStateProbability>> OrdinaryTransitionGroups;
 		public List<TupleStateProbability> StatesLeadingToException;
-		//public int? NumberOfStates;
-		//public StateStorage States;
+		//public int NumberOfStates;
+		public int NumberOfTransitions;
 		// TODO-Probabilistic: Exception gets StateNumber MaxState+1
 
 		//TODO-Probabilistic: why reevaluating again and again -> save in StateStorage and remove here
 		public int NoOfLabels;
 		public Dictionary<int,StateFormulaSet> StateLabeling;
 
+		public void AddTransition(int sourceState, int targetState, Probability probability)
+		{
+			List<TupleStateProbability> listOfState = null;
+			if (OrdinaryTransitionGroups.ContainsKey(sourceState))
+			{
+				listOfState = OrdinaryTransitionGroups[sourceState];
+			}
+			else
+			{
+				listOfState = new List<TupleStateProbability>();
+				OrdinaryTransitionGroups.Add(sourceState, listOfState);
+			}
+			NumberOfTransitions++;
+			listOfState.Add(new TupleStateProbability(targetState,probability));
+		}
 
 		public Tuple<Dictionary<int,int>,CompactProbabilityMatrix> DeriveCompactProbabilityMatrix()
 		{
@@ -506,7 +539,7 @@ namespace SafetySharp.Analysis
 				}
 				else
 				{
-					var compactId = compactProbabilityMatrix.States++;
+					var compactId = ++compactProbabilityMatrix.States;
 					sparseToCompact.Add(sparseId,compactId);
 					compactToSparse.Add(compactId,sparseId);
 					return compactId;
@@ -519,22 +552,31 @@ namespace SafetySharp.Analysis
 				compactProbabilityMatrix.InitialStates.Add(new TupleStateProbability(compactId, tupleSparseStateProbability.Probability));
 			}
 
-			foreach (var sparseTransition in OrdinaryTransitions)
+			// Faster: Convert it directly rather than using AddTransition
+			foreach (var sparseTransitionList in OrdinaryTransitionGroups)
 			{
-				var compactSourceId = CreateCompactId(sparseTransition.SourceState);
-				var compactTargetId = CreateCompactId(sparseTransition.TargetState);
-				compactProbabilityMatrix.Transitions.Add(new FullTransition(compactSourceId, compactTargetId, sparseTransition.Probability));
+				var compactSourceId = CreateCompactId(sparseTransitionList.Key);
+				var listOfTargetStates = new List<TupleStateProbability>(sparseTransitionList.Value.Count);
+				compactProbabilityMatrix.TransitionGroups.Add(compactSourceId,listOfTargetStates);
+				foreach (var transition in sparseTransitionList.Value)
+				{
+					var compactTargetId = CreateCompactId(transition.State);
+					listOfTargetStates.Add(new TupleStateProbability(compactTargetId, transition.Probability));
+				}
 			}
-			
+			compactProbabilityMatrix.NumberOfTransitions = NumberOfTransitions;
+
+
 			// Exception gets StateNumber MaxState+1
-			var exceptionState = compactProbabilityMatrix.States++;
+			var exceptionState = ++compactProbabilityMatrix.States;
 			// initial probability for an exception
 			compactProbabilityMatrix.InitialStates.Add(new TupleStateProbability(exceptionState, InitialExceptionProbability.Value));
 			// probability leading to an exception
 			foreach (var tupleSparseStateProbability in StatesLeadingToException)
 			{
+				// targetState is state of exception
 				var compactSourceId = CreateCompactId(tupleSparseStateProbability.State);
-				compactProbabilityMatrix.Transitions.Add(new FullTransition(compactSourceId, exceptionState, tupleSparseStateProbability.Probability));
+				compactProbabilityMatrix.AddTransition(compactSourceId, exceptionState, tupleSparseStateProbability.Probability);
 			}
 
 			foreach (var stateFormulaSet in StateLabeling)
@@ -544,6 +586,15 @@ namespace SafetySharp.Analysis
 			}
 			compactProbabilityMatrix.NoOfLabels = NoOfLabels;
 			// TODO: Add label for exception
+			// todo: remove hack
+			Func<bool> returnFalse = () => false;
+			var allFalseStateFormulaSet = new Func<bool>[NoOfLabels];
+			for (int i = 0; i < NoOfLabels; i++)
+			{
+				allFalseStateFormulaSet[i] = returnFalse;
+			}
+			compactProbabilityMatrix.AddTransition(exceptionState, exceptionState, Probability.One);
+			compactProbabilityMatrix.StateLabeling.Add(exceptionState,new StateFormulaSet(allFalseStateFormulaSet));
 
 
 			// return result

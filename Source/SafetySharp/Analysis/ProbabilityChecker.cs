@@ -84,7 +84,15 @@ namespace SafetySharp.Analysis
 		{
 			Requires.NotNull(model, nameof(model));
 			_model = model;
-			DefaultChecker = new Mrmc(this);
+		}
+
+		private Probability CheckWithDefaultChecker(Formula formulaToCheck)
+		{
+			if (DefaultChecker == null)
+			{
+				DefaultChecker = new Mrmc(this);
+			}
+			return DefaultChecker.ExecuteCalculation(formulaToCheck);
 		}
 
 		public void CreateProbabilityMatrix()
@@ -105,30 +113,26 @@ namespace SafetySharp.Analysis
 			{
 				var initializationTime = stopwatch.Elapsed;
 				stopwatch.Restart();
+				
+				var sparseProbabilityMatrix = checker.CreateProbabilityMatrix();
+				var derivedProbabilityMatrix = sparseProbabilityMatrix.DeriveCompactProbabilityMatrix();
+				//var compactToSparse = CompactProbabilityMatrix = derivedProbabilityMatrix.Item1;
+				CompactProbabilityMatrix = derivedProbabilityMatrix.Item2;
+				var creationTime = stopwatch.Elapsed;
+				stopwatch.Stop();
 
-				try
+				if (true) //Configuration.ProgressReportsOnly
 				{
-					var sparseProbabilityMatrix = checker.CreateProbabilityMatrix();
-					var derivedProbabilityMatrix = sparseProbabilityMatrix.DeriveCompactProbabilityMatrix();
-					//var compactToSparse = CompactProbabilityMatrix = derivedProbabilityMatrix.Item1;
-					CompactProbabilityMatrix = derivedProbabilityMatrix.Item2;
-				}
-				finally
-				{
-					var creationTime = stopwatch.Elapsed;
-					stopwatch.Stop();
-
-					if (true) //Configuration.ProgressReportsOnly
-					{
-						OutputWritten?.Invoke(String.Empty);
-						OutputWritten?.Invoke("===============================================");
-						OutputWritten?.Invoke($"Initialization time: {initializationTime}");
-						OutputWritten?.Invoke($"Probability matrix creation time: {creationTime}");
-						//OutputWritten?.Invoke($"{(int)(_probabilityMatrix.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
-						//OutputWritten?.Invoke($"{(int)(_probabilityMatrix.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
-						OutputWritten?.Invoke("===============================================");
-						OutputWritten?.Invoke(String.Empty);
-					}
+					OutputWritten?.Invoke(String.Empty);
+					OutputWritten?.Invoke("===============================================");
+					OutputWritten?.Invoke($"Initialization time: {initializationTime}");
+					OutputWritten?.Invoke($"Probability matrix creation time: {creationTime}");
+					OutputWritten?.Invoke($"States: {CompactProbabilityMatrix.States}");
+					OutputWritten?.Invoke($"Transitions: {CompactProbabilityMatrix.NumberOfTransitions}");
+					OutputWritten?.Invoke($"{(int)(CompactProbabilityMatrix.States / stopwatch.Elapsed.TotalSeconds):n0} states per second");
+					OutputWritten?.Invoke($"{(int)(CompactProbabilityMatrix.NumberOfTransitions / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+					OutputWritten?.Invoke("===============================================");
+					OutputWritten?.Invoke(String.Empty);
 				}
 			}
 
@@ -161,7 +165,7 @@ namespace SafetySharp.Analysis
 
 			var formulaToCheck = formulaValidInRequestedStates;
 
-			Func<Probability> checkWithDefaultChecker = () => DefaultChecker.ExecuteCalculation(formulaToCheck);
+			Func<Probability> checkWithDefaultChecker = () => CheckWithDefaultChecker(formulaToCheck);
 			Func<ProbabilisticModelChecker,Probability> checkWithChecker = customChecker => customChecker.ExecuteCalculation(formulaToCheck);
 
 			var checker = new FormulaChecker(checkWithDefaultChecker, checkWithChecker);
