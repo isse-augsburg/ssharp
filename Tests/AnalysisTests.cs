@@ -73,10 +73,10 @@ namespace Tests
 
 	public partial class ProbabilisticTests
 	{
-		[Theory, MemberData("DiscoverTests", "Analysis/Probabilistic")]
-		public void Probabilistic(string test, string file)
+		[Theory, MemberData("AllProbabilisticModelCheckerTests", "Analysis/Probabilistic")]
+		public void Probabilistic(Type modelCheckerType, string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(LtsMin));
+			ExecuteDynamicTests(file, modelCheckerType);
 		}
 	}
 }

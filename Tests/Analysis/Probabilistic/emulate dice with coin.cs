@@ -22,10 +22,13 @@
 
 namespace Tests.Analysis.Probabilistic
 {
+	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
+
+	// Knuth's die. Described e.g. on http://wwwhome.cs.utwente.nl/~timmer/scoop/casestudies/knuth/knuth.html
 
 	internal class EmulateDiceWithCoin : ProbabilisticAnalysisTestObject
 	{
@@ -52,11 +55,16 @@ namespace Tests.Analysis.Probabilistic
 			var c = new C();
 			Probability probabilityOfFinal1;
 
-			using (var modelChecker = new Mrmc(TestModel.New(c)))
+			using (var probabilityChecker = new ProbabilityChecker(TestModel.New(c)))
 			{
-				var checkProbabilityOf1 = modelChecker.CalculateProbabilityToReachStates(c.IsInStateFinal1());
-				modelChecker.CreateProbabilityMatrix();
-				probabilityOfFinal1 = checkProbabilityOf1();
+				var typeOfModelChecker = (Type)Arguments[0];
+				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker,probabilityChecker);
+
+				var checkProbabilityOf1 = probabilityChecker.CalculateProbabilityToReachStates(c.IsInStateFinal1());
+				probabilityChecker.CreateProbabilityMatrix();
+				probabilityChecker.DefaultChecker = modelChecker;
+				probabilityOfFinal1 = checkProbabilityOf1.Check();
+				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);
 			}
 
 			probabilityOfFinal1.Between(0.1, 0.2).ShouldBe(true);
@@ -70,7 +78,7 @@ namespace Tests.Analysis.Probabilistic
 			}
 
 			public readonly StateMachine<S> StateMachine = new StateMachine<S>(S.InitialThrow);
-			
+
 			public override void Update()
 			{
 				StateMachine.Transition(

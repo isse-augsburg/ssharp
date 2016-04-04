@@ -177,9 +177,16 @@ namespace Tests
 		}
 
 		[UsedImplicitly]
-		public static IEnumerable<object[]> DiscoverTests(string directory)
+		public static IEnumerable<object[]> AllProbabilisticModelCheckerTests(string directory)
 		{
-			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
+			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
+				yield return new object[] { typeof(Mrmc) }.Concat(testCase).ToArray();
+
+			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
+				yield return new object[] { typeof(Prism) }.Concat(testCase).ToArray();
+
+			//foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
+			//	yield return new object[] { typeof(Cadp) }.Concat(testCase).ToArray();
 		}
 	}
 }
