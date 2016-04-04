@@ -28,30 +28,21 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.Analysis
 {
+	using System.Globalization;
 	using System.IO;
 	using Utilities;
 
 	public class Prism : ProbabilisticModelChecker
 	{
-		// There are two simple ways to transform the state space into a pm file.
-		// 1.) Add variables for each state label. Initial "active" labels
-		//     depend on the initial states. Every time we enter a state, we
-		//     set the state label, accordingly. Only reachable states are in the state space.
-		//     State vector is quite big.
-		// 2.) Add for every label a big formula which is defined as big OR above all
-		//     states where the label is true. Formula might get big. Might be
-		//     inefficient for Prism to evaluate the formula in each state
-		// Currently, we use transformation 1 as it seems the better way. Don't really know which
-		// transformation performs better. A third possibility is to use the computation
-		// engines of Prism directly
-		//  -> http://www.prismmodelchecker.org/manual/ConfiguringPRISM/ComputationEngines
-
-		private TemporaryFile _filePrism;
-
 		public Prism(ProbabilityChecker probabilityChecker) : base(probabilityChecker)
 		{
 		}
 
+		/************************************************/
+		/*            OUTPUT PARSER                     */
+		/************************************************/
+
+		private readonly string _textDelimiter = @"---------------------------------------------------------------------";
 		private readonly System.Text.RegularExpressions.Regex _parserFormula = new System.Text.RegularExpressions.Regex(@"Model checking: (?<formula>.*)");
 		private readonly System.Text.RegularExpressions.Regex _parserConstants = new System.Text.RegularExpressions.Regex(@"Property constants: (?<constants>.*)");
 		private readonly System.Text.RegularExpressions.Regex _parserProb0 = new System.Text.RegularExpressions.Regex(@"Prob0: (?<prob0>.*)");
@@ -64,7 +55,7 @@ namespace SafetySharp.Analysis
 		private readonly System.Text.RegularExpressions.Regex _parserSatisfyingSatisfiedInInitialStates = new System.Text.RegularExpressions.Regex(@"Property satisfied in (?<satisfyingInitialStates>.*) of(?<initialStates>.*) initial states[.]");
 		private readonly System.Text.RegularExpressions.Regex _parserSatisfyingValueInInitialState = new System.Text.RegularExpressions.Regex(@"Value in the initial state: (?<valueInInitialState>.*)");
 		private readonly System.Text.RegularExpressions.Regex _parserTimeMc = new System.Text.RegularExpressions.Regex(@"Time for model checking: (?<timeMc>.*)[.]");
-		private readonly System.Text.RegularExpressions.Regex _parserResult = new System.Text.RegularExpressions.Regex(@"Result: (?<result>.+?) \(.*\k<nl>");
+		private readonly System.Text.RegularExpressions.Regex _parserResult = new System.Text.RegularExpressions.Regex(@"Result: (?<result>.+?)");
 
 		private class PrismResult
 		{
@@ -81,7 +72,7 @@ namespace SafetySharp.Analysis
 
 		private class PrismResultQuantitative : PrismResult
 		{
-			public string Result;
+			public double Result;
 		}
 
 		private class PrismOutput
@@ -100,168 +91,138 @@ namespace SafetySharp.Analysis
 			public PrismResult Result;
 		}
 
-		private PrismOutput ParseResult(string input)
+		private PrismOutput ParseOutput(List<string> inputLines)
 		{
-			var inputLines = input.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+			//var inputLines = input.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 			var enumerator = ((IEnumerable<string>) inputLines).GetEnumerator();
-			var emptyLineReached = false;
+			System.Text.RegularExpressions.Match match = null;
 
-			// Parse empty line
-			enumerator.MoveNext();
-			if (string.IsNullOrEmpty(enumerator.Current))
+			string peekedValue = null;
+
+			Func<System.Text.RegularExpressions.Regex, StringBuilder, bool> parseUntilExcludingRegex =
+				(pattern, stringBuilder) =>
+				{
+					while (enumerator.MoveNext())
+					{
+						peekedValue = enumerator.Current;
+						match = pattern.Match(peekedValue);
+						if (match.Success)
+							return true;
+						stringBuilder?.AppendLine(enumerator.Current);
+					}
+					return false;
+				};
+			Func<System.Text.RegularExpressions.Regex, StringBuilder, bool> parseUntilIncludingRegex =
+				(pattern,stringBuilder) =>
+				{
+					if (peekedValue != null)
+					{
+						// first consume peekedValue
+						match = pattern.Match(peekedValue);
+						if (match.Success)
+							return true;
+						stringBuilder?.AppendLine(peekedValue);
+						peekedValue = null;
+					}
+					while (enumerator.MoveNext())
+					{
+						match = pattern.Match(enumerator.Current);
+						if (match.Success)
+							return true;
+						stringBuilder?.AppendLine(enumerator.Current);
+					}
+					return false;
+				};
+			Func<string, StringBuilder, bool> parseUntilIncludingString =
+				(pattern, stringBuilder) =>
+				{
+					if (peekedValue != null)
+					{
+						// first consume peekedValue
+						if (string.Equals(peekedValue, pattern))
+							return true;
+						stringBuilder?.AppendLine(peekedValue);
+						peekedValue = null;
+					}
+					while (enumerator.MoveNext())
+					{
+						if (string.Equals(enumerator.Current, pattern))
+							return true;
+						stringBuilder?.AppendLine(enumerator.Current);
+					}
+					return false;
+				};
+			
+			// Parse until delimiter
+			if (!parseUntilIncludingString(_textDelimiter,null))
 				return null;
 
 			// Parse "Model checking: /formula/"
-			enumerator.MoveNext();
-			var formulaMatch = _parserFormula.Match(enumerator.Current);
-			if (!formulaMatch.Success)
+			if (!parseUntilIncludingRegex(_parserFormula, null))
 				return null;
-			var formula = formulaMatch.Groups["formula"].Value;
-
-			// Parse empty line
-			enumerator.MoveNext();
-			if (string.IsNullOrEmpty(enumerator.Current))
-				return null;
+			var formula = match.Groups["formula"].Value;
 
 			// Parse "Prob0: : /prob0/"
-			enumerator.MoveNext();
-			var prob0Match = _parserProb0.Match(enumerator.Current);
-			if (!formulaMatch.Success)
+			if (!parseUntilIncludingRegex(_parserProb0, null))
 				return null;
-			var prob0 = formulaMatch.Groups["prob0"].Value;
-			
-			// Parse empty line
-			enumerator.MoveNext();
-			if (string.IsNullOrEmpty(enumerator.Current))
-				return null;
+			var prob0 = match.Groups["prob0"].Value;
 
 			// Parse "Prob1: : /prob1/"
-			enumerator.MoveNext();
-			var prob1Match = _parserProb1.Match(enumerator.Current);
-			if (!formulaMatch.Success)
+			if (!parseUntilIncludingRegex(_parserProb1, null))
 				return null;
-			var prob1 = formulaMatch.Groups["prob1"].Value;
-			
-			// Parse empty line
-			enumerator.MoveNext();
-			if (string.IsNullOrEmpty(enumerator.Current))
-				return null;
+			var prob1 = match.Groups["prob1"].Value;
 
 			// Parse "yes = /yes/, no = /no/, maybe = /maybe/"
-			enumerator.MoveNext();
-			var yesNoMaybeMatch = _parserYesNoMaybe.Match(enumerator.Current);
-			if (!formulaMatch.Success)
+			if (!parseUntilIncludingRegex(_parserYesNoMaybe, null))
 				return null;
-			var yes = formulaMatch.Groups["yes"].Value;
-			var no = formulaMatch.Groups["no"].Value;
-			var maybe = formulaMatch.Groups["maybe"].Value;
-
-			// Parse empty line
-			enumerator.MoveNext();
-			if (string.IsNullOrEmpty(enumerator.Current))
-				return null;
+			var yes = match.Groups["yes"].Value;
+			var no = match.Groups["no"].Value;
+			var maybe = match.Groups["maybe"].Value;
 
 			// Parse "Computing remaining probabilities..."
-			enumerator.MoveNext();
-			if (!string.Equals(enumerator.Current, _textRemainingProbabilities))
+			if (!parseUntilIncludingString(_textRemainingProbabilities, null))
 				return null;
 
 			// Parse "Engine: : /engine/"
-			enumerator.MoveNext();
-			var engineMatch = _parserEngine.Match(enumerator.Current);
-			if (!engineMatch.Success)
+			if (!parseUntilIncludingRegex(_parserEngine, null))
 				return null;
-			var engine = formulaMatch.Groups["engine"].Value;
+			var engine = match.Groups["engine"].Value;
 
-			// Parse empty line
-			enumerator.MoveNext();
-			if (string.IsNullOrEmpty(enumerator.Current))
-				return null;
-
-			// Parse engineStats until empty line (which is also parsed)
+			// Parse engineStats until including "Starting iterations..."
 			var engineStatsStringBuilder = new StringBuilder();
-			emptyLineReached = false;
-			while (!emptyLineReached)
-			{
-				enumerator.MoveNext();
-				if (string.IsNullOrEmpty(enumerator.Current))
-				{
-					emptyLineReached = true;
-				}
-				else
-				{
-					engineStatsStringBuilder.AppendLine(enumerator.Current);
-				}
-			}
+			if (!parseUntilIncludingString(_textStartingIterations, engineStatsStringBuilder))
+				return null;
 			var enginestats = engineStatsStringBuilder.ToString();
 
-			// Parse "Starting iterations..."
-			enumerator.MoveNext();
-			if (!string.Equals(enumerator.Current, _textStartingIterations))
-				return null;
 
-			// Parse empty line
-			enumerator.MoveNext();
-			if (string.IsNullOrEmpty(enumerator.Current))
-				return null;
-
-
-			// Parse iterations until empty line (which is also parsed)
+			// Parse iterations until excluding _parserSatisfyingValueInInitialState
 			var iterationsStringBuilder = new StringBuilder();
-			emptyLineReached = false;
-			while (!emptyLineReached)
-			{
-				enumerator.MoveNext();
-				if (string.IsNullOrEmpty(enumerator.Current))
-				{
-					emptyLineReached = true;
-				}
-				else
-				{
-					iterationsStringBuilder.AppendLine(enumerator.Current);
-				}
-			}
+			if (!parseUntilExcludingRegex(_parserSatisfyingValueInInitialState, iterationsStringBuilder))
+				return null;
 			var iterations = iterationsStringBuilder.ToString();
-
-
+			
 
 			// Now here is a split. Either the Quantitative Value was calculated or the qualitative.
-			enumerator.MoveNext();
+			// TODO: implement qualitative
+			//branch quantitative
 			PrismResult result = null;
-			if (_parserSatisfyingValueInInitialState.Match(enumerator.Current).Success)
+			if (!parseUntilIncludingRegex(_parserSatisfyingValueInInitialState, null))
+				return null;
+			var valueInInitialState = match.Groups["valueInInitialState"].Value;
+			result = new PrismResultQuantitative()
 			{
-				//branch quantitative
-				var valueInInitialStateMatch = _parserSatisfyingValueInInitialState.Match(enumerator.Current);
-				var valueInInitialState = valueInInitialStateMatch.Groups["valueInInitialState"].Value;
-				result = new PrismResultQuantitative()
-				{
-					Result = valueInInitialState
-				};
-			}
-			else
-			{
-				//branch qualitative
-				throw new NotImplementedException();
-			}
+				Result = double.Parse(valueInInitialState, CultureInfo.InvariantCulture)
+			};
 
 			// Parse "Time for model checking: /timeMc/"
-			enumerator.MoveNext();
-			var timeMcMatch = _parserTimeMc.Match(enumerator.Current);
-			if (!timeMcMatch.Success)
+			if (!parseUntilIncludingRegex(_parserTimeMc, null))
 				return null;
-			var timeMc = formulaMatch.Groups["timeMc"].Value;
-
-			// Parse empty line
-			enumerator.MoveNext();
-			if (string.IsNullOrEmpty(enumerator.Current))
-				return null;
+			var timeMc = match.Groups["timeMc"].Value;
 
 			// Parse "Result: /engine/ ..."
-			enumerator.MoveNext();
-			var resultMatch = _parserResult.Match(enumerator.Current);
-			if (!resultMatch.Success)
+			if (!parseUntilIncludingRegex(_parserResult, null))
 				return null;
-			//var resultString = formulaMatch.Groups["result"].Value;
+			var resultString = match.Groups["result"].Value;
 			
 			
 			return new PrismOutput()
@@ -280,6 +241,26 @@ namespace SafetySharp.Analysis
 				Result = result,
 			};
 		}
+
+		/************************************************/
+		/*         PRISM MODEL WRITER                   */
+		/************************************************/
+
+		// There are two simple ways to transform the state space into a pm file.
+		// 1.) Add variables for each state label. Initial "active" labels
+		//     depend on the initial states. Every time we enter a state, we
+		//     set the state label, accordingly. Only reachable states are in the state space.
+		//     State vector is quite big.
+		// 2.) Add for every label a big formula which is defined as big OR above all
+		//     states where the label is true. Formula might get big. Might be
+		//     inefficient for Prism to evaluate the formula in each state
+		// Currently, we use transformation 1 as it seems the better way. Don't really know which
+		// transformation performs better. A third possibility is to use the computation
+		// engines of Prism directly
+		//  -> http://www.prismmodelchecker.org/manual/ConfiguringPRISM/ComputationEngines
+
+		private TemporaryFile _filePrism;
+
 
 		private void WriteCommandSourcePart(StreamWriter writer, int sourceState)
 		{
@@ -360,19 +341,94 @@ namespace SafetySharp.Analysis
 			streamPrism.Close();
 		}
 
+		/************************************************/
+		/*         PRISM EXECUTION                      */
+		/************************************************/
+
+		private readonly List<string> _prismProcessOutput = new List<string>();
+
 		internal override Probability ExecuteCalculation(Formula formulaToCheck)
 		{
 			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
 			WriteProbabilityMatrixToDisk();
+			
+			using (var fileProperties = new TemporaryFile("props"))
+			{
+				var formulaToCheckString = "P=? [ F formula0=true ]";
+				File.WriteAllText(fileProperties.FilePath, formulaToCheckString);
 
-			throw new NotImplementedException();
+				var prismArguments = _filePrism.FilePath + " " + fileProperties.FilePath;
+
+				var prism = ExecutePrism(prismArguments);
+				prism.Run();
+
+				var result = ParseOutput(_prismProcessOutput);
+				var quantitativeResult = (PrismResultQuantitative)result.Result;
+				
+				return new Probability(quantitativeResult.Result);
+			}
 		}
 
 		private string FindJava()
 		{
 			var javaCandidate = "C:\\ProgramData\\Oracle\\Java\\javapath\\java.exe";
+			if (!System.IO.File.Exists(javaCandidate))
+				throw new Exception("Please install the JAVA runtime");
 			return javaCandidate;
 		}
+
+		private string FindPrism()
+		{
+			var path = System.Environment.GetEnvironmentVariable("PRISM_DIR");
+			if (path==null)
+				throw new Exception("Set the environmental variable PRISM_DIR to the PRISM top level directory. You can download PRISM from http://www.prismmodelchecker.org/");
+			var pathOfBin = System.IO.Path.Combine(path, "bin", "prism.bat");
+			if (!System.IO.File.Exists(pathOfBin))
+				throw new Exception("Environmental variable PRISM_DIR should point to the PRISM top level directory. You can download PRISM from http://www.prismmodelchecker.org/");
+			return path;
+		}
+
+		private void CheckPrismVersion(string pathToJavaExe,string pathToPrism)
+		{
+			var javaMachineCode = ExternalProcess.GetDllMachineType(pathToJavaExe);
+			var fileNameToPrismDll = System.IO.Path.Combine(pathToPrism, "lib", "prism.dll");
+			var prismMachineCode = ExternalProcess.GetDllMachineType(fileNameToPrismDll);
+			if (javaMachineCode != prismMachineCode)
+			{
+				throw new Exception("JAVA VM and PRISM version are not compiled for the same architecture.");
+			}
+		}
+
+		private void AddPrismLibToPath(string pathToPrism)
+		{
+			var prismLibDir = System.IO.Path.Combine(pathToPrism, "lib");
+			var dirsInPath = System.Environment.GetEnvironmentVariable("PATH").Split(';');
+			var prismIsInPath = Array.Exists(dirsInPath,elem => elem==prismLibDir);
+			if (!prismIsInPath)
+			{
+				// Add libdir to PATH
+				// http://stackoverflow.com/questions/2998343/adding-a-directory-temporarily-to-windows-7s-dll-search-paths
+				System.Environment.SetEnvironmentVariable("PATH", System.Environment.GetEnvironmentVariable("PATH") + ";" + prismLibDir);
+			}
+		}
+
+		private ExternalProcess ExecutePrism(string prismArguments)
+		{
+			var javaExe = FindJava();
+			var prismDir = FindPrism();
+			CheckPrismVersion(javaExe, prismDir);
+			AddPrismLibToPath(prismDir);
+
+			var classpath = string.Format(@"{0}\lib\prism.jar;{0}\classes;{0};{0}\lib\pepa.zip;{0}\lib\*", prismDir);
+
+			var argument = $"-Djava.library.path=\"{prismDir}\\lib\" -classpath \"{classpath}\" prism.PrismCL {prismArguments}";
+
+			Action<ExternalProcess.Output> addToOutput = (output) => _prismProcessOutput.Add(output.Message);
+
+			var process = new ExternalProcess(javaExe,argument, addToOutput);
+			return process;
+		}
+		
 
 		/// <summary>
 		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
