@@ -436,7 +436,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		public SafetySharp.Analysis.Probability GetProbability()
 		{
-			return _choiceResolver.Probability;
+			return _choiceResolver.CalculateProbabilityOfPath();
 		}
 
 		/// <summary>

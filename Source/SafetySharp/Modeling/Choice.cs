@@ -116,7 +116,6 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2)
 		{
-			Resolver.Probability /= 2;
 			switch (Resolver.HandleChoice(2))
 			{
 				case 0:
@@ -136,7 +135,6 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3)
 		{
-			Resolver.Probability /= 3;
 			switch (Resolver.HandleChoice(3))
 			{
 				case 0:
@@ -160,7 +158,6 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3, T value4)
 		{
-			Resolver.Probability /= 4;
 			switch (Resolver.HandleChoice(4))
 			{
 				case 0:
@@ -187,7 +184,6 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3, T value4, T value5)
 		{
-			Resolver.Probability /= 5;
 			switch (Resolver.HandleChoice(5))
 			{
 				case 0:
@@ -217,7 +213,6 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(T value1, T value2, T value3, T value4, T value5, T value6)
 		{
-			Resolver.Probability /= 6;
 			switch (Resolver.HandleChoice(6))
 			{
 				case 0:
@@ -242,7 +237,6 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(params T[] values)
 		{
-			Resolver.Probability /= values.Length;
 			return values[Resolver.HandleChoice(values.Length)];
 		}
 
@@ -254,7 +248,7 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(Option< T> value)
 		{
-			Resolver.Probability *= value.Probability;
+			Resolver.SetProbabilityOfLastChoice(value.Probability);
 			return value.Result;
 		}
 
@@ -270,10 +264,10 @@ namespace SafetySharp.Modeling
 			switch (Resolver.HandleChoice(2))
 			{
 				case 0:
-					Resolver.Probability *= value1.Probability;
+					Resolver.SetProbabilityOfLastChoice(value1.Probability);
 					return value1.Result;
 				default:
-					Resolver.Probability *= value2.Probability;
+					Resolver.SetProbabilityOfLastChoice(value2.Probability);
 					return value2.Result;
 			}
 		}
@@ -291,13 +285,13 @@ namespace SafetySharp.Modeling
 			switch (Resolver.HandleChoice(3))
 			{
 				case 0:
-					Resolver.Probability *= value1.Probability;
+					Resolver.SetProbabilityOfLastChoice(value1.Probability);
 					return value1.Result;
 				case 1:
-					Resolver.Probability *= value2.Probability;
+					Resolver.SetProbabilityOfLastChoice(value2.Probability);
 					return value2.Result;
 				default:
-					Resolver.Probability *= value3.Probability;
+					Resolver.SetProbabilityOfLastChoice(value3.Probability);
 					return value3.Result;
 			}
 		}
@@ -317,16 +311,16 @@ namespace SafetySharp.Modeling
 			switch (Resolver.HandleChoice(4))
 			{
 				case 0:
-					Resolver.Probability *= value1.Probability;
+					Resolver.SetProbabilityOfLastChoice(value1.Probability);
 					return value1.Result;
 				case 1:
-					Resolver.Probability *= value2.Probability;
+					Resolver.SetProbabilityOfLastChoice(value2.Probability);
 					return value2.Result;
 				case 2:
-					Resolver.Probability *= value3.Probability;
+					Resolver.SetProbabilityOfLastChoice(value3.Probability);
 					return value3.Result;
 				default:
-					Resolver.Probability *= value4.Probability;
+					Resolver.SetProbabilityOfLastChoice(value4.Probability);
 					return value4.Result;
 			}
 		}
@@ -347,19 +341,19 @@ namespace SafetySharp.Modeling
 			switch (Resolver.HandleChoice(5))
 			{
 				case 0:
-					Resolver.Probability *= value1.Probability;
+					Resolver.SetProbabilityOfLastChoice(value1.Probability);
 					return value1.Result;
 				case 1:
-					Resolver.Probability *= value2.Probability;
+					Resolver.SetProbabilityOfLastChoice(value2.Probability);
 					return value2.Result;
 				case 2:
-					Resolver.Probability *= value3.Probability;
+					Resolver.SetProbabilityOfLastChoice(value3.Probability);
 					return value3.Result;
 				case 3:
-					Resolver.Probability *= value4.Probability;
+					Resolver.SetProbabilityOfLastChoice(value4.Probability);
 					return value4.Result;
 				default:
-					Resolver.Probability *= value5.Probability;
+					Resolver.SetProbabilityOfLastChoice(value5.Probability);
 					return value5.Result;
 			}
 		}
@@ -381,22 +375,22 @@ namespace SafetySharp.Modeling
 			switch (Resolver.HandleChoice(6))
 			{
 				case 0:
-					Resolver.Probability *= value1.Probability;
+					Resolver.SetProbabilityOfLastChoice(value1.Probability);
 					return value1.Result;
 				case 1:
-					Resolver.Probability *= value2.Probability;
+					Resolver.SetProbabilityOfLastChoice(value2.Probability);
 					return value2.Result;
 				case 2:
-					Resolver.Probability *= value3.Probability;
+					Resolver.SetProbabilityOfLastChoice(value3.Probability);
 					return value3.Result;
 				case 3:
-					Resolver.Probability *= value4.Probability;
+					Resolver.SetProbabilityOfLastChoice(value4.Probability);
 					return value4.Result;
 				case 4:
-					Resolver.Probability *= value5.Probability;
+					Resolver.SetProbabilityOfLastChoice(value5.Probability);
 					return value5.Result;
 				default:
-					Resolver.Probability *= value6.Probability;
+					Resolver.SetProbabilityOfLastChoice(value6.Probability);
 					return value6.Result;
 			}
 		}
@@ -409,7 +403,7 @@ namespace SafetySharp.Modeling
 		public T Choose<T>(params Option< T>[] values)
 		{
 			var chosen = Resolver.HandleChoice(values.Length);
-			Resolver.Probability *= values[chosen].Probability;
+			Resolver.SetProbabilityOfLastChoice(values[chosen].Probability);
 			return values[chosen].Result;
 		}
 

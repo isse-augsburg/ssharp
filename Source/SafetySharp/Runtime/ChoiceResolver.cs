@@ -47,10 +47,14 @@ namespace SafetySharp.Runtime
 		private readonly ChoiceStack _chosenValues = new ChoiceStack(InitialCapacity);
 
 		/// <summary>
+		/// </summary>
+		private readonly ProbabilityStack _probabilitiesOfChosenValues = new ProbabilityStack(InitialCapacity);
+
+		/// <summary>
 		///   The stack that stores the number of possible values of all encountered choices along the current path.
 		/// </summary>
 		private readonly ChoiceStack _valueCount = new ChoiceStack(InitialCapacity);
-
+		
 		/// <summary>
 		///   The number of choices that have been encountered for the current path.
 		/// </summary>
@@ -94,7 +98,6 @@ namespace SafetySharp.Runtime
 		{
 			// Reset the choice counter as each path starts from the beginning
 			_choiceIndex = -1;
-			Probability = Probability.One;
 
 			// If this is the first path of the state, we definitely have to enumerate it
 			if (_firstPath)
@@ -134,14 +137,36 @@ namespace SafetySharp.Runtime
 			++_choiceIndex;
 
 			// If we have a preselected value that we should choose for the current path, return it
-			if (_choiceIndex < _chosenValues.Count)
+			var chosenValuesMaxIndex = _chosenValues.Count - 1;
+			if (_choiceIndex <= chosenValuesMaxIndex)
 				return _chosenValues[_choiceIndex];
 
 			// We haven't encountered this choice before; store the value count and return the first value
 			_valueCount.Push(valueCount);
 			_chosenValues.Push(0);
+			_probabilitiesOfChosenValues.Push(Probability.One/valueCount); //placeholder value
 
 			return 0;
+		}
+
+
+		/// <summary>
+		/// </summary>
+		/// <param name="valueCount">The number of values that can be chosen.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void SetProbabilityOfLastChoice(Probability probability)
+		{
+			var probabilitiesOfChosenValuesMaxIndex = _probabilitiesOfChosenValues.Count - 1;
+			// If this part of the path has previously been visited we do not change the value
+			// because this value has already been set by a previous call of SetProbabilityOfLastChoice.
+			// Further, this value might have been overridden by an Undo. Only if we explore
+			// a new part of the path the probability should be written.
+			// A new part of the path is explored, iff the previous HandleChoice pushed a new placeholder
+			// value onto the three stacks).
+			if (_choiceIndex == probabilitiesOfChosenValuesMaxIndex)
+			{
+				_probabilitiesOfChosenValues[_choiceIndex] = probability;
+			}
 		}
 
 		/// <summary>
@@ -154,6 +179,7 @@ namespace SafetySharp.Runtime
 			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
 			// turning the choice into a deterministic selection of the value at index 0
 			_valueCount[choiceIndex] = 0;
+			_probabilitiesOfChosenValues[choiceIndex] = Probability.One;
 		}
 
 		/// <summary>
@@ -177,14 +203,19 @@ namespace SafetySharp.Runtime
 		internal void Clear()
 		{
 			_chosenValues.Clear();
+			_probabilitiesOfChosenValues.Clear();
 			_valueCount.Clear();
 			_choiceIndex = -1;
 		}
-		
+
 		/// <summary>
 		///	  The probability of the current path
 		/// </summary>
-		public SafetySharp.Analysis.Probability Probability = Probability.One;
+		internal Probability CalculateProbabilityOfPath()
+		{
+			var probability = Probability.One;
+			return probability;
+		}
 
 		/// <summary>
 		///   Gets the choices that were made to generate the last transitions.
@@ -205,6 +236,7 @@ namespace SafetySharp.Runtime
 				return;
 
 			_chosenValues.SafeDispose();
+			_probabilitiesOfChosenValues.SafeDispose();
 			_valueCount.SafeDispose();
 		}
 	}

@@ -29,7 +29,7 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Represents a stack that uses a <see cref="MemoryBuffer" /> for its underlying storage.
 	/// </summary>
-	internal sealed unsafe class ChoiceStack : DisposableObject
+	internal sealed unsafe class ProbabilityStack : DisposableObject
 	{
 		/// <summary>
 		///   The underlying memory of the stack.
@@ -39,16 +39,16 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   The pointer to the stack's memory.
 		/// </summary>
-		private int* _buffer;
+		private Probability* _buffer;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="initialCapacity">The initial capacity of the stack.</param>
-		public ChoiceStack(int initialCapacity)
+		public ProbabilityStack(int initialCapacity)
 		{
-			_memoryBuffer.Resize(initialCapacity * sizeof(int), zeroMemory: true);
-			_buffer = (int*)_memoryBuffer.Pointer;
+			_memoryBuffer.Resize(initialCapacity * sizeof(Probability), zeroMemory: true);
+			_buffer = (Probability*)_memoryBuffer.Pointer;
 		}
 
 		/// <summary>
@@ -59,7 +59,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the element at <paramref name="index" /> from the stack.
 		/// </summary>
-		public int this[int index]
+		public Probability this[int index]
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get { return _buffer[index]; }
@@ -71,7 +71,7 @@ namespace SafetySharp.Runtime
 		///   Returns the element at the top of the stack without removing it.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int Peek()
+		public Probability Peek()
 		{
 			return _buffer[Count - 1];
 		}
@@ -80,7 +80,7 @@ namespace SafetySharp.Runtime
 		///   Removes the topmost element from the stack.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int Remove()
+		public Probability Remove()
 		{
 			return _buffer[--Count];
 		}
@@ -90,12 +90,12 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="value">The value that should be pushed.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void Push(int value)
+		public void Push(Probability value)
 		{
-			if (_memoryBuffer.SizeInBytes <= Count * sizeof(int))
+			if (_memoryBuffer.SizeInBytes <= Count * sizeof(Probability))
 			{
 				_memoryBuffer.Resize(_memoryBuffer.SizeInBytes * 2, zeroMemory: true);
-				_buffer = (int*)_memoryBuffer.Pointer;
+				_buffer = (Probability*)_memoryBuffer.Pointer;
 			}
 
 			_buffer[Count++] = value;

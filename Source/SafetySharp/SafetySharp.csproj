@@ -48,14 +48,14 @@
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
     <Compile Include="Analysis\ProbabilisticModelChecker.cs" />
     <Compile Include="Analysis\ProbabilisticModelChecker.Prism.cs">
-		<DependentUpon>ProbabilisticModelChecker.cs</DependentUpon>
-	</Compile>	
+      <DependentUpon>ProbabilisticModelChecker.cs</DependentUpon>
+    </Compile>
     <Compile Include="Analysis\ProbabilisticModelChecker.Mrmc.cs">
-		<DependentUpon>ProbabilisticModelChecker.cs</DependentUpon>
-	</Compile>
+      <DependentUpon>ProbabilisticModelChecker.cs</DependentUpon>
+    </Compile>
     <Compile Include="Analysis\ProbabilisticModelChecker.Cadp.cs">
-		<DependentUpon>ProbabilisticModelChecker.cs</DependentUpon>
-	</Compile>
+      <DependentUpon>ProbabilisticModelChecker.cs</DependentUpon>
+    </Compile>
     <Compile Include="Analysis\ProbabilityChecker.cs" />
     <Compile Include="Analysis\ProbabilityMatrixBuilder.cs" />
     <Compile Include="Analysis\Probability.cs" />
@@ -70,6 +70,7 @@
     <Compile Include="Modeling\ModelBase.cs" />
     <Compile Include="Analysis\RootAttribute.cs" />
     <Compile Include="Analysis\SafetyAnalysis.cs" />
+    <Compile Include="Runtime\ProbabilityStack.cs" />
     <Compile Include="Runtime\FaultSet.cs" />
     <Compile Include="Runtime\Serialization\DelegateMetadata.cs" />
     <Compile Include="Runtime\Serialization\Serializers\DelegateSerializer.cs" />
