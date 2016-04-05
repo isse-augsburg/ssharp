@@ -121,6 +121,7 @@ namespace SafetySharp.Runtime
 
 				// Otherwise, we've chosen all values of the last choice, so we're done with it
 				_valueCount.Remove();
+				_probabilitiesOfChosenValues.Remove();
 			}
 
 			// If we reach this point, we know that we've chosen all values of all choices, so there are no further paths
@@ -214,6 +215,8 @@ namespace SafetySharp.Runtime
 		internal Probability CalculateProbabilityOfPath()
 		{
 			var probability = Probability.One;
+			for (var i = 0; i < _probabilitiesOfChosenValues.Count; ++i)
+				probability *= _probabilitiesOfChosenValues[i];
 			return probability;
 		}
 
