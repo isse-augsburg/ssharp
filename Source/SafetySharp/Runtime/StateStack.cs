@@ -119,7 +119,7 @@ namespace SafetySharp.Runtime
 
 			if (offset >= _capacity)
 			{
-				throw new InvalidOperationException(
+				throw new OutOfMemoryException(
 					"Unable to allocate an additional depth first search state. Try increasing the size of the state stack.");
 			}
 			

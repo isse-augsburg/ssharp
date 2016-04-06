@@ -37,7 +37,7 @@ namespace SafetySharp.Analysis
 		/// <param name="counterExample">The path through the model that leads to the <paramref name="exception" /> being thrown.</param>
 		public AnalysisException(Exception exception, CounterExample counterExample)
 			: base($"Error: An unhandled exception of type '{exception.GetType().FullName}' was " +
-				   $"thrown during model checking: {exception.Message}.", exception)
+				   $"thrown during model checking: {exception.Message}", exception)
 		{
 			Requires.NotNull(exception, nameof(exception));
 			CounterExample = counterExample;
