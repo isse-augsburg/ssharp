@@ -417,6 +417,7 @@
     <Compile Include="FaultActivation\Formulas\not activated initial state.cs" />
     <Compile Include="FaultActivation\Formulas\multiple activated initial state.cs" />
     <Compile Include="FaultActivation\Formulas\single activated initial state.cs" />
+    <Compile Include="FaultActivation\StateGraph\fault with same observable effect as latter choice.cs" />
     <Compile Include="FaultActivation\StateGraph\multiple faults fully minimizable.cs" />
     <Compile Include="FaultActivation\StateGraph\nondeterminism.cs" />
     <Compile Include="FaultActivation\StateGraph\single permanent fault activated once.cs" />
