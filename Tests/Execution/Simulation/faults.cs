@@ -24,7 +24,6 @@ namespace Tests.Execution.Simulation
 {
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 
@@ -32,8 +31,8 @@ namespace Tests.Execution.Simulation
 	{
 		protected override void Check()
 		{
-			var simulator = new Simulator(TestModel.New(new C()));
-			var c = (C)simulator.Model.RootComponents[0];
+			var simulator = new Simulator(TestModel.InitializeModel(new C()));
+			var c = (C)simulator.Model.Roots[0];
 
 			c.F.Activation = Activation.Forced;
 			simulator.SimulateStep();
@@ -50,6 +49,8 @@ namespace Tests.Execution.Simulation
 			c.F.Activation = Activation.Nondeterministic;
 			simulator.SimulateStep();
 			c.X.ShouldBe(1);
+
+			simulator.Model.Faults.ShouldBe(new[] { ((C)simulator.Model.Roots[0]).F });
 		}
 
 		private class C : Component

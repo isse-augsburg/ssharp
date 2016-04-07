@@ -36,22 +36,21 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	public abstract class ModelBase
 	{
-		private readonly Lazy<IComponent[]> _components;
+		private IComponent[] _components;
 		private Fault[] _faults;
 		private IComponent[] _roots;
 
 		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		protected ModelBase()
-		{
-			_components = new Lazy<IComponent[]>(GetComponents);
-		}
-
-		/// <summary>
 		///   Gets the components contained in the model.
 		/// </summary>
-		public IComponent[] Components => _components.Value;
+		public IComponent[] Components
+		{
+			get
+			{
+				EnsureIsBound();
+				return _components ?? (_components = GetComponents());
+			}
+		}
 
 		/// <summary>
 		///   Gets the model's root components.
@@ -80,7 +79,7 @@ namespace SafetySharp.Modeling
 				EnsureIsBound();
 				return _faults;
 			}
-			set
+			internal set
 			{
 				Requires.That(_faults == null, "The faults have already been set.");
 				_faults = value;
@@ -131,6 +130,13 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
+		///   Invoked when the model should initialize bindings between its components.
+		/// </summary>
+		protected internal virtual void CreateBindings()
+		{
+		}
+
+		/// <summary>
 		///   Creates a <see cref="RuntimeModel" /> instance from the model and the <paramref name="formulas" />.
 		/// </summary>
 		/// <param name="formulas">The formulas the model should be able to check.</param>
@@ -144,9 +150,20 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Gets the <see cref="IComponent" /> instances the model consists of.
+		///   Gets the <see cref="IComponent" /> instances referenced by the model.
 		/// </summary>
 		private IComponent[] GetComponents()
+		{
+			var components = new HashSet<IComponent>();
+			VisitPreOrder(c => components.Add(c));
+
+			return components.ToArray();
+		}
+
+		/// <summary>
+		///   Gets the <see cref="Fault" /> instances referenced by the model.
+		/// </summary>
+		private IComponent[] GetFaults()
 		{
 			var components = new HashSet<IComponent>();
 			VisitPreOrder(c => components.Add(c));

@@ -27,6 +27,8 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
+	using System.Runtime.Serialization;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -62,6 +64,10 @@ namespace SafetySharp.Runtime.Serialization
 			// Generate the object to identifier lookup table; unfortunately, we can't have null keys
 			for (var i = 1; i < _objects.Length; ++i)
 				_objectToIdentifier.Add(_objects[i], (ushort)i);
+
+			// Assign the identifiers of all delegates to their metadata objects
+			foreach (var metadata in _objects.OfType<DelegateMetadata>())
+				metadata.ObjectIdentifier = GetObjectIdentifier(metadata.Delegate);
 		}
 
 		/// <summary>
@@ -118,6 +124,25 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
+		///   Substitutes the components and fault effects with their corresponding runtime instances.
+		/// </summary>
+		public  void SubstituteRuntimeInstances()
+		{
+			foreach (var component in _objects.OfType<Component>().ToArray())
+			{
+				if (component.IsFaultEffect())
+					continue;
+
+				var runtimeType = component.GetRuntimeType();
+				var runtimeObj = (Component)FormatterServices.GetUninitializedObject(runtimeType);
+
+				Substitute(component, runtimeObj);
+				foreach (var faultEffect in component.FaultEffects)
+					Substitute(faultEffect, runtimeObj);
+			}
+		}
+
+		/// <summary>
 		///   Substitutes the <paramref name="original" /> object with the <paramref name="replacement" /> object.
 		/// </summary>
 		/// <param name="original">The original object that should be substituted.</param>
@@ -144,6 +169,20 @@ namespace SafetySharp.Runtime.Serialization
 
 			// We have to remove the original mapping in any case, though
 			_objectToIdentifier.Remove(original);
+		}
+
+		/// <summary>
+		///   Substitutes the dummy <see cref="Delegate" /> objects in the table with actual instances created from the
+		///   <see cref="DelegateMetadata" /> instances.
+		/// </summary>
+		public void SubstituteDelegates()
+		{
+			foreach (var info in _objects.OfType<DelegateMetadata>())
+			{
+				var d = info.CreateDelegate();
+				_objects[info.ObjectIdentifier] = d;
+				_objectToIdentifier.Add(d, info.ObjectIdentifier);
+			}
 		}
 	}
 }

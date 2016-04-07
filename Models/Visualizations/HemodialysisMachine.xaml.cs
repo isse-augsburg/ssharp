@@ -176,7 +176,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			var specification = new SafetySharp.CaseStudies.HemodialysisMachine.Specification();
 
 			InitializeComponent();
-
+			InitializeElements();
 
 			// Initialize the simulation environment
 			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
@@ -185,7 +185,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			SimulationControls.SetModel(specification);
 
 
-			InitializeElements();
+			
 
 			// Initialize the visualization state
 			UpdateModelState();
@@ -195,8 +195,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 		}
 
 
-		private HemodialysisMachine.Model.HdMachine Machine => SimulationControls.Model.RootComponents.OfType<HemodialysisMachine.Model.HdMachine>().Single();
-		private HemodialysisMachine.Model.Patient Patient => SimulationControls.Model.RootComponents.OfType<HemodialysisMachine.Model.Patient>().First();
+		private HemodialysisMachine.Model.HdMachine Machine => SimulationControls.Model.Roots.OfType<HemodialysisMachine.Model.HdMachine>().Single();
+		private HemodialysisMachine.Model.Patient Patient => SimulationControls.Model.Roots.OfType<HemodialysisMachine.Model.Patient>().First();
 
 		private Storyboard _animationBloodPumpEnabled;
 		private Storyboard _animationHeparinPumpEnabled;

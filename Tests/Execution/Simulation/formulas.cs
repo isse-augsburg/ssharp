@@ -24,7 +24,6 @@ namespace Tests.Execution.Simulation
 {
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 
@@ -32,12 +31,42 @@ namespace Tests.Execution.Simulation
 	{
 		protected override void Check()
 		{
-			var c = new C();
-			var simulator = new Simulator(TestModel.New(c), c.X != 1);
+			var m = new M();
+			var simulator = new Simulator(m, m.F);
+			m = (M)simulator.Model;
+			var f = m.F.Compile();
+			var g = m.G.Compile();
+			
+			m.C.X.ShouldBe(0);
+			m.F.Evaluate().ShouldBe(true);
+			m.G.Evaluate().ShouldBe(true);
 
-			simulator.Model.Formulas[0].Evaluate().ShouldBe(true);
+			f().ShouldBe(true);
+			g().ShouldBe(true);
+
 			simulator.SimulateStep();
-			simulator.Model.Formulas[0].Evaluate().ShouldBe(false);
+
+			m.C.X.ShouldBe(1);
+			m.F.Evaluate().ShouldBe(false);
+			m.G.Evaluate().ShouldBe(false);
+
+			f().ShouldBe(false);
+			g().ShouldBe(false);
+		}
+
+		private class M : ModelBase
+		{
+			[Root(Role.Environment)]
+			public readonly C C = new C();
+
+			public Formula F => C.X != 1;
+
+			public Formula G { get; }
+
+			public M()
+			{
+				G = C.X == 0;
+			}
 		}
 
 		private class C : Component

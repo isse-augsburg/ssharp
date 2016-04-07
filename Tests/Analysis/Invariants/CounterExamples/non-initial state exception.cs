@@ -37,7 +37,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 
 			SimulateCounterExample(e.CounterExample, simulator =>
 			{
-				c = (C)simulator.Model.RootComponents[0];
+				c = (C)simulator.Model.Roots[0];
 
 				c.X.ShouldBe(0);
 
@@ -56,7 +56,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 
 			SimulateCounterExample(e.CounterExample, simulator =>
 			{
-				d = (D)simulator.Model.RootComponents[0];
+				d = (D)simulator.Model.Roots[0];
 				Should.Throw<InvalidOperationException>(() => simulator.SimulateStep()).Message.ShouldBe("test");
 			});
 		}

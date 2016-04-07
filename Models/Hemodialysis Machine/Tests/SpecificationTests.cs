@@ -39,7 +39,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (DialyzingFluidFlowCombinator)simulator.Model.RootComponents[0];
+			var flowCombinatorAfterStep = (DialyzingFluidFlowCombinator)simulator.Model.Roots[0];
 		}
 
 		[Test]
@@ -58,7 +58,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			simulator.SimulateStep();
 			simulator.SimulateStep();
 
-			var flowCombinatorAfterStep = (DialyzingFluidFlowCombinator)simulator.Model.RootComponents[0];
+			var flowCombinatorAfterStep = (DialyzingFluidFlowCombinator)simulator.Model.Roots[0];
 		}
 
 		[Test]
@@ -67,15 +67,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var testModel = new Specification();
 
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
-			var patient = simulator.Model.RootComponents.OfType<Patient>().First();
-			var hdMachine = simulator.Model.RootComponents.OfType<HdMachine>().First();
+			var patient = simulator.Model.Roots.OfType<Patient>().First();
+			var hdMachine = simulator.Model.Roots.OfType<HdMachine>().First();
 			hdMachine.Dialyzer.DialyzerMembraneRupturesFault.Activation = Activation.Forced;
 			simulator.SimulateStep();
-			patient = simulator.Model.RootComponents.OfType<Patient>().First();
+			patient = simulator.Model.Roots.OfType<Patient>().First();
 			simulator.SimulateStep();
-			patient = simulator.Model.RootComponents.OfType<Patient>().First();
+			patient = simulator.Model.Roots.OfType<Patient>().First();
 			simulator.SimulateStep();
-			patient = simulator.Model.RootComponents.OfType<Patient>().First();
+			patient = simulator.Model.Roots.OfType<Patient>().First();
 			simulator.SimulateStep();
 			simulator.SimulateStep();
 			simulator.SimulateStep();
@@ -91,17 +91,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var testModel = new Specification();
 
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
-			var patient = simulator.Model.RootComponents.OfType<Patient>().First();
-			var hdMachine = simulator.Model.RootComponents.OfType<HdMachine>().First();
+			var patient = simulator.Model.Roots.OfType<Patient>().First();
+			var hdMachine = simulator.Model.Roots.OfType<HdMachine>().First();
 			hdMachine.DialyzingFluidDeliverySystem.DialyzingFluidWaterPreparation.WaterHeaterDefect.Activation = Activation.Forced;
 			hdMachine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpToBalanceChamberDefect.Activation = Activation.Forced;
 			simulator.SimulateStep();
-			var patient2 = simulator.Model.RootComponents.OfType<Patient>().First();
+			var patient2 = simulator.Model.Roots.OfType<Patient>().First();
 			simulator.SimulateStep();
-			var patient3 = simulator.Model.RootComponents.OfType<Patient>().First();
+			var patient3 = simulator.Model.Roots.OfType<Patient>().First();
 			simulator.SimulateStep();
-			var patient4 = simulator.Model.RootComponents.OfType<Patient>().First();
-			var hdMachine4 = simulator.Model.RootComponents.OfType<HdMachine>().First();
+			var patient4 = simulator.Model.Roots.OfType<Patient>().First();
+			var hdMachine4 = simulator.Model.Roots.OfType<HdMachine>().First();
 			simulator.SimulateStep();
 			simulator.SimulateStep();
 			simulator.SimulateStep();

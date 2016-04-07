@@ -42,7 +42,7 @@ namespace Tests
 		protected void GenerateStateSpace(params IComponent[] components)
 		{
 			var serializer = new RuntimeModelSerializer();
-			serializer.Serialize(TestModel.New(components), new StateFormula(() => true));
+			serializer.Serialize(TestModel.InitializeModel(components), new StateFormula(() => true));
 
 			var configuration = AnalysisConfiguration.Default;
 			configuration.StateCapacity = 10000;

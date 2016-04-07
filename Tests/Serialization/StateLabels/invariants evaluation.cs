@@ -32,7 +32,7 @@ namespace Tests.Serialization.StateLabels
 		protected override void Check()
 		{
 			var c = new C { F = 3, G = 7, X = 3 };
-			var m = TestModel.New(c);
+			var m = InitializeModel(c);
 			Formula s1 = c.F == 3;
 			Formula s2 = c.G == 7;
 			Formula s3 = c.F == c.X;

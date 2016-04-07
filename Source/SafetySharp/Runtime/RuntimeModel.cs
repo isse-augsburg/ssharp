@@ -34,7 +34,7 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Represents a runtime model that can be used for model checking or simulation.
 	/// </summary>
-	public sealed unsafe class RuntimeModel : DisposableObject
+	internal sealed unsafe class RuntimeModel : DisposableObject
 	{
 		/// <summary>
 		///   The unique name of the construction state.
@@ -76,18 +76,20 @@ namespace SafetySharp.Runtime
 		internal RuntimeModel(SerializedRuntimeModel serializedData, int stateHeaderBytes = 0)
 		{
 			var buffer = serializedData.Buffer;
-			var rootComponents = serializedData.RootComponents;
+			var rootComponents = serializedData.Model.Roots;
 			var objectTable = serializedData.ObjectTable;
 			var formulas = serializedData.Formulas;
 
+			Requires.That(serializedData.Model != null, "Expected a valid model instance.");
 			Requires.NotNull(buffer, nameof(buffer));
 			Requires.NotNull(rootComponents, nameof(rootComponents));
 			Requires.NotNull(objectTable, nameof(objectTable));
 			Requires.NotNull(formulas, nameof(formulas));
 			Requires.That(stateHeaderBytes % 4 == 0, nameof(stateHeaderBytes), "Expected a multiple of 4.");
 
+			Model = serializedData.Model;
 			SerializedModel = buffer;
-			RootComponents = rootComponents;
+			RootComponents = rootComponents.Cast<Component>().ToArray();
 			Faults = objectTable.OfType<Fault>().Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
 			ActivationSensitiveFaults = Faults.Where(fault => fault.RequiresActivationNotification).ToArray();
 			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
@@ -119,6 +121,11 @@ namespace SafetySharp.Runtime
 			FaultSet.CheckFaultCount(Faults.Length);
 			StateFormulaSet.CheckFormulaCount(StateFormulas.Length);
 		}
+
+		/// <summary>
+		///   Gets a copy of the original model the runtime model was generated from.
+		/// </summary>
+		internal ModelBase Model { get; }
 
 		/// <summary>
 		///   Gets the construction state of the model.
@@ -229,16 +236,6 @@ namespace SafetySharp.Runtime
 
 			foreach (var component in RootComponents)
 				component.Update();
-		}
-
-		/// <summary>
-		///   Checks whether the state formula identified by the zero-based <paramref name="formulaIndex" /> holds for the model's
-		///   current state.
-		/// </summary>
-		/// <param name="formulaIndex">The zero-based index of the formula that should be checked.</param>
-		public bool CheckStateFormula(int formulaIndex)
-		{
-			return StateFormulas[formulaIndex].Expression();
 		}
 
 		/// <summary>

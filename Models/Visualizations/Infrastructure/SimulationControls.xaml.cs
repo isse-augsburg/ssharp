@@ -44,7 +44,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 		}
 
 		public RealTimeSimulator Simulator { get; private set; }
-		public RuntimeModel Model => Simulator.Model;
+		public ModelBase Model => Simulator.Model;
 
 		public int StepDelay { get; set; } = 1000;
 
@@ -63,6 +63,8 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 			Simulator = new RealTimeSimulator(simulator, (int)Math.Round(1000 / _speed));
 			Simulator.ModelStateChanged += OnModelStateChanged;
 			UpdateSimulationButtonVisibilities();
+
+			OnReset(null, null);
 		}
 
 		public void SetModel(ModelBase model, params Formula[] formulas)
@@ -113,8 +115,9 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 
 		private void OnReset(object sender, RoutedEventArgs e)
 		{
-			Simulator.Reset();
 			Reset?.Invoke(this, EventArgs.Empty);
+
+			Simulator.Reset();
 			EndOfCounterExample.Visibility = Visibility.Hidden;
 		}
 
@@ -195,10 +198,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 
 				SetSimulator(simulator);
 				CloseCounterExampleButton.Visibility = Visibility.Visible;
-
-				ModelStateChanged?.Invoke(this, EventArgs.Empty);
-				Reset?.Invoke(this, EventArgs.Empty);
-				EndOfCounterExample.Visibility = Visibility.Hidden;
+				
 			}
 			catch (Exception ex)
 			{
@@ -211,10 +211,6 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 		{
 			SetSimulator(new Simulator(_model, _formulas));
 			CloseCounterExampleButton.Visibility = Visibility.Hidden;
-
-			ModelStateChanged?.Invoke(this, EventArgs.Empty);
-			Reset?.Invoke(this, EventArgs.Empty);
-			EndOfCounterExample.Visibility = Visibility.Hidden;
 		}
 	}
 }

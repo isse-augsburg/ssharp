@@ -23,10 +23,8 @@
 namespace SafetySharp.CaseStudies.Visualizations
 {
 	using System;
-	using System.Linq;
 	using System.Windows;
 	using System.Windows.Media.Animation;
-	using CaseStudies.PressureTank.Analysis;
 	using CaseStudies.PressureTank.Modeling;
 	using Infrastructure;
 	using Modeling;
@@ -37,6 +35,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 		private readonly Storyboard _pumpingStoryboard;
 		private readonly Storyboard _sensorAlertStoryboard;
 		private readonly Storyboard _timerAlertStoryboard;
+		private Model _model;
 
 		public PressureTank()
 		{
@@ -67,71 +66,67 @@ namespace SafetySharp.CaseStudies.Visualizations
 			SimulationControls.ChangeSpeed(8);
 		}
 
-		private Pump Pump => Controller.Pump;
-		private PressureSensor Sensor => Controller.Sensor;
-		private Timer Timer => Controller.Timer;
-		private Tank Tank => SimulationControls.Model.RootComponents.OfType<Tank>().Single();
-		private Controller Controller => SimulationControls.Model.RootComponents.OfType<Controller>().Single();
-
 		private void OnSuppressPumping(object sender, RoutedEventArgs e)
 		{
-			Pump.SuppressPumping.ToggleActivationMode();
+			_model.Pump.SuppressPumping.ToggleActivationMode();
 		}
 
 		private void OnSuppressTimeout(object sender, RoutedEventArgs e)
 		{
-			Timer.SuppressTimeout.ToggleActivationMode();
+			_model.Timer.SuppressTimeout.ToggleActivationMode();
 		}
 
 		private void OnSuppressFull(object sender, RoutedEventArgs e)
 		{
-			Sensor.SuppressIsFull.ToggleActivationMode();
+			_model.Sensor.SuppressIsFull.ToggleActivationMode();
 		}
 
 		private void OnSuppressEmpty(object sender, RoutedEventArgs e)
 		{
-			Sensor.SuppressIsEmpty.ToggleActivationMode();
+			_model.Sensor.SuppressIsEmpty.ToggleActivationMode();
 		}
 
 		private void OnModelStateReset()
 		{
+			_model = (Model)SimulationControls.Model;
+
 			if (SimulationControls.Simulator.IsReplay)
 				return;
 
-			Sensor.SuppressIsFull.Activation = SuppressFull.IsChecked.ToOccurrenceKind();
-			Sensor.SuppressIsEmpty.Activation = SuppressEmpty.IsChecked.ToOccurrenceKind();
-			Timer.SuppressTimeout.Activation = SuppressTimeout.IsChecked.ToOccurrenceKind();
-			Pump.SuppressPumping.Activation = SuppressPumping.IsChecked.ToOccurrenceKind();
+			_model.Sensor.SuppressIsFull.Activation = SuppressFull.IsChecked.ToOccurrenceKind();
+			_model.Sensor.SuppressIsEmpty.Activation = SuppressEmpty.IsChecked.ToOccurrenceKind();
+			_model.Timer.SuppressTimeout.Activation = SuppressTimeout.IsChecked.ToOccurrenceKind();
+			_model.Pump.SuppressPumping.Activation = SuppressPumping.IsChecked.ToOccurrenceKind();
 		}
 
 		private void UpdateModelState()
 		{
 			// Timer
-			CountDown.Text = Timer.RemainingTime.ToString();
-			CountDown.Visibility = Timer.IsActive.ToVisibility();
-			SuppressTimeout.IsChecked = Timer.SuppressTimeout.IsActivated;
+			CountDown.Text = _model.Timer.RemainingTime.ToString();
+			CountDown.Visibility = _model.Timer.IsActive.ToVisibility();
+			SuppressTimeout.IsChecked = _model.Timer.SuppressTimeout.IsActivated;
 			TimerFailure.Visibility = SuppressTimeout.IsChecked.ToVisibility();
 
-			if (Timer.HasElapsed)
+			if (_model.Timer.HasElapsed)
 				_timerAlertStoryboard.Begin();
 
 			// Tank
-			var pressureLevel = Math.Round(Tank.PressureLevel / (double)Model.PressureLimit * 100);
+			var pressureLevel = Math.Round(_model.Tank.PressureLevel / (double)Model.PressureLimit * 100);
 			_pressureLevelStoryboard.Seek(TimeSpan.FromMilliseconds(Math.Max(0, 10 * pressureLevel)));
 			PressureLevel.Text = $"{pressureLevel}%";
-			PressureLevel.Visibility = (!Tank.IsRuptured).ToVisibility();
-			TankRupture.Visibility = Tank.IsRuptured.ToVisibility();
+			PressureLevel.Visibility = (!_model.Tank.IsRuptured).ToVisibility();
+			TankRupture.Visibility = _model.Tank.IsRuptured.ToVisibility();
 
 			// Sensor
-			SuppressFull.IsChecked = Sensor.SuppressIsFull.IsActivated;
-			SuppressEmpty.IsChecked = Sensor.SuppressIsEmpty.IsActivated;
+			SuppressFull.IsChecked = _model.Sensor.SuppressIsFull.IsActivated;
+			SuppressEmpty.IsChecked = _model.Sensor.SuppressIsEmpty.IsActivated;
 			SensorFailure.Visibility = (SuppressFull.IsChecked || SuppressEmpty.IsChecked).ToVisibility();
 
-			if ((Sensor.IsFull || Sensor.IsEmpty))
+			if ((_model.Sensor.IsFull || _model.Sensor.IsEmpty))
 				_sensorAlertStoryboard.Begin();
 
 			// Controller
-			switch (Controller.StateMachine.State)
+			switch (_model.Controller.StateMachine.State)
 			{
 				case Controller.State.Inactive:
 					ControllerScreen.Text = "Inactive";
@@ -148,12 +143,12 @@ namespace SafetySharp.CaseStudies.Visualizations
 			}
 
 			// Pump
-			if (!Pump.IsEnabled)
+			if (!_model.Pump.IsEnabled)
 				_pumpingStoryboard.Pause();
 			else
 				_pumpingStoryboard.Resume();
 
-			SuppressPumping.IsChecked = Pump.SuppressPumping.IsActivated;
+			SuppressPumping.IsChecked = _model.Pump.SuppressPumping.IsActivated;
 			PumpFailure.Visibility = SuppressPumping.IsChecked.ToVisibility();
 		}
 	}

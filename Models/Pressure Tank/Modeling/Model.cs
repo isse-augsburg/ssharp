@@ -25,55 +25,55 @@ namespace SafetySharp.CaseStudies.PressureTank.Modeling
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 
+/// <summary>
+///   The model representing the pressure tank case study.
+/// </summary>
+public class Model : ModelBase
+{
 	/// <summary>
-	///   The model representing the pressure tank case study.
+	///   The tank's pressure limit that may not be reached or exceeded.
 	/// </summary>
-	public class Model : ModelBase
+	public const int PressureLimit = 60;
+
+	/// <summary>
+	///   The pressure level when the sensor reports the tank to be full.
+	/// </summary>
+	public const int SensorFullPressure = 55;
+
+	/// <summary>
+	///   The pressure level when the sensor reports the tank to be empty.
+	/// </summary>
+	public const int SensorEmptyPressure = 0;
+
+	/// <summary>
+	///   The controller's timeout in seconds.
+	/// </summary>
+	public const int Timeout = 59;
+
+	/// <summary>
+	///   Initializes a new instance.
+	/// </summary>
+	public Model()
 	{
-		/// <summary>
-		///   The tank's pressure limit that may not be reached or exceeded.
-		/// </summary>
-		public const int PressureLimit = 60;
-
-		/// <summary>
-		///   The pressure level when the sensor reports the tank to be full.
-		/// </summary>
-		public const int SensorFullPressure = 55;
-
-		/// <summary>
-		///   The pressure level when the sensor reports the tank to be empty.
-		/// </summary>
-		public const int SensorEmptyPressure = 0;
-
-		/// <summary>
-		///   The controller's timeout in seconds.
-		/// </summary>
-		public const int Timeout = 59;
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		public Model()
+		Controller = new Controller
 		{
-			Controller = new Controller
-			{
-				Sensor = new PressureSensor(),
-				Pump = new Pump(),
-				Timer = new Timer()
-			};
+			Sensor = new PressureSensor(),
+			Pump = new Pump(),
+			Timer = new Timer()
+		};
 
-			Bind(nameof(Sensor.PhysicalPressure), nameof(Tank.PressureLevel));
-			Bind(nameof(Tank.IsBeingFilled), nameof(Pump.IsEnabled));
-		}
-
-		[Root(Role.SystemContext)]
-		public Tank Tank { get; } = new Tank();
-
-		[Root(Role.SystemOfInterest)]
-		public Controller Controller { get; }
-
-		public PressureSensor Sensor => Controller.Sensor;
-		public Pump Pump => Controller.Pump;
-		public Timer Timer => Controller.Timer;
+		Bind(nameof(Sensor.PhysicalPressure), nameof(Tank.PressureLevel));
+		Bind(nameof(Tank.IsBeingFilled), nameof(Pump.IsEnabled));
 	}
+
+	[Root(Role.Environment)]
+	public Tank Tank { get; } = new Tank();
+
+	[Root(Role.System)]
+	public Controller Controller { get; }
+
+	public PressureSensor Sensor => Controller.Sensor;
+	public Pump Pump => Controller.Pump;
+	public Timer Timer => Controller.Timer;
+}
 }

@@ -23,18 +23,18 @@
 namespace SafetySharp.Analysis
 {
 	/// <summary>
-	///   Indicates whether a component is considered to belong to the system of interest or to the system context.
+	///   Indicates whether a component is considered to belong to the system that is analyzed or to the system's environment.
 	/// </summary>
 	public enum Role
 	{
 		/// <summary>
-		///   Indicates that the component is considered to belong to the system of interest.
+		///   Indicates that the component is considered to belong to the system that is analyzed.
 		/// </summary>
-		SystemOfInterest,
+		System,
 
 		/// <summary>
-		///   Indicates that the component is considered to belong to the system context.
+		///   Indicates that the component is considered to belong to the analyzed system's environment.
 		/// </summary>
-		SystemContext
+		Environment
 	}
 }

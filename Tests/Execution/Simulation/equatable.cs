@@ -25,7 +25,6 @@ namespace Tests.Execution.Simulation
 	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 
@@ -33,8 +32,8 @@ namespace Tests.Execution.Simulation
 	{
 		protected override void Check()
 		{
-			var simulator = new Simulator(TestModel.New(new C()));
-			var c = (C)simulator.Model.RootComponents[0];
+			var simulator = new Simulator(TestModel.InitializeModel(new C()));
+			var c = (C)simulator.Model.Roots[0];
 
 			c.D.X.ShouldBe(44);
 			c.E.X.ShouldBe(44);

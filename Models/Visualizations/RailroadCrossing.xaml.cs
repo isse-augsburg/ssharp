@@ -22,7 +22,7 @@
 
 namespace SafetySharp.CaseStudies.Visualizations
 {
-	using System.Linq;
+	using System;
 	using System.Windows;
 	using System.Windows.Controls;
 	using CaseStudies.RailroadCrossing.Modeling;
@@ -34,6 +34,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 	public partial class RailroadCrossing
 	{
 		private bool _hazard;
+		private Func<bool> _hazardFormula;
 
 		public RailroadCrossing()
 		{
@@ -52,15 +53,16 @@ namespace SafetySharp.CaseStudies.Visualizations
 			SimulationControls.ChangeSpeed(16);
 		}
 
-		private Barrier Barrier => SimulationControls.Model.RootComponents.OfType<Barrier>().Single();
-		private RadioChannel Channel => SimulationControls.Model.RootComponents.OfType<RadioChannel>().Single();
-		private CrossingController CrossingController => SimulationControls.Model.RootComponents.OfType<CrossingController>().Single();
-		private Train Train => SimulationControls.Model.RootComponents.OfType<Train>().Single();
-		private TrainController TrainController => SimulationControls.Model.RootComponents.OfType<TrainController>().Single();
+		private Barrier Barrier => ((Model)SimulationControls.Model).Barrier;
+		private RadioChannel Channel => ((Model)SimulationControls.Model).Channel;
+		private CrossingController CrossingController => ((Model)SimulationControls.Model).CrossingController;
+		private Train Train => ((Model)SimulationControls.Model).Train;
+		private TrainController TrainController => ((Model)SimulationControls.Model).TrainController;
 
 		private void OnModelStateReset()
 		{
 			OnRewound();
+			_hazardFormula = ((Model)SimulationControls.Model).PossibleCollision.Compile();
 
 			if (SimulationControls.Simulator.IsReplay)
 				return;
@@ -99,7 +101,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			FaultTrainSensor.IsChecked = CrossingController.TrainSensor.ErroneousTrainDetection.IsActivated;
 			FaultMessage.IsChecked = Channel.MessageDropped.IsActivated;
 
-			_hazard |= SimulationControls.Model.CheckStateFormula(0);
+			_hazard |= _hazardFormula?.Invoke() ?? false;
 			Collision.Visibility = _hazard.ToVisibility();
 
 			MessageFailure.Visibility = FaultMessage.IsChecked.ToVisibility();

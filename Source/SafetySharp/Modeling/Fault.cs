@@ -23,15 +23,16 @@
 namespace SafetySharp.Modeling
 {
 	using System;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.Serialization;
-	using CompilerServices;
 	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   Represents a base class for all faults affecting the behavior of <see cref="Component" />s.
 	/// </summary>
+	[DebuggerDisplay("{_name} (#{_identifier})")]
 	public abstract class Fault
 	{
 		private readonly Choice _choice = new Choice();

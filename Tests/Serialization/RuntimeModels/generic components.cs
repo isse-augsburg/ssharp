@@ -35,7 +35,7 @@ namespace Tests.Serialization.RuntimeModels
 		{
 			var c1 = new C<int> { F = 99 };
 			var c2 = new C<bool> { F = true };
-			var m = TestModel.New(c1, c2);
+			var m = TestModel.InitializeModel(c1, c2);
 
 			_hasConstructorRun = false;
 			Create(m);

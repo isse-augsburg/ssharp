@@ -23,7 +23,6 @@
 namespace Tests.Serialization.RuntimeModels
 {
 	using System;
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
@@ -33,7 +32,7 @@ namespace Tests.Serialization.RuntimeModels
 		protected override void Check()
 		{
 			var d = new D { T = typeof(object) };
-			var m = TestModel.New(d);
+			var m = InitializeModel(d);
 
 			Create(m);
 

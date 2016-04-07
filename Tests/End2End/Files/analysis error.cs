@@ -38,7 +38,7 @@ namespace Tests.End2End.Files
 
 	internal class S1 : ModelBase
 	{
-		[Root(Role.SystemOfInterest)]
+		[Root(Role.System)]
 		public C1 C { get; } = new C1();
 
 		public static int Main(string[] args)

@@ -239,6 +239,11 @@ namespace SafetySharp.Analysis
 							_context.Report();
 					}
 				}
+				catch (OutOfMemoryException e)
+				{
+					_context._loadBalancer.Terminate();
+					_context._exception = e;
+				}
 				catch (Exception e)
 				{
 					_context._loadBalancer.Terminate();

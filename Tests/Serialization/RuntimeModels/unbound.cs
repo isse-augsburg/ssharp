@@ -40,7 +40,7 @@ namespace Tests.Serialization.RuntimeModels
 			Should.Throw<UnboundPortException>(() => { var x = d.C; });
 			Should.Throw<UnboundPortException>(() => d.C = 0);
 
-			var m = TestModel.New(d);
+			var m = TestModel.InitializeModel(d);
 			Create(m);
 
 			StateFormulas.ShouldBeEmpty();

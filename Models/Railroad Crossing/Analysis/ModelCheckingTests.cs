@@ -33,11 +33,13 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		public void EnumerateAllStates()
 		{
 			var model = new Model();
-			ModelChecker.CheckInvariant(model, true);
+
+			var result = ModelChecker.CheckInvariant(model, true);
+			result.FormulaHolds.Should().BeTrue();
 		}
 
 		[Test]
-		public void TrainIsAbleToStopBeforeCrossing()
+		public void TrainCanStopBeforeCrossing()
 		{
 			var model = new Model();
 
@@ -48,7 +50,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		}
 
 		[Test]
-		public void TrainIsAbleToPassSecuredCrossing()
+		public void TrainCanPassSecuredCrossing()
 		{
 			var model = new Model();
 
@@ -59,7 +61,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		}
 
 		[Test]
-		public void TrainIsAbleToPassUnsecuredCrossing()
+		public void TrainCanPassUnsecuredCrossing()
 		{
 			var model = new Model();
 

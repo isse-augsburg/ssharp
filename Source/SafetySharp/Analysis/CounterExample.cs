@@ -60,25 +60,30 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="model">The model the counter example was generated for.</param>
+		/// <param name="runtimeModel">The runtime model the counter example was generated for.</param>
 		/// <param name="counterExample">The serialized counter example.</param>
 		/// <param name="replayInfo">The replay information of the counter example.</param>
-		internal CounterExample(RuntimeModel model, byte[][] counterExample, int[][] replayInfo)
+		internal CounterExample(RuntimeModel runtimeModel, byte[][] counterExample, int[][] replayInfo)
 		{
-			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(runtimeModel, nameof(runtimeModel));
 			Requires.NotNull(counterExample, nameof(counterExample));
 			Requires.NotNull(replayInfo, nameof(replayInfo));
 			Requires.That(replayInfo.Length == counterExample.Length - 1, "Invalid replay info.");
 
-			Model = model;
+			RuntimeModel = runtimeModel;
 			_counterExample = counterExample;
 			_replayInfo = replayInfo;
 		}
 
 		/// <summary>
+		///   Gets the runtime model the counter example was generated for.
+		/// </summary>
+		internal RuntimeModel RuntimeModel { get; }
+
+		/// <summary>
 		///   Gets the model the counter example was generated for.
 		/// </summary>
-		public RuntimeModel Model { get; }
+		public ModelBase Model => RuntimeModel.Model;
 
 		/// <summary>
 		///   Gets the number of steps the counter example consists of.
@@ -96,13 +101,13 @@ namespace SafetySharp.Analysis
 		///   Deserializes the state at the <paramref name="position" /> of the counter example.
 		/// </summary>
 		/// <param name="position">The position of the state within the counter example that should be deserialized.</param>
-		public unsafe RuntimeModel DeserializeState(int position)
+		public unsafe ModelBase DeserializeState(int position)
 		{
 			Requires.That(_counterExample != null, "No counter example has been loaded.");
 			Requires.InRange(position, nameof(position), 0, StepCount);
 
 			using (var pointer = PinnedPointer.Create(_counterExample[position + 1]))
-				Model.Deserialize((byte*)pointer);
+				RuntimeModel.Deserialize((byte*)pointer);
 
 			return Model;
 		}
@@ -124,14 +129,14 @@ namespace SafetySharp.Analysis
 		{
 			var initialState = _counterExample[0];
 			fixed (byte* state = &initialState[0])
-				Model.Replay(state, _replayInfo[0], initializationStep: true);
+				RuntimeModel.Replay(state, _replayInfo[0], initializationStep: true);
 		}
 
 		/// <summary>
 		///   Executs the <paramref name="action" /> for each step of the counter example.
 		/// </summary>
 		/// <param name="action">The action that should be executed on the deserialized model state.</param>
-		public void ForEachStep(Action<RuntimeModel> action)
+		public void ForEachStep(Action<ModelBase> action)
 		{
 			Requires.NotNull(action, nameof(action));
 
@@ -170,22 +175,22 @@ namespace SafetySharp.Analysis
 			using (var writer = new BinaryWriter(File.OpenWrite(file), Encoding.UTF8))
 			{
 				writer.Write(FileHeader);
-				writer.Write(Model.SerializedModel.Length);
-				writer.Write(Model.SerializedModel);
+				writer.Write(RuntimeModel.SerializedModel.Length);
+				writer.Write(RuntimeModel.SerializedModel);
 
-				foreach (var fault in Model.Objects.OfType<Fault>())
+				foreach (var fault in RuntimeModel.Objects.OfType<Fault>())
 					writer.Write((int)fault.Activation);
 
 				var formatter = new BinaryFormatter();
 				var memoryStream = new MemoryStream();
-				formatter.Serialize(memoryStream, Model.StateVectorLayout.ToArray());
+				formatter.Serialize(memoryStream, RuntimeModel.StateVectorLayout.ToArray());
 
 				var metadata = memoryStream.ToArray();
 				writer.Write(metadata.Length);
 				writer.Write(metadata);
 
 				writer.Write(StepCount + 1);
-				writer.Write(Model.StateVectorSize);
+				writer.Write(RuntimeModel.StateVectorSize);
 
 				foreach (var slot in _counterExample.SelectMany(step => step))
 					writer.Write(slot);
@@ -219,19 +224,19 @@ namespace SafetySharp.Analysis
 				foreach (var fault in modelData.ObjectTable.OfType<Fault>())
 					fault.Activation = (Activation)reader.ReadInt32();
 
-				var model = new RuntimeModel(modelData);
+				var runtimeModel = new RuntimeModel(modelData);
 				var metadataStream = new MemoryStream(reader.ReadBytes(reader.ReadInt32()));
 				var formatter = new BinaryFormatter();
 				var slotMetadata = new StateVectorLayout((StateSlotMetadata[])formatter.Deserialize(metadataStream));
-				var modelMetadata = model.StateVectorLayout;
+				var modelMetadata = runtimeModel.StateVectorLayout;
 
 				var counterExample = new byte[reader.ReadInt32()][];
 				var slotCount = reader.ReadInt32();
 
-				if (slotCount != model.StateVectorSize)
+				if (slotCount != runtimeModel.StateVectorSize)
 				{
 					throw new InvalidOperationException(
-						$"State slot count mismatch; the instantiated model requires {model.StateVectorSize} state slots, " +
+						$"State slot count mismatch; the instantiated model requires {runtimeModel.StateVectorSize} state slots, " +
 						$"whereas the counter example uses {slotCount} state slots.");
 				}
 
@@ -250,8 +255,8 @@ namespace SafetySharp.Analysis
 
 				for (var i = 0; i < counterExample.Length; ++i)
 				{
-					counterExample[i] = new byte[model.StateVectorSize];
-					for (var j = 0; j < model.StateVectorSize; ++j)
+					counterExample[i] = new byte[runtimeModel.StateVectorSize];
+					for (var j = 0; j < runtimeModel.StateVectorSize; ++j)
 						counterExample[i][j] = reader.ReadByte();
 				}
 
@@ -263,7 +268,7 @@ namespace SafetySharp.Analysis
 						replayInfo[i][j] = reader.ReadInt32();
 				}
 
-				return new CounterExample(model, counterExample, replayInfo);
+				return new CounterExample(runtimeModel, counterExample, replayInfo);
 			}
 		}
 
@@ -274,7 +279,7 @@ namespace SafetySharp.Analysis
 		protected override void OnDisposing(bool disposing)
 		{
 			if (disposing)
-				Model.SafeDispose();
+				RuntimeModel.SafeDispose();
 		}
 	}
 }

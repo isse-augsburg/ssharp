@@ -57,12 +57,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 
 	class DialyzingFluidDeliverySystemTestEnvironment : ModelBase
 	{
-		[Root(Role.SystemOfInterest)]
+		[Root(Role.System)]
 		public readonly DialyzingFluidDeliverySystem DialyzingFluidDeliverySystem = new DialyzingFluidDeliverySystem();
 
-		[Root(Role.SystemContext)]
+		[Root(Role.Environment)]
 		public readonly DialyzingFluidFlowCombinator DialysingFluidFlowCombinator = new DialyzingFluidFlowCombinator();
-		[Root(Role.SystemContext)]
+		[Root(Role.Environment)]
 		public readonly DialyzingFluidDeliverySystemTestEnvironmentDialyzer Dialyzer = new DialyzingFluidDeliverySystemTestEnvironmentDialyzer();
 
 		public DialyzingFluidDeliverySystemTestEnvironment()
@@ -81,8 +81,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var specification = new DialyzingFluidDeliverySystemTestEnvironment();
 
 			var simulator = new Simulator(specification); //Important: Call after all objects have been created
-			var dialyzerAfterStep0 = simulator.Model.RootComponents.OfType<DialyzingFluidDeliverySystemTestEnvironmentDialyzer>().First();
-			var dialyzingFluidDeliverySystemAfterStep0 = simulator.Model.RootComponents.OfType<DialyzingFluidDeliverySystem>().First();
+			var dialyzerAfterStep0 = simulator.Model.Roots.OfType<DialyzingFluidDeliverySystemTestEnvironmentDialyzer>().First();
+			var dialyzingFluidDeliverySystemAfterStep0 = simulator.Model.Roots.OfType<DialyzingFluidDeliverySystem>().First();
 			Console.Out.WriteLine("Initial");
 			//dialyzingFluidDeliverySystemAfterStep0.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			//patientAfterStep0.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");

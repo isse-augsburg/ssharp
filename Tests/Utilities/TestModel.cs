@@ -87,14 +87,14 @@ namespace Tests.Utilities
 		/// <param name="components">The root components of the model that should be instantiated.</param>
 		protected void Create(params IComponent[] components)
 		{
-			Create(New(components));
+			Create(InitializeModel(components));
 		}
 
 		/// <summary>
 		///   Instantiates a runtime model.
 		/// </summary>
 		/// <param name="components">The root components of the model that should be instantiated.</param>
-		internal static ModelBase New(params IComponent[] components)
+		internal static ModelBase InitializeModel(params IComponent[] components)
 		{
 			var model = new Model { Roots = components };
 			ModelBinder.Bind(model);

@@ -28,7 +28,6 @@ namespace Tests
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using SafetySharp.Utilities;
 	using Shouldly;
 	using Utilities;
@@ -54,7 +53,7 @@ namespace Tests
 		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var result = modelChecker.CheckInvariant(TestModel.New(components), invariant);
+			var result = modelChecker.CheckInvariant(TestModel.InitializeModel(components), invariant);
 
 			CounterExample = result.CounterExample;
 			return result.FormulaHolds;
@@ -63,7 +62,7 @@ namespace Tests
 		protected bool Check(Formula formula, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var result = modelChecker.Check(TestModel.New(components), formula);
+			var result = modelChecker.Check(TestModel.InitializeModel(components), formula);
 
 			CounterExample = result.CounterExample;
 			return result.FormulaHolds;
@@ -71,7 +70,7 @@ namespace Tests
 
 		protected SafetyAnalysis.Result DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
 		{
-			var model = TestModel.New(components);
+			var model = TestModel.InitializeModel(components);
 			var analysis = new SafetyAnalysis();
 			analysis.OutputWritten += message => Output.Log("{0}", message);
 

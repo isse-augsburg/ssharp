@@ -85,5 +85,17 @@ namespace Tests
 		{
 			ExecuteDynamicTests(file);
 		}
+
+		[Theory, MemberData("DiscoverTests", "Execution/ModelCopy")]
+		public void ModelCopy(string test, string file)
+		{
+			ExecuteDynamicTests(file);
+		}
+
+		[Theory, MemberData("DiscoverTests", "Execution/RootDiscovery")]
+		public void RootDiscovery(string test, string file)
+		{
+			ExecuteDynamicTests(file);
+		}
 	}
 }

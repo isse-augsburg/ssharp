@@ -105,14 +105,14 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 
 	class ExtracorporealBloodCircuitTestEnvironment : ModelBase
 	{
-		[Root(Role.SystemOfInterest)]
+		[Root(Role.System)]
 		public readonly ExtracorporealBloodCircuit ExtracorporealBloodCircuit = new ExtracorporealBloodCircuit();
 
-		[Root(Role.SystemContext)]
+		[Root(Role.Environment)]
 		public readonly Patient Patient = new Patient();
-		[Root(Role.SystemContext)]
+		[Root(Role.Environment)]
 		public readonly ExtracorporealBloodCircuitTestEnvironmentDialyzer Dialyzer = new ExtracorporealBloodCircuitTestEnvironmentDialyzer();
-		[Root(Role.SystemContext)]
+		[Root(Role.Environment)]
 		public readonly BloodFlowCombinator BloodFlowCombinator = new BloodFlowCombinator();
 
 		public ExtracorporealBloodCircuitTestEnvironment()
@@ -134,8 +134,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var specification = new ExtracorporealBloodCircuitTestEnvironment();
 
 			var simulator = new Simulator(specification); //Important: Call after all objects have been created
-			var extracorporealBloodCircuitAfterStep0 = simulator.Model.RootComponents.OfType<ExtracorporealBloodCircuit>().First();
-			var patientAfterStep0 = simulator.Model.RootComponents.OfType<Patient>().First();
+			var extracorporealBloodCircuitAfterStep0 = simulator.Model.Roots.OfType<ExtracorporealBloodCircuit>().First();
+			var patientAfterStep0 = simulator.Model.Roots.OfType<Patient>().First();
 			Console.Out.WriteLine("Initial");
 			patientAfterStep0.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
 			patientAfterStep0.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");

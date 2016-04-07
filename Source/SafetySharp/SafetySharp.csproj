@@ -58,6 +58,9 @@
     <Compile Include="Analysis\RootAttribute.cs" />
     <Compile Include="Analysis\SafetyAnalysis.cs" />
     <Compile Include="Runtime\FaultSet.cs" />
+    <Compile Include="Runtime\Serialization\DelegateMetadata.cs" />
+    <Compile Include="Runtime\Serialization\Serializers\DelegateSerializer.cs" />
+    <Compile Include="Runtime\Serialization\Serializers\MethodInfoSerializer.cs" />
     <Compile Include="Runtime\Serialization\StateVectorMismatchException.cs" />
     <Compile Include="CompilerServices\FaultHelper.cs" />
     <Compile Include="CompilerServices\PortBinding.cs" />
@@ -123,7 +126,6 @@
     <Compile Include="Runtime\Serialization\SerializedRuntimeModel.cs" />
     <Compile Include="Runtime\Serialization\Serializers\ListSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\FaultEffectSerializer.cs" />
-    <Compile Include="Runtime\Serialization\Serializers\StateFormulaSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\TypeSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\StringSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\ArraySerializer.cs" />

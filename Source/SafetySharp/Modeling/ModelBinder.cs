@@ -51,7 +51,7 @@ namespace SafetySharp.Modeling
 			CollectRoots(components, roles, model.GetType().GetFields(bindingFlags), info => info.FieldType,
 				info => info.GetValue(model));
 			CollectRoots(components, roles, model.GetType().GetProperties(bindingFlags), info => info.PropertyType,
-				info => info.GetValue(model));
+				info => info.CanRead ? info.GetValue(model) : null);
 			CollectRoots(components, roles, model.GetType().GetMethods(bindingFlags), info => info.ReturnType, info =>
 			{
 				if (info.GetParameters().Length == 0)
@@ -63,7 +63,7 @@ namespace SafetySharp.Modeling
 			if (components.Count == 0)
 			{
 				throw new InvalidOperationException(
-					$"At least one property, field, or method of the model must be marked with {typeof(RootAttribute).FullName}");
+					$"At least one property, field, or method of the model must be marked with '{typeof(RootAttribute).FullName}'.");
 			}
 
 			model.Roots = components.OrderByDescending(component => roles[component]).ToArray();
@@ -121,6 +121,8 @@ namespace SafetySharp.Modeling
 			BindFaultEffects(model);
 			DiscoverFaults(model);
 			AssignFaultIdentifiers(model);
+
+			model.CreateBindings();
 			CreateBindings(model);
 		}
 
