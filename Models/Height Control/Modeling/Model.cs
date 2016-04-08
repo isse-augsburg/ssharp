@@ -100,15 +100,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		public Formula FalseAlarm =>
 			HeightControl.TrafficLights.IsRed &&
 			Vehicles.Vehicles.All(vehicle => vehicle.Lane == Lane.Right || vehicle.Kind != VehicleKind.OverheightTruck);
-
-
-		/// <summary>
-		///   Represents the hazard of an alarm even when no over-height vehicle is on the right lane.
-		/// </summary>
-		public Formula FalseAlarm =>
-			HeightControl.TrafficLights.IsRed &&
-			Vehicles.Vehicles.All(vehicle => vehicle.Lane == Lane.Right || vehicle.Kind != VehicleKind.OverheightTruck);
-
+		
 		/// <summary>
 		///   Represents the hazard of an alarm even when no high vehicle and no over-height vehicle is on the right lane.
 		/// </summary>

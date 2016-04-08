@@ -55,7 +55,7 @@ namespace Tests.Analysis.Probabilistic
 			var c = new C();
 			Probability probabilityOfFinal1;
 
-			using (var probabilityChecker = new ProbabilityChecker(TestModel.New(c)))
+			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
 			{
 				var typeOfModelChecker = (Type)Arguments[0];
 				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker,probabilityChecker);

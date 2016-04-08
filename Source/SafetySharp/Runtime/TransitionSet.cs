@@ -25,6 +25,7 @@ namespace SafetySharp.Runtime
 	using System;
 	using System.Collections.Generic;
 	using System.Runtime.CompilerServices;
+	using Analysis;
 	using Utilities;
 
 	/// <summary>
@@ -322,6 +323,8 @@ namespace SafetySharp.Runtime
 			///   is actually not activation-minimal.
 			/// </summary>
 			public bool IsValid;
+
+			public Probability Probability;
 		}
 
 		/// <summary>
