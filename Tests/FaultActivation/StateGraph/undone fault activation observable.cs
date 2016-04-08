@@ -32,7 +32,7 @@ namespace Tests.FaultActivation.StateGraph
 			GenerateStateSpace(new C());
 
 			StateCount.ShouldBe(6);
-			TransitionCount.ShouldBe(17);
+			TransitionCount.ShouldBe(26);
 			ComputedTransitionCount.ShouldBe(31);
 		}
 

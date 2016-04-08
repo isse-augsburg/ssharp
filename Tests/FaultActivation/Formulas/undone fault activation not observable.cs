@@ -20,25 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.FaultActivation.StateGraph
+namespace Tests.FaultActivation.Formulas
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class UndoneFaultActivationNotObservable : FaultActivationTestObject
+	internal class UndoneFaultActivationNotObservable : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			GenerateStateSpace(new C());
-
-			StateCount.ShouldBe(6);
-			TransitionCount.ShouldBe(16);
-			ComputedTransitionCount.ShouldBe(25);
+			var c = new C();
+			CheckInvariant(!c.F.IsActivated, c).ShouldBe(true);
 		}
 
 		private class C : Component
 		{
-			private readonly Fault _f = new TransientFault();
+			public readonly Fault F = new TransientFault();
 
 			[Range(0, 5, OverflowBehavior.Clamp)]
 			private int _x;
@@ -53,13 +50,13 @@ namespace Tests.FaultActivation.StateGraph
 			public virtual int Y => Choose(1, 2, 3, 4); 
 			public virtual bool B => true;
 
-			[FaultEffect(Fault = nameof(_f))]
+			[FaultEffect(Fault = nameof(F))]
 			public class E1 : C
 			{
 				public override int Y => 3;
 			}
 
-			[FaultEffect(Fault = nameof(_f))]
+			[FaultEffect(Fault = nameof(F))]
 			public class E2 : C
 			{
 				public override bool B => true;

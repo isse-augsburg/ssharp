@@ -52,6 +52,10 @@ namespace Tests
 			var checker = new InvariantChecker(serializer.Load, s => Output.Log("{0}", s), configuration);
 			_result = checker.Check();
 			CounterExample.ShouldBe(null);
+
+			Output.Log($"States: {_result.StateCount}");
+			Output.Log($"Actual Transitions: {_result.TransitionCount}");
+			Output.Log($"Computed Transitions: {_result.ComputedTransitionCount}");
 		}
 	}
 

@@ -22,7 +22,6 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 {
-	using ModelVariants;
 	using SafetySharp.Modeling;
 
 	/// <summary>
@@ -42,7 +41,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// <summary>
 		///   Gets the current lane of the vehicle.
 		/// </summary>
-		public Lane Lane { get; protected set; }
+		public Lane Lane { get; protected set; } = Lane.Right;
 
 		/// <summary>
 		///   Gets the kind the vehicle.
@@ -83,15 +82,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		public extern bool IsTunnelClosed { get; }
 
 		/// <summary>
-		///   Performs the nondeterministic initialization.
-		/// </summary>
-		protected override void Initialize()
-		{
-			Lane = Lane.Right;
-			Speed = ChooseFromRange(0, Model.MaxSpeed);
-		}
-
-		/// <summary>
 		///   Chooses the lane the vehicle drives on. By default, vehicles always drive on the right lane.
 		/// </summary>
 		protected virtual Lane ChooseLane() => Lane.Right;
@@ -104,7 +94,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 			if (IsTunnelClosed)
 				return;
 
-			// Vehicles are only allowed to stop at the initial position
 			Speed = ChooseFromRange(1, Model.MaxSpeed);
 			Position += Speed;
 
@@ -120,10 +109,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		[FaultEffect]
 		public class DisregardTrafficRulesEffect : Vehicle
 		{
-			protected override Lane ChooseLane()
-			{
-				return Choose(Lane.Left, Lane.Right);
-			}
+			protected override Lane ChooseLane() => Choose(Lane.Left, Lane.Right);
 		}
 	}
 }

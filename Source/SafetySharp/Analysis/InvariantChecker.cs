@@ -261,14 +261,14 @@ namespace SafetySharp.Analysis
 				if (_transitions.Count == 0)
 					throw new InvalidOperationException("Deadlock detected.");
 
-				Interlocked.Add(ref _context._transitionCount, _transitions.Count);
-				Interlocked.Add(ref _context._computedTransitionCount, _transitions.ComputedTransitionCount);
-
+				var transitionCount = 0;
 				_stateStack.PushFrame();
 
 				for (var i = 0; i < _transitions.Count; ++i)
 				{
 					var transition = _transitions[i];
+					if (!transition->IsValid)
+						continue;
 
 					// Store the state if it hasn't been discovered before
 					int index;
@@ -286,7 +286,12 @@ namespace SafetySharp.Analysis
 
 						return;
 					}
+
+					++transitionCount;
 				}
+
+				Interlocked.Add(ref _context._transitionCount, transitionCount);
+				Interlocked.Add(ref _context._computedTransitionCount, _transitions.ComputedTransitionCount);
 			}
 
 			/// <summary>

@@ -23,12 +23,22 @@
 namespace SafetySharp.CaseStudies.HeightControl.Analysis
 {
 	using System;
+	using FluentAssertions;
 	using Modeling.ModelVariants;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 
 	public class OriginalTests
 	{
+		[Test]
+		public void EnumerateAllStates()
+		{
+			var model = new OriginalModel();
+
+			var result = ModelChecker.CheckInvariant(model, true);
+			result.FormulaHolds.Should().BeTrue();
+		}
+
 		[Test]
 		public void Collision()
 		{

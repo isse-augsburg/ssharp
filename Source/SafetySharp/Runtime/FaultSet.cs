@@ -26,6 +26,7 @@ namespace SafetySharp.Runtime
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using Modeling;
 	using Utilities;
 
@@ -137,6 +138,7 @@ namespace SafetySharp.Runtime
 		///   Checks whether this fault set is a subset of <paramref name="faultSet" />.
 		/// </summary>
 		/// <param name="faultSet">The fault set that is expected to be a super set.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal bool IsSubsetOf(FaultSet faultSet)
 		{
 			return (_faults & faultSet._faults) == _faults;
@@ -185,6 +187,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="left">The fault set on the left-hand side to compare.</param>
 		/// <param name="right">The fault set on the right-hand side to compare.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==(FaultSet left, FaultSet right)
 		{
 			return left.Equals(right);
@@ -195,6 +198,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="left">The fault set on the left-hand side to compare.</param>
 		/// <param name="right">The fault set on the right-hand side to compare.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator !=(FaultSet left, FaultSet right)
 		{
 			return !left.Equals(right);

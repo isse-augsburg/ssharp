@@ -433,20 +433,22 @@
     </Compile>
     <Compile Include="FaultActivation\Formulas\combined activated initial state.cs" />
     <Compile Include="FaultActivation\Formulas\combined activated.cs" />
+    <Compile Include="FaultActivation\Formulas\multiple transitions later removed.cs" />
+    <Compile Include="FaultActivation\Formulas\fault with same observable effect as later choice.cs" />
     <Compile Include="FaultActivation\Formulas\multiple activated.cs" />
     <Compile Include="FaultActivation\Formulas\single activated.cs" />
     <Compile Include="FaultActivation\Formulas\never activated.cs" />
     <Compile Include="FaultActivation\Formulas\not activated initial state.cs" />
     <Compile Include="FaultActivation\Formulas\multiple activated initial state.cs" />
     <Compile Include="FaultActivation\Formulas\single activated initial state.cs" />
-    <Compile Include="FaultActivation\StateGraph\fault with same observable effect as latter choice.cs" />
+    <Compile Include="FaultActivation\Formulas\undone fault activation not observable.cs" />
     <Compile Include="FaultActivation\StateGraph\multiple faults fully minimizable.cs" />
+    <Compile Include="FaultActivation\StateGraph\multiple transitions later removed.cs" />
     <Compile Include="FaultActivation\StateGraph\nondeterminism.cs" />
     <Compile Include="FaultActivation\StateGraph\single permanent fault activated once.cs" />
     <Compile Include="FaultActivation\StateGraph\multiple faults semi minimizable.cs" />
     <Compile Include="FaultActivation\StateGraph\undone fault activation not observable enum.cs" />
     <Compile Include="FaultActivation\StateGraph\undone fault activation observable.cs" />
-    <Compile Include="FaultActivation\StateGraph\undone fault activation not observable.cs" />
     <Compile Include="FaultActivation\StateGraph\faults with constant effects.cs" />
     <Compile Include="FaultActivation\StateGraph\unused fault.cs" />
     <Compile Include="FaultActivation\StateGraph\initial state.cs" />

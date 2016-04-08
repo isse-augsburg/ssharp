@@ -25,55 +25,54 @@ namespace Tests.FaultActivation.StateGraph
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class UndoneFaultActivationNotObservableEnum : FaultActivationTestObject
+	internal class MultipleTransitionsLaterRemovedBecauseNotActivationMinimal : FaultActivationTestObject
 	{
 		protected override void Check()
 		{
 			GenerateStateSpace(new C());
 
 			StateCount.ShouldBe(6);
-			TransitionCount.ShouldBe(25);
-			ComputedTransitionCount.ShouldBe(25);
+			TransitionCount.ShouldBe(13);
+			ComputedTransitionCount.ShouldBe(20);
 		}
 
 		private class C : Component
 		{
-			private readonly Fault _f = new TransientFault();
+			private readonly Fault _f1 = new PermanentFault();
+			private readonly Fault _f2 = new PermanentFault();
+			private readonly Fault _f3 = new PermanentFault();
 
-			private E _x = E.A;
+			private int _x;
 
 			public override void Update()
 			{
-				// When checking B, activation of _f is undone, fault might be activated again when retrieving Y
-				if (B)
-					_x = (E)((int)_x + (int)Y);
+				if (_x != 0)
+					return;
 
-				if ((int)_x >= 5)
-					_x = (E)5;
+				if (Choose(true, false))
+					_x = Value;
+				else
+					_x = ChooseFromRange(0, 5);
 			}
 
-			public virtual E Y => Choose(E.B, E.C, E.D, E.E); 
-			public virtual bool B => true;
+			public virtual int Value => 1;
 
-			[FaultEffect(Fault = nameof(_f))]
+			[FaultEffect(Fault = nameof(_f1)), Priority(1)]
 			public class E1 : C
 			{
-				public override E Y => E.D;
+				public override int Value => base.Value + 2;
 			}
 
-			[FaultEffect(Fault = nameof(_f))]
-			public class E2 : C
+			[FaultEffect(Fault = nameof(_f2)), Priority(2)]
+			public class E2: C
 			{
-				public override bool B => true;
+				public override int Value => base.Value + 1;
 			}
 
-			public enum E
+			[FaultEffect(Fault = nameof(_f3)), Priority(3)]
+			public class E3 : C
 			{
-				A,
-				B,
-				C,
-				D,
-				E
+				public override int Value => base.Value + 1;
 			}
 		}
 	}

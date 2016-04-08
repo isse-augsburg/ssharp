@@ -20,25 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.FaultActivation.StateGraph
+namespace Tests.FaultActivation.Formulas
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class FaultWithSameEffectAsLatterChoice : FaultActivationTestObject
+	internal class FaultWithSameEffectAsLaterChoice : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			GenerateStateSpace(new C());
-
-			StateCount.ShouldBe(3);
-			TransitionCount.ShouldBe(5);
-			ComputedTransitionCount.ShouldBe(6);
+			var c = new C();
+			CheckInvariant(!c.F.IsActivated, c).ShouldBe(true);
 		}
 
 		private class C : Component
 		{
-			private readonly Fault _f = new TransientFault();
+			public readonly Fault F = new PermanentFault();
 			
 			private int _x;
 
@@ -46,6 +43,7 @@ namespace Tests.FaultActivation.StateGraph
 			{
 				if (_x != 0)
 					return;
+
 				var selectionToMake = Choose(1, 2);
 				if (selectionToMake == 1)
 					Select1();
@@ -63,7 +61,7 @@ namespace Tests.FaultActivation.StateGraph
 				_x = 2;
 			}
 
-			[FaultEffect(Fault = nameof(_f))]
+			[FaultEffect(Fault = nameof(F))]
 			public class E : C
 			{
 				public override void Select1()

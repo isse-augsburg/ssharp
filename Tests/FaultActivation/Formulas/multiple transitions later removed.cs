@@ -20,60 +20,56 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.FaultActivation.StateGraph
+namespace Tests.FaultActivation.Formulas
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class UndoneFaultActivationNotObservableEnum : FaultActivationTestObject
+	internal class MultipleTransitionsLaterRemovedBecauseNotActivationMinimal : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			GenerateStateSpace(new C());
-
-			StateCount.ShouldBe(6);
-			TransitionCount.ShouldBe(25);
-			ComputedTransitionCount.ShouldBe(25);
+			var c = new C();
+			CheckInvariant(!c.F1.IsActivated && !c.F2.IsActivated && !c.F3.IsActivated, c).ShouldBe(true);
 		}
 
 		private class C : Component
 		{
-			private readonly Fault _f = new TransientFault();
+			public readonly Fault F1 = new PermanentFault();
+			public readonly Fault F2 = new PermanentFault();
+			public readonly Fault F3 = new PermanentFault();
 
-			private E _x = E.A;
+			private int _x;
 
 			public override void Update()
 			{
-				// When checking B, activation of _f is undone, fault might be activated again when retrieving Y
-				if (B)
-					_x = (E)((int)_x + (int)Y);
+				if (_x != 0)
+					return;
 
-				if ((int)_x >= 5)
-					_x = (E)5;
+				if (Choose(true, false))
+					_x = Value;
+				else
+					_x = ChooseFromRange(0, 5);
 			}
 
-			public virtual E Y => Choose(E.B, E.C, E.D, E.E); 
-			public virtual bool B => true;
+			public virtual int Value => 1;
 
-			[FaultEffect(Fault = nameof(_f))]
+			[FaultEffect(Fault = nameof(F1)), Priority(1)]
 			public class E1 : C
 			{
-				public override E Y => E.D;
+				public override int Value => base.Value + 2;
 			}
 
-			[FaultEffect(Fault = nameof(_f))]
-			public class E2 : C
+			[FaultEffect(Fault = nameof(F2)), Priority(2)]
+			public class E2: C
 			{
-				public override bool B => true;
+				public override int Value => base.Value + 1;
 			}
 
-			public enum E
+			[FaultEffect(Fault = nameof(F3)), Priority(3)]
+			public class E3 : C
 			{
-				A,
-				B,
-				C,
-				D,
-				E
+				public override int Value => base.Value + 1;
 			}
 		}
 	}
