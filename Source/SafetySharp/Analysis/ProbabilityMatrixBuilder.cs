@@ -281,21 +281,21 @@ namespace SafetySharp.Analysis
 			/// </summary>
 			private void AddStates(int? sourceState)
 			{
-				if (_transitions.Count == 0)
+				if (_transitions.ComputedTransitionCount == 0)
 					throw new InvalidOperationException("Deadlock detected.");
 
-				Interlocked.Add(ref _context._transitionCount, _transitions.Count);
-				Interlocked.Add(ref _context._computedTransitionCount, _transitions.ComputedTransitionCount);
-
+				var transitionCount = 0;
 				_stateStack.PushFrame();
 
-				for (var i = 0; i < _transitions.Count; ++i)
+				var transitionEnumerator = _transitions.GetResettedEnumerator();
+
+				while (transitionEnumerator.MoveNext())
 				{
-					var transition = _transitions[i];
+					var transition = transitionEnumerator.Current;
 
 					// Store the state if it hasn't been discovered before
 					int index;
-					if (_states.AddState(transition->TargetState, out index))
+					if (_states.AddState(transition.TargetState, out index))
 					{
 						Interlocked.Increment(ref _context._stateCount);
 						_stateStack.PushState(index);
@@ -303,17 +303,22 @@ namespace SafetySharp.Analysis
 					if (sourceState == null)
 					{
 						// Add initial state to probability matrix
-						ProbabilityMatrix.InitialStates.Add(new TupleStateProbability(index, transition->Probability));
+						ProbabilityMatrix.InitialStates.Add(new TupleStateProbability(index, transition.Probability));
 					}
 					else
 					{
 						// Add transition to probability matrix
-						ProbabilityMatrix.AddTransition(sourceState.Value,index, transition->Probability);
+						ProbabilityMatrix.AddTransition(sourceState.Value,index, transition.Probability);
 					}
 
 					//TODO-Probabilistic: why adding again and again -> save in StateStorage and remove here
-					ProbabilityMatrix.StateLabeling[index] = transition->Formulas;
+					ProbabilityMatrix.StateLabeling[index] = transition.Formulas;
+
+					++transitionCount;
 				}
+
+				Interlocked.Add(ref _context._transitionCount, transitionCount);
+				Interlocked.Add(ref _context._computedTransitionCount, _transitions.ComputedTransitionCount);
 			}
 			
 

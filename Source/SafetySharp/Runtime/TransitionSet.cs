@@ -23,9 +23,11 @@
 namespace SafetySharp.Runtime
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Runtime.CompilerServices;
 	using Analysis;
+	using JetBrains.Annotations;
 	using Utilities;
 
 	/// <summary>
@@ -35,20 +37,28 @@ namespace SafetySharp.Runtime
 	{
 		private const int ProbeThreshold = 1000;
 		private readonly int _capacity;
-		private readonly FaultSetInfo* _faults;
-		private readonly MemoryBuffer _faultsBuffer = new MemoryBuffer();
+		private readonly TargetStateGroupElement* _targetStateGroupElements;
+		private readonly MemoryBuffer _targetStateGroupElementsBuffer = new MemoryBuffer();
 		private readonly Func<bool>[] _formulas;
 		private readonly MemoryBuffer _hashedStateBuffer = new MemoryBuffer();
 		private readonly byte* _hashedStateMemory;
 		private readonly int* _lookup;
 		private readonly MemoryBuffer _lookupBuffer = new MemoryBuffer();
 		private readonly int _stateVectorSize;
-		private readonly List<uint> _successors;
+		private readonly List<uint> _stateHashesOfTargetStateGroups;
+
+		private readonly MemoryBuffer _tempStateBuffer = new MemoryBuffer();
+		private readonly byte* _tempStateMemoryNotified;
+		private readonly byte* _tempStateMemoryUnnotified;
 		private readonly MemoryBuffer _targetStateBuffer = new MemoryBuffer();
 		private readonly byte* _targetStateMemory;
-		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
-		private readonly Transition* _transitions;
-		private int _nextFaultIndex;
+
+		private readonly TransitionEnumerator Enumerator;
+
+		private int _nextTargetStateBufferIndex;
+		private int _nextTargetStateGroupIndex;
+
+		internal MinimalizationMode Mode = MinimalizationMode.UseFaultMinimalization;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -65,42 +75,34 @@ namespace SafetySharp.Runtime
 
 			_stateVectorSize = model.StateVectorSize;
 			_formulas = formulas;
-
-			_transitionBuffer.Resize(capacity * sizeof(Transition), zeroMemory: false);
-			_transitions = (Transition*)_transitionBuffer.Pointer;
-
+			
+			_tempStateBuffer.Resize(2 * model.StateVectorSize, zeroMemory: true);
+			_tempStateMemoryNotified = _tempStateBuffer.Pointer;
+			_tempStateMemoryUnnotified = _tempStateBuffer.Pointer + _stateVectorSize;
 			_targetStateBuffer.Resize(capacity * model.StateVectorSize, zeroMemory: true);
 			_targetStateMemory = _targetStateBuffer.Pointer;
 
 			_lookupBuffer.Resize(capacity * sizeof(int), zeroMemory: false);
-			_faultsBuffer.Resize(capacity * sizeof(FaultSet), zeroMemory: false);
+			_targetStateGroupElementsBuffer.Resize(capacity * sizeof(FaultSet), zeroMemory: false);
 			_hashedStateBuffer.Resize(capacity * _stateVectorSize, zeroMemory: true);
 
-			_successors = new List<uint>(capacity);
+			_stateHashesOfTargetStateGroups = new List<uint>(capacity);
 			_capacity = capacity;
 
 			_lookup = (int*)_lookupBuffer.Pointer;
-			_faults = (FaultSetInfo*)_faultsBuffer.Pointer;
+			_targetStateGroupElements = (TargetStateGroupElement*)_targetStateGroupElementsBuffer.Pointer;
 			_hashedStateMemory = _hashedStateBuffer.Pointer;
+
+			Enumerator = new TransitionEnumerator(this,formulas);
 
 			for (var i = 0; i < capacity; ++i)
 				_lookup[i] = -1;
 		}
 
 		/// <summary>
-		///   Gets the number of activation-minimal transitions.
-		/// </summary>
-		public int Count { get; private set; }
-
-		/// <summary>
 		///   Gets the total number of computed transitions.
 		/// </summary>
 		public int ComputedTransitionCount { get; private set; }
-
-		/// <summary>
-		///   Gets the transition stored at the <paramref name="index" />.
-		/// </summary>
-		public Transition* this[int index] => &_transitions[index];
 
 		/// <summary>
 		///   Adds a transition to the <paramref name="model" />'s current state.
@@ -112,26 +114,20 @@ namespace SafetySharp.Runtime
 
 			// 1. Serialize the model's computed state; that is the successor state of the transition's source state
 			//    modulo any changes resulting from notifications of fault activations
-			var successorState = _targetStateMemory + _stateVectorSize * Count;
 			var activatedFaults = FaultSet.FromActivatedFaults(model.Faults);
-			model.Serialize(successorState);
+			model.Serialize(_tempStateMemoryUnnotified);
 
-			// 2. Make sure the transition we're about to add is activation-minimal
-			if (!Add(successorState, activatedFaults))
-				return;
-
-			// 3. Execute fault activation notifications and serialize the updated state if necessary
+			// 2. Execute fault activation notifications, serialize the updated state if necessary, and store the transition
 			if (model.NotifyFaultActivations())
-				model.Serialize(successorState);
+				model.Serialize(_tempStateMemoryNotified);
+			else
+				MemoryBuffer.Copy(_tempStateMemoryUnnotified, _tempStateMemoryNotified, _stateVectorSize);
 
-			// 4. Store the transition
-			_transitions[Count] = new Transition
-			{
-				TargetState = successorState,
-				Formulas = new StateFormulaSet(_formulas),
-				IsValid = true,
-			};
-			++Count;
+			// 3. Make sure the transition we're about to add is activation-minimal
+			//if (!Add(successorState, activatedFaults))
+			//	return;
+
+			StoreTransition(activatedFaults,model.GetProbability());
 		}
 
 		/// <summary>
@@ -140,46 +136,48 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Clear()
 		{
-			Count = 0;
 			ComputedTransitionCount = 0;
 
-			foreach (var state in _successors)
+			foreach (var state in _stateHashesOfTargetStateGroups)
 				_lookup[state] = -1;
 
-			_successors.Clear();
-			_nextFaultIndex = 0;
+			_stateHashesOfTargetStateGroups.Clear();
+			_nextTargetStateGroupIndex = 0;
+			_nextTargetStateBufferIndex = 0;
 		}
 
 		/// <summary>
-		///   Adds the <paramref name="successorState" /> to the transition set if neccessary, reached using the
+		///   Adds the current transition to the transition set if necessary, reached using the
 		///   <paramref name="activatedFaults" />.
 		/// </summary>
-		/// <param name="successorState">The successor state that should be added.</param>
 		/// <param name="activatedFaults">The faults activated by the transition to reach the state.</param>
-		private bool Add(byte* successorState, FaultSet activatedFaults)
+		private void StoreTransition(FaultSet activatedFaults,Probability probability)
 		{
-			var hash = MemoryBuffer.Hash(successorState, _stateVectorSize, 0);
+			var targetStateGroup = (Mode == MinimalizationMode.UseFaultMinimalization) ? _tempStateMemoryUnnotified : _tempStateMemoryNotified;
+
+			var hash = MemoryBuffer.Hash(targetStateGroup, _stateVectorSize, 0);
 			for (var i = 1; i < ProbeThreshold; ++i)
 			{
 				var stateHash = MemoryBuffer.Hash((byte*)&hash, sizeof(int), i * 8345723) % _capacity;
-				var faultIndex = _lookup[stateHash];
+				var targetStateGroupIndex = _lookup[stateHash];
 
 				// If we don't know the state yet, set everything up and add the transition
-				if (faultIndex == -1)
+				if (targetStateGroupIndex == -1)
 				{
-					_successors.Add((uint)stateHash);
-					AddFaultMetadata(stateHash, activatedFaults, -1);
-					MemoryBuffer.Copy(successorState, _hashedStateMemory + stateHash * _stateVectorSize, _stateVectorSize);
+					_stateHashesOfTargetStateGroups.Add((uint)stateHash);
+					AddTargetStateGroupElement(stateHash, activatedFaults, probability, - 1);
+					MemoryBuffer.Copy(targetStateGroup, _hashedStateMemory + stateHash * _stateVectorSize, _stateVectorSize);
 
-					return true;
+					return;
 				}
 
 				// If there is a hash conflict, try again
-				if (!MemoryBuffer.AreEqual(successorState, _hashedStateMemory + stateHash * _stateVectorSize, _stateVectorSize))
+				if (!MemoryBuffer.AreEqual(targetStateGroup, _hashedStateMemory + stateHash * _stateVectorSize, _stateVectorSize))
 					continue;
 
 				// The transition has an already-known target state; it might have to be added or invalidate previously found transitions
-				return UpdateTransitions(stateHash, activatedFaults, faultIndex);
+				UpdateTargetStateGroup(stateHash, activatedFaults, probability, targetStateGroupIndex);
+				return;
 			}
 
 			throw new OutOfMemoryException(
@@ -190,39 +188,37 @@ namespace SafetySharp.Runtime
 		///   Adds the current transition if it is activation-minimal. Previously found transition might have to be removed if they are
 		///   no longer activation-minimal.
 		/// </summary>
-		private bool UpdateTransitions(long stateHash, FaultSet activatedFaults, int faultIndex)
+		private void UpdateTargetStateGroup(long stateHash, FaultSet activatedFaults, Probability probability,int targetStateGroupIndex)
 		{
 			bool addTransition;
 			bool addFaults;
 			bool cleanupTransitions;
 
-			ClassifyActivatedFaults(activatedFaults, faultIndex, out addTransition, out addFaults, out cleanupTransitions);
+			ClassifyActivatedFaults(activatedFaults, targetStateGroupIndex, out addTransition, out addFaults, out cleanupTransitions);
 
 			if (cleanupTransitions)
-				CleanupTransitions(activatedFaults, faultIndex, stateHash);
+				CleanupTargetStateGroup(activatedFaults, targetStateGroupIndex, stateHash);
 
-			if (addFaults)
-				AddFaultMetadata(stateHash, activatedFaults, _lookup[stateHash]);
-
-			return addTransition;
+			if (addFaults|| addTransition)
+				AddTargetStateGroupElement(stateHash, activatedFaults, probability, _lookup[stateHash]);
 		}
 
 		/// <summary>
 		///   Removes all transitions that are no longer activation minimal due to the current transition.
 		/// </summary>
-		private void CleanupTransitions(FaultSet activatedFaults, int faultIndex, long stateHash)
+		private void CleanupTargetStateGroup(FaultSet activatedFaults, int targetStateGroupIndex, long stateHash)
 		{
-			var current = faultIndex;
+			var current = targetStateGroupIndex;
 			var nextPointer = &_lookup[stateHash];
 
 			while (current != -1)
 			{
-				var faultSet = &_faults[current];
+				var faultSet = &_targetStateGroupElements[current];
 
 				// Remove the fault set and the corresponding transition if it is a proper subset of the activated faults
 				if (activatedFaults.IsSubsetOf(faultSet->ActivatedFaults) && activatedFaults != faultSet->ActivatedFaults)
 				{
-					faultSet->Transition->IsValid = false;
+					faultSet->IsValid = false;
 					*nextPointer = faultSet->NextSet;
 				}
 
@@ -245,7 +241,7 @@ namespace SafetySharp.Runtime
 			// Basic invariant of the fault list: it contains only sets of activation-minimal faults
 			while (faultIndex != -1)
 			{
-				var faultSet = &_faults[faultIndex];
+				var faultSet = &_targetStateGroupElements[faultIndex];
 				faultIndex = faultSet->NextSet;
 
 				// If the fault set is a subset of the activated faults, the current transition is not activation-minimal;
@@ -272,20 +268,37 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Adds the fault metadata of the current transition.
 		/// </summary>
-		private void AddFaultMetadata(long stateHash, FaultSet activatedFaults, int nextSet)
+		private void AddTargetStateGroupElement(long stateHash, FaultSet activatedFaults, Probability probability, int nextSet)
 		{
-			if (_nextFaultIndex >= _capacity)
+			if (_nextTargetStateBufferIndex >= _capacity)
 				throw new OutOfMemoryException("Out of memory. Try increasing the successor state capacity.");
 
-			_faults[_nextFaultIndex] = new FaultSetInfo
+			var targetState = _targetStateMemory + _nextTargetStateBufferIndex * _stateVectorSize;
+			MemoryBuffer.Copy(_tempStateMemoryNotified, targetState, _stateVectorSize); // copy the real target state where all fault notifications have been enabled
+
+			if (_nextTargetStateGroupIndex >= _capacity)
+				throw new OutOfMemoryException("Out of memory. Try increasing the successor state capacity.");
+
+			_targetStateGroupElements[_nextTargetStateGroupIndex] = new TargetStateGroupElement
 			{
 				ActivatedFaults = activatedFaults,
+				Formulas = new StateFormulaSet(_formulas),
 				NextSet = nextSet,
-				Transition = &_transitions[Count]
+				TargetState = targetState,
+				Probability = probability,
+				IsValid = true,
 			};
 
-			_lookup[stateHash] = _nextFaultIndex;
-			_nextFaultIndex++;
+			_lookup[stateHash] = _nextTargetStateGroupIndex;
+			_nextTargetStateGroupIndex++;
+			_nextTargetStateBufferIndex++;
+		}
+
+		// Note: We only have one single TransitionEnumerator
+		internal TransitionEnumerator GetResettedEnumerator()
+		{
+			Enumerator.Reset();
+			return Enumerator;
 		}
 
 		/// <summary>
@@ -296,10 +309,10 @@ namespace SafetySharp.Runtime
 		{
 			if (!disposing)
 				return;
-
-			_transitionBuffer.SafeDispose();
+			
+			_tempStateBuffer.SafeDispose();
 			_targetStateBuffer.SafeDispose();
-			_faultsBuffer.SafeDispose();
+			_targetStateGroupElementsBuffer.SafeDispose();
 			_lookupBuffer.SafeDispose();
 		}
 
@@ -318,10 +331,6 @@ namespace SafetySharp.Runtime
 			/// </summary>
 			public StateFormulaSet Formulas;
 
-			/// <summary>
-			///   Indicates whether the transition is valid. A transition might be invalidated if it was added before it was discovered that
-			///   is actually not activation-minimal.
-			/// </summary>
 			public bool IsValid;
 
 			public Probability Probability;
@@ -330,11 +339,130 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Represents an element of a linked list of activated faults.
 		/// </summary>
-		private struct FaultSetInfo
+		internal struct TargetStateGroupElement
 		{
 			public FaultSet ActivatedFaults;
+			public StateFormulaSet Formulas;
 			public int NextSet;
-			public Transition* Transition;
+			//public Transition* Transition;
+
+			public bool IsValid;
+
+			public Probability Probability;
+
+			public byte* TargetState; //The target state of this fault with activated
+		}
+
+		internal enum MinimalizationMode
+		{
+			UseFaultMinimalization,
+			CombineSameTargetStates, //When a target state can be reached by two transitions (with maybe different FaultSets) then both transitions get combined into one transition without any information of FaultSets
+			Disable
+		}
+
+		internal class TransitionEnumerator : IEnumerator<Transition>
+		{
+			private TransitionSet _transitionSet;
+			private readonly Func<bool>[] _formulas;
+			
+			private TargetStateGroupElement? currentElement;
+
+			private int _targetStateGroupHashIterator;
+
+			public TransitionEnumerator(TransitionSet transitionSet, Func<bool>[] formulas)
+			{
+				_transitionSet = transitionSet;
+				_formulas = formulas;
+				Reset();
+			}
+
+			/// <summary>
+			/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+			/// </summary>
+			public void Dispose()
+			{
+			}
+
+			private bool MoveToNextStateGroup()
+			{
+				if (_transitionSet._stateHashesOfTargetStateGroups.Count <= _targetStateGroupHashIterator)
+				{
+					currentElement = null;
+					return false;
+				}
+				var stateGroupHash = _transitionSet._stateHashesOfTargetStateGroups[_targetStateGroupHashIterator++];
+				var nextPointer = _transitionSet._lookup[stateGroupHash];
+				if (nextPointer == -1)
+				{
+					currentElement = null;
+					return false;
+				}
+				currentElement = _transitionSet._targetStateGroupElements[nextPointer];
+				return true;
+			}
+
+			/// <summary>
+			/// Advances the enumerator to the next element of the collection.
+			/// </summary>
+			/// <returns>
+			/// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
+			/// </returns>
+			/// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
+			public bool MoveNext()
+			{
+				if (currentElement == null)
+				{
+					return MoveToNextStateGroup();
+				}
+				var nextPointer = currentElement.Value.NextSet;
+
+				if (nextPointer == -1)
+					return MoveToNextStateGroup();
+				currentElement = _transitionSet._targetStateGroupElements[nextPointer];
+				return true;
+			}
+
+			/// <summary>
+			/// Sets the enumerator to its initial position, which is before the first element in the collection.
+			/// </summary>
+			/// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
+			public void Reset()
+			{
+				_targetStateGroupHashIterator = 0;
+				currentElement=null;
+			}
+
+			/// <summary>
+			/// Gets the element in the collection at the current position of the enumerator.
+			/// </summary>
+			/// <returns>
+			/// The element in the collection at the current position of the enumerator.
+			/// </returns>
+			public Transition Current
+			{
+				get
+				{
+					var currentTargetStateGroupElement = currentElement.Value;
+					return new Transition
+					{
+						TargetState = currentTargetStateGroupElement.TargetState,
+						Formulas = currentTargetStateGroupElement.Formulas,
+						Probability = currentTargetStateGroupElement.Probability,
+						IsValid =  currentTargetStateGroupElement.IsValid
+					};
+				}
+			}
+
+			/// <summary>
+			/// Gets the current element in the collection.
+			/// </summary>
+			/// <returns>
+			/// The current element in the collection.
+			/// </returns>
+			object IEnumerator.Current
+			{
+				get { return Current; }
+			}
 		}
 	}
 }

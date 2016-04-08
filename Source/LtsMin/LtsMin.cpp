@@ -238,14 +238,20 @@ int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, Transit
 			Globals::Model->ComputeSuccessorStates(Globals::Transitions, (unsigned char*)state);
 
 		transition_info info = { nullptr, 0, 0 };
-		for (auto i = 0; i < Globals::Transitions->Count; ++i)
+
+		auto transitionEnumerator = Globals::Transitions->GetResettedEnumerator();
+		int count = 0;
+
+		while (transitionEnumerator->MoveNext())
 		{
-			auto stateMemory = (int32_t*)Globals::Transitions[i]->TargetState;
+			auto transition = transitionEnumerator->Current;
+			auto stateMemory = (int32_t*)transition.TargetState;
 			stateMemory[0] = 0;
 			callback(context, &info, stateMemory, nullptr);
+			++count;
 		}
 
-		return Globals::Transitions->Count;
+		return count;
 	}
 	catch (Exception^ e)
 	{

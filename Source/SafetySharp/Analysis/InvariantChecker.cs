@@ -258,28 +258,30 @@ namespace SafetySharp.Analysis
 			/// </summary>
 			private void AddStates()
 			{
-				if (_transitions.Count == 0)
+				if (_transitions.ComputedTransitionCount == 0)
 					throw new InvalidOperationException("Deadlock detected.");
 
 				var transitionCount = 0;
 				_stateStack.PushFrame();
 
-				for (var i = 0; i < _transitions.Count; ++i)
+				var transitionEnumerator = _transitions.GetResettedEnumerator();
+
+				while (transitionEnumerator.MoveNext())
 				{
-					var transition = _transitions[i];
-					if (!transition->IsValid)
+					var transition = transitionEnumerator.Current;
+					if (!transition.IsValid)
 						continue;
 
 					// Store the state if it hasn't been discovered before
 					int index;
-					if (_states.AddState(transition->TargetState, out index))
+					if (_states.AddState(transition.TargetState, out index))
 					{
 						Interlocked.Increment(ref _context._stateCount);
 						_stateStack.PushState(index);
 					}
 
 					// Check if the invariant is violated; if so, generate a counter example and abort
-					if (!transition->Formulas[0])
+					if (!transition.Formulas[0])
 					{
 						_context._loadBalancer.Terminate();
 						CreateCounterExample(endsWithException: false);
