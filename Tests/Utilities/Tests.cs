@@ -36,7 +36,6 @@ namespace Tests.Utilities
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Microsoft.CodeAnalysis.Diagnostics;
 	using SafetySharp.Compiler;
-	using SafetySharp.Compiler.Analyzers;
 	using SafetySharp.Compiler.Roslyn.Symbols;
 	using SafetySharp.Compiler.Roslyn.Syntax;
 	using SafetySharp.Modeling;
@@ -53,6 +52,20 @@ namespace Tests.Utilities
 		///   The number of dynamically generated assemblies.
 		/// </summary>
 		private static int _assemblyCount;
+
+		/// <summary>
+		///   The assemblies that have to be loaded when compiling S# code.
+		/// </summary>
+		private static readonly string[] _assemblies;
+
+		/// <summary>
+		///   Initializes the type.
+		/// </summary>
+		static Tests()
+		{
+			const string facadesPath = @"Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.2\Facades";
+			_assemblies = Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), facadesPath));
+		}
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -161,14 +174,16 @@ namespace Tests.Utilities
 		{
 			var compilation = CSharpCompilation
 				.Create("TestAssembly" + Interlocked.Increment(ref _assemblyCount))
-				.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true))
+				.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true,
+					assemblyIdentityComparer: DesktopAssemblyIdentityComparer.Default))
 				.AddSyntaxTrees(syntaxTrees)
 				.AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
-				.AddReferences(MetadataReference.CreateFromFile(typeof(DynamicAttribute).Assembly.Location))
-				.AddReferences(MetadataReference.CreateFromFile(typeof(Tests).Assembly.Location))
+				.AddReferences(MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(ISet<>).Assembly.Location))
+				.AddReferences(_assemblies.Select(assembly => MetadataReference.CreateFromFile(assembly)))
+				.AddReferences(MetadataReference.CreateFromFile(typeof(Tests).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Component).Assembly.Location))
-				.AddReferences(MetadataReference.CreateFromFile(typeof(DiagnosticIdentifier).Assembly.Location))
+				.AddReferences(MetadataReference.CreateFromFile(typeof(Compiler).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Should).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(ImmutableArray).Assembly.Location));
 
