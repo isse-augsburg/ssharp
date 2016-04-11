@@ -30,6 +30,7 @@ namespace SafetySharp.Analysis
 {
 	using System.Globalization;
 	using System.IO;
+	using FormulaVisitors;
 	using Utilities;
 
 	public class Prism : ProbabilisticModelChecker
@@ -278,9 +279,10 @@ namespace SafetySharp.Analysis
 			writer.Write(")");
 
 			var stateFormulaSet = CompactProbabilityMatrix.StateLabeling[transition.State];
-			for (var i = 0; i < CompactProbabilityMatrix.NoOfLabels; i++)
+			for (var i = 0; i < CompactProbabilityMatrix.NoOfStateFormulaLabels; i++)
 			{
-				writer.Write(" & (formula" + i + "' = ");
+				var label = CompactProbabilityMatrix.StateFormulaLabels[i];
+				writer.Write(" & (" + label + "' = ");
 				if (stateFormulaSet[i])
 					writer.Write("true");
 				else
@@ -305,9 +307,9 @@ namespace SafetySharp.Analysis
 			streamPrism.WriteLine("");
 			streamPrism.WriteLine("global currentState : [0.." + CompactProbabilityMatrix.States + "] init 0;"); // 0 is artificial initial state.
 
-			for (var i = 0; i < CompactProbabilityMatrix.NoOfLabels; i++)
-			{
-				streamPrism.WriteLine("global formula" + i + " : bool init false;");
+			foreach (var label in CompactProbabilityMatrix.StateFormulaLabels)
+				{
+				streamPrism.WriteLine("global " + label + " : bool init false;");
 			}
 			streamPrism.WriteLine("");
 			streamPrism.WriteLine("module systemModule");
@@ -351,10 +353,13 @@ namespace SafetySharp.Analysis
 		{
 			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
 			WriteProbabilityMatrixToDisk();
-			
+
+			var transformationVisitor = new PrismTransformer();
+			transformationVisitor.Visit(formulaToCheck);
+
 			using (var fileProperties = new TemporaryFile("props"))
 			{
-				var formulaToCheckString = "P=? [ F formula0=true ]";
+				var formulaToCheckString = "P=? [ F "+ transformationVisitor.TransformedFormula + "=true ]";
 				File.WriteAllText(fileProperties.FilePath, formulaToCheckString);
 
 				var prismArguments = _filePrism.FilePath + " " + fileProperties.FilePath;

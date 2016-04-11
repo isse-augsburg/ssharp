@@ -62,13 +62,14 @@ namespace SafetySharp.Analysis
 		{
 			var firstElement = true;
 			var stateFormulaSet = CompactProbabilityMatrix.StateLabeling[state];
-			for (var i = 0; i < CompactProbabilityMatrix.NoOfLabels; i++)
+			for (var i = 0; i < CompactProbabilityMatrix.NoOfStateFormulaLabels; i++)
 			{
 				if (stateFormulaSet[i])
 				{
 					if (firstElement == false)
 						writer.Write(" !");
-					writer.Write("formula" + i);
+					var label = CompactProbabilityMatrix.StateFormulaLabels[i];
+					writer.Write(label);
 					firstElement = false;
 				}
 			}

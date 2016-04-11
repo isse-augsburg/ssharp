@@ -46,6 +46,8 @@
     <Compile Include="Analysis\AnalysisException.cs" />
     <Compile Include="Analysis\AnalysisResult.cs" />
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
+    <Compile Include="Analysis\FormulaVisitors\PrismTransformer.cs" />
+    <Compile Include="Analysis\FormulaVisitors\MrmcTransformer.cs" />
     <Compile Include="Analysis\ProbabilisticModelChecker.cs" />
     <Compile Include="Analysis\ProbabilisticModelChecker.Prism.cs">
       <DependentUpon>ProbabilisticModelChecker.cs</DependentUpon>

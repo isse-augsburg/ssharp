@@ -52,11 +52,11 @@ namespace SafetySharp.Runtime
 		internal bool this[int index]
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get { return (_formulas & (1 << index)) == 1; }
+			get { return (_formulas & (1 << index)) != 0; }
 		}
 
 		/// <summary>
-		///   Checks whether the number of formlas in <paramref name="formulaCount" /> is supported.
+		///   Checks whether the number of formulas in <paramref name="formulaCount" /> is supported.
 		/// </summary>
 		/// <param name="formulaCount">The formula count that should be checked.</param>
 		internal static void CheckFormulaCount(int formulaCount)

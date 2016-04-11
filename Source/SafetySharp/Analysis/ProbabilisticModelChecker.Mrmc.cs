@@ -30,6 +30,7 @@ namespace SafetySharp.Analysis
 {
 	using System.Globalization;
 	using System.IO;
+	using FormulaVisitors;
 	using Utilities;
 
 	public class Mrmc : ProbabilisticModelChecker
@@ -68,13 +69,14 @@ namespace SafetySharp.Analysis
 
 			streamStateLabelings.WriteLine("#DECLARATION");
 			//bool firstElement = true;
-			for (var i = 0; i < CompactProbabilityMatrix.NoOfLabels; i++)
+			for (var i = 0; i < CompactProbabilityMatrix.NoOfStateFormulaLabels; i++)
 			{
+				var label = CompactProbabilityMatrix.StateFormulaLabels[i];
 				if (i > 0)
 				{
 					streamStateLabelings.Write(" ");
 				}
-				streamStateLabelings.Write("formula" + i);
+				streamStateLabelings.Write(label);
 			}
 			streamStateLabelings.WriteLine();
 			streamStateLabelings.WriteLine("#END");
@@ -82,10 +84,11 @@ namespace SafetySharp.Analysis
 			{
 				streamStateLabelings.Write(stateFormulaSet.Key);
 				//stateFormulaSet.Value.
-				for (var i = 0; i < CompactProbabilityMatrix.NoOfLabels; i++)
+				for (var i = 0; i < CompactProbabilityMatrix.NoOfStateFormulaLabels; i++)
 				{
+					var label = CompactProbabilityMatrix.StateFormulaLabels[i];
 					if (stateFormulaSet.Value[i])
-						streamStateLabelings.Write(" formula" + i);
+						streamStateLabelings.Write(" " + label);
 				}
 				streamStateLabelings.WriteLine();
 			}
@@ -101,13 +104,19 @@ namespace SafetySharp.Analysis
 			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
 			WriteProbabilityMatrixToDisk();
 
+			//var formulaAsString = "P { > 0 } [ tt U formula0 ]";
+			var transformationVisitor = new MrmcTransformer();
+			transformationVisitor.Visit(formulaToCheck);
+
+			var formulaAsString = "P { > 0 } [ tt U "+ transformationVisitor.TransformedFormula +" ]";
+
 
 			using (var fileResults = new TemporaryFile("res"))
 			using (var fileCommandScript = new TemporaryFile("cmd"))
 			{
 				var script = new StringBuilder();
 				script.AppendLine("set method_path gauss_jacobi");
-				script.AppendLine("P { > 0 } [ tt U formula0 ]");
+				script.AppendLine(formulaAsString);
 				script.AppendLine("write_res_file 1");
 				script.AppendLine("quit");
 

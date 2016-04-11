@@ -23,6 +23,7 @@
 namespace Tests.Analysis.Probabilistic
 {
 	using System;
+	using System.Diagnostics;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
@@ -52,13 +53,19 @@ namespace Tests.Analysis.Probabilistic
 				probabilityOfFinal3 = checkProbabilityOfFinal3.Check();
 			}
 
+			Debugger.Break();
 			probabilityOfFinal2.Between(0.399, 0.401).ShouldBe(true);
 			probabilityOfFinal3.Between(0.599, 0.601).ShouldBe(true);
 		}
 
 		private class C : Component
 		{
-			public int Value = 0;
+			private int _value;
+			public int Value
+			{
+				set { _value = value; }
+				get {  return _value; }
+			}
 
 			public override void Update()
 			{

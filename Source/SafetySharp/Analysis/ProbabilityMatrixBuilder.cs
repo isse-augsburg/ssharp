@@ -26,6 +26,8 @@ namespace SafetySharp.Analysis
 	using System.Collections.Concurrent;
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using System.Diagnostics;
+	using System.Linq;
 	using System.Runtime.InteropServices;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -193,6 +195,9 @@ namespace SafetySharp.Analysis
 				_model = model;
 				_stateStack = stateStack;
 
+				var stateFormulaLabels =
+					_model.StateFormulas.Select(stateformula => stateformula.Label).ToArray();
+
 				ProbabilityMatrix = new SparseProbabilityMatrix()
 				{
 					//TODO-Probabilistic: Labels : new List<StateFormula>(),
@@ -200,11 +205,27 @@ namespace SafetySharp.Analysis
 					StatesLeadingToException = new List<TupleStateProbability>(),
 					//States = _context._states,
 					StateLabeling = new Dictionary<int, StateFormulaSet>(),
-					NoOfLabels = 1
+					NoOfStateFormulaLabels = _model.StateFormulas.Length,
+					StateFormulaLabels = stateFormulaLabels
 				};
 
-				var invariant = CompilationVisitor.Compile(_model.Formulas[0]);
-				_transitions = new TransitionSet(model, successorCapacity, invariant);
+				//add debugger
+				Func<Func<bool>, Func<bool>> addDebugger = (func) =>
+				{
+					return () =>
+					{
+						
+						var result = func();
+						return result;
+					};
+				};
+
+				var compiledStateFormulas =
+					_model.StateFormulas.Select(CompilationVisitor.Compile)
+					//.Select(addDebugger)
+					.ToArray();
+				
+				_transitions = new TransitionSet(model, successorCapacity, compiledStateFormulas);
 			}
 
 			/// <summary>
@@ -455,20 +476,6 @@ namespace SafetySharp.Analysis
 		public int State;
 		public Probability Probability;
 	}
-	/*
-	struct FullTransition
-	{
-		internal FullTransition(int sourceState, int targetState, Probability probability)
-		{
-			SourceState = sourceState;
-			TargetState = targetState;
-			Probability = probability;
-		}
-		// refer to the index in StateStorage, not the actual bytevector
-		public int SourceState;
-		public int TargetState;
-		public Probability Probability;
-	}*/
 
 	internal class CompactProbabilityMatrix
 	{
@@ -476,7 +483,10 @@ namespace SafetySharp.Analysis
 		public int States;
 		public List<TupleStateProbability> InitialStates=new List<TupleStateProbability>();
 		public Dictionary<int, List<TupleStateProbability>> TransitionGroups = new Dictionary<int, List<TupleStateProbability>>();
-		public int NoOfLabels=0;
+
+		public int NoOfStateFormulaLabels;
+		public string[] StateFormulaLabels;
+
 		public int NumberOfTransitions;
 		public Dictionary<int, StateFormulaSet> StateLabeling=new Dictionary<int, StateFormulaSet>();
 
@@ -512,7 +522,8 @@ namespace SafetySharp.Analysis
 		// TODO-Probabilistic: Exception gets StateNumber MaxState+1
 
 		//TODO-Probabilistic: why reevaluating again and again -> save in StateStorage and remove here
-		public int NoOfLabels;
+		public int NoOfStateFormulaLabels;
+		public string[] StateFormulaLabels;
 		public Dictionary<int,StateFormulaSet> StateLabeling;
 
 		public void AddTransition(int sourceState, int targetState, Probability probability)
@@ -589,15 +600,16 @@ namespace SafetySharp.Analysis
 				var compactId = CreateCompactId(stateFormulaSet.Key);
 				compactProbabilityMatrix.StateLabeling.Add(compactId,stateFormulaSet.Value);
 			}
-			compactProbabilityMatrix.NoOfLabels = NoOfLabels;
+			compactProbabilityMatrix.NoOfStateFormulaLabels = NoOfStateFormulaLabels;
 			// TODO: Add label for exception
 			// todo: remove hack
 			Func<bool> returnFalse = () => false;
-			var allFalseStateFormulaSet = new Func<bool>[NoOfLabels];
-			for (int i = 0; i < NoOfLabels; i++)
+			var allFalseStateFormulaSet = new Func<bool>[NoOfStateFormulaLabels];
+			for (int i = 0; i < NoOfStateFormulaLabels; i++)
 			{
 				allFalseStateFormulaSet[i] = returnFalse;
 			}
+			compactProbabilityMatrix.StateFormulaLabels = StateFormulaLabels;
 			compactProbabilityMatrix.AddTransition(exceptionState, exceptionState, Probability.One);
 			compactProbabilityMatrix.StateLabeling.Add(exceptionState,new StateFormulaSet(allFalseStateFormulaSet));
 
