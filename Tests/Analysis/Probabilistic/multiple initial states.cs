@@ -27,4 +27,41 @@ namespace Tests.Analysis.Probabilistic
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
+
+	using SafetySharp.Modeling;
+	using Shouldly;
+
+	internal class MultipleInitialStates : ProbabilisticAnalysisTestObject
+	{
+		protected override void Check()
+		{
+			var c = new C();
+			Probability probabilityOfFinally2;
+
+			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
+			{
+				var typeOfModelChecker = (Type)Arguments[0];
+				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker, probabilityChecker);
+
+				Formula finally2 = c.F==2;
+				var checkProbabilityOfFinally2 = probabilityChecker.CalculateProbabilityToReachStates(finally2);
+				probabilityChecker.CreateProbabilityMatrix();
+				probabilityChecker.DefaultChecker = modelChecker;
+				probabilityOfFinally2 = checkProbabilityOfFinally2.Check();
+				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);
+			}
+
+			probabilityOfFinally2.Between(0.33, 0.34).ShouldBe(true);
+		}
+
+		private class C : Component
+		{
+			public int F;
+
+			protected internal override void Initialize()
+			{
+				F = Choose(1, 2, 3);
+			}
+		}
+	}
 }

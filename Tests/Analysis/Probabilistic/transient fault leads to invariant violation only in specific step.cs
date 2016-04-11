@@ -33,7 +33,7 @@ namespace Tests.Analysis.Probabilistic
 		protected override void Check()
 		{
 			var c = new C();
-			Probability probabilityOfFinal1;
+			Probability probabilityOfInvariantViolation;
 
 			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
 			{
@@ -41,14 +41,14 @@ namespace Tests.Analysis.Probabilistic
 				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker,probabilityChecker);
 				
 				Formula invariantViolated = c.ViolateInvariant;
-				var checkProbabilityOf1 = probabilityChecker.CalculateProbabilityToReachStates(invariantViolated);
+				var checkProbabilityOfInvariantViolation = probabilityChecker.CalculateProbabilityToReachStates(invariantViolated);
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
-				probabilityOfFinal1 = checkProbabilityOf1.Check();
+				probabilityOfInvariantViolation = checkProbabilityOfInvariantViolation.Check();
 				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);
 			}
 
-			probabilityOfFinal1.Between(0.4, 0.6).ShouldBe(true);
+			probabilityOfInvariantViolation.Between(0.4, 0.6).ShouldBe(true);
 		}
 
 		private class C : Component
