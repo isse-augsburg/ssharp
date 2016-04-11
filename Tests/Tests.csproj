@@ -181,6 +181,7 @@
     <Compile Include="Analysis\Ltl\Violated\multiple choices.cs" />
     <Compile Include="Analysis\Ltl\Violated\single choice.cs" />
     <Compile Include="Analysis\Ltl\Violated\undo fault after successful activation.cs" />
+    <Compile Include="Analysis\Probabilistic\multiple formulas in one run.cs" />
     <Compile Include="Analysis\Probabilistic\permanent fault leads to invariant violation only in specific step.cs" />
     <Compile Include="Analysis\Probabilistic\transient fault leads to invariant violation only in specific step.cs" />
     <Compile Include="Analysis\Probabilistic\probabilities sum up to 1 even with permanent activatable fault.cs" />
