@@ -39,8 +39,9 @@ namespace Tests.Analysis.Probabilistic
 			{
 				var typeOfModelChecker = (Type)Arguments[0];
 				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker,probabilityChecker);
-
-				var checkProbabilityOf1 = probabilityChecker.CalculateProbabilityToReachStates(c.InvariantViolated());
+				
+				Formula invariantViolated = c.ViolateInvariant;
+				var checkProbabilityOf1 = probabilityChecker.CalculateProbabilityToReachStates(invariantViolated);
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
 				probabilityOfFinal1 = checkProbabilityOf1.Check();
@@ -58,17 +59,7 @@ namespace Tests.Analysis.Probabilistic
 			private int _timestep;
 
 			public bool ViolateInvariant;
-
-			public bool ReturnViolateInvariant()
-			{
-				return ViolateInvariant;
-			}
-
-			public Formula InvariantViolated()
-			{
-				return (_timestep>5);
-			}
-
+			
 			protected virtual void CriticalStep()
 			{
 				ViolateInvariant = false;
