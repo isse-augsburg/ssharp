@@ -20,25 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.RootDiscovery
+namespace Tests.Serialization.Objects
 {
 	using System;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
-	using Utilities;
 
-	internal class None : TestObject
+	internal class NondiscoverableDelegate : SerializationObject
 	{
 		protected override void Check()
 		{
-			var m = new M();
+			var c = new C();
 
-			Should.Throw<InvalidOperationException>(() => { var x = m.Roots[0]; });
-			Should.Throw<ArgumentException>(() => TestModel.InitializeModel());
+			GenerateCode(SerializationMode.Optimized, c);
+
+			Serialize();
+			c.N = null;
+
+			Deserialize();
+			c.N.ShouldBe(null);
 		}
 
-		private class M : ModelBase
+		private class C
 		{
+			[Hidden, NonDiscoverable]
+			public Action N = () => { };
 		}
 	}
 }

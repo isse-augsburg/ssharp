@@ -65,6 +65,9 @@ namespace SafetySharp.Modeling
 			internal set
 			{
 				Requires.That(_roots == null, "The roots have already been set.");
+				Requires.NotNull(value, nameof(value));
+				Requires.That(value.Length > 0, nameof(value), "Expected at least one root component.");
+
 				_roots = value;
 			}
 		}

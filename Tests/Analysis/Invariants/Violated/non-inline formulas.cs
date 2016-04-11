@@ -20,25 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.RootDiscovery
+namespace Tests.Analysis.Invariants.Violated
 {
-	using System;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
-	using Utilities;
 
-	internal class None : TestObject
+	internal class NonInlineFormulas : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			var m = new M();
+			var c = new C();
 
-			Should.Throw<InvalidOperationException>(() => { var x = m.Roots[0]; });
-			Should.Throw<ArgumentException>(() => TestModel.InitializeModel());
+			CheckInvariant(c.Invariant1, c).ShouldBe(false);
+			CheckInvariant(c.Invariant2, c).ShouldBe(false);
+			CheckInvariant(c.Invariant3(), c).ShouldBe(false);
+			CheckInvariant(c.Invariant4, c).ShouldBe(false);
+			CheckInvariant(c.Invariant5(), c).ShouldBe(false);
 		}
 
-		private class M : ModelBase
+		private class C : Component
 		{
+			private int _f;
+			public readonly Formula Invariant2;
+
+			public C()
+			{
+				Invariant1 = _f != 3;
+				Invariant2 = _f != 4;
+			}
+
+			public Formula Invariant1 { get; }
+			public Formula Invariant4 => Invariant1;
+
+			public override void Update()
+			{
+				if (_f < 10)
+					_f++;
+			}
+
+			public Formula Invariant3() => Invariant1;
+			public Formula Invariant5() => _f == 5;
 		}
 	}
 }

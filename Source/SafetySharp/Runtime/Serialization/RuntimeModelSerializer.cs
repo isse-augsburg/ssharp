@@ -212,12 +212,14 @@ namespace SafetySharp.Runtime.Serialization
 
 			deserializer(objectTable, serializedState);
 
-			// 1. We instantiate the runtime type for each component and replace the original component
-			//    instance with the new runtime instance; we also replace all of the component's fault effects
-			//    with that instance and deserialize the initial state again. Afterwards, we have completely
-			//    replaced the original instance with its runtime instance, taking over all serialized data
-			// 2. We substitute the dummy delegate objects with the actual instances obtained from the DelegateMetadata instances
+			// We instantiate the runtime type for each component and replace the original component
+			// instance with the new runtime instance; we also replace all of the component's fault effects
+			// with that instance and deserialize the initial state again. Afterwards, we have completely
+			// replaced the original instance with its runtime instance, taking over all serialized data
 			objectTable.SubstituteRuntimeInstances();
+			deserializer(objectTable, serializedState);
+
+			// We substitute the dummy delegate objects with the actual instances obtained from the DelegateMetadata instances
 			objectTable.SubstituteDelegates();
 			deserializer(objectTable, serializedState);
 

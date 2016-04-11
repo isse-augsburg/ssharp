@@ -20,25 +20,57 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.RootDiscovery
+namespace Tests.Execution.Simulation
 {
-	using System;
+	using System.Linq;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	internal class None : TestObject
+	internal class LinqQuery : TestObject
 	{
 		protected override void Check()
 		{
-			var m = new M();
+			var simulator = new Simulator(TestModel.InitializeModel(new C()));
+			var c = (C)simulator.Model.Roots[0];
 
-			Should.Throw<InvalidOperationException>(() => { var x = m.Roots[0]; });
-			Should.Throw<ArgumentException>(() => TestModel.InitializeModel());
+			c.X.ShouldBe(0);
+			c.Y.ShouldBe(0);
+
+			simulator.SimulateStep();
+			c.X.ShouldBe(3320);
+			c.Y.ShouldBe(2480);
 		}
 
-		private class M : ModelBase
+		private class C : Component
 		{
+			public int X;
+			public int Y;
+
+			public C()
+			{
+				Bind(nameof(Q), nameof(P));
+			}
+
+			private extern decimal Q();
+			private decimal P() => 33.3m;
+
+			public override void Update()
+			{
+				var abc = new { Z = P(), W = "test" };
+
+				X = Enumerable
+					.Range(2, 100)
+					.Where(x => x > 10 && x < 51)
+					.Select((x, y) => new { X = x, Y = y })
+					.Sum(t => t.X + t.Y + (int)abc.Z);
+
+				Y = (from x in Enumerable.Range(2, 100)
+					  where x > 10 && x < 51
+					  select new { X = x, Y = x + 1 }).
+					Sum(t => t.X + t.Y);
+			}
 		}
 	}
 }
