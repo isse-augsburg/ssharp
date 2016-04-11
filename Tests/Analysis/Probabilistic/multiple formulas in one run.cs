@@ -54,7 +54,7 @@ namespace Tests.Analysis.Probabilistic
 			}
 
 			Debugger.Break();
-			probabilityOfFinal2.Between(0.399, 0.401).ShouldBe(true);
+			probabilityOfFinal2.Between(0.299, 0.301).ShouldBe(true);
 			probabilityOfFinal3.Between(0.599, 0.601).ShouldBe(true);
 		}
 
@@ -71,8 +71,8 @@ namespace Tests.Analysis.Probabilistic
 			{
 				if (Value == 0)
 				{
-					Value = Choose(new Option<int>(new Probability(0.2),1),
-								   new Option<int>(new Probability(0.4), 2),
+					Value = Choose(new Option<int>(new Probability(0.1), 1),
+								   new Option<int>(new Probability(0.3), 2),
 								   new Option<int>(new Probability(0.6), 3));
 				}
 			}

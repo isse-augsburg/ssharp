@@ -79,9 +79,9 @@ namespace SafetySharp.Analysis
 		private class PrismOutput
 		{
 			public string Formula;
-			public string Constants;
-			public string Prob0;
-			public string Prob1;
+			//public string Constants;
+			//public string Prob0;
+			//public string Prob1;
 			public string Yes;
 			public string No;
 			public string Maybe;
@@ -94,6 +94,12 @@ namespace SafetySharp.Analysis
 
 		private PrismOutput ParseOutput(List<string> inputLines)
 		{
+			foreach (var inputLine in inputLines)
+			{
+				if (inputLine.StartsWith("Error:"))
+					throw new Exception("Prism-"+inputLine);
+			}
+
 			//var inputLines = input.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 			var enumerator = ((IEnumerable<string>) inputLines).GetEnumerator();
 			System.Text.RegularExpressions.Match match = null;
@@ -156,59 +162,62 @@ namespace SafetySharp.Analysis
 			
 			// Parse until delimiter
 			if (!parseUntilIncludingString(_textDelimiter,null))
-				return null;
+				throw new Exception("Parsing prism output failed");
 
 			// Parse "Model checking: /formula/"
 			if (!parseUntilIncludingRegex(_parserFormula, null))
-				return null;
+				throw new Exception("Parsing prism output failed");
 			var formula = match.Groups["formula"].Value;
 
+			/*
 			// Parse "Prob0: : /prob0/"
 			if (!parseUntilIncludingRegex(_parserProb0, null))
-				return null;
+				throw new Exception("Parsing prism output failed");
 			var prob0 = match.Groups["prob0"].Value;
+			*/
 
+			/*
 			// Parse "Prob1: : /prob1/"
 			if (!parseUntilIncludingRegex(_parserProb1, null))
-				return null;
+				throw new Exception("Parsing prism output failed");
 			var prob1 = match.Groups["prob1"].Value;
-
+			*/
+			
 			// Parse "yes = /yes/, no = /no/, maybe = /maybe/"
 			if (!parseUntilIncludingRegex(_parserYesNoMaybe, null))
-				return null;
+				throw new Exception("Parsing prism output failed");
 			var yes = match.Groups["yes"].Value;
 			var no = match.Groups["no"].Value;
 			var maybe = match.Groups["maybe"].Value;
 
 			// Parse "Computing remaining probabilities..."
 			if (!parseUntilIncludingString(_textRemainingProbabilities, null))
-				return null;
-
+				throw new Exception("Parsing prism output failed");
+			
 			// Parse "Engine: : /engine/"
 			if (!parseUntilIncludingRegex(_parserEngine, null))
-				return null;
+				throw new Exception("Parsing prism output failed");
 			var engine = match.Groups["engine"].Value;
 
 			// Parse engineStats until including "Starting iterations..."
 			var engineStatsStringBuilder = new StringBuilder();
 			if (!parseUntilIncludingString(_textStartingIterations, engineStatsStringBuilder))
-				return null;
+				throw new Exception("Parsing prism output failed");
 			var enginestats = engineStatsStringBuilder.ToString();
 
 
 			// Parse iterations until excluding _parserSatisfyingValueInInitialState
 			var iterationsStringBuilder = new StringBuilder();
 			if (!parseUntilExcludingRegex(_parserSatisfyingValueInInitialState, iterationsStringBuilder))
-				return null;
+				throw new Exception("Parsing prism output failed");
 			var iterations = iterationsStringBuilder.ToString();
-			
 
 			// Now here is a split. Either the Quantitative Value was calculated or the qualitative.
 			// TODO: implement qualitative
 			//branch quantitative
 			PrismResult result = null;
 			if (!parseUntilIncludingRegex(_parserSatisfyingValueInInitialState, null))
-				return null;
+				throw new Exception("Parsing prism output failed");
 			var valueInInitialState = match.Groups["valueInInitialState"].Value;
 			result = new PrismResultQuantitative()
 			{
@@ -217,12 +226,12 @@ namespace SafetySharp.Analysis
 
 			// Parse "Time for model checking: /timeMc/"
 			if (!parseUntilIncludingRegex(_parserTimeMc, null))
-				return null;
+				throw new Exception("Parsing prism output failed");
 			var timeMc = match.Groups["timeMc"].Value;
 
 			// Parse "Result: /engine/ ..."
 			if (!parseUntilIncludingRegex(_parserResult, null))
-				return null;
+				throw new Exception("Parsing prism output failed");
 			var resultString = match.Groups["result"].Value;
 			
 			
@@ -230,8 +239,8 @@ namespace SafetySharp.Analysis
 			{
 				Formula = formula,
 				//Constants = constants,
-				Prob0 = prob0,
-				Prob1 = prob1,
+				//Prob0 = prob0,
+				//Prob1 = prob1,
 				Yes = yes,
 				No = no,
 				Maybe = maybe,
@@ -365,6 +374,7 @@ namespace SafetySharp.Analysis
 				var prismArguments = _filePrism.FilePath + " " + fileProperties.FilePath;
 
 				var prism = ExecutePrism(prismArguments);
+				_prismProcessOutput.Clear();
 				prism.Run();
 
 				var result = ParseOutput(_prismProcessOutput);
