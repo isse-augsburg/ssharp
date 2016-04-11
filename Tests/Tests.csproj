@@ -149,6 +149,7 @@
     <Compile Include="Analysis\Invariants\NotViolated\deterministic.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\disabled faults.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\fault activation.cs" />
+    <Compile Include="Analysis\Invariants\Violated\non-inline formulas.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\initial state.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\multiple subformulas.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\single choice.cs" />
