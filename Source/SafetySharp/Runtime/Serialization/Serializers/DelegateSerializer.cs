@@ -82,7 +82,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
 		{
 			if (mode == SerializationMode.Optimized)
-				throw new NotSupportedException("Delegates cannot be part of a model's state space.");
+				yield break;
 
 			var d = (Delegate)obj;
 			var method = d.Method;

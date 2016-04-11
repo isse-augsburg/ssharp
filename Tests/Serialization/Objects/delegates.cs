@@ -66,8 +66,6 @@ namespace Tests.Serialization.Objects
 
 			c.Multi();
 			c.D.X.ShouldBe(41);
-
-			Should.Throw<NotSupportedException>(() => GenerateCode(SerializationMode.Optimized, c));
 		}
 
 		private class C

@@ -586,6 +586,8 @@
     <Compile Include="Serialization\Misc\hidden state full.cs" />
     <Compile Include="Serialization\Misc\mixed 2.cs" />
     <Compile Include="Serialization\Misc\mixed 1.cs" />
+    <Compile Include="Serialization\Objects\delegate assignment.cs" />
+    <Compile Include="Serialization\Objects\nondiscoverable delegate.cs" />
     <Compile Include="Serialization\Objects\hidden array elements.cs" />
     <Compile Include="Serialization\Objects\hidden list elements.cs" />
     <Compile Include="Serialization\Objects\serialized arrays.cs" />
