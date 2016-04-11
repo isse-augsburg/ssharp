@@ -32,7 +32,9 @@ namespace Tests.Execution.RootDiscovery
 		protected override void Check()
 		{
 			var m = new M();
+
 			Should.Throw<InvalidOperationException>(() => { var x = m.Roots[0]; });
+			Should.Throw<ArgumentException>(() => TestModel.InitializeModel());
 		}
 
 		private class M : ModelBase
