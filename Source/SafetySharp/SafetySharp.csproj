@@ -59,6 +59,7 @@
     <Compile Include="Analysis\SafetyAnalysis.cs" />
     <Compile Include="Runtime\FaultSet.cs" />
     <Compile Include="Runtime\Serialization\DelegateMetadata.cs" />
+    <Compile Include="Runtime\Serialization\RangeRestrictionsGenerator.cs" />
     <Compile Include="Runtime\Serialization\Serializers\DelegateSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\MethodInfoSerializer.cs" />
     <Compile Include="Runtime\Serialization\StateVectorMismatchException.cs" />

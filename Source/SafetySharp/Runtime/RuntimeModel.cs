@@ -57,6 +57,11 @@ namespace SafetySharp.Runtime
 		private readonly SerializationDelegate _serialize;
 
 		/// <summary>
+		/// Restricts the ranges of the model's state variables.
+		/// </summary>
+		private readonly Action _restrictRanges;
+
+		/// <summary>
 		///   The objects referenced by the model that participate in state serialization.
 		/// </summary>
 		private readonly ObjectTable _serializedObjects;
@@ -109,6 +114,7 @@ namespace SafetySharp.Runtime
 
 			_deserialize = StateVectorLayout.CreateDeserializer(_serializedObjects);
 			_serialize = StateVectorLayout.CreateSerializer(_serializedObjects);
+			_restrictRanges = StateVectorLayout.CreateRangeRestrictor(_serializedObjects);
 			_stateHeaderBytes = stateHeaderBytes;
 
 			PortBinding.BindAll(objectTable);
@@ -209,6 +215,8 @@ namespace SafetySharp.Runtime
 
 				foreach (var obj in _serializedObjects.OfType<IInitializable>())
 					obj.Initialize();
+
+				_restrictRanges();
 			}
 		}
 
@@ -223,6 +231,8 @@ namespace SafetySharp.Runtime
 
 			foreach (var obj in _serializedObjects.OfType<IInitializable>())
 				obj.Initialize();
+
+			_restrictRanges();
 		}
 
 		/// <summary>
@@ -236,6 +246,8 @@ namespace SafetySharp.Runtime
 
 			foreach (var component in RootComponents)
 				component.Update();
+
+			_restrictRanges();
 		}
 
 		/// <summary>

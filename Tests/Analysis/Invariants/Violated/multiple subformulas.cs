@@ -20,75 +20,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Simulation
+namespace Tests.Analysis.Invariants.Violated
 {
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
-	using Utilities;
 
-	internal class VariableRanges : TestObject
+	internal class MultipleSubformulas : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			var simulator = new Simulator(TestModel.InitializeModel(new C()));
-			var c = (C)simulator.Model.Roots[0];
+			var c = new C();
 
-			c.X.ShouldBe(0);
-			c.Y.ShouldBe(0);
-			c.Z.ShouldBe(0);
+			Formula f0 = c.F != 0;
+			Formula f1 = c.F != 1;
+			Formula f2 = c.F != 2;
+			Formula f3 = c.F != 3;
 
-			simulator.SimulateStep();
-			c.X.ShouldBe(1);
-			c.Y.ShouldBe(1);
-			c.Z.ShouldBe(1);
-
-			simulator.SimulateStep();
-			c.X.ShouldBe(2);
-			c.Y.ShouldBe(0);
-			c.Z.ShouldBe(2);
-
-			simulator.SimulateStep();
-			c.X.ShouldBe(2);
-			c.Y.ShouldBe(1);
-			c.Z.ShouldBe(3);
-
-			var exception = Should.Throw<RangeViolationException>(() => simulator.SimulateStep());
-			exception.Field.ShouldBe(typeof(C).GetField("Z"));
-			exception.Object.ShouldBe(c);
-			exception.FieldValue.ShouldBe(4);
-			exception.Range.LowerBound.ShouldBe(0);
-			exception.Range.UpperBound.ShouldBe(3);
-			exception.Range.OverflowBehavior.ShouldBe(OverflowBehavior.Error);
-
-			simulator.Reset();
-			c.X.ShouldBe(0);
-			c.Y.ShouldBe(0);
-			c.Z.ShouldBe(0);
+			CheckInvariant(f0 && f1 && f2 && f3, c).ShouldBe(false);
+			CheckInvariant(f3 && f2 && f1 && f0, c).ShouldBe(false);
+			CheckInvariant(f3 && c.X && f0, c).ShouldBe(false);
 		}
 
 		private class C : Component
 		{
-			[Range(0, 2, OverflowBehavior.Clamp)]
-			public int X;
+			public int F;
+			public readonly Formula X;
 
-			[Range(0, 1, OverflowBehavior.WrapClamp)]
-			public int Y;
-
-			[Range(0, 3, OverflowBehavior.Error)]
-			public int Z;
-
-			protected internal override void Initialize()
+			public C()
 			{
-				Y = 77;
+				X = F != 2;
 			}
 
 			public override void Update()
 			{
-				++X;
-				++Y;
-				++Z;
+				F = Choose(2, 1);
 			}
 		}
 	}
