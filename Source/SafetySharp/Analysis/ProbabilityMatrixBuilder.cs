@@ -332,7 +332,8 @@ namespace SafetySharp.Analysis
 						ProbabilityMatrix.AddTransition(sourceState.Value,index, transition.Probability);
 					}
 
-					//TODO-Probabilistic: why adding again and again -> save in StateStorage and remove here
+					// TODO-Probabilistic: why adding again and again -> save in StateStorage and remove here
+					// TODO for debugging: Assure that if the index already exists the existing entry is exactly transition.Formulas
 					ProbabilityMatrix.StateLabeling[index] = transition.Formulas;
 
 					++transitionCount;
