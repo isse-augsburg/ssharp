@@ -120,10 +120,7 @@ namespace SafetySharp.Analysis
 			{
 				_runtimeModel.ExecuteStep();
 
-				// Serialize and deserialize the state to get the correct overflow behavior
 				_runtimeModel.Serialize(state);
-				_runtimeModel.Deserialize(state);
-
 				AddState(state);
 			}
 			else
@@ -132,10 +129,9 @@ namespace SafetySharp.Analysis
 					return;
 
 				_counterExample.DeserializeState(_stateIndex + 1);
-
 				_runtimeModel.Serialize(state);
-				AddState(state);
 
+				AddState(state);
 				Replay();
 			}
 		}
@@ -193,22 +189,12 @@ namespace SafetySharp.Analysis
 			_stateIndex = -1;
 
 			if (_counterExample == null)
-			{
 				_runtimeModel.Reset();
-
-				// Serialize and deserialize the state to get the correct overflow behavior
-				_runtimeModel.Serialize(state);
-				_runtimeModel.Deserialize(state);
-
-				AddState(state);
-			}
 			else
-			{
 				_counterExample.ReplayInitialState();
 
-				_runtimeModel.Serialize(state);
-				AddState(state);
-			}
+			_runtimeModel.Serialize(state);
+			AddState(state);
 		}
 
 		/// <summary>
@@ -219,10 +205,8 @@ namespace SafetySharp.Analysis
 			fixed (byte* sourceState = _states[_stateIndex - 1])
 				_runtimeModel.Replay(sourceState, _counterExample.GetReplayInformation(_stateIndex - 1), initializationStep: _stateIndex == -1);
 
-			// Serialize and deserialize the state to get the correct overflow behavior
 			var state = stackalloc byte[_runtimeModel.StateVectorSize];
 			_runtimeModel.Serialize(state);
-			_runtimeModel.Deserialize(state);
 
 			for (var i = 0; i < _runtimeModel.StateVectorSize; ++i)
 				Requires.That(state[i] == _states[_stateIndex][i], "Invalid replay of counter example: Unexpected state difference.");

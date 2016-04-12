@@ -23,10 +23,8 @@
 namespace SafetySharp.Runtime.Serialization
 {
 	using System;
-	using System.Linq;
 	using System.Reflection;
 	using System.Reflection.Emit;
-	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -431,106 +429,9 @@ namespace SafetySharp.Runtime.Serialization
 			// s = state
 			_il.Emit(OpCodes.Ldloc_0);
 
-			var exceedsFourBytes = metadata.ElementSizeInBits > 32;
-			if (metadata.Range != null && !metadata.DataType.IsEnum)
-			{
-				var continueLabel = _il.DefineLabel();
-
-				switch (metadata.Range.OverflowBehavior)
-				{
-					case OverflowBehavior.Error:
-						// if (v < lower | v > upper) throw
-						_il.Emit(OpCodes.Ldloc_1);
-						_il.Emit(OpCodes.Ldfld, metadata.Field);
-						_il.Emit(OpCodes.Dup);
-						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
-						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Clt_Un : OpCodes.Clt);
-
-						_il.Emit(OpCodes.Ldloc_1);
-						_il.Emit(OpCodes.Ldfld, metadata.Field);
-						LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
-						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Cgt_Un : OpCodes.Cgt);
-
-						_il.Emit(OpCodes.Or);
-						_il.Emit(OpCodes.Brfalse, continueLabel);
-
-						_il.Emit(OpCodes.Pop);
-						_il.Emit(OpCodes.Pop);
-
-						// throw new RangeViolationException(obj, field)
-						_il.Emit(OpCodes.Ldloc_1);
-						_il.Emit(OpCodes.Ldtoken, metadata.Field);
-						_il.Emit(OpCodes.Ldtoken, metadata.Field.DeclaringType);
-						var parameters = new[] { typeof(RuntimeFieldHandle), typeof(RuntimeTypeHandle) };
-						_il.Emit(OpCodes.Call, typeof(FieldInfo).GetMethod("GetFieldFromHandle", parameters));
-						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
-						_il.Emit(OpCodes.Box, metadata.EffectiveType);
-						LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
-						_il.Emit(OpCodes.Box, metadata.EffectiveType);
-						_il.Emit(OpCodes.Ldc_I4, (int)OverflowBehavior.Error);
-						_il.Emit(OpCodes.Newobj, typeof(RangeAttribute).GetConstructors().Single());
-						_il.Emit(OpCodes.Newobj, typeof(RangeViolationException).GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic).Single());
-						_il.Emit(OpCodes.Throw);
-						break;
-					case OverflowBehavior.Clamp:
-						var clamplabel = _il.DefineLabel();
-
-						_il.Emit(OpCodes.Ldloc_1);
-						_il.Emit(OpCodes.Ldfld, metadata.Field);
-						_il.Emit(OpCodes.Dup);
-						_il.Emit(OpCodes.Dup);
-
-						// if (v < lower) v = lower
-						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
-						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Bge_Un_S : OpCodes.Bge_S, clamplabel);
-						_il.Emit(OpCodes.Pop);
-						_il.Emit(OpCodes.Pop);
-						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
-						_il.Emit(OpCodes.Br, continueLabel);
-
-						// else if (v > upper) v = upper
-						_il.MarkLabel(clamplabel);
-						LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
-						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Ble_Un_S : OpCodes.Ble_S, continueLabel);
-						_il.Emit(OpCodes.Pop);
-						LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
-						break;
-					case OverflowBehavior.WrapClamp:
-						var wrapLabel = _il.DefineLabel();
-
-						_il.Emit(OpCodes.Ldloc_1);
-						_il.Emit(OpCodes.Ldfld, metadata.Field);
-						_il.Emit(OpCodes.Dup);
-						_il.Emit(OpCodes.Dup);
-
-						// if (v < lower) v = upper
-						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
-						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Bge_Un_S : OpCodes.Bge_S, wrapLabel);
-						_il.Emit(OpCodes.Pop);
-						_il.Emit(OpCodes.Pop);
-						LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
-						_il.Emit(OpCodes.Br, continueLabel);
-
-						// else if (v > upper) v = lower
-						_il.MarkLabel(wrapLabel);
-						LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
-						_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Ble_Un_S : OpCodes.Ble_S, continueLabel);
-						_il.Emit(OpCodes.Pop);
-						LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
-						break;
-					default:
-						Assert.NotReached("Unknown overflow behavior.");
-						break;
-				}
-
-				_il.MarkLabel(continueLabel);
-			}
-			else
-			{
-				// v = o.field
-				_il.Emit(OpCodes.Ldloc_1);
-				_il.Emit(OpCodes.Ldfld, metadata.Field);
-			}
+			// v = o.field
+			_il.Emit(OpCodes.Ldloc_1);
+			_il.Emit(OpCodes.Ldfld, metadata.Field);
 
 			// *s = v
 			_il.Emit(GetStoreElementOpCode(metadata.ElementSizeInBits / 8));
@@ -575,87 +476,6 @@ namespace SafetySharp.Runtime.Serialization
 			_il.Emit(OpCodes.Or);
 
 			_il.Emit(OpCodes.Stind_I1);
-		}
-
-		/// <summary>
-		///   Loads the <paramref name="constant" /> onto the stack.
-		/// </summary>
-		private void LoadConstant(object constant, bool exceedsFourBytes)
-		{
-			if (exceedsFourBytes)
-			{
-				if (constant is double)
-					_il.Emit(OpCodes.Ldc_I8, (double)constant);
-				else
-					_il.Emit(OpCodes.Ldc_I8, NormalizeToInt64(constant));
-			}
-			else
-			{
-				if (constant is float)
-					_il.Emit(OpCodes.Ldc_I4, (float)constant);
-				else
-					_il.Emit(OpCodes.Ldc_I4, NormalizeToInt32(constant));
-			}
-		}
-
-		/// <summary>
-		///   Normalizes the type of the <paramref name="constant" /> value.
-		/// </summary>
-		private static int NormalizeToInt32(object constant)
-		{
-			switch (Type.GetTypeCode(constant.GetType()))
-			{
-				case TypeCode.Char:
-					return (char)constant;
-				case TypeCode.SByte:
-					return (sbyte)constant;
-				case TypeCode.Byte:
-					return (byte)constant;
-				case TypeCode.Int16:
-					return (short)constant;
-				case TypeCode.UInt16:
-					return (ushort)constant;
-				case TypeCode.Int32:
-					return (int)constant;
-				case TypeCode.UInt32:
-					return (int)(uint)constant;
-				case TypeCode.Int64:
-					return checked((int)(long)constant);
-				case TypeCode.UInt64:
-					return checked((int)(ulong)constant);
-				default:
-					return Assert.NotReached<int>($"Cannot normalize value of type {constant.GetType().FullName}.");
-			}
-		}
-
-		/// <summary>
-		///   Normalizes the type of the <paramref name="constant" /> value.
-		/// </summary>
-		private static long NormalizeToInt64(object constant)
-		{
-			switch (Type.GetTypeCode(constant.GetType()))
-			{
-				case TypeCode.Char:
-					return (char)constant;
-				case TypeCode.SByte:
-					return (sbyte)constant;
-				case TypeCode.Byte:
-					return (byte)constant;
-				case TypeCode.Int16:
-					return (short)constant;
-				case TypeCode.UInt16:
-					return (ushort)constant;
-				case TypeCode.Int32:
-					return (int)constant;
-				case TypeCode.UInt32:
-					return (int)(uint)constant;
-				case TypeCode.Int64:
-					return (long)constant;
-				case TypeCode.UInt64:
-					return (long)(ulong)constant;
-				default:
-					return Assert.NotReached<long>($"Cannot normalize value of type {constant.GetType().FullName}.");
-			}
 		}
 
 		/// <summary>

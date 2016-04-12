@@ -36,6 +36,7 @@ namespace Tests
 		private SerializationDelegate _deserializer;
 		private ObjectTable _objectTable;
 		private SerializationDelegate _serializer;
+		private Action _rangeRestrictor;
 		protected byte* SerializedState { get; private set; }
 		protected int StateSlotCount { get; private set; }
 		protected int StateVectorSize { get; private set; }
@@ -55,6 +56,7 @@ namespace Tests
 			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_objectTable, mode);
 			_serializer = StateVectorLayout.CreateSerializer(_objectTable);
 			_deserializer = StateVectorLayout.CreateDeserializer(_objectTable);
+			_rangeRestrictor = StateVectorLayout.CreateRangeRestrictor(_objectTable);
 
 			StateSlotCount = StateVectorLayout.SizeInBytes / 4;
 			StateVectorSize = StateVectorLayout.SizeInBytes;
@@ -68,6 +70,7 @@ namespace Tests
 		protected void Serialize()
 		{
 			_buffer.CheckBounds();
+			_rangeRestrictor();
 			_serializer(SerializedState);
 			_buffer.CheckBounds();
 		}

@@ -36,11 +36,20 @@ namespace Tests.Analysis.Invariants.NotViolated
 			Formula f1 = c.F == 3;
 			Formula f2 = c.F == 5;
 			CheckInvariant(f1 || f2, c, d).ShouldBe(true);
+
+			Formula f3 = c.F != 0;
+			CheckInvariant(f3 && c.X, d).ShouldBe(true);
 		}
 
 		private class C : Component
 		{
 			public int F;
+			public readonly Formula X;
+
+			public C()
+			{
+				X = F == 3 || F == 5;
+			}
 		}
 
 		private class D : Component

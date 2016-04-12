@@ -160,6 +160,17 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
+		///   Dynamically generates a delegate that can be used to restrict state ranges.
+		/// </summary>
+		/// <param name="objects">The objects whose data is stored in the state vector.</param>
+		internal Action CreateRangeRestrictor(ObjectTable objects)
+		{
+			var generator = new RangeRestrictionsGenerator(methodName: "RestrictRanges");
+			generator.GenerateCode(Groups);
+			return generator.Compile(objects);
+		}
+
+		/// <summary>
 		///   Dynamically generates a delegate that can be used to serialize the state vector.
 		/// </summary>
 		/// <param name="objects">The objects whose data is stored in the state vector.</param>
