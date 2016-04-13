@@ -85,9 +85,9 @@ namespace SafetySharp.Analysis
 			public string Yes;
 			public string No;
 			public string Maybe;
-			public string Engine;
-			public string Enginestats;
-			public string Iterations;
+			//public string Engine;
+			//public string Enginestats;
+			//public string Iterations;
 			public string TimeMc;
 			public PrismResult Result;
 		}
@@ -98,6 +98,12 @@ namespace SafetySharp.Analysis
 			{
 				if (inputLine.StartsWith("Error:"))
 					throw new Exception("Prism-"+inputLine);
+			}
+			var doComputingRemainingProbabilities = false;
+			foreach (var inputLine in inputLines)
+			{
+				if (inputLine.StartsWith(_textRemainingProbabilities))
+					doComputingRemainingProbabilities = true;
 			}
 
 			//var inputLines = input.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
@@ -190,27 +196,30 @@ namespace SafetySharp.Analysis
 			var no = match.Groups["no"].Value;
 			var maybe = match.Groups["maybe"].Value;
 
-			// Parse "Computing remaining probabilities..."
-			if (!parseUntilIncludingString(_textRemainingProbabilities, null))
-				throw new Exception("Parsing prism output failed");
-			
-			// Parse "Engine: : /engine/"
-			if (!parseUntilIncludingRegex(_parserEngine, null))
-				throw new Exception("Parsing prism output failed");
-			var engine = match.Groups["engine"].Value;
+			if (doComputingRemainingProbabilities)
+			{
+				// Parse "Computing remaining probabilities..."
+				if (!parseUntilIncludingString(_textRemainingProbabilities, null))
+					throw new Exception("Parsing prism output failed");
 
-			// Parse engineStats until including "Starting iterations..."
-			var engineStatsStringBuilder = new StringBuilder();
-			if (!parseUntilIncludingString(_textStartingIterations, engineStatsStringBuilder))
-				throw new Exception("Parsing prism output failed");
-			var enginestats = engineStatsStringBuilder.ToString();
+				// Parse "Engine: : /engine/"
+				if (!parseUntilIncludingRegex(_parserEngine, null))
+					throw new Exception("Parsing prism output failed");
+				var engine = match.Groups["engine"].Value;
+
+				// Parse engineStats until including "Starting iterations..."
+				var engineStatsStringBuilder = new StringBuilder();
+				if (!parseUntilIncludingString(_textStartingIterations, engineStatsStringBuilder))
+					throw new Exception("Parsing prism output failed");
+				var enginestats = engineStatsStringBuilder.ToString();
 
 
-			// Parse iterations until excluding _parserSatisfyingValueInInitialState
-			var iterationsStringBuilder = new StringBuilder();
-			if (!parseUntilExcludingRegex(_parserSatisfyingValueInInitialState, iterationsStringBuilder))
-				throw new Exception("Parsing prism output failed");
-			var iterations = iterationsStringBuilder.ToString();
+				// Parse iterations until excluding _parserSatisfyingValueInInitialState
+				var iterationsStringBuilder = new StringBuilder();
+				if (!parseUntilExcludingRegex(_parserSatisfyingValueInInitialState, iterationsStringBuilder))
+					throw new Exception("Parsing prism output failed");
+				var iterations = iterationsStringBuilder.ToString();
+			}
 
 			// Now here is a split. Either the Quantitative Value was calculated or the qualitative.
 			// TODO: implement qualitative
@@ -244,9 +253,9 @@ namespace SafetySharp.Analysis
 				Yes = yes,
 				No = no,
 				Maybe = maybe,
-				Engine = engine,
-				Enginestats = enginestats,
-				Iterations = iterations,
+				//Engine = engine,
+				//Enginestats = enginestats,
+				//Iterations = iterations,
 				TimeMc = timeMc,
 				Result = result,
 			};
