@@ -110,6 +110,9 @@ namespace SafetySharp.Analysis
 
 			var formulaAsString = "P { > 0 } [ tt U "+ transformationVisitor.TransformedFormula +" ]";
 
+			var initialStatesWithProbabilities = ProbabilityChecker.CompactProbabilityMatrix.InitialStates;
+			var initialStates = initialStatesWithProbabilities.Select(tuple => tuple.State);
+			var probabilities = initialStatesWithProbabilities.Select(tuple => tuple.Probability);
 
 			using (var fileResults = new TemporaryFile("res"))
 			using (var fileCommandScript = new TemporaryFile("cmd"))
@@ -117,7 +120,12 @@ namespace SafetySharp.Analysis
 				var script = new StringBuilder();
 				script.AppendLine("set method_path gauss_jacobi");
 				script.AppendLine(formulaAsString);
-				script.AppendLine("write_res_file 1");
+				script.Append("write_res_file");
+				foreach (var initialState in initialStates)
+				{
+					script.Append(" " + initialState);
+				}
+				script.AppendLine();
 				script.AppendLine("quit");
 
 				File.WriteAllText(fileCommandScript.FilePath, script.ToString());
@@ -131,8 +139,11 @@ namespace SafetySharp.Analysis
 
 				var index = 0;
 				var probability = Probability.Zero;
+				var probabilityEnumerator = probabilities.GetEnumerator();
 				while (resultEnumerator.MoveNext())
 				{
+					probabilityEnumerator.MoveNext();
+
 					var result = resultEnumerator.Current;
 					if (!String.IsNullOrEmpty(result))
 					{
@@ -140,7 +151,7 @@ namespace SafetySharp.Analysis
 						if (parsed.Success)
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
-							var probabilityOfState = Probability.One;
+							var probabilityOfState = probabilityEnumerator.Current;
 							var probabilityInState = Double.Parse(parsed.Groups["probability"].Value, CultureInfo.InvariantCulture);
 							probability += probabilityOfState * probabilityInState;
 						}
