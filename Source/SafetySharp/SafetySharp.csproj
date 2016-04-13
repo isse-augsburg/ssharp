@@ -45,7 +45,7 @@
     <Compile Include="Analysis\AnalysisConfiguration.cs" />
     <Compile Include="Analysis\AnalysisException.cs" />
     <Compile Include="Analysis\AnalysisResult.cs" />
-    <Compile Include="Analysis\MinimalizationMode.cs" />
+    <Compile Include="Analysis\MinimizationMode.cs" />
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\PrismTransformer.cs" />
     <Compile Include="Analysis\FormulaVisitors\MrmcTransformer.cs" />

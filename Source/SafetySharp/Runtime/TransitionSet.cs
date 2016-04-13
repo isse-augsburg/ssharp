@@ -58,7 +58,7 @@ namespace SafetySharp.Runtime
 		private int _nextTargetStateBufferIndex;
 		private int _nextTargetStateGroupIndex;
 
-		public TransitionMinimalizationMode TransitionMinimalizationMode { get; set; } = TransitionMinimalizationMode.RemoveNonActivationMinimalTransitions;
+		public TransitionMinimizationMode TransitionMinimizationMode { get; set; } = TransitionMinimizationMode.RemoveNonActivationMinimalTransitions;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -150,7 +150,7 @@ namespace SafetySharp.Runtime
 		/// <param name="activatedFaults">The faults activated by the transition to reach the state.</param>
 		private void StoreTransition(FaultSet activatedFaults,Probability probability)
 		{
-			var targetStateGroup = (TransitionMinimalizationMode == TransitionMinimalizationMode.RemoveNonActivationMinimalTransitions) ? _tempStateMemoryUnnotified : _tempStateMemoryNotified;
+			var targetStateGroup = (TransitionMinimizationMode == TransitionMinimizationMode.RemoveNonActivationMinimalTransitions) ? _tempStateMemoryUnnotified : _tempStateMemoryNotified;
 
 			var hash = MemoryBuffer.Hash(targetStateGroup, _stateVectorSize, 0);
 			for (var i = 1; i < ProbeThreshold; ++i)

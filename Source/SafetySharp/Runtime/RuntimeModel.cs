@@ -72,7 +72,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		private readonly int _stateHeaderBytes;
 
-		internal EffectlessFaultsMinimalizationMode EffectlessFaultsMinimalizationMode { get; set; } = EffectlessFaultsMinimalizationMode.DontActivateEffectlessFaults;
+		internal EffectlessFaultsMinimizationMode EffectlessFaultsMinimizationMode { get; set; } = EffectlessFaultsMinimizationMode.DontActivateEffectlessFaults;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -235,9 +235,9 @@ namespace SafetySharp.Runtime
 			foreach (var obj in _serializedObjects.OfType<IInitializable>())
 				obj.Initialize();
 			
-			switch (EffectlessFaultsMinimalizationMode)
+			switch (EffectlessFaultsMinimizationMode)
 			{
-				case EffectlessFaultsMinimalizationMode.Disable:
+				case EffectlessFaultsMinimizationMode.Disable:
 					// Activate all faults
 					// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
 					foreach (var fault in Faults)
@@ -245,7 +245,7 @@ namespace SafetySharp.Runtime
 						fault.TryActivate();
 					}
 					break;
-				case EffectlessFaultsMinimalizationMode.DontActivateEffectlessTransientFaults:
+				case EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults:
 					// Activate all non-transient faults
 					foreach (var fault in Faults)
 					{
@@ -253,7 +253,7 @@ namespace SafetySharp.Runtime
 							fault.TryActivate();
 					}
 					break;
-				case EffectlessFaultsMinimalizationMode.DontActivateEffectlessFaults:
+				case EffectlessFaultsMinimizationMode.DontActivateEffectlessFaults:
 					// Do not activate any unnecessary fault at all
 					break;
 				default:
@@ -275,9 +275,9 @@ namespace SafetySharp.Runtime
 			foreach (var component in RootComponents)
 				component.Update();
 
-			switch (EffectlessFaultsMinimalizationMode)
+			switch (EffectlessFaultsMinimizationMode)
 			{
-				case EffectlessFaultsMinimalizationMode.Disable:
+				case EffectlessFaultsMinimizationMode.Disable:
 					// Activate all faults
 					// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
 					foreach (var fault in Faults)
@@ -285,7 +285,7 @@ namespace SafetySharp.Runtime
 						fault.TryActivate();
 					}
 					break;
-				case EffectlessFaultsMinimalizationMode.DontActivateEffectlessTransientFaults:
+				case EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults:
 					// Activate all non-transient faults
 					foreach (var fault in Faults)
 					{
@@ -293,7 +293,7 @@ namespace SafetySharp.Runtime
 							fault.TryActivate();
 					}
 					break;
-				case EffectlessFaultsMinimalizationMode.DontActivateEffectlessFaults:
+				case EffectlessFaultsMinimizationMode.DontActivateEffectlessFaults:
 					// Do not activate any unnecessary fault at all
 					break;
 				default:

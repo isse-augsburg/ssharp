@@ -22,14 +22,14 @@
 
 namespace SafetySharp.Analysis
 {
-	internal enum EffectlessFaultsMinimalizationMode
+	internal enum EffectlessFaultsMinimizationMode
 	{
 		DontActivateEffectlessFaults,
 		DontActivateEffectlessTransientFaults, //only restrict to transient faults
 		Disable
 	}
 
-	internal enum TransitionMinimalizationMode
+	internal enum TransitionMinimizationMode
 	{
 		RemoveNonActivationMinimalTransitions,
 		//CombineAllTransitionsWithSameTargetState, //When a target state can be reached by two transitions (with maybe different FaultSets) then both transitions get combined into one transition without any information of FaultSets

@@ -193,6 +193,7 @@ namespace SafetySharp.Analysis
 
 				_context = context;
 				_model = model;
+				_model.EffectlessFaultsMinimizationMode=EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults;
 				_stateStack = stateStack;
 
 				var stateFormulaLabels =
@@ -226,6 +227,7 @@ namespace SafetySharp.Analysis
 					.ToArray();
 				
 				_transitions = new TransitionSet(model, successorCapacity, compiledStateFormulas);
+				_transitions.TransitionMinimizationMode=TransitionMinimizationMode.Disable;
 			}
 
 			/// <summary>
