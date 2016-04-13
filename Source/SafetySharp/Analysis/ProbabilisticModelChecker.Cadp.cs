@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 namespace SafetySharp.Analysis
 {
 	using System.IO;
+	using Modeling;
 	using Utilities;
 
 	public class Cadp : ProbabilisticModelChecker

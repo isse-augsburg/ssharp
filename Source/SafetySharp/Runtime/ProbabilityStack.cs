@@ -24,6 +24,7 @@ namespace SafetySharp.Runtime
 {
 	using System.Runtime.CompilerServices;
 	using Analysis;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>

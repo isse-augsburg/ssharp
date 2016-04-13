@@ -27,6 +27,7 @@ namespace SafetySharp.Analysis
 	using System.IO;
 	using System.Globalization;
 	using System.Text;
+	using Modeling;
 
 	// Mrmc is in file ProbabilisticModelChecker.Mrmc.cs which is nested in ProbabilisticModelChecker.cs.
 	// Open arrow of ProbabilisticModelChecker.cs in Solution Explorer to see nested files.

@@ -25,7 +25,6 @@ namespace SafetySharp.Modeling
 	using System;
 	using System.Runtime.CompilerServices;
 	using Runtime;
-	using Probability = Analysis.Probability;
 
 	public struct Option<T> //Probabilistic Option. Use it until we have real Tuples in C#
 	{

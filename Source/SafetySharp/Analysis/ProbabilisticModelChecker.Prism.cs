@@ -31,6 +31,7 @@ namespace SafetySharp.Analysis
 	using System.Globalization;
 	using System.IO;
 	using FormulaVisitors;
+	using Modeling;
 	using Utilities;
 
 	public class Prism : ProbabilisticModelChecker

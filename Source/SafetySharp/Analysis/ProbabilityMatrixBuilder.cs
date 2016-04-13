@@ -32,6 +32,7 @@ namespace SafetySharp.Analysis
 	using System.Threading;
 	using System.Threading.Tasks;
 	using FormulaVisitors;
+	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;

@@ -61,7 +61,7 @@
     </Compile>
     <Compile Include="Analysis\ProbabilityChecker.cs" />
     <Compile Include="Analysis\ProbabilityMatrixBuilder.cs" />
-    <Compile Include="Analysis\Probability.cs" />
+    <Compile Include="Modeling\Probability.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
     <Compile Include="Analysis\Role.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsStateFormulaVisitor.cs" />

@@ -497,7 +497,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///	  The probability to reach the current state from its predecessor from the last transition.
 		/// </summary>
-		public SafetySharp.Analysis.Probability GetProbability()
+		public Probability GetProbability()
 		{
 			return _choiceResolver.CalculateProbabilityOfPath();
 		}
