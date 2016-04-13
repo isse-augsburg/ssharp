@@ -72,6 +72,8 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		private readonly int _stateHeaderBytes;
 
+		internal EffectlessFaultsMinimalizationMode EffectlessFaultsMinimalizationMode { get; set; } = EffectlessFaultsMinimalizationMode.DontActivateEffectlessFaults;
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
@@ -232,6 +234,31 @@ namespace SafetySharp.Runtime
 
 			foreach (var obj in _serializedObjects.OfType<IInitializable>())
 				obj.Initialize();
+			
+			switch (EffectlessFaultsMinimalizationMode)
+			{
+				case EffectlessFaultsMinimalizationMode.Disable:
+					// Activate all faults
+					// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
+					foreach (var fault in Faults)
+					{
+						fault.TryActivate();
+					}
+					break;
+				case EffectlessFaultsMinimalizationMode.DontActivateEffectlessTransientFaults:
+					// Activate all non-transient faults
+					foreach (var fault in Faults)
+					{
+						if (!(fault is TransientFault))
+							fault.TryActivate();
+					}
+					break;
+				case EffectlessFaultsMinimalizationMode.DontActivateEffectlessFaults:
+					// Do not activate any unnecessary fault at all
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 
 			_restrictRanges();
 		}
@@ -247,6 +274,31 @@ namespace SafetySharp.Runtime
 
 			foreach (var component in RootComponents)
 				component.Update();
+
+			switch (EffectlessFaultsMinimalizationMode)
+			{
+				case EffectlessFaultsMinimalizationMode.Disable:
+					// Activate all faults
+					// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
+					foreach (var fault in Faults)
+					{
+						fault.TryActivate();
+					}
+					break;
+				case EffectlessFaultsMinimalizationMode.DontActivateEffectlessTransientFaults:
+					// Activate all non-transient faults
+					foreach (var fault in Faults)
+					{
+						if (!(fault is TransientFault))
+							fault.TryActivate();
+					}
+					break;
+				case EffectlessFaultsMinimalizationMode.DontActivateEffectlessFaults:
+					// Do not activate any unnecessary fault at all
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 
 			_restrictRanges();
 		}
@@ -325,7 +377,7 @@ namespace SafetySharp.Runtime
 			var newPathAvailable = true;
 			while (newPathAvailable)
 			{
-				newPathAvailable = ComputeNextSuccessorState(transitions,sourceState);
+				newPathAvailable = ComputeNextSuccessorState(transitions, sourceState);
 			}
 		}
 
@@ -441,7 +493,6 @@ namespace SafetySharp.Runtime
 		{
 			return _choiceResolver.GetChoices().ToArray();
 		}
-
 
 		/// <summary>
 		///	  The probability to reach the current state from its predecessor from the last transition.

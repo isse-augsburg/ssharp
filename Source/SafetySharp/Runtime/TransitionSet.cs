@@ -58,7 +58,7 @@ namespace SafetySharp.Runtime
 		private int _nextTargetStateBufferIndex;
 		private int _nextTargetStateGroupIndex;
 
-		internal MinimalizationMode Mode = MinimalizationMode.UseFaultMinimalization;
+		public TransitionMinimalizationMode TransitionMinimalizationMode { get; set; } = TransitionMinimalizationMode.RemoveNonActivationMinimalTransitions;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -116,17 +116,14 @@ namespace SafetySharp.Runtime
 			//    modulo any changes resulting from notifications of fault activations
 			var activatedFaults = FaultSet.FromActivatedFaults(model.Faults);
 			model.Serialize(_tempStateMemoryUnnotified);
-
+			
 			// 2. Execute fault activation notifications, serialize the updated state if necessary, and store the transition
 			if (model.NotifyFaultActivations())
 				model.Serialize(_tempStateMemoryNotified);
 			else
 				MemoryBuffer.Copy(_tempStateMemoryUnnotified, _tempStateMemoryNotified, _stateVectorSize);
 
-			// 3. Make sure the transition we're about to add is activation-minimal
-			//if (!Add(successorState, activatedFaults))
-			//	return;
-
+			// 3. Store Transition
 			StoreTransition(activatedFaults,model.GetProbability());
 		}
 
@@ -153,7 +150,7 @@ namespace SafetySharp.Runtime
 		/// <param name="activatedFaults">The faults activated by the transition to reach the state.</param>
 		private void StoreTransition(FaultSet activatedFaults,Probability probability)
 		{
-			var targetStateGroup = (Mode == MinimalizationMode.UseFaultMinimalization) ? _tempStateMemoryUnnotified : _tempStateMemoryNotified;
+			var targetStateGroup = (TransitionMinimalizationMode == TransitionMinimalizationMode.RemoveNonActivationMinimalTransitions) ? _tempStateMemoryUnnotified : _tempStateMemoryNotified;
 
 			var hash = MemoryBuffer.Hash(targetStateGroup, _stateVectorSize, 0);
 			for (var i = 1; i < ProbeThreshold; ++i)
@@ -352,14 +349,7 @@ namespace SafetySharp.Runtime
 
 			public byte* TargetState; //The target state of this fault with activated
 		}
-
-		internal enum MinimalizationMode
-		{
-			UseFaultMinimalization,
-			CombineSameTargetStates, //When a target state can be reached by two transitions (with maybe different FaultSets) then both transitions get combined into one transition without any information of FaultSets
-			Disable
-		}
-
+		
 		internal class TransitionEnumerator : IEnumerator<Transition>
 		{
 			private TransitionSet _transitionSet;
