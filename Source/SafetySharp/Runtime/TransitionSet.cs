@@ -191,13 +191,20 @@ namespace SafetySharp.Runtime
 			bool addFaults;
 			bool cleanupTransitions;
 
-			ClassifyActivatedFaults(activatedFaults, targetStateGroupIndex, out addTransition, out addFaults, out cleanupTransitions);
+			if (TransitionMinimizationMode == TransitionMinimizationMode.RemoveNonActivationMinimalTransitions)
+			{
+				ClassifyActivatedFaults(activatedFaults, targetStateGroupIndex, out addTransition, out addFaults, out cleanupTransitions);
 
-			if (cleanupTransitions)
-				CleanupTargetStateGroup(activatedFaults, targetStateGroupIndex, stateHash);
+				if (cleanupTransitions)
+					CleanupTargetStateGroup(activatedFaults, targetStateGroupIndex, stateHash);
 
-			if (addFaults|| addTransition)
+				if (addFaults || addTransition)
+					AddTargetStateGroupElement(stateHash, activatedFaults, probability, _lookup[stateHash]);
+			}
+			else
+			{
 				AddTargetStateGroupElement(stateHash, activatedFaults, probability, _lookup[stateHash]);
+			}
 		}
 
 		/// <summary>
