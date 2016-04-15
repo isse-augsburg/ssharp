@@ -55,6 +55,7 @@ namespace SafetySharp.Runtime.Serialization
 			RegisterSerializer(new TypeSerializer());
 			RegisterSerializer(new MethodInfoSerializer());
 			RegisterSerializer(new DelegateSerializer());
+			RegisterSerializer(new ProbabilitySerializer());
 		}
 
 		/// <summary>
@@ -77,7 +78,8 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		internal Serializer GetSerializer(object obj)
 		{
-			return GetSerializer(GetSerializerIndex(obj));
+			var a = GetSerializer(GetSerializerIndex(obj));
+			return a;
 		}
 
 		/// <summary>

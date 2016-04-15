@@ -183,6 +183,8 @@ namespace SafetySharp.Runtime.Serialization
 				DeserializePrimitiveTypeField(metadata);
 			else if (IsReferenceType(metadata.Field.FieldType))
 				DeserializeReferenceField(metadata.Field);
+			else if (Serializers.ProbabilitySerializer.IsProbability(metadata))
+				Serializers.ProbabilitySerializer.DeserializeField(_il, metadata.Field);
 			else
 				throw new NotSupportedException($"Field type '{metadata.Field.FieldType.FullName}' is unsupported.");
 		}
@@ -199,6 +201,8 @@ namespace SafetySharp.Runtime.Serialization
 				SerializePrimitiveTypeField(metadata);
 			else if (IsReferenceType(metadata.Field.FieldType))
 				SerializeReferenceField(metadata.Field);
+			else if (Serializers.ProbabilitySerializer.IsProbability(metadata))
+				Serializers.ProbabilitySerializer.SerializeField(_il,metadata.Field);
 			else
 				throw new NotSupportedException($"Field type '{metadata.Field.FieldType.FullName}' is unsupported.");
 		}

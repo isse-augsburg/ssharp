@@ -98,6 +98,9 @@ namespace SafetySharp.Runtime.Serialization
 				if (DataType == typeof(bool))
 					return 1;
 
+				if (DataType == typeof(Probability))
+					return Serializers.ProbabilitySerializer.GetElementSizeInBits();
+
 				return EffectiveType.GetUnmanagedSize() * 8;
 			}
 		}

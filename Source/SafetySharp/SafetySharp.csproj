@@ -79,6 +79,7 @@
     <Compile Include="Runtime\Serialization\RangeRestrictionsGenerator.cs" />
     <Compile Include="Runtime\Serialization\Serializers\DelegateSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\MethodInfoSerializer.cs" />
+    <Compile Include="Runtime\Serialization\Serializers\ProbabilitySerializer.cs" />
     <Compile Include="Runtime\Serialization\StateVectorMismatchException.cs" />
     <Compile Include="CompilerServices\FaultHelper.cs" />
     <Compile Include="CompilerServices\PortBinding.cs" />

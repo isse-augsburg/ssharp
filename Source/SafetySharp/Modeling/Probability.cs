@@ -26,7 +26,7 @@ namespace SafetySharp.Modeling
 
 	public struct Probability
 	{
-		public double Value;
+		public double Value { get; }
 
 		public Probability(double value)
 		{
@@ -69,6 +69,11 @@ namespace SafetySharp.Modeling
 		public bool Between(double minimal, double maximal)
 		{
 			return (Value >= minimal && Value <= maximal);
+		}
+
+		public bool Between(double minimal, double maximal, double tolerance)
+		{
+			return (Value >= (minimal-tolerance) && Value <= (maximal+tolerance));
 		}
 
 		/// <summary>

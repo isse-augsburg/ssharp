@@ -61,6 +61,9 @@ namespace SafetySharp.Modeling
 		[NonSerializable]
 		private string _name = "UnnamedFault";
 
+		[Hidden]
+		public Probability ProbabilityOfOccurrence = new Probability(0.5);
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
