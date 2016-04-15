@@ -29,7 +29,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	using System.Reflection;
 	using System.Reflection.Emit;
 	using Modeling;
-	
+
 	// Currently Probabilities are value types and not reference types.
 	// Thus, they occupy space in the state vector but do not contribute any meta-data.
 
@@ -38,6 +38,18 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	/// </summary>
 	internal sealed class ProbabilitySerializer : Serializer
 	{
+		private static ConstructorInfo _createProbability;
+
+		private static MethodInfo _readProbability;
+
+		static ProbabilitySerializer()
+		{
+			_createProbability = typeof(Probability).GetConstructor(new []{typeof(double)});
+			//_readProbability =  typeof(Probability).GetMethod(nameof(Probability.Value));
+			_readProbability = typeof(Probability).GetProperty(nameof(Probability.Value)).GetMethod;
+		}
+
+
 		/// <summary>
 		///   Checks whether the serialize is able to serialize the <paramref name="obj" />.
 		/// </summary>
@@ -68,10 +80,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="writer">The writer the serialized information should be written to.</param>
 		protected internal override void SerializeType(object obj, BinaryWriter writer)
 		{
-			//TODO: never called
-			var probability = (Probability)obj;
-			// save the value of the probability into the metadata
-			writer.Write(probability.Value);
+			// never called
 		}
 
 		/// <summary>
@@ -81,11 +90,8 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="reader">The reader the serialized type information should be read from.</param>
 		protected internal override object InstantiateType(BinaryReader reader)
 		{
-			//TODO: never called
-			// load the value of the probability from the metadata
-			Debugger.Break();
-			var probabilityValue = reader.ReadDouble();
-			return new Probability(probabilityValue);
+			// never called
+			return Probability.Zero;
 		}
 
 		/// <summary>
@@ -100,7 +106,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 
 		internal static int GetElementSizeInBits()
 		{
-			return sizeof(double);
+			return sizeof(double)*8;
 		}
 
 		internal static bool IsProbability(StateSlotMetadata stateSlotMetadata)
@@ -114,17 +120,15 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="field">The field that should be serialized.</param>
 		internal static void SerializeField(ILGenerator il,FieldInfo field)
 		{
-			/*
-			// s = state
-			_il.Emit(OpCodes.Ldloc_0);
+			// *posInStateVector = o.field.GetValue()
+			
+			il.Emit(OpCodes.Ldloc_0); // Ldloc_0 contains a pointer on the position in the stateVector (byte*) where the value should be saved (see constructor of SerializationGenerator)
 
-			// *s = objs.GetObjectIdentifier(o.field)
-			_il.Emit(OpCodes.Ldarg_0);
-			_il.Emit(OpCodes.Ldloc_1);
-			_il.Emit(OpCodes.Ldfld, field);
-			_il.Emit(OpCodes.Call, _getObjectIdentifierMethod); //parent class: ObjectTable, 1 argument (object), returns ushort
-			_il.Emit(OpCodes.Stind_I2);
-			*/
+			il.Emit(OpCodes.Ldloc_1); // Ldloc_1 contains the object which contains field
+			il.Emit(OpCodes.Ldflda, field); //Note: Because Probability is a value type we need Ldflda instead of Ldfld
+			il.Emit(OpCodes.Call, _readProbability); //parent class: Probability, returns double
+
+			il.Emit(OpCodes.Stind_R8);
 		}
 
 
@@ -134,19 +138,15 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="field">The field that should be serialized.</param>
 		internal static void DeserializeField(ILGenerator il, FieldInfo field)
 		{
-			/*
-			// o = objs.GetObject(identifier)
-			_il.Emit(OpCodes.Ldloc_1);
-
-			// v = objs.GetObject(*state)
-			_il.Emit(OpCodes.Ldarg_0);
-			_il.Emit(OpCodes.Ldloc_0);
-			_il.Emit(OpCodes.Ldind_I2);
-			_il.Emit(OpCodes.Call, _getObjectMethod);   //parent class: ObjectTable, 1 argument (ushort), returns object
+			// o.field = new Probability(*posInStateVector)
+			il.Emit(OpCodes.Ldloc_1); // Ldloc_1 contains the object which contains field
+			
+			il.Emit(OpCodes.Ldloc_0); // Ldloc_0 contains a pointer on the position in the stateVector (byte*) where the value to load is located (see constructor of SerializationGenerator)
+			il.Emit(OpCodes.Ldind_R8);
+			il.Emit(OpCodes.Newobj, _createProbability);
 
 			// o.field = v
-			_il.Emit(OpCodes.Stfld, field);
-			*/
+			il.Emit(OpCodes.Stfld, field);
 		}
 	}
 }
