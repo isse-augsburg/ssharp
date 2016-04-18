@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Modeling
 {
+	using System;
 	using System.Globalization;
 
 	public struct Probability
@@ -66,6 +67,11 @@ namespace SafetySharp.Modeling
 			return new Probability(p1.Value / p2);
 		}
 
+		public Probability Complement()
+		{
+			return new Probability(1.0 - Value);
+		}
+
 		public bool Between(double minimal, double maximal)
 		{
 			return (Value >= minimal && Value <= maximal);
@@ -74,6 +80,13 @@ namespace SafetySharp.Modeling
 		public bool Between(double minimal, double maximal, double tolerance)
 		{
 			return (Value >= (minimal-tolerance) && Value <= (maximal+tolerance));
+		}
+		
+		public bool Be(double value, double tolerance)
+		{
+			var minimum = Math.Max(value - tolerance, 0.0);
+			var maximum = Math.Min(value + tolerance, 1.0);
+			return (Value >= minimum && Value <= maximum);
 		}
 
 		/// <summary>

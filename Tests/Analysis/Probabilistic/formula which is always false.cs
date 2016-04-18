@@ -30,7 +30,7 @@ namespace Tests.Analysis.Probabilistic
 				probabilityOfFalse = checkProbabilityOfFinally2.Check();
 			}
 
-			probabilityOfFalse.Between(0.0, 0.001).ShouldBe(true);
+			probabilityOfFalse.Be(0.0, 0.001).ShouldBe(true);
 		}
 
 		private class C : Component

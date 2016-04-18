@@ -48,12 +48,15 @@ namespace Tests.Analysis.Probabilistic
 				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);
 			}
 
-			probabilityOfInvariantViolation.Between(0.4, 0.6).ShouldBe(true);
+			probabilityOfInvariantViolation.Be(0.1, 0.00001).ShouldBe(true);
 		}
 
 		private class C : Component
 		{
-			public readonly Fault F1 = new TransientFault();
+			public readonly Fault F1 = new TransientFault
+			{
+				ProbabilityOfOccurrence = new Probability(0.1)
+			};
 
 			[Range(0,11,OverflowBehavior.Clamp)]
 			private int _timestep;

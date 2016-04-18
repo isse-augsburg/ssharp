@@ -23,60 +23,66 @@
 namespace Tests.Analysis.Probabilistic
 {
 	using System;
-	using System.Diagnostics;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
-
-	internal class MultipleFormulasInOneRun : ProbabilisticAnalysisTestObject
+	
+	internal class CustomProbabilityOfTransientFault  : ProbabilisticAnalysisTestObject
 	{
 		protected override void Check()
 		{
 			var c = new C();
-			Probability probabilityOfFinal2;
-			Probability probabilityOfFinal3;
+			Probability probabilityOfInvariantViolation;
 
 			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
 			{
 				var typeOfModelChecker = (Type)Arguments[0];
 				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker,probabilityChecker);
-
-				Formula final2 = c.Value == 2;
-				Formula final3 = c.Value == 3;
-
-				var checkProbabilityOfFinal2 = probabilityChecker.CalculateProbabilityToReachStates(final2);
-				var checkProbabilityOfFinal3 = probabilityChecker.CalculateProbabilityToReachStates(final3);
+				
+				Formula invariantViolated = c.ViolateInvariant;
+				var checkProbabilityOfInvariantViolation = probabilityChecker.CalculateProbabilityToReachStates(invariantViolated);
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
-				probabilityOfFinal2 = checkProbabilityOfFinal2.Check();
-				probabilityOfFinal3 = checkProbabilityOfFinal3.Check();
+				probabilityOfInvariantViolation = checkProbabilityOfInvariantViolation.Check();
+				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);
 			}
 
-			Debugger.Break();
-			probabilityOfFinal2.Be(0.3, 0.0001).ShouldBe(true);
-			probabilityOfFinal3.Be(0.6, 0.0001).ShouldBe(true);
+			probabilityOfInvariantViolation.Be(0.01, 0.0001).ShouldBe(true);
 		}
 
 		private class C : Component
 		{
-			private int _value;
-			public int Value
+			public readonly Fault F1 = new TransientFault
 			{
-				set { _value = value; }
-				get {  return _value; }
+				ProbabilityOfOccurrence = new Probability(0.01)
+			};
+
+			private bool _finished;
+
+			public bool ViolateInvariant;
+			
+			protected virtual void CriticalStep()
+			{
+				ViolateInvariant = false;
 			}
 
 			public override void Update()
 			{
-				if (Value == 0)
+				if (!_finished)
+					CriticalStep();
+				_finished = true;
+			}
+
+
+			[FaultEffect(Fault = nameof(F1)), Priority(1)]
+			public class E1 : C
+			{
+				protected override void CriticalStep()
 				{
-					Value = Choose(new Option<int>(new Probability(0.1), 1),
-								   new Option<int>(new Probability(0.3), 2),
-								   new Option<int>(new Probability(0.6), 3));
+					base.ViolateInvariant = true;
 				}
 			}
 		}
-
 	}
 }

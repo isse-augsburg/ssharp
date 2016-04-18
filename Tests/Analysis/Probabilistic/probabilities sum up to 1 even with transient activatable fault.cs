@@ -67,7 +67,7 @@ namespace Tests.Analysis.Probabilistic
 				probabilityOfStep11FrozenValue2AndInvariantNotViolated +
 				probabilityOfStep11FrozenValue3AndInvariantNotViolated;
 
-			probabilitiesSummedUp.Between(0.999999, 1.000001).ShouldBe(true);
+			probabilitiesSummedUp.Be(1.0, 0.000001).ShouldBe(true);
 		}
 
 		private class C : Component

@@ -47,8 +47,8 @@ namespace Tests.Analysis.Probabilistic
 				probabilityChecker.DefaultChecker = modelChecker;
 				probabilityOfFinal1 = checkProbabilityOfFinal1.Check();
 			}
-
-			probabilityOfFinal1.Between(0.649999, 0.650001).ShouldBe(true);
+			
+			probabilityOfFinal1.Be(0.65, 0.000001).ShouldBe(true);
 		}
 
 		private class C : Component

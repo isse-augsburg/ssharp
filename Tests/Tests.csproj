@@ -189,6 +189,7 @@
     <Compile Include="Analysis\Probabilistic\permanent fault leads to invariant violation only in specific step.cs" />
     <Compile Include="Analysis\Probabilistic\same target state with different transient faults.cs" />
     <Compile Include="Analysis\Probabilistic\same target state on different ways.cs" />
+    <Compile Include="Analysis\Probabilistic\custom probability of transient fault.cs" />
     <Compile Include="Analysis\Probabilistic\transient fault leads to invariant violation only in specific step.cs" />
     <Compile Include="Analysis\Probabilistic\probabilities sum up to 1 even with permanent activatable fault.cs" />
     <Compile Include="Analysis\Probabilistic\multiple initial states.cs" />

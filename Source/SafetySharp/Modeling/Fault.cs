@@ -197,7 +197,7 @@ namespace SafetySharp.Modeling
 						_canUndoActivation = false;
 						break;
 					case Activation.Nondeterministic:
-						_isActivated = _choice.Choose(false, true);
+						_isActivated = _choice.Choose(new Option<bool>(ProbabilityOfOccurrence.Complement(), false), new Option<bool>(ProbabilityOfOccurrence, true));
 						_choiceIndex = _choice.Resolver.LastChoiceIndex;
 						_canUndoActivation = true;
 						break;
