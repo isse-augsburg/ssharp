@@ -120,6 +120,36 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			}
 	}
 
+	class DialyzerTestEnvironmentDialyzingFluidDeliverySystem : Component
+	{
+		public readonly DialyzingFluidFlowSource DialyzingFluidFlowSource = new DialyzingFluidFlowSource();
+		public readonly DialyzingFluidFlowSink DialyzingFluidFlowSink = new DialyzingFluidFlowSink();
+
+		[Provided]
+		public void CreateDialyzingFluid(DialyzingFluid outgoingDialyzingFluid)
+		{
+			//Hard code delivered quantity 2 and suction 3. We simulate if Ultra Filtration works with Dialyzer.
+			outgoingDialyzingFluid.Quantity = 2;
+			outgoingDialyzingFluid.KindOfDialysate = KindOfDialysate.Bicarbonate;
+			outgoingDialyzingFluid.ContaminatedByBlood = false;
+			outgoingDialyzingFluid.Temperature = QualitativeTemperature.BodyHeat;
+		}
+
+		[Provided]
+		public void CreateDialyzingFluidSuction(Suction outgoingSuction)
+		{
+			//Hard code delivered quantity 2 and suction 3. We simulate if Ultra Filtration works with Dialyzer.
+			outgoingSuction.SuctionType = SuctionType.CustomSuction;
+			outgoingSuction.CustomSuctionValue = 3;
+		}
+
+		protected override void CreateBindings()
+		{
+			DialyzingFluidFlowSource.SendForward = CreateDialyzingFluid;
+			DialyzingFluidFlowSink.SendBackward = CreateDialyzingFluidSuction;
+		}
+	}
+
 	class DialyzerTestEnvironment : ModelBase
 	{
 		[Root(Role.System)]
@@ -130,37 +160,16 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		[Root(Role.Environment)]
 		public readonly BloodFlowCombinator BloodFlowCombinator = new BloodFlowCombinator();
 		[Root(Role.Environment)]
-		public readonly DialyzingFluidFlowSource DialyzingFluidFlowSource = new DialyzingFluidFlowSource();
-		[Root(Role.Environment)]
-		public readonly DialyzingFluidFlowSink DialyzingFluidFlowSink = new DialyzingFluidFlowSink();
-		[Root(Role.Environment)]
 		public readonly DialyzerTestEnvironmentPatient Patient = new DialyzerTestEnvironmentPatient();
-		
-		[Provided]
-		public void CreateDialyzingFluid(DialyzingFluid outgoingDialyzingFluid)
-		{
-			//Hard code delivered quantity 2 and suction 3. We simulate if Ultra Filtration works with Dialyzer.
-			outgoingDialyzingFluid.Quantity = 2;
-			outgoingDialyzingFluid.KindOfDialysate = KindOfDialysate.Bicarbonate;
-			outgoingDialyzingFluid.ContaminatedByBlood = false;
-			outgoingDialyzingFluid.Temperature=QualitativeTemperature.BodyHeat;
-	}
+		[Root(Role.Environment)]
+		public readonly DialyzerTestEnvironmentDialyzingFluidDeliverySystem DialyzingFluidDeliverySystem = new DialyzerTestEnvironmentDialyzingFluidDeliverySystem();
 
-		[Provided]
-		public void CreateDialyzingFluidSuction(Suction outgoingSuction)
-		{
-			//Hard code delivered quantity 2 and suction 3. We simulate if Ultra Filtration works with Dialyzer.
-			outgoingSuction.SuctionType = SuctionType.CustomSuction;
-			outgoingSuction.CustomSuctionValue = 3;
-		}
 		
 		public DialyzerTestEnvironment()
 		{
-			DialyzingFluidFlowSource.SendForward=CreateDialyzingFluid;
-			DialyzingFluidFlowSink.SendBackward=CreateDialyzingFluidSuction;
 
-			DialysingFluidFlowCombinator.ConnectOutWithIn(DialyzingFluidFlowSource, Dialyzer.DialyzingFluidFlow);
-			DialysingFluidFlowCombinator.ConnectOutWithIn(Dialyzer.DialyzingFluidFlow, DialyzingFluidFlowSink);
+			DialysingFluidFlowCombinator.ConnectOutWithIn(DialyzingFluidDeliverySystem.DialyzingFluidFlowSource, Dialyzer.DialyzingFluidFlow);
+			DialysingFluidFlowCombinator.ConnectOutWithIn(Dialyzer.DialyzingFluidFlow, DialyzingFluidDeliverySystem.DialyzingFluidFlowSink);
 			BloodFlowCombinator.ConnectOutWithIn(Patient.ArteryFlow, Dialyzer.BloodFlow);
 			BloodFlowCombinator.ConnectOutWithIn(Dialyzer.BloodFlow, Patient.VeinFlow);
 			BloodFlowCombinator.CommitFlow();

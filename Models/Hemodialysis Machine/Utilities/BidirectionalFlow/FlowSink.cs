@@ -34,9 +34,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	{
 		public FlowPort<TForward, TBackward> Incoming { get; } = new FlowPort<TForward, TBackward>();
 
-		public Action<TBackward> SendBackward = outgoingBackward => { };
+		public Action<TBackward> SendBackward = toPredecessor => { };
 
-		public Action<TForward> ReceivedForward = incomingForward => { };
+		public Action<TForward> ReceivedForward = fromPredecessor => { };
 
 		public void UpdateForwardInternal()
 		{

@@ -17,16 +17,16 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public int SpeedOfMotor = 0;
 
 		[Provided]
-		public void SetMainFlow(Blood outgoing, Blood incoming)
+		public void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
 		{
-			outgoing.CopyValuesFrom(incoming);
+			toSuccessor.CopyValuesFrom(fromPredecessor);
 		}
 
 		[Provided]
-		public virtual void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public virtual void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CustomSuctionValue = SpeedOfMotor; //Force suction set by motor
-			outgoingSuction.SuctionType=SuctionType.CustomSuction;
+			toPredecessor.CustomSuctionValue = SpeedOfMotor; //Force suction set by motor
+			toPredecessor.SuctionType=SuctionType.CustomSuction;
 		}
 
 		protected override void CreateBindings()
@@ -41,10 +41,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public class BloodPumpDefectEffect : ArterialBloodPump
 		{
 			[Provided]
-			public override void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+			public override void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 			{
-				outgoingSuction.CustomSuctionValue = 0; //Force suction set by motor
-				outgoingSuction.SuctionType = SuctionType.CustomSuction;
+				toPredecessor.CustomSuctionValue = 0; //Force suction set by motor
+				toPredecessor.SuctionType = SuctionType.CustomSuction;
 			}
 		}
 	}
@@ -56,10 +56,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public QualitativePressure SensedPressure = QualitativePressure.NoPressure;
 
 		[Provided]
-		public void SetSenseFlowSuction(Suction outgoingSuction)
+		public void SetSenseFlowSuction(Suction toPredecessor)
 		{
-			outgoingSuction.CustomSuctionValue = 0;
-			outgoingSuction.SuctionType = SuctionType.CustomSuction;
+			toPredecessor.CustomSuctionValue = 0;
+			toPredecessor.SuctionType = SuctionType.CustomSuction;
 		}
 
 		[Provided]
@@ -95,7 +95,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 	}
 
 		[Provided]
-		public void ReceivedSuction(Suction incomingSuction)
+		public void ReceivedSuction(Suction fromSuccessor)
 		{
 		}
 
@@ -112,16 +112,16 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public readonly BloodFlowInToOut MainFlow = new BloodFlowInToOut();
 
 		[Provided]
-		public void SetMainFlow(Blood outgoing, Blood incoming)
+		public void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
 		{
-			outgoing.CopyValuesFrom(incoming);
-			outgoing.GasFree = true;
+			toSuccessor.CopyValuesFrom(fromPredecessor);
+			toSuccessor.GasFree = true;
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CopyValuesFrom(incomingSuction);
+			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
 		protected override void CreateBindings()
@@ -137,16 +137,16 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public readonly BloodFlowInToOut MainFlow = new BloodFlowInToOut();
 
 		[Provided]
-		public void SetMainFlow(Blood outgoing, Blood incoming)
+		public void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
 		{
-			outgoing.CopyValuesFrom(incoming);
-			outgoing.GasFree = true;
+			toSuccessor.CopyValuesFrom(fromPredecessor);
+			toSuccessor.GasFree = true;
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CopyValuesFrom(incomingSuction);
+			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
 		protected override void CreateBindings()
@@ -163,10 +163,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public QualitativePressure SensedPressure = QualitativePressure.NoPressure;
 
 		[Provided]
-		public void SetSenseFlowSuction(Suction outgoingSuction)
+		public void SetSenseFlowSuction(Suction toPredecessor)
 		{
-			outgoingSuction.CustomSuctionValue = 0;
-			outgoingSuction.SuctionType = SuctionType.CustomSuction;
+			toPredecessor.CustomSuctionValue = 0;
+			toPredecessor.SuctionType = SuctionType.CustomSuction;
 		}
 
 		[Provided]
@@ -189,10 +189,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public bool DetectedGasOrContaminatedBlood = false;
 
 		[Provided]
-		public virtual void SetMainFlow(Blood outgoing, Blood incoming)
+		public virtual void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
 		{
-			outgoing.CopyValuesFrom(incoming);
-			if (incoming.GasFree == false || incoming.ChemicalCompositionOk != true)
+			toSuccessor.CopyValuesFrom(fromPredecessor);
+			if (fromPredecessor.GasFree == false || fromPredecessor.ChemicalCompositionOk != true)
 			{
 				DetectedGasOrContaminatedBlood = true;
 			}
@@ -203,9 +203,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CopyValuesFrom(incomingSuction);
+			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
 		protected override void CreateBindings()
@@ -220,9 +220,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public class SafetyDetectorDefectEffect : VenousSafetyDetector
 		{
 			[Provided]
-			public override void SetMainFlow(Blood outgoing, Blood incoming)
+			public override void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
 			{
-				outgoing.CopyValuesFrom(incoming);
+				toSuccessor.CopyValuesFrom(fromPredecessor);
 				DetectedGasOrContaminatedBlood = false;
 			}
 		}
@@ -238,30 +238,30 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public readonly BufferedBlood DelayedBlood = new BufferedBlood();
 
 		[Provided]
-		public void SetMainFlow(Blood outgoing, Blood incoming)
+		public void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
 		{
 			if (ValveState == ValveState.Open)
 			{
-				outgoing.CopyValuesFrom(DelayedBlood);
+				toSuccessor.CopyValuesFrom(DelayedBlood);
 			}
 			else
 			{
-				outgoing.HasHeparin = true;
-				outgoing.Water = 0;
-				outgoing.SmallWasteProducts = 0;
-				outgoing.BigWasteProducts = 0;
-				outgoing.ChemicalCompositionOk = true;
-				outgoing.GasFree = true;
-				outgoing.Pressure = QualitativePressure.NoPressure;
-				outgoing.Temperature = QualitativeTemperature.BodyHeat;
+				toSuccessor.HasHeparin = true;
+				toSuccessor.Water = 0;
+				toSuccessor.SmallWasteProducts = 0;
+				toSuccessor.BigWasteProducts = 0;
+				toSuccessor.ChemicalCompositionOk = true;
+				toSuccessor.GasFree = true;
+				toSuccessor.Pressure = QualitativePressure.NoPressure;
+				toSuccessor.Temperature = QualitativeTemperature.BodyHeat;
 			}
-			DelayedBlood.CopyValuesFrom(incoming);
+			DelayedBlood.CopyValuesFrom(fromPredecessor);
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CopyValuesFrom(incomingSuction);
+			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
 		public virtual void CloseValve()

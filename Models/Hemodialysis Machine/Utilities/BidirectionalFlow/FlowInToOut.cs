@@ -34,16 +34,16 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 		public FlowPort<TForward, TBackward> Incoming { get; } = new FlowPort<TForward, TBackward>();
 		public FlowPort<TForward, TBackward> Outgoing { get; } = new FlowPort<TForward, TBackward>();
 
-		public Action<TBackward, TBackward> UpdateBackward = (outgoingBackward,incomingBackward) =>
+		public Action<TBackward, TBackward> UpdateBackward = (fromSuccessor,toPredecessor) =>
 		{
 			// Standard behavior: Just copy. For a different behavior you have to overwrite this function
-			incomingBackward.CopyValuesFrom(outgoingBackward);
+			toPredecessor.CopyValuesFrom(fromSuccessor);
 		};
 		
-		public Action<TForward, TForward> UpdateForward = (outgoingForward,incomingForward) =>
+		public Action<TForward, TForward> UpdateForward = (toSuccessor,fromPredecessor) =>
 		{
 			// Standard behavior: Just copy. For a different behavior you have to overwrite this function
-			outgoingForward.CopyValuesFrom(incomingForward);
+			toSuccessor.CopyValuesFrom(fromPredecessor);
 		};
 
 		public void UpdateForwardInternal()

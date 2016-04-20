@@ -46,17 +46,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public virtual void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		public virtual void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
 		{
-			outgoing.CopyValuesFrom(incoming);
+			toSuccessor.CopyValuesFrom(fromPredecessor);
 			if (WaterHeaterEnabled())
-				outgoing.Temperature = QualitativeTemperature.BodyHeat;
+				toSuccessor.Temperature = QualitativeTemperature.BodyHeat;
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CopyValuesFrom(incomingSuction);
+			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
 		protected override void CreateBindings()
@@ -118,17 +118,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		public void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
 		{
-			outgoing.CopyValuesFrom(incoming);
-			outgoing.KindOfDialysate = KindOfDialysate;
+			toSuccessor.CopyValuesFrom(fromPredecessor);
+			toSuccessor.KindOfDialysate = KindOfDialysate;
 		}
 
 		[Provided]
-		public virtual void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public virtual void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CustomSuctionValue= PumpSpeed; //Force the pump
-			outgoingSuction.SuctionType=SuctionType.CustomSuction;
+			toPredecessor.CustomSuctionValue= PumpSpeed; //Force the pump
+			toPredecessor.SuctionType=SuctionType.CustomSuction;
 		}
 
 		[Provided]
@@ -151,10 +151,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public class DialyzingFluidPreparationPumpDefectEffect : DialyzingFluidPreparation
 		{
 			[Provided]
-			public override void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+			public override void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 			{
-				outgoingSuction.CustomSuctionValue = 0;
-				outgoingSuction.SuctionType = SuctionType.CustomSuction;
+				toPredecessor.CustomSuctionValue = 0;
+				toPredecessor.SuctionType = SuctionType.CustomSuction;
 			}
 		}
 	}
@@ -167,16 +167,16 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public int UltraFiltrationPumpSpeed = 0;
 
 		[Provided]
-		public void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		public void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
 		{
-			outgoing.CopyValuesFrom(incoming);
+			toSuccessor.CopyValuesFrom(fromPredecessor);
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.SuctionType = SuctionType.CustomSuction;
-			outgoingSuction.CustomSuctionValue = UltraFiltrationPumpSpeed;
+			toPredecessor.SuctionType = SuctionType.CustomSuction;
+			toPredecessor.CustomSuctionValue = UltraFiltrationPumpSpeed;
 		}
 
 		protected override void CreateBindings()
@@ -213,27 +213,27 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public bool BypassEnabled = false;
 
 		[Provided]
-		public virtual void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		public virtual void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
 		{
-			if (BypassEnabled || incoming.Temperature != QualitativeTemperature.BodyHeat)
+			if (BypassEnabled || fromPredecessor.Temperature != QualitativeTemperature.BodyHeat)
 			{
-				ToDrainValue.CopyValuesFrom(incoming);
-				outgoing.Quantity = 0;
-				outgoing.ContaminatedByBlood = false;
-				outgoing.Temperature = QualitativeTemperature.TooCold;
-				outgoing.WasUsed = false;
-				outgoing.KindOfDialysate = KindOfDialysate.Water;
+				ToDrainValue.CopyValuesFrom(fromPredecessor);
+				toSuccessor.Quantity = 0;
+				toSuccessor.ContaminatedByBlood = false;
+				toSuccessor.Temperature = QualitativeTemperature.TooCold;
+				toSuccessor.WasUsed = false;
+				toSuccessor.KindOfDialysate = KindOfDialysate.Water;
 			}
 			else
 			{
-				outgoing.CopyValuesFrom(incoming);
+				toSuccessor.CopyValuesFrom(fromPredecessor);
 			}
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CopyValuesFrom(incomingSuction);
+			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
 		[Provided]
@@ -256,9 +256,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public class SafetyBypassFaultEffect : DialyzingFluidSafetyBypass
 		{
 			[Provided]
-			public override void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+			public override void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
 			{
-				outgoing.CopyValuesFrom(incoming);
+				toSuccessor.CopyValuesFrom(fromPredecessor);
 			}
 		}
 	}
@@ -278,27 +278,27 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		}
 
 		[Provided]
-		public void ForwardProducedFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		public void ForwardProducedFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
 		{
-			outgoing.CopyValuesFrom(incoming);
+			toSuccessor.CopyValuesFrom(fromPredecessor);
 		}
 
 		[Provided]
-		public void ForwardProducedFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void ForwardProducedFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CopyValuesFrom(incomingSuction);
+			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
 		[Provided]
-		public void ForwardUsedFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		public void ForwardUsedFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
 		{
-			outgoing.CopyValuesFrom(incoming);
+		toSuccessor.CopyValuesFrom(fromPredecessor);
 		}
 
 		[Provided]
-		public void ForwardUsedFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void ForwardUsedFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CopyValuesFrom(incomingSuction);
+			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
 
@@ -331,16 +331,16 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public int PumpSpeed = 0;
 
 		[Provided]
-		public void SetMainFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		public void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
 		{
-			outgoing.CopyValuesFrom(incoming);
+			toSuccessor.CopyValuesFrom(fromPredecessor);
 		}
 
 		[Provided]
-		public virtual void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public virtual void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CustomSuctionValue = PumpSpeed; //Force the pump
-			outgoingSuction.SuctionType = SuctionType.CustomSuction;
+			toPredecessor.CustomSuctionValue = PumpSpeed; //Force the pump
+			toPredecessor.SuctionType = SuctionType.CustomSuction;
 		}
 		
 
@@ -356,10 +356,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public class PumpToBalanceChamberDefectEffect : PumpToBalanceChamber
 		{
 			[Provided]
-			public override void SetMainFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+			public override void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 			{
-				outgoingSuction.CustomSuctionValue = 0;
-				outgoingSuction.SuctionType = SuctionType.CustomSuction;
+				toPredecessor.CustomSuctionValue = 0;
+				toPredecessor.SuctionType = SuctionType.CustomSuction;
 			}
 		}
 	}

@@ -30,47 +30,47 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 
 		[Provided]
-		public void SetDialyzingFluidFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void SetDialyzingFluidFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
 			//Assume incomingSuction.SuctionType == SuctionType.CustomSuction;
-			if (incomingSuction.SuctionType==SuctionType.SourceDependentSuction)
+			if (fromSuccessor.SuctionType==SuctionType.SourceDependentSuction)
 				throw new Exception("Model Bug");
-			IncomingSuctionRateOnDialyzingFluidSide = incomingSuction.CustomSuctionValue;
-			outgoingSuction.CustomSuctionValue = 0;
-			outgoingSuction.SuctionType = SuctionType.SourceDependentSuction;
+			IncomingSuctionRateOnDialyzingFluidSide = fromSuccessor.CustomSuctionValue;
+			toPredecessor.CustomSuctionValue = 0;
+			toPredecessor.SuctionType = SuctionType.SourceDependentSuction;
 		}
 
 		[Provided]
-		public void SetDialyzingFluidFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		public void SetDialyzingFluidFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
 		{
-			IncomingFluidTemperature = incoming.Temperature;
-			IncomingQuantityOfDialyzingFluid = incoming.Quantity;
-			outgoing.CopyValuesFrom(incoming);
-			outgoing.Quantity = IncomingSuctionRateOnDialyzingFluidSide;
-			outgoing.WasUsed = true;
+			IncomingFluidTemperature = fromPredecessor.Temperature;
+			IncomingQuantityOfDialyzingFluid = fromPredecessor.Quantity;
+			toSuccessor.CopyValuesFrom(fromPredecessor);
+			toSuccessor.Quantity = IncomingSuctionRateOnDialyzingFluidSide;
+			toSuccessor.WasUsed = true;
 		}
 
 		[Provided]
-		public void SetBloodFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void SetBloodFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CopyValuesFrom(incomingSuction);
+			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
 		[Provided]
-		public void SetBloodFlow(Blood outgoing, Blood incoming)
+		public void SetBloodFlow(Blood toSuccessor, Blood fromPredecessor)
 		{
-			if (incoming.Water > 0 || incoming.BigWasteProducts > 0)
+			if (fromPredecessor.Water > 0 || fromPredecessor.BigWasteProducts > 0)
 			{
-				outgoing.CopyValuesFrom(incoming);
-				outgoing.Temperature = IncomingFluidTemperature;
+				toSuccessor.CopyValuesFrom(fromPredecessor);
+				toSuccessor.Temperature = IncomingFluidTemperature;
 				// First step: Filtrate Blood
-				if (IncomingQuantityOfDialyzingFluid >= outgoing.SmallWasteProducts)
+				if (IncomingQuantityOfDialyzingFluid >= toSuccessor.SmallWasteProducts)
 				{
-					outgoing.SmallWasteProducts = 0;
+					toSuccessor.SmallWasteProducts = 0;
 				}
 				else
 				{
-					outgoing.SmallWasteProducts -= IncomingQuantityOfDialyzingFluid;
+					toSuccessor.SmallWasteProducts -= IncomingQuantityOfDialyzingFluid;
 				}
 				// Second step: Ultra Filtration
 				// To satisfy the incoming suction rate we must take the fluid from the blood.
@@ -78,26 +78,26 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 				var ultrafiltrationRate = IncomingSuctionRateOnDialyzingFluidSide - IncomingQuantityOfDialyzingFluid;
 				if (ultrafiltrationRate >= 0)
 				{
-					if (ultrafiltrationRate < outgoing.BigWasteProducts)
+					if (ultrafiltrationRate < toSuccessor.BigWasteProducts)
 					{
-						outgoing.BigWasteProducts -= ultrafiltrationRate;
+						toSuccessor.BigWasteProducts -= ultrafiltrationRate;
 					}
 					else
 					{
 						// Remove water instead of BigWasteProducts
-						// Assume Water >= (ultrafiltrationRate - outgoing.BigWasteProducts)
-						outgoing.Water -= (ultrafiltrationRate - outgoing.BigWasteProducts);
-						outgoing.BigWasteProducts = 0;
+						// Assume Water >= (ultrafiltrationRate - toSuccessor.BigWasteProducts)
+						toSuccessor.Water -= (ultrafiltrationRate - toSuccessor.BigWasteProducts);
+						toSuccessor.BigWasteProducts = 0;
 					}
 				}
 			}
 			else
 			{
-				outgoing.CopyValuesFrom(incoming);
+				toSuccessor.CopyValuesFrom(fromPredecessor);
 			}
 			if (!MembraneIntact)
 			{
-				outgoing.ChemicalCompositionOk = false;
+				toSuccessor.ChemicalCompositionOk = false;
 			}
 		}
 
