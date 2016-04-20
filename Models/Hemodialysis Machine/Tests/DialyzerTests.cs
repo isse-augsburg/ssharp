@@ -163,6 +163,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			DialysingFluidFlowCombinator.ConnectOutWithIn(Dialyzer.DialyzingFluidFlow, DialyzingFluidFlowSink);
 			BloodFlowCombinator.ConnectOutWithIn(Patient.ArteryFlow, Dialyzer.BloodFlow);
 			BloodFlowCombinator.ConnectOutWithIn(Dialyzer.BloodFlow, Patient.VeinFlow);
+			BloodFlowCombinator.CommitFlow();
+			DialysingFluidFlowCombinator.CommitFlow();
 		}
 	}
 

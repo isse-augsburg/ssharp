@@ -95,7 +95,7 @@
     <Compile Include="Utilities\BidirectionalFlow\FlowInToOut.cs" />
     <Compile Include="Utilities\BidirectionalFlow\FlowMerger.cs" />
     <Compile Include="Utilities\BidirectionalFlow\FlowPort.cs" />
-    <Compile Include="Utilities\BidirectionalFlow\IComposite.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IFlowComposite.cs" />
     <Compile Include="Utilities\BidirectionalFlow\FlowSink.cs" />
     <Compile Include="Utilities\BidirectionalFlow\FlowSource.cs" />
     <Compile Include="Utilities\BidirectionalFlow\FlowSplitter.cs" />

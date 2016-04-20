@@ -42,7 +42,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 
 		public void UpdateBackwardInternal()
 		{
-			Incoming.Backward.CopyValuesFrom(Incoming.Backward);
+			Incoming.Backward.CopyValuesFrom(Outgoing.Backward);
 		}
 	}
 }

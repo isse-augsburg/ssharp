@@ -122,6 +122,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			BloodFlowCombinator.ConnectOutWithIn(ExtracorporealBloodCircuit.BloodFlow, Patient.VeinFlow);
 			BloodFlowCombinator.ConnectOutWithIn(ExtracorporealBloodCircuit.ToDialyzer, Dialyzer.BloodFlow);
 			BloodFlowCombinator.ConnectOutWithIn(Dialyzer.BloodFlow, ExtracorporealBloodCircuit.FromDialyzer);
+			BloodFlowCombinator.CommitFlow();
 
 		}
 	}

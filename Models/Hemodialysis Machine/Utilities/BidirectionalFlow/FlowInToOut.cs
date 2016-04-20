@@ -36,14 +36,14 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 
 		public Action<TBackward, TBackward> UpdateBackward = (outgoingBackward,incomingBackward) =>
 		{
-			// You have to overwrite this function
-			throw new NotImplementedException();
+			// Standard behavior: Just copy. For a different behavior you have to overwrite this function
+			incomingBackward.CopyValuesFrom(outgoingBackward);
 		};
 		
 		public Action<TForward, TForward> UpdateForward = (outgoingForward,incomingForward) =>
 		{
-			// You have to overwrite this function
-			throw new NotImplementedException();
+			// Standard behavior: Just copy. For a different behavior you have to overwrite this function
+			outgoingForward.CopyValuesFrom(incomingForward);
 		};
 
 		public void UpdateForwardInternal()

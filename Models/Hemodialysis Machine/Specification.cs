@@ -50,6 +50,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine
 
 			_bloodFlowCombinator.ConnectOutWithIn(HdMachine.ToPatientVein, Patient.VeinFlow);
 			_bloodFlowCombinator.ConnectOutWithIn(Patient.ArteryFlow,HdMachine.FromPatientArtery);
+			_bloodFlowCombinator.CommitFlow();
+			_dialysingFluidFlowCombinator.CommitFlow();
 		}
 		
 

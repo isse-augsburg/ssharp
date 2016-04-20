@@ -25,6 +25,7 @@ using System;
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
 {
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using Modeling;
 	using QuickGraph;
@@ -36,7 +37,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	{
 		[Hidden(HideElements = true)]
 		private IFlowAtomic<TForward, TBackward>[] _updateForwardOrder;
-		
+
+		[NonSerializable]
 		private readonly BidirectionalGraph<IFlowAtomic<TForward, TBackward>, Edge<IFlowAtomic<TForward, TBackward>>> _graphOfComponents = new BidirectionalGraph<IFlowAtomic<TForward, TBackward>, Edge<IFlowAtomic<TForward, TBackward>>>();
 
 		public abstract FlowMerger<TForward, TBackward> CreateFlowVirtualMerger(int elementNos);
@@ -49,13 +51,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 
 		public override void Update()
 		{
+			if (_updateForwardOrder==null)
+				throw new Exception("Flow was not committed. Please execute CommitFlow() in the model initialization phase");
 			for (var i = _updateForwardOrder.Length - 1; i >= 0; i--)
 			{
 				_updateForwardOrder[i].UpdateBackwardInternal();
 			}
 			for (var i = 0; i < _updateForwardOrder.Length; i++)
 			{
-				_updateForwardOrder[i].UpdateBackwardInternal();
+				_updateForwardOrder[i].UpdateForwardInternal();
 			}
 		}
 
@@ -75,9 +79,23 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 		private void AddAtomicConnection(IFlowComponent<TForward, TBackward> from, IFlowComponent<TForward, TBackward> to)
 		{
 			var fromAtomic = from as IFlowAtomic<TForward, TBackward>;
+			if (fromAtomic == null)
+			{
+				var fromComposite = from as IFlowComposite<TForward, TBackward>;
+				if (fromComposite == null)
+					throw new Exception("BUG: from should be either IFlowAtomic or IFlowComposite");
+				fromAtomic = fromComposite.FlowOut;
+			}
 			var toAtomic = to as IFlowAtomic<TForward, TBackward>;
-			if (fromAtomic != null && toAtomic != null)
-				_graphOfComponents.AddEdge(new Edge<IFlowAtomic<TForward, TBackward>>(fromAtomic, toAtomic));
+			if (toAtomic == null)
+			{
+				var toComposite = to as IFlowComposite<TForward, TBackward>;
+				if (toComposite == null)
+					throw new Exception("BUG: to should be either IFlowAtomic or IFlowComposite");
+				toAtomic = toComposite.FlowIn;
+			}
+
+			_graphOfComponents.AddVerticesAndEdge(new Edge<IFlowAtomic<TForward, TBackward>>(fromAtomic, toAtomic));
 		}
 
 		public void ConnectOutWithIn(IFlowComponentUniqueOutgoing<TForward, TBackward> @from, IFlowComponentUniqueIncoming<TForward, TBackward> to)
@@ -145,22 +163,22 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 		}
 		
 		// For Composites (internal view)
-		public void ConnectInWithIn(IComposite<TForward, TBackward> @from, IFlowComponentUniqueIncoming<TForward, TBackward> to)
+		public void ConnectInWithIn(IFlowComposite<TForward, TBackward> @from, IFlowComponentUniqueIncoming<TForward, TBackward> to)
 		{
 			ConnectOutWithIn(from.FlowIn, to);
 		}
 
-		public void ConnectInWithIns(IComposite<TForward, TBackward> @from, IFlowComponentUniqueIncoming<TForward, TBackward>[] tos)
+		public void ConnectInWithIns(IFlowComposite<TForward, TBackward> @from, IFlowComponentUniqueIncoming<TForward, TBackward>[] tos)
 		{
 			ConnectOutWithIns(from.FlowIn, tos);
 		}
 		
-		public void ConnectOutWithOut(IFlowComponentUniqueOutgoing<TForward, TBackward> @from, IComposite<TForward, TBackward> to)
+		public void ConnectOutWithOut(IFlowComponentUniqueOutgoing<TForward, TBackward> @from, IFlowComposite<TForward, TBackward> to)
 		{
 			ConnectOutWithIn(from, to.FlowOut);
 		}
 
-		public void ConnectOutsWithOut(IFlowComponentUniqueOutgoing<TForward, TBackward>[] @froms, IComposite<TForward, TBackward> to)
+		public void ConnectOutsWithOut(IFlowComponentUniqueOutgoing<TForward, TBackward>[] @froms, IFlowComposite<TForward, TBackward> to)
 		{
 			ConnectOutsWithIn(froms, to.FlowOut);
 		}

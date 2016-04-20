@@ -70,6 +70,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			DialyzingFluidDeliverySystem.AddFlows(DialysingFluidFlowCombinator);
 			DialysingFluidFlowCombinator.ConnectOutWithIn(DialyzingFluidDeliverySystem.ToDialyzer, Dialyzer.DialyzingFluidFlow);
 			DialysingFluidFlowCombinator.ConnectOutWithIn(Dialyzer.DialyzingFluidFlow, DialyzingFluidDeliverySystem.FromDialyzer);
+			DialysingFluidFlowCombinator.CommitFlow();
 		}
 		
 	}

@@ -87,6 +87,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			sink.ReceivedForward = testModel.PrintReceivedForward;
 			testModel.Combinator.ConnectOutWithIn(source, direct);
 			testModel.Combinator.ConnectOutWithIn(direct, sink);
+			testModel.Combinator.CommitFlow();
 
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
@@ -124,6 +125,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutWithIn(source, direct1);
 			testModel.Combinator.ConnectOutWithIn(direct1, direct2);
 			testModel.Combinator.ConnectOutWithIn(direct2, sink);
+			testModel.Combinator.CommitFlow();
 
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
@@ -133,6 +135,41 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
 			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[3];
 			sinkAfterStep.Incoming.Forward.Should().Be(7);
+			sourceAfterStep.Outgoing.Backward.Should().Be(1);
+		}
+
+		[Test]
+		public void DelegateFlowArrives()
+		{
+			var testModel = new IntFlowModel();
+			var source = new IntFlowSource();
+			var del = new IntFlowDelegate();
+			var sink = new IntFlowSink();
+			testModel.Components = new IntFlowComponentCollection(source, del, sink);
+
+			source.SendForward = testModel.CreateForward;
+			source.ReceivedBackward = testModel.PrintReceivedBackward;
+			sink.SendBackward = testModel.CreateBackward;
+			sink.ReceivedForward = testModel.PrintReceivedForward;
+			testModel.Combinator.ConnectOutWithIn(source, del);
+			testModel.Combinator.ConnectOutWithIn(del, sink);
+			testModel.Combinator.CommitFlow();
+
+			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			simulator.SimulateStep();
+
+			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
+			var flowComponentsAfterStep = ((IntFlowComponentCollection)simulator.Model.Roots[1]).Components;
+			var sourceAfterStep = (IntFlowSource)flowComponentsAfterStep[0];
+			var delAfterStep = (IntFlowDelegate)flowComponentsAfterStep[1];
+			var sinkAfterStep = (IntFlowSink)flowComponentsAfterStep[2];
+			sourceAfterStep.Outgoing.Forward.Should().Be((Int)7);
+			delAfterStep.Incoming.Forward.Should().Be((Int)7);
+			delAfterStep.Outgoing.Forward.Should().Be((Int)7);
+			sinkAfterStep.Incoming.Forward.Should().Be((Int)7);
+			sinkAfterStep.Incoming.Backward.Should().Be(1);
+			delAfterStep.Outgoing.Backward.Should().Be(1);
+			delAfterStep.Incoming.Backward.Should().Be(1);
 			sourceAfterStep.Outgoing.Backward.Should().Be(1);
 		}
 
@@ -156,6 +193,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutWithIn(firstInComposite, secondInComposite);
 			testModel.Combinator.ConnectOutWithOut(secondInComposite, composite);
 			testModel.Combinator.ConnectOutWithIn(composite, sink);
+			testModel.Combinator.CommitFlow();
 
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
@@ -196,6 +234,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutWithIns(source, new IFlowComponentUniqueIncoming<Int, Int>[] { way1Direct, way2Direct });
 			testModel.Combinator.ConnectOutWithIn(way1Direct, way1Sink);
 			testModel.Combinator.ConnectOutWithIn(way2Direct, way2Sink);
+			testModel.Combinator.CommitFlow();
 
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
@@ -230,6 +269,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutWithIn(source1, way1Direct);
 			testModel.Combinator.ConnectOutWithIn(source2, way2Direct);
 			testModel.Combinator.ConnectOutsWithIn(new IFlowComponentUniqueOutgoing<Int, Int>[] { way1Direct, way2Direct }, sink);
+			testModel.Combinator.CommitFlow();
 
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
@@ -267,6 +307,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutWithIn(way1Direct, sinkInside);
 			testModel.Combinator.ConnectOutWithOut(way2Direct, composite);
 			testModel.Combinator.ConnectOutWithIn(composite, sinkOutside);
+			testModel.Combinator.CommitFlow();
 
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
@@ -304,6 +345,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			testModel.Combinator.ConnectOutWithIn(sourceInside, way2Direct);
 			testModel.Combinator.ConnectOutsWithOut(new IFlowComponentUniqueOutgoing<Int, Int>[] { way1Direct, way2Direct }, composite);
 			testModel.Combinator.ConnectOutWithIn(composite, sink);
+			testModel.Combinator.CommitFlow();
 
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();

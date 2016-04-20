@@ -25,7 +25,7 @@ using System;
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow {
 	using System.Dynamic;
 
-	public abstract class FlowComposite<TForward, TBackward> : IComposite<TForward,TBackward>
+	public abstract class FlowComposite<TForward, TBackward> : IFlowComposite<TForward,TBackward>
 		where TForward : class, IFlowElement<TForward>, new()
 		where TBackward : class, IFlowElement<TBackward>, new()
 	{
