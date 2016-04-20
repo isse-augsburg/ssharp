@@ -20,11 +20,11 @@
 		[Provided]
 		public void CreateBlood(Blood outgoingBlood)
 		{
-			var incomingSuction = ArteryFlow.Outgoing.BackwardFromSuccessor;
+			var incomingSuction = ArteryFlow.Outgoing.Backward;
 			var hasSuction = incomingSuction.SuctionType == SuctionType.CustomSuction && incomingSuction.CustomSuctionValue > 0;
 			if (hasSuction && IsConnected)
 			{
-				var totalUnitsToDeliver = ArteryFlow.Outgoing.BackwardFromSuccessor.CustomSuctionValue;
+				var totalUnitsToDeliver = ArteryFlow.Outgoing.Backward.CustomSuctionValue;
 				var bigWasteUnitsToDeliver = totalUnitsToDeliver / 2;
 				if (BigWasteProducts >= bigWasteUnitsToDeliver)
 				{
@@ -90,10 +90,9 @@
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(ArteryFlow.SetOutgoingForward), nameof(CreateBlood));
-			Bind(nameof(ArteryFlow.BackwardFromSuccessorWasUpdated), nameof(DoNothing));
-			Bind(nameof(VeinFlow.SetOutgoingBackward), nameof(CreateBloodSuction));
-			Bind(nameof(VeinFlow.ForwardFromPredecessorWasUpdated), nameof(BloodReceived));
+			ArteryFlow.SendForward=CreateBlood;
+			VeinFlow.SendBackward=CreateBloodSuction;
+			VeinFlow.ReceivedForward=BloodReceived;
 		}
 
 		public void PrintBloodValues(string pointOfTime)

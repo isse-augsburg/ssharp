@@ -29,11 +29,11 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		[Provided]
 		public void CreateBlood(Blood outgoingBlood)
 		{
-			var incomingSuction = ArteryFlow.Outgoing.BackwardFromSuccessor;
+			var incomingSuction = ArteryFlow.Outgoing.Backward;
 			var hasSuction = incomingSuction.SuctionType == SuctionType.CustomSuction && incomingSuction.CustomSuctionValue > 0;
 			if (hasSuction)
 			{
-				var totalUnitsToDeliver = ArteryFlow.Outgoing.BackwardFromSuccessor.CustomSuctionValue;
+				var totalUnitsToDeliver = ArteryFlow.Outgoing.Backward.CustomSuctionValue;
 				var bigWasteUnitsToDeliver = totalUnitsToDeliver / 2;
 				if (BigWasteProducts >= bigWasteUnitsToDeliver)
 				{
@@ -98,12 +98,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 				SmallWasteProducts += incomingBlood.SmallWasteProducts;
 				BigWasteProducts += incomingBlood.BigWasteProducts;
 			}
-
-			[Provided]
-			public void DoNothing(Suction incomingSuction)
-			{
-			}
-
+		
 			public override void Update()
 			{
 				TimeStepsLeft = (TimeStepsLeft > 0) ? (TimeStepsLeft - 1) : 0;
@@ -111,10 +106,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 
 			protected override void CreateBindings()
 			{
-				Bind(nameof(ArteryFlow.SetOutgoingForward), nameof(CreateBlood));
-				Bind(nameof(ArteryFlow.BackwardFromSuccessorWasUpdated), nameof(DoNothing));
-				Bind(nameof(VeinFlow.SetOutgoingBackward), nameof(CreateBloodSuction));
-				Bind(nameof(VeinFlow.ForwardFromPredecessorWasUpdated), nameof(BloodReceived));
+				ArteryFlow.SendForward=CreateBlood;
+				VeinFlow.SendBackward=CreateBloodSuction;
+				VeinFlow.ReceivedForward=BloodReceived;
 			}
 
 			public void PrintBloodValues(string pointOfTime)
@@ -159,28 +153,16 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			outgoingSuction.SuctionType = SuctionType.CustomSuction;
 			outgoingSuction.CustomSuctionValue = 3;
 		}
-
-		[Provided]
-		public void DoNothing(Suction incomingSuction)
-		{
-		}
-
-		[Provided]
-		public void DoNothing(DialyzingFluid incomingDialyzingFluid)
-		{
-		}
-
+		
 		public DialyzerTestEnvironment()
 		{
-			Component.Bind(nameof(DialyzingFluidFlowSource.SetOutgoingForward), nameof(CreateDialyzingFluid));
-			Component.Bind(nameof(DialyzingFluidFlowSource.BackwardFromSuccessorWasUpdated), nameof(DoNothing));
-			Component.Bind(nameof(DialyzingFluidFlowSink.SetOutgoingBackward), nameof(CreateDialyzingFluidSuction));
-			Component.Bind(nameof(DialyzingFluidFlowSink.ForwardFromPredecessorWasUpdated), nameof(DoNothing));
+			DialyzingFluidFlowSource.SendForward=CreateDialyzingFluid;
+			DialyzingFluidFlowSink.SendBackward=CreateDialyzingFluidSuction;
 
-			DialysingFluidFlowCombinator.Connect(DialyzingFluidFlowSource.Outgoing, Dialyzer.DialyzingFluidFlow.Incoming);
-			DialysingFluidFlowCombinator.Connect(Dialyzer.DialyzingFluidFlow.Outgoing, DialyzingFluidFlowSink.Incoming);
-			BloodFlowCombinator.Connect(Patient.ArteryFlow.Outgoing, Dialyzer.BloodFlow.Incoming);
-			BloodFlowCombinator.Connect(Dialyzer.BloodFlow.Outgoing, Patient.VeinFlow.Incoming);
+			DialysingFluidFlowCombinator.ConnectOutWithIn(DialyzingFluidFlowSource, Dialyzer.DialyzingFluidFlow);
+			DialysingFluidFlowCombinator.ConnectOutWithIn(Dialyzer.DialyzingFluidFlow, DialyzingFluidFlowSink);
+			BloodFlowCombinator.ConnectOutWithIn(Patient.ArteryFlow, Dialyzer.BloodFlow);
+			BloodFlowCombinator.ConnectOutWithIn(Dialyzer.BloodFlow, Patient.VeinFlow);
 		}
 	}
 
@@ -198,8 +180,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 				(DialyzerTestEnvironmentPatient)
 					simulator.Model.Roots.OfType<DialyzerTestEnvironmentPatient>().First();
 			Console.Out.WriteLine("Initial");
-			patientAfterStep0.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
-			patientAfterStep0.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
+			patientAfterStep0.ArteryFlow.Outgoing.Forward.PrintBloodValues("outgoing Blood");
+			patientAfterStep0.VeinFlow.Incoming.Forward.PrintBloodValues("incoming Blood");
 			patientAfterStep0.PrintBloodValues("");
 			Console.Out.WriteLine("Step 1");
 			simulator.SimulateStep();
@@ -207,8 +189,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var patientAfterStep1 =
 				(DialyzerTestEnvironmentPatient)
 					simulator.Model.Roots.OfType<DialyzerTestEnvironmentPatient>().First();
-			patientAfterStep1.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
-			patientAfterStep1.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
+			patientAfterStep1.ArteryFlow.Outgoing.Forward.PrintBloodValues("outgoing Blood");
+			patientAfterStep1.VeinFlow.Incoming.Forward.PrintBloodValues("incoming Blood");
 			patientAfterStep1.PrintBloodValues("");
 			Console.Out.WriteLine("Step 2");
 			simulator.SimulateStep();
@@ -216,8 +198,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var patientAfterStep2 =
 				(DialyzerTestEnvironmentPatient)
 					simulator.Model.Roots.OfType<DialyzerTestEnvironmentPatient>().First();
-			patientAfterStep2.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
-			patientAfterStep2.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
+			patientAfterStep2.ArteryFlow.Outgoing.Forward.PrintBloodValues("outgoing Blood");
+			patientAfterStep2.VeinFlow.Incoming.Forward.PrintBloodValues("incoming Blood");
 			patientAfterStep2.PrintBloodValues("");
 			Console.Out.WriteLine("Step 3");
 			simulator.SimulateStep();
@@ -225,8 +207,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var patientAfterStep3 =
 				(DialyzerTestEnvironmentPatient)
 					simulator.Model.Roots.OfType<DialyzerTestEnvironmentPatient>().First();
-			patientAfterStep3.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
-			patientAfterStep3.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
+			patientAfterStep3.ArteryFlow.Outgoing.Forward.PrintBloodValues("outgoing Blood");
+			patientAfterStep3.VeinFlow.Incoming.Forward.PrintBloodValues("incoming Blood");
 			patientAfterStep3.PrintBloodValues("");
 			Console.Out.WriteLine("Step 4");
 			simulator.SimulateStep();
@@ -234,8 +216,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var patientAfterStep4 =
 				(DialyzerTestEnvironmentPatient)
 					simulator.Model.Roots.OfType<DialyzerTestEnvironmentPatient>().First();
-			patientAfterStep4.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
-			patientAfterStep4.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
+			patientAfterStep4.ArteryFlow.Outgoing.Forward.PrintBloodValues("outgoing Blood");
+			patientAfterStep4.VeinFlow.Incoming.Forward.PrintBloodValues("incoming Blood");
 			patientAfterStep4.PrintBloodValues("");
 
 			//dialyzerAfterStep1.Should().Be(1);

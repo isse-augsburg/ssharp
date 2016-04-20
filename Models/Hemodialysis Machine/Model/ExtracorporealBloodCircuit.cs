@@ -11,7 +11,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 	public class ArterialBloodPump : Component
 	{
-		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
+		public readonly BloodFlowInToOut MainFlow = new BloodFlowInToOut();
 
 		[Range(0, 8, OverflowBehavior.Error)]
 		public int SpeedOfMotor = 0;
@@ -31,8 +31,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
-			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+			MainFlow.UpdateBackward=SetMainFlowSuction;
+			MainFlow.UpdateForward=SetMainFlow;
 		}
 
 		public readonly Fault BloodPumpDefect = new TransientFault();
@@ -70,8 +70,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(SenseFlow.SetOutgoingBackward), nameof(SetSenseFlowSuction));
-			Bind(nameof(SenseFlow.ForwardFromPredecessorWasUpdated), nameof(ReceivedBlood));
+			SenseFlow.SendBackward=SetSenseFlowSuction;
+			SenseFlow.ReceivedForward=ReceivedBlood;
 		}
 	}
 
@@ -101,15 +101,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(HeparinFlow.SetOutgoingForward), nameof(SetHeparinFlow));
-			Bind(nameof(HeparinFlow.BackwardFromSuccessorWasUpdated), nameof(ReceivedSuction));
+			HeparinFlow.SendForward=SetHeparinFlow;
+			HeparinFlow.ReceivedBackward=ReceivedSuction;
 		}
 	}
 
 	public class ArtierialChamber : Component
 	{
 		// Drip Chamber
-		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
+		public readonly BloodFlowInToOut MainFlow = new BloodFlowInToOut();
 
 		[Provided]
 		public void SetMainFlow(Blood outgoing, Blood incoming)
@@ -126,15 +126,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
-			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+			MainFlow.UpdateBackward=SetMainFlowSuction;
+			MainFlow.UpdateForward=SetMainFlow;
 		}
 	}
 
 	public class VenousChamber : Component
 	{
 		// Drip Chamber
-		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
+		public readonly BloodFlowInToOut MainFlow = new BloodFlowInToOut();
 
 		[Provided]
 		public void SetMainFlow(Blood outgoing, Blood incoming)
@@ -151,8 +151,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
-			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+			MainFlow.UpdateBackward=SetMainFlowSuction;
+			MainFlow.UpdateForward=SetMainFlow;
 		}
 	}
 
@@ -177,14 +177,14 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(SenseFlow.SetOutgoingBackward), nameof(SetSenseFlowSuction));
-			Bind(nameof(SenseFlow.ForwardFromPredecessorWasUpdated), nameof(ReceivedBlood));
+			SenseFlow.SendBackward=SetSenseFlowSuction;
+			SenseFlow.ReceivedForward=ReceivedBlood;
 		}
 	}
 
 	public class VenousSafetyDetector : Component
 	{
-		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
+		public readonly BloodFlowInToOut MainFlow = new BloodFlowInToOut();
 
 		public bool DetectedGasOrContaminatedBlood = false;
 
@@ -210,8 +210,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
-			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+			MainFlow.UpdateBackward=SetMainFlowSuction;
+			MainFlow.UpdateForward=SetMainFlow;
 		}
 
 		public readonly Fault SafetyDetectorDefect = new TransientFault();
@@ -231,7 +231,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 	public class VenousTubingValve : Component
 	{
 		// HACK: To be able to react in time we delay the BloodFlow
-		public readonly BloodFlowInToOutSegment MainFlow = new BloodFlowInToOutSegment();
+		public readonly BloodFlowInToOut MainFlow = new BloodFlowInToOut();
 
 		public ValveState ValveState = ValveState.Open;
 
@@ -271,8 +271,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
-			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+			MainFlow.UpdateBackward=SetMainFlowSuction;
+			MainFlow.UpdateForward=SetMainFlow;
 		}
 
 		public readonly Fault ValveDoesNotClose = new TransientFault();
@@ -289,8 +289,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 	public class ExtracorporealBloodCircuit : Component
 	{
 		public readonly BloodFlowComposite BloodFlow = new BloodFlowComposite();
-		public readonly BloodFlowUniqueOutgoingStub FromDialyzer = new BloodFlowUniqueOutgoingStub();
-		public readonly BloodFlowUniqueIncomingStub ToDialyzer = new BloodFlowUniqueIncomingStub();
+		public readonly BloodFlowDelegate FromDialyzer = new BloodFlowDelegate();
+		public readonly BloodFlowDelegate ToDialyzer = new BloodFlowDelegate();
 
 		public readonly ArterialBloodPump ArterialBloodPump = new ArterialBloodPump();
 		public readonly ArteriaPressureTransducer ArteriaPressureTransducer = new ArteriaPressureTransducer();
@@ -304,20 +304,20 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public void AddFlows(BloodFlowCombinator flowCombinator)
 		{
 			// The order of the connections matter
-			flowCombinator.Connect(BloodFlow.InternalSource.Outgoing,
-				new PortFlowIn<Blood, Suction>[] { ArterialBloodPump.MainFlow.Incoming, ArteriaPressureTransducer.SenseFlow.Incoming });
-			flowCombinator.Connect(new PortFlowOut<Blood, Suction>[] { ArterialBloodPump.MainFlow.Outgoing, HeparinPump.HeparinFlow.Outgoing },
-				ArterialChamber.MainFlow.Incoming);
-			flowCombinator.Connect(ArterialChamber.MainFlow.Outgoing,
-				ToDialyzer.Incoming);
-			flowCombinator.Connect(FromDialyzer.Outgoing,
-				new PortFlowIn<Blood, Suction>[] { VenousChamber.MainFlow.Incoming, VenousPressureTransducer.SenseFlow.Incoming });
-			flowCombinator.Connect(VenousChamber.MainFlow.Outgoing,
-				VenousSafetyDetector.MainFlow.Incoming);
-			flowCombinator.Connect(VenousSafetyDetector.MainFlow.Outgoing,
-				VenousTubingValve.MainFlow.Incoming);
-			flowCombinator.Connect(VenousTubingValve.MainFlow.Outgoing,
-				BloodFlow.InternalSink.Incoming);
+			flowCombinator.ConnectInWithIns(BloodFlow,
+				new IFlowComponentUniqueIncoming<Blood, Suction>[] { ArterialBloodPump.MainFlow, ArteriaPressureTransducer.SenseFlow });
+			flowCombinator.ConnectOutsWithIn(new IFlowComponentUniqueOutgoing<Blood, Suction>[] { ArterialBloodPump.MainFlow, HeparinPump.HeparinFlow },
+				ArterialChamber.MainFlow);
+			flowCombinator.ConnectOutWithIn(ArterialChamber.MainFlow,
+				ToDialyzer);
+			flowCombinator.ConnectOutWithIns(FromDialyzer,
+				new IFlowComponentUniqueIncoming<Blood, Suction>[] { VenousChamber.MainFlow, VenousPressureTransducer.SenseFlow });
+			flowCombinator.ConnectOutWithIn(VenousChamber.MainFlow,
+				VenousSafetyDetector.MainFlow);
+			flowCombinator.ConnectOutWithIn(VenousSafetyDetector.MainFlow,
+				VenousTubingValve.MainFlow);
+			flowCombinator.ConnectOutWithOut(VenousTubingValve.MainFlow,
+				BloodFlow);
 		}
 
 	}

@@ -26,7 +26,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 {
 	using Modeling;
 
-	internal class Int : IElement<Int>
+	internal class Int : IFlowElement<Int>
 	{
 		public int Value;
 
@@ -72,7 +72,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	{
 	}
 
-	class IntFlowInToOutSegment : FlowInToOutSegment<Int, Int>, IIntFlowComponent
+	class IntFlowInToOut : FlowInToOut<Int, Int>, IIntFlowComponent
 	{
 	}
 
@@ -84,73 +84,80 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	{
 	}
 
-	class IntFlowComposite : FlowComposite<Int, Int>, IIntFlowComponent
+	class IntFlowSplitter : FlowSplitter<Int, Int>, IIntFlowComponent
 	{
-	}
-
-	class IntFlowVirtualSplitter : FlowVirtualSplitter<Int, Int>, IIntFlowComponent
-	{
-		public IntFlowVirtualSplitter(int number)
+		public IntFlowSplitter(int number)
 			: base(number)
 		{
 		}
 
-		public override void SplitForwards(Int source, Int[] targets, Int[] dependingOn)
+		public override void UpdateForwardInternal()
 		{
-			StandardBehaviorSplitForwardsEqual(source,targets,dependingOn);
+			//Standard behavior: Copy each value
+			for (int i = 0; i < Number; i++)
+			{
+				Outgoings[i].Forward.CopyValuesFrom(Incoming.Forward);
+			}
 		}
 
-		public override void MergeBackwards(Int[] sources, Int target)
+		public override void UpdateBackwardInternal()
 		{
-			StandardBehaviorMergeBackwardsSelectFirst(sources,target);
+			//Standard behavior: Select first source
+			Incoming.Backward.CopyValuesFrom(Outgoings[0].Backward);
 		}
 	}
+	
 
-	class IntFlowVirtualMerger : FlowVirtualMerger<Int, Int>, IIntFlowComponent
+	class IntFlowMerger : FlowMerger<Int, Int>, IIntFlowComponent
 	{
-		public IntFlowVirtualMerger(int number)
+		public IntFlowMerger(int number)
 			: base(number)
 		{
 		}
 
-		public override void SplitBackwards(Int source, Int[] targets)
+		public override void UpdateForwardInternal()
 		{
-			StandardBehaviorSplitBackwardsEqual(source,targets);
+			//Standard behavior: Select first source
+			Outgoing.Forward.CopyValuesFrom(Incomings[0].Forward);
 		}
 
-		public override void MergeForwards(Int[] sources, Int target, Int dependingOn)
+		public override void UpdateBackwardInternal()
 		{
-			StandardBehaviorMergeForwardsSelectFirst(sources,target,dependingOn);
+			//Standard behavior: Copy each value
+			for (int i = 0; i < Number; i++)
+			{
+				Incomings[i].Backward.CopyValuesFrom(Outgoing.Backward);
+			}
 		}
 	}
 
-	class IntFlowCombinator : FlowCombinator<Int, Int>, IIntFlowComponent
+	class IntFlowCombinator : FlowCombinator<Int, Int>
 	{
-		public override FlowVirtualMerger<Int, Int> CreateFlowVirtualMerger(int elementNos)
+		public override FlowMerger<Int, Int> CreateFlowVirtualMerger(int elementNos)
 		{
-			return new IntFlowVirtualMerger(elementNos);
+			return new IntFlowMerger(elementNos);
 		}
 
-		public override FlowVirtualSplitter<Int, Int> CreateFlowVirtualSplitter(int elementNos)
+		public override FlowSplitter<Int, Int> CreateFlowVirtualSplitter(int elementNos)
 		{
-			return new IntFlowVirtualSplitter(elementNos);
+			return new IntFlowSplitter(elementNos);
 		}
 	}
 
-	class IntFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<Int, Int>, IIntFlowComponent
+
+	class IntFlowComposite : FlowComposite<Int,Int>, IIntFlowComponent
 	{
 	}
 
-	class IntFlowUniqueIncomingStub : FlowUniqueIncomingStub<Int, Int>, IIntFlowComponent
+	class IntFlowDelegate : FlowDelegate<Int, Int>, IIntFlowComponent
 	{
 	}
 
 	class IntFlowComponentCollection : Component
 	{
 		/// <summary>
-		///   The vehicles contained in the collection.
+		///   The IIntFlowComponent contained in the collection.
 		/// </summary>
-		//[Hidden(HideElements = true)]
 		public readonly IIntFlowComponent[] Components;
 
 		/// <summary>

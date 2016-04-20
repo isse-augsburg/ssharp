@@ -20,7 +20,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		// 1. Suction of DialyzingFluid is calculated
 		// 2. Element of DialyzingFluid is calculated
 
-		public DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
+		public DialyzingFluidFlowInToOut DialyzingFluidFlow = new DialyzingFluidFlowInToOut();
 
 		public int IncomingSuctionRateOnDialyzingFluidSide = 0;
 		public int IncomingQuantityOfDialyzingFluid = 0; //Amount of BloodUnits we can clean.
@@ -50,8 +50,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingBackward), nameof(SetDialyzingFluidFlowSuction));
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingForward), nameof(SetDialyzingFluidFlow));
+			DialyzingFluidFlow.UpdateBackward=SetDialyzingFluidFlowSuction;
+			DialyzingFluidFlow.UpdateForward=SetDialyzingFluidFlow;
 		}
 	}
 
@@ -68,8 +68,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		public DialyzingFluidDeliverySystemTestEnvironment()
 		{
 			DialyzingFluidDeliverySystem.AddFlows(DialysingFluidFlowCombinator);
-			DialysingFluidFlowCombinator.Replace(DialyzingFluidDeliverySystem.ToDialyzer.Incoming, Dialyzer.DialyzingFluidFlow.Incoming);
-			DialysingFluidFlowCombinator.Replace(DialyzingFluidDeliverySystem.FromDialyzer.Outgoing, Dialyzer.DialyzingFluidFlow.Outgoing);
+			DialysingFluidFlowCombinator.ConnectOutWithIn(DialyzingFluidDeliverySystem.ToDialyzer, Dialyzer.DialyzingFluidFlow);
+			DialysingFluidFlowCombinator.ConnectOutWithIn(Dialyzer.DialyzingFluidFlow, DialyzingFluidDeliverySystem.FromDialyzer);
 		}
 		
 	}

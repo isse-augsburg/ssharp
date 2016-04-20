@@ -16,8 +16,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		// 3. Suction of Blood is calculated
 		// 4. Element of Blood is calculated
 
-		public BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment();
-		public DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
+		public BloodFlowInToOut BloodFlow = new BloodFlowInToOut();
+		public DialyzingFluidFlowInToOut DialyzingFluidFlow = new DialyzingFluidFlowInToOut();
 
 		[Range(0, 8, OverflowBehavior.Error)]
 		public int IncomingSuctionRateOnDialyzingFluidSide = 0;
@@ -108,10 +108,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingBackward), nameof(SetDialyzingFluidFlowSuction));
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingForward), nameof(SetDialyzingFluidFlow));
-			Bind(nameof(BloodFlow.SetOutgoingBackward), nameof(SetBloodFlowSuction));
-			Bind(nameof(BloodFlow.SetOutgoingForward), nameof(SetBloodFlow));
+			DialyzingFluidFlow.UpdateBackward = SetDialyzingFluidFlowSuction;
+			DialyzingFluidFlow.UpdateForward = SetDialyzingFluidFlow;
+			BloodFlow.UpdateBackward = SetBloodFlowSuction;
+			BloodFlow.UpdateForward = SetBloodFlow;
 		}
 
 

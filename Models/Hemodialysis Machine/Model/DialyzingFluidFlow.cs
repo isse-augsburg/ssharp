@@ -32,7 +32,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 	using Utilities.BidirectionalFlow;
 	
 	// Also called dialysate or dialyzate
-	public class DialyzingFluid : IElement<DialyzingFluid>
+	public class DialyzingFluid : IFlowElement<DialyzingFluid>
 	{
 		[Hidden,Range(0, 8, OverflowBehavior.Error)]
 		public int Quantity;
@@ -66,7 +66,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 	}
 
 
-	public class DialyzingFluidFlowInToOutSegment : FlowInToOutSegment<DialyzingFluid,Suction>
+	public class DialyzingFluidFlowInToOut : FlowInToOut<DialyzingFluid,Suction>
 	{
 	}
 
@@ -78,35 +78,34 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 	{
 	}
 
-	public class DialyzingFluidFlowComposite : FlowComposite<DialyzingFluid, Suction>
-	{
-	}
 
-
-	public class DialyzingFluidFlowVirtualSplitter : FlowVirtualSplitter<DialyzingFluid, Suction>
+	public class DialyzingFluidFlowSplitter : FlowSplitter<DialyzingFluid, Suction>
 	{
-		public DialyzingFluidFlowVirtualSplitter(int number)
+		public DialyzingFluidFlowSplitter(int number)
 			: base(number)
 		{
 		}
 
-		public override void SplitForwards(DialyzingFluid source, DialyzingFluid[] targets, Suction[] dependingOn)
+		public override void UpdateForwardInternal()
 		{
-			var number = targets.Length;
+			var source = Incoming.Forward;
 			var availableQuantity = source.Quantity;
 			// Copy all needed values
 			var countRest = 0;
-			for (int i = 0; i < number; i++)
+			for (int i = 0; i < Number; i++)
 			{
-				targets[i].CopyValuesFrom(source);
+				var target = Outgoings[i].Forward;
+				target.CopyValuesFrom(source);
 			}
 			// first satisfy all CustomSuctions
-			for (int i = 0; i < number; i++)
+			for (int i = 0; i < Number; i++)
 			{
-				if (dependingOn[i].SuctionType == SuctionType.CustomSuction)
+				var dependingOn = Outgoings[i].Backward;
+				var target = Outgoings[i].Forward;
+				if (dependingOn.SuctionType == SuctionType.CustomSuction)
 				{
-					targets[i].Quantity = dependingOn[i].CustomSuctionValue;
-					availableQuantity -= dependingOn[i].CustomSuctionValue;
+					target.Quantity = dependingOn.CustomSuctionValue;
+					availableQuantity -= dependingOn.CustomSuctionValue;
 				}
 				else
 				{
@@ -118,23 +117,26 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 			if (countRest > 0)
 			{
 				var quantityForEachOfTheRest = availableQuantity / countRest;
-				for (int i = 0; i < number; i++)
+				for (int i = 0; i < Number; i++)
 				{
-					if (dependingOn[i].SuctionType != SuctionType.CustomSuction)
+					var dependingOn = Outgoings[i].Backward;
+					var target = Outgoings[i].Forward;
+					if (dependingOn.SuctionType != SuctionType.CustomSuction)
 					{
-						targets[i].Quantity = quantityForEachOfTheRest;
+						target.Quantity = quantityForEachOfTheRest;
 					}
 				}
 			}
 		}
 
-		public override void MergeBackwards(Suction[] sources, Suction target)
+		public override void UpdateBackwardInternal()
 		{
-			target.CopyValuesFrom(sources[0]);
-			var number = sources.Length;
-			for (int i = 1; i < number; i++) //start with second element
+			var target = Incoming.Backward;
+			target.CopyValuesFrom(Outgoings[0].Backward);
+			for (int i = 1; i < Number; i++) //start with second element
 			{
-				if (target.SuctionType == SuctionType.SourceDependentSuction || sources[i].SuctionType == SuctionType.SourceDependentSuction)
+				var source = Outgoings[i].Backward;
+				if (target.SuctionType == SuctionType.SourceDependentSuction || source.SuctionType == SuctionType.SourceDependentSuction)
 				{
 					target.SuctionType = SuctionType.SourceDependentSuction;
 					target.CustomSuctionValue = 0;
@@ -142,74 +144,76 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 				else
 				{
 					target.SuctionType = SuctionType.CustomSuction;
-					target.CustomSuctionValue += sources[i].CustomSuctionValue;
+					target.CustomSuctionValue += source.CustomSuctionValue;
 				}
 			}
 		}
 	}
 
-	public class DialyzingFluidFlowVirtualMerger : FlowVirtualMerger<DialyzingFluid, Suction>
+	public class DialyzingFluidFlowMerger : FlowMerger<DialyzingFluid, Suction>
 	{
-		public DialyzingFluidFlowVirtualMerger(int number)
+		public DialyzingFluidFlowMerger(int number)
 			: base(number)
 		{
 		}
 
-		public override void SplitBackwards(Suction source, Suction[] targets)
+		public override void UpdateForwardInternal()
 		{
-			var number = targets.Length;
+			var target = Outgoing.Forward;
+			target.CopyValuesFrom(Incomings[0].Forward);
+			for (int i = 1; i < Number; i++) //start with second element
+			{
+				var source = Incomings[i].Forward;
+				target.Quantity += source.Quantity;
+				target.ContaminatedByBlood |= source.ContaminatedByBlood;
+				target.WasUsed |= source.WasUsed;
+				if (source.Temperature != QualitativeTemperature.BodyHeat)
+					target.Temperature = source.Temperature;
+			}
+		}
 
+		public override void UpdateBackwardInternal()
+		{
+			var source = Outgoing.Backward;
 			if (source.SuctionType == SuctionType.SourceDependentSuction)
 			{
-				for (int i = 0; i < number; i++)
+				for (int i = 0; i < Number; i++)
 				{
-					targets[i].CopyValuesFrom(source);
+					var target = Incomings[i].Backward;
+					target.CopyValuesFrom(source);
 				}
 			}
 			else
 			{
-				var suctionForEach = source.CustomSuctionValue / number;
-				for (int i = 0; i < number; i++)
+				var suctionForEach = source.CustomSuctionValue / Number;
+				for (int i = 0; i < Number; i++)
 				{
-					targets[i].SuctionType = SuctionType.CustomSuction;
-					targets[i].CustomSuctionValue = suctionForEach;
+					var target = Incomings[i].Backward;
+					target.SuctionType = SuctionType.CustomSuction;
+					target.CustomSuctionValue = suctionForEach;
 				}
 			}
 		}
+	}
 
-		public override void MergeForwards(DialyzingFluid[] sources, DialyzingFluid target, Suction dependingOn)
-		{
-			target.CopyValuesFrom(sources[0]);
-			var number = sources.Length;
-			for (int i = 1; i < number; i++) //start with second element
-			{
-				target.Quantity += sources[i].Quantity;
-				target.ContaminatedByBlood |= sources[i].ContaminatedByBlood;
-				target.WasUsed |= sources[i].WasUsed;
-				if (sources[i].Temperature != QualitativeTemperature.BodyHeat)
-					target.Temperature = sources[i].Temperature;
-			}
-		}
+	public class DialyzingFluidFlowComposite : FlowComposite<DialyzingFluid, Suction>
+	{
+	}
+
+	public class DialyzingFluidFlowDelegate : FlowDelegate<DialyzingFluid, Suction>
+	{
 	}
 
 	public class DialyzingFluidFlowCombinator : FlowCombinator<DialyzingFluid, Suction>
 	{
-		public override FlowVirtualMerger<DialyzingFluid, Suction> CreateFlowVirtualMerger(int elementNos)
+		public override FlowMerger<DialyzingFluid, Suction> CreateFlowVirtualMerger(int elementNos)
 		{
-			return new DialyzingFluidFlowVirtualMerger(elementNos);
+			return new DialyzingFluidFlowMerger(elementNos);
 		}
 
-		public override FlowVirtualSplitter<DialyzingFluid, Suction> CreateFlowVirtualSplitter(int elementNos)
+		public override FlowSplitter<DialyzingFluid, Suction> CreateFlowVirtualSplitter(int elementNos)
 		{
-			return new DialyzingFluidFlowVirtualSplitter(elementNos);
+			return new DialyzingFluidFlowSplitter(elementNos);
 		}
-	}
-
-	public class DialyzingFluidFlowUniqueOutgoingStub : FlowUniqueOutgoingStub<DialyzingFluid, Suction>
-	{
-	}
-
-	public class DialyzingFluidFlowUniqueIncomingStub : FlowUniqueIncomingStub<DialyzingFluid, Suction>
-	{
 	}
 }

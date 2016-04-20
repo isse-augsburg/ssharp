@@ -48,8 +48,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine
 
 			HdMachine.AddFlows(_dialysingFluidFlowCombinator, _bloodFlowCombinator);
 
-			_bloodFlowCombinator.Replace(HdMachine.ToPatientVein.Incoming, Patient.VeinFlow.Incoming);
-			_bloodFlowCombinator.Replace(HdMachine.FromPatientArtery.Outgoing, Patient.ArteryFlow.Outgoing);
+			_bloodFlowCombinator.ConnectOutWithIn(HdMachine.ToPatientVein, Patient.VeinFlow);
+			_bloodFlowCombinator.ConnectOutWithIn(Patient.ArteryFlow,HdMachine.FromPatientArtery);
 		}
 		
 
@@ -63,7 +63,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine
 		{
 			get
 			{
-				var incomingBlood = Patient.VeinFlow.Incoming.ForwardFromPredecessor;
+				var incomingBlood = Patient.VeinFlow.Incoming.Forward;
 				Formula receivedSomething = incomingBlood.BigWasteProducts > 0 || incomingBlood.Water > 0;
 				Formula compositionOk = incomingBlood.ChemicalCompositionOk && incomingBlood.GasFree &&
 										(incomingBlood.Temperature == QualitativeTemperature.BodyHeat);

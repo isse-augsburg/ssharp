@@ -15,7 +15,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		CustomSuction
 	}
 
-	public class Suction : IElement<Suction>
+	public class Suction : IFlowElement<Suction>
 	{
 		[Hidden]
 		public SuctionType SuctionType = SuctionType.SourceDependentSuction;

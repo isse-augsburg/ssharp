@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 {
 	using Modeling;
+	/*
 
 	// Each chamber has
 	//   * Two sides separated by diaphragm.
@@ -31,10 +32,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		public class Chamber
 		{
-			/*public ValveState ValveToDialyser;
-			public ValveState ValveToDrain;
-			public ValveState ValveFromDialyzingFluidPreparation;
-			public ValveState ValveFromDialyzer;*/
+			//public ValveState ValveToDialyser;
+			//public ValveState ValveToDrain;
+			//public ValveState ValveFromDialyzingFluidPreparation;
+			//public ValveState ValveFromDialyzer;
 
 			public DialyzingFluid StoredProducedDialysingFluid = new DialyzingFluid();
 			public DialyzingFluid StoredUsedProducedDialysingFluid = new DialyzingFluid();
@@ -207,5 +208,5 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 				ChamberForDialyzer = ChamberForDialyzerEnum.UseChamber1ForDialyzer;
 			}
 		}
-	}
+	}*/
 }

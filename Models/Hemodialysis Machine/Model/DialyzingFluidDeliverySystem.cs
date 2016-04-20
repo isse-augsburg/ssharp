@@ -21,7 +21,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		[Provided]
 		public void SetMainFlow(DialyzingFluid outgoing)
 		{
-			var incomingSuction = MainFlow.Outgoing.BackwardFromSuccessor;
+			var incomingSuction = MainFlow.Outgoing.Backward;
 			//Assume incomingSuction.SuctionType == SuctionType.CustomSuction;
 			outgoing.Quantity = incomingSuction.CustomSuctionValue;
 			outgoing.ContaminatedByBlood = false;
@@ -30,21 +30,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 			outgoing.KindOfDialysate = KindOfDialysate.Water;
 		}
 		
-		[Provided]
-		public void ReceivedSuction(Suction incomingSuction)
-		{
-		}
-
 		protected override void CreateBindings()
 		{
-			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
-			Bind(nameof(MainFlow.BackwardFromSuccessorWasUpdated), nameof(ReceivedSuction));
+			MainFlow.SendForward=SetMainFlow;
 		}
 	}
 
 	public class DialyzingFluidWaterPreparation : Component
 	{
-		public readonly DialyzingFluidFlowInToOutSegment MainFlow = new DialyzingFluidFlowInToOutSegment();
+		public readonly DialyzingFluidFlowInToOut MainFlow = new DialyzingFluidFlowInToOut();
 
 		public virtual bool WaterHeaterEnabled()
 		{
@@ -67,8 +61,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
-			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+			MainFlow.UpdateBackward=SetMainFlowSuction;
+			MainFlow.UpdateForward=SetMainFlow;
 		}
 
 		public readonly Fault WaterHeaterDefect = new TransientFault();
@@ -92,30 +86,24 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		[Provided]
 		public void SetConcentrateFlow(DialyzingFluid outgoing)
 		{
-			var incomingSuction = Concentrate.Outgoing.BackwardFromSuccessor;
+			var incomingSuction = Concentrate.Outgoing.Backward;
 			outgoing.Quantity = incomingSuction.CustomSuctionValue;
 			outgoing.ContaminatedByBlood = false;
 			outgoing.Temperature = QualitativeTemperature.TooCold;
 			outgoing.WasUsed = false;
 			outgoing.KindOfDialysate = KindOfDialysate;
 		}
-
-		[Provided]
-		public void ReceivedSuction(Suction incomingSuction)
-		{
-		}
-
+		
 		protected override void CreateBindings()
 		{
-			Bind(nameof(Concentrate.SetOutgoingForward), nameof(SetConcentrateFlow));
-			Bind(nameof(Concentrate.BackwardFromSuccessorWasUpdated), nameof(ReceivedSuction));
+			Concentrate.SendForward=SetConcentrateFlow;
 		}
 	}
 
 	public class DialyzingFluidPreparation : Component
 	{
 		public readonly DialyzingFluidFlowSink Concentrate = new DialyzingFluidFlowSink();
-		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
+		public readonly DialyzingFluidFlowInToOut DialyzingFluidFlow = new DialyzingFluidFlowInToOut();
 
 		public KindOfDialysate KindOfDialysate = KindOfDialysate.Water;
 
@@ -151,10 +139,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(Concentrate.SetOutgoingBackward), nameof(SetConcentrateFlowSuction));
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingForward), nameof(SetMainFlow));
-			Bind(nameof(Concentrate.ForwardFromPredecessorWasUpdated), nameof(ReceivedConcentrate));
+			Concentrate.SendBackward=SetConcentrateFlowSuction;
+			DialyzingFluidFlow.UpdateBackward=SetMainFlowSuction;
+			DialyzingFluidFlow.UpdateForward=SetMainFlow;
+			Concentrate.ReceivedForward=ReceivedConcentrate;
 		}
 
 		public readonly Fault DialyzingFluidPreparationPumpDefect = new TransientFault();
@@ -173,7 +161,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 	public class DialyzingUltraFiltrationPump : Component
 	{
-		public readonly DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
+		public readonly DialyzingFluidFlowInToOut DialyzingFluidFlow = new DialyzingFluidFlowInToOut();
 
 		[Range(0, 8, OverflowBehavior.Error)]
 		public int UltraFiltrationPumpSpeed = 0;
@@ -193,8 +181,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingForward), nameof(SetMainFlow));
+			DialyzingFluidFlow.UpdateBackward=SetMainFlowSuction;
+			DialyzingFluidFlow.UpdateForward=SetMainFlow;
 		}
 	}
 
@@ -208,22 +196,16 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 			outgoingSuction.CustomSuctionValue = 0;
 			outgoingSuction.SuctionType = SuctionType.SourceDependentSuction;
 		}
-
-		[Provided]
-		public void ReceivedDialyzingFluid(DialyzingFluid incomingElement)
-		{
-		}
-
+		
 		protected override void CreateBindings()
 		{
-			Bind(nameof(DrainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
-			Bind(nameof(DrainFlow.ForwardFromPredecessorWasUpdated), nameof(ReceivedDialyzingFluid));
+			DrainFlow.SendBackward=SetMainFlowSuction;
 		}
 	}
 
 	public class DialyzingFluidSafetyBypass : Component
 	{
-		public readonly DialyzingFluidFlowInToOutSegment MainFlow = new DialyzingFluidFlowInToOutSegment();
+		public readonly DialyzingFluidFlowInToOut MainFlow = new DialyzingFluidFlowInToOut();
 		public readonly DialyzingFluidFlowSource DrainFlow = new DialyzingFluidFlowSource();
 
 		public readonly DialyzingFluid ToDrainValue = new DialyzingFluid();
@@ -259,18 +241,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		{
 			outgoing.CopyValuesFrom(ToDrainValue);
 		}
-
-		[Provided]
-		public void ReceivedSuction(Suction incomingSuction)
-		{
-		}
-
+		
 		protected override void CreateBindings()
 		{
-			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
-			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
-			Bind(nameof(DrainFlow.SetOutgoingForward), nameof(SetDrainFlow));
-			Bind(nameof(DrainFlow.BackwardFromSuccessorWasUpdated), nameof(ReceivedSuction));
+			MainFlow.UpdateBackward=SetMainFlowSuction;
+			MainFlow.UpdateForward=SetMainFlow;
+			DrainFlow.SendForward=SetDrainFlow;
 		}
 
 
@@ -289,13 +265,13 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 	public class SimplifiedBalanceChamber : Component
 	{
-		public readonly DialyzingFluidFlowUniqueIncomingStub ProducedDialysingFluid = new DialyzingFluidFlowUniqueIncomingStub();
-		public readonly DialyzingFluidFlowUniqueIncomingStub UsedDialysingFluid = new DialyzingFluidFlowUniqueIncomingStub();
-		public readonly DialyzingFluidFlowUniqueOutgoingStub StoredProducedDialysingFluid = new DialyzingFluidFlowUniqueOutgoingStub();
-		public readonly DialyzingFluidFlowUniqueOutgoingStub StoredUsedDialysingFluid = new DialyzingFluidFlowUniqueOutgoingStub();
-		
-		public readonly DialyzingFluidFlowInToOutSegment ForwardProducedFlowSegment = new DialyzingFluidFlowInToOutSegment();
-		public readonly DialyzingFluidFlowInToOutSegment ForwardUsedFlowSegment = new DialyzingFluidFlowInToOutSegment();
+		public readonly DialyzingFluidFlowDelegate ProducedDialysingFluid = new DialyzingFluidFlowDelegate(); //Incoming
+		public readonly DialyzingFluidFlowDelegate UsedDialysingFluid = new DialyzingFluidFlowDelegate(); //Incoming
+		public readonly DialyzingFluidFlowDelegate StoredProducedDialysingFluid = new DialyzingFluidFlowDelegate(); //Outgoing
+		public readonly DialyzingFluidFlowDelegate StoredUsedDialysingFluid = new DialyzingFluidFlowDelegate();//Outgoing
+
+		public readonly DialyzingFluidFlowInToOut ForwardProducedFlowSegment = new DialyzingFluidFlowInToOut();
+		public readonly DialyzingFluidFlowInToOut ForwardUsedFlowSegment = new DialyzingFluidFlowInToOut();
 
 		public SimplifiedBalanceChamber()
 		{
@@ -328,18 +304,18 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(ForwardProducedFlowSegment.SetOutgoingForward), nameof(ForwardProducedFlow));
-			Bind(nameof(ForwardProducedFlowSegment.SetOutgoingBackward), nameof(ForwardProducedFlowSuction));
-			Bind(nameof(ForwardUsedFlowSegment.SetOutgoingForward), nameof(ForwardUsedFlow));
-			Bind(nameof(ForwardUsedFlowSegment.SetOutgoingBackward), nameof(ForwardUsedFlowSuction));
+			ForwardProducedFlowSegment.UpdateForward=ForwardProducedFlow;
+			ForwardProducedFlowSegment.UpdateBackward=ForwardProducedFlowSuction;
+			ForwardUsedFlowSegment.UpdateForward=ForwardUsedFlow;
+			ForwardUsedFlowSegment.UpdateBackward=ForwardUsedFlowSuction;
 		}
 
 		public void AddFlows(DialyzingFluidFlowCombinator flowCombinator)
-		{
-			flowCombinator.Replace(ProducedDialysingFluid.Incoming, ForwardProducedFlowSegment.Incoming);
-			flowCombinator.Replace(UsedDialysingFluid.Incoming, ForwardUsedFlowSegment.Incoming);
-			flowCombinator.Replace(StoredProducedDialysingFluid.Outgoing, ForwardProducedFlowSegment.Outgoing);
-			flowCombinator.Replace(StoredUsedDialysingFluid.Outgoing, ForwardUsedFlowSegment.Outgoing);
+		{//TODO: Check
+			flowCombinator.ConnectOutWithIn(ProducedDialysingFluid, ForwardProducedFlowSegment);
+			flowCombinator.ConnectOutWithIn(UsedDialysingFluid, ForwardUsedFlowSegment);
+			flowCombinator.ConnectOutWithIn(ForwardProducedFlowSegment,StoredProducedDialysingFluid);
+			flowCombinator.ConnectOutWithIn(ForwardUsedFlowSegment, StoredUsedDialysingFluid);
 		}
 
 		public override void Update()
@@ -349,7 +325,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 	public class PumpToBalanceChamber : Component
 	{
-		public readonly DialyzingFluidFlowInToOutSegment MainFlow = new DialyzingFluidFlowInToOutSegment();
+		public readonly DialyzingFluidFlowInToOut MainFlow = new DialyzingFluidFlowInToOut();
 
 		[Range(0, 8, OverflowBehavior.Error)]
 		public int PumpSpeed = 0;
@@ -370,8 +346,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(MainFlow.SetOutgoingBackward), nameof(SetMainFlowSuction));
-			Bind(nameof(MainFlow.SetOutgoingForward), nameof(SetMainFlow));
+			MainFlow.UpdateBackward=SetMainFlowSuction;
+			MainFlow.UpdateForward=SetMainFlow;
 		}
 
 		public readonly Fault PumpToBalanceChamberDefect = new TransientFault();
@@ -392,8 +368,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 	// Also called dialyzing fluid delivery system
 	public class DialyzingFluidDeliverySystem : Component
 	{
-		public readonly DialyzingFluidFlowUniqueOutgoingStub FromDialyzer = new DialyzingFluidFlowUniqueOutgoingStub();
-		public readonly DialyzingFluidFlowUniqueIncomingStub ToDialyzer = new DialyzingFluidFlowUniqueIncomingStub();
+		public readonly DialyzingFluidFlowDelegate FromDialyzer = new DialyzingFluidFlowDelegate();
+		public readonly DialyzingFluidFlowDelegate ToDialyzer = new DialyzingFluidFlowDelegate();
 
 		public readonly DialyzingFluidWaterSupply DialyzingFluidWaterSupply = new DialyzingFluidWaterSupply();
 		public readonly DialyzingFluidWaterPreparation DialyzingFluidWaterPreparation = new DialyzingFluidWaterPreparation();
@@ -409,33 +385,33 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public void AddFlows(DialyzingFluidFlowCombinator flowCombinator)
 		{
 			// The order of the connections matters
-			flowCombinator.Connect(DialyzingFluidWaterSupply.MainFlow.Outgoing,
-				DialyzingFluidWaterPreparation.MainFlow.Incoming);
-			flowCombinator.Connect(DialyzingFluidConcentrateSupply.Concentrate.Outgoing,
-				DialyzingFluidPreparation.Concentrate.Incoming);
-			flowCombinator.Connect(DialyzingFluidWaterPreparation.MainFlow.Outgoing,
-				DialyzingFluidPreparation.DialyzingFluidFlow.Incoming);
-			flowCombinator.Connect(DialyzingFluidPreparation.DialyzingFluidFlow.Outgoing,
-				BalanceChamber.ProducedDialysingFluid.Incoming);
-			flowCombinator.Connect(BalanceChamber.StoredProducedDialysingFluid.Outgoing,
-				DialyzingFluidSafetyBypass.MainFlow.Incoming);
-			flowCombinator.Connect(DialyzingFluidSafetyBypass.MainFlow.Outgoing,
-				ToDialyzer.Incoming);
-			flowCombinator.Connect(
-				FromDialyzer.Outgoing,
-				new PortFlowIn<DialyzingFluid, Suction>[] {
-					DialyzingUltraFiltrationPump.DialyzingFluidFlow.Incoming,
-					PumpToBalanceChamber.MainFlow.Incoming
+			flowCombinator.ConnectOutWithIn(DialyzingFluidWaterSupply.MainFlow,
+				DialyzingFluidWaterPreparation.MainFlow);
+			flowCombinator.ConnectOutWithIn(DialyzingFluidConcentrateSupply.Concentrate,
+				DialyzingFluidPreparation.Concentrate);
+			flowCombinator.ConnectOutWithIn(DialyzingFluidWaterPreparation.MainFlow,
+				DialyzingFluidPreparation.DialyzingFluidFlow);
+			flowCombinator.ConnectOutWithIn(DialyzingFluidPreparation.DialyzingFluidFlow,
+				BalanceChamber.ProducedDialysingFluid);
+			flowCombinator.ConnectOutWithIn(BalanceChamber.StoredProducedDialysingFluid,
+				DialyzingFluidSafetyBypass.MainFlow);
+			flowCombinator.ConnectOutWithIn(DialyzingFluidSafetyBypass.MainFlow,
+				ToDialyzer);
+			flowCombinator.ConnectOutWithIns(
+				FromDialyzer,
+				new IFlowComponentUniqueIncoming<DialyzingFluid, Suction>[] {
+					DialyzingUltraFiltrationPump.DialyzingFluidFlow,
+					PumpToBalanceChamber.MainFlow
 				});
-			flowCombinator.Connect(PumpToBalanceChamber.MainFlow.Outgoing,
-				BalanceChamber.UsedDialysingFluid.Incoming);
-			flowCombinator.Connect(
-				new PortFlowOut<DialyzingFluid, Suction>[] {
-					DialyzingFluidSafetyBypass.DrainFlow.Outgoing,
-					BalanceChamber.StoredUsedDialysingFluid.Outgoing,
-					DialyzingUltraFiltrationPump.DialyzingFluidFlow.Outgoing
+			flowCombinator.ConnectOutWithIn(PumpToBalanceChamber.MainFlow,
+				BalanceChamber.UsedDialysingFluid);
+			flowCombinator.ConnectOutsWithIn(
+				new IFlowComponentUniqueOutgoing<DialyzingFluid, Suction>[] {
+					DialyzingFluidSafetyBypass.DrainFlow,
+					BalanceChamber.StoredUsedDialysingFluid,
+					DialyzingUltraFiltrationPump.DialyzingFluidFlow
 				},
-				DialyzingFluidDrain.DrainFlow.Incoming);
+				DialyzingFluidDrain.DrainFlow);
 
 			BalanceChamber.AddFlows(flowCombinator);
 		}

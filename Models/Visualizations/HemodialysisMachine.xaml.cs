@@ -53,7 +53,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			public Action UpdateVisualization;
 			public Func<string> GetInfoText;
 
-			public VisualFlow(string _name, Storyboard _animation, Rectangle _selectionRectangle, Func<PortFlowOut<Blood, Suction>> portFlowOut)
+			public VisualFlow(string _name, Storyboard _animation, Rectangle _selectionRectangle, Func<FlowPort<Blood, Suction>> portFlowOut)
 			{
 				Name = _name;
 				Animation = _animation;
@@ -61,12 +61,12 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 				UpdateVisualization = () =>
 				{
-					GenericUpdateVisualization(portFlowOut().ForwardToSuccessor.HasWaterOrBigWaste());
+					GenericUpdateVisualization(portFlowOut().Forward.HasWaterOrBigWaste());
 				};
-				GetInfoText = () => portFlowOut().ForwardToSuccessor.ValuesAsText();
+				GetInfoText = () => portFlowOut().Forward.ValuesAsText();
 			}
 
-			public VisualFlow(string _name, Storyboard _animation, Rectangle _selectionRectangle, Func<PortFlowOut<DialyzingFluid, Suction>> portFlowOut)
+			public VisualFlow(string _name, Storyboard _animation, Rectangle _selectionRectangle, Func<FlowPort<DialyzingFluid, Suction>> portFlowOut)
 			{
 				Name = _name;
 				Animation = _animation;
@@ -74,9 +74,9 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 				UpdateVisualization = () =>
 				{
-					GenericUpdateVisualization(portFlowOut().ForwardToSuccessor.Quantity > 0);
+					GenericUpdateVisualization(portFlowOut().Forward.Quantity > 0);
 				};
-				GetInfoText = () => portFlowOut().ForwardToSuccessor.ValuesAsText();
+				GetInfoText = () => portFlowOut().Forward.ValuesAsText();
 			}
 
 			private void GenericUpdateVisualization(bool shouldBeEnabled)
@@ -129,10 +129,10 @@ namespace SafetySharp.CaseStudies.Visualizations
 			{
 				new VisualFlow("FlowPatientToBloodPump",(Storyboard)Resources["FlowPatientToBloodPump"],selectFlowPatientToBloodPump,() => Patient.ArteryFlow.Outgoing),
 				new VisualFlow("FlowBloodPumpToMerge1",(Storyboard)Resources["FlowBloodPumpToMerge1"],selectFlowBloodPumpToMerge1,() => Machine.ExtracorporealBloodCircuit.ArterialBloodPump.MainFlow.Outgoing),
-				new VisualFlow("FlowMerge1ToArterialChamber",(Storyboard)Resources["FlowMerge1ToArterialChamber"],selectFlowMerge1ToArterialChamber,() => Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Incoming.ConnectedPredecessor),
+				new VisualFlow("FlowMerge1ToArterialChamber",(Storyboard)Resources["FlowMerge1ToArterialChamber"],selectFlowMerge1ToArterialChamber,() => Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Incoming),
 				new VisualFlow("FlowArterialChamberToDialyzer",(Storyboard)Resources["FlowArterialChamberToDialyzer"],selectFlowArterialChamberToDialyzer,() => Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Outgoing),
 				new VisualFlow("FlowDialyzerBloodSideToSplit2",(Storyboard)Resources["FlowDialyzerBloodSideToSplit2"],selectFlowDialyzerBloodSideToSplit2,() => Machine.Dialyzer.BloodFlow.Outgoing),
-				new VisualFlow("FlowSplit2ToVenousChamber",(Storyboard)Resources["FlowSplit2ToVenousChamber"],selectFlowSplit2ToVenousChamber,() => Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Incoming.ConnectedPredecessor),
+				new VisualFlow("FlowSplit2ToVenousChamber",(Storyboard)Resources["FlowSplit2ToVenousChamber"],selectFlowSplit2ToVenousChamber,() => Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Incoming),
 				new VisualFlow("FlowVenousChamberToSafetyDetector",(Storyboard)Resources["FlowVenousChamberToSafetyDetector"],selectFlowVenousChamberToSafetyDetector,() => Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Outgoing),
 				new VisualFlow("FlowSafetySensorToVenousValve",(Storyboard)Resources["FlowSafetySensorToVenousValve"],selectFlowSafetySensorToVenousValve,() => Machine.ExtracorporealBloodCircuit.VenousSafetyDetector.MainFlow.Outgoing),
 				new VisualFlow("FlowVenousValveToPatient",(Storyboard)Resources["FlowVenousValveToPatient"],selectFlowVenousValveToPatient,() => Machine.ExtracorporealBloodCircuit.VenousTubingValve.MainFlow.Outgoing),
@@ -144,8 +144,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 				new VisualFlow("FlowSafetyBypassToDialyzer",(Storyboard)Resources["FlowSafetyBypassToDialyzer"],selectFlowSafetyBypassToDialyzer,() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.MainFlow.Outgoing),
 				new VisualFlow("FlowSafetyBypassToDrain",(Storyboard)Resources["FlowSafetyBypassToDrain"],selectFlowSafetyBypassToDrain,() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.DrainFlow.Outgoing),
 				new VisualFlow("FlowDialyzerDialyzingFluidSideToSplit3",(Storyboard)Resources["FlowDialyzerDialyzingFluidSideToSplit3"],selectFlowDialyzerDialyzingFluidSideToSplit3,() => Machine.Dialyzer.DialyzingFluidFlow.Outgoing),
-				new VisualFlow("FlowSplit3ToPumpToBalanceChamber",(Storyboard)Resources["FlowSplit3ToPumpToBalanceChamber"],selectFlowSplit3ToPumpToBalanceChamber,() => Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Incoming.ConnectedPredecessor),
-				new VisualFlow("FlowSplit3ToUltraFiltrationPump",(Storyboard)Resources["FlowSplit3ToUltraFiltrationPump"],selectFlowSplit3ToUltraFiltrationPump,() => Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.DialyzingFluidFlow.Incoming.ConnectedPredecessor),
+				new VisualFlow("FlowSplit3ToPumpToBalanceChamber",(Storyboard)Resources["FlowSplit3ToPumpToBalanceChamber"],selectFlowSplit3ToPumpToBalanceChamber,() => Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Incoming),
+				new VisualFlow("FlowSplit3ToUltraFiltrationPump",(Storyboard)Resources["FlowSplit3ToUltraFiltrationPump"],selectFlowSplit3ToUltraFiltrationPump,() => Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.DialyzingFluidFlow.Incoming),
 				new VisualFlow("FlowPumpToBalanceChamberToBalanceChamber",(Storyboard)Resources["FlowPumpToBalanceChamberToBalanceChamber"],selectFlowPumpToBalanceChamberToBalanceChamber,() => Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Outgoing),
 				new VisualFlow("FlowUltraFiltrationPumpToDrain",(Storyboard)Resources["FlowUltraFiltrationPumpToDrain"],selectFlowUltraFiltrationPumpToDrain,() => Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.DialyzingFluidFlow.Outgoing),
 			};
@@ -340,14 +340,14 @@ namespace SafetySharp.CaseStudies.Visualizations
 			}
 
 			// ArterialChamber
-			if (Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Outgoing.ForwardToSuccessor.HasWaterOrBigWaste() && _visualStateArterialChamber != LastVisualState.Enabled)
+			if (Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Outgoing.Forward.HasWaterOrBigWaste() && _visualStateArterialChamber != LastVisualState.Enabled)
 			{
 				_visualStateArterialChamber = LastVisualState.Enabled;
 				_animationArterialChamberDripping.RepeatBehavior = RepeatBehavior.Forever;
 				_animationArterialChamberNotDripping.Stop();
 				_animationArterialChamberDripping.Begin();
 			}
-			else if (Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Outgoing.ForwardToSuccessor.HasWaterOrBigWaste()==false && _visualStateArterialChamber != LastVisualState.Disabled)
+			else if (Machine.ExtracorporealBloodCircuit.ArterialChamber.MainFlow.Outgoing.Forward.HasWaterOrBigWaste()==false && _visualStateArterialChamber != LastVisualState.Disabled)
 			{
 				_visualStateArterialChamber = LastVisualState.Disabled;
 				_animationArterialChamberDripping.Stop();
@@ -355,14 +355,14 @@ namespace SafetySharp.CaseStudies.Visualizations
 			}
 
 			// VenousChamber
-			if (Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Outgoing.ForwardToSuccessor.HasWaterOrBigWaste() && _visualStateVenousChamber != LastVisualState.Enabled)
+			if (Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Outgoing.Forward.HasWaterOrBigWaste() && _visualStateVenousChamber != LastVisualState.Enabled)
 			{
 				_visualStateVenousChamber = LastVisualState.Enabled;
 				_animationVenousChamberDripping.RepeatBehavior = RepeatBehavior.Forever;
 				_animationVenousChamberNotDripping.Stop();
 				_animationVenousChamberDripping.Begin();
 			}
-			else if (Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Outgoing.ForwardToSuccessor.HasWaterOrBigWaste() == false && _visualStateVenousChamber != LastVisualState.Disabled)
+			else if (Machine.ExtracorporealBloodCircuit.VenousChamber.MainFlow.Outgoing.Forward.HasWaterOrBigWaste() == false && _visualStateVenousChamber != LastVisualState.Disabled)
 			{
 				_visualStateVenousChamber = LastVisualState.Disabled;
 				_animationVenousChamberDripping.Stop();
@@ -402,8 +402,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 		public void UpdatePatientInfoText()
 		{
 			var textPatient = Patient.ValuesAsText();
-			var textOutgoingBlood = Patient.ArteryFlow.Outgoing.ForwardToSuccessor.ValuesAsText();
-			var textIncomingBlood = Patient.VeinFlow.Incoming.ForwardFromPredecessor.ValuesAsText();
+			var textOutgoingBlood = Patient.ArteryFlow.Outgoing.Forward.ValuesAsText();
+			var textIncomingBlood = Patient.VeinFlow.Incoming.Forward.ValuesAsText();
 			textBlockPatientInfos.Text = "Patient:\n" + textPatient + "\n\nOutgoing (Artery):\n" + textOutgoingBlood + "\n\nIncoming (Vein):\n" + textIncomingBlood;
 		}
 

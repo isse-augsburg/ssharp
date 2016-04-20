@@ -52,6 +52,22 @@
     <Reference Include="nunit.framework">
       <HintPath>..\..\Dependencies\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="QuickGraph, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="QuickGraph.Data, Version=3.6.61114.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="QuickGraph.Graphviz, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="QuickGraph.Serialization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
@@ -74,8 +90,20 @@
     <Compile Include="Tests\ExtracorporealBloodCircuitTests.cs" />
     <Compile Include="Tests\DialyzerTests.cs" />
     <Compile Include="Tests\IntFlowTests.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowCombinator.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowDelegate.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowInToOut.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowMerger.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowPort.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IComposite.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowSink.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowSource.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowSplitter.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowComposite.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IFlowAtomic.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IFlowComponent.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IFlowElement.cs" />
     <Compile Include="Utilities\BidirectionalFlow\IntFlow.cs" />
-    <Compile Include="Utilities\BidirectionalFlow\AbstractBiflow.cs" />
     <Compile Include="Model\ValveState.cs" />
     <Compile Include="Model\Dialyzer.cs" />
     <Compile Include="Model\DialyzingFluidDeliverySystem.cs" />
@@ -93,6 +121,9 @@
   <ItemGroup>
     <Analyzer Include="$(OutDir)\SafetySharp.Modeling.dll" />
     <Analyzer Include="$(OutDir)\SafetySharp.Compiler.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="../../Source/SafetySharp.targets" />
