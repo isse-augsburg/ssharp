@@ -11,8 +11,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 	public class HdMachine : Component
 	{
 		public readonly Dialyzer Dialyzer;
-		public readonly ExtracorporealBloodCircuit ExtracorporealBloodCircuit;
-		public readonly DialyzingFluidDeliverySystem DialyzingFluidDeliverySystem;
+		public readonly ExtracorporealBloodCircuit.ExtracorporealBloodCircuit ExtracorporealBloodCircuit;
+		public readonly DialyzingFluidDeliverySystem.DialyzingFluidDeliverySystem DialyzingFluidDeliverySystem;
 		public readonly ControlSystem ControlSystem;
 
 		[Hidden]
@@ -24,8 +24,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public HdMachine()
 		{
 			Dialyzer = new Dialyzer();
-			ExtracorporealBloodCircuit = new ExtracorporealBloodCircuit();
-			DialyzingFluidDeliverySystem = new DialyzingFluidDeliverySystem();
+			ExtracorporealBloodCircuit = new ExtracorporealBloodCircuit.ExtracorporealBloodCircuit();
+			DialyzingFluidDeliverySystem = new DialyzingFluidDeliverySystem.DialyzingFluidDeliverySystem();
 			ControlSystem = new ControlSystem(Dialyzer, ExtracorporealBloodCircuit, DialyzingFluidDeliverySystem);
 
 			FromPatientArtery = new BloodFlowDelegate();

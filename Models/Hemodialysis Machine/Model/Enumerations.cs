@@ -40,5 +40,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		TooHot
 	}
 	// analyzed, evaluated
+
+
+	public enum ValveState
+	{
+		Open,
+		Closed
+	}
 }
 

@@ -10,6 +10,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 	using Model;
 	using NUnit.Framework;
 	using Analysis;
+	using Model.DialyzingFluidDeliverySystem;
 	using Modeling;
 	using Runtime;
 

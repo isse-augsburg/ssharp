@@ -32,6 +32,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 	using Model;
 	using NUnit.Framework;
 	using Analysis;
+	using Model.ExtracorporealBloodCircuit;
 	using Modeling;
 	using Runtime;
 
