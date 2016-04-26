@@ -62,7 +62,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   The maximum number of states that can be stored on the stack.
 		/// </summary>
-		private int _capacity;
+		private readonly int _capacity;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -122,7 +122,7 @@ namespace SafetySharp.Runtime
 				throw new OutOfMemoryException(
 					"Unable to allocate an additional depth first search state. Try increasing the size of the state stack.");
 			}
-			
+
 			_states[offset] = state;
 			_frames[FrameCount - 1].Count += 1;
 		}
@@ -157,10 +157,11 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Splits the work between this instance and the <paramref name="other" /> instance.
+		///   Splits the work between this instance and the <paramref name="other" /> instance. Returns <c>true</c> to indicate that
+		///   work has been split; <c>false</c>, otherwise.
 		/// </summary>
 		/// <param name="other">The other instance the work should be split with.</param>
-		public void SplitWork(StateStack other)
+		public bool SplitWork(StateStack other)
 		{
 			Requires.That(other.FrameCount == 0, nameof(other), "Expected an empty state stack.");
 
@@ -171,12 +172,17 @@ namespace SafetySharp.Runtime
 
 				switch (_frames[i].Count)
 				{
+					// The stack is in an invalid state; clear the other worker's stack and let this worker
+					// continue; it will clean up its stack and try to split work later
 					case 0:
 						other.Clear();
-						return;
+						return false;
+					// We can't split work here, so just push the state to the other worker's stack
 					case 1:
 						other.PushState(_states[_frames[i].Offset]);
 						break;
+					// We've encountered a frame where we can actually split work; we always split work as early as possible,
+					// that is, as low on the stack as possible, to hopefully maximize the amount of work passed to the other worker
 					default:
 						// Split the states of the frame
 						var otherCount = _frames[i].Count / 2;
@@ -190,12 +196,13 @@ namespace SafetySharp.Runtime
 						_frames[i].Offset += otherCount;
 						_frames[i].Count = thisCount;
 
-						return;
+						return true;
 				}
 			}
 
-			// If this stack could not be split, we clear the other's stack and let some other worker try again
+			// This stack could not be split, so we clear the other's stack and let some other worker try again
 			other.Clear();
+			return false;
 		}
 
 		/// <summary>
