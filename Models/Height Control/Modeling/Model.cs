@@ -103,10 +103,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		/// </summary>
 		private static Model CreateVariant(Type preControlType, Type mainControlType, Type endControlType, Vehicle[] vehicles = null)
 		{
-			preControlType = preControlType ?? typeof(PreControlOriginal);
-			mainControlType = mainControlType ?? typeof(MainControlOriginal);
-			endControlType = endControlType ?? typeof(EndControlOriginal);
-
 			var preControl = (PreControl)Activator.CreateInstance(preControlType);
 			var mainControl = (MainControl)Activator.CreateInstance(mainControlType);
 			var endControl = (EndControl)Activator.CreateInstance(endControlType);

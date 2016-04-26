@@ -25,6 +25,7 @@ namespace SafetySharp.Utilities
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.IO;
 	using System.Linq;
 	using System.Threading.Tasks;
 
@@ -71,9 +72,6 @@ namespace SafetySharp.Utilities
 					CreateNoWindow = true
 				}
 			};
-
-			_process.OutputDataReceived += (o, e) => LogMessage(e.Data, isError: false);
-			_process.ErrorDataReceived += (o, e) => LogMessage(e.Data, isError: true);
 
 			_outputCallback = outputCallback;
 		}
@@ -139,15 +137,26 @@ namespace SafetySharp.Utilities
 				_outputs = new List<Output>();
 				_process.Start();
 
-				_process.BeginErrorReadLine();
-				_process.BeginOutputReadLine();
-
-				_process.WaitForExit();
+				using (var processWaiter = Task.Factory.StartNew(() => _process.WaitForExit()))
+				using (var outputReader = Task.Factory.StartNew(() => HandleOutput(_process.StandardOutput, isError: false)))
+				using (var errorReader = Task.Factory.StartNew(() => HandleOutput(_process.StandardError, isError: true)))
+					Task.WaitAll(processWaiter, outputReader, errorReader);
 			}
 			finally
 			{
 				Running = false;
 			}
+		}
+
+		/// <summary>
+		///   Handles process output.
+		/// </summary>
+		private async Task HandleOutput(TextReader reader, bool isError)
+		{
+			string text;
+
+			while ((text = await reader.ReadLineAsync()) != null)
+				LogMessage(text, isError);
 		}
 
 		/// <summary>
