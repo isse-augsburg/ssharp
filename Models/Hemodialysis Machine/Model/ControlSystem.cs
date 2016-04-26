@@ -92,14 +92,14 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public int TimeStepsLeft = 7; // hard code 7 time steps
 
 		//Subcomponents
-		private readonly WaterPreparation DialyzingFluidWaterPreparation;
+		private readonly WaterPreparation WaterPreparation;
 		private readonly DialyzingFluidPreparation DialyzingFluidPreparation;
-		private readonly Pump DialyzingUltraFiltrationPump;
-		private readonly SafetyBypass DialyzingFluidSafetyBypass;
+		private readonly Pump UltraFiltrationPump;
+		private readonly SafetyBypass SafetyBypass;
 		private readonly Pump PumpToBalanceChamber;
 		private readonly HeparinPump HeparinPump;
-		private readonly ArterialBloodPump ArterialBloodPump;
-		private readonly VenousPressureTransducer VenousPressureTransducer;
+		private readonly BloodPump ArterialBloodPump;
+		private readonly PressureTransducer VenousPressureTransducer;
 		private readonly VenousSafetyDetector VenousSafetyDetector;
 		private readonly VenousTubingValve VenousTubingValve;
 
@@ -112,10 +112,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		public ControlSystem(Dialyzer dialyzer, ExtracorporealBloodCircuit.ExtracorporealBloodCircuit extracorporealBloodCircuit, DialyzingFluidDeliverySystem.DialyzingFluidDeliverySystem dialyzingFluidDeliverySystem)
 		{
 			Dialyzer = dialyzer;
-			DialyzingFluidWaterPreparation = dialyzingFluidDeliverySystem.WaterPreparation;
+			WaterPreparation = dialyzingFluidDeliverySystem.WaterPreparation;
 			DialyzingFluidPreparation = dialyzingFluidDeliverySystem.DialyzingFluidPreparation;
-			DialyzingUltraFiltrationPump = dialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump;
-			DialyzingFluidSafetyBypass = dialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass;
+			UltraFiltrationPump = dialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump;
+			SafetyBypass = dialyzingFluidDeliverySystem.SafetyBypass;
 			PumpToBalanceChamber = dialyzingFluidDeliverySystem.PumpToBalanceChamber;
 			HeparinPump = extracorporealBloodCircuit.HeparinPump;
 			ArterialBloodPump = extracorporealBloodCircuit.ArterialBloodPump;
@@ -128,7 +128,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		{
 			TimeStepsLeft = (TimeStepsLeft > 0) ? (TimeStepsLeft - 1) : 0;
 			ArterialBloodPump.SpeedOfMotor = 4;
-			DialyzingUltraFiltrationPump.PumpSpeed = 1;
+			UltraFiltrationPump.PumpSpeed = 1;
 			PumpToBalanceChamber.PumpSpeed = 4;
 			DialyzingFluidPreparation.PumpSpeed = 4;
 		}
@@ -138,7 +138,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 			VenousTubingValve.CloseValve();
 			TimeStepsLeft = 0;
 			ArterialBloodPump.SpeedOfMotor = 0;
-			DialyzingUltraFiltrationPump.PumpSpeed = 0;
+			UltraFiltrationPump.PumpSpeed = 0;
 			PumpToBalanceChamber.PumpSpeed = 0;
 			DialyzingFluidPreparation.PumpSpeed = 0;
 		}

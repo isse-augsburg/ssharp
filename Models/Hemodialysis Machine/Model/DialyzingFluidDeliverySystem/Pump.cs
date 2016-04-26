@@ -37,14 +37,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.DialyzingFluidDelive
 
 		[Range(0, 8, OverflowBehavior.Error)]
 		public int PumpSpeed = 0;
-
-		[Provided]
+		
 		public void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
 		{
 			toSuccessor.CopyValuesFrom(fromPredecessor);
 		}
-
-		[Provided]
+		
 		public virtual void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
 			toPredecessor.SuctionType = SuctionType.CustomSuction;

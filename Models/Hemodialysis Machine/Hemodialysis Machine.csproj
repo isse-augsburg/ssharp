@@ -86,12 +86,10 @@
     <Compile Include="Model\DialyzingFluidDeliverySystem\WaterSupply.cs" />
     <Compile Include="Model\DialyzingFluidDeliverySystem\Pump.cs" />
     <Compile Include="Model\DialyzingFluidDeliverySystem\SimplifiedBalanceChamber.cs" />
-    <Compile Include="Model\ExtracorporealBloodCircuit\ArterialBloodPump.cs" />
-    <Compile Include="Model\ExtracorporealBloodCircuit\ArteriaPressureTransducer.cs" />
-    <Compile Include="Model\ExtracorporealBloodCircuit\ArtierialChamber.cs" />
+    <Compile Include="Model\ExtracorporealBloodCircuit\BloodPump.cs" />
+    <Compile Include="Model\ExtracorporealBloodCircuit\PressureTransducer.cs" />
+    <Compile Include="Model\ExtracorporealBloodCircuit\DripChamber.cs" />
     <Compile Include="Model\ExtracorporealBloodCircuit\HeparinPump.cs" />
-    <Compile Include="Model\ExtracorporealBloodCircuit\VenousChamber.cs" />
-    <Compile Include="Model\ExtracorporealBloodCircuit\VenousPressureTransducer.cs" />
     <Compile Include="Model\ExtracorporealBloodCircuit\VenousSafetyDetector.cs" />
     <Compile Include="Model\ExtracorporealBloodCircuit\VenousTubingValve.cs" />
     <Compile Include="Model\Flows\BloodFlow.cs" />

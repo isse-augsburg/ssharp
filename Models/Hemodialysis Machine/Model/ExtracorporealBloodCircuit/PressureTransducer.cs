@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -24,10 +24,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.ExtracorporealBloodC
 {
 	using Modeling;
 
-	public class VenousPressureTransducer : Component
+	public class PressureTransducer : Component
 	{
 		public readonly BloodFlowSink SenseFlow = new BloodFlowSink();
-
+		
 		public QualitativePressure SensedPressure = QualitativePressure.NoPressure;
 
 		[Provided]

@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -24,28 +24,43 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.ExtracorporealBloodC
 {
 	using Modeling;
 
-	public class ArtierialChamber : Component
+	public class BloodPump : Component
 	{
-		// Drip Chamber
 		public readonly BloodFlowInToOut MainFlow = new BloodFlowInToOut();
+
+		[Range(0, 8, OverflowBehavior.Error)]
+		public int SpeedOfMotor = 0;
 
 		[Provided]
 		public void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
 		{
 			toSuccessor.CopyValuesFrom(fromPredecessor);
-			toSuccessor.GasFree = true;
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public virtual void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			toPredecessor.CopyValuesFrom(fromSuccessor);
+			toPredecessor.CustomSuctionValue = SpeedOfMotor; //Force suction set by motor
+			toPredecessor.SuctionType=SuctionType.CustomSuction;
 		}
 
 		protected override void CreateBindings()
 		{
 			MainFlow.UpdateBackward=SetMainFlowSuction;
 			MainFlow.UpdateForward=SetMainFlow;
+		}
+
+		public readonly Fault BloodPumpDefect = new TransientFault();
+
+		[FaultEffect(Fault = nameof(BloodPumpDefect))]
+		public class BloodPumpDefectEffect : BloodPump
+		{
+			[Provided]
+			public override void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+			{
+				toPredecessor.CustomSuctionValue = 0; //Force suction set by motor
+				toPredecessor.SuctionType = SuctionType.CustomSuction;
+			}
 		}
 	}
 }

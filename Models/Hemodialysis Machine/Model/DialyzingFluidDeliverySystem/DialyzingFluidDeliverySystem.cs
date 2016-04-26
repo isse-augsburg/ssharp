@@ -49,7 +49,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.DialyzingFluidDelive
 		public readonly SimplifiedBalanceChamber BalanceChamber = new SimplifiedBalanceChamber();
 		public readonly Pump PumpToBalanceChamber = new Pump();
 		public readonly Drain DialyzingFluidDrain = new Drain();
-		public readonly SafetyBypass DialyzingFluidSafetyBypass = new SafetyBypass();
+		public readonly SafetyBypass SafetyBypass = new SafetyBypass();
 
 		public readonly Pump DialyzingUltraFiltrationPump = new Pump();
 
@@ -71,8 +71,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.DialyzingFluidDelive
 			flowCombinator.ConnectOutWithIn(DialyzingFluidPreparation.DialyzingFluidFlow,
 				BalanceChamber.ProducedDialysingFluid);
 			flowCombinator.ConnectOutWithIn(BalanceChamber.StoredProducedDialysingFluid,
-				DialyzingFluidSafetyBypass.MainFlow);
-			flowCombinator.ConnectOutWithIn(DialyzingFluidSafetyBypass.MainFlow,
+				SafetyBypass.MainFlow);
+			flowCombinator.ConnectOutWithIn(SafetyBypass.MainFlow,
 				ToDialyzer);
 			flowCombinator.ConnectOutWithIns(
 				FromDialyzer,
@@ -84,7 +84,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.DialyzingFluidDelive
 				BalanceChamber.UsedDialysingFluid);
 			flowCombinator.ConnectOutsWithIn(
 				new IFlowComponentUniqueOutgoing<DialyzingFluid, Suction>[] {
-					DialyzingFluidSafetyBypass.DrainFlow,
+					SafetyBypass.DrainFlow,
 					BalanceChamber.StoredUsedDialysingFluid,
 					DialyzingUltraFiltrationPump.MainFlow
 				},

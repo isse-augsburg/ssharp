@@ -60,9 +60,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 			DialyzingFluidDeliverySystem.AddFlows(dialysingFluidFlowCombinator);
 			//Blood
 			bloodFlowCombinator.ConnectOutWithIn(FromPatientArtery,
-				ExtracorporealBloodCircuit.BloodFlow);
+				ExtracorporealBloodCircuit.FromPatientArtery);
 			ExtracorporealBloodCircuit.AddFlows(bloodFlowCombinator);
-			bloodFlowCombinator.ConnectOutWithIn(ExtracorporealBloodCircuit.BloodFlow,
+			bloodFlowCombinator.ConnectOutWithIn(ExtracorporealBloodCircuit.ToPatientVein,
 				ToPatientVein);
 			//Insert Stubs
 			bloodFlowCombinator.ConnectOutWithIn(ExtracorporealBloodCircuit.ToDialyzer,

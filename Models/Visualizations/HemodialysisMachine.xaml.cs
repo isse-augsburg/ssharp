@@ -141,8 +141,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 				new VisualFlow("FlowDialyzingFluidPreparationToBalanceChamber",(Storyboard)Resources["FlowDialyzingFluidPreparationToBalanceChamber"],selectFlowDialyzingFluidPreparationToBalanceChamber,() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidFlow.Outgoing),
 				new VisualFlow("FlowBalanceChamberToDrain",(Storyboard)Resources["FlowBalanceChamberToDrain"],selectFlowBalanceChamberToDrain,() => Machine.DialyzingFluidDeliverySystem.BalanceChamber.ForwardUsedFlowSegment.Outgoing),
 				new VisualFlow("FlowBalanceChamberToSafetyBypass",(Storyboard)Resources["FlowBalanceChamberToSafetyBypass"],selectFlowBalanceChamberToSafetyBypass,() => Machine.DialyzingFluidDeliverySystem.BalanceChamber.ForwardProducedFlowSegment.Outgoing),
-				new VisualFlow("FlowSafetyBypassToDialyzer",(Storyboard)Resources["FlowSafetyBypassToDialyzer"],selectFlowSafetyBypassToDialyzer,() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.MainFlow.Outgoing),
-				new VisualFlow("FlowSafetyBypassToDrain",(Storyboard)Resources["FlowSafetyBypassToDrain"],selectFlowSafetyBypassToDrain,() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.DrainFlow.Outgoing),
+				new VisualFlow("FlowSafetyBypassToDialyzer",(Storyboard)Resources["FlowSafetyBypassToDialyzer"],selectFlowSafetyBypassToDialyzer,() => Machine.DialyzingFluidDeliverySystem.SafetyBypass.MainFlow.Outgoing),
+				new VisualFlow("FlowSafetyBypassToDrain",(Storyboard)Resources["FlowSafetyBypassToDrain"],selectFlowSafetyBypassToDrain,() => Machine.DialyzingFluidDeliverySystem.SafetyBypass.DrainFlow.Outgoing),
 				new VisualFlow("FlowDialyzerDialyzingFluidSideToSplit3",(Storyboard)Resources["FlowDialyzerDialyzingFluidSideToSplit3"],selectFlowDialyzerDialyzingFluidSideToSplit3,() => Machine.Dialyzer.DialyzingFluidFlow.Outgoing),
 				new VisualFlow("FlowSplit3ToPumpToBalanceChamber",(Storyboard)Resources["FlowSplit3ToPumpToBalanceChamber"],selectFlowSplit3ToPumpToBalanceChamber,() => Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.MainFlow.Incoming),
 				new VisualFlow("FlowSplit3ToUltraFiltrationPump",(Storyboard)Resources["FlowSplit3ToUltraFiltrationPump"],selectFlowSplit3ToUltraFiltrationPump,() => Machine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.MainFlow.Incoming),
@@ -166,7 +166,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 				new VisualFault(() => Machine.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefect,buttonFaultWaterPreparation),
 				new VisualFault(() => Machine.ExtracorporealBloodCircuit.ArterialBloodPump.BloodPumpDefect,buttonFaultBloodPump),
 				new VisualFault(() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidPreparationPumpDefect,buttonFaultDialyzingFluidPreparation),
-				new VisualFault(() => Machine.DialyzingFluidDeliverySystem.DialyzingFluidSafetyBypass.SafetyBypassFault,buttonFaultSafetyBypass),
+				new VisualFault(() => Machine.DialyzingFluidDeliverySystem.SafetyBypass.SafetyBypassFault,buttonFaultSafetyBypass),
 				new VisualFault(() => Machine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpDefect,buttonFaultPumpToBalanceChamber),
 			};
 		}

@@ -27,23 +27,25 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.ExtracorporealBloodC
 
 	public class ExtracorporealBloodCircuit : Component
 	{
-		public readonly BloodFlowComposite BloodFlow = new BloodFlowComposite();
+		public readonly BloodFlowDelegate FromPatientArtery = new BloodFlowDelegate();
+		public readonly BloodFlowDelegate ToPatientVein = new BloodFlowDelegate();
+
 		public readonly BloodFlowDelegate FromDialyzer = new BloodFlowDelegate();
 		public readonly BloodFlowDelegate ToDialyzer = new BloodFlowDelegate();
 
-		public readonly ArterialBloodPump ArterialBloodPump = new ArterialBloodPump();
-		public readonly ArteriaPressureTransducer ArteriaPressureTransducer = new ArteriaPressureTransducer();
+		public readonly BloodPump ArterialBloodPump = new BloodPump();
+		public readonly PressureTransducer ArteriaPressureTransducer = new PressureTransducer();
 		public readonly HeparinPump HeparinPump = new HeparinPump();
-		public readonly ArtierialChamber ArterialChamber  = new ArtierialChamber();
-		public readonly VenousChamber VenousChamber = new VenousChamber();
-		public readonly VenousPressureTransducer VenousPressureTransducer = new VenousPressureTransducer();
+		public readonly DripChamber ArterialChamber  = new DripChamber();
+		public readonly DripChamber VenousChamber = new DripChamber();
+		public readonly PressureTransducer VenousPressureTransducer = new PressureTransducer();
 		public readonly VenousSafetyDetector VenousSafetyDetector = new VenousSafetyDetector();
 		public readonly VenousTubingValve VenousTubingValve = new VenousTubingValve();
 
 		public void AddFlows(BloodFlowCombinator flowCombinator)
 		{
 			// The order of the connections matter
-			flowCombinator.ConnectInWithIns(BloodFlow,
+			flowCombinator.ConnectOutWithIns(FromPatientArtery,
 				new IFlowComponentUniqueIncoming<Blood, Suction>[] { ArterialBloodPump.MainFlow, ArteriaPressureTransducer.SenseFlow });
 			flowCombinator.ConnectOutsWithIn(new IFlowComponentUniqueOutgoing<Blood, Suction>[] { ArterialBloodPump.MainFlow, HeparinPump.HeparinFlow },
 				ArterialChamber.MainFlow);
@@ -55,8 +57,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.ExtracorporealBloodC
 				VenousSafetyDetector.MainFlow);
 			flowCombinator.ConnectOutWithIn(VenousSafetyDetector.MainFlow,
 				VenousTubingValve.MainFlow);
-			flowCombinator.ConnectOutWithOut(VenousTubingValve.MainFlow,
-				BloodFlow);
+			flowCombinator.ConnectOutWithIn(VenousTubingValve.MainFlow,
+				ToPatientVein);
 		}
 
 	}

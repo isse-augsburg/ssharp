@@ -118,9 +118,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 
 		public ExtracorporealBloodCircuitTestEnvironment()
 		{
-			BloodFlowCombinator.ConnectOutWithIn(Patient.ArteryFlow, ExtracorporealBloodCircuit.BloodFlow);
+			BloodFlowCombinator.ConnectOutWithIn(Patient.ArteryFlow, ExtracorporealBloodCircuit.FromPatientArtery);
 			ExtracorporealBloodCircuit.AddFlows(BloodFlowCombinator);
-			BloodFlowCombinator.ConnectOutWithIn(ExtracorporealBloodCircuit.BloodFlow, Patient.VeinFlow);
+			BloodFlowCombinator.ConnectOutWithIn(ExtracorporealBloodCircuit.ToPatientVein, Patient.VeinFlow);
 			BloodFlowCombinator.ConnectOutWithIn(ExtracorporealBloodCircuit.ToDialyzer, Dialyzer.BloodFlow);
 			BloodFlowCombinator.ConnectOutWithIn(Dialyzer.BloodFlow, ExtracorporealBloodCircuit.FromDialyzer);
 			BloodFlowCombinator.CommitFlow();

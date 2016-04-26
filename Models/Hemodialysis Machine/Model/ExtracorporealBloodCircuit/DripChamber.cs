@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -24,29 +24,28 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.ExtracorporealBloodC
 {
 	using Modeling;
 
-	public class ArteriaPressureTransducer : Component
+	public class DripChamber : Component
 	{
-		public readonly BloodFlowSink SenseFlow = new BloodFlowSink();
-		
-		public QualitativePressure SensedPressure = QualitativePressure.NoPressure;
+		// Drip Chamber
+		public readonly BloodFlowInToOut MainFlow = new BloodFlowInToOut();
 
 		[Provided]
-		public void SetSenseFlowSuction(Suction toPredecessor)
+		public void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
 		{
-			toPredecessor.CustomSuctionValue = 0;
-			toPredecessor.SuctionType = SuctionType.CustomSuction;
+			toSuccessor.CopyValuesFrom(fromPredecessor);
+			toSuccessor.GasFree = true;
 		}
 
 		[Provided]
-		public void ReceivedBlood(Blood incomingElement)
+		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			SensedPressure = incomingElement.Pressure;
+			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
 		protected override void CreateBindings()
 		{
-			SenseFlow.SendBackward=SetSenseFlowSuction;
-			SenseFlow.ReceivedForward=ReceivedBlood;
+			MainFlow.UpdateBackward=SetMainFlowSuction;
+			MainFlow.UpdateForward=SetMainFlow;
 		}
 	}
 }
