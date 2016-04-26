@@ -22,8 +22,8 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 {
-	using SafetySharp.Modeling;
 	using Sensors;
+	using Vehicles;
 
 	/// <summary>
 	///   Represents a more sophisticated pre-control of the Elbtunnel height control that uses additional sensors to detect
@@ -32,22 +32,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 	public sealed class PreControlImprovedDetection : PreControl
 	{
 		/// <summary>
-		///   The sensor that detects vehicles on the left lane.
+		///   The sensor that detects high vehicles on the left lane.
 		/// </summary>
-		[Hidden]
-		public VehicleDetector LeftDetector;
+		public readonly VehicleDetector LeftDetector = new OverheadDetector { Lane = Lane.Left, Position = Model.PreControlPosition };
 
 		/// <summary>
-		///   The sensor that detects vehicles on any lane.
+		///   The sensor that detects high vehicles on the right lane.
 		/// </summary>
-		[Hidden]
-		public VehicleDetector PositionDetector;
-
-		/// <summary>
-		///   The sensor that detects vehicles on the right lane.
-		/// </summary>
-		[Hidden]
-		public VehicleDetector RightDetector;
+		public readonly VehicleDetector RightDetector = new OverheadDetector { Lane = Lane.Right, Position = Model.PreControlPosition };
 
 		/// <summary>
 		///   Gets the number of vehicles that passed the pre-control during the current system step.

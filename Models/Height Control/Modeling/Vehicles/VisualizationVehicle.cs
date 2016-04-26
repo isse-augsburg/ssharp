@@ -22,7 +22,6 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 {
-	using ModelVariants;
 	using SafetySharp.Modeling;
 
 	/// <summary>

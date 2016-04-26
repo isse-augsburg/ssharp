@@ -60,5 +60,10 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Sensors
 
 			return begin <= Position && end > Position;
 		}
+
+		/// <summary>
+		///   Returns a string that represents the current object.
+		/// </summary>
+		public override string ToString() => $"OD-{Model.GetPositionName(Position)}-{Lane}";
 	}
 }

@@ -131,7 +131,7 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		private static void DiscoverFaults(ModelBase model)
 		{
-			var faults = new HashSet<Fault>();
+			var faults = new HashSet<Fault>(ReferenceEqualityComparer<Fault>.Default);
 			model.VisitPreOrder(c =>
 			{
 				foreach (var faultEffect in ((Component)c).FaultEffects)

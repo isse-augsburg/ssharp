@@ -25,6 +25,7 @@ namespace SafetySharp.Utilities
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.IO;
 	using System.Diagnostics.Eventing.Reader;
 	using System.IO;
 	using System.Linq;
@@ -75,8 +76,6 @@ namespace SafetySharp.Utilities
 			};
 
 			_outputCallback = outputCallback;
-			_process.OutputDataReceived += (o, e) => LogMessage(e.Data, isError: false);
-			_process.ErrorDataReceived += (o, e) => LogMessage(e.Data, isError: true);
 		}
 
 		/// <summary>
@@ -132,34 +131,34 @@ namespace SafetySharp.Utilities
 		/// </summary>
 		public void Run()
 		{
-			RunAsync().Wait();
-		}
-
-		/// <summary>
-		///   Asynchronously runs the process.
-		/// </summary>
-		public async Task RunAsync()
-		{
 			Requires.That(!Running, "The process is already running.");
 
 			Running = true;
 			try
 			{
 				_outputs = new List<Output>();
-				var tcs = new TaskCompletionSource<int>();
-
-				_process.Exited += (o, e) => tcs.SetResult(0);
 				_process.Start();
 
-				_process.BeginErrorReadLine();
-				_process.BeginOutputReadLine();
-
-				await tcs.Task;
+				using (var processWaiter = Task.Factory.StartNew(() => _process.WaitForExit()))
+				using (var outputReader = Task.Factory.StartNew(() => HandleOutput(_process.StandardOutput, isError: false)))
+				using (var errorReader = Task.Factory.StartNew(() => HandleOutput(_process.StandardError, isError: true)))
+					Task.WaitAll(processWaiter, outputReader, errorReader);
 			}
 			finally
 			{
 				Running = false;
 			}
+		}
+
+		/// <summary>
+		///   Handles process output.
+		/// </summary>
+		private async Task HandleOutput(TextReader reader, bool isError)
+		{
+			string text;
+
+			while ((text = await reader.ReadLineAsync()) != null)
+				LogMessage(text, isError);
 		}
 
 		/// <summary>

@@ -23,12 +23,24 @@
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
+	using Sensors;
+	using Vehicles;
 
 	/// <summary>
 	///   A common interface for different end-control implementations.
 	/// </summary>
 	public abstract class EndControl : Component
 	{
+		/// <summary>
+		///   The sensor that is used to detect vehicles in the end-control area on the left lane.
+		/// </summary>
+		public readonly VehicleDetector LeftLaneDetector = new OverheadDetector { Lane = Lane.Left, Position = Model.EndControlPosition };
+
+		/// <summary>
+		///   The timer that is used to deactivate the end-control automatically.
+		/// </summary>
+		public readonly Timer Timer = new Timer();
+
 		/// <summary>
 		///   Gets a value indicating whether a crash is potentially imminent.
 		/// </summary>

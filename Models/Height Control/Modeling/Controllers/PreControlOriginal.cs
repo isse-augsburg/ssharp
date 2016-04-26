@@ -22,9 +22,6 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 {
-	using SafetySharp.Modeling;
-	using Sensors;
-
 	/// <summary>
 	///   Represents the simple pre-control of the Elbtunnel height control that only checks incoming overheight vehicles using a
 	///   single detector.
@@ -32,17 +29,11 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 	public sealed class PreControlOriginal : PreControl
 	{
 		/// <summary>
-		///   The vehicle detector that is used to detect vehicles entering the pre-control area.
-		/// </summary>
-		[Hidden]
-		public VehicleDetector Detector;
-
-		/// <summary>
 		///   Gets the number of vehicles that passed the pre-control during the current system step.
 		/// </summary>
 		public override int GetNumberOfPassingVehicles()
 		{
-			return Detector.IsVehicleDetected ? 1 : 0;
+			return PositionDetector.IsVehicleDetected ? 1 : 0;
 		}
 
 		/// <summary>
@@ -50,7 +41,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// </summary>
 		public override void Update()
 		{
-			Update(Detector);
+			Update(PositionDetector);
 		}
 	}
 }
