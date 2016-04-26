@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,54 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.DialyzingFluidDeliverySystem
 {
-	// Coarse/rough measurement/quantifiers
-	// In German: "unbestimmte Mengenangaben"
-	//enum RoughAmount
-	//{
-	//	None=0,
-	//	Few=1,
-	//	Half=2,
-	//	Much=3,
-	//	Complete=4
-	//}
-	// none, half, complete, some, few, plenty, empty, much, full
+	using Modeling;
 
-	public enum KindOfDialysate
+	public class WaterPreparation : Component
 	{
-		Water = 0,
-		Bicarbonate = 1,
-		Acid = 2
-	}
+		public readonly DialyzingFluidFlowInToOut MainFlow = new DialyzingFluidFlowInToOut();
 
-	public enum QualitativePressure
-	{
-		NoPressure,
-		LowPressure,
-		GoodPressure,
-		HighPressure
-	}
+		public virtual bool WaterHeaterEnabled()
+		{
+			return true;
+		}
 
-	public enum QualitativeTemperature
-	{
-		TooCold,
-		BodyHeat,
-		TooHot
-	}
-	// analyzed, evaluated
+		[Provided]
+		public virtual void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
+		{
+			toSuccessor.CopyValuesFrom(fromPredecessor);
+			if (WaterHeaterEnabled())
+				toSuccessor.Temperature = QualitativeTemperature.BodyHeat;
+		}
 
+		[Provided]
+		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		{
+			toPredecessor.CopyValuesFrom(fromSuccessor);
+		}
 
-	public enum ValveState
-	{
-		Open,
-		Closed
+		protected override void CreateBindings()
+		{
+			MainFlow.UpdateBackward=SetMainFlowSuction;
+			MainFlow.UpdateForward=SetMainFlow;
+		}
+
+		public readonly Fault WaterHeaterDefect = new TransientFault();
+
+		[FaultEffect(Fault = nameof(WaterHeaterDefect))]
+		public class WaterHeaterDefectEffect : WaterPreparation
+		{
+			public override bool WaterHeaterEnabled()
+			{
+				return false;
+			}
+		}
 	}
 }
-

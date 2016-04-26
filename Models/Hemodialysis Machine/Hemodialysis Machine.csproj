@@ -52,6 +52,22 @@
     <Reference Include="nunit.framework">
       <HintPath>..\..\Dependencies\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="QuickGraph, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="QuickGraph.Data, Version=3.6.61114.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="QuickGraph.Graphviz, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="QuickGraph.Serialization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
@@ -62,24 +78,49 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Model\BloodFlow.cs" />
-    <Compile Include="Model\DetailedBalanceChamber.cs" />
+    <Compile Include="Model\DialyzingFluidDeliverySystem\ConcentrateSupply.cs" />
+    <Compile Include="Model\DialyzingFluidDeliverySystem\Drain.cs" />
+    <Compile Include="Model\DialyzingFluidDeliverySystem\DialyzingFluidPreparation.cs" />
+    <Compile Include="Model\DialyzingFluidDeliverySystem\SafetyBypass.cs" />
+    <Compile Include="Model\DialyzingFluidDeliverySystem\WaterPreparation.cs" />
+    <Compile Include="Model\DialyzingFluidDeliverySystem\WaterSupply.cs" />
+    <Compile Include="Model\DialyzingFluidDeliverySystem\Pump.cs" />
+    <Compile Include="Model\DialyzingFluidDeliverySystem\SimplifiedBalanceChamber.cs" />
+    <Compile Include="Model\ExtracorporealBloodCircuit\BloodPump.cs" />
+    <Compile Include="Model\ExtracorporealBloodCircuit\PressureTransducer.cs" />
+    <Compile Include="Model\ExtracorporealBloodCircuit\DripChamber.cs" />
+    <Compile Include="Model\ExtracorporealBloodCircuit\HeparinPump.cs" />
+    <Compile Include="Model\ExtracorporealBloodCircuit\VenousSafetyDetector.cs" />
+    <Compile Include="Model\ExtracorporealBloodCircuit\VenousTubingValve.cs" />
+    <Compile Include="Model\Flows\BloodFlow.cs" />
+    <Compile Include="Model\DialyzingFluidDeliverySystem\DetailedBalanceChamber.cs" />
     <Compile Include="Model\Enumerations.cs" />
-    <Compile Include="Model\DialyzingFluidFlow.cs" />
+    <Compile Include="Model\Flows\DialyzingFluidFlow.cs" />
     <Compile Include="Model\ControlSystem.cs" />
     <Compile Include="Model\HemodialysisMachine.cs" />
-    <Compile Include="Model\Suction.cs" />
+    <Compile Include="Model\Flows\Suction.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="Tests\DialyzingFluidDeliverySystemTests.cs" />
     <Compile Include="Tests\ExtracorporealBloodCircuitTests.cs" />
     <Compile Include="Tests\DialyzerTests.cs" />
     <Compile Include="Tests\IntFlowTests.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowCombinator.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowDelegate.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowInToOut.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowMerger.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowPort.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IFlowComposite.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowSink.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowSource.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowSplitter.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowComposite.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IFlowAtomic.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IFlowComponent.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IFlowElement.cs" />
     <Compile Include="Utilities\BidirectionalFlow\IntFlow.cs" />
-    <Compile Include="Utilities\BidirectionalFlow\AbstractBiflow.cs" />
-    <Compile Include="Model\ValveState.cs" />
     <Compile Include="Model\Dialyzer.cs" />
-    <Compile Include="Model\DialyzingFluidDeliverySystem.cs" />
-    <Compile Include="Model\ExtracorporealBloodCircuit.cs" />
+    <Compile Include="Model\DialyzingFluidDeliverySystem\DialyzingFluidDeliverySystem.cs" />
+    <Compile Include="Model\ExtracorporealBloodCircuit\ExtracorporealBloodCircuit.cs" />
     <Compile Include="Model\Patient.cs" />
     <Compile Include="Tests\SpecificationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

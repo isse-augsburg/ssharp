@@ -28,46 +28,34 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 {
-	// Coarse/rough measurement/quantifiers
-	// In German: "unbestimmte Mengenangaben"
-	//enum RoughAmount
-	//{
-	//	None=0,
-	//	Few=1,
-	//	Half=2,
-	//	Much=3,
-	//	Complete=4
-	//}
-	// none, half, complete, some, few, plenty, empty, much, full
+	using Modeling;
+	using Utilities.BidirectionalFlow;
 
-	public enum KindOfDialysate
+	public enum SuctionType
 	{
-		Water = 0,
-		Bicarbonate = 1,
-		Acid = 2
+		SourceDependentSuction,
+		CustomSuction
 	}
 
-	public enum QualitativePressure
+	public class Suction : IFlowElement<Suction>
 	{
-		NoPressure,
-		LowPressure,
-		GoodPressure,
-		HighPressure
-	}
+		[Hidden]
+		public SuctionType SuctionType = SuctionType.SourceDependentSuction;
 
-	public enum QualitativeTemperature
-	{
-		TooCold,
-		BodyHeat,
-		TooHot
-	}
-	// analyzed, evaluated
+		[Hidden,Range(0, 8, OverflowBehavior.Error)]
+		public int CustomSuctionValue = 0;
 
+		public void CopyValuesFrom(Suction from)
+		{
+			SuctionType = from.SuctionType;
+			CustomSuctionValue = from.CustomSuctionValue;
+		}
 
-	public enum ValveState
-	{
-		Open,
-		Closed
+		public void PrintSuctionValues(string description)
+		{
+			System.Console.Out.WriteLine("\t" + description);
+			System.Console.Out.WriteLine("\t\tSuction Type: " + SuctionType.ToString());
+			System.Console.Out.WriteLine("\t\tCustomSuctionValue: " + CustomSuctionValue);
+		}
 	}
 }
-

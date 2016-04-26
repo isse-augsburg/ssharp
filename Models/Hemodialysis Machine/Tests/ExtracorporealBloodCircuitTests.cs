@@ -32,6 +32,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 	using Model;
 	using NUnit.Framework;
 	using Analysis;
+	using Model.ExtracorporealBloodCircuit;
 	using Modeling;
 	using Runtime;
 
@@ -43,7 +44,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		// 3. Suction of Blood is calculated
 		// 4. Element of Blood is calculated
 
-		public BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment();
+		public BloodFlowInToOut BloodFlow = new BloodFlowInToOut();
 
 		public int IncomingSuctionRateOnDialyzingFluidSide = 3;
 		public int IncomingQuantityOfDialyzingFluid = 2;
@@ -98,8 +99,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(BloodFlow.SetOutgoingBackward), nameof(SetBloodFlowSuction));
-			Bind(nameof(BloodFlow.SetOutgoingForward), nameof(SetBloodFlow));
+			BloodFlow.UpdateBackward=SetBloodFlowSuction;
+			BloodFlow.UpdateForward=SetBloodFlow;
 		}
 	}
 
@@ -117,11 +118,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 
 		public ExtracorporealBloodCircuitTestEnvironment()
 		{
-			BloodFlowCombinator.Connect(Patient.ArteryFlow.Outgoing, ExtracorporealBloodCircuit.BloodFlow.Incoming);
+			BloodFlowCombinator.ConnectOutWithIn(Patient.ArteryFlow, ExtracorporealBloodCircuit.FromPatientArtery);
 			ExtracorporealBloodCircuit.AddFlows(BloodFlowCombinator);
-			BloodFlowCombinator.Connect(ExtracorporealBloodCircuit.BloodFlow.Outgoing, Patient.VeinFlow.Incoming);
-			BloodFlowCombinator.Replace(ExtracorporealBloodCircuit.ToDialyzer.Incoming, Dialyzer.BloodFlow.Incoming);
-			BloodFlowCombinator.Replace(ExtracorporealBloodCircuit.FromDialyzer.Outgoing, Dialyzer.BloodFlow.Outgoing);
+			BloodFlowCombinator.ConnectOutWithIn(ExtracorporealBloodCircuit.ToPatientVein, Patient.VeinFlow);
+			BloodFlowCombinator.ConnectOutWithIn(ExtracorporealBloodCircuit.ToDialyzer, Dialyzer.BloodFlow);
+			BloodFlowCombinator.ConnectOutWithIn(Dialyzer.BloodFlow, ExtracorporealBloodCircuit.FromDialyzer);
+			BloodFlowCombinator.CommitFlow();
 
 		}
 	}
@@ -137,8 +139,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var extracorporealBloodCircuitAfterStep0 = simulator.Model.Roots.OfType<ExtracorporealBloodCircuit>().First();
 			var patientAfterStep0 = simulator.Model.Roots.OfType<Patient>().First();
 			Console.Out.WriteLine("Initial");
-			patientAfterStep0.ArteryFlow.Outgoing.ForwardToSuccessor.PrintBloodValues("outgoing Blood");
-			patientAfterStep0.VeinFlow.Incoming.ForwardFromPredecessor.PrintBloodValues("incoming Blood");
+			patientAfterStep0.ArteryFlow.Outgoing.Forward.PrintBloodValues("outgoing Blood");
+			patientAfterStep0.VeinFlow.Incoming.Forward.PrintBloodValues("incoming Blood");
 			patientAfterStep0.PrintBloodValues("");
 			Console.Out.WriteLine("Step 1");
 			simulator.SimulateStep();

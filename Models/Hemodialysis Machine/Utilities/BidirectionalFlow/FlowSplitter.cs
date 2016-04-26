@@ -20,54 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
 {
-	// Coarse/rough measurement/quantifiers
-	// In German: "unbestimmte Mengenangaben"
-	//enum RoughAmount
-	//{
-	//	None=0,
-	//	Few=1,
-	//	Half=2,
-	//	Much=3,
-	//	Complete=4
-	//}
-	// none, half, complete, some, few, plenty, empty, much, full
+	using Modeling;
 
-	public enum KindOfDialysate
+	public abstract class FlowSplitter<TForward, TBackward> : IFlowAtomic<TForward, TBackward>,
+		IFlowComponentUniqueIncoming<TForward, TBackward>
+		where TForward : class, IFlowElement<TForward>, new()
+		where TBackward : class, IFlowElement<TBackward>, new()
 	{
-		Water = 0,
-		Bicarbonate = 1,
-		Acid = 2
-	}
+		protected int Number { get; }
+		public FlowPort<TForward, TBackward> Incoming { get; } = new FlowPort<TForward, TBackward>();
+		public FlowPort<TForward, TBackward>[] Outgoings { get; }
+		
+		protected FlowSplitter(int number)
+		{
+			Number = number;
+			Outgoings = new FlowPort<TForward, TBackward>[number];
+			for (var i = 0; i < Outgoings.Length; i++)
+			{
+				Outgoings[i]=new FlowPort<TForward, TBackward>();
+			}
+		}
 
-	public enum QualitativePressure
-	{
-		NoPressure,
-		LowPressure,
-		GoodPressure,
-		HighPressure
-	}
+		public virtual void UpdateForwardInternal()
+		{
+			//Standard behavior: Copy each value
+			for (int i = 0; i < Number; i++)
+			{
+				Outgoings[i].Forward.CopyValuesFrom(Incoming.Forward);
+			}
+		}
 
-	public enum QualitativeTemperature
-	{
-		TooCold,
-		BodyHeat,
-		TooHot
-	}
-	// analyzed, evaluated
-
-
-	public enum ValveState
-	{
-		Open,
-		Closed
+		public virtual void UpdateBackwardInternal()
+		{
+			//Standard behavior: Select first source
+			Incoming.Backward.CopyValuesFrom(Outgoings[0].Backward);
+		}
 	}
 }
-

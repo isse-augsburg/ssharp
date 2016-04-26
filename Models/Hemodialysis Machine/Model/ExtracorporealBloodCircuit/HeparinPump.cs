@@ -20,54 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.ExtracorporealBloodCircuit
 {
-	// Coarse/rough measurement/quantifiers
-	// In German: "unbestimmte Mengenangaben"
-	//enum RoughAmount
-	//{
-	//	None=0,
-	//	Few=1,
-	//	Half=2,
-	//	Much=3,
-	//	Complete=4
-	//}
-	// none, half, complete, some, few, plenty, empty, much, full
+	using Modeling;
 
-	public enum KindOfDialysate
+	public class HeparinPump : Component
 	{
-		Water = 0,
-		Bicarbonate = 1,
-		Acid = 2
-	}
+		public readonly BloodFlowSource HeparinFlow = new BloodFlowSource();
 
-	public enum QualitativePressure
-	{
-		NoPressure,
-		LowPressure,
-		GoodPressure,
-		HighPressure
-	}
+		public readonly bool Enabled = true;
 
-	public enum QualitativeTemperature
-	{
-		TooCold,
-		BodyHeat,
-		TooHot
-	}
-	// analyzed, evaluated
+		[Provided]
+		public void SetHeparinFlow(Blood outgoing)
+		{
+			outgoing.HasHeparin = true;
+			outgoing.Water = 0;
+			outgoing.SmallWasteProducts = 0;
+			outgoing.BigWasteProducts = 0;
+			outgoing.ChemicalCompositionOk = true;
+			outgoing.GasFree = true;
+			outgoing.Pressure = QualitativePressure.NoPressure;
+			outgoing.Temperature = QualitativeTemperature.BodyHeat;
+		}
 
+		[Provided]
+		public void ReceivedSuction(Suction fromSuccessor)
+		{
+		}
 
-	public enum ValveState
-	{
-		Open,
-		Closed
+		protected override void CreateBindings()
+		{
+			HeparinFlow.SendForward=SetHeparinFlow;
+			HeparinFlow.ReceivedBackward=ReceivedSuction;
+		}
 	}
 }
-

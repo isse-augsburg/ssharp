@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,54 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.DialyzingFluidDeliverySystem
 {
-	// Coarse/rough measurement/quantifiers
-	// In German: "unbestimmte Mengenangaben"
-	//enum RoughAmount
-	//{
-	//	None=0,
-	//	Few=1,
-	//	Half=2,
-	//	Much=3,
-	//	Complete=4
-	//}
-	// none, half, complete, some, few, plenty, empty, much, full
+	using Modeling;
 
-	public enum KindOfDialysate
+	public class WaterSupply : Component
 	{
-		Water = 0,
-		Bicarbonate = 1,
-		Acid = 2
-	}
-
-	public enum QualitativePressure
-	{
-		NoPressure,
-		LowPressure,
-		GoodPressure,
-		HighPressure
-	}
-
-	public enum QualitativeTemperature
-	{
-		TooCold,
-		BodyHeat,
-		TooHot
-	}
-	// analyzed, evaluated
-
-
-	public enum ValveState
-	{
-		Open,
-		Closed
+		public readonly DialyzingFluidFlowSource MainFlow = new DialyzingFluidFlowSource();
+		
+		[Provided]
+		public void SetMainFlow(DialyzingFluid outgoing)
+		{
+			var incomingSuction = MainFlow.Outgoing.Backward;
+			//Assume incomingSuction.SuctionType == SuctionType.CustomSuction;
+			outgoing.Quantity = incomingSuction.CustomSuctionValue;
+			outgoing.ContaminatedByBlood = false;
+			outgoing.Temperature = QualitativeTemperature.TooCold;
+			outgoing.WasUsed = false;
+			outgoing.KindOfDialysate = KindOfDialysate.Water;
+		}
+		
+		protected override void CreateBindings()
+		{
+			MainFlow.SendForward=SetMainFlow;
+		}
 	}
 }
-

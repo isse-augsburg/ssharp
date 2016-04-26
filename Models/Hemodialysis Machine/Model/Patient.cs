@@ -1,4 +1,26 @@
-﻿namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 {
 	using Modeling;
 	
@@ -20,11 +42,11 @@
 		[Provided]
 		public void CreateBlood(Blood outgoingBlood)
 		{
-			var incomingSuction = ArteryFlow.Outgoing.BackwardFromSuccessor;
+			var incomingSuction = ArteryFlow.Outgoing.Backward;
 			var hasSuction = incomingSuction.SuctionType == SuctionType.CustomSuction && incomingSuction.CustomSuctionValue > 0;
 			if (hasSuction && IsConnected)
 			{
-				var totalUnitsToDeliver = ArteryFlow.Outgoing.BackwardFromSuccessor.CustomSuctionValue;
+				var totalUnitsToDeliver = ArteryFlow.Outgoing.Backward.CustomSuctionValue;
 				var bigWasteUnitsToDeliver = totalUnitsToDeliver / 2;
 				if (BigWasteProducts >= bigWasteUnitsToDeliver)
 				{
@@ -90,10 +112,9 @@
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(ArteryFlow.SetOutgoingForward), nameof(CreateBlood));
-			Bind(nameof(ArteryFlow.BackwardFromSuccessorWasUpdated), nameof(DoNothing));
-			Bind(nameof(VeinFlow.SetOutgoingBackward), nameof(CreateBloodSuction));
-			Bind(nameof(VeinFlow.ForwardFromPredecessorWasUpdated), nameof(BloodReceived));
+			ArteryFlow.SendForward=CreateBlood;
+			VeinFlow.SendBackward=CreateBloodSuction;
+			VeinFlow.ReceivedForward=BloodReceived;
 		}
 
 		public void PrintBloodValues(string pointOfTime)

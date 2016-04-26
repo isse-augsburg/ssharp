@@ -392,19 +392,27 @@ namespace SafetySharp.Analysis
 			/// </summary>
 			private bool AssignWork(int workerIndex)
 			{
+				Assert.That(_stacks[workerIndex].FrameCount != 0, "Idle worker tries to assign work.");
+
 				int idleWorker;
 				if (!_idleWorkers.TryDequeue(out idleWorker))
 					return true;
 
 				// At this point we've got an idle worker that we can assign work to
+				Assert.That(_stacks[idleWorker].FrameCount == 0, "Trying to assign work to non-idle worker.");
 				Assert.That(workerIndex != idleWorker, "Worker tries to assign work to itself.");
-				_stacks[workerIndex].SplitWork(_stacks[idleWorker]);
 
 				// If the worker actually got some new work, notify it, otherwise continue waiting
-				if (_stacks[idleWorker].FrameCount > 0)
+				if (_stacks[workerIndex].SplitWork(_stacks[idleWorker]))
+				{
+					Assert.That(_stacks[idleWorker].FrameCount != 0, "No work was assigned to non-idle worker.");
 					Volatile.Write(ref _awaitingWork[idleWorker], false);
+				}
 				else
+				{
+					Assert.That(_stacks[idleWorker].FrameCount == 0, "Unexpected work assigned to idle worker.");
 					_idleWorkers.Enqueue(idleWorker);
+				}
 
 				return true;
 			}
@@ -414,8 +422,10 @@ namespace SafetySharp.Analysis
 			/// </summary>
 			private bool AwaitWork(int workerIndex)
 			{
-				_idleWorkers.Enqueue(workerIndex);
+				Assert.That(_stacks[workerIndex].FrameCount == 0, "Non-idle worker awaits work.");
+
 				Volatile.Write(ref _awaitingWork[workerIndex], true);
+				_idleWorkers.Enqueue(workerIndex);
 
 				var spinWait = new SpinWait();
 				while (Volatile.Read(ref _awaitingWork[workerIndex]) && !_terminated)

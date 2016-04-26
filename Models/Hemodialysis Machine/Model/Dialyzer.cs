@@ -1,4 +1,26 @@
-﻿using System;
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,8 +38,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 		// 3. Suction of Blood is calculated
 		// 4. Element of Blood is calculated
 
-		public BloodFlowInToOutSegment BloodFlow = new BloodFlowInToOutSegment();
-		public DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
+		public BloodFlowInToOut BloodFlow = new BloodFlowInToOut();
+		public DialyzingFluidFlowInToOut DialyzingFluidFlow = new DialyzingFluidFlowInToOut();
 
 		[Range(0, 8, OverflowBehavior.Error)]
 		public int IncomingSuctionRateOnDialyzingFluidSide = 0;
@@ -30,47 +52,47 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 
 		[Provided]
-		public void SetDialyzingFluidFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void SetDialyzingFluidFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
 			//Assume incomingSuction.SuctionType == SuctionType.CustomSuction;
-			if (incomingSuction.SuctionType==SuctionType.SourceDependentSuction)
+			if (fromSuccessor.SuctionType==SuctionType.SourceDependentSuction)
 				throw new Exception("Model Bug");
-			IncomingSuctionRateOnDialyzingFluidSide = incomingSuction.CustomSuctionValue;
-			outgoingSuction.CustomSuctionValue = 0;
-			outgoingSuction.SuctionType = SuctionType.SourceDependentSuction;
+			IncomingSuctionRateOnDialyzingFluidSide = fromSuccessor.CustomSuctionValue;
+			toPredecessor.CustomSuctionValue = 0;
+			toPredecessor.SuctionType = SuctionType.SourceDependentSuction;
 		}
 
 		[Provided]
-		public void SetDialyzingFluidFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		public void SetDialyzingFluidFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
 		{
-			IncomingFluidTemperature = incoming.Temperature;
-			IncomingQuantityOfDialyzingFluid = incoming.Quantity;
-			outgoing.CopyValuesFrom(incoming);
-			outgoing.Quantity = IncomingSuctionRateOnDialyzingFluidSide;
-			outgoing.WasUsed = true;
+			IncomingFluidTemperature = fromPredecessor.Temperature;
+			IncomingQuantityOfDialyzingFluid = fromPredecessor.Quantity;
+			toSuccessor.CopyValuesFrom(fromPredecessor);
+			toSuccessor.Quantity = IncomingSuctionRateOnDialyzingFluidSide;
+			toSuccessor.WasUsed = true;
 		}
 
 		[Provided]
-		public void SetBloodFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public void SetBloodFlowSuction(Suction fromSuccessor, Suction toPredecessor)
 		{
-			outgoingSuction.CopyValuesFrom(incomingSuction);
+			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
 		[Provided]
-		public void SetBloodFlow(Blood outgoing, Blood incoming)
+		public void SetBloodFlow(Blood toSuccessor, Blood fromPredecessor)
 		{
-			if (incoming.Water > 0 || incoming.BigWasteProducts > 0)
+			if (fromPredecessor.Water > 0 || fromPredecessor.BigWasteProducts > 0)
 			{
-				outgoing.CopyValuesFrom(incoming);
-				outgoing.Temperature = IncomingFluidTemperature;
+				toSuccessor.CopyValuesFrom(fromPredecessor);
+				toSuccessor.Temperature = IncomingFluidTemperature;
 				// First step: Filtrate Blood
-				if (IncomingQuantityOfDialyzingFluid >= outgoing.SmallWasteProducts)
+				if (IncomingQuantityOfDialyzingFluid >= toSuccessor.SmallWasteProducts)
 				{
-					outgoing.SmallWasteProducts = 0;
+					toSuccessor.SmallWasteProducts = 0;
 				}
 				else
 				{
-					outgoing.SmallWasteProducts -= IncomingQuantityOfDialyzingFluid;
+					toSuccessor.SmallWasteProducts -= IncomingQuantityOfDialyzingFluid;
 				}
 				// Second step: Ultra Filtration
 				// To satisfy the incoming suction rate we must take the fluid from the blood.
@@ -78,26 +100,26 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 				var ultrafiltrationRate = IncomingSuctionRateOnDialyzingFluidSide - IncomingQuantityOfDialyzingFluid;
 				if (ultrafiltrationRate >= 0)
 				{
-					if (ultrafiltrationRate < outgoing.BigWasteProducts)
+					if (ultrafiltrationRate < toSuccessor.BigWasteProducts)
 					{
-						outgoing.BigWasteProducts -= ultrafiltrationRate;
+						toSuccessor.BigWasteProducts -= ultrafiltrationRate;
 					}
 					else
 					{
 						// Remove water instead of BigWasteProducts
-						// Assume Water >= (ultrafiltrationRate - outgoing.BigWasteProducts)
-						outgoing.Water -= (ultrafiltrationRate - outgoing.BigWasteProducts);
-						outgoing.BigWasteProducts = 0;
+						// Assume Water >= (ultrafiltrationRate - toSuccessor.BigWasteProducts)
+						toSuccessor.Water -= (ultrafiltrationRate - toSuccessor.BigWasteProducts);
+						toSuccessor.BigWasteProducts = 0;
 					}
 				}
 			}
 			else
 			{
-				outgoing.CopyValuesFrom(incoming);
+				toSuccessor.CopyValuesFrom(fromPredecessor);
 			}
 			if (!MembraneIntact)
 			{
-				outgoing.ChemicalCompositionOk = false;
+				toSuccessor.ChemicalCompositionOk = false;
 			}
 		}
 
@@ -108,10 +130,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingBackward), nameof(SetDialyzingFluidFlowSuction));
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingForward), nameof(SetDialyzingFluidFlow));
-			Bind(nameof(BloodFlow.SetOutgoingBackward), nameof(SetBloodFlowSuction));
-			Bind(nameof(BloodFlow.SetOutgoingForward), nameof(SetBloodFlow));
+			DialyzingFluidFlow.UpdateBackward = SetDialyzingFluidFlowSuction;
+			DialyzingFluidFlow.UpdateForward = SetDialyzingFluidFlow;
+			BloodFlow.UpdateBackward = SetBloodFlowSuction;
+			BloodFlow.UpdateForward = SetBloodFlow;
 		}
 
 

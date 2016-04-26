@@ -21,53 +21,28 @@
 // THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
 {
-	// Coarse/rough measurement/quantifiers
-	// In German: "unbestimmte Mengenangaben"
-	//enum RoughAmount
-	//{
-	//	None=0,
-	//	Few=1,
-	//	Half=2,
-	//	Much=3,
-	//	Complete=4
-	//}
-	// none, half, complete, some, few, plenty, empty, much, full
+	using System.Collections.Generic;
+	using System.Linq;
+	using Modeling;
 
-	public enum KindOfDialysate
+	public class FlowDelegate<TForward, TBackward> : IFlowAtomic<TForward, TBackward>, IFlowComponentUniqueOutgoing<TForward, TBackward>, IFlowComponentUniqueIncoming<TForward, TBackward>
+		where TForward : class, IFlowElement<TForward>, new()
+		where TBackward : class, IFlowElement<TBackward>, new()
 	{
-		Water = 0,
-		Bicarbonate = 1,
-		Acid = 2
-	}
+		public FlowPort<TForward, TBackward> Incoming { get; } = new FlowPort<TForward, TBackward>();
+		public FlowPort<TForward, TBackward> Outgoing { get; } = new FlowPort<TForward, TBackward>();
 
-	public enum QualitativePressure
-	{
-		NoPressure,
-		LowPressure,
-		GoodPressure,
-		HighPressure
-	}
+		public void UpdateForwardInternal()
+		{
+			Outgoing.Forward.CopyValuesFrom(Incoming.Forward);
+		}
 
-	public enum QualitativeTemperature
-	{
-		TooCold,
-		BodyHeat,
-		TooHot
-	}
-	// analyzed, evaluated
-
-
-	public enum ValveState
-	{
-		Open,
-		Closed
+		public void UpdateBackwardInternal()
+		{
+			Incoming.Backward.CopyValuesFrom(Outgoing.Backward);
+		}
 	}
 }
-

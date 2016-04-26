@@ -21,53 +21,35 @@
 // THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
 {
-	// Coarse/rough measurement/quantifiers
-	// In German: "unbestimmte Mengenangaben"
-	//enum RoughAmount
-	//{
-	//	None=0,
-	//	Few=1,
-	//	Half=2,
-	//	Much=3,
-	//	Complete=4
-	//}
-	// none, half, complete, some, few, plenty, empty, much, full
+	using Modeling;
 
-	public enum KindOfDialysate
+	public class FlowPort<TForward, TBackward>
+		where TForward : class, IFlowElement<TForward>, new()
+		where TBackward : class, IFlowElement<TBackward>, new()
 	{
-		Water = 0,
-		Bicarbonate = 1,
-		Acid = 2
+		[Hidden]
+		public TForward Forward;
+
+		[Hidden]
+		public TBackward Backward;
 	}
 
-	public enum QualitativePressure
+
+	public interface IFlowComponentUniqueOutgoing<TForward, TBackward> : IFlowComponent<TForward, TBackward>
+		where TForward : class, IFlowElement<TForward>, new()
+		where TBackward : class, IFlowElement<TBackward>, new()
 	{
-		NoPressure,
-		LowPressure,
-		GoodPressure,
-		HighPressure
+		FlowPort<TForward, TBackward> Outgoing { get; }
 	}
 
-	public enum QualitativeTemperature
-	{
-		TooCold,
-		BodyHeat,
-		TooHot
-	}
-	// analyzed, evaluated
 
-
-	public enum ValveState
+	public interface IFlowComponentUniqueIncoming<TForward, TBackward> : IFlowComponent<TForward, TBackward>
+		where TForward : class, IFlowElement<TForward>, new()
+		where TBackward : class, IFlowElement<TBackward>, new()
 	{
-		Open,
-		Closed
+		FlowPort<TForward, TBackward> Incoming { get; }
 	}
 }
-

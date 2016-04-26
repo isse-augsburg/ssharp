@@ -20,54 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.DialyzingFluidDeliverySystem
 {
-	// Coarse/rough measurement/quantifiers
-	// In German: "unbestimmte Mengenangaben"
-	//enum RoughAmount
-	//{
-	//	None=0,
-	//	Few=1,
-	//	Half=2,
-	//	Much=3,
-	//	Complete=4
-	//}
-	// none, half, complete, some, few, plenty, empty, much, full
+	using Modeling;
 
-	public enum KindOfDialysate
+	public class ConcentrateSupply : Component
 	{
-		Water = 0,
-		Bicarbonate = 1,
-		Acid = 2
-	}
+		public readonly DialyzingFluidFlowSource Concentrate = new DialyzingFluidFlowSource();
 
-	public enum QualitativePressure
-	{
-		NoPressure,
-		LowPressure,
-		GoodPressure,
-		HighPressure
-	}
+		public KindOfDialysate KindOfDialysate = KindOfDialysate.Bicarbonate;
 
-	public enum QualitativeTemperature
-	{
-		TooCold,
-		BodyHeat,
-		TooHot
-	}
-	// analyzed, evaluated
-
-
-	public enum ValveState
-	{
-		Open,
-		Closed
+		[Provided]
+		public void SetConcentrateFlow(DialyzingFluid outgoing)
+		{
+			var incomingSuction = Concentrate.Outgoing.Backward;
+			outgoing.Quantity = incomingSuction.CustomSuctionValue;
+			outgoing.ContaminatedByBlood = false;
+			outgoing.Temperature = QualitativeTemperature.TooCold;
+			outgoing.WasUsed = false;
+			outgoing.KindOfDialysate = KindOfDialysate;
+		}
+		
+		protected override void CreateBindings()
+		{
+			Concentrate.SendForward=SetConcentrateFlow;
+		}
 	}
 }
-

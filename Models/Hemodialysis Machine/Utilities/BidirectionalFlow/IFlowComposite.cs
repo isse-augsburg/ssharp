@@ -21,16 +21,17 @@
 // THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
-{
-	public enum ValveState
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow {
+	using System.Dynamic;
+
+	public interface IFlowComposite<TForward, TBackward> : IFlowComponent<TForward, TBackward>, IFlowComponentUniqueOutgoing<TForward, TBackward>, IFlowComponentUniqueIncoming<TForward, TBackward>
+		where TForward : class, IFlowElement<TForward>, new()
+		where TBackward : class, IFlowElement<TBackward>, new()
 	{
-		Open,
-		Closed
+		FlowDelegate<TForward, TBackward> FlowIn { get; }
+		FlowDelegate<TForward, TBackward> FlowOut {get; }
 	}
+
+
 }

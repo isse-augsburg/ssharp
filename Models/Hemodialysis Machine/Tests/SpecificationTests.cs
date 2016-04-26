@@ -93,8 +93,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
 			var patient = simulator.Model.Roots.OfType<Patient>().First();
 			var hdMachine = simulator.Model.Roots.OfType<HdMachine>().First();
-			hdMachine.DialyzingFluidDeliverySystem.DialyzingFluidWaterPreparation.WaterHeaterDefect.Activation = Activation.Forced;
-			hdMachine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpToBalanceChamberDefect.Activation = Activation.Forced;
+			hdMachine.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefect.Activation = Activation.Forced;
+			hdMachine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpDefect.Activation = Activation.Forced;
 			simulator.SimulateStep();
 			var patient2 = simulator.Model.Roots.OfType<Patient>().First();
 			simulator.SimulateStep();

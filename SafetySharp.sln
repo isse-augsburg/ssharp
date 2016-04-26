@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler", "Source\Compiler\Compiler.csproj", "{8823091C-387F-4F4D-ABCD-8F71D1528CBB}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pressure Tank", "Models\Pre
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{64793805-8DC9-4A61-B41B-3369490319CD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LtsMin", "Source\LtsMin\LtsMin.vcxproj", "{96F3A853-B30A-4413-98C8-C9AAA4C084DE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LtsMin", "Source\ltsmin\LtsMin.vcxproj", "{96F3A853-B30A-4413-98C8-C9AAA4C084DE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9B6C1FB4-3F1B-43AC-A0E0-EAED4088BF37} = {9B6C1FB4-3F1B-43AC-A0E0-EAED4088BF37}
 	EndProjectSection

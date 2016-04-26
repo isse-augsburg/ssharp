@@ -66,13 +66,8 @@ namespace SafetySharp.CaseStudies.PressureTank.Modeling
 		/// </summary>
 		public override void Update()
 		{
-			if (IsRuptured)
-				return;
-
-			_pressureLevel -= 1;
-
-			if (IsBeingFilled)
-				_pressureLevel += 2;
+			if (!IsRuptured)
+				_pressureLevel += IsBeingFilled ? 1 : -1;
 		}
 	}
 }

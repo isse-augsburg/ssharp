@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,54 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Model
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Model.ExtracorporealBloodCircuit
 {
-	// Coarse/rough measurement/quantifiers
-	// In German: "unbestimmte Mengenangaben"
-	//enum RoughAmount
-	//{
-	//	None=0,
-	//	Few=1,
-	//	Half=2,
-	//	Much=3,
-	//	Complete=4
-	//}
-	// none, half, complete, some, few, plenty, empty, much, full
+	using Modeling;
 
-	public enum KindOfDialysate
+	public class PressureTransducer : Component
 	{
-		Water = 0,
-		Bicarbonate = 1,
-		Acid = 2
-	}
+		public readonly BloodFlowSink SenseFlow = new BloodFlowSink();
+		
+		public QualitativePressure SensedPressure = QualitativePressure.NoPressure;
 
-	public enum QualitativePressure
-	{
-		NoPressure,
-		LowPressure,
-		GoodPressure,
-		HighPressure
-	}
+		[Provided]
+		public void SetSenseFlowSuction(Suction toPredecessor)
+		{
+			toPredecessor.CustomSuctionValue = 0;
+			toPredecessor.SuctionType = SuctionType.CustomSuction;
+		}
 
-	public enum QualitativeTemperature
-	{
-		TooCold,
-		BodyHeat,
-		TooHot
-	}
-	// analyzed, evaluated
+		[Provided]
+		public void ReceivedBlood(Blood incomingElement)
+		{
+			SensedPressure = incomingElement.Pressure;
+		}
 
-
-	public enum ValveState
-	{
-		Open,
-		Closed
+		protected override void CreateBindings()
+		{
+			SenseFlow.SendBackward=SetSenseFlowSuction;
+			SenseFlow.ReceivedForward=ReceivedBlood;
+		}
 	}
 }
-

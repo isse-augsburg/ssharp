@@ -1,4 +1,26 @@
-﻿using System;
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +32,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 	using Model;
 	using NUnit.Framework;
 	using Analysis;
+	using Model.DialyzingFluidDeliverySystem;
 	using Modeling;
 	using Runtime;
 
@@ -20,7 +43,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		// 1. Suction of DialyzingFluid is calculated
 		// 2. Element of DialyzingFluid is calculated
 
-		public DialyzingFluidFlowInToOutSegment DialyzingFluidFlow = new DialyzingFluidFlowInToOutSegment();
+		public DialyzingFluidFlowInToOut DialyzingFluidFlow = new DialyzingFluidFlowInToOut();
 
 		public int IncomingSuctionRateOnDialyzingFluidSide = 0;
 		public int IncomingQuantityOfDialyzingFluid = 0; //Amount of BloodUnits we can clean.
@@ -50,8 +73,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 
 		protected override void CreateBindings()
 		{
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingBackward), nameof(SetDialyzingFluidFlowSuction));
-			Bind(nameof(DialyzingFluidFlow.SetOutgoingForward), nameof(SetDialyzingFluidFlow));
+			DialyzingFluidFlow.UpdateBackward=SetDialyzingFluidFlowSuction;
+			DialyzingFluidFlow.UpdateForward=SetDialyzingFluidFlow;
 		}
 	}
 
@@ -68,8 +91,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Tests
 		public DialyzingFluidDeliverySystemTestEnvironment()
 		{
 			DialyzingFluidDeliverySystem.AddFlows(DialysingFluidFlowCombinator);
-			DialysingFluidFlowCombinator.Replace(DialyzingFluidDeliverySystem.ToDialyzer.Incoming, Dialyzer.DialyzingFluidFlow.Incoming);
-			DialysingFluidFlowCombinator.Replace(DialyzingFluidDeliverySystem.FromDialyzer.Outgoing, Dialyzer.DialyzingFluidFlow.Outgoing);
+			DialysingFluidFlowCombinator.ConnectOutWithIn(DialyzingFluidDeliverySystem.ToDialyzer, Dialyzer.DialyzingFluidFlow);
+			DialysingFluidFlowCombinator.ConnectOutWithIn(Dialyzer.DialyzingFluidFlow, DialyzingFluidDeliverySystem.FromDialyzer);
+			DialysingFluidFlowCombinator.CommitFlow();
 		}
 		
 	}
