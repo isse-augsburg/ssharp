@@ -34,6 +34,11 @@ namespace SafetySharp.Utilities
 	internal class ExternalProcess : IDisposable
 	{
 		/// <summary>
+		///   The callback that is invoked when an output is generated.
+		/// </summary>
+		private readonly Action<Output> _outputCallback;
+
+		/// <summary>
 		///   The external process.
 		/// </summary>
 		private readonly Process _process;
@@ -67,10 +72,9 @@ namespace SafetySharp.Utilities
 				}
 			};
 
+			_outputCallback = outputCallback;
 			_process.OutputDataReceived += (o, e) => LogMessage(e.Data, isError: false);
 			_process.ErrorDataReceived += (o, e) => LogMessage(e.Data, isError: true);
-
-			OutputCallback = outputCallback;
 		}
 
 		/// <summary>
@@ -98,11 +102,6 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
-		///   Gets  the callback that is invoked when an output is generated.
-		/// </summary>
-		public Action<Output> OutputCallback { get; }
-
-		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>
 		public void Dispose()
@@ -123,7 +122,7 @@ namespace SafetySharp.Utilities
 			var output = new Output { Message = message, IsError = isError };
 			_outputs.Add(output);
 
-			OutputCallback?.Invoke(output);
+			_outputCallback?.Invoke(output);
 		}
 
 		/// <summary>
@@ -131,23 +130,7 @@ namespace SafetySharp.Utilities
 		/// </summary>
 		public void Run()
 		{
-			Requires.That(!Running, "The process is already running.");
-
-			Running = true;
-			try
-			{
-				_outputs = new List<Output>();
-				_process.Start();
-
-				_process.BeginErrorReadLine();
-				_process.BeginOutputReadLine();
-
-				_process.WaitForExit();
-			}
-			finally
-			{
-				Running = false;
-			}
+			RunAsync().Wait();
 		}
 
 		/// <summary>
