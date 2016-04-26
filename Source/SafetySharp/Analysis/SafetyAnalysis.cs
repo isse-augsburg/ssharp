@@ -332,7 +332,7 @@ namespace SafetySharp.Analysis
 			/// </summary>
 			private static ISet<ISet<Fault>> Convert(Dictionary<FaultSet, ISet<Fault>> knownSets, HashSet<FaultSet> sets, Fault[] faults)
 			{
-				var result = new HashSet<ISet<Fault>>();
+				var result = new HashSet<ISet<Fault>>(ReferenceEqualityComparer<ISet<Fault>>.Default);
 
 				foreach (var set in sets)
 					result.Add(Convert(knownSets, set, faults));

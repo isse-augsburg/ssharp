@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
 	using Sensors;
+	using Vehicles;
 
 	/// <summary>
 	///   Represents the original design of the end-control.
@@ -31,28 +32,15 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 	public class EndControlAdditionalLightBarrier : EndControl
 	{
 		/// <summary>
+		///   The sensor that is used to detect over-height vehicles in the end-control area on the right lane.
+		/// </summary>
+		public readonly VehicleDetector RightLaneDetector = new OverheadDetector { Position = Model.EndControlPosition, Lane = Lane.Right };
+
+		/// <summary>
 		///   The number of high vehicles currently in the main-control area.
 		/// </summary>
 		[Range(0, 5, OverflowBehavior.Clamp)]
 		private int _count;
-
-		/// <summary>
-		///   The sensor that is used to detect vehicles in the end-control area on the left lane.
-		/// </summary>
-		[Hidden]
-		public VehicleDetector LeftLaneDetector;
-
-		/// <summary>
-		///   The sensor that is used to detect over-height vehicles in the end-control area on the right lane.
-		/// </summary>
-		[Hidden]
-		public VehicleDetector RightLaneDetector;
-
-		/// <summary>
-		///   The timer that is used to deactivate the end-control automatically.
-		/// </summary>
-		[Hidden]
-		public Timer Timer;
 
 		/// <summary>
 		///   Gets a value indicating whether a crash is potentially imminent.

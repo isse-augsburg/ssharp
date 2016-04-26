@@ -24,32 +24,29 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
 	using Sensors;
+	using Vehicles;
 
 	public abstract class MainControl : Component
 	{
 		/// <summary>
 		///   The sensor that detects high vehicles on the left lane.
 		/// </summary>
-		[Hidden]
-		public VehicleDetector LeftDetector;
+		public readonly VehicleDetector LeftDetector = new OverheadDetector { Lane = Lane.Left, Position = Model.MainControlPosition };
 
 		/// <summary>
 		///   The sensor that detects overheight vehicles on any lane.
 		/// </summary>
-		[Hidden]
-		public VehicleDetector PositionDetector;
+		public readonly VehicleDetector PositionDetector = new LightBarrier { Position = Model.MainControlPosition };
 
 		/// <summary>
 		///   The sensor that detects high vehicles on the right lane.
 		/// </summary>
-		[Hidden]
-		public VehicleDetector RightDetector;
+		public readonly VehicleDetector RightDetector = new OverheadDetector { Lane = Lane.Right, Position = Model.MainControlPosition };
 
 		/// <summary>
 		///   The timer that is used to deactivate the main-control automatically.
 		/// </summary>
-		[Hidden]
-		public Timer Timer;
+		public readonly Timer Timer = new Timer();
 
 		/// <summary>
 		///   Indicates whether an vehicle leaving the main-control area.

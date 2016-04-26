@@ -22,7 +22,10 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling
 {
+	using System;
+	using System.Collections.Generic;
 	using System.Linq;
+	using System.Reflection;
 	using Controllers;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
@@ -32,7 +35,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 	/// <summary>
 	///   Represents a base class for all variants of the height control case study model.
 	/// </summary>
-	public abstract class Model : ModelBase
+	public sealed class Model : ModelBase
 	{
 		public const int PreControlPosition = 3;
 		public const int MainControlPosition = 6;
@@ -44,7 +47,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		protected Model(Vehicle[] vehicles = null)
+		private Model(Vehicle[] vehicles = null)
 		{
 			vehicles = vehicles ?? new[]
 			{
@@ -54,38 +57,19 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 			};
 
 			Vehicles = new VehicleCollection(vehicles);
-
-			LightBarrierPre = new LightBarrier { Position = PreControlPosition };
-			LightBarrierMain = new LightBarrier { Position = MainControlPosition };
-
-			DetectorMainLeft = new OverheadDetector { Lane = Lane.Left, Position = MainControlPosition };
-			DetectorMainRight = new OverheadDetector { Lane = Lane.Right, Position = MainControlPosition };
-			DetectorEndLeft = new OverheadDetector { Lane = Lane.Left, Position = EndControlPosition };
-
-			Setup(LightBarrierPre, "LB-Pre");
-			Setup(LightBarrierMain, "LB-Main");
-			Setup(DetectorMainLeft, "OD-Main-Left");
-			Setup(DetectorMainRight, "OD-Main-Right");
-			Setup(DetectorEndLeft, "OD-End-Left");
 		}
 
 		/// <summary>
 		///   Gets the height control that monitors the vehicles and closes the tunnel, if necessary.
 		/// </summary>
 		[Root(Role.System)]
-		public HeightControl HeightControl { get; protected set; }
+		public HeightControl HeightControl { get; private set; }
 
 		/// <summary>
 		///   Gets the monitored vehicles.
 		/// </summary>
 		[Root(Role.Environment)]
 		public VehicleCollection Vehicles { get; }
-
-		protected LightBarrier LightBarrierPre { get; }
-		protected LightBarrier LightBarrierMain { get; }
-		protected OverheadDetector DetectorMainLeft { get; }
-		protected OverheadDetector DetectorMainRight { get; }
-		protected OverheadDetector DetectorEndLeft { get; }
 
 		/// <summary>
 		///   Represents the hazard of an over-height vehicle colliding with the tunnel entrance on the left lane.
@@ -109,6 +93,41 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 				vehicle => vehicle.Lane == Lane.Right || !(vehicle.Kind == VehicleKind.OverheightTruck || vehicle.Kind == VehicleKind.Truck));
 
 		/// <summary>
+		///   Initializes a model of the original design.
+		/// </summary>
+		public static Model CreateOriginal(Vehicle[] vehicles = null)
+			=> CreateVariant(typeof(PreControlOriginal), typeof(MainControlOriginal), typeof(EndControlOriginal), vehicles);
+
+		/// <summary>
+		///   Initializes a new variant with the given control types.
+		/// </summary>
+		private static Model CreateVariant(Type preControlType, Type mainControlType, Type endControlType, Vehicle[] vehicles = null)
+		{
+			preControlType = preControlType ?? typeof(PreControlOriginal);
+			mainControlType = mainControlType ?? typeof(MainControlOriginal);
+			endControlType = endControlType ?? typeof(EndControlOriginal);
+
+			var preControl = (PreControl)Activator.CreateInstance(preControlType);
+			var mainControl = (MainControl)Activator.CreateInstance(mainControlType);
+			var endControl = (EndControl)Activator.CreateInstance(endControlType);
+			var model = new Model(vehicles);
+
+			model.SetupController(preControl);
+			model.SetupController(mainControl);
+			model.SetupController(endControl);
+
+			model.HeightControl = new HeightControl
+			{
+				PreControl = preControl,
+				MainControl = mainControl,
+				EndControl = endControl,
+				TrafficLights = new TrafficLights()
+			};
+
+			return model;
+		}
+
+		/// <summary>
 		///   Invoked when the model should initialize bindings between its components.
 		/// </summary>
 		protected override void CreateBindings()
@@ -117,18 +136,76 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		}
 
 		/// <summary>
-		///   Binds the <paramref name="detector" /> to the <see cref="Vehicles" /> and sets up the <paramref name="detector" />'s
-		///   fault names.
+		///   Binds the <paramref name="controller" />'s detectors to the <see cref="Vehicles" /> and sets up the detector's fault
+		///   names.
 		/// </summary>
-		protected void Setup(VehicleDetector detector, string faultSuffix)
+		private void SetupController(Component controller)
 		{
-			Component.Bind(nameof(detector.GetVehicleKind), nameof(Vehicles.GetVehicleKind));
-			Component.Bind(nameof(detector.GetVehiclePosition), nameof(Vehicles.GetVehiclePosition));
-			Component.Bind(nameof(detector.GetVehicleLane), nameof(Vehicles.GetVehicleLane));
+			foreach (var detector in GetDetectors(controller))
+			{
+				Component.Bind(nameof(detector.GetVehicleKind), nameof(Vehicles.GetVehicleKind));
+				Component.Bind(nameof(detector.GetVehiclePosition), nameof(Vehicles.GetVehiclePosition));
+				Component.Bind(nameof(detector.GetVehicleLane), nameof(Vehicles.GetVehicleLane));
 
-			detector.FalseDetection.Name = $"FalseDetection{faultSuffix}";
-			detector.Misdetection.Name = $"Misdetection{faultSuffix}";
-			detector.VehicleCount = Vehicles.Vehicles.Length;
+				var name = detector.ToString();
+				detector.FalseDetection.Name = $"FalseDetection{name}";
+				detector.Misdetection.Name = $"Misdetection{name}";
+				detector.VehicleCount = Vehicles.Vehicles.Length;
+			}
+		}
+
+		/// <summary>
+		///   Creates the model variants for all combinations of different pre-, main-, and end-controls.
+		/// </summary>
+		public static IEnumerable<Model> CreateVariants()
+		{
+			var preControls = GetVariants<PreControl>().ToArray();
+			var mainControls = GetVariants<MainControl>().ToArray();
+			var endControls = GetVariants<EndControl>().ToArray();
+
+			return from preControl in preControls
+				   from mainControl in mainControls
+				   from endControl in endControls
+				   select CreateVariant(preControl, mainControl, endControl);
+		}
+
+		/// <summary>
+		///   Gets all variants of the control of type <typeparamref name="T" />.
+		/// </summary>
+		private static IEnumerable<Type> GetVariants<T>()
+			where T : class
+		{
+			return from type in Assembly.GetExecutingAssembly().GetTypes()
+				   where type.IsSubclassOf(typeof(T)) && !type.IsAbstract
+				   select type;
+		}
+
+		/// <summary>
+		///   Gets all vehicle detector instances stored in any of the <paramref name="component" />'s fields.
+		/// </summary>
+		private static IEnumerable<VehicleDetector> GetDetectors(Component component)
+		{
+			return from field in component.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance)
+				   where field.FieldType.IsAssignableFrom(typeof(VehicleDetector))
+				   select (VehicleDetector)field.GetValue(component);
+		}
+
+		/// <summary>
+		///   Gets a name for the <paramref name="position." />
+		/// </summary>
+		public static string GetPositionName(int position)
+		{
+			switch (position)
+			{
+				case EndControlPosition:
+					return "End";
+				case MainControlPosition:
+					return "Main";
+				case PreControlPosition:
+					return "Pre";
+				default:
+					return "Unknown";
+			}
 		}
 	}
 }

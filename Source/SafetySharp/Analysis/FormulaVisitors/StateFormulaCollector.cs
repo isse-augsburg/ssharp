@@ -23,6 +23,7 @@
 namespace SafetySharp.Analysis.FormulaVisitors
 {
 	using System.Collections.Generic;
+	using Utilities;
 
 	/// <summary>
 	///   Collects all <see cref="StateFormula" /> instances contained in a <see cref="Formula" />.
@@ -32,7 +33,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// <summary>
 		///   Gets the collected state formulas.
 		/// </summary>
-		public HashSet<StateFormula> StateFormulas { get; } = new HashSet<StateFormula>();
+		public HashSet<StateFormula> StateFormulas { get; } = new HashSet<StateFormula>(ReferenceEqualityComparer<StateFormula>.Default);
 
 		/// <summary>
 		///   Visits the <paramref name="formula." />

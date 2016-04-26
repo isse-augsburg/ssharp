@@ -22,26 +22,11 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 {
-	using SafetySharp.Modeling;
-	using Sensors;
-
 	/// <summary>
 	///   Represents the original design of the end-control.
 	/// </summary>
 	public class EndControlOriginal : EndControl
 	{
-		/// <summary>
-		///   The sensor that is used to detect vehicles in the end-control area.
-		/// </summary>
-		[Hidden]
-		public VehicleDetector Detector;
-
-		/// <summary>
-		///   The timer that is used to deactivate the end-control automatically.
-		/// </summary>
-		[Hidden]
-		public Timer Timer;
-
 		/// <summary>
 		///   Indicates whether the end-control is currently active.
 		/// </summary>
@@ -50,14 +35,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   Gets a value indicating whether a crash is potentially imminent.
 		/// </summary>
-		public override bool IsCrashPotentiallyImminent => IsActive && Detector.IsVehicleDetected;
+		public override bool IsCrashPotentiallyImminent => IsActive && LeftLaneDetector.IsVehicleDetected;
 
 		/// <summary>
 		///   Updates the internal state of the component.
 		/// </summary>
 		public override void Update()
 		{
-			Update(Timer, Detector);
+			Update(Timer, LeftLaneDetector);
 
 			if (VehicleEntering)
 				Timer.Start();

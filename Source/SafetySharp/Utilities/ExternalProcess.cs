@@ -72,9 +72,10 @@ namespace SafetySharp.Utilities
 				}
 			};
 
-			_outputCallback = outputCallback;
 			_process.OutputDataReceived += (o, e) => LogMessage(e.Data, isError: false);
 			_process.ErrorDataReceived += (o, e) => LogMessage(e.Data, isError: true);
+
+			_outputCallback = outputCallback;
 		}
 
 		/// <summary>
@@ -130,29 +131,18 @@ namespace SafetySharp.Utilities
 		/// </summary>
 		public void Run()
 		{
-			RunAsync().Wait();
-		}
-
-		/// <summary>
-		///   Asynchronously runs the process.
-		/// </summary>
-		public async Task RunAsync()
-		{
 			Requires.That(!Running, "The process is already running.");
 
 			Running = true;
 			try
 			{
 				_outputs = new List<Output>();
-				var tcs = new TaskCompletionSource<int>();
-
-				_process.Exited += (o, e) => tcs.SetResult(0);
 				_process.Start();
 
 				_process.BeginErrorReadLine();
 				_process.BeginOutputReadLine();
 
-				await tcs.Task;
+				_process.WaitForExit();
 			}
 			finally
 			{

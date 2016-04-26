@@ -23,12 +23,18 @@
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
+	using Sensors;
 
 	/// <summary>
 	///   A common base component for different pre-control implementations.
 	/// </summary>
 	public abstract class PreControl : Component
 	{
+		/// <summary>
+		///   The sensor that detects vehicles on any lane.
+		/// </summary>
+		public readonly VehicleDetector PositionDetector = new LightBarrier { Position = Model.PreControlPosition };
+
 		/// <summary>
 		///   Gets the number of vehicles that passed the pre-control during the current system step.
 		/// </summary>

@@ -157,18 +157,7 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		private IComponent[] GetComponents()
 		{
-			var components = new HashSet<IComponent>();
-			VisitPreOrder(c => components.Add(c));
-
-			return components.ToArray();
-		}
-
-		/// <summary>
-		///   Gets the <see cref="Fault" /> instances referenced by the model.
-		/// </summary>
-		private IComponent[] GetFaults()
-		{
-			var components = new HashSet<IComponent>();
+			var components = new HashSet<IComponent>(ReferenceEqualityComparer<IComponent>.Default);
 			VisitPreOrder(c => components.Add(c));
 
 			return components.ToArray();

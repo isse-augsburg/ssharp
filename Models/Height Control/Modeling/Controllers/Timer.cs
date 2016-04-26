@@ -22,7 +22,6 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 {
-	using ModelVariants;
 	using SafetySharp.Modeling;
 
 	/// <summary>

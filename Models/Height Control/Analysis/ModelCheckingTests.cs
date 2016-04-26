@@ -23,52 +23,66 @@
 namespace SafetySharp.CaseStudies.HeightControl.Analysis
 {
 	using System;
+	using System.Collections;
+	using System.Linq;
 	using FluentAssertions;
-	using Modeling.ModelVariants;
+	using Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 
-	public class OriginalTests
+	public class ModelCheckingTests
 	{
 		[Test]
-		public void EnumerateAllStates()
+		public void EnumerateAllStatesOriginalDesign()
 		{
-			var model = new OriginalModel();
-
+			var model = Model.CreateOriginal();
 			var result = ModelChecker.CheckInvariant(model, true);
+
 			result.FormulaHolds.Should().BeTrue();
 		}
 
 		[Test]
-		public void Collision()
+		public void CollisionOriginalDesign()
 		{
-			var model = new OriginalModel();
+			var model = Model.CreateOriginal();
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision, maxCardinality: 3);
 
 			result.SaveCounterExamples("counter examples/height control/dcca/collision/original");
 			Console.WriteLine(result);
-
-			// TODO
-			//result.IsComplete.Should().BeTrue();
-			//result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new ISet<Fault>[]
-			//{
-			//});
 		}
 
-		[Test]
-		public void FalseAlarm()
+		[Test, TestCaseSource(nameof(CreateModelVariants))]
+		public void EnumerateAllStates(Model model, string variantName)
 		{
-			var model = new OriginalModel();
+			var result = ModelChecker.CheckInvariant(model, true);
+			result.FormulaHolds.Should().BeTrue();
+		}
+
+		[Test, TestCaseSource(nameof(CreateModelVariants))]
+		public void Collision(Model model, string variantName)
+		{
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision, maxCardinality: 3);
+
+			result.SaveCounterExamples($"counter examples/height control/dcca/collision/{variantName}");
+			Console.WriteLine(result);
+		}
+
+		[Test, TestCaseSource(nameof(CreateModelVariants))]
+		public void FalseAlarm(Model model, string variantName)
+		{
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, maxCardinality: 3);
 
-			result.SaveCounterExamples("counter examples/height control/dcca/false alarm/original");
+			result.SaveCounterExamples($"counter examples/height control/dcca/false alarm/{variantName}");
 			Console.WriteLine(result);
+		}
 
-			// TODO
-			//result.IsComplete.Should().BeTrue();
-			//result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new ISet<Fault>[]
-			//{
-			//});
+		private static IEnumerable CreateModelVariants()
+		{
+			return from model in Model.CreateVariants()
+				   let name = $"{model.HeightControl.PreControl.GetType().Name}-" +
+							  $"{model.HeightControl.MainControl.GetType().Name}-" +
+							  $"{model.HeightControl.EndControl.GetType().Name}"
+				   select new TestCaseData(model, name).SetName(name);
 		}
 	}
 }

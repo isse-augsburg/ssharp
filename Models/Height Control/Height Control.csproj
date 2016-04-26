@@ -65,12 +65,7 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Analysis\DetectorAtRightEndTests.cs" />
-    <Compile Include="Analysis\ImprovedPreControlTests.cs" />
-    <Compile Include="Analysis\NoCounterInMainControlTests.cs" />
-    <Compile Include="Analysis\NoCounterInTolerantMainControlTests.cs" />
-    <Compile Include="Analysis\OriginalTests.cs" />
-    <Compile Include="Analysis\TolerantMainControlTests.cs" />
+    <Compile Include="Analysis\ModelCheckingTests.cs" />
     <Compile Include="Modeling\Controllers\EndControlAdditionalLightBarrier.cs" />
     <Compile Include="Modeling\Controllers\HeightControl.cs" />
     <Compile Include="Modeling\Controllers\EndControl.cs" />
@@ -83,12 +78,6 @@
     <Compile Include="Modeling\Controllers\MainControlOriginal.cs" />
     <Compile Include="Modeling\Controllers\PreControlImprovedDetection.cs" />
     <Compile Include="Modeling\Controllers\PreControlOriginal.cs" />
-    <Compile Include="Modeling\ModelVariants\DetectorAtRightEndModel.cs" />
-    <Compile Include="Modeling\ModelVariants\ImprovedPreControlModel.cs" />
-    <Compile Include="Modeling\ModelVariants\OriginalModel.cs" />
-    <Compile Include="Modeling\ModelVariants\TolerantMainControlModel.cs" />
-    <Compile Include="Modeling\ModelVariants\NoCounterInTolerantMainControlModel.cs" />
-    <Compile Include="Modeling\ModelVariants\NoCounterInMainControlModel.cs" />
     <Compile Include="Modeling\TrafficLights.cs" />
     <Compile Include="Modeling\Controllers\Timer.cs" />
     <Compile Include="Modeling\Vehicles\VisualizationVehicle.cs" />

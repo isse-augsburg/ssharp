@@ -33,7 +33,6 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using System.Windows.Shapes;
 	using HeightControl.Modeling;
 	using HeightControl.Modeling.Controllers;
-	using HeightControl.Modeling.ModelVariants;
 	using HeightControl.Modeling.Sensors;
 	using HeightControl.Modeling.Vehicles;
 	using Infrastructure;
@@ -62,7 +61,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			_odfStoryboard = (Storyboard)Resources["EventOdf"];
 
 			// Initialize the simulation environment
-			var specification = new OriginalModel(Enumerable
+			var specification = Model.CreateOriginal(Enumerable
 				.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.Truck })
 				.Concat(Enumerable.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.OverheightTruck }))
 				.ToArray());
@@ -84,9 +83,9 @@ namespace SafetySharp.CaseStudies.Visualizations
 			AlertOdf.Opacity = 0;
 		}
 
-		private VehicleCollection Vehicles => ((OriginalModel)SimulationControls.Model).Vehicles;
+		private VehicleCollection Vehicles => ((Model)SimulationControls.Model).Vehicles;
 		private EndControlOriginal EndControl => (EndControlOriginal)HeightControl.EndControl;
-		private HeightControl HeightControl => ((OriginalModel)SimulationControls.Model).HeightControl;
+		private HeightControl HeightControl => ((Model)SimulationControls.Model).HeightControl;
 		private MainControlOriginal MainControl => (MainControlOriginal)HeightControl.MainControl;
 		private PreControlOriginal PreControl => (PreControlOriginal)HeightControl.PreControl;
 
@@ -129,11 +128,11 @@ namespace SafetySharp.CaseStudies.Visualizations
 			if (SimulationControls.Simulator.IsReplay)
 				return;
 
-			PreControl.Detector.Misdetection.Activation = MisdetectionLb1.IsChecked.ToOccurrenceKind();
+			PreControl.PositionDetector.Misdetection.Activation = MisdetectionLb1.IsChecked.ToOccurrenceKind();
 			MainControl.PositionDetector.Misdetection.Activation = MisdetectionLb2.IsChecked.ToOccurrenceKind();
 			MainControl.LeftDetector.Misdetection.Activation = MisdetectionOdl.IsChecked.ToOccurrenceKind();
 			MainControl.RightDetector.Misdetection.Activation = MisdetectionOdr.IsChecked.ToOccurrenceKind();
-			EndControl.Detector.Misdetection.Activation = MisdetectionOdf.IsChecked.ToOccurrenceKind();
+			EndControl.LeftLaneDetector.Misdetection.Activation = MisdetectionOdf.IsChecked.ToOccurrenceKind();
 		}
 
 		private void OnRewound()
@@ -144,7 +143,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 		private void UpdateModelState()
 		{
-			if (PreControl.Detector.IsVehicleDetected)
+			if (PreControl.PositionDetector.IsVehicleDetected)
 				_lb1Storyboard.Begin();
 
 			if (MainControl.PositionDetector.IsVehicleDetected)
@@ -156,26 +155,26 @@ namespace SafetySharp.CaseStudies.Visualizations
 			if (MainControl.RightDetector.IsVehicleDetected)
 				_odrStoryboard.Begin();
 
-			if (EndControl.Detector.IsVehicleDetected)
+			if (EndControl.LeftLaneDetector.IsVehicleDetected)
 				_odfStoryboard.Begin();
 
-			MisdetectionLb1.IsChecked = PreControl.Detector.Misdetection.IsActivated;
+			MisdetectionLb1.IsChecked = PreControl.PositionDetector.Misdetection.IsActivated;
 			MisdetectionLb2.IsChecked = MainControl.PositionDetector.Misdetection.IsActivated;
 			MisdetectionOdl.IsChecked = MainControl.LeftDetector.Misdetection.IsActivated;
 			MisdetectionOdr.IsChecked = MainControl.RightDetector.Misdetection.IsActivated;
-			MisdetectionOdf.IsChecked = EndControl.Detector.Misdetection.IsActivated;
+			MisdetectionOdf.IsChecked = EndControl.LeftLaneDetector.Misdetection.IsActivated;
 
-			PreControl.Detector.FalseDetection.Activation = Activation.Suppressed;
+			PreControl.PositionDetector.FalseDetection.Activation = Activation.Suppressed;
 			MainControl.PositionDetector.FalseDetection.Activation = Activation.Suppressed;
 			MainControl.LeftDetector.FalseDetection.Activation = Activation.Suppressed;
 			MainControl.RightDetector.FalseDetection.Activation = Activation.Suppressed;
-			EndControl.Detector.FalseDetection.Activation = Activation.Suppressed;
+			EndControl.LeftLaneDetector.FalseDetection.Activation = Activation.Suppressed;
 
-			SetFaultAdornment(FaultLb1, PreControl.Detector);
+			SetFaultAdornment(FaultLb1, PreControl.PositionDetector);
 			SetFaultAdornment(FaultLb2, MainControl.PositionDetector);
 			SetFaultAdornment(FaultOdl, MainControl.LeftDetector);
 			SetFaultAdornment(FaultOdr, MainControl.RightDetector);
-			SetFaultAdornment(FaultOdf, EndControl.Detector);
+			SetFaultAdornment(FaultOdf, EndControl.LeftLaneDetector);
 
 			var isMainControlActive = MainControl.Count > 0;
 			MainControlNumOhvLabel.Visibility = isMainControlActive.ToVisibility();
@@ -222,7 +221,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 		private void OnMisdetectionLb1(object sender, RoutedEventArgs e)
 		{
-			PreControl.Detector.Misdetection.ToggleActivationMode();
+			PreControl.PositionDetector.Misdetection.ToggleActivationMode();
 		}
 
 		private void OnMisdetectionLb2(object sender, RoutedEventArgs e)
@@ -242,13 +241,13 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 		private void OnMisdetectionOdf(object sender, RoutedEventArgs e)
 		{
-			EndControl.Detector.Misdetection.ToggleActivationMode();
+			EndControl.LeftLaneDetector.Misdetection.ToggleActivationMode();
 		}
 
 		private void OnFalseDetectionLb1(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				PreControl.Detector.FalseDetection.Activation = Activation.Forced;
+				PreControl.PositionDetector.FalseDetection.Activation = Activation.Forced;
 		}
 
 		private void OnFalseDetectionLb2(object sender, MouseButtonEventArgs e)
@@ -272,7 +271,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 		private void OnFalseDetectionOdf(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				EndControl.Detector.FalseDetection.Activation = Activation.Forced;
+				EndControl.LeftLaneDetector.FalseDetection.Activation = Activation.Forced;
 		}
 
 		private static void OnManipulationCompleted(object sender, ManipulationCompletedEventArgs e)

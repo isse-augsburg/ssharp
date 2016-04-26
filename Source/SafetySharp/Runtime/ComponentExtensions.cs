@@ -45,7 +45,7 @@ namespace SafetySharp.Runtime
 		{
 			Requires.NotNull(component, nameof(component));
 
-			var subcomponents = new HashSet<IComponent>();
+			var subcomponents = new HashSet<IComponent>(ReferenceEqualityComparer<IComponent>.Default);
 			GetSubcomponents(subcomponents, component);
 
 			// Some objects may have backward references to the component itself, so we have to make sure that we
@@ -104,7 +104,7 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(component, nameof(component));
 			Requires.NotNull(action, nameof(action));
 
-			var visitedComponents = new HashSet<IComponent>();
+			var visitedComponents = new HashSet<IComponent>(ReferenceEqualityComparer<IComponent>.Default);
 			VisitPreOrder(visitedComponents, component, action);
 		}
 
@@ -119,7 +119,7 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(component, nameof(component));
 			Requires.NotNull(action, nameof(action));
 
-			var visitedComponents = new HashSet<IComponent>();
+			var visitedComponents = new HashSet<IComponent>(ReferenceEqualityComparer<IComponent>.Default);
 			VisitPostOrder(visitedComponents, component, action);
 		}
 
