@@ -63,7 +63,7 @@ namespace Tests
 
 			var process = new ExternalProcess(Path.Combine(msbuildPath, "msbuild.exe"),
 				$"\"{projectPath}\" /p:Configuration=Release /p:Platform=AnyCPU /nr:false",
-				message => Output.Log("{0}", message.Message));
+				message => Output.Log("{0}", message));
 
 			process.Run();
 			return process.ExitCode == 0;

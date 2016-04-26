@@ -162,7 +162,7 @@ namespace SafetySharp.Analysis
 			_ltsMin = new ExternalProcess(
 				fileName: "pins2lts-seq.exe",
 				commandLineArguments: $"--loader=\"{loaderAssembly}\" \"{modelFile}\" {checkArgument}",
-				outputCallback: output => OutputWritten?.Invoke(output.Message))
+				outputCallback: output => OutputWritten?.Invoke(output))
 			{
 				WorkingDirectory = Environment.CurrentDirectory
 			};
