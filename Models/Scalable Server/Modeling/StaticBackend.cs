@@ -28,11 +28,29 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 {
+	using SafetySharp.Modeling;
+
 	public class StaticBackend : IBackend
 	{
-		public RequestResult Request(QualitativeAmount requestNumber)
+		public Reward UserReward;
+
+		public readonly bool _degradedMode;
+
+		public readonly QualitativeAmount _satisfiableRequests;
+
+		public StaticBackend(QualitativeAmount satisfiableRequests, bool degradedMode)
 		{
-			throw new NotImplementedException();
+			_satisfiableRequests = satisfiableRequests;
+			_degradedMode = degradedMode;
+		}
+
+		public RequestResult Request(QualitativeAmount requestUsers)
+		{
+			if (_satisfiableRequests.Value() < requestUsers.Value())
+				return RequestResult.Failed;
+			else if(_degradedMode)
+				return RequestResult.Degraded;
+			else return RequestResult.Complete;
 		}
 	}
 }

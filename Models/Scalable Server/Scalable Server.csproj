@@ -62,6 +62,7 @@
     <Compile Include="Modeling\ElasticBackend.cs" />
     <Compile Include="Modeling\StaticBackend.cs" />
     <Compile Include="Modeling\UserModel1.cs" />
+    <Compile Include="Modeling\UserModel2.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
