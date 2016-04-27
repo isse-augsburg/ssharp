@@ -28,7 +28,11 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 {
-	public class ManagedInfrastructure
+	public class StaticBackend : IBackend
 	{
+		public RequestResult Request(QualitativeAmount requestNumber)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

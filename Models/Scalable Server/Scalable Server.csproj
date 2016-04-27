@@ -55,9 +55,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\CalculateExpectedReward.cs" />
-    <Compile Include="Modeling\ManagedInfrastructure.cs" />
-    <Compile Include="Modeling\ElasticInfrastructure.cs" />
-    <Compile Include="Modeling\FixedInfrastructure.cs" />
+    <Compile Include="Modeling\QualitativeAmount.cs" />
+    <Compile Include="Modeling\RequestResult.cs" />
+    <Compile Include="Modeling\IBackend.cs" />
+    <Compile Include="Modeling\ManagedBackend.cs" />
+    <Compile Include="Modeling\ElasticBackend.cs" />
+    <Compile Include="Modeling\StaticBackend.cs" />
     <Compile Include="Modeling\UserModel1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

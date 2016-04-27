@@ -73,6 +73,7 @@
     <Compile Include="Modeling\ModelBase.cs" />
     <Compile Include="Analysis\RootAttribute.cs" />
     <Compile Include="Analysis\SafetyAnalysis.cs" />
+    <Compile Include="Modeling\Reward.cs" />
     <Compile Include="Runtime\ProbabilityStack.cs" />
     <Compile Include="Runtime\FaultSet.cs" />
     <Compile Include="Runtime\Serialization\DelegateMetadata.cs" />

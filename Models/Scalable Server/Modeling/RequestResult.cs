@@ -28,7 +28,10 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 {
-	public class ElasticInfrastructure
+	public enum RequestResult
 	{
+		Failed,
+		Degraded,
+		Complete
 	}
 }

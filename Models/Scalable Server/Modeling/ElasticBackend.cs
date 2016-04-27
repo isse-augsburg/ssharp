@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 {
-	public class FixedInfrastructure
+	public class ElasticBackend
 	{
 	}
 }
