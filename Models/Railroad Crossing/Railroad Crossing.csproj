@@ -63,6 +63,7 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analysis\HazardProbabilityTests.cs" />
     <Compile Include="Analysis\SafetyAnalysisTests.cs" />
     <Compile Include="Modeling\Environment\Barrier.cs" />
     <Compile Include="Modeling\Environment\RadioChannel.cs" />

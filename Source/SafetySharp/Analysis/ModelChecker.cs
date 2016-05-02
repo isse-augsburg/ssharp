@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis
 {
+	using System;
 	using Modeling;
 
 	/// <summary>
@@ -49,6 +50,20 @@ namespace SafetySharp.Analysis
 		public static AnalysisResult CheckInvariant(ModelBase model, Formula invariant)
 		{
 			return new SSharpChecker().CheckInvariant(model, invariant);
+		}
+
+		public static Probability CalculateProbabilityOfHazard(ModelBase model, Formula hazard)
+		{
+			Probability probabilityOfHazard;
+
+			using (var probabilityChecker = new ProbabilityChecker(model))
+			{
+				var checkProbabilityOfHazard = probabilityChecker.CalculateProbabilityToReachStates(hazard);
+				probabilityChecker.CreateProbabilityMatrix();
+				probabilityChecker.DefaultChecker = new Prism(probabilityChecker);
+				probabilityOfHazard = checkProbabilityOfHazard.Calculate();
+			}
+			return probabilityOfHazard;
 		}
 	}
 }
