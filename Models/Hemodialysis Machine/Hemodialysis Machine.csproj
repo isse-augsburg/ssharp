@@ -78,7 +78,6 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Analysis\HazardProbabilityTests.cs" />
     <Compile Include="Modeling\DialyzingFluidDeliverySystem\ConcentrateSupply.cs" />
     <Compile Include="Modeling\DialyzingFluidDeliverySystem\Drain.cs" />
     <Compile Include="Modeling\DialyzingFluidDeliverySystem\DialyzingFluidPreparation.cs" />
