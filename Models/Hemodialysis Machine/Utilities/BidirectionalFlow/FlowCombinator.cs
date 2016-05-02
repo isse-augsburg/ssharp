@@ -27,7 +27,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
-	using Modeling;
+	using SafetySharp.Modeling;
 	using QuickGraph;
 	using QuickGraph.Algorithms;
 

@@ -24,7 +24,7 @@ using System;
 
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
 {
-	using Modeling;
+	using SafetySharp.Modeling;
 
 	internal class Int : IFlowElement<Int>
 	{

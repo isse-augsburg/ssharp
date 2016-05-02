@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,36 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDeliverySystem
 {
 	using SafetySharp.Modeling;
 
-	public class FlowPort<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+	public class Pump : Component
 	{
-		[Hidden]
-		public TForward Forward;
+		public readonly DialyzingFluidFlowInToOut MainFlow;
+		
+		public Pump()
+		{
+			MainFlow = new DialyzingFluidFlowInToOut();
+			MainFlow.UpdateBackward = SetMainFlowSuction;
+			MainFlow.UpdateForward = SetMainFlow;
+		}
 
-		[Hidden]
-		public TBackward Backward;
-	}
+		[Range(0, 8, OverflowBehavior.Error)]
+		public int PumpSpeed = 0;
+		
+		public void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
+		{
+			toSuccessor.CopyValuesFrom(fromPredecessor);
+		}
+		
+		public virtual void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		{
+			toPredecessor.SuctionType = SuctionType.CustomSuction;
+			toPredecessor.CustomSuctionValue = PumpSpeed;
+		}
+		
+		public readonly Fault PumpDefect = new TransientFault();
 
+		[FaultEffect(Fault = nameof(PumpDefect))]
+		public class PumpDefectEffect : Pump
+		{
+			[Provided]
+			public override void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+			{
+				toPredecessor.SuctionType = SuctionType.CustomSuction;
+				toPredecessor.CustomSuctionValue = 0;
+			}
+		}
 
-	public interface IFlowComponentUniqueOutgoing<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Outgoing { get; }
-	}
-
-
-	public interface IFlowComponentUniqueIncoming<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Incoming { get; }
 	}
 }

@@ -20,36 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDeliverySystem
 {
 	using SafetySharp.Modeling;
 
-	public class FlowPort<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+	public class ConcentrateSupply : Component
 	{
-		[Hidden]
-		public TForward Forward;
+		public readonly DialyzingFluidFlowSource Concentrate = new DialyzingFluidFlowSource();
 
-		[Hidden]
-		public TBackward Backward;
-	}
+		public KindOfDialysate KindOfDialysate = KindOfDialysate.Bicarbonate;
 
-
-	public interface IFlowComponentUniqueOutgoing<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Outgoing { get; }
-	}
-
-
-	public interface IFlowComponentUniqueIncoming<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Incoming { get; }
+		[Provided]
+		public void SetConcentrateFlow(DialyzingFluid outgoing)
+		{
+			var incomingSuction = Concentrate.Outgoing.Backward;
+			outgoing.Quantity = incomingSuction.CustomSuctionValue;
+			outgoing.ContaminatedByBlood = false;
+			outgoing.Temperature = QualitativeTemperature.TooCold;
+			outgoing.WasUsed = false;
+			outgoing.KindOfDialysate = KindOfDialysate;
+		}
+		
+		protected override void CreateBindings()
+		{
+			Concentrate.SendForward=SetConcentrateFlow;
+		}
 	}
 }

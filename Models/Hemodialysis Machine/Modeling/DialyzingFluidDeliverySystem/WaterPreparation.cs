@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,36 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDeliverySystem
 {
 	using SafetySharp.Modeling;
 
-	public class FlowPort<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+	public class WaterPreparation : Component
 	{
-		[Hidden]
-		public TForward Forward;
+		public readonly DialyzingFluidFlowInToOut MainFlow = new DialyzingFluidFlowInToOut();
 
-		[Hidden]
-		public TBackward Backward;
-	}
+		public virtual bool WaterHeaterEnabled()
+		{
+			return true;
+		}
 
+		[Provided]
+		public virtual void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
+		{
+			toSuccessor.CopyValuesFrom(fromPredecessor);
+			if (WaterHeaterEnabled())
+				toSuccessor.Temperature = QualitativeTemperature.BodyHeat;
+		}
 
-	public interface IFlowComponentUniqueOutgoing<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Outgoing { get; }
-	}
+		[Provided]
+		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		{
+			toPredecessor.CopyValuesFrom(fromSuccessor);
+		}
 
+		protected override void CreateBindings()
+		{
+			MainFlow.UpdateBackward=SetMainFlowSuction;
+			MainFlow.UpdateForward=SetMainFlow;
+		}
 
-	public interface IFlowComponentUniqueIncoming<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Incoming { get; }
+		public readonly Fault WaterHeaterDefect = new TransientFault();
+
+		[FaultEffect(Fault = nameof(WaterHeaterDefect))]
+		public class WaterHeaterDefectEffect : WaterPreparation
+		{
+			public override bool WaterHeaterEnabled()
+			{
+				return false;
+			}
+		}
 	}
 }

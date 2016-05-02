@@ -20,36 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBloodCircuit
 {
 	using SafetySharp.Modeling;
 
-	public class FlowPort<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+	public class HeparinPump : Component
 	{
-		[Hidden]
-		public TForward Forward;
+		public readonly BloodFlowSource HeparinFlow = new BloodFlowSource();
 
-		[Hidden]
-		public TBackward Backward;
-	}
+		public readonly bool Enabled = true;
 
+		[Provided]
+		public void SetHeparinFlow(Blood outgoing)
+		{
+			outgoing.HasHeparin = true;
+			outgoing.Water = 0;
+			outgoing.SmallWasteProducts = 0;
+			outgoing.BigWasteProducts = 0;
+			outgoing.ChemicalCompositionOk = true;
+			outgoing.GasFree = true;
+			outgoing.Pressure = QualitativePressure.NoPressure;
+			outgoing.Temperature = QualitativeTemperature.BodyHeat;
+		}
 
-	public interface IFlowComponentUniqueOutgoing<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Outgoing { get; }
-	}
+		[Provided]
+		public void ReceivedSuction(Suction fromSuccessor)
+		{
+		}
 
-
-	public interface IFlowComponentUniqueIncoming<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Incoming { get; }
+		protected override void CreateBindings()
+		{
+			HeparinFlow.SendForward=SetHeparinFlow;
+			HeparinFlow.ReceivedBackward=ReceivedSuction;
+		}
 	}
 }

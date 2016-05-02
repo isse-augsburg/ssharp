@@ -29,7 +29,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using System.Windows;
 	using System.Windows.Media.Animation;
 	using System.Windows.Shapes;
-	using HemodialysisMachine.Model;
+	using HemodialysisMachine.Modeling;
 	using HemodialysisMachine.Utilities.BidirectionalFlow;
 	using Infrastructure;
 	using SafetySharp.Modeling;
@@ -173,7 +173,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 		public HdMachine()
 		{
-			var specification = new SafetySharp.CaseStudies.HemodialysisMachine.Specification();
+			var specification = new SafetySharp.CaseStudies.HemodialysisMachine.Model();
 
 			InitializeComponent();
 			InitializeElements();
@@ -195,8 +195,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 		}
 
 
-		private HemodialysisMachine.Model.HdMachine Machine => SimulationControls.Model.Roots.OfType<HemodialysisMachine.Model.HdMachine>().Single();
-		private HemodialysisMachine.Model.Patient Patient => SimulationControls.Model.Roots.OfType<HemodialysisMachine.Model.Patient>().First();
+		private HemodialysisMachine.Modeling.HdMachine Machine => SimulationControls.Model.Roots.OfType<HemodialysisMachine.Modeling.HdMachine>().Single();
+		private HemodialysisMachine.Modeling.Patient Patient => SimulationControls.Model.Roots.OfType<HemodialysisMachine.Modeling.Patient>().First();
 
 		private Storyboard _animationBloodPumpEnabled;
 		private Storyboard _animationHeparinPumpEnabled;
