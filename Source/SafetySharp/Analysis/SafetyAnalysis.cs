@@ -187,7 +187,7 @@ namespace SafetySharp.Analysis
 			return () =>
 			{
 				var serializedData = serializer.LoadSerializedData();
-				var faults = serializedData.ObjectTable.OfType<Fault>().OrderBy(f => f.Identifier).ToArray();
+				var faults = serializedData.ObjectTable.OfType<Fault>().Where(f => f.Identifier >= 0).OrderBy(f => f.Identifier).ToArray();
 				Requires.That(faults.Length == faultTemplates.Length, "Unexpected fault count.");
 
 				for (var i = 0; i < faults.Length; ++i)

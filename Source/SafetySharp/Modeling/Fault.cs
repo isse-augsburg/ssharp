@@ -53,7 +53,7 @@ namespace SafetySharp.Modeling
 		private int _choiceIndex;
 
 		[Hidden]
-		private int _identifier;
+		private int _identifier = -1;
 
 		[Hidden]
 		private bool _isActivated;

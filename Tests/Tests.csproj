@@ -134,6 +134,7 @@
     <Compile Include="Analysis\Dcca\exception.cs" />
     <Compile Include="Analysis\Dcca\multiple two point cut sets.cs" />
     <Compile Include="Analysis\Dcca\no cut sets.cs" />
+    <Compile Include="Analysis\Dcca\unused fault.cs" />
     <Compile Include="Analysis\Dcca\single singleton cut set.cs" />
     <Compile Include="Analysis\Dcca\single two point cut set.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\bindings.cs" />
