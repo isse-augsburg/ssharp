@@ -368,7 +368,7 @@ namespace SafetySharp.Analysis
 
 		private readonly List<string> _prismProcessOutput = new List<string>();
 
-		internal override Probability ExecuteCalculation(Formula formulaToCheck)
+		internal override Probability CalculateProbability(Formula formulaToCheck)
 		{
 			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
 			WriteProbabilityMatrixToDisk();
@@ -392,6 +392,11 @@ namespace SafetySharp.Analysis
 				
 				return new Probability(quantitativeResult.Result);
 			}
+		}
+
+		internal override double CalculateReward(Func<Reward> retrieveReward)
+		{
+			throw new NotImplementedException();
 		}
 
 		private string FindJava()

@@ -55,6 +55,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\CalculateExpectedReward.cs" />
+    <Compile Include="Modeling\IUserModel.cs" />
+    <Compile Include="Modeling\Model.cs" />
     <Compile Include="Modeling\QualitativeAmount.cs" />
     <Compile Include="Modeling\RequestResult.cs" />
     <Compile Include="Modeling\IBackend.cs" />

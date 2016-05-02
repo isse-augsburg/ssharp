@@ -47,7 +47,7 @@ namespace Tests.Analysis.Probabilistic
 				var checkProbabilityOfFinally2 = probabilityChecker.CalculateProbabilityToReachStates(finally2);
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
-				probabilityOfFinally2 = checkProbabilityOfFinally2.Check();
+				probabilityOfFinally2 = checkProbabilityOfFinally2.Calculate();
 				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);
 			}
 

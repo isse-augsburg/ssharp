@@ -56,10 +56,10 @@ namespace Tests.Analysis.Probabilistic
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
 
-				probabilityOfStep11FrozenValue2AndInvariantViolated = checkProbabilityOfStep11FrozenValue2AndInvariantViolated.Check();
-				probabilityOfStep11FrozenValue3AndInvariantViolated = checkProbabilityOfStep11FrozenValue3AndInvariantViolated.Check();
-				probabilityOfStep11FrozenValue2AndInvariantNotViolated = checkProbabilityOfStep11FrozenValue2AndInvariantNotViolated.Check();
-				probabilityOfStep11FrozenValue3AndInvariantNotViolated = checkProbabilityOfStep11FrozenValue3AndInvariantNotViolated.Check();
+				probabilityOfStep11FrozenValue2AndInvariantViolated = checkProbabilityOfStep11FrozenValue2AndInvariantViolated.Calculate();
+				probabilityOfStep11FrozenValue3AndInvariantViolated = checkProbabilityOfStep11FrozenValue3AndInvariantViolated.Calculate();
+				probabilityOfStep11FrozenValue2AndInvariantNotViolated = checkProbabilityOfStep11FrozenValue2AndInvariantNotViolated.Calculate();
+				probabilityOfStep11FrozenValue3AndInvariantNotViolated = checkProbabilityOfStep11FrozenValue3AndInvariantNotViolated.Calculate();
 			}
 			var probabilitiesSummedUp =
 				probabilityOfStep11FrozenValue2AndInvariantViolated +

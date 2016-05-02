@@ -45,17 +45,30 @@ namespace SafetySharp.Analysis
 	{
 		public struct FormulaChecker
 		{
-			public FormulaChecker(Func<Probability> checkWithDefaultChecker,Func<ProbabilisticModelChecker,Probability> checkWithChecker)
+			public FormulaChecker(Func<Probability> useDefaultChecker,Func<ProbabilisticModelChecker,Probability> useCustomChecker)
 			{
-				Check = checkWithDefaultChecker;
-				CheckWithChecker = checkWithChecker;
+				Calculate = useDefaultChecker;
+				CalculateWithChecker = useCustomChecker;
 			}
 
 			// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
-			public Func<Probability> Check { get; }
-			public Func<ProbabilisticModelChecker,Probability> CheckWithChecker { get; }
+			public Func<Probability> Calculate { get; }
+			public Func<ProbabilisticModelChecker,Probability> CalculateWithChecker { get; }
 		}
-		
+
+		public struct RewardChecker
+		{
+			public RewardChecker(Func<double> useDefaultChecker, Func<ProbabilisticModelChecker, double> useCustomChecker)
+			{
+				Calculate = useDefaultChecker;
+				CalculateWithChecker = useCustomChecker;
+			}
+
+			// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
+			public Func<double> Calculate { get; }
+			public Func<ProbabilisticModelChecker, double> CalculateWithChecker { get; }
+		}
+
 
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
@@ -69,7 +82,8 @@ namespace SafetySharp.Analysis
 
 		private ModelBase _model;
 		private readonly ConcurrentBag<Formula> _formulasToCheck = new ConcurrentBag<Formula>();
-		
+		private readonly ConcurrentBag<Func<Reward>> _rewardsToCheck = new ConcurrentBag<Func<Reward>>();
+
 		public ProbabilisticModelChecker DefaultChecker { get; set; }
 
 		/// <summary>
@@ -86,13 +100,22 @@ namespace SafetySharp.Analysis
 			_model = model;
 		}
 
-		private Probability CheckWithDefaultChecker(Formula formulaToCheck)
+		private Probability CalculateProbabilityWithDefaultChecker(Formula formulaToCheck)
 		{
 			if (DefaultChecker == null)
 			{
 				DefaultChecker = new Mrmc(this);
 			}
-			return DefaultChecker.ExecuteCalculation(formulaToCheck);
+			return DefaultChecker.CalculateProbability(formulaToCheck);
+		}
+		
+		private double CalculateRewardWithDefaultChecker(Func<Reward> retrieveReward)
+		{
+			if (DefaultChecker == null)
+			{
+				DefaultChecker = new Mrmc(this);
+			}
+			return DefaultChecker.CalculateReward(retrieveReward);
 		}
 
 		public void CreateProbabilityMatrix()
@@ -165,16 +188,37 @@ namespace SafetySharp.Analysis
 
 			var formulaToCheck = formulaValidInRequestedStates;
 
-			Func<Probability> checkWithDefaultChecker = () => CheckWithDefaultChecker(formulaToCheck);
-			Func<ProbabilisticModelChecker,Probability> checkWithChecker = customChecker => customChecker.ExecuteCalculation(formulaToCheck);
+			Func<Probability> useDefaultChecker = () => CalculateProbabilityWithDefaultChecker(formulaToCheck);
+			Func<ProbabilisticModelChecker,Probability> useCustomChecker = customChecker => customChecker.CalculateProbability(formulaToCheck);
 
-			var checker = new FormulaChecker(checkWithDefaultChecker, checkWithChecker);
+			var checker = new FormulaChecker(useDefaultChecker, useCustomChecker);
+			return checker;
+		}
+
+		public RewardChecker CalculateSteadyStateReward(Func<Reward> retrieveReward)
+		{
+			Requires.NotNull(retrieveReward, nameof(retrieveReward));
+			
+			_rewardsToCheck.Add(retrieveReward);
+
+			Interlocked.MemoryBarrier();
+			if ((bool)_probabilityMatrixCreationStarted)
+			{
+				throw new Exception(nameof(CalculateProbabilityToReachStates) + " must be called before " + nameof(CreateProbabilityMatrix));
+			}
+
+			var rewardToCheck = retrieveReward;
+
+			Func<double> useDefaultChecker = () => CalculateRewardWithDefaultChecker(rewardToCheck);
+			Func<ProbabilisticModelChecker, double> useCustomChecker = customChecker => customChecker.CalculateReward(rewardToCheck);
+
+			var checker = new RewardChecker(useDefaultChecker, useCustomChecker);
 			return checker;
 		}
 
 		public void Dispose()
 		{
-			DefaultChecker.Dispose();
+			DefaultChecker?.Dispose();
 		}
 	}
 }

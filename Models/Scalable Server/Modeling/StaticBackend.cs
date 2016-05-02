@@ -30,9 +30,9 @@ namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 {
 	using SafetySharp.Modeling;
 
-	public class StaticBackend : IBackend
+	public class StaticBackend : Component, IBackend
 	{
-		public Reward UserReward;
+		public Reward ProviderReward;
 
 		public readonly bool _degradedMode;
 
@@ -51,6 +51,12 @@ namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 			else if(_degradedMode)
 				return RequestResult.Degraded;
 			else return RequestResult.Complete;
+		}
+
+		[Provided]
+		public Reward GetReward()
+		{
+			return ProviderReward;
 		}
 	}
 }

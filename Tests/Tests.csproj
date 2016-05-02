@@ -642,6 +642,8 @@
     <Compile Include="Serialization\Ranges\UInt64.cs" />
     <Compile Include="Serialization\Ranges\UInt8.cs" />
     <Compile Include="Serialization\RuntimeModels\multiple effects with state.cs" />
+    <Compile Include="Serialization\RuntimeModels\reward positive only.cs" />
+    <Compile Include="Serialization\RuntimeModels\reward positive and negative.cs" />
     <Compile Include="Serialization\RuntimeModels\probability.cs" />
     <Compile Include="Serialization\RuntimeModels\unbound.cs" />
     <Compile Include="Serialization\RuntimeModels\binding.cs" />

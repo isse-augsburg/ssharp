@@ -20,36 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace Tests.Serialization.RuntimeModels
 {
-	using System;
+	using System.Diagnostics;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
 	using Utilities;
-	using System.IO;
-	using System.Globalization;
-	using System.Text;
-	using Modeling;
 
-	// Mrmc is in file ProbabilisticModelChecker.Mrmc.cs which is nested in ProbabilisticModelChecker.cs.
-	// Open arrow of ProbabilisticModelChecker.cs in Solution Explorer to see nested files.
-
-	/// <summary>
-	///   Represents a base class for external probabilistic model checker tools.
-	/// </summary>
-	public abstract class ProbabilisticModelChecker : IDisposable
+	internal class RewardPositiveAndNegative : TestModel
 	{
-		public ProbabilityChecker ProbabilityChecker { get; }
-
-		internal CompactProbabilityMatrix CompactProbabilityMatrix => ProbabilityChecker.CompactProbabilityMatrix;
-
-		protected ProbabilisticModelChecker(ProbabilityChecker probabilityChecker)
+		protected override void Check()
 		{
-			ProbabilityChecker = probabilityChecker;
+			var d = new D { R = new SafetySharp.Modeling.Reward(true) };
+			var m = TestModel.InitializeModel(d);
+
+			Create(m);
+
+			StateFormulas.ShouldBeEmpty();
+			RootComponents.Length.ShouldBe(1);
+			Debugger.Break();
+			//The StateSlotCount is 1. The, Reward is not serialized. Thus, actually the state vector should be 0. But the minimum size of the state vector is 1.
+			StateSlotCount.ShouldBe(1);
+
+			var root = RootComponents[0];
+			root.ShouldBeOfType<D>();
+
+			((D)root).R.MightBeNegative.ShouldBe(true);
 		}
 
-		public abstract void Dispose();
-
-		internal abstract Probability CalculateProbability(Formula formulaToCheck);
-
-		internal abstract double CalculateReward(Func<Reward> retrieveReward);
+		private class D : Component
+		{
+			public SafetySharp.Modeling.Reward R;
+		}
 	}
 }

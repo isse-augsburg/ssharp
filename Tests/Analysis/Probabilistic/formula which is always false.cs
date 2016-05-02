@@ -27,7 +27,7 @@ namespace Tests.Analysis.Probabilistic
 				var checkProbabilityOfFinally2 = probabilityChecker.CalculateProbabilityToReachStates(falseFormula);
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
-				probabilityOfFalse = checkProbabilityOfFinally2.Check();
+				probabilityOfFalse = checkProbabilityOfFinally2.Calculate();
 			}
 
 			probabilityOfFalse.Be(0.0, 0.001).ShouldBe(true);

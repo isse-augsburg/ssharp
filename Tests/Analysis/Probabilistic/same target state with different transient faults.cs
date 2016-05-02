@@ -45,7 +45,7 @@ namespace Tests.Analysis.Probabilistic
 				var checkProbabilityOfFinal1 = probabilityChecker.CalculateProbabilityToReachStates(final1);
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
-				probabilityOfFinal1 = checkProbabilityOfFinal1.Check();
+				probabilityOfFinal1 = checkProbabilityOfFinal1.Calculate();
 			}
 			
 			probabilityOfFinal1.Be(0.325, 0.000001).ShouldBe(true);

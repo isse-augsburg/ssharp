@@ -44,7 +44,7 @@ namespace Tests.Analysis.Probabilistic
 				var checkProbabilityOfInvariantViolation = probabilityChecker.CalculateProbabilityToReachStates(invariantViolated);
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
-				probabilityOfInvariantViolation = checkProbabilityOfInvariantViolation.Check();
+				probabilityOfInvariantViolation = checkProbabilityOfInvariantViolation.Calculate();
 				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);
 			}
 

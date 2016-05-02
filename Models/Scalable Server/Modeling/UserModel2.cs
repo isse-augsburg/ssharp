@@ -30,7 +30,7 @@ namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 {
 	using SafetySharp.Modeling;
 	
-	public class UserModel2 : Component
+	public class UserModel2 : Component, IUserModel
 	{
 		public enum ChangeOfRegularRequests
 		{
@@ -38,13 +38,6 @@ namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 			EqualRequests,
 			MoreRequests,
 		}
-
-		public UserModel2(IBackend backend)
-		{
-			_backend = backend;
-		}
-
-		private readonly IBackend _backend;
 
 		public Reward UserReward;
 		
@@ -102,7 +95,7 @@ namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 				}
 			}
 
-			var result = _backend.Request(actualRequests);
+			var result = Request(actualRequests);
 
 			switch (result)
 			{
@@ -148,6 +141,15 @@ namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
+		}
+
+		[Required]
+		public extern RequestResult Request(QualitativeAmount requestNumber);
+
+		[Provided]
+		public Reward GetReward()
+		{
+			return UserReward;
 		}
 	}
 }

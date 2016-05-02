@@ -100,7 +100,7 @@ namespace SafetySharp.Analysis
 		private System.Text.RegularExpressions.Regex MrmcResultParser = new System.Text.RegularExpressions.Regex("^(?<state>\\d\\d*)\\s(?<probability>[0-1]\\.?[0-9]+)$");
 
 
-		internal override Probability ExecuteCalculation(Formula formulaToCheck)
+		internal override Probability CalculateProbability(Formula formulaToCheck)
 		{
 			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
 			WriteProbabilityMatrixToDisk();
@@ -163,6 +163,16 @@ namespace SafetySharp.Analysis
 					}
 				}
 				return probability;
+			}
+		}
+
+		internal override double CalculateReward(Func<Reward> retrieveReward)
+		{
+			using (var rewardFile = new TemporaryFile("res"))
+			using (var fileResults = new TemporaryFile("res"))
+			using (var fileCommandScript = new TemporaryFile("cmd"))
+			{
+				throw new NotImplementedException();
 			}
 		}
 

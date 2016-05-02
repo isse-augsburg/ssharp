@@ -28,8 +28,14 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 {
-	public interface IBackend
+	using SafetySharp.Modeling;
+
+	public interface IBackend : IComponent
 	{
+		[Provided]
 		RequestResult Request(QualitativeAmount requestNumber);
+
+		[Provided]
+		Reward GetReward();
 	}
 }

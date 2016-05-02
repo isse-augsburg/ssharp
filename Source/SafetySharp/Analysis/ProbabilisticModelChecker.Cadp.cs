@@ -127,7 +127,7 @@ namespace SafetySharp.Analysis
 			streamAut.Close();
 		}
 
-		internal override Probability ExecuteCalculation(Formula formulaToCheck)
+		internal override Probability CalculateProbability(Formula formulaToCheck)
 		{
 			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
 			WriteProbabilityMatrixToDisk();
@@ -141,6 +141,11 @@ namespace SafetySharp.Analysis
 		public override void Dispose()
 		{
 			_fileAut.SafeDispose();
+		}
+
+		internal override double CalculateReward(Func<Reward> retrieveReward)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

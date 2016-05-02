@@ -31,15 +31,12 @@ namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 	using SafetySharp.Modeling;
 	
 	//Constant amounts of visits. Every user makes each time step one request
-	public class UserModel1 : Component
+	public class UserModel1 : Component, IUserModel
 	{
-		public UserModel1(IBackend backend, QualitativeAmount amountOfVisits)
+		public UserModel1(QualitativeAmount amountOfVisits)
 		{
-			_backend = backend;
 			RegularUsers = amountOfVisits;
 		}
-
-		private readonly IBackend _backend;
 
 		public Reward UserReward;
 		
@@ -48,7 +45,7 @@ namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 
 		public override void Update()
 		{
-			var result = _backend.Request(RegularUsers);
+			var result = Request(RegularUsers);
 
 			switch (result)
 			{
@@ -64,6 +61,15 @@ namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
+		}
+
+		[Required]
+		public extern RequestResult Request(QualitativeAmount requestNumber);
+
+		[Provided]
+		public Reward GetReward()
+		{
+			return UserReward;
 		}
 	}
 }

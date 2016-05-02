@@ -28,7 +28,38 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.ScalableServer.Analysis
 {
-    public class CalculateExpectedReward
-    {
-    }
+	using Modeling;
+	using NUnit.Framework;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+
+	public class CalculateExpectedReward
+	{
+		[TestCase(QualitativeAmount.Some,false, QualitativeAmount.Some,typeof(Mrmc))]
+		public void CalculateExpectedRewardUserModel1StaticBackend(QualitativeAmount satisfiable, bool backendInDegradedMode, QualitativeAmount demand, Type modelCheckerType )
+		{
+			var backend = new StaticBackend(satisfiable, backendInDegradedMode);
+			var userModel = new UserModel1(demand);
+			
+			var model = new Model(backend, userModel);
+			double steadyStateRewardOfUser;
+			double steadyStateRewardOfProvider;
+
+			using (var probabilityChecker = new ProbabilityChecker(model))
+			{
+				var typeOfModelChecker = modelCheckerType;
+				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker, probabilityChecker);
+
+				var calculateSteadyStateRewardOfUser = probabilityChecker.CalculateSteadyStateReward(model.UserModel.GetReward);
+				var calculateSteadyStateRewardOfProvider = probabilityChecker.CalculateSteadyStateReward(model.UserModel.GetReward);
+				probabilityChecker.CreateProbabilityMatrix();
+				probabilityChecker.DefaultChecker = modelChecker;
+				steadyStateRewardOfUser = calculateSteadyStateRewardOfUser.Calculate();
+				steadyStateRewardOfProvider = calculateSteadyStateRewardOfProvider.Calculate();
+			}
+			Console.WriteLine($"Steady State Reward of User {steadyStateRewardOfUser}");
+			Console.WriteLine($"Steady State Reward of Provider {steadyStateRewardOfProvider}");
+			//probabilityOfFinal1.Between(0.1, 0.2).ShouldBe(true);
+		}
+	}
 }

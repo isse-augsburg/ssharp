@@ -56,6 +56,7 @@ namespace SafetySharp.Runtime.Serialization
 			RegisterSerializer(new MethodInfoSerializer());
 			RegisterSerializer(new DelegateSerializer());
 			RegisterSerializer(new ProbabilitySerializer());
+			RegisterSerializer(new RewardSerializer());
 		}
 
 		/// <summary>
