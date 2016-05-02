@@ -34,7 +34,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   The sensor that is used to detect over-height vehicles in the end-control area on the right lane.
 		/// </summary>
-		public readonly VehicleDetector RightLaneDetector = new OverheadDetector { Position = Model.EndControlPosition, Lane = Lane.Right };
+		public readonly VehicleDetector RightLaneDetector = new SmallLightBarrier(Model.EndControlPosition, Lane.Right);
 
 		/// <summary>
 		///   The number of high vehicles currently in the main-control area.

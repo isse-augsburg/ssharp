@@ -139,14 +139,11 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		{
 			foreach (var detector in GetDetectors(controller))
 			{
-				Component.Bind(nameof(detector.GetVehicleKind), nameof(Vehicles.GetVehicleKind));
-				Component.Bind(nameof(detector.GetVehiclePosition), nameof(Vehicles.GetVehiclePosition));
-				Component.Bind(nameof(detector.GetVehicleLane), nameof(Vehicles.GetVehicleLane));
+				Bind(nameof(detector.ObserveVehicles), nameof(Vehicles.ObserveVehicles));
 
 				var name = detector.ToString();
 				detector.FalseDetection.Name = $"FalseDetection{name}";
 				detector.Misdetection.Name = $"Misdetection{name}";
-				detector.VehicleCount = Vehicles.Vehicles.Length;
 			}
 		}
 

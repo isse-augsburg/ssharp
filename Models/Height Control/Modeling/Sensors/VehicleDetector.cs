@@ -41,54 +41,21 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Sensors
 		public readonly Fault Misdetection = new TransientFault();
 
 		/// <summary>
-		///   The number of vehicles that can potentially be detected.
-		/// </summary>
-		[Hidden]
-		public int VehicleCount;
-
-		/// <summary>
 		///   Indicates whether the light barrier detected a vehicle.
 		/// </summary>
-		public virtual bool IsVehicleDetected
-		{
-			get
-			{
-				for (var i = 0; i < VehicleCount; ++i)
-				{
-					if (CheckVehicle(i))
-						return true;
-				}
-
-				return false;
-			}
-		}
+		public virtual bool IsVehicleDetected => ObserveVehicles(this);
 
 		/// <summary>
-		///   Gets a value indicating whether the light barrier detects the vehicle with the given position and speed.
+		///   Checks whether the <paramref name="detector" /> detects any vehicles.
 		/// </summary>
-		/// <param name="vehicleIndex">The index of the vehicle that should be checked.</param>
-		protected abstract bool CheckVehicle(int vehicleIndex);
+		/// <param name="detector">The detector that should observe the vehicles.</param>
+		public extern bool ObserveVehicles(VehicleDetector detector);
 
 		/// <summary>
-		///   Gets the position of the vehicle with the given <paramref name="vehicleIndex" />; the vehicle's position lies between
-		///   <paramref name="begin" /> and <paramref name="end" />.
+		///   Gets a value indicating whether the detector detects the <paramref name="vehicle" />.
 		/// </summary>
-		/// <param name="vehicleIndex">The index of the vehicle that should be checked.</param>
-		/// <param name="begin">Returns the vehicle's minimum position.</param>
-		/// <param name="end">Returns the vehicle's maximum position.</param>
-		public extern void GetVehiclePosition(int vehicleIndex, out int begin, out int end);
-
-		/// <summary>
-		///   Gets the speed of the vehicle with the given <paramref name="vehicleIndex" />.
-		/// </summary>
-		/// <param name="vehicleIndex">The index of the vehicle that should be checked.</param>
-		public extern VehicleKind GetVehicleKind(int vehicleIndex);
-
-		/// <summary>
-		///   Gets the lane of the vehicle with the given <paramref name="vehicleIndex" />.
-		/// </summary>
-		/// <param name="vehicleIndex">The index of the vehicle that should be checked.</param>
-		public extern Lane GetVehicleLane(int vehicleIndex);
+		/// <param name="vehicle">The vehicle that should be checked.</param>
+		public abstract bool DetectsVehicle(Vehicle vehicle);
 
 		/// <summary>
 		///   Represents a false detection, i.e., a vehicle is detected even though none is present.

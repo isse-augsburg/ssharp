@@ -35,20 +35,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		[Hidden]
 		public int NextSpeed;
 
-		public override void Update()
-		{
-			if (IsTunnelClosed)
-				return;
-
-			// The road layout makes lane changes impossible when the end control has been reached
-			if (Position < Model.EndControlPosition)
-				Lane = NextLane;
-
-			if (NextSpeed < 0)
-				NextSpeed = 0;
-
-			Speed = NextSpeed;
-			Position += Speed;
-		}
+		protected override Lane ChooseLane() => NextLane;
+		protected override int ChooseSpeed() => NextSpeed;
 	}
 }
