@@ -32,6 +32,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 	using Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 
 	class HazardProbabilityTests
 	{
@@ -39,6 +40,13 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		public void Calculate()
 		{
 			var model = new Model();
+			model.Channel.MessageDropped.ProbabilityOfOccurrence = Probability.Zero;
+			model.CrossingController.Motor.BarrierMotorStuck.ProbabilityOfOccurrence = Probability.Zero;
+			model.CrossingController.Sensor.BarrierSensorFailure.ProbabilityOfOccurrence = Probability.Zero;
+			model.CrossingController.TrainSensor.ErroneousTrainDetection.ProbabilityOfOccurrence = Probability.Zero;
+			model.TrainController.Brakes.BrakesFailure.ProbabilityOfOccurrence = Probability.Zero;
+			model.TrainController.Odometer.OdometerPositionOffset.ProbabilityOfOccurrence = Probability.Zero;
+			model.TrainController.Odometer.OdometerSpeedOffset.ProbabilityOfOccurrence = Probability.Zero;
 
 			var result = ModelChecker.CalculateProbabilityOfHazard(model, model.PossibleCollision);
 			Console.Write($"Probability of hazard: {result.Value}");
