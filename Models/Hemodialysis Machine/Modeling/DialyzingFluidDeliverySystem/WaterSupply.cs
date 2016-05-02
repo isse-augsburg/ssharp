@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,36 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDeliverySystem
 {
 	using SafetySharp.Modeling;
 
-	public class FlowPort<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+	public class WaterSupply : Component
 	{
-		[Hidden]
-		public TForward Forward;
-
-		[Hidden]
-		public TBackward Backward;
-	}
-
-
-	public interface IFlowComponentUniqueOutgoing<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Outgoing { get; }
-	}
-
-
-	public interface IFlowComponentUniqueIncoming<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Incoming { get; }
+		public readonly DialyzingFluidFlowSource MainFlow = new DialyzingFluidFlowSource();
+		
+		[Provided]
+		public void SetMainFlow(DialyzingFluid outgoing)
+		{
+			var incomingSuction = MainFlow.Outgoing.Backward;
+			//Assume incomingSuction.SuctionType == SuctionType.CustomSuction;
+			outgoing.Quantity = incomingSuction.CustomSuctionValue;
+			outgoing.ContaminatedByBlood = false;
+			outgoing.Temperature = QualitativeTemperature.TooCold;
+			outgoing.WasUsed = false;
+			outgoing.KindOfDialysate = KindOfDialysate.Water;
+		}
+		
+		protected override void CreateBindings()
+		{
+			MainFlow.SendForward=SetMainFlow;
+		}
 	}
 }

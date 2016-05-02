@@ -20,36 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBloodCircuit
 {
 	using SafetySharp.Modeling;
 
-	public class FlowPort<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+	public class DripChamber : Component
 	{
-		[Hidden]
-		public TForward Forward;
+		// Drip Chamber
+		public readonly BloodFlowInToOut MainFlow = new BloodFlowInToOut();
 
-		[Hidden]
-		public TBackward Backward;
-	}
+		[Provided]
+		public void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
+		{
+			toSuccessor.CopyValuesFrom(fromPredecessor);
+			toSuccessor.GasFree = true;
+		}
 
+		[Provided]
+		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		{
+			toPredecessor.CopyValuesFrom(fromSuccessor);
+		}
 
-	public interface IFlowComponentUniqueOutgoing<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Outgoing { get; }
-	}
-
-
-	public interface IFlowComponentUniqueIncoming<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Incoming { get; }
+		protected override void CreateBindings()
+		{
+			MainFlow.UpdateBackward=SetMainFlowSuction;
+			MainFlow.UpdateForward=SetMainFlow;
+		}
 	}
 }

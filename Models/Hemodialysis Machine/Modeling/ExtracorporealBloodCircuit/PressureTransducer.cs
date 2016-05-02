@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,36 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBloodCircuit
 {
 	using SafetySharp.Modeling;
 
-	public class FlowPort<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+	public class PressureTransducer : Component
 	{
-		[Hidden]
-		public TForward Forward;
+		public readonly BloodFlowSink SenseFlow = new BloodFlowSink();
+		
+		public QualitativePressure SensedPressure = QualitativePressure.NoPressure;
 
-		[Hidden]
-		public TBackward Backward;
-	}
+		[Provided]
+		public void SetSenseFlowSuction(Suction toPredecessor)
+		{
+			toPredecessor.CustomSuctionValue = 0;
+			toPredecessor.SuctionType = SuctionType.CustomSuction;
+		}
 
+		[Provided]
+		public void ReceivedBlood(Blood incomingElement)
+		{
+			SensedPressure = incomingElement.Pressure;
+		}
 
-	public interface IFlowComponentUniqueOutgoing<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Outgoing { get; }
-	}
-
-
-	public interface IFlowComponentUniqueIncoming<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		FlowPort<TForward, TBackward> Incoming { get; }
+		protected override void CreateBindings()
+		{
+			SenseFlow.SendBackward=SetSenseFlowSuction;
+			SenseFlow.ReceivedForward=ReceivedBlood;
+		}
 	}
 }
