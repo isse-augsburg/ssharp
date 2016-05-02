@@ -453,7 +453,7 @@ namespace SafetySharp.Analysis
 
 			var argument = $"-Djava.library.path=\"{prismDir}\\lib\" -classpath \"{classpath}\" prism.PrismCL {prismArguments}";
 
-			Action<ExternalProcess.Output> addToOutput = (output) => _prismProcessOutput.Add(output.Message);
+			Action<string> addToOutput = (output) => _prismProcessOutput.Add(output);
 
 			var process = new ExternalProcess(javaExe,argument, addToOutput);
 			return process;
