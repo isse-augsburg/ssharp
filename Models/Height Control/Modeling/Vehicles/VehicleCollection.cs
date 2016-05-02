@@ -23,11 +23,12 @@
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 {
 	using SafetySharp.Modeling;
+	using Sensors;
 
 	/// <summary>
 	///   Represents a collection of vehicles.
 	/// </summary>
-	public class VehicleCollection : Component
+	public sealed class VehicleCollection : Component
 	{
 		/// <summary>
 		///   Represents a fault where drivers disregards traffic rules and potentially drive on the left lane. There is only one fault
@@ -48,7 +49,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		{
 			Vehicles = vehicles;
 
-			// Add the fault effect vor the traffic rules fault for each vehicle and establish the port forwardings
+			// Add the fault effect for the traffic rules fault for each vehicle and establish the port forwardings
 			foreach (var vehicle in Vehicles)
 			{
 				DisregardTrafficRules.AddEffect<Vehicle.DisregardTrafficRulesEffect>(vehicle);
@@ -73,35 +74,24 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		}
 
 		/// <summary>
-		///   Gets the position of the vehicle with the given <paramref name="vehicleIndex" />; the vehicle's position lies between
-		///   <paramref name="begin" /> and <paramref name="end" />.
+		///   Checks whether the <paramref name="detector" /> detects any vehicles.
 		/// </summary>
-		/// <param name="vehicleIndex">The index of the vehicle that should be checked.</param>
-		/// <param name="begin">Returns the vehicle's minimum position.</param>
-		/// <param name="end">Returns the vehicle's maximum position.</param>
-		public void GetVehiclePosition(int vehicleIndex, out int begin, out int end)
+		/// <param name="detector">The detector that should observe the vehicles.</param>
+		public bool ObserveVehicles(VehicleDetector detector)
 		{
-			var vehicle = Vehicles[vehicleIndex];
-			begin = vehicle.Position - vehicle.Speed;
-			end = vehicle.Position;
-		}
+			// Ideally, we'd just use the following line instead of the for-loop below; however, it generates
+			// a delegate and probably an interator each time the method is called, therefore increasing the 
+			// pressure on the garbage collector. All in all, model checking times increase noticeably, in 
+			// some cases by 40% or more...
+			// return Vehicles.Any(detector.DetectsVehicle);
 
-		/// <summary>
-		///   Gets the lane of the vehicle with the given <paramref name="vehicleIndex" />.
-		/// </summary>
-		/// <param name="vehicleIndex">The index of the vehicle that should be checked.</param>
-		public Lane GetVehicleLane(int vehicleIndex)
-		{
-			return Vehicles[vehicleIndex].Lane;
-		}
+			foreach (var vehicle in Vehicles)
+			{
+				if (detector.DetectsVehicle(vehicle))
+					return true;
+			}
 
-		/// <summary>
-		///   Gets the speed of the vehicle with the given <paramref name="vehicleIndex" />.
-		/// </summary>
-		/// <param name="vehicleIndex">The index of the vehicle that should be checked.</param>
-		public VehicleKind GetVehicleKind(int vehicleIndex)
-		{
-			return Vehicles[vehicleIndex].Kind;
+			return false;
 		}
 	}
 }

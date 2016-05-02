@@ -22,7 +22,6 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Sensors
 {
-	using SafetySharp.Modeling;
 	using Vehicles;
 
 	/// <summary>
@@ -33,36 +32,35 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Sensors
 		/// <summary>
 		///   The lane of the detector.
 		/// </summary>
-		[Hidden]
-		public Lane Lane;
+		private readonly Lane _lane;
 
 		/// <summary>
 		///   The position of the detector.
 		/// </summary>
-		[Hidden]
-		public int Position;
+		private readonly int _position;
 
 		/// <summary>
-		///   Gets a value indicating whether the light barrier detects the vehicle with the given position and speed.
+		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="vehicleIndex">The index of the vehicle that should be checked.</param>
-		protected override bool CheckVehicle(int vehicleIndex)
+		/// <param name="position">The position of the detector.</param>
+		/// <param name="lane">The lane of the detector.</param>
+		public SmallLightBarrier(int position, Lane lane)
 		{
-			if (GetVehicleKind(vehicleIndex) != VehicleKind.OverheightTruck)
-				return false;
-
-			if (GetVehicleLane(vehicleIndex) != Lane)
-				return false;
-
-			int begin, end;
-			GetVehiclePosition(vehicleIndex, out begin, out end);
-
-			return begin <= Position && end > Position;
+			_position = position;
+			_lane = lane;
 		}
+
+		/// <summary>
+		///   Gets a value indicating whether the detector detects the <paramref name="vehicle" />.
+		/// </summary>
+		/// <param name="vehicle">The vehicle that should be checked.</param>
+		public override bool DetectsVehicle(Vehicle vehicle)
+			=> vehicle.Kind == VehicleKind.OverheightTruck && vehicle.Lane == _lane && vehicle.IsAtPosition(_position);
+
 
 		/// <summary>
 		///   Returns a string that represents the current object.
 		/// </summary>
-		public override string ToString() => $"SLB-{Model.GetPositionName(Position)}-{Lane}";
+		public override string ToString() => $"SLB-{Model.GetPositionName(_position)}-{_lane}";
 	}
 }

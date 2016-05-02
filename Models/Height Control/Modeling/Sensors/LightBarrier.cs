@@ -22,7 +22,6 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Sensors
 {
-	using SafetySharp.Modeling;
 	using Vehicles;
 
 	/// <summary>
@@ -33,27 +32,26 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Sensors
 		/// <summary>
 		///   The position of the light barrier. When an overheight vehicle passes this position, it is detected by the light barrier.
 		/// </summary>
-		[Hidden]
-		public int Position;
+		private readonly int _position;
 
 		/// <summary>
-		///   Gets a value indicating whether the light barrier detects the vehicle with the given position and speed.
+		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="vehicleIndex">The index of the vehicle that should be checked.</param>
-		protected override bool CheckVehicle(int vehicleIndex)
+		/// <param name="position">The position of the light barrier.</param>
+		public LightBarrier(int position)
 		{
-			if (GetVehicleKind(vehicleIndex) != VehicleKind.OverheightTruck)
-				return false;
-
-			int begin, end;
-			GetVehiclePosition(vehicleIndex, out begin, out end);
-
-			return begin <= Position && end > Position;
+			_position = position;
 		}
+
+		/// <summary>
+		///   Gets a value indicating whether the detector detects the <paramref name="vehicle" />.
+		/// </summary>
+		/// <param name="vehicle">The vehicle that should be checked.</param>
+		public override bool DetectsVehicle(Vehicle vehicle) => vehicle.Kind == VehicleKind.OverheightTruck && vehicle.IsAtPosition(_position);
 
 		/// <summary>
 		///   Returns a string that represents the current object.
 		/// </summary>
-		public override string ToString() => $"LB-{Model.GetPositionName(Position)}";
+		public override string ToString() => $"LB-{Model.GetPositionName(_position)}";
 	}
 }

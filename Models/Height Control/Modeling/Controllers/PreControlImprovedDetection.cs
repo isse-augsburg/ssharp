@@ -34,12 +34,12 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   The sensor that detects high vehicles on the left lane.
 		/// </summary>
-		public readonly VehicleDetector LeftDetector = new OverheadDetector { Lane = Lane.Left, Position = Model.PreControlPosition };
+		public readonly VehicleDetector LeftDetector = new OverheadDetector(Model.PreControlPosition, Lane.Left);
 
 		/// <summary>
 		///   The sensor that detects high vehicles on the right lane.
 		/// </summary>
-		public readonly VehicleDetector RightDetector = new OverheadDetector { Lane = Lane.Right, Position = Model.PreControlPosition };
+		public readonly VehicleDetector RightDetector = new OverheadDetector(Model.PreControlPosition, Lane.Right);
 
 		/// <summary>
 		///   Gets the number of vehicles that passed the pre-control during the current system step.

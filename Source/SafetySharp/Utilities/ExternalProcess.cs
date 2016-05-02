@@ -23,12 +23,8 @@
 namespace SafetySharp.Utilities
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.IO;
-	using System.Diagnostics.Eventing.Reader;
-	using System.IO;
-	using System.Linq;
 	using System.Threading.Tasks;
 
 	/// <summary>
@@ -39,7 +35,7 @@ namespace SafetySharp.Utilities
 		/// <summary>
 		///   The callback that is invoked when an output is generated.
 		/// </summary>
-		private readonly Action<Output> _outputCallback;
+		private readonly Action<string> _outputCallback;
 
 		/// <summary>
 		///   The external process.
@@ -47,17 +43,12 @@ namespace SafetySharp.Utilities
 		private readonly Process _process;
 
 		/// <summary>
-		///   The outputs generated during the execution of the process.
-		/// </summary>
-		private List<Output> _outputs;
-
-		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="fileName">The file name of the external executable.</param>
 		/// <param name="commandLineArguments">The command line arguments that should be passed to the executable.</param>
 		/// <param name="outputCallback">The callback that is invoked when an output is generated.</param>
-		public ExternalProcess(string fileName, string commandLineArguments, Action<Output> outputCallback = null)
+		public ExternalProcess(string fileName, string commandLineArguments, Action<string> outputCallback = null)
 		{
 			Requires.NotNullOrWhitespace(fileName, nameof(fileName));
 			Requires.NotNull(commandLineArguments, nameof(commandLineArguments));
@@ -77,11 +68,6 @@ namespace SafetySharp.Utilities
 
 			_outputCallback = outputCallback;
 		}
-
-		/// <summary>
-		///   Gets the outputs generated during the last execution of the process.
-		/// </summary>
-		public IEnumerable<Output> Outputs => _outputs ?? Enumerable.Empty<Output>();
 
 		/// <summary>
 		///   Gets a value indicating whether the process has exited.
@@ -111,22 +97,6 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
-		///   Adds the <paramref name="message" /> to the output queue.
-		/// </summary>
-		/// <param name="message">The message that should be added.</param>
-		/// <param name="isError">Indicates whether <paramref name="message" /> describes an error.</param>
-		private void LogMessage(string message, bool isError)
-		{
-			if (String.IsNullOrWhiteSpace(message))
-				return;
-
-			var output = new Output { Message = message, IsError = isError };
-			_outputs.Add(output);
-
-			_outputCallback?.Invoke(output);
-		}
-
-		/// <summary>
 		///   Runs the process.
 		/// </summary>
 		public void Run()
@@ -136,12 +106,11 @@ namespace SafetySharp.Utilities
 			Running = true;
 			try
 			{
-				_outputs = new List<Output>();
 				_process.Start();
 
 				using (var processWaiter = Task.Factory.StartNew(() => _process.WaitForExit()))
-				using (var outputReader = Task.Factory.StartNew(() => HandleOutput(_process.StandardOutput, isError: false)))
-				using (var errorReader = Task.Factory.StartNew(() => HandleOutput(_process.StandardError, isError: true)))
+				using (var outputReader = Task.Factory.StartNew(() => HandleOutput(_process.StandardOutput)))
+				using (var errorReader = Task.Factory.StartNew(() => HandleOutput(_process.StandardError)))
 					Task.WaitAll(processWaiter, outputReader, errorReader);
 			}
 			finally
@@ -153,64 +122,13 @@ namespace SafetySharp.Utilities
 		/// <summary>
 		///   Handles process output.
 		/// </summary>
-		private async Task HandleOutput(TextReader reader, bool isError)
+		private async Task HandleOutput(TextReader reader)
 		{
 			string text;
-
 			while ((text = await reader.ReadLineAsync()) != null)
-				LogMessage(text, isError);
-		}
-
-		/// <summary>
-		///   Represents an output of the process.
-		/// </summary>
-		public struct Output
-		{
-			/// <summary>
-			///   Indicates whether the message describes an error.
-			/// </summary>
-			public bool IsError;
-
-			/// <summary>
-			///   The message that has been written.
-			/// </summary>
-			public string Message;
-		}
-
-
-		internal enum MachineType
-		{
-			// ReSharper disable once InconsistentNaming
-			AMD64,
-			I386,
-			Unknown
-		}
-
-		internal static MachineType GetDllMachineType(string dllPath)
-		{
-			// Source: http://stackoverflow.com/questions/1001404/check-if-unmanaged-dll-is-32-bit-or-64-bit/1002672#1002672
-			// see also: http://www.microsoft.com/whdc/system/platform/firmware/PECOFF.mspx
-			var fs = new FileStream(dllPath, FileMode.Open, FileAccess.Read);
-			var br = new BinaryReader(fs);
-			fs.Seek(0x3c, SeekOrigin.Begin);
-			var peOffset = br.ReadInt32();
-
-			fs.Seek(peOffset, SeekOrigin.Begin);
-			var peHead = br.ReadUInt32();
-			if (peHead != 0x00004550) // "PE\0\0", little-endian
-				throw new Exception("Can't find PE header");
-
-			var machineTypeAsUint16 = br.ReadUInt16();
-			br.Close();
-			fs.Close();
-			switch (machineTypeAsUint16)
 			{
-				case 0x8664:
-					return MachineType.AMD64;
-				case 0x14c:
-					return MachineType.I386;
-				default:
-					return MachineType.Unknown;
+				if (!String.IsNullOrWhiteSpace(text))
+					_outputCallback?.Invoke(text);
 			}
 		}
 	}
