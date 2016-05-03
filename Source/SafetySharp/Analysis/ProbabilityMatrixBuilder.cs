@@ -275,7 +275,7 @@ namespace SafetySharp.Analysis
 					int state;
 					if (!_stateStack.TryGetState(out state))
 						continue;
-
+					
 					_transitions.Clear();
 
 					_model.PrepareNextState();
@@ -307,7 +307,7 @@ namespace SafetySharp.Analysis
 			{
 				if (_transitions.ComputedTransitionCount == 0)
 					throw new InvalidOperationException("Deadlock detected.");
-
+				
 				var transitionCount = 0;
 				_stateStack.PushFrame();
 
@@ -336,8 +336,14 @@ namespace SafetySharp.Analysis
 					}
 
 					// TODO-Probabilistic: why adding again and again -> save in StateStorage and remove here
-					// TODO for debugging: Assure that if the index already exists the existing entry is exactly transition.Formulas
+					AssertOldEntryMatchesNewEntry(index,ref transition);
+
 					ProbabilityMatrix.StateLabeling[index] = transition.Formulas;
+					
+					if (ProbabilityMatrix.StateLabeling.ContainsKey(57146179) && ProbabilityMatrix.StateLabeling[57146179][0] && !ProbabilityMatrix.StateLabeling[57146179][1])
+					{
+						
+					}
 
 					++transitionCount;
 				}
@@ -345,7 +351,19 @@ namespace SafetySharp.Analysis
 				Interlocked.Add(ref _context._transitionCount, transitionCount);
 				Interlocked.Add(ref _context._computedTransitionCount, _transitions.ComputedTransitionCount);
 			}
-			
+
+			[Conditional("DEBUG")]
+			private void AssertOldEntryMatchesNewEntry(int index,ref TransitionSet.Transition transition)
+			{
+				// For debugging: Assure that if the index already exists the existing entry is exactly transition.Formulas
+				if (ProbabilityMatrix.StateLabeling.ContainsKey(index))
+				{
+					if (!ProbabilityMatrix.StateLabeling[index].Equals(transition.Formulas))
+					{
+						//Debugger.Break();
+					}
+				}
+			}
 
 			/// <summary>
 			///   Disposes the object, releasing all managed and unmanaged resources.
