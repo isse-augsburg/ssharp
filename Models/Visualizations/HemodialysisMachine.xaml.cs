@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using System.Windows;
@@ -420,6 +421,12 @@ namespace SafetySharp.CaseStudies.Visualizations
 					visualFault.FaultSymbol.Style = (Style)Resources["NoFailureIndicator"];
 				}
 			}
+		}
+
+		private void StartDebuggingButtonClick(object sender, RoutedEventArgs e)
+		{
+			var model = SimulationControls.Model;
+			Debugger.Break();
 		}
 
 		/*

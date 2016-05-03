@@ -1587,7 +1587,7 @@
                 </Path>
             </Canvas>
             <Canvas x:Name="information" Width="776.696" Height="396.50001" RenderTransformOrigin="0.5,0.5" d:LayoutOverrides="TopMargin, BottomMargin">
-                <TextBlock x:Name="textBlockPatientInfos" Height="397" TextWrapping="Wrap" Text="PatientInfos" Width="147" Foreground="White"/>
+                <TextBlock x:Name="textBlockPatientInfos" Height="357" TextWrapping="Wrap" Text="PatientInfos" Width="147" Foreground="White"/>
                 <TextBlock x:Name="textBlockSelectedElementInfos" Height="79.423" TextWrapping="Wrap" Text="SelectedElementInfos" Width="179.006" Foreground="White" Canvas.Left="367.362" Canvas.Top="290"/>
                 <Rectangle x:Name="selectFlowPatientToBloodPump" Height="22" Canvas.Left="212.368" Canvas.Top="108.211" Width="59" StrokeThickness="2" Fill="#00000000"/>
                 <Rectangle x:Name="selectFlowBloodPumpToMerge1" Height="17" Canvas.Left="308.368" Canvas.Top="86.211" Width="35" StrokeThickness="2" Fill="#00000000"/>
@@ -1690,6 +1690,7 @@
                     </Rectangle.RenderTransform>
                 </Rectangle>
                 <Rectangle x:Name="selectFlowSafetyBypassToDrain" Height="17" Canvas.Left="554.035" Canvas.Top="153.211" Width="22" StrokeThickness="2" Fill="#00000000"/>
+                <Button x:Name="startDebuggingButton" Content="Debug" Canvas.Left="10" Canvas.Top="362" Width="137" Click="StartDebuggingButtonClick"/>
             </Canvas>
         </Canvas>
     </DockPanel>
