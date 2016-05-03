@@ -29,6 +29,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 	/// </summary>
 	public class Vehicle : Component
 	{
+		public readonly Fault DriveLeft = new TransientFault();
+
 		[Hidden]
 		private VehicleKind _kind;
 
@@ -101,13 +103,12 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		}
 
 		/// <summary>
-		///   A fault effect representing the case where a vehicle ignores the traffic rules and potentially chooses
-		///   to drive on the left lane.
+		///   A fault effect representing the case where a vehicle drives on the left lane.
 		/// </summary>
-		[FaultEffect]
-		public class DisregardTrafficRulesEffect : Vehicle
+		[FaultEffect(Fault = nameof(DriveLeft))]
+		public class DriveLeftEffect : Vehicle
 		{
-			protected override Lane ChooseLane() => Choose(Lane.Left, Lane.Right);
+			protected override Lane ChooseLane() => Lane.Left;
 		}
 	}
 }

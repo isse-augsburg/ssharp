@@ -31,12 +31,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 	public sealed class VehicleCollection : Component
 	{
 		/// <summary>
-		///   Represents a fault where drivers disregards traffic rules and potentially drive on the left lane. There is only one fault
-		///   for all vehicles, as during safety analysis, it is of no interest which vehicle drives on the left.
-		/// </summary>
-		public readonly Fault DisregardTrafficRules = new TransientFault();
-
-		/// <summary>
 		///   The vehicles contained in the collection.
 		/// </summary>
 		[Hidden(HideElements = true)]
@@ -49,12 +43,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		{
 			Vehicles = vehicles;
 
-			// Add the fault effect for the traffic rules fault for each vehicle and establish the port forwardings
 			foreach (var vehicle in Vehicles)
-			{
-				DisregardTrafficRules.AddEffect<Vehicle.DisregardTrafficRulesEffect>(vehicle);
 				Bind(nameof(vehicle.IsTunnelClosed), nameof(ForwardIsTunnelClosed));
-			}
 		}
 
 		// TODO: Remove once S# supports port forwardings

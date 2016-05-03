@@ -51,9 +51,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		{
 			vehicles = vehicles ?? new[]
 			{
-				new Vehicle { Kind = VehicleKind.OverheightTruck },
-				new Vehicle { Kind = VehicleKind.OverheightTruck },
-				new Vehicle { Kind = VehicleKind.Truck }
+				new Vehicle { Kind = VehicleKind.OverheightTruck, DriveLeft = { Name = "LeftOHV1" } },
+				new Vehicle { Kind = VehicleKind.OverheightTruck, DriveLeft = { Name = "LeftOHV2" } },
+				new Vehicle { Kind = VehicleKind.Truck, DriveLeft = { Name = "LeftHV" } }
 			};
 
 			Vehicles = new VehicleCollection(vehicles);

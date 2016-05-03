@@ -102,7 +102,10 @@
     <Analyzer Include="$(OutDir)\SafetySharp.Modeling.dll" />
     <Analyzer Include="$(OutDir)\SafetySharp.Compiler.dll" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Analysis\Height Control.smv" />
+    <None Include="Analysis\Height Control.spin" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="../../Source/SafetySharp.targets" />
 </Project>

@@ -87,7 +87,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 		private EndControlOriginal EndControl => (EndControlOriginal)HeightControl.EndControl;
 		private HeightControl HeightControl => ((Model)SimulationControls.Model).HeightControl;
 		private MainControlOriginal MainControl => (MainControlOriginal)HeightControl.MainControl;
-		private PreControlOriginal PreControl => (PreControlOriginal)HeightControl.PreControl;
+		private PreControl PreControl => HeightControl.PreControl;
 
 		private void OnModelStateReset()
 		{
