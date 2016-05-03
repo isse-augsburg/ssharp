@@ -94,7 +94,7 @@ namespace SafetySharp.Runtime
 			_targetStateGroupElements = (TargetStateGroupElement*)_targetStateGroupElementsBuffer.Pointer;
 			_hashedStateMemory = _hashedStateBuffer.Pointer;
 
-			Enumerator = new TransitionEnumerator(this,formulas);
+			Enumerator = new TransitionEnumerator(this);
 
 			for (var i = 0; i < capacity; ++i)
 				_lookup[i] = -1;
@@ -300,7 +300,7 @@ namespace SafetySharp.Runtime
 		}
 
 		// Note: We only have one single TransitionEnumerator
-		internal TransitionEnumerator GetResettedEnumerator()
+		internal TransitionEnumerator GetResetedEnumerator()
 		{
 			Enumerator.Reset();
 			return Enumerator;
@@ -361,16 +361,14 @@ namespace SafetySharp.Runtime
 		internal class TransitionEnumerator : IEnumerator<Transition>
 		{
 			private TransitionSet _transitionSet;
-			private readonly Func<bool>[] _formulas;
 			
 			private TargetStateGroupElement? currentElement;
 
 			private int _targetStateGroupHashIterator;
 
-			public TransitionEnumerator(TransitionSet transitionSet, Func<bool>[] formulas)
+			public TransitionEnumerator(TransitionSet transitionSet)
 			{
 				_transitionSet = transitionSet;
-				_formulas = formulas;
 				Reset();
 			}
 

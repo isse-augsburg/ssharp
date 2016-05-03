@@ -138,6 +138,9 @@ namespace SafetySharp.Analysis
 				stopwatch.Restart();
 				
 				var sparseProbabilityMatrix = checker.CreateProbabilityMatrix();
+
+				sparseProbabilityMatrix.PrintPathWithStepwiseHighestProbability(10);
+
 				var derivedProbabilityMatrix = sparseProbabilityMatrix.DeriveCompactProbabilityMatrix();
 				//var compactToSparse = CompactProbabilityMatrix = derivedProbabilityMatrix.Item1;
 				CompactProbabilityMatrix = derivedProbabilityMatrix.Item2;

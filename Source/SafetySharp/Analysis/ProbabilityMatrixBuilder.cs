@@ -311,7 +311,7 @@ namespace SafetySharp.Analysis
 				var transitionCount = 0;
 				_stateStack.PushFrame();
 
-				var transitionEnumerator = _transitions.GetResettedEnumerator();
+				var transitionEnumerator = _transitions.GetResetedEnumerator();
 
 				while (transitionEnumerator.MoveNext())
 				{
@@ -620,6 +620,45 @@ namespace SafetySharp.Analysis
 
 			// return result
 			return new Tuple<Dictionary<int, int>, CompactProbabilityMatrix>(compactToSparse, compactProbabilityMatrix);
+		}
+
+		internal void PrintPathWithStepwiseHighestProbability(int steps)
+		{
+			Func<List<TupleStateProbability>,TupleStateProbability> selectTupleWithHighestProbability =
+				elements =>
+				{
+					var enumerator = elements.GetEnumerator();
+					enumerator.MoveNext();
+					var candidate = enumerator.Current;
+					while(enumerator.MoveNext())
+						if (candidate.Probability.Value < enumerator.Current.Probability.Value)
+							candidate = enumerator.Current;
+					return candidate;
+				};
+			Action<TupleStateProbability> printTuple =
+				tuple =>
+				{
+					Console.Write($"step: {tuple.Probability.Value} {tuple.State}");
+					for (var i = 0; i < NoOfStateFormulaLabels; i++)
+					{
+						var label = StateFormulaLabels[i];
+						Console.Write(" " + label + "=");
+						if (StateLabeling[tuple.State][i])
+							Console.Write("true");
+						else
+							Console.Write("false");
+					}
+					Console.WriteLine();
+				};
+			var initialStepWithHighestProbability = selectTupleWithHighestProbability(InitialStates);
+			printTuple(initialStepWithHighestProbability);
+			var lastState = initialStepWithHighestProbability.State;
+			for (var i = 0; i < steps; i++)
+			{
+				var currentTuple = selectTupleWithHighestProbability(OrdinaryTransitionGroups[lastState]);
+				printTuple(currentTuple);
+				lastState = currentTuple.State;
+			}
 		}
 	}
 

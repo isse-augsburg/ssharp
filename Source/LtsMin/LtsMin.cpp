@@ -239,7 +239,7 @@ int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, Transit
 
 		transition_info info = { nullptr, 0, 0 };
 
-		auto transitionEnumerator = Globals::Transitions->GetResettedEnumerator();
+		auto transitionEnumerator = Globals::Transitions->GetResetedEnumerator();
 		int count = 0;
 
 		while (transitionEnumerator->MoveNext())

@@ -264,7 +264,7 @@ namespace SafetySharp.Analysis
 				var transitionCount = 0;
 				_stateStack.PushFrame();
 
-				var transitionEnumerator = _transitions.GetResettedEnumerator();
+				var transitionEnumerator = _transitions.GetResetedEnumerator();
 
 				while (transitionEnumerator.MoveNext())
 				{
