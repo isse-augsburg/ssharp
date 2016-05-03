@@ -72,16 +72,16 @@ namespace SafetySharp.Analysis.FormulaVisitors
 			switch (formula.Operator)
 			{
 				case BinaryOperator.And:
-					_builder.Append(" && ");
+					_builder.Append(" & ");
 					break;
 				case BinaryOperator.Or:
-					_builder.Append(" || ");
+					_builder.Append(" | ");
 					break;
 				case BinaryOperator.Implication:
-					_builder.Append(" -> ");
+					_builder.Append(" => ");
 					break;
 				case BinaryOperator.Equivalence:
-					_builder.Append(" <-> ");
+					_builder.Append(" <=> ");
 					break;
 				default:
 					Assert.NotReached($"Unknown or unsupported binary operator '{formula.Operator}'.");
