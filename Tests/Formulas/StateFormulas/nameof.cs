@@ -20,16 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Normalization.LiftedExpressions.Unlifted
+namespace Tests.Formulas.StateFormulas
 {
 	using System;
 	using SafetySharp.Modeling;
 
-	internal class In3 : Component
+	internal class Nameof : FormulaTestObject
 	{
-		public In3()
+		protected override void Check()
 		{
-			var x = $"{"".Substring(nameof(Component).Length)}";
+			var x = $"{"abcdefghijklm".Substring(nameof(Component).Length)}";
 			var s = nameof(x);
 			Console.WriteLine($"{nameof(s)} {s}");
 		}

@@ -46,13 +46,13 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 			Requires.NotNull(invocationExpression, nameof(invocationExpression));
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
+			if (invocationExpression.Expression.Kind() == SyntaxKind.SimpleMemberAccessExpression)
+				return false;
+
+			if (invocationExpression.Expression.Kind() == SyntaxKind.PointerMemberAccessExpression)
+				return false;
+
 			if (semanticModel.GetSymbolInfo(invocationExpression).Symbol != null)
-				return false;
-
-			if (invocationExpression.Parent.Kind() == SyntaxKind.SimpleMemberAccessExpression)
-				return false;
-
-			if (invocationExpression.Parent.Kind() == SyntaxKind.PointerMemberAccessExpression)
 				return false;
 
 			return true;

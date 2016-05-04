@@ -459,6 +459,7 @@
     <Compile Include="FaultActivation\StateGraph\initial state.cs" />
     <Compile Include="Formulas\StateFormulas\binary expressions.cs" />
     <Compile Include="Formulas\StateFormulas\arrays.cs" />
+    <Compile Include="Formulas\StateFormulas\nameof.cs" />
     <Compile Include="Formulas\StateFormulas\parameters.cs" />
     <Compile Include="Formulas\StateFormulas\cast.cs" />
     <Compile Include="Formulas\StateFormulas\assignment.cs" />
