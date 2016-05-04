@@ -29,9 +29,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 	/// </summary>
 	public class Vehicle : Component
 	{
-		public readonly Fault DriveLeft = new TransientFault();
-		public readonly Fault SlowTraffic = new TransientFault();
-
 		[Hidden]
 		private VehicleKind _kind;
 
@@ -77,7 +74,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		protected virtual Lane ChooseLane() => Lane.Right;
 
 		/// <summary>
-		///   Chooses the speed the vehicle drives with.
+		///   Chooses the speed the vehicle drives with. By default, vehicles always drive with their maximum speed.
 		/// </summary>
 		protected virtual int ChooseSpeed() => Model.MaxSpeed;
 
@@ -108,19 +105,19 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// <summary>
 		///   A fault effect representing the case where a vehicle drives on the left lane.
 		/// </summary>
-		[FaultEffect(Fault = nameof(DriveLeft))]
+		[FaultEffect]
 		public class DriveLeftEffect : Vehicle
 		{
-			protected override Lane ChooseLane() => Lane.Left;
+			protected override Lane ChooseLane() => Choose(Lane.Right, Lane.Left);
 		}
 
 		/// <summary>
 		///   A fault effect representing the case where a vehicle is slowed down by traffic.
 		/// </summary>
-		[FaultEffect(Fault = nameof(SlowTraffic))]
+		[FaultEffect]
 		public class SlowTrafficEffect : Vehicle
 		{
-			protected override int ChooseSpeed() => 1;
+			protected override int ChooseSpeed() => ChooseFromRange(1, Model.MaxSpeed);
 		}
 	}
 }

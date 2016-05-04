@@ -44,6 +44,10 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		public const int TunnelPosition = 12;
 		public const int MaxSpeed = 2;
 
+		public readonly Fault LeftHV = new TransientFault();
+		public readonly Fault LeftOHV = new TransientFault();
+		public readonly Fault SlowTraffic = new TransientFault();
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
@@ -51,10 +55,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		{
 			vehicles = vehicles ?? new[]
 			{
-				new Vehicle { Kind = VehicleKind.OverheightVehicle, DriveLeft = { Name = "LeftOHV1" }, SlowTraffic = { Name = "SlowOHV1" } },
-				new Vehicle { Kind = VehicleKind.OverheightVehicle, DriveLeft = { Name = "LeftOHV2" }, SlowTraffic = { Name = "SlowOHV2" } },
-				new Vehicle { Kind = VehicleKind.HighVehicle, DriveLeft = { Name = "LeftHV" }, SlowTraffic = { Name = "SlowHV" } }
+				new Vehicle { Kind = VehicleKind.OverheightVehicle },
+				new Vehicle { Kind = VehicleKind.OverheightVehicle },
+				new Vehicle { Kind = VehicleKind.HighVehicle }
 			};
+
+			LeftOHV.AddEffects<Vehicle.DriveLeftEffect>(vehicles.Where(vehicle => vehicle.Kind == VehicleKind.OverheightVehicle));
+			LeftHV.AddEffects<Vehicle.DriveLeftEffect>(vehicles.Where(vehicle => vehicle.Kind == VehicleKind.HighVehicle));
+			SlowTraffic.AddEffects<Vehicle.SlowTrafficEffect>(vehicles);
 
 			Vehicles = new VehicleCollection(vehicles);
 		}

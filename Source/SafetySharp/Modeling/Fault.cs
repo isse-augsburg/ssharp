@@ -23,6 +23,7 @@
 namespace SafetySharp.Modeling
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.Serialization;
@@ -120,6 +121,29 @@ namespace SafetySharp.Modeling
 				else
 					_isActivated = value == Activation.Forced;
 			}
+		}
+
+		/// <summary>
+		///   Adds fault effects for the <paramref name="components" /> that are enabled when the fault is activated.
+		/// </summary>
+		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
+		/// <param name="components">The components the fault effects are added for.</param>
+		public void AddEffects<TFaultEffect>(params IComponent[] components)
+			where TFaultEffect : Component, new()
+		{
+			AddEffects<TFaultEffect>((IEnumerable<IComponent>)components);
+		}
+
+		/// <summary>
+		///   Adds fault effects for the <paramref name="components" /> that are enabled when the fault is activated.
+		/// </summary>
+		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
+		/// <param name="components">The components the fault effects are added for.</param>
+		public void AddEffects<TFaultEffect>(IEnumerable<IComponent> components)
+			where TFaultEffect : Component, new()
+		{
+			foreach (var component in components)
+				AddEffect<TFaultEffect>(component);
 		}
 
 		/// <summary>
