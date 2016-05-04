@@ -51,6 +51,16 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			Console.WriteLine(result);
 		}
 
+		[Test]
+		public void FalseAlarmOriginalDesign()
+		{
+			var model = Model.CreateOriginal();
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, maxCardinality: 3);
+
+			result.SaveCounterExamples("counter examples/height control/dcca/false alarm/original");
+			Console.WriteLine(result);
+		}
+
 		[Test, TestCaseSource(nameof(CreateModelVariants))]
 		public void EnumerateAllStates(Model model, string variantName)
 		{

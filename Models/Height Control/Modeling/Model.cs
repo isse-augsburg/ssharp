@@ -51,9 +51,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		{
 			vehicles = vehicles ?? new[]
 			{
-				new Vehicle { Kind = VehicleKind.OverheightTruck, DriveLeft = { Name = "LeftOHV1" } },
-				new Vehicle { Kind = VehicleKind.OverheightTruck, DriveLeft = { Name = "LeftOHV2" } },
-				new Vehicle { Kind = VehicleKind.Truck, DriveLeft = { Name = "LeftHV" } }
+				new Vehicle { Kind = VehicleKind.OverheightVehicle, DriveLeft = { Name = "LeftOHV1" }, SlowTraffic = { Name = "SlowOHV1" } },
+				new Vehicle { Kind = VehicleKind.OverheightVehicle, DriveLeft = { Name = "LeftOHV2" }, SlowTraffic = { Name = "SlowOHV2" } },
+				new Vehicle { Kind = VehicleKind.HighVehicle, DriveLeft = { Name = "LeftHV" }, SlowTraffic = { Name = "SlowHV" } }
 			};
 
 			Vehicles = new VehicleCollection(vehicles);
@@ -74,15 +74,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		/// <summary>
 		///   Represents the hazard of an over-height vehicle colliding with the tunnel entrance on the left lane.
 		/// </summary>
-		public Formula Collision =>
-			Vehicles.Vehicles.Skip(1).Aggregate<Vehicle, Formula>(Vehicles.Vehicles[0].IsCollided, (f, v) => f || v.IsCollided);
+		public Formula Collision => Vehicles.Vehicles.Skip(1).Aggregate((Formula)Vehicles.Vehicles[0].IsCollided, (f, v) => f || v.IsCollided);
 
 		/// <summary>
 		///   Represents the hazard of an alarm even when no over-height vehicle is on the right lane.
 		/// </summary>
 		public Formula FalseAlarm =>
 			HeightControl.TrafficLights.IsRed &&
-			Vehicles.Vehicles.All(vehicle => vehicle.Lane == Lane.Right || vehicle.Kind != VehicleKind.OverheightTruck);
+			Vehicles.Vehicles.All(vehicle => vehicle.Lane == Lane.Right || vehicle.Kind != VehicleKind.OverheightVehicle);
 
 		/// <summary>
 		///   Represents the hazard of an alarm even when no high vehicle and no over-height vehicle is on the right lane.
@@ -90,22 +89,19 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		public Formula FalseAlarmWhenAllConformToTrafficLaws =>
 			HeightControl.TrafficLights.IsRed &&
 			Vehicles.Vehicles.All(
-				vehicle => vehicle.Lane == Lane.Right || !(vehicle.Kind == VehicleKind.OverheightTruck || vehicle.Kind == VehicleKind.Truck));
+				vehicle => vehicle.Lane == Lane.Right || !(vehicle.Kind == VehicleKind.OverheightVehicle || vehicle.Kind == VehicleKind.HighVehicle));
 
 		/// <summary>
 		///   Initializes a model of the original design.
 		/// </summary>
 		public static Model CreateOriginal(Vehicle[] vehicles = null)
-			=> CreateVariant(typeof(PreControlOriginal), typeof(MainControlOriginal), typeof(EndControlOriginal), vehicles);
+			=> CreateVariant(new PreControlOriginal(), new MainControlOriginal(), new EndControlOriginal(), vehicles);
 
 		/// <summary>
 		///   Initializes a new variant with the given control types.
 		/// </summary>
-		private static Model CreateVariant(Type preControlType, Type mainControlType, Type endControlType, Vehicle[] vehicles = null)
+		public static Model CreateVariant(PreControl preControl, MainControl mainControl, EndControl endControl, Vehicle[] vehicles = null)
 		{
-			var preControl = (PreControl)Activator.CreateInstance(preControlType);
-			var mainControl = (MainControl)Activator.CreateInstance(mainControlType);
-			var endControl = (EndControl)Activator.CreateInstance(endControlType);
 			var model = new Model(vehicles);
 
 			model.SetupController(preControl);
@@ -121,6 +117,18 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 			};
 
 			return model;
+		}
+
+		/// <summary>
+		///   Initializes a new variant with the given control types.
+		/// </summary>
+		private static Model CreateVariant(Type preControlType, Type mainControlType, Type endControlType, Vehicle[] vehicles = null)
+		{
+			var preControl = (PreControl)Activator.CreateInstance(preControlType);
+			var mainControl = (MainControl)Activator.CreateInstance(mainControlType);
+			var endControl = (EndControl)Activator.CreateInstance(endControlType);
+
+			return CreateVariant(preControl, mainControl, endControl);
 		}
 
 		/// <summary>

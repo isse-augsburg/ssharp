@@ -30,6 +30,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 	public class Vehicle : Component
 	{
 		public readonly Fault DriveLeft = new TransientFault();
+		public readonly Fault SlowTraffic = new TransientFault();
 
 		[Hidden]
 		private VehicleKind _kind;
@@ -58,7 +59,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		///   Gets a value indicating whether the vehicle has collided with the tunnel.
 		/// </summary>
 		public bool IsCollided =>
-			Kind == VehicleKind.OverheightTruck && _position >= Model.TunnelPosition && Lane == Lane.Left;
+			Kind == VehicleKind.OverheightVehicle && _position >= Model.TunnelPosition && Lane == Lane.Left;
 
 		/// <summary>
 		///   Informs the vehicle whether the tunnel is closed.
@@ -78,7 +79,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// <summary>
 		///   Chooses the speed the vehicle drives with.
 		/// </summary>
-		protected virtual int ChooseSpeed() => ChooseFromRange(1, Model.MaxSpeed);
+		protected virtual int ChooseSpeed() => Model.MaxSpeed;
 
 		/// <summary>
 		///   Checks whether the vehicle is at the <paramref name="position" />.
@@ -109,6 +110,15 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		public class DriveLeftEffect : Vehicle
 		{
 			protected override Lane ChooseLane() => Lane.Left;
+		}
+
+		/// <summary>
+		///   A fault effect representing the case where a vehicle is slowed down by traffic.
+		/// </summary>
+		[FaultEffect(Fault = nameof(SlowTraffic))]
+		public class SlowTrafficEffect : Vehicle
+		{
+			protected override int ChooseSpeed() => 1;
 		}
 	}
 }

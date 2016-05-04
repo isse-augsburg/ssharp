@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 	public enum VehicleKind
 	{
 		PassengerCar,
-		Truck,
-		OverheightTruck
+		HighVehicle,
+		OverheightVehicle
 	}
 }

@@ -47,6 +47,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 		public ModelBase Model => Simulator.Model;
 
 		public int StepDelay { get; set; } = 1000;
+		public bool ReplayingCounterExample => Simulator?.IsReplay ?? false;
 
 		public event EventHandler Reset;
 		public event EventHandler Rewound;

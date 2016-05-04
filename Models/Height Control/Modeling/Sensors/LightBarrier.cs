@@ -47,7 +47,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Sensors
 		///   Gets a value indicating whether the detector detects the <paramref name="vehicle" />.
 		/// </summary>
 		/// <param name="vehicle">The vehicle that should be checked.</param>
-		public override bool DetectsVehicle(Vehicle vehicle) => vehicle.Kind == VehicleKind.OverheightTruck && vehicle.IsAtPosition(_position);
+		public override bool DetectsVehicle(Vehicle vehicle) => vehicle.Kind == VehicleKind.OverheightVehicle && vehicle.IsAtPosition(_position);
 
 		/// <summary>
 		///   Returns a string that represents the current object.

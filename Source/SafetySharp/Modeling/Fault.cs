@@ -26,6 +26,7 @@ namespace SafetySharp.Modeling
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.Serialization;
+	using CompilerServices;
 	using Runtime;
 	using Utilities;
 
@@ -58,7 +59,7 @@ namespace SafetySharp.Modeling
 		[Hidden]
 		private bool _isActivated;
 
-		[NonSerializable]
+		[Hidden, NonDiscoverable]
 		private string _name = "UnnamedFault";
 
 		/// <summary>
