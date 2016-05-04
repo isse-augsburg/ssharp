@@ -92,10 +92,12 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// </summary>
 		public override void Update()
 		{
+			// Once the tunnel is closed, all vehicles stop
 			if (IsTunnelClosed)
 				return;
 
-			_speed = ChooseSpeed();
+			// The vehicle's speed is irrelevant once the end control has been passed
+			_speed = _position >= Model.EndControlPosition ? Model.MaxSpeed : ChooseSpeed();
 			_position += _speed;
 
 			// The road layout makes lane changes impossible when the end control has been reached

@@ -75,6 +75,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// </summary>
 		public override void Update()
 		{
+			_isVehicleLeavingOnRightLane = false;
+			_isVehicleLeavingOnLeftLane = false;
+
 			Update(LeftDetector, RightDetector, PositionDetector, Timer);
 		}
 	}

@@ -52,25 +52,19 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 			{
 				if (LeftDetector.IsVehicleDetected)
 				{
-					// Here we detected a vehicle on the left lane. This is one of the undesired cases.
-					_isVehicleLeavingOnRightLane = true;
 					_isVehicleLeavingOnLeftLane = true;
 					_count--;
 				}
-				else if (RightDetector.IsVehicleDetected)
+
+				if (RightDetector.IsVehicleDetected)
 				{
-					// Here we detected a vehicle on the right lane.
 					_isVehicleLeavingOnRightLane = true;
-					_isVehicleLeavingOnLeftLane = false;
 					_count--;
 				}
-				else
-				{
-					// Here we detected a vehicle on neither the left lane nor the right lane.
-					// Just in case we emit a signal that a vehicle to monitor might have passed.
+
+				// We assume the best case: If the vehicle was not seen on the left lane, it is assumed to be on the right lane
+				if (!LeftDetector.IsVehicleDetected && !RightDetector.IsVehicleDetected)
 					_isVehicleLeavingOnRightLane = true;
-					_isVehicleLeavingOnLeftLane = false;
-				}
 			}
 
 			if (Timer.HasElapsed)

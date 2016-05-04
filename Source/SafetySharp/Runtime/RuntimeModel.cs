@@ -42,7 +42,7 @@ namespace SafetySharp.Runtime
 		internal const string ConstructionStateName = "constructionState259C2EE0D9884B92989DF442BA268E8E";
 
 		/// <summary>
-		///   The <see cref="Runtime.ChoiceResolver" /> used by the model.
+		///   The <see cref="ChoiceResolver" /> used by the model.
 		/// </summary>
 		private readonly ChoiceResolver _choiceResolver;
 
@@ -96,7 +96,7 @@ namespace SafetySharp.Runtime
 			Model = serializedData.Model;
 			SerializedModel = buffer;
 			RootComponents = rootComponents.Cast<Component>().ToArray();
-			Faults = objectTable.OfType<Fault>().Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
+			Faults = objectTable.OfType<Fault>().Where(fault => fault.Activation == Activation.Nondeterministic && fault.IsUsed).ToArray();
 			ActivationSensitiveFaults = Faults.Where(fault => fault.RequiresActivationNotification).ToArray();
 			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
 			Formulas = formulas;

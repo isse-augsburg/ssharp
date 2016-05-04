@@ -33,7 +33,7 @@ namespace SafetySharp.Modeling
 	/// <summary>
 	///   Represents a base class for all faults affecting the behavior of <see cref="Component" />s.
 	/// </summary>
-	[DebuggerDisplay("{_name} (#{_identifier})")]
+	[DebuggerDisplay("{_name} (#{_identifier}) [{Activation}]")]
 	public abstract class Fault
 	{
 		private readonly Choice _choice = new Choice();
@@ -84,6 +84,11 @@ namespace SafetySharp.Modeling
 			get { return _identifier; }
 			set { _identifier = value; }
 		}
+
+		/// <summary>
+		///   Gets a value indicating whether the fault is used.
+		/// </summary>
+		internal bool IsUsed => _identifier != -1;
 
 		/// <summary>
 		///   Gets a value indicating whether the fault is activated and has some effect on the state of the system, therefore inducing

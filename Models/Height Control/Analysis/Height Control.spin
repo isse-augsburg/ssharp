@@ -94,9 +94,9 @@ active proctype System()
 		{	
 			if 
 				:: !tunnelClosed;
-					if :: true; speed1 = 1 :: true; speed1 = 2 fi;
-					if :: true; speed2 = 1 :: true; speed2 = 2 fi;
-					if :: true; speed3 = 1 :: true; speed3 = 2 fi;
+					if :: pos1 < EndControlPos; speed1 = 1 :: true; speed1 = 2 fi;
+					if :: pos2 < EndControlPos; speed2 = 1 :: true; speed2 = 2 fi;
+					if :: pos3 < EndControlPos; speed3 = 1 :: true; speed3 = 2 fi;
 					
 					d_step
 					{
