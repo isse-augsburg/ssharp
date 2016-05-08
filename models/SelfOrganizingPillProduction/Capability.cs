@@ -35,8 +35,8 @@
             Amount = amount;
         }
 
-        public IngredientType Type { get; private set; }
+        public IngredientType Type { get; }
 
-        public uint Amount { get; private set; }
+        public uint Amount { get; }
     }
 }
