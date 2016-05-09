@@ -1,7 +1,10 @@
-﻿namespace SelfOrganizingPillProduction
+﻿using System.Linq;
+
+namespace SelfOrganizingPillProduction
 {
     abstract class Capability
     {
+        public abstract bool IsSatisfied(Capability[] availableCapabilities);
     }
 
     /// <summary>
@@ -12,6 +15,8 @@
         private ProduceCapability() { }
 
         public static readonly ProduceCapability Instance = new ProduceCapability();
+
+        public override bool IsSatisfied(Capability[] availableCapabilities) => availableCapabilities.Contains(Instance);
     }
 
     /// <summary>
@@ -22,6 +27,8 @@
         private ConsumeCapability() { }
 
         public static readonly ConsumeCapability Instance = new ConsumeCapability();
+
+        public override bool IsSatisfied(Capability[] availableCapabilities) => availableCapabilities.Contains(Instance);
     }
 
     /// <summary>
@@ -38,5 +45,13 @@
         public IngredientType Type { get; }
 
         public uint Amount { get; }
+
+        public override bool IsSatisfied(Capability[] availableCapabilities)
+        {
+            return availableCapabilities
+                .OfType<Ingredient>()
+                .Where(ingredient => ingredient.Type == Type)
+                .Any(ingredient => ingredient.Amount >= Amount);
+        }
     }
 }
