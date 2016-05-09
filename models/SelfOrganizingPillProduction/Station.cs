@@ -120,6 +120,33 @@ namespace SelfOrganizingPillProduction
         }
 
         /// <summary>
+        /// Removes all configuration related to a recipe and propagates
+        /// this change to neighbouring stations.
+        /// </summary>
+        /// <param name="recipe"></param>
+        protected void RemoveRecipeConfigurations(Recipe recipe)
+        {
+            lockedRecipes.Add(recipe);
+
+            var affectedRoles = from role in AllocatedRoles
+                                where role.Recipe == recipe
+                                select role;
+            var affectedStations =
+                (from role in affectedRoles select role.PreCondition.Port)
+                .Concat(from role in affectedRoles select role.PostCondition.Port)
+                .Distinct()
+                .Where(station => station != null);
+
+            foreach (var role in affectedRoles)
+                AllocatedRoles.Remove(role);
+
+            foreach (var station in affectedStations)
+                station.RemoveRecipeConfigurations(recipe);
+
+            lockedRecipes.Remove(recipe);
+        }
+
+        /// <summary>
         /// Executes the specified role on the current <see cref="Container"/>.
         /// When this method is called, <see cref="Container"/> must not be null.
         /// </summary>
