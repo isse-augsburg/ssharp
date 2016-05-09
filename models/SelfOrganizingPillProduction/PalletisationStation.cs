@@ -3,7 +3,7 @@
     /// <summary>
     /// A production station that removes containers from the conveyor belt, closes, labels and stores them on pallets.
     /// </summary>
-    class PalletisationStation : Station
+    public class PalletisationStation : Station
     {
         public override Capability[] AvailableCapabilities { get; } = new[] { ConsumeCapability.Instance };
 

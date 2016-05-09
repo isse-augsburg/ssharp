@@ -6,7 +6,7 @@ namespace SelfOrganizingPillProduction
     /// <summary>
     /// A pill container which is filled with different ingredients.
     /// </summary>
-    class PillContainer : Component
+    public class PillContainer : Component
     {
         public PillContainer(Recipe recipe)
         {

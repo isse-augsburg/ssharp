@@ -7,7 +7,7 @@ namespace SelfOrganizingPillProduction
     /// <summary>
     /// A production station that loads containers on the conveyor belt.
     /// </summary>
-    class ContainerLoader : Station
+    public class ContainerLoader : Station
     {
         public override Capability[] AvailableCapabilities { get; } = new[] { ProduceCapability.Instance };
 

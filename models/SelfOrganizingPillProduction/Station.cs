@@ -8,7 +8,7 @@ namespace SelfOrganizingPillProduction
     /// <summary>
     /// A production station that modifies containers.
     /// </summary>
-    abstract class Station : Component
+    public abstract class Station : Component
     {
         /// <summary>
         /// The resource currently located at the station.

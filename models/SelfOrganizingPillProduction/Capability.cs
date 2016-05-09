@@ -2,7 +2,7 @@
 
 namespace SelfOrganizingPillProduction
 {
-    abstract class Capability
+    public abstract class Capability
     {
         public abstract bool IsSatisfied(Capability[] availableCapabilities);
     }
@@ -10,7 +10,7 @@ namespace SelfOrganizingPillProduction
     /// <summary>
     /// Represents the loading of empty pill containers on the conveyor belt.
     /// </summary>
-    class ProduceCapability : Capability
+    public class ProduceCapability : Capability
     {
         private ProduceCapability() { }
 
@@ -22,7 +22,7 @@ namespace SelfOrganizingPillProduction
     /// <summary>
     /// Represents the removal of pill containers from the conveyor belt, labeling and palletization.
     /// </summary>
-    class ConsumeCapability : Capability
+    public class ConsumeCapability : Capability
     {
         private ConsumeCapability() { }
 
@@ -34,7 +34,7 @@ namespace SelfOrganizingPillProduction
     /// <summary>
     /// Represents the addition of a specified amount of a certain ingredient to the container.
     /// </summary>
-    class Ingredient : Capability
+    public class Ingredient : Capability
     {
         public Ingredient(IngredientType type, uint amount)
         {

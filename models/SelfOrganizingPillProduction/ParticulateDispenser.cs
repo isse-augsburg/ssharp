@@ -7,7 +7,7 @@ namespace SelfOrganizingPillProduction
     /// <summary>
     /// A production station that adds ingredients to the containers.
     /// </summary>
-    class ParticulateDispenser : Station
+    public class ParticulateDispenser : Station
     {
         private readonly Dictionary<IngredientType, uint> availableIngredients = new Dictionary<IngredientType, uint>();
 

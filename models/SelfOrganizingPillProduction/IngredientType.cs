@@ -1,6 +1,9 @@
-﻿enum IngredientType
+﻿namespace SelfOrganizingPillProduction
 {
-    BlueParticulate,
-    RedParticulate,
-    YellowParticulate
+    public enum IngredientType
+    {
+        BlueParticulate,
+        RedParticulate,
+        YellowParticulate
+    }
 }

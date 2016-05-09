@@ -3,7 +3,7 @@
     /// <summary>
     /// Describes the condition of a pill container before or after a role's capabilities are applied to it.
     /// </summary>
-    class Condition
+    public class Condition
     {
         /// <summary>
         /// The station the container is received from or sent to.

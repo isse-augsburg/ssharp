@@ -3,7 +3,7 @@
     /// <summary>
     /// Describes a sequence of capabilities a specific station should apply to a container.
     /// </summary>
-    class Role
+    public class Role
     {
         /// <summary>
         /// The condition of the container before the role is executed.

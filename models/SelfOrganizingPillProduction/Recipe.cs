@@ -6,7 +6,7 @@ namespace SelfOrganizingPillProduction
     /// <summary>
     /// Describes how a container should be processed.
     /// </summary>
-    class Recipe
+    public class Recipe
     {
         /// <summary>
         /// Creates a new recipe with the specified sequence of ingredients.
