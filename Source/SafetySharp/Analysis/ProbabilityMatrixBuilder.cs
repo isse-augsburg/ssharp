@@ -336,15 +336,10 @@ namespace SafetySharp.Analysis
 					}
 
 					// TODO-Probabilistic: why adding again and again -> save in StateStorage and remove here
-					AssertOldEntryMatchesNewEntry(index,ref transition);
+					//AssertOldEntryMatchesNewEntry(index,ref transition);
 
 					ProbabilityMatrix.StateLabeling[index] = transition.Formulas;
 					
-					if (ProbabilityMatrix.StateLabeling.ContainsKey(57146179) && ProbabilityMatrix.StateLabeling[57146179][0] && !ProbabilityMatrix.StateLabeling[57146179][1])
-					{
-						
-					}
-
 					++transitionCount;
 				}
 
