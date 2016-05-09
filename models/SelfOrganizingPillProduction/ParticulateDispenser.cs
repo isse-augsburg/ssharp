@@ -25,9 +25,9 @@ namespace SelfOrganizingPillProduction
             {
                 var ingredient = capability as Ingredient;
                 if (ingredient == null)
-                    throw new InvalidOperationException("Invalid capability in ParticulateDispenser: " + capability);
+                    throw new InvalidOperationException($"Invalid capability in ParticulateDispenser: {capability}");
                 if (!availableIngredients.ContainsKey(ingredient.Type) || availableIngredients[ingredient.Type] < ingredient.Amount)
-                    throw new InvalidOperationException("Insufficient amount available of ingredient " + ingredient.Type);
+                    throw new InvalidOperationException($"Insufficient amount available of ingredient {ingredient.Type}");
 
                 availableIngredients[ingredient.Type] -= ingredient.Amount;
                 Container.AddIngredient(ingredient);
