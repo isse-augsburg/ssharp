@@ -56,7 +56,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		///   Gets a value indicating whether the vehicle has collided with the tunnel.
 		/// </summary>
 		public bool IsCollided =>
-			Kind == VehicleKind.OverheightTruck && _position >= Model.TunnelPosition && Lane == Lane.Left;
+			Kind == VehicleKind.OverheightVehicle && _position >= Model.TunnelPosition && Lane == Lane.Left;
 
 		/// <summary>
 		///   Informs the vehicle whether the tunnel is closed.
@@ -74,9 +74,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		protected virtual Lane ChooseLane() => Lane.Right;
 
 		/// <summary>
-		///   Chooses the speed the vehicle drives with.
+		///   Chooses the speed the vehicle drives with. By default, vehicles always drive with their maximum speed.
 		/// </summary>
-		protected virtual int ChooseSpeed() => ChooseFromRange(1, Model.MaxSpeed);
+		protected virtual int ChooseSpeed() => Model.MaxSpeed;
 
 		/// <summary>
 		///   Checks whether the vehicle is at the <paramref name="position" />.
@@ -89,10 +89,12 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// </summary>
 		public override void Update()
 		{
+			// Once the tunnel is closed, all vehicles stop
 			if (IsTunnelClosed)
 				return;
 
-			_speed = ChooseSpeed();
+			// The vehicle's speed is irrelevant once the end control has been passed
+			_speed = _position >= Model.EndControlPosition ? Model.MaxSpeed : ChooseSpeed();
 			_position += _speed;
 
 			// The road layout makes lane changes impossible when the end control has been reached
@@ -101,13 +103,21 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		}
 
 		/// <summary>
-		///   A fault effect representing the case where a vehicle ignores the traffic rules and potentially chooses
-		///   to drive on the left lane.
+		///   A fault effect representing the case where a vehicle drives on the left lane.
 		/// </summary>
 		[FaultEffect]
-		public class DisregardTrafficRulesEffect : Vehicle
+		public class DriveLeftEffect : Vehicle
 		{
-			protected override Lane ChooseLane() => Choose(Lane.Left, Lane.Right);
+			protected override Lane ChooseLane() => Choose(Lane.Right, Lane.Left);
+		}
+
+		/// <summary>
+		///   A fault effect representing the case where a vehicle is slowed down by traffic.
+		/// </summary>
+		[FaultEffect]
+		public class SlowTrafficEffect : Vehicle
+		{
+			protected override int ChooseSpeed() => ChooseFromRange(1, Model.MaxSpeed);
 		}
 	}
 }

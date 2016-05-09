@@ -28,11 +28,12 @@ namespace SafetySharp.Modeling
 	using System.Reflection;
 	using Analysis;
 	using Runtime;
+	using Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>
-	///   A helper type that discovers the <see cref="IComponent" /> instances within a <see cref="ModelBase" /> that are marked with
-	///   <see cref="RootAttribute" /> and binds the model.
+	///   A helper type that discovers the <see cref="IComponent" /> instances within a <see cref="ModelBase" /> that are
+	///   marked with <see cref="RootAttribute" /> and binds the model.
 	/// </summary>
 	internal static class ModelBinder
 	{
@@ -124,6 +125,8 @@ namespace SafetySharp.Modeling
 
 			model.CreateBindings();
 			CreateBindings(model);
+
+			model.ReferencedObjects = SerializationRegistry.Default.GetReferencedObjects(model.Roots, SerializationMode.Optimized).ToArray();
 		}
 
 		/// <summary>

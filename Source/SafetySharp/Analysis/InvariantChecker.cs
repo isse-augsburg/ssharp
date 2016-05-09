@@ -87,7 +87,7 @@ namespace SafetySharp.Analysis
 			_states = new StateStorage(_workers[0].StateVectorLayout, configuration.StateCapacity);
 
 #if false
-			Console.WriteLine(_model.StateVectorLayout);
+			Console.WriteLine(_workers[0].StateVectorLayout);
 #endif
 		}
 

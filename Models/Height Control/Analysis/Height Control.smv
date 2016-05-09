@@ -1,0 +1,174 @@
+-- The MIT License (MIT)
+-- 
+-- Copyright (c) 2014-2016, Institute for Software & Systems Engineering
+-- 
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to deal
+-- in the Software without restriction, including without limitation the rights
+-- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-- copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions:
+-- 
+-- The above copyright notice and this permission notice shall be included in
+-- all copies or substantial portions of the Software.
+-- 
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+-- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+-- THE SOFTWARE.
+
+MODULE main
+	DEFINE
+		PreControlPos := 3;
+		MainControlPos := 6;
+		EndControlPos := 9;
+		TunnelPos := 12;
+		Timeout := 4;
+		
+		lb1mis 		:= fault_lb1mis.occurs;
+		lb1false 	:= fault_lb1false.occurs;
+		lb2mis 		:= fault_lb2mis.occurs;
+		lb2false 	:= fault_lb2false.occurs;
+		odlmis 		:= fault_odlmis.occurs;
+		odlfalse 	:= fault_odlfalse.occurs;
+		odrmis 		:= fault_odrmis.occurs;
+		odrfalse 	:= fault_odrfalse.occurs;
+		odfmis 		:= fault_odfmis.occurs;
+		odffalse	:= fault_odffalse.occurs;
+		
+		LB1 := !lb1mis & (lb1false | 
+			   (v1.pos - v1.speed <= PreControlPos & v1.pos > PreControlPos) |
+		       (v2.pos - v2.speed <= PreControlPos & v2.pos > PreControlPos));
+			   
+		LB2 := !lb2mis & (lb2false | 
+			   (v1.pos - v1.speed <= MainControlPos & v1.pos > MainControlPos) |
+		       (v2.pos - v2.speed <= MainControlPos & v2.pos > MainControlPos));
+			   
+		ODL := !odlmis & (odlfalse | 
+			   (v1.pos - v1.speed <= MainControlPos & v1.pos > MainControlPos & v1.lane = Left) |
+			   (v2.pos - v2.speed <= MainControlPos & v2.pos > MainControlPos & v2.lane = Left) |
+			   (v3.pos - v3.speed <= MainControlPos & v3.pos > MainControlPos & v3.lane = Left));
+			   
+		ODR := !odrmis & (odrfalse | 
+			   (v1.pos - v1.speed <= MainControlPos & v1.pos > MainControlPos & v1.lane = Right) |
+			   (v2.pos - v2.speed <= MainControlPos & v2.pos > MainControlPos & v2.lane = Right) |
+			   (v3.pos - v3.speed <= MainControlPos & v3.pos > MainControlPos & v3.lane = Right));
+			   
+		ODF := !odfmis & (odffalse | 
+			   (v1.pos - v1.speed <= EndControlPos & v1.pos > EndControlPos & v1.lane = Left) |
+			   (v2.pos - v2.speed <= EndControlPos & v2.pos > EndControlPos & v2.lane = Left) |
+			   (v3.pos - v3.speed <= EndControlPos & v3.pos > EndControlPos & v3.lane = Left));
+			   
+		PreControlDetected := LB1;
+		
+	VAR
+		tunnelClosed : boolean;
+	
+		v1 : Vehicle(TunnelPos, EndControlPos, tunnelClosed);
+		v2 : Vehicle(TunnelPos, EndControlPos, tunnelClosed);
+		v3 : Vehicle(TunnelPos, EndControlPos, tunnelClosed);
+		
+		fault_lb1mis : TransientFault();
+		fault_lb1false : TransientFault();
+		fault_lb2mis : TransientFault();
+		fault_lb2false : TransientFault();
+		fault_odlmis : TransientFault();
+		fault_odlfalse : TransientFault();
+		fault_odrmis : TransientFault();
+		fault_odrfalse : TransientFault();
+		fault_odfmis : TransientFault();
+		fault_odffalse : TransientFault();
+		
+		mainControl : MainControl(Timeout, PreControlDetected, LB2, ODL, ODR);
+		endControl : EndControl(Timeout, mainControl.leavingRight, ODF);
+		
+	ASSIGN
+		init(tunnelClosed) := FALSE;
+		next(tunnelClosed) := case
+				mainControl.leavingLeft | endControl.potentialCrash : TRUE;
+				TRUE : tunnelClosed;
+			esac;
+
+MODULE Vehicle(tunnelPos, endControlPos, tunnelClosed)
+	VAR
+		lane : { Left, Right };
+		pos : 0..tunnelPos;
+		speed : 0..2;
+		
+	ASSIGN
+		init(lane) := Right;
+		init(pos) := 0;
+		init(speed) := 0;
+		
+		next(pos) := case
+				tunnelClosed					: pos;
+				pos + speed > tunnelPos 		: tunnelPos;
+				TRUE							: pos + speed;
+			esac;
+			
+		next(speed) := { 1, 2 };
+		
+		next(lane) := case
+				pos < endControlPos : { Left, Right };
+				TRUE				: lane;
+			esac;
+			
+MODULE MainControl(timeout, preDetected, lb, odl, odr)
+	VAR
+		remainingTime : -1..timeout;
+		vehicleCount : 0..5;
+		
+	DEFINE
+		active := vehicleCount != 0;
+		onlyRightTriggered := active & !odl & odr;
+		leavingLeft := active & !onlyRightTriggered & lb;
+		leavingRight := active & onlyRightTriggered & lb;
+	
+	ASSIGN
+		init(remainingTime) := -1;
+		init(vehicleCount) := 0;
+		
+		next(remainingTime) := case
+				preDetected			: timeout;
+				vehicleCount = 0	: -1;
+				remainingTime > -1 	: remainingTime - 1;
+				TRUE				: -1;
+			esac;
+			
+		next(vehicleCount) := case
+				preDetected & vehicleCount < 5 & !leavingLeft & !leavingRight	: vehicleCount + 1;
+				preDetected & !leavingLeft & leavingRight 						: vehicleCount;
+				preDetected & leavingLeft & !leavingRight 						: vehicleCount;
+				preDetected & vehicleCount > 0 & leavingLeft & leavingRight 	: vehicleCount - 1;
+				!preDetected & vehicleCount > 1 & leavingLeft & leavingRight 	: vehicleCount - 2;
+				!preDetected & vehicleCount > 0 & leavingLeft & leavingRight 	: 0;
+				!preDetected & vehicleCount > 0 & (leavingLeft | leavingRight) 	: vehicleCount - 1;
+				remainingTime = 0												: 0;
+				TRUE															: vehicleCount;
+			esac;
+			
+MODULE EndControl(timeout, mainDetected, odf)
+	VAR
+		remainingTime : -1..timeout;
+		
+	DEFINE
+		potentialCrash := remainingTime > 0 & odf;
+		
+	ASSIGN
+		init(remainingTime) := -1;
+		next(remainingTime) := case
+				mainDetected		: timeout;
+				remainingTime > -1 	: remainingTime - 1;
+				TRUE				: -1;
+			esac;
+			
+MODULE TransientFault
+	VAR
+		occurs : boolean;
+		
+	ASSIGN
+		init(occurs) := {TRUE, FALSE};
+		next(occurs) := {TRUE, FALSE};

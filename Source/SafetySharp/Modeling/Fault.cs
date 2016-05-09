@@ -23,16 +23,18 @@
 namespace SafetySharp.Modeling
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.Serialization;
+	using CompilerServices;
 	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   Represents a base class for all faults affecting the behavior of <see cref="Component" />s.
 	/// </summary>
-	[DebuggerDisplay("{_name} (#{_identifier})")]
+	[DebuggerDisplay("{_name} (#{_identifier}) [{Activation}]")]
 	public abstract class Fault
 	{
 		private readonly Choice _choice = new Choice();
@@ -58,7 +60,7 @@ namespace SafetySharp.Modeling
 		[Hidden]
 		private bool _isActivated;
 
-		[NonSerializable]
+		[Hidden, NonDiscoverable]
 		private string _name = "UnnamedFault";
 
 		[Hidden]
@@ -86,6 +88,11 @@ namespace SafetySharp.Modeling
 			get { return _identifier; }
 			set { _identifier = value; }
 		}
+
+		/// <summary>
+		///   Gets a value indicating whether the fault is used.
+		/// </summary>
+		internal bool IsUsed => _identifier != -1;
 
 		/// <summary>
 		///   Gets a value indicating whether the fault is activated and has some effect on the state of the system, therefore inducing
@@ -117,6 +124,29 @@ namespace SafetySharp.Modeling
 				else
 					_isActivated = value == Activation.Forced;
 			}
+		}
+
+		/// <summary>
+		///   Adds fault effects for the <paramref name="components" /> that are enabled when the fault is activated.
+		/// </summary>
+		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
+		/// <param name="components">The components the fault effects are added for.</param>
+		public void AddEffects<TFaultEffect>(params IComponent[] components)
+			where TFaultEffect : Component, new()
+		{
+			AddEffects<TFaultEffect>((IEnumerable<IComponent>)components);
+		}
+
+		/// <summary>
+		///   Adds fault effects for the <paramref name="components" /> that are enabled when the fault is activated.
+		/// </summary>
+		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
+		/// <param name="components">The components the fault effects are added for.</param>
+		public void AddEffects<TFaultEffect>(IEnumerable<IComponent> components)
+			where TFaultEffect : Component, new()
+		{
+			foreach (var component in components)
+				AddEffect<TFaultEffect>(component);
 		}
 
 		/// <summary>

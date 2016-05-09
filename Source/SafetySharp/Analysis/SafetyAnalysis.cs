@@ -171,7 +171,9 @@ namespace SafetySharp.Analysis
 						criticalSets.Add(set);
 
 						exceptions.Add(set, e.InnerException);
-						counterExamples.Add(set, e.CounterExample);
+
+						if (e.CounterExample != null)
+							counterExamples.Add(set, e.CounterExample);
 					}
 				}
 			}
@@ -359,9 +361,16 @@ namespace SafetySharp.Analysis
 			/// 
 			/// </summary>
 			/// <param name="directory">The directory the generated counter examples should be written to.</param>
-			public void SaveCounterExamples(string directory)
+			/// <param name="clearFiles">Indicates whether all files in the directory should be cleared before saving the counter examples.</param>
+			public void SaveCounterExamples(string directory, bool clearFiles = true)
 			{
 				Requires.NotNullOrWhitespace(directory, nameof(directory));
+
+				if (clearFiles && Directory.Exists(directory))
+				{
+					foreach (var file in new DirectoryInfo(directory).GetFiles())
+						file.Delete();
+				}
 
 				foreach (var pair in CounterExamples)
 				{

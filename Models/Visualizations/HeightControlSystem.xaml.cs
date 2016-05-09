@@ -62,8 +62,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 			// Initialize the simulation environment
 			var specification = Model.CreateOriginal(Enumerable
-				.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.Truck })
-				.Concat(Enumerable.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.OverheightTruck }))
+				.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.HighVehicle })
+				.Concat(Enumerable.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.OverheightVehicle }))
 				.ToArray());
 
 			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
@@ -87,7 +87,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 		private EndControlOriginal EndControl => (EndControlOriginal)HeightControl.EndControl;
 		private HeightControl HeightControl => ((Model)SimulationControls.Model).HeightControl;
 		private MainControlOriginal MainControl => (MainControlOriginal)HeightControl.MainControl;
-		private PreControlOriginal PreControl => (PreControlOriginal)HeightControl.PreControl;
+		private PreControl PreControl => HeightControl.PreControl;
 
 		private void OnModelStateReset()
 		{
@@ -104,7 +104,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			foreach (var vehicle in Vehicles.Vehicles)
 			{
 				int count;
-				if (vehicle.Kind == VehicleKind.OverheightTruck)
+				if (vehicle.Kind == VehicleKind.OverheightVehicle)
 				{
 					++overHighCount;
 					count = overHighCount;
@@ -164,11 +164,14 @@ namespace SafetySharp.CaseStudies.Visualizations
 			MisdetectionOdr.IsChecked = MainControl.RightDetector.Misdetection.IsActivated;
 			MisdetectionOdf.IsChecked = EndControl.LeftLaneDetector.Misdetection.IsActivated;
 
-			PreControl.PositionDetector.FalseDetection.Activation = Activation.Suppressed;
-			MainControl.PositionDetector.FalseDetection.Activation = Activation.Suppressed;
-			MainControl.LeftDetector.FalseDetection.Activation = Activation.Suppressed;
-			MainControl.RightDetector.FalseDetection.Activation = Activation.Suppressed;
-			EndControl.LeftLaneDetector.FalseDetection.Activation = Activation.Suppressed;
+			if (!SimulationControls.ReplayingCounterExample)
+			{
+				PreControl.PositionDetector.FalseDetection.Activation = Activation.Suppressed;
+				MainControl.PositionDetector.FalseDetection.Activation = Activation.Suppressed;
+				MainControl.LeftDetector.FalseDetection.Activation = Activation.Suppressed;
+				MainControl.RightDetector.FalseDetection.Activation = Activation.Suppressed;
+				EndControl.LeftLaneDetector.FalseDetection.Activation = Activation.Suppressed;
+			}
 
 			SetFaultAdornment(FaultLb1, PreControl.PositionDetector);
 			SetFaultAdornment(FaultLb2, MainControl.PositionDetector);
@@ -199,14 +202,14 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 			if (HeightControl.TrafficLights.IsRed)
 			{
-				var falseAlarm = !_vehicles.Any(v => v.Item1.Lane == Lane.Left && v.Item1.Kind == VehicleKind.OverheightTruck);
+				var falseAlarm = !_vehicles.Any(v => v.Item1.Lane == Lane.Left && v.Item1.Kind == VehicleKind.OverheightVehicle);
 
 				Message.Text = falseAlarm ? "False Alarm" : "Tunnel Closed";
 				HazardIndicator.Visibility = falseAlarm.ToVisibility();
 			}
 
 			if (_vehicles.Any(
-				v => v.Item1.Lane == Lane.Left && v.Item1.Position >= Model.TunnelPosition && v.Item1.Kind == VehicleKind.OverheightTruck))
+				v => v.Item1.Lane == Lane.Left && v.Item1.Position >= Model.TunnelPosition && v.Item1.Kind == VehicleKind.OverheightVehicle))
 			{
 				HazardIndicator.Visibility = Visibility.Visible;
 				Message.Text = "Collision";
@@ -298,22 +301,22 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 		private void SpawnOhvLeft(object sender, RoutedEventArgs e)
 		{
-			Spawn(VehicleKind.OverheightTruck, Lane.Left);
+			Spawn(VehicleKind.OverheightVehicle, Lane.Left);
 		}
 
 		private void SpawnHvLeft(object sender, RoutedEventArgs e)
 		{
-			Spawn(VehicleKind.Truck, Lane.Left);
+			Spawn(VehicleKind.HighVehicle, Lane.Left);
 		}
 
 		private void SpawnOhvRight(object sender, RoutedEventArgs e)
 		{
-			Spawn(VehicleKind.OverheightTruck, Lane.Right);
+			Spawn(VehicleKind.OverheightVehicle, Lane.Right);
 		}
 
 		private void SpawnHvRight(object sender, RoutedEventArgs e)
 		{
-			Spawn(VehicleKind.Truck, Lane.Right);
+			Spawn(VehicleKind.HighVehicle, Lane.Right);
 		}
 
 		private void Spawn(VehicleKind kind, Lane lane)
@@ -340,8 +343,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 				return;
 			}
 
-			var leftLane = vehicle.Item1.Kind != VehicleKind.OverheightTruck ? 225 : 223;
-			var rightLane = vehicle.Item1.Kind != VehicleKind.OverheightTruck ? 304 : 302;
+			var leftLane = vehicle.Item1.Kind != VehicleKind.OverheightVehicle ? 225 : 223;
+			var rightLane = vehicle.Item1.Kind != VehicleKind.OverheightVehicle ? 304 : 302;
 
 			Canvas.SetLeft(vehicle.Item2, vehicle.Item1.Position * 60 - vehicle.Item2.Width * 1.5);
 			Canvas.SetTop(vehicle.Item2, vehicle.Item1.Lane == Lane.Left ? leftLane : rightLane);
@@ -349,8 +352,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 		private Canvas CreateVehicleUIElement(VehicleKind kind, int index)
 		{
-			var width = kind == VehicleKind.OverheightTruck ? 50 : 35;
-			var height = kind == VehicleKind.OverheightTruck ? 30 : 25;
+			var width = kind == VehicleKind.OverheightVehicle ? 50 : 35;
+			var height = kind == VehicleKind.OverheightVehicle ? 30 : 25;
 
 			var canvas = new Canvas
 			{
@@ -363,14 +366,14 @@ namespace SafetySharp.CaseStudies.Visualizations
 					{
 						Width = width,
 						Height = height,
-						Fill = new SolidColorBrush(kind == VehicleKind.OverheightTruck ? Colors.DarkRed : Colors.BlueViolet)
+						Fill = new SolidColorBrush(kind == VehicleKind.OverheightVehicle ? Colors.DarkRed : Colors.BlueViolet)
 					},
 					new TextBlock
 					{
 						Width = width,
 						Height = height,
 						TextAlignment = TextAlignment.Center,
-						Text = (kind == VehicleKind.OverheightTruck ? "OHV" : "HV") + index
+						Text = (kind == VehicleKind.OverheightVehicle ? "OHV" : "HV") + index
 					}
 				}
 			};

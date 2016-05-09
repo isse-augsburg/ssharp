@@ -25,6 +25,7 @@ namespace SafetySharp.Analysis
 	using System;
 	using System.Collections.Generic;
 	using System.Runtime.InteropServices;
+	using System.Text;
 	using Modeling;
 	using Runtime;
 	using Utilities;
@@ -131,6 +132,8 @@ namespace SafetySharp.Analysis
 				_counterExample.DeserializeState(_stateIndex + 1);
 				_runtimeModel.Serialize(state);
 
+				EnsureStatesMatch(state, _counterExample.GetState(_stateIndex + 1));
+
 				AddState(state);
 				Replay();
 			}
@@ -205,11 +208,28 @@ namespace SafetySharp.Analysis
 			fixed (byte* sourceState = _states[_stateIndex - 1])
 				_runtimeModel.Replay(sourceState, _counterExample.GetReplayInformation(_stateIndex - 1), initializationStep: _stateIndex == -1);
 
-			var state = stackalloc byte[_runtimeModel.StateVectorSize];
-			_runtimeModel.Serialize(state);
+			var actualState = stackalloc byte[_runtimeModel.StateVectorSize];
+			_runtimeModel.Serialize(actualState);
 
-			for (var i = 0; i < _runtimeModel.StateVectorSize; ++i)
-				Requires.That(state[i] == _states[_stateIndex][i], "Invalid replay of counter example: Unexpected state difference.");
+			EnsureStatesMatch(actualState, _states[_stateIndex]);
+		}
+
+		/// <summary>
+		/// Ensures that the two states match.
+		/// </summary>
+		private void EnsureStatesMatch(byte* actualState, byte[] expectedState)
+		{
+			fixed (byte* state = expectedState)
+			{
+				if (MemoryBuffer.AreEqual(actualState, state, _runtimeModel.StateVectorSize))
+					return;
+
+				var builder = new StringBuilder();
+				for (var i = 0; i < _runtimeModel.StateVectorSize; ++i)
+					builder.AppendLine($"@{i}: {actualState[i]} vs. {_states[_stateIndex][i]}");
+
+				throw new InvalidOperationException($"Invalid replay of counter example: Unexpected state difference.\n\n{builder}");
+			}
 		}
 
 		/// <summary>

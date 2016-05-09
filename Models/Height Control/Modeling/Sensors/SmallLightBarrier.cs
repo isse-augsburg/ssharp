@@ -55,7 +55,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Sensors
 		/// </summary>
 		/// <param name="vehicle">The vehicle that should be checked.</param>
 		public override bool DetectsVehicle(Vehicle vehicle)
-			=> vehicle.Kind == VehicleKind.OverheightTruck && vehicle.Lane == _lane && vehicle.IsAtPosition(_position);
+			=> vehicle.Kind == VehicleKind.OverheightVehicle && vehicle.Lane == _lane && vehicle.IsAtPosition(_position);
 
 
 		/// <summary>

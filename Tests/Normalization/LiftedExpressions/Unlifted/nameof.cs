@@ -27,9 +27,10 @@ namespace Tests.Normalization.LiftedExpressions.Unlifted
 
 	internal class In3 : Component
 	{
-		private In3(int i)
+		public In3()
 		{
-			var s = nameof(i);
+			var x = $"{"".Substring(nameof(Component).Length)}";
+			var s = nameof(x);
 			Console.WriteLine($"{nameof(s)} {s}");
 		}
 	}

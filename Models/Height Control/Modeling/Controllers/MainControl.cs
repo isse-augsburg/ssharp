@@ -48,16 +48,22 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// </summary>
 		public readonly Timer Timer = new Timer();
 
+		[Hidden]
+		protected bool _isVehicleLeavingOnLeftLane;
+
+		[Hidden]
+		protected bool _isVehicleLeavingOnRightLane;
+
 		/// <summary>
 		///   Indicates whether an vehicle leaving the main-control area.
 		/// </summary>
-		public bool IsVehicleLeavingOnRightLane { get; protected set; }
+		public bool IsVehicleLeavingOnRightLane => _isVehicleLeavingOnRightLane;
 
 		/// <summary>
 		///   Indicates whether an vehicle leaving the main-control area on the left lane has been detected.
 		///   This might trigger the alarm.
 		/// </summary>
-		public bool IsVehicleLeavingOnLeftLane { get; protected set; }
+		public bool IsVehicleLeavingOnLeftLane => _isVehicleLeavingOnLeftLane;
 
 		/// <summary>
 		///   Gets the number of vehicles that entered the area in front of the main control during the current system step.
@@ -69,6 +75,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// </summary>
 		public override void Update()
 		{
+			_isVehicleLeavingOnRightLane = false;
+			_isVehicleLeavingOnLeftLane = false;
+
 			Update(LeftDetector, RightDetector, PositionDetector, Timer);
 		}
 	}

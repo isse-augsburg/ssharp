@@ -151,6 +151,7 @@
     <Compile Include="Analysis\Invariants\NotViolated\disabled faults.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\fault activation.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\ranges.cs" />
+    <Compile Include="Analysis\Invariants\Violated\hidden variable in formula.cs" />
     <Compile Include="Analysis\Invariants\Violated\multiple subformulas.cs" />
     <Compile Include="Analysis\Invariants\Violated\non-inline formulas.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\initial state.cs" />
@@ -471,6 +472,7 @@
     <Compile Include="FaultActivation\StateGraph\initial state.cs" />
     <Compile Include="Formulas\StateFormulas\binary expressions.cs" />
     <Compile Include="Formulas\StateFormulas\arrays.cs" />
+    <Compile Include="Formulas\StateFormulas\nameof.cs" />
     <Compile Include="Formulas\StateFormulas\parameters.cs" />
     <Compile Include="Formulas\StateFormulas\cast.cs" />
     <Compile Include="Formulas\StateFormulas\assignment.cs" />

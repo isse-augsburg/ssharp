@@ -84,7 +84,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 			if (fromPredecessor.Water > 0 || fromPredecessor.BigWasteProducts > 0)
 			{
 				toSuccessor.CopyValuesFrom(fromPredecessor);
-				toSuccessor.Temperature = IncomingFluidTemperature;
+				if (IncomingQuantityOfDialyzingFluid > 0)
+					toSuccessor.Temperature = IncomingFluidTemperature; //otherwise keep blood temperature
 				// First step: Filtrate Blood
 				if (IncomingQuantityOfDialyzingFluid >= toSuccessor.SmallWasteProducts)
 				{

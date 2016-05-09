@@ -219,7 +219,7 @@ namespace SafetySharp.Runtime.Serialization
 		///   Generates the code to deserialize the array state slot described by the <paramref name="metadata" />.
 		/// </summary>
 		/// <param name="metadata">The metadata of the state slot the code should be generated for.</param>
-		public void DeserializeArray(StateSlotMetadata metadata)
+		private void DeserializeArray(StateSlotMetadata metadata)
 		{
 			var isReferenceType = metadata.DataType.IsReferenceType();
 			var loadCode = _bitLevelAddressing
@@ -263,7 +263,7 @@ namespace SafetySharp.Runtime.Serialization
 		///   Generates the code to serialize the array state slot described by the <paramref name="metadata" />.
 		/// </summary>
 		/// <param name="metadata">The metadata of the state slot the code should be generated for.</param>
-		public void SerializeArray(StateSlotMetadata metadata)
+		private void SerializeArray(StateSlotMetadata metadata)
 		{
 			var isReferenceType = metadata.DataType.IsReferenceType();
 			var storeCode = _bitLevelAddressing ? default(OpCode) : GetStoreElementOpCode(metadata.ElementSizeInBits / 8);

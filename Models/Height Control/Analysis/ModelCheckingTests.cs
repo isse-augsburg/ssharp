@@ -27,6 +27,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 	using System.Linq;
 	using FluentAssertions;
 	using Modeling;
+	using Modeling.Controllers;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 
@@ -48,6 +49,16 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision, maxCardinality: 3);
 
 			result.SaveCounterExamples("counter examples/height control/dcca/collision/original");
+			Console.WriteLine(result);
+		}
+
+		[Test]
+		public void FalseAlarmOriginalDesign()
+		{
+			var model = Model.CreateOriginal();
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, maxCardinality: 3);
+
+			result.SaveCounterExamples("counter examples/height control/dcca/false alarm/original");
 			Console.WriteLine(result);
 		}
 
@@ -79,9 +90,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		private static IEnumerable CreateModelVariants()
 		{
 			return from model in Model.CreateVariants()
-				   let name = $"{model.HeightControl.PreControl.GetType().Name}-" +
-							  $"{model.HeightControl.MainControl.GetType().Name}-" +
-							  $"{model.HeightControl.EndControl.GetType().Name}"
+				   let name = $"{model.HeightControl.PreControl.GetType().Name.Substring(nameof(PreControl).Length)}-" +
+							  $"{model.HeightControl.MainControl.GetType().Name.Substring(nameof(MainControl).Length)}-" +
+							  $"{model.HeightControl.EndControl.GetType().Name.Substring(nameof(EndControl).Length)}"
 				   select new TestCaseData(model, name).SetName(name);
 		}
 	}

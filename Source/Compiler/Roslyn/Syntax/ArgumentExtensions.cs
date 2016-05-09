@@ -154,6 +154,9 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 			Requires.NotNull(semanticModel, nameof(semanticModel));
 
 			var invocation = argument.GetInvocationExpression();
+			Requires.That(!(invocation as InvocationExpressionSyntax)?.IsNameOfOperator(semanticModel) ?? true, 
+				"Cannot get parameter symbol for nameof operator.");
+
 			var methodSymbol = invocation.GetReferencedSymbol(semanticModel) as IMethodSymbol;
 			var propertySymbol = invocation.GetReferencedSymbol(semanticModel) as IPropertySymbol;
 			var parameterSymbols = methodSymbol?.Parameters ?? propertySymbol.Parameters;

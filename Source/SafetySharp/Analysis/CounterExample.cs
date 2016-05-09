@@ -48,30 +48,27 @@ namespace SafetySharp.Analysis
 		private const int FileHeader = 0x3FE0DD03;
 
 		/// <summary>
-		///   The serialized counter example.
-		/// </summary>
-		private readonly byte[][] _counterExample;
-
-		/// <summary>
 		///   The information required to replay the counter example.
 		/// </summary>
 		private readonly int[][] _replayInfo;
+
+		private readonly byte[][] _states;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="runtimeModel">The runtime model the counter example was generated for.</param>
-		/// <param name="counterExample">The serialized counter example.</param>
+		/// <param name="states">The serialized counter example.</param>
 		/// <param name="replayInfo">The replay information of the counter example.</param>
-		internal CounterExample(RuntimeModel runtimeModel, byte[][] counterExample, int[][] replayInfo)
+		internal CounterExample(RuntimeModel runtimeModel, byte[][] states, int[][] replayInfo)
 		{
 			Requires.NotNull(runtimeModel, nameof(runtimeModel));
-			Requires.NotNull(counterExample, nameof(counterExample));
+			Requires.NotNull(states, nameof(states));
 			Requires.NotNull(replayInfo, nameof(replayInfo));
-			Requires.That(replayInfo.Length == counterExample.Length - 1, "Invalid replay info.");
+			Requires.That(replayInfo.Length == states.Length - 1, "Invalid replay info.");
 
 			RuntimeModel = runtimeModel;
-			_counterExample = counterExample;
+			_states = states;
 			_replayInfo = replayInfo;
 		}
 
@@ -92,10 +89,15 @@ namespace SafetySharp.Analysis
 		{
 			get
 			{
-				Requires.That(_counterExample != null, "No counter example has been loaded.");
-				return _counterExample.Length - 1;
+				Requires.That(_states != null, "No counter example has been loaded.");
+				return _states.Length - 1;
 			}
 		}
+
+		/// <summary>
+		///   Gets the serialized states of the counter example.
+		/// </summary>
+		internal byte[] GetState(int position) => _states[position + 1];
 
 		/// <summary>
 		///   Deserializes the state at the <paramref name="position" /> of the counter example.
@@ -103,10 +105,10 @@ namespace SafetySharp.Analysis
 		/// <param name="position">The position of the state within the counter example that should be deserialized.</param>
 		public unsafe ModelBase DeserializeState(int position)
 		{
-			Requires.That(_counterExample != null, "No counter example has been loaded.");
+			Requires.That(_states != null, "No counter example has been loaded.");
 			Requires.InRange(position, nameof(position), 0, StepCount);
 
-			using (var pointer = PinnedPointer.Create(_counterExample[position + 1]))
+			using (var pointer = PinnedPointer.Create(GetState(position)))
 				RuntimeModel.Deserialize((byte*)pointer);
 
 			return Model;
@@ -118,7 +120,7 @@ namespace SafetySharp.Analysis
 		/// <param name="stateIndex">The index of the state the replay information should be returned for.</param>
 		internal int[] GetReplayInformation(int stateIndex)
 		{
-			Requires.InRange(stateIndex, nameof(stateIndex), 0, _counterExample.Length - 1);
+			Requires.InRange(stateIndex, nameof(stateIndex), 0, _states.Length - 1);
 			return _replayInfo[stateIndex + 1];
 		}
 
@@ -127,7 +129,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		internal unsafe void ReplayInitialState()
 		{
-			var initialState = _counterExample[0];
+			var initialState = _states[0];
 			fixed (byte* state = &initialState[0])
 				RuntimeModel.Replay(state, _replayInfo[0], initializationStep: true);
 		}
@@ -151,10 +153,10 @@ namespace SafetySharp.Analysis
 		internal void ForEachStep(Action<byte[]> action)
 		{
 			Requires.NotNull(action, nameof(action));
-			Requires.That(_counterExample != null, "No counter example has been loaded.");
+			Requires.That(_states != null, "No counter example has been loaded.");
 
 			for (var i = 1; i < StepCount + 1; ++i)
-				action(_counterExample[i]);
+				action(_states[i]);
 		}
 
 		/// <summary>
@@ -192,7 +194,7 @@ namespace SafetySharp.Analysis
 				writer.Write(StepCount + 1);
 				writer.Write(RuntimeModel.StateVectorSize);
 
-				foreach (var slot in _counterExample.SelectMany(step => step))
+				foreach (var slot in _states.SelectMany(step => step))
 					writer.Write(slot);
 
 				writer.Write(_replayInfo.Length);

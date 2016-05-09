@@ -97,12 +97,19 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 			outgoingSuction.CustomSuctionValue = 0;
 		}
 
+		public bool IncomingBloodWasNotOk;
+
 		[Provided]
 		public void BloodReceived(Blood incomingBlood)
 		{
 			Water += incomingBlood.Water;
 			SmallWasteProducts += incomingBlood.SmallWasteProducts;
 			BigWasteProducts += incomingBlood.BigWasteProducts;
+			
+			var receivedSomething = incomingBlood.BigWasteProducts > 0 || incomingBlood.Water > 0;
+			var compositionOk = incomingBlood.ChemicalCompositionOk && incomingBlood.GasFree &&
+									(incomingBlood.Temperature == QualitativeTemperature.BodyHeat);
+			IncomingBloodWasNotOk |= receivedSomething && !compositionOk;
 		}
 
 		[Provided]

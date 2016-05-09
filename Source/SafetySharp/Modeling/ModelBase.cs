@@ -38,6 +38,7 @@ namespace SafetySharp.Modeling
 	{
 		private IComponent[] _components;
 		private Fault[] _faults;
+		private object[] _referencedObjects;
 		private IComponent[] _roots;
 
 		/// <summary>
@@ -73,6 +74,23 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
+		///   Gets or sets the objects referenced by the model that have to be serialized during simulation and model checking.
+		/// </summary>
+		internal object[] ReferencedObjects
+		{
+			get
+			{
+				EnsureIsBound();
+				return _referencedObjects;
+			}
+			set
+			{
+				Requires.That(_referencedObjects == null, "The referenced objects have already been set.");
+				_referencedObjects = value;
+			}
+		}
+
+		/// <summary>
 		///   Gets all of the faults contained in the model.
 		/// </summary>
 		public Fault[] Faults
@@ -94,7 +112,7 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		/// <param name="requiredPort">The required port that should be bound to the <paramref name="providedPort" />.</param>
 		/// <param name="providedPort">The provided port that should be bound to the <paramref name="requiredPort" />.</param>
-		public static void Bind(string requiredPort, string providedPort)
+		protected static void Bind(string requiredPort, string providedPort)
 		{
 			Requires.CompilationTransformation();
 		}
@@ -106,7 +124,7 @@ namespace SafetySharp.Modeling
 		/// <typeparam name="T">A delegate type that disambiguates the ports.</typeparam>
 		/// <param name="requiredPort">The required port that should be bound to the <paramref name="providedPort" />.</param>
 		/// <param name="providedPort">The provided port that should be bound to the <paramref name="requiredPort" />.</param>
-		public static void Bind<T>(string requiredPort, string providedPort)
+		protected static void Bind<T>(string requiredPort, string providedPort)
 			where T : class
 		{
 			Requires.CompilationTransformation();

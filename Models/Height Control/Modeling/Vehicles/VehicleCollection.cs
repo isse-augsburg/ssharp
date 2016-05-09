@@ -31,12 +31,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 	public sealed class VehicleCollection : Component
 	{
 		/// <summary>
-		///   Represents a fault where drivers disregards traffic rules and potentially drive on the left lane. There is only one fault
-		///   for all vehicles, as during safety analysis, it is of no interest which vehicle drives on the left.
-		/// </summary>
-		public readonly Fault DisregardTrafficRules = new TransientFault();
-
-		/// <summary>
 		///   The vehicles contained in the collection.
 		/// </summary>
 		[Hidden(HideElements = true)]
@@ -49,12 +43,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		{
 			Vehicles = vehicles;
 
-			// Add the fault effect for the traffic rules fault for each vehicle and establish the port forwardings
 			foreach (var vehicle in Vehicles)
-			{
-				DisregardTrafficRules.AddEffect<Vehicle.DisregardTrafficRulesEffect>(vehicle);
 				Bind(nameof(vehicle.IsTunnelClosed), nameof(ForwardIsTunnelClosed));
-			}
 		}
 
 		// TODO: Remove once S# supports port forwardings
@@ -81,8 +71,10 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		{
 			// Ideally, we'd just use the following line instead of the for-loop below; however, it generates
 			// a delegate and probably an interator each time the method is called, therefore increasing the 
-			// pressure on the garbage collector. All in all, model checking times increase noticeably, in 
+			// pressure on the garbage collector; roughly 250 million heap allocations would be required to
+			// check the case study's original design. All in all, model checking times increase noticeably, in 
 			// some cases by 40% or more...
+
 			// return Vehicles.Any(detector.DetectsVehicle);
 
 			foreach (var vehicle in Vehicles)

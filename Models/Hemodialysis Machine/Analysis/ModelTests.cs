@@ -117,7 +117,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			var specification = new Model();
 			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 } };
 
-			var result = analysis.ComputeMinimalCriticalSets(specification, specification.IncomingBloodNotOk);
+			var result = analysis.ComputeMinimalCriticalSets(specification, specification.IncomingBloodWasNotOk);
 			result.SaveCounterExamples("counter examples/hdmachine_contamination");
 
 			Console.WriteLine(result);

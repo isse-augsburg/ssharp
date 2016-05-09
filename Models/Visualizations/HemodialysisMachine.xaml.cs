@@ -174,7 +174,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 		public HdMachine()
 		{
-			var specification = new SafetySharp.CaseStudies.HemodialysisMachine.Model();
+			var specification = new Model();
 
 			InitializeComponent();
 			InitializeElements();

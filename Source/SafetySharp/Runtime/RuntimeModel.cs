@@ -43,7 +43,7 @@ namespace SafetySharp.Runtime
 		internal const string ConstructionStateName = "constructionState259C2EE0D9884B92989DF442BA268E8E";
 
 		/// <summary>
-		///   The <see cref="Runtime.ChoiceResolver" /> used by the model.
+		///   The <see cref="ChoiceResolver" /> used by the model.
 		/// </summary>
 		private readonly ChoiceResolver _choiceResolver;
 
@@ -83,12 +83,13 @@ namespace SafetySharp.Runtime
 		/// </param>
 		internal RuntimeModel(SerializedRuntimeModel serializedData, int stateHeaderBytes = 0)
 		{
+			Requires.That(serializedData.Model != null, "Expected a valid model instance.");
+
 			var buffer = serializedData.Buffer;
 			var rootComponents = serializedData.Model.Roots;
 			var objectTable = serializedData.ObjectTable;
 			var formulas = serializedData.Formulas;
 
-			Requires.That(serializedData.Model != null, "Expected a valid model instance.");
 			Requires.NotNull(buffer, nameof(buffer));
 			Requires.NotNull(rootComponents, nameof(rootComponents));
 			Requires.NotNull(objectTable, nameof(objectTable));
@@ -98,7 +99,7 @@ namespace SafetySharp.Runtime
 			Model = serializedData.Model;
 			SerializedModel = buffer;
 			RootComponents = rootComponents.Cast<Component>().ToArray();
-			Faults = objectTable.OfType<Fault>().Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
+			Faults = objectTable.OfType<Fault>().Where(fault => fault.Activation == Activation.Nondeterministic && fault.IsUsed).ToArray();
 			ActivationSensitiveFaults = Faults.Where(fault => fault.RequiresActivationNotification).ToArray();
 			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
 			Formulas = formulas;
@@ -106,11 +107,10 @@ namespace SafetySharp.Runtime
 			// Create a local object table just for the objects referenced by the model; only these objects
 			// have to be serialized and deserialized. The local object table does not contain, for instance,
 			// the closure types of the state formulas
-			var objects = SerializationRegistry.Default.GetReferencedObjects(rootComponents, SerializationMode.Optimized);
+			var objects = Model.ReferencedObjects;
 			var deterministicFaults = objectTable.OfType<Fault>().Where(fault => fault.Activation != Activation.Nondeterministic);
 
-			objects = objects.Except(deterministicFaults, ReferenceEqualityComparer<object>.Default);
-			_serializedObjects = new ObjectTable(objects);
+			_serializedObjects = new ObjectTable(objects.Except(deterministicFaults, ReferenceEqualityComparer<object>.Default));
 			Objects = objectTable;
 
 			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_serializedObjects, SerializationMode.Optimized);
