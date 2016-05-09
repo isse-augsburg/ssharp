@@ -36,7 +36,7 @@ namespace SelfOrganizingPillProduction
         public abstract Capability[] AvailableCapabilities { get; }
 
         private readonly List<Tuple<Station, Condition>> resourceRequests = new List<Tuple<Station, Condition>>(); // TODO: initial capacity
-        protected readonly List<Recipe> lockedRecipes = new List<Recipe>(); // TODO: initial capacity
+        protected readonly ISet<Recipe> lockedRecipes = new HashSet<Recipe>(); // TODO: initial capacity
 
         public override void Update()
         {
