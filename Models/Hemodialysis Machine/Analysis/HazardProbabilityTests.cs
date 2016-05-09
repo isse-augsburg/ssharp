@@ -54,7 +54,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = Probability.Zero;
 
-			var result = ModelChecker.CalculateProbabilityOfHazard(model, model.IncomingBloodNotOk);
+			var result = ModelChecker.CalculateProbabilityOfHazard(model, model.IncomingBloodWasNotOk);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
 

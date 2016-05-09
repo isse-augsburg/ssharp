@@ -40,7 +40,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		public void CalculateHazardInOriginalDesign()
 		{
 			var model = Model.CreateOriginal();
-			model.Vehicles.DisregardTrafficRules.ProbabilityOfOccurrence = Probability.Zero;
+			model.LeftHV.ProbabilityOfOccurrence = Probability.Zero;
+			model.LeftOHV.ProbabilityOfOccurrence = Probability.Zero;
+			model.SlowTraffic.ProbabilityOfOccurrence = Probability.Zero;
 			model.HeightControl.PreControl.PositionDetector.Misdetection.ProbabilityOfOccurrence = Probability.Zero;
 			model.HeightControl.PreControl.PositionDetector.FalseDetection.ProbabilityOfOccurrence = Probability.Zero;
 			model.HeightControl.MainControl.PositionDetector.Misdetection.ProbabilityOfOccurrence = Probability.Zero;
