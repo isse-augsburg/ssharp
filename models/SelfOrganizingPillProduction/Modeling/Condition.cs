@@ -1,4 +1,4 @@
-﻿namespace SelfOrganizingPillProduction
+﻿namespace SelfOrganizingPillProduction.Modeling
 {
     /// <summary>
     /// Describes the condition of a pill container before or after a role's capabilities are applied to it.

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SelfOrganizingPillProduction
+namespace SelfOrganizingPillProduction.Modeling
 {
     /// <summary>
     /// A production station that adds ingredients to the containers.

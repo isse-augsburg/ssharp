@@ -42,18 +42,18 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Capability.cs" />
-    <Compile Include="Condition.cs" />
-    <Compile Include="ContainerLoader.cs" />
-    <Compile Include="IngredientType.cs" />
-    <Compile Include="Model.cs" />
-    <Compile Include="PalletisationStation.cs" />
-    <Compile Include="ParticulateDispenser.cs" />
-    <Compile Include="PillContainer.cs" />
+    <Compile Include="Modeling\Capability.cs" />
+    <Compile Include="Modeling\Condition.cs" />
+    <Compile Include="Modeling\ContainerLoader.cs" />
+    <Compile Include="Modeling\IngredientType.cs" />
+    <Compile Include="Modeling\Model.cs" />
+    <Compile Include="Modeling\PalletisationStation.cs" />
+    <Compile Include="Modeling\ParticulateDispenser.cs" />
+    <Compile Include="Modeling\PillContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Recipe.cs" />
-    <Compile Include="Role.cs" />
-    <Compile Include="Station.cs" />
+    <Compile Include="Modeling\Recipe.cs" />
+    <Compile Include="Modeling\Role.cs" />
+    <Compile Include="Modeling\Station.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

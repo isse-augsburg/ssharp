@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace SelfOrganizingPillProduction
+namespace SelfOrganizingPillProduction.Modeling
 {
     public abstract class Capability
     {

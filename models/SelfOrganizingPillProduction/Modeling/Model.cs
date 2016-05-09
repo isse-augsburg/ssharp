@@ -2,7 +2,7 @@
 using SafetySharp.Modeling;
 using ModelRole = SafetySharp.Analysis.Role;
 
-namespace SelfOrganizingPillProduction
+namespace SelfOrganizingPillProduction.Modeling
 {
     public class Model : ModelBase
     {

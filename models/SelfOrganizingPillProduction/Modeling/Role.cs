@@ -1,4 +1,4 @@
-﻿namespace SelfOrganizingPillProduction
+﻿namespace SelfOrganizingPillProduction.Modeling
 {
     /// <summary>
     /// Describes a sequence of capabilities a specific station should apply to a container.

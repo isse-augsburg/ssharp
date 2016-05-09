@@ -1,4 +1,4 @@
-﻿namespace SelfOrganizingPillProduction
+﻿namespace SelfOrganizingPillProduction.Modeling
 {
     public enum IngredientType
     {
