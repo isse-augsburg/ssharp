@@ -41,7 +41,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 			outgoing.KindOfDialysate = KindOfDialysate;
 		}
 		
-		protected override void CreateBindings()
+		public ConcentrateSupply()
 		{
 			Concentrate.SendForward=SetConcentrateFlow;
 		}

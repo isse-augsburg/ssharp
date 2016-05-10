@@ -62,8 +62,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		{
 			outgoing.CopyValuesFrom(ToDrainValue);
 		}
-		
-		protected override void CreateBindings()
+
+		public SafetyBypass()
 		{
 			MainFlow.UpdateBackward=SetMainFlowSuction;
 			MainFlow.UpdateForward=SetMainFlow;

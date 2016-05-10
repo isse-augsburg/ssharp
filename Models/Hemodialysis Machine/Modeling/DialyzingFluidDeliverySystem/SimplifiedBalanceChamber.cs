@@ -33,10 +33,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 
 		public readonly DialyzingFluidFlowInToOut ForwardProducedFlowSegment = new DialyzingFluidFlowInToOut();
 		public readonly DialyzingFluidFlowInToOut ForwardUsedFlowSegment = new DialyzingFluidFlowInToOut();
-
-		public SimplifiedBalanceChamber()
-		{
-		}
+		
 
 		[Provided]
 		public void ForwardProducedFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
@@ -63,7 +60,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		}
 
 
-		protected override void CreateBindings()
+		public SimplifiedBalanceChamber()
 		{
 			ForwardProducedFlowSegment.UpdateForward=ForwardProducedFlow;
 			ForwardProducedFlowSegment.UpdateBackward=ForwardProducedFlowSuction;

@@ -61,6 +61,5 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 				toPredecessor.CustomSuctionValue = 0;
 			}
 		}
-
 	}
 }

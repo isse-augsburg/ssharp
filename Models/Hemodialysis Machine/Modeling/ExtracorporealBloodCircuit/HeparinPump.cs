@@ -48,7 +48,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 		{
 		}
 
-		protected override void CreateBindings()
+		public HeparinPump()
 		{
 			HeparinFlow.SendForward=SetHeparinFlow;
 			HeparinFlow.ReceivedBackward=ReceivedSuction;

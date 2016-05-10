@@ -42,7 +42,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
-		protected override void CreateBindings()
+		public DripChamber()
 		{
 			MainFlow.UpdateBackward=SetMainFlowSuction;
 			MainFlow.UpdateForward=SetMainFlow;

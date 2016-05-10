@@ -47,7 +47,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 	//   trans membrane pressure too low).
 	// - leave out parameters which are sensed and not set by the medical staff (ActualTmp).
 
-	public enum InternalTherapyPhase // the phase seen by controller
+	public enum TherapyPhase // the phase seen by controller
 	{
 		//PreparationSelfTest,
 		//PreparationConnectingConcentrate,
@@ -57,7 +57,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		//PreparationSettingTreatmentParameters,
 		//PreparationRinsingDialyzer,
 		//InitiationConnectingPatient,
-		InitiationMainTherapy,
+		MainTherapy,
 		EndOfThreatment
 		//EndingReinfusion,
 		//EndingEmptyingDialyzer,
@@ -105,7 +105,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 
 
 		[Hidden]
-		public readonly StateMachine<InternalTherapyPhase> CurrentTherapyPhase = new StateMachine<InternalTherapyPhase>(InternalTherapyPhase.InitiationMainTherapy);
+		public readonly StateMachine<TherapyPhase> CurrentTherapyPhase = new StateMachine<TherapyPhase>(TherapyPhase.MainTherapy);
 
 		private Dialyzer Dialyzer;
 
@@ -148,15 +148,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 			//Update(Sensor, Timer, Pump);
 			CurrentTherapyPhase
 				.Transition(
-					from: InternalTherapyPhase.InitiationMainTherapy,
-					to: InternalTherapyPhase.InitiationMainTherapy,
+					from: TherapyPhase.MainTherapy,
+					to: TherapyPhase.MainTherapy,
 					guard: TimeStepsLeft>0 && !VenousSafetyDetector.DetectedGasOrContaminatedBlood,
 					action: StepOfMainTherapy
 				);
 			CurrentTherapyPhase
 				.Transition(
-					from: InternalTherapyPhase.InitiationMainTherapy,
-					to: InternalTherapyPhase.EndOfThreatment,
+					from: TherapyPhase.MainTherapy,
+					to: TherapyPhase.EndOfThreatment,
 					guard: TimeStepsLeft <= 0 || VenousSafetyDetector.DetectedGasOrContaminatedBlood,
 					action: ShutdownMotors
 				);

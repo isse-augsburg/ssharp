@@ -65,7 +65,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 			ValveState = ValveState.Closed;
 		}
 
-		protected override void CreateBindings()
+		public VenousTubingValve()
 		{
 			MainFlow.UpdateBackward=SetMainFlowSuction;
 			MainFlow.UpdateForward=SetMainFlow;

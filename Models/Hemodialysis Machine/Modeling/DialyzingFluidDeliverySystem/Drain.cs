@@ -35,7 +35,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 			outgoingSuction.SuctionType = SuctionType.SourceDependentSuction;
 		}
 		
-		protected override void CreateBindings()
+		public Drain()
 		{
 			DrainFlow.SendBackward=SetMainFlowSuction;
 		}

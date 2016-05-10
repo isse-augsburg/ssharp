@@ -50,7 +50,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
-		protected override void CreateBindings()
+		public VenousSafetyDetector()
 		{
 			MainFlow.UpdateBackward=SetMainFlowSuction;
 			MainFlow.UpdateForward=SetMainFlow;
