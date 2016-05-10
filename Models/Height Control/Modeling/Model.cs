@@ -175,7 +175,17 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 			return from preControl in preControls
 				   from mainControl in mainControls
 				   from endControl in endControls
+				   where IsRealisiticCombination(preControl, mainControl, endControl)
 				   select CreateVariant(preControl, mainControl, endControl);
+		}
+
+		/// <summary>
+		///   Checks whether the given combination of control types is realistic.
+		/// </summary>
+		private static bool IsRealisiticCombination(Type preControl, Type mainControl, Type endControl)
+		{
+			var mainControlHasCounter = mainControl != typeof(MainControlRemovedCounter) && mainControl != typeof(MainControlRemovedCounterTolerant);
+			return preControl != typeof(PreControlImprovedDetection) || mainControlHasCounter;
 		}
 
 		/// <summary>
