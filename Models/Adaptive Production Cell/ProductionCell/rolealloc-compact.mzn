@@ -73,7 +73,7 @@ array[AGENT] of set of CAP: capabilities;
 array[AGENT] of bool: isCart;
 
 % connectivity (for now, any cart may connect any robots and that's the only option for mobility)
-array[AGENT,AGENT] of bool: isConnected = array2d(AGENT,AGENT, [ isCart[a1] xor isCart[a2] | a1 in AGENT, a2 in AGENT]);
+array[AGENT,AGENT] of bool: isConnected;% = array2d(AGENT,AGENT, [ isCart[a1] xor isCart[a2] | a1 in AGENT, a2 in AGENT]);
 
 % ----------------------------------------
 % decision variables  
