@@ -48,7 +48,7 @@ var drain = new Drain();
 var combinator = new DialyzingFluidFlowCombinator();
 pump.PumpSpeed = 7;
 combinator.ConnectOutWithIn(supply.MainFlow,pump.MainFlow);
-combinator.ConnectOutWithIn(pump.MainFlow, drain.DrainFlow);
+combinator.ConnectOutWithIn(pump.MainFlow, drain.MainFlow);
 combinator.CommitFlow();
 
 			var model = new DialyzingFluidFlowModel
@@ -65,7 +65,7 @@ combinator.CommitFlow();
 			var drainAfterStep = (Drain)modelAfterStep.Components[2];
 			pumpAfterStep.MainFlow.Incoming.Backward.CustomSuctionValue.Should().Be(7);
 			supplyAfterStep.MainFlow.Outgoing.Forward.Quantity.Should().Be(7);
-			drainAfterStep.DrainFlow.Incoming.Forward.Quantity.Should().Be(7);
+			drainAfterStep.MainFlow.Incoming.Forward.Quantity.Should().Be(7);
 		}
 	}
 }

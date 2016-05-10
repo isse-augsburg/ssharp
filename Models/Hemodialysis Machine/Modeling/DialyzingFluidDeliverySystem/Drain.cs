@@ -26,7 +26,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 
 	public class Drain : Component
 	{
-		public readonly DialyzingFluidFlowSink DrainFlow = new DialyzingFluidFlowSink();
+		public readonly DialyzingFluidFlowSink MainFlow = new DialyzingFluidFlowSink();
 
 		[Provided]
 		public void SetMainFlowSuction(Suction outgoingSuction)
@@ -37,7 +37,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		
 		public Drain()
 		{
-			DrainFlow.SendBackward=SetMainFlowSuction;
+			MainFlow.SendBackward=SetMainFlowSuction;
 		}
 	}
 }
