@@ -31,10 +31,33 @@ namespace ProductionCell
 		public List<Capability> AvailableCapabilites { get; set; }
 		public List<OdpRole> AllocatedRoles { get; set; }
 		public bool IsCart => !(this is Robot);
-		//	public List<Agent> Output { get; set; }
-		//	public List<Agent> Inputs { get; set; }
+		public List<Agent> Outputs { get; set; } = new List<Agent>();
+		public List<Agent> Inputs { get; set; } = new List<Agent>();
 
 		//	public Resource Resource { get; set; }
+	}
+
+	class Cart : Agent
+	{
+		public readonly Fault RouteBlocked = new TransientFault();
+
+		[FaultEffect(Fault = nameof(RouteBlocked)), Priority(2)]
+		public class RouteBlockedEffect : Cart
+		{
+			public override void Update()
+			{
+				foreach (var i in Inputs)
+				{
+					i.Outputs.Remove(this);
+				}
+
+				foreach (var o in Outputs)
+					o.Inputs.Remove(this);
+
+				Inputs.Clear();
+				Outputs.Clear();
+			}
+		}
 	}
 
 	internal class Robot : Agent

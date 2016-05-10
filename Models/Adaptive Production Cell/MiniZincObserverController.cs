@@ -27,6 +27,7 @@ namespace ProductionCell
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
+	using System.Text;
 
 	internal class MiniZincObserverController : ObserverController
 	{
@@ -112,12 +113,26 @@ namespace ProductionCell
 				isCart.Add(agent.IsCart);
 			}
 
+			var builder = new StringBuilder();
+			foreach (var from in Agents)
+			{
+				builder.Append("| ");
+				var l = new List<string>();
+				foreach (var to in Agents)
+				{
+					l.Add((from.Outputs.Contains(to)).ToString().ToLower());
+				}
+
+				builder.AppendLine(String.Join(", ", l));
+			}
+
 			IEnumerable<Tuple<String, String>> dnzVars = new List<Tuple<string, string>>
 			{
 				Tuple.Create("task", "[" + string.Join(",", CurrentTask.GetTaskAsStrings()) + "]"),
 				Tuple.Create("noAgents", Agents.Count().ToString()),
 				Tuple.Create("capabilities", "[" + string.Join(",", capabilities.ToArray()) + "]"),
-				Tuple.Create("isCart", "[" + string.Join(",", isCart.ToArray()).ToLower() + "]")
+				Tuple.Create("isCart", "[" + string.Join(",", isCart.ToArray()).ToLower() + "]"),
+				Tuple.Create("isConnected", $"[{builder} |]")
 			};
 
 			//foreach (var v in dnzVars)

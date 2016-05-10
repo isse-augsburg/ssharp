@@ -40,7 +40,7 @@ namespace ProductionCell
         public override string ToString()
         {
             if (Type == Type.None) return "";
-            return Type.ToString();
+	        return ((int)Type).ToString();
         }
     }
 }
