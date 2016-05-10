@@ -87,3 +87,6 @@ UpgradeLog*.htm
 *.aux
 *.log
 *.out
+Models/Adaptive Production Cell/packages/NUnit.2.6.4/license.txt
+Models/Adaptive Production Cell/packages/NUnit.2.6.4/lib/nunit.framework.xml
+Models/Adaptive Production Cell/packages/ISSE.SafetySharp.1.1.1/
