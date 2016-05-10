@@ -5,22 +5,36 @@ namespace ProductionCell
 {
     abstract class ObserverController : Component
     {
-        public List<Agent> Agents { get; set; }
-        public Task CurrentTasks { get; set; }
-        protected List<OdpRole> RolePool = new List<OdpRole>(10); 
+		[Hidden]
+	    public List<Agent> Agents;
+
+		[Hidden]
+	    public Task CurrentTask;
+
+		[Hidden(HideElements=true)]
+        protected List<OdpRole> RolePool = new List<OdpRole>(10);
+
+	    private bool _reconfed;
+
+		public bool Unsatisfiable { get; protected set; }
 
         public abstract void Reconfigure();
         public override void Update()
         {
+	        if (_reconfed)
+		        return;
+
             base.Update();
             Reconfigure();
+
+	        _reconfed = true;
         }
 
         protected ObserverController()
         {
             for (int i = 0; i < 10; i++)
             {
-                RolePool.Add(new OdpRole() {CapabilitiesToApply =  new List<Capability>(1)});
+                RolePool.Add(new OdpRole());
             }
         }
     }

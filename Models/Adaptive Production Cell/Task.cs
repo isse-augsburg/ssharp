@@ -5,9 +5,15 @@ namespace ProductionCell
 {
     class Task : Component
     {
-        public List<Capability> RequiresCapabilities { get; set; }
+	    [Hidden(HideElements = true)]
+	    public readonly List<Capability> RequiresCapabilities;
 
-        public string[] GetTaskAsStrings()
+	    public Task(List<Capability> requiresCapabilities)
+	    {
+		    RequiresCapabilities = requiresCapabilities;
+	    }
+
+	    public string[] GetTaskAsStrings()
         {
             List<string> capaList = new List<string>(RequiresCapabilities.Count);
             foreach (var capa in RequiresCapabilities)

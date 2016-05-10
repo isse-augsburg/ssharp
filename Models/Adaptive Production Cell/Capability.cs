@@ -5,11 +5,11 @@ namespace ProductionCell
 {
     class Capability : Component
     {
-        readonly Type _type;
+        public readonly Type Type;
 
         public Capability(Type type)
         {
-            this._type = type;
+            this.Type = type;
         }
 
         void Apply(Workpiece rs)
@@ -19,12 +19,12 @@ namespace ProductionCell
 
         public static bool operator ==(Capability left, Capability right)
         {
-            return left._type == right._type;
+            return left.Type == right.Type;
         }
 
         public static bool operator !=(Capability left, Capability right)
         {
-            return left._type != right._type;
+            return left.Type != right.Type;
         }
 
         public override bool Equals(object obj)
@@ -34,13 +34,13 @@ namespace ProductionCell
 
         public override int GetHashCode()
         {
-            return _type.GetHashCode();
+            return Type.GetHashCode();
         }
 
         public override string ToString()
         {
-            if (_type == Type.None) return "";
-            return _type.ToString();
+            if (Type == Type.None) return "";
+            return Type.ToString();
         }
     }
 }
