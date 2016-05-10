@@ -20,56 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Compaction
+namespace Tests.Serialization.Ranges
 {
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class OneByte : SerializationObject
+	internal class StructArray : SerializationObject
 	{
 		protected override void Check()
 		{
-			var c = new C { A = 3, B = -17, S = { A = 3 }, T = new[] { new S { A = 99 }, new S { A = 81 } } };
-			var a = new[] { E.A, E.B };
-
-			GenerateCode(SerializationMode.Optimized, a, c);
-			StateSlotCount.ShouldBe(1);
+			var d = new D { S = new[] { new S { F = 3 }, new S { F = 4 } } };
+			GenerateCode(SerializationMode.Optimized, d);
+			StateVectorSize.ShouldBe(1);
 
 			Serialize();
-			c.B = 2;
-			c.A = 1;
-			a[0] = 0;
-			a[1] = 0;
-			c.S = new S();
-			c.T[0] = new S();
-			c.T[1] = new S();
+			d.S[0].F = 33;
+			d.S[1].F = 33;
 
 			Deserialize();
-			c.B.ShouldBe((sbyte)-17);
-			c.A.ShouldBe((byte)3);
-			a.ShouldBe(new[] { E.A, E.B });
-			c.S.A.ShouldBe((byte)3);
-			c.T[0].A.ShouldBe((byte)3);
-			c.T[1].A.ShouldBe((byte)3);
+			d.S[0].F.ShouldBe(3);
+			d.S[1].F.ShouldBe(4);
+
+			d.S[0].F = -1;
+			Should.Throw<RangeViolationException>(() => Serialize());
 		}
 
-		private class C
+		internal struct S
 		{
-			public byte A;
-			public sbyte B;
-			public S S;
-			public S[] T;
+			[Range(0, 5, OverflowBehavior.Error)]
+			public int F;
 		}
 
-		private enum E : byte
+		internal class D : Component
 		{
-			A,
-			B
-		}
-
-		private struct S
-		{
-			public byte A;
+			public S[] S;
 		}
 	}
 }

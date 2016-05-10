@@ -20,56 +20,73 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Compaction
+namespace Tests.Serialization.Objects
 {
+	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class OneByte : SerializationObject
+	internal class Struct : SerializationObject
 	{
 		protected override void Check()
 		{
-			var c = new C { A = 3, B = -17, S = { A = 3 }, T = new[] { new S { A = 99 }, new S { A = 81 } } };
-			var a = new[] { E.A, E.B };
+			var o = new object();
+			var e = new[] { new object() };
 
-			GenerateCode(SerializationMode.Optimized, a, c);
+			var c = new C
+			{
+				X =
+				{
+					A = 3,
+					B = 6,
+					C = { A = 1, B = 2 },
+					D = o,
+					E = e
+				},
+				Y =
+				{
+					A = 17,
+					B = 44
+				}
+			};
+
+			GenerateCode(SerializationMode.Optimized, c);
 			StateSlotCount.ShouldBe(1);
 
 			Serialize();
-			c.B = 2;
-			c.A = 1;
-			a[0] = 0;
-			a[1] = 0;
-			c.S = new S();
-			c.T[0] = new S();
-			c.T[1] = new S();
+			c.X = new X();
+			c.Y = new Y();
 
 			Deserialize();
-			c.B.ShouldBe((sbyte)-17);
-			c.A.ShouldBe((byte)3);
-			a.ShouldBe(new[] { E.A, E.B });
-			c.S.A.ShouldBe((byte)3);
-			c.T[0].A.ShouldBe((byte)3);
-			c.T[1].A.ShouldBe((byte)3);
+			c.X.A.ShouldBe(3);
+			c.X.B.ShouldBe((ushort)6);
+			c.X.C.A.ShouldBe((byte)1);
+			c.X.C.B.ShouldBe((ushort)2);
+			c.X.D.ShouldBe(o);
+			c.X.E.ShouldBe(e);
+			c.Y.A.ShouldBe((byte)17);
+			c.Y.B.ShouldBe((ushort)44);
 		}
 
-		private class C
+		private struct X
+		{
+			public int A;
+			public ushort B;
+			public Y C;
+			public object D;
+			public object[] E;
+		}
+
+		private struct Y
 		{
 			public byte A;
-			public sbyte B;
-			public S S;
-			public S[] T;
+			public ushort B;
 		}
 
-		private enum E : byte
+		private class C : Component
 		{
-			A,
-			B
-		}
-
-		private struct S
-		{
-			public byte A;
+			public X X;
+			public Y Y;
 		}
 	}
 }

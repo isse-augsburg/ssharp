@@ -107,7 +107,7 @@ namespace SafetySharp.Modeling
 			var objectExpression = memberExpression.Expression as ConstantExpression;
 
 			Requires.That(fieldInfo != null, nameof(fieldExpression), "Expected a non-nested reference to a field.");
-			Requires.That(objectExpression != null, nameof(fieldExpression), "Expected a non-nested reference to non-static field.");
+			Requires.That(objectExpression != null, nameof(fieldExpression), "Expected a non-nested reference to non-static field of primitive type.");
 			Requires.That(((IComparable)range.LowerBound).CompareTo(range.UpperBound) <= 0, nameof(lowerBound),
 				$"lower bound '{range.LowerBound}' is not smaller than upper bound '{range.UpperBound}'.");
 
