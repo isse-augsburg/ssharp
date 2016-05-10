@@ -52,18 +52,17 @@ include "globals.mzn"; % minizinc globals libary
 % ----------------------------------------
 
 % replaces enumeration type
-int: D = 1; int: I = 2; int: T = 3;
-set of int: CAP = {D, I, T};
-% only for the output 
-array[CAP] of string: labels = ["D","I","T"];
+%int: D = 1; int: I = 2; int: T = 3;
+%set of int: CAP = {D, I, T};
 
 % ----------------------------------------
 % input data 
 % ----------------------------------------
 
 % task specification
-array[int] of CAP: task;
-set of int: TASK_IND = index_set(task);
+array[int] of int: task;
+set of int:TASK_IND = index_set(task);
+set of int: CAP = {task[i] | i in TASK_IND };
 set of int: TASK_IND_0 = TASK_IND union {0}; % includes the zero for the first pointer "incoming port from bottom"
 
 % agent specification
