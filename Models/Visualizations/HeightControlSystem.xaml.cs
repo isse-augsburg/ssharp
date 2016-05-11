@@ -83,7 +83,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			AlertOdf.Opacity = 0;
 		}
 
-		private VehicleCollection Vehicles => ((Model)SimulationControls.Model).Vehicles;
+		private Vehicle[] Vehicles => ((Model)SimulationControls.Model).Vehicles;
 		private EndControlOriginal EndControl => (EndControlOriginal)HeightControl.EndControl;
 		private HeightControl HeightControl => ((Model)SimulationControls.Model).HeightControl;
 		private MainControlOriginal MainControl => (MainControlOriginal)HeightControl.MainControl;
@@ -101,7 +101,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 			var highCount = 0;
 			var overHighCount = 0;
-			foreach (var vehicle in Vehicles.Vehicles)
+			foreach (var vehicle in Vehicles)
 			{
 				int count;
 				if (vehicle.Kind == VehicleKind.OverheightVehicle)
