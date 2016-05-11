@@ -137,6 +137,11 @@ namespace SafetySharp.Analysis
 					break;
 				}
 
+				if (cardinality == 0)
+					ConsoleHelpers.WriteLine("Checking the empty fault set...");
+				else
+					ConsoleHelpers.WriteLine($"Checking {sets.Count} sets of cardinality {cardinality}...");
+
 				// We have to check each set; if one of them is a critical set, it has no effect on the other
 				// sets we have to check
 				foreach (var set in sets)
@@ -151,14 +156,11 @@ namespace SafetySharp.Analysis
 
 						if (!result.FormulaHolds)
 						{
-							ConsoleHelpers.WriteLine($"[Critical]  {{ {set.ToString(faults)} }}", ConsoleColor.DarkRed);
+							ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(faults)} }}", ConsoleColor.DarkRed);
 							criticalSets.Add(set);
 						}
 						else
-						{
-							ConsoleHelpers.WriteLine($"[  Safe  ]  {{ {set.ToString(faults)} }}", ConsoleColor.DarkGreen);
 							safeSets.Add(set);
-						}
 
 						checkedSets.Add(set);
 
