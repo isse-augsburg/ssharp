@@ -64,7 +64,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 			LeftHV.AddEffects<Vehicle.DriveLeftEffect>(vehicles.Where(vehicle => vehicle.Kind == VehicleKind.HighVehicle));
 			SlowTraffic.AddEffects<Vehicle.SlowTrafficEffect>(vehicles);
 
-			Vehicles = new VehicleCollection(vehicles);
+			VehicleCollection = new VehicleCollection(vehicles);
 		}
 
 		/// <summary>
@@ -74,30 +74,27 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		public HeightControl HeightControl { get; private set; }
 
 		/// <summary>
-		///   Gets the monitored vehicles.
+		///   Gets the collection of monitored vehicles.
 		/// </summary>
 		[Root(Role.Environment)]
-		public VehicleCollection Vehicles { get; }
+		public VehicleCollection VehicleCollection { get; }
 
 		/// <summary>
-		///   Represents the hazard of an over-height vehicle colliding with the tunnel entrance on the left lane.
+		///   Gets the monitored vehicles.
 		/// </summary>
-		public Formula Collision => Vehicles.Vehicles.Skip(1).Aggregate((Formula)Vehicles.Vehicles[0].IsCollided, (f, v) => f || v.IsCollided);
+		public Vehicle[] Vehicles => VehicleCollection.Vehicles;
 
 		/// <summary>
-		///   Represents the hazard of an alarm even when no over-height vehicle is on the right lane.
+		///   Represents the hazard of an overheight vehicle colliding with the tunnel entrance on the left lane.
+		/// </summary>
+		public Formula Collision => Vehicles.Skip(1).Aggregate((Formula)VehicleCollection.Vehicles[0].IsCollided, (f, v) => f || v.IsCollided);
+
+		/// <summary>
+		///   Represents the hazard of an alarm even when no overheight vehicle is on the right lane.
 		/// </summary>
 		public Formula FalseAlarm =>
 			HeightControl.TrafficLights.IsRed &&
-			Vehicles.Vehicles.All(vehicle => vehicle.Lane == Lane.Right || vehicle.Kind != VehicleKind.OverheightVehicle);
-
-		/// <summary>
-		///   Represents the hazard of an alarm even when no high vehicle and no over-height vehicle is on the right lane.
-		/// </summary>
-		public Formula FalseAlarmWhenAllConformToTrafficLaws =>
-			HeightControl.TrafficLights.IsRed &&
-			Vehicles.Vehicles.All(
-				vehicle => vehicle.Lane == Lane.Right || !(vehicle.Kind == VehicleKind.OverheightVehicle || vehicle.Kind == VehicleKind.HighVehicle));
+			Vehicles.All(vehicle => vehicle.Lane == Lane.Right || vehicle.Kind != VehicleKind.OverheightVehicle);
 
 		/// <summary>
 		///   Initializes a model of the original design.
@@ -136,7 +133,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 			var mainControl = (MainControl)Activator.CreateInstance(mainControlType);
 			var endControl = (EndControl)Activator.CreateInstance(endControlType);
 
-			return CreateVariant(preControl, mainControl, endControl);
+			return CreateVariant(preControl, mainControl, endControl, vehicles);
 		}
 
 		/// <summary>
@@ -144,18 +141,19 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		/// </summary>
 		protected override void CreateBindings()
 		{
-			Bind(nameof(Vehicles.IsTunnelClosed), nameof(HeightControl.TrafficLights.IsRed));
+			Bind(nameof(VehicleCollection.IsTunnelClosed), nameof(HeightControl.TrafficLights.IsRed));
 		}
 
 		/// <summary>
-		///   Binds the <paramref name="controller" />'s detectors to the <see cref="Vehicles" /> and sets up the detector's fault
+		///   Binds the <paramref name="controller" />'s detectors to the <see cref="VehicleCollection" /> and sets up the detector's
+		///   fault
 		///   names.
 		/// </summary>
 		private void SetupController(Component controller)
 		{
 			foreach (var detector in GetDetectors(controller))
 			{
-				Bind(nameof(detector.ObserveVehicles), nameof(Vehicles.ObserveVehicles));
+				Bind(nameof(detector.ObserveVehicles), nameof(VehicleCollection.ObserveVehicles));
 
 				var name = detector.ToString();
 				detector.FalseDetection.Name = $"FalseDetection{name}";
@@ -175,7 +173,17 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 			return from preControl in preControls
 				   from mainControl in mainControls
 				   from endControl in endControls
+				   where IsRealisiticCombination(preControl, mainControl, endControl)
 				   select CreateVariant(preControl, mainControl, endControl);
+		}
+
+		/// <summary>
+		///   Checks whether the given combination of control types is realistic.
+		/// </summary>
+		private static bool IsRealisiticCombination(Type preControl, Type mainControl, Type endControl)
+		{
+			var mainControlHasCounter = mainControl != typeof(MainControlRemovedCounter) && mainControl != typeof(MainControlRemovedCounterTolerant);
+			return preControl != typeof(PreControlImprovedDetection) || mainControlHasCounter;
 		}
 
 		/// <summary>
@@ -184,7 +192,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		private static IEnumerable<Type> GetVariants<T>()
 			where T : class
 		{
-			return from type in Assembly.GetExecutingAssembly().GetTypes()
+			return from type in typeof(T).Assembly.GetTypes()
 				   where type.IsSubclassOf(typeof(T)) && !type.IsAbstract
 				   select type;
 		}

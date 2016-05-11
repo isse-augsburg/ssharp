@@ -20,54 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
+namespace SafetySharp.CaseStudies.HeightControl.Analysis
 {
+	using FluentAssertions;
+	using Modeling;
+	using NUnit.Framework;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using Sensors;
-	using Vehicles;
 
 	/// <summary>
-	///   Represents the original design of the end-control.
+	///   Contains a set of tests that simulate the case study to validate certain aspects of its behavior.
 	/// </summary>
-	public class EndControlAdditionalLightBarrier : EndControl
+	public class SimulationTests
 	{
 		/// <summary>
-		///   The sensor that is used to detect overheight vehicles in the end-control area on the right lane.
+		///   Simulates a path where no faults occur with the expectation that the tank does not rupture.
 		/// </summary>
-		public readonly VehicleDetector RightLaneDetector = new SmallLightBarrier(Model.EndControlPosition, Lane.Right);
-
-		/// <summary>
-		///   The number of high vehicles currently in the main-control area.
-		/// </summary>
-		[Range(0, 5, OverflowBehavior.Clamp)]
-		private int _count;
-
-		/// <summary>
-		///   Gets a value indicating whether a crash is potentially imminent.
-		/// </summary>
-		public override bool IsCrashPotentiallyImminent => _count > 0 && LeftLaneDetector.IsVehicleDetected;
-
-		/// <summary>
-		///   Updates the internal state of the component.
-		/// </summary>
-		public override void Update()
+		[Test]
+		public void TankDoesNotRuptureWhenNoFaultsOccur()
 		{
-			Update(Timer, LeftLaneDetector, RightLaneDetector);
+			var model = Model.CreateOriginal();
+			model.Faults.SuppressActivations();
 
-			if (VehicleEntering)
-			{
-				_count++;
-				Timer.Start();
-			}
+			var simulator = new Simulator(model);
+			simulator.FastForward(steps: 20);
 
-			if (Timer.HasElapsed)
-				_count = 0;
-
-			if (RightLaneDetector.IsVehicleDetected)
-				_count--;
-
-			if (_count == 0)
-				Timer.Stop();
+			foreach (var vehicle in model.Vehicles)
+				vehicle.IsCollided.Should().BeFalse();
 		}
 	}
 }
