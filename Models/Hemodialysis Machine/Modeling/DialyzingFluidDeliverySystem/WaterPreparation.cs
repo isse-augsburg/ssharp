@@ -47,7 +47,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 			toPredecessor.CopyValuesFrom(fromSuccessor);
 		}
 
-		protected override void CreateBindings()
+		public WaterPreparation()
 		{
 			MainFlow.UpdateBackward=SetMainFlowSuction;
 			MainFlow.UpdateForward=SetMainFlow;

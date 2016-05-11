@@ -67,6 +67,7 @@
     </Compile>
     <Compile Include="Analysis\HazardProbabilityTests.cs" />
     <Compile Include="Analysis\ModelCheckingTests.cs" />
+    <Compile Include="Analysis\SimulationTests.cs" />
     <Compile Include="Modeling\Controllers\EndControlAdditionalLightBarrier.cs" />
     <Compile Include="Modeling\Controllers\HeightControl.cs" />
     <Compile Include="Modeling\Controllers\EndControl.cs" />

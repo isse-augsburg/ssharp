@@ -22,6 +22,7 @@
 
 namespace Tests.Analysis.Invariants.Violated
 {
+	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
@@ -33,7 +34,8 @@ namespace Tests.Analysis.Invariants.Violated
 			var c = new C();
 			Formula fUnequalZero = c.F != 0;
 
-			CheckInvariant(fUnequalZero, c).ShouldBe(false);
+			if ((Type)Arguments[0] != typeof(LtsMin))
+				CheckInvariant(fUnequalZero, c).ShouldBe(false);
 		}
 
 		private class C : Component

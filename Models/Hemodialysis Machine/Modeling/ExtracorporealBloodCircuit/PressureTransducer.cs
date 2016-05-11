@@ -43,7 +43,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 			SensedPressure = incomingElement.Pressure;
 		}
 
-		protected override void CreateBindings()
+		public PressureTransducer()
 		{
 			SenseFlow.SendBackward=SetSenseFlowSuction;
 			SenseFlow.ReceivedForward=ReceivedBlood;

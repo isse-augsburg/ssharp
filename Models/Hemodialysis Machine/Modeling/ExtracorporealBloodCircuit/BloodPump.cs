@@ -44,7 +44,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 			toPredecessor.SuctionType=SuctionType.CustomSuction;
 		}
 
-		protected override void CreateBindings()
+		public BloodPump()
 		{
 			MainFlow.UpdateBackward=SetMainFlowSuction;
 			MainFlow.UpdateForward=SetMainFlow;

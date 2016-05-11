@@ -61,7 +61,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 			KindOfDialysate = incomingElement.KindOfDialysate;
 		}
 
-		protected override void CreateBindings()
+		public DialyzingFluidPreparation()
 		{
 			Concentrate.SendBackward=SetConcentrateFlowSuction;
 			DialyzingFluidFlow.UpdateBackward=SetMainFlowSuction;

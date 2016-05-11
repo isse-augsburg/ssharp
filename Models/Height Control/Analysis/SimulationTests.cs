@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,46 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDeliverySystem
+namespace SafetySharp.CaseStudies.HeightControl.Analysis
 {
+	using FluentAssertions;
+	using Modeling;
+	using NUnit.Framework;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 
-	public class Pump : Component
+	/// <summary>
+	///   Contains a set of tests that simulate the case study to validate certain aspects of its behavior.
+	/// </summary>
+	public class SimulationTests
 	{
-		public readonly DialyzingFluidFlowInToOut MainFlow;
-		
-		public Pump()
+		/// <summary>
+		///   Simulates a path where no faults occur with the expectation that the tank does not rupture.
+		/// </summary>
+		[Test]
+		public void TankDoesNotRuptureWhenNoFaultsOccur()
 		{
-			MainFlow = new DialyzingFluidFlowInToOut();
-			MainFlow.UpdateBackward = SetMainFlowSuction;
-			MainFlow.UpdateForward = SetMainFlow;
-		}
+			var model = Model.CreateOriginal();
+			model.Faults.SuppressActivations();
 
-		[Range(0, 8, OverflowBehavior.Error)]
-		public int PumpSpeed = 0;
-		
-		public void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
-		{
-			toSuccessor.CopyValuesFrom(fromPredecessor);
-		}
-		
-		public virtual void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
-		{
-			toPredecessor.SuctionType = SuctionType.CustomSuction;
-			toPredecessor.CustomSuctionValue = PumpSpeed;
-		}
-		
-		public readonly Fault PumpDefect = new TransientFault();
+			var simulator = new Simulator(model);
+			simulator.FastForward(steps: 20);
 
-		[FaultEffect(Fault = nameof(PumpDefect))]
-		public class PumpDefectEffect : Pump
-		{
-			[Provided]
-			public override void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
-			{
-				toPredecessor.SuctionType = SuctionType.CustomSuction;
-				toPredecessor.CustomSuctionValue = 0;
-			}
+			foreach (var vehicle in model.Vehicles)
+				vehicle.IsCollided.Should().BeFalse();
 		}
 	}
 }

@@ -40,7 +40,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 			outgoing.KindOfDialysate = KindOfDialysate.Water;
 		}
 		
-		protected override void CreateBindings()
+		public WaterSupply()
 		{
 			MainFlow.SendForward=SetMainFlow;
 		}

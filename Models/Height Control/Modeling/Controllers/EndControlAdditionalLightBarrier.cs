@@ -32,7 +32,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 	public class EndControlAdditionalLightBarrier : EndControl
 	{
 		/// <summary>
-		///   The sensor that is used to detect over-height vehicles in the end-control area on the right lane.
+		///   The sensor that is used to detect overheight vehicles in the end-control area on the right lane.
 		/// </summary>
 		public readonly VehicleDetector RightLaneDetector = new SmallLightBarrier(Model.EndControlPosition, Lane.Right);
 

@@ -88,7 +88,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 					BalanceChamber.StoredUsedDialysingFluid,
 					DialyzingUltraFiltrationPump.MainFlow
 				},
-				DialyzingFluidDrain.DrainFlow);
+				DialyzingFluidDrain.MainFlow);
 
 			BalanceChamber.AddFlows(flowCombinator);
 		}
