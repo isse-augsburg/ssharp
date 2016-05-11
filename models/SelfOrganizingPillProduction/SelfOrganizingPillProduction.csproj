@@ -66,6 +66,9 @@
     <Analyzer Include="packages\ISSE.SafetySharp.1.1.2\analyzers\dotnet\cs\SafetySharp.Compiler.dll" />
     <Analyzer Include="packages\ISSE.SafetySharp.1.1.2\analyzers\dotnet\cs\SafetySharp.Modeling.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Analysis\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
