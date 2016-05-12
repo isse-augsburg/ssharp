@@ -44,7 +44,7 @@ namespace SelfOrganizingPillProduction.Modeling
 
         public IngredientType Type { get; }
 
-        public uint Amount { get; }
+        public uint Amount { get; internal set; }
 
         public override bool IsSatisfied(Capability[] availableCapabilities)
         {
