@@ -61,8 +61,7 @@ namespace SelfOrganizingPillProduction.Modeling
         {
             // TODO: deadlock avoidance?
             return (from Role role in AllocatedRoles
-                    where role.PreCondition.Recipe == preCondition.Recipe
-                        && role.PreCondition.State.SequenceEqual(preCondition.State)
+                    where role.PreCondition.Matches(preCondition)
                     select role)
                .FirstOrDefault(); // there should only ever be zero or one
         }
