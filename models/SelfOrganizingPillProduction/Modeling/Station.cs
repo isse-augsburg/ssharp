@@ -45,7 +45,7 @@ namespace SelfOrganizingPillProduction.Modeling
             if (Container == null && resourceRequests.Count > 0)
             {
                 var request = resourceRequests[0];
-                var role = ChooseRole(request.Condition);
+                var role = ChooseRole(request.Source, request.Condition);
                 if (role != null)
                 {
                     Container = request.Source.TransferResource();
@@ -57,11 +57,12 @@ namespace SelfOrganizingPillProduction.Modeling
             }
         }
 
-        protected Role ChooseRole(Condition preCondition)
+        protected Role ChooseRole(Station source, Condition condition)
         {
             // TODO: deadlock avoidance?
             return (from Role role in AllocatedRoles
-                    where role.PreCondition.Matches(preCondition)
+                    where role.PreCondition.Matches(condition)
+                        && role.PreCondition.Port == source
                     select role)
                .FirstOrDefault(); // there should only ever be zero or one
         }

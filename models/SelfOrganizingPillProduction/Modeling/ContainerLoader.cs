@@ -43,7 +43,7 @@ namespace SelfOrganizingPillProduction.Modeling
                 var request = productionRequests[0];
                 var recipe = request.Recipe;
 
-                var role = ChooseRole(new Condition { Recipe = recipe, State = new Capability[0] });
+                var role = ChooseRole(source: null, condition: new Condition { Recipe = recipe, State = new Capability[0] });
 
                 // role.capabilitiesToApply will always be { ProduceCapability }
                 Container = new PillContainer(recipe);
