@@ -1,0 +1,32 @@
+/*
+Task: produce, cap2(4), cap4(4), cap3(8), consume
+where produce is capability 1, consume is capability 5.
+
+Setup:
+
+  P --> I1 [cap1(16)] --> I2 [cap2(20)] --> I3 [cap3(12)] --> C
+  ^                                                           |
+  +-----------------------------------------------------------+
+
+Optimal role sequence:
+  (P, {0}), (I1, {1}), (I2, {}), (I3, {3}), (C, {}), (P, {}), (I1, {}), (I2, {2}), (I3, {}), (C, {4})
+
+Expected output:
+  agents=[1,2,3,4,5,1,2,3,4,5]
+  workedOn=[1,2,0,3,0,0,0,4,0,5]
+*/
+
+task = [1,2,4,3,5];
+task_amount = [1,4,4,8,1];
+
+noAgents = 5;
+capabilities = [|1,0,0,0,0,
+  |0,16,0,0,0,
+  |0,0,20,0,0,
+  |0,0,0,12,0,
+  |0,0,0,0,1|];
+isConnected = [|false,true,false,false,false,
+  |false,false,true,false,false,
+  |false,false,false,true,false,
+  |false,false,false,false,true,
+  |true,false,false,false,false|];
