@@ -11,7 +11,7 @@ namespace SelfOrganizingPillProduction.Modeling
         public PillContainer(Recipe recipe)
         {
             Recipe = recipe;
-            State = new List<Capability>(recipe.RequiredCapabilities.Length);
+            State = new List<Capability>(recipe.RequiredCapabilities.Length) { ProduceCapability.Instance };
         }
 
         /// <summary>
