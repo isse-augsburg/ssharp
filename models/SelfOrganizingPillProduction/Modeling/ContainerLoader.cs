@@ -10,7 +10,8 @@ namespace SelfOrganizingPillProduction.Modeling
     {
         public override Capability[] AvailableCapabilities { get; } = new[] { ProduceCapability.Instance };
 
-        private readonly List<Tuple<Recipe, uint>> productionRequests = new List<Tuple<Recipe, uint>>(); // TODO: initial capacity
+        // Elements are only added during setup. During runtime, elements are only removed.
+        private readonly List<ProductionRequest> productionRequests = new List<ProductionRequest>();
 
         protected override void ExecuteRole(Role role)
         {
@@ -26,7 +27,7 @@ namespace SelfOrganizingPillProduction.Modeling
         /// </summary>
         public void AcceptProductionRequest(Recipe recipe)
         {
-            productionRequests.Add(new Tuple<Recipe, uint>(recipe, recipe.Amount));
+            productionRequests.Add(new ProductionRequest(recipe));
             // TODO: start configuration
             throw new NotImplementedException();
         }
@@ -40,8 +41,7 @@ namespace SelfOrganizingPillProduction.Modeling
             if (Container == null && productionRequests.Count > 0)
             {
                 var request = productionRequests[0];
-                var recipe = request.Item1;
-                var remainingAmount = request.Item2;
+                var recipe = request.Recipe;
 
                 var role = ChooseRole(new Condition { Recipe = recipe, State = new Capability[0] });
 
@@ -52,17 +52,25 @@ namespace SelfOrganizingPillProduction.Modeling
                 // assume role.PostCondition.Port != null
                 role.PostCondition.Port.ResourceReady(source: this, condition: role.PostCondition);
 
-                remainingAmount--;
-                if (remainingAmount > 0) // update count
-                {
-                    // TODO: improve performance (no index search / use mutable class instead of Tuple)
-                    productionRequests[productionRequests.IndexOf(request)] = new Tuple<Recipe, uint>(recipe, remainingAmount);
-                }
-                else // request was completed
+                request.RemainingAmount--; // update count
+                if (request.RemainingAmount <= 0) // request was completed
                 {
                     productionRequests.Remove(request);
                 }
             }
+        }
+
+        private class ProductionRequest
+        {
+            public ProductionRequest(Recipe recipe)
+            {
+                Recipe = recipe;
+                RemainingAmount = recipe.Amount;
+            }
+
+            public Recipe Recipe { get; }
+
+            public uint RemainingAmount { get; set; }
         }
     }
 }
