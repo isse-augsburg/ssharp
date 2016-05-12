@@ -47,10 +47,12 @@ namespace SelfOrganizingPillProduction.Modeling
 
         public override void Update()
         {
-            // Handle resource requests if any. This is required to allow forwarding of containers to the next station.
+            // Handle resource requests if any. This is required to allow forwarding
+            // of containers to the next station.
             base.Update();
 
-            // No accepted resource requests, so produce resources instead.
+            // No accepted resource requests and no previous resource,
+            // so produce resources instead.
             if (Container == null && productionRequests.Count > 0)
             {
                 var request = productionRequests[0];

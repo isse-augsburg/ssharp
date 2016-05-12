@@ -18,7 +18,6 @@ namespace SelfOrganizingPillProduction.Modeling
             ActiveContainers = new List<PillContainer>((int)amount);
             Amount = amount;
 
-            // only executed during setup; can therefore use LINQ (and create objects)
             RequiredCapabilities = new Capability[] { ProduceCapability.Instance }
                 .Concat(ingredients)
                 .Concat(new[] { ConsumeCapability.Instance })
