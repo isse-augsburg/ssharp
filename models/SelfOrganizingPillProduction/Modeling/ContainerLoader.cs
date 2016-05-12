@@ -56,7 +56,7 @@ namespace SelfOrganizingPillProduction.Modeling
                 var request = productionRequests[0];
                 var recipe = request.Recipe;
 
-                var role = ChooseRole(source: null, condition: new Condition { Recipe = recipe, State = new Capability[0] });
+                var role = ChooseRole(source: null, condition: request.InitialCondition);
 
                 // role.capabilitiesToApply will always be { ProduceCapability }
                 Container = containerStorage.Pop();
@@ -80,11 +80,16 @@ namespace SelfOrganizingPillProduction.Modeling
             {
                 Recipe = recipe;
                 RemainingAmount = recipe.Amount;
+
+                // necessary here because it cannot be created later during model checking
+                InitialCondition = new Condition { Recipe = recipe, State = new Capability[0], Port = null };
             }
 
             public Recipe Recipe { get; }
 
             public uint RemainingAmount { get; set; }
+
+            public Condition InitialCondition { get; }
         }
     }
 }
