@@ -60,11 +60,12 @@ namespace SelfOrganizingPillProduction.Modeling
         protected Role ChooseRole(Station source, Condition condition)
         {
             // TODO: deadlock avoidance?
-            return (from Role role in AllocatedRoles
-                    where role.PreCondition.Matches(condition)
-                        && role.PreCondition.Port == source
-                    select role)
-               .FirstOrDefault(); // there should only ever be zero or one
+            foreach (var role in AllocatedRoles)
+            {
+                if (role.PreCondition.Matches(condition) && role.PreCondition.Port == source)
+                    return role; // there should be at most one such role
+            }
+            return null;
         }
 
         /// <summary>
@@ -111,20 +112,15 @@ namespace SelfOrganizingPillProduction.Modeling
         /// <param name="recipe"></param>
         protected void RemoveRecipeConfigurations(Recipe recipe)
         {
-            var affectedRoles = from role in AllocatedRoles
-                                where role.Recipe == recipe
-                                select role;
-            var affectedStations =
-                (from role in affectedRoles select role.PreCondition.Port)
-                .Concat(from role in affectedRoles select role.PostCondition.Port)
-                .Distinct()
-                .Where(station => station != null);
-
-            foreach (var role in affectedRoles)
-                AllocatedRoles.Remove(role);
-
-            foreach (var station in affectedStations)
-                station.RemoveRecipeConfigurations(recipe);
+            foreach (var role in AllocatedRoles)
+            {
+                if (role.Recipe == recipe)
+                {
+                    AllocatedRoles.Remove(role);
+                    role.PreCondition.Port?.RemoveRecipeConfigurations(recipe);
+                    role.PostCondition.Port?.RemoveRecipeConfigurations(recipe);
+                }
+            }
         }
 
         /// <summary>

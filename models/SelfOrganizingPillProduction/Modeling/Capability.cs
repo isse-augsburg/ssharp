@@ -48,10 +48,13 @@ namespace SelfOrganizingPillProduction.Modeling
 
         public override bool IsSatisfied(Capability[] availableCapabilities)
         {
-            return availableCapabilities
-                .OfType<Ingredient>()
-                .Where(ingredient => ingredient.Type == Type)
-                .Any(ingredient => ingredient.Amount >= Amount);
+            foreach (var capability in availableCapabilities)
+            {
+                Ingredient ingredient = capability as Ingredient;
+                if (ingredient != null && ingredient.Type == Type && ingredient.Amount >= Amount)
+                    return true;
+            }
+            return false;
         }
     }
 }
