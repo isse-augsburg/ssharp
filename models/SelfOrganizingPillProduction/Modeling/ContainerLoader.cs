@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SelfOrganizingPillProduction.Modeling
 {
@@ -38,9 +37,9 @@ namespace SelfOrganizingPillProduction.Modeling
             base.Update();
 
             // No accepted resource requests, so produce resources instead.
-            var request = ChooseProductionRequest();
-            if (Container == null && request != null)
+            if (Container == null && productionRequests.Count > 0)
             {
+                var request = productionRequests[0];
                 var recipe = request.Item1;
                 var remainingAmount = request.Item2;
 
@@ -64,16 +63,6 @@ namespace SelfOrganizingPillProduction.Modeling
                     productionRequests.Remove(request);
                 }
             }
-        }
-
-        private Tuple<Recipe, uint> ChooseProductionRequest()
-        {
-            // prioritization & filtering possible here
-            return (from request in productionRequests
-                    let recipe = request.Item1
-                    where !lockedRecipes.Contains(recipe)
-                    select request)
-                .FirstOrDefault();
         }
     }
 }

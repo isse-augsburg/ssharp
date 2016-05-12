@@ -36,16 +36,15 @@ namespace SelfOrganizingPillProduction.Modeling
         public abstract Capability[] AvailableCapabilities { get; }
 
         private readonly List<Tuple<Station, Condition>> resourceRequests = new List<Tuple<Station, Condition>>(); // TODO: initial capacity
-        protected readonly ISet<Recipe> lockedRecipes = new HashSet<Recipe>(); // TODO: initial capacity
 
         public override void Update()
         {
             CheckCapabilityConsistency();
 
             // see Fig. 7, How To Design and Implement Self-Organising Resource-Flow Systems (simplified version)
-            var request = ChooseResourceRequest();
-            if (Container == null && request != null)
+            if (Container == null && resourceRequests.Count > 0)
             {
+                var request = resourceRequests[0];
                 var agent = request.Item1;
                 var condition = request.Item2;
 
@@ -59,16 +58,6 @@ namespace SelfOrganizingPillProduction.Modeling
                     role.PostCondition.Port?.ResourceReady(source: this, condition: role.PostCondition);
                 }
             }
-        }
-
-        protected Tuple<Station, Condition> ChooseResourceRequest()
-        {
-            // prioritization & filtering possible here
-            return (from request in resourceRequests
-                    let condition = request.Item2
-                    where !lockedRecipes.Contains(condition.Recipe)
-                    select request)
-                .FirstOrDefault();
         }
 
         protected Role ChooseRole(Condition preCondition)
@@ -113,7 +102,6 @@ namespace SelfOrganizingPillProduction.Modeling
             {
                 if (!role.CapabilitiesToApply.All(capability => capability.IsSatisfied(AvailableCapabilities)))
                 {
-                    lockedRecipes.Add(role.Recipe);
                     // TODO: trigger reconfiguration
                 }
             }
@@ -126,8 +114,6 @@ namespace SelfOrganizingPillProduction.Modeling
         /// <param name="recipe"></param>
         protected void RemoveRecipeConfigurations(Recipe recipe)
         {
-            lockedRecipes.Add(recipe);
-
             var affectedRoles = from role in AllocatedRoles
                                 where role.Recipe == recipe
                                 select role;
@@ -142,8 +128,6 @@ namespace SelfOrganizingPillProduction.Modeling
 
             foreach (var station in affectedStations)
                 station.RemoveRecipeConfigurations(recipe);
-
-            lockedRecipes.Remove(recipe);
         }
 
         /// <summary>
