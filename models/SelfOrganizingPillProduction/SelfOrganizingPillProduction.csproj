@@ -46,6 +46,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Modeling\IngredientStorage.cs" />
     <Compile Include="Modeling\Capability.cs" />
     <Compile Include="Modeling\Condition.cs" />
     <Compile Include="Modeling\ContainerLoader.cs" />
