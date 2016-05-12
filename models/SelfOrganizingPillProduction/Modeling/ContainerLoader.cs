@@ -8,7 +8,11 @@ namespace SelfOrganizingPillProduction.Modeling
     /// </summary>
     public class ContainerLoader : Station
     {
-        public override Capability[] AvailableCapabilities { get; } = new[] { ProduceCapability.Instance };
+        private static readonly Capability[] produceCapabilities = new[] { ProduceCapability.Instance };
+        private static readonly Capability[] emptyCapabilities = new Capability[0];
+
+        public override Capability[] AvailableCapabilities =>
+            containerStorage.Count > 0 ? produceCapabilities : emptyCapabilities;
 
         // Elements are only added during setup. During runtime, elements are only removed.
         private readonly Stack<PillContainer> containerStorage = new Stack<PillContainer>();
