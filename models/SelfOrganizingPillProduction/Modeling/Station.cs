@@ -35,7 +35,7 @@ namespace SelfOrganizingPillProduction.Modeling
         /// </summary>
         public abstract Capability[] AvailableCapabilities { get; }
 
-        private readonly List<Tuple<Station, Condition>> resourceRequests = new List<Tuple<Station, Condition>>(); // TODO: initial capacity
+        private readonly List<ResourceRequest> resourceRequests = new List<ResourceRequest>(); // TODO: initial capacity
 
         public override void Update()
         {
@@ -45,13 +45,10 @@ namespace SelfOrganizingPillProduction.Modeling
             if (Container == null && resourceRequests.Count > 0)
             {
                 var request = resourceRequests[0];
-                var agent = request.Item1;
-                var condition = request.Item2;
-
-                var role = ChooseRole(condition);
+                var role = ChooseRole(request.Condition);
                 if (role != null)
                 {
-                    Container = agent.TransferResource();
+                    Container = request.Source.TransferResource();
                     resourceRequests.RemoveAt(0);
 
                     ExecuteRole(role);
@@ -77,7 +74,7 @@ namespace SelfOrganizingPillProduction.Modeling
         /// <param name="condition">The container's current condition.</param>
         public void ResourceReady(Station source, Condition condition)
         {
-            resourceRequests.Add(new Tuple<Station, Condition>(source, condition));
+            resourceRequests.Add(new ResourceRequest(source, condition));
         }
 
         /// <summary>
@@ -135,5 +132,17 @@ namespace SelfOrganizingPillProduction.Modeling
         /// When this method is called, <see cref="Container"/> must not be null.
         /// </summary>
         protected abstract void ExecuteRole(Role role);
+
+        private struct ResourceRequest
+        {
+            public ResourceRequest(Station source, Condition condition)
+            {
+                Source = source;
+                Condition = condition;
+            }
+
+            public Station Source { get; }
+            public Condition Condition { get; }
+        }
     }
 }
