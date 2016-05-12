@@ -6,6 +6,9 @@ namespace SelfOrganizingPillProduction.Modeling
 {
     public class Model : ModelBase
     {
+        public const int MaximumRecipeLength = 30;
+        public const int ContainerStorageSize = 30;
+
         public Model(Station[] stations)
         {
             Stations = stations;

@@ -11,7 +11,16 @@ namespace SelfOrganizingPillProduction.Modeling
         public override Capability[] AvailableCapabilities { get; } = new[] { ProduceCapability.Instance };
 
         // Elements are only added during setup. During runtime, elements are only removed.
+        private readonly Stack<PillContainer> containerStorage = new Stack<PillContainer>();
+
+        // Elements are only added during setup. During runtime, elements are only removed.
         private readonly List<ProductionRequest> productionRequests = new List<ProductionRequest>();
+
+        public ContainerLoader()
+        {
+            for (int i = 0; i < Model.ContainerStorageSize; ++i)
+                containerStorage.Push(new PillContainer());
+        }
 
         protected override void ExecuteRole(Role role)
         {
@@ -46,7 +55,8 @@ namespace SelfOrganizingPillProduction.Modeling
                 var role = ChooseRole(source: null, condition: new Condition { Recipe = recipe, State = new Capability[0] });
 
                 // role.capabilitiesToApply will always be { ProduceCapability }
-                Container = new PillContainer(recipe);
+                Container = containerStorage.Pop();
+                Container.OnLoaded(recipe);
                 recipe.ActiveContainers.Add(Container);
 
                 // assume role.PostCondition.Port != null

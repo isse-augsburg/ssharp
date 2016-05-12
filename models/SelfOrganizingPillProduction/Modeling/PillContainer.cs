@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SafetySharp.Modeling;
 
 namespace SelfOrganizingPillProduction.Modeling
@@ -8,21 +9,29 @@ namespace SelfOrganizingPillProduction.Modeling
     /// </summary>
     public class PillContainer : Component
     {
-        public PillContainer(Recipe recipe)
-        {
-            Recipe = recipe;
-            State = new List<Capability>(recipe.RequiredCapabilities.Length) { ProduceCapability.Instance };
-        }
+        private Recipe recipe = null;
 
         /// <summary>
         /// The recipe according to which the container is processed.
         /// </summary>
-        public Recipe Recipe { get; }
+        public Recipe Recipe => recipe;
 
         /// <summary>
         /// The capabilities already applied to the container.
         /// </summary>
-        public List<Capability> State { get; }
+        public List<Capability> State { get; } = new List<Capability>(Model.MaximumRecipeLength);
+
+        /// <summary>
+        /// Tells the container it was loaded on the conveyor belt.
+        /// </summary>
+        /// <param name="recipe">The recipe according to which it will henceforth be processed.</param>
+        public void OnLoaded(Recipe recipe)
+        {
+            if (this.recipe != null)
+                throw new InvalidOperationException("Container already belongs to a recipe");
+            this.recipe = recipe;
+            State.Add(ProduceCapability.Instance);
+        }
 
         /// <summary>
         /// Adds an ingredient to the container.
