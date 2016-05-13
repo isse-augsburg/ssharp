@@ -33,7 +33,7 @@ namespace Tests.Serialization.Ranges
 		{
 			var d = new D { S = new[] { new S { F = 2, G = 3, H = 4 }, new S { F = 6, G = 7, H = 8 } } };
 			GenerateCode(SerializationMode.Optimized, d);
-			StateVectorSize.ShouldBe(1);
+			StateVectorSize.ShouldBe(8);
 
 			Serialize();
 			d.S[0].F = 33;
@@ -81,10 +81,10 @@ namespace Tests.Serialization.Ranges
 
 			d.S[0].F.ShouldBe(2);
 			d.S[0].G.ShouldBe(3);
-			d.S[0].H.ShouldBe(0);
+			d.S[0].H.ShouldBe(10);
 			d.S[1].F.ShouldBe(6);
 			d.S[1].G.ShouldBe(7);
-			d.S[1].H.ShouldBe(0);
+			d.S[1].H.ShouldBe(10);
 
 			d.S[0].H = 111;
 			d.S[1].H = 111;
@@ -93,10 +93,10 @@ namespace Tests.Serialization.Ranges
 
 			d.S[0].F.ShouldBe(2);
 			d.S[0].G.ShouldBe(3);
-			d.S[0].H.ShouldBe(10);
+			d.S[0].H.ShouldBe(0);
 			d.S[1].F.ShouldBe(6);
 			d.S[1].G.ShouldBe(7);
-			d.S[1].H.ShouldBe(10);
+			d.S[1].H.ShouldBe(0);
 
 			d.S[0].F = -1;
 			Should.Throw<RangeViolationException>(() => Serialize());

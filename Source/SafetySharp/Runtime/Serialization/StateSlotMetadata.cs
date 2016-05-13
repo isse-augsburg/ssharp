@@ -126,7 +126,7 @@ namespace SafetySharp.Runtime.Serialization
 				   Equals(Field, other.Field) &&
 				   DataType == other.DataType &&
 				   CompressedDataType == other.CompressedDataType &&
-				   FieldChain.SequenceEqual(other.FieldChain);
+				   (FieldChain?.SequenceEqual(other.FieldChain) ?? true);
 		}
 
 		/// <summary>

@@ -34,7 +34,7 @@ namespace Tests.Serialization.Ranges
 		{
 			var d = new D { S = { F = 3, G = 4, H = 2 } };
 			GenerateCode(SerializationMode.Optimized, d);
-			StateVectorSize.ShouldBe(1);
+			StateVectorSize.ShouldBe(4);
 
 			Serialize();
 			d.S.F = 33;

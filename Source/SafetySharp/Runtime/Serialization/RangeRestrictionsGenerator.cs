@@ -91,24 +91,37 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			Requires.NotNull(stateGroups, nameof(stateGroups));
 
-			foreach (var group in stateGroups)
+			foreach (var group in stateGroups.SelectMany(g => g.Slots).GroupBy(slot => slot.Object, ReferenceEqualityComparer<object>.Default))
 			{
-				foreach (var slot in group.Slots)
+				var rangedSlots = group.Where(slot => slot.Range != null && slot.DataType.IsPrimitiveType() && !slot.DataType.IsEnum).ToArray();
+				if (rangedSlots.Length == 0)
+					continue;
+
+				LoadObject(rangedSlots[0].ObjectIdentifier);
+				foreach (var slot in rangedSlots)
 				{
-					if (slot.Field != null && slot.Range != null && slot.Field.FieldType.IsPrimitiveType() && !slot.DataType.IsEnum)
+					if (slot.ObjectType.IsArray)
+						RestrictFields(slot);
+					else
 						RestrictField(slot);
 				}
 			}
 		}
 
 		/// <summary>
-		///   Generates the code to deserialize the state slot described by the <paramref name="metadata" />.
+		///   Generates the code to restrict the values contained in ranged array fields.
 		/// </summary>
-		/// <param name="metadata">The metadata of the state slot the code should be generated for.</param>
-		private void RestrictField(StateSlotMetadata metadata)
+		private void RestrictFields(StateSlotMetadata metadata)
 		{
-			LoadObject(metadata.ObjectIdentifier);
+			for (var i = 0; i < metadata.ElementCount; ++i)
+				RestrictField(metadata, i);
+		}
 
+		/// <summary>
+		///   Generates the code to restrict the values contained in ranged object fields.
+		/// </summary>
+		private void RestrictField(StateSlotMetadata metadata, int elementIndex = 0)
+		{
 			var exceedsFourBytes = metadata.ElementSizeInBits > 32;
 			var continueLabel = _il.DefineLabel();
 
@@ -116,23 +129,24 @@ namespace SafetySharp.Runtime.Serialization
 			{
 				case OverflowBehavior.Error:
 					// if (v < lower | v > upper) throw
-					_il.Emit(OpCodes.Ldloc_0);
-					_il.Emit(OpCodes.Ldfld, metadata.Field);
+					PrepareAccess(metadata, elementIndex);
+					AccessField(metadata, OpCodes.Ldfld);
 					LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
 					_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Clt_Un : OpCodes.Clt);
-					
-					_il.Emit(OpCodes.Ldloc_0);
-					_il.Emit(OpCodes.Ldfld, metadata.Field);
+
+					PrepareAccess(metadata, elementIndex);
+					AccessField(metadata, OpCodes.Ldfld);
 					LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
 					_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Cgt_Un : OpCodes.Cgt);
-					
+
 					_il.Emit(OpCodes.Or);
 					_il.Emit(OpCodes.Brfalse, continueLabel);
-					
+
 					// throw new RangeViolationException(obj, field)
 					_il.Emit(OpCodes.Ldloc_0);
-					_il.Emit(OpCodes.Ldtoken, metadata.Field);
-					_il.Emit(OpCodes.Ldtoken, metadata.Field.DeclaringType);
+					var field = metadata.ContainedInStruct ? metadata.FieldChain.Last() : metadata.Field;
+					_il.Emit(OpCodes.Ldtoken, field);
+					_il.Emit(OpCodes.Ldtoken, field.DeclaringType);
 					var parameters = new[] { typeof(RuntimeFieldHandle), typeof(RuntimeTypeHandle) };
 					_il.Emit(OpCodes.Call, typeof(FieldInfo).GetMethod("GetFieldFromHandle", parameters));
 					LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
@@ -146,51 +160,51 @@ namespace SafetySharp.Runtime.Serialization
 					break;
 				case OverflowBehavior.Clamp:
 					var clampLabel = _il.DefineLabel();
-					
-					_il.Emit(OpCodes.Ldloc_0);
-					_il.Emit(OpCodes.Ldfld, metadata.Field);
+
+					PrepareAccess(metadata, elementIndex);
+					AccessField(metadata, OpCodes.Ldfld);
 					_il.Emit(OpCodes.Dup);
-					
+
 					// if (v < lower) v = lower
 					LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
 					_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Bge_Un_S : OpCodes.Bge_S, clampLabel);
 					_il.Emit(OpCodes.Pop);
-					_il.Emit(OpCodes.Ldloc_0);
+					PrepareAccess(metadata, elementIndex);
 					LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
-					_il.Emit(OpCodes.Stfld, metadata.Field);
+					AccessField(metadata, OpCodes.Stfld);
 					_il.Emit(OpCodes.Br, continueLabel);
-					
+
 					// else if (v > upper) v = upper
 					_il.MarkLabel(clampLabel);
 					LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
 					_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Ble_Un_S : OpCodes.Ble_S, continueLabel);
-					_il.Emit(OpCodes.Ldloc_0);
+					PrepareAccess(metadata, elementIndex);
 					LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
-					_il.Emit(OpCodes.Stfld, metadata.Field);
+					AccessField(metadata, OpCodes.Stfld);
 					break;
 				case OverflowBehavior.WrapClamp:
 					var wrapLabel = _il.DefineLabel();
-					
-					_il.Emit(OpCodes.Ldloc_0);
-					_il.Emit(OpCodes.Ldfld, metadata.Field);
+
+					PrepareAccess(metadata, elementIndex);
+					AccessField(metadata, OpCodes.Ldfld);
 					_il.Emit(OpCodes.Dup);
-					
+
 					// if (v < lower) v = upper
 					LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
 					_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Bge_Un_S : OpCodes.Bge_S, wrapLabel);
 					_il.Emit(OpCodes.Pop);
-					_il.Emit(OpCodes.Ldloc_0);
+					PrepareAccess(metadata, elementIndex);
 					LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
-					_il.Emit(OpCodes.Stfld, metadata.Field);
+					AccessField(metadata, OpCodes.Stfld);
 					_il.Emit(OpCodes.Br, continueLabel);
-					
+
 					// else if (v > upper) v = lower
 					_il.MarkLabel(wrapLabel);
 					LoadConstant(metadata.Range.UpperBound, exceedsFourBytes);
 					_il.Emit(metadata.DataType.IsUnsignedNumericType() ? OpCodes.Ble_Un_S : OpCodes.Ble_S, continueLabel);
-					_il.Emit(OpCodes.Ldloc_0);
+					PrepareAccess(metadata, elementIndex);
 					LoadConstant(metadata.Range.LowerBound, exceedsFourBytes);
-					_il.Emit(OpCodes.Stfld, metadata.Field);
+					AccessField(metadata, OpCodes.Stfld);
 					break;
 				default:
 					Assert.NotReached("Unknown overflow behavior.");
@@ -296,6 +310,37 @@ namespace SafetySharp.Runtime.Serialization
 			_il.Emit(OpCodes.Stloc_0);
 
 			_loadedObject = objectIdentifier;
+		}
+
+		/// <summary>
+		///   Prepares the access to the field referenced by the <paramref name="metadata" />.
+		/// </summary>
+		private void PrepareAccess(StateSlotMetadata metadata, int elementIndex)
+		{
+			_il.Emit(OpCodes.Ldloc_0);
+
+			if (!metadata.ContainedInStruct)
+				return;
+
+			if (metadata.ObjectType.IsArray)
+			{
+				_il.Emit(OpCodes.Ldc_I4, elementIndex);
+				_il.Emit(OpCodes.Ldelema, metadata.ObjectType.GetElementType());
+			}
+			else
+				_il.Emit(OpCodes.Ldflda, metadata.Field);
+
+			for (var i = 0; i < metadata.FieldChain.Length - 1; ++i)
+				_il.Emit(OpCodes.Ldflda, metadata.FieldChain[i]);
+		}
+
+		/// <summary>
+		///   Accesses the field on the object currently on the stack.
+		/// </summary>
+		private void AccessField(StateSlotMetadata metadata, OpCode accessCode)
+		{
+			var field = metadata.ContainedInStruct ? metadata.FieldChain.Last() : metadata.Field;
+			_il.Emit(accessCode, field);
 		}
 	}
 }

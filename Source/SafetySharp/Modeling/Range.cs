@@ -41,6 +41,23 @@ namespace SafetySharp.Modeling
 			new ConditionalWeakTable<object, Dictionary<FieldInfo, RangeAttribute>>();
 
 		/// <summary>
+		///   Gets the range metadata for the <paramref name="field" />. Returns <c>null</c> when the range is unrestricted.
+		/// </summary>
+		/// <param name="field">The field the range metadata should be returned for.</param>
+		/// <param name="mode">The serialization mode the range is obtained for.</param>
+		internal static RangeAttribute GetMetadata(FieldInfo field, SerializationMode mode)
+		{
+			var range = field.GetCustomAttribute<RangeAttribute>();
+			if (range != null)
+			{
+				return new RangeAttribute(
+					ConvertType(field.FieldType, range.LowerBound), ConvertType(field.FieldType, range.UpperBound), range.OverflowBehavior);
+			}
+
+			return null;
+		}
+
+		/// <summary>
 		///   Gets the range metadata for the <paramref name="obj" />'s <paramref name="field" />. Returns <c>null</c> when the range is
 		///   unrestricted.
 		/// </summary>
