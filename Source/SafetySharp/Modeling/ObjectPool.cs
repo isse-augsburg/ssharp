@@ -35,21 +35,73 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	/// <typeparam name="T">The type of the pooled objects.</typeparam>
 	public sealed class ObjectPool<T>
-		where T : class, new()
+		where T : class
 	{
 		/// <summary>
 		///   The pooled objects that are currently not in use.
 		/// </summary>
-		private readonly Stack<T> _pooledObjects;
+		[Hidden]
+		private readonly T[] _pooledObjects;
+
+		/// <summary>
+		/// The number of objects that are available in the pool.
+		/// </summary>
+		public int Count { get; private set; }
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="objs">The objects that can be allocated from the pool.</param>
-		internal ObjectPool(IEnumerable<T> objs)
+		public ObjectPool(IEnumerable<T> objs)
 		{
 			Requires.NotNull(objs, nameof(objs));
-			_pooledObjects = new Stack<T>(objs);
+
+			_pooledObjects = objs.ToArray();
+			Count = _pooledObjects.Length;
+		}
+
+		/// <summary>
+		///   Initializes a new instance, initializing <paramref name="capacity" />-many instances using the
+		///   <paramref name="constructor" /> function.
+		///   If <paramref name="constructor" /> is <c>null</c>, <typeparamref name="T" />'s default constructor is used to initialize
+		///   the objects.
+		/// </summary>
+		/// <param name="capacity">The number of instances that can be allocated from the pool.</param>
+		/// <param name="constructor">
+		///   The function that should be used to initialize the objects or <c>null</c> if
+		///   <typeparamref name="T" />'s default constructor should be used.
+		/// </param>
+		public ObjectPool(int capacity, Func<T> constructor = null)
+		{
+			Requires.That(capacity >= 0, nameof(capacity), "Invalid capacity.");
+
+			_pooledObjects = new T[capacity];
+			Count = capacity;
+
+			for (var i = 0; i < capacity; ++i)
+			{
+				T obj;
+				if (constructor != null)
+				{
+					obj = constructor();
+					if (obj == null)
+						throw new InvalidOperationException("The constructor function returned a null value.");
+				}
+				else
+				{
+					try
+					{
+						obj = Activator.CreateInstance<T>();
+					}
+					catch (MissingMethodException)
+					{
+						throw new InvalidOperationException(
+							$"Type '{typeof(T).FullName}' does not declare a default constructor. Provide a constructor function instead.");
+					}
+				}
+
+				_pooledObjects[i] = obj;
+			}
 		}
 
 		/// <summary>
@@ -57,23 +109,42 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		public T Allocate()
 		{
-			if (_pooledObjects.Count == 0)
+			if (Count <= 0)
 				throw new OutOfMemoryException($"Object pool ran out of instances of type '{typeof(T).FullName}'.");
 
-			return _pooledObjects.Pop();
+			var obj = _pooledObjects[Count - 1];
+			_pooledObjects[Count - 1] = null;
+
+			--Count;
+			return obj;
 		}
 
 		/// <summary>
-		///   Returns an object to the pool so that it can be reused later.
+		///   Returns <paramref name="obj" /> to the pool so that it can be reused later.
 		/// </summary>
 		/// <param name="obj">The object that should be returned to the pool.</param>
-		public void Free(T obj)
+		public void Return(T obj)
 		{
 			if (obj == null)
 				return;
 
-			Requires.That(_pooledObjects.Contains(obj, ReferenceEqualityComparer<T>.Default), "The object has already been returned to the pool.");
-			_pooledObjects.Push(obj);
+			Requires.That(!_pooledObjects.Contains(obj, ReferenceEqualityComparer<T>.Default), "The object has already been returned to the pool.");
+			Requires.That(Count < _pooledObjects.Length, "Too many objects have been returned to the pool.");
+
+			_pooledObjects[Count++] = obj;
+		}
+
+		/// <summary>
+		///   Returns <paramref name="objs" /> to the pool so that they can be reused later.
+		/// </summary>
+		/// <param name="objs">The objects that should be returned to the pool.</param>
+		public void Return(IEnumerable<T> objs)
+		{
+			if (objs == null)
+				return;
+
+			foreach (var obj in objs)
+				Return(obj);
 		}
 	}
 }
