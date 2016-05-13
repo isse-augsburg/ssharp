@@ -41,6 +41,23 @@ namespace SafetySharp.Modeling
 			new ConditionalWeakTable<object, Dictionary<FieldInfo, RangeAttribute>>();
 
 		/// <summary>
+		///   Gets the range metadata for the <paramref name="field" />. Returns <c>null</c> when the range is unrestricted.
+		/// </summary>
+		/// <param name="field">The field the range metadata should be returned for.</param>
+		/// <param name="mode">The serialization mode the range is obtained for.</param>
+		internal static RangeAttribute GetMetadata(FieldInfo field, SerializationMode mode)
+		{
+			var range = field.GetCustomAttribute<RangeAttribute>();
+			if (range != null)
+			{
+				return new RangeAttribute(
+					ConvertType(field.FieldType, range.LowerBound), ConvertType(field.FieldType, range.UpperBound), range.OverflowBehavior);
+			}
+
+			return null;
+		}
+
+		/// <summary>
 		///   Gets the range metadata for the <paramref name="obj" />'s <paramref name="field" />. Returns <c>null</c> when the range is
 		///   unrestricted.
 		/// </summary>
@@ -107,7 +124,7 @@ namespace SafetySharp.Modeling
 			var objectExpression = memberExpression.Expression as ConstantExpression;
 
 			Requires.That(fieldInfo != null, nameof(fieldExpression), "Expected a non-nested reference to a field.");
-			Requires.That(objectExpression != null, nameof(fieldExpression), "Expected a non-nested reference to non-static field.");
+			Requires.That(objectExpression != null, nameof(fieldExpression), "Expected a non-nested reference to non-static field of primitive type.");
 			Requires.That(((IComparable)range.LowerBound).CompareTo(range.UpperBound) <= 0, nameof(lowerBound),
 				$"lower bound '{range.LowerBound}' is not smaller than upper bound '{range.UpperBound}'.");
 

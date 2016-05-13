@@ -39,10 +39,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 	class IntFlowModel : ModelBase
 	{
-		[Root(Role.System)]
+		[Root(RootKind.Controller)]
 		public readonly IntFlowCombinator Combinator = new IntFlowCombinator();
 
-		[Root(Role.System)]
+		[Root(RootKind.Controller)]
 		public new IntFlowComponentCollection Components;
 
 		

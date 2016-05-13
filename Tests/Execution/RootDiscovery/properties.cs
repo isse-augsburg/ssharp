@@ -41,19 +41,19 @@ namespace Tests.Execution.RootDiscovery
 
 		private class M : ModelBase
 		{
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			private C C { get; } = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			protected C D { get; } = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			internal D E { get; } = new D();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public C F { get; } = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public IEnumerable<IComponent> G { get; } = new[]
 			{
 				new C(),

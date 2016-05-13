@@ -45,10 +45,10 @@ namespace Tests.Execution.ModelCopy
 
 		private class M : ModelBase
 		{
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			internal readonly D E;
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public readonly C F;
 
 			public M()

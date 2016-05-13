@@ -39,7 +39,7 @@ namespace Tests.Execution.RootDiscovery
 
 		private class M : ModelBase
 		{
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public C C(int i) => new C();
 		}
 

@@ -66,10 +66,10 @@ namespace SafetySharp.CaseStudies.PressureTank.Modeling
 			Bind(nameof(Tank.IsBeingFilled), nameof(Pump.IsEnabled));
 		}
 
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		public Tank Tank { get; } = new Tank();
 
-		[Root(Role.System)]
+		[Root(RootKind.Controller)]
 		public Controller Controller { get; }
 
 		public PressureSensor Sensor => Controller.Sensor;

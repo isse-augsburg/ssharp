@@ -33,7 +33,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 	class DialyzingFluidFlowModel : ModelBase
 	{
-		[Root(Role.System)]
+		[Root(RootKind.Controller)]
 		public IComponent[] FlowElements;
 }
 

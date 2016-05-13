@@ -54,7 +54,7 @@ namespace Tests.Execution.ModelCopy
 
 		private class M : ModelBase
 		{
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public readonly C A = new C();
 
 			public readonly C E = new C();
@@ -64,10 +64,10 @@ namespace Tests.Execution.ModelCopy
 				F = A;
 			}
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public C B { get; } = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public C C { get; } = new C();
 
 			public C F { get; }
@@ -76,7 +76,7 @@ namespace Tests.Execution.ModelCopy
 
 			public Formula Formula => D().I == E.I;
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public C D() => G;
 
 			public C H() => G;

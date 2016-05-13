@@ -63,7 +63,8 @@
     <Compile Include="Analysis\ProbabilityMatrixBuilder.cs" />
     <Compile Include="Modeling\Probability.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
-    <Compile Include="Analysis\Role.cs" />
+    <Compile Include="Modeling\ObjectPool.cs" />
+    <Compile Include="Modeling\RootKind.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsStateFormulaVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\LtsMinCtlTransformer.cs" />
     <Compile Include="Analysis\ModelChecker.cs" />
@@ -71,7 +72,7 @@
     <Compile Include="Modeling\FaultExtensions.cs" />
     <Compile Include="Modeling\ModelBinder.cs" />
     <Compile Include="Modeling\ModelBase.cs" />
-    <Compile Include="Analysis\RootAttribute.cs" />
+    <Compile Include="Modeling\RootAttribute.cs" />
     <Compile Include="Analysis\SafetyAnalysis.cs" />
     <Compile Include="Modeling\Reward.cs" />
     <Compile Include="Runtime\ProbabilityStack.cs" />

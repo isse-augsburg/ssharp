@@ -41,7 +41,7 @@ class PressureSensor : Component
 
   // A persistent fault that can occur nondeterminisitcally; once it has occurred,
   // it cannot disappear.
-  private readonly Fault _noPressureFault = new PersistentFault();
+  private readonly Fault _noPressureFault = new PermanentFault();
 
   // Instantiates an instance of a pressure sensor. The maximum allowed pressure is
   // passed in as a constructor argument, allowing for easy configuration and
@@ -86,8 +86,7 @@ more details, please see the
 [Wiki](https://github.com/isse-augsburg/ssharp/wiki/Safety%20Analysis).
 
 ```csharp
-var analysis = new SafetyAnalysis();
-var result = analysis.ComputeMinimalCriticalSets(model, hazard);
+var result = SafetyAnalysis.AnalyzeHazard(model, hazard);
 
 result.SaveCounterExamples("counter examples");
 Console.WriteLine(result);

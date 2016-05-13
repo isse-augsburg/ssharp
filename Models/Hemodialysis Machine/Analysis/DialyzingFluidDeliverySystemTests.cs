@@ -80,12 +80,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 	class DialyzingFluidDeliverySystemTestEnvironment : ModelBase
 	{
-		[Root(Role.System)]
+		[Root(RootKind.Controller)]
 		public readonly DialyzingFluidDeliverySystem DialyzingFluidDeliverySystem = new DialyzingFluidDeliverySystem();
 
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		public readonly DialyzingFluidFlowCombinator DialysingFluidFlowCombinator = new DialyzingFluidFlowCombinator();
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		public readonly DialyzingFluidDeliverySystemTestEnvironmentDialyzer Dialyzer = new DialyzingFluidDeliverySystemTestEnvironmentDialyzer();
 
 		public DialyzingFluidDeliverySystemTestEnvironment()
