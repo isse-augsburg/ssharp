@@ -20,26 +20,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
+namespace Tests.Serialization.Misc
 {
-	public sealed class MainControlRemovedCounter : MainControl
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
+
+	internal class HiddenProperty : SerializationObject
 	{
-		/// <summary>
-		///   Updates the internal state of the component.
-		/// </summary>
-		public override void Update()
+		protected override void Check()
 		{
-			base.Update();
+			var c = new C { X = 1};
 
-			if (GetNumberOfEnteringVehicles() > 0)
-				Timer.Start();
+			GenerateCode(SerializationMode.Full, c);
+			StateSlotCount.ShouldBe(1);
 
-			var active = !Timer.HasElapsed;
-			var onlyRightTriggered = !LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected;
+			Serialize();
+			c.X = 2;
 
-			// We assume the worst case: If the vehicle was not seen on the right lane, it is assumed to be on the left lane
-			IsVehicleLeavingOnLeftLane = PositionDetector.IsVehicleDetected && !onlyRightTriggered && active;
-			IsVehicleLeavingOnRightLane = PositionDetector.IsVehicleDetected && onlyRightTriggered && active;
+			Deserialize();
+			c.X.ShouldBe(1);
+			c.Y.ShouldBe(99);
+
+			GenerateCode(SerializationMode.Optimized, c);
+			StateSlotCount.ShouldBe(1);
+
+			Serialize();
+			c.X = 2;
+
+			Deserialize();
+			c.X.ShouldBe(2);
+			c.Y.ShouldBe(99);
+		}
+
+		internal class C
+		{
+			[Hidden]
+			public int X { get; set; }
+
+			[NonSerializable]
+			public int Y { get; } = 99;
+		}
+
+		internal class D
+		{
+			public int X;
 		}
 	}
 }

@@ -27,6 +27,7 @@ namespace SafetySharp.Utilities
 	using System.Linq;
 	using System.Reflection;
 	using System.Reflection.Emit;
+	using System.Runtime.CompilerServices;
 	using System.Runtime.InteropServices;
 	using Modeling;
 	using Runtime.Serialization;
@@ -253,6 +254,19 @@ namespace SafetySharp.Utilities
 		/// <param name="discoveringObjects">Indicates whether objects are being discovered.</param>
 		public static bool IsHidden(this MemberInfo member, SerializationMode mode, bool discoveringObjects)
 		{
+			// If the field is compiler generated and matches the general naming scheme of backing fields '<PropName>k__BackingField'
+			// of auto-implemented properties, check the property instead
+			// TODO: Remove this workaround once C# supports [field:Attribute] on properties
+			var fieldInfo = member as FieldInfo;
+			if (fieldInfo != null && fieldInfo.HasAttribute<CompilerGeneratedAttribute>() && fieldInfo.Name.EndsWith(">k__BackingField"))
+			{
+				var propertyName = fieldInfo.Name.Substring(1, fieldInfo.Name.Length - ">k__BackingField".Length - 1);
+				var property = member.DeclaringType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+				if (property != null)
+					return property.IsHidden(mode, discoveringObjects);
+			}
+
 			// Don't try to serialize members that are explicitly marked as non-serializable
 			if (member.HasAttribute<NonSerializableAttribute>() || member.HasAttribute<NonSerializedAttribute>())
 				return true;
@@ -262,7 +276,6 @@ namespace SafetySharp.Utilities
 				return true;
 
 			// Read-only fields are implicitly marked with [Hidden]
-			var fieldInfo = member as FieldInfo;
 			var hiddenAttribute = member.GetCustomAttribute<HiddenAttribute>();
 			var isHidden = hiddenAttribute != null || (fieldInfo != null && fieldInfo.IsInitOnly);
 

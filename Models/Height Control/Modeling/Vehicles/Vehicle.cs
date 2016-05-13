@@ -29,9 +29,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 	/// </summary>
 	public class Vehicle : Component
 	{
-		[Hidden]
-		private VehicleKind _kind;
-
 		[Range(0, Model.TunnelPosition, OverflowBehavior.Clamp)]
 		private int _position;
 
@@ -46,11 +43,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// <summary>
 		///   Gets the kind the vehicle.
 		/// </summary>
-		public VehicleKind Kind
-		{
-			get { return _kind; }
-			set { _kind = value; }
-		}
+		[Hidden]
+		public VehicleKind Kind { get; set; }
 
 		/// <summary>
 		///   Gets a value indicating whether the vehicle has collided with the tunnel.
