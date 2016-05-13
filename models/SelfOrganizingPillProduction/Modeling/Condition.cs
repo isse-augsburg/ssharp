@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace SelfOrganizingPillProduction.Modeling
 {
@@ -15,7 +16,7 @@ namespace SelfOrganizingPillProduction.Modeling
         /// <summary>
         /// The capabilities already applied to the container.
         /// </summary>
-        public Capability[] State { get; set; }
+        public List<Capability> State { get; } = new List<Capability>(Model.MaximumRecipeLength);
 
         /// <summary>
         /// A reference to the container's recipe.

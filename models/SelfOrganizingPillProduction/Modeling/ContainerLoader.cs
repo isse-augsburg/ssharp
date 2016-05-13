@@ -31,7 +31,7 @@ namespace SelfOrganizingPillProduction.Modeling
             // This is only called if the current Container comes from another station.
             // The only valid role is thus an empty one (no CapabilitiesToApply) and represents
             // a simple forwarding to the next station.
-            if (role.CapabilitiesToApply.Length > 0)
+            if (role.CapabilitiesToApply.Count > 0)
                 throw new InvalidOperationException("Unsupported capability configuration in ContainerLoader");
         }
 
@@ -84,7 +84,7 @@ namespace SelfOrganizingPillProduction.Modeling
                 RemainingAmount = recipe.Amount;
 
                 // necessary here because it cannot be created later during model checking
-                InitialCondition = new Condition { Recipe = recipe, State = new Capability[0], Port = null };
+                InitialCondition = new Condition { Recipe = recipe, Port = null };
             }
 
             public Recipe Recipe { get; }
