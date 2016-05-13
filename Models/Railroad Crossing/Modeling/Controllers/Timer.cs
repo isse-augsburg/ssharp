@@ -20,13 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
-	public enum Message
+	using SafetySharp.Modeling;
+
+	public class Timer : Component
 	{
-		None,
-		Close,
-		Query,
-		Closed
+		[Range(-1, Model.CloseTimeout, OverflowBehavior.Clamp)]
+		private int _remainingTime = -1;
+
+		public bool HasElapsed => _remainingTime == 0;
+
+		public void Start()
+		{
+			_remainingTime = Model.CloseTimeout;
+		}
+
+		public void Stop()
+		{
+			_remainingTime = -1;
+		}
+
+		public override void Update()
+		{
+			--_remainingTime;
+		}
 	}
 }

@@ -64,22 +64,22 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Analysis\SafetyAnalysisTests.cs" />
-    <Compile Include="Modeling\Environment\Barrier.cs" />
-    <Compile Include="Modeling\Environment\RadioChannel.cs" />
-    <Compile Include="Modeling\Environment\Train.cs" />
-    <Compile Include="Modeling\System\BarrierMotor.cs" />
-    <Compile Include="Modeling\System\BarrierSensor.cs" />
-    <Compile Include="Modeling\System\CrossingController.cs" />
-    <Compile Include="Modeling\System\Timer.cs" />
-    <Compile Include="Modeling\System\TrainSensor.cs" />
-    <Compile Include="Modeling\System\Message.cs" />
+    <Compile Include="Modeling\Plants\Barrier.cs" />
+    <Compile Include="Modeling\Plants\RadioChannel.cs" />
+    <Compile Include="Modeling\Plants\Train.cs" />
+    <Compile Include="Modeling\Controllers\BarrierMotor.cs" />
+    <Compile Include="Modeling\Controllers\BarrierSensor.cs" />
+    <Compile Include="Modeling\Controllers\CrossingController.cs" />
+    <Compile Include="Modeling\Controllers\Timer.cs" />
+    <Compile Include="Modeling\Controllers\TrainSensor.cs" />
+    <Compile Include="Modeling\Controllers\Message.cs" />
     <Compile Include="Modeling\Model.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Modeling\System\RadioModule.cs" />
+    <Compile Include="Modeling\Controllers\RadioModule.cs" />
     <Compile Include="Analysis\ModelCheckingTests.cs" />
-    <Compile Include="Modeling\System\Brakes.cs" />
-    <Compile Include="Modeling\System\Odometer.cs" />
-    <Compile Include="Modeling\System\TrainController.cs" />
+    <Compile Include="Modeling\Controllers\Brakes.cs" />
+    <Compile Include="Modeling\Controllers\Odometer.cs" />
+    <Compile Include="Modeling\Controllers\TrainController.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">

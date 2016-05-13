@@ -20,43 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Environment
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Plants
 {
+	using Controllers;
 	using SafetySharp.Modeling;
 
 	/// <summary>
-	///   Represents the actual train that is controlled by the train controller.
+	///   Represents the radio channel that the train and crossing controllers use to communicate with each other.
 	/// </summary>
-	public class Train : Component
+	public class RadioChannel : Component
 	{
-		[Range(0, Model.EndPosition, OverflowBehavior.Clamp)]
-		private int _position;
+		public readonly Fault MessageDropped = new TransientFault();
 
-		[Range(0, Model.MaxSpeed, OverflowBehavior.Clamp)]
-		private int _speed = Model.MaxSpeed;
+		private Message _currentMessage;
 
 		/// <summary>
-		///   Gets the train's current position.
+		///   Receives the message that was sent last.
 		/// </summary>
-		public int Position => _position;
-
-		/// <summary>
-		///   Gets the train's current speed that affects its position.
-		/// </summary>
-		public int Speed => _speed;
-
-		/// <summary>
-		///   Gets the train's current acceleration that affects its speed.
-		/// </summary>
-		public extern int Acceleration { get; }
-
-		/// <summary>
-		///   Updates the train's speed and position in accordance with its current acceleration.
-		/// </summary>
-		public override void Update()
+		public virtual Message Receive()
 		{
-			_position += _speed;
-			_speed += Acceleration;
+			return _currentMessage;
+		}
+
+		/// <summary>
+		///   Sends the given message.
+		/// </summary>
+		public void Send(Message message)
+		{
+			_currentMessage = message;
+		}
+
+		[FaultEffect(Fault = nameof(MessageDropped))]
+		public class DroppedEffect : RadioChannel
+		{
+			public override Message Receive()
+			{
+				return Message.None;
+			}
 		}
 	}
 }

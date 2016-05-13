@@ -20,30 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
 
-	public class Timer : Component
+	public class RadioModule : Component
 	{
-		[Range(-1, Model.CloseTimeout, OverflowBehavior.Clamp)]
-		private int _remainingTime = -1;
+		public extern Message RetrieveFromChannel();
+		public extern void DeliverToChannel(Message message);
 
-		public bool HasElapsed => _remainingTime == 0;
+		public Message Receive() => RetrieveFromChannel();
 
-		public void Start()
+		public void Send(Message message)
 		{
-			_remainingTime = Model.CloseTimeout;
-		}
-
-		public void Stop()
-		{
-			_remainingTime = -1;
-		}
-
-		public override void Update()
-		{
-			--_remainingTime;
+			DeliverToChannel(message);
 		}
 	}
 }

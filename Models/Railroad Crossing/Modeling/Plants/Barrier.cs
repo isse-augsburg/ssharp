@@ -20,21 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Plants
 {
 	using SafetySharp.Modeling;
 
-	public class TrainSensor : Component
+	/// <summary>
+	///   Represents the actual barrier that are controlled by the crossing controller.
+	/// </summary>
+	public class Barrier : Component
 	{
-		public readonly Fault ErroneousTrainDetection = new TransientFault();
+		[Range(0, Model.ClosingDelay, OverflowBehavior.Clamp)]
+		private int _angle = Model.ClosingDelay;
 
-		public virtual bool HasTrainPassed => TrainPosition > Model.SensorPosition;
-		public extern int TrainPosition { get; }
+		/// <summary>
+		///   Gets the current angle of the barrier; a value of 0 means that the barrier is closed.
+		/// </summary>
+		public int Angle => _angle;
 
-		[FaultEffect(Fault = nameof(ErroneousTrainDetection))]
-		public class ErroneousDetectionEffect : TrainSensor
+		/// <summary>
+		///   Gets the barrier's current angular movement speed.
+		/// </summary>
+		public extern int Speed { get; }
+
+		/// <summary>
+		///   Updates the barrier's angle in accordance with its movement speed.
+		/// </summary>
+		public override void Update()
 		{
-			public override bool HasTrainPassed => true;
+			_angle += Speed;
 		}
 	}
 }

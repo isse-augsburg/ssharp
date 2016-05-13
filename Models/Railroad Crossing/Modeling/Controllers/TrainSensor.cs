@@ -20,20 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
 
-	public class RadioModule : Component
+	public class TrainSensor : Component
 	{
-		public extern Message RetrieveFromChannel();
-		public extern void DeliverToChannel(Message message);
+		public readonly Fault ErroneousTrainDetection = new TransientFault();
 
-		public Message Receive() => RetrieveFromChannel();
+		public virtual bool HasTrainPassed => TrainPosition > Model.SensorPosition;
+		public extern int TrainPosition { get; }
 
-		public void Send(Message message)
+		[FaultEffect(Fault = nameof(ErroneousTrainDetection))]
+		public class ErroneousDetectionEffect : TrainSensor
 		{
-			DeliverToChannel(message);
+			public override bool HasTrainPassed => true;
 		}
 	}
 }

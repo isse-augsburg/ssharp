@@ -20,34 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Environment
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   Represents the actual barrier that are controlled by the crossing controller.
-	/// </summary>
-	public class Barrier : Component
+	public class BarrierMotor : Component
 	{
-		[Range(0, Model.ClosingDelay, OverflowBehavior.Clamp)]
-		private int _angle = Model.ClosingDelay;
+		public readonly Fault BarrierMotorStuck = new TransientFault();
 
-		/// <summary>
-		///   Gets the current angle of the barrier; a value of 0 means that the barrier is closed.
-		/// </summary>
-		public int Angle => _angle;
+		[Range(-1, 1, OverflowBehavior.Clamp)]
+		private int _currentSpeed;
 
-		/// <summary>
-		///   Gets the barrier's current angular movement speed.
-		/// </summary>
-		public extern int Speed { get; }
+		public virtual int Speed => _currentSpeed;
 
-		/// <summary>
-		///   Updates the barrier's angle in accordance with its movement speed.
-		/// </summary>
-		public override void Update()
+		public void Open()
 		{
-			_angle += Speed;
+			_currentSpeed = 1;
+		}
+
+		public void Close()
+		{
+			_currentSpeed = -1;
+		}
+
+		public void Stop()
+		{
+			_currentSpeed = 0;
+		}
+
+		[FaultEffect(Fault = nameof(BarrierMotorStuck))]
+		public class StuckEffect : BarrierMotor
+		{
+			public override int Speed => 0;
 		}
 	}
 }
