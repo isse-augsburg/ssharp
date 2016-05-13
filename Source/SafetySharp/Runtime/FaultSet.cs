@@ -104,7 +104,7 @@ namespace SafetySharp.Runtime
 			Requires.That(faults.Length < 32, "More than 31 faults are not supported.");
 
 			for (var i = 1; i <= faults.Length; ++i)
-				faults[i - 1].Activation = (_faults & (1 << (i - 1))) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
+				faults[i - 1].Activation = (_faults & (1 << (i - 1))) != 0 ? Activation.Forced : Activation.Suppressed;
 		}
 
 		/// <summary>
