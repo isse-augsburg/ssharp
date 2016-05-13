@@ -31,26 +31,91 @@ namespace Tests.Serialization.Ranges
 	{
 		protected override void Check()
 		{
-			var d = new D { S = new[] { new S { F = 3 }, new S { F = 4 } } };
+			var d = new D { S = new[] { new S { F = 2, G = 3, H = 4 }, new S { F = 6, G = 7, H = 8 } } };
 			GenerateCode(SerializationMode.Optimized, d);
 			StateVectorSize.ShouldBe(1);
 
 			Serialize();
 			d.S[0].F = 33;
-			d.S[1].F = 33;
+			d.S[0].G = 0;
+			d.S[0].H = 0;
 
 			Deserialize();
-			d.S[0].F.ShouldBe(3);
-			d.S[1].F.ShouldBe(4);
+			d.S[0].F.ShouldBe(2);
+			d.S[0].G.ShouldBe(3);
+			d.S[0].H.ShouldBe(4);
+			d.S[1].F.ShouldBe(6);
+			d.S[1].G.ShouldBe(7);
+			d.S[1].H.ShouldBe(8);
+
+			d.S[0].G = -1;
+			d.S[1].G = -1;
+			Serialize();
+			Deserialize();
+
+			d.S[0].F.ShouldBe(2);
+			d.S[0].G.ShouldBe(0);
+			d.S[0].H.ShouldBe(4);
+			d.S[1].F.ShouldBe(6);
+			d.S[1].G.ShouldBe(0);
+			d.S[1].H.ShouldBe(8);
+
+			d.S[0].G = 121;
+			d.S[1].G = 121;
+			Serialize();
+			Deserialize();
+
+			d.S[0].F.ShouldBe(2);
+			d.S[0].G.ShouldBe(10);
+			d.S[0].H.ShouldBe(4);
+			d.S[1].F.ShouldBe(6);
+			d.S[1].G.ShouldBe(10);
+			d.S[1].H.ShouldBe(8);
+
+			d.S[0].G = 3;
+			d.S[1].G = 7;
+			d.S[0].H = -1;
+			d.S[1].H = -1;
+			Serialize();
+			Deserialize();
+
+			d.S[0].F.ShouldBe(2);
+			d.S[0].G.ShouldBe(3);
+			d.S[0].H.ShouldBe(0);
+			d.S[1].F.ShouldBe(6);
+			d.S[1].G.ShouldBe(7);
+			d.S[1].H.ShouldBe(0);
+
+			d.S[0].H = 111;
+			d.S[1].H = 111;
+			Serialize();
+			Deserialize();
+
+			d.S[0].F.ShouldBe(2);
+			d.S[0].G.ShouldBe(3);
+			d.S[0].H.ShouldBe(10);
+			d.S[1].F.ShouldBe(6);
+			d.S[1].G.ShouldBe(7);
+			d.S[1].H.ShouldBe(10);
 
 			d.S[0].F = -1;
+			Should.Throw<RangeViolationException>(() => Serialize());
+
+			d.S[0].F = 2;
+			d.S[1].F = -1;
 			Should.Throw<RangeViolationException>(() => Serialize());
 		}
 
 		internal struct S
 		{
-			[Range(0, 5, OverflowBehavior.Error)]
+			[Range(0, 10, OverflowBehavior.Error)]
 			public int F;
+
+			[Range(0, 10, OverflowBehavior.Clamp)]
+			public int G;
+
+			[Range(0, 10, OverflowBehavior.WrapClamp)]
+			public int H;
 		}
 
 		internal class D : Component

@@ -33,7 +33,7 @@ namespace Tests.Serialization.Compaction
 			var a = new[] { E.A, E.B };
 
 			GenerateCode(SerializationMode.Optimized, a, c);
-			StateSlotCount.ShouldBe(1);
+			StateSlotCount.ShouldBe(3);
 
 			Serialize();
 			c.B = 2;
@@ -49,8 +49,8 @@ namespace Tests.Serialization.Compaction
 			c.A.ShouldBe((byte)3);
 			a.ShouldBe(new[] { E.A, E.B });
 			c.S.A.ShouldBe((byte)3);
-			c.T[0].A.ShouldBe((byte)3);
-			c.T[1].A.ShouldBe((byte)3);
+			c.T[0].A.ShouldBe((byte)99);
+			c.T[1].A.ShouldBe((byte)81);
 		}
 
 		private class C

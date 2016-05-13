@@ -53,15 +53,34 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="mode">The serialization mode that should be used to generate the metadata.</param>
 		protected internal override IEnumerable<StateSlotMetadata> GetStateSlotMetadata(object obj, int objectIdentifier, SerializationMode mode)
 		{
-			return GetFields(obj, mode).Select(field => new StateSlotMetadata
+			foreach (var field in GetFields(obj, mode))
 			{
-				Object = obj,
-				ObjectType = obj.GetType(),
-				ObjectIdentifier = objectIdentifier,
-				DataType = field.FieldType,
-				Field = field,
-				ElementCount = 1
-			});
+				if (field.FieldType.IsStructType())
+				{
+					foreach (var metadataSlot in StateSlotMetadata.FromStruct(field.FieldType))
+					{
+						metadataSlot.Object = obj;
+						metadataSlot.ObjectIdentifier = objectIdentifier;
+						metadataSlot.ObjectType = obj.GetType();
+						metadataSlot.ElementCount = 1;
+						metadataSlot.Field = field;
+
+						yield return metadataSlot;
+					}
+				}
+				else
+				{
+					yield return new StateSlotMetadata
+					{
+						Object = obj,
+						ObjectType = obj.GetType(),
+						ObjectIdentifier = objectIdentifier,
+						DataType = field.FieldType,
+						Field = field,
+						ElementCount = 1
+					};
+				}
+			}
 		}
 
 		/// <summary>

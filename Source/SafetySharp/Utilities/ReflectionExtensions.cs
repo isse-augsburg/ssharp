@@ -137,6 +137,15 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
+		///   Checks whether <paramref name="type" /> is a struct type.
+		/// </summary>
+		public static bool IsStructType(this Type type)
+		{
+			Requires.NotNull(type, nameof(type));
+			return type.IsValueType && !type.IsEnum && !type.IsPrimitive;
+		}
+
+		/// <summary>
 		///   Checks whether <paramref name="type" /> is a reference type, i.e., a class, delegate, or interface.
 		/// </summary>
 		public static bool IsReferenceType(this Type type)
