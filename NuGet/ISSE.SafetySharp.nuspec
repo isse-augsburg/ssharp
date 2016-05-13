@@ -3,7 +3,7 @@
 	<metadata>
 		<id>ISSE.SafetySharp</id>
 		<title>S#</title>
-		<version>1.1.2</version>
+		<version>1.2.0</version>
 		<authors>Institute for Software and Systems Engineering (University of Augsburg)</authors>
 		<owners>Institute for Software and Systems Engineering (University of Augsburg)</owners>
 		<licenseUrl>https://github.com/isse-augsburg/ssharp/blob/master/LICENSE.md</licenseUrl>
