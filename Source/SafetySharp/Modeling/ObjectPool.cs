@@ -35,21 +35,64 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	/// <typeparam name="T">The type of the pooled objects.</typeparam>
 	public sealed class ObjectPool<T>
-		where T : class, new()
+		where T : class
 	{
 		/// <summary>
 		///   The pooled objects that are currently not in use.
 		/// </summary>
-		private readonly Stack<T> _pooledObjects;
+		private readonly Stack<T> _pooledObjects = new Stack<T>();
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="objs">The objects that can be allocated from the pool.</param>
-		internal ObjectPool(IEnumerable<T> objs)
+		public ObjectPool(IEnumerable<T> objs)
 		{
 			Requires.NotNull(objs, nameof(objs));
-			_pooledObjects = new Stack<T>(objs);
+
+			foreach (var obj in objs)
+				_pooledObjects.Push(obj);
+		}
+
+		/// <summary>
+		///   Initializes a new instance, initializing <paramref name="capacity" />-many instances using the
+		///   <paramref name="constructor" /> function.
+		///   If <paramref name="constructor" /> is <c>null</c>, <typeparamref name="T" />'s default constructor is used to initialize
+		///   the objects.
+		/// </summary>
+		/// <param name="capacity">The number of instances that can be allocated from the pool.</param>
+		/// <param name="constructor">
+		///   The function that should be used to initialize the objects or <c>null</c> if
+		///   <typeparamref name="T" />'s default constructor should be used.
+		/// </param>
+		public ObjectPool(int capacity, Func<T> constructor = null)
+		{
+			Requires.That(capacity >= 0, nameof(capacity), "Invalid capacity.");
+
+			for (var i = 0; i < capacity; ++i)
+			{
+				T obj;
+				if (constructor != null)
+				{
+					obj = constructor();
+					if (obj == null)
+						throw new InvalidOperationException("The constructor function returned a null value.");
+				}
+				else
+				{
+					try
+					{
+						obj = Activator.CreateInstance<T>();
+					}
+					catch (MissingMethodException)
+					{
+						throw new InvalidOperationException(
+							$"Type '{typeof(T).FullName}' does not declare a default constructor. Provide a constructor function instead.");
+					}
+				}
+
+				_pooledObjects.Push(obj);
+			}
 		}
 
 		/// <summary>
