@@ -40,7 +40,13 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   The pooled objects that are currently not in use.
 		/// </summary>
-		private readonly Stack<T> _pooledObjects = new Stack<T>();
+		[Hidden]
+		private readonly T[] _pooledObjects;
+
+		/// <summary>
+		/// The number of objects that are available in the pool.
+		/// </summary>
+		public int Count { get; private set; }
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -50,8 +56,8 @@ namespace SafetySharp.Modeling
 		{
 			Requires.NotNull(objs, nameof(objs));
 
-			foreach (var obj in objs)
-				_pooledObjects.Push(obj);
+			_pooledObjects = objs.ToArray();
+			Count = _pooledObjects.Length;
 		}
 
 		/// <summary>
@@ -68,6 +74,9 @@ namespace SafetySharp.Modeling
 		public ObjectPool(int capacity, Func<T> constructor = null)
 		{
 			Requires.That(capacity >= 0, nameof(capacity), "Invalid capacity.");
+
+			_pooledObjects = new T[capacity];
+			Count = capacity;
 
 			for (var i = 0; i < capacity; ++i)
 			{
@@ -91,7 +100,7 @@ namespace SafetySharp.Modeling
 					}
 				}
 
-				_pooledObjects.Push(obj);
+				_pooledObjects[i] = obj;
 			}
 		}
 
@@ -100,23 +109,42 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		public T Allocate()
 		{
-			if (_pooledObjects.Count == 0)
+			if (Count <= 0)
 				throw new OutOfMemoryException($"Object pool ran out of instances of type '{typeof(T).FullName}'.");
 
-			return _pooledObjects.Pop();
+			var obj = _pooledObjects[Count - 1];
+			_pooledObjects[Count - 1] = null;
+
+			--Count;
+			return obj;
 		}
 
 		/// <summary>
-		///   Returns an object to the pool so that it can be reused later.
+		///   Returns <paramref name="obj" /> to the pool so that it can be reused later.
 		/// </summary>
 		/// <param name="obj">The object that should be returned to the pool.</param>
-		public void Free(T obj)
+		public void Return(T obj)
 		{
 			if (obj == null)
 				return;
 
-			Requires.That(_pooledObjects.Contains(obj, ReferenceEqualityComparer<T>.Default), "The object has already been returned to the pool.");
-			_pooledObjects.Push(obj);
+			Requires.That(!_pooledObjects.Contains(obj, ReferenceEqualityComparer<T>.Default), "The object has already been returned to the pool.");
+			Requires.That(Count < _pooledObjects.Length, "Too many objects have been returned to the pool.");
+
+			_pooledObjects[Count++] = obj;
+		}
+
+		/// <summary>
+		///   Returns <paramref name="objs" /> to the pool so that they can be reused later.
+		/// </summary>
+		/// <param name="objs">The objects that should be returned to the pool.</param>
+		public void Return(IEnumerable<T> objs)
+		{
+			if (objs == null)
+				return;
+
+			foreach (var obj in objs)
+				Return(obj);
 		}
 	}
 }
