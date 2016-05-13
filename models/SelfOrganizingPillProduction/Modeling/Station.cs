@@ -28,7 +28,7 @@ namespace SelfOrganizingPillProduction.Modeling
         /// <summary>
         /// The roles the station must apply to containers.
         /// </summary>
-        protected List<Role> AllocatedRoles { get; } = new List<Role>(); // TODO: initial capacity
+        public List<Role> AllocatedRoles { get; } = new List<Role>(); // TODO: initial capacity
 
         /// <summary>
         /// The capabilities the station has.
