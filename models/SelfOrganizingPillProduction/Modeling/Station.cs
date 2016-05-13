@@ -28,14 +28,14 @@ namespace SelfOrganizingPillProduction.Modeling
         /// <summary>
         /// The roles the station must apply to containers.
         /// </summary>
-        public List<Role> AllocatedRoles { get; } = new List<Role>(); // TODO: initial capacity
+        public List<Role> AllocatedRoles { get; } = new List<Role>(Model.MaximumRoleCount);
 
         /// <summary>
         /// The capabilities the station has.
         /// </summary>
         public abstract Capability[] AvailableCapabilities { get; }
 
-        private readonly List<ResourceRequest> resourceRequests = new List<ResourceRequest>(); // TODO: initial capacity
+        private readonly List<ResourceRequest> resourceRequests = new List<ResourceRequest>(Model.MaximumResourceCount);
 
         public override void Update()
         {

@@ -8,6 +8,8 @@ namespace SelfOrganizingPillProduction.Modeling
     {
         public const int MaximumRecipeLength = 30;
         public const int ContainerStorageSize = 30;
+        public const int MaximumRoleCount = 30;
+        public const int MaximumResourceCount = 30;
 
         public Model(Station[] stations)
         {
