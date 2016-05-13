@@ -47,13 +47,13 @@ namespace SafetySharp.Modeling
 
 			const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 			var components = new HashSet<IComponent>(ReferenceEqualityComparer<IComponent>.Default);
-			var roles = new Dictionary<IComponent, Role>(ReferenceEqualityComparer<IComponent>.Default);
+			var kinds = new Dictionary<IComponent, RootKind>(ReferenceEqualityComparer<IComponent>.Default);
 
-			CollectRoots(components, roles, model.GetType().GetFields(bindingFlags), info => info.FieldType,
+			CollectRoots(components, kinds, model.GetType().GetFields(bindingFlags), info => info.FieldType,
 				info => info.GetValue(model));
-			CollectRoots(components, roles, model.GetType().GetProperties(bindingFlags), info => info.PropertyType,
+			CollectRoots(components, kinds, model.GetType().GetProperties(bindingFlags), info => info.PropertyType,
 				info => info.CanRead ? info.GetValue(model) : null);
-			CollectRoots(components, roles, model.GetType().GetMethods(bindingFlags), info => info.ReturnType, info =>
+			CollectRoots(components, kinds, model.GetType().GetMethods(bindingFlags), info => info.ReturnType, info =>
 			{
 				if (info.GetParameters().Length == 0)
 					return info.Invoke(model, new object[0]);
@@ -67,13 +67,13 @@ namespace SafetySharp.Modeling
 					$"At least one property, field, or method of the model must be marked with '{typeof(RootAttribute).FullName}'.");
 			}
 
-			model.Roots = components.OrderByDescending(component => roles[component]).ToArray();
+			model.Roots = components.OrderByDescending(component => kinds[component]).ToArray();
 		}
 
 		/// <summary>
 		///   A helper method that collects root <see cref="IComponent" /> instances.
 		/// </summary>
-		private static void CollectRoots<T>(HashSet<IComponent> components, Dictionary<IComponent, Role> roles, IEnumerable<T> members,
+		private static void CollectRoots<T>(HashSet<IComponent> components, Dictionary<IComponent, RootKind> kinds, IEnumerable<T> members,
 											Func<T, Type> getMemberType, Func<T, object> getValue)
 			where T : MemberInfo
 		{
@@ -88,7 +88,7 @@ namespace SafetySharp.Modeling
 				{
 					var value = (IComponent)getValue(member);
 					if (value != null && components.Add(value))
-						roles.Add(value, rootAttribute.Role);
+						kinds.Add(value, rootAttribute.Kind);
 				}
 				else if (typeof(IEnumerable<IComponent>).IsAssignableFrom(memberType))
 				{
@@ -99,7 +99,7 @@ namespace SafetySharp.Modeling
 					foreach (var value in values.Where(value => value != null))
 					{
 						if (components.Add(value))
-							roles.Add(value, rootAttribute.Role);
+							kinds.Add(value, rootAttribute.Kind);
 					}
 				}
 				else

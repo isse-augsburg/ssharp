@@ -76,19 +76,19 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling
 			Bind(nameof(TrainController.Odometer.TrainSpeed), nameof(Train.Speed));
 		}
 
-		[Root(Role.System)]
+		[Root(RootKind.Controller)]
 		public CrossingController CrossingController { get; }
 
-		[Root(Role.System)]
+		[Root(RootKind.Controller)]
 		public TrainController TrainController { get; }
 
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		public Train Train { get; } = new Train();
 
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		public Barrier Barrier { get; } = new Barrier();
 
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		public RadioChannel Channel { get; } = new RadioChannel();
 
 		public Formula PossibleCollision => !CrossingIsSecured && TrainIsAtCrossing;

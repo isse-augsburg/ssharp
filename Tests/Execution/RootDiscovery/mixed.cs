@@ -39,23 +39,23 @@ namespace Tests.Execution.RootDiscovery
 
 		private class M : ModelBase
 		{
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public readonly C A = new C();
 
 			public readonly C E = new C();
 			private readonly C _c2 = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public C B { get; } = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public C C { get; } = new C();
 
 			public C F => new C();
 
 			public C G { get; } = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public C D() => _c2;
 
 			public C H() => new C();

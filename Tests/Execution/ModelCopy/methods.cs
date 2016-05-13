@@ -61,19 +61,19 @@ namespace Tests.Execution.ModelCopy
 				new C()
 			};
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			private C C() => _c[0];
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			protected C D() => _c[1];
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			internal D E() => _d;
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public C F() => _c[2];
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public List<C> G() => _l;
 
 			public IEnumerable<IComponent> GetRoots()

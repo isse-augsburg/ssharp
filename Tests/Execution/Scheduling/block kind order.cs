@@ -22,7 +22,6 @@
 
 namespace Tests.Execution.Scheduling
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
@@ -43,19 +42,19 @@ namespace Tests.Execution.Scheduling
 
 		private class S : ModelBase
 		{
-			[Root(Role.System)]
+			[Root(RootKind.Controller)]
 			public C C = new C();
 
 			// Should be ignored
 			public C C1 = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public D D = new D();
 
-			[Root(Role.System)]
+			[Root(RootKind.Controller)]
 			public E E = new E();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public F F = new F();
 		}
 

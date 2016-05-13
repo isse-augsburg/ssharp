@@ -52,19 +52,19 @@ namespace Tests.Execution.ModelCopy
 
 		private class M : ModelBase
 		{
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			private readonly C _c = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			protected readonly C _d = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			internal readonly D E = new D();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public readonly C F = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public readonly C[] G = { new C(), new C() };
 
 			public IEnumerable<IComponent> GetRoots()

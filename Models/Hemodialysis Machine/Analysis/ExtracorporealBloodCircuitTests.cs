@@ -106,14 +106,14 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 	class ExtracorporealBloodCircuitTestEnvironment : ModelBase
 	{
-		[Root(Role.System)]
+		[Root(RootKind.Controller)]
 		public readonly ExtracorporealBloodCircuit ExtracorporealBloodCircuit = new ExtracorporealBloodCircuit();
 
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		public readonly Patient Patient = new Patient();
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		public readonly ExtracorporealBloodCircuitTestEnvironmentDialyzer Dialyzer = new ExtracorporealBloodCircuitTestEnvironmentDialyzer();
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		public readonly BloodFlowCombinator BloodFlowCombinator = new BloodFlowCombinator();
 
 		public ExtracorporealBloodCircuitTestEnvironment()
