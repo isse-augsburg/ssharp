@@ -23,6 +23,7 @@
 namespace SafetySharp.Runtime.Serialization
 {
 	using System;
+	using System.Linq;
 	using System.Reflection;
 	using System.Reflection.Emit;
 	using Utilities;
@@ -179,12 +180,10 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			LoadObject(metadata.ObjectIdentifier);
 
-			if (metadata.Field.FieldType.IsPrimitiveType())
-				DeserializePrimitiveTypeField(metadata);
-			else if (IsReferenceType(metadata.Field.FieldType))
-				DeserializeReferenceField(metadata.Field);
+			if (IsReferenceType(metadata.DataType))
+				DeserializeReferenceField(metadata);
 			else
-				throw new NotSupportedException($"Field type '{metadata.Field.FieldType.FullName}' is unsupported.");
+				DeserializePrimitiveTypeField(metadata);
 		}
 
 		/// <summary>
@@ -195,12 +194,10 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			LoadObject(metadata.ObjectIdentifier);
 
-			if (metadata.Field.FieldType.IsPrimitiveType())
-				SerializePrimitiveTypeField(metadata);
-			else if (IsReferenceType(metadata.Field.FieldType))
-				SerializeReferenceField(metadata.Field);
+			if (IsReferenceType(metadata.DataType))
+				SerializeReferenceField(metadata);
 			else
-				throw new NotSupportedException($"Field type '{metadata.Field.FieldType.FullName}' is unsupported.");
+				SerializePrimitiveTypeField(metadata);
 		}
 
 		/// <summary>
@@ -215,13 +212,13 @@ namespace SafetySharp.Runtime.Serialization
 				: GetLoadElementOpCode(metadata.ElementSizeInBits / 8, metadata.EffectiveType.IsUnsignedNumericType());
 			var storeCode = isReferenceType ? OpCodes.Stelem_Ref : GetStoreArrayElementOpCode(GetUnmanagedSize(metadata.DataType));
 
+			LoadObject(metadata.ObjectIdentifier);
+
 			for (var i = 0; i < metadata.ElementCount; ++i)
 			{
 				// o = &objs.GetObject(identifier)[i]
-				_il.Emit(OpCodes.Ldarg_0);
-				_il.Emit(OpCodes.Ldc_I4, metadata.ObjectIdentifier);
-				_il.Emit(OpCodes.Call, _getObjectMethod);
-				_il.Emit(OpCodes.Ldc_I4, i);
+				_il.Emit(OpCodes.Ldloc_1);
+				PrepareElementAccess(metadata, i);
 
 				if (isReferenceType)
 				{
@@ -241,7 +238,10 @@ namespace SafetySharp.Runtime.Serialization
 				}
 
 				// *o = v
-				_il.Emit(storeCode);
+				if (metadata.ContainedInStruct)
+					AccessField(metadata, OpCodes.Stfld);
+				else
+					_il.Emit(storeCode);
 
 				Advance(metadata.ElementSizeInBits / 8);
 			}
@@ -259,6 +259,8 @@ namespace SafetySharp.Runtime.Serialization
 				? OpCodes.Ldelem_Ref
 				: GetLoadArrayElementOpCode(GetUnmanagedSize(metadata.DataType), metadata.EffectiveType.IsUnsignedNumericType());
 
+			LoadObject(metadata.ObjectIdentifier);
+
 			for (var i = 0; i < metadata.ElementCount; ++i)
 			{
 				if (_bitLevelAddressing)
@@ -266,13 +268,14 @@ namespace SafetySharp.Runtime.Serialization
 					StoreBooleanValue(() =>
 					{
 						// o = objs.GetObject(identifier)
-						_il.Emit(OpCodes.Ldarg_0);
-						_il.Emit(OpCodes.Ldc_I4, metadata.ObjectIdentifier);
-						_il.Emit(OpCodes.Call, _getObjectMethod);
+						_il.Emit(OpCodes.Ldloc_1);
 
 						// v = o[i]
-						_il.Emit(OpCodes.Ldc_I4, i);
-						_il.Emit(loadCode);
+						PrepareElementAccess(metadata, i);
+						if (metadata.ContainedInStruct)
+							AccessField(metadata, OpCodes.Ldfld);
+						else
+							_il.Emit(loadCode);
 					});
 				}
 				else
@@ -281,17 +284,17 @@ namespace SafetySharp.Runtime.Serialization
 					_il.Emit(OpCodes.Ldloc_0);
 
 					// o = objs.GetObject(identifier)
-					_il.Emit(OpCodes.Ldarg_0);
-
 					if (isReferenceType)
-						_il.Emit(OpCodes.Dup);
+						_il.Emit(OpCodes.Ldarg_0);
 
-					_il.Emit(OpCodes.Ldc_I4, metadata.ObjectIdentifier);
-					_il.Emit(OpCodes.Call, _getObjectMethod);
+					_il.Emit(OpCodes.Ldloc_1);
 
 					// v = o[i]
-					_il.Emit(OpCodes.Ldc_I4, i);
-					_il.Emit(loadCode);
+					PrepareElementAccess(metadata, i);
+					if (metadata.ContainedInStruct)
+						AccessField(metadata, OpCodes.Ldfld);
+					else
+						_il.Emit(loadCode);
 
 					// v = objs.GetObjectIdentifier(o[i])
 					if (isReferenceType)
@@ -393,7 +396,7 @@ namespace SafetySharp.Runtime.Serialization
 		private void DeserializePrimitiveTypeField(StateSlotMetadata metadata)
 		{
 			// o = objs.GetObject(identifier)
-			_il.Emit(OpCodes.Ldloc_1);
+			PrepareFieldAccess(metadata);
 
 			if (_bitLevelAddressing)
 				LoadBooleanValue();
@@ -405,7 +408,7 @@ namespace SafetySharp.Runtime.Serialization
 			}
 
 			// o.field = v
-			_il.Emit(OpCodes.Stfld, metadata.Field);
+			AccessField(metadata, OpCodes.Stfld);
 		}
 
 		/// <summary>
@@ -419,10 +422,9 @@ namespace SafetySharp.Runtime.Serialization
 			{
 				StoreBooleanValue(() =>
 				{
-					_il.Emit(OpCodes.Ldloc_1);
-					_il.Emit(OpCodes.Ldfld, metadata.Field);
+					PrepareFieldAccess(metadata);
+					AccessField(metadata, OpCodes.Ldfld);
 				});
-
 				return;
 			}
 
@@ -430,11 +432,52 @@ namespace SafetySharp.Runtime.Serialization
 			_il.Emit(OpCodes.Ldloc_0);
 
 			// v = o.field
-			_il.Emit(OpCodes.Ldloc_1);
-			_il.Emit(OpCodes.Ldfld, metadata.Field);
+			PrepareFieldAccess(metadata);
+			AccessField(metadata, OpCodes.Ldfld);
 
 			// *s = v
 			_il.Emit(GetStoreElementOpCode(metadata.ElementSizeInBits / 8));
+		}
+
+		/// <summary>
+		///   Prepares the access to the field referenced by the <paramref name="metadata" /> of an element contained in an array.
+		/// </summary>
+		private void PrepareElementAccess(StateSlotMetadata metadata, int elementIndex)
+		{
+			_il.Emit(OpCodes.Ldc_I4, elementIndex);
+
+			if (!metadata.ContainedInStruct)
+				return;
+
+			_il.Emit(OpCodes.Ldelema, metadata.ObjectType.GetElementType());
+
+			for (var i = 0; i < metadata.FieldChain.Length - 1; ++i)
+				_il.Emit(OpCodes.Ldflda, metadata.FieldChain[i]);
+		}
+
+		/// <summary>
+		///   Prepares the access to the field referenced by the <paramref name="metadata" /> of an object.
+		/// </summary>
+		private void PrepareFieldAccess(StateSlotMetadata metadata)
+		{
+			_il.Emit(OpCodes.Ldloc_1);
+
+			if (!metadata.ContainedInStruct)
+				return;
+
+			_il.Emit(OpCodes.Ldflda, metadata.Field);
+
+			for (var i = 0; i < metadata.FieldChain.Length - 1; ++i)
+				_il.Emit(OpCodes.Ldflda, metadata.FieldChain[i]);
+		}
+
+		/// <summary>
+		///   Accesses the field on the object currently on the stack.
+		/// </summary>
+		private void AccessField(StateSlotMetadata metadata, OpCode accessCode)
+		{
+			var field = metadata.ContainedInStruct ? metadata.FieldChain.Last() : metadata.Field;
+			_il.Emit(accessCode, field);
 		}
 
 		/// <summary>
@@ -479,13 +522,12 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Generates the code to deserialize the <paramref name="field" /> of the object stored in the local variable.
+		///   Generates the code to deserialize a reference field.
 		/// </summary>
-		/// <param name="field">The field that should be deserialized.</param>
-		private void DeserializeReferenceField(FieldInfo field)
+		private void DeserializeReferenceField(StateSlotMetadata metadata)
 		{
 			// o = objs.GetObject(identifier)
-			_il.Emit(OpCodes.Ldloc_1);
+			PrepareFieldAccess(metadata);
 
 			// v = objs.GetObject(*state)
 			_il.Emit(OpCodes.Ldarg_0);
@@ -494,22 +536,21 @@ namespace SafetySharp.Runtime.Serialization
 			_il.Emit(OpCodes.Call, _getObjectMethod);
 
 			// o.field = v
-			_il.Emit(OpCodes.Stfld, field);
+			AccessField(metadata, OpCodes.Stfld);
 		}
 
 		/// <summary>
-		///   Generates the code to serialize the <paramref name="field" /> of the object stored in the local variable.
+		///   Generates the code to serialize a reference field.
 		/// </summary>
-		/// <param name="field">The field that should be serialized.</param>
-		private void SerializeReferenceField(FieldInfo field)
+		private void SerializeReferenceField(StateSlotMetadata metadata)
 		{
 			// s = state
 			_il.Emit(OpCodes.Ldloc_0);
 
 			// *s = objs.GetObjectIdentifier(o.field)
 			_il.Emit(OpCodes.Ldarg_0);
-			_il.Emit(OpCodes.Ldloc_1);
-			_il.Emit(OpCodes.Ldfld, field);
+			PrepareFieldAccess(metadata);
+			AccessField(metadata, OpCodes.Ldfld);
 			_il.Emit(OpCodes.Call, _getObjectIdentifierMethod);
 			_il.Emit(OpCodes.Stind_I2);
 		}

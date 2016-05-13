@@ -53,14 +53,32 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		{
 			Requires.That(((Array)obj).Rank == 1 && !obj.GetType().GetElementType().IsArray, "Multidimensional arrays are not supported.");
 
-			yield return new StateSlotMetadata
+			var elementType = obj.GetType().GetElementType();
+			var length = ((Array)obj).GetLength(0);
+
+			if (elementType.IsStructType())
 			{
-				Object = obj,
-				ObjectIdentifier = objectIdentifier,
-				ObjectType = obj.GetType(),
-				DataType = obj.GetType().GetElementType(),
-				ElementCount = ((Array)obj).GetLength(0)
-			};
+				foreach (var metadataSlot in StateSlotMetadata.FromStruct(elementType))
+				{
+					metadataSlot.Object = obj;
+					metadataSlot.ObjectIdentifier = objectIdentifier;
+					metadataSlot.ObjectType = obj.GetType();
+					metadataSlot.ElementCount = length;
+
+					yield return metadataSlot;
+				}
+			}
+			else
+			{
+				yield return new StateSlotMetadata
+				{
+					Object = obj,
+					ObjectIdentifier = objectIdentifier,
+					ObjectType = obj.GetType(),
+					DataType = obj.GetType().GetElementType(),
+					ElementCount = length
+				};
+			}
 		}
 
 		/// <summary>

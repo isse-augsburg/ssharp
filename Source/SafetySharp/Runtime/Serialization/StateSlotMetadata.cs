@@ -23,6 +23,8 @@
 namespace SafetySharp.Runtime.Serialization
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 	using System.Reflection;
 	using Modeling;
 	using Utilities;
@@ -54,6 +56,11 @@ namespace SafetySharp.Runtime.Serialization
 		public FieldInfo Field;
 
 		/// <summary>
+		///   The chain of fields if the data is stored in possibly nested structs.
+		/// </summary>
+		public FieldInfo[] FieldChain;
+
+		/// <summary>
 		///   The object whose data is stored in the slot.
 		/// </summary>
 		[NonSerialized]
@@ -74,6 +81,11 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		[NonSerialized]
 		public RangeAttribute Range;
+
+		/// <summary>
+		///   Gets a value indicating whether the data is stored in a struct.
+		/// </summary>
+		public bool ContainedInStruct => (FieldChain?.Length ?? 0) != 0;
 
 		/// <summary>
 		///   Gets the effective type of the data stored in the slot.
@@ -113,7 +125,8 @@ namespace SafetySharp.Runtime.Serialization
 				   ElementCount == other.ElementCount &&
 				   Equals(Field, other.Field) &&
 				   DataType == other.DataType &&
-				   CompressedDataType == other.CompressedDataType;
+				   CompressedDataType == other.CompressedDataType &&
+				   (FieldChain?.SequenceEqual(other.FieldChain) ?? true);
 		}
 
 		/// <summary>
@@ -143,7 +156,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="right">The second instance that should be compared.</param>
 		public static bool operator ==(StateSlotMetadata left, StateSlotMetadata right)
 		{
-			return left.Equals(right);
+			return left?.Equals(right) ?? right == null;
 		}
 
 		/// <summary>
@@ -153,7 +166,46 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="right">The second instance that should be compared.</param>
 		public static bool operator !=(StateSlotMetadata left, StateSlotMetadata right)
 		{
-			return !left.Equals(right);
+			return !(left == right);
+		}
+
+		/// <summary>
+		///   Creates the metadata required to serialize the <paramref name="structType" />.
+		/// </summary>
+		/// <param name="structType">The type of the struct the metadata should be created for.</param>
+		public static IEnumerable<StateSlotMetadata> FromStruct(Type structType)
+		{
+			Requires.NotNull(structType, nameof(structType));
+			Requires.That(structType.IsStructType(), "Expected a value type.");
+
+			return FromStruct(structType, new FieldInfo[0]);
+		}
+
+		/// <summary>
+		///   Creates the metadata required to serialize the <paramref name="structType" /> with the <paramref name="fieldChain" />.
+		/// </summary>
+		public static IEnumerable<StateSlotMetadata> FromStruct(Type structType, FieldInfo[] fieldChain)
+		{
+			var fields = structType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+			foreach (var field in fields)
+			{
+				var chain = fieldChain.Concat(new[] { field }).ToArray();
+
+				if (field.FieldType.IsStructType())
+				{
+					foreach (var metadataSlot in FromStruct(field.FieldType, chain))
+						yield return metadataSlot;
+				}
+				else
+				{
+					yield return new StateSlotMetadata
+					{
+						DataType = field.FieldType,
+						FieldChain = chain
+					};
+				}
+			}
 		}
 	}
 }
