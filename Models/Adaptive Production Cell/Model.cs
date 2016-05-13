@@ -31,19 +31,19 @@ namespace ProductionCell
 
 	internal class Model : ModelBase
 	{
-		[Root(Role.Environment)]
+		[Root(RootKind.Controller)]
 		public Robot AwesomeRobot;
 
-		[Root(Role.Environment)]
+		[Root(RootKind.Controller)]
 		public Cart FirstCart = new Cart() { RouteBlocked = { Name = "RouteCart1" } };
 
-		[Root(Role.Environment)]
+		[Root(RootKind.Controller)]
 		public Robot PatheticRobot;
 
-		[Root(Role.Environment)]
+		[Root(RootKind.Controller)]
 		public Cart SecondCart = new Cart() { RouteBlocked = { Name = "RouteCart2" } };
 
-		[Root(Role.Environment)]
+		[Root(RootKind.Controller)]
 		public Robot YetAnotherAwesomeRobot;
 
 		public Model()
@@ -86,7 +86,7 @@ namespace ProductionCell
 			ObserverController.Reconfigure();
 		}
 
-		[Root(Role.System)]
+		[Root(RootKind.Controller)]
 		public ObserverController ObserverController { get; }
 
 		private void Connect(Agent from, Agent to)

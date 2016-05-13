@@ -12,7 +12,7 @@ namespace ProductionCell
 	    public Task CurrentTask;
 
 		[Hidden(HideElements=true)]
-        protected List<OdpRole> RolePool = new List<OdpRole>(10);
+        protected ObjectPool<OdpRole> RolePool = new ObjectPool<OdpRole>(10);
 
 	    private bool _reconfed;
 
