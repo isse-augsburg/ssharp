@@ -20,21 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace SafetySharp.Modeling
 {
 	/// <summary>
-	///   Indicates whether a component is considered to belong to the system that is analyzed or to the system's environment.
+	///   Indicates whether a component is considered to be a controller or a plant of the system described by a
+	///   <see cref="ModelBase" /> instance.
 	/// </summary>
-	public enum Role
+	public enum RootKind
 	{
 		/// <summary>
 		///   Indicates that the component is considered to belong to the system that is analyzed.
 		/// </summary>
-		System,
+		Controller,
 
 		/// <summary>
 		///   Indicates that the component is considered to belong to the analyzed system's environment.
 		/// </summary>
-		Environment
+		Plant
 	}
 }

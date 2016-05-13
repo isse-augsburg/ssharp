@@ -606,6 +606,7 @@
     <Compile Include="Serialization\Objects\arrays.cs" />
     <Compile Include="Serialization\Objects\fault effect.cs" />
     <Compile Include="Serialization\Objects\single object.cs" />
+    <Compile Include="Serialization\Objects\structs.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Char.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Bool.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int64.cs" />
@@ -621,6 +622,8 @@
     <Compile Include="Serialization\Ranges\Bool.cs" />
     <Compile Include="Serialization\Ranges\Char.cs" />
     <Compile Include="Serialization\Ranges\Error.cs" />
+    <Compile Include="Serialization\Ranges\struct array.cs" />
+    <Compile Include="Serialization\Ranges\struct.cs" />
     <Compile Include="Serialization\Ranges\inherited field.cs" />
     <Compile Include="Serialization\Ranges\generic type.cs" />
     <Compile Include="Serialization\Ranges\Int16.cs" />

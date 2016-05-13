@@ -58,7 +58,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		//PreparationRinsingDialyzer,
 		//InitiationConnectingPatient,
 		MainTherapy,
-		EndOfThreatment
+		EndOfTreatment
 		//EndingReinfusion,
 		//EndingEmptyingDialyzer,
 		//EndingEmptyingCatridge,
@@ -91,7 +91,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 
 		public int TimeStepsLeft = 7; // hard code 7 time steps
 
-		//Subcomponents
+		//references to components
 		private readonly WaterPreparation WaterPreparation;
 		private readonly DialyzingFluidPreparation DialyzingFluidPreparation;
 		private readonly Pump UltraFiltrationPump;
@@ -105,7 +105,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 
 
 		[Hidden]
-		public readonly StateMachine<TherapyPhase> CurrentTherapyPhase = new StateMachine<TherapyPhase>(TherapyPhase.MainTherapy);
+		public readonly StateMachine<TherapyPhase> CurrentTherapyPhase = TherapyPhase.MainTherapy;
 
 		private Dialyzer Dialyzer;
 
@@ -145,7 +145,6 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 
 		public override void Update()
 		{
-			//Update(Sensor, Timer, Pump);
 			CurrentTherapyPhase
 				.Transition(
 					from: TherapyPhase.MainTherapy,
@@ -156,7 +155,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 			CurrentTherapyPhase
 				.Transition(
 					from: TherapyPhase.MainTherapy,
-					to: TherapyPhase.EndOfThreatment,
+					to: TherapyPhase.EndOfTreatment,
 					guard: TimeStepsLeft <= 0 || VenousSafetyDetector.DetectedGasOrContaminatedBlood,
 					action: ShutdownMotors
 				);

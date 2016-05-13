@@ -51,21 +51,21 @@ namespace Tests.Execution.ModelCopy
 
 			public readonly C E = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public C C { get; } = new C();
 
 			public C F => new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public C D() => _c2;
 		}
 
 		private class M2 : M
 		{
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public readonly C A = new C();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public C B { get; } = new C();
 
 			public C G { get; } = new C();

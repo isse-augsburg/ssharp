@@ -20,14 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace SafetySharp.Modeling
 {
 	using System;
-	using Modeling;
 
 	/// <summary>
-	///   Indicates that the marked member holds or generates one or more root <see cref="Component" /> instances that
-	///   should be used by an analysis.
+	///   Indicates that the marked member holds or generates one or more <see cref="Component" /> instances that
+	///   should be the roots of a <see cref="ModelBase" /> instance.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
 	public sealed class RootAttribute : Attribute
@@ -35,19 +34,17 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="role">
-		///   The component role of the root component, indicating whether the component is considered to belong to the system of
-		///   interest or to the system context.
+		/// <param name="kind">
+		///   The kind of the root component, indicating whether the component is considered to be a controller or a plant.
 		/// </param>
-		public RootAttribute(Role role)
+		public RootAttribute(RootKind kind)
 		{
-			Role = role;
+			Kind = kind;
 		}
 
 		/// <summary>
-		///   Gets the component role of the root component, indicating whether the component is considered to belong to the system of
-		///   interest or to the system context.
+		///   Gets the kind of the root component, indicating whether the component is considered to be a controller or a plant.
 		/// </summary>
-		public Role Role { get; }
+		public RootKind Kind { get; }
 	}
 }

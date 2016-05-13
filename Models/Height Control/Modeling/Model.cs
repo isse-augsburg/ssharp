@@ -70,13 +70,13 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		/// <summary>
 		///   Gets the height control that monitors the vehicles and closes the tunnel, if necessary.
 		/// </summary>
-		[Root(Role.System)]
+		[Root(RootKind.Controller)]
 		public HeightControl HeightControl { get; private set; }
 
 		/// <summary>
 		///   Gets the collection of monitored vehicles.
 		/// </summary>
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		public VehicleCollection VehicleCollection { get; }
 
 		/// <summary>

@@ -29,33 +29,47 @@ namespace Tests.Serialization.Compaction
 	{
 		protected override void Check()
 		{
-			var c = new C { A = 3, B = -17 };
-			var a = new [] { E.A, E.B };
+			var c = new C { A = 3, B = -17, S = { A = 3 }, T = new[] { new S { A = 99 }, new S { A = 81 } } };
+			var a = new[] { E.A, E.B };
 
 			GenerateCode(SerializationMode.Optimized, a, c);
-			StateSlotCount.ShouldBe(1);
+			StateSlotCount.ShouldBe(3);
 
 			Serialize();
 			c.B = 2;
 			c.A = 1;
 			a[0] = 0;
 			a[1] = 0;
+			c.S = new S();
+			c.T[0] = new S();
+			c.T[1] = new S();
 
 			Deserialize();
 			c.B.ShouldBe((sbyte)-17);
 			c.A.ShouldBe((byte)3);
-			a.ShouldBe(new [] { E.A, E.B });
+			a.ShouldBe(new[] { E.A, E.B });
+			c.S.A.ShouldBe((byte)3);
+			c.T[0].A.ShouldBe((byte)99);
+			c.T[1].A.ShouldBe((byte)81);
 		}
 
 		private class C
 		{
 			public byte A;
 			public sbyte B;
+			public S S;
+			public S[] T;
 		}
 
 		private enum E : byte
 		{
-			A, B
+			A,
+			B
+		}
+
+		private struct S
+		{
+			public byte A;
 		}
 	}
 }

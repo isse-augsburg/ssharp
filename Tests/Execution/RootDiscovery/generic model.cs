@@ -40,23 +40,23 @@ namespace Tests.Execution.RootDiscovery
 		private class M<T> : ModelBase
 			where T : Component, new()
 		{
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public readonly T A = new T();
 
 			public readonly T E = new T();
 			private readonly T _c2 = new T();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public Component B { get; } = new T();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public IComponent C { get; } = new T();
 
 			public T F => new T();
 
 			public T G { get; } = new T();
 
-			[Root(Role.Environment)]
+			[Root(RootKind.Plant)]
 			public T D() => _c2;
 
 			public T H() => new T();

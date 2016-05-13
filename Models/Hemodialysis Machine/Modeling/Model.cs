@@ -27,10 +27,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 
 	public class Model : ModelBase
 	{
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		private readonly DialyzingFluidFlowCombinator _dialysingFluidFlowCombinator;
 
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		private readonly BloodFlowCombinator _bloodFlowCombinator;
 
 		public Model()
@@ -55,10 +55,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		}
 		
 
-		[Root(Role.System)]
+		[Root(RootKind.Controller)]
 		internal HdMachine HdMachine { get; }
 
-		[Root(Role.Environment)]
+		[Root(RootKind.Plant)]
 		internal Patient Patient { get; }
 
 		public Formula IncomingBloodWasNotOk => Patient.IncomingBloodWasNotOk;

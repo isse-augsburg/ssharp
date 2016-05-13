@@ -118,9 +118,12 @@ namespace SafetySharp.Runtime.Serialization
 			// Check if we can use the range to compress the data even further
 			foreach (var slot in _slots)
 			{
-				slot.Range = slot.Field != null
-					? Range.GetMetadata(slot.Object, slot.Field, mode)
-					: Range.CreateDefaultRange(slot.DataType);
+				if (slot.ContainedInStruct)
+					slot.Range = Range.GetMetadata(slot.FieldChain.Last(), mode);
+				else if (slot.Field != null)
+					slot.Range = Range.GetMetadata(slot.Object, slot.Field, mode);
+				else
+					slot.Range = Range.CreateDefaultRange(slot.DataType);
 
 				if (slot.Range != null)
 					slot.CompressedDataType = slot.Range.GetRangeType();
