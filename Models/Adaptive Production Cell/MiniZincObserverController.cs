@@ -55,7 +55,7 @@ namespace ProductionCell
 			var workedOn = varVals.Item2;
 			foreach (var agent in Agents)
 			{
-				RolePool.AddRange(agent.AllocatedRoles);
+				RolePool.Return(agent.AllocatedRoles);
 				agent.AllocatedRoles.Clear();
 			}
 
@@ -66,8 +66,7 @@ namespace ProductionCell
 
 				var cap = Agents[agents[i] - 1].AvailableCapabilites.First(c => c == CurrentTask.RequiresCapabilities[workedOn[i] - 1]);
 
-				OdpRole roleToAllocate = RolePool.Last();
-				RolePool.RemoveAt(RolePool.Count - 1);
+				var roleToAllocate = RolePool.Allocate();
 				roleToAllocate.CapabilitiesToApply.Clear();
 				roleToAllocate.CapabilitiesToApply.Add(cap);
 

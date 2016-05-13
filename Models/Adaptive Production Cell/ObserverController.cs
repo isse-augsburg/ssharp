@@ -29,13 +29,5 @@ namespace ProductionCell
 
 	        _reconfed = true;
         }
-
-        protected ObserverController()
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                RolePool.Add(new OdpRole());
-            }
-        }
     }
 }
