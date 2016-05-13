@@ -84,7 +84,7 @@ namespace SafetySharp.Runtime
 			_targetStateMemory = _targetStateBuffer.Pointer;
 
 			_lookupBuffer.Resize(capacity * sizeof(int), zeroMemory: false);
-			_targetStateGroupElementsBuffer.Resize(capacity * sizeof(FaultSet), zeroMemory: false);
+			_targetStateGroupElementsBuffer.Resize(capacity * sizeof(TargetStateGroupElement), zeroMemory: false);
 			_hashedStateBuffer.Resize(capacity * _stateVectorSize, zeroMemory: true);
 
 			_stateHashesOfTargetStateGroups = new List<uint>(capacity);
