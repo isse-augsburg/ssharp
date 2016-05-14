@@ -1,5 +1,4 @@
-﻿using SafetySharp.Analysis;
-using SafetySharp.Modeling;
+﻿using SafetySharp.Modeling;
 
 namespace SelfOrganizingPillProduction.Modeling
 {
@@ -10,17 +9,21 @@ namespace SelfOrganizingPillProduction.Modeling
         public const int MaximumRoleCount = 30;
         public const int MaximumResourceCount = 30;
 
-        public Model(Station[] stations)
+        public Model(Station[] stations, ObserverController obsContr)
         {
             Stations = stations;
             foreach (var station in stations)
             {
                 station.Model = this;
             }
+            ObserverController = obsContr;
         }
 
         [Root(RootKind.Controller)]
         public Station[] Stations { get; }
+
+        [Root(RootKind.Controller)]
+        public ObserverController ObserverController { get; }
 
         public static Model NoRedundancyCircularModel()
         {
@@ -40,7 +43,7 @@ namespace SelfOrganizingPillProduction.Modeling
                 next.Inputs.Add(stations[i]);
             }
 
-            return new Model(stations);
+            return new Model(stations, new MiniZincObserverController(stations));
         }
     }
 }
