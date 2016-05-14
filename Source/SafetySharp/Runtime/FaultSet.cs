@@ -48,6 +48,11 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
+		///   Gets a value indicating whether the fault set is empty.
+		/// </summary>
+		internal bool IsEmpty => _faults == 0;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="faults">The faults the set should contain.</param>
@@ -60,7 +65,7 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Creates a fault set that contains all activated <paramref name="faults"/>.
+		///   Creates a fault set that contains all activated <paramref name="faults" />.
 		/// </summary>
 		/// <param name="faults">The faults the set should contain.</param>
 		internal static FaultSet FromActivatedFaults(params Fault[] faults)
@@ -71,6 +76,16 @@ namespace SafetySharp.Runtime
 				mask |= fault.IsActivated ? 1 << fault.Identifier : 0;
 
 			return new FaultSet(mask);
+		}
+
+		/// <summary>
+		///   Returns a new <see cref="FaultSet" /> that represents the intersection between this instance and
+		///   <paramref name="other." />
+		/// </summary>
+		/// <param name="other">The other fault set that this instance should be intersected with.</param>
+		internal FaultSet GetIntersection(FaultSet other)
+		{
+			return new FaultSet(_faults & other._faults);
 		}
 
 		/// <summary>
@@ -103,8 +118,8 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(faults, nameof(faults));
 			Requires.That(faults.Length < 32, "More than 31 faults are not supported.");
 
-			for (var i = 1; i <= faults.Length; ++i)
-				faults[i - 1].Activation = (_faults & (1 << (i - 1))) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
+			foreach (var fault in faults)
+				fault.Activation = (_faults & (1 << fault.Identifier)) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
 		}
 
 		/// <summary>

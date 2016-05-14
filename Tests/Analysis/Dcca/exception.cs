@@ -39,6 +39,8 @@ namespace Tests.Analysis.Dcca
 			result.MinimalCriticalSets.Count.ShouldBe(3);
 			result.Exceptions.Count.ShouldBe(2);
 			result.IsComplete.ShouldBe(true);
+			result.SuppressedFaults.ShouldBeEmpty();
+			result.ForcedFaults.ShouldBeEmpty();
 
 			ShouldContain(result.CheckedSets);
 			ShouldContain(result.CheckedSets, c.F1);

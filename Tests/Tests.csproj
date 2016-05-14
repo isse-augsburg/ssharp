@@ -132,6 +132,11 @@
     <Compile Include="Analysis\Dcca\empty set.cs" />
     <Compile Include="Analysis\Dcca\multiple singleton cut sets.cs" />
     <Compile Include="Analysis\Dcca\exception.cs" />
+    <Compile Include="Analysis\Dcca\multiple forced faults.cs" />
+    <Compile Include="Analysis\Dcca\multiple suppressed faults.cs" />
+    <Compile Include="Analysis\Dcca\single forced fault.cs" />
+    <Compile Include="Analysis\Dcca\forced and suppressed faults.cs" />
+    <Compile Include="Analysis\Dcca\single suppressed fault.cs" />
     <Compile Include="Analysis\Dcca\multiple two point cut sets.cs" />
     <Compile Include="Analysis\Dcca\no cut sets.cs" />
     <Compile Include="Analysis\Dcca\unused fault.cs" />

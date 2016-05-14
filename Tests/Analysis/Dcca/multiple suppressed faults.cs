@@ -25,40 +25,35 @@ namespace Tests.Analysis.Dcca
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class X3 : AnalysisTestObject
+	internal class MultipleSuppressedFaults : AnalysisTestObject
 	{
 		protected override void Check()
 		{
 			var c = new C();
+			c.F1.Activation = Activation.Suppressed;
+			c.F2.Activation = Activation.Suppressed;
 			var result = Dcca(c.X > 4, c);
 
-			result.CheckedSets.Count.ShouldBe(8);
+			result.CheckedSets.Count.ShouldBe(2);
 			result.MinimalCriticalSets.Count.ShouldBe(0);
-			result.MinimalCriticalSets.ShouldBeEmpty();
-			result.CounterExamples.ShouldBeEmpty();
 			result.Exceptions.ShouldBeEmpty();
 			result.IsComplete.ShouldBe(true);
-			result.SuppressedFaults.ShouldBeEmpty();
+			result.SuppressedFaults.ShouldBe(new[] { c.F1, c.F2 }, ignoreOrder: true);
 			result.ForcedFaults.ShouldBeEmpty();
 
 			ShouldContain(result.CheckedSets);
-			ShouldContain(result.CheckedSets, c.F1);
-			ShouldContain(result.CheckedSets, c.F2);
 			ShouldContain(result.CheckedSets, c.F3);
 
-			ShouldContain(result.CheckedSets, c.F1, c.F2);
-			ShouldContain(result.CheckedSets, c.F1, c.F3);
-			ShouldContain(result.CheckedSets, c.F2, c.F3);
-
-			ShouldContain(result.CheckedSets, c.F1, c.F2, c.F3);
-
-			result = DccaWithMaxCardinality(c.X > 4, 0, c);
-
-			result.CheckedSets.Count.ShouldBe(1);
-			result.MinimalCriticalSets.ShouldBeEmpty();
 			result.CounterExamples.ShouldBeEmpty();
+
+			result = DccaWithMaxCardinality(c.X > 4, 1, c);
+
+			result.CheckedSets.Count.ShouldBe(2);
+			result.MinimalCriticalSets.ShouldBeEmpty();
 			result.Exceptions.ShouldBeEmpty();
-			result.IsComplete.ShouldBe(false);
+			result.IsComplete.ShouldBe(true);
+			result.SuppressedFaults.ShouldBe(new[] { c.F1, c.F2 }, ignoreOrder: true);
+			result.ForcedFaults.ShouldBeEmpty();
 		}
 
 		private class C : Component
@@ -70,29 +65,39 @@ namespace Tests.Analysis.Dcca
 
 			public override void Update()
 			{
+				X = 3;
 			}
 
 			[FaultEffect(Fault = nameof(F1))]
+			[Priority(1)]
 			private class E1 : C
 			{
 				public override void Update()
 				{
+					base.Update();
+					X += 1;
 				}
 			}
 
 			[FaultEffect(Fault = nameof(F2))]
+			[Priority(2)]
 			private class E2 : C
 			{
 				public override void Update()
 				{
+					base.Update();
+					X += 1;
 				}
 			}
 
 			[FaultEffect(Fault = nameof(F3))]
+			[Priority(3)]
 			private class E3 : C
 			{
 				public override void Update()
 				{
+					base.Update();
+					X += 1;
 				}
 			}
 		}
