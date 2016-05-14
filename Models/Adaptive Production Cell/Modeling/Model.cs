@@ -36,14 +36,19 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 
 		public Model()
 		{
-			Tasks = new List<Task> { new Task(Capability.Drill, Capability.Insert, Capability.Tighten, Capability.Polish) };
+			var produce = new ProduceCapability(Resources, Tasks);
+			var insert = new ProcessCapability(ProductionAction.Insert);
+			var drill = new ProcessCapability(ProductionAction.Drill);
+			var tighten = new ProcessCapability(ProductionAction.Tighten);
+			var polish = new ProcessCapability(ProductionAction.Polish);
+			var consume = new ConsumeCapability(Resources);
+			
+			CreateWorkpieces(5, produce, drill, insert, tighten, polish, consume);
 
-			CreateWorkpieces(Tasks[0], 3);
-
-			CreateRobot(Capability.Drill);
-			CreateRobot(Capability.Insert);
-			CreateRobot(Capability.Tighten);
-			CreateRobot(Capability.Polish);
+			CreateRobot(drill);
+			CreateRobot(insert);
+			CreateRobot(tighten);
+			CreateRobot(polish);
 
 			CreateCart(Robots[0], new Route(Robots[0], Robots[1]));
 			CreateCart(Robots[1], new Route(Robots[1], Robots[2]));
@@ -52,7 +57,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 			ObserverController = new MiniZincObserverController(RobotAgents.Cast<Agent>().Concat(CartAgents));
 		}
 
-		private List<Task> Tasks { get; }
+		private List<Task> Tasks { get; } = new List<Task>();
 
 		[Root(RootKind.Plant)]
 		public List<Workpiece> Workpieces { get; } = new List<Workpiece>();
@@ -70,15 +75,24 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 		public List<CartAgent> CartAgents { get; } = new List<CartAgent>();
 
 		[Root(RootKind.Controller)]
+		public List<Resource> Resources { get; } = new List<Resource>();
+
+		[Root(RootKind.Controller)]
 		public ObserverController ObserverController { get; }
 
-		private void CreateWorkpieces(Task task, int count)
+		private void CreateWorkpieces(int count, params Capability[] capabilities)
 		{
+			var task = new Task(capabilities);
+			Tasks.Add(task);
+
 			for (var i = 0; i < count; ++i)
-				Workpieces.Add(new Workpiece(task.Capabilities.Select(c => c.ProductionAction).ToArray()));
+			{
+				Workpieces.Add(new Workpiece(capabilities.OfType<ProcessCapability>().Select(c => c.ProductionAction).ToArray()));
+				Resources.Add(new Resource(task));
+			}
 		}
 
-		private void CreateRobot(params Capability[] capabilities)
+		private void CreateRobot(params ProcessCapability[] capabilities)
 		{
 			var robot = new Robot(capabilities);
 			var agent = new RobotAgent(capabilities, robot);

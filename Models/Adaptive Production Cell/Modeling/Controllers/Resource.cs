@@ -23,8 +23,9 @@
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
 	using System.Collections.Generic;
+	using SafetySharp.Modeling;
 
-	internal class Resource
+	internal class Resource : Component
 	{
 		private readonly List<Capability> _state;
 		private readonly Task _task;

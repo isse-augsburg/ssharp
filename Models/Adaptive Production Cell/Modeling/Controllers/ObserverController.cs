@@ -29,7 +29,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 	internal abstract class ObserverController : Component
 	{
 		[Hidden]
-		private bool _reconfigurationRequested;
+		private bool _reconfigurationRequested = true;
 
 		protected ObserverController(IEnumerable<Agent> agents)
 		{

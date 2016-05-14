@@ -22,8 +22,19 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-	internal abstract class Capability
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+
+	internal class ConsumeCapability : Capability
 	{
-		public abstract int Identifier { get; }
+		private readonly List<Resource> _resources;
+
+		public ConsumeCapability(List<Resource> resources)
+		{
+			_resources = resources;
+		}
+
+		public override int Identifier { get; } = Enum.GetValues(typeof(ProductionAction)).Cast<int>().Max() + 1;
 	}
 }

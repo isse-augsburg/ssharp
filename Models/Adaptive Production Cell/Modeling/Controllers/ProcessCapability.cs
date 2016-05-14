@@ -22,8 +22,14 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-	internal abstract class Capability
+	internal class ProcessCapability : Capability
 	{
-		public abstract int Identifier { get; }
+		public ProcessCapability(ProductionAction productionAction)
+		{
+			ProductionAction = productionAction;
+		}
+
+		public ProductionAction ProductionAction { get; }
+		public override int Identifier => (int)ProductionAction;
 	}
 }

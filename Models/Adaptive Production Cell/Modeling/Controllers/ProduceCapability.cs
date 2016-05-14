@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -22,8 +22,19 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-	internal abstract class Capability
+	using System.Collections.Generic;
+
+	internal class ProduceCapability : Capability
 	{
-		public abstract int Identifier { get; }
+		private readonly List<Resource> _resources;
+		private readonly List<Task> _tasks;
+
+		public ProduceCapability(List<Resource> resources, List<Task> tasks)
+		{
+			_resources = resources;
+			_tasks = tasks;
+		}
+
+		public override int Identifier => 1;
 	}
 }

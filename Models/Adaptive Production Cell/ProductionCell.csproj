@@ -62,14 +62,17 @@
     <Compile Include="Analysis\SafetyAnalysisTests.cs" />
     <Compile Include="Modeling\Controllers\Agent.cs" />
     <Compile Include="Modeling\Controllers\Capability.cs" />
+    <Compile Include="Modeling\Controllers\ConsumeCapability.cs" />
     <Compile Include="Modeling\Controllers\MiniZincObserverController.cs" />
     <Compile Include="Modeling\Controllers\ObserverController.cs" />
+    <Compile Include="Modeling\Controllers\ProcessCapability.cs" />
     <Compile Include="Modeling\Controllers\Resource.cs" />
     <Compile Include="Modeling\Controllers\Role.cs" />
     <Compile Include="Modeling\Controllers\Task.cs" />
     <Compile Include="Modeling\Model.cs" />
     <Compile Include="Modeling\Plants\Cart.cs" />
     <Compile Include="Modeling\Controllers\CartAgent.cs" />
+    <Compile Include="Modeling\Controllers\ProduceCapability.cs" />
     <Compile Include="Modeling\ProductionAction.cs" />
     <Compile Include="Modeling\Plants\Robot.cs" />
     <Compile Include="Modeling\Controllers\RobotAgent.cs" />

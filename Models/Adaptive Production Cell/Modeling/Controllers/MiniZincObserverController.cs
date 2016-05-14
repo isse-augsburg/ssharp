@@ -54,10 +54,10 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 			using (var writer = new StreamWriter(ConstraintsFile))
 			{
-				var task = String.Join(",", Tasks[0].Capabilities.Select(c => (int)c.ProductionAction));
+				var task = String.Join(",", Tasks[0].Capabilities.Select(c => c.Identifier));
 				var isCart = String.Join(",", Agents.Select(a => (a is CartAgent).ToString().ToLower()));
 				var capabilities = String.Join(",", Agents.Select(a =>
-					$"{{{String.Join(",", a.AvailableCapabilites.Select(c => (int)c.ProductionAction))}}}"));
+					$"{{{String.Join(",", a.AvailableCapabilites.Select(c => c.Identifier))}}}"));
 				var isConnected = String.Join("|", Agents.Select(from =>
 					String.Join(",", Agents.Select(to => from.Outputs.Contains(to).ToString().ToLower()))));
 

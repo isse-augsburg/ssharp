@@ -38,7 +38,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 		public Fault ResourceTransportFault = new PermanentFault();
 		public Fault SwitchFault = new PermanentFault();
 
-		public Robot(params Capability[] capabilities)
+		public Robot(params ProcessCapability[] capabilities)
 		{
 			_tools = capabilities.Select(c => new Tool(c.ProductionAction)).ToArray();
 		}
@@ -52,7 +52,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 			return _currentTool.Apply(_workpiece);
 		}
 
-		public virtual bool SwitchCapability(Capability capability)
+		public virtual bool SwitchCapability(ProcessCapability capability)
 		{
 			_currentTool = _tools.First(t => t.ProductionAction == capability.ProductionAction);
 			return true;
@@ -93,7 +93,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 		[FaultEffect(Fault = nameof(SwitchFault))]
 		internal class SwitchEffect : Robot
 		{
-			public override bool SwitchCapability(Capability capability) => false;
+			public override bool SwitchCapability(ProcessCapability capability) => false;
 		}
 
 		[FaultEffect(Fault = nameof(ResourceTransportFault))]
