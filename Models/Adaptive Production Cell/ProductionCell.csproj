@@ -8,8 +8,8 @@
     <ProjectGuid>{07DEADE8-4700-4F51-AF54-EE88878C0127}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ProductionCell</RootNamespace>
-    <AssemblyName>ProductionCell</AssemblyName>
+    <RootNamespace>SafetySharp.CaseStudies.ProductionCell</RootNamespace>
+    <AssemblyName>SafetySharp.CaseStudies.ProductionCell</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -58,27 +58,33 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Agent.cs" />
-    <Compile Include="Capability.cs" />
-    <Compile Include="Condition.cs" />
-    <Compile Include="DumpObserverController.cs" />
-    <Compile Include="MiniZincObserverController.cs" />
-    <Compile Include="Model.cs" />
-    <Compile Include="ObserverController.cs" />
-    <Compile Include="ODPRole.cs" />
+    <Compile Include="Analysis\ModelCheckingTests.cs" />
+    <Compile Include="Analysis\SafetyAnalysisTests.cs" />
+    <Compile Include="Modeling\Controllers\Agent.cs" />
+    <Compile Include="Modeling\Controllers\Capability.cs" />
+    <Compile Include="Modeling\Controllers\MiniZincObserverController.cs" />
+    <Compile Include="Modeling\Controllers\ObserverController.cs" />
+    <Compile Include="Modeling\Controllers\Resource.cs" />
+    <Compile Include="Modeling\Controllers\Role.cs" />
+    <Compile Include="Modeling\Controllers\Task.cs" />
+    <Compile Include="Modeling\Model.cs" />
+    <Compile Include="Modeling\Plants\Cart.cs" />
+    <Compile Include="Modeling\Controllers\CartAgent.cs" />
+    <Compile Include="Modeling\ProductionAction.cs" />
+    <Compile Include="Modeling\Plants\Robot.cs" />
+    <Compile Include="Modeling\Controllers\RobotAgent.cs" />
+    <Compile Include="Modeling\Plants\Route.cs" />
+    <Compile Include="Modeling\Plants\Tool.cs" />
+    <Compile Include="Modeling\Plants\Workpiece.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Resource.cs" />
-    <Compile Include="Task.cs" />
-    <Compile Include="Type.cs" />
-    <Compile Include="Workpiece.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="rolealloc-compact.mzn">
+    <None Include="Modeling\Controllers\ConstraintModel.mzn">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -34,6 +34,7 @@ namespace SafetySharp.Modeling
 	///   being used, it must be returned to the pool so that it can be reused later on.
 	/// </summary>
 	/// <typeparam name="T">The type of the pooled objects.</typeparam>
+	[Hidden]
 	public sealed class ObjectPool<T>
 		where T : class
 	{
