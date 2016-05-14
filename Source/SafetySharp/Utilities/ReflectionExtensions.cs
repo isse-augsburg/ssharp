@@ -246,6 +246,35 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
+		///   Gets the <see cref="PropertyInfo" /> for the <paramref name="backingField" />. Returns <c>null</c> if
+		///   <paramref name="backingField" /> is not a compiler generated backing field for an auto-property.
+		/// </summary>
+		/// <param name="backingField">The backing field the <see cref="PropertyInfo" /> should be returned for.</param>
+		public static PropertyInfo GetAutoProperty(this FieldInfo backingField)
+		{
+			Requires.NotNull(backingField, nameof(backingField));
+
+			if (!backingField.HasAttribute<CompilerGeneratedAttribute>() || !backingField.Name.EndsWith(">k__BackingField"))
+				return null;
+
+			var propertyName = backingField.Name.Substring(1, backingField.Name.Length - ">k__BackingField".Length - 1);
+			return backingField.DeclaringType.GetProperty(propertyName, Flags);
+		}
+
+		/// <summary>
+		///   Tries to get the <see cref="FieldInfo" /> for the <paramref name="property" />'s backing field. Returns <c>null</c> if
+		///   <paramref name="property" /> is not a compiler generated an auto-property.
+		/// </summary>
+		/// <param name="property">The property the backing field should be returned for.</param>
+		public static FieldInfo GetBackingField(this PropertyInfo property)
+		{
+			Requires.NotNull(property, nameof(property));
+
+			var fieldName = $"<{property.Name}>k__BackingField";
+			return property.DeclaringType.GetField(fieldName, Flags);
+		}
+
+		/// <summary>
 		///   Checks whether the <paramref name="member" /> is hidden in the serialization <paramref name="mode" />, depending on
 		///   whether <paramref name="discoveringObjects" /> is <c>true</c>.
 		/// </summary>
@@ -254,18 +283,13 @@ namespace SafetySharp.Utilities
 		/// <param name="discoveringObjects">Indicates whether objects are being discovered.</param>
 		public static bool IsHidden(this MemberInfo member, SerializationMode mode, bool discoveringObjects)
 		{
-			// If the field is compiler generated and matches the general naming scheme of backing fields '<PropName>k__BackingField'
-			// of auto-implemented properties, check the property instead
+			// For backing fields of auto-implemented properties, check the property instead
 			// TODO: Remove this workaround once C# supports [field:Attribute] on properties
 			var fieldInfo = member as FieldInfo;
-			if (fieldInfo != null && fieldInfo.HasAttribute<CompilerGeneratedAttribute>() && fieldInfo.Name.EndsWith(">k__BackingField"))
-			{
-				var propertyName = fieldInfo.Name.Substring(1, fieldInfo.Name.Length - ">k__BackingField".Length - 1);
-				var property = member.DeclaringType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+			var property = fieldInfo?.GetAutoProperty();
 
-				if (property != null)
-					return property.IsHidden(mode, discoveringObjects);
-			}
+			if (property != null)
+				return property.IsHidden(mode, discoveringObjects);
 
 			// Don't try to serialize members that are explicitly marked as non-serializable
 			if (member.HasAttribute<NonSerializableAttribute>() || member.HasAttribute<NonSerializedAttribute>())

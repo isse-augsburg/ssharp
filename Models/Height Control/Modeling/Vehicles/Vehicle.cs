@@ -29,9 +29,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 	/// </summary>
 	public class Vehicle : Component
 	{
-		[Range(0, Model.TunnelPosition, OverflowBehavior.Clamp)]
-		private int _position;
-
 		[Hidden]
 		private int _speed;
 
@@ -50,7 +47,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		///   Gets a value indicating whether the vehicle has collided with the tunnel.
 		/// </summary>
 		public bool IsCollided =>
-			Kind == VehicleKind.OverheightVehicle && _position >= Model.TunnelPosition && Lane == Lane.Left;
+			Kind == VehicleKind.OverheightVehicle && Position >= Model.TunnelPosition && Lane == Lane.Left;
 
 		/// <summary>
 		///   Informs the vehicle whether the tunnel is closed.
@@ -60,7 +57,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// <summary>
 		///   Gets the vehicle's position.
 		/// </summary>
-		public int Position => _position;
+		[Range(0, Model.TunnelPosition, OverflowBehavior.Clamp)]
+		public int Position { get; private set; }
 
 		/// <summary>
 		///   Chooses the lane the vehicle drives on. By default, vehicles always drive on the right lane.
@@ -76,7 +74,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		///   Checks whether the vehicle is at the <paramref name="position" />.
 		/// </summary>
 		/// <param name="position">The position that should be checked.</param>
-		public bool IsAtPosition(int position) => _position - _speed <= position && _position > position;
+		public bool IsAtPosition(int position) => Position - _speed <= position && Position > position;
 
 		/// <summary>
 		///   Moves the vehicle.
@@ -88,11 +86,11 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 				return;
 
 			// The vehicle's speed is irrelevant once the end control has been passed
-			_speed = _position >= Model.EndControlPosition ? Model.MaxSpeed : ChooseSpeed();
-			_position += _speed;
+			_speed = Position >= Model.EndControlPosition ? Model.MaxSpeed : ChooseSpeed();
+			Position += _speed;
 
 			// The road layout makes lane changes impossible when the end control has been reached
-			if (_position < Model.EndControlPosition)
+			if (Position < Model.EndControlPosition)
 				Lane = ChooseLane();
 		}
 

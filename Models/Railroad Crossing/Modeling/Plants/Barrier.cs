@@ -29,13 +29,11 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Plants
 	/// </summary>
 	public class Barrier : Component
 	{
-		[Range(0, Model.ClosingDelay, OverflowBehavior.Clamp)]
-		private int _angle = Model.ClosingDelay;
-
 		/// <summary>
 		///   Gets the current angle of the barrier; a value of 0 means that the barrier is closed.
 		/// </summary>
-		public int Angle => _angle;
+		[Range(0, Model.ClosingDelay, OverflowBehavior.Clamp)]
+		public int Angle { get; private set; } = Model.ClosingDelay;
 
 		/// <summary>
 		///   Gets the barrier's current angular movement speed.
@@ -47,7 +45,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Plants
 		/// </summary>
 		public override void Update()
 		{
-			_angle += Speed;
+			Angle += Speed;
 		}
 	}
 }

@@ -29,21 +29,17 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Plants
 	/// </summary>
 	public class Train : Component
 	{
-		[Range(0, Model.EndPosition, OverflowBehavior.Clamp)]
-		private int _position;
-
-		[Range(0, Model.MaxSpeed, OverflowBehavior.Clamp)]
-		private int _speed = Model.MaxSpeed;
-
 		/// <summary>
 		///   Gets the train's current position.
 		/// </summary>
-		public int Position => _position;
+		[Range(0, Model.EndPosition, OverflowBehavior.Clamp)]
+		public int Position { get; private set; }
 
 		/// <summary>
 		///   Gets the train's current speed that affects its position.
 		/// </summary>
-		public int Speed => _speed;
+		[Range(0, Model.MaxSpeed, OverflowBehavior.Clamp)]
+		public int Speed { get; private set; } = Model.MaxSpeed;
 
 		/// <summary>
 		///   Gets the train's current acceleration that affects its speed.
@@ -55,8 +51,8 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Plants
 		/// </summary>
 		public override void Update()
 		{
-			_position += _speed;
-			_speed += Acceleration;
+			Position += Speed;
+			Speed += Acceleration;
 		}
 	}
 }

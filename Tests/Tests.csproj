@@ -623,6 +623,8 @@
     <Compile Include="Serialization\Ranges\Bool.cs" />
     <Compile Include="Serialization\Ranges\Char.cs" />
     <Compile Include="Serialization\Ranges\Error.cs" />
+    <Compile Include="Serialization\Ranges\property ranges via method.cs" />
+    <Compile Include="Serialization\Ranges\property ranges via attributes.cs" />
     <Compile Include="Serialization\Ranges\struct array.cs" />
     <Compile Include="Serialization\Ranges\struct.cs" />
     <Compile Include="Serialization\Ranges\inherited field.cs" />
