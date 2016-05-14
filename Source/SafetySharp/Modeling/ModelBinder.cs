@@ -26,7 +26,6 @@ namespace SafetySharp.Modeling
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Reflection;
-	using Analysis;
 	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;

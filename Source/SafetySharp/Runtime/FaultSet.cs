@@ -36,13 +36,13 @@ namespace SafetySharp.Runtime
 	[DebuggerDisplay("{_faults}")]
 	internal struct FaultSet : IEquatable<FaultSet>
 	{
-		private readonly int _faults;
+		private readonly long _faults;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="faults">The faults the set should contain.</param>
-		private FaultSet(int faults)
+		private FaultSet(long faults)
 		{
 			_faults = faults;
 		}
@@ -61,7 +61,7 @@ namespace SafetySharp.Runtime
 			_faults = 0;
 
 			foreach (var fault in faults)
-				_faults |= 1 << fault.Identifier;
+				_faults |= 1L << fault.Identifier;
 		}
 
 		/// <summary>
@@ -70,10 +70,10 @@ namespace SafetySharp.Runtime
 		/// <param name="faults">The faults the set should contain.</param>
 		internal static FaultSet FromActivatedFaults(params Fault[] faults)
 		{
-			var mask = 0;
+			var mask = 0L;
 
 			foreach (var fault in faults)
-				mask |= fault.IsActivated ? 1 << fault.Identifier : 0;
+				mask |= fault.IsActivated ? 1L << fault.Identifier : 0;
 
 			return new FaultSet(mask);
 		}
@@ -105,7 +105,7 @@ namespace SafetySharp.Runtime
 		internal FaultSet Add(Fault fault)
 		{
 			Requires.NotNull(fault, nameof(fault));
-			return new FaultSet(_faults | (1 << fault.Identifier));
+			return new FaultSet(_faults | (1L << fault.Identifier));
 		}
 
 		/// <summary>
@@ -116,10 +116,10 @@ namespace SafetySharp.Runtime
 		internal void SetActivation(Fault[] faults)
 		{
 			Requires.NotNull(faults, nameof(faults));
-			Requires.That(faults.Length < 32, "More than 31 faults are not supported.");
+			CheckFaultCount(faults.Length);
 
 			foreach (var fault in faults)
-				fault.Activation = (_faults & (1 << fault.Identifier)) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
+				fault.Activation = (_faults & (1L << fault.Identifier)) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
 		}
 
 		/// <summary>
@@ -132,7 +132,7 @@ namespace SafetySharp.Runtime
 
 			for (var i = 1; i <= faults.Length; ++i)
 			{
-				if ((_faults & (1 << (i - 1))) != 0)
+				if ((_faults & (1L << (i - 1))) != 0)
 					yield return faults[i - 1];
 			}
 		}
@@ -165,7 +165,7 @@ namespace SafetySharp.Runtime
 		/// <param name="faultCount">The fault count that should be checked.</param>
 		internal static void CheckFaultCount(int faultCount)
 		{
-			Requires.That(faultCount < 32, "More than 31 faults are not supported.");
+			Requires.That(faultCount < 64, "More than 63 faults are not supported.");
 		}
 
 		/// <summary>
@@ -194,7 +194,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		public override int GetHashCode()
 		{
-			return _faults;
+			return (int)_faults;
 		}
 
 		/// <summary>

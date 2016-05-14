@@ -136,6 +136,7 @@
     <Compile Include="Analysis\Dcca\multiple suppressed faults.cs" />
     <Compile Include="Analysis\Dcca\single forced fault.cs" />
     <Compile Include="Analysis\Dcca\forced and suppressed faults.cs" />
+    <Compile Include="Analysis\Dcca\large fault count.cs" />
     <Compile Include="Analysis\Dcca\single suppressed fault.cs" />
     <Compile Include="Analysis\Dcca\multiple two point cut sets.cs" />
     <Compile Include="Analysis\Dcca\no cut sets.cs" />
