@@ -25,11 +25,12 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using CompilerServices;
 	using SafetySharp.Modeling;
 
 	internal class Agent : Component
 	{
-		private readonly Stack<Agent> _requests = new Stack<Agent>(Model.MaxAgentRequests);
+		private readonly List<Agent> _requests = new List<Agent>(Model.MaxAgentRequests);
 		private readonly StateMachine<State> _stateMachine = State.Idle;
 		protected Role _currentRole;
 
@@ -70,6 +71,14 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			to.Inputs.Remove(from);
 		}
 
+		public virtual void OnReconfigured()
+		{
+			// For now, the resource disappears magically...
+			Resource = null;
+			_currentRole = null;
+			_stateMachine.ChangeState(State.Idle); // Todo: This is a bit of a hack
+		}
+
 		public virtual void Produce(ProduceCapability capability)
 		{
 		}
@@ -90,6 +99,47 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 		{
 		}
 
+		public void CheckAllocatedCapabilities()
+		{
+			// We ignore faults for unused capabilities that are currently not used to improve general model checking efficiency
+			// For DCCA efficiency, it would be beneficial, however, to check for faults of all capabilities and I/O relations;
+			// this is also how the ODP seems to work
+
+			// Using ToArray() to prevent modifications of the list during iteration...
+			foreach (var capability in AvailableCapabilites.ToArray())
+			{
+				if (!CheckAllocatedCapability(capability))
+					AvailableCapabilites.Remove(capability);
+			}
+
+			foreach (var input in Inputs.ToArray())
+			{
+				if (!CheckInput(input))
+					Disconnect(input, this);
+			}
+
+			foreach (var output in Outputs.ToArray())
+			{
+				if (!CheckOutput(output))
+					Disconnect(this, output);
+			}
+		}
+
+		protected virtual bool CheckAllocatedCapability(Capability capability)
+		{
+			return true;
+		}
+
+		protected virtual bool CheckInput(Agent agent)
+		{
+			return true;
+		}
+
+		protected virtual bool CheckOutput(Agent agent)
+		{
+			return true;
+		}
+
 		public override void Update()
 		{
 			_stateMachine
@@ -108,6 +158,11 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 					guard: _currentRole != null && _currentRole.PreCondition.Port == null)
 				.Transition(
 					from: State.WaitForResource,
+					to: State.WaitForResource,
+					guard: Resource == null,
+					action: () => _currentRole.PreCondition.Port.TransferResource(this))
+				.Transition(
+					from: State.WaitForResource,
 					to: State.ExecuteRole,
 					guard: Resource != null,
 					action: () => _currentRole.PreCondition.Port.ResourcePickedUp())
@@ -124,6 +179,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 					{
 						_currentRole.PostCondition.Port.ResourceReady(this);
 						_currentRole.Reset();
+						_requests.Remove(_currentRole.PreCondition.Port);
 					})
 				.Transition(
 					from: State.ExecuteRole,
@@ -180,7 +236,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			if (_requests.Count == 0)
 				return false;
 
-			var otherAgent = _requests.Pop();
+			var otherAgent = _requests[0];
 			_currentRole = AllocatedRoles.FirstOrDefault(role => role.PreCondition.Port == otherAgent);
 
 			return true;
@@ -189,12 +245,12 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 		private void ResourceReady(Agent otherAgent)
 		{
 			if (_requests.Count < Model.MaxAgentRequests && !_requests.Contains(otherAgent))
-				_requests.Push(otherAgent);
+				_requests.Add(otherAgent);
 		}
 
 		public override string ToString()
 		{
-			return $"{Name}: State: {_stateMachine.State}, HasResource: {HasResource}";
+			return $"{Name}: State: {_stateMachine.State}, Resource: {Resource?.Workpiece.Name}, #Requests: {_requests.Count}";
 		}
 
 		private enum State

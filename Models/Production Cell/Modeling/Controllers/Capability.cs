@@ -26,5 +26,6 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 	{
 		public abstract void Execute(Agent agent);
 		public abstract int Identifier { get; }
+		public abstract bool IsSame(Capability capability);
 	}
 }

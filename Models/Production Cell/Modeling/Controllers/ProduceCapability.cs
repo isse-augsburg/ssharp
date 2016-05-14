@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
 	using System.Collections.Generic;
+	using System.Linq;
 
 	internal class ProduceCapability : Capability
 	{
@@ -41,5 +42,14 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 		}
 
 		public override int Identifier => 1;
+
+		public override bool IsSame(Capability capability)
+		{
+			var produce = capability as ProduceCapability;
+			if (produce == null)
+				return false;
+
+			return Tasks.SequenceEqual(produce.Tasks);
+		}
 	}
 }

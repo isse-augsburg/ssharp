@@ -37,5 +37,11 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 		{
 			agent.Process(this);
 		}
+
+		public override bool IsSame(Capability capability)
+		{
+			var process = capability as ProcessCapability;
+			return ProductionAction == process?.ProductionAction;
+		}
 	}
 }

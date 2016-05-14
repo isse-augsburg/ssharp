@@ -27,6 +27,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 	using Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 
 	public class SafetyAnalysisTests
 	{
@@ -44,6 +45,10 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 		public void ReconfigurationFailed()
 		{
 			var model = new Model();
+
+			foreach (var robot in model.Robots)
+				robot.ResourceTransportFault.SuppressActivation();
+
 			var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationFailed);
 

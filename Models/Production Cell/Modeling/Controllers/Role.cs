@@ -33,7 +33,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 		public Condition PreCondition { get; } = new Condition();
 		public Condition PostCondition { get; } = new Condition();
 
-		public bool IsCompleted => _current == CapabilitiesToApply.Count;
+		public bool IsCompleted => _current >= CapabilitiesToApply.Count;
 
 		public void Execute(Agent agent)
 		{

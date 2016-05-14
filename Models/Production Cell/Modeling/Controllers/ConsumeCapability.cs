@@ -23,23 +23,20 @@
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
 
 	internal class ConsumeCapability : Capability
 	{
-		public List<Resource> Resources { get; }
-
-		public ConsumeCapability(List<Resource> resources)
-		{
-			Resources = resources;
-		}
+		public override int Identifier { get; } = (int)Enum.GetValues(typeof(ProductionAction)).Cast<ProductionAction>().Max() + 2;
 
 		public override void Execute(Agent agent)
 		{
 			agent.Consume(this);
 		}
 
-		public override int Identifier { get; } = (int)Enum.GetValues(typeof(ProductionAction)).Cast<ProductionAction>().Max() + 2;
+		public override bool IsSame(Capability capability)
+		{
+			return capability is ConsumeCapability;
+		}
 	}
 }

@@ -38,22 +38,22 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 
 		public Model()
 		{
-			var produce = new ProduceCapability(Resources, Tasks);
-			var insert = new ProcessCapability(ProductionAction.Insert);
-			var drill = new ProcessCapability(ProductionAction.Drill);
-			var tighten = new ProcessCapability(ProductionAction.Tighten);
-			var polish = new ProcessCapability(ProductionAction.Polish);
-			var consume = new ConsumeCapability(Resources);
+			var produce = (Func<ProduceCapability>)(() => new ProduceCapability(Resources, Tasks));
+			var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
+			var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
+			var tighten = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Tighten));
+			var polish = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Polish));
+			var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
 
-			CreateWorkpieces(5, produce, drill, insert, tighten, polish, consume);
+			CreateWorkpieces(5, produce(), drill(), insert(), tighten(), polish(), consume());
 
-			CreateRobot(produce, drill);
-			CreateRobot(insert);
-			CreateRobot(tighten);
-			CreateRobot(polish, consume);
+			CreateRobot(produce(), drill(), insert());
+			CreateRobot(insert(), drill());
+			CreateRobot(tighten(), polish(), tighten(), drill());
+			CreateRobot(polish(), consume());
 
-			CreateCart(Robots[0], new Route(Robots[0], Robots[1]));
-			CreateCart(Robots[1], new Route(Robots[1], Robots[2]));
+			CreateCart(Robots[0], new Route(Robots[0], Robots[1]), new Route(Robots[0], Robots[2]), new Route(Robots[0], Robots[3]));
+			CreateCart(Robots[1], new Route(Robots[0], Robots[1]), new Route(Robots[1], Robots[2]));
 			CreateCart(Robots[2], new Route(Robots[2], Robots[3]));
 
 			ObserverController = new MiniZincObserverController(RobotAgents.Cast<Agent>().Concat(CartAgents), Tasks);
@@ -89,8 +89,10 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 
 			for (var i = 0; i < count; ++i)
 			{
-				var workpiece = new Workpiece(capabilities.OfType<ProcessCapability>().Select(c => c.ProductionAction).ToArray());
-				workpiece.Name = $"W{Workpieces.Count + 1}";
+				var workpiece = new Workpiece(capabilities.OfType<ProcessCapability>().Select(c => c.ProductionAction).ToArray())
+				{
+					Name = $"W{Workpieces.Count + 1}"
+				};
 
 				Workpieces.Add(workpiece);
 				Resources.Add(new Resource(task, workpiece));
@@ -117,7 +119,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 			Carts.Add(cart);
 			CartAgents.Add(agent);
 
-			cart.SetNames(Robots, Carts.Count);
+			cart.SetNames(Carts.Count);
 			agent.Name = $"C{Carts.Count}";
 
 			foreach (var route in routes)

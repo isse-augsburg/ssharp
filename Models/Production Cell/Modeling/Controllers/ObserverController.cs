@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using SafetySharp.Modeling;
 
@@ -62,6 +63,9 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 			if (!_reconfigurationRequested)
 				return;
+
+			foreach (var agent in Agents)
+				agent.CheckAllocatedCapabilities();
 
 			Reconfigure();
 			_reconfigurationRequested = false;

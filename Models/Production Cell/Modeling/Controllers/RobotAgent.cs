@@ -36,24 +36,60 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 		public Robot Robot { get; }
 
+		public override void OnReconfigured()
+		{
+			_currentCapability = null;
+			base.OnReconfigured();
+
+			// For now, the resource disappears magically...
+			Robot.RemoveWorkpiece();
+		}
+
+		protected override bool CheckInput(Agent agent)
+		{
+			return Robot.CanTransfer();
+		}
+
+		protected override bool CheckOutput(Agent agent)
+		{
+			return Robot.CanTransfer();
+		}
+
+		protected override bool CheckAllocatedCapability(Capability capability)
+		{
+			var processCapability = capability as ProcessCapability;
+			return processCapability == null || Robot.CanApply(processCapability);
+		}
+
 		public override void TakeResource(Agent agent)
 		{
-			// If we fail to transfer the resource, the robot loses all of its capabilities; todo: really?
+			// If we fail to transfer the resource, the robot loses all of its connections
 			if (Robot.TakeResource(((CartAgent)agent).Cart))
 				return;
 
-			AvailableCapabilites.Clear();
+			ClearConnections();
 			ObserverController.ScheduleReconfiguration();
 		}
 
 		public override void PlaceResource(Agent agent)
 		{
-			// If we fail to transfer the resource, the robot loses all of its capabilities; todo: really?
+			// If we fail to transfer the resource, the robot loses all of its connections
 			if (Robot.PlaceResource(((CartAgent)agent).Cart))
 				return;
 
-			AvailableCapabilites.Clear();
+			ClearConnections();
 			ObserverController.ScheduleReconfiguration();
+		}
+
+		private void ClearConnections()
+		{
+			// Using ToArray() to prevent removal during collection iteration
+
+			foreach (var input in Inputs.ToArray())
+				Disconnect(input, this);
+
+			foreach (var output in Outputs.ToArray())
+				Disconnect(this, output);
 		}
 
 		public override void Produce(ProduceCapability capability)
@@ -79,7 +115,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 					_currentCapability = capability;
 				else
 				{
-					AvailableCapabilites.RemoveAll(c => c != capability);
+					AvailableCapabilites.RemoveAll(c => c != _currentCapability);
 					ObserverController.ScheduleReconfiguration();
 					return;
 				}
@@ -98,7 +134,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			if (Resource == null)
 				return;
 
-			Robot.ConsumeWorkpiece(Resource.Workpiece);
+			Robot.ConsumeWorkpiece();
 			Resource = null;
 		}
 	}

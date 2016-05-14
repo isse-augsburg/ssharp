@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 {
 	using System.Collections.Generic;
 	using System.Linq;
+	using Controllers;
 	using SafetySharp.Modeling;
 
 	internal class Cart : Component
@@ -66,24 +67,33 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 			return true;
 		}
 
-		public void SetNames(List<Robot> robots, int cartId)
+		public void SetNames(int cartId)
 		{
 			_name = $"C{cartId}";
 			Broken.Name = $"C{cartId}.Broken";
 
 			foreach (var route in _routes)
-				route.Blocked.Name = $"C{cartId}.R{robots.IndexOf(route.From)}->R{robots.IndexOf(route.To)}.Blocked";
+				route.Blocked.Name = $"C{cartId}.{route.From.Name}->{route.To.Name}.Blocked";
 		}
 
 		public override string ToString()
 		{
-			return $"{_name}: HasWorkpiece: {LoadedWorkpiece != null}";
+			return $"{_name}@{_position.Name}: Workpiece: {LoadedWorkpiece?.Name}";
 		}
 
 		[FaultEffect(Fault = nameof(Broken))]
 		internal class BrokenEffect : Cart
 		{
 			public override bool MoveTo(Robot robot) => false;
+			public override bool CanMove(Robot robot) => false;
+		}
+
+		public virtual bool CanMove(Robot robot)
+		{
+			if (_position == robot)
+				return true;
+
+			return _routes.Any(r => r.CanNavigate(_position, robot));
 		}
 	}
 }

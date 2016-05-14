@@ -119,6 +119,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			{
 				RolePool.Return(agent.AllocatedRoles);
 				agent.AllocatedRoles.Clear();
+				agent.OnReconfigured();
 			}
 
 			var roleAllocations = Parse(lines[0], lines[1]).ToArray();
@@ -130,6 +131,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 				var role = RolePool.Allocate();
 				role.CapabilitiesToApply.Clear();
 				role.CapabilitiesToApply.AddRange(capabilities);
+				role.Reset();
 				role.PreCondition.Task = Tasks[0];
 				role.PostCondition.Task = Tasks[0];
 				role.PreCondition.Port = i == 0 ? null : roleAllocations[i - 1].Item1;
@@ -163,7 +165,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			for (var i = offset; i < agents.Length && agents[i] == agentId; ++i)
 			{
 				if (capabilities[i] != -1)
-					yield return agent.AvailableCapabilites.First(c => c == Tasks[0].Capabilities[capabilities[i]]);
+					yield return agent.AvailableCapabilites.First(c => c.IsSame(Tasks[0].Capabilities[capabilities[i]]));
 			}
 		}
 

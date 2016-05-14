@@ -22,26 +22,32 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 {
+	using Controllers;
 	using SafetySharp.Modeling;
 
 	internal class Tool : Component
 	{
 		public Fault Broken = new PermanentFault();
 
-		public Tool(ProductionAction action)
+		public Tool(ProcessCapability capability)
 		{
-			ProductionAction = action;
+			Capability = capability;
 		}
 
 		public Tool()
 		{
 		}
 
-		public ProductionAction ProductionAction { get; }
+		public ProcessCapability Capability { get; }
 
 		public virtual bool Apply(Workpiece workpiece)
 		{
-			workpiece.Apply(ProductionAction);
+			workpiece.Apply(Capability.ProductionAction);
+			return true;
+		}
+
+		public virtual bool CanApply()
+		{
 			return true;
 		}
 
@@ -49,6 +55,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 		internal class BrokenEffect : Tool
 		{
 			public override bool Apply(Workpiece workpiece) => false;
+			public override bool CanApply() => false;
 		}
 	}
 }

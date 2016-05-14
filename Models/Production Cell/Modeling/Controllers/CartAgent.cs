@@ -54,5 +54,23 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			Disconnect(agent, this);
 			ObserverController.ScheduleReconfiguration();
 		}
+
+		public override void OnReconfigured()
+		{
+			base.OnReconfigured();
+
+			// For now, the resource disappears magically...
+			Cart.LoadedWorkpiece = null;
+		}
+
+		protected override bool CheckInput(Agent agent)
+		{
+			return Cart.CanMove(((RobotAgent)agent).Robot);
+		}
+
+		protected override bool CheckOutput(Agent agent)
+		{
+			return Cart.CanMove(((RobotAgent)agent).Robot);
+		}
 	}
 }

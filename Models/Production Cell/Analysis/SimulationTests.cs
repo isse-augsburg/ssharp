@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 {
+	using System;
 	using System.Diagnostics;
 	using Modeling;
 	using NUnit.Framework;
@@ -38,28 +39,42 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 
 			var simulator = new Simulator(model);
 			model = (Model)simulator.Model;
+			model.Robots[2].Tools[0].Broken.ForceActivation();
 
 			for (var i = 0; i < 100; ++i)
 			{
-				foreach (var robot in model.RobotAgents)
-					Debug.WriteLine(robot);
+				WriteLine($"=================  Step: {i}  =====================================");
 
-				foreach (var cart in model.CartAgents)
-					Debug.WriteLine(cart);
+				if (model.ObserverController.ReconfigurationFailed)
+					WriteLine("Reconfiguration failed.");
+				else
+				{
+					foreach (var robot in model.RobotAgents)
+						WriteLine(robot);
 
-				foreach (var workpiece in model.Workpieces)
-					Debug.WriteLine(workpiece);
+					foreach (var cart in model.CartAgents)
+						WriteLine(cart);
 
-				foreach (var robot in model.Robots)
-					Debug.WriteLine(robot);
+					foreach (var workpiece in model.Workpieces)
+						WriteLine(workpiece);
 
-				foreach (var cart in model.Carts)
-					Debug.WriteLine(cart);
+					foreach (var robot in model.Robots)
+						WriteLine(robot);
 
-				Debug.WriteLine($"=================  Step: {i}  =====================================");
+					foreach (var cart in model.Carts)
+						WriteLine(cart);
+				}
 
 				simulator.SimulateStep();
 			}
+		}
+
+		private static void WriteLine(object line)
+		{
+			Debug.WriteLine(line.ToString());
+#if !DEBUG
+			Console.WriteLine(line.ToString());
+#endif
 		}
 	}
 }

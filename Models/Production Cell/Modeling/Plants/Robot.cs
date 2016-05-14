@@ -30,12 +30,9 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 	internal class Robot : Component
 	{
 		[Hidden(HideElements = true)]
-		private readonly Tool[] _tools;
+		public Tool[] Tools { get; }
 
 		private Tool _currentTool;
-
-		[Hidden]
-		private string _name;
 
 		private Workpiece _workpiece;
 
@@ -43,15 +40,23 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 		public Fault ResourceTransportFault = new PermanentFault();
 		public Fault SwitchFault = new PermanentFault();
 
-		public bool HasWorkpiece => _workpiece != null;
-
 		public Robot(params ProcessCapability[] capabilities)
 		{
-			_tools = capabilities.Select(c => new Tool(c.ProductionAction)).ToArray();
+			Tools = capabilities.Select(c => new Tool(c)).ToArray();
 		}
 
 		public Robot()
 		{
+		}
+
+		[Hidden]
+		public string Name { get; set; }
+
+		public bool HasWorkpiece => _workpiece != null;
+
+		public virtual bool CanApply(ProcessCapability capability)
+		{
+			return Tools.First(t => t.Capability == capability).CanApply();
 		}
 
 		public virtual bool ApplyCapability()
@@ -61,7 +66,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 
 		public virtual bool SwitchCapability(ProcessCapability capability)
 		{
-			_currentTool = _tools.First(t => t.ProductionAction == capability.ProductionAction);
+			_currentTool = Tools.First(t => t.Capability == capability);
 			return true;
 		}
 
@@ -79,16 +84,16 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 
 		public void SetNames(int robotId)
 		{
-			_name = $"R{robotId}";
+			Name = $"R{robotId}";
 			ApplyFault.Name = $"R{robotId}.ApplyFailed";
 			SwitchFault.Name = $"R{robotId}.SwitchFailed";
 			ResourceTransportFault.Name = $"R{robotId}.TransportFailed";
 
-			foreach (var group in _tools.GroupBy(t => t.ProductionAction))
+			foreach (var group in Tools.GroupBy(t => t.Capability.ProductionAction))
 			{
 				var tools = group.ToArray();
 				for (var i = 0; i < tools.Length; i++)
-					tools[i].Broken.Name = $"R{robotId}.{tools[i].ProductionAction}{i + 1}";
+					tools[i].Broken.Name = $"R{robotId}.{tools[i].Capability.ProductionAction}{i + 1}";
 			}
 		}
 
@@ -100,7 +105,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 			_workpiece = workpiece;
 		}
 
-		public void ConsumeWorkpiece(Workpiece workpiece)
+		public void ConsumeWorkpiece()
 		{
 			if (_workpiece == null)
 				throw new InvalidOperationException("There is no workpiece located at the robot.");
@@ -108,21 +113,30 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 			_workpiece = null;
 		}
 
-		public override string ToString()
+		public void RemoveWorkpiece()
 		{
-			return $"{_name}: HasWorkpiece: {_workpiece != null}";
+			_workpiece = null;
 		}
 
-		[FaultEffect(Fault = nameof(ApplyFault))]
+		public override string ToString()
+		{
+			return $"{Name}: Workpiece: {_workpiece?.Name}";
+		}
+
+		public virtual bool CanTransfer() => true;
+
+		[FaultEffect(Fault = nameof(ApplyFault)), Priority(2)]
 		internal class ApplyEffect : Robot
 		{
 			public override bool ApplyCapability() => false;
+			public override bool CanApply(ProcessCapability capability) => false;
 		}
 
-		[FaultEffect(Fault = nameof(SwitchFault))]
+		[FaultEffect(Fault = nameof(SwitchFault)), Priority(1)]
 		internal class SwitchEffect : Robot
 		{
 			public override bool SwitchCapability(ProcessCapability capability) => false;
+			public override bool CanApply(ProcessCapability capability) => false;
 		}
 
 		[FaultEffect(Fault = nameof(ResourceTransportFault))]
@@ -130,6 +144,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 		{
 			public override bool TakeResource(Cart cart) => false;
 			public override bool PlaceResource(Cart cart) => false;
+			public override bool CanTransfer() => false;
 		}
 	}
 }
