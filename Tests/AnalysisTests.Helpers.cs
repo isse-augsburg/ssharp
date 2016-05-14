@@ -80,7 +80,7 @@ namespace Tests
 
 		protected SafetyAnalysis.Result DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality)
 		{
-			var analysis = new SafetyAnalysis();
+			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 10 } };
 			analysis.OutputWritten += message => Output.Log("{0}", message);
 
 			var result = analysis.ComputeMinimalCriticalSets(model, hazard, maxCardinality);
