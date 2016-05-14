@@ -46,7 +46,8 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(component, nameof(component));
 
 			var subcomponents = new HashSet<IComponent>(ReferenceEqualityComparer<IComponent>.Default);
-			GetSubcomponents(subcomponents, component);
+			var visitedObjects = new HashSet<object>(ReferenceEqualityComparer<object>.Default);
+			GetSubcomponents(subcomponents, visitedObjects, component);
 
 			// Some objects may have backward references to the component itself, so we have to make sure that we
 			// don't include the component in its set of subcomponents
@@ -229,9 +230,13 @@ namespace SafetySharp.Runtime
 		///   <paramref name="subcomponents" />.
 		/// </summary>
 		/// <param name="subcomponents">The set of referenced objects.</param>
+		/// <param name="visitedObjects">The set of objects that have already been visited, required to break up cycles.</param>
 		/// <param name="obj">The object the referenced objects should be returned for.</param>
-		private static void GetSubcomponents(HashSet<IComponent> subcomponents, object obj)
+		private static void GetSubcomponents(HashSet<IComponent> subcomponents, HashSet<object> visitedObjects, object obj)
 		{
+			if (!visitedObjects.Add(obj))
+				return;
+
 			foreach (var referencedObject in SerializationRegistry.Default.GetSerializer(obj).GetReferencedObjects(obj, SerializationMode.Full))
 			{
 				if (referencedObject == null)
@@ -244,7 +249,7 @@ namespace SafetySharp.Runtime
 						subcomponents.Add(component);
 				}
 				else
-					GetSubcomponents(subcomponents, referencedObject);
+					GetSubcomponents(subcomponents, visitedObjects, referencedObject);
 			}
 		}
 	}

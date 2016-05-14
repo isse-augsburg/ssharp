@@ -22,6 +22,7 @@
 
 namespace Tests.Serialization.RuntimeModels
 {
+	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 	using Shouldly;
@@ -35,8 +36,12 @@ namespace Tests.Serialization.RuntimeModels
 		{
 			var c = new C { F = 33 };
 			var d = new D { C = c };
+			var e = new E { C = new [] { c} };
+			var f = new F { E = e };
 			c.D = d;
-			var m = TestModel.InitializeModel(d);
+			c.E = new List<E> {e};
+			e.F = f;
+			var m = InitializeModel(d);
 
 			_hasConstructorRun = false;
 			Create(m);
@@ -62,6 +67,7 @@ namespace Tests.Serialization.RuntimeModels
 		{
 			public D D;
 			public int F;
+			public List<E> E;
 
 			public C()
 			{
@@ -74,6 +80,27 @@ namespace Tests.Serialization.RuntimeModels
 			public C C;
 
 			public D()
+			{
+				_hasConstructorRun = true;
+			}
+		}
+
+		private class E
+		{
+			public C[] C;
+			public F F;
+
+			public E()
+			{
+				_hasConstructorRun = true;
+			}
+		}
+
+		private class F
+		{
+			public E E;
+
+			public F()
 			{
 				_hasConstructorRun = true;
 			}
