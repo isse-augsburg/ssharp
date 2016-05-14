@@ -1,6 +1,5 @@
 ﻿using SafetySharp.Analysis;
 using SafetySharp.Modeling;
-using ModelRole = SafetySharp.Analysis.Role;
 
 namespace SelfOrganizingPillProduction.Modeling
 {
@@ -16,7 +15,7 @@ namespace SelfOrganizingPillProduction.Modeling
             Stations = stations;
         }
 
-        [Root(ModelRole.System)]
+        [Root(RootKind.Controller)]
         public Station[] Stations { get; }
 
         public static Model NoRedundancyCircularModel()
