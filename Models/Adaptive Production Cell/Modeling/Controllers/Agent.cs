@@ -35,7 +35,11 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 		public List<Capability> AvailableCapabilites { get; } = new List<Capability>();
 		public List<Role> AllocatedRoles { get; } = new List<Role>();
+
+		[Hidden(HideElements = true)]
 		public List<Agent> Outputs { get; } = new List<Agent>();
+
+		[Hidden(HideElements = true)]
 		public List<Agent> Inputs { get; } = new List<Agent>();
 
 		public extern void TriggerReconfiguration();

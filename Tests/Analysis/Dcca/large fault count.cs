@@ -61,13 +61,13 @@ namespace Tests.Analysis.Dcca
 					c = (C)simulator.Model.Roots[0];
 
 					foreach (var d in c.D)
-						d.X.ShouldBe(0);
+						d.X.ShouldBe((byte)0);
 
 					while (!simulator.IsCompleted)
 						simulator.SimulateStep();
 
 					foreach (var d in c.D)
-						d.X.ShouldBe(d.F.IsActivated ? 17 : 0);
+						d.X.ShouldBe(d.F.IsActivated ? (byte)17 : (byte)0);
 				});
 			}
 		}
@@ -91,7 +91,7 @@ namespace Tests.Analysis.Dcca
 		private class D : Component
 		{
 			public readonly Fault F = new TransientFault();
-			public int X;
+			public byte X;
 
 			[FaultEffect(Fault = nameof(F))]
 			private class E : D

@@ -24,23 +24,31 @@ namespace Tests.Serialization.Misc
 {
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;
+	using SafetySharp.Utilities;
 	using Shouldly;
 
 	internal class HiddenProperty : SerializationObject
 	{
 		protected override void Check()
 		{
-			var c = new C { X = 1};
+			var c = new C { X = 1 };
 
 			GenerateCode(SerializationMode.Full, c);
-			StateSlotCount.ShouldBe(1);
+			StateSlotCount.ShouldBe(2);
 
 			Serialize();
 			c.X = 2;
 
+			typeof(C).GetProperty("Y").GetBackingField().SetValue(c, 102);
+			typeof(C).GetProperty("Z").GetBackingField().SetValue(c, 101);
+
+			c.Y.ShouldBe(102);
+			c.Z.ShouldBe(101);
+
 			Deserialize();
 			c.X.ShouldBe(1);
-			c.Y.ShouldBe(99);
+			c.Y.ShouldBe(102);
+			c.Z.ShouldBe(11);
 
 			GenerateCode(SerializationMode.Optimized, c);
 			StateSlotCount.ShouldBe(1);
@@ -48,9 +56,16 @@ namespace Tests.Serialization.Misc
 			Serialize();
 			c.X = 2;
 
+			typeof(C).GetProperty("Y").GetBackingField().SetValue(c, 1102);
+			typeof(C).GetProperty("Z").GetBackingField().SetValue(c, 1101);
+
+			c.Y.ShouldBe(1102);
+			c.Z.ShouldBe(1101);
+
 			Deserialize();
 			c.X.ShouldBe(2);
-			c.Y.ShouldBe(99);
+			c.Y.ShouldBe(1102);
+			c.Z.ShouldBe(1101);
 		}
 
 		internal class C
@@ -60,6 +75,8 @@ namespace Tests.Serialization.Misc
 
 			[NonSerializable]
 			public int Y { get; } = 99;
+
+			public int Z { get; } = 11;
 		}
 
 		internal class D

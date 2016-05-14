@@ -35,6 +35,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 		public Workpiece(params ProductionAction[] productionActions)
 		{
 			_productionActions = productionActions;
+			Range.Restrict(_productionStep, 0, _productionActions.Length, OverflowBehavior.Error);
 		}
 
 		public bool IsDamaged { get; private set; }

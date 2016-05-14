@@ -287,20 +287,18 @@ namespace SafetySharp.Utilities
 			// TODO: Remove this workaround once C# supports [field:Attribute] on properties
 			var fieldInfo = member as FieldInfo;
 			var property = fieldInfo?.GetAutoProperty();
-
-			if (property != null)
-				return property.IsHidden(mode, discoveringObjects);
+			var attributeMember = property ?? member;
 
 			// Don't try to serialize members that are explicitly marked as non-serializable
-			if (member.HasAttribute<NonSerializableAttribute>() || member.HasAttribute<NonSerializedAttribute>())
+			if (attributeMember.HasAttribute<NonSerializableAttribute>() || attributeMember.HasAttribute<NonSerializedAttribute>())
 				return true;
 
 			// If we're discovering objects in optimized mode and the member is explicitly marked as non-discoverable, it is hidden
-			if (mode == SerializationMode.Optimized && discoveringObjects && member.HasAttribute<NonDiscoverableAttribute>())
+			if (mode == SerializationMode.Optimized && discoveringObjects && attributeMember.HasAttribute<NonDiscoverableAttribute>())
 				return true;
 
 			// Read-only fields are implicitly marked with [Hidden]
-			var hiddenAttribute = member.GetCustomAttribute<HiddenAttribute>();
+			var hiddenAttribute = attributeMember.GetCustomAttribute<HiddenAttribute>();
 			var isHidden = hiddenAttribute != null || (fieldInfo != null && fieldInfo.IsInitOnly);
 
 			// If the member is hidden, only ignore it in optimized serializations when we're not discovering objects

@@ -26,8 +26,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 	internal class Resource
 	{
-		private List<Capability> _state;
-		private Task _task;
+		private readonly List<Capability> _state;
+		private readonly Task _task;
 
 		public Resource(Task task)
 		{
