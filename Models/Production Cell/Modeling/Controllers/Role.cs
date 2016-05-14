@@ -20,56 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
+namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
+	using System;
 	using System.Collections.Generic;
-	using System.Linq;
-	using SafetySharp.Modeling;
 
-	internal class Cart : Component
+	internal class Role
 	{
-		[Hidden(HideElements = true)]
-		private readonly Route[] _routes;
+		private int _current;
 
-		private Robot _position;
+		public List<Capability> CapabilitiesToApply { get; } = new List<Capability>(Model.MaxRoleCapabilities);
+		public Condition PreCondition { get; } = new Condition();
+		public Condition PostCondition { get; } = new Condition();
 
-		public Fault Broken = new PermanentFault();
+		public bool IsCompleted => _current == CapabilitiesToApply.Count;
 
-		public Workpiece LoadedWorkpiece;
-
-		public Cart(Robot startPosition, params Route[] routes)
+		public void Execute(Agent agent)
 		{
-			_routes = routes;
-			_position = startPosition;
+			if (_current >= CapabilitiesToApply.Count)
+				throw new InvalidOperationException("The role has already been completely executed and must be reset.");
+
+			CapabilitiesToApply[_current++].Execute(agent);
 		}
 
-		public Cart()
+		public void Reset()
 		{
-		}
-
-		public virtual bool MoveTo(Robot robot)
-		{
-			var route = _routes.SingleOrDefault(r => r.From == _position && r.To == robot && !r.IsBlocked);
-
-			if (route == null)
-				return false;
-
-			_position = route.To;
-			return true;
-		}
-
-		public void SetNames(List<Robot> robots, int cartId)
-		{
-			Broken.Name = $"C{cartId}.Broken";
-
-			foreach (var route in _routes)
-				route.Blocked.Name = $"C{cartId}.R{robots.IndexOf(route.From)}->R{robots.IndexOf(route.To)}.Blocked";
-		}
-
-		[FaultEffect(Fault = nameof(Broken))]
-		internal class BrokenEffect : Cart
-		{
-			public override bool MoveTo(Robot robot) => false;
+			_current = 0;
 		}
 	}
 }

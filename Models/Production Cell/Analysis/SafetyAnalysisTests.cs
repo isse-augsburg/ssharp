@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,10 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
+namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 {
-	internal abstract class Capability
+	using System;
+	using System.Linq;
+	using Modeling;
+	using NUnit.Framework;
+	using SafetySharp.Analysis;
+
+	public class SafetyAnalysisTests
 	{
-		public abstract int Identifier { get; }
+		[Test]
+		public void DamagedWorkpieces()
+		{
+			var model = new Model();
+			var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
+			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.Workpieces.Any(w => w.IsDamaged));
+
+			Console.WriteLine(result);
+		}
+
+		[Test]
+		public void ReconfigurationFailed()
+		{
+			var model = new Model();
+			var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
+			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationFailed);
+
+			Console.WriteLine(result);
+		}
 	}
 }

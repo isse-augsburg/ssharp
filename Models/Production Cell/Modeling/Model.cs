@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using Controllers;
@@ -30,9 +31,10 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 
 	internal class Model : ModelBase
 	{
-		public const int MaxRoleCapabilities = 2;
+		public const int MaxRoleCapabilities = 5;
 		public const int MaxRoleCount = 20;
-		public const int MaxTaskCount = 3;
+		public const int MaxAgentRequests = 2;
+		public const int MaxProductionSteps = 6;
 
 		public Model()
 		{
@@ -42,19 +44,19 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 			var tighten = new ProcessCapability(ProductionAction.Tighten);
 			var polish = new ProcessCapability(ProductionAction.Polish);
 			var consume = new ConsumeCapability(Resources);
-			
+
 			CreateWorkpieces(5, produce, drill, insert, tighten, polish, consume);
 
-			CreateRobot(drill);
+			CreateRobot(produce, drill);
 			CreateRobot(insert);
 			CreateRobot(tighten);
-			CreateRobot(polish);
+			CreateRobot(polish, consume);
 
 			CreateCart(Robots[0], new Route(Robots[0], Robots[1]));
 			CreateCart(Robots[1], new Route(Robots[1], Robots[2]));
 			CreateCart(Robots[2], new Route(Robots[2], Robots[3]));
 
-			ObserverController = new MiniZincObserverController(RobotAgents.Cast<Agent>().Concat(CartAgents));
+			ObserverController = new MiniZincObserverController(RobotAgents.Cast<Agent>().Concat(CartAgents), Tasks);
 		}
 
 		private List<Task> Tasks { get; } = new List<Task>();
@@ -68,10 +70,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 		[Root(RootKind.Plant)]
 		public List<Cart> Carts { get; } = new List<Cart>();
 
-		[Root(RootKind.Controller)]
 		public List<RobotAgent> RobotAgents { get; } = new List<RobotAgent>();
-
-		[Root(RootKind.Controller)]
 		public List<CartAgent> CartAgents { get; } = new List<CartAgent>();
 
 		[Root(RootKind.Controller)]
@@ -82,25 +81,32 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 
 		private void CreateWorkpieces(int count, params Capability[] capabilities)
 		{
+			if (capabilities.Length > MaxProductionSteps)
+				throw new InvalidOperationException($"Too many production steps; increase '{MaxProductionSteps}'.");
+
 			var task = new Task(capabilities);
 			Tasks.Add(task);
 
 			for (var i = 0; i < count; ++i)
 			{
-				Workpieces.Add(new Workpiece(capabilities.OfType<ProcessCapability>().Select(c => c.ProductionAction).ToArray()));
-				Resources.Add(new Resource(task));
+				var workpiece = new Workpiece(capabilities.OfType<ProcessCapability>().Select(c => c.ProductionAction).ToArray());
+				workpiece.Name = $"W{Workpieces.Count + 1}";
+
+				Workpieces.Add(workpiece);
+				Resources.Add(new Resource(task, workpiece));
 			}
 		}
 
-		private void CreateRobot(params ProcessCapability[] capabilities)
+		private void CreateRobot(params Capability[] capabilities)
 		{
-			var robot = new Robot(capabilities);
+			var robot = new Robot(capabilities.OfType<ProcessCapability>().ToArray());
 			var agent = new RobotAgent(capabilities, robot);
 
 			Robots.Add(robot);
 			RobotAgents.Add(agent);
 
 			robot.SetNames(Robots.Count);
+			agent.Name = $"R{Robots.Count}";
 		}
 
 		private void CreateCart(Robot startPosition, params Route[] routes)
@@ -112,6 +118,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 			CartAgents.Add(agent);
 
 			cart.SetNames(Robots, Carts.Count);
+			agent.Name = $"C{Carts.Count}";
 
 			foreach (var route in routes)
 			{

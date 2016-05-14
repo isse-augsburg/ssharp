@@ -32,6 +32,9 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 
 		private int _productionStep;
 
+		[Hidden]
+		public string Name { get; set; }
+
 		public Workpiece(params ProductionAction[] productionActions)
 		{
 			_productionActions = productionActions;
@@ -39,6 +42,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 		}
 
 		public bool IsDamaged { get; private set; }
+
+		public bool IsComplete => _productionStep == _productionActions.Length;
 
 		public void Apply(ProductionAction action)
 		{
@@ -56,6 +61,17 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 
 			destination = origin;
 			origin = null;
+		}
+
+		public override string ToString()
+		{
+			if (IsDamaged)
+				return $"{Name}: IsDamaged";
+
+			if (IsComplete)
+				return $"{Name}: IsComplete";
+
+			return $"{Name}: {_productionStep}/{_productionActions.Length}";
 		}
 	}
 }

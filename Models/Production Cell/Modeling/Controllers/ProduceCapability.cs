@@ -20,19 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.ProductionCell.Analysis
+namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-	using Modeling;
-	using NUnit.Framework;
-	using SafetySharp.Analysis;
+	using System.Collections.Generic;
 
-	public class ModelCheckingTests
+	internal class ProduceCapability : Capability
 	{
-		[Test]
-		public void EnumerateStateSpace()
+		public List<Resource> Resources { get; }
+		public List<Task> Tasks { get; }
+
+		public ProduceCapability(List<Resource> resources, List<Task> tasks)
 		{
-			var model = new Model();
-			ModelChecker.CheckInvariant(model, true);
+			Resources = resources;
+			Tasks = tasks;
 		}
+
+		public override void Execute(Agent agent)
+		{
+			agent.Produce(this);
+		}
+
+		public override int Identifier => 1;
 	}
 }

@@ -22,16 +22,24 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-	using Plants;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 
-	internal class RobotAgent : Agent
+	internal class ConsumeCapability : Capability
 	{
-		public Robot Robot { get; }
+		public List<Resource> Resources { get; }
 
-		public RobotAgent(Capability[] capabilities, Robot robot)
-			: base(capabilities)
+		public ConsumeCapability(List<Resource> resources)
 		{
-			Robot = robot;
+			Resources = resources;
 		}
+
+		public override void Execute(Agent agent)
+		{
+			agent.Consume(this);
+		}
+
+		public override int Identifier { get; } = (int)Enum.GetValues(typeof(ProductionAction)).Cast<ProductionAction>().Max() + 2;
 	}
 }

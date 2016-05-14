@@ -22,14 +22,37 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-	internal class ProcessCapability : Capability
+	using Plants;
+
+	internal class CartAgent : Agent
 	{
-		public ProcessCapability(ProductionAction productionAction)
+		public CartAgent(Cart cart)
 		{
-			ProductionAction = productionAction;
+			Cart = cart;
 		}
 
-		public ProductionAction ProductionAction { get; }
-		public override int Identifier => (int)ProductionAction;
+		public Cart Cart { get; }
+
+		public override void TakeResource(Agent agent)
+		{
+			// If we fail to move to the robot, the cart loses its route
+			if (Cart.MoveTo(((RobotAgent)agent).Robot))
+				return;
+
+			Disconnect(this, agent);
+			Disconnect(agent, this);
+			ObserverController.ScheduleReconfiguration();
+		}
+
+		public override void PlaceResource(Agent agent)
+		{
+			// If we fail to move to the robot, the cart loses its route
+			if (Cart.MoveTo(((RobotAgent)agent).Robot))
+				return;
+
+			Disconnect(this, agent);
+			Disconnect(agent, this);
+			ObserverController.ScheduleReconfiguration();
+		}
 	}
 }

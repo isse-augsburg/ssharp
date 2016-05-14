@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,23 +20,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.ProductionCell.Analysis
+namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-	using System;
+	using System.Collections.Generic;
 	using System.Linq;
-	using Modeling;
-	using NUnit.Framework;
-	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 
-	public class SafetyAnalysisTests
+	internal abstract class ObserverController : Component
 	{
-		[Test]
-		public void OneConfiguration()
-		{
-			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Workpieces.Any(w => w.IsDamaged));
+		[Hidden]
+		private bool _reconfigurationRequested = true;
 
-			Console.WriteLine(result);
+		protected ObserverController(IEnumerable<Agent> agents, List<Task> tasks)
+		{
+			Tasks = tasks;
+			Agents = agents.ToArray();
+
+			foreach (var agent in Agents)
+				agent.ObserverController = this;
+		}
+
+		protected ObjectPool<Role> RolePool { get; } = new ObjectPool<Role>(Model.MaxRoleCount);
+		protected List<Task> Tasks { get; } 
+
+		[Hidden(HideElements = true)]
+		protected Agent[] Agents { get; }
+
+		public bool ReconfigurationFailed { get; protected set; }
+
+		protected abstract void Reconfigure();
+
+		public void ScheduleReconfiguration()
+		{
+			_reconfigurationRequested = true;
+		}
+
+		public override void Update()
+		{
+			foreach (var agent in Agents)
+				agent.Update();
+
+			if (!_reconfigurationRequested)
+				return;
+
+			Reconfigure();
+			_reconfigurationRequested = false;
 		}
 	}
 }

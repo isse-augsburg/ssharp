@@ -22,31 +22,68 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 {
+	using System.Collections.Generic;
+	using System.Linq;
 	using SafetySharp.Modeling;
 
-	internal class Route : Component
+	internal class Cart : Component
 	{
-		public Fault Blocked = new PermanentFault();
+		[Hidden(HideElements = true)]
+		private readonly Route[] _routes;
 
-		public Route(Robot from, Robot to)
+		[Hidden]
+		private string _name;
+
+		private Robot _position;
+
+		public Fault Broken = new PermanentFault();
+
+		public Workpiece LoadedWorkpiece;
+
+		public Cart(Robot startPosition, params Route[] routes)
 		{
-			From = from;
-			To = to;
+			_routes = routes;
+			_position = startPosition;
 		}
 
-		public Route()
+		public Cart()
 		{
 		}
 
-		public Robot From { get; }
-		public Robot To { get; }
+		public bool HasWorkpiece => LoadedWorkpiece != null;
 
-		public virtual bool IsBlocked => false;
-
-		[FaultEffect(Fault = nameof(Blocked))]
-		internal class BlockedEffect : Route
+		public virtual bool MoveTo(Robot robot)
 		{
-			public override bool IsBlocked => true;
+			if (_position == robot)
+				return true;
+
+			var route = _routes.SingleOrDefault(r => r.CanNavigate(_position, robot));
+
+			if (route == null)
+				return false;
+
+			_position = route.To;
+			return true;
+		}
+
+		public void SetNames(List<Robot> robots, int cartId)
+		{
+			_name = $"C{cartId}";
+			Broken.Name = $"C{cartId}.Broken";
+
+			foreach (var route in _routes)
+				route.Blocked.Name = $"C{cartId}.R{robots.IndexOf(route.From)}->R{robots.IndexOf(route.To)}.Blocked";
+		}
+
+		public override string ToString()
+		{
+			return $"{_name}: HasWorkpiece: {LoadedWorkpiece != null}";
+		}
+
+		[FaultEffect(Fault = nameof(Broken))]
+		internal class BrokenEffect : Cart
+		{
+			public override bool MoveTo(Robot robot) => false;
 		}
 	}
 }

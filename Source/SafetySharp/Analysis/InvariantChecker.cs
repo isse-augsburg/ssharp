@@ -78,7 +78,7 @@ namespace SafetySharp.Analysis
 				tasks[i] = Task.Factory.StartNew(() =>
 				{
 					stacks[index] = new StateStack(configuration.StackCapacity);
-					_workers[index] = new Worker(index, this, stacks[index], createModel(), configuration.SuccessorCapacity);
+					_workers[index] = new Worker(index, this, stacks[index], createModel, configuration.SuccessorCapacity);
 				});
 			}
 
@@ -171,20 +171,22 @@ namespace SafetySharp.Analysis
 			private readonly StateStack _stateStack;
 			private readonly TransitionSet _transitions;
 			private StateStorage _states;
+			private Func<RuntimeModel> _createModel;
 
 			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
-			public Worker(int index, InvariantChecker context, StateStack stateStack, RuntimeModel model, int successorCapacity)
+			public Worker(int index, InvariantChecker context, StateStack stateStack, Func<RuntimeModel> createModel, int successorCapacity)
 			{
 				_index = index;
 
 				_context = context;
-				_model = model;
+				_createModel = createModel;
+				_model = createModel();
 				_stateStack = stateStack;
 
 				var invariant = CompilationVisitor.Compile(_model.Formulas[0]);
-				_transitions = new TransitionSet(model, successorCapacity, invariant);
+				_transitions = new TransitionSet(_model, successorCapacity, invariant);
 			}
 
 			/// <summary>
@@ -316,7 +318,8 @@ namespace SafetySharp.Analysis
 					Marshal.Copy(new IntPtr((int*)_states[indexedTrace[i]]), trace[i + 1], 0, trace[i + 1].Length);
 				}
 
-				_context._counterExample = new CounterExample(_model, trace, _model.GenerateReplayInformation(trace, endsWithException));
+				var model = _createModel();
+				_context._counterExample = new CounterExample(model, trace, model.GenerateReplayInformation(trace, endsWithException));
 			}
 
 			/// <summary>

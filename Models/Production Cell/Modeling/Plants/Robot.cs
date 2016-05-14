@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 {
+	using System;
 	using System.Linq;
 	using Controllers;
 	using SafetySharp.Modeling;
@@ -32,11 +33,17 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 		private readonly Tool[] _tools;
 
 		private Tool _currentTool;
+
+		[Hidden]
+		private string _name;
+
 		private Workpiece _workpiece;
 
 		public Fault ApplyFault = new PermanentFault();
 		public Fault ResourceTransportFault = new PermanentFault();
 		public Fault SwitchFault = new PermanentFault();
+
+		public bool HasWorkpiece => _workpiece != null;
 
 		public Robot(params ProcessCapability[] capabilities)
 		{
@@ -72,6 +79,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 
 		public void SetNames(int robotId)
 		{
+			_name = $"R{robotId}";
 			ApplyFault.Name = $"R{robotId}.ApplyFailed";
 			SwitchFault.Name = $"R{robotId}.SwitchFailed";
 			ResourceTransportFault.Name = $"R{robotId}.TransportFailed";
@@ -80,8 +88,29 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 			{
 				var tools = group.ToArray();
 				for (var i = 0; i < tools.Length; i++)
-					tools[i].Broken.Name = $"R{robotId}.{tools[i].ProductionAction}{i}";
+					tools[i].Broken.Name = $"R{robotId}.{tools[i].ProductionAction}{i + 1}";
 			}
+		}
+
+		public void ProduceWorkpiece(Workpiece workpiece)
+		{
+			if (_workpiece != null)
+				throw new InvalidOperationException("There is already a workpiece located at the robot.");
+
+			_workpiece = workpiece;
+		}
+
+		public void ConsumeWorkpiece(Workpiece workpiece)
+		{
+			if (_workpiece == null)
+				throw new InvalidOperationException("There is no workpiece located at the robot.");
+
+			_workpiece = null;
+		}
+
+		public override string ToString()
+		{
+			return $"{_name}: HasWorkpiece: {_workpiece != null}";
 		}
 
 		[FaultEffect(Fault = nameof(ApplyFault))]

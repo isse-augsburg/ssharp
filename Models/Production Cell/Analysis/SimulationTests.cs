@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,47 +20,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
+namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 {
-	using System.Collections.Generic;
-	using System.Linq;
+	using System.Diagnostics;
+	using Modeling;
+	using NUnit.Framework;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 
-	internal abstract class ObserverController : Component
+	public class SimulationTests
 	{
-		[Hidden]
-		private bool _reconfigurationRequested = true;
-
-		protected ObserverController(IEnumerable<Agent> agents)
+		[Test]
+		public void Simulate()
 		{
-			Agents = agents.ToArray();
+			var model = new Model();
+			model.Faults.SuppressActivations();
 
-			foreach (var agent in Agents)
-				Bind(nameof(agent.TriggerReconfiguration), nameof(OnReconfigurationRequested));
-		}
+			var simulator = new Simulator(model);
+			model = (Model)simulator.Model;
 
-		protected ObjectPool<Role> RolePool { get; } = new ObjectPool<Role>(Model.MaxRoleCount);
-		protected List<Task> Tasks { get; } = new List<Task>(Model.MaxTaskCount);
+			for (var i = 0; i < 100; ++i)
+			{
+				foreach (var robot in model.RobotAgents)
+					Debug.WriteLine(robot);
 
-		[Hidden(HideElements = true)]
-		protected Agent[] Agents { get; }
+				foreach (var cart in model.CartAgents)
+					Debug.WriteLine(cart);
 
-		public bool ReconfigurationFailed { get; protected set; }
+				foreach (var workpiece in model.Workpieces)
+					Debug.WriteLine(workpiece);
 
-		protected abstract void Reconfigure();
+				foreach (var robot in model.Robots)
+					Debug.WriteLine(robot);
 
-		private void OnReconfigurationRequested()
-		{
-			_reconfigurationRequested = true;
-		}
+				foreach (var cart in model.Carts)
+					Debug.WriteLine(cart);
 
-		public override void Update()
-		{
-			if (!_reconfigurationRequested)
-				return;
+				Debug.WriteLine($"=================  Step: {i}  =====================================");
 
-			Reconfigure();
-			_reconfigurationRequested = false;
+				simulator.SimulateStep();
+			}
 		}
 	}
 }

@@ -22,15 +22,9 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-	using Plants;
-
-	internal class CartAgent : Agent
+	internal abstract class Capability
 	{
-		public CartAgent(Cart cart)
-		{
-			Cart = cart;
-		}
-
-		public Cart Cart { get; }
+		public abstract void Execute(Agent agent);
+		public abstract int Identifier { get; }
 	}
 }

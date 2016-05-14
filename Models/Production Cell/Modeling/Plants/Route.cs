@@ -20,21 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
+namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
+	using SafetySharp.Modeling;
 
-	internal class ConsumeCapability : Capability
+	internal class Route : Component
 	{
-		private readonly List<Resource> _resources;
+		public Fault Blocked = new PermanentFault();
 
-		public ConsumeCapability(List<Resource> resources)
+		public Route(Robot from, Robot to)
 		{
-			_resources = resources;
+			From = from;
+			To = to;
 		}
 
-		public override int Identifier { get; } = Enum.GetValues(typeof(ProductionAction)).Cast<int>().Max() + 1;
+		public Route()
+		{
+		}
+
+		public Robot From { get; }
+		public Robot To { get; }
+
+		public virtual bool IsBlocked => false;
+
+		[FaultEffect(Fault = nameof(Blocked))]
+		internal class BlockedEffect : Route
+		{
+			public override bool IsBlocked => true;
+		}
+
+		public bool CanNavigate(Robot robot1, Robot robot2)
+		{
+			if (IsBlocked)
+				return false;
+
+			if (From != robot1 && To != robot1)
+				return false;
+
+			if (From != robot2 && To != robot2)
+				return false;
+
+			return true;
+		}
 	}
 }

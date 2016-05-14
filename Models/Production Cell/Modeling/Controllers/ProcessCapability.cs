@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -22,19 +22,20 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-	using System.Collections.Generic;
-
-	internal class ProduceCapability : Capability
+	internal class ProcessCapability : Capability
 	{
-		private readonly List<Resource> _resources;
-		private readonly List<Task> _tasks;
-
-		public ProduceCapability(List<Resource> resources, List<Task> tasks)
+		public ProcessCapability(ProductionAction productionAction)
 		{
-			_resources = resources;
-			_tasks = tasks;
+			ProductionAction = productionAction;
 		}
 
-		public override int Identifier => 1;
+		public ProductionAction ProductionAction { get; }
+
+		public override int Identifier => (int)ProductionAction + 1;
+
+		public override void Execute(Agent agent)
+		{
+			agent.Process(this);
+		}
 	}
 }
