@@ -52,6 +52,7 @@
     <Compile Include="Modeling\ContainerLoader.cs" />
     <Compile Include="Modeling\IngredientType.cs" />
     <Compile Include="Modeling\Model.cs" />
+    <Compile Include="Modeling\ObserverController.cs" />
     <Compile Include="Modeling\PalletisationStation.cs" />
     <Compile Include="Modeling\ParticulateDispenser.cs" />
     <Compile Include="Modeling\PillContainer.cs" />
