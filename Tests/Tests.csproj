@@ -132,6 +132,12 @@
     <Compile Include="Analysis\Dcca\empty set.cs" />
     <Compile Include="Analysis\Dcca\multiple singleton cut sets.cs" />
     <Compile Include="Analysis\Dcca\exception.cs" />
+    <Compile Include="Analysis\Dcca\multiple forced faults.cs" />
+    <Compile Include="Analysis\Dcca\multiple suppressed faults.cs" />
+    <Compile Include="Analysis\Dcca\single forced fault.cs" />
+    <Compile Include="Analysis\Dcca\forced and suppressed faults.cs" />
+    <Compile Include="Analysis\Dcca\large fault count.cs" />
+    <Compile Include="Analysis\Dcca\single suppressed fault.cs" />
     <Compile Include="Analysis\Dcca\multiple two point cut sets.cs" />
     <Compile Include="Analysis\Dcca\no cut sets.cs" />
     <Compile Include="Analysis\Dcca\unused fault.cs" />
@@ -585,6 +591,7 @@
     <Compile Include="Serialization\Enumerations\UInt32.cs" />
     <Compile Include="Serialization\Enumerations\UInt8.cs" />
     <Compile Include="Serialization\Misc\empty state.cs" />
+    <Compile Include="Serialization\Misc\hidden property.cs" />
     <Compile Include="Serialization\Misc\hidden state optimized.cs" />
     <Compile Include="Serialization\Misc\optimized serialization.cs" />
     <Compile Include="Serialization\Misc\full serialization.cs" />
@@ -622,6 +629,8 @@
     <Compile Include="Serialization\Ranges\Bool.cs" />
     <Compile Include="Serialization\Ranges\Char.cs" />
     <Compile Include="Serialization\Ranges\Error.cs" />
+    <Compile Include="Serialization\Ranges\property ranges via method.cs" />
+    <Compile Include="Serialization\Ranges\property ranges via attributes.cs" />
     <Compile Include="Serialization\Ranges\struct array.cs" />
     <Compile Include="Serialization\Ranges\struct.cs" />
     <Compile Include="Serialization\Ranges\inherited field.cs" />

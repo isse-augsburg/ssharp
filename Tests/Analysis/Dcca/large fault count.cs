@@ -22,77 +22,83 @@
 
 namespace Tests.Analysis.Dcca
 {
+	using System.Linq;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class X3 : AnalysisTestObject
+	internal class LargeFaultCount : AnalysisTestObject
 	{
+		private const int FaultCount = 60;
+
 		protected override void Check()
 		{
 			var c = new C();
-			var result = Dcca(c.X > 4, c);
+			var result = Dcca(c.D.Any(d => d.X > 4), c);
 
-			result.CheckedSets.Count.ShouldBe(8);
-			result.MinimalCriticalSets.Count.ShouldBe(0);
-			result.MinimalCriticalSets.ShouldBeEmpty();
-			result.CounterExamples.ShouldBeEmpty();
+			result.CheckedSets.Count.ShouldBe(FaultCount + 1);
+			result.MinimalCriticalSets.Count.ShouldBe(FaultCount);
 			result.Exceptions.ShouldBeEmpty();
 			result.IsComplete.ShouldBe(true);
 			result.SuppressedFaults.ShouldBeEmpty();
 			result.ForcedFaults.ShouldBeEmpty();
 
 			ShouldContain(result.CheckedSets);
-			ShouldContain(result.CheckedSets, c.F1);
-			ShouldContain(result.CheckedSets, c.F2);
-			ShouldContain(result.CheckedSets, c.F3);
 
-			ShouldContain(result.CheckedSets, c.F1, c.F2);
-			ShouldContain(result.CheckedSets, c.F1, c.F3);
-			ShouldContain(result.CheckedSets, c.F2, c.F3);
+			foreach (var d in c.D)
+			{
+				ShouldContain(result.CheckedSets, d.F);
+				ShouldContain(result.MinimalCriticalSets, d.F);
+			}
 
-			ShouldContain(result.CheckedSets, c.F1, c.F2, c.F3);
+			result.CounterExamples.Count.ShouldBe(FaultCount);
+			foreach (var set in result.MinimalCriticalSets)
+				result.CounterExamples.ContainsKey(set).ShouldBe(true);
 
-			result = DccaWithMaxCardinality(c.X > 4, 0, c);
+			foreach (var set in result.MinimalCriticalSets)
+			{
+				SimulateCounterExample(result.CounterExamples[set], simulator =>
+				{
+					c = (C)simulator.Model.Roots[0];
 
-			result.CheckedSets.Count.ShouldBe(1);
-			result.MinimalCriticalSets.ShouldBeEmpty();
-			result.CounterExamples.ShouldBeEmpty();
-			result.Exceptions.ShouldBeEmpty();
-			result.IsComplete.ShouldBe(false);
+					foreach (var d in c.D)
+						d.X.ShouldBe(0);
+
+					while (!simulator.IsCompleted)
+						simulator.SimulateStep();
+
+					foreach (var d in c.D)
+						d.X.ShouldBe(d.F.IsActivated ? 17 : 0);
+				});
+			}
 		}
 
 		private class C : Component
 		{
-			public readonly Fault F1 = new TransientFault();
-			public readonly Fault F2 = new PermanentFault();
-			public readonly Fault F3 = new PermanentFault();
-			public int X;
+			public readonly D[] D = new D[FaultCount];
+
+			public C()
+			{
+				for (var i = 0; i < D.Length; ++i)
+					D[i] = new D();
+			}
 
 			public override void Update()
 			{
+				Update(D);
 			}
+		}
 
-			[FaultEffect(Fault = nameof(F1))]
-			private class E1 : C
+		private class D : Component
+		{
+			public readonly Fault F = new TransientFault();
+			public int X;
+
+			[FaultEffect(Fault = nameof(F))]
+			private class E : D
 			{
 				public override void Update()
 				{
-				}
-			}
-
-			[FaultEffect(Fault = nameof(F2))]
-			private class E2 : C
-			{
-				public override void Update()
-				{
-				}
-			}
-
-			[FaultEffect(Fault = nameof(F3))]
-			private class E3 : C
-			{
-				public override void Update()
-				{
+					X = 17;
 				}
 			}
 		}

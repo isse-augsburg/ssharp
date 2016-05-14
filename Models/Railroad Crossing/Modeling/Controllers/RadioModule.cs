@@ -20,26 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
-	public sealed class MainControlRemovedCounter : MainControl
+	using SafetySharp.Modeling;
+
+	public class RadioModule : Component
 	{
-		/// <summary>
-		///   Updates the internal state of the component.
-		/// </summary>
-		public override void Update()
+		public extern Message RetrieveFromChannel();
+		public extern void DeliverToChannel(Message message);
+
+		public Message Receive() => RetrieveFromChannel();
+
+		public void Send(Message message)
 		{
-			base.Update();
-
-			if (GetNumberOfEnteringVehicles() > 0)
-				Timer.Start();
-
-			var active = !Timer.HasElapsed;
-			var onlyRightTriggered = !LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected;
-
-			// We assume the worst case: If the vehicle was not seen on the right lane, it is assumed to be on the left lane
-			IsVehicleLeavingOnLeftLane = PositionDetector.IsVehicleDetected && !onlyRightTriggered && active;
-			IsVehicleLeavingOnRightLane = PositionDetector.IsVehicleDetected && onlyRightTriggered && active;
+			DeliverToChannel(message);
 		}
 	}
 }

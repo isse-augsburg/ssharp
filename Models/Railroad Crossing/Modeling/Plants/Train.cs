@@ -20,20 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Plants
 {
 	using SafetySharp.Modeling;
 
-	public class RadioModule : Component
+	/// <summary>
+	///   Represents the actual train that is controlled by the train controller.
+	/// </summary>
+	public class Train : Component
 	{
-		public extern Message RetrieveFromChannel();
-		public extern void DeliverToChannel(Message message);
+		/// <summary>
+		///   Gets the train's current position.
+		/// </summary>
+		[Range(0, Model.EndPosition, OverflowBehavior.Clamp)]
+		public int Position { get; private set; }
 
-		public Message Receive() => RetrieveFromChannel();
+		/// <summary>
+		///   Gets the train's current speed that affects its position.
+		/// </summary>
+		[Range(0, Model.MaxSpeed, OverflowBehavior.Clamp)]
+		public int Speed { get; private set; } = Model.MaxSpeed;
 
-		public void Send(Message message)
+		/// <summary>
+		///   Gets the train's current acceleration that affects its speed.
+		/// </summary>
+		public extern int Acceleration { get; }
+
+		/// <summary>
+		///   Updates the train's speed and position in accordance with its current acceleration.
+		/// </summary>
+		public override void Update()
 		{
-			DeliverToChannel(message);
+			Position += Speed;
+			Speed += Acceleration;
 		}
 	}
 }

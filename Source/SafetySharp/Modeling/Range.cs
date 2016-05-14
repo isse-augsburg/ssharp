@@ -66,7 +66,10 @@ namespace SafetySharp.Modeling
 		/// <param name="mode">The serialization mode the range is obtained for.</param>
 		internal static RangeAttribute GetMetadata(object obj, FieldInfo field, SerializationMode mode)
 		{
-			var range = field.GetCustomAttribute<RangeAttribute>();
+			// For backing fields of auto-implemented properties, check the property instead
+			// TODO: Remove this workaround once C# supports [field:Attribute] on properties
+			var range = field.GetCustomAttribute<RangeAttribute>() ?? field?.GetAutoProperty()?.GetCustomAttribute<RangeAttribute>();
+
 			if (range != null)
 			{
 				return new RangeAttribute(
@@ -120,10 +123,11 @@ namespace SafetySharp.Modeling
 
 			var range = new RangeAttribute(ConvertType(typeof(T), lowerBound), ConvertType(typeof(T), upperBound), overflowBehavior);
 			var memberExpression = (MemberExpression)fieldExpression.Body;
-			var fieldInfo = memberExpression.Member as FieldInfo;
+			var propertyInfo = memberExpression.Member as PropertyInfo;
+			var fieldInfo = propertyInfo?.GetBackingField() ?? memberExpression.Member as FieldInfo;
 			var objectExpression = memberExpression.Expression as ConstantExpression;
 
-			Requires.That(fieldInfo != null, nameof(fieldExpression), "Expected a non-nested reference to a field.");
+			Requires.That(fieldInfo != null, nameof(fieldExpression), "Expected a non-nested reference to a field or an auto-property.");
 			Requires.That(objectExpression != null, nameof(fieldExpression), "Expected a non-nested reference to non-static field of primitive type.");
 			Requires.That(((IComparable)range.LowerBound).CompareTo(range.UpperBound) <= 0, nameof(lowerBound),
 				$"lower bound '{range.LowerBound}' is not smaller than upper bound '{range.UpperBound}'.");

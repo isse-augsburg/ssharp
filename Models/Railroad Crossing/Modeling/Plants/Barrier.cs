@@ -20,28 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Plants
 {
 	using SafetySharp.Modeling;
 
-	public class Brakes : Component
+	/// <summary>
+	///   Represents the actual barrier that are controlled by the crossing controller.
+	/// </summary>
+	public class Barrier : Component
 	{
-		public readonly Fault BrakesFailure = new PermanentFault();
+		/// <summary>
+		///   Gets the current angle of the barrier; a value of 0 means that the barrier is closed.
+		/// </summary>
+		[Range(0, Model.ClosingDelay, OverflowBehavior.Clamp)]
+		public int Angle { get; private set; } = Model.ClosingDelay;
 
-		[Range(Model.Decelaration, 0, OverflowBehavior.Error)]
-		private int _acceleration;
+		/// <summary>
+		///   Gets the barrier's current angular movement speed.
+		/// </summary>
+		public extern int Speed { get; }
 
-		public virtual int Acceleration => _acceleration;
-
-		public void Engage()
+		/// <summary>
+		///   Updates the barrier's angle in accordance with its movement speed.
+		/// </summary>
+		public override void Update()
 		{
-			_acceleration = Model.Decelaration;
-		}
-
-		[FaultEffect(Fault = nameof(BrakesFailure))]
-		public class UnresponsiveEffect : Brakes
-		{
-			public override int Acceleration => 0;
+			Angle += Speed;
 		}
 	}
 }

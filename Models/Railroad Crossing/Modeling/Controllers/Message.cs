@@ -20,23 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
-	using SafetySharp.Modeling;
-
-	public class BarrierSensor : Component
+	public enum Message
 	{
-		public readonly Fault BarrierSensorFailure = new TransientFault();
-
-		public virtual bool IsOpen => BarrierAngle == Model.ClosingDelay;
-		public virtual bool IsClosed => BarrierAngle == 0;
-		public extern int BarrierAngle { get; }
-
-		[FaultEffect(Fault = nameof(BarrierSensorFailure))]
-		public class BrokenEffect : BarrierSensor
-		{
-			public override bool IsOpen => true;
-			public override bool IsClosed => true;
-		}
+		None,
+		Close,
+		Query,
+		Closed
 	}
 }

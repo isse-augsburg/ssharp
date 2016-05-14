@@ -20,38 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
 
-	public class BarrierMotor : Component
+	public class BarrierSensor : Component
 	{
-		public readonly Fault BarrierMotorStuck = new TransientFault();
+		public readonly Fault BarrierSensorFailure = new TransientFault();
 
-		[Range(-1, 1, OverflowBehavior.Clamp)]
-		private int _currentSpeed;
+		public virtual bool IsOpen => BarrierAngle == Model.ClosingDelay;
+		public virtual bool IsClosed => BarrierAngle == 0;
+		public extern int BarrierAngle { get; }
 
-		public virtual int Speed => _currentSpeed;
-
-		public void Open()
+		[FaultEffect(Fault = nameof(BarrierSensorFailure))]
+		public class BrokenEffect : BarrierSensor
 		{
-			_currentSpeed = 1;
-		}
-
-		public void Close()
-		{
-			_currentSpeed = -1;
-		}
-
-		public void Stop()
-		{
-			_currentSpeed = 0;
-		}
-
-		[FaultEffect(Fault = nameof(BarrierMotorStuck))]
-		public class StuckEffect : BarrierMotor
-		{
-			public override int Speed => 0;
+			public override bool IsOpen => true;
+			public override bool IsClosed => true;
 		}
 	}
 }

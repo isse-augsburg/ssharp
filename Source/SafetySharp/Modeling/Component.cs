@@ -32,26 +32,14 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	public abstract partial class Component : IComponent, IInitializable
 	{
-		[Hidden, NonDiscoverable, DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private readonly List<Component> _faultEffects = new List<Component>();
-
-		[NonSerializable, DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private readonly List<Type> _faultEffectTypes = new List<Type>();
-
-		[Hidden, DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private Type _faultEffectType;
-
 		/// <summary>
 		///   Gets the actual type of the fault effect.
 		/// </summary>
 #if !DEBUG
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 #endif
-		internal Type FaultEffectType
-		{
-			get { return _faultEffectType; }
-			set { _faultEffectType = value; }
-		}
+		[Hidden]
+		internal Type FaultEffectType { get; set; }
 
 		/// <summary>
 		///   Gets the fault effects that affect the component.
@@ -59,7 +47,8 @@ namespace SafetySharp.Modeling
 #if !DEBUG
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 #endif
-		internal List<Component> FaultEffects => _faultEffects;
+		[Hidden, NonDiscoverable]
+		internal List<Component> FaultEffects { get; } = new List<Component>();
 
 		/// <summary>
 		///   Gets the original types of the fault effects that affect the component.
@@ -67,7 +56,8 @@ namespace SafetySharp.Modeling
 #if !DEBUG
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 #endif
-		internal List<Type> FaultEffectTypes => _faultEffectTypes;
+		[NonSerializable]
+		internal List<Type> FaultEffectTypes { get; } = new List<Type>();
 
 		/// <summary>
 		///   Updates the state of the component.

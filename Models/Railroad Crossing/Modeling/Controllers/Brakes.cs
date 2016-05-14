@@ -20,13 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
-	public enum Message
+	using SafetySharp.Modeling;
+
+	public class Brakes : Component
 	{
-		None,
-		Close,
-		Query,
-		Closed
+		public readonly Fault BrakesFailure = new PermanentFault();
+
+		[Range(Model.Decelaration, 0, OverflowBehavior.Error)]
+		public virtual int Acceleration { get; private set; }
+
+		public void Engage()
+		{
+			Acceleration = Model.Decelaration;
+		}
+
+		[FaultEffect(Fault = nameof(BrakesFailure))]
+		public class UnresponsiveEffect : Brakes
+		{
+			public override int Acceleration => 0;
+		}
 	}
 }

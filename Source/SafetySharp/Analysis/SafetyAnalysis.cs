@@ -99,8 +99,15 @@ namespace SafetySharp.Analysis
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var faults = model.Faults;
-			FaultSet.CheckFaultCount(faults.Length);
+			var allFaults = model.Faults;
+			FaultSet.CheckFaultCount(allFaults.Length);
+
+			var forcedFaults = allFaults.Where(fault => fault.Activation == Activation.Forced).ToArray();
+			var suppressedFaults = allFaults.Where(fault => fault.Activation == Activation.Suppressed).ToArray();
+			var nondeterministicFaults = allFaults.Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
+
+			var suppressedSet = new FaultSet(suppressedFaults);
+			var forcedSet = new FaultSet(forcedFaults);
 
 			var isComplete = true;
 			var safeSets = new HashSet<FaultSet>();
@@ -116,10 +123,10 @@ namespace SafetySharp.Analysis
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we
 			// know are going to be critical sets due to monotonicity
-			for (var cardinality = 0; cardinality <= faults.Length; ++cardinality)
+			for (var cardinality = 0; cardinality <= allFaults.Length; ++cardinality)
 			{
 				// Generate the sets for the current level that we'll have to check
-				var sets = GeneratePowerSetLevel(safeSets, criticalSets, cardinality, faults);
+				var sets = GeneratePowerSetLevel(safeSets, criticalSets, cardinality, allFaults);
 
 				// Clear the safe sets, we don't need the previous level to generate the next one
 				safeSets.Clear();
@@ -128,6 +135,12 @@ namespace SafetySharp.Analysis
 				// that this level does not contain any set that is not a super set of any of those critical sets
 				if (sets.Count == 0)
 					break;
+
+				// Remove all sets that conflict with the forced or suppressed faults; these sets are considered to be safe.
+				// If no sets remain, skip to the next level
+				sets = RemoveInvalidSets(sets, suppressedSet, forcedSet, safeSets);
+				if (sets.Count == 0)
+					continue;
 
 				// Abort if we've exceeded the maximum fault set cardinality; doing the check here allows us
 				// to report the analysis as complete if the maximum cardinality is never reached
@@ -147,16 +160,16 @@ namespace SafetySharp.Analysis
 				foreach (var set in sets)
 				{
 					// Enable or disable the faults that the set represents
-					set.SetActivation(faults);
+					set.SetActivation(nondeterministicFaults);
 
 					// If there was a counter example, the set is a critical set
 					try
 					{
-						var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializer, faults));
+						var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializer, allFaults));
 
 						if (!result.FormulaHolds)
 						{
-							ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(faults)} }}", ConsoleColor.DarkRed);
+							ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
 							criticalSets.Add(set);
 						}
 						else
@@ -180,7 +193,14 @@ namespace SafetySharp.Analysis
 				}
 			}
 
-			return new Result(model, isComplete, criticalSets, checkedSets, faults, counterExamples, exceptions, stopwatch.Elapsed);
+			// Reset the nondeterministic faults so as to not influence subsequent analyses
+			foreach (var fault in nondeterministicFaults)
+				fault.Activation = Activation.Nondeterministic;
+
+			return new Result(
+				model, isComplete, criticalSets, checkedSets,
+				allFaults, suppressedFaults, forcedFaults,
+				counterExamples, exceptions, stopwatch.Elapsed);
 		}
 
 		/// <summary>
@@ -259,10 +279,51 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
+		///   Removes all invalid sets from <paramref name="sets" /> that conflict with either <paramref name="suppressedFaults" /> or
+		///   <paramref name="forcedFaults" />.
+		/// </summary>
+		private static HashSet<FaultSet> RemoveInvalidSets(HashSet<FaultSet> sets, FaultSet suppressedFaults, FaultSet forcedFaults,
+														   HashSet<FaultSet> safeSets)
+		{
+			var validSets = new HashSet<FaultSet>();
+
+			foreach (var set in sets)
+			{
+				// The set must contain all forced faults, hence it must be a superset of those
+				if (!forcedFaults.IsSubsetOf(set))
+				{
+					safeSets.Add(set);
+					continue;
+				}
+
+				// The set is not allowed to contain any suppressed faults, hence the intersection must be empty
+				if (!suppressedFaults.GetIntersection(set).IsEmpty)
+				{
+					safeSets.Add(set);
+					continue;
+				}
+
+				validSets.Add(set);
+			}
+
+			return validSets;
+		}
+
+		/// <summary>
 		///   Represents the result of a safety analysis.
 		/// </summary>
 		public struct Result
 		{
+			/// <summary>
+			///   Gets the faults whose activations have been completely suppressed during analysis.
+			/// </summary>
+			public IEnumerable<Fault> SuppressedFaults { get; }
+
+			/// <summary>
+			///   Gets the faults whose activations have been forced during analysis.
+			/// </summary>
+			public IEnumerable<Fault> ForcedFaults { get; }
+
 			/// <summary>
 			///   Gets the minimal critical sets, each critical set containing the faults that potentially result in the occurrence of a
 			///   hazard.
@@ -316,7 +377,10 @@ namespace SafetySharp.Analysis
 			/// <param name="counterExamples">The counter examples that were generated for the critical fault sets.</param>
 			/// <param name="exceptions">The exceptions that have been thrown during the analysis.</param>
 			/// <param name="time">The time it took to complete the analysis.</param>
-			internal Result(ModelBase model, bool isComplete, HashSet<FaultSet> criticalSets, HashSet<FaultSet> checkedSets, Fault[] faults,
+			/// <param name="suppressedFaults">The faults whose activations have been completely suppressed during analysis.</param>
+			/// <param name="forcedFaults">The faults whose activations have been forced during analysis.</param>
+			internal Result(ModelBase model, bool isComplete, HashSet<FaultSet> criticalSets, HashSet<FaultSet> checkedSets,
+							Fault[] faults, Fault[] suppressedFaults, Fault[] forcedFaults,
 							Dictionary<FaultSet, CounterExample> counterExamples, Dictionary<FaultSet, Exception> exceptions, TimeSpan time)
 			{
 				var knownFaultSets = new Dictionary<FaultSet, ISet<Fault>>();
@@ -329,6 +393,8 @@ namespace SafetySharp.Analysis
 				Faults = faults;
 				CounterExamples = counterExamples.ToDictionary(pair => Convert(knownFaultSets, pair.Key, faults), pair => pair.Value);
 				Exceptions = exceptions.ToDictionary(pair => Convert(knownFaultSets, pair.Key, faults), pair => pair.Value);
+				SuppressedFaults = suppressedFaults;
+				ForcedFaults = forcedFaults;
 			}
 
 			/// <summary>
@@ -410,12 +476,28 @@ namespace SafetySharp.Analysis
 					builder.AppendLine();
 				}
 
+				Func<IEnumerable<Fault>, string> getFaultString =
+					faults => String.Join(", ", faults.Select(fault => fault.Name).OrderBy(name => name));
+
 				builder.AppendFormat("Elapsed Time: {0}", Time);
 				builder.AppendLine();
 				builder.AppendFormat("Fault Count: {0}", Faults.Count());
 				builder.AppendLine();
-				builder.AppendFormat("Faults: {0}", String.Join(", ", Faults.Select(fault => fault.Name).OrderBy(name => name)));
+				builder.AppendFormat("Faults: {0}", getFaultString(Faults));
 				builder.AppendLine();
+
+				if (ForcedFaults.Any())
+				{
+					builder.AppendFormat("Forced Faults: {0}", getFaultString(ForcedFaults));
+					builder.AppendLine();
+				}
+
+				if (SuppressedFaults.Any())
+				{
+					builder.AppendFormat("Suppressed Faults: {0}", getFaultString(SuppressedFaults));
+					builder.AppendLine();
+				}
+
 				builder.AppendLine();
 
 				builder.AppendFormat("Checked Fault Sets: {0} ({1:F0}% of all fault sets)", CheckedSets.Count, percentage);

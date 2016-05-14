@@ -20,43 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Environment
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   Represents the actual train that is controlled by the train controller.
-	/// </summary>
-	public class Train : Component
+	public class TrainSensor : Component
 	{
-		[Range(0, Model.EndPosition, OverflowBehavior.Clamp)]
-		private int _position;
+		public readonly Fault ErroneousTrainDetection = new TransientFault();
 
-		[Range(0, Model.MaxSpeed, OverflowBehavior.Clamp)]
-		private int _speed = Model.MaxSpeed;
+		public virtual bool HasTrainPassed => TrainPosition > Model.SensorPosition;
+		public extern int TrainPosition { get; }
 
-		/// <summary>
-		///   Gets the train's current position.
-		/// </summary>
-		public int Position => _position;
-
-		/// <summary>
-		///   Gets the train's current speed that affects its position.
-		/// </summary>
-		public int Speed => _speed;
-
-		/// <summary>
-		///   Gets the train's current acceleration that affects its speed.
-		/// </summary>
-		public extern int Acceleration { get; }
-
-		/// <summary>
-		///   Updates the train's speed and position in accordance with its current acceleration.
-		/// </summary>
-		public override void Update()
+		[FaultEffect(Fault = nameof(ErroneousTrainDetection))]
+		public class ErroneousDetectionEffect : TrainSensor
 		{
-			_position += _speed;
-			_speed += Acceleration;
+			public override bool HasTrainPassed => true;
 		}
 	}
 }

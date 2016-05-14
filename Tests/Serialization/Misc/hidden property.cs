@@ -20,34 +20,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Environment
+namespace Tests.Serialization.Misc
 {
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	/// <summary>
-	///   Represents the actual barrier that are controlled by the crossing controller.
-	/// </summary>
-	public class Barrier : Component
+	internal class HiddenProperty : SerializationObject
 	{
-		[Range(0, Model.ClosingDelay, OverflowBehavior.Clamp)]
-		private int _angle = Model.ClosingDelay;
-
-		/// <summary>
-		///   Gets the current angle of the barrier; a value of 0 means that the barrier is closed.
-		/// </summary>
-		public int Angle => _angle;
-
-		/// <summary>
-		///   Gets the barrier's current angular movement speed.
-		/// </summary>
-		public extern int Speed { get; }
-
-		/// <summary>
-		///   Updates the barrier's angle in accordance with its movement speed.
-		/// </summary>
-		public override void Update()
+		protected override void Check()
 		{
-			_angle += Speed;
+			var c = new C { X = 1};
+
+			GenerateCode(SerializationMode.Full, c);
+			StateSlotCount.ShouldBe(1);
+
+			Serialize();
+			c.X = 2;
+
+			Deserialize();
+			c.X.ShouldBe(1);
+			c.Y.ShouldBe(99);
+
+			GenerateCode(SerializationMode.Optimized, c);
+			StateSlotCount.ShouldBe(1);
+
+			Serialize();
+			c.X = 2;
+
+			Deserialize();
+			c.X.ShouldBe(2);
+			c.Y.ShouldBe(99);
+		}
+
+		internal class C
+		{
+			[Hidden]
+			public int X { get; set; }
+
+			[NonSerializable]
+			public int Y { get; } = 99;
+		}
+
+		internal class D
+		{
+			public int X;
 		}
 	}
 }

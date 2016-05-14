@@ -20,43 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Environment
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
-	using System;
 	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   Represents the radio channel that the train and crossing controllers use to communicate with each other.
-	/// </summary>
-	public class RadioChannel : Component
+	public class Odometer : Component
 	{
-		public readonly Fault MessageDropped = new TransientFault();
+		public readonly Fault OdometerPositionOffset = new TransientFault();
+		public readonly Fault OdometerSpeedOffset = new TransientFault();
 
-		private Message _currentMessage;
+		public virtual int Position => TrainPosition;
+		public virtual int Speed => TrainSpeed;
 
-		/// <summary>
-		///   Receives the message that was sent last.
-		/// </summary>
-		public virtual Message Receive()
+		public extern int TrainPosition { get; }
+		public extern int TrainSpeed { get; }
+
+		[FaultEffect(Fault = nameof(OdometerPositionOffset))]
+		public class PositionOffsetEffect : Odometer
 		{
-			return _currentMessage;
+			public override int Position => base.Position + Model.MaxPositionOffset * Choose(-1, 1);
 		}
 
-		/// <summary>
-		///   Sends the given message.
-		/// </summary>
-		public void Send(Message message)
+		[FaultEffect(Fault = nameof(OdometerSpeedOffset))]
+		public class SpeedOffsetEffect : Odometer
 		{
-			_currentMessage = message;
-		}
-
-		[FaultEffect(Fault = nameof(MessageDropped))]
-		public class DroppedEffect : RadioChannel
-		{
-			public override Message Receive()
-			{
-				return Message.None;
-			}
+			public override int Speed => base.Speed + Model.MaxSpeedOffset * Choose(-1, 1);
 		}
 	}
 }

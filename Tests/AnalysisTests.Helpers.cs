@@ -70,7 +70,16 @@ namespace Tests
 
 		protected SafetyAnalysis.Result DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
 		{
-			var model = TestModel.InitializeModel(components);
+			return DccaWithMaxCardinality(TestModel.InitializeModel(components), hazard, maxCardinality);
+		}
+
+		protected SafetyAnalysis.Result Dcca(Formula hazard, params IComponent[] components)
+		{
+			return DccaWithMaxCardinality(hazard, Int32.MaxValue, components);
+		}
+
+		protected SafetyAnalysis.Result DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality)
+		{
 			var analysis = new SafetyAnalysis();
 			analysis.OutputWritten += message => Output.Log("{0}", message);
 
@@ -81,9 +90,9 @@ namespace Tests
 			return result;
 		}
 
-		protected SafetyAnalysis.Result Dcca(Formula hazard, params IComponent[] components)
+		protected SafetyAnalysis.Result Dcca(ModelBase model, Formula hazard)
 		{
-			return DccaWithMaxCardinality(hazard, Int32.MaxValue, components);
+			return DccaWithMaxCardinality(model, hazard, Int32.MaxValue);
 		}
 
 		private dynamic CreateModelChecker()

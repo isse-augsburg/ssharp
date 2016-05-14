@@ -27,7 +27,7 @@ namespace SafetySharp.Modeling
 	/// <summary>
 	///   When applied to a S# field, indicates the field's range of valid values and its <see cref="OverflowBehavior" />.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
 	public sealed class RangeAttribute : Attribute
 	{
 		/// <summary>
