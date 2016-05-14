@@ -13,6 +13,10 @@ namespace SelfOrganizingPillProduction.Modeling
         public Model(Station[] stations)
         {
             Stations = stations;
+            foreach (var station in stations)
+            {
+                station.Model = this;
+            }
         }
 
         [Root(RootKind.Controller)]

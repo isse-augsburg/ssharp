@@ -35,6 +35,8 @@ namespace SelfOrganizingPillProduction.Modeling
         /// </summary>
         public abstract Capability[] AvailableCapabilities { get; }
 
+        internal Model Model { get; set; }
+
         private readonly List<ResourceRequest> resourceRequests = new List<ResourceRequest>(Model.MaximumResourceCount);
 
         public override void Update()
