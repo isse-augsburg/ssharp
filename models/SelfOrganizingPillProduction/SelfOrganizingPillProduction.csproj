@@ -51,6 +51,7 @@
     <Compile Include="Modeling\Condition.cs" />
     <Compile Include="Modeling\ContainerLoader.cs" />
     <Compile Include="Modeling\IngredientType.cs" />
+    <Compile Include="Modeling\MiniZincObserverController.cs" />
     <Compile Include="Modeling\Model.cs" />
     <Compile Include="Modeling\ObserverController.cs" />
     <Compile Include="Modeling\PalletisationStation.cs" />
