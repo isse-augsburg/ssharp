@@ -46,6 +46,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis\ModelCheckingTests.cs" />
     <Compile Include="Modeling\IngredientStorage.cs" />
     <Compile Include="Modeling\Capability.cs" />
     <Compile Include="Modeling\Condition.cs" />
@@ -66,7 +67,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Analysis\" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\ISSE.SafetySharp.1.2.0\analyzers\dotnet\cs\SafetySharp.Compiler.dll" />
