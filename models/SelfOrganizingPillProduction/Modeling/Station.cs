@@ -98,12 +98,14 @@ namespace SelfOrganizingPillProduction.Modeling
         /// </summary>
         protected void CheckCapabilityConsistency()
         {
-            foreach (var role in AllocatedRoles)
+            var inconsistentRecipes = (from role in AllocatedRoles
+                                       where !role.CapabilitiesToApply
+                                           .All(capability => capability.IsSatisfied(AvailableCapabilities))
+                                       select role.Recipe).Distinct();
+
+            foreach (var recipe in inconsistentRecipes)
             {
-                if (!role.CapabilitiesToApply.All(capability => capability.IsSatisfied(AvailableCapabilities)))
-                {
-                    // TODO: trigger reconfiguration
-                }
+                Model.ObserverController.Configure(recipe);
             }
         }
 

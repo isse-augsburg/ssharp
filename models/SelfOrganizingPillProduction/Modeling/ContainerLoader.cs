@@ -41,8 +41,6 @@ namespace SelfOrganizingPillProduction.Modeling
         public void AcceptProductionRequest(Recipe recipe)
         {
             productionRequests.Add(new ProductionRequest(recipe));
-            // TODO: start configuration
-            throw new NotImplementedException();
         }
 
         public override void Update()
@@ -57,6 +55,11 @@ namespace SelfOrganizingPillProduction.Modeling
             {
                 var request = productionRequests[0];
                 var recipe = request.Recipe;
+
+                if (!request.IsConfigured)
+                {
+                    Model.ObserverController.Configure(recipe);
+                }
 
                 var role = ChooseRole(source: null, condition: request.InitialCondition);
 
@@ -92,6 +95,8 @@ namespace SelfOrganizingPillProduction.Modeling
             public uint RemainingAmount { get; set; }
 
             public Condition InitialCondition { get; }
+
+            public bool IsConfigured { get; set; }
         }
     }
 }
