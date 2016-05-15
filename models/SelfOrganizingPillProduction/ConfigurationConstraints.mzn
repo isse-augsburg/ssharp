@@ -18,7 +18,7 @@
 include "globals.mzn"; % minizinc globals libary
 
 % ----------------------------------------
-% input data 
+% input data
 % ----------------------------------------
 
 % task specification
@@ -40,14 +40,14 @@ array[AGENT, CAP] of int: capabilities;
 array[AGENT,AGENT] of bool: isConnected;
 
 % ----------------------------------------
-% decision variables  
+% decision variables
 % ----------------------------------------
 
-% allocated role segments  
+% allocated role segments
 % should be as few as possible, should in principle be bounded by the number of capabilities to apply (including movement tasks) 
 
 int: maxRoleSegments = (noAgents-1)*max(TASK_IND); % worst case: between each step, all other stations have to be visited
-set of int: ROLE_SEGMENTS = 1..maxRoleSegments; 
+set of int: ROLE_SEGMENTS = 1..maxRoleSegments;
 set of int: ROLE_SEGMENTS_0 = ROLE_SEGMENTS union {0};
 var ROLE_SEGMENTS: lastRoleSegment; % to be decided by the solver, after that we do not care about the rest
 
@@ -63,7 +63,7 @@ array[ROLE_SEGMENTS] of var 0..1: capApplied; % encodes if a role segment is emp
 array[TASK_IND] of var AGENT: taskAssigned; % which agent is responsible for a given step in the task
 
 % ----------------------------------------
-% constraints ensuring valid transitions 
+% constraints ensuring valid transitions
 % for role segments
 % ----------------------------------------
 
@@ -88,7 +88,7 @@ constraint forall(r in 1..lastRoleSegment-1) (agent[r] != agent[r+1] -> isConnec
 % objective function (make plans short)
 % ----------------------------------------
 
-solve 
+solve
 % prioritize shorter plans (domain-specific search heuristic)
 :: int_search([lastRoleSegment], input_order,indomain_min,complete)
 minimize lastRoleSegment;

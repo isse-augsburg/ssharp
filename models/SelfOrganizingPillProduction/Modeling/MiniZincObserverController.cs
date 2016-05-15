@@ -13,7 +13,7 @@ namespace SelfOrganizingPillProduction.Modeling
         private const string DataFile = "data.dzn";
         private const string SolutionFile = "s.sol";
         private const string MinizincExe = "minizinc.exe";
-        private const string MinizincModel = "rolealloc-compact.mzn";
+        private const string MinizincModel = "ConfigurationConstraints.mzn";
 
         public MiniZincObserverController(params Station[] stations) : base(stations) { }
 

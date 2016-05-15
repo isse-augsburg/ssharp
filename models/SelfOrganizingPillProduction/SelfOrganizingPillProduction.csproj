@@ -64,6 +64,9 @@
     <Compile Include="Modeling\Station.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ConfigurationConstraints.mzn">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
