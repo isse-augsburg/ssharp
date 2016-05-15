@@ -22,21 +22,26 @@
 
 namespace SafetySharp.Runtime.Serialization.Serializers
 {
+	using System;
 	using System.Collections.Generic;
 	using System.IO;
-	using System.Reflection;
-	using Modeling;
 
 	/// <summary>
-	///   Represents a dynamic code generator that generate the serialization code.
+	///   Serializes all kinds of objects.
 	/// </summary>
-	internal abstract class Serializer
+	internal class BoxedValueSerializer : Serializer
 	{
 		/// <summary>
 		///   Checks whether the serialize is able to serialize the <paramref name="obj" />.
 		/// </summary>
 		/// <param name="obj">The obj that should be checked.</param>
-		protected internal abstract bool CanSerialize(object obj);
+		protected internal override bool CanSerialize(object obj)
+		{
+			if (obj.GetType().IsValueType)
+				throw new NotSupportedException("Boxed value types cannot be serialized.");
+
+			return false;
+		}
 
 		/// <summary>
 		///   Generates the state slot metadata for the <paramref name="obj" />.
@@ -44,52 +49,39 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="obj">The object the state slot metadata should be generated for.</param>
 		/// <param name="objectIdentifier">The identifier of the <paramref name="obj" />.</param>
 		/// <param name="mode">The serialization mode that should be used to generate the metadata.</param>
-		protected internal abstract IEnumerable<StateSlotMetadata> GetStateSlotMetadata(object obj, int objectIdentifier, SerializationMode mode);
+		protected internal override IEnumerable<StateSlotMetadata> GetStateSlotMetadata(object obj, int objectIdentifier, SerializationMode mode)
+		{
+			throw new NotSupportedException();
+		}
 
 		/// <summary>
 		///   Serializes the information about <paramref name="obj" />'s type using the <paramref name="writer" />.
 		/// </summary>
 		/// <param name="obj">The object whose type information should be serialized.</param>
 		/// <param name="writer">The writer the serialized information should be written to.</param>
-		protected internal abstract void SerializeType(object obj, BinaryWriter writer);
+		protected internal override void SerializeType(object obj, BinaryWriter writer)
+		{
+			throw new NotSupportedException();
+		}
 
 		/// <summary>
 		///   Creates an instance of the serialized type stored in the <paramref name="reader" /> without running
 		///   any of the type's constructors.
 		/// </summary>
 		/// <param name="reader">The reader the serialized type information should be read from.</param>
-		protected internal abstract object InstantiateType(BinaryReader reader);
+		protected internal override object InstantiateType(BinaryReader reader)
+		{
+			throw new NotSupportedException();
+		}
 
 		/// <summary>
 		///   Gets all objects referenced by <paramref name="obj" />, excluding <paramref name="obj" /> itself.
 		/// </summary>
 		/// <param name="obj">The object the referenced objects should be returned for.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		protected internal abstract IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode);
-
-		/// <summary>
-		///   Gets all objects referenced by <paramref name="obj" /> potentially marked with the <paramref name="hidden" /> attribute.
-		/// </summary>
-		/// <param name="obj">The object the referenced objects should be returned for.</param>
-		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		/// <param name="hidden">The <see cref="HiddenAttribute" /> instance, if any, the field storing <paramref name="obj" /> was marked with.</param>
-		protected internal virtual IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode, HiddenAttribute hidden)
+		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
 		{
-			yield return obj;
-		}
-
-		/// <summary>
-		///   Gets the range information for the <paramref name="obj" />'s <paramref name="field" /> if it cannot be determined
-		///   automatically by S#.
-		///   Returns <c>false</c> to indicate that no range information is available.
-		/// </summary>
-		/// <param name="obj">The object the range should be determined for.</param>
-		/// <param name="field">The field the range should be determined for.</param>
-		/// <param name="range">Returns the range, if available.</param>
-		protected internal virtual bool TryGetRange(object obj, FieldInfo field, out RangeAttribute range)
-		{
-			range = null;
-			return false;
+			throw new NotSupportedException();
 		}
 	}
 }

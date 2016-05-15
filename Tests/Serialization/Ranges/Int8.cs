@@ -34,7 +34,7 @@ namespace Tests.Serialization.Ranges
 		{
 			var c = new C { F = 1, G = 2, H = 3 };
 
-			GenerateCode(SerializationMode.Full, c);
+			GenerateCode(SerializationMode.Optimized, c);
 
 			Serialize();
 			c.F = 31;

@@ -28,13 +28,15 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	using System.Linq;
 	using System.Reflection;
 	using Modeling;
-	using Utilities;
 
 	/// <summary>
-	///   Serializes <see cref="List{T}" /> instances.
+	///   Serializes <see cref="Dictionary{TKey,TValue}" /> instances.
 	/// </summary>
-	internal sealed class ListSerializer : ObjectSerializer
+	internal sealed class DictionarySerializer : ObjectSerializer
 	{
+		private readonly string[] _hiddenFields = { "version", "_syncRoot", "keys", "values", "comparer" };
+		private string[] _rangeFields = { "count", "freeList", "freeCount" };
+
 		/// <summary>
 		///   Checks whether the serialize is able to serialize the <paramref name="obj" />.
 		/// </summary>
@@ -42,30 +44,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		protected internal override bool CanSerialize(object obj)
 		{
 			var type = obj.GetType();
-			return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>);
-		}
-
-		/// <summary>
-		///   Gets all objects referenced by <paramref name="obj" /> potentially marked with the <paramref name="hidden" /> attribute.
-		/// </summary>
-		/// <param name="obj">The object the referenced objects should be returned for.</param>
-		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		/// <param name="hidden">The <see cref="HiddenAttribute" /> instance, if any, the field storing <paramref name="obj" /> was marked with.</param>
-		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode, HiddenAttribute hidden)
-		{
-			// Optimization: Skip enumerables with hidden elements
-			if (mode == SerializationMode.Optimized && hidden?.HideElements == true)
-			{
-				// We have to make sure the objects referenced by the list are discovered nevertheless
-				var enumerable = obj as IEnumerable;
-				if (enumerable == null)
-					yield break;
-
-				foreach (var element in enumerable.Cast<object>().Where(item => item.GetType().IsReferenceType()))
-					yield return element;
-			}
-			else
-				yield return obj;
+			return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
 		}
 
 		/// <summary>
@@ -90,7 +69,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 			if (mode == SerializationMode.Full || discoveringObjects)
 				return fields;
 
-			return fields.Where(field => field.Name == "_size");
+			return fields.Where(field => !_hiddenFields.Contains(field.Name));
 		}
 
 		/// <summary>
@@ -103,16 +82,14 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="range">Returns the range, if available.</param>
 		protected internal override bool TryGetRange(object obj, FieldInfo field, out RangeAttribute range)
 		{
-			if (field.Name != "_size")
+			if (!_rangeFields.Contains(field.Name))
 			{
 				range = null;
 				return false;
 			}
 
-			var capacityProperty = obj.GetType().GetProperty("Capacity");
-			var capacity = (int)capacityProperty.GetValue(obj);
-
-			range = new RangeAttribute(0, capacity, OverflowBehavior.Error);
+			var capacity = ((IDictionary)obj).Count;
+			range = new RangeAttribute(field.Name == "freeList" ? -1 : 0, capacity, OverflowBehavior.Error);
 			return true;
 		}
 	}

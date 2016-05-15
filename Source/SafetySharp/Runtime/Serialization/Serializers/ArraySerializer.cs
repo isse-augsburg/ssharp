@@ -23,9 +23,9 @@
 namespace SafetySharp.Runtime.Serialization.Serializers
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.IO;
-	using System.Linq;
 	using Modeling;
 	using Utilities;
 
@@ -111,10 +111,18 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
 		{
-			if (!obj.GetType().GetElementType().IsReferenceType())
-				return Enumerable.Empty<object>();
+			if (obj.GetType().GetElementType().IsReferenceType())
+			{
+				foreach (var referencedObj in (object[])obj)
+					yield return referencedObj;
+			}
 
-			return (object[])obj;
+			if (obj.GetType().GetElementType().IsStructType())
+			{
+				foreach (var valueObj in (IEnumerable)obj)
+					foreach (var referencedObj in SerializationRegistry.Default.GetObjectsReferencedByStruct(valueObj, mode))
+						yield return referencedObj;
+			}
 		}
 
 		/// <summary>

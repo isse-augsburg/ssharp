@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,42 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Serialization.Objects
 {
 	using System;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	/// <summary>
-	///   When applied to a S# field, indicates the field's range of valid values and its <see cref="OverflowBehavior" />.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-	public sealed class RangeAttribute : Attribute
+	internal class BoxedValues : SerializationObject
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="from">The inclusive lower bound.</param>
-		/// <param name="to">The inclusive upper bound.</param>
-		/// <param name="overflowBehavior">The overflow behavior.</param>
-		public RangeAttribute(object from, object to, OverflowBehavior overflowBehavior)
+		protected override void Check()
 		{
-			LowerBound = from;
-			UpperBound = to;
-			OverflowBehavior = overflowBehavior;
+			var o = (object)1;
+			var p = (object)new X { A = 1, B = 2 };
+			var c = new C { O = o, P = p };
+
+			Should.Throw<NotSupportedException>(() => GenerateCode(SerializationMode.Optimized, c, o, p));
+
+			// TODO: Uncomment once boxed value types are supported
+			//StateSlotCount.ShouldBe(2);
+			//
+			//Serialize();
+			//c.O = null;
+			//c.P = null;
+			//Deserialize();
+			//c.O.ShouldBe(o);
+			//c.P.ShouldBe(p);
 		}
 
-		/// <summary>
-		///   Gets the inclusive lower bound.
-		/// </summary>
-		public object LowerBound { get; }
+		private class C : Component
+		{
+			public object O;
+			public object P;
+		}
 
-		/// <summary>
-		///   Gets the inclusive upper bound.
-		/// </summary>
-		public object UpperBound { get; }
-
-		/// <summary>
-		///   Gets the overflow behavior.
-		/// </summary>
-		public OverflowBehavior OverflowBehavior { get; }
+		private struct X
+		{
+			public int A;
+			public int B;
+		}
 	}
 }

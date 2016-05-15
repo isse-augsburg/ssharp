@@ -32,7 +32,7 @@ namespace Tests.Serialization.Ranges
 		protected override void Check()
 		{
 			var d = new D { F = -1 };
-			GenerateCode(SerializationMode.Full, d);
+			GenerateCode(SerializationMode.Optimized, d);
 
 			Should.Throw<RangeViolationException>(() => Serialize());
 		}
