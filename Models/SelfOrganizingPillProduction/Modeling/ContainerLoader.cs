@@ -9,7 +9,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     /// </summary>
     public class ContainerLoader : Station
     {
-        private static readonly Capability[] produceCapabilities = new[] { ProduceCapability.Instance };
+        private static readonly Capability[] produceCapabilities = new[] { new ProduceCapability() };
         private static readonly Capability[] emptyCapabilities = new Capability[0];
 
         public override Capability[] AvailableCapabilities =>

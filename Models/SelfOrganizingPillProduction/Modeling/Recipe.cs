@@ -18,9 +18,9 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             activeContainers = new List<PillContainer>((int)amount);
             Amount = amount;
 
-            RequiredCapabilities = new Capability[] { ProduceCapability.Instance }
+            RequiredCapabilities = new Capability[] { new ProduceCapability() }
                 .Concat(ingredients)
-                .Concat(new[] { ConsumeCapability.Instance })
+                .Concat(new[] { new ConsumeCapability() })
                 .ToArray();
         }
 

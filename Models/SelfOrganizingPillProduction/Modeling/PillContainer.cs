@@ -30,7 +30,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             if (this.recipe != null)
                 throw new InvalidOperationException("Container already belongs to a recipe");
             this.recipe = recipe;
-            State.Add(ProduceCapability.Instance);
+            State.Add(recipe.RequiredCapabilities[0]); // will always be ProduceCapability
         }
 
         /// <summary>

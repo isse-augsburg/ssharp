@@ -5,7 +5,7 @@
     /// </summary>
     public class PalletisationStation : Station
     {
-        public override Capability[] AvailableCapabilities { get; } = new[] { ConsumeCapability.Instance };
+        public override Capability[] AvailableCapabilities { get; } = new[] { new ConsumeCapability() };
 
         protected override void ExecuteRole(Role role)
         {
