@@ -116,14 +116,22 @@ namespace SelfOrganizingPillProduction.Modeling
         /// <param name="recipe"></param>
         protected void RemoveRecipeConfigurations(Recipe recipe)
         {
-            foreach (var role in AllocatedRoles)
+            var obsoleteRoles = (from role in AllocatedRoles where role.Recipe == recipe select role)
+                .ToArray(); // collect roles before underlying collection is modified
+            var affectedNeighbours = (from role in obsoleteRoles select role.PreCondition.Port)
+                .Concat(from role in obsoleteRoles select role.PostCondition.Port)
+                .Distinct()
+                .Where(neighbour => neighbour != null);
+
+            foreach (var role in obsoleteRoles)
             {
-                if (role.Recipe == recipe)
-                {
-                    AllocatedRoles.Remove(role);
-                    role.PreCondition.Port?.RemoveRecipeConfigurations(recipe);
-                    role.PostCondition.Port?.RemoveRecipeConfigurations(recipe);
-                }
+                AllocatedRoles.Remove(role);
+            }
+            Model.ObserverController.RolePool.Return(obsoleteRoles);
+
+            foreach (var neighbour in affectedNeighbours)
+            {
+                neighbour.RemoveRecipeConfigurations(recipe);
             }
         }
 

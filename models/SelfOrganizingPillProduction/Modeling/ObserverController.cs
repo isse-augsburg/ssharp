@@ -8,7 +8,7 @@ namespace SelfOrganizingPillProduction.Modeling
 
         public bool Unsatisfiable { get; protected set; }
 
-        protected readonly ObjectPool<Role> RolePool = new ObjectPool<Role>(Model.MaximumRoleCount);
+        public readonly ObjectPool<Role> RolePool = new ObjectPool<Role>(Model.MaximumRoleCount);
 
         public ObserverController(params Station[] stations)
         {
