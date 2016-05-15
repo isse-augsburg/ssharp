@@ -150,6 +150,7 @@
     <Compile Include="Analysis\Invariants\CounterExamples\nondeterminism.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\replay.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\non-initial state exception.cs" />
+    <Compile Include="Analysis\Invariants\CounterExamples\hidden initial state.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\stepping.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\steps.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\variable ranges.cs" />
