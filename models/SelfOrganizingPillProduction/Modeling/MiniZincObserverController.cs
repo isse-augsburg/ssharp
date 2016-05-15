@@ -35,7 +35,8 @@ namespace SelfOrganizingPillProduction.Modeling
         {
             foreach (var station in stations)
             {
-                var obsoleteRoles = (from role in station.AllocatedRoles where role.Recipe == recipe select role);
+                var obsoleteRoles = (from role in station.AllocatedRoles where role.Recipe == recipe select role)
+                    .ToArray();
                 foreach (var role in obsoleteRoles)
                 {
                     station.AllocatedRoles.Remove(role);
