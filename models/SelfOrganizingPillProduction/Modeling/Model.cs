@@ -14,7 +14,7 @@ namespace SelfOrganizingPillProduction.Modeling
             Stations = stations;
             foreach (var station in stations)
             {
-                station.Model = this;
+                station.ObserverController = obsContr;
             }
             ObserverController = obsContr;
         }

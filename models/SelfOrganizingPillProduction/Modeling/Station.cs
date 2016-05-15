@@ -35,7 +35,7 @@ namespace SelfOrganizingPillProduction.Modeling
         /// </summary>
         public abstract Capability[] AvailableCapabilities { get; }
 
-        internal Model Model { get; set; }
+        internal ObserverController ObserverController { get; set; }
 
         private readonly List<ResourceRequest> resourceRequests = new List<ResourceRequest>(Model.MaximumResourceCount);
 
@@ -105,7 +105,7 @@ namespace SelfOrganizingPillProduction.Modeling
 
             foreach (var recipe in inconsistentRecipes)
             {
-                Model.ObserverController.Configure(recipe);
+                ObserverController.Configure(recipe);
             }
         }
 
@@ -127,7 +127,7 @@ namespace SelfOrganizingPillProduction.Modeling
             {
                 AllocatedRoles.Remove(role);
             }
-            Model.ObserverController.RolePool.Return(obsoleteRoles);
+            ObserverController.RolePool.Return(obsoleteRoles);
 
             foreach (var neighbour in affectedNeighbours)
             {

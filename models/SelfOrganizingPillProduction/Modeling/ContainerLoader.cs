@@ -52,7 +52,7 @@ namespace SelfOrganizingPillProduction.Modeling
 
                 if (!request.IsConfigured)
                 {
-                    Model.ObserverController.Configure(recipe);
+                    ObserverController.Configure(recipe);
                 }
 
                 var role = ChooseRole(source: null, condition: request.InitialCondition);
