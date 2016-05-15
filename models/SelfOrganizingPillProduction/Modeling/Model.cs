@@ -28,10 +28,11 @@ namespace SelfOrganizingPillProduction.Modeling
         public static Model NoRedundancyCircularModel()
         {
             // create 3 stations
+            var producer = new ContainerLoader();
             var dispenser = new ParticulateDispenser();
             var stations = new Station[]
             {
-                new ContainerLoader(),
+                producer,
                 dispenser,
                 new PalletisationStation()
             };
@@ -47,6 +48,13 @@ namespace SelfOrganizingPillProduction.Modeling
                 stations[i].Outputs.Add(next);
                 next.Inputs.Add(stations[i]);
             }
+
+            var recipe = new Recipe(new[] {
+                new Ingredient(IngredientType.BlueParticulate, 12),
+                new Ingredient(IngredientType.RedParticulate, 4),
+                new Ingredient(IngredientType.YellowParticulate, 5)
+            }, 3);
+            producer.AcceptProductionRequest(recipe);
 
             return new Model(stations, new MiniZincObserverController(stations));
         }
