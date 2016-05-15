@@ -182,6 +182,8 @@ namespace SafetySharp.Analysis
 					}
 					catch (AnalysisException e)
 					{
+						ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }} [exception thrown]", ConsoleColor.DarkRed);
+
 						checkedSets.Add(set);
 						criticalSets.Add(set);
 
@@ -517,7 +519,7 @@ namespace SafetySharp.Analysis
 					{
 						builder.AppendLine();
 						builder.AppendFormat(
-							"    An unhandled exception of type {0} was thrown while checking the fault set: {1}.",
+							"    An unhandled exception of type {0} was thrown while checking the fault set: {1}",
 							e.GetType().FullName, e.Message);
 					}
 
