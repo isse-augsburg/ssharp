@@ -64,13 +64,9 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         protected Role ChooseRole(Station source, Condition condition)
         {
-            // TODO: deadlock avoidance?
-            foreach (var role in AllocatedRoles)
-            {
-                if (role.PreCondition.Matches(condition) && role.PreCondition.Port == source)
-                    return role; // there should be at most one such role
-            }
-            return null;
+            return AllocatedRoles.FirstOrDefault(
+                role => role.PreCondition.Matches(condition) && role.PreCondition.Port == source
+            ); // there should be at most one such role
         }
 
         /// <summary>
@@ -97,7 +93,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         }
 
         /// <summary>
-        /// Checks if all required capabilities are available and locks recipes for which this is not the case.
+        /// Checks if all required capabilities are available and
+        /// reconfigures recipes for which this is not the case.
         /// </summary>
         protected void CheckCapabilityConsistency()
         {

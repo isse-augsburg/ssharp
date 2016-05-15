@@ -53,14 +53,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         public uint Amount { get; internal set; }
 
         public override bool IsSatisfied(Capability[] availableCapabilities)
-        {
-            foreach (var capability in availableCapabilities)
-            {
-                Ingredient ingredient = capability as Ingredient;
-                if (ingredient != null && ingredient.Type == Type && ingredient.Amount >= Amount)
-                    return true;
-            }
-            return false;
-        }
+            => availableCapabilities.OfType<Ingredient>()
+                .Any(ingredient => ingredient.Type == Type && ingredient.Amount >= Amount);
     }
 }

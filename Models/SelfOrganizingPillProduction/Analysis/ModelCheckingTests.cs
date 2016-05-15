@@ -6,7 +6,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
 {
     public class ModelCheckingTests
     {
-
         [Test]
         public void Dcca()
         {
