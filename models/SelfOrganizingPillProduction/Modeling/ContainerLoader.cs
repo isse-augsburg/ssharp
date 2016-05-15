@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SafetySharp.Modeling;
+using System;
 using System.Collections.Generic;
 
 namespace SelfOrganizingPillProduction.Modeling
@@ -14,17 +15,10 @@ namespace SelfOrganizingPillProduction.Modeling
         public override Capability[] AvailableCapabilities =>
             containerStorage.Count > 0 ? produceCapabilities : emptyCapabilities;
 
-        // Elements are only added during setup. During runtime, elements are only removed.
-        private readonly Stack<PillContainer> containerStorage = new Stack<PillContainer>();
+        private readonly ObjectPool<PillContainer> containerStorage = new ObjectPool<PillContainer>(Model.ContainerStorageSize);
 
         // Elements are only added during setup. During runtime, elements are only removed.
         private readonly List<ProductionRequest> productionRequests = new List<ProductionRequest>();
-
-        public ContainerLoader()
-        {
-            for (int i = 0; i < Model.ContainerStorageSize; ++i)
-                containerStorage.Push(new PillContainer());
-        }
 
         protected override void ExecuteRole(Role role)
         {
@@ -64,7 +58,7 @@ namespace SelfOrganizingPillProduction.Modeling
                 var role = ChooseRole(source: null, condition: request.InitialCondition);
 
                 // role.capabilitiesToApply will always be { ProduceCapability }
-                Container = containerStorage.Pop();
+                Container = containerStorage.Allocate();
                 Container.OnLoaded(recipe);
                 recipe.ActiveContainers.Add(Container);
 
