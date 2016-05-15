@@ -70,7 +70,7 @@ task_amount = [{ string.Join(",", recipe_data.Item2) }];
 
 noAgents = { stations.Length };
 capabilities = [|{ capabilities }];
-isConnected = [{ connections }|];
+isConnected = [{ connections.ToString().ToLower() }|];
 ";
             File.WriteAllText(DataFile, data);
         }
@@ -209,7 +209,7 @@ isConnected = [{ connections }|];
 
             int i = 0;
             ProcessCapabilities(recipe.RequiredCapabilities, (cap, amount) => {
-                capabilities[i] = cap;
+                capabilities[i] = cap + 1; // capabilities in mzn are 1-based
                 amounts[i] = amount;
                 i++;
             });
