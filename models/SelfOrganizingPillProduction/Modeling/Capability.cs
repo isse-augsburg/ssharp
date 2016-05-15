@@ -14,9 +14,12 @@ namespace SelfOrganizingPillProduction.Modeling
     {
         private ProduceCapability() { }
 
+        // Singleton pattern is of limited use, since there will still be multiple
+        // instances due to serialization and deserialization.
         public static readonly ProduceCapability Instance = new ProduceCapability();
 
-        public override bool IsSatisfied(Capability[] availableCapabilities) => availableCapabilities.Contains(Instance);
+        public override bool IsSatisfied(Capability[] availableCapabilities)
+            => availableCapabilities.Any(cap => cap is ProduceCapability);
     }
 
     /// <summary>
@@ -26,9 +29,12 @@ namespace SelfOrganizingPillProduction.Modeling
     {
         private ConsumeCapability() { }
 
+        // Singleton pattern is of limited use, since there will still be multiple
+        // instances due to serialization and deserialization.
         public static readonly ConsumeCapability Instance = new ConsumeCapability();
 
-        public override bool IsSatisfied(Capability[] availableCapabilities) => availableCapabilities.Contains(Instance);
+        public override bool IsSatisfied(Capability[] availableCapabilities)
+            => availableCapabilities.Any(cap => cap is ConsumeCapability);
     }
 
     /// <summary>

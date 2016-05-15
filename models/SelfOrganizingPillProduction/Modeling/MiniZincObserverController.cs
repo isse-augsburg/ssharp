@@ -230,10 +230,14 @@ isConnected = [{ connections }|];
             {
                 int capability_code;
                 uint amount = 1u;
-                if (capabilities[i] == ProduceCapability.Instance)
+                if (capabilities[i] is ProduceCapability)
+                {
                     capability_code = produce_capability;
-                else if (capabilities[i] == ConsumeCapability.Instance)
+                }
+                else if (capabilities[i] is ConsumeCapability)
+                {
                     capability_code = consume_capability;
+                }
                 else // if (capabilities[i] is Ingredient)
                 {
                     var ingredient = capabilities[i] as Ingredient;
