@@ -26,7 +26,7 @@ namespace Tests.Serialization.Objects
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class HiddenArrayElements : SerializationObject
+	internal class HiddenArrayElementsFields : SerializationObject
 	{
 		protected override void Check()
 		{

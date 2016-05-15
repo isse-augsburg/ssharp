@@ -121,7 +121,10 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 					continue;
 
 				var serializer = SerializationRegistry.Default.GetSerializer(value);
-				foreach (var o in serializer.GetReferencedObjects(value, mode, field.GetCustomAttribute<HiddenAttribute>()))
+				var autoProperty = field.GetAutoProperty();
+				var hiddenAttribute = autoProperty?.GetCustomAttribute<HiddenAttribute>() ?? field.GetCustomAttribute<HiddenAttribute>();
+
+				foreach (var o in serializer.GetReferencedObjects(value, mode, hiddenAttribute))
 					yield return o;
 			}
 		}
