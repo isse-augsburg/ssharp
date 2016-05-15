@@ -15,7 +15,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// <param name="amount">The number of containers to produce for this recipe.</param>
         public Recipe(Ingredient[] ingredients, uint amount)
         {
-            ActiveContainers = new List<PillContainer>((int)amount);
+            activeContainers = new List<PillContainer>((int)amount);
             Amount = amount;
 
             RequiredCapabilities = new Capability[] { ProduceCapability.Instance }
@@ -24,10 +24,34 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 .ToArray();
         }
 
+        private uint producedAmount = 0u;
+
+        private readonly List<PillContainer> activeContainers;
+
         /// <summary>
-        /// A list of all containers processed according to this recipe that are currently in the system.
+        /// Adds a <paramref name="container"/> to the recipe's active containers.
+        /// This is called when processing of the container starts.
         /// </summary>
-        public List<PillContainer> ActiveContainers { get; }
+        public void AddContainer(PillContainer container)
+        {
+            producedAmount++;
+            activeContainers.Add(container);
+        }
+
+        /// <summary>
+        /// Notifies the recipe that the given <paramref name="container"/> was
+        /// completely processed and has left the production system.
+        /// </summary>
+        public void RemoveContainer(PillContainer container)
+        {
+            activeContainers.Remove(container);
+        }
+
+        /// <summary>
+        /// True if the specified <see cref="Amount"/> of containers was produced
+        /// and completely processed for the recipe.
+        /// </summary>
+        public bool ProcessingComplete => activeContainers.Count == 0 && producedAmount == Amount;
 
         /// <summary>
         /// The sequence of capabilities defining this recipe.

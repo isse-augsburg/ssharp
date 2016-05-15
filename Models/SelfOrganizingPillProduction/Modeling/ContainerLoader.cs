@@ -61,7 +61,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 // role.capabilitiesToApply will always be { ProduceCapability }
                 Container = containerStorage.Allocate();
                 Container.OnLoaded(recipe);
-                recipe.ActiveContainers.Add(Container);
+                recipe.AddContainer(Container);
 
                 // assume role.PostCondition.Port != null
                 role.PostCondition.Port.ResourceReady(source: this, condition: role.PostCondition);

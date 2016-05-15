@@ -9,8 +9,8 @@
 
         protected override void ExecuteRole(Role role)
         {
-            Container.Recipe.ActiveContainers.Remove(Container);
-            if (Container.Recipe.ActiveContainers.Count == 0)
+            Container.Recipe.RemoveContainer(Container);
+            if (Container.Recipe.ProcessingComplete)
             {
                 RemoveRecipeConfigurations(Container.Recipe);
             }
