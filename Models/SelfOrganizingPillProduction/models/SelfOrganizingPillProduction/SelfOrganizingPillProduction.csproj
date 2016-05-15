@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="packages\ISSE.SafetySharp.1.2.0\build\ISSE.SafetySharp.props" Condition="Exists('packages\ISSE.SafetySharp.1.2.0\build\ISSE.SafetySharp.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AB94E0EB-C085-421F-9A29-441409BCD30F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SelfOrganizingPillProduction</RootNamespace>
+    <AssemblyName>SelfOrganizingPillProduction</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <HintPath>packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SafetySharp.Modeling, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\ISSE.SafetySharp.1.2.0\lib\net45\SafetySharp.Modeling.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Analysis\ModelCheckingTests.cs" />
+    <Compile Include="Modeling\IngredientStorage.cs" />
+    <Compile Include="Modeling\Capability.cs" />
+    <Compile Include="Modeling\Condition.cs" />
+    <Compile Include="Modeling\ContainerLoader.cs" />
+    <Compile Include="Modeling\IngredientType.cs" />
+    <Compile Include="Modeling\MiniZincObserverController.cs" />
+    <Compile Include="Modeling\Model.cs" />
+    <Compile Include="Modeling\ObserverController.cs" />
+    <Compile Include="Modeling\PalletisationStation.cs" />
+    <Compile Include="Modeling\ParticulateDispenser.cs" />
+    <Compile Include="Modeling\PillContainer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Modeling\Recipe.cs" />
+    <Compile Include="Modeling\Role.cs" />
+    <Compile Include="Modeling\Station.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ConfigurationConstraints.mzn">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="packages\ISSE.SafetySharp.1.2.0\analyzers\dotnet\cs\SafetySharp.Compiler.dll" />
+    <Analyzer Include="packages\ISSE.SafetySharp.1.2.0\analyzers\dotnet\cs\SafetySharp.Modeling.dll" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Dieses Projekt verweist auf mindestens ein NuGet-Paket, das auf diesem Computer fehlt. Verwenden Sie die Wiederherstellung von NuGet-Paketen, um die fehlenden Dateien herunterzuladen. Weitere Informationen finden Sie unter "http://go.microsoft.com/fwlink/?LinkID=322105". Die fehlende Datei ist "{0}".</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\ISSE.SafetySharp.1.2.0\build\ISSE.SafetySharp.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\ISSE.SafetySharp.1.2.0\build\ISSE.SafetySharp.props'))" />
+    <Error Condition="!Exists('packages\ISSE.SafetySharp.1.2.0\build\ISSE.SafetySharp.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\ISSE.SafetySharp.1.2.0\build\ISSE.SafetySharp.targets'))" />
+  </Target>
+  <Import Project="packages\ISSE.SafetySharp.1.2.0\build\ISSE.SafetySharp.targets" Condition="Exists('packages\ISSE.SafetySharp.1.2.0\build\ISSE.SafetySharp.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
