@@ -53,6 +53,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 if (!request.IsConfigured)
                 {
                     ObserverController.Configure(recipe);
+                    request.IsConfigured = true;
                 }
 
                 var role = ChooseRole(source: null, condition: request.InitialCondition);
