@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SelfOrganizingPillProduction.Modeling
+namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
     public partial class ParticulateDispenser
     {

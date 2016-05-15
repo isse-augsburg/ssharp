@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SafetySharp.Modeling;
 
-namespace SelfOrganizingPillProduction.Modeling
+namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
     /// <summary>
     /// A pill container which is filled with different ingredients.

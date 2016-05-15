@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SafetySharp.Modeling;
 
-namespace SelfOrganizingPillProduction.Modeling
+namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
     /// <summary>
     /// A production station that modifies containers.

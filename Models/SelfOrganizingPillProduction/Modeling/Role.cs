@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SelfOrganizingPillProduction.Modeling
+namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
     /// <summary>
     /// Describes a sequence of capabilities a specific station should apply to a container.

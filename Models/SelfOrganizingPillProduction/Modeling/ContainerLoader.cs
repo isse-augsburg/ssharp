@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SelfOrganizingPillProduction.Modeling
+namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
     /// <summary>
     /// A production station that loads containers on the conveyor belt.

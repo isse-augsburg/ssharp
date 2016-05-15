@@ -1,6 +1,6 @@
 ﻿using SafetySharp.Modeling;
 
-namespace SelfOrganizingPillProduction.Modeling
+namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
     public abstract class ObserverController : Component
     {

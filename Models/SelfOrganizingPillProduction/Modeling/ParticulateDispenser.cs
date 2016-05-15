@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SelfOrganizingPillProduction.Modeling
+namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
     /// <summary>
     /// A production station that adds ingredients to the containers.

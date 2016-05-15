@@ -1,4 +1,4 @@
-﻿namespace SelfOrganizingPillProduction.Modeling
+﻿namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
     /// <summary>
     /// A production station that removes containers from the conveyor belt, closes, labels and stores them on pallets.

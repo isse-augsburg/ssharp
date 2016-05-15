@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
 using SafetySharp.Analysis;
-using SelfOrganizingPillProduction.Modeling;
+using SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling;
 
-namespace SelfOrganizingPillProduction.Analysis
+namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
 {
     public class ModelCheckingTests
     {
