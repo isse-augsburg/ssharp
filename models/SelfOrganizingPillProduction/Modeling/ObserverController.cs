@@ -4,6 +4,7 @@ namespace SelfOrganizingPillProduction.Modeling
 {
     public abstract class ObserverController : Component
     {
+        [Hidden(HideElements = true)]
         protected readonly Station[] stations;
 
         public bool Unsatisfiable { get; protected set; }

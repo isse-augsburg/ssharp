@@ -18,11 +18,13 @@ namespace SelfOrganizingPillProduction.Modeling
         /// <summary>
         /// The list of station that can send containers.
         /// </summary>
+        [Hidden(HideElements = true)]
         public List<Station> Inputs { get; } = new List<Station>();
 
         /// <summary>
         /// The list of stations processed containers can be sent to.
         /// </summary>
+        [Hidden(HideElements = true)]
         public List<Station> Outputs { get; } = new List<Station>();
 
         /// <summary>
@@ -35,6 +37,7 @@ namespace SelfOrganizingPillProduction.Modeling
         /// </summary>
         public abstract Capability[] AvailableCapabilities { get; }
 
+        [Hidden]
         internal ObserverController ObserverController { get; set; }
 
         private readonly List<ResourceRequest> resourceRequests = new List<ResourceRequest>(Model.MaximumResourceCount);
