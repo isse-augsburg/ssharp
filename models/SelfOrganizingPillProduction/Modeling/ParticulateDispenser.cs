@@ -7,7 +7,7 @@ namespace SelfOrganizingPillProduction.Modeling
     /// </summary>
     public partial class ParticulateDispenser : Station
     {
-        private readonly IngredientStorage Storage = new IngredientStorage();
+        public readonly IngredientStorage Storage = new IngredientStorage();
 
         public override Capability[] AvailableCapabilities => Storage.Capabilities;
 

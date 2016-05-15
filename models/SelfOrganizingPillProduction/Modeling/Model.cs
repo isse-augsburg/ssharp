@@ -28,12 +28,17 @@ namespace SelfOrganizingPillProduction.Modeling
         public static Model NoRedundancyCircularModel()
         {
             // create 3 stations
+            var dispenser = new ParticulateDispenser();
             var stations = new Station[]
             {
                 new ContainerLoader(),
-                new ParticulateDispenser(),
+                dispenser,
                 new PalletisationStation()
             };
+
+            dispenser.Storage[IngredientType.BlueParticulate] = 50;
+            dispenser.Storage[IngredientType.RedParticulate] = 50;
+            dispenser.Storage[IngredientType.YellowParticulate] = 50;
 
             // connect them to a circle
             for (int i = 0; i < stations.Length; ++i)

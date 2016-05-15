@@ -4,7 +4,7 @@ namespace SelfOrganizingPillProduction.Modeling
 {
     public partial class ParticulateDispenser
     {
-        private class IngredientStorage
+        public class IngredientStorage
         {
             private readonly Ingredient[] ingredients;
 
