@@ -170,8 +170,8 @@ namespace SafetySharp.Analysis
 			private readonly RuntimeModel _model;
 			private readonly StateStack _stateStack;
 			private readonly TransitionSet _transitions;
+			private readonly Func<RuntimeModel> _createModel;
 			private StateStorage _states;
-			private Func<RuntimeModel> _createModel;
 
 			/// <summary>
 			///   Initializes a new instance.
@@ -182,7 +182,7 @@ namespace SafetySharp.Analysis
 
 				_context = context;
 				_createModel = createModel;
-				_model = createModel();
+				_model = _createModel();
 				_stateStack = stateStack;
 
 				var invariant = CompilationVisitor.Compile(_model.Formulas[0]);
@@ -318,8 +318,10 @@ namespace SafetySharp.Analysis
 					Marshal.Copy(new IntPtr((int*)_states[indexedTrace[i]]), trace[i + 1], 0, trace[i + 1].Length);
 				}
 
-				var model = _createModel();
-				_context._counterExample = new CounterExample(model, trace, model.GenerateReplayInformation(trace, endsWithException));
+				// We have to create new model instances to generate and initialize the counter example, otherwise hidden
+				// state variables might prevent us from doing so if they somehow influence the state
+				var replayInfo = _createModel().GenerateReplayInformation(trace, endsWithException);
+				_context._counterExample = new CounterExample(_createModel(), trace, replayInfo);
 			}
 
 			/// <summary>

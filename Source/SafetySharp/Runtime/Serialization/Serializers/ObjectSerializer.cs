@@ -25,7 +25,6 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
-	using System.Linq;
 	using System.Reflection;
 	using System.Runtime.Serialization;
 	using Modeling;
@@ -114,16 +113,38 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		protected internal override IEnumerable<object> GetReferencedObjects(object obj, SerializationMode mode)
 		{
-			foreach (var field in GetFields(obj, mode, discoveringObjects: true).Where(field => field.FieldType.IsReferenceType()))
+			foreach (var field in GetFields(obj, mode, discoveringObjects: true))
 			{
-				var value = field.GetValue(obj);
-				if (value == null)
-					continue;
+				if (field.FieldType.IsReferenceType())
+				{
+					var value = field.GetValue(obj);
+					if (value == null)
+						continue;
 
-				var serializer = SerializationRegistry.Default.GetSerializer(value);
-				foreach (var o in serializer.GetReferencedObjects(value, mode, field.GetCustomAttribute<HiddenAttribute>()))
-					yield return o;
+					foreach (var o in GetObjectReferencesFromField(value, field, mode))
+						yield return o;
+				}
+				else if (field.FieldType.IsStructType())
+				{
+					foreach (var referencedObj in SerializationRegistry.Default.GetObjectsReferencedByStruct(field.GetValue(obj), mode))
+						foreach (var o in GetObjectReferencesFromField(referencedObj, field, mode))
+							yield return o;
+				}
 			}
+		}
+
+		/// <summary>
+		///   Gets all objects referenced in the <paramref name="obj" />'s <paramref name="field" />, taking a potential
+		///   <see cref="HiddenAttribute" /> into account.
+		/// </summary>
+		private static IEnumerable<object> GetObjectReferencesFromField(object obj, FieldInfo field, SerializationMode mode)
+		{
+			var serializer = SerializationRegistry.Default.GetSerializer(obj);
+			var autoProperty = field.GetAutoProperty();
+			var hiddenAttribute = autoProperty?.GetCustomAttribute<HiddenAttribute>() ?? field.GetCustomAttribute<HiddenAttribute>();
+
+			foreach (var o in serializer.GetReferencedObjects(obj, mode, hiddenAttribute))
+				yield return o;
 		}
 
 		/// <summary>
@@ -145,28 +166,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 														   Type inheritanceRoot = null,
 														   bool discoveringObjects = false)
 		{
-			var type = startType ?? obj.GetType();
-			if (type.IsHidden(mode, discoveringObjects))
-				return Enumerable.Empty<FieldInfo>();
-
-			var fields = type.GetFields(inheritanceRoot ?? typeof(object)).Where(field =>
-			{
-				// Ignore static or constant fields
-				if (field.IsStatic || field.IsLiteral)
-					return false;
-
-				// Don't try to serialize hidden fields
-				if (field.IsHidden(mode, discoveringObjects) || field.FieldType.IsHidden(mode, discoveringObjects))
-					return false;
-
-				// Otherwise, serialize the field
-				return true;
-			});
-
-			// It is important to sort the fields in a deterministic order; by default, .NET's reflection APIs don't
-			// return fields in any particular order at all, which obviously causes problems when we then go on to try
-			// to deserialize fields in a different order than the one that was used to serialize them
-			return fields.OrderBy(field => field.DeclaringType.FullName).ThenBy(field => field.Name);
+			return SerializationRegistry.GetSerializationFields(obj, mode, startType, inheritanceRoot, discoveringObjects);
 		}
 	}
 }

@@ -113,20 +113,25 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Compacts the state vector.
 		/// </summary>
-		internal void Compact(SerializationMode mode)
+		/// <param name="model">The model whose state vector is compacted.</param>
+		/// <param name="mode">The serialization mode the state vector is compacted for.</param>
+		internal void Compact(ModelBase model, SerializationMode mode)
 		{
-			// Check if we can use the range to compress the data even further
-			foreach (var slot in _slots)
+			if (mode == SerializationMode.Optimized)
 			{
-				if (slot.ContainedInStruct)
-					slot.Range = Range.GetMetadata(slot.FieldChain.Last(), mode);
-				else if (slot.Field != null)
-					slot.Range = Range.GetMetadata(slot.Object, slot.Field, mode);
-				else
-					slot.Range = Range.CreateDefaultRange(slot.DataType);
+				// Check if we can use the range to compress the data even further
+				foreach (var slot in _slots)
+				{
+					if (slot.ContainedInStruct)
+						slot.Range = Range.GetMetadata(slot.FieldChain.Last());
+					else if (slot.Field != null)
+						slot.Range = Range.GetMetadata(model, slot.Object, slot.Field);
+					else
+						slot.Range = RangeMetadata.Create(slot.Object, slot.DataType, Range.CreateDefaultRange(slot.DataType));
 
-				if (slot.Range != null)
-					slot.CompressedDataType = slot.Range.GetRangeType();
+					if (slot.Range != null)
+						slot.CompressedDataType = slot.Range.GetRangeType();
+				}
 			}
 
 			// Organize all slots with the same element size into groups

@@ -33,7 +33,7 @@ namespace Tests.Serialization.Ranges
 		{
 			var c = new C { F = F.A, E = E.B };
 
-			GenerateCode(SerializationMode.Full, c);
+			GenerateCode(SerializationMode.Optimized, c);
 
 			Serialize();
 			c.E = E.A;

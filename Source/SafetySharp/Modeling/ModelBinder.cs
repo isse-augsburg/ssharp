@@ -126,6 +126,7 @@ namespace SafetySharp.Modeling
 			CreateBindings(model);
 
 			model.ReferencedObjects = SerializationRegistry.Default.GetReferencedObjects(model.Roots, SerializationMode.Optimized).ToArray();
+			Range.CopyMetadata(model);
 		}
 
 		/// <summary>
