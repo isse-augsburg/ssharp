@@ -38,6 +38,8 @@ namespace SafetySharp.Modeling
 	{
 		private IComponent[] _components;
 		private Fault[] _faults;
+
+		[Hidden]
 		private object[] _referencedObjects;
 		private IComponent[] _roots;
 
