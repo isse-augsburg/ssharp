@@ -652,6 +652,7 @@
     <Compile Include="Serialization\RuntimeModels\ranges via methods.cs" />
     <Compile Include="Serialization\RuntimeModels\ranges via attributes.cs" />
     <Compile Include="Serialization\RuntimeModels\objects in struct.cs" />
+    <Compile Include="Serialization\RuntimeModels\reference to model.cs" />
     <Compile Include="Serialization\RuntimeModels\unbound.cs" />
     <Compile Include="Serialization\RuntimeModels\binding.cs" />
     <Compile Include="Serialization\RuntimeModels\deterministic faults.cs" />
