@@ -11,10 +11,10 @@ namespace SafetySharp.CaseStudies.ScalableServer.Modeling
 
 	public class Model : ModelBase
 	{
-		[Root(Role.System)]
+		[Root(RootKind.Plant)]
 		public IBackend Backend;
 
-		[Root(Role.System)]
+		[Root(RootKind.Plant)]
 		public IUserModel UserModel;
 
 		public Model(IBackend backend,IUserModel userModel)
