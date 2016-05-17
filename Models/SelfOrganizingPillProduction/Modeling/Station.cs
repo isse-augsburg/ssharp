@@ -101,7 +101,10 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             var inconsistentRecipes = (from role in AllocatedRoles
                                        where !role.CapabilitiesToApply
                                            .All(capability => capability.IsSatisfied(AvailableCapabilities))
-                                       select role.Recipe).Distinct();
+                                       select role.Recipe)
+                                   .Distinct()
+                                   // in an array, as AllocatedRoles may be modified by reconfiguration below
+                                   .ToArray();
 
             foreach (var recipe in inconsistentRecipes)
             {
