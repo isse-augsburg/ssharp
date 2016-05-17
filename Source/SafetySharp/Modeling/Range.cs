@@ -29,6 +29,7 @@ namespace SafetySharp.Modeling
 	using System.Reflection;
 	using System.Runtime.CompilerServices;
 	using CompilerServices;
+	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;
 
@@ -37,50 +38,37 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	public static class Range
 	{
-		private static readonly ConditionalWeakTable<object, Dictionary<FieldInfo, RangeAttribute>> _ranges =
-			new ConditionalWeakTable<object, Dictionary<FieldInfo, RangeAttribute>>();
+		private static readonly ConditionalWeakTable<object, List<RangeMetadata>> _ranges =
+			new ConditionalWeakTable<object, List<RangeMetadata>>();
 
 		/// <summary>
 		///   Gets the range metadata for the <paramref name="field" />. Returns <c>null</c> when the range is unrestricted.
 		/// </summary>
 		/// <param name="field">The field the range metadata should be returned for.</param>
-		/// <param name="mode">The serialization mode the range is obtained for.</param>
-		internal static RangeAttribute GetMetadata(FieldInfo field, SerializationMode mode)
+		internal static RangeMetadata GetMetadata(FieldInfo field)
 		{
 			var range = field.GetCustomAttribute<RangeAttribute>();
-			if (range != null)
-			{
-				return new RangeAttribute(
-					ConvertType(field.FieldType, range.LowerBound), ConvertType(field.FieldType, range.UpperBound), range.OverflowBehavior);
-			}
-
-			return null;
+			return range == null ? null : RangeMetadata.Create(null, field, range);
 		}
 
 		/// <summary>
 		///   Gets the range metadata for the <paramref name="obj" />'s <paramref name="field" />. Returns <c>null</c> when the range is
 		///   unrestricted.
 		/// </summary>
+		/// <param name="model">The model that stores the <paramref name="obj" />'s range metadata.</param>
 		/// <param name="obj">The object the range metadata should be returned for.</param>
 		/// <param name="field">The field the range metadata should be returned for.</param>
-		/// <param name="mode">The serialization mode the range is obtained for.</param>
-		internal static RangeAttribute GetMetadata(object obj, FieldInfo field, SerializationMode mode)
+		internal static RangeMetadata GetMetadata(ModelBase model, object obj, FieldInfo field)
 		{
-			var range = field.GetCustomAttribute<RangeAttribute>();
+			// For backing fields of auto-implemented properties, check the property instead
+			// TODO: Remove this workaround once C# supports [field:Attribute] on properties
+			var range = field.GetCustomAttribute<RangeAttribute>() ?? field?.GetAutoProperty()?.GetCustomAttribute<RangeAttribute>();
+
 			if (range != null)
-			{
-				return new RangeAttribute(
-					ConvertType(field.FieldType, range.LowerBound), ConvertType(field.FieldType, range.UpperBound), range.OverflowBehavior);
-			}
+				return RangeMetadata.Create(obj, field, range);
 
-			Dictionary<FieldInfo, RangeAttribute> infos;
-			if (!_ranges.TryGetValue(obj, out infos))
-				return CreateDefaultRange(obj, field, mode);
-
-			if (!infos.TryGetValue(field, out range))
-				return CreateDefaultRange(obj, field, mode);
-
-			return range;
+			var metadata = model.RangeMetadata.FirstOrDefault(m => m.DescribesField(obj, field));
+			return metadata ?? CreateDefaultRange(obj, field);
 		}
 
 		/// <summary>
@@ -118,78 +106,61 @@ namespace SafetySharp.Modeling
 			Requires.That(typeof(T).IsNumericType(), nameof(fieldExpression), "Expected a field of numeric type.");
 			Requires.OfType<MemberExpression>(fieldExpression.Body, nameof(fieldExpression), "Expected a non-nested reference to a field.");
 
-			var range = new RangeAttribute(ConvertType(typeof(T), lowerBound), ConvertType(typeof(T), upperBound), overflowBehavior);
+			var range = new RangeAttribute(lowerBound, upperBound, overflowBehavior);
 			var memberExpression = (MemberExpression)fieldExpression.Body;
-			var fieldInfo = memberExpression.Member as FieldInfo;
+			var propertyInfo = memberExpression.Member as PropertyInfo;
+			var fieldInfo = propertyInfo?.GetBackingField() ?? memberExpression.Member as FieldInfo;
 			var objectExpression = memberExpression.Expression as ConstantExpression;
 
-			Requires.That(fieldInfo != null, nameof(fieldExpression), "Expected a non-nested reference to a field.");
+			Requires.That(fieldInfo != null, nameof(fieldExpression), "Expected a non-nested reference to a field or an auto-property.");
 			Requires.That(objectExpression != null, nameof(fieldExpression), "Expected a non-nested reference to non-static field of primitive type.");
 			Requires.That(((IComparable)range.LowerBound).CompareTo(range.UpperBound) <= 0, nameof(lowerBound),
 				$"lower bound '{range.LowerBound}' is not smaller than upper bound '{range.UpperBound}'.");
 
-			Dictionary<FieldInfo, RangeAttribute> infos;
-			if (_ranges.TryGetValue(objectExpression.Value, out infos))
-				infos[fieldInfo] = range;
+			List<RangeMetadata> fields;
+			if (_ranges.TryGetValue(objectExpression.Value, out fields))
+			{
+				var metadata = fields.FirstOrDefault(m => m.DescribesField(objectExpression.Value, fieldInfo));
+				if (metadata != null)
+					fields.Remove(metadata);
+
+				fields.Add(RangeMetadata.Create(objectExpression.Value, fieldInfo, range));
+			}
 			else
-				_ranges.Add(objectExpression.Value, new Dictionary<FieldInfo, RangeAttribute> { [fieldInfo] = range });
+				_ranges.Add(objectExpression.Value, new List<RangeMetadata> { RangeMetadata.Create(objectExpression.Value, fieldInfo, range) });
 		}
 
 		/// <summary>
-		///   Converts the type of <paramref name="value" /> if it does not match exactly.
+		///   Copies the range metadata of the <paramref name="model" />'s object to the <paramref name="model" />.
 		/// </summary>
-		private static object ConvertType(Type fieldType, object value)
+		/// <param name="model">The model whose range metadata should be copied.</param>
+		public static void CopyMetadata(ModelBase model)
 		{
-			var valueType = value.GetType();
-
-			if (fieldType == valueType)
-				return value;
-
-			switch (Type.GetTypeCode(fieldType))
+			foreach (var obj in model.ReferencedObjects)
 			{
-				case TypeCode.Char:
-					return Convert.ToChar(value);
-				case TypeCode.SByte:
-					return Convert.ToSByte(value);
-				case TypeCode.Byte:
-					return Convert.ToByte(value);
-				case TypeCode.Int16:
-					return Convert.ToInt16(value);
-				case TypeCode.UInt16:
-					return Convert.ToUInt16(value);
-				case TypeCode.Int32:
-					return Convert.ToInt32(value);
-				case TypeCode.UInt32:
-					return Convert.ToUInt32(value);
-				case TypeCode.Int64:
-					return Convert.ToInt64(value);
-				case TypeCode.UInt64:
-					return Convert.ToUInt64(value);
-				case TypeCode.Single:
-					return Convert.ToSingle(value);
-				case TypeCode.Double:
-					return Convert.ToDouble(value);
-				default:
-					return Assert.NotReached<object>($"Cannot convert a value of type '{valueType.FullName}' to type '{fieldType.FullName}'.");
+				List<RangeMetadata> metadata;
+				if (_ranges.TryGetValue(obj, out metadata))
+					model.RangeMetadata.AddRange(metadata);
 			}
 		}
 
 		/// <summary>
-		///   Creates the default range when no additional range data is available for the <paramref name="obj"/>'s <paramref name="field"/>.
+		///   Creates the default range when no additional range data is available for the <paramref name="obj" />'s
+		///   <paramref name="field" />.
 		/// </summary>
-		internal static RangeAttribute CreateDefaultRange(object obj, FieldInfo field, SerializationMode mode)
+		internal static RangeMetadata CreateDefaultRange(object obj, FieldInfo field)
 		{
 			// Check if the serializer knows a range
 			RangeAttribute range;
-			if (SerializationRegistry.Default.GetSerializer(obj).TryGetRange(obj, field, mode, out range))
-				return range;
+			if (SerializationRegistry.Default.GetSerializer(obj).TryGetRange(obj, field, out range))
+				return RangeMetadata.Create(obj, field, range);
 
 			// Otherwise, maybe we can deduce a range for the type
-			return CreateDefaultRange(field.FieldType);
+			return RangeMetadata.Create(obj, field, CreateDefaultRange(field.FieldType));
 		}
 
 		/// <summary>
-		///   Creates the default range when no additional range data is available for the <paramref name="type"/>.
+		///   Creates the default range when no additional range data is available for the <paramref name="type" />.
 		/// </summary>
 		internal static RangeAttribute CreateDefaultRange(Type type)
 		{

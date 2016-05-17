@@ -20,28 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
 
-	public class Brakes : Component
+	public class Timer : Component
 	{
-		public readonly Fault BrakesFailure = new PermanentFault();
+		[Range(-1, Model.CloseTimeout, OverflowBehavior.Clamp)]
+		private int _remainingTime = -1;
 
-		[Range(Model.Decelaration, 0, OverflowBehavior.Error)]
-		private int _acceleration;
+		public bool HasElapsed => _remainingTime == 0;
 
-		public virtual int Acceleration => _acceleration;
-
-		public void Engage()
+		public void Start()
 		{
-			_acceleration = Model.Decelaration;
+			_remainingTime = Model.CloseTimeout;
 		}
 
-		[FaultEffect(Fault = nameof(BrakesFailure))]
-		public class UnresponsiveEffect : Brakes
+		public void Stop()
 		{
-			public override int Acceleration => 0;
+			_remainingTime = -1;
+		}
+
+		public override void Update()
+		{
+			--_remainingTime;
 		}
 	}
 }

@@ -20,30 +20,59 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace Tests.Serialization.RuntimeModels
 {
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
+	using Utilities;
 
-	public class Timer : Component
+	internal class ReferenceToModel : TestModel
 	{
-		[Range(-1, Model.CloseTimeout, OverflowBehavior.Clamp)]
-		private int _remainingTime = -1;
+		private static bool _hasConstructorRun;
 
-		public bool HasElapsed => _remainingTime == 0;
-
-		public void Start()
+		protected override void Check()
 		{
-			_remainingTime = Model.CloseTimeout;
+			var m = new M();
+
+			_hasConstructorRun = false;
+			Create(m);
+
+			StateFormulas.ShouldBeEmpty();
+			RootComponents.Length.ShouldBe(1);
+
+			var root = RootComponents[0];
+			root.ShouldBeOfType<C>();
+			((C)root).F.ShouldBe((sbyte)99);
+			((C)root).Model.Components.ShouldBe(new[] { root });
+			((C)root).Model.Roots.ShouldBe(new[] { root });
+			((C)root).Model.Faults.ShouldBeEmpty();
+			((C)root).Model.ReferencedObjects.ShouldBe(new object[] { root, ((C)root).Model });
+			root.GetSubcomponents().ShouldBeEmpty();
+
+			_hasConstructorRun.ShouldBe(false);
 		}
 
-		public void Stop()
+		private class C : Component
 		{
-			_remainingTime = -1;
+			public sbyte F = 99;
+			public ModelBase Model;
+
+			public C()
+			{
+				_hasConstructorRun = true;
+			}
 		}
 
-		public override void Update()
+		class M : ModelBase
 		{
-			--_remainingTime;
+			[Root(RootKind.Plant)]
+			public C C = new C();
+
+			public M()
+			{
+				C.Model = this;
+			}
 		}
 	}
 }

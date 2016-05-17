@@ -26,7 +26,6 @@ namespace SafetySharp.Modeling
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Reflection;
-	using Analysis;
 	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;
@@ -127,6 +126,7 @@ namespace SafetySharp.Modeling
 			CreateBindings(model);
 
 			model.ReferencedObjects = SerializationRegistry.Default.GetReferencedObjects(model.Roots, SerializationMode.Optimized).ToArray();
+			Range.CopyMetadata(model);
 		}
 
 		/// <summary>

@@ -20,20 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
 
-	public class RadioModule : Component
+	public class Odometer : Component
 	{
-		public extern Message RetrieveFromChannel();
-		public extern void DeliverToChannel(Message message);
+		public readonly Fault OdometerPositionOffset = new TransientFault();
+		public readonly Fault OdometerSpeedOffset = new TransientFault();
 
-		public Message Receive() => RetrieveFromChannel();
+		public virtual int Position => TrainPosition;
+		public virtual int Speed => TrainSpeed;
 
-		public void Send(Message message)
+		public extern int TrainPosition { get; }
+		public extern int TrainSpeed { get; }
+
+		[FaultEffect(Fault = nameof(OdometerPositionOffset))]
+		public class PositionOffsetEffect : Odometer
 		{
-			DeliverToChannel(message);
+			public override int Position => base.Position + Model.MaxPositionOffset * Choose(-1, 1);
+		}
+
+		[FaultEffect(Fault = nameof(OdometerSpeedOffset))]
+		public class SpeedOffsetEffect : Odometer
+		{
+			public override int Speed => base.Speed + Model.MaxSpeedOffset * Choose(-1, 1);
 		}
 	}
 }

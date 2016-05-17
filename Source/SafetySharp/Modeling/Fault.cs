@@ -34,13 +34,10 @@ namespace SafetySharp.Modeling
 	/// <summary>
 	///   Represents a base class for all faults affecting the behavior of <see cref="Component" />s.
 	/// </summary>
-	[DebuggerDisplay("{_name} (#{_identifier}) [{Activation}]")]
+	[DebuggerDisplay("{Name} (#{Identifier}) [{Activation}]")]
 	public abstract class Fault
 	{
 		private readonly Choice _choice = new Choice();
-
-		[Hidden]
-		private readonly bool _requiresActivationNotification;
 
 		[Hidden]
 		private Activation _activation = Activation.Nondeterministic;
@@ -55,15 +52,6 @@ namespace SafetySharp.Modeling
 		private int _choiceIndex;
 
 		[Hidden]
-		private int _identifier = -1;
-
-		[Hidden]
-		private bool _isActivated;
-
-		[Hidden, NonDiscoverable]
-		private string _name = "UnnamedFault";
-
-		[Hidden]
 		public Probability ProbabilityOfOccurrence = new Probability(0.5);
 
 		/// <summary>
@@ -72,42 +60,38 @@ namespace SafetySharp.Modeling
 		/// <param name="requiresActivationNotification">Indicates whether the fault must be notified about its activation.</param>
 		protected Fault(bool requiresActivationNotification)
 		{
-			_requiresActivationNotification = requiresActivationNotification;
+			RequiresActivationNotification = requiresActivationNotification;
 		}
 
 		/// <summary>
 		///   Gets a value indicating whether the fault must be notified about its activation.
 		/// </summary>
-		internal bool RequiresActivationNotification => _requiresActivationNotification;
+		[Hidden]
+		internal bool RequiresActivationNotification { get; private set; }
 
 		/// <summary>
 		///   Gets or sets an identifier for the fault.
 		/// </summary>
-		internal int Identifier
-		{
-			get { return _identifier; }
-			set { _identifier = value; }
-		}
+		[Hidden]
+		internal int Identifier { get; set; } = -1;
 
 		/// <summary>
 		///   Gets a value indicating whether the fault is used.
 		/// </summary>
-		internal bool IsUsed => _identifier != -1;
+		internal bool IsUsed => Identifier != -1;
 
 		/// <summary>
 		///   Gets a value indicating whether the fault is activated and has some effect on the state of the system, therefore inducing
 		///   an error or possibly a failure.
 		/// </summary>
-		public bool IsActivated => _isActivated;
+		[Hidden]
+		public bool IsActivated { get; private set; }
 
 		/// <summary>
 		///   Gets or sets the fault's name.
 		/// </summary>
-		public string Name
-		{
-			get { return _name; }
-			set { _name = value; }
-		}
+		[Hidden, NonDiscoverable]
+		public string Name { get; set; } = "UnnamedFault";
 
 		/// <summary>
 		///   Gets or sets the fault's forced activation kind. This property should not be changed while model checking.
@@ -120,9 +104,9 @@ namespace SafetySharp.Modeling
 				_activation = value;
 
 				if (value == Activation.Nondeterministic)
-					_isActivated = false;
+					IsActivated = false;
 				else
-					_isActivated = value == Activation.Forced;
+					IsActivated = value == Activation.Forced;
 			}
 		}
 
@@ -219,15 +203,15 @@ namespace SafetySharp.Modeling
 				switch (CheckActivation())
 				{
 					case Activation.Forced:
-						_isActivated = true;
+						IsActivated = true;
 						_canUndoActivation = false;
 						break;
 					case Activation.Suppressed:
-						_isActivated = false;
+						IsActivated = false;
 						_canUndoActivation = false;
 						break;
 					case Activation.Nondeterministic:
-						_isActivated = _choice.Choose(new Option<bool>(ProbabilityOfOccurrence.Complement(), false), new Option<bool>(ProbabilityOfOccurrence, true));
+						IsActivated = _choice.Choose(new Option<bool>(ProbabilityOfOccurrence.Complement(), false), new Option<bool>(ProbabilityOfOccurrence, true));
 						_choiceIndex = _choice.Resolver.LastChoiceIndex;
 						_canUndoActivation = true;
 						break;
@@ -249,7 +233,7 @@ namespace SafetySharp.Modeling
 
 			_activationIsUnknown = true;
 			_canUndoActivation = false;
-			_isActivated = false;
+			IsActivated = false;
 		}
 
 		/// <summary>

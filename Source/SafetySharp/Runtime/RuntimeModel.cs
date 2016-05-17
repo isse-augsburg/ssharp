@@ -113,7 +113,7 @@ namespace SafetySharp.Runtime
 			_serializedObjects = new ObjectTable(objects.Except(deterministicFaults, ReferenceEqualityComparer<object>.Default));
 			Objects = objectTable;
 
-			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_serializedObjects, SerializationMode.Optimized);
+			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(Model, _serializedObjects, SerializationMode.Optimized);
 
 			_deserialize = StateVectorLayout.CreateDeserializer(_serializedObjects);
 			_serialize = StateVectorLayout.CreateSerializer(_serializedObjects);
@@ -125,7 +125,10 @@ namespace SafetySharp.Runtime
 
 			ConstructionState = new byte[StateVectorSize];
 			fixed (byte* state = ConstructionState)
+			{
 				Serialize(state);
+				_restrictRanges();
+			}
 
 			FaultSet.CheckFaultCount(Faults.Length);
 			StateFormulaSet.CheckFormulaCount(StateFormulas.Length);

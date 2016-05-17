@@ -56,7 +56,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 			// Optimization: Skip enumerables with hidden elements
 			if (mode == SerializationMode.Optimized && hidden?.HideElements == true)
 			{
-				// We have to make sure the objects referenced by the array are discovered nevertheless
+				// We have to make sure the objects referenced by the list are discovered nevertheless
 				var enumerable = obj as IEnumerable;
 				if (enumerable == null)
 					yield break;
@@ -100,11 +100,10 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// </summary>
 		/// <param name="obj">The object the range should be determined for.</param>
 		/// <param name="field">The field the range should be determined for.</param>
-		/// <param name="mode">The serialization mode the range is obtained for.</param>
 		/// <param name="range">Returns the range, if available.</param>
-		protected internal override bool TryGetRange(object obj, FieldInfo field, SerializationMode mode, out RangeAttribute range)
+		protected internal override bool TryGetRange(object obj, FieldInfo field, out RangeAttribute range)
 		{
-			if (field.Name != "_size" || mode != SerializationMode.Optimized)
+			if (field.Name != "_size")
 			{
 				range = null;
 				return false;

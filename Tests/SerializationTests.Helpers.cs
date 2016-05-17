@@ -26,6 +26,7 @@ namespace Tests
 	using System.Collections.Generic;
 	using System.Linq;
 	using JetBrains.Annotations;
+	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;
 	using SafetySharp.Utilities;
 	using Utilities;
@@ -33,15 +34,15 @@ namespace Tests
 
 	public abstract unsafe class SerializationObject : TestObject, IDisposable
 	{
+		private MemoryBuffer _buffer;
 		private SerializationDelegate _deserializer;
 		private ObjectTable _objectTable;
-		private SerializationDelegate _serializer;
 		private Action _rangeRestrictor;
+		private SerializationDelegate _serializer;
 		protected byte* SerializedState { get; private set; }
 		protected int StateSlotCount { get; private set; }
 		protected int StateVectorSize { get; private set; }
 		protected StateVectorLayout StateVectorLayout { get; private set; }
-		private MemoryBuffer _buffer;
 
 		public void Dispose()
 		{
@@ -51,9 +52,10 @@ namespace Tests
 		protected void GenerateCode(SerializationMode mode, params object[] objects)
 		{
 			objects = SerializationRegistry.Default.GetReferencedObjects(objects, mode).ToArray();
+			var model = TestModel.InitializeModel(new DummyComponent(objects));
 
 			_objectTable = new ObjectTable(objects);
-			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(_objectTable, mode);
+			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(model, _objectTable, mode);
 			_serializer = StateVectorLayout.CreateSerializer(_objectTable);
 			_deserializer = StateVectorLayout.CreateDeserializer(_objectTable);
 			_rangeRestrictor = StateVectorLayout.CreateRangeRestrictor(_objectTable);
@@ -78,6 +80,17 @@ namespace Tests
 		protected void Deserialize()
 		{
 			_deserializer(SerializedState);
+		}
+
+		private class DummyComponent : Component
+		{
+			private object[] _objects;
+			private static Type __runtimeType__ = typeof(DummyComponent);
+
+			public DummyComponent(object[] objects)
+			{
+				_objects = objects;
+			}
 		}
 	}
 

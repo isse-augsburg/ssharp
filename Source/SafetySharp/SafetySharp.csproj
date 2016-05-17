@@ -77,10 +77,14 @@
     <Compile Include="Modeling\Reward.cs" />
     <Compile Include="Runtime\ProbabilityStack.cs" />
     <Compile Include="Runtime\FaultSet.cs" />
+    <Compile Include="Runtime\RangeMetadata`1.cs" />
+    <Compile Include="Runtime\RangeMetadata.cs" />
     <Compile Include="Runtime\Serialization\DelegateMetadata.cs" />
     <Compile Include="Runtime\Serialization\RangeRestrictionsGenerator.cs" />
     <Compile Include="Runtime\Serialization\Serializers\DelegateSerializer.cs" />
+    <Compile Include="Runtime\Serialization\Serializers\DictionarySerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\MethodInfoSerializer.cs" />
+    <Compile Include="Runtime\Serialization\Serializers\BoxedValueSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\RewardSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\ProbabilitySerializer.cs" />
     <Compile Include="Runtime\Serialization\StateVectorMismatchException.cs" />

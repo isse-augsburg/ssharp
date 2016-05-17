@@ -112,8 +112,8 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 
 		/// <summary>
 		///   Gets the <see cref="InvocationExpressionSyntax" />, <see cref="ObjectCreationExpressionSyntax" />,
-		///   <see cref="ConstructorInitializerSyntax" />, or <see cref="ElementAccessExpressionSyntax" /> that contains the
-		///   <paramref name="argument" />.
+		///   <see cref="ConstructorInitializerSyntax" />, <see cref="ElementAccessExpressionSyntax" />, or
+		///   <see cref="ImplicitElementAccessSyntax"/> that contains the <paramref name="argument" />.
 		/// </summary>
 		/// <param name="argument">The argument the method call expression should be returned for.</param>
 		[Pure, NotNull]
@@ -127,7 +127,8 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 					node is InvocationExpressionSyntax ||
 					node is ObjectCreationExpressionSyntax ||
 					node is ConstructorInitializerSyntax ||
-					node is ElementAccessExpressionSyntax;
+					node is ElementAccessExpressionSyntax ||
+					node is ImplicitElementAccessSyntax;
 
 				if (isInvocation)
 					return node;
@@ -171,6 +172,7 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 			var objectCreationExpression = invocation as ObjectCreationExpressionSyntax;
 			var constructorInitializer = invocation as ConstructorInitializerSyntax;
 			var elementAccessExpression = invocation as ElementAccessExpressionSyntax;
+			var implicitElementAccessExpression = invocation as ImplicitElementAccessSyntax;
 
 			if (invocationExpression != null)
 				arguments = invocationExpression.ArgumentList.Arguments;
@@ -180,6 +182,8 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 				arguments = constructorInitializer.ArgumentList.Arguments;
 			else if (elementAccessExpression != null)
 				arguments = elementAccessExpression.ArgumentList.Arguments;
+			else if (implicitElementAccessExpression != null)
+				arguments = implicitElementAccessExpression.ArgumentList.Arguments;
 			else
 				Assert.NotReached("Expected an invocation expression or an object creation expression.");
 

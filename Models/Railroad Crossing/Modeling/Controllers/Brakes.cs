@@ -20,21 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
 
-	public class TrainSensor : Component
+	public class Brakes : Component
 	{
-		public readonly Fault ErroneousTrainDetection = new TransientFault();
+		public readonly Fault BrakesFailure = new PermanentFault();
 
-		public virtual bool HasTrainPassed => TrainPosition > Model.SensorPosition;
-		public extern int TrainPosition { get; }
+		[Range(Model.Decelaration, 0, OverflowBehavior.Error)]
+		public virtual int Acceleration { get; private set; }
 
-		[FaultEffect(Fault = nameof(ErroneousTrainDetection))]
-		public class ErroneousDetectionEffect : TrainSensor
+		public void Engage()
 		{
-			public override bool HasTrainPassed => true;
+			Acceleration = Model.Decelaration;
+		}
+
+		[FaultEffect(Fault = nameof(BrakesFailure))]
+		public class UnresponsiveEffect : Brakes
+		{
+			public override int Acceleration => 0;
 		}
 	}
 }

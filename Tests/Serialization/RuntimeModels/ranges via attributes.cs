@@ -20,34 +20,58 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Environment
+namespace Tests.Serialization.RuntimeModels
 {
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
+	using Utilities;
 
-	/// <summary>
-	///   Represents the actual barrier that are controlled by the crossing controller.
-	/// </summary>
-	public class Barrier : Component
+	internal class RangesViaAttributes : TestModel
 	{
-		[Range(0, Model.ClosingDelay, OverflowBehavior.Clamp)]
-		private int _angle = Model.ClosingDelay;
+		private static bool _hasConstructorRun;
 
-		/// <summary>
-		///   Gets the current angle of the barrier; a value of 0 means that the barrier is closed.
-		/// </summary>
-		public int Angle => _angle;
-
-		/// <summary>
-		///   Gets the barrier's current angular movement speed.
-		/// </summary>
-		public extern int Speed { get; }
-
-		/// <summary>
-		///   Updates the barrier's angle in accordance with its movement speed.
-		/// </summary>
-		public override void Update()
+		protected override void Check()
 		{
-			_angle += Speed;
+			var c = new C { F1 = 99, F2 = 12, F3 = -1, F4 = 3 };
+			var m = InitializeModel(c);
+
+			_hasConstructorRun = false;
+			Create(m);
+
+			StateVectorSize.ShouldBe(4);
+			StateFormulas.ShouldBeEmpty();
+			RootComponents.Length.ShouldBe(1);
+
+			var root = RootComponents[0];
+			root.ShouldBeOfType<C>();
+			((C)root).F1.ShouldBe(5);
+			((C)root).F2.ShouldBe(5);
+			((C)root).F3.ShouldBe(0);
+			((C)root).F4.ShouldBe(3);
+			root.GetSubcomponents().ShouldBeEmpty();
+
+			_hasConstructorRun.ShouldBe(false);
+		}
+
+		private class C : Component
+		{
+			[Range(0, 5, OverflowBehavior.Clamp)]
+			public int F1;
+
+			[Range(0, 5, OverflowBehavior.Clamp)]
+			public int F2;
+
+			[Range(0, 5, OverflowBehavior.Clamp)]
+			public int F3;
+
+			[Range(0, 5, OverflowBehavior.Clamp)]
+			public int F4;
+
+			public C()
+			{
+				_hasConstructorRun = true;
+			}
 		}
 	}
 }

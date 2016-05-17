@@ -38,8 +38,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 			var onlyRightTriggered = !LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected;
 
 			// We assume the worst case: If the vehicle was not seen on the right lane, it is assumed to be on the left lane
-			_isVehicleLeavingOnLeftLane = PositionDetector.IsVehicleDetected && !onlyRightTriggered && active;
-			_isVehicleLeavingOnRightLane = PositionDetector.IsVehicleDetected && onlyRightTriggered && active;
+			IsVehicleLeavingOnLeftLane = PositionDetector.IsVehicleDetected && !onlyRightTriggered && active;
+			IsVehicleLeavingOnRightLane = PositionDetector.IsVehicleDetected && onlyRightTriggered && active;
 		}
 	}
 }

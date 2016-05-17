@@ -20,13 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
-	public enum Message
+	using SafetySharp.Modeling;
+
+	public class BarrierMotor : Component
 	{
-		None,
-		Close,
-		Query,
-		Closed
+		public readonly Fault BarrierMotorStuck = new TransientFault();
+
+		[Range(-1, 1, OverflowBehavior.Clamp)]
+		private int _currentSpeed;
+
+		public virtual int Speed => _currentSpeed;
+
+		public void Open()
+		{
+			_currentSpeed = 1;
+		}
+
+		public void Close()
+		{
+			_currentSpeed = -1;
+		}
+
+		public void Stop()
+		{
+			_currentSpeed = 0;
+		}
+
+		[FaultEffect(Fault = nameof(BarrierMotorStuck))]
+		public class StuckEffect : BarrierMotor
+		{
+			public override int Speed => 0;
+		}
 	}
 }

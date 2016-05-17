@@ -27,6 +27,7 @@ namespace SafetySharp.Utilities
 	using System.Linq;
 	using System.Reflection;
 	using System.Reflection.Emit;
+	using System.Runtime.CompilerServices;
 	using System.Runtime.InteropServices;
 	using Modeling;
 	using Runtime.Serialization;
@@ -245,6 +246,35 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
+		///   Gets the <see cref="PropertyInfo" /> for the <paramref name="backingField" />. Returns <c>null</c> if
+		///   <paramref name="backingField" /> is not a compiler generated backing field for an auto-property.
+		/// </summary>
+		/// <param name="backingField">The backing field the <see cref="PropertyInfo" /> should be returned for.</param>
+		public static PropertyInfo GetAutoProperty(this FieldInfo backingField)
+		{
+			Requires.NotNull(backingField, nameof(backingField));
+
+			if (!backingField.HasAttribute<CompilerGeneratedAttribute>() || !backingField.Name.EndsWith(">k__BackingField"))
+				return null;
+
+			var propertyName = backingField.Name.Substring(1, backingField.Name.Length - ">k__BackingField".Length - 1);
+			return backingField.DeclaringType.GetProperty(propertyName, Flags);
+		}
+
+		/// <summary>
+		///   Tries to get the <see cref="FieldInfo" /> for the <paramref name="property" />'s backing field. Returns <c>null</c> if
+		///   <paramref name="property" /> is not a compiler generated an auto-property.
+		/// </summary>
+		/// <param name="property">The property the backing field should be returned for.</param>
+		public static FieldInfo GetBackingField(this PropertyInfo property)
+		{
+			Requires.NotNull(property, nameof(property));
+
+			var fieldName = $"<{property.Name}>k__BackingField";
+			return property.DeclaringType.GetField(fieldName, Flags);
+		}
+
+		/// <summary>
 		///   Checks whether the <paramref name="member" /> is hidden in the serialization <paramref name="mode" />, depending on
 		///   whether <paramref name="discoveringObjects" /> is <c>true</c>.
 		/// </summary>
@@ -253,17 +283,22 @@ namespace SafetySharp.Utilities
 		/// <param name="discoveringObjects">Indicates whether objects are being discovered.</param>
 		public static bool IsHidden(this MemberInfo member, SerializationMode mode, bool discoveringObjects)
 		{
+			// For backing fields of auto-implemented properties, check the property instead
+			// TODO: Remove this workaround once C# supports [field:Attribute] on properties
+			var fieldInfo = member as FieldInfo;
+			var property = fieldInfo?.GetAutoProperty();
+			var attributeMember = property ?? member;
+
 			// Don't try to serialize members that are explicitly marked as non-serializable
-			if (member.HasAttribute<NonSerializableAttribute>() || member.HasAttribute<NonSerializedAttribute>())
+			if (attributeMember.HasAttribute<NonSerializableAttribute>() || attributeMember.HasAttribute<NonSerializedAttribute>())
 				return true;
 
 			// If we're discovering objects in optimized mode and the member is explicitly marked as non-discoverable, it is hidden
-			if (mode == SerializationMode.Optimized && discoveringObjects && member.HasAttribute<NonDiscoverableAttribute>())
+			if (mode == SerializationMode.Optimized && discoveringObjects && attributeMember.HasAttribute<NonDiscoverableAttribute>())
 				return true;
 
 			// Read-only fields are implicitly marked with [Hidden]
-			var fieldInfo = member as FieldInfo;
-			var hiddenAttribute = member.GetCustomAttribute<HiddenAttribute>();
+			var hiddenAttribute = attributeMember.GetCustomAttribute<HiddenAttribute>();
 			var isHidden = hiddenAttribute != null || (fieldInfo != null && fieldInfo.IsInitOnly);
 
 			// If the member is hidden, only ignore it in optimized serializations when we're not discovering objects

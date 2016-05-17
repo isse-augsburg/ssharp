@@ -26,8 +26,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using System.Windows;
 	using System.Windows.Controls;
 	using CaseStudies.RailroadCrossing.Modeling;
-	using CaseStudies.RailroadCrossing.Modeling.Environment;
-	using CaseStudies.RailroadCrossing.Modeling.System;
+	using CaseStudies.RailroadCrossing.Modeling.Plants;
+	using CaseStudies.RailroadCrossing.Modeling.Controllers;
 	using Infrastructure;
 	using Modeling;
 

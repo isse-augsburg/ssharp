@@ -22,8 +22,8 @@
 
 namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling
 {
-	using System;
-	using Environment;
+	using Controllers;
+	using Plants;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 

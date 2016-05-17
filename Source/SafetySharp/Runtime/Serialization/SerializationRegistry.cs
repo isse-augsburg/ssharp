@@ -22,8 +22,11 @@
 
 namespace SafetySharp.Runtime.Serialization
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Reflection;
+	using Modeling;
 	using Serializers;
 	using Utilities;
 
@@ -48,9 +51,11 @@ namespace SafetySharp.Runtime.Serialization
 		private SerializationRegistry()
 		{
 			RegisterSerializer(new ObjectSerializer());
+			RegisterSerializer(new BoxedValueSerializer());
 			RegisterSerializer(new FaultEffectSerializer());
 			RegisterSerializer(new ArraySerializer());
 			RegisterSerializer(new ListSerializer());
+			RegisterSerializer(new DictionarySerializer());
 			RegisterSerializer(new StringSerializer());
 			RegisterSerializer(new TypeSerializer());
 			RegisterSerializer(new MethodInfoSerializer());
@@ -102,10 +107,12 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Generates the <see cref="StateVectorLayout" /> for the <paramref name="objects" />.
 		/// </summary>
+		/// <param name="model">The model the state vector should be layouted for.</param>
 		/// <param name="objects">The objects consisting of state values the state vector layout should be generated for.</param>
 		/// <param name="mode">The serialization mode that should be used to generate the state vector layout.</param>
-		internal StateVectorLayout GetStateVectorLayout(ObjectTable objects, SerializationMode mode)
+		internal StateVectorLayout GetStateVectorLayout(ModelBase model, ObjectTable objects, SerializationMode mode)
 		{
+			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(objects, nameof(objects));
 			Requires.InRange(mode, nameof(mode));
 
@@ -113,7 +120,7 @@ namespace SafetySharp.Runtime.Serialization
 			foreach (var slot in objects.SelectMany(obj => GetSerializer(obj).GetStateSlotMetadata(obj, objects.GetObjectIdentifier(obj), mode)))
 				layout.Add(slot);
 
-			layout.Compact(mode);
+			layout.Compact(model, mode);
 			return layout;
 		}
 
@@ -151,6 +158,87 @@ namespace SafetySharp.Runtime.Serialization
 				if (referencedObject != null && referencedObjects.Add(referencedObject))
 					GetReferencedObjects(referencedObjects, referencedObject, mode);
 			}
+		}
+
+		/// <summary>
+		///   Gets all objects referenced by the value-typed <paramref name="obj" />.
+		/// </summary>
+		/// <param name="obj">The value-typed object the referenced objects should be returned for.</param>
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		internal IEnumerable<object> GetObjectsReferencedByStruct(object obj, SerializationMode mode)
+		{
+			Requires.NotNull(obj, nameof(obj));
+			Requires.That(obj.GetType().IsStructType(), "Expected a value-typed object.");
+
+			var referencedObjects = new HashSet<object>(ReferenceEqualityComparer<object>.Default);
+			GetObjectsReferencedByStruct(referencedObjects, obj, mode);
+
+			return referencedObjects;
+		}
+
+		/// <summary>
+		///   Adds all objects referenced by the value-typed <paramref name="obj" /> to the set of <paramref name="referencedObjects" />
+		///   .
+		/// </summary>
+		/// <param name="referencedObjects">The set of referenced objects.</param>
+		/// <param name="obj">The value-typed object the referenced objects should be returned for.</param>
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		private static void GetObjectsReferencedByStruct(HashSet<object> referencedObjects, object obj, SerializationMode mode)
+		{
+			foreach (var field in GetSerializationFields(obj, mode))
+			{
+				if (field.FieldType.IsStructType())
+					GetObjectsReferencedByStruct(referencedObjects, field.GetValue(obj), mode);
+				else if (field.FieldType.IsReferenceType())
+				{
+					var referencedObj = field.GetValue(obj);
+					if (referencedObj != null)
+						referencedObjects.Add(referencedObj);
+				}
+			}
+		}
+
+		/// <summary>
+		///   Gets the fields declared by the <paramref name="obj" /> that should be serialized.
+		/// </summary>
+		/// <param name="obj">The object that should be serialized.</param>
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
+		/// <param name="startType">
+		///   The first type in <paramref name="obj" />'s inheritance hierarchy whose fields should be returned.
+		///   If <c>null</c>, corresponds to <paramref name="obj" />'s actual type.
+		/// </param>
+		/// <param name="inheritanceRoot">
+		///   The first base type of the <paramref name="obj" /> whose fields should be ignored. If
+		///   <c>null</c>, <see cref="object" /> is the inheritance root.
+		/// </param>
+		/// <param name="discoveringObjects">Indicates whether objects are being discovered.</param>
+		internal static IEnumerable<FieldInfo> GetSerializationFields(object obj, SerializationMode mode,
+																	  Type startType = null,
+																	  Type inheritanceRoot = null,
+																	  bool discoveringObjects = false)
+		{
+			var type = startType ?? obj.GetType();
+			if (type.IsHidden(mode, discoveringObjects))
+				return Enumerable.Empty<FieldInfo>();
+
+			var fields = type.GetFields(inheritanceRoot ?? typeof(object)).Where(field =>
+			{
+				// Ignore static or constant fields
+				if (field.IsStatic || field.IsLiteral)
+					return false;
+
+				// Don't try to serialize hidden fields
+				if (field.IsHidden(mode, discoveringObjects) || field.FieldType.IsHidden(mode, discoveringObjects))
+					return false;
+
+				// Otherwise, serialize the field
+				return true;
+			});
+
+			// It is important to sort the fields in a deterministic order; by default, .NET's reflection APIs don't
+			// return fields in any particular order at all, which obviously causes problems when we then go on to try
+			// to deserialize fields in a different order than the one that was used to serialize them
+			return fields.OrderBy(field => field.DeclaringType.FullName).ThenBy(field => field.Name);
 		}
 	}
 }

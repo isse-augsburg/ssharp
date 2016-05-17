@@ -20,43 +20,69 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Environment
+namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
-	using System;
 	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   Represents the radio channel that the train and crossing controllers use to communicate with each other.
-	/// </summary>
-	public class RadioChannel : Component
+	public class CrossingController : Component
 	{
-		public readonly Fault MessageDropped = new TransientFault();
+		private readonly StateMachine<State> _stateMachine = State.Open;
 
-		private Message _currentMessage;
+		[Hidden]
+		public BarrierMotor Motor;
 
-		/// <summary>
-		///   Receives the message that was sent last.
-		/// </summary>
-		public virtual Message Receive()
+		[Hidden]
+		public RadioModule Radio;
+
+		[Hidden]
+		public BarrierSensor Sensor;
+
+		[Hidden]
+		public Timer Timer;
+
+		[Hidden]
+		public TrainSensor TrainSensor;
+
+		public override void Update()
 		{
-			return _currentMessage;
+			Update(Motor, Radio, Sensor, Timer);
+
+			_stateMachine
+				.Transition(
+					from: State.Open,
+					to: State.Closing,
+					guard: Radio.Receive() == Message.Close,
+					action: () =>
+					{
+						Motor.Close();
+						Timer.Start();
+					})
+				.Transition(
+					from: State.Closing,
+					to: State.Closed,
+					guard: Sensor.IsClosed,
+					action: Motor.Stop)
+				.Transition(
+					from: State.Closed,
+					to: State.Opening,
+					guard: Timer.HasElapsed || TrainSensor.HasTrainPassed,
+					action: Motor.Open)
+				.Transition(
+					from: State.Opening,
+					to: State.Open,
+					guard: Sensor.IsOpen,
+					action: Motor.Stop);
+
+			if (Radio.Receive() == Message.Query && _stateMachine == State.Closed)
+				Radio.Send(Message.Closed);
 		}
 
-		/// <summary>
-		///   Sends the given message.
-		/// </summary>
-		public void Send(Message message)
+		private enum State
 		{
-			_currentMessage = message;
-		}
-
-		[FaultEffect(Fault = nameof(MessageDropped))]
-		public class DroppedEffect : RadioChannel
-		{
-			public override Message Receive()
-			{
-				return Message.None;
-			}
+			Open,
+			Closing,
+			Closed,
+			Opening
 		}
 	}
 }

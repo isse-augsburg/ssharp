@@ -32,7 +32,8 @@ namespace SafetySharp.Modeling
 	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
 	///   written value could be read.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct,
+		AllowMultiple = false, Inherited = false)]
 	public sealed class HiddenAttribute : Attribute
 	{
 		/// <summary>

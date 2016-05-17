@@ -27,7 +27,7 @@ namespace SafetySharp.Modeling
 	/// <summary>
 	///   When applied to a S# field, indicates the field's range of valid values and its <see cref="OverflowBehavior" />.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
 	public sealed class RangeAttribute : Attribute
 	{
 		/// <summary>
@@ -57,54 +57,5 @@ namespace SafetySharp.Modeling
 		///   Gets the overflow behavior.
 		/// </summary>
 		public OverflowBehavior OverflowBehavior { get; }
-
-		/// <summary>
-		///   Gets the numeric <see cref="Type" /> that can express all values in the range.
-		/// </summary>
-		internal Type GetRangeType()
-		{
-			if (CheckType(SByte.MinValue, SByte.MaxValue, Convert.ToSByte))
-				return typeof(SByte);
-
-			if (CheckType(Byte.MinValue, Byte.MaxValue, Convert.ToByte))
-				return typeof(Byte);
-
-			if (CheckType(UInt16.MinValue, UInt16.MaxValue, Convert.ToUInt16))
-				return typeof(UInt16);
-
-			if (CheckType(Int16.MinValue, Int16.MaxValue, Convert.ToInt16))
-				return typeof(Int16);
-
-			if (CheckType(UInt32.MinValue, UInt32.MaxValue, Convert.ToUInt32))
-				return typeof(UInt32);
-
-			if (CheckType(Int32.MinValue, Int32.MaxValue, Convert.ToInt32))
-				return typeof(Int32);
-
-			if (CheckType(UInt64.MinValue, UInt64.MaxValue, Convert.ToUInt64))
-				return typeof(UInt64);
-
-			return typeof(Int64);
-		}
-
-		/// <summary>
-		///   Checks whether the <paramref name="conversion" /> can be applied to both the lower and the upper bound and whether the
-		///   bounds lie withing the range of the <paramref name="min" /> and <paramref name="max" /> values.
-		/// </summary>
-		private bool CheckType<T>(T min, T max, Func<object, T> conversion)
-			where T : IComparable
-		{
-			try
-			{
-				var lower = conversion(LowerBound);
-				var upper = conversion(UpperBound);
-
-				return min.CompareTo(lower) <= 0 && max.CompareTo(upper) >= 0;
-			}
-			catch (Exception)
-			{
-				return false;
-			}
-		}
 	}
 }

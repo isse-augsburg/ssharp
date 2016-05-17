@@ -26,7 +26,6 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Reflection;
-	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -80,7 +79,7 @@ namespace SafetySharp.Runtime.Serialization
 		///   The range metadata of the slot, if any.
 		/// </summary>
 		[NonSerialized]
-		public RangeAttribute Range;
+		public RangeMetadata Range;
 
 		/// <summary>
 		///   Gets a value indicating whether the data is stored in a struct.

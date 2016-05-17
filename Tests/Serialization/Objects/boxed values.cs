@@ -20,69 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace Tests.Serialization.Objects
 {
+	using System;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	public class CrossingController : Component
+	internal class BoxedValues : SerializationObject
 	{
-		private readonly StateMachine<State> _stateMachine = State.Open;
-
-		[Hidden]
-		public BarrierMotor Motor;
-
-		[Hidden]
-		public RadioModule Radio;
-
-		[Hidden]
-		public BarrierSensor Sensor;
-
-		[Hidden]
-		public Timer Timer;
-
-		[Hidden]
-		public TrainSensor TrainSensor;
-
-		public override void Update()
+		protected override void Check()
 		{
-			Update(Motor, Radio, Sensor, Timer);
+			var o = (object)1;
+			var p = (object)new X { A = 1, B = 2 };
+			var c = new C { O = o, P = p };
 
-			_stateMachine
-				.Transition(
-					from: State.Open,
-					to: State.Closing,
-					guard: Radio.Receive() == Message.Close,
-					action: () =>
-					{
-						Motor.Close();
-						Timer.Start();
-					})
-				.Transition(
-					from: State.Closing,
-					to: State.Closed,
-					guard: Sensor.IsClosed,
-					action: Motor.Stop)
-				.Transition(
-					from: State.Closed,
-					to: State.Opening,
-					guard: Timer.HasElapsed || TrainSensor.HasTrainPassed,
-					action: Motor.Open)
-				.Transition(
-					from: State.Opening,
-					to: State.Open,
-					guard: Sensor.IsOpen,
-					action: Motor.Stop);
+			Should.Throw<NotSupportedException>(() => GenerateCode(SerializationMode.Optimized, c, o, p));
 
-			if (Radio.Receive() == Message.Query && _stateMachine == State.Closed)
-				Radio.Send(Message.Closed);
+			// TODO: Uncomment once boxed value types are supported
+			//StateSlotCount.ShouldBe(2);
+			//
+			//Serialize();
+			//c.O = null;
+			//c.P = null;
+			//Deserialize();
+			//c.O.ShouldBe(o);
+			//c.P.ShouldBe(p);
 		}
 
-		private enum State
+		private class C : Component
 		{
-			Open,
-			Closing,
-			Closed,
-			Opening
+			public object O;
+			public object P;
+		}
+
+		private struct X
+		{
+			public int A;
+			public int B;
 		}
 	}
 }

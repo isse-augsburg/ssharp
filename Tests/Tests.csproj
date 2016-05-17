@@ -132,6 +132,12 @@
     <Compile Include="Analysis\Dcca\empty set.cs" />
     <Compile Include="Analysis\Dcca\multiple singleton cut sets.cs" />
     <Compile Include="Analysis\Dcca\exception.cs" />
+    <Compile Include="Analysis\Dcca\multiple forced faults.cs" />
+    <Compile Include="Analysis\Dcca\multiple suppressed faults.cs" />
+    <Compile Include="Analysis\Dcca\single forced fault.cs" />
+    <Compile Include="Analysis\Dcca\forced and suppressed faults.cs" />
+    <Compile Include="Analysis\Dcca\large fault count.cs" />
+    <Compile Include="Analysis\Dcca\single suppressed fault.cs" />
     <Compile Include="Analysis\Dcca\multiple two point cut sets.cs" />
     <Compile Include="Analysis\Dcca\no cut sets.cs" />
     <Compile Include="Analysis\Dcca\unused fault.cs" />
@@ -144,6 +150,7 @@
     <Compile Include="Analysis\Invariants\CounterExamples\nondeterminism.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\replay.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\non-initial state exception.cs" />
+    <Compile Include="Analysis\Invariants\CounterExamples\hidden initial state.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\stepping.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\steps.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\variable ranges.cs" />
@@ -597,6 +604,7 @@
     <Compile Include="Serialization\Enumerations\UInt32.cs" />
     <Compile Include="Serialization\Enumerations\UInt8.cs" />
     <Compile Include="Serialization\Misc\empty state.cs" />
+    <Compile Include="Serialization\Misc\hidden property.cs" />
     <Compile Include="Serialization\Misc\hidden state optimized.cs" />
     <Compile Include="Serialization\Misc\optimized serialization.cs" />
     <Compile Include="Serialization\Misc\full serialization.cs" />
@@ -604,9 +612,11 @@
     <Compile Include="Serialization\Misc\hidden state full.cs" />
     <Compile Include="Serialization\Misc\mixed 2.cs" />
     <Compile Include="Serialization\Misc\mixed 1.cs" />
+    <Compile Include="Serialization\Objects\dictionaries.cs" />
     <Compile Include="Serialization\Objects\delegate assignment.cs" />
+    <Compile Include="Serialization\Objects\hidden array elements properties.cs" />
     <Compile Include="Serialization\Objects\nondiscoverable delegate.cs" />
-    <Compile Include="Serialization\Objects\hidden array elements.cs" />
+    <Compile Include="Serialization\Objects\hidden array elements fields.cs" />
     <Compile Include="Serialization\Objects\hidden list elements.cs" />
     <Compile Include="Serialization\Objects\serialized arrays.cs" />
     <Compile Include="Serialization\Objects\lists.cs" />
@@ -617,6 +627,7 @@
     <Compile Include="Serialization\Objects\interface field.cs" />
     <Compile Include="Serialization\Objects\arrays.cs" />
     <Compile Include="Serialization\Objects\fault effect.cs" />
+    <Compile Include="Serialization\Objects\boxed values.cs" />
     <Compile Include="Serialization\Objects\single object.cs" />
     <Compile Include="Serialization\Objects\structs.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Char.cs" />
@@ -634,6 +645,8 @@
     <Compile Include="Serialization\Ranges\Bool.cs" />
     <Compile Include="Serialization\Ranges\Char.cs" />
     <Compile Include="Serialization\Ranges\Error.cs" />
+    <Compile Include="Serialization\Ranges\property ranges via method.cs" />
+    <Compile Include="Serialization\Ranges\property ranges via attributes.cs" />
     <Compile Include="Serialization\Ranges\struct array.cs" />
     <Compile Include="Serialization\Ranges\struct.cs" />
     <Compile Include="Serialization\Ranges\inherited field.cs" />
@@ -648,6 +661,10 @@
     <Compile Include="Serialization\Ranges\UInt64.cs" />
     <Compile Include="Serialization\Ranges\UInt8.cs" />
     <Compile Include="Serialization\RuntimeModels\multiple effects with state.cs" />
+    <Compile Include="Serialization\RuntimeModels\ranges via methods.cs" />
+    <Compile Include="Serialization\RuntimeModels\ranges via attributes.cs" />
+    <Compile Include="Serialization\RuntimeModels\objects in struct.cs" />
+    <Compile Include="Serialization\RuntimeModels\reference to model.cs" />
     <Compile Include="Serialization\RuntimeModels\reward positive only.cs" />
     <Compile Include="Serialization\RuntimeModels\reward positive and negative.cs" />
     <Compile Include="Serialization\RuntimeModels\probability.cs" />

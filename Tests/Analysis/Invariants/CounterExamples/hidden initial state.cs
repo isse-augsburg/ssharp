@@ -20,38 +20,57 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace Tests.Analysis.Invariants.CounterExamples
 {
 	using SafetySharp.Modeling;
+	using Shouldly;
 
-	public class BarrierMotor : Component
+	internal class HiddenInitialState : AnalysisTestObject
 	{
-		public readonly Fault BarrierMotorStuck = new TransientFault();
-
-		[Range(-1, 1, OverflowBehavior.Clamp)]
-		private int _currentSpeed;
-
-		public virtual int Speed => _currentSpeed;
-
-		public void Open()
+		protected override void Check()
 		{
-			_currentSpeed = 1;
+			var c = new C ();
+			CheckInvariant(c.X != 20, c);
+			CounterExample.StepCount.ShouldBe(4);
+
+			SimulateCounterExample(CounterExample, simulator =>
+			{
+				c = (C)simulator.Model.Roots[0];
+
+				c.X.ShouldBe(0);
+
+				simulator.SimulateStep();
+				c.X.ShouldBe(18);
+
+				simulator.SimulateStep();
+				c.X.ShouldBe(19);
+
+				simulator.SimulateStep();
+				c.X.ShouldBe(20);
+
+				simulator.Rewind(steps: 100);
+				c.X.ShouldBe(0);
+
+				simulator.FastForward(steps: 2);
+				c.X.ShouldBe(19);
+			});
 		}
 
-		public void Close()
+		private class C : Component
 		{
-			_currentSpeed = -1;
-		}
+			public int X;
 
-		public void Stop()
-		{
-			_currentSpeed = 0;
-		}
+			[Hidden]
+			private int _y = 99;
 
-		[FaultEffect(Fault = nameof(BarrierMotorStuck))]
-		public class StuckEffect : BarrierMotor
-		{
-			public override int Speed => 0;
+			public override void Update()
+			{
+				if (_y == 99)
+					X = 17;
+
+				++X;
+				++_y;
+			}
 		}
 	}
 }

@@ -85,9 +85,8 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// </summary>
 		/// <param name="obj">The object the range should be determined for.</param>
 		/// <param name="field">The field the range should be determined for.</param>
-		/// <param name="mode">The serialization mode the range is obtained for.</param>
 		/// <param name="range">Returns the range, if available.</param>
-		protected internal virtual bool TryGetRange(object obj, FieldInfo field, SerializationMode mode, out RangeAttribute range)
+		protected internal virtual bool TryGetRange(object obj, FieldInfo field, out RangeAttribute range)
 		{
 			range = null;
 			return false;

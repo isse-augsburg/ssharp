@@ -39,6 +39,8 @@ namespace Tests.Analysis.Dcca
 			result.MinimalCriticalSets.Count.ShouldBe(1);
 			result.Exceptions.ShouldBeEmpty();
 			result.IsComplete.ShouldBe(true);
+			result.SuppressedFaults.ShouldBeEmpty();
+			result.ForcedFaults.ShouldBeEmpty();
 
 			result.CheckedSets.ShouldBe(new[] { new HashSet<Fault>() });
 			result.MinimalCriticalSets.ShouldBe(new[] { new HashSet<Fault>() });

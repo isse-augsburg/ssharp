@@ -20,31 +20,68 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.System
+namespace Tests.Serialization.Misc
 {
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using SafetySharp.Utilities;
+	using Shouldly;
 
-	public class Odometer : Component
+	internal class HiddenProperty : SerializationObject
 	{
-		public readonly Fault OdometerPositionOffset = new TransientFault();
-		public readonly Fault OdometerSpeedOffset = new TransientFault();
-
-		public virtual int Position => TrainPosition;
-		public virtual int Speed => TrainSpeed;
-
-		public extern int TrainPosition { get; }
-		public extern int TrainSpeed { get; }
-
-		[FaultEffect(Fault = nameof(OdometerPositionOffset))]
-		public class PositionOffsetEffect : Odometer
+		protected override void Check()
 		{
-			public override int Position => base.Position + Model.MaxPositionOffset * Choose(-1, 1);
+			var c = new C { X = 1 };
+
+			GenerateCode(SerializationMode.Full, c);
+			StateSlotCount.ShouldBe(2);
+
+			Serialize();
+			c.X = 2;
+
+			typeof(C).GetProperty("Y").GetBackingField().SetValue(c, 102);
+			typeof(C).GetProperty("Z").GetBackingField().SetValue(c, 101);
+
+			c.Y.ShouldBe(102);
+			c.Z.ShouldBe(101);
+
+			Deserialize();
+			c.X.ShouldBe(1);
+			c.Y.ShouldBe(102);
+			c.Z.ShouldBe(11);
+
+			GenerateCode(SerializationMode.Optimized, c);
+			StateSlotCount.ShouldBe(1);
+
+			Serialize();
+			c.X = 2;
+
+			typeof(C).GetProperty("Y").GetBackingField().SetValue(c, 1102);
+			typeof(C).GetProperty("Z").GetBackingField().SetValue(c, 1101);
+
+			c.Y.ShouldBe(1102);
+			c.Z.ShouldBe(1101);
+
+			Deserialize();
+			c.X.ShouldBe(2);
+			c.Y.ShouldBe(1102);
+			c.Z.ShouldBe(1101);
 		}
 
-		[FaultEffect(Fault = nameof(OdometerSpeedOffset))]
-		public class SpeedOffsetEffect : Odometer
+		internal class C
 		{
-			public override int Speed => base.Speed + Model.MaxSpeedOffset * Choose(-1, 1);
+			[Hidden]
+			public int X { get; set; }
+
+			[NonSerializable]
+			public int Y { get; } = 99;
+
+			public int Z { get; } = 11;
+		}
+
+		internal class D
+		{
+			public int X;
 		}
 	}
 }

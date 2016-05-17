@@ -31,7 +31,7 @@ namespace Tests.Serialization.Ranges
 		protected override void Check()
 		{
 			var c = new C { F = 'y', G = 'y' };
-			GenerateCode(SerializationMode.Full, c);
+			GenerateCode(SerializationMode.Optimized, c);
 
 			Serialize();
 			c.F = 'z';

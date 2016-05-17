@@ -38,6 +38,8 @@ namespace Tests.Analysis.Dcca
 			result.CounterExamples.ShouldBeEmpty();
 			result.Exceptions.ShouldBeEmpty();
 			result.IsComplete.ShouldBe(true);
+			result.SuppressedFaults.ShouldBeEmpty();
+			result.ForcedFaults.ShouldBeEmpty();
 
 			ShouldContain(result.CheckedSets);
 			ShouldContain(result.CheckedSets, c.F1);
