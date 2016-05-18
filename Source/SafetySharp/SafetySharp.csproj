@@ -85,7 +85,7 @@
     <Compile Include="Runtime\Serialization\Serializers\DictionarySerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\MethodInfoSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\BoxedValueSerializer.cs" />
-    <Compile Include="Runtime\Serialization\Serializers\RewardSerializer.cs" />
+    <Compile Include="Runtime\Serialization\ResetRewardGenerator.cs" />
     <Compile Include="Runtime\Serialization\StateVectorMismatchException.cs" />
     <Compile Include="CompilerServices\FaultHelper.cs" />
     <Compile Include="CompilerServices\PortBinding.cs" />

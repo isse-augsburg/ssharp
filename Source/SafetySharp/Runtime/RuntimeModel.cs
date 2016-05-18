@@ -63,6 +63,11 @@ namespace SafetySharp.Runtime
 		private readonly Action _restrictRanges;
 
 		/// <summary>
+		/// Resets the rewards to 0 after a time step.
+		/// </summary>
+		private readonly Action _resetRewards;
+
+		/// <summary>
 		///   The objects referenced by the model that participate in state serialization.
 		/// </summary>
 		private readonly ObjectTable _serializedObjects;
@@ -118,6 +123,7 @@ namespace SafetySharp.Runtime
 			_deserialize = StateVectorLayout.CreateDeserializer(_serializedObjects);
 			_serialize = StateVectorLayout.CreateSerializer(_serializedObjects);
 			_restrictRanges = StateVectorLayout.CreateRangeRestrictor(_serializedObjects);
+			_resetRewards = ResetRewardGenerator.CreateRangeRestrictor(objectTable);
 			_stateHeaderBytes = stateHeaderBytes;
 
 			PortBinding.BindAll(objectTable);
@@ -218,6 +224,7 @@ namespace SafetySharp.Runtime
 			fixed (byte* state = ConstructionState)
 			{
 				Deserialize(state);
+				_resetRewards();
 
 				foreach (var obj in _serializedObjects.OfType<IInitializable>())
 					obj.Initialize();
@@ -232,6 +239,8 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void ExecuteInitialStep()
 		{
+			_resetRewards();
+
 			foreach (var fault in Faults)
 				fault.Reset();
 
@@ -272,6 +281,8 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void ExecuteStep()
 		{
+			_resetRewards();
+
 			foreach (var fault in Faults)
 				fault.Reset();
 
