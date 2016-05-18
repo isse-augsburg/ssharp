@@ -40,7 +40,7 @@ namespace Tests.Serialization.RuntimeModels
 			StateFormulas.ShouldBeEmpty();
 			RootComponents.Length.ShouldBe(1);
 			Debugger.Break();
-			//The StateSlotCount is 1. The, Reward is not serialized. Thus, actually the state vector should be 0. But the minimum size of the state vector is 1.
+			//The StateSlotCount is 1. Only the boolean MightBeNegative is serialized.
 			StateSlotCount.ShouldBe(1);
 
 			var root = RootComponents[0];

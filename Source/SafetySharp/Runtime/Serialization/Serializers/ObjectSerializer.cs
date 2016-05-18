@@ -56,7 +56,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 			{
 				if (field.FieldType.IsStructType())
 				{
-					foreach (var metadataSlot in StateSlotMetadata.FromStruct(field.FieldType))
+					foreach (var metadataSlot in StateSlotMetadata.FromStruct(field.FieldType, mode))
 					{
 						metadataSlot.Object = obj;
 						metadataSlot.ObjectIdentifier = objectIdentifier;

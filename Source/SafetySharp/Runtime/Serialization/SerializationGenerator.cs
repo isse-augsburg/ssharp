@@ -184,16 +184,6 @@ namespace SafetySharp.Runtime.Serialization
 				DeserializeReferenceField(metadata);
 			else
 				DeserializePrimitiveTypeField(metadata);
-			/*
-else if (IsReferenceType(metadata.Field.FieldType))
-				DeserializeReferenceField(metadata.Field);
-			else if (Serializers.ProbabilitySerializer.IsProbability(metadata))
-				Serializers.ProbabilitySerializer.DeserializeField(_il, metadata.Field);
-			else if (Serializers.RewardSerializer.IsReward(metadata))
-			{
-				Serializers.RewardSerializer.ResetFields(_il, metadata.Field);
-			}
-			*/
 		}
 
 		/// <summary>
@@ -208,15 +198,6 @@ else if (IsReferenceType(metadata.Field.FieldType))
 				SerializeReferenceField(metadata);
 			else
 				SerializePrimitiveTypeField(metadata);
-			
-			/*else if (IsReferenceType(metadata.Field.FieldType))
-				SerializeReferenceField(metadata.Field);
-			else if (Serializers.ProbabilitySerializer.IsProbability(metadata))
-				Serializers.ProbabilitySerializer.SerializeField(_il, metadata.Field);
-			else if (Serializers.RewardSerializer.IsReward(metadata))
-			{
-				//Serializers.RewardSerializer.SerializeField(_il, metadata.Field);
-			}*/
 		}
 
 		/// <summary>

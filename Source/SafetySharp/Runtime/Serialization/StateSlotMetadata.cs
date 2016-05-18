@@ -109,12 +109,6 @@ namespace SafetySharp.Runtime.Serialization
 				if (DataType == typeof(bool))
 					return 1;
 
-				if (DataType == typeof(Probability))
-					return Serializers.ProbabilitySerializer.GetElementSizeInBits();
-
-				if (DataType == typeof(Reward))
-					return Serializers.RewardSerializer.GetElementSizeInBits();
-
 				return EffectiveType.GetUnmanagedSize() * 8;
 			}
 		}
@@ -178,18 +172,18 @@ namespace SafetySharp.Runtime.Serialization
 		///   Creates the metadata required to serialize the <paramref name="structType" />.
 		/// </summary>
 		/// <param name="structType">The type of the struct the metadata should be created for.</param>
-		public static IEnumerable<StateSlotMetadata> FromStruct(Type structType)
+		public static IEnumerable<StateSlotMetadata> FromStruct(Type structType, SerializationMode mode)
 		{
 			Requires.NotNull(structType, nameof(structType));
 			Requires.That(structType.IsStructType(), "Expected a value type.");
 
-			return FromStruct(structType, new FieldInfo[0]);
+			return FromStruct(structType, new FieldInfo[0], mode);
 		}
 
 		/// <summary>
 		///   Creates the metadata required to serialize the <paramref name="structType" /> with the <paramref name="fieldChain" />.
 		/// </summary>
-		public static IEnumerable<StateSlotMetadata> FromStruct(Type structType, FieldInfo[] fieldChain)
+		public static IEnumerable<StateSlotMetadata> FromStruct(Type structType, FieldInfo[] fieldChain, SerializationMode mode)
 		{
 			var fields = structType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -199,8 +193,12 @@ namespace SafetySharp.Runtime.Serialization
 
 				if (field.FieldType.IsStructType())
 				{
-					foreach (var metadataSlot in FromStruct(field.FieldType, chain))
+					foreach (var metadataSlot in FromStruct(field.FieldType, chain, mode))
 						yield return metadataSlot;
+				}
+				else if (field.IsHidden(mode, discoveringObjects: true) || field.FieldType.IsHidden(mode, discoveringObjects: true))
+				{
+					// Don't try to serialize hidden fields
 				}
 				else
 				{

@@ -116,10 +116,12 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 			return 0*8;
 		}
 
+		/*
 		internal static bool IsReward(StateSlotMetadata stateSlotMetadata)
 		{
 			return typeof(Reward) == stateSlotMetadata.DataType;
 		}
+		*/
 
 		/*
 		/// <summary>
@@ -164,6 +166,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="field">The field that should be serialized.</param>
 		internal static void ResetFields(ILGenerator il, FieldInfo field)
 		{
+			Debugger.Break();
 			//here we need to reset both Reward Fields
 			// o.field.ValuePositive = 0
 			// o.field.ValueNegative = 0
