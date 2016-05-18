@@ -42,6 +42,14 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         private readonly List<ResourceRequest> resourceRequests = new List<ResourceRequest>(Model.MaximumResourceCount);
 
+        private static int instanceCounter = 0;
+        protected readonly string name;
+
+        public Station()
+        {
+            name = $"Station#{++instanceCounter}";
+        }
+
         public override void Update()
         {
             CheckCapabilityConsistency();

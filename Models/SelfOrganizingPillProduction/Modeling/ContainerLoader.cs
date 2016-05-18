@@ -9,6 +9,13 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     /// </summary>
     public class ContainerLoader : Station
     {
+        public readonly Fault NoContainersLeft = new PermanentFault();
+
+        public ContainerLoader() : base()
+        {
+            NoContainersLeft.Name = $"{name}.NoContainersLeft";
+        }
+
         private static readonly Capability[] produceCapabilities = new[] { new ProduceCapability() };
         private static readonly Capability[] emptyCapabilities = new Capability[0];
 
@@ -92,6 +99,12 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             public Condition InitialCondition { get; }
 
             public bool IsConfigured { get; set; }
+        }
+
+        [FaultEffect(Fault = nameof(NoContainersLeft))]
+        public class NoContainersLeftEffect : ContainerLoader
+        {
+            public override Capability[] AvailableCapabilities => emptyCapabilities;
         }
     }
 }

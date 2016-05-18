@@ -1,10 +1,19 @@
-﻿namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
+﻿using SafetySharp.Modeling;
+
+namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
     /// <summary>
     /// A production station that removes containers from the conveyor belt, closes, labels and stores them on pallets.
     /// </summary>
     public class PalletisationStation : Station
     {
+        public readonly Fault PalletisationDefect = new PermanentFault();
+
+        public PalletisationStation()
+        {
+            PalletisationDefect.Name = $"{name}.PalletisationDefect";
+        }
+
         public override Capability[] AvailableCapabilities { get; } = new[] { new ConsumeCapability() };
 
         protected override void ExecuteRole(Role role)
@@ -16,5 +25,12 @@
             }
             Container = null;
         }
+
+        [FaultEffect(Fault = nameof(PalletisationDefect))]
+        public class PalletisationDefectEffect : PalletisationStation
+        {
+            public override Capability[] AvailableCapabilities => new Capability[0];
+        }
+
     }
 }
