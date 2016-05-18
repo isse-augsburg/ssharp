@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
@@ -7,6 +8,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     {
         [Hidden(HideElements = true)]
         protected readonly Station[] stations;
+
+        protected Station[] AvailableStations => stations.Where(s => s.IsAlive).ToArray();
 
         public bool Unsatisfiable { get; protected set; }
 

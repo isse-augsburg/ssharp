@@ -63,5 +63,13 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         {
             public override Capability[] AvailableCapabilities => emptyCapabilities;
         }
+
+        [FaultEffect(Fault = nameof(CompleteStationFailure))]
+        public class CompleteStationFailureEffect : ContainerLoader
+        {
+            public override bool IsAlive => false;
+
+            public override void Update() { }
+        }
     }
 }

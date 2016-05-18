@@ -33,7 +33,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         private void RemoveObsoleteConfiguration(Recipe recipe)
         {
-            foreach (var station in stations)
+            foreach (var station in AvailableStations)
             {
                 var obsoleteRoles = (from role in station.AllocatedRoles where role.Recipe == recipe select role)
                     .ToArray();
@@ -52,15 +52,15 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             StringBuilder capabilities = new StringBuilder();
             StringBuilder connections = new StringBuilder();
 
-            for (int i = 0; i < stations.Length; ++i)
+            foreach (var station in AvailableStations)
             {
-                capabilities.Append(String.Join(",", ExtractCapabilityAmounts(stations[i].AvailableCapabilities)));
+                capabilities.Append(String.Join(",", ExtractCapabilityAmounts(station.AvailableCapabilities)));
                 capabilities.Append(",\n|");
 
                 connections.Append("|");
-                for (int j = 0; j < stations.Length; ++j)
+                foreach (var other in AvailableStations)
                 {
-                    connections.Append(stations[i].Outputs.Contains(stations[j]).ToString());
+                    connections.Append(station.Outputs.Contains(other).ToString());
                     connections.Append(",");
                 }
             }
@@ -69,7 +69,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 $@"task = [{ string.Join(",", recipe_data.Item1) }];
 task_amount = [{ string.Join(",", recipe_data.Item2) }];
 
-noAgents = { stations.Length };
+noAgents = { AvailableStations.Length };
 capabilities = [|{ capabilities }];
 isConnected = [{ connections.ToString().ToLower() }|];
 ";
@@ -143,7 +143,7 @@ isConnected = [{ connections.ToString().ToLower() }|];
 
             for (int i = 0; i < agents.Length; i++)
             {
-                var agent = stations[agents[i] - 1];
+                var agent = AvailableStations[agents[i] - 1];
 
                 Role role = lastRole;
                 if (agent != lastAgent)

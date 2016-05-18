@@ -10,6 +10,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     /// </summary>
     public abstract class Station : Component
     {
+        public readonly Fault CompleteStationFailure = new PermanentFault();
+
         /// <summary>
         /// The resource currently located at the station.
         /// </summary>
@@ -36,6 +38,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// The capabilities the station has.
         /// </summary>
         public abstract Capability[] AvailableCapabilities { get; }
+
+        public virtual bool IsAlive => true;
 
         [Hidden]
         internal ObserverController ObserverController { get; set; }
@@ -64,7 +68,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         public override void Update()
         {
-            CheckCapabilityConsistency();
+            CheckConfigurationConsistency();
 
             // see Fig. 7, How To Design and Implement Self-Organising Resource-Flow Systems (simplified version)
             if (Container == null && resourceRequests.Count > 0)
@@ -114,13 +118,15 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         /// <summary>
         /// Checks if all required capabilities are available and
-        /// reconfigures recipes for which this is not the case.
+        /// the output station is alive, and reconfigures recipes
+        /// for which this is not the case.
         /// </summary>
-        protected void CheckCapabilityConsistency()
+        protected void CheckConfigurationConsistency()
         {
             var inconsistentRecipes = (from role in AllocatedRoles
                                        where !role.CapabilitiesToApply
                                            .All(capability => capability.IsSatisfied(AvailableCapabilities))
+                                           || !(role.PostCondition.Port?.IsAlive ?? true)
                                        select role.Recipe)
                                    .Distinct()
                                    // in an array, as AllocatedRoles may be modified by reconfiguration below
@@ -175,5 +181,15 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             public Station Source { get; }
             public Condition Condition { get; }
         }
+
+        // S# seems not to support abstract fault effects,
+        // thus this is duplicated in each concrete subclass.
+        /*[FaultEffect(Fault = nameof(CompleteStationFailureEffect))]
+        public abstract class CompleteStationFailureEffect : Station
+        {
+            public override bool IsAlive => false;
+
+            public override void Update() { }
+        }*/
     }
 }
