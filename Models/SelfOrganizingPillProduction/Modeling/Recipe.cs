@@ -62,5 +62,10 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// The total number of containers to be produced for this recipe.
         /// </summary>
         public uint Amount { get; }
+
+        /// <summary>
+        /// The number of containers still to be produced.
+        /// </summary>
+        public uint RemainingAmount => Amount - producedAmount;
     }
 }

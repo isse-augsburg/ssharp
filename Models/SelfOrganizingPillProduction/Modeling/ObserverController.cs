@@ -1,4 +1,5 @@
-﻿using SafetySharp.Modeling;
+﻿using System.Collections.Generic;
+using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
@@ -14,6 +15,19 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         public ObserverController(params Station[] stations)
         {
             this.stations = stations;
+        }
+
+        private readonly Queue<Recipe> scheduledRecipes = new Queue<Recipe>();
+
+        public void ScheduleConfiguration(Recipe recipe)
+        {
+            scheduledRecipes.Enqueue(recipe);
+        }
+
+        public override void Update()
+        {
+            if (scheduledRecipes.Count > 0)
+                Configure(scheduledRecipes.Dequeue());
         }
 
         public abstract void Configure(Recipe recipe);

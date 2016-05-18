@@ -25,6 +25,11 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         [Root(RootKind.Controller)]
         public ObserverController ObserverController { get; }
 
+        public void ScheduleProduction(Recipe recipe)
+        {
+            ObserverController.ScheduleConfiguration(recipe);
+        }
+
         public static Model NoRedundancyCircularModel()
         {
             // create 3 stations
@@ -49,14 +54,16 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 next.Inputs.Add(stations[i]);
             }
 
-            var recipe = new Recipe(new[] {
+            var model = new Model(stations, new MiniZincObserverController(stations));
+
+            var recipe = new Recipe(ingredients: new[] {
                 new Ingredient(IngredientType.BlueParticulate, 12),
                 new Ingredient(IngredientType.RedParticulate, 4),
                 new Ingredient(IngredientType.YellowParticulate, 5)
-            }, 3);
-            producer.AcceptProductionRequest(recipe);
+            }, amount: 3);
+            model.ScheduleProduction(recipe);
 
-            return new Model(stations, new MiniZincObserverController(stations));
+            return model;
         }
     }
 }

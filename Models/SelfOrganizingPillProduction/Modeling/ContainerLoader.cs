@@ -1,6 +1,6 @@
 ﻿using SafetySharp.Modeling;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
@@ -19,9 +19,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         private readonly ObjectPool<PillContainer> containerStorage = new ObjectPool<PillContainer>(Model.ContainerStorageSize);
 
-        // Elements are only added during setup. During runtime, elements are only removed.
-        private readonly List<ProductionRequest> productionRequests = new List<ProductionRequest>();
-
         protected override void ExecuteRole(Role role)
         {
             // This is only called if the current Container comes from another station.
@@ -29,14 +26,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             // a simple forwarding to the next station.
             if (role.CapabilitiesToApply.Count > 0)
                 throw new InvalidOperationException("Unsupported capability configuration in ContainerLoader");
-        }
-
-        /// <summary>
-        /// Starts production of containers according to the given <paramref name="recipe"/>.
-        /// </summary>
-        public void AcceptProductionRequest(Recipe recipe)
-        {
-            productionRequests.Add(new ProductionRequest(recipe));
         }
 
         public override void Update()
@@ -47,18 +36,10 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
             // No accepted resource requests and no previous resource,
             // so produce resources instead.
-            if (Container == null && productionRequests.Count > 0)
+            var role = ChooseProductionRole();
+            if (Container == null && role != null)
             {
-                var request = productionRequests[0];
-                var recipe = request.Recipe;
-
-                if (!request.IsConfigured)
-                {
-                    ObserverController.Configure(recipe);
-                    request.IsConfigured = true;
-                }
-
-                var role = ChooseRole(source: null, condition: request.InitialCondition);
+                var recipe = role.Recipe;
 
                 // role.capabilitiesToApply will always be { ProduceCapability }
                 Container = containerStorage.Allocate();
@@ -67,33 +48,14 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
                 // assume role.PostCondition.Port != null
                 role.PostCondition.Port.ResourceReady(source: this, condition: role.PostCondition);
-
-                request.RemainingAmount--; // update count
-                if (request.RemainingAmount <= 0) // request was completed
-                {
-                    productionRequests.Remove(request);
-                }
             }
         }
 
-        private class ProductionRequest
+        private Role ChooseProductionRole()
         {
-            public ProductionRequest(Recipe recipe)
-            {
-                Recipe = recipe;
-                RemainingAmount = recipe.Amount;
-
-                // necessary here because it cannot be created later during model checking
-                InitialCondition = new Condition { Recipe = recipe, Port = null };
-            }
-
-            public Recipe Recipe { get; }
-
-            public uint RemainingAmount { get; set; }
-
-            public Condition InitialCondition { get; }
-
-            public bool IsConfigured { get; set; }
+            return AllocatedRoles.FirstOrDefault(role =>
+                role.PreCondition.Port == null && role.Recipe.RemainingAmount > 0
+            );
         }
 
         [FaultEffect(Fault = nameof(NoContainersLeft))]
