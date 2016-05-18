@@ -53,10 +53,10 @@
     </Compile>
     <Compile Include="Analysis\ModelCheckingTests.cs" />
     <Compile Include="Modeling\FaultHelper.cs" />
-    <Compile Include="Modeling\IngredientStorage.cs" />
     <Compile Include="Modeling\Capability.cs" />
     <Compile Include="Modeling\Condition.cs" />
     <Compile Include="Modeling\ContainerLoader.cs" />
+    <Compile Include="Modeling\IngredientTank.cs" />
     <Compile Include="Modeling\IngredientType.cs" />
     <Compile Include="Modeling\MiniZincObserverController.cs" />
     <Compile Include="Modeling\Model.cs" />

@@ -38,7 +38,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         public IngredientType Type { get; }
 
-        public uint Amount { get; internal set; }
+        public uint Amount { get; }
 
         public override bool IsSatisfied(Capability[] availableCapabilities)
             => availableCapabilities.OfType<Ingredient>()

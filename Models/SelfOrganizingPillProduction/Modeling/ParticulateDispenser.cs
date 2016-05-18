@@ -10,9 +10,23 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     {
         public readonly Fault DispenserDefect = new PermanentFault();
 
-        public readonly IngredientStorage Storage = new IngredientStorage();
+        private readonly IngredientTank[] ingredientTanks;
 
-        public override Capability[] AvailableCapabilities => Storage.Capabilities;
+        public override Capability[] AvailableCapabilities
+            => Array.ConvertAll(ingredientTanks, tank => tank.Capability);
+
+        public ParticulateDispenser()
+        {
+            ingredientTanks = Array.ConvertAll(
+                (IngredientType[])Enum.GetValues(typeof(IngredientType)),
+                type => new IngredientTank(name, type)
+            );
+        }
+
+        public void SetStoredAmount(IngredientType ingredientType, uint amount)
+        {
+            ingredientTanks[(int)ingredientType].Amount = amount;
+        }
 
         protected override void ExecuteRole(Role role)
         {
@@ -21,11 +35,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 var ingredient = capability as Ingredient;
                 if (ingredient == null)
                     throw new InvalidOperationException($"Invalid capability in ParticulateDispenser: {capability}");
-                if (Storage[ingredient.Type] < ingredient.Amount)
-                    throw new InvalidOperationException($"Insufficient amount available of ingredient {ingredient.Type}");
 
-                Storage[ingredient.Type] -= ingredient.Amount;
-                Container.AddIngredient(ingredient);
+                ingredientTanks[(int)ingredient.Type].Dispense(Container, ingredient);
             }
         }
 

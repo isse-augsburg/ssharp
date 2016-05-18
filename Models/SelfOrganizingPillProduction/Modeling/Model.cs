@@ -42,9 +42,9 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 new PalletisationStation()
             };
 
-            dispenser.Storage[IngredientType.BlueParticulate] = 50;
-            dispenser.Storage[IngredientType.RedParticulate] = 50;
-            dispenser.Storage[IngredientType.YellowParticulate] = 50;
+            dispenser.SetStoredAmount(IngredientType.BlueParticulate, 50u);
+            dispenser.SetStoredAmount(IngredientType.RedParticulate, 50u);
+            dispenser.SetStoredAmount(IngredientType.YellowParticulate, 50u);
 
             // connect them to a circle
             for (int i = 0; i < stations.Length; ++i)
