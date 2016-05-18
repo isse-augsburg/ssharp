@@ -39,7 +39,6 @@ namespace Tests.Serialization.RuntimeModels
 
 			StateFormulas.ShouldBeEmpty();
 			RootComponents.Length.ShouldBe(1);
-			Debugger.Break();
 			StateSlotCount.ShouldBe(2); //because sizeof(double)/sizeof(int)==2
 
 			var root = RootComponents[0];

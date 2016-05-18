@@ -272,6 +272,8 @@
     <Compile Include="Execution\Simulation\bindings.cs" />
     <Compile Include="Execution\Simulation\nondeterminism.cs" />
     <Compile Include="Execution\Simulation\formulas.cs" />
+    <Compile Include="Execution\Simulation\reward positive only.cs" />
+    <Compile Include="Execution\Simulation\reward positive and negative.cs" />
     <Compile Include="Execution\Simulation\stepping.cs" />
     <Compile Include="Execution\Simulation\generics.cs" />
     <Compile Include="Execution\Simulation\equatable.cs" />

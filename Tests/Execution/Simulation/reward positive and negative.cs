@@ -20,62 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Probabilistic
+namespace Tests.Execution.Simulation
 {
-	using System;
 	using System.Diagnostics;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	internal class MultipleFormulasInOneRun : ProbabilisticAnalysisTestObject
+	internal class RewardPositiveAndNegative : TestObject
 	{
+
 		protected override void Check()
 		{
-			var c = new C();
-			Probability probabilityOfFinal2;
-			Probability probabilityOfFinal3;
+			var simulator = new Simulator(TestModel.InitializeModel(new C()));
+			var c = (C)simulator.Model.Roots[0];
 
-			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
-			{
-				var typeOfModelChecker = (Type)Arguments[0];
-				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker,probabilityChecker);
-
-				Formula final2 = c.Value == 2;
-				Formula final3 = c.Value == 3;
-
-				var checkProbabilityOfFinal2 = probabilityChecker.CalculateProbabilityToReachStates(final2);
-				var checkProbabilityOfFinal3 = probabilityChecker.CalculateProbabilityToReachStates(final3);
-				probabilityChecker.CreateProbabilityMatrix();
-				probabilityChecker.DefaultChecker = modelChecker;
-				probabilityOfFinal2 = checkProbabilityOfFinal2.Calculate();
-				probabilityOfFinal3 = checkProbabilityOfFinal3.Calculate();
-			}
+			c.R.ValuePositive().ShouldBe(0);
+			c.R.ValueNegative().ShouldBe(0);
 			
-			probabilityOfFinal2.Be(0.3, 0.0001).ShouldBe(true);
-			probabilityOfFinal3.Be(0.6, 0.0001).ShouldBe(true);
+			simulator.SimulateStep();
+			c.R.ValuePositive().ShouldBe(3);
+			c.R.ValueNegative().ShouldBe(2);
+
+			simulator.SimulateStep();
+			c.R.ValuePositive().ShouldBe(3);
+			c.R.ValueNegative().ShouldBe(2);
 		}
 
 		private class C : Component
 		{
-			private int _value;
-			public int Value
-			{
-				set { _value = value; }
-				get {  return _value; }
-			}
+			public SafetySharp.Modeling.Reward R = new Reward(true);
 
 			public override void Update()
 			{
-				if (Value == 0)
-				{
-					Value = Choose(new Option<int>(new Probability(0.1), 1),
-								   new Option<int>(new Probability(0.3), 2),
-								   new Option<int>(new Probability(0.6), 3));
-				}
+				R.Positive(3);
+				R.Negative(2);
 			}
 		}
-
 	}
 }
