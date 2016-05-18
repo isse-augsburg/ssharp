@@ -9,11 +9,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     {
         public readonly Fault PalletisationDefect = new PermanentFault();
 
-        public PalletisationStation()
-        {
-            PalletisationDefect.Name = $"{name}.PalletisationDefect";
-        }
-
         public override Capability[] AvailableCapabilities { get; } = new[] { new ConsumeCapability() };
 
         protected override void ExecuteRole(Role role)

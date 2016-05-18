@@ -11,11 +11,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     {
         public readonly Fault NoContainersLeft = new PermanentFault();
 
-        public ContainerLoader() : base()
-        {
-            NoContainersLeft.Name = $"{name}.NoContainersLeft";
-        }
-
         private static readonly Capability[] produceCapabilities = new[] { new ProduceCapability() };
         private static readonly Capability[] emptyCapabilities = new Capability[0];
 

@@ -48,6 +48,18 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         public Station()
         {
             name = $"Station#{++instanceCounter}";
+            SetFaultNames();
+        }
+
+        private void SetFaultNames()
+        {
+            var faults = (from field in GetType().GetFields()
+                          where typeof(Fault).IsAssignableFrom(field.FieldType)
+                          select field.GetValue(this)).Cast<Fault>();
+            foreach (var fault in faults)
+            {
+                fault.Name = $"{name}.{fault.Name}";
+            }
         }
 
         public override void Update()

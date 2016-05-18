@@ -10,11 +10,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     {
         public readonly Fault DispenserDefect = new PermanentFault();
 
-        public ParticulateDispenser() : base()
-        {
-            DispenserDefect.Name = $"{name}.DispenserDefect";
-        }
-
         public readonly IngredientStorage Storage = new IngredientStorage();
 
         public override Capability[] AvailableCapabilities => Storage.Capabilities;
