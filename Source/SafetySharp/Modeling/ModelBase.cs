@@ -32,14 +32,27 @@ namespace SafetySharp.Modeling
 
 	/// <summary>
 	///   A base class for S# models consisting of several root <see cref="IComponent" /> instances
-	///   that can be simulator and model checked.
+	///   that can be simulated and model checked.
 	/// </summary>
 	public abstract class ModelBase
 	{
+		[Hidden, NonDiscoverable]
 		private IComponent[] _components;
+
+		[Hidden, NonDiscoverable]
 		private Fault[] _faults;
+
+		[Hidden, NonDiscoverable]
 		private object[] _referencedObjects;
+
+		[Hidden, NonDiscoverable]
 		private IComponent[] _roots;
+
+		/// <summary>
+		///   Gets the range metadata for the model's objects.
+		/// </summary>
+		[Hidden, NonDiscoverable]
+		internal List<RangeMetadata> RangeMetadata { get; } = new List<RangeMetadata>();
 
 		/// <summary>
 		///   Gets the components contained in the model.

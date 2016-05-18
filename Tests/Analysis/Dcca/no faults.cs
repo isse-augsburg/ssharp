@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,42 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Analysis.Dcca
 {
-	using System;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	/// <summary>
-	///   When applied to a S# field, indicates the field's range of valid values and its <see cref="OverflowBehavior" />.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-	public sealed class RangeAttribute : Attribute
+	internal class NoFaults : AnalysisTestObject
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="from">The inclusive lower bound.</param>
-		/// <param name="to">The inclusive upper bound.</param>
-		/// <param name="overflowBehavior">The overflow behavior.</param>
-		public RangeAttribute(object from, object to, OverflowBehavior overflowBehavior)
+		protected override void Check()
 		{
-			LowerBound = from;
-			UpperBound = to;
-			OverflowBehavior = overflowBehavior;
+			var c = new C();
+			var result = Dcca(c.X > 4, c);
+
+			result.CheckedSets.Count.ShouldBe(1);
+			result.MinimalCriticalSets.ShouldBeEmpty();
+			result.CounterExamples.ShouldBeEmpty();
+			result.Exceptions.ShouldBeEmpty();
+			result.IsComplete.ShouldBe(true);
+			result.SuppressedFaults.ShouldBeEmpty();
+			result.ForcedFaults.ShouldBeEmpty();
+
+			ShouldContain(result.CheckedSets);
+			result = DccaWithMaxCardinality(c.X > 4, 0, c);
+
+			result.CheckedSets.Count.ShouldBe(1);
+			result.MinimalCriticalSets.ShouldBeEmpty();
+			result.CounterExamples.ShouldBeEmpty();
+			result.Exceptions.ShouldBeEmpty();
+			result.IsComplete.ShouldBe(true);
 		}
 
-		/// <summary>
-		///   Gets the inclusive lower bound.
-		/// </summary>
-		public object LowerBound { get; }
+		private class C : Component
+		{
+			public int X;
 
-		/// <summary>
-		///   Gets the inclusive upper bound.
-		/// </summary>
-		public object UpperBound { get; }
-
-		/// <summary>
-		///   Gets the overflow behavior.
-		/// </summary>
-		public OverflowBehavior OverflowBehavior { get; }
+			public override void Update()
+			{
+			}
+		}
 	}
 }

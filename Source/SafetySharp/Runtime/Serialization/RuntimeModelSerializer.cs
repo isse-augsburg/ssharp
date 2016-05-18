@@ -86,7 +86,7 @@ namespace SafetySharp.Runtime.Serialization
 			// Prepare the serialization of the model's initial state
 			lock (_syncObject)
 			{
-				_stateVector = SerializationRegistry.Default.GetStateVectorLayout(objectTable, SerializationMode.Full);
+				_stateVector = SerializationRegistry.Default.GetStateVectorLayout(model, objectTable, SerializationMode.Full);
 				_deserializer = null;
 			}
 
@@ -202,7 +202,7 @@ namespace SafetySharp.Runtime.Serialization
 			lock (_syncObject)
 			{
 				if (_stateVector == null)
-					_stateVector = SerializationRegistry.Default.GetStateVectorLayout(objectTable, SerializationMode.Full);
+					_stateVector = SerializationRegistry.Default.GetStateVectorLayout(model, objectTable, SerializationMode.Full);
 
 				if (_deserializer == null)
 					_deserializer = _stateVector.CreateDeserializer();

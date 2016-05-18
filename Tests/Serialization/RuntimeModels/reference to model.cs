@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,42 +20,59 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Serialization.RuntimeModels
 {
-	using System;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
+	using Utilities;
 
-	/// <summary>
-	///   When applied to a S# field, indicates the field's range of valid values and its <see cref="OverflowBehavior" />.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-	public sealed class RangeAttribute : Attribute
+	internal class ReferenceToModel : TestModel
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="from">The inclusive lower bound.</param>
-		/// <param name="to">The inclusive upper bound.</param>
-		/// <param name="overflowBehavior">The overflow behavior.</param>
-		public RangeAttribute(object from, object to, OverflowBehavior overflowBehavior)
+		private static bool _hasConstructorRun;
+
+		protected override void Check()
 		{
-			LowerBound = from;
-			UpperBound = to;
-			OverflowBehavior = overflowBehavior;
+			var m = new M();
+
+			_hasConstructorRun = false;
+			Create(m);
+
+			StateFormulas.ShouldBeEmpty();
+			RootComponents.Length.ShouldBe(1);
+
+			var root = RootComponents[0];
+			root.ShouldBeOfType<C>();
+			((C)root).F.ShouldBe((sbyte)99);
+			((C)root).Model.Components.ShouldBe(new[] { root });
+			((C)root).Model.Roots.ShouldBe(new[] { root });
+			((C)root).Model.Faults.ShouldBeEmpty();
+			((C)root).Model.ReferencedObjects.ShouldBe(new object[] { root, ((C)root).Model });
+			root.GetSubcomponents().ShouldBeEmpty();
+
+			_hasConstructorRun.ShouldBe(false);
 		}
 
-		/// <summary>
-		///   Gets the inclusive lower bound.
-		/// </summary>
-		public object LowerBound { get; }
+		private class C : Component
+		{
+			public sbyte F = 99;
+			public ModelBase Model;
 
-		/// <summary>
-		///   Gets the inclusive upper bound.
-		/// </summary>
-		public object UpperBound { get; }
+			public C()
+			{
+				_hasConstructorRun = true;
+			}
+		}
 
-		/// <summary>
-		///   Gets the overflow behavior.
-		/// </summary>
-		public OverflowBehavior OverflowBehavior { get; }
+		class M : ModelBase
+		{
+			[Root(RootKind.Plant)]
+			public C C = new C();
+
+			public M()
+			{
+				C.Model = this;
+			}
+		}
 	}
 }

@@ -59,10 +59,14 @@
     <Compile Include="Modeling\RootAttribute.cs" />
     <Compile Include="Analysis\SafetyAnalysis.cs" />
     <Compile Include="Runtime\FaultSet.cs" />
+    <Compile Include="Runtime\RangeMetadata`1.cs" />
+    <Compile Include="Runtime\RangeMetadata.cs" />
     <Compile Include="Runtime\Serialization\DelegateMetadata.cs" />
     <Compile Include="Runtime\Serialization\RangeRestrictionsGenerator.cs" />
     <Compile Include="Runtime\Serialization\Serializers\DelegateSerializer.cs" />
+    <Compile Include="Runtime\Serialization\Serializers\DictionarySerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\MethodInfoSerializer.cs" />
+    <Compile Include="Runtime\Serialization\Serializers\BoxedValueSerializer.cs" />
     <Compile Include="Runtime\Serialization\StateVectorMismatchException.cs" />
     <Compile Include="CompilerServices\FaultHelper.cs" />
     <Compile Include="CompilerServices\PortBinding.cs" />

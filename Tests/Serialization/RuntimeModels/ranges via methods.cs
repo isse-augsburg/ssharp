@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,42 +20,56 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Serialization.RuntimeModels
 {
-	using System;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
+	using Utilities;
 
-	/// <summary>
-	///   When applied to a S# field, indicates the field's range of valid values and its <see cref="OverflowBehavior" />.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-	public sealed class RangeAttribute : Attribute
+	internal class RangesViaMethods : TestModel
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="from">The inclusive lower bound.</param>
-		/// <param name="to">The inclusive upper bound.</param>
-		/// <param name="overflowBehavior">The overflow behavior.</param>
-		public RangeAttribute(object from, object to, OverflowBehavior overflowBehavior)
+		private static bool _hasConstructorRun;
+
+		protected override void Check()
 		{
-			LowerBound = from;
-			UpperBound = to;
-			OverflowBehavior = overflowBehavior;
+			var c = new C { F1 = 99, F2 = 12, F3 = -1, F4 = 3 };
+			var m = InitializeModel(c);
+
+			_hasConstructorRun = false;
+			Create(m);
+
+			StateVectorSize.ShouldBe(4);
+			StateFormulas.ShouldBeEmpty();
+			RootComponents.Length.ShouldBe(1);
+
+			var root = RootComponents[0];
+			root.ShouldBeOfType<C>();
+			((C)root).F1.ShouldBe(5);
+			((C)root).F2.ShouldBe(5);
+			((C)root).F3.ShouldBe(0);
+			((C)root).F4.ShouldBe(3);
+			root.GetSubcomponents().ShouldBeEmpty();
+
+			_hasConstructorRun.ShouldBe(false);
 		}
 
-		/// <summary>
-		///   Gets the inclusive lower bound.
-		/// </summary>
-		public object LowerBound { get; }
+		private class C : Component
+		{
+			public int F1;
+			public int F2;
+			public int F3;
+			public int F4;
 
-		/// <summary>
-		///   Gets the inclusive upper bound.
-		/// </summary>
-		public object UpperBound { get; }
+			public C()
+			{
+				_hasConstructorRun = true;
 
-		/// <summary>
-		///   Gets the overflow behavior.
-		/// </summary>
-		public OverflowBehavior OverflowBehavior { get; }
+				Range.Restrict(F1, 0, 5, OverflowBehavior.Clamp);
+				Range.Restrict(F2, 0, 5, OverflowBehavior.Clamp);
+				Range.Restrict(F3, 0, 5, OverflowBehavior.Clamp);
+				Range.Restrict(F4, 0, 5, OverflowBehavior.Clamp);
+			}
+		}
 	}
 }

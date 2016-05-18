@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,42 +20,57 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Analysis.Invariants.CounterExamples
 {
-	using System;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	/// <summary>
-	///   When applied to a S# field, indicates the field's range of valid values and its <see cref="OverflowBehavior" />.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-	public sealed class RangeAttribute : Attribute
+	internal class HiddenInitialState : AnalysisTestObject
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="from">The inclusive lower bound.</param>
-		/// <param name="to">The inclusive upper bound.</param>
-		/// <param name="overflowBehavior">The overflow behavior.</param>
-		public RangeAttribute(object from, object to, OverflowBehavior overflowBehavior)
+		protected override void Check()
 		{
-			LowerBound = from;
-			UpperBound = to;
-			OverflowBehavior = overflowBehavior;
+			var c = new C ();
+			CheckInvariant(c.X != 20, c);
+			CounterExample.StepCount.ShouldBe(4);
+
+			SimulateCounterExample(CounterExample, simulator =>
+			{
+				c = (C)simulator.Model.Roots[0];
+
+				c.X.ShouldBe(0);
+
+				simulator.SimulateStep();
+				c.X.ShouldBe(18);
+
+				simulator.SimulateStep();
+				c.X.ShouldBe(19);
+
+				simulator.SimulateStep();
+				c.X.ShouldBe(20);
+
+				simulator.Rewind(steps: 100);
+				c.X.ShouldBe(0);
+
+				simulator.FastForward(steps: 2);
+				c.X.ShouldBe(19);
+			});
 		}
 
-		/// <summary>
-		///   Gets the inclusive lower bound.
-		/// </summary>
-		public object LowerBound { get; }
+		private class C : Component
+		{
+			public int X;
 
-		/// <summary>
-		///   Gets the inclusive upper bound.
-		/// </summary>
-		public object UpperBound { get; }
+			[Hidden]
+			private int _y = 99;
 
-		/// <summary>
-		///   Gets the overflow behavior.
-		/// </summary>
-		public OverflowBehavior OverflowBehavior { get; }
+			public override void Update()
+			{
+				if (_y == 99)
+					X = 17;
+
+				++X;
+				++_y;
+			}
+		}
 	}
 }
