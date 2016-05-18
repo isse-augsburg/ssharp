@@ -22,16 +22,11 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 {
-	using System.Collections.Generic;
 	using System.Linq;
-	using Controllers;
 	using SafetySharp.Modeling;
 
 	internal class Cart : Component
 	{
-		[Hidden(HideElements = true)]
-		private readonly Route[] _routes;
-
 		[Hidden]
 		private string _name;
 
@@ -43,13 +38,16 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 
 		public Cart(Robot startPosition, params Route[] routes)
 		{
-			_routes = routes;
+			Routes = routes;
 			_position = startPosition;
 		}
 
 		public Cart()
 		{
 		}
+
+		[Hidden(HideElements = true)]
+		public Route[] Routes { get; }
 
 		public bool HasWorkpiece => LoadedWorkpiece != null;
 
@@ -58,7 +56,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 			if (_position == robot)
 				return true;
 
-			var route = _routes.SingleOrDefault(r => r.CanNavigate(_position, robot));
+			var route = Routes.SingleOrDefault(r => r.CanNavigate(_position, robot));
 
 			if (route == null)
 				return false;
@@ -72,7 +70,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 			_name = $"C{cartId}";
 			Broken.Name = $"C{cartId}.Broken";
 
-			foreach (var route in _routes)
+			foreach (var route in Routes)
 				route.Blocked.Name = $"C{cartId}.{route.From.Name}->{route.To.Name}.Blocked";
 		}
 
@@ -81,19 +79,19 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 			return $"{_name}@{_position.Name}: Workpiece: {LoadedWorkpiece?.Name}";
 		}
 
-		[FaultEffect(Fault = nameof(Broken))]
-		internal class BrokenEffect : Cart
-		{
-			public override bool MoveTo(Robot robot) => false;
-			public override bool CanMove(Robot robot) => false;
-		}
-
 		public virtual bool CanMove(Robot robot)
 		{
 			if (_position == robot)
 				return true;
 
-			return _routes.Any(r => r.CanNavigate(_position, robot));
+			return Routes.Any(r => r.CanNavigate(_position, robot));
+		}
+
+		[FaultEffect(Fault = nameof(Broken))]
+		internal class BrokenEffect : Cart
+		{
+			public override bool MoveTo(Robot robot) => false;
+			public override bool CanMove(Robot robot) => false;
 		}
 	}
 }

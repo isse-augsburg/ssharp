@@ -35,6 +35,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 		public const int MaxRoleCount = 20;
 		public const int MaxAgentRequests = 2;
 		public const int MaxProductionSteps = 6;
+		public const int MaxAllocatedRoles = 5;
 
 		public Model()
 		{
@@ -91,7 +92,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 			{
 				var workpiece = new Workpiece(capabilities.OfType<ProcessCapability>().Select(c => c.ProductionAction).ToArray())
 				{
-					Name = $"W{Workpieces.Count + 1}"
+					Name = $"W{Workpieces.Count}"
 				};
 
 				Workpieces.Add(workpiece);
@@ -107,8 +108,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 			Robots.Add(robot);
 			RobotAgents.Add(agent);
 
-			robot.SetNames(Robots.Count);
-			agent.Name = $"R{Robots.Count}";
+			robot.SetNames(Robots.Count - 1);
+			agent.Name = $"R{Robots.Count - 1}";
 		}
 
 		private void CreateCart(Robot startPosition, params Route[] routes)
@@ -119,8 +120,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 			Carts.Add(cart);
 			CartAgents.Add(agent);
 
-			cart.SetNames(Carts.Count);
-			agent.Name = $"C{Carts.Count}";
+			cart.SetNames(Carts.Count - 1);
+			agent.Name = $"C{Carts.Count - 1}";
 
 			foreach (var route in routes)
 			{

@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 {
 	using System;
 	using System.Diagnostics;
+	using System.Linq;
 	using Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
@@ -39,7 +40,6 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 
 			var simulator = new Simulator(model);
 			model = (Model)simulator.Model;
-			model.Robots[2].Tools[0].Broken.ForceActivation();
 
 			for (var i = 0; i < 100; ++i)
 			{
