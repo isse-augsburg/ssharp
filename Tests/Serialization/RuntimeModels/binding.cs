@@ -22,7 +22,6 @@
 
 namespace Tests.Serialization.RuntimeModels
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
@@ -32,7 +31,7 @@ namespace Tests.Serialization.RuntimeModels
 		protected override void Check()
 		{
 			var d = new D { G = 3 };
-			var m = TestModel.InitializeModel(d);
+			var m = InitializeModel(d);
 			Create(m);
 
 			StateFormulas.ShouldBeEmpty();

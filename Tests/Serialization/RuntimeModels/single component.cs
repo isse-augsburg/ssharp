@@ -34,7 +34,7 @@ namespace Tests.Serialization.RuntimeModels
 		protected override void Check()
 		{
 			var c = new C { F = 99 };
-			var m = TestModel.InitializeModel(c);
+			var m = InitializeModel(c);
 
 			_hasConstructorRun = false;
 			Create(m);

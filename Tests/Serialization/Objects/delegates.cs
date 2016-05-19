@@ -33,6 +33,7 @@ namespace Tests.Serialization.Objects
 		protected override void Check()
 		{
 			var c = new C();
+			var a = new[] { 1, 2, 3 };
 
 			GenerateCode(SerializationMode.Full, c);
 
@@ -45,7 +46,8 @@ namespace Tests.Serialization.Objects
 			c.Z = null;
 			c.W = null;
 			c.V = null;
-			c.Q = null;
+			c.Q1 = null;
+			c.Q2 = null;
 			c.Multi = null;
 
 			Deserialize();
@@ -53,7 +55,9 @@ namespace Tests.Serialization.Objects
 			c.O(17);
 			c.P().ShouldBe(50);
 			c.N.ShouldBe(null);
-			c.Q(3333).ShouldBe(3333);
+			c.Q1(a).ShouldBe(true);
+			c.Q2(a, x => x > 1).ShouldBe(true);
+			c.Q2(a, x => x > 10).ShouldBe(false);
 
 			var b = false;
 			short s;
@@ -83,8 +87,8 @@ namespace Tests.Serialization.Objects
 			public Func<int, int> Z;
 			public Func<int, int> W;
 			public Func<int, int> V;
-			public Func<int, int> Q;
-			public Func<IEnumerable<int>, Func<int, bool>> Q2;
+			public Func<IEnumerable<int>, bool> Q1;
+			public Func<IEnumerable<int>, Func<int, bool>, bool> Q2;
 			public Action Multi;
 
 			public C()
@@ -99,17 +103,8 @@ namespace Tests.Serialization.Objects
 				Multi = () => ++D.X;
 				Multi += () => ++D.X;
 				V = Q<int>.R;
-				Q = GenericMethod;
-			}
-
-			private T GenericMethod<T>(T i)
-			{
-				return i;
-			}
-
-			private T GenericMethod<T>(T i, T i2)
-			{
-				return i;
+				Q1 = Enumerable.Any;
+				Q2 = Enumerable.Any;
 			}
 
 			private int M(int a, ref bool b, out short c)

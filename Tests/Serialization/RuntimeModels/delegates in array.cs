@@ -22,44 +22,52 @@
 
 namespace Tests.Serialization.RuntimeModels
 {
+	using System;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	internal class GenericComponents : TestModel
+	internal class DelegatesInArray : TestModel
 	{
 		private static bool _hasConstructorRun;
 
 		protected override void Check()
 		{
-			var c1 = new C<int> { F = 99 };
-			var c2 = new C<bool> { F = true };
-			var m = InitializeModel(c1, c2);
+			var c = new C();
+			var m = InitializeModel(c);
 
 			_hasConstructorRun = false;
 			Create(m);
 
 			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(2);
+			RootComponents.Length.ShouldBe(1);
 
-			var root1 = RootComponents[0];
-			root1.ShouldBeOfType<C<int>>();
-			((C<int>)root1).F.ShouldBe(99);
+			var root = RootComponents[0];
+			root.ShouldBeOfType<C>();
+			c = (C)root;
 
-			var root2 = RootComponents[1];
-			root2.ShouldBeOfType<C<bool>>();
-			((C<bool>)root2).F.ShouldBe(true);
+			c.Funcs.Length.ShouldBe(2);
+			c.Funcs[0]().ShouldBe(true);
+			c.Funcs[1]().ShouldBe(false);
 
 			_hasConstructorRun.ShouldBe(false);
 		}
 
-		private class C<T> : Component
+		private class C : Component
 		{
-			public T F;
+			public readonly Func<bool>[] Funcs = new Func<bool>[2];
 
 			public C()
 			{
 				_hasConstructorRun = true;
+
+				Funcs[0] = M;
+				Funcs[1] = () => false;
+			}
+
+			private bool M()
+			{
+				return true;
 			}
 		}
 	}
