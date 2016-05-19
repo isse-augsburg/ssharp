@@ -22,9 +22,11 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 {
-	using System.Linq;
+    using System.Collections.Generic;
+    using System.Linq;
 	using Modeling;
-	using NUnit.Framework;
+    using Modeling.Controllers;
+    using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 
@@ -77,5 +79,33 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 
 			Assert.IsTrue(result.FormulaHolds);
 		}
+
+
+	    private bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<CartAgent> cartAgents, IEnumerable<Task> tasks )
+	    {
+	        var isReconfPossible = true;
+            foreach (var task in tasks)
+            {
+                isReconfPossible &= task.Capabilities.All(capability => robotsAgents.Any(agent => agent.AvailableCapabilites.Contains(capability)));
+                for (var i = 0; i < task.Capabilities.Length-1; i++)
+                {
+                    var capability = task.Capabilities[i];
+                    var capableRobots = robotsAgents
+                        .Where(agent => agent.AvailableCapabilites.Contains(capability));
+                    var nextCapableRobots = robotsAgents
+                        .Where(agent => agent.AvailableCapabilites.Contains(task.Capabilities[i+1]));
+                    isReconfPossible &= capableRobots.Any(agent => nextCapableRobots.Any(robotAgent => IsConnected(agent, robotAgent, cartAgents)));
+                }
+            }
+
+	        return isReconfPossible;
+	    }
+
+	    private bool IsConnected(RobotAgent source, RobotAgent target, IEnumerable<CartAgent> cartAgents)
+	    {
+	        var connectingCarts = cartAgents
+                .Where(agent => agent.Outputs.Contains(source) && agent.Inputs.Contains(target));
+            return connectingCarts.Any();
+	    }
 	}
 }
