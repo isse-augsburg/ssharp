@@ -56,7 +56,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 			{
 				if (field.FieldType.IsStructType())
 				{
-					foreach (var metadataSlot in StateSlotMetadata.FromStruct(field.FieldType))
+					foreach (var metadataSlot in StateSlotMetadata.FromStruct(field.FieldType, mode))
 					{
 						metadataSlot.Object = obj;
 						metadataSlot.ObjectIdentifier = objectIdentifier;
@@ -166,7 +166,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 														   Type inheritanceRoot = null,
 														   bool discoveringObjects = false)
 		{
-			return SerializationRegistry.GetSerializationFields(obj, mode, startType, inheritanceRoot, discoveringObjects);
+			return SerializationRegistry.GetSerializationFields(startType ?? obj.GetType(), mode, inheritanceRoot, discoveringObjects);
 		}
 	}
 }

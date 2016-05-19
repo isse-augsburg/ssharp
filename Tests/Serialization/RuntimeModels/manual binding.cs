@@ -23,7 +23,6 @@
 namespace Tests.Serialization.RuntimeModels
 {
 	using System;
-	using SafetySharp.Analysis;
 	using SafetySharp.CompilerServices;
 	using SafetySharp.Modeling;
 	using Shouldly;
@@ -37,7 +36,7 @@ namespace Tests.Serialization.RuntimeModels
 			var r = new PortReference(d, typeof(D), "M", new[] { typeof(bool), typeof(int) }, typeof(bool), false);
 			var p = new PortReference(d, typeof(D), "Q", new[] { typeof(bool), typeof(int) }, typeof(bool), true);
 			d.B = new PortBinding(r, p);
-			var m = TestModel.InitializeModel(d);
+			var m = InitializeModel(d);
 
 			Create(m);
 

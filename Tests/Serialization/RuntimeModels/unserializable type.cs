@@ -22,7 +22,6 @@
 
 namespace Tests.Serialization.RuntimeModels
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
@@ -33,7 +32,7 @@ namespace Tests.Serialization.RuntimeModels
 		{
 			var c = new C { F = 9 };
 			var d = new D { C = c };
-			var m = TestModel.InitializeModel(d);
+			var m = InitializeModel(d);
 
 			Create(m);
 

@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 	internal class Resource : Component
 	{
-	    public readonly List<Capability> State { get; };
+	    public List<Capability> State { get; }
 
 	    public Resource(Task task, Workpiece workpiece)
 		{

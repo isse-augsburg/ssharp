@@ -20,46 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Analysis.Dcca
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
-	using Utilities;
 
-	internal class GenericComponents : TestModel
+	internal class NoFaults : AnalysisTestObject
 	{
-		private static bool _hasConstructorRun;
-
 		protected override void Check()
 		{
-			var c1 = new C<int> { F = 99 };
-			var c2 = new C<bool> { F = true };
-			var m = InitializeModel(c1, c2);
+			var c = new C();
+			var result = Dcca(c.X > 4, c);
 
-			_hasConstructorRun = false;
-			Create(m);
+			result.CheckedSets.Count.ShouldBe(1);
+			result.MinimalCriticalSets.ShouldBeEmpty();
+			result.CounterExamples.ShouldBeEmpty();
+			result.Exceptions.ShouldBeEmpty();
+			result.IsComplete.ShouldBe(true);
+			result.SuppressedFaults.ShouldBeEmpty();
+			result.ForcedFaults.ShouldBeEmpty();
 
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(2);
+			ShouldContain(result.CheckedSets);
+			result = DccaWithMaxCardinality(c.X > 4, 0, c);
 
-			var root1 = RootComponents[0];
-			root1.ShouldBeOfType<C<int>>();
-			((C<int>)root1).F.ShouldBe(99);
-
-			var root2 = RootComponents[1];
-			root2.ShouldBeOfType<C<bool>>();
-			((C<bool>)root2).F.ShouldBe(true);
-
-			_hasConstructorRun.ShouldBe(false);
+			result.CheckedSets.Count.ShouldBe(1);
+			result.MinimalCriticalSets.ShouldBeEmpty();
+			result.CounterExamples.ShouldBeEmpty();
+			result.Exceptions.ShouldBeEmpty();
+			result.IsComplete.ShouldBe(true);
 		}
 
-		private class C<T> : Component
+		private class C : Component
 		{
-			public T F;
+			public int X;
 
-			public C()
+			public override void Update()
 			{
-				_hasConstructorRun = true;
 			}
 		}
 	}

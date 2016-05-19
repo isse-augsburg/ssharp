@@ -73,6 +73,9 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 
 			foreach (var parameter in method.GetParameters())
 				writer.Write(parameter.ParameterType.AssemblyQualifiedName);
+
+			foreach (var typeArgument in method.GetGenericArguments())
+				writer.Write(typeArgument.AssemblyQualifiedName);
 		}
 
 		/// <summary>
@@ -84,20 +87,22 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		{
 			var name = reader.ReadString();
 			var parameters = new Type[reader.ReadInt32()];
-			var genericArgumentsCount = reader.ReadInt32();
+			var typeArguments = new Type[reader.ReadInt32()];
 			var declaringType = Type.GetType(reader.ReadString(), throwOnError: true);
 			var returnType = Type.GetType(reader.ReadString(), throwOnError: true);
 
 			for (var i = 0; i < parameters.Length; ++i)
 				parameters[i] = Type.GetType(reader.ReadString(), throwOnError: true);
 
+			for (var i = 0; i < typeArguments.Length; ++i)
+				typeArguments[i] = Type.GetType(reader.ReadString(), throwOnError: true);
+
 			var methods = declaringType
 				.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+				.Where(m => m.Name == name && m.ReturnType == returnType && m.GetGenericArguments().Length == typeArguments.Length)
+				.Select(m => typeArguments.Length > 0 ? m.MakeGenericMethod(typeArguments) : m)
 				.Where(m =>
 				{
-					if (m.Name != name || m.ReturnType != returnType || m.GetGenericArguments().Length != genericArgumentsCount)
-						return false;
-
 					var p = m.GetParameters();
 					if (p.Length != parameters.Length)
 						return false;

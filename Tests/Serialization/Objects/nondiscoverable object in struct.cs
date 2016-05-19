@@ -20,47 +20,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Serialization.Objects
 {
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
-	using Utilities;
 
-	internal class GenericComponents : TestModel
+	internal class NondiscoverableObjectInStruct : SerializationObject
 	{
-		private static bool _hasConstructorRun;
-
 		protected override void Check()
 		{
-			var c1 = new C<int> { F = 99 };
-			var c2 = new C<bool> { F = true };
-			var m = InitializeModel(c1, c2);
+			var c = new C { D = new D { E = new E { X = 32 } } };
 
-			_hasConstructorRun = false;
-			Create(m);
+			GenerateCode(SerializationMode.Optimized, c);
 
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(2);
+			Serialize();
+			c.D.E.X = 934;
 
-			var root1 = RootComponents[0];
-			root1.ShouldBeOfType<C<int>>();
-			((C<int>)root1).F.ShouldBe(99);
-
-			var root2 = RootComponents[1];
-			root2.ShouldBeOfType<C<bool>>();
-			((C<bool>)root2).F.ShouldBe(true);
-
-			_hasConstructorRun.ShouldBe(false);
+			Deserialize();
+			c.D.E.X.ShouldBe(934);
 		}
 
-		private class C<T> : Component
+		private class C
 		{
-			public T F;
+			public D D;
+		}
 
-			public C()
-			{
-				_hasConstructorRun = true;
-			}
+		private struct D
+		{
+			[Hidden, NonDiscoverable]
+			public E E;
+		}
+
+		private class E
+		{
+			public int X;
 		}
 	}
 }

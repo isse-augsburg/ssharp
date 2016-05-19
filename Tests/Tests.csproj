@@ -129,11 +129,14 @@
     <Compile Include="..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analysis\Dcca\all faults suppressed.cs" />
     <Compile Include="Analysis\Dcca\empty set.cs" />
     <Compile Include="Analysis\Dcca\multiple singleton cut sets.cs" />
     <Compile Include="Analysis\Dcca\exception.cs" />
     <Compile Include="Analysis\Dcca\multiple forced faults.cs" />
     <Compile Include="Analysis\Dcca\multiple suppressed faults.cs" />
+    <Compile Include="Analysis\Dcca\no faults.cs" />
+    <Compile Include="Analysis\Dcca\all faults forced.cs" />
     <Compile Include="Analysis\Dcca\single forced fault.cs" />
     <Compile Include="Analysis\Dcca\forced and suppressed faults.cs" />
     <Compile Include="Analysis\Dcca\large fault count.cs" />
@@ -593,6 +596,7 @@
     <Compile Include="Serialization\Enumerations\UInt8.cs" />
     <Compile Include="Serialization\Misc\empty state.cs" />
     <Compile Include="Serialization\Misc\hidden property.cs" />
+    <Compile Include="Serialization\Misc\hidden state struct.cs" />
     <Compile Include="Serialization\Misc\hidden state optimized.cs" />
     <Compile Include="Serialization\Misc\optimized serialization.cs" />
     <Compile Include="Serialization\Misc\full serialization.cs" />
@@ -603,6 +607,7 @@
     <Compile Include="Serialization\Objects\dictionaries.cs" />
     <Compile Include="Serialization\Objects\delegate assignment.cs" />
     <Compile Include="Serialization\Objects\hidden array elements properties.cs" />
+    <Compile Include="Serialization\Objects\nondiscoverable object in struct.cs" />
     <Compile Include="Serialization\Objects\nondiscoverable delegate.cs" />
     <Compile Include="Serialization\Objects\hidden array elements fields.cs" />
     <Compile Include="Serialization\Objects\hidden list elements.cs" />
@@ -648,11 +653,13 @@
     <Compile Include="Serialization\Ranges\UInt32.cs" />
     <Compile Include="Serialization\Ranges\UInt64.cs" />
     <Compile Include="Serialization\Ranges\UInt8.cs" />
+    <Compile Include="Serialization\RuntimeModels\linq delegate.cs" />
     <Compile Include="Serialization\RuntimeModels\multiple effects with state.cs" />
     <Compile Include="Serialization\RuntimeModels\ranges via methods.cs" />
     <Compile Include="Serialization\RuntimeModels\ranges via attributes.cs" />
     <Compile Include="Serialization\RuntimeModels\objects in struct.cs" />
     <Compile Include="Serialization\RuntimeModels\reference to model.cs" />
+    <Compile Include="Serialization\RuntimeModels\delegates in array.cs" />
     <Compile Include="Serialization\RuntimeModels\unbound.cs" />
     <Compile Include="Serialization\RuntimeModels\binding.cs" />
     <Compile Include="Serialization\RuntimeModels\deterministic faults.cs" />
