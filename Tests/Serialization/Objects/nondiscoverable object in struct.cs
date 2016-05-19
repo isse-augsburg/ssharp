@@ -20,81 +20,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.Misc
+namespace Tests.Serialization.Objects
 {
-	using System;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 
-	internal class HiddenOptimized : SerializationObject
+	internal class NondiscoverableObjectInStruct : SerializationObject
 	{
-		public enum E : long
-		{
-			A,
-			B = Int64.MaxValue,
-			C = 5
-		}
-
 		protected override void Check()
 		{
-			var c = new C { F = true, G = -1247, H = E.B, I = 33, D = new D { T = 77 }, T = new F { T = 12 } };
+			var c = new C { D = new D { E = new E { X = 32 } } };
 
 			GenerateCode(SerializationMode.Optimized, c);
-			StateSlotCount.ShouldBe(1);
 
 			Serialize();
-			c.F = false;
-			c.G = 3;
-			c.H = E.C;
-			c.I = 88;
-			c.D.T = 0;
-			c.T.T = 0;
+			c.D.E.X = 934;
+
 			Deserialize();
-			c.F.ShouldBe(false);
-			c.G.ShouldBe(-1247);
-			c.H.ShouldBe(E.C);
-			c.I.ShouldBe(88);
-			c.J.ShouldBe(333);
-			c.K.ShouldBe(11);
-			c.D.T.ShouldBe(0);
-			c.T.ShouldNotBeNull();
+			c.D.E.X.ShouldBe(934);
 		}
 
-		internal class C
+		private class C
 		{
-			[NonSerializable]
-			public readonly int J = 333;
-
-			[Hidden]
-			public readonly int K = 11;
-
 			public D D;
-
-			[Hidden]
-			public bool F;
-
-			public int G;
-
-			[Hidden]
-			public E H;
-
-			[NonSerializable]
-			public int I;
-
-			public F T;
 		}
 
-		[Hidden]
-		internal class D
+		private struct D
 		{
-			public int T;
+			[Hidden, NonDiscoverable]
+			public E E;
 		}
 
-		[NonSerializable]
-		internal class F
+		private class E
 		{
-			public int T;
+			public int X;
 		}
 	}
 }
