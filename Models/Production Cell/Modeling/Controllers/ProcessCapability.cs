@@ -29,7 +29,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			ProductionAction = productionAction;
 		}
 
-		public ProductionAction ProductionAction { get; }
+        public ProductionAction ProductionAction { get; }
 
 		public override int Identifier => (int)ProductionAction + 1;
 

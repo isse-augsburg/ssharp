@@ -41,8 +41,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 			Disconnect(this, agent);
 			Disconnect(agent, this);
-			ObserverController.ScheduleReconfiguration();
-		}
+            CheckConstraints();
+        }
 
 		public override void PlaceResource(Agent agent)
 		{
@@ -52,8 +52,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 			Disconnect(this, agent);
 			Disconnect(agent, this);
-			ObserverController.ScheduleReconfiguration();
-		}
+            CheckConstraints();
+        }
 
 		public override void OnReconfigured()
 		{

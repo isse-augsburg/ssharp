@@ -22,245 +22,257 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using CompilerServices;
-	using SafetySharp.Modeling;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using CompilerServices;
+    using SafetySharp.Modeling;
 
-	internal class Agent : Component
-	{
-		private readonly List<Agent> _requests = new List<Agent>(Model.MaxAgentRequests);
-		private readonly StateMachine<State> _stateMachine = State.Idle;
-		protected Role _currentRole;
+    internal class Agent : Component
+    {
+        private readonly List<Agent> _requests = new List<Agent>(Model.MaxAgentRequests);
+        private readonly StateMachine<State> _stateMachine = State.Idle;
+        protected Role _currentRole;
 
-		public Agent(params Capability[] capabilities)
-		{
-			AvailableCapabilites.AddRange(capabilities);
-			AllocatedRoles.Capacity = Math.Max(1, capabilities.Length);
-		}
+        [Hidden(HideElements = true)]
+        public List<Func<bool>> Constraints { get; set; }
 
-		public List<Capability> AvailableCapabilites { get; } = new List<Capability>();
-		public List<Role> AllocatedRoles { get; } = new List<Role>();
+        public Agent(params Capability[] capabilities)
+        {
+            AvailableCapabilites.AddRange(capabilities);
+            AllocatedRoles.Capacity = Math.Max(1, capabilities.Length);
+        }
 
-		[Hidden(HideElements = true)]
-		public List<Agent> Outputs { get; } = new List<Agent>();
+        public List<Capability> AvailableCapabilites { get; } = new List<Capability>();
+        public List<Role> AllocatedRoles { get; } = new List<Role>();
 
-		[Hidden(HideElements = true)]
-		public List<Agent> Inputs { get; } = new List<Agent>();
+        [Hidden(HideElements = true)]
+        public List<Agent> Outputs { get; } = new List<Agent>();
 
-		[Hidden]
-		public string Name { get; set; }
+        [Hidden(HideElements = true)]
+        public List<Agent> Inputs { get; } = new List<Agent>();
 
-		[Hidden]
-		public ObserverController ObserverController { get; set; }
+        [Hidden]
+        public string Name { get; set; }
 
-		public Resource Resource { get; set; }
+        [Hidden]
+        public ObserverController ObserverController { get; set; }
 
-		public bool HasResource => Resource != null;
+        public Resource Resource { get; set; }
 
-		public static void Connect(Agent from, Agent to)
-		{
-			from.Outputs.Add(to);
-			to.Inputs.Add(from);
-		}
+        public bool HasResource => Resource != null;
 
-		public static void Disconnect(Agent from, Agent to)
-		{
-			from.Outputs.Remove(to);
-			to.Inputs.Remove(from);
-		}
+        public static void Connect(Agent from, Agent to)
+        {
+            from.Outputs.Add(to);
+            to.Inputs.Add(from);
+        }
 
-		public virtual void OnReconfigured()
-		{
-			// For now, the resource disappears magically...
-			Resource = null;
-			_currentRole = null;
-			_stateMachine.ChangeState(State.Idle); // Todo: This is a bit of a hack
-		}
+        public static void Disconnect(Agent from, Agent to)
+        {
+            from.Outputs.Remove(to);
+            to.Inputs.Remove(from);
+        }
 
-		public virtual void Produce(ProduceCapability capability)
-		{
-		}
+        public virtual void OnReconfigured()
+        {
+            // For now, the resource disappears magically...
+            Resource = null;
+            _currentRole = null;
+            _stateMachine.ChangeState(State.Idle); // Todo: This is a bit of a hack
+        }
 
-		public virtual void Process(ProcessCapability capability)
-		{
-		}
+        protected void CheckConstraints()
+        {
+            if (Constraints.Any(constraint => !constraint()))
+            {
+                ObserverController.ScheduleReconfiguration();
+                return;
+            }
+        }
 
-		public virtual void Consume(ConsumeCapability capability)
-		{
-		}
+        public virtual void Produce(ProduceCapability capability)
+        {
+        }
 
-		public virtual void TakeResource(Agent agent)
-		{
-		}
+        public virtual void Process(ProcessCapability capability)
+        {
+        }
 
-		public virtual void PlaceResource(Agent agent)
-		{
-		}
+        public virtual void Consume(ConsumeCapability capability)
+        {
+        }
 
-		public void CheckAllocatedCapabilities()
-		{
-			// We ignore faults for unused capabilities that are currently not used to improve general model checking efficiency
-			// For DCCA efficiency, it would be beneficial, however, to check for faults of all capabilities and I/O relations;
-			// this is also how the ODP seems to work
+        public virtual void TakeResource(Agent agent)
+        {
+        }
 
-			// Using ToArray() to prevent modifications of the list during iteration...
-			foreach (var capability in AvailableCapabilites.ToArray())
-			{
-				if (!CheckAllocatedCapability(capability))
-					AvailableCapabilites.Remove(capability);
-			}
+        public virtual void PlaceResource(Agent agent)
+        {
+        }
 
-			foreach (var input in Inputs.ToArray())
-			{
-				if (!CheckInput(input))
-					Disconnect(input, this);
-			}
+        public void CheckAllocatedCapabilities()
+        {
+            // We ignore faults for unused capabilities that are currently not used to improve general model checking efficiency
+            // For DCCA efficiency, it would be beneficial, however, to check for faults of all capabilities and I/O relations;
+            // this is also how the ODP seems to work
 
-			foreach (var output in Outputs.ToArray())
-			{
-				if (!CheckOutput(output))
-					Disconnect(this, output);
-			}
-		}
+            // Using ToArray() to prevent modifications of the list during iteration...
+            foreach (var capability in AvailableCapabilites.ToArray())
+            {
+                if (!CheckAllocatedCapability(capability))
+                    AvailableCapabilites.Remove(capability);
+            }
 
-		protected virtual bool CheckAllocatedCapability(Capability capability)
-		{
-			return true;
-		}
+            foreach (var input in Inputs.ToArray())
+            {
+                if (!CheckInput(input))
+                    Disconnect(input, this);
+            }
 
-		protected virtual bool CheckInput(Agent agent)
-		{
-			return true;
-		}
+            foreach (var output in Outputs.ToArray())
+            {
+                if (!CheckOutput(output))
+                    Disconnect(this, output);
+            }
+        }
 
-		protected virtual bool CheckOutput(Agent agent)
-		{
-			return true;
-		}
+        protected virtual bool CheckAllocatedCapability(Capability capability)
+        {
+            return true;
+        }
 
-		public override void Update()
-		{
-			_stateMachine
-				.Transition(
-					from: State.Idle,
-					to: State.RoleChosen,
-					guard: ChooseRole())
-				.Transition(
-					from: State.RoleChosen,
-					to: State.WaitForResource,
-					guard: _currentRole?.PreCondition.Port != null,
-					action: () => _currentRole.PreCondition.Port.TransferResource(this))
-				.Transition(
-					from: State.RoleChosen,
-					to: State.ExecuteRole,
-					guard: _currentRole != null && _currentRole.PreCondition.Port == null)
-				.Transition(
-					from: State.WaitForResource,
-					to: State.WaitForResource,
-					guard: Resource == null,
-					action: () => _currentRole.PreCondition.Port.TransferResource(this))
-				.Transition(
-					from: State.WaitForResource,
-					to: State.ExecuteRole,
-					guard: Resource != null,
-					action: () => _currentRole.PreCondition.Port.ResourcePickedUp())
-				.Transition(
-					from: State.ExecuteRole,
-					to: State.ExecuteRole,
-					guard: !_currentRole.IsCompleted,
-					action: () => _currentRole.Execute(this))
-				.Transition(
-					from: State.ExecuteRole,
-					to: State.Output,
-					guard: _currentRole.IsCompleted && _currentRole.PostCondition.Port != null && Resource != null,
-					action: () =>
-					{
-						_currentRole.PostCondition.Port.ResourceReady(this);
-						_currentRole.Reset();
-						_requests.Remove(_currentRole.PreCondition.Port);
-					})
-				.Transition(
-					from: State.ExecuteRole,
-					to: State.Idle,
-					guard: Resource == null || (_currentRole.IsCompleted && _currentRole.PostCondition.Port == null),
-					action: () => _currentRole.Reset())
-				.Transition(
-					from: State.Output,
-					to: State.Output,
-					guard: Resource != null,
-					action: () => _currentRole.PostCondition.Port.ResourceReady(this));
-		}
+        protected virtual bool CheckInput(Agent agent)
+        {
+            return true;
+        }
 
-		private void TransferResource(Agent agent)
-		{
-			_stateMachine.Transition(
-				from: State.Output,
-				to: State.ResourceGiven,
-				guard: Resource != null,
-				action: () =>
-				{
-					agent.TakeResource(this);
-					PlaceResource(agent);
+        protected virtual bool CheckOutput(Agent agent)
+        {
+            return true;
+        }
 
-					agent.Resource = Resource;
-					Resource = null;
-				});
-		}
+        public override void Update()
+        {
+            _stateMachine
+                .Transition(
+                    from: State.Idle,
+                    to: State.RoleChosen,
+                    guard: ChooseRole())
+                .Transition(
+                    from: State.RoleChosen,
+                    to: State.WaitForResource,
+                    guard: _currentRole?.PreCondition.Port != null,
+                    action: () => _currentRole.PreCondition.Port.TransferResource(this))
+                .Transition(
+                    from: State.RoleChosen,
+                    to: State.ExecuteRole,
+                    guard: _currentRole != null && _currentRole.PreCondition.Port == null)
+                .Transition(
+                    from: State.WaitForResource,
+                    to: State.WaitForResource,
+                    guard: Resource == null,
+                    action: () => _currentRole.PreCondition.Port.TransferResource(this))
+                .Transition(
+                    from: State.WaitForResource,
+                    to: State.ExecuteRole,
+                    guard: Resource != null,
+                    action: () => _currentRole.PreCondition.Port.ResourcePickedUp())
+                .Transition(
+                    from: State.ExecuteRole,
+                    to: State.ExecuteRole,
+                    guard: !_currentRole.IsCompleted,
+                    action: () => _currentRole.Execute(this))
+                .Transition(
+                    from: State.ExecuteRole,
+                    to: State.Output,
+                    guard: _currentRole.IsCompleted && _currentRole.PostCondition.Port != null && Resource != null,
+                    action: () =>
+                    {
+                        _currentRole.PostCondition.Port.ResourceReady(this);
+                        _currentRole.Reset();
+                        _requests.Remove(_currentRole.PreCondition.Port);
+                    })
+                .Transition(
+                    from: State.ExecuteRole,
+                    to: State.Idle,
+                    guard: Resource == null || (_currentRole.IsCompleted && _currentRole.PostCondition.Port == null),
+                    action: () => _currentRole.Reset())
+                .Transition(
+                    from: State.Output,
+                    to: State.Output,
+                    guard: Resource != null,
+                    action: () => _currentRole.PostCondition.Port.ResourceReady(this));
+        }
 
-		private void ResourcePickedUp()
-		{
-			_stateMachine.Transition(from: State.ResourceGiven, to: State.Idle);
-		}
+        private void TransferResource(Agent agent)
+        {
+            _stateMachine.Transition(
+                from: State.Output,
+                to: State.ResourceGiven,
+                guard: Resource != null,
+                action: () =>
+                {
+                    agent.TakeResource(this);
+                    PlaceResource(agent);
 
-		private bool ChooseRole()
-		{
-			// Check if we can produce
-			if (Resource == null)
-			{
-				_currentRole = AllocatedRoles.FirstOrDefault(role => role.PreCondition.Port == null);
-				if (_currentRole != null)
-					return true;
-			}
+                    agent.Resource = Resource;
+                    Resource = null;
+                });
+        }
 
-			// Check if we can consume
-			if (Resource != null)
-			{
-				_currentRole = AllocatedRoles.FirstOrDefault(role => role.PostCondition.Port == null);
-				if (_currentRole != null)
-					return true;
-			}
+        private void ResourcePickedUp()
+        {
+            _stateMachine.Transition(from: State.ResourceGiven, to: State.Idle);
+        }
 
-			// Check if we can process
-			if (_requests.Count == 0)
-				return false;
+        private bool ChooseRole()
+        {
+            // Check if we can produce
+            if (Resource == null)
+            {
+                _currentRole = AllocatedRoles.FirstOrDefault(role => role.PreCondition.Port == null);
+                if (_currentRole != null)
+                    return true;
+            }
 
-			var otherAgent = _requests[0];
-			_currentRole = AllocatedRoles.FirstOrDefault(role => role.PreCondition.Port == otherAgent);
+            // Check if we can consume
+            if (Resource != null)
+            {
+                _currentRole = AllocatedRoles.FirstOrDefault(role => role.PostCondition.Port == null);
+                if (_currentRole != null)
+                    return true;
+            }
 
-			return true;
-		}
+            // Check if we can process
+            if (_requests.Count == 0)
+                return false;
 
-		private void ResourceReady(Agent otherAgent)
-		{
-			if (_requests.Count < Model.MaxAgentRequests && !_requests.Contains(otherAgent))
-				_requests.Add(otherAgent);
-		}
+            var otherAgent = _requests[0];
+            _currentRole = AllocatedRoles.FirstOrDefault(role => role.PreCondition.Port == otherAgent);
 
-		public override string ToString()
-		{
-			return $"{Name}: State: {_stateMachine.State}, Resource: {Resource?.Workpiece.Name}, #Requests: {_requests.Count}";
-		}
+            return true;
+        }
 
-		private enum State
-		{
-			Idle,
-			RoleChosen,
-			WaitForResource,
-			ExecuteRole,
-			Output,
-			ResourceGiven
-		}
-	}
+        private void ResourceReady(Agent otherAgent)
+        {
+            if (_requests.Count < Model.MaxAgentRequests && !_requests.Contains(otherAgent))
+                _requests.Add(otherAgent);
+        }
+
+        public override string ToString()
+        {
+            return $"{Name}: State: {_stateMachine.State}, Resource: {Resource?.Workpiece.Name}, #Requests: {_requests.Count}";
+        }
+
+        private enum State
+        {
+            Idle,
+            RoleChosen,
+            WaitForResource,
+            ExecuteRole,
+            Output,
+            ResourceGiven
+        }
+    }
 }

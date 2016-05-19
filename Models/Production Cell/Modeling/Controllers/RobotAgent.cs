@@ -68,7 +68,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 				return;
 
 			ClearConnections();
-			ObserverController.ScheduleReconfiguration();
+            CheckConstraints();
 		}
 
 		public override void PlaceResource(Agent agent)
@@ -78,7 +78,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 				return;
 
 			ClearConnections();
-			ObserverController.ScheduleReconfiguration();
+			CheckConstraints();
 		}
 
 		private void ClearConnections()
@@ -116,8 +116,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 				else
 				{
 					AvailableCapabilites.RemoveAll(c => c != _currentCapability);
-					ObserverController.ScheduleReconfiguration();
-					return;
+                    CheckConstraints();
+                    return;
 				}
 			}
 
@@ -125,8 +125,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			if (!Robot.ApplyCapability())
 			{
 				AvailableCapabilites.Remove(capability);
-				ObserverController.ScheduleReconfiguration();
-			}
+                CheckConstraints();
+            }
 		}
 
 		public override void Consume(ConsumeCapability capability)
