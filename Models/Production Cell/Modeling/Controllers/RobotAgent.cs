@@ -98,6 +98,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 				return;
 
 			Resource = capability.Resources[0];
+			Resource.State.Add(capability);
 			capability.Resources.RemoveAt(0);
 			Robot.ProduceWorkpiece(Resource.Workpiece);
 		}
@@ -127,6 +128,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 				AvailableCapabilites.Remove(capability);
                 CheckConstraints();
             }
+			else
+				Resource.State.Add(capability);
 		}
 
 		public override void Consume(ConsumeCapability capability)
@@ -135,6 +138,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 				return;
 
 			Robot.ConsumeWorkpiece();
+			Resource.State.Add(capability);
 			Resource = null;
 		}
 	}

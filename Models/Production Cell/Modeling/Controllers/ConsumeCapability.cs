@@ -34,7 +34,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			agent.Consume(this);
 		}
 
-		public override bool IsSame(Capability capability)
+		public override bool Equals(Capability capability)
 		{
 			return capability is ConsumeCapability;
 		}

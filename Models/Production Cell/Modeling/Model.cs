@@ -54,13 +54,13 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 			CreateRobot(polish(), consume());
 
 			CreateCart(Robots[0], new Route(Robots[0], Robots[1]), new Route(Robots[0], Robots[2]), new Route(Robots[0], Robots[3]));
-			CreateCart(Robots[1], new Route(Robots[0], Robots[1]), new Route(Robots[1], Robots[2]));
+			CreateCart(Robots[1], new Route(Robots[1], Robots[2]), new Route(Robots[0], Robots[1]));
 			CreateCart(Robots[2], new Route(Robots[2], Robots[3]));
 
 			ObserverController = new MiniZincObserverController(RobotAgents.Cast<Agent>().Concat(CartAgents), Tasks);
 		}
 
-		private List<Task> Tasks { get; } = new List<Task>();
+		public List<Task> Tasks { get; } = new List<Task>();
 
 		[Root(RootKind.Plant)]
 		public List<Workpiece> Workpieces { get; } = new List<Workpiece>();
@@ -127,6 +127,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 			{
 				Agent.Connect(from: RobotAgents.Single(a => route.From == a.Robot), to: agent);
 				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.To == a.Robot));
+				//Agent.Connect(from: RobotAgents.Single(a => route.To == a.Robot), to: agent);
+				//Agent.Connect(from: agent, to: RobotAgents.Single(a => route.From == a.Robot));
 			}
 		}
 	}

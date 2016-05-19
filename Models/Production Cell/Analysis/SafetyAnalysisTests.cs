@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 	using System;
 	using System.Linq;
 	using Modeling;
+	using Modeling.Controllers;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
@@ -53,6 +54,38 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationFailed);
 
 			Console.WriteLine(result);
+		}
+
+		[Test]
+		public void InvariantViolation()
+		{
+			var model = new Model();
+
+			
+
+			var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
+			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, Hazard(model));
+
+			Console.WriteLine(result);
+		}
+
+		private bool Hazard(Model model)
+		{
+			var agents = model.CartAgents.Cast<Agent>().Concat(model.RobotAgents).ToArray();
+
+			if (model.ObserverController.ReconfigurationFailed)
+				return false;
+
+			foreach (var agent in agents)
+			{
+				foreach (var constraint in agent.Constraints)
+				{
+					if (!constraint())
+						return true;
+				}
+			}
+
+			return false;
 		}
 	}
 }

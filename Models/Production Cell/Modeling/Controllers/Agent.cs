@@ -40,16 +40,15 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
         public Agent(params Capability[] capabilities)
         {
             AvailableCapabilites.AddRange(capabilities);
-            AllocatedRoles.Capacity = Math.Max(1, capabilities.Length);
         }
 
         public List<Capability> AvailableCapabilites { get; } = new List<Capability>();
-        public List<Role> AllocatedRoles { get; } = new List<Role>();
+        public List<Role> AllocatedRoles { get; } = new List<Role>(10);
 
-        [Hidden(HideElements = true)]
+        [Hidden]
         public List<Agent> Outputs { get; } = new List<Agent>();
 
-        [Hidden(HideElements = true)]
+        [Hidden]
         public List<Agent> Inputs { get; } = new List<Agent>();
 
         [Hidden]
@@ -64,8 +63,11 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
         public static void Connect(Agent from, Agent to)
         {
-            from.Outputs.Add(to);
-            to.Inputs.Add(from);
+			if (!from.Outputs.Contains(to))
+				from.Outputs.Add(to);
+
+			if (!to.Inputs.Contains(from))
+				to.Inputs.Add(from);
         }
 
         public static void Disconnect(Agent from, Agent to)

@@ -59,7 +59,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 				var capabilities = String.Join(",", Agents.Select(a =>
 					$"{{{String.Join(",", a.AvailableCapabilites.Select(c => c.Identifier))}}}"));
 				var isConnected = String.Join("\n|", Agents.Select(from =>
-					String.Join(",", Agents.Select(to => from.Outputs.Contains(to).ToString().ToLower()))));
+					String.Join(",", Agents.Select(to => (from.Outputs.Contains(to) || from == to).ToString().ToLower()))));
 
 				writer.WriteLine($"task = [{task}];");
 				writer.WriteLine($"noAgents = {Agents.Length};");
@@ -165,7 +165,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			for (var i = offset; i < agents.Length && agents[i] == agentId; ++i)
 			{
 				if (capabilities[i] != -1)
-					yield return agent.AvailableCapabilites.First(c => c.IsSame(Tasks[0].Capabilities[capabilities[i]]));
+					yield return agent.AvailableCapabilites.First(c => c == Tasks[0].Capabilities[capabilities[i]]);
 			}
 		}
 
