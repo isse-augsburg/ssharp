@@ -21,6 +21,14 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         {
             RemoveObsoleteConfiguration(recipe);
 
+            // Can't do anything without stations
+            // (MiniZinc model expects at least one station, thus handle this case here)
+            if (AvailableStations.Length == 0)
+            {
+                Unsatisfiable = true;
+                return;
+            }
+
             CreateDznFile(recipe);
             ExecuteMiniZinc();
             var solution = ReadSolution();
