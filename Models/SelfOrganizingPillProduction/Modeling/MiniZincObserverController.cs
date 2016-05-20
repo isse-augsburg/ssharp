@@ -66,7 +66,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             }
 
             string data =
-$@"task = [{ string.Join(",", recipe_data.Item1) }];
+$@"noCapabilities = {numIngredients + 2};
+task = [{ string.Join(",", recipe_data.Item1) }];
 task_amount = [{ string.Join(",", recipe_data.Item2) }];
 
 noAgents = { AvailableStations.Length };
@@ -100,6 +101,8 @@ isConnected = [{ connections.ToString().ToLower() }|];
             //process.ErrorDataReceived += (o, e) => Console.WriteLine(e.Data);
 
             process.WaitForExit();
+            if (process.ExitCode != 0)
+                throw new Exception("MiniZinc reconfiguration failed");;
         }
 
         private Tuple<int[], int[]> ReadSolution()

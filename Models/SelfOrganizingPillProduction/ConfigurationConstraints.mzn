@@ -21,12 +21,14 @@ include "globals.mzn"; % minizinc globals libary
 % input data
 % ----------------------------------------
 
+int: noCapabilities;
+set of int: CAP = 1..noCapabilities;
+
 % task specification
-array[int] of int: task; % the sequence of capabilities to apply
-set of int:TASK_IND = index_set(task);
+array[int] of CAP: task; % the sequence of capabilities to apply
+set of int: TASK_IND = index_set(task);
 array[TASK_IND] of int: task_amount; % how much of each ingredient is required (use 1 for produce, consume)
 
-set of int: CAP = {task[i] | i in TASK_IND };
 set of int: TASK_IND_0 = TASK_IND union {0}; % includes the zero for the first pointer "incoming port from bottom"
 
 % agent specification
