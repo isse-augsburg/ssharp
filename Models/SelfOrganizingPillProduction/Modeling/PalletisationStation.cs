@@ -13,12 +13,16 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         protected override void ExecuteRole(Role role)
         {
-            Container.Recipe.RemoveContainer(Container);
-            if (Container.Recipe.ProcessingComplete)
+            // unless role is transport only, it will always be { ConsumeCapability }
+            if (role.CapabilitiesToApply.Count > 0)
             {
-                RemoveRecipeConfigurations(Container.Recipe);
+                Container.Recipe.RemoveContainer(Container);
+                if (Container.Recipe.ProcessingComplete)
+                {
+                    RemoveRecipeConfigurations(Container.Recipe);
+                }
+                Container = null;
             }
-            Container = null;
         }
 
         [FaultEffect(Fault = nameof(PalletisationDefect))]
