@@ -22,44 +22,55 @@
 
 namespace Tests.Serialization.RuntimeModels
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	internal class GenericComponents : TestModel
+	internal class LinqDelegate : TestModel
 	{
 		private static bool _hasConstructorRun;
 
 		protected override void Check()
 		{
-			var c1 = new C<int> { F = 99 };
-			var c2 = new C<bool> { F = true };
-			var m = InitializeModel(c1, c2);
+			var c = new C();
+			var a = new[] { 1, 2, 3 };
+			var m = InitializeModel(c);
 
 			_hasConstructorRun = false;
 			Create(m);
 
 			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(2);
+			RootComponents.Length.ShouldBe(1);
 
-			var root1 = RootComponents[0];
-			root1.ShouldBeOfType<C<int>>();
-			((C<int>)root1).F.ShouldBe(99);
+			var root = RootComponents[0];
+			root.ShouldBeOfType<C>();
+			c = (C)root;
 
-			var root2 = RootComponents[1];
-			root2.ShouldBeOfType<C<bool>>();
-			((C<bool>)root2).F.ShouldBe(true);
+			c.AnyWithoutPredicate(a).ShouldBe(true);
+			c.Any(a, x => x > 1).ShouldBe(true);
+			c.Any(a, x => x > 10).ShouldBe(false);
+			c.All(a, x => x > 1).ShouldBe(false);
+			c.All(a, x => x < 10).ShouldBe(true);
 
 			_hasConstructorRun.ShouldBe(false);
 		}
 
-		private class C<T> : Component
+		private class C : Component
 		{
-			public T F;
+			public readonly Func<IEnumerable<int>, Func<int, bool>, bool> All;
+			public readonly Func<IEnumerable<int>, Func<int, bool>, bool> Any;
+			public readonly Func<IEnumerable<int>, bool> AnyWithoutPredicate;
 
 			public C()
 			{
 				_hasConstructorRun = true;
+
+				All = Enumerable.All;
+				Any = Enumerable.Any;
+				AnyWithoutPredicate = Enumerable.Any;
 			}
 		}
 	}

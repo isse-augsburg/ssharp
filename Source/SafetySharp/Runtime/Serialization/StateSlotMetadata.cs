@@ -172,33 +172,28 @@ namespace SafetySharp.Runtime.Serialization
 		///   Creates the metadata required to serialize the <paramref name="structType" />.
 		/// </summary>
 		/// <param name="structType">The type of the struct the metadata should be created for.</param>
+		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		public static IEnumerable<StateSlotMetadata> FromStruct(Type structType, SerializationMode mode)
 		{
 			Requires.NotNull(structType, nameof(structType));
 			Requires.That(structType.IsStructType(), "Expected a value type.");
 
-			return FromStruct(structType, new FieldInfo[0], mode);
+			return FromStruct(structType, mode, new FieldInfo[0]);
 		}
 
 		/// <summary>
 		///   Creates the metadata required to serialize the <paramref name="structType" /> with the <paramref name="fieldChain" />.
 		/// </summary>
-		public static IEnumerable<StateSlotMetadata> FromStruct(Type structType, FieldInfo[] fieldChain, SerializationMode mode)
+		private static IEnumerable<StateSlotMetadata> FromStruct(Type structType, SerializationMode mode, FieldInfo[] fieldChain)
 		{
-			var fields = structType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-			foreach (var field in fields)
+			foreach (var field in SerializationRegistry.GetSerializationFields(structType, mode))
 			{
 				var chain = fieldChain.Concat(new[] { field }).ToArray();
 
 				if (field.FieldType.IsStructType())
 				{
-					foreach (var metadataSlot in FromStruct(field.FieldType, chain, mode))
+					foreach (var metadataSlot in FromStruct(field.FieldType, mode, chain))
 						yield return metadataSlot;
-				}
-				else if (field.IsHidden(mode, discoveringObjects: true) || field.FieldType.IsHidden(mode, discoveringObjects: true))
-				{
-					// Don't try to serialize hidden fields
 				}
 				else
 				{

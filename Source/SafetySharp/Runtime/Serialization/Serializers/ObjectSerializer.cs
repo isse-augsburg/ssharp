@@ -166,7 +166,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 														   Type inheritanceRoot = null,
 														   bool discoveringObjects = false)
 		{
-			return SerializationRegistry.GetSerializationFields(obj, mode, startType, inheritanceRoot, discoveringObjects);
+			return SerializationRegistry.GetSerializationFields(startType ?? obj.GetType(), mode, inheritanceRoot, discoveringObjects);
 		}
 	}
 }

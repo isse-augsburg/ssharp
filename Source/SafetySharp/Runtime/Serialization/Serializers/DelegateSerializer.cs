@@ -25,6 +25,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Runtime.Serialization;
 	using Modeling;
 
 	/// <summary>
@@ -60,7 +61,8 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="writer">The writer the serialized information should be written to.</param>
 		protected internal override void SerializeType(object obj, BinaryWriter writer)
 		{
-			// Nothing to do here; delegates are serialized separately
+			// ReSharper disable once AssignNullToNotNullAttribute
+			writer.Write(obj.GetType().AssemblyQualifiedName);
 		}
 
 		/// <summary>
@@ -70,8 +72,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		/// <param name="reader">The reader the serialized type information should be read from.</param>
 		protected internal override object InstantiateType(BinaryReader reader)
 		{
-			// We only have to return some object here; delegates are deserialized separately
-			return new object();
+			return FormatterServices.GetUninitializedObject(Type.GetType(reader.ReadString(), throwOnError: true));
 		}
 
 		/// <summary>

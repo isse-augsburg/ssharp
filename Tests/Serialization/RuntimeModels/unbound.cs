@@ -22,7 +22,6 @@
 
 namespace Tests.Serialization.RuntimeModels
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 	using Shouldly;
@@ -40,7 +39,7 @@ namespace Tests.Serialization.RuntimeModels
 			Should.Throw<UnboundPortException>(() => { var x = d.C; });
 			Should.Throw<UnboundPortException>(() => d.C = 0);
 
-			var m = TestModel.InitializeModel(d);
+			var m = InitializeModel(d);
 			Create(m);
 
 			StateFormulas.ShouldBeEmpty();
