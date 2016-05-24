@@ -638,9 +638,11 @@
     <Compile Include="Serialization\Objects\fault effect.cs" />
     <Compile Include="Serialization\Objects\boxed values.cs" />
     <Compile Include="Serialization\Objects\single object.cs" />
+    <Compile Include="Serialization\Objects\probabilities.cs" />
     <Compile Include="Serialization\Objects\structs.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Char.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Bool.cs" />
+    <Compile Include="Serialization\PrimitiveTypes\Double.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int64.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int8.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Int16.cs" />

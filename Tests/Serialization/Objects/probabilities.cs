@@ -20,39 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Serialization.Objects
 {
 	using System.Diagnostics;
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
-	using Utilities;
 
-	internal class Probability : TestModel
+	internal class Probabilities : SerializationObject
 	{
 		protected override void Check()
 		{
-			var d = new D { P = new SafetySharp.Modeling.Probability(0.7) };
-			var m = TestModel.InitializeModel(d);
+			var c = new C();
+			
+			GenerateCode(SerializationMode.Full, c);
 
-			Create(m);
+			Serialize();
+			c.Probability=new Probability(0.2334232434);
 
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-			// For the initial state vector 8 bytes are necessary (because sizeof(double)/sizeof(int)==2).
-			// Probability is immutable. Thus for the optimized state vector 0 bytes are necessary, but 
-			// the minimal number of StateSlots is 1, so StateSlotCount is aligned to 1.
-			StateSlotCount.ShouldBe(1); 
-
-			var root = RootComponents[0];
-			root.ShouldBeOfType<D>();
-
-			((D)root).P.Value.ShouldBe(0.7);
+			Deserialize();
+			c.Probability.Value.ShouldBe(0.2222);
 		}
 
-		private class D : Component
+		private class C : Component
 		{
-			public SafetySharp.Modeling.Probability P;
+			public Probability Probability = new Probability(0.2222);
 		}
 	}
 }

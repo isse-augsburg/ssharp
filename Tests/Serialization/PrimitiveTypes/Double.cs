@@ -20,39 +20,54 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Serialization.RuntimeModels
+namespace Tests.Serialization.PrimitiveTypes
 {
-	using System.Diagnostics;
-	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
-	using Utilities;
 
-	internal class Probability : TestModel
+	internal class Double : SerializationObject
 	{
 		protected override void Check()
 		{
-			var d = new D { P = new SafetySharp.Modeling.Probability(0.7) };
-			var m = TestModel.InitializeModel(d);
+			var c = new C { F = 0 };
 
-			Create(m);
+			GenerateCode(SerializationMode.Full, c);
+			StateSlotCount.ShouldBe(2);
 
-			StateFormulas.ShouldBeEmpty();
-			RootComponents.Length.ShouldBe(1);
-			// For the initial state vector 8 bytes are necessary (because sizeof(double)/sizeof(int)==2).
-			// Probability is immutable. Thus for the optimized state vector 0 bytes are necessary, but 
-			// the minimal number of StateSlots is 1, so StateSlotCount is aligned to 1.
-			StateSlotCount.ShouldBe(1); 
+			c.F = 77202020202.013223;
+			Serialize();
+			c.F = 31;
+			Deserialize();
+			c.F.ShouldBe(77202020202.013223);
 
-			var root = RootComponents[0];
-			root.ShouldBeOfType<D>();
+			c.F = -17;
+			Serialize();
+			c.F = 31;
+			Deserialize();
+			c.F.ShouldBe(-17);
 
-			((D)root).P.Value.ShouldBe(0.7);
+			c.F = System.Double.MaxValue;
+			Serialize();
+			c.F = 31;
+			Deserialize();
+			c.F.ShouldBe(System.Double.MaxValue);
+
+			c.F = System.Double.MinValue;
+			Serialize();
+			c.F = 31;
+			Deserialize();
+			c.F.ShouldBe(System.Double.MinValue);
+
+			c.F = System.Double.NaN;
+			Serialize();
+			c.F = 31;
+			Deserialize();
+			c.F.ShouldBe(System.Double.NaN);
 		}
 
-		private class D : Component
+		internal class C
 		{
-			public SafetySharp.Modeling.Probability P;
+			public double F;
 		}
 	}
 }
