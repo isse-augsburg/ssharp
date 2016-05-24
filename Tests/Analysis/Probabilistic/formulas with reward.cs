@@ -23,87 +23,74 @@
 namespace Tests.Analysis.Probabilistic
 {
 	using System;
+	using System.Diagnostics;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
 
-	// Knuth's die. Described e.g. on http://wwwhome.cs.utwente.nl/~timmer/scoop/casestudies/knuth/knuth.html
-
-	internal class EmulateDiceWithCoin : ProbabilisticAnalysisTestObject
+	internal class FormulasWithReward : ProbabilisticAnalysisTestObject
 	{
-
-		private enum S
-		{
-			InitialThrow,
-			Throw1To3,
-			Throw4To6,
-			Throw1Or2,
-			Throw3OrRethrow,
-			Throw4Or5,
-			Throw6OrRethrow,
-			Final1,
-			Final2,
-			Final3,
-			Final4,
-			Final5,
-			Final6,
-		}
-
 		protected override void Check()
 		{
 			var c = new C();
-			Probability probabilityOfFinal1;
+			bool formulaOfReward1;
+			bool formulaOfReward2;
 
 			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
 			{
 				var typeOfModelChecker = (Type)Arguments[0];
 				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker,probabilityChecker);
 
-				var checkProbabilityOf1 = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(c.IsInStateFinal1()));
+				Formula final2 = c.Value == 2;
+				Formula final3 = c.Value == 3;
+
+				var calculateSteadyStateReward1 = probabilityChecker.CalculateFormula(new LongRunExpectedRewardFormula(() => c.reward1, 2.5-0.001,2.5+0.001));
+				var calculateSteadyStateReward2 = probabilityChecker.CalculateFormula(new LongRunExpectedRewardFormula(()=> c.reward2, 2.0 - 0.001, 2.0 + 0.001));
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
-				probabilityOfFinal1 = checkProbabilityOf1.Calculate();
-				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);
+				formulaOfReward1 = calculateSteadyStateReward1.Calculate();
+				formulaOfReward2 = calculateSteadyStateReward2.Calculate();
 			}
 
-			probabilityOfFinal1.Between(0.1, 0.2).ShouldBe(true);
+			formulaOfReward1.ShouldBe(true);
+			formulaOfReward2.ShouldBe(true);
 		}
 
 		private class C : Component
 		{
-			public Formula IsInStateFinal1()
-			{
-				return StateMachine.State == S.Final1;
-			}
+			private int _value;
+			public Reward reward1 = new Reward(false);
+			public Reward reward2 = new Reward(false);
 
-			public readonly StateMachine<S> StateMachine = new StateMachine<S>(S.InitialThrow);
+			public int Value
+			{
+				set { _value = value; }
+				get {  return _value; }
+			}
 
 			public override void Update()
 			{
-				StateMachine.Transition(
-					from: S.InitialThrow,
-					to: new[] { S.Throw1To3, S.Throw4To6 })
-				.Transition(
-					from: S.Throw1To3,
-					to: new[] { S.Throw1Or2, S.Throw3OrRethrow })
-				.Transition(
-					from: S.Throw1Or2,
-					to: new[] { S.Final1, S.Final2 })
-				.Transition(
-					from: S.Throw3OrRethrow,
-					to: new[] { S.Final3, S.Throw1To3 })
-				.Transition(
-					from: S.Throw4To6,
-					to: new[] { S.Throw4Or5, S.Throw6OrRethrow })
-				.Transition(
-					from: S.Throw4Or5,
-					to: new[] { S.Final4, S.Final5 })
-				.Transition(
-					from: S.Throw6OrRethrow,
-					to: new[] { S.Final6, S.Throw4To6 });
+				if (Value == 0)
+				{
+					Value = Choose(new Option<int>(new Probability(0.1), 1),
+								   new Option<int>(new Probability(0.3), 2),
+								   new Option<int>(new Probability(0.6), 3));
+				}
+				switch (Value)
+				{
+					case 1:
+						reward1.Positive(1);
+						break;
+					case 2:
+						reward1.Positive(2);
+						break;
+					default:
+						reward1.Positive(3);
+						break;
+				}
+				reward2.Positive(2);
 			}
 		}
-
 	}
 }

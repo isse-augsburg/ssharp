@@ -108,11 +108,12 @@ namespace SafetySharp.Runtime
 			ActivationSensitiveFaults = Faults.Where(fault => fault.RequiresActivationNotification).ToArray();
 			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
 			Formulas = formulas;
+			Rewards = objectTable.OfType<RewardRetriever>().ToArray();
 
-			// Create a local object table just for the objects referenced by the model; only these objects
-			// have to be serialized and deserialized. The local object table does not contain, for instance,
-			// the closure types of the state formulas
-			var objects = Model.ReferencedObjects;
+		// Create a local object table just for the objects referenced by the model; only these objects
+		// have to be serialized and deserialized. The local object table does not contain, for instance,
+		// the closure types of the state formulas
+		var objects = Model.ReferencedObjects;
 			var deterministicFaults = objectTable.OfType<Fault>().Where(fault => fault.Activation != Activation.Nondeterministic);
 
 			_serializedObjects = new ObjectTable(objects.Except(deterministicFaults, ReferenceEqualityComparer<object>.Default));
@@ -169,6 +170,9 @@ namespace SafetySharp.Runtime
 		///   The formulas that are checked on the model.
 		/// </summary>
 		public Formula[] Formulas { get; }
+
+
+		public RewardRetriever[] Rewards { get; }
 
 		/// <summary>
 		///   Gets the size of the state vector in bytes. The size is always a multiple of 4.

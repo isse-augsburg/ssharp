@@ -37,15 +37,12 @@ namespace SafetySharp.Analysis
 	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;
-
-	/// <summary>
-	///   Represents the Mrmc model checker.
-	/// </summary>
+	
 	public class ProbabilityChecker : IDisposable
 	{
-		public struct FormulaChecker
+		public struct ProbabilityCalculator
 		{
-			public FormulaChecker(Func<Probability> useDefaultChecker,Func<ProbabilisticModelChecker,Probability> useCustomChecker)
+			public ProbabilityCalculator(Func<Probability> useDefaultChecker,Func<ProbabilisticModelChecker,Probability> useCustomChecker)
 			{
 				Calculate = useDefaultChecker;
 				CalculateWithChecker = useCustomChecker;
@@ -56,17 +53,30 @@ namespace SafetySharp.Analysis
 			public Func<ProbabilisticModelChecker,Probability> CalculateWithChecker { get; }
 		}
 
-		public struct RewardChecker
+		public struct FormulaCalculator
 		{
-			public RewardChecker(Func<double> useDefaultChecker, Func<ProbabilisticModelChecker, double> useCustomChecker)
+			public FormulaCalculator(Func<bool> useDefaultChecker, Func<ProbabilisticModelChecker, bool> useCustomChecker)
 			{
 				Calculate = useDefaultChecker;
 				CalculateWithChecker = useCustomChecker;
 			}
 
 			// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
-			public Func<double> Calculate { get; }
-			public Func<ProbabilisticModelChecker, double> CalculateWithChecker { get; }
+			public Func<bool> Calculate { get; }
+			public Func<ProbabilisticModelChecker, bool> CalculateWithChecker { get; }
+		}
+
+		public struct RewardCalculator
+		{
+			public RewardCalculator(Func<RewardResult> useDefaultChecker, Func<ProbabilisticModelChecker, RewardResult> useCustomChecker)
+			{
+				Calculate = useDefaultChecker;
+				CalculateWithChecker = useCustomChecker;
+			}
+
+			// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
+			public Func<RewardResult> Calculate { get; }
+			public Func<ProbabilisticModelChecker, RewardResult> CalculateWithChecker { get; }
 		}
 
 
@@ -82,9 +92,17 @@ namespace SafetySharp.Analysis
 
 		private ModelBase _model;
 		private readonly ConcurrentBag<Formula> _formulasToCheck = new ConcurrentBag<Formula>();
-		private readonly ConcurrentBag<Func<Reward>> _rewardsToCheck = new ConcurrentBag<Func<Reward>>();
 
 		public ProbabilisticModelChecker DefaultChecker { get; set; }
+
+		public void InitializeDefaultChecker()
+		{
+			if (DefaultChecker == null)
+			{
+				DefaultChecker = new Mrmc(this);
+			}
+		}
+
 
 		/// <summary>
 		///   The model checker's configuration that determines certain model checker settings.
@@ -99,23 +117,24 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(model, nameof(model));
 			_model = model;
 		}
-
+		
 		private Probability CalculateProbabilityWithDefaultChecker(Formula formulaToCheck)
 		{
-			if (DefaultChecker == null)
-			{
-				DefaultChecker = new Mrmc(this);
-			}
+			InitializeDefaultChecker();
 			return DefaultChecker.CalculateProbability(formulaToCheck);
 		}
-		
-		private double CalculateRewardWithDefaultChecker(Func<Reward> retrieveReward)
+
+		private bool CalculateFormulaWithDefaultChecker(Formula formulaToCheck)
 		{
-			if (DefaultChecker == null)
-			{
-				DefaultChecker = new Mrmc(this);
-			}
-			return DefaultChecker.CalculateReward(retrieveReward);
+			InitializeDefaultChecker();
+			return DefaultChecker.CalculateFormula(formulaToCheck);
+		}
+
+
+		private RewardResult CalculateRewardWithDefaultChecker(Formula formulaToCheck)
+		{
+			InitializeDefaultChecker();
+			return DefaultChecker.CalculateReward(formulaToCheck);
 		}
 
 		public void CreateProbabilityMatrix()
@@ -171,51 +190,74 @@ namespace SafetySharp.Analysis
 			Requires.That(_probabilityMatrixWasCreated, nameof(CreateProbabilityMatrix) + "must be called before");
 		}
 
-		public FormulaChecker CalculateProbabilityToReachStates(Formula formulaValidInRequestedStates)
+		public ProbabilityCalculator CalculateProbability(Formula formula)
 		{
-			Requires.NotNull(formulaValidInRequestedStates, nameof(formulaValidInRequestedStates));
+			Requires.NotNull(formula, nameof(formula));
 
-			var visitor = new IsStateFormulaVisitor();
-			visitor.Visit(formulaValidInRequestedStates);
-
-			if (!visitor.IsStateFormula)
-				throw new InvalidOperationException("Formula must be non-temporal state formulas.");
+			var visitor = new IsFormulaReturningProbabilityVisitor();
+			visitor.Visit(formula);
+			if (!visitor.IsReturningProbability)
+				throw new InvalidOperationException("Formula must return probability.");
 			
-			_formulasToCheck.Add(formulaValidInRequestedStates);
-
 			Interlocked.MemoryBarrier();
 			if ((bool)_probabilityMatrixCreationStarted)
 			{
-				throw new Exception(nameof(CalculateProbabilityToReachStates) + " must be called before " + nameof(CreateProbabilityMatrix));
+				throw new Exception(nameof(CalculateProbability) + " must be called before " + nameof(CreateProbabilityMatrix));
 			}
 
-			var formulaToCheck = formulaValidInRequestedStates;
+			_formulasToCheck.Add(formula);
+			var formulaToCheck = formula;
 
 			Func<Probability> useDefaultChecker = () => CalculateProbabilityWithDefaultChecker(formulaToCheck);
 			Func<ProbabilisticModelChecker,Probability> useCustomChecker = customChecker => customChecker.CalculateProbability(formulaToCheck);
 
-			var checker = new FormulaChecker(useDefaultChecker, useCustomChecker);
+			var checker = new ProbabilityCalculator(useDefaultChecker, useCustomChecker);
 			return checker;
 		}
 
-		public RewardChecker CalculateSteadyStateReward(Func<Reward> retrieveReward)
+		public FormulaCalculator CalculateFormula(Formula formula)
 		{
-			Requires.NotNull(retrieveReward, nameof(retrieveReward));
-			
-			_rewardsToCheck.Add(retrieveReward);
+			Requires.NotNull(formula, nameof(formula));
 
 			Interlocked.MemoryBarrier();
 			if ((bool)_probabilityMatrixCreationStarted)
 			{
-				throw new Exception(nameof(CalculateProbabilityToReachStates) + " must be called before " + nameof(CreateProbabilityMatrix));
+				throw new Exception(nameof(CalculateFormula) + " must be called before " + nameof(CreateProbabilityMatrix));
 			}
 
-			var rewardToCheck = retrieveReward;
+			_formulasToCheck.Add(formula);
+			var formulaToCheck = formula;
 
-			Func<double> useDefaultChecker = () => CalculateRewardWithDefaultChecker(rewardToCheck);
-			Func<ProbabilisticModelChecker, double> useCustomChecker = customChecker => customChecker.CalculateReward(rewardToCheck);
+			Func<bool> useDefaultChecker = () => CalculateFormulaWithDefaultChecker(formulaToCheck);
+			Func<ProbabilisticModelChecker, bool> useCustomChecker = customChecker => customChecker.CalculateFormula(formulaToCheck);
 
-			var checker = new RewardChecker(useDefaultChecker, useCustomChecker);
+			var checker = new FormulaCalculator(useDefaultChecker, useCustomChecker);
+			return checker;
+		}
+
+		public RewardCalculator CalculateReward(Formula formula)
+		{
+			Requires.NotNull(formula, nameof(formula));
+
+			var visitor = new IsFormulaReturningRewardResultVisitor();
+			visitor.Visit(formula);
+			if (!visitor.IsReturningRewardResult)
+				throw new InvalidOperationException("Formula must return reward.");
+
+			_formulasToCheck.Add(formula);
+			var formulaToCheck = formula;
+
+			Interlocked.MemoryBarrier();
+			if ((bool)_probabilityMatrixCreationStarted)
+			{
+				throw new Exception(nameof(CalculateReward) + " must be called before " + nameof(CreateProbabilityMatrix));
+			}
+			
+
+			Func<RewardResult> useDefaultChecker = () => CalculateRewardWithDefaultChecker(formulaToCheck);
+			Func<ProbabilisticModelChecker, RewardResult> useCustomChecker = customChecker => customChecker.CalculateReward(formulaToCheck);
+
+			var checker = new RewardCalculator(useDefaultChecker, useCustomChecker);
 			return checker;
 		}
 

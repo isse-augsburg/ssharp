@@ -32,6 +32,7 @@ namespace SafetySharp.Analysis
 	using System.IO;
 	using FormulaVisitors;
 	using Modeling;
+	using Runtime.Serialization;
 	using Utilities;
 
 	public class Prism : ProbabilisticModelChecker
@@ -298,7 +299,8 @@ namespace SafetySharp.Analysis
 			writer.Write(")");
 
 			var stateFormulaSet = CompactProbabilityMatrix.StateLabeling[transition.State];
-			for (var i = 0; i < CompactProbabilityMatrix.NoOfStateFormulaLabels; i++)
+			var noStateFormulaLabels = CompactProbabilityMatrix.StateFormulaLabels.Length;
+			for (var i = 0; i < noStateFormulaLabels; i++)
 			{
 				var label = CompactProbabilityMatrix.StateFormulaLabels[i];
 				writer.Write(" & (" + label + "' = ");
@@ -372,13 +374,20 @@ namespace SafetySharp.Analysis
 		{
 			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
 			WriteProbabilityMatrixToDisk();
+			
+			var isFormulaReturningProbabilityVisitor = new IsFormulaReturningProbabilityVisitor();
+			isFormulaReturningProbabilityVisitor.Visit(formulaToCheck);
+			if (!isFormulaReturningProbabilityVisitor.IsReturningProbability)
+			{
+				throw new Exception("expected formula which returns a probability");
+			}
 
 			var transformationVisitor = new PrismTransformer();
 			transformationVisitor.Visit(formulaToCheck);
+			var formulaToCheckString = transformationVisitor.TransformedFormula;
 
 			using (var fileProperties = new TemporaryFile("props"))
 			{
-				var formulaToCheckString = "P=? [ F "+ transformationVisitor.TransformedFormula + "=true ]";
 				File.WriteAllText(fileProperties.FilePath, formulaToCheckString);
 
 				var prismArguments = _filePrism.FilePath + " " + fileProperties.FilePath;
@@ -394,7 +403,12 @@ namespace SafetySharp.Analysis
 			}
 		}
 
-		internal override double CalculateReward(Func<Reward> retrieveReward)
+		internal override bool CalculateFormula(Formula formulaToCheck)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal override RewardResult CalculateReward(Formula formulaToCheck)
 		{
 			throw new NotImplementedException();
 		}

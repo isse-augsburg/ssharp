@@ -45,16 +45,16 @@ namespace Tests.Analysis.Probabilistic
 				Formula final2 = c.Value == 2;
 				Formula final3 = c.Value == 3;
 
-				var checkProbabilityOfFinal2 = probabilityChecker.CalculateProbabilityToReachStates(final2);
-				var checkProbabilityOfFinal3 = probabilityChecker.CalculateProbabilityToReachStates(final3);
+				var checkProbabilityOfFinal2 = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(final2));
+				var checkProbabilityOfFinal3 = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(final3));
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
 				probabilityOfFinal2 = checkProbabilityOfFinal2.Calculate();
 				probabilityOfFinal3 = checkProbabilityOfFinal3.Calculate();
 			}
 			
-			probabilityOfFinal2.Be(0.3, 0.0001).ShouldBe(true);
-			probabilityOfFinal3.Be(0.6, 0.0001).ShouldBe(true);
+			probabilityOfFinal2.Is(0.3, tolerance: 0.0001).ShouldBe(true);
+			probabilityOfFinal3.Is(0.6, tolerance: 0.0001).ShouldBe(true);
 		}
 
 		private class C : Component

@@ -30,6 +30,7 @@ namespace SafetySharp.Analysis
 {
 	using System.IO;
 	using Modeling;
+	using Runtime.Serialization;
 	using Utilities;
 
 	public class Cadp : ProbabilisticModelChecker
@@ -63,7 +64,8 @@ namespace SafetySharp.Analysis
 		{
 			var firstElement = true;
 			var stateFormulaSet = CompactProbabilityMatrix.StateLabeling[state];
-			for (var i = 0; i < CompactProbabilityMatrix.NoOfStateFormulaLabels; i++)
+			var noStateFormulaLabels = CompactProbabilityMatrix.StateFormulaLabels.Length;
+			for (var i = 0; i < noStateFormulaLabels; i++)
 			{
 				if (stateFormulaSet[i])
 				{
@@ -135,17 +137,22 @@ namespace SafetySharp.Analysis
 			throw new NotImplementedException();
 		}
 
+		internal override bool CalculateFormula(Formula formulaToCheck)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal override RewardResult CalculateReward(Formula formulaToCheck)
+		{
+			throw new NotImplementedException();
+		}
+
 		/// <summary>
 		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
 		/// </summary>
 		public override void Dispose()
 		{
 			_fileAut.SafeDispose();
-		}
-
-		internal override double CalculateReward(Func<Reward> retrieveReward)
-		{
-			throw new NotImplementedException();
 		}
 	}
 }

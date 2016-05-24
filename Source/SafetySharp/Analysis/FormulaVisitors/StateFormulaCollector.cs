@@ -59,5 +59,20 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		{
 			StateFormulas.Add(formula);
 		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitRewardFormula(RewardFormula formula)
+		{
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
+		{
+			Visit(formula.Operand);
+		}
 	}
 }

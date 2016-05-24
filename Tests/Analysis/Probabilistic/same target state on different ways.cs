@@ -42,13 +42,13 @@ namespace Tests.Analysis.Probabilistic
 				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker, probabilityChecker);
 
 				Formula final1 = c.Result==1;
-				var checkProbabilityOfFinal1 = probabilityChecker.CalculateProbabilityToReachStates(final1);
+				var checkProbabilityOfFinal1 = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(final1));
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
 				probabilityOfFinal1 = checkProbabilityOfFinal1.Calculate();
 			}
 			
-			probabilityOfFinal1.Be(0.65, 0.000001).ShouldBe(true);
+			probabilityOfFinal1.Is(0.65, 0.000001).ShouldBe(true);
 		}
 
 		private class C : Component

@@ -22,30 +22,26 @@
 
 namespace SafetySharp.Analysis.FormulaVisitors
 {
+	using System.Collections.Generic;
+	using Runtime.Serialization;
+	using Utilities;
+
 	/// <summary>
-	///   Determines whether a <see cref="Formula" /> is a formula that can be evaluted in a single state.
+	///   Collects all <see cref="StateFormula" /> instances contained in a <see cref="Formula" />.
 	/// </summary>
-	internal class IsStateFormulaVisitor : FormulaVisitor
+	internal class RewardRetrieverCollector : FormulaVisitor
 	{
 		/// <summary>
-		///   Indicates whether the visited formula contains any invalid operators.
+		///   Gets the collected state formulas.
 		/// </summary>
-		private bool _containsInvalidOperators;
-
-		/// <summary>
-		///   Gets a value indicating whether the formula is a LTL formula.
-		/// </summary>
-		public bool IsStateFormula => !_containsInvalidOperators;
+		public HashSet<string> RewardRetrievers { get; } = new HashSet<string>();
 
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
 		public override void VisitUnaryFormula(UnaryFormula formula)
 		{
-			if (formula.Operator == UnaryOperator.Not)
-				Visit(formula.Operand);
-			else
-				_containsInvalidOperators = true;
+			Visit(formula.Operand);
 		}
 
 		/// <summary>
@@ -53,15 +49,8 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitBinaryFormula(BinaryFormula formula)
 		{
-			if (formula.Operator == BinaryOperator.Until)
-				_containsInvalidOperators = true;
-			else
-			{
-				Visit(formula.LeftOperand);
-
-				if (IsStateFormula)
-					Visit(formula.RightOperand);
-			}
+			Visit(formula.LeftOperand);
+			Visit(formula.RightOperand);
 		}
 
 		/// <summary>
@@ -76,7 +65,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitRewardFormula(RewardFormula formula)
 		{
-			_containsInvalidOperators = true;
+			RewardRetrievers.Add(formula.RewardRetriever.Label);
 		}
 
 		/// <summary>
@@ -84,7 +73,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
 		{
-			_containsInvalidOperators = true;
+			Visit(formula.Operand);
 		}
 	}
 }

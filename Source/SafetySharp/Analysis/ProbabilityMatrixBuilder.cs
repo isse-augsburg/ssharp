@@ -200,6 +200,9 @@ namespace SafetySharp.Analysis
 				var stateFormulaLabels =
 					_model.StateFormulas.Select(stateformula => stateformula.Label).ToArray();
 
+				var stateRewardRetrieverLabels =
+					_model.Rewards.Select(rewardRetriever => rewardRetriever.Label).ToArray();
+
 				ProbabilityMatrix = new SparseProbabilityMatrix()
 				{
 					//TODO-Probabilistic: Labels : new List<StateFormula>(),
@@ -207,8 +210,8 @@ namespace SafetySharp.Analysis
 					StatesLeadingToException = new List<TupleStateProbability>(),
 					//States = _context._states,
 					StateLabeling = new Dictionary<int, StateFormulaSet>(),
-					NoOfStateFormulaLabels = _model.StateFormulas.Length,
-					StateFormulaLabels = stateFormulaLabels
+					StateFormulaLabels = stateFormulaLabels,
+					StateRewardRetrieverLabels = stateRewardRetrieverLabels
 				};
 
 				//add debugger
@@ -227,7 +230,7 @@ namespace SafetySharp.Analysis
 					//.Select(addDebugger)
 					.ToArray();
 				
-				_transitions = new TransitionSet(model, successorCapacity, compiledStateFormulas);
+				_transitions = new TransitionSet(model, successorCapacity, compiledStateFormulas, _model.Rewards);
 				_transitions.TransitionMinimizationMode=TransitionMinimizationMode.Disable;
 			}
 
@@ -336,10 +339,11 @@ namespace SafetySharp.Analysis
 					}
 
 					// TODO-Probabilistic: why adding again and again -> save in StateStorage and remove here
-					//AssertOldEntryMatchesNewEntry(index,ref transition);
+					AssertOldEntryMatchesNewEntry(index,ref transition);
 
 					ProbabilityMatrix.StateLabeling[index] = transition.Formulas;
-					
+					ProbabilityMatrix.StateRewards[index] = new [] {transition.Reward0,transition.Reward1};
+
 					++transitionCount;
 				}
 
@@ -355,7 +359,7 @@ namespace SafetySharp.Analysis
 				{
 					if (!ProbabilityMatrix.StateLabeling[index].Equals(transition.Formulas))
 					{
-						//Debugger.Break();
+						throw new Exception("The labeling of a state is not consistent.");
 					}
 				}
 			}
@@ -510,12 +514,13 @@ namespace SafetySharp.Analysis
 		public int States;
 		public List<TupleStateProbability> InitialStates=new List<TupleStateProbability>();
 		public Dictionary<int, List<TupleStateProbability>> TransitionGroups = new Dictionary<int, List<TupleStateProbability>>();
-
-		public int NoOfStateFormulaLabels;
+		
 		public string[] StateFormulaLabels;
+		public string[] StateRewardRetrieverLabels;
 
 		public int NumberOfTransitions;
-		public Dictionary<int, StateFormulaSet> StateLabeling=new Dictionary<int, StateFormulaSet>();
+		public Dictionary<int, StateFormulaSet> StateLabeling = new Dictionary<int, StateFormulaSet>();
+		public Dictionary<int, Reward[]> StateRewards = new Dictionary<int, Reward[]>();
 
 
 		public void AddTransition(int sourceState, int targetState, Probability probability)
@@ -549,9 +554,10 @@ namespace SafetySharp.Analysis
 		// TODO-Probabilistic: Exception gets StateNumber MaxState+1
 
 		//TODO-Probabilistic: why reevaluating again and again -> save in StateStorage and remove here
-		public int NoOfStateFormulaLabels;
 		public string[] StateFormulaLabels;
+		public string[] StateRewardRetrieverLabels;
 		public Dictionary<int,StateFormulaSet> StateLabeling;
+		public Dictionary<int, Reward[]> StateRewards = new Dictionary<int, Reward[]>();
 
 		public void AddTransition(int sourceState, int targetState, Probability probability)
 		{
@@ -627,20 +633,33 @@ namespace SafetySharp.Analysis
 				var compactId = CreateCompactId(stateFormulaSet.Key);
 				compactProbabilityMatrix.StateLabeling.Add(compactId,stateFormulaSet.Value);
 			}
-			compactProbabilityMatrix.NoOfStateFormulaLabels = NoOfStateFormulaLabels;
-			// TODO: Add label for exception
-			// todo: remove hack
+
+			// State Labeling
 			Func<bool> returnFalse = () => false;
-			var allFalseStateFormulaSet = new Func<bool>[NoOfStateFormulaLabels];
-			for (int i = 0; i < NoOfStateFormulaLabels; i++)
+			var allFalseStateFormulaSet = new Func<bool>[StateFormulaLabels.Length];
+			for (int i = 0; i < StateFormulaLabels.Length; i++)
 			{
 				allFalseStateFormulaSet[i] = returnFalse;
 			}
 			compactProbabilityMatrix.StateFormulaLabels = StateFormulaLabels;
 			compactProbabilityMatrix.AddTransition(exceptionState, exceptionState, Probability.One);
-			compactProbabilityMatrix.StateLabeling.Add(exceptionState,new StateFormulaSet(allFalseStateFormulaSet));
+			compactProbabilityMatrix.StateLabeling.Add(exceptionState, new StateFormulaSet(allFalseStateFormulaSet));
 
-
+			// State Rewards
+			foreach (var stateRewards in StateRewards)
+			{
+				var compactId = CreateCompactId(stateRewards.Key);
+				compactProbabilityMatrix.StateRewards.Add(compactId, stateRewards.Value);
+			}
+			var noRewards = new Reward[StateRewardRetrieverLabels.Length];
+			for (int i = 0; i < StateRewardRetrieverLabels.Length; i++)
+			{
+				noRewards[i] = compactProbabilityMatrix.StateRewards[1][i]; //use available rewards of any state
+				noRewards[i].Reset();
+			}
+			compactProbabilityMatrix.StateRewards.Add(exceptionState, noRewards);
+			compactProbabilityMatrix.StateRewardRetrieverLabels = StateRewardRetrieverLabels;
+			
 			// return result
 			return new Tuple<Dictionary<int, int>, CompactProbabilityMatrix>(compactToSparse, compactProbabilityMatrix);
 		}
@@ -662,7 +681,7 @@ namespace SafetySharp.Analysis
 				tuple =>
 				{
 					Console.Write($"step: {tuple.Probability.Value} {tuple.State}");
-					for (var i = 0; i < NoOfStateFormulaLabels; i++)
+					for (var i = 0; i < StateFormulaLabels.Length; i++)
 					{
 						var label = StateFormulaLabels[i];
 						Console.Write(" " + label + "=");
@@ -670,6 +689,12 @@ namespace SafetySharp.Analysis
 							Console.Write("true");
 						else
 							Console.Write("false");
+					}
+					for (var i = 0; i < StateRewardRetrieverLabels.Length; i++)
+					{
+						var label = StateRewardRetrieverLabels[i];
+						Console.Write(" " + label + "=");
+						Console.Write("TODO");
 					}
 					Console.WriteLine();
 				};

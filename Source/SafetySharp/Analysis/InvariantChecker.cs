@@ -186,7 +186,7 @@ namespace SafetySharp.Analysis
 				_stateStack = stateStack;
 
 				var invariant = CompilationVisitor.Compile(_model.Formulas[0]);
-				_transitions = new TransitionSet(_model, successorCapacity, invariant);
+				_transitions = new TransitionSet(_model, successorCapacity, new Func<bool>[] {invariant}, new RewardRetriever[] { });
 			}
 
 			/// <summary>

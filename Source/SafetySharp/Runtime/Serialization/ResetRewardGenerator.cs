@@ -52,7 +52,7 @@ namespace SafetySharp.Runtime.Serialization
 		private readonly MethodInfo _getObjectMethod;
 
 		private readonly ConstructorInfo _createReward;
-		private readonly FieldInfo _fieldInfoRewardPositive;
+		private readonly FieldInfo _fieldInfoRewardValue;
 		private readonly FieldInfo _fieldInfoRewardNegative;
 		private readonly FieldInfo _fieldInfoMightBeNegative;
 
@@ -79,7 +79,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			_getObjectMethod = typeof(ObjectTable).GetMethod(nameof(ObjectTable.GetObject));
 
-			_fieldInfoRewardPositive = typeof(Reward).GetField("_valuePositive", BindingFlags.Instance | BindingFlags.NonPublic);
+			_fieldInfoRewardValue = typeof(Reward).GetField("_value", BindingFlags.Instance | BindingFlags.NonPublic);
 			_fieldInfoRewardNegative = typeof(Reward).GetField("_valueNegative", BindingFlags.Instance | BindingFlags.NonPublic);
 			_fieldInfoMightBeNegative = typeof(Reward).GetField(nameof(Reward.MightBeNegative));
 
@@ -141,7 +141,7 @@ namespace SafetySharp.Runtime.Serialization
 			_il.Emit(OpCodes.Dup); //We double the pointer towards Reward, because we need it two times
 								  // now the location of Reward is on the stack two times
 			_il.Emit(OpCodes.Ldc_I4_0);
-			_il.Emit(OpCodes.Stfld, _fieldInfoRewardPositive);
+			_il.Emit(OpCodes.Stfld, _fieldInfoRewardValue);
 			_il.Emit(OpCodes.Ldc_I4_0);
 			_il.Emit(OpCodes.Stfld, _fieldInfoRewardNegative);
 		}

@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis.FormulaVisitors
 {
+	using System;
 	using System.Text;
 	using Utilities;
 
@@ -110,6 +111,22 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		public override void VisitStateFormula(StateFormula formula)
 		{
 			_builder.Append(formula.Label);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitRewardFormula(RewardFormula formula)
+		{
+			throw new Exception("Rewards are currently not supported");
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
+		{
+			throw new Exception("Probabilities are currently not supported");
 		}
 	}
 }

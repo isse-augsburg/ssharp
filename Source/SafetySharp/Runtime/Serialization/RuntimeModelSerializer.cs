@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Runtime.Serialization
 {
+	using System;
 	using System.IO;
 	using System.Linq;
 	using System.Text;
@@ -50,6 +51,7 @@ namespace SafetySharp.Runtime.Serialization
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
+
 
 			using (var buffer = new MemoryStream())
 			using (var writer = new BinaryWriter(buffer, Encoding.UTF8, leaveOpen: true))
@@ -96,7 +98,7 @@ namespace SafetySharp.Runtime.Serialization
 			// Serialize the object table
 			SerializeObjectTable(objectTable, writer);
 
-			// Serialize the object identifier of the model itself and the formulas
+			// Serialize the object identifier of the model itself and the formulas and rewards
 			writer.Write(objectTable.GetObjectIdentifier(model));
 			writer.Write(formulas.Length);
 			foreach (var formula in formulas)
@@ -184,7 +186,7 @@ namespace SafetySharp.Runtime.Serialization
 			// Deserialize the object table
 			var objectTable = DeserializeObjectTable(reader);
 
-			// Deserialize the object identifiers of the model itself and the root formulas
+			// Deserialize the object identifiers of the model itself and the root formulas and rewards
 			var model = (ModelBase)objectTable.GetObject(reader.ReadUInt16());
 			var formulas = new Formula[reader.ReadInt32()];
 			for (var i = 0; i < formulas.Length; ++i)
@@ -222,7 +224,7 @@ namespace SafetySharp.Runtime.Serialization
 			// We substitute the dummy delegate objects with the actual instances obtained from the DelegateMetadata instances
 			objectTable.SubstituteDelegates();
 			deserializer(objectTable, serializedState);
-
+			
 			// Return the serialized model data
 			return new SerializedRuntimeModel(model, buffer, objectTable, formulas);
 		}

@@ -42,16 +42,16 @@ namespace SafetySharp.CaseStudies.ScalableServer.Analysis
 			var userModel = new UserModel1(demand);
 			
 			var model = new Model(backend, userModel);
-			double steadyStateRewardOfUser;
-			double steadyStateRewardOfProvider;
+			RewardResult steadyStateRewardOfUser;
+			RewardResult steadyStateRewardOfProvider;
 
 			using (var probabilityChecker = new ProbabilityChecker(model))
 			{
 				var typeOfModelChecker = modelCheckerType;
 				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker, probabilityChecker);
 
-				var calculateSteadyStateRewardOfUser = probabilityChecker.CalculateSteadyStateReward(model.UserModel.GetReward);
-				var calculateSteadyStateRewardOfProvider = probabilityChecker.CalculateSteadyStateReward(model.UserModel.GetReward);
+				var calculateSteadyStateRewardOfUser = probabilityChecker.CalculateReward(new CalculateLongRunExpectedRewardFormula(model.UserModel.GetReward));
+				var calculateSteadyStateRewardOfProvider = probabilityChecker.CalculateReward(new CalculateLongRunExpectedRewardFormula(model.UserModel.GetReward));
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
 				steadyStateRewardOfUser = calculateSteadyStateRewardOfUser.Calculate();

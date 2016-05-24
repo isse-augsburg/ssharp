@@ -28,9 +28,14 @@ namespace SafetySharp.Analysis
 	using System.Globalization;
 	using System.Text;
 	using Modeling;
+	using Runtime.Serialization;
+	using FormulaVisitors;
+
+
 
 	// Mrmc is in file ProbabilisticModelChecker.Mrmc.cs which is nested in ProbabilisticModelChecker.cs.
 	// Open arrow of ProbabilisticModelChecker.cs in Solution Explorer to see nested files.
+	
 
 	/// <summary>
 	///   Represents a base class for external probabilistic model checker tools.
@@ -50,6 +55,8 @@ namespace SafetySharp.Analysis
 
 		internal abstract Probability CalculateProbability(Formula formulaToCheck);
 
-		internal abstract double CalculateReward(Func<Reward> retrieveReward);
+		internal abstract bool CalculateFormula(Formula formulaToCheck);
+
+		internal abstract RewardResult CalculateReward(Formula formulaToCheck);
 	}
 }

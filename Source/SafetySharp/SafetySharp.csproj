@@ -45,6 +45,12 @@
     <Compile Include="Analysis\AnalysisConfiguration.cs" />
     <Compile Include="Analysis\AnalysisException.cs" />
     <Compile Include="Analysis\AnalysisResult.cs" />
+    <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningProbabilityVisitor.cs" />
+    <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningBoolValueVisitor.cs" />
+    <Compile Include="Analysis\FormulaVisitors\RewardRetrieverCollector.cs" />
+    <Compile Include="Analysis\ProbabilitisticFormula.cs" />
+    <Compile Include="Analysis\RewardFormula.cs" />
+    <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningRewardResultVisitor.cs" />
     <Compile Include="Analysis\MinimizationMode.cs" />
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\PrismTransformer.cs" />
@@ -81,6 +87,7 @@
     <Compile Include="Runtime\RangeMetadata.cs" />
     <Compile Include="Runtime\Serialization\DelegateMetadata.cs" />
     <Compile Include="Runtime\Serialization\RangeRestrictionsGenerator.cs" />
+    <Compile Include="Runtime\Serialization\RewardRetriever.cs" />
     <Compile Include="Runtime\Serialization\Serializers\DelegateSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\DictionarySerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\MethodInfoSerializer.cs" />

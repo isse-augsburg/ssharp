@@ -56,9 +56,11 @@ namespace SafetySharp.Analysis
 		{
 			Probability probabilityOfHazard;
 
+			var probabilityOfHazardFormula = new CalculateProbabilityToReachStateFormula(hazard);
+
 			using (var probabilityChecker = new ProbabilityChecker(model))
 			{
-				var checkProbabilityOfHazard = probabilityChecker.CalculateProbabilityToReachStates(hazard);
+				var checkProbabilityOfHazard = probabilityChecker.CalculateProbability(probabilityOfHazardFormula);
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = new Mrmc(probabilityChecker);
 				probabilityOfHazard = checkProbabilityOfHazard.Calculate();

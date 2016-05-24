@@ -41,7 +41,7 @@ namespace Tests.Analysis.Probabilistic
 				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker, probabilityChecker);
 
 				Formula invariantViolated = c.ViolateInvariant;
-				var checkProbabilityOfInvariantViolation = probabilityChecker.CalculateProbabilityToReachStates(invariantViolated);
+				var checkProbabilityOfInvariantViolation = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(invariantViolated));
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
 				probabilityOfInvariantViolation = checkProbabilityOfInvariantViolation.Calculate();
@@ -49,7 +49,7 @@ namespace Tests.Analysis.Probabilistic
 			}
 
 			// 1.0-(1.0-0.1)^11 = 0.68618940391
-			probabilityOfInvariantViolation.Be(0.68618940391, 0.00001).ShouldBe(true);
+			probabilityOfInvariantViolation.Is(0.68618940391, 0.00001).ShouldBe(true);
 		}
 
 		private class C : Component

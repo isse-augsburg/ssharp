@@ -103,5 +103,21 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		{
 			_expression = Expression.Invoke(Expression.Constant(formula.Expression));
 		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitRewardFormula(RewardFormula formula)
+		{
+			throw new InvalidOperationException("Only state formulas can be evaluated.");
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
+		{
+			throw new InvalidOperationException("Only state formulas can be evaluated.");
+		}
 	}
 }

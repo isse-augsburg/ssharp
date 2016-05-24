@@ -36,15 +36,15 @@ namespace Tests.Execution.Simulation
 			var simulator = new Simulator(TestModel.InitializeModel(new C()));
 			var c = (C)simulator.Model.Roots[0];
 
-			c.R.ValuePositive().ShouldBe(0);
+			c.R.Value().ShouldBe(0);
 			c.R.ValueNegative().ShouldBe(0);
 			
 			simulator.SimulateStep();
-			c.R.ValuePositive().ShouldBe(3);
+			c.R.Value().ShouldBe(3);
 			c.R.ValueNegative().ShouldBe(2);
 
 			simulator.SimulateStep();
-			c.R.ValuePositive().ShouldBe(3);
+			c.R.Value().ShouldBe(3);
 			c.R.ValueNegative().ShouldBe(2);
 		}
 

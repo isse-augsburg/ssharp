@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Runtime.Serialization
 {
+	using System;
 	using Analysis;
 	using Modeling;
 

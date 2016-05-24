@@ -22,6 +22,8 @@
 
 namespace SafetySharp.Analysis.FormulaVisitors
 {
+	using System;
+	using System.Globalization;
 	using System.Text;
 	using Utilities;
 
@@ -98,6 +100,64 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		public override void VisitStateFormula(StateFormula formula)
 		{
 			_builder.Append(formula.Label);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitRewardFormula(RewardFormula formula)
+		{
+			if (formula is CalculateLongRunExpectedRewardFormula)
+			{
+				var longRunExpected = (CalculateLongRunExpectedRewardFormula)formula;
+				_builder.Append($"E [ {0.0}, {1.0}] [ ");
+				//_builder.Append(formula.RewardRetriever.Label);
+				_builder.Append(" tt ");
+				_builder.Append(" ]");
+			}
+			else if (formula is CalculateExpectedAccumulatedRewardFormula)
+			{
+				throw new Exception("Not supported, yet");
+			}
+			else if (formula is ExpectedAccumulatedRewardFormula)
+			{
+				throw new Exception("Not supported, yet");
+			}
+			else if (formula is LongRunExpectedRewardFormula)
+			{
+				var longRunExpected = (LongRunExpectedRewardFormula) formula;
+				var lowerBound = longRunExpected.LowerBound.ToString(CultureInfo.InvariantCulture);
+				var upperBound = longRunExpected.UpperBound.ToString(CultureInfo.InvariantCulture);
+				_builder.Append($"E [ {lowerBound}, {upperBound}] [ ");
+				//_builder.Append(formula.RewardRetriever.Label);
+				_builder.Append(" tt ");
+				_builder.Append(" ]");
+			}
+			else
+			{
+				throw new Exception("Not supported, yet");
+			}
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
+		{
+			if (formula is CalculateProbabilityToReachStateFormula)
+			{
+				_builder.Append("P { > 0 } [ tt U ");
+				Visit(formula.Operand);
+				_builder.Append(" ]");
+			}
+			else if (formula is ProbabilityToReachStateFormula)
+			{
+				throw new Exception("Not supported, yet");
+			}
+			else
+			{
+				throw new Exception("Not supported, yet");
+			}
 		}
 	}
 }

@@ -48,10 +48,10 @@ namespace Tests.Analysis.Probabilistic
 				Formula formulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated = c._timestep == 11 && c._frozenValue == 2 && !c.ViolateInvariant;
 				Formula formulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated = c._timestep == 11 && c._frozenValue == 3 && !c.ViolateInvariant;
 
-				var checkProbabilityOfStep11FrozenValue2AndInvariantViolated = probabilityChecker.CalculateProbabilityToReachStates(formulaProbabilityOfStep11FrozenValue2AndInvariantViolated);
-				var checkProbabilityOfStep11FrozenValue3AndInvariantViolated = probabilityChecker.CalculateProbabilityToReachStates(formulaProbabilityOfStep11FrozenValue3AndInvariantViolated);
-				var checkProbabilityOfStep11FrozenValue2AndInvariantNotViolated = probabilityChecker.CalculateProbabilityToReachStates(formulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated);
-				var checkProbabilityOfStep11FrozenValue3AndInvariantNotViolated = probabilityChecker.CalculateProbabilityToReachStates(formulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated);
+				var checkProbabilityOfStep11FrozenValue2AndInvariantViolated = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue2AndInvariantViolated));
+				var checkProbabilityOfStep11FrozenValue3AndInvariantViolated = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue3AndInvariantViolated));
+				var checkProbabilityOfStep11FrozenValue2AndInvariantNotViolated = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated));
+				var checkProbabilityOfStep11FrozenValue3AndInvariantNotViolated = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated));
 
 				probabilityChecker.CreateProbabilityMatrix();
 				probabilityChecker.DefaultChecker = modelChecker;
@@ -67,7 +67,7 @@ namespace Tests.Analysis.Probabilistic
 				probabilityOfStep11FrozenValue2AndInvariantNotViolated +
 				probabilityOfStep11FrozenValue3AndInvariantNotViolated;
 
-			probabilitiesSummedUp.Be(1.0, 0.000001).ShouldBe(true);
+			probabilitiesSummedUp.Is(1.0, 0.000001).ShouldBe(true);
 		}
 
 		private class C : Component

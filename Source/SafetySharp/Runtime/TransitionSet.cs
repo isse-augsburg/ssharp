@@ -29,6 +29,7 @@ namespace SafetySharp.Runtime
 	using Analysis;
 	using JetBrains.Annotations;
 	using Modeling;
+	using Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -41,6 +42,7 @@ namespace SafetySharp.Runtime
 		private readonly TargetStateGroupElement* _targetStateGroupElements;
 		private readonly MemoryBuffer _targetStateGroupElementsBuffer = new MemoryBuffer();
 		private readonly Func<bool>[] _formulas;
+		private readonly RewardRetriever[] _rewards;
 		private readonly MemoryBuffer _hashedStateBuffer = new MemoryBuffer();
 		private readonly byte* _hashedStateMemory;
 		private readonly int* _lookup;
@@ -60,14 +62,14 @@ namespace SafetySharp.Runtime
 		private int _nextTargetStateGroupIndex;
 
 		public TransitionMinimizationMode TransitionMinimizationMode { get; set; } = TransitionMinimizationMode.RemoveNonActivationMinimalTransitions;
-
+		
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="model">The model the successors are computed for.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public TransitionSet(RuntimeModel model, int capacity, params Func<bool>[] formulas)
+		public TransitionSet(RuntimeModel model, int capacity, Func<bool>[] formulas, RewardRetriever[] rewards)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
@@ -76,7 +78,9 @@ namespace SafetySharp.Runtime
 
 			_stateVectorSize = model.StateVectorSize;
 			_formulas = formulas;
-			
+			_rewards = rewards;
+
+
 			_tempStateBuffer.Resize(2 * model.StateVectorSize, zeroMemory: true);
 			_tempStateMemoryNotified = _tempStateBuffer.Pointer;
 			_tempStateMemoryUnnotified = _tempStateBuffer.Pointer + _stateVectorSize;
@@ -98,6 +102,11 @@ namespace SafetySharp.Runtime
 
 			for (var i = 0; i < capacity; ++i)
 				_lookup[i] = -1;
+		}
+		
+		public TransitionSet(RuntimeModel model, int capacity)
+			: this(model,capacity,new Func<bool>[] { }, new RewardRetriever[] {} )
+		{
 		}
 
 		/// <summary>
@@ -288,6 +297,8 @@ namespace SafetySharp.Runtime
 			{
 				ActivatedFaults = activatedFaults,
 				Formulas = new StateFormulaSet(_formulas),
+				Reward0 = _rewards.Length >= 1 ? _rewards[0].Retriever() : default(Reward),
+				Reward1 = _rewards.Length >= 2 ? _rewards[1].Retriever() : default(Reward),
 				NextSet = nextSet,
 				TargetState = targetState,
 				Probability = probability,
@@ -324,6 +335,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Represents a transition.
 		/// </summary>
+		/// TODO: Maybe use FieldOffsets https://msdn.microsoft.com/de-de/library/system.runtime.interopservices.fieldoffsetattribute(v=vs.110).aspx
 		internal struct Transition
 		{
 			/// <summary>
@@ -335,6 +347,9 @@ namespace SafetySharp.Runtime
 			///   The state formulas holding in the target successorState.
 			/// </summary>
 			public StateFormulaSet Formulas;
+
+			public Reward Reward0;
+			public Reward Reward1;
 
 			public bool IsValid;
 
@@ -348,6 +363,10 @@ namespace SafetySharp.Runtime
 		{
 			public FaultSet ActivatedFaults;
 			public StateFormulaSet Formulas;
+
+			public Reward Reward0;
+			public Reward Reward1;
+
 			public int NextSet;
 			//public Transition* Transition;
 
@@ -443,6 +462,8 @@ namespace SafetySharp.Runtime
 					{
 						TargetState = currentTargetStateGroupElement.TargetState,
 						Formulas = currentTargetStateGroupElement.Formulas,
+						Reward0=currentTargetStateGroupElement.Reward0,
+						Reward1=currentTargetStateGroupElement.Reward1,
 						Probability = currentTargetStateGroupElement.Probability,
 						IsValid =  currentTargetStateGroupElement.IsValid
 					};

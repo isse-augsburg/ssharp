@@ -24,25 +24,27 @@ namespace SafetySharp.Modeling
 {
 	public struct Reward
 	{
-		public Reward(bool mightBeNegative)
+		public Reward(bool mightBeNegative = false)
 		{
 			_valueNegative = 0;
-			_valuePositive = 0;
+			_value = 0;
 			MightBeNegative = mightBeNegative;
 		}
 
 		[Hidden]
 		public readonly bool MightBeNegative;
 
-		[NonSerializable] //TODO: Change to [AutoReset] (NotImplementedYet) which we may introduce for value types. Values are reseted after each time step. Makes behavior more deterministic compared to [NonSerializable] when a value is read before written even if it is permitted.
-		private int _valuePositive;
+		[NonSerializable]
+		//TODO: Change to [AutoReset] (NotImplementedYet) which we may introduce for value types. Values are reseted after each time step. Makes behavior more deterministic compared to [NonSerializable] when a value is read before written even if it is permitted.
+		private int _value;
 
-		[NonSerializable] //TODO: Change to [AutoReset] (NotImplementedYet) which we may introduce for value types. Values are reseted after each time step. Makes behavior more deterministic compared to [NonSerializable] when a value is read before written even if it is permitted.
+		[NonSerializable]
+		//TODO: Change to [AutoReset] (NotImplementedYet) which we may introduce for value types. Values are reseted after each time step. Makes behavior more deterministic compared to [NonSerializable] when a value is read before written even if it is permitted.
 		private int _valueNegative;
 
-		public int ValuePositive()
+		public int Value()
 		{
-			return _valuePositive;
+			return _value;
 		}
 
 		public int ValueNegative()
@@ -56,12 +58,12 @@ namespace SafetySharp.Modeling
 			if (MightBeNegative)
 				_valueNegative += value;
 			else
-				_valuePositive -= value;
+				_value -= value;
 		}
 
 		public void Positive(int value)
 		{
-			_valuePositive += value;
+			_value += value;
 		}
 
 		internal void Reset()
@@ -69,4 +71,17 @@ namespace SafetySharp.Modeling
 
 		}
 	}
+
+	public struct RewardResult
+	{
+		public double Value;
+
+		public bool Is(double expected, double tolerance)
+		{
+			var minimum = expected - tolerance;
+			var maximum = expected + tolerance;
+			return (Value >= minimum && Value <= maximum);
+		}
+	}
 }
+

@@ -22,6 +22,8 @@
 
 namespace SafetySharp.Analysis.FormulaVisitors
 {
+	using System;
+	using System.Globalization;
 	using System.Text;
 	using Utilities;
 
@@ -116,6 +118,67 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		public override void VisitStateFormula(StateFormula formula)
 		{
 			_builder.Append(formula.Label);
+		}
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitRewardFormula(RewardFormula formula)
+		{
+			if (formula is CalculateLongRunExpectedRewardFormula)
+			{
+				_builder.Append(" LongRunReward(?,");
+				_builder.Append(formula.RewardRetriever.Label);
+				_builder.Append(" )");
+			}
+			else if (formula is CalculateExpectedAccumulatedRewardFormula)
+			{
+				_builder.Append(" ExpectedAccumulatedReward(?,");
+				_builder.Append(formula.RewardRetriever.Label);
+				_builder.Append(" )");
+			}
+			else if (formula is ExpectedAccumulatedRewardFormula)
+			{
+				var expectedAccumulated = (ExpectedAccumulatedRewardFormula)formula;
+				var lowerBound = expectedAccumulated.LowerBound.ToString(CultureInfo.InvariantCulture);
+				var upperBound = expectedAccumulated.UpperBound.ToString(CultureInfo.InvariantCulture);
+				_builder.Append($"ExpectedAccumulatedReward({lowerBound}, {upperBound}, ");
+				_builder.Append(formula.RewardRetriever.Label);
+				_builder.Append(")");
+			}
+			else if (formula is LongRunExpectedRewardFormula)
+			{
+				var longRunExpected = (LongRunExpectedRewardFormula)formula;
+				var lowerBound = longRunExpected.LowerBound.ToString(CultureInfo.InvariantCulture);
+				var upperBound = longRunExpected.UpperBound.ToString(CultureInfo.InvariantCulture);
+				_builder.Append($"LongRunReward({lowerBound}, {upperBound}, ");
+				_builder.Append(formula.RewardRetriever.Label);
+				_builder.Append(")");
+			}
+			else
+			{
+				throw new Exception("Not supported, yet");
+			}
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
+		{
+			if (formula is CalculateProbabilityToReachStateFormula)
+			{
+				_builder.Append("ProbabilityToReach(?,");
+				Visit(formula.Operand);
+				_builder.Append(")");
+			}
+			else if (formula is ProbabilityToReachStateFormula)
+			{
+				throw new Exception("Not supported, yet");
+			}
+			else
+			{
+				throw new Exception("Not supported, yet");
+			}
 		}
 	}
 }

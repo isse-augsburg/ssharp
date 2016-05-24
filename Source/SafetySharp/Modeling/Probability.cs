@@ -82,10 +82,10 @@ namespace SafetySharp.Modeling
 			return (Value >= (minimal-tolerance) && Value <= (maximal+tolerance));
 		}
 		
-		public bool Be(double value, double tolerance)
+		public bool Is(double expected, double tolerance)
 		{
-			var minimum = Math.Max(value - tolerance, 0.0);
-			var maximum = Math.Min(value + tolerance, 1.0);
+			var minimum = Math.Max(expected - tolerance, 0.0);
+			var maximum = Math.Min(expected + tolerance, 1.0);
 			return (Value >= minimum && Value <= maximum);
 		}
 

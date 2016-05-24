@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis.FormulaVisitors
 {
+	using System;
 	using System.Text;
 	using Utilities;
 
@@ -98,6 +99,54 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		public override void VisitStateFormula(StateFormula formula)
 		{
 			_builder.Append(formula.Label);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitRewardFormula(RewardFormula formula)
+		{
+			if (formula is CalculateLongRunExpectedRewardFormula)
+			{
+				throw new Exception("Not supported, yet");
+			}
+			else if (formula is CalculateExpectedAccumulatedRewardFormula)
+			{
+				throw new Exception("Not supported, yet");
+			}
+			else if (formula is ExpectedAccumulatedRewardFormula)
+			{
+				throw new Exception("Not supported, yet");
+			}
+			else if (formula is LongRunExpectedRewardFormula)
+			{
+				throw new Exception("Not supported, yet");
+			}
+			else
+			{
+				throw new Exception("Not supported, yet");
+			}
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
+		{
+			if (formula is CalculateProbabilityToReachStateFormula)
+			{
+				_builder.Append("P=? [ F ");
+				Visit(formula.Operand);
+				_builder.Append("=true ]");
+			}
+			else if (formula is ProbabilityToReachStateFormula)
+			{
+				throw new Exception("Not supported, yet");
+			}
+			else
+			{
+				throw new Exception("Not supported, yet");
+			}
 		}
 	}
 }
