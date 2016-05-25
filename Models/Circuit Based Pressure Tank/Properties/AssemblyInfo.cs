@@ -22,4 +22,4 @@
 
 using System.Reflection;
 
-[assembly: AssemblyTitle("S# Scalable Server Case Study")]
+[assembly: AssemblyTitle("S# Circuit Based Pressure Tank Case Study")]

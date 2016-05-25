@@ -52,6 +52,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hemodialysis Machine", "Mod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scalable Server", "Models\Scalable Server\Scalable Server.csproj", "{966634DE-86D3-401A-B294-93A70ED6C5DE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Circuit Based Pressure Tank", "Models\Circuit Based Pressure Tank\Circuit Based Pressure Tank.csproj", "{931E5CC0-11E6-41A7-9D2B-87BD6FEBA3BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +100,10 @@ Global
 		{966634DE-86D3-401A-B294-93A70ED6C5DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{966634DE-86D3-401A-B294-93A70ED6C5DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{966634DE-86D3-401A-B294-93A70ED6C5DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{931E5CC0-11E6-41A7-9D2B-87BD6FEBA3BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{931E5CC0-11E6-41A7-9D2B-87BD6FEBA3BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{931E5CC0-11E6-41A7-9D2B-87BD6FEBA3BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{931E5CC0-11E6-41A7-9D2B-87BD6FEBA3BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -113,5 +119,6 @@ Global
 		{6AE088BD-212E-4F38-96A1-B16C4F95D243} = {C6B04010-51F6-49C0-8F58-FEA7D30541E2}
 		{1D2F1575-4473-485B-B361-EE7E76589BEC} = {C6B04010-51F6-49C0-8F58-FEA7D30541E2}
 		{966634DE-86D3-401A-B294-93A70ED6C5DE} = {C6B04010-51F6-49C0-8F58-FEA7D30541E2}
+		{931E5CC0-11E6-41A7-9D2B-87BD6FEBA3BB} = {C6B04010-51F6-49C0-8F58-FEA7D30541E2}
 	EndGlobalSection
 EndGlobal
