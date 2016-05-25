@@ -129,40 +129,34 @@ namespace SafetySharp.Analysis
 			return fileStateRewards;
 		}
 
-		private System.Text.RegularExpressions.Regex MrmcProbabilityParser = new System.Text.RegularExpressions.Regex("^(?<state>\\d\\d*)\\s(?<probability>[0-1]\\.?[0-9]+)$");
-		private System.Text.RegularExpressions.Regex MrmcRewardParser = new System.Text.RegularExpressions.Regex("^(?<state>\\d\\d*)\\s(?<reward>[0-9]+\\.?[0-9]+)$");
+		private readonly System.Text.RegularExpressions.Regex MrmcProbabilityParser = new System.Text.RegularExpressions.Regex("^(?<state>\\d\\d*)\\s(?<probability>[0-1]\\.?[0-9]+)$");
+		private readonly System.Text.RegularExpressions.Regex MrmcFormulaParser = new System.Text.RegularExpressions.Regex("^(?<state>\\d\\d*)\\s(?<satisfied>(TRUE)|(FALSE))$");
+		private readonly System.Text.RegularExpressions.Regex MrmcRewardParser = new System.Text.RegularExpressions.Regex("^(?<state>\\d\\d*)\\s(?<reward>[0-9]+\\.?[0-9]+)$");
 
-
-
-		internal override Probability CalculateProbability(Formula formulaToCheck)
+		private TemporaryFile WriteFilesAndExecuteMrmc(Formula formulaToCheck,bool outputExactResult) //returns result file
 		{
 			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
 			WriteProbabilityMatrixToDisk();
 			
-			var isFormulaReturningProbabilityVisitor = new IsFormulaReturningProbabilityVisitor();
-			isFormulaReturningProbabilityVisitor.Visit(formulaToCheck);
-			if (!isFormulaReturningProbabilityVisitor.IsReturningProbability)
-			{
-				throw new Exception("expected formula which returns a probability");
-			}
-
 			var transformationVisitor = new MrmcTransformer();
 			transformationVisitor.Visit(formulaToCheck);
 			var formulaToCheckString = transformationVisitor.TransformedFormula;
-			
+
 			var initialStatesWithProbabilities = ProbabilityChecker.CompactProbabilityMatrix.InitialStates;
 			var initialStates = initialStatesWithProbabilities.Select(tuple => tuple.State);
-			var probabilities = initialStatesWithProbabilities.Select(tuple => tuple.Probability);
 			bool useRewards;
 
-			using (var fileResults = new TemporaryFile("res"))
+			var fileResults = new TemporaryFile("res");
 			using (var fileCommandScript = new TemporaryFile("cmd"))
 			using (var fileStateRewards = WriteRewardsToFile(formulaToCheck, out useRewards))
 			{
 				var script = new StringBuilder();
 				script.AppendLine("set method_path gauss_jacobi");
 				script.AppendLine(formulaToCheckString);
-				script.Append("write_res_file");
+				if (outputExactResult)
+					script.Append("write_res_file_result");
+				else
+					script.Append("write_res_file_state");
 				foreach (var initialState in initialStates)
 				{
 					script.Append(" " + initialState);
@@ -189,6 +183,23 @@ namespace SafetySharp.Analysis
 
 				var mrmc = new ExternalProcess("mrmc.exe", commandLineArguments);
 				mrmc.Run();
+			}
+			return fileResults;
+		}
+
+		internal override Probability CalculateProbability(Formula formulaToCheck)
+		{
+			var isFormulaReturningProbabilityVisitor = new IsFormulaReturningProbabilityVisitor();
+			isFormulaReturningProbabilityVisitor.Visit(formulaToCheck);
+			if (!isFormulaReturningProbabilityVisitor.IsReturningProbability)
+			{
+				throw new Exception("expected formula which returns a probability");
+			}
+			using (var fileResults = WriteFilesAndExecuteMrmc(formulaToCheck,true))
+			{
+				var initialStatesWithProbabilities = ProbabilityChecker.CompactProbabilityMatrix.InitialStates;
+				var initialStates = initialStatesWithProbabilities.Select(tuple => tuple.State);
+				var probabilities = initialStatesWithProbabilities.Select(tuple => tuple.Probability);
 
 				var resultEnumerator = File.ReadLines(fileResults.FilePath).GetEnumerator();
 
@@ -222,9 +233,6 @@ namespace SafetySharp.Analysis
 
 		internal override bool CalculateFormula(Formula formulaToCheck)
 		{
-			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
-			WriteProbabilityMatrixToDisk();
-
 			var isFormulaReturningBoolValueVisitor = new IsFormulaReturningBoolValueVisitor();
 			isFormulaReturningBoolValueVisitor.Visit(formulaToCheck);
 			if (!isFormulaReturningBoolValueVisitor.IsFormulaReturningBoolValue)
@@ -232,55 +240,16 @@ namespace SafetySharp.Analysis
 				throw new Exception("expected formula which returns true or false");
 			}
 
-			var transformationVisitor = new MrmcTransformer();
-			transformationVisitor.Visit(formulaToCheck);
-			var formulaToCheckString = transformationVisitor.TransformedFormula;
-
-			var initialStatesWithProbabilities = ProbabilityChecker.CompactProbabilityMatrix.InitialStates;
-			var initialStates = initialStatesWithProbabilities.Select(tuple => tuple.State);
-			var probabilities = initialStatesWithProbabilities.Select(tuple => tuple.Probability);
-			bool useRewards;
-
-			using (var fileResults = new TemporaryFile("res"))
-			using (var fileCommandScript = new TemporaryFile("cmd"))
-			using (var fileStateRewards = WriteRewardsToFile(formulaToCheck, out useRewards))
+			using (var fileResults = WriteFilesAndExecuteMrmc(formulaToCheck, false))
 			{
-				var script = new StringBuilder();
-				script.AppendLine("set method_path gauss_jacobi");
-				script.AppendLine(formulaToCheckString);
-				script.Append("write_res_file");
-				foreach (var initialState in initialStates)
-				{
-					script.Append(" " + initialState);
-				}
-				script.AppendLine();
-				script.AppendLine("quit");
-
-				File.WriteAllText(fileCommandScript.FilePath, script.ToString());
-
-				var commandLineMode = useRewards ? "dmrm" : "dtmc";
-				var commandLineArgumentTransitionFile = $" {_fileTransitions.FilePath}";
-				var commandLineArgumentStateLabelingFile = $" {_fileStateLabelings.FilePath}";
-				var commandLineArgumentRewardFile = fileStateRewards != null ? $" {fileStateRewards.FilePath}" : "";
-				var commandLineArgumentCommandScriptFile = $" {fileCommandScript.FilePath}";
-				var commandLineArgumentResultsFile = $" {fileResults.FilePath}";
-
-
-				var commandLineArguments =
-					commandLineMode
-					+ commandLineArgumentTransitionFile
-					+ commandLineArgumentStateLabelingFile
-					+ commandLineArgumentRewardFile
-					+ commandLineArgumentCommandScriptFile
-					+ commandLineArgumentResultsFile;
-
-				var mrmc = new ExternalProcess("mrmc.exe", commandLineArguments);
-				mrmc.Run();
+				var initialStatesWithProbabilities = ProbabilityChecker.CompactProbabilityMatrix.InitialStates;
+				var initialStates = initialStatesWithProbabilities.Select(tuple => tuple.State);
+				var probabilities = initialStatesWithProbabilities.Select(tuple => tuple.Probability);
 
 				var resultEnumerator = File.ReadLines(fileResults.FilePath).GetEnumerator();
 
 				var index = 0;
-				var probability = Probability.Zero;
+				var satisfied = true;
 				var probabilityEnumerator = probabilities.GetEnumerator();
 				while (resultEnumerator.MoveNext())
 				{
@@ -289,13 +258,16 @@ namespace SafetySharp.Analysis
 					var result = resultEnumerator.Current;
 					if (!String.IsNullOrEmpty(result))
 					{
-						var parsed = MrmcProbabilityParser.Match(result);
+						var parsed = MrmcFormulaParser.Match(result);
 						if (parsed.Success)
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
 							var probabilityOfState = probabilityEnumerator.Current;
-							var probabilityInState = Double.Parse(parsed.Groups["probability"].Value, CultureInfo.InvariantCulture);
-							probability += probabilityOfState * probabilityInState;
+							if (probabilityOfState.Greater(0.0))
+							{
+								var isSatisfiedResult = parsed.Groups["satisfied"].Value.Equals("TRUE");
+								satisfied &= isSatisfiedResult;
+							}
 						}
 						else
 						{
@@ -303,15 +275,12 @@ namespace SafetySharp.Analysis
 						}
 					}
 				}
-				return true;
+				return satisfied;
 			}
 		}
 
 		internal override RewardResult CalculateReward(Formula formulaToCheck)
 		{
-			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
-			WriteProbabilityMatrixToDisk();
-
 			var isFormulaReturningRewardResultVisitor = new IsFormulaReturningRewardResultVisitor();
 			isFormulaReturningRewardResultVisitor.Visit(formulaToCheck);
 			if (!isFormulaReturningRewardResultVisitor.IsReturningRewardResult)
@@ -319,50 +288,11 @@ namespace SafetySharp.Analysis
 				throw new Exception("expected formula which returns reward");
 			}
 
-			var transformationVisitor = new MrmcTransformer();
-			transformationVisitor.Visit(formulaToCheck);
-			var formulaToCheckString = transformationVisitor.TransformedFormula;
-
-			var initialStatesWithProbabilities = ProbabilityChecker.CompactProbabilityMatrix.InitialStates;
-			var initialStates = initialStatesWithProbabilities.Select(tuple => tuple.State);
-			var probabilities = initialStatesWithProbabilities.Select(tuple => tuple.Probability);
-			bool useRewards;
-
-			using (var fileResults = new TemporaryFile("res"))
-			using (var fileCommandScript = new TemporaryFile("cmd"))
-			using (var fileStateRewards = WriteRewardsToFile(formulaToCheck, out useRewards))
+			using (var fileResults = WriteFilesAndExecuteMrmc(formulaToCheck, true))
 			{
-				var script = new StringBuilder();
-				script.AppendLine("set method_path gauss_jacobi");
-				script.AppendLine(formulaToCheckString);
-				script.Append("write_res_file");
-				foreach (var initialState in initialStates)
-				{
-					script.Append(" " + initialState);
-				}
-				script.AppendLine();
-				script.AppendLine("quit");
-
-				File.WriteAllText(fileCommandScript.FilePath, script.ToString());
-
-				var commandLineMode = useRewards ? "dmrm" : "dtmc";
-				var commandLineArgumentTransitionFile = $" {_fileTransitions.FilePath}";
-				var commandLineArgumentStateLabelingFile = $" {_fileStateLabelings.FilePath}";
-				var commandLineArgumentRewardFile = fileStateRewards != null ? $" {fileStateRewards.FilePath}" : "";
-				var commandLineArgumentCommandScriptFile = $" {fileCommandScript.FilePath}";
-				var commandLineArgumentResultsFile = $" {fileResults.FilePath}";
-
-
-				var commandLineArguments =
-					commandLineMode
-					+ commandLineArgumentTransitionFile
-					+ commandLineArgumentStateLabelingFile
-					+ commandLineArgumentRewardFile
-					+ commandLineArgumentCommandScriptFile
-					+ commandLineArgumentResultsFile;
-
-				var mrmc = new ExternalProcess("mrmc.exe", commandLineArguments);
-				mrmc.Run();
+				var initialStatesWithProbabilities = ProbabilityChecker.CompactProbabilityMatrix.InitialStates;
+				var initialStates = initialStatesWithProbabilities.Select(tuple => tuple.State);
+				var probabilities = initialStatesWithProbabilities.Select(tuple => tuple.Probability);
 
 				var resultEnumerator = File.ReadLines(fileResults.FilePath).GetEnumerator();
 

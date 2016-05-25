@@ -89,6 +89,17 @@ namespace SafetySharp.Modeling
 			return (Value >= minimum && Value <= maximum);
 		}
 
+		public bool Greater(double expected, double tolerance)
+		{
+			var minimum = Math.Max(expected - tolerance, 0.0);
+			return (Value > minimum);
+		}
+
+		public bool Greater(double expected)
+		{
+			return (Value > expected);
+		}
+
 		/// <summary>
 		/// Returns the fully qualified type name of this instance.
 		/// </summary>
