@@ -6,7 +6,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     {
         public const int MaximumRecipeLength = 30;
         public const int ContainerStorageSize = 30;
-        public const int MaximumRoleCount = 30;
+        public const int MaximumRoleCount = 60;
         public const int MaximumResourceCount = 30;
         public const uint InitialIngredientAmount = 100u;
 
@@ -34,11 +34,10 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         public static Model NoRedundancyCircularModel()
         {
             // create 3 stations
-            var producer = new ContainerLoader();
             var dispenser = new ParticulateDispenser();
             var stations = new Station[]
             {
-                producer,
+                new ContainerLoader(),
                 dispenser,
                 new PalletisationStation()
             };
