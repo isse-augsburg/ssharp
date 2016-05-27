@@ -55,6 +55,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         {
             return AllocatedRoles.FirstOrDefault(role =>
                 role.PreCondition.Port == null && role.Recipe.RemainingAmount > 0
+                    && role.CapabilitiesToApply.Count > 0
             );
         }
 
