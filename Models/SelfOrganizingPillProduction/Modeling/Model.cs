@@ -8,6 +8,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         public const int ContainerStorageSize = 30;
         public const int MaximumRoleCount = 30;
         public const int MaximumResourceCount = 30;
+        public const uint InitialIngredientAmount = 100u;
 
         public Model(Station[] stations, ObserverController obsContr)
         {

@@ -11,7 +11,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
         [Test]
         public void Dcca()
         {
-            var model = Model.NoRedundancyCircularModel();
+            //var model = Model.NoRedundancyCircularModel();
+            var model = new ModelSetupParser().Parse("Analysis/medium_setup.model");
 
             var modelChecker = new SafetyAnalysis();
             modelChecker.Configuration.StateCapacity = 20000;

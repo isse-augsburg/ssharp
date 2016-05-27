@@ -64,12 +64,19 @@
     <Compile Include="Modeling\PalletisationStation.cs" />
     <Compile Include="Modeling\ParticulateDispenser.cs" />
     <Compile Include="Modeling\PillContainer.cs" />
+    <Compile Include="Analysis\ModelSetupParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Modeling\Recipe.cs" />
     <Compile Include="Modeling\Role.cs" />
     <Compile Include="Modeling\Station.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Analysis\complex_setup1.model">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Analysis\medium_setup.model">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="ConfigurationConstraints.mzn">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
