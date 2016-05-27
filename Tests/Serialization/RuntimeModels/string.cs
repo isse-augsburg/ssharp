@@ -32,7 +32,7 @@ namespace Tests.Serialization.RuntimeModels
 		protected override void Check()
 		{
 			var d = new D { S = "Hello" };
-			var m = TestModel.InitializeModel(d);
+			var m = InitializeModel(d);
 
 			Create(m);
 

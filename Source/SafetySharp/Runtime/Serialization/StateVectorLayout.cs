@@ -228,11 +228,13 @@ namespace SafetySharp.Runtime.Serialization
 
 				foreach (var slot in group.Slots)
 				{
+					var chain = slot.FieldChain != null ? "." + String.Join(".", slot.FieldChain.Select(field => field.Name)) : String.Empty;
+
 					if (slot.Field == null)
 						builder.AppendLine($"\tobj#{slot.ObjectIdentifier}: {slot.EffectiveType.FullName}[{slot.ElementCount}]");
 					else
 						builder.AppendLine(
-							$"\tobj#{slot.ObjectIdentifier}: {slot.Field.DeclaringType.FullName}.{slot.Field.Name}");
+							$"\tobj#{slot.ObjectIdentifier}: {slot.Field.DeclaringType.FullName}.{slot.Field.Name}{chain}");
 				}
 
 				if (group.PaddingBytes > 0)

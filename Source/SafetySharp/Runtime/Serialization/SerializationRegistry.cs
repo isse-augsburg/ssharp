@@ -182,7 +182,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
 		private static void GetObjectsReferencedByStruct(HashSet<object> referencedObjects, object obj, SerializationMode mode)
 		{
-			foreach (var field in GetSerializationFields(obj, mode))
+			foreach (var field in GetSerializationFields(obj.GetType(), mode))
 			{
 				if (field.FieldType.IsStructType())
 					GetObjectsReferencedByStruct(referencedObjects, field.GetValue(obj), mode);
@@ -196,25 +196,18 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Gets the fields declared by the <paramref name="obj" /> that should be serialized.
+		///   Gets the fields declared by the <paramref name="type" /> that should be serialized.
 		/// </summary>
-		/// <param name="obj">The object that should be serialized.</param>
+		/// <param name="type">The type that should be serialized.</param>
 		/// <param name="mode">The serialization mode that should be used to serialize the objects.</param>
-		/// <param name="startType">
-		///   The first type in <paramref name="obj" />'s inheritance hierarchy whose fields should be returned.
-		///   If <c>null</c>, corresponds to <paramref name="obj" />'s actual type.
-		/// </param>
 		/// <param name="inheritanceRoot">
-		///   The first base type of the <paramref name="obj" /> whose fields should be ignored. If
+		///   The first base of <paramref name="type" /> whose fields should be ignored. If
 		///   <c>null</c>, <see cref="object" /> is the inheritance root.
 		/// </param>
 		/// <param name="discoveringObjects">Indicates whether objects are being discovered.</param>
-		internal static IEnumerable<FieldInfo> GetSerializationFields(object obj, SerializationMode mode,
-																	  Type startType = null,
-																	  Type inheritanceRoot = null,
-																	  bool discoveringObjects = false)
+		internal static IEnumerable<FieldInfo> GetSerializationFields(Type type, SerializationMode mode,
+																	  Type inheritanceRoot = null,bool discoveringObjects = false)
 		{
-			var type = startType ?? obj.GetType();
 			if (type.IsHidden(mode, discoveringObjects))
 				return Enumerable.Empty<FieldInfo>();
 
