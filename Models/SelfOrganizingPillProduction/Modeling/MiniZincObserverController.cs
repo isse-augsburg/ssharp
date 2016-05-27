@@ -10,8 +10,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     {
         private static readonly int numIngredients = Enum.GetValues(typeof(IngredientType)).Length;
 
-        private const string DataFile = "data.dzn";
-        private const string SolutionFile = "s.sol";
         private const string MinizincExe = "minizinc.exe";
         private const string MinizincModel = "ConfigurationConstraints.mzn";
 
@@ -29,10 +27,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 return;
             }
 
-            CreateDznFile(recipe);
-            ExecuteMiniZinc();
-            var solution = ReadSolution();
-
+            var solution = ParseSolution(ExecuteMiniZinc(GetCurrentConfiguration(recipe)));
             if (!Unsatisfiable)
             {
                 ApplyConfiguration(recipe, solution);
@@ -53,7 +48,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             }
         }
 
-        private void CreateDznFile(Recipe recipe)
+        private string GetCurrentConfiguration(Recipe recipe)
         {
             var recipe_data = RecipeToCapabilitySequence(recipe);
 
@@ -62,7 +57,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
             foreach (var station in AvailableStations)
             {
-                capabilities.Append(String.Join(",", ExtractCapabilityAmounts(station.AvailableCapabilities)));
+                capabilities.Append(string.Join(",", ExtractCapabilityAmounts(station.AvailableCapabilities)));
                 capabilities.Append(",\n|");
 
                 connections.Append("|");
@@ -82,40 +77,39 @@ noAgents = { AvailableStations.Length };
 capabilities = [|{ capabilities }];
 isConnected = [{ connections.ToString().ToLower() }|];
 ";
-            File.WriteAllText(DataFile, data);
+
+            return data.Replace('\n', ' ');
         }
 
-        private void ExecuteMiniZinc()
+        private string ExecuteMiniZinc(string data)
         {
             //Console.WriteLine("Executing Minizinc");
 
             var startInfo = new ProcessStartInfo
             {
                 FileName = MinizincExe,
-                Arguments = "-o " + SolutionFile + " " + MinizincModel + " " + DataFile,
+                Arguments = $"-D \"{data}\" {MinizincModel}",
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
 
-            var process = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
-            process.Start();
+            var process = Process.Start(startInfo);
 
             process.BeginErrorReadLine();
-            process.BeginOutputReadLine();
-
-            //process.OutputDataReceived += (o, e) => Console.WriteLine(e.Data);
             //process.ErrorDataReceived += (o, e) => Console.WriteLine(e.Data);
 
-            process.WaitForExit();
+            string solutionData = process.StandardOutput.ReadToEnd();
             if (process.ExitCode != 0)
-                throw new Exception("MiniZinc reconfiguration failed");;
+                throw new Exception("MiniZinc reconfiguration failed");
+
+            return solutionData;
         }
 
-        private Tuple<int[], int[]> ReadSolution()
+        private Tuple<int[], int[]> ParseSolution(string solutionData)
         {
-            var lines = File.ReadAllLines(SolutionFile);
+            var lines = solutionData.Split('\n');
             var agentsData = new int[0];
             var workedOnData = new int[0];
 
@@ -203,7 +197,7 @@ isConnected = [{ connections.ToString().ToLower() }|];
 
         private int[] ParseArray(string input)
         {
-            var trimChars = new[] { ' ', '[', ']' };
+            var trimChars = new[] { ' ', '[', ']', '\r' };
             return Array.ConvertAll(input.Trim(trimChars).Split(','), int.Parse);
         }
 
