@@ -20,37 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Analysis
+using System;
+
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
 {
-	using System;
-	using FluentAssertions;
-	using Modeling;
-	using NUnit.Framework;
-	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   Conducts safety analyses using Deductive Cause Consequence Analysis for the hazards of the case study.
-	/// </summary>
-	public class SafetyAnalysisTests
+	public class FlowPort<TForward, TBackward>
+		where TForward : class, IFlowElement<TForward>, new()
+		where TBackward : class, IFlowElement<TBackward>, new()
 	{
-		/// <summary>
-		///   Conducts a DCCA for the hazard of a tank rupture. It prints a summary of the analysis and writes out witnesses for
-		///   minimal critical fault sets to disk that can be replayed using the case study's visualization.
-		/// </summary>
-		[Test]
-		public void TankRupture()
-		{
-			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Tank.IsRuptured);
+		[Hidden]
+		public TForward Forward;
 
-			result.SaveCounterExamples("counter examples/circuit based pressure tank/dcca/tank rupture");
-			Console.WriteLine(result);
+		[Hidden]
+		public TBackward Backward;
+	}
 
-			result.IsComplete.Should().BeTrue();
-			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new[]
-			{
-				new[] { model.Circuits.Sensor.SuppressIsFull }
-			});
-		}
+
+	public interface IFlowComponentUniqueOutgoing<TForward, TBackward> : IFlowComponent<TForward, TBackward>
+		where TForward : class, IFlowElement<TForward>, new()
+		where TBackward : class, IFlowElement<TBackward>, new()
+	{
+		FlowPort<TForward, TBackward> Outgoing { get; }
+	}
+
+
+	public interface IFlowComponentUniqueIncoming<TForward, TBackward> : IFlowComponent<TForward, TBackward>
+		where TForward : class, IFlowElement<TForward>, new()
+		where TBackward : class, IFlowElement<TBackward>, new()
+	{
+		FlowPort<TForward, TBackward> Incoming { get; }
 	}
 }

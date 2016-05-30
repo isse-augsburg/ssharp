@@ -20,37 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Analysis
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 {
-	using System;
-	using FluentAssertions;
-	using Modeling;
-	using NUnit.Framework;
-	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   Conducts safety analyses using Deductive Cause Consequence Analysis for the hazards of the case study.
-	/// </summary>
-	public class SafetyAnalysisTests
+	public class Operator : Component
 	{
-		/// <summary>
-		///   Conducts a DCCA for the hazard of a tank rupture. It prints a summary of the analysis and writes out witnesses for
-		///   minimal critical fault sets to disk that can be replayed using the case study's visualization.
-		/// </summary>
-		[Test]
-		public void TankRupture()
-		{
-			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Tank.IsRuptured);
-
-			result.SaveCounterExamples("counter examples/circuit based pressure tank/dcca/tank rupture");
-			Console.WriteLine(result);
-
-			result.IsComplete.Should().BeTrue();
-			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new[]
-			{
-				new[] { model.Circuits.Sensor.SuppressIsFull }
-			});
-		}
 	}
 }

@@ -39,6 +39,33 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analysis\HazardProbabilityTests.cs" />
+    <Compile Include="Analysis\ModelCheckingTests.cs" />
+    <Compile Include="Analysis\SimulationTests.cs" />
+    <Compile Include="Modeling\Circuits.cs" />
+    <Compile Include="Modeling\ElectricCurrent.cs" />
+    <Compile Include="Modeling\Model.cs" />
+    <Compile Include="Modeling\Operator.cs" />
+    <Compile Include="Modeling\PowerSource.cs" />
+    <Compile Include="Modeling\Pump.cs" />
+    <Compile Include="Modeling\Relay.cs" />
+    <Compile Include="Modeling\Sensor.cs" />
+    <Compile Include="Modeling\Switch.cs" />
+    <Compile Include="Modeling\Tank.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowCombinator.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowComposite.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowDelegate.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowInToOut.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowMerger.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowPort.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowSink.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowSource.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\FlowSplitter.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IFlowAtomic.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IFlowComponent.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IFlowComposite.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IFlowElement.cs" />
+    <Compile Include="Utilities\BidirectionalFlow\IntFlow.cs" />
     <Reference Include="FluentAssertions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
       <HintPath>..\..\Dependencies\FluentAssertions.4.1.1\lib\net45\FluentAssertions.dll</HintPath>
       <Private>True</Private>
@@ -74,7 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\SafetyAnalysisTests.cs" />
-    <Compile Include="Modeling\Timer.cs" />
+    <Compile Include="Modeling\TimerRelay.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

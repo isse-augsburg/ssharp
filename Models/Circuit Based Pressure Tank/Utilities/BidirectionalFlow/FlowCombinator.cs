@@ -173,16 +173,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 				return flowVirtualMerger;
 			}
 		}
-
-		/*
-		public Tuple<FlowMerger<TForward, TBackward>,FlowSplitter<TForward, TBackward>>
-				ConnectOutsWithIns(IFlowComponentUniqueOutgoing<TForward, TBackward>[] fromOuts,
-																 IFlowComponentUniqueIncoming<TForward, TBackward> tos)
-		{
-			return null;
-		}
-		*/
-
+		
 		// For Composites (internal view)
 		public void ConnectInWithIn(IFlowComposite<TForward, TBackward> @from, IFlowComponentUniqueIncoming<TForward, TBackward> to)
 		{

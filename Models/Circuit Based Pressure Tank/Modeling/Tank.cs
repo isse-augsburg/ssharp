@@ -20,37 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Analysis
+namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 {
-	using System;
-	using FluentAssertions;
-	using Modeling;
-	using NUnit.Framework;
-	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 
 	/// <summary>
-	///   Conducts safety analyses using Deductive Cause Consequence Analysis for the hazards of the case study.
+	///   Represents the pressure tank that is filled by the system.
 	/// </summary>
-	public class SafetyAnalysisTests
+	public class Tank : Component
 	{
 		/// <summary>
-		///   Conducts a DCCA for the hazard of a tank rupture. It prints a summary of the analysis and writes out witnesses for
-		///   minimal critical fault sets to disk that can be replayed using the case study's visualization.
+		///   The current pressure level.
 		/// </summary>
-		[Test]
-		public void TankRupture()
+		[Range(0, Model.PressureLimit, OverflowBehavior.Clamp)]
+		private int _pressureLevel;
+
+		/// <summary>
+		///   Gets a value indicating whether the pressure tank has ruptured after exceeding its maximum allowed pressure level.
+		/// </summary>
+		public bool IsRuptured => _pressureLevel >= Model.PressureLimit;
+		
+		/// <summary>
+		///   Gets the current pressure level within the tank.
+		/// </summary>
+		public int PressureLevel => _pressureLevel;
+
+		/// <summary>
+		///   Gets a value indicating whether the pressure tank is currently being filled.
+		/// </summary>
+		public extern bool IsBeingFilled { get; }
+
+		/// <summary>
+		///   Updates the pressure tank's internal state.
+		/// </summary>
+		public override void Update()
 		{
-			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Tank.IsRuptured);
-
-			result.SaveCounterExamples("counter examples/circuit based pressure tank/dcca/tank rupture");
-			Console.WriteLine(result);
-
-			result.IsComplete.Should().BeTrue();
-			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new[]
-			{
-				new[] { model.Circuits.Sensor.SuppressIsFull }
-			});
+			if (!IsRuptured && IsBeingFilled)
+				_pressureLevel += 1;
+			else
+				_pressureLevel = 0;
 		}
 	}
 }

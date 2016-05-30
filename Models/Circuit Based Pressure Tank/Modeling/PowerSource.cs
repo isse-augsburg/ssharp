@@ -20,37 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Analysis
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 {
-	using System;
-	using FluentAssertions;
-	using Modeling;
-	using NUnit.Framework;
-	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   Conducts safety analyses using Deductive Cause Consequence Analysis for the hazards of the case study.
-	/// </summary>
-	public class SafetyAnalysisTests
+	public class PowerSource : Component
 	{
-		/// <summary>
-		///   Conducts a DCCA for the hazard of a tank rupture. It prints a summary of the analysis and writes out witnesses for
-		///   minimal critical fault sets to disk that can be replayed using the case study's visualization.
-		/// </summary>
-		[Test]
-		public void TankRupture()
+		public readonly CurrentSource PositivePole;
+		public readonly CurrentSink NegativePole;
+
+		public PowerSource()
 		{
-			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Tank.IsRuptured);
+			PositivePole = new CurrentSource();
+			NegativePole = new CurrentSink();
+			PositivePole.SendForward = CreatePositiveCharge;
+			NegativePole.SendBackward = CreateElectron;
+		}
 
-			result.SaveCounterExamples("counter examples/circuit based pressure tank/dcca/tank rupture");
-			Console.WriteLine(result);
+		public void CreatePositiveCharge(PositiveCharge toSuccessor)
+		{
+			toSuccessor.Available = true;
+		}
 
-			result.IsComplete.Should().BeTrue();
-			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new[]
-			{
-				new[] { model.Circuits.Sensor.SuppressIsFull }
-			});
+		public void CreateElectron(Electron toPrecedessor)
+		{
+			toPrecedessor.Available = true;
 		}
 	}
 }

@@ -20,37 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Analysis
+using System;
+
+namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
 {
-	using System;
-	using FluentAssertions;
+	using System.Collections.Generic;
+	using System.Linq;
 	using Modeling;
-	using NUnit.Framework;
-	using SafetySharp.Analysis;
 
-	/// <summary>
-	///   Conducts safety analyses using Deductive Cause Consequence Analysis for the hazards of the case study.
-	/// </summary>
-	public class SafetyAnalysisTests
+	public class FlowSource<TForward, TBackward> : IFlowAtomic<TForward, TBackward>, IFlowComponentUniqueOutgoing<TForward, TBackward>
+		where TForward : class, IFlowElement<TForward>, new()
+		where TBackward : class, IFlowElement<TBackward>, new()
 	{
-		/// <summary>
-		///   Conducts a DCCA for the hazard of a tank rupture. It prints a summary of the analysis and writes out witnesses for
-		///   minimal critical fault sets to disk that can be replayed using the case study's visualization.
-		/// </summary>
-		[Test]
-		public void TankRupture()
+		public FlowPort<TForward, TBackward> Outgoing { get; } = new FlowPort<TForward, TBackward>();
+
+		public Action<TForward> SendForward = toSuccessor => { };
+
+		public Action<TBackward> ReceivedBackward = fromSuccessor => { };
+
+		public void UpdateForwardInternal()
 		{
-			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Tank.IsRuptured);
+			SendForward(Outgoing.Forward);
+		}
 
-			result.SaveCounterExamples("counter examples/circuit based pressure tank/dcca/tank rupture");
-			Console.WriteLine(result);
-
-			result.IsComplete.Should().BeTrue();
-			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new[]
-			{
-				new[] { model.Circuits.Sensor.SuppressIsFull }
-			});
+		public void UpdateBackwardInternal()
+		{
+			ReceivedBackward(Outgoing.Backward);
 		}
 	}
 }

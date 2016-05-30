@@ -20,37 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Analysis
-{
-	using System;
-	using FluentAssertions;
-	using Modeling;
-	using NUnit.Framework;
-	using SafetySharp.Analysis;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-	/// <summary>
-	///   Conducts safety analyses using Deductive Cause Consequence Analysis for the hazards of the case study.
-	/// </summary>
-	public class SafetyAnalysisTests
+namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
+{
+	using SafetySharp.Modeling;
+
+	public class Model : ModelBase
 	{
 		/// <summary>
-		///   Conducts a DCCA for the hazard of a tank rupture. It prints a summary of the analysis and writes out witnesses for
-		///   minimal critical fault sets to disk that can be replayed using the case study's visualization.
+		///   The tank's pressure limit that may not be reached or exceeded.
 		/// </summary>
-		[Test]
-		public void TankRupture()
+		public const int PressureLimit = 60;
+
+		/// <summary>
+		///   The pressure level when the sensor reports the tank to be full.
+		/// </summary>
+		public const int SensorFullPressure = 55;
+
+		/// <summary>
+		///   The controller's timeout in seconds.
+		/// </summary>
+		public const int Timeout = 59;
+
+		[Root(RootKind.Controller)]
+		public readonly Circuits Circuits;
+
+
+		[Root(RootKind.Plant)]
+		public readonly Tank Tank;
+
+
+		public Model()
 		{
-			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Tank.IsRuptured);
+			Circuits = new Circuits();
+			Tank = new Tank();
 
-			result.SaveCounterExamples("counter examples/circuit based pressure tank/dcca/tank rupture");
-			Console.WriteLine(result);
-
-			result.IsComplete.Should().BeTrue();
-			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new[]
-			{
-				new[] { model.Circuits.Sensor.SuppressIsFull }
-			});
+			Bind(nameof(Circuits.Sensor.PhysicalPressure), nameof(Tank.PressureLevel));
+			Bind(nameof(Tank.IsBeingFilled), nameof(Circuits.Pump.IsEnabled));
 		}
 	}
 }
