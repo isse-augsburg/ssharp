@@ -40,12 +40,12 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 		/// <summary>
 		///   The pressure level when the sensor reports the tank to be full.
 		/// </summary>
-		public const int SensorFullPressure = 55;
+		public const int SensorFullPressure = 50;
 
 		/// <summary>
 		///   The controller's timeout in seconds.
 		/// </summary>
-		public const int Timeout = 59;
+		public const int Timeout = 55;
 
 		[Root(RootKind.Controller)]
 		public readonly Circuits Circuits;

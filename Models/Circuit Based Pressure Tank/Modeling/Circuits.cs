@@ -109,6 +109,11 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 			_currentCombinatorMotorCircuit.ConnectOutWithIn(Pump.MainCircuit,
 				PowerSourceMotorCircuit.NegativePole);
 			_currentCombinatorMotorCircuit.CommitFlow();
+
+
+			K1.StuckFault.Name = $"{nameof(K1)}Stuck";
+			K2.StuckFault.Name = $"{nameof(K2)}Stuck";
+			Timer.StuckFault.Name = $"{nameof(Timer)}Stuck";
 		}
 
 		public override void Update()
