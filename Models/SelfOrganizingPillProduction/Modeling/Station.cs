@@ -89,7 +89,9 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// <param name="condition">The container's current condition.</param>
         public void ResourceReady(Station source, Condition condition)
         {
-            resourceRequests.Add(new ResourceRequest(source, condition));
+            var request = new ResourceRequest(source, condition);
+            if (!resourceRequests.Contains(request))
+                resourceRequests.Add(request);
         }
 
         /// <summary>
