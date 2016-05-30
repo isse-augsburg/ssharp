@@ -50,15 +50,18 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 		[Root(RootKind.Controller)]
 		public readonly Circuits Circuits;
 
-
 		[Root(RootKind.Plant)]
 		public readonly Tank Tank;
 
+
+		[Root(RootKind.Plant)]
+		public readonly Operator Operator;
 
 		public Model()
 		{
 			Circuits = new Circuits();
 			Tank = new Tank();
+			Operator = new Operator(Circuits.Switch);
 
 			Bind(nameof(Circuits.Sensor.PhysicalPressure), nameof(Tank.PressureLevel));
 			Bind(nameof(Tank.IsBeingFilled), nameof(Circuits.Pump.IsEnabled));

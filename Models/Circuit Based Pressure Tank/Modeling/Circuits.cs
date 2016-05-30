@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 {
+	using System.Diagnostics;
 	using HemodialysisMachine.Utilities.BidirectionalFlow;
 	using SafetySharp.Modeling;
 
@@ -112,8 +113,13 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 
 		public override void Update()
 		{
+			//Debugger.Break();
 			_currentCombinatorControlCircuit.Update();
 			_currentCombinatorMotorCircuit.Update();
+
+			Update(Sensor,Timer, K1, K2,Switch, PowerSourceControlCircuit);
+
+			Update(Pump, PowerSourceMotorCircuit);
 		}
 	}
 }

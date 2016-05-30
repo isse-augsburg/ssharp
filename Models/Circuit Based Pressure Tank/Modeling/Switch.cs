@@ -34,7 +34,7 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 	{
 		public readonly CurrentInToOut MainCircuit;
 
-		public bool SwitchIsPressed = true;
+		public bool SwitchIsPressed = false;
 		
 		public Switch()
 		{

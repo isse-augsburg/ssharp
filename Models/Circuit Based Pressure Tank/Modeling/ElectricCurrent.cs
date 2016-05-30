@@ -123,7 +123,7 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 
 			for (var i = 1; i < Outgoings.Length; i++) //start with second element
 			{
-				target.Available &= Outgoings[i].Backward.Available;
+				target.Available |= Outgoings[i].Backward.Available;
 			}
 		}
 	}
@@ -142,7 +142,7 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 
 			for (var i = 1; i < Incomings.Length; i++) //start with second element
 			{
-				target.Available &= Incomings[i].Forward.Available;
+				target.Available |= Incomings[i].Forward.Available;
 			}
 		}
 
@@ -151,8 +151,7 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 			//Standard behavior: Copy each value
 			for (var i = 0; i < Number; i++)
 			{
-				var target = Incomings[i].Backward;
-				target.CopyValuesFrom(Outgoing.Backward);
+				Incomings[i].Backward.CopyValuesFrom(Outgoing.Backward);
 			}
 		}
 	}

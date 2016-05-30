@@ -32,5 +32,27 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 
 	public class Operator : Component
 	{
+		private bool _pushButtonActionTodo;
+
+		private readonly Switch _switch;
+
+		public Operator(Switch @switch)
+		{
+			_switch = @switch;
+			_pushButtonActionTodo = true;
+		}
+
+		public override void Update()
+		{
+			if (_pushButtonActionTodo)
+			{
+				_pushButtonActionTodo = false;
+				_switch.SwitchIsPressed = true;
+			}
+			else
+			{
+				_switch.SwitchIsPressed = false;
+			}
+		}
 	}
 }

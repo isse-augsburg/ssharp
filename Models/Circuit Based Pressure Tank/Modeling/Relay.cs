@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 {
+	using System.Diagnostics;
 	using SafetySharp.Modeling;
 
 	public class Relay : Component
@@ -49,6 +50,7 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 
 		public override void Update()
 		{
+			//Debugger.Break();
 			// The value of IsClosed in the next step, is determined by the power in the current step
 			var powered = ControlCircuit.IsPowered();
 			if (_openOnPower)
