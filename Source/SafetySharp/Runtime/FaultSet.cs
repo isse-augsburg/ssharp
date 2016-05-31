@@ -38,6 +38,8 @@ namespace SafetySharp.Runtime
 	{
 		private readonly long _faults;
 
+		public uint Cardinality { get; }
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
@@ -45,6 +47,11 @@ namespace SafetySharp.Runtime
 		private FaultSet(long faults)
 		{
 			_faults = faults;
+
+			// count bits set to 1:
+			Cardinality = 0;
+			for (long n = _faults; n != 0; n &= n - 1) // n &= n-1 removes the last 1
+				Cardinality++;
 		}
 
 		/// <summary>
@@ -62,6 +69,8 @@ namespace SafetySharp.Runtime
 
 			foreach (var fault in faults)
 				_faults |= 1L << fault.Identifier;
+
+			Cardinality = (uint)faults.Length;
 		}
 
 		/// <summary>
