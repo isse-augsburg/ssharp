@@ -159,39 +159,7 @@ namespace SafetySharp.Analysis
 				// sets we have to check
 				foreach (var set in sets)
 				{
-					// Enable or disable the faults that the set represents
-					set.SetActivation(nondeterministicFaults);
-
-					// If there was a counter example, the set is a critical set
-					try
-					{
-						var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializer, allFaults));
-
-						if (!result.FormulaHolds)
-						{
-							ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
-							criticalSets.Add(set);
-						}
-						else
-							safeSets.Add(set);
-
-						checkedSets.Add(set);
-
-						if (result.CounterExample != null)
-							counterExamples.Add(set, result.CounterExample);
-					}
-					catch (AnalysisException e)
-					{
-						ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }} [exception thrown]", ConsoleColor.DarkRed);
-
-						checkedSets.Add(set);
-						criticalSets.Add(set);
-
-						exceptions.Add(set, e.InnerException);
-
-						if (e.CounterExample != null)
-							counterExamples.Add(set, e.CounterExample);
-					}
+					CheckSet(set, nondeterministicFaults, allFaults, serializer, criticalSets, safeSets, checkedSets, counterExamples, exceptions);
 				}
 			}
 
@@ -203,6 +171,52 @@ namespace SafetySharp.Analysis
 				model, isComplete, criticalSets, checkedSets,
 				allFaults, suppressedFaults, forcedFaults,
 				counterExamples, exceptions, stopwatch.Elapsed);
+		}
+
+		private bool CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
+			RuntimeModelSerializer serializer, ISet<FaultSet> criticalSets, ISet<FaultSet> safeSets,
+			ISet<FaultSet> checkedSets,
+			Dictionary<FaultSet, CounterExample> counterExamples, Dictionary<FaultSet, Exception> exceptions)
+		{
+			// Enable or disable the faults that the set represents
+			set.SetActivation(nondeterministicFaults);
+
+			// If there was a counter example, the set is a critical set
+			try
+			{
+				var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializer, allFaults));
+
+				if (!result.FormulaHolds)
+				{
+					ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
+					criticalSets.Add(set);
+				}
+				else
+				{
+					ConsoleHelpers.WriteLine($"    safe set:  {{ {set.ToString(allFaults)} }}", ConsoleColor.Blue);
+					safeSets.Add(set);
+				}
+
+				checkedSets.Add(set);
+
+				if (result.CounterExample != null)
+					counterExamples.Add(set, result.CounterExample);
+				return result.FormulaHolds;
+			}
+			catch (AnalysisException e)
+			{
+				ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }} [exception thrown]", ConsoleColor.DarkRed);
+				Console.WriteLine(e);
+
+				checkedSets.Add(set);
+				criticalSets.Add(set);
+
+				exceptions.Add(set, e.InnerException);
+
+				if (e.CounterExample != null)
+					counterExamples.Add(set, e.CounterExample);
+				return false;
+			}
 		}
 
 		/// <summary>
