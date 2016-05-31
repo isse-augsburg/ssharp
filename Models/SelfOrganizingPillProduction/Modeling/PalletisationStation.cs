@@ -11,6 +11,11 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         public override Capability[] AvailableCapabilities { get; } = new[] { new ConsumeCapability() };
 
+        public PalletisationStation()
+        {
+            CompleteStationFailure.Subsumes(PalletisationDefect);
+        }
+
         protected override void ExecuteRole(Role role)
         {
             // unless role is transport only, it will always be { ConsumeCapability }

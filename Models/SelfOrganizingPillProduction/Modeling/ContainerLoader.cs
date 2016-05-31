@@ -19,6 +19,11 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         private readonly ObjectPool<PillContainer> containerStorage = new ObjectPool<PillContainer>(Model.ContainerStorageSize);
 
+        public ContainerLoader()
+        {
+            CompleteStationFailure.Subsumes(NoContainersLeft);
+        }
+
         protected override void ExecuteRole(Role role)
         {
             // This is only called if the current Container comes from another station.

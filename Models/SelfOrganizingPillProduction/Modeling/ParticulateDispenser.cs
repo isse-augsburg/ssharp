@@ -21,6 +21,13 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 (IngredientType[])Enum.GetValues(typeof(IngredientType)),
                 type => new IngredientTank(name, type)
             );
+
+            CompleteStationFailure.Subsumes(DispenserDefect);
+            DispenserDefect.Subsumes(
+                ingredientTanks[(int)IngredientType.BlueParticulate].TankDepleted,
+                ingredientTanks[(int)IngredientType.RedParticulate].TankDepleted,
+                ingredientTanks[(int)IngredientType.YellowParticulate].TankDepleted
+            );
         }
 
         public void SetStoredAmount(IngredientType ingredientType, uint amount)
