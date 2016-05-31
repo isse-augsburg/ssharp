@@ -98,6 +98,16 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
+		///   Returns a new <see cref="FaultSet" /> that represents the union between this instance and
+		///   <paramref name="other." />
+		/// </summary>
+		/// <param name="other">The other fault set that this instance should be unioned with.</param>
+		public FaultSet GetUnion(FaultSet other)
+		{
+			return new FaultSet(_faults | other._faults);
+		}
+
+		/// <summary>
 		///   Checks whether the <paramref name="fault" /> is contained in the set.
 		/// </summary>
 		/// <param name="fault">The fault that should be checked.</param>
