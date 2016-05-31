@@ -34,7 +34,7 @@ namespace SafetySharp.Runtime
 	///   An efficient immutable representation of a fault set.
 	/// </summary>
 	[DebuggerDisplay("{_faults}")]
-	internal struct FaultSet : IEquatable<FaultSet>
+	public struct FaultSet : IEquatable<FaultSet>
 	{
 		private readonly long _faults;
 
@@ -57,13 +57,13 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets a value indicating whether the fault set is empty.
 		/// </summary>
-		internal bool IsEmpty => _faults == 0;
+		public bool IsEmpty => _faults == 0;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="faults">The faults the set should contain.</param>
-		internal FaultSet(params Fault[] faults)
+		public FaultSet(params Fault[] faults)
 		{
 			_faults = 0;
 
@@ -92,7 +92,7 @@ namespace SafetySharp.Runtime
 		///   <paramref name="other." />
 		/// </summary>
 		/// <param name="other">The other fault set that this instance should be intersected with.</param>
-		internal FaultSet GetIntersection(FaultSet other)
+		public FaultSet GetIntersection(FaultSet other)
 		{
 			return new FaultSet(_faults & other._faults);
 		}
@@ -111,7 +111,7 @@ namespace SafetySharp.Runtime
 		///   Checks whether the <paramref name="fault" /> is contained in the set.
 		/// </summary>
 		/// <param name="fault">The fault that should be checked.</param>
-		internal bool Contains(Fault fault)
+		public bool Contains(Fault fault)
 		{
 			Requires.NotNull(fault, nameof(fault));
 			return (_faults & (1 << fault.Identifier)) != 0;
@@ -121,7 +121,7 @@ namespace SafetySharp.Runtime
 		///   Returns a copy of the fault set that contains <paramref name="fault" />.
 		/// </summary>
 		/// <param name="fault">The fault that should be added.</param>
-		internal FaultSet Add(Fault fault)
+		public FaultSet Add(Fault fault)
 		{
 			Requires.NotNull(fault, nameof(fault));
 			return new FaultSet(_faults | (1L << fault.Identifier));
@@ -145,7 +145,7 @@ namespace SafetySharp.Runtime
 		///   Returns a <see cref="Fault" />-based representation of the set.
 		/// </summary>
 		/// <param name="faults">The faults that can potentially be contained in the set.</param>
-		internal IEnumerable<Fault> ToFaultSequence(Fault[] faults)
+		public IEnumerable<Fault> ToFaultSequence(Fault[] faults)
 		{
 			Requires.NotNull(faults, nameof(faults));
 
@@ -160,7 +160,7 @@ namespace SafetySharp.Runtime
 		///   Returns a string representation of the <paramref name="faults" /> contained in the set.
 		/// </summary>
 		/// <param name="faults">The faults that can potentially be contained in the set.</param>
-		internal string ToString(Fault[] faults)
+		public string ToString(Fault[] faults)
 		{
 			Requires.NotNull(faults, nameof(faults));
 
@@ -173,7 +173,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		/// <param name="faultSet">The fault set that is expected to be a super set.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal bool IsSubsetOf(FaultSet faultSet)
+		public bool IsSubsetOf(FaultSet faultSet)
 		{
 			return (_faults & faultSet._faults) == _faults;
 		}
