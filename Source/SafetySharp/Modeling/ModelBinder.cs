@@ -122,6 +122,8 @@ namespace SafetySharp.Modeling
 			DiscoverFaults(model);
 			AssignFaultIdentifiers(model);
 
+			SubsumptionHelper.ProcessSubsumptions();
+
 			model.CreateBindings();
 			CreateBindings(model);
 
