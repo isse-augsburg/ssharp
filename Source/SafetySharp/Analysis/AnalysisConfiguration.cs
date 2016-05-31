@@ -23,7 +23,9 @@
 namespace SafetySharp.Analysis
 {
 	using System;
+	using System.Collections.Generic;
 	using Utilities;
+	using Heuristics;
 
 	/// <summary>
 	///   Configures S#'s model checker, determining the amount of CPU cores and memory to use.
@@ -41,6 +43,11 @@ namespace SafetySharp.Analysis
 		private int _successorStateCapacity;
 
 		/// <summary>
+		///   Gets or sets a list of heuristics to use during the analysis.
+		/// </summary>
+		public List<IFaultSetHeuristic> Heuristics { get; set; }
+
+		/// <summary>
 		///   Gets or sets a value indicating whether only progress reports should be output.
 		/// </summary>
 		public bool ProgressReportsOnly { get; set; }
@@ -54,7 +61,8 @@ namespace SafetySharp.Analysis
 			ProgressReportsOnly = false,
 			StackCapacity = DefaultStackCapacity,
 			StateCapacity = DefaultStateCapacity,
-			SuccessorCapacity = DefaultSuccessorStateCapacity
+			SuccessorCapacity = DefaultSuccessorStateCapacity,
+			Heuristics = new List<IFaultSetHeuristic>()
 		};
 
 		/// <summary>
