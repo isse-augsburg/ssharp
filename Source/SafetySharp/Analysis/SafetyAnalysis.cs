@@ -128,13 +128,37 @@ namespace SafetySharp.Analysis
 				// Generate the sets for the current level that we'll have to check
 				var sets = GeneratePowerSetLevel(safeSets, criticalSets, cardinality, allFaults);
 
-				// Clear the safe sets, we don't need the previous level to generate the next one
-				safeSets.Clear();
+				// check sets suggested by heuristics
+				if ((Configuration.Heuristics?.Count ?? 0) > 0)
+				{
+					var heuristicSets = Configuration.Heuristics.SelectMany(heuristic => heuristic.MakeSuggestions(sets))
+						.Where(set => !criticalSets.Any(critical => critical.IsSubsetOf(set) && !safeSets.Any(safe => set.IsSubsetOf(safe))))
+						.OrderByDescending(set => set.Cardinality)
+						.ToList();
 
-				// If there are no sets to check, we're done; this happens when there are so many critical sets
-				// that this level does not contain any set that is not a super set of any of those critical sets
-				if (sets.Count == 0)
-					break;
+					if (heuristicSets.Count > 0)
+						ConsoleHelpers.WriteLine($"Checking up to {heuristicSets.Count} sets suggested by heuristics...");
+					for (int i = 0; i < heuristicSets.Count; ++i)
+					{
+						var set = heuristicSets[i];
+						bool isSafe = CheckSet(set, nondeterministicFaults, allFaults, serializer, criticalSets, safeSets, checkedSets, counterExamples, exceptions);
+
+						if (isSafe)
+						{
+							// remove safe subsets
+							for (int j = i + 1; j < heuristicSets.Count; ++j)
+								if (heuristicSets[j].IsSubsetOf(set))
+									heuristicSets.RemoveAt(j);
+
+							sets.RemoveWhere(s => s.IsSubsetOf(set));
+						}
+						else
+						{
+							// remove critical supersets
+							sets.RemoveWhere(s => set.IsSubsetOf(s));
+						}
+					}
+				}
 
 				// Remove all sets that conflict with the forced or suppressed faults; these sets are considered to be safe.
 				// If no sets remain, skip to the next level
@@ -274,6 +298,10 @@ namespace SafetySharp.Analysis
 					// the ones we don't want
 					foreach (var safeSet in safeSets)
 					{
+						// skip safe sets that are too small (already checked) or too large (suggested by heuristics)
+						if (safeSet.Cardinality != cardinality - 1)
+							continue;
+
 						foreach (var fault in faults)
 						{
 							// If we're trying to add an element to the set that it already contains, we get a set
@@ -283,8 +311,9 @@ namespace SafetySharp.Analysis
 
 							var set = safeSet.Add(fault);
 
-							// Check if the newly generated set it a super set of any critical sets; if so, discard it
-							if (criticalSets.All(s => !s.IsSubsetOf(set)))
+							// Check if the newly generated set is a super set of any critical sets or subset of any safe sets;
+							// if so, discard it
+							if (criticalSets.All(s => !s.IsSubsetOf(set)) && safeSets.All(s => !set.IsSubsetOf(s)))
 								result.Add(set);
 						}
 					}
