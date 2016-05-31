@@ -42,6 +42,7 @@
       <HintPath>..\..\Dependencies\MahApps.Metro.1.1.3-ALPHA028\lib\net45\MahApps.Metro.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Expression.Drawing, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="Microsoft.CSharp" />
@@ -84,6 +85,24 @@
     <Compile Include="PressureTank.xaml.cs">
       <DependentUpon>PressureTank.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CircuitBasedPressureTank.xaml.cs">
+      <DependentUpon>CircuitBasedPressureTank.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\Circuits\Pump.xaml.cs">
+      <DependentUpon>Pump.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\Circuits\PowerSource.xaml.cs">
+      <DependentUpon>PowerSource.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\Circuits\NamedElement.xaml.cs">
+      <DependentUpon>NamedElement.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\Circuits\Switch.xaml.cs">
+      <DependentUpon>Switch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\Circuits\LoadCircuitContact.xaml.cs">
+      <DependentUpon>LoadCircuitContact.xaml</DependentUpon>
+    </Compile>
     <Page Include="HeightControlSystem.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -119,6 +138,30 @@
     <Page Include="PressureTank.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CircuitBasedPressureTank.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Circuits\Pump.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Circuits\PowerSource.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Circuits\NamedElement.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Circuits\Switch.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Circuits\LoadCircuitContact.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Resources\Icons.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -178,5 +221,6 @@
   <ItemGroup>
     <Resource Include="Resources\Entypo-license.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
