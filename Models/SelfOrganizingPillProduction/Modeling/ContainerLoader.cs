@@ -40,6 +40,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             if (Container == null && role != null)
             {
                 var recipe = role.Recipe;
+                currentRole = role;
 
                 // role.capabilitiesToApply will always be { ProduceCapability }
                 Container = containerStorage.Allocate();

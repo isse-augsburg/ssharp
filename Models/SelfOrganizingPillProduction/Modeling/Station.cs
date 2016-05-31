@@ -49,6 +49,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         private static int instanceCounter = 0;
         protected readonly string name;
 
+        protected Role currentRole = null;
+
         public Station()
         {
             name = $"Station#{++instanceCounter}";
@@ -66,8 +68,9 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 var role = ChooseRole(request.Source, request.Condition);
                 if (role != null)
                 {
+                    currentRole = role;
                     Container = request.Source.TransferResource();
-                    resourceRequests.RemoveAt(0);
+                    resourceRequests.Remove(request);
 
                     ExecuteRole(role);
                     role.PostCondition.Port?.ResourceReady(source: this, condition: role.PostCondition);
@@ -94,6 +97,11 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 resourceRequests.Add(request);
         }
 
+        public void RemoveRequest(Station source, Condition condition)
+        {
+            resourceRequests.Remove(new ResourceRequest(source, condition));
+        }
+
         /// <summary>
         /// Instructs the station to hand over its current container to the caller.
         /// </summary>
@@ -104,6 +112,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 throw new InvalidOperationException("No container available");
             var resource = Container;
             Container = null;
+            currentRole = null;
             return resource;
         }
 
@@ -122,6 +131,21 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                                    .Distinct()
                                    // in an array, as AllocatedRoles may be modified by reconfiguration below
                                    .ToArray();
+
+            // if the current resource's recipe was reconfigured, drop it from production
+            //
+            // TODO: try to fix it, i.e. check if the reconfiguration even affected
+            // currentRole.PostCondition.Port or removed currentRole, and if so,
+            // where to send the resource next
+            if (Container != null && inconsistentRecipes.Contains(Container.Recipe))
+            {
+                Container.Recipe.DropContainer(Container);
+
+                currentRole.PostCondition.Port?.RemoveRequest(source: this, condition: currentRole.PostCondition);
+
+                Container = null;
+                currentRole = null;
+            }
 
             foreach (var recipe in inconsistentRecipes)
             {

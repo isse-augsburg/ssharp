@@ -48,6 +48,16 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         }
 
         /// <summary>
+        /// Notifies the recipe that production of the given
+        /// <paramref name="container"/> failed.
+        /// </summary>
+        public void DropContainer(PillContainer container)
+        {
+            producedAmount--;
+            RemoveContainer(container);
+        }
+
+        /// <summary>
         /// True if the specified <see cref="Amount"/> of containers was produced
         /// and completely processed for the recipe.
         /// </summary>
