@@ -24,6 +24,9 @@
             <TabItem Header="Hemodialysis Machine">
                 <visualization:HdMachine />
             </TabItem>
+            <TabItem Header="Pressure Tank Circuit">
+                <visualization:CircuitBasedPressureTank />
+            </TabItem>
         </TabControl>
     </Grid>
 </controls:MetroWindow>

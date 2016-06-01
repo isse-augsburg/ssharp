@@ -62,6 +62,11 @@ namespace SafetySharp.CaseStudies.Visualizations
 			
 			SimulationControls.MaxSpeed = 64;
 			SimulationControls.ChangeSpeed(8);
+
+			NamedElementK1.NameOfElement = "K1";
+			NamedElementK2.NameOfElement = "K2";
+			NamedElementSensor.NameOfElement = "S";
+			NamedElementTimer.NameOfElement = "T";
 		}
 
 		private void OnSuppressPumping(object sender, RoutedEventArgs e)

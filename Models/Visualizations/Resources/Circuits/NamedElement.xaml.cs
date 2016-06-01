@@ -24,5 +24,21 @@ namespace SafetySharp.CaseStudies.Visualizations.Resources.Circuits
 		{
 			InitializeComponent();
 		}
+
+		/// <summary>
+		/// Gets or sets the NameOfElement
+		/// </summary>
+		public string NameOfElement
+		{
+			get { return (string)GetValue(NameOfElementProperty); }
+			set { SetValue(NameOfElementProperty, value); }
+		}
+
+		/// <summary>
+		/// Identified the NameOfElement dependency property
+		/// </summary>
+		public static readonly DependencyProperty NameOfElementProperty =
+			DependencyProperty.Register("NameOfElement", typeof(string),
+			  typeof(NamedElement), new PropertyMetadata("?"));
 	}
 }

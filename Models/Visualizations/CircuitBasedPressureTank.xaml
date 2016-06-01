@@ -64,15 +64,15 @@
                 </Rectangle>
                 <TextBlock x:Name="PressureLevel" Canvas.Left="413.143" TextWrapping="NoWrap" Width="70" TextAlignment="Center" Text="100%"
                            Canvas.Top="80.811" Foreground="Black" FontSize="24" FontWeight="Bold" />
-                <Rectangle x:Name="TimerFailure" Height="31.33" Canvas.Left="303.56" Canvas.Top="183.59" Width="17.169"
+                <Rectangle x:Name="TimerFailure" Height="31.33" Canvas.Left="319.386" Canvas.Top="202.582" Width="17.169"
                            Style="{StaticResource FailureIndicator}" />
                 <TextBlock x:Name="CountDown" Canvas.Left="267.775" TextWrapping="NoWrap" Text="45" Canvas.Top="127.789" Foreground="White"
                            FontSize="24" FontWeight="Bold" />
                 <Rectangle x:Name="SensorFailure" Height="31.33" Canvas.Left="373.197" Canvas.Top="72.803" Width="17.169"
                            Style="{StaticResource FailureIndicator}" />
-                <Rectangle x:Name="PumpFailure" Height="31.33" Canvas.Left="309.89" Canvas.Top="240.566" Width="17.169"
+                <Rectangle x:Name="PumpFailure" Height="31.33" Canvas.Left="309.89" Canvas.Top="256.716" Width="17.169"
                            Style="{StaticResource FailureIndicator}" />
-                <circuits:PowerSource Canvas.Left="92.366" Canvas.Top="213.755" RenderTransformOrigin="0.5,0.5">
+                <circuits:PowerSource Canvas.Left="92.366" Canvas.Top="229.904" RenderTransformOrigin="0.5,0.5">
                     <circuits:PowerSource.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.35"/>
@@ -92,7 +92,7 @@
                         </TransformGroup>
                     </circuits:Switch.RenderTransform>
                 </circuits:Switch>
-                <circuits:LoadCircuitContact Canvas.Left="89.635" Canvas.Top="178.936" RenderTransformOrigin="0.5,0.5">
+                <circuits:LoadCircuitContact Canvas.Left="89.635" Canvas.Top="195.085" RenderTransformOrigin="0.5,0.5">
                     <circuits:LoadCircuitContact.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.35"/>
@@ -102,7 +102,7 @@
                         </TransformGroup>
                     </circuits:LoadCircuitContact.RenderTransform>
                 </circuits:LoadCircuitContact>
-                <circuits:Pump Canvas.Left="241.571" Canvas.Top="204.259" RenderTransformOrigin="0.5,0.5">
+                <circuits:Pump Canvas.Left="241.571" Canvas.Top="220.408" RenderTransformOrigin="0.5,0.5">
                     <circuits:Pump.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
@@ -142,7 +142,8 @@
                         </TransformGroup>
                     </circuits:LoadCircuitContact.RenderTransform>
                 </circuits:LoadCircuitContact>
-                <circuits:NamedElement Canvas.Left="332.457" Canvas.Top="73.286" RenderTransformOrigin="0.5,0.5">
+                <circuits:NamedElement Canvas.Left="332.457" Canvas.Top="73.286" RenderTransformOrigin="0.5,0.5" x:Name="NamedElementSensor">
+                    <!--<circuits:NamedElement.NameOfElement>K3</circuits:NamedElement.NameOfElement> (Not usable due to a bug in Blend and x64)-->
                     <circuits:NamedElement.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
@@ -152,7 +153,7 @@
                         </TransformGroup>
                     </circuits:NamedElement.RenderTransform>
                 </circuits:NamedElement>
-                <circuits:NamedElement Canvas.Left="237.236" Canvas.Top="133.428" RenderTransformOrigin="0.5,0.5">
+                <circuits:NamedElement Canvas.Left="249.748" Canvas.Top="136.109" RenderTransformOrigin="0.5,0.5" x:Name="NamedElementTimer">
                     <circuits:NamedElement.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
@@ -162,7 +163,7 @@
                         </TransformGroup>
                     </circuits:NamedElement.RenderTransform>
                 </circuits:NamedElement>
-                <circuits:NamedElement Canvas.Left="161.268" Canvas.Top="133.688" RenderTransformOrigin="0.5,0.5">
+                <circuits:NamedElement Canvas.Left="161.268" Canvas.Top="133.688" RenderTransformOrigin="0.5,0.5" x:Name="NamedElementK2">
                     <circuits:NamedElement.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
@@ -172,7 +173,7 @@
                         </TransformGroup>
                     </circuits:NamedElement.RenderTransform>
                 </circuits:NamedElement>
-                <circuits:NamedElement Canvas.Left="158.103" Canvas.Top="35.302" RenderTransformOrigin="0.5,0.5">
+                <circuits:NamedElement Canvas.Left="158.103" Canvas.Top="35.302" RenderTransformOrigin="0.5,0.5" x:Name="NamedElementK1">
                     <circuits:NamedElement.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
@@ -192,24 +193,26 @@
                         </TransformGroup>
                     </circuits:LoadCircuitContact.RenderTransform>
                 </circuits:LoadCircuitContact>
-                <Path Data="M137.11528,212.06522 L137.11528,195.55408 175.09964,195.55408" Height="16.668" Canvas.Left="137.115" Stretch="Fill" Canvas.Top="222.09" Width="37.984" StrokeThickness="1.75" Stroke="White"/>
-                <Path Data="M137.11528,183.57107 L137.11528,195.55438 296.89068,195.55438" Height="12.574" Canvas.Left="137.115" Stretch="Fill" Canvas.Top="260.016" Width="154.147" StrokeThickness="1.75" Stroke="White"/>
-                <Path Data="M289.0516,244.68072 L289.0516,237.47522" Height="8.956" Canvas.Left="289.052" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="264.475" Width="1.75"/>
-                <Path Data="M244.73684,194.03533 L285.01111,194.03533 285.01111,212.15211" Height="19.867" Canvas.Left="244.737" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="221.036" Width="42.024"/>
+                <Path Data="M137.11528,212.06522 L137.11528,195.55408 175.09964,195.55408" Height="16.668" Canvas.Left="137.115" Stretch="Fill" Canvas.Top="238.24" Width="37.984" StrokeThickness="1.75" Stroke="White"/>
+                <Path Data="M137.11528,183.57107 L137.11528,195.55438 296.89068,195.55438" Height="12.574" Canvas.Left="137.115" Stretch="Fill" Canvas.Top="276.166" Width="154.147" StrokeThickness="1.75" Stroke="White"/>
+                <Path Data="M289.0516,244.68072 L289.0516,237.47522" Height="8.956" Canvas.Left="289.052" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="280.625" Width="1.75"/>
+                <Path Data="M244.73684,194.03533 L285.01111,194.03533 285.01111,212.15211" Height="19.867" Canvas.Left="244.737" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="237.186" Width="42.024"/>
                 <Path Data="M209.9181,175.04333 L209.9181,164.67202" Height="12.121" Canvas.Left="209.918" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="191.673" Width="1.75"/>
-                <Path Data="M222.57946,156.05126 L272.35035,156.05126" Height="1.75" Canvas.Left="222.579" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="183.052" Width="51.521"/>
-                <Path Data="M295.38228,156.05128 L338.82233,156.05128 338.82233,126.68787" Height="31.113" Canvas.Left="295.382" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="153.689" Width="45.19"/>
+                <Path Data="M222.57946,156.05126 L282.90156,156.05126" Height="1.75" Canvas.Left="222.579" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="183.052" Width="62.071"/>
+                <Path Data="M309.62653,156.05128 L338.82233,156.05128 338.82233,126.68787" Height="31.113" Canvas.Left="309.631" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="153.689" Width="30.941"/>
                 <Path Data="M330.20102,51.595063 L338.82206,51.595063 338.82206,57.051182" Height="7.206" Canvas.Left="330.201" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="78.595" Width="10.371"/>
                 <Path Data="M263.72888,51.595042 L215.37366,51.595042" Height="1.75" Canvas.Left="215.374" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="78.595" Width="50.105"/>
                 <Path Data="M194.0914,57.925725 L171.05942,57.925725 171.05942,152.01105" Height="95.835" Canvas.Left="171.059" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="84.926" Width="24.782"/>
                 <Path Data="M197.25674,152.88592 L171.05876,152.88592" Height="1.75" Canvas.Left="171.059" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="179.886" Width="27.948"/>
-                <Path Data="M206.75276,45.264375 L206.75276,25.397093 107.75198,25.397093 107.75198,120.35835" Height="96.71" Canvas.Left="107.752" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="52.398" Width="100.751"/>
+                <Path Data="M206.75276,45.264375 L206.75276,25.397093 107.75198,25.397093 107.75198,120.35835" Height="96.71" Canvas.Left="107.752" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="52.398" Width="100.751" StrokeDashArray="2 2"/>
                 <Path Data="M171.93402,152.88592 L161.56302,152.88592 161.56302,151.5892 161.56302,139.34989 145.73632,139.34989" Height="15.286" Canvas.Left="145.736" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="166.35" Width="27.948"/>
                 <Path Data="M162.438,159.21661 L162.438,189.99501 148.90164,189.99501" Height="32.528" Canvas.Left="148.902" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="186.217" Width="15.286"/>
                 <Path Data="M80.13916,190.86999 L63.43762,190.86999 63.43762,161.50733" Height="31.113" Canvas.Left="63.437" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="188.507" Width="18.452"/>
                 <Path Data="M76.97382,140.22455 L63.437284,140.22455 63.437284,164.67223" Height="26.198" Canvas.Left="63.437" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="167.225" Width="15.287"/>
                 <Path Data="M61.14712,165.54728 L28.618841,165.54728 28.618841,91.869151" Height="75.428" Canvas.Left="28.619" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="118.87" Width="34.278"/>
                 <Path Data="M29.49372,67.421742 L29.49372,9.5707591 338.82176,9.5707591 338.82176,50.720185" Height="59.601" Canvas.Left="29.494" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="36.571" Width="311.078"/>
+                <Path Data="M208.59936,218.40846 L208.59936,201.70722" Height="18.451" Canvas.Left="208.599" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="201.707" Width="1.75" StrokeDashArray="2 2"/>
+                <Path Data="M297.22888,101.29088 L297.22888,170.05322" Height="70.512" Canvas.Left="295.382" Stretch="Fill" Stroke="White" StrokeThickness="1.75" Canvas.Top="101.172" Width="1.75" StrokeDashArray="2 2"/>
 
             </Canvas>
         </Viewbox>

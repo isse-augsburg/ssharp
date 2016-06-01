@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:SafetySharp.CaseStudies.Visualizations.Resources.Circuits"
              xmlns:ed="http://schemas.microsoft.com/expression/2010/drawing" x:Class="SafetySharp.CaseStudies.Visualizations.Resources.Circuits.NamedElement"
              mc:Ignorable="d" 
-             d:DesignHeight="94.7" d:DesignWidth="94.7">
+             d:DesignHeight="94.7" d:DesignWidth="94.7"
+             x:Name="parent">
     <UserControl.Resources>
         <Storyboard x:Key="GettingActivatedStoryBoard">
             <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse">
@@ -29,6 +30,6 @@
     </UserControl.Triggers>
     <Grid>
         <Ellipse x:Name="ellipse" Fill="White" Stroke="Black" Width="94.7" Height="94.7"/>
-        <TextBlock x:Name="textBlock" Margin="0,14,0,15.7" TextWrapping="Wrap" Text="K1" FontSize="48" HorizontalAlignment="Center" TextAlignment="Center" Width="94.7"/>
+        <TextBlock x:Name="textBlock" Margin="0,14,0,15.7" TextWrapping="Wrap" Text="{Binding NameOfElement, ElementName=parent}" FontSize="48" HorizontalAlignment="Center" TextAlignment="Center" Width="94.7" Foreground="Black"/>
     </Grid>
 </UserControl>
