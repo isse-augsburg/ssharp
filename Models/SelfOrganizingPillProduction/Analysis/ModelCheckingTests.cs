@@ -13,11 +13,25 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
         [Test]
         public void SimpleDcca()
         {
+            var model = new ModelSetupParser().Parse("Analysis/simple_setup.model");
+            Dcca(model, new SubsumptionHeuristic(), RedundancyHeuristic(model));
+        }
+
+        [Test]
+        public void SimpleDccaWithoutHeuristics()
+        {
             Dcca(new ModelSetupParser().Parse("Analysis/simple_setup.model"));
         }
 
         [Test]
         public void MediumDcca()
+        {
+            var model = new ModelSetupParser().Parse("Analysis/medium_setup.model");
+            Dcca(model, new SubsumptionHeuristic(), RedundancyHeuristic(model));
+        }
+
+        [Test]
+        public void MediumDccaWithoutHeuristics()
         {
             Dcca(new ModelSetupParser().Parse("Analysis/medium_setup.model"));
         }
@@ -25,27 +39,37 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
         [Test]
         public void ComplexDcca()
         {
+            var model = new ModelSetupParser().Parse("Analysis/complex_setup.model");
+            Dcca(model, new SubsumptionHeuristic(), RedundancyHeuristic(model));
+        }
+
+        [Test]
+        public void ComplexDccaWithoutHeuristics()
+        {
             Dcca(new ModelSetupParser().Parse("Analysis/complex_setup.model"));
         }
 
-        private void Dcca(Model model)
+        private void Dcca(Model model, params IFaultSetHeuristic[] heuristics)
         {
             var modelChecker = new SafetyAnalysis();
             modelChecker.Configuration.StateCapacity = 40000;
             modelChecker.Configuration.CpuCount = 1;
+            modelChecker.Configuration.Heuristics.AddRange(heuristics);
 
-            modelChecker.Configuration.Heuristics.Add(new SubsumptionHeuristic());
-            modelChecker.Configuration.Heuristics.Add(new RedundancyRemainingHeuristic(
+            var result = modelChecker.ComputeMinimalCriticalSets(model, model.ObserverController.Unsatisfiable);
+            System.Console.WriteLine(result);
+        }
+
+        private IFaultSetHeuristic RedundancyHeuristic(Model model)
+        {
+            return new RedundancyRemainingHeuristic(
                 model,
                 model.Stations.OfType<ContainerLoader>().Select(c => c.NoContainersLeft),
                 model.Stations.OfType<ParticulateDispenser>().Select(d => d.BlueTankDepleted),
                 model.Stations.OfType<ParticulateDispenser>().Select(d => d.RedTankDepleted),
                 model.Stations.OfType<ParticulateDispenser>().Select(d => d.YellowTankDepleted),
                 model.Stations.OfType<PalletisationStation>().Select(p => p.PalletisationDefect)
-            ));
-
-            var result = modelChecker.ComputeMinimalCriticalSets(model, model.ObserverController.Unsatisfiable);
-            System.Console.WriteLine(result);
+            );
         }
 
         [Test]
