@@ -53,5 +53,24 @@
 
             return subsumed;
         }
+
+        public static FaultSet SubsumingFaults(this FaultSet faults)
+        {
+            var subsuming = faults;
+
+            uint oldCount;
+            do
+            {
+                oldCount = subsuming.Cardinality;
+
+                foreach (var subsumption in subsumptions)
+                {
+                    if (!subsumption.Value.GetIntersection(subsuming).IsEmpty)
+                        subsuming = subsuming.GetUnion(subsumption.Key);
+                }
+            } while (oldCount < subsuming.Cardinality);
+
+            return subsuming;
+        }
     }
 }
