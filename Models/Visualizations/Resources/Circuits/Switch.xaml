@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:SafetySharp.CaseStudies.Visualizations.Resources.Circuits"
              xmlns:ed="http://schemas.microsoft.com/expression/2010/drawing" x:Class="SafetySharp.CaseStudies.Visualizations.Resources.Circuits.Switch"
              mc:Ignorable="d" 
-             d:DesignHeight="68" d:DesignWidth="241">
+             d:DesignHeight="68" d:DesignWidth="241"
+             x:Name="parent">
     <UserControl.Resources>
         <Storyboard x:Key="CloseCircuitStoryBoard">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)" Storyboard.TargetName="rectangle">

@@ -88,21 +88,23 @@
                         </TransformGroup>
                     </circuits:PowerSource.RenderTransform>
                 </circuits:PowerSource>
-                <circuits:Switch Canvas.Left="-6.495" Canvas.Top="173.553" RenderTransformOrigin="0.5,0.5" x:Name="Switch">
-                    <circuits:Switch.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform ScaleX="0.3" ScaleY="0.35"/>
-                            <SkewTransform/>
-                            <RotateTransform/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </circuits:Switch.RenderTransform>
-                    <circuits:Switch.ContextMenu>
+                <Canvas Height="66" Canvas.Left="-6" Canvas.Top="174" Width="241">
+                    <circuits:Switch RenderTransformOrigin="0.5,0.5" x:Name="Switch">
+                        <circuits:Switch.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="0.3" ScaleY="0.35"/>
+                                <SkewTransform/>
+                                <RotateTransform/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </circuits:Switch.RenderTransform>
+                    </circuits:Switch>
+                    <Canvas.ContextMenu>
                         <ContextMenu StaysOpen="true">
                             <MenuItem x:Name="SwitchStuck" Header="Switch stuck" IsCheckable="true" Click="OnSwitchStuck" />
                         </ContextMenu>
-                    </circuits:Switch.ContextMenu>
-                </circuits:Switch>
+                    </Canvas.ContextMenu>
+                </Canvas>
                 <circuits:LoadCircuitContact Canvas.Left="89.635" Canvas.Top="195.085" RenderTransformOrigin="0.5,0.5" x:Name="LoadCircuitContactK2">
                     <circuits:LoadCircuitContact.RenderTransform>
                         <TransformGroup>
@@ -113,21 +115,23 @@
                         </TransformGroup>
                     </circuits:LoadCircuitContact.RenderTransform>
                 </circuits:LoadCircuitContact>
-                <circuits:Pump Canvas.Left="241.571" Canvas.Top="220.408" RenderTransformOrigin="0.5,0.5" x:Name="Pump">
-                    <circuits:Pump.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
-                            <SkewTransform/>
-                            <RotateTransform/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </circuits:Pump.RenderTransform>
-                    <circuits:Pump.ContextMenu>
+                <Canvas Height="95" Canvas.Left="242" Canvas.Top="220" Width="95">
+                    <circuits:Pump RenderTransformOrigin="0.5,0.5" x:Name="Pump">
+                        <circuits:Pump.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
+                                <SkewTransform/>
+                                <RotateTransform/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </circuits:Pump.RenderTransform>
+                    </circuits:Pump>
+                    <Canvas.ContextMenu>
                         <ContextMenu StaysOpen="true">
                             <MenuItem x:Name="SuppressPumping" Header="Suppress 'Pumping'" IsCheckable="true" Click="OnSuppressPumping" />
                         </ContextMenu>
-                    </circuits:Pump.ContextMenu>
-                </circuits:Pump>
+                    </Canvas.ContextMenu>
+                </Canvas>
                 <circuits:PowerSource x:Name="PowerSourceControlCircuit" Canvas.Left="-18.591" Canvas.Top="71.076" RenderTransformOrigin="0.5,0.5">
                     <circuits:PowerSource.RenderTransform>
                         <TransformGroup>
@@ -158,68 +162,76 @@
                         </TransformGroup>
                     </circuits:LoadCircuitContact.RenderTransform>
                 </circuits:LoadCircuitContact>
-                <circuits:NamedElement Canvas.Left="332.457" Canvas.Top="73.286" RenderTransformOrigin="0.5,0.5" x:Name="NamedElementSensor">
-                    <!--<circuits:NamedElement.NameOfElement>K3</circuits:NamedElement.NameOfElement> (Not usable due to a bug in Blend and x64)-->
-                    <circuits:NamedElement.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
-                            <SkewTransform/>
-                            <RotateTransform/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </circuits:NamedElement.RenderTransform>
-                    <circuits:NamedElement.ContextMenu>
+                <Canvas Height="95" Canvas.Left="332" Canvas.Top="73" Width="95">
+                    <circuits:NamedElement RenderTransformOrigin="0.5,0.5" x:Name="NamedElementSensor">
+                        <!--<circuits:NamedElement.NameOfElement>K3</circuits:NamedElement.NameOfElement> (Not usable due to a bug in Blend and x64)-->
+                        <circuits:NamedElement.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
+                                <SkewTransform/>
+                                <RotateTransform/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </circuits:NamedElement.RenderTransform>
+                    </circuits:NamedElement>
+                    <Canvas.ContextMenu>
                         <ContextMenu StaysOpen="true">
                             <MenuItem x:Name="SensorRelayStuck" Header="Relay got stuck" IsCheckable="true" Click="OnSensorRelayStuck" />
                             <MenuItem x:Name="SensorSupressIsFull" Header="IsFull suppressed" IsCheckable="true" Click="OnSensorSupressIsFull" />
                         </ContextMenu>
-                    </circuits:NamedElement.ContextMenu>
-                </circuits:NamedElement>
-                <circuits:NamedElement Canvas.Left="249.748" Canvas.Top="136.109" RenderTransformOrigin="0.5,0.5" x:Name="NamedElementTimer">
-                    <circuits:NamedElement.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
-                            <SkewTransform/>
-                            <RotateTransform/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </circuits:NamedElement.RenderTransform>
-                    <circuits:NamedElement.ContextMenu>
+                    </Canvas.ContextMenu>
+                </Canvas>
+                <Canvas Height="95" Canvas.Left="250" Canvas.Top="136" Width="95">
+                    <circuits:NamedElement RenderTransformOrigin="0.5,0.5" x:Name="NamedElementTimer">
+                        <circuits:NamedElement.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
+                                <SkewTransform/>
+                                <RotateTransform/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </circuits:NamedElement.RenderTransform>
+                    </circuits:NamedElement>
+                    <Canvas.ContextMenu>
                         <ContextMenu StaysOpen="true">
                             <MenuItem x:Name="TimerRelayStuck" Header="Relay got stuck" IsCheckable="true" Click="OnTimerRelayStuck" />
                         </ContextMenu>
-                    </circuits:NamedElement.ContextMenu>
-                </circuits:NamedElement>
-                <circuits:NamedElement Canvas.Left="161.268" Canvas.Top="133.688" RenderTransformOrigin="0.5,0.5" x:Name="NamedElementK2">
-                    <circuits:NamedElement.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
-                            <SkewTransform/>
-                            <RotateTransform/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </circuits:NamedElement.RenderTransform>
-                    <circuits:NamedElement.ContextMenu>
+                    </Canvas.ContextMenu>
+                </Canvas>
+                <Canvas Height="95" Canvas.Left="161" Canvas.Top="134" Width="95">
+                    <circuits:NamedElement RenderTransformOrigin="0.5,0.5" x:Name="NamedElementK2">
+                        <circuits:NamedElement.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
+                                <SkewTransform/>
+                                <RotateTransform/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </circuits:NamedElement.RenderTransform>
+                    </circuits:NamedElement>
+                    <Canvas.ContextMenu>
                         <ContextMenu StaysOpen="true">
                             <MenuItem x:Name="RelayK2Stuck" Header="Relay got stuck" IsCheckable="true" Click="OnRelayK2Stuck" />
                         </ContextMenu>
-                    </circuits:NamedElement.ContextMenu>
-                </circuits:NamedElement>
-                <circuits:NamedElement Canvas.Left="158.103" Canvas.Top="35.302" RenderTransformOrigin="0.5,0.5" x:Name="NamedElementK1">
-                    <circuits:NamedElement.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
-                            <SkewTransform/>
-                            <RotateTransform/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </circuits:NamedElement.RenderTransform>
-                    <circuits:NamedElement.ContextMenu>
+                    </Canvas.ContextMenu>
+                </Canvas>
+                <Canvas Height="95" Canvas.Left="158" Canvas.Top="35" Width="95">
+                    <circuits:NamedElement RenderTransformOrigin="0.5,0.5" x:Name="NamedElementK1">
+                        <circuits:NamedElement.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
+                                <SkewTransform/>
+                                <RotateTransform/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </circuits:NamedElement.RenderTransform>
+                    </circuits:NamedElement>
+                    <Canvas.ContextMenu>
                         <ContextMenu StaysOpen="true">
                             <MenuItem x:Name="RelayK1Stuck" Header="Relay got stuck" IsCheckable="true" Click="OnRelayK1Stuck" />
                         </ContextMenu>
-                    </circuits:NamedElement.ContextMenu>
-                </circuits:NamedElement>
+                    </Canvas.ContextMenu>
+                </Canvas>
                 <circuits:LoadCircuitContact Canvas.Left="-9.66" Canvas.Top="124.227" RenderTransformOrigin="0.5,0.5" x:Name="LoadCircuitContactK1">
                     <circuits:LoadCircuitContact.RenderTransform>
                         <TransformGroup>
