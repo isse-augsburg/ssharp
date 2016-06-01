@@ -89,7 +89,7 @@ namespace SafetySharp.Runtime
 
 		/// <summary>
 		///   Returns a new <see cref="FaultSet" /> that represents the intersection between this instance and
-		///   <paramref name="other." />
+		///   <paramref name="other" />.
 		/// </summary>
 		/// <param name="other">The other fault set that this instance should be intersected with.</param>
 		public FaultSet GetIntersection(FaultSet other)
@@ -99,12 +99,23 @@ namespace SafetySharp.Runtime
 
 		/// <summary>
 		///   Returns a new <see cref="FaultSet" /> that represents the union between this instance and
-		///   <paramref name="other." />
+		///   <paramref name="other" />.
 		/// </summary>
 		/// <param name="other">The other fault set that this instance should be unioned with.</param>
 		public FaultSet GetUnion(FaultSet other)
 		{
 			return new FaultSet(_faults | other._faults);
+		}
+
+		/// <summary>
+		///   Returns a new <see cref="FaultSet" /> that represents the set difference between this
+		///   instance and <paramref name="other"/>.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		public FaultSet GetDifference(FaultSet other)
+		{
+			return new FaultSet(_faults & ~other._faults);
 		}
 
 		/// <summary>
