@@ -35,7 +35,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
             modelChecker.Configuration.CpuCount = 1;
 
             modelChecker.Configuration.Heuristics.Add(new SubsumptionHeuristic());
-            modelChecker.Configuration.Heuristics.Add(new RedundanyRemainingHeuristic(
+            modelChecker.Configuration.Heuristics.Add(new RedundancyRemainingHeuristic(
                 model,
                 model.Stations.OfType<ContainerLoader>().Select(c => c.NoContainersLeft),
                 model.Stations.OfType<ParticulateDispenser>().Select(d => d.BlueTankDepleted),

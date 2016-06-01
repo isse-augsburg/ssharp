@@ -5,13 +5,13 @@
     using Modeling;
     using Runtime;
 
-    public class RedundanyRemainingHeuristic : IFaultSetHeuristic
+    public class RedundancyRemainingHeuristic : IFaultSetHeuristic
     {
         private readonly IEnumerable<Fault>[] faultGroups;
         private readonly Fault[] allFaults;
         private readonly ISet<FaultSet> noSuggestions = new HashSet<FaultSet>();
 
-        public RedundanyRemainingHeuristic(ModelBase model, params IEnumerable<Fault>[] faultGroups)
+        public RedundancyRemainingHeuristic(ModelBase model, params IEnumerable<Fault>[] faultGroups)
         {
             this.faultGroups = faultGroups;
             allFaults = model.Faults;
