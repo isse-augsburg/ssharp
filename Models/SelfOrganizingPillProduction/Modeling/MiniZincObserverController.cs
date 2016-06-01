@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -88,7 +87,7 @@ isConnected = [{ connections.ToString().ToLower() }|];
             var startInfo = new ProcessStartInfo
             {
                 FileName = MinizincExe,
-                Arguments = $"-D \"{data}\" {MinizincModel}",
+                Arguments = $"-b sat -D \"{data}\" {MinizincModel}",
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
@@ -190,7 +189,6 @@ isConnected = [{ connections.ToString().ToLower() }|];
             {
                 lastRole.PostCondition.Port = null; // last role must include consume capability -> no output
             }
-                
         }
 
         #region helper methods

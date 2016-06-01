@@ -15,7 +15,8 @@
 % ISSE Augsburg, 2016
 % ==========================================
 
-include "globals.mzn"; % minizinc globals libary
+include "stdlib.mzn";
+include "increasing.mzn";
 
 % ----------------------------------------
 % input data
@@ -92,7 +93,7 @@ constraint forall(r in 1..lastRoleSegment-1) (agent[r] != agent[r+1] -> isConnec
 
 solve
 % prioritize shorter plans (domain-specific search heuristic)
-:: int_search([lastRoleSegment], input_order,indomain_min,complete)
+:: int_search([lastRoleSegment], input_order,outdomain_min,complete)
 minimize lastRoleSegment;
 
 output [
