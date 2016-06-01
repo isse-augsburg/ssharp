@@ -77,6 +77,9 @@
     <None Include="Analysis\medium_setup.model">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Analysis\simple_setup.model">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="ConfigurationConstraints.mzn">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

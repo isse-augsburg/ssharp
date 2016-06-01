@@ -15,6 +15,11 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         public override Capability[] AvailableCapabilities
             => Array.ConvertAll(ingredientTanks, tank => tank.Capability);
 
+        // for convenience
+        public Fault BlueTankDepleted => ingredientTanks[(int)IngredientType.BlueParticulate].TankDepleted;
+        public Fault RedTankDepleted => ingredientTanks[(int)IngredientType.RedParticulate].TankDepleted;
+        public Fault YellowTankDepleted => ingredientTanks[(int)IngredientType.YellowParticulate].TankDepleted;
+
         public ParticulateDispenser()
         {
             ingredientTanks = Array.ConvertAll(
@@ -23,11 +28,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             );
 
             CompleteStationFailure.Subsumes(DispenserDefect);
-            DispenserDefect.Subsumes(
-                ingredientTanks[(int)IngredientType.BlueParticulate].TankDepleted,
-                ingredientTanks[(int)IngredientType.RedParticulate].TankDepleted,
-                ingredientTanks[(int)IngredientType.YellowParticulate].TankDepleted
-            );
+            DispenserDefect.Subsumes(BlueTankDepleted, RedTankDepleted, YellowTankDepleted);
         }
 
         public void SetStoredAmount(IngredientType ingredientType, uint amount)
