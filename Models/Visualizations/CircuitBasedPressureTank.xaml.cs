@@ -68,6 +68,41 @@ namespace SafetySharp.CaseStudies.Visualizations
 			NamedElementSensor.NameOfElement = "S";
 			NamedElementTimer.NameOfElement = "T";
 		}
+		
+		private void OnSuppressPumping(object sender, RoutedEventArgs e)
+		{
+			_model.Circuits.Pump.SuppressPumping.ToggleActivationMode();
+		}
+
+		private void OnSwitchStuck(object sender, RoutedEventArgs e)
+		{
+			//TODO: = _model.Circuits.Switch..ToggleActivationMode();
+		}
+
+		private void OnRelayK1Stuck(object sender, RoutedEventArgs e)
+		{
+			_model.Circuits.K1.StuckFault.ToggleActivationMode();
+		}
+
+		private void OnRelayK2Stuck(object sender, RoutedEventArgs e)
+		{
+			_model.Circuits.K2.StuckFault.ToggleActivationMode();
+		}
+
+		private void OnSensorRelayStuck(object sender, RoutedEventArgs e)
+		{
+			//TODO: _model.Circuits.Sensor..ToggleActivationMode();
+		}
+
+		private void OnSensorSupressIsFull(object sender, RoutedEventArgs e)
+		{
+			_model.Circuits.Sensor.SuppressIsFull.ToggleActivationMode();
+		}
+
+		private void OnTimerRelayStuck(object sender, RoutedEventArgs e)
+		{
+			_model.Circuits.Timer.StuckFault.ToggleActivationMode();
+		}
 
 		private void OnModelStateReset()
 		{
@@ -75,15 +110,33 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 			if (SimulationControls.Simulator.IsReplay)
 				return;
-
-			//_model.Sensor.SuppressIsFull.Activation = SuppressFull.IsChecked.ToOccurrenceKind();
-			//_model.Sensor.SuppressIsEmpty.Activation = SuppressEmpty.IsChecked.ToOccurrenceKind();
-			//_model.Timer.SuppressTimeout.Activation = SuppressTimeout.IsChecked.ToOccurrenceKind();
-			//_model.Pump.SuppressPumping.Activation = SuppressPumping.IsChecked.ToOccurrenceKind();
+			_model.Circuits.Pump.SuppressPumping.Activation = SuppressPumping.IsChecked.ToOccurrenceKind();
+			//TODO: = _model.Circuits.Switch..Activation = SwitchStuck.IsChecked.ToOccurrenceKind();
+			_model.Circuits.K1.StuckFault.Activation = RelayK1Stuck.IsChecked.ToOccurrenceKind();
+			_model.Circuits.K2.StuckFault.Activation = RelayK2Stuck.IsChecked.ToOccurrenceKind();
+			//TODO: _model.Circuits.Sensor..Activation = SensorRelayStuck.IsChecked.ToOccurrenceKind();
+			_model.Circuits.Sensor.SuppressIsFull.Activation = SensorSupressIsFull.IsChecked.ToOccurrenceKind();
+			_model.Circuits.Timer.StuckFault.Activation = TimerRelayStuck.IsChecked.ToOccurrenceKind();
 		}
 
 		private void UpdateModelState()
 		{
+			// Failures in Context menus and Indicators
+			SuppressPumping.IsChecked = _model.Circuits.Pump.SuppressPumping.IsActivated;
+			SwitchStuck.IsChecked = false; //TODO: = _model.Circuits.Switch..IsActivated;
+			RelayK1Stuck.IsChecked = _model.Circuits.K1.StuckFault.IsActivated;
+			RelayK2Stuck.IsChecked = _model.Circuits.K2.StuckFault.IsActivated;
+			SensorRelayStuck.IsChecked = false; //TODO: _model.Circuits.Sensor..IsActivated;
+			SensorSupressIsFull.IsChecked = _model.Circuits.Sensor.SuppressIsFull.IsActivated;
+			TimerRelayStuck.IsChecked = _model.Circuits.Timer.StuckFault.IsActivated;
+			
+			TimerFailure.Visibility = (TimerRelayStuck.IsChecked).ToVisibility();
+			SensorFailure.Visibility = (SensorRelayStuck.IsChecked || SensorSupressIsFull.IsChecked).ToVisibility();
+			PumpFailure.Visibility = (SuppressPumping.IsChecked).ToVisibility();
+			RelayK1Failure.Visibility = (RelayK1Stuck.IsChecked).ToVisibility();
+			RelayK2Failure.Visibility = (RelayK2Stuck.IsChecked).ToVisibility();
+			SwitchFailure.Visibility = (SwitchStuck.IsChecked).ToVisibility();
+
 			// Timer
 			CountDown.Text = _model.Circuits.Timer.RemainingTime().ToString();
 			//CountDown.Visibility = _model.Circuits.Timer.IsActive.ToVisibility();

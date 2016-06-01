@@ -64,13 +64,19 @@
                 </Rectangle>
                 <TextBlock x:Name="PressureLevel" Canvas.Left="413.143" TextWrapping="NoWrap" Width="70" TextAlignment="Center" Text="100%"
                            Canvas.Top="80.811" Foreground="Black" FontSize="24" FontWeight="Bold" />
-                <Rectangle x:Name="TimerFailure" Height="31.33" Canvas.Left="319.386" Canvas.Top="202.582" Width="17.169"
+                <Rectangle x:Name="TimerFailure" Height="32" Canvas.Left="297" Canvas.Top="190" Width="18"
                            Style="{StaticResource FailureIndicator}" />
                 <TextBlock x:Name="CountDown" Canvas.Left="267.775" TextWrapping="NoWrap" Text="45" Canvas.Top="127.789" Foreground="White"
                            FontSize="24" FontWeight="Bold" />
                 <Rectangle x:Name="SensorFailure" Height="31.33" Canvas.Left="373.197" Canvas.Top="72.803" Width="17.169"
                            Style="{StaticResource FailureIndicator}" />
                 <Rectangle x:Name="PumpFailure" Height="31.33" Canvas.Left="309.89" Canvas.Top="256.716" Width="17.169"
+                           Style="{StaticResource FailureIndicator}" />
+                <Rectangle x:Name="RelayK1Failure" Height="31" Canvas.Left="229" Canvas.Top="45" Width="17"
+                           Style="{StaticResource FailureIndicator}" />
+                <Rectangle x:Name="RelayK2Failure" Height="31" Canvas.Left="205" Canvas.Top="140" Width="17"
+                           Style="{StaticResource FailureIndicator}" />
+                <Rectangle x:Name="SwitchFailure" Height="31" Canvas.Left="76" Canvas.Top="217" Width="17"
                            Style="{StaticResource FailureIndicator}" />
                 <circuits:PowerSource Canvas.Left="92.366" Canvas.Top="229.904" RenderTransformOrigin="0.5,0.5" x:Name="PowerSourceMotorCircuit">
                     <circuits:PowerSource.RenderTransform>
@@ -91,6 +97,11 @@
                             <TranslateTransform/>
                         </TransformGroup>
                     </circuits:Switch.RenderTransform>
+                    <circuits:Switch.ContextMenu>
+                        <ContextMenu StaysOpen="true">
+                            <MenuItem x:Name="SwitchStuck" Header="Switch stuck" IsCheckable="true" Click="OnSwitchStuck" />
+                        </ContextMenu>
+                    </circuits:Switch.ContextMenu>
                 </circuits:Switch>
                 <circuits:LoadCircuitContact Canvas.Left="89.635" Canvas.Top="195.085" RenderTransformOrigin="0.5,0.5" x:Name="LoadCircuitContactK2">
                     <circuits:LoadCircuitContact.RenderTransform>
@@ -111,6 +122,11 @@
                             <TranslateTransform/>
                         </TransformGroup>
                     </circuits:Pump.RenderTransform>
+                    <circuits:Pump.ContextMenu>
+                        <ContextMenu StaysOpen="true">
+                            <MenuItem x:Name="SuppressPumping" Header="Suppress 'Pumping'" IsCheckable="true" Click="OnSuppressPumping" />
+                        </ContextMenu>
+                    </circuits:Pump.ContextMenu>
                 </circuits:Pump>
                 <circuits:PowerSource x:Name="PowerSourceControlCircuit" Canvas.Left="-18.591" Canvas.Top="71.076" RenderTransformOrigin="0.5,0.5">
                     <circuits:PowerSource.RenderTransform>
@@ -152,6 +168,12 @@
                             <TranslateTransform/>
                         </TransformGroup>
                     </circuits:NamedElement.RenderTransform>
+                    <circuits:NamedElement.ContextMenu>
+                        <ContextMenu StaysOpen="true">
+                            <MenuItem x:Name="SensorRelayStuck" Header="Relay got stuck" IsCheckable="true" Click="OnSensorRelayStuck" />
+                            <MenuItem x:Name="SensorSupressIsFull" Header="IsFull suppressed" IsCheckable="true" Click="OnSensorSupressIsFull" />
+                        </ContextMenu>
+                    </circuits:NamedElement.ContextMenu>
                 </circuits:NamedElement>
                 <circuits:NamedElement Canvas.Left="249.748" Canvas.Top="136.109" RenderTransformOrigin="0.5,0.5" x:Name="NamedElementTimer">
                     <circuits:NamedElement.RenderTransform>
@@ -162,6 +184,11 @@
                             <TranslateTransform/>
                         </TransformGroup>
                     </circuits:NamedElement.RenderTransform>
+                    <circuits:NamedElement.ContextMenu>
+                        <ContextMenu StaysOpen="true">
+                            <MenuItem x:Name="TimerRelayStuck" Header="Relay got stuck" IsCheckable="true" Click="OnTimerRelayStuck" />
+                        </ContextMenu>
+                    </circuits:NamedElement.ContextMenu>
                 </circuits:NamedElement>
                 <circuits:NamedElement Canvas.Left="161.268" Canvas.Top="133.688" RenderTransformOrigin="0.5,0.5" x:Name="NamedElementK2">
                     <circuits:NamedElement.RenderTransform>
@@ -172,6 +199,11 @@
                             <TranslateTransform/>
                         </TransformGroup>
                     </circuits:NamedElement.RenderTransform>
+                    <circuits:NamedElement.ContextMenu>
+                        <ContextMenu StaysOpen="true">
+                            <MenuItem x:Name="RelayK2Stuck" Header="Relay got stuck" IsCheckable="true" Click="OnRelayK2Stuck" />
+                        </ContextMenu>
+                    </circuits:NamedElement.ContextMenu>
                 </circuits:NamedElement>
                 <circuits:NamedElement Canvas.Left="158.103" Canvas.Top="35.302" RenderTransformOrigin="0.5,0.5" x:Name="NamedElementK1">
                     <circuits:NamedElement.RenderTransform>
@@ -182,6 +214,11 @@
                             <TranslateTransform/>
                         </TransformGroup>
                     </circuits:NamedElement.RenderTransform>
+                    <circuits:NamedElement.ContextMenu>
+                        <ContextMenu StaysOpen="true">
+                            <MenuItem x:Name="RelayK1Stuck" Header="Relay got stuck" IsCheckable="true" Click="OnRelayK1Stuck" />
+                        </ContextMenu>
+                    </circuits:NamedElement.ContextMenu>
                 </circuits:NamedElement>
                 <circuits:LoadCircuitContact Canvas.Left="-9.66" Canvas.Top="124.227" RenderTransformOrigin="0.5,0.5" x:Name="LoadCircuitContactK1">
                     <circuits:LoadCircuitContact.RenderTransform>
