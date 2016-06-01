@@ -47,6 +47,7 @@
     <Compile Include="Analysis\AnalysisResult.cs" />
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
     <Compile Include="Analysis\Heuristics\IFaultSetHeuristic.cs" />
+    <Compile Include="Analysis\Heuristics\RedundanyRemainingHeuristic.cs" />
     <Compile Include="Modeling\SubsumptionHelper.cs" />
     <Compile Include="Analysis\Heuristics\SubsumptionHeuristic.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
