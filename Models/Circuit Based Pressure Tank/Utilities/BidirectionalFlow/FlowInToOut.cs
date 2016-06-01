@@ -22,7 +22,7 @@
 
 using System;
 
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
+namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Utilities.BidirectionalFlow
 {
 	using System.Collections.Generic;
 	using System.Linq;

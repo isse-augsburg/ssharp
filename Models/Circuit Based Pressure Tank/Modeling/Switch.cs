@@ -34,12 +34,12 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 	{
 		public readonly CurrentInToOut MainCircuit;
 
-		public bool SwitchIsPressed = false;
+		public bool SwitchIsPushed = false;
 		
 		public Switch()
 		{
 			// Whether the Main Circuit is powered depends on the value of SwitchIsPressed set in the last step
-			MainCircuit = new CurrentInToOut(()=>SwitchIsPressed);
+			MainCircuit = new CurrentInToOut(()=>SwitchIsPushed);
 		}
 	}
 }

@@ -52,5 +52,10 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 		{
 			toPrecedessor.Available = true;
 		}
+
+		public bool IsPowered()
+		{
+			return NegativePole.Incoming.Forward.Available; //the positive charged returned to the PowerSource
+		}
 	}
 }

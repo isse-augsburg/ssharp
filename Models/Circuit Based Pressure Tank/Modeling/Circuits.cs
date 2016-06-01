@@ -29,7 +29,7 @@ using System.Threading.Tasks;
 namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 {
 	using System.Diagnostics;
-	using HemodialysisMachine.Utilities.BidirectionalFlow;
+	using Utilities.BidirectionalFlow;
 	using SafetySharp.Modeling;
 
 	public class Circuits : Component

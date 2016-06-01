@@ -47,11 +47,11 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 			if (_pushButtonActionTodo)
 			{
 				_pushButtonActionTodo = false;
-				_switch.SwitchIsPressed = true;
+				_switch.SwitchIsPushed = true;
 			}
 			else
 			{
-				_switch.SwitchIsPressed = false;
+				_switch.SwitchIsPushed = false;
 			}
 		}
 	}

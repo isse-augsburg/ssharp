@@ -23,7 +23,7 @@
 using SafetySharp.Modeling;
 using System;
 
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
+namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Utilities.BidirectionalFlow
 {
 	public interface IFlowElement<TElement>
 		where TElement : class, IFlowElement<TElement>, new()

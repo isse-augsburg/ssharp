@@ -72,7 +72,7 @@
                            Style="{StaticResource FailureIndicator}" />
                 <Rectangle x:Name="PumpFailure" Height="31.33" Canvas.Left="309.89" Canvas.Top="256.716" Width="17.169"
                            Style="{StaticResource FailureIndicator}" />
-                <circuits:PowerSource Canvas.Left="92.366" Canvas.Top="229.904" RenderTransformOrigin="0.5,0.5">
+                <circuits:PowerSource Canvas.Left="92.366" Canvas.Top="229.904" RenderTransformOrigin="0.5,0.5" x:Name="PowerSourceMotorCircuit">
                     <circuits:PowerSource.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.35"/>
@@ -82,7 +82,7 @@
                         </TransformGroup>
                     </circuits:PowerSource.RenderTransform>
                 </circuits:PowerSource>
-                <circuits:Switch Canvas.Left="-6.495" Canvas.Top="173.553" RenderTransformOrigin="0.5,0.5">
+                <circuits:Switch Canvas.Left="-6.495" Canvas.Top="173.553" RenderTransformOrigin="0.5,0.5" x:Name="Switch">
                     <circuits:Switch.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.35"/>
@@ -92,7 +92,7 @@
                         </TransformGroup>
                     </circuits:Switch.RenderTransform>
                 </circuits:Switch>
-                <circuits:LoadCircuitContact Canvas.Left="89.635" Canvas.Top="195.085" RenderTransformOrigin="0.5,0.5">
+                <circuits:LoadCircuitContact Canvas.Left="89.635" Canvas.Top="195.085" RenderTransformOrigin="0.5,0.5" x:Name="LoadCircuitContactK2">
                     <circuits:LoadCircuitContact.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.35"/>
@@ -102,7 +102,7 @@
                         </TransformGroup>
                     </circuits:LoadCircuitContact.RenderTransform>
                 </circuits:LoadCircuitContact>
-                <circuits:Pump Canvas.Left="241.571" Canvas.Top="220.408" RenderTransformOrigin="0.5,0.5">
+                <circuits:Pump Canvas.Left="241.571" Canvas.Top="220.408" RenderTransformOrigin="0.5,0.5" x:Name="Pump">
                     <circuits:Pump.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.3"/>
@@ -122,7 +122,7 @@
                         </TransformGroup>
                     </circuits:PowerSource.RenderTransform>
                 </circuits:PowerSource>
-                <circuits:LoadCircuitContact Canvas.Left="175.991" Canvas.Top="26.457" RenderTransformOrigin="0.547,-0.273">
+                <circuits:LoadCircuitContact Canvas.Left="175.991" Canvas.Top="26.457" RenderTransformOrigin="0.547,-0.273" x:Name="LoadCircuitContactTimer">
                     <circuits:LoadCircuitContact.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleY="-0.35" ScaleX="0.3"/>
@@ -132,7 +132,7 @@
                         </TransformGroup>
                     </circuits:LoadCircuitContact.RenderTransform>
                 </circuits:LoadCircuitContact>
-                <circuits:LoadCircuitContact Canvas.Left="230.472" Canvas.Top="87.268" RenderTransformOrigin="0.5,0.5">
+                <circuits:LoadCircuitContact Canvas.Left="230.472" Canvas.Top="87.268" RenderTransformOrigin="0.5,0.5" x:Name="LoadCircuitContactSensor">
                     <circuits:LoadCircuitContact.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.35"/>
@@ -183,7 +183,7 @@
                         </TransformGroup>
                     </circuits:NamedElement.RenderTransform>
                 </circuits:NamedElement>
-                <circuits:LoadCircuitContact Canvas.Left="-9.66" Canvas.Top="124.227" RenderTransformOrigin="0.5,0.5">
+                <circuits:LoadCircuitContact Canvas.Left="-9.66" Canvas.Top="124.227" RenderTransformOrigin="0.5,0.5" x:Name="LoadCircuitContactK1">
                     <circuits:LoadCircuitContact.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="0.3" ScaleY="0.35"/>

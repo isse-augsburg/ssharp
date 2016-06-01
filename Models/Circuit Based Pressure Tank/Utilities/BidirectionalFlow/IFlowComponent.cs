@@ -22,7 +22,7 @@
 
 using System;
 
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow {
+namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Utilities.BidirectionalFlow {
 
 	public interface IFlowComponent<TForward, TBackward>
 		where TForward : class, IFlowElement<TForward>, new()

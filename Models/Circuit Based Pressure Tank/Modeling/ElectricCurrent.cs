@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow;
+using SafetySharp.CaseStudies.CircuitBasedPressureTank.Utilities.BidirectionalFlow;
 using SafetySharp.Modeling;
 using System;
 using System.Collections.Generic;

@@ -53,7 +53,7 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 		/// <summary>
 		///   Gets a value indicating whether the triggering pressure level has been reached or exceeded.
 		/// </summary>
-		protected virtual bool IsFull => PhysicalPressure >= Model.SensorFullPressure;
+		public virtual bool IsFull => PhysicalPressure >= Model.SensorFullPressure;
 		
 		/// <summary>
 		///   Senses the physical pressure level within the tank.
@@ -79,7 +79,7 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 		[FaultEffect(Fault = nameof(SuppressIsFull))]
 		public class SuppressIsFullEffect : PressureSensor
 		{
-			protected override bool IsFull => false;
+			public override bool IsFull => false;
 		}
 	}
 }

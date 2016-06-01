@@ -40,6 +40,10 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 
 		public bool ContactIsClosed;
 
+		public int RemainingTime()
+		{
+			return _remainingTime;
+		}
 
 		/// <summary>
 		///   The remaining time before the relay opens.
