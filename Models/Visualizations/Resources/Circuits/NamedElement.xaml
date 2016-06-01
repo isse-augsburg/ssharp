@@ -24,8 +24,6 @@
     </UserControl.Resources>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-            <BeginStoryboard Storyboard="{StaticResource GettingActivatedStoryBoard}"/>
-            <BeginStoryboard Storyboard="{StaticResource GettingDeactivatedStoryBoard}"/>
         </EventTrigger>
     </UserControl.Triggers>
     <Grid>

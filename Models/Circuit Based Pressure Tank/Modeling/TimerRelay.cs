@@ -62,7 +62,7 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 				_remainingTime = Model.Timeout;
 
 			// The value of IsClosed in the next step, is determined by the remainingTime in the current step
-			var timedOut = _remainingTime == 0;
+			var timedOut = _remainingTime <= 0;
 			if (_openOnTimeout)
 			{
 				if (timedOut)

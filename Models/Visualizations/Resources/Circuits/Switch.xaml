@@ -39,8 +39,6 @@
     </UserControl.Resources>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-            <BeginStoryboard Storyboard="{StaticResource CloseCircuitStoryBoard}"/>
-            <BeginStoryboard Storyboard="{StaticResource OpenCircuitStoryBoard}"/>
         </EventTrigger>
     </UserControl.Triggers>
     <Grid>

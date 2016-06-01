@@ -47,8 +47,6 @@
     </UserControl.Resources>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-            <BeginStoryboard Storyboard="{StaticResource EnableCurrent}"/>
-            <BeginStoryboard Storyboard="{StaticResource DisableCurrent}"/>
         </EventTrigger>
     </UserControl.Triggers>
     <Grid>
