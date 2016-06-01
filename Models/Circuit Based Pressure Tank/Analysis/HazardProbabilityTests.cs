@@ -40,9 +40,10 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Analysis
 		public void CalculateHazardIsRuptured()
 		{
 			var model = new Model();
-			model.Circuits.Pump.SuppressPumping.ProbabilityOfOccurrence = Probability.Zero;
-			model.Circuits.Sensor.SuppressIsFull.ProbabilityOfOccurrence = Probability.Zero;
-			model.Circuits.Timer.StuckFault.ProbabilityOfOccurrence = Probability.Zero;
+			//override probabilities
+			//model.Circuits.Pump.SuppressPumping.ProbabilityOfOccurrence = Probability.Zero;
+			//model.Circuits.Sensor.SuppressIsFull.ProbabilityOfOccurrence = Probability.Zero;
+			//model.Circuits.Timer.StuckFault.ProbabilityOfOccurrence = Probability.Zero;
 
 			var result = ModelChecker.CalculateProbabilityOfHazard(model, model.Tank.IsRuptured);
 			Console.Write($"Probability of hazard: {result.Value}");

@@ -37,7 +37,10 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 		/// <summary>
 		///   The fault that prevents the pump from pumping.
 		/// </summary>
-		public readonly Fault SuppressPumping = new PermanentFault();
+		public readonly Fault SuppressPumping = new PermanentFault()
+		{
+			ProbabilityOfOccurrence = new Probability(0.0)
+		};
 
 		/// <summary>
 		///   Gets a value indicating whether the pump is currently enabled.

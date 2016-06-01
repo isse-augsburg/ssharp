@@ -48,7 +48,10 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 		/// <summary>
 		///   The fault that prevents the sensor from triggering when the tank has become empty.
 		/// </summary>
-		public readonly Fault SuppressIsFull = new TransientFault();
+		public readonly Fault SuppressIsFull = new TransientFault()
+		{
+			ProbabilityOfOccurrence = new Probability(0.0001)
+		};
 
 		/// <summary>
 		///   Gets a value indicating whether the triggering pressure level has been reached or exceeded.

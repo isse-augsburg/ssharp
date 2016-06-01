@@ -36,7 +36,10 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 		/// <summary>
 		///   The fault that leads a relay to get stuck
 		/// </summary>
-		public readonly Fault StuckFault = new PermanentFault();
+		public readonly Fault StuckFault = new PermanentFault()
+		{
+			ProbabilityOfOccurrence = new Probability(0.00003)
+		};
 
 		// Control Circuit
 		public readonly CurrentInToOut ControlCircuit;
