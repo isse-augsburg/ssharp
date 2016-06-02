@@ -40,10 +40,10 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 		public void CalculateHazardIsRuptured()
 		{
 			var model = new Model();
-			model.Pump.SuppressPumping.ProbabilityOfOccurrence = Probability.Zero;
-			model.Sensor.SuppressIsEmpty.ProbabilityOfOccurrence = Probability.Zero;
-			model.Sensor.SuppressIsFull.ProbabilityOfOccurrence = Probability.Zero;
-			model.Timer.SuppressTimeout.ProbabilityOfOccurrence = Probability.Zero;
+			model.Pump.SuppressPumping.ProbabilityOfOccurrence = new Probability(0.0);
+			model.Sensor.SuppressIsFull.ProbabilityOfOccurrence = new Probability(0.0001);
+			model.Sensor.SuppressIsEmpty.ProbabilityOfOccurrence = new Probability(0.0);
+			model.Timer.SuppressTimeout.ProbabilityOfOccurrence = new Probability(0.0001);
 
 			var result = ModelChecker.CalculateProbabilityOfHazard(model, model.Tank.IsRuptured);
 			Console.Write($"Probability of hazard: {result.Value}");
