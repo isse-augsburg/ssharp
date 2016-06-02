@@ -34,6 +34,8 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 	{
 		public readonly CurrentInToOut MainCircuit = new CurrentInToOut();
 
+		private bool _isEnabled;
+
 		/// <summary>
 		///   The fault that prevents the pump from pumping.
 		/// </summary>
@@ -47,7 +49,15 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 		/// </summary>
 		public virtual bool IsEnabled()
 		{
-			return MainCircuit.IsPowered();
+			// Note: this cannot directly return MainCircuit.IsPowered(), because the values in MainCircuit are determined
+			// after the required port IsBeingFilled of Tank calls this method (because it is of kind Plant). 
+			return _isEnabled;
+		}
+
+		public override void Update()
+		{
+			// The value of _isEnabled in the next step, is determined by the power in the current step
+			_isEnabled = MainCircuit.IsPowered();
 		}
 
 		/// <summary>

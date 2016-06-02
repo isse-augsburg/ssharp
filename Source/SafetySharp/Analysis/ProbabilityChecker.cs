@@ -163,6 +163,7 @@ namespace SafetySharp.Analysis
 				var derivedProbabilityMatrix = sparseProbabilityMatrix.DeriveCompactProbabilityMatrix();
 				//var compactToSparse = CompactProbabilityMatrix = derivedProbabilityMatrix.Item1;
 				CompactProbabilityMatrix = derivedProbabilityMatrix.Item2;
+				//CompactProbabilityMatrix.ValidateStates();
 				var creationTime = stopwatch.Elapsed;
 				stopwatch.Stop();
 

@@ -279,7 +279,6 @@ namespace SafetySharp.Analysis
 					int state;
 					if (!_stateStack.TryGetState(out state))
 						continue;
-					
 					_transitions.Clear();
 
 					_model.PrepareNextState();
@@ -347,6 +346,7 @@ namespace SafetySharp.Analysis
 
 					++transitionCount;
 				}
+				//ProbabilityMatrix.ValidateState(sourceState);
 
 				Interlocked.Add(ref _context._transitionCount, transitionCount);
 				Interlocked.Add(ref _context._computedTransitionCount, _transitions.ComputedTransitionCount);
@@ -539,6 +539,25 @@ namespace SafetySharp.Analysis
 			NumberOfTransitions++;
 			listOfState.Add(new TupleStateProbability(targetState, probability));
 		}
+
+		[Conditional("DEBUG")]
+		public void ValidateStates()
+		{
+			foreach (var transitionGroup in TransitionGroups)
+			{
+				var probability = Probability.Zero;
+				foreach (var tupleStateProbability in transitionGroup.Value)
+				{
+					probability += tupleStateProbability.Probability;
+				}
+				if (!probability.Is(1.0,0.000000001))
+				{
+					Debugger.Break();
+					throw new Exception("Probabilities should sum up to 1");
+				}
+
+			}
+		}
 	}
 
 	internal class SparseProbabilityMatrix
@@ -707,6 +726,38 @@ namespace SafetySharp.Analysis
 				var currentTuple = selectTupleWithHighestProbability(OrdinaryTransitionGroups[lastState]);
 				printTuple(currentTuple);
 				lastState = currentTuple.State;
+			}
+		}
+
+		[Conditional("DEBUG")]
+		public void ValidateState(int? sourceState)
+		{
+			if (sourceState.HasValue)
+			{
+				var transitionGroup = OrdinaryTransitionGroups[sourceState.Value];
+				var probability = Probability.Zero;
+				foreach (var tupleStateProbability in transitionGroup)
+				{
+					probability += tupleStateProbability.Probability;
+				}
+				if (!probability.Is(1.0, 0.000000001))
+				{
+					Debugger.Break();
+					throw new Exception("Probabilities should sum up to 1");
+				}
+			}
+			else
+			{
+				var probability = Probability.Zero;
+				foreach (var tupleStateProbability in InitialStates)
+				{
+					probability += tupleStateProbability.Probability;
+				}
+				if (!probability.Is(1.0, 0.000000001))
+				{
+					Debugger.Break();
+					throw new Exception("Probabilities should sum up to 1");
+				}
 			}
 		}
 	}
