@@ -40,13 +40,13 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		public void Calculate()
 		{
 			var model = new Model();
-			model.Channel.MessageDropped.ProbabilityOfOccurrence = Probability.Zero;
-			model.CrossingController.Motor.BarrierMotorStuck.ProbabilityOfOccurrence = Probability.Zero;
-			model.CrossingController.Sensor.BarrierSensorFailure.ProbabilityOfOccurrence = Probability.Zero;
-			model.CrossingController.TrainSensor.ErroneousTrainDetection.ProbabilityOfOccurrence = Probability.Zero;
-			model.TrainController.Brakes.BrakesFailure.ProbabilityOfOccurrence = Probability.Zero;
-			model.TrainController.Odometer.OdometerPositionOffset.ProbabilityOfOccurrence = Probability.Zero;
-			model.TrainController.Odometer.OdometerSpeedOffset.ProbabilityOfOccurrence = Probability.Zero;
+			model.Channel.MessageDropped.ProbabilityOfOccurrence = new Probability(0.0001);
+			model.CrossingController.Motor.BarrierMotorStuck.ProbabilityOfOccurrence = new Probability(0.001);
+			model.CrossingController.Sensor.BarrierSensorFailure.ProbabilityOfOccurrence = new Probability(0.00003);
+			model.CrossingController.TrainSensor.ErroneousTrainDetection.ProbabilityOfOccurrence = new Probability(0.0002);
+			model.TrainController.Brakes.BrakesFailure.ProbabilityOfOccurrence = new Probability(0.00002);
+			model.TrainController.Odometer.OdometerPositionOffset.ProbabilityOfOccurrence = new Probability(0.02);
+			model.TrainController.Odometer.OdometerSpeedOffset.ProbabilityOfOccurrence = new Probability(0.02);
 
 			var result = ModelChecker.CalculateProbabilityOfHazard(model, model.PossibleCollision);
 			Console.Write($"Probability of hazard: {result.Value}");
