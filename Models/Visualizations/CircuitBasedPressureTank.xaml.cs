@@ -124,7 +124,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 		{
 			// Failures in Context menus and Indicators
 			SuppressPumping.IsChecked = _model.Circuits.Pump.SuppressPumping.IsActivated;
-			//ASwitchStuck.IsChecked = false; //TODO: = _model.Circuits.Switch..IsActivated;
+			SwitchStuck.IsChecked = false; //TODO: = _model.Circuits.Switch..IsActivated;
 			RelayK1Stuck.IsChecked = _model.Circuits.K1.StuckFault.IsActivated;
 			RelayK2Stuck.IsChecked = _model.Circuits.K2.StuckFault.IsActivated;
 			SensorRelayStuck.IsChecked = false; //TODO: _model.Circuits.Sensor..IsActivated;
@@ -136,7 +136,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			PumpFailure.Visibility = (SuppressPumping.IsChecked).ToVisibility();
 			RelayK1Failure.Visibility = (RelayK1Stuck.IsChecked).ToVisibility();
 			RelayK2Failure.Visibility = (RelayK2Stuck.IsChecked).ToVisibility();
-			//SwitchFailure.Visibility = (ASwitchStuck.IsChecked).ToVisibility();
+			SwitchFailure.Visibility = (SwitchStuck.IsChecked).ToVisibility();
 			
 			// Timer
 			CountDown.Text = _model.Circuits.Timer.RemainingTime().ToString();

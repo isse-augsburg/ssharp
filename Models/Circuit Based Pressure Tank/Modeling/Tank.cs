@@ -38,7 +38,7 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 		/// <summary>
 		///   Gets a value indicating whether the pressure tank has ruptured after exceeding its maximum allowed pressure level.
 		/// </summary>
-		public bool IsRuptured => _pressureLevel >= Model.PressureLimit;
+		public bool IsRuptured;
 		
 		/// <summary>
 		///   Gets the current pressure level within the tank.
@@ -55,6 +55,7 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Modeling
 		/// </summary>
 		public override void Update()
 		{
+			IsRuptured |= _pressureLevel >= Model.PressureLimit;
 			if (!IsRuptured && IsBeingFilled)
 				_pressureLevel += 1;
 			else
