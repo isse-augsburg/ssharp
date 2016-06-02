@@ -87,7 +87,7 @@ isConnected = [{ connections.ToString().ToLower() }|];
             var startInfo = new ProcessStartInfo
             {
                 FileName = MinizincExe,
-                Arguments = $"-b sat -D \"{data}\" {MinizincModel}",
+                Arguments = $"-D \"{data}\" {MinizincModel}",
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
