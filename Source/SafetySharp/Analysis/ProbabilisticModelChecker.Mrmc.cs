@@ -129,9 +129,9 @@ namespace SafetySharp.Analysis
 			return fileStateRewards;
 		}
 
-		private readonly System.Text.RegularExpressions.Regex MrmcProbabilityParser = new System.Text.RegularExpressions.Regex("^(?<state>\\d\\d*)\\s(?<probability>[0-1]\\.?[0-9]+)$");
+		private readonly System.Text.RegularExpressions.Regex MrmcProbabilityParser = new System.Text.RegularExpressions.Regex("^(?<state>\\d\\d*)\\s(?<probability>([0-1]\\.?[0-9]+)|(inf))$");
 		private readonly System.Text.RegularExpressions.Regex MrmcFormulaParser = new System.Text.RegularExpressions.Regex("^(?<state>\\d\\d*)\\s(?<satisfied>(TRUE)|(FALSE))$");
-		private readonly System.Text.RegularExpressions.Regex MrmcRewardParser = new System.Text.RegularExpressions.Regex("^(?<state>\\d\\d*)\\s(?<reward>[0-9]+\\.?[0-9]+)$");
+		private readonly System.Text.RegularExpressions.Regex MrmcRewardParser = new System.Text.RegularExpressions.Regex("^(?<state>\\d\\d*)\\s(?<reward>([0-9]+\\.?[0-9]+)|(inf))$");
 
 		private TemporaryFile WriteFilesAndExecuteMrmc(Formula formulaToCheck,bool outputExactResult) //returns result file
 		{
@@ -218,7 +218,12 @@ namespace SafetySharp.Analysis
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
 							var probabilityOfState = probabilityEnumerator.Current;
-							var probabilityInState = Double.Parse(parsed.Groups["probability"].Value, CultureInfo.InvariantCulture);
+							double probabilityInState;
+							// Mrmc may return a probability in a state of PositiveInfinity. This is clearly undesired and is most likely a result of double imprecision.
+							if (parsed.Groups["probability"].Value == "inf")
+								probabilityInState = double.PositiveInfinity;
+							else
+								probabilityInState = Double.Parse(parsed.Groups["probability"].Value, CultureInfo.InvariantCulture);
 							probability += probabilityOfState * probabilityInState;
 						}
 						else
@@ -311,7 +316,11 @@ namespace SafetySharp.Analysis
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
 							var probabilityOfState = probabilityEnumerator.Current.Value;
-							var rewardOfState = Double.Parse(parsed.Groups["reward"].Value, CultureInfo.InvariantCulture);
+							double rewardOfState;
+							if (parsed.Groups["reward"].Value == "inf")
+								rewardOfState = double.PositiveInfinity;
+							else
+								rewardOfState = Double.Parse(parsed.Groups["reward"].Value, CultureInfo.InvariantCulture);
 							rewardResultValue += probabilityOfState * rewardOfState;
 						}
 						else
