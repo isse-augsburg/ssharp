@@ -27,6 +27,7 @@ namespace SafetySharp.Analysis
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Diagnostics;
+	using System.Globalization;
 	using System.Linq;
 	using System.Runtime.InteropServices;
 	using System.Threading;
@@ -680,7 +681,7 @@ namespace SafetySharp.Analysis
 			Action<TupleStateProbability> printTuple =
 				tuple =>
 				{
-					Console.Write($"step: {tuple.Probability.Value} {tuple.State}");
+					Console.Write($"step: {tuple.Probability.Value.ToString(CultureInfo.InvariantCulture)} {tuple.State}");
 					for (var i = 0; i < StateFormulaLabels.Length; i++)
 					{
 						var label = StateFormulaLabels[i];

@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Analysis
 {
+	using System.Globalization;
 	using FluentAssertions;
 	using Modeling;
 	using NUnit.Framework;
@@ -46,7 +47,7 @@ namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Analysis
 			//model.Circuits.Timer.StuckFault.ProbabilityOfOccurrence = Probability.Zero;
 
 			var result = ModelChecker.CalculateProbabilityOfHazard(model, model.Tank.IsRuptured);
-			Console.Write($"Probability of hazard: {result.Value}");
+			Console.Write($"Probability of hazard: {result.Value.ToString(CultureInfo.InvariantCulture)}");
 		}
 	}
 }
