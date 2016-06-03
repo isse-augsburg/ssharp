@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,33 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HeightControl.Analysis
+namespace SafetySharp.Runtime
 {
-	using FluentAssertions;
-	using Modeling;
-	using NUnit.Framework;
-	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
+	using System;
 
 	/// <summary>
-	///   Contains a set of tests that simulate the case study to validate certain aspects of its behavior.
+	///   Raised when the <see cref="ChoiceResolver" /> discovers that not all nondeterministic choices can be enumerated.
 	/// </summary>
-	public class SimulationTests
+	public sealed class NondeterminismException : Exception
 	{
 		/// <summary>
-		///   Simulates a path where no faults occur with the expectation that no vehicle collides.
+		///   Initializes a new instance.
 		/// </summary>
-		[Test]
-		public void NoCollisionsWhenNoFaultsOccur()
+		public NondeterminismException()
+			: base("A nondeterministic choice was not exhaustively enumerated. This problem usually results from a hidden variable " +
+				   "that should not be hidden, as its value is used between different system steps.")
 		{
-			var model = Model.CreateOriginal();
-			model.Faults.SuppressActivations();
-
-			var simulator = new Simulator(model);
-			simulator.FastForward(steps: 20);
-
-			foreach (var vehicle in model.Vehicles)
-				vehicle.IsCollided.Should().BeFalse();
 		}
 	}
 }

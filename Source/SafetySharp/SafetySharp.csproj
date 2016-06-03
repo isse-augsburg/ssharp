@@ -83,6 +83,7 @@
     <Compile Include="Modeling\Reward.cs" />
     <Compile Include="Runtime\ProbabilityStack.cs" />
     <Compile Include="Runtime\FaultSet.cs" />
+    <Compile Include="Runtime\NondeterminismException.cs" />
     <Compile Include="Runtime\RangeMetadata`1.cs" />
     <Compile Include="Runtime\RangeMetadata.cs" />
     <Compile Include="Runtime\Serialization\DelegateMetadata.cs" />

@@ -213,7 +213,7 @@ namespace SafetySharp.Analysis
 
 					var trace = new[] { _model.ConstructionState, new byte[_model.StateVectorSize] };
 					var choices = new[] { _model.GetLastChoices() };
-					_context._counterExample = new CounterExample(_model, trace, choices);
+					_context._counterExample = new CounterExample(_model, trace, choices, endsWithException: true);
 				}
 			}
 
@@ -323,7 +323,7 @@ namespace SafetySharp.Analysis
 				// We have to create new model instances to generate and initialize the counter example, otherwise hidden
 				// state variables might prevent us from doing so if they somehow influence the state
 				var replayInfo = _createModel().GenerateReplayInformation(trace, endsWithException);
-				_context._counterExample = new CounterExample(_createModel(), trace, replayInfo);
+				_context._counterExample = new CounterExample(_createModel(), trace, replayInfo, endsWithException);
 			}
 
 			/// <summary>

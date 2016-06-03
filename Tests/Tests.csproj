@@ -151,7 +151,7 @@
     <Compile Include="Analysis\Invariants\CounterExamples\formulas.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\initial state exception.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\nondeterminism.cs" />
-    <Compile Include="Analysis\Invariants\CounterExamples\replay.cs" />
+    <Compile Include="Analysis\Invariants\CounterExamples\hidden variable with effect.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\non-initial state exception.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\hidden initial state.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\stepping.cs" />
@@ -638,6 +638,7 @@
     <Compile Include="Serialization\Objects\fault effect.cs" />
     <Compile Include="Serialization\Objects\boxed values.cs" />
     <Compile Include="Serialization\Objects\single object.cs" />
+    <Compile Include="Serialization\Objects\nullable structs.cs" />
     <Compile Include="Serialization\Objects\probabilities.cs" />
     <Compile Include="Serialization\Objects\structs.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Char.cs" />
