@@ -622,6 +622,7 @@
     <Compile Include="Serialization\Objects\fault effect.cs" />
     <Compile Include="Serialization\Objects\boxed values.cs" />
     <Compile Include="Serialization\Objects\single object.cs" />
+    <Compile Include="Serialization\Objects\nullable structs.cs" />
     <Compile Include="Serialization\Objects\structs.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Char.cs" />
     <Compile Include="Serialization\PrimitiveTypes\Bool.cs" />
