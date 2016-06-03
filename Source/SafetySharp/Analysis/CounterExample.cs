@@ -45,13 +45,9 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   The first few bytes that indicate that a file is a valid S# counter example file.
 		/// </summary>
-		private const int FileHeader = 0x3FE0DD03;
+		private const int FileHeader = 0x3FE0DD04;
 
-		/// <summary>
-		///   The information required to replay the counter example.
-		/// </summary>
 		private readonly int[][] _replayInfo;
-
 		private readonly byte[][] _states;
 
 		/// <summary>
@@ -60,7 +56,8 @@ namespace SafetySharp.Analysis
 		/// <param name="runtimeModel">The runtime model the counter example was generated for.</param>
 		/// <param name="states">The serialized counter example.</param>
 		/// <param name="replayInfo">The replay information of the counter example.</param>
-		internal CounterExample(RuntimeModel runtimeModel, byte[][] states, int[][] replayInfo)
+		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
+		internal CounterExample(RuntimeModel runtimeModel, byte[][] states, int[][] replayInfo, bool endsWithException)
 		{
 			Requires.NotNull(runtimeModel, nameof(runtimeModel));
 			Requires.NotNull(states, nameof(states));
@@ -68,9 +65,16 @@ namespace SafetySharp.Analysis
 			Requires.That(replayInfo.Length == states.Length - 1, "Invalid replay info.");
 
 			RuntimeModel = runtimeModel;
+			EndsWithException = endsWithException;
+
 			_states = states;
 			_replayInfo = replayInfo;
 		}
+
+		/// <summary>
+		///   Indicates whether the counter example ends with an exception.
+		/// </summary>
+		public bool EndsWithException { get; }
 
 		/// <summary>
 		///   Gets the runtime model the counter example was generated for.
@@ -177,6 +181,7 @@ namespace SafetySharp.Analysis
 			using (var writer = new BinaryWriter(File.OpenWrite(file), Encoding.UTF8))
 			{
 				writer.Write(FileHeader);
+				writer.Write(EndsWithException);
 				writer.Write(RuntimeModel.SerializedModel.Length);
 				writer.Write(RuntimeModel.SerializedModel);
 
@@ -220,6 +225,7 @@ namespace SafetySharp.Analysis
 				if (reader.ReadInt32() != FileHeader)
 					throw new InvalidOperationException("The file does not contain a counter example that is compatible with this version of S#.");
 
+				var endsWithException = reader.ReadBoolean();
 				var serializedRuntimeModel = reader.ReadBytes(reader.ReadInt32());
 				var modelData = RuntimeModelSerializer.LoadSerializedData(serializedRuntimeModel);
 
@@ -270,7 +276,7 @@ namespace SafetySharp.Analysis
 						replayInfo[i][j] = reader.ReadInt32();
 				}
 
-				return new CounterExample(runtimeModel, counterExample, replayInfo);
+				return new CounterExample(runtimeModel, counterExample, replayInfo, endsWithException);
 			}
 		}
 
