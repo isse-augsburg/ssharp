@@ -44,6 +44,12 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		private readonly SSharpChecker _modelChecker = new SSharpChecker();
 
+		private readonly HashSet<FaultSet> safeSets = new HashSet<FaultSet>();
+		private readonly HashSet<FaultSet> minimalCriticalSets = new HashSet<FaultSet>();
+		private readonly HashSet<FaultSet> checkedSets = new HashSet<FaultSet>();
+		private readonly Dictionary<FaultSet, CounterExample> counterExamples = new Dictionary<FaultSet, CounterExample>();
+		private readonly Dictionary<FaultSet, Exception> exceptions = new Dictionary<FaultSet, Exception>();
+
 		/// <summary>
 		///   The model checker's configuration that determines certain model checker settings.
 		/// </summary>
@@ -116,11 +122,9 @@ namespace SafetySharp.Analysis
 			var forcedSet = new FaultSet(forcedFaults);
 
 			var isComplete = true;
-			var safeSets = new HashSet<FaultSet>();
-			var minimalCriticalSets = new HashSet<FaultSet>();
-			var checkedSets = new HashSet<FaultSet>();
-			var counterExamples = new Dictionary<FaultSet, CounterExample>();
-			var exceptions = new Dictionary<FaultSet, Exception>();
+
+			// remove information from previous analyses
+			Reset();
 
 			// Store the serialized model to improve performance
 			var serializer = new RuntimeModelSerializer();
@@ -132,20 +136,19 @@ namespace SafetySharp.Analysis
 			for (var cardinality = 0; cardinality <= allFaults.Length; ++cardinality)
 			{
 				// Generate the sets for the current level that we'll have to check
-				var sets = GeneratePowerSetLevel(safeSets, minimalCriticalSets, cardinality, allFaults);
+				var sets = GeneratePowerSetLevel(cardinality, allFaults);
 
 				// check sets suggested by heuristics
 				if (Heuristics.Count > 0)
 				{
 					var heuristicSets = Heuristics.SelectMany(heuristic => heuristic.MakeSuggestions(sets))
 						.Where(set => !minimalCriticalSets.Any(critical => critical.IsSubsetOf(set) && !safeSets.Any(safe => set.IsSubsetOf(safe))))
-						.OrderByDescending(set => set.Cardinality)
-						.ToList();
+						.OrderByDescending(set => set.Cardinality);
 
-					ConsoleHelpers.WriteLine($"Checking {heuristicSets.Count} sets suggested by heuristics...");
+					ConsoleHelpers.WriteLine($"Checking {heuristicSets.Count()} sets suggested by heuristics...");
 					foreach (var set in heuristicSets)
 					{
-						CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, minimalCriticalSets, safeSets, checkedSets, counterExamples, exceptions);
+						CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer);
 						// TODO: (temporarily) remember non-minimal critical sets:
 						// scenario: { f1, f2, f3 } is minimal critical set
 						//
@@ -180,7 +183,7 @@ namespace SafetySharp.Analysis
 				// sets we have to check
 				foreach (var set in sets)
 				{
-					CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, minimalCriticalSets, safeSets, checkedSets, counterExamples, exceptions);
+					CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer);
 				}
 			}
 
@@ -194,11 +197,17 @@ namespace SafetySharp.Analysis
 				counterExamples, exceptions, stopwatch.Elapsed);
 		}
 
+		private void Reset()
+		{
+			safeSets.Clear();
+			minimalCriticalSets.Clear();
+			checkedSets.Clear();
+			counterExamples.Clear();
+			exceptions.Clear();
+		}
+
 		private void CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
-			int cardinality,
-			RuntimeModelSerializer serializer, ISet<FaultSet> minimalCriticalSets, ISet<FaultSet> safeSets,
-			ISet<FaultSet> checkedSets,
-			Dictionary<FaultSet, CounterExample> counterExamples, Dictionary<FaultSet, Exception> exceptions)
+			int cardinality, RuntimeModelSerializer serializer)
 		{
 			// Enable or disable the faults that the set represents
 			set.SetActivation(nondeterministicFaults);
@@ -277,8 +286,7 @@ namespace SafetySharp.Analysis
 		/// <param name="criticalSets">The sets that are known to be critical sets. All super sets are discarded.</param>
 		/// <param name="cardinality">The cardinality of the sets that should be generated.</param>
 		/// <param name="faults">The fault set the power set is generated for.</param>
-		private static HashSet<FaultSet> GeneratePowerSetLevel(HashSet<FaultSet> safeSets, HashSet<FaultSet> criticalSets, int cardinality,
-															   Fault[] faults)
+		private HashSet<FaultSet> GeneratePowerSetLevel(int cardinality, Fault[] faults)
 		{
 			var result = new HashSet<FaultSet>();
 
@@ -291,7 +299,7 @@ namespace SafetySharp.Analysis
 				case 1:
 					// We have to kick things off by explicitly generating the singleton sets; at this point,
 					// we know that there are no further minimal critical sets if we've already found one (= the empty set)
-					if (criticalSets.Count == 0)
+					if (minimalCriticalSets.Count == 0)
 					{
 						foreach (var fault in faults)
 							result.Add(new FaultSet(fault));
@@ -319,7 +327,7 @@ namespace SafetySharp.Analysis
 
 							// Check if the newly generated set is a super set of any critical sets or subset of any safe sets;
 							// if so, discard it
-							if (criticalSets.All(s => !s.IsSubsetOf(set)))
+							if (minimalCriticalSets.All(s => !s.IsSubsetOf(set)))
 								result.Add(set);
 						}
 					}
