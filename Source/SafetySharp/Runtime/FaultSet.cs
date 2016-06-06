@@ -151,13 +151,14 @@ namespace SafetySharp.Runtime
 		///   contained in the set.
 		/// </summary>
 		/// <param name="faults">The faults whose activation should be set.</param>
-		internal void SetActivation(Fault[] faults)
+		/// <param name="activationMode">The activation mode the <paramref name="faults"/> should be set to.</param>
+		internal void SetActivation(Fault[] faults, Activation activationMode)
 		{
 			Requires.NotNull(faults, nameof(faults));
 			CheckFaultCount(faults.Length);
 
 			foreach (var fault in faults)
-				fault.Activation = (_faults & (1L << fault.Identifier)) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
+				fault.Activation = (_faults & (1L << fault.Identifier)) != 0 ? activationMode : Activation.Suppressed;
 		}
 
 		/// <summary>

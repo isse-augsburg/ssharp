@@ -56,6 +56,11 @@ namespace SafetySharp.Analysis
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
 
 		/// <summary>
+		///   Always force all faults to be activated when checking a set.
+		/// </summary>
+		public bool ForceFaultActivation { get; set; } = false;
+
+		/// <summary>
 		///   Gets or sets a list of heuristics to use during the analysis.
 		/// </summary>
 		public List<IFaultSetHeuristic> Heuristics { get; } = new List<IFaultSetHeuristic>();
@@ -209,14 +214,27 @@ namespace SafetySharp.Analysis
 		private void CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
 			int cardinality, RuntimeModelSerializer serializer)
 		{
+			bool isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, Activation.Forced);
+			if (isSafe && !ForceFaultActivation)
+			{
+				ConsoleHelpers.WriteLine("    Check again with nondeterministic activation...");
+				CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, Activation.Nondeterministic);
+			}
+
+			if (isSafe)
+				safeSets.Add(set);
+		}
+
+		private bool CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
+			int cardinality, RuntimeModelSerializer serializer, Activation activationMode)
+		{
 			// Enable or disable the faults that the set represents
-			set.SetActivation(nondeterministicFaults);
+			set.SetActivation(nondeterministicFaults, activationMode);
 
 			if (safeSets.Any(safeSet => set.IsSubsetOf(safeSet)))
 			{
 				ConsoleHelpers.WriteLine($"  triv. safe:  {{ {set.ToString(allFaults)} }}");
-				safeSets.Add(set);
-				return;
+				return true;
 			}
 
 			// If there was a counter example, the set is a critical set
@@ -233,13 +251,14 @@ namespace SafetySharp.Analysis
 				else
 				{
 					ConsoleHelpers.WriteLine($"    safe set:  {{ {set.ToString(allFaults)} }}", ConsoleColor.Blue);
-					safeSets.Add(set);
 				}
 
 				checkedSets.Add(set);
 
 				if (result.CounterExample != null)
 					counterExamples.Add(set, result.CounterExample);
+
+				return result.FormulaHolds;
 			}
 			catch (AnalysisException e)
 			{
@@ -255,6 +274,7 @@ namespace SafetySharp.Analysis
 
 				if (e.CounterExample != null)
 					counterExamples.Add(set, e.CounterExample);
+				return false;
 			}
 		}
 
