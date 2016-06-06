@@ -107,6 +107,9 @@ namespace SafetySharp.Modeling
 			}
 		}
 
+		[Hidden(HideElements = true), NonSerializable]
+		private readonly ISet<Fault> subsumedFaults = new HashSet<Fault>();
+
 		/// <summary>
 		///   Adds fault effects for the <paramref name="components" /> that are enabled when the fault is activated.
 		/// </summary>
@@ -164,6 +167,48 @@ namespace SafetySharp.Modeling
 			((Component)component).FaultEffectTypes.Add(faultEffectType);
 
 			return faultEffect;
+		}
+
+		/// <summary>
+		///   Declares the given <paramref name="faults"/> to be subsumed by this instance. This does
+		///   not change the fault's effects and is only used by heuristics.
+		/// </summary>
+		/// <param name="faults">The subsumed faults.</param>
+		public void Subsumes(params Fault[] faults)
+		{
+			subsumedFaults.UnionWith(faults);
+		}
+
+		internal static FaultSet SubsumedFaults(FaultSet set, Fault[] allFaults)
+		{
+			var currentFaults = set.ToFaultSequence(allFaults);
+			var subsumed = set;
+
+			uint oldCount;
+			do // fixed-point iteration
+			{
+				oldCount = subsumed.Cardinality;
+				currentFaults = currentFaults.SelectMany(fault => fault.subsumedFaults);
+				subsumed = subsumed.GetUnion(new FaultSet(currentFaults));
+			} while (oldCount < subsumed.Cardinality);
+
+			return subsumed;
+		}
+
+		internal static FaultSet SubsumingFaults(IEnumerable<Fault> faults, Fault[] allFaults)
+		{
+			var currentFaults = faults;
+			var subsuming = new FaultSet(faults);
+
+			uint oldCount;
+			do // fixed-point iteration
+			{
+				oldCount = subsuming.Cardinality;
+				currentFaults = allFaults.Where(fault => fault.subsumedFaults.Intersect(currentFaults).Any());
+				subsuming = subsuming.GetUnion(new FaultSet(currentFaults));
+			} while (oldCount < subsuming.Cardinality);
+
+			return subsuming;
 		}
 
 		/// <summary>

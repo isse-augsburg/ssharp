@@ -14,7 +14,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
         public void SimpleDcca()
         {
             var model = new ModelSetupParser().Parse("Analysis/simple_setup.model");
-            Dcca(model, new SubsumptionHeuristic(), RedundancyHeuristic(model));
+            Dcca(model, new SubsumptionHeuristic(model), RedundancyHeuristic(model));
         }
 
         [Test]
@@ -27,7 +27,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
         public void MediumDcca()
         {
             var model = new ModelSetupParser().Parse("Analysis/medium_setup.model");
-            Dcca(model, new SubsumptionHeuristic(), RedundancyHeuristic(model));
+            Dcca(model, new SubsumptionHeuristic(model), RedundancyHeuristic(model));
         }
 
         [Test]
@@ -40,7 +40,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
         public void ComplexDcca()
         {
             var model = new ModelSetupParser().Parse("Analysis/complex_setup.model");
-            Dcca(model, new SubsumptionHeuristic(), RedundancyHeuristic(model));
+            Dcca(model, new SubsumptionHeuristic(model), RedundancyHeuristic(model));
         }
 
         [Test]

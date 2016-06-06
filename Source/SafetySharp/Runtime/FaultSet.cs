@@ -63,14 +63,22 @@ namespace SafetySharp.Runtime
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="faults">The faults the set should contain.</param>
-		public FaultSet(params Fault[] faults)
+		public FaultSet(params Fault[] faults) : this((IEnumerable<Fault>)faults)
+		{
+		}
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="faults">The faults the set should contain.</param>
+		public FaultSet(IEnumerable<Fault> faults)
 		{
 			_faults = 0;
 
 			foreach (var fault in faults)
 				_faults |= 1L << fault.Identifier;
 
-			Cardinality = (uint)faults.Length;
+			Cardinality = (uint)faults.Count();
 		}
 
 		/// <summary>

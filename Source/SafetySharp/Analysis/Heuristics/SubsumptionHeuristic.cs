@@ -7,11 +7,18 @@
 
     public class SubsumptionHeuristic : IFaultSetHeuristic
     {
+        private Fault[] allFaults;
+
+        public SubsumptionHeuristic(ModelBase model)
+        {
+	        allFaults = model.Faults;
+        }
+
         public ISet<FaultSet> MakeSuggestions(ISet<FaultSet> setsToCheck)
         {
             return new HashSet<FaultSet>(
                 from set in setsToCheck
-                let subsumed = set.SubsumedFaults()
+                let subsumed = Fault.SubsumedFaults(set, allFaults)
                 where !set.Equals(subsumed)
                 select subsumed
             );

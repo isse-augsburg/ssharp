@@ -24,12 +24,12 @@
                 return noSuggestions;
 
             var suggestions = new HashSet<FaultSet>();
-            var allFaults = new FaultSet(this.allFaults);
+            var faults = new FaultSet(allFaults);
 
             foreach (var excludedFaults in CartesianProduct(faultGroups))
             {
-                var subsuming = new FaultSet(excludedFaults.ToArray()).SubsumingFaults();
-                suggestions.Add(allFaults.GetDifference(subsuming));
+                var subsuming = Fault.SubsumingFaults(excludedFaults, allFaults);
+                suggestions.Add(faults.GetDifference(subsuming));
             }
 
             return suggestions;
