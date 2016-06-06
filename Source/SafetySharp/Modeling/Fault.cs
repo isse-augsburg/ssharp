@@ -204,7 +204,7 @@ namespace SafetySharp.Modeling
 			do // fixed-point iteration
 			{
 				oldCount = subsuming.Cardinality;
-				currentFaults = allFaults.Where(fault => fault.subsumedFaults.Intersect(currentFaults).Any());
+				currentFaults = allFaults.Where(fault => fault.subsumedFaults.Intersect(currentFaults).Any()).ToArray();
 				subsuming = subsuming.GetUnion(new FaultSet(currentFaults));
 			} while (oldCount < subsuming.Cardinality);
 
