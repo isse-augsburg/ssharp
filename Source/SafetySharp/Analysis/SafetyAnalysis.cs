@@ -28,6 +28,7 @@ namespace SafetySharp.Analysis
 	using System.IO;
 	using System.Linq;
 	using System.Text;
+	using Heuristics;
 	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
@@ -47,6 +48,11 @@ namespace SafetySharp.Analysis
 		///   The model checker's configuration that determines certain model checker settings.
 		/// </summary>
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
+
+		/// <summary>
+		///   Gets or sets a list of heuristics to use during the analysis.
+		/// </summary>
+		public List<IFaultSetHeuristic> Heuristics { get; } = new List<IFaultSetHeuristic>();
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -129,9 +135,9 @@ namespace SafetySharp.Analysis
 				var sets = GeneratePowerSetLevel(safeSets, minimalCriticalSets, cardinality, allFaults);
 
 				// check sets suggested by heuristics
-				if ((Configuration.Heuristics?.Count ?? 0) > 0)
+				if (Heuristics.Count > 0)
 				{
-					var heuristicSets = Configuration.Heuristics.SelectMany(heuristic => heuristic.MakeSuggestions(sets))
+					var heuristicSets = Heuristics.SelectMany(heuristic => heuristic.MakeSuggestions(sets))
 						.Where(set => !minimalCriticalSets.Any(critical => critical.IsSubsetOf(set) && !safeSets.Any(safe => set.IsSubsetOf(safe))))
 						.OrderByDescending(set => set.Cardinality)
 						.ToList();
