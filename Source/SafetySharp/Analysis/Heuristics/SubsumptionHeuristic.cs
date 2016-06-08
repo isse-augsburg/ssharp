@@ -50,8 +50,10 @@
                 var set = setsToCheck[i];
                 if (subsumedSets.Contains(set))
                 {
-                    setsToCheck.RemoveAt(i);
-                    setsToCheck.Insert(i - delta, set);
+                    setsToCheck[i] = setsToCheck[i - delta];
+                    setsToCheck[i - delta] = set;
+                    if (isSafe)
+                        i++; // don't move set again
                 }
             }
         }
