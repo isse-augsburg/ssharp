@@ -45,7 +45,7 @@ namespace SafetySharp.Analysis
 		private readonly SSharpChecker _modelChecker = new SSharpChecker();
 
 		private readonly HashSet<FaultSet> safeSets = new HashSet<FaultSet>();
-		private readonly HashSet<FaultSet> minimalCriticalSets = new HashSet<FaultSet>();
+		private readonly HashSet<FaultSet> criticalSets = new HashSet<FaultSet>();
 		private readonly HashSet<FaultSet> checkedSets = new HashSet<FaultSet>();
 		private readonly Dictionary<FaultSet, CounterExample> counterExamples = new Dictionary<FaultSet, CounterExample>();
 		private readonly Dictionary<FaultSet, Exception> exceptions = new Dictionary<FaultSet, Exception>();
@@ -192,8 +192,10 @@ namespace SafetySharp.Analysis
 			foreach (var fault in nondeterministicFaults)
 				fault.Activation = Activation.Nondeterministic;
 
+			RemoveNonMinimalCriticalSets();
+
 			return new Result(
-				model, isComplete, minimalCriticalSets, checkedSets,
+				model, isComplete, criticalSets, checkedSets,
 				allFaults, suppressedFaults, forcedFaults,
 				counterExamples, exceptions, stopwatch.Elapsed);
 		}
@@ -201,11 +203,26 @@ namespace SafetySharp.Analysis
 		private void Reset()
 		{
 			safeSets.Clear();
-			minimalCriticalSets.Clear();
+			criticalSets.Clear();
 			checkedSets.Clear();
 			counterExamples.Clear();
 			exceptions.Clear();
 		}
+
+		private void RemoveNonMinimalCriticalSets()
+		{
+			Predicate<FaultSet> isNonMinimal = set => criticalSets.Any(other => other != set && other.IsSubsetOf(set));
+			var nonMinimal = criticalSets.Where(set => isNonMinimal(set));
+
+			foreach (var set in nonMinimal)
+			{
+				exceptions.Remove(set);
+				counterExamples.Remove(set);
+			}
+
+			criticalSets.RemoveWhere(isNonMinimal);
+		}
+
 
 		private bool CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
 			int cardinality, RuntimeModelSerializer serializer)
@@ -236,9 +253,9 @@ namespace SafetySharp.Analysis
 				return true;
 			}
 
-			if (minimalCriticalSets.Any(criticalSet => criticalSet.IsSubsetOf(set)))
+			if (criticalSets.Any(criticalSet => criticalSet.IsSubsetOf(set)))
 			{
-				// TODO: remember non-minimal critical sets (temporarily)
+				criticalSets.Add(set);
 				ConsoleHelpers.WriteLine($"  {heuristic}[triv.] critical:  {{ {set.ToString(allFaults)} }}");
 				return false;
 			}
@@ -251,8 +268,7 @@ namespace SafetySharp.Analysis
 				if (!result.FormulaHolds)
 				{
 					ConsoleHelpers.WriteLine($"  {heuristic}        critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
-					if (cardinality == set.Cardinality)
-						minimalCriticalSets.Add(set);
+					criticalSets.Add(set);
 				}
 				else
 				{
@@ -272,11 +288,8 @@ namespace SafetySharp.Analysis
 				Console.WriteLine(e);
 
 				checkedSets.Add(set);
-				if (cardinality == set.Cardinality)
-				{
-					minimalCriticalSets.Add(set);
-					exceptions.Add(set, e.InnerException);
-				}
+				criticalSets.Add(set);
+				exceptions.Add(set, e.InnerException);
 
 				if (e.CounterExample != null)
 					counterExamples.Add(set, e.CounterExample);
@@ -324,8 +337,9 @@ namespace SafetySharp.Analysis
 					break;
 				case 1:
 					// We have to kick things off by explicitly generating the singleton sets; at this point,
-					// we know that there are no further minimal critical sets if we've already found one (= the empty set)
-					if (minimalCriticalSets.Count == 0)
+					// we know that there are no further minimal critical sets if the empty set is already critical.
+					var emptySet = new FaultSet();
+					if (!criticalSets.Contains(emptySet))
 					{
 						foreach (var fault in faults)
 							result.Add(new FaultSet(fault));
@@ -353,7 +367,7 @@ namespace SafetySharp.Analysis
 
 							// Check if the newly generated set is a super set of any critical sets or subset of any safe sets;
 							// if so, discard it
-							if (minimalCriticalSets.All(s => !s.IsSubsetOf(set)))
+							if (criticalSets.All(s => !s.IsSubsetOf(set)))
 								result.Add(set);
 						}
 					}
