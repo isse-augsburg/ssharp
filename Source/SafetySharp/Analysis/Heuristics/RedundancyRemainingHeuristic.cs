@@ -7,16 +7,25 @@
 
     public class RedundancyRemainingHeuristic : IFaultSetHeuristic
     {
-        private readonly IEnumerable<Fault>[] faultGroups;
         private readonly Fault[] allFaults;
-        private readonly ISet<FaultSet> noSuggestions = new HashSet<FaultSet>();
+        private readonly IEnumerable<IEnumerable<Fault>> faultCombinations;
+        private readonly int minSetSize;
 
         private readonly List<FaultSet> suggestions = new List<FaultSet>();
 
+        const double minFaultSetSizeRelative = 1.0 / 2;
+
         public RedundancyRemainingHeuristic(ModelBase model, params IEnumerable<Fault>[] faultGroups)
+            : this(model, minFaultSetSizeRelative, faultGroups) { }
+
+        public RedundancyRemainingHeuristic(ModelBase model, double minSetSizeRelative, params IEnumerable<Fault>[] faultGroups)
+            : this(model, (int)(model.Faults.Length * minSetSizeRelative), faultGroups) { }
+
+        public RedundancyRemainingHeuristic(ModelBase model, int minSetSize, params IEnumerable<Fault>[] faultGroups)
         {
-            this.faultGroups = faultGroups;
             allFaults = model.Faults;
+            faultCombinations = CartesianProduct(faultGroups);
+            this.minSetSize = minSetSize;
             CollectSuggestions();
         }
 
@@ -27,16 +36,31 @@
 
         public void Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
         {
-            // TODO: if !isSafe, try more redundancy
-            // if several critical, try more redundancy FIRST
-            suggestions.Remove(checkedSet);
+            bool isSuggestion = suggestions.Remove(checkedSet);
+
+            if (isSuggestion && !isSafe)
+            {
+                // if set was critical, try some more redundancy
+                var sets = from excludedFaults in faultCombinations
+                           let excludedSet = Fault.SubsumingFaults(excludedFaults, allFaults)
+                           // disable more faults:
+                           let moreRedundancy = checkedSet.GetDifference(excludedSet)
+                           // don't check checkedSet again, stop when minSetSize reached:
+                           where moreRedundancy != checkedSet && moreRedundancy.Cardinality >= minSetSize
+                           // check larger sets first:
+                           //orderby moreRedundancy.Cardinality descending
+                           //orderby moreRedundancy.Cardinality
+                           select moreRedundancy;
+                setsToCheck.InsertRange(0, sets);
+                suggestions.AddRange(sets);
+            }
         }
 
         public void CollectSuggestions()
         {
             var faults = new FaultSet(allFaults);
 
-            foreach (var excludedFaults in CartesianProduct(faultGroups))
+            foreach (var excludedFaults in faultCombinations)
             {
                 var subsuming = Fault.SubsumingFaults(excludedFaults, allFaults);
                 suggestions.Add(faults.GetDifference(subsuming));
