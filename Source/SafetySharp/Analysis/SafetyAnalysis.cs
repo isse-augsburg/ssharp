@@ -143,28 +143,6 @@ namespace SafetySharp.Analysis
 				// Generate the sets for the current level that we'll have to check
 				var sets = GeneratePowerSetLevel(cardinality, allFaults);
 
-				// check sets suggested by heuristics
-				if (Heuristics.Count > 0)
-				{
-					var heuristicSets = Heuristics.SelectMany(heuristic => heuristic.MakeSuggestions(sets))
-						.Where(set => !minimalCriticalSets.Any(critical => critical.IsSubsetOf(set) && !safeSets.Any(safe => set.IsSubsetOf(safe))))
-						.OrderByDescending(set => set.Cardinality);
-
-					ConsoleHelpers.WriteLine($"Checking {heuristicSets.Count()} sets suggested by heuristics...");
-					foreach (var set in heuristicSets)
-					{
-						CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer);
-						// TODO: (temporarily) remember non-minimal critical sets:
-						// scenario: { f1, f2, f3 } is minimal critical set
-						//
-						// for set { f1, f2 }, heuristic suggests { f1, f2, f3, f4 }
-						// for set { f1, f2, f3 }, heuristic suggests { f1, f2, f3, f4, f5 }
-						//
-						// in this case: remember result of first heuristic, so don't check 2nd heuristic
-						// but only include { f1, f2, f3 } in result
-					}
-				}
-
 				// Remove all sets that conflict with the forced or suppressed faults; these sets are considered to be safe.
 				// If no sets remain, skip to the next level
 				sets = RemoveInvalidSets(sets, suppressedSet, forcedSet, safeSets);
@@ -184,8 +162,26 @@ namespace SafetySharp.Analysis
 				else
 					ConsoleHelpers.WriteLine($"Checking {sets.Count} sets of cardinality {cardinality}...");
 
+				// use heuristics
+				var setsToCheck = new List<FaultSet>(sets);
+				foreach (var heuristic in Heuristics)
+					heuristic.Augment(setsToCheck);
+
 				// We have to check each set; if one of them is a critical set, it has no effect on the other
 				// sets we have to check
+				while (setsToCheck.Count > 0)
+				{
+					var set = setsToCheck[0];
+
+					bool isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer);
+					sets.Remove(set);
+					setsToCheck.RemoveAt(0);
+
+					foreach (var heuristic in Heuristics)
+						heuristic.Update(setsToCheck, set, isSafe);
+				}
+
+				// in case heuristics removed a set (they shouldn't)
 				foreach (var set in sets)
 				{
 					CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer);
@@ -211,7 +207,7 @@ namespace SafetySharp.Analysis
 			exceptions.Clear();
 		}
 
-		private void CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
+		private bool CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
 			int cardinality, RuntimeModelSerializer serializer)
 		{
 			bool isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, Activation.Forced);
@@ -223,6 +219,8 @@ namespace SafetySharp.Analysis
 
 			if (isSafe)
 				safeSets.Add(set);
+
+			return isSafe;
 		}
 
 		private bool CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
@@ -230,11 +228,19 @@ namespace SafetySharp.Analysis
 		{
 			// Enable or disable the faults that the set represents
 			set.SetActivation(nondeterministicFaults, activationMode);
+			var heuristic = set.Cardinality == cardinality ? "       " : "[heur.]";
 
 			if (safeSets.Any(safeSet => set.IsSubsetOf(safeSet)))
 			{
-				ConsoleHelpers.WriteLine($"  triv. safe:  {{ {set.ToString(allFaults)} }}");
+				ConsoleHelpers.WriteLine($"  {heuristic}[triv.]     safe:  {{ {set.ToString(allFaults)} }}");
 				return true;
+			}
+
+			if (minimalCriticalSets.Any(criticalSet => criticalSet.IsSubsetOf(set)))
+			{
+				// TODO: remember non-minimal critical sets (temporarily)
+				ConsoleHelpers.WriteLine($"  {heuristic}[triv.] critical:  {{ {set.ToString(allFaults)} }}");
+				return false;
 			}
 
 			// If there was a counter example, the set is a critical set
@@ -244,13 +250,13 @@ namespace SafetySharp.Analysis
 
 				if (!result.FormulaHolds)
 				{
-					ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
+					ConsoleHelpers.WriteLine($"  {heuristic}        critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
 					if (cardinality == set.Cardinality)
 						minimalCriticalSets.Add(set);
 				}
 				else
 				{
-					ConsoleHelpers.WriteLine($"    safe set:  {{ {set.ToString(allFaults)} }}", ConsoleColor.Blue);
+					ConsoleHelpers.WriteLine($"  {heuristic}            safe:  {{ {set.ToString(allFaults)} }}", ConsoleColor.Blue);
 				}
 
 				checkedSets.Add(set);
@@ -262,7 +268,7 @@ namespace SafetySharp.Analysis
 			}
 			catch (AnalysisException e)
 			{
-				ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }} [exception thrown]", ConsoleColor.DarkRed);
+				ConsoleHelpers.WriteLine($"  {heuristic}        critical:  {{ {set.ToString(allFaults)} }} [exception thrown]", ConsoleColor.DarkRed);
 				Console.WriteLine(e);
 
 				checkedSets.Add(set);

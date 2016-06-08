@@ -31,9 +31,14 @@ namespace SafetySharp.Analysis.Heuristics
 	public interface IFaultSetHeuristic
 	{
 		/// <summary>
-		///   Given a set of fault sets that will be checked, returns
-		///   fault sets to be checked first.
+		///   Changes the sets that will be checked by DCCA, by reordering and adding sets.
 		/// </summary>
-		ISet<FaultSet> MakeSuggestions(ISet<FaultSet> setsToCheck);
+		void Augment(List<FaultSet> setsToCheck);
+
+		/// <summary>
+		///   Informs the heuristic of the result of analyzing <paramref name="checkedSet"/>
+		///   and allows it to adapt the sets to check next.
+		/// </summary>
+		void Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe);
 	}
 }

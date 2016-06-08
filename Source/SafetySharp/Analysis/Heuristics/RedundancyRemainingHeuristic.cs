@@ -11,19 +11,29 @@
         private readonly Fault[] allFaults;
         private readonly ISet<FaultSet> noSuggestions = new HashSet<FaultSet>();
 
+        private readonly List<FaultSet> suggestions = new List<FaultSet>();
+
         public RedundancyRemainingHeuristic(ModelBase model, params IEnumerable<Fault>[] faultGroups)
         {
             this.faultGroups = faultGroups;
             allFaults = model.Faults;
+            CollectSuggestions();
         }
 
-        public ISet<FaultSet> MakeSuggestions(ISet<FaultSet> setsToCheck)
+        public void Augment(List<FaultSet> setsToCheck)
         {
-            // only make suggestions at the beginning
-            if (setsToCheck.Count != 1 || !setsToCheck.First().IsEmpty)
-                return noSuggestions;
+            setsToCheck.InsertRange(0, suggestions);
+        }
 
-            var suggestions = new HashSet<FaultSet>();
+        public void Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
+        {
+            // TODO: if !isSafe, try more redundancy
+            // if several critical, try more redundancy FIRST
+            suggestions.Remove(checkedSet);
+        }
+
+        public void CollectSuggestions()
+        {
             var faults = new FaultSet(allFaults);
 
             foreach (var excludedFaults in CartesianProduct(faultGroups))
@@ -31,8 +41,6 @@
                 var subsuming = Fault.SubsumingFaults(excludedFaults, allFaults);
                 suggestions.Add(faults.GetDifference(subsuming));
             }
-
-            return suggestions;
         }
 
         public static IEnumerable<IEnumerable<T>> CartesianProduct<T>(IEnumerable<IEnumerable<T>> sequences)
