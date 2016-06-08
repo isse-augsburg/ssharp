@@ -87,7 +87,7 @@ isConnected = [{ connections.ToString().ToLower() }|];
             var startInfo = new ProcessStartInfo
             {
                 FileName = MinizincExe,
-                Arguments = $"-D \"{data}\" {MinizincModel}",
+                Arguments = $"-G gecode -f fzn-gecode -D \"{data}\" {MinizincModel}",
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
