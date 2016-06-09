@@ -33,20 +33,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             }
         }
 
-        private void RemoveObsoleteConfiguration(Recipe recipe)
-        {
-            foreach (var station in AvailableStations)
-            {
-                var obsoleteRoles = (from role in station.AllocatedRoles where role.Recipe == recipe select role)
-                    .ToArray();
-                foreach (var role in obsoleteRoles)
-                {
-                    station.AllocatedRoles.Remove(role);
-                }
-                RolePool.Return(obsoleteRoles);
-            }
-        }
-
         private string GetCurrentConfiguration(Recipe recipe)
         {
             var recipe_data = RecipeToCapabilitySequence(recipe);
@@ -152,26 +138,13 @@ isConnected = [{ connections.ToString().ToLower() }|];
                 Role role = lastRole;
                 if (agent != lastAgent)
                 {
-                    role = RolePool.Allocate();
+                    role = GetRole(recipe, lastAgent, lastRole?.PostCondition.State);
                     agent.AllocatedRoles.Add(role);
-
-                    role.CapabilitiesToApply.Clear();
-
-                    // update precondition
-                    role.PreCondition.Recipe = recipe;
-                    role.PreCondition.State.Clear();
-                    role.PreCondition.Port = lastAgent;
 
                     if (lastRole != null)
                     {
                         lastRole.PostCondition.Port = agent;
-                        role.PreCondition.State.AddRange(lastRole.PostCondition.State);
                     }
-
-                    // update postcondition
-                    role.PostCondition.Recipe = recipe;
-                    role.PostCondition.State.Clear();
-                    role.PostCondition.State.AddRange(role.PreCondition.State);
                 }
 
                 if (workedOn[i] > 0)
@@ -183,11 +156,6 @@ isConnected = [{ connections.ToString().ToLower() }|];
 
                 lastAgent = agent;
                 lastRole = role;
-            }
-
-            if (lastRole != null)
-            {
-                lastRole.PostCondition.Port = null; // last role must include consume capability -> no output
             }
         }
 

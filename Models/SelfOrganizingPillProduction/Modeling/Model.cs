@@ -54,7 +54,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 next.Inputs.Add(stations[i]);
             }
 
-            var model = new Model(stations, new MiniZincObserverController(stations));
+            var model = new Model(stations, new FastObserverController(stations));
 
             var recipe = new Recipe(ingredients: new[] {
                 new Ingredient(IngredientType.BlueParticulate, 12),

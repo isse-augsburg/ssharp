@@ -33,7 +33,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                     lastStation = station;
                 }
             }
-            var model = new Model(stations.ToArray(), new MiniZincObserverController(stations.ToArray()));
+            var model = new Model(stations.ToArray(), new FastObserverController(stations.ToArray()));
 
             // read recipes to be produced by the model
             var ingredientNames = Enum.GetNames(typeof(IngredientType));

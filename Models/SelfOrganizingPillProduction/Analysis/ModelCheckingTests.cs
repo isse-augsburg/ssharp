@@ -53,7 +53,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
         {
             var modelChecker = new SafetyAnalysis();
             modelChecker.Configuration.StateCapacity = 40000;
-            modelChecker.Configuration.CpuCount = 1;
             modelChecker.Heuristics.AddRange(heuristics);
             modelChecker.ForceFaultActivation = true;
 
