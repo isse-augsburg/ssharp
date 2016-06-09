@@ -20,85 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.TemporalOperators
+namespace Tests.Formulas.Operators
 {
 	using SafetySharp.Analysis;
 	using static SafetySharp.Analysis.Operators;
 
-	internal class T6 : FormulaTestObject
+	internal class T5 : FormulaTestObject
 	{
 		protected override void Check()
 		{
 			var intValue = 7;
 
 			{
-				var actual = U(intValue < 7, false);
-				var expected = new BinaryFormula(
+				var actual = G(intValue < 7);
+				var expected = new UnaryFormula(
 					new StateFormula(() => intValue < 7),
-					BinaryOperator.Until,
-					new StateFormula(() => false));
+					UnaryOperator.Globally);
 
 				Check(actual, expected);
 			}
 
 			{
-				var actual = U(G(intValue >= 7), false);
-				var expected = new BinaryFormula(
-					new UnaryFormula(
-						new StateFormula(() => intValue >= 7),
-						UnaryOperator.Globally),
-					BinaryOperator.Until,
-					new StateFormula(() => false));
-
-				Check(actual, expected);
-			}
-
-			{
-				var actual = U(intValue >= 7, F(false));
-				var expected = new BinaryFormula(
-					new StateFormula(() => intValue >= 7),
-					BinaryOperator.Until,
-					new UnaryFormula(new StateFormula(() => false), UnaryOperator.Finally));
-
-				Check(actual, expected);
-			}
-
-			{
-				var actual = U(G(intValue >= 7), F(false));
-				var expected = new BinaryFormula(
-					new UnaryFormula(
-						new StateFormula(() => intValue >= 7),
-						UnaryOperator.Globally),
-					BinaryOperator.Until,
-					new UnaryFormula(new StateFormula(() => false), UnaryOperator.Finally));
-
-				Check(actual, expected);
-			}
-
-			{
-				var actual = AU(G(intValue >= 7), F(false));
+				var actual = G(G(intValue >= 7));
 				var expected = new UnaryFormula(
-					new BinaryFormula(
+					new UnaryFormula(
+						new StateFormula(() => intValue >= 7),
+						UnaryOperator.Globally),
+					UnaryOperator.Globally);
+
+				Check(actual, expected);
+			}
+
+			{
+				var actual = AG(EG(intValue >= 7));
+				var expected = new UnaryFormula(
+					new UnaryFormula(
 						new UnaryFormula(
-							new StateFormula(() => intValue >= 7),
-							UnaryOperator.Globally),
-						BinaryOperator.Until,
-						new UnaryFormula(new StateFormula(() => false), UnaryOperator.Finally)),
+							new UnaryFormula(
+								new StateFormula(() => intValue >= 7),
+								UnaryOperator.Globally),
+							UnaryOperator.Exists),
+						UnaryOperator.Globally),
 					UnaryOperator.All);
-
-				Check(actual, expected);
-			}
-
-			{
-				var actual = EU(G(intValue >= 7), F(false));
-				var expected = new UnaryFormula(
-					new BinaryFormula(
-						new UnaryFormula(
-							new StateFormula(() => intValue >= 7),
-							UnaryOperator.Globally),
-						BinaryOperator.Until,
-						new UnaryFormula(new StateFormula(() => false), UnaryOperator.Finally)),
-					UnaryOperator.Exists);
 
 				Check(actual, expected);
 			}

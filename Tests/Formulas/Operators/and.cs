@@ -1,6 +1,6 @@
 ﻿// The MIT License (MIT)
 // 
-// Copyright (c) 2014-2015, Institute for Software | Systems Engineering
+// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,52 +20,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.TemporalOperators
+namespace Tests.Formulas.Operators
 {
 	using SafetySharp.Analysis;
 	using static SafetySharp.Analysis.Operators;
 
-	internal class T11 : FormulaTestObject
+	internal class T10 : FormulaTestObject
 	{
 		protected override void Check()
 		{
 			var intValue = 7;
 
 			{
-				var actual = ((Formula)false) | (intValue < 7);
+				var actual = ((Formula)false) & (intValue < 7);
 				var expected = new BinaryFormula(
 					new StateFormula(() => false),
-					BinaryOperator.Or,
+					BinaryOperator.And,
 					new StateFormula(() => intValue < 7));
 
 				Check(actual, expected);
 			}
 
 			{
-				var actual = X(true) | intValue < 7;
+				var actual = X(true) & intValue < 7;
 				var expected = new BinaryFormula(
 					new UnaryFormula(new StateFormula(() => true), UnaryOperator.Next),
-					BinaryOperator.Or,
+					BinaryOperator.And,
 					new StateFormula(() => intValue < 7));
 
 				Check(actual, expected);
 			}
 
 			{
-				var actual = intValue < 7 | X(true);
+				var actual = intValue < 7 & X(true);
 				var expected = new BinaryFormula(
 					new StateFormula(() => intValue < 7),
-					BinaryOperator.Or,
+					BinaryOperator.And,
 					new UnaryFormula(new StateFormula(() => true), UnaryOperator.Next));
 
 				Check(actual, expected);
 			}
 
 			{
-				var actual = false | (F(intValue < 7));
+				var actual = false & (F(intValue < 7));
 				var expected = new BinaryFormula(
 					new StateFormula(() => false),
-					BinaryOperator.Or,
+					BinaryOperator.And,
 					new UnaryFormula(
 						new StateFormula(() => intValue < 7),
 						UnaryOperator.Finally));
@@ -74,40 +74,40 @@ namespace Tests.Formulas.TemporalOperators
 			}
 
 			{
-				var actual = ((Formula)false) || (intValue < 7);
+				var actual = ((Formula)false) && (intValue < 7);
 				var expected = new BinaryFormula(
 					new StateFormula(() => false),
-					BinaryOperator.Or,
+					BinaryOperator.And,
 					new StateFormula(() => intValue < 7));
 
 				Check(actual, expected);
 			}
 
 			{
-				var actual = X(true) || intValue < 7;
+				var actual = X(true) && intValue < 7;
 				var expected = new BinaryFormula(
 					new UnaryFormula(new StateFormula(() => true), UnaryOperator.Next),
-					BinaryOperator.Or,
+					BinaryOperator.And,
 					new StateFormula(() => intValue < 7));
 
 				Check(actual, expected);
 			}
 
 			{
-				var actual = intValue < 7 || X(true);
+				var actual = intValue < 7 && X(true);
 				var expected = new BinaryFormula(
 					new StateFormula(() => intValue < 7),
-					BinaryOperator.Or,
+					BinaryOperator.And,
 					new UnaryFormula(new StateFormula(() => true), UnaryOperator.Next));
 
 				Check(actual, expected);
 			}
 
 			{
-				var actual = intValue < 4 || (F(intValue < 7));
+				var actual = intValue < 3 && (F(intValue < 7));
 				var expected = new BinaryFormula(
-					new StateFormula(() => intValue < 4),
-					BinaryOperator.Or,
+					new StateFormula(() => intValue < 3),
+					BinaryOperator.And,
 					new UnaryFormula(
 						new StateFormula(() => intValue < 7),
 						UnaryOperator.Finally));
