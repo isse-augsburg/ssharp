@@ -52,6 +52,7 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Analysis\ModelCheckingTests.cs" />
+    <Compile Include="Modeling\FastObserverController.cs" />
     <Compile Include="Modeling\FaultHelper.cs" />
     <Compile Include="Modeling\Capability.cs" />
     <Compile Include="Modeling\Condition.cs" />
