@@ -14,37 +14,47 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         public override void Configure(Recipe recipe)
         {
-            RemoveObsoleteConfiguration(recipe);
+            Configure(new[] { recipe });
+        }
+
+        public override void Configure(IEnumerable<Recipe> recipes)
+        {
+            var stations = AvailableStations;
 
             // assign int identifiers to stations
-            var stations = AvailableStations;
             var identifiers = new Dictionary<Station, int>();
             for (int i = 0; i < stations.Length; ++i)
                 identifiers[stations[i]] = i;
 
-            var data = CalculateConnectionMatrix();
+            var data = CalculateConnectionMatrix(stations);
             var connections = data.Item1;
             var costs = data.Item2;
 
+            foreach (var recipe in recipes)
+                Configure(recipe, stations, identifiers, connections, costs);
+        }
+
+        private void Configure(Recipe recipe, Station[] stations, Dictionary<Station, int> identifiers, int[,] connections, int[,] costs)
+        {
+            RemoveObsoleteConfiguration(recipe);
+
             // find optimal path that satisfies the required capabilities
-            var path = FindStationPath(recipe, identifiers, connections, costs);
+            var path = FindStationPath(recipe, stations, identifiers, connections, costs);
             if (path == null)
             {
                 Unsatisfiable = true;
                 return;
             }
 
-            ApplyConfiguration(recipe, path, connections);
+            ApplyConfiguration(recipe, stations, path, connections);
         }
 
         /// <summary>
         /// Calculates the connection matrix for the available stations.
         /// </summary>
         /// <returns>A tuple containing the successor matrix and the path length matrix. -1 indicates no successor / infinite costs.</returns>
-        private Tuple<int[,], int[,]> CalculateConnectionMatrix()
+        private Tuple<int[,], int[,]> CalculateConnectionMatrix(Station[] stations)
         {
-            var stations = AvailableStations;
-
             var paths = new int[stations.Length, stations.Length];
             var costs = new int[stations.Length, stations.Length];
 
@@ -97,10 +107,9 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// An array of station identifiers, one for each capability. This array does not include stations
         /// that only transport a resource from one to the next.
         /// </returns>
-        private int[] FindStationPath(Recipe recipe, Dictionary<Station, int> identifiers, int[,] connections, int[,] costs)
+        private int[] FindStationPath(Recipe recipe, Station[] stations,
+            Dictionary<Station, int> identifiers, int[,] connections, int[,] costs)
         {
-            var stations = AvailableStations;
-
             var paths = from station in stations
                         where recipe.RequiredCapabilities[0].IsSatisfied(station.AvailableCapabilities)
                         select new[] { identifiers[station] };
@@ -145,10 +154,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// <summary>
         /// Configures the <see cref="AvailableStations"/> to produce resource for the <paramref name="recipe"/>.
         /// </summary>
-        private void ApplyConfiguration(Recipe recipe, int[] path, int[,] connections)
+        private void ApplyConfiguration(Recipe recipe, Station[] stations, int[] path, int[,] connections)
         {
-            var stations = AvailableStations;
-
             Station lastStation = null;
             Role lastRole = null;
 

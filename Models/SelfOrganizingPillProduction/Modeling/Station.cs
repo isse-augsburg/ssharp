@@ -147,10 +147,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 currentRole = null;
             }
 
-            foreach (var recipe in inconsistentRecipes)
-            {
-                ObserverController.Configure(recipe);
-            }
+            if (inconsistentRecipes.Length > 0)
+                ObserverController.Configure(inconsistentRecipes);
         }
 
         /// <summary>
