@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,49 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Compiler.Analyzers
+namespace Tests.Diagnostics.FaultEffects.Invalid
 {
-	/// <summary>
-	///   Represents a unique identifier for a S# diagnostic emitted by a <see cref="Analyzer" />.
-	/// </summary>
-	public enum DiagnosticIdentifier
+	using SafetySharp.Compiler.Analyzers;
+	using SafetySharp.Modeling;
+
+	[Diagnostic(DiagnosticIdentifier.InvalidFaultEffectBaseType, 31, 18, 6,
+		"Tests.Diagnostics.FaultEffects.Invalid.NoBase", "object")]
+	[FaultEffect]
+	public class NoBase
 	{
-		// Type diagnostics
-		CustomComponent = 1000,
-		ComponentInterfaceReimplementation,
-		ComponentIsInitializable,
-
-		// Port diagnostics
-		AmbiguousPortKind = 3000,
-		StaticPort,
-		UnmarkedInterfacePort,
-		PortPropertyAccessor,
-		ProvidedPortImplementedAsRequiredPort,
-		RequiredPortImplementedAsProvidedPort,
-		NonExternRequiredPort,
-		UpdateMethodMarkedAsPort,
-		ExternProvidedPort,
-		ExternUpdateMethod,
-		GenericPort,
-		IndexerPort,
-		EventPort,
-
-		// Fault and fault effect diagnostics
-		InvalidFaultMemberAccess = 4000,
-		GenericFaultEffect,
-		FaultEffectAccessibility,
-		InvalidFaultEffectBaseType,
-		AbstractFaultEffectOverride,
-		MultipleFaultEffectsWithoutPriority,
-		SealedFaultEffect,
-		ClosedGenericBaseType,
-
-		// Bindings diagnostics
-		BindingFailure = 5000,
-		AmbiguousBinding,
-		NonDelegateBinding,
-
-		// Misc diagnostics
-		ReservedName = 9000,
 	}
 }

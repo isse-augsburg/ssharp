@@ -198,12 +198,16 @@
     <Compile Include="Diagnostics\Bindings\Invalid\non-component required port binding.cs" />
     <Compile Include="Diagnostics\Bindings\Valid\non-component provided port binding.cs" />
     <Compile Include="Diagnostics\CustomComponents\Invalid\components cannot implement IInitializable.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Invalid\generic base substitution.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism double override.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Invalid\no base.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\sealed.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\deterministic effects without priorities.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\effects with priorities.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\explicit nondeterminism.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Valid\generic nested.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Valid\generic.cs" />
     <Compile Include="End2EndTests.cs" />
     <Compile Include="End2EndTests.Helpers.cs">
       <DependentUpon>End2EndTests.cs</DependentUpon>
