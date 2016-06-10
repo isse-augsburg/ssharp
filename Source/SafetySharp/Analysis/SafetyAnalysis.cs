@@ -231,7 +231,7 @@ namespace SafetySharp.Analysis
 			if (isSafe && !ForceFaultActivation)
 			{
 				ConsoleHelpers.WriteLine("    Check again with nondeterministic activation...");
-				CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, Activation.Nondeterministic);
+				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, Activation.Nondeterministic);
 			}
 
 			if (isSafe)
