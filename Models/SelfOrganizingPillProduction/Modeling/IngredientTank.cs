@@ -23,6 +23,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
             public virtual void Dispense(PillContainer container, Ingredient ingredient)
             {
+                if (ingredient.Type != IngredientType)
+                    throw new InvalidOperationException("Incorrect ingredient requested");
                 if (Amount < ingredient.Amount)
                     throw new InvalidOperationException($"Insufficient amount available of ingredient {ingredient.Type}");
 
