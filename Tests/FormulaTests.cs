@@ -32,8 +32,8 @@ namespace Tests
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Formulas/TemporalOperators")]
-		public void TemporalOperators(string test, string file)
+		[Theory, MemberData("DiscoverTests", "Formulas/Operators")]
+		public void Operators(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
