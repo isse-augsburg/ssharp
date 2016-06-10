@@ -52,8 +52,8 @@
                 {
                     setsToCheck[i] = setsToCheck[i - delta];
                     setsToCheck[i - delta] = set;
-                    if (isSafe)
-                        i++; // don't move set again
+                    if (!isSafe) // we just moved 'set' to position i+1
+                        i++; // skip it, don't move it again
                 }
             }
         }
