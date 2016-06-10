@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
@@ -12,6 +13,18 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     {
         public FastObserverController(params Station[] stations) : base(stations) { }
 
+        [Hidden]
+        private Station[] availableStations;
+
+        [Hidden(HideElements = true)]
+        private readonly Dictionary<Station, int> identifiers = new Dictionary<Station, int>();
+
+        [Hidden]
+        private int[,] pathMatrix;
+
+        [Hidden]
+        private int[,] costMatrix;
+
         public override void Configure(Recipe recipe)
         {
             Configure(new[] { recipe });
@@ -19,85 +32,78 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         public override void Configure(IEnumerable<Recipe> recipes)
         {
-            var stations = AvailableStations;
+            availableStations = AvailableStations;
 
             // assign int identifiers to stations
-            var identifiers = new Dictionary<Station, int>();
-            for (int i = 0; i < stations.Length; ++i)
-                identifiers[stations[i]] = i;
+            identifiers.Clear();
+            for (int i = 0; i < availableStations.Length; ++i)
+                identifiers[availableStations[i]] = i;
 
-            var data = CalculateConnectionMatrix(stations);
-            var connections = data.Item1;
-            var costs = data.Item2;
+            CalculateShortestPaths();
 
             foreach (var recipe in recipes)
-                Configure(recipe, stations, identifiers, connections, costs);
+                ConfigureInternal(recipe);
         }
 
-        private void Configure(Recipe recipe, Station[] stations, Dictionary<Station, int> identifiers, int[,] connections, int[,] costs)
+        private void ConfigureInternal(Recipe recipe)
         {
             RemoveObsoleteConfiguration(recipe);
 
             // find optimal path that satisfies the required capabilities
-            var path = FindStationPath(recipe, stations, identifiers, connections, costs);
+            var path = FindStationPath(recipe);
             if (path == null)
-            {
                 Unsatisfiable = true;
-                return;
-            }
-
-            ApplyConfiguration(recipe, stations, path, connections);
+            else
+                ApplyConfiguration(recipe, path);
         }
 
         /// <summary>
         /// Calculates the connection matrix for the available stations.
         /// </summary>
         /// <returns>A tuple containing the successor matrix and the path length matrix. -1 indicates no successor / infinite costs.</returns>
-        private Tuple<int[,], int[,]> CalculateConnectionMatrix(Station[] stations)
+        private void CalculateShortestPaths()
         {
-            var paths = new int[stations.Length, stations.Length];
-            var costs = new int[stations.Length, stations.Length];
+            pathMatrix = new int[availableStations.Length, availableStations.Length];
+            costMatrix = new int[availableStations.Length, availableStations.Length];
 
-            for (int i = 0; i < stations.Length; ++i)
+            for (int i = 0; i < availableStations.Length; ++i)
             {
-                for (int j = 0; j < stations.Length; ++j)
+                for (int j = 0; j < availableStations.Length; ++j)
                 {
                     // neighbours
-                    if (stations[i].Outputs.Contains(stations[j]))
+                    if (availableStations[i].Outputs.Contains(availableStations[j]))
                     {
-                        paths[i, j] = j;
-                        costs[i, j] = 1;
+                        pathMatrix[i, j] = j;
+                        costMatrix[i, j] = 1;
                     }
                     else // default for non-neighbours
                     {
-                        paths[i, j] = -1;
-                        costs[i, j] = -1; // signifies infinity
+                        pathMatrix[i, j] = -1; // signifies no path
+                        costMatrix[i, j] = -1; // signifies infinity
                     }
                 }
 
                 // reflexive case
-                paths[i, i] = i;
-                costs[i, i] = 0;
+                pathMatrix[i, i] = i;
+                costMatrix[i, i] = 0;
             }
 
             // Floyd-Warshall algorithm
-            for (int link = 0; link < stations.Length; ++link)
+            for (int link = 0; link < availableStations.Length; ++link)
             {
-                for (int start = 0; start < stations.Length; ++start)
+                for (int start = 0; start < availableStations.Length; ++start)
                 {
-                    for (int end = 0; end < stations.Length; ++end)
+                    for (int end = 0; end < availableStations.Length; ++end)
                     {
-                        if (costs[start, link] > -1 && costs[link, end] > -1 // paths start->link and link->end exist
-                            && (costs[start, end] == -1 || costs[start, end] > costs[start, link] + costs[link, end]))
+                        if (costMatrix[start, link] > -1 && costMatrix[link, end] > -1 // paths start->link and link->end exist
+                            && (costMatrix[start, end] == -1 || costMatrix[start, end] > costMatrix[start, link] + costMatrix[link, end]))
                         {
-                            costs[start, end] = costs[start, link] + costs[link, end];
-                            paths[start, end] = paths[start, link];
+                            costMatrix[start, end] = costMatrix[start, link] + costMatrix[link, end];
+                            pathMatrix[start, end] = pathMatrix[start, link];
                         }
                     }
                 }
             }
-
-            return Tuple.Create(paths, costs);
         }
 
         /// <summary>
@@ -107,10 +113,9 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// An array of station identifiers, one for each capability. This array does not include stations
         /// that only transport a resource from one to the next.
         /// </returns>
-        private int[] FindStationPath(Recipe recipe, Station[] stations,
-            Dictionary<Station, int> identifiers, int[,] connections, int[,] costs)
+        private int[] FindStationPath(Recipe recipe)
         {
-            var paths = from station in stations
+            var paths = from station in availableStations
                         where recipe.RequiredCapabilities[0].IsSatisfied(station.AvailableCapabilities)
                         select new[] { identifiers[station] };
 
@@ -121,13 +126,13 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             {
                 paths = (
                          from path in paths
-                         from station in stations
+                         from station in availableStations
                          let id = identifiers[station]
                          let last = path[path.Length - 1]
                          // if station has the next required capability
                          where recipe.RequiredCapabilities[i].IsSatisfied(station.AvailableCapabilities)
                          // and station is reachable from the previous path
-                         where connections[last, id] != -1
+                         where pathMatrix[last, id] != -1
                          // append station to the path
                          select path.Concat(new[] { id }).ToArray()
                         ).ToArray();
@@ -146,7 +151,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             */
 
             // optimize path length
-            Func<int[], int> cost = (path) => path.Zip(path.Skip(1), (from, to) => costs[from, to]).Sum();
+            Func<int[], int> cost = (path) => path.Zip(path.Skip(1), (from, to) => costMatrix[from, to]).Sum();
 
             return paths.OrderBy(cost).First();
         }
@@ -154,29 +159,29 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// <summary>
         /// Configures the <see cref="AvailableStations"/> to produce resource for the <paramref name="recipe"/>.
         /// </summary>
-        private void ApplyConfiguration(Recipe recipe, Station[] stations, int[] path, int[,] connections)
+        private void ApplyConfiguration(Recipe recipe, int[] path)
         {
             Station lastStation = null;
             Role lastRole = null;
 
             for (int i = 0; i < path.Length; ++i)
             {
-                var station = stations[path[i]];
+                var station = availableStations[path[i]];
                 var role = lastRole;
 
                 if (station != lastStation)
                 {
                     if (lastStation != null) // configure connection between stations
                     {
-                        var connection = FindConnection(connections, path[i - 1], path[i]).ToArray();
+                        var connection = GetShortestPath(path[i - 1], path[i]).ToArray();
                         // for each station on connection, except lastStation and station:
                         for (int j = 1; j < connection.Length - 1; ++j)
                         {
-                            var link = stations[connection[j]];
+                            var link = availableStations[connection[j]];
                             lastRole.PostCondition.Port = link; // connect to previous
 
                             var linkRole = GetRole(recipe, lastStation, lastRole.PostCondition.State);
-                            link.AllocatedRoles.Add(linkRole); // edd empty (transport) role
+                            link.AllocatedRoles.Add(linkRole); // add empty (transport) role
 
                             lastStation = link;
                             lastRole = linkRole;
@@ -199,9 +204,9 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             }
         }
 
-        private IEnumerable<int> FindConnection(int[,] connections, int from, int to)
+        private IEnumerable<int> GetShortestPath(int from, int to)
         {
-            for (int current = from; current != to; current = connections[current, to])
+            for (int current = from; current != to; current = pathMatrix[current, to])
                 yield return current;
             yield return to;
         }
