@@ -16,9 +16,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         [Hidden]
         private Station[] availableStations;
 
-        [Hidden(HideElements = true)]
-        private readonly Dictionary<Station, int> identifiers = new Dictionary<Station, int>();
-
         [Hidden]
         private int[,] pathMatrix;
 
@@ -33,11 +30,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         public override void Configure(IEnumerable<Recipe> recipes)
         {
             availableStations = AvailableStations;
-
-            // assign int identifiers to stations
-            identifiers.Clear();
-            for (int i = 0; i < availableStations.Length; ++i)
-                identifiers[availableStations[i]] = i;
 
             CalculateShortestPaths();
 
@@ -115,9 +107,11 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// </returns>
         private int[] FindStationPath(Recipe recipe)
         {
-            var paths = from station in availableStations
-                        where recipe.RequiredCapabilities[0].IsSatisfied(station.AvailableCapabilities)
-                        select new[] { identifiers[station] };
+            var identifiers = Enumerable.Range(0, availableStations.Length - 1);
+
+            var paths = from station in identifiers
+                        where Capability.IsSatisfiable(new[] { recipe.RequiredCapabilities[0] }, availableStations[station].AvailableCapabilities)
+                        select new[] { station };
 
             if (paths.Count() == 0)
                 return null;
@@ -126,15 +120,14 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             {
                 paths = (
                          from path in paths
-                         from station in availableStations
-                         let id = identifiers[station]
+                         from station in identifiers
                          let last = path[path.Length - 1]
                          // if station has the next required capability
-                         where recipe.RequiredCapabilities[i].IsSatisfied(station.AvailableCapabilities)
+                         where CanSatisfyNext(recipe, path, station)
                          // and station is reachable from the previous path
-                         where pathMatrix[last, id] != -1
+                         where pathMatrix[last, station] != -1
                          // append station to the path
-                         select path.Concat(new[] { id }).ToArray()
+                         select path.Concat(new[] { station }).ToArray()
                         ).ToArray();
 
                 if (paths.Count() == 0)
@@ -145,15 +138,30 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
              * What to optimize?
              *
              * number of roles on path (prefer less busy stations):
-            Func<int[], int> cost = (path) => path.Sum(id => stations[id].AllocatedRoles.Count);
+            Func<int[], int> cost = (path) => path(.Distinct()).Sum(id => stations[id].AllocatedRoles.Count);
              *
              * amount of necessary ingredients available (reconfiguration less likely)
             */
 
-            // optimize path length
+            // optimize for minimal path length
             Func<int[], int> cost = (path) => path.Zip(path.Skip(1), (from, to) => costMatrix[from, to]).Sum();
 
             return paths.OrderBy(cost).First();
+        }
+
+        /// <summary>
+        /// Checks if the given station can satisfy all the demanded capabilities.
+        /// </summary>
+        /// <param name="recipe">The recipe for which a path is searched.</param>
+        /// <param name="path">The current path prefix.</param>
+        /// <param name="station">The station which should be next on the path.</param>
+        /// <returns>True if choosing station as next path entry would not exceed its capabilities.</returns>
+        private bool CanSatisfyNext(Recipe recipe, int[] path, int station)
+        {
+            var capabilities = from index in Enumerable.Range(0, path.Length)
+                               where index == path.Length || path[index] == station
+                               select recipe.RequiredCapabilities[index];
+            return Capability.IsSatisfiable(capabilities, availableStations[station].AvailableCapabilities);
         }
 
         /// <summary>

@@ -82,7 +82,8 @@ constraint forall(r in ROLE_SEGMENTS) (
 );
 
 % For each step s, the responsible agent taskAssigned[s] has enough of capability task[s] available.
-constraint forall(s in TASK_IND) (task_amount[s] <= capabilities[taskAssigned[s], task[s]]);
+%constraint forall(s in TASK_IND) (task_amount[s] <= capabilities[taskAssigned[s], task[s]]);
+constraint forall(c in CAP, a in AGENT) (sum([ task_amount[s] | s in TASK_IND where task[s] = c /\ taskAssigned[s] = a ]) <= capabilities[a, c]);
 
 % Connect adjacent role segments of different agents.
 constraint forall(r in 1..lastRoleSegment-1) (agent[r] != agent[r+1] -> isConnected[agent[r], agent[r+1]]);

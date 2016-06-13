@@ -1,10 +1,35 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
     public abstract class Capability
     {
-        public abstract bool IsSatisfied(Capability[] availableCapabilities);
+        public static bool IsSatisfiable(IEnumerable<Capability> required, IEnumerable<Capability> available)
+        {
+            if (required.OfType<ProduceCapability>().Any() && !available.OfType<ProduceCapability>().Any())
+                return false;
+            if (required.OfType<ConsumeCapability>().Any() && !available.OfType<ConsumeCapability>().Any())
+                return false;
+
+            var requiredAmounts = GroupIngredientAmounts(required);
+            var availableAmounts = GroupIngredientAmounts(available);
+
+            foreach (IngredientType type in Enum.GetValues(typeof(IngredientType)))
+                if (requiredAmounts.ContainsKey(type)
+                    && (!availableAmounts.ContainsKey(type) || availableAmounts[type] < requiredAmounts[type]))
+                    return false;
+
+            return true;
+        }
+
+        private static Dictionary<IngredientType, int> GroupIngredientAmounts(IEnumerable<Capability> capabilities)
+        {
+            return capabilities.OfType<Ingredient>()
+                .GroupBy(ingredient => ingredient.Type, ingredient => (int)ingredient.Amount)
+                .ToDictionary(group => group.Key, group => group.Sum());
+        }
     }
 
     /// <summary>
@@ -12,8 +37,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     /// </summary>
     public class ProduceCapability : Capability
     {
-        public override bool IsSatisfied(Capability[] availableCapabilities)
-            => availableCapabilities.Any(cap => cap is ProduceCapability);
     }
 
     /// <summary>
@@ -21,8 +44,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     /// </summary>
     public class ConsumeCapability : Capability
     {
-        public override bool IsSatisfied(Capability[] availableCapabilities)
-            => availableCapabilities.Any(cap => cap is ConsumeCapability);
     }
 
     /// <summary>
@@ -39,9 +60,5 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         public IngredientType Type { get; }
 
         public uint Amount { get; }
-
-        public override bool IsSatisfied(Capability[] availableCapabilities)
-            => availableCapabilities.OfType<Ingredient>()
-                .Any(ingredient => ingredient.Type == Type && ingredient.Amount >= Amount);
     }
 }

@@ -124,8 +124,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         protected void CheckConfigurationConsistency()
         {
             var inconsistentRecipes = (from role in AllocatedRoles
-                                       where !role.CapabilitiesToApply
-                                           .All(capability => capability.IsSatisfied(AvailableCapabilities))
+                                       where !Capability.IsSatisfiable(role.CapabilitiesToApply, AvailableCapabilities)
                                            || !(role.PostCondition.Port?.IsAlive ?? true)
                                        select role.Recipe)
                                    .Distinct()
