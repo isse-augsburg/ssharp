@@ -20,43 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Invariants.CounterExamples
+namespace Tests.Formulas.Operators
 {
-	using SafetySharp.Modeling;
-	using Shouldly;
+	using SafetySharp.Analysis;
+	using static SafetySharp.Analysis.Operators;
 
-	internal class Replay : AnalysisTestObject
+	internal class T13 : FormulaTestObject
 	{
 		protected override void Check()
 		{
-			Check(1);
-			Check(2);
-			Check(3);
-		}
-
-		private void Check(int value)
-		{
-			var c = new C();
-			CheckInvariant(c.X != value, c);
-
-			SimulateCounterExample(CounterExample, simulator =>
 			{
-				c = (C)simulator.Model.Roots[0];
+				var actual = !(X(true));
+				var expected = new UnaryFormula(
+					new UnaryFormula(new StateFormula(() => true), UnaryOperator.Next),
+					UnaryOperator.Not);
 
-				c.X.ShouldBe(0);
+				Check(actual, expected);
+			}
 
-				simulator.SimulateStep();
-				c.X.ShouldBe(value);
-			});
-		}
-
-		private class C : Component
-		{
-			public int X;
-
-			public override void Update()
 			{
-				X = Choose(1, 2, 3);
+				var actual = !X(true);
+				var expected = new UnaryFormula(
+					new UnaryFormula(new StateFormula(() => true), UnaryOperator.Next),
+					UnaryOperator.Not);
+
+				Check(actual, expected);
 			}
 		}
 	}

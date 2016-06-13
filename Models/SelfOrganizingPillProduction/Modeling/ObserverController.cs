@@ -37,7 +37,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         }
 
         // recipes scheduled for initial configuration
-        private readonly Queue<Recipe> scheduledRecipes = new Queue<Recipe>();
+        private readonly List<Recipe> scheduledRecipes = new List<Recipe>();
 
         /// <summary>
         /// Schedules a <paramref name="recipe"/> for initial configuration once simulation
@@ -45,19 +45,34 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// </summary>
         public void ScheduleConfiguration(Recipe recipe)
         {
-            scheduledRecipes.Enqueue(recipe);
+            scheduledRecipes.Add(recipe);
         }
 
         public override void Update()
         {
             if (scheduledRecipes.Count > 0)
-                Configure(scheduledRecipes.Dequeue());
+            {
+                Configure(scheduledRecipes);
+                scheduledRecipes.Clear();
+            }
         }
 
         /// <summary>
         /// (Re-)Configures a <paramref name="recipe"/>.
         /// </summary>
         public abstract void Configure(Recipe recipe);
+
+        /// <summary>
+        /// (Re-)Configures a batch of <paramref name="recipes"/>.
+        /// The default implementation delegates to <see cref="Configure(Recipe)"/>,
+        /// but subclasses can override this.
+        /// </summary>
+        /// <param name="recipes"></param>
+        public virtual void Configure(IEnumerable<Recipe> recipes)
+        {
+            foreach (var recipe in recipes)
+                Configure(recipe);
+        }
 
         /// <summary>
         /// Removes all configuration for the given <paramref name="recipe"/> from all stations
@@ -72,6 +87,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 foreach (var role in obsoleteRoles)
                 {
                     station.AllocatedRoles.Remove(role);
+                    station.BeforeReconfiguration(recipe);
                 }
                 RolePool.Return(obsoleteRoles);
             }

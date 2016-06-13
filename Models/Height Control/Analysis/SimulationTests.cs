@@ -34,10 +34,10 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 	public class SimulationTests
 	{
 		/// <summary>
-		///   Simulates a path where no faults occur with the expectation that the tank does not rupture.
+		///   Simulates a path where no faults occur with the expectation that no vehicle collides.
 		/// </summary>
 		[Test]
-		public void TankDoesNotRuptureWhenNoFaultsOccur()
+		public void NoCollisionsWhenNoFaultsOccur()
 		{
 			var model = Model.CreateOriginal();
 			model.Faults.SuppressActivations();

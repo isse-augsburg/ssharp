@@ -20,50 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.TemporalOperators
+namespace Tests.Analysis.Invariants.CounterExamples
 {
+	using System;
 	using SafetySharp.Analysis;
-	using static SafetySharp.Analysis.Operators;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
 
-	internal class T5 : FormulaTestObject
+	internal class HiddenVariableWithEffect : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			var intValue = 7;
+			var c = new C();
+			var e = Should.Throw<AnalysisException>(() => CheckInvariant(true, c));
+			e.InnerException.ShouldBeOfType<NondeterminismException>();
 
+			SimulateCounterExample(e.CounterExample, simulator =>
 			{
-				var actual = G(intValue < 7);
-				var expected = new UnaryFormula(
-					new StateFormula(() => intValue < 7),
-					UnaryOperator.Globally);
+				c = (C)simulator.Model.Roots[0];
 
-				Check(actual, expected);
-			}
+				c.X.ShouldBe(0);
+				c.Y.ShouldBe(0);
 
+				Should.Throw<InvalidOperationException>(() => simulator.SimulateStep());
+				c.X.ShouldBe(2);
+				c.Y.ShouldBe(2);
+			});
+		}
+
+		private class C : Component
+		{
+			public int X;
+
+			[Hidden]
+			public int Y;
+
+			public override void Update()
 			{
-				var actual = G(G(intValue >= 7));
-				var expected = new UnaryFormula(
-					new UnaryFormula(
-						new StateFormula(() => intValue >= 7),
-						UnaryOperator.Globally),
-					UnaryOperator.Globally);
+				if (Y != 1)
+					X = Choose(1, 2, 3);
 
-				Check(actual, expected);
-			}
-
-			{
-				var actual = AG(EG(intValue >= 7));
-				var expected = new UnaryFormula(
-					new UnaryFormula(
-						new UnaryFormula(
-							new UnaryFormula(
-								new StateFormula(() => intValue >= 7),
-								UnaryOperator.Globally),
-							UnaryOperator.Exists),
-						UnaryOperator.Globally),
-					UnaryOperator.All);
-
-				Check(actual, expected);
+				Y = X;
 			}
 		}
 	}

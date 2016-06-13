@@ -72,7 +72,7 @@
     <Compile Include="Modeling\Station.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Analysis\complex_setup1.model">
+    <None Include="Analysis\complex_setup.model">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Analysis\medium_setup.model">
