@@ -87,6 +87,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 foreach (var role in obsoleteRoles)
                 {
                     station.AllocatedRoles.Remove(role);
+                    station.BeforeReconfiguration(recipe);
                 }
                 RolePool.Return(obsoleteRoles);
             }

@@ -21,7 +21,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 {
                     RemoveRecipeConfigurations(Container.Recipe);
                 }
-                currentRole = null;
                 Container = null;
             }
         }
