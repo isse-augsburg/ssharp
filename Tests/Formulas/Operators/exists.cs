@@ -20,22 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Formulas.Operators
 {
-	using Xunit;
+	using SafetySharp.Analysis;
+	using static SafetySharp.Analysis.Operators;
 
-	public partial class FormulaTests
+	internal class Exists : FormulaTestObject
 	{
-		[Theory, MemberData("DiscoverTests", "Formulas/StateFormulas")]
-		public void StateFormulas(string test, string file)
+		protected override void Check()
 		{
-			ExecuteDynamicTests(file);
-		}
+			var intValue = 7;
 
-		[Theory, MemberData("DiscoverTests", "Formulas/Operators")]
-		public void Operators(string test, string file)
-		{
-			ExecuteDynamicTests(file);
+			{
+				var actual = E(intValue < 7);
+				var expected = new UnaryFormula(
+					new StateFormula(() => intValue < 7),
+					UnaryOperator.Exists);
+
+				Check(actual, expected);
+			}
+
+			{
+				var actual = E(E(intValue >= 7));
+				var expected = new UnaryFormula(
+					new UnaryFormula(
+						new StateFormula(() => intValue >= 7),
+						UnaryOperator.Exists),
+					UnaryOperator.Exists);
+
+				Check(actual, expected);
+			}
 		}
 	}
 }

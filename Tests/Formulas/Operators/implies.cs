@@ -20,35 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.TemporalOperators
+namespace Tests.Formulas.Operators
 {
 	using SafetySharp.Analysis;
 	using static SafetySharp.Analysis.Operators;
 
-	internal class Multiple : FormulaTestObject
+	internal class T9 : FormulaTestObject
 	{
 		protected override void Check()
 		{
 			var intValue = 7;
-			var boolValue = false;
 
-			var actual = AF(intValue > 7 && boolValue && X(!boolValue) | intValue < 4) && AF(boolValue);
-			var expected = new BinaryFormula(
-				new UnaryFormula(
-					new UnaryFormula(
-						new BinaryFormula(
-							new StateFormula(() => intValue > 7 && boolValue),
-							BinaryOperator.And,
-							new BinaryFormula(
-								new UnaryFormula(new StateFormula(() => !boolValue), UnaryOperator.Next),
-								BinaryOperator.Or,
-								new StateFormula(() => intValue < 4))),
-						UnaryOperator.Finally),
-					UnaryOperator.All),
-				BinaryOperator.And,
-				new UnaryFormula(new UnaryFormula(new StateFormula(() => boolValue), UnaryOperator.Finally), UnaryOperator.All));
+			{
+				var actual = ((Formula)false).Implies(intValue < 7);
+				var expected = new BinaryFormula(
+					new StateFormula(() => false),
+					BinaryOperator.Implication,
+					new StateFormula(() => intValue < 7));
 
-			Check(actual, expected);
+				Check(actual, expected);
+			}
+
+			{
+				var actual = ((Formula)false).Implies(F(intValue < 7));
+				var expected = new BinaryFormula(
+					new StateFormula(() => false),
+					BinaryOperator.Implication,
+					new UnaryFormula(new StateFormula(() => intValue < 7), UnaryOperator.Finally));
+
+				Check(actual, expected);
+			}
 		}
 	}
 }

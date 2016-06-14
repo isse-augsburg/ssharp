@@ -20,22 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Diagnostics.FaultEffects.Invalid
 {
-	using Xunit;
+	using SafetySharp.Compiler.Analyzers;
+	using SafetySharp.Modeling;
 
-	public partial class FormulaTests
+	[Diagnostic(DiagnosticIdentifier.ClosedGenericBaseType, 34, 22, 1, 
+		"Tests.Diagnostics.FaultEffects.Invalid.GenericBaseSubstitution<T>.E",
+		"Tests.Diagnostics.FaultEffects.Invalid.GenericBaseSubstitution<T>")]
+	public class GenericBaseSubstitution<T> : Component
 	{
-		[Theory, MemberData("DiscoverTests", "Formulas/StateFormulas")]
-		public void StateFormulas(string test, string file)
+		[FaultEffect]
+		public class E : GenericBaseSubstitution<int>
 		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Formulas/Operators")]
-		public void Operators(string test, string file)
-		{
-			ExecuteDynamicTests(file);
 		}
 	}
 }

@@ -20,22 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests
+namespace Tests.Diagnostics.FaultEffects.Invalid
 {
-	using Xunit;
+	using SafetySharp.Compiler.Analyzers;
+	using SafetySharp.Modeling;
 
-	public partial class FormulaTests
+	[Diagnostic(DiagnosticIdentifier.InvalidFaultEffectBaseType, 31, 18, 6,
+		"Tests.Diagnostics.FaultEffects.Invalid.NoBase", "object")]
+	[FaultEffect]
+	public class NoBase
 	{
-		[Theory, MemberData("DiscoverTests", "Formulas/StateFormulas")]
-		public void StateFormulas(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Formulas/Operators")]
-		public void Operators(string test, string file)
-		{
-			ExecuteDynamicTests(file);
-		}
 	}
 }

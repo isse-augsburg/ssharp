@@ -212,12 +212,16 @@
     <Compile Include="Diagnostics\Bindings\Invalid\non-component required port binding.cs" />
     <Compile Include="Diagnostics\Bindings\Valid\non-component provided port binding.cs" />
     <Compile Include="Diagnostics\CustomComponents\Invalid\components cannot implement IInitializable.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Invalid\generic base substitution.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism double override.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\implicit nondeterminism.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Invalid\no base.cs" />
     <Compile Include="Diagnostics\FaultEffects\Invalid\sealed.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\deterministic effects without priorities.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\effects with priorities.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\explicit nondeterminism.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Valid\generic nested.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Valid\generic.cs" />
     <Compile Include="End2EndTests.cs" />
     <Compile Include="End2EndTests.Helpers.cs">
       <DependentUpon>End2EndTests.cs</DependentUpon>
@@ -484,6 +488,7 @@
     <Compile Include="FaultActivation\StateGraph\faults with constant effects.cs" />
     <Compile Include="FaultActivation\StateGraph\unused fault.cs" />
     <Compile Include="FaultActivation\StateGraph\initial state.cs" />
+    <Compile Include="Formulas\Operators\compilation.cs" />
     <Compile Include="Formulas\StateFormulas\binary expressions.cs" />
     <Compile Include="Formulas\StateFormulas\arrays.cs" />
     <Compile Include="Formulas\StateFormulas\nameof.cs" />
@@ -494,18 +499,18 @@
     <Compile Include="Formulas\StateFormulas\fields.cs" />
     <Compile Include="Formulas\StateFormulas\local.cs" />
     <Compile Include="Formulas\StateFormulas\return.cs" />
-    <Compile Include="Formulas\TemporalOperators\multiple.cs" />
-    <Compile Include="Formulas\TemporalOperators\exists.cs" />
-    <Compile Include="Formulas\TemporalOperators\and.cs" />
-    <Compile Include="Formulas\TemporalOperators\equivalence.cs" />
-    <Compile Include="Formulas\TemporalOperators\all.cs" />
-    <Compile Include="Formulas\TemporalOperators\finally.cs" />
-    <Compile Include="Formulas\TemporalOperators\globally.cs" />
-    <Compile Include="Formulas\TemporalOperators\implies.cs" />
-    <Compile Include="Formulas\TemporalOperators\next.cs" />
-    <Compile Include="Formulas\TemporalOperators\not.cs" />
-    <Compile Include="Formulas\TemporalOperators\or.cs" />
-    <Compile Include="Formulas\TemporalOperators\until.cs" />
+    <Compile Include="Formulas\Operators\multiple.cs" />
+    <Compile Include="Formulas\Operators\exists.cs" />
+    <Compile Include="Formulas\Operators\and.cs" />
+    <Compile Include="Formulas\Operators\equivalence.cs" />
+    <Compile Include="Formulas\Operators\all.cs" />
+    <Compile Include="Formulas\Operators\finally.cs" />
+    <Compile Include="Formulas\Operators\globally.cs" />
+    <Compile Include="Formulas\Operators\implies.cs" />
+    <Compile Include="Formulas\Operators\next.cs" />
+    <Compile Include="Formulas\Operators\not.cs" />
+    <Compile Include="Formulas\Operators\or.cs" />
+    <Compile Include="Formulas\Operators\until.cs" />
     <Compile Include="ExecutionTests.cs" />
     <Compile Include="ExecutionTests.Helpers.cs">
       <DependentUpon>ExecutionTests.cs</DependentUpon>
