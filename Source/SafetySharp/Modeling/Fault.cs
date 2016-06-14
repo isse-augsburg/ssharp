@@ -107,7 +107,7 @@ namespace SafetySharp.Modeling
 			}
 		}
 
-		[Hidden(HideElements = true), NonSerializable]
+		[NonSerializable]
 		private readonly ISet<Fault> subsumedFaults = new HashSet<Fault>();
 
 		/// <summary>
