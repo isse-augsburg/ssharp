@@ -56,9 +56,9 @@ namespace SafetySharp.Analysis
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
 
 		/// <summary>
-		///   Always force all faults to be activated when checking a set.
+		///   How to handle fault activation during analysis.
 		/// </summary>
-		public bool ForceFaultActivation { get; set; } = false;
+		public FaultActivationBehaviour FaultActivationBehaviour = FaultActivationBehaviour.Nondeterministic;
 
 		/// <summary>
 		///   Gets or sets a list of heuristics to use during the analysis.
@@ -227,10 +227,15 @@ namespace SafetySharp.Analysis
 		private bool CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
 			int cardinality, RuntimeModelSerializer serializer)
 		{
-			bool isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, Activation.Forced);
-			if (isSafe && !ForceFaultActivation)
+			bool isSafe = true;
+
+			if (FaultActivationBehaviour == FaultActivationBehaviour.ForceOnly
+				|| FaultActivationBehaviour == FaultActivationBehaviour.ForceThenFallback)
+				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, Activation.Forced);
+
+			if (FaultActivationBehaviour != FaultActivationBehaviour.ForceOnly && isSafe)
 			{
-				ConsoleHelpers.WriteLine("    Check again with nondeterministic activation...");
+				ConsoleHelpers.WriteLine("    Checking again with nondeterministic activation...");
 				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, Activation.Nondeterministic);
 			}
 

@@ -54,7 +54,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
             var modelChecker = new SafetyAnalysis();
             modelChecker.Configuration.StateCapacity = 40000;
             modelChecker.Heuristics.AddRange(heuristics);
-            modelChecker.ForceFaultActivation = true;
+            modelChecker.FaultActivationBehaviour = FaultActivationBehaviour.ForceOnly;
 
             var result = modelChecker.ComputeMinimalCriticalSets(model, model.ObserverController.Unsatisfiable);
             System.Console.WriteLine(result);
