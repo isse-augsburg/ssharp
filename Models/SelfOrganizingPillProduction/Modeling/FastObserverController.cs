@@ -107,7 +107,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// </returns>
         private int[] FindStationPath(Recipe recipe)
         {
-            var identifiers = Enumerable.Range(0, availableStations.Length - 1);
+            var identifiers = Enumerable.Range(0, availableStations.Length);
 
             var paths = from station in identifiers
                         where Capability.IsSatisfiable(new[] { recipe.RequiredCapabilities[0] }, availableStations[station].AvailableCapabilities)
@@ -122,10 +122,10 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                          from path in paths
                          from station in identifiers
                          let last = path[path.Length - 1]
-                         // if station has the next required capability
-                         where CanSatisfyNext(recipe, path, station)
-                         // and station is reachable from the previous path
+                         // if station is reachable from the previous path
                          where pathMatrix[last, station] != -1
+                         // and station has the next required capability
+                         where CanSatisfyNext(recipe, path, station)
                          // append station to the path
                          select path.Concat(new[] { station }).ToArray()
                         ).ToArray();
@@ -158,7 +158,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// <returns>True if choosing station as next path entry would not exceed its capabilities.</returns>
         private bool CanSatisfyNext(Recipe recipe, int[] path, int station)
         {
-            var capabilities = from index in Enumerable.Range(0, path.Length)
+            var capabilities = from index in Enumerable.Range(0, path.Length + 1)
                                where index == path.Length || path[index] == station
                                select recipe.RequiredCapabilities[index];
             return Capability.IsSatisfiable(capabilities, availableStations[station].AvailableCapabilities);
