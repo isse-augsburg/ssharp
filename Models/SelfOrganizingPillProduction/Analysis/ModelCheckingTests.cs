@@ -62,7 +62,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
 
         private IFaultSetHeuristic RedundancyHeuristic(Model model)
         {
-            return new RedundancyRemainingHeuristic(
+            return new MinimalRedundancyHeuristic(
                 model,
                 model.Stations.OfType<ContainerLoader>().Select(c => c.NoContainersLeft),
                 model.Stations.OfType<ParticulateDispenser>().Select(d => d.BlueTankDepleted),
