@@ -38,15 +38,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		[Range(0, 8, OverflowBehavior.Error)]
 		public int PumpSpeed = 0;
 		
-		public void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
+		public DialyzingFluid SetMainFlow(DialyzingFluid fromPredecessor)
 		{
-			toSuccessor.CopyValuesFrom(fromPredecessor);
+			return fromPredecessor;
 		}
 		
-		public virtual void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public virtual Suction SetMainFlowSuction(Suction fromSuccessor)
 		{
+			Suction toPredecessor;
 			toPredecessor.SuctionType = SuctionType.CustomSuction;
 			toPredecessor.CustomSuctionValue = PumpSpeed;
+			return toPredecessor;
 		}
 		
 		public readonly Fault PumpDefect = new TransientFault();
@@ -55,10 +57,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		public class PumpDefectEffect : Pump
 		{
 			[Provided]
-			public override void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+			public override Suction SetMainFlowSuction(Suction fromSuccessor)
 			{
+				Suction toPredecessor;
 				toPredecessor.SuctionType = SuctionType.CustomSuction;
 				toPredecessor.CustomSuctionValue = 0;
+				return toPredecessor;
 			}
 		}
 	}

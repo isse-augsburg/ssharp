@@ -26,9 +26,14 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 {
 	using SafetySharp.Modeling;
 
-	internal class Int : IFlowElement<Int>
+	internal struct Int
 	{
-		public int Value;
+		public readonly int Value;
+
+		public Int(int value)
+		{
+			Value = value;
+		}
 
 		public static implicit operator int(Int value)
 		{
@@ -37,7 +42,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 		//  User-defined conversion from double to Digit
 		public static implicit operator Int(int value)
 		{
-			return new Int { Value = value };
+			return new Int(value);
 		}
 
 		public override bool Equals(object other)
@@ -57,14 +62,6 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 		public override int GetHashCode()
 		{
 			return Value.GetHashCode();
-		}
-
-		public void CopyValuesFrom(Int @from)
-		{
-			this.Value = from.Value;
-		}
-		public Int()
-		{
 		}
 	}
 
@@ -96,14 +93,14 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 			//Standard behavior: Copy each value
 			for (int i = 0; i < Number; i++)
 			{
-				Outgoings[i].Forward.CopyValuesFrom(Incoming.Forward);
+				Outgoings[i].Forward=Incoming.Forward;
 			}
 		}
 
 		public override void UpdateBackwardInternal()
 		{
 			//Standard behavior: Select first source
-			Incoming.Backward.CopyValuesFrom(Outgoings[0].Backward);
+			Incoming.Backward=Outgoings[0].Backward;
 		}
 	}
 	
@@ -118,7 +115,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 		public override void UpdateForwardInternal()
 		{
 			//Standard behavior: Select first source
-			Outgoing.Forward.CopyValuesFrom(Incomings[0].Forward);
+			Outgoing.Forward=Incomings[0].Forward;
 		}
 
 		public override void UpdateBackwardInternal()
@@ -126,7 +123,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 			//Standard behavior: Copy each value
 			for (int i = 0; i < Number; i++)
 			{
-				Incomings[i].Backward.CopyValuesFrom(Outgoing.Backward);
+				Incomings[i].Backward=Outgoing.Backward;
 			}
 		}
 	}

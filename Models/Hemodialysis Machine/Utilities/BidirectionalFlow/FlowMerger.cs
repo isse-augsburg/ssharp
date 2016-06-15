@@ -27,30 +27,29 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
-	
+	using SafetySharp.Modeling;
+
 	public abstract class FlowMerger<TForward, TBackward> : IFlowAtomic<TForward, TBackward>, IFlowComponentUniqueOutgoing<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+		where TForward : struct
+		where TBackward : struct
 	{
 		protected int Number { get; }
 		public FlowPort<TForward, TBackward>[] Incomings { get; }
-		public FlowPort<TForward, TBackward> Outgoing { get; } = new FlowPort<TForward, TBackward>();
+
+		[Hidden]
+		public FlowPort<TForward, TBackward> Outgoing { get; set; }
 
 
 		public FlowMerger(int number)
 		{
 			Number = number;
 			Incomings = new FlowPort<TForward, TBackward>[number];
-			for (var i = 0; i < Incomings.Length; i++)
-			{
-				Incomings[i] = new FlowPort<TForward, TBackward>();
-			}
 		}
 
 		public virtual void UpdateForwardInternal()
 		{
 			//Standard behavior: Select first source
-			Outgoing.Forward.CopyValuesFrom(Incomings[0].Forward);
+			Outgoing.Forward=Incomings[0].Forward;
 		}
 
 		public virtual void UpdateBackwardInternal()
@@ -58,7 +57,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 			//Standard behavior: Copy each value
 			for (int i = 0; i < Number; i++)
 			{
-				Incomings[i].Backward.CopyValuesFrom(Outgoing.Backward);
+				Incomings[i].Backward=Outgoing.Backward;
 			}
 		}
 	}

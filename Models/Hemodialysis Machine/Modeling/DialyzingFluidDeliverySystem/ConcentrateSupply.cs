@@ -31,14 +31,16 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		public KindOfDialysate KindOfDialysate = KindOfDialysate.Bicarbonate;
 
 		[Provided]
-		public void SetConcentrateFlow(DialyzingFluid outgoing)
+		public DialyzingFluid SetConcentrateFlow()
 		{
+			DialyzingFluid outgoing;
 			var incomingSuction = Concentrate.Outgoing.Backward;
 			outgoing.Quantity = incomingSuction.CustomSuctionValue;
 			outgoing.ContaminatedByBlood = false;
 			outgoing.Temperature = QualitativeTemperature.TooCold;
 			outgoing.WasUsed = false;
 			outgoing.KindOfDialysate = KindOfDialysate;
+			return outgoing;
 		}
 		
 		public ConcentrateSupply()

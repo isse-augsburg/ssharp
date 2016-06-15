@@ -23,24 +23,23 @@
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
 {
 	using Modeling;
+	using SafetySharp.Modeling;
 
 	public abstract class FlowSplitter<TForward, TBackward> : IFlowAtomic<TForward, TBackward>,
 		IFlowComponentUniqueIncoming<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+		where TForward : struct
+		where TBackward : struct
 	{
 		protected int Number { get; }
-		public FlowPort<TForward, TBackward> Incoming { get; } = new FlowPort<TForward, TBackward>();
+		[Hidden]
+		public FlowPort<TForward, TBackward> Incoming { get; set; }
+
 		public FlowPort<TForward, TBackward>[] Outgoings { get; }
 		
 		protected FlowSplitter(int number)
 		{
 			Number = number;
 			Outgoings = new FlowPort<TForward, TBackward>[number];
-			for (var i = 0; i < Outgoings.Length; i++)
-			{
-				Outgoings[i]=new FlowPort<TForward, TBackward>();
-			}
 		}
 
 		public virtual void UpdateForwardInternal()
@@ -48,14 +47,14 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 			//Standard behavior: Copy each value
 			for (int i = 0; i < Number; i++)
 			{
-				Outgoings[i].Forward.CopyValuesFrom(Incoming.Forward);
+				Outgoings[i].Forward=Incoming.Forward;
 			}
 		}
 
 		public virtual void UpdateBackwardInternal()
 		{
 			//Standard behavior: Select first source
-			Incoming.Backward.CopyValuesFrom(Outgoings[0].Backward);
+			Incoming.Backward=Outgoings[0].Backward;
 		}
 	}
 }

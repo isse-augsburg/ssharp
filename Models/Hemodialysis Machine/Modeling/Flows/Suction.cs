@@ -37,18 +37,30 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		CustomSuction
 	}
 
-	public class Suction : IFlowElement<Suction>
+	public struct Suction
 	{
 		[Hidden]
-		public SuctionType SuctionType = SuctionType.SourceDependentSuction;
+		public SuctionType SuctionType;
 
 		[Hidden,Range(0, 8, OverflowBehavior.Error)]
-		public int CustomSuctionValue = 0;
+		public int CustomSuctionValue;
 
+		/*
 		public void CopyValuesFrom(Suction from)
 		{
 			SuctionType = from.SuctionType;
 			CustomSuctionValue = from.CustomSuctionValue;
+		}
+		*/
+
+		public static Suction Default()
+		{
+			var suction = new Suction
+			{
+				SuctionType = SuctionType.SourceDependentSuction,
+				CustomSuctionValue = 0
+			};
+			return suction;
 		}
 
 		public void PrintSuctionValues(string description)
