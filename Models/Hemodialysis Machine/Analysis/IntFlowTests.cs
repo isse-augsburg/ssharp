@@ -30,6 +30,7 @@ using FluentAssertions;
 
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 {
+	using System.Diagnostics;
 	using Modeling;
 	using SafetySharp.Modeling;
 	using Runtime;
@@ -47,15 +48,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 		
 		[Provided]
-		public void CreateForward(Int outgoingForward)
+		public Int CreateForward()
 		{
-			outgoingForward.Value = 7;
+			return new Int(7);
 		}
 
 		[Provided]
-		public void CreateBackward(Int outgoingBackward)
+		public Int CreateBackward()
 		{
-			outgoingBackward.Value = 1;
+			return new Int(1);
 		}
 
 		[Provided]

@@ -27,20 +27,23 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
+	using SafetySharp.Modeling;
 
 	public class FlowSource<TForward, TBackward> : IFlowAtomic<TForward, TBackward>, IFlowComponentUniqueOutgoing<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+		where TForward : struct
+		where TBackward : struct
 	{
-		public FlowPort<TForward, TBackward> Outgoing { get; } = new FlowPort<TForward, TBackward>();
 
-		public Action<TForward> SendForward = toSuccessor => { };
+		[Hidden]
+		public FlowPort<TForward, TBackward> Outgoing { get; set; }
+
+		public Func<TForward> SendForward = () => default(TForward);
 
 		public Action<TBackward> ReceivedBackward = fromSuccessor => { };
 
 		public void UpdateForwardInternal()
 		{
-			SendForward(Outgoing.Forward);
+			Outgoing.Forward=SendForward();
 		}
 
 		public void UpdateBackwardInternal()

@@ -32,8 +32,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	using QuickGraph.Algorithms;
 
 	public abstract class FlowCombinator<TForward, TBackward> : Component
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+		where TForward : struct
+		where TBackward : struct
 	{
 		[Hidden(HideElements = true)]
 		private IFlowAtomic<TForward, TBackward>[] _updateForwardOrder;
@@ -62,20 +62,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 				_updateForwardOrder[i].UpdateForwardInternal();
 			}
 		}
-
-		private void Connect(FlowPort<TForward, TBackward> from, FlowPort<TForward, TBackward> to)
-		{
-			// Forward goes from [from]-->[to]
-			// Backward goes from [to]-->[from]
-			// they all point towards the same forward and backward elements
-			var flowForward = new TForward();
-			var flowBackward = new TBackward();
-			from.Forward = flowForward;
-			from.Backward = flowBackward;
-			to.Forward = flowForward;
-			to.Backward = flowBackward;
-		}
-
+		
 		private void AddAtomicConnection(IFlowComponent<TForward, TBackward> from, IFlowComponent<TForward, TBackward> to)
 		{
 			var fromAtomic = from as IFlowAtomic<TForward, TBackward>;
@@ -100,7 +87,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 
 		public void ConnectOutWithIn(IFlowComponentUniqueOutgoing<TForward, TBackward> @from, IFlowComponentUniqueIncoming<TForward, TBackward> to)
 		{
-			Connect(from.Outgoing, to.Incoming);
+			var newPort = new FlowPort<TForward, TBackward>();
+			from.Outgoing= newPort;
+			to.Incoming = newPort;
+
 			AddAtomicConnection(from, to);
 		}
 
@@ -126,7 +116,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 			}
 			else if (elementNos == 1)
 			{
-				Connect(@from.Outgoing, tos[0].Incoming);
+				var newPort = new FlowPort<TForward, TBackward>();
+				from.Outgoing = newPort;
+				tos[0].Incoming = newPort;
 				AddAtomicConnection(from, tos[0]);
 				return null;
 			}
@@ -134,11 +126,16 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 			{
 				// create virtual splitting component.
 				var flowVirtualSplitter = CreateFlowVirtualSplitter(elementNos);
-				Connect(@from.Outgoing, flowVirtualSplitter.Incoming);
+
+				var newPortToSplitter = new FlowPort<TForward, TBackward>();
+				@from.Outgoing = newPortToSplitter;
+				flowVirtualSplitter.Incoming = newPortToSplitter;
 				AddAtomicConnection(from, flowVirtualSplitter);
 				for (int i = 0; i < elementNos; i++)
 				{
-					Connect(flowVirtualSplitter.Outgoings[i], tos[i].Incoming);
+					var newPortFromSplitter = new FlowPort<TForward, TBackward>();
+					flowVirtualSplitter.Outgoings[i] = newPortFromSplitter;
+					tos[i].Incoming = newPortFromSplitter;
 					AddAtomicConnection(flowVirtualSplitter, tos[i]);
 				}
 				return flowVirtualSplitter;
@@ -155,7 +152,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 			}
 			else if (elementNos == 1)
 			{
-				Connect(fromOuts[0].Outgoing, to.Incoming);
+
+				var newPort = new FlowPort<TForward, TBackward>();
+				fromOuts[0].Outgoing = newPort;
+				to.Incoming = newPort;
 				AddAtomicConnection(fromOuts[0], to);
 				return null;
 			}
@@ -165,10 +165,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 				var flowVirtualMerger = CreateFlowVirtualMerger(elementNos);
 				for (int i = 0; i < elementNos; i++)
 				{
-					Connect(fromOuts[i].Outgoing, flowVirtualMerger.Incomings[i]);
+
+					var newPortToMerger = new FlowPort<TForward, TBackward>();
+					fromOuts[i].Outgoing = newPortToMerger;
+					flowVirtualMerger.Incomings[i] = newPortToMerger;
 					AddAtomicConnection(fromOuts[i], flowVirtualMerger);
 				}
-				Connect(flowVirtualMerger.Outgoing, to.Incoming);
+				var newPortFromMerger = new FlowPort<TForward, TBackward>();
+				flowVirtualMerger.Outgoing = newPortFromMerger;
+				to.Incoming = newPortFromMerger;
 				AddAtomicConnection(flowVirtualMerger, to);
 				return flowVirtualMerger;
 			}

@@ -27,33 +27,32 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
-	public class FlowInToOut<TForward, TBackward> : IFlowAtomic<TForward,TBackward>, IFlowComponentUniqueOutgoing<TForward, TBackward>, IFlowComponentUniqueIncoming<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
-	{
-		public FlowPort<TForward, TBackward> Incoming { get; } = new FlowPort<TForward, TBackward>();
-		public FlowPort<TForward, TBackward> Outgoing { get; } = new FlowPort<TForward, TBackward>();
+	using SafetySharp.Modeling;
 
-		public Action<TBackward, TBackward> UpdateBackward = (fromSuccessor,toPredecessor) =>
-		{
-			// Standard behavior: Just copy. For a different behavior you have to overwrite this function
-			toPredecessor.CopyValuesFrom(fromSuccessor);
-		};
-		
-		public Action<TForward, TForward> UpdateForward = (toSuccessor,fromPredecessor) =>
-		{
-			// Standard behavior: Just copy. For a different behavior you have to overwrite this function
-			toSuccessor.CopyValuesFrom(fromPredecessor);
-		};
+	public class FlowInToOut<TForward, TBackward> : IFlowAtomic<TForward,TBackward>, IFlowComponentUniqueOutgoing<TForward, TBackward>, IFlowComponentUniqueIncoming<TForward, TBackward>
+		where TForward : struct
+		where TBackward : struct
+	{
+		[Hidden]
+		public FlowPort<TForward, TBackward> Incoming { get; set; }
+
+		[Hidden]
+		public FlowPort<TForward, TBackward> Outgoing { get; set; }
+
+		// Standard behavior: Just copy. For a different behavior you have to overwrite this function
+		public Func<TBackward, TBackward> UpdateBackward = fromSuccessor => fromSuccessor;
+
+		// Standard behavior: Just copy. For a different behavior you have to overwrite this function
+		public Func<TForward, TForward> UpdateForward = fromPredecessor => fromPredecessor;
 
 		public void UpdateForwardInternal()
 		{
-			UpdateForward(Outgoing.Forward, Incoming.Forward);
+			Outgoing.Forward = UpdateForward(Incoming.Forward);
 		}
 
 		public void UpdateBackwardInternal()
 		{
-			UpdateBackward(Outgoing.Backward, Incoming.Backward);
+			Incoming.Backward = UpdateBackward(Outgoing.Backward);
 		}
 	}
 }

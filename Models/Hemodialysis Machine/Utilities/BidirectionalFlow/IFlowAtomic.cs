@@ -25,8 +25,8 @@ using System;
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow {
 
 	public interface IFlowAtomic<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+		where TForward : struct
+		where TBackward : struct
 	{
 		void UpdateForwardInternal();
 		void UpdateBackwardInternal();

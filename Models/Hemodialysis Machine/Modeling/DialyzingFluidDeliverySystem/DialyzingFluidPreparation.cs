@@ -35,24 +35,29 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		public int PumpSpeed = 0;
 
 		[Provided]
-		public void SetConcentrateFlowSuction(Suction outgoingSuction)
+		public Suction SetConcentrateFlowSuction()
 		{
+			Suction outgoingSuction;
 			outgoingSuction.CustomSuctionValue = 1;
 			outgoingSuction.SuctionType=SuctionType.CustomSuction;
+			return outgoingSuction;
 		}
 
 		[Provided]
-		public void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
+		public DialyzingFluid SetMainFlow(DialyzingFluid  fromPredecessor)
 		{
-			toSuccessor.CopyValuesFrom(fromPredecessor);
+			DialyzingFluid toSuccessor = fromPredecessor;
 			toSuccessor.KindOfDialysate = KindOfDialysate;
+			return toSuccessor;
 		}
 
 		[Provided]
-		public virtual void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public virtual Suction SetMainFlowSuction(Suction fromSuccessor)
 		{
+			Suction toPredecessor;
 			toPredecessor.CustomSuctionValue= PumpSpeed; //Force the pump
 			toPredecessor.SuctionType=SuctionType.CustomSuction;
+			return toPredecessor;
 		}
 
 		[Provided]
@@ -75,10 +80,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		public class DialyzingFluidPreparationPumpDefectEffect : DialyzingFluidPreparation
 		{
 			[Provided]
-			public override void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+			public override Suction SetMainFlowSuction(Suction fromSuccessor)
 			{
+				Suction toPredecessor;
 				toPredecessor.CustomSuctionValue = 0;
 				toPredecessor.SuctionType = SuctionType.CustomSuction;
+				return toPredecessor;
 			}
 		}
 	}
