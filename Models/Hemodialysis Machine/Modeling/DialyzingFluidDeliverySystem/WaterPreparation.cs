@@ -34,17 +34,18 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		}
 
 		[Provided]
-		public virtual void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
+		public virtual DialyzingFluid SetMainFlow( DialyzingFluid  fromPredecessor)
 		{
-			toSuccessor.CopyValuesFrom(fromPredecessor);
+			DialyzingFluid toSuccessor = fromPredecessor;
 			if (WaterHeaterEnabled())
 				toSuccessor.Temperature = QualitativeTemperature.BodyHeat;
+			return toSuccessor;
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public Suction SetMainFlowSuction(Suction fromSuccessor)
 		{
-			toPredecessor.CopyValuesFrom(fromSuccessor);
+			return fromSuccessor;
 		}
 
 		public WaterPreparation()

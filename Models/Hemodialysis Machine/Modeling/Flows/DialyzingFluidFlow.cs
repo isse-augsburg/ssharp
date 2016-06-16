@@ -32,7 +32,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 	using Utilities.BidirectionalFlow;
 	
 	// Also called dialysate or dialyzate
-	public class DialyzingFluid : IFlowElement<DialyzingFluid>
+	public struct DialyzingFluid
 	{
 		[Hidden,Range(0, 8, OverflowBehavior.Error)]
 		public int Quantity;
@@ -44,7 +44,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		public bool WasUsed;
 		[Hidden]
 		public QualitativeTemperature Temperature;
-
+		
+		/*
 		public void CopyValuesFrom(DialyzingFluid @from)
 		{
 			Quantity = from.Quantity;
@@ -53,6 +54,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 			WasUsed = from.WasUsed;
 			Temperature = from.Temperature;
 		}
+		*/
+		
+		
+		public static DialyzingFluid Default()
+		{
+			var dialyzingFluid = new DialyzingFluid();
+			return dialyzingFluid;
+		}
+
 		public string ValuesAsText()
 		{
 			return "Quantity: " + Quantity.ToString();
@@ -94,17 +104,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 			var countRest = 0;
 			for (int i = 0; i < Number; i++)
 			{
-				var target = Outgoings[i].Forward;
-				target.CopyValuesFrom(source);
+				Outgoings[i].Forward=source;
 			}
 			// first satisfy all CustomSuctions
 			for (int i = 0; i < Number; i++)
 			{
 				var dependingOn = Outgoings[i].Backward;
-				var target = Outgoings[i].Forward;
 				if (dependingOn.SuctionType == SuctionType.CustomSuction)
 				{
-					target.Quantity = dependingOn.CustomSuctionValue;
+					Outgoings[i].Forward.Quantity = dependingOn.CustomSuctionValue;
 					availableQuantity -= dependingOn.CustomSuctionValue;
 				}
 				else
@@ -120,10 +128,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 				for (int i = 0; i < Number; i++)
 				{
 					var dependingOn = Outgoings[i].Backward;
-					var target = Outgoings[i].Forward;
 					if (dependingOn.SuctionType != SuctionType.CustomSuction)
 					{
-						target.Quantity = quantityForEachOfTheRest;
+						Outgoings[i].Forward.Quantity = quantityForEachOfTheRest;
 					}
 				}
 			}
@@ -131,20 +138,19 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 
 		public override void UpdateBackwardInternal()
 		{
-			var target = Incoming.Backward;
-			target.CopyValuesFrom(Outgoings[0].Backward);
+			Incoming.Backward=Outgoings[0].Backward;
 			for (int i = 1; i < Number; i++) //start with second element
 			{
 				var source = Outgoings[i].Backward;
-				if (target.SuctionType == SuctionType.SourceDependentSuction || source.SuctionType == SuctionType.SourceDependentSuction)
+				if (Incoming.Backward.SuctionType == SuctionType.SourceDependentSuction || source.SuctionType == SuctionType.SourceDependentSuction)
 				{
-					target.SuctionType = SuctionType.SourceDependentSuction;
-					target.CustomSuctionValue = 0;
+					Incoming.Backward.SuctionType = SuctionType.SourceDependentSuction;
+					Incoming.Backward.CustomSuctionValue = 0;
 				}
 				else
 				{
-					target.SuctionType = SuctionType.CustomSuction;
-					target.CustomSuctionValue += source.CustomSuctionValue;
+					Incoming.Backward.SuctionType = SuctionType.CustomSuction;
+					Incoming.Backward.CustomSuctionValue += source.CustomSuctionValue;
 				}
 			}
 		}
@@ -159,16 +165,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 
 		public override void UpdateForwardInternal()
 		{
-			var target = Outgoing.Forward;
-			target.CopyValuesFrom(Incomings[0].Forward);
+			Outgoing.Forward=Incomings[0].Forward;
 			for (int i = 1; i < Number; i++) //start with second element
 			{
 				var source = Incomings[i].Forward;
-				target.Quantity += source.Quantity;
-				target.ContaminatedByBlood |= source.ContaminatedByBlood;
-				target.WasUsed |= source.WasUsed;
+				Outgoing.Forward.Quantity += source.Quantity;
+				Outgoing.Forward.ContaminatedByBlood |= source.ContaminatedByBlood;
+				Outgoing.Forward.WasUsed |= source.WasUsed;
 				if (source.Temperature != QualitativeTemperature.BodyHeat)
-					target.Temperature = source.Temperature;
+					Outgoing.Forward.Temperature = source.Temperature;
 			}
 		}
 
@@ -179,8 +184,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 			{
 				for (int i = 0; i < Number; i++)
 				{
-					var target = Incomings[i].Backward;
-					target.CopyValuesFrom(source);
+					Incomings[i].Backward=source;
 				}
 			}
 			else
@@ -188,9 +192,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 				var suctionForEach = source.CustomSuctionValue / Number;
 				for (int i = 0; i < Number; i++)
 				{
-					var target = Incomings[i].Backward;
-					target.SuctionType = SuctionType.CustomSuction;
-					target.CustomSuctionValue = suctionForEach;
+					Incomings[i].Backward.SuctionType = SuctionType.CustomSuction;
+					Incomings[i].Backward.CustomSuctionValue = suctionForEach;
 				}
 			}
 		}

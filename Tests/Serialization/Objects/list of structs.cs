@@ -20,54 +20,59 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
+namespace Tests.Serialization.Objects
 {
-	using SafetySharp.Modeling;
-	using Utilities.BidirectionalFlow;
+	using System.Collections.Generic;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	public enum SuctionType
+	internal class ListOfStructs : SerializationObject
 	{
-		SourceDependentSuction,
-		CustomSuction
-	}
-
-	public struct Suction
-	{
-		[Hidden]
-		public SuctionType SuctionType;
-
-		[Hidden,Range(0, 8, OverflowBehavior.Error)]
-		public int CustomSuctionValue;
-
-		/*
-		public void CopyValuesFrom(Suction from)
+		protected override void Check()
 		{
-			SuctionType = from.SuctionType;
-			CustomSuctionValue = from.CustomSuctionValue;
+			var o1 = new object();
+			var o2 = new object();
+			var o3 = new object();
+			var l = new List<S> { new S(o1, o2), new S(o3, o2), new S(o1, o3) };
+
+			GenerateCode(SerializationMode.Optimized, l, o1, o2, o3);
+
+			Serialize();
+			l[0] = new S();
+			l[1] = new S();
+			l[2] = new S();
+
+			Deserialize();
+			l[0].O1.ShouldBe(o1);
+			l[0].O2.ShouldBe(o2);
+			l[1].O1.ShouldBe(o3);
+			l[1].O2.ShouldBe(o2);
+			l[2].O1.ShouldBe(o1);
+			l[2].O2.ShouldBe(o3);
+
+			l.Remove(new S(o3, o2));
+
+			Serialize();
+			l[0] = new S();
+			l[1] = new S();
+
+			Deserialize();
+			l[0].O1.ShouldBe(o1);
+			l[0].O2.ShouldBe(o2);
+			l[1].O1.ShouldBe(o1);
+			l[1].O2.ShouldBe(o3);
 		}
-		*/
 
-		public static Suction Default()
+		private struct S
 		{
-			var suction = new Suction
+			public S(object o1, object o2)
 			{
-				SuctionType = SuctionType.SourceDependentSuction,
-				CustomSuctionValue = 0
-			};
-			return suction;
-		}
+				O1 = o1;
+				O2 = o2;
+			}
 
-		public void PrintSuctionValues(string description)
-		{
-			System.Console.Out.WriteLine("\t" + description);
-			System.Console.Out.WriteLine("\t\tSuction Type: " + SuctionType.ToString());
-			System.Console.Out.WriteLine("\t\tCustomSuctionValue: " + CustomSuctionValue);
+			public object O1 { get; }
+			public object O2 { get; }
 		}
 	}
 }

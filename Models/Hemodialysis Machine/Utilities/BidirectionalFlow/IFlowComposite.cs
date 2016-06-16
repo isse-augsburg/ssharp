@@ -26,8 +26,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	using System.Dynamic;
 
 	public interface IFlowComposite<TForward, TBackward> : IFlowComponent<TForward, TBackward>, IFlowComponentUniqueOutgoing<TForward, TBackward>, IFlowComponentUniqueIncoming<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+		where TForward : struct
+		where TBackward : struct
 	{
 		FlowDelegate<TForward, TBackward> FlowIn { get; }
 		FlowDelegate<TForward, TBackward> FlowOut {get; }

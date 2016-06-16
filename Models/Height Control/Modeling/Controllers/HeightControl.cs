@@ -32,25 +32,25 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   The end-control step of the height control.
 		/// </summary>
-		[Hidden]
+		[Hidden, Subcomponent]
 		public EndControl EndControl;
 
 		/// <summary>
 		///   The main-control step of the height control.
 		/// </summary>
-		[Hidden]
+		[Hidden, Subcomponent]
 		public MainControl MainControl;
 
 		/// <summary>
 		///   The pre-control step of the height control.
 		/// </summary>
-		[Hidden]
+		[Hidden, Subcomponent]
 		public PreControl PreControl;
 
 		/// <summary>
 		///   The traffic lights that are used to signal that the tunnel is closed.
 		/// </summary>
-		[Hidden]
+		[Hidden, Subcomponent]
 		public TrafficLights TrafficLights;
 
 		/// <summary>

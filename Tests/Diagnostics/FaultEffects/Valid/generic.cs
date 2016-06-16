@@ -20,14 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using SafetySharp.Modeling;
-using System;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
+namespace Tests.Diagnostics.FaultEffects.Valid
 {
-	public interface IFlowElement<TElement>
-		where TElement : class, IFlowElement<TElement>, new()
+	using SafetySharp.Modeling;
+
+	public class Generic : Component
 	{
-		void CopyValuesFrom(TElement @from);
+		[FaultEffect]
+		public class E : Generic
+		{
+		}
 	}
 }

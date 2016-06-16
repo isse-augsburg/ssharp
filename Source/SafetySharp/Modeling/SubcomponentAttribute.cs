@@ -20,54 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
+namespace SafetySharp.Modeling
 {
-	using SafetySharp.Modeling;
-	using Utilities.BidirectionalFlow;
+	using System;
 
-	public enum SuctionType
+	/// <summary>
+	///   When applied to a field or property of a <see cref="Component" /> class that is of a <see cref="IComponent" />-derived
+	///   type, indicates that the component instance stored in the member is a logical part of the declaring component, i.e.,
+	///   it is one of the declaring component's subcomponents.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+	public sealed class SubcomponentAttribute : Attribute
 	{
-		SourceDependentSuction,
-		CustomSuction
-	}
-
-	public struct Suction
-	{
-		[Hidden]
-		public SuctionType SuctionType;
-
-		[Hidden,Range(0, 8, OverflowBehavior.Error)]
-		public int CustomSuctionValue;
-
-		/*
-		public void CopyValuesFrom(Suction from)
-		{
-			SuctionType = from.SuctionType;
-			CustomSuctionValue = from.CustomSuctionValue;
-		}
-		*/
-
-		public static Suction Default()
-		{
-			var suction = new Suction
-			{
-				SuctionType = SuctionType.SourceDependentSuction,
-				CustomSuctionValue = 0
-			};
-			return suction;
-		}
-
-		public void PrintSuctionValues(string description)
-		{
-			System.Console.Out.WriteLine("\t" + description);
-			System.Console.Out.WriteLine("\t\tSuction Type: " + SuctionType.ToString());
-			System.Console.Out.WriteLine("\t\tCustomSuctionValue: " + CustomSuctionValue);
-		}
 	}
 }

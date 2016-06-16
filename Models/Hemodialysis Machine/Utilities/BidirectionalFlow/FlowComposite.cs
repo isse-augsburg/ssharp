@@ -26,14 +26,23 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	using System.Dynamic;
 
 	public abstract class FlowComposite<TForward, TBackward> : IFlowComposite<TForward,TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+		where TForward : struct
+		where TBackward : struct
 	{
 		public FlowDelegate<TForward, TBackward> FlowIn { get; } = new FlowDelegate<TForward, TBackward>();
 		public FlowDelegate<TForward, TBackward> FlowOut {get; } = new FlowDelegate<TForward, TBackward>();
-		
-		public FlowPort<TForward, TBackward> Outgoing => FlowOut.Outgoing;
-		public FlowPort<TForward, TBackward> Incoming => FlowIn.Incoming;
+
+		public FlowPort<TForward, TBackward> Outgoing
+		{
+			get { return FlowOut.Outgoing; }
+			set { FlowOut.Outgoing = value; }
+		}
+
+		public FlowPort<TForward, TBackward> Incoming
+		{
+			get { return FlowIn.Incoming; }
+			set { FlowIn.Incoming = value; }
+		}
 	}
 
 
