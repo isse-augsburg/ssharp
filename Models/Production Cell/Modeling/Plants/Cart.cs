@@ -51,19 +51,57 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 
 		public bool HasWorkpiece => LoadedWorkpiece != null;
 
-		public virtual bool MoveTo(Robot robot)
+	    public virtual bool MoveTo(Robot robot)
+	    {
+	        if (IsReachable(_position, robot))
+	        {
+	            _position = robot;
+	            return true;
+	        }
+	        return false;
+	    }
+
+	/*	private bool MoveTo(Robot currentPosition, Robot robot)
 		{
-			if (_position == robot)
+			if (currentPosition == robot)
 				return true;
 
-			var route = Routes.SingleOrDefault(r => r.CanNavigate(_position, robot));
+            var route = Routes.SingleOrDefault(r => r.CanNavigate(currentPosition, robot));
 
-			if (route == null)
-				return false;
+		    if (route != null)
+		    {
+		        _position = route.To;
+		        return true;
+		    }
+		    var reachableRobotsFromPosition = Routes.Where(route1 => route1.From == _position).Select(route1 => route1.To);
+            
+		    foreach (var reachableRobot in reachableRobotsFromPosition)
+		    {
+                var transRoutes = Routes.SingleOrDefault(r => r.CanNavigate(reachableRobot, robot));
+                if (transRoutes != null)
+                {
+                    _position = route.To;
+                    return true;
+                }
+                return MoveTo(reachableRobot, robot);
+            }
+		    return false;
 
-			_position = route.To;
-			return true;
-		}
+		}*/
+
+	    private bool IsReachable(Robot position, Robot robot)
+	    {
+	        if (position == robot)
+	            return true;
+	        if (Routes.Any(route => route.CanNavigate(position, robot)))
+	            return true;
+	        foreach (var nextRobot in Routes.Where(route => route.From == position).Select(route => route.To))
+	        {
+	            if (IsReachable(nextRobot, robot))
+	                return true;
+	        }
+	        return false;
+	    }
 
 		public void SetNames(int cartId)
 		{

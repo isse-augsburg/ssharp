@@ -29,30 +29,33 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 
-	internal abstract class ObserverController : Component
-	{
-		[Hidden]
-		private bool _reconfigurationRequested = true;
+    internal abstract class ObserverController : Component
+    {
+        [Hidden]
+        private bool _reconfigurationRequested = true;
 
-		protected ObserverController(IEnumerable<Agent> agents, List<Task> tasks)
-		{
-			Tasks = tasks;
-			Agents = agents.ToArray();
+        protected ObserverController(IEnumerable<Agent> agents, List<Task> tasks)
+        {
+            Tasks = tasks;
+            Agents = agents.ToArray();
 
-			foreach (var agent in Agents)
-            { 
-				agent.ObserverController = this;
+            foreach (var agent in Agents)
+            {
+                agent.ObserverController = this;
                 GenerateConstraints(agent);
             }
         }
 
-		protected ObjectPool<Role> RolePool { get; } = new ObjectPool<Role>(Model.MaxRoleCount);
-		protected List<Task> Tasks { get; } 
+        protected ObjectPool<Role> RolePool { get; } = new ObjectPool<Role>(Model.MaxRoleCount);
+        protected List<Task> Tasks { get; }
 
-		[Hidden(HideElements = true)]
-		protected Agent[] Agents { get; }
+        [Hidden(HideElements = true)]
+        protected Agent[] Agents { get; }
 
-		public bool ReconfigurationFailed { get; protected set; }
+        [Hidden(HideElements = true)]
+        public ReconfStates ReconfigurationState { get; protected set; } = ReconfStates.NotSet;
+
+        public enum ReconfStatesEnum { Failed, Succeded, Notset };
 
 		protected abstract void Reconfigure();
 
@@ -73,10 +76,16 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 	                agent.AllocatedRoles.All(
 	                    role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilites.Contains(capability))),
                 // Resource Consistency
-               // () => agent.AllocatedRoles.Exists(role => role.PreCondition.Task.Equals(agent.Resource.Task) && role.PreCondition.State.SequenceEqual(agent.Resource.State)),
-                // Pre-PostconditionConsistency
-             //   () => agent.AllocatedRoles.TrueForAll(role => PostMatching(role, agent) && PreMatching(role, agent)) TODO: condition states
-
+              /*  () =>
+                        agent.Resource == null ? true :
+                        agent.AllocatedRoles.Any(
+                            role =>
+                                role.PreCondition.Task.Equals(agent.Resource.Task) &&
+                                role.PreCondition.State.SequenceEqual(agent.Resource.State)),*/
+//                 Pre-PostconditionConsistency
+	            () =>
+                    agent.AllocatedRoles.Any(role =>role.PostCondition.Port == null || role.PreCondition.Port == null) ? true : agent.AllocatedRoles.TrueForAll(
+                        role => PostMatching(role, agent) && PreMatching(role, agent))
 	        };
 	        
 	        
@@ -84,14 +93,26 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 	    private bool PostMatching(Role role, Agent agent)
 	    {
-            return role.PostCondition.Port.AllocatedRoles.Exists(role1 => role1.PreCondition.Port.Equals(agent)
-                                                            && role.PostCondition.State.SequenceEqual(role1.PreCondition.State) 
-                                                            && role.PostCondition.Task.Equals(role1.PreCondition.Task) );
+	        if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)))
+	        {
+	            ;
+	        } else if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role.PostCondition.State.Select(capability => capability.Identifier).SequenceEqual(role1.PreCondition.State.Select(capability => capability.Identifier))))
+	        {
+	            ;
+	        } else if (!role.PostCondition.Port.AllocatedRoles.Any( role1 => role.PostCondition.Task.Equals(role1.PreCondition.Task)))
+	        {
+	            ;
+	        }
+
+            return role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)
+                                                            && role.PostCondition.State.Select(capability => capability.Identifier).SequenceEqual(role1.PreCondition.State.Select(capability => capability.Identifier))
+                                                            && role.PostCondition.Task.Equals(role1.PreCondition.Task));
 	    }
 
         private bool PreMatching(Role role, Agent agent)
         {
-            return role.PreCondition.Port.AllocatedRoles.Exists(role1 => role1.PostCondition.Port.Equals(agent)
+          
+            return role.PreCondition.Port.AllocatedRoles.Any(role1 => role1.PostCondition.Port.Equals(agent)
                                                             && role.PreCondition.State.SequenceEqual(role1.PostCondition.State)
                                                             && role.PreCondition.Task.Equals(role1.PostCondition.Task));
         }

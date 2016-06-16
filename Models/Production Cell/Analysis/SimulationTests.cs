@@ -26,6 +26,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 	using System.Diagnostics;
 	using System.Linq;
 	using Modeling;
+	using Modeling.Controllers;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
@@ -45,7 +46,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 			{
 				WriteLine($"=================  Step: {i}  =====================================");
 
-				if (model.ObserverController.ReconfigurationFailed)
+				if (model.ObserverController.ReconfigurationState == ReconfStates.Failed)
 					WriteLine("Reconfiguration failed.");
 				else
 				{

@@ -47,7 +47,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 
 		public void Apply(ProductionAction action)
 		{
-			IsDamaged |= _productionActions[_productionStep] != action;
+			IsDamaged |= (_productionActions.Length <= _productionStep) ? true : _productionActions[_productionStep] != action;
 			++_productionStep;
 		}
 

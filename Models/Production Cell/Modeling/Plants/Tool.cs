@@ -28,6 +28,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 	internal class Tool : Component
 	{
 		public Fault Broken = new PermanentFault();
+        public Fault CurrentlyBroken = new TransientFault();
 
 		public Tool(ProcessCapability capability)
 		{

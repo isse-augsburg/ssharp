@@ -27,10 +27,15 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
+	using SafetySharp.Modeling;
 
-	internal class MiniZincObserverController : ObserverController
+    internal class MiniZincObserverController : ObserverController
 	{
-		private const string ConstraintsFile = "Constraints.dzn";
+        [Hidden]
+        private string _constraintsFile;
+
+        [Hidden]
+        private static long myID = 0;
 		private const string ConfigurationFile = "Configuration.out";
 		private const string MinizincExe = "minizinc.exe";
 		private const string MinizincModel = "ConstraintModel.mzn";
@@ -51,8 +56,9 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 		{
 			if (Tasks.Count != 1)
 				throw new InvalidOperationException("The constraint model expects exactly one task.");
+		    _constraintsFile = "Constraints"+ ++myID + ".dzn";
 
-			using (var writer = new StreamWriter(ConstraintsFile))
+            using (var writer = new StreamWriter(_constraintsFile))
 			{
 				var task = String.Join(",", Tasks[0].Capabilities.Select(c => c.Identifier));
 				var isCart = String.Join(",", Agents.Select(a => (a is CartAgent).ToString().ToLower()));
@@ -69,12 +75,12 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			}
 		}
 
-		private static void ExecuteMinizinc()
+		private void ExecuteMinizinc()
 		{
 			var startInfo = new ProcessStartInfo
 			{
 				FileName = MinizincExe,
-				Arguments = $"-o {ConfigurationFile} {MinizincModel} {ConstraintsFile}",
+				Arguments = $"-o {ConfigurationFile} {MinizincModel} {_constraintsFile}",
 				RedirectStandardError = true,
 				RedirectStandardOutput = true,
 				UseShellExecute = false,
@@ -111,8 +117,12 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			var lines = File.ReadAllLines(ConfigurationFile);
 			if (lines[0].Contains("UNSATISFIABLE"))
 			{
-				ReconfigurationFailed = true;
+				ReconfigurationState = ReconfStates.Failed;
 				return;
+			}
+			else
+			{
+			    ReconfigurationState = ReconfStates.Succedded;
 			}
 
 			foreach (var agent in Agents)
@@ -138,9 +148,37 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 				role.PostCondition.Port = i == roleAllocations.Length - 1 ? null : roleAllocations[i + 1].Item1;
 				role.PreCondition.State.Clear();
 				role.PostCondition.State.Clear();
-
-				agent.AllocatedRoles.Add(role);
+			    role.PreCondition.State.AddRange(roleAllocations.Take(i).SelectMany(tuple => tuple.Item2).ToList());
+                role.PostCondition.State.AddRange(role.PreCondition.State.Concat(role.CapabilitiesToApply).ToList());
+                agent.AllocatedRoles.Add(role);
 			}
+
+		    foreach (var agent in Agents)
+		    {
+		       
+                    if (agent.Resource == null)
+                        continue;
+		            if (!agent.AllocatedRoles.Any(
+		                role1 =>
+		                    role1.PreCondition.Task.Equals(agent.Resource.Task)))
+		                ;
+		            if (!agent.AllocatedRoles.Any(
+		                role1 =>
+		                    role1.PreCondition.State.SequenceEqual(agent.Resource.State)))
+		                ;
+
+
+
+		        
+		        foreach (var func in agent.Constraints)
+		        {
+		            if (!func())
+		            {
+		                ;
+		                break;
+		            }
+		        }
+		    }
 		}
 
 		private IEnumerable<Tuple<Agent, Capability[]>> Parse(string agentsString, string capabilitiesString)

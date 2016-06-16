@@ -27,7 +27,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 	internal class Condition
 	{
 		public Agent Port;
-		public List<Capability> State = new List<Capability>(Model.MaxProductionSteps);
-		public Task Task;
+	    public List<Capability> State { get; set; } = new List<Capability>(Model.MaxProductionSteps);
+	    public Task Task;
 	}
 }
