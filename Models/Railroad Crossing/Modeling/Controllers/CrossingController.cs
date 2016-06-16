@@ -28,19 +28,19 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 	{
 		private readonly StateMachine<State> _stateMachine = State.Open;
 
-		[Hidden]
+		[Hidden, Subcomponent]
 		public BarrierMotor Motor;
 
-		[Hidden]
+		[Hidden, Subcomponent]
 		public RadioModule Radio;
 
-		[Hidden]
+		[Hidden, Subcomponent]
 		public BarrierSensor Sensor;
 
-		[Hidden]
+		[Hidden, Subcomponent]
 		public Timer Timer;
 
-		[Hidden]
+		[Hidden, Subcomponent]
 		public TrainSensor TrainSensor;
 
 		public override void Update()

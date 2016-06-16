@@ -20,26 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
+namespace SafetySharp.Modeling
 {
-	using SafetySharp.Modeling;
-	using Sensors;
+	using System;
 
 	/// <summary>
-	///   A common base component for different pre-control implementations.
+	///   When applied to a field or property of a <see cref="Component" /> class that is of a <see cref="IComponent" />-derived
+	///   type, indicates that the component instance stored in the member is a logical part of the declaring component, i.e.,
+	///   it is one of the declaring component's subcomponents.
 	/// </summary>
-	public abstract class PreControl : Component
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+	public sealed class SubcomponentAttribute : Attribute
 	{
-		/// <summary>
-		///   The sensor that detects vehicles on any lane.
-		/// </summary>
-		[Subcomponent]
-		public readonly VehicleDetector PositionDetector = new LightBarrier(Model.PreControlPosition);
-
-		/// <summary>
-		///   Gets the number of vehicles that passed the pre-control during the current system step.
-		/// </summary>
-		[Provided]
-		public abstract int GetNumberOfPassingVehicles();
 	}
 }

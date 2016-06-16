@@ -48,6 +48,7 @@
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
     <Compile Include="Modeling\ObjectPool.cs" />
+    <Compile Include="Modeling\SubcomponentAttribute.cs" />
     <Compile Include="Modeling\RootKind.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsStateFormulaVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\LtsMinCtlTransformer.cs" />
