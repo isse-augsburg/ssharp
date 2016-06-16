@@ -616,6 +616,7 @@
     <Compile Include="Serialization\Objects\nondiscoverable delegate.cs" />
     <Compile Include="Serialization\Objects\hidden array elements fields.cs" />
     <Compile Include="Serialization\Objects\hidden list elements.cs" />
+    <Compile Include="Serialization\Objects\list of structs.cs" />
     <Compile Include="Serialization\Objects\serialized arrays.cs" />
     <Compile Include="Serialization\Objects\lists.cs" />
     <Compile Include="Serialization\Objects\delegates.cs" />
