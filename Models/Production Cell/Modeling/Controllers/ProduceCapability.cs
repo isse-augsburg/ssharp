@@ -43,7 +43,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 		public override int Identifier => 1;
 
-		public override bool Equals(Capability capability)
+		public override bool IsEquivalentTo(Capability capability)
 		{
 			var produce = capability as ProduceCapability;
 			if (produce == null)

@@ -32,16 +32,18 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 		public int SpeedOfMotor = 0;
 
 		[Provided]
-		public void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
+		public Blood SetMainFlow(Blood fromPredecessor)
 		{
-			toSuccessor.CopyValuesFrom(fromPredecessor);
+			return fromPredecessor;
 		}
 
 		[Provided]
-		public virtual void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public virtual Suction SetMainFlowSuction(Suction fromSuccessor)
 		{
+			Suction toPredecessor;
 			toPredecessor.CustomSuctionValue = SpeedOfMotor; //Force suction set by motor
 			toPredecessor.SuctionType=SuctionType.CustomSuction;
+			return toPredecessor;
 		}
 
 		public BloodPump()
@@ -56,10 +58,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 		public class BloodPumpDefectEffect : BloodPump
 		{
 			[Provided]
-			public override void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+			public override Suction SetMainFlowSuction(Suction fromSuccessor)
 			{
+				Suction toPredecessor;
 				toPredecessor.CustomSuctionValue = 0; //Force suction set by motor
 				toPredecessor.SuctionType = SuctionType.CustomSuction;
+				return toPredecessor;
 			}
 		}
 	}

@@ -20,32 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.TemporalOperators
+namespace Tests.Diagnostics.FaultEffects.Valid
 {
-	using SafetySharp.Analysis;
-	using static SafetySharp.Analysis.Operators;
+	using SafetySharp.Modeling;
 
-	internal class T13 : FormulaTestObject
+	public class Generic : Component
 	{
-		protected override void Check()
+		[FaultEffect]
+		public class E : Generic
 		{
-			{
-				var actual = !(X(true));
-				var expected = new UnaryFormula(
-					new UnaryFormula(new StateFormula(() => true), UnaryOperator.Next),
-					UnaryOperator.Not);
-
-				Check(actual, expected);
-			}
-
-			{
-				var actual = !X(true);
-				var expected = new UnaryFormula(
-					new UnaryFormula(new StateFormula(() => true), UnaryOperator.Next),
-					UnaryOperator.Not);
-
-				Check(actual, expected);
-			}
 		}
 	}
 }

@@ -63,19 +63,19 @@ namespace SafetySharp.CaseStudies.PressureTank.Modeling
 		/// <summary>
 		///   The pump that is used to fill the tank.
 		/// </summary>
-		[Hidden]
+		[Hidden, Subcomponent]
 		public Pump Pump;
 
 		/// <summary>
 		///   The sensor that is used to sense the pressure level within the tank.
 		/// </summary>
-		[Hidden]
+		[Hidden, Subcomponent]
 		public PressureSensor Sensor;
 
 		/// <summary>
 		///   The timer that is used to determine whether the pump should be disabled to prevent tank ruptures.
 		/// </summary>
-		[Hidden]
+		[Hidden, Subcomponent]
 		public Timer Timer;
 
 		/// <summary>

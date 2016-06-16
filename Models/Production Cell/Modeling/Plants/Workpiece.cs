@@ -47,8 +47,9 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 
 		public void Apply(ProductionAction action)
 		{
-			IsDamaged |= (_productionActions.Length <= _productionStep) ? true : _productionActions[_productionStep] != action;
-			++_productionStep;
+			IsDamaged |= _productionActions.Length <= _productionStep || _productionActions[_productionStep] != action;
+			if (!IsDamaged)
+				++_productionStep;
 		}
 
 		public static void Transfer(ref Workpiece origin, ref Workpiece destination)

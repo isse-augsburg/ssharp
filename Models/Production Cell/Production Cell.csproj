@@ -68,6 +68,7 @@
     <Compile Include="Modeling\Controllers\MiniZincObserverController.cs" />
     <Compile Include="Modeling\Controllers\ObserverController.cs" />
     <Compile Include="Modeling\Controllers\ProcessCapability.cs" />
+    <Compile Include="Modeling\Controllers\ReconfStates.cs" />
     <Compile Include="Modeling\Controllers\Resource.cs" />
     <Compile Include="Modeling\Controllers\Role.cs" />
     <Compile Include="Modeling\Controllers\Task.cs" />

@@ -20,47 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.TemporalOperators
+namespace Tests.Formulas.Operators
 {
 	using SafetySharp.Analysis;
 	using static SafetySharp.Analysis.Operators;
 
-	internal class T5 : FormulaTestObject
+	internal class T4 : FormulaTestObject
 	{
 		protected override void Check()
 		{
 			var intValue = 7;
 
 			{
-				var actual = G(intValue < 7);
+				var actual = F(intValue < 7);
 				var expected = new UnaryFormula(
 					new StateFormula(() => intValue < 7),
-					UnaryOperator.Globally);
+					UnaryOperator.Finally);
 
 				Check(actual, expected);
 			}
 
 			{
-				var actual = G(G(intValue >= 7));
+				var actual = F(F(intValue >= 7));
 				var expected = new UnaryFormula(
 					new UnaryFormula(
 						new StateFormula(() => intValue >= 7),
-						UnaryOperator.Globally),
-					UnaryOperator.Globally);
+						UnaryOperator.Finally),
+					UnaryOperator.Finally);
 
 				Check(actual, expected);
 			}
 
 			{
-				var actual = AG(EG(intValue >= 7));
+				var actual = AF(EF(intValue >= 7));
 				var expected = new UnaryFormula(
 					new UnaryFormula(
 						new UnaryFormula(
 							new UnaryFormula(
 								new StateFormula(() => intValue >= 7),
-								UnaryOperator.Globally),
+								UnaryOperator.Finally),
 							UnaryOperator.Exists),
-						UnaryOperator.Globally),
+						UnaryOperator.Finally),
 					UnaryOperator.All);
 
 				Check(actual, expected);

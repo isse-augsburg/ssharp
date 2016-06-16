@@ -31,17 +31,20 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 
 		public ValveState ValveState = ValveState.Open;
 
-		public readonly BufferedBlood DelayedBlood = new BufferedBlood();
+		public BufferedBlood DelayedBlood = new BufferedBlood();
 
 		[Provided]
-		public void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
+		public Blood SetMainFlow(Blood fromPredecessor)
 		{
 			if (ValveState == ValveState.Open)
 			{
-				toSuccessor.CopyValuesFrom(DelayedBlood);
+				Blood toSuccessor = DelayedBlood;
+				DelayedBlood=fromPredecessor;
+				return toSuccessor;
 			}
 			else
 			{
+				Blood toSuccessor = DelayedBlood;
 				toSuccessor.HasHeparin = true;
 				toSuccessor.Water = 0;
 				toSuccessor.SmallWasteProducts = 0;
@@ -50,14 +53,14 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 				toSuccessor.GasFree = true;
 				toSuccessor.Pressure = QualitativePressure.NoPressure;
 				toSuccessor.Temperature = QualitativeTemperature.BodyHeat;
+				return toSuccessor;
 			}
-			DelayedBlood.CopyValuesFrom(fromPredecessor);
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public Suction SetMainFlowSuction(Suction fromSuccessor)
 		{
-			toPredecessor.CopyValuesFrom(fromSuccessor);
+			return fromSuccessor;
 		}
 
 		public virtual void CloseValve()

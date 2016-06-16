@@ -22,24 +22,26 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 {
+	using System.Diagnostics;
 	using SafetySharp.Modeling;
 
+	[DebuggerDisplay("{Robot1.Name} -> {Robot2.Name}")]
 	internal class Route : Component
 	{
 		public Fault Blocked = new PermanentFault();
 
-		public Route(Robot from, Robot to)
+		public Route(Robot robot1, Robot robot2)
 		{
-			From = from;
-			To = to;
+			Robot1 = robot1;
+			Robot2 = robot2;
 		}
 
 		public Route()
 		{
 		}
 
-		public Robot From { get; }
-		public Robot To { get; }
+		public Robot Robot1 { get; }
+		public Robot Robot2 { get; }
 
 		public virtual bool IsBlocked => false;
 
@@ -51,16 +53,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 
 		public bool CanNavigate(Robot robot1, Robot robot2)
 		{
-			if (IsBlocked)
-				return false;
-
-			if (From != robot1 && To != robot1)
-				return false;
-
-			if (From != robot2 && To != robot2)
-				return false;
-
-			return true;
+			// routes are bi-directionally navigatable
+			return ((Robot1 == robot1 && Robot2 == robot2) || (Robot1 == robot2 && Robot2 == robot1)) && !IsBlocked;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,44 +20,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.FormulaVisitors
+namespace Tests.Analysis.Invariants.CounterExamples
 {
-	using System.Collections.Generic;
-	using Utilities;
+	using System;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
 
-	/// <summary>
-	///   Collects all <see cref="StateFormula" /> instances contained in a <see cref="Formula" />.
-	/// </summary>
-	internal class StateFormulaCollector : FormulaVisitor
+	internal class HiddenVariableWithEffect : AnalysisTestObject
 	{
-		/// <summary>
-		///   Gets the collected state formulas.
-		/// </summary>
-		public HashSet<StateFormula> StateFormulas { get; } = new HashSet<StateFormula>(ReferenceEqualityComparer<StateFormula>.Default);
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitUnaryFormula(UnaryFormula formula)
+		protected override void Check()
 		{
-			Visit(formula.Operand);
+			var c = new C();
+			var e = Should.Throw<AnalysisException>(() => CheckInvariant(true, c));
+			e.InnerException.ShouldBeOfType<NondeterminismException>();
+
+			SimulateCounterExample(e.CounterExample, simulator =>
+			{
+				c = (C)simulator.Model.Roots[0];
+
+				c.X.ShouldBe(0);
+				c.Y.ShouldBe(0);
+
+				Should.Throw<InvalidOperationException>(() => simulator.SimulateStep());
+				c.X.ShouldBe(2);
+				c.Y.ShouldBe(2);
+			});
 		}
 
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitBinaryFormula(BinaryFormula formula)
+		private class C : Component
 		{
-			Visit(formula.LeftOperand);
-			Visit(formula.RightOperand);
-		}
+			public int X;
 
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitStateFormula(StateFormula formula)
-		{
-			StateFormulas.Add(formula);
+			[Hidden]
+			public int Y;
+
+			public override void Update()
+			{
+				if (Y != 1)
+					X = Choose(1, 2, 3);
+
+				Y = X;
+			}
 		}
 	}
 }

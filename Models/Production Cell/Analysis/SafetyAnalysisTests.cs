@@ -23,7 +23,6 @@
 namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 {
     using System;
-    using System.Activities.Statements;
     using System.Linq;
     using Modeling;
     using Modeling.Controllers;
@@ -76,14 +75,23 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
             model.Faults.SuppressActivations();
             model.Carts[0].Broken.ForceActivation();
 
-            var safetyAnalysis = new SSharpChecker() { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
-            var result = safetyAnalysis.CheckInvariant(model, !Hazard(model));
-
-            Console.WriteLine(result);
+            var checker = new SSharpChecker() { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
+            checker.CheckInvariant(model, !Hazard(model));
         }
 
+		[Test]
+		public void C2Brocken()
+		{
+			var model = new Model();
+			model.Faults.SuppressActivations();
+			model.Carts[2].Broken.ForceActivation();
 
-        private bool Hazard(Model model)
+			var checker = new SSharpChecker() { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
+			checker.CheckInvariant(model, model.ObserverController.ReconfigurationState != ReconfStates.Failed);
+		}
+
+
+		private bool Hazard(Model model)
 		{
          
 		    var agents = model.CartAgents.Cast<Agent>().Concat(model.RobotAgents).ToArray();

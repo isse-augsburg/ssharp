@@ -89,7 +89,16 @@ namespace SafetySharp.Analysis.FormulaVisitors
 					_expression = Expression.OrElse(Expression.Not(left), right);
 					break;
 				case BinaryOperator.Equivalence:
-					_expression = Expression.OrElse(Expression.AndAlso(left, right), Expression.AndAlso(Expression.Not(left), Expression.Not(right)));
+					var leftLocal = Expression.Parameter(typeof(bool), "left");
+					var rightLocal = Expression.Parameter(typeof(bool), "right");
+					var bothHold = Expression.AndAlso(leftLocal, rightLocal);
+					var neitherHolds = Expression.AndAlso(Expression.Not(leftLocal), Expression.Not(rightLocal));
+
+					_expression = Expression.Block(
+						new[] { leftLocal, rightLocal },
+						Expression.Assign(leftLocal, left),
+						Expression.Assign(rightLocal, right),
+						Expression.OrElse(bothHold, neitherHolds));
 					break;
 				case BinaryOperator.Until:
 					throw new InvalidOperationException("Only state formulas can be evaluated.");

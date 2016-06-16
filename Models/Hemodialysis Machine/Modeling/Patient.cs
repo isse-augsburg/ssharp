@@ -40,8 +40,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		public bool IsConnected = true;
 
 		[Provided]
-		public void CreateBlood(Blood outgoingBlood)
+		public Blood CreateBlood()
 		{
+			Blood outgoingBlood;
 			var incomingSuction = ArteryFlow.Outgoing.Backward;
 			var hasSuction = incomingSuction.SuctionType == SuctionType.CustomSuction && incomingSuction.CustomSuctionValue > 0;
 			if (hasSuction && IsConnected)
@@ -88,13 +89,16 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 				outgoingBlood.Pressure = QualitativePressure.NoPressure;
 				outgoingBlood.Temperature = QualitativeTemperature.BodyHeat;
 			}
+			return outgoingBlood;
 		}
 
 		[Provided]
-		public void CreateBloodSuction(Suction outgoingSuction)
+		public Suction CreateBloodSuction()
 		{
+			Suction outgoingSuction;
 			outgoingSuction.SuctionType = SuctionType.SourceDependentSuction;
 			outgoingSuction.CustomSuctionValue = 0;
+			return outgoingSuction;
 		}
 
 		public bool IncomingBloodWasNotOk;
@@ -117,7 +121,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		{
 		}
 
-		protected override void CreateBindings()
+		public Patient()
 		{
 			ArteryFlow.SendForward=CreateBlood;
 			VeinFlow.SendBackward=CreateBloodSuction;

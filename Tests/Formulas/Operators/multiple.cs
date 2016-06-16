@@ -20,44 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Invariants.CounterExamples
+namespace Tests.Formulas.Operators
 {
-	using SafetySharp.Modeling;
-	using Shouldly;
+	using SafetySharp.Analysis;
+	using static SafetySharp.Analysis.Operators;
 
-	internal class Replay : AnalysisTestObject
+	internal class Multiple : FormulaTestObject
 	{
 		protected override void Check()
 		{
-			Check(1);
-			Check(2);
-			Check(3);
-		}
+			var intValue = 7;
+			var boolValue = false;
 
-		private void Check(int value)
-		{
-			var c = new C();
-			CheckInvariant(c.X != value, c);
+			var actual = AF(intValue > 7 && boolValue && X(!boolValue) | intValue < 4) && AF(boolValue);
+			var expected = new BinaryFormula(
+				new UnaryFormula(
+					new UnaryFormula(
+						new BinaryFormula(
+							new StateFormula(() => intValue > 7 && boolValue),
+							BinaryOperator.And,
+							new BinaryFormula(
+								new UnaryFormula(new StateFormula(() => !boolValue), UnaryOperator.Next),
+								BinaryOperator.Or,
+								new StateFormula(() => intValue < 4))),
+						UnaryOperator.Finally),
+					UnaryOperator.All),
+				BinaryOperator.And,
+				new UnaryFormula(new UnaryFormula(new StateFormula(() => boolValue), UnaryOperator.Finally), UnaryOperator.All));
 
-			SimulateCounterExample(CounterExample, simulator =>
-			{
-				c = (C)simulator.Model.Roots[0];
-
-				c.X.ShouldBe(0);
-
-				simulator.SimulateStep();
-				c.X.ShouldBe(value);
-			});
-		}
-
-		private class C : Component
-		{
-			public int X;
-
-			public override void Update()
-			{
-				X = Choose(1, 2, 3);
-			}
+			Check(actual, expected);
 		}
 	}
 }

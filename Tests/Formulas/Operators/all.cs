@@ -20,52 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Simulation
+namespace Tests.Formulas.Operators
 {
-	using System.Linq;
 	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
-	using Shouldly;
-	using Utilities;
+	using static SafetySharp.Analysis.Operators;
 
-	internal class ReachableByBindingOnly : TestObject
+	internal class All : FormulaTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C();
+			var intValue = 7;
 
-			var simulator = new Simulator(TestModel.InitializeModel(c));
-			c = (C)simulator.Model.Roots[0];
-
-			simulator.SimulateStep();
-			c.X.ShouldBe(7);
-
-			simulator.Model.Components.Length.ShouldBe(2);
-			simulator.Model.Components.OfType<C>().Count().ShouldBe(1);
-			simulator.Model.Components.OfType<D>().Count().ShouldBe(1);
-		}
-
-		private class C : Component
-		{
-			public int X;
-
-			private extern int Y { get; }
-
-			public override void Update()
 			{
-				X = Y;
+				var actual = A(intValue < 7);
+				var expected = new UnaryFormula(
+					new StateFormula(() => intValue < 7),
+					UnaryOperator.All);
+
+				Check(actual, expected);
 			}
 
-			protected internal override void CreateBindings()
 			{
-				var d = new D();
-				Bind(nameof(Y), nameof(d.Z));
-			}
-		}
+				var actual = A(A(intValue >= 7));
+				var expected = new UnaryFormula(
+					new UnaryFormula(
+						new StateFormula(() => intValue >= 7),
+						UnaryOperator.All),
+					UnaryOperator.All);
 
-		private class D : Component
-		{
-			public int Z => 7;
+				Check(actual, expected);
+			}
 		}
 	}
 }

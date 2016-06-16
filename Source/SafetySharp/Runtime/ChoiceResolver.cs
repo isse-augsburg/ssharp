@@ -53,7 +53,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   The number of choices that have been encountered for the current path.
 		/// </summary>
-		private int _choiceIndex;
+		private int _choiceIndex = -1;
 
 		/// <summary>
 		///   Indicates whether the next path is the first one of the current state.
@@ -91,6 +91,9 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool PrepareNextPath()
 		{
+			if (_choiceIndex != _valueCount.Count - 1)
+				throw new NondeterminismException();
+
 			// Reset the choice counter as each path starts from the beginning
 			_choiceIndex = -1;
 

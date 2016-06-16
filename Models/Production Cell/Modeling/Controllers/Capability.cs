@@ -22,42 +22,10 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-	using System;
-	using System.Runtime.CompilerServices;
-
-	internal abstract class Capability : IEquatable<Capability>
+	internal abstract class Capability
 	{
 		public abstract int Identifier { get; }
-		public abstract bool Equals(Capability capability);
+		public abstract bool IsEquivalentTo(Capability capability);
 		public abstract void Execute(Agent agent);
-
-		public sealed override bool Equals(object obj)
-		{
-			if (ReferenceEquals(null, obj))
-				return false;
-
-			if (ReferenceEquals(this, obj))
-				return true;
-
-			if (obj.GetType() != GetType())
-				return false;
-
-			return Equals((Capability)obj);
-		}
-
-		public override int GetHashCode()
-		{
-			return RuntimeHelpers.GetHashCode(this);
-		}
-
-		public static bool operator ==(Capability left, Capability right)
-		{
-			return Equals(left, right);
-		}
-
-		public static bool operator !=(Capability left, Capability right)
-		{
-			return !Equals(left, right);
-		}
 	}
 }

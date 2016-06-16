@@ -40,6 +40,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 		public void EnumerateStateSpace()
 		{
 			var model = new Model();
+			model.Faults.SuppressActivations();
+
 			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
 			var result = modelChecker.CheckInvariant(model, true);
 

@@ -114,23 +114,20 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 		private void UpdateConfiguration()
 		{
+			foreach (var agent in Agents)
+			{
+				agent.AllocatedRoles.Clear();
+				agent.OnReconfigured();
+			}
+
 			var lines = File.ReadAllLines(ConfigurationFile);
 			if (lines[0].Contains("UNSATISFIABLE"))
 			{
 				ReconfigurationState = ReconfStates.Failed;
 				return;
 			}
-			else
-			{
-			    ReconfigurationState = ReconfStates.Succedded;
-			}
 
-			foreach (var agent in Agents)
-			{
-				RolePool.Return(agent.AllocatedRoles);
-				agent.AllocatedRoles.Clear();
-				agent.OnReconfigured();
-			}
+			ReconfigurationState = ReconfStates.Succedded;
 
 			var roleAllocations = Parse(lines[0], lines[1]).ToArray();
 			for (var i = 0; i < roleAllocations.Length; i++)
@@ -203,7 +200,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			for (var i = offset; i < agents.Length && agents[i] == agentId; ++i)
 			{
 				if (capabilities[i] != -1)
-					yield return agent.AvailableCapabilites.First(c => c == Tasks[0].Capabilities[capabilities[i]]);
+					yield return agent.AvailableCapabilites.First(c => c.IsEquivalentTo(Tasks[0].Capabilities[capabilities[i]]));
 			}
 		}
 

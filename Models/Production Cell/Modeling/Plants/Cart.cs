@@ -22,7 +22,9 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 {
+	using System.Collections.Generic;
 	using System.Linq;
+	using Controllers;
 	using SafetySharp.Modeling;
 
 	internal class Cart : Component
@@ -53,54 +55,11 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 
 	    public virtual bool MoveTo(Robot robot)
 	    {
-	        if (IsReachable(_position, robot))
-	        {
-	            _position = robot;
-	            return true;
-	        }
-	        return false;
-	    }
+		    if (!CanMove(robot))
+			    return false;
 
-	/*	private bool MoveTo(Robot currentPosition, Robot robot)
-		{
-			if (currentPosition == robot)
-				return true;
-
-            var route = Routes.SingleOrDefault(r => r.CanNavigate(currentPosition, robot));
-
-		    if (route != null)
-		    {
-		        _position = route.To;
-		        return true;
-		    }
-		    var reachableRobotsFromPosition = Routes.Where(route1 => route1.From == _position).Select(route1 => route1.To);
-            
-		    foreach (var reachableRobot in reachableRobotsFromPosition)
-		    {
-                var transRoutes = Routes.SingleOrDefault(r => r.CanNavigate(reachableRobot, robot));
-                if (transRoutes != null)
-                {
-                    _position = route.To;
-                    return true;
-                }
-                return MoveTo(reachableRobot, robot);
-            }
-		    return false;
-
-		}*/
-
-	    private bool IsReachable(Robot position, Robot robot)
-	    {
-	        if (position == robot)
-	            return true;
-	        if (Routes.Any(route => route.CanNavigate(position, robot)))
-	            return true;
-	        foreach (var nextRobot in Routes.Where(route => route.From == position).Select(route => route.To))
-	        {
-	            if (IsReachable(nextRobot, robot))
-	                return true;
-	        }
-	        return false;
+		    _position = robot;
+		    return true;
 	    }
 
 		public void SetNames(int cartId)
@@ -109,7 +68,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 			Broken.Name = $"C{cartId}.Broken";
 
 			foreach (var route in Routes)
-				route.Blocked.Name = $"C{cartId}.{route.From.Name}->{route.To.Name}.Blocked";
+				route.Blocked.Name = $"C{cartId}.{route.Robot1.Name}->{route.Robot2.Name}.Blocked";
 		}
 
 		public override string ToString()
@@ -122,7 +81,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 			if (_position == robot)
 				return true;
 
-			return Routes.Any(r => r.CanNavigate(_position, robot));
+			return Routes.Any(route => route.CanNavigate(_position, robot));
 		}
 
 		[FaultEffect(Fault = nameof(Broken))]

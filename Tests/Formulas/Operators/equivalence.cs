@@ -20,14 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using SafetySharp.Modeling;
-using System;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlow
+namespace Tests.Formulas.Operators
 {
-	public interface IFlowElement<TElement>
-		where TElement : class, IFlowElement<TElement>, new()
+	using SafetySharp.Analysis;
+	using static SafetySharp.Analysis.Operators;
+
+	internal class T12 : FormulaTestObject
 	{
-		void CopyValuesFrom(TElement @from);
+		protected override void Check()
+		{
+			var intValue = 7;
+
+			{
+				var actual = ((Formula)false).EquivalentTo(intValue < 7);
+				var expected = new BinaryFormula(
+					new StateFormula(() => false),
+					BinaryOperator.Equivalence,
+					new StateFormula(() => intValue < 7));
+
+				Check(actual, expected);
+			}
+
+			{
+				var actual = ((Formula)false).EquivalentTo(F(intValue < 7));
+				var expected = new BinaryFormula(
+					new StateFormula(() => false),
+					BinaryOperator.Equivalence,
+					new UnaryFormula(new StateFormula(() => intValue < 7), UnaryOperator.Finally));
+
+				Check(actual, expected);
+			}
+		}
 	}
 }

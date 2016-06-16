@@ -27,22 +27,26 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
+	using SafetySharp.Modeling;
 
 	public class FlowDelegate<TForward, TBackward> : IFlowAtomic<TForward, TBackward>, IFlowComponentUniqueOutgoing<TForward, TBackward>, IFlowComponentUniqueIncoming<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+		where TForward : struct
+		where TBackward : struct
 	{
-		public FlowPort<TForward, TBackward> Incoming { get; } = new FlowPort<TForward, TBackward>();
-		public FlowPort<TForward, TBackward> Outgoing { get; } = new FlowPort<TForward, TBackward>();
+		[Hidden]
+		public FlowPort<TForward, TBackward> Incoming { get; set; }
+
+		[Hidden]
+		public FlowPort<TForward, TBackward> Outgoing { get; set; }
 
 		public void UpdateForwardInternal()
 		{
-			Outgoing.Forward.CopyValuesFrom(Incoming.Forward);
+			Outgoing.Forward=Incoming.Forward;
 		}
 
 		public void UpdateBackwardInternal()
 		{
-			Incoming.Backward.CopyValuesFrom(Outgoing.Backward);
+			Incoming.Backward=Outgoing.Backward;
 		}
 	}
 }

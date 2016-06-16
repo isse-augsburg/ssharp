@@ -29,9 +29,6 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 
 	internal class Robot : Component
 	{
-		[Hidden(HideElements = true)]
-		public Tool[] Tools { get; }
-
 		private Tool _currentTool;
 
 		private Workpiece _workpiece;
@@ -48,6 +45,9 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 		public Robot()
 		{
 		}
+
+		[Hidden(HideElements = true)]
+		public Tool[] Tools { get; }
 
 		[Hidden]
 		public string Name { get; set; }
@@ -85,9 +85,9 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Plants
 		public void SetNames(int robotId)
 		{
 			Name = $"R{robotId}";
-			ApplyFault.Name = $"R{robotId}.ApplyFailed";
-			SwitchFault.Name = $"R{robotId}.SwitchFailed";
-			ResourceTransportFault.Name = $"R{robotId}.TransportFailed";
+			ApplyFault.Name = $"R{robotId}.ToolApplicationFailed";
+			SwitchFault.Name = $"R{robotId}.ToolSwitchFailed";
+			ResourceTransportFault.Name = $"R{robotId}.ResourceTransportFailed";
 
 			foreach (var group in Tools.GroupBy(t => t.Capability.ProductionAction))
 			{

@@ -20,54 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
+namespace Tests.Formulas.Operators
 {
-	using SafetySharp.Modeling;
-	using Utilities.BidirectionalFlow;
+	using SafetySharp.Analysis;
+	using static SafetySharp.Analysis.Operators;
 
-	public enum SuctionType
+	internal class Exists : FormulaTestObject
 	{
-		SourceDependentSuction,
-		CustomSuction
-	}
-
-	public struct Suction
-	{
-		[Hidden]
-		public SuctionType SuctionType;
-
-		[Hidden,Range(0, 8, OverflowBehavior.Error)]
-		public int CustomSuctionValue;
-
-		/*
-		public void CopyValuesFrom(Suction from)
+		protected override void Check()
 		{
-			SuctionType = from.SuctionType;
-			CustomSuctionValue = from.CustomSuctionValue;
-		}
-		*/
+			var intValue = 7;
 
-		public static Suction Default()
-		{
-			var suction = new Suction
 			{
-				SuctionType = SuctionType.SourceDependentSuction,
-				CustomSuctionValue = 0
-			};
-			return suction;
-		}
+				var actual = E(intValue < 7);
+				var expected = new UnaryFormula(
+					new StateFormula(() => intValue < 7),
+					UnaryOperator.Exists);
 
-		public void PrintSuctionValues(string description)
-		{
-			System.Console.Out.WriteLine("\t" + description);
-			System.Console.Out.WriteLine("\t\tSuction Type: " + SuctionType.ToString());
-			System.Console.Out.WriteLine("\t\tCustomSuctionValue: " + CustomSuctionValue);
+				Check(actual, expected);
+			}
+
+			{
+				var actual = E(E(intValue >= 7));
+				var expected = new UnaryFormula(
+					new UnaryFormula(
+						new StateFormula(() => intValue >= 7),
+						UnaryOperator.Exists),
+					UnaryOperator.Exists);
+
+				Check(actual, expected);
+			}
 		}
 	}
 }

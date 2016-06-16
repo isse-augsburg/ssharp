@@ -68,7 +68,7 @@ namespace SafetySharp.Compiler.Analyzers
 		private static readonly DiagnosticInfo _accessibility = DiagnosticInfo.Error(
 			DiagnosticIdentifier.FaultEffectAccessibility,
 			"Fault effect must have the same effective accessibility as its base type.",
-			"Fault effect {0} must have the same effective accessibility as its base type. Try declaring the effect as 'public'.");
+			"Fault effect '{0}' must have the same effective accessibility as its base type. Try declaring the effect as 'public'.");
 
 		/// <summary>
 		///   The error diagnostic emitted by the analyzer when a fault effect is generic.
@@ -77,6 +77,14 @@ namespace SafetySharp.Compiler.Analyzers
 			DiagnosticIdentifier.InvalidFaultEffectBaseType,
 			"Fault effects must be derived from non-fault effect components.",
 			$"'{{0}}' is not allowed to derive from '{{1}}'; only non-fault effect classes derived from '{typeof(Component).FullName}' are allowed.");
+
+		/// <summary>
+		///   The error diagnostic emitted by the analyzer when a fault effect has a closed generic base type.
+		/// </summary>
+		private static readonly DiagnosticInfo _closedGenericBaseType = DiagnosticInfo.Error(
+			DiagnosticIdentifier.ClosedGenericBaseType,
+			"Fault effects cannot specify type parameters for their base type.",
+			"'{0}' is not allowed to specify any type parameters for base type '{1}'.");
 
 		/// <summary>
 		///   The error diagnostic emitted by the analyzer when a fault effect is sealed.
@@ -88,7 +96,7 @@ namespace SafetySharp.Compiler.Analyzers
 		///   Initializes a new instance.
 		/// </summary>
 		public FaultEffectAnalyzer()
-			: base(_genericEffect, _accessibility, _invalidBaseType, _abstractOverride, _multipleEffectsWithoutPriority, _sealedEffect)
+			: base(_genericEffect, _accessibility, _invalidBaseType, _abstractOverride, _multipleEffectsWithoutPriority, _sealedEffect, _closedGenericBaseType)
 		{
 		}
 
@@ -162,6 +170,9 @@ namespace SafetySharp.Compiler.Analyzers
 
 			if (symbol.IsSealed)
 				_sealedEffect.Emit(context, symbol, symbol.ToDisplayString());
+
+			if (symbol.BaseType.TypeArguments.Any(a => a.TypeKind != TypeKind.TypeParameter))
+				_closedGenericBaseType.Emit(context, symbol, symbol.ToDisplayString(), symbol.BaseType.ConstructedFrom.ToDisplayString());
 		}
 
 		/// <summary>

@@ -123,7 +123,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
             foreach (var capability in AvailableCapabilites.ToArray())
             {
                 if (!CheckAllocatedCapability(capability))
-                    AvailableCapabilites.Remove(capability);
+					AvailableCapabilites.Remove(capability);
             }
 
             foreach (var input in Inputs.ToArray())

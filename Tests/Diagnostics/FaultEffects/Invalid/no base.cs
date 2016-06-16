@@ -20,54 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
+namespace Tests.Diagnostics.FaultEffects.Invalid
 {
+	using SafetySharp.Compiler.Analyzers;
 	using SafetySharp.Modeling;
-	using Utilities.BidirectionalFlow;
 
-	public enum SuctionType
+	[Diagnostic(DiagnosticIdentifier.InvalidFaultEffectBaseType, 31, 18, 6,
+		"Tests.Diagnostics.FaultEffects.Invalid.NoBase", "object")]
+	[FaultEffect]
+	public class NoBase
 	{
-		SourceDependentSuction,
-		CustomSuction
-	}
-
-	public struct Suction
-	{
-		[Hidden]
-		public SuctionType SuctionType;
-
-		[Hidden,Range(0, 8, OverflowBehavior.Error)]
-		public int CustomSuctionValue;
-
-		/*
-		public void CopyValuesFrom(Suction from)
-		{
-			SuctionType = from.SuctionType;
-			CustomSuctionValue = from.CustomSuctionValue;
-		}
-		*/
-
-		public static Suction Default()
-		{
-			var suction = new Suction
-			{
-				SuctionType = SuctionType.SourceDependentSuction,
-				CustomSuctionValue = 0
-			};
-			return suction;
-		}
-
-		public void PrintSuctionValues(string description)
-		{
-			System.Console.Out.WriteLine("\t" + description);
-			System.Console.Out.WriteLine("\t\tSuction Type: " + SuctionType.ToString());
-			System.Console.Out.WriteLine("\t\tCustomSuctionValue: " + CustomSuctionValue);
-		}
 	}
 }

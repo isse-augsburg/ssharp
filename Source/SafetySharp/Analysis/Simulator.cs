@@ -211,6 +211,12 @@ namespace SafetySharp.Analysis
 			var actualState = stackalloc byte[_runtimeModel.StateVectorSize];
 			_runtimeModel.Serialize(actualState);
 
+			if (IsCompleted && _counterExample.EndsWithException)
+			{
+				throw new InvalidOperationException(
+					"The path the counter example was generated for ended with an exception that could not be reproduced by the replay.");
+			}
+
 			EnsureStatesMatch(actualState, _states[_stateIndex]);
 		}
 

@@ -22,9 +22,9 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-    using System.Linq;
+	using System.Linq;
 
-    internal class Task
+	internal class Task
 	{
 		public Task(params Capability[] capabilities)
 		{
@@ -33,25 +33,27 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 		public Capability[] Capabilities { get; }
 
-	    /// <summary>Determines whether the specified object is equal to the current object.</summary>
-	    /// <returns>true if the specified object  is equal to the current object; otherwise, false.</returns>
-	    /// <param name="obj">The object to compare with the current object. </param>
-	    public override bool Equals(object obj)
-	    {
-            if (ReferenceEquals(null, obj))
-                return false;
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj))
+				return false;
 
-            if (ReferenceEquals(this, obj))
-                return true;
+			if (ReferenceEquals(this, obj))
+				return true;
 
-            if (obj.GetType() != GetType())
-                return false;
+			if (obj.GetType() != GetType())
+				return false;
 
-            var task = obj as Task;
-            if (task == null)
-                return false;
+			var task = obj as Task;
+			if (task == null)
+				return false;
 
-            return Capabilities.SequenceEqual(task.Capabilities);
-        }
+			return Capabilities.SequenceEqual(task.Capabilities);
+		}
+
+		public override int GetHashCode()
+		{
+			return Capabilities?.GetHashCode() ?? 0;
+		}
 	}
 }

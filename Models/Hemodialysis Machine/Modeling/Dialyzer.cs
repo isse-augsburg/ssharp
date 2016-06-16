@@ -52,38 +52,42 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 
 
 		[Provided]
-		public void SetDialyzingFluidFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public Suction SetDialyzingFluidFlowSuction(Suction fromSuccessor)
 		{
 			//Assume incomingSuction.SuctionType == SuctionType.CustomSuction;
 			if (fromSuccessor.SuctionType==SuctionType.SourceDependentSuction)
 				throw new Exception("Model Bug");
 			IncomingSuctionRateOnDialyzingFluidSide = fromSuccessor.CustomSuctionValue;
+			Suction toPredecessor;
 			toPredecessor.CustomSuctionValue = 0;
 			toPredecessor.SuctionType = SuctionType.SourceDependentSuction;
+			return toPredecessor;
 		}
 
 		[Provided]
-		public void SetDialyzingFluidFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
+		public DialyzingFluid SetDialyzingFluidFlow(DialyzingFluid  fromPredecessor)
 		{
 			IncomingFluidTemperature = fromPredecessor.Temperature;
 			IncomingQuantityOfDialyzingFluid = fromPredecessor.Quantity;
-			toSuccessor.CopyValuesFrom(fromPredecessor);
+			var toSuccessor=fromPredecessor;
 			toSuccessor.Quantity = IncomingSuctionRateOnDialyzingFluidSide;
 			toSuccessor.WasUsed = true;
+			return toSuccessor;
 		}
 
 		[Provided]
-		public void SetBloodFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public Suction SetBloodFlowSuction(Suction fromSuccessor)
 		{
-			toPredecessor.CopyValuesFrom(fromSuccessor);
+			return fromSuccessor;
 		}
 
 		[Provided]
-		public void SetBloodFlow(Blood toSuccessor, Blood fromPredecessor)
+		public Blood SetBloodFlow(Blood fromPredecessor)
 		{
+			Blood toSuccessor;
 			if (fromPredecessor.Water > 0 || fromPredecessor.BigWasteProducts > 0)
 			{
-				toSuccessor.CopyValuesFrom(fromPredecessor);
+				toSuccessor=fromPredecessor;
 				if (IncomingQuantityOfDialyzingFluid > 0)
 					toSuccessor.Temperature = IncomingFluidTemperature; //otherwise keep blood temperature
 				// First step: Filtrate Blood
@@ -116,12 +120,13 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 			}
 			else
 			{
-				toSuccessor.CopyValuesFrom(fromPredecessor);
+				toSuccessor=fromPredecessor;
 			}
 			if (!MembraneIntact)
 			{
 				toSuccessor.ChemicalCompositionOk = false;
 			}
+			return toSuccessor;
 		}
 
 		public override void Update()
@@ -129,7 +134,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 			
 		}
 
-		protected override void CreateBindings()
+		public Dialyzer()
 		{
 			DialyzingFluidFlow.UpdateBackward = SetDialyzingFluidFlowSuction;
 			DialyzingFluidFlow.UpdateForward = SetDialyzingFluidFlow;

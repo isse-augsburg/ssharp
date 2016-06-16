@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,36 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.TemporalOperators
+namespace SafetySharp.Runtime
 {
-	using SafetySharp.Analysis;
-	using static SafetySharp.Analysis.Operators;
+	using System;
 
-	internal class Exists : FormulaTestObject
+	/// <summary>
+	///   Raised when the <see cref="ChoiceResolver" /> discovers that not all nondeterministic choices can be enumerated.
+	/// </summary>
+	public sealed class NondeterminismException : Exception
 	{
-		protected override void Check()
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		public NondeterminismException()
+			: base("A nondeterministic choice was not exhaustively enumerated. This problem usually results from a hidden variable " +
+				   "that should not be hidden, as its value is used between different system steps.")
 		{
-			var intValue = 7;
-
-			{
-				var actual = E(intValue < 7);
-				var expected = new UnaryFormula(
-					new StateFormula(() => intValue < 7),
-					UnaryOperator.Exists);
-
-				Check(actual, expected);
-			}
-
-			{
-				var actual = E(E(intValue >= 7));
-				var expected = new UnaryFormula(
-					new UnaryFormula(
-						new StateFormula(() => intValue >= 7),
-						UnaryOperator.Exists),
-					UnaryOperator.Exists);
-
-				Check(actual, expected);
-			}
 		}
 	}
 }

@@ -20,51 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.TemporalOperators
+namespace Tests.Diagnostics.FaultEffects.Invalid
 {
-	using SafetySharp.Analysis;
-	using static SafetySharp.Analysis.Operators;
+	using SafetySharp.Compiler.Analyzers;
+	using SafetySharp.Modeling;
 
-	internal class T3 : FormulaTestObject
+	[Diagnostic(DiagnosticIdentifier.ClosedGenericBaseType, 34, 22, 1, 
+		"Tests.Diagnostics.FaultEffects.Invalid.GenericBaseSubstitution<T>.E",
+		"Tests.Diagnostics.FaultEffects.Invalid.GenericBaseSubstitution<T>")]
+	public class GenericBaseSubstitution<T> : Component
 	{
-		protected override void Check()
+		[FaultEffect]
+		public class E : GenericBaseSubstitution<int>
 		{
-			var intValue = 7;
-
-			{
-				var actual = X(intValue < 7);
-				var expected = new UnaryFormula(
-					new StateFormula(() => intValue < 7),
-					UnaryOperator.Next);
-
-				Check(actual, expected);
-			}
-
-			{
-				var actual = X(X(intValue >= 7));
-				var expected = new UnaryFormula(
-					new UnaryFormula(
-						new StateFormula(() => intValue >= 7),
-						UnaryOperator.Next),
-					UnaryOperator.Next);
-
-				Check(actual, expected);
-			}
-
-			{
-				var actual = AX(EX(intValue >= 7));
-				var expected = new UnaryFormula(
-					new UnaryFormula(
-						new UnaryFormula(
-							new UnaryFormula(
-								new StateFormula(() => intValue >= 7),
-								UnaryOperator.Next),
-							UnaryOperator.Exists),
-						UnaryOperator.Next),
-					UnaryOperator.All);
-
-				Check(actual, expected);
-			}
 		}
 	}
 }

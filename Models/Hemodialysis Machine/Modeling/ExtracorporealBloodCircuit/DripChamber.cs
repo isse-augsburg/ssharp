@@ -30,16 +30,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 		public readonly BloodFlowInToOut MainFlow = new BloodFlowInToOut();
 
 		[Provided]
-		public void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
+		public Blood SetMainFlow(Blood fromPredecessor)
 		{
-			toSuccessor.CopyValuesFrom(fromPredecessor);
+			var toSuccessor=fromPredecessor;
 			toSuccessor.GasFree = true;
+			return toSuccessor;
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public Suction SetMainFlowSuction(Suction fromSuccessor)
 		{
-			toPredecessor.CopyValuesFrom(fromSuccessor);
+			return fromSuccessor;
 		}
 
 		public DripChamber()

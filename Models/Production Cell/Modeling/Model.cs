@@ -48,17 +48,16 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 
 			CreateWorkpieces(5, produce(), drill(), insert(), tighten(), polish(), consume());
 
-            CreateRobot(produce(), drill(), insert());
+			CreateRobot(produce(), drill(), insert());
 			CreateRobot(insert(), drill());
 			CreateRobot(tighten(), polish(), tighten(), drill());
 			CreateRobot(polish(), consume());
-            
 
-            CreateCart(Robots[0], new Route(Robots[0], Robots[1]), new Route(Robots[0], Robots[2]), new Route(Robots[0], Robots[3]));
+			CreateCart(Robots[0], new Route(Robots[0], Robots[1]), new Route(Robots[0], Robots[2]), new Route(Robots[0], Robots[3]));
 			CreateCart(Robots[1], new Route(Robots[1], Robots[2]), new Route(Robots[0], Robots[1]));
 			CreateCart(Robots[2], new Route(Robots[2], Robots[3]));
 
-            ObserverController = new MiniZincObserverController(RobotAgents.Cast<Agent>().Concat(CartAgents), Tasks);
+			ObserverController = new MiniZincObserverController(RobotAgents.Cast<Agent>().Concat(CartAgents), Tasks);
 		}
 
 		public List<Task> Tasks { get; } = new List<Task>();
@@ -115,6 +114,18 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 
 		private void CreateCart(Robot startPosition, params Route[] routes)
 		{
+			// compute the transitive closure of the routes
+			routes = routes.SelectMany(route => Closure(route.Robot1, robot =>
+			{
+				return routes.Where(r => r.Robot1 == robot).Select(r => r.Robot2);
+			}).Select(target => new Route(route.Robot1, target))).ToArray();
+
+			// make sure we don't have duplicate routes
+			routes = routes.Distinct(new RouteComparer()).ToArray();
+
+			// for efficiency (less faults), remove reflexive routes
+			routes = routes.Where(route => route.Robot1 != route.Robot2).ToArray();
+
 			var cart = new Cart(startPosition, routes);
 			var agent = new CartAgent(cart);
 
@@ -126,10 +137,43 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 
 			foreach (var route in routes)
 			{
-				Agent.Connect(from: RobotAgents.Single(a => route.From == a.Robot), to: agent);
-				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.To == a.Robot));
-				Agent.Connect(from: RobotAgents.Single(a => route.To == a.Robot), to: agent);
-				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.From == a.Robot));
+				Agent.Connect(from: RobotAgents.Single(a => route.Robot1 == a.Robot), to: agent);
+				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.Robot2 == a.Robot));
+				Agent.Connect(from: RobotAgents.Single(a => route.Robot2 == a.Robot), to: agent);
+				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.Robot1 == a.Robot));
+			}
+		}
+
+		private static IEnumerable<T> Closure<T>(T root, Func<T, IEnumerable<T>> children)
+		{
+			var seen = new HashSet<T>();
+			var stack = new Stack<T>();
+			stack.Push(root);
+
+			while (stack.Count != 0)
+			{
+				var item = stack.Pop();
+				if (seen.Contains(item))
+					continue;
+
+				seen.Add(item);
+				yield return item;
+
+				foreach (var child in children(item))
+					stack.Push(child);
+			}
+		}
+
+		private class RouteComparer : IEqualityComparer<Route>
+		{
+			public bool Equals(Route x, Route y)
+			{
+				return x.Robot1 == y.Robot1 && x.Robot2 == y.Robot2;
+			}
+
+			public int GetHashCode(Route obj)
+			{
+				return obj.Robot1.GetHashCode() + obj.Robot2.GetHashCode();
 			}
 		}
 	}

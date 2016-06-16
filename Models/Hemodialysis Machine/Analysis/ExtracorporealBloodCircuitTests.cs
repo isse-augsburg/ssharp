@@ -53,17 +53,18 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public bool MembraneIntact = true;
 		
 		[Provided]
-		public void SetBloodFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public Suction SetBloodFlowSuction(Suction incomingSuction)
 		{
-			outgoingSuction.CopyValuesFrom(incomingSuction);
+			return incomingSuction;
 		}
 
 		[Provided]
-		public void SetBloodFlow(Blood outgoing, Blood incoming)
+		public Blood SetBloodFlow(Blood incoming)
 		{
+			Blood outgoing;
 			if (incoming.Water > 0 || incoming.BigWasteProducts > 0)
 			{
-				outgoing.CopyValuesFrom(incoming);
+				outgoing=incoming;
 				outgoing.Temperature = IncomingFluidTemperature;
 				// First step: Filtrate Blood
 				if (IncomingQuantityOfDialyzingFluid >= outgoing.SmallWasteProducts)
@@ -93,11 +94,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			}
 			else
 			{
-				outgoing.CopyValuesFrom(incoming);
+				outgoing=incoming;
 			}
+			return outgoing;
 		}
 
-		protected override void CreateBindings()
+		public ExtracorporealBloodCircuitTestEnvironmentDialyzer()
 		{
 			BloodFlow.UpdateBackward=SetBloodFlowSuction;
 			BloodFlow.UpdateForward=SetBloodFlow;

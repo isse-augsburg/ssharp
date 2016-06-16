@@ -31,8 +31,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 		public readonly bool Enabled = true;
 
 		[Provided]
-		public void SetHeparinFlow(Blood outgoing)
+		public Blood SetHeparinFlow()
 		{
+			Blood outgoing;
 			outgoing.HasHeparin = true;
 			outgoing.Water = 0;
 			outgoing.SmallWasteProducts = 0;
@@ -41,6 +42,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 			outgoing.GasFree = true;
 			outgoing.Pressure = QualitativePressure.NoPressure;
 			outgoing.Temperature = QualitativeTemperature.BodyHeat;
+			return outgoing;
 		}
 
 		[Provided]

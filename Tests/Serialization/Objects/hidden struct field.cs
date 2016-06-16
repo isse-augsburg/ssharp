@@ -20,36 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.TemporalOperators
+namespace Tests.Serialization.Objects
 {
-	using SafetySharp.Analysis;
-	using static SafetySharp.Analysis.Operators;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	internal class T12 : FormulaTestObject
+	internal class HiddenStructField : SerializationObject
 	{
 		protected override void Check()
 		{
-			var intValue = 7;
-
+			var c = new C
 			{
-				var actual = ((Formula)false).EquivalentTo(intValue < 7);
-				var expected = new BinaryFormula(
-					new StateFormula(() => false),
-					BinaryOperator.Equivalence,
-					new StateFormula(() => intValue < 7));
+				S = new S { A = 33, B = 7 }
+			};
 
-				Check(actual, expected);
-			}
+			GenerateCode(SerializationMode.Optimized, c);
+			StateVectorLayout.Groups.ShouldBeEmpty();
+		}
 
-			{
-				var actual = ((Formula)false).EquivalentTo(F(intValue < 7));
-				var expected = new BinaryFormula(
-					new StateFormula(() => false),
-					BinaryOperator.Equivalence,
-					new UnaryFormula(new StateFormula(() => intValue < 7), UnaryOperator.Finally));
+		private class C : Component
+		{
+			[Hidden]
+			public S S;
+		}
 
-				Check(actual, expected);
-			}
+		private struct S
+		{
+			public int A;
+			public int B;
 		}
 	}
 }

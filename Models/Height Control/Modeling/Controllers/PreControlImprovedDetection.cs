@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 {
+	using SafetySharp.Modeling;
 	using Sensors;
 	using Vehicles;
 
@@ -34,11 +35,13 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   The sensor that detects high vehicles on the left lane.
 		/// </summary>
+		[Subcomponent]
 		public readonly VehicleDetector LeftDetector = new OverheadDetector(Model.PreControlPosition, Lane.Left);
 
 		/// <summary>
 		///   The sensor that detects high vehicles on the right lane.
 		/// </summary>
+		[Subcomponent]
 		public readonly VehicleDetector RightDetector = new OverheadDetector(Model.PreControlPosition, Lane.Right);
 
 		/// <summary>
