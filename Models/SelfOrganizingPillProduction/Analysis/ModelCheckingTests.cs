@@ -22,6 +22,18 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
         }
 
         [Test]
+        public void EnumerateAllStates()
+        {
+            var model = new ModelSetupParser().Parse("Analysis/medium_setup.model");
+            model.Faults.SuppressActivations();
+
+            var checker = new SSharpChecker { Configuration = { StateCapacity = 1 << 18 } };
+            var result = checker.CheckInvariant(model, true);
+
+            Console.WriteLine(result.StateVectorLayout);
+        }
+
+        [Test]
         public void ProductionCompletesIfNoFaultsOccur()
         {
             var model = Model.NoRedundancyCircularModel();
