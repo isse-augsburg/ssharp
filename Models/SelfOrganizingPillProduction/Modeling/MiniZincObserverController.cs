@@ -138,7 +138,7 @@ isConnected = [{ connections.ToString().ToLower() }|];
                 Role role = lastRole;
                 if (agent != lastAgent)
                 {
-                    role = GetRole(recipe, lastAgent, lastRole?.PostCondition.State);
+                    role = GetRole(recipe, lastAgent, lastRole?.PostCondition);
                     agent.AllocatedRoles.Add(role);
 
                     if (lastRole != null)
@@ -150,8 +150,8 @@ isConnected = [{ connections.ToString().ToLower() }|];
                 if (workedOn[i] > 0)
                 {
                     var cap = recipe.RequiredCapabilities[workedOn[i] - 1];
-                    role.CapabilitiesToApply.Add(cap);
-                    role.PostCondition.State.Add(cap);
+                    role.AddCapabilityToApply(cap);
+                    role.PostCondition.AppendToState(cap);
                 }
 
                 lastAgent = agent;

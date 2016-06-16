@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
@@ -20,7 +22,43 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// <summary>
         /// The capabilities to apply.
         /// </summary>
-        public List<Capability> CapabilitiesToApply { get; } = new List<Capability>(Model.MaximumRecipeLength);
+        public IEnumerable<Capability> CapabilitiesToApply =>
+            Recipe.RequiredCapabilities.Skip(capabilitiesToApplyStart).Take(capabilitiesToApplyCount);
+
+        private int capabilitiesToApplyStart = 0;
+        private int capabilitiesToApplyCount = 0;
+
+        /// <summary>
+        /// Resets the capabilities applied by the role (takes <see cref="PreCondition"/> into account).
+        /// </summary>
+        public void ResetCapabilitiesToApply()
+        {
+            capabilitiesToApplyStart = PreCondition.State.Count();
+            capabilitiesToApplyCount = 0;
+        }
+
+        /// <summary>
+        /// Returns true if the role contains any capabilities to be applied.
+        /// </summary>
+        public bool HasCapabilitiesToApply()
+        {
+            return capabilitiesToApplyCount > 0;
+        }
+
+        /// <summary>
+        /// Adds the given <paramref name="capability"/> to the role's capabilities to be applied.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if the given capability is not the
+        /// next required capability.</exception>
+        public void AddCapabilityToApply(Capability capability)
+        {
+            if (capabilitiesToApplyStart + capabilitiesToApplyCount >= Recipe.RequiredCapabilities.Length)
+                throw new InvalidOperationException("All required capabilities already applied.");
+            if (!capability.Equals(Recipe.RequiredCapabilities[capabilitiesToApplyStart + capabilitiesToApplyCount]))
+                throw new InvalidOperationException("Cannot apply capability that is not required.");
+
+            capabilitiesToApplyCount++;
+        }
 
         /// <summary>
         /// The recipe the role belongs to.

@@ -195,7 +195,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         // S# seems not to support abstract fault effects,
         // thus this is duplicated in each concrete subclass.
-        /*[FaultEffect(Fault = nameof(CompleteStationFailureEffect))]
+        /*[FaultEffect(Fault = nameof(CompleteStationFailure))]
         public abstract class CompleteStationFailureEffect : Station
         {
             public override bool IsAlive => false;

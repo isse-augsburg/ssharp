@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
@@ -19,7 +20,14 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// <summary>
         /// The capabilities already applied to the container.
         /// </summary>
-        public List<Capability> State { get; } = new List<Capability>(Model.MaximumRecipeLength);
+        public IEnumerable<Capability> State =>
+            Recipe?.RequiredCapabilities.Take(statePrefixLength) ?? Enumerable.Empty<Capability>();
+
+        /// <summary>
+        ///  How many of the <see cref="Recipe"/>'s <see cref="Recipe.RequiredCapabilities"/>
+        ///  were already applied to this container.
+        /// </summary>
+        private int statePrefixLength = 0;
 
         /// <summary>
         /// Tells the container it was loaded on the conveyor belt.
@@ -30,7 +38,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             if (this.recipe != null)
                 throw new InvalidOperationException("Container already belongs to a recipe");
             this.recipe = recipe;
-            State.Add(recipe.RequiredCapabilities[0]); // will always be ProduceCapability
+            statePrefixLength++; // first capability will always be ProduceCapability
         }
 
         /// <summary>
@@ -39,7 +47,12 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// <param name="ingredient"></param>
         public void AddIngredient(Ingredient ingredient)
         {
-            State.Add(ingredient);
+            if (statePrefixLength >= Recipe.RequiredCapabilities.Length)
+                throw new InvalidOperationException("PillContainer is already fully processed.");
+            if (!ingredient.Equals(Recipe.RequiredCapabilities[statePrefixLength]))
+                throw new InvalidOperationException("Added the wrong ingredient to PillContainer.");
+
+            statePrefixLength++;
         }
     }
 }
