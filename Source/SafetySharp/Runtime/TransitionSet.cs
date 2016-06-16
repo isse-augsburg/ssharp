@@ -112,7 +112,7 @@ namespace SafetySharp.Runtime
 			// 1. Serialize the model's computed state; that is the successor state of the transition's source state
 			//    modulo any changes resulting from notifications of fault activations
 			var successorState = _targetStateMemory + _stateVectorSize * Count;
-			var activatedFaults = FaultSet.FromActivatedFaults(model.Faults);
+			var activatedFaults = FaultSet.FromActivatedFaults(model.NondeterministicFaults);
 			model.Serialize(successorState);
 
 			// 2. Make sure the transition we're about to add is activation-minimal

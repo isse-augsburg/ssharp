@@ -96,6 +96,14 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
+		///   Clears the data stored in the buffer, overwriting everything with zeroes.
+		/// </summary>
+		public void Clear()
+		{
+			ZeroMemory(new IntPtr(Pointer), new IntPtr(SizeInBytes));
+		}
+
+		/// <summary>
 		///   Compares the two buffers <paramref name="buffer1" /> and <paramref name="buffer2" />, returning <c>true</c> when the
 		///   buffers are equivalent.
 		/// </summary>
