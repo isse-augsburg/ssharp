@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
@@ -21,7 +20,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// <summary>
         /// The capabilities to apply.
         /// </summary>
-        [Hidden(HideElements = true)]
         public List<Capability> CapabilitiesToApply { get; } = new List<Capability>(Model.MaximumRecipeLength);
 
         /// <summary>

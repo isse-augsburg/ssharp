@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
@@ -27,7 +26,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         private uint producedAmount = 0u;
 
-        [Hidden(HideElements = true)]
         private readonly List<PillContainer> activeContainers;
 
         /// <summary>
