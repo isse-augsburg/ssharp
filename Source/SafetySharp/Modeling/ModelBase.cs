@@ -24,7 +24,6 @@ namespace SafetySharp.Modeling
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 	using Analysis;
 	using Runtime;
 	using Runtime.Serialization;
@@ -62,7 +61,15 @@ namespace SafetySharp.Modeling
 			get
 			{
 				EnsureIsBound();
-				return _components ?? (_components = GetComponents());
+				return _components;
+			}
+			internal set
+			{
+				Requires.That(_components == null, "The components have already been set.");
+				Requires.NotNull(value, nameof(value));
+				Requires.That(value.Length > 0, nameof(value), "Expected at least one component.");
+
+				_components = value;
 			}
 		}
 
@@ -181,17 +188,6 @@ namespace SafetySharp.Modeling
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(this, formulas);
 			return serializer.Load();
-		}
-
-		/// <summary>
-		///   Gets the <see cref="IComponent" /> instances referenced by the model.
-		/// </summary>
-		private IComponent[] GetComponents()
-		{
-			var components = new HashSet<IComponent>(ReferenceEqualityComparer<IComponent>.Default);
-			VisitPreOrder(c => components.Add(c));
-
-			return components.ToArray();
 		}
 
 		/// <summary>

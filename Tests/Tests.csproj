@@ -262,7 +262,6 @@
     <Compile Include="Execution\RootDiscovery\none.cs" />
     <Compile Include="Execution\RootDiscovery\fields.cs" />
     <Compile Include="Execution\Simulation\linq.cs" />
-    <Compile Include="Execution\Simulation\reachable by binding only.cs" />
     <Compile Include="Execution\Simulation\faults.cs" />
     <Compile Include="Execution\Simulation\bindings.cs" />
     <Compile Include="Execution\Simulation\nondeterminism.cs" />
@@ -612,6 +611,7 @@
     <Compile Include="Serialization\Objects\dictionaries.cs" />
     <Compile Include="Serialization\Objects\delegate assignment.cs" />
     <Compile Include="Serialization\Objects\hidden array elements properties.cs" />
+    <Compile Include="Serialization\Objects\hidden struct field.cs" />
     <Compile Include="Serialization\Objects\nondiscoverable object in struct.cs" />
     <Compile Include="Serialization\Objects\nondiscoverable delegate.cs" />
     <Compile Include="Serialization\Objects\hidden array elements fields.cs" />

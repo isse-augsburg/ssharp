@@ -40,6 +40,11 @@ namespace SafetySharp.Runtime
 	internal sealed unsafe class StateStack : DisposableObject
 	{
 		/// <summary>
+		///   The maximum number of states that can be stored on the stack.
+		/// </summary>
+		private readonly int _capacity;
+
+		/// <summary>
 		///   The memory where the frames are stored.
 		/// </summary>
 		private readonly Frame* _frames;
@@ -58,11 +63,6 @@ namespace SafetySharp.Runtime
 		///   The buffer that stores the states.
 		/// </summary>
 		private readonly MemoryBuffer _statesBuffer = new MemoryBuffer();
-
-		/// <summary>
-		///   The maximum number of states that can be stored on the stack.
-		/// </summary>
-		private readonly int _capacity;
 
 		/// <summary>
 		///   Initializes a new instance.

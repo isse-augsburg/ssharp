@@ -39,11 +39,6 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public sealed class SafetyAnalysis
 	{
-		/// <summary>
-		///   The model checker that is used for the analysis.
-		/// </summary>
-		private readonly SSharpChecker _modelChecker = new SSharpChecker();
-
 		private readonly HashSet<FaultSet> safeSets = new HashSet<FaultSet>();
 		private readonly HashSet<FaultSet> criticalSets = new HashSet<FaultSet>();
 		private readonly HashSet<FaultSet> checkedSets = new HashSet<FaultSet>();
@@ -76,11 +71,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
 		/// </summary>
-		public event Action<string> OutputWritten
-		{
-			add { _modelChecker.OutputWritten += value; }
-			remove { _modelChecker.OutputWritten += value; }
-		}
+		public event Action<string> OutputWritten;
 
 		/// <summary>
 		///   Computes the minimal critical sets for the <paramref name="hazard" />.
@@ -110,7 +101,6 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(hazard, nameof(hazard));
 
-			_modelChecker.Configuration = Configuration;
 			ConsoleHelpers.WriteLine("Running Deductive Cause Consequence Analysis.");
 
 			var stopwatch = new Stopwatch();
@@ -131,9 +121,10 @@ namespace SafetySharp.Analysis
 			// remove information from previous analyses
 			Reset();
 
-			// Store the serialized model to improve performance
+			// Serialize the model and initialize the invariant checker
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, !hazard);
+			var invariantChecker = new InvariantChecker(serializer.Load, message => OutputWritten?.Invoke(message), Configuration);
 
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we
@@ -173,7 +164,7 @@ namespace SafetySharp.Analysis
 				{
 					var set = setsToCheck[0];
 
-					bool isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer);
+					bool isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker);
 					sets.Remove(set);
 					setsToCheck.RemoveAt(0);
 
@@ -184,7 +175,7 @@ namespace SafetySharp.Analysis
 				// in case heuristics removed a set (they shouldn't)
 				foreach (var set in sets)
 				{
-					CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer);
+					CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker);
 				}
 			}
 
@@ -225,18 +216,18 @@ namespace SafetySharp.Analysis
 
 
 		private bool CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
-			int cardinality, RuntimeModelSerializer serializer)
+			int cardinality, RuntimeModelSerializer serializer, InvariantChecker invariantChecker)
 		{
 			bool isSafe = true;
 
 			if (FaultActivationBehaviour == FaultActivationBehaviour.ForceOnly
 				|| FaultActivationBehaviour == FaultActivationBehaviour.ForceThenFallback)
-				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, Activation.Forced);
+				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker, Activation.Forced);
 
 			if (FaultActivationBehaviour != FaultActivationBehaviour.ForceOnly && isSafe)
 			{
 				ConsoleHelpers.WriteLine("    Checking again with nondeterministic activation...");
-				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, Activation.Nondeterministic);
+				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker, Activation.Nondeterministic);
 			}
 
 			if (isSafe)
@@ -246,10 +237,12 @@ namespace SafetySharp.Analysis
 		}
 
 		private bool CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
-			int cardinality, RuntimeModelSerializer serializer, Activation activationMode)
+			int cardinality, RuntimeModelSerializer serializer, InvariantChecker invariantChecker, Activation activationMode)
 		{
 			// Enable or disable the faults that the set represents
 			set.SetActivation(nondeterministicFaults, activationMode);
+			invariantChecker.ChangeFaultActivations(GetUpdateFaultActivations(allFaults));
+
 			var heuristic = set.Cardinality == cardinality ? "       " : "[heur.]";
 
 			if (safeSets.Any(safeSet => set.IsSubsetOf(safeSet)))
@@ -268,7 +261,7 @@ namespace SafetySharp.Analysis
 			// If there was a counter example, the set is a critical set
 			try
 			{
-				var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializer, allFaults));
+				var result = invariantChecker.Check();
 
 				if (!result.FormulaHolds)
 				{
@@ -303,23 +296,16 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Creates a <see cref="RuntimeModel" /> instance.
+		///   Creates a function that determines the activation state of a fault.
 		/// </summary>
-		private static Func<RuntimeModel> CreateRuntimeModel(RuntimeModelSerializer serializer, Fault[] faultTemplates)
+		private static Func<Fault, Activation> GetUpdateFaultActivations(Fault[] faults)
 		{
-			return () =>
+			return fault =>
 			{
-				var serializedData = serializer.LoadSerializedData();
-				var faults = serializedData.ObjectTable.OfType<Fault>().Where(f => f.Identifier >= 0).OrderBy(f => f.Identifier).ToArray();
-				Requires.That(faults.Length == faultTemplates.Length, "Unexpected fault count.");
+				Assert.That(fault != null && fault.IsUsed, "Invalid fault.");
+				Assert.InRange(fault.Identifier, faults);
 
-				for (var i = 0; i < faults.Length; ++i)
-				{
-					Requires.That(faults[i].Identifier == faultTemplates[i].Identifier, "Fault mismatch.");
-					faults[i].Activation = faultTemplates[i].Activation;
-				}
-
-				return new RuntimeModel(serializedData);
+				return faults[fault.Identifier].Activation;
 			};
 		}
 
@@ -560,7 +546,7 @@ namespace SafetySharp.Analysis
 			public override string ToString()
 			{
 				var builder = new StringBuilder();
-				var percentage = CheckedSets.Count / (float)(1 << Faults.Count()) * 100;
+				var percentage = CheckedSets.Count / (double)(1L << Faults.Count()) * 100;
 
 				builder.AppendLine();
 				builder.AppendLine("=======================================================================");

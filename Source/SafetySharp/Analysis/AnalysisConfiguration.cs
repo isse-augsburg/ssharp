@@ -31,7 +31,7 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public struct AnalysisConfiguration
 	{
-		private const int DefaultStateCapacity = 1 << 26;
+		private const int DefaultStateCapacity = 1 << 24;
 		private const int DefaultStackCapacity = 1 << 16;
 		private const int DefaultSuccessorStateCapacity = 1 << 14;
 		private const int MinCapacity = 1024;
