@@ -35,15 +35,33 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     /// <summary>
     /// Represents the loading of empty pill containers on the conveyor belt.
     /// </summary>
-    public class ProduceCapability : Capability
+    public sealed class ProduceCapability : Capability
     {
+        public override bool Equals(object obj)
+        {
+            return obj is ProduceCapability;
+        }
+
+        public override int GetHashCode()
+        {
+            return 17;
+        }
     }
 
     /// <summary>
     /// Represents the removal of pill containers from the conveyor belt, labeling and palletization.
     /// </summary>
-    public class ConsumeCapability : Capability
+    public sealed class ConsumeCapability : Capability
     {
+        public override bool Equals(object obj)
+        {
+            return obj is ConsumeCapability;
+        }
+
+        public override int GetHashCode()
+        {
+            return 31;
+        }
     }
 
     /// <summary>
@@ -60,5 +78,18 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         public IngredientType Type { get; }
 
         public uint Amount { get; }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as Ingredient;
+            if (other != null)
+                return other.Type == Type && other.Amount == Amount;
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)Type + 57 * (int)Amount;
+        }
     }
 }
