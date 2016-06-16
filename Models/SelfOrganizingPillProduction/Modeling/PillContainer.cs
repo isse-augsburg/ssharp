@@ -19,6 +19,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// <summary>
         /// The capabilities already applied to the container.
         /// </summary>
+        [Hidden(HideElements = true)]
         public List<Capability> State { get; } = new List<Capability>(Model.MaximumRecipeLength);
 
         /// <summary>
