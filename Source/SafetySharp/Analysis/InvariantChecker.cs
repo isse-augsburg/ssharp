@@ -40,6 +40,7 @@ namespace SafetySharp.Analysis
 		private const int ReportStateCountDelta = 200000;
 		private readonly LoadBalancer _loadBalancer;
 		private readonly Action<string> _output;
+		private readonly bool _progressOnly;
 		private readonly StateStorage _states;
 		private readonly Worker[] _workers;
 		private long _computedTransitionCount;
@@ -48,7 +49,6 @@ namespace SafetySharp.Analysis
 		private int _generatingCounterExample = -1;
 		private int _levelCount;
 		private int _nextReport = ReportStateCountDelta;
-		private readonly bool _progressOnly;
 		private int _stateCount;
 		private long _transitionCount;
 
@@ -85,10 +85,6 @@ namespace SafetySharp.Analysis
 			Task.WaitAll(tasks);
 
 			_states = new StateStorage(_workers[0].StateVectorLayout, configuration.StateCapacity);
-
-#if false
-			Console.WriteLine(_workers[0].StateVectorLayout);
-#endif
 		}
 
 		/// <summary>
@@ -119,7 +115,16 @@ namespace SafetySharp.Analysis
 			if (_counterExample != null && !_progressOnly)
 				_output("Invariant violation detected.");
 
-			return new AnalysisResult(_counterExample == null, _counterExample, _stateCount, _transitionCount, _computedTransitionCount, _levelCount);
+			return new AnalysisResult
+			{
+				FormulaHolds = _counterExample == null,
+				CounterExample = _counterExample,
+				StateCount = _stateCount,
+				TransitionCount = _transitionCount,
+				ComputedTransitionCount = _computedTransitionCount,
+				LevelCount = _levelCount,
+				StateVectorLayout = _workers[0].StateVectorLayout
+			};
 		}
 
 		/// <summary>
@@ -166,11 +171,11 @@ namespace SafetySharp.Analysis
 		private class Worker : DisposableObject
 		{
 			private readonly InvariantChecker _context;
+			private readonly Func<RuntimeModel> _createModel;
 			private readonly int _index;
 			private readonly RuntimeModel _model;
 			private readonly StateStack _stateStack;
 			private readonly TransitionSet _transitions;
-			private readonly Func<RuntimeModel> _createModel;
 			private StateStorage _states;
 
 			/// <summary>

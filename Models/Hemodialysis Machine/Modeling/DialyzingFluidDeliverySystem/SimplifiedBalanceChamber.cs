@@ -36,27 +36,27 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		
 
 		[Provided]
-		public void ForwardProducedFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
+		public DialyzingFluid ForwardProducedFlow(DialyzingFluid  fromPredecessor)
 		{
-			toSuccessor.CopyValuesFrom(fromPredecessor);
+			return fromPredecessor;
 		}
 
 		[Provided]
-		public void ForwardProducedFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public Suction ForwardProducedFlowSuction(Suction fromSuccessor)
 		{
-			toPredecessor.CopyValuesFrom(fromSuccessor);
+			return fromSuccessor;
 		}
 
 		[Provided]
-		public void ForwardUsedFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
+		public DialyzingFluid ForwardUsedFlow(DialyzingFluid  fromPredecessor)
 		{
-			toSuccessor.CopyValuesFrom(fromPredecessor);
+			return fromPredecessor;
 		}
 
 		[Provided]
-		public void ForwardUsedFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public Suction ForwardUsedFlowSuction(Suction fromSuccessor)
 		{
-			toPredecessor.CopyValuesFrom(fromSuccessor);
+			return fromSuccessor;
 		}
 
 

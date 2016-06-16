@@ -29,7 +29,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             // This is only called if the current Container comes from another station.
             // The only valid role is thus an empty one (no CapabilitiesToApply) and represents
             // a simple forwarding to the next station.
-            if (role.CapabilitiesToApply.Count > 0)
+            if (role.HasCapabilitiesToApply())
                 throw new InvalidOperationException("Unsupported capability configuration in ContainerLoader");
         }
 
@@ -60,7 +60,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         {
             return AllocatedRoles.FirstOrDefault(role =>
                 role.PreCondition.Port == null && role.Recipe.RemainingAmount > 0
-                    && role.CapabilitiesToApply.Count > 0
+                    && role.HasCapabilitiesToApply()
             );
         }
 

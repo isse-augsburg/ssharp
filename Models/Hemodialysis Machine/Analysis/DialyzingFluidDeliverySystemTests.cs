@@ -53,22 +53,25 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 
 		[Provided]
-		public void SetDialyzingFluidFlowSuction(Suction outgoingSuction, Suction incomingSuction)
+		public Suction SetDialyzingFluidFlowSuction(Suction incomingSuction)
 		{
 			//Assume incomingSuction.SuctionType == SuctionType.CustomSuction;
+			Suction outgoingSuction;
 			IncomingSuctionRateOnDialyzingFluidSide = incomingSuction.CustomSuctionValue;
 			outgoingSuction.CustomSuctionValue = 0;
 			outgoingSuction.SuctionType = SuctionType.SourceDependentSuction;
+			return outgoingSuction;
 		}
 
 		[Provided]
-		public void SetDialyzingFluidFlow(DialyzingFluid outgoing, DialyzingFluid incoming)
+		public DialyzingFluid SetDialyzingFluidFlow(DialyzingFluid incoming)
 		{
 			IncomingFluidTemperature = incoming.Temperature;
 			IncomingQuantityOfDialyzingFluid = incoming.Quantity;
-			outgoing.CopyValuesFrom(incoming);
+			var outgoing = incoming;
 			outgoing.Quantity = IncomingSuctionRateOnDialyzingFluidSide;
 			outgoing.WasUsed = true;
+			return outgoing;
 		}
 
 		protected override void CreateBindings()

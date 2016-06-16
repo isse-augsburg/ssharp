@@ -34,11 +34,13 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   The sensor that is used to detect vehicles in the end-control area on the left lane.
 		/// </summary>
+		[Subcomponent]
 		public readonly VehicleDetector LeftLaneDetector = new OverheadDetector(Model.EndControlPosition, Lane.Left);
 
 		/// <summary>
 		///   The timer that is used to deactivate the end-control automatically.
 		/// </summary>
+		[Subcomponent]
 		public readonly Timer Timer = new Timer();
 
 		/// <summary>

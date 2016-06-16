@@ -52,7 +52,9 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
         private void Dcca(Model model, params IFaultSetHeuristic[] heuristics)
         {
             var modelChecker = new SafetyAnalysis();
+
             modelChecker.Configuration.StateCapacity = 40000;
+            modelChecker.Configuration.CpuCount = 1;
             modelChecker.Heuristics.AddRange(heuristics);
             modelChecker.FaultActivationBehaviour = FaultActivationBehaviour.ForceOnly;
 
@@ -70,6 +72,18 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
                 model.Stations.OfType<ParticulateDispenser>().Select(d => d.YellowTankDepleted),
                 model.Stations.OfType<PalletisationStation>().Select(p => p.PalletisationDefect)
             );
+        }
+
+        [Test]
+        public void EnumerateAllStates()
+        {
+            var model = new ModelSetupParser().Parse("Analysis/medium_setup.model");
+            model.Faults.SuppressActivations();
+
+            var checker = new SSharpChecker { Configuration = { StateCapacity = 1 << 18 } };
+            var result = checker.CheckInvariant(model, true);
+
+            System.Console.WriteLine(result.StateVectorLayout);
         }
 
         [Test]

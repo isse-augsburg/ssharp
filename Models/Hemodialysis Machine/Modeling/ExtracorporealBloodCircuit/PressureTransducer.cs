@@ -31,10 +31,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 		public QualitativePressure SensedPressure = QualitativePressure.NoPressure;
 
 		[Provided]
-		public void SetSenseFlowSuction(Suction toPredecessor)
+		public Suction SetSenseFlowSuction()
 		{
+			Suction toPredecessor;
 			toPredecessor.CustomSuctionValue = 0;
 			toPredecessor.SuctionType = SuctionType.CustomSuction;
+			return toPredecessor;
 		}
 
 		[Provided]

@@ -29,8 +29,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		public readonly DialyzingFluidFlowSource MainFlow = new DialyzingFluidFlowSource();
 		
 		[Provided]
-		public void SetMainFlow(DialyzingFluid outgoing)
+		public DialyzingFluid SetMainFlow()
 		{
+			DialyzingFluid outgoing;
 			var incomingSuction = MainFlow.Outgoing.Backward;
 			//Assume incomingSuction.SuctionType == SuctionType.CustomSuction;
 			outgoing.Quantity = incomingSuction.CustomSuctionValue;
@@ -38,6 +39,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 			outgoing.Temperature = QualitativeTemperature.TooCold;
 			outgoing.WasUsed = false;
 			outgoing.KindOfDialysate = KindOfDialysate.Water;
+			return outgoing;
 		}
 		
 		public WaterSupply()

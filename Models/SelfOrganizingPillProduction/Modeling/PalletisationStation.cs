@@ -19,7 +19,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         protected override void ExecuteRole(Role role)
         {
             // unless role is transport only, it will always be { ConsumeCapability }
-            if (role.CapabilitiesToApply.Count > 0)
+            if (role.HasCapabilitiesToApply())
             {
                 Container.Recipe.RemoveContainer(Container);
                 if (Container.Recipe.ProcessingComplete)

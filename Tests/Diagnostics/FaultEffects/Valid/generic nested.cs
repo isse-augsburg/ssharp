@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,44 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.FormulaVisitors
+namespace Tests.Diagnostics.FaultEffects.Valid
 {
-	using System.Collections.Generic;
-	using Utilities;
+	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   Collects all <see cref="StateFormula" /> instances contained in a <see cref="Formula" />.
-	/// </summary>
-	internal class StateFormulaCollector : FormulaVisitor
+	public class GenericNested<T> : Component
 	{
-		/// <summary>
-		///   Gets the collected state formulas.
-		/// </summary>
-		public HashSet<StateFormula> StateFormulas { get; } = new HashSet<StateFormula>(ReferenceEqualityComparer<StateFormula>.Default);
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitUnaryFormula(UnaryFormula formula)
+		[FaultEffect]
+		public class E : GenericNested<T>
 		{
-			Visit(formula.Operand);
-		}
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitBinaryFormula(BinaryFormula formula)
-		{
-			Visit(formula.LeftOperand);
-			Visit(formula.RightOperand);
-		}
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitStateFormula(StateFormula formula)
-		{
-			StateFormulas.Add(formula);
 		}
 	}
 }

@@ -188,7 +188,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                             var link = availableStations[connection[j]];
                             lastRole.PostCondition.Port = link; // connect to previous
 
-                            var linkRole = GetRole(recipe, lastStation, lastRole.PostCondition.State);
+                            var linkRole = GetRole(recipe, lastStation, lastRole.PostCondition);
                             link.AllocatedRoles.Add(linkRole); // add empty (transport) role
 
                             lastStation = link;
@@ -199,13 +199,13 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                     }
 
                     // configure station itself
-                    role = GetRole(recipe, lastStation, lastRole?.PostCondition.State);
+                    role = GetRole(recipe, lastStation, lastRole?.PostCondition);
                     station.AllocatedRoles.Add(role);
                 }
 
                 var capability = recipe.RequiredCapabilities[i];
-                role.CapabilitiesToApply.Add(capability);
-                role.PostCondition.State.Add(capability);
+                role.AddCapabilityToApply(capability);
+                role.PostCondition.AppendToState(capability);
 
                 lastStation = station;
                 lastRole = role;

@@ -52,6 +52,7 @@
     <Compile Include="Analysis\Heuristics\SubsumptionHeuristic.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
     <Compile Include="Modeling\ObjectPool.cs" />
+    <Compile Include="Modeling\SubcomponentAttribute.cs" />
     <Compile Include="Modeling\RootKind.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsStateFormulaVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\LtsMinCtlTransformer.cs" />
@@ -109,7 +110,6 @@
     <Compile Include="Analysis\BinaryFormula.cs" />
     <Compile Include="Analysis\BinaryOperator.cs" />
     <Compile Include="Analysis\Formula.cs" />
-    <Compile Include="Analysis\FormulaVisitors\StateFormulaCollector.cs" />
     <Compile Include="Analysis\FormulaVisitors\FormulaVisitor.cs" />
     <Compile Include="Analysis\Operators.cs" />
     <Compile Include="Analysis\StateFormula.cs" />

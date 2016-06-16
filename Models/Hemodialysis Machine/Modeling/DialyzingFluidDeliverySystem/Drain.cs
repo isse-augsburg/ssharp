@@ -29,10 +29,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		public readonly DialyzingFluidFlowSink MainFlow = new DialyzingFluidFlowSink();
 
 		[Provided]
-		public void SetMainFlowSuction(Suction outgoingSuction)
+		public Suction SetMainFlowSuction()
 		{
+			Suction outgoingSuction;
 			outgoingSuction.CustomSuctionValue = 0;
 			outgoingSuction.SuctionType = SuctionType.SourceDependentSuction;
+			return outgoingSuction;
 		}
 		
 		public Drain()

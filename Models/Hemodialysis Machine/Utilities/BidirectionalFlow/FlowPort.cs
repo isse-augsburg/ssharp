@@ -27,8 +27,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 	using SafetySharp.Modeling;
 
 	public class FlowPort<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+		where TForward : struct
+		where TBackward : struct
 	{
 		[Hidden]
 		public TForward Forward;
@@ -39,17 +39,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 
 
 	public interface IFlowComponentUniqueOutgoing<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+		where TForward : struct
+		where TBackward : struct
 	{
-		FlowPort<TForward, TBackward> Outgoing { get; }
+		FlowPort<TForward, TBackward> Outgoing { get; set; }
 	}
 
 
 	public interface IFlowComponentUniqueIncoming<TForward, TBackward> : IFlowComponent<TForward, TBackward>
-		where TForward : class, IFlowElement<TForward>, new()
-		where TBackward : class, IFlowElement<TBackward>, new()
+		where TForward : struct
+		where TBackward : struct
 	{
-		FlowPort<TForward, TBackward> Incoming { get; }
+		FlowPort<TForward, TBackward> Incoming { get; set; }
 	}
 }

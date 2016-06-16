@@ -85,10 +85,9 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 var obsoleteRoles = (from role in station.AllocatedRoles where role.Recipe == recipe select role)
                     .ToArray();
                 foreach (var role in obsoleteRoles)
-                {
                     station.AllocatedRoles.Remove(role);
-                    station.BeforeReconfiguration(recipe);
-                }
+
+                station.BeforeReconfiguration(recipe);
                 RolePool.Return(obsoleteRoles);
             }
         }
@@ -98,26 +97,26 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// </summary>
         /// <param name="recipe">The recipe the role will belong to.</param>
         /// <param name="input">The station the role declares as input port. May be null.</param>
-        /// <param name="state">The state of a resource before it is processed by the role. May be null.</param>
+        /// <param name="previous">The previous condition (postcondition of the previous role). May be null.</param>
         /// <returns>A <see cref="Role"/> instance with the given data.</returns>
-        protected Role GetRole(Recipe recipe, Station input, IEnumerable<Capability> state)
+        protected Role GetRole(Recipe recipe, Station input, Condition previous)
         {
             var role = RolePool.Allocate();
-
-            role.CapabilitiesToApply.Clear();
 
             // update precondition
             role.PreCondition.Recipe = recipe;
             role.PreCondition.Port = input;
-            role.PreCondition.State.Clear();
-            if (state != null)
-                role.PreCondition.State.AddRange(state);
+            role.PreCondition.ResetState();
+            if (previous != null)
+                role.PreCondition.CopyStateFrom(previous);
 
             // update postcondition
             role.PostCondition.Recipe = recipe;
             role.PostCondition.Port = null;
-            role.PostCondition.State.Clear();
-            role.PostCondition.State.AddRange(role.PreCondition.State);
+            role.PostCondition.ResetState();
+            role.PostCondition.CopyStateFrom(role.PreCondition);
+
+            role.ResetCapabilitiesToApply();
 
             return role;
         }

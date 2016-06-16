@@ -73,7 +73,7 @@ namespace SafetySharp.Runtime
 
 			_lookupBuffer.Resize(capacity * sizeof(int), zeroMemory: false);
 			_faultsBuffer.Resize(capacity * sizeof(FaultSet), zeroMemory: false);
-			_hashedStateBuffer.Resize(capacity * _stateVectorSize, zeroMemory: true);
+			_hashedStateBuffer.Resize(capacity * _stateVectorSize, zeroMemory: false);
 
 			_successors = new List<uint>(capacity);
 			_capacity = capacity;

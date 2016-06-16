@@ -49,8 +49,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public int TimeStepsLeft = 6;
 
 		[Provided]
-		public void CreateBlood(Blood outgoingBlood)
+		public Blood CreateBlood()
 		{
+			Blood outgoingBlood;
 			var incomingSuction = ArteryFlow.Outgoing.Backward;
 			var hasSuction = incomingSuction.SuctionType == SuctionType.CustomSuction && incomingSuction.CustomSuctionValue > 0;
 			if (hasSuction)
@@ -97,11 +98,13 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 				outgoingBlood.Pressure = QualitativePressure.NoPressure;
 				outgoingBlood.Temperature = QualitativeTemperature.BodyHeat;
 			}
+			return outgoingBlood;
 		}
 
 		[Provided]
-		public void CreateBloodSuction(Suction outgoingSuction)
+		public Suction CreateBloodSuction()
 		{
+			Suction outgoingSuction;
 			if (TimeStepsLeft > 0)
 			{
 				outgoingSuction.SuctionType = SuctionType.CustomSuction;
@@ -112,34 +115,36 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 				outgoingSuction.SuctionType = SuctionType.CustomSuction;
 				outgoingSuction.CustomSuctionValue = 0;
 			}
+			return outgoingSuction;
 		}
-			[Provided]
-			public void BloodReceived(Blood incomingBlood)
-			{
-				Water += incomingBlood.Water;
-				SmallWasteProducts += incomingBlood.SmallWasteProducts;
-				BigWasteProducts += incomingBlood.BigWasteProducts;
-			}
+
+		[Provided]
+		public void BloodReceived(Blood incomingBlood)
+		{
+			Water += incomingBlood.Water;
+			SmallWasteProducts += incomingBlood.SmallWasteProducts;
+			BigWasteProducts += incomingBlood.BigWasteProducts;
+		}
 		
-			public override void Update()
-			{
-				TimeStepsLeft = (TimeStepsLeft > 0) ? (TimeStepsLeft - 1) : 0;
-			}
+		public override void Update()
+		{
+			TimeStepsLeft = (TimeStepsLeft > 0) ? (TimeStepsLeft - 1) : 0;
+		}
 
-			protected override void CreateBindings()
-			{
-				ArteryFlow.SendForward=CreateBlood;
-				VeinFlow.SendBackward=CreateBloodSuction;
-				VeinFlow.ReceivedForward=BloodReceived;
-			}
+		protected override void CreateBindings()
+		{
+			ArteryFlow.SendForward=CreateBlood;
+			VeinFlow.SendBackward=CreateBloodSuction;
+			VeinFlow.ReceivedForward=BloodReceived;
+		}
 
-			public void PrintBloodValues(string pointOfTime)
-			{
-				System.Console.Out.WriteLine("\t" + "Patient ("+pointOfTime+")");
-				System.Console.Out.WriteLine("\t\tWater: " + Water);
-				System.Console.Out.WriteLine("\t\tSmallWasteProducts: " + SmallWasteProducts);
-				System.Console.Out.WriteLine("\t\tBigWasteProducts: " + BigWasteProducts);
-			}
+		public void PrintBloodValues(string pointOfTime)
+		{
+			System.Console.Out.WriteLine("\t" + "Patient ("+pointOfTime+")");
+			System.Console.Out.WriteLine("\t\tWater: " + Water);
+			System.Console.Out.WriteLine("\t\tSmallWasteProducts: " + SmallWasteProducts);
+			System.Console.Out.WriteLine("\t\tBigWasteProducts: " + BigWasteProducts);
+		}
 	}
 
 	class DialyzerTestEnvironmentDialyzingFluidDeliverySystem : Component
@@ -148,21 +153,27 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public readonly DialyzingFluidFlowSink DialyzingFluidFlowSink = new DialyzingFluidFlowSink();
 
 		[Provided]
-		public void CreateDialyzingFluid(DialyzingFluid outgoingDialyzingFluid)
+		public DialyzingFluid CreateDialyzingFluid()
 		{
 			//Hard code delivered quantity 2 and suction 3. We simulate if Ultra Filtration works with Dialyzer.
-			outgoingDialyzingFluid.Quantity = 2;
-			outgoingDialyzingFluid.KindOfDialysate = KindOfDialysate.Bicarbonate;
-			outgoingDialyzingFluid.ContaminatedByBlood = false;
-			outgoingDialyzingFluid.Temperature = QualitativeTemperature.BodyHeat;
+			DialyzingFluid outgoingDialyzingFluid = new DialyzingFluid
+			{
+				Quantity = 2,
+				KindOfDialysate = KindOfDialysate.Bicarbonate,
+				ContaminatedByBlood = false,
+				Temperature = QualitativeTemperature.BodyHeat
+			};
+			return outgoingDialyzingFluid;
 		}
 
 		[Provided]
-		public void CreateDialyzingFluidSuction(Suction outgoingSuction)
+		public Suction CreateDialyzingFluidSuction()
 		{
 			//Hard code delivered quantity 2 and suction 3. We simulate if Ultra Filtration works with Dialyzer.
+			Suction outgoingSuction;
 			outgoingSuction.SuctionType = SuctionType.CustomSuction;
 			outgoingSuction.CustomSuctionValue = 3;
+			return outgoingSuction;
 		}
 
 		protected override void CreateBindings()

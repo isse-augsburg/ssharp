@@ -107,7 +107,12 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 Container = null;
             }
 
-            resourceRequests.RemoveAll(request => request.Condition.Recipe == recipe);
+            resourceRequests.RemoveAll(request =>
+            {
+                if (request.Condition == null)
+                    throw new InvalidOperationException(nameof(request.Condition) + " is null!");
+                return request.Condition.Recipe == recipe;
+            });
         }
 
         /// <summary>
@@ -178,6 +183,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         {
             public ResourceRequest(Station source, Condition condition)
             {
+                if (condition == null)
+                    throw new ArgumentNullException(nameof(condition));
                 Source = source;
                 Condition = condition;
             }
@@ -188,7 +195,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
         // S# seems not to support abstract fault effects,
         // thus this is duplicated in each concrete subclass.
-        /*[FaultEffect(Fault = nameof(CompleteStationFailureEffect))]
+        /*[FaultEffect(Fault = nameof(CompleteStationFailure))]
         public abstract class CompleteStationFailureEffect : Station
         {
             public override bool IsAlive => false;

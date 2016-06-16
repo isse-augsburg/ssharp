@@ -31,9 +31,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 		public bool DetectedGasOrContaminatedBlood = false;
 
 		[Provided]
-		public virtual void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
+		public virtual Blood SetMainFlow(Blood fromPredecessor)
 		{
-			toSuccessor.CopyValuesFrom(fromPredecessor);
 			if (fromPredecessor.GasFree == false || fromPredecessor.ChemicalCompositionOk != true)
 			{
 				DetectedGasOrContaminatedBlood = true;
@@ -42,12 +41,13 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 			{
 				DetectedGasOrContaminatedBlood = false;
 			}
+			return fromPredecessor;
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public Suction SetMainFlowSuction(Suction fromSuccessor)
 		{
-			toPredecessor.CopyValuesFrom(fromSuccessor);
+			return fromSuccessor;
 		}
 
 		public VenousSafetyDetector()
@@ -62,10 +62,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 		public class SafetyDetectorDefectEffect : VenousSafetyDetector
 		{
 			[Provided]
-			public override void SetMainFlow(Blood toSuccessor, Blood fromPredecessor)
+			public override Blood SetMainFlow(Blood fromPredecessor)
 			{
-				toSuccessor.CopyValuesFrom(fromPredecessor);
 				DetectedGasOrContaminatedBlood = false;
+				return fromPredecessor;
 			}
 		}
 	}

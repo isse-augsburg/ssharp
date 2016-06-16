@@ -33,7 +33,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// <summary>
 		///   The vehicles contained in the collection.
 		/// </summary>
-		[Hidden(HideElements = true)]
+		[Hidden(HideElements = true), Subcomponent]
 		public readonly Vehicle[] Vehicles;
 
 		/// <summary>

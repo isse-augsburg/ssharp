@@ -29,38 +29,45 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		public readonly DialyzingFluidFlowInToOut MainFlow = new DialyzingFluidFlowInToOut();
 		public readonly DialyzingFluidFlowSource DrainFlow = new DialyzingFluidFlowSource();
 
-		public readonly DialyzingFluid ToDrainValue = new DialyzingFluid();
+		public DialyzingFluid ToDrainValue = new DialyzingFluid();
 
 		public bool BypassEnabled = false;
 
 		[Provided]
-		public virtual void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
+		public virtual DialyzingFluid SetMainFlow(DialyzingFluid  fromPredecessor)
 		{
 			if (BypassEnabled || fromPredecessor.Temperature != QualitativeTemperature.BodyHeat)
 			{
-				ToDrainValue.CopyValuesFrom(fromPredecessor);
+				ToDrainValue=fromPredecessor;
+				DialyzingFluid toSuccessor;
 				toSuccessor.Quantity = 0;
 				toSuccessor.ContaminatedByBlood = false;
 				toSuccessor.Temperature = QualitativeTemperature.TooCold;
 				toSuccessor.WasUsed = false;
 				toSuccessor.KindOfDialysate = KindOfDialysate.Water;
+				return toSuccessor;
 			}
 			else
 			{
-				toSuccessor.CopyValuesFrom(fromPredecessor);
+				ToDrainValue.Quantity = 0;
+				ToDrainValue.ContaminatedByBlood = false;
+				ToDrainValue.Temperature = QualitativeTemperature.TooCold;
+				ToDrainValue.WasUsed = false;
+				ToDrainValue.KindOfDialysate = KindOfDialysate.Water;
+				return fromPredecessor;
 			}
 		}
 
 		[Provided]
-		public void SetMainFlowSuction(Suction fromSuccessor, Suction toPredecessor)
+		public Suction SetMainFlowSuction(Suction fromSuccessor)
 		{
-			toPredecessor.CopyValuesFrom(fromSuccessor);
+			return fromSuccessor;
 		}
 
 		[Provided]
-		public void SetDrainFlow(DialyzingFluid outgoing)
+		public DialyzingFluid SetDrainFlow()
 		{
-			outgoing.CopyValuesFrom(ToDrainValue);
+			return ToDrainValue;
 		}
 
 		public SafetyBypass()
@@ -77,9 +84,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		public class SafetyBypassFaultEffect : SafetyBypass
 		{
 			[Provided]
-			public override void SetMainFlow(DialyzingFluid  toSuccessor, DialyzingFluid  fromPredecessor)
+			public override DialyzingFluid SetMainFlow(DialyzingFluid  fromPredecessor)
 			{
-				toSuccessor.CopyValuesFrom(fromPredecessor);
+				return fromPredecessor;
 			}
 		}
 	}

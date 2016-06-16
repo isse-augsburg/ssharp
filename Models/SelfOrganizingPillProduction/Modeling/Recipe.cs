@@ -66,7 +66,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// <summary>
         /// The sequence of capabilities defining this recipe.
         /// </summary>
-        public Capability[] RequiredCapabilities { get;  }
+        public Capability[] RequiredCapabilities { get; }
 
         /// <summary>
         /// The total number of containers to be produced for this recipe.

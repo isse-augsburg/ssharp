@@ -33,6 +33,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   The sensor that detects vehicles on any lane.
 		/// </summary>
+		[Subcomponent]
 		public readonly VehicleDetector PositionDetector = new LightBarrier(Model.PreControlPosition);
 
 		/// <summary>
