@@ -15,6 +15,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
             var model = new ModelSetupParser().Parse("Analysis/medium_setup.model");
 
             var modelChecker = new SafetyAnalysis();
+            modelChecker.Configuration.CpuCount = 1;
             modelChecker.Configuration.StateCapacity = 20000;
 
             var result = modelChecker.ComputeMinimalCriticalSets(model, model.ObserverController.Unsatisfiable);
