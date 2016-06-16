@@ -74,7 +74,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			return outgoing;
 		}
 
-		protected override void CreateBindings()
+		public DialyzingFluidDeliverySystemTestEnvironmentDialyzer()
 		{
 			DialyzingFluidFlow.UpdateBackward=SetDialyzingFluidFlowSuction;
 			DialyzingFluidFlow.UpdateForward=SetDialyzingFluidFlow;

@@ -121,7 +121,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		{
 		}
 
-		protected override void CreateBindings()
+		public Patient()
 		{
 			ArteryFlow.SendForward=CreateBlood;
 			VeinFlow.SendBackward=CreateBloodSuction;
