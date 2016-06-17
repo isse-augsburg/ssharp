@@ -54,15 +54,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		public TrafficLights TrafficLights;
 
 		/// <summary>
-		///   Invoked when the component should initialize bindings between itself and its subcomponents.
-		/// </summary>
-		protected override void CreateBindings()
-		{
-			Bind(nameof(MainControl.GetNumberOfEnteringVehicles), nameof(PreControl.GetNumberOfPassingVehicles));
-			Bind(nameof(EndControl.VehicleEntering), nameof(MainControl.IsVehicleLeavingOnRightLane));
-		}
-
-		/// <summary>
 		///   Updates the internal state of the component.
 		/// </summary>
 		public override void Update()
