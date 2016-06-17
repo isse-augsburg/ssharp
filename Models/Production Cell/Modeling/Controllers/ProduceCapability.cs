@@ -23,8 +23,10 @@
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 
+	[DebuggerDisplay("Produce")]
 	internal class ProduceCapability : Capability
 	{
 		public List<Resource> Resources { get; }

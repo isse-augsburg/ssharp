@@ -23,8 +23,10 @@
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
 	using System;
+	using System.Diagnostics;
 	using System.Linq;
 
+	[DebuggerDisplay("Consume")]
 	internal class ConsumeCapability : Capability
 	{
 		public override int Identifier { get; } = (int)Enum.GetValues(typeof(ProductionAction)).Cast<ProductionAction>().Max() + 2;

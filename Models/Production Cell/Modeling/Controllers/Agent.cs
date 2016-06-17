@@ -39,10 +39,10 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
         public Agent(params Capability[] capabilities)
         {
-            AvailableCapabilites.AddRange(capabilities);
+            AvailableCapabilites = new List<Capability>(capabilities);
         }
 
-        public List<Capability> AvailableCapabilites { get; } = new List<Capability>();
+        public List<Capability> AvailableCapabilites { get; }
         public List<Role> AllocatedRoles { get; } = new List<Role>(10);
 
         [Hidden]
@@ -80,7 +80,9 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
         {
             // For now, the resource disappears magically...
             Resource = null;
+	        _currentRole?.Reset();
             _currentRole = null;
+	        _requests.Clear();
             _stateMachine.ChangeState(State.Idle); // Todo: This is a bit of a hack
         }
 
@@ -199,7 +201,11 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
                     from: State.ExecuteRole,
                     to: State.Idle,
                     guard: Resource == null || (_currentRole.IsCompleted && _currentRole.PostCondition.Port == null),
-                    action: () => _currentRole.Reset())
+                    action: () =>
+                    {
+						_currentRole.Reset();
+						_requests.Remove(_currentRole.PreCondition.Port);
+					})
                 .Transition(
                     from: State.Output,
                     to: State.Output,
@@ -251,7 +257,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
                 return false;
 
             var otherAgent = _requests[0];
-            _currentRole = AllocatedRoles.FirstOrDefault(role => role.PreCondition.Port == otherAgent);
+            _currentRole = AllocatedRoles.FirstOrDefault(role => role.PreCondition.Port == otherAgent &&
+				role.PreCondition.State.SequenceEqual(otherAgent.Resource.State));
 
             return true;
         }

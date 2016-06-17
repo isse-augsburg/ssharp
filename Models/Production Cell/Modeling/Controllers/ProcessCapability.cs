@@ -22,6 +22,9 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
+	using System.Diagnostics;
+
+	[DebuggerDisplay("Process: {ProductionAction}")]
 	internal class ProcessCapability : Capability
 	{
 		public ProcessCapability(ProductionAction productionAction)

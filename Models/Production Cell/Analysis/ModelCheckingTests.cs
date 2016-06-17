@@ -22,25 +22,19 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Linq;
 	using Modeling;
-    using Modeling.Controllers;
-	using Modeling.Plants;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 
 	public class ModelCheckingTests
 	{
-
-	    [Test]
+		[Test]
 		public void EnumerateStateSpace()
 		{
 			var model = new Model();
-			model.Faults.SuppressActivations();
+			//model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
 			var result = modelChecker.CheckInvariant(model, true);
@@ -79,14 +73,14 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
-			var result = modelChecker.CheckInvariant(model, 
+			var result = modelChecker.CheckInvariant(model,
 				model.RobotAgents.All(a => a.HasResource == a.Robot.HasWorkpiece) &&
 				model.CartAgents.All(a => a.HasResource == a.Cart.HasWorkpiece));
 
 			Assert.IsTrue(result.FormulaHolds);
 		}
 
-        /*[Test]
+		/*[Test]
         public void IsReconfPossible()
         {
             var model = new Model();
@@ -100,7 +94,5 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 
             Console.WriteLine(result);
         }*/
-
-
-    }
+	}
 }

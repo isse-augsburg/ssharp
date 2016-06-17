@@ -28,6 +28,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 	using System.Linq;
 	using Modeling;
 	using Modeling.Controllers;
+	using Modeling.Plants;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
@@ -48,6 +49,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 		public void ReconfigurationFailed()
 		{
 			var model = new Model();
+			model.Components.OfType<Robot>().Select(r => r.SwitchFault).ToArray().SuppressActivations();
 
 			foreach (var robot in model.Robots)
 				robot.ResourceTransportFault.SuppressActivation();
@@ -62,11 +64,27 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 		public void InvariantViolation()
 		{
 			var model = new Model();
+			model.Components.OfType<Robot>().Select(r => r.SwitchFault).ToArray().SuppressActivations();
 
 			var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, Hazard(model));
 
 			Console.WriteLine(result);
+		}
+
+		[Test]
+		public void Exception()
+		{
+			var model = new Model();
+			model.Faults.SuppressActivations();
+			model.Carts[0].Broken.ForceActivation();
+			model.Robots[0].ApplyFault.ForceActivation();
+			model.Robots[1].Tools.First(t => t.Capability.ProductionAction == ProductionAction.Drill).Broken.ForceActivation();
+
+			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
+			var result = modelChecker.CheckInvariant(model, true);
+
+			Assert.IsTrue(result.FormulaHolds);
 		}
 
 		private bool Hazard(Model model)

@@ -24,7 +24,6 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 {
 	using System;
 	using System.Diagnostics;
-	using System.Linq;
 	using Modeling;
 	using Modeling.Controllers;
 	using NUnit.Framework;

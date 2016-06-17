@@ -22,7 +22,8 @@
 
 namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-    using System.Linq;
+	using System;
+	using System.Linq;
     using Plants;
 
 	internal class RobotAgent : Agent
@@ -127,12 +128,16 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			if (!Robot.ApplyCapability())
 			{
 				AvailableCapabilites.Remove(capability);
-                CheckConstraints();
-            }
+				CheckConstraints();
+			}
 			else
+			{
+				if (Resource.State.Count == Resource.Task.Capabilities.Length)
+					throw new InvalidOperationException();
 				Resource.State.Add(capability);
-           
-        }
+			}
+
+		}
 
 		public override void Consume(ConsumeCapability capability)
 		{
