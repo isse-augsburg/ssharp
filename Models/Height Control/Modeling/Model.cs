@@ -113,7 +113,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 			model.SetupController(mainControl);
 			model.SetupController(endControl);
 
-			model.HeightControl = new HeightControl
+			var heightControl = new HeightControl
 			{
 				PreControl = preControl,
 				MainControl = mainControl,
@@ -121,6 +121,11 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 				TrafficLights = new TrafficLights()
 			};
 
+			Bind(nameof(heightControl.MainControl.GetNumberOfEnteringVehicles), nameof(heightControl.PreControl.GetNumberOfPassingVehicles));
+			Bind(nameof(heightControl.EndControl.VehicleEntering), nameof(heightControl.MainControl.IsVehicleLeavingOnRightLane));
+			Bind(nameof(model.VehicleCollection.IsTunnelClosed), nameof(heightControl.TrafficLights.IsRed));
+
+			model.HeightControl = heightControl;
 			return model;
 		}
 
@@ -134,14 +139,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 			var endControl = (EndControl)Activator.CreateInstance(endControlType);
 
 			return CreateVariant(preControl, mainControl, endControl, vehicles);
-		}
-
-		/// <summary>
-		///   Invoked when the model should initialize bindings between its components.
-		/// </summary>
-		protected override void CreateBindings()
-		{
-			Bind(nameof(VehicleCollection.IsTunnelClosed), nameof(HeightControl.TrafficLights.IsRed));
 		}
 
 		/// <summary>

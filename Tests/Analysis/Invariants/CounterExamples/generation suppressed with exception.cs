@@ -20,48 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
+namespace Tests.Analysis.Invariants.CounterExamples
 {
+	using System;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Shouldly;
 
-	/// <summary>
-	///   Represents the height control of the Elbtunnel.
-	/// </summary>
-	public class HeightControl : Component
+	internal class GenerationSuppressedWithException : AnalysisTestObject
 	{
-		/// <summary>
-		///   The end-control step of the height control.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public EndControl EndControl;
-
-		/// <summary>
-		///   The main-control step of the height control.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public MainControl MainControl;
-
-		/// <summary>
-		///   The pre-control step of the height control.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public PreControl PreControl;
-
-		/// <summary>
-		///   The traffic lights that are used to signal that the tunnel is closed.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public TrafficLights TrafficLights;
-
-		/// <summary>
-		///   Updates the internal state of the component.
-		/// </summary>
-		public override void Update()
+		protected override void Check()
 		{
-			Update(PreControl, MainControl, EndControl);
+			SuppressCounterExampleGeneration = true;
 
-			if (MainControl.IsVehicleLeavingOnLeftLane || EndControl.IsCrashPotentiallyImminent)
-				TrafficLights.SwitchToRed();
+			try
+			{
+				var c = new C { X = 1 };
+				CheckInvariant(c.X != 20, c);
+
+				throw new InvalidOperationException("should not be reached");
+			}
+			catch (AnalysisException e)
+			{
+				e.CounterExample.ShouldBeNull();
+				e.InnerException.ShouldBeOfType<RangeViolationException>();
+			}
+		}
+
+		private class C : Component
+		{
+			[Range(0, 15, OverflowBehavior.Error)]
+			public int X;
+
+			public override void Update()
+			{
+				++X;
+			}
 		}
 	}
 }

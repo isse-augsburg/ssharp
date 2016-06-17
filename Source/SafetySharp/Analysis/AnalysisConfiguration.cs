@@ -41,6 +41,12 @@ namespace SafetySharp.Analysis
 		private int _successorStateCapacity;
 
 		/// <summary>
+		///   Gets or sets a value indicating whether a counter example should be generated when a formula violation is detected or an
+		///   unhandled exception occurred during model checking.
+		/// </summary>
+		public bool GenerateCounterExample { get; set; }
+
+		/// <summary>
 		///   Gets or sets a value indicating whether only progress reports should be output.
 		/// </summary>
 		public bool ProgressReportsOnly { get; set; }
@@ -54,7 +60,8 @@ namespace SafetySharp.Analysis
 			ProgressReportsOnly = false,
 			StackCapacity = DefaultStackCapacity,
 			StateCapacity = DefaultStateCapacity,
-			SuccessorCapacity = DefaultSuccessorStateCapacity
+			SuccessorCapacity = DefaultSuccessorStateCapacity,
+			GenerateCounterExample = true
 		};
 
 		/// <summary>
