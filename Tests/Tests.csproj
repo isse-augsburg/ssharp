@@ -131,10 +131,12 @@
     </Compile>
     <Compile Include="Analysis\Dcca\all faults suppressed.cs" />
     <Compile Include="Analysis\Dcca\empty set.cs" />
+    <Compile Include="Analysis\Dcca\exception suppressed counter examples.cs" />
     <Compile Include="Analysis\Dcca\multiple singleton cut sets.cs" />
     <Compile Include="Analysis\Dcca\exception.cs" />
     <Compile Include="Analysis\Dcca\multiple forced faults.cs" />
     <Compile Include="Analysis\Dcca\multiple suppressed faults.cs" />
+    <Compile Include="Analysis\Dcca\multiple cut sets suppressed counter examples.cs" />
     <Compile Include="Analysis\Dcca\no faults.cs" />
     <Compile Include="Analysis\Dcca\all faults forced.cs" />
     <Compile Include="Analysis\Dcca\single forced fault.cs" />
@@ -149,12 +151,14 @@
     <Compile Include="Analysis\Invariants\CounterExamples\bindings.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\faults.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\formulas.cs" />
+    <Compile Include="Analysis\Invariants\CounterExamples\generation suppressed with exception.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\initial state exception.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\nondeterminism.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\hidden variable with effect.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\non-initial state exception.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\hidden initial state.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\stepping.cs" />
+    <Compile Include="Analysis\Invariants\CounterExamples\generation suppressed without exception.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\steps.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\variable ranges.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\deterministic.cs" />

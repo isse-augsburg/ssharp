@@ -43,10 +43,12 @@ namespace SafetySharp.Analysis
 		private readonly Action<string> _output;
 		private readonly bool _progressOnly;
 		private readonly StateStorage _states;
+		private readonly bool _suppressCounterExampleGeneration;
 		private readonly Worker[] _workers;
 		private long _computedTransitionCount;
 		private CounterExample _counterExample;
 		private Exception _exception;
+		private bool _formulaIsValid = true;
 		private int _generatingCounterExample = -1;
 		private int _levelCount;
 		private int _nextReport = ReportStateCountDelta;
@@ -67,6 +69,7 @@ namespace SafetySharp.Analysis
 			_progressOnly = configuration.ProgressReportsOnly;
 			_output = output;
 			_workers = new Worker[configuration.CpuCount];
+			_suppressCounterExampleGeneration = !configuration.GenerateCounterExample;
 
 			var tasks = new Task[configuration.CpuCount];
 			var stacks = new StateStack[configuration.CpuCount];
@@ -120,7 +123,7 @@ namespace SafetySharp.Analysis
 
 			return new AnalysisResult
 			{
-				FormulaHolds = _counterExample == null,
+				FormulaHolds = _formulaIsValid,
 				CounterExample = _counterExample,
 				StateCount = _stateCount,
 				TransitionCount = _transitionCount,
@@ -145,6 +148,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		private void Reset()
 		{
+			_formulaIsValid = true;
 			_computedTransitionCount = 0;
 			_counterExample = null;
 			_exception = null;
@@ -341,6 +345,7 @@ namespace SafetySharp.Analysis
 					// Check if the invariant is violated; if so, generate a counter example and abort
 					if (!transition->Formulas[0])
 					{
+						_context._formulaIsValid = false;
 						_context._loadBalancer.Terminate();
 						CreateCounterExample(endsWithException: false);
 
@@ -360,6 +365,9 @@ namespace SafetySharp.Analysis
 			private void CreateCounterExample(bool endsWithException)
 			{
 				if (Interlocked.CompareExchange(ref _context._generatingCounterExample, _index, -1) != -1)
+					return;
+
+				if (_context._suppressCounterExampleGeneration)
 					return;
 
 				var indexedTrace = _stateStack.GetTrace();
@@ -386,8 +394,6 @@ namespace SafetySharp.Analysis
 				var replayInfo = replayModel.GenerateReplayInformation(trace, endsWithException);
 				_context._counterExample = new CounterExample(counterExampleModel, trace, replayInfo, endsWithException);
 			}
-
-			
 
 			/// <summary>
 			///   Disposes the object, releasing all managed and unmanaged resources.

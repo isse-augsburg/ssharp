@@ -39,7 +39,7 @@ namespace Tests.Normalization.LineCounts
 				P = new List<int>();
 			}
 
-			protected internal override void CreateBindings()
+			private void CreateBindings()
 			{
 				Bind(nameof(_d.Required1), nameof(Provided1));
 				Bind(nameof(_d.Required2), nameof(Provided2));
