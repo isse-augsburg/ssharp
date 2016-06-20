@@ -55,6 +55,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
 
             modelChecker.Configuration.StateCapacity = 40000;
             modelChecker.Configuration.CpuCount = 1;
+            modelChecker.Configuration.GenerateCounterExample = false;
             modelChecker.Heuristics.AddRange(heuristics);
             modelChecker.FaultActivationBehaviour = FaultActivationBehaviour.ForceOnly;
 
