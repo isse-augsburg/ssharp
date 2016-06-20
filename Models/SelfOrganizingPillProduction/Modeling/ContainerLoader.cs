@@ -15,9 +15,11 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         private static readonly Capability[] emptyCapabilities = new Capability[0];
 
         public override Capability[] AvailableCapabilities =>
-            containerStorage.Count > 0 ? produceCapabilities : emptyCapabilities;
+            containerCount > 0 ? produceCapabilities : emptyCapabilities;
 
         private readonly ObjectPool<PillContainer> containerStorage = new ObjectPool<PillContainer>(Model.ContainerStorageSize);
+
+        private int containerCount = Model.ContainerStorageSize;
 
         protected override void ExecuteRole(Role role)
         {
@@ -43,6 +45,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 
                 // role.capabilitiesToApply will always be { ProduceCapability }
                 Container = containerStorage.Allocate();
+                containerCount--;
                 Container.OnLoaded(recipe);
                 recipe.AddContainer(Container);
 
