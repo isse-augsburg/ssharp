@@ -96,13 +96,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 
 		public void ConnectOutWithIn(FlowSplitter<TForward, TBackward> @from, int index, IFlowComponentUniqueIncoming<TForward, TBackward> to)
 		{
-			Connect(from.Outgoings[index], to.Incoming);
+			var newPort = new FlowPort<TForward, TBackward>();
+			from.Outgoings[index] = newPort;
+			to.Incoming = newPort;
 			AddAtomicConnection(from, to);
 		}
 
 		public void ConnectOutWithIn(IFlowComponentUniqueOutgoing<TForward, TBackward> @from, FlowMerger<TForward, TBackward> to, int index)
 		{
-			Connect(from.Outgoing, to.Incomings[index]);
+			var newPort = new FlowPort<TForward, TBackward>();
+			from.Outgoing = newPort;
+			to.Incomings[index] = newPort;
 			AddAtomicConnection(from, to);
 		}
 
