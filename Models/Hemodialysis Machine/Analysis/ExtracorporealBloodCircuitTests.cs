@@ -99,7 +99,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			return outgoing;
 		}
 
-		protected override void CreateBindings()
+		public ExtracorporealBloodCircuitTestEnvironmentDialyzer()
 		{
 			BloodFlow.UpdateBackward=SetBloodFlowSuction;
 			BloodFlow.UpdateForward=SetBloodFlow;

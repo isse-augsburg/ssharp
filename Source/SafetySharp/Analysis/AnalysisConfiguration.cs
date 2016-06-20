@@ -30,7 +30,7 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public struct AnalysisConfiguration
 	{
-		private const int DefaultStateCapacity = 1 << 26;
+		private const int DefaultStateCapacity = 1 << 24;
 		private const int DefaultStackCapacity = 1 << 16;
 		private const int DefaultSuccessorStateCapacity = 1 << 14;
 		private const int MinCapacity = 1024;
@@ -39,6 +39,12 @@ namespace SafetySharp.Analysis
 		private int _stackCapacity;
 		private int _stateCapacity;
 		private int _successorStateCapacity;
+
+		/// <summary>
+		///   Gets or sets a value indicating whether a counter example should be generated when a formula violation is detected or an
+		///   unhandled exception occurred during model checking.
+		/// </summary>
+		public bool GenerateCounterExample { get; set; }
 
 		/// <summary>
 		///   Gets or sets a value indicating whether only progress reports should be output.
@@ -54,7 +60,8 @@ namespace SafetySharp.Analysis
 			ProgressReportsOnly = false,
 			StackCapacity = DefaultStackCapacity,
 			StateCapacity = DefaultStateCapacity,
-			SuccessorCapacity = DefaultSuccessorStateCapacity
+			SuccessorCapacity = DefaultSuccessorStateCapacity,
+			GenerateCounterExample = true
 		};
 
 		/// <summary>

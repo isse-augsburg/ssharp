@@ -118,39 +118,14 @@ namespace SafetySharp.Modeling
 		{
 			Requires.NotNull(model, nameof(model));
 
+			model.ReferencedObjects = SerializationRegistry.Default.GetReferencedObjects(model.Roots, SerializationMode.Optimized).ToArray();
+			model.Components = model.ReferencedObjects.OfType<IComponent>().Distinct(ReferenceEqualityComparer<IComponent>.Default).ToArray();
+
 			BindFaultEffects(model);
 			DiscoverFaults(model);
 			AssignFaultIdentifiers(model);
 
-			model.CreateBindings();
-			CreateBindings(model);
-
-			model.ReferencedObjects = SerializationRegistry.Default.GetReferencedObjects(model.Roots, SerializationMode.Optimized).ToArray();
 			Range.CopyMetadata(model);
-		}
-
-		/// <summary>
-		///   Discovers all faults contained in the model.
-		/// </summary>
-		private static void DiscoverFaults(ModelBase model)
-		{
-			var faults = new HashSet<Fault>(ReferenceEqualityComparer<Fault>.Default);
-			model.VisitPreOrder(c =>
-			{
-				foreach (var faultEffect in ((Component)c).FaultEffects)
-					faults.Add(faultEffect.GetFault());
-			});
-
-			model.Faults = faults.OrderBy(fault => fault.Identifier).ToArray();
-		}
-
-		/// <summary>
-		///   Assigns the fault identifiers to each fault.
-		/// </summary>
-		private static void AssignFaultIdentifiers(ModelBase model)
-		{
-			for (var i = 0; i < model.Faults.Length; ++i)
-				model.Faults[i].Identifier = i;
 		}
 
 		/// <summary>
@@ -158,7 +133,7 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		private static void BindFaultEffects(ModelBase model)
 		{
-			model.VisitPostOrder(component =>
+			foreach (var component in model.Components)
 			{
 				var type = component.GetRuntimeType();
 
@@ -196,15 +171,31 @@ namespace SafetySharp.Modeling
 
 					type = type.BaseType;
 				}
-			});
+			}
 		}
 
 		/// <summary>
-		///   Initializes all bindings.
+		///   Discovers all faults contained in the model.
 		/// </summary>
-		private static void CreateBindings(ModelBase model)
+		private static void DiscoverFaults(ModelBase model)
 		{
-			model.VisitPostOrder(component => ((Component)component).CreateBindings());
+			var faults = new HashSet<Fault>(ReferenceEqualityComparer<Fault>.Default);
+			foreach (var component in model.Components)
+			{
+				foreach (var faultEffect in ((Component)component).FaultEffects)
+					faults.Add(faultEffect.GetFault());
+			}
+
+			model.Faults = faults.OrderBy(fault => fault.Identifier).ToArray();
+		}
+
+		/// <summary>
+		///   Assigns the fault identifiers to each fault.
+		/// </summary>
+		private static void AssignFaultIdentifiers(ModelBase model)
+		{
+			for (var i = 0; i < model.Faults.Length; ++i)
+				model.Faults[i].Identifier = i;
 		}
 	}
 }

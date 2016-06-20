@@ -98,7 +98,7 @@ namespace SafetySharp.Runtime
 			_stateMemory = _stateBuffer.Pointer;
 
 			// We allocate enough space so that we can align the returned pointer such that index 0 is the start of a cache line
-			_hashBuffer.Resize((long)_capacity * sizeof(int) + CacheLineSize, zeroMemory: true);
+			_hashBuffer.Resize((long)_capacity * sizeof(int) + CacheLineSize, zeroMemory: false);
 			_hashMemory = (int*)_hashBuffer.Pointer;
 
 			if ((ulong)_hashMemory % CacheLineSize != 0)
@@ -168,6 +168,14 @@ namespace SafetySharp.Runtime
 
 			throw new OutOfMemoryException(
 				"Failed to find an empty hash table slot within a reasonable amount of time. Try increasing the state capacity.");
+		}
+
+		/// <summary>
+		///   Clears all stored states.
+		/// </summary>
+		internal void Clear()
+		{
+			_hashBuffer.Clear();
 		}
 
 		/// <summary>

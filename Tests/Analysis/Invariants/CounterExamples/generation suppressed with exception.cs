@@ -20,52 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Simulation
+namespace Tests.Analysis.Invariants.CounterExamples
 {
-	using System.Linq;
+	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using Shouldly;
-	using Utilities;
 
-	internal class ReachableByBindingOnly : TestObject
+	internal class GenerationSuppressedWithException : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C();
+			SuppressCounterExampleGeneration = true;
 
-			var simulator = new Simulator(TestModel.InitializeModel(c));
-			c = (C)simulator.Model.Roots[0];
+			try
+			{
+				var c = new C { X = 1 };
+				CheckInvariant(c.X != 20, c);
 
-			simulator.SimulateStep();
-			c.X.ShouldBe(7);
-
-			simulator.Model.Components.Length.ShouldBe(2);
-			simulator.Model.Components.OfType<C>().Count().ShouldBe(1);
-			simulator.Model.Components.OfType<D>().Count().ShouldBe(1);
+				throw new InvalidOperationException("should not be reached");
+			}
+			catch (AnalysisException e)
+			{
+				e.CounterExample.ShouldBeNull();
+				e.InnerException.ShouldBeOfType<RangeViolationException>();
+			}
 		}
 
 		private class C : Component
 		{
+			[Range(0, 15, OverflowBehavior.Error)]
 			public int X;
-
-			private extern int Y { get; }
 
 			public override void Update()
 			{
-				X = Y;
+				++X;
 			}
-
-			protected internal override void CreateBindings()
-			{
-				var d = new D();
-				Bind(nameof(Y), nameof(d.Z));
-			}
-		}
-
-		private class D : Component
-		{
-			public int Z => 7;
 		}
 	}
 }

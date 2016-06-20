@@ -20,48 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
+namespace Tests.Serialization.Objects
 {
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	/// <summary>
-	///   Represents the height control of the Elbtunnel.
-	/// </summary>
-	public class HeightControl : Component
+	internal class HiddenStructField : SerializationObject
 	{
-		/// <summary>
-		///   The end-control step of the height control.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public EndControl EndControl;
-
-		/// <summary>
-		///   The main-control step of the height control.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public MainControl MainControl;
-
-		/// <summary>
-		///   The pre-control step of the height control.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public PreControl PreControl;
-
-		/// <summary>
-		///   The traffic lights that are used to signal that the tunnel is closed.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public TrafficLights TrafficLights;
-
-		/// <summary>
-		///   Updates the internal state of the component.
-		/// </summary>
-		public override void Update()
+		protected override void Check()
 		{
-			Update(PreControl, MainControl, EndControl);
+			var c = new C
+			{
+				S = new S { A = 33, B = 7 }
+			};
 
-			if (MainControl.IsVehicleLeavingOnLeftLane || EndControl.IsCrashPotentiallyImminent)
-				TrafficLights.SwitchToRed();
+			GenerateCode(SerializationMode.Optimized, c);
+			StateVectorLayout.Groups.ShouldBeEmpty();
+		}
+
+		private class C : Component
+		{
+			[Hidden]
+			public S S;
+		}
+
+		private struct S
+		{
+			public int A;
+			public int B;
 		}
 	}
 }

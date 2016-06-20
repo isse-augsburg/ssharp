@@ -39,11 +39,6 @@ namespace SafetySharp.Analysis
 	public sealed class SafetyAnalysis
 	{
 		/// <summary>
-		///   The model checker that is used for the analysis.
-		/// </summary>
-		private readonly SSharpChecker _modelChecker = new SSharpChecker();
-
-		/// <summary>
 		///   The model checker's configuration that determines certain model checker settings.
 		/// </summary>
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
@@ -59,11 +54,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
 		/// </summary>
-		public event Action<string> OutputWritten
-		{
-			add { _modelChecker.OutputWritten += value; }
-			remove { _modelChecker.OutputWritten += value; }
-		}
+		public event Action<string> OutputWritten;
 
 		/// <summary>
 		///   Computes the minimal critical sets for the <paramref name="hazard" />.
@@ -93,7 +84,6 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(hazard, nameof(hazard));
 
-			_modelChecker.Configuration = Configuration;
 			ConsoleHelpers.WriteLine("Running Deductive Cause Consequence Analysis.");
 
 			var stopwatch = new Stopwatch();
@@ -116,9 +106,10 @@ namespace SafetySharp.Analysis
 			var counterExamples = new Dictionary<FaultSet, CounterExample>();
 			var exceptions = new Dictionary<FaultSet, Exception>();
 
-			// Store the serialized model to improve performance
+			// Serialize the model and initialize the invariant checker
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, !hazard);
+			var invariantChecker = new InvariantChecker(serializer.Load, message => OutputWritten?.Invoke(message), Configuration);
 
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we
@@ -161,11 +152,12 @@ namespace SafetySharp.Analysis
 				{
 					// Enable or disable the faults that the set represents
 					set.SetActivation(nondeterministicFaults);
+					invariantChecker.ChangeFaultActivations(GetUpdateFaultActivations(allFaults));
 
 					// If there was a counter example, the set is a critical set
 					try
 					{
-						var result = _modelChecker.CheckInvariant(CreateRuntimeModel(serializer, allFaults));
+						var result = invariantChecker.Check();
 
 						if (!result.FormulaHolds)
 						{
@@ -206,23 +198,16 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Creates a <see cref="RuntimeModel" /> instance.
+		///   Creates a function that determines the activation state of a fault.
 		/// </summary>
-		private static Func<RuntimeModel> CreateRuntimeModel(RuntimeModelSerializer serializer, Fault[] faultTemplates)
+		private static Func<Fault, Activation> GetUpdateFaultActivations(Fault[] faults)
 		{
-			return () =>
+			return fault =>
 			{
-				var serializedData = serializer.LoadSerializedData();
-				var faults = serializedData.ObjectTable.OfType<Fault>().Where(f => f.Identifier >= 0).OrderBy(f => f.Identifier).ToArray();
-				Requires.That(faults.Length == faultTemplates.Length, "Unexpected fault count.");
+				Assert.That(fault != null && fault.IsUsed, "Invalid fault.");
+				Assert.InRange(fault.Identifier, faults);
 
-				for (var i = 0; i < faults.Length; ++i)
-				{
-					Requires.That(faults[i].Identifier == faultTemplates[i].Identifier, "Fault mismatch.");
-					faults[i].Activation = faultTemplates[i].Activation;
-				}
-
-				return new RuntimeModel(serializedData);
+				return faults[fault.Identifier].Activation;
 			};
 		}
 
@@ -458,7 +443,7 @@ namespace SafetySharp.Analysis
 			public override string ToString()
 			{
 				var builder = new StringBuilder();
-				var percentage = CheckedSets.Count / (float)(1 << Faults.Count()) * 100;
+				var percentage = CheckedSets.Count / (double)(1L << Faults.Count()) * 100;
 
 				builder.AppendLine();
 				builder.AppendLine("=======================================================================");

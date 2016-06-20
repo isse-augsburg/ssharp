@@ -34,19 +34,15 @@ namespace SafetySharp.Modeling
 	///   being used, it must be returned to the pool so that it can be reused later on.
 	/// </summary>
 	/// <typeparam name="T">The type of the pooled objects.</typeparam>
+	[Hidden]
 	public sealed class ObjectPool<T>
 		where T : class
 	{
 		/// <summary>
-		///   The pooled objects that are currently not in use.
+		///   The objects managed by the pool.
 		/// </summary>
 		[Hidden]
-		private readonly T[] _pooledObjects;
-
-		/// <summary>
-		/// The number of objects that are available in the pool.
-		/// </summary>
-		public int Count { get; private set; }
+		private readonly ObjectInfo[] _pooledObjects;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -55,9 +51,7 @@ namespace SafetySharp.Modeling
 		public ObjectPool(IEnumerable<T> objs)
 		{
 			Requires.NotNull(objs, nameof(objs));
-
-			_pooledObjects = objs.ToArray();
-			Count = _pooledObjects.Length;
+			_pooledObjects = objs.Select(obj => new ObjectInfo { Object = obj }).ToArray();
 		}
 
 		/// <summary>
@@ -75,8 +69,7 @@ namespace SafetySharp.Modeling
 		{
 			Requires.That(capacity >= 0, nameof(capacity), "Invalid capacity.");
 
-			_pooledObjects = new T[capacity];
-			Count = capacity;
+			_pooledObjects = new ObjectInfo[capacity];
 
 			for (var i = 0; i < capacity; ++i)
 			{
@@ -100,7 +93,7 @@ namespace SafetySharp.Modeling
 					}
 				}
 
-				_pooledObjects[i] = obj;
+				_pooledObjects[i].Object = obj;
 			}
 		}
 
@@ -109,14 +102,16 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		public T Allocate()
 		{
-			if (Count <= 0)
-				throw new OutOfMemoryException($"Object pool ran out of instances of type '{typeof(T).FullName}'.");
+			for (var i = 0; i < _pooledObjects.Length; ++i)
+			{
+				if (_pooledObjects[i].Used)
+					continue;
 
-			var obj = _pooledObjects[Count - 1];
-			_pooledObjects[Count - 1] = null;
+				_pooledObjects[i].Used = true;
+				return _pooledObjects[i].Object;
+			}
 
-			--Count;
-			return obj;
+			throw new OutOfMemoryException($"Object pool ran out of instances of type '{typeof(T).FullName}'.");
 		}
 
 		/// <summary>
@@ -128,10 +123,11 @@ namespace SafetySharp.Modeling
 			if (obj == null)
 				return;
 
-			Requires.That(!_pooledObjects.Contains(obj, ReferenceEqualityComparer<T>.Default), "The object has already been returned to the pool.");
-			Requires.That(Count < _pooledObjects.Length, "Too many objects have been returned to the pool.");
+			var index = IndexOf(obj);
+			Requires.That(index != -1, "The object is not managed by the pool.");
+			Requires.That(_pooledObjects[index].Used, "The object has already been returned to the pool.");
 
-			_pooledObjects[Count++] = obj;
+			_pooledObjects[index].Used = false;
 		}
 
 		/// <summary>
@@ -145,6 +141,45 @@ namespace SafetySharp.Modeling
 
 			foreach (var obj in objs)
 				Return(obj);
+		}
+
+		/// <summary>
+		///   Resets the object pool, marking all pooled objects as unused.
+		/// </summary>
+		public void Reset()
+		{
+			for (var i = 0; i < _pooledObjects.Length; ++i)
+				_pooledObjects[i].Used = false;
+		}
+
+		/// <summary>
+		///   Returns the zero-based index of <paramref name="obj" /> in <see cref="_pooledObjects" /> or <c>-1</c> otherwise.
+		/// </summary>
+		private int IndexOf(T obj)
+		{
+			for (var i = 0; i < _pooledObjects.Length; ++i)
+			{
+				if (ReferenceEquals(_pooledObjects[i].Object, obj))
+					return i;
+			}
+
+			return -1;
+		}
+
+		/// <summary>
+		///   Indicates whether a pooled object is currently in use.
+		/// </summary>
+		private struct ObjectInfo
+		{
+			/// <summary>
+			///   The pooled object.
+			/// </summary>
+			public T Object;
+
+			/// <summary>
+			///   A value indicating whether the item is currently in use.
+			/// </summary>
+			public bool Used;
 		}
 	}
 }
