@@ -218,6 +218,11 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			return line.Substring(openBrace + 1, closeBrace - openBrace - 1).Split(',').Select(n => Int32.Parse(n.Trim()) - 1).ToArray();
 		}
 
+        private bool ContainsCapability(IEnumerable<Capability> capabilities, Capability capability)
+        {
+            return capabilities.Any(c => c.IsEquivalentTo(capability));
+        }
+
         private bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<CartAgent> cartAgents, IEnumerable<Task> tasks,
                                       ObserverController observerController)
         {
@@ -226,11 +231,12 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
             foreach (var task in tasks)
             {
-                isReconfPossible &= task.Capabilities.All(capability => robotsAgents.Any(agent => agent.AvailableCapabilites.Contains(capability)));
+                isReconfPossible &=
+                    task.Capabilities.All(capability => robotsAgents.Any(agent => ContainsCapability(agent.AvailableCapabilites,capability))));
                 if (!isReconfPossible)
                     break;
 
-                var candidates = robotsAgents.Where(agent => agent.AvailableCapabilites.Contains(task.Capabilities.First())).ToArray();
+                var candidates = robotsAgents.Where(agent => ContainsCapability(agent.AvailableCapabilites,task.Capabilities.First())).ToArray();
 
                 for (var i = 0; i < task.Capabilities.Length - 1; i++)
                 {
