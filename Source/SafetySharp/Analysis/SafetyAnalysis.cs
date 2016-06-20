@@ -247,14 +247,14 @@ namespace SafetySharp.Analysis
 
 			if (safeSets.Any(safeSet => set.IsSubsetOf(safeSet)))
 			{
-				ConsoleHelpers.WriteLine($"  {heuristic}[triv.]     safe:  {{ {set.ToString(allFaults)} }}");
+				//ConsoleHelpers.WriteLine($"  {heuristic}[triv.]     safe:  {{ {set.ToString(allFaults)} }}");
 				return true;
 			}
 
 			if (criticalSets.Any(criticalSet => criticalSet.IsSubsetOf(set)))
 			{
 				criticalSets.Add(set);
-				ConsoleHelpers.WriteLine($"  {heuristic}[triv.] critical:  {{ {set.ToString(allFaults)} }}");
+				//ConsoleHelpers.WriteLine($"  {heuristic}[triv.] critical:  {{ {set.ToString(allFaults)} }}");
 				return false;
 			}
 
@@ -270,7 +270,7 @@ namespace SafetySharp.Analysis
 				}
 				else
 				{
-					ConsoleHelpers.WriteLine($"  {heuristic}            safe:  {{ {set.ToString(allFaults)} }}", ConsoleColor.Blue);
+					//ConsoleHelpers.WriteLine($"  {heuristic}            safe:  {{ {set.ToString(allFaults)} }}", ConsoleColor.Blue);
 				}
 
 				checkedSets.Add(set);
