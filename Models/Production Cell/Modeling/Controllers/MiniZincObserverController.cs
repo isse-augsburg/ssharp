@@ -242,7 +242,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
                 {
                     candidates =
                         candidates.SelectMany<RobotAgent, RobotAgent>(r => matrix[r])
-                                  .Where(r => r.AvailableCapabilites.Contains(task.Capabilities[i + 1]))
+                                  .Where(r => ContainsCapability(r.AvailableCapabilites,task.Capabilities[i + 1]))
                                   .ToArray();
                     if (candidates.Length == 0)
                     {
