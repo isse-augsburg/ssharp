@@ -125,9 +125,6 @@ namespace SafetySharp.Modeling
 			DiscoverFaults(model);
 			AssignFaultIdentifiers(model);
 
-			model.CreateBindings();
-			CreateBindings(model);
-
 			Range.CopyMetadata(model);
 		}
 
@@ -199,15 +196,6 @@ namespace SafetySharp.Modeling
 		{
 			for (var i = 0; i < model.Faults.Length; ++i)
 				model.Faults[i].Identifier = i;
-		}
-
-		/// <summary>
-		///   Initializes all bindings.
-		/// </summary>
-		private static void CreateBindings(ModelBase model)
-		{
-			foreach (var component in model.Components)
-				((Component)component).CreateBindings();
 		}
 	}
 }

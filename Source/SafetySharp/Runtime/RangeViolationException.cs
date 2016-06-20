@@ -53,7 +53,7 @@ namespace SafetySharp.Runtime
 		/// </returns>
 		public override string Message =>
 			$"The value '{FieldValue}' of field '{Field.FieldType.FullName} {Field.DeclaringType.FullName}.{Field.Name}' " +
-			$"lies outside of the allowed range [{Range.LowerBound};{Range.UpperBound}[.";
+			$"lies outside of the allowed range [{Range.LowerBound};{Range.UpperBound}].";
 
 		/// <summary>
 		///   Gets the object the exception was raised for.
