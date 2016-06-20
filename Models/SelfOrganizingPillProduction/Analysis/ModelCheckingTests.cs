@@ -31,7 +31,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
             var checker = new SSharpChecker { Configuration = { StateCapacity = 1 << 18 } };
             var result = checker.CheckInvariant(model, true);
 
-            Console.WriteLine(result.StateVectorLayout);
+            System.Console.WriteLine(result.StateVectorLayout);
         }
 
         [Test]
