@@ -232,7 +232,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
             foreach (var task in tasks)
             {
                 isReconfPossible &=
-                    task.Capabilities.All(capability => robotsAgents.Any(agent => ContainsCapability(agent.AvailableCapabilites,capability))));
+                    task.Capabilities.All(capability => robotsAgents.Any(agent => ContainsCapability(agent.AvailableCapabilites,capability)));
                 if (!isReconfPossible)
                     break;
 
