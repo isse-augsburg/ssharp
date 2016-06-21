@@ -1,0 +1,8 @@
+﻿P1 -> D -> C1
+P2 -> D -> C2
+P3 -> D -> C3
+C1 -> C2 -> C3 -> P3 -> P2 -> P1 -> C1
+
+3 Blue(3) Red(4) Blue(1)
+4 Yellow(2) Blue(2)
+5 Red(1) Yellow(2) Red(1)

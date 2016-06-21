@@ -81,6 +81,12 @@
     <None Include="Analysis\simple_setup.model">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Analysis\simple_setup2.model">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Analysis\simple_setup3.model">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Configuration-Simplified.mzn">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -101,6 +107,9 @@
   <ItemGroup>
     <Analyzer Include="$(OutDir)\SafetySharp.Modeling.dll" />
     <Analyzer Include="$(OutDir)\SafetySharp.Compiler.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="../../Source/SafetySharp.targets" />

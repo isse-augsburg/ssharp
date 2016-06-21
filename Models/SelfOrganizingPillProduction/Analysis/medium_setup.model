@@ -1,4 +1,4 @@
-﻿P1 -> P2 -> D1 -> D2 -> C1 -> C -> P1 -> D -> C -> P -> D -> C1 -> D2 -> D1 - P2 -> P1
+﻿P1 -> P2 -> D1 -> D2 -> C1 -> C -> P1 -> D -> C -> P -> D -> C1 -> D2 -> D1 -> P2 -> P1
 
 4 Blue(3) Red(5) Yellow(1)
 7 Blue(1) Yellow(2)
