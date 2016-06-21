@@ -229,15 +229,17 @@ namespace SafetySharp.Analysis
 				// do not add to criticalSets: non-minimal, and all supersets are supersets of criticalSet as well
 				return false;
 
+			// if configured to do so, check with forced fault activation
 			if (FaultActivationBehaviour == FaultActivationBehaviour.ForceOnly
 				|| FaultActivationBehaviour == FaultActivationBehaviour.ForceThenFallback)
 				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker, Activation.Forced);
 
-			if (FaultActivationBehaviour != FaultActivationBehaviour.ForceOnly && isSafe)
-			{
+			if (isSafe && FaultActivationBehaviour == FaultActivationBehaviour.ForceThenFallback)
 				ConsoleHelpers.WriteLine("    Checking again with nondeterministic activation...");
+
+			// check with nondeterministic fault activation
+			if (isSafe && FaultActivationBehaviour != FaultActivationBehaviour.ForceOnly)
 				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker, Activation.Nondeterministic);
-			}
 
 			if (isSafe)
 				safeSets.Add(set);
