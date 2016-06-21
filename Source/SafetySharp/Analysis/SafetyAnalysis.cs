@@ -220,6 +220,15 @@ namespace SafetySharp.Analysis
 		{
 			bool isSafe = true;
 
+			// check if set is trivially safe or critical
+			// (do not add to safeSets / criticalSets if so, in order to keep them small)
+			if (safeSets.Any(safeSet => set.IsSubsetOf(safeSet)))
+				// do not add to safeSets: all subsets are aubsets of safeSet as well
+				return true;
+			else if (criticalSets.Any(criticalSet => criticalSet.IsSubsetOf(set)))
+				// do not add to criticalSets: non-minimal, and all supersets are supersets of criticalSet as well
+				return false;
+
 			if (FaultActivationBehaviour == FaultActivationBehaviour.ForceOnly
 				|| FaultActivationBehaviour == FaultActivationBehaviour.ForceThenFallback)
 				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker, Activation.Forced);
@@ -245,20 +254,6 @@ namespace SafetySharp.Analysis
 
 			var heuristic = set.Cardinality == cardinality ? "       " : "[heur.]";
 
-			if (safeSets.Any(safeSet => set.IsSubsetOf(safeSet)))
-			{
-				//ConsoleHelpers.WriteLine($"  {heuristic}[triv.]     safe:  {{ {set.ToString(allFaults)} }}");
-				return true;
-			}
-
-			if (criticalSets.Any(criticalSet => criticalSet.IsSubsetOf(set)))
-			{
-				criticalSets.Add(set);
-				//ConsoleHelpers.WriteLine($"  {heuristic}[triv.] critical:  {{ {set.ToString(allFaults)} }}");
-				return false;
-			}
-
-			// If there was a counter example, the set is a critical set
 			try
 			{
 				var result = invariantChecker.Check();
