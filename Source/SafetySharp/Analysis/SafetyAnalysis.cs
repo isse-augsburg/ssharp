@@ -54,7 +54,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
 		/// </summary>
-		public event Action<string> OutputWritten;
+		public event Action<string> OutputWritten = Console.WriteLine;
 
 		/// <summary>
 		///   Computes the minimal critical sets for the <paramref name="hazard" />.
