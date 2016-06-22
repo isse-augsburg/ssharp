@@ -61,6 +61,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
 
             var result = modelChecker.ComputeMinimalCriticalSets(model, model.ObserverController.Unsatisfiable);
             System.Console.WriteLine(result);
+            Assert.AreEqual(0, result.Exceptions.Count);
         }
 
         private IFaultSetHeuristic RedundancyHeuristic(Model model)
