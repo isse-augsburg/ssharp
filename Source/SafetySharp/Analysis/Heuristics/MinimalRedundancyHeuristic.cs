@@ -17,6 +17,11 @@
         private ISet<FaultSet> currentSuggestions;
         private ISet<FaultSet> nextSuggestions;
 
+        private int successCounter;
+
+        // how many faults are removed from critical sets in each step
+        private int subsetStepSize = 1;
+
         const double defaultMinFaultSetSizeRelative = 0.5;
 
         public MinimalRedundancyHeuristic(ModelBase model, params IEnumerable<Fault>[] faultGroups)
@@ -38,11 +43,12 @@
             this.minSetSize = minSetSize;
 
             CollectSuggestions(faultGroups);
-            nextSuggestions = DirectSubsets(currentSuggestions);
+            nextSuggestions = GetSubsets(currentSuggestions);
         }
 
         void IFaultSetHeuristic.Augment(List<FaultSet> setsToCheck)
         {
+            successCounter = 0;
             setsToCheck.InsertRange(0, currentSuggestions);
         }
 
@@ -52,14 +58,26 @@
             if (!isSuggestion)
                 return;
 
-            // subsets of a safe sets are safe - do not check them again
+            // subsets of a safe set are safe - do not check them again
             if (isSafe)
-                nextSuggestions.ExceptWith(DirectSubsets(new[] { checkedSet }));
+            {
+                successCounter++;
+                nextSuggestions.ExceptWith(GetSubsets(new[] { checkedSet }));
+            }
+            else
+                successCounter--;
 
+            int tolerance = allFaults.Length / 4;
             if (currentSuggestions.Count == 0 && checkedSet.Cardinality > minSetSize)
             {
+                if (successCounter < -tolerance && isSafe)
+                {
+	                subsetStepSize++;
+	                successCounter = 0;
+                }
+
                 currentSuggestions = nextSuggestions;
-                nextSuggestions = DirectSubsets(currentSuggestions);
+                nextSuggestions = GetSubsets(currentSuggestions);
             }
         }
 
@@ -77,17 +95,19 @@
             );
         }
 
-        private ISet<FaultSet> DirectSubsets(IEnumerable<FaultSet> sets)
+        private ISet<FaultSet> GetSubsets(IEnumerable<FaultSet> sets)
         {
-            // remove one fault (and its subsuming faults) from each set
-            return new HashSet<FaultSet>(
-                from set in sets
-                from fault in allFaults
-                where set.Contains(fault)
-                let suggestion = set.GetDifference(Fault.SubsumingFaults(new[] { fault }, allFaults))
-                orderby suggestion.Cardinality descending
-                select suggestion
-            );
+            // remove subsetStepSize faults (and their subsuming faults) from each set
+            var subsets = sets;
+            for (int i = 0; i < subsetStepSize; ++i)
+                subsets = from set in subsets
+                          from fault in allFaults
+                          where set.Contains(fault)
+                          let suggestion = set.GetDifference(Fault.SubsumingFaults(new[] { fault }, allFaults))
+                          orderby suggestion.Cardinality descending
+                          select suggestion;
+
+            return new HashSet<FaultSet>(subsets);
         }
 
         public static IEnumerable<IEnumerable<T>> CartesianProduct<T>(IEnumerable<IEnumerable<T>> sequences)
