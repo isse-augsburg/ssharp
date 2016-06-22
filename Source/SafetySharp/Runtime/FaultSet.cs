@@ -38,32 +38,34 @@ namespace SafetySharp.Runtime
 	{
 		private readonly long _faults;
 
-		public uint Cardinality { get; }
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="faults">The faults the set should contain.</param>
-		private FaultSet(long faults)
+		public uint Cardinality
 		{
-			_faults = faults;
+			get
+			{
+				var cardinality = 0u;
+				for (var n = _faults; n != 0; n &= n - 1) // n &= n-1 removes the last 1
+					cardinality++;
 
-			// count bits set to 1:
-			Cardinality = 0;
-			for (long n = _faults; n != 0; n &= n - 1) // n &= n-1 removes the last 1
-				Cardinality++;
+				return cardinality;
+			}
 		}
 
 		/// <summary>
-		///   Gets a value indicating whether the fault set is empty.
+		///   Initializes a new instance.
 		/// </summary>
-		public bool IsEmpty => _faults == 0;
+		/// <param name="faults">The faults the set should contain.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private FaultSet(long faults)
+		{
+			_faults = faults;
+		}
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="faults">The faults the set should contain.</param>
-		public FaultSet(params Fault[] faults) : this((IEnumerable<Fault>)faults)
+		public FaultSet(params Fault[] faults)
+			: this((IEnumerable<Fault>)faults)
 		{
 		}
 
@@ -77,9 +79,12 @@ namespace SafetySharp.Runtime
 
 			foreach (var fault in faults)
 				_faults |= 1L << fault.Identifier;
-
-			Cardinality = (uint)faults.Count();
 		}
+
+		/// <summary>
+		///   Gets a value indicating whether the fault set is empty.
+		/// </summary>
+		public bool IsEmpty => _faults == 0;
 
 		/// <summary>
 		///   Creates a fault set that contains all activated <paramref name="faults" />.
@@ -100,6 +105,7 @@ namespace SafetySharp.Runtime
 		///   <paramref name="other" />.
 		/// </summary>
 		/// <param name="other">The other fault set that this instance should be intersected with.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public FaultSet GetIntersection(FaultSet other)
 		{
 			return new FaultSet(_faults & other._faults);
@@ -110,6 +116,7 @@ namespace SafetySharp.Runtime
 		///   <paramref name="other" />.
 		/// </summary>
 		/// <param name="other">The other fault set that this instance should be unioned with.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public FaultSet GetUnion(FaultSet other)
 		{
 			return new FaultSet(_faults | other._faults);
@@ -117,10 +124,11 @@ namespace SafetySharp.Runtime
 
 		/// <summary>
 		///   Returns a new <see cref="FaultSet" /> that represents the set difference between this
-		///   instance and <paramref name="other"/>.
+		///   instance and <paramref name="other" />.
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public FaultSet GetDifference(FaultSet other)
 		{
 			return new FaultSet(_faults & ~other._faults);
@@ -130,19 +138,29 @@ namespace SafetySharp.Runtime
 		///   Checks whether the <paramref name="fault" /> is contained in the set.
 		/// </summary>
 		/// <param name="fault">The fault that should be checked.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Contains(Fault fault)
 		{
-			Requires.NotNull(fault, nameof(fault));
 			return (_faults & (1 << fault.Identifier)) != 0;
+		}
+
+		/// <summary>
+		///   Checks whether this fault set is a subset of <paramref name="faultSet" />.
+		/// </summary>
+		/// <param name="faultSet">The fault set that is expected to be a super set.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool IsSubsetOf(FaultSet faultSet)
+		{
+			return (_faults & faultSet._faults) == _faults;
 		}
 
 		/// <summary>
 		///   Returns a copy of the fault set that contains <paramref name="fault" />.
 		/// </summary>
 		/// <param name="fault">The fault that should be added.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public FaultSet Add(Fault fault)
 		{
-			Requires.NotNull(fault, nameof(fault));
 			return new FaultSet(_faults | (1L << fault.Identifier));
 		}
 
@@ -151,10 +169,9 @@ namespace SafetySharp.Runtime
 		///   contained in the set.
 		/// </summary>
 		/// <param name="faults">The faults whose activation should be set.</param>
-		/// <param name="activationMode">The activation mode the <paramref name="faults"/> should be set to.</param>
+		/// <param name="activationMode">The activation mode the <paramref name="faults" /> should be set to.</param>
 		internal void SetActivation(Fault[] faults, Activation activationMode)
 		{
-			Requires.NotNull(faults, nameof(faults));
 			CheckFaultCount(faults.Length);
 
 			foreach (var fault in faults)
@@ -165,7 +182,7 @@ namespace SafetySharp.Runtime
 		///   Returns a <see cref="Fault" />-based representation of the set.
 		/// </summary>
 		/// <param name="faults">The faults that can potentially be contained in the set.</param>
-		public IEnumerable<Fault> ToFaultSequence(Fault[] faults)
+		internal IEnumerable<Fault> ToFaultSequence(Fault[] faults)
 		{
 			Requires.NotNull(faults, nameof(faults));
 
@@ -189,16 +206,6 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Checks whether this fault set is a subset of <paramref name="faultSet" />.
-		/// </summary>
-		/// <param name="faultSet">The fault set that is expected to be a super set.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool IsSubsetOf(FaultSet faultSet)
-		{
-			return (_faults & faultSet._faults) == _faults;
-		}
-
-		/// <summary>
 		///   Checks whether the number of faults in <paramref name="faultCount" /> is supported.
 		/// </summary>
 		/// <param name="faultCount">The fault count that should be checked.</param>
@@ -211,6 +218,7 @@ namespace SafetySharp.Runtime
 		///   Indicates whether the current fault set is equal to <paramref name="other" />.
 		/// </summary>
 		/// <param name="other">The other fault set to compare to.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Equals(FaultSet other)
 		{
 			return _faults == other._faults;

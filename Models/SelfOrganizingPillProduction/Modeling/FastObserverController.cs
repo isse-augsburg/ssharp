@@ -107,13 +107,13 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// </returns>
         private int[] FindStationPath(Recipe recipe)
         {
-            var identifiers = Enumerable.Range(0, availableStations.Length);
+            var identifiers = Enumerable.Range(0, availableStations.Length).ToArray();
 
-            var paths = from station in identifiers
+            var paths = (from station in identifiers
                         where Capability.IsSatisfiable(new[] { recipe.RequiredCapabilities[0] }, availableStations[station].AvailableCapabilities)
-                        select new[] { station };
+                        select new[] { station }).ToArray();
 
-            if (paths.Count() == 0)
+            if (paths.Length == 0)
                 return null;
 
             for (int i = 1; i < recipe.RequiredCapabilities.Length; ++i)
@@ -130,8 +130,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                          select path.Concat(new[] { station }).ToArray()
                         ).ToArray();
 
-                if (paths.Count() == 0)
-                    return null;
+				if (paths.Length == 0)
+					return null;
             }
 
             /*
@@ -161,7 +161,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             var capabilities = from index in Enumerable.Range(0, path.Length + 1)
                                where index == path.Length || path[index] == station
                                select recipe.RequiredCapabilities[index];
-            return Capability.IsSatisfiable(capabilities, availableStations[station].AvailableCapabilities);
+            return Capability.IsSatisfiable(capabilities.ToArray(), availableStations[station].AvailableCapabilities);
         }
 
         /// <summary>

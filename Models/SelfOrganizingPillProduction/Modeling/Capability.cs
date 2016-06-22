@@ -6,7 +6,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
 {
     public abstract class Capability
     {
-        public static bool IsSatisfiable(IEnumerable<Capability> required, IEnumerable<Capability> available)
+        public static bool IsSatisfiable(Capability[] required, Capability[] available)
         {
             if (required.OfType<ProduceCapability>().Any() && !available.OfType<ProduceCapability>().Any())
                 return false;
@@ -16,15 +16,17 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             var requiredAmounts = GroupIngredientAmounts(required);
             var availableAmounts = GroupIngredientAmounts(available);
 
-            foreach (IngredientType type in Enum.GetValues(typeof(IngredientType)))
-                if (requiredAmounts.ContainsKey(type)
-                    && (!availableAmounts.ContainsKey(type) || availableAmounts[type] < requiredAmounts[type]))
-                    return false;
+	        foreach (var pair in requiredAmounts)
+	        {
+		        int value;
+		        if (!availableAmounts.TryGetValue(pair.Key, out value) || value < pair.Value)
+			        return false;
+	        }
 
             return true;
         }
 
-        private static Dictionary<IngredientType, int> GroupIngredientAmounts(IEnumerable<Capability> capabilities)
+        private static Dictionary<IngredientType, int> GroupIngredientAmounts(Capability[] capabilities)
         {
             return capabilities.OfType<Ingredient>()
                 .GroupBy(ingredient => ingredient.Type, ingredient => (int)ingredient.Amount)
