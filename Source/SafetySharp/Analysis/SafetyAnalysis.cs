@@ -140,7 +140,7 @@ namespace SafetySharp.Analysis
 
 				// Remove all sets that conflict with the forced or suppressed faults; these sets are considered to be safe.
 				// If no sets remain, skip to the next level
-				sets = RemoveInvalidSets(sets, suppressedSet, forcedSet, safeSets);
+				sets = RemoveInvalidSets(sets, suppressedSet, forcedSet);
 				if (sets.Count == 0)
 					continue;
 
@@ -383,8 +383,7 @@ namespace SafetySharp.Analysis
 		///   Removes all invalid sets from <paramref name="sets" /> that conflict with either <paramref name="suppressedFaults" /> or
 		///   <paramref name="forcedFaults" />.
 		/// </summary>
-		private static HashSet<FaultSet> RemoveInvalidSets(HashSet<FaultSet> sets, FaultSet suppressedFaults, FaultSet forcedFaults,
-														   HashSet<FaultSet> safeSets)
+		private HashSet<FaultSet> RemoveInvalidSets(HashSet<FaultSet> sets, FaultSet suppressedFaults, FaultSet forcedFaults)
 		{
 			var validSets = new HashSet<FaultSet>();
 
