@@ -101,8 +101,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
             model.ScheduleProduction(recipe);
             model.Faults.SuppressActivations();
 
-            var invariant = ((Formula) !recipe.ProcessingComplete).Implies(F(recipe.ProcessingComplete));
-            var result = ModelChecker.Check(model, invariant);
+            var result = ModelChecker.Check(model, F(recipe.ProcessingComplete));
             Assert.That(result.FormulaHolds, "Recipe production never finishes");
         }
     }
