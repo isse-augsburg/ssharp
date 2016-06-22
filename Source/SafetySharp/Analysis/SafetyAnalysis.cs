@@ -222,10 +222,10 @@ namespace SafetySharp.Analysis
 
 			// check if set is trivially safe or critical
 			// (do not add to safeSets / criticalSets if so, in order to keep them small)
-			if (safeSets.Any(safeSet => set.IsSubsetOf(safeSet)))
-				// do not add to safeSets: all subsets are aubsets of safeSet as well
+			if (IsTriviallySafe(set))
+				// do not add to safeSets: all subsets are subsets of safeSet as well
 				return true;
-			else if (criticalSets.Any(criticalSet => criticalSet.IsSubsetOf(set)))
+			else if (IsTriviallyCritical(set))
 				// do not add to criticalSets: non-minimal, and all supersets are supersets of criticalSet as well
 				return false;
 
@@ -292,6 +292,15 @@ namespace SafetySharp.Analysis
 			}
 		}
 
+		bool IsTriviallyCritical(FaultSet faultSet)
+		{
+			return criticalSets.Any(criticalSet => criticalSet.IsSubsetOf(faultSet));
+		}
+
+		bool IsTriviallySafe(FaultSet faultSet)
+		{
+			return safeSets.Any(safeSet => faultSet.IsSubsetOf(safeSet));
+		}
 		/// <summary>
 		///   Creates a function that determines the activation state of a fault.
 		/// </summary>
@@ -355,7 +364,7 @@ namespace SafetySharp.Analysis
 
 							// Check if the newly generated set is a super set of any critical sets or subset of any safe sets;
 							// if so, discard it
-							if (criticalSets.All(s => !s.IsSubsetOf(set)))
+							if (!IsTriviallyCritical(set))
 								result.Add(set);
 						}
 					}
