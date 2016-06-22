@@ -126,13 +126,17 @@ namespace SafetySharp.Analysis
 			serializer.Serialize(model, !hazard);
 			var invariantChecker = new InvariantChecker(serializer.Load, message => OutputWritten?.Invoke(message), Configuration);
 
+			// remember all safe sets of current cardinality - we need them to generate the next power set level
+			HashSet<FaultSet> currentSafe = new HashSet<FaultSet>();
+
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we
 			// know are going to be critical sets due to monotonicity
 			for (var cardinality = 0; cardinality <= allFaults.Length; ++cardinality)
 			{
 				// Generate the sets for the current level that we'll have to check
-				var sets = GeneratePowerSetLevel(cardinality, allFaults);
+				var sets = GeneratePowerSetLevel(cardinality, allFaults, currentSafe);
+				currentSafe.Clear();
 
 				// Remove all sets that conflict with the forced or suppressed faults; these sets are considered to be safe.
 				// If no sets remain, skip to the next level
@@ -165,8 +169,11 @@ namespace SafetySharp.Analysis
 					var set = setsToCheck[0];
 
 					bool isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker);
-					sets.Remove(set);
+					bool isCurrentLevel = sets.Remove(set); // returns true if set was actually contained
 					setsToCheck.RemoveAt(0);
+
+					if (isSafe && isCurrentLevel)
+						currentSafe.Add(set);
 
 					foreach (var heuristic in Heuristics)
 						heuristic.Update(setsToCheck, set, isSafe);
@@ -175,7 +182,9 @@ namespace SafetySharp.Analysis
 				// in case heuristics removed a set (they shouldn't)
 				foreach (var set in sets)
 				{
-					CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker);
+					bool isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker);
+					if (isSafe)
+						currentSafe.Add(set);
 				}
 			}
 
@@ -322,7 +331,7 @@ namespace SafetySharp.Analysis
 		/// <param name="criticalSets">The sets that are known to be critical sets. All super sets are discarded.</param>
 		/// <param name="cardinality">The cardinality of the sets that should be generated.</param>
 		/// <param name="faults">The fault set the power set is generated for.</param>
-		private HashSet<FaultSet> GeneratePowerSetLevel(int cardinality, Fault[] faults)
+		private HashSet<FaultSet> GeneratePowerSetLevel(int cardinality, Fault[] faults, HashSet<FaultSet> currentSafe)
 		{
 			var result = new HashSet<FaultSet>();
 
@@ -347,12 +356,8 @@ namespace SafetySharp.Analysis
 					// which had a cardinality that is one less than the sets we're going to generate now. The basic
 					// idea is that we create the union between all safe sets and all singleton sets and discard
 					// the ones we don't want
-					foreach (var safeSet in safeSets)
+					foreach (var safeSet in currentSafe)
 					{
-						// skip safe sets that are too small (already checked) or too large (suggested by heuristics)
-						if (safeSet.Cardinality != cardinality - 1)
-							continue;
-
 						foreach (var fault in faults)
 						{
 							// If we're trying to add an element to the set that it already contains, we get a set
