@@ -358,14 +358,19 @@ namespace SafetySharp.Analysis
 					// idea is that we create the union between all safe sets and all singleton sets and discard
 					// the ones we don't want, while avoiding duplicate generation of sets.
 
-					var prev = new FaultSet();
+					var setsToRemove = new HashSet<FaultSet>();
 					foreach (var fault in faults)
 					{
-						prev = prev.Add(fault);
+						setsToRemove.Clear();
+
 						foreach (var safeSet in previousSafe)
 						{
-							if (!safeSet.GetIntersection(prev).IsEmpty) // implies fault not in safeSet
+							// avoid duplicate set generation
+							if (safeSet.Contains(fault))
+							{
+								setsToRemove.Add(safeSet);
 								continue;
+							}
 
 							var set = safeSet.Add(fault);
 
@@ -374,6 +379,10 @@ namespace SafetySharp.Analysis
 							if (!IsTriviallyCritical(set))
 								result.Add(set);
 						}
+
+						// all supersets of sets in setsToRemove have either
+						// been previously generated or are critical
+						previousSafe.ExceptWith(setsToRemove);
 					}
 					break;
 			}
