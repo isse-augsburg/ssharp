@@ -46,6 +46,7 @@
     <Compile Include="Analysis\AnalysisException.cs" />
     <Compile Include="Analysis\AnalysisResult.cs" />
     <Compile Include="Analysis\FaultActivationBehaviour.cs" />
+    <Compile Include="Analysis\FaultSetCollection.cs" />
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
     <Compile Include="Analysis\Heuristics\IFaultSetHeuristic.cs" />
     <Compile Include="Analysis\Heuristics\MinimalRedundancyHeuristic.cs" />
