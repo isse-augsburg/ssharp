@@ -139,7 +139,7 @@ namespace SafetySharp.Analysis
 					}
 
 					var success = InterpretExitCode(_ltsMin.ExitCode);
-					return new AnalysisResult(success, null, 0, 0, 0, 0);
+					return new AnalysisResult { FormulaHolds = success };
 				}
 			}
 			finally

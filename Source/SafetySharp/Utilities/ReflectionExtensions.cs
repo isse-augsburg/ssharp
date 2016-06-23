@@ -297,9 +297,10 @@ namespace SafetySharp.Utilities
 			if (mode == SerializationMode.Optimized && discoveringObjects && attributeMember.HasAttribute<NonDiscoverableAttribute>())
 				return true;
 
-			// Read-only fields are implicitly marked with [Hidden]
+			// Read-only fields are implicitly marked with [Hidden]; except for read-only fields of structs,
+			// as structs can be reinitialized at any time
 			var hiddenAttribute = attributeMember.GetCustomAttribute<HiddenAttribute>();
-			var isHidden = hiddenAttribute != null || (fieldInfo != null && fieldInfo.IsInitOnly);
+			var isHidden = hiddenAttribute != null || (fieldInfo != null && fieldInfo.IsInitOnly && fieldInfo.DeclaringType.IsClass);
 
 			// If the member is hidden, only ignore it in optimized serializations when we're not discovering objects
 			if (mode == SerializationMode.Optimized && !discoveringObjects && isHidden)

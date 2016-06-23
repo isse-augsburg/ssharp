@@ -53,12 +53,12 @@ namespace SafetySharp.Runtime
 		private readonly SerializationDelegate _deserialize;
 
 		/// <summary>
-		///   Serializes a state of the model.
+		///   The faults contained in the model.
 		/// </summary>
-		private readonly SerializationDelegate _serialize;
+		private readonly Fault[] _faults;
 
 		/// <summary>
-		/// Restricts the ranges of the model's state variables.
+		///   Restricts the ranges of the model's state variables.
 		/// </summary>
 		private readonly Action _restrictRanges;
 
@@ -66,6 +66,11 @@ namespace SafetySharp.Runtime
 		/// Resets the rewards to 0 after a time step.
 		/// </summary>
 		private readonly Action _resetRewards;
+
+		/// <summary>
+		///   Serializes a state of the model.
+		/// </summary>
+		private readonly SerializationDelegate _serialize;
 
 		/// <summary>
 		///   The objects referenced by the model that participate in state serialization.
@@ -104,8 +109,6 @@ namespace SafetySharp.Runtime
 			Model = serializedData.Model;
 			SerializedModel = buffer;
 			RootComponents = rootComponents.Cast<Component>().ToArray();
-			Faults = objectTable.OfType<Fault>().Where(fault => fault.Activation == Activation.Nondeterministic && fault.IsUsed).ToArray();
-			ActivationSensitiveFaults = Faults.Where(fault => fault.RequiresActivationNotification).ToArray();
 			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
 			Formulas = formulas;
 			Rewards = objectTable.OfType<RewardRetriever>().ToArray();
@@ -115,11 +118,15 @@ namespace SafetySharp.Runtime
 		// the closure types of the state formulas
 		var objects = Model.ReferencedObjects;
 			var deterministicFaults = objectTable.OfType<Fault>().Where(fault => fault.Activation != Activation.Nondeterministic);
+			// Create a local object table just for the objects referenced by the model; only these objects
+			// have to be serialized and deserialized. The local object table does not contain, for instance,
+			// the closure types of the state formulas.
+			_faults = objectTable.OfType<Fault>().Where(fault => fault.IsUsed).ToArray();
+			_serializedObjects = new ObjectTable(Model.ReferencedObjects);
 
-			_serializedObjects = new ObjectTable(objects.Except(deterministicFaults, ReferenceEqualityComparer<object>.Default));
 			Objects = objectTable;
-
 			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(Model, _serializedObjects, SerializationMode.Optimized);
+			UpdateFaultSets();
 
 			_deserialize = StateVectorLayout.CreateDeserializer(_serializedObjects);
 			_serialize = StateVectorLayout.CreateSerializer(_serializedObjects);
@@ -137,7 +144,7 @@ namespace SafetySharp.Runtime
 				_restrictRanges();
 			}
 
-			FaultSet.CheckFaultCount(Faults.Length);
+			FaultSet.CheckFaultCount(_faults.Length);
 			StateFormulaSet.CheckFormulaCount(StateFormulas.Length);
 		}
 
@@ -187,18 +194,50 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the faults contained in the model that can be activated nondeterministically.
 		/// </summary>
-		public Fault[] Faults { get; }
+		public Fault[] NondeterministicFaults { get; private set; }
 
 		/// <summary>
 		///   Gets the faults contained in the model that can be activated nondeterministically and that must be notified about their
 		///   activation.
 		/// </summary>
-		internal Fault[] ActivationSensitiveFaults { get; }
+		internal Fault[] ActivationSensitiveFaults { get; private set; }
 
 		/// <summary>
 		///   Gets the state formulas of the model.
 		/// </summary>
 		internal StateFormula[] StateFormulas { get; }
+
+		/// <summary>
+		///   Updates the activation states of the model's faults.
+		/// </summary>
+		/// <param name="getActivation">The callback that should be used to determine a fault's activation state.</param>
+		internal void ChangeFaultActivations(Func<Fault, Activation> getActivation)
+		{
+			foreach (var fault in _faults)
+				fault.Activation = getActivation(fault);
+
+			UpdateFaultSets();
+		}
+
+		/// <summary>
+		///   Updates the fault sets in accordance with the fault's actual activation states.
+		/// </summary>
+		internal void UpdateFaultSets()
+		{
+			NondeterministicFaults = _faults.Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
+			ActivationSensitiveFaults = NondeterministicFaults.Where(fault => fault.RequiresActivationNotification).ToArray();
+		}
+
+		/// <summary>
+		///   Copies the fault activation states of this instance to <paramref name="target" />.
+		/// </summary>
+		internal void CopyFaultActivationStates(RuntimeModel target)
+		{
+			for (var i = 0; i < _faults.Length; ++i)
+				target._faults[i].Activation = _faults[i].Activation;
+
+			target.UpdateFaultSets();
+		}
 
 		/// <summary>
 		///   Deserializes the model's state from <paramref name="serializedState" />.
@@ -235,6 +274,8 @@ namespace SafetySharp.Runtime
 
 				_restrictRanges();
 			}
+
+			_choiceResolver.Clear();
 		}
 
 		/// <summary>
@@ -246,6 +287,7 @@ namespace SafetySharp.Runtime
 			_resetRewards();
 
 			foreach (var fault in Faults)
+			foreach (var fault in NondeterministicFaults)
 				fault.Reset();
 
 			foreach (var obj in _serializedObjects.OfType<IInitializable>())
@@ -288,6 +330,7 @@ namespace SafetySharp.Runtime
 			_resetRewards();
 
 			foreach (var fault in Faults)
+			foreach (var fault in NondeterministicFaults)
 				fault.Reset();
 
 			foreach (var component in RootComponents)

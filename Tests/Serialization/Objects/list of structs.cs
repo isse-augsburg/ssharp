@@ -20,48 +20,59 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
+namespace Tests.Serialization.Objects
 {
-	using SafetySharp.Modeling;
+	using System.Collections.Generic;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	/// <summary>
-	///   Represents the height control of the Elbtunnel.
-	/// </summary>
-	public class HeightControl : Component
+	internal class ListOfStructs : SerializationObject
 	{
-		/// <summary>
-		///   The end-control step of the height control.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public EndControl EndControl;
-
-		/// <summary>
-		///   The main-control step of the height control.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public MainControl MainControl;
-
-		/// <summary>
-		///   The pre-control step of the height control.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public PreControl PreControl;
-
-		/// <summary>
-		///   The traffic lights that are used to signal that the tunnel is closed.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public TrafficLights TrafficLights;
-
-		/// <summary>
-		///   Updates the internal state of the component.
-		/// </summary>
-		public override void Update()
+		protected override void Check()
 		{
-			Update(PreControl, MainControl, EndControl);
+			var o1 = new object();
+			var o2 = new object();
+			var o3 = new object();
+			var l = new List<S> { new S(o1, o2), new S(o3, o2), new S(o1, o3) };
 
-			if (MainControl.IsVehicleLeavingOnLeftLane || EndControl.IsCrashPotentiallyImminent)
-				TrafficLights.SwitchToRed();
+			GenerateCode(SerializationMode.Optimized, l, o1, o2, o3);
+
+			Serialize();
+			l[0] = new S();
+			l[1] = new S();
+			l[2] = new S();
+
+			Deserialize();
+			l[0].O1.ShouldBe(o1);
+			l[0].O2.ShouldBe(o2);
+			l[1].O1.ShouldBe(o3);
+			l[1].O2.ShouldBe(o2);
+			l[2].O1.ShouldBe(o1);
+			l[2].O2.ShouldBe(o3);
+
+			l.Remove(new S(o3, o2));
+
+			Serialize();
+			l[0] = new S();
+			l[1] = new S();
+
+			Deserialize();
+			l[0].O1.ShouldBe(o1);
+			l[0].O2.ShouldBe(o2);
+			l[1].O1.ShouldBe(o1);
+			l[1].O2.ShouldBe(o3);
+		}
+
+		private struct S
+		{
+			public S(object o1, object o2)
+			{
+				O1 = o1;
+				O2 = o2;
+			}
+
+			public object O1 { get; }
+			public object O2 { get; }
 		}
 	}
 }

@@ -82,13 +82,6 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Invoked when the component should initialize bindings between itself and its subcomponents.
-		/// </summary>
-		protected internal virtual void CreateBindings()
-		{
-		}
-
-		/// <summary>
 		///   Establishes a port binding between the <paramref name="requiredPort" /> and the <paramref name="providedPort" />.
 		/// </summary>
 		/// <param name="requiredPort">The required port that should be bound to the <paramref name="providedPort" />.</param>

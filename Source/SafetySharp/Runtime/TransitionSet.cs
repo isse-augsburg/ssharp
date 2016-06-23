@@ -89,7 +89,7 @@ namespace SafetySharp.Runtime
 
 			_lookupBuffer.Resize(capacity * sizeof(int), zeroMemory: false);
 			_targetStateGroupElementsBuffer.Resize(capacity * sizeof(TargetStateGroupElement), zeroMemory: false);
-			_hashedStateBuffer.Resize(capacity * _stateVectorSize, zeroMemory: true);
+			_hashedStateBuffer.Resize(capacity * _stateVectorSize, zeroMemory: false);
 
 			_stateHashesOfTargetStateGroups = new List<uint>(capacity);
 			_capacity = capacity;
@@ -124,7 +124,7 @@ namespace SafetySharp.Runtime
 
 			// 1. Serialize the model's computed state; that is the successor state of the transition's source state
 			//    modulo any changes resulting from notifications of fault activations
-			var activatedFaults = FaultSet.FromActivatedFaults(model.Faults);
+			var activatedFaults = FaultSet.FromActivatedFaults(model.NondeterministicFaults);
 			model.Serialize(_tempStateMemoryUnnotified);
 			
 			// 2. Execute fault activation notifications, serialize the updated state if necessary, and store the transition

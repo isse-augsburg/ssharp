@@ -28,13 +28,13 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 	{
 		private readonly StateMachine<State> _stateMachine = State.Approaching;
 
-		[Hidden]
+		[Hidden, Subcomponent]
 		public Brakes Brakes;
 
-		[Hidden]
+		[Hidden, Subcomponent]
 		public Odometer Odometer;
 
-		[Hidden]
+		[Hidden, Subcomponent]
 		public RadioModule Radio;
 
 		private int ActivatePosition

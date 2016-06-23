@@ -36,6 +36,7 @@ namespace Tests
 	public abstract class AnalysisTestObject : TestObject
 	{
 		protected CounterExample CounterExample { get; private set; }
+		protected bool SuppressCounterExampleGeneration { get; set; }
 
 		protected void SimulateCounterExample(CounterExample counterExample, Action<Simulator> action)
 		{
@@ -80,7 +81,10 @@ namespace Tests
 
 		protected SafetyAnalysis.Result DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality)
 		{
-			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 10 } };
+			var analysis = new SafetyAnalysis
+			{
+				Configuration = { StateCapacity = 1 << 10, GenerateCounterExample = !SuppressCounterExampleGeneration }
+			};
 			analysis.OutputWritten += message => Output.Log("{0}", message);
 
 			var result = analysis.ComputeMinimalCriticalSets(model, hazard, maxCardinality);
@@ -102,7 +106,10 @@ namespace Tests
 
 			var ssharpChecker = modelChecker as SSharpChecker;
 			if (ssharpChecker != null)
+			{
 				ssharpChecker.Configuration.StateCapacity = 1 << 16;
+				ssharpChecker.Configuration.GenerateCounterExample = !SuppressCounterExampleGeneration;
+			}
 
 			return modelChecker;
 		}

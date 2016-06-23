@@ -28,6 +28,7 @@ namespace SafetySharp.Analysis
 	using System.Threading;
 	using System.Threading.Tasks;
 	using FormulaVisitors;
+	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;
@@ -40,22 +41,24 @@ namespace SafetySharp.Analysis
 		private const int ReportStateCountDelta = 200000;
 		private readonly LoadBalancer _loadBalancer;
 		private readonly Action<string> _output;
+		private readonly bool _progressOnly;
 		private readonly StateStorage _states;
+		private readonly bool _suppressCounterExampleGeneration;
 		private readonly Worker[] _workers;
 		private long _computedTransitionCount;
 		private CounterExample _counterExample;
 		private Exception _exception;
+		private bool _formulaIsValid = true;
 		private int _generatingCounterExample = -1;
 		private int _levelCount;
 		private int _nextReport = ReportStateCountDelta;
-		private readonly bool _progressOnly;
 		private int _stateCount;
 		private long _transitionCount;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="createModel">Creates model that should be checked.</param>
+		/// <param name="createModel">Creates the model that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		internal InvariantChecker(Func<RuntimeModel> createModel, Action<string> output, AnalysisConfiguration configuration)
@@ -66,6 +69,7 @@ namespace SafetySharp.Analysis
 			_progressOnly = configuration.ProgressReportsOnly;
 			_output = output;
 			_workers = new Worker[configuration.CpuCount];
+			_suppressCounterExampleGeneration = !configuration.GenerateCounterExample;
 
 			var tasks = new Task[configuration.CpuCount];
 			var stacks = new StateStack[configuration.CpuCount];
@@ -85,10 +89,6 @@ namespace SafetySharp.Analysis
 			Task.WaitAll(tasks);
 
 			_states = new StateStorage(_workers[0].StateVectorLayout, configuration.StateCapacity);
-
-#if false
-			Console.WriteLine(_workers[0].StateVectorLayout);
-#endif
 		}
 
 		/// <summary>
@@ -96,6 +96,8 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		internal AnalysisResult Check()
 		{
+			Reset();
+
 			if (!_progressOnly)
 			{
 				_output($"Performing invariant check with {_workers.Length} CPU cores.");
@@ -119,7 +121,48 @@ namespace SafetySharp.Analysis
 			if (_counterExample != null && !_progressOnly)
 				_output("Invariant violation detected.");
 
-			return new AnalysisResult(_counterExample == null, _counterExample, _stateCount, _transitionCount, _computedTransitionCount, _levelCount);
+			return new AnalysisResult
+			{
+				FormulaHolds = _formulaIsValid,
+				CounterExample = _counterExample,
+				StateCount = _stateCount,
+				TransitionCount = _transitionCount,
+				ComputedTransitionCount = _computedTransitionCount,
+				LevelCount = _levelCount,
+				StateVectorLayout = _workers[0].StateVectorLayout
+			};
+		}
+
+		/// <summary>
+		///   Updates the activation states of the model's faults.
+		/// </summary>
+		/// <param name="getActivation">The callback that should be used to determine a fault's activation state.</param>
+		internal void ChangeFaultActivations(Func<Fault, Activation> getActivation)
+		{
+			foreach (var worker in _workers)
+				worker.ChangeFaultActivations(getActivation);
+		}
+
+		/// <summary>
+		///   Resets the checker so that a new invariant check can be started.
+		/// </summary>
+		private void Reset()
+		{
+			_formulaIsValid = true;
+			_computedTransitionCount = 0;
+			_counterExample = null;
+			_exception = null;
+			_generatingCounterExample = -1;
+			_levelCount = 0;
+			_nextReport = ReportStateCountDelta;
+			_stateCount = 0;
+			_transitionCount = 0;
+
+			_loadBalancer.Reset();
+			_states.Clear();
+
+			foreach (var worker in _workers)
+				worker.Reset();
 		}
 
 		/// <summary>
@@ -166,11 +209,11 @@ namespace SafetySharp.Analysis
 		private class Worker : DisposableObject
 		{
 			private readonly InvariantChecker _context;
+			private readonly Func<RuntimeModel> _createModel;
 			private readonly int _index;
 			private readonly RuntimeModel _model;
 			private readonly StateStack _stateStack;
 			private readonly TransitionSet _transitions;
-			private readonly Func<RuntimeModel> _createModel;
 			private StateStorage _states;
 
 			/// <summary>
@@ -182,8 +225,8 @@ namespace SafetySharp.Analysis
 
 				_context = context;
 				_createModel = createModel;
-				_model = _createModel();
 				_stateStack = stateStack;
+				_model = _createModel();
 
 				var invariant = CompilationVisitor.Compile(_model.Formulas[0]);
 				_transitions = new TransitionSet(_model, successorCapacity, new Func<bool>[] {invariant}, new RewardRetriever[] { });
@@ -220,7 +263,7 @@ namespace SafetySharp.Analysis
 			/// <summary>
 			///   Checks whether the model's invariant holds for all states.
 			/// </summary>
-			public void Check()
+			internal void Check()
 			{
 				_states = _context._states;
 
@@ -256,6 +299,25 @@ namespace SafetySharp.Analysis
 			}
 
 			/// <summary>
+			///   Updates the activation states of the worker's faults.
+			/// </summary>
+			/// <param name="getActivation">The callback that should be used to determine a fault's activation state.</param>
+			internal void ChangeFaultActivations(Func<Fault, Activation> getActivation)
+			{
+				_model.ChangeFaultActivations(getActivation);
+			}
+
+			/// <summary>
+			///   Resets the worker so that a new invariant check can be started.
+			/// </summary>
+			internal void Reset()
+			{
+				_model.Reset();
+				_stateStack.Clear();
+				_transitions.Clear();
+			}
+
+			/// <summary>
 			///   Adds the states stored in the <see cref="_transitions" /> cache.
 			/// </summary>
 			private void AddStates()
@@ -285,6 +347,7 @@ namespace SafetySharp.Analysis
 					// Check if the invariant is violated; if so, generate a counter example and abort
 					if (!transition.Formulas[0])
 					{
+						_context._formulaIsValid = false;
 						_context._loadBalancer.Terminate();
 						CreateCounterExample(endsWithException: false);
 
@@ -306,6 +369,9 @@ namespace SafetySharp.Analysis
 				if (Interlocked.CompareExchange(ref _context._generatingCounterExample, _index, -1) != -1)
 					return;
 
+				if (_context._suppressCounterExampleGeneration)
+					return;
+
 				var indexedTrace = _stateStack.GetTrace();
 				var traceLength = 1 + (endsWithException ? indexedTrace.Length + 1 : indexedTrace.Length);
 				var trace = new byte[traceLength][];
@@ -322,8 +388,13 @@ namespace SafetySharp.Analysis
 
 				// We have to create new model instances to generate and initialize the counter example, otherwise hidden
 				// state variables might prevent us from doing so if they somehow influence the state
-				var replayInfo = _createModel().GenerateReplayInformation(trace, endsWithException);
-				_context._counterExample = new CounterExample(_createModel(), trace, replayInfo, endsWithException);
+				var replayModel = _createModel();
+				var counterExampleModel = _createModel();
+				_model.CopyFaultActivationStates(replayModel);
+				_model.CopyFaultActivationStates(counterExampleModel);
+
+				var replayInfo = replayModel.GenerateReplayInformation(trace, endsWithException);
+				_context._counterExample = new CounterExample(counterExampleModel, trace, replayInfo, endsWithException);
 			}
 
 			/// <summary>
@@ -345,9 +416,9 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		private class LoadBalancer
 		{
-			private readonly bool[] _awaitingWork;
-			private readonly ConcurrentQueue<int> _idleWorkers;
 			private readonly StateStack[] _stacks;
+			private bool[] _awaitingWork;
+			private ConcurrentQueue<int> _idleWorkers;
 
 			private volatile bool _terminated;
 
@@ -358,8 +429,7 @@ namespace SafetySharp.Analysis
 			public LoadBalancer(StateStack[] stacks)
 			{
 				_stacks = stacks;
-				_idleWorkers = new ConcurrentQueue<int>();
-				_awaitingWork = new bool[stacks.Length];
+				Reset();
 			}
 
 			/// <summary>
@@ -454,6 +524,16 @@ namespace SafetySharp.Analysis
 			public void Terminate()
 			{
 				_terminated = true;
+			}
+
+			/// <summary>
+			///   Resets the load balancer so that a new invariant check can be started.
+			/// </summary>
+			public void Reset()
+			{
+				_terminated = false;
+				_idleWorkers = new ConcurrentQueue<int>();
+				_awaitingWork = new bool[_stacks.Length];
 			}
 		}
 	}

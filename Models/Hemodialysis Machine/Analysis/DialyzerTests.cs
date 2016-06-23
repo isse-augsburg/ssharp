@@ -131,7 +131,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			TimeStepsLeft = (TimeStepsLeft > 0) ? (TimeStepsLeft - 1) : 0;
 		}
 
-		protected override void CreateBindings()
+		public DialyzerTestEnvironmentPatient()
 		{
 			ArteryFlow.SendForward=CreateBlood;
 			VeinFlow.SendBackward=CreateBloodSuction;
@@ -176,7 +176,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			return outgoingSuction;
 		}
 
-		protected override void CreateBindings()
+		public DialyzerTestEnvironmentDialyzingFluidDeliverySystem()
 		{
 			DialyzingFluidFlowSource.SendForward = CreateDialyzingFluid;
 			DialyzingFluidFlowSink.SendBackward = CreateDialyzingFluidSuction;

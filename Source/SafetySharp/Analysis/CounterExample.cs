@@ -233,6 +233,8 @@ namespace SafetySharp.Analysis
 					fault.Activation = (Activation)reader.ReadInt32();
 
 				var runtimeModel = new RuntimeModel(modelData);
+				runtimeModel.UpdateFaultSets();
+
 				var metadataStream = new MemoryStream(reader.ReadBytes(reader.ReadInt32()));
 				var formatter = new BinaryFormatter();
 				var slotMetadata = new StateVectorLayout((StateSlotMetadata[])formatter.Deserialize(metadataStream));

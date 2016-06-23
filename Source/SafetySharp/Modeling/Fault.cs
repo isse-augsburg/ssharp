@@ -107,6 +107,8 @@ namespace SafetySharp.Modeling
 					IsActivated = false;
 				else
 					IsActivated = value == Activation.Forced;
+
+				_activationIsUnknown = value == Activation.Nondeterministic;
 			}
 		}
 

@@ -20,48 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
+namespace SafetySharp.Modeling
 {
-	using SafetySharp.Modeling;
+	using System;
 
 	/// <summary>
-	///   Represents the height control of the Elbtunnel.
+	///   When applied to a field or property of a <see cref="Component" /> class that is of a <see cref="IComponent" />-derived
+	///   type, indicates that the component instance stored in the member is a logical part of the declaring component, i.e.,
+	///   it is one of the declaring component's subcomponents.
 	/// </summary>
-	public class HeightControl : Component
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+	public sealed class SubcomponentAttribute : Attribute
 	{
-		/// <summary>
-		///   The end-control step of the height control.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public EndControl EndControl;
-
-		/// <summary>
-		///   The main-control step of the height control.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public MainControl MainControl;
-
-		/// <summary>
-		///   The pre-control step of the height control.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public PreControl PreControl;
-
-		/// <summary>
-		///   The traffic lights that are used to signal that the tunnel is closed.
-		/// </summary>
-		[Hidden, Subcomponent]
-		public TrafficLights TrafficLights;
-
-		/// <summary>
-		///   Updates the internal state of the component.
-		/// </summary>
-		public override void Update()
-		{
-			Update(PreControl, MainControl, EndControl);
-
-			if (MainControl.IsVehicleLeavingOnLeftLane || EndControl.IsCrashPotentiallyImminent)
-				TrafficLights.SwitchToRed();
-		}
 	}
 }

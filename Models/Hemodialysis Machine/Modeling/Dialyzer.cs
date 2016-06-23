@@ -134,7 +134,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 			
 		}
 
-		protected override void CreateBindings()
+		public Dialyzer()
 		{
 			DialyzingFluidFlow.UpdateBackward = SetDialyzingFluidFlowSuction;
 			DialyzingFluidFlow.UpdateForward = SetDialyzingFluidFlow;
