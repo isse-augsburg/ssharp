@@ -353,17 +353,18 @@ namespace SafetySharp.Analysis
 					}
 					break;
 				default:
-					// We now generate the sets with the requested cardinality based on the sets from the previous level 
+					// We now generate the sets with the requested cardinality based on the sets from the previous level
 					// which had a cardinality that is one less than the sets we're going to generate now. The basic
 					// idea is that we create the union between all safe sets and all singleton sets and discard
-					// the ones we don't want
-					foreach (var safeSet in previousSafe)
+					// the ones we don't want, while avoiding duplicate generation of sets.
+
+					var prev = new FaultSet();
+					foreach (var fault in faults)
 					{
-						foreach (var fault in faults)
+						prev = prev.Add(fault);
+						foreach (var safeSet in previousSafe)
 						{
-							// If we're trying to add an element to the set that it already contains, we get a set
-							// we've already checked before; discard it
-							if (safeSet.Contains(fault))
+							if (!safeSet.GetIntersection(prev).IsEmpty) // implies fault not in safeSet
 								continue;
 
 							var set = safeSet.Add(fault);
