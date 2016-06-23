@@ -39,7 +39,7 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public sealed class SafetyAnalysis
 	{
-		private readonly HashSet<FaultSet> safeSets = new HashSet<FaultSet>();
+		private FaultSetCollection safeSets;
 		private readonly HashSet<FaultSet> criticalSets = new HashSet<FaultSet>();
 		private readonly HashSet<FaultSet> checkedSets = new HashSet<FaultSet>();
 		private readonly Dictionary<FaultSet, CounterExample> counterExamples = new Dictionary<FaultSet, CounterExample>();
@@ -120,6 +120,7 @@ namespace SafetySharp.Analysis
 
 			// remove information from previous analyses
 			Reset();
+			safeSets = new FaultSetCollection(allFaults.Length);
 
 			// Serialize the model and initialize the invariant checker
 			var serializer = new RuntimeModelSerializer();
@@ -203,7 +204,6 @@ namespace SafetySharp.Analysis
 
 		private void Reset()
 		{
-			safeSets.Clear();
 			criticalSets.Clear();
 			checkedSets.Clear();
 			counterExamples.Clear();
@@ -309,7 +309,7 @@ namespace SafetySharp.Analysis
 
 		bool IsTriviallySafe(FaultSet faultSet)
 		{
-			return safeSets.Any(safeSet => faultSet.IsSubsetOf(safeSet));
+			return safeSets.ContainsSupersetOf(faultSet);
 		}
 
 		/// <summary>
