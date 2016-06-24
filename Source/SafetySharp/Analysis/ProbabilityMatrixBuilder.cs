@@ -67,7 +67,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="createModel">Creates model that should be checked.</param>
+		/// <param name="createModel">Creates the model that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		internal ProbabilityMatrixBuilder(Func<RuntimeModel> createModel, Action<string> output, AnalysisConfiguration configuration)
@@ -107,11 +107,42 @@ namespace SafetySharp.Analysis
 #endif
 		}
 
+
+		/// <summary>
+		///   Updates the activation states of the model's faults.
+		/// </summary>
+		/// <param name="getActivation">The callback that should be used to determine a fault's activation state.</param>
+		internal void ChangeFaultActivations(Func<Fault, Activation> getActivation)
+		{
+			foreach (var worker in _workers)
+				worker.ChangeFaultActivations(getActivation);
+		}
+
+		/// <summary>
+		///   Resets the checker so that a new invariant check can be started.
+		/// </summary>
+		private void Reset()
+		{
+			_computedTransitionCount = 0;
+			_levelCount = 0;
+			_nextReport = ReportStateCountDelta;
+			_stateCount = 0;
+			_transitionCount = 0;
+
+			_loadBalancer.Reset();
+			_states.Clear();
+
+			foreach (var worker in _workers)
+				worker.Reset();
+		}
+
 		/// <summary>
 		///   Create probability matrix by visiting every state.
 		/// </summary>
 		internal SparseProbabilityMatrix CreateProbabilityMatrix()
 		{
+			Reset();
+
 			if (!_progressOnly)
 			{
 				_output($"Performing creation of probability matrix with {_workers.Length} CPU cores.");
@@ -134,6 +165,7 @@ namespace SafetySharp.Analysis
 
 			return _workers[0].ProbabilityMatrix;
 		}
+
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
@@ -270,7 +302,7 @@ namespace SafetySharp.Analysis
 			/// <summary>
 			///   Create probability matrix by visiting every state.
 			/// </summary>
-			public void CreateProbabilityMatrix()
+			internal void CreateProbabilityMatrix()
 			{
 				_states = _context._states;
 
@@ -301,6 +333,26 @@ namespace SafetySharp.Analysis
 						_context.Report();
 				}
 				
+			}
+
+
+			/// <summary>
+			///   Updates the activation states of the worker's faults.
+			/// </summary>
+			/// <param name="getActivation">The callback that should be used to determine a fault's activation state.</param>
+			internal void ChangeFaultActivations(Func<Fault, Activation> getActivation)
+			{
+				_model.ChangeFaultActivations(getActivation);
+			}
+
+			/// <summary>
+			///   Resets the worker so that a new invariant check can be started.
+			/// </summary>
+			internal void Reset()
+			{
+				_model.Reset();
+				_stateStack.Clear();
+				_transitions.Clear();
 			}
 
 			/// <summary>
@@ -384,9 +436,9 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		private class LoadBalancer
 		{
-			private readonly bool[] _awaitingWork;
-			private readonly ConcurrentQueue<int> _idleWorkers;
 			private readonly StateStack[] _stacks;
+			private bool[] _awaitingWork;
+			private ConcurrentQueue<int> _idleWorkers;
 
 			private volatile bool _terminated;
 
@@ -397,8 +449,7 @@ namespace SafetySharp.Analysis
 			public LoadBalancer(StateStack[] stacks)
 			{
 				_stacks = stacks;
-				_idleWorkers = new ConcurrentQueue<int>();
-				_awaitingWork = new bool[stacks.Length];
+				Reset();
 			}
 
 			/// <summary>
@@ -493,6 +544,16 @@ namespace SafetySharp.Analysis
 			public void Terminate()
 			{
 				_terminated = true;
+			}
+
+			/// <summary>
+			///   Resets the load balancer so that a new invariant check can be started.
+			/// </summary>
+			public void Reset()
+			{
+				_terminated = false;
+				_idleWorkers = new ConcurrentQueue<int>();
+				_awaitingWork = new bool[_stacks.Length];
 			}
 		}
 	}

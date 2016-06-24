@@ -269,9 +269,6 @@ namespace SafetySharp.Runtime
 				Deserialize(state);
 				_resetRewards();
 
-				foreach (var obj in _serializedObjects.OfType<IInitializable>())
-					obj.Initialize();
-
 				_restrictRanges();
 			}
 
@@ -285,8 +282,7 @@ namespace SafetySharp.Runtime
 		private void ExecuteInitialStep()
 		{
 			_resetRewards();
-
-			foreach (var fault in Faults)
+			
 			foreach (var fault in NondeterministicFaults)
 				fault.Reset();
 
@@ -298,14 +294,14 @@ namespace SafetySharp.Runtime
 				case EffectlessFaultsMinimizationMode.Disable:
 					// Activate all faults
 					// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
-					foreach (var fault in Faults)
+					foreach (var fault in NondeterministicFaults)
 					{
 						fault.TryActivate();
 					}
 					break;
 				case EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults:
 					// Activate all non-transient faults
-					foreach (var fault in Faults)
+					foreach (var fault in NondeterministicFaults)
 					{
 						if (!(fault is TransientFault))
 							fault.TryActivate();
@@ -328,8 +324,7 @@ namespace SafetySharp.Runtime
 		internal void ExecuteStep()
 		{
 			_resetRewards();
-
-			foreach (var fault in Faults)
+			
 			foreach (var fault in NondeterministicFaults)
 				fault.Reset();
 
@@ -341,14 +336,14 @@ namespace SafetySharp.Runtime
 				case EffectlessFaultsMinimizationMode.Disable:
 					// Activate all faults
 					// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
-					foreach (var fault in Faults)
+					foreach (var fault in NondeterministicFaults)
 					{
 						fault.TryActivate();
 					}
 					break;
 				case EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults:
 					// Activate all non-transient faults
-					foreach (var fault in Faults)
+					foreach (var fault in NondeterministicFaults)
 					{
 						if (!(fault is TransientFault))
 							fault.TryActivate();
