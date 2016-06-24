@@ -99,7 +99,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         }
 
         /// <summary>
-        /// Finds a sequence of connected stations that are able to fulfill the recipe's capabilities.
+        /// Finds a sequence of connected stations that are able to fulfill the <param name="recipe"/>'s capabilities.
         /// </summary>
         /// <returns>
         /// An array of station identifiers, one for each capability. This array does not include stations
@@ -107,59 +107,69 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// </returns>
         private int[] FindStationPath(Recipe recipe)
         {
-            var identifiers = Enumerable.Range(0, availableStations.Length).ToArray();
+            int[] path = new int[recipe.RequiredCapabilities.Length];
 
-            var paths = (from station in identifiers
-                        where Capability.IsSatisfiable(new[] { recipe.RequiredCapabilities[0] }, availableStations[station].AvailableCapabilities)
-                        select new[] { station }).ToArray();
-
-            if (paths.Length == 0)
-                return null;
-
-            for (int i = 1; i < recipe.RequiredCapabilities.Length; ++i)
+            for (int first = 0; first < availableStations.Length; ++first)
             {
-                paths = (
-                         from path in paths
-                         from station in identifiers
-                         let last = path[path.Length - 1]
-                         // if station is reachable from the previous path
-                         where pathMatrix[last, station] != -1
-                         // and station has the next required capability
-                         where CanSatisfyNext(recipe, path, station)
-                         // append station to the path
-                         select path.Concat(new[] { station }).ToArray()
-                        ).ToArray();
-
-				if (paths.Length == 0)
-					return null;
+	            if (Capability.IsSatisfiable(new[] { recipe.RequiredCapabilities[0] }, availableStations[first].AvailableCapabilities))
+	            {
+		            path[0] = first;
+		            if (FindStationPath(recipe, path, 1))
+			            return path;
+	            }
             }
 
-            /*
-             * What to optimize?
-             *
-             * number of roles on path (prefer less busy stations):
-            Func<int[], int> cost = (path) => path(.Distinct()).Sum(id => stations[id].AllocatedRoles.Count);
-             *
-             * amount of necessary ingredients available (reconfiguration less likely)
-            */
+            return null;
+        }
 
-            // optimize for minimal path length
-            Func<int[], int> cost = (path) => path.Zip(path.Skip(1), (from, to) => costMatrix[from, to]).Sum();
+        /// <summary>
+        /// Recursively checks if there is a valid path with the given prefix for the recipe.
+        /// If so, returns true and <param name="path"/> contains the path. Otherwise, returns false.
+        /// </summary>
+        private bool FindStationPath(Recipe recipe, int[] path, int prefixLength)
+        {
+            // termination case: the path is already complete
+            if (prefixLength == recipe.RequiredCapabilities.Length)
+                return true;
 
-            return paths.OrderBy(cost).First();
+            int last = path[prefixLength - 1];
+
+            // special handling: see if the last station can't do the next capability as well
+            if (CanSatisfyNext(recipe, path, prefixLength, last))
+            {
+	            path[prefixLength] = last;
+	            if (FindStationPath(recipe, path, prefixLength + 1))
+		            return true;
+            }
+            else // otherwise check connected stations
+            {
+                for (int next = 0; next < availableStations.Length; ++next) // go through all stations
+                {
+                    // if connected to last station and can fulfill next capability
+                    if (pathMatrix[last, next] != -1 && CanSatisfyNext(recipe, path, prefixLength, next) && next != last)
+                    {
+                        path[prefixLength] = next; // try a path over next
+                        if (FindStationPath(recipe, path, prefixLength + 1)) // if there is such a path, return true
+                            return true;
+                    }
+                }
+            }
+
+            return false; // there is no valid path with the given prefix
         }
 
         /// <summary>
         /// Checks if the given station can satisfy all the demanded capabilities.
         /// </summary>
         /// <param name="recipe">The recipe for which a path is searched.</param>
-        /// <param name="path">The current path prefix.</param>
+        /// <param name="path">The current path.</param>
+        /// <param name="prefixLength">The length of the path prefix that should be considered valid.</param>
         /// <param name="station">The station which should be next on the path.</param>
         /// <returns>True if choosing station as next path entry would not exceed its capabilities.</returns>
-        private bool CanSatisfyNext(Recipe recipe, int[] path, int station)
+        private bool CanSatisfyNext(Recipe recipe, int[] path, int prefixLength, int station)
         {
-            var capabilities = from index in Enumerable.Range(0, path.Length + 1)
-                               where index == path.Length || path[index] == station
+            var capabilities = from index in Enumerable.Range(0, prefixLength + 1)
+                               where index == prefixLength || path[index] == station
                                select recipe.RequiredCapabilities[index];
             return Capability.IsSatisfiable(capabilities.ToArray(), availableStations[station].AvailableCapabilities);
         }
