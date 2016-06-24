@@ -31,7 +31,7 @@ namespace SafetySharp.Analysis
 
 			for (int i = 0; i < cardinality; ++i)
 			{
-				if (elementsByCardinality[cardinality]?.Any(other => other.IsSubsetOf(set)) ?? false)
+				if (elementsByCardinality[i]?.Any(other => other.IsSubsetOf(set)) ?? false)
 					return true;
 			}
 			return false;
@@ -45,7 +45,7 @@ namespace SafetySharp.Analysis
 
 			for (int i = numFaults; i > cardinality; --i)
 			{
-				if (elementsByCardinality[cardinality]?.Any(other => set.IsSubsetOf(other)) ?? false)
+				if (elementsByCardinality[i]?.Any(other => set.IsSubsetOf(other)) ?? false)
 					return true;
 			}
 			return false;
