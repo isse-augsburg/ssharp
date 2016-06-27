@@ -90,7 +90,7 @@
                 from excludedFaults in CartesianProduct(faultGroups)
                 // also exclude subsuming faults
                 let subsuming = Fault.SubsumingFaults(excludedFaults, allFaults)
-                orderby subsuming.Cardinality ascending
+                orderby subsuming.Cardinality descending
                 select faults.GetDifference(subsuming)
             );
         }
@@ -104,7 +104,7 @@
                           from fault in allFaults
                           where set.Contains(fault)
                           let suggestion = set.GetDifference(Fault.SubsumingFaults(new[] { fault }, allFaults))
-                          orderby suggestion.Cardinality descending
+                          orderby suggestion.Cardinality ascending
                           select suggestion;
 
             return new HashSet<FaultSet>(subsets);
