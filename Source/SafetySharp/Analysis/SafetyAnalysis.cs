@@ -272,7 +272,7 @@ namespace SafetySharp.Analysis
 
 				if (!result.FormulaHolds)
 				{
-					ConsoleHelpers.WriteLine($"  {heuristic}        critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
+					//ConsoleHelpers.WriteLine($"  {heuristic}        critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
 					criticalSets.Add(set);
 				}
 				else
@@ -304,7 +304,13 @@ namespace SafetySharp.Analysis
 
 		bool IsTriviallyCritical(FaultSet faultSet)
 		{
-			return criticalSets.Any(criticalSet => criticalSet.IsSubsetOf(faultSet));
+			foreach (var set in criticalSets)
+			{
+				if (set.IsSubsetOf(faultSet))
+					return true;
+			}
+
+			return false;
 		}
 
 		bool IsTriviallySafe(FaultSet faultSet)
@@ -396,8 +402,10 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		private HashSet<FaultSet> RemoveInvalidSets(HashSet<FaultSet> sets, FaultSet suppressedFaults, FaultSet forcedFaults)
 		{
-			var validSets = new HashSet<FaultSet>();
+			if (suppressedFaults.Cardinality == 0 && forcedFaults.Cardinality == 0)
+				return sets;
 
+			var validSets = new HashSet<FaultSet>();
 			foreach (var set in sets)
 			{
 				// The set must contain all forced faults, hence it must be a superset of those

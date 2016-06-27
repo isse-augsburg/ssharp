@@ -45,9 +45,16 @@ namespace SafetySharp.Analysis
 
 			for (int i = numFaults; i > cardinality; --i)
 			{
-				if (elementsByCardinality[i]?.Any(other => set.IsSubsetOf(other)) ?? false)
-					return true;
+				if (elementsByCardinality[i] == null)
+					continue;
+
+				foreach (var element in elementsByCardinality[i])
+				{
+					if (set.IsSubsetOf(element))
+						return true;
+				}
 			}
+
 			return false;
 		}
 	}
