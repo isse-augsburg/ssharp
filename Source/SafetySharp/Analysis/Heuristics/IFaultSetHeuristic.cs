@@ -33,6 +33,7 @@ namespace SafetySharp.Analysis.Heuristics
 		/// <summary>
 		///   Changes the sets that will be checked by DCCA, by reordering and adding sets.
 		/// </summary>
+		/// <param name="setsToCheck">The next sets to be checked, in reverse order (last set is checked first).</param>
 		void Augment(List<FaultSet> setsToCheck);
 
 		/// <summary>

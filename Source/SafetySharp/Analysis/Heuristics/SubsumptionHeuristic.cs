@@ -25,7 +25,7 @@
                 var subsumed = Fault.SubsumedFaults(setsToCheck[i], allFaults);
                 if (!setsToCheck[i].Equals(subsumed) && !subsumedSets.Contains(subsumed))
                 {
-	                setsToCheck.Insert(i, subsumed);
+	                setsToCheck.Insert(i+1, subsumed);
 	                subsumedSets.Add(subsumed);
 	                i++;
                 }
@@ -50,9 +50,9 @@
                 var set = setsToCheck[i];
                 if (subsumedSets.Contains(set))
                 {
-                    setsToCheck[i] = setsToCheck[i - delta];
-                    setsToCheck[i - delta] = set;
-                    if (!isSafe) // we just moved 'set' to position i+1
+                    setsToCheck[i] = setsToCheck[i + delta];
+                    setsToCheck[i + delta] = set;
+                    if (isSafe) // we just moved 'set' to position i+1
                         i++; // skip it, don't move it again
                 }
             }

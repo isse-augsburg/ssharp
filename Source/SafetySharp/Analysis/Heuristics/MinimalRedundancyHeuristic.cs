@@ -49,7 +49,7 @@
         void IFaultSetHeuristic.Augment(List<FaultSet> setsToCheck)
         {
             successCounter = 0;
-            setsToCheck.InsertRange(0, currentSuggestions);
+            setsToCheck.AddRange(currentSuggestions);
         }
 
         void IFaultSetHeuristic.Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)

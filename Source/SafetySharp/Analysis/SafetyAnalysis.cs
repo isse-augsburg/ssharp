@@ -166,11 +166,11 @@ namespace SafetySharp.Analysis
 				// We have to check each set - heuristics may add further during the loop
 				while (setsToCheck.Count > 0)
 				{
-					var set = setsToCheck[0];
+					var set = setsToCheck[setsToCheck.Count - 1];
 
 					bool isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker);
 					bool isCurrentLevel = sets.Remove(set); // returns true if set was actually contained
-					setsToCheck.RemoveAt(0);
+					setsToCheck.RemoveAt(setsToCheck.Count - 1);
 
 					if (isSafe && isCurrentLevel)
 						currentSafe.Add(set);
