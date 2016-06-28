@@ -42,8 +42,8 @@ namespace SafetySharp.Runtime
 			public double Value; //Probability of outgoing state
 		}
 
-		private readonly int _maximalNumberOfRows; //pessimistic limit
-		private readonly int _maximalNumberOfEntries; //pessimistic limit
+		private readonly int _spaceLimitNumberOfRows; //pessimistic limit
+		private readonly int _spaceLimitNumberOfEntries; //pessimistic limit
 
 		private readonly MemoryBuffer _rowBufferUnoptimized = new MemoryBuffer();
 		private readonly MemoryBuffer _rowBufferOptimized = new MemoryBuffer();
@@ -68,21 +68,21 @@ namespace SafetySharp.Runtime
 		// _columnValueMemory[_rowMemory[s]] and _columnValueMemory[_rowMemory[s]+_rowColumnCountMemory[s]]
 		// or when optimized and sealed between
 		// _columnValueMemory[_rowMemory[s]] and _columnValueMemory[_rowMemory[s+1]]
-		public SparseProbMatrix(int maximalNumberOfRows,int maximalNumberOfEntries)
+		public SparseProbMatrix(int spaceLimitNumberOfRows, int spaceLimitNumberOfEntries)
 		{
-			Requires.InRange(maximalNumberOfRows, nameof(maximalNumberOfRows), 1024, Int32.MaxValue-1);
-			Requires.InRange(maximalNumberOfEntries, nameof(maximalNumberOfEntries), 1024, Int32.MaxValue);
+			Requires.InRange(spaceLimitNumberOfRows, nameof(spaceLimitNumberOfRows), 1024, Int32.MaxValue-1);
+			Requires.InRange(spaceLimitNumberOfEntries, nameof(spaceLimitNumberOfEntries), 1024, Int32.MaxValue);
 
-			_maximalNumberOfRows = maximalNumberOfRows;
-			_maximalNumberOfEntries = maximalNumberOfEntries;
+			_spaceLimitNumberOfRows = spaceLimitNumberOfRows;
+			_spaceLimitNumberOfEntries = spaceLimitNumberOfEntries;
 
-			_rowBufferUnoptimized.Resize((long)maximalNumberOfRows * sizeof(int), zeroMemory: false);
+			_rowBufferUnoptimized.Resize((long)spaceLimitNumberOfRows * sizeof(int), zeroMemory: false);
 			_rowMemory = (int*)_rowBufferUnoptimized.Pointer;
 
-			_rowColumnCountBufferUnoptimized.Resize((long)maximalNumberOfRows * sizeof(int), zeroMemory: false);
+			_rowColumnCountBufferUnoptimized.Resize((long)spaceLimitNumberOfRows * sizeof(int), zeroMemory: false);
 			_rowColumnCountMemory = (int*)_rowColumnCountBufferUnoptimized.Pointer;
 
-			_columnValueBufferUnoptimized.Resize((long)maximalNumberOfEntries * sizeof(ColumnValue), zeroMemory: false);
+			_columnValueBufferUnoptimized.Resize((long)spaceLimitNumberOfEntries * sizeof(ColumnValue), zeroMemory: false);
 			_columnValueMemory = (ColumnValue*)_columnValueBufferUnoptimized.Pointer;
 
 			SetRowEntriesToInvalid();
@@ -90,11 +90,11 @@ namespace SafetySharp.Runtime
 		
 		private void SetRowEntriesToInvalid()
 		{
-			for (var i = 0; i <= _maximalNumberOfRows+1; i++)
+			for (var i = 0; i <= _spaceLimitNumberOfRows+1; i++)
 			{
 				_rowMemory[i] = -1;
 			}
-			for (var i = 0; i <= _maximalNumberOfRows; i++)
+			for (var i = 0; i <= _spaceLimitNumberOfRows; i++)
 			{
 				_rowColumnCountMemory[i] = -1;
 			}
@@ -134,7 +134,7 @@ namespace SafetySharp.Runtime
 
 		internal void SetRow(int row)
 		{
-			Requires.InRange(row, nameof(row), 0, _maximalNumberOfRows);
+			Requires.InRange(row, nameof(row), 0, _spaceLimitNumberOfRows);
 			AssertNotSealed();
 			if (_rowMemory[row] == -1 || _rowColumnCountMemory[row] == -1)
 			{
@@ -160,8 +160,8 @@ namespace SafetySharp.Runtime
 		
 		internal void AddColumnValueToCurrentRow(ColumnValue columnValue)
 		{
-			Requires.InRange(columnValue.Value, nameof(columnValue), 0, _maximalNumberOfRows);
-			Requires.InRange(_noOfColumnValues, nameof(_noOfColumnValues), 0, _maximalNumberOfEntries);
+			Requires.InRange(columnValue.Value, nameof(columnValue), 0, _spaceLimitNumberOfRows);
+			Requires.InRange(_noOfColumnValues, nameof(_noOfColumnValues), 0, _spaceLimitNumberOfEntries);
 			AssertNotSealed();
 			var nextColumnValueIndex = _noOfColumnValues;
 			_columnValueMemory[nextColumnValueIndex] = columnValue;
@@ -209,6 +209,37 @@ namespace SafetySharp.Runtime
 			_columnValueMemory = optimizedColumnValueMemory;
 			_rowColumnCountMemory = null;
 			CheckForInvalidRowEntries();
+		}
+
+		public void MultiplyWithVectorSealed(double[] b, double[] res)
+		{
+			//Implementation of algorithm 3.13
+			for (var i = 0; i < _maximalRow; i++)
+			{
+				res[i] = 0;
+				var l = _rowMemory[i];
+				var h = _rowMemory[i+1];
+				for (var j = l; j < h; j++)
+				{
+					var colValEntry = _columnValueMemory[j];
+					res[i] = res[i] + colValEntry.Value * b[colValEntry.Column];
+				}
+			}
+		}
+
+		public void MultiplyWithVectorUnsealed(double[] b, double[] res)
+		{
+			for (var i = 0; i < _maximalRow; i++)
+			{
+				res[i] = 0;
+				var l = _rowMemory[i];
+				var h = l+_rowColumnCountMemory[i];
+				for (var j = l; j < h; j++)
+				{
+					var colValEntry = _columnValueMemory[j];
+					res[i] = res[i] + colValEntry.Value * b[colValEntry.Column];
+				}
+			}
 		}
 
 		/// <summary>
