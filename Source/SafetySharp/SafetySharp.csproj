@@ -67,6 +67,7 @@
     </Compile>
     <Compile Include="Analysis\ProbabilityChecker.cs" />
     <Compile Include="Analysis\ProbabilityMatrixBuilder.cs" />
+    <Compile Include="Runtime\SparseProbMatrix.cs" />
     <Compile Include="Modeling\Probability.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
     <Compile Include="Modeling\ObjectPool.cs" />
