@@ -165,6 +165,16 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
+		///   Returns a copy of the fault set that does not contain <paramref name="fault" />.
+		/// </summary>
+		/// <param name="fault">The fault that should be removed.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public FaultSet Remove(Fault fault)
+		{
+			return new FaultSet(_faults & ~(1L << fault.Identifier));
+		}
+
+		/// <summary>
 		///   Sets the <see cref="Fault.Activation" /> property of the <paramref name="faults" />, enabling or disabling the faults
 		///   contained in the set.
 		/// </summary>

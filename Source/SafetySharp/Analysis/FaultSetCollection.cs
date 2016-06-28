@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using SafetySharp.Runtime;
 
 namespace SafetySharp.Analysis
 {
-	class FaultSetCollection
+	class FaultSetCollection : IEnumerable<FaultSet>
 	{
 		private readonly int numFaults;
 		private readonly HashSet<FaultSet>[] elementsByCardinality;
@@ -31,8 +32,14 @@ namespace SafetySharp.Analysis
 
 			for (int i = 0; i < cardinality; ++i)
 			{
-				if (elementsByCardinality[i]?.Any(other => other.IsSubsetOf(set)) ?? false)
-					return true;
+				if (elementsByCardinality[i] == null)
+					continue;
+
+				foreach (var element in elementsByCardinality[i])
+				{
+					if (element.IsSubsetOf(set))
+						return true;
+				}
 			}
 			return false;
 		}
@@ -56,6 +63,40 @@ namespace SafetySharp.Analysis
 			}
 
 			return false;
+		}
+
+		public HashSet<FaultSet> GetMinimalSets()
+		{
+			var result = new HashSet<FaultSet>();
+			for (int i = 0; i <= numFaults; ++i)
+			{
+				if (elementsByCardinality[i] == null)
+					continue;
+
+				foreach (var element in elementsByCardinality[i])
+				{
+					if (!ContainsSubsetOf(element))
+						result.Add(element);
+				}
+			}
+			return result;
+		}
+
+		public IEnumerator<FaultSet> GetEnumerator()
+		{
+			for (int i = 0; i <= numFaults; ++i)
+			{
+				if (elementsByCardinality[i] == null)
+					continue;
+
+				foreach (var element in elementsByCardinality[i])
+					yield return element;
+			}
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 	}
 }

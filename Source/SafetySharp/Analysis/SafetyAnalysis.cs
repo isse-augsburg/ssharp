@@ -40,7 +40,7 @@ namespace SafetySharp.Analysis
 	public sealed class SafetyAnalysis
 	{
 		private FaultSetCollection safeSets;
-		private readonly HashSet<FaultSet> criticalSets = new HashSet<FaultSet>();
+		private FaultSetCollection criticalSets;
 		private readonly HashSet<FaultSet> checkedSets = new HashSet<FaultSet>();
 		private readonly Dictionary<FaultSet, CounterExample> counterExamples = new Dictionary<FaultSet, CounterExample>();
 		private readonly Dictionary<FaultSet, Exception> exceptions = new Dictionary<FaultSet, Exception>();
@@ -119,8 +119,7 @@ namespace SafetySharp.Analysis
 			var isComplete = true;
 
 			// remove information from previous analyses
-			Reset();
-			safeSets = new FaultSetCollection(allFaults.Length);
+			Reset(model);
 
 			// Serialize the model and initialize the invariant checker
 			var serializer = new RuntimeModelSerializer();
@@ -194,34 +193,37 @@ namespace SafetySharp.Analysis
 				fault.Activation = Activation.Nondeterministic;
 
 			// due to heuristics usage, we may have informatiuon on non-minimal critical sets
-			RemoveNonMinimalCriticalSets();
+			var minimalCritical = RemoveNonMinimalCriticalSets();
 
 			return new Result(
-				model, isComplete, criticalSets, checkedSets,
+				model, isComplete, minimalCritical, checkedSets,
 				allFaults, suppressedFaults, forcedFaults,
 				counterExamples, exceptions, stopwatch.Elapsed);
 		}
 
-		private void Reset()
+		private void Reset(ModelBase model)
 		{
-			criticalSets.Clear();
+			safeSets = new FaultSetCollection(model.Faults.Length);
+			criticalSets = new FaultSetCollection(model.Faults.Length);
 			checkedSets.Clear();
 			counterExamples.Clear();
 			exceptions.Clear();
 		}
 
-		private void RemoveNonMinimalCriticalSets()
+		private HashSet<FaultSet> RemoveNonMinimalCriticalSets()
 		{
-			Predicate<FaultSet> isNonMinimal = set => criticalSets.Any(other => other != set && other.IsSubsetOf(set));
-			var nonMinimal = criticalSets.Where(set => isNonMinimal(set));
+			var minimal = criticalSets.GetMinimalSets();
 
-			foreach (var set in nonMinimal)
+			foreach (var set in criticalSets)
 			{
-				exceptions.Remove(set);
-				counterExamples.Remove(set);
+				if (!minimal.Contains(set))
+				{
+					exceptions.Remove(set);
+					counterExamples.Remove(set);
+				}
 			}
 
-			criticalSets.RemoveWhere(isNonMinimal);
+			return minimal;
 		}
 
 
@@ -304,13 +306,7 @@ namespace SafetySharp.Analysis
 
 		bool IsTriviallyCritical(FaultSet faultSet)
 		{
-			foreach (var set in criticalSets)
-			{
-				if (set.IsSubsetOf(faultSet))
-					return true;
-			}
-
-			return false;
+			return criticalSets.ContainsSubsetOf(faultSet);
 		}
 
 		bool IsTriviallySafe(FaultSet faultSet)
@@ -351,8 +347,7 @@ namespace SafetySharp.Analysis
 				case 1:
 					// We have to kick things off by explicitly generating the singleton sets; at this point,
 					// we know that there are no further minimal critical sets if the empty set is already critical.
-					var emptySet = new FaultSet();
-					if (!criticalSets.Contains(emptySet))
+					if (previousSafe.Count > 0)
 					{
 						foreach (var fault in faults)
 							result.Add(new FaultSet(fault));
@@ -365,8 +360,9 @@ namespace SafetySharp.Analysis
 					// the ones we don't want, while avoiding duplicate generation of sets.
 
 					var setsToRemove = new HashSet<FaultSet>();
-					foreach (var fault in faults)
+					for (int i = 0; i < faults.Length; ++i)
 					{
+						var fault = faults[i];
 						setsToRemove.Clear();
 
 						foreach (var safeSet in previousSafe)
@@ -380,9 +376,23 @@ namespace SafetySharp.Analysis
 
 							var set = safeSet.Add(fault);
 
+							// set is trivially critical iff one of the direct subsets is not safe (i.e. critical)
+							// * the faults faults[1], ..., faults[i-1] are not definitely not contained in set (see above)
+							// * faults[i] is definitely in set, but set.Remove(faults[i]) == safeSet and is thus safe.
+							bool isTriviallyCritical = false;
+							for (int j = i + 1; j < faults.Length; ++j)
+							{
+								var f = faults[j];
+								if (set.Contains(f) && !previousSafe.Contains(set.Remove(f)))
+								{
+									isTriviallyCritical = true;
+									break;
+								}
+							}
+
 							// Check if the newly generated set is a super set of any critical sets;
 							// if so, discard it
-							if (!IsTriviallyCritical(set))
+							if (!isTriviallyCritical)
 								result.Add(set);
 						}
 
