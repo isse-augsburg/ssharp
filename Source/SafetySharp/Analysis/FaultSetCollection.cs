@@ -30,6 +30,13 @@ namespace SafetySharp.Analysis
 			if (elementsByCardinality[cardinality]?.Contains(set) ?? false)
 				return true;
 
+			return ContainsProperSubsetOf(set);
+		}
+
+		public bool ContainsProperSubsetOf(FaultSet set)
+		{
+			var cardinality = set.Cardinality;
+
 			for (int i = 0; i < cardinality; ++i)
 			{
 				if (elementsByCardinality[i] == null)
@@ -75,7 +82,7 @@ namespace SafetySharp.Analysis
 
 				foreach (var element in elementsByCardinality[i])
 				{
-					if (!ContainsSubsetOf(element))
+					if (!ContainsProperSubsetOf(element))
 						result.Add(element);
 				}
 			}
