@@ -72,10 +72,19 @@
     <Compile Include="Modeling\Station.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Analysis\bidirectional_circle.model">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Analysis\complex_setup.model">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Analysis\duplicate_dispenser.model">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Analysis\medium_setup.model">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Analysis\simple_circle.model">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Analysis\simple_setup.model">
@@ -85,6 +94,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Analysis\simple_setup3.model">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Analysis\trivial_setup.model">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Configuration-Simplified.mzn">

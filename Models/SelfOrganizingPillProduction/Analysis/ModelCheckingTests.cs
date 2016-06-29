@@ -14,7 +14,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
 
         [Test, Combinatorial]
         public void DccaTest(
-            [Values("simple_setup.model", "simple_setup3.model", "simple_setup2.model", "medium_setup.model", "complex_setup.model")]
+            [Values("bidirectional_circle.model", "duplicate_dispenser.model", "simple_circle.model", "trivial_setup.model", "simple_setup.model", "simple_setup3.model", "simple_setup2.model", "medium_setup.model", "complex_setup.model")]
             string modelFile,
             [Values(HeuristicsUsage.None, HeuristicsUsage.Subsumption, HeuristicsUsage.Redundancy, HeuristicsUsage.Both)]
             HeuristicsUsage heuristicsUsage,
