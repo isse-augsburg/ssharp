@@ -33,11 +33,17 @@ namespace SafetySharp.Runtime
 
 	// See PhD thesis of David Anthony Parker (Implementation of symbolic model checking for probabilistic systems)
 	// Chapter 3.6 Sparse Matrices
-	internal sealed unsafe class SparseProbMatrix : DisposableObject
+	internal sealed unsafe class SparseDoubleMatrix : DisposableObject
 	{
 		// Small difference: Mix column and value to improve caching
 		internal struct ColumnValue //Contains Transition
 		{
+			internal ColumnValue(int column, double value)
+			{
+				Column = column;
+				Value = value;
+			}
+
 			public int Column; //No of outgoing state
 			public double Value; //Probability of outgoing state
 		}
@@ -64,11 +70,16 @@ namespace SafetySharp.Runtime
 
 		private int _maximalRow = 0;
 
+		public int Rows()
+		{
+			return _maximalRow;
+		}
+
 		// The outgoing transitions of state s are stored between
 		// _columnValueMemory[_rowMemory[s]] and _columnValueMemory[_rowMemory[s]+_rowColumnCountMemory[s]]
 		// or when optimized and sealed between
 		// _columnValueMemory[_rowMemory[s]] and _columnValueMemory[_rowMemory[s+1]]
-		public SparseProbMatrix(int spaceLimitNumberOfRows, int spaceLimitNumberOfEntries)
+		public SparseDoubleMatrix(int spaceLimitNumberOfRows, int spaceLimitNumberOfEntries)
 		{
 			Requires.InRange(spaceLimitNumberOfRows, nameof(spaceLimitNumberOfRows), 1024, Int32.MaxValue-1);
 			Requires.InRange(spaceLimitNumberOfEntries, nameof(spaceLimitNumberOfEntries), 1024, Int32.MaxValue);
@@ -175,6 +186,7 @@ namespace SafetySharp.Runtime
 			// ... Frage: Ist ein sortierter Vektor effizienter, so das sich ein umkopieren noch lohnt ("defragmentieren")?!?
 			// ... Frage: Zusätzlich müsste auch das Ende mit angegeben werden
 			// Lässt sich evaluieren (sollte aber im Release Modus geschehen)
+			// TODO: Merge multiple entries of a row having the same Column. Sort entries?!?
 			CheckForInvalidRowEntries();
 			//initialize fresh memory for optimized data
 			// use actual number of rows and entries, not the pessimistic upper limits
@@ -257,5 +269,118 @@ namespace SafetySharp.Runtime
 				_columnValueBufferOptimized.SafeDispose();
 			}
 		}
+
+		internal SparseDoubleMatrixEnumerator GetEnumerator()
+		{
+			return new SparseDoubleMatrixEnumerator(this);
+		}
+
+		// a nested class can access private members
+		internal class SparseDoubleMatrixEnumerator
+		{
+			private SparseDoubleMatrix _matrix;
+			
+			public int CurrentRow { get; private set; }
+
+			private int _currentColumnValueL; //inclusive
+			private int _currentColumnValueH; //exclusive
+			public int _currentColumnValueIndex;
+
+			public ColumnValue? CurrentColumnValue { get; private set; }
+
+			public SparseDoubleMatrixEnumerator(SparseDoubleMatrix matrix)
+			{
+				_matrix = matrix;
+				Reset();
+			}
+
+			/// <summary>
+			/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+			/// </summary>
+			public void Dispose()
+			{
+			}
+			
+			public bool MoveRow(int row)
+			{
+				CurrentRow=row;
+				if (CurrentRow >= _matrix.Rows())
+					return false;
+				_currentColumnValueL = _matrix._rowMemory[CurrentRow];
+				if (_matrix._isSealed)
+				{
+					_currentColumnValueH = _matrix._rowMemory[CurrentRow + 1];
+				}
+				else
+				{
+					_currentColumnValueH = _matrix._rowColumnCountMemory[CurrentRow];
+				}
+				_currentColumnValueIndex = _currentColumnValueL - 1;
+				CurrentColumnValue = null;
+				return true;
+			}
+
+			/// <summary>
+			/// Advances the enumerator to the next element of the collection.
+			/// </summary>
+			/// <returns>
+			/// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
+			/// </returns>
+			/// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
+			public bool MoveNextRow()
+			{
+				CurrentRow++;
+				if (CurrentRow >= _matrix.Rows())
+					return false;
+				_currentColumnValueL = _matrix._rowMemory[CurrentRow];
+				if (_matrix._isSealed)
+				{
+					_currentColumnValueH = _matrix._rowMemory[CurrentRow + 1];
+				}
+				else
+				{
+					_currentColumnValueH = _matrix._rowColumnCountMemory[CurrentRow];
+				}
+				_currentColumnValueIndex = _currentColumnValueL - 1;
+				CurrentColumnValue = null;
+				return true;
+			}
+
+			/// <summary>
+			/// Advances the enumerator to the next element of the collection.
+			/// </summary>
+			/// <returns>
+			/// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
+			/// </returns>
+			/// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
+			public bool MoveNextColumn()
+			{
+				_currentColumnValueIndex++;
+				if (_currentColumnValueIndex>= _currentColumnValueH)
+				{
+					CurrentColumnValue = null;
+					return false;
+				}
+				else
+				{
+					CurrentColumnValue = _matrix._columnValueMemory[_currentColumnValueIndex];
+					return true;
+				}
+			}
+
+			/// <summary>
+			/// Sets the enumerator to its initial position, which is before the first element in the collection.
+			/// </summary>
+			/// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
+			public void Reset()
+			{
+				CurrentRow = -1;
+				_currentColumnValueL = -1;
+				_currentColumnValueH = -1;
+				_currentColumnValueIndex = -1;
+				CurrentColumnValue = null;
+			}
+		}
+
 	}
 }

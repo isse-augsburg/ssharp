@@ -151,7 +151,7 @@ namespace SafetySharp.Analysis
 
 			//return CheckInvariant(serializer.Load);
 
-			using (var checker = new ProbabilityMatrixBuilder(serializer.Load, message => OutputWritten?.Invoke(message), Configuration))
+			using (var checker = new MarkovChainBuilder(serializer.Load, message => OutputWritten?.Invoke(message), Configuration))
 			{
 				var initializationTime = stopwatch.Elapsed;
 				stopwatch.Restart();
@@ -172,7 +172,7 @@ namespace SafetySharp.Analysis
 					OutputWritten?.Invoke(String.Empty);
 					OutputWritten?.Invoke("===============================================");
 					OutputWritten?.Invoke($"Initialization time: {initializationTime}");
-					OutputWritten?.Invoke($"Probability matrix creation time: {creationTime}");
+					OutputWritten?.Invoke($"Markov chain creation time: {creationTime}");
 					OutputWritten?.Invoke($"States: {CompactProbabilityMatrix.States}");
 					OutputWritten?.Invoke($"Transitions: {CompactProbabilityMatrix.NumberOfTransitions}");
 					OutputWritten?.Invoke($"{(int)(CompactProbabilityMatrix.States / stopwatch.Elapsed.TotalSeconds):n0} states per second");

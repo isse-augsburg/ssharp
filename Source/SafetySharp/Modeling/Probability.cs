@@ -100,6 +100,14 @@ namespace SafetySharp.Modeling
 			return (Value > expected);
 		}
 
+
+		public static bool IsOne(double value,double tolerance)
+		{
+			var minimum = 1.0 - tolerance;
+			var maximum = 1.0 + tolerance;
+			return (value >= minimum && value <= maximum);
+		}
+
 		/// <summary>
 		/// Returns the fully qualified type name of this instance.
 		/// </summary>
