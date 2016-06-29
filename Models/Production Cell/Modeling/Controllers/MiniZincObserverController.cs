@@ -169,18 +169,6 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 		                role1 =>
 		                    role1.PreCondition.State.SequenceEqual(agent.Resource.State)))
 		                ;
-
-
-
-		        
-		        foreach (var func in agent.Constraints)
-		        {
-		            if (!func())
-		            {
-		                ;
-		                break;
-		            }
-		        }
 		    }
 		}
 
@@ -247,28 +235,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
                     if (candidates.Length == 0)
                     {
                         isReconfPossible = false;
-                        goto end;
                     }
-                }
-            }
-
-            end:
-
-            if (isReconfPossible == observerController.ReconfigurationState.Equals(ReconfStates.Failed))
-            {
-                var agents = robotsAgents.Cast<Agent>().Concat(cartAgents).ToArray();
-                using (var writer = new StreamWriter("counterFile"))
-                {
-                    var isCart = String.Join(",", agents.Select(a => (a is CartAgent).ToString().ToLower()));
-                    var capabilities = String.Join(",", agents.Select(a =>
-                        $"{{{String.Join(",", a.AvailableCapabilites.Select(c => c.Identifier))}}}"));
-                    var isConnected = String.Join("\n|", agents.Select(from =>
-                        String.Join(",", agents.Select(to => (from.Outputs.Contains(to) || from == to).ToString().ToLower()))));
-
-                    writer.WriteLine($"noAgents = {agents.Length};");
-                    writer.WriteLine($"capabilities = [{capabilities}];");
-                    writer.WriteLine($"isCart = [{isCart}];");
-                    writer.WriteLine($"isConnected = [|{isConnected}|]");
                 }
             }
 

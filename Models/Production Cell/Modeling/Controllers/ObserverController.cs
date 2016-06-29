@@ -71,14 +71,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 				() =>
 					agent.AllocatedRoles.All(
 						role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilites.Contains(capability))),
-				// Resource Consistency
-				/*  () =>
-                        agent.Resource == null ? true :
-                        agent.AllocatedRoles.Any(
-                            role =>
-                                role.PreCondition.Task.Equals(agent.Resource.Task) &&
-                                role.PreCondition.State.SequenceEqual(agent.Resource.State)),*/
-//                 Pre-PostconditionConsistency
+                //   Pre-PostconditionConsistency
 				() =>
 					agent.AllocatedRoles.Any(role => role.PostCondition.Port == null || role.PreCondition.Port == null)
 						? true

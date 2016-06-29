@@ -33,7 +33,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 
-	public class SafetyAnalysisTests
+	public class FunctionalTests
 	{
 		[Test]
 		public void DamagedWorkpieces()
@@ -66,8 +66,8 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 			var model = new Model();
 			model.Components.OfType<Robot>().Select(r => r.SwitchFault).ToArray().SuppressActivations();
 
-			var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
-			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, Hazard(model));
+			var safetyAnalysis = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
+			var result = safetyAnalysis.CheckInvariant(model, !Hazard(model));
 
 			Console.WriteLine(result);
 		}
@@ -94,6 +94,10 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 			if (model.ObserverController.ReconfigurationState == ReconfStates.NotSet)
 				return false;
 
+            if (model.ObserverController.ReconfigurationState == ReconfStates.Succedded &&
+                !IsReconfPossible(model.RobotAgents, model.CartAgents, model.Tasks, model.ObserverController))
+                    return true;
+
 			if (model.ObserverController.ReconfigurationState == ReconfStates.Failed &&
 				IsReconfPossible(model.RobotAgents, model.CartAgents, model.Tasks, model.ObserverController))
 				return true;
@@ -101,19 +105,74 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 			if (model.ObserverController.ReconfigurationState == ReconfStates.Failed)
 				return false;
 
-			foreach (var agent in agents)
-			{
-				foreach (var constraint in agent.Constraints)
-				{
-					if (!constraint())
-						;
-				}
-			}
+		    if (CheckConstraints(agents))
+		        return false; 
 
-			return agents.Any(agent => agent.Constraints.Any(constraint => !constraint()));
+            return false;
 		}
 
-		private bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<CartAgent> cartAgents, IEnumerable<Task> tasks,
+	    private bool CheckConstraints(IEnumerable<Agent> agents)
+	    {
+	        foreach (var agent in agents)
+	        {
+	            if (agent.AllocatedRoles.All(role => role.PreCondition.Port == null || agent.Inputs.Contains(role.PreCondition.Port)))
+	            {
+	                return false;
+	            }
+	            if (agent.AllocatedRoles.All(role => role.PostCondition.Port == null || agent.Outputs.Contains(role.PostCondition.Port)))
+	            {
+	                return false; 
+	            }
+	            if (agent.AllocatedRoles.All(
+	                role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilites.Contains(capability))))
+	            {
+	                return false;
+	            }
+	            if (agent.AllocatedRoles.Any(role => role.PostCondition.Port == null || role.PreCondition.Port == null)
+	                ? true
+	                : agent.AllocatedRoles.TrueForAll(role => PostMatching(role, agent) && PreMatching(role, agent)))
+	            {
+	                return false; 
+	            }
+
+	        }
+	        return true;
+	     }
+
+        private bool PostMatching(Role role, Agent agent)
+        {
+            if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)))
+            {
+                ;
+            }
+            else if (
+                !role.PostCondition.Port.AllocatedRoles.Any(
+                    role1 =>
+                        role.PostCondition.State.Select(capability => capability.Identifier)
+                            .SequenceEqual(role1.PreCondition.State.Select(capability => capability.Identifier))))
+            {
+                ;
+            }
+            else if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role.PostCondition.Task.Equals(role1.PreCondition.Task)))
+            {
+                ;
+            }
+
+            return role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)
+                                                                       &&
+                                                                       role.PostCondition.State.Select(capability => capability.Identifier)
+                                                                           .SequenceEqual(role1.PreCondition.State.Select(capability => capability.Identifier))
+                                                                       && role.PostCondition.Task.Equals(role1.PreCondition.Task));
+        }
+
+        private bool PreMatching(Role role, Agent agent)
+        {
+            return role.PreCondition.Port.AllocatedRoles.Any(role1 => role1.PostCondition.Port.Equals(agent)
+                                                                      && role.PreCondition.State.SequenceEqual(role1.PostCondition.State)
+                                                                      && role.PreCondition.Task.Equals(role1.PostCondition.Task));
+        }
+
+        private bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<CartAgent> cartAgents, IEnumerable<Task> tasks,
 									  ObserverController observerController)
 		{
 			var isReconfPossible = true;
@@ -136,28 +195,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 					if (candidates.Length == 0)
 					{
 						isReconfPossible = false;
-						goto end;
 					}
-				}
-			}
-
-			end:
-
-			if (isReconfPossible == observerController.ReconfigurationState.Equals(ReconfStates.Failed))
-			{
-				var agents = robotsAgents.Cast<Agent>().Concat(cartAgents).ToArray();
-				using (var writer = new StreamWriter("counterFile"))
-				{
-					var isCart = String.Join(",", agents.Select(a => (a is CartAgent).ToString().ToLower()));
-					var capabilities = String.Join(",", agents.Select(a =>
-						$"{{{String.Join(",", a.AvailableCapabilites.Select(c => c.Identifier))}}}"));
-					var isConnected = String.Join("\n|", agents.Select(from =>
-						String.Join(",", agents.Select(to => (from.Outputs.Contains(to) || from == to).ToString().ToLower()))));
-
-					writer.WriteLine($"noAgents = {agents.Length};");
-					writer.WriteLine($"capabilities = [{capabilities}];");
-					writer.WriteLine($"isCart = [{isCart}];");
-					writer.WriteLine($"isConnected = [|{isConnected}|]");
 				}
 			}
 

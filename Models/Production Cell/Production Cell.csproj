@@ -60,7 +60,7 @@
     </Compile>
     <Compile Include="Analysis\SimulationTests.cs" />
     <Compile Include="Analysis\ModelCheckingTests.cs" />
-    <Compile Include="Analysis\SafetyAnalysisTests.cs" />
+    <Compile Include="Analysis\FunctionalTests.cs" />
     <Compile Include="Modeling\Controllers\Agent.cs" />
     <Compile Include="Modeling\Controllers\Capability.cs" />
     <Compile Include="Modeling\Controllers\Condition.cs" />

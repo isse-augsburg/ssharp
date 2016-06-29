@@ -80,19 +80,5 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 			Assert.IsTrue(result.FormulaHolds);
 		}
 
-		/*[Test]
-        public void IsReconfPossible()
-        {
-            var model = new Model();
-            model.Faults.SuppressActivations();
-            var hazard =
-                !((Formula)IsReconfPossible(model.RobotAgents, model.CartAgents, model.Tasks, model.ObserverController)).EquivalentTo(
-                    !model.ObserverController.ReconfigurationState.Equals(ReconfStates.Failed));
-
-            var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
-            var result = safetyAnalysis.ComputeMinimalCriticalSets(model, hazard, maxCardinality: 2);
-
-            Console.WriteLine(result);
-        }*/
 	}
 }
