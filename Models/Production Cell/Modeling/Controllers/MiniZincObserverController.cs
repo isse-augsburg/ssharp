@@ -156,20 +156,20 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
                 agent.AllocatedRoles.Add(role);
 			}
 
-		    foreach (var agent in Agents)
-		    {
-		       
-                    if (agent.Resource == null)
-                        continue;
-		            if (!agent.AllocatedRoles.Any(
-		                role1 =>
-		                    role1.PreCondition.Task.Equals(agent.Resource.Task)))
-		                ;
-		            if (!agent.AllocatedRoles.Any(
-		                role1 =>
-		                    role1.PreCondition.State.SequenceEqual(agent.Resource.State)))
-		                ;
-		    }
+//		    foreach (var agent in Agents)
+//		    {
+//		       
+//                    if (agent.Resource == null)
+//                        continue;
+//		            if (!agent.AllocatedRoles.Any(
+//		                role1 =>
+//		                    role1.PreCondition.Task.Equals(agent.Resource.Task)))
+//		                ;
+//		            if (!agent.AllocatedRoles.Any(
+//		                role1 =>
+//		                    role1.PreCondition.State.SequenceEqual(agent.Resource.State)))
+//		                ;
+//		    }
 		}
 
 		private IEnumerable<Tuple<Agent, Capability[]>> Parse(string agentsString, string capabilitiesString)

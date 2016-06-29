@@ -53,6 +53,16 @@ namespace Tests.Analysis.Invariants.CounterExamples
 
 				simulator.Rewind(100);
 				c.X.ShouldBe(start);
+
+				simulator.Reset();
+				var i = 0;
+
+				do
+				{
+					++i;
+				} while (simulator.SimulateStep());
+
+				i.ShouldBe(41);
 			});
 		}
 
