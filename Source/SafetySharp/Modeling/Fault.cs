@@ -197,10 +197,10 @@ namespace SafetySharp.Modeling
 			return subsumed;
 		}
 
-		internal static FaultSet SubsumingFaults(IEnumerable<Fault> faults, Fault[] allFaults)
+		internal static FaultSet SubsumingFaults(FaultSet set, Fault[] allFaults)
 		{
-			var currentFaults = faults;
-			var subsuming = new FaultSet(faults);
+			var currentFaults = set.ToFaultSequence(allFaults);
+			var subsuming = set;
 
 			uint oldCount;
 			do // fixed-point iteration
@@ -211,6 +211,11 @@ namespace SafetySharp.Modeling
 			} while (oldCount < subsuming.Cardinality);
 
 			return subsuming;
+		}
+
+		internal static FaultSet SubsumingFaults(IEnumerable<Fault> faults, Fault[] allFaults)
+		{
+			return SubsumingFaults(new FaultSet(faults), allFaults);
 		}
 
 		/// <summary>

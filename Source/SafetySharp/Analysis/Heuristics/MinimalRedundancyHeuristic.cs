@@ -97,17 +97,46 @@
 
         private ISet<FaultSet> GetSubsets(IEnumerable<FaultSet> sets)
         {
-            // remove subsetStepSize faults (and their subsuming faults) from each set
-            var subsets = sets;
-            for (int i = 0; i < subsetStepSize; ++i)
-                subsets = from set in subsets
-                          from fault in allFaults
-                          where set.Contains(fault)
-                          let suggestion = set.GetDifference(Fault.SubsumingFaults(new[] { fault }, allFaults))
-                          orderby suggestion.Cardinality ascending
-                          select suggestion;
+            return new HashSet<FaultSet>(
+                from set in sets
+                // get a subset of size subsetStepSize
+                from subset in GetSubsets(set, subsetStepSize)
+                // remove all faults in the subset and their subsuming faults
+                let suggestion = set.GetDifference(Fault.SubsumingFaults(subset, allFaults))
+                select suggestion
+            );
+        }
 
-            return new HashSet<FaultSet>(subsets);
+        /// <summary>
+        /// Finds all subsets of <paramref name="set"/> with the given <paramref name="size"/>.
+        /// </summary>
+        private List<FaultSet> GetSubsets(FaultSet set, int size)
+        {
+            var subset = new Fault[size];
+            var results = new List<FaultSet>();
+            GetSubsets(set, subset, 0, 0, results);
+            return results;
+        }
+
+        /// <summary>
+        /// Helper function for recursively finding subsets.
+        /// </summary>
+        private void GetSubsets(FaultSet set, Fault[] subset, int index, int minFaultIndex, List<FaultSet> results)
+        {
+            if (index == subset.Length)
+            {
+                results.Add(new FaultSet(subset));
+                return;
+            }
+
+            for (int i = minFaultIndex; i < allFaults.Length - subset.Length + index; ++i)
+            {
+                if (set.Contains(allFaults[i]))
+                {
+                    subset[index] = allFaults[i];
+                    GetSubsets(set, subset, index + 1, i + 1, results);
+                }
+            }
         }
 
         public static IEnumerable<IEnumerable<T>> CartesianProduct<T>(IEnumerable<IEnumerable<T>> sequences)
