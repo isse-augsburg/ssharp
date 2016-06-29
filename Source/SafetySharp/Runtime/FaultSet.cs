@@ -119,7 +119,7 @@ namespace SafetySharp.Runtime
 			CheckFaultCount(faults.Length);
 
 			foreach (var fault in faults)
-				fault.Activation = (_faults & (1L << fault.Identifier)) != 0 ? Activation.Forced : Activation.Suppressed;
+				fault.Activation = (_faults & (1L << fault.Identifier)) != 0 ? Activation.Nondeterministic : Activation.Suppressed;
 		}
 
 		/// <summary>
