@@ -115,10 +115,9 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 		private void CreateCart(Robot startPosition, params Route[] routes)
 		{
 			// compute the transitive closure of the routes
-			routes = routes.SelectMany(route => Closure(route.Robot1, robot =>
-			{
-				return routes.Where(r => r.Robot1 == robot).Select(r => r.Robot2);
-			}).Select(target => new Route(route.Robot1, target))).ToArray();
+			routes = routes
+				.SelectMany(route => Closure(route.Robot1, robot => routes.Where(r => r.Robot1 == robot).Select(r => r.Robot2))
+				.Select(target => new Route(route.Robot1, target))).ToArray();
 
 			// make sure we don't have duplicate routes
 			routes = routes.Distinct(new RouteComparer()).ToArray();

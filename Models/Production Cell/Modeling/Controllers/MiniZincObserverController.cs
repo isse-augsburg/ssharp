@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
 	using System;
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
@@ -31,14 +32,15 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
     internal class MiniZincObserverController : ObserverController
 	{
-        [Hidden]
-        private string _constraintsFile;
-
-        [Hidden]
-        private static long myID = 0;
 		private const string ConfigurationFile = "Configuration.out";
 		private const string MinizincExe = "minizinc.exe";
 		private const string MinizincModel = "ConstraintModel.mzn";
+
+		[Hidden]
+		private static long myID = 0;
+
+		[Hidden]
+		private string _constraintsFile;
 
 		public MiniZincObserverController(IEnumerable<Agent> agents, List<Task> tasks)
 			: base(agents, tasks)
@@ -56,7 +58,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 		{
 			if (Tasks.Count != 1)
 				throw new InvalidOperationException("The constraint model expects exactly one task.");
-		    _constraintsFile = "Constraints"+ ++myID + ".dzn";
+			_constraintsFile = "Constraints" + ++myID + ".dzn";
 
             using (var writer = new StreamWriter(_constraintsFile))
 			{
@@ -89,7 +91,16 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 			using (var process = new Process { StartInfo = startInfo, EnableRaisingEvents = true })
 			{
+				try
+				{
 				process.Start();
+				}
+				catch (Win32Exception e)
+				{
+					throw new InvalidOperationException(
+						"Failed to start MiniZinc. Make sure that you have MiniZinc installed and that " +
+						$"'{MinizincExe}' is in your system path. The error message was: {e.Message}");
+				}
 
 				process.BeginErrorReadLine();
 				process.BeginOutputReadLine();
@@ -158,7 +169,6 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 
 		    foreach (var agent in Agents)
 		    {
-		       
                     if (agent.Resource == null)
                         continue;
 		            if (!agent.AllocatedRoles.Any(
@@ -220,17 +230,17 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
             foreach (var task in tasks)
             {
                 isReconfPossible &=
-                    task.Capabilities.All(capability => robotsAgents.Any(agent => ContainsCapability(agent.AvailableCapabilites,capability)));
+					task.Capabilities.All(capability => robotsAgents.Any(agent => ContainsCapability(agent.AvailableCapabilites, capability)));
                 if (!isReconfPossible)
                     break;
 
-                var candidates = robotsAgents.Where(agent => ContainsCapability(agent.AvailableCapabilites,task.Capabilities.First())).ToArray();
+				var candidates = robotsAgents.Where(agent => ContainsCapability(agent.AvailableCapabilites, task.Capabilities.First())).ToArray();
 
                 for (var i = 0; i < task.Capabilities.Length - 1; i++)
                 {
                     candidates =
                         candidates.SelectMany<RobotAgent, RobotAgent>(r => matrix[r])
-                                  .Where(r => ContainsCapability(r.AvailableCapabilites,task.Capabilities[i + 1]))
+								  .Where(r => ContainsCapability(r.AvailableCapabilites, task.Capabilities[i + 1]))
                                   .ToArray();
                     if (candidates.Length == 0)
                     {

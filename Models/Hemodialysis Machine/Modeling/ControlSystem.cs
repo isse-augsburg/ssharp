@@ -57,8 +57,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		//PreparationSettingTreatmentParameters,
 		//PreparationRinsingDialyzer,
 		//InitiationConnectingPatient,
-		MainTherapy,
-		EndOfTreatment
+		InitiationPhase,
+		EndingPhase
 		//EndingReinfusion,
 		//EndingEmptyingDialyzer,
 		//EndingEmptyingCatridge,
@@ -72,7 +72,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		public KindOfDialysate KindOfDialysateConcentrate { get; } = KindOfDialysate.Bicarbonate;
 		public int DialysingFluidTemperature { get; } = 33; // in °C. Should be between 33°C and 40°C
 		public int DialysingFluidFlowRate { get; } = 0;
-		
+
 		// UltraFiltrationParameters
 		public int UltraFiltrationRate { get; } = 0; // 0 - 500mL/h
 
@@ -105,7 +105,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 
 
 		[Hidden]
-		public readonly StateMachine<TherapyPhase> CurrentTherapyPhase = TherapyPhase.MainTherapy;
+		public readonly StateMachine<TherapyPhase> CurrentTherapyPhase = TherapyPhase.InitiationPhase;
 
 		private Dialyzer Dialyzer;
 
@@ -147,15 +147,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		{
 			CurrentTherapyPhase
 				.Transition(
-					from: TherapyPhase.MainTherapy,
-					to: TherapyPhase.MainTherapy,
-					guard: TimeStepsLeft>0 && !VenousSafetyDetector.DetectedGasOrContaminatedBlood,
+					from: TherapyPhase.InitiationPhase,
+					to: TherapyPhase.InitiationPhase,
+					guard: TimeStepsLeft > 0 && !VenousSafetyDetector.DetectedGasOrContaminatedBlood,
 					action: StepOfMainTherapy
 				);
 			CurrentTherapyPhase
 				.Transition(
-					from: TherapyPhase.MainTherapy,
-					to: TherapyPhase.EndOfTreatment,
+					from: TherapyPhase.InitiationPhase,
+					to: TherapyPhase.EndingPhase,
 					guard: TimeStepsLeft <= 0 || VenousSafetyDetector.DetectedGasOrContaminatedBlood,
 					action: ShutdownMotors
 				);

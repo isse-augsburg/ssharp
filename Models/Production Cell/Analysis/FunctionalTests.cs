@@ -170,9 +170,9 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
             return role.PreCondition.Port.AllocatedRoles.Any(role1 => role1.PostCondition.Port.Equals(agent)
                                                                       && role.PreCondition.State.SequenceEqual(role1.PostCondition.State)
                                                                       && role.PreCondition.Task.Equals(role1.PostCondition.Task));
-        }
+		}
 
-        private bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<CartAgent> cartAgents, IEnumerable<Task> tasks,
+		private bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<CartAgent> cartAgents, IEnumerable<Task> tasks,
 									  ObserverController observerController)
 		{
 			var isReconfPossible = true;
@@ -195,7 +195,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 					if (candidates.Length == 0)
 					{
 						isReconfPossible = false;
-					}
+			}
 				}
 			}
 
