@@ -101,14 +101,14 @@ namespace SafetySharp.CaseStudies.ProductionCell.Analysis
 			if (model.ObserverController.ReconfigurationState == ReconfStates.Failed)
 				return false;
 
-			foreach (var agent in agents)
-			{
-				foreach (var constraint in agent.Constraints)
-				{
-					if (!constraint())
-						;
-				}
-			}
+//			foreach (var agent in agents)
+//			{
+//				foreach (var constraint in agent.Constraints)
+//				{
+//					if (!constraint())
+//						;
+//				}
+//			}
 
 			return agents.Any(agent => agent.Constraints.Any(constraint => !constraint()));
 		}

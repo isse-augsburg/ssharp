@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Modeling
 {
+	using System.Collections.Generic;
 	using Utilities;
 
 	/// <summary>
@@ -32,7 +33,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Suppresses all activations of the <paramref name="faults" />.
 		/// </summary>
-		public static void SuppressActivations(this Fault[] faults)
+		public static void SuppressActivations(this IEnumerable<Fault> faults)
 		{
 			Requires.NotNull(faults, nameof(faults));
 
@@ -43,7 +44,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Forces the activations of the <paramref name="faults" />, i.e., whenever the faults can be activated, they are activated.
 		/// </summary>
-		public static void ForceActivations(this Fault[] faults)
+		public static void ForceActivations(this IEnumerable<Fault> faults)
 		{
 			Requires.NotNull(faults, nameof(faults));
 
