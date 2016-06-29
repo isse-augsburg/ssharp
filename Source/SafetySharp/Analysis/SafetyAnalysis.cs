@@ -377,7 +377,7 @@ namespace SafetySharp.Analysis
 							var set = safeSet.Add(fault);
 
 							// set is trivially critical iff one of the direct subsets is not safe (i.e. critical)
-							// * the faults faults[1], ..., faults[i-1] are not definitely not contained in set (see above)
+							// * the faults faults[0], ..., faults[i-1] are not definitely not contained in set (see above)
 							// * faults[i] is definitely in set, but set.Remove(faults[i]) == safeSet and is thus safe.
 							bool isTriviallyCritical = false;
 							for (int j = i + 1; j < faults.Length; ++j)
