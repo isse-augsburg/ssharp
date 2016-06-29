@@ -71,46 +71,7 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 				() =>
 					agent.AllocatedRoles.All(
 						role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilites.Contains(capability))),
-                //   Pre-PostconditionConsistency
-				() =>
-					agent.AllocatedRoles.Any(role => role.PostCondition.Port == null || role.PreCondition.Port == null)
-						? true
-						: agent.AllocatedRoles.TrueForAll(
-							role => PostMatching(role, agent) && PreMatching(role, agent))
 			};
-		}
-
-		private bool PostMatching(Role role, Agent agent)
-		{
-			if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)))
-			{
-				;
-			}
-			else if (
-				!role.PostCondition.Port.AllocatedRoles.Any(
-					role1 =>
-						role.PostCondition.State.Select(capability => capability.Identifier)
-							.SequenceEqual(role1.PreCondition.State.Select(capability => capability.Identifier))))
-			{
-				;
-			}
-			else if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role.PostCondition.Task.Equals(role1.PreCondition.Task)))
-			{
-				;
-			}
-
-			return role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)
-																	   &&
-																	   role.PostCondition.State.Select(capability => capability.Identifier)
-																		   .SequenceEqual(role1.PreCondition.State.Select(capability => capability.Identifier))
-																	   && role.PostCondition.Task.Equals(role1.PreCondition.Task));
-		}
-
-		private bool PreMatching(Role role, Agent agent)
-		{
-			return role.PreCondition.Port.AllocatedRoles.Any(role1 => role1.PostCondition.Port.Equals(agent)
-																	  && role.PreCondition.State.SequenceEqual(role1.PostCondition.State)
-																	  && role.PreCondition.Task.Equals(role1.PostCondition.Task));
 		}
 
 		public override void Update()
@@ -121,9 +82,17 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 					break;
 
 				agent.Update();
+                
 			}
 
-			if (!_reconfigurationRequested)
+            //Observer Oracle Check
+            if (_reconfigurationRequested && !CheckConstraints(Agents))
+            {
+                throw new Exception("Constraint violation not detected by Observer.");
+            }
+
+
+            if (!_reconfigurationRequested)
 				return;
 
 			// TODO: This speeds up analyses when checking for reconf failures with DCCA, but is otherwise
@@ -140,5 +109,67 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 			_reconfigurationRequested = false;
 			_hasReconfed = true;
 		}
-	}
+
+        private bool CheckConstraints(IEnumerable<Agent> agents)
+        {
+            foreach (var agent in agents)
+            {
+                if (agent.AllocatedRoles.All(role => role.PreCondition.Port == null || agent.Inputs.Contains(role.PreCondition.Port)))
+                {
+                    return false;
+                }
+                if (agent.AllocatedRoles.All(role => role.PostCondition.Port == null || agent.Outputs.Contains(role.PostCondition.Port)))
+                {
+                    return false;
+                }
+                if (agent.AllocatedRoles.All(
+                    role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilites.Contains(capability))))
+                {
+                    return false;
+                }
+                if (agent.AllocatedRoles.Any(role => role.PostCondition.Port == null || role.PreCondition.Port == null)
+                    ? true
+                    : agent.AllocatedRoles.TrueForAll(role => PostMatching(role, agent) && PreMatching(role, agent)))
+                {
+                    return false;
+                }
+
+            }
+            return true;
+        }
+
+        private bool PostMatching(Role role, Agent agent)
+        {
+            if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)))
+            {
+                ;
+            }
+            else if (
+                !role.PostCondition.Port.AllocatedRoles.Any(
+                    role1 =>
+                        role.PostCondition.State.Select(capability => capability.Identifier)
+                            .SequenceEqual(role1.PreCondition.State.Select(capability => capability.Identifier))))
+            {
+                ;
+            }
+            else if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role.PostCondition.Task.Equals(role1.PreCondition.Task)))
+            {
+                ;
+            }
+
+            return role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)
+                                                                       &&
+                                                                       role.PostCondition.State.Select(capability => capability.Identifier)
+                                                                           .SequenceEqual(role1.PreCondition.State.Select(capability => capability.Identifier))
+                                                                       && role.PostCondition.Task.Equals(role1.PreCondition.Task));
+        }
+
+        private bool PreMatching(Role role, Agent agent)
+        {
+            return role.PreCondition.Port.AllocatedRoles.Any(role1 => role1.PostCondition.Port.Equals(agent)
+                                                                      && role.PreCondition.State.SequenceEqual(role1.PostCondition.State)
+                                                                      && role.PreCondition.Task.Equals(role1.PostCondition.Task));
+        }
+
+    }
 }

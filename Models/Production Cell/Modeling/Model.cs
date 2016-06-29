@@ -60,6 +60,21 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 			ObserverController = new MiniZincObserverController(RobotAgents.Cast<Agent>().Concat(CartAgents), Tasks);
 		}
 
+	    public Model(IEnumerable<Tuple<Robot, RobotAgent>> robots, IEnumerable<Tuple<Cart, CartAgent>> carts, int numberOfWorkpieces, params Capability[] workstepsOfWorkpieces)
+	    {
+	        CreateWorkpieces(numberOfWorkpieces, workstepsOfWorkpieces);
+	        foreach (var robot in robots)
+	        {
+	            AddRobot(robot.Item1, robot.Item2);
+	        }
+	        foreach (var cart in carts)
+	        {
+	            AddCart(cart.Item1, cart.Item2);
+	        }
+
+            ObserverController = new MiniZincObserverController(RobotAgents.Cast<Agent>().Concat(CartAgents), Tasks);
+        }
+
 		public List<Task> Tasks { get; } = new List<Task>();
 
 		[Root(RootKind.Plant)]
@@ -99,18 +114,24 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 				Resources.Add(new Resource(task, workpiece));
 			}
 		}
+        
 
 		private void CreateRobot(params Capability[] capabilities)
 		{
 			var robot = new Robot(capabilities.OfType<ProcessCapability>().ToArray());
 			var agent = new RobotAgent(capabilities, robot);
 
-			Robots.Add(robot);
-			RobotAgents.Add(agent);
-
-			robot.SetNames(Robots.Count - 1);
-			agent.Name = $"R{Robots.Count - 1}";
+			AddRobot(robot,agent);
 		}
+
+	    private void AddRobot(Robot robot, RobotAgent agent)
+	    {
+            Robots.Add(robot);
+            RobotAgents.Add(agent);
+
+            robot.SetNames(Robots.Count - 1);
+            agent.Name = $"R{Robots.Count - 1}";
+        }
 
 		private void CreateCart(Robot startPosition, params Route[] routes)
 		{
@@ -128,20 +149,24 @@ namespace SafetySharp.CaseStudies.ProductionCell.Modeling
 			var cart = new Cart(startPosition, routes);
 			var agent = new CartAgent(cart);
 
-			Carts.Add(cart);
-			CartAgents.Add(agent);
+		    AddCart(cart, agent, routes);
 
-			cart.SetNames(Carts.Count - 1);
-			agent.Name = $"C{Carts.Count - 1}";
-
-			foreach (var route in routes)
-			{
-				Agent.Connect(from: RobotAgents.Single(a => route.Robot1 == a.Robot), to: agent);
-				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.Robot2 == a.Robot));
-				Agent.Connect(from: RobotAgents.Single(a => route.Robot2 == a.Robot), to: agent);
-				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.Robot1 == a.Robot));
-			}
 		}
+
+	    private void AddCart(Cart cart, CartAgent agent, IEnumerable<Route> routes)
+	    {
+            Carts.Add(cart);
+            CartAgents.Add(agent);
+            cart.SetNames(Carts.Count - 1);
+            agent.Name = $"C{Carts.Count - 1}";
+            foreach (var route in routes)
+            {
+                Agent.Connect(from: RobotAgents.Single(a => route.Robot1 == a.Robot), to: agent);
+                Agent.Connect(from: agent, to: RobotAgents.Single(a => route.Robot2 == a.Robot));
+                Agent.Connect(from: RobotAgents.Single(a => route.Robot2 == a.Robot), to: agent);
+                Agent.Connect(from: agent, to: RobotAgents.Single(a => route.Robot1 == a.Robot));
+            }
+        }
 
 		private static IEnumerable<T> Closure<T>(T root, Func<T, IEnumerable<T>> children)
 		{
