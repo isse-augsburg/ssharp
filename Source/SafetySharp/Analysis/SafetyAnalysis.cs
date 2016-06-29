@@ -45,6 +45,11 @@ namespace SafetySharp.Analysis
 		private readonly Dictionary<FaultSet, CounterExample> counterExamples = new Dictionary<FaultSet, CounterExample>();
 		private readonly Dictionary<FaultSet, Exception> exceptions = new Dictionary<FaultSet, Exception>();
 
+		private int trivialCount = 0;
+		private int heuristicCount = 0;
+		private int heuristicTrivialCount = 0;
+		private int heuristicNonTrivialSafeCount = 0;
+
 		/// <summary>
 		///   The model checker's configuration that determines certain model checker settings.
 		/// </summary>
@@ -195,6 +200,11 @@ namespace SafetySharp.Analysis
 			// due to heuristics usage, we may have informatiuon on non-minimal critical sets
 			var minimalCritical = RemoveNonMinimalCriticalSets();
 
+			ConsoleHelpers.WriteLine($"Of {heuristicCount} sets suggested by heuristics,\n\t{heuristicTrivialCount} were trivially safe / critical\n"
+				+ $"\t{heuristicNonTrivialSafeCount} were non-trivially safe\n"
+				+ $"\t{heuristicCount-heuristicNonTrivialSafeCount} were non-trivially critical\n"
+				+ $"In total, {trivialCount} trivial checks were performed.\n");
+
 			return new Result(
 				model, isComplete, minimalCritical, checkedSets,
 				allFaults, suppressedFaults, forcedFaults,
@@ -230,16 +240,29 @@ namespace SafetySharp.Analysis
 		private bool CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
 			int cardinality, RuntimeModelSerializer serializer, InvariantChecker invariantChecker)
 		{
+			bool isHeuristic = cardinality != set.Cardinality;
+			if (isHeuristic)
+				heuristicCount++;
 			bool isSafe = true;
 
 			// check if set is trivially safe or critical
 			// (do not add to safeSets / criticalSets if so, in order to keep them small)
 			if (IsTriviallySafe(set))
+			{
+				trivialCount++;
+				if (isHeuristic)
+					heuristicTrivialCount++;
 				// do not add to safeSets: all subsets are subsets of safeSet as well
 				return true;
+			}
 			else if (IsTriviallyCritical(set))
+			{
+				trivialCount++;
+				if (isHeuristic)
+					heuristicTrivialCount++;
 				// do not add to criticalSets: non-minimal, and all supersets are supersets of criticalSet as well
 				return false;
+			}
 
 			// if configured to do so, check with forced fault activation
 			if (FaultActivationBehaviour == FaultActivationBehaviour.ForceOnly
@@ -254,7 +277,11 @@ namespace SafetySharp.Analysis
 				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker, Activation.Nondeterministic);
 
 			if (isSafe) // remember non-trivially safe sets to avoid checking their subsets
+			{
 				safeSets.Add(set);
+				if (isHeuristic)
+					heuristicNonTrivialSafeCount++;
+			}
 
 			return isSafe;
 		}
