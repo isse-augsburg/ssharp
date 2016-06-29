@@ -35,6 +35,7 @@ namespace SafetySharp.Modeling
 	///   Represents a base class for all faults affecting the behavior of <see cref="Component" />s.
 	/// </summary>
 	[DebuggerDisplay("{Name} (#{Identifier}) [{Activation}]")]
+	[Hidden]
 	public abstract class Fault
 	{
 		private readonly Choice _choice = new Choice();
