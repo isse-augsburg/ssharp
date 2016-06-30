@@ -36,6 +36,8 @@ namespace SafetySharp.Runtime
 
 		private List<double> _backingArray;
 
+		public int Count => _backingArray.Count;
+
 		// auto resize
 		public DoubleVector()
 		{
@@ -59,7 +61,7 @@ namespace SafetySharp.Runtime
 				_backingArray.Capacity = size;
 			for (var i = _backingArray.Count; i < size; i++)
 			{
-				_backingArray[i] = 0.0;
+				_backingArray.Add(0.0);
 			}
 		}
 
