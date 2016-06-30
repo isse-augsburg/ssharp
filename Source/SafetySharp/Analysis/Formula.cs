@@ -90,28 +90,6 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Returns a <see cref="Formula" /> that applies the implication operator to this instance (the antecedent) and
-		///   <paramref name="formula" /> (the succedent).
-		/// </summary>
-		/// <param name="formula">The formula representing the succedent of the implication.</param>
-		public Formula Implies(Formula formula)
-		{
-			Requires.NotNull(formula, nameof(formula));
-			return new BinaryFormula(this, BinaryOperator.Implication, formula);
-		}
-
-		/// <summary>
-		///   Returns a <see cref="Formula" /> that applies the equivalence operator to this instance and
-		///   <paramref name="formula" />.
-		/// </summary>
-		/// <param name="formula">The formula that should be equivalent.</param>
-		public Formula EquivalentTo(Formula formula)
-		{
-			Requires.NotNull(formula, nameof(formula));
-			return new BinaryFormula(this, BinaryOperator.Equivalence, formula);
-		}
-
-		/// <summary>
 		///   Returns a <see cref="Formula" /> that applies the 'not' operator to the <paramref name="formula" />.
 		/// </summary>
 		public static Formula operator !(Formula formula)
