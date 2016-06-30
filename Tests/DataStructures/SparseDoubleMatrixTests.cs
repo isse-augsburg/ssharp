@@ -24,7 +24,8 @@ namespace Tests.DataStructures
 
 		private void CreateExemplaryMatrix()
 		{
-			_matrix = new SparseDoubleMatrix(6,20);
+			//_matrix = new SparseDoubleMatrix(6, 20);
+			_matrix = new SparseDoubleMatrix(1024, 1024);
 			_matrix.SetRow(0);
 			_matrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(0,1.0));
 			_matrix.FinishRow();

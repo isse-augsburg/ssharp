@@ -595,7 +595,7 @@ namespace SafetySharp.Analysis
 		}
 		// Retrieving matrix phase
 
-		public int States => _matrix.Rows();
+		public int States => _matrix.Rows;
 
 		public int ExceptionState => 0;
 

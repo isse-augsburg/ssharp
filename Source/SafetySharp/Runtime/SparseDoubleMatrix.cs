@@ -68,12 +68,7 @@ namespace SafetySharp.Runtime
 		private int _noOfColumnValues = 0;
 		private int _currentColumnCount = 0;
 
-		private int _maximalRow = 0;
-
-		public int Rows()
-		{
-			return _maximalRow;
-		}
+		public int Rows { get; private set; } = 0;
 
 		// The outgoing transitions of state s are stored between
 		// _columnValueMemory[_rowMemory[s]] and _columnValueMemory[_rowMemory[s]+_rowColumnCountMemory[s]]
@@ -101,11 +96,11 @@ namespace SafetySharp.Runtime
 		
 		private void SetRowEntriesToInvalid()
 		{
-			for (var i = 0; i <= _spaceLimitNumberOfRows+1; i++)
+			for (var i = 0; i < _spaceLimitNumberOfRows; i++)
 			{
 				_rowMemory[i] = -1;
 			}
-			for (var i = 0; i <= _spaceLimitNumberOfRows; i++)
+			for (var i = 0; i < _spaceLimitNumberOfRows; i++)
 			{
 				_rowColumnCountMemory[i] = -1;
 			}
@@ -114,14 +109,14 @@ namespace SafetySharp.Runtime
 		[Conditional("DEBUG")]
 		private void CheckForInvalidRowEntries()
 		{
-			for (var i = 0; i < _maximalRow; i++)
+			for (var i = 0; i < Rows; i++)
 			{
 				if (_rowMemory[i] == -1)
 					throw new Exception("Entry should not be -1");
 			}
 			if (!_isSealed)
 			{
-				for (var i = 0; i <= _maximalRow; i++)
+				for (var i = 0; i < Rows; i++)
 				{
 					if (_rowColumnCountMemory[i] == -1)
 						throw new Exception("Entry should not be -1");
@@ -129,7 +124,7 @@ namespace SafetySharp.Runtime
 			}
 			else
 			{
-				if (_rowMemory[_maximalRow + 1] == -1)
+				if (_rowMemory[Rows] == -1)
 					throw new Exception("Entry should not be -1");
 			}
 		}
@@ -147,14 +142,14 @@ namespace SafetySharp.Runtime
 		{
 			Requires.InRange(row, nameof(row), 0, _spaceLimitNumberOfRows);
 			AssertNotSealed();
-			if (_rowMemory[row] == -1 || _rowColumnCountMemory[row] == -1)
+			if (_rowMemory[row] != -1 || _rowColumnCountMemory[row] != -1)
 			{
 				throw new Exception("Row has already been selected. Every row might only be selected once.");
 			}
 			_currentRow = row;
 			_currentColumnCount = 0;
-			if (row > _maximalRow)
-				_maximalRow =  row;
+			if (row >= Rows)
+				Rows =  row+1;
 			_rowMemory[row] = _noOfColumnValues;
 		}
 
@@ -190,7 +185,7 @@ namespace SafetySharp.Runtime
 			CheckForInvalidRowEntries();
 			//initialize fresh memory for optimized data
 			// use actual number of rows and entries, not the pessimistic upper limits
-			_rowBufferOptimized.Resize((long) (_maximalRow + 1) * sizeof(int), zeroMemory: false);
+			_rowBufferOptimized.Resize((long) (Rows + 1) * sizeof(int), zeroMemory: false);
 			_columnValueBufferOptimized.Resize((long)_noOfColumnValues * sizeof(ColumnValue), zeroMemory: false);
 			//Reason for +1 in the previous line: To be able to optimize we need space for one more state 
 			var optimizedRowMemory = (int*)_rowBufferOptimized.Pointer;
@@ -198,7 +193,7 @@ namespace SafetySharp.Runtime
 
 			//copy values
 			var columnValueIndex = 0;
-			for (var rowi=0; rowi < _maximalRow; rowi++)
+			for (var rowi=0; rowi < Rows; rowi++)
 			{
 				optimizedRowMemory[rowi] = columnValueIndex;
 				var baseColumnIndexOfRow = _rowMemory[rowi];
@@ -209,7 +204,7 @@ namespace SafetySharp.Runtime
 					columnValueIndex++;
 				}
 			}
-			optimizedRowMemory[_maximalRow] = columnValueIndex; //last entry
+			optimizedRowMemory[Rows] = columnValueIndex; //last entry
 
 
 			//commit changes
@@ -226,7 +221,7 @@ namespace SafetySharp.Runtime
 		public void MultiplyWithVectorSealed(double[] b, double[] res)
 		{
 			//Implementation of algorithm 3.13
-			for (var i = 0; i < _maximalRow; i++)
+			for (var i = 0; i < Rows; i++)
 			{
 				res[i] = 0;
 				var l = _rowMemory[i];
@@ -241,7 +236,7 @@ namespace SafetySharp.Runtime
 
 		public void MultiplyWithVectorUnsealed(double[] b, double[] res)
 		{
-			for (var i = 0; i < _maximalRow; i++)
+			for (var i = 0; i < Rows; i++)
 			{
 				res[i] = 0;
 				var l = _rowMemory[i];
@@ -304,7 +299,7 @@ namespace SafetySharp.Runtime
 			public bool MoveRow(int row)
 			{
 				CurrentRow=row;
-				if (CurrentRow >= _matrix.Rows())
+				if (CurrentRow >= _matrix.Rows)
 					return false;
 				_currentColumnValueL = _matrix._rowMemory[CurrentRow];
 				if (_matrix._isSealed)
@@ -330,7 +325,7 @@ namespace SafetySharp.Runtime
 			public bool MoveNextRow()
 			{
 				CurrentRow++;
-				if (CurrentRow >= _matrix.Rows())
+				if (CurrentRow >= _matrix.Rows)
 					return false;
 				_currentColumnValueL = _matrix._rowMemory[CurrentRow];
 				if (_matrix._isSealed)
