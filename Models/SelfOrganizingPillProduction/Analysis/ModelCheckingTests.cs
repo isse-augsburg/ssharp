@@ -12,6 +12,55 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Analysis
     {
         public enum HeuristicsUsage { None, Subsumption, Redundancy, Both }
 
+        [Test]
+        public void ForcedActivationIncompleteDcca(
+            [Values(FaultActivationBehaviour.ForceOnly, FaultActivationBehaviour.Nondeterministic)]
+            FaultActivationBehaviour activation
+        )
+        {
+            // create stations
+            var producer = new ContainerLoader();
+            var commonDispenser = new ParticulateDispenser();
+            var dispenserTop = new ParticulateDispenser();
+            var dispenserBottom = new ParticulateDispenser();
+            var consumerTop = new PalletisationStation();
+            var consumerBottom = new PalletisationStation();
+            var stations = new Station[] { producer, commonDispenser, dispenserTop, dispenserBottom, consumerTop, consumerBottom };
+
+            // set very limited ingredient amounts
+            commonDispenser.SetStoredAmount(IngredientType.BlueParticulate, 40);
+            dispenserTop.SetStoredAmount(IngredientType.RedParticulate, 100);
+            dispenserBottom.SetStoredAmount(IngredientType.RedParticulate, 100);
+
+            // create connections
+            producer.Outputs.Add(commonDispenser);
+            commonDispenser.Inputs.Add(producer);
+
+            commonDispenser.Outputs.Add(dispenserTop);
+            dispenserTop.Inputs.Add(commonDispenser);
+            commonDispenser.Outputs.Add(dispenserBottom);
+            dispenserBottom.Inputs.Add(commonDispenser);
+
+            dispenserTop.Outputs.Add(consumerTop);
+            consumerTop.Inputs.Add(dispenserTop);
+
+            dispenserBottom.Outputs.Add(consumerBottom);
+            consumerBottom.Inputs.Add(dispenserBottom);
+
+            var model = new Model(
+                stations,
+                new FastObserverController(stations)
+            );
+
+            var recipe = new Recipe(
+                new[] { new Ingredient(IngredientType.BlueParticulate, 30), new Ingredient(IngredientType.RedParticulate, 10) },
+                1u
+            );
+            model.ScheduleProduction(recipe);
+
+            Dcca(model, activation);
+        }
+
         [Test, Combinatorial]
         public void DccaTest(
             [Values("complete_network.model", "bidirectional_circle.model", "duplicate_dispenser.model", "simple_circle.model", "trivial_setup.model", "simple_setup.model", "simple_setup3.model", "simple_setup2.model", "medium_setup.model", "complex_setup.model")]
