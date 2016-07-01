@@ -69,17 +69,19 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                     Container = request.Source.TransferResource();
                     resourceRequests.Remove(request);
 
-                    ExecuteRole(role);
-                    role.PostCondition.Port?.ResourceReady(source: this, condition: role.PostCondition);
+                    ExecuteRole(role.Value);
+                    role?.PostCondition.Port?.ResourceReady(source: this, condition: role.Value.PostCondition);
                 }
             }
         }
 
-        protected Role ChooseRole(Station source, Condition condition)
+        protected Role? ChooseRole(Station source, Condition condition)
         {
-            return AllocatedRoles.FirstOrDefault(
-                role => role.PreCondition.Matches(condition) && role.PreCondition.Port == source
-            ); // there should be at most one such role
+            foreach (var role in AllocatedRoles)
+                // there should be at most one such role
+                if (role.PreCondition.Matches(condition) && role.PreCondition.Port == source)
+                    return role;
+            return null;
         }
 
         /// <summary>
@@ -107,12 +109,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 Container = null;
             }
 
-            resourceRequests.RemoveAll(request =>
-            {
-                if (request.Condition == null)
-                    throw new InvalidOperationException(nameof(request.Condition) + " is null!");
-                return request.Condition.Recipe == recipe;
-            });
+            resourceRequests.RemoveAll(request => request.Condition.Recipe == recipe);
         }
 
         /// <summary>
@@ -165,7 +162,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             {
                 AllocatedRoles.Remove(role);
             }
-            ObserverController.RolePool.Return(obsoleteRoles);
 
             foreach (var neighbour in affectedNeighbours)
             {
@@ -183,8 +179,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         {
             public ResourceRequest(Station source, Condition condition)
             {
-                if (condition == null)
-                    throw new ArgumentNullException(nameof(condition));
                 Source = source;
                 Condition = condition;
             }

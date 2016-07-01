@@ -23,12 +23,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         public bool Unsatisfiable { get; protected set; }
 
         /// <summary>
-        /// Since S# doesn't allow creation of new <see cref="Role"/> instances during
-        /// model checking, they are collected here and reused.
-        /// </summary>
-        public readonly ObjectPool<Role> RolePool = new ObjectPool<Role>(Model.MaximumRoleCount);
-
-        /// <summary>
         /// Create a new instance controlling the given <see cref="stations"/>.
         /// </summary>
         public ObserverController(params Station[] stations)
@@ -88,7 +82,6 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                     station.AllocatedRoles.Remove(role);
 
                 station.BeforeReconfiguration(recipe);
-                RolePool.Return(obsoleteRoles);
             }
         }
 
@@ -99,16 +92,16 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// <param name="input">The station the role declares as input port. May be null.</param>
         /// <param name="previous">The previous condition (postcondition of the previous role). May be null.</param>
         /// <returns>A <see cref="Role"/> instance with the given data.</returns>
-        protected Role GetRole(Recipe recipe, Station input, Condition previous)
+        protected Role GetRole(Recipe recipe, Station input, Condition? previous)
         {
-            var role = RolePool.Allocate();
+            var role = new Role();
 
             // update precondition
             role.PreCondition.Recipe = recipe;
             role.PreCondition.Port = input;
             role.PreCondition.ResetState();
             if (previous != null)
-                role.PreCondition.CopyStateFrom(previous);
+                role.PreCondition.CopyStateFrom(previous.Value);
 
             // update postcondition
             role.PostCondition.Recipe = recipe;

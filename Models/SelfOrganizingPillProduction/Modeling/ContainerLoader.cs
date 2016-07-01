@@ -46,7 +46,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
             var role = ChooseProductionRole();
             if (Container == null && role != null)
             {
-                var recipe = role.Recipe;
+                var recipe = role?.Recipe;
 
                 // role.capabilitiesToApply will always be { ProduceCapability }
                 Container = containerStorage.Allocate();
@@ -55,16 +55,16 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                 recipe.AddContainer(Container);
 
                 // assume role.PostCondition.Port != null
-                role.PostCondition.Port.ResourceReady(source: this, condition: role.PostCondition);
+                role?.PostCondition.Port.ResourceReady(source: this, condition: role.Value.PostCondition);
             }
         }
 
-        private Role ChooseProductionRole()
+        private Role? ChooseProductionRole()
         {
-            return AllocatedRoles.FirstOrDefault(role =>
-                role.PreCondition.Port == null && role.Recipe.RemainingAmount > 0
-                    && role.HasCapabilitiesToApply()
-            );
+            foreach (var role in AllocatedRoles)
+                if (role.PreCondition.Port == null && role.Recipe.RemainingAmount > 0 && role.HasCapabilitiesToApply())
+                    return role;
+            return null;
         }
 
         [FaultEffect(Fault = nameof(NoContainersLeft))]

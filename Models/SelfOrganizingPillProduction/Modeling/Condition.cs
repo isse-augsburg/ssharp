@@ -7,7 +7,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     /// <summary>
     /// Describes the condition of a pill container before or after a role's capabilities are applied to it.
     /// </summary>
-    public class Condition
+    public struct Condition
     {
         /// <summary>
         /// The station the container is received from or sent to.
@@ -24,7 +24,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         ///  How many of the <see cref="Recipe"/>'s <see cref="Recipe.RequiredCapabilities"/>
         ///  were already applied to <see cref="PillContainer"/>s in this condition.
         /// </summary>
-        private int statePrefixLength = 0;
+        private int statePrefixLength;
 
         /// <summary>
         /// A reference to the container's recipe.
@@ -74,8 +74,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         /// </summary>
         public bool Matches(Condition other)
         {
-            return other != null
-                && Recipe == other.Recipe
+            return Recipe == other.Recipe
                 && statePrefixLength == other.statePrefixLength;
         }
     }

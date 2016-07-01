@@ -180,7 +180,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         private void ApplyConfiguration(Recipe recipe, int[] path)
         {
             Station lastStation = null;
-            Role lastRole = null;
+            Role lastRole = default(Role);
 
             for (int i = 0; i < path.Length; ++i)
             {
@@ -209,7 +209,7 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
                     }
 
                     // configure station itself
-                    role = GetRole(recipe, lastStation, lastRole?.PostCondition);
+                    role = GetRole(recipe, lastStation, lastStation == null ? (Condition?)null : lastRole.PostCondition);
                     station.AllocatedRoles.Add(role);
                 }
 

@@ -7,17 +7,17 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
     /// <summary>
     /// Describes a sequence of capabilities a specific station should apply to a container.
     /// </summary>
-    public class Role
+    public struct Role
     {
         /// <summary>
         /// The condition of the container before the role is executed.
         /// </summary>
-        public Condition PreCondition { get; } = new Condition();
+        public Condition PreCondition;
 
         /// <summary>
         /// The condition of the container after the role is executed.
         /// </summary>
-        public Condition PostCondition { get; } = new Condition();
+        public Condition PostCondition;
 
         /// <summary>
         /// The capabilities to apply.
@@ -25,8 +25,8 @@ namespace SafetySharp.CaseStudies.SelfOrganizingPillProduction.Modeling
         public IEnumerable<Capability> CapabilitiesToApply =>
             Recipe.RequiredCapabilities.Skip(capabilitiesToApplyStart).Take(capabilitiesToApplyCount);
 
-        private int capabilitiesToApplyStart = 0;
-        private int capabilitiesToApplyCount = 0;
+        private int capabilitiesToApplyStart;
+        private int capabilitiesToApplyCount;
 
         /// <summary>
         /// Resets the capabilities applied by the role (takes <see cref="PreCondition"/> into account).
