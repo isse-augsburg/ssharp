@@ -33,31 +33,40 @@ namespace SafetySharp.Runtime
 	using Modeling;
 	using Serialization;
 	using Utilities;
-	/*
-	internal class StateStorageStateToMarkovChainStateMapper
-	{
-		public StateStorage(StateVectorLayout layout, int capacity)
-		{
-			Requires.NotNull(layout, nameof(layout));
-			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
 
-			_stateVectorSize = layout.SizeInBytes;
+	internal sealed unsafe class StateStorageStateToMarkovChainStateMapper
+	{
+		/// <summary>
+		///   The number of states that can be indexed.
+		/// </summary>
+		private readonly int _capacity;
+
+		/// <summary>
+		///   The buffer that stores the states.
+		/// </summary>
+		private readonly MemoryBuffer _stateStorageToMarkovChainStateBuffer = new MemoryBuffer();
+		
+		private readonly int* _stateStorageToMarkovChainStateMemory;
+
+		public int this[int index]
+		{
+			get { return _stateStorageToMarkovChainStateMemory[index]; }
+			set { _stateStorageToMarkovChainStateMemory[index]=value; }
+		}
+
+		public StateStorageStateToMarkovChainStateMapper(int capacity)
+		{
+			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
+			
 			_capacity = capacity;
 
-			_stateBuffer.Resize((long)_capacity * _stateVectorSize, zeroMemory: false);
-			_stateMemory = _stateBuffer.Pointer;
-
-			// We allocate enough space so that we can align the returned pointer such that index 0 is the start of a cache line
-			_hashBuffer.Resize((long)_capacity * sizeof(int) + CacheLineSize, zeroMemory: false);
-			_hashMemory = (int*)_hashBuffer.Pointer;
-
-			if ((ulong)_hashMemory % CacheLineSize != 0)
-				_hashMemory = (int*)(_hashBuffer.Pointer + (CacheLineSize - (ulong)_hashBuffer.Pointer % CacheLineSize));
-
-			Assert.InRange((ulong)_hashMemory - (ulong)_hashBuffer.Pointer, 0ul, (ulong)CacheLineSize);
-			Assert.That((ulong)_hashMemory % CacheLineSize == 0, "Invalid buffer alignment.");
+			_stateStorageToMarkovChainStateBuffer.Resize((long)_capacity * sizeof(int), zeroMemory: false);
+			_stateStorageToMarkovChainStateMemory = (int*) _stateStorageToMarkovChainStateBuffer.Pointer;
+			
+			for (var i = 0; i < capacity; ++i)
+				_stateStorageToMarkovChainStateMemory[i] = -1;
 		}
-	}*/
+	}
 
 	internal class MarkovChain
 	{
@@ -75,12 +84,19 @@ namespace SafetySharp.Runtime
 
 		public Dictionary<int, Reward[]> StateRewards = new Dictionary<int, Reward[]>();
 
-		Dictionary<int, int> compactToSparse = new Dictionary<int, int>();
+		/*Dictionary<int, int> compactToSparse = new Dictionary<int, int>();
 		Dictionary<int, int> sparseToCompact = new Dictionary<int, int>();
+		*/
+		private StateStorageStateToMarkovChainStateMapper _stateMapper;
 
-		public MarkovChain()
+		public MarkovChain(int maxNumberOfStates= 1 << 21, int maxNumberOfTransitions=0)
 		{
-			_matrix = new SparseDoubleMatrix(1 << 21, 1 << 23);
+			if (maxNumberOfTransitions <= 0)
+			{
+				maxNumberOfTransitions = maxNumberOfStates << 3;
+			}
+			_stateMapper = new StateStorageStateToMarkovChainStateMapper(maxNumberOfStates);
+			_matrix = new SparseDoubleMatrix(maxNumberOfStates, maxNumberOfTransitions);
 		}
 
 
@@ -105,27 +121,28 @@ namespace SafetySharp.Runtime
 			States++;
 			return ExceptionState.Value;
 		}
-		/*
-		private int CreateNewState(int sparseId)
+
+		private int GetMarkovChainState (int stateStorageState)
 		{
 			{
-				if (sparseToCompact.ContainsKey(sparseId))
+				if (_stateMapper[stateStorageState]!=-1)
 				{
-					return sparseToCompact[sparseId];
+					return _stateMapper[stateStorageState];
 				}
 				else
 				{
-					var compactId = ++compactProbabilityMatrix.States;
-					sparseToCompact.Add(sparseId, compactId);
-					compactToSparse.Add(compactId, sparseId);
-					return compactId;
+					var freshMarkovChainState = States;
+					States++;
+					_stateMapper[stateStorageState] = freshMarkovChainState;
+					return freshMarkovChainState;
 				}
 			}
-		}*/
+		}
 
-		public void AddInitialState(int state, Probability probability)
+		public void AddInitialState(int stateStorageState, Probability probability)
 		{
-			InitialStateProbabilities[state] = InitialStateProbabilities[state] + probability.Value;
+			var markovChainState = GetMarkovChainState(stateStorageState);
+			InitialStateProbabilities[markovChainState] = InitialStateProbabilities[markovChainState] + probability.Value;
 		}
 
 		public void AddInitialException(Probability probability)
@@ -138,9 +155,10 @@ namespace SafetySharp.Runtime
 			_matrix.SetRow(state);
 		}
 
-		public void AddTransition(int state, Probability probability)
+		public void AddTransition(int stateStorageState, Probability probability)
 		{
-			_matrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(state, probability.Value));
+			var markovChainState = GetMarkovChainState(stateStorageState);
+			_matrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(markovChainState, probability.Value));
 		}
 
 		public void AddTransitionException(Probability probability)
