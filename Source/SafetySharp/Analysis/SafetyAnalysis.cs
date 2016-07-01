@@ -202,7 +202,7 @@ namespace SafetySharp.Analysis
 
 			ConsoleHelpers.WriteLine($"Of {heuristicCount} sets suggested by heuristics,\n\t{heuristicTrivialCount} were trivially safe / critical\n"
 				+ $"\t{heuristicNonTrivialSafeCount} were non-trivially safe\n"
-				+ $"\t{heuristicCount-heuristicNonTrivialSafeCount} were non-trivially critical\n"
+				+ $"\t{heuristicCount-heuristicNonTrivialSafeCount-heuristicTrivialCount} were non-trivially critical\n"
 				+ $"In total, {trivialCount} trivial checks were performed.\n");
 
 			return new Result(
