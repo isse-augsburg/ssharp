@@ -59,7 +59,6 @@
     <Compile Include="Modeling\ContainerLoader.cs" />
     <Compile Include="Modeling\IngredientTank.cs" />
     <Compile Include="Modeling\IngredientType.cs" />
-    <Compile Include="Modeling\MiniZincObserverController.cs" />
     <Compile Include="Modeling\Model.cs" />
     <Compile Include="Modeling\ObserverController.cs" />
     <Compile Include="Modeling\PalletisationStation.cs" />
@@ -100,15 +99,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Analysis\trivial_setup.model">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Configuration-Simplified.mzn">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="ConfigurationConstraints.mzn">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Model.mzn">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
