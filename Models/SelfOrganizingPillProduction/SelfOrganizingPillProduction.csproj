@@ -75,6 +75,9 @@
     <None Include="Analysis\bidirectional_circle.model">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Analysis\complete_network.model">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Analysis\complex_setup.model">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
