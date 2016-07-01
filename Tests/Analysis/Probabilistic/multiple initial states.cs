@@ -44,7 +44,7 @@ namespace Tests.Analysis.Probabilistic
 
 				Formula stateIs2 = c.F == 2;
 				var checkProbabilityOfFinally2 = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(stateIs2));
-				probabilityChecker.CreateProbabilityMatrix();
+				probabilityChecker.CreateMarkovChain();
 				probabilityChecker.DefaultChecker = modelChecker;
 				probabilityOfFinally2 = checkProbabilityOfFinally2.Calculate();
 				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);

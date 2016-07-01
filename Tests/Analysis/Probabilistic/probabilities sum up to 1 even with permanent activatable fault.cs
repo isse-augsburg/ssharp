@@ -53,7 +53,7 @@ namespace Tests.Analysis.Probabilistic
 				var checkProbabilityOfStep11FrozenValue2AndInvariantNotViolated = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated));
 				var checkProbabilityOfStep11FrozenValue3AndInvariantNotViolated = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated));
 
-				probabilityChecker.CreateProbabilityMatrix();
+				probabilityChecker.CreateMarkovChain();
 				probabilityChecker.DefaultChecker = modelChecker;
 
 				probabilityOfStep11FrozenValue2AndInvariantViolated = checkProbabilityOfStep11FrozenValue2AndInvariantViolated.Calculate();

@@ -42,7 +42,7 @@ namespace Tests.Analysis.Probabilistic
 
 				Formula invariantViolated = c.ViolateInvariant;
 				var checkProbabilityOfInvariantViolation = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(invariantViolated));
-				probabilityChecker.CreateProbabilityMatrix();
+				probabilityChecker.CreateMarkovChain();
 				probabilityChecker.DefaultChecker = modelChecker;
 				probabilityOfInvariantViolation = checkProbabilityOfInvariantViolation.Calculate();
 				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);

@@ -61,7 +61,7 @@ namespace SafetySharp.Analysis
 			using (var probabilityChecker = new ProbabilityChecker(model))
 			{
 				var checkProbabilityOfHazard = probabilityChecker.CalculateProbability(probabilityOfHazardFormula);
-				probabilityChecker.CreateProbabilityMatrix();
+				probabilityChecker.CreateMarkovChain();
 				probabilityChecker.DefaultChecker = new Mrmc(probabilityChecker);
 				probabilityOfHazard = checkProbabilityOfHazard.Calculate();
 			}

@@ -47,7 +47,7 @@ namespace Tests.Analysis.Probabilistic
 
 				var calculateSteadyStateReward1 = probabilityChecker.CalculateReward(new CalculateLongRunExpectedRewardFormula(() => c.reward1));
 				var calculateSteadyStateReward2 = probabilityChecker.CalculateReward(new CalculateLongRunExpectedRewardFormula(()=> c.reward2));
-				probabilityChecker.CreateProbabilityMatrix();
+				probabilityChecker.CreateMarkovChain();
 				probabilityChecker.DefaultChecker = modelChecker;
 				steadyStateReward1 = calculateSteadyStateReward1.Calculate();
 				steadyStateReward2 = calculateSteadyStateReward2.Calculate();

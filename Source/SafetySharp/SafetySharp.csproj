@@ -66,7 +66,7 @@
     <Compile Include="Analysis\MarkovChainBuilder.cs" />
     <Compile Include="Runtime\MarkovChain.cs" />
     <Compile Include="Runtime\SparseDoubleVector.cs" />
-    <Compile Include="Runtime\DoubleVector.cs" />
+    <Compile Include="Runtime\AutoResizeVector.cs" />
     <Compile Include="Runtime\SparseDoubleMatrix.cs" />
     <Compile Include="Modeling\Probability.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />

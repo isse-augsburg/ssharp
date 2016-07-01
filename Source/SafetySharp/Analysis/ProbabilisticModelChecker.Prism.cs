@@ -288,21 +288,21 @@ namespace SafetySharp.Analysis
 			writer.Write("\t [] currentState=" + sourceState + " -> ");
 		}
 
-		private void WriteCommandTransitionToState(StreamWriter writer, TupleStateProbability transition, bool firstTransitionOfCommand)
+		private void WriteCommandTransitionToState(StreamWriter writer, int targetState, double probability, bool firstTransitionOfCommand)
 		{
 			if (!firstTransitionOfCommand)
 				writer.Write(" + ");
-			writer.Write(transition.Probability);
+			writer.Write(probability);
 			writer.Write(":(");
 			writer.Write("currentState'=");
-			writer.Write(transition.State);
+			writer.Write(targetState);
 			writer.Write(")");
 
-			var stateFormulaSet = CompactProbabilityMatrix.StateLabeling[transition.State];
-			var noStateFormulaLabels = CompactProbabilityMatrix.StateFormulaLabels.Length;
+			var stateFormulaSet = MarkovChain.StateLabeling[targetState];
+			var noStateFormulaLabels = MarkovChain.StateFormulaLabels.Length;
 			for (var i = 0; i < noStateFormulaLabels; i++)
 			{
-				var label = CompactProbabilityMatrix.StateFormulaLabels[i];
+				var label = MarkovChain.StateFormulaLabels[i];
 				writer.Write(" & (" + label + "' = ");
 				if (stateFormulaSet[i])
 					writer.Write("true");
@@ -311,14 +311,33 @@ namespace SafetySharp.Analysis
 				writer.Write(")");
 			}
 		}
+		/*
+		
+			while (enumerator.MoveNextRow())
+			{
+				while (enumerator.MoveNextColumn())
+				{
+					var sourceState = enumerator.CurrentRow;
+					if (enumerator.CurrentColumnValue != null)
+					{
+						var currentColumnValue = enumerator.CurrentColumnValue.Value;
+						streamTransitions.WriteLine(sourceState + " " + currentColumnValue.Column + " " + currentColumnValue.Value.ToString(CultureInfo.InvariantCulture));
+					}
+					else
+					{
+						throw new Exception("Entry must not be null");
+					}						
+				}
+			}
 
+		*/
 		private void WriteCommandEnd(StreamWriter writer)
 		{
 			writer.Write(";");
 			writer.WriteLine();
 		}
 
-		private void WriteProbabilityMatrixToDisk()
+		private void WriteMarkovChainToDisk()
 		{
 			_filePrism = new TemporaryFile("prism");
 
@@ -326,9 +345,9 @@ namespace SafetySharp.Analysis
 
 			streamPrism.WriteLine("dtmc");
 			streamPrism.WriteLine("");
-			streamPrism.WriteLine("global currentState : [0.." + CompactProbabilityMatrix.States + "] init 0;"); // 0 is artificial initial state.
+			streamPrism.WriteLine("global currentState : [0.." + MarkovChain.States + "] init 0;"); // 0 is artificial initial state.
 
-			foreach (var label in CompactProbabilityMatrix.StateFormulaLabels)
+			foreach (var label in MarkovChain.StateFormulaLabels)
 				{
 				streamPrism.WriteLine("global " + label + " : bool init false;");
 			}
@@ -339,21 +358,30 @@ namespace SafetySharp.Analysis
 			var artificialSourceState = 0;
 			WriteCommandSourcePart(streamPrism, artificialSourceState);
 			var firstTransitionOfCommand = true;
-			foreach (var tupleStateProbability in CompactProbabilityMatrix.InitialStates)
+
+			var initialStateProbabilities = MarkovChain.InitialStateProbabilities;
+			for (var indexOfInitialState = 0; indexOfInitialState < initialStateProbabilities.Count; indexOfInitialState++)
 			{
-				WriteCommandTransitionToState(streamPrism, tupleStateProbability, firstTransitionOfCommand);
-				firstTransitionOfCommand = false;
+				var probability = initialStateProbabilities[indexOfInitialState];
+				if (probability > 0.0)
+				{
+					WriteCommandTransitionToState(streamPrism, indexOfInitialState, probability, firstTransitionOfCommand);
+					firstTransitionOfCommand = false;
+				}
 			}
 			WriteCommandEnd(streamPrism);
 
-			foreach (var transitionList in CompactProbabilityMatrix.TransitionGroups)
+			var enumerator = MarkovChain.ProbabilityMatrix.GetEnumerator();
+
+			while (enumerator.MoveNextRow())
 			{
-				var sourceState = transitionList.Key;
+				var sourceState = enumerator.CurrentRow;
 				WriteCommandSourcePart(streamPrism, sourceState);
 				firstTransitionOfCommand = true;
-				foreach (var transition in transitionList.Value)
+				while (enumerator.MoveNextColumn())
 				{
-					WriteCommandTransitionToState(streamPrism, transition, firstTransitionOfCommand);
+					var currentColumnValue = enumerator.CurrentColumnValue.Value;
+					WriteCommandTransitionToState(streamPrism, currentColumnValue.Column, currentColumnValue.Value, firstTransitionOfCommand);
 					firstTransitionOfCommand = false;
 				}
 				WriteCommandEnd(streamPrism);
@@ -373,7 +401,7 @@ namespace SafetySharp.Analysis
 		internal override Probability CalculateProbability(Formula formulaToCheck)
 		{
 			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
-			WriteProbabilityMatrixToDisk();
+			WriteMarkovChainToDisk();
 			
 			var isFormulaReturningProbabilityVisitor = new IsFormulaReturningProbabilityVisitor();
 			isFormulaReturningProbabilityVisitor.Visit(formulaToCheck);

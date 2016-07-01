@@ -139,7 +139,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Create probability matrix by visiting every state.
 		/// </summary>
-		internal SparseProbabilityMatrix CreateProbabilityMatrix()
+		internal MarkovChain CreateMarkovChain()
 		{
 			Reset();
 
@@ -153,7 +153,7 @@ namespace SafetySharp.Analysis
 
 			var tasks = new Task[_workers.Length];
 			for (var i = 0; i < _workers.Length; ++i)
-				tasks[i] = Task.Factory.StartNew(_workers[i].CreateProbabilityMatrix);
+				tasks[i] = Task.Factory.StartNew(_workers[i].CreateMarkovChain);
 
 			Task.WaitAll(tasks);
 
@@ -163,7 +163,7 @@ namespace SafetySharp.Analysis
 
 			// TODO-Probabilistic: For now just support one CPU because merging results is not implemented, yet.
 
-			return _workers[0].ProbabilityMatrix;
+			return _workers[0].MarkovChain;
 		}
 
 
@@ -215,7 +215,7 @@ namespace SafetySharp.Analysis
 			private readonly RuntimeModel _model;
 			private readonly StateStack _stateStack;
 			private readonly TransitionSet _transitions;
-			public SparseProbabilityMatrix ProbabilityMatrix { get; }
+			public MarkovChain MarkovChain { get; }
 			private StateStorage _states;
 
 			/// <summary>
@@ -236,13 +236,8 @@ namespace SafetySharp.Analysis
 				var stateRewardRetrieverLabels =
 					_model.Rewards.Select(rewardRetriever => rewardRetriever.Label).ToArray();
 
-				ProbabilityMatrix = new SparseProbabilityMatrix()
+				MarkovChain = new MarkovChain()
 				{
-					//TODO-Probabilistic: Labels : new List<StateFormula>(),
-					OrdinaryTransitionGroups = new Dictionary<int, List<TupleStateProbability>>(),
-					StatesLeadingToException = new List<TupleStateProbability>(),
-					//States = _context._states,
-					StateLabeling = new Dictionary<int, StateFormulaSet>(),
 					StateFormulaLabels = stateFormulaLabels,
 					StateRewardRetrieverLabels = stateRewardRetrieverLabels
 				};
@@ -277,8 +272,6 @@ namespace SafetySharp.Analysis
 			/// </summary>
 			public void ComputeInitialStates()
 			{
-				ProbabilityMatrix.InitialStates=new List<TupleStateProbability>();
-				ProbabilityMatrix.InitialExceptionProbability = Probability.Zero;
 				_states = _context._states;
 
 				_model.PrepareNextState();
@@ -292,7 +285,7 @@ namespace SafetySharp.Analysis
 					}
 					catch (Exception)
 					{
-						ProbabilityMatrix.InitialExceptionProbability += _model.GetProbability();
+						MarkovChain.AddInitialException(_model.GetProbability());
 					}
 				}
 
@@ -302,7 +295,7 @@ namespace SafetySharp.Analysis
 			/// <summary>
 			///   Create probability matrix by visiting every state.
 			/// </summary>
-			internal void CreateProbabilityMatrix()
+			internal void CreateMarkovChain()
 			{
 				_states = _context._states;
 
@@ -315,6 +308,8 @@ namespace SafetySharp.Analysis
 
 					_model.PrepareNextState();
 					var newPathAvailable = true;
+
+					MarkovChain.SetSourceStateOfUpcomingTransitions(state);
 					while (newPathAvailable)
 					{
 						try
@@ -323,10 +318,11 @@ namespace SafetySharp.Analysis
 						}
 						catch (Exception)
 						{
-							ProbabilityMatrix.StatesLeadingToException.Add(new TupleStateProbability(state,_model.GetProbability()));
+							MarkovChain.AddTransitionException(_model.GetProbability());
 						}
 					}
 					AddStates(state);
+					MarkovChain.FinishSourceState();
 
 					InterlockedExchangeIfGreaterThan(ref _context._levelCount, _stateStack.FrameCount, _stateStack.FrameCount);
 					if (InterlockedExchangeIfGreaterThan(ref _context._nextReport, _context._stateCount, _context._nextReport + ReportStateCountDelta))
@@ -382,19 +378,20 @@ namespace SafetySharp.Analysis
 					if (sourceState == null)
 					{
 						// Add initial state to probability matrix
-						ProbabilityMatrix.InitialStates.Add(new TupleStateProbability(index, transition.Probability));
+						MarkovChain.AddInitialState(index,transition.Probability);
 					}
 					else
 					{
 						// Add transition to probability matrix
-						ProbabilityMatrix.AddTransition(sourceState.Value,index, transition.Probability);
+						MarkovChain.AddTransition(index, transition.Probability);
 					}
 
 					// TODO-Probabilistic: why adding again and again -> save in StateStorage and remove here
 					AssertOldEntryMatchesNewEntry(index,ref transition);
 
-					ProbabilityMatrix.StateLabeling[index] = transition.Formulas;
-					ProbabilityMatrix.StateRewards[index] = new [] {transition.Reward0,transition.Reward1};
+					MarkovChain.StateLabeling[index] = transition.Formulas;
+					MarkovChain.StateRewards0[index] = transition.Reward0;
+					MarkovChain.StateRewards1[index] = transition.Reward1;
 
 					++transitionCount;
 				}
@@ -408,13 +405,16 @@ namespace SafetySharp.Analysis
 			private void AssertOldEntryMatchesNewEntry(int index,ref TransitionSet.Transition transition)
 			{
 				// For debugging: Assure that if the index already exists the existing entry is exactly transition.Formulas
-				if (ProbabilityMatrix.StateLabeling.ContainsKey(index))
+				// TODO: This cannot be done anymore. Find another way
+				/*
+				if (MarkovChain.StateLabeling.ContainsKey(index))
 				{
-					if (!ProbabilityMatrix.StateLabeling[index].Equals(transition.Formulas))
+					if (!MarkovChain.StateLabeling[index].Equals(transition.Formulas))
 					{
 						throw new Exception("The labeling of a state is not consistent.");
 					}
 				}
+				*/
 			}
 
 			/// <summary>
@@ -557,271 +557,4 @@ namespace SafetySharp.Analysis
 			}
 		}
 	}
-
-	struct TupleStateProbability
-	{
-		internal TupleStateProbability(int state,Probability probability)
-		{
-			State = state;
-			Probability = probability;
-		}
-		// refer to the index in StateStorage, not the actual bytevector
-		public int State;
-		public Probability Probability;
-	}
-
-
-	internal class CompactProbabilityMatrix
-	{
-		//Note: We use index origin=1
-		public int States;
-		public List<TupleStateProbability> InitialStates=new List<TupleStateProbability>();
-		public Dictionary<int, List<TupleStateProbability>> TransitionGroups = new Dictionary<int, List<TupleStateProbability>>();
-		
-		public string[] StateFormulaLabels;
-		public string[] StateRewardRetrieverLabels;
-
-		public int NumberOfTransitions;
-		public Dictionary<int, StateFormulaSet> StateLabeling = new Dictionary<int, StateFormulaSet>();
-		public Dictionary<int, Reward[]> StateRewards = new Dictionary<int, Reward[]>();
-
-
-		public void AddTransition(int sourceState, int targetState, Probability probability)
-		{
-			List<TupleStateProbability> listOfState = null;
-			if (TransitionGroups.ContainsKey(sourceState))
-			{
-				listOfState = TransitionGroups[sourceState];
-			}
-			else
-			{
-				listOfState = new List<TupleStateProbability>();
-				TransitionGroups.Add(sourceState, listOfState);
-			}
-			NumberOfTransitions++;
-			listOfState.Add(new TupleStateProbability(targetState, probability));
-		}
-
-		[Conditional("DEBUG")]
-		public void ValidateStates()
-		{
-			foreach (var transitionGroup in TransitionGroups)
-			{
-				var probability = Probability.Zero;
-				foreach (var tupleStateProbability in transitionGroup.Value)
-				{
-					probability += tupleStateProbability.Probability;
-				}
-				if (!probability.Is(1.0,0.000000001))
-				{
-					Debugger.Break();
-					throw new Exception("Probabilities should sum up to 1");
-				}
-
-			}
-		}
-	}
-
-	internal class SparseProbabilityMatrix
-	{
-		// Sparse in the sense that not all state numbers are used due to state hashing.
-		// For example state 233923923 and 30303 are used, but nothing in between.
-
-		public List<TupleStateProbability> InitialStates;
-		public Probability? InitialExceptionProbability=null;
-		public Dictionary<int,List<TupleStateProbability>> OrdinaryTransitionGroups;
-		public List<TupleStateProbability> StatesLeadingToException;
-		//public int NumberOfStates;
-		public int NumberOfTransitions;
-		// TODO-Probabilistic: Exception gets StateNumber MaxState+1
-
-		//TODO-Probabilistic: why reevaluating again and again -> save in StateStorage and remove here
-		public string[] StateFormulaLabels;
-		public string[] StateRewardRetrieverLabels;
-		public Dictionary<int,StateFormulaSet> StateLabeling;
-		public Dictionary<int, Reward[]> StateRewards = new Dictionary<int, Reward[]>();
-
-		public void AddTransition(int sourceState, int targetState, Probability probability)
-		{
-			List<TupleStateProbability> listOfState = null;
-			if (OrdinaryTransitionGroups.ContainsKey(sourceState))
-			{
-				listOfState = OrdinaryTransitionGroups[sourceState];
-			}
-			else
-			{
-				listOfState = new List<TupleStateProbability>();
-				OrdinaryTransitionGroups.Add(sourceState, listOfState);
-			}
-			NumberOfTransitions++;
-			listOfState.Add(new TupleStateProbability(targetState,probability));
-		}
-
-		public Tuple<Dictionary<int,int>,CompactProbabilityMatrix> DeriveCompactProbabilityMatrix()
-		{
-			var compactToSparse = new Dictionary<int,int>(); //for counterexamples
-			var sparseToCompact = new Dictionary<int, int>();
-			var compactProbabilityMatrix = new CompactProbabilityMatrix();
-			Func<int, int> CreateCompactId = (sparseId) =>
-			{
-				if (sparseToCompact.ContainsKey(sparseId))
-				{
-					return sparseToCompact[sparseId];
-				}
-				else
-				{
-					var compactId = ++compactProbabilityMatrix.States;
-					sparseToCompact.Add(sparseId,compactId);
-					compactToSparse.Add(compactId,sparseId);
-					return compactId;
-				}
-			};
-
-			foreach (var tupleSparseStateProbability in InitialStates)
-			{
-				var compactId = CreateCompactId(tupleSparseStateProbability.State);
-				compactProbabilityMatrix.InitialStates.Add(new TupleStateProbability(compactId, tupleSparseStateProbability.Probability));
-			}
-
-			// Faster: Convert it directly rather than using AddTransition
-			foreach (var sparseTransitionList in OrdinaryTransitionGroups)
-			{
-				var compactSourceId = CreateCompactId(sparseTransitionList.Key);
-				var listOfTargetStates = new List<TupleStateProbability>(sparseTransitionList.Value.Count);
-				compactProbabilityMatrix.TransitionGroups.Add(compactSourceId,listOfTargetStates);
-				foreach (var transition in sparseTransitionList.Value)
-				{
-					var compactTargetId = CreateCompactId(transition.State);
-					listOfTargetStates.Add(new TupleStateProbability(compactTargetId, transition.Probability));
-				}
-			}
-			compactProbabilityMatrix.NumberOfTransitions = NumberOfTransitions;
-
-
-			// Exception gets StateNumber MaxState+1
-			var exceptionState = ++compactProbabilityMatrix.States;
-			// initial probability for an exception
-			compactProbabilityMatrix.InitialStates.Add(new TupleStateProbability(exceptionState, InitialExceptionProbability.Value));
-			// probability leading to an exception
-			foreach (var tupleSparseStateProbability in StatesLeadingToException)
-			{
-				// targetState is state of exception
-				var compactSourceId = CreateCompactId(tupleSparseStateProbability.State);
-				compactProbabilityMatrix.AddTransition(compactSourceId, exceptionState, tupleSparseStateProbability.Probability);
-			}
-
-			foreach (var stateFormulaSet in StateLabeling)
-			{
-				var compactId = CreateCompactId(stateFormulaSet.Key);
-				compactProbabilityMatrix.StateLabeling.Add(compactId,stateFormulaSet.Value);
-			}
-
-			// State Labeling
-			Func<bool> returnFalse = () => false;
-			var allFalseStateFormulaSet = new Func<bool>[StateFormulaLabels.Length];
-			for (int i = 0; i < StateFormulaLabels.Length; i++)
-			{
-				allFalseStateFormulaSet[i] = returnFalse;
-			}
-			compactProbabilityMatrix.StateFormulaLabels = StateFormulaLabels;
-			compactProbabilityMatrix.AddTransition(exceptionState, exceptionState, Probability.One);
-			compactProbabilityMatrix.StateLabeling.Add(exceptionState, new StateFormulaSet(allFalseStateFormulaSet));
-
-			// State Rewards
-			foreach (var stateRewards in StateRewards)
-			{
-				var compactId = CreateCompactId(stateRewards.Key);
-				compactProbabilityMatrix.StateRewards.Add(compactId, stateRewards.Value);
-			}
-			var noRewards = new Reward[StateRewardRetrieverLabels.Length];
-			for (int i = 0; i < StateRewardRetrieverLabels.Length; i++)
-			{
-				noRewards[i] = compactProbabilityMatrix.StateRewards[1][i]; //use available rewards of any state
-				noRewards[i].Reset();
-			}
-			compactProbabilityMatrix.StateRewards.Add(exceptionState, noRewards);
-			compactProbabilityMatrix.StateRewardRetrieverLabels = StateRewardRetrieverLabels;
-			
-			// return result
-			return new Tuple<Dictionary<int, int>, CompactProbabilityMatrix>(compactToSparse, compactProbabilityMatrix);
-		}
-
-		internal void PrintPathWithStepwiseHighestProbability(int steps)
-		{
-			Func<List<TupleStateProbability>,TupleStateProbability> selectTupleWithHighestProbability =
-				elements =>
-				{
-					var enumerator = elements.GetEnumerator();
-					enumerator.MoveNext();
-					var candidate = enumerator.Current;
-					while(enumerator.MoveNext())
-						if (candidate.Probability.Value < enumerator.Current.Probability.Value)
-							candidate = enumerator.Current;
-					return candidate;
-				};
-			Action<TupleStateProbability> printTuple =
-				tuple =>
-				{
-					Console.Write($"step: {tuple.Probability.Value.ToString(CultureInfo.InvariantCulture)} {tuple.State}");
-					for (var i = 0; i < StateFormulaLabels.Length; i++)
-					{
-						var label = StateFormulaLabels[i];
-						Console.Write(" " + label + "=");
-						if (StateLabeling[tuple.State][i])
-							Console.Write("true");
-						else
-							Console.Write("false");
-					}
-					for (var i = 0; i < StateRewardRetrieverLabels.Length; i++)
-					{
-						var label = StateRewardRetrieverLabels[i];
-						Console.Write(" " + label + "=");
-						Console.Write("TODO");
-					}
-					Console.WriteLine();
-				};
-			var initialStepWithHighestProbability = selectTupleWithHighestProbability(InitialStates);
-			printTuple(initialStepWithHighestProbability);
-			var lastState = initialStepWithHighestProbability.State;
-			for (var i = 0; i < steps; i++)
-			{
-				var currentTuple = selectTupleWithHighestProbability(OrdinaryTransitionGroups[lastState]);
-				printTuple(currentTuple);
-				lastState = currentTuple.State;
-			}
-		}
-
-		[Conditional("DEBUG")]
-		public void ValidateState(int? sourceState)
-		{
-			if (sourceState.HasValue)
-			{
-				var transitionGroup = OrdinaryTransitionGroups[sourceState.Value];
-				var probability = Probability.Zero;
-				foreach (var tupleStateProbability in transitionGroup)
-				{
-					probability += tupleStateProbability.Probability;
-				}
-				if (!probability.Is(1.0, 0.000000001))
-				{
-					Debugger.Break();
-					throw new Exception("Probabilities should sum up to 1");
-				}
-			}
-			else
-			{
-				var probability = Probability.Zero;
-				foreach (var tupleStateProbability in InitialStates)
-				{
-					probability += tupleStateProbability.Probability;
-				}
-				if (!probability.Is(1.0, 0.000000001))
-				{
-					Debugger.Break();
-					throw new Exception("Probabilities should sum up to 1");
-				}
-			}
-		}
-	}
-
 }

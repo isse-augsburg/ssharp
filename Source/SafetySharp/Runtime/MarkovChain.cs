@@ -76,13 +76,15 @@ namespace SafetySharp.Runtime
 
 		public string[] StateRewardRetrieverLabels;
 
-		public SparseDoubleMatrix _matrix { get; }
+		public SparseDoubleMatrix ProbabilityMatrix { get; }
 
 		public DoubleVector InitialStateProbabilities = new DoubleVector();
 
-		public Dictionary<int, StateFormulaSet> StateLabeling = new Dictionary<int, StateFormulaSet>();
+		public LabelVector StateLabeling = new LabelVector();
 
-		public Dictionary<int, Reward[]> StateRewards = new Dictionary<int, Reward[]>();
+		//TODO: Hardcoded. Remove
+		public RewardVector StateRewards0 = new RewardVector();
+		public RewardVector StateRewards1 = new RewardVector();
 
 		/*Dictionary<int, int> compactToSparse = new Dictionary<int, int>();
 		Dictionary<int, int> sparseToCompact = new Dictionary<int, int>();
@@ -96,13 +98,15 @@ namespace SafetySharp.Runtime
 				maxNumberOfTransitions = maxNumberOfStates << 3;
 			}
 			_stateMapper = new StateStorageStateToMarkovChainStateMapper(maxNumberOfStates);
-			_matrix = new SparseDoubleMatrix(maxNumberOfStates, maxNumberOfTransitions);
+			ProbabilityMatrix = new SparseDoubleMatrix(maxNumberOfStates, maxNumberOfTransitions);
 		}
 
 
 		// Retrieving matrix phase
 
 		public int States { get; private set; } = 0;
+
+		public int Transitions { get; private set; } = 0;
 
 		public int? ExceptionState { get; private set; } = null;
 
@@ -116,8 +120,8 @@ namespace SafetySharp.Runtime
 			if (ExceptionState != null)
 				return ExceptionState.Value;
 			ExceptionState = States;
-			_matrix.SetRow(ExceptionState.Value); //add state for exception
-			_matrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(ExceptionState.Value, 1.0)); //Add self-loop in exception
+			ProbabilityMatrix.SetRow(ExceptionState.Value); //add state for exception
+			ProbabilityMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(ExceptionState.Value, 1.0)); //Add self-loop in exception
 			States++;
 			return ExceptionState.Value;
 		}
@@ -152,13 +156,14 @@ namespace SafetySharp.Runtime
 
 		public void SetSourceStateOfUpcomingTransitions(int state)
 		{
-			_matrix.SetRow(state);
+			ProbabilityMatrix.SetRow(state);
 		}
 
 		public void AddTransition(int stateStorageState, Probability probability)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
-			_matrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(markovChainState, probability.Value));
+			ProbabilityMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(markovChainState, probability.Value));
+			Transitions++;
 		}
 
 		public void AddTransitionException(Probability probability)
@@ -168,13 +173,13 @@ namespace SafetySharp.Runtime
 
 		public void FinishSourceState()
 		{
-			_matrix.FinishRow();
+			ProbabilityMatrix.FinishRow();
 		}
 
 		public void SealProbabilityMatrix()
 		{
 			InitialStateProbabilities.IncreaseSize(States);
-			_matrix.OptimizeAndSeal();
+			ProbabilityMatrix.OptimizeAndSeal();
 		}
 
 		// Validation
@@ -182,12 +187,16 @@ namespace SafetySharp.Runtime
 		[Conditional("DEBUG")]
 		public void ValidateStates()
 		{
-			if (_matrix.Rows != States)
+			if (ProbabilityMatrix.Rows != States)
 			{
 				throw new Exception("Number of states should be equal to the number of rows in the matrix");
 			}
+			//if (_matrix.ColumnEntries != Transitions)
+			//{
+			//	throw new Exception("Number of transitions should be equal to the number of ColumnEntries in the matrix");
+			//}
 
-			var enumerator = _matrix.GetEnumerator();
+			var enumerator = ProbabilityMatrix.GetEnumerator();
 
 			while (enumerator.MoveNextRow())
 			{
@@ -209,7 +218,7 @@ namespace SafetySharp.Runtime
 		[Conditional("DEBUG")]
 		internal void PrintPathWithStepwiseHighestProbability(int steps)
 		{
-			var enumerator = _matrix.GetEnumerator();
+			var enumerator = ProbabilityMatrix.GetEnumerator();
 			Func<int, SparseDoubleMatrix.ColumnValue> selectRowEntryWithHighestProbability =
 				row =>
 				{

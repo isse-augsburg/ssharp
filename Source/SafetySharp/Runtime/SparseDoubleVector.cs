@@ -28,64 +28,44 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.Runtime
 {
+	using System.Collections;
 	using System.Runtime.CompilerServices;
 
-	public class SparseDoubleVector
+	public class SparseDoubleVector : IEnumerable<SparseDoubleVector.IndexDoubleTuple>
 	{
-		/*
-		//private bool _hasFixedSize;
-
-		private List<double> _backingArray;
-
-		private List<double> _backingArray;
-
-		// fixed size
-		public SparseDoubleVector(int fixedSize)
+		private readonly List<IndexDoubleTuple> _backingArray;
+		
+		public SparseDoubleVector()
 		{
-			//_hasFixedSize = true;
-			_backingArray = new List<double>(fixedSize);
-			IncreaseSize(fixedSize);
-		}
+			_backingArray = new List<IndexDoubleTuple>();
+		}		
 
-		public void IncreaseSize(int size)
+		public void Append(int index, double value)
 		{
-			if (_backingArray.Count >= size)
-				return;
-			if (_backingArray.Capacity<size)
-				_backingArray.Capacity = size;
-			for (var i = _backingArray.Count; i < size; i++)
-			{
-				_backingArray[i] = 0.0;
-			}
+			_backingArray.Add(new IndexDoubleTuple {Index=index,Value=value});
 		}
-
-		//public void SealSize()
-		//{
-		//}
-
-		/// <summary>
-		///   Gets the element at <paramref name="index" /> from the vector.
-		/// </summary>
-		public double this[int index]
-		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
-			{
-				IncreaseSize(index+1);
-				return _backingArray[index];
-			}
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			set
-			{
-				IncreaseSize(index+1);
-				_backingArray[index] = value;
-			}
-		}
-
 
 		internal void OptimizeAndSeal()
 		{
+			_backingArray.Sort((element1,element2)=>element1.Index.CompareTo(element2.Index));
+		}
 
-		}*/
+		public struct IndexDoubleTuple
+		{
+			public int Index;
+			public double Value;
+		}
+
+		public IEnumerator<IndexDoubleTuple> GetEnumerator()
+		{
+			return _backingArray.GetEnumerator();
+		} 
+
+		/// <summary>Returns an enumerator that iterates through a collection.</summary>
+		/// <returns>An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.</returns>
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return _backingArray.GetEnumerator();
+		}
 	}
 }

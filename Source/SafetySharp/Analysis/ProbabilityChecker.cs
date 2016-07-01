@@ -88,7 +88,7 @@ namespace SafetySharp.Analysis
 		private object _probabilityMatrixCreationStarted = false;
 		private bool _probabilityMatrixWasCreated = false;
 
-		internal CompactProbabilityMatrix CompactProbabilityMatrix { get; private set; }
+		internal MarkovChain MarkovChain { get; private set; }
 
 		private ModelBase _model;
 		private readonly ConcurrentBag<Formula> _formulasToCheck = new ConcurrentBag<Formula>();
@@ -137,7 +137,7 @@ namespace SafetySharp.Analysis
 			return DefaultChecker.CalculateReward(formulaToCheck);
 		}
 
-		public void CreateProbabilityMatrix()
+		public void CreateMarkovChain()
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
 			var alreadyStarted = Interlocked.CompareExchange(ref _probabilityMatrixCreationStarted, true, false);
@@ -151,18 +151,16 @@ namespace SafetySharp.Analysis
 
 			//return CheckInvariant(serializer.Load);
 
-			using (var checker = new MarkovChainBuilder(serializer.Load, message => OutputWritten?.Invoke(message), Configuration))
+			using (var builder = new MarkovChainBuilder(serializer.Load, message => OutputWritten?.Invoke(message), Configuration))
 			{
 				var initializationTime = stopwatch.Elapsed;
 				stopwatch.Restart();
 				
-				var sparseProbabilityMatrix = checker.CreateProbabilityMatrix();
+				MarkovChain = builder.CreateMarkovChain();
 
-				sparseProbabilityMatrix.PrintPathWithStepwiseHighestProbability(10);
-
-				var derivedProbabilityMatrix = sparseProbabilityMatrix.DeriveCompactProbabilityMatrix();
+				MarkovChain.PrintPathWithStepwiseHighestProbability(10);
+				
 				//var compactToSparse = CompactProbabilityMatrix = derivedProbabilityMatrix.Item1;
-				CompactProbabilityMatrix = derivedProbabilityMatrix.Item2;
 				//CompactProbabilityMatrix.ValidateStates();
 				var creationTime = stopwatch.Elapsed;
 				stopwatch.Stop();
@@ -173,10 +171,10 @@ namespace SafetySharp.Analysis
 					OutputWritten?.Invoke("===============================================");
 					OutputWritten?.Invoke($"Initialization time: {initializationTime}");
 					OutputWritten?.Invoke($"Markov chain creation time: {creationTime}");
-					OutputWritten?.Invoke($"States: {CompactProbabilityMatrix.States}");
-					OutputWritten?.Invoke($"Transitions: {CompactProbabilityMatrix.NumberOfTransitions}");
-					OutputWritten?.Invoke($"{(int)(CompactProbabilityMatrix.States / stopwatch.Elapsed.TotalSeconds):n0} states per second");
-					OutputWritten?.Invoke($"{(int)(CompactProbabilityMatrix.NumberOfTransitions / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+					OutputWritten?.Invoke($"States: {MarkovChain.States}");
+					OutputWritten?.Invoke($"Transitions: {MarkovChain.Transitions}");
+					OutputWritten?.Invoke($"{(int)(MarkovChain.States / stopwatch.Elapsed.TotalSeconds):n0} states per second");
+					OutputWritten?.Invoke($"{(int)(MarkovChain.Transitions / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
 					OutputWritten?.Invoke("===============================================");
 					OutputWritten?.Invoke(String.Empty);
 				}
@@ -188,7 +186,7 @@ namespace SafetySharp.Analysis
 
 		public void AssertProbabilityMatrixWasCreated()
 		{
-			Requires.That(_probabilityMatrixWasCreated, nameof(CreateProbabilityMatrix) + "must be called before");
+			Requires.That(_probabilityMatrixWasCreated, nameof(CreateMarkovChain) + "must be called before");
 		}
 
 		public ProbabilityCalculator CalculateProbability(Formula formula)
@@ -203,7 +201,7 @@ namespace SafetySharp.Analysis
 			Interlocked.MemoryBarrier();
 			if ((bool)_probabilityMatrixCreationStarted)
 			{
-				throw new Exception(nameof(CalculateProbability) + " must be called before " + nameof(CreateProbabilityMatrix));
+				throw new Exception(nameof(CalculateProbability) + " must be called before " + nameof(CreateMarkovChain));
 			}
 
 			_formulasToCheck.Add(formula);
@@ -223,7 +221,7 @@ namespace SafetySharp.Analysis
 			Interlocked.MemoryBarrier();
 			if ((bool)_probabilityMatrixCreationStarted)
 			{
-				throw new Exception(nameof(CalculateFormula) + " must be called before " + nameof(CreateProbabilityMatrix));
+				throw new Exception(nameof(CalculateFormula) + " must be called before " + nameof(CreateMarkovChain));
 			}
 
 			_formulasToCheck.Add(formula);
@@ -251,7 +249,7 @@ namespace SafetySharp.Analysis
 			Interlocked.MemoryBarrier();
 			if ((bool)_probabilityMatrixCreationStarted)
 			{
-				throw new Exception(nameof(CalculateReward) + " must be called before " + nameof(CreateProbabilityMatrix));
+				throw new Exception(nameof(CalculateReward) + " must be called before " + nameof(CreateMarkovChain));
 			}
 			
 

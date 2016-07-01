@@ -52,7 +52,7 @@ namespace SafetySharp.CaseStudies.ScalableServer.Analysis
 
 				var calculateSteadyStateRewardOfUser = probabilityChecker.CalculateReward(new CalculateLongRunExpectedRewardFormula(model.UserModel.GetReward));
 				var calculateSteadyStateRewardOfProvider = probabilityChecker.CalculateReward(new CalculateLongRunExpectedRewardFormula(model.UserModel.GetReward));
-				probabilityChecker.CreateProbabilityMatrix();
+				probabilityChecker.CreateMarkovChain();
 				probabilityChecker.DefaultChecker = modelChecker;
 				steadyStateRewardOfUser = calculateSteadyStateRewardOfUser.Calculate();
 				steadyStateRewardOfProvider = calculateSteadyStateRewardOfProvider.Calculate();

@@ -30,8 +30,7 @@ namespace SafetySharp.Analysis
 	using Modeling;
 	using Runtime.Serialization;
 	using FormulaVisitors;
-
-
+	using Runtime;
 
 	// Mrmc is in file ProbabilisticModelChecker.Mrmc.cs which is nested in ProbabilisticModelChecker.cs.
 	// Open arrow of ProbabilisticModelChecker.cs in Solution Explorer to see nested files.
@@ -44,7 +43,7 @@ namespace SafetySharp.Analysis
 	{
 		public ProbabilityChecker ProbabilityChecker { get; }
 
-		internal CompactProbabilityMatrix CompactProbabilityMatrix => ProbabilityChecker.CompactProbabilityMatrix;
+		internal MarkovChain MarkovChain => ProbabilityChecker.MarkovChain;
 
 		protected ProbabilisticModelChecker(ProbabilityChecker probabilityChecker)
 		{

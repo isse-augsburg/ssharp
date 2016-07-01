@@ -41,11 +41,13 @@ namespace SafetySharp.Analysis
 		private TemporaryFile _fileTransitions;
 		private TemporaryFile _fileStateLabelings;
 
+		private List<int> InitialStates;
+
 		public Mrmc(ProbabilityChecker probabilityChecker) : base(probabilityChecker)
 		{
 		}
 
-		private void WriteProbabilityMatrixToDisk()
+		private void WriteMarkovChainToDisk()
 		{
 			_fileTransitions = new TemporaryFile("tra");
 			_fileStateLabelings = new TemporaryFile("lab");
@@ -55,14 +57,24 @@ namespace SafetySharp.Analysis
 			var streamStateLabelings = new StreamWriter(_fileStateLabelings.FilePath);
 			streamStateLabelings.NewLine = "\n";
 
-			streamTransitions.WriteLine("STATES " + CompactProbabilityMatrix.States);
-			streamTransitions.WriteLine("TRANSITIONS " + CompactProbabilityMatrix.NumberOfTransitions);
-			foreach (var transitionList in CompactProbabilityMatrix.TransitionGroups)
+			streamTransitions.WriteLine("STATES " + MarkovChain.States);
+			streamTransitions.WriteLine("TRANSITIONS " + MarkovChain.Transitions);
+
+			var enumerator = MarkovChain.ProbabilityMatrix.GetEnumerator();
+			while (enumerator.MoveNextRow())
 			{
-				var sourceState = transitionList.Key;
-				foreach (var transition in transitionList.Value)
+				while (enumerator.MoveNextColumn())
 				{
-					streamTransitions.WriteLine(sourceState + " " + transition.State + " " + transition.Probability);
+					var sourceState = enumerator.CurrentRow;
+					if (enumerator.CurrentColumnValue != null)
+					{
+						var currentColumnValue = enumerator.CurrentColumnValue.Value;
+						streamTransitions.WriteLine(sourceState + " " + currentColumnValue.Column + " " + currentColumnValue.Value.ToString(CultureInfo.InvariantCulture));
+					}
+					else
+					{
+						throw new Exception("Entry must not be null");
+					}						
 				}
 			}
 			streamTransitions.Flush();
@@ -70,10 +82,10 @@ namespace SafetySharp.Analysis
 
 			streamStateLabelings.WriteLine("#DECLARATION");
 			//bool firstElement = true;
-			var noStateFormulaLabels = CompactProbabilityMatrix.StateFormulaLabels.Length;
+			var noStateFormulaLabels = MarkovChain.StateFormulaLabels.Length;
 			for (var i = 0; i < noStateFormulaLabels; i++)
 			{
-				var label = CompactProbabilityMatrix.StateFormulaLabels[i];
+				var label = MarkovChain.StateFormulaLabels[i];
 				if (i > 0)
 				{
 					streamStateLabelings.Write(" ");
@@ -82,14 +94,14 @@ namespace SafetySharp.Analysis
 			}
 			streamStateLabelings.WriteLine();
 			streamStateLabelings.WriteLine("#END");
-			foreach (var stateFormulaSet in CompactProbabilityMatrix.StateLabeling)
+			var stateLabeling = MarkovChain.StateLabeling;
+			for (var state = 0; state < MarkovChain.States; state++)
 			{
-				streamStateLabelings.Write(stateFormulaSet.Key);
-				//stateFormulaSet.Value.
+				streamStateLabelings.Write(state);
 				for (var i = 0; i < noStateFormulaLabels; i++)
 				{
-					var label = CompactProbabilityMatrix.StateFormulaLabels[i];
-					if (stateFormulaSet.Value[i])
+					var label = MarkovChain.StateFormulaLabels[i];
+					if (stateLabeling[state][i])
 						streamStateLabelings.Write(" " + label);
 				}
 				streamStateLabelings.WriteLine();
@@ -116,12 +128,21 @@ namespace SafetySharp.Analysis
 				throw new Exception("Mrmc can currently only handle one reward in each formula");
 
 			var labelOfReward = rewardRetrieverCollector.RewardRetrievers.Single();
-			var indexOfLabel = Array.FindIndex(CompactProbabilityMatrix.StateRewardRetrieverLabels,label => label.Equals(labelOfReward));
-			
+			var indexOfLabel = Array.FindIndex(MarkovChain.StateRewardRetrieverLabels,label => label.Equals(labelOfReward));
 
-			foreach (var stateReward in CompactProbabilityMatrix.StateRewards)
+			if (indexOfLabel == 0)
 			{
-				streamRewards.WriteLine($" {stateReward.Key} {stateReward.Value[indexOfLabel].Value()}");
+				for (int i = 0; i < MarkovChain.States; i++)
+				{
+					streamRewards.WriteLine($" {i} {MarkovChain.StateRewards0[i].Value()}");
+				}
+			}
+			if (indexOfLabel == 1)
+			{
+				for (int i = 0; i < MarkovChain.States; i++)
+				{
+					streamRewards.WriteLine($" {i} {MarkovChain.StateRewards1[i].Value()}");
+				}
 			}
 			streamRewards.Flush();
 			streamRewards.Close();
@@ -136,14 +157,18 @@ namespace SafetySharp.Analysis
 		private TemporaryFile WriteFilesAndExecuteMrmc(Formula formulaToCheck,bool outputExactResult) //returns result file
 		{
 			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
-			WriteProbabilityMatrixToDisk();
+			WriteMarkovChainToDisk();
 			
 			var transformationVisitor = new MrmcTransformer();
 			transformationVisitor.Visit(formulaToCheck);
 			var formulaToCheckString = transformationVisitor.TransformedFormula;
-
-			var initialStatesWithProbabilities = ProbabilityChecker.CompactProbabilityMatrix.InitialStates;
-			var initialStates = initialStatesWithProbabilities.Select(tuple => tuple.State);
+			
+			InitialStates = new List<int>();
+			for (int i = 0; i < MarkovChain.States; i++)
+			{
+				if (MarkovChain.InitialStateProbabilities[i] > 0.0)
+					InitialStates.Add(i);
+			}
 			bool useRewards;
 
 			var fileResults = new TemporaryFile("res");
@@ -157,7 +182,7 @@ namespace SafetySharp.Analysis
 					script.Append("write_res_file_result");
 				else
 					script.Append("write_res_file_state");
-				foreach (var initialState in initialStates)
+				foreach (var initialState in InitialStates)
 				{
 					script.Append(" " + initialState);
 				}
@@ -197,19 +222,11 @@ namespace SafetySharp.Analysis
 			}
 			using (var fileResults = WriteFilesAndExecuteMrmc(formulaToCheck,true))
 			{
-				var initialStatesWithProbabilities = ProbabilityChecker.CompactProbabilityMatrix.InitialStates;
-				var initialStates = initialStatesWithProbabilities.Select(tuple => tuple.State);
-				var probabilities = initialStatesWithProbabilities.Select(tuple => tuple.Probability);
-
 				var resultEnumerator = File.ReadLines(fileResults.FilePath).GetEnumerator();
-
-				var index = 0;
-				var probability = Probability.Zero;
-				var probabilityEnumerator = probabilities.GetEnumerator();
+				
+				var probability = 0.0;
 				while (resultEnumerator.MoveNext())
 				{
-					probabilityEnumerator.MoveNext();
-
 					var result = resultEnumerator.Current;
 					if (!String.IsNullOrEmpty(result))
 					{
@@ -217,9 +234,9 @@ namespace SafetySharp.Analysis
 						if (parsed.Success)
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
-							var probabilityOfState = probabilityEnumerator.Current;
+							var probabilityOfState = MarkovChain.InitialStateProbabilities[state];
 							double probabilityInState;
-							// Mrmc may return a probability in a state of PositiveInfinity. This is clearly undesired and is most likely a result of double imprecision.
+							// Mrmc may return a probability in a state of PositiveInfinity. This is clearly undesired and might be because of a wrong probability matrix
 							if (parsed.Groups["probability"].Value == "inf")
 								probabilityInState = double.PositiveInfinity;
 							else
@@ -232,7 +249,7 @@ namespace SafetySharp.Analysis
 						}
 					}
 				}
-				return probability;
+				return new Probability(probability);
 			}
 		}
 
@@ -247,19 +264,11 @@ namespace SafetySharp.Analysis
 
 			using (var fileResults = WriteFilesAndExecuteMrmc(formulaToCheck, false))
 			{
-				var initialStatesWithProbabilities = ProbabilityChecker.CompactProbabilityMatrix.InitialStates;
-				var initialStates = initialStatesWithProbabilities.Select(tuple => tuple.State);
-				var probabilities = initialStatesWithProbabilities.Select(tuple => tuple.Probability);
-
 				var resultEnumerator = File.ReadLines(fileResults.FilePath).GetEnumerator();
-
-				var index = 0;
+				
 				var satisfied = true;
-				var probabilityEnumerator = probabilities.GetEnumerator();
 				while (resultEnumerator.MoveNext())
 				{
-					probabilityEnumerator.MoveNext();
-
 					var result = resultEnumerator.Current;
 					if (!String.IsNullOrEmpty(result))
 					{
@@ -267,8 +276,8 @@ namespace SafetySharp.Analysis
 						if (parsed.Success)
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
-							var probabilityOfState = probabilityEnumerator.Current;
-							if (probabilityOfState.Greater(0.0))
+							var probabilityOfState = MarkovChain.InitialStateProbabilities[state];
+							if (probabilityOfState>0.0)
 							{
 								var isSatisfiedResult = parsed.Groups["satisfied"].Value.Equals("TRUE");
 								satisfied &= isSatisfiedResult;
@@ -295,19 +304,11 @@ namespace SafetySharp.Analysis
 
 			using (var fileResults = WriteFilesAndExecuteMrmc(formulaToCheck, true))
 			{
-				var initialStatesWithProbabilities = ProbabilityChecker.CompactProbabilityMatrix.InitialStates;
-				var initialStates = initialStatesWithProbabilities.Select(tuple => tuple.State);
-				var probabilities = initialStatesWithProbabilities.Select(tuple => tuple.Probability);
-
 				var resultEnumerator = File.ReadLines(fileResults.FilePath).GetEnumerator();
-
-				var index = 0;
+				
 				var rewardResultValue = 0.0;
-				var probabilityEnumerator = probabilities.GetEnumerator();
 				while (resultEnumerator.MoveNext())
 				{
-					probabilityEnumerator.MoveNext();
-
 					var result = resultEnumerator.Current;
 					if (!String.IsNullOrEmpty(result))
 					{
@@ -315,7 +316,7 @@ namespace SafetySharp.Analysis
 						if (parsed.Success)
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
-							var probabilityOfState = probabilityEnumerator.Current.Value;
+							var probabilityOfState = MarkovChain.InitialStateProbabilities[state];
 							double rewardOfState;
 							if (parsed.Groups["reward"].Value == "inf")
 								rewardOfState = double.PositiveInfinity;
