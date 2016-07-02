@@ -62,11 +62,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		public void FalseAlarmOriginalDesign()
 		{
 			var model = Model.CreateOriginal();
-
-			// As false alarms cannot occur with any overheight vehicle on the left lane in the original design, we 
-			// suppress the activation of the LeftOHV fault to improve safety analysis times significantly
-			model.LeftOHV.Activation = Activation.Suppressed;
-
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm);
 
 			result.SaveCounterExamples("counter examples/height control/dcca/false alarm/original");

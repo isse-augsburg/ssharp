@@ -39,7 +39,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   Gets the number of vehicles that passed the pre-control during the current system step.
 		/// </summary>
-		[Provided]
 		public abstract int NumberOfPassingVehicles { get; }
 	}
 }

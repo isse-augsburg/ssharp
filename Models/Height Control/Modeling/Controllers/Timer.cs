@@ -39,7 +39,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		///   Gets a value indicating whether the timeout has elapsed. This method returns true only for the single system step where
 		///   the timeout occurs.
 		/// </summary>
-		public virtual bool HasElapsed => _remainingTime == 0;
+		public bool HasElapsed => _remainingTime == 0;
 
 		/// <summary>
 		///   Gets a value indicating whether the timer is currently active, eventually signaling the timeout.

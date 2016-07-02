@@ -43,6 +43,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		public const int Timeout = 4;
 		public const int TunnelPosition = 12;
 		public const int MaxSpeed = 2;
+		public const int MaxVehicles = 5;
 
 		public readonly Fault LeftHV = new TransientFault();
 		public readonly Fault LeftOHV = new TransientFault();
