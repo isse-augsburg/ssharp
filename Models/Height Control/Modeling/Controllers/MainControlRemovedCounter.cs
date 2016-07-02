@@ -31,7 +31,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		{
 			base.Update();
 
-			if (GetNumberOfEnteringVehicles() > 0)
+			if (NumberOfEnteringVehicles > 0)
 				Timer.Start();
 
 			var active = !Timer.HasElapsed;

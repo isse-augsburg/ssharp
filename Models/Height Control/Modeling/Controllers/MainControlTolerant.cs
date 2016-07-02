@@ -39,7 +39,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		{
 			base.Update();
 
-			var numberOfHVs = GetNumberOfEnteringVehicles();
+			var numberOfHVs = NumberOfEnteringVehicles;
 			if (numberOfHVs > 0)
 			{
 				_count += numberOfHVs;

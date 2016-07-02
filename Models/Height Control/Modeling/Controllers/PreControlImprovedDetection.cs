@@ -47,15 +47,18 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   Gets the number of vehicles that passed the pre-control during the current system step.
 		/// </summary>
-		public override int GetNumberOfPassingVehicles()
+		public override int NumberOfPassingVehicles
 		{
-			if (PositionDetector.IsVehicleDetected && LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected)
-				return 2;
+			get
+			{
+				if (PositionDetector.IsVehicleDetected && LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected)
+					return 2;
 
-			if (PositionDetector.IsVehicleDetected && (LeftDetector.IsVehicleDetected || RightDetector.IsVehicleDetected))
-				return 1;
+				if (PositionDetector.IsVehicleDetected && (LeftDetector.IsVehicleDetected || RightDetector.IsVehicleDetected))
+					return 1;
 
-			return 0;
+				return 0;
+			}
 		}
 
 		/// <summary>

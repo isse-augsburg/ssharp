@@ -68,7 +68,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   Gets the number of vehicles that entered the area in front of the main control during the current system step.
 		/// </summary>
-		public extern int GetNumberOfEnteringVehicles();
+		public extern int NumberOfEnteringVehicles { get; }
 
 		/// <summary>
 		///   Updates the state of the component.

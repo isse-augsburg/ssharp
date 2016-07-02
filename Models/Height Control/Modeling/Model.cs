@@ -121,7 +121,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 				TrafficLights = new TrafficLights()
 			};
 
-			Bind(nameof(heightControl.MainControl.GetNumberOfEnteringVehicles), nameof(heightControl.PreControl.GetNumberOfPassingVehicles));
+			Bind(nameof(heightControl.MainControl.NumberOfEnteringVehicles), nameof(heightControl.PreControl.NumberOfPassingVehicles));
 			Bind(nameof(heightControl.EndControl.VehicleEntering), nameof(heightControl.MainControl.IsVehicleLeavingOnRightLane));
 			Bind(nameof(model.VehicleCollection.IsTunnelClosed), nameof(heightControl.TrafficLights.IsRed));
 
