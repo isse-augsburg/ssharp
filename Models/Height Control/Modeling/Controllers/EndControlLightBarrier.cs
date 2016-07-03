@@ -22,31 +22,53 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 {
-	public sealed class MainControlRemovedCounterTolerant : MainControl
+	using SafetySharp.Modeling;
+	using Sensors;
+	using Vehicles;
+
+	/// <summary>
+	///   Represents the original design of the end-control.
+	/// </summary>
+	public class EndControlLightBarrier : EndControl
 	{
+		/// <summary>
+		///   The sensor that is used to detect overheight vehicles in the end-control area on the right lane.
+		/// </summary>
+		[Subcomponent]
+		public readonly VehicleDetector RightLaneDetector = new SmallLightBarrier(Model.EndControlPosition, Lane.Right);
+
+		/// <summary>
+		///   The number of high vehicles currently in the main-control area.
+		/// </summary>
+		[Range(0, 5, OverflowBehavior.Clamp)]
+		private int _count;
+
+		/// <summary>
+		///   Gets the number of vehicles that entered the area in front of the end control during the current system step.
+		/// </summary>
+		public override void VehicleEntering()
+		{
+			_count++;
+			Timer.Start();
+		}
+
 		/// <summary>
 		///   Updates the internal state of the component.
 		/// </summary>
 		public override void Update()
 		{
-			base.Update();
+			Update(Timer, LeftDetector, RightLaneDetector);
 
-			if (NumberOfEnteringVehicles > 0)
-				Timer.Start();
+			if (_count > 0 && LeftDetector.IsVehicleDetected)
+				CloseTunnel();
 
-			var active = !Timer.HasElapsed;
-			if (!active || !PositionDetector.IsVehicleDetected)
-				return;
+			if (RightLaneDetector.IsVehicleDetected)
+				_count--;
 
-			if (LeftDetector.IsVehicleDetected)
-				IsVehicleLeavingOnLeftLane = true;
-
-			if (RightDetector.IsVehicleDetected)
-				IsVehicleLeavingOnRightLane = true;
-
-			// We assume the best case: If the vehicle was not seen on the left lane, it is assumed to be on the right lane
-			if (!LeftDetector.IsVehicleDetected && !RightDetector.IsVehicleDetected)
-				IsVehicleLeavingOnRightLane = true;
+			if (Timer.HasElapsed)
+				_count = 0;
+			else if (_count == 0)
+				Timer.Stop();
 		}
 	}
 }

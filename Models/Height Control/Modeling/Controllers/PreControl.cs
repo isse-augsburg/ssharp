@@ -37,8 +37,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		public readonly VehicleDetector PositionDetector = new LightBarrier(Model.PreControlPosition);
 
 		/// <summary>
-		///   Gets the number of vehicles that passed the pre-control during the current system step.
+		///   Invoked when the given number of vehicles left the pre-control area.
 		/// </summary>
-		public abstract int NumberOfPassingVehicles { get; }
+		public extern void ActivateMainControl(int vehicleCount);
 	}
 }

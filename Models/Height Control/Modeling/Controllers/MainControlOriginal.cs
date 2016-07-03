@@ -33,35 +33,32 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		public int Count { get; private set; }
 
 		/// <summary>
+		///   Invoked when the given number of vehicles enters the main-control area.
+		/// </summary>
+		public override void VehiclesEntering(int vehicleCount)
+		{
+			Count += vehicleCount;
+			Timer.Start();
+		}
+
+		/// <summary>
 		///   Updates the internal state of the component.
 		/// </summary>
 		public override void Update()
 		{
 			base.Update();
 
-			var numberOfHVs = NumberOfEnteringVehicles;
-			if (numberOfHVs > 0)
+			if (Count > 0 && PositionDetector.IsVehicleDetected)
 			{
-				Count += numberOfHVs;
-				Timer.Start();
-			}
-
-			if (Count != 0)
-			{
-				var position = PositionDetector.IsVehicleDetected;
-				var left = LeftDetector.IsVehicleDetected;
-				var right = RightDetector.IsVehicleDetected;
-
 				// We assume the worst case: If the vehicle was not seen on the right lane, it is assumed to be on the left lane
-				IsVehicleLeavingOnLeftLane = position && (left || !right);
-				IsVehicleLeavingOnRightLane = position && right;
+				if (LeftDetector.IsVehicleDetected || !RightDetector.IsVehicleDetected)
+					CloseTunnel();
+				else
+				{
+					Count--;
+					ActivateEndControl();
+				}
 			}
-
-			if (IsVehicleLeavingOnLeftLane)
-				Count--;
-
-			if (IsVehicleLeavingOnRightLane)
-				Count--;
 
 			if (Timer.HasElapsed)
 				Count = 0;

@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -27,48 +27,34 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 	using Vehicles;
 
 	/// <summary>
-	///   Represents the original design of the end-control.
+	///   Represents a more sophisticated pre-control of the Elbtunnel height control that uses additional sensors to detect
+	///   vehicles entering the height control area.
 	/// </summary>
-	public class EndControlAdditionalLightBarrier : EndControl
+	public sealed class PreControlOverheadDetectors : PreControl
 	{
 		/// <summary>
-		///   The sensor that is used to detect overheight vehicles in the end-control area on the right lane.
+		///   The sensor that detects high vehicles on the left lane.
 		/// </summary>
 		[Subcomponent]
-		public readonly VehicleDetector RightLaneDetector = new SmallLightBarrier(Model.EndControlPosition, Lane.Right);
+		public readonly VehicleDetector LeftDetector = new OverheadDetector(Model.PreControlPosition, Lane.Left);
 
 		/// <summary>
-		///   The number of high vehicles currently in the main-control area.
+		///   The sensor that detects high vehicles on the right lane.
 		/// </summary>
-		[Range(0, 5, OverflowBehavior.Clamp)]
-		private int _count;
+		[Subcomponent]
+		public readonly VehicleDetector RightDetector = new OverheadDetector(Model.PreControlPosition, Lane.Right);
 
 		/// <summary>
-		///   Gets a value indicating whether a crash is potentially imminent.
-		/// </summary>
-		public override bool IsCrashPotentiallyImminent => _count > 0 && LeftLaneDetector.IsVehicleDetected;
-
-		/// <summary>
-		///   Updates the internal state of the component.
+		///   Updates the state of the component.
 		/// </summary>
 		public override void Update()
 		{
-			Update(Timer, LeftLaneDetector, RightLaneDetector);
+			Update(LeftDetector, RightDetector, PositionDetector);
 
-			if (VehicleEntering)
-			{
-				_count++;
-				Timer.Start();
-			}
-
-			if (Timer.HasElapsed)
-				_count = 0;
-
-			if (RightLaneDetector.IsVehicleDetected)
-				_count--;
-
-			if (_count == 0)
-				Timer.Stop();
+			if (PositionDetector.IsVehicleDetected && LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected)
+				ActivateMainControl(2);
+			else if (PositionDetector.IsVehicleDetected && (LeftDetector.IsVehicleDetected || RightDetector.IsVehicleDetected))
+				ActivateMainControl(1);
 		}
 	}
 }

@@ -109,7 +109,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		[FaultEffect]
 		public class SlowTrafficEffect : Vehicle
 		{
-			protected override int ChooseSpeed() => ChooseFromRange(1, Model.MaxSpeed);
+			protected override int ChooseSpeed() => ChooseFromRange(Model.MinSpeed, Model.MaxSpeed);
 		}
 	}
 }

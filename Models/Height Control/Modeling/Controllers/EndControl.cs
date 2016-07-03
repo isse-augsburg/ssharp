@@ -35,7 +35,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		///   The sensor that is used to detect vehicles in the end-control area on the left lane.
 		/// </summary>
 		[Subcomponent]
-		public readonly VehicleDetector LeftLaneDetector = new OverheadDetector(Model.EndControlPosition, Lane.Left);
+		public readonly VehicleDetector LeftDetector = new OverheadDetector(Model.EndControlPosition, Lane.Left);
 
 		/// <summary>
 		///   The timer that is used to deactivate the end-control automatically.
@@ -44,13 +44,13 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		public readonly Timer Timer = new Timer();
 
 		/// <summary>
-		///   Gets a value indicating whether a crash is potentially imminent.
+		///   Closes the tunnel when a collision is potentially imminent.
 		/// </summary>
-		public abstract bool IsCrashPotentiallyImminent { get; }
+		public extern void CloseTunnel();
 
 		/// <summary>
 		///   Gets the number of vehicles that entered the area in front of the end control during the current system step.
 		/// </summary>
-		public extern bool VehicleEntering { get; }
+		public abstract void VehicleEntering();
 	}
 }

@@ -132,7 +132,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 			MainControl.PositionDetector.Misdetection.Activation = MisdetectionLb2.IsChecked.ToOccurrenceKind();
 			MainControl.LeftDetector.Misdetection.Activation = MisdetectionOdl.IsChecked.ToOccurrenceKind();
 			MainControl.RightDetector.Misdetection.Activation = MisdetectionOdr.IsChecked.ToOccurrenceKind();
-			EndControl.LeftLaneDetector.Misdetection.Activation = MisdetectionOdf.IsChecked.ToOccurrenceKind();
+			EndControl.LeftDetector.Misdetection.Activation = MisdetectionOdf.IsChecked.ToOccurrenceKind();
 		}
 
 		private void OnRewound()
@@ -155,14 +155,14 @@ namespace SafetySharp.CaseStudies.Visualizations
 			if (MainControl.RightDetector.IsVehicleDetected)
 				_odrStoryboard.Begin();
 
-			if (EndControl.LeftLaneDetector.IsVehicleDetected)
+			if (EndControl.LeftDetector.IsVehicleDetected)
 				_odfStoryboard.Begin();
 
 			MisdetectionLb1.IsChecked = PreControl.PositionDetector.Misdetection.IsActivated;
 			MisdetectionLb2.IsChecked = MainControl.PositionDetector.Misdetection.IsActivated;
 			MisdetectionOdl.IsChecked = MainControl.LeftDetector.Misdetection.IsActivated;
 			MisdetectionOdr.IsChecked = MainControl.RightDetector.Misdetection.IsActivated;
-			MisdetectionOdf.IsChecked = EndControl.LeftLaneDetector.Misdetection.IsActivated;
+			MisdetectionOdf.IsChecked = EndControl.LeftDetector.Misdetection.IsActivated;
 
 			if (!SimulationControls.ReplayingCounterExample)
 			{
@@ -170,14 +170,14 @@ namespace SafetySharp.CaseStudies.Visualizations
 				MainControl.PositionDetector.FalseDetection.Activation = Activation.Suppressed;
 				MainControl.LeftDetector.FalseDetection.Activation = Activation.Suppressed;
 				MainControl.RightDetector.FalseDetection.Activation = Activation.Suppressed;
-				EndControl.LeftLaneDetector.FalseDetection.Activation = Activation.Suppressed;
+				EndControl.LeftDetector.FalseDetection.Activation = Activation.Suppressed;
 			}
 
 			SetFaultAdornment(FaultLb1, PreControl.PositionDetector);
 			SetFaultAdornment(FaultLb2, MainControl.PositionDetector);
 			SetFaultAdornment(FaultOdl, MainControl.LeftDetector);
 			SetFaultAdornment(FaultOdr, MainControl.RightDetector);
-			SetFaultAdornment(FaultOdf, EndControl.LeftLaneDetector);
+			SetFaultAdornment(FaultOdf, EndControl.LeftDetector);
 
 			var isMainControlActive = MainControl.Count > 0;
 			MainControlNumOhvLabel.Visibility = isMainControlActive.ToVisibility();
@@ -244,7 +244,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
 		private void OnMisdetectionOdf(object sender, RoutedEventArgs e)
 		{
-			EndControl.LeftLaneDetector.Misdetection.ToggleActivationMode();
+			EndControl.LeftDetector.Misdetection.ToggleActivationMode();
 		}
 
 		private void OnFalseDetectionLb1(object sender, MouseButtonEventArgs e)
@@ -274,7 +274,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 		private void OnFalseDetectionOdf(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left)
-				EndControl.LeftLaneDetector.FalseDetection.Activation = Activation.Forced;
+				EndControl.LeftDetector.FalseDetection.Activation = Activation.Forced;
 		}
 
 		private static void OnManipulationCompleted(object sender, ManipulationCompletedEventArgs e)

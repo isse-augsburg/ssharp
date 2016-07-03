@@ -50,7 +50,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 
 			// As collisions cannot occur without any overheight vehicles driving on the left lane, we 
 			// force the activation of the LeftOHV fault to improve safety analysis times significantly
-			model.LeftOHV.Activation = Activation.Forced; 
+			model.VehicleSet.LeftOHV.Activation = Activation.Forced; 
 
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision);
 
@@ -80,9 +80,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		{
 			// As collisions cannot occur without any overheight vehicles driving on the left lane, we 
 			// force the activation of the LeftOHV fault to improve safety analysis times significantly
-			model.LeftOHV.Activation = Activation.Forced;
+			model.VehicleSet.LeftOHV.Activation = Activation.Forced;
 
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision, maxCardinality: 3);
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision);
 
 			result.SaveCounterExamples($"counter examples/height control/dcca/collision/{variantName}");
 			Console.WriteLine(result);
@@ -91,10 +91,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		[Test, TestCaseSource(nameof(CreateModelVariants))]
 		public void FalseAlarm(Model model, string variantName)
 		{
-			// We cannot suppress LeftOHV here as at least some design variants might potentially be
-			// affected by overheight vehicles on the left lane at the pre control
-
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, maxCardinality: 3);
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm);
 
 			result.SaveCounterExamples($"counter examples/height control/dcca/false alarm/{variantName}");
 			Console.WriteLine(result);

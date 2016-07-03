@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -22,51 +22,31 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 {
-	using SafetySharp.Modeling;
-	using Sensors;
-	using Vehicles;
-
-	/// <summary>
-	///   Represents a more sophisticated pre-control of the Elbtunnel height control that uses additional sensors to detect
-	///   vehicles entering the height control area.
-	/// </summary>
-	public sealed class PreControlImprovedDetection : PreControl
+	public sealed class MainControlNoCounter : MainControl
 	{
 		/// <summary>
-		///   The sensor that detects high vehicles on the left lane.
+		///   Invoked when the given number of vehicles enters the main-control area.
 		/// </summary>
-		[Subcomponent]
-		public readonly VehicleDetector LeftDetector = new OverheadDetector(Model.PreControlPosition, Lane.Left);
-
-		/// <summary>
-		///   The sensor that detects high vehicles on the right lane.
-		/// </summary>
-		[Subcomponent]
-		public readonly VehicleDetector RightDetector = new OverheadDetector(Model.PreControlPosition, Lane.Right);
-
-		/// <summary>
-		///   Gets the number of vehicles that passed the pre-control during the current system step.
-		/// </summary>
-		public override int NumberOfPassingVehicles
+		public override void VehiclesEntering(int vehicleCount)
 		{
-			get
-			{
-				if (PositionDetector.IsVehicleDetected && LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected)
-					return 2;
-
-				if (PositionDetector.IsVehicleDetected && (LeftDetector.IsVehicleDetected || RightDetector.IsVehicleDetected))
-					return 1;
-
-				return 0;
-			}
+			Timer.Start();
 		}
 
 		/// <summary>
-		///   Updates the state of the component.
+		///   Updates the internal state of the component.
 		/// </summary>
 		public override void Update()
 		{
-			Update(LeftDetector, RightDetector, PositionDetector);
+			base.Update();
+
+			var onlyRightTriggered = !LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected;
+
+			// We assume the worst case: If the vehicle was not seen on the right lane, it is assumed to be on the left lane
+			if (Timer.IsActive && PositionDetector.IsVehicleDetected && !onlyRightTriggered)
+				CloseTunnel();
+
+			if (Timer.IsActive && PositionDetector.IsVehicleDetected && onlyRightTriggered)
+				ActivateEndControl();
 		}
 	}
 }
