@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,26 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
+namespace SafetySharp.CaseStudies.ProductionCell.Modeling.Controllers
 {
-	public sealed class MainControlRemovedCounter : MainControl
+	using System;
+	using System.Diagnostics;
+	using System.Linq;
+
+	[DebuggerDisplay("Consume")]
+	internal class ConsumeCapability : Capability
 	{
-		/// <summary>
-		///   Updates the internal state of the component.
-		/// </summary>
-		public override void Update()
+		public override int Identifier { get; } = (int)Enum.GetValues(typeof(ProductionAction)).Cast<ProductionAction>().Max() + 2;
+
+		public override void Execute(Agent agent)
 		{
-			base.Update();
+			agent.Consume(this);
+		}
 
-			if (GetNumberOfEnteringVehicles() > 0)
-				Timer.Start();
-
-			var active = !Timer.HasElapsed;
-			var onlyRightTriggered = !LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected;
-
-			// We assume the worst case: If the vehicle was not seen on the right lane, it is assumed to be on the left lane
-			IsVehicleLeavingOnLeftLane = PositionDetector.IsVehicleDetected && !onlyRightTriggered && active;
-			IsVehicleLeavingOnRightLane = PositionDetector.IsVehicleDetected && onlyRightTriggered && active;
+		public override bool IsEquivalentTo(Capability capability)
+		{
+			return capability is ConsumeCapability;
 		}
 	}
 }

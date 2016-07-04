@@ -33,19 +33,22 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		public bool IsActive => Timer.IsActive;
 
 		/// <summary>
-		///   Gets a value indicating whether a crash is potentially imminent.
+		///   Gets the number of vehicles that entered the area in front of the end control during the current system step.
 		/// </summary>
-		public override bool IsCrashPotentiallyImminent => IsActive && LeftLaneDetector.IsVehicleDetected;
+		public override void VehicleEntering()
+		{
+			Timer.Start();
+		}
 
 		/// <summary>
 		///   Updates the internal state of the component.
 		/// </summary>
 		public override void Update()
 		{
-			Update(Timer, LeftLaneDetector);
+			Update(Timer, LeftDetector);
 
-			if (VehicleEntering)
-				Timer.Start();
+			if (IsActive && LeftDetector.IsVehicleDetected)
+				CloseTunnel();
 		}
 	}
 }

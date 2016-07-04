@@ -22,8 +22,16 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 {
-	public sealed class MainControlRemovedCounterTolerant : MainControl
+	public sealed class MainControlNoCounter : MainControl
 	{
+		/// <summary>
+		///   Invoked when the given number of vehicles enters the main-control area.
+		/// </summary>
+		public override void VehiclesEntering(int vehicleCount)
+		{
+			Timer.Start();
+		}
+
 		/// <summary>
 		///   Updates the internal state of the component.
 		/// </summary>
@@ -31,22 +39,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		{
 			base.Update();
 
-			if (GetNumberOfEnteringVehicles() > 0)
-				Timer.Start();
+			var onlyRightTriggered = !LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected;
 
-			var active = !Timer.HasElapsed;
-			if (!active || !PositionDetector.IsVehicleDetected)
-				return;
+			// We assume the worst case: If the vehicle was not seen on the right lane, it is assumed to be on the left lane
+			if (Timer.IsActive && PositionDetector.IsVehicleDetected && !onlyRightTriggered)
+				CloseTunnel();
 
-			if (LeftDetector.IsVehicleDetected)
-				IsVehicleLeavingOnLeftLane = true;
-
-			if (RightDetector.IsVehicleDetected)
-				IsVehicleLeavingOnRightLane = true;
-
-			// We assume the best case: If the vehicle was not seen on the left lane, it is assumed to be on the right lane
-			if (!LeftDetector.IsVehicleDetected && !RightDetector.IsVehicleDetected)
-				IsVehicleLeavingOnRightLane = true;
+			if (Timer.IsActive && PositionDetector.IsVehicleDetected && onlyRightTriggered)
+				ActivateEndControl();
 		}
 	}
 }

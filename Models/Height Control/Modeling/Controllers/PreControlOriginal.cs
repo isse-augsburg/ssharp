@@ -29,19 +29,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 	public sealed class PreControlOriginal : PreControl
 	{
 		/// <summary>
-		///   Gets the number of vehicles that passed the pre-control during the current system step.
-		/// </summary>
-		public override int GetNumberOfPassingVehicles()
-		{
-			return PositionDetector.IsVehicleDetected ? 1 : 0;
-		}
-
-		/// <summary>
 		///   Updates the state of the component.
 		/// </summary>
 		public override void Update()
 		{
 			Update(PositionDetector);
+
+			if (PositionDetector.IsVehicleDetected)
+				ActivateMainControl(1);
 		}
 	}
 }

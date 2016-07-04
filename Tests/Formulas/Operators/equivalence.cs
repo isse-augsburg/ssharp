@@ -23,6 +23,7 @@
 namespace Tests.Formulas.Operators
 {
 	using SafetySharp.Analysis;
+	using Shouldly;
 	using static SafetySharp.Analysis.Operators;
 
 	internal class T12 : FormulaTestObject
@@ -50,6 +51,28 @@ namespace Tests.Formulas.Operators
 
 				Check(actual, expected);
 			}
+
+			{
+				Formula actual = false.EquivalentTo(intValue < 7);
+				var expected = new StateFormula(() => (false && intValue < 7) || (true && intValue >= 7));
+
+				Check(actual, expected);
+			}
+
+			{
+				var actual = false.EquivalentTo(F(intValue < 7));
+				var expected = new BinaryFormula(
+					new StateFormula(() => false),
+					BinaryOperator.Equivalence,
+					new UnaryFormula(new StateFormula(() => intValue < 7), UnaryOperator.Finally));
+
+				Check(actual, expected);
+			}
+
+			true.EquivalentTo(true).ShouldBe(true);
+			false.EquivalentTo(true).ShouldBe(false);
+			true.EquivalentTo(false).ShouldBe(false);
+			false.EquivalentTo(false).ShouldBe(true);
 		}
 	}
 }

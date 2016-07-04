@@ -53,31 +53,25 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		public readonly Timer Timer = new Timer();
 
 		/// <summary>
-		///   Indicates whether an vehicle leaving the main-control area.
+		///   Invoked when the an overheight vehicle leaves the main-control area on the right lane.
 		/// </summary>
-		[Hidden]
-		public bool IsVehicleLeavingOnRightLane { get; protected set; }
+		public extern void ActivateEndControl();
 
 		/// <summary>
-		///   Indicates whether an vehicle leaving the main-control area on the left lane has been detected.
-		///   This might trigger the alarm.
+		///   Closes the tunnel when a collision is potentially imminent.
 		/// </summary>
-		[Hidden]
-		public bool IsVehicleLeavingOnLeftLane { get; protected set; }
+		public extern void CloseTunnel();
 
 		/// <summary>
-		///   Gets the number of vehicles that entered the area in front of the main control during the current system step.
+		///   Invoked when the given number of vehicles enters the main-control area.
 		/// </summary>
-		public extern int GetNumberOfEnteringVehicles();
+		public abstract void VehiclesEntering(int vehicleCount);
 
 		/// <summary>
 		///   Updates the state of the component.
 		/// </summary>
 		public override void Update()
 		{
-			IsVehicleLeavingOnRightLane = false;
-			IsVehicleLeavingOnLeftLane = false;
-
 			Update(LeftDetector, RightDetector, PositionDetector, Timer);
 		}
 	}

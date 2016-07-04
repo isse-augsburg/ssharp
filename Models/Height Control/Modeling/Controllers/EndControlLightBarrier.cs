@@ -29,7 +29,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 	/// <summary>
 	///   Represents the original design of the end-control.
 	/// </summary>
-	public class EndControlAdditionalLightBarrier : EndControl
+	public class EndControlLightBarrier : EndControl
 	{
 		/// <summary>
 		///   The sensor that is used to detect overheight vehicles in the end-control area on the right lane.
@@ -44,30 +44,30 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		private int _count;
 
 		/// <summary>
-		///   Gets a value indicating whether a crash is potentially imminent.
+		///   Gets the number of vehicles that entered the area in front of the end control during the current system step.
 		/// </summary>
-		public override bool IsCrashPotentiallyImminent => _count > 0 && LeftLaneDetector.IsVehicleDetected;
+		public override void VehicleEntering()
+		{
+			_count++;
+			Timer.Start();
+		}
 
 		/// <summary>
 		///   Updates the internal state of the component.
 		/// </summary>
 		public override void Update()
 		{
-			Update(Timer, LeftLaneDetector, RightLaneDetector);
+			Update(Timer, LeftDetector, RightLaneDetector);
 
-			if (VehicleEntering)
-			{
-				_count++;
-				Timer.Start();
-			}
-
-			if (Timer.HasElapsed)
-				_count = 0;
+			if (_count > 0 && LeftDetector.IsVehicleDetected)
+				CloseTunnel();
 
 			if (RightLaneDetector.IsVehicleDetected)
 				_count--;
 
-			if (_count == 0)
+			if (Timer.HasElapsed)
+				_count = 0;
+			else if (_count == 0)
 				Timer.Stop();
 		}
 	}

@@ -111,8 +111,11 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Runs a step of the simulation. Returns <c>false</c> to indicate that the simulation is completed.
 		/// </summary>
-		public void SimulateStep()
+		public bool SimulateStep()
 		{
+			if (IsCompleted)
+				return false;
+
 			Prune();
 
 			var state = stackalloc byte[_runtimeModel.StateVectorSize];
@@ -126,9 +129,6 @@ namespace SafetySharp.Analysis
 			}
 			else
 			{
-				if (_stateIndex + 1 >= _counterExample.StepCount)
-					return;
-
 				_counterExample.DeserializeState(_stateIndex + 1);
 				_runtimeModel.Serialize(state);
 
@@ -137,6 +137,8 @@ namespace SafetySharp.Analysis
 				AddState(state);
 				Replay();
 			}
+
+			return true;
 		}
 
 		/// <summary>

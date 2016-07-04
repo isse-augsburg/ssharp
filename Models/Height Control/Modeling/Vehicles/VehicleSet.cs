@@ -22,36 +22,56 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 {
+	using System.Linq;
 	using SafetySharp.Modeling;
 	using Sensors;
 
 	/// <summary>
-	///   Represents a collection of vehicles.
+	///   Represents a set of vehicles.
 	/// </summary>
-	public sealed class VehicleCollection : Component
+	public sealed class VehicleSet : Component
 	{
 		/// <summary>
-		///   The vehicles contained in the collection.
+		///   Allows high vehicles to drive on the left lane.
 		/// </summary>
-		[Hidden(HideElements = true), Subcomponent]
-		public readonly Vehicle[] Vehicles;
+		public readonly Fault LeftHV = new TransientFault();
+
+		/// <summary>
+		///   Allows overheight vehicles to drive on the left lane.
+		/// </summary>
+		public readonly Fault LeftOHV = new TransientFault();
+
+		/// <summary>
+		///   Allows all kinds of vehicles to drive slower than expected.
+		/// </summary>
+		public readonly Fault SlowTraffic = new TransientFault();
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public VehicleCollection(params Vehicle[] vehicles)
+		public VehicleSet(Vehicle[] vehicles)
 		{
 			Vehicles = vehicles;
 
 			foreach (var vehicle in Vehicles)
 				Bind(nameof(vehicle.IsTunnelClosed), nameof(ForwardIsTunnelClosed));
+
+			LeftOHV.AddEffects<Vehicle.DriveLeftEffect>(vehicles.Where(vehicle => vehicle.Kind == VehicleKind.OverheightVehicle));
+			LeftHV.AddEffects<Vehicle.DriveLeftEffect>(vehicles.Where(vehicle => vehicle.Kind == VehicleKind.HighVehicle));
+			SlowTraffic.AddEffects<Vehicle.SlowTrafficEffect>(vehicles);
 		}
+
+		/// <summary>
+		///   The vehicles contained in the set.
+		/// </summary>
+		[Hidden(HideElements = true), Subcomponent]
+		public Vehicle[] Vehicles { get; }
 
 		// TODO: Remove once S# supports port forwardings
 		private bool ForwardIsTunnelClosed => IsTunnelClosed;
 
 		/// <summary>
-		///   Informs the vehicle whether the tunnel is closed.
+		///   Informs the vehicles contained in the set whether the tunnel is closed.
 		/// </summary>
 		public extern bool IsTunnelClosed { get; }
 

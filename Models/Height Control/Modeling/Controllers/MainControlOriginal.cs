@@ -29,8 +29,17 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   Gets the number of high vehicles currently in the main-control area.
 		/// </summary>
-		[Range(0, 5, OverflowBehavior.Clamp)]
+		[Range(0, Model.MaxVehicles, OverflowBehavior.Clamp)]
 		public int Count { get; private set; }
+
+		/// <summary>
+		///   Invoked when the given number of vehicles enters the main-control area.
+		/// </summary>
+		public override void VehiclesEntering(int vehicleCount)
+		{
+			Count += vehicleCount;
+			Timer.Start();
+		}
 
 		/// <summary>
 		///   Updates the internal state of the component.
@@ -39,30 +48,21 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		{
 			base.Update();
 
-			var numberOfHVs = GetNumberOfEnteringVehicles();
-			if (numberOfHVs > 0)
+			if (Count > 0 && PositionDetector.IsVehicleDetected)
 			{
-				Count += numberOfHVs;
-				Timer.Start();
+				// We assume the worst case: If the vehicle was not seen on the right lane, it is assumed to be on the left lane
+				if (LeftDetector.IsVehicleDetected || !RightDetector.IsVehicleDetected)
+					CloseTunnel();
+				else
+				{
+					Count--;
+					ActivateEndControl();
+				}
 			}
-
-			var active = Count != 0;
-			var onlyRightTriggered = active && !LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected;
-
-			// We assume the worst case: If the vehicle was not seen on the right lane, it is assumed to be on the left lane
-			IsVehicleLeavingOnLeftLane = active && !onlyRightTriggered && PositionDetector.IsVehicleDetected;
-			IsVehicleLeavingOnRightLane = active && onlyRightTriggered && PositionDetector.IsVehicleDetected;
-
-			if (IsVehicleLeavingOnLeftLane)
-				Count--;
-
-			if (IsVehicleLeavingOnRightLane)
-				Count--;
 
 			if (Timer.HasElapsed)
 				Count = 0;
-
-			if (Count == 0)
+			else if (Count <= 0)
 				Timer.Stop();
 		}
 	}
