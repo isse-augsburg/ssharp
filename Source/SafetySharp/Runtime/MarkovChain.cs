@@ -30,6 +30,7 @@ namespace SafetySharp.Runtime
 {
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.Runtime.CompilerServices;
 	using Modeling;
 	using Serialization;
 	using Utilities;
@@ -48,6 +49,7 @@ namespace SafetySharp.Runtime
 		
 		private readonly int* _stateStorageToMarkovChainStateMemory;
 
+		//[Impl(MethodImplOptions.AggressiveInlining)]
 		public int this[int index]
 		{
 			get { return _stateStorageToMarkovChainStateMemory[index]; }
@@ -78,13 +80,13 @@ namespace SafetySharp.Runtime
 
 		public SparseDoubleMatrix ProbabilityMatrix { get; }
 
-		public DoubleVector InitialStateProbabilities = new DoubleVector();
+		public DoubleVector InitialStateProbabilities;
 
-		public LabelVector StateLabeling = new LabelVector();
+		public LabelVector StateLabeling;
 
 		//TODO: Hardcoded. Remove
-		public RewardVector StateRewards0 = new RewardVector();
-		public RewardVector StateRewards1 = new RewardVector();
+		public RewardVector StateRewards0;
+		public RewardVector StateRewards1;
 
 		/*Dictionary<int, int> compactToSparse = new Dictionary<int, int>();
 		Dictionary<int, int> sparseToCompact = new Dictionary<int, int>();
@@ -97,6 +99,10 @@ namespace SafetySharp.Runtime
 			{
 				maxNumberOfTransitions = maxNumberOfStates << 3;
 			}
+			InitialStateProbabilities = new DoubleVector();
+			StateLabeling = new LabelVector();
+			StateRewards0 = new RewardVector();
+			StateRewards1 = new RewardVector();
 			_stateMapper = new StateStorageStateToMarkovChainStateMapper(maxNumberOfStates);
 			ProbabilityMatrix = new SparseDoubleMatrix(maxNumberOfStates, maxNumberOfTransitions);
 		}

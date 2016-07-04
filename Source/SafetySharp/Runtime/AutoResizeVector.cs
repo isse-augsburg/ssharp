@@ -46,11 +46,11 @@ namespace SafetySharp.Runtime
 		}
 
 		// fixed size
-		protected AutoResizeVector(int fixedSize)
+		protected AutoResizeVector(int initialCapacity)
 		{
 			//_hasFixedSize = true;
-			_backingArray = new List<T>(fixedSize);
-			IncreaseSize(fixedSize);
+			_backingArray = new List<T>(initialCapacity);
+			IncreaseSize(initialCapacity);
 		}
 
 		public void IncreaseSize(int size)
@@ -58,7 +58,7 @@ namespace SafetySharp.Runtime
 			if (_backingArray.Count >= size)
 				return;
 			if (_backingArray.Capacity < size)
-				_backingArray.Capacity = size;
+				_backingArray.Capacity = size*2;
 			for (var i = _backingArray.Count; i < size; i++)
 			{
 				_backingArray.Add(default(T));
@@ -152,45 +152,39 @@ namespace SafetySharp.Runtime
 
 	internal class DoubleVector : AutoResizeVector<double>
 	{
-		// auto resize
 		public DoubleVector()
 			: base()
 		{
 		}
-
-		// fixed size
-		public DoubleVector(int fixedSize)
-			: base(fixedSize)
+		
+		public DoubleVector(int initialCapacity)
+			: base(initialCapacity)
 		{
 		}
 	}
 
 	internal class LabelVector : AutoResizeVector<StateFormulaSet>
 	{
-		// auto resize
 		public LabelVector()
 			: base()
 		{
 		}
-
-		// fixed size
-		public LabelVector(int fixedSize)
-			: base(fixedSize)
+		
+		public LabelVector(int initialCapacity)
+			: base(initialCapacity)
 		{
 		}
 	}
 
 	internal class RewardVector : AutoResizeVector<Modeling.Reward>
 	{
-		// auto resize
 		public RewardVector()
 			: base()
 		{
 		}
-
-		// fixed size
-		public RewardVector(int fixedSize)
-			: base(fixedSize)
+		
+		public RewardVector(int initialCapacity)
+			: base(initialCapacity)
 		{
 		}
 	}

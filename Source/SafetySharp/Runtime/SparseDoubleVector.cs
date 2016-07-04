@@ -30,7 +30,7 @@ namespace SafetySharp.Runtime
 {
 	using System.Collections;
 	using System.Runtime.CompilerServices;
-
+	
 	public class SparseDoubleVector : IEnumerable<SparseDoubleVector.IndexDoubleTuple>
 	{
 		private readonly List<IndexDoubleTuple> _backingArray;

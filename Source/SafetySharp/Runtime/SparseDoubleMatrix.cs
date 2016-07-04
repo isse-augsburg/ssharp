@@ -141,7 +141,7 @@ namespace SafetySharp.Runtime
 
 		internal void SetRow(int row)
 		{
-			Requires.InRange(row, nameof(row), 0, _spaceLimitNumberOfRows);
+			Assert.InRange(row, 0, _spaceLimitNumberOfRows);
 			AssertNotSealed();
 			if (_rowMemory[row] != -1 || _rowColumnCountMemory[row] != -1)
 			{
@@ -167,8 +167,8 @@ namespace SafetySharp.Runtime
 		
 		internal void AddColumnValueToCurrentRow(ColumnValue columnValue)
 		{
-			Requires.InRange(columnValue.Value, nameof(columnValue), 0, _spaceLimitNumberOfRows);
-			Requires.InRange(_noOfColumnValues, nameof(_noOfColumnValues), 0, _spaceLimitNumberOfEntries);
+			Assert.InRange(columnValue.Value, 0, _spaceLimitNumberOfRows);
+			Assert.InRange(_noOfColumnValues, 0, _spaceLimitNumberOfEntries);
 			AssertNotSealed();
 			var nextColumnValueIndex = _noOfColumnValues;
 			_columnValueMemory[nextColumnValueIndex] = columnValue;
