@@ -292,7 +292,7 @@ namespace SafetySharp.Analysis
 		{
 			if (!firstTransitionOfCommand)
 				writer.Write(" + ");
-			writer.Write(probability);
+			writer.Write(probability.ToString(CultureInfo.InvariantCulture));
 			writer.Write(":(");
 			writer.Write("currentState'=");
 			writer.Write(targetState);
@@ -311,26 +311,7 @@ namespace SafetySharp.Analysis
 				writer.Write(")");
 			}
 		}
-		/*
-		
-			while (enumerator.MoveNextRow())
-			{
-				while (enumerator.MoveNextColumn())
-				{
-					var sourceState = enumerator.CurrentRow;
-					if (enumerator.CurrentColumnValue != null)
-					{
-						var currentColumnValue = enumerator.CurrentColumnValue.Value;
-						streamTransitions.WriteLine(sourceState + " " + currentColumnValue.Column + " " + currentColumnValue.Value.ToString(CultureInfo.InvariantCulture));
-					}
-					else
-					{
-						throw new Exception("Entry must not be null");
-					}						
-				}
-			}
 
-		*/
 		private void WriteCommandEnd(StreamWriter writer)
 		{
 			writer.Write(";");
@@ -345,7 +326,7 @@ namespace SafetySharp.Analysis
 
 			streamPrism.WriteLine("dtmc");
 			streamPrism.WriteLine("");
-			streamPrism.WriteLine("global currentState : [0.." + MarkovChain.States + "] init 0;"); // 0 is artificial initial state.
+			streamPrism.WriteLine("global currentState : [-1.." + MarkovChain.States + "] init -1;"); // -1 is artificial initial state.
 
 			foreach (var label in MarkovChain.StateFormulaLabels)
 				{
@@ -355,7 +336,7 @@ namespace SafetySharp.Analysis
 			streamPrism.WriteLine("module systemModule");
 
 			// From artificial initial state to real initial states
-			var artificialSourceState = 0;
+			var artificialSourceState = -1;
 			WriteCommandSourcePart(streamPrism, artificialSourceState);
 			var firstTransitionOfCommand = true;
 
