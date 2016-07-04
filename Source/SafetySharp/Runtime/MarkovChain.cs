@@ -172,6 +172,24 @@ namespace SafetySharp.Runtime
 			AddTransition(GetOrCreateStateForException(), probability);
 		}
 
+		public void SetStateLabeling(int stateStorageState, StateFormulaSet formula)
+		{
+			var markovChainState = GetMarkovChainState(stateStorageState);
+			StateLabeling[markovChainState] = formula;
+		}
+
+		public void SetStateRewards0(int stateStorageState, Reward reward)
+		{
+			var markovChainState = GetMarkovChainState(stateStorageState);
+			StateRewards0[markovChainState] = reward;
+		}
+
+		public void SetStateRewards1(int stateStorageState, Reward reward)
+		{
+			var markovChainState = GetMarkovChainState(stateStorageState);
+			StateRewards1[markovChainState] = reward;
+		}
+
 		public void FinishSourceState()
 		{
 			ProbabilityMatrix.FinishRow();
@@ -272,6 +290,26 @@ namespace SafetySharp.Runtime
 				printStateAndProbability(currentTuple.Column, currentTuple.Value);
 				lastState = currentTuple.Column;
 			}
+		}
+
+
+		[Conditional("DEBUG")]
+		private void AssertOldStateLabelingMatchesNewLabeling(int index, ref TransitionSet.Transition transition)
+		{
+			// For debugging: Assure that if the index already exists the existing entry is exactly transition.Formulas
+			// TODO: This cannot be done anymore. Find another way
+			/*
+			if (MarkovChain.StateLabeling.ContainsKey(index))
+			{
+				if (!MarkovChain.StateLabeling[index].Equals(transition.Formulas))
+				{
+					// When this happens, it is an indication for a problem in the model:
+					// One state has different labels due to hidden-variables.
+					// StateFormulas should not be dependent on hidden variables!
+					throw new Exception("The labeling of a state is not consistent.");
+				}
+			}
+			*/
 		}
 	}
 }

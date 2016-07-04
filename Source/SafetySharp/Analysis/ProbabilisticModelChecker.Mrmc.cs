@@ -69,7 +69,7 @@ namespace SafetySharp.Analysis
 					if (enumerator.CurrentColumnValue != null)
 					{
 						var currentColumnValue = enumerator.CurrentColumnValue.Value;
-						streamTransitions.WriteLine(sourceState + " " + currentColumnValue.Column + " " + currentColumnValue.Value.ToString(CultureInfo.InvariantCulture));
+						streamTransitions.WriteLine((sourceState+1) + " " + (currentColumnValue.Column+1) + " " + currentColumnValue.Value.ToString(CultureInfo.InvariantCulture)); //index in mrmc is 1-based
 					}
 					else
 					{
@@ -97,7 +97,7 @@ namespace SafetySharp.Analysis
 			var stateLabeling = MarkovChain.StateLabeling;
 			for (var state = 0; state < MarkovChain.States; state++)
 			{
-				streamStateLabelings.Write(state);
+				streamStateLabelings.Write(state+1); //index in mrmc is 1-based
 				for (var i = 0; i < noStateFormulaLabels; i++)
 				{
 					var label = MarkovChain.StateFormulaLabels[i];
@@ -134,14 +134,14 @@ namespace SafetySharp.Analysis
 			{
 				for (int i = 0; i < MarkovChain.States; i++)
 				{
-					streamRewards.WriteLine($" {i} {MarkovChain.StateRewards0[i].Value()}");
+					streamRewards.WriteLine($" {i+1} {MarkovChain.StateRewards0[i].Value()}"); //index in mrmc is 1-based
 				}
 			}
 			if (indexOfLabel == 1)
 			{
 				for (int i = 0; i < MarkovChain.States; i++)
 				{
-					streamRewards.WriteLine($" {i} {MarkovChain.StateRewards1[i].Value()}");
+					streamRewards.WriteLine($" {i+1} {MarkovChain.StateRewards1[i].Value()}"); //index in mrmc is 1-based
 				}
 			}
 			streamRewards.Flush();
@@ -184,7 +184,7 @@ namespace SafetySharp.Analysis
 					script.Append("write_res_file_state");
 				foreach (var initialState in InitialStates)
 				{
-					script.Append(" " + initialState);
+					script.Append(" " + (initialState+1) ); //index in mrmc is 1-based
 				}
 				script.AppendLine();
 				script.AppendLine("quit");
@@ -234,7 +234,7 @@ namespace SafetySharp.Analysis
 						if (parsed.Success)
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
-							var probabilityOfState = MarkovChain.InitialStateProbabilities[state];
+							var probabilityOfState = MarkovChain.InitialStateProbabilities[state-1]; //index in mrmc is 1-based
 							double probabilityInState;
 							// Mrmc may return a probability in a state of PositiveInfinity. This is clearly undesired and might be because of a wrong probability matrix
 							if (parsed.Groups["probability"].Value == "inf")
@@ -276,7 +276,7 @@ namespace SafetySharp.Analysis
 						if (parsed.Success)
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
-							var probabilityOfState = MarkovChain.InitialStateProbabilities[state];
+							var probabilityOfState = MarkovChain.InitialStateProbabilities[state - 1]; //index in mrmc is 1-based
 							if (probabilityOfState>0.0)
 							{
 								var isSatisfiedResult = parsed.Groups["satisfied"].Value.Equals("TRUE");
@@ -316,13 +316,13 @@ namespace SafetySharp.Analysis
 						if (parsed.Success)
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
-							var probabilityOfState = MarkovChain.InitialStateProbabilities[state];
+							var probabilityOfState = MarkovChain.InitialStateProbabilities[state - 1]; //index in mrmc is 1-based
 							double rewardOfState;
 							if (parsed.Groups["reward"].Value == "inf")
 								rewardOfState = double.PositiveInfinity;
 							else
 								rewardOfState = Double.Parse(parsed.Groups["reward"].Value, CultureInfo.InvariantCulture);
-							rewardResultValue += probabilityOfState * rewardOfState;
+							rewardResultValue += probabilityOfState * rewardOfState; //TODO: Calculate reward _in_ initial state?
 						}
 						else
 						{

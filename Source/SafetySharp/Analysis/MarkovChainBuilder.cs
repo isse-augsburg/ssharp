@@ -387,11 +387,9 @@ namespace SafetySharp.Analysis
 					}
 
 					// TODO-Probabilistic: why adding again and again -> save in StateStorage and remove here
-					AssertOldEntryMatchesNewEntry(index,ref transition);
-
-					MarkovChain.StateLabeling[index] = transition.Formulas;
-					MarkovChain.StateRewards0[index] = transition.Reward0;
-					MarkovChain.StateRewards1[index] = transition.Reward1;
+					MarkovChain.SetStateLabeling(index,transition.Formulas);
+					MarkovChain.SetStateRewards0(index, transition.Reward0);
+					MarkovChain.SetStateRewards1(index, transition.Reward1);
 
 					++transitionCount;
 				}
@@ -401,21 +399,6 @@ namespace SafetySharp.Analysis
 				Interlocked.Add(ref _context._computedTransitionCount, _transitions.ComputedTransitionCount);
 			}
 
-			[Conditional("DEBUG")]
-			private void AssertOldEntryMatchesNewEntry(int index,ref TransitionSet.Transition transition)
-			{
-				// For debugging: Assure that if the index already exists the existing entry is exactly transition.Formulas
-				// TODO: This cannot be done anymore. Find another way
-				/*
-				if (MarkovChain.StateLabeling.ContainsKey(index))
-				{
-					if (!MarkovChain.StateLabeling[index].Equals(transition.Formulas))
-					{
-						throw new Exception("The labeling of a state is not consistent.");
-					}
-				}
-				*/
-			}
 
 			/// <summary>
 			///   Disposes the object, releasing all managed and unmanaged resources.
