@@ -43,7 +43,6 @@ namespace Tests.DataStructures
 			_matrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(4, 6.0));
 			_matrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(3, 7.0));
 			_matrix.FinishRow();
-			_matrix.OptimizeAndSeal();
 		}
 
 		public SparseDoubleMatrixTests(ITestOutputHelper output)
@@ -52,9 +51,10 @@ namespace Tests.DataStructures
 		}
 
 		[Fact]
-		public void PassingTest()
+		public void PassingTestOptimized()
 		{
 			CreateExemplaryMatrix();
+			_matrix.OptimizeAndSeal();
 			var enumerator = _matrix.GetEnumerator();
 			var counter = 0.0;
 			while (enumerator.MoveNextRow())
@@ -67,7 +67,26 @@ namespace Tests.DataStructures
 						throw new Exception("Entry must not be null");
 				}
 			}
-			Assert.Equal(counter, 28.0);
+			Assert.Equal(28.0, counter);
+		}
+
+		[Fact]
+		public void PassingTestUnoptimized()
+		{
+			CreateExemplaryMatrix();
+			var enumerator = _matrix.GetEnumerator();
+			var counter = 0.0;
+			while (enumerator.MoveNextRow())
+			{
+				while (enumerator.MoveNextColumn())
+				{
+					if (enumerator.CurrentColumnValue != null)
+						counter += enumerator.CurrentColumnValue.Value.Value;
+					else
+						throw new Exception("Entry must not be null");
+				}
+			}
+			Assert.Equal(28.0, counter);
 		}
 	}
 }

@@ -154,9 +154,10 @@ namespace SafetySharp.Runtime
 			AddInitialState(GetOrCreateStateForException(), probability);
 		}
 
-		public void SetSourceStateOfUpcomingTransitions(int state)
+		public void SetSourceStateOfUpcomingTransitions(int stateStorageState)
 		{
-			ProbabilityMatrix.SetRow(state);
+			var markovChainState = GetMarkovChainState(stateStorageState);
+			ProbabilityMatrix.SetRow(markovChainState);
 		}
 
 		public void AddTransition(int stateStorageState, Probability probability)
@@ -209,7 +210,7 @@ namespace SafetySharp.Runtime
 					else
 						throw new Exception("Entry must not be null");
 				}
-				if (Probability.IsOne(probability, 0.000000001))
+				if (!Probability.IsOne(probability, 0.000000001))
 					throw new Exception("Probabilities should sum up to 1");
 			}
 		}

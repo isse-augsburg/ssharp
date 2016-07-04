@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 namespace SafetySharp.Runtime
 {
 	using System.Diagnostics;
+	using System.Globalization;
 	using Utilities;
 
 	// See PhD thesis of David Anthony Parker (Implementation of symbolic model checking for probabilistic systems)
@@ -196,11 +197,11 @@ namespace SafetySharp.Runtime
 			for (var rowi=0; rowi < Rows; rowi++)
 			{
 				optimizedRowMemory[rowi] = columnValueIndex;
-				var baseColumnIndexOfRow = _rowMemory[rowi];
-				var columnEntries = _rowColumnCountMemory[rowi];
-				for (var columnEntry=0; columnEntry< columnEntries; columnEntry++)
+				var l = _rowMemory[rowi];
+				var h = l + _rowColumnCountMemory[rowi];
+				for (var j = l; j < h; j++)
 				{
-					optimizedColumnValueMemory[columnValueIndex]=_columnValueMemory[baseColumnIndexOfRow+columnEntry];
+					optimizedColumnValueMemory[columnValueIndex]=_columnValueMemory[j];
 					columnValueIndex++;
 				}
 			}
@@ -265,6 +266,25 @@ namespace SafetySharp.Runtime
 			}
 		}
 
+		[Conditional("DEBUG")]
+		public void PrintMatrix(Action<string, object[]> printer=null)
+		{
+			if (printer == null)
+				printer = Console.WriteLine;
+			var enumerator = GetEnumerator();
+			while (enumerator.MoveNextRow())
+			{
+				printer(enumerator.CurrentRow.ToString(),new object[0]);
+				while (enumerator.MoveNextColumn())
+				{
+					if (enumerator.CurrentColumnValue != null) 
+						printer($"\t-> {enumerator.CurrentColumnValue.Value.Column} {enumerator.CurrentColumnValue.Value.Value.ToString(CultureInfo.InvariantCulture)}", new object[0]);
+					else
+						throw new Exception("Entry must not be null");
+				}
+			}
+		}
+
 		internal SparseDoubleMatrixEnumerator GetEnumerator()
 		{
 			return new SparseDoubleMatrixEnumerator(this);
@@ -308,7 +328,7 @@ namespace SafetySharp.Runtime
 				}
 				else
 				{
-					_currentColumnValueH = _matrix._rowColumnCountMemory[CurrentRow];
+					_currentColumnValueH = _currentColumnValueL+_matrix._rowColumnCountMemory[CurrentRow];
 				}
 				_currentColumnValueIndex = _currentColumnValueL - 1;
 				CurrentColumnValue = null;
@@ -334,7 +354,7 @@ namespace SafetySharp.Runtime
 				}
 				else
 				{
-					_currentColumnValueH = _matrix._rowColumnCountMemory[CurrentRow];
+					_currentColumnValueH = _currentColumnValueL+_matrix._rowColumnCountMemory[CurrentRow];
 				}
 				_currentColumnValueIndex = _currentColumnValueL - 1;
 				CurrentColumnValue = null;

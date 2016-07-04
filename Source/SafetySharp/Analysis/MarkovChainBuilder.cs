@@ -94,7 +94,7 @@ namespace SafetySharp.Analysis
 				tasks[i] = Task.Factory.StartNew(() =>
 				{
 					stacks[index] = new StateStack(configuration.StackCapacity);
-					_workers[index] = new Worker(index, this, stacks[index], createModel(), configuration.SuccessorCapacity);
+					_workers[index] = new Worker(index, this, stacks[index], createModel(), configuration.SuccessorCapacity, configuration.StateCapacity);
 				});
 			}
 
@@ -221,7 +221,7 @@ namespace SafetySharp.Analysis
 			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
-			public Worker(int index, MarkovChainBuilder context, StateStack stateStack, RuntimeModel model, int successorCapacity)
+			public Worker(int index, MarkovChainBuilder context, StateStack stateStack, RuntimeModel model, int successorCapacity,int stateCapacity)
 			{
 				_index = index;
 
@@ -236,7 +236,7 @@ namespace SafetySharp.Analysis
 				var stateRewardRetrieverLabels =
 					_model.Rewards.Select(rewardRetriever => rewardRetriever.Label).ToArray();
 
-				MarkovChain = new MarkovChain()
+				MarkovChain = new MarkovChain(stateCapacity)
 				{
 					StateFormulaLabels = stateFormulaLabels,
 					StateRewardRetrieverLabels = stateRewardRetrieverLabels
