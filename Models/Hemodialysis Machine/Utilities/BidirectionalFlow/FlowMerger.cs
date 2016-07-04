@@ -34,6 +34,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 		where TBackward : struct
 	{
 		protected int Number { get; }
+
+		[Hidden(HideElements = true)]
 		public FlowPort<TForward, TBackward>[] Incomings { get; }
 
 		[Hidden]

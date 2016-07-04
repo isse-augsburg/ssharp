@@ -39,10 +39,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
 		[Hidden]
 		public FlowPort<TForward, TBackward> Outgoing { get; set; }
 
-		// Standard behavior: Just copy. For a different behavior you have to overwrite this function
+		// Standard behavior: Just copy. For a different behavior you have to overwrite this function]
+		[Hidden]
 		public Func<TBackward, TBackward> UpdateBackward = fromSuccessor => fromSuccessor;
 
 		// Standard behavior: Just copy. For a different behavior you have to overwrite this function
+		[Hidden]
 		public Func<TForward, TForward> UpdateForward = fromPredecessor => fromPredecessor;
 
 		public void UpdateForwardInternal()
