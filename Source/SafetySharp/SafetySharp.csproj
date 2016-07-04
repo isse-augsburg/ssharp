@@ -48,6 +48,7 @@
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningProbabilityVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningBoolValueVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\RewardRetrieverCollector.cs" />
+    <Compile Include="Analysis\ProbabilisticModelChecker.Builtin.cs" />
     <Compile Include="Analysis\ProbabilitisticFormula.cs" />
     <Compile Include="Analysis\RewardFormula.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningRewardResultVisitor.cs" />
@@ -56,12 +57,8 @@
     <Compile Include="Analysis\FormulaVisitors\PrismTransformer.cs" />
     <Compile Include="Analysis\FormulaVisitors\MrmcTransformer.cs" />
     <Compile Include="Analysis\ProbabilisticModelChecker.cs" />
-    <Compile Include="Analysis\ProbabilisticModelChecker.Prism.cs">
-      <DependentUpon>ProbabilisticModelChecker.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Analysis\ProbabilisticModelChecker.Mrmc.cs">
-      <DependentUpon>ProbabilisticModelChecker.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Analysis\ProbabilisticModelChecker.Prism.cs" />
+    <Compile Include="Analysis\ProbabilisticModelChecker.Mrmc.cs" />
     <Compile Include="Analysis\ProbabilityChecker.cs" />
     <Compile Include="Analysis\MarkovChainBuilder.cs" />
     <Compile Include="Runtime\MarkovChain.cs" />
