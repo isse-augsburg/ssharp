@@ -40,9 +40,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		public void CalculateHazardInOriginalDesign()
 		{
 			var model = Model.CreateOriginal();
-			model.LeftHV.ProbabilityOfOccurrence = new Probability(0.01);
-			model.LeftOHV.ProbabilityOfOccurrence = new Probability(0.001);
-			model.SlowTraffic.ProbabilityOfOccurrence = new Probability(0.1);
+			model.VehicleSet.LeftHV.ProbabilityOfOccurrence = new Probability(0.01);
+			model.VehicleSet.LeftOHV.ProbabilityOfOccurrence = new Probability(0.001);
+			model.VehicleSet.SlowTraffic.ProbabilityOfOccurrence = new Probability(0.1);
 			model.HeightControl.PreControl.PositionDetector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
 			model.HeightControl.PreControl.PositionDetector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
 			model.HeightControl.MainControl.PositionDetector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
@@ -51,8 +51,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			model.HeightControl.MainControl.LeftDetector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
 			model.HeightControl.MainControl.RightDetector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
 			model.HeightControl.MainControl.RightDetector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
-			model.HeightControl.EndControl.LeftLaneDetector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
-			model.HeightControl.EndControl.LeftLaneDetector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
+			model.HeightControl.EndControl.LeftDetector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
+			model.HeightControl.EndControl.LeftDetector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
 
 			var result = ModelChecker.CalculateProbabilityOfHazard(model, model.Collision);
 			Console.Write($"Probability of hazard: {result.Value}");
