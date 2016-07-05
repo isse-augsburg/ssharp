@@ -236,7 +236,7 @@ namespace SafetySharp.Analysis
 				var stateRewardRetrieverLabels =
 					_model.Rewards.Select(rewardRetriever => rewardRetriever.Label).ToArray();
 
-				MarkovChain = new MarkovChain(stateCapacity)
+				MarkovChain = new MarkovChain(maxNumberOfStates: stateCapacity)
 				{
 					StateFormulaLabels = stateFormulaLabels,
 					StateRewardRetrieverLabels = stateRewardRetrieverLabels

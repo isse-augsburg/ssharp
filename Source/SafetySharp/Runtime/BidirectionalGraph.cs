@@ -26,61 +26,56 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests.DataStructures
+namespace SafetySharp.Runtime
 {
-	using SafetySharp.Runtime;
-	using Shouldly;
 	using Utilities;
-	using Xunit;
-	using Xunit.Abstractions;
 
-	public class DoubleVectorTests
+	internal sealed class BidirectionalGraph
 	{
-		/// <summary>
-		///   Gets the output that writes to the test output stream.
-		/// </summary>
-		public TestTraceOutput Output { get; }
-
-		public DoubleVectorTests(ITestOutputHelper output)
+		public struct Edge
 		{
-			Output = new TestTraceOutput(output);
+			public int Source;
+			public int Target;
+
+			public Edge(int source,int target)
+			{
+				Source = source;
+				Target = target;
+			}
 		}
 
-		[Fact]
-		public void PassingTest()
+		private Dictionary<int, List<Edge>> _outEdges = new Dictionary<int, List<Edge>>();
+		private Dictionary<int, List<Edge>> _inEdges = new Dictionary<int, List<Edge>>();
+
+		public IEnumerable<Edge> OutEdges(int vertex) => _outEdges[vertex];
+		public IEnumerable<Edge> InEdges(int vertex) => _inEdges[vertex];
+
+		public List<Edge> GetOrCreateOutEdges(int vertex)
 		{
-			var vec = new DoubleVector();
-			vec[0] = 1.0;
-			vec[7] = 2.0;
-			vec[0].ShouldBe(1.0);
-			vec[7].ShouldBe(2.0);
-			vec.Count.ShouldBe(8);
-			var sum = 0.0;
-			for (int i = 0; i < vec.Count; i++)
+			if (_outEdges.ContainsKey(vertex))
 			{
-				sum += vec[i];
+				return _outEdges[vertex];
 			}
-			sum.ShouldBe(3.0);
-			vec[1] = 3.0;
-			vec[2] = 4.0;
-			vec[4] = 5.0;
-			vec[3] = 6.0;
-			vec[6] = 7.0;
-			vec[5] = 8.0;
-			vec[0].ShouldBe(1.0);
-			vec[1].ShouldBe(3.0);
-			vec[2].ShouldBe(4.0);
-			vec[3].ShouldBe(6.0);
-			vec[4].ShouldBe(5.0);
-			vec[5].ShouldBe(8.0);
-			vec[6].ShouldBe(7.0);
-			vec[7].ShouldBe(2.0);
-			sum = 0.0;
-			for (int i = 0; i < vec.Count; i++)
+			var dictionary = new List<Edge>();
+			_outEdges.Add(vertex, dictionary);
+			return dictionary;
+		}
+
+		public List<Edge> GetOrCreateInEdges(int vertex)
+		{
+			if (_inEdges.ContainsKey(vertex))
 			{
-				sum += vec[i];
+				return _inEdges[vertex];
 			}
-			sum.ShouldBe(36.0);
+			var dictionary = new List<Edge>();
+			_inEdges.Add(vertex, dictionary);
+			return dictionary;
+		}
+
+		public void AddVerticesAndEdge(Edge edge)
+		{
+			GetOrCreateOutEdges(edge.Source).Add(edge);
+			GetOrCreateInEdges(edge.Target).Add(edge);
 		}
 	}
 }

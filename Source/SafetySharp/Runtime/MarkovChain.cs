@@ -117,8 +117,7 @@ namespace SafetySharp.Runtime
 		public int? ExceptionState { get; private set; } = null;
 
 		public bool HasExceptionInModel => ExceptionState != -1;
-
-
+		
 		// Creating matrix phase
 
 		private int GetOrCreateStateForException()
@@ -205,6 +204,7 @@ namespace SafetySharp.Runtime
 		{
 			InitialStateProbabilities.IncreaseSize(States);
 			ProbabilityMatrix.OptimizeAndSeal();
+			MarkovChainComplete = true;
 		}
 
 		// Validation
@@ -316,6 +316,70 @@ namespace SafetySharp.Runtime
 				}
 			}
 			*/
+		}
+
+		public UnderlyingDigraph CreateUnderlyingDigraph()
+		{
+			if (MarkovChainComplete)
+				return new UnderlyingDigraph(this);
+			return null;
+		}
+
+		internal class UnderlyingDigraph
+		{
+			public BidirectionalGraph Graph { get; private set; }
+
+			public UnderlyingDigraph(MarkovChain markovChain)
+			{
+				//Assumption "every node is reachable" is fulfilled due to the construction
+				Graph = new BidirectionalGraph();
+
+				var enumerator = markovChain.ProbabilityMatrix.GetEnumerator();
+				while (enumerator.MoveNextRow())
+				{
+					var sourceState = enumerator.CurrentRow;
+					while (enumerator.MoveNextColumn())
+					{
+						if (enumerator.CurrentColumnValue != null)
+						{
+							var value = enumerator.CurrentColumnValue.Value;
+							if (value.Value>0.0)
+								Graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(sourceState, value.Column));
+						}
+						else
+							throw new Exception("Entry must not be null");
+					}
+				}
+			}
+
+			public Dictionary<int, bool> GetAncestors(Dictionary<int, bool> toNodes, Dictionary<int, bool> nodesToIgnore)
+			{
+				// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
+				var nodesAdded = new Dictionary<int,bool>();
+				var nodesToTraverse = new Stack<int>();
+				foreach (var node in toNodes)
+				{
+					nodesToTraverse.Push(node.Key);
+				}
+
+				while (nodesToTraverse.Count > 0)
+				{
+					var currentNode = nodesToTraverse.Pop();
+					var isIgnored = nodesToIgnore.ContainsKey(currentNode);
+					var alreadyDiscovered = nodesAdded.ContainsKey(currentNode);
+					if (!(isIgnored || alreadyDiscovered))
+					{
+						nodesAdded.Add(currentNode,true);
+						foreach (var inEdge in Graph.InEdges(currentNode))
+						{
+							nodesToTraverse.Push(inEdge.Source);
+						}
+					}
+				}
+
+				return nodesAdded;
+			}
+
 		}
 	}
 }
