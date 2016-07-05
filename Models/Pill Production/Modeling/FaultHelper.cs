@@ -20,27 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
-	/// <summary>
-	///   Defines how faults are activated during analysis.
-	/// </summary>
-	public enum FaultActivationBehaviour
+	using System.Linq;
+	using SafetySharp.Modeling;
+
+	internal static class FaultHelper
 	{
-		/// <summary>
-		///   Faults are activated nondeterministically (the default).
-		/// </summary>
-		Nondeterministic,
-
-		/// <summary>
-		///   First analyze with forced fault activation. If the hazard does not occur,
-		///   test nondeterministically to make sure the fault set is safe.
-		/// </summary>
-		ForceThenFallback,
-
-		/// <summary>
-		///   Only analyze with forced fault activation.
-		/// </summary>
-		ForceOnly
+		internal static void PrefixFaultNames(Component component, string prefix)
+		{
+			var faults = (from field in component.GetType().GetFields()
+						  where typeof(Fault).IsAssignableFrom(field.FieldType)
+						  select field.GetValue(component)).Cast<Fault>();
+			foreach (var fault in faults)
+			{
+				fault.Name = $"{prefix}.{fault.Name}";
+			}
+		}
 	}
 }

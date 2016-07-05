@@ -8,8 +8,8 @@
     <ProjectGuid>{AB94E0EB-C085-421F-9A29-441409BCD30F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SafetySharp.CaseStudies.SelfOrganizingPillProduction</RootNamespace>
-    <AssemblyName>SelfOrganizingPillProduction</AssemblyName>
+    <RootNamespace>SafetySharp.CaseStudies.PillProduction</RootNamespace>
+    <AssemblyName>SafetySharp.CaseStudies.PillProduction</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -101,7 +101,6 @@
     <None Include="Analysis\trivial_setup.model">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">
