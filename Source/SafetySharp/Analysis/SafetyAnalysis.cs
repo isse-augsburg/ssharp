@@ -696,18 +696,23 @@ namespace SafetySharp.Analysis
 				var heuristicCount = Heuristics.Count();
 				if (heuristicCount != 0)
 				{
-					var nonTriviallyCritical = HeuristicSuggestionCount - HeuristicNonTrivialSafeCount - HeuristicTrivialCount;
-					var percentageTrivial = HeuristicTrivialCount / (double)(HeuristicSuggestionCount) * 100;
-					var percentageNonTrivialSafe = HeuristicNonTrivialSafeCount / (double)(HeuristicSuggestionCount) * 100;
-					var percentageNonTrivialCritical = nonTriviallyCritical / (double)(HeuristicSuggestionCount) * 100;
-
 					builder.AppendLine();
 
-					builder.AppendLine($"Of {HeuristicSuggestionCount} fault sets suggested by {heuristicCount} heuristics");
-					builder.AppendLine($"    {HeuristicTrivialCount} ({percentageTrivial:F0}%) were trivially safe or trivially critical,");
-					builder.AppendLine($"    {HeuristicNonTrivialSafeCount} ({percentageNonTrivialSafe:F0}%) were non-trivially safe, and");
-					builder.AppendLine($"    {nonTriviallyCritical} ({percentageNonTrivialCritical:F0}%) were non-trivially critical.");
-					builder.AppendLine($"In total, {TrivialChecksCount} trivial checks were performed.");
+					if (HeuristicSuggestionCount == 0)
+						builder.AppendLine("No suggestions were made by the heuristics.");
+					else
+					{
+						var nonTriviallyCritical = HeuristicSuggestionCount - HeuristicNonTrivialSafeCount - HeuristicTrivialCount;
+						var percentageTrivial = HeuristicTrivialCount / (double)(HeuristicSuggestionCount) * 100;
+						var percentageNonTrivialSafe = HeuristicNonTrivialSafeCount / (double)(HeuristicSuggestionCount) * 100;
+						var percentageNonTrivialCritical = nonTriviallyCritical / (double)(HeuristicSuggestionCount) * 100;
+
+						builder.AppendLine($"Of {HeuristicSuggestionCount} fault sets suggested by {heuristicCount} heuristics");
+						builder.AppendLine($"    {HeuristicTrivialCount} ({percentageTrivial:F0}%) were trivially safe or trivially critical,");
+						builder.AppendLine($"    {HeuristicNonTrivialSafeCount} ({percentageNonTrivialSafe:F0}%) were non-trivially safe, and");
+						builder.AppendLine($"    {nonTriviallyCritical} ({percentageNonTrivialCritical:F0}%) were non-trivially critical.");
+						builder.AppendLine($"In total, {TrivialChecksCount} trivial checks were performed.");
+					}
 				}
 
 				return builder.ToString();
