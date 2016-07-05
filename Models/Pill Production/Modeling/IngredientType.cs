@@ -20,27 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
-	/// <summary>
-	///   Defines how faults are activated during safety analysis.
-	/// </summary>
-	public enum FaultActivationBehaviour
+	public enum IngredientType
 	{
-		/// <summary>
-		///   Faults are activated nondeterministically (the default).
-		/// </summary>
-		Nondeterministic,
-
-		/// <summary>
-		///   Only analyze with forced fault activation.
-		/// </summary>
-		ForceOnly,
-
-		/// <summary>
-		///   First analyze with forced fault activation. If the hazard does not occur, nondeterministical activations are checked to
-		///   make sure the fault set is safe.
-		/// </summary>
-		ForceThenFallback
+		BlueParticulate,
+		RedParticulate,
+		YellowParticulate
 	}
 }

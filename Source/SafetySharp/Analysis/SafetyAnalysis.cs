@@ -39,16 +39,13 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public sealed class SafetyAnalysis
 	{
-		private FaultSetCollection safeSets;
-		private FaultSetCollection criticalSets;
-		private readonly HashSet<FaultSet> checkedSets = new HashSet<FaultSet>();
-		private readonly Dictionary<FaultSet, CounterExample> counterExamples = new Dictionary<FaultSet, CounterExample>();
-		private readonly Dictionary<FaultSet, Exception> exceptions = new Dictionary<FaultSet, Exception>();
-
-		private int trivialCount = 0;
-		private int heuristicCount = 0;
-		private int heuristicTrivialCount = 0;
-		private int heuristicNonTrivialSafeCount = 0;
+		private readonly HashSet<FaultSet> _checkedSets = new HashSet<FaultSet>();
+		private readonly Dictionary<FaultSet, CounterExample> _counterExamples = new Dictionary<FaultSet, CounterExample>();
+		private readonly Dictionary<FaultSet, Exception> _exceptions = new Dictionary<FaultSet, Exception>();
+		private FaultSetCollection _criticalSets;
+		private InvariantChecker _invariantChecker;
+		private Result _result;
+		private FaultSetCollection _safeSets;
 
 		/// <summary>
 		///   The model checker's configuration that determines certain model checker settings.
@@ -61,17 +58,17 @@ namespace SafetySharp.Analysis
 		public FaultActivationBehaviour FaultActivationBehaviour = FaultActivationBehaviour.Nondeterministic;
 
 		/// <summary>
-		///   Gets or sets a list of heuristics to use during the analysis.
-		/// </summary>
-		public List<IFaultSetHeuristic> Heuristics { get; } = new List<IFaultSetHeuristic>();
-
-		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		public SafetyAnalysis()
 		{
 			Configuration.ProgressReportsOnly = true;
 		}
+
+		/// <summary>
+		///   Gets a list of heuristics to use during the analysis.
+		/// </summary>
+		public List<IFaultSetHeuristic> Heuristics { get; } = new List<IFaultSetHeuristic>();
 
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
@@ -129,10 +126,11 @@ namespace SafetySharp.Analysis
 			// Serialize the model and initialize the invariant checker
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, !hazard);
-			var invariantChecker = new InvariantChecker(serializer.Load, message => OutputWritten?.Invoke(message), Configuration);
+			_invariantChecker = new InvariantChecker(serializer.Load, message => OutputWritten?.Invoke(message), Configuration);
+			_result = new Result(model, suppressedFaults, forcedFaults, Heuristics);
 
 			// remember all safe sets of current cardinality - we need them to generate the next power set level
-			HashSet<FaultSet> currentSafe = new HashSet<FaultSet>();
+			var currentSafe = new HashSet<FaultSet>();
 
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we
@@ -172,8 +170,8 @@ namespace SafetySharp.Analysis
 				{
 					var set = setsToCheck[setsToCheck.Count - 1];
 
-					bool isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker);
-					bool isCurrentLevel = sets.Remove(set); // returns true if set was actually contained
+					var isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality);
+					var isCurrentLevel = sets.Remove(set); // returns true if set was actually contained
 					setsToCheck.RemoveAt(setsToCheck.Count - 1);
 
 					if (isSafe && isCurrentLevel)
@@ -187,7 +185,7 @@ namespace SafetySharp.Analysis
 				// in case heuristics removed a set (they shouldn't)
 				foreach (var set in sets)
 				{
-					bool isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker);
+					var isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality);
 					if (isSafe)
 						currentSafe.Add(set);
 				}
@@ -200,66 +198,64 @@ namespace SafetySharp.Analysis
 			// due to heuristics usage, we may have informatiuon on non-minimal critical sets
 			var minimalCritical = RemoveNonMinimalCriticalSets();
 
-			ConsoleHelpers.WriteLine($"Of {heuristicCount} sets suggested by heuristics,\n\t{heuristicTrivialCount} were trivially safe / critical\n"
-				+ $"\t{heuristicNonTrivialSafeCount} were non-trivially safe\n"
-				+ $"\t{heuristicCount-heuristicNonTrivialSafeCount-heuristicTrivialCount} were non-trivially critical\n"
-				+ $"In total, {trivialCount} trivial checks were performed.\n");
+			_result.IsComplete = isComplete;
+			_result.Time = stopwatch.Elapsed;
+			_result.SetResult(minimalCritical, _checkedSets, _counterExamples, _exceptions);
 
-			return new Result(
-				model, isComplete, minimalCritical, checkedSets,
-				allFaults, suppressedFaults, forcedFaults,
-				counterExamples, exceptions, stopwatch.Elapsed);
+			return _result;
 		}
 
 		private void Reset(ModelBase model)
 		{
-			safeSets = new FaultSetCollection(model.Faults.Length);
-			criticalSets = new FaultSetCollection(model.Faults.Length);
-			checkedSets.Clear();
-			counterExamples.Clear();
-			exceptions.Clear();
+			_safeSets = new FaultSetCollection(model.Faults.Length);
+			_criticalSets = new FaultSetCollection(model.Faults.Length);
+			_checkedSets.Clear();
+			_counterExamples.Clear();
+			_exceptions.Clear();
 		}
 
 		private HashSet<FaultSet> RemoveNonMinimalCriticalSets()
 		{
-			var minimal = criticalSets.GetMinimalSets();
+			var minimal = _criticalSets.GetMinimalSets();
 
-			foreach (var set in criticalSets)
+			foreach (var set in _criticalSets)
 			{
 				if (!minimal.Contains(set))
 				{
-					exceptions.Remove(set);
-					counterExamples.Remove(set);
+					_exceptions.Remove(set);
+					_counterExamples.Remove(set);
 				}
 			}
 
 			return minimal;
 		}
 
-
-		private bool CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
-			int cardinality, RuntimeModelSerializer serializer, InvariantChecker invariantChecker)
+		private bool CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults, int cardinality)
 		{
-			bool isHeuristic = cardinality != set.Cardinality;
+			var isHeuristic = cardinality != set.Cardinality;
 			if (isHeuristic)
-				heuristicCount++;
-			bool isSafe = true;
+				_result.HeuristicSuggestionCount++;
+
+			var isSafe = true;
 
 			// check if set is trivially safe or critical
 			// (do not add to safeSets / criticalSets if so, in order to keep them small)
 			if (IsTriviallySafe(set))
 			{
-				trivialCount++;
+				_result.TrivialChecksCount++;
 				if (isHeuristic)
-					heuristicTrivialCount++;
+					_result.HeuristicTrivialCount++;
+
 				// do not add to safeSets: all subsets are subsets of safeSet as well
 				return true;
 			}
-			else if (IsTriviallyCritical(set))
+
+			if (IsTriviallyCritical(set))
 			{
-				trivialCount++;
+				_result.TrivialChecksCount++;
 				if (isHeuristic)
-					heuristicTrivialCount++;
+					_result.HeuristicTrivialCount++;
+
 				// do not add to criticalSets: non-minimal, and all supersets are supersets of criticalSet as well
 				return false;
 			}
@@ -267,78 +263,81 @@ namespace SafetySharp.Analysis
 			// if configured to do so, check with forced fault activation
 			if (FaultActivationBehaviour == FaultActivationBehaviour.ForceOnly
 				|| FaultActivationBehaviour == FaultActivationBehaviour.ForceThenFallback)
-				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker, Activation.Forced);
+				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, Activation.Forced, isHeuristic);
 
 			if (isSafe && FaultActivationBehaviour == FaultActivationBehaviour.ForceThenFallback)
 				ConsoleHelpers.WriteLine("    Checking again with nondeterministic activation...");
 
 			// check with nondeterministic fault activation
 			if (isSafe && FaultActivationBehaviour != FaultActivationBehaviour.ForceOnly)
-				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, serializer, invariantChecker, Activation.Nondeterministic);
+				isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality, Activation.Nondeterministic, isHeuristic);
 
 			if (isSafe) // remember non-trivially safe sets to avoid checking their subsets
 			{
-				safeSets.Add(set);
+				_safeSets.Add(set);
+
 				if (isHeuristic)
-					heuristicNonTrivialSafeCount++;
+					_result.HeuristicNonTrivialSafeCount++;
 			}
 
 			return isSafe;
 		}
 
 		private bool CheckSet(FaultSet set, Fault[] nondeterministicFaults, Fault[] allFaults,
-			int cardinality, RuntimeModelSerializer serializer, InvariantChecker invariantChecker, Activation activationMode)
+							  int cardinality, Activation activationMode, bool isHeuristic)
 		{
 			// Enable or disable the faults that the set represents
 			set.SetActivation(nondeterministicFaults, activationMode);
-			invariantChecker.ChangeFaultActivations(GetUpdateFaultActivations(allFaults));
+			_invariantChecker.ChangeFaultActivations(GetUpdateFaultActivations(allFaults));
 
-			var heuristic = set.Cardinality == cardinality ? "       " : "[heur.]";
+			var heuristic = set.Cardinality == cardinality ? String.Empty : "[heuristic]";
 
 			try
 			{
-				var result = invariantChecker.Check();
+				var result = _invariantChecker.Check();
 
 				if (!result.FormulaHolds)
 				{
-					//ConsoleHelpers.WriteLine($"  {heuristic}        critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
-					criticalSets.Add(set);
+					if (!isHeuristic)
+						ConsoleHelpers.WriteLine($"    {heuristic} critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
+
+					_criticalSets.Add(set);
 				}
-				else
+				else if (isHeuristic)
 				{
-					//ConsoleHelpers.WriteLine($"  {heuristic}            safe:  {{ {set.ToString(allFaults)} }}", ConsoleColor.Blue);
+					ConsoleHelpers.WriteLine($"    {heuristic} safe:  {{ {set.ToString(allFaults)} }}", ConsoleColor.Blue);
 				}
 
-				checkedSets.Add(set);
+				_checkedSets.Add(set);
 
 				if (result.CounterExample != null)
-					counterExamples.Add(set, result.CounterExample);
+					_counterExamples.Add(set, result.CounterExample);
 
 				return result.FormulaHolds;
 			}
 			catch (AnalysisException e)
 			{
-				ConsoleHelpers.WriteLine($"  {heuristic}        critical:  {{ {set.ToString(allFaults)} }} [exception thrown]", ConsoleColor.DarkRed);
+				ConsoleHelpers.WriteLine($"    {heuristic} critical:  {{ {set.ToString(allFaults)} }} [exception thrown]", ConsoleColor.DarkRed);
 				Console.WriteLine(e.InnerException);
 
-				checkedSets.Add(set);
-				criticalSets.Add(set);
-				exceptions.Add(set, e.InnerException);
+				_checkedSets.Add(set);
+				_criticalSets.Add(set);
+				_exceptions.Add(set, e.InnerException);
 
 				if (e.CounterExample != null)
-					counterExamples.Add(set, e.CounterExample);
+					_counterExamples.Add(set, e.CounterExample);
 				return false;
 			}
 		}
 
-		bool IsTriviallyCritical(FaultSet faultSet)
+		private bool IsTriviallyCritical(FaultSet faultSet)
 		{
-			return criticalSets.ContainsSubsetOf(faultSet);
+			return _criticalSets.ContainsSubsetOf(faultSet);
 		}
 
-		bool IsTriviallySafe(FaultSet faultSet)
+		private bool IsTriviallySafe(FaultSet faultSet)
 		{
-			return safeSets.ContainsSupersetOf(faultSet);
+			return _safeSets.ContainsSupersetOf(faultSet);
 		}
 
 		/// <summary>
@@ -361,7 +360,7 @@ namespace SafetySharp.Analysis
 		/// <param name="cardinality">The cardinality of the sets that should be generated.</param>
 		/// <param name="faults">The fault set the power set is generated for.</param>
 		/// <param name="previousSafe">The set of safe sets generated at the previous level.</param>
-		private HashSet<FaultSet> GeneratePowerSetLevel(int cardinality, Fault[] faults, HashSet<FaultSet> previousSafe)
+		private static HashSet<FaultSet> GeneratePowerSetLevel(int cardinality, Fault[] faults, HashSet<FaultSet> previousSafe)
 		{
 			var result = new HashSet<FaultSet>();
 
@@ -387,7 +386,7 @@ namespace SafetySharp.Analysis
 					// the ones we don't want, while avoiding duplicate generation of sets.
 
 					var setsToRemove = new HashSet<FaultSet>();
-					for (int i = 0; i < faults.Length; ++i)
+					for (var i = 0; i < faults.Length; ++i)
 					{
 						var fault = faults[i];
 						setsToRemove.Clear();
@@ -406,8 +405,8 @@ namespace SafetySharp.Analysis
 							// set is trivially critical iff one of the direct subsets is not safe (i.e. critical)
 							// * the faults faults[0], ..., faults[i-1] are not definitely not contained in set (see above)
 							// * faults[i] is definitely in set, but set.Remove(faults[i]) == safeSet and is thus safe.
-							bool isTriviallyCritical = false;
-							for (int j = i + 1; j < faults.Length; ++j)
+							var isTriviallyCritical = false;
+							for (var j = i + 1; j < faults.Length; ++j)
 							{
 								var f = faults[j];
 								if (set.Contains(f) && !previousSafe.Contains(set.Remove(f)))
@@ -452,14 +451,14 @@ namespace SafetySharp.Analysis
 				// The set must contain all forced faults, hence it must be a superset of those
 				if (!forcedFaults.IsSubsetOf(set))
 				{
-					safeSets.Add(set);
+					_safeSets.Add(set);
 					continue;
 				}
 
 				// The set is not allowed to contain any suppressed faults, hence the intersection must be empty
 				if (!suppressedFaults.GetIntersection(set).IsEmpty)
 				{
-					safeSets.Add(set);
+					_safeSets.Add(set);
 					continue;
 				}
 
@@ -472,8 +471,24 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Represents the result of a safety analysis.
 		/// </summary>
-		public struct Result
+		public class Result
 		{
+			/// <summary>
+			///   Initializes a new instance.
+			/// </summary>
+			/// <param name="model">The <see cref="Model" /> instance the safety analysis was conducted for.</param>
+			/// <param name="suppressedFaults">The faults whose activations have been completely suppressed during analysis.</param>
+			/// <param name="forcedFaults">The faults whose activations have been forced during analysis.</param>
+			/// <param name="heuristics">The heuristics that are used during the analysis.</param>
+			internal Result(ModelBase model, IEnumerable<Fault> suppressedFaults, IEnumerable<Fault> forcedFaults,
+							IEnumerable<IFaultSetHeuristic> heuristics)
+			{
+				Model = model;
+				SuppressedFaults = suppressedFaults;
+				ForcedFaults = forcedFaults;
+				Heuristics = heuristics.ToArray(); // make a copy so that later changes to the heuristics don't affect the results
+			}
+
 			/// <summary>
 			///   Gets the faults whose activations have been completely suppressed during analysis.
 			/// </summary>
@@ -488,33 +503,33 @@ namespace SafetySharp.Analysis
 			///   Gets the minimal critical sets, each critical set containing the faults that potentially result in the occurrence of a
 			///   hazard.
 			/// </summary>
-			public ISet<ISet<Fault>> MinimalCriticalSets { get; }
+			public ISet<ISet<Fault>> MinimalCriticalSets { get; private set; }
 
 			/// <summary>
 			///   Gets all of the fault sets that were checked for criticality. Some sets might not have been checked as they were known to
 			///   be critical sets due to the monotonicity of the critical set property.
 			/// </summary>
-			public ISet<ISet<Fault>> CheckedSets { get; }
+			public ISet<ISet<Fault>> CheckedSets { get; private set; }
 
 			/// <summary>
 			///   Gets the exception that has been thrown during the analysis, if any.
 			/// </summary>
-			public IDictionary<ISet<Fault>, Exception> Exceptions { get; }
+			public IDictionary<ISet<Fault>, Exception> Exceptions { get; private set; }
 
 			/// <summary>
 			///   Gets the faults that have been checked.
 			/// </summary>
-			public IEnumerable<Fault> Faults { get; }
+			public IEnumerable<Fault> Faults => Model.Faults;
 
 			/// <summary>
 			///   Gets the counter examples that were generated for the critical fault sets.
 			/// </summary>
-			public IDictionary<ISet<Fault>, CounterExample> CounterExamples { get; }
+			public IDictionary<ISet<Fault>, CounterExample> CounterExamples { get; private set; }
 
 			/// <summary>
 			///   Gets a value indicating whether the analysis might is complete, i.e., all fault sets have been checked for criticality.
 			/// </summary>
-			public bool IsComplete { get; }
+			public bool IsComplete { get; internal set; }
 
 			/// <summary>
 			///   Gets the <see cref="Model" /> instance the safety analysis was conducted for.
@@ -524,48 +539,60 @@ namespace SafetySharp.Analysis
 			/// <summary>
 			///   Gets the time it took to complete the analysis.
 			/// </summary>
-			public TimeSpan Time { get; }
+			public TimeSpan Time { get; internal set; }
+
+			/// <summary>
+			///   Gets the heuristics that were used during analysis.
+			/// </summary>
+			public IEnumerable<IFaultSetHeuristic> Heuristics { get; }
+
+			/// <summary>
+			///   The total number of fault sets suggested by the heuristics.
+			/// </summary>
+			public int HeuristicSuggestionCount { get; internal set; }
+
+			/// <summary>
+			///   The number of sets suggested by a heuristic that were not trivially safe.
+			/// </summary>
+			public int HeuristicNonTrivialSafeCount { get; internal set; }
+
+			/// <summary>
+			///   The number of sets suggested by a heuristic that were trivially safe or critical.
+			/// </summary>
+			public int HeuristicTrivialCount { get; internal set; }
+
+			/// <summary>
+			///   The number of trivial checks that have been performed.
+			/// </summary>
+			public int TrivialChecksCount { get; internal set; }
 
 			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
-			/// <param name="model">The <see cref="Model" /> instance the safety analysis was conducted for.</param>
-			/// <param name="isComplete">Indicates whether the analysis is complete.</param>
 			/// <param name="criticalSets">The minimal critical sets.</param>
 			/// <param name="checkedSets">The sets that have been checked.</param>
-			/// <param name="faults">The faults that have been checked.</param>
 			/// <param name="counterExamples">The counter examples that were generated for the critical fault sets.</param>
 			/// <param name="exceptions">The exceptions that have been thrown during the analysis.</param>
-			/// <param name="time">The time it took to complete the analysis.</param>
-			/// <param name="suppressedFaults">The faults whose activations have been completely suppressed during analysis.</param>
-			/// <param name="forcedFaults">The faults whose activations have been forced during analysis.</param>
-			internal Result(ModelBase model, bool isComplete, HashSet<FaultSet> criticalSets, HashSet<FaultSet> checkedSets,
-							Fault[] faults, Fault[] suppressedFaults, Fault[] forcedFaults,
-							Dictionary<FaultSet, CounterExample> counterExamples, Dictionary<FaultSet, Exception> exceptions, TimeSpan time)
+			internal void SetResult(HashSet<FaultSet> criticalSets, HashSet<FaultSet> checkedSets,
+									Dictionary<FaultSet, CounterExample> counterExamples, Dictionary<FaultSet, Exception> exceptions)
 			{
 				var knownFaultSets = new Dictionary<FaultSet, ISet<Fault>>();
 
-				Time = time;
-				Model = model;
-				IsComplete = isComplete;
-				MinimalCriticalSets = Convert(knownFaultSets, criticalSets, faults);
-				CheckedSets = Convert(knownFaultSets, checkedSets, faults);
-				Faults = faults;
-				CounterExamples = counterExamples.ToDictionary(pair => Convert(knownFaultSets, pair.Key, faults), pair => pair.Value);
-				Exceptions = exceptions.ToDictionary(pair => Convert(knownFaultSets, pair.Key, faults), pair => pair.Value);
-				SuppressedFaults = suppressedFaults;
-				ForcedFaults = forcedFaults;
+				MinimalCriticalSets = Convert(knownFaultSets, criticalSets);
+				CheckedSets = Convert(knownFaultSets, checkedSets);
+				CounterExamples = counterExamples.ToDictionary(pair => Convert(knownFaultSets, pair.Key), pair => pair.Value);
+				Exceptions = exceptions.ToDictionary(pair => Convert(knownFaultSets, pair.Key), pair => pair.Value);
 			}
 
 			/// <summary>
 			///   Converts the integer-based sets to a sets of fault sets.
 			/// </summary>
-			private static ISet<ISet<Fault>> Convert(Dictionary<FaultSet, ISet<Fault>> knownSets, HashSet<FaultSet> sets, Fault[] faults)
+			private ISet<ISet<Fault>> Convert(Dictionary<FaultSet, ISet<Fault>> knownSets, HashSet<FaultSet> sets)
 			{
 				var result = new HashSet<ISet<Fault>>(ReferenceEqualityComparer<ISet<Fault>>.Default);
 
 				foreach (var set in sets)
-					result.Add(Convert(knownSets, set, faults));
+					result.Add(Convert(knownSets, set));
 
 				return result;
 			}
@@ -573,13 +600,13 @@ namespace SafetySharp.Analysis
 			/// <summary>
 			///   Converts the integer-based set to a set faults.
 			/// </summary>
-			private static ISet<Fault> Convert(Dictionary<FaultSet, ISet<Fault>> knownSets, FaultSet set, Fault[] faults)
+			private ISet<Fault> Convert(Dictionary<FaultSet, ISet<Fault>> knownSets, FaultSet set)
 			{
 				ISet<Fault> faultSet;
 				if (knownSets.TryGetValue(set, out faultSet))
 					return faultSet;
 
-				faultSet = new HashSet<Fault>(set.ToFaultSequence(faults));
+				faultSet = new HashSet<Fault>(set.ToFaultSequence(Model.Faults));
 				knownSets.Add(set, faultSet);
 
 				return faultSet;
@@ -639,32 +666,19 @@ namespace SafetySharp.Analysis
 				Func<IEnumerable<Fault>, string> getFaultString =
 					faults => String.Join(", ", faults.Select(fault => fault.Name).OrderBy(name => name));
 
-				builder.AppendFormat("Elapsed Time: {0}", Time);
-				builder.AppendLine();
-				builder.AppendFormat("Fault Count: {0}", Faults.Count());
-				builder.AppendLine();
-				builder.AppendFormat("Faults: {0}", getFaultString(Faults));
-				builder.AppendLine();
+				builder.AppendLine($"Elapsed Time: {Time}");
+				builder.AppendLine($"Fault Count: {Faults.Count()}");
+				builder.AppendLine($"Faults: {getFaultString(Faults)}");
 
 				if (ForcedFaults.Any())
-				{
-					builder.AppendFormat("Forced Faults: {0}", getFaultString(ForcedFaults));
-					builder.AppendLine();
-				}
+					builder.AppendLine($"Forced Faults: {getFaultString(ForcedFaults)}");
 
 				if (SuppressedFaults.Any())
-				{
-					builder.AppendFormat("Suppressed Faults: {0}", getFaultString(SuppressedFaults));
-					builder.AppendLine();
-				}
+					builder.AppendLine($"Suppressed Faults: {getFaultString(SuppressedFaults)}");
 
 				builder.AppendLine();
-
-				builder.AppendFormat("Checked Fault Sets: {0} ({1:F0}% of all fault sets)", CheckedSets.Count, percentage);
-				builder.AppendLine();
-
-				builder.AppendFormat("Minimal Critical Sets: {0}", MinimalCriticalSets.Count);
-				builder.AppendLine();
+				builder.AppendLine($"Checked Fault Sets: {CheckedSets.Count} ({percentage:F0}% of all fault sets)");
+				builder.AppendLine($"Minimal Critical Sets: {MinimalCriticalSets.Count}");
 				builder.AppendLine();
 
 				var i = 1;
@@ -676,12 +690,33 @@ namespace SafetySharp.Analysis
 					if (Exceptions.TryGetValue(criticalSet, out e))
 					{
 						builder.AppendLine();
-						builder.AppendFormat(
-							"    An unhandled exception of type {0} was thrown while checking the fault set: {1}",
-							e.GetType().FullName, e.Message);
+						builder.Append(
+							$"    An unhandled exception of type {e.GetType().FullName} was thrown while checking the fault set: {e.Message}");
 					}
 
 					builder.AppendLine();
+				}
+
+				var heuristicCount = Heuristics.Count();
+				if (heuristicCount != 0)
+				{
+					builder.AppendLine();
+
+					if (HeuristicSuggestionCount == 0)
+						builder.AppendLine("No suggestions were made by the heuristics.");
+					else
+					{
+						var nonTriviallyCritical = HeuristicSuggestionCount - HeuristicNonTrivialSafeCount - HeuristicTrivialCount;
+						var percentageTrivial = HeuristicTrivialCount / (double)(HeuristicSuggestionCount) * 100;
+						var percentageNonTrivialSafe = HeuristicNonTrivialSafeCount / (double)(HeuristicSuggestionCount) * 100;
+						var percentageNonTrivialCritical = nonTriviallyCritical / (double)(HeuristicSuggestionCount) * 100;
+
+						builder.AppendLine($"Of {HeuristicSuggestionCount} fault sets suggested by {heuristicCount} heuristics");
+						builder.AppendLine($"    {HeuristicTrivialCount} ({percentageTrivial:F0}%) were trivially safe or trivially critical,");
+						builder.AppendLine($"    {HeuristicNonTrivialSafeCount} ({percentageNonTrivialSafe:F0}%) were non-trivially safe, and");
+						builder.AppendLine($"    {nonTriviallyCritical} ({percentageNonTrivialCritical:F0}%) were non-trivially critical.");
+						builder.AppendLine($"In total, {TrivialChecksCount} trivial checks were performed.");
+					}
 				}
 
 				return builder.ToString();

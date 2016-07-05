@@ -39,6 +39,9 @@ namespace SafetySharp.Modeling
 	{
 		private readonly Choice _choice = new Choice();
 
+		[NonSerializable]
+		private readonly ISet<Fault> _subsumedFaults = new HashSet<Fault>();
+
 		[Hidden]
 		private Activation _activation = Activation.Nondeterministic;
 
@@ -109,9 +112,6 @@ namespace SafetySharp.Modeling
 			}
 		}
 
-		[NonSerializable]
-		private readonly ISet<Fault> subsumedFaults = new HashSet<Fault>();
-
 		/// <summary>
 		///   Adds fault effects for the <paramref name="components" /> that are enabled when the fault is activated.
 		/// </summary>
@@ -172,15 +172,20 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		///   Declares the given <paramref name="faults"/> to be subsumed by this instance. This does
+		///   Declares the given <paramref name="faults" /> to be subsumed by this instance. Subsumption metadata does
 		///   not change the fault's effects and is only used by heuristics.
 		/// </summary>
 		/// <param name="faults">The subsumed faults.</param>
 		public void Subsumes(params Fault[] faults)
 		{
-			subsumedFaults.UnionWith(faults);
+			_subsumedFaults.UnionWith(faults);
 		}
 
+		/// <summary>
+		///   Gets a <see cref="FaultSet" /> containing all fault instances subsumed by the <paramref name="set" />.
+		/// </summary>
+		/// <param name="set">The fault set the subsumed faults should be returned for.</param>
+		/// <param name="allFaults">The list of all analyzed faults.</param>
 		internal static FaultSet SubsumedFaults(FaultSet set, Fault[] allFaults)
 		{
 			var currentFaults = set.ToFaultSequence(allFaults);
@@ -190,13 +195,18 @@ namespace SafetySharp.Modeling
 			do // fixed-point iteration
 			{
 				oldCount = subsumed.Cardinality;
-				currentFaults = currentFaults.SelectMany(fault => fault.subsumedFaults);
+				currentFaults = currentFaults.SelectMany(fault => fault._subsumedFaults);
 				subsumed = subsumed.GetUnion(new FaultSet(currentFaults));
 			} while (oldCount < subsumed.Cardinality);
 
 			return subsumed;
 		}
 
+		/// <summary>
+		///   Gets a <see cref="FaultSet" /> containing all fault instances subsuming the <paramref name="set" />.
+		/// </summary>
+		/// <param name="set">The subsumed fault set the subsuming faults should be returned for.</param>
+		/// <param name="allFaults">The list of all analyzed faults.</param>
 		internal static FaultSet SubsumingFaults(FaultSet set, Fault[] allFaults)
 		{
 			var currentFaults = set.ToFaultSequence(allFaults);
@@ -206,13 +216,18 @@ namespace SafetySharp.Modeling
 			do // fixed-point iteration
 			{
 				oldCount = subsuming.Cardinality;
-				currentFaults = allFaults.Where(fault => fault.subsumedFaults.Intersect(currentFaults).Any()).ToArray();
+				currentFaults = allFaults.Where(fault => fault._subsumedFaults.Intersect(currentFaults).Any()).ToArray();
 				subsuming = subsuming.GetUnion(new FaultSet(currentFaults));
 			} while (oldCount < subsuming.Cardinality);
 
 			return subsuming;
 		}
 
+		/// <summary>
+		///   Gets a <see cref="FaultSet" /> containing all fault instances subsuming the <paramref name="set" />.
+		/// </summary>
+		/// <param name="faults">The subsumed faults the subsuming faults should be returned for.</param>
+		/// <param name="allFaults">The list of all analyzed faults.</param>
 		internal static FaultSet SubsumingFaults(IEnumerable<Fault> faults, Fault[] allFaults)
 		{
 			return SubsumingFaults(new FaultSet(faults), allFaults);
