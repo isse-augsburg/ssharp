@@ -46,6 +46,8 @@ namespace SafetySharp.Analysis
 		private InvariantChecker _invariantChecker;
 		private Result _result;
 		private FaultSetCollection _safeSets;
+		private FaultSet _forcedSet;
+		private FaultSet _suppressedSet;
 
 		/// <summary>
 		///   The model checker's configuration that determines certain model checker settings.
@@ -115,8 +117,8 @@ namespace SafetySharp.Analysis
 			var suppressedFaults = allFaults.Where(fault => fault.Activation == Activation.Suppressed).ToArray();
 			var nondeterministicFaults = allFaults.Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
 
-			var suppressedSet = new FaultSet(suppressedFaults);
-			var forcedSet = new FaultSet(forcedFaults);
+			_suppressedSet = new FaultSet(suppressedFaults);
+			_forcedSet = new FaultSet(forcedFaults);
 
 			var isComplete = true;
 
@@ -143,7 +145,7 @@ namespace SafetySharp.Analysis
 
 				// Remove all sets that conflict with the forced or suppressed faults; these sets are considered to be safe.
 				// If no sets remain, skip to the next level
-				sets = RemoveInvalidSets(sets, suppressedSet, forcedSet);
+				sets = RemoveInvalidSets(sets, currentSafe);
 				if (sets.Count == 0)
 					continue;
 
@@ -170,9 +172,15 @@ namespace SafetySharp.Analysis
 				{
 					var set = setsToCheck[setsToCheck.Count - 1];
 
-					var isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality);
 					var isCurrentLevel = sets.Remove(set); // returns true if set was actually contained
 					setsToCheck.RemoveAt(setsToCheck.Count - 1);
+
+					// for current level, we already know the set is valid
+					bool isValid = isCurrentLevel || !IsInvalid(set);
+
+					bool isSafe = true;
+					if (isValid)
+						isSafe = CheckSet(set, nondeterministicFaults, allFaults, cardinality);
 
 					if (isSafe && isCurrentLevel)
 						currentSafe.Add(set);
@@ -440,32 +448,34 @@ namespace SafetySharp.Analysis
 		///   Removes all invalid sets from <paramref name="sets" /> that conflict with either <paramref name="suppressedFaults" /> or
 		///   <paramref name="forcedFaults" />.
 		/// </summary>
-		private HashSet<FaultSet> RemoveInvalidSets(HashSet<FaultSet> sets, FaultSet suppressedFaults, FaultSet forcedFaults)
+		private HashSet<FaultSet> RemoveInvalidSets(HashSet<FaultSet> sets, HashSet<FaultSet> currentSafe)
 		{
-			if (suppressedFaults.Cardinality == 0 && forcedFaults.Cardinality == 0)
+			if (_suppressedSet.IsEmpty && _forcedSet.IsEmpty)
 				return sets;
 
 			var validSets = new HashSet<FaultSet>();
 			foreach (var set in sets)
 			{
-				// The set must contain all forced faults, hence it must be a superset of those
-				if (!forcedFaults.IsSubsetOf(set))
-				{
-					_safeSets.Add(set);
-					continue;
-				}
-
-				// The set is not allowed to contain any suppressed faults, hence the intersection must be empty
-				if (!suppressedFaults.GetIntersection(set).IsEmpty)
-				{
-					_safeSets.Add(set);
-					continue;
-				}
-
-				validSets.Add(set);
+				if (IsInvalid(set))
+					currentSafe.Add(set);
+				else
+					validSets.Add(set);
 			}
 
 			return validSets;
+		}
+
+		private bool IsInvalid(FaultSet set)
+		{
+			// The set must contain all forced faults, hence it must be a superset of those
+			// The set is not allowed to contain any suppressed faults, hence the intersection must be empty
+			if (!_forcedSet.IsSubsetOf(set) || !_suppressedSet.GetIntersection(set).IsEmpty)
+			{
+				_safeSets.Add(set);
+				return true;
+			}
+
+			return false;
 		}
 
 		/// <summary>
