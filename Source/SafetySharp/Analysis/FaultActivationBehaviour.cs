@@ -23,7 +23,7 @@
 namespace SafetySharp.Analysis
 {
 	/// <summary>
-	///   Defines how faults are activated during analysis.
+	///   Defines how faults are activated during safety analysis.
 	/// </summary>
 	public enum FaultActivationBehaviour
 	{
@@ -33,14 +33,14 @@ namespace SafetySharp.Analysis
 		Nondeterministic,
 
 		/// <summary>
-		///   First analyze with forced fault activation. If the hazard does not occur,
-		///   test nondeterministically to make sure the fault set is safe.
-		/// </summary>
-		ForceThenFallback,
-
-		/// <summary>
 		///   Only analyze with forced fault activation.
 		/// </summary>
-		ForceOnly
+		ForceOnly,
+
+		/// <summary>
+		///   First analyze with forced fault activation. If the hazard does not occur, nondeterministical activations are checked to
+		///   make sure the fault set is safe.
+		/// </summary>
+		ForceThenFallback
 	}
 }
