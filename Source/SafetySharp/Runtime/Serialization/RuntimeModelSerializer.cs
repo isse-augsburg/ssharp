@@ -56,7 +56,30 @@ namespace SafetySharp.Runtime.Serialization
 			using (var buffer = new MemoryStream())
 			using (var writer = new BinaryWriter(buffer, Encoding.UTF8, leaveOpen: true))
 			{
-				SerializeModel(writer, model, formulas);
+				SerializeModel(writer, model, null, formulas);
+
+				lock (_syncObject)
+					_serializedModel = buffer.ToArray();
+			}
+		}
+
+
+		/// <summary>
+		///   Serializes the <paramref name="model" /> and the <paramref name="formulas" />.
+		/// </summary>
+		/// <param name="model">The model that should be serialized.</param>
+		/// <param name="terminateEarlyCondition">When this method evaluates to true during model checking, the current trace should not be expanded further.</param>
+		/// <param name="formulas">The formulas that should be serialized.</param>
+		public void Serialize(ModelBase model, Func<bool> terminateEarlyCondition, params Formula[] formulas)
+		{
+			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(formulas, nameof(formulas));
+
+
+			using (var buffer = new MemoryStream())
+			using (var writer = new BinaryWriter(buffer, Encoding.UTF8, leaveOpen: true))
+			{
+				SerializeModel(writer, model, terminateEarlyCondition, formulas);
 
 				lock (_syncObject)
 					_serializedModel = buffer.ToArray();
@@ -80,10 +103,10 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Serializes the <paramref name="model" />.
 		/// </summary>
-		private unsafe void SerializeModel(BinaryWriter writer, ModelBase model, Formula[] formulas)
+		private unsafe void SerializeModel(BinaryWriter writer, ModelBase model, Func<bool> terminateEarlyCondition, Formula[] formulas)
 		{
 			// Collect all objects contained in the model
-			var objectTable = CreateObjectTable(model, formulas);
+			var objectTable = CreateObjectTable(model, terminateEarlyCondition, formulas);
 
 			// Prepare the serialization of the model's initial state
 			lock (_syncObject)
@@ -98,8 +121,9 @@ namespace SafetySharp.Runtime.Serialization
 			// Serialize the object table
 			SerializeObjectTable(objectTable, writer);
 
-			// Serialize the object identifier of the model itself and the formulas and rewards
+			// Serialize the object identifier of the model itself, the terminateEarlyCondition, and the formulas
 			writer.Write(objectTable.GetObjectIdentifier(model));
+			writer.Write(objectTable.GetObjectIdentifier(terminateEarlyCondition));
 			writer.Write(formulas.Length);
 			foreach (var formula in formulas)
 				writer.Write(objectTable.GetObjectIdentifier(formula));
@@ -117,9 +141,9 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Creates the object table for the <paramref name="model" /> and <paramref name="formulas" />.
 		/// </summary>
-		private static ObjectTable CreateObjectTable(ModelBase model, Formula[] formulas)
+		private static ObjectTable CreateObjectTable(ModelBase model, Func<bool> terminateEarlyCondition, Formula[] formulas)
 		{
-			var objects = model.Roots.Cast<object>().Concat(formulas).Concat(new[] { model });
+			var objects = model.Roots.Cast<object>().Concat(formulas).Concat(new []{ terminateEarlyCondition }).Concat(new [] { model });
 			return new ObjectTable(SerializationRegistry.Default.GetReferencedObjects(objects.ToArray(), SerializationMode.Full));
 		}
 
@@ -186,8 +210,9 @@ namespace SafetySharp.Runtime.Serialization
 			// Deserialize the object table
 			var objectTable = DeserializeObjectTable(reader);
 
-			// Deserialize the object identifiers of the model itself and the root formulas and rewards
+			// Deserialize the object identifiers of the model itself, the terminateEarlyCondition, and the root formulas
 			var model = (ModelBase)objectTable.GetObject(reader.ReadUInt16());
+			var terminateEarlyCondition = (Func<bool>)objectTable.GetObject(reader.ReadUInt16());
 			var formulas = new Formula[reader.ReadInt32()];
 			for (var i = 0; i < formulas.Length; ++i)
 				formulas[i] = (Formula)objectTable.GetObject(reader.ReadUInt16());
@@ -226,7 +251,7 @@ namespace SafetySharp.Runtime.Serialization
 			deserializer(objectTable, serializedState);
 			
 			// Return the serialized model data
-			return new SerializedRuntimeModel(model, buffer, objectTable, formulas);
+			return new SerializedRuntimeModel(model, buffer, objectTable, terminateEarlyCondition, formulas);
 		}
 
 		/// <summary>

@@ -47,6 +47,11 @@ namespace SafetySharp.Runtime.Serialization
 		internal ModelBase Model;
 
 		/// <summary>
+		///   When this method evaluates to true during model checking, the current trace should not be expanded further.
+		/// </summary>
+		public readonly Func<bool> TerminateEarlyCondition;
+
+		/// <summary>
 		///   The formulas that are checked on the model.
 		/// </summary>
 		public readonly Formula[] Formulas;
@@ -54,12 +59,14 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="model">A copy of the original model the runtime model was generated from.</param>
 		/// <param name="buffer">The buffer the model was deserialized from.</param>
 		/// <param name="objectTable">The table of objects referenced by the model.</param>
+		/// <param name="terminateEarlyCondition">When this method evaluates to true during model checking, the current trace should not be expanded further..</param>
 		/// <param name="formulas">The formulas that are checked on the model.</param>
-		internal SerializedRuntimeModel(ModelBase model, byte[] buffer, ObjectTable objectTable, Formula[] formulas)
+		internal SerializedRuntimeModel(ModelBase model, byte[] buffer, ObjectTable objectTable, Func<bool> terminateEarlyCondition, Formula[] formulas)
 		{
 			Model = model;
 			Buffer = buffer;
 			ObjectTable = objectTable;
+			TerminateEarlyCondition = terminateEarlyCondition;
 			Formulas = formulas;
 		}
 	}

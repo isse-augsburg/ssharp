@@ -51,7 +51,12 @@ namespace SafetySharp.Runtime
 		///   Deserializes a state of the model.
 		/// </summary>
 		private readonly SerializationDelegate _deserialize;
-
+		
+		/// <summary>
+		///   When this method evaluates to true during model checking, the current trace should not be expanded further.
+		/// </summary>
+		private readonly Func<bool> TerminateEarlyCondition;
+		
 		/// <summary>
 		///   The faults contained in the model.
 		/// </summary>
@@ -98,6 +103,7 @@ namespace SafetySharp.Runtime
 			var buffer = serializedData.Buffer;
 			var rootComponents = serializedData.Model.Roots;
 			var objectTable = serializedData.ObjectTable;
+			var terminateEarlyCondition = serializedData.TerminateEarlyCondition;
 			var formulas = serializedData.Formulas;
 
 			Requires.NotNull(buffer, nameof(buffer));
@@ -110,6 +116,7 @@ namespace SafetySharp.Runtime
 			SerializedModel = buffer;
 			RootComponents = rootComponents.Cast<Component>().ToArray();
 			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
+			TerminateEarlyCondition = terminateEarlyCondition;
 			Formulas = formulas;
 			Rewards = objectTable.OfType<RewardRetriever>().ToArray();
 
