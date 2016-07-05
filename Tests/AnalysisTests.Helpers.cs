@@ -27,6 +27,7 @@ namespace Tests
 	using System.Linq;
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
+	using SafetySharp.Analysis.Heuristics;
 	using SafetySharp.Modeling;
 	using SafetySharp.Utilities;
 	using Shouldly;
@@ -37,6 +38,7 @@ namespace Tests
 	{
 		protected CounterExample CounterExample { get; private set; }
 		protected bool SuppressCounterExampleGeneration { get; set; }
+		protected IFaultSetHeuristic[] Heuristics { get; set; }
 
 		protected void SimulateCounterExample(CounterExample counterExample, Action<Simulator> action)
 		{
@@ -86,6 +88,9 @@ namespace Tests
 				Configuration = { StateCapacity = 1 << 10, GenerateCounterExample = !SuppressCounterExampleGeneration }
 			};
 			analysis.OutputWritten += message => Output.Log("{0}", message);
+
+			if (Heuristics != null)
+				analysis.Heuristics.AddRange(Heuristics);
 
 			var result = analysis.ComputeMinimalCriticalSets(model, hazard, maxCardinality);
 			Output.Log("{0}", result);

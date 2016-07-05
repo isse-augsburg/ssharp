@@ -23,6 +23,7 @@
 namespace SafetySharp.Analysis
 {
 	using System;
+	using System.Collections.Generic;
 	using Utilities;
 
 	/// <summary>
