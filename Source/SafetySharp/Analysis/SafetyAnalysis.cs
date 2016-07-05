@@ -426,6 +426,10 @@ namespace SafetySharp.Analysis
 						// all supersets of sets in setsToRemove have either
 						// been previously generated or are critical
 						previousSafe.ExceptWith(setsToRemove);
+
+                        // if no more sets in previousSafe, further iterations are pointless
+                        if (previousSafe.Count == 0)
+                            break;
 					}
 					break;
 			}
