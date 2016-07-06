@@ -24,7 +24,6 @@ namespace SafetySharp.Analysis.ModelChecking
 {
 	using System;
 	using System.Linq;
-	using ModelTraversal;
 	using ModelTraversal.TraversalModifiers;
 	using Utilities;
 

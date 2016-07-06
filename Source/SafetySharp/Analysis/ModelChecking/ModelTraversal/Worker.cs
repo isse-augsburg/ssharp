@@ -103,17 +103,13 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 					_context.ReportProgress();
 				}
 			}
-			catch (OutOfMemoryException e)
-			{
-				_context.LoadBalancer.Terminate();
-				_context.Exception = e;
-			}
 			catch (Exception e)
 			{
 				_context.LoadBalancer.Terminate();
 				_context.Exception = e;
 
-				CreateCounterExample(endsWithException: true);
+				if (!(e is OutOfMemoryException))
+					CreateCounterExample(endsWithException: true);
 			}
 		}
 
@@ -128,7 +124,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 			if (_transitionActions != null)
 				return;
 
-			// We have to initialize the following here as the context is not yet completely specified when the
+			// We have to initialize the following arrays here as the context is not yet completely initialized when the
 			// worker's constructor executes...
 			_transitionActions = _context.TraversalParameters.TransitionActions?.Invoke().ToArray() ?? new ITransitionAction[0];
 			_batchedTransitionActions = _context.TraversalParameters.BatchedTransitionActions?.Invoke().ToArray() ?? new IBatchedTransitionAction[0];
@@ -155,7 +151,6 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 				if (!transition->IsValid)
 					continue;
 
-				// Store the state if it hasn't been discovered before
 				int index;
 				var isNewState = _context.States.AddState(transition->TargetState, out index);
 				transition->TargetStateIndex = index;
@@ -170,7 +165,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 				}
 
 				foreach (var action in _transitionActions)
-					action.ProcessTransition(_context, this, sourceState, index, transition, isInitialState);
+					action.ProcessTransition(_context, this, sourceState, transition, isInitialState);
 
 				++transitionCount;
 			}

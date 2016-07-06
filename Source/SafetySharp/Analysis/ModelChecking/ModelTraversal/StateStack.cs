@@ -24,11 +24,10 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 {
 	using System;
 	using System.Collections.Generic;
-	using Runtime;
 	using Utilities;
 
 	/// <summary>
-	///   Represents a stack of <see cref="RuntimeModel" /> states that have yet to be checked.
+	///   Represents a stack of <see cref="AnalysisModel" /> states that have yet to be checked.
 	/// </summary>
 	/// <remarks>
 	///   When enumerating all states of a model in a depth-first fashion, we have to store the next states (that are computed all
