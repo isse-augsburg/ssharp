@@ -108,14 +108,14 @@ namespace Tests.DataStructures
 			var evaluateStateFormulaBoth = _markovChain.CreateFormulaEvaluator(stateFormulaBoth);
 			var evaluateStateFormulaAny = _markovChain.CreateFormulaEvaluator(stateFormulaAny);
 			
-			Assert.Equal(evaluateStateFormulaLabel1(0), false);
-			Assert.Equal(evaluateStateFormulaLabel2(0), true);
-			Assert.Equal(evaluateStateFormulaBoth(0), false);
-			Assert.Equal(evaluateStateFormulaAny(0), true);
-			Assert.Equal(evaluateStateFormulaLabel1(1), true);
-			Assert.Equal(evaluateStateFormulaLabel2(1), false);
-			Assert.Equal(evaluateStateFormulaBoth(1), false);
-			Assert.Equal(evaluateStateFormulaAny(1), true);
+			Assert.Equal(evaluateStateFormulaLabel1(8920), false);
+			Assert.Equal(evaluateStateFormulaLabel2(8920), true);
+			Assert.Equal(evaluateStateFormulaBoth(8920), false);
+			Assert.Equal(evaluateStateFormulaAny(8920), true);
+			Assert.Equal(evaluateStateFormulaLabel1(4442), true);
+			Assert.Equal(evaluateStateFormulaLabel2(4442), false);
+			Assert.Equal(evaluateStateFormulaBoth(4442), false);
+			Assert.Equal(evaluateStateFormulaAny(4442), true);
 		}
 	}
 }

@@ -48,9 +48,11 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		private Expression _expression;
 
-		public ParameterExpression StateParameter { get; }
+		public ParameterExpression StateStorageStateExpr { get; }
 
-		public ConstantExpression LabelingVector { get; }
+		public ConstantExpression LabelingVectorExpr { get; }
+
+		public ConstantExpression MarkovChainExpr { get; }
 
 		public ParameterExpression LabelsOfCurrentStateExpr { get; }
 
@@ -59,8 +61,9 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		public MarkovChainFormulaEvaluatorCompilationVisitor(MarkovChain markovChain)
 		{
 			_markovChain = markovChain;
-			StateParameter = Expression.Parameter(typeof(int), "state");
-			LabelingVector = Expression.Constant(_markovChain.StateLabeling);
+			StateStorageStateExpr = Expression.Parameter(typeof(int), "state");
+			LabelingVectorExpr = Expression.Constant(_markovChain.StateLabeling);
+			MarkovChainExpr = Expression.Constant(_markovChain);
 			LabelsOfCurrentStateExpr = Expression.Parameter(typeof(StateFormulaSet), "labelsOfCurrentState");
 		}
 
@@ -75,14 +78,16 @@ namespace SafetySharp.Analysis.FormulaVisitors
 
 			var visitor = new MarkovChainFormulaEvaluatorCompilationVisitor(markovChain);
 			visitor.Visit(formula);
+			
+			var getMarkovChainState = visitor.MarkovChainExpr.Type.GetMethod("GetMarkovChainState", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+			var markovChainStateExpr = Expression.Call(visitor.MarkovChainExpr, getMarkovChainState, visitor.StateStorageStateExpr); // = GetMarkovChainState(stateStorageState);
+			var indexer = visitor.LabelingVectorExpr.Type.GetProperty("Item", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+			var labelsOfCurrentStateExpr = Expression.Property(visitor.LabelingVectorExpr, indexer, markovChainStateExpr);
+			var setLabelsOfCurrentStateExpr = Expression.Assign(visitor.LabelsOfCurrentStateExpr, labelsOfCurrentStateExpr);
 
-			var indexer = visitor.LabelingVector.Type.GetProperty("Item", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-			var setLabelOfCurrentStateExpr = Expression.Assign(visitor.LabelsOfCurrentStateExpr, Expression.Property(visitor.LabelingVector, indexer, visitor.StateParameter));
-			//var setLabelOfCurrentStateExpr = Expression.ArrayAccess(visitor.LabelingVector, visitor.StateParameter);
+			var codeOfLambda = Expression.Block(new[] { visitor.LabelsOfCurrentStateExpr }, setLabelsOfCurrentStateExpr, visitor._expression);
 
-			var codeOfLambda = Expression.Block(new[] { visitor.LabelsOfCurrentStateExpr }, setLabelOfCurrentStateExpr, visitor._expression);
-
-			var lambda = Expression.Lambda<Func<int, bool>>(codeOfLambda, visitor.StateParameter).Compile();
+			var lambda = Expression.Lambda<Func<int, bool>>(codeOfLambda, visitor.StateStorageStateExpr).Compile();
 
 			return lambda;
 		}
