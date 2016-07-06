@@ -318,6 +318,11 @@ namespace SafetySharp.Runtime
 			*/
 		}
 
+		public Func<int, bool> CreateFormulaEvaluator(Analysis.Formula formula)
+		{
+			return Analysis.FormulaVisitors.MarkovChainFormulaEvaluatorCompilationVisitor.Compile(this,formula);
+		}
+
 		public UnderlyingDigraph CreateUnderlyingDigraph()
 		{
 			if (MarkovChainComplete)
@@ -376,10 +381,8 @@ namespace SafetySharp.Runtime
 						}
 					}
 				}
-
 				return nodesAdded;
 			}
-
 		}
 	}
 }

@@ -45,6 +45,7 @@
     <Compile Include="Analysis\AnalysisConfiguration.cs" />
     <Compile Include="Analysis\AnalysisException.cs" />
     <Compile Include="Analysis\AnalysisResult.cs" />
+    <Compile Include="Analysis\FormulaVisitors\MarkovChainFormulaEvaluatorCompilationVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningProbabilityVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningBoolValueVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\RewardRetrieverCollector.cs" />

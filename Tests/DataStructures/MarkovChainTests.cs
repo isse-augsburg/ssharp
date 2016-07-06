@@ -47,19 +47,21 @@ namespace Tests.DataStructures
 
 		private void CreateExemplaryMarkovChain()
 		{
-			//_matrix = new SparseDoubleMatrix(6, 20);
+			Func<bool> returnTrue = () => true;
+			Func<bool> returnFalse = () => false;
+
 			_markovChain = new MarkovChain();
-			_markovChain.StateFormulaLabels = new string[] { };
+			_markovChain.StateFormulaLabels = new string[] { "label1" , "label2" };
 			_markovChain.StateRewardRetrieverLabels = new string[] { };
 			_markovChain.AddInitialState(8920,Probability.One);
 			_markovChain.SetSourceStateOfUpcomingTransitions(4442);
 			_markovChain.AddTransition(4442,Probability.One);
-			//_markovChain.SetStateLabeling();
+			_markovChain.SetStateLabeling(4442, new StateFormulaSet(new []{ returnTrue, returnFalse }));
 			_markovChain.FinishSourceState();
 			_markovChain.SetSourceStateOfUpcomingTransitions(8920);
 			_markovChain.AddTransition(4442, new Probability(0.6));
 			_markovChain.AddTransition(8920, new Probability(0.4));
-			//_markovChain.SetStateLabeling();
+			_markovChain.SetStateLabeling(8920, new StateFormulaSet(new[] { returnFalse, returnTrue }));
 			_markovChain.FinishSourceState();
 			//_markovChain.ProbabilityMatrix.OptimizeAndSeal();
 		}
@@ -88,7 +90,32 @@ namespace Tests.DataStructures
 						throw new Exception("Entry must not be null");
 				}
 			}
-			Assert.Equal(counter, 2.0);
+			Assert.Equal(2.0, counter);
+		}
+
+		[Fact]
+		public void MarkovChainFormulaEvaluatorTest()
+		{
+			CreateExemplaryMarkovChain();
+
+			Func<bool> returnTrue = () => true;
+			var stateFormulaLabel1 = new StateFormula(returnTrue, "label1");
+			var stateFormulaLabel2 = new StateFormula(returnTrue, "label2");
+			var stateFormulaBoth = new BinaryFormula(stateFormulaLabel1,BinaryOperator.And, stateFormulaLabel2);
+			var stateFormulaAny = new BinaryFormula(stateFormulaLabel1, BinaryOperator.Or, stateFormulaLabel2);
+			var evaluateStateFormulaLabel1 = _markovChain.CreateFormulaEvaluator(stateFormulaLabel1);
+			var evaluateStateFormulaLabel2 = _markovChain.CreateFormulaEvaluator(stateFormulaLabel2);
+			var evaluateStateFormulaBoth = _markovChain.CreateFormulaEvaluator(stateFormulaBoth);
+			var evaluateStateFormulaAny = _markovChain.CreateFormulaEvaluator(stateFormulaAny);
+			
+			Assert.Equal(evaluateStateFormulaLabel1(0), false);
+			Assert.Equal(evaluateStateFormulaLabel2(0), true);
+			Assert.Equal(evaluateStateFormulaBoth(0), false);
+			Assert.Equal(evaluateStateFormulaAny(0), true);
+			Assert.Equal(evaluateStateFormulaLabel1(1), true);
+			Assert.Equal(evaluateStateFormulaLabel2(1), false);
+			Assert.Equal(evaluateStateFormulaBoth(1), false);
+			Assert.Equal(evaluateStateFormulaAny(1), true);
 		}
 	}
 }
