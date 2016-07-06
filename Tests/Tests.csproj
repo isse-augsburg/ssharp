@@ -152,6 +152,7 @@
     <Compile Include="Analysis\Heuristics\empty set.cs" />
     <Compile Include="Analysis\Heuristics\fault subsumption.cs" />
     <Compile Include="Analysis\Heuristics\heuristic with forced and suppressed.cs" />
+    <Compile Include="Analysis\Heuristics\heuristics integration.cs" />
     <Compile Include="Analysis\Heuristics\minimal redundancy heuristic.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\bindings.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\faults.cs" />
