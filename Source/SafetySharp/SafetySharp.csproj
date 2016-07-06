@@ -45,7 +45,12 @@
     <Compile Include="Analysis\AnalysisConfiguration.cs" />
     <Compile Include="Analysis\AnalysisException.cs" />
     <Compile Include="Analysis\AnalysisResult.cs" />
+    <Compile Include="Analysis\FaultActivationBehaviour.cs" />
+    <Compile Include="Analysis\FaultSetCollection.cs" />
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
+    <Compile Include="Analysis\Heuristics\IFaultSetHeuristic.cs" />
+    <Compile Include="Analysis\Heuristics\MinimalRedundancyHeuristic.cs" />
+    <Compile Include="Analysis\Heuristics\SubsumptionHeuristic.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
     <Compile Include="Modeling\ObjectPool.cs" />
     <Compile Include="Modeling\SubcomponentAttribute.cs" />

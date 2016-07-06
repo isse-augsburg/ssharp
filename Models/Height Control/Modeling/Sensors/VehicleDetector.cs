@@ -60,7 +60,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Sensors
 		/// <summary>
 		///   Represents a false detection, i.e., a vehicle is detected even though none is present.
 		/// </summary>
-		[FaultEffect(Fault = nameof(FalseDetection)), Priority(1)]
+		[FaultEffect(Fault = nameof(FalseDetection)), Priority(0)]
 		public abstract class FalseDetectionEffect : VehicleDetector
 		{
 			public override bool IsVehicleDetected => true;
@@ -69,7 +69,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Sensors
 		/// <summary>
 		///   Represents a misdetection, i.e., a vehicle does not detect even though it should have been detected.
 		/// </summary>
-		[FaultEffect(Fault = nameof(Misdetection)), Priority(0)]
+		[FaultEffect(Fault = nameof(Misdetection)), Priority(1)]
 		public abstract class MisdetectionEffect : VehicleDetector
 		{
 			public override bool IsVehicleDetected => false;

@@ -32,6 +32,79 @@ namespace SafetySharp.Analysis
 	public static class Operators
 	{
 		/// <summary>
+		///   Returns a value indicating whether <paramref name="leftOperand" /> (the antecedent) implies
+		///   <paramref name="rightOperand" /> (the succedent).
+		/// </summary>
+		/// <param name="leftOperand">The value representing the antecedent of the implication.</param>
+		/// <param name="rightOperand">The value representing the succedent of the implication.</param>
+		public static bool Implies(this bool leftOperand, bool rightOperand)
+		{
+			return !leftOperand || rightOperand;
+		}
+
+		/// <summary>
+		///   Returns a <see cref="Formula" /> that applies the implication operator to <paramref name="leftOperand" /> (the antecedent)
+		///   and <paramref name="rightOperand" /> (the succedent).
+		/// </summary>
+		/// <param name="leftOperand">The value representing the antecedent of the implication.</param>
+		/// <param name="rightOperand">The formula representing the succedent of the implication.</param>
+		public static Formula Implies(this bool leftOperand, Formula rightOperand)
+		{
+			return Implies(new StateFormula(() => leftOperand), rightOperand);
+		}
+
+		/// <summary>
+		///   Returns a <see cref="Formula" /> that applies the implication operator to <paramref name="leftOperand" /> (the antecedent)
+		///   and
+		///   <paramref name="rightOperand" /> (the succedent).
+		/// </summary>
+		/// <param name="leftOperand">The formula representing the antecedent of the implication.</param>
+		/// <param name="rightOperand">The formula representing the succedent of the implication.</param>
+		public static Formula Implies(this Formula leftOperand, Formula rightOperand)
+		{
+			Requires.NotNull(leftOperand, nameof(leftOperand));
+			Requires.NotNull(rightOperand, nameof(rightOperand));
+
+			return new BinaryFormula(leftOperand, BinaryOperator.Implication, rightOperand);
+		}
+
+		/// <summary>
+		///   Returns a value indicating whether <paramref name="leftOperand" /> is equivalent to
+		///   <paramref name="rightOperand" />.
+		/// </summary>
+		/// <param name="leftOperand">The value on the left-hand side that should be equivalent.</param>
+		/// <param name="rightOperand">The value on the right-hand side that should be equivalent.</param>
+		public static bool EquivalentTo(this bool leftOperand, bool rightOperand)
+		{
+			return (leftOperand && rightOperand) || (!leftOperand && !rightOperand);
+		}
+
+		/// <summary>
+		///   Returns a <see cref="Formula" /> that applies the equivalence operator to <paramref name="leftOperand" /> and
+		///   <paramref name="rightOperand" />.
+		/// </summary>
+		/// <param name="leftOperand">The value on the left-hand side that should be equivalent.</param>
+		/// <param name="rightOperand">The formula on the right-hand side that should be equivalent.</param>
+		public static Formula EquivalentTo(this bool leftOperand, Formula rightOperand)
+		{
+			return EquivalentTo(new StateFormula(() => leftOperand), rightOperand);
+		}
+
+		/// <summary>
+		///   Returns a <see cref="Formula" /> that applies the equivalence operator to <paramref name="leftOperand" /> and
+		///   <paramref name="rightOperand" />.
+		/// </summary>
+		/// <param name="leftOperand">The formula on the left-hand side that should be equivalent.</param>
+		/// <param name="rightOperand">The formula on the right-hand side that should be equivalent.</param>
+		public static Formula EquivalentTo(this Formula leftOperand, Formula rightOperand)
+		{
+			Requires.NotNull(leftOperand, nameof(leftOperand));
+			Requires.NotNull(rightOperand, nameof(rightOperand));
+
+			return new BinaryFormula(leftOperand, BinaryOperator.Equivalence, rightOperand);
+		}
+
+		/// <summary>
 		///   Returns a <see cref="Formula" /> that applies the 'all paths' operator to <paramref name="operand" />.
 		/// </summary>
 		/// <param name="operand">The operand the 'all paths' operator should be applied to.</param>

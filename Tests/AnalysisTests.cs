@@ -33,6 +33,12 @@ namespace Tests
 		{
 			ExecuteDynamicTests(file, typeof(LtsMin));
 		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Heuristics")]
+		public void Heuristics(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(LtsMin));
+		}
 	}
 
 	public partial class InvariantTests

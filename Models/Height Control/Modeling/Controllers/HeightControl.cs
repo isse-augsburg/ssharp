@@ -32,26 +32,42 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   The end-control step of the height control.
 		/// </summary>
-		[Hidden, Subcomponent]
-		public EndControl EndControl;
+		[Subcomponent]
+		public readonly EndControl EndControl;
 
 		/// <summary>
 		///   The main-control step of the height control.
 		/// </summary>
-		[Hidden, Subcomponent]
-		public MainControl MainControl;
+		[Subcomponent]
+		public readonly MainControl MainControl;
 
 		/// <summary>
 		///   The pre-control step of the height control.
 		/// </summary>
-		[Hidden, Subcomponent]
-		public PreControl PreControl;
+		[Subcomponent]
+		public readonly PreControl PreControl;
 
 		/// <summary>
 		///   The traffic lights that are used to signal that the tunnel is closed.
 		/// </summary>
-		[Hidden, Subcomponent]
-		public TrafficLights TrafficLights;
+		[Subcomponent]
+		public readonly TrafficLights TrafficLights = new TrafficLights();
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		public HeightControl(PreControl preControl, MainControl mainControl, EndControl endControl)
+		{
+			PreControl = preControl;
+			MainControl = mainControl;
+			EndControl = endControl;
+
+			Bind(nameof(preControl.ActivateMainControl), nameof(mainControl.VehiclesEntering));
+			Bind(nameof(mainControl.ActivateEndControl), nameof(endControl.VehicleEntering));
+
+			Bind(nameof(endControl.CloseTunnel), nameof(TrafficLights.SwitchToRed));
+			Bind(nameof(mainControl.CloseTunnel), nameof(TrafficLights.SwitchToRed));
+		}
 
 		/// <summary>
 		///   Updates the internal state of the component.
@@ -59,9 +75,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		public override void Update()
 		{
 			Update(PreControl, MainControl, EndControl);
-
-			if (MainControl.IsVehicleLeavingOnLeftLane || EndControl.IsCrashPotentiallyImminent)
-				TrafficLights.SwitchToRed();
 		}
 	}
 }

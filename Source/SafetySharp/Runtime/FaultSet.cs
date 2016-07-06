@@ -34,35 +34,57 @@ namespace SafetySharp.Runtime
 	///   An efficient immutable representation of a fault set.
 	/// </summary>
 	[DebuggerDisplay("{_faults}")]
-	internal struct FaultSet : IEquatable<FaultSet>
+	public struct FaultSet : IEquatable<FaultSet>
 	{
 		private readonly long _faults;
+
+		public uint Cardinality
+		{
+			get
+			{
+				var cardinality = 0u;
+				for (var n = _faults; n != 0; n &= n - 1) // n &= n-1 removes the last 1
+					cardinality++;
+
+				return cardinality;
+			}
+		}
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="faults">The faults the set should contain.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private FaultSet(long faults)
 		{
 			_faults = faults;
 		}
 
 		/// <summary>
-		///   Gets a value indicating whether the fault set is empty.
+		///   Initializes a new instance.
 		/// </summary>
-		internal bool IsEmpty => _faults == 0;
+		/// <param name="faults">The faults the set should contain.</param>
+		public FaultSet(params Fault[] faults)
+			: this((IEnumerable<Fault>)faults)
+		{
+		}
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="faults">The faults the set should contain.</param>
-		internal FaultSet(params Fault[] faults)
+		public FaultSet(IEnumerable<Fault> faults)
 		{
 			_faults = 0;
 
 			foreach (var fault in faults)
 				_faults |= 1L << fault.Identifier;
 		}
+
+		/// <summary>
+		///   Gets a value indicating whether the fault set is empty.
+		/// </summary>
+		public bool IsEmpty => _faults == 0;
 
 		/// <summary>
 		///   Creates a fault set that contains all activated <paramref name="faults" />.
@@ -80,32 +102,76 @@ namespace SafetySharp.Runtime
 
 		/// <summary>
 		///   Returns a new <see cref="FaultSet" /> that represents the intersection between this instance and
-		///   <paramref name="other." />
+		///   <paramref name="other" />.
 		/// </summary>
 		/// <param name="other">The other fault set that this instance should be intersected with.</param>
-		internal FaultSet GetIntersection(FaultSet other)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public FaultSet GetIntersection(FaultSet other)
 		{
 			return new FaultSet(_faults & other._faults);
+		}
+
+		/// <summary>
+		///   Returns a new <see cref="FaultSet" /> that represents the union between this instance and
+		///   <paramref name="other" />.
+		/// </summary>
+		/// <param name="other">The other fault set that this instance should be unioned with.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public FaultSet GetUnion(FaultSet other)
+		{
+			return new FaultSet(_faults | other._faults);
+		}
+
+		/// <summary>
+		///   Returns a new <see cref="FaultSet" /> that represents the set difference between this
+		///   instance and <paramref name="other" />.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public FaultSet GetDifference(FaultSet other)
+		{
+			return new FaultSet(_faults & ~other._faults);
 		}
 
 		/// <summary>
 		///   Checks whether the <paramref name="fault" /> is contained in the set.
 		/// </summary>
 		/// <param name="fault">The fault that should be checked.</param>
-		internal bool Contains(Fault fault)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool Contains(Fault fault)
 		{
-			Requires.NotNull(fault, nameof(fault));
 			return (_faults & (1 << fault.Identifier)) != 0;
+		}
+
+		/// <summary>
+		///   Checks whether this fault set is a subset of <paramref name="faultSet" />.
+		/// </summary>
+		/// <param name="faultSet">The fault set that is expected to be a super set.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool IsSubsetOf(FaultSet faultSet)
+		{
+			return (_faults & faultSet._faults) == _faults;
 		}
 
 		/// <summary>
 		///   Returns a copy of the fault set that contains <paramref name="fault" />.
 		/// </summary>
 		/// <param name="fault">The fault that should be added.</param>
-		internal FaultSet Add(Fault fault)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public FaultSet Add(Fault fault)
 		{
-			Requires.NotNull(fault, nameof(fault));
 			return new FaultSet(_faults | (1L << fault.Identifier));
+		}
+
+		/// <summary>
+		///   Returns a copy of the fault set that does not contain <paramref name="fault" />.
+		/// </summary>
+		/// <param name="fault">The fault that should be removed.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public FaultSet Remove(Fault fault)
+		{
+			return new FaultSet(_faults & ~(1L << fault.Identifier));
 		}
 
 		/// <summary>
@@ -113,13 +179,13 @@ namespace SafetySharp.Runtime
 		///   contained in the set.
 		/// </summary>
 		/// <param name="faults">The faults whose activation should be set.</param>
-		internal void SetActivation(Fault[] faults)
+		/// <param name="activationMode">The activation mode the <paramref name="faults" /> should be set to.</param>
+		internal void SetActivation(Fault[] faults, Activation activationMode)
 		{
-			Requires.NotNull(faults, nameof(faults));
 			CheckFaultCount(faults.Length);
 
 			foreach (var fault in faults)
-				fault.Activation = (_faults & (1L << fault.Identifier)) != 0 ? Activation.Forced : Activation.Suppressed;
+				fault.Activation = (_faults & (1L << fault.Identifier)) != 0 ? activationMode : Activation.Suppressed;
 		}
 
 		/// <summary>
@@ -141,22 +207,12 @@ namespace SafetySharp.Runtime
 		///   Returns a string representation of the <paramref name="faults" /> contained in the set.
 		/// </summary>
 		/// <param name="faults">The faults that can potentially be contained in the set.</param>
-		internal string ToString(Fault[] faults)
+		public string ToString(Fault[] faults)
 		{
 			Requires.NotNull(faults, nameof(faults));
 
 			var faultNames = ToFaultSequence(faults).Select(fault => fault.Name).OrderBy(name => name);
 			return String.Join(", ", faultNames);
-		}
-
-		/// <summary>
-		///   Checks whether this fault set is a subset of <paramref name="faultSet" />.
-		/// </summary>
-		/// <param name="faultSet">The fault set that is expected to be a super set.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal bool IsSubsetOf(FaultSet faultSet)
-		{
-			return (_faults & faultSet._faults) == _faults;
 		}
 
 		/// <summary>
@@ -172,6 +228,7 @@ namespace SafetySharp.Runtime
 		///   Indicates whether the current fault set is equal to <paramref name="other" />.
 		/// </summary>
 		/// <param name="other">The other fault set to compare to.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Equals(FaultSet other)
 		{
 			return _faults == other._faults;

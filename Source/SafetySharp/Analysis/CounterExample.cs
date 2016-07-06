@@ -141,18 +141,6 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Executs the <paramref name="action" /> for each step of the counter example.
 		/// </summary>
-		/// <param name="action">The action that should be executed on the deserialized model state.</param>
-		public void ForEachStep(Action<ModelBase> action)
-		{
-			Requires.NotNull(action, nameof(action));
-
-			for (var i = 1; i < StepCount + 1; ++i)
-				action(DeserializeState(i));
-		}
-
-		/// <summary>
-		///   Executs the <paramref name="action" /> for each step of the counter example.
-		/// </summary>
 		/// <param name="action">The action that should be executed on the serialized model state.</param>
 		internal void ForEachStep(Action<byte[]> action)
 		{
