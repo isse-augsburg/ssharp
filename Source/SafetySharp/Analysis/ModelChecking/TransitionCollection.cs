@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,27 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Analysis.ModelChecking
 {
 	/// <summary>
-	///   Controls the overflow semantics when field values lie outside the field's allowed range of values.
+	///   Represents a collection of <see cref="Transition" /> instances.
 	/// </summary>
-	public enum OverflowBehavior
+	internal unsafe struct TransitionCollection
 	{
 		/// <summary>
-		///   Indicates that an exception should be thrown when a field contains a value outside of its allowed range.
+		///   The transition instances stored in a contiguous array.
 		/// </summary>
-		Error,
+		public Transition* Transitions;
 
 		/// <summary>
-		///   Indicates that the field value is clamped to the field's range.
+		///   The number of transitions contained in the set; not all of these transitions are valid.
 		/// </summary>
-		Clamp,
+		public int Count;
 
 		/// <summary>
-		///   Indicates that the field value wraps around if it underflows or overflows the field's range, i.e., if the range's upper
-		///   limit is exceeded, the value is set to the lower bound and vice versa.
+		///   The total number of all originally computed transitions.
 		/// </summary>
-		WrapClamp
+		public int TotalCount;
 	}
 }

@@ -20,27 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Analysis.ModelChecking
 {
+	using Utilities;
+
 	/// <summary>
-	///   Controls the overflow semantics when field values lie outside the field's allowed range of values.
+	///   Represents a common interface for models that can be analyzed with the model checking infrastructure.
 	/// </summary>
-	public enum OverflowBehavior
+	internal abstract unsafe class AnalysisModel : DisposableObject
 	{
 		/// <summary>
-		///   Indicates that an exception should be thrown when a field contains a value outside of its allowed range.
+		///   Gets the size of the model's state vector in bytes.
 		/// </summary>
-		Error,
+		public abstract int StateVectorSize { get; }
 
 		/// <summary>
-		///   Indicates that the field value is clamped to the field's range.
+		///   Gets all initial transitions of the model.
 		/// </summary>
-		Clamp,
+		public abstract TransitionCollection GetInitialTransitions();
 
 		/// <summary>
-		///   Indicates that the field value wraps around if it underflows or overflows the field's range, i.e., if the range's upper
-		///   limit is exceeded, the value is set to the lower bound and vice versa.
+		///   Gets all transitions towards successor states of <paramref name="state" />.
 		/// </summary>
-		WrapClamp
+		/// <param name="state">The state the successors should be returned for.</param>
+		public abstract TransitionCollection GetSuccessorTransitions(byte* state);
+
+		/// <summary>
+		///   Resets the model to its initial state.
+		/// </summary>
+		public abstract void Reset();
+
+		/// <summary>
+		///   Creates a counter example from the <paramref name="path" />.
+		/// </summary>
+		/// <param name="path">
+		///   The path the counter example should be generated from. A value of <c>null</c> indicates that no
+		///   transitions could be generated for the model.
+		/// </param>
+		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
+		public abstract CounterExample CreateCounterExample(byte[][] path, bool endsWithException);
 	}
 }

@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,27 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Analysis.ModelChecking
 {
+	using System.Runtime.InteropServices;
+	using ModelTraversal.TraversalModifiers;
+
 	/// <summary>
-	///   Controls the overflow semantics when field values lie outside the field's allowed range of values.
+	///   Represents a transition.
 	/// </summary>
-	public enum OverflowBehavior
+	[StructLayout(LayoutKind.Explicit)]
+	internal unsafe struct Transition
 	{
 		/// <summary>
-		///   Indicates that an exception should be thrown when a field contains a value outside of its allowed range.
+		///   A pointer to the transition's target state that can only be accessed during <see cref="ITransitionModifier" /> execution.
 		/// </summary>
-		Error,
+		[FieldOffset(0)]
+		public byte* TargetState;
 
 		/// <summary>
-		///   Indicates that the field value is clamped to the field's range.
+		///   The unique index of the target state that can only be accessed after <see cref="ITransitionModifier" /> execution.
 		/// </summary>
-		Clamp,
+		[FieldOffset(0)]
+		public int TargetStateIndex;
 
 		/// <summary>
-		///   Indicates that the field value wraps around if it underflows or overflows the field's range, i.e., if the range's upper
-		///   limit is exceeded, the value is set to the lower bound and vice versa.
+		///   The state formulas holding in the target state.
 		/// </summary>
-		WrapClamp
+		[FieldOffset(8)]
+		public StateFormulaSet Formulas;
+
+		/// <summary>
+		///   The faults that are activated by the transition.
+		/// </summary>
+		[FieldOffset(12)]
+		public FaultSet ActivatedFaults;
+
+		/// <summary>
+		///   Indicates whether the transition is valid or should be ignored.
+		/// </summary>
+		[FieldOffset(20)]
+		public bool IsValid;
 	}
 }

@@ -20,27 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
 	/// <summary>
-	///   Controls the overflow semantics when field values lie outside the field's allowed range of values.
+	///   Represents an action that is executed when a new, valid transition is found during model traversal.
 	/// </summary>
-	public enum OverflowBehavior
+	internal unsafe interface ITransitionAction
 	{
 		/// <summary>
-		///   Indicates that an exception should be thrown when a field contains a value outside of its allowed range.
+		///   Processes the new <paramref name="transition" /> discovered by the <paramref name="worker " /> within the traversal
+		///   <paramref name="context" />.
 		/// </summary>
-		Error,
-
-		/// <summary>
-		///   Indicates that the field value is clamped to the field's range.
-		/// </summary>
-		Clamp,
-
-		/// <summary>
-		///   Indicates that the field value wraps around if it underflows or overflows the field's range, i.e., if the range's upper
-		///   limit is exceeded, the value is set to the lower bound and vice versa.
-		/// </summary>
-		WrapClamp
+		/// <param name="context">The context of the model traversal.</param>
+		/// <param name="worker">The worker that found the transition.</param>
+		/// <param name="sourceState">The index of the transition's source state.</param>
+		/// <param name="targetState">The index of the transition's target state.</param>
+		/// <param name="transition">The new transition that should be handled.</param>
+		/// <param name="isInitialTransition">
+		///   Indicates whether the transition is an initial transition not starting in any valid source state.
+		/// </param>
+		void ProcessTransition(TraversalContext context, Worker worker, int sourceState, int targetState,
+							   Transition* transition, bool isInitialTransition);
 	}
 }

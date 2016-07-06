@@ -44,13 +44,24 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		}
 
 		[Test]
+		public void StateGraphAllStatesOriginalDesign()
+		{
+			var model = Model.CreateOriginal();
+			var checker = new SSharpChecker();
+			var stateGraph = checker.GenerateStateGraph(model);
+
+			Console.WriteLine(
+				$"States: {stateGraph.StateCount:n0}, Transitions: {stateGraph.TransitionCount:n0}, Initial Transitions: {stateGraph.InitialTransitionCount:n0}");
+		}
+
+		[Test]
 		public void CollisionOriginalDesign()
 		{
 			var model = Model.CreateOriginal();
 
 			// As collisions cannot occur without any overheight vehicles driving on the left lane, we 
 			// force the activation of the LeftOHV fault to improve safety analysis times significantly
-			model.VehicleSet.LeftOHV.Activation = Activation.Forced; 
+			model.VehicleSet.LeftOHV.Activation = Activation.Forced;
 
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision);
 

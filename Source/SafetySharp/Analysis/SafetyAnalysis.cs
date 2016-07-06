@@ -29,8 +29,8 @@ namespace SafetySharp.Analysis
 	using System.Linq;
 	using System.Text;
 	using Heuristics;
+	using ModelChecking;
 	using Modeling;
-	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;
 
@@ -43,10 +43,10 @@ namespace SafetySharp.Analysis
 		private readonly Dictionary<FaultSet, CounterExample> _counterExamples = new Dictionary<FaultSet, CounterExample>();
 		private readonly Dictionary<FaultSet, Exception> _exceptions = new Dictionary<FaultSet, Exception>();
 		private FaultSetCollection _criticalSets;
+		private FaultSet _forcedSet;
 		private InvariantChecker _invariantChecker;
 		private Result _result;
 		private FaultSetCollection _safeSets;
-		private FaultSet _forcedSet;
 		private FaultSet _suppressedSet;
 
 		/// <summary>
@@ -128,7 +128,9 @@ namespace SafetySharp.Analysis
 			// Serialize the model and initialize the invariant checker
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, !hazard);
-			_invariantChecker = new InvariantChecker(serializer.Load, message => OutputWritten?.Invoke(message), Configuration);
+
+			Func<AnalysisModel> createModel = () => new ActivationMinimalExecutedModel(serializer.Load, Configuration.SuccessorCapacity);
+			_invariantChecker = new InvariantChecker(createModel, message => OutputWritten?.Invoke(message), Configuration);
 			_result = new Result(model, suppressedFaults, forcedFaults, Heuristics);
 
 			// remember all safe sets of current cardinality - we need them to generate the next power set level
@@ -296,7 +298,9 @@ namespace SafetySharp.Analysis
 		{
 			// Enable or disable the faults that the set represents
 			set.SetActivation(nondeterministicFaults, activationMode);
-			_invariantChecker.ChangeFaultActivations(GetUpdateFaultActivations(allFaults));
+
+			foreach (var model in _invariantChecker.AnalyzedModels.Cast<ExecutedModel>())
+				model.ChangeFaultActivations(GetUpdateFaultActivations(allFaults));
 
 			var heuristic = set.Cardinality == cardinality ? String.Empty : "[heuristic]";
 
@@ -434,9 +438,9 @@ namespace SafetySharp.Analysis
 						// been previously generated or are critical
 						previousSafe.ExceptWith(setsToRemove);
 
-                        // if no more sets in previousSafe, further iterations are pointless
-                        if (previousSafe.Count == 0)
-                            break;
+						// if no more sets in previousSafe, further iterations are pointless
+						if (previousSafe.Count == 0)
+							break;
 					}
 					break;
 			}
@@ -445,8 +449,8 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Removes all invalid sets from <paramref name="sets" /> that conflict with either <paramref name="suppressedFaults" /> or
-		///   <paramref name="forcedFaults" />.
+		///   Removes all invalid sets from <paramref name="sets" /> that conflict with either <see cref="_suppressedSet" /> or
+		///   <see cref="_forcedSet" />.
 		/// </summary>
 		private HashSet<FaultSet> RemoveInvalidSets(HashSet<FaultSet> sets, HashSet<FaultSet> currentSafe)
 		{

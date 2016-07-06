@@ -20,17 +20,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace SafetySharp.Analysis.ModelChecking
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Runtime.CompilerServices;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   Caches an activation-minimal set of transitions.
 	/// </summary>
-	internal sealed unsafe class TransitionSet : DisposableObject
+	internal sealed unsafe class ActivationMinimalTransitionSet : DisposableObject
 	{
 		private const int ProbeThreshold = 1000;
 		private readonly int _capacity;
@@ -47,6 +48,8 @@ namespace SafetySharp.Runtime
 		private readonly byte* _targetStateMemory;
 		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
 		private readonly Transition* _transitions;
+		private int _computedCount;
+		private int _count;
 		private int _nextFaultIndex;
 
 		/// <summary>
@@ -55,7 +58,7 @@ namespace SafetySharp.Runtime
 		/// <param name="model">The model the successors are computed for.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public TransitionSet(RuntimeModel model, int capacity, params Func<bool>[] formulas)
+		public ActivationMinimalTransitionSet(RuntimeModel model, int capacity, params Func<bool>[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
@@ -87,31 +90,16 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Gets the number of activation-minimal transitions.
-		/// </summary>
-		public int Count { get; private set; }
-
-		/// <summary>
-		///   Gets the total number of computed transitions.
-		/// </summary>
-		public int ComputedTransitionCount { get; private set; }
-
-		/// <summary>
-		///   Gets the transition stored at the <paramref name="index" />.
-		/// </summary>
-		public Transition* this[int index] => &_transitions[index];
-
-		/// <summary>
 		///   Adds a transition to the <paramref name="model" />'s current state.
 		/// </summary>
 		/// <param name="model">The model the transition should be added for.</param>
 		public void Add(RuntimeModel model)
 		{
-			++ComputedTransitionCount;
+			++_computedCount;
 
 			// 1. Serialize the model's computed state; that is the successor state of the transition's source state
 			//    modulo any changes resulting from notifications of fault activations
-			var successorState = _targetStateMemory + _stateVectorSize * Count;
+			var successorState = _targetStateMemory + _stateVectorSize * _count;
 			var activatedFaults = FaultSet.FromActivatedFaults(model.NondeterministicFaults);
 			model.Serialize(successorState);
 
@@ -124,13 +112,14 @@ namespace SafetySharp.Runtime
 				model.Serialize(successorState);
 
 			// 4. Store the transition
-			_transitions[Count] = new Transition
+			_transitions[_count] = new Transition
 			{
 				TargetState = successorState,
 				Formulas = new StateFormulaSet(_formulas),
+				ActivatedFaults = activatedFaults,
 				IsValid = true,
 			};
-			++Count;
+			++_count;
 		}
 
 		/// <summary>
@@ -139,8 +128,8 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Clear()
 		{
-			Count = 0;
-			ComputedTransitionCount = 0;
+			_count = 0;
+			_computedCount = 0;
 
 			foreach (var state in _successors)
 				_lookup[state] = -1;
@@ -219,7 +208,7 @@ namespace SafetySharp.Runtime
 				var faultSet = &_faults[current];
 
 				// Remove the fault set and the corresponding transition if it is a proper subset of the activated faults
-				if (activatedFaults.IsSubsetOf(faultSet->ActivatedFaults) && activatedFaults != faultSet->ActivatedFaults)
+				if (activatedFaults.IsSubsetOf(faultSet->Transition->ActivatedFaults) && activatedFaults != faultSet->Transition->ActivatedFaults)
 				{
 					faultSet->Transition->IsValid = false;
 					*nextPointer = faultSet->NextSet;
@@ -251,15 +240,15 @@ namespace SafetySharp.Runtime
 				// we can therefore safely ignore the transition; due to the list invariant, none of the remaining
 				// fault sets in the list can be a superset of the activated faults because then the current fault set
 				// would also be a subset of that other fault set, violating the invariant
-				if (faultSet->ActivatedFaults.IsSubsetOf(activatedFaults))
+				if (faultSet->Transition->ActivatedFaults.IsSubsetOf(activatedFaults))
 				{
-					addTransition = faultSet->ActivatedFaults == activatedFaults;
+					addTransition = faultSet->Transition->ActivatedFaults == activatedFaults;
 					return;
 				}
 
 				// If at least one of the previously added transitions that we assumed to be activation-minimal is 
 				// in fact not activation-minimal, we have to clean up the transition set
-				if (activatedFaults.IsSubsetOf(faultSet->ActivatedFaults))
+				if (activatedFaults.IsSubsetOf(faultSet->Transition->ActivatedFaults))
 					cleanupTransitions = true;
 			}
 
@@ -278,9 +267,8 @@ namespace SafetySharp.Runtime
 
 			_faults[_nextFaultIndex] = new FaultSetInfo
 			{
-				ActivatedFaults = activatedFaults,
 				NextSet = nextSet,
-				Transition = &_transitions[Count]
+				Transition = &_transitions[_count]
 			};
 
 			_lookup[stateHash] = _nextFaultIndex;
@@ -303,25 +291,16 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Represents a transition.
+		///   Creates a <see cref="TransitionCollection" /> instance for all transitions contained in the set.
 		/// </summary>
-		internal struct Transition
+		public TransitionCollection ToCollection()
 		{
-			/// <summary>
-			///   The transition's target state.
-			/// </summary>
-			public byte* TargetState;
-
-			/// <summary>
-			///   The state formulas holding in the target successorState.
-			/// </summary>
-			public StateFormulaSet Formulas;
-
-			/// <summary>
-			///   Indicates whether the transition is valid. A transition might be invalidated if it was added before it was discovered that
-			///   is actually not activation-minimal.
-			/// </summary>
-			public bool IsValid;
+			return new TransitionCollection
+			{
+				Count = _count,
+				TotalCount = _computedCount,
+				Transitions = _transitions
+			};
 		}
 
 		/// <summary>
@@ -329,7 +308,6 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		private struct FaultSetInfo
 		{
-			public FaultSet ActivatedFaults;
 			public int NextSet;
 			public Transition* Transition;
 		}

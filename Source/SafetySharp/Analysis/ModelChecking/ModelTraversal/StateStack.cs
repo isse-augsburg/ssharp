@@ -20,10 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 {
 	using System;
 	using System.Collections.Generic;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
@@ -100,7 +101,7 @@ namespace SafetySharp.Runtime
 		{
 			if (FrameCount >= _capacity)
 			{
-				throw new InvalidOperationException(
+				throw new OutOfMemoryException(
 					"Unable to allocate an additional depth first search frame. Try increasing the size of the state stack.");
 			}
 
@@ -206,21 +207,21 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Gets the trace the stack currently represents, i.e., returns the sequence of topmost states of each frame, starting with
+		///   Gets the path the stack currently represents, i.e., returns the sequence of topmost states of each frame, starting with
 		///   the oldest one.
 		/// </summary>
-		public int[] GetTrace()
+		public int[] GetPath()
 		{
 			// We have to explicitly allocate and fill a list here, as pointers are not allowed in iterators
-			var trace = new List<int>(FrameCount);
+			var path = new List<int>(FrameCount);
 
 			for (var i = 0; i < FrameCount; ++i)
 			{
 				if (_frames[i].Count > 0)
-					trace.Add(_states[_frames[i].Offset + _frames[i].Count - 1]);
+					path.Add(_states[_frames[i].Offset + _frames[i].Count - 1]);
 			}
 
-			return trace.ToArray();
+			return path.ToArray();
 		}
 
 		/// <summary>

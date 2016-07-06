@@ -23,6 +23,7 @@
 namespace Tests.Execution.Scheduling
 {
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 
@@ -31,7 +32,7 @@ namespace Tests.Execution.Scheduling
 		protected override void Check()
 		{
 			var m = new S();
-			var r = m.ToRuntimeModel();
+			var r = RuntimeModel.Create(m);
 
 			r.RootComponents.Length.ShouldBe(4);
 			r.RootComponents[0].ShouldBeOfType<D>();

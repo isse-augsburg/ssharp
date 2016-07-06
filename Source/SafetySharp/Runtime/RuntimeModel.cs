@@ -42,11 +42,6 @@ namespace SafetySharp.Runtime
 		internal const string ConstructionStateName = "constructionState259C2EE0D9884B92989DF442BA268E8E";
 
 		/// <summary>
-		///   The <see cref="ChoiceResolver" /> used by the model.
-		/// </summary>
-		private readonly ChoiceResolver _choiceResolver;
-
-		/// <summary>
 		///   Deserializes a state of the model.
 		/// </summary>
 		private readonly SerializationDelegate _deserialize;
@@ -120,7 +115,7 @@ namespace SafetySharp.Runtime
 			_stateHeaderBytes = stateHeaderBytes;
 
 			PortBinding.BindAll(objectTable);
-			_choiceResolver = new ChoiceResolver(objectTable);
+			ChoiceResolver = new ChoiceResolver(objectTable);
 
 			ConstructionState = new byte[StateVectorSize];
 			fixed (byte* state = ConstructionState)
@@ -132,6 +127,11 @@ namespace SafetySharp.Runtime
 			FaultSet.CheckFaultCount(_faults.Length);
 			StateFormulaSet.CheckFormulaCount(StateFormulas.Length);
 		}
+
+		/// <summary>
+		///   Gets the <see cref="Runtime.ChoiceResolver" /> used by the model.
+		/// </summary>
+		internal ChoiceResolver ChoiceResolver { get; }
 
 		/// <summary>
 		///   Gets a copy of the original model the runtime model was generated from.
@@ -252,14 +252,14 @@ namespace SafetySharp.Runtime
 				_restrictRanges();
 			}
 
-			_choiceResolver.Clear();
+			ChoiceResolver.Clear();
 		}
 
 		/// <summary>
 		///   Computes an initial state of the model.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void ExecuteInitialStep()
+		internal void ExecuteInitialStep()
 		{
 			foreach (var fault in NondeterministicFaults)
 				fault.Reset();
@@ -286,42 +286,6 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Computes the initial states of the model, storing the computed <paramref name="transitions" />.
-		/// </summary>
-		/// <param name="transitions">The set the computed transitions should be stored in.</param>
-		internal void ComputeInitialStates(TransitionSet transitions)
-		{
-			_choiceResolver.PrepareNextState();
-
-			fixed (byte* state = ConstructionState)
-			{
-				while (_choiceResolver.PrepareNextPath())
-				{
-					Deserialize(state);
-					ExecuteInitialStep();
-					transitions.Add(this);
-				}
-			}
-		}
-
-		/// <summary>
-		///   Computes the successor states for <paramref name="sourceState" />, storing the computed <paramref name="transitions" />.
-		/// </summary>
-		/// <param name="transitions">The set the computed transitions should be stored in.</param>
-		/// <param name="sourceState">The source state the next states should be computed for.</param>
-		internal void ComputeSuccessorStates(TransitionSet transitions, byte* sourceState)
-		{
-			_choiceResolver.PrepareNextState();
-
-			while (_choiceResolver.PrepareNextPath())
-			{
-				Deserialize(sourceState);
-				ExecuteStep();
-				transitions.Add(this);
-			}
-		}
-
-		/// <summary>
 		///   Generates the replay information for the <paramref name="trace" />.
 		/// </summary>
 		/// <param name="trace">The trace the replay information should be generated for.</param>
@@ -334,11 +298,11 @@ namespace SafetySharp.Runtime
 			// We have to generate the replay info for all transitions
 			for (var i = 0; i < trace.Length - 1; ++i)
 			{
-				_choiceResolver.Clear();
-				_choiceResolver.PrepareNextState();
+				ChoiceResolver.Clear();
+				ChoiceResolver.PrepareNextState();
 
 				// Try all transitions until we find the one that leads to the desired state
-				while (_choiceResolver.PrepareNextPath())
+				while (ChoiceResolver.PrepareNextPath())
 				{
 					fixed (byte* sourceState = trace[i])
 						Deserialize(sourceState);
@@ -355,7 +319,7 @@ namespace SafetySharp.Runtime
 						Requires.That(endsWithException, "Unexpected exception.");
 						Requires.That(i == trace.Length - 2, "Unexpected exception.");
 
-						info[i] = _choiceResolver.GetChoices().ToArray();
+						info[i] = ChoiceResolver.GetChoices().ToArray();
 						break;
 					}
 
@@ -370,7 +334,7 @@ namespace SafetySharp.Runtime
 					if (!areEqual)
 						continue;
 
-					info[i] = _choiceResolver.GetChoices().ToArray();
+					info[i] = ChoiceResolver.GetChoices().ToArray();
 					break;
 				}
 
@@ -391,9 +355,9 @@ namespace SafetySharp.Runtime
 		{
 			Requires.NotNull(replayInformation, nameof(replayInformation));
 
-			_choiceResolver.Clear();
-			_choiceResolver.PrepareNextState();
-			_choiceResolver.SetChoices(replayInformation);
+			ChoiceResolver.Clear();
+			ChoiceResolver.PrepareNextState();
+			ChoiceResolver.SetChoices(replayInformation);
 
 			Deserialize(state);
 
@@ -431,7 +395,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		internal int[] GetLastChoices()
 		{
-			return _choiceResolver.GetChoices().ToArray();
+			return ChoiceResolver.GetChoices().ToArray();
 		}
 
 		/// <summary>
@@ -443,8 +407,22 @@ namespace SafetySharp.Runtime
 			if (!disposing)
 				return;
 
-			_choiceResolver.SafeDispose();
+			ChoiceResolver.SafeDispose();
 			Objects.OfType<IDisposable>().SafeDisposeAll();
+		}
+
+		/// <summary>
+		///   Creates a <see cref="RuntimeModel" /> instance from the <paramref name="model" /> and the <paramref name="formulas" />.
+		/// </summary>
+		/// <param name="model">The model the runtime model should be created for.</param>
+		/// <param name="formulas">The formulas the model should be able to check.</param>
+		internal static RuntimeModel Create(ModelBase model, params Formula[] formulas)
+		{
+			Requires.NotNull(formulas, nameof(formulas));
+
+			var serializer = new RuntimeModelSerializer();
+			serializer.Serialize(model, formulas);
+			return serializer.Load();
 		}
 	}
 }

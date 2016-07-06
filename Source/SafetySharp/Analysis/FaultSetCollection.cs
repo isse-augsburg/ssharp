@@ -24,7 +24,6 @@ namespace SafetySharp.Analysis
 {
 	using System.Collections;
 	using System.Collections.Generic;
-	using Runtime;
 
 	/// <summary>
 	///   Represents a collection of <see cref="FaultSet" /> ordered by cardinality.

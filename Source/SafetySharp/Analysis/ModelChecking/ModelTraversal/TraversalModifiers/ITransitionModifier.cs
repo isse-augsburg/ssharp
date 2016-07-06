@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,27 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
 	/// <summary>
-	///   Controls the overflow semantics when field values lie outside the field's allowed range of values.
+	///   Represents a modifier that is executed when new transitions are found during model traversal.
 	/// </summary>
-	public enum OverflowBehavior
+	internal interface ITransitionModifier
 	{
 		/// <summary>
-		///   Indicates that an exception should be thrown when a field contains a value outside of its allowed range.
+		///   Optionally modifies the <paramref name="transitions" />, changing any of their values. However, no new transitions can be
+		///   added; transitions can be removed by setting their <see cref="Transition.IsValid" /> flag to <c>false</c>.
+		///   During subsequent traversal steps, only valid transitions and target states reached by at least one valid transition
+		///   are considered.
 		/// </summary>
-		Error,
-
-		/// <summary>
-		///   Indicates that the field value is clamped to the field's range.
-		/// </summary>
-		Clamp,
-
-		/// <summary>
-		///   Indicates that the field value wraps around if it underflows or overflows the field's range, i.e., if the range's upper
-		///   limit is exceeded, the value is set to the lower bound and vice versa.
-		/// </summary>
-		WrapClamp
+		/// <param name="context">The context of the model traversal.</param>
+		/// <param name="transitions">The transitions that should be checked.</param>
+		void ModifyTransitions(TraversalContext context, TransitionCollection transitions);
 	}
 }

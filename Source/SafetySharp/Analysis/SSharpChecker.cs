@@ -24,6 +24,7 @@ namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Diagnostics;
+	using ModelChecking;
 	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
@@ -47,7 +48,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal AnalysisResult CheckInvariant(Func<RuntimeModel> createModel)
+		internal AnalysisResult CheckInvariant(Func<AnalysisModel> createModel)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
 
@@ -85,6 +86,76 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
+		///   Generates a <see cref="StateGraph" /> for the model created by <paramref name="createModel" />.
+		/// </summary>
+		internal StateGraph GenerateStateGraph(Func<AnalysisModel> createModel)
+		{
+			Requires.That(IntPtr.Size == 8, "State graph generation is only supported in 64bit processes.");
+
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
+			using (var checker = new StateGraphGenerator(createModel, message => OutputWritten?.Invoke(message), Configuration))
+			{
+				var stateGraph = default(StateGraph);
+				var initializationTime = stopwatch.Elapsed;
+				stopwatch.Restart();
+
+				try
+				{
+					stateGraph = checker.GenerateStateGraph();
+					return stateGraph;
+				}
+				finally
+				{
+					stopwatch.Stop();
+
+					if (!Configuration.ProgressReportsOnly)
+					{
+						OutputWritten?.Invoke(String.Empty);
+						OutputWritten?.Invoke("===============================================");
+						OutputWritten?.Invoke($"Initialization time: {initializationTime}");
+						OutputWritten?.Invoke($"State graph generation time: {stopwatch.Elapsed}");
+
+						if (stateGraph != null)
+						{
+							OutputWritten?.Invoke($"{(int)(stateGraph.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
+							OutputWritten?.Invoke($"{(int)(stateGraph.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+						}
+
+						OutputWritten?.Invoke("===============================================");
+						OutputWritten?.Invoke(String.Empty);
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
+		/// </summary>
+		internal AnalysisResult CheckInvariant(Func<RuntimeModel> createModel)
+		{
+			// We have to track the state vector layout here; this will nondeterministically store some model instance of
+			// one of the workers; but since all state vectors are the same, we don't care
+			ExecutedModel model = null;
+			Func<AnalysisModel> createAnalysisModel = () =>
+				model = new ActivationMinimalExecutedModel(createModel, Configuration.SuccessorCapacity);
+
+			var result = CheckInvariant(createAnalysisModel);
+			result.StateVectorLayout = model.StateVectorLayout;
+
+			return result;
+		}
+
+		/// <summary>
+		///   Generates a <see cref="StateGraph" /> for the model created by <paramref name="createModel" />.
+		/// </summary>
+		internal StateGraph GenerateStateGraph(Func<RuntimeModel> createModel)
+		{
+			return GenerateStateGraph(() => new ActivationMinimalExecutedModel(createModel, Configuration.SuccessorCapacity));
+		}
+
+		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
@@ -97,7 +168,23 @@ namespace SafetySharp.Analysis
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, invariant);
 
-			return CheckInvariant(serializer.Load);
+			return CheckInvariant((Func<RuntimeModel>)serializer.Load);
+		}
+
+		/// <summary>
+		///   Generates a <see cref="StateGraph" /> for the <paramref name="model" />.
+		/// </summary>
+		/// <param name="model">The model the state graph should be generated for.</param>
+		/// <param name="formulas">The state formulas that should be evaluated during state graph generation..</param>
+		public StateGraph GenerateStateGraph(ModelBase model, params Formula[] formulas)
+		{
+			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(formulas, nameof(formulas));
+
+			var serializer = new RuntimeModelSerializer();
+			serializer.Serialize(model, formulas);
+
+			return GenerateStateGraph((Func<RuntimeModel>)serializer.Load);
 		}
 	}
 }

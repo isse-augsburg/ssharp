@@ -61,9 +61,17 @@ namespace SafetySharp.Runtime
 		public int this[int index]
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get { return _buffer[index]; }
+			get
+			{
+				Assert.InRange(index, 0, Count);
+				return _buffer[index];
+			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			set { _buffer[index] = value; }
+			set
+			{
+				Assert.InRange(index, 0, Count);
+				_buffer[index] = value;
+			}
 		}
 
 		/// <summary>
@@ -72,6 +80,7 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int Peek()
 		{
+			Assert.That(Count > 0, "Stack is empty.");
 			return _buffer[Count - 1];
 		}
 
@@ -81,6 +90,7 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int Remove()
 		{
+			Assert.That(Count > 0, "Stack is empty.");
 			return _buffer[--Count];
 		}
 

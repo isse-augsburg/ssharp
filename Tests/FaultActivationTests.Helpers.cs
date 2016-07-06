@@ -25,6 +25,7 @@ namespace Tests
 	using System.Collections.Generic;
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
+	using SafetySharp.Analysis.ModelChecking;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
@@ -49,7 +50,11 @@ namespace Tests
 			configuration.StackCapacity = 10000;
 			configuration.CpuCount = 1;
 
-			var checker = new InvariantChecker(serializer.Load, s => Output.Log("{0}", s), configuration);
+			var checker = new InvariantChecker(
+				() => new ActivationMinimalExecutedModel(serializer.Load, configuration.SuccessorCapacity),
+				s => Output.Log("{0}", s),
+				configuration);
+
 			_result = checker.Check();
 			CounterExample.ShouldBe(null);
 

@@ -95,8 +95,8 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 
 			var type = ((Component)obj).FaultEffectType;
 			return mode == SerializationMode.Optimized
-				? base.GetFields(obj, mode, null, null, false)
-				: base.GetFields(obj, mode, type, type.BaseType, false);
+				? base.GetFields(obj, mode)
+				: base.GetFields(obj, mode, type, type.BaseType);
 		}
 	}
 }

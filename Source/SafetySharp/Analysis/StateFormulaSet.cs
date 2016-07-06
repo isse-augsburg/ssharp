@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Runtime.CompilerServices;
@@ -56,12 +56,12 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Checks whether the number of formlas in <paramref name="formulaCount" /> is supported.
+		///   Checks whether the number of <paramref name="formulas" /> is supported.
 		/// </summary>
-		/// <param name="formulaCount">The formula count that should be checked.</param>
-		internal static void CheckFormulaCount(int formulaCount)
+		/// <param name="formulas">The formula count that should be checked.</param>
+		internal static void CheckFormulaCount(int formulas)
 		{
-			Requires.That(formulaCount < 32, "More than 31 state formulas are not supported.");
+			Requires.That(formulas < 32, "More than 31 state formulas are not supported.");
 		}
 
 		/// <summary>

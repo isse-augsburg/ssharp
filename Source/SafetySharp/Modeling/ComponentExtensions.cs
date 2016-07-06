@@ -20,15 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace SafetySharp.Modeling
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Reflection;
 	using CompilerServices;
-	using Modeling;
-	using Serialization;
+	using Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>

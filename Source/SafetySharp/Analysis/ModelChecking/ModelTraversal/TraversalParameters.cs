@@ -20,27 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 {
+	using System;
+	using System.Collections.Generic;
+	using TraversalModifiers;
+
 	/// <summary>
-	///   Controls the overflow semantics when field values lie outside the field's allowed range of values.
+	///   Provides parameters for the model traversal process.
 	/// </summary>
-	public enum OverflowBehavior
+	internal struct TraversalParameters
 	{
 		/// <summary>
-		///   Indicates that an exception should be thrown when a field contains a value outside of its allowed range.
+		///   A factory method for <see cref="ITransitionAction" /> instances that should be executed by all <see cref="Worker" />
+		///   instances.
 		/// </summary>
-		Error,
+		internal Func<IEnumerable<ITransitionAction>> TransitionActions;
 
 		/// <summary>
-		///   Indicates that the field value is clamped to the field's range.
+		///   A factory method for <see cref="IBatchedTransitionAction" /> instances that should be executed by all
+		///   <see cref="Worker" /> instances.
 		/// </summary>
-		Clamp,
+		internal Func<IEnumerable<IBatchedTransitionAction>> BatchedTransitionActions;
 
 		/// <summary>
-		///   Indicates that the field value wraps around if it underflows or overflows the field's range, i.e., if the range's upper
-		///   limit is exceeded, the value is set to the lower bound and vice versa.
+		///   A factory method for <see cref="ITransitionModifier" /> instances that should be executed by all <see cref="Worker" />
+		///   instances.
 		/// </summary>
-		WrapClamp
+		internal Func<IEnumerable<ITransitionModifier>> TransitionModifiers;
+
+		/// <summary>
+		///   A factory method for <see cref="IStateAction" /> instances that should be executed by all <see cref="Worker" />
+		///   instances.
+		/// </summary>
+		internal Func<IEnumerable<IStateAction>> StateActions;
 	}
 }

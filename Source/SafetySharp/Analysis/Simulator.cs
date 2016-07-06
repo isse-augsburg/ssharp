@@ -65,7 +65,7 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
 
-			_runtimeModel = model.ToRuntimeModel(formulas);
+			_runtimeModel = RuntimeModel.Create(model, formulas);
 			Reset();
 		}
 

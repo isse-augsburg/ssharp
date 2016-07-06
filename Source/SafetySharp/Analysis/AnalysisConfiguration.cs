@@ -23,7 +23,6 @@
 namespace SafetySharp.Analysis
 {
 	using System;
-	using System.Collections.Generic;
 	using Utilities;
 
 	/// <summary>
@@ -32,6 +31,7 @@ namespace SafetySharp.Analysis
 	public struct AnalysisConfiguration
 	{
 		private const int DefaultStateCapacity = 1 << 24;
+		private const int DefaultTransitionCapacity = 1 << 26;
 		private const int DefaultStackCapacity = 1 << 16;
 		private const int DefaultSuccessorStateCapacity = 1 << 14;
 		private const int MinCapacity = 1024;
@@ -39,6 +39,7 @@ namespace SafetySharp.Analysis
 		private int _cpuCount;
 		private int _stackCapacity;
 		private int _stateCapacity;
+		private int _transitionCapacity;
 		private int _successorStateCapacity;
 
 		/// <summary>
@@ -62,8 +63,22 @@ namespace SafetySharp.Analysis
 			StackCapacity = DefaultStackCapacity,
 			StateCapacity = DefaultStateCapacity,
 			SuccessorCapacity = DefaultSuccessorStateCapacity,
+			TransitionCapacity = DefaultTransitionCapacity,
 			GenerateCounterExample = true
 		};
+
+		/// <summary>
+		///   Gets or sets the number of transitions that can be stored during model checking.
+		/// </summary>
+		public int TransitionCapacity
+		{
+			get { return Math.Max(_transitionCapacity, MinCapacity); }
+			set
+			{
+				Requires.That(value >= MinCapacity, $"{nameof(TransitionCapacity)} must be at least {MinCapacity}.");
+				_transitionCapacity = value;
+			}
+		}
 
 		/// <summary>
 		///   Gets or sets the number of states that can be stored during model checking.

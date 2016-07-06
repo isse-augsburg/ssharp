@@ -40,9 +40,6 @@ namespace SafetySharp.Modeling
 	{
 		private readonly Choice _choice = new Choice();
 
-		[NonSerializable]
-		private readonly ISet<Fault> _subsumedFaults = new HashSet<Fault>();
-
 		[Hidden]
 		private Activation _activation = Activation.Nondeterministic;
 
@@ -63,6 +60,12 @@ namespace SafetySharp.Modeling
 		{
 			RequiresActivationNotification = requiresActivationNotification;
 		}
+
+		/// <summary>
+		///   Gets the <see cref="Fault" /> instances subsumed by this fault.
+		/// </summary>
+		[NonSerializable]
+		internal ISet<Fault> SubsumedFaults { get; } = new HashSet<Fault>();
 
 		/// <summary>
 		///   Gets a value indicating whether the fault must be notified about its activation.
@@ -179,59 +182,7 @@ namespace SafetySharp.Modeling
 		/// <param name="faults">The subsumed faults.</param>
 		public void Subsumes(params Fault[] faults)
 		{
-			_subsumedFaults.UnionWith(faults);
-		}
-
-		/// <summary>
-		///   Gets a <see cref="FaultSet" /> containing all fault instances subsumed by the <paramref name="set" />.
-		/// </summary>
-		/// <param name="set">The fault set the subsumed faults should be returned for.</param>
-		/// <param name="allFaults">The list of all analyzed faults.</param>
-		internal static FaultSet SubsumedFaults(FaultSet set, Fault[] allFaults)
-		{
-			var currentFaults = set.ToFaultSequence(allFaults);
-			var subsumed = set;
-
-			uint oldCount;
-			do // fixed-point iteration
-			{
-				oldCount = subsumed.Cardinality;
-				currentFaults = currentFaults.SelectMany(fault => fault._subsumedFaults);
-				subsumed = subsumed.GetUnion(new FaultSet(currentFaults));
-			} while (oldCount < subsumed.Cardinality);
-
-			return subsumed;
-		}
-
-		/// <summary>
-		///   Gets a <see cref="FaultSet" /> containing all fault instances subsuming the <paramref name="set" />.
-		/// </summary>
-		/// <param name="set">The subsumed fault set the subsuming faults should be returned for.</param>
-		/// <param name="allFaults">The list of all analyzed faults.</param>
-		internal static FaultSet SubsumingFaults(FaultSet set, Fault[] allFaults)
-		{
-			var currentFaults = set.ToFaultSequence(allFaults);
-			var subsuming = set;
-
-			uint oldCount;
-			do // fixed-point iteration
-			{
-				oldCount = subsuming.Cardinality;
-				currentFaults = allFaults.Where(fault => fault._subsumedFaults.Intersect(currentFaults).Any()).ToArray();
-				subsuming = subsuming.GetUnion(new FaultSet(currentFaults));
-			} while (oldCount < subsuming.Cardinality);
-
-			return subsuming;
-		}
-
-		/// <summary>
-		///   Gets a <see cref="FaultSet" /> containing all fault instances subsuming the <paramref name="set" />.
-		/// </summary>
-		/// <param name="faults">The subsumed faults the subsuming faults should be returned for.</param>
-		/// <param name="allFaults">The list of all analyzed faults.</param>
-		internal static FaultSet SubsumingFaults(IEnumerable<Fault> faults, Fault[] allFaults)
-		{
-			return SubsumingFaults(new FaultSet(faults), allFaults);
+			SubsumedFaults.UnionWith(faults);
 		}
 
 		/// <summary>

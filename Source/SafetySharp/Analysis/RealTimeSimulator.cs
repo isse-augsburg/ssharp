@@ -25,7 +25,6 @@ namespace SafetySharp.Analysis
 	using System;
 	using System.Threading;
 	using Modeling;
-	using Runtime;
 	using Utilities;
 
 	/// <summary>

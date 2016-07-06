@@ -35,7 +35,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	internal sealed class DictionarySerializer : ObjectSerializer
 	{
 		private readonly string[] _hiddenFields = { "version", "_syncRoot", "keys", "values", "comparer" };
-		private string[] _rangeFields = { "count", "freeList", "freeCount" };
+		private readonly string[] _rangeFields = { "count", "freeList", "freeCount" };
 
 		/// <summary>
 		///   Checks whether the serialize is able to serialize the <paramref name="obj" />.
