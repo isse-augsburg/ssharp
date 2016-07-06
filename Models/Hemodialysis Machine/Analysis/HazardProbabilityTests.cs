@@ -54,7 +54,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = Probability.Zero;
 
-			var result = ModelChecker.CalculateProbabilityOfHazard(model, model.IncomingBloodWasNotOk);
+			var result = ModelChecker.CalculateProbabilityToReachState(model, model.IncomingBloodWasNotOk);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
 
@@ -75,7 +75,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = Probability.Zero;
 
-			var result = ModelChecker.CalculateProbabilityOfHazard(model, model.BloodNotCleanedAndDialyzingFinished);
+			var result = ModelChecker.CalculateProbabilityToReachState(model, model.BloodNotCleanedAndDialyzingFinished);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
 	}

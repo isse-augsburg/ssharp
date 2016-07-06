@@ -55,7 +55,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   When this method evaluates to true during model checking, the current trace should not be expanded further.
 		/// </summary>
-		private readonly Func<bool> TerminateEarlyCondition;
+		internal Func<bool> TerminateEarlyCondition { get;}
 		
 		/// <summary>
 		///   The faults contained in the model.
@@ -408,6 +408,15 @@ namespace SafetySharp.Runtime
 			{
 				newPathAvailable = ComputeNextInitialState(transitions);
 			}
+		}
+
+		/// <summary>
+		///   Adds transition to <paramref name="state" />, storing the computed <paramref name="transitions" />.
+		/// </summary>
+		internal void AddTransitionToState(TransitionSet transitions,byte* state)
+		{
+			Deserialize(state);
+			transitions.Add(this);
 		}
 
 		/// <summary>

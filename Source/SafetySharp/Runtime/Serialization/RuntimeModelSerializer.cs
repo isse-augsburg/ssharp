@@ -70,7 +70,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <param name="model">The model that should be serialized.</param>
 		/// <param name="terminateEarlyCondition">When this method evaluates to true during model checking, the current trace should not be expanded further.</param>
 		/// <param name="formulas">The formulas that should be serialized.</param>
-		public void Serialize(ModelBase model, Func<bool> terminateEarlyCondition, params Formula[] formulas)
+		public void Serialize(ModelBase model, TerminateEarlyCondition terminateEarlyCondition, params Formula[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
@@ -103,7 +103,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Serializes the <paramref name="model" />.
 		/// </summary>
-		private unsafe void SerializeModel(BinaryWriter writer, ModelBase model, Func<bool> terminateEarlyCondition, Formula[] formulas)
+		private unsafe void SerializeModel(BinaryWriter writer, ModelBase model, TerminateEarlyCondition terminateEarlyCondition, Formula[] formulas)
 		{
 			// Collect all objects contained in the model
 			var objectTable = CreateObjectTable(model, terminateEarlyCondition, formulas);
@@ -141,9 +141,9 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Creates the object table for the <paramref name="model" /> and <paramref name="formulas" />.
 		/// </summary>
-		private static ObjectTable CreateObjectTable(ModelBase model, Func<bool> terminateEarlyCondition, Formula[] formulas)
+		private static ObjectTable CreateObjectTable(ModelBase model, TerminateEarlyCondition terminateEarlyCondition, Formula[] formulas)
 		{
-			var objects = model.Roots.Cast<object>().Concat(formulas).Concat(new []{ terminateEarlyCondition }).Concat(new [] { model });
+			var objects = model.Roots.Cast<object>().Concat(formulas).Concat(new object[] { terminateEarlyCondition }).Concat(new [] { model });
 			return new ObjectTable(SerializationRegistry.Default.GetReferencedObjects(objects.ToArray(), SerializationMode.Full));
 		}
 
@@ -212,7 +212,7 @@ namespace SafetySharp.Runtime.Serialization
 
 			// Deserialize the object identifiers of the model itself, the terminateEarlyCondition, and the root formulas
 			var model = (ModelBase)objectTable.GetObject(reader.ReadUInt16());
-			var terminateEarlyCondition = (Func<bool>)objectTable.GetObject(reader.ReadUInt16());
+			var terminateEarlyConditionCapsule = (TerminateEarlyCondition)objectTable.GetObject(reader.ReadUInt16());
 			var formulas = new Formula[reader.ReadInt32()];
 			for (var i = 0; i < formulas.Length; ++i)
 				formulas[i] = (Formula)objectTable.GetObject(reader.ReadUInt16());
@@ -249,7 +249,12 @@ namespace SafetySharp.Runtime.Serialization
 			// We substitute the dummy delegate objects with the actual instances obtained from the DelegateMetadata instances
 			objectTable.SubstituteDelegates();
 			deserializer(objectTable, serializedState);
-			
+
+			// retrieve terminateEarlyCondition after substitution 
+			Func<bool> terminateEarlyCondition = null;
+			if (terminateEarlyConditionCapsule.Condition != null)
+				terminateEarlyCondition = terminateEarlyConditionCapsule.Condition.Compile();
+
 			// Return the serialized model data
 			return new SerializedRuntimeModel(model, buffer, objectTable, terminateEarlyCondition, formulas);
 		}

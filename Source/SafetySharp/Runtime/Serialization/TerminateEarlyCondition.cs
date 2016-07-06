@@ -26,31 +26,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SafetySharp.CaseStudies.CircuitBasedPressureTank.Analysis
+namespace SafetySharp.Runtime
 {
-	using System.Globalization;
-	using FluentAssertions;
-	using Modeling;
-	using NUnit.Framework;
-	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
+	using Analysis;
 
-	class HazardProbabilityTests
+	internal class TerminateEarlyCondition
 	{
-		[Test]
-		public void CalculateHazardIsRuptured()
-		{
-			var model = new Model();
-			
-			// override default probabilities
-			model.Circuits.Pump.SuppressPumping.ProbabilityOfOccurrence = new Probability(0.0);
-			model.Circuits.Sensor.SuppressIsFull.ProbabilityOfOccurrence = new Probability(0.0001);
-			model.Circuits.Timer.StuckFault.ProbabilityOfOccurrence = new Probability(0.0001);
-			model.Circuits.K1.StuckFault.ProbabilityOfOccurrence = new Probability(0.00003);
-			model.Circuits.K2.StuckFault.ProbabilityOfOccurrence = new Probability(0.00003);
-
-			var result = ModelChecker.CalculateProbabilityToReachState(model, model.Tank.IsRuptured);
-			Console.Write($"Probability of hazard: {result.Value.ToString(CultureInfo.InvariantCulture)}");
-		}
+		public Formula Condition;
 	}
 }

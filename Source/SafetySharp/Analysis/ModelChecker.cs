@@ -52,20 +52,21 @@ namespace SafetySharp.Analysis
 			return new SSharpChecker().CheckInvariant(model, invariant);
 		}
 
-		public static Probability CalculateProbabilityOfHazard(ModelBase model, Formula hazard)
+		public static Probability CalculateProbabilityToReachState(ModelBase model, Formula stateFormula)
 		{
-			Probability probabilityOfHazard;
+			Probability probabilityToReachState;
 
-			var probabilityOfHazardFormula = new CalculateProbabilityToReachStateFormula(hazard);
-
+			var probabilityToReachStateFormula = new CalculateProbabilityToReachStateFormula(stateFormula);
+			
 			using (var probabilityChecker = new ProbabilityChecker(model))
 			{
-				var checkProbabilityOfHazard = probabilityChecker.CalculateProbability(probabilityOfHazardFormula);
-				probabilityChecker.CreateMarkovChain();
+				var checkProbabilityToReachState = probabilityChecker.CalculateProbability(probabilityToReachStateFormula);
+				probabilityChecker.CreateMarkovChain(stateFormula);
+				//probabilityChecker.CreateMarkovChain(); //no early termination
 				probabilityChecker.DefaultChecker = new Mrmc(probabilityChecker);
-				probabilityOfHazard = checkProbabilityOfHazard.Calculate();
+				probabilityToReachState = checkProbabilityToReachState.Calculate();
 			}
-			return probabilityOfHazard;
+			return probabilityToReachState;
 		}
 	}
 }

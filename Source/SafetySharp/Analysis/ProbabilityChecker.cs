@@ -137,7 +137,7 @@ namespace SafetySharp.Analysis
 			return DefaultChecker.CalculateReward(formulaToCheck);
 		}
 
-		public void CreateMarkovChain()
+		public void CreateMarkovChain(Formula terminateEarlyCondition = null)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
 			var alreadyStarted = Interlocked.CompareExchange(ref _probabilityMatrixCreationStarted, true, false);
@@ -146,8 +146,10 @@ namespace SafetySharp.Analysis
 
 			var stopwatch = new Stopwatch();
 
+			var terminateEarlyConditionCapsule = new TerminateEarlyCondition() { Condition = terminateEarlyCondition };
+
 			var serializer = new RuntimeModelSerializer();
-			serializer.Serialize(_model, _formulasToCheck.ToArray());
+			serializer.Serialize(_model, terminateEarlyConditionCapsule, _formulasToCheck.ToArray());
 
 			//return CheckInvariant(serializer.Load);
 

@@ -175,6 +175,7 @@
     <Compile Include="Runtime\StateFormulaSet.cs" />
     <Compile Include="Runtime\StateStack.cs" />
     <Compile Include="Runtime\StateStorage.cs" />
+    <Compile Include="Runtime\Serialization\TerminateEarlyCondition.cs" />
     <Compile Include="Runtime\TransitionSet.cs" />
     <Compile Include="Runtime\UnboundPortException.cs" />
     <Compile Include="Utilities\ConsoleHelpers.cs" />

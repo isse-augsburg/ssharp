@@ -307,21 +307,32 @@ namespace SafetySharp.Analysis
 					_transitions.Clear();
 
 					_model.PrepareNextState();
-					var newPathAvailable = true;
-
 					MarkovChain.SetSourceStateOfUpcomingTransitions(state);
-					while (newPathAvailable)
+					
+					_model.Deserialize(_states[state]);
+					var terminateEarly = _model.TerminateEarlyCondition!=null && _model.TerminateEarlyCondition();
+					if (terminateEarly)
 					{
-						try
+						// only add self reference
+						_model.AddTransitionToState(_transitions, _states[state]);
+					}
+					else
+					{
+						var newPathAvailable = true;
+						while (newPathAvailable)
 						{
-							newPathAvailable = _model.ComputeNextSuccessorState(_transitions, _states[state]);
-						}
-						catch (Exception)
-						{
-							MarkovChain.AddTransitionException(_model.GetProbability());
+							try
+							{
+								newPathAvailable = _model.ComputeNextSuccessorState(_transitions, _states[state]);
+							}
+							catch (Exception)
+							{
+								MarkovChain.AddTransitionException(_model.GetProbability());
+							}
 						}
 					}
 					AddStates(state);
+
 					MarkovChain.FinishSourceState();
 
 					InterlockedExchangeIfGreaterThan(ref _context._levelCount, _stateStack.FrameCount, _stateStack.FrameCount);
