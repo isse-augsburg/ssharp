@@ -1,6 +1,7 @@
 ﻿namespace Tests.Analysis.Heuristics
 {
 	using System;
+	using System.Collections.Generic;
 	using SafetySharp.Analysis.Heuristics;
 	using SafetySharp.Modeling;
 	using Shouldly;
@@ -10,14 +11,22 @@
 	{
 		protected override void Check()
 		{
-			var components = new[] { new C(), new C() };
-			var model = TestModel.InitializeModel(components);
+			var c = new C();
+			var model = TestModel.InitializeModel(c);
 
 			Heuristics = new[] { new SubsumptionHeuristic(model) };
 
 			var result = Dcca(model, false);
 			result.Exceptions.ShouldBeEmpty();
+			result.IsComplete.ShouldBe(true);
 			result.MinimalCriticalSets.ShouldBeEmpty();
+			result.CheckedSets.ShouldBe(new[]
+			{
+				new HashSet<Fault>(),
+				new HashSet<Fault>(new[] { c.F2, c.F1 }),
+				new HashSet<Fault>(new[] { c.F3, c.F2 }),
+				new HashSet<Fault>(new[] { c.F3, c.F2, c.F1  })
+			}, ignoreOrder: true);
 		}
 
 		private class C : Component

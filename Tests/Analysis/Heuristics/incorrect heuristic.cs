@@ -1,66 +1,58 @@
 ﻿namespace Tests.Analysis.Heuristics
 {
-	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 	using SafetySharp.Analysis.Heuristics;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 
-	internal class X5 : AnalysisTestObject
+	internal class X7 : AnalysisTestObject
 	{
 		protected override void Check()
 		{
 			var c = new C();
 			var m = TestModel.InitializeModel(c);
 
-			Heuristics = new[] { new Heuristic() { C = c } };
-
-			c.F1.SuppressActivation();
+			Heuristics = new[] { new WrongHeuristic() { C = c } };
 
 			var result = Dcca(m, c.Defect);
-			result.Exceptions.ShouldBeEmpty();
-			result.IsComplete.ShouldBe(true);
-			result.ForcedFaults.ShouldBe(new[] { c.F1 });
-			result.SuppressedFaults.ShouldBeEmpty();
-			result.MinimalCriticalSets.ShouldBeEmpty();
 			result.CheckedSets.ShouldBe(new[] {
-				new HashSet<Fault>(),
+				new HashSet<Fault>(new[] { c.F1 }),
+				new HashSet<Fault>(new[] { c.F2 }),
+				new HashSet<Fault>() }
+			);
+			result.MinimalCriticalSets.ShouldBe(new[] {
+				new HashSet<Fault>(new[] { c.F1 }),
 				new HashSet<Fault>(new[] { c.F2 })
 			});
-
-			c.F1.ForceActivation();
-
-			result = Dcca(m, c.Defect);
 			result.Exceptions.ShouldBeEmpty();
-			result.IsComplete.ShouldBe(true);
-			result.SuppressedFaults.ShouldBe(new[] { c.F1 });
-			result.ForcedFaults.ShouldBeEmpty();
-			result.MinimalCriticalSets.Single().ShouldBe(new HashSet<Fault>(new[] { c.F1 }));
-			result.CheckedSets.Count.ShouldBe(1);
 		}
 
-		private class Heuristic : IFaultSetHeuristic
+		private class WrongHeuristic : IFaultSetHeuristic
 		{
 			public C C { get; set; }
 
 			public void Augment(List<FaultSet> setsToCheck)
 			{
-				setsToCheck.Add(new FaultSet());
-				setsToCheck.Add(new FaultSet(C.F1, C.F2));
 				setsToCheck.Add(new FaultSet(C.F1));
 			}
 
+			private bool updated = false;
 			public void Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
 			{
+				if (updated)
+					return;
+				setsToCheck.Add(new FaultSet(C.F2));
+				updated = true;
 			}
 		}
 
 		private class C : Component
 		{
-			public virtual bool Defect => false;
+			public virtual bool Defect => X > 7;
+
+			public virtual int X => 3;
 
 			public readonly Fault F1 = new PermanentFault();
 			public readonly Fault F2 = new PermanentFault();
@@ -68,12 +60,13 @@
 			[FaultEffect(Fault = nameof(F1))]
 			private class E1 : C
 			{
-				public override bool Defect => true;
+				public override int X => 12;
 			}
 
 			[FaultEffect(Fault = nameof(F2))]
 			private class E2 : C
 			{
+				public override int X => 30;
 			}
 		}
 	}

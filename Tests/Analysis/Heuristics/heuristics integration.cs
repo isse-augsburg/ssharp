@@ -11,7 +11,7 @@
 
 	internal class X6 : AnalysisTestObject
 	{
-		const int componentCount = 4;
+		const int componentCount = 8;
 
 		protected override void Check()
 		{
@@ -23,6 +23,9 @@
 			Heuristics = new[] { counter };
 
 			var result = Dcca(model, false);
+			result.IsComplete.ShouldBe(true);
+			result.Exceptions.ShouldBeEmpty();
+			result.MinimalCriticalSets.ShouldBeEmpty();
 			result.CheckedSets.Count.ShouldBe(1 << model.Faults.Length);
 			counter.setCounter.ShouldBe((ulong)result.CheckedSets.Count);
 			counter.cardinalityCounter.ShouldBe(model.Faults.Length + 1);
@@ -36,6 +39,10 @@
 			};
 
 			result = Dcca(model, false);
+			result.IsComplete.ShouldBe(true);
+			result.Exceptions.ShouldBeEmpty();
+			result.MinimalCriticalSets.ShouldBeEmpty();
+			result.CheckedSets.Count.ShouldBe(575);
 			((ulong)result.CheckedSets.Count).ShouldBeLessThan(counter.setCounter);
 
 			// subsumption heuristic is effective
@@ -45,6 +52,10 @@
 				c.F1.Subsumes(c.F2);
 
 			result = Dcca(model, false);
+			result.IsComplete.ShouldBe(true);
+			result.Exceptions.ShouldBeEmpty();
+			result.MinimalCriticalSets.ShouldBeEmpty();
+			result.CheckedSets.Count.ShouldBe(985);
 			((ulong)result.CheckedSets.Count).ShouldBeLessThan(counter.setCounter); // heuristic has effect
 
 			// heuristics are called appropriately when combined
@@ -52,6 +63,9 @@
 			Heuristics = new IFaultSetHeuristic[] { counter, new SubsumptionHeuristic(model) };
 
 			result = Dcca(model, false);
+			result.IsComplete.ShouldBe(true);
+			result.Exceptions.ShouldBeEmpty();
+			result.MinimalCriticalSets.ShouldBeEmpty();
 			counter.cardinalityCounter.ShouldBe(model.Faults.Length + 1);
 			result.CheckedSets.Count.ShouldBeLessThan(1 << model.Faults.Length);
 			counter.setCounter.ShouldBeGreaterThanOrEqualTo((ulong)result.CheckedSets.Count);
