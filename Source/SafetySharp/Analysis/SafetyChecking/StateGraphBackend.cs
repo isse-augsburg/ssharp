@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis.SafetyChecking
 {
+	using System;
 	using ModelChecking;
 	using ModelChecking.ModelTraversal.TraversalModifiers;
 	using Modeling;
@@ -29,7 +30,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 	/// <summary>
 	///   Pre-builts the model's entire state graph, subsequently taking advantage of the fault-removal optimization.
 	/// </summary>
-	internal class StateGraphBackend : SafetyAnalysisBackend
+	internal class StateGraphBackend : AnalysisBackend
 	{
 		private InvariantChecker _checker;
 
@@ -46,7 +47,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 
 			var stateGraph = checker.GenerateStateGraph(Model, !hazard);
 
-			configuration.StateCapacity = (int)(stateGraph.StateCount * 1.5);
+			configuration.StateCapacity = Math.Max(1024, (int)(stateGraph.StateCount * 1.5));
 			_checker = new InvariantChecker(() => new StateGraphModel(stateGraph, configuration.SuccessorCapacity), OnOutputWritten,
 				configuration, formulaIndex: 0);
 		}

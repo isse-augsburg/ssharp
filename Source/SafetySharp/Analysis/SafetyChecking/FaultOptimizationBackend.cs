@@ -31,7 +31,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 	/// <summary>
 	///   Checks all formulas individually on the model taking advantage of the fault-removal optimization.
 	/// </summary>
-	internal class FaultOptimizationBackend : SafetyAnalysisBackend
+	internal class FaultOptimizationBackend : AnalysisBackend
 	{
 		private InvariantChecker _invariantChecker;
 

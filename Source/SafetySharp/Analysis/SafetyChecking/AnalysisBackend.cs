@@ -31,7 +31,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 	///   Represents a back end for safety analyses, encapsulating the way that the individual checks are carried out on the
 	///   analyzed model.
 	/// </summary>
-	internal abstract class SafetyAnalysisBackend
+	internal abstract class AnalysisBackend
 	{
 		protected FaultSet ForcedFaults { get; private set; }
 		protected ModelBase Model { get; private set; }

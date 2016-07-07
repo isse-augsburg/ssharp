@@ -25,7 +25,6 @@ namespace Tests.Analysis.Dcca
 	using System;
 	using System.Linq;
 	using SafetySharp.Analysis;
-	using SafetySharp.Analysis.SafetyChecking;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
@@ -35,7 +34,7 @@ namespace Tests.Analysis.Dcca
 		{
 			SuppressCounterExampleGeneration = true;
 
-			if (Arguments[0] is StateGraphBackend)
+			if ((SafetyAnalysisBackend)Arguments[0] == SafetyAnalysisBackend.FaultOptimizedStateGraph)
 			{
 				var exception = Should.Throw<AnalysisException>(() => Dcca(true, new C()));
 				exception.CounterExample.ShouldBeNull();

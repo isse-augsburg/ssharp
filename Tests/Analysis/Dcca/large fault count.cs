@@ -23,7 +23,7 @@
 namespace Tests.Analysis.Dcca
 {
 	using System.Linq;
-	using SafetySharp.Analysis.SafetyChecking;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
@@ -34,7 +34,7 @@ namespace Tests.Analysis.Dcca
 		protected override void Check()
 		{
 			// The test is too large for the state graph backend
-			if (Arguments[0] is StateGraphBackend)
+			if ((SafetyAnalysisBackend)Arguments[0] == SafetyAnalysisBackend.FaultOptimizedStateGraph)
 				return;
 
 			var c = new C();

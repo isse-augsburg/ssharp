@@ -39,7 +39,7 @@ namespace SafetySharp.Analysis
 		private readonly HashSet<FaultSet> _checkedSets = new HashSet<FaultSet>();
 		private readonly Dictionary<FaultSet, CounterExample> _counterExamples = new Dictionary<FaultSet, CounterExample>();
 		private readonly Dictionary<FaultSet, Exception> _exceptions = new Dictionary<FaultSet, Exception>();
-		private SafetyChecking.SafetyAnalysisBackend _backend;
+		private SafetyChecking.AnalysisBackend _backend;
 		private FaultSetCollection _criticalSets;
 		private FaultSet _forcedSet;
 		private SafetyAnalysisResult _result;

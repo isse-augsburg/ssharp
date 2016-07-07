@@ -54,7 +54,7 @@
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultSuppressionModifier.cs" />
     <Compile Include="Analysis\SafetyAnalysisBackend.cs" />
     <Compile Include="Analysis\SafetyChecking\FaultOptimizationBackend.cs" />
-    <Compile Include="Analysis\SafetyChecking\SafetyAnalysisBackend.cs" />
+    <Compile Include="Analysis\SafetyChecking\AnalysisBackend.cs" />
     <Compile Include="Analysis\ModelChecking\AnalysisModel.cs" />
     <Compile Include="Analysis\ModelChecking\ActivationMinimalExecutedModel.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\LoadBalancer.cs" />
