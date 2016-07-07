@@ -30,7 +30,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using Utilities;
 
 	/// <summary>
-	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="RuntimeModel" />.
+	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="Runtime.RuntimeModel" />.
 	/// </summary>
 	internal abstract unsafe class ExecutedModel : AnalysisModel
 	{
@@ -42,40 +42,40 @@ namespace SafetySharp.Analysis.ModelChecking
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 
-			CreateModel = createModel;
-			Model = createModel();
+			RuntimeModelCreator = createModel;
+			RuntimeModel = createModel();
 		}
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="model">The model instance that should be executed.</param>
-		internal ExecutedModel(RuntimeModel model)
+		/// <param name="runtimeModel">The model instance that should be executed.</param>
+		internal ExecutedModel(RuntimeModel runtimeModel)
 		{
-			Requires.NotNull(model, nameof(model));
-			Model = model;
+			Requires.NotNull(runtimeModel, nameof(runtimeModel));
+			RuntimeModel = runtimeModel;
 		}
 
 		/// <summary>
-		///   The <see cref="RuntimeModel" /> instance that is analyzed.
+		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
 		/// </summary>
-		protected RuntimeModel Model { get; }
+		public sealed override RuntimeModel RuntimeModel { get; }
 
 		/// <summary>
-		///   A factory function that can be used to create new instances of the analyzed model instance. <c>null</c> when the model is
-		///   analyzed with LtsMIN.
+		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
+		///   <see cref="AnalysisModel" />.
 		/// </summary>
-		protected Func<RuntimeModel> CreateModel { get; }
+		public sealed override Func<RuntimeModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   Gets the model's state vector layout.
 		/// </summary>
-		public StateVectorLayout StateVectorLayout => Model.StateVectorLayout;
+		public StateVectorLayout StateVectorLayout => RuntimeModel.StateVectorLayout;
 
 		/// <summary>
 		///   Gets the size of the model's state vector in bytes.
 		/// </summary>
-		public sealed override int StateVectorSize => Model.StateVectorSize;
+		public sealed override int StateVectorSize => RuntimeModel.StateVectorSize;
 
 		/// <summary>
 		///   Updates the activation states of the worker's faults.
@@ -83,7 +83,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="getActivation">The callback that should be used to determine a fault's activation state.</param>
 		internal void ChangeFaultActivations(Func<Fault, Activation> getActivation)
 		{
-			Model.ChangeFaultActivations(getActivation);
+			RuntimeModel.ChangeFaultActivations(getActivation);
 		}
 
 		/// <summary>
@@ -93,7 +93,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		protected override void OnDisposing(bool disposing)
 		{
 			if (disposing)
-				Model.SafeDispose();
+				RuntimeModel.SafeDispose();
 		}
 
 		/// <summary>
@@ -130,13 +130,13 @@ namespace SafetySharp.Analysis.ModelChecking
 		{
 			BeginExecution();
 
-			Model.ChoiceResolver.PrepareNextState();
+			RuntimeModel.ChoiceResolver.PrepareNextState();
 
-			fixed (byte* state = Model.ConstructionState)
+			fixed (byte* state = RuntimeModel.ConstructionState)
 			{
-				while (Model.ChoiceResolver.PrepareNextPath())
+				while (RuntimeModel.ChoiceResolver.PrepareNextPath())
 				{
-					Model.Deserialize(state);
+					RuntimeModel.Deserialize(state);
 					ExecuteInitialTransition();
 
 					GenerateTransition();
@@ -154,11 +154,11 @@ namespace SafetySharp.Analysis.ModelChecking
 		{
 			BeginExecution();
 
-			Model.ChoiceResolver.PrepareNextState();
+			RuntimeModel.ChoiceResolver.PrepareNextState();
 
-			while (Model.ChoiceResolver.PrepareNextPath())
+			while (RuntimeModel.ChoiceResolver.PrepareNextPath())
 			{
-				Model.Deserialize(state);
+				RuntimeModel.Deserialize(state);
 				ExecuteTransition();
 
 				GenerateTransition();
@@ -172,7 +172,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		public sealed override void Reset()
 		{
-			Model.Reset();
+			RuntimeModel.Reset();
 		}
 	}
 }

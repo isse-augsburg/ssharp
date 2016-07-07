@@ -130,7 +130,7 @@ namespace SafetySharp.Analysis
 			serializer.Serialize(model, !hazard);
 
 			Func<AnalysisModel> createModel = () => new ActivationMinimalExecutedModel(serializer.Load, Configuration.SuccessorCapacity);
-			_invariantChecker = new InvariantChecker(createModel, message => OutputWritten?.Invoke(message), Configuration);
+			_invariantChecker = new InvariantChecker(createModel, message => OutputWritten?.Invoke(message), Configuration, formulaIndex: 0);
 			_result = new Result(model, suppressedFaults, forcedFaults, Heuristics);
 
 			// remember all safe sets of current cardinality - we need them to generate the next power set level

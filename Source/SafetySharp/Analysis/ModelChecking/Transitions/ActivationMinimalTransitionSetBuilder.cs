@@ -29,9 +29,9 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 	using Utilities;
 
 	/// <summary>
-	///   Caches an activation-minimal set of transitions.
+	///   Creates an activation-minimal set of <see cref="CandidateTransition"/> instances.
 	/// </summary>
-	internal sealed unsafe class ActivationMinimalTransitionSet : DisposableObject
+	internal sealed unsafe class ActivationMinimalTransitionSetBuilder : DisposableObject
 	{
 		private const int ProbeThreshold = 1000;
 		private readonly int _capacity;
@@ -58,7 +58,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// <param name="model">The model the successors are computed for.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public ActivationMinimalTransitionSet(RuntimeModel model, int capacity, params Func<bool>[] formulas)
+		public ActivationMinimalTransitionSetBuilder(RuntimeModel model, int capacity, params Func<bool>[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));

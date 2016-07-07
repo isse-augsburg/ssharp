@@ -52,7 +52,7 @@ namespace SafetySharp.Analysis
 		internal bool this[int index]
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get { return (_formulas & (1 << index)) == 1; }
+			get { return (_formulas & (1 << index)) != 0; }
 		}
 
 		/// <summary>

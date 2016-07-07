@@ -20,53 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Invariants.CounterExamples
+namespace Tests.Analysis.Invariants.StateGraph
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class Steps : AnalysisTestObject
+	internal class MultipleInitialStates : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			for (var i = 0; i < 10; ++i)
-				Check(i);
-		}
-
-		private void Check(int steps)
-		{
-			const int start = 2;
-			var c = new C { X = start };
-			CheckInvariant(c.X != start + steps, c);
-			CounterExample.StepCount.ShouldBe(steps + 1);
-
-			SimulateCounterExample(CounterExample, simulator =>
-			{
-				c = (C)simulator.Model.Roots[0];
-
-				c.X.ShouldBe(start);
-
-				for (var i = start + 1; i < start + steps; ++i)
-				{
-					simulator.SimulateStep();
-					c.X.ShouldBe(i);
-					simulator.IsCompleted.ShouldBe(false);
-				}
-
-				simulator.SimulateStep();
-				c.X.ShouldBe(start + steps);
-				simulator.IsCompleted.ShouldBe(true);
-			});
+			var c = new C();
+			CheckInvariants(c, c.F != 1, c.F != 2, c.F != 3, c.F > 0 && c.F < 4).ShouldBe(new[] { false, false, false, true });
 		}
 
 		private class C : Component
 		{
-			[Range(0, 20, OverflowBehavior.Clamp)]
-			public int X;
+			public int F;
 
-			public override void Update()
+			protected internal override void Initialize()
 			{
-				++X;
+				F = Choose(1, 2, 3);
 			}
 		}
 	}

@@ -53,7 +53,8 @@ namespace Tests
 			var checker = new InvariantChecker(
 				() => new ActivationMinimalExecutedModel(serializer.Load, configuration.SuccessorCapacity),
 				s => Output.Log("{0}", s),
-				configuration);
+				configuration,
+				formulaIndex: 0);
 
 			_result = checker.Check();
 			CounterExample.ShouldBe(null);

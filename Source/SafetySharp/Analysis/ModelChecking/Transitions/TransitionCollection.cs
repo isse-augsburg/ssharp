@@ -54,6 +54,17 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// </summary>
 		/// <param name="transitions">The transition instances stored in a contiguous array.</param>
 		/// <param name="count">The number of transitions contained in the set; not all of these transitions are valid.</param>
+		/// <param name="transitionSize">The size of a single transition in bytes.</param>
+		public TransitionCollection(Transition* transitions, int count, int transitionSize)
+			: this(transitions, count, count, transitionSize)
+		{
+		}
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="transitions">The transition instances stored in a contiguous array.</param>
+		/// <param name="count">The number of transitions contained in the set; not all of these transitions are valid.</param>
 		/// <param name="totalCount">The total number of all originally computed transitions.</param>
 		/// <param name="transitionSize">The size of a single transition in bytes.</param>
 		public TransitionCollection(Transition* transitions, int count, int totalCount, int transitionSize)
@@ -78,6 +89,8 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// </summary>
 		internal static void ValidateTransitionSizes()
 		{
+			Requires.That(sizeof(Transition) == 24, "Unexpected transition size.");
+			Requires.That(sizeof(CandidateTransition) == 24, "Unexpected candidate transitions size.");
 			Requires.That(sizeof(StateFormulaSet) == 4, "Unexpected state formula set size.");
 			Requires.That(sizeof(FaultSet) == 8, "Unexpected fault set size.");
 

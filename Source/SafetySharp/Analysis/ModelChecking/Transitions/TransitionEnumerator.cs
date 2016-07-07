@@ -27,7 +27,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 	/// </summary>
 	internal unsafe struct TransitionEnumerator
 	{
-		private readonly Transition* _transitions;
+		private readonly byte* _transitions;
 		private readonly int _count;
 		private readonly int _transitionSize;
 		private int _current;
@@ -41,7 +41,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		public TransitionEnumerator(Transition* transitions, int count, int transitionSize)
 			: this()
 		{
-			_transitions = transitions;
+			_transitions = (byte*)transitions;
 			_count = count;
 			_transitionSize = transitionSize;
 			_current = -1;
@@ -56,7 +56,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 
 			while (_current < _count)
 			{
-				if (((CandidateTransition*)_transitions)[_current].IsValid)
+				if (((CandidateTransition*)Current)->IsValid)
 					return true;
 
 				++_current;
@@ -68,6 +68,6 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// <summary>
 		///   Gets the element in the collection at the current position of the enumerator.
 		/// </summary>
-		public Transition* Current => (Transition*)((byte*)_transitions + _current * _transitionSize);
+		public Transition* Current => (Transition*)(_transitions + _current * _transitionSize);
 	}
 }

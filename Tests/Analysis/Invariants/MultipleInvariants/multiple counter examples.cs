@@ -20,8 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Invariants.CounterExamples
+namespace Tests.Analysis.Invariants.StateGraph
 {
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
@@ -29,39 +30,49 @@ namespace Tests.Analysis.Invariants.CounterExamples
 	{
 		protected override void Check()
 		{
-			for (var i = 0; i < 10; ++i)
-				Check(i);
-		}
-
-		private void Check(int steps)
-		{
+			const int count = 31;
 			const int start = 2;
+
 			var c = new C { X = start };
-			CheckInvariant(c.X != start + steps, c);
-			CounterExample.StepCount.ShouldBe(steps + 1);
+			var formulas = new Formula[count];
 
-			SimulateCounterExample(CounterExample, simulator =>
+			for (var i = 0; i < count; ++i)
 			{
-				c = (C)simulator.Model.Roots[0];
+				var j = i;
+				formulas[i] = c.X != start + j;
+			}
 
-				c.X.ShouldBe(start);
+			var results = CheckInvariants(c, formulas);
 
-				for (var i = start + 1; i < start + steps; ++i)
+			for (var i = 0; i < count; ++i)
+			{
+				results[i].ShouldBe(false);
+				CounterExamples[i].ShouldNotBeNull();
+				CounterExamples[i].StepCount.ShouldBe(i + 1);
+
+				SimulateCounterExample(CounterExamples[i], simulator =>
 				{
-					simulator.SimulateStep();
-					c.X.ShouldBe(i);
-					simulator.IsCompleted.ShouldBe(false);
-				}
+					c = (C)simulator.Model.Roots[0];
 
-				simulator.SimulateStep();
-				c.X.ShouldBe(start + steps);
-				simulator.IsCompleted.ShouldBe(true);
-			});
+					c.X.ShouldBe(start);
+
+					for (var j = start + 1; j < start + i; ++j)
+					{
+						simulator.SimulateStep();
+						c.X.ShouldBe(j);
+						simulator.IsCompleted.ShouldBe(false);
+					}
+
+					simulator.SimulateStep();
+					c.X.ShouldBe(start + i);
+					simulator.IsCompleted.ShouldBe(true);
+				});
+			}
 		}
 
 		private class C : Component
 		{
-			[Range(0, 20, OverflowBehavior.Clamp)]
+			[Range(0, 50, OverflowBehavior.Clamp)]
 			public int X;
 
 			public override void Update()

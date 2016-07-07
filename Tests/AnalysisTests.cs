@@ -46,19 +46,61 @@ namespace Tests
 		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/CounterExamples")]
 		public void CounterExamples(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker));
+			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
 		}
 
-		[Theory, MemberData("DiscoverTestsBothModelCheckers", "Analysis/Invariants/NotViolated")]
-		public void NotViolated(Type modelCheckerType, string test, string file)
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/NotViolated")]
+		public void NotViolated(string test, string file)
 		{
-			ExecuteDynamicTests(file, modelCheckerType);
+			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
 		}
 
-		[Theory, MemberData("DiscoverTestsBothModelCheckers", "Analysis/Invariants/Violated")]
-		public void Violated(Type modelCheckerType, string test, string file)
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/Violated")]
+		public void Violated(string test, string file)
 		{
-			ExecuteDynamicTests(file, modelCheckerType);
+			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
+		}
+	}
+
+	public partial class StateGraphInvariantTests
+	{
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/CounterExamples")]
+		public void CounterExamples(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
+		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/NotViolated")]
+		public void NotViolated(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
+		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/Violated")]
+		public void Violated(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
+		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/MultipleInvariants")]
+		public void MultipleInvariants(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
+		}
+	}
+
+	public partial class LtsMinInvariantTests
+	{
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/NotViolated")]
+		public void NotViolated(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(LtsMin));
+		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/Violated")]
+		public void Violated(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(LtsMin));
 		}
 	}
 

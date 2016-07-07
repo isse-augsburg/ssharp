@@ -65,6 +65,11 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		private readonly MemoryBuffer _statesBuffer = new MemoryBuffer();
 
 		/// <summary>
+		///   The lowest index of a splittable frame. -1 if no frame is splittable.
+		/// </summary>
+		private int _lowestSplittableFrame = -1;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="capacity">The maximum number of states that can be stored on the stack.</param>
@@ -79,6 +84,11 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 			_states = (int*)_statesBuffer.Pointer;
 			_capacity = capacity;
 		}
+
+		/// <summary>
+		///   Indicates whether the stack can be split.
+		/// </summary>
+		public bool CanSplit => _lowestSplittableFrame != -1;
 
 		/// <summary>
 		///   Gets the number of frames on the stack.
@@ -125,6 +135,9 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 
 			_states[offset] = state;
 			_frames[FrameCount - 1].Count += 1;
+
+			if (_lowestSplittableFrame == -1 && frame.Count > 1)
+				_lowestSplittableFrame = FrameCount - 1;
 		}
 
 		/// <summary>
@@ -157,13 +170,31 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		}
 
 		/// <summary>
+		/// Finds the next splittable frame, if any.
+		/// </summary>
+		private void UpdateLowestSplittableFrame()
+		{
+			for (var i = Math.Max(0, _lowestSplittableFrame); i < FrameCount; ++i)
+			{
+				if (_frames[i].Count > 1)
+				{
+					_lowestSplittableFrame = i;
+					return;
+				}
+			}
+
+			_lowestSplittableFrame = -1;
+		}
+
+		/// <summary>
 		///   Splits the work between this instance and the <paramref name="other" /> instance. Returns <c>true</c> to indicate that
 		///   work has been split; <c>false</c>, otherwise.
 		/// </summary>
 		/// <param name="other">The other instance the work should be split with.</param>
 		public bool SplitWork(StateStack other)
 		{
-			Requires.That(other.FrameCount == 0, nameof(other), "Expected an empty state stack.");
+			Assert.That(CanSplit, "Cannot split the state stack.");
+			Assert.That(other.FrameCount == 0, "Expected an empty state stack.");
 
 			// We go through each frame and split the first frame with more than two states in half
 			for (var i = 0; i < FrameCount; ++i)
@@ -195,6 +226,10 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 						// Adjust the count and offset of the frame
 						_frames[i].Offset += otherCount;
 						_frames[i].Count = thisCount;
+
+						// Find the next splittable frame if this one no longer is
+						if (thisCount == 1)
+							UpdateLowestSplittableFrame();
 
 						return true;
 				}

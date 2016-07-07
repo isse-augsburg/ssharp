@@ -27,7 +27,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 	/// <summary>
 	///   Represents a candidate transition of an <see cref="AnalysisModel" />.
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Explicit, Size = 24)]
 	internal unsafe struct CandidateTransition
 	{
 		/// <summary>

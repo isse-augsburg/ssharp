@@ -166,6 +166,15 @@
     <Compile Include="Analysis\Invariants\NotViolated\disabled faults.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\fault activation.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\ranges.cs" />
+    <Compile Include="Analysis\Invariants\MultipleInvariants\fault activation.cs" />
+    <Compile Include="Analysis\Invariants\MultipleInvariants\multiple choices 1.cs" />
+    <Compile Include="Analysis\Invariants\MultipleInvariants\multiple initial states.cs" />
+    <Compile Include="Analysis\Invariants\MultipleInvariants\multiple subformulas.cs" />
+    <Compile Include="Analysis\Invariants\MultipleInvariants\non-inline formulas.cs" />
+    <Compile Include="Analysis\Invariants\MultipleInvariants\nondeterministic fault effects.cs" />
+    <Compile Include="Analysis\Invariants\MultipleInvariants\single choice.cs" />
+    <Compile Include="Analysis\Invariants\MultipleInvariants\state machine.cs" />
+    <Compile Include="Analysis\Invariants\MultipleInvariants\multiple counter examples.cs" />
     <Compile Include="Analysis\Invariants\Violated\hidden variable in formula.cs" />
     <Compile Include="Analysis\Invariants\Violated\multiple subformulas.cs" />
     <Compile Include="Analysis\Invariants\Violated\non-inline formulas.cs" />

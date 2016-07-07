@@ -27,7 +27,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 	/// <summary>
 	///   Represents an actual, valid transition of an <see cref="AnalysisModel" />.
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Explicit, Size = 24)]
 	internal struct Transition
 	{
 		/// <summary>

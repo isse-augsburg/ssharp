@@ -72,8 +72,12 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 			if (!hasWork)
 				return AwaitWork(workerIndex);
 
-			// Try to assign some of the worker's work to an idle worker
-			return AssignWork(workerIndex);
+			// Try to assign some of the worker's work to an idle worker, if possible
+			if (_stacks[workerIndex].CanSplit)
+				return AssignWork(workerIndex);
+
+			// Otherwise, let the worker continue
+			return true;
 		}
 
 		/// <summary>

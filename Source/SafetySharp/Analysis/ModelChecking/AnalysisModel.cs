@@ -22,6 +22,8 @@
 
 namespace SafetySharp.Analysis.ModelChecking
 {
+	using System;
+	using Runtime;
 	using Transitions;
 	using Utilities;
 
@@ -36,9 +38,20 @@ namespace SafetySharp.Analysis.ModelChecking
 		public abstract int StateVectorSize { get; }
 
 		/// <summary>
-		/// Gets the size of a single transition of the model in bytes.
+		///   Gets the size of a single transition of the model in bytes.
 		/// </summary>
 		public abstract int TransitionSize { get; }
+
+		/// <summary>
+		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
+		/// </summary>
+		public abstract RuntimeModel RuntimeModel { get; }
+
+		/// <summary>
+		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
+		///   <see cref="AnalysisModel" />.
+		/// </summary>
+		public abstract Func<RuntimeModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   Gets all initial transitions of the model.

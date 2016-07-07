@@ -25,6 +25,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System;
 	using System.Threading;
 	using ModelTraversal;
+	using Runtime;
 	using Transitions;
 	using Utilities;
 
@@ -34,7 +35,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// <remarks>
 	///   Transitions are untyped as C# unfortunately does not support generic type arguments of pointer types.
 	/// </remarks>
-	public unsafe class StateGraph : DisposableObject
+	internal unsafe class StateGraph : DisposableObject
 	{
 		private readonly TransitionRange* _stateMap;
 		private readonly MemoryBuffer _stateMapBuffer = new MemoryBuffer();
@@ -42,7 +43,6 @@ namespace SafetySharp.Analysis.ModelChecking
 		private readonly long _transitionCapacity;
 		private readonly byte* _transitions;
 		private readonly MemoryBuffer _transitionsBuffer = new MemoryBuffer();
-		private readonly int _transitionSize;
 		private int _initialTransitionCount;
 		private int _stateCount;
 		private long _transitionCount;
@@ -52,21 +52,53 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="context">The context of the traversal process.</param>
+		/// <param name="stateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="transitionSizeInBytes">The size of a transition in bytes.</param>
-		internal StateGraph(TraversalContext context, int transitionSizeInBytes)
+		/// <param name="model">The runtime model the state graph is generated for.</param>
+		/// <param name="createModel">
+		///   The factory function that should be used to create instances of the <see cref="RuntimeModel" />
+		///   the state graph is generated for.
+		/// </param>
+		internal StateGraph(TraversalContext context, Formula[] stateFormulas, int transitionSizeInBytes,
+							RuntimeModel model, Func<RuntimeModel> createModel)
 		{
 			Requires.NotNull(context, nameof(context));
 
+			StateFormulas = stateFormulas;
+			TransitionSize = transitionSizeInBytes;
+			RuntimeModel = model;
+			RuntimeModelCreator = createModel;
+
 			_stateStorage = context.States;
-			_transitionSize = transitionSizeInBytes;
 			_transitionCapacity = context.Configuration.TransitionCapacity;
 
-			_transitionsBuffer.Resize(_transitionSize * _transitionCapacity, zeroMemory: false);
+			_transitionsBuffer.Resize(TransitionSize * _transitionCapacity, zeroMemory: false);
 			_stateMapBuffer.Resize(context.Configuration.StateCapacity * sizeof(TransitionRange), zeroMemory: false);
 
 			_transitions = _transitionsBuffer.Pointer;
 			_stateMap = (TransitionRange*)_stateMapBuffer.Pointer;
 		}
+
+		/// <summary>
+		///   Gets the runtime model that is directly or indirectly represented by this <see cref="StateGraph" />.
+		/// </summary>
+		public RuntimeModel RuntimeModel { get; }
+
+		/// <summary>
+		///   Gets the factory function that was used to create the runtime model that is directly or indirectly represented by this
+		///   <see cref="StateGraph" />.
+		/// </summary>
+		public Func<RuntimeModel> RuntimeModelCreator { get; }
+
+		/// <summary>
+		///   The state formulas that can be evaluated over the model.
+		/// </summary>
+		public Formula[] StateFormulas { get; set; }
+
+		/// <summary>
+		///   Gets the size of a single transition of the state graph in bytes.
+		/// </summary>
+		public int TransitionSize { get; }
 
 		/// <summary>
 		///   Gets the number of states contained in the state graph.
@@ -93,6 +125,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		internal void AddStateInfo(int state, bool isInitial, TransitionCollection transitions, int transitionCount)
 		{
 			Assert.That(!isInitial || _initialTransitionCount == 0, "Initial transitions can only be added once.");
+			Assert.That(transitionCount > 0, "Cannot add deadlock state.");
 
 			if (isInitial)
 				_initialTransitionCount = transitionCount;
@@ -108,41 +141,41 @@ namespace SafetySharp.Analysis.ModelChecking
 
 			// No need to synchronize state addition, as all states are only discovered once
 			if (!isInitial)
-				_stateMap[state] = new TransitionRange { StartIndex = _transitionOffset, Count = transitionCount };
+				_stateMap[state] = new TransitionRange { StartIndex = offset, Count = transitionCount };
 
 			// Copy the transitions into the buffer
 			foreach (var transition in transitions)
-				MemoryBuffer.Copy((byte*)transition, _transitions + offset, _transitionSize);
+			{
+				Assert.That(((CandidateTransition*)transition)->IsValid, "Attempted to add an invalid transition.");
+
+				MemoryBuffer.Copy((byte*)transition, _transitions + offset * TransitionSize, TransitionSize);
+				++offset;
+			}
 		}
 
 		/// <summary>
-		///   Gets all initial transitions without any source <paramref name="state" />.
+		///   Gets all initial transitions without any source state.
 		/// </summary>
-		/// <param name="transitions">Returns the address to the first initial transition.</param>
-		/// <param name="count">Returns the number of initial transitions.</param>
-		public void GetInitialTransitions(out void* transitions, out int count)
+		internal TransitionCollection GetInitialTransitions()
 		{
-			transitions = _transitions;
-			count = _initialTransitionCount;
+			return new TransitionCollection((Transition*)_transitions, _initialTransitionCount, TransitionSize);
 		}
 
 		/// <summary>
 		///   Gets all transitions leaving the <paramref name="state" />.
 		/// </summary>
 		/// <param name="state">The state whose outgoing transitions should be returned.</param>
-		/// <param name="transitions">Returns the address to the first transition leaving the state.</param>
-		/// <param name="count">Returns the number of transitions leaving the state.</param>
-		public void GetTransitions(int state, out void* transitions, out int count)
+		internal TransitionCollection GetTransitions(int state)
 		{
-			count = _stateMap[state].Count;
-			transitions = _transitions + _stateMap[state].StartIndex;
+			var transitions = (Transition*)(_transitions + TransitionSize * _stateMap[state].StartIndex);
+			return new TransitionCollection(transitions, _stateMap[state].Count, TransitionSize);
 		}
 
 		/// <summary>
 		///   Gets the state of the model the state graph was generated from that corresponds to state graph <paramref name="state" />.
 		/// </summary>
 		/// <param name="state">The state the original state should be returned for.</param>
-		public byte* GetState(int state)
+		internal byte* GetState(int state)
 		{
 			return _stateStorage[state];
 		}

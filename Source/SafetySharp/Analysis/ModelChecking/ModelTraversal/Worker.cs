@@ -170,7 +170,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 			}
 
 			if (transitionCount == 0)
-				throw new InvalidOperationException("Deadlock detected.");
+				throw new InvalidOperationException("Deadlock state detected.");
 
 			foreach (var action in _batchedTransitionActions)
 				action.ProcessTransitions(_context, this, sourceState, transitions, transitionCount, isInitialState);

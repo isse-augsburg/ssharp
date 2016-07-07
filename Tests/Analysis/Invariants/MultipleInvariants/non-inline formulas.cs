@@ -20,54 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Invariants.CounterExamples
+namespace Tests.Analysis.Invariants.StateGraph
 {
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class Steps : AnalysisTestObject
+	internal class NonInlineFormulas : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			for (var i = 0; i < 10; ++i)
-				Check(i);
-		}
+			var c = new C();
 
-		private void Check(int steps)
-		{
-			const int start = 2;
-			var c = new C { X = start };
-			CheckInvariant(c.X != start + steps, c);
-			CounterExample.StepCount.ShouldBe(steps + 1);
-
-			SimulateCounterExample(CounterExample, simulator =>
-			{
-				c = (C)simulator.Model.Roots[0];
-
-				c.X.ShouldBe(start);
-
-				for (var i = start + 1; i < start + steps; ++i)
-				{
-					simulator.SimulateStep();
-					c.X.ShouldBe(i);
-					simulator.IsCompleted.ShouldBe(false);
-				}
-
-				simulator.SimulateStep();
-				c.X.ShouldBe(start + steps);
-				simulator.IsCompleted.ShouldBe(true);
-			});
+			CheckInvariants(c, c.Invariant1, c.Invariant2, c.Invariant3(), c.Invariant4, c.Invariant5())
+				.ShouldBe(new[] { false, false, false, false, false });
 		}
 
 		private class C : Component
 		{
-			[Range(0, 20, OverflowBehavior.Clamp)]
-			public int X;
+			public readonly Formula Invariant2;
+			private int _f;
+
+			public C()
+			{
+				Invariant1 = _f != 3;
+				Invariant2 = _f != 4;
+			}
+
+			public Formula Invariant1 { get; }
+			public Formula Invariant4 => Invariant1;
 
 			public override void Update()
 			{
-				++X;
+				if (_f < 10)
+					_f++;
 			}
+
+			public Formula Invariant3() => Invariant1;
+			public Formula Invariant5() => _f == 5;
 		}
 	}
 }

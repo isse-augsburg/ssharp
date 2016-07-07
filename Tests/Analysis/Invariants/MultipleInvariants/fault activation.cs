@@ -20,53 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Invariants.CounterExamples
+namespace Tests.Analysis.Invariants.StateGraph
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class Steps : AnalysisTestObject
+	internal class FaultActivation : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			for (var i = 0; i < 10; ++i)
-				Check(i);
-		}
+			var c = new C();
+			CheckInvariants(c, c.X == 0 || c.X == 6 || c.X == 14, c.X != 6, c.X != 14).ShouldBe(new [] { true, false, false});
 
-		private void Check(int steps)
-		{
-			const int start = 2;
-			var c = new C { X = start };
-			CheckInvariant(c.X != start + steps, c);
-			CounterExample.StepCount.ShouldBe(steps + 1);
+			CounterExamples[0].ShouldBeNull();
+			CounterExamples[1].ShouldNotBeNull();
+			CounterExamples[2].ShouldNotBeNull();
 
-			SimulateCounterExample(CounterExample, simulator =>
-			{
-				c = (C)simulator.Model.Roots[0];
+			SuppressCounterExampleGeneration = true;
+			CheckInvariants(c, c.X == 0 || c.X == 6 || c.X == 14, c.X != 6, c.X != 14).ShouldBe(new[] { true, false, false });
 
-				c.X.ShouldBe(start);
-
-				for (var i = start + 1; i < start + steps; ++i)
-				{
-					simulator.SimulateStep();
-					c.X.ShouldBe(i);
-					simulator.IsCompleted.ShouldBe(false);
-				}
-
-				simulator.SimulateStep();
-				c.X.ShouldBe(start + steps);
-				simulator.IsCompleted.ShouldBe(true);
-			});
+			CounterExamples[0].ShouldBeNull();
+			CounterExamples[1].ShouldBeNull();
+			CounterExamples[2].ShouldBeNull();
 		}
 
 		private class C : Component
 		{
-			[Range(0, 20, OverflowBehavior.Clamp)]
 			public int X;
+
+			protected virtual int Y => 3;
+
+			public Fault F = new TransientFault();
 
 			public override void Update()
 			{
-				++X;
+				X = Y + Y;
+			}
+
+			[FaultEffect(Fault = nameof(F))]
+			public class E : C
+			{
+				protected override int Y => 7;
 			}
 		}
 	}

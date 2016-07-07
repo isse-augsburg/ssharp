@@ -35,29 +35,29 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// </summary>
 	internal sealed class ActivationMinimalExecutedModel : ExecutedModel
 	{
-		private readonly ActivationMinimalTransitionSet _transitions;
+		private readonly ActivationMinimalTransitionSetBuilder _transitions;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="createModel">A factory function that creates the model instance that should be executed.</param>
+		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ActivationMinimalExecutedModel(Func<RuntimeModel> createModel, int successorStateCapacity)
-			: base(createModel)
+		internal ActivationMinimalExecutedModel(Func<RuntimeModel> runtimeModelCreator, int successorStateCapacity)
+			: base(runtimeModelCreator)
 		{
-			var formulas = Model.Formulas.Select(CompilationVisitor.Compile).ToArray();
-			_transitions = new ActivationMinimalTransitionSet(Model, successorStateCapacity, formulas);
+			var formulas = RuntimeModel.Formulas.Select(CompilationVisitor.Compile).ToArray();
+			_transitions = new ActivationMinimalTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
 		}
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="model">The model instance that should be executed.</param>
+		/// <param name="runtimeModel">The model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ActivationMinimalExecutedModel(RuntimeModel model, int successorStateCapacity)
-			: base(model)
+		internal ActivationMinimalExecutedModel(RuntimeModel runtimeModel, int successorStateCapacity)
+			: base(runtimeModel)
 		{
-			_transitions = new ActivationMinimalTransitionSet(Model, successorStateCapacity);
+			_transitions = new ActivationMinimalTransitionSetBuilder(RuntimeModel, successorStateCapacity);
 		}
 
 		/// <summary>
@@ -82,7 +82,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		protected override void ExecuteInitialTransition()
 		{
-			Model.ExecuteInitialStep();
+			RuntimeModel.ExecuteInitialStep();
 		}
 
 		/// <summary>
@@ -90,7 +90,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		protected override void ExecuteTransition()
 		{
-			Model.ExecuteStep();
+			RuntimeModel.ExecuteStep();
 		}
 
 		/// <summary>
@@ -98,7 +98,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		protected override void GenerateTransition()
 		{
-			_transitions.Add(Model);
+			_transitions.Add(RuntimeModel);
 		}
 
 		/// <summary>
@@ -129,31 +129,10 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
 		public override CounterExample CreateCounterExample(byte[][] path, bool endsWithException)
 		{
-			if (CreateModel == null)
+			if (RuntimeModelCreator == null)
 				throw new InvalidOperationException("Counter example generation is not supported in this context.");
 
-			// We have to create new model instances to generate and initialize the counter example, otherwise hidden
-			// state variables might prevent us from doing so if they somehow influence the state
-			var replayModel = CreateModel();
-			var counterExampleModel = CreateModel();
-
-			Model.CopyFaultActivationStates(replayModel);
-			Model.CopyFaultActivationStates(counterExampleModel);
-
-			// Prepend the construction state to the path; if the path is null, at least one further state must be added
-			// to enable counter example debugging.
-			// Also, get the replay information, i.e., the nondeterministic choices that were made on the path; if the path is null,
-			// we still have to get the choices that caused the problem.
-
-			if (path == null)
-			{
-				path = new[] { Model.ConstructionState, new byte[Model.StateVectorSize] };
-				return new CounterExample(counterExampleModel, path, new[] { Model.GetLastChoices() }, endsWithException);
-			}
-
-			path = new[] { Model.ConstructionState }.Concat(path).ToArray();
-			var replayInfo = replayModel.GenerateReplayInformation(path, endsWithException);
-			return new CounterExample(counterExampleModel, path, replayInfo, endsWithException);
+			return RuntimeModel.CreateCounterExample(RuntimeModelCreator, path, endsWithException);
 		}
 	}
 }

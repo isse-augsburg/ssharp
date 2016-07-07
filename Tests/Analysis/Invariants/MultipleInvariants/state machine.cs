@@ -20,54 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Invariants.CounterExamples
+namespace Tests.Analysis.Invariants.StateGraph
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class Steps : AnalysisTestObject
+	internal class StateMachineTest : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			for (var i = 0; i < 10; ++i)
-				Check(i);
+			var d = new D();
+			CheckInvariants(d, d.StateMachine != S.B, d.StateMachine != S.C).ShouldBe(new[] { false, false });
 		}
 
-		private void Check(int steps)
+		private class D : Component
 		{
-			const int start = 2;
-			var c = new C { X = start };
-			CheckInvariant(c.X != start + steps, c);
-			CounterExample.StepCount.ShouldBe(steps + 1);
-
-			SimulateCounterExample(CounterExample, simulator =>
-			{
-				c = (C)simulator.Model.Roots[0];
-
-				c.X.ShouldBe(start);
-
-				for (var i = start + 1; i < start + steps; ++i)
-				{
-					simulator.SimulateStep();
-					c.X.ShouldBe(i);
-					simulator.IsCompleted.ShouldBe(false);
-				}
-
-				simulator.SimulateStep();
-				c.X.ShouldBe(start + steps);
-				simulator.IsCompleted.ShouldBe(true);
-			});
-		}
-
-		private class C : Component
-		{
-			[Range(0, 20, OverflowBehavior.Clamp)]
-			public int X;
+			public readonly StateMachine<S> StateMachine = new StateMachine<S>(S.A);
 
 			public override void Update()
 			{
-				++X;
+				StateMachine.Transition(
+					from: S.A,
+					to: new[] { S.B, S.C });
 			}
+		}
+
+		private enum S
+		{
+			A,
+			B,
+			C
 		}
 	}
 }

@@ -37,6 +37,7 @@ namespace Tests
 	public abstract class AnalysisTestObject : TestObject
 	{
 		protected CounterExample CounterExample { get; private set; }
+		protected CounterExample[] CounterExamples { get; private set; }
 		protected bool SuppressCounterExampleGeneration { get; set; }
 		protected IFaultSetHeuristic[] Heuristics { get; set; }
 
@@ -56,10 +57,25 @@ namespace Tests
 		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var result = modelChecker.CheckInvariant(TestModel.InitializeModel(components), invariant);
 
+			if (Arguments.Length > 1 && (bool)Arguments[1])
+			{
+				var results = modelChecker.CheckInvariants(TestModel.InitializeModel(components), invariant);
+				CounterExample = results[0].CounterExample;
+				return results[0].FormulaHolds;
+			}
+			
+			var result = modelChecker.CheckInvariant(TestModel.InitializeModel(components), invariant);
 			CounterExample = result.CounterExample;
 			return result.FormulaHolds;
+		}
+
+		protected bool[] CheckInvariants(IComponent component, params Formula[] invariants)
+		{
+			var modelChecker = CreateModelChecker();
+			var results = (AnalysisResult[])modelChecker.CheckInvariants(TestModel.InitializeModel(component), invariants);
+			CounterExamples = results.Select(result => result.CounterExample).ToArray();
+			return results.Select(result => result.FormulaHolds).ToArray();
 		}
 
 		protected bool Check(Formula formula, params IComponent[] components)
@@ -145,15 +161,33 @@ namespace Tests
 		{
 			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
 		}
+	}
+
+	public partial class StateGraphInvariantTests : Tests
+	{
+		public StateGraphInvariantTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
 
 		[UsedImplicitly]
-		public static IEnumerable<object[]> DiscoverTestsBothModelCheckers(string directory)
+		public static IEnumerable<object[]> DiscoverTests(string directory)
 		{
-			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
-				yield return new object[] { typeof(SSharpChecker) }.Concat(testCase).ToArray();
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
+		}
+	}
 
-			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
-				yield return new object[] { typeof(LtsMin) }.Concat(testCase).ToArray();
+	public partial class LtsMinInvariantTests : Tests
+	{
+		public LtsMinInvariantTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests(string directory)
+		{
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
 		}
 	}
 

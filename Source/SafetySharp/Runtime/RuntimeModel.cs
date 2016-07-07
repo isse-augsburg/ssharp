@@ -213,7 +213,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Copies the fault activation states of this instance to <paramref name="target" />.
 		/// </summary>
-		internal void CopyFaultActivationStates(RuntimeModel target)
+		private void CopyFaultActivationStates(RuntimeModel target)
 		{
 			for (var i = 0; i < _faults.Length; ++i)
 				target._faults[i].Activation = _faults[i].Activation;
@@ -286,11 +286,48 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
+		///   Creates a counter example from the <paramref name="path" />.
+		/// </summary>
+		/// <param name="createModel">The factory function that can be used to create new instances of this model.</param>
+		/// <param name="path">
+		///   The path the counter example should be generated from. A value of <c>null</c> indicates that no
+		///   transitions could be generated for the model.
+		/// </param>
+		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
+		public CounterExample CreateCounterExample(Func<RuntimeModel> createModel, byte[][] path, bool endsWithException)
+		{
+			Requires.NotNull(createModel, nameof(createModel));
+
+			// We have to create new model instances to generate and initialize the counter example, otherwise hidden
+			// state variables might prevent us from doing so if they somehow influence the state
+			var replayModel = createModel();
+			var counterExampleModel = createModel();
+
+			CopyFaultActivationStates(replayModel);
+			CopyFaultActivationStates(counterExampleModel);
+
+			// Prepend the construction state to the path; if the path is null, at least one further state must be added
+			// to enable counter example debugging.
+			// Also, get the replay information, i.e., the nondeterministic choices that were made on the path; if the path is null,
+			// we still have to get the choices that caused the problem.
+
+			if (path == null)
+			{
+				path = new[] { ConstructionState, new byte[StateVectorSize] };
+				return new CounterExample(counterExampleModel, path, new[] { GetLastChoices() }, endsWithException);
+			}
+
+			path = new[] { ConstructionState }.Concat(path).ToArray();
+			var replayInfo = replayModel.GenerateReplayInformation(path, endsWithException);
+			return new CounterExample(counterExampleModel, path, replayInfo, endsWithException);
+		}
+
+		/// <summary>
 		///   Generates the replay information for the <paramref name="trace" />.
 		/// </summary>
 		/// <param name="trace">The trace the replay information should be generated for.</param>
 		/// <param name="endsWithException">Indicates whether the trace ends with an exception being thrown.</param>
-		internal int[][] GenerateReplayInformation(byte[][] trace, bool endsWithException)
+		private int[][] GenerateReplayInformation(byte[][] trace, bool endsWithException)
 		{
 			var info = new int[trace.Length - 1][];
 			var targetState = stackalloc byte[StateVectorSize];

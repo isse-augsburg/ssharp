@@ -38,10 +38,11 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="createModel">Creates the model that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal InvariantChecker(Func<AnalysisModel> createModel, Action<string> output, AnalysisConfiguration configuration)
+		/// <param name="formulaIndex">The zero-based index of the analyzed formula.</param>
+		internal InvariantChecker(Func<AnalysisModel> createModel, Action<string> output, AnalysisConfiguration configuration, int formulaIndex)
 			: base(createModel, output, configuration)
 		{
-			Context.TraversalParameters.TransitionActions = () => new[] { new InvariantViolationAction() };
+			Context.TraversalParameters.TransitionActions = () => new[] { new InvariantViolationAction(formulaIndex) };
 		}
 
 		/// <summary>
@@ -62,7 +63,7 @@ namespace SafetySharp.Analysis.ModelChecking
 
 			RethrowTraversalException();
 
-			if (Context.CounterExample != null && !Context.Configuration.ProgressReportsOnly)
+			if (!Context.FormulaIsValid && !Context.Configuration.ProgressReportsOnly)
 				Context.Output("Invariant violation detected.");
 
 			return new AnalysisResult

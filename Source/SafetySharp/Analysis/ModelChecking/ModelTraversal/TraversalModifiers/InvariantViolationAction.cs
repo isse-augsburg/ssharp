@@ -29,6 +29,17 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 	/// </summary>
 	internal class InvariantViolationAction : ITransitionAction
 	{
+		private readonly int _formulaIndex;
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="formulaIndex">The zero-based index of the analyzed formula.</param>
+		public InvariantViolationAction(int formulaIndex)
+		{
+			_formulaIndex = formulaIndex;
+		}
+
 		/// <summary>
 		///   Processes the new <paramref name="transition" /> discovered by the <paramref name="worker " /> within the traversal
 		///   <paramref name="context" />.
@@ -41,7 +52,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// </param>
 		public unsafe void ProcessTransition(TraversalContext context, Worker worker, Transition* transition, bool isInitialTransition)
 		{
-			if (transition->Formulas[0])
+			if (transition->Formulas[_formulaIndex])
 				return;
 
 			context.FormulaIsValid = false;

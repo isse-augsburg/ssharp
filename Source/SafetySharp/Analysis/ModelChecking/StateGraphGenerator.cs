@@ -37,12 +37,17 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="createModel">Creates the model that should be checked.</param>
+		/// <param name="stateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal StateGraphGenerator(Func<AnalysisModel> createModel, Action<string> output, AnalysisConfiguration configuration)
+		internal StateGraphGenerator(Func<AnalysisModel> createModel, Formula[] stateFormulas,
+									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration)
 		{
-			_stateGraph = new StateGraph(Context, AnalyzedModels.First().TransitionSize);
+			var analyzedModel = AnalyzedModels.First();
+			_stateGraph = new StateGraph(Context, stateFormulas, analyzedModel.TransitionSize,
+				analyzedModel.RuntimeModel, analyzedModel.RuntimeModelCreator);
+
 			Context.TraversalParameters.BatchedTransitionActions = () => new[] { new StateGraphBuilder(_stateGraph) };
 		}
 

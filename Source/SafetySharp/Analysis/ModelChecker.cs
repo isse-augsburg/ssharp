@@ -25,7 +25,7 @@ namespace SafetySharp.Analysis
 	using Modeling;
 
 	/// <summary>
-	///   Represents a base class for external model checker tools.
+	///   Provides convienent methods for model checking S# models.
 	/// </summary>
 	public static class ModelChecker
 	{
@@ -49,6 +49,17 @@ namespace SafetySharp.Analysis
 		public static AnalysisResult CheckInvariant(ModelBase model, Formula invariant)
 		{
 			return new SSharpChecker().CheckInvariant(model, invariant);
+		}
+
+		/// <summary>
+		///   Checks whether the <paramref name="invariants" /> hold in all states of the <paramref name="model" />. The appropriate
+		///   model checker is chosen automatically.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="invariants">The invariants that should be checked.</param>
+		public static AnalysisResult[] CheckInvariants(ModelBase model, params Formula[] invariants)
+		{
+			return new SSharpChecker().CheckInvariants(model, invariants);
 		}
 	}
 }

@@ -58,6 +58,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 
 		private class C : Component
 		{
+			[Range(0, 100, OverflowBehavior.Clamp)]
 			public int X;
 
 			[Hidden]

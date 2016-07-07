@@ -47,11 +47,11 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		public void StateGraphAllStatesOriginalDesign()
 		{
 			var model = Model.CreateOriginal();
-			var checker = new SSharpChecker();
-			var stateGraph = checker.GenerateStateGraph(model);
 
-			Console.WriteLine(
-				$"States: {stateGraph.StateCount:n0}, Transitions: {stateGraph.TransitionCount:n0}, Initial Transitions: {stateGraph.InitialTransitionCount:n0}");
+			var result = ModelChecker.CheckInvariants(model, true, false, true);
+			result[0].FormulaHolds.Should().BeTrue();
+			result[1].FormulaHolds.Should().BeFalse();
+			result[2].FormulaHolds.Should().BeTrue();
 		}
 
 		[Test]

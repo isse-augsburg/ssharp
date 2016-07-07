@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 {
+	using System;
 	using FluentAssertions;
 	using Modeling;
 	using NUnit.Framework;
@@ -36,6 +37,17 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 			var result = ModelChecker.CheckInvariant(model, true);
 			result.FormulaHolds.Should().BeTrue();
+		}
+
+		[Test]
+		public void StateGraphAllStates()
+		{
+			var model = new Model();
+
+			var result = ModelChecker.CheckInvariants(model, true, false, true);
+			result[0].FormulaHolds.Should().BeTrue();
+			result[1].FormulaHolds.Should().BeFalse();
+			result[2].FormulaHolds.Should().BeTrue();
 		}
 
 		[Test]
