@@ -53,7 +53,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		public void ModifyTransitions(TraversalContext context, TransitionCollection transitions, byte* sourceState, int sourceStateIndex)
 		{
 			foreach (CandidateTransition* transition in transitions)
-				transition->IsValid = transition->ActivatedFaults.GetIntersection(_suppressedFaults).IsEmpty;
+				transition->IsValid &= transition->ActivatedFaults.GetIntersection(_suppressedFaults).IsEmpty;
 		}
 	}
 }

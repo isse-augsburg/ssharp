@@ -149,6 +149,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 				int targetState;
 				var isNewState = _context.States.AddState(((CandidateTransition*)transition)->TargetState, out targetState);
 
+				// Replace the CandidateTransition.TargetState pointer with the hash values of the transition's source and target states
 				transition->TargetState = targetState;
 				transition->SourceState = sourceState;
 

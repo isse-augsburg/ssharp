@@ -30,7 +30,6 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 	/// </summary>
 	internal sealed unsafe class TransitionSetBuilder : DisposableObject
 	{
-		private readonly int _capacity;
 		private readonly int _stateVectorSize;
 		private readonly MemoryBuffer _targetStateBuffer = new MemoryBuffer();
 		private readonly byte* _targetStateMemory;
@@ -48,7 +47,6 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 			Requires.That(capacity <= (1 << 30), nameof(capacity), $"Maximum supported capacity is {1 << 30}.");
 
 			_stateVectorSize = stateVectorSize;
-			_capacity = capacity;
 
 			_transitionBuffer.Resize(capacity * sizeof(CandidateTransition), zeroMemory: false);
 			_transitions = (CandidateTransition*)_transitionBuffer.Pointer;

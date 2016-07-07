@@ -59,7 +59,9 @@ namespace SafetySharp.Utilities
 			while (true)
 			{
 				var initialValue = location;
-				if (Interlocked.Add(ref location, value) == initialValue + value)
+				var newValue = initialValue + value;
+
+				if (Interlocked.CompareExchange(ref location, newValue, initialValue) == initialValue)
 					return initialValue;
 			}
 		}

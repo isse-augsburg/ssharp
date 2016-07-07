@@ -129,7 +129,6 @@ namespace SafetySharp.Analysis.ModelChecking
 		public override TransitionCollection GetInitialTransitions()
 		{
 			BeginExecution();
-
 			RuntimeModel.ChoiceResolver.PrepareNextState();
 
 			fixed (byte* state = RuntimeModel.ConstructionState)
@@ -153,7 +152,6 @@ namespace SafetySharp.Analysis.ModelChecking
 		public override TransitionCollection GetSuccessorTransitions(byte* state)
 		{
 			BeginExecution();
-
 			RuntimeModel.ChoiceResolver.PrepareNextState();
 
 			while (RuntimeModel.ChoiceResolver.PrepareNextPath())
