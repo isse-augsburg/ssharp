@@ -26,6 +26,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
+	using Transitions;
 	using Utilities;
 
 	/// <summary>

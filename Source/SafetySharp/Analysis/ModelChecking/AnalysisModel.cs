@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis.ModelChecking
 {
+	using Transitions;
 	using Utilities;
 
 	/// <summary>
@@ -33,6 +34,11 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Gets the size of the model's state vector in bytes.
 		/// </summary>
 		public abstract int StateVectorSize { get; }
+
+		/// <summary>
+		/// Gets the size of a single transition of the model in bytes.
+		/// </summary>
+		public abstract int TransitionSize { get; }
 
 		/// <summary>
 		///   Gets all initial transitions of the model.

@@ -26,6 +26,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System.Linq;
 	using FormulaVisitors;
 	using Runtime;
+	using Transitions;
 	using Utilities;
 
 	/// <summary>
@@ -58,6 +59,11 @@ namespace SafetySharp.Analysis.ModelChecking
 		{
 			_transitions = new ActivationMinimalTransitionSet(Model, successorStateCapacity);
 		}
+
+		/// <summary>
+		///   Gets the size of a single transition of the model in bytes.
+		/// </summary>
+		public override unsafe int TransitionSize => sizeof(CandidateTransition);
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.

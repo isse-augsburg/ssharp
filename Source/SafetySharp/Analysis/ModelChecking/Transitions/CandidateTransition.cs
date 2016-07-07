@@ -20,40 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking
+namespace SafetySharp.Analysis.ModelChecking.Transitions
 {
 	using System.Runtime.InteropServices;
-	using ModelTraversal.TraversalModifiers;
 
 	/// <summary>
-	///   Represents a transition.
+	///   Represents a candidate transition of an <see cref="AnalysisModel" />.
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	internal unsafe struct Transition
+	internal unsafe struct CandidateTransition
 	{
 		/// <summary>
-		///   A pointer to the transition's target state that can only be accessed during <see cref="ITransitionModifier" /> execution.
+		///   A pointer to the transition's target state.
 		/// </summary>
 		[FieldOffset(0)]
 		public byte* TargetState;
 
 		/// <summary>
-		///   The unique index of the target state that can only be accessed after <see cref="ITransitionModifier" /> execution.
+		///   The faults that are activated by the transition.
 		/// </summary>
-		[FieldOffset(0)]
-		public int TargetStateIndex;
+		[FieldOffset(8)]
+		public FaultSet ActivatedFaults;
 
 		/// <summary>
 		///   The state formulas holding in the target state.
 		/// </summary>
-		[FieldOffset(8)]
+		[FieldOffset(16)]
 		public StateFormulaSet Formulas;
-
-		/// <summary>
-		///   The faults that are activated by the transition.
-		/// </summary>
-		[FieldOffset(12)]
-		public FaultSet ActivatedFaults;
 
 		/// <summary>
 		///   Indicates whether the transition is valid or should be ignored.

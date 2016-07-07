@@ -22,6 +22,8 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using Transitions;
+
 	/// <summary>
 	///   Checks for invariant violations during model traversal.
 	/// </summary>
@@ -33,13 +35,11 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// </summary>
 		/// <param name="context">The context of the model traversal.</param>
 		/// <param name="worker">The worker that found the transition.</param>
-		/// <param name="sourceState">The index of the transition's source state.</param>
-		/// <param name="transition">The new transition that should be handled.</param>
+		/// <param name="transition">The new transition that should be processed.</param>
 		/// <param name="isInitialTransition">
 		///   Indicates whether the transition is an initial transition not starting in any valid source state.
 		/// </param>
-		public unsafe void ProcessTransition(TraversalContext context, Worker worker, int sourceState,
-											 Transition* transition, bool isInitialTransition)
+		public unsafe void ProcessTransition(TraversalContext context, Worker worker, Transition* transition, bool isInitialTransition)
 		{
 			if (transition->Formulas[0])
 				return;

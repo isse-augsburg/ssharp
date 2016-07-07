@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using Transitions;
 	using Utilities;
 
 	/// <summary>
@@ -43,12 +44,13 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 
 		/// <summary>
 		///   Processes the new <paramref name="transitions" /> discovered by the <paramref name="worker " /> within the traversal
-		///   <paramref name="context" />. Only transitions with <see cref="Transition.IsValid" /> set to <c>true</c> are actually new.
+		///   <paramref name="context" />. Only transitions with <see cref="CandidateTransition.IsValid" /> set to <c>true</c> are
+		///   actually new.
 		/// </summary>
 		/// <param name="context">The context of the model traversal.</param>
 		/// <param name="worker">The worker that found the transition.</param>
 		/// <param name="sourceState">The index of the transition's source state.</param>
-		/// <param name="transitions">The new transitions that should be handled.</param>
+		/// <param name="transitions">The new transitions that should be processed.</param>
 		/// <param name="transitionCount">The actual number of valid transitions.</param>
 		/// <param name="areInitialTransitions">
 		///   Indicates whether the transitions are an initial transitions not starting in any valid source state.

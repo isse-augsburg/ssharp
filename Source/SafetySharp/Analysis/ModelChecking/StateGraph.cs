@@ -25,6 +25,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System;
 	using System.Threading;
 	using ModelTraversal;
+	using Transitions;
 	using Utilities;
 
 	/// <summary>
@@ -110,11 +111,8 @@ namespace SafetySharp.Analysis.ModelChecking
 				_stateMap[state] = new TransitionRange { StartIndex = _transitionOffset, Count = transitionCount };
 
 			// Copy the transitions into the buffer
-			for (var i = 0; i < transitions.Count; ++i)
-			{
-				if (transitions.Transitions[i].IsValid)
-					MemoryBuffer.Copy((byte*)&transitions.Transitions[i], _transitions + offset, _transitionSize);
-			}
+			foreach (var transition in transitions)
+				MemoryBuffer.Copy((byte*)transition, _transitions + offset, _transitionSize);
 		}
 
 		/// <summary>

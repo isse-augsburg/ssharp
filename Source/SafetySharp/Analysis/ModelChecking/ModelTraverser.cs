@@ -27,6 +27,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System.Linq;
 	using System.Threading.Tasks;
 	using ModelTraversal;
+	using Transitions;
 	using Utilities;
 
 	/// <summary>
@@ -48,6 +49,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(output, nameof(output));
+			TransitionCollection.ValidateTransitionSizes();
 
 			var tasks = new Task[configuration.CpuCount];
 			var stacks = new StateStack[configuration.CpuCount];

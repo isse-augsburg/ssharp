@@ -65,10 +65,12 @@
     <Compile Include="Analysis\ModelChecking\ModelTraverser.cs" />
     <Compile Include="Analysis\ModelChecking\StateGraph.cs" />
     <Compile Include="Analysis\ModelChecking\StateGraphGenerator.cs" />
-    <Compile Include="Analysis\ModelChecking\Transition.cs" />
+    <Compile Include="Analysis\ModelChecking\Transitions\CandidateTransition.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\ITransitionAction.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\ITransitionModifier.cs" />
-    <Compile Include="Analysis\ModelChecking\TransitionCollection.cs" />
+    <Compile Include="Analysis\ModelChecking\Transitions\Transition.cs" />
+    <Compile Include="Analysis\ModelChecking\Transitions\TransitionCollection.cs" />
+    <Compile Include="Analysis\ModelChecking\Transitions\TransitionEnumerator.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
     <Compile Include="Modeling\ObjectPool.cs" />
     <Compile Include="Modeling\SubcomponentAttribute.cs" />
@@ -172,7 +174,7 @@
     <Compile Include="Analysis\StateFormulaSet.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\StateStack.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\StateStorage.cs" />
-    <Compile Include="Analysis\ModelChecking\ActivationMinimalTransitionSet.cs" />
+    <Compile Include="Analysis\ModelChecking\Transitions\ActivationMinimalTransitionSet.cs" />
     <Compile Include="Runtime\UnboundPortException.cs" />
     <Compile Include="Utilities\ConsoleHelpers.cs" />
     <Compile Include="Utilities\InterlockedExtensions.cs" />

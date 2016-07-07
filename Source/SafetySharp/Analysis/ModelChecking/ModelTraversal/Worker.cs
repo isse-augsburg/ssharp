@@ -26,6 +26,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 	using System.Linq;
 	using System.Runtime.InteropServices;
 	using System.Threading;
+	using Transitions;
 	using TraversalModifiers;
 	using Utilities;
 
@@ -145,27 +146,25 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 
 			_stateStack.PushFrame();
 
-			for (var i = 0; i < transitions.Count; ++i)
+			foreach (var transition in transitions)
 			{
-				var transition = &transitions.Transitions[i];
-				if (!transition->IsValid)
-					continue;
+				int targetState;
+				var isNewState = _context.States.AddState(((CandidateTransition*)transition)->TargetState, out targetState);
 
-				int index;
-				var isNewState = _context.States.AddState(transition->TargetState, out index);
-				transition->TargetStateIndex = index;
+				transition->TargetState = targetState;
+				transition->SourceState = sourceState;
 
 				if (isNewState)
 				{
 					++stateCount;
-					_stateStack.PushState(index);
+					_stateStack.PushState(targetState);
 
 					foreach (var action in _stateActions)
-						action.ProcessState(_context, this, transition->TargetState, index, isInitialState);
+						action.ProcessState(_context, this, _context.States[targetState], targetState, isInitialState);
 				}
 
 				foreach (var action in _transitionActions)
-					action.ProcessTransition(_context, this, sourceState, transition, isInitialState);
+					action.ProcessTransition(_context, this, transition, isInitialState);
 
 				++transitionCount;
 			}

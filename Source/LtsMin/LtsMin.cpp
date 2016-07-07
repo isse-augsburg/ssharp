@@ -59,6 +59,7 @@ using namespace System::Reflection;
 using namespace System::Runtime::InteropServices;
 using namespace System::Threading;
 using namespace SafetySharp::Analysis::ModelChecking;
+using namespace SafetySharp::Analysis::ModelChecking::Transitions;
 using namespace SafetySharp::Runtime;
 using namespace SafetySharp::Runtime::Serialization;
 
@@ -238,12 +239,9 @@ int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, Transit
 		transition_info info = { nullptr, 0, 0 };
 		auto transitionCount = 0;
 
-		for (auto i = 0; i < transitions.Count; ++i)
+		for each (auto transition in transitions)
 		{
-			if (!transitions.Transitions[i].IsValid)
-				continue;
-
-			auto stateMemory = (int32_t*)transitions.Transitions[i].TargetState;
+			auto stateMemory = (int32_t*)((CandidateTransition*)transition)->TargetState;
 			stateMemory[0] = 0;
 			callback(context, &info, stateMemory, nullptr);
 

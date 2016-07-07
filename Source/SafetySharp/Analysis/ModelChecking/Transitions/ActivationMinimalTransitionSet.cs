@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking
+namespace SafetySharp.Analysis.ModelChecking.Transitions
 {
 	using System;
 	using System.Collections.Generic;
@@ -47,7 +47,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		private readonly MemoryBuffer _targetStateBuffer = new MemoryBuffer();
 		private readonly byte* _targetStateMemory;
 		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
-		private readonly Transition* _transitions;
+		private readonly CandidateTransition* _transitions;
 		private int _computedCount;
 		private int _count;
 		private int _nextFaultIndex;
@@ -68,8 +68,8 @@ namespace SafetySharp.Analysis.ModelChecking
 			_stateVectorSize = model.StateVectorSize;
 			_formulas = formulas;
 
-			_transitionBuffer.Resize(capacity * sizeof(Transition), zeroMemory: false);
-			_transitions = (Transition*)_transitionBuffer.Pointer;
+			_transitionBuffer.Resize(capacity * sizeof(CandidateTransition), zeroMemory: false);
+			_transitions = (CandidateTransition*)_transitionBuffer.Pointer;
 
 			_targetStateBuffer.Resize(capacity * model.StateVectorSize, zeroMemory: true);
 			_targetStateMemory = _targetStateBuffer.Pointer;
@@ -112,7 +112,7 @@ namespace SafetySharp.Analysis.ModelChecking
 				model.Serialize(successorState);
 
 			// 4. Store the transition
-			_transitions[_count] = new Transition
+			_transitions[_count] = new CandidateTransition
 			{
 				TargetState = successorState,
 				Formulas = new StateFormulaSet(_formulas),
@@ -295,12 +295,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		public TransitionCollection ToCollection()
 		{
-			return new TransitionCollection
-			{
-				Count = _count,
-				TotalCount = _computedCount,
-				Transitions = _transitions
-			};
+			return new TransitionCollection((Transition*)_transitions, _count, _computedCount, sizeof(CandidateTransition));
 		}
 
 		/// <summary>
@@ -309,7 +304,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		private struct FaultSetInfo
 		{
 			public int NextSet;
-			public Transition* Transition;
+			public CandidateTransition* Transition;
 		}
 	}
 }

@@ -20,26 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking
+namespace SafetySharp.Analysis.ModelChecking.Transitions
 {
+	using System.Runtime.InteropServices;
+
 	/// <summary>
-	///   Represents a collection of <see cref="Transition" /> instances.
+	///   Represents an actual, valid transition of an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal unsafe struct TransitionCollection
+	[StructLayout(LayoutKind.Explicit)]
+	internal struct Transition
 	{
 		/// <summary>
-		///   The transition instances stored in a contiguous array.
+		///   The index of the transition's source state.
 		/// </summary>
-		public Transition* Transitions;
+		[FieldOffset(0)]
+		public int SourceState;
 
 		/// <summary>
-		///   The number of transitions contained in the set; not all of these transitions are valid.
+		///   The index of the transition's target state.
 		/// </summary>
-		public int Count;
+		[FieldOffset(4)]
+		public int TargetState;
 
 		/// <summary>
-		///   The total number of all originally computed transitions.
+		///   The faults that are activated by the transition.
 		/// </summary>
-		public int TotalCount;
+		[FieldOffset(8)]
+		public FaultSet ActivatedFaults;
+
+		/// <summary>
+		///   The state formulas holding in the target state.
+		/// </summary>
+		[FieldOffset(16)]
+		public StateFormulaSet Formulas;
 	}
 }

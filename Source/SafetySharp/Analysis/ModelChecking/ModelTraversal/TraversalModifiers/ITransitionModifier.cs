@@ -22,6 +22,8 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using Transitions;
+
 	/// <summary>
 	///   Represents a modifier that is executed when new transitions are found during model traversal.
 	/// </summary>
@@ -29,7 +31,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 	{
 		/// <summary>
 		///   Optionally modifies the <paramref name="transitions" />, changing any of their values. However, no new transitions can be
-		///   added; transitions can be removed by setting their <see cref="Transition.IsValid" /> flag to <c>false</c>.
+		///   added; transitions can be removed by setting their <see cref="CandidateTransition.IsValid" /> flag to <c>false</c>.
 		///   During subsequent traversal steps, only valid transitions and target states reached by at least one valid transition
 		///   are considered.
 		/// </summary>

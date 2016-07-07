@@ -29,7 +29,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// <summary>
 	///   Generates a <see cref="StateGraph" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal unsafe class StateGraphGenerator : ModelTraverser
+	internal class StateGraphGenerator : ModelTraverser
 	{
 		private readonly StateGraph _stateGraph;
 
@@ -42,7 +42,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		internal StateGraphGenerator(Func<AnalysisModel> createModel, Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration)
 		{
-			_stateGraph = new StateGraph(Context, sizeof(Transition));
+			_stateGraph = new StateGraph(Context, AnalyzedModels.First().TransitionSize);
 			Context.TraversalParameters.BatchedTransitionActions = () => new[] { new StateGraphBuilder(_stateGraph) };
 		}
 
