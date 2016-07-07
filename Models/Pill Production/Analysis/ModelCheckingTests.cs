@@ -43,7 +43,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 
 		[Test]
 		public void ForcedActivationIncompleteDcca(
-			[Values(FaultActivationBehaviour.ForceOnly, FaultActivationBehaviour.Nondeterministic)] FaultActivationBehaviour activation)
+			[Values(FaultActivationBehavior.ForceOnly, FaultActivationBehavior.Nondeterministic)] FaultActivationBehavior activation)
 		{
 			// create stations
 			var producer = new ContainerLoader();
@@ -88,8 +88,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 				string modelFile,
 			[Values(HeuristicsUsage.None, HeuristicsUsage.Subsumption, HeuristicsUsage.Redundancy, HeuristicsUsage.Both)]
 				HeuristicsUsage heuristicsUsage,
-			[Values(FaultActivationBehaviour.ForceOnly, FaultActivationBehaviour.ForceThenFallback, FaultActivationBehaviour.Nondeterministic)]
-				FaultActivationBehaviour faultActivation)
+			[Values(FaultActivationBehavior.ForceOnly, FaultActivationBehavior.ForceThenFallback, FaultActivationBehavior.Nondeterministic)]
+				FaultActivationBehavior faultActivation)
 		{
 			var model = new ModelSetupParser().Parse($"Analysis/{modelFile}");
 			IFaultSetHeuristic[] heuristics;
@@ -112,7 +112,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			Dcca(model, faultActivation, heuristics);
 		}
 
-		private void Dcca(Model model, FaultActivationBehaviour activation, params IFaultSetHeuristic[] heuristics)
+		private void Dcca(Model model, FaultActivationBehavior activation, params IFaultSetHeuristic[] heuristics)
 		{
 			var modelChecker = new SafetyAnalysis();
 
@@ -120,7 +120,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			modelChecker.Configuration.CpuCount = 4;
 			modelChecker.Configuration.GenerateCounterExample = false;
 			modelChecker.Heuristics.AddRange(heuristics);
-			modelChecker.FaultActivationBehaviour = activation;
+			modelChecker.FaultActivationBehavior = activation;
 
 			var result = modelChecker.ComputeMinimalCriticalSets(model, model.ObserverController.Unsatisfiable);
 			Console.WriteLine(result);
