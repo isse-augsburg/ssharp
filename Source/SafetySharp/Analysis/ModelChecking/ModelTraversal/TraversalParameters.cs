@@ -29,30 +29,30 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 	/// <summary>
 	///   Provides parameters for the model traversal process.
 	/// </summary>
-	internal struct TraversalParameters
+	internal class TraversalParameters
 	{
 		/// <summary>
-		///   A factory method for <see cref="ITransitionAction" /> instances that should be executed by all <see cref="Worker" />
+		///   Factory methods for <see cref="ITransitionAction" /> instances that should be executed by all <see cref="Worker" />
 		///   instances.
 		/// </summary>
-		internal Func<IEnumerable<ITransitionAction>> TransitionActions;
+		internal readonly List<Func<ITransitionAction>> TransitionActions = new List<Func<ITransitionAction>>();
 
 		/// <summary>
-		///   A factory method for <see cref="IBatchedTransitionAction" /> instances that should be executed by all
+		///   Factory methods for <see cref="IBatchedTransitionAction" /> instances that should be executed by all
 		///   <see cref="Worker" /> instances.
 		/// </summary>
-		internal Func<IEnumerable<IBatchedTransitionAction>> BatchedTransitionActions;
+		internal readonly List<Func<IBatchedTransitionAction>> BatchedTransitionActions = new List<Func<IBatchedTransitionAction>>();
 
 		/// <summary>
-		///   A factory method for <see cref="ITransitionModifier" /> instances that should be executed by all <see cref="Worker" />
+		///   Factory methods for <see cref="ITransitionModifier" /> instances that should be executed by all <see cref="Worker" />
 		///   instances.
 		/// </summary>
-		internal Func<IEnumerable<ITransitionModifier>> TransitionModifiers;
+		internal readonly List<Func<ITransitionModifier>> TransitionModifiers = new List<Func<ITransitionModifier>>();
 
 		/// <summary>
-		///   A factory method for <see cref="IStateAction" /> instances that should be executed by all <see cref="Worker" />
+		///   Factory methods for <see cref="IStateAction" /> instances that should be executed by all <see cref="Worker" />
 		///   instances.
 		/// </summary>
-		internal Func<IEnumerable<IStateAction>> StateActions;
+		internal readonly List<Func<IStateAction>> StateActions = new List<Func<IStateAction>>();
 	}
 }

@@ -55,7 +55,7 @@ namespace SafetySharp.Analysis
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			using (var checker = new InvariantChecker(createModel, message => OutputWritten?.Invoke(message), Configuration, formulaIndex))
+			using (var checker = new InvariantChecker(createModel, OutputWritten, Configuration, formulaIndex))
 			{
 				var result = default(AnalysisResult);
 				var initializationTime = stopwatch.Elapsed;
@@ -76,8 +76,13 @@ namespace SafetySharp.Analysis
 						OutputWritten?.Invoke("===============================================");
 						OutputWritten?.Invoke($"Initialization time: {initializationTime}");
 						OutputWritten?.Invoke($"Model checking time: {stopwatch.Elapsed}");
-						OutputWritten?.Invoke($"{(int)(result.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
-						OutputWritten?.Invoke($"{(int)(result.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+
+						if (result != null)
+						{
+							OutputWritten?.Invoke($"{(int)(result.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
+							OutputWritten?.Invoke($"{(int)(result.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+						}
+
 						OutputWritten?.Invoke("===============================================");
 						OutputWritten?.Invoke(String.Empty);
 					}
@@ -95,7 +100,7 @@ namespace SafetySharp.Analysis
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			using (var checker = new StateGraphGenerator(createModel, stateFormulas, message => OutputWritten?.Invoke(message), Configuration))
+			using (var checker = new StateGraphGenerator(createModel, stateFormulas, OutputWritten, Configuration))
 			{
 				var stateGraph = default(StateGraph);
 				var initializationTime = stopwatch.Elapsed;

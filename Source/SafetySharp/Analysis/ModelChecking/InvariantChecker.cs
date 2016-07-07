@@ -42,7 +42,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		internal InvariantChecker(Func<AnalysisModel> createModel, Action<string> output, AnalysisConfiguration configuration, int formulaIndex)
 			: base(createModel, output, configuration)
 		{
-			Context.TraversalParameters.TransitionActions = () => new[] { new InvariantViolationAction(formulaIndex) };
+			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationAction(formulaIndex));
 		}
 
 		/// <summary>

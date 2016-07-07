@@ -20,25 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
+namespace SafetySharp.Analysis
 {
-	using Transitions;
-
 	/// <summary>
-	///   Represents a modifier that is executed when new transitions are found during model traversal.
+	///   Determines the analysis backend that is used during <see cref="SafetyAnalysis." />
 	/// </summary>
-	internal unsafe interface ITransitionModifier
+	public enum SafetyAnalysisBackend
 	{
 		/// <summary>
-		///   Optionally modifies the <paramref name="transitions" />, changing any of their values. However, no new transitions can be
-		///   added; transitions can be removed by setting their <see cref="CandidateTransition.IsValid" /> flag to <c>false</c>.
-		///   During subsequent traversal steps, only valid transitions and target states reached by at least one valid transition
-		///   are considered.
+		///   Indicates that the model is traversed on-the-fly using the fault removal optimization.
 		/// </summary>
-		/// <param name="context">The context of the model traversal.</param>
-		/// <param name="transitions">The transitions that should be checked.</param>
-		/// <param name="sourceState">The source state of the transitions.</param>
-		/// <param name="sourceStateIndex">The unique index of the transition's source state.</param>
-		void ModifyTransitions(TraversalContext context, TransitionCollection transitions, byte* sourceState, int sourceStateIndex);
+		FaultOptimizedOnTheFly,
+
+		/// <summary>
+		///   Indicates that the model's state graph is pre-built in its entirety and subsequently traversed using the fault removal
+		///   optimization.
+		/// </summary>
+		FaultOptimizedStateGraph
 	}
 }

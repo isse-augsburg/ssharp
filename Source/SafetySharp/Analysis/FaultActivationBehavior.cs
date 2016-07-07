@@ -23,9 +23,9 @@
 namespace SafetySharp.Analysis
 {
 	/// <summary>
-	///   Defines how faults are activated during safety analysis.
+	///   Determines how faults are activated during safety analysis.
 	/// </summary>
-	public enum FaultActivationBehaviour
+	public enum FaultActivationBehavior
 	{
 		/// <summary>
 		///   Faults are activated nondeterministically (the default).

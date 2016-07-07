@@ -54,8 +54,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			result[2].FormulaHolds.Should().BeTrue();
 		}
 
-		[Test]
-		public void CollisionOriginalDesign()
+		[TestCase]
+		public void CollisionOriginalDesign(
+			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
 			var model = Model.CreateOriginal();
 
@@ -63,17 +64,18 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			// force the activation of the LeftOHV fault to improve safety analysis times significantly
 			model.VehicleSet.LeftOHV.Activation = Activation.Forced;
 
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision);
-
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision, backend: backend);
 			result.SaveCounterExamples("counter examples/height control/dcca/collision/original");
+
 			Console.WriteLine(result);
 		}
 
-		[Test]
-		public void FalseAlarmOriginalDesign()
+		[TestCase]
+		public void FalseAlarmOriginalDesign(
+			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
 			var model = Model.CreateOriginal();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm);
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, backend: backend);
 
 			result.SaveCounterExamples("counter examples/height control/dcca/false alarm/original");
 			Console.WriteLine(result);
@@ -102,7 +104,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		[Test, TestCaseSource(nameof(CreateModelVariants))]
 		public void FalseAlarm(Model model, string variantName)
 		{
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm);
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, backend: SafetyAnalysisBackend.FaultOptimizedStateGraph);
 
 			result.SaveCounterExamples($"counter examples/height control/dcca/false alarm/{variantName}");
 			Console.WriteLine(result);

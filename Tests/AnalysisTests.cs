@@ -22,22 +22,27 @@
 
 namespace Tests
 {
-	using System;
 	using SafetySharp.Analysis;
 	using Xunit;
 
 	public partial class DccaTests
 	{
 		[Theory, MemberData("DiscoverTests", "Analysis/Dcca")]
-		public void Dcca(string test, string file)
+		public void FaultRemovalDcca(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(LtsMin));
+			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedOnTheFly);
+		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Dcca")]
+		public void StateGraphDcca(string test, string file)
+		{
+			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedStateGraph);
 		}
 
 		[Theory, MemberData("DiscoverTests", "Analysis/Heuristics")]
 		public void Heuristics(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(LtsMin));
+			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedOnTheFly);
 		}
 	}
 

@@ -51,6 +51,11 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		public readonly Action<string> Output;
 
 		/// <summary>
+		///   The parameters influencing the traversal process.
+		/// </summary>
+		public readonly TraversalParameters TraversalParameters = new TraversalParameters();
+
+		/// <summary>
 		///   The number of computed transitions checked by the model checker.
 		/// </summary>
 		internal long ComputedTransitionCount;
@@ -99,11 +104,6 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		///   The number of activation-minimal transitions checked by the model checker.
 		/// </summary>
 		public long TransitionCount;
-
-		/// <summary>
-		///   The parameters influencing the traversal process.
-		/// </summary>
-		public TraversalParameters TraversalParameters;
 
 		/// <summary>
 		///   Initializes a new instance.

@@ -45,10 +45,12 @@ namespace SafetySharp.Analysis.ModelChecking
 			: base(createModel, output, configuration)
 		{
 			var analyzedModel = AnalyzedModels.First();
-			_stateGraph = new StateGraph(Context, stateFormulas, analyzedModel.TransitionSize,
+
+			_stateGraph = new StateGraph(
+				Context, stateFormulas, analyzedModel.TransitionSize,
 				analyzedModel.RuntimeModel, analyzedModel.RuntimeModelCreator);
 
-			Context.TraversalParameters.BatchedTransitionActions = () => new[] { new StateGraphBuilder(_stateGraph) };
+			Context.TraversalParameters.BatchedTransitionActions.Add(() => new StateGraphBuilder(_stateGraph));
 		}
 
 		/// <summary>

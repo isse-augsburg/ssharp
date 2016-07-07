@@ -31,7 +31,7 @@ namespace SafetySharp.Analysis
 	public struct AnalysisConfiguration
 	{
 		private const int DefaultStateCapacity = 1 << 24;
-		private const int DefaultTransitionCapacity = 1 << 26;
+		private const int DefaultTransitionCapacity = 1 << 30;
 		private const int DefaultStackCapacity = 1 << 16;
 		private const int DefaultSuccessorStateCapacity = 1 << 14;
 		private const int MinCapacity = 1024;
@@ -51,7 +51,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Gets or sets a value indicating whether only progress reports should be output.
 		/// </summary>
-		public bool ProgressReportsOnly { get; set; }
+		internal bool ProgressReportsOnly { get; set; }
 
 		/// <summary>
 		///   The default configuration.

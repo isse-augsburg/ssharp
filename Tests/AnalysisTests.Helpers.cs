@@ -64,7 +64,7 @@ namespace Tests
 				CounterExample = results[0].CounterExample;
 				return results[0].FormulaHolds;
 			}
-			
+
 			var result = modelChecker.CheckInvariant(TestModel.InitializeModel(components), invariant);
 			CounterExample = result.CounterExample;
 			return result.FormulaHolds;
@@ -87,21 +87,27 @@ namespace Tests
 			return result.FormulaHolds;
 		}
 
-		protected SafetyAnalysis.Result DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
+		protected SafetyAnalysisResult DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
 		{
 			return DccaWithMaxCardinality(TestModel.InitializeModel(components), hazard, maxCardinality);
 		}
 
-		protected SafetyAnalysis.Result Dcca(Formula hazard, params IComponent[] components)
+		protected SafetyAnalysisResult Dcca(Formula hazard, params IComponent[] components)
 		{
 			return DccaWithMaxCardinality(hazard, Int32.MaxValue, components);
 		}
 
-		protected SafetyAnalysis.Result DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality)
+		protected SafetyAnalysisResult DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality)
 		{
 			var analysis = new SafetyAnalysis
 			{
-				Configuration = { StateCapacity = 1 << 10, GenerateCounterExample = !SuppressCounterExampleGeneration }
+				Backend = (SafetyAnalysisBackend)Arguments[0],
+				Configuration =
+				{
+					StateCapacity = 1 << 10,
+					TransitionCapacity = 1 << 12,
+					GenerateCounterExample = !SuppressCounterExampleGeneration
+				}
 			};
 			analysis.OutputWritten += message => Output.Log("{0}", message);
 
@@ -115,7 +121,7 @@ namespace Tests
 			return result;
 		}
 
-		protected SafetyAnalysis.Result Dcca(ModelBase model, Formula hazard)
+		protected SafetyAnalysisResult Dcca(ModelBase model, Formula hazard)
 		{
 			return DccaWithMaxCardinality(model, hazard, Int32.MaxValue);
 		}
@@ -128,7 +134,8 @@ namespace Tests
 			var ssharpChecker = modelChecker as SSharpChecker;
 			if (ssharpChecker != null)
 			{
-				ssharpChecker.Configuration.StateCapacity = 1 << 16;
+				ssharpChecker.Configuration.StateCapacity = 1 << 14;
+				ssharpChecker.Configuration.TransitionCapacity = 1 << 16;
 				ssharpChecker.Configuration.GenerateCounterExample = !SuppressCounterExampleGeneration;
 			}
 

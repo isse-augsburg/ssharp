@@ -128,7 +128,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
 		public override CounterExample CreateCounterExample(byte[][] path, bool endsWithException)
 		{
-			var modelPath = path.Select(state =>
+			var modelPath = path?.Select(state =>
 			{
 				var graphState = BitConverter.ToInt32(state, 0);
 				var modelState = _stateGraph.GetState(graphState);

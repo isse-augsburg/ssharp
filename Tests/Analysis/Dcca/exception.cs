@@ -24,6 +24,8 @@ namespace Tests.Analysis.Dcca
 {
 	using System;
 	using System.Linq;
+	using SafetySharp.Analysis;
+	using SafetySharp.Analysis.SafetyChecking;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
@@ -31,50 +33,61 @@ namespace Tests.Analysis.Dcca
 	{
 		protected override void Check()
 		{
-			var c = new C();
-			var result = Dcca(c.X > 4, c);
-
-			result.Faults.Count().ShouldBe(3);
-			result.CheckedSets.Count.ShouldBe(4);
-			result.MinimalCriticalSets.Count.ShouldBe(3);
-			result.Exceptions.Count.ShouldBe(2);
-			result.IsComplete.ShouldBe(true);
-			result.SuppressedFaults.ShouldBeEmpty();
-			result.ForcedFaults.ShouldBeEmpty();
-
-			ShouldContain(result.CheckedSets);
-			ShouldContain(result.CheckedSets, c.F1);
-			ShouldContain(result.CheckedSets, c.F2);
-			ShouldContain(result.CheckedSets, c.F3);
-
-			ShouldContain(result.MinimalCriticalSets, c.F1);
-			ShouldContain(result.MinimalCriticalSets, c.F2);
-			ShouldContain(result.MinimalCriticalSets, c.F3);
-
-			result.CounterExamples.Count.ShouldBe(3);
-			foreach (var set in result.MinimalCriticalSets)
-				result.CounterExamples.ContainsKey(set).ShouldBe(true);
-
-			foreach (var exceptionSet in result.Exceptions.Keys)
+			if (Arguments[0] is StateGraphBackend)
 			{
-				ShouldContain(result.CheckedSets, exceptionSet.ToArray());
-				ShouldContain(result.MinimalCriticalSets, exceptionSet.ToArray());
+				var exception = Should.Throw<AnalysisException>(() => Dcca(true, new C()));
+				exception.CounterExample.ShouldNotBeNull();
+
+				SimulateCounterExample(exception.CounterExample,
+					simulator => Should.Throw<ArgumentException>(() => simulator.FastForward(100)).Message.ShouldBe("arg"));
 			}
-
-			foreach (var set in result.MinimalCriticalSets)
+			else
 			{
-				if (!result.Exceptions.ContainsKey(set))
-					continue;
+				var c = new C();
+				var result = Dcca(c.X > 4, c);
 
-				if (set.Contains(c.F2))
+				result.Faults.Count().ShouldBe(3);
+				result.CheckedSets.Count.ShouldBe(4);
+				result.MinimalCriticalSets.Count.ShouldBe(3);
+				result.Exceptions.Count.ShouldBe(2);
+				result.IsComplete.ShouldBe(true);
+				result.SuppressedFaults.ShouldBeEmpty();
+				result.ForcedFaults.ShouldBeEmpty();
+
+				ShouldContain(result.CheckedSets);
+				ShouldContain(result.CheckedSets, c.F1);
+				ShouldContain(result.CheckedSets, c.F2);
+				ShouldContain(result.CheckedSets, c.F3);
+
+				ShouldContain(result.MinimalCriticalSets, c.F1);
+				ShouldContain(result.MinimalCriticalSets, c.F2);
+				ShouldContain(result.MinimalCriticalSets, c.F3);
+
+				result.CounterExamples.Count.ShouldBe(3);
+				foreach (var set in result.MinimalCriticalSets)
+					result.CounterExamples.ContainsKey(set).ShouldBe(true);
+
+				foreach (var exceptionSet in result.Exceptions.Keys)
 				{
-					SimulateCounterExample(result.CounterExamples[set],
-						simulator => Should.Throw<ArgumentException>(() => simulator.FastForward(100)).Message.ShouldBe("arg"));
+					ShouldContain(result.CheckedSets, exceptionSet.ToArray());
+					ShouldContain(result.MinimalCriticalSets, exceptionSet.ToArray());
 				}
-				else
+
+				foreach (var set in result.MinimalCriticalSets)
 				{
-					SimulateCounterExample(result.CounterExamples[set],
-						simulator => Should.Throw<InvalidOperationException>(() => simulator.FastForward(100)).Message.ShouldBe("test"));
+					if (!result.Exceptions.ContainsKey(set))
+						continue;
+
+					if (set.Contains(c.F2))
+					{
+						SimulateCounterExample(result.CounterExamples[set],
+							simulator => Should.Throw<ArgumentException>(() => simulator.FastForward(100)).Message.ShouldBe("arg"));
+					}
+					else
+					{
+						SimulateCounterExample(result.CounterExamples[set],
+							simulator => Should.Throw<InvalidOperationException>(() => simulator.FastForward(100)).Message.ShouldBe("test"));
+					}
 				}
 			}
 		}

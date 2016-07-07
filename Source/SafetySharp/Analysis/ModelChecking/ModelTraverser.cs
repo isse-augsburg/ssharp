@@ -77,7 +77,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <summary>
 		///   Gets the context of the traversal.
 		/// </summary>
-		protected TraversalContext Context { get; }
+		public TraversalContext Context { get; }
 
 		/// <summary>
 		///   Gets the <see cref="AnalysisModel" /> instances analyzed by the checker's <see cref="Worker" /> instances.

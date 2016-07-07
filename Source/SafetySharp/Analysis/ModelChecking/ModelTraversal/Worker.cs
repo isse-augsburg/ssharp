@@ -122,15 +122,13 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 			Model.Reset();
 			_stateStack.Clear();
 
-			if (_transitionActions != null)
-				return;
-
-			// We have to initialize the following arrays here as the context is not yet completely initialized when the
-			// worker's constructor executes...
-			_transitionActions = _context.TraversalParameters.TransitionActions?.Invoke().ToArray() ?? new ITransitionAction[0];
-			_batchedTransitionActions = _context.TraversalParameters.BatchedTransitionActions?.Invoke().ToArray() ?? new IBatchedTransitionAction[0];
-			_transitionModifiers = _context.TraversalParameters.TransitionModifiers?.Invoke().ToArray() ?? new ITransitionModifier[0];
-			_stateActions = _context.TraversalParameters.StateActions?.Invoke().ToArray() ?? new IStateAction[0];
+			// We have to initialize the following arrays here for two reasons:
+			// 1) The context is not yet completely initialized when the worker's constructor executes
+			// 2) We sometimes want to change some traversal parameters between multiple traversals
+			_transitionActions = _context.TraversalParameters.TransitionActions.Select(a => a.Invoke()).ToArray();
+			_batchedTransitionActions = _context.TraversalParameters.BatchedTransitionActions.Select(a => a.Invoke()).ToArray();
+			_transitionModifiers = _context.TraversalParameters.TransitionModifiers.Select(a => a.Invoke()).ToArray();
+			_stateActions = _context.TraversalParameters.StateActions.Select(a => a.Invoke()).ToArray();
 		}
 
 		/// <summary>
@@ -142,7 +140,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 			var stateCount = 0;
 
 			foreach (var modifier in _transitionModifiers)
-				modifier.ModifyTransitions(_context, transitions);
+				modifier.ModifyTransitions(_context, transitions, _context.States[sourceState], sourceState);
 
 			_stateStack.PushFrame();
 
@@ -168,9 +166,6 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 
 				++transitionCount;
 			}
-
-			if (transitionCount == 0)
-				throw new InvalidOperationException("Deadlock state detected.");
 
 			foreach (var action in _batchedTransitionActions)
 				action.ProcessTransitions(_context, this, sourceState, transitions, transitionCount, isInitialState);

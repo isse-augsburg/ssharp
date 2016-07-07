@@ -25,10 +25,21 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 	using Transitions;
 
 	/// <summary>
-	///   Represents a modifier that is executed when new transitions are found during model traversal.
+	///   Removes all candidate transition that activate one or more of certain suppressed faults.
 	/// </summary>
-	internal unsafe interface ITransitionModifier
+	internal sealed unsafe class FaultSuppressionModifier : ITransitionModifier
 	{
+		private readonly FaultSet _suppressedFaults;
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="suppressedFaults">The suppressed faults that are removed by the modifier.</param>
+		public FaultSuppressionModifier(FaultSet suppressedFaults)
+		{
+			_suppressedFaults = suppressedFaults;
+		}
+
 		/// <summary>
 		///   Optionally modifies the <paramref name="transitions" />, changing any of their values. However, no new transitions can be
 		///   added; transitions can be removed by setting their <see cref="CandidateTransition.IsValid" /> flag to <c>false</c>.
@@ -39,6 +50,10 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// <param name="transitions">The transitions that should be checked.</param>
 		/// <param name="sourceState">The source state of the transitions.</param>
 		/// <param name="sourceStateIndex">The unique index of the transition's source state.</param>
-		void ModifyTransitions(TraversalContext context, TransitionCollection transitions, byte* sourceState, int sourceStateIndex);
+		public void ModifyTransitions(TraversalContext context, TransitionCollection transitions, byte* sourceState, int sourceStateIndex)
+		{
+			foreach (CandidateTransition* transition in transitions)
+				transition->IsValid = transition->ActivatedFaults.GetIntersection(_suppressedFaults).IsEmpty;
+		}
 	}
 }
