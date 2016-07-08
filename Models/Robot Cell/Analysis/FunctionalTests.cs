@@ -38,7 +38,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void DamagedWorkpieces()
 		{
-			var model = new Model();
+			var model = Model.GetDefaultInstance();
 			var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.Workpieces.Any(w => w.IsDamaged));
 
@@ -48,7 +48,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void ReconfigurationFailed()
 		{
-			var model = new Model();
+			var model = Model.GetDefaultInstance();
 			model.Components.OfType<Robot>().Select(r => r.SwitchFault).ToArray().SuppressActivations();
 
 			foreach (var robot in model.Robots)
@@ -63,7 +63,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void InvariantViolation()
 		{
-			var model = new Model();
+			var model = Model.GetDefaultInstance();
 			model.Components.OfType<Robot>().Select(r => r.SwitchFault).ToArray().SuppressActivations();
 
 			var safetyAnalysis = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
@@ -75,7 +75,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void Exception()
 		{
-			var model = new Model();
+			var model = Model.GetDefaultInstance();
 			model.Faults.SuppressActivations();
 			model.Carts[0].Broken.ForceActivation();
 			model.Robots[0].ApplyFault.ForceActivation();
@@ -86,6 +86,32 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 			Assert.IsTrue(result.FormulaHolds);
 		}
+
+	    [Test]
+	    public void EvalIctss1()
+	    {
+	        var model = new Model();
+
+	        model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
+
+            var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
+            var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
+            var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
+            var tighten = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Tighten));
+            var polish = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Polish));
+            var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
+
+            model.CreateWorkpieces(5, produce(), drill(), insert(), tighten(), polish(), consume());
+
+            model.CreateRobot(produce(), drill(), insert());
+            model.CreateRobot(insert(), drill());
+            model.CreateRobot(tighten(), polish(), tighten(), drill());
+            model.CreateRobot(polish(), consume());
+
+            model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]), new Route(model.Robots[0], model.Robots[2]), new Route(model.Robots[0], model.Robots[3]));
+            model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]));
+            model.CreateCart(model.Robots[2], new Route(model.Robots[2], model.Robots[3]));
+        }
 
 		private bool Hazard(Model model)
 		{
