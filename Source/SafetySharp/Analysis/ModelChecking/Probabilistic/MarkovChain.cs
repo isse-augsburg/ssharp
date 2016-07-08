@@ -31,7 +31,9 @@ namespace SafetySharp.Runtime
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.Runtime.CompilerServices;
+	using System.Threading;
 	using Analysis;
+	using Analysis.ModelChecking.Transitions;
 	using Modeling;
 	using Serialization;
 	using Utilities;
@@ -71,7 +73,7 @@ namespace SafetySharp.Runtime
 		}
 	}
 
-	internal class MarkovChain
+	internal unsafe class MarkovChain
 	{
 		public bool MarkovChainComplete { get; private set; }
 
@@ -118,9 +120,10 @@ namespace SafetySharp.Runtime
 		public int? ExceptionState { get; private set; } = null;
 
 		public bool HasExceptionInModel => ExceptionState != -1;
-		
+
 		// Creating matrix phase
 
+		/*
 		private int GetOrCreateStateForException()
 		{
 			if (ExceptionState != null)
@@ -131,6 +134,7 @@ namespace SafetySharp.Runtime
 			States++;
 			return ExceptionState.Value;
 		}
+		*/
 
 		private int GetMarkovChainState (int stateStorageState)
 		{
@@ -149,56 +153,99 @@ namespace SafetySharp.Runtime
 			}
 		}
 
-		public void AddInitialState(int stateStorageState, Probability probability)
+		private void AddInitialState(int stateStorageState, double probability)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
-			InitialStateProbabilities[markovChainState] = InitialStateProbabilities[markovChainState] + probability.Value;
+			InitialStateProbabilities[markovChainState] = InitialStateProbabilities[markovChainState] + probability;
 		}
 
-		public void AddInitialException(Probability probability)
+		/*
+		private void AddInitialException(Probability probability)
 		{
 			AddInitialState(GetOrCreateStateForException(), probability);
 		}
+		*/
 
-		public void SetSourceStateOfUpcomingTransitions(int stateStorageState)
+		private void SetSourceStateOfUpcomingTransitions(int stateStorageState)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
 			ProbabilityMatrix.SetRow(markovChainState);
 		}
 
-		public void AddTransition(int stateStorageState, Probability probability)
+		private void AddTransition(int stateStorageState, double probability)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
-			ProbabilityMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(markovChainState, probability.Value));
+			ProbabilityMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(markovChainState, probability));
 			Transitions++;
 		}
 
-		public void AddTransitionException(Probability probability)
+		/*
+		private void AddTransitionException(Probability probability)
 		{
 			AddTransition(GetOrCreateStateForException(), probability);
 		}
+		*/
 
-		public void SetStateLabeling(int stateStorageState, StateFormulaSet formula)
+		private void SetStateLabeling(int stateStorageState, StateFormulaSet formula)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
 			StateLabeling[markovChainState] = formula;
 		}
 
-		public void SetStateRewards0(int stateStorageState, Reward reward)
+		private void SetStateRewards0(int stateStorageState, Reward reward)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
 			StateRewards0[markovChainState] = reward;
 		}
 
-		public void SetStateRewards1(int stateStorageState, Reward reward)
+		private void SetStateRewards1(int stateStorageState, Reward reward)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
 			StateRewards1[markovChainState] = reward;
 		}
 
-		public void FinishSourceState()
+		private void FinishSourceState()
 		{
 			ProbabilityMatrix.FinishRow();
+		}
+
+
+		/// <summary>
+		///   Adds the <paramref name="state" /> and all of its <see cref="transitions" /> to the state graph.
+		/// </summary>
+		/// <param name="state">The state that should be added.</param>
+		/// <param name="isInitial">Indicates whether the state is an initial state.</param>
+		/// <param name="transitions">The transitions leaving the state.</param>
+		/// <param name="transitionCount">The number of valid transitions leaving the state.</param>
+		internal void AddStateInfo(int state, bool isInitial, TransitionCollection transitions, int transitionCount)
+		{
+			Assert.That(transitionCount > 0, "Cannot add deadlock state.");
+
+			if (isInitial)
+			{
+				foreach (var transition in transitions)
+				{
+					var probTransition = (ProbabilisticTransition*)transition;
+					Assert.That(probTransition->IsValid, "Attempted to add an invalid transition.");
+					AddInitialState(transition->TargetState, probTransition->Probability);
+				}
+			}
+			else
+			{
+				SetSourceStateOfUpcomingTransitions(state);
+				foreach (var transition in transitions)
+				{
+					var probTransition = (ProbabilisticTransition*)transition;
+					Assert.That(probTransition->IsValid, "Attempted to add an invalid transition.");
+					AddTransition(transition->TargetState, probTransition->Probability);
+
+					//TODO: optimize and allow different target transitions
+					SetStateLabeling(state, transition->Formulas);
+					//SetStateRewards0(state, transition.Reward0);
+					//SetStateRewards1(state, transition.Reward1);
+				}
+				FinishSourceState();
+			}
 		}
 
 		public void SealProbabilityMatrix()
