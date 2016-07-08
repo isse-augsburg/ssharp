@@ -153,26 +153,26 @@ namespace SafetySharp.Runtime
 			}
 		}
 
-		private void AddInitialState(int stateStorageState, double probability)
+		internal void AddInitialState(int stateStorageState, double probability)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
 			InitialStateProbabilities[markovChainState] = InitialStateProbabilities[markovChainState] + probability;
 		}
 
 		/*
-		private void AddInitialException(Probability probability)
+		internal void AddInitialException(Probability probability)
 		{
 			AddInitialState(GetOrCreateStateForException(), probability);
 		}
 		*/
 
-		private void SetSourceStateOfUpcomingTransitions(int stateStorageState)
+		internal void SetSourceStateOfUpcomingTransitions(int stateStorageState)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
 			ProbabilityMatrix.SetRow(markovChainState);
 		}
 
-		private void AddTransition(int stateStorageState, double probability)
+		internal void AddTransition(int stateStorageState, double probability)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
 			ProbabilityMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(markovChainState, probability));
@@ -186,25 +186,25 @@ namespace SafetySharp.Runtime
 		}
 		*/
 
-		private void SetStateLabeling(int stateStorageState, StateFormulaSet formula)
+		internal void SetStateLabeling(int stateStorageState, StateFormulaSet formula)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
 			StateLabeling[markovChainState] = formula;
 		}
 
-		private void SetStateRewards0(int stateStorageState, Reward reward)
+		internal void SetStateRewards0(int stateStorageState, Reward reward)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
 			StateRewards0[markovChainState] = reward;
 		}
 
-		private void SetStateRewards1(int stateStorageState, Reward reward)
+		internal void SetStateRewards1(int stateStorageState, Reward reward)
 		{
 			var markovChainState = GetMarkovChainState(stateStorageState);
 			StateRewards1[markovChainState] = reward;
 		}
 
-		private void FinishSourceState()
+		internal void FinishSourceState()
 		{
 			ProbabilityMatrix.FinishRow();
 		}

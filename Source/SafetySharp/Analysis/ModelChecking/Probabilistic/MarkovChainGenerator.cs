@@ -46,14 +46,14 @@ namespace SafetySharp.Analysis.ModelChecking
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration)
 		{
-			var stateLabelCollector = new CollectStateFormulaLabelsVisitor();
+			var stateFormulaCollector = new CollectStateFormulasVisitor();
 			foreach (var stateFormula in stateFormulas)
 			{
-				stateLabelCollector.Visit(stateFormula);
+				stateFormulaCollector.Visit(stateFormula);
 			}
 
-			_markovChain = new MarkovChain();
-			_markovChain.StateFormulaLabels = stateLabelCollector.Labels.ToArray();
+			_markovChain = new MarkovChain(configuration.StateCapacity);
+			_markovChain.StateFormulaLabels = stateFormulaCollector.StateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
 			Context.TraversalParameters.BatchedTransitionActions.Add(() => new MarkovChainBuilder(_markovChain));
 		}

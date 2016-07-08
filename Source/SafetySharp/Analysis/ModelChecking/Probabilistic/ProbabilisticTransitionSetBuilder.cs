@@ -71,6 +71,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		public void Add(RuntimeModel model)
 		{
 			// 1. Notify all fault activations, so that the correct activation is set in the run time model
+			//    (Needed to persist persistent faults)
 			model.NotifyFaultActivations();
 			
 			// 2. Serialize the model's computed state; that is the successor state of the transition's source state

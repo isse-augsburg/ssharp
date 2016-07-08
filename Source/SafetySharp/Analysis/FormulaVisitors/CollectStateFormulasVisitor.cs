@@ -27,12 +27,12 @@ namespace SafetySharp.Analysis.FormulaVisitors
 	/// <summary>
 	///   Determines whether a <see cref="Formula" /> is a formula that can be evaluted in a single state.
 	/// </summary>
-	internal class CollectStateFormulaLabelsVisitor : FormulaVisitor
+	internal class CollectStateFormulasVisitor : FormulaVisitor
 	{
 		/// <summary>
 		///   Indicates whether the visited formula contains any invalid operators.
 		/// </summary>
-		public HashSet<string> Labels { get; private set; } = new HashSet<string>();
+		public HashSet<StateFormula> StateFormulas { get; } = new HashSet<StateFormula>();
 
 
 		/// <summary>
@@ -58,7 +58,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		public override void VisitStateFormula(StateFormula formula)
 		{
 			if (formula.Label != null)
-				Labels.Add(formula.Label);
+				StateFormulas.Add(formula);
 		}
 
 		/// <summary>
