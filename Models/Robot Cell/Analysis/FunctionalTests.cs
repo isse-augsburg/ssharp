@@ -106,6 +106,60 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             Console.WriteLine(result);
         }
 
+        [Test]
+        public void EvalIctss2()
+        {
+            var model = new Model();
+
+            var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
+            var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
+            var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
+            var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
+
+            model.CreateWorkpieces(5, produce(), drill(), insert(), consume());
+
+            model.CreateRobot(produce(), insert());
+            model.CreateRobot(insert());
+            model.CreateRobot(drill(), consume());
+
+            model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]), new Route(model.Robots[0], model.Robots[2]));
+            model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]));
+
+            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
+
+            var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
+            var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
+
+            Console.WriteLine(result);
+        }
+
+        [Test]
+        public void EvalIctss3()
+        {
+            var model = new Model();
+
+            var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
+            var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
+            var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
+            var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
+
+            model.CreateWorkpieces(5, produce(), drill(), insert(), consume());
+
+            model.CreateRobot(produce(), insert(), drill(), insert());
+            model.CreateRobot(insert(), drill(), drill());
+            model.CreateRobot(drill(), insert(), consume(), drill());
+
+            model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]), new Route(model.Robots[0], model.Robots[2]));
+            model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]));
+
+            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
+
+            var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
+            var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
+
+            Console.WriteLine(result);
+        }
+
         [Obsolete("The check has been moved into the agents")]
         private bool Hazard(Model model)
 		{
