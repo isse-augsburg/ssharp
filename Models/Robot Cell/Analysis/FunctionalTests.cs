@@ -61,18 +61,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		}
 
 		[Test]
-		public void InvariantViolation()
-		{
-			var model = Model.GetDefaultInstance();
-			model.Components.OfType<Robot>().Select(r => r.SwitchFault).ToArray().SuppressActivations();
-
-			var safetyAnalysis = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
-			var result = safetyAnalysis.CheckInvariant(model, !Hazard(model));
-
-			Console.WriteLine(result);
-		}
-
-		[Test]
 		public void Exception()
 		{
 			var model = Model.GetDefaultInstance();
@@ -92,9 +80,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	    {
 	        var model = new Model();
 
-	        model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
-
-            var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
+	        var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
             var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
             var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
             var tighten = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Tighten));
@@ -111,9 +97,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]), new Route(model.Robots[0], model.Robots[2]), new Route(model.Robots[0], model.Robots[3]));
             model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]));
             model.CreateCart(model.Robots[2], new Route(model.Robots[2], model.Robots[3]));
+
+            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
+
+            var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
+            var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
+
+            Console.WriteLine(result);
         }
 
-		private bool Hazard(Model model)
+        [Obsolete("The check has been moved into the agents")]
+        private bool Hazard(Model model)
 		{
 			var agents = model.CartAgents.Cast<Agent>().Concat(model.RobotAgents).ToArray();
 
@@ -137,7 +131,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             return false;
 		}
 
-	    private bool CheckConstraints(IEnumerable<Agent> agents)
+        [Obsolete("The check has been moved into the agents")]
+        private bool CheckConstraints(IEnumerable<Agent> agents)
 	    {
 	        foreach (var agent in agents)
 	        {
@@ -165,6 +160,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	        return true;
 	     }
 
+        [Obsolete("The check has been moved into the agents")]
         private bool PostMatching(Role role, Agent agent)
         {
             if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)))
@@ -191,6 +187,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                                                                        && role.PostCondition.Task.Equals(role1.PreCondition.Task));
         }
 
+        [Obsolete("The check has been moved into the agents")]
         private bool PreMatching(Role role, Agent agent)
         {
             return role.PreCondition.Port.AllocatedRoles.Any(role1 => role1.PostCondition.Port.Equals(agent)
@@ -228,7 +225,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			return isReconfPossible;
 		}
 
-		private Dictionary<RobotAgent, List<RobotAgent>> GetConnectionMatrix(IEnumerable<RobotAgent> robotAgents)
+        [Obsolete("The check has been moved into the agents")]
+        private Dictionary<RobotAgent, List<RobotAgent>> GetConnectionMatrix(IEnumerable<RobotAgent> robotAgents)
 		{
 			var matrix = new Dictionary<RobotAgent, List<RobotAgent>>();
 
@@ -241,7 +239,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			return matrix;
 		}
 
-		private bool IsConnected(RobotAgent source, RobotAgent target, HashSet<RobotAgent> seenRobots)
+        [Obsolete("The check has been moved into the agents")]
+        private bool IsConnected(RobotAgent source, RobotAgent target, HashSet<RobotAgent> seenRobots)
 		{
 			if (source == target)
 				return true;
