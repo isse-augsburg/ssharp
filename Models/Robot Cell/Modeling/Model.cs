@@ -34,7 +34,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		public const int MaxRoleCapabilities = 5;
 		public const int MaxRoleCount = 20;
 		public const int MaxAgentRequests = 2;
-		public const int MaxProductionSteps = 6;
+		public const int MaxProductionSteps = 8;
 		public const int MaxAllocatedRoles = 5;
 
 
