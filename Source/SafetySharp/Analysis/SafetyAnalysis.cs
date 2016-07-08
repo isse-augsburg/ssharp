@@ -39,10 +39,10 @@ namespace SafetySharp.Analysis
 		private readonly HashSet<FaultSet> _checkedSets = new HashSet<FaultSet>();
 		private readonly Dictionary<FaultSet, CounterExample> _counterExamples = new Dictionary<FaultSet, CounterExample>();
 		private readonly Dictionary<FaultSet, Exception> _exceptions = new Dictionary<FaultSet, Exception>();
-		private SafetyChecking.AnalysisBackend _backend;
+		private AnalysisBackend _backend;
 		private FaultSetCollection _criticalSets;
 		private FaultSet _forcedSet;
-		private SafetyAnalysisResult _result;
+		private SafetyAnalysisResults _results;
 		private FaultSetCollection _safeSets;
 		private FaultSet _suppressedSet;
 
@@ -75,7 +75,7 @@ namespace SafetySharp.Analysis
 		public List<IFaultSetHeuristic> Heuristics { get; } = new List<IFaultSetHeuristic>();
 
 		/// <summary>
-		///   Raised when the model checker has written an output. The output is always written to the console by default.
+		///   Raised when the model checker has written an output.
 		/// </summary>
 		public event Action<string> OutputWritten;
 
@@ -89,7 +89,7 @@ namespace SafetySharp.Analysis
 		///   critical fault sets are determined.
 		/// </param>
 		/// <param name="backend">Determines the safety analysis backend that is used during the analysis.</param>
-		public static SafetyAnalysisResult AnalyzeHazard(ModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue,
+		public static SafetyAnalysisResults AnalyzeHazard(ModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue,
 														 SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
 		{
 			return new SafetyAnalysis { Backend = backend }.ComputeMinimalCriticalSets(model, hazard, maxCardinality);
@@ -104,7 +104,7 @@ namespace SafetySharp.Analysis
 		///   The maximum cardinality of the fault sets that should be checked. By default, all minimal
 		///   critical fault sets are determined.
 		/// </param>
-		public SafetyAnalysisResult ComputeMinimalCriticalSets(ModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue)
+		public SafetyAnalysisResults ComputeMinimalCriticalSets(ModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(hazard, nameof(hazard));
@@ -144,7 +144,7 @@ namespace SafetySharp.Analysis
 
 			_backend.OutputWritten += output => OutputWritten?.Invoke(output);
 			_backend.InitializeModel(Configuration, model, hazard);
-			_result = new SafetyAnalysisResult(model, suppressedFaults, forcedFaults, Heuristics);
+			_results = new SafetyAnalysisResults(model, hazard, suppressedFaults, forcedFaults, Heuristics, FaultActivationBehavior);
 
 			// Remember all safe sets of current cardinality - we need them to generate the next power set level
 			var currentSafe = new HashSet<FaultSet>();
@@ -191,9 +191,9 @@ namespace SafetySharp.Analysis
 					setsToCheck.RemoveAt(setsToCheck.Count - 1);
 
 					// for current level, we already know the set is valid
-					bool isValid = isCurrentLevel || !IsInvalid(set);
+					var isValid = isCurrentLevel || !IsInvalid(set);
 
-					bool isSafe = true;
+					var isSafe = true;
 					if (isValid)
 						isSafe = CheckSet(set, allFaults, cardinality);
 
@@ -221,11 +221,11 @@ namespace SafetySharp.Analysis
 			// due to heuristics usage, we may have informatiuon on non-minimal critical sets
 			var minimalCritical = RemoveNonMinimalCriticalSets();
 
-			_result.IsComplete = isComplete;
-			_result.Time = stopwatch.Elapsed;
-			_result.SetResult(minimalCritical, _checkedSets, _counterExamples, _exceptions);
+			_results.IsComplete = isComplete;
+			_results.Time = stopwatch.Elapsed;
+			_results.SetResult(minimalCritical, _checkedSets, _counterExamples, _exceptions);
 
-			return _result;
+			return _results;
 		}
 
 		private void Reset(ModelBase model)
@@ -257,7 +257,7 @@ namespace SafetySharp.Analysis
 		{
 			var isHeuristic = cardinality != set.Cardinality;
 			if (isHeuristic)
-				_result.HeuristicSuggestionCount++;
+				_results.HeuristicSuggestionCount++;
 
 			var isSafe = true;
 
@@ -265,9 +265,9 @@ namespace SafetySharp.Analysis
 			// (do not add to safeSets / criticalSets if so, in order to keep them small)
 			if (IsTriviallySafe(set))
 			{
-				_result.TrivialChecksCount++;
+				_results.TrivialChecksCount++;
 				if (isHeuristic)
-					_result.HeuristicTrivialCount++;
+					_results.HeuristicTrivialCount++;
 
 				// do not add to safeSets: all subsets are subsets of safeSet as well
 				return true;
@@ -275,9 +275,9 @@ namespace SafetySharp.Analysis
 
 			if (IsTriviallyCritical(set))
 			{
-				_result.TrivialChecksCount++;
+				_results.TrivialChecksCount++;
 				if (isHeuristic)
-					_result.HeuristicTrivialCount++;
+					_results.HeuristicTrivialCount++;
 
 				// do not add to criticalSets: non-minimal, and all supersets are supersets of criticalSet as well
 				return false;
@@ -299,7 +299,7 @@ namespace SafetySharp.Analysis
 				_safeSets.Add(set);
 
 				if (isHeuristic)
-					_result.HeuristicNonTrivialSafeCount++;
+					_results.HeuristicNonTrivialSafeCount++;
 			}
 
 			return isSafe;
@@ -311,7 +311,7 @@ namespace SafetySharp.Analysis
 
 			try
 			{
-				var result = _backend.CheckFaults(set, activationMode);
+				var result = _backend.CheckCriticality(set, activationMode);
 
 				if (!result.FormulaHolds)
 				{

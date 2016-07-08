@@ -57,7 +57,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// </summary>
 		/// <param name="faults">The fault set that should be checked for criticality.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
-		internal override AnalysisResult CheckFaults(FaultSet faults, Activation activation)
+		internal override AnalysisResult CheckCriticality(FaultSet faults, Activation activation)
 		{
 			var suppressedFaults = new FaultSet();
 			foreach (var fault in Model.Faults)
@@ -70,6 +70,21 @@ namespace SafetySharp.Analysis.SafetyChecking
 			_checker.Context.TraversalParameters.TransitionModifiers.Add(() => new FaultSuppressionModifier(suppressedFaults));
 
 			return _checker.Check();
+		}
+
+		/// <summary>
+		///   Checks the order of <see cref="firstFault" /> and <see cref="secondFault" /> for the
+		///   <see cref="minimalCriticalFaultSet" /> using the <see cref="activation" /> mode.
+		/// </summary>
+		/// <param name="firstFault">The first fault that should be checked.</param>
+		/// <param name="secondFault">The second fault that should be checked.</param>
+		/// <param name="minimalCriticalFaultSet">The minimal critical fault set that should be checked.</param>
+		/// <param name="activation">The activation mode of the fault set.</param>
+		/// <param name="forceSimultaneous">Indicates whether both faults must occur simultaneously.</param>
+		internal override AnalysisResult CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
+													Activation activation, bool forceSimultaneous)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

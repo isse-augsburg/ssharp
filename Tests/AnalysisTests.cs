@@ -44,6 +44,12 @@ namespace Tests
 		{
 			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedOnTheFly);
 		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Ordering")]
+		public void Ordering(string test, string file)
+		{
+			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedOnTheFly);
+		}
 	}
 
 	public partial class InvariantTests

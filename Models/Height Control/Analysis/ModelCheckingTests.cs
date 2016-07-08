@@ -67,7 +67,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision, backend: backend);
 			result.SaveCounterExamples("counter examples/height control/dcca/collision/original");
 
-			Console.WriteLine(result);
+			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
+			Console.WriteLine(orderResult);
 		}
 
 		[TestCase]
@@ -76,9 +77,10 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		{
 			var model = Model.CreateOriginal();
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, backend: backend);
-
 			result.SaveCounterExamples("counter examples/height control/dcca/false alarm/original");
-			Console.WriteLine(result);
+
+			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
+			Console.WriteLine(orderResult);
 		}
 
 		[Test, TestCaseSource(nameof(CreateModelVariants))]

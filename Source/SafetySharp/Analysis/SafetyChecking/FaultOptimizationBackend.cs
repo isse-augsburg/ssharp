@@ -25,7 +25,9 @@ namespace SafetySharp.Analysis.SafetyChecking
 	using System;
 	using System.Linq;
 	using ModelChecking;
+	using ModelChecking.ModelTraversal.TraversalModifiers;
 	using Modeling;
+	using Runtime;
 	using Runtime.Serialization;
 
 	/// <summary>
@@ -33,7 +35,17 @@ namespace SafetySharp.Analysis.SafetyChecking
 	/// </summary>
 	internal class FaultOptimizationBackend : AnalysisBackend
 	{
+		private readonly int _stateHeaderBytes;
 		private InvariantChecker _invariantChecker;
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="stateHeaderBytes">The number of bytes to reserve in the state vector for analysis purposes.</param>
+		public FaultOptimizationBackend(int stateHeaderBytes = 0)
+		{
+			_stateHeaderBytes = stateHeaderBytes;
+		}
 
 		/// <summary>
 		///   Initizializes the model that should be analyzed.
@@ -46,9 +58,24 @@ namespace SafetySharp.Analysis.SafetyChecking
 			serializer.Serialize(Model, !hazard);
 
 			Func<AnalysisModel> createModel = () =>
-				new ActivationMinimalExecutedModel(serializer.Load, configuration.SuccessorCapacity);
+				new ActivationMinimalExecutedModel(CreateModel(hazard), configuration.SuccessorCapacity);
 
 			_invariantChecker = new InvariantChecker(createModel, OnOutputWritten, configuration, formulaIndex: 0);
+		}
+
+		/// <summary>
+		///   Gets a function that initializes the runtime model.
+		/// </summary>
+		private Func<RuntimeModel> CreateModel(Formula hazard)
+		{
+			var serializer = new RuntimeModelSerializer();
+			serializer.Serialize(Model, !hazard);
+
+			return () =>
+			{
+				var serializedData = serializer.LoadSerializedData();
+				return new RuntimeModel(serializedData, _stateHeaderBytes);
+			};
 		}
 
 		/// <summary>
@@ -56,12 +83,40 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// </summary>
 		/// <param name="faults">The fault set that should be checked for criticality.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
-		internal override AnalysisResult CheckFaults(FaultSet faults, Activation activation)
+		internal override AnalysisResult CheckCriticality(FaultSet faults, Activation activation)
+		{
+			ChangeFaultActivations(faults, activation);
+			return _invariantChecker.Check();
+		}
+
+		/// <summary>
+		///   Checks the order of <see cref="firstFault" /> and <see cref="secondFault" /> for the
+		///   <see cref="minimalCriticalFaultSet" /> using the <see cref="activation" /> mode.
+		/// </summary>
+		/// <param name="firstFault">The first fault that should be checked.</param>
+		/// <param name="secondFault">The second fault that should be checked.</param>
+		/// <param name="minimalCriticalFaultSet">The minimal critical fault set that should be checked.</param>
+		/// <param name="activation">The activation mode of the fault set.</param>
+		/// <param name="forceSimultaneous">Indicates whether both faults must occur simultaneously.</param>
+		internal override AnalysisResult CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
+													Activation activation, bool forceSimultaneous)
+		{
+			ChangeFaultActivations(minimalCriticalFaultSet, activation);
+
+			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Clear();
+			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Add(
+				() => new FaultOrderModifier(firstFault, secondFault, forceSimultaneous));
+
+			return _invariantChecker.Check();
+		}
+
+		/// <summary>
+		///   Updates the activation modes of the faults contained in the model.
+		/// </summary>
+		private void ChangeFaultActivations(FaultSet faults, Activation activation)
 		{
 			foreach (var model in _invariantChecker.AnalyzedModels.Cast<ExecutedModel>())
 				model.ChangeFaultActivations(GetUpdateFaultActivations(faults, activation));
-
-			return _invariantChecker.Check();
 		}
 
 		/// <summary>

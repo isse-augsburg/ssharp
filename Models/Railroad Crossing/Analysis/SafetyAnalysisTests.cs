@@ -30,14 +30,16 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 	public class SafetyAnalysisTests
 	{
-		[Test]
-		public void Collision()
+		[TestCase]
+		public void Collision(
+			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
 			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.PossibleCollision);
-
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.PossibleCollision, backend: backend);
 			result.SaveCounterExamples("counter examples/railroad crossing/dcca/collision");
-			Console.WriteLine(result);
+
+			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
+			Console.WriteLine(orderResult);
 
 			result.IsComplete.Should().BeTrue();
 			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new[]

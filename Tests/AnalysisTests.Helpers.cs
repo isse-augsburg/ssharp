@@ -87,17 +87,34 @@ namespace Tests
 			return result.FormulaHolds;
 		}
 
-		protected SafetyAnalysisResult DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
+		protected SafetyAnalysisResults DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
 		{
 			return DccaWithMaxCardinality(TestModel.InitializeModel(components), hazard, maxCardinality);
 		}
 
-		protected SafetyAnalysisResult Dcca(Formula hazard, params IComponent[] components)
+		protected SafetyAnalysisResults Dcca(Formula hazard, params IComponent[] components)
 		{
 			return DccaWithMaxCardinality(hazard, Int32.MaxValue, components);
 		}
 
-		protected SafetyAnalysisResult DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality)
+		protected OrderAnalysisResults AnalyzeOrder(Formula hazard, params IComponent[] components)
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.StateCapacity = 1 << 10;
+			configuration.TransitionCapacity = 1 << 12;
+			configuration.GenerateCounterExample = !SuppressCounterExampleGeneration;
+			configuration.ProgressReportsOnly = true;
+
+			var analysis = new OrderAnalysis(DccaWithMaxCardinality(hazard, Int32.MaxValue, components), configuration);
+			analysis.OutputWritten += message => Output.Log("{0}", message);
+
+			var result = analysis.ComputeOrderRelationships();
+			Output.Log("{0}", result);
+
+			return result;
+		}
+
+		protected SafetyAnalysisResults DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality)
 		{
 			var analysis = new SafetyAnalysis
 			{
@@ -121,7 +138,7 @@ namespace Tests
 			return result;
 		}
 
-		protected SafetyAnalysisResult Dcca(ModelBase model, Formula hazard)
+		protected SafetyAnalysisResults Dcca(ModelBase model, Formula hazard)
 		{
 			return DccaWithMaxCardinality(model, hazard, Int32.MaxValue);
 		}
@@ -153,6 +170,29 @@ namespace Tests
 			}
 
 			throw new TestException("Fault set is not contained in set.");
+		}
+
+		protected void ShouldContain(OrderRelationship[] relationships, Fault fault1, Fault fault2, OrderRelationshipKind kind)
+		{
+			foreach (var relationship in relationships)
+			{
+				if (kind == OrderRelationshipKind.Simultaneously)
+				{
+					if (relationship.Kind != OrderRelationshipKind.Simultaneously)
+						continue;
+
+					if (relationship.FirstFault == fault1 && relationship.SecondFault == fault2)
+						return;
+
+					if (relationship.FirstFault == fault2 && relationship.SecondFault == fault1)
+						return;
+				}
+
+				if (relationship.FirstFault == fault1 && relationship.SecondFault == fault2 && relationship.Kind == kind)
+					return;
+			}
+
+			throw new TestException("Relationship is not contained in set.");
 		}
 	}
 

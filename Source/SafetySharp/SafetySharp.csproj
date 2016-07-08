@@ -51,7 +51,12 @@
     <Compile Include="Analysis\Heuristics\IFaultSetHeuristic.cs" />
     <Compile Include="Analysis\Heuristics\MinimalRedundancyHeuristic.cs" />
     <Compile Include="Analysis\Heuristics\SubsumptionHeuristic.cs" />
+    <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultOrderModifier.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultSuppressionModifier.cs" />
+    <Compile Include="Analysis\OrderAnalysis.cs" />
+    <Compile Include="Analysis\OrderAnalysisResults.cs" />
+    <Compile Include="Analysis\OrderRelationshipKind.cs" />
+    <Compile Include="Analysis\OrderRelationship.cs" />
     <Compile Include="Analysis\SafetyAnalysisBackend.cs" />
     <Compile Include="Analysis\SafetyChecking\FaultOptimizationBackend.cs" />
     <Compile Include="Analysis\SafetyChecking\AnalysisBackend.cs" />
@@ -77,7 +82,7 @@
     <Compile Include="Analysis\ModelChecking\Transitions\Transition.cs" />
     <Compile Include="Analysis\ModelChecking\Transitions\TransitionCollection.cs" />
     <Compile Include="Analysis\ModelChecking\Transitions\TransitionEnumerator.cs" />
-    <Compile Include="Analysis\SafetyAnalysisResult.cs" />
+    <Compile Include="Analysis\SafetyAnalysisResults.cs" />
     <Compile Include="Analysis\SafetyChecking\StateGraphBackend.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
     <Compile Include="Modeling\ObjectPool.cs" />
