@@ -42,8 +42,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	    {
             var model = new Model();
 
-            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
-
             var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
             var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
             var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
@@ -62,7 +60,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]));
             model.CreateCart(model.Robots[2], new Route(model.Robots[2], model.Robots[3]));
 
-	        return model;
+            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
+
+            return model;
 	    }
 
 		public List<Task> Tasks { get; } = new List<Task>();

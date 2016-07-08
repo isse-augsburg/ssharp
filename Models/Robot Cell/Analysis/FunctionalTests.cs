@@ -61,18 +61,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		}
 
 		[Test]
-		public void Exception()
+		public void DepthFirstSearch()
 		{
 			var model = Model.GetDefaultInstance();
-			model.Faults.SuppressActivations();
-			model.Carts[0].Broken.ForceActivation();
-			model.Robots[0].ApplyFault.ForceActivation();
-			model.Robots[1].Tools.First(t => t.Capability.ProductionAction == ProductionAction.Drill).Broken.ForceActivation();
 
 			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
 			var result = modelChecker.CheckInvariant(model, true);
 
-			Assert.IsTrue(result.FormulaHolds);
+			Console.WriteLine(result);
 		}
 
 	    [Test]
