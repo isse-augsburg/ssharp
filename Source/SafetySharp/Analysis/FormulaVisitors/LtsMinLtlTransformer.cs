@@ -111,5 +111,21 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		{
 			_builder.Append(formula.Label);
 		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitRewardFormula(RewardFormula formula)
+		{
+			Assert.NotReached("Rewards are currently not supported");
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
+		{
+			Assert.NotReached("Probabilities are currently not supported");
+		}
 	}
 }

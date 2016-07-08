@@ -45,6 +45,16 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
+		public abstract void VisitRewardFormula(RewardFormula formula);
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public abstract void VisitProbabilisticFormula(ProbabilitisticFormula formula);
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
 		public void Visit(Formula formula)
 		{
 			formula.Visit(this);
