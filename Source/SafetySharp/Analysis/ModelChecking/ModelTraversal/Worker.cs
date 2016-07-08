@@ -75,7 +75,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		{
 			try
 			{
-				HandleTransitions(Model.GetInitialTransitions(), 0, isInitialState: true);
+				HandleTransitions(Model.GetInitialTransitions(), 0, isInitial: true);
 			}
 			catch (Exception e)
 			{
@@ -98,7 +98,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 					if (!_stateStack.TryGetState(out state))
 						continue;
 
-					HandleTransitions(Model.GetSuccessorTransitions(_context.States[state]), state, isInitialState: false);
+					HandleTransitions(Model.GetSuccessorTransitions(_context.States[state]), state, isInitial: false);
 
 					InterlockedExtensions.ExchangeIfGreaterThan(ref _context.LevelCount, _stateStack.FrameCount, _stateStack.FrameCount);
 					_context.ReportProgress();
@@ -134,13 +134,13 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		/// <summary>
 		///   Handles the <paramref name="transitions" />, adding newly discovered states so that they are not visited again.
 		/// </summary>
-		private void HandleTransitions(TransitionCollection transitions, int sourceState, bool isInitialState)
+		private void HandleTransitions(TransitionCollection transitions, int sourceState, bool isInitial)
 		{
 			var transitionCount = 0;
 			var stateCount = 0;
 
 			foreach (var modifier in _transitionModifiers)
-				modifier.ModifyTransitions(_context, transitions, _context.States[sourceState], sourceState);
+				modifier.ModifyTransitions(_context, transitions, _context.States[sourceState], sourceState, isInitial);
 
 			_stateStack.PushFrame();
 
@@ -159,17 +159,17 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 					_stateStack.PushState(targetState);
 
 					foreach (var action in _stateActions)
-						action.ProcessState(_context, this, _context.States[targetState], targetState, isInitialState);
+						action.ProcessState(_context, this, _context.States[targetState], targetState, isInitial);
 				}
 
 				foreach (var action in _transitionActions)
-					action.ProcessTransition(_context, this, transition, isInitialState);
+					action.ProcessTransition(_context, this, transition, isInitial);
 
 				++transitionCount;
 			}
 
 			foreach (var action in _batchedTransitionActions)
-				action.ProcessTransitions(_context, this, sourceState, transitions, transitionCount, isInitialState);
+				action.ProcessTransitions(_context, this, sourceState, transitions, transitionCount, isInitial);
 
 			Interlocked.Add(ref _context.StateCount, stateCount);
 			Interlocked.Add(ref _context.TransitionCount, transitionCount);

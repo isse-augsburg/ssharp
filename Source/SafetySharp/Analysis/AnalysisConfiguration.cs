@@ -31,7 +31,7 @@ namespace SafetySharp.Analysis
 	public struct AnalysisConfiguration
 	{
 		private const int DefaultStateCapacity = 1 << 24;
-		private const int DefaultTransitionCapacity = 1 << 30;
+		private const int DefaultTransitionCapacity = 1 << 28;
 		private const int DefaultStackCapacity = 1 << 16;
 		private const int DefaultSuccessorStateCapacity = 1 << 14;
 		private const int MinCapacity = 1024;
@@ -56,7 +56,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   The default configuration.
 		/// </summary>
-		internal static readonly AnalysisConfiguration Default = new AnalysisConfiguration
+		public static readonly AnalysisConfiguration Default = new AnalysisConfiguration
 		{
 			CpuCount = Int32.MaxValue,
 			ProgressReportsOnly = false,

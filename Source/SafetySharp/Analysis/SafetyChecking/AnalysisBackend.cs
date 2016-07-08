@@ -64,7 +64,19 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// </summary>
 		/// <param name="faults">The fault set that should be checked for criticality.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
-		internal abstract AnalysisResult CheckFaults(FaultSet faults, Activation activation);
+		internal abstract AnalysisResult CheckCriticality(FaultSet faults, Activation activation);
+
+		/// <summary>
+		///   Checks the order of <see cref="firstFault" /> and <see cref="secondFault" /> for the
+		///   <see cref="minimalCriticalFaultSet" /> using the <see cref="activation" /> mode.
+		/// </summary>
+		/// <param name="firstFault">The first fault that should be checked.</param>
+		/// <param name="secondFault">The second fault that should be checked.</param>
+		/// <param name="minimalCriticalFaultSet">The minimal critical fault set that should be checked.</param>
+		/// <param name="activation">The activation mode of the fault set.</param>
+		/// <param name="forceSimultaneous">Indicates whether both faults must occur simultaneously.</param>
+		internal abstract AnalysisResult CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
+													Activation activation, bool forceSimultaneous);
 
 		/// <summary>
 		///   Raised when output is generated during the analyses.
@@ -81,7 +93,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 		}
 
 		/// <summary>
-		///   Determines the effective <see cref="Activation" /> of the <paramref name="fault" /> whe <paramref name="faults" /> should
+		///   Determines the effective <see cref="Activation" /> of the <paramref name="fault" /> when <paramref name="faults" /> should
 		///   be checked for criticality.
 		/// </summary>
 		protected Activation GetEffectiveActivation(Fault fault, FaultSet faults, Activation activation)

@@ -170,7 +170,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		}
 
 		/// <summary>
-		/// Finds the next splittable frame, if any.
+		///   Finds the next splittable frame, if any.
 		/// </summary>
 		private void UpdateLowestSplittableFrame()
 		{

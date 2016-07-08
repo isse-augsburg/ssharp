@@ -34,23 +34,33 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents the result of a <see cref="SafetyAnalysis" />.
 	/// </summary>
-	public class SafetyAnalysisResult
+	public sealed class SafetyAnalysisResults
 	{
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="model">The <see cref="Model" /> instance the safety analysis was conducted for.</param>
+		/// <param name="hazard">The hazard the analysis was conducated for.</param>
 		/// <param name="suppressedFaults">The faults whose activations have been completely suppressed during analysis.</param>
 		/// <param name="forcedFaults">The faults whose activations have been forced during analysis.</param>
 		/// <param name="heuristics">The heuristics that are used during the analysis.</param>
-		internal SafetyAnalysisResult(ModelBase model, IEnumerable<Fault> suppressedFaults, IEnumerable<Fault> forcedFaults,
-									  IEnumerable<IFaultSetHeuristic> heuristics)
+		/// <param name="activationBehavior">The fault acitvation behavior used during the analysis.</param>
+		internal SafetyAnalysisResults(ModelBase model, Formula hazard, IEnumerable<Fault> suppressedFaults,
+									  IEnumerable<Fault> forcedFaults, IEnumerable<IFaultSetHeuristic> heuristics,
+									  FaultActivationBehavior activationBehavior)
 		{
 			Model = model;
+			Hazard = hazard;
 			SuppressedFaults = suppressedFaults;
 			ForcedFaults = forcedFaults;
 			Heuristics = heuristics.ToArray(); // make a copy so that later changes to the heuristics don't affect the results
+			FaultActivationBehavior = activationBehavior;
 		}
+
+		/// <summary>
+		///   The fault acitvation behavior used during the analysis.
+		/// </summary>
+		public FaultActivationBehavior FaultActivationBehavior { get; }
 
 		/// <summary>
 		///   Gets the faults whose activations have been completely suppressed during analysis.
@@ -128,6 +138,11 @@ namespace SafetySharp.Analysis
 		///   The number of trivial checks that have been performed.
 		/// </summary>
 		public int TrivialChecksCount { get; internal set; }
+
+		/// <summary>
+		///   The hazard the analysis was conducted for.
+		/// </summary>
+		public Formula Hazard { get; }
 
 		/// <summary>
 		///   Initializes a new instance.

@@ -67,7 +67,7 @@ namespace SafetySharp.Runtime
 		private readonly ObjectTable _serializedObjects;
 
 		/// <summary>
-		///   The number of bytes reserved at the beginning of each state vector by the model checker tool.
+		///   The number of bytes reserved at the beginning of each state vector by the model checker.
 		/// </summary>
 		private readonly int _stateHeaderBytes;
 
@@ -365,7 +365,7 @@ namespace SafetySharp.Runtime
 
 					// Compare the target states; if they match, we've found the correct transition
 					var areEqual = true;
-					for (var j = 0; j < StateVectorSize; ++j)
+					for (var j = _stateHeaderBytes; j < StateVectorSize; ++j)
 						areEqual &= targetState[j] == trace[i + 1][j];
 
 					if (!areEqual)

@@ -209,6 +209,13 @@
     <Compile Include="Analysis\Ltl\Violated\multiple choices.cs" />
     <Compile Include="Analysis\Ltl\Violated\single choice.cs" />
     <Compile Include="Analysis\Ltl\Violated\undo fault after successful activation.cs" />
+    <Compile Include="Analysis\Ordering\no order.cs" />
+    <Compile Include="Analysis\Ordering\precedes some.cs" />
+    <Compile Include="Analysis\Ordering\simultaneous some.cs" />
+    <Compile Include="Analysis\Ordering\simultaneous all.cs" />
+    <Compile Include="Analysis\Ordering\precedes all.cs" />
+    <Compile Include="Analysis\Ordering\strictly precedes some.cs" />
+    <Compile Include="Analysis\Ordering\strictly precedes all.cs" />
     <Compile Include="Diagnostics\Bindings\Invalid\non-component required port binding.cs" />
     <Compile Include="Diagnostics\Bindings\Valid\non-component provided port binding.cs" />
     <Compile Include="Diagnostics\CustomComponents\Invalid\components cannot implement IInitializable.cs" />
@@ -478,6 +485,7 @@
     <Compile Include="FaultActivation\StateGraph\multiple faults fully minimizable.cs" />
     <Compile Include="FaultActivation\StateGraph\multiple transitions later removed.cs" />
     <Compile Include="FaultActivation\StateGraph\nondeterminism.cs" />
+    <Compile Include="FaultActivation\StateGraph\simultaneous faults.cs" />
     <Compile Include="FaultActivation\StateGraph\single permanent fault activated once.cs" />
     <Compile Include="FaultActivation\StateGraph\multiple faults semi minimizable.cs" />
     <Compile Include="FaultActivation\StateGraph\undone fault activation not observable enum.cs" />
