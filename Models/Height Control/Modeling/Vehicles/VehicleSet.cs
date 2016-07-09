@@ -63,9 +63,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 			for (var i = 0; i < Vehicles.Length; ++i)
 			{
 				for (var j = i + 1; j < Vehicles.Length; ++j)
-				{
 					AddPositionConstraint(Vehicles[i], Vehicles[j]);
-				}
 			}
 		}
 
@@ -89,10 +87,11 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// </summary>
 		private void AddPositionConstraint(Vehicle vehicle1, Vehicle vehicle2)
 		{
-			AddStateConstraint(vehicle1.Position == 0
-							   || vehicle1.Position == Model.TunnelPosition
-							   || vehicle1.Position != vehicle2.Position
-							   || vehicle1.Lane == vehicle2.Lane);
+			AddStateConstraint(
+				vehicle1.Position == 0 ||
+				vehicle1.Position == Model.TunnelPosition ||
+				vehicle1.Position != vehicle2.Position ||
+				vehicle1.Lane != vehicle2.Lane);
 		}
 
 		/// <summary>
