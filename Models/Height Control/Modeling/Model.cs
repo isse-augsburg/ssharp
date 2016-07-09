@@ -26,7 +26,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 	using System.Collections.Generic;
 	using System.Linq;
 	using Controllers;
-	using Runtime;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Sensors;
@@ -43,8 +42,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		public const int Timeout = 5;
 		public const int TunnelPosition = 12;
 		public const int MaxSpeed = 2;
-		public const int MinSpeed = 1;
-		public const int MaxVehicles = 5;
+		public const int MinSpeed = 0;
+		public const int MaxVehicles = 3;
 
 		/// <summary>
 		///   Initializes a new instance.

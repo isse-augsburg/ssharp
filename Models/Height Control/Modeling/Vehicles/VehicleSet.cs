@@ -59,6 +59,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 			LeftOHV.AddEffects<Vehicle.DriveLeftEffect>(vehicles.Where(vehicle => vehicle.Kind == VehicleKind.OverheightVehicle));
 			LeftHV.AddEffects<Vehicle.DriveLeftEffect>(vehicles.Where(vehicle => vehicle.Kind == VehicleKind.HighVehicle));
 			SlowTraffic.AddEffects<Vehicle.SlowTrafficEffect>(vehicles);
+
+			for (var i = 0; i < Vehicles.Length; ++i)
+			{
+				for (var j = i + 1; j < Vehicles.Length; ++j)
+				{
+					AddPositionConstraint(Vehicles[i], Vehicles[j]);
+				}
+			}
 		}
 
 		/// <summary>
@@ -74,6 +82,18 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		///   Informs the vehicles contained in the set whether the tunnel is closed.
 		/// </summary>
 		public extern bool IsTunnelClosed { get; }
+
+		/// <summary>
+		///   Adds a state constraint ensuring that <paramref name="vehicle1" /> and <paramref name="vehicle2" /> are never located at
+		///   the same position.
+		/// </summary>
+		private void AddPositionConstraint(Vehicle vehicle1, Vehicle vehicle2)
+		{
+			AddStateConstraint(vehicle1.Position == 0
+							   || vehicle1.Position == Model.TunnelPosition
+							   || vehicle1.Position != vehicle2.Position
+							   || vehicle1.Lane == vehicle2.Lane);
+		}
 
 		/// <summary>
 		///   Updates the state of the component.

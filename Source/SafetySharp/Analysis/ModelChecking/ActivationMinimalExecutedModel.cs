@@ -25,6 +25,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System;
 	using System.Linq;
 	using FormulaVisitors;
+	using Modeling;
 	using Runtime;
 	using Transitions;
 	using Utilities;
@@ -35,6 +36,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// </summary>
 	internal sealed class ActivationMinimalExecutedModel : ExecutedModel
 	{
+		private readonly Func<bool>[] _stateConstraints;
 		private readonly ActivationMinimalTransitionSetBuilder _transitions;
 
 		/// <summary>
@@ -47,6 +49,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		{
 			var formulas = RuntimeModel.Formulas.Select(CompilationVisitor.Compile).ToArray();
 			_transitions = new ActivationMinimalTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
+			_stateConstraints = CollectStateConstraints();
 		}
 
 		/// <summary>
@@ -58,12 +61,21 @@ namespace SafetySharp.Analysis.ModelChecking
 			: base(runtimeModel)
 		{
 			_transitions = new ActivationMinimalTransitionSetBuilder(RuntimeModel, successorStateCapacity);
+			_stateConstraints = CollectStateConstraints();
 		}
 
 		/// <summary>
 		///   Gets the size of a single transition of the model in bytes.
 		/// </summary>
 		public override unsafe int TransitionSize => sizeof(CandidateTransition);
+
+		/// <summary>
+		///   Collects all state constraints contained in the model.
+		/// </summary>
+		private Func<bool>[] CollectStateConstraints()
+		{
+			return RuntimeModel.Model.Components.Cast<Component>().SelectMany(component => component.StateConstraints).ToArray();
+		}
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
@@ -98,6 +110,13 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		protected override void GenerateTransition()
 		{
+			// Ignore transitions leading to a state with one or more violated state constraints
+			foreach (var constraint in _stateConstraints)
+			{
+				if (!constraint())
+					return;
+			}
+
 			_transitions.Add(RuntimeModel);
 		}
 

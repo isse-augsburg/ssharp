@@ -96,7 +96,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Gets a value indicating whether the simulation is completed.
 		/// </summary>
-		public bool IsCompleted => _counterExample != null && _stateIndex + 1 == _counterExample.StepCount;
+		public bool IsCompleted => _counterExample != null && _stateIndex + 1 >= _counterExample.StepCount;
 
 		/// <summary>
 		///   Gets a value indicating whether the simulation can be fast-forwarded.

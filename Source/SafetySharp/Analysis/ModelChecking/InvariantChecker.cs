@@ -30,7 +30,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// <summary>
 	///   Checks whether an invariant holds for all states of an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal class InvariantChecker : ModelTraverser
+	internal sealed class InvariantChecker : ModelTraverser
 	{
 		/// <summary>
 		///   Initializes a new instance.
@@ -43,6 +43,7 @@ namespace SafetySharp.Analysis.ModelChecking
 			: base(createModel, output, configuration)
 		{
 			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationAction(formulaIndex));
+			Context.TraversalParameters.BatchedTransitionActions.Add(() => new DeadlockChecker());
 		}
 
 		/// <summary>

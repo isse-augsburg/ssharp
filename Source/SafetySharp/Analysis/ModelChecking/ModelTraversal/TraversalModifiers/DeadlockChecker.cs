@@ -22,26 +22,14 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using System;
 	using Transitions;
-	using Utilities;
 
 	/// <summary>
-	///   Builds up a <see cref="StateGraph" /> instance during model traversal.
+	///   Checks for deadlock states, raising an exception if one is found.
 	/// </summary>
-	internal sealed class StateGraphBuilder : IBatchedTransitionAction
+	internal sealed class DeadlockChecker : IBatchedTransitionAction
 	{
-		private readonly StateGraph _stateGraph;
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="stateGraph">The state graph that should be built up.</param>
-		public StateGraphBuilder(StateGraph stateGraph)
-		{
-			Requires.NotNull(stateGraph, nameof(stateGraph));
-			_stateGraph = stateGraph;
-		}
-
 		/// <summary>
 		///   Processes the new <paramref name="transitions" /> discovered by the <paramref name="worker " /> within the traversal
 		///   <paramref name="context" />. Only transitions with <see cref="CandidateTransition.IsValid" /> set to <c>true</c> are
@@ -55,10 +43,14 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// <param name="areInitialTransitions">
 		///   Indicates whether the transitions are an initial transitions not starting in any valid source state.
 		/// </param>
-		public void ProcessTransitions(TraversalContext context, Worker worker, int sourceState,
-									   TransitionCollection transitions, int transitionCount, bool areInitialTransitions)
+		public void ProcessTransitions(TraversalContext context, Worker worker, int sourceState, TransitionCollection transitions,
+									   int transitionCount, bool areInitialTransitions)
 		{
-			_stateGraph.AddStateInfo(sourceState, areInitialTransitions, transitions, transitionCount);
+			if (transitionCount == 0)
+			{
+				throw new InvalidOperationException("Deadlock state detected, i.e., there are no outgoing transitions for " +
+													"the last state in the generated counter example. Try relaxing state constraints.");
+			}
 		}
 	}
 }

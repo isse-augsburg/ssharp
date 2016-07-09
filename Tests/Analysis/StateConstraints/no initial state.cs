@@ -20,54 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
+namespace Tests.Analysis.StateConstraints
 {
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using Shouldly;
 
-	public sealed class MainControlTolerant : MainControl
+	internal class NoInitialState : AnalysisTestObject
 	{
-		/// <summary>
-		///   The number of high vehicles currently in the main-control area.
-		/// </summary>
-		[Range(0, Model.MaxVehicles, OverflowBehavior.Clamp)]
-		private int _count;
-
-		/// <summary>
-		///   Invoked when the given number of vehicles enters the main-control area.
-		/// </summary>
-		public override void VehiclesEntering(int vehicleCount)
+		protected override void Check()
 		{
-			_count += vehicleCount;
-			Timer.Start();
+			var exception = Should.Throw<AnalysisException>(() => CheckInvariant(true, new C()));
+			exception.CounterExample.StepCount.ShouldBe(0);
+
+			SimulateCounterExample(exception.CounterExample, simulator =>
+			{
+				var c = (C)simulator.Model.Roots[0];
+
+				c.X.ShouldBe(0);
+				simulator.IsCompleted.ShouldBe(true);
+			});
 		}
 
-		/// <summary>
-		///   Updates the internal state of the component.
-		/// </summary>
-		public override void Update()
+		private class C : Component
 		{
-			base.Update();
+			[Range(0, 20, OverflowBehavior.Clamp)]
+			public int X;
 
-			if (_count != 0 && PositionDetector.IsVehicleDetected)
+			public C()
 			{
-				if (LeftDetector.IsVehicleDetected)
-					_count--;
-
-				if (RightDetector.IsVehicleDetected)
-					_count--;
-
-				// We assume the best case: If the vehicle was not seen on the left lane, it is assumed to be on the right lane
-				if (LeftDetector.IsVehicleDetected && !RightDetector.IsVehicleDetected)
-					CloseTunnel();
-				else
-					ActivateEndControl();
+				AddStateConstraint(X != 0);
 			}
 
-			if (Timer.HasElapsed)
-				_count = 0;
-
-			if (_count == 0)
-				Timer.Stop();
+			public override void Update()
+			{
+				++X;
+			}
 		}
 	}
 }

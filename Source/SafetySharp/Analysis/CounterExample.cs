@@ -133,6 +133,9 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		internal unsafe void ReplayInitialState()
 		{
+			if (StepCount == 0)
+				return;
+
 			var initialState = _states[0];
 			fixed (byte* state = &initialState[0])
 				RuntimeModel.Replay(state, _replayInfo[0], initializationStep: true);

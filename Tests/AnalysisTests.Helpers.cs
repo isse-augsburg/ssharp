@@ -40,6 +40,7 @@ namespace Tests
 		protected CounterExample[] CounterExamples { get; private set; }
 		protected bool SuppressCounterExampleGeneration { get; set; }
 		protected IFaultSetHeuristic[] Heuristics { get; set; }
+		protected AnalysisResult Result { get; private set; }
 
 		protected void SimulateCounterExample(CounterExample counterExample, Action<Simulator> action)
 		{
@@ -65,9 +66,9 @@ namespace Tests
 				return results[0].FormulaHolds;
 			}
 
-			var result = modelChecker.CheckInvariant(TestModel.InitializeModel(components), invariant);
-			CounterExample = result.CounterExample;
-			return result.FormulaHolds;
+			Result = modelChecker.CheckInvariant(TestModel.InitializeModel(components), invariant);
+			CounterExample = Result.CounterExample;
+			return Result.FormulaHolds;
 		}
 
 		protected bool[] CheckInvariants(IComponent component, params Formula[] invariants)
@@ -199,6 +200,20 @@ namespace Tests
 	public partial class InvariantTests : Tests
 	{
 		public InvariantTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests(string directory)
+		{
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
+		}
+	}
+
+	public partial class StateConstraintTests : Tests
+	{
+		public StateConstraintTests(ITestOutputHelper output)
 			: base(output)
 		{
 		}

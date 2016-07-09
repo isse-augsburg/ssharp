@@ -144,7 +144,7 @@ namespace SafetySharp.Runtime
 		internal byte[] ConstructionState { get; }
 
 		/// <summary>
-		///   Gets the objects referenced by the model.
+		///   Gets all of the objects referenced by the model, including those that do not take part in state serialization.
 		/// </summary>
 		internal ObjectTable Objects { get; }
 
@@ -375,7 +375,7 @@ namespace SafetySharp.Runtime
 					break;
 				}
 
-				Requires.That(info[i] != null, $"Unable to generate replay information for step {i} of {trace.Length}.");
+				Requires.That(info[i] != null, $"Unable to generate replay information for step {i + 1} of {trace.Length}.");
 			}
 
 			return info;

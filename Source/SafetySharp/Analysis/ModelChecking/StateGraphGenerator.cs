@@ -29,7 +29,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// <summary>
 	///   Generates a <see cref="StateGraph" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal class StateGraphGenerator : ModelTraverser
+	internal sealed class StateGraphGenerator : ModelTraverser
 	{
 		private readonly StateGraph _stateGraph;
 
