@@ -22,7 +22,6 @@
 
 namespace Tests.Analysis.StateConstraints
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
@@ -30,16 +29,10 @@ namespace Tests.Analysis.StateConstraints
 	{
 		protected override void Check()
 		{
-			var exception = Should.Throw<AnalysisException>(() => CheckInvariant(true, new C()));
-			exception.CounterExample.StepCount.ShouldBe(0);
-
-			SimulateCounterExample(exception.CounterExample, simulator =>
-			{
-				var c = (C)simulator.Model.Roots[0];
-
-				c.X.ShouldBe(0);
-				simulator.IsCompleted.ShouldBe(true);
-			});
+			CheckInvariant(true, new C());
+			Result.FormulaHolds.ShouldBe(true);
+			Result.StateCount.ShouldBe(0);
+			Result.TransitionCount.ShouldBe(0);
 		}
 
 		private class C : Component

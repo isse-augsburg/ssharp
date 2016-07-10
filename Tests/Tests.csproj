@@ -221,7 +221,7 @@
     <Compile Include="Analysis\StateConstraints\additional object.cs" />
     <Compile Include="Analysis\StateConstraints\single removed state.cs" />
     <Compile Include="Analysis\StateConstraints\deterministic through constraints.cs" />
-    <Compile Include="Analysis\StateConstraints\deadlock counter example.cs" />
+    <Compile Include="Analysis\StateConstraints\deadlock.cs" />
     <Compile Include="Diagnostics\Bindings\Invalid\non-component required port binding.cs" />
     <Compile Include="Diagnostics\Bindings\Valid\non-component provided port binding.cs" />
     <Compile Include="Diagnostics\CustomComponents\Invalid\components cannot implement IInitializable.cs" />

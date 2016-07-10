@@ -22,30 +22,17 @@
 
 namespace Tests.Analysis.StateConstraints
 {
-	using System;
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class DeadlockCounterExample : AnalysisTestObject
+	internal class Deadlock : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			var exception = Should.Throw<AnalysisException>(() => CheckInvariant(true, new C()));
-			exception.CounterExample.StepCount.ShouldBe(10);
-
-			SimulateCounterExample(exception.CounterExample, simulator =>
-			{
-				var c = (C)simulator.Model.Roots[0];
-
-				c.X.ShouldBe(0);
-				simulator.FastForward(8);
-
-				c.X.ShouldBe(8);
-
-				var e = Should.Throw<InvalidOperationException>(() => simulator.SimulateStep());
-				simulator.IsCompleted.ShouldBe(true);
-			});
+			CheckInvariant(true, new C());
+			Result.FormulaHolds.ShouldBe(true);
+			Result.StateCount.ShouldBe(10);
+			Result.TransitionCount.ShouldBe(10);
 		}
 
 		private class C : Component
