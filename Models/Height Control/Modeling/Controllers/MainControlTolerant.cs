@@ -65,8 +65,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 
 			if (Timer.HasElapsed)
 				_count = 0;
-
-			if (_count == 0)
+			else if (_count == 0)
 				Timer.Stop();
 		}
 	}

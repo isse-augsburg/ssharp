@@ -43,7 +43,6 @@ namespace SafetySharp.Analysis.ModelChecking
 			: base(createModel, output, configuration)
 		{
 			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationAction(formulaIndex));
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new DeadlockChecker());
 		}
 
 		/// <summary>

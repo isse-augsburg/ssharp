@@ -48,8 +48,9 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		{
 			if (transitionCount == 0)
 			{
-				throw new InvalidOperationException("Deadlock state detected, i.e., there are no outgoing transitions for " +
-													"the last state in the generated counter example. Try relaxing state constraints.");
+				throw new InvalidOperationException(
+					"Deadlock state detected, i.e., there are no outgoing transitions for " +
+					"the last state in the generated counter example. Try relaxing state constraints.");
 			}
 		}
 	}
