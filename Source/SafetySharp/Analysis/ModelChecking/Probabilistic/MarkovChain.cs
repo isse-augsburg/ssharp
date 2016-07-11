@@ -228,6 +228,7 @@ namespace SafetySharp.Runtime
 					var probTransition = (ProbabilisticTransition*)transition;
 					Assert.That(probTransition->IsValid, "Attempted to add an invalid transition.");
 					AddInitialState(transition->TargetState, probTransition->Probability);
+					SetStateLabeling(transition->TargetState, transition->Formulas);
 				}
 			}
 			else
@@ -240,9 +241,9 @@ namespace SafetySharp.Runtime
 					AddTransition(transition->TargetState, probTransition->Probability);
 
 					//TODO: optimize and allow different target transitions
-					SetStateLabeling(state, transition->Formulas);
-					//SetStateRewards0(state, transition.Reward0);
-					//SetStateRewards1(state, transition.Reward1);
+					SetStateLabeling(transition->TargetState, transition->Formulas);
+					//SetStateRewards0(transition->TargetState, transition.Reward0);
+					//SetStateRewards1(transition->TargetState, transition.Reward1);
 				}
 				FinishSourceState();
 			}

@@ -25,6 +25,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System;
 	using System.Linq;
 	using FormulaVisitors;
+	using Modeling;
 	using Runtime;
 	using Transitions;
 	using Utilities;
@@ -150,13 +151,21 @@ namespace SafetySharp.Analysis.ModelChecking
 					throw new ArgumentOutOfRangeException();
 			}
 		}
+		
+		/// <summary>
+		///	  The probability to reach the current state from its predecessor from the last transition.
+		/// </summary>
+		public Probability GetProbability()
+		{
+			return RuntimeModel.ChoiceResolver.CalculateProbabilityOfPath();
+		}
 
 		/// <summary>
 		///   Generates a transition from the model's current state.
 		/// </summary>
 		protected override void GenerateTransition()
 		{
-			_transitions.Add(RuntimeModel);
+			_transitions.Add(RuntimeModel, GetProbability().Value);
 		}
 
 		/// <summary>

@@ -224,5 +224,173 @@ namespace SafetySharp.Modeling
 		{
 			return values[Resolver.HandleChoice(values.Length)];
 		}
+
+
+		/// <summary>
+		///   Deterministically returns the <paramref name="value" />.
+		/// </summary>
+		/// <param name="value">The value to return.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(Option<T> value)
+		{
+			Utilities.Assert.That(value.Probability.Is(1.0,0.000000000001),"probability in this case must be 1");
+			return value.Result;
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" /> or <paramref name="value2" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The first value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(Option<T> value1, Option<T> value2)
+		{
+			switch (Resolver.HandleProbabilisticChoice(2))
+			{
+				case 0:
+					Resolver.SetProbabilityOfLastChoice(value1.Probability);
+					return value1.Result;
+				default:
+					Resolver.SetProbabilityOfLastChoice(value2.Probability);
+					return value2.Result;
+			}
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, or <paramref name="value3" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The firsOption< T> value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <param name="value3">The third value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(Option<T> value1, Option<T> value2, Option<T> value3)
+		{
+			switch (Resolver.HandleProbabilisticChoice(3))
+			{
+				case 0:
+					Resolver.SetProbabilityOfLastChoice(value1.Probability);
+					return value1.Result;
+				case 1:
+					Resolver.SetProbabilityOfLastChoice(value2.Probability);
+					return value2.Result;
+				default:
+					Resolver.SetProbabilityOfLastChoice(value3.Probability);
+					return value3.Result;
+			}
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />, or
+		///   <paramref name="value4" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The firsOption< T> value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <param name="value3">The third value to choose.</param>
+		/// <param name="value4">The fourth value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(Option<T> value1, Option<T> value2, Option<T> value3, Option<T> value4)
+		{
+			switch (Resolver.HandleProbabilisticChoice(4))
+			{
+				case 0:
+					Resolver.SetProbabilityOfLastChoice(value1.Probability);
+					return value1.Result;
+				case 1:
+					Resolver.SetProbabilityOfLastChoice(value2.Probability);
+					return value2.Result;
+				case 2:
+					Resolver.SetProbabilityOfLastChoice(value3.Probability);
+					return value3.Result;
+				default:
+					Resolver.SetProbabilityOfLastChoice(value4.Probability);
+					return value4.Result;
+			}
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />,
+		///   <paramref name="value4" />, or <paramref name="value5" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The firsOption< T> value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <param name="value3">The third value to choose.</param>
+		/// <param name="value4">The fourth value to choose.</param>
+		/// <param name="value5">The fifth value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(Option<T> value1, Option<T> value2, Option<T> value3, Option<T> value4, Option<T> value5)
+		{
+			switch (Resolver.HandleProbabilisticChoice(5))
+			{
+				case 0:
+					Resolver.SetProbabilityOfLastChoice(value1.Probability);
+					return value1.Result;
+				case 1:
+					Resolver.SetProbabilityOfLastChoice(value2.Probability);
+					return value2.Result;
+				case 2:
+					Resolver.SetProbabilityOfLastChoice(value3.Probability);
+					return value3.Result;
+				case 3:
+					Resolver.SetProbabilityOfLastChoice(value4.Probability);
+					return value4.Result;
+				default:
+					Resolver.SetProbabilityOfLastChoice(value5.Probability);
+					return value5.Result;
+			}
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />,
+		///   <paramref name="value4" />, <paramref name="value5" />, or <paramref name="value6" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The firsOption< T> value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <param name="value3">The third value to choose.</param>
+		/// <param name="value4">The fourth value to choose.</param>
+		/// <param name="value5">The fifth value to choose.</param>
+		/// <param name="value6">The sixth value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(Option<T> value1, Option<T> value2, Option<T> value3, Option<T> value4, Option<T> value5, Option<T> value6)
+		{
+			switch (Resolver.HandleProbabilisticChoice(6))
+			{
+				case 0:
+					Resolver.SetProbabilityOfLastChoice(value1.Probability);
+					return value1.Result;
+				case 1:
+					Resolver.SetProbabilityOfLastChoice(value2.Probability);
+					return value2.Result;
+				case 2:
+					Resolver.SetProbabilityOfLastChoice(value3.Probability);
+					return value3.Result;
+				case 3:
+					Resolver.SetProbabilityOfLastChoice(value4.Probability);
+					return value4.Result;
+				case 4:
+					Resolver.SetProbabilityOfLastChoice(value5.Probability);
+					return value5.Result;
+				default:
+					Resolver.SetProbabilityOfLastChoice(value6.Probability);
+					return value6.Result;
+			}
+		}
+
+		/// <summary>
+		///   Returns one of the <paramref name="values" /> nondeterministically.
+		/// </summary>
+		/// <param name="values">The values to choose from.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Choose<T>(params Option<T>[] values)
+		{
+			var chosen = Resolver.HandleProbabilisticChoice(values.Length);
+			Resolver.SetProbabilityOfLastChoice(values[chosen].Probability);
+			return values[chosen].Result;
+		}
 	}
 }

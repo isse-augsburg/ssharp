@@ -58,6 +58,7 @@
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningBoolValueVisitor.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\MarkovChainBuilder.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\MrmcTransformer.cs" />
+    <Compile Include="Analysis\ModelChecking\Probabilistic\ProbabilisticChoiceResolver.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\ProbabilisticExecutedModel.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\ProbabilisticModelChecker.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\Mrmc.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="Analysis\ModelChecking\Probabilistic\MarkovChainFormulaEvaluatorCompilationVisitor.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\ProbabilitisticFormula.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\ProbabilityChecker.cs" />
+    <Compile Include="Analysis\ModelChecking\Probabilistic\ProbabilityStack.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\RewardFormula.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\RewardRetriever.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\SparseDoubleMatrix.cs" />
@@ -115,6 +117,7 @@
     <Compile Include="Modeling\RootAttribute.cs" />
     <Compile Include="Analysis\SafetyAnalysis.cs" />
     <Compile Include="Analysis\FaultSet.cs" />
+    <Compile Include="Runtime\NondeterministicChoiceResolver.cs" />
     <Compile Include="Runtime\NondeterminismException.cs" />
     <Compile Include="Runtime\RangeMetadata`1.cs" />
     <Compile Include="Runtime\RangeMetadata.cs" />

@@ -115,7 +115,8 @@ namespace SafetySharp.Runtime
 			_stateHeaderBytes = stateHeaderBytes;
 
 			PortBinding.BindAll(objectTable);
-			ChoiceResolver = new ChoiceResolver(objectTable);
+			//ChoiceResolver = new NondeterministicChoiceResolver(objectTable);
+			ChoiceResolver = new ProbabilisticChoiceResolver(objectTable);
 
 			ConstructionState = new byte[StateVectorSize];
 			fixed (byte* state = ConstructionState)

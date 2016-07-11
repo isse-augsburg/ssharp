@@ -68,7 +68,8 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		///   Adds a transition to the <paramref name="model" />'s current state.
 		/// </summary>
 		/// <param name="model">The model the transition should be added for.</param>
-		public void Add(RuntimeModel model)
+		/// <param name="probability">The probability of the transition.</param>
+		public void Add(RuntimeModel model, double probability)
 		{
 			// 1. Notify all fault activations, so that the correct activation is set in the run time model
 			//    (Needed to persist persistent faults)
@@ -87,7 +88,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 				Formulas = new StateFormulaSet(_formulas),
 				ActivatedFaults = activatedFaults,
 				IsValid = true,
-				Probability = 0.0 //TODO
+				Probability = probability
 			};
 			++_count;
 		}
