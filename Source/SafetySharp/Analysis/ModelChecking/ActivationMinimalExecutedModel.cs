@@ -45,37 +45,31 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
 		internal ActivationMinimalExecutedModel(Func<RuntimeModel> runtimeModelCreator, int successorStateCapacity)
-			: base(runtimeModelCreator)
+			: this(runtimeModelCreator, null, successorStateCapacity)
 		{
-			var formulas = RuntimeModel.Formulas.Select(CompilationVisitor.Compile).ToArray();
-			_transitions = new ActivationMinimalTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
-			_stateConstraints = CollectStateConstraints();
 		}
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="runtimeModel">The model instance that should be executed.</param>
+		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
+		/// <param name="formulas">The formulas that should be evaluated for each state.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ActivationMinimalExecutedModel(RuntimeModel runtimeModel, int successorStateCapacity)
-			: base(runtimeModel)
+		internal ActivationMinimalExecutedModel(Func<RuntimeModel> runtimeModelCreator, Func<bool>[] formulas, int successorStateCapacity)
+			: base(runtimeModelCreator)
 		{
-			_transitions = new ActivationMinimalTransitionSetBuilder(RuntimeModel, successorStateCapacity);
-			_stateConstraints = CollectStateConstraints();
+			formulas = formulas ?? RuntimeModel.Formulas.Select(CompilationVisitor.Compile).ToArray();
+
+			_transitions = new ActivationMinimalTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
+			_stateConstraints = RuntimeModel.Model.Components.Cast<Component>().SelectMany(component => component.StateConstraints).ToArray();
+
+			ChoiceResolver = new ChoiceResolver(RuntimeModel.Objects.OfType<Choice>());
 		}
 
 		/// <summary>
 		///   Gets the size of a single transition of the model in bytes.
 		/// </summary>
 		public override unsafe int TransitionSize => sizeof(CandidateTransition);
-
-		/// <summary>
-		///   Collects all state constraints contained in the model.
-		/// </summary>
-		private Func<bool>[] CollectStateConstraints()
-		{
-			return RuntimeModel.Model.Components.Cast<Component>().SelectMany(component => component.StateConstraints).ToArray();
-		}
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.

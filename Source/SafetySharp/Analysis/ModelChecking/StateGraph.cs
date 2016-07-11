@@ -125,7 +125,6 @@ namespace SafetySharp.Analysis.ModelChecking
 		internal void AddStateInfo(int state, bool isInitial, TransitionCollection transitions, int transitionCount)
 		{
 			Assert.That(!isInitial || _initialTransitionCount == 0, "Initial transitions can only be added once.");
-			Assert.That(transitionCount > 0, "Cannot add deadlock state.");
 
 			if (isInitial)
 				_initialTransitionCount = transitionCount;

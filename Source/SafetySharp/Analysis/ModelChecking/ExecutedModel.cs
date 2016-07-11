@@ -68,6 +68,11 @@ namespace SafetySharp.Analysis.ModelChecking
 		public sealed override Func<RuntimeModel> RuntimeModelCreator { get; }
 
 		/// <summary>
+		///   Gets or sets the choice resolver that is used to resolve choices within the model.
+		/// </summary>
+		protected ChoiceResolver ChoiceResolver { get; set; }
+
+		/// <summary>
 		///   Gets the model's state vector layout.
 		/// </summary>
 		public StateVectorLayout StateVectorLayout => RuntimeModel.StateVectorLayout;
@@ -92,8 +97,11 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
-			if (disposing)
-				RuntimeModel.SafeDispose();
+			if (!disposing)
+				return;
+
+			ChoiceResolver.SafeDispose();
+			RuntimeModel.SafeDispose();
 		}
 
 		/// <summary>
@@ -129,11 +137,11 @@ namespace SafetySharp.Analysis.ModelChecking
 		public override TransitionCollection GetInitialTransitions()
 		{
 			BeginExecution();
-			RuntimeModel.ChoiceResolver.PrepareNextState();
+			ChoiceResolver.PrepareNextState();
 
 			fixed (byte* state = RuntimeModel.ConstructionState)
 			{
-				while (RuntimeModel.ChoiceResolver.PrepareNextPath())
+				while (ChoiceResolver.PrepareNextPath())
 				{
 					RuntimeModel.Deserialize(state);
 					ExecuteInitialTransition();
@@ -152,9 +160,9 @@ namespace SafetySharp.Analysis.ModelChecking
 		public override TransitionCollection GetSuccessorTransitions(byte* state)
 		{
 			BeginExecution();
-			RuntimeModel.ChoiceResolver.PrepareNextState();
+			ChoiceResolver.PrepareNextState();
 
-			while (RuntimeModel.ChoiceResolver.PrepareNextPath())
+			while (ChoiceResolver.PrepareNextPath())
 			{
 				RuntimeModel.Deserialize(state);
 				ExecuteTransition();
@@ -170,6 +178,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		public sealed override void Reset()
 		{
+			ChoiceResolver.Clear();
 			RuntimeModel.Reset();
 		}
 	}
