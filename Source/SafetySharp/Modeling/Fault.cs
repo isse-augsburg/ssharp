@@ -52,6 +52,9 @@ namespace SafetySharp.Modeling
 		[NonSerializable]
 		private int _choiceIndex;
 
+		[Hidden]
+		public Probability ProbabilityOfOccurrence = new Probability(0.5);
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
@@ -227,7 +230,7 @@ namespace SafetySharp.Modeling
 						_canUndoActivation = false;
 						break;
 					case Activation.Nondeterministic:
-						IsActivated = _choice.Choose(false, true);
+						IsActivated = _choice.Choose(new Option<bool>(ProbabilityOfOccurrence.Complement(), false), new Option<bool>(ProbabilityOfOccurrence, true));
 						_choiceIndex = _choice.Resolver.LastChoiceIndex;
 						_canUndoActivation = true;
 						break;
