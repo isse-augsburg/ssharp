@@ -61,5 +61,27 @@ namespace SafetySharp.Analysis
 		{
 			return new SSharpChecker().CheckInvariants(model, invariants);
 		}
+
+		/// <summary>
+		///   Calculates the probability to reach a state whether <paramref name="stateFormula" /> holds.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="stateFormula">The state formula to be checked.</param>
+		public static Probability CalculateProbabilityToReachState(ModelBase model, Formula stateFormula)
+		{
+			Probability probabilityToReachState;
+
+			var probabilityToReachStateFormula = new CalculateProbabilityToReachStateFormula(stateFormula);
+
+			using (var probabilityChecker = new ProbabilityChecker(model))
+			{
+				var checkProbabilityToReachState = probabilityChecker.CalculateProbability(probabilityToReachStateFormula);
+				probabilityChecker.CreateMarkovChain(stateFormula);
+				//probabilityChecker.CreateMarkovChain(); //no early termination
+				probabilityChecker.DefaultChecker = new Mrmc(probabilityChecker);
+				probabilityToReachState = checkProbabilityToReachState.Calculate();
+			}
+			return probabilityToReachState;
+		}
 	}
 }

@@ -65,6 +65,7 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analysis\HazardProbabilityTests.cs" />
     <Compile Include="Analysis\ModelCheckingTests.cs" />
     <Compile Include="Analysis\SimulationTests.cs" />
     <Compile Include="Modeling\Controllers\EndControlLightBarrier.cs" />
