@@ -155,6 +155,10 @@ namespace Tests
 			throw new TestException("Fault set is not contained in set.");
 		}
 	}
+	
+	public abstract class ProbabilisticAnalysisTestObject : TestObject
+	{
+	}
 
 	public partial class InvariantTests : Tests
 	{
@@ -223,6 +227,25 @@ namespace Tests
 		public static IEnumerable<object[]> DiscoverTests(string directory)
 		{
 			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
+		}
+	}
+
+
+	public partial class ProbabilisticTests : Tests
+	{
+		public ProbabilisticTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> AllProbabilisticModelCheckerTests(string directory)
+		{
+			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
+				yield return new object[] { typeof(Mrmc) }.Concat(testCase).ToArray();
+
+			//foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
+			//	yield return new object[] { typeof(Prism) }.Concat(testCase).ToArray();
 		}
 	}
 }

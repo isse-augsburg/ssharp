@@ -209,6 +209,10 @@
     <Compile Include="Analysis\Ltl\Violated\multiple choices.cs" />
     <Compile Include="Analysis\Ltl\Violated\single choice.cs" />
     <Compile Include="Analysis\Ltl\Violated\undo fault after successful activation.cs" />
+    <Compile Include="Analysis\Probabilistic\emulate dice with coin.cs" />
+    <Compile Include="Analysis\Probabilistic\formula which is always false.cs" />
+    <Compile Include="Analysis\Probabilistic\same target state on different ways.cs" />
+    <Compile Include="DataStructures\BidirectionalGraphTests.cs" />
     <Compile Include="Diagnostics\Bindings\Invalid\non-component required port binding.cs" />
     <Compile Include="Diagnostics\Bindings\Valid\non-component provided port binding.cs" />
     <Compile Include="Diagnostics\CustomComponents\Invalid\components cannot implement IInitializable.cs" />
@@ -222,6 +226,7 @@
     <Compile Include="Diagnostics\FaultEffects\Valid\explicit nondeterminism.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\generic nested.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\generic.cs" />
+    <Compile Include="DataStructures\DoubleVectorTests.cs" />
     <Compile Include="End2EndTests.cs" />
     <Compile Include="End2EndTests.Helpers.cs">
       <DependentUpon>End2EndTests.cs</DependentUpon>
@@ -517,6 +522,7 @@
       <DependentUpon>FormulaTests.cs</DependentUpon>
     </Compile>
     <Compile Include="AnalysisTests.cs" />
+    <Compile Include="DataStructures\MarkovChainTests.cs" />
     <Compile Include="Normalization\FaultNames\Changed\properties.cs" />
     <Compile Include="Normalization\FaultNames\Changed\fields.cs" />
     <Compile Include="Normalization\FaultNames\Changed\locals.cs" />
@@ -707,6 +713,7 @@
     <Compile Include="Serialization\StateLabels\ltl formula.cs" />
     <Compile Include="Serialization\StateLabels\invariants with closure.cs" />
     <Compile Include="Serialization\StateLabels\invariant without closure.cs" />
+    <Compile Include="DataStructures\SparseDoubleMatrixTests.cs" />
     <Compile Include="Utilities\TestErrorReporter.cs" />
     <Compile Include="Utilities\TestModel.cs" />
     <Compile Include="Utilities\TestTraceOutput.cs" />

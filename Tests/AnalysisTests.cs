@@ -22,6 +22,7 @@
 
 namespace Tests
 {
+	using System;
 	using SafetySharp.Analysis;
 	using Xunit;
 
@@ -121,6 +122,15 @@ namespace Tests
 		public void NotViolated(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(LtsMin));
+		}
+	}
+
+	public partial class ProbabilisticTests
+	{
+		[Theory, MemberData("AllProbabilisticModelCheckerTests", "Analysis/Probabilistic")]
+		public void Probabilistic(Type modelCheckerType, string test, string file)
+		{
+			ExecuteDynamicTests(file, modelCheckerType);
 		}
 	}
 }
