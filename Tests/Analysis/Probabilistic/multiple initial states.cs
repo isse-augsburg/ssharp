@@ -27,8 +27,6 @@ namespace Tests.Analysis.Probabilistic
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
-	
-	using Shouldly;
 
 	internal class MultipleInitialStates : ProbabilisticAnalysisTestObject
 	{

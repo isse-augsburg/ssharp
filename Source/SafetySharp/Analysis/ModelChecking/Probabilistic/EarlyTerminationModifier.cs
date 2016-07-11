@@ -22,13 +22,28 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using System;
 	using Transitions;
+	using Utilities;
 
 	/// <summary>
-	///   Represents a modifier that is executed when new transitions are found during model traversal.
+	///   Makes all candidate transitions reflexive when the terminateEarlyCondition is fulfilled.
+	///   (To keep all other assumptions about the transitions, the transitions are not replaced by
+	///   only one transition).
 	/// </summary>
-	internal unsafe interface ITransitionModifier
+	internal sealed unsafe class EarlyTerminationModifier : ITransitionModifier
 	{
+		private readonly Func<StateFormulaSet, bool> _terminateEarlyCondition;
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="terminateEarlyCondition">A delegate which calculates the terminateEarlyCondition.</param>
+		public EarlyTerminationModifier(Func<StateFormulaSet,bool> terminateEarlyCondition)
+		{
+			_terminateEarlyCondition = terminateEarlyCondition;
+		}
+
 		/// <summary>
 		///   Optionally modifies the <paramref name="transitions" />, changing any of their values. However, no new transitions can be
 		///   added; transitions can be removed by setting their <see cref="CandidateTransition.IsValid" /> flag to <c>false</c>.
@@ -40,6 +55,15 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// <param name="transitions">The transitions that should be checked.</param>
 		/// <param name="sourceState">The source state of the transitions.</param>
 		/// <param name="sourceStateIndex">The unique index of the transition's source state.</param>
-		void ModifyTransitions(TraversalContext context, Worker worker, TransitionCollection transitions, byte* sourceState, int sourceStateIndex);
+		public void ModifyTransitions(TraversalContext context, Worker worker, TransitionCollection transitions, byte* sourceState, int sourceStateIndex)
+		{
+			foreach (CandidateTransition* transition in transitions)
+			{
+				if (transition->IsValid && _terminateEarlyCondition(transition->Formulas))
+				{
+					MemoryBuffer.Copy(sourceState, transition->TargetState, worker.Model.StateVectorSize); //make reflexive
+				}
+			}
+		}
 	}
 }

@@ -56,7 +56,9 @@
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningProbabilityVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningRewardResultVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningBoolValueVisitor.cs" />
+    <Compile Include="Analysis\ModelChecking\Probabilistic\EarlyTerminationModifier.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\MarkovChainBuilder.cs" />
+    <Compile Include="Analysis\ModelChecking\Probabilistic\StateFormulaSetEvaluatorCompilationVisitor.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\MrmcTransformer.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\ProbabilisticChoiceResolver.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\ProbabilisticExecutedModel.cs" />

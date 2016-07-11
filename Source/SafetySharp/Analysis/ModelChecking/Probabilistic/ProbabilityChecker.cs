@@ -144,7 +144,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Generates a <see cref="StateGraph" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal MarkovChain GenerateMarkovChain(Func<AnalysisModel> createModel, Formula[] stateFormulas)
+		internal MarkovChain GenerateMarkovChain(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas)
 		{
 			Requires.That(IntPtr.Size == 8, "State graph generation is only supported in 64bit processes.");
 
@@ -154,7 +154,7 @@ namespace SafetySharp.Analysis
 			Configuration.CpuCount = 1; //TODO: Make multi threaded
 
 
-			using (var checker = new MarkovChainGenerator(createModel, stateFormulas, OutputWritten, Configuration))
+			using (var checker = new MarkovChainGenerator(createModel, terminateEarlyCondition, stateFormulas, OutputWritten, Configuration))
 			{
 				var markovChain = default(MarkovChain);
 				var initializationTime = stopwatch.Elapsed;
@@ -193,9 +193,9 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Generates a <see cref="MarkovChain" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal MarkovChain GenerateMarkovChain(Func<RuntimeModel> createModel, Formula[] stateFormulas)
+		internal MarkovChain GenerateMarkovChain(Func<RuntimeModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas)
 		{
-			return GenerateMarkovChain(() => new ProbabilisticExecutedModel(createModel, Configuration.SuccessorCapacity), stateFormulas);
+			return GenerateMarkovChain(() => new ProbabilisticExecutedModel(createModel, Configuration.SuccessorCapacity), terminateEarlyCondition, stateFormulas);
 		}
 
 		/// <summary>
@@ -203,7 +203,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model the state graph should be generated for.</param>
 		/// <param name="stateFormulas">The state formulas that should be evaluated during state graph generation.</param>
-		internal MarkovChain GenerateMarkovChain(ModelBase model, params Formula[] stateFormulas)
+		internal MarkovChain GenerateMarkovChain(ModelBase model, Formula terminateEarlyCondition, params StateFormula[] stateFormulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(stateFormulas, nameof(stateFormulas));
@@ -211,7 +211,7 @@ namespace SafetySharp.Analysis
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, stateFormulas);
 
-			return GenerateMarkovChain((Func<RuntimeModel>)serializer.Load, stateFormulas);
+			return GenerateMarkovChain((Func<RuntimeModel>)serializer.Load, terminateEarlyCondition, stateFormulas);
 		}
 
 
@@ -232,7 +232,9 @@ namespace SafetySharp.Analysis
 				stateFormulaCollector.Visit(stateFormula);
 			}
 
-			MarkovChain = GenerateMarkovChain(_model, stateFormulaCollector.StateFormulas.ToArray());
+			//StateFormulaSetEvaluatorCompilationVisitor
+
+			MarkovChain = GenerateMarkovChain(_model, terminateEarlyCondition, stateFormulaCollector.StateFormulas.ToArray());
 
 			_probabilityMatrixWasCreated = true;
 			Interlocked.MemoryBarrier();

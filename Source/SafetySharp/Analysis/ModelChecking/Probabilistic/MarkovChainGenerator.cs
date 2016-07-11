@@ -42,20 +42,19 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="stateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal MarkovChainGenerator(Func<AnalysisModel> createModel, Formula[] stateFormulas,
+		internal MarkovChainGenerator(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration)
 		{
-			var stateFormulaCollector = new CollectStateFormulasVisitor();
-			foreach (var stateFormula in stateFormulas)
-			{
-				stateFormulaCollector.Visit(stateFormula);
-			}
-
 			_markovChain = new MarkovChain(configuration.StateCapacity);
-			_markovChain.StateFormulaLabels = stateFormulaCollector.StateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
+			_markovChain.StateFormulaLabels = stateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
 			Context.TraversalParameters.BatchedTransitionActions.Add(() => new MarkovChainBuilder(_markovChain));
+			if (terminateEarlyCondition != null)
+			{
+				var terminalteEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_markovChain.StateFormulaLabels, terminateEarlyCondition);
+				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminalteEarlyFunc));
+			}
 		}
 
 		/// <summary>
