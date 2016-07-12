@@ -170,6 +170,9 @@ namespace SafetySharp.Runtime
 			Assert.InRange(columnValue.Value, 0, _spaceLimitNumberOfRows);
 			Assert.InRange(TotalColumnValueEntries, 0, _spaceLimitNumberOfEntries);
 			AssertNotSealed();
+			if (TotalColumnValueEntries >= _spaceLimitNumberOfEntries)
+				throw new OutOfMemoryException("Unable to store entry. Try increasing the transition capacity.");
+
 			var nextColumnValueIndex = TotalColumnValueEntries;
 			_columnValueMemory[nextColumnValueIndex] = columnValue;
 			TotalColumnValueEntries++;

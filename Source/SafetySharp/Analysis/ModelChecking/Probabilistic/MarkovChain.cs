@@ -60,7 +60,10 @@ namespace SafetySharp.Runtime
 			if (maxNumberOfTransitions <= 0)
 			{
 				maxNumberOfTransitions = maxNumberOfStates << 6;
+				if (maxNumberOfTransitions < maxNumberOfStates)
+					maxNumberOfTransitions = Int32.MaxValue - 1;
 			}
+
 			InitialStateProbabilities = new DoubleVector();
 			StateLabeling = new LabelVector();
 			ProbabilityMatrix = new SparseDoubleMatrix(maxNumberOfStates, maxNumberOfTransitions);

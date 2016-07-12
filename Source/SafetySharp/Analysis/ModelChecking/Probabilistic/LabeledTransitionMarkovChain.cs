@@ -59,15 +59,19 @@ namespace SafetySharp.Runtime
 		private TransitionChainElement* _transitionChainElementsMemory;
 		private int _transitionChainElementCount = 0;
 
+		private int _maxNumberOfTransitions;
+
 
 		public LabeledTransitionMarkovChain(int maxNumberOfStates= 1 << 21, int maxNumberOfTransitions=0)
 		{
 			Requires.InRange(maxNumberOfStates, nameof(maxNumberOfStates), 1024, Int32.MaxValue - 1);
-
 			if (maxNumberOfTransitions <= 0)
 			{
-				maxNumberOfTransitions = maxNumberOfStates << 3;
+				maxNumberOfTransitions = maxNumberOfStates << 6;
+				if (maxNumberOfTransitions < maxNumberOfStates)
+					maxNumberOfTransitions = Int32.MaxValue - 1;
 			}
+			_maxNumberOfTransitions = maxNumberOfTransitions;
 
 			_stateStorageStateToFirstTransitionChainElementBuffer.Resize((long)maxNumberOfStates * sizeof(int), zeroMemory: false);
 			_stateStorageStateToFirstTransitionChainElementMemory = (int*)_stateStorageStateToFirstTransitionChainElementBuffer.Pointer;
@@ -100,7 +104,11 @@ namespace SafetySharp.Runtime
 		internal void AddStateInfo(int sourceState, bool isInitial, TransitionCollection transitions, int transitionCount)
 		{
 			Assert.That(transitionCount > 0, "Cannot add deadlock state.");
-			
+
+			if (_transitionChainElementCount + transitionCount > _maxNumberOfTransitions)
+				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
+
+
 			// Search for place to append is linear in number of existing transitions of state linearly => O(n^2) 
 			foreach (var transition in transitions)
 			{
