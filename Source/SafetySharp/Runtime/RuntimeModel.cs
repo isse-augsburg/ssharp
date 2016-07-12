@@ -294,7 +294,7 @@ namespace SafetySharp.Runtime
 			// state variables might prevent us from doing so if they somehow influence the state
 			var replayModel = createModel();
 			var counterExampleModel = createModel();
-			var choiceResolver = new ChoiceResolver(replayModel.Objects.OfType<Choice>());
+			var choiceResolver = new NondeterministicChoiceResolver(replayModel.Objects.OfType<Choice>());
 
 			CopyFaultActivationStates(replayModel);
 			CopyFaultActivationStates(counterExampleModel);

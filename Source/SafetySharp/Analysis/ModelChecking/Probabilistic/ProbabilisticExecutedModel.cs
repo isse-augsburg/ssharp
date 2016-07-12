@@ -57,6 +57,8 @@ namespace SafetySharp.Analysis.ModelChecking
 		{
 			var formulas = RuntimeModel.Formulas.Select(CompilationVisitor.Compile).ToArray();
 			_transitions = new ProbabilisticTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
+
+			ChoiceResolver = new ProbabilisticChoiceResolver(RuntimeModel.Objects.OfType<Choice>());
 		}
 
 		/// <summary>
@@ -157,7 +159,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		public Probability GetProbability()
 		{
-			return RuntimeModel.ChoiceResolver.CalculateProbabilityOfPath();
+			return ChoiceResolver.CalculateProbabilityOfPath();
 		}
 
 		/// <summary>

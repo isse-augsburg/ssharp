@@ -64,9 +64,9 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="objectTable">The object table containing all objects that potentially require access to the choice resolver.</param>
-		public NondeterministicChoiceResolver(ObjectTable objectTable)
-				: base(objectTable)
+		/// <param name="choices">The choices that potentially require access to the choice resolver.</param>
+		public NondeterministicChoiceResolver(IEnumerable<Choice> choices)
+				: base(choices)
 		{
 		}
 

@@ -63,7 +63,7 @@ namespace SafetySharp.Analysis.ModelChecking
 			_transitions = new ActivationMinimalTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
 			_stateConstraints = RuntimeModel.Model.Components.Cast<Component>().SelectMany(component => component.StateConstraints).ToArray();
 
-			ChoiceResolver = new ChoiceResolver(RuntimeModel.Objects.OfType<Choice>());
+			ChoiceResolver = new NondeterministicChoiceResolver(RuntimeModel.Objects.OfType<Choice>());
 		}
 
 		/// <summary>

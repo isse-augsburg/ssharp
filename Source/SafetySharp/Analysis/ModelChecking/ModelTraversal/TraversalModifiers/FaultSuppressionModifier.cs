@@ -47,11 +47,12 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		///   are considered.
 		/// </summary>
 		/// <param name="context">The context of the model traversal.</param>
+		/// <param name="worker">The worker that found the transition.</param>
 		/// <param name="transitions">The transitions that should be checked.</param>
 		/// <param name="sourceState">The source state of the transitions.</param>
 		/// <param name="sourceStateIndex">The unique index of the transition's source state.</param>
 		/// <param name="isInitial">Indicates whether the transitions are initial transitions not starting in any valid source state.</param>
-		public void ModifyTransitions(TraversalContext context, TransitionCollection transitions, byte* sourceState,
+		public void ModifyTransitions(TraversalContext context, Worker worker, TransitionCollection transitions, byte* sourceState,
 									  int sourceStateIndex, bool isInitial)
 		{
 			foreach (CandidateTransition* transition in transitions)

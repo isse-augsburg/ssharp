@@ -142,7 +142,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 				var stateCount = 0;
 
 				foreach (var modifier in _transitionModifiers)
-					modifier.ModifyTransitions(_context, transitions, _context.States[sourceState], sourceState, isInitial);
+					modifier.ModifyTransitions(_context, this, transitions, _context.States[sourceState], sourceState, isInitial);
 
 				_stateStack.PushFrame();
 

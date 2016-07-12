@@ -23,10 +23,8 @@
 namespace SafetySharp.Runtime
 {
 	using System.Collections.Generic;
-	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Modeling;
-	using Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -67,9 +65,9 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="objectTable">The object table containing all objects that potentially require access to the choice resolver.</param>
-		public ProbabilisticChoiceResolver(ObjectTable objectTable)
-				: base(objectTable)
+		/// <param name="choices">The choices that potentially require access to the choice resolver.</param>
+		public ProbabilisticChoiceResolver(IEnumerable<Choice> choices)
+				: base(choices)
 		{
 		}
 
