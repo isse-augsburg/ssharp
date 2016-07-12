@@ -111,33 +111,36 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			simulator.SimulateStep();
 		}
 
-		[Test]
-		public void IncomingBloodIsContaminated_ModelChecking()
+		[TestCase]
+		public void IncomingBloodIsContaminated_ModelChecking(
+			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
 			var specification = new Model();
-			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 } };
+			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 }, Backend = backend };
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.IncomingBloodWasNotOk);
 			result.SaveCounterExamples("counter examples/hdmachine_contamination");
 
-			Console.WriteLine(result);
+			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
+			Console.WriteLine(orderResult);
 		}
 
-		[Test]
-		public void DialysisFinishedAndBloodNotCleaned_ModelChecking()
+		[TestCase]
+		public void DialysisFinishedAndBloodNotCleaned_ModelChecking(
+			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
 			var specification = new Model();
-			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 } };
+			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 }, Backend = backend};
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.BloodNotCleanedAndDialyzingFinished);
 			result.SaveCounterExamples("counter examples/hdmachine_unsuccessful");
 
-			Console.WriteLine(result);
+			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
+			Console.WriteLine(orderResult);
 		}
 
 		private static void Main()
 		{
-			new ModelTests().IncomingBloodIsContaminated_ModelChecking();
 		}
 
 		[Test]

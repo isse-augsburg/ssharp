@@ -37,28 +37,33 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		public const int MaxProductionSteps = 6;
 		public const int MaxAllocatedRoles = 5;
 
-		public Model()
-		{
-			var produce = (Func<ProduceCapability>)(() => new ProduceCapability(Resources, Tasks));
-			var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
-			var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
-			var tighten = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Tighten));
-			var polish = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Polish));
-			var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
 
-			CreateWorkpieces(5, produce(), drill(), insert(), tighten(), polish(), consume());
+	    public static Model GetDefaultInstance()
+	    {
+            var model = new Model();
 
-			CreateRobot(produce(), drill(), insert());
-			CreateRobot(insert(), drill());
-			CreateRobot(tighten(), polish(), tighten(), drill());
-			CreateRobot(polish(), consume());
+            var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
+            var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
+            var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
+            var tighten = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Tighten));
+            var polish = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Polish));
+            var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
 
-			CreateCart(Robots[0], new Route(Robots[0], Robots[1]), new Route(Robots[0], Robots[2]), new Route(Robots[0], Robots[3]));
-			CreateCart(Robots[1], new Route(Robots[1], Robots[2]), new Route(Robots[0], Robots[1]));
-			CreateCart(Robots[2], new Route(Robots[2], Robots[3]));
+            model.CreateWorkpieces(5, produce(), drill(), insert(), tighten(), polish(), consume());
 
-			ObserverController = new MiniZincObserverController(RobotAgents.Cast<Agent>().Concat(CartAgents), Tasks);
-		}
+            model.CreateRobot(produce(), drill(), insert());
+            model.CreateRobot(insert(), drill());
+            model.CreateRobot(tighten(), polish(), tighten(), drill());
+            model.CreateRobot(polish(), consume());
+
+            model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]), new Route(model.Robots[0], model.Robots[2]), new Route(model.Robots[0], model.Robots[3]));
+            model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]));
+            model.CreateCart(model.Robots[2], new Route(model.Robots[2], model.Robots[3]));
+
+            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
+
+            return model;
+	    }
 
 		public List<Task> Tasks { get; } = new List<Task>();
 
@@ -78,9 +83,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		public List<Resource> Resources { get; } = new List<Resource>();
 
 		[Root(RootKind.Controller)]
-		public ObserverController ObserverController { get; }
+		public ObserverController ObserverController { get; set; }
 
-		private void CreateWorkpieces(int count, params Capability[] capabilities)
+		public void CreateWorkpieces(int count, params Capability[] capabilities)
 		{
 			if (capabilities.Length > MaxProductionSteps)
 				throw new InvalidOperationException($"Too many production steps; increase '{MaxProductionSteps}'.");
@@ -100,7 +105,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			}
 		}
 
-		private void CreateRobot(params Capability[] capabilities)
+		public void CreateRobot(params Capability[] capabilities)
 		{
 			var robot = new Robot(capabilities.OfType<ProcessCapability>().ToArray());
 			var agent = new RobotAgent(capabilities, robot);
@@ -112,7 +117,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			agent.Name = $"R{Robots.Count - 1}";
 		}
 
-		private void CreateCart(Robot startPosition, params Route[] routes)
+		public void CreateCart(Robot startPosition, params Route[] routes)
 		{
 			// compute the transitive closure of the routes
 			routes = routes.SelectMany(route => Closure(route.Robot1, robot =>

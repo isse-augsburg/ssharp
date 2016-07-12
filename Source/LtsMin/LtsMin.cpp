@@ -97,6 +97,7 @@ ref struct Globals
 {
 	static ActivationMinimalExecutedModel^ ExecutedModel;
 	static RuntimeModel^ RuntimeModel;
+	static const char* ModelFile;
 };
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -115,18 +116,19 @@ void PrepareLoadModel(model_t model, const char* modelFile)
 	LoadModel(model, modelFile);
 }
 
+RuntimeModel^ CreateModel()
+{
+	return Globals::RuntimeModel;
+}
+
 void LoadModel(model_t model, const char* modelFile)
 {
 	try
 	{
 		auto modelData = RuntimeModelSerializer::LoadSerializedData(File::ReadAllBytes(gcnew String(modelFile)));
 		Globals::RuntimeModel = gcnew RuntimeModel(modelData, sizeof(int32_t));
-		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel(Globals::RuntimeModel, 1 << 16);
+		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel(gcnew Func<RuntimeModel^>(&CreateModel), gcnew array<Func<bool>^>(0), 1 << 16);
 
-#if false
-		Console::WriteLine(Globals::Model->StateVectorLayout);
-#endif
-		
 		auto stateSlotCount = (int32_t)(Globals::RuntimeModel->StateVectorSize / sizeof(int32_t));
 		auto stateLabelCount = Globals::RuntimeModel->StateFormulas->Length;
 		auto transitionGroupCount = 1;

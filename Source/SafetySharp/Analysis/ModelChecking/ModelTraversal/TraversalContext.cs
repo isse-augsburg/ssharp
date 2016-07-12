@@ -28,7 +28,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 	/// <summary>
 	///   Provides context information for the traversal of a model.
 	/// </summary>
-	internal class TraversalContext
+	internal sealed class TraversalContext
 	{
 		/// <summary>
 		///   The number of states that have to be found between two progress reports.

@@ -53,7 +53,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 
 			if (PositionDetector.IsVehicleDetected && LeftDetector.IsVehicleDetected && RightDetector.IsVehicleDetected)
 				ActivateMainControl(2);
-			else if (PositionDetector.IsVehicleDetected && (LeftDetector.IsVehicleDetected || RightDetector.IsVehicleDetected))
+			else if (PositionDetector.IsVehicleDetected)
 				ActivateMainControl(1);
 		}
 	}

@@ -20,53 +20,58 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
+namespace Tests.Analysis.Ordering
 {
+	using System.Linq;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using Shouldly;
 
-	public sealed class MainControlTolerant : MainControl
+	internal class NoOrder : AnalysisTestObject
 	{
-		/// <summary>
-		///   The number of high vehicles currently in the main-control area.
-		/// </summary>
-		[Range(0, Model.MaxVehicles, OverflowBehavior.Clamp)]
-		private int _count;
-
-		/// <summary>
-		///   Invoked when the given number of vehicles enters the main-control area.
-		/// </summary>
-		public override void VehiclesEntering(int vehicleCount)
+		protected override void Check()
 		{
-			_count += vehicleCount;
-			Timer.Start();
+			var c = new C();
+			var result = AnalyzeOrder(c.X == 6, c);
+
+			result.SafetyAnalysisResults.MinimalCriticalSets.Count.ShouldBe(1);
+			ShouldContain(result.SafetyAnalysisResults.MinimalCriticalSets, c.F1, c.F2, c.F3);
+			var relationships = result.OrderRelationships[result.SafetyAnalysisResults.MinimalCriticalSets.Single()].ToArray();
+			relationships.Length.ShouldBe(0);
 		}
 
-		/// <summary>
-		///   Updates the internal state of the component.
-		/// </summary>
-		public override void Update()
+		private class C : Component
 		{
-			base.Update();
+			public readonly Fault F1 = new TransientFault();
+			public readonly Fault F2 = new TransientFault();
+			public readonly Fault F3 = new TransientFault();
+			public int X;
+			public virtual int X1 => 0;
+			public virtual int X2 => 0;
+			public virtual int X3 => 0;
 
-			if (_count != 0 && PositionDetector.IsVehicleDetected)
+			public override void Update()
 			{
-				if (LeftDetector.IsVehicleDetected)
-					_count--;
-
-				if (RightDetector.IsVehicleDetected)
-					_count--;
-
-				// We assume the best case: If the vehicle was not seen on the left lane, it is assumed to be on the right lane
-				if (LeftDetector.IsVehicleDetected && !RightDetector.IsVehicleDetected)
-					CloseTunnel();
-				else
-					ActivateEndControl();
+				X = X1 + X2 + X3;
 			}
 
-			if (Timer.HasElapsed)
-				_count = 0;
-			else if (_count == 0)
-				Timer.Stop();
+			[FaultEffect(Fault = nameof(F1))]
+			private class E1 : C
+			{
+				public override int X1 => 2;
+			}
+
+			[FaultEffect(Fault = nameof(F2))]
+			private class E2 : C
+			{
+				public override int X2 => 2;
+			}
+
+			[FaultEffect(Fault = nameof(F3))]
+			private class E3 : C
+			{
+				public override int X3 => 2;
+			}
 		}
 	}
 }

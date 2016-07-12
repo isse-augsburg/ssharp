@@ -29,7 +29,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 	/// <summary>
 	///   Balances the load of multiple <see cref="Worker" /> instances.
 	/// </summary>
-	internal class LoadBalancer
+	internal sealed class LoadBalancer
 	{
 		private readonly StateStack[] _stacks;
 		private bool[] _awaitingWork;

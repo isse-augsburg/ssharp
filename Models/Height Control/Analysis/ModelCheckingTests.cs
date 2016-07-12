@@ -67,7 +67,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision, backend: backend);
 			result.SaveCounterExamples("counter examples/height control/dcca/collision/original");
 
-			Console.WriteLine(result);
+			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
+			Console.WriteLine(orderResult);
 		}
 
 		[TestCase]
@@ -76,9 +77,10 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		{
 			var model = Model.CreateOriginal();
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, backend: backend);
-
 			result.SaveCounterExamples("counter examples/height control/dcca/false alarm/original");
-			Console.WriteLine(result);
+
+			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
+			Console.WriteLine(orderResult);
 		}
 
 		[Test, TestCaseSource(nameof(CreateModelVariants))]
@@ -95,7 +97,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			// force the activation of the LeftOHV fault to improve safety analysis times significantly
 			model.VehicleSet.LeftOHV.Activation = Activation.Forced;
 
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision);
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision, maxCardinality: 4);
 
 			result.SaveCounterExamples($"counter examples/height control/dcca/collision/{variantName}");
 			Console.WriteLine(result);
@@ -104,7 +106,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		[Test, TestCaseSource(nameof(CreateModelVariants))]
 		public void FalseAlarm(Model model, string variantName)
 		{
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, backend: SafetyAnalysisBackend.FaultOptimizedStateGraph);
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, maxCardinality: 3);
 
 			result.SaveCounterExamples($"counter examples/height control/dcca/false alarm/{variantName}");
 			Console.WriteLine(result);

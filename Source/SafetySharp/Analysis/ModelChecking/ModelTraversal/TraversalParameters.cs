@@ -29,7 +29,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 	/// <summary>
 	///   Provides parameters for the model traversal process.
 	/// </summary>
-	internal class TraversalParameters
+	internal sealed class TraversalParameters
 	{
 		/// <summary>
 		///   Factory methods for <see cref="ITransitionAction" /> instances that should be executed by all <see cref="Worker" />

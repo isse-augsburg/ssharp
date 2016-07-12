@@ -27,7 +27,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 	/// <summary>
 	///   Checks for invariant violations during model traversal.
 	/// </summary>
-	internal class InvariantViolationAction : ITransitionAction
+	internal sealed class InvariantViolationAction : ITransitionAction
 	{
 		private readonly int _formulaIndex;
 
@@ -57,7 +57,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 
 			context.FormulaIsValid = false;
 			context.LoadBalancer.Terminate();
-			worker.CreateCounterExample(endsWithException: false);
+			worker.CreateCounterExample(endsWithException: false, addAdditionalState: false);
 		}
 	}
 }

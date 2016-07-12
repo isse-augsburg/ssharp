@@ -33,7 +33,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void EnumerateStateSpace()
 		{
-			var model = new Model();
+			var model = Model.GetDefaultInstance();
 			//model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
@@ -45,7 +45,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void NoDamagedWorkpieces()
 		{
-			var model = new Model();
+			var model = Model.GetDefaultInstance();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
@@ -57,7 +57,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void AllWorkpiecesCompleteEventually()
 		{
-			var model = new Model();
+			var model = Model.GetDefaultInstance();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
@@ -69,7 +69,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void HasResourceAndHasWorkpieceMatch()
 		{
-			var model = new Model();
+			var model = Model.GetDefaultInstance();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
