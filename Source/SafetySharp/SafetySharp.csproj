@@ -57,7 +57,9 @@
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningRewardResultVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningBoolValueVisitor.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\EarlyTerminationModifier.cs" />
-    <Compile Include="Analysis\ModelChecking\Probabilistic\MarkovChainBuilder.cs" />
+    <Compile Include="Analysis\ModelChecking\Probabilistic\LtmcToMc.cs" />
+    <Compile Include="Analysis\ModelChecking\Probabilistic\LabeledTransitionMarkovChain.cs" />
+    <Compile Include="Analysis\ModelChecking\Probabilistic\LabeledTransitionMarkovChainBuilder.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\StateFormulaSetEvaluatorCompilationVisitor.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\MrmcTransformer.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\ProbabilisticChoiceResolver.cs" />
@@ -76,7 +78,7 @@
     <Compile Include="Analysis\ModelChecking\Probabilistic\RewardFormula.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\RewardRetriever.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\SparseDoubleMatrix.cs" />
-    <Compile Include="Analysis\ModelChecking\Probabilistic\MarkovChainGenerator.cs" />
+    <Compile Include="Analysis\ModelChecking\Probabilistic\LabeledTransitionMarkovChainGenerator.cs" />
     <Compile Include="Analysis\SafetyAnalysisBackend.cs" />
     <Compile Include="Analysis\SafetyChecking\FaultOptimizationBackend.cs" />
     <Compile Include="Analysis\SafetyChecking\AnalysisBackend.cs" />

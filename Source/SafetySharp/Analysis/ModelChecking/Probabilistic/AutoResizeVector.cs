@@ -32,22 +32,22 @@ namespace SafetySharp.Runtime
 	using System.Collections;
 	using System.Runtime.CompilerServices;
 
-	public abstract class AutoResizeVector<T> : IEnumerable<T>
+	public class AutoResizeVector<T> : IEnumerable<T>
 		where T : struct
 	{
-		private List<T> _backingArray;
+		protected readonly List<T> _backingArray;
 
 		public int Count => _backingArray.Count;
 
 		// auto resize
-		protected AutoResizeVector()
+		public AutoResizeVector()
 		{
 			//_hasFixedSize = false;
 			_backingArray = new List<T>();
 		}
 
 		// fixed size
-		protected AutoResizeVector(int initialCapacity)
+		public AutoResizeVector(int initialCapacity)
 		{
 			//_hasFixedSize = true;
 			_backingArray = new List<T>(initialCapacity);
@@ -99,8 +99,13 @@ namespace SafetySharp.Runtime
 			}
 		}
 
+		public void Clear()
+		{
+			_backingArray.Clear();
+		}
+
 		// a nested class can access private members
-		internal class AutoResizeVectorEnumerator : IEnumerator<T>
+		internal struct AutoResizeVectorEnumerator : IEnumerator<T>
 		{
 			private readonly AutoResizeVector<T> _vector;
 
@@ -113,7 +118,7 @@ namespace SafetySharp.Runtime
 			public AutoResizeVectorEnumerator(AutoResizeVector<T> vector)
 			{
 				_vector = vector;
-				Reset();
+				CurrentIndex = -1;
 			}
 
 			/// <summary>

@@ -30,18 +30,18 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 
 
 	/// <summary>
-	///   Builds up a <see cref="MarkovChain" /> instance during model traversal.
+	///   Builds up a <see cref="LabeledTransitionMarkovChain" /> instance during model traversal.
 	///   Note: This only works single threaded
 	/// </summary>
-	internal class MarkovChainBuilder : IBatchedTransitionAction
+	internal class LabeledTransitionMarkovChainBuilder : IBatchedTransitionAction
 	{
-		private readonly MarkovChain _markovChain;
+		private readonly LabeledTransitionMarkovChain _markovChain;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="markovChain">The Markov chain that should be built up.</param>
-		public MarkovChainBuilder(MarkovChain markovChain)
+		public LabeledTransitionMarkovChainBuilder(LabeledTransitionMarkovChain markovChain)
 		{
 			Requires.NotNull(markovChain, nameof(markovChain));
 			_markovChain = markovChain;

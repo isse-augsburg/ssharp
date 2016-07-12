@@ -53,15 +53,15 @@ namespace Tests.DataStructures
 			_markovChain = new MarkovChain();
 			_markovChain.StateFormulaLabels = new string[] { "label1" , "label2" };
 			_markovChain.StateRewardRetrieverLabels = new string[] { };
-			_markovChain.AddInitialState(8920,1.0);
-			_markovChain.SetSourceStateOfUpcomingTransitions(4442);
-			_markovChain.AddTransition(4442, 1.0);
-			_markovChain.SetStateLabeling(4442, new StateFormulaSet(new []{ returnTrue, returnFalse }));
+			_markovChain.AddInitialState(0,1.0);
+			_markovChain.SetMarkovChainSourceStateOfUpcomingTransitions(1);
+			_markovChain.AddTransition(1, 1.0);
+			_markovChain.SetStateLabeling(1, new StateFormulaSet(new []{ returnTrue, returnFalse }));
 			_markovChain.FinishSourceState();
-			_markovChain.SetSourceStateOfUpcomingTransitions(8920);
-			_markovChain.AddTransition(4442, 0.6);
-			_markovChain.AddTransition(8920, 0.4);
-			_markovChain.SetStateLabeling(8920, new StateFormulaSet(new[] { returnFalse, returnTrue }));
+			_markovChain.SetMarkovChainSourceStateOfUpcomingTransitions(0);
+			_markovChain.AddTransition(1, 0.6);
+			_markovChain.AddTransition(0, 0.4);
+			_markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
 			_markovChain.FinishSourceState();
 			//_markovChain.ProbabilityMatrix.OptimizeAndSeal();
 		}
@@ -108,14 +108,14 @@ namespace Tests.DataStructures
 			var evaluateStateFormulaBoth = _markovChain.CreateFormulaEvaluator(stateFormulaBoth);
 			var evaluateStateFormulaAny = _markovChain.CreateFormulaEvaluator(stateFormulaAny);
 			
-			Assert.Equal(evaluateStateFormulaLabel1(8920), false);
-			Assert.Equal(evaluateStateFormulaLabel2(8920), true);
-			Assert.Equal(evaluateStateFormulaBoth(8920), false);
-			Assert.Equal(evaluateStateFormulaAny(8920), true);
-			Assert.Equal(evaluateStateFormulaLabel1(4442), true);
-			Assert.Equal(evaluateStateFormulaLabel2(4442), false);
-			Assert.Equal(evaluateStateFormulaBoth(4442), false);
-			Assert.Equal(evaluateStateFormulaAny(4442), true);
+			Assert.Equal(evaluateStateFormulaLabel1(0), false);
+			Assert.Equal(evaluateStateFormulaLabel2(0), true);
+			Assert.Equal(evaluateStateFormulaBoth(0), false);
+			Assert.Equal(evaluateStateFormulaAny(0), true);
+			Assert.Equal(evaluateStateFormulaLabel1(1), true);
+			Assert.Equal(evaluateStateFormulaLabel2(1), false);
+			Assert.Equal(evaluateStateFormulaBoth(1), false);
+			Assert.Equal(evaluateStateFormulaAny(1), true);
 		}
 	}
 }

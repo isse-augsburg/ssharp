@@ -154,15 +154,19 @@ namespace SafetySharp.Analysis
 			Configuration.CpuCount = 1; //TODO: Make multi threaded
 
 
-			using (var checker = new MarkovChainGenerator(createModel, terminateEarlyCondition, stateFormulas, OutputWritten, Configuration))
+			using (var checker = new LabeledTransitionMarkovChainGenerator(createModel, terminateEarlyCondition, stateFormulas, OutputWritten, Configuration))
 			{
 				var markovChain = default(MarkovChain);
 				var initializationTime = stopwatch.Elapsed;
+				var markovChainGenerationTime= stopwatch.Elapsed;
 				stopwatch.Restart();
 
 				try
 				{
-					markovChain = checker.GenerateStateGraph();
+					var labeledTransitionMarkovChain = checker.GenerateStateGraph();
+					markovChainGenerationTime = stopwatch.Elapsed;
+					var ltmcToMc = new LtmcToMc(labeledTransitionMarkovChain);
+					markovChain = ltmcToMc.MarkovChain;
 					return markovChain;
 				}
 				finally
@@ -174,7 +178,8 @@ namespace SafetySharp.Analysis
 						OutputWritten?.Invoke(String.Empty);
 						OutputWritten?.Invoke("===============================================");
 						OutputWritten?.Invoke($"Initialization time: {initializationTime}");
-						OutputWritten?.Invoke($"Markov chain generation time: {stopwatch.Elapsed}");
+						OutputWritten?.Invoke($"Labeled Transition Markov chain generation time: {markovChainGenerationTime}");
+						OutputWritten?.Invoke($"Markov chain conversion time: {stopwatch.Elapsed}");
 
 						if (markovChain != null)
 						{

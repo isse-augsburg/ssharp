@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.Runtime
 {
+	using System.Collections;
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.Runtime.CompilerServices;
@@ -38,44 +39,11 @@ namespace SafetySharp.Runtime
 	using Serialization;
 	using Utilities;
 
-	internal sealed unsafe class StateStorageStateToMarkovChainStateMapper
-	{
-		/// <summary>
-		///   The number of states that can be indexed.
-		/// </summary>
-		private readonly int _capacity;
-
-		/// <summary>
-		///   The buffer that stores the states.
-		/// </summary>
-		private readonly MemoryBuffer _stateStorageToMarkovChainStateBuffer = new MemoryBuffer();
-		
-		private readonly int* _stateStorageToMarkovChainStateMemory;
-
-		//[Impl(MethodImplOptions.AggressiveInlining)]
-		public int this[int index]
-		{
-			get { return _stateStorageToMarkovChainStateMemory[index]; }
-			set { _stateStorageToMarkovChainStateMemory[index]=value; }
-		}
-
-		public StateStorageStateToMarkovChainStateMapper(int capacity)
-		{
-			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
-			
-			_capacity = capacity;
-
-			_stateStorageToMarkovChainStateBuffer.Resize((long)_capacity * sizeof(int), zeroMemory: false);
-			_stateStorageToMarkovChainStateMemory = (int*) _stateStorageToMarkovChainStateBuffer.Pointer;
-			
-			for (var i = 0; i < capacity; ++i)
-				_stateStorageToMarkovChainStateMemory[i] = -1;
-		}
-	}
-
+	
 	internal unsafe class MarkovChain
 	{
-		public bool MarkovChainComplete { get; private set; }
+		// TODO: Optimization potential for custom model checker: Add every state only once. Save the transitions and evaluate reachability formulas more efficient by only expanding "states" to "states x stateformulaset" where the state labels of interests are in "stateformulaset"
+
 
 		public string[] StateFormulaLabels;
 
@@ -86,122 +54,46 @@ namespace SafetySharp.Runtime
 		public DoubleVector InitialStateProbabilities;
 
 		public LabelVector StateLabeling;
-
-		//TODO: Hardcoded. Remove
-		public RewardVector StateRewards0;
-		public RewardVector StateRewards1;
-
-		/*Dictionary<int, int> compactToSparse = new Dictionary<int, int>();
-		Dictionary<int, int> sparseToCompact = new Dictionary<int, int>();
-		*/
-		private StateStorageStateToMarkovChainStateMapper _stateMapper;
-
+		
 		public MarkovChain(int maxNumberOfStates= 1 << 21, int maxNumberOfTransitions=0)
 		{
 			if (maxNumberOfTransitions <= 0)
 			{
-				maxNumberOfTransitions = maxNumberOfStates << 3;
+				maxNumberOfTransitions = maxNumberOfStates << 6;
 			}
 			InitialStateProbabilities = new DoubleVector();
 			StateLabeling = new LabelVector();
-			StateRewards0 = new RewardVector();
-			StateRewards1 = new RewardVector();
-			_stateMapper = new StateStorageStateToMarkovChainStateMapper(maxNumberOfStates);
 			ProbabilityMatrix = new SparseDoubleMatrix(maxNumberOfStates, maxNumberOfTransitions);
 		}
 
 
 		// Retrieving matrix phase
 
-		public int States { get; private set; } = 0;
+		public int States => ProbabilityMatrix.Rows;
 
-		public int Transitions { get; private set; } = 0;
+		public int Transitions => ProbabilityMatrix.TotalColumnValueEntries;
 
-		public int? ExceptionState { get; private set; } = null;
-
-		public bool HasExceptionInModel => ExceptionState != -1;
 
 		// Creating matrix phase
-
-		/*
-		private int GetOrCreateStateForException()
+			
+		internal void AddInitialState(int markovChainState, double probability)
 		{
-			if (ExceptionState != null)
-				return ExceptionState.Value;
-			ExceptionState = States;
-			ProbabilityMatrix.SetRow(ExceptionState.Value); //add state for exception
-			ProbabilityMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(ExceptionState.Value, 1.0)); //Add self-loop in exception
-			States++;
-			return ExceptionState.Value;
-		}
-		*/
-
-		private int GetMarkovChainState (int stateStorageState)
-		{
-			{
-				if (_stateMapper[stateStorageState]!=-1)
-				{
-					return _stateMapper[stateStorageState];
-				}
-				else
-				{
-					var freshMarkovChainState = States;
-					States++;
-					_stateMapper[stateStorageState] = freshMarkovChainState;
-					return freshMarkovChainState;
-				}
-			}
-		}
-
-		internal void AddInitialState(int stateStorageState, double probability)
-		{
-			var markovChainState = GetMarkovChainState(stateStorageState);
 			InitialStateProbabilities[markovChainState] = InitialStateProbabilities[markovChainState] + probability;
 		}
 
-		/*
-		internal void AddInitialException(Probability probability)
+		internal void SetMarkovChainSourceStateOfUpcomingTransitions(int markovChainState)
 		{
-			AddInitialState(GetOrCreateStateForException(), probability);
-		}
-		*/
-
-		internal void SetSourceStateOfUpcomingTransitions(int stateStorageState)
-		{
-			var markovChainState = GetMarkovChainState(stateStorageState);
 			ProbabilityMatrix.SetRow(markovChainState);
 		}
 
-		internal void AddTransition(int stateStorageState, double probability)
+		internal void AddTransition(int markovChainState, double probability)
 		{
-			var markovChainState = GetMarkovChainState(stateStorageState);
 			ProbabilityMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(markovChainState, probability));
-			Transitions++;
 		}
 
-		/*
-		private void AddTransitionException(Probability probability)
+		internal void SetStateLabeling(int markovChainState, StateFormulaSet formula)
 		{
-			AddTransition(GetOrCreateStateForException(), probability);
-		}
-		*/
-
-		internal void SetStateLabeling(int stateStorageState, StateFormulaSet formula)
-		{
-			var markovChainState = GetMarkovChainState(stateStorageState);
 			StateLabeling[markovChainState] = formula;
-		}
-
-		internal void SetStateRewards0(int stateStorageState, Reward reward)
-		{
-			var markovChainState = GetMarkovChainState(stateStorageState);
-			StateRewards0[markovChainState] = reward;
-		}
-
-		internal void SetStateRewards1(int stateStorageState, Reward reward)
-		{
-			var markovChainState = GetMarkovChainState(stateStorageState);
-			StateRewards1[markovChainState] = reward;
 		}
 
 		internal void FinishSourceState()
@@ -209,51 +101,10 @@ namespace SafetySharp.Runtime
 			ProbabilityMatrix.FinishRow();
 		}
 
-
-		/// <summary>
-		///   Adds the <paramref name="state" /> and all of its <see cref="transitions" /> to the state graph.
-		/// </summary>
-		/// <param name="state">The state that should be added.</param>
-		/// <param name="isInitial">Indicates whether the state is an initial state.</param>
-		/// <param name="transitions">The transitions leaving the state.</param>
-		/// <param name="transitionCount">The number of valid transitions leaving the state.</param>
-		internal void AddStateInfo(int state, bool isInitial, TransitionCollection transitions, int transitionCount)
-		{
-			Assert.That(transitionCount > 0, "Cannot add deadlock state.");
-
-			if (isInitial)
-			{
-				foreach (var transition in transitions)
-				{
-					var probTransition = (ProbabilisticTransition*)transition;
-					Assert.That(probTransition->IsValid, "Attempted to add an invalid transition.");
-					AddInitialState(transition->TargetState, probTransition->Probability);
-					SetStateLabeling(transition->TargetState, transition->Formulas);
-				}
-			}
-			else
-			{
-				SetSourceStateOfUpcomingTransitions(state);
-				foreach (var transition in transitions)
-				{
-					var probTransition = (ProbabilisticTransition*)transition;
-					Assert.That(probTransition->IsValid, "Attempted to add an invalid transition.");
-					AddTransition(transition->TargetState, probTransition->Probability);
-
-					//TODO: optimize and allow different target transitions
-					SetStateLabeling(transition->TargetState, transition->Formulas);
-					//SetStateRewards0(transition->TargetState, transition.Reward0);
-					//SetStateRewards1(transition->TargetState, transition.Reward1);
-				}
-				FinishSourceState();
-			}
-		}
-
 		public void SealProbabilityMatrix()
 		{
 			InitialStateProbabilities.IncreaseSize(States);
 			ProbabilityMatrix.OptimizeAndSeal();
-			MarkovChainComplete = true;
 		}
 
 		// Validation
@@ -354,9 +205,7 @@ namespace SafetySharp.Runtime
 
 		public UnderlyingDigraph CreateUnderlyingDigraph()
 		{
-			if (MarkovChainComplete)
-				return new UnderlyingDigraph(this);
-			return null;
+			return new UnderlyingDigraph(this);
 		}
 
 		internal class UnderlyingDigraph

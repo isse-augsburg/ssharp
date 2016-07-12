@@ -48,7 +48,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		private Expression _expression;
 
-		public ParameterExpression StateStorageStateExpr { get; }
+		public ParameterExpression MarkovChainStateExpr { get; }
 
 		public ConstantExpression LabelingVectorExpr { get; }
 
@@ -61,7 +61,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		public MarkovChainFormulaEvaluatorCompilationVisitor(MarkovChain markovChain)
 		{
 			_markovChain = markovChain;
-			StateStorageStateExpr = Expression.Parameter(typeof(int), "state");
+			MarkovChainStateExpr = Expression.Parameter(typeof(int), "state");
 			LabelingVectorExpr = Expression.Constant(_markovChain.StateLabeling);
 			MarkovChainExpr = Expression.Constant(_markovChain);
 			LabelsOfCurrentStateExpr = Expression.Parameter(typeof(StateFormulaSet), "labelsOfCurrentState");
@@ -79,15 +79,15 @@ namespace SafetySharp.Analysis.FormulaVisitors
 			var visitor = new MarkovChainFormulaEvaluatorCompilationVisitor(markovChain);
 			visitor.Visit(formula);
 			
-			var getMarkovChainState = visitor.MarkovChainExpr.Type.GetMethod("GetMarkovChainState", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-			var markovChainStateExpr = Expression.Call(visitor.MarkovChainExpr, getMarkovChainState, visitor.StateStorageStateExpr); // = GetMarkovChainState(stateStorageState);
+			//var getMarkovChainState = visitor.MarkovChainExpr.Type.GetMethod("GetMarkovChainState", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+			//var markovChainStateExpr = Expression.Call(visitor.MarkovChainExpr, getMarkovChainState, visitor.StateStorageStateExpr); // = GetMarkovChainState(stateStorageState);
 			var indexer = visitor.LabelingVectorExpr.Type.GetProperty("Item", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-			var labelsOfCurrentStateExpr = Expression.Property(visitor.LabelingVectorExpr, indexer, markovChainStateExpr);
+			var labelsOfCurrentStateExpr = Expression.Property(visitor.LabelingVectorExpr, indexer, visitor.MarkovChainStateExpr);
 			var setLabelsOfCurrentStateExpr = Expression.Assign(visitor.LabelsOfCurrentStateExpr, labelsOfCurrentStateExpr);
 
 			var codeOfLambda = Expression.Block(new[] { visitor.LabelsOfCurrentStateExpr }, setLabelsOfCurrentStateExpr, visitor._expression);
 
-			var lambda = Expression.Lambda<Func<int, bool>>(codeOfLambda, visitor.StateStorageStateExpr).Compile();
+			var lambda = Expression.Lambda<Func<int, bool>>(codeOfLambda, visitor.MarkovChainStateExpr).Compile();
 
 			return lambda;
 		}

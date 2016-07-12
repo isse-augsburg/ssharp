@@ -31,9 +31,9 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// <summary>
 	///   Generates a <see cref="StateGraph" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal class MarkovChainGenerator : ModelTraverser
+	internal class LabeledTransitionMarkovChainGenerator : ModelTraverser
 	{
-		private readonly MarkovChain _markovChain;
+		private readonly LabeledTransitionMarkovChain _markovChain;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -42,14 +42,14 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="stateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal MarkovChainGenerator(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas,
+		internal LabeledTransitionMarkovChainGenerator(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration)
 		{
-			_markovChain = new MarkovChain(configuration.StateCapacity);
+			_markovChain = new LabeledTransitionMarkovChain(configuration.StateCapacity);
 			_markovChain.StateFormulaLabels = stateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new MarkovChainBuilder(_markovChain));
+			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovChainBuilder(_markovChain));
 			if (terminateEarlyCondition != null)
 			{
 				var terminalteEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_markovChain.StateFormulaLabels, terminateEarlyCondition);
@@ -60,7 +60,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <summary>
 		///   Generates the state graph.
 		/// </summary>
-		internal MarkovChain GenerateStateGraph()
+		internal LabeledTransitionMarkovChain GenerateStateGraph()
 		{
 			if (!Context.Configuration.ProgressReportsOnly)
 			{

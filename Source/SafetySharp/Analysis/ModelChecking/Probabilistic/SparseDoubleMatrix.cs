@@ -66,8 +66,8 @@ namespace SafetySharp.Runtime
 		private bool _isSealed = false;
 
 		private int _currentRow = -1;
-		private int _noOfColumnValues = 0;
-		private int _currentColumnCount = 0;
+		public int TotalColumnValueEntries { get; private set; }
+		private int _columnCountOfCurrentRow = 0;
 
 		public int Rows { get; private set; } = 0;
 
@@ -77,8 +77,8 @@ namespace SafetySharp.Runtime
 		// _columnValueMemory[_rowMemory[s]] and _columnValueMemory[_rowMemory[s+1]]
 		public SparseDoubleMatrix(int spaceLimitNumberOfRows, int spaceLimitNumberOfEntries)
 		{
-			Requires.InRange(spaceLimitNumberOfRows, nameof(spaceLimitNumberOfRows), 1024, Int32.MaxValue-1);
-			Requires.InRange(spaceLimitNumberOfEntries, nameof(spaceLimitNumberOfEntries), 1024, Int32.MaxValue);
+			Requires.InRange(spaceLimitNumberOfRows, nameof(spaceLimitNumberOfRows), 1, Int32.MaxValue-1);
+			Requires.InRange(spaceLimitNumberOfEntries, nameof(spaceLimitNumberOfEntries), 1, Int32.MaxValue);
 
 			_spaceLimitNumberOfRows = spaceLimitNumberOfRows;
 			_spaceLimitNumberOfEntries = spaceLimitNumberOfEntries;
@@ -148,10 +148,10 @@ namespace SafetySharp.Runtime
 				throw new Exception("Row has already been selected. Every row might only be selected once.");
 			}
 			_currentRow = row;
-			_currentColumnCount = 0;
+			_columnCountOfCurrentRow = 0;
 			if (row >= Rows)
 				Rows =  row+1;
-			_rowMemory[row] = _noOfColumnValues;
+			_rowMemory[row] = TotalColumnValueEntries;
 		}
 
 		internal void FinishRow()
@@ -160,7 +160,7 @@ namespace SafetySharp.Runtime
 			if (_currentRow != -1)
 			{
 				//finish row
-				_rowColumnCountMemory[_currentRow] = _currentColumnCount;
+				_rowColumnCountMemory[_currentRow] = _columnCountOfCurrentRow;
 			}
 			//TODO: Check if row has at least one entry (this is required and asserted by our application for probability matrices)
 		}
@@ -168,12 +168,12 @@ namespace SafetySharp.Runtime
 		internal void AddColumnValueToCurrentRow(ColumnValue columnValue)
 		{
 			Assert.InRange(columnValue.Value, 0, _spaceLimitNumberOfRows);
-			Assert.InRange(_noOfColumnValues, 0, _spaceLimitNumberOfEntries);
+			Assert.InRange(TotalColumnValueEntries, 0, _spaceLimitNumberOfEntries);
 			AssertNotSealed();
-			var nextColumnValueIndex = _noOfColumnValues;
+			var nextColumnValueIndex = TotalColumnValueEntries;
 			_columnValueMemory[nextColumnValueIndex] = columnValue;
-			_noOfColumnValues++;
-			_currentColumnCount++;
+			TotalColumnValueEntries++;
+			_columnCountOfCurrentRow++;
 		}
 
 		internal void OptimizeAndSeal()
@@ -187,7 +187,7 @@ namespace SafetySharp.Runtime
 			//initialize fresh memory for optimized data
 			// use actual number of rows and entries, not the pessimistic upper limits
 			_rowBufferOptimized.Resize((long) (Rows + 1) * sizeof(int), zeroMemory: false);
-			_columnValueBufferOptimized.Resize((long)_noOfColumnValues * sizeof(ColumnValue), zeroMemory: false);
+			_columnValueBufferOptimized.Resize((long)TotalColumnValueEntries * sizeof(ColumnValue), zeroMemory: false);
 			//Reason for +1 in the previous line: To be able to optimize we need space for one more state 
 			var optimizedRowMemory = (int*)_rowBufferOptimized.Pointer;
 			var optimizedColumnValueMemory = (ColumnValue*)_columnValueBufferOptimized.Pointer;
