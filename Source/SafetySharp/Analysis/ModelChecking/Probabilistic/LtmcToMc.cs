@@ -43,10 +43,27 @@ namespace SafetySharp.Runtime
 			public readonly StateFormulaSet Formula;
 			public readonly int StateStorageState;
 
+			public bool Equals(StateStorageEntry other)
+			{
+				return Formula.Equals(other.Formula) && StateStorageState == other.StateStorageState;
+			}
+			
+			public override bool Equals(object obj)
+			{
+				if (ReferenceEquals(null, obj))
+					return false;
+				return obj is StateStorageEntry && Equals((StateStorageEntry)obj);
+			}
+
 			public override int GetHashCode()
 			{
-				return StateStorageState.GetHashCode();
+				unchecked
+				{
+					return (Formula.GetHashCode() * 397) ^ StateStorageState;
+				}
 			}
+			
+
 		}
 
 		public int States = 0;
@@ -59,7 +76,7 @@ namespace SafetySharp.Runtime
 
 		private void CreateStates(LabeledTransitionMarkovChain ltmc)
 		{
-			Console.Error.WriteLine("Starting to convert");
+			Console.Error.WriteLine("Starting to convert labeled transition Markov chain to Markov chain");
 			var enumerator = ltmc.GetTransitionChainEnumerator();
 			while (enumerator.MoveNext())
 			{

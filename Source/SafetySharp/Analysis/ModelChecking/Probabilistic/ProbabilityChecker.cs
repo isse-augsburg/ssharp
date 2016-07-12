@@ -165,6 +165,7 @@ namespace SafetySharp.Analysis
 				{
 					var labeledTransitionMarkovChain = checker.GenerateStateGraph();
 					markovChainGenerationTime = stopwatch.Elapsed;
+					stopwatch.Restart();
 					var ltmcToMc = new LtmcToMc(labeledTransitionMarkovChain);
 					markovChain = ltmcToMc.MarkovChain;
 					return markovChain;
