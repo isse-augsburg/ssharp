@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 namespace SafetySharp.Runtime
 {
 	using System.Collections;
+	using System.Collections.Concurrent;
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.Runtime.CompilerServices;
@@ -50,7 +51,7 @@ namespace SafetySharp.Runtime
 		
 		private int _indexOfFirstInitialTransition = -1;
 
-		public List<int> SourceStates { get; } = new List<int>();
+		public ConcurrentBag<int> SourceStates { get; } = new ConcurrentBag<int>();
 
 		private readonly MemoryBuffer _stateStorageStateToFirstTransitionChainElementBuffer = new MemoryBuffer();
 		private int* _stateStorageStateToFirstTransitionChainElementMemory;
@@ -124,7 +125,8 @@ namespace SafetySharp.Runtime
 				if (currentElementIndex == -1)
 				{
 					// Add new chain start
-					_transitionChainElementsMemory[_transitionChainElementCount] =
+					var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
+					_transitionChainElementsMemory[locationOfNewEntry] =
 						new TransitionChainElement
 						{
 							Formulas = transition->Formulas,
@@ -134,15 +136,13 @@ namespace SafetySharp.Runtime
 						};
 					if (isInitial)
 					{
-						_indexOfFirstInitialTransition = _transitionChainElementCount;
+						_indexOfFirstInitialTransition = locationOfNewEntry;
 					}
 					else
 					{
 						SourceStates.Add(sourceState);
-						_stateStorageStateToFirstTransitionChainElementMemory[sourceState] = _transitionChainElementCount;
+						_stateStorageStateToFirstTransitionChainElementMemory[sourceState] = locationOfNewEntry;
 					}
-						
-					_transitionChainElementCount++;
 				}
 				else
 				{
@@ -167,16 +167,17 @@ namespace SafetySharp.Runtime
 						else if (currentElement.NextElementIndex == -1)
 						{
 							//Case 2: Append
+							var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
 							mergedOrAppended = true;
 							_transitionChainElementsMemory[currentElementIndex] =
 								new TransitionChainElement
 								{
 									Formulas = currentElement.Formulas,
-									NextElementIndex = _transitionChainElementCount,
+									NextElementIndex = locationOfNewEntry,
 									Probability = currentElement.Probability,
 									TargetState = currentElement.TargetState
 								};
-							_transitionChainElementsMemory[_transitionChainElementCount] =
+							_transitionChainElementsMemory[locationOfNewEntry] =
 								new TransitionChainElement
 								{
 									Formulas = transition->Formulas,
@@ -184,7 +185,6 @@ namespace SafetySharp.Runtime
 									Probability = probTransition->Probability,
 									TargetState = transition->TargetState
 								};
-							_transitionChainElementCount++;
 						}
 						else
 						{
