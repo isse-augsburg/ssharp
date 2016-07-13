@@ -81,6 +81,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// </summary>
 		public override void Update()
 		{
+			if (Position == 0 && Choose(true, false))
+				return;
+
 			// Once the tunnel is closed, all vehicles stop
 			if (IsTunnelClosed)
 				return;

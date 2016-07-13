@@ -38,7 +38,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 
 		private class C : Component
 		{
-			[Range(0, 15, OverflowBehavior.Error)]
+			[Range(0, 15, OverflowBehavior.Clamp)]
 			public int X;
 
 			public override void Update()

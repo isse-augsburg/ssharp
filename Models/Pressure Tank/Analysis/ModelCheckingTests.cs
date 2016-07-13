@@ -49,6 +49,21 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 		}
 
 		/// <summary>
+		///   Checks two formulas over the case study, only evaluating the S# model once.
+		/// </summary>
+		[Test]
+		public void StateGraphAllStates()
+		{
+			var model = new Model();
+			var result = ModelChecker.CheckInvariants(model, model.Tank.PressureLevel < 100, model.Tank.PressureLevel < 40);
+
+			result[0].FormulaHolds.Should().BeTrue();
+			result[1].FormulaHolds.Should().BeFalse();
+
+			result[1].CounterExample.Save("counter examples/pressure tank/pressure level below 40");
+		}
+
+		/// <summary>
 		///   Uses LTL and LTSMin to check an LTL formula: When no faults occur, the tank should never rupture.
 		/// </summary>
 		[Test]

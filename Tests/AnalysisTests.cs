@@ -22,22 +22,33 @@
 
 namespace Tests
 {
-	using System;
 	using SafetySharp.Analysis;
 	using Xunit;
 
 	public partial class DccaTests
 	{
 		[Theory, MemberData("DiscoverTests", "Analysis/Dcca")]
-		public void Dcca(string test, string file)
+		public void FaultRemovalDcca(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(LtsMin));
+			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedOnTheFly);
+		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Dcca")]
+		public void StateGraphDcca(string test, string file)
+		{
+			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedStateGraph);
 		}
 
 		[Theory, MemberData("DiscoverTests", "Analysis/Heuristics")]
 		public void Heuristics(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(LtsMin));
+			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedOnTheFly);
+		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Ordering")]
+		public void Ordering(string test, string file)
+		{
+			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedOnTheFly);
 		}
 	}
 
@@ -46,19 +57,70 @@ namespace Tests
 		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/CounterExamples")]
 		public void CounterExamples(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker));
+			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
 		}
 
-		[Theory, MemberData("DiscoverTestsBothModelCheckers", "Analysis/Invariants/NotViolated")]
-		public void NotViolated(Type modelCheckerType, string test, string file)
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/NotViolated")]
+		public void NotViolated(string test, string file)
 		{
-			ExecuteDynamicTests(file, modelCheckerType);
+			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
 		}
 
-		[Theory, MemberData("DiscoverTestsBothModelCheckers", "Analysis/Invariants/Violated")]
-		public void Violated(Type modelCheckerType, string test, string file)
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/Violated")]
+		public void Violated(string test, string file)
 		{
-			ExecuteDynamicTests(file, modelCheckerType);
+			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
+		}
+	}
+
+	public partial class StateConstraintTests
+	{
+		[Theory, MemberData("DiscoverTests", "Analysis/StateConstraints")]
+		public void StateConstraints(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
+		}
+	}
+
+	public partial class StateGraphInvariantTests
+	{
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/CounterExamples")]
+		public void CounterExamples(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
+		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/NotViolated")]
+		public void NotViolated(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
+		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/Violated")]
+		public void Violated(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
+		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/MultipleInvariants")]
+		public void MultipleInvariants(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
+		}
+	}
+
+	public partial class LtsMinInvariantTests
+	{
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/NotViolated")]
+		public void NotViolated(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(LtsMin));
+		}
+
+		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/Violated")]
+		public void Violated(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(LtsMin));
 		}
 	}
 

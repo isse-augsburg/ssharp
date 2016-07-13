@@ -129,7 +129,7 @@ namespace SafetySharp.Analysis.Heuristics
 				// one fault of each group is not activated (try all combinations)
 				from excludedFaults in CartesianProduct(faultGroups)
 				// also exclude subsuming faults
-				let subsuming = Fault.SubsumingFaults(excludedFaults, _allFaults)
+				let subsuming = FaultSet.SubsumingFaults(excludedFaults, _allFaults)
 				orderby subsuming.Cardinality descending
 				select faults.GetDifference(subsuming)
 				);
@@ -142,7 +142,7 @@ namespace SafetySharp.Analysis.Heuristics
 				// get a subset of size subsetStepSize
 				from subset in GetSubsets(set, _subsetStepSize)
 				// remove all faults in the subset and their subsuming faults
-				let suggestion = set.GetDifference(Fault.SubsumingFaults(subset, _allFaults))
+				let suggestion = set.GetDifference(FaultSet.SubsumingFaults(subset, _allFaults))
 				select suggestion
 				);
 		}

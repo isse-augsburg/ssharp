@@ -20,14 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 {
 	using System;
 	using System.Collections.Generic;
 	using Utilities;
 
 	/// <summary>
-	///   Represents a stack of <see cref="RuntimeModel" /> states that have yet to be checked.
+	///   Represents a stack of <see cref="AnalysisModel" /> states that have yet to be checked.
 	/// </summary>
 	/// <remarks>
 	///   When enumerating all states of a model in a depth-first fashion, we have to store the next states (that are computed all
@@ -65,6 +65,11 @@ namespace SafetySharp.Runtime
 		private readonly MemoryBuffer _statesBuffer = new MemoryBuffer();
 
 		/// <summary>
+		///   The lowest index of a splittable frame. -1 if no frame is splittable.
+		/// </summary>
+		private int _lowestSplittableFrame = -1;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="capacity">The maximum number of states that can be stored on the stack.</param>
@@ -79,6 +84,11 @@ namespace SafetySharp.Runtime
 			_states = (int*)_statesBuffer.Pointer;
 			_capacity = capacity;
 		}
+
+		/// <summary>
+		///   Indicates whether the stack can be split.
+		/// </summary>
+		public bool CanSplit => _lowestSplittableFrame != -1;
 
 		/// <summary>
 		///   Gets the number of frames on the stack.
@@ -100,7 +110,7 @@ namespace SafetySharp.Runtime
 		{
 			if (FrameCount >= _capacity)
 			{
-				throw new InvalidOperationException(
+				throw new OutOfMemoryException(
 					"Unable to allocate an additional depth first search frame. Try increasing the size of the state stack.");
 			}
 
@@ -125,6 +135,9 @@ namespace SafetySharp.Runtime
 
 			_states[offset] = state;
 			_frames[FrameCount - 1].Count += 1;
+
+			if (_lowestSplittableFrame == -1 && frame.Count > 1)
+				_lowestSplittableFrame = FrameCount - 1;
 		}
 
 		/// <summary>
@@ -157,13 +170,31 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
+		///   Finds the next splittable frame, if any.
+		/// </summary>
+		private void UpdateLowestSplittableFrame()
+		{
+			for (var i = Math.Max(0, _lowestSplittableFrame); i < FrameCount; ++i)
+			{
+				if (_frames[i].Count > 1)
+				{
+					_lowestSplittableFrame = i;
+					return;
+				}
+			}
+
+			_lowestSplittableFrame = -1;
+		}
+
+		/// <summary>
 		///   Splits the work between this instance and the <paramref name="other" /> instance. Returns <c>true</c> to indicate that
 		///   work has been split; <c>false</c>, otherwise.
 		/// </summary>
 		/// <param name="other">The other instance the work should be split with.</param>
 		public bool SplitWork(StateStack other)
 		{
-			Requires.That(other.FrameCount == 0, nameof(other), "Expected an empty state stack.");
+			Assert.That(CanSplit, "Cannot split the state stack.");
+			Assert.That(other.FrameCount == 0, "Expected an empty state stack.");
 
 			// We go through each frame and split the first frame with more than two states in half
 			for (var i = 0; i < FrameCount; ++i)
@@ -196,6 +227,10 @@ namespace SafetySharp.Runtime
 						_frames[i].Offset += otherCount;
 						_frames[i].Count = thisCount;
 
+						// Find the next splittable frame if this one no longer is
+						if (thisCount == 1)
+							UpdateLowestSplittableFrame();
+
 						return true;
 				}
 			}
@@ -206,21 +241,21 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Gets the trace the stack currently represents, i.e., returns the sequence of topmost states of each frame, starting with
+		///   Gets the path the stack currently represents, i.e., returns the sequence of topmost states of each frame, starting with
 		///   the oldest one.
 		/// </summary>
-		public int[] GetTrace()
+		public int[] GetPath()
 		{
 			// We have to explicitly allocate and fill a list here, as pointers are not allowed in iterators
-			var trace = new List<int>(FrameCount);
+			var path = new List<int>(FrameCount);
 
 			for (var i = 0; i < FrameCount; ++i)
 			{
 				if (_frames[i].Count > 0)
-					trace.Add(_states[_frames[i].Offset + _frames[i].Count - 1]);
+					path.Add(_states[_frames[i].Offset + _frames[i].Count - 1]);
 			}
 
-			return trace.ToArray();
+			return path.ToArray();
 		}
 
 		/// <summary>

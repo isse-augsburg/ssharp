@@ -52,7 +52,7 @@ namespace SafetySharp.Analysis.Heuristics
 			// for each set, check the set of subsumed faults first
 			for (var i = 0; i < setsToCheck.Count; ++i)
 			{
-				var subsumed = Fault.SubsumedFaults(setsToCheck[i], _allFaults);
+				var subsumed = FaultSet.SubsumedFaults(setsToCheck[i], _allFaults);
 				if (!setsToCheck[i].Equals(subsumed) && !_subsumedSets.Contains(subsumed))
 				{
 					setsToCheck.Insert(i + 1, subsumed);

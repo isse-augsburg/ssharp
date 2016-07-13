@@ -23,7 +23,6 @@
 namespace SafetySharp.Analysis
 {
 	using System;
-	using System.Collections.Generic;
 	using Utilities;
 
 	/// <summary>
@@ -32,13 +31,15 @@ namespace SafetySharp.Analysis
 	public struct AnalysisConfiguration
 	{
 		private const int DefaultStateCapacity = 1 << 24;
-		private const int DefaultStackCapacity = 1 << 16;
+		private const int DefaultTransitionCapacity = 1 << 28;
+		private const int DefaultStackCapacity = 1 << 20;
 		private const int DefaultSuccessorStateCapacity = 1 << 14;
 		private const int MinCapacity = 1024;
 
 		private int _cpuCount;
 		private int _stackCapacity;
 		private int _stateCapacity;
+		private int _transitionCapacity;
 		private int _successorStateCapacity;
 
 		/// <summary>
@@ -50,20 +51,34 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Gets or sets a value indicating whether only progress reports should be output.
 		/// </summary>
-		public bool ProgressReportsOnly { get; set; }
+		internal bool ProgressReportsOnly { get; set; }
 
 		/// <summary>
 		///   The default configuration.
 		/// </summary>
-		internal static readonly AnalysisConfiguration Default = new AnalysisConfiguration
+		public static readonly AnalysisConfiguration Default = new AnalysisConfiguration
 		{
 			CpuCount = Int32.MaxValue,
 			ProgressReportsOnly = false,
 			StackCapacity = DefaultStackCapacity,
 			StateCapacity = DefaultStateCapacity,
 			SuccessorCapacity = DefaultSuccessorStateCapacity,
+			TransitionCapacity = DefaultTransitionCapacity,
 			GenerateCounterExample = true
 		};
+
+		/// <summary>
+		///   Gets or sets the number of transitions that can be stored during model checking.
+		/// </summary>
+		public int TransitionCapacity
+		{
+			get { return Math.Max(_transitionCapacity, MinCapacity); }
+			set
+			{
+				Requires.That(value >= MinCapacity, $"{nameof(TransitionCapacity)} must be at least {MinCapacity}.");
+				_transitionCapacity = value;
+			}
+		}
 
 		/// <summary>
 		///   Gets or sets the number of states that can be stored during model checking.

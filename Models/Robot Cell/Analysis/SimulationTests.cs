@@ -35,7 +35,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void Simulate()
 		{
-			var model = new Model();
+			var model = Model.GetDefaultInstance();
 			model.Faults.SuppressActivations();
 
 			var simulator = new Simulator(model);

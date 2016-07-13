@@ -26,7 +26,6 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Runtime.Serialization;
-	using Modeling;
 
 	/// <summary>
 	///   Serializes instances of types derived from <see cref="Delegate" />.

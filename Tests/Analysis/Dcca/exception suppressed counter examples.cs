@@ -24,6 +24,7 @@ namespace Tests.Analysis.Dcca
 {
 	using System;
 	using System.Linq;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
@@ -33,32 +34,40 @@ namespace Tests.Analysis.Dcca
 		{
 			SuppressCounterExampleGeneration = true;
 
-			var c = new C();
-			var result = Dcca(c.X > 4, c);
-
-			result.Faults.Count().ShouldBe(3);
-			result.CheckedSets.Count.ShouldBe(4);
-			result.MinimalCriticalSets.Count.ShouldBe(3);
-			result.Exceptions.Count.ShouldBe(2);
-			result.IsComplete.ShouldBe(true);
-			result.SuppressedFaults.ShouldBeEmpty();
-			result.ForcedFaults.ShouldBeEmpty();
-
-			ShouldContain(result.CheckedSets);
-			ShouldContain(result.CheckedSets, c.F1);
-			ShouldContain(result.CheckedSets, c.F2);
-			ShouldContain(result.CheckedSets, c.F3);
-
-			ShouldContain(result.MinimalCriticalSets, c.F1);
-			ShouldContain(result.MinimalCriticalSets, c.F2);
-			ShouldContain(result.MinimalCriticalSets, c.F3);
-
-			result.CounterExamples.Count.ShouldBe(0);
-
-			foreach (var exceptionSet in result.Exceptions.Keys)
+			if ((SafetyAnalysisBackend)Arguments[0] == SafetyAnalysisBackend.FaultOptimizedStateGraph)
 			{
-				ShouldContain(result.CheckedSets, exceptionSet.ToArray());
-				ShouldContain(result.MinimalCriticalSets, exceptionSet.ToArray());
+				var exception = Should.Throw<AnalysisException>(() => Dcca(true, new C()));
+				exception.CounterExample.ShouldBeNull();
+			}
+			else
+			{
+				var c = new C();
+				var result = Dcca(c.X > 4, c);
+
+				result.Faults.Count().ShouldBe(3);
+				result.CheckedSets.Count.ShouldBe(4);
+				result.MinimalCriticalSets.Count.ShouldBe(3);
+				result.Exceptions.Count.ShouldBe(2);
+				result.IsComplete.ShouldBe(true);
+				result.SuppressedFaults.ShouldBeEmpty();
+				result.ForcedFaults.ShouldBeEmpty();
+
+				ShouldContain(result.CheckedSets);
+				ShouldContain(result.CheckedSets, c.F1);
+				ShouldContain(result.CheckedSets, c.F2);
+				ShouldContain(result.CheckedSets, c.F3);
+
+				ShouldContain(result.MinimalCriticalSets, c.F1);
+				ShouldContain(result.MinimalCriticalSets, c.F2);
+				ShouldContain(result.MinimalCriticalSets, c.F3);
+
+				result.CounterExamples.Count.ShouldBe(0);
+
+				foreach (var exceptionSet in result.Exceptions.Keys)
+				{
+					ShouldContain(result.CheckedSets, exceptionSet.ToArray());
+					ShouldContain(result.MinimalCriticalSets, exceptionSet.ToArray());
+				}
 			}
 		}
 

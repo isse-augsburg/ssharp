@@ -58,6 +58,8 @@ using namespace System::IO;
 using namespace System::Reflection;
 using namespace System::Runtime::InteropServices;
 using namespace System::Threading;
+using namespace SafetySharp::Analysis::ModelChecking;
+using namespace SafetySharp::Analysis::ModelChecking::Transitions;
 using namespace SafetySharp::Runtime;
 using namespace SafetySharp::Runtime::Serialization;
 
@@ -93,8 +95,9 @@ matrix_t StateLabelMatrix;
 // Global variables of managed types must be wrapped in a class...
 ref struct Globals
 {
-	static RuntimeModel^ Model;
-	static TransitionSet^ Transitions;
+	static ActivationMinimalExecutedModel^ ExecutedModel;
+	static RuntimeModel^ RuntimeModel;
+	static const char* ModelFile;
 };
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -113,20 +116,21 @@ void PrepareLoadModel(model_t model, const char* modelFile)
 	LoadModel(model, modelFile);
 }
 
+RuntimeModel^ CreateModel()
+{
+	return Globals::RuntimeModel;
+}
+
 void LoadModel(model_t model, const char* modelFile)
 {
 	try
 	{
 		auto modelData = RuntimeModelSerializer::LoadSerializedData(File::ReadAllBytes(gcnew String(modelFile)));
-		Globals::Model = gcnew RuntimeModel(modelData, sizeof(int32_t));
-		Globals::Transitions = gcnew TransitionSet(Globals::Model, 1 << 16);
+		Globals::RuntimeModel = gcnew RuntimeModel(modelData, sizeof(int32_t));
+		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel(gcnew Func<RuntimeModel^>(&CreateModel), gcnew array<Func<bool>^>(0), 1 << 16);
 
-#if false
-		Console::WriteLine(Globals::Model->StateVectorLayout);
-#endif
-		
-		auto stateSlotCount = (int32_t)(Globals::Model->StateVectorSize / sizeof(int32_t));
-		auto stateLabelCount = Globals::Model->StateFormulas->Length;
+		auto stateSlotCount = (int32_t)(Globals::RuntimeModel->StateVectorSize / sizeof(int32_t));
+		auto stateLabelCount = Globals::RuntimeModel->StateFormulas->Length;
 		auto transitionGroupCount = 1;
 
 		// Create the LTS type and set the state vector size
@@ -161,7 +165,7 @@ void LoadModel(model_t model, const char* modelFile)
 
 		for (auto i = 0; i < stateLabelCount; ++i)
 		{
-			auto stateLabel = Marshal::StringToHGlobalAnsi(Globals::Model->StateFormulas[i]->Label);
+			auto stateLabel = Marshal::StringToHGlobalAnsi(Globals::RuntimeModel->StateFormulas[i]->Label);
 			lts_type_set_state_label_name(ltsType, i, (char*)stateLabel.ToPointer());
 			lts_type_set_state_label_typeno(ltsType, i, boolType);
 			Marshal::FreeHGlobal(stateLabel);
@@ -176,7 +180,7 @@ void LoadModel(model_t model, const char* modelFile)
 		GBchunkPut(model, boolType, chunk_str(LTSMIN_VALUE_BOOL_TRUE));
 		
 		// Set the initial state, the user context, and the callback functions
-		pin_ptr<unsigned char> initialStatePtr = &Globals::Model->ConstructionState[0];
+		pin_ptr<unsigned char> initialStatePtr = &Globals::RuntimeModel->ConstructionState[0];
 		auto initialState = (int32_t*)initialStatePtr;
 		initialState[0] = 1;
 		GBsetInitialState(model, initialState);
@@ -230,22 +234,23 @@ int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, Transit
 
 	try
 	{
-		Globals::Transitions->Clear();
-
-		if (IsConstructionState(state))
-			Globals::Model->ComputeInitialStates(Globals::Transitions);
-		else
-			Globals::Model->ComputeSuccessorStates(Globals::Transitions, (unsigned char*)state);
+		auto transitions = IsConstructionState(state)
+			? Globals::ExecutedModel->GetInitialTransitions()
+			: Globals::ExecutedModel->GetSuccessorTransitions((unsigned char*)state);
 
 		transition_info info = { nullptr, 0, 0 };
-		for (auto i = 0; i < Globals::Transitions->Count; ++i)
+		auto transitionCount = 0;
+
+		for each (auto transition in transitions)
 		{
-			auto stateMemory = (int32_t*)Globals::Transitions[i]->TargetState;
+			auto stateMemory = (int32_t*)((CandidateTransition*)transition)->TargetState;
 			stateMemory[0] = 0;
 			callback(context, &info, stateMemory, nullptr);
+
+			++transitionCount;
 		}
 
-		return Globals::Transitions->Count;
+		return transitionCount;
 	}
 	catch (Exception^ e)
 	{
@@ -265,8 +270,8 @@ int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state)
 
 	try
 	{
-		Globals::Model->Deserialize((unsigned char*)state);
-		return Globals::Model->StateFormulas[label]->Expression() ? 1 : 0;
+		Globals::RuntimeModel->Deserialize((unsigned char*)state);
+		return Globals::RuntimeModel->StateFormulas[label]->Expression() ? 1 : 0;
 	}
 	catch (Exception^ e)
 	{

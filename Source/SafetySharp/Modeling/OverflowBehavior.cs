@@ -22,16 +22,13 @@
 
 namespace SafetySharp.Modeling
 {
-	using Runtime;
-
 	/// <summary>
 	///   Controls the overflow semantics when field values lie outside the field's allowed range of values.
 	/// </summary>
 	public enum OverflowBehavior
 	{
 		/// <summary>
-		///   Indicates that a <see cref="RangeViolationException" /> is thrown when a field contains a value outside of its allowed
-		///   range.
+		///   Indicates that an exception should be thrown when a field contains a value outside of its allowed range.
 		/// </summary>
 		Error,
 

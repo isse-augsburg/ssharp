@@ -142,7 +142,7 @@ namespace SafetySharp.Utilities
 		/// <param name="source">The first buffer of memory to compare.</param>
 		/// <param name="destination">The second buffer of memory to compare.</param>
 		/// <param name="sizeInBytes">The size of the buffers in bytes.</param>
-		public static bool Copy(byte* source, byte* destination, long sizeInBytes)
+		public static void Copy(byte* source, byte* destination, long sizeInBytes)
 		{
 			for (var i = sizeInBytes / 8; i > 0; --i)
 			{
@@ -152,15 +152,23 @@ namespace SafetySharp.Utilities
 				destination += 8;
 			}
 
-			for (var i = sizeInBytes % 8; i > 0; --i)
+			var remaining = sizeInBytes % 8;
+			if (remaining >= 4)
+			{
+				*(int*)destination = *(int*)source;
+
+				source += 4;
+				destination += 4;
+				remaining -= 4;
+			}
+
+			for (var i = 0; i < remaining; ++i)
 			{
 				*destination = *source;
 
 				source += 1;
 				destination += 1;
 			}
-
-			return true;
 		}
 
 		/// <summary>

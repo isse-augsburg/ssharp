@@ -26,7 +26,6 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 	using System.Collections.Generic;
 	using System.Linq;
 	using Controllers;
-	using Runtime;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Sensors;
@@ -44,7 +43,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		public const int TunnelPosition = 12;
 		public const int MaxSpeed = 2;
 		public const int MinSpeed = 1;
-		public const int MaxVehicles = 5;
+		public const int MaxVehicles = 3;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -88,14 +87,18 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		/// <summary>
 		///   Represents the hazard of an overheight vehicle colliding with the tunnel entrance on the left lane.
 		/// </summary>
-		public Formula Collision => Vehicles.Skip(1).Aggregate((Formula)VehicleSet.Vehicles[0].IsCollided, (f, v) => f || v.IsCollided);
+		public Formula Collision =>
+			Vehicles.Any(vehicle =>
+				vehicle.Position == TunnelPosition &&
+				vehicle.Lane == Lane.Left &&
+				vehicle.Kind == VehicleKind.OverheightVehicle);
 
 		/// <summary>
 		///   Represents the hazard of an alarm even when no overheight vehicle is on the right lane.
 		/// </summary>
 		public Formula FalseAlarm =>
 			HeightControl.TrafficLights.IsRed &&
-			Vehicles.All(vehicle => vehicle.Lane == Lane.Right || vehicle.Kind != VehicleKind.OverheightVehicle);
+			!Vehicles.Any(vehicle => vehicle.Lane == Lane.Left && vehicle.Kind == VehicleKind.OverheightVehicle);
 
 		/// <summary>
 		///   Initializes a model of the original design.

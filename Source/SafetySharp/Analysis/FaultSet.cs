@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Collections.Generic;
@@ -38,6 +38,9 @@ namespace SafetySharp.Runtime
 	{
 		private readonly long _faults;
 
+		/// <summary>
+		///   Gets the cardinality of the fault set.
+		/// </summary>
 		public uint Cardinality
 		{
 			get
@@ -216,12 +219,64 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Checks whether the number of faults in <paramref name="faultCount" /> is supported.
+		///   Gets a <see cref="FaultSet" /> containing all fault instances subsumed by the <paramref name="set" />.
 		/// </summary>
-		/// <param name="faultCount">The fault count that should be checked.</param>
-		internal static void CheckFaultCount(int faultCount)
+		/// <param name="set">The fault set the subsumed faults should be returned for.</param>
+		/// <param name="allFaults">The list of all analyzed faults.</param>
+		internal static FaultSet SubsumedFaults(FaultSet set, Fault[] allFaults)
 		{
-			Requires.That(faultCount < 64, "More than 63 faults are not supported.");
+			var currentFaults = set.ToFaultSequence(allFaults);
+			var subsumed = set;
+
+			uint oldCount;
+			do // fixed-point iteration
+			{
+				oldCount = subsumed.Cardinality;
+				currentFaults = currentFaults.SelectMany(fault => fault.SubsumedFaults);
+				subsumed = subsumed.GetUnion(new FaultSet(currentFaults));
+			} while (oldCount < subsumed.Cardinality);
+
+			return subsumed;
+		}
+
+		/// <summary>
+		///   Gets a <see cref="FaultSet" /> containing all fault instances subsuming the <paramref name="set" />.
+		/// </summary>
+		/// <param name="set">The subsumed fault set the subsuming faults should be returned for.</param>
+		/// <param name="allFaults">The list of all analyzed faults.</param>
+		internal static FaultSet SubsumingFaults(FaultSet set, Fault[] allFaults)
+		{
+			var currentFaults = set.ToFaultSequence(allFaults);
+			var subsuming = set;
+
+			uint oldCount;
+			do // fixed-point iteration
+			{
+				oldCount = subsuming.Cardinality;
+				currentFaults = allFaults.Where(fault => fault.SubsumedFaults.Intersect(currentFaults).Any()).ToArray();
+				subsuming = subsuming.GetUnion(new FaultSet(currentFaults));
+			} while (oldCount < subsuming.Cardinality);
+
+			return subsuming;
+		}
+
+		/// <summary>
+		///   Gets a <see cref="FaultSet" /> containing all fault instances subsuming the <paramref name="faults" />.
+		/// </summary>
+		/// <param name="faults">The subsumed faults the subsuming faults should be returned for.</param>
+		/// <param name="allFaults">The list of all analyzed faults.</param>
+		internal static FaultSet SubsumingFaults(IEnumerable<Fault> faults, Fault[] allFaults)
+		{
+			return SubsumingFaults(new FaultSet(faults), allFaults);
+		}
+
+		/// <summary>
+		///   Checks whether the number of <paramref name="faults" /> is supported.
+		/// </summary>
+		/// <param name="faults">The fault count that should be checked.</param>
+		internal static void CheckFaultCount(int faults)
+		{
+			Requires.That(faults < 64, "More than 63 faults are not supported.");
 		}
 
 		/// <summary>
@@ -251,7 +306,7 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		public override int GetHashCode()
 		{
-			return (int)_faults;
+			return _faults.GetHashCode();
 		}
 
 		/// <summary>

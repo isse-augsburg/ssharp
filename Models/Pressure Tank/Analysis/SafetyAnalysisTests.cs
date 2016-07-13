@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.PressureTank.Analysis
 {
 	using System;
+	using System.Linq;
 	using FluentAssertions;
 	using Modeling;
 	using NUnit.Framework;
@@ -42,9 +43,10 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 		{
 			var model = new Model();
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.Tank.IsRuptured);
-
 			result.SaveCounterExamples("counter examples/pressure tank/dcca/tank rupture");
-			Console.WriteLine(result);
+
+			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
+			Console.WriteLine(orderResult);
 
 			result.IsComplete.Should().BeTrue();
 			result.MinimalCriticalSets.ShouldAllBeEquivalentTo(new[]
@@ -52,6 +54,9 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 				// The tank rupture hazard has only one single minimial critical set consisting of the following to faults
 				new[] { model.Sensor.SuppressIsFull, model.Timer.SuppressTimeout }
 			});
+
+			orderResult.OrderRelationships[result.MinimalCriticalSets.Single()].Single().FirstFault.Should().Be(model.Sensor.SuppressIsFull);
+			orderResult.OrderRelationships[result.MinimalCriticalSets.Single()].Single().SecondFault.Should().Be(model.Timer.SuppressTimeout);
 		}
 
 		/// <summary>

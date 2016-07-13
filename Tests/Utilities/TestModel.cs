@@ -78,7 +78,7 @@ namespace Tests.Utilities
 		/// <param name="formulas">The formulas the runtime model should be instantiated with.</param>
 		protected void Create(ModelBase model, params Formula[] formulas)
 		{
-			RuntimeModel = model.ToRuntimeModel(formulas);
+			RuntimeModel = RuntimeModel.Create(model, formulas);
 		}
 
 		/// <summary>

@@ -20,27 +20,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace Tests.Analysis.Invariants.StateGraph
 {
-	/// <summary>
-	///   Defines how faults are activated during safety analysis.
-	/// </summary>
-	public enum FaultActivationBehaviour
+	using SafetySharp.Modeling;
+	using Shouldly;
+
+	internal class FaultActivation : AnalysisTestObject
 	{
-		/// <summary>
-		///   Faults are activated nondeterministically (the default).
-		/// </summary>
-		Nondeterministic,
+		protected override void Check()
+		{
+			var c = new C();
+			CheckInvariants(c, c.X == 0 || c.X == 6 || c.X == 14, c.X != 6, c.X != 14).ShouldBe(new [] { true, false, false});
 
-		/// <summary>
-		///   Only analyze with forced fault activation.
-		/// </summary>
-		ForceOnly,
+			CounterExamples[0].ShouldBeNull();
+			CounterExamples[1].ShouldNotBeNull();
+			CounterExamples[2].ShouldNotBeNull();
 
-		/// <summary>
-		///   First analyze with forced fault activation. If the hazard does not occur, nondeterministical activations are checked to
-		///   make sure the fault set is safe.
-		/// </summary>
-		ForceThenFallback
+			SuppressCounterExampleGeneration = true;
+			CheckInvariants(c, c.X == 0 || c.X == 6 || c.X == 14, c.X != 6, c.X != 14).ShouldBe(new[] { true, false, false });
+
+			CounterExamples[0].ShouldBeNull();
+			CounterExamples[1].ShouldBeNull();
+			CounterExamples[2].ShouldBeNull();
+		}
+
+		private class C : Component
+		{
+			public int X;
+
+			protected virtual int Y => 3;
+
+			public Fault F = new TransientFault();
+
+			public override void Update()
+			{
+				X = Y + Y;
+			}
+
+			[FaultEffect(Fault = nameof(F))]
+			public class E : C
+			{
+				protected override int Y => 7;
+			}
+		}
 	}
 }

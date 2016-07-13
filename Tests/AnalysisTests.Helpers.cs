@@ -37,8 +37,10 @@ namespace Tests
 	public abstract class AnalysisTestObject : TestObject
 	{
 		protected CounterExample CounterExample { get; private set; }
+		protected CounterExample[] CounterExamples { get; private set; }
 		protected bool SuppressCounterExampleGeneration { get; set; }
 		protected IFaultSetHeuristic[] Heuristics { get; set; }
+		protected AnalysisResult Result { get; private set; }
 
 		protected void SimulateCounterExample(CounterExample counterExample, Action<Simulator> action)
 		{
@@ -56,10 +58,25 @@ namespace Tests
 		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var result = modelChecker.CheckInvariant(TestModel.InitializeModel(components), invariant);
 
-			CounterExample = result.CounterExample;
-			return result.FormulaHolds;
+			if (Arguments.Length > 1 && (bool)Arguments[1])
+			{
+				var results = modelChecker.CheckInvariants(TestModel.InitializeModel(components), invariant);
+				CounterExample = results[0].CounterExample;
+				return results[0].FormulaHolds;
+			}
+
+			Result = modelChecker.CheckInvariant(TestModel.InitializeModel(components), invariant);
+			CounterExample = Result.CounterExample;
+			return Result.FormulaHolds;
+		}
+
+		protected bool[] CheckInvariants(IComponent component, params Formula[] invariants)
+		{
+			var modelChecker = CreateModelChecker();
+			var results = (AnalysisResult[])modelChecker.CheckInvariants(TestModel.InitializeModel(component), invariants);
+			CounterExamples = results.Select(result => result.CounterExample).ToArray();
+			return results.Select(result => result.FormulaHolds).ToArray();
 		}
 
 		protected bool Check(Formula formula, params IComponent[] components)
@@ -71,21 +88,44 @@ namespace Tests
 			return result.FormulaHolds;
 		}
 
-		protected SafetyAnalysis.Result DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
+		protected SafetyAnalysisResults DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
 		{
 			return DccaWithMaxCardinality(TestModel.InitializeModel(components), hazard, maxCardinality);
 		}
 
-		protected SafetyAnalysis.Result Dcca(Formula hazard, params IComponent[] components)
+		protected SafetyAnalysisResults Dcca(Formula hazard, params IComponent[] components)
 		{
 			return DccaWithMaxCardinality(hazard, Int32.MaxValue, components);
 		}
 
-		protected SafetyAnalysis.Result DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality)
+		protected OrderAnalysisResults AnalyzeOrder(Formula hazard, params IComponent[] components)
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.StateCapacity = 1 << 10;
+			configuration.TransitionCapacity = 1 << 12;
+			configuration.GenerateCounterExample = !SuppressCounterExampleGeneration;
+			configuration.ProgressReportsOnly = true;
+
+			var analysis = new OrderAnalysis(DccaWithMaxCardinality(hazard, Int32.MaxValue, components), configuration);
+			analysis.OutputWritten += message => Output.Log("{0}", message);
+
+			var result = analysis.ComputeOrderRelationships();
+			Output.Log("{0}", result);
+
+			return result;
+		}
+
+		protected SafetyAnalysisResults DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality)
 		{
 			var analysis = new SafetyAnalysis
 			{
-				Configuration = { StateCapacity = 1 << 10, GenerateCounterExample = !SuppressCounterExampleGeneration }
+				Backend = (SafetyAnalysisBackend)Arguments[0],
+				Configuration =
+				{
+					StateCapacity = 1 << 10,
+					TransitionCapacity = 1 << 12,
+					GenerateCounterExample = !SuppressCounterExampleGeneration
+				}
 			};
 			analysis.OutputWritten += message => Output.Log("{0}", message);
 
@@ -99,7 +139,7 @@ namespace Tests
 			return result;
 		}
 
-		protected SafetyAnalysis.Result Dcca(ModelBase model, Formula hazard)
+		protected SafetyAnalysisResults Dcca(ModelBase model, Formula hazard)
 		{
 			return DccaWithMaxCardinality(model, hazard, Int32.MaxValue);
 		}
@@ -112,7 +152,8 @@ namespace Tests
 			var ssharpChecker = modelChecker as SSharpChecker;
 			if (ssharpChecker != null)
 			{
-				ssharpChecker.Configuration.StateCapacity = 1 << 16;
+				ssharpChecker.Configuration.StateCapacity = 1 << 14;
+				ssharpChecker.Configuration.TransitionCapacity = 1 << 16;
 				ssharpChecker.Configuration.GenerateCounterExample = !SuppressCounterExampleGeneration;
 			}
 
@@ -131,6 +172,29 @@ namespace Tests
 
 			throw new TestException("Fault set is not contained in set.");
 		}
+
+		protected void ShouldContain(OrderRelationship[] relationships, Fault fault1, Fault fault2, OrderRelationshipKind kind)
+		{
+			foreach (var relationship in relationships)
+			{
+				if (kind == OrderRelationshipKind.Simultaneously)
+				{
+					if (relationship.Kind != OrderRelationshipKind.Simultaneously)
+						continue;
+
+					if (relationship.FirstFault == fault1 && relationship.SecondFault == fault2)
+						return;
+
+					if (relationship.FirstFault == fault2 && relationship.SecondFault == fault1)
+						return;
+				}
+
+				if (relationship.FirstFault == fault1 && relationship.SecondFault == fault2 && relationship.Kind == kind)
+					return;
+			}
+
+			throw new TestException("Relationship is not contained in set.");
+		}
 	}
 
 	public partial class InvariantTests : Tests
@@ -145,15 +209,47 @@ namespace Tests
 		{
 			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
 		}
+	}
+
+	public partial class StateConstraintTests : Tests
+	{
+		public StateConstraintTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
 
 		[UsedImplicitly]
-		public static IEnumerable<object[]> DiscoverTestsBothModelCheckers(string directory)
+		public static IEnumerable<object[]> DiscoverTests(string directory)
 		{
-			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
-				yield return new object[] { typeof(SSharpChecker) }.Concat(testCase).ToArray();
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
+		}
+	}
 
-			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
-				yield return new object[] { typeof(LtsMin) }.Concat(testCase).ToArray();
+	public partial class StateGraphInvariantTests : Tests
+	{
+		public StateGraphInvariantTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests(string directory)
+		{
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
+		}
+	}
+
+	public partial class LtsMinInvariantTests : Tests
+	{
+		public LtsMinInvariantTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests(string directory)
+		{
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
 		}
 	}
 

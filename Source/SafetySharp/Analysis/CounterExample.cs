@@ -119,23 +119,28 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Gets the replay information for the state identified by the zero-based <paramref name="stateIndex" />.
+		///   Replays the transition of the counter example with the zero-baesd <paramref name="transitionIndex" />.
 		/// </summary>
-		/// <param name="stateIndex">The index of the state the replay information should be returned for.</param>
-		internal int[] GetReplayInformation(int stateIndex)
+		/// <param name="choiceResolver">The choice resolver that should be used to resolve nondeterministic choices.</param>
+		/// <param name="transitionIndex">The zero-based index of the transition that should be replayed.</param>
+		internal unsafe void Replay(ChoiceResolver choiceResolver, int transitionIndex)
 		{
-			Requires.InRange(stateIndex, nameof(stateIndex), 0, _states.Length - 1);
-			return _replayInfo[stateIndex + 1];
-		}
+			if (StepCount == 0)
+				return;
 
-		/// <summary>
-		///   Replays the computation of the initial state.
-		/// </summary>
-		internal unsafe void ReplayInitialState()
-		{
-			var initialState = _states[0];
-			fixed (byte* state = &initialState[0])
-				RuntimeModel.Replay(state, _replayInfo[0], initializationStep: true);
+			choiceResolver.Clear();
+			choiceResolver.PrepareNextState();
+			choiceResolver.SetChoices(_replayInfo[transitionIndex]);
+
+			fixed (byte* state = _states[transitionIndex])
+				RuntimeModel.Deserialize(state);
+
+			if (transitionIndex == 0)
+				RuntimeModel.ExecuteInitialStep();
+			else
+				RuntimeModel.ExecuteStep();
+
+			RuntimeModel.NotifyFaultActivations();
 		}
 
 		/// <summary>

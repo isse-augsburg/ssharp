@@ -20,15 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 {
 	using System;
 	using System.Threading;
-	using Serialization;
 	using Utilities;
 
 	/// <summary>
-	///   Stores the serialized states of a <see cref="RuntimeModel" />.
+	///   Stores the serialized states of an <see cref="AnalysisModel" />.
 	/// </summary>
 	/// <remarks>
 	///   We store states in a contiguous array, indexed by the state's hash. The hashes are stored in a separate array,
@@ -84,14 +83,13 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="layout">The layout of the state vector..</param>
+		/// <param name="stateVectorSize">The size of the state vector in bytes.</param>
 		/// <param name="capacity">The capacity of the cache, i.e., the number of states that can be stored in the cache.</param>
-		public StateStorage(StateVectorLayout layout, int capacity)
+		public StateStorage(int stateVectorSize, int capacity)
 		{
-			Requires.NotNull(layout, nameof(layout));
 			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
 
-			_stateVectorSize = layout.SizeInBytes;
+			_stateVectorSize = stateVectorSize;
 			_capacity = capacity;
 
 			_stateBuffer.Resize((long)_capacity * _stateVectorSize, zeroMemory: false);
@@ -112,7 +110,14 @@ namespace SafetySharp.Runtime
 		///   Gets the state at the given zero-based <paramref name="index" />.
 		/// </summary>
 		/// <param name="index">The index of the state that should be returned.</param>
-		public byte* this[int index] => _stateMemory + (long)index * _stateVectorSize;
+		public byte* this[int index]
+		{
+			get
+			{
+				Assert.InRange(index, 0, _capacity * _stateVectorSize);
+				return _stateMemory + (long)index * _stateVectorSize;
+			}
+		}
 
 		/// <summary>
 		///   Adds the <paramref name="state" /> to the cache if it is not already known. Returns <c>true</c> to indicate that the state
@@ -143,7 +148,7 @@ namespace SafetySharp.Runtime
 
 					if (currentValue == 0 && Interlocked.CompareExchange(ref _hashMemory[offset], (int)memoizedHash | (1 << 30), 0) == 0)
 					{
-						MemoryBuffer.Copy(state, _stateMemory + (long)offset * _stateVectorSize, _stateVectorSize);
+						MemoryBuffer.Copy(state, this[offset], _stateVectorSize);
 						Volatile.Write(ref _hashMemory[offset], (int)memoizedHash | (1 << 31));
 
 						index = offset;
@@ -157,7 +162,7 @@ namespace SafetySharp.Runtime
 						while ((currentValue & 1 << 31) == 0)
 							currentValue = Volatile.Read(ref _hashMemory[offset]);
 
-						if (MemoryBuffer.AreEqual(state, _stateMemory + (long)offset * _stateVectorSize, _stateVectorSize))
+						if (MemoryBuffer.AreEqual(state, this[offset], _stateVectorSize))
 						{
 							index = offset;
 							return false;

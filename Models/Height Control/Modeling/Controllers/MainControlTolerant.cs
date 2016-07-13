@@ -29,7 +29,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 		/// <summary>
 		///   The number of high vehicles currently in the main-control area.
 		/// </summary>
-		[Range(0, 5, OverflowBehavior.Clamp)]
+		[Range(0, Model.MaxVehicles, OverflowBehavior.Clamp)]
 		private int _count;
 
 		/// <summary>
@@ -65,8 +65,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Controllers
 
 			if (Timer.HasElapsed)
 				_count = 0;
-
-			if (_count == 0)
+			else if (_count == 0)
 				Timer.Stop();
 		}
 	}

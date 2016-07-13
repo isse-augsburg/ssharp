@@ -24,9 +24,7 @@ namespace SafetySharp.Modeling
 {
 	using System;
 	using System.Collections.Generic;
-	using Analysis;
 	using Runtime;
-	using Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>
@@ -168,19 +166,6 @@ namespace SafetySharp.Modeling
 		{
 			foreach (var component in Roots)
 				component.VisitPostOrder(action);
-		}
-
-		/// <summary>
-		///   Creates a <see cref="RuntimeModel" /> instance from the model and the <paramref name="formulas" />.
-		/// </summary>
-		/// <param name="formulas">The formulas the model should be able to check.</param>
-		internal RuntimeModel ToRuntimeModel(params Formula[] formulas)
-		{
-			Requires.NotNull(formulas, nameof(formulas));
-
-			var serializer = new RuntimeModelSerializer();
-			serializer.Serialize(this, formulas);
-			return serializer.Load();
 		}
 
 		/// <summary>

@@ -42,11 +42,6 @@ namespace SafetySharp.Runtime
 		internal const string ConstructionStateName = "constructionState259C2EE0D9884B92989DF442BA268E8E";
 
 		/// <summary>
-		///   The <see cref="ChoiceResolver" /> used by the model.
-		/// </summary>
-		private readonly ChoiceResolver _choiceResolver;
-
-		/// <summary>
 		///   Deserializes a state of the model.
 		/// </summary>
 		private readonly SerializationDelegate _deserialize;
@@ -72,7 +67,7 @@ namespace SafetySharp.Runtime
 		private readonly ObjectTable _serializedObjects;
 
 		/// <summary>
-		///   The number of bytes reserved at the beginning of each state vector by the model checker tool.
+		///   The number of bytes reserved at the beginning of each state vector by the model checker.
 		/// </summary>
 		private readonly int _stateHeaderBytes;
 
@@ -120,7 +115,6 @@ namespace SafetySharp.Runtime
 			_stateHeaderBytes = stateHeaderBytes;
 
 			PortBinding.BindAll(objectTable);
-			_choiceResolver = new ChoiceResolver(objectTable);
 
 			ConstructionState = new byte[StateVectorSize];
 			fixed (byte* state = ConstructionState)
@@ -144,7 +138,7 @@ namespace SafetySharp.Runtime
 		internal byte[] ConstructionState { get; }
 
 		/// <summary>
-		///   Gets the objects referenced by the model.
+		///   Gets all of the objects referenced by the model, including those that do not take part in state serialization.
 		/// </summary>
 		internal ObjectTable Objects { get; }
 
@@ -213,7 +207,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Copies the fault activation states of this instance to <paramref name="target" />.
 		/// </summary>
-		internal void CopyFaultActivationStates(RuntimeModel target)
+		private void CopyFaultActivationStates(RuntimeModel target)
 		{
 			for (var i = 0; i < _faults.Length; ++i)
 				target._faults[i].Activation = _faults[i].Activation;
@@ -251,15 +245,13 @@ namespace SafetySharp.Runtime
 				Deserialize(state);
 				_restrictRanges();
 			}
-
-			_choiceResolver.Clear();
 		}
 
 		/// <summary>
 		///   Computes an initial state of the model.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void ExecuteInitialStep()
+		internal void ExecuteInitialStep()
 		{
 			foreach (var fault in NondeterministicFaults)
 				fault.Reset();
@@ -286,47 +278,47 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Computes the initial states of the model, storing the computed <paramref name="transitions" />.
+		///   Creates a counter example from the <paramref name="path" />.
 		/// </summary>
-		/// <param name="transitions">The set the computed transitions should be stored in.</param>
-		internal void ComputeInitialStates(TransitionSet transitions)
+		/// <param name="createModel">The factory function that can be used to create new instances of this model.</param>
+		/// <param name="path">
+		///   The path the counter example should be generated from. A value of <c>null</c> indicates that no
+		///   transitions could be generated for the model.
+		/// </param>
+		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
+		public CounterExample CreateCounterExample(Func<RuntimeModel> createModel, byte[][] path,bool endsWithException)
 		{
-			_choiceResolver.PrepareNextState();
+			Requires.NotNull(createModel, nameof(createModel));
 
-			fixed (byte* state = ConstructionState)
-			{
-				while (_choiceResolver.PrepareNextPath())
-				{
-					Deserialize(state);
-					ExecuteInitialStep();
-					transitions.Add(this);
-				}
-			}
-		}
+			// We have to create new model instances to generate and initialize the counter example, otherwise hidden
+			// state variables might prevent us from doing so if they somehow influence the state
+			var replayModel = createModel();
+			var counterExampleModel = createModel();
+			var choiceResolver = new ChoiceResolver(replayModel.Objects.OfType<Choice>());
 
-		/// <summary>
-		///   Computes the successor states for <paramref name="sourceState" />, storing the computed <paramref name="transitions" />.
-		/// </summary>
-		/// <param name="transitions">The set the computed transitions should be stored in.</param>
-		/// <param name="sourceState">The source state the next states should be computed for.</param>
-		internal void ComputeSuccessorStates(TransitionSet transitions, byte* sourceState)
-		{
-			_choiceResolver.PrepareNextState();
+			CopyFaultActivationStates(replayModel);
+			CopyFaultActivationStates(counterExampleModel);
 
-			while (_choiceResolver.PrepareNextPath())
-			{
-				Deserialize(sourceState);
-				ExecuteStep();
-				transitions.Add(this);
-			}
+			// Prepend the construction state to the path; if the path is null, at least one further state must be added
+			// to enable counter example debugging.
+			// Also, get the replay information, i.e., the nondeterministic choices that were made on the path; if the path is null,
+			// we still have to get the choices that caused the problem.
+
+			if (path == null)
+				path = new[] { new byte[StateVectorSize] };
+
+			path = new[] { ConstructionState }.Concat(path).ToArray();
+			var replayInfo = replayModel.GenerateReplayInformation(choiceResolver, path, endsWithException);
+			return new CounterExample(counterExampleModel, path, replayInfo, endsWithException);
 		}
 
 		/// <summary>
 		///   Generates the replay information for the <paramref name="trace" />.
 		/// </summary>
+		/// <param name="choiceResolver">The choice resolver that should be used to resolve nondeterministic choices.</param>
 		/// <param name="trace">The trace the replay information should be generated for.</param>
 		/// <param name="endsWithException">Indicates whether the trace ends with an exception being thrown.</param>
-		internal int[][] GenerateReplayInformation(byte[][] trace, bool endsWithException)
+		private int[][] GenerateReplayInformation(ChoiceResolver choiceResolver, byte[][] trace, bool endsWithException)
 		{
 			var info = new int[trace.Length - 1][];
 			var targetState = stackalloc byte[StateVectorSize];
@@ -334,28 +326,34 @@ namespace SafetySharp.Runtime
 			// We have to generate the replay info for all transitions
 			for (var i = 0; i < trace.Length - 1; ++i)
 			{
-				_choiceResolver.Clear();
-				_choiceResolver.PrepareNextState();
+				choiceResolver.Clear();
+				choiceResolver.PrepareNextState();
 
 				// Try all transitions until we find the one that leads to the desired state
-				while (_choiceResolver.PrepareNextPath())
+				while (true)
 				{
-					fixed (byte* sourceState = trace[i])
-						Deserialize(sourceState);
-
 					try
 					{
+						if (!choiceResolver.PrepareNextPath())
+							break;
+
+						fixed (byte* sourceState = trace[i])
+						Deserialize(sourceState);
+
 						if (i == 0)
 							ExecuteInitialStep();
 						else
 							ExecuteStep();
+
+						if (endsWithException && i == trace.Length - 2)
+							continue;
 					}
 					catch (Exception)
 					{
 						Requires.That(endsWithException, "Unexpected exception.");
 						Requires.That(i == trace.Length - 2, "Unexpected exception.");
 
-						info[i] = _choiceResolver.GetChoices().ToArray();
+						info[i] = choiceResolver.GetChoices().ToArray();
 						break;
 					}
 
@@ -364,45 +362,20 @@ namespace SafetySharp.Runtime
 
 					// Compare the target states; if they match, we've found the correct transition
 					var areEqual = true;
-					for (var j = 0; j < StateVectorSize; ++j)
+					for (var j = _stateHeaderBytes; j < StateVectorSize; ++j)
 						areEqual &= targetState[j] == trace[i + 1][j];
 
 					if (!areEqual)
 						continue;
 
-					info[i] = _choiceResolver.GetChoices().ToArray();
+					info[i] = choiceResolver.GetChoices().ToArray();
 					break;
 				}
 
-				Requires.That(info[i] != null, $"Unable to generate replay information for step {i} of {trace.Length}.");
+				Requires.That(info[i] != null, $"Unable to generate replay information for step {i + 1} of {trace.Length}.");
 			}
 
 			return info;
-		}
-
-		/// <summary>
-		///   Replays the model step starting at the serialized <paramref name="state" /> using the given
-		///   <paramref name="replayInformation" />.
-		/// </summary>
-		/// <param name="state">The serialized state that the replay starts from.</param>
-		/// <param name="replayInformation">The replay information required to compute the target state.</param>
-		/// <param name="initializationStep">Indicates whether the initialization step should be replayed.</param>
-		internal void Replay(byte* state, int[] replayInformation, bool initializationStep)
-		{
-			Requires.NotNull(replayInformation, nameof(replayInformation));
-
-			_choiceResolver.Clear();
-			_choiceResolver.PrepareNextState();
-			_choiceResolver.SetChoices(replayInformation);
-
-			Deserialize(state);
-
-			if (initializationStep)
-				ExecuteInitialStep();
-			else
-				ExecuteStep();
-
-			NotifyFaultActivations();
 		}
 
 		/// <summary>
@@ -427,24 +400,27 @@ namespace SafetySharp.Runtime
 		}
 
 		/// <summary>
-		///   Gets the choices that were made to generate the last transitions.
-		/// </summary>
-		internal int[] GetLastChoices()
-		{
-			return _choiceResolver.GetChoices().ToArray();
-		}
-
-		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
-			if (!disposing)
-				return;
+			if (disposing)
+				Objects.OfType<IDisposable>().SafeDisposeAll();
+		}
 
-			_choiceResolver.SafeDispose();
-			Objects.OfType<IDisposable>().SafeDisposeAll();
+		/// <summary>
+		///   Creates a <see cref="RuntimeModel" /> instance from the <paramref name="model" /> and the <paramref name="formulas" />.
+		/// </summary>
+		/// <param name="model">The model the runtime model should be created for.</param>
+		/// <param name="formulas">The formulas the model should be able to check.</param>
+		internal static RuntimeModel Create(ModelBase model, params Formula[] formulas)
+		{
+			Requires.NotNull(formulas, nameof(formulas));
+
+			var serializer = new RuntimeModelSerializer();
+			serializer.Serialize(model, formulas);
+			return serializer.Load();
 		}
 	}
 }
