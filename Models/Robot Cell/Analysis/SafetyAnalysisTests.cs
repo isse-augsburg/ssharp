@@ -28,6 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using Modeling.Controllers;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 
 	public class SafetyAnalysisTests
 	{
@@ -39,7 +40,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<FastObserverController>();
 			model.SetAnalysisMode(AnalysisMode.IntolerableFaults);
 
-			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 16, GenerateCounterExample = false } };
+			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
 			var result = modelChecker.ComputeMinimalCriticalSets(model, model.Workpieces.Any(w => w.IsDamaged));
 
 			Console.WriteLine(result);
@@ -53,9 +54,30 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<FastObserverController>();
 			model.SetAnalysisMode(AnalysisMode.IntolerableFaults);
 
-			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 16, GenerateCounterExample = false } };
+			model.Faults.SuppressActivations();
+			model.Carts[0].Lost.MakeNondeterministic();
+
+			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
 			var result = modelChecker.ComputeMinimalCriticalSets(model,
-				model.ObserverController._stepCount >= ObserverController.MaxSteps && !model.Workpieces.All(w => w.IsDiscarded || w.IsComplete));
+				model.ObserverController._stepCount >= ObserverController.MaxSteps && !model.Workpieces.All(w => w.IsDamaged || w.IsDiscarded || w.IsComplete));
+
+			Console.WriteLine(result);
+		}
+
+		[Test]
+		public void Bug()
+		{
+			var model = new Model();
+			model.InitializeDefaultInstance();
+			model.CreateObserverController<FastObserverController>();
+			model.SetAnalysisMode(AnalysisMode.IntolerableFaults);
+
+			model.Faults.SuppressActivations();
+			model.Carts[0].Lost.MakeNondeterministic();
+
+			var modelChecker = new SSharpChecker() { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
+			var result = modelChecker.CheckInvariant(model,
+				!(model.ObserverController._stepCount >= ObserverController.MaxSteps && !model.Workpieces.All(w => w.IsDamaged || w.IsDiscarded || w.IsComplete)));
 
 			Console.WriteLine(result);
 		}

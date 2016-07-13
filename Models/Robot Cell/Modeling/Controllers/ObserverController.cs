@@ -61,7 +61,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		protected List<Task> Tasks { get; }
 
 		[Hidden(HideElements = true)]
-		protected Agent[] Agents { get; }
+		public Agent[] Agents { get; }
 
 		public ReconfStates ReconfigurationState { get; protected set; } = ReconfStates.NotSet;
 

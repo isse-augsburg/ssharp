@@ -22,7 +22,9 @@
 
 namespace SafetySharp.Modeling
 {
+	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Linq;
 	using System.Runtime.CompilerServices;
 
 	public abstract partial class Component
@@ -157,6 +159,16 @@ namespace SafetySharp.Modeling
 		protected T Choose<T>(params T[] values)
 		{
 			return _defaultChoice.Choose(values);
+		}
+
+		/// <summary>
+		///   Returns one of the <paramref name="values" /> nondeterministically.
+		/// </summary>
+		/// <param name="values">The values to choose from.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected T Choose<T>(IEnumerable<T> values)
+		{
+			return _defaultChoice.Choose(values.ToArray());
 		}
 	}
 }

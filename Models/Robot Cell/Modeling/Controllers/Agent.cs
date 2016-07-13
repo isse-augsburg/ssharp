@@ -165,7 +165,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				.Transition(
 					from: State.Idle,
 					to: State.RoleChosen,
-					guard: ChooseRole())
+					guard: ChooseRole(),
+					action: () => OnRoleChosen(_currentRole))
 				.Transition(
 					from: State.RoleChosen,
 					to: State.WaitForResource,
@@ -213,7 +214,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 					from: State.Output,
 					to: State.Output,
 					guard: Resource != null,
-					action: () => _currentRole.PostCondition.Port.ResourceReady(this));
+					action: () => OnResourceReady(_currentRole.PostCondition.Port));
+		}
+
+		protected virtual void OnResourceReady(Agent agent)
+		{
+			agent.ResourceReady(this);
+		}
+
+		protected virtual void OnRoleChosen(Role role)
+		{
 		}
 
 		private void TransferResource(Agent agent)
@@ -224,8 +234,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				guard: Resource != null,
 				action: () =>
 				{
-					agent.TakeResource(this);
 					PlaceResource(agent);
+					agent.TakeResource(this);
 
 					agent.Resource = Resource;
 					Resource = null;

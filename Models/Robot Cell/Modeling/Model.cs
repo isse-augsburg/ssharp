@@ -172,22 +172,30 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			where T : ObserverController
 		{
 			ObserverController = (ObserverController)Activator.CreateInstance(typeof(T), RobotAgents.Cast<Agent>().Concat(CartAgents), Tasks);
-			
 		}
 
 		public void SetAnalysisMode(AnalysisMode mode)
 		{
 			ObserverController.Mode = mode;
+			var agents = ObserverController.Agents;
 
 			switch (mode)
 			{
 				case AnalysisMode.TolerableFaults:
-					Faults.Where(fault => fault.Name.Contains("ConfigUpdateFailed")).SuppressActivations();
+					agents.Select(agent => agent.ConfigurationUpdateFailed).SuppressActivations();
+					Workpieces.Select(workpiece => workpiece.IncorrectlyPositionedFault).SuppressActivations();
+					Workpieces.Select(workpiece => workpiece.ToolApplicationFailed).SuppressActivations();
+					Robots.Select(robot => robot.SwitchToWrongToolFault).SuppressActivations();
+					Carts.Select(cart => cart.Lost).SuppressActivations();
 					ObserverController.ReconfigurationFailure.SuppressActivation();
 					break;
 				case AnalysisMode.IntolerableFaults:
 					Faults.SuppressActivations();
-					Faults.Where(fault => fault.Name.Contains("ConfigUpdateFailed")).MakeNondeterministic();
+					agents.Select(agent => agent.ConfigurationUpdateFailed).MakeNondeterministic();
+					Workpieces.Select(workpiece => workpiece.IncorrectlyPositionedFault).MakeNondeterministic();
+					Workpieces.Select(workpiece => workpiece.ToolApplicationFailed).MakeNondeterministic();
+					Robots.Select(robot => robot.SwitchToWrongToolFault).MakeNondeterministic();
+					Carts.Select(cart => cart.Lost).MakeNondeterministic();
 					ObserverController.ReconfigurationFailure.MakeNondeterministic();
 					break;
 				case AnalysisMode.AllFaults:
@@ -209,7 +217,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			{
 				var workpiece = new Workpiece(capabilities.OfType<ProcessCapability>().Select(c => c.ProductionAction).ToArray())
 				{
-					Name = $"W{Workpieces.Count}"
+					Name = $"W{Workpieces.Count}",
+					IncorrectlyPositionedFault = { Name = $"W{Workpieces.Count}.IncorrectlyPositioned" },
+					ToolApplicationFailed = { Name = $"W{Workpieces.Count}.ToolApplicationFailed" },
 				};
 
 				Workpieces.Add(workpiece);
@@ -233,7 +243,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		private void CreateCart(params Route[] routes)
 		{
 			// compute the transitive closure of the routes
-			routes = routes.SelectMany(route => Closure(route.Robot1, robot => { return routes.Where(r => r.Robot1 == robot).Select(r => r.Robot2); }).Select(target => new Route(route.Robot1, target))).ToArray();
+			routes =
+				routes.SelectMany(
+					route =>
+						Closure(route.Robot1, robot => { return routes.Where(r => r.Robot1 == robot).Select(r => r.Robot2); })
+							.Select(target => new Route(route.Robot1, target))).ToArray();
 
 			// make sure we don't have duplicate routes
 			routes = routes.Distinct(new RouteComparer()).ToArray();
