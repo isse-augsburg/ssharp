@@ -39,28 +39,28 @@ namespace Tests.Analysis.Heuristics
 
 			Heuristics = new[] { new Heuristic() { C = c } };
 
-			c.F1.SuppressActivation();
+			c.F1.ForceActivation(); 
 
 			var result = Dcca(m, c.Defect);
 			result.Exceptions.ShouldBeEmpty();
 			result.IsComplete.ShouldBe(true);
 			result.ForcedFaults.ShouldBe(new[] { c.F1 });
 			result.SuppressedFaults.ShouldBeEmpty();
-			result.MinimalCriticalSets.ShouldBeEmpty();
-			result.CheckedSets.ShouldBe(new[] {
-				new HashSet<Fault>(),
-				new HashSet<Fault>(new[] { c.F2 })
-			});
+			result.MinimalCriticalSets.Single().ShouldBe(new HashSet<Fault>(new[] { c.F1 }));
+			result.CheckedSets.Count.ShouldBe(1);
 
-			c.F1.ForceActivation();
+			c.F1.SuppressActivation();
 
 			result = Dcca(m, c.Defect);
 			result.Exceptions.ShouldBeEmpty();
 			result.IsComplete.ShouldBe(true);
 			result.SuppressedFaults.ShouldBe(new[] { c.F1 });
 			result.ForcedFaults.ShouldBeEmpty();
-			result.MinimalCriticalSets.Single().ShouldBe(new HashSet<Fault>(new[] { c.F1 }));
-			result.CheckedSets.Count.ShouldBe(1);
+			result.MinimalCriticalSets.ShouldBeEmpty();
+			result.CheckedSets.ShouldBe(new[] {
+				new HashSet<Fault>(),
+				new HashSet<Fault>(new[] { c.F2 })
+			}); 
 		}
 
 		private class Heuristic : IFaultSetHeuristic
