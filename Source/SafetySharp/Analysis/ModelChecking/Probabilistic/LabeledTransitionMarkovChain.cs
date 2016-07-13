@@ -54,13 +54,13 @@ namespace SafetySharp.Runtime
 		public ConcurrentBag<int> SourceStates { get; } = new ConcurrentBag<int>();
 
 		private readonly MemoryBuffer _stateStorageStateToFirstTransitionChainElementBuffer = new MemoryBuffer();
-		private int* _stateStorageStateToFirstTransitionChainElementMemory;
+		private readonly int* _stateStorageStateToFirstTransitionChainElementMemory;
 		
 		private readonly MemoryBuffer _transitionChainElementsBuffer = new MemoryBuffer();
-		private TransitionChainElement* _transitionChainElementsMemory;
+		private readonly TransitionChainElement* _transitionChainElementsMemory;
 		private int _transitionChainElementCount = 0;
 
-		private int _maxNumberOfTransitions;
+		private readonly int _maxNumberOfTransitions;
 
 
 		public LabeledTransitionMarkovChain(int maxNumberOfStates= 1 << 21, int maxNumberOfTransitions=0)
@@ -106,7 +106,8 @@ namespace SafetySharp.Runtime
 		{
 			Assert.That(transitionCount > 0, "Cannot add deadlock state.");
 
-			if (_transitionChainElementCount + transitionCount > _maxNumberOfTransitions)
+			var upperBoundaryForTransitions = _transitionChainElementCount + transitionCount;
+			if (upperBoundaryForTransitions > _maxNumberOfTransitions || upperBoundaryForTransitions<0)
 				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
 
 
