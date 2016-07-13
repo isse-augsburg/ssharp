@@ -39,6 +39,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (Cart.MoveTo(((RobotAgent)agent).Robot))
 				return;
 
+			// Bug: We shouldn't be doing this in all cases; for example,
+			// the cart might have the connections R0->R1 and R1->R2. If
+			// R0->R1 breaks, R1 would no longer be in its inputs and 
+			// outputs, which is obviously wrong
 			Disconnect(this, agent);
 			Disconnect(agent, this);
             CheckConstraints();
@@ -50,6 +54,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (Cart.MoveTo(((RobotAgent)agent).Robot))
 				return;
 
+			// Bug; see above
 			Disconnect(this, agent);
 			Disconnect(agent, this);
             CheckConstraints();

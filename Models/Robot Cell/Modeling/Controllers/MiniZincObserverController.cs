@@ -63,7 +63,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				var task = String.Join(",", Tasks[0].Capabilities.Select(c => c.Identifier));
 				var isCart = String.Join(",", Agents.Select(a => (a is CartAgent).ToString().ToLower()));
 				var capabilities = String.Join(",", Agents.Select(a =>
-					$"{{{String.Join(",", a.AvailableCapabilites.Select(c => c.Identifier))}}}"));
+					$"{{{String.Join(",", a.AvailableCapabilities.Select(c => c.Identifier))}}}"));
 				var isConnected = String.Join("\n|", Agents.Select(from =>
 					String.Join(",", Agents.Select(to => (from.Outputs.Contains(to) || from == to).ToString().ToLower()))));
 
@@ -114,12 +114,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		private void UpdateConfiguration()
 		{
-			foreach (var agent in Agents)
-			{
-				agent.AllocatedRoles.Clear();
-				agent.OnReconfigured();
-			}
-
 		    var isReconfPossible = IsReconfPossible(Agents.OfType<RobotAgent>(), Agents.OfType<CartAgent>(), Tasks, this);
 
 			var lines = File.ReadAllLines(ConfigurationFile);
@@ -136,40 +130,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
                 throw new Exception("Reconf. is succedded while there is no reconf. possible.");
 
 			var roleAllocations = Parse(lines[0], lines[1]).ToArray();
-			for (var i = 0; i < roleAllocations.Length; i++)
-			{
-				var agent = roleAllocations[i].Item1;
-				var capabilities = roleAllocations[i].Item2;
-
-				var role = RolePool.Allocate();
-				role.CapabilitiesToApply.Clear();
-				role.CapabilitiesToApply.AddRange(capabilities);
-				role.Reset();
-				role.PreCondition.Task = Tasks[0];
-				role.PostCondition.Task = Tasks[0];
-				role.PreCondition.Port = i == 0 ? null : roleAllocations[i - 1].Item1;
-				role.PostCondition.Port = i == roleAllocations.Length - 1 ? null : roleAllocations[i + 1].Item1;
-				role.PreCondition.State.Clear();
-				role.PostCondition.State.Clear();
-			    role.PreCondition.State.AddRange(roleAllocations.Take(i).SelectMany(tuple => tuple.Item2).ToList());
-                role.PostCondition.State.AddRange(role.PreCondition.State.Concat(role.CapabilitiesToApply).ToList());
-                agent.AllocatedRoles.Add(role);
-			}
-
-//		    foreach (var agent in Agents)
-//		    {
-//		       
-//                    if (agent.Resource == null)
-//                        continue;
-//		            if (!agent.AllocatedRoles.Any(
-//		                role1 =>
-//		                    role1.PreCondition.Task.Equals(agent.Resource.Task)))
-//		                ;
-//		            if (!agent.AllocatedRoles.Any(
-//		                role1 =>
-//		                    role1.PreCondition.State.SequenceEqual(agent.Resource.State)))
-//		                ;
-//		    }
+			ApplyConfiguration(roleAllocations);
 		}
 
 		private IEnumerable<Tuple<Agent, Capability[]>> Parse(string agentsString, string capabilitiesString)
@@ -194,7 +155,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			for (var i = offset; i < agents.Length && agents[i] == agentId; ++i)
 			{
 				if (capabilities[i] != -1)
-					yield return agent.AvailableCapabilites.First(c => c.IsEquivalentTo(Tasks[0].Capabilities[capabilities[i]]));
+					yield return agent.AvailableCapabilities.First(c => c.IsEquivalentTo(Tasks[0].Capabilities[capabilities[i]]));
 			}
 		}
 
@@ -220,17 +181,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
             foreach (var task in tasks)
             {
                 isReconfPossible &=
-                    task.Capabilities.All(capability => robotsAgents.Any(agent => ContainsCapability(agent.AvailableCapabilites,capability)));
+                    task.Capabilities.All(capability => robotsAgents.Any(agent => ContainsCapability(agent.AvailableCapabilities,capability)));
                 if (!isReconfPossible)
                     break;
 
-                var candidates = robotsAgents.Where(agent => ContainsCapability(agent.AvailableCapabilites,task.Capabilities.First())).ToArray();
+                var candidates = robotsAgents.Where(agent => ContainsCapability(agent.AvailableCapabilities,task.Capabilities.First())).ToArray();
 
                 for (var i = 0; i < task.Capabilities.Length - 1; i++)
                 {
                     candidates =
                         candidates.SelectMany<RobotAgent, RobotAgent>(r => matrix[r])
-                                  .Where(r => ContainsCapability(r.AvailableCapabilites,task.Capabilities[i + 1]))
+                                  .Where(r => ContainsCapability(r.AvailableCapabilities,task.Capabilities[i + 1]))
                                   .ToArray();
                     if (candidates.Length == 0)
                     {

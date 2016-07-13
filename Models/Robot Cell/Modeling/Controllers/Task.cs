@@ -32,6 +32,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		}
 
 		public Capability[] Capabilities { get; }
+		public bool IsResourceInProduction { get; set; }
 
 		public override bool Equals(object obj)
 		{

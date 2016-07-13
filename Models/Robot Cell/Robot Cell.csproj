@@ -59,6 +59,7 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analysis\SafetyAnalysisTests.cs" />
     <Compile Include="Analysis\SimulationTests.cs" />
     <Compile Include="Analysis\ModelCheckingTests.cs" />
     <Compile Include="Analysis\FunctionalTests.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="Modeling\Controllers\Capability.cs" />
     <Compile Include="Modeling\Controllers\Condition.cs" />
     <Compile Include="Modeling\Controllers\ConsumeCapability.cs" />
+    <Compile Include="Modeling\Controllers\FastObserverController.cs" />
     <Compile Include="Modeling\Controllers\MiniZincObserverController.cs" />
     <Compile Include="Modeling\Controllers\ObserverController.cs" />
     <Compile Include="Modeling\Controllers\ProcessCapability.cs" />

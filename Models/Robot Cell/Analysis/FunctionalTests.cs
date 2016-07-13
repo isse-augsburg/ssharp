@@ -48,13 +48,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void ReconfigurationFailed()
 		{
-			var model = Model.GetDefaultInstance();
+			var model = Model.GetDefaultInstance(typeof(FastObserverController));
 			model.Components.OfType<Robot>().Select(r => r.SwitchFault).ToArray().SuppressActivations();
 
 			foreach (var robot in model.Robots)
 				robot.ResourceTransportFault.SuppressActivation();
 
-			var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
+			var safetyAnalysis = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 16, GenerateCounterExample = false } };
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
 
 			Console.WriteLine(result);
@@ -180,7 +180,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
             model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
 
-            var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
+			//model.Faults.SuppressActivations();
+			//model.Carts[0].Routes.Single(r => r.Robot1 == model.Robots[0] && r.Robot2==model.Robots[2]).Blocked.Activation=Activation.Forced;
+			//model.Carts[1].Routes.Single(r => r.Robot1 == model.Robots[1] && r.Robot2 == model.Robots[2]).Blocked.Activation = Activation.Forced;
+
+			var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
             var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
 
             Console.WriteLine(result);
@@ -313,7 +317,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	                return false; 
 	            }
 	            if (agent.AllocatedRoles.All(
-	                role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilites.Contains(capability))))
+	                role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilities.Contains(capability))))
 	            {
 	                return false;
 	            }
@@ -371,17 +375,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 			foreach (var task in tasks)
 			{
-				isReconfPossible &= task.Capabilities.All(capability => robotsAgents.Any(agent => agent.AvailableCapabilites.Contains(capability)));
+				isReconfPossible &= task.Capabilities.All(capability => robotsAgents.Any(agent => agent.AvailableCapabilities.Contains(capability)));
 				if (!isReconfPossible)
 					break;
 
-				var candidates = robotsAgents.Where(agent => agent.AvailableCapabilites.Contains(task.Capabilities.First())).ToArray();
+				var candidates = robotsAgents.Where(agent => agent.AvailableCapabilities.Contains(task.Capabilities.First())).ToArray();
 
 				for (var i = 0; i < task.Capabilities.Length - 1; i++)
 				{
 					candidates =
 						candidates.SelectMany<RobotAgent, RobotAgent>(r => matrix[r])
-								  .Where(r => r.AvailableCapabilites.Contains(task.Capabilities[i + 1]))
+								  .Where(r => r.AvailableCapabilities.Contains(task.Capabilities[i + 1]))
 								  .ToArray();
 					if (candidates.Length == 0)
 					{

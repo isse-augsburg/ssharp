@@ -38,7 +38,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		public const int MaxAllocatedRoles = 5;
 
 
-	    public static Model GetDefaultInstance()
+	    public static Model GetDefaultInstance(Type observerControllerType = null)
 	    {
             var model = new Model();
 
@@ -60,7 +60,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]));
             model.CreateCart(model.Robots[2], new Route(model.Robots[2], model.Robots[3]));
 
-            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
+		    observerControllerType = observerControllerType ?? typeof(MiniZincObserverController);
+			model.ObserverController = (ObserverController)Activator.CreateInstance(observerControllerType, model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
 
             return model;
 	    }

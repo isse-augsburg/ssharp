@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -23,58 +23,36 @@
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
-	using System.Diagnostics;
+	using System.Linq;
 	using Modeling;
 	using Modeling.Controllers;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 
-	public class SimulationTests
+	public class SafetyAnalysisTests
 	{
 		[Test]
-		public void Simulate()
+		public void NoDamagedWorkpieces()
+		{
+			var model = Model.GetDefaultInstance(observerControllerType: typeof(FastObserverController));
+
+			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 16 } };
+			var result = modelChecker.ComputeMinimalCriticalSets(model, model.Workpieces.Any(w => w.IsDamaged));
+
+			Console.WriteLine(result);
+		}
+
+		[Test]
+		public void AllWorkpiecesCompleteEventually()
 		{
 			var model = Model.GetDefaultInstance(observerControllerType: typeof(FastObserverController));
 			model.Faults.SuppressActivations();
 
-			var simulator = new Simulator(model);
-			model = (Model)simulator.Model;
+			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 16 } };
+			var result = modelChecker.ComputeMinimalCriticalSets(model, model.ObserverController._stepCount >= 200 && ! model.Workpieces.All(w => w.IsComplete));
 
-			for (var i = 0; i < 120; ++i)
-			{
-				WriteLine($"=================  Step: {i}  =====================================");
-
-				if (model.ObserverController.ReconfigurationState == ReconfStates.Failed)
-					WriteLine("Reconfiguration failed.");
-				else
-				{
-					foreach (var robot in model.RobotAgents)
-						WriteLine(robot);
-
-					foreach (var cart in model.CartAgents)
-						WriteLine(cart);
-
-					foreach (var workpiece in model.Workpieces)
-						WriteLine(workpiece);
-
-					foreach (var robot in model.Robots)
-						WriteLine(robot);
-
-					foreach (var cart in model.Carts)
-						WriteLine(cart);
-				}
-
-				simulator.SimulateStep();
-			}
-		}
-
-		private static void WriteLine(object line)
-		{
-			Debug.WriteLine(line.ToString());
-#if !DEBUG
-			Console.WriteLine(line.ToString());
-#endif
+			Console.WriteLine(result);
 		}
 	}
 }

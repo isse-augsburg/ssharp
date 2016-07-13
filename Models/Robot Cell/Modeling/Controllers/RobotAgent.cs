@@ -24,7 +24,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using System;
 	using System.Linq;
-    using Plants;
+	using Plants;
 
 	internal class RobotAgent : Agent
 	{
@@ -70,7 +70,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				return;
 
 			ClearConnections();
-            CheckConstraints();
+			CheckConstraints();
 		}
 
 		public override void PlaceResource(Agent agent)
@@ -96,12 +96,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public override void Produce(ProduceCapability capability)
 		{
-			if (Resource != null || capability.Resources.Count == 0)
+			if (Resource != null || capability.Resources.Count == 0 || capability.Tasks.Any(task => task.IsResourceInProduction))
 				return;
 
 			Resource = capability.Resources[0];
 			Resource.State.Add(capability);
 			capability.Resources.RemoveAt(0);
+			Resource.Task.IsResourceInProduction = true;
 			Robot.ProduceWorkpiece(Resource.Workpiece);
 		}
 
@@ -118,16 +119,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 					_currentCapability = capability;
 				else
 				{
-					AvailableCapabilites.RemoveAll(c => c != _currentCapability);
-                    CheckConstraints();
-                    return;
+					AvailableCapabilities.RemoveAll(c => c != _currentCapability);
+					CheckConstraints();
+					return;
 				}
 			}
 
 			// Apply the capability; if we fail to do so, remove it from the available ones and trigger a reconfiguration
 			if (!Robot.ApplyCapability())
 			{
-				AvailableCapabilites.Remove(capability);
+				AvailableCapabilities.Remove(capability);
 				CheckConstraints();
 			}
 			else
@@ -136,7 +137,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 					throw new InvalidOperationException();
 				Resource.State.Add(capability);
 			}
-
 		}
 
 		public override void Consume(ConsumeCapability capability)
@@ -146,6 +146,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 			Robot.ConsumeWorkpiece();
 			Resource.State.Add(capability);
+			Resource.Task.IsResourceInProduction = false;
 			Resource = null;
 		}
 	}

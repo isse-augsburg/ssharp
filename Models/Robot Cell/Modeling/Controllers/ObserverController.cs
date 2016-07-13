@@ -33,6 +33,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		//[Hidden]
 		private bool _reconfigurationRequested = true;
 
+		[Range(0, 200, OverflowBehavior.Clamp)]
+		public int _stepCount;
+
 		protected ObserverController(IEnumerable<Agent> agents, List<Task> tasks)
 		{
 			Tasks = tasks;
@@ -70,7 +73,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				// Capability Consistency
 				() =>
 					agent.AllocatedRoles.All(
-						role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilites.Contains(capability))),
+						role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilities.Contains(capability))),
                 //   Pre-PostconditionConsistency
 				() =>
 					agent.AllocatedRoles.Any(role => role.PostCondition.Port == null || role.PreCondition.Port == null)
@@ -115,6 +118,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public override void Update()
 		{
+			++_stepCount;
+			if (_stepCount >= 200)
+				return;
+
+			if (ReconfigurationState == ReconfStates.Failed)
+				return;
+
 			foreach (var agent in Agents)
 			{
 				if (_reconfigurationRequested)
@@ -129,8 +139,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			// TODO: This speeds up analyses when checking for reconf failures with DCCA, but is otherwise
 			// unacceptable for other kinds of analyses
 
-			if (_hasReconfed)
-				return;
+			//if (_hasReconfed)
+			//	return;
 
 			foreach (var agent in Agents)
 				agent.CheckAllocatedCapabilities();
@@ -139,6 +149,47 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Reconfigure();
 			_reconfigurationRequested = false;
 			_hasReconfed = true;
+		}
+
+		[NonSerializable]
+		private Tuple<Agent, Capability[]>[] _lastRoleAllocations; // for debugging purposes
+
+		/// <summary>
+		/// Applies the <paramref name="roleAllocations"/> to the system.
+		/// </summary>
+		/// <param name="roleAllocations">The sequence of agents and the capabilities they should execute.</param>
+		protected void ApplyConfiguration(Tuple<Agent, Capability[]>[] roleAllocations)
+		{
+			foreach (var agent in Agents)
+			{
+				agent.AllocatedRoles.Clear();
+				agent.OnReconfigured();
+			}
+
+			foreach (var task in Tasks)
+				task.IsResourceInProduction = false;
+
+			_lastRoleAllocations = roleAllocations;
+
+			for (var i = 0; i < roleAllocations.Length; i++)
+			{
+				var agent = roleAllocations[i].Item1;
+				var capabilities = roleAllocations[i].Item2;
+
+				var role = RolePool.Allocate();
+				role.CapabilitiesToApply.Clear();
+				role.CapabilitiesToApply.AddRange(capabilities);
+				role.Reset();
+				role.PreCondition.Task = Tasks[0];
+				role.PostCondition.Task = Tasks[0];
+				role.PreCondition.Port = i == 0 ? null : roleAllocations[i - 1].Item1;
+				role.PostCondition.Port = i == roleAllocations.Length - 1 ? null : roleAllocations[i + 1].Item1;
+				role.PreCondition.State.Clear();
+				role.PostCondition.State.Clear();
+				role.PreCondition.State.AddRange(roleAllocations.Take(i).SelectMany(tuple => tuple.Item2).ToList());
+				role.PostCondition.State.AddRange(role.PreCondition.State.Concat(role.CapabilitiesToApply).ToList());
+				agent.AllocatedRoles.Add(role);
+			}
 		}
 	}
 }

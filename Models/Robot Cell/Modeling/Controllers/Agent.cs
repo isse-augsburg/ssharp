@@ -39,10 +39,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
         public Agent(params Capability[] capabilities)
         {
-            AvailableCapabilites = new List<Capability>(capabilities);
+            AvailableCapabilities = new List<Capability>(capabilities);
         }
 
-        public List<Capability> AvailableCapabilites { get; }
+        public List<Capability> AvailableCapabilities { get; }
         public List<Role> AllocatedRoles { get; } = new List<Role>(10);
 
         [Hidden]
@@ -122,10 +122,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
             // this is also how the ODP seems to work
 
             // Using ToArray() to prevent modifications of the list during iteration...
-            foreach (var capability in AvailableCapabilites.ToArray())
+            foreach (var capability in AvailableCapabilities.ToArray())
             {
                 if (!CheckAllocatedCapability(capability))
-					AvailableCapabilites.Remove(capability);
+					AvailableCapabilities.Remove(capability);
             }
 
             foreach (var input in Inputs.ToArray())
@@ -185,7 +185,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
                 .Transition(
                     from: State.ExecuteRole,
                     to: State.ExecuteRole,
-                    guard: !_currentRole.IsCompleted,
+                    guard: (Resource != null || _currentRole.PreCondition.Port == null) && !_currentRole.IsCompleted,
                     action: () => _currentRole.Execute(this))
                 .Transition(
                     from: State.ExecuteRole,
@@ -200,7 +200,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
                 .Transition(
                     from: State.ExecuteRole,
                     to: State.Idle,
-                    guard: Resource == null || (_currentRole.IsCompleted && _currentRole.PostCondition.Port == null),
+                    guard: Resource == null && (_currentRole.IsCompleted || _currentRole.PostCondition.Port == null),
                     action: () =>
                     {
 						_currentRole.Reset();
