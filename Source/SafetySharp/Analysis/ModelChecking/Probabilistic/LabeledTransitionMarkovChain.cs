@@ -77,7 +77,7 @@ namespace SafetySharp.Runtime
 			_stateStorageStateToFirstTransitionChainElementBuffer.Resize((long)maxNumberOfStates * sizeof(int), zeroMemory: false);
 			_stateStorageStateToFirstTransitionChainElementMemory = (int*)_stateStorageStateToFirstTransitionChainElementBuffer.Pointer;
 
-			_transitionChainElementsBuffer.Resize((long)maxNumberOfTransitions * sizeof(int), zeroMemory: false);
+			_transitionChainElementsBuffer.Resize((long)maxNumberOfTransitions * sizeof(TransitionChainElement), zeroMemory: false);
 			_transitionChainElementsMemory = (TransitionChainElement*)_transitionChainElementsBuffer.Pointer;
 
 
