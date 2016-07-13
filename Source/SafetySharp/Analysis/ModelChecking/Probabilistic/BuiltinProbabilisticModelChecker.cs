@@ -242,7 +242,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
 
 			// calculate probabilityExactlyOne
-			nodesToIgnore = new Dictionary<int, bool>();  // change for \phi Until \psi
+			nodesToIgnore = directlySatisfiedStates; // change for \phi Until \psi
 			var probabilitySmallerThanOne = underlyingDigraph.GetAncestors(probabilityExactlyZero, nodesToIgnore); ;
 			var probabilityExactlyOne = CreateComplement(probabilitySmallerThanOne); ;
 
@@ -251,7 +251,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var derivedMatrix = CreateDerivedMatrix(probabilityExactlyOne, probabilityExactlyZero);
 			var derivedVector = CreateDerivedVector(probabilityExactlyOne);
 
-			var resultVector = GaussSeidel(derivedMatrix, derivedVector, 20);
+			var resultVector = GaussSeidel(derivedMatrix, derivedVector, 200);
 
 			var finalProbability = 0.0;
 			for (var i = 0; i < MarkovChain.States; i++)
@@ -271,8 +271,8 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var reachStateFormula = formulaToCheck as CalculateProbabilityToReachStateFormula;
 			if (reachStateFormula == null)
 				throw new NotImplementedException();
-			//var result=CalculateProbabilityToReachStateFormula(reachStateFormula.Operand);
-			var result = CalculateProbabilityToReachStateFormulaInBoundedSteps(reachStateFormula.Operand, 200);
+			var result=CalculateProbabilityToReachStateFormula(reachStateFormula.Operand);
+			//var result = CalculateProbabilityToReachStateFormulaInBoundedSteps(reachStateFormula.Operand, 200);
 
 
 			stopwatch.Stop();
