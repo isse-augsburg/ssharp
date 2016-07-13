@@ -35,13 +35,20 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void Simulate()
 		{
-			var model = Model.GetDefaultInstance(observerControllerType: typeof(FastObserverController));
+			var model = new Model();
+			model.InitializeDefaultInstance();
+			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
 			var simulator = new Simulator(model);
-			model = (Model)simulator.Model;
+			PrintTrace(simulator, steps: 120);
+		}
 
-			for (var i = 0; i < 120; ++i)
+		public static void PrintTrace(Simulator simulator, int steps)
+		{
+			var model = (Model)simulator.Model;
+
+			for (var i = 0; i < steps; ++i)
 			{
 				WriteLine($"=================  Step: {i}  =====================================");
 

@@ -67,8 +67,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			_name = $"C{cartId}";
 			Broken.Name = $"C{cartId}.Broken";
 
-			foreach (var route in Routes)
-				route.Blocked.Name = $"C{cartId}.{route.Robot1.Name}->{route.Robot2.Name}.Blocked";
+			//foreach (var route in Routes)
+			//	route.Blocked.Name = $"C{cartId}.{route.Robot1.Name}->{route.Robot2.Name}.Blocked";
 		}
 
 		public override string ToString()
@@ -81,7 +81,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			if (_position == robot)
 				return true;
 
-			return Routes.Any(route => route.CanNavigate(_position, robot));
+			//return Routes.Any(route => route.CanNavigate(_position, robot));
+
+			// todo: for now, ignore specific routes
+			var allRobots = Routes.SelectMany(route => new[] { route.Robot1, route.Robot2 }).ToArray();
+			return allRobots.Contains(_position) && allRobots.Contains(robot);
 		}
 
 		[FaultEffect(Fault = nameof(Broken))]

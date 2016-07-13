@@ -114,20 +114,20 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		private void UpdateConfiguration()
 		{
-		    var isReconfPossible = IsReconfPossible(Agents.OfType<RobotAgent>(), Agents.OfType<CartAgent>(), Tasks, this);
+		    var isReconfPossible = IsReconfPossible(Agents.OfType<RobotAgent>(), Tasks);
 
 			var lines = File.ReadAllLines(ConfigurationFile);
 			if (lines[0].Contains("UNSATISFIABLE"))
 			{
 				ReconfigurationState = ReconfStates.Failed;
                 if (isReconfPossible) 
-                    throw new Exception("Reconf. failed while there is a solution.");
+                    throw new Exception("Reconfiguration failed even though there is a solution.");
 				return;
 			}
 
 			ReconfigurationState = ReconfStates.Succedded;
             if (!isReconfPossible)
-                throw new Exception("Reconf. is succedded while there is no reconf. possible.");
+                throw new Exception("Reconfiguration successful even though there is no valid configuration.");
 
 			var roleAllocations = Parse(lines[0], lines[1]).ToArray();
 			ApplyConfiguration(roleAllocations);
@@ -172,8 +172,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
             return capabilities.Any(c => c.IsEquivalentTo(capability));
         }
 
-        private bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<CartAgent> cartAgents, IEnumerable<Task> tasks,
-                                      ObserverController observerController)
+        private bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<Task> tasks)
         {
             var isReconfPossible = true;
             var matrix = GetConnectionMatrix(robotsAgents);
@@ -190,7 +189,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
                 for (var i = 0; i < task.Capabilities.Length - 1; i++)
                 {
                     candidates =
-                        candidates.SelectMany<RobotAgent, RobotAgent>(r => matrix[r])
+                        candidates.SelectMany(r => matrix[r])
                                   .Where(r => ContainsCapability(r.AvailableCapabilities,task.Capabilities[i + 1]))
                                   .ToArray();
                     if (candidates.Length == 0)
@@ -216,7 +215,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
             return matrix;
         }
 
-        private bool IsConnected(RobotAgent source, RobotAgent target, HashSet<RobotAgent> seenRobots)
+        private static bool IsConnected(RobotAgent source, RobotAgent target, HashSet<RobotAgent> seenRobots)
         {
             if (source == target)
                 return true;

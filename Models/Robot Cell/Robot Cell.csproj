@@ -64,6 +64,7 @@
     <Compile Include="Analysis\ModelCheckingTests.cs" />
     <Compile Include="Analysis\FunctionalTests.cs" />
     <Compile Include="Modeling\Controllers\Agent.cs" />
+    <Compile Include="Modeling\Controllers\AnalysisMode.cs" />
     <Compile Include="Modeling\Controllers\Capability.cs" />
     <Compile Include="Modeling\Controllers\Condition.cs" />
     <Compile Include="Modeling\Controllers\ConsumeCapability.cs" />

@@ -35,7 +35,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		public Fault ApplyFault = new PermanentFault();
 		public Fault ResourceTransportFault = new PermanentFault();
-		public Fault SwitchFault = new PermanentFault();
+		//public Fault SwitchFault = new PermanentFault();
 
 		public Robot(params ProcessCapability[] capabilities)
 		{
@@ -57,6 +57,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 		public virtual bool CanApply(ProcessCapability capability)
 		{
 			return Tools.First(t => t.Capability == capability).CanApply();
+		}
+
+		public virtual bool CanSwitch()
+		{
+			return true;
 		}
 
 		public virtual bool ApplyCapability()
@@ -86,7 +91,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 		{
 			Name = $"R{robotId}";
 			ApplyFault.Name = $"R{robotId}.ToolApplicationFailed";
-			SwitchFault.Name = $"R{robotId}.ToolSwitchFailed";
+			//SwitchFault.Name = $"R{robotId}.ToolSwitchFailed";
 			ResourceTransportFault.Name = $"R{robotId}.ResourceTransportFailed";
 
 			foreach (var group in Tools.GroupBy(t => t.Capability.ProductionAction))
@@ -113,8 +118,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			_workpiece = null;
 		}
 
-		public void RemoveWorkpiece()
+		public void DiscardWorkpiece()
 		{
+			_workpiece?.Discard();
 			_workpiece = null;
 		}
 
@@ -132,12 +138,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			public override bool CanApply(ProcessCapability capability) => false;
 		}
 
-		[FaultEffect(Fault = nameof(SwitchFault)), Priority(1)]
-		internal class SwitchEffect : Robot
-		{
-			public override bool SwitchCapability(ProcessCapability capability) => false;
-			public override bool CanApply(ProcessCapability capability) => false;
-		}
+		//[FaultEffect(Fault = nameof(SwitchFault)), Priority(1)]
+		//internal class SwitchEffect : Robot
+		//{
+		//	public override bool SwitchCapability(ProcessCapability capability) => false;
+		//	public override bool CanSwitch() => false;
+		//}
 
 		[FaultEffect(Fault = nameof(ResourceTransportFault))]
 		internal class ResourceTransportEffect : Robot

@@ -44,7 +44,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			base.OnReconfigured();
 
 			// For now, the resource disappears magically...
-			Robot.RemoveWorkpiece();
+			Robot.DiscardWorkpiece();
 		}
 
 		protected override bool CheckInput(Agent agent)
@@ -59,6 +59,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		protected override bool CheckAllocatedCapability(Capability capability)
 		{
+			if (!Robot.CanSwitch())
+				return false;
+
 			var processCapability = capability as ProcessCapability;
 			return processCapability == null || Robot.CanApply(processCapability);
 		}
@@ -69,6 +72,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (Robot.TakeResource(((CartAgent)agent).Cart))
 				return;
 
+			Robot.DiscardWorkpiece();
 			ClearConnections();
 			CheckConstraints();
 		}
@@ -79,6 +83,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (Robot.PlaceResource(((CartAgent)agent).Cart))
 				return;
 
+			Robot.DiscardWorkpiece();
 			ClearConnections();
 			CheckConstraints();
 		}

@@ -34,7 +34,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void EnumerateStateSpace()
 		{
-			var model = Model.GetDefaultInstance(observerControllerType: typeof(FastObserverController));
+			var model = new Model();
+			model.InitializeDefaultInstance();
+			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
@@ -46,7 +48,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void NoDamagedWorkpieces()
 		{
-			var model = Model.GetDefaultInstance(observerControllerType: typeof(FastObserverController));
+			var model = new Model();
+			model.InitializeDefaultInstance();
+			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
@@ -58,7 +62,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void AllWorkpiecesCompleteEventually()
 		{
-			var model = Model.GetDefaultInstance(observerControllerType: typeof(FastObserverController));
+			var model = new Model();
+			model.InitializeDefaultInstance();
+			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
@@ -70,7 +76,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void HasResourceAndHasWorkpieceMatch()
 		{
-			var model = Model.GetDefaultInstance(observerControllerType: typeof(FastObserverController));
+			var model = new Model();
+			model.InitializeDefaultInstance();
+			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };

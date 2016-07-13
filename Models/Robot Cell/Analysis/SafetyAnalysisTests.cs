@@ -28,16 +28,18 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using Modeling.Controllers;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
 
 	public class SafetyAnalysisTests
 	{
 		[Test]
 		public void NoDamagedWorkpieces()
 		{
-			var model = Model.GetDefaultInstance(observerControllerType: typeof(FastObserverController));
+			var model = new Model();
+			model.InitializeDefaultInstance();
+			model.CreateObserverController<FastObserverController>();
+			model.SetAnalysisMode(AnalysisMode.IntolerableFaults);
 
-			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 16 } };
+			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 16, GenerateCounterExample = false } };
 			var result = modelChecker.ComputeMinimalCriticalSets(model, model.Workpieces.Any(w => w.IsDamaged));
 
 			Console.WriteLine(result);
@@ -46,11 +48,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void AllWorkpiecesCompleteEventually()
 		{
-			var model = Model.GetDefaultInstance(observerControllerType: typeof(FastObserverController));
-			model.Faults.SuppressActivations();
+			var model = new Model();
+			model.InitializeDefaultInstance();
+			model.CreateObserverController<FastObserverController>();
+			model.SetAnalysisMode(AnalysisMode.IntolerableFaults);
 
-			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 16 } };
-			var result = modelChecker.ComputeMinimalCriticalSets(model, model.ObserverController._stepCount >= 200 && ! model.Workpieces.All(w => w.IsComplete));
+			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 16, GenerateCounterExample = false } };
+			var result = modelChecker.ComputeMinimalCriticalSets(model,
+				model.ObserverController._stepCount >= ObserverController.MaxSteps && !model.Workpieces.All(w => w.IsDiscarded || w.IsComplete));
 
 			Console.WriteLine(result);
 		}

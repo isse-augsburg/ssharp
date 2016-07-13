@@ -29,12 +29,21 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 	internal abstract class ObserverController : Component
 	{
-		private bool _hasReconfed = false;
+		public const int MaxSteps = 200;
+		private bool _hasReconfed;
+
+		[NonSerializable]
+		private Tuple<Agent, Capability[]>[] _lastRoleAllocations; // for debugging purposes
+
 		//[Hidden]
 		private bool _reconfigurationRequested = true;
 
-		[Range(0, 200, OverflowBehavior.Clamp)]
+		[Range(0, MaxSteps, OverflowBehavior.Clamp)]
 		public int _stepCount;
+
+		public AnalysisMode Mode = AnalysisMode.AllFaults;
+
+		public Fault ReconfigurationFailure = new TransientFault();
 
 		protected ObserverController(IEnumerable<Agent> agents, List<Task> tasks)
 		{
@@ -74,7 +83,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				() =>
 					agent.AllocatedRoles.All(
 						role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilities.Contains(capability))),
-                //   Pre-PostconditionConsistency
+				//   Pre-PostconditionConsistency
 				() =>
 					agent.AllocatedRoles.Any(role => role.PostCondition.Port == null || role.PreCondition.Port == null)
 						? true
@@ -118,9 +127,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public override void Update()
 		{
-			++_stepCount;
-			if (_stepCount >= 200)
-				return;
+			if (Mode == AnalysisMode.IntolerableFaults)
+			{
+				++_stepCount;
+				if (_stepCount >= MaxSteps)
+					return;
+			}
 
 			if (ReconfigurationState == ReconfStates.Failed)
 				return;
@@ -136,14 +148,23 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (!_reconfigurationRequested)
 				return;
 
-			// TODO: This speeds up analyses when checking for reconf failures with DCCA, but is otherwise
-			// unacceptable for other kinds of analyses
+			if (Mode == AnalysisMode.TolerableFaults)
+			{
+				// This speeds up analyses when checking for reconf failures with DCCA, but is otherwise
+				// unacceptable for other kinds of analyses
 
-			//if (_hasReconfed)
-			//	return;
+				if (_hasReconfed)
+					return;
+			}
 
 			foreach (var agent in Agents)
 				agent.CheckAllocatedCapabilities();
+
+			foreach (var agent in Agents)
+			{
+				agent.AllocatedRoles.Clear();
+				agent.OnReconfigured();
+			}
 
 			RolePool.Reset();
 			Reconfigure();
@@ -151,21 +172,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			_hasReconfed = true;
 		}
 
-		[NonSerializable]
-		private Tuple<Agent, Capability[]>[] _lastRoleAllocations; // for debugging purposes
-
 		/// <summary>
-		/// Applies the <paramref name="roleAllocations"/> to the system.
+		///   Applies the <paramref name="roleAllocations" /> to the system.
 		/// </summary>
 		/// <param name="roleAllocations">The sequence of agents and the capabilities they should execute.</param>
-		protected void ApplyConfiguration(Tuple<Agent, Capability[]>[] roleAllocations)
+		protected virtual void ApplyConfiguration(Tuple<Agent, Capability[]>[] roleAllocations)
 		{
-			foreach (var agent in Agents)
-			{
-				agent.AllocatedRoles.Clear();
-				agent.OnReconfigured();
-			}
-
 			foreach (var task in Tasks)
 				task.IsResourceInProduction = false;
 
@@ -188,7 +200,21 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				role.PostCondition.State.Clear();
 				role.PreCondition.State.AddRange(roleAllocations.Take(i).SelectMany(tuple => tuple.Item2).ToList());
 				role.PostCondition.State.AddRange(role.PreCondition.State.Concat(role.CapabilitiesToApply).ToList());
-				agent.AllocatedRoles.Add(role);
+				agent.Configure(role);
+			}
+		}
+
+		[FaultEffect(Fault = nameof(ReconfigurationFailure))]
+		public abstract class ReconfigurationFailureEffect : ObserverController
+		{
+			protected ReconfigurationFailureEffect(IEnumerable<Agent> agents, List<Task> tasks)
+				: base(agents, tasks)
+			{
+			}
+
+			protected override void ApplyConfiguration(Tuple<Agent, Capability[]>[] roleAllocations)
+			{
+				ReconfigurationState = ReconfStates.Failed;
 			}
 		}
 	}

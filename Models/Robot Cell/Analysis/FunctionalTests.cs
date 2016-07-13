@@ -23,416 +23,130 @@
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Linq;
 	using Modeling;
 	using Modeling.Controllers;
-	using Modeling.Plants;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
 
 	public class FunctionalTests
 	{
 		[Test]
-		public void DamagedWorkpieces()
-		{
-			var model = Model.GetDefaultInstance();
-			var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
-			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.Workpieces.Any(w => w.IsDamaged));
-
-			Console.WriteLine(result);
-		}
-
-		[Test]
 		public void ReconfigurationFailed()
 		{
-			var model = Model.GetDefaultInstance(typeof(FastObserverController));
-			model.Components.OfType<Robot>().Select(r => r.SwitchFault).ToArray().SuppressActivations();
+			var model = new Model();
+			model.InitializeDefaultInstance();
+			model.CreateObserverController<FastObserverController>();
+			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
 
-			foreach (var robot in model.Robots)
-				robot.ResourceTransportFault.SuppressActivation();
-
-			var safetyAnalysis = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 16, GenerateCounterExample = false } };
-			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
-
-			Console.WriteLine(result);
+			Dcca(model);
 		}
 
 		[Test]
 		public void DepthFirstSearch()
 		{
-			var model = Model.GetDefaultInstance();
+			var model = new Model();
+			model.InitializeDefaultInstance();
+			model.CreateObserverController<MiniZincObserverController>();
+			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
 
-			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 16 } };
+			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 20 } };
 			var result = modelChecker.CheckInvariant(model, true);
 
 			Console.WriteLine(result);
 		}
 
-	    [Test]
-	    public void EvalIctss1()
-	    {
-	        var model = new Model();
-
-	        var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
-            var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
-            var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
-            var tighten = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Tighten));
-            var polish = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Polish));
-            var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
-
-            model.CreateWorkpieces(5, produce(), drill(), insert(), tighten(), polish(), consume());
-
-            model.CreateRobot(produce(), drill(), insert());
-            model.CreateRobot(insert(), drill());
-            model.CreateRobot(tighten(), polish(), tighten(), drill());
-            model.CreateRobot(polish(), consume());
-
-            model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]), new Route(model.Robots[0], model.Robots[2]), new Route(model.Robots[0], model.Robots[3]));
-            model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]));
-            model.CreateCart(model.Robots[2], new Route(model.Robots[2], model.Robots[3]));
-
-            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
-
-            var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
-            var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
-
-            Console.WriteLine(result);
-        }
-
-        [Test]
-        public void EvalIctss2()
-        {
-            var model = new Model();
-
-            var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
-            var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
-            var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
-            var tighten = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Tighten));
-            var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
-
-            model.CreateWorkpieces(5, produce(), drill(), insert(), tighten(), consume());
-
-            model.CreateRobot(produce(), insert());
-            model.CreateRobot(tighten());
-            model.CreateRobot(drill(), consume());
-
-            model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]), new Route(model.Robots[0], model.Robots[2]));
-            model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]));
-
-            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
-
-            var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
-            var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
-
-            Console.WriteLine(result);
-        }
-
-        [Test]
-        public void EvalIctss3()
-        {
-            var model = new Model();
-
-            var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
-            var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
-            var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
-            var tighten = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Tighten));
-            var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
-
-            model.CreateWorkpieces(5, produce(), drill(), insert(), tighten(), consume());
-
-            model.CreateRobot(produce(), insert(), drill(), insert());
-            model.CreateRobot(insert(), tighten(), drill());
-            model.CreateRobot(tighten(), insert(), consume(), drill());
-
-            model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]), new Route(model.Robots[0], model.Robots[2]));
-            model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]));
-
-            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
-
-            var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
-            var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
-
-            Console.WriteLine(result);
-        }
-
-        [Test]
-        public void EvalIctss4()
-        {
-            var model = new Model();
-
-            var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
-            var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
-            var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
-            var tighten = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Tighten));
-            var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
-
-            model.CreateWorkpieces(5, produce(), drill(), insert(), tighten(), consume());
-
-            model.CreateRobot(produce(), insert());
-            model.CreateRobot(tighten());
-            model.CreateRobot(drill(), consume());
-
-            model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]), new Route(model.Robots[0], model.Robots[2]), new Route(model.Robots[1], model.Robots[2]));
-            model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]), new Route(model.Robots[0], model.Robots[2]));
-
-            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
-
-			//model.Faults.SuppressActivations();
-			//model.Carts[0].Routes.Single(r => r.Robot1 == model.Robots[0] && r.Robot2==model.Robots[2]).Blocked.Activation=Activation.Forced;
-			//model.Carts[1].Routes.Single(r => r.Robot1 == model.Robots[1] && r.Robot2 == model.Robots[2]).Blocked.Activation = Activation.Forced;
-
-			var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
-            var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
-
-            Console.WriteLine(result);
-        }
-
-        [Test]
-        public void EvalIctss5()
-        {
-            var model = new Model();
-
-            var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
-            var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
-            var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
-            var tighten = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Tighten));
-            var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
-
-            model.CreateWorkpieces(5, produce(), drill(), insert(), tighten(), drill(), insert(), tighten(), consume());
-
-            model.CreateRobot(produce(), insert());
-            model.CreateRobot(tighten());
-            model.CreateRobot(drill(), consume());
-
-            model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]), new Route(model.Robots[0], model.Robots[2]));
-            model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]));
-
-            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
-
-            var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
-            var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
-
-            Console.WriteLine(result);
-        }
-
-        [Test]
-        public void EvalIctss6()
-        {
-            var model = new Model();
-
-            var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
-            var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
-            var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
-            var tighten = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Tighten));
-            var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
-
-            model.CreateWorkpieces(5, produce(), drill(), insert(), tighten(), consume());
-
-            model.CreateRobot(produce(), insert());
-            model.CreateRobot(insert());
-            model.CreateRobot(drill(), tighten());
-            model.CreateRobot(tighten());
-            model.CreateRobot(drill(), consume());
-
-            model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]), new Route(model.Robots[0], model.Robots[2]));
-            model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[3]), new Route(model.Robots[1], model.Robots[4]), new Route(model.Robots[1], model.Robots[2]));
-
-            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
-
-            var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
-            var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
-
-            Console.WriteLine(result);
-        }
-
-        [Test]
-        public void EvalIctss7()
-        {
-            var model = new Model();
-
-            var produce = (Func<ProduceCapability>)(() => new ProduceCapability(model.Resources, model.Tasks));
-            var insert = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Insert));
-            var drill = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Drill));
-            var tighten = (Func<ProcessCapability>)(() => new ProcessCapability(ProductionAction.Tighten));
-            var consume = (Func<ConsumeCapability>)(() => new ConsumeCapability());
-
-            model.CreateWorkpieces(5, produce(), drill(), insert(), tighten(), consume());
-
-            model.CreateRobot(produce(), insert());
-            model.CreateRobot(tighten());
-            model.CreateRobot(drill(), consume());
-
-            model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]));
-            model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]), new Route(model.Robots[0], model.Robots[1]));
-            model.CreateCart(model.Robots[0], new Route(model.Robots[0], model.Robots[1]));
-            model.CreateCart(model.Robots[1], new Route(model.Robots[1], model.Robots[2]));
-
-            model.ObserverController = new MiniZincObserverController(model.RobotAgents.Cast<Agent>().Concat(model.CartAgents), model.Tasks);
-
-            var safetyAnalysis = new SafetyAnalysis { Configuration = { CpuCount = 1, StateCapacity = 1 << 16, GenerateCounterExample = false } };
-            var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
-
-            Console.WriteLine(result);
-        }
-
-        [Obsolete("The check has been moved into the agents")]
-        private bool Hazard(Model model)
+		[Test]
+		public void EvalIctss1()
 		{
-			var agents = model.CartAgents.Cast<Agent>().Concat(model.RobotAgents).ToArray();
+			var model = new Model();
+			model.Ictss1();
+			model.CreateObserverController<MiniZincObserverController>();
+			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
 
-			if (model.ObserverController.ReconfigurationState == ReconfStates.NotSet)
-				return false;
-
-            if (model.ObserverController.ReconfigurationState == ReconfStates.Succedded &&
-                !IsReconfPossible(model.RobotAgents, model.CartAgents, model.Tasks, model.ObserverController))
-                    return true;
-
-			if (model.ObserverController.ReconfigurationState == ReconfStates.Failed &&
-				IsReconfPossible(model.RobotAgents, model.CartAgents, model.Tasks, model.ObserverController))
-				return true;
-
-			if (model.ObserverController.ReconfigurationState == ReconfStates.Failed)
-				return false;
-
-		    if (CheckConstraints(agents))
-		        return false; 
-
-            return false;
+			Dcca(model);
 		}
 
-        [Obsolete("The check has been moved into the agents")]
-        private bool CheckConstraints(IEnumerable<Agent> agents)
-	    {
-	        foreach (var agent in agents)
-	        {
-	            if (agent.AllocatedRoles.All(role => role.PreCondition.Port == null || agent.Inputs.Contains(role.PreCondition.Port)))
-	            {
-	                return false;
-	            }
-	            if (agent.AllocatedRoles.All(role => role.PostCondition.Port == null || agent.Outputs.Contains(role.PostCondition.Port)))
-	            {
-	                return false; 
-	            }
-	            if (agent.AllocatedRoles.All(
-	                role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilities.Contains(capability))))
-	            {
-	                return false;
-	            }
-	            if (agent.AllocatedRoles.Any(role => role.PostCondition.Port == null || role.PreCondition.Port == null)
-	                ? true
-	                : agent.AllocatedRoles.TrueForAll(role => PostMatching(role, agent) && PreMatching(role, agent)))
-	            {
-	                return false; 
-	            }
-
-	        }
-	        return true;
-	     }
-
-        [Obsolete("The check has been moved into the agents")]
-        private bool PostMatching(Role role, Agent agent)
-        {
-            if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)))
-            {
-                ;
-            }
-            else if (
-                !role.PostCondition.Port.AllocatedRoles.Any(
-                    role1 =>
-                        role.PostCondition.State.Select(capability => capability.Identifier)
-                            .SequenceEqual(role1.PreCondition.State.Select(capability => capability.Identifier))))
-            {
-                ;
-            }
-            else if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role.PostCondition.Task.Equals(role1.PreCondition.Task)))
-            {
-                ;
-            }
-
-            return role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)
-                                                                       &&
-                                                                       role.PostCondition.State.Select(capability => capability.Identifier)
-                                                                           .SequenceEqual(role1.PreCondition.State.Select(capability => capability.Identifier))
-                                                                       && role.PostCondition.Task.Equals(role1.PreCondition.Task));
-        }
-
-        [Obsolete("The check has been moved into the agents")]
-        private bool PreMatching(Role role, Agent agent)
-        {
-            return role.PreCondition.Port.AllocatedRoles.Any(role1 => role1.PostCondition.Port.Equals(agent)
-                                                                      && role.PreCondition.State.SequenceEqual(role1.PostCondition.State)
-                                                                      && role.PreCondition.Task.Equals(role1.PostCondition.Task));
-        }
-
-        private bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<CartAgent> cartAgents, IEnumerable<Task> tasks,
-									  ObserverController observerController)
+		[Test]
+		public void EvalIctss2()
 		{
-			var isReconfPossible = true;
-			var matrix = GetConnectionMatrix(robotsAgents);
+			var model = new Model();
+			model.Ictss2();
+			model.CreateObserverController<MiniZincObserverController>();
+			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
 
-			foreach (var task in tasks)
+			Dcca(model);
+		}
+
+		[Test]
+		public void EvalIctss3()
+		{
+			var model = new Model();
+			model.Ictss3();
+			model.CreateObserverController<MiniZincObserverController>();
+			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
+
+			Dcca(model);
+		}
+
+		[Test]
+		public void EvalIctss4()
+		{
+			var model = new Model();
+			model.Ictss4();
+			model.CreateObserverController<MiniZincObserverController>();
+			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
+
+			Dcca(model);
+		}
+
+		[Test]
+		public void EvalIctss5()
+		{
+			var model = new Model();
+			model.Ictss5();
+			model.CreateObserverController<MiniZincObserverController>();
+			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
+
+			Dcca(model);
+		}
+
+		[Test]
+		public void EvalIctss6()
+		{
+			var model = new Model();
+			model.Ictss6();
+			model.CreateObserverController<MiniZincObserverController>();
+			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
+
+			Dcca(model);
+		}
+
+		[Test]
+		public void EvalIctss7()
+		{
+			var model = new Model();
+			model.Ictss7();
+			model.CreateObserverController<MiniZincObserverController>();
+			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
+
+			Dcca(model);
+		}
+
+		private void Dcca(Model model)
+		{
+			var safetyAnalysis = new SafetyAnalysis
 			{
-				isReconfPossible &= task.Capabilities.All(capability => robotsAgents.Any(agent => agent.AvailableCapabilities.Contains(capability)));
-				if (!isReconfPossible)
-					break;
-
-				var candidates = robotsAgents.Where(agent => agent.AvailableCapabilities.Contains(task.Capabilities.First())).ToArray();
-
-				for (var i = 0; i < task.Capabilities.Length - 1; i++)
+				Configuration =
 				{
-					candidates =
-						candidates.SelectMany<RobotAgent, RobotAgent>(r => matrix[r])
-								  .Where(r => r.AvailableCapabilities.Contains(task.Capabilities[i + 1]))
-								  .ToArray();
-					if (candidates.Length == 0)
-					{
-						isReconfPossible = false;
-					}
-				}
-			}
+					CpuCount = 1,
+					StateCapacity = 1 << 20,
+					GenerateCounterExample = false
+				},
+				FaultActivationBehavior = FaultActivationBehavior.ForceOnly
+			};
 
-			return isReconfPossible;
-		}
-
-        [Obsolete("The check has been moved into the agents")]
-        private Dictionary<RobotAgent, List<RobotAgent>> GetConnectionMatrix(IEnumerable<RobotAgent> robotAgents)
-		{
-			var matrix = new Dictionary<RobotAgent, List<RobotAgent>>();
-
-			foreach (var robot in robotAgents)
-			{
-				var list = new List<RobotAgent>(robotAgents.Where(r => IsConnected(robot, r, new HashSet<RobotAgent>())));
-				matrix.Add(robot, list);
-			}
-
-			return matrix;
-		}
-
-        [Obsolete("The check has been moved into the agents")]
-        private bool IsConnected(RobotAgent source, RobotAgent target, HashSet<RobotAgent> seenRobots)
-		{
-			if (source == target)
-				return true;
-
-			if (!seenRobots.Add(source))
-				return false;
-
-			foreach (var output in source.Outputs)
-			{
-				foreach (var output2 in output.Outputs)
-				{
-					if (output2 == target)
-						return true;
-
-					if (IsConnected((RobotAgent)output2, target, seenRobots))
-						return true;
-				}
-			}
-
-			return false;
+			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
+			Console.WriteLine(result);
 		}
 	}
 }

@@ -32,18 +32,24 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		private int _productionStep;
 
-		[Hidden]
-		public string Name { get; set; }
-
 		public Workpiece(params ProductionAction[] productionActions)
 		{
 			_productionActions = productionActions;
 			Range.Restrict(_productionStep, 0, _productionActions.Length, OverflowBehavior.Error);
 		}
 
+		[Hidden]
+		public string Name { get; set; }
+
 		public bool IsDamaged { get; private set; }
 
 		public bool IsComplete => _productionStep == _productionActions.Length;
+		public bool IsDiscarded { get; private set; }
+
+		public void Discard()
+		{
+			IsDiscarded = true;
+		}
 
 		public void Apply(ProductionAction action)
 		{

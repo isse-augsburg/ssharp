@@ -20,41 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
+namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
-	using System.Diagnostics;
-	using SafetySharp.Modeling;
-
-	[DebuggerDisplay("{Robot1.Name} -> {Robot2.Name}")]
-	internal class Route : Component
+	public enum AnalysisMode
 	{
-		//public Fault Blocked = new PermanentFault();
-
-		public Route(Robot robot1, Robot robot2)
-		{
-			Robot1 = robot1;
-			Robot2 = robot2;
-		}
-
-		public Route()
-		{
-		}
-
-		public Robot Robot1 { get; }
-		public Robot Robot2 { get; }
-
-		public virtual bool IsBlocked => false;
-
-		//[FaultEffect(Fault = nameof(Blocked))]
-		//internal class BlockedEffect : Route
-		//{
-		//	public override bool IsBlocked => true;
-		//}
-
-		public bool CanNavigate(Robot robot1, Robot robot2)
-		{
-			// routes are bi-directionally navigatable
-			return ((Robot1 == robot1 && Robot2 == robot2) || (Robot1 == robot2 && Robot2 == robot1)) && !IsBlocked;
-		}
+		AllFaults,
+		TolerableFaults,
+		IntolerableFaults
 	}
 }

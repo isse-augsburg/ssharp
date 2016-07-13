@@ -53,6 +53,17 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
+		///   Makes the activations of the <paramref name="faults" /> nondeterministic.
+		/// </summary>
+		public static void MakeNondeterministic(this IEnumerable<Fault> faults)
+		{
+			Requires.NotNull(faults, nameof(faults));
+
+			foreach (var fault in faults)
+				fault.Activation = Activation.Nondeterministic;
+		}
+
+		/// <summary>
 		///   Suppresses all activations of the <paramref name="fault" />.
 		/// </summary>
 		public static void SuppressActivation(this Fault fault)
@@ -69,6 +80,15 @@ namespace SafetySharp.Modeling
 		{
 			Requires.NotNull(fault, nameof(fault));
 			fault.Activation = Activation.Forced;
+		}
+
+		/// <summary>
+		///   Makes the activation of the <paramref name="fault" /> nondeterministic.
+		/// </summary>
+		public static void MakeNondeterministic(this Fault fault)
+		{
+			Requires.NotNull(fault, nameof(fault));
+			fault.Activation = Activation.Nondeterministic;
 		}
 
 		/// <summary>
