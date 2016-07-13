@@ -76,6 +76,9 @@ namespace SafetySharp.Runtime
 		{
 			GetOrCreateOutEdges(edge.Source).Add(edge);
 			GetOrCreateInEdges(edge.Target).Add(edge);
+			//Ensure that data structures are initialized even for states without incoming/outgoing edges
+			GetOrCreateInEdges(edge.Source);
+			GetOrCreateOutEdges(edge.Target);
 		}
 	}
 }

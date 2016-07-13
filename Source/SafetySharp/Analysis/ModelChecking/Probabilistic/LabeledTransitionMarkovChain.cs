@@ -60,6 +60,8 @@ namespace SafetySharp.Runtime
 		private readonly TransitionChainElement* _transitionChainElementsMemory;
 		private int _transitionChainElementCount = 0;
 
+		public int Transitions => _transitionChainElementCount;
+
 		private readonly int _maxNumberOfTransitions;
 
 
@@ -69,8 +71,11 @@ namespace SafetySharp.Runtime
 			if (maxNumberOfTransitions <= 0)
 			{
 				maxNumberOfTransitions = maxNumberOfStates << 6;
-				if (maxNumberOfTransitions < maxNumberOfStates)
-					maxNumberOfTransitions = Int32.MaxValue - 1;
+				var limit = 5 * 1024 / 32 * 1024 * 1024; // 5 gb / 16 bytes (for entries)
+
+				if (maxNumberOfTransitions < maxNumberOfStates || maxNumberOfTransitions > limit)
+					maxNumberOfTransitions = limit;
+
 			}
 			_maxNumberOfTransitions = maxNumberOfTransitions;
 

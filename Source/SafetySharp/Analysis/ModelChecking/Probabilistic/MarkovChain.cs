@@ -40,7 +40,7 @@ namespace SafetySharp.Runtime
 	using Utilities;
 
 	
-	internal unsafe class MarkovChain
+	internal class MarkovChain
 	{
 		// TODO: Optimization potential for custom model checker: Add every state only once. Save the transitions and evaluate reachability formulas more efficient by only expanding "states" to "states x stateformulaset" where the state labels of interests are in "stateformulaset"
 
@@ -59,9 +59,11 @@ namespace SafetySharp.Runtime
 		{
 			if (maxNumberOfTransitions <= 0)
 			{
-				maxNumberOfTransitions = maxNumberOfStates << 6;
-				if (maxNumberOfTransitions < maxNumberOfStates)
-					maxNumberOfTransitions = Int32.MaxValue - 1;
+				maxNumberOfTransitions = maxNumberOfStates << 8;
+				var limit = 5 * 1024 / 16 * 1024 * 1024; // 5 gb / 16 bytes (for entries)
+
+				if (maxNumberOfTransitions < maxNumberOfStates || maxNumberOfTransitions > limit)
+					maxNumberOfTransitions = limit;
 			}
 
 			InitialStateProbabilities = new DoubleVector();
@@ -210,7 +212,7 @@ namespace SafetySharp.Runtime
 		{
 			return new UnderlyingDigraph(this);
 		}
-
+		
 		internal class UnderlyingDigraph
 		{
 			public BidirectionalGraph Graph { get; private set; }

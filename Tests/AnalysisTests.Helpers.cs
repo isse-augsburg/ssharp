@@ -299,8 +299,8 @@ namespace Tests
 			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
 				yield return new object[] { typeof(Mrmc) }.Concat(testCase).ToArray();
 
-			//foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
-			//	yield return new object[] { typeof(Prism) }.Concat(testCase).ToArray();
+			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
+				yield return new object[] { typeof(SafetySharp.Analysis.ModelChecking.Probabilistic.BuiltinProbabilisticModelChecker) }.Concat(testCase).ToArray();
 		}
 	}
 }

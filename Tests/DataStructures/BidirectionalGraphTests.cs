@@ -28,7 +28,61 @@ using System.Threading.Tasks;
 
 namespace Tests.DataStructures
 {
-	class BidirectionalGraphTests
+	using SafetySharp.Analysis;
+	using SafetySharp.Runtime;
+	using Utilities;
+	using Xunit;
+	using Xunit.Abstractions;
+
+	public class BidirectionalGraphTests
 	{
+
+		public TestTraceOutput Output { get; }
+
+		private BidirectionalGraph _graph;
+
+
+		public BidirectionalGraphTests(ITestOutputHelper output)
+		{
+			Output = new TestTraceOutput(output);
+		}
+
+		private void CreateExemplaryGraphChain1()
+		{
+			_graph = new BidirectionalGraph();
+			_graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(0, 0));
+			_graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(0, 1));
+			_graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(1, 1));
+		}
+
+		private void CreateExemplaryGraphChain2()
+		{
+			_graph = new BidirectionalGraph();
+			_graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(0, 1));
+			_graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(1, 1));
+		}
+
+		[Fact]
+		public void CalculateAncestorsTest()
+		{
+			CreateExemplaryGraphChain1();
+			
+			Assert.Equal(1, _graph.InEdges(0).Count());
+			Assert.Equal(2, _graph.InEdges(1).Count());
+			Assert.Equal(2, _graph.OutEdges(0).Count());
+			Assert.Equal(1, _graph.OutEdges(1).Count());
+		}
+
+
+		[Fact]
+		public void CalculateAncestors2Test()
+		{
+			CreateExemplaryGraphChain2();
+
+			Assert.Equal(0, _graph.InEdges(0).Count());
+			Assert.Equal(2, _graph.InEdges(1).Count());
+			Assert.Equal(1, _graph.OutEdges(0).Count());
+			Assert.Equal(1, _graph.OutEdges(1).Count());
+		}
 	}
 }

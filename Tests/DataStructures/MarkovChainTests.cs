@@ -45,7 +45,7 @@ namespace Tests.DataStructures
 
 		private MarkovChain _markovChain;
 
-		private void CreateExemplaryMarkovChain()
+		private void CreateExemplaryMarkovChain1()
 		{
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
@@ -66,6 +66,26 @@ namespace Tests.DataStructures
 			//_markovChain.ProbabilityMatrix.OptimizeAndSeal();
 		}
 
+		private void CreateExemplaryMarkovChain2()
+		{
+			Func<bool> returnTrue = () => true;
+			Func<bool> returnFalse = () => false;
+
+			_markovChain = new MarkovChain();
+			_markovChain.StateFormulaLabels = new string[] { "label1", "label2" };
+			_markovChain.StateRewardRetrieverLabels = new string[] { };
+			_markovChain.AddInitialState(0, 1.0);
+			_markovChain.SetMarkovChainSourceStateOfUpcomingTransitions(1);
+			_markovChain.AddTransition(1, 1.0);
+			_markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { returnTrue, returnFalse }));
+			_markovChain.FinishSourceState();
+			_markovChain.SetMarkovChainSourceStateOfUpcomingTransitions(0);
+			_markovChain.AddTransition(1, 0.1);
+			_markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
+			_markovChain.FinishSourceState();
+			//_markovChain.ProbabilityMatrix.OptimizeAndSeal();
+		}
+
 		public MarkovChainTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
@@ -74,7 +94,7 @@ namespace Tests.DataStructures
 		[Fact]
 		public void PassingTest()
 		{
-			CreateExemplaryMarkovChain();
+			CreateExemplaryMarkovChain1();
 			_markovChain.ProbabilityMatrix.PrintMatrix(Output.Log);
 			_markovChain.ValidateStates();
 			_markovChain.PrintPathWithStepwiseHighestProbability(10);
@@ -96,7 +116,7 @@ namespace Tests.DataStructures
 		[Fact]
 		public void MarkovChainFormulaEvaluatorTest()
 		{
-			CreateExemplaryMarkovChain();
+			CreateExemplaryMarkovChain1();
 
 			Func<bool> returnTrue = () => true;
 			var stateFormulaLabel1 = new StateFormula(returnTrue, "label1");
@@ -116,6 +136,46 @@ namespace Tests.DataStructures
 			Assert.Equal(evaluateStateFormulaLabel2(1), false);
 			Assert.Equal(evaluateStateFormulaBoth(1), false);
 			Assert.Equal(evaluateStateFormulaAny(1), true);
+		}
+
+
+		[Fact]
+		public void CalculateAncestorsTest()
+		{
+			CreateExemplaryMarkovChain1();
+
+			var underlyingDigraph = _markovChain.CreateUnderlyingDigraph();
+			var nodesToIgnore = new Dictionary<int,bool>();
+			var selectedNodes1 = new Dictionary<int,bool>();
+			selectedNodes1.Add(1,true);
+			var result1 = underlyingDigraph.GetAncestors(selectedNodes1,nodesToIgnore);
+			
+			var selectedNodes2 = new Dictionary<int, bool>();
+			selectedNodes2.Add(0, true);
+			var result2 = underlyingDigraph.GetAncestors(selectedNodes2, nodesToIgnore);
+
+			Assert.Equal(2, result1.Count);
+			Assert.Equal(1, result2.Count);
+		}
+
+
+		[Fact]
+		public void CalculateAncestors2Test()
+		{
+			CreateExemplaryMarkovChain2();
+
+			var underlyingDigraph = _markovChain.CreateUnderlyingDigraph();
+			var nodesToIgnore = new Dictionary<int, bool>();
+			var selectedNodes1 = new Dictionary<int, bool>();
+			selectedNodes1.Add(1, true);
+			var result1 = underlyingDigraph.GetAncestors(selectedNodes1, nodesToIgnore);
+
+			var selectedNodes2 = new Dictionary<int, bool>();
+			selectedNodes2.Add(0, true);
+			var result2 = underlyingDigraph.GetAncestors(selectedNodes2, nodesToIgnore);
+
+			Assert.Equal(2, result1.Count);
+			Assert.Equal(1, result2.Count);
 		}
 	}
 }
