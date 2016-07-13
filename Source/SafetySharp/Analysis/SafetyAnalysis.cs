@@ -24,6 +24,7 @@ namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Runtime.CompilerServices;
 	using System.Diagnostics;
 	using System.Linq;
 	using Heuristics;
@@ -192,7 +193,7 @@ namespace SafetySharp.Analysis
 					setsToCheck.RemoveAt(setsToCheck.Count - 1);
 
 					// for current level, we already know the set is valid
-					var isValid = isCurrentLevel || !IsInvalid(set);
+					var isValid = isCurrentLevel || IsValid(set);
 
 					var isSafe = true;
 					if (isValid)
@@ -452,26 +453,21 @@ namespace SafetySharp.Analysis
 			var validSets = new HashSet<FaultSet>();
 			foreach (var set in sets)
 			{
-				if (IsInvalid(set))
-					currentSafe.Add(set);
-				else
+				if (IsValid(set))
 					validSets.Add(set);
+				else
+					currentSafe.Add(set); // necessary so its supersets will be generated
 			}
 
 			return validSets;
 		}
 
-		private bool IsInvalid(FaultSet set)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private bool IsValid(FaultSet set)
 		{
 			// The set must contain all forced faults, hence it must be a superset of those
 			// The set is not allowed to contain any suppressed faults, hence the intersection must be empty
-			if (!_forcedSet.IsSubsetOf(set) || !_suppressedSet.GetIntersection(set).IsEmpty)
-			{
-				_safeSets.Add(set);
-				return true;
-			}
-
-			return false;
+			return _forcedSet.IsSubsetOf(set) && _suppressedSet.GetIntersection(set).IsEmpty;
 		}
 	}
 }
