@@ -120,6 +120,7 @@ namespace SafetySharp.Analysis
 			var forcedFaults = allFaults.Where(fault => fault.Activation == Activation.Forced).ToArray();
 			var suppressedFaults = allFaults.Where(fault => fault.Activation == Activation.Suppressed).ToArray();
 			var nondeterministicFaults = allFaults.Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
+			var nonSuppressedFaults = allFaults.Where(fault => fault.Activation != Activation.Suppressed).ToArray();
 
 			_suppressedSet = new FaultSet(suppressedFaults);
 			_forcedSet = new FaultSet(forcedFaults);
@@ -155,7 +156,7 @@ namespace SafetySharp.Analysis
 			for (var cardinality = 0; cardinality <= allFaults.Length; ++cardinality)
 			{
 				// Generate the sets for the current level that we'll have to check
-				var sets = GeneratePowerSetLevel(cardinality, allFaults, currentSafe);
+				var sets = GeneratePowerSetLevel(cardinality, nonSuppressedFaults, currentSafe);
 				currentSafe.Clear();
 
 				// Remove all sets that conflict with the forced or suppressed faults; these sets are considered to be safe.
