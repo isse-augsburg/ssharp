@@ -23,9 +23,9 @@
 namespace Tests.Analysis.Heuristics
 {
 	using System.Collections.Generic;
+	using SafetySharp.Analysis;
 	using SafetySharp.Analysis.Heuristics;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;
 
