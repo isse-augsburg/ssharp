@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.Analysis
 {
+	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
 	using FormulaVisitors;
@@ -184,7 +185,7 @@ namespace SafetySharp.Analysis
 			using (var fileStateRewards = WriteRewardsToFile(formulaToCheck, out useRewards))
 			{
 				var script = new StringBuilder();
-				script.AppendLine("set method_path gauss_jacobi");
+				script.AppendLine("set method_path gauss_seidel");
 				script.AppendLine(formulaToCheckString);
 				if (outputExactResult)
 					script.Append("write_res_file_result");
@@ -215,7 +216,13 @@ namespace SafetySharp.Analysis
 					+ commandLineArgumentResultsFile;
 
 				var mrmc = new ExternalProcess("mrmc.exe", commandLineArguments);
+
+				var stopwatch = new Stopwatch();
+				stopwatch.Start();
 				mrmc.Run();
+				stopwatch.Stop();
+
+				Console.WriteLine($"MRMC model checking time: {stopwatch.Elapsed}");
 			}
 			return fileResults;
 		}

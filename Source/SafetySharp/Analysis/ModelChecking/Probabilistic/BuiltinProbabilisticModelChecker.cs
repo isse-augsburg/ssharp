@@ -30,6 +30,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 {
 	using Modeling;
 	using Runtime;
+	using System.Diagnostics;
 	using Utilities;
 
 	class BuiltinProbabilisticModelChecker : ProbabilisticModelChecker
@@ -168,6 +169,64 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return resultVector;
 		}
 
+		private Probability CalculateProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
+		{
+			// calculate P [true U<=steps psi]
+			
+			var psiEvaluator = MarkovChain.CreateFormulaEvaluator(psi);
+			var stateCount = MarkovChain.States;
+
+			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
+			var directlyUnsatisfiedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
+			
+			var enumerator = MarkovChain.ProbabilityMatrix.GetEnumerator();
+
+			var xold = new double[stateCount];
+			var xnew = CreateDerivedVector(directlySatisfiedStates);
+			var loops = 0;
+			while (loops < steps)
+			{
+				// switch xold and xnew
+				var xtemp = xold;
+				xold = xnew;
+				xnew = xtemp;
+				loops++;
+				for (var i = 0; i < stateCount; i++)
+				{
+					enumerator.MoveRow(i);
+					if (directlySatisfiedStates.ContainsKey(i))
+					{
+						xnew[i] = 1.0;
+					}
+					else if (directlyUnsatisfiedStates.ContainsKey(i))
+					{
+						xnew[i] = 0.0;
+					}
+					else
+					{
+						var sum = 0.0;
+						while (enumerator.MoveNextColumn())
+						{
+							var entry = enumerator.CurrentColumnValue.Value;
+							sum += entry.Value * xold[entry.Column];
+						}
+						xnew[i] = sum;
+					}
+				}
+				if (loops % 10 == 0)
+					Console.WriteLine($"Made {loops} Bounded Until iterations");
+			}
+			
+			var finalProbability = 0.0;
+			for (var i = 0; i < stateCount; i++)
+			{
+				finalProbability += MarkovChain.InitialStateProbabilities[i] * xnew[i];
+			}
+			
+			return new Probability(finalProbability);
+			
+		}
+
 		private Probability CalculateProbabilityToReachStateFormula(Formula psi)
 		{
 			// calculate P [true U psi]
@@ -192,7 +251,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var derivedMatrix = CreateDerivedMatrix(probabilityExactlyOne, probabilityExactlyZero);
 			var derivedVector = CreateDerivedVector(probabilityExactlyOne);
 
-			var resultVector = GaussSeidel(derivedMatrix, derivedVector, 400);
+			var resultVector = GaussSeidel(derivedMatrix, derivedVector, 20);
 
 			var finalProbability = 0.0;
 			for (var i = 0; i < MarkovChain.States; i++)
@@ -206,11 +265,20 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 		internal override Probability CalculateProbability(Formula formulaToCheck)
 		{
 			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
 
 			var reachStateFormula = formulaToCheck as CalculateProbabilityToReachStateFormula;
 			if (reachStateFormula == null)
 				throw new NotImplementedException();
-			return CalculateProbabilityToReachStateFormula(reachStateFormula.Operand);
+			//var result=CalculateProbabilityToReachStateFormula(reachStateFormula.Operand);
+			var result = CalculateProbabilityToReachStateFormulaInBoundedSteps(reachStateFormula.Operand, 200);
+
+
+			stopwatch.Stop();
+
+			Console.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
+			return result;
 		}
 
 		internal override bool CalculateFormula(Formula formulaToCheck)
