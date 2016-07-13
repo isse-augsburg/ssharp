@@ -31,6 +31,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 	using Modeling;
 	using Runtime;
 	using System.Diagnostics;
+	using System.Globalization;
 	using Utilities;
 
 	class BuiltinProbabilisticModelChecker : ProbabilisticModelChecker
@@ -124,8 +125,11 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return satisfiedStates;
 		}
 		
-		private double[] GaussSeidel(SparseDoubleMatrix derivedMatrix, double[] derivedVector, int iterationsLeft)
+		private double GaussSeidel(SparseDoubleMatrix derivedMatrix, double[] derivedVector, int iterationsLeft)
 		{
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
 			var stateCount = MarkovChain.States;
 			var resultVector = new double[stateCount];
 			var fixPointReached = iterationsLeft <= 0;
@@ -160,19 +164,40 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 				iterationsLeft--;
 				iterations++;
-				if (iterations % 10==0)
-					Console.WriteLine($"Made {iterations} Gauss-Seidel iterations");
+				if (iterations % 10 == 0)
+				{
+					stopwatch.Stop();
+					var currentProbability = CalculateFinalProbability(resultVector);
+					Console.WriteLine($"Completed {iterations} Gauss-Seidel iterations in {stopwatch.Elapsed}.  Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
+					stopwatch.Start();
+				}
 				if (iterationsLeft <= 0)
 					fixPointReached = true;
 			}
+			stopwatch.Stop();
+			var finalProbability = CalculateFinalProbability(resultVector);
 
-			return resultVector;
+			return finalProbability;
 		}
 
-		private Probability CalculateProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
+		private double CalculateFinalProbability(double[] initialStateProbabilities)
+		{
+			var finalProbability = 0.0;
+			for (var i = 0; i < MarkovChain.States; i++)
+			{
+				finalProbability += MarkovChain.InitialStateProbabilities[i] * initialStateProbabilities[i];
+			}
+			return finalProbability;
+		}
+
+		private double CalculateProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
 		{
 			// calculate P [true U<=steps psi]
-			
+
+
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
 			var psiEvaluator = MarkovChain.CreateFormulaEvaluator(psi);
 			var stateCount = MarkovChain.States;
 
@@ -213,21 +238,24 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 						xnew[i] = sum;
 					}
 				}
+
 				if (loops % 10 == 0)
-					Console.WriteLine($"Made {loops} Bounded Until iterations");
+				{
+					stopwatch.Stop();
+					var currentProbability = CalculateFinalProbability(xnew);
+					Console.WriteLine($"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
+					stopwatch.Start();
+				}
 			}
+
+			var finalProbability=CalculateFinalProbability(xnew);
 			
-			var finalProbability = 0.0;
-			for (var i = 0; i < stateCount; i++)
-			{
-				finalProbability += MarkovChain.InitialStateProbabilities[i] * xnew[i];
-			}
-			
-			return new Probability(finalProbability);
+			stopwatch.Stop();
+			return finalProbability;
 			
 		}
 
-		private Probability CalculateProbabilityToReachStateFormula(Formula psi)
+		private double CalculateProbabilityToReachStateFormula(Formula psi)
 		{
 			// calculate P [true U psi]
 
@@ -251,15 +279,9 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var derivedMatrix = CreateDerivedMatrix(probabilityExactlyOne, probabilityExactlyZero);
 			var derivedVector = CreateDerivedVector(probabilityExactlyOne);
 
-			var resultVector = GaussSeidel(derivedMatrix, derivedVector, 200);
-
-			var finalProbability = 0.0;
-			for (var i = 0; i < MarkovChain.States; i++)
-			{
-				finalProbability += MarkovChain.InitialStateProbabilities[i] * resultVector[i];
-			}
-
-			return new Probability(finalProbability);
+			var finalProbability = GaussSeidel(derivedMatrix, derivedVector, 2000);
+			
+			return finalProbability;
 		}
 
 		internal override Probability CalculateProbability(Formula formulaToCheck)
@@ -278,7 +300,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			stopwatch.Stop();
 
 			Console.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
-			return result;
+			return new Probability(result);
 		}
 
 		internal override bool CalculateFormula(Formula formulaToCheck)
