@@ -87,18 +87,18 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 		[FaultEffect(Fault = nameof(IncorrectlyPositionedFault)), Priority(1)]
 		public class IncorrectlyPositionedEffect : Workpiece
 		{
-			//public override void Apply(ProductionAction action)
-			//{
-			//	IsDamaged = true;
-			//}
+			public override void Apply(ProductionAction action)
+			{
+				IsDamaged = true;
+			}
 		}
 
 		[FaultEffect(Fault = nameof(ToolApplicationFailed)), Priority(2)]
 		public class ToolApplicationFailedEffect : Workpiece
 		{
-			//public override void Apply(ProductionAction action)
-			//{
-			//}
+			public override void Apply(ProductionAction action)
+			{
+			}
 		}
 	}
 }

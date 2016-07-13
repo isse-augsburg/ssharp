@@ -33,9 +33,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		private Workpiece _workpiece;
 
-		public Fault ApplyFault = new PermanentFault();
-		public Fault ResourceTransportFault = new PermanentFault();
-		//public Fault SwitchFault = new PermanentFault();
+		public Fault ApplyFault = new TransientFault();
+		public Fault ResourceTransportFault = new TransientFault();
+		//public Fault SwitchFault = new TransientFault();
 		public Fault SwitchToWrongToolFault = new TransientFault();
 
 		public Robot(params ProcessCapability[] capabilities)

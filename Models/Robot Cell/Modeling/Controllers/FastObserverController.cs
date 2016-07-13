@@ -208,7 +208,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 					path
 					.Skip(i)
 					.TakeWhile(robot => robot == current)
-					.Select((_, index) => _availableRobots[current].AvailableCapabilities.First(c => c.IsEquivalentTo(task.Capabilities[i + index])))
+					.Select((_, index) => task.Capabilities[i + index])
 					.ToArray();
 
 				yield return Tuple.Create(Agents[path[i]], capabilities);

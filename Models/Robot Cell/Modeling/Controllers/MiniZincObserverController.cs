@@ -35,7 +35,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
         private string _constraintsFile;
 
         [Hidden]
-        private static long myID = 0;
+        private static long myID;
 		private const string ConfigurationFile = "Configuration.out";
 		private const string MinizincExe = "minizinc.exe";
 		private const string MinizincModel = "ConstraintModel.mzn";

@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,41 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
+namespace Tests.Serialization.Misc
 {
-	using System.Diagnostics;
-	using SafetySharp.Modeling;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	[DebuggerDisplay("{Robot1.Name} -> {Robot2.Name}")]
-	internal class Route : Component
+	internal class NullableField : SerializationObject
 	{
-		//public Fault Blocked = new TransientFault();
-
-		public Route(Robot robot1, Robot robot2)
+		protected override void Check()
 		{
-			Robot1 = robot1;
-			Robot2 = robot2;
+			var c = new C();
+
+			GenerateCode(SerializationMode.Full, c);
+			StateSlotCount.ShouldBe(2);
+
+			Serialize();
+			c.X = 3;
+			Deserialize();
+			c.X.ShouldBe(null);
+
+			c.X = 7;
+			Serialize();
+			c.X = 3;
+			Deserialize();
+			c.X.ShouldBe(7);
 		}
 
-		public Route()
+		internal class C
 		{
-		}
-
-		public Robot Robot1 { get; }
-		public Robot Robot2 { get; }
-
-		public virtual bool IsBlocked => false;
-
-		//[FaultEffect(Fault = nameof(Blocked))]
-		//internal class BlockedEffect : Route
-		//{
-		//	public override bool IsBlocked => true;
-		//}
-
-		public bool CanNavigate(Robot robot1, Robot robot2)
-		{
-			// routes are bi-directionally navigatable
-			return ((Robot1 == robot1 && Robot2 == robot2) || (Robot1 == robot2 && Robot2 == robot1)) && !IsBlocked;
+			public int? X;
 		}
 	}
 }

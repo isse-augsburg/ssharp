@@ -31,11 +31,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 	internal class Model : ModelBase
 	{
-		public const int MaxRoleCapabilities = 5;
-		public const int MaxRoleCount = 20;
+		public const int MaxRoleCount = 8;
 		public const int MaxAgentRequests = 2;
 		public const int MaxProductionSteps = 8;
-		public const int MaxAllocatedRoles = 5;
+
+		public Model(string name = "")
+		{
+			Name = name;
+		}
+
+		public string Name { get; }
 
 		public List<Task> Tasks { get; } = new List<Task>();
 
@@ -203,6 +208,30 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 				default:
 					throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
 			}
+		}
+
+		public static IEnumerable<Model> CreateConfigurations<T>(AnalysisMode mode)
+			where T : ObserverController
+		{
+			yield return CreateConfiguration<T>(m => m.InitializeDefaultInstance(), "DefaultInstance", mode);
+			yield return CreateConfiguration<T>(m => m.Ictss1(), nameof(Ictss1), mode);
+			yield return CreateConfiguration<T>(m => m.Ictss2(), nameof(Ictss2), mode);
+			yield return CreateConfiguration<T>(m => m.Ictss3(), nameof(Ictss3), mode);
+			yield return CreateConfiguration<T>(m => m.Ictss4(), nameof(Ictss4), mode);
+			yield return CreateConfiguration<T>(m => m.Ictss5(), nameof(Ictss5), mode);
+			yield return CreateConfiguration<T>(m => m.Ictss6(), nameof(Ictss6), mode);
+			yield return CreateConfiguration<T>(m => m.Ictss7(), nameof(Ictss7), mode);
+		}
+
+		private static Model CreateConfiguration<T>(Action<Model> initializer, string name, AnalysisMode mode)
+			where T : ObserverController
+		{
+			var model = new Model(name);
+			initializer(model);
+			model.CreateObserverController<T>();
+			model.SetAnalysisMode(mode);
+
+			return model;
 		}
 
 		private void CreateWorkpieces(int count, params Capability[] capabilities)

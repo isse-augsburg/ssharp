@@ -33,8 +33,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		private readonly List<Agent> _requests = new List<Agent>(Model.MaxAgentRequests);
 		private readonly StateMachine<State> _stateMachine = State.Idle;
 		protected Role _currentRole;
+		private bool _hasRole;
 
-		public Fault ConfigurationUpdateFailed = new TransientFault();
+		public readonly Fault ConfigurationUpdateFailed = new TransientFault();
 
 		public Agent(params Capability[] capabilities)
 		{
@@ -45,7 +46,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		public List<Func<bool>> Constraints { get; set; }
 
 		public List<Capability> AvailableCapabilities { get; }
-		public List<Role> AllocatedRoles { get; } = new List<Role>(10);
+		public List<Role> AllocatedRoles { get; } = new List<Role>(Model.MaxRoleCount);
 
 		[Hidden]
 		public List<Agent> Outputs { get; } = new List<Agent>();
@@ -82,8 +83,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		{
 			// For now, the resource disappears magically...
 			Resource = null;
-			_currentRole?.Reset();
-			_currentRole = null;
+			_currentRole  = default(Role);
+			_hasRole = false;
 			_requests.Clear();
 			_stateMachine.ChangeState(State.Idle); // Todo: This is a bit of a hack
 		}
@@ -170,12 +171,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				.Transition(
 					from: State.RoleChosen,
 					to: State.WaitForResource,
-					guard: _currentRole?.PreCondition.Port != null,
+					guard: _currentRole.PreCondition.Port != null,
 					action: () => _currentRole.PreCondition.Port.TransferResource(this))
 				.Transition(
 					from: State.RoleChosen,
 					to: State.ExecuteRole,
-					guard: _currentRole != null && _currentRole.PreCondition.Port == null)
+					guard: !_hasRole && _currentRole.PreCondition.Port == null)
 				.Transition(
 					from: State.WaitForResource,
 					to: State.WaitForResource,
@@ -247,32 +248,43 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			_stateMachine.Transition(from: State.ResourceGiven, to: State.Idle);
 		}
 
+		protected bool TryChooseRole(Func<Role, bool> predicate, out Role role)
+		{
+			foreach (var allocatedRole in AllocatedRoles)
+			{
+				if (predicate(allocatedRole))
+				{
+					role = allocatedRole;
+					return true;
+				}
+			}
+
+			role = default(Role);
+			return false;
+		}
+
 		private bool ChooseRole()
 		{
 			// Check if we can process
 			if (_requests.Count != 0)
 			{
 				var otherAgent = _requests[0];
-				_currentRole = AllocatedRoles.FirstOrDefault(role => role.PreCondition.Port == otherAgent &&
-																	 role.PreCondition.State.SequenceEqual(otherAgent.Resource.State));
-
-				if (_currentRole != null)
+				if (TryChooseRole(role => role.PreCondition.Port == otherAgent &&
+										  role.PreCondition.StateMatches(otherAgent.Resource.State), out _currentRole))
 					return true;
 			}
 
 			// Check if we can produce
 			if (Resource == null)
 			{
-				_currentRole = AllocatedRoles.FirstOrDefault(role => role.PreCondition.Port == null);
-				if (_currentRole != null)
+				if (TryChooseRole(role => role.PreCondition.Port == null, out _currentRole))
 					return true;
 			}
 
 			// Check if we can consume
 			if (Resource != null)
 			{
-				_currentRole = AllocatedRoles.FirstOrDefault(role => role.PostCondition.Port == null);
-				if (_currentRole != null)
+				if (TryChooseRole(role => role.PostCondition.Port == null, out _currentRole))
 					return true;
 			}
 

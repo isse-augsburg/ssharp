@@ -30,6 +30,14 @@ namespace SafetySharp.Utilities
 	internal static class ConsoleHelpers
 	{
 		/// <summary>
+		///   Writes an empty line to the console.
+		/// </summary>
+		internal static void WriteLine()
+		{
+			Console.WriteLine();
+		}
+
+		/// <summary>
 		///   Writes the <paramref name="message" />, optionally in the given <paramref name="color" /> to the console.
 		/// </summary>
 		/// <param name="message">The message that should be written.</param>

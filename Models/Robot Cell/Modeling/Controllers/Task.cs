@@ -22,8 +22,6 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
-	using System.Linq;
-
 	internal class Task
 	{
 		public Task(params Capability[] capabilities)
@@ -33,28 +31,5 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public Capability[] Capabilities { get; }
 		public bool IsResourceInProduction { get; set; }
-
-		public override bool Equals(object obj)
-		{
-			if (ReferenceEquals(null, obj))
-				return false;
-
-			if (ReferenceEquals(this, obj))
-				return true;
-
-			if (obj.GetType() != GetType())
-				return false;
-
-			var task = obj as Task;
-			if (task == null)
-				return false;
-
-			return Capabilities.SequenceEqual(task.Capabilities);
-		}
-
-		public override int GetHashCode()
-		{
-			return Capabilities?.GetHashCode() ?? 0;
-		}
 	}
 }

@@ -23,11 +23,44 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using System.Collections.Generic;
+	using System.Diagnostics.Contracts;
+	using System.Linq;
 
-	internal class Condition
+	internal struct Condition
 	{
-		public Agent Port;
-	    public List<Capability> State { get; set; } = new List<Capability>(Model.MaxProductionSteps);
-	    public Task Task;
+		private readonly byte _statePrefixLength;
+		public readonly Agent Port;
+		public readonly Task Task;
+
+		public Condition(Task task, Agent port, int statePrefixLength)
+		{
+			_statePrefixLength = checked((byte)statePrefixLength);
+			Port = port;
+			Task = task;
+		}
+
+		public IEnumerable<Capability> State =>
+			Task?.Capabilities.Take(_statePrefixLength) ?? Enumerable.Empty<Capability>();
+
+		[Pure]
+		public bool StateMatches(IEnumerable<Capability> other)
+		{
+			return State.SequenceEqual(other, StateComparer.Default);
+		}
+
+		private class StateComparer : IEqualityComparer<Capability>
+		{
+			public static readonly StateComparer Default = new StateComparer();
+
+			public bool Equals(Capability x, Capability y)
+			{
+				return x.IsEquivalentTo(y);
+			}
+
+			public int GetHashCode(Capability obj)
+			{
+				return obj.GetHashCode();
+			}
+		}
 	}
 }

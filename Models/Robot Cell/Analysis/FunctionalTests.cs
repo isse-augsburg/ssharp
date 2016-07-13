@@ -23,12 +23,14 @@
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
+	using System.Collections;
+	using System.Linq;
 	using Modeling;
 	using Modeling.Controllers;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 
-	public class FunctionalTests
+	internal class FunctionalTests
 	{
 		[Test]
 		public void ReconfigurationFailed()
@@ -55,84 +57,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Console.WriteLine(result);
 		}
 
-		[Test]
-		public void EvalIctss1()
+		[TestCase, TestCaseSource(nameof(CreateConfigurations))]
+		public void Evaluation(Model model)
 		{
-			var model = new Model();
-			model.Ictss1();
-			model.CreateObserverController<MiniZincObserverController>();
-			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
-
 			Dcca(model);
 		}
 
-		[Test]
-		public void EvalIctss2()
-		{
-			var model = new Model();
-			model.Ictss2();
-			model.CreateObserverController<MiniZincObserverController>();
-			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
-
-			Dcca(model);
-		}
-
-		[Test]
-		public void EvalIctss3()
-		{
-			var model = new Model();
-			model.Ictss3();
-			model.CreateObserverController<MiniZincObserverController>();
-			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
-
-			Dcca(model);
-		}
-
-		[Test]
-		public void EvalIctss4()
-		{
-			var model = new Model();
-			model.Ictss4();
-			model.CreateObserverController<MiniZincObserverController>();
-			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
-
-			Dcca(model);
-		}
-
-		[Test]
-		public void EvalIctss5()
-		{
-			var model = new Model();
-			model.Ictss5();
-			model.CreateObserverController<MiniZincObserverController>();
-			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
-
-			Dcca(model);
-		}
-
-		[Test]
-		public void EvalIctss6()
-		{
-			var model = new Model();
-			model.Ictss6();
-			model.CreateObserverController<MiniZincObserverController>();
-			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
-
-			Dcca(model);
-		}
-
-		[Test]
-		public void EvalIctss7()
-		{
-			var model = new Model();
-			model.Ictss7();
-			model.CreateObserverController<MiniZincObserverController>();
-			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
-
-			Dcca(model);
-		}
-
-		private void Dcca(Model model)
+		private static void Dcca(Model model)
 		{
 			var safetyAnalysis = new SafetyAnalysis
 			{
@@ -147,6 +78,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
 			Console.WriteLine(result);
+		}
+
+		private static IEnumerable CreateConfigurations()
+		{
+			return Model.CreateConfigurations<MiniZincObserverController>(AnalysisMode.TolerableFaults)
+						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 	}
 }

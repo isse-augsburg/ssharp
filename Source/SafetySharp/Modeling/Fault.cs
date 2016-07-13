@@ -28,7 +28,6 @@ namespace SafetySharp.Modeling
 	using System.Linq;
 	using System.Runtime.Serialization;
 	using CompilerServices;
-	using Runtime;
 	using Utilities;
 
 	/// <summary>
