@@ -29,6 +29,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using Modeling.Controllers;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
+	using SafetySharp.Analysis.Heuristics;
 
 	internal class FunctionalTests
 	{
@@ -73,11 +74,22 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 					StateCapacity = 1 << 20,
 					GenerateCounterExample = false
 				},
-				FaultActivationBehavior = FaultActivationBehavior.ForceOnly
+				FaultActivationBehavior = FaultActivationBehavior.ForceOnly,
+				Heuristics = { RedundancyHeuristic(model), new SubsumptionHeuristic(model) }
 			};
 
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
 			Console.WriteLine(result);
+		}
+
+		private static IFaultSetHeuristic RedundancyHeuristic(Model model)
+		{
+			return new MinimalRedundancyHeuristic(
+				model,
+				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Drill).Select(t => t.Broken)),
+				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Insert).Select(t => t.Broken)),
+				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Tighten).Select(t => t.Broken)),
+				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Polish).Select(t => t.Broken)));
 		}
 
 		private static IEnumerable CreateConfigurations()

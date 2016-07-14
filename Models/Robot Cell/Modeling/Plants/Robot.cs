@@ -41,6 +41,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 		public Robot(params ProcessCapability[] capabilities)
 		{
 			Tools = capabilities.Select(c => new Tool(c)).ToArray();
+			ApplyFault.Subsumes(Tools.Select(tool => tool.Broken));
 		}
 
 		public Robot()

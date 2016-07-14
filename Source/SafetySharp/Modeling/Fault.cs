@@ -185,6 +185,16 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
+		///   Declares the given <paramref name="faults" /> to be subsumed by this instance. Subsumption metadata does
+		///   not change the fault's effects and is only used by heuristics.
+		/// </summary>
+		/// <param name="faults">The subsumed faults.</param>
+		public void Subsumes(IEnumerable<Fault> faults)
+		{
+			SubsumedFaults.UnionWith(faults);
+		}
+
+		/// <summary>
 		///   Undoes the activation of the fault when the activation is known to have no observable effect and fault activation was
 		///   nondeterministic in the current step.
 		/// </summary>
