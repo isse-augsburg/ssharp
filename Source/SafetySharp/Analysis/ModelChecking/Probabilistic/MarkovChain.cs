@@ -59,7 +59,7 @@ namespace SafetySharp.Runtime
 		{
 			if (maxNumberOfTransitions <= 0)
 			{
-				maxNumberOfTransitions = maxNumberOfStates << 8;
+				maxNumberOfTransitions = maxNumberOfStates << 12;
 				var limit = 5 * 1024 / 16 * 1024 * 1024; // 5 gb / 16 bytes (for entries)
 
 				if (maxNumberOfTransitions < maxNumberOfStates || maxNumberOfTransitions > limit)

@@ -70,8 +70,8 @@ namespace SafetySharp.Runtime
 			Requires.InRange(maxNumberOfStates, nameof(maxNumberOfStates), 1024, Int32.MaxValue - 1);
 			if (maxNumberOfTransitions <= 0)
 			{
-				maxNumberOfTransitions = maxNumberOfStates << 6;
-				var limit = 5 * 1024 / 32 * 1024 * 1024; // 5 gb / 16 bytes (for entries)
+				maxNumberOfTransitions = maxNumberOfStates << 10;
+				var limit = 6 * 1024 / 32 * 1024 * 1024; // 6 gb / 32 bytes (for entries)
 
 				if (maxNumberOfTransitions < maxNumberOfStates || maxNumberOfTransitions > limit)
 					maxNumberOfTransitions = limit;

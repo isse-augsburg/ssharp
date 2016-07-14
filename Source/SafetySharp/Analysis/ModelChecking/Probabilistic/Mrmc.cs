@@ -185,7 +185,7 @@ namespace SafetySharp.Analysis
 			using (var fileStateRewards = WriteRewardsToFile(formulaToCheck, out useRewards))
 			{
 				var script = new StringBuilder();
-				script.AppendLine("set method_path gauss_seidel");
+				script.AppendLine("set method_path gauss_jacobi"); //warning: gauss_seidel seems to be buggy in MRMC
 				script.AppendLine(formulaToCheckString);
 				if (outputExactResult)
 					script.Append("write_res_file_result");
