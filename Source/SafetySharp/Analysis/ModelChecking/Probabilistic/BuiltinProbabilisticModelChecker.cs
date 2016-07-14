@@ -279,7 +279,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var derivedMatrix = CreateDerivedMatrix(probabilityExactlyOne, probabilityExactlyZero);
 			var derivedVector = CreateDerivedVector(probabilityExactlyOne);
 
-			var finalProbability = GaussSeidel(derivedMatrix, derivedVector, 100);
+			var finalProbability = GaussSeidel(derivedMatrix, derivedVector, 50);
 			
 			return finalProbability;
 		}

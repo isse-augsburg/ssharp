@@ -186,6 +186,7 @@ namespace SafetySharp.Analysis
 			{
 				var script = new StringBuilder();
 				script.AppendLine("set method_path gauss_jacobi"); //warning: gauss_seidel seems to be buggy in MRMC
+				script.Append("error_bound 1.0E-10");
 				script.AppendLine(formulaToCheckString);
 				if (outputExactResult)
 					script.Append("write_res_file_result");
