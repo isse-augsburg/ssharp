@@ -97,7 +97,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			// force the activation of the LeftOHV fault to improve safety analysis times significantly
 			model.VehicleSet.LeftOHV.Activation = Activation.Forced;
 
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision);
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision, maxCardinality: 4);
 
 			result.SaveCounterExamples($"counter examples/height control/dcca/collision/{variantName}");
 			Console.WriteLine(result);
@@ -106,7 +106,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		[Test, TestCaseSource(nameof(CreateModelVariants))]
 		public void FalseAlarm(Model model, string variantName)
 		{
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, backend: SafetyAnalysisBackend.FaultOptimizedStateGraph);
+			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, maxCardinality: 3);
 
 			result.SaveCounterExamples($"counter examples/height control/dcca/false alarm/{variantName}");
 			Console.WriteLine(result);

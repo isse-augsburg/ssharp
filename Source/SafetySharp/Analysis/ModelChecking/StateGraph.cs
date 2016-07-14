@@ -35,7 +35,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// <remarks>
 	///   Transitions are untyped as C# unfortunately does not support generic type arguments of pointer types.
 	/// </remarks>
-	internal unsafe class StateGraph : DisposableObject
+	internal sealed unsafe class StateGraph : DisposableObject
 	{
 		private readonly TransitionRange* _stateMap;
 		private readonly MemoryBuffer _stateMapBuffer = new MemoryBuffer();
@@ -125,7 +125,6 @@ namespace SafetySharp.Analysis.ModelChecking
 		internal void AddStateInfo(int state, bool isInitial, TransitionCollection transitions, int transitionCount)
 		{
 			Assert.That(!isInitial || _initialTransitionCount == 0, "Initial transitions can only be added once.");
-			Assert.That(transitionCount > 0, "Cannot add deadlock state.");
 
 			if (isInitial)
 				_initialTransitionCount = transitionCount;

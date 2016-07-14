@@ -114,7 +114,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		{
 			get
 			{
-				Assert.InRange(index, 0, _capacity * _stateVectorSize);
+				Assert.InRange(index, 0, (long)_capacity * _stateVectorSize);
 				return _stateMemory + (long)index * _stateVectorSize;
 			}
 		}

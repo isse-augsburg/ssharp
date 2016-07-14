@@ -73,6 +73,15 @@ namespace Tests
 		}
 	}
 
+	public partial class StateConstraintTests
+	{
+		[Theory, MemberData("DiscoverTests", "Analysis/StateConstraints")]
+		public void StateConstraints(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
+		}
+	}
+
 	public partial class StateGraphInvariantTests
 	{
 		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/CounterExamples")]

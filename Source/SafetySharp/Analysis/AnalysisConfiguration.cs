@@ -32,7 +32,7 @@ namespace SafetySharp.Analysis
 	{
 		private const int DefaultStateCapacity = 1 << 24;
 		private const int DefaultTransitionCapacity = 1 << 28;
-		private const int DefaultStackCapacity = 1 << 16;
+		private const int DefaultStackCapacity = 1 << 20;
 		private const int DefaultSuccessorStateCapacity = 1 << 14;
 		private const int MinCapacity = 1024;
 

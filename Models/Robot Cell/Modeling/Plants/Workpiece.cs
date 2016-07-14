@@ -32,8 +32,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		private int _productionStep;
 
-		[Hidden]
-		public string Name { get; set; }
+		public Fault IncorrectlyPositionedFault = new TransientFault();
+		public Fault ToolApplicationFailed = new TransientFault();
 
 		public Workpiece(params ProductionAction[] productionActions)
 		{
@@ -41,11 +41,20 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			Range.Restrict(_productionStep, 0, _productionActions.Length, OverflowBehavior.Error);
 		}
 
+		[Hidden]
+		public string Name { get; set; }
+
 		public bool IsDamaged { get; private set; }
 
 		public bool IsComplete => _productionStep == _productionActions.Length;
+		public bool IsDiscarded { get; private set; }
 
-		public void Apply(ProductionAction action)
+		public void Discard()
+		{
+			IsDiscarded = true;
+		}
+
+		public virtual void Apply(ProductionAction action)
 		{
 			IsDamaged |= _productionActions.Length <= _productionStep || _productionActions[_productionStep] != action;
 			if (!IsDamaged)
@@ -73,6 +82,23 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 				return $"{Name}: IsComplete";
 
 			return $"{Name}: {_productionStep}/{_productionActions.Length}";
+		}
+
+		[FaultEffect(Fault = nameof(IncorrectlyPositionedFault)), Priority(1)]
+		public class IncorrectlyPositionedEffect : Workpiece
+		{
+			public override void Apply(ProductionAction action)
+			{
+				IsDamaged = true;
+			}
+		}
+
+		[FaultEffect(Fault = nameof(ToolApplicationFailed)), Priority(2)]
+		public class ToolApplicationFailedEffect : Workpiece
+		{
+			public override void Apply(ProductionAction action)
+			{
+			}
 		}
 	}
 }

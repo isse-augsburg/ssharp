@@ -148,7 +148,13 @@
     <Compile Include="Analysis\Dcca\unused fault.cs" />
     <Compile Include="Analysis\Dcca\single singleton cut set.cs" />
     <Compile Include="Analysis\Dcca\single two point cut set.cs" />
+    <Compile Include="Analysis\Heuristics\all sets safe.cs" />
     <Compile Include="Analysis\Heuristics\empty set.cs" />
+    <Compile Include="Analysis\Heuristics\fault subsumption.cs" />
+    <Compile Include="Analysis\Heuristics\heuristic with forced and suppressed.cs" />
+    <Compile Include="Analysis\Heuristics\heuristics integration.cs" />
+    <Compile Include="Analysis\Heuristics\incorrect heuristic.cs" />
+    <Compile Include="Analysis\Heuristics\minimal redundancy heuristic.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\bindings.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\faults.cs" />
     <Compile Include="Analysis\Invariants\CounterExamples\formulas.cs" />
@@ -216,6 +222,12 @@
     <Compile Include="Analysis\Ordering\precedes all.cs" />
     <Compile Include="Analysis\Ordering\strictly precedes some.cs" />
     <Compile Include="Analysis\Ordering\strictly precedes all.cs" />
+    <Compile Include="Analysis\StateConstraints\no initial state.cs" />
+    <Compile Include="Analysis\StateConstraints\ineffective constraint.cs" />
+    <Compile Include="Analysis\StateConstraints\additional object.cs" />
+    <Compile Include="Analysis\StateConstraints\single removed state.cs" />
+    <Compile Include="Analysis\StateConstraints\deterministic through constraints.cs" />
+    <Compile Include="Analysis\StateConstraints\deadlock.cs" />
     <Compile Include="Diagnostics\Bindings\Invalid\non-component required port binding.cs" />
     <Compile Include="Diagnostics\Bindings\Valid\non-component provided port binding.cs" />
     <Compile Include="Diagnostics\CustomComponents\Invalid\components cannot implement IInitializable.cs" />
@@ -620,6 +632,7 @@
     <Compile Include="Serialization\Enumerations\UInt64.cs" />
     <Compile Include="Serialization\Enumerations\UInt32.cs" />
     <Compile Include="Serialization\Enumerations\UInt8.cs" />
+    <Compile Include="Serialization\Misc\nullable field.cs" />
     <Compile Include="Serialization\Misc\empty state.cs" />
     <Compile Include="Serialization\Misc\hidden property.cs" />
     <Compile Include="Serialization\Misc\hidden state struct.cs" />

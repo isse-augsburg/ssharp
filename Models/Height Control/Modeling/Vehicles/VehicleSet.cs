@@ -59,6 +59,16 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 			LeftOHV.AddEffects<Vehicle.DriveLeftEffect>(vehicles.Where(vehicle => vehicle.Kind == VehicleKind.OverheightVehicle));
 			LeftHV.AddEffects<Vehicle.DriveLeftEffect>(vehicles.Where(vehicle => vehicle.Kind == VehicleKind.HighVehicle));
 			SlowTraffic.AddEffects<Vehicle.SlowTrafficEffect>(vehicles);
+
+			for (var i = 0; i < Vehicles.Length; ++i)
+			{
+				for (var j = i + 1; j < Vehicles.Length; ++j)
+				{
+					AddSensorConstraint(Vehicles[i], Vehicles[j], Model.PreControlPosition);
+					AddSensorConstraint(Vehicles[i], Vehicles[j], Model.MainControlPosition);
+					AddSensorConstraint(Vehicles[i], Vehicles[j], Model.EndControlPosition);
+				}
+			}
 		}
 
 		/// <summary>
@@ -74,6 +84,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		///   Informs the vehicles contained in the set whether the tunnel is closed.
 		/// </summary>
 		public extern bool IsTunnelClosed { get; }
+
+		/// <summary>
+		///   Adds a state constraint ensuring that no two vehicles pass the same sensor on the same lane at the same time.
+		/// </summary>
+		private void AddSensorConstraint(Vehicle vehicle1, Vehicle vehicle2, int position)
+		{
+			AddStateConstraint(!vehicle1.IsAtPosition(position) || !vehicle2.IsAtPosition(position) || vehicle1.Lane != vehicle2.Lane);
+		}
 
 		/// <summary>
 		///   Updates the state of the component.

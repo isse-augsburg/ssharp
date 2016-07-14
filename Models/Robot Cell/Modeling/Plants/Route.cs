@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 	[DebuggerDisplay("{Robot1.Name} -> {Robot2.Name}")]
 	internal class Route : Component
 	{
-		public Fault Blocked = new PermanentFault();
+		//public Fault Blocked = new TransientFault();
 
 		public Route(Robot robot1, Robot robot2)
 		{
@@ -45,11 +45,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		public virtual bool IsBlocked => false;
 
-		[FaultEffect(Fault = nameof(Blocked))]
-		internal class BlockedEffect : Route
-		{
-			public override bool IsBlocked => true;
-		}
+		//[FaultEffect(Fault = nameof(Blocked))]
+		//internal class BlockedEffect : Route
+		//{
+		//	public override bool IsBlocked => true;
+		//}
 
 		public bool CanNavigate(Robot robot1, Robot robot2)
 		{

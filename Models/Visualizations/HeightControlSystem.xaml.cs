@@ -61,10 +61,14 @@ namespace SafetySharp.CaseStudies.Visualizations
 			_odfStoryboard = (Storyboard)Resources["EventOdf"];
 
 			// Initialize the simulation environment
-			var specification = Model.CreateOriginal(Enumerable
-				.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.HighVehicle })
-				.Concat(Enumerable.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.OverheightVehicle }))
-				.ToArray());
+			var specification = new Model(
+				new PreControlOriginal(),
+				new MainControlOriginal(),
+				new EndControlOriginal(),
+				Enumerable
+					.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.HighVehicle })
+					.Concat(Enumerable.Range(0, 9).Select(_ => new VisualizationVehicle { Kind = VehicleKind.OverheightVehicle }))
+					.ToArray());
 
 			SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
 			SimulationControls.Reset += (o, e) => OnModelStateReset();

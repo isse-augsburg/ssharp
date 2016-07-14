@@ -28,7 +28,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 	/// <summary>
 	///   Builds up a <see cref="StateGraph" /> instance during model traversal.
 	/// </summary>
-	internal class StateGraphBuilder : IBatchedTransitionAction
+	internal sealed class StateGraphBuilder : IBatchedTransitionAction
 	{
 		private readonly StateGraph _stateGraph;
 

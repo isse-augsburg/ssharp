@@ -222,6 +222,9 @@ namespace SafetySharp.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(params T[] values)
 		{
+			if (values.Length == 1)
+				return values[0];
+
 			return values[Resolver.HandleChoice(values.Length)];
 		}
 	}

@@ -22,7 +22,6 @@
 
 namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 {
-	using System;
 	using FluentAssertions;
 	using Modeling;
 	using NUnit.Framework;

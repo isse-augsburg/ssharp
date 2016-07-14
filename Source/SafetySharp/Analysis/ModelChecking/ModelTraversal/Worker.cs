@@ -33,7 +33,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 	/// <summary>
 	///   Represents a thread that checks for invariant violations.
 	/// </summary>
-	internal unsafe class Worker : DisposableObject
+	internal sealed unsafe class Worker : DisposableObject
 	{
 		private readonly TraversalContext _context;
 		private readonly int _index;
@@ -110,7 +110,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 				_context.Exception = e;
 
 				if (!(e is OutOfMemoryException))
-					CreateCounterExample(endsWithException: true);
+					CreateCounterExample(endsWithException: true, addAdditionalState: true);
 			}
 		}
 
@@ -136,50 +136,61 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		/// </summary>
 		private void HandleTransitions(TransitionCollection transitions, int sourceState, bool isInitial)
 		{
-			var transitionCount = 0;
-			var stateCount = 0;
-
-			foreach (var modifier in _transitionModifiers)
-				modifier.ModifyTransitions(_context, transitions, _context.States[sourceState], sourceState, isInitial);
-
-			_stateStack.PushFrame();
-
-			foreach (var transition in transitions)
+			try
 			{
-				int targetState;
-				var isNewState = _context.States.AddState(((CandidateTransition*)transition)->TargetState, out targetState);
+				var transitionCount = 0;
+				var stateCount = 0;
 
-				// Replace the CandidateTransition.TargetState pointer with the hash values of the transition's source and target states
-				transition->TargetState = targetState;
-				transition->SourceState = sourceState;
+				foreach (var modifier in _transitionModifiers)
+					modifier.ModifyTransitions(_context, transitions, _context.States[sourceState], sourceState, isInitial);
 
-				if (isNewState)
+				_stateStack.PushFrame();
+
+				foreach (var transition in transitions)
 				{
-					++stateCount;
-					_stateStack.PushState(targetState);
+					int targetState;
+					var isNewState = _context.States.AddState(((CandidateTransition*)transition)->TargetState, out targetState);
 
-					foreach (var action in _stateActions)
-						action.ProcessState(_context, this, _context.States[targetState], targetState, isInitial);
+					// Replace the CandidateTransition.TargetState pointer with the hash values of the transition's source and target states
+					transition->TargetState = targetState;
+					transition->SourceState = sourceState;
+
+					if (isNewState)
+					{
+						++stateCount;
+						_stateStack.PushState(targetState);
+
+						foreach (var action in _stateActions)
+							action.ProcessState(_context, this, _context.States[targetState], targetState, isInitial);
+					}
+
+					foreach (var action in _transitionActions)
+						action.ProcessTransition(_context, this, transition, isInitial);
+
+					++transitionCount;
 				}
 
-				foreach (var action in _transitionActions)
-					action.ProcessTransition(_context, this, transition, isInitial);
+				Interlocked.Add(ref _context.StateCount, stateCount);
+				Interlocked.Add(ref _context.TransitionCount, transitionCount);
+				Interlocked.Add(ref _context.ComputedTransitionCount, transitions.TotalCount);
 
-				++transitionCount;
+				foreach (var action in _batchedTransitionActions)
+					action.ProcessTransitions(_context, this, sourceState, transitions, transitionCount, isInitial);
 			}
+			catch (Exception e)
+			{
+				_context.LoadBalancer.Terminate();
+				_context.Exception = e;
 
-			foreach (var action in _batchedTransitionActions)
-				action.ProcessTransitions(_context, this, sourceState, transitions, transitionCount, isInitial);
-
-			Interlocked.Add(ref _context.StateCount, stateCount);
-			Interlocked.Add(ref _context.TransitionCount, transitionCount);
-			Interlocked.Add(ref _context.ComputedTransitionCount, transitions.TotalCount);
+				if (!(e is OutOfMemoryException))
+					CreateCounterExample(endsWithException: true, addAdditionalState: false);
+			}
 		}
 
 		/// <summary>
 		///   Creates a counter example for the current topmost state.
 		/// </summary>
-		public void CreateCounterExample(bool endsWithException)
+		public void CreateCounterExample(bool endsWithException, bool addAdditionalState)
 		{
 			if (Interlocked.CompareExchange(ref _context.GeneratingCounterExample, _index, -1) != -1)
 				return;
@@ -188,10 +199,10 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 				return;
 
 			var indexedPath = _stateStack.GetPath();
-			var traceLength = endsWithException ? indexedPath.Length + 1 : indexedPath.Length;
+			var traceLength = addAdditionalState ? indexedPath.Length + 1 : indexedPath.Length;
 			var path = new byte[traceLength][];
 
-			if (endsWithException)
+			if (addAdditionalState)
 				path[path.Length - 1] = new byte[Model.StateVectorSize];
 
 			for (var i = 0; i < indexedPath.Length; ++i)

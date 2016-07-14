@@ -25,25 +25,28 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
+	using SafetySharp.Modeling;
 
 	[DebuggerDisplay("Produce")]
 	internal class ProduceCapability : Capability
 	{
-		public List<Resource> Resources { get; }
-		public List<Task> Tasks { get; }
-
 		public ProduceCapability(List<Resource> resources, List<Task> tasks)
 		{
 			Resources = resources;
 			Tasks = tasks;
 		}
 
+		public List<Resource> Resources { get; }
+
+		[Hidden(HideElements = true)]
+		public List<Task> Tasks { get; }
+
+		public override int Identifier => 1;
+
 		public override void Execute(Agent agent)
 		{
 			agent.Produce(this);
 		}
-
-		public override int Identifier => 1;
 
 		public override bool IsEquivalentTo(Capability capability)
 		{

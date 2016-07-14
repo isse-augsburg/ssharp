@@ -24,6 +24,7 @@ namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Runtime.InteropServices;
 	using System.Text;
 	using Modeling;
@@ -33,26 +34,12 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Simulates a S# model for debugging or testing purposes.
 	/// </summary>
-	public sealed unsafe class Simulator
+	public sealed unsafe class Simulator : DisposableObject
 	{
-		/// <summary>
-		///   The counter example that is replayed by the simulator.
-		/// </summary>
 		private readonly CounterExample _counterExample;
-
-		/// <summary>
-		///   The runtime model that is simulated.
-		/// </summary>
 		private readonly RuntimeModel _runtimeModel;
-
-		/// <summary>
-		///   The states encountered by the simulator.
-		/// </summary>
 		private readonly List<byte[]> _states = new List<byte[]>();
-
-		/// <summary>
-		///   The current state number of the simulator.
-		/// </summary>
+		private ChoiceResolver _choiceResolver;
 		private int _stateIndex;
 
 		/// <summary>
@@ -96,7 +83,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Gets a value indicating whether the simulation is completed.
 		/// </summary>
-		public bool IsCompleted => _counterExample != null && _stateIndex + 1 == _counterExample.StepCount;
+		public bool IsCompleted => _counterExample != null && _stateIndex + 1 >= _counterExample.StepCount;
 
 		/// <summary>
 		///   Gets a value indicating whether the simulation can be fast-forwarded.
@@ -188,6 +175,9 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		public void Reset()
 		{
+			if (_choiceResolver == null)
+				_choiceResolver = new ChoiceResolver(_runtimeModel.Objects.OfType<Choice>());
+
 			var state = stackalloc byte[_runtimeModel.StateVectorSize];
 
 			_states.Clear();
@@ -196,7 +186,7 @@ namespace SafetySharp.Analysis
 			if (_counterExample == null)
 				_runtimeModel.Reset();
 			else
-				_counterExample.ReplayInitialState();
+				_counterExample.Replay(_choiceResolver, 0);
 
 			_runtimeModel.Serialize(state);
 			AddState(state);
@@ -207,8 +197,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		private void Replay()
 		{
-			fixed (byte* sourceState = _states[_stateIndex - 1])
-				_runtimeModel.Replay(sourceState, _counterExample.GetReplayInformation(_stateIndex - 1), initializationStep: _stateIndex == -1);
+			_counterExample.Replay(_choiceResolver, _stateIndex);
 
 			var actualState = stackalloc byte[_runtimeModel.StateVectorSize];
 			_runtimeModel.Serialize(actualState);
@@ -223,7 +212,7 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		/// Ensures that the two states match.
+		///   Ensures that the two states match.
 		/// </summary>
 		private void EnsureStatesMatch(byte* actualState, byte[] expectedState)
 		{
@@ -259,6 +248,19 @@ namespace SafetySharp.Analysis
 		{
 			fixed (byte* state = _states[stateNumber])
 				_runtimeModel.Deserialize(state);
+		}
+
+		/// <summary>
+		///   Disposes the object, releasing all managed and unmanaged resources.
+		/// </summary>
+		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
+		protected override void OnDisposing(bool disposing)
+		{
+			if (!disposing)
+				return;
+
+			_counterExample.SafeDispose();
+			_choiceResolver.SafeDispose();
 		}
 	}
 }

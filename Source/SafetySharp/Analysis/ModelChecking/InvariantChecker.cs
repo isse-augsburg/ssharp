@@ -30,7 +30,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// <summary>
 	///   Checks whether an invariant holds for all states of an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal class InvariantChecker : ModelTraverser
+	internal sealed class InvariantChecker : ModelTraverser
 	{
 		/// <summary>
 		///   Initializes a new instance.

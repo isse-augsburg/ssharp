@@ -144,7 +144,7 @@ namespace SafetySharp.Analysis
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Contains(Fault fault)
 		{
-			return (_faults & (1 << fault.Identifier)) != 0;
+			return (_faults & (1L << fault.Identifier)) != 0;
 		}
 
 		/// <summary>

@@ -25,6 +25,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System;
 	using System.Linq;
 	using FormulaVisitors;
+	using Modeling;
 	using Runtime;
 	using Transitions;
 	using Utilities;
@@ -35,6 +36,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// </summary>
 	internal sealed class ActivationMinimalExecutedModel : ExecutedModel
 	{
+		private readonly Func<bool>[] _stateConstraints;
 		private readonly ActivationMinimalTransitionSetBuilder _transitions;
 
 		/// <summary>
@@ -43,21 +45,25 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
 		internal ActivationMinimalExecutedModel(Func<RuntimeModel> runtimeModelCreator, int successorStateCapacity)
-			: base(runtimeModelCreator)
+			: this(runtimeModelCreator, null, successorStateCapacity)
 		{
-			var formulas = RuntimeModel.Formulas.Select(CompilationVisitor.Compile).ToArray();
-			_transitions = new ActivationMinimalTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
 		}
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="runtimeModel">The model instance that should be executed.</param>
+		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
+		/// <param name="formulas">The formulas that should be evaluated for each state.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ActivationMinimalExecutedModel(RuntimeModel runtimeModel, int successorStateCapacity)
-			: base(runtimeModel)
+		internal ActivationMinimalExecutedModel(Func<RuntimeModel> runtimeModelCreator, Func<bool>[] formulas, int successorStateCapacity)
+			: base(runtimeModelCreator)
 		{
-			_transitions = new ActivationMinimalTransitionSetBuilder(RuntimeModel, successorStateCapacity);
+			formulas = formulas ?? RuntimeModel.Formulas.Select(CompilationVisitor.Compile).ToArray();
+
+			_transitions = new ActivationMinimalTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
+			_stateConstraints = RuntimeModel.Model.Components.Cast<Component>().SelectMany(component => component.StateConstraints).ToArray();
+
+			ChoiceResolver = new ChoiceResolver(RuntimeModel.Objects.OfType<Choice>());
 		}
 
 		/// <summary>
@@ -98,6 +104,13 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		protected override void GenerateTransition()
 		{
+			// Ignore transitions leading to a state with one or more violated state constraints
+			foreach (var constraint in _stateConstraints)
+			{
+				if (!constraint())
+					return;
+			}
+
 			_transitions.Add(RuntimeModel);
 		}
 

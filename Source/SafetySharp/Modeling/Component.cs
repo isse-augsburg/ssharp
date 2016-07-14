@@ -25,6 +25,7 @@ namespace SafetySharp.Modeling
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using CompilerServices;
 	using Utilities;
 
 	/// <summary>
@@ -49,6 +50,15 @@ namespace SafetySharp.Modeling
 #endif
 		[Hidden, NonDiscoverable]
 		internal List<Component> FaultEffects { get; } = new List<Component>();
+
+		/// <summary>
+		///   Gets the state constraints defined over the component.
+		/// </summary>
+#if !DEBUG
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+#endif
+		[Hidden, NonDiscoverable]
+		internal List<Func<bool>> StateConstraints { get; } = new List<Func<bool>>();
 
 		/// <summary>
 		///   Gets the original types of the fault effects that affect the component.
@@ -102,6 +112,29 @@ namespace SafetySharp.Modeling
 			where T : class
 		{
 			Requires.CompilationTransformation();
+		}
+
+		/// <summary>
+		///   Adds the state <paramref name="constraint" /> to the model. All states in which the constraint is violated, i.e.,
+		///   <c>false</c>, are not considered during model checking. State constraints can lead to deadlock states with no outgoing
+		///   transitions; such states are reported as errors during model checking.
+		/// </summary>
+		/// <param name="constraint">The state constraint that should be added.</param>
+		protected void AddStateConstraint([LiftExpression] bool constraint)
+		{
+			Requires.CompilationTransformation();
+		}
+
+		/// <summary>
+		///   Adds the state <paramref name="constraint" /> to the model. All states in which the constraint is violated, i.e.,
+		///   <c>false</c>, are not considered during model checking. State constraints can lead to deadlock states with no outgoing
+		///   transitions; such states are reported as errors during model checking.
+		/// </summary>
+		/// <param name="constraint">The state constraint that should be added.</param>
+		protected void AddStateConstraint(Func<bool> constraint)
+		{
+			Requires.NotNull(constraint, nameof(constraint));
+			StateConstraints.Add(constraint);
 		}
 	}
 }
