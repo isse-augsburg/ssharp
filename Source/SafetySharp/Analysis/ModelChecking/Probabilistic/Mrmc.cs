@@ -216,14 +216,29 @@ namespace SafetySharp.Analysis
 					+ commandLineArgumentCommandScriptFile
 					+ commandLineArgumentResultsFile;
 
-				var mrmc = new ExternalProcess("mrmc.exe", commandLineArguments);
+				var pureModelCheckingTime = "";
+				var iterations = "";
+				Action<string> extractInterestingOutput =
+					output =>
+					{
+						if (output.StartsWith("The Total Elapsed Model-Checking Time"))
+							pureModelCheckingTime = output;
+
+						else if (output.StartsWith("Gauss Jacobi V_B: The number of Gauss-Jacobi iterations"))
+							iterations = output;
+					};
+				
+
+				var mrmc = new ExternalProcess("mrmc.exe", commandLineArguments, extractInterestingOutput);
 
 				var stopwatch = new Stopwatch();
 				stopwatch.Start();
 				mrmc.Run();
 				stopwatch.Stop();
 
-				Console.WriteLine($"MRMC model checking time: {stopwatch.Elapsed}");
+				Console.WriteLine(iterations);
+				Console.WriteLine(pureModelCheckingTime);
+				Console.WriteLine($"MRMC total model checking time: {stopwatch.Elapsed}");
 			}
 			return fileResults;
 		}

@@ -36,23 +36,28 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 	class HazardProbabilityTests
 	{
+		private readonly Probability _prob1Eneg1 = new Probability(0.1);
+		private readonly Probability _prob1Eneg3 = new Probability(0.001);
+		private readonly Probability _prob1Eneg5 = new Probability(0.00001);
+		private readonly Probability _prob1Eneg7 = new Probability(0.0000001);
 
 		[Test]
 		public void IncomingBloodIsContaminated()
 		{
 			var model = new Model();
 
-			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidPreparationPumpDefect.ProbabilityOfOccurrence = Probability.Zero;
-			model.HdMachine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpDefect.ProbabilityOfOccurrence = Probability.Zero;
-			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.PumpDefect.ProbabilityOfOccurrence = Probability.Zero;
-			model.HdMachine.DialyzingFluidDeliverySystem.SafetyBypass.SafetyBypassFault.ProbabilityOfOccurrence = Probability.Zero;
-			model.HdMachine.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefect.ProbabilityOfOccurrence = Probability.Zero;
 
-			model.HdMachine.ExtracorporealBloodCircuit.ArterialBloodPump.BloodPumpDefect.ProbabilityOfOccurrence = Probability.Zero;
-			model.HdMachine.ExtracorporealBloodCircuit.VenousSafetyDetector.SafetyDetectorDefect.ProbabilityOfOccurrence = Probability.Zero;
-			model.HdMachine.ExtracorporealBloodCircuit.VenousTubingValve.ValveDoesNotClose.ProbabilityOfOccurrence = Probability.Zero;
+			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidPreparationPumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
+			model.HdMachine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
+			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.PumpDefect.ProbabilityOfOccurrence = _prob1Eneg3;
+			model.HdMachine.DialyzingFluidDeliverySystem.SafetyBypass.SafetyBypassFault.ProbabilityOfOccurrence = _prob1Eneg3;
+			model.HdMachine.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefect.ProbabilityOfOccurrence = _prob1Eneg1;
 
-			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = Probability.Zero;
+			model.HdMachine.ExtracorporealBloodCircuit.ArterialBloodPump.BloodPumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
+			model.HdMachine.ExtracorporealBloodCircuit.VenousSafetyDetector.SafetyDetectorDefect.ProbabilityOfOccurrence = _prob1Eneg7;
+			model.HdMachine.ExtracorporealBloodCircuit.VenousTubingValve.ValveDoesNotClose.ProbabilityOfOccurrence = _prob1Eneg5;
+
+			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = _prob1Eneg5;
 
 			var result = ModelChecker.CalculateProbabilityToReachState(model, model.IncomingBloodWasNotOk);
 			Console.Write($"Probability of hazard: {result.Value}");
@@ -63,17 +68,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		{
 			var model = new Model();
 
-			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidPreparationPumpDefect.ProbabilityOfOccurrence = Probability.Zero;
-			model.HdMachine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpDefect.ProbabilityOfOccurrence = Probability.Zero;
-			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.PumpDefect.ProbabilityOfOccurrence = Probability.Zero;
-			model.HdMachine.DialyzingFluidDeliverySystem.SafetyBypass.SafetyBypassFault.ProbabilityOfOccurrence = Probability.Zero;
-			model.HdMachine.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefect.ProbabilityOfOccurrence = Probability.Zero;
+			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidPreparationPumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
+			model.HdMachine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
+			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.PumpDefect.ProbabilityOfOccurrence = _prob1Eneg3;
+			model.HdMachine.DialyzingFluidDeliverySystem.SafetyBypass.SafetyBypassFault.ProbabilityOfOccurrence = _prob1Eneg3;
+			model.HdMachine.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefect.ProbabilityOfOccurrence = _prob1Eneg1;
 
-			model.HdMachine.ExtracorporealBloodCircuit.ArterialBloodPump.BloodPumpDefect.ProbabilityOfOccurrence = Probability.Zero;
-			model.HdMachine.ExtracorporealBloodCircuit.VenousSafetyDetector.SafetyDetectorDefect.ProbabilityOfOccurrence = Probability.Zero;
-			model.HdMachine.ExtracorporealBloodCircuit.VenousTubingValve.ValveDoesNotClose.ProbabilityOfOccurrence = Probability.Zero;
+			model.HdMachine.ExtracorporealBloodCircuit.ArterialBloodPump.BloodPumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
+			model.HdMachine.ExtracorporealBloodCircuit.VenousSafetyDetector.SafetyDetectorDefect.ProbabilityOfOccurrence = _prob1Eneg7;
+			model.HdMachine.ExtracorporealBloodCircuit.VenousTubingValve.ValveDoesNotClose.ProbabilityOfOccurrence = _prob1Eneg5;
 
-			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = Probability.Zero;
+			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = _prob1Eneg5;
 
 			var result = ModelChecker.CalculateProbabilityToReachState(model, model.BloodNotCleanedAndDialyzingFinished);
 			Console.Write($"Probability of hazard: {result.Value}");
