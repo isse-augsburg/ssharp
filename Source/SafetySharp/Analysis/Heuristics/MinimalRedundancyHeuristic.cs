@@ -79,7 +79,7 @@ namespace SafetySharp.Analysis.Heuristics
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(faultGroups, nameof(faultGroups));
 
-			_allFaults = model.Faults;
+			_allFaults = model.Faults.Where(fault => fault.Activation != Activation.Suppressed).ToArray();
 			_minSetSize = minSetSize;
 
 			CollectSuggestions(faultGroups);

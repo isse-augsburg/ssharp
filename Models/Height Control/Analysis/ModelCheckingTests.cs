@@ -54,7 +54,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			result[2].FormulaHolds.Should().BeTrue();
 		}
 
-		[TestCase]
+		[Test]
 		public void CollisionOriginalDesign(
 			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
@@ -71,7 +71,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			Console.WriteLine(orderResult);
 		}
 
-		[TestCase]
+		[Test]
 		public void FalseAlarmOriginalDesign(
 			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
@@ -83,14 +83,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			Console.WriteLine(orderResult);
 		}
 
-		[Test, TestCaseSource(nameof(CreateModelVariants))]
+		[TestCaseSource(nameof(CreateModelVariants))]
 		public void EnumerateAllStates(Model model, string variantName)
 		{
 			var result = ModelChecker.CheckInvariant(model, true);
 			result.FormulaHolds.Should().BeTrue();
 		}
 
-		[Test, TestCaseSource(nameof(CreateModelVariants))]
+		[TestCaseSource(nameof(CreateModelVariants))]
 		public void Collision(Model model, string variantName)
 		{
 			// As collisions cannot occur without any overheight vehicles driving on the left lane, we 
@@ -103,7 +103,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			Console.WriteLine(result);
 		}
 
-		[Test, TestCaseSource(nameof(CreateModelVariants))]
+		[TestCaseSource(nameof(CreateModelVariants))]
 		public void FalseAlarm(Model model, string variantName)
 		{
 			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, maxCardinality: 3);

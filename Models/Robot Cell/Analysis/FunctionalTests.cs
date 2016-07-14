@@ -33,14 +33,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 	internal class FunctionalTests
 	{
-		[Test]
-		public void ReconfigurationFailed()
+		[TestCaseSource(nameof(CreateConfigurationsFast))]
+		public void ReconfigurationFailed(Model model)
 		{
-			var model = new Model();
-			model.InitializeDefaultInstance();
-			model.CreateObserverController<FastObserverController>();
-			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
-
 			Dcca(model);
 		}
 
@@ -58,7 +53,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Console.WriteLine(result);
 		}
 
-		[TestCase, TestCaseSource(nameof(CreateConfigurations))]
+		[TestCaseSource(nameof(CreateConfigurationsMiniZinc))]
 		public void Evaluation(Model model)
 		{
 			Dcca(model);
@@ -77,7 +72,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				FaultActivationBehavior = FaultActivationBehavior.ForceOnly,
 				Heuristics = { RedundancyHeuristic(model), new SubsumptionHeuristic(model) }
 			};
-
+		
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
 			Console.WriteLine(result);
 		}
@@ -92,9 +87,15 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Polish).Select(t => t.Broken)));
 		}
 
-		private static IEnumerable CreateConfigurations()
+		private static IEnumerable CreateConfigurationsMiniZinc()
 		{
 			return Model.CreateConfigurations<MiniZincObserverController>(AnalysisMode.TolerableFaults)
+						.Select(model => new TestCaseData(model).SetName(model.Name));
+		}
+
+		private static IEnumerable CreateConfigurationsFast()
+		{
+			return Model.CreateConfigurations<FastObserverController>(AnalysisMode.TolerableFaults)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 	}

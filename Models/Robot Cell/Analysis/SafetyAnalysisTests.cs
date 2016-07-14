@@ -32,7 +32,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 	internal class SafetyAnalysisTests
 	{
-		[TestCase, TestCaseSource(nameof(CreateConfigurations))]
+		[TestCaseSource(nameof(CreateConfigurations))]
 		public void NoDamagedWorkpieces(Model model)
 		{
 			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
@@ -41,7 +41,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Console.WriteLine(result);
 		}
 
-		[TestCase, TestCaseSource(nameof(CreateConfigurations))]
+		[TestCaseSource(nameof(CreateConfigurations))]
 		public void AllWorkpiecesCompleteEventually(Model model)
 		{
 			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
