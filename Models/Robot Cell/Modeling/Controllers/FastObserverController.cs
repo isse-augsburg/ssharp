@@ -184,6 +184,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		private IEnumerable<Tuple<Agent, Capability[]>> Convert(Task task, int[] path)
 		{
 			var previous = -1;
+			var usedCarts = new List<Agent>();
 
 			for (var i = 0; i < path.Length;)
 			{
@@ -194,7 +195,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 					// Find a cart that connects both robots, the path matrix contains the next robot we have to go to
 					foreach (var nextRobot in GetShortestPath(previous, current))
 					{
-						yield return Transport(previous, nextRobot);
+						yield return Transport(previous, nextRobot, usedCarts);
 
 						if (nextRobot != current)
 							yield return Tuple.Create(Agents[path[i]], new Capability[0]);
@@ -225,10 +226,19 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			yield return to;
 		}
 
-		private Tuple<Agent, Capability[]> Transport(int from, int to)
+		private Tuple<Agent, Capability[]> Transport(int from, int to, List<Agent> usedCarts)
 		{
-			var cart = _availableRobots[from].Outputs.First(c => _availableRobots[to].Inputs.Contains(c));
-			return Tuple.Create(cart, new Capability[0]);
+			// prefer not to use a cart that has already been used
+			var candidates = _availableRobots[from].Outputs.Where(c => _availableRobots[to].Inputs.Contains(c)).ToArray();
+			var unusedCart = candidates.Except(usedCarts).FirstOrDefault();
+			if (unusedCart != null)
+			{
+				usedCarts.Add(unusedCart);
+				return Tuple.Create(unusedCart, new Capability[0]);
+			}
+
+			// otherwise, reuse some cart
+			return Tuple.Create(candidates.First(), new Capability[0]);
 		}
 	}
 }
