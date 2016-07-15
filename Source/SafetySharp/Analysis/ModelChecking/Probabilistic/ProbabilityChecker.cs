@@ -151,7 +151,7 @@ namespace SafetySharp.Analysis
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			//Configuration.CpuCount = 1; //TODO: Make multi threaded
+			Configuration.CpuCount = 4;
 
 
 			using (var checker = new LabeledTransitionMarkovChainGenerator(createModel, terminateEarlyCondition, stateFormulas, OutputWritten, Configuration))

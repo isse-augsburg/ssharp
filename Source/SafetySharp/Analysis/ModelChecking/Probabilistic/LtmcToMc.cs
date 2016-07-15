@@ -76,7 +76,6 @@ namespace SafetySharp.Runtime
 
 		private void CreateStates(LabeledTransitionMarkovChain ltmc)
 		{
-			Console.Error.WriteLine("Starting to convert labeled transition Markov chain to Markov chain");
 			var enumerator = ltmc.GetTransitionChainEnumerator();
 			while (enumerator.MoveNext())
 			{
@@ -129,12 +128,15 @@ namespace SafetySharp.Runtime
 
 		public LtmcToMc(LabeledTransitionMarkovChain ltmc)
 		{
+			Console.Error.WriteLine("Starting to convert labeled transition Markov chain to Markov chain");
+			Console.Error.WriteLine($"Ltmc: States {ltmc.SourceStates.Count}, Transitions {ltmc.Transitions}");
 			CreateStates(ltmc);
 			MarkovChain=new MarkovChain(States);
 			MarkovChain.StateFormulaLabels = ltmc.StateFormulaLabels;
 			SetStateLabeling();
 			ConvertInitialStates(ltmc);
 			ConvertTransitions(ltmc);
+			Console.Error.WriteLine($"Mc: States {MarkovChain.States}, Transitions {MarkovChain.Transitions}");
 		}
 	}
 }
