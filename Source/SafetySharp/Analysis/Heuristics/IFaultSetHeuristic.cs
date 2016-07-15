@@ -23,7 +23,6 @@
 namespace SafetySharp.Analysis.Heuristics
 {
 	using System.Collections.Generic;
-	using Runtime;
 
 	/// <summary>
 	///   Represents a heuristic for finding large safe fault sets.
@@ -33,8 +32,9 @@ namespace SafetySharp.Analysis.Heuristics
 		/// <summary>
 		///   Changes the sets that will be checked by DCCA, by reordering and adding sets.
 		/// </summary>
+		/// <param name="cardinalityLevel">The level of cardinality that is currently checked.</param>
 		/// <param name="setsToCheck">The next sets to be checked, in reverse order (the last set is checked first).</param>
-		void Augment(List<FaultSet> setsToCheck);
+		void Augment(uint cardinalityLevel, List<FaultSet> setsToCheck);
 
 		/// <summary>
 		///   Informs the heuristic of the result of analyzing <paramref name="checkedSet" />

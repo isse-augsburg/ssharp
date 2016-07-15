@@ -257,6 +257,7 @@ namespace SafetySharp.Analysis
 			builder.AppendLine();
 			builder.AppendLine($"Checked Fault Sets: {CheckedSets.Count} ({percentage:F0}% of all fault sets)");
 			builder.AppendLine($"Minimal Critical Sets: {MinimalCriticalSets.Count}");
+			builder.AppendLine($"Average Minimal Critical Set Cardinality: {MinimalCriticalSets.Average(set => set.Count):F1}");
 			builder.AppendLine();
 
 			var i = 1;

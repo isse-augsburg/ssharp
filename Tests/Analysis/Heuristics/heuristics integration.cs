@@ -96,7 +96,7 @@ namespace Tests.Analysis.Heuristics
 		{
 			public int cardinalityCounter = 0;
 
-			public void Augment(List<FaultSet> setsToCheck)
+			public void Augment(uint cardinalityLevel, List<FaultSet> setsToCheck)
 			{
 				cardinalityCounter++;
 			}
