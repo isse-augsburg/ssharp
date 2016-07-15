@@ -315,8 +315,6 @@ namespace SafetySharp.Analysis
 
 		private bool CheckSet(FaultSet set, Fault[] allFaults, bool isHeuristicSuggestion, Activation activationMode)
 		{
-			var heuristic = isHeuristicSuggestion ? "[heuristic]" : string.Empty;
-
 			try
 			{
 				var result = _backend.CheckCriticality(set, activationMode);
@@ -324,13 +322,13 @@ namespace SafetySharp.Analysis
 				if (!result.FormulaHolds)
 				{
 					if (!isHeuristicSuggestion)
-						ConsoleHelpers.WriteLine($"    {heuristic} critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
+						ConsoleHelpers.WriteLine($"     critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
 
 					_criticalSets.Add(set);
 				}
 				else if (isHeuristicSuggestion)
 				{
-					ConsoleHelpers.WriteLine($"    {heuristic} safe:  {{ {set.ToString(allFaults)} }}", ConsoleColor.Blue);
+					ConsoleHelpers.WriteLine($"    [heuristic] safe:  {{ {set.ToString(allFaults)} }}", ConsoleColor.Blue);
 				}
 
 				_checkedSets.Add(set);
@@ -342,6 +340,7 @@ namespace SafetySharp.Analysis
 			}
 			catch (AnalysisException e)
 			{
+				var heuristic = isHeuristicSuggestion ? "[heuristic]" : string.Empty;
 				ConsoleHelpers.WriteLine($"    {heuristic} critical:  {{ {set.ToString(allFaults)} }} [exception thrown]", ConsoleColor.DarkRed);
 				Console.WriteLine(e.InnerException);
 
