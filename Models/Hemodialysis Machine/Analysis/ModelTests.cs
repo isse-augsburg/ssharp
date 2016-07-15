@@ -29,7 +29,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using Runtime;
-
+	using FluentAssertions;
 	public class ModelTests
 	{
 		[Test]
@@ -155,6 +155,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 			var checker = new SSharpChecker { Configuration = { StateCapacity = 1310720 } };
 			checker.CheckInvariant(model, true);
+		}
+		
+		[Test]
+		public void StateGraphAllStates()
+		{
+			var specification = new Model();
+			var model = specification;
+			var result = ModelChecker.CheckInvariants(model, !specification.IncomingBloodWasNotOk, !specification.BloodNotCleanedAndDialyzingFinished);
+
+			result[0].FormulaHolds.Should().BeFalse();
+			result[1].FormulaHolds.Should().BeFalse();
 		}
 	}
 }
