@@ -1,0 +1,22 @@
+Total time: 1.1 sec
+
+Generating markov chain using 4 CPU cores.
+State vector has 4 bytes.
+Discovered 1.353 states, 3.187 transitions, 181 levels.
+Starting to convert labeled transition Markov chain to Markov chain
+Ltmc: States 1353, Transitions 3178
+Mc: States 1353, Transitions 3174
+
+===============================================
+Initialization time: 00:00:00.1634058
+Labeled Transition Markov chain generation time: 00:00:00.6996608
+Markov chain conversion time: 00:00:00.0165078
+===============================================
+
+Completed 10 Gauss-Seidel iterations in 00:00:00.0009711.  Current probability=1
+Completed 20 Gauss-Seidel iterations in 00:00:00.0016668.  Current probability=1
+Completed 30 Gauss-Seidel iterations in 00:00:00.0022974.  Current probability=1
+Completed 40 Gauss-Seidel iterations in 00:00:00.0030101.  Current probability=1
+Completed 50 Gauss-Seidel iterations in 00:00:00.0037003.  Current probability=1
+Built-in probabilistic model checker model checking time: 00:00:00.0546168
+Probability of hazard: 1

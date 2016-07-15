@@ -1,0 +1,41 @@
+Total time: 1 seconds
+
+Running Deductive Cause Consequence Analysis.
+Checking the empty fault set...
+Checking 9 sets of cardinality 1...
+     critical:  { WaterHeaterDefect }
+     critical:  { UltrafiltrationPumpDefect }
+     critical:  { PumpToBalanceChamberDefect }
+     critical:  { DialyzingFluidPreparationPumpDefect }
+     critical:  { DialyzerMembraneRupturesFault }
+     critical:  { BloodPumpDefect }
+Checking 3 sets of cardinality 2...
+Checking 1 sets of cardinality 3...
+
+=======================================================================
+=======      Deductive Cause Consequence Analysis: Results      =======
+=======================================================================
+
+Elapsed Time: 00:00:00.8137939
+Fault Count: 9
+Faults: BloodPumpDefect, DialyzerMembraneRupturesFault, DialyzingFluidPreparationPumpDefect, PumpToBalanceChamberDefect, SafetyBypassFault, SafetyDetectorDefect, UltrafiltrationPumpDefect, ValveDoesNotClose, WaterHeaterDefect
+
+Checked Fault Sets: 14 (3% of all fault sets)
+Minimal Critical Sets: 6
+
+   (1) { WaterHeaterDefect }
+   (2) { UltrafiltrationPumpDefect }
+   (3) { PumpToBalanceChamberDefect }
+   (4) { DialyzingFluidPreparationPumpDefect }
+   (5) { DialyzerMembraneRupturesFault }
+   (6) { BloodPumpDefect }
+
+
+=======================================================================
+=======        Fault Activation Order Analysis: Results         =======
+=======================================================================
+
+Elapsed Time: 00:00:00.0000166
+Order Relationship Count: 0
+
+

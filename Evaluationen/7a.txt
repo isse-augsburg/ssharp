@@ -1,0 +1,30 @@
+Total time: 15:07 minutes
+
+Generating markov chain using 4 CPU cores.
+State vector has 12 bytes.
+Discovered 200.009 states, 9.016.025 transitions, 38 levels.
+Discovered 400.001 states, 38.070.025 transitions, 38 levels.
+Discovered 600.005 states, 76.148.693 transitions, 38 levels.
+Discovered 800.002 states, 119.989.097 transitions, 38 levels.
+Discovered 1.000.001 states, 165.032.787 transitions, 38 levels.
+Discovered 1.200.037 states, 238.822.353 transitions, 38 levels.
+Discovered 1.400.001 states, 283.929.575 transitions, 38 levels.
+Discovered 1.600.004 states, 340.714.653 transitions, 38 levels.
+Discovered 1.800.001 states, 421.570.245 transitions, 38 levels.
+Discovered 2.000.002 states, 521.562.769 transitions, 38 levels.
+Discovered 2.200.001 states, 627.082.003 transitions, 38 levels.
+Discovered 2.246.400 states, 707.715.217 transitions, 38 levels.
+Starting to convert labeled transition Markov chain to Markov chain
+Ltmc: States 2246400, Transitions 199511977
+Mc: States 2425800, Transitions 199691376
+
+===============================================
+Initialization time: 00:00:00.2455963
+Labeled Transition Markov chain generation time: 00:05:37.1523025
+Markov chain conversion time: 00:00:37.3431085
+===============================================
+
+Gauss Jacobi V_B: The number of Gauss-Jacobi iterations 7
+The Total Elapsed Model-Checking Time is 5297 milli sec(s).
+MRMC total model checking time: 00:05:29.3165804
+Probability of hazard: 1E-07

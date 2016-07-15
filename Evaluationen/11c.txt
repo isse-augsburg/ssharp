@@ -1,0 +1,33 @@
+Total time: 1.4 sec
+
+Running Deductive Cause Consequence Analysis.
+Checking the empty fault set...
+Checking 4 sets of cardinality 1...
+Checking 6 sets of cardinality 2...
+     critical:  { SuppressIsFull, SuppressTimeout }
+Checking 2 sets of cardinality 3...
+
+=======================================================================
+=======      Deductive Cause Consequence Analysis: Results      =======
+=======================================================================
+
+Elapsed Time: 00:00:01.1873772
+Fault Count: 4
+Faults: SuppressIsEmpty, SuppressIsFull, SuppressPumping, SuppressTimeout
+
+Checked Fault Sets: 13 (81% of all fault sets)
+Minimal Critical Sets: 1
+
+   (1) { SuppressIsFull, SuppressTimeout }
+
+
+=======================================================================
+=======        Fault Activation Order Analysis: Results         =======
+=======================================================================
+
+Elapsed Time: 00:00:00.0518738
+Order Relationship Count: 1
+
+{ SuppressIsFull, SuppressTimeout }
+    (1) SuppressIsFull < SuppressTimeout
+

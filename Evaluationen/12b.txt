@@ -1,0 +1,83 @@
+Total time: 5 sec
+
+Generating state graph using 4 CPU cores.
+State vector has 12 bytes.
+Discovered 200.258 states, 556.822 transitions, 732 levels.
+Discovered 400.006 states, 1.150.179 transitions, 732 levels.
+Discovered 600.001 states, 1.834.289 transitions, 732 levels.
+Discovered 800.004 states, 2.466.755 transitions, 732 levels.
+Discovered 1.000.002 states, 3.127.526 transitions, 732 levels.
+Discovered 1.200.005 states, 3.782.020 transitions, 732 levels.
+Discovered 1.400.001 states, 4.481.043 transitions, 732 levels.
+Discovered 1.600.002 states, 5.186.702 transitions, 732 levels.
+Discovered 1.800.001 states, 5.897.260 transitions, 732 levels.
+Discovered 2.000.003 states, 6.630.443 transitions, 732 levels.
+Discovered 2.200.001 states, 7.397.653 transitions, 732 levels.
+Discovered 2.400.001 states, 8.190.699 transitions, 732 levels.
+Discovered 2.499.325 states, 8.606.799 transitions, 732 levels.
+
+===============================================
+Initialization time: 00:00:00.1657270
+State graph generation time: 00:00:03.0271534
+825.635 states per second
+2.843.198 transitions per second
+===============================================
+
+Performing invariant check using 4 CPU cores.
+State vector has 4 bytes.
+Discovered 200.005 states, 545.001 transitions, 732 levels.
+Discovered 400.007 states, 1.141.267 transitions, 732 levels.
+Discovered 600.007 states, 1.809.560 transitions, 732 levels.
+Discovered 800.005 states, 2.463.645 transitions, 732 levels.
+Discovered 1.000.006 states, 3.110.259 transitions, 732 levels.
+Discovered 1.200.009 states, 3.777.378 transitions, 732 levels.
+Discovered 1.400.008 states, 4.449.889 transitions, 732 levels.
+Discovered 1.600.007 states, 5.158.378 transitions, 732 levels.
+Discovered 1.800.007 states, 5.881.478 transitions, 732 levels.
+Discovered 2.000.010 states, 6.606.351 transitions, 732 levels.
+Discovered 2.200.009 states, 7.388.513 transitions, 732 levels.
+Discovered 2.400.005 states, 8.186.925 transitions, 732 levels.
+Discovered 2.499.325 states, 8.606.799 transitions, 732 levels.
+
+===============================================
+Initialization time: 00:00:00.0013904
+Model checking time: 00:00:00.5833629
+4.284.339 states per second
+14.753.764 transitions per second
+===============================================
+
+Performing invariant check using 4 CPU cores.
+State vector has 4 bytes.
+Discovered 1 states, 1 transitions, 0 levels.
+Invariant violation detected.
+
+===============================================
+Initialization time: 00:00:00.0006998
+Model checking time: 00:00:00.0399525
+25 states per second
+25 transitions per second
+===============================================
+
+Performing invariant check using 4 CPU cores.
+State vector has 4 bytes.
+Discovered 200.030 states, 548.628 transitions, 732 levels.
+Discovered 400.011 states, 1.145.446 transitions, 732 levels.
+Discovered 600.008 states, 1.833.131 transitions, 732 levels.
+Discovered 800.005 states, 2.471.937 transitions, 732 levels.
+Discovered 1.000.001 states, 3.119.969 transitions, 732 levels.
+Discovered 1.200.008 states, 3.784.633 transitions, 732 levels.
+Discovered 1.400.003 states, 4.469.377 transitions, 732 levels.
+Discovered 1.600.027 states, 5.168.934 transitions, 732 levels.
+Discovered 1.800.006 states, 5.888.397 transitions, 732 levels.
+Discovered 2.000.005 states, 6.628.575 transitions, 732 levels.
+Discovered 2.200.005 states, 7.403.729 transitions, 732 levels.
+Discovered 2.400.014 states, 8.185.835 transitions, 732 levels.
+Discovered 2.499.325 states, 8.606.799 transitions, 732 levels.
+
+===============================================
+Initialization time: 00:00:00.0005398
+Model checking time: 00:00:00.5955263
+4.196.833 states per second
+14.452.424 transitions per second
+===============================================
+

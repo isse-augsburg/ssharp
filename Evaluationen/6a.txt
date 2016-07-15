@@ -1,0 +1,34 @@
+Total time: 11:55 minutes
+
+Generating markov chain using 4 CPU cores.
+State vector has 12 bytes.
+Discovered 200.001 states, 6.762.319 transitions, 38 levels.
+Discovered 400.004 states, 33.881.525 transitions, 38 levels.
+Discovered 600.002 states, 68.901.761 transitions, 38 levels.
+Discovered 800.010 states, 105.213.993 transitions, 38 levels.
+Discovered 1.000.002 states, 148.575.017 transitions, 38 levels.
+Discovered 1.200.003 states, 194.823.409 transitions, 38 levels.
+Discovered 1.400.001 states, 266.447.557 transitions, 38 levels.
+Discovered 1.600.002 states, 309.972.053 transitions, 38 levels.
+Discovered 1.800.053 states, 359.105.473 transitions, 38 levels.
+Discovered 2.000.015 states, 470.797.525 transitions, 38 levels.
+Discovered 2.200.002 states, 569.214.053 transitions, 38 levels.
+Discovered 2.400.005 states, 666.186.429 transitions, 38 levels.
+Discovered 2.437.500 states, 732.081.169 transitions, 38 levels.
+Starting to convert labeled transition Markov chain to Markov chain
+Ltmc: States 2437500, Transitions 217286635
+Mc: States 2437500, Transitions 217286634
+
+===============================================
+Initialization time: 00:00:00.2089784
+Labeled Transition Markov chain generation time: 00:05:46.7052124
+Markov chain conversion time: 00:00:40.0110796
+===============================================
+
+Completed 10 Gauss-Seidel iterations in 00:00:49.0759536.  Current probability=1.17871234803271E-07
+Completed 20 Gauss-Seidel iterations in 00:01:38.4248521.  Current probability=1.17871278012871E-07
+Completed 30 Gauss-Seidel iterations in 00:02:27.1467293.  Current probability=1.17871278012872E-07
+Completed 40 Gauss-Seidel iterations in 00:03:15.8823893.  Current probability=1.17871278012872E-07
+Completed 50 Gauss-Seidel iterations in 00:04:04.6450648.  Current probability=1.17871278012872E-07
+Built-in probabilistic model checker model checking time: 00:05:28.3434911
+Probability of hazard: 1,17871278012872E-07

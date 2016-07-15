@@ -1,0 +1,32 @@
+diff --git a/Models/Hemodialysis Machine/Modeling/Flows/DialyzingFluidFlow.cs b/Models/Hemodialysis Machine/Modeling/Flows/DialyzingFluidFlow.cs
+index d541924..641c08c 100644
+--- a/Models/Hemodialysis Machine/Modeling/Flows/DialyzingFluidFlow.cs	
++++ b/Models/Hemodialysis Machine/Modeling/Flows/DialyzingFluidFlow.cs	
+@@ -34,11 +34,11 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
+ 	// Also called dialysate or dialyzate
+ 	public struct DialyzingFluid
+ 	{
+-		[Hidden,Range(0, 8, OverflowBehavior.Error)]
++		//[Range(0, 8, OverflowBehavior.Error)]
+ 		public int Quantity;
+-		[Hidden]
++		//[Hidden]
+ 		public KindOfDialysate KindOfDialysate;
+-		[Hidden]
++		//[Hidden]
+ 		public bool ContaminatedByBlood;
+ 		[Hidden]
+ 		public bool WasUsed;
+diff --git a/Models/Hemodialysis Machine/Utilities/BidirectionalFlow/FlowPort.cs b/Models/Hemodialysis Machine/Utilities/BidirectionalFlow/FlowPort.cs
+index ca062f9..5dbd899 100644
+--- a/Models/Hemodialysis Machine/Utilities/BidirectionalFlow/FlowPort.cs	
++++ b/Models/Hemodialysis Machine/Utilities/BidirectionalFlow/FlowPort.cs	
+@@ -30,7 +30,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Utilities.BidirectionalFlo
+ 		where TForward : struct
+ 		where TBackward : struct
+ 	{
+-		[Hidden]
++		//[Hidden]
+ 		public TForward Forward;
+ 
+ 		[Hidden]

@@ -1,0 +1,36 @@
+Total time: 1.4 sec
+
+Generating state graph using 4 CPU cores.
+State vector has 4 bytes.
+Discovered 680 states, 747 transitions, 182 levels.
+
+===============================================
+Initialization time: 00:00:00.1386127
+State graph generation time: 00:00:00.8318003
+817 states per second
+898 transitions per second
+===============================================
+
+Performing invariant check using 4 CPU cores.
+State vector has 4 bytes.
+Discovered 680 states, 747 transitions, 182 levels.
+
+===============================================
+Initialization time: 00:00:00.0014102
+Model checking time: 00:00:00.0267143
+25.454 states per second
+27.962 transitions per second
+===============================================
+
+Performing invariant check using 4 CPU cores.
+State vector has 4 bytes.
+Discovered 97 states, 101 transitions, 45 levels.
+Invariant violation detected.
+
+===============================================
+Initialization time: 00:00:00.0006886
+Model checking time: 00:00:00.0369960
+2.621 states per second
+2.730 transitions per second
+===============================================
+

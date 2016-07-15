@@ -1,0 +1,13 @@
+diff --git a/Models/Height Control/Modeling/Vehicles/Vehicle.cs b/Models/Height Control/Modeling/Vehicles/Vehicle.cs
+index 4bc0369..511e6a9 100644
+--- a/Models/Height Control/Modeling/Vehicles/Vehicle.cs	
++++ b/Models/Height Control/Modeling/Vehicles/Vehicle.cs	
+@@ -29,7 +29,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
+ 	/// </summary>
+ 	public class Vehicle : Component
+ 	{
+-		[Hidden]
++		//[Hidden]
+ 		private int _speed;
+ 
+ 		/// <summary>

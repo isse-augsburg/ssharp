@@ -1,0 +1,45 @@
+Total time: 22 seconds
+
+Running Deductive Cause Consequence Analysis.
+Checking the empty fault set...
+Checking 9 sets of cardinality 1...
+Checking 36 sets of cardinality 2...
+     critical:  { SafetyBypassFault, WaterHeaterDefect }
+     critical:  { DialyzerMembraneRupturesFault, SafetyDetectorDefect }
+     critical:  { DialyzerMembraneRupturesFault, ValveDoesNotClose }
+Checking 64 sets of cardinality 3...
+Checking 71 sets of cardinality 4...
+Checking 45 sets of cardinality 5...
+Checking 15 sets of cardinality 6...
+Checking 2 sets of cardinality 7...
+
+=======================================================================
+=======      Deductive Cause Consequence Analysis: Results      =======
+=======================================================================
+
+Elapsed Time: 00:00:21.2982251
+Fault Count: 9
+Faults: BloodPumpDefect, DialyzerMembraneRupturesFault, DialyzingFluidPreparationPumpDefect, PumpToBalanceChamberDefect, SafetyBypassFault, SafetyDetectorDefect, UltrafiltrationPumpDefect, ValveDoesNotClose, WaterHeaterDefect
+
+Checked Fault Sets: 243 (47% of all fault sets)
+Minimal Critical Sets: 3
+
+   (1) { SafetyBypassFault, WaterHeaterDefect }
+   (2) { DialyzerMembraneRupturesFault, SafetyDetectorDefect }
+   (3) { DialyzerMembraneRupturesFault, ValveDoesNotClose }
+
+
+=======================================================================
+=======        Fault Activation Order Analysis: Results         =======
+=======================================================================
+
+Elapsed Time: 00:00:00.2820400
+Order Relationship Count: 2
+
+{ SafetyBypassFault, WaterHeaterDefect }
+    (1) WaterHeaterDefect <= SafetyBypassFault
+{ DialyzerMembraneRupturesFault, SafetyDetectorDefect }
+    no order relationships exist
+{ DialyzerMembraneRupturesFault, ValveDoesNotClose }
+    (1) DialyzerMembraneRupturesFault < ValveDoesNotClose
+

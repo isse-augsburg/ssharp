@@ -1,0 +1,36 @@
+Total time: 27 seconds
+
+
+Generating markov chain using 4 CPU cores.
+State vector has 12 bytes.
+Discovered 200.018 states, 2.076.174 transitions, 732 levels.
+Discovered 400.001 states, 4.657.645 transitions, 732 levels.
+Discovered 600.005 states, 7.522.163 transitions, 732 levels.
+Discovered 800.002 states, 10.898.122 transitions, 732 levels.
+Discovered 1.000.001 states, 12.712.992 transitions, 732 levels.
+Discovered 1.200.003 states, 14.714.656 transitions, 732 levels.
+Discovered 1.400.001 states, 16.678.848 transitions, 732 levels.
+Discovered 1.600.003 states, 18.819.806 transitions, 732 levels.
+Discovered 1.800.001 states, 21.217.686 transitions, 732 levels.
+Discovered 2.000.002 states, 23.487.380 transitions, 732 levels.
+Discovered 2.200.004 states, 25.822.522 transitions, 732 levels.
+Discovered 2.400.001 states, 28.939.312 transitions, 732 levels.
+Discovered 2.600.001 states, 34.077.358 transitions, 732 levels.
+Discovered 2.612.970 states, 35.412.994 transitions, 732 levels.
+Starting to convert labeled transition Markov chain to Markov chain
+Ltmc: States 2612970, Transitions 9254581
+Mc: States 2612970, Transitions 9254579
+
+===============================================
+Initialization time: 00:00:00.1834354
+Labeled Transition Markov chain generation time: 00:00:06.7591438
+Markov chain conversion time: 00:00:02.8340657
+===============================================
+
+Completed 10 Gauss-Seidel iterations in 00:00:02.0383912.  Current probability=1.6477948693789E-13
+Completed 20 Gauss-Seidel iterations in 00:00:04.0691758.  Current probability=5.8539934396664E-07
+Completed 30 Gauss-Seidel iterations in 00:00:06.0964210.  Current probability=0.00108054880516786
+Completed 40 Gauss-Seidel iterations in 00:00:08.1299758.  Current probability=0.110738380704275
+Completed 50 Gauss-Seidel iterations in 00:00:10.1649845.  Current probability=0.110738947995923
+Built-in probabilistic model checker model checking time: 00:00:17.1549819
+Probability of hazard: 0,110738947995923

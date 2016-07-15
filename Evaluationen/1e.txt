@@ -1,0 +1,14 @@
+
+Generating markov chain using 1 CPU cores.
+State vector has 40 bytes.
+Discovered 200.053 states, 102.337.536 transitions, 10 levels.
+Discovered 362.485 states, 185.592.832 transitions, 10 levels.
+Starting to convert labeled transition Markov chain to Markov chain
+Ltmc: States 362485, Transitions 9873173
+Mc: States 362485, Transitions 9873172
+
+===============================================
+Initialization time: 00:00:00.2464328
+Labeled Transition Markov chain generation time: 00:04:43.9010563
+Markov chain conversion time: 00:00:01.4596399
+===============================================
