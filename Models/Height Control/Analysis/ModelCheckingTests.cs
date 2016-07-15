@@ -30,6 +30,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 	using Modeling.Controllers;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
+	using SafetySharp.Analysis.Heuristics;
 	using SafetySharp.Modeling;
 
 	public class ModelCheckingTests
@@ -54,7 +55,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			result[2].FormulaHolds.Should().BeTrue();
 		}
 
-		[TestCase]
+		[Test]
 		public void CollisionOriginalDesign(
 			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
@@ -64,49 +65,53 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			// force the activation of the LeftOHV fault to improve safety analysis times significantly
 			model.VehicleSet.LeftOHV.Activation = Activation.Forced;
 
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision, backend: backend);
+			var analysis = new SafetyAnalysis { Backend = backend, Heuristics = { new MaximalSafeSetHeuristic(model) } };
+			var result = analysis.ComputeMinimalCriticalSets(model, model.Collision);
 			result.SaveCounterExamples("counter examples/height control/dcca/collision/original");
 
 			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
 			Console.WriteLine(orderResult);
 		}
 
-		[TestCase]
+		[Test]
 		public void FalseAlarmOriginalDesign(
 			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
 			var model = Model.CreateOriginal();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, backend: backend);
+			var analysis = new SafetyAnalysis { Backend = backend, Heuristics = { new MaximalSafeSetHeuristic(model) } };
+			var result = analysis.ComputeMinimalCriticalSets(model, model.FalseAlarm);
 			result.SaveCounterExamples("counter examples/height control/dcca/false alarm/original");
 
 			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
 			Console.WriteLine(orderResult);
 		}
 
-		[Test, TestCaseSource(nameof(CreateModelVariants))]
+		[TestCaseSource(nameof(CreateModelVariants))]
 		public void EnumerateAllStates(Model model, string variantName)
 		{
 			var result = ModelChecker.CheckInvariant(model, true);
 			result.FormulaHolds.Should().BeTrue();
 		}
 
-		[Test, TestCaseSource(nameof(CreateModelVariants))]
+		[TestCaseSource(nameof(CreateModelVariants))]
 		public void Collision(Model model, string variantName)
 		{
 			// As collisions cannot occur without any overheight vehicles driving on the left lane, we 
 			// force the activation of the LeftOHV fault to improve safety analysis times significantly
 			model.VehicleSet.LeftOHV.Activation = Activation.Forced;
 
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Collision, maxCardinality: 4);
+			var analysis = new SafetyAnalysis { Heuristics = { new MaximalSafeSetHeuristic(model, cardinalityLevel: 4) } };
+			var result = analysis.ComputeMinimalCriticalSets(model, model.Collision);
 
 			result.SaveCounterExamples($"counter examples/height control/dcca/collision/{variantName}");
 			Console.WriteLine(result);
 		}
 
-		[Test, TestCaseSource(nameof(CreateModelVariants))]
+		[TestCaseSource(nameof(CreateModelVariants))]
 		public void FalseAlarm(Model model, string variantName)
 		{
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.FalseAlarm, maxCardinality: 3);
+			var analysis = new SafetyAnalysis { Heuristics = { new MaximalSafeSetHeuristic(model) } };
+			var result = analysis.ComputeMinimalCriticalSets(model, model.FalseAlarm);
 
 			result.SaveCounterExamples($"counter examples/height control/dcca/false alarm/{variantName}");
 			Console.WriteLine(result);

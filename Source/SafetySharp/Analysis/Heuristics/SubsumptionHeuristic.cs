@@ -24,13 +24,12 @@ namespace SafetySharp.Analysis.Heuristics
 {
 	using System.Collections.Generic;
 	using Modeling;
-	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   A heuristic taking the subsumption relation between different <see cref="Fault" /> instances into account.
 	/// </summary>
-	public class SubsumptionHeuristic : IFaultSetHeuristic
+	public sealed class SubsumptionHeuristic : IFaultSetHeuristic
 	{
 		private readonly Fault[] _allFaults;
 		private readonly HashSet<FaultSet> _subsumedSets = new HashSet<FaultSet>();
@@ -47,7 +46,7 @@ namespace SafetySharp.Analysis.Heuristics
 			_allFaults = model.Faults;
 		}
 
-		void IFaultSetHeuristic.Augment(List<FaultSet> setsToCheck)
+		void IFaultSetHeuristic.Augment(uint cardinalityLevel, List<FaultSet> setsToCheck)
 		{
 			// for each set, check the set of subsumed faults first
 			for (var i = 0; i < setsToCheck.Count; ++i)

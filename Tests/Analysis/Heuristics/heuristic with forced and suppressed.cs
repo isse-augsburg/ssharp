@@ -67,7 +67,7 @@ namespace Tests.Analysis.Heuristics
 		{
 			public C C { get; set; }
 
-			public void Augment(List<FaultSet> setsToCheck)
+			public void Augment(uint cardinalityLevel, List<FaultSet> setsToCheck)
 			{
 				setsToCheck.Add(new FaultSet());
 				setsToCheck.Add(new FaultSet(C.F1, C.F2));

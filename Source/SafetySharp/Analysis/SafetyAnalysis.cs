@@ -24,9 +24,9 @@ namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Runtime.CompilerServices;
 	using System.Diagnostics;
 	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using Heuristics;
 	using Modeling;
 	using SafetyChecking;
@@ -91,7 +91,7 @@ namespace SafetySharp.Analysis
 		/// </param>
 		/// <param name="backend">Determines the safety analysis backend that is used during the analysis.</param>
 		public static SafetyAnalysisResults AnalyzeHazard(ModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue,
-														 SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
+														  SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
 		{
 			return new SafetyAnalysis { Backend = backend }.ComputeMinimalCriticalSets(model, hazard, maxCardinality);
 		}
@@ -112,6 +112,7 @@ namespace SafetySharp.Analysis
 
 			ConsoleHelpers.WriteLine("Running Deductive Cause Consequence Analysis.");
 
+			var heuristicWatch = new Stopwatch();
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
@@ -189,7 +190,16 @@ namespace SafetySharp.Analysis
 				// use heuristics
 				var setsToCheck = new List<FaultSet>(sets);
 				foreach (var heuristic in Heuristics)
-					heuristic.Augment(setsToCheck);
+				{
+					var count = setsToCheck.Count;
+
+					heuristicWatch.Restart();
+					heuristic.Augment((uint)cardinality, setsToCheck);
+
+					count = setsToCheck.Count - count;
+					if (count > 0)
+						ConsoleHelpers.WriteLine($"    {heuristic.GetType().Name} made {count} suggestions in {heuristicWatch.Elapsed.TotalMilliseconds}ms.");
+				}
 
 				// We have to check each set - heuristics may add further during the loop
 				while (setsToCheck.Count > 0)
@@ -201,6 +211,9 @@ namespace SafetySharp.Analysis
 
 					// for current level, we already know the set is valid
 					var isValid = isCurrentLevel || IsValid(set);
+
+					// the set is invalid if it exceeds the maximum cardinality level
+					isValid &= set.Cardinality <= maxCardinality;
 
 					var isSafe = true;
 					if (isValid)
@@ -322,13 +335,13 @@ namespace SafetySharp.Analysis
 				if (!result.FormulaHolds)
 				{
 					if (!isHeuristicSuggestion)
-						ConsoleHelpers.WriteLine($"     critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
+						ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
 
 					_criticalSets.Add(set);
 				}
 				else if (isHeuristicSuggestion)
 				{
-					ConsoleHelpers.WriteLine($"    [heuristic] safe:  {{ {set.ToString(allFaults)} }}", ConsoleColor.Blue);
+					ConsoleHelpers.WriteLine($"    safe:      {{ {set.ToString(allFaults)} }}  [heuristic]", ConsoleColor.Blue);
 				}
 
 				_checkedSets.Add(set);
@@ -340,8 +353,8 @@ namespace SafetySharp.Analysis
 			}
 			catch (AnalysisException e)
 			{
-				var heuristic = isHeuristicSuggestion ? "[heuristic]" : string.Empty;
-				ConsoleHelpers.WriteLine($"    {heuristic} critical:  {{ {set.ToString(allFaults)} }} [exception thrown]", ConsoleColor.DarkRed);
+				var heuristic = isHeuristicSuggestion ? " [heuristic]" : string.Empty;
+				ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }} {heuristic} [exception thrown]", ConsoleColor.DarkRed);
 				Console.WriteLine(e.InnerException);
 
 				_checkedSets.Add(set);

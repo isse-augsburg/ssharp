@@ -71,16 +71,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		public void InitializeDefaultInstance()
 		{
-			CreateWorkpieces(5, Produce, Drill, Insert, Tighten, Polish, Consume);
-
-			CreateRobot(Produce, Drill, Insert);
-			CreateRobot(Insert, Drill);
-			CreateRobot(Tighten, Polish, Tighten, Drill);
-			CreateRobot(Polish, Consume);
-
-			CreateCart(new Route(Robots[0], Robots[1]), new Route(Robots[0], Robots[2]), new Route(Robots[0], Robots[3]));
-			CreateCart(new Route(Robots[1], Robots[2]), new Route(Robots[0], Robots[1]));
-			CreateCart(new Route(Robots[2], Robots[3]));
+			Ictss1();
 		}
 
 		public void Ictss1()
@@ -213,7 +204,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		public static IEnumerable<Model> CreateConfigurations<T>(AnalysisMode mode)
 			where T : ObserverController
 		{
-			yield return CreateConfiguration<T>(m => m.InitializeDefaultInstance(), "DefaultInstance", mode);
 			yield return CreateConfiguration<T>(m => m.Ictss1(), nameof(Ictss1), mode);
 			yield return CreateConfiguration<T>(m => m.Ictss2(), nameof(Ictss2), mode);
 			yield return CreateConfiguration<T>(m => m.Ictss3(), nameof(Ictss3), mode);

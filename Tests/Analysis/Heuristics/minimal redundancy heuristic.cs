@@ -45,7 +45,7 @@ namespace Tests.Analysis.Heuristics
 			);
 
 			var setsToCheck = new List<FaultSet>();
-			heuristic.Augment(setsToCheck);
+			heuristic.Augment(0, setsToCheck);
 
 			setsToCheck.Count.ShouldBe(125);
 			setsToCheck.All(set => set.Cardinality == 12).ShouldBe(true);

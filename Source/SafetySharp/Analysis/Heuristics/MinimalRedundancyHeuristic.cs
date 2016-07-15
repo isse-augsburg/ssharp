@@ -25,13 +25,12 @@ namespace SafetySharp.Analysis.Heuristics
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
-	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   A heuristic that tries to determine the minimal redundancy necessary in the system so the hazard does not occur.
 	/// </summary>
-	public class MinimalRedundancyHeuristic : IFaultSetHeuristic
+	public sealed class MinimalRedundancyHeuristic : IFaultSetHeuristic
 	{
 		private const double DefaultMinFaultSetSizeRelative = 0.5;
 		private readonly Fault[] _allFaults;
@@ -79,14 +78,14 @@ namespace SafetySharp.Analysis.Heuristics
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(faultGroups, nameof(faultGroups));
 
-			_allFaults = model.Faults;
+			_allFaults = model.Faults.Where(fault => fault.Activation != Activation.Suppressed).ToArray();
 			_minSetSize = minSetSize;
 
 			CollectSuggestions(faultGroups);
 			_nextSuggestions = GetSubsets(_currentSuggestions);
 		}
 
-		void IFaultSetHeuristic.Augment(List<FaultSet> setsToCheck)
+		void IFaultSetHeuristic.Augment(uint cardinalityLevel, List<FaultSet> setsToCheck)
 		{
 			_successCounter = 0;
 			setsToCheck.AddRange(_currentSuggestions);

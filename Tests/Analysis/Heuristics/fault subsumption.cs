@@ -40,13 +40,13 @@ namespace Tests.Analysis.Heuristics
 			// no subsumption declared
 			IFaultSetHeuristic heuristic = new SubsumptionHeuristic(model);
 			var setsToCheck = new[] { new FaultSet(c.F1), new FaultSet(c.F2) }.ToList();
-			heuristic.Augment(setsToCheck);
+			heuristic.Augment(0, setsToCheck);
 			setsToCheck.Count.ShouldBe(2);
 
 			// simple subsumption
 			heuristic = new SubsumptionHeuristic(model);
 			c.F1.Subsumes(c.F2);
-			heuristic.Augment(setsToCheck);
+			heuristic.Augment(0, setsToCheck);
 			setsToCheck.Count.ShouldBe(3);
 			setsToCheck.ShouldBe(new[] { new FaultSet(c.F1), new FaultSet(c.F1, c.F2), new FaultSet(c.F2) });
 
@@ -54,7 +54,7 @@ namespace Tests.Analysis.Heuristics
 			heuristic = new SubsumptionHeuristic(model);
 			setsToCheck = new[] { new FaultSet(c.F1), new FaultSet(c.F2) }.ToList();
 			c.F2.Subsumes(c.F3);
-			heuristic.Augment(setsToCheck);
+			heuristic.Augment(0, setsToCheck);
 			setsToCheck.Count.ShouldBe(4);
 			setsToCheck.ShouldBe(new[] { new FaultSet(c.F1), new FaultSet(c.F1, c.F2, c.F3),
 				new FaultSet(c.F2), new FaultSet(c.F2, c.F3) });
@@ -63,20 +63,20 @@ namespace Tests.Analysis.Heuristics
 			heuristic = new SubsumptionHeuristic(model);
 			setsToCheck = new[] { new FaultSet(c.F3) }.ToList();
 			c.F3.Subsumes(c.F3);
-			heuristic.Augment(setsToCheck);
+			heuristic.Augment(0, setsToCheck);
 			setsToCheck.ShouldBe(new[] { new FaultSet(c.F3) });
 
 			// circular subsumption
 			heuristic = new SubsumptionHeuristic(model);
 			setsToCheck = new[] { new FaultSet(c.F2) }.ToList();
 			c.F3.Subsumes(c.F2);
-			heuristic.Augment(setsToCheck);
+			heuristic.Augment(0, setsToCheck);
 			setsToCheck.ShouldBe(new[] { new FaultSet(c.F2), new FaultSet(c.F2, c.F3) }, false, "circular");
 
 			// empty set subsumes nothing
 			heuristic = new SubsumptionHeuristic(model);
 			setsToCheck = new[] { new FaultSet() }.ToList();
-			heuristic.Augment(setsToCheck);
+			heuristic.Augment(0, setsToCheck);
 			setsToCheck.Count.ShouldBe(1);
 		}
 
