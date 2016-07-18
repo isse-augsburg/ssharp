@@ -225,18 +225,9 @@ namespace SafetySharp.Analysis
 		/// <param name="allFaults">The list of all analyzed faults.</param>
 		internal static FaultSet SubsumedFaults(FaultSet set, Fault[] allFaults)
 		{
-			var currentFaults = set.ToFaultSequence(allFaults);
-			var subsumed = set;
-
-			uint oldCount;
-			do // fixed-point iteration
-			{
-				oldCount = subsumed.Cardinality;
-				currentFaults = currentFaults.SelectMany(fault => fault.SubsumedFaults);
-				subsumed = subsumed.GetUnion(new FaultSet(currentFaults));
-			} while (oldCount < subsumed.Cardinality);
-
-			return subsumed;
+			// Fault class performs fixed-point iteration and caches the result for performance reasons
+			return set.ToFaultSequence(allFaults)
+				.Aggregate(set, (subsumed, fault) => subsumed.GetUnion(fault.SubsumedFaultSet));
 		}
 
 		/// <summary>

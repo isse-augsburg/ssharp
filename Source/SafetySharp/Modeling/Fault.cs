@@ -27,8 +27,8 @@ namespace SafetySharp.Modeling
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.Serialization;
-	using CompilerServices;
 	using Utilities;
+	using Analysis;
 
 	/// <summary>
 	///   Represents a base class for all faults affecting the behavior of <see cref="Component" />s.
@@ -50,6 +50,12 @@ namespace SafetySharp.Modeling
 
 		[NonSerializable]
 		private int _choiceIndex;
+
+		[NonSerializable]
+		private FaultSet subsumedFaultSet;
+
+		[NonSerializable]
+		private bool isSubsumedFaultSetCached = false;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -113,6 +119,38 @@ namespace SafetySharp.Modeling
 
 				_activationIsUnknown = value == Activation.Nondeterministic;
 			}
+		}
+
+		/// <summary>
+		/// The set of subsumed faults, including transitively subsumed faults.
+		/// </summary>
+		internal FaultSet SubsumedFaultSet
+		{
+			get
+			{
+				if (!isSubsumedFaultSetCached)
+				{
+					subsumedFaultSet = CollectSubsumedFaultsTransitive();
+					isSubsumedFaultSetCached = true;
+				}
+				return subsumedFaultSet;
+			}
+		}
+
+		private FaultSet CollectSubsumedFaultsTransitive()
+		{
+			IEnumerable<Fault> currentFaults = new[] { this };
+			var subsumed = new FaultSet(this);
+
+			uint oldCount;
+			do // fixed-point iteration
+			{
+				oldCount = subsumed.Cardinality;
+				currentFaults = currentFaults.SelectMany(fault => fault.SubsumedFaults);
+				subsumed = subsumed.GetUnion(new FaultSet(currentFaults));
+			} while (oldCount < subsumed.Cardinality);
+
+			return subsumed;
 		}
 
 		/// <summary>
