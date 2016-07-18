@@ -81,15 +81,20 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
+		/// Checks if the collection contains the given <paramref name="faultSet"/>.
+		/// </summary>
+		public bool Contains(FaultSet faultSet)
+		{
+			return _elementsByCardinality[faultSet.Cardinality]?.Contains(faultSet) ?? false;
+		}
+
+		/// <summary>
 		///   Checks whether the collection contains a subset of <paramref name="faultSet." />
 		/// </summary>
 		/// <param name="faultSet">The fault set that should be checked.</param>
 		public bool ContainsSubsetOf(FaultSet faultSet)
 		{
-			if (_elementsByCardinality[faultSet.Cardinality]?.Contains(faultSet) ?? false)
-				return true;
-
-			return ContainsProperSubsetOf(faultSet);
+			return Contains(faultSet) || ContainsProperSubsetOf(faultSet);
 		}
 
 		/// <summary>

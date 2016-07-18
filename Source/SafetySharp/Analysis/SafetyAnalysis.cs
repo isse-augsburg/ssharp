@@ -383,7 +383,7 @@ namespace SafetySharp.Analysis
 		/// <param name="cardinality">The cardinality of the sets that should be generated.</param>
 		/// <param name="faults">The fault set the power set is generated for.</param>
 		/// <param name="previousSafe">The set of safe sets generated at the previous level.</param>
-		private static HashSet<FaultSet> GeneratePowerSetLevel(int cardinality, Fault[] faults, HashSet<FaultSet> previousSafe)
+		private HashSet<FaultSet> GeneratePowerSetLevel(int cardinality, Fault[] faults, HashSet<FaultSet> previousSafe)
 		{
 			var result = new HashSet<FaultSet>();
 
@@ -399,7 +399,11 @@ namespace SafetySharp.Analysis
 					if (previousSafe.Count > 0)
 					{
 						foreach (var fault in faults)
-							result.Add(new FaultSet(fault));
+						{
+							var set = new FaultSet(fault);
+							if (!_criticalSets.Contains(set))
+								result.Add(set);
+						}
 					}
 					break;
 				default:
@@ -428,15 +432,12 @@ namespace SafetySharp.Analysis
 							// set is trivially critical iff one of the direct subsets is not safe (i.e. critical)
 							// * the faults faults[0], ..., faults[i-1] are not definitely not contained in set (see above)
 							// * faults[i] is definitely in set, but set.Remove(faults[i]) == safeSet and is thus safe.
-							var isTriviallyCritical = false;
-							for (var j = i + 1; j < faults.Length; ++j)
+							var isTriviallyCritical = _criticalSets.Contains(set);
+							for (var j = i + 1; j < faults.Length && !isTriviallyCritical; ++j)
 							{
 								var f = faults[j];
 								if (set.Contains(f) && !previousSafe.Contains(set.Remove(f)))
-								{
 									isTriviallyCritical = true;
-									break;
-								}
 							}
 
 							// Check if the newly generated set is a super set of any critical sets;
