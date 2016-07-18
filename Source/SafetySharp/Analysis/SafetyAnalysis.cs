@@ -217,7 +217,7 @@ namespace SafetySharp.Analysis
 
 					var isSafe = true;
 					if (isValid)
-						isSafe = CheckSet(set, allFaults, cardinality);
+						isSafe = CheckSet(set, allFaults, !isCurrentLevel);
 
 					if (isSafe && isCurrentLevel)
 						currentSafe.Add(set);
@@ -230,7 +230,7 @@ namespace SafetySharp.Analysis
 				// in case heuristics removed a set (they shouldn't)
 				foreach (var set in sets)
 				{
-					var isSafe = CheckSet(set, allFaults, cardinality);
+					var isSafe = CheckSet(set, allFaults, false);
 					if (isSafe)
 						currentSafe.Add(set);
 				}
@@ -275,10 +275,9 @@ namespace SafetySharp.Analysis
 			return minimal;
 		}
 
-		private bool CheckSet(FaultSet set, Fault[] allFaults, int cardinality)
+		private bool CheckSet(FaultSet set, Fault[] allFaults, bool isHeuristicSuggestion)
 		{
-			var isHeuristic = cardinality != set.Cardinality;
-			if (isHeuristic)
+			if (isHeuristicSuggestion)
 				_results.HeuristicSuggestionCount++;
 
 			var isSafe = true;
@@ -288,18 +287,18 @@ namespace SafetySharp.Analysis
 			if (IsTriviallySafe(set))
 			{
 				_results.TrivialChecksCount++;
-				if (isHeuristic)
+				if (isHeuristicSuggestion)
 					_results.HeuristicTrivialCount++;
 
 				// do not add to safeSets: all subsets are subsets of safeSet as well
 				return true;
 			}
 
-			if (IsTriviallyCritical(set))
+			// trivially critical sets are not generated in GeneratePowerSetLevel, thus only check if set suggested by heuristic
+			if (isHeuristicSuggestion && IsTriviallyCritical(set))
 			{
 				_results.TrivialChecksCount++;
-				if (isHeuristic)
-					_results.HeuristicTrivialCount++;
+				_results.HeuristicTrivialCount++;
 
 				// do not add to criticalSets: non-minimal, and all supersets are supersets of criticalSet as well
 				return false;
@@ -307,44 +306,42 @@ namespace SafetySharp.Analysis
 
 			// if configured to do so, check with forced fault activation
 			if (FaultActivationBehavior == FaultActivationBehavior.ForceOnly || FaultActivationBehavior == FaultActivationBehavior.ForceThenFallback)
-				isSafe = CheckSet(set, allFaults, cardinality, Activation.Forced, isHeuristic);
+				isSafe = CheckSet(set, allFaults, isHeuristicSuggestion, Activation.Forced);
 
 			if (isSafe && FaultActivationBehavior == FaultActivationBehavior.ForceThenFallback)
 				ConsoleHelpers.WriteLine("    Checking again with nondeterministic activation...");
 
 			// check with nondeterministic fault activation
 			if (isSafe && FaultActivationBehavior != FaultActivationBehavior.ForceOnly)
-				isSafe = CheckSet(set, allFaults, cardinality, Activation.Nondeterministic, isHeuristic);
+				isSafe = CheckSet(set, allFaults, isHeuristicSuggestion, Activation.Nondeterministic);
 
 			if (isSafe) // remember non-trivially safe sets to avoid checking their subsets
 			{
 				_safeSets.Add(set);
 
-				if (isHeuristic)
+				if (isHeuristicSuggestion)
 					_results.HeuristicNonTrivialSafeCount++;
 			}
 
 			return isSafe;
 		}
 
-		private bool CheckSet(FaultSet set, Fault[] allFaults, int cardinality, Activation activationMode, bool isHeuristic)
+		private bool CheckSet(FaultSet set, Fault[] allFaults, bool isHeuristicSuggestion, Activation activationMode)
 		{
-			var heuristic = set.Cardinality == cardinality ? String.Empty : " [heuristic]";
-
 			try
 			{
 				var result = _backend.CheckCriticality(set, activationMode);
 
 				if (!result.FormulaHolds)
 				{
-					if (!isHeuristic)
-						ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }} {heuristic}", ConsoleColor.DarkRed);
+					if (!isHeuristicSuggestion)
+						ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
 
 					_criticalSets.Add(set);
 				}
-				else if (isHeuristic)
+				else if (isHeuristicSuggestion)
 				{
-					ConsoleHelpers.WriteLine($"    safe:      {{ {set.ToString(allFaults)} }} {heuristic}", ConsoleColor.Blue);
+					ConsoleHelpers.WriteLine($"    safe:      {{ {set.ToString(allFaults)} }}  [heuristic]", ConsoleColor.Blue);
 				}
 
 				_checkedSets.Add(set);
@@ -356,6 +353,7 @@ namespace SafetySharp.Analysis
 			}
 			catch (AnalysisException e)
 			{
+				var heuristic = isHeuristicSuggestion ? " [heuristic]" : string.Empty;
 				ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }} {heuristic} [exception thrown]", ConsoleColor.DarkRed);
 				Console.WriteLine(e.InnerException);
 
