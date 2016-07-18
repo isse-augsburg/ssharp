@@ -188,7 +188,7 @@ namespace SafetySharp.Analysis
 					ConsoleHelpers.WriteLine($"Checking {sets.Count} sets of cardinality {cardinality}...");
 
 				// use heuristics
-				var setsToCheck = new List<FaultSet>(sets);
+				var setsToCheck = new LinkedList<FaultSet>(sets);
 				foreach (var heuristic in Heuristics)
 				{
 					var count = setsToCheck.Count;
@@ -204,10 +204,10 @@ namespace SafetySharp.Analysis
 				// We have to check each set - heuristics may add further during the loop
 				while (setsToCheck.Count > 0)
 				{
-					var set = setsToCheck[setsToCheck.Count - 1];
+					var set = setsToCheck.First.Value;
 
 					var isCurrentLevel = sets.Remove(set); // returns true if set was actually contained
-					setsToCheck.RemoveAt(setsToCheck.Count - 1);
+					setsToCheck.RemoveFirst();
 
 					// for current level, we already know the set is valid
 					var isValid = isCurrentLevel || IsValid(set);

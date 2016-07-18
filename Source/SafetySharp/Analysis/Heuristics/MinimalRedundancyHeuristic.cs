@@ -85,13 +85,14 @@ namespace SafetySharp.Analysis.Heuristics
 			_nextSuggestions = GetSubsets(_currentSuggestions);
 		}
 
-		void IFaultSetHeuristic.Augment(uint cardinalityLevel, List<FaultSet> setsToCheck)
+		void IFaultSetHeuristic.Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck)
 		{
 			_successCounter = 0;
-			setsToCheck.AddRange(_currentSuggestions);
+			foreach (var suggestion in _currentSuggestions)
+				setsToCheck.AddFirst(suggestion);
 		}
 
-		void IFaultSetHeuristic.Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
+		void IFaultSetHeuristic.Update(LinkedList<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
 		{
 			var isSuggestion = _currentSuggestions.Remove(checkedSet);
 			if (!isSuggestion)
@@ -129,7 +130,7 @@ namespace SafetySharp.Analysis.Heuristics
 				from excludedFaults in CartesianProduct(faultGroups)
 				// also exclude subsuming faults
 				let subsuming = FaultSet.SubsumingFaults(excludedFaults, _allFaults)
-				orderby subsuming.Cardinality descending
+				orderby subsuming.Cardinality ascending
 				select faults.GetDifference(subsuming)
 				);
 		}
