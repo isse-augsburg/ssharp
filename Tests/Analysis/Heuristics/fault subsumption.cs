@@ -39,39 +39,34 @@ namespace Tests.Analysis.Heuristics
 
 			// no subsumption declared
 			IFaultSetHeuristic heuristic = new SubsumptionHeuristic(model);
-			var setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F1), new FaultSet(c.F2) });
+			var setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F4), new FaultSet(c.F5) });
 			heuristic.Augment(0, setsToCheck);
 			setsToCheck.Count.ShouldBe(2);
 
 			// simple subsumption
 			heuristic = new SubsumptionHeuristic(model);
-			c.F1.Subsumes(c.F2);
+			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F3), new FaultSet(c.F5) });
 			heuristic.Augment(0, setsToCheck);
-			setsToCheck.Count.ShouldBe(3);
-			setsToCheck.ShouldBe(new[] { new FaultSet(c.F1, c.F2), new FaultSet(c.F1), new FaultSet(c.F2) });
+			setsToCheck.ShouldBe(new[] { new FaultSet(c.F3, c.F4), new FaultSet(c.F3), new FaultSet(c.F5) });
 
 			// transitive subsumption
 			heuristic = new SubsumptionHeuristic(model);
-			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F1), new FaultSet(c.F2) });
-			c.F2.Subsumes(c.F3);
+			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F2), new FaultSet(c.F3) });
 			heuristic.Augment(0, setsToCheck);
-			setsToCheck.Count.ShouldBe(4);
-			setsToCheck.ShouldBe(new[] { new FaultSet(c.F1, c.F2, c.F3), new FaultSet(c.F1),
-				new FaultSet(c.F2, c.F3), new FaultSet(c.F2) });
+			setsToCheck.ShouldBe(new[] { new FaultSet(c.F2, c.F3, c.F4), new FaultSet(c.F2),
+				new FaultSet(c.F3, c.F4), new FaultSet(c.F3) });
 
 			// reflexive subsumption (nonsensical, but should be handled without endless loop)
 			heuristic = new SubsumptionHeuristic(model);
-			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F3) });
-			c.F3.Subsumes(c.F3);
+			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F1) });
 			heuristic.Augment(0, setsToCheck);
-			setsToCheck.ShouldBe(new[] { new FaultSet(c.F3) });
+			setsToCheck.ShouldBe(new[] { new FaultSet(c.F1) });
 
 			// circular subsumption
 			heuristic = new SubsumptionHeuristic(model);
-			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F2) });
-			c.F3.Subsumes(c.F2);
+			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F6) });
 			heuristic.Augment(0, setsToCheck);
-			setsToCheck.ShouldBe(new[] { new FaultSet(c.F2, c.F3), new FaultSet(c.F2) });
+			setsToCheck.ShouldBe(new[] { new FaultSet(c.F6, c.F7, c.F8), new FaultSet(c.F6) });
 
 			// empty set subsumes nothing
 			heuristic = new SubsumptionHeuristic(model);
@@ -85,7 +80,24 @@ namespace Tests.Analysis.Heuristics
 			public readonly Fault F1 = new TransientFault();
 			public readonly Fault F2 = new PermanentFault();
 			public readonly Fault F3 = new PermanentFault();
+			public readonly Fault F4 = new PermanentFault();
+			public readonly Fault F5 = new PermanentFault();
+			public readonly Fault F6 = new PermanentFault();
+			public readonly Fault F7 = new PermanentFault();
+			public readonly Fault F8 = new PermanentFault();
 			public int X;
+
+			public C()
+			{
+				F1.Subsumes(F1);
+
+				F2.Subsumes(F3);
+				F3.Subsumes(F4);
+
+				F6.Subsumes(F7);
+				F7.Subsumes(F8);
+				F8.Subsumes(F6);
+			}
 
 			public override void Update()
 			{
@@ -110,6 +122,46 @@ namespace Tests.Analysis.Heuristics
 
 			[FaultEffect(Fault = nameof(F3))]
 			private class E3 : C
+			{
+				public override void Update()
+				{
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F4))]
+			private class E4 : C
+			{
+				public override void Update()
+				{
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F5))]
+			private class E5 : C
+			{
+				public override void Update()
+				{
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F6))]
+			private class E6 : C
+			{
+				public override void Update()
+				{
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F7))]
+			private class E7 : C
+			{
+				public override void Update()
+				{
+				}
+			}
+
+			[FaultEffect(Fault = nameof(F8))]
+			private class E8 : C
 			{
 				public override void Update()
 				{
