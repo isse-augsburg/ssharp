@@ -34,12 +34,12 @@ namespace SafetySharp.Analysis.Heuristics
 		/// </summary>
 		/// <param name="cardinalityLevel">The level of cardinality that is currently checked.</param>
 		/// <param name="setsToCheck">The next sets to be checked, in reverse order (the last set is checked first).</param>
-		void Augment(uint cardinalityLevel, List<FaultSet> setsToCheck);
+		void Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck);
 
 		/// <summary>
 		///   Informs the heuristic of the result of analyzing <paramref name="checkedSet" />
 		///   and allows it to adapt the sets to check next.
 		/// </summary>
-		void Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe);
+		void Update(LinkedList<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe);
 	}
 }

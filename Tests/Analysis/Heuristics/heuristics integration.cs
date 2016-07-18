@@ -76,7 +76,7 @@ namespace Tests.Analysis.Heuristics
 			result.IsComplete.ShouldBe(true);
 			result.Exceptions.ShouldBeEmpty();
 			result.MinimalCriticalSets.ShouldBeEmpty();
-			result.CheckedSets.Count.ShouldBe(985);
+			result.CheckedSets.Count.ShouldBe(6561);
 			((ulong)result.CheckedSets.Count).ShouldBeLessThan(counter.setCounter); // heuristic has effect
 
 			// heuristics are called appropriately when combined
@@ -96,14 +96,14 @@ namespace Tests.Analysis.Heuristics
 		{
 			public int cardinalityCounter = 0;
 
-			public void Augment(uint cardinalityLevel, List<FaultSet> setsToCheck)
+			public void Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck)
 			{
 				cardinalityCounter++;
 			}
 
 			public ulong setCounter = 0;
 
-			public void Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
+			public void Update(LinkedList<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
 			{
 				setCounter++;
 			}

@@ -76,7 +76,7 @@ namespace SafetySharp.Analysis.Heuristics
 		/// </summary>
 		/// <param name="cardinalityLevel">The level of cardinality that is currently checked.</param>
 		/// <param name="setsToCheck">The next sets to be checked, in reverse order (the last set is checked first).</param>
-		public void Augment(uint cardinalityLevel, List<FaultSet> setsToCheck)
+		public void Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck)
 		{
 			if (setsToCheck.Count == 0 || _minimalCriticalSets.Count == 0 || _cardinalityLevel > cardinalityLevel || !_hasNewMinimalCriticalSets)
 				return;
@@ -85,16 +85,17 @@ namespace SafetySharp.Analysis.Heuristics
 			_hasNewMinimalCriticalSets = false;
 
 			foreach (var set in RemoveAllFaults(new FaultSet(), 0))
+			{
+				setsToCheck.AddFirst(set);
 				_suggestedSets.Add(_allFaults.GetDifference(set));
-
-			setsToCheck.AddRange(_suggestedSets);
+			}
 		}
 
 		/// <summary>
 		///   Informs the heuristic of the result of analyzing <paramref name="checkedSet" />
 		///   and allows it to adapt the sets to check next.
 		/// </summary>
-		public void Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
+		public void Update(LinkedList<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
 		{
 			// Ignore critical sets we've suggested ourself as these are likely not minimal and
 			// would degrade the quality of our suggestions

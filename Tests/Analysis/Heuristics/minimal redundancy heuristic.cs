@@ -44,7 +44,7 @@ namespace Tests.Analysis.Heuristics
 				components.Select(c => c.F3)
 			);
 
-			var setsToCheck = new List<FaultSet>();
+			var setsToCheck = new LinkedList<FaultSet>();
 			heuristic.Augment(0, setsToCheck);
 
 			setsToCheck.Count.ShouldBe(125);

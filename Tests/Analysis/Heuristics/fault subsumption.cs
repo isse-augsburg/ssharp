@@ -23,7 +23,7 @@
 namespace Tests.Analysis.Heuristics
 {
 	using System;
-	using System.Linq;
+	using System.Collections.Generic;
 	using SafetySharp.Analysis;
 	using SafetySharp.Analysis.Heuristics;
 	using SafetySharp.Modeling;
@@ -39,7 +39,7 @@ namespace Tests.Analysis.Heuristics
 
 			// no subsumption declared
 			IFaultSetHeuristic heuristic = new SubsumptionHeuristic(model);
-			var setsToCheck = new[] { new FaultSet(c.F1), new FaultSet(c.F2) }.ToList();
+			var setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F1), new FaultSet(c.F2) });
 			heuristic.Augment(0, setsToCheck);
 			setsToCheck.Count.ShouldBe(2);
 
@@ -48,34 +48,34 @@ namespace Tests.Analysis.Heuristics
 			c.F1.Subsumes(c.F2);
 			heuristic.Augment(0, setsToCheck);
 			setsToCheck.Count.ShouldBe(3);
-			setsToCheck.ShouldBe(new[] { new FaultSet(c.F1), new FaultSet(c.F1, c.F2), new FaultSet(c.F2) });
+			setsToCheck.ShouldBe(new[] { new FaultSet(c.F1, c.F2), new FaultSet(c.F1), new FaultSet(c.F2) });
 
 			// transitive subsumption
 			heuristic = new SubsumptionHeuristic(model);
-			setsToCheck = new[] { new FaultSet(c.F1), new FaultSet(c.F2) }.ToList();
+			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F1), new FaultSet(c.F2) });
 			c.F2.Subsumes(c.F3);
 			heuristic.Augment(0, setsToCheck);
 			setsToCheck.Count.ShouldBe(4);
-			setsToCheck.ShouldBe(new[] { new FaultSet(c.F1), new FaultSet(c.F1, c.F2, c.F3),
-				new FaultSet(c.F2), new FaultSet(c.F2, c.F3) });
+			setsToCheck.ShouldBe(new[] { new FaultSet(c.F1, c.F2, c.F3), new FaultSet(c.F1),
+				new FaultSet(c.F2, c.F3), new FaultSet(c.F2) });
 
 			// reflexive subsumption (nonsensical, but should be handled without endless loop)
 			heuristic = new SubsumptionHeuristic(model);
-			setsToCheck = new[] { new FaultSet(c.F3) }.ToList();
+			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F3) });
 			c.F3.Subsumes(c.F3);
 			heuristic.Augment(0, setsToCheck);
 			setsToCheck.ShouldBe(new[] { new FaultSet(c.F3) });
 
 			// circular subsumption
 			heuristic = new SubsumptionHeuristic(model);
-			setsToCheck = new[] { new FaultSet(c.F2) }.ToList();
+			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F2) });
 			c.F3.Subsumes(c.F2);
 			heuristic.Augment(0, setsToCheck);
-			setsToCheck.ShouldBe(new[] { new FaultSet(c.F2), new FaultSet(c.F2, c.F3) }, false, "circular");
+			setsToCheck.ShouldBe(new[] { new FaultSet(c.F2, c.F3), new FaultSet(c.F2) });
 
 			// empty set subsumes nothing
 			heuristic = new SubsumptionHeuristic(model);
-			setsToCheck = new[] { new FaultSet() }.ToList();
+			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet() });
 			heuristic.Augment(0, setsToCheck);
 			setsToCheck.Count.ShouldBe(1);
 		}
