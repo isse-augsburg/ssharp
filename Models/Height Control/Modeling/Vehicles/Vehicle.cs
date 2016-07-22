@@ -74,14 +74,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		///   Checks whether the vehicle is at the <paramref name="position" />.
 		/// </summary>
 		/// <param name="position">The position that should be checked.</param>
-		public bool IsAtPosition(int position) => Position - _speed <= position && Position > position;
+		public bool IsAtPosition(int position) => Position - _speed < position && Position >= position;
 
 		/// <summary>
 		///   Moves the vehicle.
 		/// </summary>
 		public override void Update()
 		{
-			if (Position == 0 && Choose(true, false))
+			if (Position == 0 && Choose(false, true))
 				return;
 
 			// Once the tunnel is closed, all vehicles stop
