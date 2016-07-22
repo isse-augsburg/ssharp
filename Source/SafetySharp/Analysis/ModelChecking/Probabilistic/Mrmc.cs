@@ -186,7 +186,7 @@ namespace SafetySharp.Analysis
 			{
 				var script = new StringBuilder();
 				script.AppendLine("set method_path gauss_jacobi"); //warning: gauss_seidel seems to be buggy in MRMC
-				script.Append("error_bound 1.0E-10");
+				script.AppendLine("set error_bound 1.0E-6");
 				script.AppendLine(formulaToCheckString);
 				if (outputExactResult)
 					script.Append("write_res_file_result");
@@ -235,6 +235,13 @@ namespace SafetySharp.Analysis
 				stopwatch.Start();
 				mrmc.Run();
 				stopwatch.Stop();
+				var maxIterations = 100;
+				while (pureModelCheckingTime == "" && maxIterations > 0)
+				{
+					maxIterations--;
+					System.Threading.Thread.Sleep(100);
+				}
+					
 
 				Console.WriteLine(iterations);
 				Console.WriteLine(pureModelCheckingTime);

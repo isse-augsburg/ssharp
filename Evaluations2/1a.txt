@@ -1,0 +1,23 @@
+Did not finish. Stopped after 15 hours.
+
+
+
+Generating markov chain using 1 CPU cores.
+State vector has 12 bytes.
+Discovered 200.001 states, 1.083.846.384 transitions, 37 levels.
+Discovered 400.002 states, 3.238.550.110 transitions, 37 levels.
+Discovered 600.007 states, 6.468.458.182 transitions, 37 levels.
+Discovered 800.002 states, 8.805.368.330 transitions, 37 levels.
+Discovered 1.000.001 states, 11.889.206.464 transitions, 37 levels.
+Discovered 1.200.001 states, 15.734.051.254 transitions, 37 levels.
+Discovered 1.400.004 states, 19.707.575.554 transitions, 37 levels.
+Discovered 1.600.002 states, 24.788.699.520 transitions, 39 levels.
+Discovered 1.800.001 states, 27.675.634.422 transitions, 39 levels.
+Discovered 2.000.002 states, 32.432.903.194 transitions, 39 levels.
+
+===============================================
+Initialization time: 00:00:00.2222881
+Labeled Transition Markov chain generation time: 00:00:00.2222881
+Markov chain conversion time: 14:58:59.8318016
+===============================================
+

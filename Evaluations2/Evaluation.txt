@@ -1,0 +1,59 @@
+Models:
+a) Height Control Original, Collision (12 bytes state vector)
+b) Railroad Crossing, Collision
+c) Pressure Tank, Rupturing
+d) Hemodialysis Machine, Unsuccessful (Finished and not cleaned)
+e) Hemodialysis Machine, Contamination
+
+f) Hemodialysis Machine, Unsuccessful, Removed several Hidden (*1)
+g) Height Control Original, Collision, Removed several Hidden (*2)
+
+
+Probabilistic Tests  (Note: Always Release Mode):
+
+Optimization 1: Probability Calculation with Transient Fault Optimization
+1. no transient Fault Optimization (no Early Termination, MRMC, no Lumping, Jacobi, e=10^-6)
+2. transient Fault Optimization (no Early Termination, MRMC, no Lumping, Jacobi, e=10^-6)
+=> Following tests use Transient Fault Optimization
+
+
+
+Optimization 2: Parallel generation of the Labeled Transition Markov Chain
+3. 4 Cores (transient Fault Optimization, no Early Termination, MRMC, no Lumping, Jacobi, e=10^-6)
+=> Following tests have 4 Cores activated by default
+
+
+Optimization 3: Probability Calculation with Early Termination
+7. with Early Termination (transient Fault Optimization, MRMC, no Lumping, Jacobi, e=10^-6)
+8. with Early Termination (transient Fault Optimization, Built-In, no Lumping, Gauss-Seidel, 50 Iterations)
+=> Following tests use Early Termination
+
+Upcoming Optimization 4: Derive Hidden
+Until now we assumed, we used optimized State Vectors. All State Vectors have been optimized manually. What happens, if we leave out this assumption
+9. Probabilistic (transient Fault Optimization, with Early Termination, MRMC, no Lumping, Jacobi, e=10^-6)
+10. Probabilistic (transient Fault Optimization, with Early Termination, Built-In, no Lumping, Gauss-Seidel, 50 Iterations)
+
+
+=========================================
+
+Other Tests
+
+11. DCCA (On the fly, Full Fault Optimization, Note maxCardinality:4 is used for a)
+12. Qualitative, Complete State Space (State Graph, all States, Fault Optimized(transient and persistent))
+
+
+
+
+
+
+
+Settings:
+Cores: ProbabilityChecker.cs line 154,
+Transient Fault Optimization: ProbabilisticExecutedModel.cs line 46 and custom file TransientFault.cs
+Built-In or MRMC, early termination: ModelChecker.cs lines 80-83
+
+
+(*1) See hemodialysis_hidden.diff
+(*2) See heightcontrol_hidden.diff
+
+Have to increase DefaultSuccessorStateCapacity in AnalysisConfiguration.cs (line.67) to 1 << 22

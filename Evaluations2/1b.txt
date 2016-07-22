@@ -1,0 +1,110 @@
+Time: 18:12 min
+
+
+SafetySharp.Analysis.AnalysisException : Error: An unhandled exception of type 'System.OutOfMemoryException' was thrown during model checking: Failed to find an empty hash table slot within a reasonable amount of time. Try increasing the state capacity.
+  ----> System.OutOfMemoryException : Failed to find an empty hash table slot within a reasonable amount of time. Try increasing the state capacity.
+   bei SafetySharp.Analysis.ModelChecking.ModelTraverser.RethrowTraversalException() in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\ModelTraverser.cs:Zeile 109.
+   bei SafetySharp.Analysis.ModelChecking.LabeledTransitionMarkovChainGenerator.GenerateStateGraph() in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\Probabilistic\LabeledTransitionMarkovChainGenerator.cs:Zeile 78.
+   bei SafetySharp.Analysis.ProbabilityChecker.GenerateMarkovChain(Func`1 createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas) in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\Probabilistic\ProbabilityChecker.cs:Zeile 166.
+   bei SafetySharp.Analysis.ProbabilityChecker.CreateMarkovChain(Formula terminateEarlyCondition) in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\Probabilistic\ProbabilityChecker.cs:Zeile 243.
+   bei SafetySharp.Analysis.ModelChecker.CalculateProbabilityToReachState(ModelBase model, Formula stateFormula) in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecker.cs:Zeile 82.
+   bei SafetySharp.CaseStudies.RailroadCrossing.Analysis.HazardProbabilityTests.Calculate() in D:\Repositories\Universität\ssharp\Models\Railroad Crossing\Analysis\HazardProbabilityTests.cs:Zeile 49.
+--OutOfMemoryException
+   bei SafetySharp.Analysis.ModelChecking.ModelTraversal.StateStorage.AddState(Byte* state, Int32& index) in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\ModelTraversal\StateStorage.cs:Zeile 174.
+   bei SafetySharp.Analysis.ModelChecking.ModelTraversal.Worker.HandleTransitions(TransitionCollection transitions, Int32 sourceState, Boolean isInitial) in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\ModelTraversal\Worker.cs:Zeile 152.
+
+Generating markov chain using 1 CPU cores.
+State vector has 12 bytes.
+Discovered 200.001 states, 32.167.302 transitions, 113 levels.
+Discovered 400.001 states, 64.038.414 transitions, 113 levels.
+Discovered 600.001 states, 97.556.980 transitions, 122 levels.
+Discovered 800.001 states, 134.443.354 transitions, 122 levels.
+Discovered 1.000.001 states, 166.519.174 transitions, 122 levels.
+Discovered 1.200.001 states, 205.529.606 transitions, 122 levels.
+Discovered 1.400.002 states, 236.506.302 transitions, 122 levels.
+Discovered 1.600.001 states, 267.539.676 transitions, 122 levels.
+Discovered 1.800.002 states, 299.126.606 transitions, 122 levels.
+Discovered 2.000.001 states, 330.976.712 transitions, 732 levels.
+Discovered 2.200.001 states, 344.336.160 transitions, 732 levels.
+Discovered 2.400.001 states, 358.380.784 transitions, 732 levels.
+Discovered 2.600.002 states, 373.261.396 transitions, 732 levels.
+Discovered 2.800.001 states, 389.247.224 transitions, 732 levels.
+Discovered 3.000.001 states, 405.255.128 transitions, 732 levels.
+Discovered 3.200.001 states, 422.837.828 transitions, 732 levels.
+Discovered 3.400.002 states, 440.137.876 transitions, 732 levels.
+Discovered 3.600.001 states, 458.156.684 transitions, 732 levels.
+Discovered 3.800.004 states, 477.080.680 transitions, 732 levels.
+Discovered 4.000.001 states, 495.266.744 transitions, 732 levels.
+Discovered 4.200.001 states, 516.472.580 transitions, 732 levels.
+Discovered 4.400.005 states, 542.797.284 transitions, 732 levels.
+Discovered 4.600.001 states, 561.779.256 transitions, 732 levels.
+Discovered 4.800.002 states, 575.435.648 transitions, 732 levels.
+Discovered 5.000.001 states, 589.797.296 transitions, 732 levels.
+Discovered 5.200.001 states, 604.895.268 transitions, 732 levels.
+Discovered 5.400.002 states, 621.992.264 transitions, 732 levels.
+Discovered 5.600.001 states, 641.961.288 transitions, 732 levels.
+Discovered 5.800.001 states, 660.523.664 transitions, 732 levels.
+Discovered 6.000.001 states, 673.995.944 transitions, 732 levels.
+Discovered 6.200.003 states, 688.039.920 transitions, 732 levels.
+Discovered 6.400.001 states, 702.871.492 transitions, 732 levels.
+Discovered 6.600.001 states, 718.902.800 transitions, 732 levels.
+Discovered 6.800.002 states, 735.956.148 transitions, 732 levels.
+Discovered 7.000.004 states, 755.264.436 transitions, 732 levels.
+Discovered 7.200.001 states, 779.166.656 transitions, 732 levels.
+Discovered 7.400.002 states, 802.024.540 transitions, 732 levels.
+Discovered 7.600.002 states, 816.675.780 transitions, 732 levels.
+Discovered 7.800.002 states, 830.558.980 transitions, 732 levels.
+Discovered 8.000.001 states, 845.832.696 transitions, 732 levels.
+Discovered 8.200.003 states, 862.466.028 transitions, 732 levels.
+Discovered 8.400.002 states, 880.270.180 transitions, 732 levels.
+Discovered 8.600.002 states, 899.776.476 transitions, 732 levels.
+Discovered 8.800.001 states, 925.633.888 transitions, 732 levels.
+Discovered 9.000.001 states, 938.792.392 transitions, 732 levels.
+Discovered 9.200.001 states, 952.983.128 transitions, 732 levels.
+Discovered 9.400.001 states, 969.726.952 transitions, 732 levels.
+Discovered 9.600.002 states, 986.354.012 transitions, 732 levels.
+Discovered 9.800.001 states, 999.917.508 transitions, 732 levels.
+Discovered 10.000.001 states, 1.014.721.928 transitions, 732 levels.
+Discovered 10.200.003 states, 1.032.250.280 transitions, 732 levels.
+Discovered 10.400.001 states, 1.056.284.524 transitions, 732 levels.
+Discovered 10.600.001 states, 1.070.152.748 transitions, 732 levels.
+Discovered 10.800.001 states, 1.084.505.024 transitions, 732 levels.
+Discovered 11.000.001 states, 1.101.150.628 transitions, 732 levels.
+Discovered 11.200.001 states, 1.120.211.796 transitions, 732 levels.
+Discovered 11.400.001 states, 1.138.631.376 transitions, 732 levels.
+Discovered 11.600.001 states, 1.153.776.884 transitions, 732 levels.
+Discovered 11.800.001 states, 1.169.605.836 transitions, 732 levels.
+Discovered 12.000.001 states, 1.184.323.360 transitions, 732 levels.
+Discovered 12.200.001 states, 1.205.249.240 transitions, 732 levels.
+Discovered 12.400.001 states, 1.219.354.196 transitions, 732 levels.
+Discovered 12.600.001 states, 1.236.951.764 transitions, 732 levels.
+Discovered 12.800.001 states, 1.256.797.180 transitions, 732 levels.
+Discovered 13.000.001 states, 1.273.565.440 transitions, 732 levels.
+Discovered 13.200.001 states, 1.287.628.380 transitions, 732 levels.
+Discovered 13.400.002 states, 1.307.251.964 transitions, 732 levels.
+Discovered 13.600.002 states, 1.320.392.508 transitions, 743 levels.
+Discovered 13.800.001 states, 1.335.921.020 transitions, 743 levels.
+Discovered 14.000.001 states, 1.350.254.372 transitions, 743 levels.
+Discovered 14.200.001 states, 1.365.749.064 transitions, 743 levels.
+Discovered 14.400.001 states, 1.383.154.568 transitions, 743 levels.
+Discovered 14.600.001 states, 1.401.918.376 transitions, 743 levels.
+Discovered 14.800.001 states, 1.422.464.156 transitions, 743 levels.
+Discovered 15.000.001 states, 1.441.475.652 transitions, 743 levels.
+Discovered 15.200.001 states, 1.461.962.984 transitions, 743 levels.
+Discovered 15.400.001 states, 1.486.284.280 transitions, 743 levels.
+Discovered 15.600.001 states, 1.508.254.292 transitions, 743 levels.
+Discovered 15.800.001 states, 1.522.518.244 transitions, 743 levels.
+Discovered 16.000.001 states, 1.537.601.744 transitions, 743 levels.
+Discovered 16.200.001 states, 1.554.142.900 transitions, 743 levels.
+Discovered 16.400.001 states, 1.573.550.008 transitions, 743 levels.
+Discovered 16.600.001 states, 1.592.367.660 transitions, 743 levels.
+Discovered 16.754.463 states, 1.603.118.908 transitions, 743 levels.
+
+===============================================
+Initialization time: 00:00:00.2074799
+Labeled Transition Markov chain generation time: 00:00:00.2074799
+Markov chain conversion time: 00:18:11.9454810
+===============================================
+
+The output has reached the limit and was truncated.
+To view the full output use 'Show Stack Trace in a new window' action.

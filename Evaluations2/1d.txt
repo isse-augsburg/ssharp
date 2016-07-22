@@ -1,0 +1,53 @@
+
+SafetySharp.Analysis.AnalysisException : Error: An unhandled exception of type 'System.OutOfMemoryException' was thrown during model checking: Unable to store transitions. Try increasing the transition capacity.
+  ----> System.OutOfMemoryException : Unable to store transitions. Try increasing the transition capacity.
+   bei SafetySharp.Analysis.ModelChecking.ModelTraverser.RethrowTraversalException() in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\ModelTraverser.cs:Zeile 109.
+   bei SafetySharp.Analysis.ModelChecking.LabeledTransitionMarkovChainGenerator.GenerateStateGraph() in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\Probabilistic\LabeledTransitionMarkovChainGenerator.cs:Zeile 78.
+   bei SafetySharp.Analysis.ProbabilityChecker.GenerateMarkovChain(Func`1 createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas) in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\Probabilistic\ProbabilityChecker.cs:Zeile 166.
+   bei SafetySharp.Analysis.ProbabilityChecker.CreateMarkovChain(Formula terminateEarlyCondition) in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\Probabilistic\ProbabilityChecker.cs:Zeile 243.
+   bei SafetySharp.Analysis.ModelChecker.CalculateProbabilityToReachState(ModelBase model, Formula stateFormula) in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecker.cs:Zeile 82.
+   bei SafetySharp.CaseStudies.HemodialysisMachine.Analysis.HazardProbabilityTests.DialysisFinishedAndBloodNotCleaned() in D:\Repositories\Universität\ssharp\Models\Hemodialysis Machine\Analysis\HazardProbabilityTests.cs:Zeile 69.
+--OutOfMemoryException
+   bei SafetySharp.Runtime.LabeledTransitionMarkovChain.AddStateInfo(Int32 sourceState, Boolean isInitial, TransitionCollection transitions, Int32 transitionCount) in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\Probabilistic\LabeledTransitionMarkovChain.cs:Zeile 116.
+   bei SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers.LabeledTransitionMarkovChainBuilder.ProcessTransitions(TraversalContext context, Worker worker, Int32 sourceState, TransitionCollection transitions, Int32 transitionCount, Boolean areInitialTransitions) in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\Probabilistic\LabeledTransitionMarkovChainBuilder.cs:Zeile 67.
+   bei SafetySharp.Analysis.ModelChecking.ModelTraversal.Worker.HandleTransitions(TransitionCollection transitions, Int32 sourceState, Boolean isInitial) in D:\Repositories\Universität\ssharp\Source\SafetySharp\Analysis\ModelChecking\ModelTraversal\Worker.cs:Zeile 178.
+
+Generating markov chain using 1 CPU cores.
+State vector has 40 bytes.
+Discovered 200.042 states, 102.064.128 transitions, 10 levels.
+Discovered 400.008 states, 204.475.392 transitions, 10 levels.
+Discovered 600.016 states, 306.881.024 transitions, 10 levels.
+Discovered 800.004 states, 409.232.384 transitions, 10 levels.
+Discovered 1.000.004 states, 511.653.376 transitions, 10 levels.
+Discovered 1.200.030 states, 614.072.320 transitions, 10 levels.
+Discovered 1.400.004 states, 716.486.656 transitions, 10 levels.
+Discovered 1.600.002 states, 818.904.064 transitions, 10 levels.
+Discovered 1.800.012 states, 921.285.632 transitions, 10 levels.
+Discovered 2.000.002 states, 1.023.677.952 transitions, 10 levels.
+Discovered 2.200.002 states, 1.126.120.448 transitions, 10 levels.
+Discovered 2.400.002 states, 1.228.496.896 transitions, 10 levels.
+Discovered 2.600.030 states, 1.330.890.240 transitions, 10 levels.
+Discovered 2.800.002 states, 1.433.312.256 transitions, 10 levels.
+Discovered 3.000.008 states, 1.535.739.392 transitions, 10 levels.
+Discovered 3.200.012 states, 1.638.136.832 transitions, 10 levels.
+Discovered 3.400.004 states, 1.740.518.912 transitions, 10 levels.
+Discovered 3.600.002 states, 1.842.955.264 transitions, 10 levels.
+Discovered 3.800.005 states, 1.945.357.312 transitions, 10 levels.
+Discovered 4.000.001 states, 2.047.745.536 transitions, 10 levels.
+Discovered 4.200.011 states, 2.150.155.776 transitions, 10 levels.
+Discovered 4.400.010 states, 2.252.558.336 transitions, 10 levels.
+Discovered 4.600.013 states, 2.354.974.720 transitions, 10 levels.
+Discovered 4.800.002 states, 2.457.305.600 transitions, 10 levels.
+Discovered 5.000.002 states, 2.559.723.520 transitions, 10 levels.
+Discovered 5.200.020 states, 2.662.165.504 transitions, 10 levels.
+Discovered 5.400.002 states, 2.764.559.360 transitions, 10 levels.
+Discovered 5.600.028 states, 2.866.966.016 transitions, 10 levels.
+Discovered 5.800.002 states, 2.969.368.064 transitions, 10 levels.
+Discovered 5.946.124 states, 3.044.173.312 transitions, 10 levels.
+
+===============================================
+Initialization time: 00:00:00.2423998
+Labeled Transition Markov chain generation time: 00:00:00.2424001
+Markov chain conversion time: 01:28:11.4483566
+===============================================
+

@@ -17,20 +17,20 @@ Optimization 1: Parallel generation of the Labeled Transition Markov Chain
 => Following tests have 4 Cores activated by default
 
 Optimization 2: Probability Calculation with Transient Fault Optimization
-3. no transient Fault Optimization (no Early Termination, MRMC, no Lumping, Jacobi, e=10^-10)
+3. no transient Fault Optimization (no Early Termination, MRMC, no Lumping, Jacobi, e=10^-6)
 4. no transient Fault Optimization (no Early Termination, Built-In, no Lumping, Gauss-Seidel, 50 Iterations)
-5. transient Fault Optimization (no Early Termination, MRMC, no Lumping, Jacobi, e=10^-10)
+5. transient Fault Optimization (no Early Termination, MRMC, no Lumping, Jacobi, e=10^-6)
 6. transient Fault Optimization (no Early Termination, Built-In, no Lumping, Gauss-Seidel, 50 Iterations)
 => Following tests use Transient Fault Optimization
 
 Optimization 3: Probability Calculation with Early Termination
-7. with Early Termination (transient Fault Optimization, MRMC, no Lumping, Jacobi, e=10^-10)
+7. with Early Termination (transient Fault Optimization, MRMC, no Lumping, Jacobi, e=10^-6)
 8. with Early Termination (transient Fault Optimization, Built-In, no Lumping, Gauss-Seidel, 50 Iterations)
 => Following tests use Early Termination
 
 Upcoming Optimization 4: Derive Hidden
 Until now we assumed, we used optimized State Vectors. All State Vectors have been optimized manually. What happens, if we leave out this assumption
-9. Probabilistic (transient Fault Optimization, with Early Termination, MRMC, no Lumping, Jacobi, e=10^-10)
+9. Probabilistic (transient Fault Optimization, with Early Termination, MRMC, no Lumping, Jacobi, e=10^-6)
 10. Probabilistic (transient Fault Optimization, with Early Termination, Built-In, no Lumping, Gauss-Seidel, 50 Iterations)
 
 

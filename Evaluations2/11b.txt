@@ -1,0 +1,44 @@
+Total time: 2 sec
+
+Running Deductive Cause Consequence Analysis.
+Checking the empty fault set...
+Checking 7 sets of cardinality 1...
+     critical:  { OdometerPositionOffset }
+     critical:  { OdometerSpeedOffset }
+     critical:  { ErroneousTrainDetection }
+     critical:  { BarrierSensorFailure }
+Checking 3 sets of cardinality 2...
+     critical:  { BarrierMotorStuck, BrakesFailure }
+     critical:  { BrakesFailure, MessageDropped }
+
+=======================================================================
+=======      Deductive Cause Consequence Analysis: Results      =======
+=======================================================================
+
+Elapsed Time: 00:00:01.7249270
+Fault Count: 7
+Faults: BarrierMotorStuck, BarrierSensorFailure, BrakesFailure, ErroneousTrainDetection, MessageDropped, OdometerPositionOffset, OdometerSpeedOffset
+
+Checked Fault Sets: 11 (9% of all fault sets)
+Minimal Critical Sets: 6
+
+   (1) { OdometerPositionOffset }
+   (2) { OdometerSpeedOffset }
+   (3) { ErroneousTrainDetection }
+   (4) { BarrierSensorFailure }
+   (5) { BarrierMotorStuck, BrakesFailure }
+   (6) { BrakesFailure, MessageDropped }
+
+
+=======================================================================
+=======        Fault Activation Order Analysis: Results         =======
+=======================================================================
+
+Elapsed Time: 00:00:00.1037829
+Order Relationship Count: 2
+
+{ BarrierMotorStuck, BrakesFailure }
+    (1) BarrierMotorStuck < BrakesFailure
+{ MessageDropped, BrakesFailure }
+    (1) MessageDropped < BrakesFailure
+

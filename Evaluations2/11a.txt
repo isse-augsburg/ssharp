@@ -1,0 +1,33 @@
+Total time: 04 sec
+
+Running Deductive Cause Consequence Analysis.
+Checking 1 sets of cardinality 1...
+Checking 12 sets of cardinality 2...
+     critical:  { LeftOHV, MisdetectionLB-Pre }
+     critical:  { LeftOHV, MisdetectionLB-Main }
+     critical:  { LeftOHV, SlowTraffic }
+Checking 36 sets of cardinality 3...
+     critical:  { FalseDetectionLB-Main, LeftOHV, MisdetectionOD-End-Left }
+     critical:  { LeftOHV, MisdetectionOD-End-Left, MisdetectionOD-Main-Left }
+Checking 71 sets of cardinality 4...
+
+=======================================================================
+=======      Deductive Cause Consequence Analysis: Results      =======
+=======================================================================
+
+*** Warning: Analysis might be incomplete; not all fault sets have been checked. ***
+
+Elapsed Time: 00:00:04.5240312
+Fault Count: 13
+Faults: FalseDetectionLB-Main, FalseDetectionLB-Pre, FalseDetectionOD-End-Left, FalseDetectionOD-Main-Left, FalseDetectionOD-Main-Right, LeftHV, LeftOHV, MisdetectionLB-Main, MisdetectionLB-Pre, MisdetectionOD-End-Left, MisdetectionOD-Main-Left, MisdetectionOD-Main-Right, SlowTraffic
+Forced Faults: LeftOHV
+
+Checked Fault Sets: 120 (1% of all fault sets)
+Minimal Critical Sets: 5
+
+   (1) { LeftOHV, MisdetectionLB-Pre }
+   (2) { LeftOHV, MisdetectionLB-Main }
+   (3) { LeftOHV, SlowTraffic }
+   (4) { FalseDetectionLB-Main, LeftOHV, MisdetectionOD-End-Left }
+   (5) { LeftOHV, MisdetectionOD-End-Left, MisdetectionOD-Main-Left }
+

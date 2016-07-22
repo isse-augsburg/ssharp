@@ -40,6 +40,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
 		private readonly ProbabilisticTransition* _transitions;
 		private int _count;
+		private int _capacity;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -49,6 +50,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
 		public ProbabilisticTransitionSetBuilder(RuntimeModel model, int capacity, params Func<bool>[] formulas)
 		{
+			_capacity = capacity;
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
 			Requires.That(formulas.Length < 32, "At most 32 formulas are supported.");
@@ -71,6 +73,8 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// <param name="probability">The probability of the transition.</param>
 		public void Add(RuntimeModel model, double probability)
 		{
+			Requires.That(_count < _capacity,"Too Small");
+
 			// 1. Notify all fault activations, so that the correct activation is set in the run time model
 			//    (Needed to persist persistent faults)
 			model.NotifyFaultActivations();
