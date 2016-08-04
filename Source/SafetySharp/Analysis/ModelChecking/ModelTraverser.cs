@@ -92,6 +92,8 @@ namespace SafetySharp.Analysis.ModelChecking
 			Reset();
 
 			_workers[0].ComputeInitialStates();
+			if (_loadBalancer.IsTerminated)
+				return;
 
 			var tasks = new Task[_workers.Length];
 			for (var i = 0; i < _workers.Length; ++i)

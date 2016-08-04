@@ -81,7 +81,9 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 			{
 				_context.LoadBalancer.Terminate();
 				_context.Exception = e;
-				_context.CounterExample = Model.CreateCounterExample(null, endsWithException: true);
+
+				if (!(e is OutOfMemoryException))
+					_context.CounterExample = Model.CreateCounterExample(null, endsWithException: true);
 			}
 		}
 

@@ -79,8 +79,8 @@ namespace SafetySharp.Analysis
 
 						if (result != null)
 						{
-							OutputWritten?.Invoke($"{(int)(result.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
-							OutputWritten?.Invoke($"{(int)(result.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+							OutputWritten?.Invoke($"{(long)(result.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
+							OutputWritten?.Invoke($"{(long)(result.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
 						}
 
 						OutputWritten?.Invoke("===============================================");

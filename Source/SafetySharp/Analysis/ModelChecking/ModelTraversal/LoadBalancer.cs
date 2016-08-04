@@ -52,6 +52,11 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		private int WorkerCount => _stacks.Length;
 
 		/// <summary>
+		///   Gets a value indicating whether model traversal has been terminated.
+		/// </summary>
+		public bool IsTerminated => _terminated;
+
+		/// <summary>
 		///   Balances the load between <see cref="Worker" /> instances. Returns <c>false</c> to indicate that the worker should
 		///   terminate.
 		/// </summary>

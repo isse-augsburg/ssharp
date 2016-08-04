@@ -27,8 +27,9 @@ namespace SafetySharp.Modeling
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.Serialization;
-	using Utilities;
 	using Analysis;
+	using CompilerServices;
+	using Utilities;
 
 	/// <summary>
 	///   Represents a base class for all faults affecting the behavior of <see cref="Component" />s.
@@ -52,10 +53,10 @@ namespace SafetySharp.Modeling
 		private int _choiceIndex;
 
 		[NonSerializable]
-		private FaultSet subsumedFaultSet;
+		private bool _isSubsumedFaultSetCached;
 
 		[NonSerializable]
-		private bool isSubsumedFaultSetCached = false;
+		private FaultSet _subsumedFaultSet;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -122,18 +123,18 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
-		/// The set of subsumed faults, including transitively subsumed faults.
+		///   The set of subsumed faults, including transitively subsumed faults.
 		/// </summary>
 		internal FaultSet SubsumedFaultSet
 		{
 			get
 			{
-				if (!isSubsumedFaultSetCached)
+				if (!_isSubsumedFaultSetCached)
 				{
-					subsumedFaultSet = CollectSubsumedFaultsTransitive();
-					isSubsumedFaultSetCached = true;
+					_subsumedFaultSet = CollectSubsumedFaultsTransitive();
+					_isSubsumedFaultSetCached = true;
 				}
-				return subsumedFaultSet;
+				return _subsumedFaultSet;
 			}
 		}
 

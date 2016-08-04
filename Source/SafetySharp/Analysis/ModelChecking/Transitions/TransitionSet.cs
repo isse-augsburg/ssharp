@@ -42,7 +42,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// </summary>
 		/// <param name="stateVectorSize">The size of the state vector in bytes.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
-		public TransitionSetBuilder(int stateVectorSize, int capacity)
+		public TransitionSetBuilder(int stateVectorSize, long capacity)
 		{
 			Requires.That(capacity <= (1 << 30), nameof(capacity), $"Maximum supported capacity is {1 << 30}.");
 

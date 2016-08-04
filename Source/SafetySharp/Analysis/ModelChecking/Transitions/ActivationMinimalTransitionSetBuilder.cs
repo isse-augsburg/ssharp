@@ -29,12 +29,12 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 	using Utilities;
 
 	/// <summary>
-	///   Creates an activation-minimal set of <see cref="CandidateTransition"/> instances.
+	///   Creates an activation-minimal set of <see cref="CandidateTransition" /> instances.
 	/// </summary>
 	internal sealed unsafe class ActivationMinimalTransitionSetBuilder : DisposableObject
 	{
 		private const int ProbeThreshold = 1000;
-		private readonly int _capacity;
+		private readonly long _capacity;
 		private readonly FaultSetInfo* _faults;
 		private readonly MemoryBuffer _faultsBuffer = new MemoryBuffer();
 		private readonly Func<bool>[] _formulas;
@@ -58,7 +58,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// <param name="model">The model the successors are computed for.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public ActivationMinimalTransitionSetBuilder(RuntimeModel model, int capacity, params Func<bool>[] formulas)
+		public ActivationMinimalTransitionSetBuilder(RuntimeModel model, long capacity, params Func<bool>[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
@@ -75,10 +75,10 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 			_targetStateMemory = _targetStateBuffer.Pointer;
 
 			_lookupBuffer.Resize(capacity * sizeof(int), zeroMemory: false);
-			_faultsBuffer.Resize(capacity * sizeof(FaultSet), zeroMemory: false);
+			_faultsBuffer.Resize(capacity * sizeof(FaultSetInfo), zeroMemory: false);
 			_hashedStateBuffer.Resize(capacity * _stateVectorSize, zeroMemory: false);
 
-			_successors = new List<uint>(capacity);
+			_successors = new List<uint>();
 			_capacity = capacity;
 
 			_lookup = (int*)_lookupBuffer.Pointer;
@@ -95,6 +95,9 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// <param name="model">The model the transition should be added for.</param>
 		public void Add(RuntimeModel model)
 		{
+			if (_count >= _capacity)
+				throw new OutOfMemoryException("Unable to store an additional transition. Try increasing the successor state capacity.");
+
 			++_computedCount;
 
 			// 1. Serialize the model's computed state; that is the successor state of the transition's source state
@@ -156,7 +159,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 				if (faultIndex == -1)
 				{
 					_successors.Add((uint)stateHash);
-					AddFaultMetadata(stateHash, activatedFaults, -1);
+					AddFaultMetadata(stateHash, -1);
 					MemoryBuffer.Copy(successorState, _hashedStateMemory + stateHash * _stateVectorSize, _stateVectorSize);
 
 					return true;
@@ -190,7 +193,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 				CleanupTransitions(activatedFaults, faultIndex, stateHash);
 
 			if (addFaults)
-				AddFaultMetadata(stateHash, activatedFaults, _lookup[stateHash]);
+				AddFaultMetadata(stateHash, _lookup[stateHash]);
 
 			return addTransition;
 		}
@@ -260,10 +263,10 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// <summary>
 		///   Adds the fault metadata of the current transition.
 		/// </summary>
-		private void AddFaultMetadata(long stateHash, FaultSet activatedFaults, int nextSet)
+		private void AddFaultMetadata(long stateHash, int nextSet)
 		{
 			if (_nextFaultIndex >= _capacity)
-				throw new OutOfMemoryException("Out of memory. Try increasing the successor state capacity.");
+				throw new OutOfMemoryException("Unable to store an additional transition. Try increasing the successor state capacity.");
 
 			_faults[_nextFaultIndex] = new FaultSetInfo
 			{
