@@ -86,7 +86,7 @@ namespace SafetySharp.Analysis.Heuristics
 
 			foreach (var set in RemoveAllFaults(new FaultSet(), 0))
 			{
-				setsToCheck.AddFirst(set);
+				setsToCheck.AddFirst(_allFaults.GetDifference(set));
 				_suggestedSets.Add(_allFaults.GetDifference(set));
 			}
 		}
