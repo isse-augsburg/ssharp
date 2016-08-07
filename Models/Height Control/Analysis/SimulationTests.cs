@@ -45,7 +45,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			var simulator = new Simulator(model);
 			simulator.FastForward(steps: 20);
 
-			foreach (var vehicle in model.Vehicles)
+			foreach (var vehicle in ((Model)simulator.Model).Vehicles)
 				vehicle.IsCollided.Should().BeFalse();
 		}
 	}

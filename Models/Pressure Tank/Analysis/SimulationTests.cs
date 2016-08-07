@@ -43,6 +43,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			model.Faults.SuppressActivations();
 
 			var simulator = new Simulator(model);
+			model = (Model)simulator.Model;
 			simulator.FastForward(steps: 120);
 
 			model.Tank.IsRuptured.Should().BeFalse();
@@ -59,6 +60,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			model.Sensor.SuppressIsFull.ForceActivation();
 
 			var simulator = new Simulator(model);
+			model = (Model)simulator.Model;
 			simulator.FastForward(steps: 120);
 
 			model.Tank.IsRuptured.Should().BeFalse();
@@ -76,15 +78,16 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			model.Sensor.SuppressIsFull.ForceActivation();
 			model.Timer.SuppressTimeout.ForceActivation();
 
-			// Check that the tank is still not ruptured after 120 steps
+			// Check that the tank is ruptured after 62 steps
 			var simulator = new Simulator(model);
-			simulator.FastForward(steps: 120);
+			model = (Model)simulator.Model;
+			simulator.FastForward(steps: 62);
 
-			model.Tank.IsRuptured.Should().BeFalse();
+			model.Tank.IsRuptured.Should().BeTrue();
 
-			// Check that the tank does not rupture in the first 120 steps
+			// Check that the tank does not rupture in the first 61 steps
 			simulator.Reset();
-			for (var i = 0; i < 120; ++i)
+			for (var i = 0; i < 61; ++i)
 			{
 				simulator.SimulateStep();
 				model.Tank.IsRuptured.Should().BeFalse();
