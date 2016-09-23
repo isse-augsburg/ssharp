@@ -52,7 +52,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ProbabilisticExecutedModel(Func<RuntimeModel> runtimeModelCreator, int successorStateCapacity)
+		internal ProbabilisticExecutedModel(Func<RuntimeModel> runtimeModelCreator, long successorStateCapacity)
 			: base(runtimeModelCreator)
 		{
 			var formulas = RuntimeModel.Formulas.Select(CompilationVisitor.Compile).ToArray();

@@ -62,10 +62,10 @@ namespace SafetySharp.Runtime
 
 		public int Transitions => _transitionChainElementCount;
 
-		private readonly int _maxNumberOfTransitions;
+		private readonly long _maxNumberOfTransitions;
 
 
-		public LabeledTransitionMarkovChain(int maxNumberOfStates= 1 << 21, int maxNumberOfTransitions=0)
+		public LabeledTransitionMarkovChain(long maxNumberOfStates= 1 << 21, long maxNumberOfTransitions=0)
 		{
 			Requires.InRange(maxNumberOfStates, nameof(maxNumberOfStates), 1024, Int32.MaxValue - 1);
 			if (maxNumberOfTransitions <= 0)

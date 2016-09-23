@@ -47,7 +47,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// <param name="model">The model the successors are computed for.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public ProbabilisticTransitionSetBuilder(RuntimeModel model, int capacity, params Func<bool>[] formulas)
+		public ProbabilisticTransitionSetBuilder(RuntimeModel model, long capacity, params Func<bool>[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
