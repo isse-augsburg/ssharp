@@ -24,13 +24,12 @@ namespace SafetySharp.Analysis.Heuristics
 {
 	using System.Collections.Generic;
 	using Modeling;
-	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   A heuristic taking the subsumption relation between different <see cref="Fault" /> instances into account.
 	/// </summary>
-	public class SubsumptionHeuristic : IFaultSetHeuristic
+	public sealed class SubsumptionHeuristic : IFaultSetHeuristic
 	{
 		private readonly Fault[] _allFaults;
 		private readonly HashSet<FaultSet> _subsumedSets = new HashSet<FaultSet>();
@@ -47,45 +46,52 @@ namespace SafetySharp.Analysis.Heuristics
 			_allFaults = model.Faults;
 		}
 
-		void IFaultSetHeuristic.Augment(List<FaultSet> setsToCheck)
+		void IFaultSetHeuristic.Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck)
 		{
 			// for each set, check the set of subsumed faults first
-			for (var i = 0; i < setsToCheck.Count; ++i)
+			for (var node = setsToCheck.First; node != null; node = node.Next)
 			{
-				var subsumed = FaultSet.SubsumedFaults(setsToCheck[i], _allFaults);
-				if (!setsToCheck[i].Equals(subsumed) && !_subsumedSets.Contains(subsumed))
+				var subsumed = FaultSet.SubsumedFaults(node.Value, _allFaults);
+				if (!node.Value.Equals(subsumed) && !_subsumedSets.Contains(subsumed))
 				{
-					setsToCheck.Insert(i + 1, subsumed);
+					setsToCheck.AddBefore(node, subsumed);
 					_subsumedSets.Add(subsumed);
-					i++;
 				}
 			}
 		}
 
-		void IFaultSetHeuristic.Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
+		void IFaultSetHeuristic.Update(LinkedList<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
 		{
 			if (!_subsumedSets.Contains(checkedSet))
 				return;
 
-			var delta = isSafe ? 1 : -1;
-			_successCounter += delta;
-
+			_successCounter += isSafe ? 1 : -1;
 			if (_successCounter != 0)
 				return;
 
 			// if the subsumed sets are critical more often than they are not,
 			// check the "normal" sets first.
-			for (var i = 0; i < setsToCheck.Count; ++i)
+			for (var node = setsToCheck.First; node != null; node = node.Next)
 			{
-				var set = setsToCheck[i];
+				var set = node.Value;
 				if (_subsumedSets.Contains(set))
 				{
-					setsToCheck[i] = setsToCheck[i + delta];
-					setsToCheck[i + delta] = set;
-					if (isSafe) // we just moved 'set' to position i+1
-						i++; // skip it, don't move it again
+					if (isSafe && node.Previous != null) // move subsumed set before set
+						SwitchValues(node, node.Previous);
+					else if (!isSafe && node.Next != null) // move subsumed set after set
+					{
+						SwitchValues(node, node.Next);
+						node = node.Next; // skip iteration for node.Next
+					}
 				}
 			}
+		}
+
+		private void SwitchValues(LinkedListNode<FaultSet> node1, LinkedListNode<FaultSet> node2)
+		{
+			var tmp = node1.Value;
+			node1.Value = node2.Value;
+			node2.Value = tmp;
 		}
 	}
 }

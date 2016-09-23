@@ -27,8 +27,8 @@ namespace SafetySharp.Modeling
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.Serialization;
+	using Analysis;
 	using CompilerServices;
-	using Runtime;
 	using Utilities;
 
 	/// <summary>
@@ -51,6 +51,12 @@ namespace SafetySharp.Modeling
 
 		[NonSerializable]
 		private int _choiceIndex;
+
+		[NonSerializable]
+		private bool _isSubsumedFaultSetCached;
+
+		[NonSerializable]
+		private FaultSet _subsumedFaultSet;
 
 		[Hidden]
 		public Probability ProbabilityOfOccurrence = new Probability(0.5);
@@ -120,6 +126,38 @@ namespace SafetySharp.Modeling
 		}
 
 		/// <summary>
+		///   The set of subsumed faults, including transitively subsumed faults.
+		/// </summary>
+		internal FaultSet SubsumedFaultSet
+		{
+			get
+			{
+				if (!_isSubsumedFaultSetCached)
+				{
+					_subsumedFaultSet = CollectSubsumedFaultsTransitive();
+					_isSubsumedFaultSetCached = true;
+				}
+				return _subsumedFaultSet;
+			}
+		}
+
+		private FaultSet CollectSubsumedFaultsTransitive()
+		{
+			IEnumerable<Fault> currentFaults = new[] { this };
+			var subsumed = new FaultSet(this);
+
+			uint oldCount;
+			do // fixed-point iteration
+			{
+				oldCount = subsumed.Cardinality;
+				currentFaults = currentFaults.SelectMany(fault => fault.SubsumedFaults);
+				subsumed = subsumed.GetUnion(new FaultSet(currentFaults));
+			} while (oldCount < subsumed.Cardinality);
+
+			return subsumed;
+		}
+
+		/// <summary>
 		///   Adds fault effects for the <paramref name="components" /> that are enabled when the fault is activated.
 		/// </summary>
 		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
@@ -184,6 +222,16 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		/// <param name="faults">The subsumed faults.</param>
 		public void Subsumes(params Fault[] faults)
+		{
+			SubsumedFaults.UnionWith(faults);
+		}
+
+		/// <summary>
+		///   Declares the given <paramref name="faults" /> to be subsumed by this instance. Subsumption metadata does
+		///   not change the fault's effects and is only used by heuristics.
+		/// </summary>
+		/// <param name="faults">The subsumed faults.</param>
+		public void Subsumes(IEnumerable<Fault> faults)
 		{
 			SubsumedFaults.UnionWith(faults);
 		}

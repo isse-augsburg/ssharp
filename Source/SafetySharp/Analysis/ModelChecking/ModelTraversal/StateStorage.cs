@@ -53,7 +53,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		/// <summary>
 		///   The number of states that can be cached.
 		/// </summary>
-		private readonly int _capacity;
+		private readonly long _capacity;
 
 		/// <summary>
 		///   The buffer that stores the hash table information.
@@ -85,18 +85,18 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		/// </summary>
 		/// <param name="stateVectorSize">The size of the state vector in bytes.</param>
 		/// <param name="capacity">The capacity of the cache, i.e., the number of states that can be stored in the cache.</param>
-		public StateStorage(int stateVectorSize, int capacity)
+		public StateStorage(int stateVectorSize, long capacity)
 		{
 			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
 
 			_stateVectorSize = stateVectorSize;
 			_capacity = capacity;
 
-			_stateBuffer.Resize((long)_capacity * _stateVectorSize, zeroMemory: false);
+			_stateBuffer.Resize(_capacity * _stateVectorSize, zeroMemory: false);
 			_stateMemory = _stateBuffer.Pointer;
 
 			// We allocate enough space so that we can align the returned pointer such that index 0 is the start of a cache line
-			_hashBuffer.Resize((long)_capacity * sizeof(int) + CacheLineSize, zeroMemory: false);
+			_hashBuffer.Resize(_capacity * sizeof(int) + CacheLineSize, zeroMemory: false);
 			_hashMemory = (int*)_hashBuffer.Pointer;
 
 			if ((ulong)_hashMemory % CacheLineSize != 0)
@@ -114,7 +114,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		{
 			get
 			{
-				Assert.InRange(index, 0, (long)_capacity * _stateVectorSize);
+				Assert.InRange(index, 0, _capacity * _stateVectorSize);
 				return _stateMemory + (long)index * _stateVectorSize;
 			}
 		}

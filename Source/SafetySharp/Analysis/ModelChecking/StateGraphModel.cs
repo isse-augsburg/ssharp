@@ -42,7 +42,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		/// <param name="stateGraph">The state graph that should be analyzed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		public StateGraphModel(StateGraph stateGraph, int successorStateCapacity)
+		public StateGraphModel(StateGraph stateGraph, long successorStateCapacity)
 		{
 			Requires.NotNull(stateGraph, nameof(stateGraph));
 

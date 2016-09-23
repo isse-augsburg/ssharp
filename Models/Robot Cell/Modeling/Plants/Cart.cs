@@ -22,9 +22,7 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 {
-	using System.Collections.Generic;
 	using System.Linq;
-	using Controllers;
 	using SafetySharp.Modeling;
 
 	internal class Cart : Component
@@ -34,9 +32,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		private Robot _position;
 
-		public Fault Broken = new PermanentFault();
+		public Fault Broken = new TransientFault();
 
 		public Workpiece LoadedWorkpiece;
+		public Fault Lost = new TransientFault();
 
 		public Cart(Robot startPosition, params Route[] routes)
 		{
@@ -53,19 +52,20 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		public bool HasWorkpiece => LoadedWorkpiece != null;
 
-	    public virtual bool MoveTo(Robot robot)
-	    {
-		    if (!CanMove(robot))
-			    return false;
+		public virtual bool MoveTo(Robot robot)
+		{
+			if (!CanMove(robot))
+				return false;
 
-		    _position = robot;
-		    return true;
-	    }
+			_position = robot;
+			return true;
+		}
 
 		public void SetNames(int cartId)
 		{
 			_name = $"C{cartId}";
-			Broken.Name = $"C{cartId}.Broken";
+			Broken.Name = _name + ".Broken";
+			Lost.Name = _name + ".Lost";
 
 			foreach (var route in Routes)
 				route.Blocked.Name = $"C{cartId}.{route.Robot1.Name}->{route.Robot2.Name}.Blocked";
@@ -84,11 +84,26 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			return Routes.Any(route => route.CanNavigate(_position, robot));
 		}
 
-		[FaultEffect(Fault = nameof(Broken))]
+		public bool IsPositionedAt(Robot robot)
+		{
+			return _position == robot;
+		}
+
+		[FaultEffect(Fault = nameof(Broken)), Priority(2)]
 		internal class BrokenEffect : Cart
 		{
 			public override bool MoveTo(Robot robot) => false;
 			public override bool CanMove(Robot robot) => false;
+		}
+
+		[FaultEffect(Fault = nameof(Lost)), Priority(1)]
+		internal class LostEffect : Cart
+		{
+			public override bool MoveTo(Robot robot)
+			{
+				_position = Choose(Routes.SelectMany(route => new[] { route.Robot1, route.Robot2 }));
+				return true;
+			}
 		}
 	}
 }

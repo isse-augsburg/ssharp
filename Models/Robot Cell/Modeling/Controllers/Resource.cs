@@ -23,19 +23,26 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using System.Collections.Generic;
+	using System.Linq;
 	using Plants;
 	using SafetySharp.Modeling;
 
 	internal class Resource : Component
 	{
-	    public List<Capability> State { get; }
+		private byte _statePrefixLength;
 
-	    public Resource(Task task, Workpiece workpiece)
+		public IEnumerable<Capability> State =>
+			Task?.Capabilities.Take(_statePrefixLength) ?? Enumerable.Empty<Capability>();
+
+		public Resource(Task task, Workpiece workpiece)
 		{
 			Task = task;
 			Workpiece = workpiece;
+		}
 
-			State = new List<Capability>(task.Capabilities.Length);
+		public void OnCapabilityApplied()
+		{
+			++_statePrefixLength;
 		}
 
 		public Workpiece Workpiece { get; }

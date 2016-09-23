@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 	[DebuggerDisplay("{Robot1.Name} -> {Robot2.Name}")]
 	internal class Route : Component
 	{
-		public Fault Blocked = new PermanentFault();
+		public Fault Blocked = new TransientFault();
 
 		public Route(Robot robot1, Robot robot2)
 		{

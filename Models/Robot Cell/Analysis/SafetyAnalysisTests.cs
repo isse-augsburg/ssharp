@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -23,65 +23,39 @@
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
-	using System.Diagnostics;
+	using System.Collections;
+	using System.Linq;
 	using Modeling;
 	using Modeling.Controllers;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
 
-	public class SimulationTests
+	internal class SafetyAnalysisTests
 	{
-		[Test]
-		public void Simulate()
+		[TestCaseSource(nameof(CreateConfigurations))]
+		public void NoDamagedWorkpieces(Model model)
 		{
-			var model = new Model();
-			model.InitializeDefaultInstance();
-			model.CreateObserverController<FastObserverController>();
-			model.Faults.SuppressActivations();
+			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
+			var result = modelChecker.ComputeMinimalCriticalSets(model, model.Workpieces.Any(w => w.IsDamaged), maxCardinality: 2);
 
-			var simulator = new Simulator(model);
-			PrintTrace(simulator, steps: 120);
+			Console.WriteLine(result);
 		}
 
-		public static void PrintTrace(Simulator simulator, int steps)
+		[TestCaseSource(nameof(CreateConfigurations))]
+		public void AllWorkpiecesCompleteEventually(Model model)
 		{
-			var model = (Model)simulator.Model;
+			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
+			var result = modelChecker.ComputeMinimalCriticalSets(model,
+				model.ObserverController._stepCount >= ObserverController.MaxSteps &&
+				!model.Workpieces.All(w => w.IsDamaged || w.IsDiscarded || w.IsComplete), maxCardinality: 2);
 
-			for (var i = 0; i < steps; ++i)
-			{
-				WriteLine($"=================  Step: {i}  =====================================");
-
-				if (model.ObserverController.ReconfigurationState == ReconfStates.Failed)
-					WriteLine("Reconfiguration failed.");
-				else
-				{
-					foreach (var robot in model.RobotAgents)
-						WriteLine(robot);
-
-					foreach (var cart in model.CartAgents)
-						WriteLine(cart);
-
-					foreach (var workpiece in model.Workpieces)
-						WriteLine(workpiece);
-
-					foreach (var robot in model.Robots)
-						WriteLine(robot);
-
-					foreach (var cart in model.Carts)
-						WriteLine(cart);
-				}
-
-				simulator.SimulateStep();
-			}
+			Console.WriteLine(result);
 		}
 
-		private static void WriteLine(object line)
+		private static IEnumerable CreateConfigurations()
 		{
-			Debug.WriteLine(line.ToString());
-#if !DEBUG
-			Console.WriteLine(line.ToString());
-#endif
+			return Model.CreateConfigurations<FastObserverController>(AnalysisMode.IntolerableFaults)
+						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 	}
 }

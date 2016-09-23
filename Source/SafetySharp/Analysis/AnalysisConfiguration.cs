@@ -30,17 +30,17 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public struct AnalysisConfiguration
 	{
-		private const int DefaultStateCapacity = 1 << 24;
-		private const int DefaultTransitionCapacity = 1 << 28;
-		private const int DefaultStackCapacity = 1 << 20;
-		private const int DefaultSuccessorStateCapacity = 1 << 14;
-		private const int MinCapacity = 1024;
+		private const long DefaultStateCapacity = 1 << 24;
+		private const long DefaultTransitionCapacity = 1 << 28;
+		private const long DefaultStackCapacity = 1 << 20;
+		private const long DefaultSuccessorStateCapacity = 1 << 14;
+		private const long MinCapacity = 1024;
 
 		private int _cpuCount;
-		private int _stackCapacity;
-		private int _stateCapacity;
-		private int _transitionCapacity;
-		private int _successorStateCapacity;
+		private long _stackCapacity;
+		private long _stateCapacity;
+		private long _transitionCapacity;
+		private long _successorStateCapacity;
 
 		/// <summary>
 		///   Gets or sets a value indicating whether a counter example should be generated when a formula violation is detected or an
@@ -70,7 +70,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Gets or sets the number of transitions that can be stored during model checking.
 		/// </summary>
-		public int TransitionCapacity
+		public long TransitionCapacity
 		{
 			get { return Math.Max(_transitionCapacity, MinCapacity); }
 			set
@@ -83,7 +83,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Gets or sets the number of states that can be stored during model checking.
 		/// </summary>
-		public int StateCapacity
+		public long StateCapacity
 		{
 			get { return Math.Max(_stateCapacity, MinCapacity); }
 			set
@@ -96,7 +96,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Gets or sets the number of states that can be stored on the stack during model checking.
 		/// </summary>
-		public int StackCapacity
+		public long StackCapacity
 		{
 			get { return Math.Max(_stackCapacity, MinCapacity); }
 			set
@@ -109,7 +109,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Gets or sets the number of successor states that can be computed for each state.
 		/// </summary>
-		public int SuccessorCapacity
+		public long SuccessorCapacity
 		{
 			get { return Math.Max(_successorStateCapacity, MinCapacity); }
 			set

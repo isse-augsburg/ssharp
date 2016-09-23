@@ -42,7 +42,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		/// <summary>
 		///   The maximum number of states that can be stored on the stack.
 		/// </summary>
-		private readonly int _capacity;
+		private readonly long _capacity;
 
 		/// <summary>
 		///   The memory where the frames are stored.
@@ -73,12 +73,12 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="capacity">The maximum number of states that can be stored on the stack.</param>
-		public StateStack(int capacity)
+		public StateStack(long capacity)
 		{
 			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
 
-			_framesBuffer.Resize((long)capacity * sizeof(Frame), zeroMemory: false);
-			_statesBuffer.Resize((long)capacity * sizeof(int), zeroMemory: false);
+			_framesBuffer.Resize(capacity * sizeof(Frame), zeroMemory: false);
+			_statesBuffer.Resize(capacity * sizeof(int), zeroMemory: false);
 
 			_frames = (Frame*)_framesBuffer.Pointer;
 			_states = (int*)_statesBuffer.Pointer;

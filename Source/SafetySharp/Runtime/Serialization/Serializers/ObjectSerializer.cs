@@ -126,7 +126,11 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 				}
 				else if (field.FieldType.IsStructType())
 				{
-					foreach (var referencedObj in SerializationRegistry.Default.GetObjectsReferencedByStruct(field.GetValue(obj), mode))
+					var value = field.GetValue(obj);
+					if (value == null)
+						continue;
+
+					foreach (var referencedObj in SerializationRegistry.Default.GetObjectsReferencedByStruct(value, mode))
 						foreach (var o in GetObjectReferencesFromField(referencedObj, field, mode))
 							yield return o;
 				}

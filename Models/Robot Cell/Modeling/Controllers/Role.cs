@@ -24,23 +24,41 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 
-	internal class Role
+	internal struct Role
 	{
-		private int _current;
+		private byte _current;
+		private readonly byte _capabilitiesToApplyStart;
+		private readonly byte _capabilitiesToApplyCount;
 
-		public List<Capability> CapabilitiesToApply { get; } = new List<Capability>(Model.MaxRoleCapabilities);
-		public Condition PreCondition { get; } = new Condition();
-		public Condition PostCondition { get; } = new Condition();
+		private Task Task => PreCondition.Task ?? PostCondition.Task;
 
-		public bool IsCompleted => _current >= CapabilitiesToApply.Count;
+		public IEnumerable<Capability> CapabilitiesToApply =>
+			Task.Capabilities.Skip(_capabilitiesToApplyStart).Take(_capabilitiesToApplyCount);
+
+		public readonly Condition PreCondition;
+		public readonly Condition PostCondition;
+
+		public bool IsCompleted => _current >= _capabilitiesToApplyCount;
+
+		public Role(Condition preCondition, Condition postCondition, int offset, int count)
+			: this()
+		{
+			PreCondition = preCondition;
+			PostCondition = postCondition;
+
+			_capabilitiesToApplyStart = checked((byte)offset);
+			_capabilitiesToApplyCount = checked((byte)count);
+		}
 
 		public void Execute(Agent agent)
 		{
-			if (_current >= CapabilitiesToApply.Count)
+			if (_current >= _capabilitiesToApplyCount)
 				throw new InvalidOperationException("The role has already been completely executed and must be reset.");
 
-			CapabilitiesToApply[_current++].Execute(agent);
+			var capability = Task.Capabilities[_capabilitiesToApplyStart + _current++];
+			agent.AvailableCapabilities.First(c => c.IsEquivalentTo(capability)).Execute(agent);
 		}
 
 		public void Reset()

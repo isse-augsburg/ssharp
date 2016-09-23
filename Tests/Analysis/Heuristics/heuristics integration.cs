@@ -32,7 +32,7 @@ namespace Tests.Analysis.Heuristics
 
 	internal class X6 : AnalysisTestObject
 	{
-		const int componentCount = 8;
+		const int componentCount = 4;
 
 		protected override void Check()
 		{
@@ -63,7 +63,7 @@ namespace Tests.Analysis.Heuristics
 			result.IsComplete.ShouldBe(true);
 			result.Exceptions.ShouldBeEmpty();
 			result.MinimalCriticalSets.ShouldBeEmpty();
-			result.CheckedSets.Count.ShouldBe(575);
+			result.CheckedSets.Count.ShouldBe(47);
 			((ulong)result.CheckedSets.Count).ShouldBeLessThan(counter.setCounter);
 
 			// subsumption heuristic is effective
@@ -76,7 +76,7 @@ namespace Tests.Analysis.Heuristics
 			result.IsComplete.ShouldBe(true);
 			result.Exceptions.ShouldBeEmpty();
 			result.MinimalCriticalSets.ShouldBeEmpty();
-			result.CheckedSets.Count.ShouldBe(985);
+			result.CheckedSets.Count.ShouldBe(81);
 			((ulong)result.CheckedSets.Count).ShouldBeLessThan(counter.setCounter); // heuristic has effect
 
 			// heuristics are called appropriately when combined
@@ -96,14 +96,14 @@ namespace Tests.Analysis.Heuristics
 		{
 			public int cardinalityCounter = 0;
 
-			public void Augment(List<FaultSet> setsToCheck)
+			public void Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck)
 			{
 				cardinalityCounter++;
 			}
 
 			public ulong setCounter = 0;
 
-			public void Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
+			public void Update(LinkedList<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
 			{
 				setCounter++;
 			}

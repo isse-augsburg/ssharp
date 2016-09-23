@@ -25,10 +25,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 	using System;
 	using System.Linq;
 	using Modeling;
-	using SafetySharp.Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
-	using Runtime;
+	using SafetySharp.Analysis.Heuristics;
+	using SafetySharp.Modeling;
 	using FluentAssertions;
 	public class ModelTests
 	{
@@ -111,12 +111,17 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			simulator.SimulateStep();
 		}
 
-		[TestCase]
+		[Test]
 		public void IncomingBloodIsContaminated_ModelChecking(
 			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
 			var specification = new Model();
-			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 }, Backend = backend };
+			var analysis = new SafetyAnalysis
+			{
+				Configuration = { StateCapacity = 1310720 },
+				Backend = backend,
+				Heuristics = { new MaximalSafeSetHeuristic(specification) }
+			};
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.IncomingBloodWasNotOk);
 			result.SaveCounterExamples("counter examples/hdmachine_contamination");
@@ -125,12 +130,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			Console.WriteLine(orderResult);
 		}
 
-		[TestCase]
+		[Test]
 		public void DialysisFinishedAndBloodNotCleaned_ModelChecking(
 			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
 			var specification = new Model();
-			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 }, Backend = backend};
+			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 }, Backend = backend };
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.BloodNotCleanedAndDialyzingFinished);
 			result.SaveCounterExamples("counter examples/hdmachine_unsuccessful");

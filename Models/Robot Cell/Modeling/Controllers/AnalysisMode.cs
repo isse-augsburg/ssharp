@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,26 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.Heuristics
+namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
-	using System.Collections.Generic;
-
-	/// <summary>
-	///   Represents a heuristic for finding large safe fault sets.
-	/// </summary>
-	public interface IFaultSetHeuristic
+	public enum AnalysisMode
 	{
-		/// <summary>
-		///   Changes the sets that will be checked by DCCA, by reordering and adding sets.
-		/// </summary>
-		/// <param name="cardinalityLevel">The level of cardinality that is currently checked.</param>
-		/// <param name="setsToCheck">The next sets to be checked, in reverse order (the last set is checked first).</param>
-		void Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck);
-
-		/// <summary>
-		///   Informs the heuristic of the result of analyzing <paramref name="checkedSet" />
-		///   and allows it to adapt the sets to check next.
-		/// </summary>
-		void Update(LinkedList<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe);
+		AllFaults,
+		TolerableFaults,
+		IntolerableFaults
 	}
 }

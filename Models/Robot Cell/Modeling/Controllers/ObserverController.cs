@@ -29,9 +29,21 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 	internal abstract class ObserverController : Component
 	{
-		private bool _hasReconfed = false;
+		public const int MaxSteps = 350;
+		private bool _hasReconfed;
+
+		[NonSerializable]
+		private Tuple<Agent, Capability[]>[] _lastRoleAllocations; // for debugging purposes
+
 		//[Hidden]
 		private bool _reconfigurationRequested = true;
+
+		[Range(0, MaxSteps, OverflowBehavior.Clamp)]
+		public int _stepCount;
+
+		public AnalysisMode Mode = AnalysisMode.AllFaults;
+
+		public readonly Fault ReconfigurationFailure = new TransientFault();
 
 		protected ObserverController(IEnumerable<Agent> agents, List<Task> tasks)
 		{
@@ -45,11 +57,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			}
 		}
 
-		protected ObjectPool<Role> RolePool { get; } = new ObjectPool<Role>(Model.MaxRoleCount);
+		[Hidden]
 		protected List<Task> Tasks { get; }
 
 		[Hidden(HideElements = true)]
-		protected Agent[] Agents { get; }
+		public Agent[] Agents { get; }
 
 		public ReconfStates ReconfigurationState { get; protected set; } = ReconfStates.NotSet;
 
@@ -62,7 +74,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		private void GenerateConstraints(Agent agent)
 		{
-			agent.Constraints = new List<Func<bool>>()
+			agent.Constraints = new List<Func<bool>>
 			{
 				// I/O Consistency
 				() => agent.AllocatedRoles.All(role => role.PreCondition.Port == null || agent.Inputs.Contains(role.PreCondition.Port)),
@@ -70,51 +82,57 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				// Capability Consistency
 				() =>
 					agent.AllocatedRoles.All(
-						role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilites.Contains(capability))),
-                //   Pre-PostconditionConsistency
+						role => role.CapabilitiesToApply.All(capability => agent.AvailableCapabilities.Any(c => c.IsEquivalentTo(capability)))),
+				//   Pre-PostconditionConsistency
 				() =>
-					agent.AllocatedRoles.Any(role => role.PostCondition.Port == null || role.PreCondition.Port == null)
-						? true
-						: agent.AllocatedRoles.TrueForAll(
-							role => PostMatching(role, agent) && PreMatching(role, agent))
+					agent.AllocatedRoles.Any(role => role.PostCondition.Port == null || role.PreCondition.Port == null) ||
+					agent.AllocatedRoles.TrueForAll(role => PostMatching(role, agent) && PreMatching(role, agent))
 			};
 		}
 
 		private bool PostMatching(Role role, Agent agent)
 		{
-			if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)))
+			if (role.PostCondition.Port.AllocatedRoles.All(role1 => role1.PreCondition.Port != agent))
 			{
 				;
 			}
 			else if (
 				!role.PostCondition.Port.AllocatedRoles.Any(
 					role1 =>
-						role.PostCondition.State.Select(capability => capability.Identifier)
-							.SequenceEqual(role1.PreCondition.State.Select(capability => capability.Identifier))))
+						role.PostCondition.StateMatches(role1.PreCondition.State)))
 			{
 				;
 			}
-			else if (!role.PostCondition.Port.AllocatedRoles.Any(role1 => role.PostCondition.Task.Equals(role1.PreCondition.Task)))
+			else if (role.PostCondition.Port.AllocatedRoles.All(role1 => role.PostCondition.Task != role1.PreCondition.Task))
 			{
 				;
 			}
 
-			return role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port.Equals(agent)
+			return role.PostCondition.Port.AllocatedRoles.Any(role1 => role1.PreCondition.Port == agent
 																	   &&
-																	   role.PostCondition.State.Select(capability => capability.Identifier)
-																		   .SequenceEqual(role1.PreCondition.State.Select(capability => capability.Identifier))
-																	   && role.PostCondition.Task.Equals(role1.PreCondition.Task));
+																	   role.PostCondition.StateMatches(role1.PreCondition.State)
+																	   && role.PostCondition.Task == role1.PreCondition.Task);
 		}
 
 		private bool PreMatching(Role role, Agent agent)
 		{
-			return role.PreCondition.Port.AllocatedRoles.Any(role1 => role1.PostCondition.Port.Equals(agent)
-																	  && role.PreCondition.State.SequenceEqual(role1.PostCondition.State)
-																	  && role.PreCondition.Task.Equals(role1.PostCondition.Task));
+			return role.PreCondition.Port.AllocatedRoles.Any(role1 => role1.PostCondition.Port == agent
+																	  && role.PreCondition.StateMatches(role1.PostCondition.State)
+																	  && role.PreCondition.Task == role1.PostCondition.Task);
 		}
 
 		public override void Update()
 		{
+			if (Mode == AnalysisMode.IntolerableFaults)
+			{
+				++_stepCount;
+				if (_stepCount >= MaxSteps)
+					return;
+			}
+
+			if (ReconfigurationState == ReconfStates.Failed)
+				return;
+
 			foreach (var agent in Agents)
 			{
 				if (_reconfigurationRequested)
@@ -126,19 +144,71 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (!_reconfigurationRequested)
 				return;
 
-			// TODO: This speeds up analyses when checking for reconf failures with DCCA, but is otherwise
-			// unacceptable for other kinds of analyses
+			if (Mode == AnalysisMode.TolerableFaults)
+			{
+				// This speeds up analyses when checking for reconf failures with DCCA, but is otherwise
+				// unacceptable for other kinds of analyses
 
-			if (_hasReconfed)
-				return;
+				if (_hasReconfed)
+					return;
+			}
 
 			foreach (var agent in Agents)
 				agent.CheckAllocatedCapabilities();
 
-			RolePool.Reset();
+			foreach (var agent in Agents)
+			{
+				agent.AllocatedRoles.Clear();
+				agent.OnReconfigured();
+			}
+
 			Reconfigure();
 			_reconfigurationRequested = false;
 			_hasReconfed = true;
+		}
+
+		/// <summary>
+		///   Applies the <paramref name="roleAllocations" /> to the system.
+		/// </summary>
+		/// <param name="roleAllocations">The sequence of agents and the capabilities they should execute.</param>
+		protected virtual void ApplyConfiguration(Tuple<Agent, Capability[]>[] roleAllocations)
+		{
+			foreach (var task in Tasks)
+				task.IsResourceInProduction = false;
+
+			_lastRoleAllocations = roleAllocations;
+			var allocatedCapabilities = 0;
+
+			for (var i = 0; i < roleAllocations.Length; i++)
+			{
+				var agent = roleAllocations[i].Item1;
+				var capabilities = roleAllocations[i].Item2;
+
+				var preAgent = i == 0 ? null : roleAllocations[i - 1].Item1;
+				var postAgent = i == roleAllocations.Length - 1 ? null : roleAllocations[i + 1].Item1;
+
+				var preCondition = new Condition(Tasks[0], preAgent, allocatedCapabilities);
+				var postCondition = new Condition(Tasks[0], postAgent, allocatedCapabilities + capabilities.Length);
+				var role = new Role(preCondition, postCondition, allocatedCapabilities, capabilities.Length);
+
+				allocatedCapabilities += capabilities.Length;
+
+				agent.Configure(role);
+			}
+		}
+
+		[FaultEffect(Fault = nameof(ReconfigurationFailure))]
+		public abstract class ReconfigurationFailureEffect : ObserverController
+		{
+			protected ReconfigurationFailureEffect(IEnumerable<Agent> agents, List<Task> tasks)
+				: base(agents, tasks)
+			{
+			}
+
+			protected override void ApplyConfiguration(Tuple<Agent, Capability[]>[] roleAllocations)
+			{
+				ReconfigurationState = ReconfStates.Failed;
+			}
 		}
 	}
 }

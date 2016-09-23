@@ -67,14 +67,14 @@ namespace Tests.Analysis.Heuristics
 		{
 			public C C { get; set; }
 
-			public void Augment(List<FaultSet> setsToCheck)
+			public void Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck)
 			{
-				setsToCheck.Add(new FaultSet());
-				setsToCheck.Add(new FaultSet(C.F1, C.F2));
-				setsToCheck.Add(new FaultSet(C.F1));
+				setsToCheck.AddFirst(new FaultSet());
+				setsToCheck.AddFirst(new FaultSet(C.F1, C.F2));
+				setsToCheck.AddFirst(new FaultSet(C.F1));
 			}
 
-			public void Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
+			public void Update(LinkedList<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
 			{
 			}
 		}

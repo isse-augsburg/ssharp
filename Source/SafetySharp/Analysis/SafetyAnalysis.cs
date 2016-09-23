@@ -24,9 +24,9 @@ namespace SafetySharp.Analysis
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Runtime.CompilerServices;
 	using System.Diagnostics;
 	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using Heuristics;
 	using Modeling;
 	using SafetyChecking;
@@ -91,7 +91,7 @@ namespace SafetySharp.Analysis
 		/// </param>
 		/// <param name="backend">Determines the safety analysis backend that is used during the analysis.</param>
 		public static SafetyAnalysisResults AnalyzeHazard(ModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue,
-														 SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
+														  SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
 		{
 			return new SafetyAnalysis { Backend = backend }.ComputeMinimalCriticalSets(model, hazard, maxCardinality);
 		}
@@ -112,6 +112,7 @@ namespace SafetySharp.Analysis
 
 			ConsoleHelpers.WriteLine("Running Deductive Cause Consequence Analysis.");
 
+			var heuristicWatch = new Stopwatch();
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
@@ -122,6 +123,13 @@ namespace SafetySharp.Analysis
 			var suppressedFaults = allFaults.Where(fault => fault.Activation == Activation.Suppressed).ToArray();
 			var nondeterministicFaults = allFaults.Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
 			var nonSuppressedFaults = allFaults.Where(fault => fault.Activation != Activation.Suppressed).ToArray();
+
+			ConsoleHelpers.WriteLine();
+			ConsoleHelpers.WriteLine($"Of the {allFaults.Length} faults contained in the model,");
+			ConsoleHelpers.WriteLine($"   {suppressedFaults.Length} faults are suppressed,");
+			ConsoleHelpers.WriteLine($"   {forcedFaults.Length} faults are forced, and");
+			ConsoleHelpers.WriteLine($"   {nondeterministicFaults.Length} faults are nondeterministically activated.");
+			ConsoleHelpers.WriteLine();
 
 			_suppressedSet = new FaultSet(suppressedFaults);
 			_forcedSet = new FaultSet(forcedFaults);
@@ -154,7 +162,7 @@ namespace SafetySharp.Analysis
 			// We check fault sets by increasing cardinality; this is, we check the empty set first, then
 			// all singleton sets, then all sets with two elements, etc. We don't check sets that we
 			// know are going to be critical sets due to monotonicity
-			for (var cardinality = 0; cardinality <= allFaults.Length; ++cardinality)
+			for (var cardinality = 0; cardinality <= nonSuppressedFaults.Length; ++cardinality)
 			{
 				// Generate the sets for the current level that we'll have to check
 				var sets = GeneratePowerSetLevel(cardinality, nonSuppressedFaults, currentSafe);
@@ -180,24 +188,36 @@ namespace SafetySharp.Analysis
 					ConsoleHelpers.WriteLine($"Checking {sets.Count} sets of cardinality {cardinality}...");
 
 				// use heuristics
-				var setsToCheck = new List<FaultSet>(sets);
+				var setsToCheck = new LinkedList<FaultSet>(sets);
 				foreach (var heuristic in Heuristics)
-					heuristic.Augment(setsToCheck);
+				{
+					var count = setsToCheck.Count;
+
+					heuristicWatch.Restart();
+					heuristic.Augment((uint)cardinality, setsToCheck);
+
+					count = setsToCheck.Count - count;
+					if (count > 0)
+						ConsoleHelpers.WriteLine($"    {heuristic.GetType().Name} made {count} suggestions in {heuristicWatch.Elapsed.TotalMilliseconds}ms.");
+				}
 
 				// We have to check each set - heuristics may add further during the loop
 				while (setsToCheck.Count > 0)
 				{
-					var set = setsToCheck[setsToCheck.Count - 1];
+					var set = setsToCheck.First.Value;
 
 					var isCurrentLevel = sets.Remove(set); // returns true if set was actually contained
-					setsToCheck.RemoveAt(setsToCheck.Count - 1);
+					setsToCheck.RemoveFirst();
 
 					// for current level, we already know the set is valid
 					var isValid = isCurrentLevel || IsValid(set);
 
+					// the set is invalid if it exceeds the maximum cardinality level
+					isValid &= set.Cardinality <= maxCardinality;
+
 					var isSafe = true;
 					if (isValid)
-						isSafe = CheckSet(set, allFaults, cardinality);
+						isSafe = CheckSet(set, allFaults, !isCurrentLevel);
 
 					if (isSafe && isCurrentLevel)
 						currentSafe.Add(set);
@@ -210,7 +230,7 @@ namespace SafetySharp.Analysis
 				// in case heuristics removed a set (they shouldn't)
 				foreach (var set in sets)
 				{
-					var isSafe = CheckSet(set, allFaults, cardinality);
+					var isSafe = CheckSet(set, allFaults, false);
 					if (isSafe)
 						currentSafe.Add(set);
 				}
@@ -255,10 +275,9 @@ namespace SafetySharp.Analysis
 			return minimal;
 		}
 
-		private bool CheckSet(FaultSet set, Fault[] allFaults, int cardinality)
+		private bool CheckSet(FaultSet set, Fault[] allFaults, bool isHeuristicSuggestion)
 		{
-			var isHeuristic = cardinality != set.Cardinality;
-			if (isHeuristic)
+			if (isHeuristicSuggestion)
 				_results.HeuristicSuggestionCount++;
 
 			var isSafe = true;
@@ -268,18 +287,18 @@ namespace SafetySharp.Analysis
 			if (IsTriviallySafe(set))
 			{
 				_results.TrivialChecksCount++;
-				if (isHeuristic)
+				if (isHeuristicSuggestion)
 					_results.HeuristicTrivialCount++;
 
 				// do not add to safeSets: all subsets are subsets of safeSet as well
 				return true;
 			}
 
-			if (IsTriviallyCritical(set))
+			// trivially critical sets are not generated in GeneratePowerSetLevel, thus only check if set suggested by heuristic
+			if (isHeuristicSuggestion && IsTriviallyCritical(set))
 			{
 				_results.TrivialChecksCount++;
-				if (isHeuristic)
-					_results.HeuristicTrivialCount++;
+				_results.HeuristicTrivialCount++;
 
 				// do not add to criticalSets: non-minimal, and all supersets are supersets of criticalSet as well
 				return false;
@@ -287,44 +306,42 @@ namespace SafetySharp.Analysis
 
 			// if configured to do so, check with forced fault activation
 			if (FaultActivationBehavior == FaultActivationBehavior.ForceOnly || FaultActivationBehavior == FaultActivationBehavior.ForceThenFallback)
-				isSafe = CheckSet(set, allFaults, cardinality, Activation.Forced, isHeuristic);
+				isSafe = CheckSet(set, allFaults, isHeuristicSuggestion, Activation.Forced);
 
 			if (isSafe && FaultActivationBehavior == FaultActivationBehavior.ForceThenFallback)
 				ConsoleHelpers.WriteLine("    Checking again with nondeterministic activation...");
 
 			// check with nondeterministic fault activation
 			if (isSafe && FaultActivationBehavior != FaultActivationBehavior.ForceOnly)
-				isSafe = CheckSet(set, allFaults, cardinality, Activation.Nondeterministic, isHeuristic);
+				isSafe = CheckSet(set, allFaults, isHeuristicSuggestion, Activation.Nondeterministic);
 
 			if (isSafe) // remember non-trivially safe sets to avoid checking their subsets
 			{
 				_safeSets.Add(set);
 
-				if (isHeuristic)
+				if (isHeuristicSuggestion)
 					_results.HeuristicNonTrivialSafeCount++;
 			}
 
 			return isSafe;
 		}
 
-		private bool CheckSet(FaultSet set, Fault[] allFaults, int cardinality, Activation activationMode, bool isHeuristic)
+		private bool CheckSet(FaultSet set, Fault[] allFaults, bool isHeuristicSuggestion, Activation activationMode)
 		{
-			var heuristic = set.Cardinality == cardinality ? String.Empty : "[heuristic]";
-
 			try
 			{
 				var result = _backend.CheckCriticality(set, activationMode);
 
 				if (!result.FormulaHolds)
 				{
-					if (!isHeuristic)
-						ConsoleHelpers.WriteLine($"    {heuristic} critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
+					if (!isHeuristicSuggestion)
+						ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
 
 					_criticalSets.Add(set);
 				}
-				else if (isHeuristic)
+				else if (isHeuristicSuggestion)
 				{
-					ConsoleHelpers.WriteLine($"    {heuristic} safe:  {{ {set.ToString(allFaults)} }}", ConsoleColor.Blue);
+					ConsoleHelpers.WriteLine($"    safe:      {{ {set.ToString(allFaults)} }}  [heuristic]", ConsoleColor.Blue);
 				}
 
 				_checkedSets.Add(set);
@@ -336,7 +353,8 @@ namespace SafetySharp.Analysis
 			}
 			catch (AnalysisException e)
 			{
-				ConsoleHelpers.WriteLine($"    {heuristic} critical:  {{ {set.ToString(allFaults)} }} [exception thrown]", ConsoleColor.DarkRed);
+				var heuristic = isHeuristicSuggestion ? " [heuristic]" : string.Empty;
+				ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }} {heuristic} [exception thrown]", ConsoleColor.DarkRed);
 				Console.WriteLine(e.InnerException);
 
 				_checkedSets.Add(set);
@@ -365,7 +383,7 @@ namespace SafetySharp.Analysis
 		/// <param name="cardinality">The cardinality of the sets that should be generated.</param>
 		/// <param name="faults">The fault set the power set is generated for.</param>
 		/// <param name="previousSafe">The set of safe sets generated at the previous level.</param>
-		private static HashSet<FaultSet> GeneratePowerSetLevel(int cardinality, Fault[] faults, HashSet<FaultSet> previousSafe)
+		private HashSet<FaultSet> GeneratePowerSetLevel(int cardinality, Fault[] faults, HashSet<FaultSet> previousSafe)
 		{
 			var result = new HashSet<FaultSet>();
 
@@ -381,7 +399,11 @@ namespace SafetySharp.Analysis
 					if (previousSafe.Count > 0)
 					{
 						foreach (var fault in faults)
-							result.Add(new FaultSet(fault));
+						{
+							var set = new FaultSet(fault);
+							if (!_criticalSets.Contains(set))
+								result.Add(set);
+						}
 					}
 					break;
 				default:
@@ -410,15 +432,12 @@ namespace SafetySharp.Analysis
 							// set is trivially critical iff one of the direct subsets is not safe (i.e. critical)
 							// * the faults faults[0], ..., faults[i-1] are not definitely not contained in set (see above)
 							// * faults[i] is definitely in set, but set.Remove(faults[i]) == safeSet and is thus safe.
-							var isTriviallyCritical = false;
-							for (var j = i + 1; j < faults.Length; ++j)
+							var isTriviallyCritical = _criticalSets.Contains(set);
+							for (var j = i + 1; j < faults.Length && !isTriviallyCritical; ++j)
 							{
 								var f = faults[j];
 								if (set.Contains(f) && !previousSafe.Contains(set.Remove(f)))
-								{
 									isTriviallyCritical = true;
-									break;
-								}
 							}
 
 							// Check if the newly generated set is a super set of any critical sets;

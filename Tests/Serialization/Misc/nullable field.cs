@@ -20,26 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.Heuristics
+namespace Tests.Serialization.Misc
 {
-	using System.Collections.Generic;
+	using SafetySharp.Runtime.Serialization;
+	using Shouldly;
 
-	/// <summary>
-	///   Represents a heuristic for finding large safe fault sets.
-	/// </summary>
-	public interface IFaultSetHeuristic
+	internal class NullableField : SerializationObject
 	{
-		/// <summary>
-		///   Changes the sets that will be checked by DCCA, by reordering and adding sets.
-		/// </summary>
-		/// <param name="cardinalityLevel">The level of cardinality that is currently checked.</param>
-		/// <param name="setsToCheck">The next sets to be checked, in reverse order (the last set is checked first).</param>
-		void Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck);
+		protected override void Check()
+		{
+			var c = new C();
 
-		/// <summary>
-		///   Informs the heuristic of the result of analyzing <paramref name="checkedSet" />
-		///   and allows it to adapt the sets to check next.
-		/// </summary>
-		void Update(LinkedList<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe);
+			GenerateCode(SerializationMode.Full, c);
+			StateSlotCount.ShouldBe(2);
+
+			Serialize();
+			c.X = 3;
+			Deserialize();
+			c.X.ShouldBe(null);
+
+			c.X = 7;
+			Serialize();
+			c.X = 3;
+			Deserialize();
+			c.X.ShouldBe(7);
+		}
+
+		internal class C
+		{
+			public int? X;
+		}
 	}
 }

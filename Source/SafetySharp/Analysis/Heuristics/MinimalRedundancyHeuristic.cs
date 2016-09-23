@@ -25,13 +25,12 @@ namespace SafetySharp.Analysis.Heuristics
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
-	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   A heuristic that tries to determine the minimal redundancy necessary in the system so the hazard does not occur.
 	/// </summary>
-	public class MinimalRedundancyHeuristic : IFaultSetHeuristic
+	public sealed class MinimalRedundancyHeuristic : IFaultSetHeuristic
 	{
 		private const double DefaultMinFaultSetSizeRelative = 0.5;
 		private readonly Fault[] _allFaults;
@@ -79,20 +78,21 @@ namespace SafetySharp.Analysis.Heuristics
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(faultGroups, nameof(faultGroups));
 
-			_allFaults = model.Faults;
+			_allFaults = model.Faults.Where(fault => fault.Activation != Activation.Suppressed).ToArray();
 			_minSetSize = minSetSize;
 
 			CollectSuggestions(faultGroups);
 			_nextSuggestions = GetSubsets(_currentSuggestions);
 		}
 
-		void IFaultSetHeuristic.Augment(List<FaultSet> setsToCheck)
+		void IFaultSetHeuristic.Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck)
 		{
 			_successCounter = 0;
-			setsToCheck.AddRange(_currentSuggestions);
+			foreach (var suggestion in _currentSuggestions)
+				setsToCheck.AddFirst(suggestion);
 		}
 
-		void IFaultSetHeuristic.Update(List<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
+		void IFaultSetHeuristic.Update(LinkedList<FaultSet> setsToCheck, FaultSet checkedSet, bool isSafe)
 		{
 			var isSuggestion = _currentSuggestions.Remove(checkedSet);
 			if (!isSuggestion)
@@ -130,7 +130,7 @@ namespace SafetySharp.Analysis.Heuristics
 				from excludedFaults in CartesianProduct(faultGroups)
 				// also exclude subsuming faults
 				let subsuming = FaultSet.SubsumingFaults(excludedFaults, _allFaults)
-				orderby subsuming.Cardinality descending
+				orderby subsuming.Cardinality ascending
 				select faults.GetDifference(subsuming)
 				);
 		}
