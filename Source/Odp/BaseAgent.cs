@@ -36,21 +36,23 @@ namespace SafetySharp.Odp
 		public static int MaximumReconfigurationRequests = 30;
 		public static int MaximumRoleCount = 30;
 
+		public abstract ICapability[] AvailableCapabilities { get; }
+
+		public List<Role<A, T, R>> AllocatedRoles { get; } = new List<Role<A, T, R>>(MaximumRoleCount);
+
 		public override void Update()
 		{
 			Observe();
 			Work();
 		}
 
-		#region configuration
-
-		public abstract ICapability[] AvailableCapabilities { get; }
-
-		public List<Role<A,T,R>> AllocatedRoles { get; } = new List<Role<A,T,R>>(MaximumRoleCount);
-
-		#endregion
-
 		#region functional part
+
+		protected bool _hasRole;
+		protected Role<A, T, R> _currentRole;
+		protected R _resource;
+
+		protected readonly StateMachine<State> _stateMachine = State.Idle;
 
 		protected virtual void Work()
 		{
@@ -104,8 +106,6 @@ namespace SafetySharp.Odp
 					action: () => RemoveResourceRequest(_currentRole.PreCondition.Port, _currentRole.PreCondition));
 		}
 
-		protected readonly StateMachine<State> _stateMachine = State.Idle;
-
 		public enum State
 		{
 			Idle,
@@ -115,10 +115,6 @@ namespace SafetySharp.Odp
 			Output,
 			ResourceGiven
 		}
-
-		protected bool _hasRole;
-		protected Role<A, T, R> _currentRole;
-		protected R _resource;
 
 		protected virtual void DropResource()
 		{
@@ -246,6 +242,7 @@ namespace SafetySharp.Odp
 
 		#region observer
 
+		[Hidden]
 		private bool _deficientConfiguration = false;
 
 		protected abstract IReconfigurationStrategy<A, T, R> ReconfigurationStrategy { get; }
@@ -270,8 +267,8 @@ namespace SafetySharp.Odp
 
 			// stop work on deficient tasks
 			_resourceRequests.RemoveAll(request => deficientTasks.Contains(request.Condition.Task));
-			if (_hasRole && deficientTasks.Contains(_currentRole.Task))
-				_deficientConfiguration = true; // abort execution of current role
+			// abort execution of current role if necessary
+			_deficientConfiguration = _hasRole && deficientTasks.Contains(_currentRole.Task);
 
 			// initiate reconfiguration to fix violations, satisfy requests
 			ReconfigurationStrategy.Update(deficientTasks);
