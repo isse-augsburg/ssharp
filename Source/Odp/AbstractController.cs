@@ -22,7 +22,6 @@
 
 namespace SafetySharp.Odp
 {
-	using System;
 	using System.Collections.Generic;
 	using Modeling;
 

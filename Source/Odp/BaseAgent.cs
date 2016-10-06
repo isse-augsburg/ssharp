@@ -32,9 +32,10 @@ namespace SafetySharp.Odp
 		where T : class, ITask
     {
 		// configuration options
+		public static int MaximumAgentCount = 20;
 		public static int MaximumResourceCount = 30;
 		public static int MaximumReconfigurationRequests = 30;
-		public static int MaximumRoleCount = 30;
+		public static int MaximumRoleCount = 100;
 
 		public abstract ICapability[] AvailableCapabilities { get; }
 
@@ -304,7 +305,7 @@ namespace SafetySharp.Odp
 
 		#region ping
 
-		protected readonly ISet<A> _responses = new HashSet<A>();
+		protected readonly List<A> _responses = new List<A>(MaximumAgentCount);
 
 		protected virtual IEnumerable<A> PingNeighbors()
 		{
