@@ -39,6 +39,7 @@
   <ItemGroup>
     <Compile Include="AbstractController.cs" />
     <Compile Include="BaseAgent.cs" />
+    <Compile Include="CentralReconfiguration.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="ICapability.cs" />
     <Compile Include="IController.cs" />
