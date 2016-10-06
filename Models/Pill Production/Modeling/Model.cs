@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
+	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 	using IController = Odp.IController<Station, Recipe, PillContainer>;
 
@@ -37,9 +38,12 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		{
 			Stations = stations;
 			foreach (var station in stations)
+			{
 				station.SetReconfigurationStrategy(
 					new Odp.CentralReconfiguration<Station, Recipe, PillContainer>(controller)
 				);
+				station.RecipeQueue = _scheduledRecipes;
+			}
 			Controller = controller;
 		}
 
@@ -49,9 +53,11 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[Root(RootKind.Controller)]
 		public IController Controller { get; }
 
+		private readonly Queue<Recipe> _scheduledRecipes = new Queue<Recipe>();
+
 		public void ScheduleProduction(Recipe recipe)
 		{
-			throw new System.NotImplementedException();
+			_scheduledRecipes.Enqueue(recipe);
 		}
 
 		public static Model NoRedundancyCircularModel()

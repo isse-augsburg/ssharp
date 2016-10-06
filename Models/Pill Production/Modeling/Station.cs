@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using SafetySharp.Modeling;
 	using Odp;
@@ -47,6 +48,16 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		{
 			Name = $"Station#{++_instanceCounter}";
 			FaultHelper.PrefixFaultNames(this, Name);
+		}
+
+		internal Queue<Recipe> RecipeQueue { get; set; }
+
+		public override void Update()
+		{
+			if (RecipeQueue.Count > 0)
+				ReconfigurationStrategy.Reconfigure(new[] { RecipeQueue.Dequeue() });
+
+			base.Update();
 		}
 
 		/// <summary>
