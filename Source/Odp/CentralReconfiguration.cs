@@ -38,7 +38,24 @@ namespace SafetySharp.Odp
 
 		public virtual void Update(IEnumerable<T> deficientTasks)
 		{
-			_controller.Reconfigure(deficientTasks.ToArray());
+			var tasks = deficientTasks.ToArray();
+
+			RemoveConfigurations(tasks);
+			var configs = _controller.CalculateConfigurations(tasks);
+			ApplyConfigurations(configs);
+		}
+
+		protected virtual void RemoveConfigurations(params T[] tasks)
+		{
+			var affectedTasks = new HashSet<T>(tasks);
+			foreach (var agent in _controller.Agents)
+				agent.AllocatedRoles.RemoveAll(role => affectedTasks.Contains(role.Task));
+		}
+
+		protected virtual void ApplyConfigurations(Dictionary<A, IEnumerable<Role<A, T, R>>> configurations)
+		{
+			foreach (var agent in configurations.Keys)
+				agent.AllocatedRoles.AddRange(configurations[agent]);
 		}
 	}
 }

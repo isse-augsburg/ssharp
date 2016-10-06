@@ -29,12 +29,8 @@ namespace SafetySharp.Odp
 		where T : class, ITask
 	{
 		A[] Agents { get; }
-		// used by reconf agent
-		Dictionary<A, Role<A, T, R>[]> CalculateConfigurations(params T[] tasks);
-		// TODO: needs additional info, especially defect agents
 
-		// when used without reconf agent
-		void Reconfigure(params T[] tasks);
+		Dictionary<A, IEnumerable<Role<A, T, R>>> CalculateConfigurations(params T[] tasks);
 
 		bool ReconfigurationFailure { get; }
 	}

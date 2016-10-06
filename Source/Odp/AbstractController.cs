@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Odp
 {
+	using System;
 	using System.Collections.Generic;
 	using Modeling;
 
@@ -43,27 +44,7 @@ namespace SafetySharp.Odp
 			protected set;
 		}
 
-		public abstract Dictionary<A, Role<A, T, R>[]> CalculateConfigurations(params T[] tasks);
-
-		public virtual void Reconfigure(params T[] tasks)
-		{
-			RemoveConfigurations(tasks);
-			var configs = CalculateConfigurations(tasks);
-			ApplyConfigurations(configs);
-		}
-
-		protected virtual void RemoveConfigurations(params T[] tasks)
-		{
-			var affectedTasks = new HashSet<T>(tasks);
-			foreach (var agent in _agents)
-				agent.AllocatedRoles.RemoveAll(role => affectedTasks.Contains(role.Task));
-		}
-
-		protected virtual void ApplyConfigurations(Dictionary<A, Role<A,T,R>[]> configurations)
-		{
-			foreach (var agent in configurations.Keys)
-				agent.AllocatedRoles.AddRange(configurations[agent]);
-		}
+		public abstract Dictionary<A, IEnumerable<Role<A, T, R>>> CalculateConfigurations(params T[] tasks);
 
 		protected Role<A,T,R> GetRole(T recipe, A input, Condition<A,T>? previous)
 		{
