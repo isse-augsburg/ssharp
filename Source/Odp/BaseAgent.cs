@@ -34,12 +34,21 @@ namespace SafetySharp.Odp
 		// configuration options
 		public static int MaximumResourceCount = 30;
 		public static int MaximumReconfigurationRequests = 30;
+		public static int MaximumRoleCount = 30;
 
 		public override void Update()
 		{
 			Observe();
 			Work();
 		}
+
+		#region configuration
+
+		public abstract ICapability[] AvailableCapabilities { get; }
+
+		public List<Role<A,T,R>> AllocatedRoles { get; } = new List<Role<A,T,R>>(MaximumRoleCount);
+
+		#endregion
 
 		#region functional part
 
