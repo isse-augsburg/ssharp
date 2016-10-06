@@ -50,6 +50,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			FaultHelper.PrefixFaultNames(this, Name);
 		}
 
+		[Hidden]
 		internal Queue<Recipe> RecipeQueue { get; set; }
 
 		public override void Update()
