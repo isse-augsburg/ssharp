@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using SafetySharp.Modeling;
+	using Odp;
 
 	/// <summary>
 	///   A production station that removes containers from the conveyor belt, closes, labels and stores them on pallets.
@@ -36,7 +37,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			CompleteStationFailure.Subsumes(PalletisationDefect);
 		}
 
-		public override Capability[] AvailableCapabilities { get; } = { new ConsumeCapability() };
+		public override ICapability[] AvailableCapabilities { get; } = { new ConsumeCapability() };
 
 		protected override void ExecuteRole(Role role)
 		{
@@ -55,7 +56,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[FaultEffect(Fault = nameof(PalletisationDefect))]
 		public class PalletisationDefectEffect : PalletisationStation
 		{
-			public override Capability[] AvailableCapabilities => new Capability[0];
+			public override ICapability[] AvailableCapabilities => new ICapability[0];
 		}
 
 		[FaultEffect(Fault = nameof(CompleteStationFailure))]

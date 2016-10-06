@@ -137,7 +137,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 
 			for (var first = 0; first < _availableStations.Length; ++first)
 			{
-				if (Capability.IsSatisfiable(new[] { recipe.RequiredCapabilities[0] }, _availableStations[first].AvailableCapabilities))
+				var requiredCapabilities = new[] { recipe.RequiredCapabilities[0] };
+				if (requiredCapabilities.IsSatisfiable(_availableStations[first].AvailableCapabilities))
 				{
 					path[0] = first;
 					if (FindStationPath(recipe, path, 1))
@@ -199,7 +200,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			var capabilities = from index in Enumerable.Range(0, prefixLength + 1)
 							   where index == prefixLength || path[index] == station
 							   select recipe.RequiredCapabilities[index];
-			return Capability.IsSatisfiable(capabilities.ToArray(), _availableStations[station].AvailableCapabilities);
+			return capabilities.ToArray().IsSatisfiable(_availableStations[station].AvailableCapabilities);
 		}
 
 		/// <summary>

@@ -27,6 +27,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using System.Linq;
 	using SafetySharp.Modeling;
 
+	using Odp;
+
 	/// <summary>
 	///   A pill container which is filled with different ingredients.
 	/// </summary>
@@ -46,8 +48,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		/// <summary>
 		///   The capabilities already applied to the container.
 		/// </summary>
-		public IEnumerable<Capability> State =>
-			Recipe?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<Capability>();
+		public IEnumerable<ICapability> State =>
+			Recipe?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
 
 		/// <summary>
 		///   Tells the container it was loaded on the conveyor belt.

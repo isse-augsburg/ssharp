@@ -25,9 +25,11 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public abstract class Capability
+	using Odp;
+
+	public static class CapabilityHelper
 	{
-		public static bool IsSatisfiable(Capability[] required, Capability[] available)
+		public static bool IsSatisfiable(this ICapability[] required, ICapability[] available)
 		{
 			if (required.OfType<ProduceCapability>().Any() && !available.OfType<ProduceCapability>().Any())
 				return false;
@@ -47,7 +49,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			return true;
 		}
 
-		private static Dictionary<IngredientType, int> GroupIngredientAmounts(Capability[] capabilities)
+		private static Dictionary<IngredientType, int> GroupIngredientAmounts(ICapability[] capabilities)
 		{
 			return capabilities.OfType<Ingredient>()
 							   .GroupBy(ingredient => ingredient.Type, ingredient => (int)ingredient.Amount)
@@ -58,7 +60,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	/// <summary>
 	///   Represents the loading of empty pill containers on the conveyor belt.
 	/// </summary>
-	public sealed class ProduceCapability : Capability
+	public sealed class ProduceCapability : ICapability
 	{
 		public override bool Equals(object obj)
 		{
@@ -74,7 +76,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	/// <summary>
 	///   Represents the removal of pill containers from the conveyor belt, labeling and palletization.
 	/// </summary>
-	public sealed class ConsumeCapability : Capability
+	public sealed class ConsumeCapability : ICapability
 	{
 		public override bool Equals(object obj)
 		{
@@ -90,7 +92,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	/// <summary>
 	///   Represents the addition of a specified amount of a certain ingredient to the container.
 	/// </summary>
-	public class Ingredient : Capability
+	public class Ingredient : ICapability
 	{
 		public Ingredient(IngredientType type, uint amount)
 		{

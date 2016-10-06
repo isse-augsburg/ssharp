@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using System;
 	using SafetySharp.Modeling;
+	using Odp;
 
 	/// <summary>
 	///   A production station that adds ingredients to the containers.
@@ -45,7 +46,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			DispenserDefect.Subsumes(BlueTankDepleted, RedTankDepleted, YellowTankDepleted);
 		}
 
-		public override Capability[] AvailableCapabilities
+		public override ICapability[] AvailableCapabilities
 			=> Array.ConvertAll(_ingredientTanks, tank => tank.Capability);
 
 		// for convenience
@@ -73,7 +74,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[FaultEffect(Fault = nameof(DispenserDefect))]
 		public class DispenserDefectEffect : ParticulateDispenser
 		{
-			public override Capability[] AvailableCapabilities => new Capability[0];
+			public override ICapability[] AvailableCapabilities => new ICapability[0];
 		}
 
 		[FaultEffect(Fault = nameof(CompleteStationFailure))]

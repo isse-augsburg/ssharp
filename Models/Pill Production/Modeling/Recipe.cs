@@ -25,10 +25,12 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using System.Collections.Generic;
 	using System.Linq;
 
+	using Odp;
+
 	/// <summary>
 	///   Describes how a container should be processed.
 	/// </summary>
-	public class Recipe
+	public class Recipe : ITask
 	{
 		private readonly List<PillContainer> _activeContainers;
 
@@ -44,7 +46,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			_activeContainers = new List<PillContainer>((int)amount);
 			Amount = amount;
 
-			RequiredCapabilities = new Capability[] { new ProduceCapability() }
+			RequiredCapabilities = new ICapability[] { new ProduceCapability() }
 				.Concat(ingredients)
 				.Concat(new[] { new ConsumeCapability() })
 				.ToArray();
@@ -59,7 +61,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		/// <summary>
 		///   The sequence of capabilities defining this recipe.
 		/// </summary>
-		public Capability[] RequiredCapabilities { get; }
+		public ICapability[] RequiredCapabilities { get; }
 
 		/// <summary>
 		///   The total number of containers to be produced for this recipe.

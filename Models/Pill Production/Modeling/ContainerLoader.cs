@@ -24,15 +24,18 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using System;
 	using SafetySharp.Modeling;
+	using Odp;
 
 	/// <summary>
 	///   A production station that loads containers on the conveyor belt.
 	/// </summary>
 	public class ContainerLoader : Station
 	{
-		private static readonly Capability[] _produceCapabilities = new[] { new ProduceCapability() };
-		private static readonly Capability[] _emptyCapabilities = new Capability[0];
+		private static readonly ICapability[] _produceCapabilities = new[] { new ProduceCapability() };
+		private static readonly ICapability[] _emptyCapabilities = new ICapability[0];
 
+		public override ICapability[] AvailableCapabilities =>
+			_containerCount > 0 ? _produceCapabilities : _emptyCapabilities;
 		private readonly ObjectPool<PillContainer> _containerStorage = new ObjectPool<PillContainer>(Model.ContainerStorageSize);
 		public readonly Fault NoContainersLeft = new PermanentFault();
 
@@ -42,9 +45,6 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		{
 			CompleteStationFailure.Subsumes(NoContainersLeft);
 		}
-
-		public override Capability[] AvailableCapabilities =>
-			_containerCount > 0 ? _produceCapabilities : _emptyCapabilities;
 
 		protected override void ExecuteRole(Role role)
 		{
@@ -90,7 +90,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[FaultEffect(Fault = nameof(NoContainersLeft))]
 		public class NoContainersLeftEffect : ContainerLoader
 		{
-			public override Capability[] AvailableCapabilities => _emptyCapabilities;
+			public override ICapability[] AvailableCapabilities => _emptyCapabilities;
 		}
 
 		[FaultEffect(Fault = nameof(CompleteStationFailure))]
