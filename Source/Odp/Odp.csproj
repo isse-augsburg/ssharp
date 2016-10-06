@@ -43,12 +43,14 @@
     <Compile Include="ICapability.cs" />
     <Compile Include="IController.cs" />
     <Compile Include="Invariant.cs" />
+    <Compile Include="IReconfigurationStrategy.cs" />
     <Compile Include="ITask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="IReconfigurationAgent.cs" />
+    <Compile Include="ReconfigurationAgentHandler.cs" />
     <Compile Include="Role.cs" />
   </ItemGroup>
   <ItemGroup>

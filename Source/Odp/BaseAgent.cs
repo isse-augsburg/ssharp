@@ -248,29 +248,34 @@ namespace SafetySharp.Odp
 
 		private bool _deficientConfiguration = false;
 
+		protected abstract IReconfigurationStrategy<A, T, R> ReconfigurationStrategy { get; }
+
+		protected readonly List<ReconfigurationRequest> _reconfigurationRequests
+			= new List<ReconfigurationRequest>(MaximumReconfigurationRequests);
+
+		protected virtual Predicate<Role<A, T, R>>[] RoleInvariants => new[] {
+			Invariant.CapabilitiesAvailable(this),
+			Invariant.ResourceFlowPossible(this),
+			Invariant.ResourceFlowConsistent(this)
+		};
+
 		protected virtual void Observe()
 		{
+			// find tasks that need to be reconfigured
 			var inactiveNeighbors = PingNeighbors();
+			var deficientTasks = new HashSet<T>(
+				_reconfigurationRequests.Select(request => request.Task)
+				.Union(FindInvariantViolations(inactiveNeighbors))
+			);
 
-			var deficientTasks = _reconfigurationRequests.Select(request => request.Task)
-				.Union(FindInvariantViolations(inactiveNeighbors));
+			// stop work on deficient tasks
+			_resourceRequests.RemoveAll(request => deficientTasks.Contains(request.Condition.Task));
+			if (_hasRole && deficientTasks.Contains(_currentRole.Task))
+				_deficientConfiguration = true; // abort execution of current role
 
-			foreach (var task in deficientTasks)
-			{
-				// TODO: what are these values?
-				object agent = null;
-				object state = null;
-
-				LockConfigurations(task);
-				if (_hasRole && _currentRole.Task == task)
-					_deficientConfiguration = true; // abort execution of current role
-
-				if (!_tasksUnderReconstruction.ContainsKey(task))
-				{
-					_tasksUnderReconstruction.Add(task, CreateReconfigurationAgent(task));
-				}
-				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, state);
-			}
+			// initiate reconfiguration to fix violations, satisfy requests
+			ReconfigurationStrategy.Update(deficientTasks);
+			_reconfigurationRequests.Clear();
 		}
 
 		protected virtual T[] FindInvariantViolations(IEnumerable<A> inactiveNeighbors)
@@ -283,11 +288,22 @@ namespace SafetySharp.Odp
 				).Distinct().ToArray();
 		}
 
-		protected virtual Predicate<Role<A,T,R>>[] RoleInvariants => new[] {
-			Invariant.CapabilitiesAvailable(this),
-			Invariant.ResourceFlowPossible(this),
-			Invariant.ResourceFlowConsistent(this)
-		};
+		public virtual void RequestReconfiguration(A agent, T task)
+		{
+			_reconfigurationRequests.Add(new ReconfigurationRequest(agent, task));
+		}
+
+		protected struct ReconfigurationRequest
+		{
+			public ReconfigurationRequest(A source, T task)
+			{
+				Source = source;
+				Task = task;
+			}
+
+			public A Source { get; }
+			public T Task { get; }
+		}
 
 		#region ping
 
@@ -320,60 +336,5 @@ namespace SafetySharp.Odp
 		#endregion
 
 		#endregion
-
-		#region controller
-
-		protected readonly Dictionary<T, IReconfigurationAgent<T>> _tasksUnderReconstruction
-			= new Dictionary<T, IReconfigurationAgent<T>>();
-
-		protected struct ReconfigurationRequest
-		{
-			public ReconfigurationRequest(A source, T task)
-			{
-				Source = source;
-				Task = task;
-			}
-
-			public A Source { get; }
-			public T Task { get; }
-		}
-
-		protected readonly List<ReconfigurationRequest> _reconfigurationRequests
-			= new List<ReconfigurationRequest>(MaximumReconfigurationRequests);
-
-		public virtual void RequestReconfiguration(A agent, T task)
-		{
-			_reconfigurationRequests.Add(new ReconfigurationRequest(agent, task));
-		}
-
-		protected abstract IReconfigurationAgent<T> CreateReconfigurationAgent(T task);
-
-		public virtual void UpdateConfigurations(object conf)
-		{
-			throw new NotImplementedException();
-		}
-
-		public virtual void Go(T task)
-		{
-			UnlockConfigurations(task);
-			_resourceRequests.RemoveAll(request => request.Condition.Task == task);
-		}
-
-		protected virtual void LockConfigurations(T task)
-		{
-			throw new NotImplementedException();
-		}
-
-		protected virtual void UnlockConfigurations(T task)
-		{
-			throw new NotImplementedException();
-		}
-
-		public virtual void Done(T task)
-		{
-			_tasksUnderReconstruction.Remove(task);
-		}
-
-		#endregion		
 	}
 }
