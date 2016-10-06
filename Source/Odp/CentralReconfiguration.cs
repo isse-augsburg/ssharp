@@ -36,7 +36,7 @@ namespace SafetySharp.Odp
 			_controller = controller;
 		}
 
-		public virtual void Update(IEnumerable<T> deficientTasks)
+		public virtual void Reconfigure(IEnumerable<T> deficientTasks)
 		{
 			var tasks = deficientTasks.ToArray();
 

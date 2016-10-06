@@ -271,7 +271,7 @@ namespace SafetySharp.Odp
 			_deficientConfiguration = _hasRole && deficientTasks.Contains(_currentRole.Task);
 
 			// initiate reconfiguration to fix violations, satisfy requests
-			ReconfigurationStrategy.Update(deficientTasks);
+			ReconfigurationStrategy.Reconfigure(deficientTasks);
 			_reconfigurationRequests.Clear();
 		}
 

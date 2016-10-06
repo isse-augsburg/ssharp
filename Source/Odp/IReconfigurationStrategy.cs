@@ -29,6 +29,6 @@ namespace SafetySharp.Odp
 		where T : class, ITask
 	{
 		// TODO: add "state" parameter of some kind, additional info
-		void Update(IEnumerable<T> deficientTasks);
+		void Reconfigure(IEnumerable<T> deficientTasks);
 	}
 }

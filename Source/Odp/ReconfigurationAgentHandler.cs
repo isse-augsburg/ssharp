@@ -39,7 +39,7 @@ namespace SafetySharp.Odp
 		protected readonly Dictionary<T, IReconfigurationAgent<T>> _tasksUnderReconstruction
 			= new Dictionary<T, IReconfigurationAgent<T>>();
 
-		public void Update(IEnumerable<T> deficientTasks)
+		public void Reconfigure(IEnumerable<T> deficientTasks)
 		{
 			foreach (var task in deficientTasks)
 			{
