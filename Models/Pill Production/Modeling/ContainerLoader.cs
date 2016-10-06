@@ -36,55 +36,30 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 
 		public override ICapability[] AvailableCapabilities =>
 			_containerCount > 0 ? _produceCapabilities : _emptyCapabilities;
-		private readonly ObjectPool<PillContainer> _containerStorage = new ObjectPool<PillContainer>(Model.ContainerStorageSize);
-		public readonly Fault NoContainersLeft = new PermanentFault();
 
+		private readonly ObjectPool<PillContainer> _containerStorage = new ObjectPool<PillContainer>(Model.ContainerStorageSize);
 		private int _containerCount = Model.ContainerStorageSize;
+
+		public readonly Fault NoContainersLeft = new PermanentFault();
 
 		public ContainerLoader()
 		{
 			CompleteStationFailure.Subsumes(NoContainersLeft);
 		}
 
-		protected override void ExecuteRole(Role role)
+		public override void ApplyCapability(ICapability capability)
 		{
-			// This is only called if the current Container comes from another station.
-			// The only valid role is thus an empty one (no CapabilitiesToApply) and represents
-			// a simple forwarding to the next station.
-			if (role.HasCapabilitiesToApply())
-				throw new InvalidOperationException("Unsupported capability configuration in ContainerLoader");
-		}
-
-		public override void Update()
-		{
-			// Handle resource requests if any. This is required to allow forwarding
-			// of containers to the next station.
-			base.Update();
-
-			// No accepted resource requests and no previous resource,
-			// so produce resources instead.
-			var role = ChooseProductionRole();
-			if (Container == null && role != null)
+			if (capability is ProduceCapability)
 			{
-				var recipe = role?.Recipe;
-
-				// role.capabilitiesToApply will always be { ProduceCapability }
 				Container = _containerStorage.Allocate();
 				_containerCount--;
+
+				var recipe = _currentRole.Task;
 				Container.OnLoaded(recipe);
 				recipe.AddContainer(Container);
-
-				// assume role.PostCondition.Port != null
-				role?.PostCondition.Port.ResourceReady(source: this, condition: role.Value.PostCondition);
 			}
-		}
-
-		private Role? ChooseProductionRole()
-		{
-			foreach (var role in AllocatedRoles)
-				if (role.PreCondition.Port == null && role.Recipe.RemainingAmount > 0 && role.HasCapabilitiesToApply())
-					return role;
-			return null;
+			else
+				throw new InvalidOperationException();
 		}
 
 		[FaultEffect(Fault = nameof(NoContainersLeft))]
@@ -96,11 +71,9 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[FaultEffect(Fault = nameof(CompleteStationFailure))]
 		public class CompleteStationFailureEffect : ContainerLoader
 		{
-			public override bool IsAlive => false;
+			public override void SayHello(Station agent) { } // do not respond to pings
 
-			public override void Update()
-			{
-			}
+			public override void Update() { } // do not act
 		}
 	}
 }

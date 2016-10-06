@@ -26,6 +26,9 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using System.Linq;
 	using SafetySharp.Modeling;
 
+	using Condition = Odp.Condition<Station, Recipe>;
+	using Role = Odp.Role<Station, Recipe, PillContainer>;
+
 	/// <summary>
 	///   An <see cref="ObserverController" /> implementation that is much faster than
 	///   the MiniZinc implementation.
@@ -243,7 +246,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 				}
 
 				var capability = recipe.RequiredCapabilities[i];
-				role.AddCapabilityToApply(capability);
+				role.AddCapability(capability);
 				role.PostCondition.AppendToState(capability);
 
 				lastStation = station;

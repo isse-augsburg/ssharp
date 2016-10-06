@@ -59,16 +59,13 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			_ingredientTanks[(int)ingredientType].Amount = amount;
 		}
 
-		protected override void ExecuteRole(Role role)
+		public override void ApplyCapability(ICapability capability)
 		{
-			foreach (var capability in role.CapabilitiesToApply)
-			{
-				var ingredient = capability as Ingredient;
-				if (ingredient == null)
-					throw new InvalidOperationException($"Invalid capability in ParticulateDispenser: {capability}");
+			var ingredient = capability as Ingredient;
+			if (ingredient == null)
+				throw new InvalidOperationException($"Invalid capability in ParticulateDispenser: {capability}");
 
-				_ingredientTanks[(int)ingredient.Type].Dispense(Container, ingredient);
-			}
+			_ingredientTanks[(int)ingredient.Type].Dispense(Container, ingredient);
 		}
 
 		[FaultEffect(Fault = nameof(DispenserDefect))]
@@ -80,11 +77,9 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[FaultEffect(Fault = nameof(CompleteStationFailure))]
 		public class CompleteStationFailureEffect : ParticulateDispenser
 		{
-			public override bool IsAlive => false;
+			public override void SayHello(Station agent) { } // do not respond to pings
 
-			public override void Update()
-			{
-			}
+			public override void Update() { } // do not act
 		}
 	}
 }

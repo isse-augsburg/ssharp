@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
+	using System;
 	using SafetySharp.Modeling;
 	using Odp;
 
@@ -39,10 +40,9 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 
 		public override ICapability[] AvailableCapabilities { get; } = { new ConsumeCapability() };
 
-		protected override void ExecuteRole(Role role)
+		public override void ApplyCapability(ICapability capability)
 		{
-			// unless role is transport only, it will always be { ConsumeCapability }
-			if (role.HasCapabilitiesToApply())
+			if (capability is ConsumeCapability)
 			{
 				Container.Recipe.RemoveContainer(Container);
 				if (Container.Recipe.ProcessingComplete)
@@ -51,6 +51,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 				}
 				Container = null;
 			}
+			else
+				throw new InvalidOperationException();
 		}
 
 		[FaultEffect(Fault = nameof(PalletisationDefect))]
@@ -62,11 +64,9 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[FaultEffect(Fault = nameof(CompleteStationFailure))]
 		public class CompleteStationFailureEffect : PalletisationStation
 		{
-			public override bool IsAlive => false;
+			public override void SayHello(Station agent) { } // do not respond to pings
 
-			public override void Update()
-			{
-			}
+			public override void Update() { } // do not act
 		}
 	}
 }

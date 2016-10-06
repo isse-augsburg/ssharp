@@ -26,6 +26,9 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using System.Linq;
 	using SafetySharp.Modeling;
 
+	using Condition = Odp.Condition<Station, Recipe>;
+	using Role = Odp.Role<Station, Recipe, PillContainer>;
+
 	public abstract class ObserverController : Component
 	{
 		// recipes scheduled for initial configuration
@@ -42,7 +45,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		/// </summary>
 		protected ObserverController(params Station[] stations)
 		{
-			this.Stations = stations;
+			Stations = stations;
 		}
 
 		/// <summary>
@@ -98,12 +101,10 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		{
 			foreach (var station in AvailableStations)
 			{
-				var obsoleteRoles = (from role in station.AllocatedRoles where role.Recipe == recipe select role)
+				var obsoleteRoles = (from role in station.AllocatedRoles where role.Task == recipe select role)
 					.ToArray();
 				foreach (var role in obsoleteRoles)
 					station.AllocatedRoles.Remove(role);
-
-				station.BeforeReconfiguration(recipe);
 			}
 		}
 
@@ -119,19 +120,19 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			var role = new Role();
 
 			// update precondition
-			role.PreCondition.Recipe = recipe;
+			role.PreCondition.Task = recipe;
 			role.PreCondition.Port = input;
 			role.PreCondition.ResetState();
 			if (previous != null)
 				role.PreCondition.CopyStateFrom(previous.Value);
 
 			// update postcondition
-			role.PostCondition.Recipe = recipe;
+			role.PostCondition.Task = recipe;
 			role.PostCondition.Port = null;
 			role.PostCondition.ResetState();
 			role.PostCondition.CopyStateFrom(role.PreCondition);
 
-			role.ResetCapabilitiesToApply();
+			role.Clear();
 
 			return role;
 		}
