@@ -273,7 +273,21 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		protected abstract T[] FindInvariantViolations(IEnumerable<A> inactiveNeighbors);
+		protected virtual T[] FindInvariantViolations(IEnumerable<A> inactiveNeighbors)
+		{
+			var defectNeighbors = new HashSet<A>(inactiveNeighbors);
+			return (
+					from role in AllocatedRoles
+					where RoleInvariants.Any(inv => !inv(role))
+					select role.Task
+				).Distinct().ToArray();
+		}
+
+		protected virtual Predicate<Role<A,T,R>>[] RoleInvariants => new[] {
+			Invariant.CapabilitiesAvailable(this),
+			Invariant.ResourceFlowPossible(this),
+			Invariant.ResourceFlowConsistent(this)
+		};
 
 		#region ping
 
