@@ -30,11 +30,11 @@ namespace SafetySharp.Odp
 		where T : class, ITask
 	{
 		[Hidden(HideElements = true)]
-		protected readonly A[] _agents;
+		public A[] Agents { get; }
 
 		public AbstractController(A[] agents)
 		{
-			_agents = agents;
+			Agents = agents;
 		}
 
 		public virtual bool ReconfigurationFailure

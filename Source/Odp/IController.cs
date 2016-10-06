@@ -28,6 +28,7 @@ namespace SafetySharp.Odp
 		where A : BaseAgent<A,T,R>
 		where T : class, ITask
 	{
+		A[] Agents { get; }
 		// used by reconf agent
 		Dictionary<A, Role<A, T, R>[]> CalculateConfigurations(params T[] tasks);
 		// TODO: needs additional info, especially defect agents
