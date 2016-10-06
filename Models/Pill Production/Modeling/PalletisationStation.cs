@@ -64,6 +64,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[FaultEffect(Fault = nameof(CompleteStationFailure))]
 		public class CompleteStationFailureEffect : PalletisationStation
 		{
+			public override bool IsAlive => false;
+
 			public override void SayHello(Station agent) { } // do not respond to pings
 
 			public override void Update() { } // do not act

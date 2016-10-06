@@ -49,7 +49,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 
 		public override Dictionary<Station, IEnumerable<Role>> CalculateConfigurations(params Recipe[] tasks)
 		{
-			_availableStations = null; // TODO
+			_availableStations = Agents.Where(station => station.IsAlive).ToArray();
 			var configuration = new Dictionary<Station, IEnumerable<Role>>();
 
 			CalculateShortestPaths();
