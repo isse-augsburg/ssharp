@@ -60,8 +60,8 @@ namespace SafetySharp.Odp
 				guard: _hasRole && _deficientConfiguration,
 				action: () =>
 				{
+					DropResource();
 					_hasRole = false;
-					_resource = default(R);
 					_deficientConfiguration = false;
 				});
 
@@ -120,6 +120,10 @@ namespace SafetySharp.Odp
 		protected Role<A, T, R> _currentRole;
 		protected R _resource;
 
+		protected virtual void DropResource()
+		{
+			_resource = default(R);
+		}
 		protected virtual void ChooseRole() { }
 
 		protected virtual void ExecuteRole() { }
