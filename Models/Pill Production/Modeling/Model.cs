@@ -28,10 +28,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 
 	public class Model : ModelBase
 	{
-		public const int MaximumRecipeLength = 30;
 		public const int ContainerStorageSize = 30;
-		public const int MaximumRoleCount = 100;
-		public const int MaximumResourceCount = 30;
 		public const uint InitialIngredientAmount = 100u;
 
 		public Model(Station[] stations, IController controller)
@@ -60,6 +57,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			_scheduledRecipes.Enqueue(recipe);
 		}
 
+		[System.Obsolete]
 		public static Model NoRedundancyCircularModel()
 		{
 			// create 3 stations
