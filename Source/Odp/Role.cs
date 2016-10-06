@@ -30,30 +30,23 @@ namespace SafetySharp.Odp
 		where A : BaseAgent<A, T, R>
 		where T : class, ITask
 	{
-		public readonly Condition<A, T> PreCondition;
-		public readonly Condition<A, T> PostCondition;
+		public Condition<A, T> PreCondition;
+		public Condition<A, T> PostCondition;
 
 		public T Task => PreCondition.Task ?? PostCondition.Task;
 
 		public IEnumerable<ICapability> CapabilitiesToApply =>
 			Task.RequiredCapabilities.Skip(_capabilitiesToApplyStart).Take(_capabilitiesToApplyCount);
 
-		private readonly byte _capabilitiesToApplyStart;
-		private readonly byte _capabilitiesToApplyCount;
+		private byte _capabilitiesToApplyStart;
+		private byte _capabilitiesToApplyCount;
 		private byte _current;
 
 		public bool IsCompleted => _current >= _capabilitiesToApplyCount;
 
-		public Role(int offset, int count)
-			: this()
-		{
-			_capabilitiesToApplyStart = checked((byte)offset);
-			_capabilitiesToApplyCount = checked((byte)count);
-		}
-
 		public void ExecuteStep(A agent)
 		{
-			if (_current >= _capabilitiesToApplyCount)
+			if (IsCompleted)
 				throw new InvalidOperationException("The role has already been completely executed and must be reset.");
 
 			var capability = Task.RequiredCapabilities[_capabilitiesToApplyStart + _current++];
@@ -63,6 +56,26 @@ namespace SafetySharp.Odp
 		public void Reset()
 		{
 			_current = 0;
+		}
+
+		public void Clear()
+		{
+			_capabilitiesToApplyStart = checked((byte)PreCondition.State.Count());
+			_capabilitiesToApplyCount = 0;
+		}
+
+		public void AddCapability(ICapability capability)
+		{
+			if (_capabilitiesToApplyStart + _capabilitiesToApplyCount >= Task.RequiredCapabilities.Length)
+				throw new InvalidOperationException("All required capabilities already applied.");
+			if (!capability.Equals(Task.RequiredCapabilities[_capabilitiesToApplyStart + _capabilitiesToApplyCount]))
+				throw new InvalidOperationException("Cannot apply capability that is not required.");
+			_capabilitiesToApplyCount++;
+		}
+
+		public bool IsEmpty()
+		{
+			return _capabilitiesToApplyCount == 0;
 		}
 	}
 }

@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Odp
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 
@@ -35,8 +36,8 @@ namespace SafetySharp.Odp
 			_statePrefixLength = checked((byte)statePrefixLength);
 		}
 
-		public A Port { get; }
-		public T Task { get; }
+		public A Port { get; set; }
+		public T Task { get; set; }
 
 		private byte _statePrefixLength;
 
@@ -47,6 +48,28 @@ namespace SafetySharp.Odp
 		{
 			return Task == other.Task
 				   && _statePrefixLength == other._statePrefixLength;
+		}
+
+		public void AppendToState(ICapability capability)
+		{
+			if (_statePrefixLength >= Task.RequiredCapabilities.Length)
+				throw new InvalidOperationException("Condition already has maximum state.");
+			if (Task.RequiredCapabilities[_statePrefixLength] != capability)
+				throw new InvalidOperationException("Invalid capability order in Condition state.");
+
+			_statePrefixLength++;
+		}
+
+		public void ResetState()
+		{
+			_statePrefixLength = 0;
+		}
+
+		public void CopyStateFrom(Condition<A, T> other)
+		{
+			if (other.Task != Task)
+				throw new InvalidOperationException("Invalid task: cannot copy Condition state");
+			_statePrefixLength = other._statePrefixLength;
 		}
 	}
 }
