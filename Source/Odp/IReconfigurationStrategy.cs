@@ -28,6 +28,7 @@ namespace SafetySharp.Odp
 		where A : BaseAgent<A, T, R>
 		where T : class, ITask
 	{
-		void Update(IEnumerable<T> deficientTasks);
+		// TODO: change parameters (reconf request, active/inactive stations, overall state, ...)
+		void Update(IEnumerable<T> deficientTasks, IEnumerable<A> inactiveNeighbors);
 	}
 }
