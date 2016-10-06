@@ -87,7 +87,7 @@ namespace SafetySharp.Odp
 					from : State.ExecuteRole,
 					to: State.ExecuteRole,
 					guard: !_currentRole.IsCompleted,
-					action: ExecuteRole)
+					action: () => _currentRole.ExecuteStep((A)this))
 				.Transition( // work is done -- pass resource on
 					from: State.ExecuteRole,
 					to: State.Output,
@@ -124,9 +124,8 @@ namespace SafetySharp.Odp
 		{
 			_resource = default(R);
 		}
-		protected virtual void ChooseRole() { }
 
-		protected virtual void ExecuteRole() { }
+		protected virtual void ChooseRole() { }
 
 		public abstract void ApplyCapability(ICapability capability);
 
