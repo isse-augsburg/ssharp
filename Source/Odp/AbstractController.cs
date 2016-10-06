@@ -22,25 +22,69 @@
 
 namespace SafetySharp.Odp
 {
-	using System;
-
+	using System.Collections.Generic;
 	using Modeling;
 
-	public class AbstractController<T> : Component, IController<T>
-		where T : ITask
+	public abstract class AbstractController<A, T, R> : Component, IController<A, T, R>
+		where A : BaseAgent<A, T, R>
+		where T : class, ITask
 	{
+		[Hidden(HideElements = true)]
+		protected readonly A[] _agents;
+
+		public AbstractController(A[] agents)
+		{
+			_agents = agents;
+		}
+
 		public virtual bool ReconfigurationFailure
 		{
 			get;
 			protected set;
 		}
 
-		public virtual void ScheduleReconfiguration(params T[] tasks)
+		public abstract Dictionary<A, Role<A, T, R>[]> CalculateConfigurations(params T[] tasks);
+
+		public virtual void Reconfigure(params T[] tasks)
 		{
-			// TODO: remove old config, add to list (use list in Update())
-			throw new NotImplementedException();
+			RemoveConfigurations(tasks);
+			var configs = CalculateConfigurations(tasks);
+			ApplyConfigurations(configs);
 		}
 
-		// TODO: helper methods such as GetRole()
+		protected virtual void RemoveConfigurations(params T[] tasks)
+		{
+			var affectedTasks = new HashSet<T>(tasks);
+			foreach (var agent in _agents)
+				agent.AllocatedRoles.RemoveAll(role => affectedTasks.Contains(role.Task));
+		}
+
+		protected virtual void ApplyConfigurations(Dictionary<A, Role<A,T,R>[]> configurations)
+		{
+			foreach (var agent in configurations.Keys)
+				agent.AllocatedRoles.AddRange(configurations[agent]);
+		}
+
+		protected Role<A,T,R> GetRole(T recipe, A input, Condition<A,T>? previous)
+		{
+			var role = new Role<A,T,R>();
+
+			// update precondition
+			role.PreCondition.Task = recipe;
+			role.PreCondition.Port = input;
+			role.PreCondition.ResetState();
+			if (previous != null)
+				role.PreCondition.CopyStateFrom(previous.Value);
+
+			// update postcondition
+			role.PostCondition.Task = recipe;
+			role.PostCondition.Port = null;
+			role.PostCondition.ResetState();
+			role.PostCondition.CopyStateFrom(role.PreCondition);
+
+			role.Clear();
+
+			return role;
+		}
 	}
 }

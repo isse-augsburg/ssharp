@@ -22,10 +22,18 @@
 
 namespace SafetySharp.Odp
 {
-	public interface IController<T>
-		where T : ITask
+	using System.Collections.Generic;
+
+	public interface IController<A, T, R>
+		where A : BaseAgent<A,T,R>
+		where T : class, ITask
 	{
-		void ScheduleReconfiguration(params T[] tasks);
+		// used by reconf agent
+		Dictionary<A, Role<A, T, R>[]> CalculateConfigurations(params T[] tasks);
+		// TODO: needs additional info, especially defect agents
+
+		// when used without reconf agent
+		void Reconfigure(params T[] tasks);
 
 		bool ReconfigurationFailure { get; }
 	}
