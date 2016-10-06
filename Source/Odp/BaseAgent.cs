@@ -329,7 +329,8 @@ namespace SafetySharp.Odp
 
 		public virtual void Go(T task)
 		{
-			throw new NotImplementedException();
+			UnlockConfigurations(task);
+			_resourceRequests.RemoveAll(request => request.Condition.Task == task);
 		}
 
 		protected virtual void LockConfigurations(T task)
@@ -342,9 +343,9 @@ namespace SafetySharp.Odp
 			throw new NotImplementedException();
 		}
 
-		public virtual void Done(object task)
+		public virtual void Done(T task)
 		{
-			throw new NotImplementedException();
+			_tasksUnderReconstruction.Remove(task);
 		}
 
 		#endregion		
