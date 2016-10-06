@@ -23,7 +23,6 @@
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
 	using SafetySharp.Modeling;
 	using Odp;
@@ -33,10 +32,9 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	/// </summary>
 	public abstract class Station : BaseAgent<Station, Recipe, PillContainer>
 	{
-		private static int _instanceCounter;
-
 		public readonly Fault CompleteStationFailure = new PermanentFault();
 
+		private static int _instanceCounter;
 		protected readonly string Name;
 
 		protected Station() : base()
@@ -48,13 +46,22 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		/// <summary>
 		///   The resource currently located at the station.
 		/// </summary>
-		public PillContainer Container {
+		public PillContainer Container { // TODO: remove?
 			get { return _resource; }
 			protected set { _resource = value; }
 		}
 
 		[Hidden, Obsolete("superseeded by reconf agents")]
-		internal ObserverController ObserverController { get; set; }
+		internal ObserverController ObserverController
+		{
+			set { _reconfigurationStrategy = new CentralReconfiguration<Station, Recipe, PillContainer>(value); }
+		}
+
+		[Hidden]
+		private IReconfigurationStrategy<Station, Recipe, PillContainer> _reconfigurationStrategy;
+
+		protected override IReconfigurationStrategy<Station, Recipe, PillContainer> ReconfigurationStrategy
+			=> _reconfigurationStrategy;
 
 		protected override void DropResource()
 		{
@@ -69,11 +76,6 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			// custom version of capability consistency due to ingredient amounts
 			(role) => role.CapabilitiesToApply.ToArray().IsSatisfiable(AvailableCapabilities)
 		};
-
-		protected override IReconfigurationAgent<Recipe> CreateReconfigurationAgent(Recipe task)
-		{
-			throw new NotImplementedException();
-		}
 
 		/// <summary>
 		///   Removes all configuration related to a recipe and propagates
