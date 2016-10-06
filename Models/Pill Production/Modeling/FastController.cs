@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using SafetySharp.Modeling;
@@ -33,7 +34,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	///   An <see cref="ObserverController" /> implementation that is much faster than
 	///   the MiniZinc implementation.
 	/// </summary>
-	internal class FastObserverController : ObserverController
+	internal class FastController : Odp.AbstractController<Station, Recipe, PillContainer>
 	{
 		[Hidden]
 		private Station[] _availableStations;
@@ -44,36 +45,29 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[Hidden]
 		private int[,] _pathMatrix;
 
-		public FastObserverController(params Station[] stations)
-			: base(stations)
-		{
-		}
+		public FastController(params Station[] stations) : base(stations) { }
 
-		public override void Configure(Recipe recipe)
+		public override Dictionary<Station, IEnumerable<Role>> CalculateConfigurations(params Recipe[] tasks)
 		{
-			Configure(new[] { recipe });
-		}
-
-		public override void Configure(IEnumerable<Recipe> recipes)
-		{
-			_availableStations = AvailableStations;
+			_availableStations = null; // TODO
+			var configuration = new Dictionary<Station, IEnumerable<Role>>();
 
 			CalculateShortestPaths();
 
-			foreach (var recipe in recipes)
-				ConfigureInternal(recipe);
-		}
+			foreach (var recipe in tasks)
+			{
+				// find optimal path that satisfies the required capabilities
+				var path = FindStationPath(recipe);
+				if (path == null)
+				{
+					ReconfigurationFailure = true;
+					continue; // TODO: or break ?
+				}
 
-		private void ConfigureInternal(Recipe recipe)
-		{
-			RemoveObsoleteConfiguration(recipe);
+				ExtractConfigurations(configuration, recipe, path);
+			}
 
-			// find optimal path that satisfies the required capabilities
-			var path = FindStationPath(recipe);
-			if (path == null)
-				Unsatisfiable = true;
-			else
-				ApplyConfiguration(recipe, path);
+			return configuration;
 		}
 
 		/// <summary>
@@ -206,10 +200,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			return capabilities.ToArray().IsSatisfiable(_availableStations[station].AvailableCapabilities);
 		}
 
-		/// <summary>
-		///   Configures the <see cref="_availableStations" /> to produce resource for the <paramref name="recipe" />.
-		/// </summary>
-		private void ApplyConfiguration(Recipe recipe, int[] path)
+		private void ExtractConfigurations(Dictionary<Station, IEnumerable<Role>> configuration, Recipe recipe, int[] path)
 		{
 			Station lastStation = null;
 			Role lastRole = default(Role);
@@ -218,6 +209,12 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			{
 				var station = _availableStations[path[i]];
 				var role = lastRole;
+
+				Action<Station, Role> addRole = (s, r) => {
+					if (!configuration.ContainsKey(s))
+						configuration.Add(s, new HashSet<Role>());
+					(configuration[s] as HashSet<Role>).Add(r);
+				};
 
 				if (station != lastStation)
 				{
@@ -231,7 +228,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 							lastRole.PostCondition.Port = link; // connect to previous
 
 							var linkRole = GetRole(recipe, lastStation, lastRole.PostCondition);
-							link.AllocatedRoles.Add(linkRole); // add empty (transport) role
+							addRole(link, linkRole); // add empty (transport) role
 
 							lastStation = link;
 							lastRole = linkRole;
@@ -240,9 +237,9 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 						lastRole.PostCondition.Port = station; // finish connection
 					}
 
-					// configure station itself
+					// configuration for station itself
 					role = GetRole(recipe, lastStation, lastStation == null ? (Condition?)null : lastRole.PostCondition);
-					station.AllocatedRoles.Add(role);
+					addRole(station, role);
 				}
 
 				var capability = recipe.RequiredCapabilities[i];

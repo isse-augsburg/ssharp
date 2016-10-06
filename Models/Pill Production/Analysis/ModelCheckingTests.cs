@@ -74,7 +74,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			dispenserBottom.Outputs.Add(consumerBottom);
 			consumerBottom.Inputs.Add(dispenserBottom);
 
-			var model = new Model(stations, new FastObserverController(stations));
+			var model = new Model(stations, new FastController(stations));
 			var recipe = new Recipe(new[] { new Ingredient(IngredientType.BlueParticulate, 30), new Ingredient(IngredientType.RedParticulate, 10) }, 1u);
 			model.ScheduleProduction(recipe);
 
@@ -127,7 +127,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			modelChecker.Heuristics.AddRange(heuristics);
 			modelChecker.FaultActivationBehavior = activation;
 
-			var result = modelChecker.ComputeMinimalCriticalSets(model, model.ObserverController.Unsatisfiable);
+			var result = modelChecker.ComputeMinimalCriticalSets(model, model.Controller.ReconfigurationFailure);
 			Console.WriteLine(result);
 			Assert.AreEqual(0, result.Exceptions.Count);
 		}

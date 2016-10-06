@@ -27,6 +27,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using SafetySharp.Modeling;
 	using Odp;
 
+	using IReconfigurationStrategy = Odp.IReconfigurationStrategy<Station, Recipe, PillContainer>;
+
 	/// <summary>
 	///   A production station that modifies containers.
 	/// </summary>
@@ -51,17 +53,15 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			protected set { _resource = value; }
 		}
 
-		[Hidden, Obsolete("superseeded by reconf agents")]
-		internal ObserverController ObserverController
-		{
-			set { _reconfigurationStrategy = new CentralReconfiguration<Station, Recipe, PillContainer>(value); }
-		}
-
 		[Hidden]
-		private IReconfigurationStrategy<Station, Recipe, PillContainer> _reconfigurationStrategy;
+		private IReconfigurationStrategy _reconfigurationStrategy;
 
-		protected override IReconfigurationStrategy<Station, Recipe, PillContainer> ReconfigurationStrategy
-			=> _reconfigurationStrategy;
+		protected override IReconfigurationStrategy ReconfigurationStrategy => _reconfigurationStrategy;
+
+		internal void SetReconfigurationStrategy(IReconfigurationStrategy strategy)
+		{
+			_reconfigurationStrategy = strategy;
+		}
 
 		protected override void DropResource()
 		{

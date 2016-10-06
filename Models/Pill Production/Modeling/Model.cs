@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using SafetySharp.Modeling;
+	using IController = Odp.IController<Station, Recipe, PillContainer>;
 
 	public class Model : ModelBase
 	{
@@ -32,25 +33,25 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		public const int MaximumResourceCount = 30;
 		public const uint InitialIngredientAmount = 100u;
 
-		public Model(Station[] stations, ObserverController obsContr)
+		public Model(Station[] stations, IController controller)
 		{
 			Stations = stations;
 			foreach (var station in stations)
-			{
-				station.ObserverController = obsContr;
-			}
-			ObserverController = obsContr;
+				station.SetReconfigurationStrategy(
+					new Odp.CentralReconfiguration<Station, Recipe, PillContainer>(controller)
+				);
+			Controller = controller;
 		}
 
 		[Root(RootKind.Controller)]
 		public Station[] Stations { get; }
 
 		[Root(RootKind.Controller)]
-		public ObserverController ObserverController { get; }
+		public IController Controller { get; }
 
 		public void ScheduleProduction(Recipe recipe)
 		{
-			ObserverController.ScheduleConfiguration(recipe);
+			throw new System.NotImplementedException();
 		}
 
 		public static Model NoRedundancyCircularModel()
@@ -76,7 +77,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 				next.Inputs.Add(stations[i]);
 			}
 
-			var model = new Model(stations, new FastObserverController(stations));
+			var model = new Model(stations, new FastController(stations));
 
 			var recipe = new Recipe(ingredients: new[]
 			{

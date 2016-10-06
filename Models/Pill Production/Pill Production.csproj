@@ -52,14 +52,13 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Analysis\ModelCheckingTests.cs" />
-    <Compile Include="Modeling\FastObserverController.cs" />
+    <Compile Include="Modeling\FastController.cs" />
     <Compile Include="Modeling\FaultHelper.cs" />
     <Compile Include="Modeling\Capability.cs" />
     <Compile Include="Modeling\ContainerLoader.cs" />
     <Compile Include="Modeling\IngredientTank.cs" />
     <Compile Include="Modeling\IngredientType.cs" />
     <Compile Include="Modeling\Model.cs" />
-    <Compile Include="Modeling\ObserverController.cs" />
     <Compile Include="Modeling\PalletisationStation.cs" />
     <Compile Include="Modeling\ParticulateDispenser.cs" />
     <Compile Include="Modeling\PillContainer.cs" />

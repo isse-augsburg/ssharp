@@ -57,7 +57,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 					lastStation = station;
 				}
 			}
-			var model = new Model(_stations.ToArray(), new FastObserverController(_stations.ToArray()));
+			var model = new Model(_stations.ToArray(), new FastController(_stations.ToArray()));
 
 			// read recipes to be produced by the model
 			for (lineIndex++; lineIndex < lines.Length; ++lineIndex)
