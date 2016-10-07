@@ -22,14 +22,16 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
-	internal class Task
+	using Odp;
+
+	internal class Task : ITask
 	{
-		public Task(params Capability[] capabilities)
+		public Task(params ICapability[] capabilities)
 		{
-			Capabilities = capabilities;
+			RequiredCapabilities = capabilities;
 		}
 
-		public Capability[] Capabilities { get; }
+		public ICapability[] RequiredCapabilities { get; }
 		public bool IsResourceInProduction { get; set; }
 	}
 }

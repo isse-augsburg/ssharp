@@ -48,7 +48,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			agent.Produce(this);
 		}
 
-		public override bool IsEquivalentTo(Capability capability)
+		public override bool IsEquivalentTo(Odp.ICapability capability)
 		{
 			var produce = capability as ProduceCapability;
 			if (produce == null)

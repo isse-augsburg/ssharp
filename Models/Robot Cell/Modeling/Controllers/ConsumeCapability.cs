@@ -36,7 +36,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			agent.Consume(this);
 		}
 
-		public override bool IsEquivalentTo(Capability capability)
+		public override bool IsEquivalentTo(Odp.ICapability capability)
 		{
 			return capability is ConsumeCapability;
 		}

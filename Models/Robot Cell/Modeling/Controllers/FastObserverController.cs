@@ -26,6 +26,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.Collections.Generic;
 	using System.Linq;
 	using SafetySharp.Modeling;
+	using Odp;
 
 	/// <summary>
 	///   An <see cref="ObserverController" /> implementation that is much faster than
@@ -118,7 +119,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		/// </returns>
 		private int[] FindPath(Task task)
 		{
-			var path = new int[task.Capabilities.Length];
+			var path = new int[task.RequiredCapabilities.Length];
 
 			for (var first = 0; first < _availableRobots.Length; ++first)
 			{
@@ -140,7 +141,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		private bool FindPath(Task task, int[] path, int prefixLength)
 		{
 			// termination case: the path is already complete
-			if (prefixLength == task.Capabilities.Length)
+			if (prefixLength == task.RequiredCapabilities.Length)
 				return true;
 
 			var last = path[prefixLength - 1];
@@ -178,10 +179,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		/// <returns>True if choosing station as next path entry would not exceed its capabilities.</returns>
 		private bool CanSatisfyNext(Task task, int capability, int robot)
 		{
-			return _availableRobots[robot].AvailableCapabilities.Any(c => c.IsEquivalentTo(task.Capabilities[capability]));
+			return _availableRobots[robot].AvailableCapabilities.Any(c => c.IsEquivalentTo(task.RequiredCapabilities[capability]));
 		}
 
-		private IEnumerable<Tuple<Agent, Capability[]>> Convert(Task task, int[] path)
+		private IEnumerable<Tuple<Agent, ICapability[]>> Convert(Task task, int[] path)
 		{
 			var previous = -1;
 			var usedCarts = new List<Agent>();
@@ -198,7 +199,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 						yield return Transport(previous, nextRobot, usedCarts);
 
 						if (nextRobot != current)
-							yield return Tuple.Create(Agents[path[i]], new Capability[0]);
+							yield return Tuple.Create(Agents[path[i]], new ICapability[0]);
 
 						previous = nextRobot;
 					}
@@ -209,7 +210,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 					path
 					.Skip(i)
 					.TakeWhile(robot => robot == current)
-					.Select((_, index) => task.Capabilities[i + index])
+					.Select((_, index) => task.RequiredCapabilities[i + index])
 					.ToArray();
 
 				yield return Tuple.Create(Agents[path[i]], capabilities);
@@ -226,7 +227,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			yield return to;
 		}
 
-		private Tuple<Agent, Capability[]> Transport(int from, int to, List<Agent> usedCarts)
+		private Tuple<Agent, ICapability[]> Transport(int from, int to, List<Agent> usedCarts)
 		{
 			// prefer not to use a cart that has already been used
 			var candidates = _availableRobots[from].Outputs.Where(c => _availableRobots[to].Inputs.Contains(c)).ToArray();
@@ -234,11 +235,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (unusedCart != null)
 			{
 				usedCarts.Add(unusedCart);
-				return Tuple.Create(unusedCart, new Capability[0]);
+				return Tuple.Create(unusedCart, new ICapability[0]);
 			}
 
 			// otherwise, reuse some cart
-			return Tuple.Create(candidates.First(), new Capability[0]);
+			return Tuple.Create(candidates.First(), new ICapability[0]);
 		}
 	}
 }

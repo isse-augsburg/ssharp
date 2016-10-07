@@ -138,7 +138,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			}
 			else
 			{
-				if (Resource.State.Count() == Resource.Task.Capabilities.Length)
+				if (Resource.State.Count() == Resource.Task.RequiredCapabilities.Length)
 					throw new InvalidOperationException();
 
 				Resource.OnCapabilityApplied();

@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using Odp;
 
 	internal struct Role
 	{
@@ -34,8 +35,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		private Task Task => PreCondition.Task ?? PostCondition.Task;
 
-		public IEnumerable<Capability> CapabilitiesToApply =>
-			Task.Capabilities.Skip(_capabilitiesToApplyStart).Take(_capabilitiesToApplyCount);
+		public IEnumerable<ICapability> CapabilitiesToApply =>
+			Task.RequiredCapabilities.Skip(_capabilitiesToApplyStart).Take(_capabilitiesToApplyCount);
 
 		public readonly Condition PreCondition;
 		public readonly Condition PostCondition;
@@ -57,7 +58,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (_current >= _capabilitiesToApplyCount)
 				throw new InvalidOperationException("The role has already been completely executed and must be reset.");
 
-			var capability = Task.Capabilities[_capabilitiesToApplyStart + _current++];
+			var capability = Task.RequiredCapabilities[_capabilitiesToApplyStart + _current++];
 			agent.AvailableCapabilities.First(c => c.IsEquivalentTo(capability)).Execute(agent);
 		}
 

@@ -26,6 +26,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.Collections.Generic;
 	using System.Linq;
 	using SafetySharp.Modeling;
+	using Odp;
 
 	internal abstract class ObserverController : Component
 	{
@@ -33,7 +34,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		private bool _hasReconfed;
 
 		[NonSerializable]
-		private Tuple<Agent, Capability[]>[] _lastRoleAllocations; // for debugging purposes
+		private Tuple<Agent, ICapability[]>[] _lastRoleAllocations; // for debugging purposes
 
 		//[Hidden]
 		private bool _reconfigurationRequested = true;
@@ -171,7 +172,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		///   Applies the <paramref name="roleAllocations" /> to the system.
 		/// </summary>
 		/// <param name="roleAllocations">The sequence of agents and the capabilities they should execute.</param>
-		protected virtual void ApplyConfiguration(Tuple<Agent, Capability[]>[] roleAllocations)
+		protected virtual void ApplyConfiguration(Tuple<Agent, ICapability[]>[] roleAllocations)
 		{
 			foreach (var task in Tasks)
 				task.IsResourceInProduction = false;
@@ -205,7 +206,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			{
 			}
 
-			protected override void ApplyConfiguration(Tuple<Agent, Capability[]>[] roleAllocations)
+			protected override void ApplyConfiguration(Tuple<Agent, ICapability[]>[] roleAllocations)
 			{
 				ReconfigurationState = ReconfStates.Failed;
 			}

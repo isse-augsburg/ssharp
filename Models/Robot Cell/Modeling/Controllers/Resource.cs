@@ -26,13 +26,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.Linq;
 	using Plants;
 	using SafetySharp.Modeling;
+	using Odp;
 
 	internal class Resource : Component
 	{
 		private byte _statePrefixLength;
 
-		public IEnumerable<Capability> State =>
-			Task?.Capabilities.Take(_statePrefixLength) ?? Enumerable.Empty<Capability>();
+		public IEnumerable<ICapability> State =>
+			Task?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
 
 		public Resource(Task task, Workpiece workpiece)
 		{

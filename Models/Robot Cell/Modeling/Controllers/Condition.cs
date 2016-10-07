@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.Collections.Generic;
 	using System.Diagnostics.Contracts;
 	using System.Linq;
+	using Odp;
 
 	internal struct Condition
 	{
@@ -39,25 +40,25 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Task = task;
 		}
 
-		public IEnumerable<Capability> State =>
-			Task?.Capabilities.Take(_statePrefixLength) ?? Enumerable.Empty<Capability>();
+		public IEnumerable<ICapability> State =>
+			Task?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
 
 		[Pure]
-		public bool StateMatches(IEnumerable<Capability> other)
+		public bool StateMatches(IEnumerable<ICapability> other)
 		{
 			return State.SequenceEqual(other, StateComparer.Default);
 		}
 
-		private class StateComparer : IEqualityComparer<Capability>
+		private class StateComparer : IEqualityComparer<ICapability>
 		{
 			public static readonly StateComparer Default = new StateComparer();
 
-			public bool Equals(Capability x, Capability y)
+			public bool Equals(ICapability x, ICapability y)
 			{
-				return x.IsEquivalentTo(y);
+				return (x as Capability).IsEquivalentTo(y);
 			}
 
-			public int GetHashCode(Capability obj)
+			public int GetHashCode(ICapability obj)
 			{
 				return obj.GetHashCode();
 			}

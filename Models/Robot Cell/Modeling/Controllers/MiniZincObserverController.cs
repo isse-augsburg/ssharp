@@ -28,6 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.IO;
 	using System.Linq;
 	using SafetySharp.Modeling;
+	using Odp;
 
     internal class MiniZincObserverController : ObserverController
 	{
@@ -60,7 +61,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
             using (var writer = new StreamWriter(_constraintsFile))
 			{
-				var task = String.Join(",", Tasks[0].Capabilities.Select(c => c.Identifier));
+				var task = String.Join(",", Tasks[0].RequiredCapabilities.Select(c => (c as Capability).Identifier));
 				var isCart = String.Join(",", Agents.Select(a => (a is CartAgent).ToString().ToLower()));
 				var capabilities = String.Join(",", Agents.Select(a =>
 					$"{{{String.Join(",", a.AvailableCapabilities.Select(c => c.Identifier))}}}"));
@@ -133,7 +134,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			ApplyConfiguration(roleAllocations);
 		}
 
-		private IEnumerable<Tuple<Agent, Capability[]>> Parse(string agentsString, string capabilitiesString)
+		private IEnumerable<Tuple<Agent, ICapability[]>> Parse(string agentsString, string capabilitiesString)
 		{
 			var agentIds = ParseList(agentsString);
 			var capabilityIds = ParseList(capabilitiesString);
@@ -147,7 +148,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			}
 		}
 
-		private IEnumerable<Capability> EnumerateCapabilities(int[] agents, int[] capabilities, int offset)
+		private IEnumerable<ICapability> EnumerateCapabilities(int[] agents, int[] capabilities, int offset)
 		{
 			var agentId = agents[offset];
 			var agent = Agents[agentId];
@@ -155,7 +156,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			for (var i = offset; i < agents.Length && agents[i] == agentId; ++i)
 			{
 				if (capabilities[i] != -1)
-					yield return agent.AvailableCapabilities.First(c => c.IsEquivalentTo(Tasks[0].Capabilities[capabilities[i]]));
+					yield return agent.AvailableCapabilities.First(c => c.IsEquivalentTo(Tasks[0].RequiredCapabilities[capabilities[i]]));
 			}
 		}
 
@@ -167,9 +168,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return line.Substring(openBrace + 1, closeBrace - openBrace - 1).Split(',').Select(n => Int32.Parse(n.Trim()) - 1).ToArray();
 		}
 
-        private bool ContainsCapability(IEnumerable<Capability> capabilities, Capability capability)
+        private bool ContainsCapability(IEnumerable<ICapability> capabilities, ICapability capability)
         {
-            return capabilities.Any(c => c.IsEquivalentTo(capability));
+            return capabilities.Any(c => (c as Capability).IsEquivalentTo(capability));
         }
 
         private bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<Task> tasks)
@@ -180,17 +181,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
             foreach (var task in tasks)
             {
                 isReconfPossible &=
-                    task.Capabilities.All(capability => robotsAgents.Any(agent => ContainsCapability(agent.AvailableCapabilities,capability)));
+                    task.RequiredCapabilities.All(capability => robotsAgents.Any(agent => ContainsCapability(agent.AvailableCapabilities,capability)));
                 if (!isReconfPossible)
                     break;
 
-                var candidates = robotsAgents.Where(agent => ContainsCapability(agent.AvailableCapabilities,task.Capabilities.First())).ToArray();
+                var candidates = robotsAgents.Where(agent => ContainsCapability(agent.AvailableCapabilities,task.RequiredCapabilities.First())).ToArray();
 
-                for (var i = 0; i < task.Capabilities.Length - 1; i++)
+                for (var i = 0; i < task.RequiredCapabilities.Length - 1; i++)
                 {
                     candidates =
                         candidates.SelectMany(r => matrix[r])
-                                  .Where(r => ContainsCapability(r.AvailableCapabilities,task.Capabilities[i + 1]))
+                                  .Where(r => ContainsCapability(r.AvailableCapabilities,task.RequiredCapabilities[i + 1]))
                                   .ToArray();
                     if (candidates.Length == 0)
                     {
