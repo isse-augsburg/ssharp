@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using System;
+	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 	using Odp;
 
@@ -34,7 +35,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		private static readonly ICapability[] _produceCapabilities = new[] { new ProduceCapability() };
 		private static readonly ICapability[] _emptyCapabilities = new ICapability[0];
 
-		public override ICapability[] AvailableCapabilities =>
+		public override IEnumerable<ICapability> AvailableCapabilities =>
 			_containerCount > 0 ? _produceCapabilities : _emptyCapabilities;
 
 		private readonly ObjectPool<PillContainer> _containerStorage = new ObjectPool<PillContainer>(Model.ContainerStorageSize);
@@ -65,7 +66,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[FaultEffect(Fault = nameof(NoContainersLeft))]
 		public class NoContainersLeftEffect : ContainerLoader
 		{
-			public override ICapability[] AvailableCapabilities => _emptyCapabilities;
+			public override IEnumerable<ICapability> AvailableCapabilities => _emptyCapabilities;
 		}
 
 		[FaultEffect(Fault = nameof(CompleteStationFailure))]

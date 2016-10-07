@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using System;
+	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 	using Odp;
 
@@ -46,7 +47,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			DispenserDefect.Subsumes(BlueTankDepleted, RedTankDepleted, YellowTankDepleted);
 		}
 
-		public override ICapability[] AvailableCapabilities
+		public override IEnumerable<ICapability> AvailableCapabilities
 			=> Array.ConvertAll(_ingredientTanks, tank => tank.Capability);
 
 		// for convenience
@@ -71,7 +72,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[FaultEffect(Fault = nameof(DispenserDefect))]
 		public class DispenserDefectEffect : ParticulateDispenser
 		{
-			public override ICapability[] AvailableCapabilities => new ICapability[0];
+			public override IEnumerable<ICapability> AvailableCapabilities => new ICapability[0];
 		}
 
 		[FaultEffect(Fault = nameof(CompleteStationFailure))]

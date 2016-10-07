@@ -29,7 +29,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 
 	public static class CapabilityHelper
 	{
-		public static bool IsSatisfiable(this ICapability[] required, ICapability[] available)
+		public static bool IsSatisfiable(this IEnumerable<ICapability> required, IEnumerable<ICapability> available)
 		{
 			if (required.OfType<ProduceCapability>().Any() && !available.OfType<ProduceCapability>().Any())
 				return false;
@@ -49,7 +49,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			return true;
 		}
 
-		private static Dictionary<IngredientType, int> GroupIngredientAmounts(ICapability[] capabilities)
+		private static Dictionary<IngredientType, int> GroupIngredientAmounts(IEnumerable<ICapability> capabilities)
 		{
 			return capabilities.OfType<Ingredient>()
 							   .GroupBy(ingredient => ingredient.Type, ingredient => (int)ingredient.Amount)

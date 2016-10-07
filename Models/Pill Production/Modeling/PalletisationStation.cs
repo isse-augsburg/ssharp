@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using System;
+	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 	using Odp;
 
@@ -38,7 +39,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			CompleteStationFailure.Subsumes(PalletisationDefect);
 		}
 
-		public override ICapability[] AvailableCapabilities { get; } = { new ConsumeCapability() };
+		public override IEnumerable<ICapability> AvailableCapabilities { get; } = new[] { new ConsumeCapability() };
 
 		public override void ApplyCapability(ICapability capability)
 		{
@@ -58,7 +59,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[FaultEffect(Fault = nameof(PalletisationDefect))]
 		public class PalletisationDefectEffect : PalletisationStation
 		{
-			public override ICapability[] AvailableCapabilities => new ICapability[0];
+			public override IEnumerable<ICapability> AvailableCapabilities => new ICapability[0];
 		}
 
 		[FaultEffect(Fault = nameof(CompleteStationFailure))]

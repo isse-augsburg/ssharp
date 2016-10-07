@@ -37,7 +37,7 @@ namespace SafetySharp.Odp
 		public static int MaximumReconfigurationRequests = 30;
 		public static int MaximumRoleCount = 100;
 
-		public abstract ICapability[] AvailableCapabilities { get; }
+		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
 		public List<Role<A, T, R>> AllocatedRoles { get; } = new List<Role<A, T, R>>(MaximumRoleCount);
 
