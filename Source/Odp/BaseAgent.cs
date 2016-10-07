@@ -98,13 +98,17 @@ namespace SafetySharp.Odp
 					action: () =>
 					{
 						_currentRole.PostCondition.Port.ResourceReady((A)this, _currentRole.PostCondition);
+						_currentRole.Reset();
 						RemoveResourceRequest(_currentRole.PreCondition.Port, _currentRole.PreCondition);
 					})
 				.Transition( // resource has been consumed
 					from: State.ExecuteRole,
 					to: State.Idle,
 					guard: _currentRole.IsCompleted && _resource == null && _currentRole.PostCondition.Port == null,
-					action: () => RemoveResourceRequest(_currentRole.PreCondition.Port, _currentRole.PreCondition));
+					action: () => {
+						_currentRole.Reset();
+						RemoveResourceRequest(_currentRole.PreCondition.Port, _currentRole.PreCondition)
+					});
 		}
 
 		public enum State
@@ -122,7 +126,10 @@ namespace SafetySharp.Odp
 			_resource = default(R);
 		}
 
-		protected virtual void ChooseRole() { }
+		protected virtual void ChooseRole()
+		{
+			throw new NotImplementedException(); // TODO: implement or make abstract
+		}
 
 		public abstract void ApplyCapability(ICapability capability);
 
@@ -211,7 +218,7 @@ namespace SafetySharp.Odp
 			_stateMachine.Transition(
 				from: State.WaitingForResource,
 				to: State.ExecuteRole,
-				action: _currentRole.PostCondition.Port.ResourcePickedUp
+				action: _currentRole.PreCondition.Port.ResourcePickedUp
 			);
 		}
 
