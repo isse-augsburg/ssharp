@@ -54,7 +54,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 				Container = _containerStorage.Allocate();
 				_containerCount--;
 
-				var recipe = _currentRole.Task;
+				var recipe = _currentRole?.Task;
 				Container.OnLoaded(recipe);
 				recipe.AddContainer(Container);
 			}
