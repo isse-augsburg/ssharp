@@ -107,6 +107,7 @@ namespace SafetySharp.Odp
 					action: () => {
 						_currentRole?.Reset();
 						RemoveResourceRequest(_currentRole?.PreCondition.Port, _currentRole.Value.PreCondition);
+						_currentRole = null;
 					});
 		}
 
