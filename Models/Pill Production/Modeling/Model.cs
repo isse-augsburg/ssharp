@@ -36,9 +36,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			Stations = stations;
 			foreach (var station in stations)
 			{
-				station.SetReconfigurationStrategy(
-					new Odp.CentralReconfiguration<Station, Recipe, PillContainer>(controller)
-				);
+				station.ReconfigurationStrategy =
+					new Odp.CentralReconfiguration<Station, Recipe, PillContainer>(controller);
 				station.RecipeQueue = _scheduledRecipes;
 			}
 			Controller = controller;
