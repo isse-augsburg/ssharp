@@ -30,7 +30,7 @@ namespace SafetySharp.Odp
 		where A : BaseAgent<A, T, R>
 		where T : class, ITask
 	{
-		private readonly IController<A, T, R> _controller;
+		protected readonly IController<A, T, R> _controller;
 
 		public CentralReconfiguration(IController<A, T, R> controller)
 		{

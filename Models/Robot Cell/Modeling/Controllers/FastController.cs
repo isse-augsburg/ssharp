@@ -28,11 +28,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using SafetySharp.Modeling;
 	using Odp;
 
+	using Role = Odp.Role<Agent, Task, Resource>;
+
 	/// <summary>
-	///   An <see cref="ObserverController" /> implementation that is much faster than
+	///   An <see cref="Controller" /> implementation that is much faster than
 	///   the MiniZinc implementation.
 	/// </summary>
-	internal class FastObserverController : ObserverController
+	internal class FastController : Controller
 	{
 		[Hidden(HideElements = true)]
 		private readonly RobotAgent[] _availableRobots;
@@ -43,22 +45,31 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		[Hidden(HideElements = true)]
 		private int[,] _pathMatrix;
 
-		public FastObserverController(IEnumerable<Agent> agents, List<Task> tasks)
-			: base(agents, tasks)
+		public FastController(IEnumerable<Agent> agents) : base(agents.ToArray())
 		{
 			_availableRobots = Agents.OfType<RobotAgent>().ToArray();
 		}
 
-		protected override void Reconfigure()
+		public override Dictionary<Agent, IEnumerable<Role>> CalculateConfigurations(params Task[] tasks)
 		{
-			// find optimal path that satisfies the required capabilities
+			var configs = new Dictionary<Agent, IEnumerable<Role>>();
 			CalculateShortestPaths();
-			var path = FindPath(Tasks[0]);
 
-			if (path == null)
-				ReconfigurationState = ReconfStates.Failed;
-			else
-				ApplyConfiguration(Convert(Tasks[0], path).ToArray());
+			foreach (var task in tasks)
+			{
+				var path = FindPath(task);
+				if (path == null)
+				{
+					ReconfigurationFailure = true;
+				}
+				else
+				{
+					ExtractConfigurations(configs, task, Convert(task, path).ToArray());
+					task.IsResourceInProduction = false;
+				}
+			}
+
+			return configs;
 		}
 
 		/// <summary>
@@ -179,7 +190,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		/// <returns>True if choosing station as next path entry would not exceed its capabilities.</returns>
 		private bool CanSatisfyNext(Task task, int capability, int robot)
 		{
-			return _availableRobots[robot].AvailableCapabilities.Any(c => c.IsEquivalentTo(task.RequiredCapabilities[capability]));
+			return _availableRobots[robot].AvailableCapabilities.Any(c => (c as Capability).IsEquivalentTo(task.RequiredCapabilities[capability]));
 		}
 
 		private IEnumerable<Tuple<Agent, ICapability[]>> Convert(Task task, int[] path)

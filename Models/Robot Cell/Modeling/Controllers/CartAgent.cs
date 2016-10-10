@@ -33,10 +33,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public Cart Cart { get; }
 
-		protected override void OnResourceReady(Agent agent)
+		protected override void InitiateResourceTransfer(Agent agent)
 		{
-			base.OnResourceReady(agent);
-
 			// If we fail to move to the robot, the cart loses its route
 			if (Cart.MoveTo(((RobotAgent)agent).Robot))
 				return;
@@ -45,29 +43,28 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			// the cart might have the connections R0->R1 and R1->R2. If
 			// R0->R1 breaks, R1 would no longer be in its inputs and 
 			// outputs, which is obviously wrong
-			Disconnect(this, agent);
-			Disconnect(agent, this);
-			CheckConstraints();
+			BidirectionallyDisconnect(agent);
 		}
 
-		protected override void OnRoleChosen(Role role)
+		protected override void BeginResourcePickup(Agent source)
 		{
 			// If we fail to move to the robot, the cart loses its route
-			if (Cart.MoveTo(((RobotAgent)role.PreCondition.Port).Robot))
+			if (Cart.MoveTo(((RobotAgent)source).Robot))
+			{
+				base.BeginResourcePickup(source);
 				return;
+			}
 
 			// ODP inconsistency: We shouldn't be doing this in all cases; for example,
 			// the cart might have the connections R0->R1 and R1->R2. If
 			// R0->R1 breaks, R1 would no longer be in its inputs and 
 			// outputs, which is obviously wrong
-			Disconnect(this, role.PreCondition.Port);
-			Disconnect(role.PreCondition.Port, this);
-			CheckConstraints();
+			BidirectionallyDisconnect(source);
 		}
 
-		public override void OnReconfigured()
+		protected override void DropResource()
 		{
-			base.OnReconfigured();
+			base.DropResource();
 
 			// For now, the resource disappears magically...
 			Cart.LoadedWorkpiece?.Discard();

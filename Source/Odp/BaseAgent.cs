@@ -80,7 +80,7 @@ namespace SafetySharp.Odp
 					from: State.ChooseRole,
 					to: State.WaitingForResource,
 					guard: _currentRole?.PreCondition.Port != null,
-					action: _currentRole.Value.PreCondition.Port.TransferResource)
+					action: () => BeginResourcePickup(_currentRole?.PreCondition.Port))
 				.Transition( // going to produce new resource (no transfer necessary)
 					from: State.ChooseRole,
 					to: State.ExecuteRole,
@@ -186,6 +186,12 @@ namespace SafetySharp.Odp
 			public Condition<A, T> Condition { get; }
 		}
 
+		// TODO: naming, distinct from physical transfer -- or abandon physical transfer methods?
+		protected virtual void BeginResourcePickup(A source)
+		{
+			source.TransferResource();
+		}
+
 		public virtual void ResourceReady(A agent, Condition<A, T> condition)
 		{
 			_resourceRequests.Add(new ResourceRequest(agent, condition));
@@ -199,7 +205,7 @@ namespace SafetySharp.Odp
 
 		public virtual void TransferResource()
 		{
-			InitiateResourceTransfer();
+			InitiateResourceTransfer(_currentRole?.PreCondition.Port);
 
 			_stateMachine.Transition(
 				from: State.Output,
@@ -212,7 +218,7 @@ namespace SafetySharp.Odp
 		{
 			// assert resource != null
 
-			PickupResource();
+			PickupResource(_currentRole?.PreCondition.Port);
 			_resource = resource;
 
 			_stateMachine.Transition(
@@ -224,7 +230,7 @@ namespace SafetySharp.Odp
 
 		public virtual void ResourcePickedUp()
 		{
-			EndResourceTransfer();
+			EndResourceTransfer(_currentRole?.PreCondition.Port);
 			_resource = default(R);
 
 			_stateMachine.Transition(
@@ -238,11 +244,11 @@ namespace SafetySharp.Odp
 
 		#region physical resource transfer
 
-		protected abstract void PickupResource();
+		protected abstract void InitiateResourceTransfer(A source);
 
-		protected abstract void InitiateResourceTransfer();
+		protected abstract void PickupResource(A source);
 
-		protected abstract void EndResourceTransfer();
+		protected abstract void EndResourceTransfer(A source);
 
 		#endregion
 
@@ -315,6 +321,7 @@ namespace SafetySharp.Odp
 
 		protected readonly List<A> _responses = new List<A>(MaximumAgentCount);
 
+		// TODO: abstract from ping mechanism again?
 		protected virtual IEnumerable<A> PingNeighbors()
 		{
 			var neighbors = Inputs.Union(Outputs);

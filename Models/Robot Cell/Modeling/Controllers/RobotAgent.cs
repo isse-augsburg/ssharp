@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System;
 	using System.Linq;
 	using Plants;
+	using Odp;
 
 	internal class RobotAgent : Agent
 	{
@@ -38,10 +39,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public Robot Robot { get; }
 
-		public override void OnReconfigured()
+		protected override void DropResource()
 		{
 			_currentCapability = null;
-			base.OnReconfigured();
+			base.DropResource();
 
 			// For now, the resource disappears magically...
 			Robot.DiscardWorkpiece();
@@ -57,7 +58,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return Robot.CanTransfer();
 		}
 
-		protected override bool CheckAllocatedCapability(Capability capability)
+		protected override bool CheckAllocatedCapability(ICapability capability)
 		{
 			if (!Robot.CanSwitch())
 				return false;
@@ -66,7 +67,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return processCapability == null || Robot.CanApply(processCapability);
 		}
 
-		public override void TakeResource(Agent agent)
+		protected override void PickupResource(Agent agent)
 		{
 			// If we fail to transfer the resource, the robot loses all of its connections
 			if (Robot.TakeResource(((CartAgent)agent).Cart))
@@ -77,7 +78,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			CheckConstraints();
 		}
 
-		public override void PlaceResource(Agent agent)
+		protected override void InitiateResourceTransfer(Agent agent)
 		{
 			// If we fail to transfer the resource, the robot loses all of its connections
 			if (Robot.PlaceResource(((CartAgent)agent).Cart))
@@ -93,10 +94,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			// Using ToArray() to prevent removal during collection iteration
 
 			foreach (var input in Inputs.ToArray())
-				Disconnect(input, this);
+				input.Disconnect(this);
 
 			foreach (var output in Outputs.ToArray())
-				Disconnect(this, output);
+				this.Disconnect(output);
 		}
 
 		public override void Produce(ProduceCapability capability)
@@ -124,7 +125,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 					_currentCapability = capability;
 				else
 				{
-					AvailableCapabilities.RemoveAll(c => c != _currentCapability);
+					_availableCapabilities.RemoveAll(c => c != _currentCapability);
 					CheckConstraints();
 					return;
 				}
@@ -133,7 +134,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			// Apply the capability; if we fail to do so, remove it from the available ones and trigger a reconfiguration
 			if (!Robot.ApplyCapability())
 			{
-				AvailableCapabilities.Remove(capability);
+				_availableCapabilities.Remove(capability);
 				CheckConstraints();
 			}
 			else

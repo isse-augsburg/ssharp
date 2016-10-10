@@ -22,45 +22,45 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
+	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.Contracts;
 	using System.Linq;
 	using Odp;
 
-	internal struct Condition
+	using Role = Odp.Role<Agent, Task, Resource>;
+
+	internal abstract class Controller : AbstractController<Agent, Task, Resource>
 	{
-		private readonly byte _statePrefixLength;
-		public readonly Agent Port;
-		public readonly Task Task;
+		protected Controller(IEnumerable<Agent> agents) : base(agents.ToArray()) { }
 
-		public Condition(Task task, Agent port, int statePrefixLength)
+		protected void ExtractConfigurations(Dictionary<Agent, IEnumerable<Role>> configs, Task task, Tuple<Agent, ICapability[]>[] roleAllocations)
 		{
-			_statePrefixLength = checked((byte)statePrefixLength);
-			Port = port;
-			Task = task;
-		}
+			Action<Agent, Role> addRole = (agent, role) => {
+				if (!configs.ContainsKey(agent))
+					configs.Add(agent, new HashSet<Role>());
+			};
 
-		public IEnumerable<ICapability> State =>
-			Task?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
+			Role lastRole = default(Role);
 
-		[Pure]
-		public bool StateMatches(IEnumerable<ICapability> other)
-		{
-			return State.SequenceEqual(other, StateComparer.Default);
-		}
-
-		private class StateComparer : IEqualityComparer<ICapability>
-		{
-			public static readonly StateComparer Default = new StateComparer();
-
-			public bool Equals(ICapability x, ICapability y)
+			for (var i = 0; i < roleAllocations.Length; i++)
 			{
-				return (x as Capability).IsEquivalentTo(y);
-			}
+				var agent = roleAllocations[i].Item1;
+				var capabilities = roleAllocations[i].Item2;
 
-			public int GetHashCode(ICapability obj)
-			{
-				return obj.GetHashCode();
+				var preAgent = i == 0 ? null : roleAllocations[i - 1].Item1;
+				var postAgent = i == roleAllocations.Length - 1 ? null : roleAllocations[i + 1].Item1;
+
+				var role = GetRole(task, preAgent, lastRole.PostCondition);
+				role.PostCondition.Port = postAgent;
+
+				foreach (var capability in capabilities)
+				{
+					role.AddCapability(capability);
+					role.PostCondition.AppendToState(capability);
+				}
+
+				addRole(agent, role);
+				lastRole = role;
 			}
 		}
 	}

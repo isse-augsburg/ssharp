@@ -25,78 +25,33 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using CompilerServices;
 	using SafetySharp.Modeling;
+	using Odp;
 
-	internal class Agent : Component
+	using IReconfigurationStrategy = Odp.IReconfigurationStrategy<Agent, Task, Resource>;
+	using Role = Odp.Role<Agent, Task, Resource>;
+
+	internal class Agent : BaseAgent<Agent, Task, Resource>
 	{
-		private readonly List<Agent> _requests = new List<Agent>(Model.MaxAgentRequests);
-		private readonly StateMachine<State> _stateMachine = State.Idle;
-		protected Role _currentRole;
-		private bool _hasRole;
-
 		public readonly Fault ConfigurationUpdateFailed = new TransientFault();
 
 		public Agent(params Capability[] capabilities)
 		{
-			AvailableCapabilities = new List<Capability>(capabilities);
+			_availableCapabilities = new List<ICapability>(capabilities);
 		}
 
-		[Hidden(HideElements = true)]
-		public List<Func<bool>> Constraints { get; set; }
-
-		public List<Capability> AvailableCapabilities { get; }
-		public List<Role> AllocatedRoles { get; } = new List<Role>(Model.MaxRoleCount);
-
-		[Hidden]
-		public List<Agent> Outputs { get; } = new List<Agent>();
-
-		[Hidden]
-		public List<Agent> Inputs { get; } = new List<Agent>();
+		protected readonly List<ICapability> _availableCapabilities;
+		public override IEnumerable<ICapability> AvailableCapabilities => _availableCapabilities;
 
 		[Hidden]
 		public string Name { get; set; }
 
-		[Hidden]
-		public ObserverController ObserverController { get; set; }
+		public bool HasResource => _resource != null;
 
-		public Resource Resource { get; set; }
-
-		public bool HasResource => Resource != null;
-
-		public static void Connect(Agent from, Agent to)
+		public override void Update()
 		{
-			if (!from.Outputs.Contains(to))
-				from.Outputs.Add(to);
-
-			if (!to.Inputs.Contains(from))
-				to.Inputs.Add(from);
-		}
-
-		public static void Disconnect(Agent from, Agent to)
-		{
-			from.Outputs.Remove(to);
-			to.Inputs.Remove(from);
-		}
-
-		public virtual void OnReconfigured()
-		{
-			// For now, the resource disappears magically...
-			Resource = null;
-			_currentRole  = default(Role);
-			_hasRole = false;
-			_requests.Clear();
-			_stateMachine.ChangeState(State.Idle); // Todo: This is a bit of a hack
-		}
-
-		protected void CheckConstraints()
-		{
-			var constraints = Constraints.Select(constraint => constraint());
-			if (constraints.Any(constraint => !constraint))
-			{
-				ObserverController.ScheduleReconfiguration();
-				return;
-			}
+			CheckAllocatedCapabilities();
+			base.Update();
 		}
 
 		public virtual void Produce(ProduceCapability capability)
@@ -111,13 +66,22 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		{
 		}
 
-		public virtual void TakeResource(Agent agent)
+		// TODO: switch to original robot cell approach (Capability.Execute()) in ODP core?
+		public override void ApplyCapability(ICapability capability)
 		{
+			if (capability is ProduceCapability)
+				Produce(capability as ProduceCapability);
+			else if (capability is ProcessCapability)
+				Process(capability as ProcessCapability);
+			else if (capability is ConsumeCapability)
+				Consume(capability as ConsumeCapability);
+			throw new NotImplementedException();
 		}
 
-		public virtual void PlaceResource(Agent agent)
-		{
-		}
+		// empty implementations for physical resource transfer -- RobotAgent, CartAgent override some of these
+		protected override void PickupResource(Agent source) { }
+		protected override void InitiateResourceTransfer(Agent agent) { }
+		protected override void EndResourceTransfer(Agent source) { }
 
 		public void CheckAllocatedCapabilities()
 		{
@@ -129,23 +93,23 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			foreach (var capability in AvailableCapabilities.ToArray())
 			{
 				if (!CheckAllocatedCapability(capability))
-					AvailableCapabilities.Remove(capability);
+					_availableCapabilities.Remove(capability);
 			}
 
 			foreach (var input in Inputs.ToArray())
 			{
 				if (!CheckInput(input))
-					Disconnect(input, this);
+					input.Disconnect(this);
 			}
 
 			foreach (var output in Outputs.ToArray())
 			{
 				if (!CheckOutput(output))
-					Disconnect(this, output);
+					this.Disconnect(output);
 			}
 		}
 
-		protected virtual bool CheckAllocatedCapability(Capability capability)
+		protected virtual bool CheckAllocatedCapability(ICapability capability)
 		{
 			return true;
 		}
@@ -158,94 +122,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		protected virtual bool CheckOutput(Agent agent)
 		{
 			return true;
-		}
-
-		public override void Update()
-		{
-			_stateMachine
-				.Transition(
-					from: State.Idle,
-					to: State.RoleChosen,
-					guard: ChooseRole(),
-					action: () => OnRoleChosen(_currentRole))
-				.Transition(
-					from: State.RoleChosen,
-					to: State.WaitForResource,
-					guard: _currentRole.PreCondition.Port != null,
-					action: () => _currentRole.PreCondition.Port.TransferResource(this))
-				.Transition(
-					from: State.RoleChosen,
-					to: State.ExecuteRole,
-					guard: !_hasRole && _currentRole.PreCondition.Port == null)
-				.Transition(
-					from: State.WaitForResource,
-					to: State.WaitForResource,
-					guard: Resource == null,
-					action: () => _currentRole.PreCondition.Port.TransferResource(this))
-				.Transition(
-					from: State.WaitForResource,
-					to: State.ExecuteRole,
-					guard: Resource != null,
-					action: () => _currentRole.PreCondition.Port.ResourcePickedUp())
-				.Transition(
-					from: State.ExecuteRole,
-					to: State.ExecuteRole,
-					guard: (Resource != null || _currentRole.PreCondition.Port == null) && !_currentRole.IsCompleted,
-					action: () => _currentRole.Execute(this))
-				.Transition(
-					from: State.ExecuteRole,
-					to: State.Output,
-					guard: _currentRole.IsCompleted && _currentRole.PostCondition.Port != null && Resource != null,
-					action: () =>
-					{
-						_currentRole.PostCondition.Port.ResourceReady(this);
-						_currentRole.Reset();
-						_requests.Remove(_currentRole.PreCondition.Port);
-					})
-				.Transition(
-					from: State.ExecuteRole,
-					to: State.Idle,
-					guard: Resource == null && (_currentRole.IsCompleted || _currentRole.PostCondition.Port == null),
-					action: () =>
-					{
-						_currentRole.Reset();
-						_requests.Remove(_currentRole.PreCondition.Port);
-					})
-				.Transition(
-					from: State.Output,
-					to: State.Output,
-					guard: Resource != null,
-					action: () => OnResourceReady(_currentRole.PostCondition.Port));
-		}
-
-		protected virtual void OnResourceReady(Agent agent)
-		{
-			agent.ResourceReady(this);
-		}
-
-		protected virtual void OnRoleChosen(Role role)
-		{
-		}
-
-		private void TransferResource(Agent agent)
-		{
-			_stateMachine.Transition(
-				from: State.Output,
-				to: State.ResourceGiven,
-				guard: Resource != null,
-				action: () =>
-				{
-					PlaceResource(agent);
-					agent.TakeResource(this);
-
-					agent.Resource = Resource;
-					Resource = null;
-				});
-		}
-
-		private void ResourcePickedUp()
-		{
-			_stateMachine.Transition(from: State.ResourceGiven, to: State.Idle);
 		}
 
 		protected bool TryChooseRole(Func<Role, bool> predicate, out Role role)
@@ -265,41 +141,47 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		private bool ChooseRole()
 		{
+			Role chosenRole;
+
 			// Check if we can process
-			if (_requests.Count != 0)
+			if (_resourceRequests.Count != 0)
 			{
-				var otherAgent = _requests[0];
+				var otherAgent = _resourceRequests[0].Source;
+				var condition = _resourceRequests[0].Condition;
 				if (TryChooseRole(role => role.PreCondition.Port == otherAgent &&
-										  role.PreCondition.StateMatches(otherAgent.Resource.State), out _currentRole))
+										  role.PreCondition.StateMatches(condition), out chosenRole))
+				{
+					_currentRole = chosenRole;
 					return true;
+				}
 			}
 
 			// Check if we can produce
-			if (Resource == null)
+			if (_resource == null)
 			{
-				if (TryChooseRole(role => role.PreCondition.Port == null, out _currentRole))
+				if (TryChooseRole(role => role.PreCondition.Port == null, out chosenRole))
+				{
+					_currentRole = chosenRole;
 					return true;
+				}
 			}
 
 			// Check if we can consume
-			if (Resource != null)
+			if (_resource != null)
 			{
-				if (TryChooseRole(role => role.PostCondition.Port == null, out _currentRole))
+				if (TryChooseRole(role => role.PostCondition.Port == null, out chosenRole))
+				{
+					_currentRole = chosenRole;
 					return true;
+				}
 			}
 
 			return false;
 		}
 
-		private void ResourceReady(Agent otherAgent)
-		{
-			if (_requests.Count < Model.MaxAgentRequests && !_requests.Contains(otherAgent))
-				_requests.Add(otherAgent);
-		}
-
 		public override string ToString()
 		{
-			return $"{Name}: State: {_stateMachine.State}, Resource: {Resource?.Workpiece.Name}, #Requests: {_requests.Count}";
+			return $"{Name}: State: {_stateMachine.State}, Resource: {_resource?.Workpiece.Name}, #Requests: {_resourceRequests.Count}";
 		}
 
 		public virtual void Configure(Role role)
@@ -307,16 +189,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			AllocatedRoles.Add(role);
 		}
 
-		private enum State
-		{
-			Idle,
-			RoleChosen,
-			WaitForResource,
-			ExecuteRole,
-			Output,
-			ResourceGiven
-		}
-
+		// TODO: integrate fault effect with Odp library
 		[FaultEffect(Fault = nameof(ConfigurationUpdateFailed))]
 		public class ConfigurationUpdateFailedEffect : Agent
 		{

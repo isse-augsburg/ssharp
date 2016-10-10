@@ -30,7 +30,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using SafetySharp.Modeling;
 	using Odp;
 
-    internal class MiniZincObserverController : ObserverController
+	using Role = Odp.Role<Agent, Task, Resource>;
+
+	internal class MiniZincController : Controller
 	{
         [Hidden]
         private string _constraintsFile;
@@ -41,34 +43,49 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		private const string MinizincExe = "minizinc.exe";
 		private const string MinizincModel = "ConstraintModel.mzn";
 
-		public MiniZincObserverController(IEnumerable<Agent> agents, List<Task> tasks)
-			: base(agents, tasks)
+		public MiniZincController(IEnumerable<Agent> agents) : base(agents) { }
+
+		public override Dictionary<Agent, IEnumerable<Role>> CalculateConfigurations(params Task[] tasks)
 		{
+			var configs = new Dictionary<Agent, IEnumerable<Role>>();
+			foreach (var task in tasks)
+			{
+				CreateConstraintsFile(task);
+				ExecuteMinizinc();
+
+				// TODO: move comparison to isReconfPossible in CentralReconf subclass?
+				//var isReconfPossible = IsReconfPossible(Agents.OfType<RobotAgent>(), Tasks);
+
+				var lines = File.ReadAllLines(ConfigurationFile);
+				if (lines[0].Contains("UNSATISFIABLE"))
+				{
+					ReconfigurationFailure = true;
+					//    if (isReconfPossible) 
+					//       throw new Exception("Reconfiguration failed even though there is a solution.");
+				}
+
+				//if (!isReconfPossible)
+				//   throw new Exception("Reconfiguration successful even though there is no valid configuration.");
+				else
+					ExtractConfigurations(configs, task, Parse(task, lines[0], lines[1]).ToArray());
+			}
+			return configs;
 		}
 
-		protected override void Reconfigure()
+		private void CreateConstraintsFile(Task task)
 		{
-			CreateConstraintsFile();
-			ExecuteMinizinc();
-			UpdateConfiguration();
-		}
-
-		private void CreateConstraintsFile()
-		{
-			if (Tasks.Count != 1)
-				throw new InvalidOperationException("The constraint model expects exactly one task.");
 		    _constraintsFile = "Constraints"+ ++myID + ".dzn";
 
             using (var writer = new StreamWriter(_constraintsFile))
 			{
-				var task = String.Join(",", Tasks[0].RequiredCapabilities.Select(c => (c as Capability).Identifier));
+				var taskSequence = String.Join(",", task.RequiredCapabilities.Select(c => (c as Capability).Identifier));
 				var isCart = String.Join(",", Agents.Select(a => (a is CartAgent).ToString().ToLower()));
 				var capabilities = String.Join(",", Agents.Select(a =>
-					$"{{{String.Join(",", a.AvailableCapabilities.Select(c => c.Identifier))}}}"));
+					$"{{{String.Join(",", a.AvailableCapabilities.Select(c => (c as Capability).Identifier))}}}"));
 				var isConnected = String.Join("\n|", Agents.Select(from =>
 					String.Join(",", Agents.Select(to => (from.Outputs.Contains(to) || from == to).ToString().ToLower()))));
 
-				writer.WriteLine($"task = [{task}];");
+				writer.WriteLine($"task = [{taskSequence}];");
 				writer.WriteLine($"noAgents = {Agents.Length};");
 				writer.WriteLine($"capabilities = [{capabilities}];");
 				writer.WriteLine($"isCart = [{isCart}];");
@@ -113,42 +130,21 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Console.WriteLine(output);
 		}
 
-		private void UpdateConfiguration()
-		{
-		    var isReconfPossible = IsReconfPossible(Agents.OfType<RobotAgent>(), Tasks);
-
-			var lines = File.ReadAllLines(ConfigurationFile);
-			if (lines[0].Contains("UNSATISFIABLE"))
-			{
-				ReconfigurationState = ReconfStates.Failed;
-                if (isReconfPossible) 
-                    throw new Exception("Reconfiguration failed even though there is a solution.");
-				return;
-			}
-
-			ReconfigurationState = ReconfStates.Succedded;
-            if (!isReconfPossible)
-                throw new Exception("Reconfiguration successful even though there is no valid configuration.");
-
-			var roleAllocations = Parse(lines[0], lines[1]).ToArray();
-			ApplyConfiguration(roleAllocations);
-		}
-
-		private IEnumerable<Tuple<Agent, ICapability[]>> Parse(string agentsString, string capabilitiesString)
+		private IEnumerable<Tuple<Agent, ICapability[]>> Parse(Task task, string agentsString, string capabilitiesString)
 		{
 			var agentIds = ParseList(agentsString);
 			var capabilityIds = ParseList(capabilitiesString);
 
 			for (var i = 0; i < agentIds.Length;)
 			{
-				var capabilities = EnumerateCapabilities(agentIds, capabilityIds, i).ToArray();
+				var capabilities = EnumerateCapabilities(task, agentIds, capabilityIds, i).ToArray();
 				yield return Tuple.Create(Agents[agentIds[i]], capabilities);
 
 				i += Math.Max(1, capabilities.Length);
 			}
 		}
 
-		private IEnumerable<ICapability> EnumerateCapabilities(int[] agents, int[] capabilities, int offset)
+		private IEnumerable<ICapability> EnumerateCapabilities(Task task, int[] agents, int[] capabilities, int offset)
 		{
 			var agentId = agents[offset];
 			var agent = Agents[agentId];
@@ -156,7 +152,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			for (var i = offset; i < agents.Length && agents[i] == agentId; ++i)
 			{
 				if (capabilities[i] != -1)
-					yield return agent.AvailableCapabilities.First(c => c.IsEquivalentTo(Tasks[0].RequiredCapabilities[capabilities[i]]));
+					yield return agent.AvailableCapabilities.First(c => (c as Capability).IsEquivalentTo(task.RequiredCapabilities[capabilities[i]]));
 			}
 		}
 

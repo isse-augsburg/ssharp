@@ -44,7 +44,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			var model = new Model();
 			model.InitializeDefaultInstance();
-			model.CreateObserverController<MiniZincObserverController>();
+			model.CreateController<MiniZincController>();
 			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
 
 			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 20 } };
@@ -73,7 +73,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				Heuristics = { RedundancyHeuristic(model), new SubsumptionHeuristic(model) }
 			};
 		
-			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
+			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ReconfigurationStrategy.UnsuccessfulReconfiguration);
 			Console.WriteLine(result);
 		}
 
@@ -89,13 +89,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 		private static IEnumerable CreateConfigurationsMiniZinc()
 		{
-			return Model.CreateConfigurations<MiniZincObserverController>(AnalysisMode.TolerableFaults)
+			return Model.CreateConfigurations<MiniZincController>(AnalysisMode.TolerableFaults)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 
 		private static IEnumerable CreateConfigurationsFast()
 		{
-			return Model.CreateConfigurations<FastObserverController>(AnalysisMode.TolerableFaults)
+			return Model.CreateConfigurations<FastController>(AnalysisMode.TolerableFaults)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 	}

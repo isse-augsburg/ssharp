@@ -27,6 +27,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	using System.Linq;
 	using Controllers;
 	using Plants;
+	using Odp;
 	using SafetySharp.Modeling;
 
 	internal class Model : ModelBase
@@ -60,7 +61,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		public List<Resource> Resources { get; } = new List<Resource>();
 
 		[Root(RootKind.Controller)]
-		public ObserverController ObserverController { get; set; }
+		public CentralRobotReconfiguration ReconfigurationStrategy { get; set; }
 
 		private Capability Produce => new ProduceCapability(Resources, Tasks);
 		private static Capability Insert => new ProcessCapability(ProductionAction.Insert);
@@ -164,16 +165,21 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			CreateCart(new Route(Robots[1], Robots[2]));
 		}
 
-		public void CreateObserverController<T>()
-			where T : ObserverController
+		public void CreateController<T>()
+			where T : Controller
 		{
-			ObserverController = (ObserverController)Activator.CreateInstance(typeof(T), RobotAgents.Cast<Agent>().Concat(CartAgents), Tasks);
+			var agents = RobotAgents.Cast<Agent>().Concat(CartAgents);
+			ReconfigurationStrategy = new CentralRobotReconfiguration(
+				(Controller)Activator.CreateInstance(typeof(T), agents)
+			);
+			foreach (var agent in agents)
+				agent.ReconfigurationStrategy = ReconfigurationStrategy;
 		}
 
 		public void SetAnalysisMode(AnalysisMode mode)
 		{
-			ObserverController.Mode = mode;
-			var agents = ObserverController.Agents;
+			ReconfigurationStrategy.Mode = mode;
+			var agents = RobotAgents.Cast<Agent>().Concat(CartAgents);
 
 			switch (mode)
 			{
@@ -183,7 +189,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 					Workpieces.Select(workpiece => workpiece.ToolApplicationFailed).SuppressActivations();
 					Robots.Select(robot => robot.SwitchToWrongToolFault).SuppressActivations();
 					Carts.Select(cart => cart.Lost).SuppressActivations();
-					ObserverController.ReconfigurationFailure.SuppressActivation();
+					ReconfigurationStrategy.ReconfigurationFailure.SuppressActivation();
 					break;
 				case AnalysisMode.IntolerableFaults:
 					Faults.SuppressActivations();
@@ -192,7 +198,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 					Workpieces.Select(workpiece => workpiece.ToolApplicationFailed).MakeNondeterministic();
 					Robots.Select(robot => robot.SwitchToWrongToolFault).MakeNondeterministic();
 					Carts.Select(cart => cart.Lost).MakeNondeterministic();
-					ObserverController.ReconfigurationFailure.MakeNondeterministic();
+					ReconfigurationStrategy.ReconfigurationFailure.MakeNondeterministic();
 					break;
 				case AnalysisMode.AllFaults:
 					return;
@@ -202,7 +208,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		}
 
 		public static IEnumerable<Model> CreateConfigurations<T>(AnalysisMode mode)
-			where T : ObserverController
+			where T : Controller
 		{
 			yield return CreateConfiguration<T>(m => m.Ictss1(), nameof(Ictss1), mode);
 			yield return CreateConfiguration<T>(m => m.Ictss2(), nameof(Ictss2), mode);
@@ -214,11 +220,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		}
 
 		private static Model CreateConfiguration<T>(Action<Model> initializer, string name, AnalysisMode mode)
-			where T : ObserverController
+			where T : Controller
 		{
 			var model = new Model(name);
 			initializer(model);
-			model.CreateObserverController<T>();
+			model.CreateController<T>();
 			model.SetAnalysisMode(mode);
 
 			return model;
@@ -286,10 +292,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 			foreach (var route in routes)
 			{
-				Agent.Connect(from: RobotAgents.Single(a => route.Robot1 == a.Robot), to: agent);
-				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.Robot2 == a.Robot));
-				Agent.Connect(from: RobotAgents.Single(a => route.Robot2 == a.Robot), to: agent);
-				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.Robot1 == a.Robot));
+				RobotAgents.Single(a => route.Robot1 == a.Robot).BidirectionallyConnect(agent);
+				RobotAgents.Single(a => route.Robot2 == a.Robot).BidirectionallyConnect(agent);
 			}
 		}
 
