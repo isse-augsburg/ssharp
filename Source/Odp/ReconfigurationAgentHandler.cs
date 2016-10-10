@@ -24,8 +24,9 @@ namespace SafetySharp.Odp
 {
 	using System;
 	using System.Collections.Generic;
+	using Modeling;
 
-	public class ReconfigurationAgentHandler<A, T, R> : IReconfigurationStrategy<A, T, R>
+	public class ReconfigurationAgentHandler<A, T, R> : Component, IReconfigurationStrategy<A, T, R>
 		where A : BaseAgent<A, T, R>
 		where T : class, ITask
 	{

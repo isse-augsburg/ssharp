@@ -23,12 +23,14 @@
 namespace SafetySharp.Odp
 {
 	using System.Collections.Generic;
+	using Modeling;
 
-	public interface IReconfigurationStrategy<A, T, R>
+	public interface IReconfigurationStrategy<A, T, R> : IComponent
 		where A : BaseAgent<A, T, R>
 		where T : class, ITask
 	{
 		// TODO: add "state" parameter of some kind, additional info
+		[Provided]
 		void Reconfigure(IEnumerable<T> deficientTasks);
 	}
 }

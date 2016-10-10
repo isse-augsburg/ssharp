@@ -24,8 +24,9 @@ namespace SafetySharp.Odp
 {
 	using System.Collections.Generic;
 	using System.Linq;
+	using Modeling;
 
-	public class CentralReconfiguration<A, T, R> : IReconfigurationStrategy<A, T, R>
+	public class CentralReconfiguration<A, T, R> : Component, IReconfigurationStrategy<A, T, R>
 		where A : BaseAgent<A, T, R>
 		where T : class, ITask
 	{
@@ -56,6 +57,11 @@ namespace SafetySharp.Odp
 		{
 			foreach (var agent in configurations.Keys)
 				agent.AllocatedRoles.AddRange(configurations[agent]);
+		}
+
+		public override void Update()
+		{
+			_controller.Update();
 		}
 	}
 }
