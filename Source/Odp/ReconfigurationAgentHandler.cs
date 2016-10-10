@@ -26,23 +26,23 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using Modeling;
 
-	public class ReconfigurationAgentHandler<A, T, R> : Component, IReconfigurationStrategy<A, T, R>
-		where A : BaseAgent<A, T, R>
-		where T : class, ITask
+	public class ReconfigurationAgentHandler<TAgent, TTask, TResource> : Component, IReconfigurationStrategy<TAgent, TTask, TResource>
+		where TAgent : BaseAgent<TAgent, TTask, TResource>
+		where TTask : class, ITask
 	{
-		private readonly A _baseAgent;
-		private readonly Func<A, T, IReconfigurationAgent<T>> _createReconfAgent;
+		private readonly TAgent _baseAgent;
+		private readonly Func<TAgent, TTask, IReconfigurationAgent<TTask>> _createReconfAgent;
 
-		public ReconfigurationAgentHandler(A baseAgent, Func<A, T, IReconfigurationAgent<T>> createReconfAgent)
+		public ReconfigurationAgentHandler(TAgent baseAgent, Func<TAgent, TTask, IReconfigurationAgent<TTask>> createReconfAgent)
 		{
 			_baseAgent = baseAgent;
 			_createReconfAgent = createReconfAgent;
 		}
 
-		protected readonly Dictionary<T, IReconfigurationAgent<T>> _tasksUnderReconstruction
-			= new Dictionary<T, IReconfigurationAgent<T>>();
+		protected readonly Dictionary<TTask, IReconfigurationAgent<TTask>> _tasksUnderReconstruction
+			= new Dictionary<TTask, IReconfigurationAgent<TTask>>();
 
-		public void Reconfigure(IEnumerable<T> deficientTasks)
+		public void Reconfigure(IEnumerable<TTask> deficientTasks)
 		{
 			foreach (var task in deficientTasks)
 			{
@@ -65,23 +65,23 @@ namespace SafetySharp.Odp
 			throw new NotImplementedException();
 		}
 
-		public virtual void Go(T task)
+		public virtual void Go(TTask task)
 		{
 			UnlockConfigurations(task);
 		}
 
-		public virtual void Done(T task)
+		public virtual void Done(TTask task)
 		{
 			_tasksUnderReconstruction.Remove(task);
 		}
 		#endregion
 
-		protected virtual void LockConfigurations(T task)
+		protected virtual void LockConfigurations(TTask task)
 		{
 			throw new NotImplementedException();
 		}
 
-		protected virtual void UnlockConfigurations(T task)
+		protected virtual void UnlockConfigurations(TTask task)
 		{
 			throw new NotImplementedException();
 		}

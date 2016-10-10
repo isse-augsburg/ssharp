@@ -5,24 +5,24 @@
 
 	public static class Invariant
 	{
-		public static Predicate<Role<A, T, R>> CapabilitiesAvailable<A, T, R>(this BaseAgent<A, T, R> agent)
-			where A : BaseAgent<A,T,R>
-			where T : class, ITask
+		public static Predicate<Role<TAgent, TTask, TResource>> CapabilitiesAvailable<TAgent, TTask, TResource>(this BaseAgent<TAgent, TTask, TResource> agent)
+			where TAgent : BaseAgent<TAgent,TTask,TResource>
+			where TTask : class, ITask
 		{
 			return (role) => role.CapabilitiesToApply.All(cap => agent.AvailableCapabilities.Contains(cap));
 		}
 
-		public static Predicate<Role<A,T,R>> ResourceFlowPossible<A,T,R>(this BaseAgent<A, T, R> agent)
-			where A : BaseAgent<A, T, R>
-			where T : class, ITask
+		public static Predicate<Role<TAgent,TTask,TResource>> ResourceFlowPossible<TAgent,TTask,TResource>(this BaseAgent<TAgent, TTask, TResource> agent)
+			where TAgent : BaseAgent<TAgent, TTask, TResource>
+			where TTask : class, ITask
 		{
 			return (role) => (role.PreCondition.Port == null || agent.Inputs.Contains(role.PreCondition.Port))
 				&& (role.PostCondition.Port == null || agent.Outputs.Contains(role.PostCondition.Port));
 		}
 
-		public static Predicate<Role<A, T, R>> ResourceFlowConsistent<A, T, R>(this BaseAgent<A, T, R> agent)
-			where A : BaseAgent<A, T, R>
-			where T : class, ITask
+		public static Predicate<Role<TAgent, TTask, TResource>> ResourceFlowConsistent<TAgent, TTask, TResource>(this BaseAgent<TAgent, TTask, TResource> agent)
+			where TAgent : BaseAgent<TAgent, TTask, TResource>
+			where TTask : class, ITask
 		{
 			return (role) =>
 				// consistent input:

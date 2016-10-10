@@ -25,15 +25,15 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 
-	public interface IController<A, T, R> : IComponent
-		where A : BaseAgent<A,T,R>
-		where T : class, ITask
+	public interface IController<TAgent, TTask, TResource> : IComponent
+		where TAgent : BaseAgent<TAgent,TTask,TResource>
+		where TTask : class, ITask
 	{
 		[Provided]
-		A[] Agents { get; }
+		TAgent[] Agents { get; }
 
 		[Provided]
-		Dictionary<A, IEnumerable<Role<A, T, R>>> CalculateConfigurations(params T[] tasks);
+		Dictionary<TAgent, IEnumerable<Role<TAgent, TTask, TResource>>> CalculateConfigurations(params TTask[] tasks);
 
 		[Provided]
 		bool ReconfigurationFailure { get; }

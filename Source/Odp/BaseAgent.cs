@@ -27,9 +27,9 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-    public abstract class BaseAgent<A, T, R> : Component
-		where A : BaseAgent<A, T, R>
-		where T : class, ITask
+    public abstract class BaseAgent<TAgent, TTask, TResource> : Component
+		where TAgent : BaseAgent<TAgent, TTask, TResource>
+		where TTask : class, ITask
     {
 		// configuration options
 		public static int MaximumAgentCount = 20;
@@ -39,7 +39,7 @@ namespace SafetySharp.Odp
 
 		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
-		public List<Role<A, T, R>> AllocatedRoles { get; } = new List<Role<A, T, R>>(MaximumRoleCount);
+		public List<Role<TAgent, TTask, TResource>> AllocatedRoles { get; } = new List<Role<TAgent, TTask, TResource>>(MaximumRoleCount);
 
 		public override void Update()
 		{
@@ -49,8 +49,8 @@ namespace SafetySharp.Odp
 
 		#region functional part
 
-		protected Role<A, T, R>? _currentRole;
-		protected R _resource;
+		protected Role<TAgent, TTask, TResource>? _currentRole;
+		protected TResource _resource;
 
 		protected readonly StateMachine<State> _stateMachine = State.Idle;
 
@@ -89,14 +89,14 @@ namespace SafetySharp.Odp
 					from : State.ExecuteRole,
 					to: State.ExecuteRole,
 					guard: !_currentRole.Value.IsCompleted,
-					action: () => _currentRole?.ExecuteStep((A)this))
+					action: () => _currentRole?.ExecuteStep((TAgent)this))
 				.Transition( // work is done -- pass resource on
 					from: State.ExecuteRole,
 					to: State.Output,
 					guard: _currentRole.Value.IsCompleted && _currentRole?.PostCondition.Port != null,
 					action: () =>
 					{
-						_currentRole?.PostCondition.Port.ResourceReady((A)this, _currentRole.Value.PostCondition);
+						_currentRole?.PostCondition.Port.ResourceReady((TAgent)this, _currentRole.Value.PostCondition);
 						_currentRole?.Reset();
 						RemoveResourceRequest(_currentRole?.PreCondition.Port, _currentRole.Value.PreCondition);
 					})
@@ -123,7 +123,7 @@ namespace SafetySharp.Odp
 
 		protected virtual void DropResource()
 		{
-			_resource = default(R);
+			_resource = default(TResource);
 		}
 
 		protected virtual void ChooseRole()
@@ -138,33 +138,33 @@ namespace SafetySharp.Odp
 		// TODO: can these be hidden?
 		// in pill production, yes (connections never change, only agents fail)
 		// in robot cell: individual connections are removed -- but hidden in model (incorrect?)
-		public virtual List<A> Inputs { get; } = new List<A>();
-		public virtual List<A> Outputs { get; } = new List<A>();
+		public virtual List<TAgent> Inputs { get; } = new List<TAgent>();
+		public virtual List<TAgent> Outputs { get; } = new List<TAgent>();
 
-		public void Connect(A successor)
+		public void Connect(TAgent successor)
 		{
 			if (!Outputs.Contains(successor))
 				Outputs.Add(successor);
 			if (!successor.Inputs.Contains(this))
-				successor.Inputs.Add((A)this);
+				successor.Inputs.Add((TAgent)this);
 		}
 
-		public void BidirectionallyConnect(A neighbor)
+		public void BidirectionallyConnect(TAgent neighbor)
 		{
 			Connect(neighbor);
-			neighbor.Connect((A)this);
+			neighbor.Connect((TAgent)this);
 		}
 
-		public void Disconnect(A successor)
+		public void Disconnect(TAgent successor)
 		{
 			Outputs.Remove(successor);
-			successor.Inputs.Remove((A)this);
+			successor.Inputs.Remove((TAgent)this);
 		}
 
-		public void BidirectionallyDisconnect(A neighbor)
+		public void BidirectionallyDisconnect(TAgent neighbor)
 		{
 			Disconnect(neighbor);
-			neighbor.Disconnect((A)this);
+			neighbor.Disconnect((TAgent)this);
 		}
 
 		#endregion
@@ -176,28 +176,28 @@ namespace SafetySharp.Odp
 
 		protected struct ResourceRequest
 		{
-			public ResourceRequest(A source, Condition<A, T> condition)
+			public ResourceRequest(TAgent source, Condition<TAgent, TTask> condition)
 			{
 				Source = source;
 				Condition = condition;
 			}
 
-			public A Source { get; }
-			public Condition<A, T> Condition { get; }
+			public TAgent Source { get; }
+			public Condition<TAgent, TTask> Condition { get; }
 		}
 
 		// TODO: naming, distinct from physical transfer -- or abandon physical transfer methods?
-		protected virtual void BeginResourcePickup(A source)
+		protected virtual void BeginResourcePickup(TAgent source)
 		{
 			source.TransferResource();
 		}
 
-		public virtual void ResourceReady(A agent, Condition<A, T> condition)
+		public virtual void ResourceReady(TAgent agent, Condition<TAgent, TTask> condition)
 		{
 			_resourceRequests.Add(new ResourceRequest(agent, condition));
 		}
 
-		protected virtual void RemoveResourceRequest(A agent, Condition<A, T> condition)
+		protected virtual void RemoveResourceRequest(TAgent agent, Condition<TAgent, TTask> condition)
 		{
 			_resourceRequests.RemoveAll(
 				request => request.Source == agent && request.Condition.StateMatches(condition));
@@ -214,7 +214,7 @@ namespace SafetySharp.Odp
 			);
 		}
 
-		public virtual void Resource(R resource)
+		public virtual void Resource(TResource resource)
 		{
 			// assert resource != null
 
@@ -231,7 +231,7 @@ namespace SafetySharp.Odp
 		public virtual void ResourcePickedUp()
 		{
 			EndResourceTransfer(_currentRole?.PreCondition.Port);
-			_resource = default(R);
+			_resource = default(TResource);
 
 			_stateMachine.Transition(
 				from: State.ResourceGiven,
@@ -244,11 +244,11 @@ namespace SafetySharp.Odp
 
 		#region physical resource transfer
 
-		protected abstract void InitiateResourceTransfer(A source);
+		protected abstract void InitiateResourceTransfer(TAgent source);
 
-		protected abstract void PickupResource(A source);
+		protected abstract void PickupResource(TAgent source);
 
-		protected abstract void EndResourceTransfer(A source);
+		protected abstract void EndResourceTransfer(TAgent source);
 
 		#endregion
 
@@ -260,12 +260,12 @@ namespace SafetySharp.Odp
 		private bool _deficientConfiguration = false;
 
 		[Hidden]
-		public IReconfigurationStrategy<A, T, R> ReconfigurationStrategy { get; set; }
+		public IReconfigurationStrategy<TAgent, TTask, TResource> ReconfigurationStrategy { get; set; }
 
 		protected readonly List<ReconfigurationRequest> _reconfigurationRequests
 			= new List<ReconfigurationRequest>(MaximumReconfigurationRequests);
 
-		protected virtual Predicate<Role<A, T, R>>[] RoleInvariants => new[] {
+		protected virtual Predicate<Role<TAgent, TTask, TResource>>[] RoleInvariants => new[] {
 			Invariant.CapabilitiesAvailable(this),
 			Invariant.ResourceFlowPossible(this),
 			Invariant.ResourceFlowConsistent(this)
@@ -275,7 +275,7 @@ namespace SafetySharp.Odp
 		{
 			// find tasks that need to be reconfigured
 			var inactiveNeighbors = PingNeighbors();
-			var deficientTasks = new HashSet<T>(
+			var deficientTasks = new HashSet<TTask>(
 				_reconfigurationRequests.Select(request => request.Task)
 				.Union(FindInvariantViolations(inactiveNeighbors))
 			);
@@ -290,9 +290,9 @@ namespace SafetySharp.Odp
 			_reconfigurationRequests.Clear();
 		}
 
-		protected virtual T[] FindInvariantViolations(IEnumerable<A> inactiveNeighbors)
+		protected virtual TTask[] FindInvariantViolations(IEnumerable<TAgent> inactiveNeighbors)
 		{
-			var defectNeighbors = new HashSet<A>(inactiveNeighbors);
+			var defectNeighbors = new HashSet<TAgent>(inactiveNeighbors);
 			return (
 					from role in AllocatedRoles
 					where RoleInvariants.Any(inv => !inv(role))
@@ -300,29 +300,29 @@ namespace SafetySharp.Odp
 				).Distinct().ToArray();
 		}
 
-		public virtual void RequestReconfiguration(A agent, T task)
+		public virtual void RequestReconfiguration(TAgent agent, TTask task)
 		{
 			_reconfigurationRequests.Add(new ReconfigurationRequest(agent, task));
 		}
 
 		protected struct ReconfigurationRequest
 		{
-			public ReconfigurationRequest(A source, T task)
+			public ReconfigurationRequest(TAgent source, TTask task)
 			{
 				Source = source;
 				Task = task;
 			}
 
-			public A Source { get; }
-			public T Task { get; }
+			public TAgent Source { get; }
+			public TTask Task { get; }
 		}
 
 		#region ping
 
-		protected readonly List<A> _responses = new List<A>(MaximumAgentCount);
+		protected readonly List<TAgent> _responses = new List<TAgent>(MaximumAgentCount);
 
 		// TODO: abstract from ping mechanism again?
-		protected virtual IEnumerable<A> PingNeighbors()
+		protected virtual IEnumerable<TAgent> PingNeighbors()
 		{
 			var neighbors = Inputs.Union(Outputs);
 
@@ -331,17 +331,17 @@ namespace SafetySharp.Odp
 
 			// ping neighboring agents to determine if they are still functioning
 			foreach (var neighbor in neighbors)
-				neighbor.SayHello((A)this);
+				neighbor.SayHello((TAgent)this);
 
 			return neighbors.Except(_responses);
 		}
 
-		public virtual void SayHello(A agent)
+		public virtual void SayHello(TAgent agent)
 		{
-			agent.SendHello((A)this);
+			agent.SendHello((TAgent)this);
 		}
 
-		public virtual void SendHello(A agent)
+		public virtual void SendHello(TAgent agent)
 		{
 			_responses.Add(agent);
 		}

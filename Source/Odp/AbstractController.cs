@@ -25,14 +25,14 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using Modeling;
 
-	public abstract class AbstractController<A, T, R> : Component, IController<A, T, R>
-		where A : BaseAgent<A, T, R>
-		where T : class, ITask
+	public abstract class AbstractController<TAgent, TTask, TResource> : Component, IController<TAgent, TTask, TResource>
+		where TAgent : BaseAgent<TAgent, TTask, TResource>
+		where TTask : class, ITask
 	{
 		[Hidden(HideElements = true)]
-		public A[] Agents { get; }
+		public TAgent[] Agents { get; }
 
-		public AbstractController(A[] agents)
+		public AbstractController(TAgent[] agents)
 		{
 			Agents = agents;
 		}
@@ -43,11 +43,11 @@ namespace SafetySharp.Odp
 			protected set;
 		}
 
-		public abstract Dictionary<A, IEnumerable<Role<A, T, R>>> CalculateConfigurations(params T[] tasks);
+		public abstract Dictionary<TAgent, IEnumerable<Role<TAgent, TTask, TResource>>> CalculateConfigurations(params TTask[] tasks);
 
-		protected Role<A,T,R> GetRole(T recipe, A input, Condition<A,T>? previous)
+		protected Role<TAgent,TTask,TResource> GetRole(TTask recipe, TAgent input, Condition<TAgent,TTask>? previous)
 		{
-			var role = new Role<A,T,R>();
+			var role = new Role<TAgent,TTask,TResource>();
 
 			// update precondition
 			role.PreCondition.Task = recipe;

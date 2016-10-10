@@ -26,18 +26,18 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-	public class CentralReconfiguration<A, T, R> : Component, IReconfigurationStrategy<A, T, R>
-		where A : BaseAgent<A, T, R>
-		where T : class, ITask
+	public class CentralReconfiguration<TAgent, TTask, TResource> : Component, IReconfigurationStrategy<TAgent, TTask, TResource>
+		where TAgent : BaseAgent<TAgent, TTask, TResource>
+		where TTask : class, ITask
 	{
-		protected readonly IController<A, T, R> _controller;
+		protected readonly IController<TAgent, TTask, TResource> _controller;
 
-		public CentralReconfiguration(IController<A, T, R> controller)
+		public CentralReconfiguration(IController<TAgent, TTask, TResource> controller)
 		{
 			_controller = controller;
 		}
 
-		public virtual void Reconfigure(IEnumerable<T> deficientTasks)
+		public virtual void Reconfigure(IEnumerable<TTask> deficientTasks)
 		{
 			var tasks = deficientTasks.ToArray();
 
@@ -46,14 +46,14 @@ namespace SafetySharp.Odp
 			ApplyConfigurations(configs);
 		}
 
-		protected virtual void RemoveConfigurations(params T[] tasks)
+		protected virtual void RemoveConfigurations(params TTask[] tasks)
 		{
-			var affectedTasks = new HashSet<T>(tasks);
+			var affectedTasks = new HashSet<TTask>(tasks);
 			foreach (var agent in _controller.Agents)
 				agent.AllocatedRoles.RemoveAll(role => affectedTasks.Contains(role.Task));
 		}
 
-		protected virtual void ApplyConfigurations(Dictionary<A, IEnumerable<Role<A, T, R>>> configurations)
+		protected virtual void ApplyConfigurations(Dictionary<TAgent, IEnumerable<Role<TAgent, TTask, TResource>>> configurations)
 		{
 			foreach (var agent in configurations.Keys)
 				agent.AllocatedRoles.AddRange(configurations[agent]);
