@@ -252,7 +252,8 @@ namespace SafetySharp.Odp
 		[Hidden]
 		private bool _deficientConfiguration = false;
 
-		protected abstract IReconfigurationStrategy<A, T, R> ReconfigurationStrategy { get; }
+		[Hidden]
+		public IReconfigurationStrategy<A, T, R> ReconfigurationStrategy { get; set; }
 
 		protected readonly List<ReconfigurationRequest> _reconfigurationRequests
 			= new List<ReconfigurationRequest>(MaximumReconfigurationRequests);

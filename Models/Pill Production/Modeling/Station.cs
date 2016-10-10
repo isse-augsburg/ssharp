@@ -69,16 +69,6 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			protected set { _resource = value; }
 		}
 
-		[Hidden]
-		private IReconfigurationStrategy _reconfigurationStrategy;
-
-		protected override IReconfigurationStrategy ReconfigurationStrategy => _reconfigurationStrategy;
-
-		internal void SetReconfigurationStrategy(IReconfigurationStrategy strategy)
-		{
-			_reconfigurationStrategy = strategy;
-		}
-
 		protected override void DropResource()
 		{
 			Container.Recipe.DropContainer(Container);
