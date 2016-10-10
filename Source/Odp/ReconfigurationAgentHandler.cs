@@ -30,10 +30,12 @@ namespace SafetySharp.Odp
 		where A : BaseAgent<A, T, R>
 		where T : class, ITask
 	{
-		private readonly Func<T, IReconfigurationAgent<T>> _createReconfAgent;
+		private readonly A _baseAgent;
+		private readonly Func<A, T, IReconfigurationAgent<T>> _createReconfAgent;
 
-		public ReconfigurationAgentHandler(Func<T, IReconfigurationAgent<T>> createReconfAgent)
+		public ReconfigurationAgentHandler(A baseAgent, Func<A, T, IReconfigurationAgent<T>> createReconfAgent)
 		{
+			_baseAgent = baseAgent;
 			_createReconfAgent = createReconfAgent;
 		}
 
@@ -51,7 +53,7 @@ namespace SafetySharp.Odp
 				LockConfigurations(task);
 				if (!_tasksUnderReconstruction.ContainsKey(task))
 				{
-					_tasksUnderReconstruction.Add(task, _createReconfAgent(task));
+					_tasksUnderReconstruction.Add(task, _createReconfAgent(_baseAgent, task));
 				}
 				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, state);
 			}
