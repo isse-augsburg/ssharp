@@ -52,9 +52,9 @@ namespace SafetySharp.Odp
 		protected Role<TAgent, TTask, TResource>? _currentRole;
 		protected TResource _resource;
 
-		protected readonly StateMachine<State> _stateMachine = State.Idle;
+		private readonly StateMachine<State> _stateMachine = State.Idle;
 
-		protected virtual void Work()
+		private void Work()
 		{
 			_stateMachine.Transition( // abort work if current task has configuration issues
 				from: new[] { State.ChooseRole, State.WaitingForResource, State.ExecuteRole, State.Output, State.ResourceGiven },
@@ -111,7 +111,7 @@ namespace SafetySharp.Odp
 					});
 		}
 
-		public enum State
+		private enum State
 		{
 			Idle,
 			ChooseRole,
@@ -171,10 +171,10 @@ namespace SafetySharp.Odp
 
 		#region resource handshake
 
-		protected readonly List<ResourceRequest> _resourceRequests
+		private readonly List<ResourceRequest> _resourceRequests
 			= new List<ResourceRequest>(MaximumResourceCount);
 
-		protected struct ResourceRequest
+		private struct ResourceRequest
 		{
 			public ResourceRequest(TAgent source, Condition<TAgent, TTask> condition)
 			{
@@ -262,7 +262,7 @@ namespace SafetySharp.Odp
 		[Hidden]
 		public IReconfigurationStrategy<TAgent, TTask, TResource> ReconfigurationStrategy { get; set; }
 
-		protected readonly List<ReconfigurationRequest> _reconfigurationRequests
+		private readonly List<ReconfigurationRequest> _reconfigurationRequests
 			= new List<ReconfigurationRequest>(MaximumReconfigurationRequests);
 
 		protected virtual Predicate<Role<TAgent, TTask, TResource>>[] RoleInvariants => new[] {
@@ -271,7 +271,7 @@ namespace SafetySharp.Odp
 			Invariant.ResourceFlowConsistent(this)
 		};
 
-		protected virtual void Observe()
+		private void Observe()
 		{
 			// find tasks that need to be reconfigured
 			var inactiveNeighbors = PingNeighbors();
@@ -305,7 +305,7 @@ namespace SafetySharp.Odp
 			_reconfigurationRequests.Add(new ReconfigurationRequest(agent, task));
 		}
 
-		protected struct ReconfigurationRequest
+		private struct ReconfigurationRequest
 		{
 			public ReconfigurationRequest(TAgent source, TTask task)
 			{
@@ -319,7 +319,7 @@ namespace SafetySharp.Odp
 
 		#region ping
 
-		protected readonly List<TAgent> _responses = new List<TAgent>(MaximumAgentCount);
+		private readonly List<TAgent> _responses = new List<TAgent>(MaximumAgentCount);
 
 		// TODO: abstract from ping mechanism again?
 		protected virtual IEnumerable<TAgent> PingNeighbors()
