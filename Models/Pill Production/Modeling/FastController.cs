@@ -28,13 +28,13 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using SafetySharp.Modeling;
 
 	using Condition = Odp.Condition<Station, Recipe>;
-	using Role = Odp.Role<Station, Recipe, PillContainer>;
+	using Role = Odp.Role<Station, Recipe>;
 
 	/// <summary>
 	///   An <see cref="ObserverController" /> implementation that is much faster than
 	///   the MiniZinc implementation.
 	/// </summary>
-	internal class FastController : Odp.AbstractController<Station, Recipe, PillContainer>
+	internal class FastController : Odp.AbstractController<Station, Recipe>
 	{
 		[Hidden]
 		private Station[] _availableStations;

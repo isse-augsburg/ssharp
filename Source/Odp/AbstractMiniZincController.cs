@@ -29,8 +29,8 @@ namespace SafetySharp.Odp
 	using Modeling;
 	using System.Diagnostics;
 
-	public abstract class AbstractMiniZincController<TAgent, TTask, TResource> : AbstractController<TAgent, TTask, TResource>
-		where TAgent : BaseAgent<TAgent, TTask, TResource>
+	public abstract class AbstractMiniZincController<TAgent, TTask> : AbstractController<TAgent, TTask>
+		where TAgent : BaseAgent<TAgent, TTask>
 		where TTask : class, ITask
 	{
 		private readonly string _constraintsModel;
@@ -47,9 +47,9 @@ namespace SafetySharp.Odp
 			_constraintsModel = constraintsModel;
 		}
 
-		public override Dictionary<TAgent, IEnumerable<Role<TAgent, TTask, TResource>>> CalculateConfigurations(params TTask[] tasks)
+		public override Dictionary<TAgent, IEnumerable<Role<TAgent, TTask>>> CalculateConfigurations(params TTask[] tasks)
 		{
-			var configs = new Dictionary<TAgent, IEnumerable<Role<TAgent, TTask, TResource>>>();
+			var configs = new Dictionary<TAgent, IEnumerable<Role<TAgent, TTask>>>();
 			foreach (var task in tasks)
 			{
 				lock(MiniZinc)
@@ -100,7 +100,7 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		private void ParseConfigurations(Dictionary<TAgent, IEnumerable<Role<TAgent, TTask, TResource>>> configs, TTask task)
+		private void ParseConfigurations(Dictionary<TAgent, IEnumerable<Role<TAgent, TTask>>> configs, TTask task)
 		{
 			var lines = File.ReadAllLines(_outputFile);
 			if (lines[0].Contains("UNSATISFIABLE"))
@@ -112,7 +112,7 @@ namespace SafetySharp.Odp
 			var agentIds = ParseList(lines[0]);
 			var capabilityIds = ParseList(lines[1]);
 
-			var role = default(Role<TAgent, TTask, TResource>);
+			var role = default(Role<TAgent, TTask>);
 			TAgent lastAgent = null;
 
 			for (int i = 0; i < agentIds.Length; ++i)
@@ -131,8 +131,8 @@ namespace SafetySharp.Odp
 				}
 
 				if (!configs.ContainsKey(agent))
-					configs.Add(agent, new HashSet<Role<TAgent, TTask, TResource>>());
-				(configs[agent] as HashSet<Role<TAgent, TTask, TResource>>).Add(role);
+					configs.Add(agent, new HashSet<Role<TAgent, TTask>>());
+				(configs[agent] as HashSet<Role<TAgent, TTask>>).Add(role);
 			}
 		}
 

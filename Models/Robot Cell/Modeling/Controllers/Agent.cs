@@ -28,10 +28,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using SafetySharp.Modeling;
 	using Odp;
 
-	using IReconfigurationStrategy = Odp.IReconfigurationStrategy<Agent, Task, Resource>;
-	using Role = Odp.Role<Agent, Task, Resource>;
+	using Role = Odp.Role<Agent, Task>;
 
-	internal class Agent : BaseAgent<Agent, Task, Resource>
+	internal class Agent : BaseAgent<Agent, Task>
 	{
 		public readonly Fault ConfigurationUpdateFailed = new TransientFault();
 

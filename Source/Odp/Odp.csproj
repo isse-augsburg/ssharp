@@ -55,6 +55,7 @@
     <Compile Include="IReconfigurationAgent.cs" />
     <Compile Include="ReconfigurationAgentHandler.cs" />
     <Compile Include="ReconfigurationReason.cs" />
+    <Compile Include="Resource.cs" />
     <Compile Include="Role.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -22,32 +22,16 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
-	using System.Collections.Generic;
-	using System.Linq;
 	using Plants;
-	using SafetySharp.Modeling;
-	using Odp;
 
-	internal class Resource : Component
+	internal class Resource : Odp.Resource<Task>
 	{
-		private byte _statePrefixLength;
-
-		public IEnumerable<ICapability> State =>
-			Task?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
-
 		public Resource(Task task, Workpiece workpiece)
 		{
 			Task = task;
 			Workpiece = workpiece;
 		}
 
-		public void OnCapabilityApplied()
-		{
-			++_statePrefixLength;
-		}
-
 		public Workpiece Workpiece { get; }
-
-		public Task Task { get; }
 	}
 }

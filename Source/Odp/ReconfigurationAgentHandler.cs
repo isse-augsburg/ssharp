@@ -26,26 +26,26 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using Modeling;
 
-	public class ReconfigurationAgentHandler<TAgent, TTask, TResource> : Component, IReconfigurationStrategy<TAgent, TTask, TResource>
-		where TAgent : BaseAgent<TAgent, TTask, TResource>
+	public class ReconfigurationAgentHandler<TAgent, TTask> : Component, IReconfigurationStrategy<TAgent, TTask>
+		where TAgent : BaseAgent<TAgent, TTask>
 		where TTask : class, ITask
 	{
 		private readonly TAgent _baseAgent;
-		private readonly Func<TAgent, TTask, IReconfigurationAgent<TAgent, TTask, TResource>> _createReconfAgent;
+		private readonly Func<TAgent, TTask, IReconfigurationAgent<TAgent, TTask>> _createReconfAgent;
 
 		public ReconfigurationAgentHandler(
 			TAgent baseAgent,
-			Func<TAgent, TTask, IReconfigurationAgent<TAgent, TTask, TResource>> createReconfAgent
+			Func<TAgent, TTask, IReconfigurationAgent<TAgent, TTask>> createReconfAgent
 		)
 		{
 			_baseAgent = baseAgent;
 			_createReconfAgent = createReconfAgent;
 		}
 
-		protected readonly Dictionary<TTask, IReconfigurationAgent<TAgent, TTask, TResource>> _tasksUnderReconstruction
-			= new Dictionary<TTask, IReconfigurationAgent<TAgent, TTask, TResource>>();
+		protected readonly Dictionary<TTask, IReconfigurationAgent<TAgent, TTask>> _tasksUnderReconstruction
+			= new Dictionary<TTask, IReconfigurationAgent<TAgent, TTask>>();
 
-		public void Reconfigure(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask, TResource>>> reconfigurations)
+		public void Reconfigure(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask>>> reconfigurations)
 		{
 			foreach (var tuple in reconfigurations)
 			{

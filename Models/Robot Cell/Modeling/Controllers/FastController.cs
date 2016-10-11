@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using SafetySharp.Modeling;
 	using Odp;
 
-	using Role = Odp.Role<Agent, Task, Resource>;
+	using Role = Odp.Role<Agent, Task>;
 
 	/// <summary>
 	///   An <see cref="Controller" /> implementation that is much faster than

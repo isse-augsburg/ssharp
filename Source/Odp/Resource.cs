@@ -22,21 +22,29 @@
 
 namespace SafetySharp.Odp
 {
+	using System;
 	using System.Collections.Generic;
-	using SafetySharp.Modeling;
+	using System.Linq;
+	using Modeling;
 
-	// TODO: naming is ambiguous between "controller" (vs. "observer") and "controller" (vs. "plant")
-	public interface IController<TAgent, TTask> : IComponent
-		where TAgent : BaseAgent<TAgent,TTask>
-		where TTask : class, ITask
+	public abstract class Resource<TTask> : Component
+		where TTask : ITask
 	{
-		[Provided]
-		TAgent[] Agents { get; }
+		private int _statePrefixLength = 0;
 
-		[Provided]
-		Dictionary<TAgent, IEnumerable<Role<TAgent, TTask>>> CalculateConfigurations(params TTask[] tasks);
+		public TTask Task { get; protected set; }
 
-		[Provided]
-		bool ReconfigurationFailure { get; }
+		public IEnumerable<ICapability> State =>
+			Task?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
+
+		public void ApplyCapability(ICapability capability)
+		{
+			if (_statePrefixLength >= Task.RequiredCapabilities.Length)
+				throw new InvalidOperationException("resource is already fully processed");
+			if (!capability.Equals(Task.RequiredCapabilities[_statePrefixLength]))
+				throw new InvalidOperationException("wrong capability applied to resource");
+
+			_statePrefixLength++;
+		}
 	}
 }

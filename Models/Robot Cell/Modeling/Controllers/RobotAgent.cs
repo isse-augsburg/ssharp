@@ -108,8 +108,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Resource = capability.Resources[0];
 			capability.Resources.RemoveAt(0);
 			Resource.Task.IsResourceInProduction = true;
-			Robot.ProduceWorkpiece(Resource.Workpiece);
-			Resource.OnCapabilityApplied();
+			Robot.ProduceWorkpiece((Resource as Resource).Workpiece);
+			Resource.ApplyCapability(capability);
 		}
 
 		public override void Process(ProcessCapability capability)
@@ -140,7 +140,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				if (Resource.State.Count() == Resource.Task.RequiredCapabilities.Length)
 					throw new InvalidOperationException();
 
-				Resource.OnCapabilityApplied();
+				Resource.ApplyCapability(capability);
 			}
 		}
 
@@ -149,7 +149,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (Resource == null)
 				return;
 
-			Resource.OnCapabilityApplied();
+			Resource.ApplyCapability(capability);
 			Robot.ConsumeWorkpiece();
 			Resource.Task.IsResourceInProduction = false;
 			Resource = null;

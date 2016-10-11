@@ -30,7 +30,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using SafetySharp.Modeling;
 	using Odp;
 
-	using Role = Odp.Role<Agent, Task, Resource>;
+	using Role = Odp.Role<Agent, Task>;
 
 	internal class MiniZincController : Controller
 	{

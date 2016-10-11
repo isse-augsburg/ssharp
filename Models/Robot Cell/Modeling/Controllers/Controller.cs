@@ -27,9 +27,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.Linq;
 	using Odp;
 
-	using Role = Odp.Role<Agent, Task, Resource>;
+	using Role = Odp.Role<Agent, Task>;
 
-	internal abstract class Controller : AbstractController<Agent, Task, Resource>
+	internal abstract class Controller : AbstractController<Agent, Task>
 	{
 		protected Controller(IEnumerable<Agent> agents) : base(agents.ToArray()) { }
 

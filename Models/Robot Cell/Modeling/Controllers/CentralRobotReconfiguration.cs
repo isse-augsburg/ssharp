@@ -26,7 +26,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using Odp;
 	using System.Collections.Generic;
 
-	class CentralRobotReconfiguration : CentralReconfiguration<Agent, Task, Resource>
+	class CentralRobotReconfiguration : CentralReconfiguration<Agent, Task>
 	{
 		public readonly Fault ReconfigurationFailure = new TransientFault();
 

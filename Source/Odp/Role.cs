@@ -26,8 +26,8 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public struct Role<TAgent, TTask, TResource>
-		where TAgent : BaseAgent<TAgent, TTask, TResource>
+	public struct Role<TAgent, TTask>
+		where TAgent : BaseAgent<TAgent, TTask>
 		where TTask : class, ITask
 	{
 		public bool IsLocked { get; set; }

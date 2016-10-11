@@ -23,44 +23,23 @@
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using SafetySharp.Modeling;
-
 	using Odp;
 
 	/// <summary>
 	///   A pill container which is filled with different ingredients.
 	/// </summary>
-	public class PillContainer : Component
+	public class PillContainer : Resource<Recipe>
 	{
-		/// <summary>
-		///   How many of the <see cref="Recipe" />'s <see cref="Modeling.Recipe.RequiredCapabilities" />
-		///   were already applied to this container.
-		/// </summary>
-		private int _statePrefixLength;
-
-		/// <summary>
-		///   The recipe according to which the container is processed.
-		/// </summary>
-		public Recipe Recipe { get; private set; }
-
-		/// <summary>
-		///   The capabilities already applied to the container.
-		/// </summary>
-		public IEnumerable<ICapability> State =>
-			Recipe?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
-
 		/// <summary>
 		///   Tells the container it was loaded on the conveyor belt.
 		/// </summary>
 		/// <param name="recipe">The recipe according to which it will henceforth be processed.</param>
 		public void OnLoaded(Recipe recipe)
 		{
-			if (Recipe != null)
+			if (Task != null)
 				throw new InvalidOperationException("Container already belongs to a recipe");
-			Recipe = recipe;
-			_statePrefixLength++; // first capability will always be ProduceCapability
+			Task = recipe;
+			ApplyCapability(Task.RequiredCapabilities[0]); // first capability will always be ProduceCapability
 		}
 
 		/// <summary>
@@ -69,12 +48,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		/// <param name="ingredient"></param>
 		public void AddIngredient(Ingredient ingredient)
 		{
-			if (_statePrefixLength >= Recipe.RequiredCapabilities.Length)
-				throw new InvalidOperationException("PillContainer is already fully processed.");
-			if (!ingredient.Equals(Recipe.RequiredCapabilities[_statePrefixLength]))
-				throw new InvalidOperationException("Added the wrong ingredient to PillContainer.");
-
-			_statePrefixLength++;
+			ApplyCapability(ingredient);
 		}
 	}
 }

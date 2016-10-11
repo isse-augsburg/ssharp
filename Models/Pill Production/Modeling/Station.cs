@@ -28,12 +28,12 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using SafetySharp.Modeling;
 	using Odp;
 
-	using IReconfigurationStrategy = Odp.IReconfigurationStrategy<Station, Recipe, PillContainer>;
+	using IReconfigurationStrategy = Odp.IReconfigurationStrategy<Station, Recipe>;
 
 	/// <summary>
 	///   A production station that modifies containers.
 	/// </summary>
-	public abstract class Station : BaseAgent<Station, Recipe, PillContainer>
+	public abstract class Station : BaseAgent<Station, Recipe>
 	{
 		public readonly Fault CompleteStationFailure = new PermanentFault();
 
@@ -53,7 +53,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		{
 			if (RecipeQueue.Count > 0)
 				PerformReconfiguration(new[] {
-					Tuple.Create(RecipeQueue.Dequeue(), new ReconfigurationReason<Station, Recipe, PillContainer>(null, null))
+					Tuple.Create(RecipeQueue.Dequeue(), new ReconfigurationReason<Station, Recipe>(null, null))
 				});
 
 			base.Update();
@@ -62,21 +62,21 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		/// <summary>
 		///   The resource currently located at the station.
 		/// </summary>
-		public PillContainer Container { // TODO: remove?
-			get { return Resource; }
+		public PillContainer Container {
+			get { return (PillContainer)Resource; }
 			protected set { Resource = value; }
 		}
 
 		protected override void DropResource()
 		{
-			Container.Recipe.DropContainer(Container);
+			Container.Task.DropContainer(Container);
 			base.DropResource();
 		}
 
 		protected override InvariantPredicate[] MonitoringPredicates => new[] {
 			Invariant.IOConsistency,
 			Invariant.NeighborsAliveGuarantee,
-			// Invariant.ResourceConsistency,
+			Invariant.ResourceConsistency,
 
 			// custom version of capability consistency due to ingredient amounts
 			Invariant.RoleInvariant(role => role.CapabilitiesToApply.ToArray().IsSatisfiable(AvailableCapabilities))

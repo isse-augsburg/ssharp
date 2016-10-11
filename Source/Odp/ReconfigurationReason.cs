@@ -22,12 +22,12 @@
 
 namespace SafetySharp.Odp
 {
-	public class ReconfigurationReason<TAgent, TTask, TResource>
-		where TAgent : BaseAgent<TAgent, TTask, TResource>
+	public class ReconfigurationReason<TAgent, TTask>
+		where TAgent : BaseAgent<TAgent, TTask>
 		where TTask : class, ITask
 	{
 		public ReconfigurationReason(
-			BaseAgent<TAgent, TTask, TResource>.InvariantPredicate[] violatedPredicates,
+			BaseAgent<TAgent, TTask>.InvariantPredicate[] violatedPredicates,
 			TAgent requestSource
 		)
 		{
@@ -38,7 +38,7 @@ namespace SafetySharp.Odp
 		public bool IsLocalViolation => ViolatedPredicates != null && ViolatedPredicates.Length > 0;
 		public bool IsRequest => RequestSource != null;
 
-		public BaseAgent<TAgent, TTask, TResource>.InvariantPredicate[] ViolatedPredicates { get; }
+		public BaseAgent<TAgent, TTask>.InvariantPredicate[] ViolatedPredicates { get; }
 		public TAgent RequestSource { get; }
 	}
 }

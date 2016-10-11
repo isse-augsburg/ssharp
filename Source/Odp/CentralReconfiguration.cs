@@ -27,18 +27,18 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-	public class CentralReconfiguration<TAgent, TTask, TResource> : Component, IReconfigurationStrategy<TAgent, TTask, TResource>
-		where TAgent : BaseAgent<TAgent, TTask, TResource>
+	public class CentralReconfiguration<TAgent, TTask> : Component, IReconfigurationStrategy<TAgent, TTask>
+		where TAgent : BaseAgent<TAgent, TTask>
 		where TTask : class, ITask
 	{
-		protected readonly IController<TAgent, TTask, TResource> _controller;
+		protected readonly IController<TAgent, TTask> _controller;
 
-		public CentralReconfiguration(IController<TAgent, TTask, TResource> controller)
+		public CentralReconfiguration(IController<TAgent, TTask> controller)
 		{
 			_controller = controller;
 		}
 
-		public virtual void Reconfigure(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask, TResource>>> reconfigurations)
+		public virtual void Reconfigure(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask>>> reconfigurations)
 		{
 			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
 
@@ -54,7 +54,7 @@ namespace SafetySharp.Odp
 				agent.AllocatedRoles.RemoveAll(role => affectedTasks.Contains(role.Task));
 		}
 
-		protected virtual void ApplyConfigurations(Dictionary<TAgent, IEnumerable<Role<TAgent, TTask, TResource>>> configurations)
+		protected virtual void ApplyConfigurations(Dictionary<TAgent, IEnumerable<Role<TAgent, TTask>>> configurations)
 		{
 			foreach (var agent in configurations.Keys)
 				agent.AllocatedRoles.AddRange(configurations[agent]);

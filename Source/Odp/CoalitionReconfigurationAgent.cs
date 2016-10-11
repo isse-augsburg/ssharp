@@ -25,8 +25,8 @@ namespace SafetySharp.Odp
 	using System;
 	using System.Collections.Generic;
 
-	public class CoalitionReconfigurationAgent<TAgent, TTask, TResource> : IReconfigurationAgent<TAgent, TTask, TResource>
-		where TAgent : BaseAgent<TAgent, TTask, TResource>
+	public class CoalitionReconfigurationAgent<TAgent, TTask> : IReconfigurationAgent<TAgent, TTask>
+		where TAgent : BaseAgent<TAgent, TTask>
 		where TTask : class, ITask
 	{
 		protected Coalition CurrentCoalition { get; set; }
@@ -74,10 +74,10 @@ namespace SafetySharp.Odp
 
 		protected class Coalition
 		{
-			public CoalitionReconfigurationAgent<TAgent, TTask, TResource> Leader { get; }
+			public CoalitionReconfigurationAgent<TAgent, TTask> Leader { get; }
 
-			public List<CoalitionReconfigurationAgent<TAgent, TTask, TResource>> Members { get; }
-				= new List<CoalitionReconfigurationAgent<TAgent, TTask, TResource>>();
+			public List<CoalitionReconfigurationAgent<TAgent, TTask>> Members { get; }
+				= new List<CoalitionReconfigurationAgent<TAgent, TTask>>();
 
 			private int _ctfStart = -1;
 			private int _ctfEnd = -1;
@@ -85,13 +85,13 @@ namespace SafetySharp.Odp
 			private int _tfrStart = -1;
 			private int _tfrEnd = -1;
 
-			public Coalition(CoalitionReconfigurationAgent<TAgent, TTask, TResource> leader)
+			public Coalition(CoalitionReconfigurationAgent<TAgent, TTask> leader)
 			{
 				Leader = leader;
 				Members.Add(leader);
 			}
 
-			public void Join(CoalitionReconfigurationAgent<TAgent, TTask, TResource> newMember)
+			public void Join(CoalitionReconfigurationAgent<TAgent, TTask> newMember)
 			{
 				Members.Add(newMember);
 			}

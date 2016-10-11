@@ -27,8 +27,8 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-    public abstract partial class BaseAgent<TAgent, TTask, TResource> : Component
-		where TAgent : BaseAgent<TAgent, TTask, TResource>
+    public abstract partial class BaseAgent<TAgent, TTask> : Component
+		where TAgent : BaseAgent<TAgent, TTask>
 		where TTask : class, ITask
     {
 		// configuration options
@@ -39,7 +39,7 @@ namespace SafetySharp.Odp
 
 		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
-		public List<Role<TAgent, TTask, TResource>> AllocatedRoles { get; } = new List<Role<TAgent, TTask, TResource>>(MaximumRoleCount);
+		public List<Role<TAgent, TTask>> AllocatedRoles { get; } = new List<Role<TAgent, TTask>>(MaximumRoleCount);
 
 		public override void Update()
 		{
@@ -49,9 +49,9 @@ namespace SafetySharp.Odp
 
 		#region functional part
 
-		protected Role<TAgent, TTask, TResource>? _currentRole;
+		protected Role<TAgent, TTask>? _currentRole;
 
-		public TResource Resource { get; protected set; }
+		public Resource<TTask> Resource { get; protected set; }
 
 		private readonly StateMachine<State> _stateMachine = State.Idle;
 
@@ -124,7 +124,7 @@ namespace SafetySharp.Odp
 
 		protected virtual void DropResource()
 		{
-			Resource = default(TResource);
+			Resource = null;
 		}
 
 		private void ChooseRole()
@@ -147,7 +147,7 @@ namespace SafetySharp.Odp
 			TryChooseRole(role => role.PreCondition.Port == null, out _currentRole);
 		}
 
-		private bool TryChooseRole(Predicate<Role<TAgent, TTask, TResource>> predicate, out Role<TAgent, TTask, TResource>? chosenRole)
+		private bool TryChooseRole(Predicate<Role<TAgent, TTask>> predicate, out Role<TAgent, TTask>? chosenRole)
 		{
 			foreach (var role in AllocatedRoles)
 			{
@@ -239,7 +239,7 @@ namespace SafetySharp.Odp
 			);
 		}
 
-		public virtual void TakeResource(TResource resource)
+		public virtual void TakeResource(Resource<TTask> resource)
 		{
 			// assert resource != null
 			Resource = resource;
@@ -253,7 +253,7 @@ namespace SafetySharp.Odp
 
 		public virtual void ResourcePickedUp()
 		{
-			Resource = default(TResource);
+			Resource = null;
 
 			_stateMachine.Transition(
 				from: State.ResourceGiven,
@@ -274,14 +274,14 @@ namespace SafetySharp.Odp
 		private bool _deficientConfiguration = false;
 
 		[Hidden]
-		public IReconfigurationStrategy<TAgent, TTask, TResource> ReconfigurationStrategy { get; set; }
+		public IReconfigurationStrategy<TAgent, TTask> ReconfigurationStrategy { get; set; }
 
 		public delegate IEnumerable<TTask> InvariantPredicate(TAgent agent);
 
 		protected virtual InvariantPredicate[] MonitoringPredicates => new InvariantPredicate[] {
 			Invariant.IOConsistency,
 			Invariant.NeighborsAliveGuarantee,
-			// Invariant.ResourceConsistency,
+			Invariant.ResourceConsistency,
 			Invariant.CapabilityConsistency
 		};
 
@@ -298,12 +298,12 @@ namespace SafetySharp.Odp
 
 			PerformReconfiguration(
 				from vio in violations
-				let reason = new ReconfigurationReason<TAgent, TTask, TResource>(vio.Value.ToArray(), null)
+				let reason = new ReconfigurationReason<TAgent, TTask>(vio.Value.ToArray(), null)
 				select Tuple.Create(vio.Key, reason)
 			);
 		}
 
-		protected void PerformReconfiguration(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask, TResource>>> reconfigurations)
+		protected void PerformReconfiguration(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask>>> reconfigurations)
 		{
 			var deficientTasks = new HashSet<TTask>(reconfigurations.Select(t => t.Item1));
 
@@ -334,7 +334,7 @@ namespace SafetySharp.Odp
 		public virtual void RequestReconfiguration(TAgent agent, TTask task)
 		{
 			PerformReconfiguration(new[] {
-				Tuple.Create(task, new ReconfigurationReason<TAgent, TTask, TResource>(null, agent))
+				Tuple.Create(task, new ReconfigurationReason<TAgent, TTask>(null, agent))
 			});
 		}
 

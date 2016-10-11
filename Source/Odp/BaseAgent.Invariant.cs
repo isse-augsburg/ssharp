@@ -1,11 +1,33 @@
-﻿namespace SafetySharp.Odp
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+namespace SafetySharp.Odp
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public partial class BaseAgent<TAgent, TTask, TResource>
-		where TAgent : BaseAgent<TAgent, TTask, TResource>
+	public partial class BaseAgent<TAgent, TTask>
+		where TAgent : BaseAgent<TAgent, TTask>
 		where TTask : class, ITask
 	{
 		public static class Invariant
@@ -19,14 +41,14 @@
 				);
 			}
 
-			// TODO: needs access to resource properties -- add IResource?
-			/*public static IEnumerable<TTask> ResourceConsistency(TAgent agent)
+			public static IEnumerable<TTask> ResourceConsistency(TAgent agent)
 			{
 				if (agent.Resource != null
 					&& !agent.AllocatedRoles.Any(role => role.PreCondition.Task == agent.Resource.Task
 					   && role.PreCondition.State.SequenceEqual(agent.Resource.State)))
 					return new[] { agent.Resource.Task };
-			}*/
+				return Enumerable.Empty<TTask>();
+			}
 
 			public static IEnumerable<TTask> CapabilityConsistency(TAgent agent)
 			{
@@ -82,14 +104,14 @@
 				);
 			}
 
-			private static IEnumerable<TTask> RoleInvariant(TAgent agent, Predicate<Role<TAgent, TTask, TResource>> invariant)
+			private static IEnumerable<TTask> RoleInvariant(TAgent agent, Predicate<Role<TAgent, TTask>> invariant)
 			{
 				return (from role in agent.AllocatedRoles
 						where !invariant(role)
 						select role.Task).Distinct();
 			}
 
-			public static InvariantPredicate RoleInvariant(Predicate<Role<TAgent, TTask, TResource>> invariant)
+			public static InvariantPredicate RoleInvariant(Predicate<Role<TAgent, TTask>> invariant)
 			{
 				return (agent) => RoleInvariant(agent, invariant);
 			}
