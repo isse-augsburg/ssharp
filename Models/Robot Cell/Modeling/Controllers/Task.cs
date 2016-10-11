@@ -32,6 +32,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		}
 
 		public ICapability[] RequiredCapabilities { get; }
+
+		// TODO: remove restriction once deadlock avoidance implemented
+		[System.Obsolete]
 		public bool IsResourceInProduction { get; set; }
 	}
 }

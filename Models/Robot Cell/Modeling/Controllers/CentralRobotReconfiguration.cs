@@ -22,9 +22,9 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
+	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 	using Odp;
-	using System.Collections.Generic;
 
 	class CentralRobotReconfiguration : CentralReconfiguration<Agent, Task>
 	{

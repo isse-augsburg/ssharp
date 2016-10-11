@@ -119,8 +119,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 			if (_currentCapability != capability)
 			{
-				// Switch the capability; if we fail to do so, remove all other capabilities from the available ones and
-				// trigger a reconfiguration
+				// Switch the capability; if we fail to do so, remove all other capabilities from the available ones
 				if (Robot.SwitchCapability(capability))
 					_currentCapability = capability;
 				else
@@ -130,16 +129,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				}
 			}
 
-			// Apply the capability; if we fail to do so, remove it from the available ones and trigger a reconfiguration
+			// Apply the capability; if we fail to do so, remove it from the available ones
 			if (!Robot.ApplyCapability())
 			{
 				_availableCapabilities.Remove(capability);
 			}
 			else
 			{
-				if (Resource.State.Count() == Resource.Task.RequiredCapabilities.Length)
-					throw new InvalidOperationException();
-
 				Resource.OnCapabilityApplied(capability);
 			}
 		}

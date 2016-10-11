@@ -22,10 +22,17 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
+	using System;
 	using Odp;
 
+	[Obsolete("remove once IsEquivalentTo() is removed, base type ICapability")]
 	internal abstract class Capability : ICapability
 	{
+		// TODO: is this really still necessary?
+		// Only controllers use it, to select an agent's actual available capability
+		// instead of the capability specified in the task. But all subclasses are immutable,
+		// and do not reference an agent or any plant.
+		[Obsolete]
 		public abstract bool IsEquivalentTo(ICapability capability);
 	}
 }

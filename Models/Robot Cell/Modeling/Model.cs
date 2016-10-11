@@ -27,7 +27,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	using System.Linq;
 	using Controllers;
 	using Plants;
-	using Odp;
 	using SafetySharp.Modeling;
 
 	internal class Model : ModelBase
