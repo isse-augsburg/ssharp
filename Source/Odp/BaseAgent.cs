@@ -27,7 +27,7 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-    public abstract class BaseAgent<TAgent, TTask, TResource> : Component
+    public abstract partial class BaseAgent<TAgent, TTask, TResource> : Component
 		where TAgent : BaseAgent<TAgent, TTask, TResource>
 		where TTask : class, ITask
     {
@@ -281,10 +281,18 @@ namespace SafetySharp.Odp
 		private readonly List<ReconfigurationRequest> _reconfigurationRequests
 			= new List<ReconfigurationRequest>(MaximumReconfigurationRequests);
 
-		protected virtual Predicate<Role<TAgent, TTask, TResource>>[] RoleInvariants => new[] {
-			Invariant.CapabilitiesAvailable(this),
-			Invariant.ResourceFlowPossible(this),
-			Invariant.ResourceFlowConsistent(this)
+		public delegate IEnumerable<TTask> InvariantPredicate(TAgent agent);
+
+		protected virtual InvariantPredicate[] MonitoringPredicates => new InvariantPredicate[] {
+			Invariant.IOConsistency,
+			// Invariant.ResourceConsistency,
+			Invariant.CapabilityConsistency
+		};
+
+		protected virtual InvariantPredicate[] ConsistencyPredicates => new InvariantPredicate[] {
+			Invariant.PrePostConditionConsistency,
+			Invariant.TaskEquality,
+			Invariant.StateConsistency
 		};
 
 		private void Observe()
@@ -293,8 +301,9 @@ namespace SafetySharp.Odp
 			var inactiveNeighbors = PingNeighbors();
 			var deficientTasks = new HashSet<TTask>(
 				_reconfigurationRequests.Select(request => request.Task)
-				.Union(FindInvariantViolations(inactiveNeighbors))
+				.Union(FindInvariantViolations(inactiveNeighbors).Select(kv => kv.Key))
 			);
+			// TODO: pass invariant violation info to reconf strategy
 
 			// stop work on deficient tasks
 			_resourceRequests.RemoveAll(request => deficientTasks.Contains(request.Condition.Task));
@@ -306,14 +315,19 @@ namespace SafetySharp.Odp
 			_reconfigurationRequests.Clear();
 		}
 
-		protected virtual TTask[] FindInvariantViolations(IEnumerable<TAgent> inactiveNeighbors)
+		private Dictionary<TTask, IEnumerable<InvariantPredicate>> FindInvariantViolations(IEnumerable<TAgent> inactiveNeighbors)
 		{
-			var defectNeighbors = new HashSet<TAgent>(inactiveNeighbors);
-			return (
-					from role in AllocatedRoles
-					where RoleInvariants.Any(inv => !inv(role))
-					select role.Task
-				).Distinct().ToArray();
+			var violations = new Dictionary<TTask, IEnumerable<InvariantPredicate>>();
+			foreach (var predicate in MonitoringPredicates)
+			{
+				foreach (var violatingTask in predicate((TAgent)this))
+				{
+					if (!violations.ContainsKey(violatingTask))
+						violations.Add(violatingTask, new HashSet<InvariantPredicate>());
+					(violations[violatingTask] as HashSet<InvariantPredicate>).Add(predicate);
+				}
+			}
+			return violations;
 		}
 
 		public virtual void RequestReconfiguration(TAgent agent, TTask task)

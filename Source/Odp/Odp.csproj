@@ -44,7 +44,7 @@
     <Compile Include="Condition.cs" />
     <Compile Include="ICapability.cs" />
     <Compile Include="IController.cs" />
-    <Compile Include="Invariant.cs" />
+    <Compile Include="BaseAgent.Invariant.cs" />
     <Compile Include="IReconfigurationStrategy.cs" />
     <Compile Include="ITask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

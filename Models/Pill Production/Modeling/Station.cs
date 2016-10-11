@@ -75,12 +75,12 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			base.DropResource();
 		}
 
-		protected override Predicate<Role<Station, Recipe, PillContainer>>[] RoleInvariants => new[] {
-			Invariant.ResourceFlowPossible(this),
-			Invariant.ResourceFlowConsistent(this),
+		protected override InvariantPredicate[] MonitoringPredicates => new[] {
+			Invariant.IOConsistency,
+			// Invariant.ResourceConsistency,
 
 			// custom version of capability consistency due to ingredient amounts
-			(role) => role.CapabilitiesToApply.ToArray().IsSatisfiable(AvailableCapabilities)
+			Invariant.RoleInvariant(role => role.CapabilitiesToApply.ToArray().IsSatisfiable(AvailableCapabilities))
 		};
 
 		/// <summary>
