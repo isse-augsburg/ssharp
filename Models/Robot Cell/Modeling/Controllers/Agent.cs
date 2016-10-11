@@ -119,66 +119,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return true;
 		}
 
-		protected bool TryChooseRole(Func<Role, bool> predicate, out Role role)
-		{
-			foreach (var allocatedRole in AllocatedRoles)
-			{
-				if (predicate(allocatedRole))
-				{
-					role = allocatedRole;
-					return true;
-				}
-			}
-
-			role = default(Role);
-			return false;
-		}
-
-		private bool ChooseRole()
-		{
-			Role chosenRole;
-
-			// Check if we can process
-			if (_resourceRequests.Count != 0)
-			{
-				var otherAgent = _resourceRequests[0].Source;
-				var condition = _resourceRequests[0].Condition;
-				if (TryChooseRole(role => role.PreCondition.Port == otherAgent &&
-										  role.PreCondition.StateMatches(condition), out chosenRole))
-				{
-					_currentRole = chosenRole;
-					return true;
-				}
-			}
-
-			// Check if we can produce
-			if (_resource == null)
-			{
-				if (TryChooseRole(role => role.PreCondition.Port == null, out chosenRole))
-				{
-					_currentRole = chosenRole;
-					return true;
-				}
-			}
-
-			// Check if we can consume
-			if (_resource != null)
-			{
-				if (TryChooseRole(role => role.PostCondition.Port == null, out chosenRole))
-				{
-					_currentRole = chosenRole;
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		public override string ToString()
-		{
-			return $"{Name}: State: {_stateMachine.State}, Resource: {_resource?.Workpiece.Name}, #Requests: {_resourceRequests.Count}";
-		}
-
 		public virtual void Configure(Role role)
 		{
 			AllocatedRoles.Add(role);
