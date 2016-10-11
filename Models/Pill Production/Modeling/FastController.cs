@@ -205,16 +205,16 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			Station lastStation = null;
 			Role lastRole = default(Role);
 
+			Action<Station, Role> addRole = (s, r) => {
+				if (!configuration.ContainsKey(s))
+					configuration.Add(s, new HashSet<Role>());
+				(configuration[s] as HashSet<Role>).Add(r);
+			};
+
 			for (var i = 0; i < path.Length; ++i)
 			{
 				var station = _availableStations[path[i]];
 				var role = lastRole;
-
-				Action<Station, Role> addRole = (s, r) => {
-					if (!configuration.ContainsKey(s))
-						configuration.Add(s, new HashSet<Role>());
-					(configuration[s] as HashSet<Role>).Add(r);
-				};
 
 				if (station != lastStation)
 				{
