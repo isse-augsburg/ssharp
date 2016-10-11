@@ -166,9 +166,6 @@ namespace SafetySharp.Odp
 
 		#region resource flow
 
-		// TODO: can these be hidden?
-		// in pill production, yes (connections never change, only agents fail)
-		// in robot cell: individual connections are removed -- but hidden in model (incorrect?)
 		public List<TAgent> Inputs { get; } = new List<TAgent>();
 		public List<TAgent> Outputs { get; } = new List<TAgent>();
 
