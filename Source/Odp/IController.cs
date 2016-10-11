@@ -25,6 +25,7 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 
+	// TODO: naming is ambiguous between "controller" (vs. "observer") and "controller" (vs. "plant")
 	public interface IController<TAgent, TTask, TResource> : IComponent
 		where TAgent : BaseAgent<TAgent,TTask,TResource>
 		where TTask : class, ITask
