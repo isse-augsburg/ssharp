@@ -280,6 +280,7 @@ namespace SafetySharp.Odp
 
 		protected virtual InvariantPredicate[] MonitoringPredicates => new InvariantPredicate[] {
 			Invariant.IOConsistency,
+			Invariant.NeighborsAliveGuarantee,
 			// Invariant.ResourceConsistency,
 			Invariant.CapabilityConsistency
 		};

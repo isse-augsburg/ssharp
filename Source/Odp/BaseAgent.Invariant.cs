@@ -74,6 +74,14 @@
 
 			// StateIsPrefix invariant: ensured by Condition.State implementation
 
+			public static IEnumerable<TTask> NeighborsAliveGuarantee(TAgent agent)
+			{
+				return RoleInvariant(
+					agent,
+					role => (role.PreCondition.Port?.IsAlive ?? true) && (role.PostCondition.Port?.IsAlive ?? true)
+				);
+			}
+
 			private static IEnumerable<TTask> RoleInvariant(TAgent agent, Predicate<Role<TAgent, TTask, TResource>> invariant)
 			{
 				return (from role in agent.AllocatedRoles

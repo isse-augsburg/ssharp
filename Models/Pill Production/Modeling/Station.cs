@@ -73,6 +73,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 
 		protected override InvariantPredicate[] MonitoringPredicates => new[] {
 			Invariant.IOConsistency,
+			Invariant.NeighborsAliveGuarantee,
 			// Invariant.ResourceConsistency,
 
 			// custom version of capability consistency due to ingredient amounts
