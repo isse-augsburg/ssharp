@@ -126,9 +126,38 @@ namespace SafetySharp.Odp
 			_resource = default(TResource);
 		}
 
-		protected virtual void ChooseRole()
+		private void ChooseRole()
 		{
-			throw new NotImplementedException(); // TODO: implement or make abstract
+			// Fairness is guaranteed by using the oldest resource request (_resourceRequests is a queue).
+			// This includes production roles: eventually, there are no more _resourceRequests (because all
+			// resources have been processed and consumed) and thus the agent eventually chooses a
+			// production role again.
+			//
+			// TODO: prioritization, deadlock avoidance
+			// (see chapters 6.3 & 6.4, Konstruktion selbst-organisierender Softwaresysteme)
+
+			// try processing or consuming
+			if (TryChooseRole(role => _resourceRequests[0].Source == role.PreCondition.Port
+				&& role.PreCondition.StateMatches(_resourceRequests[0].Condition), out _currentRole))
+				return;
+
+			// try producing
+			TryChooseRole(role => role.PreCondition.Port == null, out _currentRole);
+		}
+
+		private bool TryChooseRole(Predicate<Role<TAgent, TTask, TResource>> predicate, out Role<TAgent, TTask, TResource>? chosenRole)
+		{
+			foreach (var role in AllocatedRoles)
+			{
+				if (predicate(role))
+				{
+					chosenRole = role;
+					return true;
+				}
+			}
+
+			chosenRole = null;
+			return false;
 		}
 
 		public abstract void ApplyCapability(ICapability capability);
