@@ -268,6 +268,8 @@ namespace SafetySharp.Odp
 
 		#region observer
 
+		public virtual bool IsAlive => true;
+
 		[Hidden]
 		private bool _deficientConfiguration = false;
 
@@ -324,37 +326,6 @@ namespace SafetySharp.Odp
 		{
 			PerformReconfiguration(task);
 		}
-
-		#region ping
-
-		private readonly List<TAgent> _responses = new List<TAgent>(MaximumAgentCount);
-
-		// TODO: abstract from ping mechanism again?
-		protected virtual IEnumerable<TAgent> PingNeighbors()
-		{
-			var neighbors = Inputs.Union(Outputs);
-
-			// reset previous responses
-			_responses.Clear();
-
-			// ping neighboring agents to determine if they are still functioning
-			foreach (var neighbor in neighbors)
-				neighbor.SayHello((TAgent)this);
-
-			return neighbors.Except(_responses);
-		}
-
-		public virtual void SayHello(TAgent agent)
-		{
-			agent.SendHello((TAgent)this);
-		}
-
-		public virtual void SendHello(TAgent agent)
-		{
-			_responses.Add(agent);
-		}
-
-		#endregion
 
 		#endregion
 	}

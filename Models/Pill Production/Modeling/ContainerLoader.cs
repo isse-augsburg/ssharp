@@ -74,8 +74,6 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		{
 			public override bool IsAlive => false;
 
-			public override void SayHello(Station agent) { } // do not respond to pings
-
 			public override void Update() { } // do not act
 		}
 	}

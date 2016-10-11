@@ -40,10 +40,6 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		private static int _instanceCounter;
 		protected readonly string Name;
 
-		// used by central reconfiguration mechanism instead of ping mechanism
-		// because ping only provides local knowledge
-		public virtual bool IsAlive => true;
-
 		protected Station() : base()
 		{
 			Name = $"Station#{++_instanceCounter}";
