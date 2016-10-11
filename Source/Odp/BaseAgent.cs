@@ -81,7 +81,7 @@ namespace SafetySharp.Odp
 					from: State.ChooseRole,
 					to: State.WaitingForResource,
 					guard: _currentRole?.PreCondition.Port != null,
-					action: () => BeginResourcePickup(_currentRole?.PreCondition.Port))
+					action: () => InitiateResourceTransfer(_currentRole?.PreCondition.Port))
 				.Transition( // going to produce new resource (no transfer necessary)
 					from: State.ChooseRole,
 					to: State.ExecuteRole,
@@ -217,8 +217,7 @@ namespace SafetySharp.Odp
 			public Condition<TAgent, TTask> Condition { get; }
 		}
 
-		// TODO: naming, distinct from physical transfer -- or abandon physical transfer methods?
-		protected virtual void BeginResourcePickup(TAgent source)
+		protected virtual void InitiateResourceTransfer(TAgent source)
 		{
 			source.TransferResource();
 		}

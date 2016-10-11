@@ -34,7 +34,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		public Cart Cart { get; }
 
 		// TODO: move or remove code
-		protected void InitiateResourceTransfer(Agent agent)
+		protected void InitiatePhysicalResourceTransfer(Agent agent)
 		{
 			// If we fail to move to the robot, the cart loses its route
 			if (Cart.MoveTo(((RobotAgent)agent).Robot))
@@ -47,12 +47,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			BidirectionallyDisconnect(agent);
 		}
 
-		protected override void BeginResourcePickup(Agent source)
+		protected override void InitiateResourceTransfer(Agent source)
 		{
 			// If we fail to move to the robot, the cart loses its route
 			if (Cart.MoveTo(((RobotAgent)source).Robot))
 			{
-				base.BeginResourcePickup(source);
+				base.InitiateResourceTransfer(source);
 				return;
 			}
 

@@ -79,7 +79,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		}
 
 		// TODO: move or remove code
-		protected void InitiateResourceTransfer(Agent agent)
+		protected void InitiatePhysicalResourceTransfer(Agent agent)
 		{
 			// If we fail to transfer the resource, the robot loses all of its connections
 			if (Robot.PlaceResource(((CartAgent)agent).Cart))
