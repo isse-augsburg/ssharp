@@ -238,11 +238,11 @@ namespace SafetySharp.Odp
 			_stateMachine.Transition(
 				from: State.Output,
 				to: State.ResourceGiven,
-				action: () => _currentRole?.PostCondition.Port.Resource(_resource)
+				action: () => _currentRole?.PostCondition.Port.TakeResource(_resource)
 			);
 		}
 
-		public virtual void Resource(TResource resource)
+		public virtual void TakeResource(TResource resource)
 		{
 			// assert resource != null
 			_resource = resource;
