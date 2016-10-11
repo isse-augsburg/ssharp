@@ -34,13 +34,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
         public ProductionAction ProductionAction { get; }
 
-		public override int Identifier => (int)ProductionAction + 1;
-
-		public override void Execute(Agent agent)
-		{
-			agent.Process(this);
-		}
-
 		public override bool IsEquivalentTo(Odp.ICapability capability)
 		{
 			var process = capability as ProcessCapability;

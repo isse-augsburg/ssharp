@@ -26,8 +26,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 	internal abstract class Capability : ICapability
 	{
-		public abstract int Identifier { get; }
 		public abstract bool IsEquivalentTo(ICapability capability);
-		public abstract void Execute(Agent agent);
 	}
 }

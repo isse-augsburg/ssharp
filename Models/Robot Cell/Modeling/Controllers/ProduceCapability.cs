@@ -41,13 +41,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		[Hidden(HideElements = true)]
 		public List<Task> Tasks { get; }
 
-		public override int Identifier => 1;
-
-		public override void Execute(Agent agent)
-		{
-			agent.Produce(this);
-		}
-
 		public override bool IsEquivalentTo(Odp.ICapability capability)
 		{
 			var produce = capability as ProduceCapability;

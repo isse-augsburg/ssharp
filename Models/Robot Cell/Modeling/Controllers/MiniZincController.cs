@@ -72,16 +72,27 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return configs;
 		}
 
+		private int GetIdentifier(ICapability capability)
+		{
+			if (capability is ProduceCapability)
+				return 1;
+			else if (capability is ProcessCapability)
+				return (int)(capability as ProcessCapability).ProductionAction + 1;
+			else if (capability is ConsumeCapability)
+				return (int)Enum.GetValues(typeof(ProductionAction)).Cast<ProductionAction>().Max() + 2;
+			throw new InvalidOperationException("unsupported capability");
+		}
+
 		private void CreateConstraintsFile(Task task)
 		{
 		    _constraintsFile = "Constraints"+ ++myID + ".dzn";
 
             using (var writer = new StreamWriter(_constraintsFile))
 			{
-				var taskSequence = String.Join(",", task.RequiredCapabilities.Select(c => (c as Capability).Identifier));
+				var taskSequence = String.Join(",", task.RequiredCapabilities.Select(GetIdentifier));
 				var isCart = String.Join(",", Agents.Select(a => (a is CartAgent).ToString().ToLower()));
 				var capabilities = String.Join(",", Agents.Select(a =>
-					$"{{{String.Join(",", a.AvailableCapabilities.Select(c => (c as Capability).Identifier))}}}"));
+					$"{{{String.Join(",", a.AvailableCapabilities.Select(GetIdentifier))}}}"));
 				var isConnected = String.Join("\n|", Agents.Select(from =>
 					String.Join(",", Agents.Select(to => (from.Outputs.Contains(to) || from == to).ToString().ToLower()))));
 
