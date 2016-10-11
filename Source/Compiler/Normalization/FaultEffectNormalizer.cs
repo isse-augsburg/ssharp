@@ -24,6 +24,7 @@ namespace SafetySharp.Compiler.Normalization
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using CompilerServices;
@@ -354,6 +355,9 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private ClassDeclarationSyntax ChangeComponentBaseType(INamedTypeSymbol classSymbol, ClassDeclarationSyntax classDeclaration)
 		{
+			if (classDeclaration.BaseList == null)
+				return classDeclaration;
+
 			if (classSymbol.BaseType.Equals(SemanticModel.GetTypeSymbol<Component>()))
 				return classDeclaration;
 
