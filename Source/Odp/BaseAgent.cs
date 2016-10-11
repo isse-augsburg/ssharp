@@ -274,9 +274,6 @@ namespace SafetySharp.Odp
 		[Hidden]
 		public IReconfigurationStrategy<TAgent, TTask, TResource> ReconfigurationStrategy { get; set; }
 
-		private readonly List<ReconfigurationRequest> _reconfigurationRequests
-			= new List<ReconfigurationRequest>(MaximumReconfigurationRequests);
-
 		public delegate IEnumerable<TTask> InvariantPredicate(TAgent agent);
 
 		protected virtual InvariantPredicate[] MonitoringPredicates => new InvariantPredicate[] {
@@ -293,25 +290,22 @@ namespace SafetySharp.Odp
 
 		private void Observe()
 		{
-			// find tasks that need to be reconfigured
-			var inactiveNeighbors = PingNeighbors();
-			var deficientTasks = new HashSet<TTask>(
-				_reconfigurationRequests.Select(request => request.Task)
-				.Union(FindInvariantViolations(inactiveNeighbors).Select(kv => kv.Key))
-			);
-			// TODO: pass invariant violation info to reconf strategy
+			var deficientTasks = FindInvariantViolations().Keys.ToArray();
+			PerformReconfiguration(deficientTasks);
+		}
 
+		private void PerformReconfiguration(params TTask[] deficientTasks)
+		{
 			// stop work on deficient tasks
 			_resourceRequests.RemoveAll(request => deficientTasks.Contains(request.Condition.Task));
 			// abort execution of current role if necessary
 			_deficientConfiguration = deficientTasks.Contains(_currentRole?.Task);
 
-			// initiate reconfiguration to fix violations, satisfy requests
+			// initiate reconfiguration to fix violations
 			ReconfigurationStrategy.Reconfigure(deficientTasks);
-			_reconfigurationRequests.Clear();
 		}
 
-		private Dictionary<TTask, IEnumerable<InvariantPredicate>> FindInvariantViolations(IEnumerable<TAgent> inactiveNeighbors)
+		private Dictionary<TTask, IEnumerable<InvariantPredicate>> FindInvariantViolations()
 		{
 			var violations = new Dictionary<TTask, IEnumerable<InvariantPredicate>>();
 			foreach (var predicate in MonitoringPredicates)
@@ -328,19 +322,7 @@ namespace SafetySharp.Odp
 
 		public virtual void RequestReconfiguration(TAgent agent, TTask task)
 		{
-			_reconfigurationRequests.Add(new ReconfigurationRequest(agent, task));
-		}
-
-		private struct ReconfigurationRequest
-		{
-			public ReconfigurationRequest(TAgent source, TTask task)
-			{
-				Source = source;
-				Task = task;
-			}
-
-			public TAgent Source { get; }
-			public TTask Task { get; }
+			PerformReconfiguration(task);
 		}
 
 		#region ping
