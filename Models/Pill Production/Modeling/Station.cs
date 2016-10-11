@@ -104,13 +104,13 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		}
 
 		/*[FaultEffect(Fault = nameof(CompleteStationFailure))]
-        public abstract class CompleteStationFailureEffect : Station
-        {
-			public override void SayHello(Station agent) { } // do not respond to pings
+		public abstract class CompleteStationFailureEffect : Station
+		{
+			public override bool IsAlive => false;
 
 			public override void Update() { } // do not act
-        }*/
-		// S# seems not to support abstract fault effects,
+		}*/
+		// S# seems not to (entirely) support abstract fault effects,
 		// thus this is duplicated in each concrete subclass.
 	}
 }
