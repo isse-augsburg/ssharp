@@ -39,7 +39,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			if (Task != null)
 				throw new InvalidOperationException("Container already belongs to a recipe");
 			Task = recipe;
-			ApplyCapability(Task.RequiredCapabilities[0]); // first capability will always be ProduceCapability
+			OnCapabilityApplied(Task.RequiredCapabilities[0]); // first capability will always be ProduceCapability
 		}
 
 		/// <summary>
@@ -48,7 +48,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		/// <param name="ingredient"></param>
 		public void AddIngredient(Ingredient ingredient)
 		{
-			ApplyCapability(ingredient);
+			OnCapabilityApplied(ingredient);
 		}
 	}
 }

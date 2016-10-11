@@ -37,7 +37,7 @@ namespace SafetySharp.Odp
 		public IEnumerable<ICapability> State =>
 			Task?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
 
-		public void ApplyCapability(ICapability capability)
+		public void OnCapabilityApplied(ICapability capability)
 		{
 			if (_statePrefixLength >= Task.RequiredCapabilities.Length)
 				throw new InvalidOperationException("resource is already fully processed");
