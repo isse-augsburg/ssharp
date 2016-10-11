@@ -38,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractController.cs" />
+    <Compile Include="AbstractMiniZincController.cs" />
     <Compile Include="BaseAgent.cs" />
     <Compile Include="CentralReconfiguration.cs" />
     <Compile Include="Condition.cs" />
