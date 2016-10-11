@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
+	using System;
 	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 	using Odp;
@@ -47,7 +48,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			base.Update();
 		}
 
-		public override void Reconfigure(IEnumerable<Task> deficientTasks)
+		public override void Reconfigure(IEnumerable<Tuple<Task, ReconfigurationReason<Agent, Task>>> deficientTasks)
 		{
 			if (Mode == AnalysisMode.IntolerableFaults && StepCount >= MaxSteps)
 				return;
@@ -72,7 +73,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		{
 			public ReconfigurationFailureEffect(Controller controller) : base(controller) { }
 
-			public override void Reconfigure(IEnumerable<Task> deficientTasks)
+			public override void Reconfigure(IEnumerable<Tuple<Task, ReconfigurationReason<Agent, Task>>> deficientTasks)
 			{
 				UnsuccessfulReconfiguration = true;
 			}
