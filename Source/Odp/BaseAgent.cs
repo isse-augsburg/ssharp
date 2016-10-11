@@ -50,7 +50,8 @@ namespace SafetySharp.Odp
 		#region functional part
 
 		protected Role<TAgent, TTask, TResource>? _currentRole;
-		protected TResource _resource;
+
+		public TResource Resource { get; protected set; }
 
 		private readonly StateMachine<State> _stateMachine = State.Idle;
 
@@ -103,7 +104,7 @@ namespace SafetySharp.Odp
 				.Transition( // resource has been consumed
 					from: State.ExecuteRole,
 					to: State.Idle,
-					guard: _currentRole.Value.IsCompleted && _resource == null && _currentRole?.PostCondition.Port == null,
+					guard: _currentRole.Value.IsCompleted && Resource == null && _currentRole?.PostCondition.Port == null,
 					action: () => {
 						_currentRole?.Reset();
 						RemoveResourceRequest(_currentRole?.PreCondition.Port, _currentRole.Value.PreCondition);
@@ -123,7 +124,7 @@ namespace SafetySharp.Odp
 
 		protected virtual void DropResource()
 		{
-			_resource = default(TResource);
+			Resource = default(TResource);
 		}
 
 		private void ChooseRole()
@@ -238,14 +239,14 @@ namespace SafetySharp.Odp
 			_stateMachine.Transition(
 				from: State.Output,
 				to: State.ResourceGiven,
-				action: () => _currentRole?.PostCondition.Port.TakeResource(_resource)
+				action: () => _currentRole?.PostCondition.Port.TakeResource(Resource)
 			);
 		}
 
 		public virtual void TakeResource(TResource resource)
 		{
 			// assert resource != null
-			_resource = resource;
+			Resource = resource;
 
 			_stateMachine.Transition(
 				from: State.WaitingForResource,
@@ -256,7 +257,7 @@ namespace SafetySharp.Odp
 
 		public virtual void ResourcePickedUp()
 		{
-			_resource = default(TResource);
+			Resource = default(TResource);
 
 			_stateMachine.Transition(
 				from: State.ResourceGiven,

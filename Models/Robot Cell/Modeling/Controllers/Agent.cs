@@ -46,7 +46,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		[Hidden]
 		public string Name { get; set; }
 
-		public bool HasResource => _resource != null;
+		public bool HasResource => Resource != null;
 
 		public override void Update()
 		{

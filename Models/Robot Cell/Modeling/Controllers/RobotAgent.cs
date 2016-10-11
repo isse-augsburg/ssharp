@@ -102,19 +102,19 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public override void Produce(ProduceCapability capability)
 		{
-			if (_resource != null || capability.Resources.Count == 0 || capability.Tasks.Any(task => task.IsResourceInProduction))
+			if (Resource != null || capability.Resources.Count == 0 || capability.Tasks.Any(task => task.IsResourceInProduction))
 				return;
 
-			_resource = capability.Resources[0];
+			Resource = capability.Resources[0];
 			capability.Resources.RemoveAt(0);
-			_resource.Task.IsResourceInProduction = true;
-			Robot.ProduceWorkpiece(_resource.Workpiece);
-			_resource.OnCapabilityApplied();
+			Resource.Task.IsResourceInProduction = true;
+			Robot.ProduceWorkpiece(Resource.Workpiece);
+			Resource.OnCapabilityApplied();
 		}
 
 		public override void Process(ProcessCapability capability)
 		{
-			if (_resource == null)
+			if (Resource == null)
 				return;
 
 			if (_currentCapability != capability)
@@ -137,22 +137,22 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			}
 			else
 			{
-				if (_resource.State.Count() == _resource.Task.RequiredCapabilities.Length)
+				if (Resource.State.Count() == Resource.Task.RequiredCapabilities.Length)
 					throw new InvalidOperationException();
 
-				_resource.OnCapabilityApplied();
+				Resource.OnCapabilityApplied();
 			}
 		}
 
 		public override void Consume(ConsumeCapability capability)
 		{
-			if (_resource == null)
+			if (Resource == null)
 				return;
 
-			_resource.OnCapabilityApplied();
+			Resource.OnCapabilityApplied();
 			Robot.ConsumeWorkpiece();
-			_resource.Task.IsResourceInProduction = false;
-			_resource = null;
+			Resource.Task.IsResourceInProduction = false;
+			Resource = null;
 		}
 	}
 }

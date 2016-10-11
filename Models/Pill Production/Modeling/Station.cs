@@ -65,8 +65,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		///   The resource currently located at the station.
 		/// </summary>
 		public PillContainer Container { // TODO: remove?
-			get { return _resource; }
-			protected set { _resource = value; }
+			get { return Resource; }
+			protected set { Resource = value; }
 		}
 
 		protected override void DropResource()
