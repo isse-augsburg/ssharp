@@ -137,9 +137,10 @@ namespace SafetySharp.Odp
 			// (see chapters 6.3 & 6.4, Konstruktion selbst-organisierender Softwaresysteme)
 
 			// try processing or consuming
-			if (TryChooseRole(role => _resourceRequests[0].Source == role.PreCondition.Port
-				&& role.PreCondition.StateMatches(_resourceRequests[0].Condition), out _currentRole))
-				return;
+			if (_resourceRequests.Count > 0)
+				if (TryChooseRole(role => _resourceRequests[0].Source == role.PreCondition.Port
+					&& role.PreCondition.StateMatches(_resourceRequests[0].Condition), out _currentRole))
+					return;
 
 			// try producing
 			TryChooseRole(role => role.PreCondition.Port == null, out _currentRole);
