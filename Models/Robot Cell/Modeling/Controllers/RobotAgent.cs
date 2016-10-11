@@ -87,7 +87,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 			Robot.DiscardWorkpiece();
 			ClearConnections();
-			CheckConstraints();
 		}
 
 		private void ClearConnections()
@@ -103,19 +102,19 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public override void Produce(ProduceCapability capability)
 		{
-			if (Resource != null || capability.Resources.Count == 0 || capability.Tasks.Any(task => task.IsResourceInProduction))
+			if (_resource != null || capability.Resources.Count == 0 || capability.Tasks.Any(task => task.IsResourceInProduction))
 				return;
 
-			Resource = capability.Resources[0];
+			_resource = capability.Resources[0];
 			capability.Resources.RemoveAt(0);
-			Resource.Task.IsResourceInProduction = true;
-			Robot.ProduceWorkpiece(Resource.Workpiece);
-			Resource.OnCapabilityApplied();
+			_resource.Task.IsResourceInProduction = true;
+			Robot.ProduceWorkpiece(_resource.Workpiece);
+			_resource.OnCapabilityApplied();
 		}
 
 		public override void Process(ProcessCapability capability)
 		{
-			if (Resource == null)
+			if (_resource == null)
 				return;
 
 			if (_currentCapability != capability)
@@ -127,7 +126,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				else
 				{
 					_availableCapabilities.RemoveAll(c => c != _currentCapability);
-					CheckConstraints();
 					return;
 				}
 			}
@@ -136,26 +134,25 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (!Robot.ApplyCapability())
 			{
 				_availableCapabilities.Remove(capability);
-				CheckConstraints();
 			}
 			else
 			{
-				if (Resource.State.Count() == Resource.Task.RequiredCapabilities.Length)
+				if (_resource.State.Count() == _resource.Task.RequiredCapabilities.Length)
 					throw new InvalidOperationException();
 
-				Resource.OnCapabilityApplied();
+				_resource.OnCapabilityApplied();
 			}
 		}
 
 		public override void Consume(ConsumeCapability capability)
 		{
-			if (Resource == null)
+			if (_resource == null)
 				return;
 
-			Resource.OnCapabilityApplied();
+			_resource.OnCapabilityApplied();
 			Robot.ConsumeWorkpiece();
-			Resource.Task.IsResourceInProduction = false;
-			Resource = null;
+			_resource.Task.IsResourceInProduction = false;
+			_resource = null;
 		}
 	}
 }

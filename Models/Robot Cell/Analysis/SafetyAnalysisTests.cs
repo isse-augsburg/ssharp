@@ -46,7 +46,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
 			var result = modelChecker.ComputeMinimalCriticalSets(model,
-				model.ObserverController._stepCount >= ObserverController.MaxSteps &&
+				model.ReconfigurationStrategy.StepCount >= CentralRobotReconfiguration.MaxSteps &&
 				!model.Workpieces.All(w => w.IsDamaged || w.IsDiscarded || w.IsComplete), maxCardinality: 2);
 
 			Console.WriteLine(result);
@@ -54,7 +54,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 		private static IEnumerable CreateConfigurations()
 		{
-			return Model.CreateConfigurations<FastObserverController>(AnalysisMode.IntolerableFaults)
+			return Model.CreateConfigurations<FastController>(AnalysisMode.IntolerableFaults)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 	}

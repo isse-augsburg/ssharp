@@ -34,7 +34,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		public const int MaxSteps = 350;
 
 		[Range(0, MaxSteps, OverflowBehavior.Clamp)]
-		private int _stepCount;
+		public int StepCount { get; private set; }
 		private bool _hasReconfed;
 		[Hidden]
 		public AnalysisMode Mode = AnalysisMode.AllFaults;
@@ -43,13 +43,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public override void Update()
 		{
-			++_stepCount;
+			++StepCount;
 			base.Update();
 		}
 
 		public override void Reconfigure(IEnumerable<Task> deficientTasks)
 		{
-			if (Mode == AnalysisMode.IntolerableFaults && _stepCount >= MaxSteps)
+			if (Mode == AnalysisMode.IntolerableFaults && StepCount >= MaxSteps)
 				return;
 
 			if (UnsuccessfulReconfiguration)

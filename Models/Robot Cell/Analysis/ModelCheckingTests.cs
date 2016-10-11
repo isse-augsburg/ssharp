@@ -37,7 +37,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			var model = new Model();
 			model.InitializeDefaultInstance();
-			model.CreateObserverController<FastObserverController>();
+			model.CreateController<FastController>();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
@@ -51,7 +51,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			var model = new Model();
 			model.InitializeDefaultInstance();
-			model.CreateObserverController<FastObserverController>();
+			model.CreateController<FastController>();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
@@ -65,7 +65,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			var model = new Model();
 			model.InitializeDefaultInstance();
-			model.CreateObserverController<FastObserverController>();
+			model.CreateController<FastController>();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
@@ -79,7 +79,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			var model = new Model();
 			model.InitializeDefaultInstance();
-			model.CreateObserverController<FastObserverController>();
+			model.CreateController<FastController>();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };

@@ -37,7 +37,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			var model = new Model();
 			model.InitializeDefaultInstance();
-			model.CreateObserverController<FastObserverController>();
+			model.CreateController<FastController>();
 			model.Faults.SuppressActivations();
 
 			var simulator = new Simulator(model);
@@ -52,7 +52,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			{
 				WriteLine($"=================  Step: {i}  =====================================");
 
-				if (model.ObserverController.ReconfigurationState == ReconfStates.Failed)
+				if (model.ReconfigurationStrategy.UnsuccessfulReconfiguration)
 					WriteLine("Reconfiguration failed.");
 				else
 				{
