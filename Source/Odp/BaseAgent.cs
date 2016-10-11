@@ -285,6 +285,7 @@ namespace SafetySharp.Odp
 			Invariant.CapabilityConsistency
 		};
 
+		// TODO: use to verify configuration
 		protected virtual InvariantPredicate[] ConsistencyPredicates => new InvariantPredicate[] {
 			Invariant.PrePostConditionConsistency,
 			Invariant.TaskEquality,
@@ -293,19 +294,26 @@ namespace SafetySharp.Odp
 
 		private void Observe()
 		{
-			var deficientTasks = FindInvariantViolations().Keys.ToArray();
-			PerformReconfiguration(deficientTasks);
+			var violations = FindInvariantViolations();
+
+			PerformReconfiguration(
+				from vio in violations
+				let reason = new ReconfigurationReason<TAgent, TTask, TResource>(vio.Value.ToArray(), null)
+				select Tuple.Create(vio.Key, reason)
+			);
 		}
 
-		private void PerformReconfiguration(params TTask[] deficientTasks)
+		protected void PerformReconfiguration(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask, TResource>>> reconfigurations)
 		{
+			var deficientTasks = new HashSet<TTask>(reconfigurations.Select(t => t.Item1));
+
 			// stop work on deficient tasks
 			_resourceRequests.RemoveAll(request => deficientTasks.Contains(request.Condition.Task));
 			// abort execution of current role if necessary
 			_deficientConfiguration = deficientTasks.Contains(_currentRole?.Task);
 
 			// initiate reconfiguration to fix violations
-			ReconfigurationStrategy.Reconfigure(deficientTasks);
+			ReconfigurationStrategy.Reconfigure(reconfigurations);
 		}
 
 		private Dictionary<TTask, IEnumerable<InvariantPredicate>> FindInvariantViolations()
@@ -325,7 +333,9 @@ namespace SafetySharp.Odp
 
 		public virtual void RequestReconfiguration(TAgent agent, TTask task)
 		{
-			PerformReconfiguration(task);
+			PerformReconfiguration(new[] {
+				Tuple.Create(task, new ReconfigurationReason<TAgent, TTask, TResource>(null, agent))
+			});
 		}
 
 		#endregion

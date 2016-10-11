@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Odp
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
@@ -37,9 +38,9 @@ namespace SafetySharp.Odp
 			_controller = controller;
 		}
 
-		public virtual void Reconfigure(IEnumerable<TTask> deficientTasks)
+		public virtual void Reconfigure(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask, TResource>>> reconfigurations)
 		{
-			var tasks = deficientTasks.ToArray();
+			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
 
 			RemoveConfigurations(tasks);
 			var configs = _controller.CalculateConfigurations(tasks);

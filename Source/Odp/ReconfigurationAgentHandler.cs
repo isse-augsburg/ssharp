@@ -31,24 +31,29 @@ namespace SafetySharp.Odp
 		where TTask : class, ITask
 	{
 		private readonly TAgent _baseAgent;
-		private readonly Func<TAgent, TTask, IReconfigurationAgent<TTask>> _createReconfAgent;
+		private readonly Func<TAgent, TTask, IReconfigurationAgent<TAgent, TTask, TResource>> _createReconfAgent;
 
-		public ReconfigurationAgentHandler(TAgent baseAgent, Func<TAgent, TTask, IReconfigurationAgent<TTask>> createReconfAgent)
+		public ReconfigurationAgentHandler(
+			TAgent baseAgent,
+			Func<TAgent, TTask, IReconfigurationAgent<TAgent, TTask, TResource>> createReconfAgent
+		)
 		{
 			_baseAgent = baseAgent;
 			_createReconfAgent = createReconfAgent;
 		}
 
-		protected readonly Dictionary<TTask, IReconfigurationAgent<TTask>> _tasksUnderReconstruction
-			= new Dictionary<TTask, IReconfigurationAgent<TTask>>();
+		protected readonly Dictionary<TTask, IReconfigurationAgent<TAgent, TTask, TResource>> _tasksUnderReconstruction
+			= new Dictionary<TTask, IReconfigurationAgent<TAgent, TTask, TResource>>();
 
-		public void Reconfigure(IEnumerable<TTask> deficientTasks)
+		public void Reconfigure(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask, TResource>>> reconfigurations)
 		{
-			foreach (var task in deficientTasks)
+			foreach (var tuple in reconfigurations)
 			{
-				// TODO: what are these values?
-				object agent = null;
-				object state = null;
+				var task = tuple.Item1;
+				var reason = tuple.Item2;
+
+				var agent = reason.RequestSource ?? _baseAgent;
+				object state = null; // TODO: what is this value?
 
 				LockConfigurations(task);
 				if (!_tasksUnderReconstruction.ContainsKey(task))

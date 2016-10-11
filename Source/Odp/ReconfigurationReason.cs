@@ -22,15 +22,23 @@
 
 namespace SafetySharp.Odp
 {
-	using System;
-	using System.Collections.Generic;
-	using Modeling;
-
-	public interface IReconfigurationStrategy<TAgent, TTask, TResource> : IComponent
+	public class ReconfigurationReason<TAgent, TTask, TResource>
 		where TAgent : BaseAgent<TAgent, TTask, TResource>
 		where TTask : class, ITask
 	{
-		[Provided]
-		void Reconfigure(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask, TResource>>> reconfigurations);
+		public ReconfigurationReason(
+			BaseAgent<TAgent, TTask, TResource>.InvariantPredicate[] violatedPredicates,
+			TAgent requestSource
+		)
+		{
+			ViolatedPredicates = violatedPredicates;
+			RequestSource = requestSource;
+		}
+
+		public bool IsLocalViolation => ViolatedPredicates != null && ViolatedPredicates.Length > 0;
+		public bool IsRequest => RequestSource != null;
+
+		public BaseAgent<TAgent, TTask, TResource>.InvariantPredicate[] ViolatedPredicates { get; }
+		public TAgent RequestSource { get; }
 	}
 }

@@ -52,7 +52,9 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		public override void Update()
 		{
 			if (RecipeQueue.Count > 0)
-				ReconfigurationStrategy.Reconfigure(new[] { RecipeQueue.Dequeue() });
+				PerformReconfiguration(new[] {
+					Tuple.Create(RecipeQueue.Dequeue(), new ReconfigurationReason<Station, Recipe, PillContainer>(null, null))
+				});
 
 			base.Update();
 		}
