@@ -78,11 +78,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			throw new NotImplementedException();
 		}
 
-		// empty implementations for physical resource transfer -- RobotAgent, CartAgent override some of these
-		protected override void PickupResource(Agent source) { }
-		protected override void InitiateResourceTransfer(Agent agent) { }
-		protected override void EndResourceTransfer(Agent source) { }
-
 		public void CheckAllocatedCapabilities()
 		{
 			// We ignore faults for unused capabilities that are currently not used to improve general model checking efficiency

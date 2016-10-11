@@ -33,7 +33,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public Cart Cart { get; }
 
-		protected override void InitiateResourceTransfer(Agent agent)
+		// TODO: move or remove code
+		protected void InitiateResourceTransfer(Agent agent)
 		{
 			// If we fail to move to the robot, the cart loses its route
 			if (Cart.MoveTo(((RobotAgent)agent).Robot))

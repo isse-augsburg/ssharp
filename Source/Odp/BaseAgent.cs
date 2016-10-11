@@ -167,8 +167,8 @@ namespace SafetySharp.Odp
 		// TODO: can these be hidden?
 		// in pill production, yes (connections never change, only agents fail)
 		// in robot cell: individual connections are removed -- but hidden in model (incorrect?)
-		public virtual List<TAgent> Inputs { get; } = new List<TAgent>();
-		public virtual List<TAgent> Outputs { get; } = new List<TAgent>();
+		public List<TAgent> Inputs { get; } = new List<TAgent>();
+		public List<TAgent> Outputs { get; } = new List<TAgent>();
 
 		public void Connect(TAgent successor)
 		{
@@ -234,8 +234,6 @@ namespace SafetySharp.Odp
 
 		public virtual void TransferResource()
 		{
-			InitiateResourceTransfer(_currentRole?.PreCondition.Port);
-
 			_stateMachine.Transition(
 				from: State.Output,
 				to: State.ResourceGiven,
@@ -246,8 +244,6 @@ namespace SafetySharp.Odp
 		public virtual void Resource(TResource resource)
 		{
 			// assert resource != null
-
-			PickupResource(_currentRole?.PreCondition.Port);
 			_resource = resource;
 
 			_stateMachine.Transition(
@@ -259,7 +255,6 @@ namespace SafetySharp.Odp
 
 		public virtual void ResourcePickedUp()
 		{
-			EndResourceTransfer(_currentRole?.PreCondition.Port);
 			_resource = default(TResource);
 
 			_stateMachine.Transition(
@@ -268,16 +263,6 @@ namespace SafetySharp.Odp
 				action: () => _currentRole = null
 			);
 		}
-
-		#endregion
-
-		#region physical resource transfer
-
-		protected abstract void InitiateResourceTransfer(TAgent source);
-
-		protected abstract void PickupResource(TAgent source);
-
-		protected abstract void EndResourceTransfer(TAgent source);
 
 		#endregion
 

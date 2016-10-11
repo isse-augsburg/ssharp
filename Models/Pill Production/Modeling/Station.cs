@@ -104,14 +104,6 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 				neighbour.RemoveRecipeConfigurations(recipe);
 		}
 
-		#region physical resource transfer -- not modeled
-
-		protected override void PickupResource() { }
-		protected override void InitiateResourceTransfer() { }
-		protected override void EndResourceTransfer() { }
-
-		#endregion
-
 		/*[FaultEffect(Fault = nameof(CompleteStationFailure))]
         public abstract class CompleteStationFailureEffect : Station
         {
