@@ -151,7 +151,7 @@ namespace SafetySharp.Odp
 		{
 			foreach (var role in AllocatedRoles)
 			{
-				if (predicate(role))
+				if (!role.IsLocked && predicate(role))
 				{
 					chosenRole = role;
 					return true;

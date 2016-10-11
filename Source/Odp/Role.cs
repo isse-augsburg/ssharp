@@ -30,6 +30,8 @@ namespace SafetySharp.Odp
 		where TAgent : BaseAgent<TAgent, TTask, TResource>
 		where TTask : class, ITask
 	{
+		public bool IsLocked { get; set; }
+
 		public Condition<TAgent, TTask> PreCondition;
 		public Condition<TAgent, TTask> PostCondition;
 
