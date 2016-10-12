@@ -24,52 +24,30 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
-	using SafetySharp.Modeling;
 	using Odp;
 
-	using Role = Odp.Role<Agent, Task>;
-
-	internal class MiniZincController : Controller
+	internal class MiniZincController : AbstractMiniZincController<Agent, Task>
 	{
-        [Hidden]
-        private string _constraintsFile;
-
-        [Hidden]
-        private static long myID;
-		private const string ConfigurationFile = "Configuration.out";
-		private const string MinizincExe = "minizinc.exe";
 		private const string MinizincModel = "ConstraintModel.mzn";
 
-		public MiniZincController(IEnumerable<Agent> agents) : base(agents) { }
+		public MiniZincController(IEnumerable<Agent> agents) : base(MinizincModel, agents.ToArray()) { }
 
-		public override Dictionary<Agent, IEnumerable<Role>> CalculateConfigurations(params Task[] tasks)
+		protected override void WriteInputData(Task task, StreamWriter writer)
 		{
-			var configs = new Dictionary<Agent, IEnumerable<Role>>();
-			foreach (var task in tasks)
-			{
-				CreateConstraintsFile(task);
-				ExecuteMinizinc();
+			var taskSequence = String.Join(",", task.RequiredCapabilities.Select(GetIdentifier));
+			var isCart = String.Join(",", Agents.Select(a => (a is CartAgent).ToString().ToLower()));
+			var capabilities = String.Join(",", Agents.Select(a =>
+				$"{{{String.Join(",", a.AvailableCapabilities.Select(GetIdentifier))}}}"));
+			var isConnected = String.Join("\n|", Agents.Select(from =>
+				String.Join(",", Agents.Select(to => (from.Outputs.Contains(to) || from == to).ToString().ToLower()))));
 
-				// TODO: move comparison to isReconfPossible in CentralReconf subclass?
-				//var isReconfPossible = IsReconfPossible(Agents.OfType<RobotAgent>(), Tasks);
-
-				var lines = File.ReadAllLines(ConfigurationFile);
-				if (lines[0].Contains("UNSATISFIABLE"))
-				{
-					ReconfigurationFailure = true;
-					//    if (isReconfPossible) 
-					//       throw new Exception("Reconfiguration failed even though there is a solution.");
-				}
-
-				//if (!isReconfPossible)
-				//   throw new Exception("Reconfiguration successful even though there is no valid configuration.");
-				else
-					ExtractConfigurations(configs, task, Parse(task, lines[0], lines[1]).ToArray());
-			}
-			return configs;
+			writer.WriteLine($"task = [{taskSequence}];");
+			writer.WriteLine($"noAgents = {Agents.Length};");
+			writer.WriteLine($"capabilities = [{capabilities}];");
+			writer.WriteLine($"isCart = [{isCart}];");
+			writer.WriteLine($"isConnected = [|{isConnected}|]");
 		}
 
 		private int GetIdentifier(ICapability capability)
@@ -83,99 +61,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			throw new InvalidOperationException("unsupported capability");
 		}
 
-		private void CreateConstraintsFile(Task task)
-		{
-		    _constraintsFile = "Constraints"+ ++myID + ".dzn";
-
-            using (var writer = new StreamWriter(_constraintsFile))
-			{
-				var taskSequence = String.Join(",", task.RequiredCapabilities.Select(GetIdentifier));
-				var isCart = String.Join(",", Agents.Select(a => (a is CartAgent).ToString().ToLower()));
-				var capabilities = String.Join(",", Agents.Select(a =>
-					$"{{{String.Join(",", a.AvailableCapabilities.Select(GetIdentifier))}}}"));
-				var isConnected = String.Join("\n|", Agents.Select(from =>
-					String.Join(",", Agents.Select(to => (from.Outputs.Contains(to) || from == to).ToString().ToLower()))));
-
-				writer.WriteLine($"task = [{taskSequence}];");
-				writer.WriteLine($"noAgents = {Agents.Length};");
-				writer.WriteLine($"capabilities = [{capabilities}];");
-				writer.WriteLine($"isCart = [{isCart}];");
-				writer.WriteLine($"isConnected = [|{isConnected}|]");
-			}
-		}
-
-		private void ExecuteMinizinc()
-		{
-			var startInfo = new ProcessStartInfo
-			{
-				FileName = MinizincExe,
-				Arguments = $"-o {ConfigurationFile} {MinizincModel} {_constraintsFile}",
-				RedirectStandardError = true,
-				RedirectStandardOutput = true,
-				UseShellExecute = false,
-				CreateNoWindow = true
-			};
-
-			using (var process = new Process { StartInfo = startInfo, EnableRaisingEvents = true })
-			{
-				process.Start();
-
-				process.BeginErrorReadLine();
-				process.BeginOutputReadLine();
-
-				process.OutputDataReceived += (o, e) => PrintOutput(e.Data);
-				process.ErrorDataReceived += (o, e) => PrintOutput(e.Data);
-
-				process.WaitForExit();
-			}
-		}
-
-		private static void PrintOutput(string output)
-		{
-			if (String.IsNullOrWhiteSpace(output))
-				return;
-
-			if (output.Contains("warning") || output.Contains(Path.GetFileNameWithoutExtension(MinizincModel)))
-				return;
-
-			Console.WriteLine(output);
-		}
-
-		private IEnumerable<Tuple<Agent, ICapability[]>> Parse(Task task, string agentsString, string capabilitiesString)
-		{
-			var agentIds = ParseList(agentsString);
-			var capabilityIds = ParseList(capabilitiesString);
-
-			for (var i = 0; i < agentIds.Length;)
-			{
-				var capabilities = EnumerateCapabilities(task, agentIds, capabilityIds, i).ToArray();
-				yield return Tuple.Create(Agents[agentIds[i]], capabilities);
-
-				i += Math.Max(1, capabilities.Length);
-			}
-		}
-
-		private IEnumerable<ICapability> EnumerateCapabilities(Task task, int[] agents, int[] capabilities, int offset)
-		{
-			var agentId = agents[offset];
-			var agent = Agents[agentId];
-
-			for (var i = offset; i < agents.Length && agents[i] == agentId; ++i)
-			{
-				if (capabilities[i] != -1)
-					yield return agent.AvailableCapabilities.First(c => (c as Capability).IsEquivalentTo(task.RequiredCapabilities[capabilities[i]]));
-			}
-		}
-
-		private static int[] ParseList(string line)
-		{
-			var openBrace = line.IndexOf("[", StringComparison.Ordinal);
-			var closeBrace = line.IndexOf("]", StringComparison.Ordinal);
-
-			return line.Substring(openBrace + 1, closeBrace - openBrace - 1).Split(',').Select(n => Int32.Parse(n.Trim()) - 1).ToArray();
-		}
-
-        private bool ContainsCapability(IEnumerable<ICapability> capabilities, ICapability capability)
+		#region isReconfPossible
+		// TODO: move comparison to isReconfPossible in CentralReconf subclass (?)
+		private bool ContainsCapability(IEnumerable<ICapability> capabilities, ICapability capability)
         {
             return capabilities.Any(c => (c as Capability).IsEquivalentTo(capability));
         }
@@ -245,5 +133,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
             return false;
         }
-    }
+		#endregion
+	}
 }

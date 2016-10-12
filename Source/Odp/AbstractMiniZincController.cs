@@ -67,11 +67,11 @@ namespace SafetySharp.Odp
 			_inputFile = $"data{++_counter}.dzn";
 			using (var writer = new StreamWriter(_inputFile))
 			{
-				WriteInputData(writer);
+				WriteInputData(task, writer);
 			}
 		}
 
-		protected abstract void WriteInputData(StreamWriter writer);
+		protected abstract void WriteInputData(TTask task, StreamWriter writer);
 
 		private void ExecuteMiniZinc()
 		{
