@@ -31,19 +31,19 @@ namespace SafetySharp.Odp
 		where TTask : class, ITask
 	{
 		private readonly TAgent _baseAgent;
-		private readonly Func<TAgent, TTask, IReconfigurationAgent<TAgent, TTask>> _createReconfAgent;
+		private readonly Func<TAgent, TTask, IReconfigurationAgent<TTask>> _createReconfAgent;
 
 		public ReconfigurationAgentHandler(
 			TAgent baseAgent,
-			Func<TAgent, TTask, IReconfigurationAgent<TAgent, TTask>> createReconfAgent
+			Func<TAgent, TTask, IReconfigurationAgent<TTask>> createReconfAgent
 		)
 		{
 			_baseAgent = baseAgent;
 			_createReconfAgent = createReconfAgent;
 		}
 
-		protected readonly Dictionary<TTask, IReconfigurationAgent<TAgent, TTask>> _tasksUnderReconstruction
-			= new Dictionary<TTask, IReconfigurationAgent<TAgent, TTask>>();
+		protected readonly Dictionary<TTask, IReconfigurationAgent<TTask>> _tasksUnderReconstruction
+			= new Dictionary<TTask, IReconfigurationAgent<TTask>>();
 
 		public void Reconfigure(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask>>> reconfigurations)
 		{
@@ -54,12 +54,13 @@ namespace SafetySharp.Odp
 
 				var agent = reason.RequestSource ?? _baseAgent;
 				object state = null; // TODO: what is this value?
-
 				LockConfigurations(task);
 				if (!_tasksUnderReconstruction.ContainsKey(task))
 				{
 					_tasksUnderReconstruction.Add(task, _createReconfAgent(_baseAgent, task));
 				}
+
+
 				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, state);
 			}
 		}

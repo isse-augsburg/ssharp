@@ -27,7 +27,7 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-    public abstract partial class BaseAgent<TAgent, TTask> : Component
+    public abstract partial class BaseAgent<TAgent, TTask> : Component, IAgent
 		where TAgent : BaseAgent<TAgent, TTask>
 		where TTask : class, ITask
     {
@@ -331,7 +331,7 @@ namespace SafetySharp.Odp
 			return violations;
 		}
 
-		public virtual void RequestReconfiguration(TAgent agent, TTask task)
+		public virtual void RequestReconfiguration(IAgent agent, TTask task)
 		{
 			PerformReconfiguration(new[] {
 				Tuple.Create(task, new ReconfigurationReason<TAgent, TTask>(null, agent))

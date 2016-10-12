@@ -28,7 +28,7 @@ namespace SafetySharp.Odp
 	{
 		public ReconfigurationReason(
 			BaseAgent<TAgent, TTask>.InvariantPredicate[] violatedPredicates,
-			TAgent requestSource
+			IAgent requestSource
 		)
 		{
 			ViolatedPredicates = violatedPredicates;
@@ -39,6 +39,6 @@ namespace SafetySharp.Odp
 		public bool IsRequest => RequestSource != null;
 
 		public BaseAgent<TAgent, TTask>.InvariantPredicate[] ViolatedPredicates { get; }
-		public TAgent RequestSource { get; }
+		public IAgent RequestSource { get; }
 	}
 }
