@@ -282,6 +282,7 @@
     <Compile Include="Execution\Faults\Binding\inherited fault.cs" />
     <Compile Include="Execution\Faults\Binding\generics.cs" />
     <Compile Include="Execution\Faults\Binding\non nested.cs" />
+    <Compile Include="Execution\Faults\ProvidedPorts\effect in partial class.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\multiple effects same type.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\multiple effects.cs" />
     <Compile Include="Execution\Faults\ProvidedPorts\multiple inactive effects.cs" />

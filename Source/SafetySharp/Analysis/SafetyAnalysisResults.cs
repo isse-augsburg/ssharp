@@ -223,7 +223,7 @@ namespace SafetySharp.Analysis
 			var builder = new StringBuilder();
 			var percentage = CheckedSets.Count / (double)(1L << Faults.Count()) * 100;
 			var cardinalitySum = MinimalCriticalSets.Sum(set => set.Count);
-			var minimalSetCardianalityAverage = cardinalitySum == 0 ? 0 : cardinalitySum / MinimalCriticalSets.Count;
+			var minimalSetCardinalityAverage = cardinalitySum == 0 ? 0 : cardinalitySum / (double)MinimalCriticalSets.Count;
 
 			builder.AppendLine();
 			builder.AppendLine("=======================================================================");
@@ -259,7 +259,7 @@ namespace SafetySharp.Analysis
 			builder.AppendLine();
 			builder.AppendLine($"Checked Fault Sets: {CheckedSets.Count} ({percentage:F0}% of all fault sets)");
 			builder.AppendLine($"Minimal Critical Sets: {MinimalCriticalSets.Count}");
-			builder.AppendLine($"Average Minimal Critical Set Cardinality: {minimalSetCardianalityAverage:F1}");
+			builder.AppendLine($"Average Minimal Critical Set Cardinality: {minimalSetCardinalityAverage:F1}");
 			builder.AppendLine();
 
 			var i = 1;
