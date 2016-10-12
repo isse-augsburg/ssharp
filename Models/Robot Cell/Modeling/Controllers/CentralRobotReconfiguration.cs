@@ -27,6 +27,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using SafetySharp.Modeling;
 	using Odp;
 
+	using IController = Odp.IController<Agent, Task>;
+
 	class CentralRobotReconfiguration : CentralReconfiguration<Agent, Task>
 	{
 		public readonly Fault ReconfigurationFailure = new TransientFault();
@@ -40,7 +42,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		[Hidden]
 		public AnalysisMode Mode = AnalysisMode.AllFaults;
 
-		public CentralRobotReconfiguration(Controller controller) : base(controller) { }
+		public CentralRobotReconfiguration(IController controller) : base(controller) { }
 
 		public override void Update()
 		{
@@ -71,7 +73,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		[FaultEffect(Fault = nameof(ReconfigurationFailure))]
 		public abstract class ReconfigurationFailureEffect : CentralRobotReconfiguration
 		{
-			public ReconfigurationFailureEffect(Controller controller) : base(controller) { }
+			public ReconfigurationFailureEffect(IController controller) : base(controller) { }
 
 			public override void Reconfigure(IEnumerable<Tuple<Task, Agent.State>> deficientTasks)
 			{

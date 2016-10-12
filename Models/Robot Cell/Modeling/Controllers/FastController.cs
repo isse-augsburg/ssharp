@@ -31,10 +31,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using Role = Odp.Role<Agent, Task>;
 
 	/// <summary>
-	///   An <see cref="Controller" /> implementation that is much faster than
+	///   An <see cref="Odp.IController{Agent, Task}" /> implementation that is much faster than
 	///   the MiniZinc implementation.
 	/// </summary>
-	internal class FastController : Controller
+	internal class FastController : AbstractController<Agent, Task>
 	{
 		[Hidden(HideElements = true)]
 		private readonly RobotAgent[] _availableRobots;
@@ -251,6 +251,33 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 			// otherwise, reuse some cart
 			return Tuple.Create(candidates.First(), new ICapability[0]);
+		}
+
+		protected void ExtractConfigurations(Dictionary<Agent, IEnumerable<Role>> configs, Task task, Tuple<Agent, ICapability[]>[] roleAllocations)
+		{
+			var role = default(Role);
+
+			for (var i = 0; i < roleAllocations.Length; i++)
+			{
+				var agent = roleAllocations[i].Item1;
+				var capabilities = roleAllocations[i].Item2;
+
+				var preAgent = i == 0 ? null : roleAllocations[i - 1].Item1;
+				var postAgent = i == roleAllocations.Length - 1 ? null : roleAllocations[i + 1].Item1;
+
+				role = GetRole(task, preAgent, i > 0 ? (Condition<Agent, Task>?)role.PostCondition : null);
+				role.PostCondition.Port = postAgent;
+
+				foreach (var capability in capabilities)
+				{
+					role.AddCapability(capability);
+					role.PostCondition.AppendToState(capability);
+				}
+
+				if (!configs.ContainsKey(agent))
+					configs.Add(agent, new HashSet<Role>());
+				(configs[agent] as HashSet<Role>).Add(role);
+			}
 		}
 	}
 }

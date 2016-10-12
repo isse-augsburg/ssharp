@@ -70,7 +70,6 @@
     <Compile Include="Modeling\Controllers\ConsumeCapability.cs" />
     <Compile Include="Modeling\Controllers\FastController.cs" />
     <Compile Include="Modeling\Controllers\MiniZincController.cs" />
-    <Compile Include="Modeling\Controllers\Controller.cs" />
     <Compile Include="Modeling\Controllers\ProcessCapability.cs" />
     <Compile Include="Modeling\Controllers\Resource.cs" />
     <Compile Include="Modeling\Controllers\Task.cs" />

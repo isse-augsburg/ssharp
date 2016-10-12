@@ -29,6 +29,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	using Plants;
 	using SafetySharp.Modeling;
 
+	using IController = Odp.IController<Controllers.Agent, Controllers.Task>;
+
 	internal class Model : ModelBase
 	{
 		public const int MaxRoleCount = 8;
@@ -165,11 +167,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		}
 
 		public void CreateController<T>()
-			where T : Controller
+			where T : IController
 		{
 			var agents = RobotAgents.Cast<Agent>().Concat(CartAgents);
 			ReconfigurationStrategy = new CentralRobotReconfiguration(
-				(Controller)Activator.CreateInstance(typeof(T), agents)
+				(IController)Activator.CreateInstance(typeof(T), agents)
 			);
 			foreach (var agent in agents)
 				agent.ReconfigurationStrategy = ReconfigurationStrategy;
@@ -207,7 +209,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		}
 
 		public static IEnumerable<Model> CreateConfigurations<T>(AnalysisMode mode)
-			where T : Controller
+			where T : IController
 		{
 			yield return CreateConfiguration<T>(m => m.Ictss1(), nameof(Ictss1), mode);
 			yield return CreateConfiguration<T>(m => m.Ictss2(), nameof(Ictss2), mode);
@@ -219,7 +221,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		}
 
 		private static Model CreateConfiguration<T>(Action<Model> initializer, string name, AnalysisMode mode)
-			where T : Controller
+			where T : IController
 		{
 			var model = new Model(name);
 			initializer(model);
