@@ -53,26 +53,25 @@ namespace SafetySharp.Odp
 				var baseAgentState = tuple.Item2;
 				var agent = baseAgentState.ReconfRequestSource ?? _baseAgent;
 
-				LockConfigurations(task);
+				LockAllocatedRoles(task);
 				if (!_tasksUnderReconstruction.ContainsKey(task))
 				{
 					_tasksUnderReconstruction.Add(task, _createReconfAgent(_baseAgent, task));
 				}
-
 
 				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, baseAgentState);
 			}
 		}
 
 		#region interface presented to reconfiguration agent
-		public virtual void UpdateConfigurations(object conf)
+		public virtual void UpdateAllocatedRoles(object conf)
 		{
 			throw new NotImplementedException();
 		}
 
 		public virtual void Go(TTask task)
 		{
-			UnlockConfigurations(task);
+			UnlockRoleAllocations(task);
 		}
 
 		public virtual void Done(TTask task)
@@ -81,12 +80,12 @@ namespace SafetySharp.Odp
 		}
 		#endregion
 
-		protected virtual void LockConfigurations(TTask task)
+		protected virtual void LockAllocatedRoles(TTask task)
 		{
 			throw new NotImplementedException();
 		}
 
-		protected virtual void UnlockConfigurations(TTask task)
+		protected virtual void UnlockRoleAllocations(TTask task)
 		{
 			throw new NotImplementedException();
 		}
