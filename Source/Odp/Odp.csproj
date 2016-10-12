@@ -45,6 +45,7 @@
     <Compile Include="CoalitionReconfigurationAgent.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="ControllerReconfigurationAgent.cs" />
+    <Compile Include="FastController.cs" />
     <Compile Include="IAgent.cs" />
     <Compile Include="ICapability.cs" />
     <Compile Include="IController.cs" />

@@ -28,256 +28,57 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using SafetySharp.Modeling;
 	using Odp;
 
-	using Role = Odp.Role<Agent, Task>;
-
 	/// <summary>
 	///   An <see cref="Odp.IController{Agent, Task}" /> implementation that is much faster than
 	///   the MiniZinc implementation.
 	/// </summary>
-	internal class FastController : AbstractController<Agent, Task>
+	internal class FastController : FastController<Agent, Task>
 	{
 		[Hidden(HideElements = true)]
-		private readonly RobotAgent[] _availableRobots;
+		private readonly HashSet<CartAgent> _usedCarts = new HashSet<CartAgent>();
 
-		[Hidden(HideElements = true)]
-		private int[,] _costMatrix;
+		public FastController(IEnumerable<Agent> agents) : base(agents.ToArray()) { }
 
-		[Hidden(HideElements = true)]
-		private int[,] _pathMatrix;
-
-		public FastController(IEnumerable<Agent> agents) : base(agents.ToArray())
+		public override Dictionary<Agent, IEnumerable<Role<Agent, Task>>> CalculateConfigurations(params Task[] tasks)
 		{
-			_availableRobots = Agents.OfType<RobotAgent>().ToArray();
+			_usedCarts.Clear();
+			return base.CalculateConfigurations(tasks);
 		}
 
-		public override Dictionary<Agent, IEnumerable<Role>> CalculateConfigurations(params Task[] tasks)
+		protected override IEnumerable<int> GetShortestPath(int from, int to)
 		{
-			var configs = new Dictionary<Agent, IEnumerable<Role>>();
-			CalculateShortestPaths();
-
-			foreach (var task in tasks)
+			int previous = -1;
+			for (int current = from; current != to; current = _pathMatrix[current, to])
 			{
-				var path = FindPath(task);
-				if (path == null)
+				var cart = _availableAgents[current] as CartAgent;
+				if (cart != null && _usedCarts.Contains(cart))
 				{
-					ReconfigurationFailure = true;
+					var destination = (RobotAgent)_availableAgents[_pathMatrix[current, to]];
+					var unusedCart = _availableAgents[previous].Outputs
+						.OfType<CartAgent>()
+						.Where(candidate => !_usedCarts.Contains(candidate) && candidate.Outputs.Contains(destination))
+						.FirstOrDefault();
+
+					if (unusedCart != null)
+					{
+						_usedCarts.Add(unusedCart);
+						var cartID = Array.IndexOf(_availableAgents, unusedCart);
+						yield return cartID;
+						previous = cartID;
+					}
+					else
+					{
+						yield return current;
+						previous = current;
+					}
 				}
 				else
 				{
-					ExtractConfigurations(configs, task, Convert(task, path).ToArray());
-					task.IsResourceInProduction = false;
+					yield return current;
+					previous = current;
 				}
 			}
-
-			return configs;
-		}
-
-		/// <summary>
-		///   Calculates the connection matrix for the available robots.
-		/// </summary>
-		/// <returns>A tuple containing the successor matrix and the path length matrix. -1 indicates no successor / infinite costs.</returns>
-		private void CalculateShortestPaths()
-		{
-			_pathMatrix = new int[_availableRobots.Length, _availableRobots.Length];
-			_costMatrix = new int[_availableRobots.Length, _availableRobots.Length];
-
-			for (var i = 0; i < _availableRobots.Length; ++i)
-			{
-				for (var j = 0; j < _availableRobots.Length; ++j)
-				{
-					// neighbours
-					if (_availableRobots[i].Outputs.Any(cart => cart.Outputs.Contains(_availableRobots[j])))
-					{
-						_pathMatrix[i, j] = j;
-						_costMatrix[i, j] = 1;
-					}
-					else // default for non-neighbours
-					{
-						_pathMatrix[i, j] = -1; // signifies no path
-						_costMatrix[i, j] = -1; // signifies infinity
-					}
-				}
-
-				// reflexive case
-				_pathMatrix[i, i] = i;
-				_costMatrix[i, i] = 0;
-			}
-
-			// Floyd-Warshall algorithm
-			for (var link = 0; link < _availableRobots.Length; ++link)
-			{
-				for (var start = 0; start < _availableRobots.Length; ++start)
-				{
-					for (var end = 0; end < _availableRobots.Length; ++end)
-					{
-						if (_costMatrix[start, link] > -1 && _costMatrix[link, end] > -1 // paths start->link and link->end exist
-							&& (_costMatrix[start, end] == -1 || _costMatrix[start, end] > _costMatrix[start, link] + _costMatrix[link, end]))
-						{
-							_costMatrix[start, end] = _costMatrix[start, link] + _costMatrix[link, end];
-							_pathMatrix[start, end] = _pathMatrix[start, link];
-						}
-					}
-				}
-			}
-		}
-
-		/// <summary>
-		///   Finds a sequence of connected robots that are able to fulfill the
-		///   <param name="task" />'s capabilities.
-		/// </summary>
-		/// <returns>
-		///   An array of robot identifiers, one for each capability.
-		/// </returns>
-		private int[] FindPath(Task task)
-		{
-			var path = new int[task.RequiredCapabilities.Length];
-
-			for (var first = 0; first < _availableRobots.Length; ++first)
-			{
-				if (CanSatisfyNext(task, 0, first))
-				{
-					path[0] = first;
-					if (FindPath(task, path, 1))
-						return path;
-				}
-			}
-
-			return null;
-		}
-
-		/// <summary>
-		///   Recursively checks if there is a valid path with the given prefix for the task.
-		///   If so, returns true and <param name="path" /> contains the path. Otherwise, returns false.
-		/// </summary>
-		private bool FindPath(Task task, int[] path, int prefixLength)
-		{
-			// termination case: the path is already complete
-			if (prefixLength == task.RequiredCapabilities.Length)
-				return true;
-
-			var last = path[prefixLength - 1];
-
-			// special handling: see if the last robot can't do the next capability as well
-			if (CanSatisfyNext(task, prefixLength, last))
-			{
-				path[prefixLength] = last;
-				if (FindPath(task, path, prefixLength + 1))
-					return true;
-			}
-			else // otherwise check connected robots
-			{
-				for (int next = 0; next < _availableRobots.Length; ++next) // go through all stations
-				{
-					// if connected to last robot and can fulfill next capability
-					if (_pathMatrix[last, next] != -1 && CanSatisfyNext(task, prefixLength, next) && next != last)
-					{
-						path[prefixLength] = next; // try a path over next
-						if (FindPath(task, path, prefixLength + 1)) // if there is such a path, return true
-							return true;
-					}
-				}
-			}
-
-			return false; // there is no valid path with the given prefix
-		}
-
-		/// <summary>
-		///   Checks if the given robot can satisfy all the demanded capabilities.
-		/// </summary>
-		/// <param name="task">The task for which a path is searched.</param>
-		/// <param name="capability">The zero-based index of the task's capability that should be applied next.</param>
-		/// <param name="robot">The robot which should be next on the path.</param>
-		/// <returns>True if choosing station as next path entry would not exceed its capabilities.</returns>
-		private bool CanSatisfyNext(Task task, int capability, int robot)
-		{
-			return _availableRobots[robot].AvailableCapabilities.Any(c => (c as Capability).IsEquivalentTo(task.RequiredCapabilities[capability]));
-		}
-
-		private IEnumerable<Tuple<Agent, ICapability[]>> Convert(Task task, int[] path)
-		{
-			var previous = -1;
-			var usedCarts = new List<Agent>();
-
-			for (var i = 0; i < path.Length;)
-			{
-				var current = path[i];
-
-				if (previous != -1)
-				{
-					// Find a cart that connects both robots, the path matrix contains the next robot we have to go to
-					foreach (var nextRobot in GetShortestPath(previous, current))
-					{
-						yield return Transport(previous, nextRobot, usedCarts);
-
-						if (nextRobot != current)
-							yield return Tuple.Create(Agents[path[i]], new ICapability[0]);
-
-						previous = nextRobot;
-					}
-				}
-
-				// Collect the capabilities that this robot should apply
-				var capabilities = 
-					path
-					.Skip(i)
-					.TakeWhile(robot => robot == current)
-					.Select((_, index) => task.RequiredCapabilities[i + index])
-					.ToArray();
-
-				yield return Tuple.Create(Agents[path[i]], capabilities);
-				previous = current;
-
-				i += capabilities.Length;
-			}
-		}
-
-		private IEnumerable<int> GetShortestPath(int from, int to)
-		{
-			for (var current = _pathMatrix[from, to]; current != to; current = _pathMatrix[current, to])
-				yield return current;
 			yield return to;
-		}
-
-		private Tuple<Agent, ICapability[]> Transport(int from, int to, List<Agent> usedCarts)
-		{
-			// prefer not to use a cart that has already been used
-			var candidates = _availableRobots[from].Outputs.Where(c => _availableRobots[to].Inputs.Contains(c)).ToArray();
-			var unusedCart = candidates.Except(usedCarts).FirstOrDefault();
-			if (unusedCart != null)
-			{
-				usedCarts.Add(unusedCart);
-				return Tuple.Create(unusedCart, new ICapability[0]);
-			}
-
-			// otherwise, reuse some cart
-			return Tuple.Create(candidates.First(), new ICapability[0]);
-		}
-
-		protected void ExtractConfigurations(Dictionary<Agent, IEnumerable<Role>> configs, Task task, Tuple<Agent, ICapability[]>[] roleAllocations)
-		{
-			var role = default(Role);
-
-			for (var i = 0; i < roleAllocations.Length; i++)
-			{
-				var agent = roleAllocations[i].Item1;
-				var capabilities = roleAllocations[i].Item2;
-
-				var preAgent = i == 0 ? null : roleAllocations[i - 1].Item1;
-				var postAgent = i == roleAllocations.Length - 1 ? null : roleAllocations[i + 1].Item1;
-
-				role = GetRole(task, preAgent, i > 0 ? (Condition<Agent, Task>?)role.PostCondition : null);
-				role.PostCondition.Port = postAgent;
-
-				foreach (var capability in capabilities)
-				{
-					role.AddCapability(capability);
-					role.PostCondition.AppendToState(capability);
-				}
-
-				if (!configs.ContainsKey(agent))
-					configs.Add(agent, new HashSet<Role>());
-				(configs[agent] as HashSet<Role>).Add(role);
-			}
 		}
 	}
 }

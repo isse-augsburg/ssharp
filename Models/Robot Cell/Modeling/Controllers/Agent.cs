@@ -53,6 +53,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			base.Update();
 		}
 
+		protected override void DropResource()
+		{
+			Resource.Task.IsResourceInProduction = false;
+			base.DropResource();
+		}
+
 		public virtual void Produce(ProduceCapability capability)
 		{
 		}
