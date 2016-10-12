@@ -22,23 +22,33 @@
 
 namespace SafetySharp.Odp
 {
-	public class ReconfigurationReason<TAgent, TTask>
-		where TAgent : BaseAgent<TAgent, TTask>
-		where TTask : class, ITask
+	public partial class BaseAgent<TAgent, TTask>
 	{
-		public ReconfigurationReason(
-			BaseAgent<TAgent, TTask>.InvariantPredicate[] violatedPredicates,
-			IAgent requestSource
-		)
+		public class State
 		{
-			ViolatedPredicates = violatedPredicates;
-			RequestSource = requestSource;
+			protected internal State(BaseAgent<TAgent, TTask> agent, IAgent requestSource = null, params InvariantPredicate[] violatedPredicates)
+			{
+				ReconfRequestSource = requestSource;
+				ViolatedPredicates = violatedPredicates;
+
+				Agent = agent;
+
+				Resource = agent.Resource;
+				Inputs = agent.Inputs.ToArray();
+				Outputs = agent.Outputs.ToArray();
+				AllocatedRoles = agent.AllocatedRoles.ToArray();
+			}
+
+			public IAgent ReconfRequestSource { get; }
+			public InvariantPredicate[] ViolatedPredicates { get; }
+
+			// TODO: including the agent defeats the purpose of all the properties below
+			public BaseAgent<TAgent, TTask> Agent { get; }
+
+			public Resource<TTask> Resource { get; }
+			public TAgent[] Inputs { get; }
+			public TAgent[] Outputs { get; }
+			public Role<TAgent, TTask>[] AllocatedRoles { get; }
 		}
-
-		public bool IsLocalViolation => ViolatedPredicates != null && ViolatedPredicates.Length > 0;
-		public bool IsRequest => RequestSource != null;
-
-		public BaseAgent<TAgent, TTask>.InvariantPredicate[] ViolatedPredicates { get; }
-		public IAgent RequestSource { get; }
 	}
 }

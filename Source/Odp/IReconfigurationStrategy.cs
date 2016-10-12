@@ -31,6 +31,6 @@ namespace SafetySharp.Odp
 		where TTask : class, ITask
 	{
 		[Provided]
-		void Reconfigure(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask>>> reconfigurations);
+		void Reconfigure(IEnumerable<Tuple<TTask, BaseAgent<TAgent, TTask>.State>> reconfigurations);
 	}
 }

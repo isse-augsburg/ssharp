@@ -53,13 +53,23 @@ namespace SafetySharp.Odp
 
 		public Resource<TTask> Resource { get; protected set; }
 
-		private readonly StateMachine<State> _stateMachine = State.Idle;
+		private readonly StateMachine<States> _stateMachine = States.Idle;
+
+		private enum States
+		{
+			Idle,
+			ChooseRole,
+			WaitingForResource,
+			ExecuteRole,
+			Output,
+			ResourceGiven
+		}
 
 		private void Work()
 		{
 			_stateMachine.Transition( // abort work if current task has configuration issues
-				from: new[] { State.ChooseRole, State.WaitingForResource, State.ExecuteRole, State.Output, State.ResourceGiven },
-				to: State.Idle,
+				from: new[] { States.ChooseRole, States.WaitingForResource, States.ExecuteRole, States.Output, States.ResourceGiven },
+				to: States.Idle,
 				guard: _currentRole != null && _deficientConfiguration,
 				action: () =>
 				{
@@ -70,30 +80,30 @@ namespace SafetySharp.Odp
 
 			_stateMachine
 				.Transition( // see if there is work to do
-					from: State.Idle,
-					to: State.ChooseRole,
+					from: States.Idle,
+					to: States.ChooseRole,
 					action: ChooseRole)
 				.Transition( // no work found (or deadlock avoidance or similar reasons)
-					from: State.ChooseRole,
-					to: State.Idle,
+					from: States.ChooseRole,
+					to: States.Idle,
 					guard: _currentRole == null)
 				.Transition( // going to work on pre-existing resource (first transfer it)
-					from: State.ChooseRole,
-					to: State.WaitingForResource,
+					from: States.ChooseRole,
+					to: States.WaitingForResource,
 					guard: _currentRole?.PreCondition.Port != null,
 					action: () => InitiateResourceTransfer(_currentRole?.PreCondition.Port))
 				.Transition( // going to produce new resource (no transfer necessary)
-					from: State.ChooseRole,
-					to: State.ExecuteRole,
+					from: States.ChooseRole,
+					to: States.ExecuteRole,
 					guard: _currentRole != null && _currentRole?.PreCondition.Port == null)
 				.Transition( // actual work on resource
-					from : State.ExecuteRole,
-					to: State.ExecuteRole,
+					from : States.ExecuteRole,
+					to: States.ExecuteRole,
 					guard: !_currentRole.Value.IsCompleted,
 					action: () => _currentRole?.ExecuteStep((TAgent)this))
 				.Transition( // work is done -- pass resource on
-					from: State.ExecuteRole,
-					to: State.Output,
+					from: States.ExecuteRole,
+					to: States.Output,
 					guard: _currentRole.Value.IsCompleted && _currentRole?.PostCondition.Port != null,
 					action: () =>
 					{
@@ -102,24 +112,14 @@ namespace SafetySharp.Odp
 						RemoveResourceRequest(_currentRole?.PreCondition.Port, _currentRole.Value.PreCondition);
 					})
 				.Transition( // resource has been consumed
-					from: State.ExecuteRole,
-					to: State.Idle,
+					from: States.ExecuteRole,
+					to: States.Idle,
 					guard: _currentRole.Value.IsCompleted && Resource == null && _currentRole?.PostCondition.Port == null,
 					action: () => {
 						_currentRole?.Reset();
 						RemoveResourceRequest(_currentRole?.PreCondition.Port, _currentRole.Value.PreCondition);
 						_currentRole = null;
 					});
-		}
-
-		private enum State
-		{
-			Idle,
-			ChooseRole,
-			WaitingForResource,
-			ExecuteRole,
-			Output,
-			ResourceGiven
 		}
 
 		protected virtual void DropResource()
@@ -233,8 +233,8 @@ namespace SafetySharp.Odp
 		public virtual void TransferResource()
 		{
 			_stateMachine.Transition(
-				from: State.Output,
-				to: State.ResourceGiven,
+				from: States.Output,
+				to: States.ResourceGiven,
 				action: () => _currentRole?.PostCondition.Port.TakeResource(Resource)
 			);
 		}
@@ -245,8 +245,8 @@ namespace SafetySharp.Odp
 			Resource = resource;
 
 			_stateMachine.Transition(
-				from: State.WaitingForResource,
-				to: State.ExecuteRole,
+				from: States.WaitingForResource,
+				to: States.ExecuteRole,
 				action: _currentRole.Value.PreCondition.Port.ResourcePickedUp
 			);
 		}
@@ -256,8 +256,8 @@ namespace SafetySharp.Odp
 			Resource = null;
 
 			_stateMachine.Transition(
-				from: State.ResourceGiven,
-				to: State.Idle,
+				from: States.ResourceGiven,
+				to: States.Idle,
 				action: () => _currentRole = null
 			);
 		}
@@ -298,12 +298,12 @@ namespace SafetySharp.Odp
 
 			PerformReconfiguration(
 				from vio in violations
-				let reason = new ReconfigurationReason<TAgent, TTask>(vio.Value.ToArray(), null)
-				select Tuple.Create(vio.Key, reason)
+				let state = new State(this, null, vio.Value.ToArray())
+				select Tuple.Create(vio.Key, state)
 			);
 		}
 
-		protected void PerformReconfiguration(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask>>> reconfigurations)
+		protected void PerformReconfiguration(IEnumerable<Tuple<TTask, State>> reconfigurations)
 		{
 			var deficientTasks = new HashSet<TTask>(reconfigurations.Select(t => t.Item1));
 
@@ -334,7 +334,7 @@ namespace SafetySharp.Odp
 		public virtual void RequestReconfiguration(IAgent agent, TTask task)
 		{
 			PerformReconfiguration(new[] {
-				Tuple.Create(task, new ReconfigurationReason<TAgent, TTask>(null, agent))
+				Tuple.Create(task, new State(this, agent))
 			});
 		}
 

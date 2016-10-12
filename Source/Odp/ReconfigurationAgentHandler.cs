@@ -31,29 +31,28 @@ namespace SafetySharp.Odp
 		where TTask : class, ITask
 	{
 		private readonly TAgent _baseAgent;
-		private readonly Func<TAgent, TTask, IReconfigurationAgent<TTask>> _createReconfAgent;
+		private readonly Func<TAgent, TTask, IReconfigurationAgent<TAgent, TTask>> _createReconfAgent;
 
 		public ReconfigurationAgentHandler(
 			TAgent baseAgent,
-			Func<TAgent, TTask, IReconfigurationAgent<TTask>> createReconfAgent
+			Func<TAgent, TTask, IReconfigurationAgent<TAgent, TTask>> createReconfAgent
 		)
 		{
 			_baseAgent = baseAgent;
 			_createReconfAgent = createReconfAgent;
 		}
 
-		protected readonly Dictionary<TTask, IReconfigurationAgent<TTask>> _tasksUnderReconstruction
-			= new Dictionary<TTask, IReconfigurationAgent<TTask>>();
+		protected readonly Dictionary<TTask, IReconfigurationAgent<TAgent, TTask>> _tasksUnderReconstruction
+			= new Dictionary<TTask, IReconfigurationAgent<TAgent, TTask>>();
 
-		public void Reconfigure(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask>>> reconfigurations)
+		public void Reconfigure(IEnumerable<Tuple<TTask, BaseAgent<TAgent, TTask>.State>> reconfigurations)
 		{
 			foreach (var tuple in reconfigurations)
 			{
 				var task = tuple.Item1;
-				var reason = tuple.Item2;
+				var baseAgentState = tuple.Item2;
+				var agent = baseAgentState.ReconfRequestSource ?? _baseAgent;
 
-				var agent = reason.RequestSource ?? _baseAgent;
-				object state = null; // TODO: what is this value?
 				LockConfigurations(task);
 				if (!_tasksUnderReconstruction.ContainsKey(task))
 				{
@@ -61,7 +60,7 @@ namespace SafetySharp.Odp
 				}
 
 
-				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, state);
+				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, baseAgentState);
 			}
 		}
 

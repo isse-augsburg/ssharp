@@ -38,7 +38,7 @@ namespace SafetySharp.Odp
 			_controller = controller;
 		}
 
-		public virtual void Reconfigure(IEnumerable<Tuple<TTask, ReconfigurationReason<TAgent, TTask>>> reconfigurations)
+		public virtual void Reconfigure(IEnumerable<Tuple<TTask, BaseAgent<TAgent, TTask>.State>> reconfigurations)
 		{
 			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
 
