@@ -53,7 +53,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		{
 			if (RecipeQueue.Count > 0)
 				PerformReconfiguration(new[] {
-					Tuple.Create(RecipeQueue.Dequeue(), new ReconfigurationReason<Station, Recipe>(null, null))
+					Tuple.Create(RecipeQueue.Dequeue(), new State(this))
 				});
 
 			base.Update();

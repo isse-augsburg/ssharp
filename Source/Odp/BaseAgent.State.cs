@@ -26,7 +26,7 @@ namespace SafetySharp.Odp
 	{
 		public class State
 		{
-			protected internal State(BaseAgent<TAgent, TTask> agent, IAgent requestSource = null, params InvariantPredicate[] violatedPredicates)
+			public State(BaseAgent<TAgent, TTask> agent, IAgent requestSource = null, params InvariantPredicate[] violatedPredicates)
 			{
 				ReconfRequestSource = requestSource;
 				ViolatedPredicates = violatedPredicates;
