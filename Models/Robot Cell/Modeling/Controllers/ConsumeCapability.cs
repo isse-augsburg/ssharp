@@ -23,13 +23,12 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using System.Diagnostics;
+	using Odp;
 
 	[DebuggerDisplay("Consume")]
-	internal class ConsumeCapability : Capability
+	internal class ConsumeCapability : ICapability
 	{
-		public override bool IsEquivalentTo(Odp.ICapability capability)
-		{
-			return capability is ConsumeCapability;
-		}
+		public override bool Equals(object obj) => obj is ConsumeCapability;
+		public override int GetHashCode() => 7;
 	}
 }

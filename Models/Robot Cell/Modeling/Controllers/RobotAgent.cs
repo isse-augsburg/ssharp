@@ -22,16 +22,15 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
-	using System;
 	using System.Linq;
 	using Plants;
 	using Odp;
 
 	internal class RobotAgent : Agent
 	{
-		private Capability _currentCapability;
+		private ICapability _currentCapability;
 
-		public RobotAgent(Capability[] capabilities, Robot robot)
+		public RobotAgent(ICapability[] capabilities, Robot robot)
 			: base(capabilities)
 		{
 			Robot = robot;

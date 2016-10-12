@@ -62,11 +62,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		}
 
 		#region isReconfPossible
-		// TODO: move comparison to isReconfPossible in CentralReconf subclass (?)
-		private bool ContainsCapability(IEnumerable<ICapability> capabilities, ICapability capability)
-        {
-            return capabilities.Any(c => (c as Capability).IsEquivalentTo(capability));
-        }
+		// TODO: move comparison with isReconfPossible into CentralReconf subclass (?)
 
         private bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<Task> tasks)
         {
@@ -76,17 +72,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
             foreach (var task in tasks)
             {
                 isReconfPossible &=
-                    task.RequiredCapabilities.All(capability => robotsAgents.Any(agent => ContainsCapability(agent.AvailableCapabilities,capability)));
+                    task.RequiredCapabilities.All(capability => robotsAgents.Any(agent => agent.AvailableCapabilities.Contains(capability)));
                 if (!isReconfPossible)
                     break;
 
-                var candidates = robotsAgents.Where(agent => ContainsCapability(agent.AvailableCapabilities,task.RequiredCapabilities.First())).ToArray();
+                var candidates = robotsAgents.Where(agent => agent.AvailableCapabilities.Contains(task.RequiredCapabilities.First())).ToArray();
 
                 for (var i = 0; i < task.RequiredCapabilities.Length - 1; i++)
                 {
                     candidates =
                         candidates.SelectMany(r => matrix[r])
-                                  .Where(r => ContainsCapability(r.AvailableCapabilities,task.RequiredCapabilities[i + 1]))
+                                  .Where(r => r.AvailableCapabilities.Contains(task.RequiredCapabilities[i + 1]))
                                   .ToArray();
                     if (candidates.Length == 0)
                     {

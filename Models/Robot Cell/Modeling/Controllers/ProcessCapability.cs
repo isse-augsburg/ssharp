@@ -20,12 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// TODO: check case study: reference equality vs. Equals()
+// either fix in case study or add IsEquivalentTo() to ICapability, fix in Odp core
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using System.Diagnostics;
+	using Odp;
 
 	[DebuggerDisplay("Process: {ProductionAction}")]
-	internal class ProcessCapability : Capability
+	internal class ProcessCapability : ICapability
 	{
 		public ProcessCapability(ProductionAction productionAction)
 		{
@@ -34,10 +37,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
         public ProductionAction ProductionAction { get; }
 
-		public override bool IsEquivalentTo(Odp.ICapability capability)
+		public override bool Equals(object obj)
 		{
-			var process = capability as ProcessCapability;
+			var process = obj as ProcessCapability;
 			return ProductionAction == process?.ProductionAction;
 		}
+
+		public override int GetHashCode() => 79 + 13 * (int)ProductionAction;
 	}
 }

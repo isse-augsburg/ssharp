@@ -66,7 +66,6 @@
     <Compile Include="Modeling\Controllers\CentralRobotReconfiguration.cs" />
     <Compile Include="Modeling\Controllers\Agent.cs" />
     <Compile Include="Modeling\Controllers\AnalysisMode.cs" />
-    <Compile Include="Modeling\Controllers\Capability.cs" />
     <Compile Include="Modeling\Controllers\ConsumeCapability.cs" />
     <Compile Include="Modeling\Controllers\FastController.cs" />
     <Compile Include="Modeling\Controllers\MiniZincController.cs" />

@@ -28,6 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	using Controllers;
 	using Plants;
 	using SafetySharp.Modeling;
+	using Odp;
 
 	using IController = Odp.IController<Controllers.Agent, Controllers.Task>;
 
@@ -64,12 +65,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		[Root(RootKind.Controller)]
 		public CentralRobotReconfiguration ReconfigurationStrategy { get; set; }
 
-		private Capability Produce => new ProduceCapability(Resources, Tasks);
-		private static Capability Insert => new ProcessCapability(ProductionAction.Insert);
-		private static Capability Drill => new ProcessCapability(ProductionAction.Drill);
-		private static Capability Tighten => new ProcessCapability(ProductionAction.Tighten);
-		private static Capability Polish => new ProcessCapability(ProductionAction.Polish);
-		private static Capability Consume => new ConsumeCapability();
+		private ICapability Produce => new ProduceCapability(Resources, Tasks);
+		private static ICapability Insert => new ProcessCapability(ProductionAction.Insert);
+		private static ICapability Drill => new ProcessCapability(ProductionAction.Drill);
+		private static ICapability Tighten => new ProcessCapability(ProductionAction.Tighten);
+		private static ICapability Polish => new ProcessCapability(ProductionAction.Polish);
+		private static ICapability Consume => new ConsumeCapability();
 
 		public void InitializeDefaultInstance()
 		{
@@ -231,7 +232,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			return model;
 		}
 
-		private void CreateWorkpieces(int count, params Capability[] capabilities)
+		private void CreateWorkpieces(int count, params ICapability[] capabilities)
 		{
 			if (capabilities.Length > MaxProductionSteps)
 				throw new InvalidOperationException($"Too many production steps; increase '{MaxProductionSteps}'.");
@@ -253,7 +254,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			}
 		}
 
-		private void CreateRobot(params Capability[] capabilities)
+		private void CreateRobot(params ICapability[] capabilities)
 		{
 			var robot = new Robot(capabilities.OfType<ProcessCapability>().ToArray());
 			var agent = new RobotAgent(capabilities, robot);

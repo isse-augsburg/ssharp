@@ -26,9 +26,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.Diagnostics;
 	using System.Linq;
 	using SafetySharp.Modeling;
+	using Odp;
 
 	[DebuggerDisplay("Produce")]
-	internal class ProduceCapability : Capability
+	internal class ProduceCapability : ICapability
 	{
 		public ProduceCapability(List<Resource> resources, List<Task> tasks)
 		{
@@ -41,13 +42,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		[Hidden(HideElements = true)]
 		public List<Task> Tasks { get; }
 
-		public override bool IsEquivalentTo(Odp.ICapability capability)
+		public override bool Equals(object obj)
 		{
-			var produce = capability as ProduceCapability;
-			if (produce == null)
-				return false;
-
-			return Tasks.SequenceEqual(produce.Tasks);
+			var produce = obj as ProduceCapability;
+			return produce != null && Tasks.SequenceEqual(produce.Tasks);
 		}
+
+		public override int GetHashCode() => 57;
 	}
 }

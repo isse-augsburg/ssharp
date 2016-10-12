@@ -34,7 +34,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	{
 		public readonly Fault ConfigurationUpdateFailed = new TransientFault();
 
-		public Agent(params Capability[] capabilities)
+		public Agent(params ICapability[] capabilities)
 		{
 			_availableCapabilities = new List<ICapability>(capabilities);
 		}
@@ -80,7 +80,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				Process(capability as ProcessCapability);
 			else if (capability is ConsumeCapability)
 				Consume(capability as ConsumeCapability);
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		public void CheckAllocatedCapabilities()
@@ -133,7 +133,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		[FaultEffect(Fault = nameof(ConfigurationUpdateFailed))]
 		public class ConfigurationUpdateFailedEffect : Agent
 		{
-			public ConfigurationUpdateFailedEffect(params Capability[] capabilities)
+			public ConfigurationUpdateFailedEffect(params ICapability[] capabilities)
 				: base(capabilities)
 			{
 			}
