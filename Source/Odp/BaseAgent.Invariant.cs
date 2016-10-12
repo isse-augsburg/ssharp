@@ -27,8 +27,6 @@ namespace SafetySharp.Odp
 	using System.Linq;
 
 	public partial class BaseAgent<TAgent, TTask>
-		where TAgent : BaseAgent<TAgent, TTask>
-		where TTask : class, ITask
 	{
 		public static class Invariant
 		{
@@ -107,7 +105,7 @@ namespace SafetySharp.Odp
 			private static IEnumerable<TTask> RoleInvariant(TAgent agent, Predicate<Role<TAgent, TTask>> invariant)
 			{
 				return (from role in agent.AllocatedRoles
-						where !invariant(role)
+						where !role.IsLocked && !invariant(role)
 						select role.Task).Distinct();
 			}
 
