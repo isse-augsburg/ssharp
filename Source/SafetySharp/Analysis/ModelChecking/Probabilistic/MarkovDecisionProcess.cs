@@ -40,7 +40,7 @@ namespace SafetySharp.Runtime
 	using Utilities;
 
 	
-	internal class MarkovChain : IFormalismWithStateLabeling
+	internal class MarkovDecisionProcess : IFormalismWithStateLabeling
 	{
 		// TODO: Optimization potential for custom model checker: Add every state only once. Save the transitions and evaluate reachability formulas more efficient by only expanding "states" to "states x stateformulaset" where the state labels of interests are in "stateformulaset"
 
@@ -54,8 +54,8 @@ namespace SafetySharp.Runtime
 		public DoubleVector InitialStateProbabilities;
 
 		public LabelVector StateLabeling { get; }
-		
-		public MarkovChain(int maxNumberOfStates= 1 << 21, int maxNumberOfTransitions=0)
+
+		public MarkovDecisionProcess(int maxNumberOfStates= 1 << 21, int maxNumberOfTransitions=0)
 		{
 			if (maxNumberOfTransitions <= 0)
 			{
@@ -217,12 +217,12 @@ namespace SafetySharp.Runtime
 		{
 			public BidirectionalGraph Graph { get; private set; }
 
-			public UnderlyingDigraph(MarkovChain markovChain)
+			public UnderlyingDigraph(MarkovDecisionProcess mdp)
 			{
 				//Assumption "every node is reachable" is fulfilled due to the construction
 				Graph = new BidirectionalGraph();
 
-				var enumerator = markovChain.ProbabilityMatrix.GetEnumerator();
+				var enumerator = mdp.ProbabilityMatrix.GetEnumerator();
 				while (enumerator.MoveNextRow())
 				{
 					var sourceState = enumerator.CurrentRow;

@@ -36,7 +36,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 	/// <summary>
 	///   Compiles a <see cref="Formula" /> if it does not contain any temporal operators.
 	/// </summary>
-	internal class MarkovChainFormulaEvaluatorCompilationVisitor : FormulaVisitor
+	internal class FormulaEvaluatorCompilationVisitor : FormulaVisitor
 	{
 		/// <summary>
 		///   The evaluator that is being generated.
@@ -56,27 +56,27 @@ namespace SafetySharp.Analysis.FormulaVisitors
 
 		public ParameterExpression LabelsOfCurrentStateExpr { get; }
 
-		private readonly MarkovChain _markovChain;
+		private readonly IFormalismWithStateLabeling _formalism;
 
-		public MarkovChainFormulaEvaluatorCompilationVisitor(MarkovChain markovChain)
+		public FormulaEvaluatorCompilationVisitor(IFormalismWithStateLabeling formalism)
 		{
-			_markovChain = markovChain;
+			_formalism = formalism;
 			MarkovChainStateExpr = Expression.Parameter(typeof(int), "state");
-			LabelingVectorExpr = Expression.Constant(_markovChain.StateLabeling);
-			MarkovChainExpr = Expression.Constant(_markovChain);
+			LabelingVectorExpr = Expression.Constant(_formalism.StateLabeling);
+			MarkovChainExpr = Expression.Constant(_formalism);
 			LabelsOfCurrentStateExpr = Expression.Parameter(typeof(StateFormulaSet), "labelsOfCurrentState");
 		}
 
 		/// <summary>
-		///   Compiles the <paramref name="formula" /> of the <paramref name="markovChain" />.
+		///   Compiles the <paramref name="formula" /> of the <paramref name="formalism" />.
 		/// </summary>
-		/// <param name="markovChain"></param>
+		/// <param name="formalism"></param>
 		/// <param name="formula">The formula that should be compiled.</param>
-		public static Func<int, bool> Compile(MarkovChain markovChain, Formula formula)
+		public static Func<int, bool> Compile(IFormalismWithStateLabeling formalism, Formula formula)
 		{
 			Requires.NotNull(formula, nameof(formula));
 
-			var visitor = new MarkovChainFormulaEvaluatorCompilationVisitor(markovChain);
+			var visitor = new FormulaEvaluatorCompilationVisitor(formalism);
 			visitor.Visit(formula);
 			
 			//var getMarkovChainState = visitor.MarkovChainExpr.Type.GetMethod("GetMarkovChainState", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
@@ -156,7 +156,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 			//  var indexOfStateFormula = Array.IndexOf(_markovChain.StateFormulaLabels, formula.Label);
 			//  var result = _markovChain.StateLabeling[StateParameter][indexOfStateFormula];
 
-			var indexOfStateFormula = Array.IndexOf(_markovChain.StateFormulaLabels, formula.Label);
+			var indexOfStateFormula = Array.IndexOf(_formalism.StateFormulaLabels, formula.Label);
 			var indexOfStateFormulaExpr = Expression.Constant(indexOfStateFormula);
 
 			var indexer = LabelsOfCurrentStateExpr.Type.GetProperty("Item",BindingFlags.Instance| BindingFlags.NonPublic| BindingFlags.Public);

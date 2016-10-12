@@ -57,7 +57,9 @@
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultOrderModifier.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultSuppressionModifier.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\BuiltinProbabilisticModelChecker.cs" />
+    <Compile Include="Analysis\ModelChecking\Probabilistic\IFormalismWithStateLabeling.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\LabeledTransitionMarkovChain2.cs" />
+    <Compile Include="Analysis\ModelChecking\Probabilistic\MarkovDecisionProcess.cs" />
     <Compile Include="Analysis\OrderAnalysis.cs" />
     <Compile Include="Analysis\OrderAnalysisResults.cs" />
     <Compile Include="Analysis\OrderRelationshipKind.cs" />
@@ -80,7 +82,7 @@
     <Compile Include="Analysis\ModelChecking\Probabilistic\AutoResizeVector.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\BidirectionalGraph.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\MarkovChain.cs" />
-    <Compile Include="Analysis\ModelChecking\Probabilistic\MarkovChainFormulaEvaluatorCompilationVisitor.cs" />
+    <Compile Include="Analysis\ModelChecking\Probabilistic\FormulaEvaluatorCompilationVisitor.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\ProbabilitisticFormula.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\ProbabilityChecker.cs" />
     <Compile Include="Analysis\ModelChecking\Probabilistic\ProbabilityStack.cs" />
