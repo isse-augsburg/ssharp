@@ -64,9 +64,18 @@ namespace SafetySharp.Odp
 		}
 
 		#region interface presented to reconfiguration agent
-		public virtual void UpdateAllocatedRoles(object conf)
+		public virtual void UpdateAllocatedRoles(TTask task, Role<TAgent, TTask>[] newRoles)
 		{
-			throw new NotImplementedException();
+			// new roles must be locked
+			for (int i = 0; i < newRoles.Length; ++i)
+			{
+				var role = newRoles[i];
+				role.IsLocked = true;
+				newRoles[i] = role;
+			}
+
+			_baseAgent.AllocatedRoles.RemoveAll(role => role.Task == task);
+			_baseAgent.AllocatedRoles.AddRange(newRoles);
 		}
 
 		public virtual void Go(TTask task)
@@ -82,12 +91,24 @@ namespace SafetySharp.Odp
 
 		protected virtual void LockAllocatedRoles(TTask task)
 		{
-			throw new NotImplementedException();
+			for (int i = 0; i < _baseAgent.AllocatedRoles.Count; ++i)
+			{
+				// necessary as long as roles are structs
+				var role = _baseAgent.AllocatedRoles[i];
+				role.IsLocked = true;
+				_baseAgent.AllocatedRoles[i] = role;
+			}
 		}
 
 		protected virtual void UnlockRoleAllocations(TTask task)
 		{
-			throw new NotImplementedException();
+			for (int i = 0; i < _baseAgent.AllocatedRoles.Count; ++i)
+			{
+				// necessary as long as roles are structs
+				var role = _baseAgent.AllocatedRoles[i];
+				role.IsLocked = false;
+				_baseAgent.AllocatedRoles[i] = role;
+			}
 		}
 	}
 }

@@ -79,9 +79,9 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		public void UpdateAllocatedRoles(object rs) // TODO: parameter
+		public void UpdateAllocatedRoles(Role<TAgent, TTask>[] newRoles)
 		{
-			_reconfAgentHandler.UpdateAllocatedRoles(rs);
+			_reconfAgentHandler.UpdateAllocatedRoles(_task, newRoles);
 		}
 
 		public void Go(TTask task)
@@ -150,7 +150,7 @@ namespace SafetySharp.Odp
 						foreach (var agent in _functioningAgents.Cast<TAgent>())
 						{
 							_reconfAgents[agent].UpdateAllocatedRoles(
-								configs.ContainsKey(agent) ? configs[agent] : emptyRoles
+								configs.ContainsKey(agent) ? configs[agent].ToArray() : emptyRoles
 							);
 						}
 					}
