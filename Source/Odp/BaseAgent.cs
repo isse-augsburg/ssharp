@@ -136,6 +136,10 @@ namespace SafetySharp.Odp
 			//
 			// TODO: prioritization, deadlock avoidance
 			// (see chapters 6.3 & 6.4, Konstruktion selbst-organisierender Softwaresysteme)
+			//
+			// TODO: fairness for production roles
+			// the comment above is incorrect: if A is producer for task t1, B processes for t1 and produces t2,
+			// B might never produce for t2 with this solution
 
 			// try processing or consuming
 			if (_resourceRequests.Count > 0)
