@@ -50,9 +50,7 @@ namespace SafetySharp.Runtime
 		public string[] StateRewardRetrieverLabels;
 
 		public SparseDoubleMatrix ProbabilityMatrix { get; }
-
-		public DoubleVector InitialStateProbabilities;
-
+		
 		public LabelVector StateLabeling { get; }
 		
 		public MarkovChain(int maxNumberOfStates= 1 << 21, int maxNumberOfTransitions=0)
@@ -65,35 +63,57 @@ namespace SafetySharp.Runtime
 				if (maxNumberOfTransitions < maxNumberOfStates || maxNumberOfTransitions > limit)
 					maxNumberOfTransitions = limit;
 			}
-
-			InitialStateProbabilities = new DoubleVector();
+			
 			StateLabeling = new LabelVector();
-			ProbabilityMatrix = new SparseDoubleMatrix(maxNumberOfStates, maxNumberOfTransitions);
+			ProbabilityMatrix = new SparseDoubleMatrix(maxNumberOfStates+1, maxNumberOfTransitions); // one additional row for row of initial distribution
 		}
 
 
 		// Retrieving matrix phase
 
-		public int States => ProbabilityMatrix.Rows;
+		public int States => ProbabilityMatrix.Rows-1; //Note: returns 0 if initial distribution added and -1 if nothing was added. So check for 0 is not enough
 
-		public int Transitions => ProbabilityMatrix.TotalColumnValueEntries;
+		public int Transitions { get; private set; } = 0; //without entries of initial distribution
+
+		public int RowOfInitialState = 0;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int StateToRow(int state) => state+1;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int StateToColumn(int state) => state; //Do nothing! Just here to make the algorithms more clear.
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int ColumnToState(int state) => state; //Do nothing! Just here to make the algorithms more clear.
 
 
 		// Creating matrix phase
-			
+
+		internal void StartWithInitialStates()
+		{
+			ProbabilityMatrix.SetRow(RowOfInitialState);
+		}
+
 		internal void AddInitialState(int markovChainState, double probability)
 		{
-			InitialStateProbabilities[markovChainState] = InitialStateProbabilities[markovChainState] + probability;
+			// initial state probabilities are also saved in the ProbabilityMatrix
+			ProbabilityMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(StateToColumn(markovChainState), probability));
+		}
+
+		internal void FinishInitialStates()
+		{
+			ProbabilityMatrix.FinishRow();
 		}
 
 		internal void SetMarkovChainSourceStateOfUpcomingTransitions(int markovChainState)
 		{
-			ProbabilityMatrix.SetRow(markovChainState);
+			ProbabilityMatrix.SetRow(StateToRow(markovChainState));
 		}
 
 		internal void AddTransition(int markovChainState, double probability)
 		{
-			ProbabilityMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(markovChainState, probability));
+			ProbabilityMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(StateToColumn(markovChainState), probability));
+			Transitions++;
 		}
 
 		internal void SetStateLabeling(int markovChainState, StateFormulaSet formula)
@@ -108,7 +128,6 @@ namespace SafetySharp.Runtime
 
 		public void SealProbabilityMatrix()
 		{
-			InitialStateProbabilities.IncreaseSize(States);
 			ProbabilityMatrix.OptimizeAndSeal();
 		}
 
@@ -117,9 +136,9 @@ namespace SafetySharp.Runtime
 		[Conditional("DEBUG")]
 		public void ValidateStates()
 		{
-			if (ProbabilityMatrix.Rows != States)
+			if (ProbabilityMatrix.Rows+1 != States)
 			{
-				throw new Exception("Number of states should be equal to the number of rows in the matrix");
+				throw new Exception("Number of states should be one less than the number of rows in the matrix"); //the initial distribution also occupies one row
 			}
 			//if (_matrix.ColumnEntries != Transitions)
 			//{
@@ -128,6 +147,7 @@ namespace SafetySharp.Runtime
 
 			var enumerator = ProbabilityMatrix.GetEnumerator();
 
+			//every row contains one probability distribution (also the initial distribution)
 			while (enumerator.MoveNextRow())
 			{
 				// for each state there is a row. The sum of all columns in a row should be 1.0
@@ -182,24 +202,16 @@ namespace SafetySharp.Runtime
 					Console.WriteLine();
 				};
 
-			var initialStateWithHighestProbability = 0;
-			var probabilityOfInitialStateWithHighestProbability = 0.0;
-			for (var i = 0; i < States; i++)
-			{
-				if (InitialStateProbabilities[i] > probabilityOfInitialStateWithHighestProbability)
-				{
-					probabilityOfInitialStateWithHighestProbability = InitialStateProbabilities[i];
-					initialStateWithHighestProbability = i;
-				}
-			}
-			printStateAndProbability(initialStateWithHighestProbability, probabilityOfInitialStateWithHighestProbability);
 
-			var lastState = initialStateWithHighestProbability;
+			var currentTuple = selectRowEntryWithHighestProbability(RowOfInitialState);
+			printStateAndProbability(ColumnToState(currentTuple.Column), currentTuple.Value);
+			var lastState = ColumnToState(currentTuple.Column);
+			
 			for (var i = 0; i < steps; i++)
 			{
-				var currentTuple = selectRowEntryWithHighestProbability(lastState);
-				printStateAndProbability(currentTuple.Column, currentTuple.Value);
-				lastState = currentTuple.Column;
+				currentTuple = selectRowEntryWithHighestProbability(StateToRow(lastState));
+				printStateAndProbability(ColumnToState(currentTuple.Column), currentTuple.Value);
+				lastState = ColumnToState(currentTuple.Column);
 			}
 		}
 		
@@ -223,48 +235,21 @@ namespace SafetySharp.Runtime
 				Graph = new BidirectionalGraph();
 
 				var enumerator = markovChain.ProbabilityMatrix.GetEnumerator();
-				while (enumerator.MoveNextRow())
+				for (var sourceState=0;sourceState< markovChain.States; sourceState++)
 				{
-					var sourceState = enumerator.CurrentRow;
+					enumerator.MoveRow(markovChain.StateToRow(sourceState));
 					while (enumerator.MoveNextColumn())
 					{
 						if (enumerator.CurrentColumnValue != null)
 						{
 							var value = enumerator.CurrentColumnValue.Value;
 							if (value.Value>0.0)
-								Graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(sourceState, value.Column));
+								Graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(sourceState, markovChain.ColumnToState(value.Column)));
 						}
 						else
 							throw new Exception("Entry must not be null");
 					}
 				}
-			}
-
-			public Dictionary<int, bool> GetAncestors(Dictionary<int, bool> toNodes, Dictionary<int, bool> nodesToIgnore)
-			{
-				// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
-				var nodesAdded = new Dictionary<int,bool>();
-				var nodesToTraverse = new Stack<int>();
-				foreach (var node in toNodes)
-				{
-					nodesToTraverse.Push(node.Key);
-				}
-
-				while (nodesToTraverse.Count > 0)
-				{
-					var currentNode = nodesToTraverse.Pop();
-					var isIgnored = nodesToIgnore.ContainsKey(currentNode);
-					var alreadyDiscovered = nodesAdded.ContainsKey(currentNode);
-					if (!(isIgnored || alreadyDiscovered))
-					{
-						nodesAdded.Add(currentNode,true);
-						foreach (var inEdge in Graph.InEdges(currentNode))
-						{
-							nodesToTraverse.Push(inEdge.Source);
-						}
-					}
-				}
-				return nodesAdded;
 			}
 		}
 	}

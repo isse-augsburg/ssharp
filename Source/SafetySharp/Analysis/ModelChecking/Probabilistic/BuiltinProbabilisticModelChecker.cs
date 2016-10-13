@@ -38,18 +38,20 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 	{
 		private SparseDoubleMatrix CreateDerivedMatrix(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates)
 		{
+			//Derived matrix is 0-based. Row i is equivalent to the probability distribution of state i (this is not the case for the Markov Chain). 
+
 			var derivedMatrix = new SparseDoubleMatrix(MarkovChain.States, MarkovChain.Transitions+ MarkovChain.States); //Transitions+States is a upper limit
 
 			var enumerator = MarkovChain.ProbabilityMatrix.GetEnumerator();
 
-			while (enumerator.MoveNextRow())
+			for (var sourceState = 0; sourceState < MarkovChain.States; sourceState++)
 			{
-				var state = enumerator.CurrentRow;
-				derivedMatrix.SetRow(state);
-				if (exactlyOneStates.ContainsKey(state) || exactlyZeroStates.ContainsKey(state))
+				enumerator.MoveRow(MarkovChain.StateToRow(sourceState));
+				derivedMatrix.SetRow(sourceState);
+				if (exactlyOneStates.ContainsKey(sourceState) || exactlyZeroStates.ContainsKey(sourceState))
 				{
 					// only add a self reference entry
-					derivedMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(state,1.0));
+					derivedMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(sourceState,1.0));
 				}
 				else
 				{
@@ -60,10 +62,11 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 						if (enumerator.CurrentColumnValue != null)
 						{
 							var columnValueEntry = enumerator.CurrentColumnValue.Value;
-							if (columnValueEntry.Column == state)
+							var targetState = MarkovChain.ColumnToState(columnValueEntry.Column);
+							if (targetState == sourceState)
 							{
 								//this implements the removal of the identity matrix
-								derivedMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(state, columnValueEntry.Value - 1.0));
+								derivedMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(sourceState, columnValueEntry.Value - 1.0));
 								selfReferenceAdded = true;
 							}
 							else
@@ -76,8 +79,8 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 					}
 					if (!selfReferenceAdded)
 					{
-						//this implements the removal of the identity matrix
-						derivedMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(state, -1.0));
+						//this implements the removal of the identity matrix (if not already done)
+						derivedMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(sourceState, -1.0));
 					}
 				}
 				derivedMatrix.FinishRow();
@@ -135,6 +138,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var fixPointReached = iterationsLeft <= 0;
 			var iterations = 0;
 
+			//Derived matrix is 0-based. Row i is equivalent to the probability distribution of state i (this is not the case for the Markov Chain). 
 			var enumerator = derivedMatrix.GetEnumerator();
 
 			for (var i = 0; i < stateCount; i++)
@@ -183,9 +187,13 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 		private double CalculateFinalProbability(double[] initialStateProbabilities)
 		{
 			var finalProbability = 0.0;
-			for (var i = 0; i < MarkovChain.States; i++)
+
+			var enumerator = MarkovChain.ProbabilityMatrix.GetEnumerator();
+			enumerator.MoveRow(MarkovChain.RowOfInitialState);
+			while (enumerator.MoveNextColumn())
 			{
-				finalProbability += MarkovChain.InitialStateProbabilities[i] * initialStateProbabilities[i];
+				var entry = enumerator.CurrentColumnValue.Value;
+				finalProbability += entry.Value * initialStateProbabilities[MarkovChain.ColumnToState(entry.Column)];
 			}
 			return finalProbability;
 		}
@@ -218,7 +226,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				loops++;
 				for (var i = 0; i < stateCount; i++)
 				{
-					enumerator.MoveRow(i);
+					enumerator.MoveRow(MarkovChain.StateToRow(i));
 					if (directlySatisfiedStates.ContainsKey(i))
 					{
 						xnew[i] = 1.0;
@@ -233,7 +241,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 						while (enumerator.MoveNextColumn())
 						{
 							var entry = enumerator.CurrentColumnValue.Value;
-							sum += entry.Value * xold[entry.Column];
+							sum += entry.Value * xold[MarkovChain.ColumnToState(entry.Column)];
 						}
 						xnew[i] = sum;
 					}
@@ -259,22 +267,22 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 		{
 			// calculate P [true U psi]
 
-			var underlyingDigraph = MarkovChain.CreateUnderlyingDigraph(); //TODO: source out
+			var underlyingDigraph = MarkovChain.CreateUnderlyingDigraph();
 
 			var psiEvaluator = MarkovChain.CreateFormulaEvaluator(psi);
 
 			// calculate probabilityExactlyZero
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
 			var nodesToIgnore=new Dictionary<int,bool>();  // change for \phi Until \psi
-			var probabilityGreaterThanZero = underlyingDigraph.GetAncestors(directlySatisfiedStates, nodesToIgnore);
+			var probabilityGreaterThanZero = underlyingDigraph.Graph.GetAncestors(directlySatisfiedStates, nodesToIgnore);
 			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
 
 			// calculate probabilityExactlyOne
 			nodesToIgnore = directlySatisfiedStates; // change for \phi Until \psi
-			var probabilitySmallerThanOne = underlyingDigraph.GetAncestors(probabilityExactlyZero, nodesToIgnore); ;
+			var probabilitySmallerThanOne = underlyingDigraph.Graph.GetAncestors(probabilityExactlyZero, nodesToIgnore); ;
 			var probabilityExactlyOne = CreateComplement(probabilitySmallerThanOne); ;
 
-			//TODO: Do not calculate exact state probabilities, when every initial state>0 is either in probabilityExactlyZero or in probabilityExactlyOne
+			//TODO: Do not calculate exact state probabilities, when _every_ initial state>0 is either in probabilityExactlyZero or in probabilityExactlyOne
 
 			var derivedMatrix = CreateDerivedMatrix(probabilityExactlyOne, probabilityExactlyZero);
 			var derivedVector = CreateDerivedVector(probabilityExactlyOne);

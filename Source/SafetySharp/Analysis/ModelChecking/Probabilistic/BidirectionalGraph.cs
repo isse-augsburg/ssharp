@@ -80,5 +80,34 @@ namespace SafetySharp.Runtime
 			GetOrCreateInEdges(edge.Source);
 			GetOrCreateOutEdges(edge.Target);
 		}
+
+
+
+		public Dictionary<int, bool> GetAncestors(Dictionary<int, bool> toNodes, Dictionary<int, bool> nodesToIgnore)
+		{
+			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
+			var nodesAdded = new Dictionary<int, bool>();
+			var nodesToTraverse = new Stack<int>();
+			foreach (var node in toNodes)
+			{
+				nodesToTraverse.Push(node.Key);
+			}
+
+			while (nodesToTraverse.Count > 0)
+			{
+				var currentNode = nodesToTraverse.Pop();
+				var isIgnored = nodesToIgnore.ContainsKey(currentNode);
+				var alreadyDiscovered = nodesAdded.ContainsKey(currentNode);
+				if (!(isIgnored || alreadyDiscovered))
+				{
+					nodesAdded.Add(currentNode, true);
+					foreach (var inEdge in InEdges(currentNode))
+					{
+						nodesToTraverse.Push(inEdge.Source);
+					}
+				}
+			}
+			return nodesAdded;
+		}
 	}
 }

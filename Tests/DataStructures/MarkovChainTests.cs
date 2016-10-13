@@ -53,7 +53,9 @@ namespace Tests.DataStructures
 			_markovChain = new MarkovChain();
 			_markovChain.StateFormulaLabels = new string[] { "label1" , "label2" };
 			_markovChain.StateRewardRetrieverLabels = new string[] { };
+			_markovChain.StartWithInitialStates();
 			_markovChain.AddInitialState(0,1.0);
+			_markovChain.FinishInitialStates();
 			_markovChain.SetMarkovChainSourceStateOfUpcomingTransitions(1);
 			_markovChain.AddTransition(1, 1.0);
 			_markovChain.SetStateLabeling(1, new StateFormulaSet(new []{ returnTrue, returnFalse }));
@@ -74,7 +76,9 @@ namespace Tests.DataStructures
 			_markovChain = new MarkovChain();
 			_markovChain.StateFormulaLabels = new string[] { "label1", "label2" };
 			_markovChain.StateRewardRetrieverLabels = new string[] { };
+			_markovChain.StartWithInitialStates();
 			_markovChain.AddInitialState(0, 1.0);
+			_markovChain.FinishInitialStates();
 			_markovChain.SetMarkovChainSourceStateOfUpcomingTransitions(1);
 			_markovChain.AddTransition(1, 1.0);
 			_markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { returnTrue, returnFalse }));
@@ -100,8 +104,9 @@ namespace Tests.DataStructures
 			_markovChain.PrintPathWithStepwiseHighestProbability(10);
 			var enumerator = _markovChain.ProbabilityMatrix.GetEnumerator();
 			var counter = 0.0;
-			while (enumerator.MoveNextRow())
+			for (var sourceState = 0; sourceState < _markovChain.States; sourceState++)
 			{
+				enumerator.MoveRow(_markovChain.StateToRow(sourceState));
 				while (enumerator.MoveNextColumn())
 				{
 					if (enumerator.CurrentColumnValue!=null)
@@ -148,11 +153,11 @@ namespace Tests.DataStructures
 			var nodesToIgnore = new Dictionary<int,bool>();
 			var selectedNodes1 = new Dictionary<int,bool>();
 			selectedNodes1.Add(1,true);
-			var result1 = underlyingDigraph.GetAncestors(selectedNodes1,nodesToIgnore);
+			var result1 = underlyingDigraph.Graph.GetAncestors(selectedNodes1,nodesToIgnore);
 			
 			var selectedNodes2 = new Dictionary<int, bool>();
 			selectedNodes2.Add(0, true);
-			var result2 = underlyingDigraph.GetAncestors(selectedNodes2, nodesToIgnore);
+			var result2 = underlyingDigraph.Graph.GetAncestors(selectedNodes2, nodesToIgnore);
 
 			Assert.Equal(2, result1.Count);
 			Assert.Equal(1, result2.Count);
@@ -168,11 +173,11 @@ namespace Tests.DataStructures
 			var nodesToIgnore = new Dictionary<int, bool>();
 			var selectedNodes1 = new Dictionary<int, bool>();
 			selectedNodes1.Add(1, true);
-			var result1 = underlyingDigraph.GetAncestors(selectedNodes1, nodesToIgnore);
+			var result1 = underlyingDigraph.Graph.GetAncestors(selectedNodes1, nodesToIgnore);
 
 			var selectedNodes2 = new Dictionary<int, bool>();
 			selectedNodes2.Add(0, true);
-			var result2 = underlyingDigraph.GetAncestors(selectedNodes2, nodesToIgnore);
+			var result2 = underlyingDigraph.Graph.GetAncestors(selectedNodes2, nodesToIgnore);
 
 			Assert.Equal(2, result1.Count);
 			Assert.Equal(1, result2.Count);

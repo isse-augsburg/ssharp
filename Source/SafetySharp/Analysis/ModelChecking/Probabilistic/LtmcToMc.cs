@@ -117,6 +117,7 @@ namespace SafetySharp.Runtime
 
 		public void ConvertInitialStates(LabeledTransitionMarkovChain ltmc)
 		{
+			MarkovChain.StartWithInitialStates();
 			var enumerator = ltmc.GetInitialDistributionEnumerator();
 			while (enumerator.MoveNext())
 			{
@@ -124,6 +125,7 @@ namespace SafetySharp.Runtime
 				var targetState = _mapper[targetEntry];
 				MarkovChain.AddInitialState(targetState, enumerator.CurrentProbability);
 			}
+			MarkovChain.FinishInitialStates();
 		}
 
 		public LtmcToMc(LabeledTransitionMarkovChain ltmc)
