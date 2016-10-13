@@ -162,7 +162,6 @@ namespace SafetySharp.Odp
 
 		protected virtual bool CanSatisfyNext(TTask task, int[] path, int prefixLength, int agent)
 		{
-			// TODO: Contains() uses Equals() by default -- need to update robots to fit this
 			return _availableAgents[agent].AvailableCapabilities.Contains(task.RequiredCapabilities[prefixLength]);
 		}
 

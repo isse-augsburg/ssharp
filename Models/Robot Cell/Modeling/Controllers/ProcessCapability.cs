@@ -20,8 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// TODO: check case study: reference equality vs. Equals()
-// either fix in case study or add IsEquivalentTo() to ICapability, fix in Odp core
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using System.Diagnostics;
