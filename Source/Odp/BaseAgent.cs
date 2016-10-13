@@ -39,10 +39,16 @@ namespace SafetySharp.Odp
 
 		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
+		// TODO: AllocatedRoles must be consistent with _applicationTimes -- no outside modifications!!
 		public List<Role<TAgent, TTask>> AllocatedRoles { get; } = new List<Role<TAgent, TTask>>(MaximumRoleCount);
+		private readonly List<uint> _applicationTimes = new List<uint>();
+
+		private uint _timeStamp = 0;
+		private uint _roleApplications = 0;
 
 		public override void Update()
 		{
+			_timeStamp++;
 			Observe();
 			Work();
 		}
@@ -109,7 +115,6 @@ namespace SafetySharp.Odp
 					{
 						_currentRole?.PostCondition.Port.ResourceReady((TAgent)this, _currentRole.Value.PostCondition);
 						_currentRole?.Reset();
-						RemoveResourceRequest(_currentRole?.PreCondition.Port, _currentRole.Value.PreCondition);
 					})
 				.Transition( // resource has been consumed
 					from: States.ExecuteRole,
@@ -117,7 +122,6 @@ namespace SafetySharp.Odp
 					guard: _currentRole.Value.IsCompleted && Resource == null && _currentRole?.PostCondition.Port == null,
 					action: () => {
 						_currentRole?.Reset();
-						RemoveResourceRequest(_currentRole?.PreCondition.Port, _currentRole.Value.PreCondition);
 						_currentRole = null;
 					});
 		}
@@ -127,46 +131,82 @@ namespace SafetySharp.Odp
 			Resource = null;
 		}
 
+		public abstract void ApplyCapability(ICapability capability);
+
+		#region role selection algorithm
+
+		// fair role selection algorithm
+		// (Konstruktion selbst-organisierender Softwaresysteme, section 6.3)
+		//
+		// TODO: deadlock avoidance
+		// (Konstruktion selbst-organisierender Softwaresysteme, section 6.4)
+
 		private void ChooseRole()
 		{
-			// Fairness is guaranteed by using the oldest resource request (_resourceRequests is a queue).
-			// This includes production roles: eventually, there are no more _resourceRequests (because all
-			// resources have been processed and consumed) and thus the agent eventually chooses a
-			// production role again.
-			//
-			// TODO: prioritization, deadlock avoidance
-			// (see chapters 6.3 & 6.4, Konstruktion selbst-organisierender Softwaresysteme)
-			//
-			// TODO: fairness for production roles
-			// the comment above is incorrect: if A is producer for task t1, B processes for t1 and produces t2,
-			// B might never produce for t2 with this solution
+			// producer roles and roles with open resource requests can be chosen, unless they're locked
+			var candidateRoles = AllocatedRoles.Where(role => !role.IsLocked
+				&& (role.PreCondition.Port == null || _resourceRequests.Any(req => role.Equals(req.Role))));
 
-			// try processing or consuming
-			if (_resourceRequests.Count > 0)
-				if (TryChooseRole(role => _resourceRequests[0].Source == role.PreCondition.Port
-					&& role.PreCondition.StateMatches(_resourceRequests[0].Condition), out _currentRole))
-					return;
-
-			// try producing
-			TryChooseRole(role => role.PreCondition.Port == null, out _currentRole);
-		}
-
-		private bool TryChooseRole(Predicate<Role<TAgent, TTask>> predicate, out Role<TAgent, TTask>? chosenRole)
-		{
-			foreach (var role in AllocatedRoles)
+			if (candidateRoles.Any())
 			{
-				if (!role.IsLocked && predicate(role))
-				{
-					chosenRole = role;
-					return true;
-				}
-			}
+				// fair role selection
+				_currentRole = candidateRoles.Aggregate(ChooseRole);
 
-			chosenRole = null;
-			return false;
+				// update data
+				_roleApplications++;
+				_applicationTimes[AllocatedRoles.IndexOf(_currentRole.Value)] = _roleApplications;
+				_resourceRequests.RemoveAll(request => request.Source == _currentRole?.PreCondition.Port);
+			}
 		}
 
-		public abstract void ApplyCapability(ICapability capability);
+		private Role<TAgent, TTask> ChooseRole(Role<TAgent, TTask> role1, Role<TAgent, TTask> role2)
+		{
+			var fitness1 = Fitness(role1);
+			var fitness2 = Fitness(role2);
+
+			// role with higher fitness wins
+			if (fitness1 > fitness2)
+				return role1;
+			else if (fitness1 < fitness2)
+				return role2;
+			else
+			{
+				// same fitness => older resource request wins
+				var timeStamp1 = GetTimeStamp(role1);
+				var timeStamp2 = GetTimeStamp(role2);
+
+				if (timeStamp1 <= timeStamp2)
+					return role1;
+				return role2;
+			}
+		}
+
+		private const uint alpha = 1;
+		private const uint beta = 1;
+		private uint Fitness(Role<TAgent, TTask> role)
+		{
+			var applicationTime = _applicationTimes[AllocatedRoles.IndexOf(role)];
+			return alpha * (_roleApplications - applicationTime)
+				+ beta * (uint)(role.Task.RequiredCapabilities.Length - role.PreCondition.State.Count());
+		}
+
+		private uint GetTimeStamp(Role<TAgent, TTask> role)
+		{
+			// for roles without request (production roles) use current time
+			return (from request in _resourceRequests
+					where role.Equals(request.Role)
+					select request.TimeStamp
+				).DefaultIfEmpty(_timeStamp).Single();
+		}
+
+		private Role<TAgent, TTask>[] GetRoles(TAgent source, Condition<TAgent, TTask> condition)
+		{
+			return AllocatedRoles.Where(role =>
+				role.PreCondition.Port == source && role.PreCondition.StateMatches(condition)
+			).ToArray();
+		}
+
+		#endregion
 
 		#region resource flow
 
@@ -208,14 +248,16 @@ namespace SafetySharp.Odp
 
 		private struct ResourceRequest
 		{
-			public ResourceRequest(TAgent source, Condition<TAgent, TTask> condition)
+			public ResourceRequest(TAgent source, Role<TAgent, TTask> role, uint timeStamp)
 			{
 				Source = source;
-				Condition = condition;
+				Role = role;
+				TimeStamp = timeStamp;
 			}
 
 			public TAgent Source { get; }
-			public Condition<TAgent, TTask> Condition { get; }
+			public Role<TAgent, TTask> Role { get; }
+			public uint TimeStamp { get; }
 		}
 
 		protected virtual void InitiateResourceTransfer(TAgent source)
@@ -225,13 +267,14 @@ namespace SafetySharp.Odp
 
 		public virtual void ResourceReady(TAgent agent, Condition<TAgent, TTask> condition)
 		{
-			_resourceRequests.Add(new ResourceRequest(agent, condition));
-		}
+			var roles = GetRoles(agent, condition);
+			if (roles.Length == 0)
+				throw new InvalidOperationException("no role found for resource request: invariant violated!");
 
-		protected virtual void RemoveResourceRequest(TAgent agent, Condition<TAgent, TTask> condition)
-		{
-			_resourceRequests.RemoveAll(
-				request => request.Source == agent && request.Condition.StateMatches(condition));
+			foreach (var role in roles)
+			{
+				_resourceRequests.Add(new ResourceRequest(agent, role, _timeStamp));
+			}
 		}
 
 		public virtual void TransferResource()
@@ -312,7 +355,7 @@ namespace SafetySharp.Odp
 			var deficientTasks = new HashSet<TTask>(reconfigurations.Select(t => t.Item1));
 
 			// stop work on deficient tasks
-			_resourceRequests.RemoveAll(request => deficientTasks.Contains(request.Condition.Task));
+			_resourceRequests.RemoveAll(request => deficientTasks.Contains(request.Role.Task));
 			// abort execution of current role if necessary
 			_deficientConfiguration = deficientTasks.Contains(_currentRole?.Task);
 
