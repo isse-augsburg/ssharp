@@ -34,7 +34,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 		private Workpiece _workpiece;
 
 		public Fault Broken = new TransientFault();
-		public Fault ResourceTransportFault = new TransientFault();
 		//public Fault SwitchFault = new TransientFault();
 		public Fault SwitchToWrongToolFault = new TransientFault();
 
@@ -48,12 +47,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 		public Robot(params ProcessCapability[] capabilities)
 		{
 			Tools = capabilities.Select(c => new Tool(c.ProductionAction)).ToArray();
-			Broken.Subsumes(Tools.Select(tool => tool.Broken).Concat(new [] {ResourceTransportFault}));
+			Broken.Subsumes(Tools.Select(tool => tool.Broken));
+			// TODO: Broken.Subsumes(ResourceTransportFault)
 		}
 
-		public Robot()
-		{
-		}
+		protected Robot() { } // for fault effects
 
 		[Hidden(HideElements = true)]
 		public Tool[] Tools { get; }
@@ -108,7 +106,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			Broken.Name = $"R{robotId}.Broken";
 			//SwitchFault.Name = $"R{robotId}.ToolSwitchFailed";
 			SwitchToWrongToolFault.Name = $"R{robotId}.WrongToolSelected";
-			ResourceTransportFault.Name = $"R{robotId}.ResourceTransportFailed";
 
 			foreach (var group in Tools.GroupBy(t => t.ProductionAction))
 			{
@@ -147,6 +144,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		public virtual bool CanTransfer() => true;
 
+		internal void AddTolerableFaultEffects(Fault resourceTransportFault)
+		{
+			resourceTransportFault.AddEffect<ResourceTransportEffect>(this);
+		}
+
 		[FaultEffect(Fault = nameof(Broken)), Priority(2)]
 		internal class BrokenEffect : Robot
 		{
@@ -174,7 +176,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			}
 		}
 
-		[FaultEffect(Fault = nameof(ResourceTransportFault))]
 		internal class ResourceTransportEffect : Robot
 		{
 			public override bool TakeResource(Cart cart) => false;

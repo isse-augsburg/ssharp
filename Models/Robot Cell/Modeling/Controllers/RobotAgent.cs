@@ -24,16 +24,22 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using System.Linq;
 	using Plants;
+	using SafetySharp.Modeling;
 	using Odp;
 
 	internal class RobotAgent : Agent
 	{
+		public Fault ResourceTransportFault = new TransientFault();
+
 		private ICapability _currentCapability;
 
 		public RobotAgent(ICapability[] capabilities, Robot robot)
 			: base(capabilities)
 		{
 			Robot = robot;
+			robot?.AddTolerableFaultEffects(ResourceTransportFault);
+
+			ResourceTransportFault.Name = $"{Name}.ResourceTransportFailed"; // TODO: Name is null at this point
 		}
 
 		public Robot Robot { get; }
@@ -44,34 +50,37 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			base.DropResource();
 
 			// For now, the resource disappears magically...
-			Robot.DiscardWorkpiece();
+			Robot?.DiscardWorkpiece();
 		}
 
 		protected override bool CheckInput(Agent agent)
 		{
-			return Robot.CanTransfer();
+			return Robot?.CanTransfer() ?? true;
 		}
 
 		protected override bool CheckOutput(Agent agent)
 		{
-			return Robot.CanTransfer();
+			return Robot?.CanTransfer() ?? true;
 		}
 
 		protected override bool CheckAllocatedCapability(ICapability capability)
 		{
-			if (!Robot.CanSwitch())
+			if (!CanSwitchTools())
 				return false;
 
 			var processCapability = capability as ProcessCapability;
-			return processCapability == null || Robot.CanApply(processCapability);
+			return processCapability == null || CanApply(processCapability);
 		}
+
+		private bool CanSwitchTools() => Robot?.CanSwitch() ?? true;
+		private bool CanApply(ProcessCapability capability) => Robot?.CanApply(capability) ?? true;
 
 		protected override void TakeResource(Resource<Task> resource)
 		{
 			var agent = (CartAgent)_currentRole?.PreCondition.Port;
 
 			// If we fail to transfer the resource, the robot loses all of its connections
-			if (Robot.TakeResource(((CartAgent)agent).Cart))
+			if (TakeResource(agent.Cart))
 			{
 				base.TakeResource(resource);
 				return;
@@ -81,12 +90,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			ClearConnections();
 		}
 
+		protected virtual bool TakeResource(Cart cart) => Robot?.TakeResource(cart) ?? true;
+
 		protected override void TransferResource()
 		{
 			var agent = (CartAgent)_currentRole?.PostCondition.Port;
 
 			// If we fail to transfer the resource, the robot loses all of its connections
-			if (Robot.PlaceResource(agent.Cart))
+			if (PlaceResource(agent.Cart))
 			{
 				base.TransferResource(); // inform the cart
 				return;
@@ -95,6 +106,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Robot.DiscardWorkpiece();
 			ClearConnections();
 		}
+
+		protected virtual bool PlaceResource(Cart cart) => Robot?.PlaceResource(cart) ?? true;
 
 		private void ClearConnections()
 		{
@@ -156,6 +169,18 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Robot.ConsumeWorkpiece();
 			Resource.Task.IsResourceInProduction = false;
 			Resource = null;
+		}
+
+		[FaultEffect(Fault = nameof(ResourceTransportFault))]
+		internal class ResourceTransportEffect : RobotAgent
+		{
+			public ResourceTransportEffect(ICapability[] capabilities, Robot robot) : base(capabilities, robot) { }
+
+			protected override bool TakeResource(Cart cart) => false;
+			protected override bool PlaceResource(Cart cart) => false;
+
+			protected override bool CheckInput(Agent agent) => false;
+			protected override bool CheckOutput(Agent agent) => false;
 		}
 	}
 }

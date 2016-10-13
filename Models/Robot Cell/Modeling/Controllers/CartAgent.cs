@@ -34,7 +34,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Cart = cart;
 			Cart?.AddTolerableFaultEffects(Broken);
 
-			Broken.Name = $"{Name}.Broken";
+			Broken.Name = $"{Name}.Broken"; // TODO: Name is null at this point
 		}
 
 		public Cart Cart { get; }
