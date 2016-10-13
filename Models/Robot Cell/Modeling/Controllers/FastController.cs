@@ -50,35 +50,30 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			int previous = -1;
 			for (int current = from; current != to; current = _pathMatrix[current, to])
 			{
-				var cart = _availableAgents[current] as CartAgent;
-				if (cart != null && _usedCarts.Contains(cart))
-				{
-					var destination = (RobotAgent)_availableAgents[_pathMatrix[current, to]];
-					var unusedCart = _availableAgents[previous].Outputs
-						.OfType<CartAgent>()
-						.Where(candidate => !_usedCarts.Contains(candidate) && candidate.Outputs.Contains(destination))
-						.FirstOrDefault();
-
-					if (unusedCart != null)
-					{
-						_usedCarts.Add(unusedCart);
-						var cartID = Array.IndexOf(_availableAgents, unusedCart);
-						yield return cartID;
-						previous = cartID;
-					}
-					else
-					{
-						yield return current;
-						previous = current;
-					}
-				}
-				else
-				{
-					yield return current;
-					previous = current;
-				}
+				int agent = (_availableAgents[current] is CartAgent) ? GetPreferredCart(current, previous, to) : current;
+				yield return agent;
+				previous = agent;
 			}
 			yield return to;
+		}
+
+		private int GetPreferredCart(int suggestion, int previous, int destination)
+		{
+			var cart = _availableAgents[suggestion] as CartAgent;
+			var nextRobot = (RobotAgent)_availableAgents[_pathMatrix[suggestion, destination]];
+
+			var unusedCart = _availableAgents[previous].Outputs
+				.OfType<CartAgent>()
+				.Where(candidate => !_usedCarts.Contains(candidate) && candidate.Outputs.Contains(nextRobot))
+				.FirstOrDefault();
+
+			if (unusedCart != null)
+			{
+				_usedCarts.Add(unusedCart);
+				var cartID = Array.IndexOf(_availableAgents, unusedCart);
+				return cartID;
+			}
+			return suggestion;
 		}
 	}
 }
