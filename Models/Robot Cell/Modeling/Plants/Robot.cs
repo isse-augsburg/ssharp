@@ -38,9 +38,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 		//public Fault SwitchFault = new TransientFault();
 		public Fault SwitchToWrongToolFault = new TransientFault();
 
+		/// <summary>
+		/// Creates a new robot.
+		/// </summary>
+		/// <param name="capabilities">The robot's processing capabilities.</param>
+		/// <remarks>For each capability, one tool with the corresponding ProductionAction is created.
+		/// In contrast to <see cref="RobotAgent"/>, duplicate capabilities ARE allowed
+		/// and lead to the creation of multiple tools with the same ProductionAction.</remarks>
 		public Robot(params ProcessCapability[] capabilities)
 		{
-			Tools = capabilities.Select(c => new Tool(c)).ToArray();
+			Tools = capabilities.Select(c => new Tool(c.ProductionAction)).ToArray();
 			Broken.Subsumes(Tools.Select(tool => tool.Broken).Concat(new [] {ResourceTransportFault}));
 		}
 
@@ -58,7 +65,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		public virtual bool CanApply(ProcessCapability capability)
 		{
-			return Tools.First(t => t.Capability == capability).CanApply();
+			return Tools.Any(t => t.ProductionAction == capability.ProductionAction && t.CanApply());
 		}
 
 		public virtual bool CanSwitch()
@@ -73,7 +80,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		public virtual bool SwitchCapability(ProcessCapability capability)
 		{
-			_currentTool = Tools.First(t => t.Capability == capability);
+			_currentTool = Tools.First(t => t.ProductionAction == capability.ProductionAction && t.CanApply());
 			return true;
 		}
 
@@ -103,11 +110,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			SwitchToWrongToolFault.Name = $"R{robotId}.WrongToolSelected";
 			ResourceTransportFault.Name = $"R{robotId}.ResourceTransportFailed";
 
-			foreach (var group in Tools.GroupBy(t => t.Capability.ProductionAction))
+			foreach (var group in Tools.GroupBy(t => t.ProductionAction))
 			{
 				var tools = group.ToArray();
 				for (var i = 0; i < tools.Length; i++)
-					tools[i].Broken.Name = $"R{robotId}.{tools[i].Capability.ProductionAction}{i + 1}";
+					tools[i].Broken.Name = $"R{robotId}.{tools[i].ProductionAction}{i + 1}";
 			}
 		}
 

@@ -81,10 +81,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			return new MinimalRedundancyHeuristic(
 				model,
-				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Drill).Select(t => t.Broken)),
-				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Insert).Select(t => t.Broken)),
-				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Tighten).Select(t => t.Broken)),
-				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Polish).Select(t => t.Broken)));
+				model.Robots.SelectMany(d => d.Tools.Where(t => t.ProductionAction == ProductionAction.Drill).Select(t => t.Broken)),
+				model.Robots.SelectMany(d => d.Tools.Where(t => t.ProductionAction == ProductionAction.Insert).Select(t => t.Broken)),
+				model.Robots.SelectMany(d => d.Tools.Where(t => t.ProductionAction == ProductionAction.Tighten).Select(t => t.Broken)),
+				model.Robots.SelectMany(d => d.Tools.Where(t => t.ProductionAction == ProductionAction.Polish).Select(t => t.Broken)));
 		}
 
 		private static IEnumerable CreateConfigurationsMiniZinc()

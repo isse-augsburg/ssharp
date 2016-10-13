@@ -29,20 +29,20 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 	{
 		public Fault Broken = new TransientFault();
 
-		public Tool(ProcessCapability capability)
+		public Tool(ProductionAction productionAction)
 		{
-			Capability = capability;
+			ProductionAction = productionAction;
 		}
 
 		public Tool()
 		{
 		}
 
-		public ProcessCapability Capability { get; }
+		public ProductionAction ProductionAction { get; }
 
 		public virtual bool Apply(Workpiece workpiece)
 		{
-			workpiece.Apply(Capability.ProductionAction);
+			workpiece.Apply(ProductionAction);
 			return true;
 		}
 

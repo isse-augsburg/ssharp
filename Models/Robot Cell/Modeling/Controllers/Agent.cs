@@ -28,15 +28,42 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using SafetySharp.Modeling;
 	using Odp;
 
-	using Role = Odp.Role<Agent, Task>;
-
 	internal class Agent : BaseAgent<Agent, Task>
 	{
 		public readonly Fault ConfigurationUpdateFailed = new TransientFault();
 
 		public Agent(params ICapability[] capabilities)
 		{
+			if (HasDuplicates(capabilities))
+				throw new InvalidOperationException("Duplicate capabilities have no effect.");
 			_availableCapabilities = new List<ICapability>(capabilities);
+		}
+
+		/* TODO: agents cannot have duplicate capabilities
+		 *
+		 * Adding duplicate capabilities to agents (RobotAgents) has no effect:
+		 * a robot may have multiple tools that perform the same action (e.g. multiple drills),
+		 * but the agent has just one corresponding capability (as long as any of the tools are
+		 * functioning).
+		 *
+		 * In the future, multiple capabilities should be supported, each associated with one tool.
+		 * This would allow for the selection of less-used tools etc.
+		 * To support this, we need to distinguish between functional equivalence and reference equality
+		 * of capabilities in SafetySharp.Odp. For example, add IsEquivalentTo(ICapability) to the
+		 * ICapability interface. Adjust all configuration mechanisms, agents etc. to
+		 * use the appropriate comparison.
+		 *
+		 * */
+		private bool HasDuplicates(ICapability[] capabilities)
+		{
+			var set = new HashSet<ICapability>();
+			foreach (var cap in capabilities)
+			{
+				if (set.Contains(cap))
+					return true;
+				set.Add(cap);
+			}
+			return false;
 		}
 
 		protected readonly List<ICapability> _availableCapabilities;

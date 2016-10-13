@@ -257,7 +257,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		private void CreateRobot(params ICapability[] capabilities)
 		{
 			var robot = new Robot(capabilities.OfType<ProcessCapability>().ToArray());
-			var agent = new RobotAgent(capabilities, robot);
+			var agent = new RobotAgent(capabilities.Distinct().ToArray(), robot);
 
 			Robots.Add(robot);
 			RobotAgents.Add(agent);
