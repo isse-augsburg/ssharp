@@ -52,6 +52,7 @@
     <Compile Include="BaseAgent.Invariant.cs" />
     <Compile Include="IReconfigurationStrategy.cs" />
     <Compile Include="ITask.cs" />
+    <Compile Include="OptimalController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>

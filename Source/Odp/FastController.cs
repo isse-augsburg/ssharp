@@ -111,7 +111,7 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		private int[] FindAgentPath(TTask task)
+		protected virtual int[] FindAgentPath(TTask task)
 		{
 			var path = new int[task.RequiredCapabilities.Length];
 
