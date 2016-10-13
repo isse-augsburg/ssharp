@@ -95,8 +95,11 @@ namespace SafetySharp.Odp
 			{
 				// necessary as long as roles are structs
 				var role = _baseAgent.AllocatedRoles[i];
-				role.IsLocked = true;
-				_baseAgent.AllocatedRoles[i] = role;
+				if (role.Task == task)
+				{
+					role.IsLocked = true;
+					_baseAgent.AllocatedRoles[i] = role;
+				}
 			}
 		}
 
@@ -106,8 +109,11 @@ namespace SafetySharp.Odp
 			{
 				// necessary as long as roles are structs
 				var role = _baseAgent.AllocatedRoles[i];
-				role.IsLocked = false;
-				_baseAgent.AllocatedRoles[i] = role;
+				if (role.Task == task)
+				{
+					role.IsLocked = false;
+					_baseAgent.AllocatedRoles[i] = role;
+				}
 			}
 		}
 	}
