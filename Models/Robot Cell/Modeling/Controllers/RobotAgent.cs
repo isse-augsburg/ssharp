@@ -29,6 +29,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 	internal class RobotAgent : Agent
 	{
+		public Fault Broken = new TransientFault();
 		public Fault ResourceTransportFault = new TransientFault();
 
 		private ICapability _currentCapability;
@@ -37,9 +38,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			: base(capabilities)
 		{
 			Robot = robot;
-			robot?.AddTolerableFaultEffects(ResourceTransportFault);
+			robot?.AddTolerableFaultEffects(Broken, ResourceTransportFault);
 
-			ResourceTransportFault.Name = $"{Name}.ResourceTransportFailed"; // TODO: Name is null at this point
+			Broken.Subsumes(ResourceTransportFault);
+
+			Broken.Name = $"{Name}.Broken"; // TODO: Name is null at this point
+			ResourceTransportFault.Name = $"{Name}.ResourceTransportFailed";
 		}
 
 		public Robot Robot { get; }
@@ -72,8 +76,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return processCapability == null || CanApply(processCapability);
 		}
 
-		private bool CanSwitchTools() => Robot?.CanSwitch() ?? true;
-		private bool CanApply(ProcessCapability capability) => Robot?.CanApply(capability) ?? true;
+		protected virtual bool CanSwitchTools() => Robot?.CanSwitch() ?? true;
+		protected virtual bool CanApply(ProcessCapability capability) => Robot?.CanApply(capability) ?? true;
 
 		protected override void TakeResource(Resource<Task> resource)
 		{
@@ -86,7 +90,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				return;
 			}
 
-			Robot.DiscardWorkpiece();
+			Robot?.DiscardWorkpiece();
 			ClearConnections();
 		}
 
@@ -103,7 +107,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				return;
 			}
 
-			Robot.DiscardWorkpiece();
+			Robot?.DiscardWorkpiece();
 			ClearConnections();
 		}
 
@@ -128,7 +132,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Resource = capability.Resources[0];
 			capability.Resources.RemoveAt(0);
 			Resource.Task.IsResourceInProduction = true;
-			Robot.ProduceWorkpiece((Resource as Resource).Workpiece);
+			Robot?.ProduceWorkpiece((Resource as Resource).Workpiece);
 			Resource.OnCapabilityApplied(capability);
 		}
 
@@ -140,7 +144,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (_currentCapability != capability)
 			{
 				// Switch the capability; if we fail to do so, remove all other capabilities from the available ones
-				if (Robot.SwitchCapability(capability))
+				if (SwitchCapability(capability))
 					_currentCapability = capability;
 				else
 				{
@@ -150,7 +154,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			}
 
 			// Apply the capability; if we fail to do so, remove it from the available ones
-			if (!Robot.ApplyCapability())
+			if (!ApplyCurrentCapability())
 			{
 				_availableCapabilities.Remove(capability);
 			}
@@ -160,15 +164,32 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			}
 		}
 
+		protected virtual bool SwitchCapability(ProcessCapability capability) => Robot?.SwitchCapability(capability) ?? true;
+		protected virtual bool ApplyCurrentCapability() => Robot?.ApplyCapability() ?? true;
+
 		public override void Consume(ConsumeCapability capability)
 		{
 			if (Resource == null)
 				return;
 
 			Resource.OnCapabilityApplied(capability);
-			Robot.ConsumeWorkpiece();
+			Robot?.ConsumeWorkpiece();
 			Resource.Task.IsResourceInProduction = false;
 			Resource = null;
+		}
+
+		[FaultEffect(Fault = nameof(Broken)), Priority(2)]
+		internal class BrokenEffect : RobotAgent
+		{
+			public BrokenEffect(ICapability[] capabilities, Robot robot) : base(capabilities, robot) { }
+
+			protected override bool ApplyCurrentCapability() => false;
+			protected override bool CanApply(ProcessCapability capability) => false;
+			protected override bool TakeResource(Cart cart) => false;
+			protected override bool PlaceResource(Cart cart) => false;
+
+			protected override bool CheckInput(Agent agent) => false;
+			protected override bool CheckOutput(Agent agent) => false;
 		}
 
 		[FaultEffect(Fault = nameof(ResourceTransportFault))]
