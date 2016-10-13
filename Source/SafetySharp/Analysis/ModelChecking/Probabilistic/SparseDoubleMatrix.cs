@@ -179,6 +179,66 @@ namespace SafetySharp.Runtime
 			_columnCountOfCurrentRow++;
 		}
 
+		internal void SortRow(int row)
+		{
+			AssertNotSealed();
+			// we implement InsertionSort here with the ability to merge two entries
+			// First inner loop tries to merge.
+			// If merging succeeds, row is one element smaller and the last element gets at the former position of the merged element.
+			// If merging does not work the element is inserted at the right place.
+			// see wiki https://en.wikipedia.org/wiki/Insertion_sort
+
+			var l = _rowMemory[row];
+			var h = l + _rowColumnCountMemory[row];
+
+			var i = l + 1;
+			while (i < h)
+			{
+				var currentElement = _columnValueMemory[i];
+
+				var j = i - 1;
+				while (j>=l && _columnValueMemory[j].Column >= currentElement.Column)
+				{
+					j--;
+				}
+				j++;
+				// now j is at the position where either
+				//     * i==j:
+				//               nothing to do, element was already at the right position)
+				//     * j<i && _columnValueMemory[j].Column == currentElement.Column:
+				//               merge
+				//     * j<i && _columnValueMemory[j].Column > currentElement.Column
+				//               move
+				if (i == j)
+				{
+					i++;
+				}
+				else
+				{
+					if (_columnValueMemory[j].Column == currentElement.Column)
+					{
+						// merge nodes
+						_columnValueMemory[j].Value += currentElement.Value;
+						// move last entry to the front
+						_columnValueMemory[i] = _columnValueMemory[h - 1]; //last element is always h-1
+						h--;
+						_rowColumnCountMemory[row]--;
+					}
+					else
+					{
+						// insertion at the right position and move every element
+						j = i - 1;
+						while (j >= l && _columnValueMemory[j].Column > currentElement.Column)
+						{
+							_columnValueMemory[j + 1] = _columnValueMemory[j];
+							j--;
+						}
+						_columnValueMemory[j+1] = currentElement;
+					}
+				}
+			}
+		}
+
 		internal void OptimizeAndSeal()
 		{
 			//Problem: Es kann sein, dass die States unsortiert hereinkommen. Also zuerst State 0, dann State 5, dann State 4
