@@ -28,8 +28,6 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using SafetySharp.Modeling;
 	using Odp;
 
-	using IReconfigurationStrategy = Odp.IReconfigurationStrategy<Station, Recipe>;
-
 	/// <summary>
 	///   A production station that modifies containers.
 	/// </summary>
@@ -96,8 +94,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 				.Distinct()
 				.Where(neighbour => neighbour != null);
 
-			foreach (var role in obsoleteRoles)
-				AllocatedRoles.Remove(role);
+			RemoveAllocatedRoles(recipe);
 
 			foreach (var neighbour in affectedNeighbours)
 				neighbour.RemoveRecipeConfigurations(recipe);

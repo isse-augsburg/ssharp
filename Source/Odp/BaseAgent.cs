@@ -39,9 +39,8 @@ namespace SafetySharp.Odp
 
 		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
-		// TODO: AllocatedRoles must be consistent with _applicationTimes -- no outside modifications!!
 		public List<Role<TAgent, TTask>> AllocatedRoles { get; } = new List<Role<TAgent, TTask>>(MaximumRoleCount);
-		private readonly List<uint> _applicationTimes = new List<uint>();
+		private readonly List<uint> _applicationTimes = new List<uint>(MaximumRoleCount);
 
 		private uint _timeStamp = 0;
 		private uint _roleApplications = 0;
@@ -383,6 +382,24 @@ namespace SafetySharp.Odp
 			PerformReconfiguration(new[] {
 				Tuple.Create(task, new State(this, agent))
 			});
+		}
+
+		public virtual void RemoveAllocatedRoles(TTask task)
+		{
+			for (int i = 0; i < AllocatedRoles.Count; ++i)
+			{
+				if (AllocatedRoles[i].Task == task)
+				{
+					AllocatedRoles.RemoveAt(i);
+					_applicationTimes.RemoveAt(i);
+				}
+			}
+		}
+
+		public virtual void AllocateRoles(params Role<TAgent, TTask>[] roles)
+		{
+			AllocatedRoles.AddRange(roles);
+			_applicationTimes.AddRange(Enumerable.Repeat(0u, roles.Length));
 		}
 
 		#endregion

@@ -74,8 +74,8 @@ namespace SafetySharp.Odp
 				newRoles[i] = role;
 			}
 
-			_baseAgent.AllocatedRoles.RemoveAll(role => role.Task == task);
-			_baseAgent.AllocatedRoles.AddRange(newRoles);
+			_baseAgent.RemoveAllocatedRoles(task);
+			_baseAgent.AllocateRoles(newRoles);
 		}
 
 		public virtual void Go(TTask task)

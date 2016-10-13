@@ -124,23 +124,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return true;
 		}
 
-		public virtual void Configure(Role role)
-		{
-			AllocatedRoles.Add(role);
-		}
-
-		// TODO: integrate fault effect with Odp library
 		[FaultEffect(Fault = nameof(ConfigurationUpdateFailed))]
 		public class ConfigurationUpdateFailedEffect : Agent
 		{
 			public ConfigurationUpdateFailedEffect(params ICapability[] capabilities)
-				: base(capabilities)
-			{
-			}
+				: base(capabilities) { }
 
-			public override void Configure(Role role)
-			{
-			}
+			public override void RemoveAllocatedRoles(Task task) { }
+			public override void AllocateRoles(params Role<Agent, Task>[] roles) { }
 		}
 	}
 }

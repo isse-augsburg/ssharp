@@ -49,15 +49,15 @@ namespace SafetySharp.Odp
 
 		protected virtual void RemoveConfigurations(params TTask[] tasks)
 		{
-			var affectedTasks = new HashSet<TTask>(tasks);
 			foreach (var agent in _controller.Agents)
-				agent.AllocatedRoles.RemoveAll(role => affectedTasks.Contains(role.Task));
+				foreach (var task in tasks)
+					agent.RemoveAllocatedRoles(task);
 		}
 
 		protected virtual void ApplyConfigurations(Dictionary<TAgent, IEnumerable<Role<TAgent, TTask>>> configurations)
 		{
 			foreach (var agent in configurations.Keys)
-				agent.AllocatedRoles.AddRange(configurations[agent]);
+				agent.AllocateRoles(configurations[agent].ToArray());
 		}
 
 		public override void Update()
