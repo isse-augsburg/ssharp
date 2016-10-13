@@ -66,23 +66,31 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return processCapability == null || Robot.CanApply(processCapability);
 		}
 
-		// TODO: move or remove code
-		protected void PickupResource(Agent agent)
+		public override void TakeResource(Resource<Task> resource)
 		{
+			var agent = (CartAgent)_currentRole?.PreCondition.Port;
+
 			// If we fail to transfer the resource, the robot loses all of its connections
 			if (Robot.TakeResource(((CartAgent)agent).Cart))
+			{
+				base.TakeResource(resource);
 				return;
+			}
 
 			Robot.DiscardWorkpiece();
 			ClearConnections();
 		}
 
-		// TODO: move or remove code
-		protected void InitiatePhysicalResourceTransfer(Agent agent)
+		public override void TransferResource()
 		{
+			var agent = (CartAgent)_currentRole?.PostCondition.Port;
+
 			// If we fail to transfer the resource, the robot loses all of its connections
-			if (Robot.PlaceResource(((CartAgent)agent).Cart))
+			if (Robot.PlaceResource(agent.Cart))
+			{
+				base.TransferResource(); // inform the cart
 				return;
+			}
 
 			Robot.DiscardWorkpiece();
 			ClearConnections();

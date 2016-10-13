@@ -33,12 +33,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public Cart Cart { get; }
 
-		// TODO: move or remove code
-		protected void InitiatePhysicalResourceTransfer(Agent agent)
+		public override void TransferResource()
 		{
+			var agent = (RobotAgent)_currentRole?.PostCondition.Port;
+
 			// If we fail to move to the robot, the cart loses its route
-			if (Cart.MoveTo(((RobotAgent)agent).Robot))
+			if (Cart.MoveTo(agent.Robot))
+			{
+				base.TransferResource();
 				return;
+			}
 
 			// ODP inconsistency: We shouldn't be doing this in all cases; for example,
 			// the cart might have the connections R0->R1 and R1->R2. If
