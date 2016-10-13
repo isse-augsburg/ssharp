@@ -97,8 +97,8 @@ namespace SafetySharp.Odp
 			private readonly BaseAgent<TAgent, TTask>[] _functioningAgents;
 			private readonly IController<TAgent, TTask> _controller;
 
-			private readonly Dictionary<TAgent, ControllerReconfigurationAgent<TAgent, TTask>> _reconfAgents
-				= new Dictionary<TAgent, ControllerReconfigurationAgent<TAgent, TTask>>();
+			private readonly Dictionary<uint, ControllerReconfigurationAgent<TAgent, TTask>> _reconfAgents
+				= new Dictionary<uint, ControllerReconfigurationAgent<TAgent, TTask>>();
 
 			private int _ackCounter = 0;
 
@@ -128,7 +128,7 @@ namespace SafetySharp.Odp
 				_stateMachine.Transition(
 					from: State.GatherGlobalKnowledge,
 					to: State.GatherGlobalKnowledge,
-					action: () => _reconfAgents.Add(baseAgentState.Agent, agent)
+					action: () => _reconfAgents.Add(baseAgentState.ID, agent)
 				);
 				_stateMachine.Transition(
 					from: State.GatherGlobalKnowledge,
@@ -149,7 +149,7 @@ namespace SafetySharp.Odp
 						var emptyRoles = new Role<TAgent, TTask>[0];
 						foreach (var agent in _functioningAgents.Cast<TAgent>())
 						{
-							_reconfAgents[agent].UpdateAllocatedRoles(
+							_reconfAgents[agent.ID].UpdateAllocatedRoles(
 								configs.ContainsKey(agent) ? configs[agent].ToArray() : emptyRoles
 							);
 						}

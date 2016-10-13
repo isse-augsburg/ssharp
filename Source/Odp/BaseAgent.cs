@@ -37,6 +37,10 @@ namespace SafetySharp.Odp
 		public static int MaximumReconfigurationRequests = 30;
 		public static int MaximumRoleCount = 100;
 
+		private static uint _maxID = 0;
+		private readonly uint _id;
+		public uint ID => _id;
+
 		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
 		public List<Role<TAgent, TTask>> AllocatedRoles { get; } = new List<Role<TAgent, TTask>>(MaximumRoleCount);
@@ -44,6 +48,11 @@ namespace SafetySharp.Odp
 
 		private uint _timeStamp = 0;
 		private uint _roleApplications = 0;
+
+		protected BaseAgent()
+		{
+			_id = _maxID++;
+		}
 
 		public override void Update()
 		{

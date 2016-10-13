@@ -31,8 +31,7 @@ namespace SafetySharp.Odp
 				ReconfRequestSource = requestSource;
 				ViolatedPredicates = violatedPredicates;
 
-				Agent = (TAgent)agent;
-
+				ID = agent.ID;
 				Resource = agent.Resource;
 				Inputs = agent.Inputs.ToArray();
 				Outputs = agent.Outputs.ToArray();
@@ -42,9 +41,7 @@ namespace SafetySharp.Odp
 			public IAgent ReconfRequestSource { get; }
 			public InvariantPredicate[] ViolatedPredicates { get; }
 
-			// TODO: including the agent defeats the purpose of all the properties below
-			public TAgent Agent { get; }
-
+			public uint ID { get; }
 			public Resource<TTask> Resource { get; }
 			public TAgent[] Inputs { get; }
 			public TAgent[] Outputs { get; }
