@@ -22,13 +22,19 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
+	using SafetySharp.Modeling;
 	using Plants;
 
 	internal class CartAgent : Agent
 	{
+		public Fault Broken = new TransientFault();
+
 		public CartAgent(Cart cart)
 		{
 			Cart = cart;
+			Cart?.AddTolerableFaultEffects(Broken);
+
+			Broken.Name = $"{Name}.Broken";
 		}
 
 		public Cart Cart { get; }
@@ -38,7 +44,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			var agent = (RobotAgent)_currentRole?.PostCondition.Port;
 
 			// If we fail to move to the robot, the cart loses its route
-			if (Cart.MoveTo(agent.Robot))
+			if (MoveTo(agent.Robot))
 			{
 				base.TransferResource();
 				return;
@@ -54,7 +60,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		protected override void InitiateResourceTransfer(Agent source)
 		{
 			// If we fail to move to the robot, the cart loses its route
-			if (Cart.MoveTo(((RobotAgent)source).Robot))
+			if (MoveTo(((RobotAgent)source).Robot))
 			{
 				base.InitiateResourceTransfer(source);
 				return;
@@ -72,18 +78,33 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			base.DropResource();
 
 			// For now, the resource disappears magically...
-			Cart.LoadedWorkpiece?.Discard();
-			Cart.LoadedWorkpiece = null;
+			Cart?.LoadedWorkpiece?.Discard();
+			if (Cart != null) Cart.LoadedWorkpiece = null;
 		}
 
 		protected override bool CheckInput(Agent agent)
 		{
-			return Cart.CanMove(((RobotAgent)agent).Robot);
+			return Cart?.CanMove(((RobotAgent)agent).Robot) ?? true;
 		}
 
 		protected override bool CheckOutput(Agent agent)
 		{
-			return Cart.CanMove(((RobotAgent)agent).Robot);
+			return Cart?.CanMove(((RobotAgent)agent).Robot) ?? true;
+		}
+
+		protected virtual bool MoveTo(Robot robot)
+		{
+			return Cart?.MoveTo(robot) ?? true;
+		}
+
+		[FaultEffect(Fault = nameof(Broken))]
+		public class BrokenEffect : CartAgent
+		{
+			public BrokenEffect(Cart cart) : base(cart) { }
+
+			protected override bool CheckInput(Agent agent) => false;
+			protected override bool CheckOutput(Agent agent) => false;
+			protected override bool MoveTo(Robot robot) => false;
 		}
 	}
 }

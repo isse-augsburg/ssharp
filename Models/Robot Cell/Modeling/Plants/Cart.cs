@@ -32,8 +32,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		private Robot _position;
 
-		public Fault Broken = new TransientFault();
-
 		public Workpiece LoadedWorkpiece;
 		public Fault Lost = new TransientFault();
 
@@ -43,9 +41,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			_position = startPosition;
 		}
 
-		public Cart()
-		{
-		}
+		protected Cart() { } // for fault effects
 
 		[Hidden(HideElements = true)]
 		public Route[] Routes { get; }
@@ -64,7 +60,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 		public void SetNames(int cartId)
 		{
 			_name = $"C{cartId}";
-			Broken.Name = _name + ".Broken";
 			Lost.Name = _name + ".Lost";
 
 			foreach (var route in Routes)
@@ -89,7 +84,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			return _position == robot;
 		}
 
-		[FaultEffect(Fault = nameof(Broken)), Priority(2)]
+		// dynamically adds fault effects for tolerable faults
+		// declared on the controller level
+		internal void AddTolerableFaultEffects(Fault broken)
+		{
+			broken.AddEffect<BrokenEffect>(this);
+		}
+
 		internal class BrokenEffect : Cart
 		{
 			public override bool MoveTo(Robot robot) => false;
@@ -97,7 +98,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 		}
 
 		[FaultEffect(Fault = nameof(Lost)), Priority(1)]
-		internal class LostEffect : Cart
+		internal class LostEffect : Cart // intolerable fault
 		{
 			public override bool MoveTo(Robot robot)
 			{
