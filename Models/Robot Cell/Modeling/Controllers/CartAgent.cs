@@ -33,7 +33,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public Cart Cart { get; }
 
-		public override void TransferResource()
+		protected override void TransferResource()
 		{
 			var agent = (RobotAgent)_currentRole?.PostCondition.Port;
 

@@ -66,7 +66,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return processCapability == null || Robot.CanApply(processCapability);
 		}
 
-		public override void TakeResource(Resource<Task> resource)
+		protected override void TakeResource(Resource<Task> resource)
 		{
 			var agent = (CartAgent)_currentRole?.PreCondition.Port;
 
@@ -81,7 +81,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			ClearConnections();
 		}
 
-		public override void TransferResource()
+		protected override void TransferResource()
 		{
 			var agent = (CartAgent)_currentRole?.PostCondition.Port;
 

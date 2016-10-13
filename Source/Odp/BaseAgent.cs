@@ -273,7 +273,7 @@ namespace SafetySharp.Odp
 			source.TransferResource();
 		}
 
-		public virtual void ResourceReady(TAgent agent, Condition<TAgent, TTask> condition)
+		private void ResourceReady(TAgent agent, Condition<TAgent, TTask> condition)
 		{
 			var roles = GetRoles(agent, condition);
 			if (roles.Length == 0)
@@ -285,7 +285,7 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		public virtual void TransferResource()
+		protected virtual void TransferResource()
 		{
 			_stateMachine.Transition(
 				from: States.Output,
@@ -294,7 +294,7 @@ namespace SafetySharp.Odp
 			);
 		}
 
-		public virtual void TakeResource(Resource<TTask> resource)
+		protected virtual void TakeResource(Resource<TTask> resource)
 		{
 			// assert resource != null
 			Resource = resource;
@@ -306,7 +306,7 @@ namespace SafetySharp.Odp
 			);
 		}
 
-		public virtual void ResourcePickedUp()
+		protected virtual void ResourcePickedUp()
 		{
 			Resource = null;
 
