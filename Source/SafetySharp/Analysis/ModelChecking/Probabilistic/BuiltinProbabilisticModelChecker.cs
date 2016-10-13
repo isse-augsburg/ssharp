@@ -311,6 +311,22 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return new Probability(result);
 		}
 
+		private void ApproximateDelta(double target)
+		{
+			// https://en.wikipedia.org/wiki/Machine_epsilon
+			//  Note: Result is even more inaccurate because in lines like
+			//		newValue += verySmallValue1 * verySmallValue2
+			//  as they appear in the iteration algorithm may already lead to epsilons which are ignored
+			//  even if they would have an impact in sum ("sum+=100*epsilon" has an influence, but "for (i=1..100) {sum+=epsilon;}" not.
+
+			double epsilon = 1.0;
+			// ReSharper disable once CompareOfFloatsByEqualityOperator
+			while ((target + (epsilon / 2.0)) != target)
+				epsilon /= 2.0;
+
+			Console.WriteLine(epsilon);
+		}
+
 		internal override bool CalculateFormula(Formula formulaToCheck)
 		{
 			throw new NotImplementedException();
