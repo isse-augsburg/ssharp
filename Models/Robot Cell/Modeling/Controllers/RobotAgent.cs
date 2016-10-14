@@ -38,13 +38,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			: base(capabilities)
 		{
 			Robot = robot;
-			robot?.AddTolerableFaultEffects(Broken, ResourceTransportFault);
 
 			Broken.Subsumes(ResourceTransportFault);
 
 			Broken.Name = $"{Name}.Broken"; // TODO: Name is null at this point
 			ResourceTransportFault.Name = $"{Name}.ResourceTransportFailed";
+
+			AddTolerableFaultEffects();
 		}
+
+		protected RobotAgent() { } // for fault effects
 
 		public Robot Robot { get; }
 
@@ -76,9 +79,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return processCapability == null || CanApply(processCapability);
 		}
 
-		protected virtual bool CanSwitchTools() => Robot?.CanSwitch() ?? true;
-		protected virtual bool CanApply(ProcessCapability capability) => Robot?.CanApply(capability) ?? true;
-
 		protected override void TakeResource(Resource<Task> resource)
 		{
 			var agent = (CartAgent)_currentRole?.PreCondition.Port;
@@ -94,8 +94,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			ClearConnections();
 		}
 
-		protected virtual bool TakeResource(Cart cart) => Robot?.TakeResource(cart) ?? true;
-
 		protected override void TransferResource()
 		{
 			var agent = (CartAgent)_currentRole?.PostCondition.Port;
@@ -110,8 +108,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Robot?.DiscardWorkpiece();
 			ClearConnections();
 		}
-
-		protected virtual bool PlaceResource(Cart cart) => Robot?.PlaceResource(cart) ?? true;
 
 		private void ClearConnections()
 		{
@@ -164,9 +160,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			}
 		}
 
-		protected virtual bool SwitchCapability(ProcessCapability capability) => Robot?.SwitchCapability(capability) ?? true;
-		protected virtual bool ApplyCurrentCapability() => Robot?.ApplyCapability() ?? true;
-
 		public override void Consume(ConsumeCapability capability)
 		{
 			if (Resource == null)
@@ -178,11 +171,29 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Resource = null;
 		}
 
-		[FaultEffect(Fault = nameof(Broken)), Priority(2)]
+		// robot delegation methods
+		// This enables tolerable faults to be analyzed both with and without hardware models.
+		protected virtual bool CanSwitchTools()			=> Robot?.CanSwitch() ?? true;
+		protected virtual bool ApplyCurrentCapability() => Robot?.ApplyCapability() ?? true;
+		protected virtual bool TakeResource(Cart cart)	=> Robot?.TakeResource(cart) ?? true;
+		protected virtual bool PlaceResource(Cart cart)	=> Robot?.PlaceResource(cart) ?? true;
+		protected virtual bool CanApply(ProcessCapability capability)			=> Robot?.CanApply(capability) ?? true;
+		protected virtual bool SwitchCapability(ProcessCapability capability)	=> Robot?.SwitchCapability(capability) ?? true;
+
+		private void AddTolerableFaultEffects()
+		{
+			if (Robot != null)
+				Robot.AddTolerableFaultEffects(Broken, ResourceTransportFault);
+			else
+			{
+				Broken.AddEffect<BrokenEffect>(this);
+				ResourceTransportFault.AddEffect<ResourceTransportEffect>(this);
+			}
+		}
+
+		[FaultEffect, Priority(2)]
 		internal class BrokenEffect : RobotAgent
 		{
-			public BrokenEffect(ICapability[] capabilities, Robot robot) : base(capabilities, robot) { }
-
 			protected override bool ApplyCurrentCapability() => false;
 			protected override bool CanApply(ProcessCapability capability) => false;
 			protected override bool TakeResource(Cart cart) => false;
@@ -192,11 +203,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			protected override bool CheckOutput(Agent agent) => false;
 		}
 
-		[FaultEffect(Fault = nameof(ResourceTransportFault))]
+		[FaultEffect]
 		internal class ResourceTransportEffect : RobotAgent
 		{
-			public ResourceTransportEffect(ICapability[] capabilities, Robot robot) : base(capabilities, robot) { }
-
 			protected override bool TakeResource(Cart cart) => false;
 			protected override bool PlaceResource(Cart cart) => false;
 

@@ -91,6 +91,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			broken.AddEffect<BrokenEffect>(this);
 		}
 
+		[FaultEffect]
 		internal class BrokenEffect : Cart
 		{
 			public override bool MoveTo(Robot robot) => false;

@@ -32,10 +32,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		public CartAgent(Cart cart)
 		{
 			Cart = cart;
-			Cart?.AddTolerableFaultEffects(Broken);
 
 			Broken.Name = $"{Name}.Broken"; // TODO: Name is null at this point
+
+			AddTolerableFaultEffects();
 		}
+
+		protected CartAgent() { } // for fault effects
 
 		public Cart Cart { get; }
 
@@ -92,16 +95,19 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return Cart?.CanMove(((RobotAgent)agent).Robot) ?? true;
 		}
 
-		protected virtual bool MoveTo(Robot robot)
+		protected virtual bool MoveTo(Robot robot) => Cart?.MoveTo(robot) ?? true;
+
+		private void AddTolerableFaultEffects()
 		{
-			return Cart?.MoveTo(robot) ?? true;
+			if (Cart != null)
+				Broken.AddEffect<BrokenEffect>(this);
+			else
+				Cart.AddTolerableFaultEffects(Broken);
 		}
 
-		[FaultEffect(Fault = nameof(Broken))]
+		[FaultEffect]
 		public class BrokenEffect : CartAgent
 		{
-			public BrokenEffect(Cart cart) : base(cart) { }
-
 			protected override bool CheckInput(Agent agent) => false;
 			protected override bool CheckOutput(Agent agent) => false;
 			protected override bool MoveTo(Robot robot) => false;
