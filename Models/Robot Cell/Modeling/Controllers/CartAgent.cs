@@ -105,7 +105,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				Cart.AddTolerableFaultEffects(Broken);
 		}
 
-		[FaultEffect]
+		[FaultEffect, Priority(2)]
 		public class BrokenEffect : CartAgent
 		{
 			protected override bool CheckInput(Agent agent) => false;

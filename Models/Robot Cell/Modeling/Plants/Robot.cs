@@ -150,7 +150,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			broken.Subsumes(Tools.Select(tool => tool.Broken));
 		}
 
-		[FaultEffect]
+		[FaultEffect, Priority(2)]
 		internal class BrokenEffect : Robot
 		{
 			public override bool ApplyCapability() => false;
