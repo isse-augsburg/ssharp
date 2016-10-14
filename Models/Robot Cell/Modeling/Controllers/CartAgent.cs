@@ -32,13 +32,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		public CartAgent(Cart cart)
 		{
 			Cart = cart;
-
-			Broken.Name = $"{Name}.Broken"; // TODO: Name is null at this point
-
+			Broken.Name = $"{Name}.{nameof(Broken)}";
 			AddTolerableFaultEffects();
 		}
 
 		protected CartAgent() { } // for fault effects
+
+		public override string Name => $"C{ID}";
 
 		public Cart Cart { get; }
 

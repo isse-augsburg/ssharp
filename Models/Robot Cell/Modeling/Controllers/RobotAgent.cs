@@ -26,6 +26,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using Plants;
 	using SafetySharp.Modeling;
 	using Odp;
+	using System;
 
 	internal class RobotAgent : Agent
 	{
@@ -46,13 +47,15 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		{
 			Robot = robot;
 
-			Broken.Name = $"{Name}.Broken"; // TODO: Name is null at this point
-			ResourceTransportFault.Name = $"{Name}.ResourceTransportFailed";
+			Broken.Name = $"{Name}.{nameof(Broken)}";
+			ResourceTransportFault.Name = $"{Name}.{nameof(ResourceTransportFault)}";
 
 			AddTolerableFaultEffects();
 		}
 
 		protected RobotAgent() { } // for fault effects
+
+		public override string Name => $"R{ID}";
 
 		public Robot Robot { get; }
 

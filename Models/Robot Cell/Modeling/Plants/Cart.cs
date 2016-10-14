@@ -57,7 +57,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			return true;
 		}
 
-		public void SetNames(int cartId)
+		public void SetNames(uint cartId)
 		{
 			_name = $"C{cartId}";
 			Lost.Name = _name + ".Lost";

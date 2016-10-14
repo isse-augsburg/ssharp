@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using SafetySharp.Modeling;
 	using Odp;
 
-	internal class Agent : BaseAgent<Agent, Task>
+	internal abstract class Agent : BaseAgent<Agent, Task>
 	{
 		public readonly Fault ConfigurationUpdateFailed = new TransientFault();
 
@@ -37,6 +37,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (HasDuplicates(capabilities))
 				throw new InvalidOperationException("Duplicate capabilities have no effect.");
 			_availableCapabilities = new List<ICapability>(capabilities);
+			ConfigurationUpdateFailed.Name = $"{Name}.{nameof(ConfigurationUpdateFailed)}";
 		}
 
 		/* TODO: agents cannot have duplicate capabilities
@@ -69,8 +70,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		protected readonly List<ICapability> _availableCapabilities;
 		public override IEnumerable<ICapability> AvailableCapabilities => _availableCapabilities;
 
-		[Hidden]
-		public string Name { get; set; }
+		public abstract string Name { get; }
 
 		public bool HasResource => Resource != null;
 
@@ -152,7 +152,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		}
 
 		[FaultEffect(Fault = nameof(ConfigurationUpdateFailed))]
-		public class ConfigurationUpdateFailedEffect : Agent
+		public abstract class ConfigurationUpdateFailedEffect : Agent
 		{
 			public ConfigurationUpdateFailedEffect(params ICapability[] capabilities)
 				: base(capabilities) { }

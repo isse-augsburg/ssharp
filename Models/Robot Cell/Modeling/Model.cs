@@ -262,9 +262,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			Robots.Add(robot);
 			RobotAgents.Add(agent);
 
-			robot.SetNames(Robots.Count - 1);
-			agent.Name = $"R{Robots.Count - 1}";
-			agent.ConfigurationUpdateFailed.Name = agent.Name + ".ConfigUpdateFailed";
+			robot.SetNames(agent.ID);
 		}
 
 		private void CreateCart(params Route[] routes)
@@ -288,9 +286,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			Carts.Add(cart);
 			CartAgents.Add(agent);
 
-			cart.SetNames(Carts.Count - 1);
-			agent.Name = $"C{Carts.Count - 1}";
-			agent.ConfigurationUpdateFailed.Name = agent.Name + ".ConfigUpdateFailed";
+			cart.SetNames(agent.ID);
 
 			foreach (var route in routes)
 			{

@@ -99,7 +99,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			return true;
 		}
 
-		public void SetNames(int robotId)
+		public void SetNames(uint robotId)
 		{
 			Name = $"R{robotId}";
 			//SwitchFault.Name = $"R{robotId}.ToolSwitchFailed";
