@@ -29,8 +29,15 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 	internal class RobotAgent : Agent
 	{
-		public Fault Broken = new TransientFault();
-		public Fault ResourceTransportFault = new TransientFault();
+		public readonly Fault Broken = new TransientFault();
+		public readonly Fault ResourceTransportFault = new TransientFault();
+
+		// In analyses without hardware components, these replace the Tool.Broken faults.
+		// When hardware components are included, these faults are ignored.
+		public readonly Fault DrillBroken = new TransientFault();
+		public readonly Fault InsertBroken = new TransientFault();
+		public readonly Fault TightenBroken = new TransientFault();
+		public readonly Fault PolishBroken = new TransientFault();
 
 		private ICapability _currentCapability;
 
@@ -38,8 +45,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			: base(capabilities)
 		{
 			Robot = robot;
-
-			Broken.Subsumes(ResourceTransportFault);
 
 			Broken.Name = $"{Name}.Broken"; // TODO: Name is null at this point
 			ResourceTransportFault.Name = $"{Name}.ResourceTransportFailed";
@@ -182,16 +187,24 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		private void AddTolerableFaultEffects()
 		{
+			Broken.Subsumes(ResourceTransportFault);
 			if (Robot != null)
 				Robot.AddTolerableFaultEffects(Broken, ResourceTransportFault);
 			else
 			{
 				Broken.AddEffect<BrokenEffect>(this);
 				ResourceTransportFault.AddEffect<ResourceTransportEffect>(this);
+
+				DrillBroken.AddEffect<DrillBrokenEffect>(this);
+				InsertBroken.AddEffect<InsertBrokenEffect>(this);
+				TightenBroken.AddEffect<TightenBrokenEffect>(this);
+				PolishBroken.AddEffect<PolishBrokenEffect>(this);
+
+				Broken.Subsumes(DrillBroken, InsertBroken, TightenBroken, PolishBroken);
 			}
 		}
 
-		[FaultEffect, Priority(2)]
+		[FaultEffect, Priority(5)]
 		internal class BrokenEffect : RobotAgent
 		{
 			protected override bool ApplyCurrentCapability() => false;
@@ -211,6 +224,51 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 			protected override bool CheckInput(Agent agent) => false;
 			protected override bool CheckOutput(Agent agent) => false;
+		}
+
+		// TODO: a common base class for these effects would be nice (once S# supports it)
+		[FaultEffect, Priority(1)]
+		internal class DrillBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.Drill && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.Drill
+					&& base.ApplyCurrentCapability();
+		}
+
+		[FaultEffect, Priority(2)]
+		internal class InsertBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.Insert && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.Insert
+					&& base.ApplyCurrentCapability();
+		}
+
+		[FaultEffect, Priority(3)]
+		internal class TightenBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.Tighten && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.Tighten
+					&& base.ApplyCurrentCapability();
+		}
+
+		[FaultEffect, Priority(4)]
+		internal class PolishBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.Polish && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.Polish
+					&& base.ApplyCurrentCapability();
 		}
 	}
 }
