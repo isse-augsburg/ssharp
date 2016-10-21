@@ -61,6 +61,8 @@ namespace SafetySharp.Odp
 			return configs;
 		}
 
+		protected virtual bool PreferCapabilityAccumulation => true;
+
 		protected virtual TAgent[] GetAvailableAgents()
 		{
 			return Array.FindAll(Agents, agent => agent.IsAlive);
@@ -137,7 +139,7 @@ namespace SafetySharp.Odp
 			var last = path[prefixLength - 1];
 
 			// special handling: see if the last agent can't do the next capability as well
-			if (CanSatisfyNext(task, path, prefixLength, last)) // TODO: don't do this for robots, it requires switching tools
+			if (PreferCapabilityAccumulation && CanSatisfyNext(task, path, prefixLength, last))
 			{
 				path[prefixLength] = last;
 				if (FindAgentPath(task, path, prefixLength + 1))

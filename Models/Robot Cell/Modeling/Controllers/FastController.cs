@@ -34,6 +34,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	/// </summary>
 	internal class FastController : FastController<Agent, Task>
 	{
+		protected override bool PreferCapabilityAccumulation => false;
+
 		[Hidden(HideElements = true)]
 		private readonly HashSet<CartAgent> _usedCarts = new HashSet<CartAgent>();
 
