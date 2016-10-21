@@ -49,7 +49,7 @@ namespace SafetySharp.Runtime
 
 		public string[] StateRewardRetrieverLabels;
 
-		public SparseDoubleMatrix ProbabilityMatrix { get; }
+		internal SparseDoubleMatrix ProbabilityMatrix { get; }
 		
 		public LabelVector StateLabeling { get; }
 		
@@ -75,39 +75,50 @@ namespace SafetySharp.Runtime
 
 		public int Transitions { get; private set; } = 0; //without entries of initial distribution
 
-		public int RowOfInitialState = 0;
+		public int RowOfInitialStates = 0;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int StateToRow(int state) => state+1;
+		private int StateToRow(int state) => state+1;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int StateToColumn(int state) => state; //Do nothing! Just here to make the algorithms more clear.
+		private int StateToColumn(int state) => state; //Do nothing! Just here to make the algorithms more clear.
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int ColumnToState(int state) => state; //Do nothing! Just here to make the algorithms more clear.
+		private int ColumnToState(int state) => state; //Do nothing! Just here to make the algorithms more clear.
 
 
 		// Creating matrix phase
-
-		internal void StartWithInitialStates()
+		// For the initial distribution the process is
+		//    StartWithInitialDistribution()
+		//    while(transitions to add exist) {
+		//	      AddInitialTransition();
+		//    }
+		//    FinishInitialDistribution()
+		internal void StartWithInitialDistribution()
 		{
-			ProbabilityMatrix.SetRow(RowOfInitialState);
+			ProbabilityMatrix.SetRow(RowOfInitialStates);
 		}
 
-		internal void AddInitialState(int markovChainState, double probability)
+		internal void AddInitialTransition(int markovChainState, double probability)
 		{
 			// initial state probabilities are also saved in the ProbabilityMatrix
 			ProbabilityMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(StateToColumn(markovChainState), probability));
 		}
 
-		internal void FinishInitialStates()
+		internal void FinishInitialDistribution()
 		{
 			ProbabilityMatrix.FinishRow();
 		}
 
-		internal void SetMarkovChainSourceStateOfUpcomingTransitions(int markovChainState)
+		// For distribution of a state the process is
+		//    StartWithNewDistribution(markovChainSourceState)
+		//    while(transitions to add exist) {
+		//	      AddTransition();
+		//    }
+		//    FinishDistribution()
+		internal void StartWithNewDistribution(int markovChainSourceState)
 		{
-			ProbabilityMatrix.SetRow(StateToRow(markovChainState));
+			ProbabilityMatrix.SetRow(StateToRow(markovChainSourceState));
 		}
 
 		internal void AddTransition(int markovChainState, double probability)
@@ -116,14 +127,14 @@ namespace SafetySharp.Runtime
 			Transitions++;
 		}
 
+		internal void FinishDistribution()
+		{
+			ProbabilityMatrix.FinishRow();
+		}
+
 		internal void SetStateLabeling(int markovChainState, StateFormulaSet formula)
 		{
 			StateLabeling[markovChainState] = formula;
-		}
-
-		internal void FinishSourceState()
-		{
-			ProbabilityMatrix.FinishRow();
 		}
 
 		public void SealProbabilityMatrix()
@@ -168,16 +179,15 @@ namespace SafetySharp.Runtime
 		[Conditional("DEBUG")]
 		internal void PrintPathWithStepwiseHighestProbability(int steps)
 		{
-			var enumerator = ProbabilityMatrix.GetEnumerator();
-			Func<int, SparseDoubleMatrix.ColumnValue> selectRowEntryWithHighestProbability =
-				row =>
+			var enumerator = GetEnumerator();
+			Func<SparseDoubleMatrix.ColumnValue> selectRowEntryWithHighestProbability =
+				() =>
 				{
-					enumerator.MoveRow(row);
-					enumerator.MoveNextColumn();
-					var candidate = enumerator.CurrentColumnValue.Value;
-					while (enumerator.MoveNextColumn())
-						if (candidate.Value < enumerator.CurrentColumnValue.Value.Value)
-							candidate = enumerator.CurrentColumnValue.Value;
+					enumerator.MoveNextTransition();
+					var candidate = enumerator.CurrentTransition;
+					while (enumerator.MoveNextTransition())
+						if (candidate.Value < enumerator.CurrentTransition.Value)
+							candidate = enumerator.CurrentTransition;
 					return candidate;
 				};
 			Action<int, double> printStateAndProbability =
@@ -203,13 +213,15 @@ namespace SafetySharp.Runtime
 				};
 
 
-			var currentTuple = selectRowEntryWithHighestProbability(RowOfInitialState);
+			enumerator.SelectInitialDistribution();
+			var currentTuple = selectRowEntryWithHighestProbability();
 			printStateAndProbability(ColumnToState(currentTuple.Column), currentTuple.Value);
 			var lastState = ColumnToState(currentTuple.Column);
 			
 			for (var i = 0; i < steps; i++)
 			{
-				currentTuple = selectRowEntryWithHighestProbability(StateToRow(lastState));
+				enumerator.SelectSourceState(lastState);
+				currentTuple = selectRowEntryWithHighestProbability();
 				printStateAndProbability(ColumnToState(currentTuple.Column), currentTuple.Value);
 				lastState = ColumnToState(currentTuple.Column);
 			}
@@ -234,22 +246,91 @@ namespace SafetySharp.Runtime
 				//Assumption "every node is reachable" is fulfilled due to the construction
 				Graph = new BidirectionalGraph();
 
-				var enumerator = markovChain.ProbabilityMatrix.GetEnumerator();
-				for (var sourceState=0;sourceState< markovChain.States; sourceState++)
+				var enumerator = markovChain.GetEnumerator();
+				while (enumerator.MoveNextState())
 				{
-					enumerator.MoveRow(markovChain.StateToRow(sourceState));
-					while (enumerator.MoveNextColumn())
+					while (enumerator.MoveNextTransition())
 					{
-						if (enumerator.CurrentColumnValue != null)
-						{
-							var value = enumerator.CurrentColumnValue.Value;
-							if (value.Value>0.0)
-								Graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(sourceState, markovChain.ColumnToState(value.Column)));
-						}
-						else
-							throw new Exception("Entry must not be null");
+						if (enumerator.CurrentTransition.Value>0.0)
+							Graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(enumerator.CurrentState, enumerator.CurrentTransition.Column));
 					}
 				}
+			}
+		}
+
+		internal MarkovChainEnumerator GetEnumerator()
+		{
+			return new MarkovChainEnumerator(this);
+		}
+
+		// a nested class can access private members
+		internal class MarkovChainEnumerator
+		{
+			private MarkovChain _markovChain;
+			private SparseDoubleMatrix.SparseDoubleMatrixEnumerator _enumerator;
+
+			public int CurrentState { get; private set; }
+
+			public SparseDoubleMatrix.ColumnValue CurrentTransition => _enumerator.CurrentColumnValue.Value;
+
+			public MarkovChainEnumerator(MarkovChain markovChain)
+			{
+				_markovChain = markovChain;
+				_enumerator = markovChain.ProbabilityMatrix.GetEnumerator();
+				Reset();
+			}
+
+			/// <summary>
+			/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+			/// </summary>
+			public void Dispose()
+			{
+			}
+
+			public void SelectInitialDistribution()
+			{
+				CurrentState = -1;
+				_enumerator.MoveRow(_markovChain.RowOfInitialStates);
+			}
+
+			public bool SelectSourceState(int state)
+			{
+				CurrentState = state;
+				return _enumerator.MoveRow(CurrentState+1); //state 0 lies in row 1, state 1 in row 2,...
+			}
+
+			/// <summary>
+			/// Advances the enumerator to the next element of the collection.
+			/// </summary>
+			/// <returns>
+			/// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
+			/// </returns>
+			/// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
+			public bool MoveNextState()
+			{
+				// MoveNextState() returns on a reseted enumerator the first state
+				return SelectSourceState(CurrentState+1);
+			}
+
+			/// <summary>
+			/// Advances the enumerator to the next element of the collection.
+			/// </summary>
+			/// <returns>
+			/// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
+			/// </returns>
+			/// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
+			public bool MoveNextTransition()
+			{
+				return _enumerator.MoveNextColumn();
+			}
+
+			/// <summary>
+			/// Sets the enumerator to its initial position, which is before the first element in the collection.
+			/// </summary>
+			/// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
+			public void Reset()
+			{
+				SelectInitialDistribution();
 			}
 		}
 	}

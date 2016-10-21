@@ -240,6 +240,7 @@
     <Compile Include="Analysis\Probabilistic\same target state with different transient faults.cs" />
     <Compile Include="Analysis\Probabilistic\transient fault leads to invariant violation only in specific step.cs" />
     <Compile Include="DataStructures\BidirectionalGraphTests.cs" />
+    <Compile Include="DataStructures\MarkovDecisionProcessTests.cs" />
     <Compile Include="Diagnostics\Bindings\Invalid\non-component required port binding.cs" />
     <Compile Include="Diagnostics\Bindings\Valid\non-component provided port binding.cs" />
     <Compile Include="Diagnostics\CustomComponents\Invalid\components cannot implement IInitializable.cs" />

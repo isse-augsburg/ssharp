@@ -42,11 +42,11 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 			var derivedMatrix = new SparseDoubleMatrix(MarkovChain.States, MarkovChain.Transitions+ MarkovChain.States); //Transitions+States is a upper limit
 
-			var enumerator = MarkovChain.ProbabilityMatrix.GetEnumerator();
+			var enumerator = MarkovChain.GetEnumerator();
 
 			for (var sourceState = 0; sourceState < MarkovChain.States; sourceState++)
 			{
-				enumerator.MoveRow(MarkovChain.StateToRow(sourceState));
+				enumerator.SelectSourceState(sourceState);
 				derivedMatrix.SetRow(sourceState);
 				if (exactlyOneStates.ContainsKey(sourceState) || exactlyZeroStates.ContainsKey(sourceState))
 				{
@@ -57,25 +57,20 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				{
 					// if state is neither exactlyOneStates nor exactlyZeroStates, it is a toCalculateState
 					var selfReferenceAdded = false;
-					while (enumerator.MoveNextColumn())
+					while (enumerator.MoveNextTransition())
 					{
-						if (enumerator.CurrentColumnValue != null)
+						var columnValueEntry = enumerator.CurrentTransition;
+						var targetState = columnValueEntry.Column;
+						if (targetState == sourceState)
 						{
-							var columnValueEntry = enumerator.CurrentColumnValue.Value;
-							var targetState = MarkovChain.ColumnToState(columnValueEntry.Column);
-							if (targetState == sourceState)
-							{
-								//this implements the removal of the identity matrix
-								derivedMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(sourceState, columnValueEntry.Value - 1.0));
-								selfReferenceAdded = true;
-							}
-							else
-							{
-								derivedMatrix.AddColumnValueToCurrentRow(columnValueEntry);
-							}
+							//this implements the removal of the identity matrix
+							derivedMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(sourceState, columnValueEntry.Value - 1.0));
+							selfReferenceAdded = true;
 						}
 						else
-							throw new Exception("Entry must not be null");
+						{
+							derivedMatrix.AddColumnValueToCurrentRow(columnValueEntry);
+						}
 					}
 					if (!selfReferenceAdded)
 					{
@@ -188,12 +183,12 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 		{
 			var finalProbability = 0.0;
 
-			var enumerator = MarkovChain.ProbabilityMatrix.GetEnumerator();
-			enumerator.MoveRow(MarkovChain.RowOfInitialState);
-			while (enumerator.MoveNextColumn())
+			var enumerator = MarkovChain.GetEnumerator();
+			enumerator.SelectInitialDistribution();
+			while (enumerator.MoveNextTransition())
 			{
-				var entry = enumerator.CurrentColumnValue.Value;
-				finalProbability += entry.Value * initialStateProbabilities[MarkovChain.ColumnToState(entry.Column)];
+				var entry = enumerator.CurrentTransition;
+				finalProbability += entry.Value * initialStateProbabilities[entry.Column];
 			}
 			return finalProbability;
 		}
@@ -212,7 +207,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
 			var directlyUnsatisfiedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
 			
-			var enumerator = MarkovChain.ProbabilityMatrix.GetEnumerator();
+			var enumerator = MarkovChain.GetEnumerator();
 
 			var xold = new double[stateCount];
 			var xnew = CreateDerivedVector(directlySatisfiedStates);
@@ -226,7 +221,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				loops++;
 				for (var i = 0; i < stateCount; i++)
 				{
-					enumerator.MoveRow(MarkovChain.StateToRow(i));
+					enumerator.SelectSourceState(i);
 					if (directlySatisfiedStates.ContainsKey(i))
 					{
 						xnew[i] = 1.0;
@@ -238,10 +233,10 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 					else
 					{
 						var sum = 0.0;
-						while (enumerator.MoveNextColumn())
+						while (enumerator.MoveNextTransition())
 						{
-							var entry = enumerator.CurrentColumnValue.Value;
-							sum += entry.Value * xold[MarkovChain.ColumnToState(entry.Column)];
+							var entry = enumerator.CurrentTransition;
+							sum += entry.Value * xold[entry.Column];
 						}
 						xnew[i] = sum;
 					}

@@ -36,61 +36,73 @@ namespace Tests.DataStructures
 	using Xunit;
 	using Xunit.Abstractions;
 
-	public class MarkovChainTests
+	public class MarkovDecisionProcessTests
 	{
 		/// <summary>
 		///   Gets the output that writes to the test output stream.
 		/// </summary>
 		public TestTraceOutput Output { get; }
 
-		private MarkovChain _markovChain;
+		private MarkovDecisionProcess _mdp;
 
-		private void CreateExemplaryMarkovChain1()
+		private void CreateExemplaryMdp1()
 		{
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			_markovChain = new MarkovChain();
-			_markovChain.StateFormulaLabels = new string[] { "label1" , "label2" };
-			_markovChain.StateRewardRetrieverLabels = new string[] { };
-			_markovChain.StartWithInitialDistribution();
-			_markovChain.AddInitialTransition(0,1.0);
-			_markovChain.FinishInitialDistribution();
-			_markovChain.StartWithNewDistribution(1);
-			_markovChain.AddTransition(1, 1.0);
-			_markovChain.SetStateLabeling(1, new StateFormulaSet(new []{ returnTrue, returnFalse }));
-			_markovChain.FinishDistribution();
-			_markovChain.StartWithNewDistribution(0);
-			_markovChain.AddTransition(1, 0.6);
-			_markovChain.AddTransition(0, 0.4);
-			_markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
-			_markovChain.FinishDistribution();
+			_mdp = new MarkovDecisionProcess();
+			_mdp.StateFormulaLabels = new string[] { "label1" , "label2" };
+			_mdp.StateRewardRetrieverLabels = new string[] { };
+			_mdp.StartWithInitialDistributions();
+			_mdp.StartWithNewInitialDistribution();
+			_mdp.AddTransitionToInitialDistribution(0,1.0);
+			_mdp.FinishInitialDistribution();
+			_mdp.FinishInitialDistributions();
+			_mdp.StartWithNewDistributions(1);
+			_mdp.StartWithNewDistribution();
+			_mdp.AddTransition(1, 1.0);
+			_mdp.SetStateLabeling(1, new StateFormulaSet(new []{ returnTrue, returnFalse }));
+			_mdp.FinishDistribution();
+			_mdp.FinishDistributions();
+			_mdp.StartWithNewDistributions(0);
+			_mdp.StartWithNewDistribution();
+			_mdp.AddTransition(1, 0.6);
+			_mdp.AddTransition(0, 0.4);
+			_mdp.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
+			_mdp.FinishDistribution();
+			_mdp.FinishDistributions();
 			//_markovChain.ProbabilityMatrix.OptimizeAndSeal();
 		}
 
-		private void CreateExemplaryMarkovChain2()
+		private void CreateExemplaryMdp2()
 		{
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			_markovChain = new MarkovChain();
-			_markovChain.StateFormulaLabels = new string[] { "label1", "label2" };
-			_markovChain.StateRewardRetrieverLabels = new string[] { };
-			_markovChain.StartWithInitialDistribution();
-			_markovChain.AddInitialTransition(0, 1.0);
-			_markovChain.FinishInitialDistribution();
-			_markovChain.StartWithNewDistribution(1);
-			_markovChain.AddTransition(1, 1.0);
-			_markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { returnTrue, returnFalse }));
-			_markovChain.FinishDistribution();
-			_markovChain.StartWithNewDistribution(0);
-			_markovChain.AddTransition(1, 0.1);
-			_markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
-			_markovChain.FinishDistribution();
+			_mdp = new MarkovDecisionProcess();
+			_mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			_mdp.StateRewardRetrieverLabels = new string[] { };
+			_mdp.StartWithInitialDistributions();
+			_mdp.StartWithNewInitialDistribution();
+			_mdp.AddTransitionToInitialDistribution(0, 1.0);
+			_mdp.FinishInitialDistribution();
+			_mdp.FinishInitialDistributions();
+			_mdp.StartWithNewDistributions(1);
+			_mdp.StartWithNewDistribution();
+			_mdp.AddTransition(1, 1.0);
+			_mdp.SetStateLabeling(1, new StateFormulaSet(new[] { returnTrue, returnFalse }));
+			_mdp.FinishDistribution();
+			_mdp.FinishDistributions();
+			_mdp.StartWithNewDistributions(0);
+			_mdp.StartWithNewDistribution();
+			_mdp.AddTransition(1, 0.1);
+			_mdp.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
+			_mdp.FinishDistribution();
+			_mdp.FinishDistributions();
 			//_markovChain.ProbabilityMatrix.OptimizeAndSeal();
 		}
 
-		public MarkovChainTests(ITestOutputHelper output)
+		public MarkovDecisionProcessTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 		}
@@ -98,17 +110,20 @@ namespace Tests.DataStructures
 		[Fact]
 		public void PassingTest()
 		{
-			CreateExemplaryMarkovChain1();
-			_markovChain.ProbabilityMatrix.PrintMatrix(Output.Log);
-			_markovChain.ValidateStates();
-			_markovChain.PrintPathWithStepwiseHighestProbability(10);
-			var enumerator = _markovChain.GetEnumerator();
+			CreateExemplaryMdp1();
+			_mdp.RowsWithDistributions.PrintMatrix(Output.Log);
+			_mdp.ValidateStates();
+			_mdp.PrintPathWithStepwiseHighestProbability(10);
+			var enumerator = _mdp.GetEnumerator();
 			var counter = 0.0;
 			while (enumerator.MoveNextState())
 			{
-				while (enumerator.MoveNextTransition())
+				while (enumerator.MoveNextDistribution())
 				{
-					counter += enumerator.CurrentTransition.Value;
+					while (enumerator.MoveNextTransition())
+					{
+						counter += enumerator.CurrentTransition.Value;
+					}
 				}
 			}
 			Assert.Equal(2.0, counter);
@@ -117,17 +132,17 @@ namespace Tests.DataStructures
 		[Fact]
 		public void MarkovChainFormulaEvaluatorTest()
 		{
-			CreateExemplaryMarkovChain1();
+			CreateExemplaryMdp1();
 
 			Func<bool> returnTrue = () => true;
 			var stateFormulaLabel1 = new StateFormula(returnTrue, "label1");
 			var stateFormulaLabel2 = new StateFormula(returnTrue, "label2");
 			var stateFormulaBoth = new BinaryFormula(stateFormulaLabel1,BinaryOperator.And, stateFormulaLabel2);
 			var stateFormulaAny = new BinaryFormula(stateFormulaLabel1, BinaryOperator.Or, stateFormulaLabel2);
-			var evaluateStateFormulaLabel1 = _markovChain.CreateFormulaEvaluator(stateFormulaLabel1);
-			var evaluateStateFormulaLabel2 = _markovChain.CreateFormulaEvaluator(stateFormulaLabel2);
-			var evaluateStateFormulaBoth = _markovChain.CreateFormulaEvaluator(stateFormulaBoth);
-			var evaluateStateFormulaAny = _markovChain.CreateFormulaEvaluator(stateFormulaAny);
+			var evaluateStateFormulaLabel1 = _mdp.CreateFormulaEvaluator(stateFormulaLabel1);
+			var evaluateStateFormulaLabel2 = _mdp.CreateFormulaEvaluator(stateFormulaLabel2);
+			var evaluateStateFormulaBoth = _mdp.CreateFormulaEvaluator(stateFormulaBoth);
+			var evaluateStateFormulaAny = _mdp.CreateFormulaEvaluator(stateFormulaAny);
 			
 			Assert.Equal(evaluateStateFormulaLabel1(0), false);
 			Assert.Equal(evaluateStateFormulaLabel2(0), true);
@@ -138,14 +153,13 @@ namespace Tests.DataStructures
 			Assert.Equal(evaluateStateFormulaBoth(1), false);
 			Assert.Equal(evaluateStateFormulaAny(1), true);
 		}
-
-
+		
 		[Fact]
 		public void CalculateAncestorsTest()
 		{
-			CreateExemplaryMarkovChain1();
+			CreateExemplaryMdp1();
 
-			var underlyingDigraph = _markovChain.CreateUnderlyingDigraph();
+			var underlyingDigraph = _mdp.CreateUnderlyingDigraph();
 			var nodesToIgnore = new Dictionary<int,bool>();
 			var selectedNodes1 = new Dictionary<int,bool>();
 			selectedNodes1.Add(1,true);
@@ -163,9 +177,9 @@ namespace Tests.DataStructures
 		[Fact]
 		public void CalculateAncestors2Test()
 		{
-			CreateExemplaryMarkovChain2();
+			CreateExemplaryMdp2();
 
-			var underlyingDigraph = _markovChain.CreateUnderlyingDigraph();
+			var underlyingDigraph = _mdp.CreateUnderlyingDigraph();
 			var nodesToIgnore = new Dictionary<int, bool>();
 			var selectedNodes1 = new Dictionary<int, bool>();
 			selectedNodes1.Add(1, true);

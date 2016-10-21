@@ -102,7 +102,7 @@ namespace SafetySharp.Runtime
 			for (var i = 0; i < States; i++)
 			{
 				var sourceEntry = _backMapper[i];
-				MarkovChain.SetMarkovChainSourceStateOfUpcomingTransitions(i);
+				MarkovChain.StartWithNewDistribution(i);
 
 				var enumerator = ltmc.GetTransitionEnumerator(sourceEntry.StateStorageState);
 				while (enumerator.MoveNext())
@@ -111,21 +111,21 @@ namespace SafetySharp.Runtime
 					var targetState = _mapper[targetEntry];
 					MarkovChain.AddTransition(targetState,enumerator.CurrentProbability);
 				}
-				MarkovChain.FinishSourceState();
+				MarkovChain.FinishDistribution();
 			}
 		}
 
 		public void ConvertInitialStates(LabeledTransitionMarkovChain ltmc)
 		{
-			MarkovChain.StartWithInitialStates();
+			MarkovChain.StartWithInitialDistribution();
 			var enumerator = ltmc.GetInitialDistributionEnumerator();
 			while (enumerator.MoveNext())
 			{
 				var targetEntry = new StateStorageEntry(enumerator.CurrentFormulas, enumerator.CurrentTargetState);
 				var targetState = _mapper[targetEntry];
-				MarkovChain.AddInitialState(targetState, enumerator.CurrentProbability);
+				MarkovChain.AddInitialTransition(targetState, enumerator.CurrentProbability);
 			}
-			MarkovChain.FinishInitialStates();
+			MarkovChain.FinishInitialDistribution();
 		}
 
 		public LtmcToMc(LabeledTransitionMarkovChain ltmc)

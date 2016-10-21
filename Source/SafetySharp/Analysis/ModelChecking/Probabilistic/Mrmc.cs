@@ -61,21 +61,13 @@ namespace SafetySharp.Analysis
 			streamTransitions.WriteLine("STATES " + MarkovChain.States);
 			streamTransitions.WriteLine("TRANSITIONS " + MarkovChain.Transitions);
 
-			var enumerator = MarkovChain.ProbabilityMatrix.GetEnumerator();
-			for(var sourceState=0; sourceState<MarkovChain.States;sourceState++ )
+			var enumerator = MarkovChain.GetEnumerator();
+			while(enumerator.MoveNextState())
 			{
-				enumerator.MoveRow(MarkovChain.StateToRow(sourceState));
-				while (enumerator.MoveNextColumn())
+				while (enumerator.MoveNextTransition())
 				{
-					if (enumerator.CurrentColumnValue != null)
-					{
-						var currentColumnValue = enumerator.CurrentColumnValue.Value;
-						streamTransitions.WriteLine((sourceState+1) + " " + (MarkovChain.ColumnToState(currentColumnValue.Column)+1) + " " + currentColumnValue.Value.ToString(CultureInfo.InvariantCulture)); //index in mrmc is 1-based
-					}
-					else
-					{
-						throw new Exception("Entry must not be null");
-					}						
+					var currentColumnValue = enumerator.CurrentTransition;
+					streamTransitions.WriteLine((enumerator.CurrentState + 1) + " " + (currentColumnValue.Column+1) + " " + currentColumnValue.Value.ToString(CultureInfo.InvariantCulture)); //index in mrmc is 1-based
 				}
 			}
 			streamTransitions.Flush();
@@ -174,13 +166,17 @@ namespace SafetySharp.Analysis
 			
 			bool useRewards;
 			_initialStates = new Dictionary<int, double>();
-			var enumerator = MarkovChain.ProbabilityMatrix.GetEnumerator();
-			enumerator.MoveRow(MarkovChain.RowOfInitialState);
-			while (enumerator.MoveNextColumn())
+			var enumerator = MarkovChain.GetEnumerator();
+			enumerator.SelectInitialDistribution();
+			while (enumerator.MoveNextTransition())
 			{
 				//enumerate initial states
-				var entry = enumerator.CurrentColumnValue.Value;
-				_initialStates.Add(MarkovChain.ColumnToState(entry.Column), entry.Value); //index in mrmc is 1-based
+				var entry = enumerator.CurrentTransition;
+				var index = entry.Column + 1; //index in mrmc is 1-based
+				if (_initialStates.ContainsKey(index))
+					_initialStates.Add(index, _initialStates[index]+ entry.Value);
+				else
+					_initialStates.Add(index, entry.Value);
 			}
 
 			var fileResults = new TemporaryFile("res");
@@ -199,7 +195,7 @@ namespace SafetySharp.Analysis
 					script.Append("write_res_file_state");
 				foreach (var initialState in _initialStates)
 				{
-					script.Append(" " + (initialState.Key + 1)); //index in mrmc is 1-based
+					script.Append(" " + (initialState.Key));
 				}
 
 				script.AppendLine();
@@ -271,7 +267,7 @@ namespace SafetySharp.Analysis
 						if (parsed.Success)
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
-							var probabilityOfState = _initialStates[state-1]; //index in mrmc is 1-based
+							var probabilityOfState = _initialStates[state]; //index in mrmc is 1-based
 							double probabilityInState;
 							// Mrmc may return a probability in a state of PositiveInfinity. This is clearly undesired and might be because of a wrong probability matrix
 							if (parsed.Groups["probability"].Value == "inf")
@@ -313,7 +309,7 @@ namespace SafetySharp.Analysis
 						if (parsed.Success)
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
-							var probabilityOfState = _initialStates[state - 1]; //index in mrmc is 1-based
+							var probabilityOfState = _initialStates[state];
 							if (probabilityOfState>0.0)
 							{
 								var isSatisfiedResult = parsed.Groups["satisfied"].Value.Equals("TRUE");
@@ -353,7 +349,7 @@ namespace SafetySharp.Analysis
 						if (parsed.Success)
 						{
 							var state = Int32.Parse(parsed.Groups["state"].Value);
-							var probabilityOfState = _initialStates[state - 1]; //index in mrmc is 1-based
+							var probabilityOfState = _initialStates[state];
 							double rewardOfState;
 							if (parsed.Groups["reward"].Value == "inf")
 								rewardOfState = double.PositiveInfinity;
