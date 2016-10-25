@@ -63,6 +63,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robot Cell", "Models\Robot 
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Odp", "Source\Odp\Odp.csproj", "{56F7AEC6-842D-4DFC-A217-51623FACF1F0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8823091C-387F-4F4D-ABCD-8F71D1528CBB} = {8823091C-387F-4F4D-ABCD-8F71D1528CBB}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
