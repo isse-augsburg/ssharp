@@ -26,7 +26,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using Plants;
 	using SafetySharp.Modeling;
 	using Odp;
-	using System;
 
 	internal class RobotAgent : Agent
 	{

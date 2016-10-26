@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using SafetySharp.Modeling;
 	using Odp;
 
-	internal abstract class Agent : BaseAgent<Agent>
+	internal abstract class Agent : BaseAgent
 	{
 		public readonly Fault ConfigurationUpdateFailed = new TransientFault();
 
@@ -125,13 +125,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 			foreach (var input in Inputs.ToArray())
 			{
-				if (!CheckInput(input))
+				if (!CheckInput((Agent)input))
 					input.Disconnect(this);
 			}
 
 			foreach (var output in Outputs.ToArray())
 			{
-				if (!CheckOutput(output))
+				if (!CheckOutput((Agent)output))
 					this.Disconnect(output);
 			}
 		}
@@ -158,7 +158,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				: base(capabilities) { }
 
 			public override void RemoveAllocatedRoles(ITask task) { }
-			public override void AllocateRoles(params Role<Agent>[] roles) { }
+			public override void AllocateRoles(params Role[] roles) { }
 		}
 	}
 }

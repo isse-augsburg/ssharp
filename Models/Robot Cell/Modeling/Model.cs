@@ -30,7 +30,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	using SafetySharp.Modeling;
 
 	using ICapability = Odp.ICapability;
-	using IController = Odp.IController<Controllers.Agent>;
+	using IController = Odp.IController;
 
 	internal class Model : ModelBase
 	{

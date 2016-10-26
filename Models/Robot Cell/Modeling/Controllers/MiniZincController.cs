@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.Linq;
 	using Odp;
 
-	internal class MiniZincController : AbstractMiniZincController<Agent>
+	internal class MiniZincController : AbstractMiniZincController
 	{
 		private const string MinizincModel = "ConstraintModel.mzn";
 

@@ -26,27 +26,26 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-	public class ControllerReconfigurationAgent<TAgent> : IReconfigurationAgent<TAgent>
-		where TAgent : BaseAgent<TAgent>
+	public class ControllerReconfigurationAgent : IReconfigurationAgent
 	{
 		// used in this class
-		private readonly BaseAgent<TAgent> _baseAgent;
-		private readonly ReconfigurationAgentHandler<TAgent> _reconfAgentHandler;
+		private readonly BaseAgent _baseAgent;
+		private readonly ReconfigurationAgentHandler _reconfAgentHandler;
 		private RoleCalculationAgent _roleCalculationAgent;
 		private ITask _task;
 
 		// passed on to RoleCalculationAgent
-		private readonly BaseAgent<TAgent>[] _allBaseAgents;
-		private readonly IController<TAgent> _controller;
+		private readonly BaseAgent[] _allBaseAgents;
+		private readonly IController _controller;
 
 		public ControllerReconfigurationAgent(
-			BaseAgent<TAgent> baseAgent,
-			BaseAgent<TAgent>[] allBaseAgents,
-			IController<TAgent> controller
+			BaseAgent baseAgent,
+			BaseAgent[] allBaseAgents,
+			IController controller
 		)
 		{
 			_baseAgent = baseAgent;
-			_reconfAgentHandler = baseAgent.ReconfigurationStrategy as ReconfigurationAgentHandler<TAgent>;
+			_reconfAgentHandler = baseAgent.ReconfigurationStrategy as ReconfigurationAgentHandler;
 
 			_allBaseAgents = allBaseAgents;
 			_controller = controller;
@@ -57,7 +56,7 @@ namespace SafetySharp.Odp
 			_roleCalculationAgent.Acknowledge(_task);
 		}
 
-		public void StartReconfiguration(ITask task, IAgent agent, BaseAgent<TAgent>.State baseAgentState)
+		public void StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
 		{
 			_task = task;
 			if (_roleCalculationAgent != null) // a configuration is already under way
@@ -78,7 +77,7 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		public void UpdateAllocatedRoles(Role<TAgent>[] newRoles)
+		public void UpdateAllocatedRoles(Role[] newRoles)
 		{
 			_reconfAgentHandler.UpdateAllocatedRoles(_task, newRoles);
 		}
@@ -93,24 +92,24 @@ namespace SafetySharp.Odp
 
 		protected class RoleCalculationAgent : IAgent
 		{
-			private readonly BaseAgent<TAgent>[] _functioningAgents;
-			private readonly IController<TAgent> _controller;
+			private readonly BaseAgent[] _functioningAgents;
+			private readonly IController _controller;
 
-			private readonly Dictionary<uint, ControllerReconfigurationAgent<TAgent>> _reconfAgents
-				= new Dictionary<uint, ControllerReconfigurationAgent<TAgent>>();
+			private readonly Dictionary<uint, ControllerReconfigurationAgent> _reconfAgents
+				= new Dictionary<uint, ControllerReconfigurationAgent>();
 
 			private int _ackCounter = 0;
 
 			private enum State { Idle, GatherGlobalKnowledge, CalculateRoles, AllocateRoles }
 			private readonly StateMachine<State> _stateMachine = State.Idle;
 
-			public RoleCalculationAgent(BaseAgent<TAgent>[] allBaseAgents, IController<TAgent> controller)
+			public RoleCalculationAgent(BaseAgent[] allBaseAgents, IController controller)
 			{
 				_functioningAgents = allBaseAgents.Where(agent => agent.IsAlive).ToArray();
 				_controller = controller;
 			}
 
-			public void StartCentralReconfiguration(ITask task, BaseAgent<TAgent> agent, object bastate)
+			public void StartCentralReconfiguration(ITask task, BaseAgent agent, object bastate)
 			{
 				_stateMachine.Transition(
 					from: State.Idle,
@@ -122,7 +121,7 @@ namespace SafetySharp.Odp
 				);
 			}
 
-			public void AcknowledgeReconfigurationRequest(ITask task, ControllerReconfigurationAgent<TAgent> agent, BaseAgent<TAgent>.State baseAgentState)
+			public void AcknowledgeReconfigurationRequest(ITask task, ControllerReconfigurationAgent agent, BaseAgent.State baseAgentState)
 			{
 				_stateMachine.Transition(
 					from: State.GatherGlobalKnowledge,
@@ -145,8 +144,8 @@ namespace SafetySharp.Odp
 					from: State.CalculateRoles,
 					to: State.AllocateRoles,
 					action: () => {
-						var emptyRoles = new Role<TAgent>[0];
-						foreach (var agent in _functioningAgents.Cast<TAgent>())
+						var emptyRoles = new Role[0];
+						foreach (var agent in _functioningAgents)
 						{
 							_reconfAgents[agent.ID].UpdateAllocatedRoles(
 								configs.ContainsKey(agent) ? configs[agent].ToArray() : emptyRoles

@@ -29,8 +29,7 @@ namespace SafetySharp.Odp
 	using Modeling;
 	using System.Diagnostics;
 
-	public abstract class AbstractMiniZincController<TAgent> : AbstractController<TAgent>
-		where TAgent : BaseAgent<TAgent>
+	public abstract class AbstractMiniZincController : AbstractController
 	{
 		private readonly string _constraintsModel;
 		[Hidden]
@@ -41,14 +40,14 @@ namespace SafetySharp.Odp
 		public static string MiniZinc = "minizinc.exe";
 		private static int _counter = 0;
 
-		public AbstractMiniZincController(string constraintsModel, TAgent[] agents) : base(agents)
+		public AbstractMiniZincController(string constraintsModel, BaseAgent[] agents) : base(agents)
 		{
 			_constraintsModel = constraintsModel;
 		}
 
-		public override Dictionary<TAgent, IEnumerable<Role<TAgent>>> CalculateConfigurations(params ITask[] tasks)
+		public override Dictionary<BaseAgent, IEnumerable<Role>> CalculateConfigurations(params ITask[] tasks)
 		{
-			var configs = new Dictionary<TAgent, IEnumerable<Role<TAgent>>>();
+			var configs = new Dictionary<BaseAgent, IEnumerable<Role>>();
 			foreach (var task in tasks)
 			{
 				lock(MiniZinc)
@@ -99,7 +98,7 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		private void ParseConfigurations(Dictionary<TAgent, IEnumerable<Role<TAgent>>> configs, ITask task)
+		private void ParseConfigurations(Dictionary<BaseAgent, IEnumerable<Role>> configs, ITask task)
 		{
 			var lines = File.ReadAllLines(_outputFile);
 			if (lines[0].Contains("UNSATISFIABLE"))
@@ -111,8 +110,8 @@ namespace SafetySharp.Odp
 			var agentIds = ParseList(lines[0]);
 			var capabilityIds = ParseList(lines[1]);
 
-			var role = default(Role<TAgent>);
-			TAgent lastAgent = null;
+			var role = default(Role);
+			BaseAgent lastAgent = null;
 
 			for (int i = 0; i < agentIds.Length; ++i)
 			{
@@ -120,7 +119,7 @@ namespace SafetySharp.Odp
 				// connect to previous role
 				role.PostCondition.Port = agent;
 				// get new role
-				role = GetRole(task, lastAgent, lastAgent == null ? null : (Condition<TAgent>?)role.PostCondition);
+				role = GetRole(task, lastAgent, lastAgent == null ? null : (Condition?)role.PostCondition);
 
 				// collect capabilities for the current agent into one role
 				for (var current = agentIds[i]; current == agentIds[i]; ++i)
@@ -130,8 +129,8 @@ namespace SafetySharp.Odp
 				}
 
 				if (!configs.ContainsKey(agent))
-					configs.Add(agent, new HashSet<Role<TAgent>>());
-				(configs[agent] as HashSet<Role<TAgent>>).Add(role);
+					configs.Add(agent, new HashSet<Role>());
+				(configs[agent] as HashSet<Role>).Add(role);
 			}
 		}
 
@@ -144,7 +143,7 @@ namespace SafetySharp.Odp
 				.Select(n => int.Parse(n.Trim()) - 1).ToArray();
 		}
 
-		protected virtual TAgent GetAgent(int index)
+		protected virtual BaseAgent GetAgent(int index)
 		{
 			return Agents[index];
 		}

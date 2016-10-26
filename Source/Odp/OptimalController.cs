@@ -25,10 +25,9 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public class OptimalController<TAgent> : FastController<TAgent>
-		where TAgent : BaseAgent<TAgent>
+	public class OptimalController : FastController
 	{
-		public OptimalController(TAgent[] agents) : base(agents) { }
+		public OptimalController(BaseAgent[] agents) : base(agents) { }
 
 		protected override int[] FindAgentPath(ITask task)
 		{

@@ -27,8 +27,7 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-    public abstract partial class BaseAgent<TAgent> : Component, IAgent
-		where TAgent : BaseAgent<TAgent>
+    public abstract partial class BaseAgent : Component, IAgent
     {
 		// configuration options
 		public static int MaximumAgentCount = 20;
@@ -42,7 +41,7 @@ namespace SafetySharp.Odp
 
 		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
-		public List<Role<TAgent>> AllocatedRoles { get; } = new List<Role<TAgent>>(MaximumRoleCount);
+		public List<Role> AllocatedRoles { get; } = new List<Role>(MaximumRoleCount);
 		private readonly List<uint> _applicationTimes = new List<uint>(MaximumRoleCount);
 
 		private uint _timeStamp = 0;
@@ -62,7 +61,7 @@ namespace SafetySharp.Odp
 
 		#region functional part
 
-		protected Role<TAgent>? _currentRole;
+		protected Role? _currentRole;
 
 		public Resource Resource { get; protected set; }
 
@@ -113,14 +112,14 @@ namespace SafetySharp.Odp
 					from : States.ExecuteRole,
 					to: States.ExecuteRole,
 					guard: !_currentRole.Value.IsCompleted,
-					action: () => _currentRole?.ExecuteStep((TAgent)this))
+					action: () => _currentRole?.ExecuteStep(this))
 				.Transition( // work is done -- pass resource on
 					from: States.ExecuteRole,
 					to: States.Output,
 					guard: _currentRole.Value.IsCompleted && _currentRole?.PostCondition.Port != null,
 					action: () =>
 					{
-						_currentRole?.PostCondition.Port.ResourceReady((TAgent)this, _currentRole.Value.PostCondition);
+						_currentRole?.PostCondition.Port.ResourceReady(this, _currentRole.Value.PostCondition);
 						_currentRole?.Reset();
 					})
 				.Transition( // resource has been consumed
@@ -166,7 +165,7 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		private Role<TAgent> ChooseRole(Role<TAgent> role1, Role<TAgent> role2)
+		private Role ChooseRole(Role role1, Role role2)
 		{
 			var fitness1 = Fitness(role1);
 			var fitness2 = Fitness(role2);
@@ -190,14 +189,14 @@ namespace SafetySharp.Odp
 
 		private const uint alpha = 1;
 		private const uint beta = 1;
-		private uint Fitness(Role<TAgent> role)
+		private uint Fitness(Role role)
 		{
 			var applicationTime = _applicationTimes[AllocatedRoles.IndexOf(role)];
 			return alpha * (_roleApplications - applicationTime)
 				+ beta * (uint)(role.Task.RequiredCapabilities.Length - role.PreCondition.State.Count());
 		}
 
-		private uint GetTimeStamp(Role<TAgent> role)
+		private uint GetTimeStamp(Role role)
 		{
 			// for roles without request (production roles) use current time
 			return (from request in _resourceRequests
@@ -206,7 +205,7 @@ namespace SafetySharp.Odp
 				).DefaultIfEmpty(_timeStamp).Single();
 		}
 
-		private Role<TAgent>[] GetRoles(TAgent source, Condition<TAgent> condition)
+		private Role[] GetRoles(BaseAgent source, Condition condition)
 		{
 			return AllocatedRoles.Where(role =>
 				role.PreCondition.Port == source && role.PreCondition.StateMatches(condition)
@@ -217,33 +216,33 @@ namespace SafetySharp.Odp
 
 		#region resource flow
 
-		public List<TAgent> Inputs { get; } = new List<TAgent>();
-		public List<TAgent> Outputs { get; } = new List<TAgent>();
+		public List<BaseAgent> Inputs { get; } = new List<BaseAgent>();
+		public List<BaseAgent> Outputs { get; } = new List<BaseAgent>();
 
-		public void Connect(TAgent successor)
+		public void Connect(BaseAgent successor)
 		{
 			if (!Outputs.Contains(successor))
 				Outputs.Add(successor);
 			if (!successor.Inputs.Contains(this))
-				successor.Inputs.Add((TAgent)this);
+				successor.Inputs.Add(this);
 		}
 
-		public void BidirectionallyConnect(TAgent neighbor)
+		public void BidirectionallyConnect(BaseAgent neighbor)
 		{
 			Connect(neighbor);
-			neighbor.Connect((TAgent)this);
+			neighbor.Connect(this);
 		}
 
-		public void Disconnect(TAgent successor)
+		public void Disconnect(BaseAgent successor)
 		{
 			Outputs.Remove(successor);
-			successor.Inputs.Remove((TAgent)this);
+			successor.Inputs.Remove(this);
 		}
 
-		public void BidirectionallyDisconnect(TAgent neighbor)
+		public void BidirectionallyDisconnect(BaseAgent neighbor)
 		{
 			Disconnect(neighbor);
-			neighbor.Disconnect((TAgent)this);
+			neighbor.Disconnect(this);
 		}
 
 		#endregion
@@ -255,24 +254,24 @@ namespace SafetySharp.Odp
 
 		private struct ResourceRequest
 		{
-			public ResourceRequest(TAgent source, Role<TAgent> role, uint timeStamp)
+			public ResourceRequest(BaseAgent source, Role role, uint timeStamp)
 			{
 				Source = source;
 				Role = role;
 				TimeStamp = timeStamp;
 			}
 
-			public TAgent Source { get; }
-			public Role<TAgent> Role { get; }
+			public BaseAgent Source { get; }
+			public Role Role { get; }
 			public uint TimeStamp { get; }
 		}
 
-		protected virtual void InitiateResourceTransfer(TAgent source)
+		protected virtual void InitiateResourceTransfer(BaseAgent source)
 		{
 			source.TransferResource();
 		}
 
-		private void ResourceReady(TAgent agent, Condition<TAgent> condition)
+		private void ResourceReady(BaseAgent agent, Condition condition)
 		{
 			var roles = GetRoles(agent, condition);
 			if (roles.Length == 0)
@@ -328,9 +327,9 @@ namespace SafetySharp.Odp
 		private bool _deficientConfiguration = false;
 
 		[Hidden]
-		public IReconfigurationStrategy<TAgent> ReconfigurationStrategy { get; set; }
+		public IReconfigurationStrategy ReconfigurationStrategy { get; set; }
 
-		public delegate IEnumerable<ITask> InvariantPredicate(TAgent agent);
+		public delegate IEnumerable<ITask> InvariantPredicate(BaseAgent agent);
 
 		protected virtual InvariantPredicate[] MonitoringPredicates => new InvariantPredicate[] {
 			Invariant.IOConsistency,
@@ -375,7 +374,7 @@ namespace SafetySharp.Odp
 			var violations = new Dictionary<ITask, IEnumerable<InvariantPredicate>>();
 			foreach (var predicate in MonitoringPredicates)
 			{
-				foreach (var violatingTask in predicate((TAgent)this))
+				foreach (var violatingTask in predicate(this))
 				{
 					if (!violations.ContainsKey(violatingTask))
 						violations.Add(violatingTask, new HashSet<InvariantPredicate>());
@@ -404,7 +403,7 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		public virtual void AllocateRoles(params Role<TAgent>[] roles)
+		public virtual void AllocateRoles(params Role[] roles)
 		{
 			AllocatedRoles.AddRange(roles);
 			_applicationTimes.AddRange(Enumerable.Repeat(0u, roles.Length));

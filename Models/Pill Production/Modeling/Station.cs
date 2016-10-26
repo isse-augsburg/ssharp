@@ -31,7 +31,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	/// <summary>
 	///   A production station that modifies containers.
 	/// </summary>
-	public abstract class Station : BaseAgent<Station>
+	public abstract class Station : BaseAgent
 	{
 		public readonly Fault CompleteStationFailure = new PermanentFault();
 
@@ -97,7 +97,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			RemoveAllocatedRoles(recipe);
 
 			foreach (var neighbour in affectedNeighbours)
-				neighbour.RemoveRecipeConfigurations(recipe);
+				(neighbour as Station).RemoveRecipeConfigurations(recipe);
 		}
 
 		/*[FaultEffect(Fault = nameof(CompleteStationFailure))]

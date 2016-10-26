@@ -25,8 +25,7 @@ namespace SafetySharp.Odp
 	using System;
 	using System.Collections.Generic;
 
-	public class CoalitionReconfigurationAgent<TAgent> : IReconfigurationAgent<TAgent>
-		where TAgent : BaseAgent<TAgent>
+	public class CoalitionReconfigurationAgent : IReconfigurationAgent
 	{
 		protected Coalition CurrentCoalition { get; set; }
 
@@ -35,7 +34,7 @@ namespace SafetySharp.Odp
 			throw new NotImplementedException();
 		}
 
-		public void StartReconfiguration(ITask task, IAgent agent, BaseAgent<TAgent>.State baseAgentState)
+		public void StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
 		{
 			//if (state.isRequest) // also handle (IsRequest && IsLocalViolation)
 			{
@@ -73,10 +72,10 @@ namespace SafetySharp.Odp
 
 		protected class Coalition
 		{
-			public CoalitionReconfigurationAgent<TAgent> Leader { get; }
+			public CoalitionReconfigurationAgent Leader { get; }
 
-			public List<CoalitionReconfigurationAgent<TAgent>> Members { get; }
-				= new List<CoalitionReconfigurationAgent<TAgent>>();
+			public List<CoalitionReconfigurationAgent> Members { get; }
+				= new List<CoalitionReconfigurationAgent>();
 
 			private int _ctfStart = -1;
 			private int _ctfEnd = -1;
@@ -84,13 +83,13 @@ namespace SafetySharp.Odp
 			private int _tfrStart = -1;
 			private int _tfrEnd = -1;
 
-			public Coalition(CoalitionReconfigurationAgent<TAgent> leader)
+			public Coalition(CoalitionReconfigurationAgent leader)
 			{
 				Leader = leader;
 				Members.Add(leader);
 			}
 
-			public void Join(CoalitionReconfigurationAgent<TAgent> newMember)
+			public void Join(CoalitionReconfigurationAgent newMember)
 			{
 				Members.Add(newMember);
 			}

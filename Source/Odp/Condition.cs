@@ -26,16 +26,16 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public struct Condition<TAgent>
+	public struct Condition
 	{
-		public Condition(TAgent port, ITask task, int statePrefixLength)
+		public Condition(BaseAgent port, ITask task, int statePrefixLength)
 		{
 			Port = port;
 			Task = task;
 			_statePrefixLength = checked((byte)statePrefixLength);
 		}
 
-		public TAgent Port { get; set; }
+		public BaseAgent Port { get; set; }
 		public ITask Task { get; set; }
 
 		private byte _statePrefixLength;
@@ -43,7 +43,7 @@ namespace SafetySharp.Odp
 		public IEnumerable<ICapability> State =>
 			Task?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
 
-		public bool StateMatches(Condition<TAgent> other)
+		public bool StateMatches(Condition other)
 		{
 			return Task == other.Task
 				   && _statePrefixLength == other._statePrefixLength;
@@ -64,7 +64,7 @@ namespace SafetySharp.Odp
 			_statePrefixLength = 0;
 		}
 
-		public void CopyStateFrom(Condition<TAgent> other)
+		public void CopyStateFrom(Condition other)
 		{
 			if (other.Task != Task)
 				throw new InvalidOperationException("Invalid task: cannot copy Condition state");

@@ -26,11 +26,11 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public partial class BaseAgent<TAgent>
+	public partial class BaseAgent
 	{
 		public static class Invariant
 		{
-			public static IEnumerable<ITask> IOConsistency(TAgent agent)
+			public static IEnumerable<ITask> IOConsistency(BaseAgent agent)
 			{
 				return RoleInvariant(
 					agent,
@@ -39,7 +39,7 @@ namespace SafetySharp.Odp
 				);
 			}
 
-			public static IEnumerable<ITask> ResourceConsistency(TAgent agent)
+			public static IEnumerable<ITask> ResourceConsistency(BaseAgent agent)
 			{
 				if (agent.Resource != null
 					&& !agent.AllocatedRoles.Any(role => role.PreCondition.Task == agent.Resource.Task
@@ -48,7 +48,7 @@ namespace SafetySharp.Odp
 				return Enumerable.Empty<ITask>();
 			}
 
-			public static IEnumerable<ITask> CapabilityConsistency(TAgent agent)
+			public static IEnumerable<ITask> CapabilityConsistency(BaseAgent agent)
 			{
 				return RoleInvariant(
 					agent,
@@ -56,7 +56,7 @@ namespace SafetySharp.Odp
 				);
 			}
 
-			public static IEnumerable<ITask> PrePostConditionConsistency(TAgent agent)
+			public static IEnumerable<ITask> PrePostConditionConsistency(BaseAgent agent)
 			{
 				return RoleInvariant(
 					agent,
@@ -78,12 +78,12 @@ namespace SafetySharp.Odp
 				);
 			}
 
-			public static IEnumerable<ITask> TaskEquality(TAgent agent)
+			public static IEnumerable<ITask> TaskEquality(BaseAgent agent)
 			{
 				return RoleInvariant(agent, role => role.PreCondition.Task == role.PostCondition.Task);
 			}
 
-			public static IEnumerable<ITask> StateConsistency(TAgent agent)
+			public static IEnumerable<ITask> StateConsistency(BaseAgent agent)
 			{
 				return RoleInvariant(agent, role => role.PreCondition.State.Concat(role.CapabilitiesToApply)
 					.SequenceEqual(role.PostCondition.State));
@@ -94,7 +94,7 @@ namespace SafetySharp.Odp
 
 			// StateIsPrefix invariant: ensured by Condition.State implementation
 
-			public static IEnumerable<ITask> NeighborsAliveGuarantee(TAgent agent)
+			public static IEnumerable<ITask> NeighborsAliveGuarantee(BaseAgent agent)
 			{
 				return RoleInvariant(
 					agent,
@@ -102,14 +102,14 @@ namespace SafetySharp.Odp
 				);
 			}
 
-			private static IEnumerable<ITask> RoleInvariant(TAgent agent, Predicate<Role<TAgent>> invariant)
+			private static IEnumerable<ITask> RoleInvariant(BaseAgent agent, Predicate<Role> invariant)
 			{
 				return (from role in agent.AllocatedRoles
 						where !role.IsLocked && !invariant(role)
 						select role.Task).Distinct();
 			}
 
-			public static InvariantPredicate RoleInvariant(Predicate<Role<TAgent>> invariant)
+			public static InvariantPredicate RoleInvariant(Predicate<Role> invariant)
 			{
 				return (agent) => RoleInvariant(agent, invariant);
 			}

@@ -26,25 +26,24 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using Modeling;
 
-	public class ReconfigurationAgentHandler<TAgent> : Component, IReconfigurationStrategy<TAgent>
-		where TAgent : BaseAgent<TAgent>
+	public class ReconfigurationAgentHandler : Component, IReconfigurationStrategy
 	{
-		private readonly TAgent _baseAgent;
-		private readonly Func<TAgent, ITask, IReconfigurationAgent<TAgent>> _createReconfAgent;
+		private readonly BaseAgent _baseAgent;
+		private readonly Func<BaseAgent, ITask, IReconfigurationAgent> _createReconfAgent;
 
 		public ReconfigurationAgentHandler(
-			TAgent baseAgent,
-			Func<TAgent, ITask, IReconfigurationAgent<TAgent>> createReconfAgent
+			BaseAgent baseAgent,
+			Func<BaseAgent, ITask, IReconfigurationAgent> createReconfAgent
 		)
 		{
 			_baseAgent = baseAgent;
 			_createReconfAgent = createReconfAgent;
 		}
 
-		protected readonly Dictionary<ITask, IReconfigurationAgent<TAgent>> _tasksUnderReconstruction
-			= new Dictionary<ITask, IReconfigurationAgent<TAgent>>();
+		protected readonly Dictionary<ITask, IReconfigurationAgent> _tasksUnderReconstruction
+			= new Dictionary<ITask, IReconfigurationAgent>();
 
-		public void Reconfigure(IEnumerable<Tuple<ITask, BaseAgent<TAgent>.State>> reconfigurations)
+		public void Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
 		{
 			foreach (var tuple in reconfigurations)
 			{
@@ -63,7 +62,7 @@ namespace SafetySharp.Odp
 		}
 
 		#region interface presented to reconfiguration agent
-		public virtual void UpdateAllocatedRoles(ITask task, Role<TAgent>[] newRoles)
+		public virtual void UpdateAllocatedRoles(ITask task, Role[] newRoles)
 		{
 			// new roles must be locked
 			for (int i = 0; i < newRoles.Length; ++i)

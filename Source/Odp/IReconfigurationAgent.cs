@@ -22,10 +22,9 @@
 
 namespace SafetySharp.Odp
 {
-	public interface IReconfigurationAgent<TAgent> : IAgent
-		where TAgent : BaseAgent<TAgent>
+	public interface IReconfigurationAgent : IAgent
 	{
-		void StartReconfiguration(ITask task, IAgent agent, BaseAgent<TAgent>.State baseAgentState);
+		void StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState);
 		void Acknowledge();
 	}
 }

@@ -22,11 +22,11 @@
 
 namespace SafetySharp.Odp
 {
-	public partial class BaseAgent<TAgent>
+	public partial class BaseAgent
 	{
 		public class State
 		{
-			public State(BaseAgent<TAgent> agent, IAgent requestSource = null, params InvariantPredicate[] violatedPredicates)
+			public State(BaseAgent agent, IAgent requestSource = null, params InvariantPredicate[] violatedPredicates)
 			{
 				ReconfRequestSource = requestSource;
 				ViolatedPredicates = violatedPredicates;
@@ -43,9 +43,9 @@ namespace SafetySharp.Odp
 
 			public uint ID { get; }
 			public Resource Resource { get; }
-			public TAgent[] Inputs { get; }
-			public TAgent[] Outputs { get; }
-			public Role<TAgent>[] AllocatedRoles { get; }
+			public BaseAgent[] Inputs { get; }
+			public BaseAgent[] Outputs { get; }
+			public Role[] AllocatedRoles { get; }
 		}
 	}
 }
