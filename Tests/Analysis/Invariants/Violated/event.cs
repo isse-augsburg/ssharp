@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,50 +20,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Compiler.Analyzers
+namespace Tests.Analysis.Invariants.Violated
 {
-	/// <summary>
-	///   Represents a unique identifier for a S# diagnostic emitted by a <see cref="Analyzer" />.
-	/// </summary>
-	public enum DiagnosticIdentifier
+	using System;
+	using SafetySharp.Modeling;
+	using Shouldly;
+
+	internal class Event : AnalysisTestObject
 	{
-		// Type diagnostics
-		CustomComponent = 1000,
-		ComponentInterfaceReimplementation,
-		ComponentIsInitializable,
+		protected override void Check()
+		{
+			var d = new D();
+			var c = new C(d);
 
-		// Port diagnostics
-		AmbiguousPortKind = 3000,
-		StaticPort,
-		UnmarkedInterfacePort,
-		PortPropertyAccessor,
-		ProvidedPortImplementedAsRequiredPort,
-		RequiredPortImplementedAsProvidedPort,
-		NonExternRequiredPort,
-		UpdateMethodMarkedAsPort,
-		ExternProvidedPort,
-		ExternUpdateMethod,
-		GenericPort,
-		IndexerPort,
-		EventPort,
+			CheckInvariant(c.F != 2, d).ShouldBe(false);
+		}
 
-		// Fault and fault effect diagnostics
-		InvalidFaultMemberAccess = 4000,
-		GenericFaultEffect,
-		FaultEffectAccessibility,
-		InvalidFaultEffectBaseType,
-		AbstractFaultEffectOverride,
-		MultipleFaultEffectsWithoutPriority,
-		SealedFaultEffect,
-		ClosedGenericBaseType,
-		EventFaultEffect,
+		private class C : Component
+		{
+			public int F;
 
-		// Bindings diagnostics
-		BindingFailure = 5000,
-		AmbiguousBinding,
-		NonDelegateBinding,
+			public C(D d)
+			{
+				d.E += f => F = f;
+			}
+		}
 
-		// Misc diagnostics
-		ReservedName = 9000,
+		private class D : Component
+		{
+			[Range(0, 3, OverflowBehavior.Clamp)]
+			private int _f;
+
+			public event Action<int> E;
+
+			public override void Update()
+			{
+				_f++;
+
+				if (_f == 2)
+					E(_f);
+			}
+		}
 	}
 }

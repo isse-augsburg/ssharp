@@ -262,6 +262,21 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
+		///   Gets the <see cref="EventInfo" /> for the <paramref name="backingField" />. Returns <c>null</c> if
+		///   <paramref name="backingField" /> is not a compiler generated backing field for a field-like event.
+		/// </summary>
+		/// <param name="backingField">The backing field the <see cref="EventInfo" /> should be returned for.</param>
+		public static EventInfo GetFieldLikeEvent(this FieldInfo backingField)
+		{
+			Requires.NotNull(backingField, nameof(backingField));
+
+			if (!backingField.HasAttribute<CompilerGeneratedAttribute>() || !backingField.IsPrivate)
+				return null;
+
+			return backingField.DeclaringType.GetEvent(backingField.Name, Flags);
+		}
+
+		/// <summary>
 		///   Tries to get the <see cref="FieldInfo" /> for the <paramref name="property" />'s backing field. Returns <c>null</c> if
 		///   <paramref name="property" /> is not a compiler generated an auto-property.
 		/// </summary>
@@ -283,11 +298,11 @@ namespace SafetySharp.Utilities
 		/// <param name="discoveringObjects">Indicates whether objects are being discovered.</param>
 		public static bool IsHidden(this MemberInfo member, SerializationMode mode, bool discoveringObjects)
 		{
-			// For backing fields of auto-implemented properties, check the property instead
-			// TODO: Remove this workaround once C# supports [field:Attribute] on properties
+			Requires.NotNull(member, nameof(member));
+			Requires.InRange(mode, nameof(mode));
+
 			var fieldInfo = member as FieldInfo;
-			var property = fieldInfo?.GetAutoProperty();
-			var attributeMember = property ?? member;
+			var attributeMember = fieldInfo?.GetDeclaringMember() ?? member;
 
 			// Don't try to serialize members that are explicitly marked as non-serializable
 			if (attributeMember.HasAttribute<NonSerializableAttribute>() || attributeMember.HasAttribute<NonSerializedAttribute>())
@@ -307,6 +322,26 @@ namespace SafetySharp.Utilities
 				return true;
 
 			return false;
+		}
+
+		/// <summary>
+		///   Gets the <see cref="MemberInfo" /> the <paramref name="field" /> is directly or indirectly generated for, i.e., by an
+		///   auto-property or a field-like event. Otherwise, returns the <paramref name="field" />.
+		/// </summary>
+		/// <param name="field">The field that should be checked.</param>
+		public static MemberInfo GetDeclaringMember(this FieldInfo field)
+		{
+			Requires.NotNull(field, nameof(field));
+
+			var autoProperty = field.GetAutoProperty();
+			if (autoProperty != null)
+				return autoProperty;
+
+			var fieldLikeEvent = field.GetFieldLikeEvent();
+			if (fieldLikeEvent != null)
+				return fieldLikeEvent;
+
+			return field;
 		}
 
 		/// <summary>

@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,50 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Compiler.Analyzers
+namespace Tests.Diagnostics.PortKinds.Valid
 {
-	/// <summary>
-	///   Represents a unique identifier for a S# diagnostic emitted by a <see cref="Analyzer" />.
-	/// </summary>
-	public enum DiagnosticIdentifier
+	using System;
+	using SafetySharp.Modeling;
+	
+	internal abstract class Events : Component
 	{
-		// Type diagnostics
-		CustomComponent = 1000,
-		ComponentInterfaceReimplementation,
-		ComponentIsInitializable,
+		private event Action B;
 
-		// Port diagnostics
-		AmbiguousPortKind = 3000,
-		StaticPort,
-		UnmarkedInterfacePort,
-		PortPropertyAccessor,
-		ProvidedPortImplementedAsRequiredPort,
-		RequiredPortImplementedAsProvidedPort,
-		NonExternRequiredPort,
-		UpdateMethodMarkedAsPort,
-		ExternProvidedPort,
-		ExternUpdateMethod,
-		GenericPort,
-		IndexerPort,
-		EventPort,
+		private event Action C
+		{
+			add { }
+			remove { }
+		}
+	}
 
-		// Fault and fault effect diagnostics
-		InvalidFaultMemberAccess = 4000,
-		GenericFaultEffect,
-		FaultEffectAccessibility,
-		InvalidFaultEffectBaseType,
-		AbstractFaultEffectOverride,
-		MultipleFaultEffectsWithoutPriority,
-		SealedFaultEffect,
-		ClosedGenericBaseType,
-		EventFaultEffect,
-
-		// Bindings diagnostics
-		BindingFailure = 5000,
-		AmbiguousBinding,
-		NonDelegateBinding,
-
-		// Misc diagnostics
-		ReservedName = 9000,
+	internal interface IEvents : IComponent
+	{
+		event Action B;
 	}
 }

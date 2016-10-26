@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,50 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Compiler.Analyzers
+namespace Tests.Diagnostics.FaultEffects.Invalid
 {
-	/// <summary>
-	///   Represents a unique identifier for a S# diagnostic emitted by a <see cref="Analyzer" />.
-	/// </summary>
-	public enum DiagnosticIdentifier
+	using System;
+	using SafetySharp.Compiler.Analyzers;
+	using SafetySharp.Modeling;
+
+	[Diagnostic(DiagnosticIdentifier.EventFaultEffect, 43, 42, 1,
+		 "Tests.Diagnostics.FaultEffects.Invalid.Events.E.P", "Tests.Diagnostics.FaultEffects.Invalid.Events.P")]
+	public class Events : Component
 	{
-		// Type diagnostics
-		CustomComponent = 1000,
-		ComponentInterfaceReimplementation,
-		ComponentIsInitializable,
+		public virtual event Action P;
 
-		// Port diagnostics
-		AmbiguousPortKind = 3000,
-		StaticPort,
-		UnmarkedInterfacePort,
-		PortPropertyAccessor,
-		ProvidedPortImplementedAsRequiredPort,
-		RequiredPortImplementedAsProvidedPort,
-		NonExternRequiredPort,
-		UpdateMethodMarkedAsPort,
-		ExternProvidedPort,
-		ExternUpdateMethod,
-		GenericPort,
-		IndexerPort,
-		EventPort,
+		public Events()
+		{
+			P();
+		}
 
-		// Fault and fault effect diagnostics
-		InvalidFaultMemberAccess = 4000,
-		GenericFaultEffect,
-		FaultEffectAccessibility,
-		InvalidFaultEffectBaseType,
-		AbstractFaultEffectOverride,
-		MultipleFaultEffectsWithoutPriority,
-		SealedFaultEffect,
-		ClosedGenericBaseType,
-		EventFaultEffect,
-
-		// Bindings diagnostics
-		BindingFailure = 5000,
-		AmbiguousBinding,
-		NonDelegateBinding,
-
-		// Misc diagnostics
-		ReservedName = 9000,
+		[FaultEffect]
+		public class E : Events
+		{
+			public override event Action P
+			{
+				add { base.P += value; }
+				remove { base.P -= value; }
+			}
+		}
 	}
 }

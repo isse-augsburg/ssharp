@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,50 +20,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Compiler.Analyzers
+namespace Tests.Execution.Simulation
 {
-	/// <summary>
-	///   Represents a unique identifier for a S# diagnostic emitted by a <see cref="Analyzer" />.
-	/// </summary>
-	public enum DiagnosticIdentifier
+	using System;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
+
+	internal class Event : TestObject
 	{
-		// Type diagnostics
-		CustomComponent = 1000,
-		ComponentInterfaceReimplementation,
-		ComponentIsInitializable,
+		protected override void Check()
+		{
+			var simulator = new Simulator(TestModel.InitializeModel(new C { X = 1 }));
+			var c = (C)simulator.Model.Roots[0];
 
-		// Port diagnostics
-		AmbiguousPortKind = 3000,
-		StaticPort,
-		UnmarkedInterfacePort,
-		PortPropertyAccessor,
-		ProvidedPortImplementedAsRequiredPort,
-		RequiredPortImplementedAsProvidedPort,
-		NonExternRequiredPort,
-		UpdateMethodMarkedAsPort,
-		ExternProvidedPort,
-		ExternUpdateMethod,
-		GenericPort,
-		IndexerPort,
-		EventPort,
+			var y = 0;
+			c.Y += x => y = x;
 
-		// Fault and fault effect diagnostics
-		InvalidFaultMemberAccess = 4000,
-		GenericFaultEffect,
-		FaultEffectAccessibility,
-		InvalidFaultEffectBaseType,
-		AbstractFaultEffectOverride,
-		MultipleFaultEffectsWithoutPriority,
-		SealedFaultEffect,
-		ClosedGenericBaseType,
-		EventFaultEffect,
+			c.X.ShouldBe(1);
+			y.ShouldBe(0);
 
-		// Bindings diagnostics
-		BindingFailure = 5000,
-		AmbiguousBinding,
-		NonDelegateBinding,
+			simulator.SimulateStep();
+			y.ShouldBe(0);
 
-		// Misc diagnostics
-		ReservedName = 9000,
+			simulator.SimulateStep();
+			y.ShouldBe(3);
+
+			y = 0;
+			simulator.SimulateStep();
+			y.ShouldBe(0);
+		}
+
+		private class C : Component
+		{
+			public int X;
+
+			[Hidden]
+			public event Action<int> Y;
+
+			public override void Update()
+			{
+				++X;
+
+				if (X == 3)
+					Y(X);
+			}
+		}
 	}
 }
