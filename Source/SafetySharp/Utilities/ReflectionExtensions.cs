@@ -302,19 +302,18 @@ namespace SafetySharp.Utilities
 			Requires.InRange(mode, nameof(mode));
 
 			var fieldInfo = member as FieldInfo;
-			var attributeMember = fieldInfo?.GetDeclaringMember() ?? member;
 
 			// Don't try to serialize members that are explicitly marked as non-serializable
-			if (attributeMember.HasAttribute<NonSerializableAttribute>() || attributeMember.HasAttribute<NonSerializedAttribute>())
+			if (member.HasAttributeTransitive<NonSerializableAttribute>() || member.HasAttributeTransitive<NonSerializedAttribute>())
 				return true;
 
 			// If we're discovering objects in optimized mode and the member is explicitly marked as non-discoverable, it is hidden
-			if (mode == SerializationMode.Optimized && discoveringObjects && attributeMember.HasAttribute<NonDiscoverableAttribute>())
+			if (mode == SerializationMode.Optimized && discoveringObjects && member.HasAttributeTransitive<NonDiscoverableAttribute>())
 				return true;
 
 			// Read-only fields are implicitly marked with [Hidden]; except for read-only fields of structs,
 			// as structs can be reinitialized at any time
-			var hiddenAttribute = attributeMember.GetCustomAttribute<HiddenAttribute>();
+			var hiddenAttribute = member.GetAttributeTransitive<HiddenAttribute>();
 			var isHidden = hiddenAttribute != null || (fieldInfo != null && fieldInfo.IsInitOnly && fieldInfo.DeclaringType.IsClass);
 
 			// If the member is hidden, only ignore it in optimized serializations when we're not discovering objects
@@ -322,6 +321,42 @@ namespace SafetySharp.Utilities
 				return true;
 
 			return false;
+		}
+
+		/// <summary>
+		///   Checks whether the <paramref name="member" /> is directly or indirectly marked with <typeparamref name="TAttribute"/>.
+		/// </summary>
+		/// <typeparam name="TAttribute">The type of the attribute that should be returned.</typeparam>
+		/// <param name="member">The member that should be checked.</param>
+		public static bool HasAttributeTransitive<TAttribute>(this MemberInfo member)
+			where TAttribute : Attribute
+		{
+			return member.GetAttributeTransitive<TAttribute>() != null;
+		}
+
+		/// <summary>
+		///   Gets the <typeparamref name="TAttribute"/> instance the <paramref name="member" /> is directly or indirectly marked
+		///   with, i.e., by an auto-property or a field-like event. In case the <paramref name="member" /> is marked both directly
+		///   and indirectly, the direct attribute instance is returned; this can only happen for field-like events using the
+		///   <c>[field: Hidden]</c> syntax.
+		/// </summary>
+		/// <typeparam name="TAttribute">The type of the attribute that should be returned.</typeparam>
+		/// <param name="member">The member that should be checked.</param>
+		public static TAttribute GetAttributeTransitive<TAttribute>(this MemberInfo member)
+			where TAttribute : Attribute
+		{
+			Requires.NotNull(member, nameof(member));
+
+			var attribute = member.GetCustomAttribute<TAttribute>();
+			if (attribute != null)
+				return attribute;
+
+			var fieldInfo = member as FieldInfo;
+			if (fieldInfo == null)
+				return null;
+
+			var declaringMember = fieldInfo.GetDeclaringMember();
+			return declaringMember.GetCustomAttribute<TAttribute>();
 		}
 
 		/// <summary>

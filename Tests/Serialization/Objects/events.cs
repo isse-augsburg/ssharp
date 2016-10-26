@@ -34,12 +34,22 @@ namespace Tests.Serialization.Objects
 			var c = new C();
 			c.O += c.M;
 			c.P += c.M;
+			c.R += c.M;
+			c.S += c.M;
+			c.T += c.M;
+			c.X += c.M;
+			c.Y += c.M;
 
 			GenerateCode(SerializationMode.Full, c);
 
 			Serialize();
 			c.O -= c.M;
 			c.P -= c.M;
+			c.R -= c.M;
+			c.S -= c.M;
+			c.T -= c.M;
+			c.X -= c.M;
+			c.Y -= c.M;
 
 			Deserialize();
 
@@ -47,6 +57,20 @@ namespace Tests.Serialization.Objects
 			c.F.ShouldBe(4);
 			c.RaiseP(2);
 			c.F.ShouldBe(6);
+			c.RaiseR(1);
+			c.F.ShouldBe(7);
+			c.RaiseX(9);
+			c.F.ShouldBe(16);
+			c.RaiseY(3);
+			c.F.ShouldBe(19);
+
+			Should.Throw<NullReferenceException>(() => c.RaiseS(1));
+			Should.Throw<NullReferenceException>(() => c.RaiseT(1));
+
+			c = new C();
+			c.O += c.M;
+			c.P += c.N;
+			c.R += c.N;
 
 			GenerateCode(SerializationMode.Optimized, c);
 
@@ -55,7 +79,12 @@ namespace Tests.Serialization.Objects
 
 			Deserialize();
 			c.RaiseO(4);
-			c.F.ShouldBe(10);
+			c.F.ShouldBe(4);
+
+			Should.Throw<NullReferenceException>(() => c.RaiseS(1));
+			Should.Throw<NullReferenceException>(() => c.RaiseT(1));
+			Should.Throw<NullReferenceException>(() => c.RaiseX(1));
+			Should.Throw<NullReferenceException>(() => c.RaiseY(1));
 
 			c.O += c.N;
 			Should.Throw<InvalidOperationException>(() => Serialize());
@@ -76,14 +105,18 @@ namespace Tests.Serialization.Objects
 
 			c = new C();
 			c.P += c.M;
+			c.R += c.M;
 
 			GenerateCode(SerializationMode.Optimized, c);
 			Serialize();
 
 			c.P -= c.M;
+			c.R -= c.M;
 
 			Deserialize();
+
 			Should.Throw<NullReferenceException>(() => c.RaiseP(1));
+			Should.Throw<NullReferenceException>(() => c.RaiseR(1));
 		}
 
 		private class C
@@ -92,6 +125,21 @@ namespace Tests.Serialization.Objects
 
 			[Hidden]
 			public event Action<int> P;
+
+			[field: Hidden]
+			public event Action<int> R;
+
+			[NonSerializable]
+			public event Action<int> S;
+
+			[field: NonSerializable]
+			public event Action<int> T;
+
+			[NonDiscoverable]
+			public event Action<int> X;
+
+			[field: NonDiscoverable]
+			public event Action<int> Y;
 
 			public int F { get; private set; }
 
@@ -114,8 +162,31 @@ namespace Tests.Serialization.Objects
 			{
 				P(f);
 			}
-		}
 
-		
+			public void RaiseR(int f)
+			{
+				R(f);
+			}
+
+			public void RaiseS(int f)
+			{
+				S(f);
+			}
+
+			public void RaiseT(int f)
+			{
+				T(f);
+			}
+
+			public void RaiseX(int f)
+			{
+				X(f);
+			}
+
+			public void RaiseY(int f)
+			{
+				Y(f);
+			}
+		}
 	}
 }
