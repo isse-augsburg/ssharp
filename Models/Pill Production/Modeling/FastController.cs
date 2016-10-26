@@ -23,13 +23,14 @@
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using System.Linq;
+	using Odp;
 
-	internal class FastController : Odp.FastController<Station, Recipe>
+	internal class FastController : Odp.FastController<Station>
 	{
 		public FastController(params Station[] stations) : base(stations) { }
 
 		// override necessary due to ingredient amounts
-		protected override bool CanSatisfyNext(Recipe recipe, int[] path, int prefixLength, int station)
+		protected override bool CanSatisfyNext(ITask recipe, int[] path, int prefixLength, int station)
 		{
 			var capabilities = from index in Enumerable.Range(0, prefixLength + 1)
 							   where index == prefixLength || path[index] == station

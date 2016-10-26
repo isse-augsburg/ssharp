@@ -27,9 +27,8 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-    public abstract partial class BaseAgent<TAgent, TTask> : Component, IAgent
-		where TAgent : BaseAgent<TAgent, TTask>
-		where TTask : class, ITask
+    public abstract partial class BaseAgent<TAgent> : Component, IAgent
+		where TAgent : BaseAgent<TAgent>
     {
 		// configuration options
 		public static int MaximumAgentCount = 20;
@@ -43,7 +42,7 @@ namespace SafetySharp.Odp
 
 		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
-		public List<Role<TAgent, TTask>> AllocatedRoles { get; } = new List<Role<TAgent, TTask>>(MaximumRoleCount);
+		public List<Role<TAgent>> AllocatedRoles { get; } = new List<Role<TAgent>>(MaximumRoleCount);
 		private readonly List<uint> _applicationTimes = new List<uint>(MaximumRoleCount);
 
 		private uint _timeStamp = 0;
@@ -63,9 +62,9 @@ namespace SafetySharp.Odp
 
 		#region functional part
 
-		protected Role<TAgent, TTask>? _currentRole;
+		protected Role<TAgent>? _currentRole;
 
-		public Resource<TTask> Resource { get; protected set; }
+		public Resource Resource { get; protected set; }
 
 		private readonly StateMachine<States> _stateMachine = States.Idle;
 
@@ -167,7 +166,7 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		private Role<TAgent, TTask> ChooseRole(Role<TAgent, TTask> role1, Role<TAgent, TTask> role2)
+		private Role<TAgent> ChooseRole(Role<TAgent> role1, Role<TAgent> role2)
 		{
 			var fitness1 = Fitness(role1);
 			var fitness2 = Fitness(role2);
@@ -191,14 +190,14 @@ namespace SafetySharp.Odp
 
 		private const uint alpha = 1;
 		private const uint beta = 1;
-		private uint Fitness(Role<TAgent, TTask> role)
+		private uint Fitness(Role<TAgent> role)
 		{
 			var applicationTime = _applicationTimes[AllocatedRoles.IndexOf(role)];
 			return alpha * (_roleApplications - applicationTime)
 				+ beta * (uint)(role.Task.RequiredCapabilities.Length - role.PreCondition.State.Count());
 		}
 
-		private uint GetTimeStamp(Role<TAgent, TTask> role)
+		private uint GetTimeStamp(Role<TAgent> role)
 		{
 			// for roles without request (production roles) use current time
 			return (from request in _resourceRequests
@@ -207,7 +206,7 @@ namespace SafetySharp.Odp
 				).DefaultIfEmpty(_timeStamp).Single();
 		}
 
-		private Role<TAgent, TTask>[] GetRoles(TAgent source, Condition<TAgent, TTask> condition)
+		private Role<TAgent>[] GetRoles(TAgent source, Condition<TAgent> condition)
 		{
 			return AllocatedRoles.Where(role =>
 				role.PreCondition.Port == source && role.PreCondition.StateMatches(condition)
@@ -256,7 +255,7 @@ namespace SafetySharp.Odp
 
 		private struct ResourceRequest
 		{
-			public ResourceRequest(TAgent source, Role<TAgent, TTask> role, uint timeStamp)
+			public ResourceRequest(TAgent source, Role<TAgent> role, uint timeStamp)
 			{
 				Source = source;
 				Role = role;
@@ -264,7 +263,7 @@ namespace SafetySharp.Odp
 			}
 
 			public TAgent Source { get; }
-			public Role<TAgent, TTask> Role { get; }
+			public Role<TAgent> Role { get; }
 			public uint TimeStamp { get; }
 		}
 
@@ -273,7 +272,7 @@ namespace SafetySharp.Odp
 			source.TransferResource();
 		}
 
-		private void ResourceReady(TAgent agent, Condition<TAgent, TTask> condition)
+		private void ResourceReady(TAgent agent, Condition<TAgent> condition)
 		{
 			var roles = GetRoles(agent, condition);
 			if (roles.Length == 0)
@@ -294,7 +293,7 @@ namespace SafetySharp.Odp
 			);
 		}
 
-		protected virtual void TakeResource(Resource<TTask> resource)
+		protected virtual void TakeResource(Resource resource)
 		{
 			// assert resource != null
 			Resource = resource;
@@ -329,9 +328,9 @@ namespace SafetySharp.Odp
 		private bool _deficientConfiguration = false;
 
 		[Hidden]
-		public IReconfigurationStrategy<TAgent, TTask> ReconfigurationStrategy { get; set; }
+		public IReconfigurationStrategy<TAgent> ReconfigurationStrategy { get; set; }
 
-		public delegate IEnumerable<TTask> InvariantPredicate(TAgent agent);
+		public delegate IEnumerable<ITask> InvariantPredicate(TAgent agent);
 
 		protected virtual InvariantPredicate[] MonitoringPredicates => new InvariantPredicate[] {
 			Invariant.IOConsistency,
@@ -358,9 +357,9 @@ namespace SafetySharp.Odp
 			);
 		}
 
-		protected void PerformReconfiguration(IEnumerable<Tuple<TTask, State>> reconfigurations)
+		protected void PerformReconfiguration(IEnumerable<Tuple<ITask, State>> reconfigurations)
 		{
-			var deficientTasks = new HashSet<TTask>(reconfigurations.Select(t => t.Item1));
+			var deficientTasks = new HashSet<ITask>(reconfigurations.Select(t => t.Item1));
 
 			// stop work on deficient tasks
 			_resourceRequests.RemoveAll(request => deficientTasks.Contains(request.Role.Task));
@@ -371,9 +370,9 @@ namespace SafetySharp.Odp
 			ReconfigurationStrategy.Reconfigure(reconfigurations);
 		}
 
-		private Dictionary<TTask, IEnumerable<InvariantPredicate>> FindInvariantViolations()
+		private Dictionary<ITask, IEnumerable<InvariantPredicate>> FindInvariantViolations()
 		{
-			var violations = new Dictionary<TTask, IEnumerable<InvariantPredicate>>();
+			var violations = new Dictionary<ITask, IEnumerable<InvariantPredicate>>();
 			foreach (var predicate in MonitoringPredicates)
 			{
 				foreach (var violatingTask in predicate((TAgent)this))
@@ -386,14 +385,14 @@ namespace SafetySharp.Odp
 			return violations;
 		}
 
-		public virtual void RequestReconfiguration(IAgent agent, TTask task)
+		public virtual void RequestReconfiguration(IAgent agent, ITask task)
 		{
 			PerformReconfiguration(new[] {
 				Tuple.Create(task, new State(this, agent))
 			});
 		}
 
-		public virtual void RemoveAllocatedRoles(TTask task)
+		public virtual void RemoveAllocatedRoles(ITask task)
 		{
 			for (int i = 0; i < AllocatedRoles.Count; ++i)
 			{
@@ -405,7 +404,7 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		public virtual void AllocateRoles(params Role<TAgent, TTask>[] roles)
+		public virtual void AllocateRoles(params Role<TAgent>[] roles)
 		{
 			AllocatedRoles.AddRange(roles);
 			_applicationTimes.AddRange(Enumerable.Repeat(0u, roles.Length));

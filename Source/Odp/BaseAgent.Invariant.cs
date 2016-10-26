@@ -26,11 +26,11 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public partial class BaseAgent<TAgent, TTask>
+	public partial class BaseAgent<TAgent>
 	{
 		public static class Invariant
 		{
-			public static IEnumerable<TTask> IOConsistency(TAgent agent)
+			public static IEnumerable<ITask> IOConsistency(TAgent agent)
 			{
 				return RoleInvariant(
 					agent,
@@ -39,16 +39,16 @@ namespace SafetySharp.Odp
 				);
 			}
 
-			public static IEnumerable<TTask> ResourceConsistency(TAgent agent)
+			public static IEnumerable<ITask> ResourceConsistency(TAgent agent)
 			{
 				if (agent.Resource != null
 					&& !agent.AllocatedRoles.Any(role => role.PreCondition.Task == agent.Resource.Task
 					   && role.PreCondition.State.SequenceEqual(agent.Resource.State)))
 					return new[] { agent.Resource.Task };
-				return Enumerable.Empty<TTask>();
+				return Enumerable.Empty<ITask>();
 			}
 
-			public static IEnumerable<TTask> CapabilityConsistency(TAgent agent)
+			public static IEnumerable<ITask> CapabilityConsistency(TAgent agent)
 			{
 				return RoleInvariant(
 					agent,
@@ -56,7 +56,7 @@ namespace SafetySharp.Odp
 				);
 			}
 
-			public static IEnumerable<TTask> PrePostConditionConsistency(TAgent agent)
+			public static IEnumerable<ITask> PrePostConditionConsistency(TAgent agent)
 			{
 				return RoleInvariant(
 					agent,
@@ -78,12 +78,12 @@ namespace SafetySharp.Odp
 				);
 			}
 
-			public static IEnumerable<TTask> TaskEquality(TAgent agent)
+			public static IEnumerable<ITask> TaskEquality(TAgent agent)
 			{
 				return RoleInvariant(agent, role => role.PreCondition.Task == role.PostCondition.Task);
 			}
 
-			public static IEnumerable<TTask> StateConsistency(TAgent agent)
+			public static IEnumerable<ITask> StateConsistency(TAgent agent)
 			{
 				return RoleInvariant(agent, role => role.PreCondition.State.Concat(role.CapabilitiesToApply)
 					.SequenceEqual(role.PostCondition.State));
@@ -94,7 +94,7 @@ namespace SafetySharp.Odp
 
 			// StateIsPrefix invariant: ensured by Condition.State implementation
 
-			public static IEnumerable<TTask> NeighborsAliveGuarantee(TAgent agent)
+			public static IEnumerable<ITask> NeighborsAliveGuarantee(TAgent agent)
 			{
 				return RoleInvariant(
 					agent,
@@ -102,14 +102,14 @@ namespace SafetySharp.Odp
 				);
 			}
 
-			private static IEnumerable<TTask> RoleInvariant(TAgent agent, Predicate<Role<TAgent, TTask>> invariant)
+			private static IEnumerable<ITask> RoleInvariant(TAgent agent, Predicate<Role<TAgent>> invariant)
 			{
 				return (from role in agent.AllocatedRoles
 						where !role.IsLocked && !invariant(role)
 						select role.Task).Distinct();
 			}
 
-			public static InvariantPredicate RoleInvariant(Predicate<Role<TAgent, TTask>> invariant)
+			public static InvariantPredicate RoleInvariant(Predicate<Role<TAgent>> invariant)
 			{
 				return (agent) => RoleInvariant(agent, invariant);
 			}

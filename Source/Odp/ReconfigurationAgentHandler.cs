@@ -26,26 +26,25 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using Modeling;
 
-	public class ReconfigurationAgentHandler<TAgent, TTask> : Component, IReconfigurationStrategy<TAgent, TTask>
-		where TAgent : BaseAgent<TAgent, TTask>
-		where TTask : class, ITask
+	public class ReconfigurationAgentHandler<TAgent> : Component, IReconfigurationStrategy<TAgent>
+		where TAgent : BaseAgent<TAgent>
 	{
 		private readonly TAgent _baseAgent;
-		private readonly Func<TAgent, TTask, IReconfigurationAgent<TAgent, TTask>> _createReconfAgent;
+		private readonly Func<TAgent, ITask, IReconfigurationAgent<TAgent>> _createReconfAgent;
 
 		public ReconfigurationAgentHandler(
 			TAgent baseAgent,
-			Func<TAgent, TTask, IReconfigurationAgent<TAgent, TTask>> createReconfAgent
+			Func<TAgent, ITask, IReconfigurationAgent<TAgent>> createReconfAgent
 		)
 		{
 			_baseAgent = baseAgent;
 			_createReconfAgent = createReconfAgent;
 		}
 
-		protected readonly Dictionary<TTask, IReconfigurationAgent<TAgent, TTask>> _tasksUnderReconstruction
-			= new Dictionary<TTask, IReconfigurationAgent<TAgent, TTask>>();
+		protected readonly Dictionary<ITask, IReconfigurationAgent<TAgent>> _tasksUnderReconstruction
+			= new Dictionary<ITask, IReconfigurationAgent<TAgent>>();
 
-		public void Reconfigure(IEnumerable<Tuple<TTask, BaseAgent<TAgent, TTask>.State>> reconfigurations)
+		public void Reconfigure(IEnumerable<Tuple<ITask, BaseAgent<TAgent>.State>> reconfigurations)
 		{
 			foreach (var tuple in reconfigurations)
 			{
@@ -64,7 +63,7 @@ namespace SafetySharp.Odp
 		}
 
 		#region interface presented to reconfiguration agent
-		public virtual void UpdateAllocatedRoles(TTask task, Role<TAgent, TTask>[] newRoles)
+		public virtual void UpdateAllocatedRoles(ITask task, Role<TAgent>[] newRoles)
 		{
 			// new roles must be locked
 			for (int i = 0; i < newRoles.Length; ++i)
@@ -78,18 +77,18 @@ namespace SafetySharp.Odp
 			_baseAgent.AllocateRoles(newRoles);
 		}
 
-		public virtual void Go(TTask task)
+		public virtual void Go(ITask task)
 		{
 			UnlockRoleAllocations(task);
 		}
 
-		public virtual void Done(TTask task)
+		public virtual void Done(ITask task)
 		{
 			_tasksUnderReconstruction.Remove(task);
 		}
 		#endregion
 
-		protected virtual void LockAllocatedRoles(TTask task)
+		protected virtual void LockAllocatedRoles(ITask task)
 		{
 			for (int i = 0; i < _baseAgent.AllocatedRoles.Count; ++i)
 			{
@@ -103,7 +102,7 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		protected virtual void UnlockRoleAllocations(TTask task)
+		protected virtual void UnlockRoleAllocations(ITask task)
 		{
 			for (int i = 0; i < _baseAgent.AllocatedRoles.Count; ++i)
 			{

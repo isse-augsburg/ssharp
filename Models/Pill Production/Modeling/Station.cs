@@ -31,7 +31,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	/// <summary>
 	///   A production station that modifies containers.
 	/// </summary>
-	public abstract class Station : BaseAgent<Station, Recipe>
+	public abstract class Station : BaseAgent<Station>
 	{
 		public readonly Fault CompleteStationFailure = new PermanentFault();
 
@@ -51,7 +51,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		{
 			if (RecipeQueue.Count > 0)
 				PerformReconfiguration(new[] {
-					Tuple.Create(RecipeQueue.Dequeue(), new State(this))
+					Tuple.Create((ITask)RecipeQueue.Dequeue(), new State(this))
 				});
 
 			base.Update();
@@ -67,7 +67,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 
 		protected override void DropResource()
 		{
-			Container.Task.DropContainer(Container);
+			Container.Recipe.DropContainer(Container);
 			base.DropResource();
 		}
 

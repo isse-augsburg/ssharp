@@ -26,28 +26,27 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-	public class ControllerReconfigurationAgent<TAgent, TTask> : IReconfigurationAgent<TAgent, TTask>
-		where TAgent : BaseAgent<TAgent, TTask>
-		where TTask : class, ITask
+	public class ControllerReconfigurationAgent<TAgent> : IReconfigurationAgent<TAgent>
+		where TAgent : BaseAgent<TAgent>
 	{
 		// used in this class
-		private readonly BaseAgent<TAgent, TTask> _baseAgent;
-		private readonly ReconfigurationAgentHandler<TAgent, TTask> _reconfAgentHandler;
+		private readonly BaseAgent<TAgent> _baseAgent;
+		private readonly ReconfigurationAgentHandler<TAgent> _reconfAgentHandler;
 		private RoleCalculationAgent _roleCalculationAgent;
-		private TTask _task;
+		private ITask _task;
 
 		// passed on to RoleCalculationAgent
-		private readonly BaseAgent<TAgent, TTask>[] _allBaseAgents;
-		private readonly IController<TAgent, TTask> _controller;
+		private readonly BaseAgent<TAgent>[] _allBaseAgents;
+		private readonly IController<TAgent> _controller;
 
 		public ControllerReconfigurationAgent(
-			BaseAgent<TAgent, TTask> baseAgent,
-			BaseAgent<TAgent, TTask>[] allBaseAgents,
-			IController<TAgent, TTask> controller
+			BaseAgent<TAgent> baseAgent,
+			BaseAgent<TAgent>[] allBaseAgents,
+			IController<TAgent> controller
 		)
 		{
 			_baseAgent = baseAgent;
-			_reconfAgentHandler = baseAgent.ReconfigurationStrategy as ReconfigurationAgentHandler<TAgent, TTask>;
+			_reconfAgentHandler = baseAgent.ReconfigurationStrategy as ReconfigurationAgentHandler<TAgent>;
 
 			_allBaseAgents = allBaseAgents;
 			_controller = controller;
@@ -58,7 +57,7 @@ namespace SafetySharp.Odp
 			_roleCalculationAgent.Acknowledge(_task);
 		}
 
-		public void StartReconfiguration(TTask task, IAgent agent, BaseAgent<TAgent, TTask>.State baseAgentState)
+		public void StartReconfiguration(ITask task, IAgent agent, BaseAgent<TAgent>.State baseAgentState)
 		{
 			_task = task;
 			if (_roleCalculationAgent != null) // a configuration is already under way
@@ -79,12 +78,12 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		public void UpdateAllocatedRoles(Role<TAgent, TTask>[] newRoles)
+		public void UpdateAllocatedRoles(Role<TAgent>[] newRoles)
 		{
 			_reconfAgentHandler.UpdateAllocatedRoles(_task, newRoles);
 		}
 
-		public void Go(TTask task)
+		public void Go(ITask task)
 		{
 			_roleCalculationAgent = null;
 
@@ -94,24 +93,24 @@ namespace SafetySharp.Odp
 
 		protected class RoleCalculationAgent : IAgent
 		{
-			private readonly BaseAgent<TAgent, TTask>[] _functioningAgents;
-			private readonly IController<TAgent, TTask> _controller;
+			private readonly BaseAgent<TAgent>[] _functioningAgents;
+			private readonly IController<TAgent> _controller;
 
-			private readonly Dictionary<uint, ControllerReconfigurationAgent<TAgent, TTask>> _reconfAgents
-				= new Dictionary<uint, ControllerReconfigurationAgent<TAgent, TTask>>();
+			private readonly Dictionary<uint, ControllerReconfigurationAgent<TAgent>> _reconfAgents
+				= new Dictionary<uint, ControllerReconfigurationAgent<TAgent>>();
 
 			private int _ackCounter = 0;
 
 			private enum State { Idle, GatherGlobalKnowledge, CalculateRoles, AllocateRoles }
 			private readonly StateMachine<State> _stateMachine = State.Idle;
 
-			public RoleCalculationAgent(BaseAgent<TAgent, TTask>[] allBaseAgents, IController<TAgent, TTask> controller)
+			public RoleCalculationAgent(BaseAgent<TAgent>[] allBaseAgents, IController<TAgent> controller)
 			{
 				_functioningAgents = allBaseAgents.Where(agent => agent.IsAlive).ToArray();
 				_controller = controller;
 			}
 
-			public void StartCentralReconfiguration(TTask task, BaseAgent<TAgent, TTask> agent, object bastate)
+			public void StartCentralReconfiguration(ITask task, BaseAgent<TAgent> agent, object bastate)
 			{
 				_stateMachine.Transition(
 					from: State.Idle,
@@ -123,7 +122,7 @@ namespace SafetySharp.Odp
 				);
 			}
 
-			public void AcknowledgeReconfigurationRequest(TTask task, ControllerReconfigurationAgent<TAgent, TTask> agent, BaseAgent<TAgent, TTask>.State baseAgentState)
+			public void AcknowledgeReconfigurationRequest(ITask task, ControllerReconfigurationAgent<TAgent> agent, BaseAgent<TAgent>.State baseAgentState)
 			{
 				_stateMachine.Transition(
 					from: State.GatherGlobalKnowledge,
@@ -138,7 +137,7 @@ namespace SafetySharp.Odp
 				);
 			}
 
-			private void CalculateRoles(TTask task)
+			private void CalculateRoles(ITask task)
 			{
 				var configs = _controller.CalculateConfigurations(task);
 
@@ -146,7 +145,7 @@ namespace SafetySharp.Odp
 					from: State.CalculateRoles,
 					to: State.AllocateRoles,
 					action: () => {
-						var emptyRoles = new Role<TAgent, TTask>[0];
+						var emptyRoles = new Role<TAgent>[0];
 						foreach (var agent in _functioningAgents.Cast<TAgent>())
 						{
 							_reconfAgents[agent.ID].UpdateAllocatedRoles(
@@ -157,7 +156,7 @@ namespace SafetySharp.Odp
 				);
 			}
 
-			public void Acknowledge(TTask task)
+			public void Acknowledge(ITask task)
 			{
 				_stateMachine.Transition(
 					from: State.AllocateRoles,

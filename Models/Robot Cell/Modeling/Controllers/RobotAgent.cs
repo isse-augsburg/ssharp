@@ -87,7 +87,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return processCapability == null || CanApply(processCapability);
 		}
 
-		protected override void TakeResource(Resource<Task> resource)
+		protected override void TakeResource(Odp.Resource resource)
 		{
 			var agent = (CartAgent)_currentRole?.PreCondition.Port;
 
@@ -135,7 +135,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 			Resource = capability.Resources[0];
 			capability.Resources.RemoveAt(0);
-			Resource.Task.IsResourceInProduction = true;
+			(Resource.Task as Task).IsResourceInProduction = true;
 			Robot?.ProduceWorkpiece((Resource as Resource).Workpiece);
 			Resource.OnCapabilityApplied(capability);
 		}
@@ -175,7 +175,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 			Resource.OnCapabilityApplied(capability);
 			Robot?.ConsumeWorkpiece();
-			Resource.Task.IsResourceInProduction = false;
+			(Resource.Task as Task).IsResourceInProduction = false;
 			Resource = null;
 		}
 

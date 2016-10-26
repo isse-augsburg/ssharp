@@ -27,12 +27,11 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-	public abstract class Resource<TTask> : Component
-		where TTask : ITask
+	public abstract class Resource : Component
 	{
 		private int _statePrefixLength = 0;
 
-		public TTask Task { get; protected set; }
+		public ITask Task { get; protected set; }
 
 		public IEnumerable<ICapability> State =>
 			Task?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();

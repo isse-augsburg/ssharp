@@ -45,10 +45,10 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		{
 			if (capability is ConsumeCapability)
 			{
-				Container.Task.RemoveContainer(Container);
-				if (Container.Task.ProcessingComplete)
+				Container.Recipe.RemoveContainer(Container);
+				if (Container.Recipe.ProcessingComplete)
 				{
-					RemoveRecipeConfigurations(Container.Task);
+					RemoveRecipeConfigurations(Container.Recipe);
 				}
 				Container = null;
 			}

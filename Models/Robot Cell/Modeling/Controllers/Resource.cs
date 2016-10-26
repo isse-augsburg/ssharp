@@ -24,7 +24,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using Plants;
 
-	internal class Resource : Odp.Resource<Task>
+	internal class Resource : Odp.Resource
 	{
 		public Resource(Task task, Workpiece workpiece)
 		{

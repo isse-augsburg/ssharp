@@ -28,9 +28,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	using Controllers;
 	using Plants;
 	using SafetySharp.Modeling;
-	using Odp;
 
-	using IController = Odp.IController<Controllers.Agent, Controllers.Task>;
+	using ICapability = Odp.ICapability;
+	using IController = Odp.IController<Controllers.Agent>;
 
 	internal class Model : ModelBase
 	{
@@ -250,7 +250,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 				};
 
 				Workpieces.Add(workpiece);
-				Resources.Add(new Resource(task, workpiece));
+				Resources.Add(new Controllers.Resource(task, workpiece));
 			}
 		}
 

@@ -26,16 +26,15 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public struct Role<TAgent, TTask>
-		where TAgent : BaseAgent<TAgent, TTask>
-		where TTask : class, ITask
+	public struct Role<TAgent>
+		where TAgent : BaseAgent<TAgent>
 	{
 		public bool IsLocked { get; set; }
 
-		public Condition<TAgent, TTask> PreCondition;
-		public Condition<TAgent, TTask> PostCondition;
+		public Condition<TAgent> PreCondition;
+		public Condition<TAgent> PostCondition;
 
-		public TTask Task => PreCondition.Task ?? PostCondition.Task;
+		public ITask Task => PreCondition.Task ?? PostCondition.Task;
 
 		public IEnumerable<ICapability> CapabilitiesToApply =>
 			Task.RequiredCapabilities.Skip(_capabilitiesToApplyStart).Take(_capabilitiesToApplyCount);

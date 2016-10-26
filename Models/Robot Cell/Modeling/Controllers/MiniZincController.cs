@@ -28,13 +28,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.Linq;
 	using Odp;
 
-	internal class MiniZincController : AbstractMiniZincController<Agent, Task>
+	internal class MiniZincController : AbstractMiniZincController<Agent>
 	{
 		private const string MinizincModel = "ConstraintModel.mzn";
 
 		public MiniZincController(IEnumerable<Agent> agents) : base(MinizincModel, agents.ToArray()) { }
 
-		protected override void WriteInputData(Task task, StreamWriter writer)
+		protected override void WriteInputData(ITask task, StreamWriter writer)
 		{
 			var taskSequence = String.Join(",", task.RequiredCapabilities.Select(GetIdentifier));
 			var isCart = String.Join(",", Agents.Select(a => (a is CartAgent).ToString().ToLower()));

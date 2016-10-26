@@ -28,8 +28,10 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	/// <summary>
 	///   A pill container which is filled with different ingredients.
 	/// </summary>
-	public class PillContainer : Resource<Recipe>
+	public class PillContainer : Resource
 	{
+		public Recipe Recipe => (Recipe)Task;
+
 		/// <summary>
 		///   Tells the container it was loaded on the conveyor belt.
 		/// </summary>

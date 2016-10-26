@@ -27,9 +27,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using SafetySharp.Modeling;
 	using Odp;
 
-	using IController = Odp.IController<Agent, Task>;
+	using IController = Odp.IController<Agent>;
 
-	class CentralRobotReconfiguration : CentralReconfiguration<Agent, Task>
+	class CentralRobotReconfiguration : CentralReconfiguration<Agent>
 	{
 		public readonly Fault ReconfigurationFailure = new TransientFault();
 
@@ -50,7 +50,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			base.Update();
 		}
 
-		public override void Reconfigure(IEnumerable<Tuple<Task, Agent.State>> deficientTasks)
+		public override void Reconfigure(IEnumerable<Tuple<ITask, Agent.State>> deficientTasks)
 		{
 			if (Mode == AnalysisMode.IntolerableFaults && StepCount >= MaxSteps)
 				return;
@@ -75,7 +75,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		{
 			public ReconfigurationFailureEffect(IController controller) : base(controller) { }
 
-			public override void Reconfigure(IEnumerable<Tuple<Task, Agent.State>> deficientTasks)
+			public override void Reconfigure(IEnumerable<Tuple<ITask, Agent.State>> deficientTasks)
 			{
 				UnsuccessfulReconfiguration = true;
 			}

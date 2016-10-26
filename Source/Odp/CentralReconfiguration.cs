@@ -27,18 +27,17 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-	public class CentralReconfiguration<TAgent, TTask> : Component, IReconfigurationStrategy<TAgent, TTask>
-		where TAgent : BaseAgent<TAgent, TTask>
-		where TTask : class, ITask
+	public class CentralReconfiguration<TAgent> : Component, IReconfigurationStrategy<TAgent>
+		where TAgent : BaseAgent<TAgent>
 	{
-		protected readonly IController<TAgent, TTask> _controller;
+		protected readonly IController<TAgent> _controller;
 
-		public CentralReconfiguration(IController<TAgent, TTask> controller)
+		public CentralReconfiguration(IController<TAgent> controller)
 		{
 			_controller = controller;
 		}
 
-		public virtual void Reconfigure(IEnumerable<Tuple<TTask, BaseAgent<TAgent, TTask>.State>> reconfigurations)
+		public virtual void Reconfigure(IEnumerable<Tuple<ITask, BaseAgent<TAgent>.State>> reconfigurations)
 		{
 			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
 
@@ -47,14 +46,14 @@ namespace SafetySharp.Odp
 			ApplyConfigurations(configs);
 		}
 
-		protected virtual void RemoveConfigurations(params TTask[] tasks)
+		protected virtual void RemoveConfigurations(params ITask[] tasks)
 		{
 			foreach (var agent in _controller.Agents)
 				foreach (var task in tasks)
 					agent.RemoveAllocatedRoles(task);
 		}
 
-		protected virtual void ApplyConfigurations(Dictionary<TAgent, IEnumerable<Role<TAgent, TTask>>> configurations)
+		protected virtual void ApplyConfigurations(Dictionary<TAgent, IEnumerable<Role<TAgent>>> configurations)
 		{
 			foreach (var agent in configurations.Keys)
 				agent.AllocateRoles(configurations[agent].ToArray());

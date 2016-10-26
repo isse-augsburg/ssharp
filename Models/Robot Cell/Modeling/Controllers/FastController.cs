@@ -32,7 +32,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	///   An <see cref="Odp.IController{Agent, Task}" /> implementation that is much faster than
 	///   the MiniZinc implementation.
 	/// </summary>
-	internal class FastController : FastController<Agent, Task>
+	internal class FastController : FastController<Agent>
 	{
 		protected override bool PreferCapabilityAccumulation => false;
 
@@ -41,7 +41,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public FastController(IEnumerable<Agent> agents) : base(agents.ToArray()) { }
 
-		public override Dictionary<Agent, IEnumerable<Role<Agent, Task>>> CalculateConfigurations(params Task[] tasks)
+		public override Dictionary<Agent, IEnumerable<Role<Agent>>> CalculateConfigurations(params ITask[] tasks)
 		{
 			_usedCarts.Clear();
 			return base.CalculateConfigurations(tasks);
