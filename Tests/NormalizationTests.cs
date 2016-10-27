@@ -28,25 +28,19 @@ namespace Tests
 
 	public partial class NormalizationTests : Tests
 	{
-		[Theory, MemberData("DiscoverTests", "Normalization/LiftedExpressions")]
-		public void LiftedExpressions(string test, string file)
-		{
-			CheckNormalization<LiftedExpressionNormalizer>(file);
-		}
-
-		[Theory, MemberData("DiscoverTests", "Normalization/Partial")]
+		[Theory, MemberData(nameof(DiscoverTests), "Normalization/Partial")]
 		public void Partial(string test, string file)
 		{
 			CheckNormalization<PartialNormalizer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Normalization/FaultNames")]
+		[Theory, MemberData(nameof(DiscoverTests), "Normalization/FaultNames")]
 		public void FaultNames(string test, string file)
 		{
 			CheckNormalization<FaultNameNormalizer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Normalization/LineCounts")]
+		[Theory, MemberData(nameof(DiscoverTests), "Normalization/LineCounts")]
 		public void LineCounts(string test, string file)
 		{
 			ExecuteDynamicTests(file, file);

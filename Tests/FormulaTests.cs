@@ -26,13 +26,13 @@ namespace Tests
 
 	public partial class FormulaTests
 	{
-		[Theory, MemberData("DiscoverTests", "Formulas/StateFormulas")]
+		[Theory, MemberData(nameof(DiscoverTests), "Formulas/StateFormulas")]
 		public void StateFormulas(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Formulas/Operators")]
+		[Theory, MemberData(nameof(DiscoverTests), "Formulas/Operators")]
 		public void Operators(string test, string file)
 		{
 			ExecuteDynamicTests(file);

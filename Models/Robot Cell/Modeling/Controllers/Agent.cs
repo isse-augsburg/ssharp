@@ -32,10 +32,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	{
 		private readonly List<Agent> _requests = new List<Agent>(Model.MaxAgentRequests);
 		private readonly StateMachine<State> _stateMachine = State.Idle;
-		protected Role _currentRole;
-		private bool _hasRole;
 
 		public readonly Fault ConfigurationUpdateFailed = new TransientFault();
+		protected Role _currentRole;
+		private bool _hasRole;
 
 		public Agent(params Capability[] capabilities)
 		{
@@ -83,7 +83,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		{
 			// For now, the resource disappears magically...
 			Resource = null;
-			_currentRole  = default(Role);
+			_currentRole = default(Role);
 			_hasRole = false;
 			_requests.Clear();
 			_stateMachine.ChangeState(State.Idle); // Todo: This is a bit of a hack

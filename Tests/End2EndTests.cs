@@ -26,7 +26,7 @@ namespace Tests
 
 	public partial class End2EndTests
 	{
-		[Theory, MemberData("DiscoverTests", "End2End/Tests")]
+		[Theory, MemberData(nameof(DiscoverTests), "End2End/Tests")]
 		public void MSBuild(string test, string file)
 		{
 			ExecuteDynamicTests(file);

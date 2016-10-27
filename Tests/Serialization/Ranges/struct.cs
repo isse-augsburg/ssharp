@@ -105,7 +105,7 @@ namespace Tests.Serialization.Ranges
 
 			private void Restrict()
 			{
-				Range.Restrict(S.F, 0, 3, OverflowBehavior.Clamp);
+				Range.Restrict(() => S.F, 0, 3, OverflowBehavior.Clamp);
 			}
 		}
 	}
