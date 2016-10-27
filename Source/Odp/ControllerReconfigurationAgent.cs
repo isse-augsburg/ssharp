@@ -40,12 +40,13 @@ namespace SafetySharp.Odp
 
 		public ControllerReconfigurationAgent(
 			BaseAgent baseAgent,
+			ReconfigurationAgentHandler reconfAgentHandler,
 			BaseAgent[] allBaseAgents,
 			IController controller
 		)
 		{
 			_baseAgent = baseAgent;
-			_reconfAgentHandler = baseAgent.ReconfigurationStrategy as ReconfigurationAgentHandler;
+			_reconfAgentHandler = reconfAgentHandler;
 
 			_allBaseAgents = allBaseAgents;
 			_controller = controller;

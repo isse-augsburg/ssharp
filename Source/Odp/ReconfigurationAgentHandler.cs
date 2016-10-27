@@ -29,11 +29,11 @@ namespace SafetySharp.Odp
 	public class ReconfigurationAgentHandler : Component, IReconfigurationStrategy
 	{
 		private readonly BaseAgent _baseAgent;
-		private readonly Func<BaseAgent, ITask, IReconfigurationAgent> _createReconfAgent;
+		private readonly Func<BaseAgent, ReconfigurationAgentHandler, ITask, IReconfigurationAgent> _createReconfAgent;
 
 		public ReconfigurationAgentHandler(
 			BaseAgent baseAgent,
-			Func<BaseAgent, ITask, IReconfigurationAgent> createReconfAgent
+			Func<BaseAgent, ReconfigurationAgentHandler, ITask, IReconfigurationAgent> createReconfAgent
 		)
 		{
 			_baseAgent = baseAgent;
@@ -54,7 +54,7 @@ namespace SafetySharp.Odp
 				LockAllocatedRoles(task);
 				if (!_tasksUnderReconstruction.ContainsKey(task))
 				{
-					_tasksUnderReconstruction.Add(task, _createReconfAgent(_baseAgent, task));
+					_tasksUnderReconstruction.Add(task, _createReconfAgent(_baseAgent, this, task));
 				}
 
 				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, baseAgentState);
