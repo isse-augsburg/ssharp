@@ -20,20 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Diagnostics.Bindings.Invalid
 {
 	using System;
+	using SafetySharp.Compiler.Analyzers;
+	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   When a state field or type is marked as <c>[NonSerializable]</c>, its state is not preserved between different system
-	///   steps. The marked state is also completely ignored at model initialization time.
-	///   Hiding state variables potentially increases simulation and model checking performance, but is only possible
-	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
-	///   written value could be read.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Event,
-		AllowMultiple = false, Inherited = false)]
-	public sealed class NonSerializableAttribute : Attribute
+	[Diagnostic(DiagnosticIdentifier.BindingFailure, 35, 13, 26, "<none>", "<none>")]
+	[Diagnostic(DiagnosticIdentifier.BindingFailure, 36, 13, 26, "<none>", "<none>")]
+	internal class Events : Component
 	{
+		public Events()
+		{
+			Bind(nameof(A), nameof(B));
+			Bind(nameof(B), nameof(A));
+		}
+
+		public event Action A;
+		public extern event Action B;
 	}
 }

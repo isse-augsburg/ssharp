@@ -20,20 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Diagnostics.PortKinds.Valid
 {
 	using System;
-
-	/// <summary>
-	///   When a state field or type is marked as <c>[NonSerializable]</c>, its state is not preserved between different system
-	///   steps. The marked state is also completely ignored at model initialization time.
-	///   Hiding state variables potentially increases simulation and model checking performance, but is only possible
-	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
-	///   written value could be read.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Event,
-		AllowMultiple = false, Inherited = false)]
-	public sealed class NonSerializableAttribute : Attribute
+	using SafetySharp.Modeling;
+	
+	internal abstract class Events : Component
 	{
+		private event Action B;
+
+		private event Action C
+		{
+			add { }
+			remove { }
+		}
+	}
+
+	internal interface IEvents : IComponent
+	{
+		event Action B;
 	}
 }

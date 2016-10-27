@@ -55,6 +55,14 @@ namespace SafetySharp.Compiler.Analyzers
 			"'{0}' cannot override abstract member '{1}'.");
 
 		/// <summary>
+		///   The error diagnostic emitted by the analyzer when a fault effect overrides an event member.
+		/// </summary>
+		private static readonly DiagnosticInfo _eventOverride = DiagnosticInfo.Error(
+			DiagnosticIdentifier.EventFaultEffect,
+			"Fault effects are not supported for event members.",
+			"'{0}' cannot affect event member '{1}'; fault effects are not supported for event members.");
+
+		/// <summary>
 		///   The error diagnostic emitted by the analyzer when a fault effect is generic.
 		/// </summary>
 		private static readonly DiagnosticInfo _genericEffect = DiagnosticInfo.Error(
@@ -96,7 +104,8 @@ namespace SafetySharp.Compiler.Analyzers
 		///   Initializes a new instance.
 		/// </summary>
 		public FaultEffectAnalyzer()
-			: base(_genericEffect, _accessibility, _invalidBaseType, _abstractOverride, _multipleEffectsWithoutPriority, _sealedEffect, _closedGenericBaseType)
+			: base(_genericEffect, _accessibility, _invalidBaseType, _abstractOverride, _multipleEffectsWithoutPriority, 
+				  _sealedEffect, _closedGenericBaseType, _eventOverride)
 		{
 		}
 
@@ -106,7 +115,7 @@ namespace SafetySharp.Compiler.Analyzers
 		protected override void Initialize(CompilationStartAnalysisContext context)
 		{
 			context.RegisterSymbolAction(AnalyzeType, SymbolKind.NamedType);
-			context.RegisterSymbolAction(AnalyzeMember, SymbolKind.Method, SymbolKind.Property);
+			context.RegisterSymbolAction(AnalyzeMember, SymbolKind.Method, SymbolKind.Property, SymbolKind.Event);
 			context.RegisterCompilationEndAction(AnalyzeCompilation);
 		}
 
@@ -186,6 +195,10 @@ namespace SafetySharp.Compiler.Analyzers
 
 			var methodSymbol = context.Symbol as IMethodSymbol;
 			var propertySymbol = context.Symbol as IPropertySymbol;
+			var eventSymbol = context.Symbol as IEventSymbol;
+
+			if (eventSymbol != null)
+				_eventOverride.Emit(context, eventSymbol, eventSymbol, eventSymbol.OverriddenEvent);
 
 			if (methodSymbol != null && !methodSymbol.IsPropertyAccessor())
 			{

@@ -20,20 +20,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Execution.Simulation
 {
 	using System;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	/// <summary>
-	///   When a state field or type is marked as <c>[NonSerializable]</c>, its state is not preserved between different system
-	///   steps. The marked state is also completely ignored at model initialization time.
-	///   Hiding state variables potentially increases simulation and model checking performance, but is only possible
-	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
-	///   written value could be read.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Event,
-		AllowMultiple = false, Inherited = false)]
-	public sealed class NonSerializableAttribute : Attribute
+	internal class Event : TestObject
 	{
+		protected override void Check()
+		{
+			var simulator = new Simulator(TestModel.InitializeModel(new C { X = 1 }));
+			var c = (C)simulator.Model.Roots[0];
+
+			var y = 0;
+			c.Y += x => y = x;
+
+			c.X.ShouldBe(1);
+			y.ShouldBe(0);
+
+			simulator.SimulateStep();
+			y.ShouldBe(0);
+
+			simulator.SimulateStep();
+			y.ShouldBe(3);
+
+			y = 0;
+			simulator.SimulateStep();
+			y.ShouldBe(0);
+		}
+
+		private class C : Component
+		{
+			public int X;
+
+			[Hidden]
+			public event Action<int> Y;
+
+			public override void Update()
+			{
+				++X;
+
+				if (X == 3)
+					Y(X);
+			}
+		}
 	}
 }

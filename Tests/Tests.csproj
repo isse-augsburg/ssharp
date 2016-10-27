@@ -171,6 +171,7 @@
     <Compile Include="Analysis\Invariants\NotViolated\deterministic.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\disabled faults.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\fault activation.cs" />
+    <Compile Include="Analysis\Invariants\Violated\event.cs" />
     <Compile Include="Analysis\Invariants\NotViolated\ranges.cs" />
     <Compile Include="Analysis\Invariants\MultipleInvariants\fault activation.cs" />
     <Compile Include="Analysis\Invariants\MultipleInvariants\multiple choices 1.cs" />
@@ -228,6 +229,7 @@
     <Compile Include="Analysis\StateConstraints\single removed state.cs" />
     <Compile Include="Analysis\StateConstraints\deterministic through constraints.cs" />
     <Compile Include="Analysis\StateConstraints\deadlock.cs" />
+    <Compile Include="Diagnostics\Bindings\Invalid\events.cs" />
     <Compile Include="Diagnostics\Bindings\Invalid\non-component required port binding.cs" />
     <Compile Include="Diagnostics\Bindings\Valid\non-component provided port binding.cs" />
     <Compile Include="Diagnostics\CustomComponents\Invalid\components cannot implement IInitializable.cs" />
@@ -241,6 +243,8 @@
     <Compile Include="Diagnostics\FaultEffects\Valid\explicit nondeterminism.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\generic nested.cs" />
     <Compile Include="Diagnostics\FaultEffects\Valid\generic.cs" />
+    <Compile Include="Diagnostics\FaultEffects\Invalid\events.cs" />
+    <None Include="Diagnostics\PortKinds\Invalid\event ports.cs" />
     <Compile Include="End2EndTests.cs" />
     <Compile Include="End2EndTests.Helpers.cs">
       <DependentUpon>End2EndTests.cs</DependentUpon>
@@ -303,6 +307,7 @@
     <Compile Include="Execution\Simulation\stepping.cs" />
     <Compile Include="Execution\Simulation\generics.cs" />
     <Compile Include="Execution\Simulation\equatable.cs" />
+    <Compile Include="Execution\Simulation\event.cs" />
     <Compile Include="Execution\Simulation\variable ranges.cs" />
     <Compile Include="Execution\Simulation\steps.cs" />
     <Compile Include="FaultActivationTests.cs" />
@@ -370,7 +375,7 @@
     <Compile Include="Diagnostics\PortKinds\Invalid\indexer ports.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\extern update method.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\extern with Provided attribute.cs" />
-    <Compile Include="Diagnostics\PortKinds\Invalid\event ports.cs" />
+    <Compile Include="Diagnostics\PortKinds\Valid\events.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\non-extern with Required attribute.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\generic ports.cs" />
     <Compile Include="Diagnostics\PortKinds\Invalid\static ports.cs" />
@@ -644,6 +649,7 @@
     <Compile Include="Serialization\Misc\hidden state full.cs" />
     <Compile Include="Serialization\Misc\mixed 2.cs" />
     <Compile Include="Serialization\Misc\mixed 1.cs" />
+    <Compile Include="Serialization\Objects\events.cs" />
     <Compile Include="Serialization\Objects\dictionaries.cs" />
     <Compile Include="Serialization\Objects\delegate assignment.cs" />
     <Compile Include="Serialization\Objects\hidden array elements properties.cs" />

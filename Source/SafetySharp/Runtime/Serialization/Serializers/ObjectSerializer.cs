@@ -144,10 +144,8 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 		private static IEnumerable<object> GetObjectReferencesFromField(object obj, FieldInfo field, SerializationMode mode)
 		{
 			var serializer = SerializationRegistry.Default.GetSerializer(obj);
-			var autoProperty = field.GetAutoProperty();
-			var hiddenAttribute = autoProperty?.GetCustomAttribute<HiddenAttribute>() ?? field.GetCustomAttribute<HiddenAttribute>();
 
-			foreach (var o in serializer.GetReferencedObjects(obj, mode, hiddenAttribute))
+			foreach (var o in serializer.GetReferencedObjects(obj, mode, field.GetAttributeTransitive<HiddenAttribute>()))
 				yield return o;
 		}
 

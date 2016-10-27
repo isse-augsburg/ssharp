@@ -20,20 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Diagnostics.FaultEffects.Invalid
 {
 	using System;
+	using SafetySharp.Compiler.Analyzers;
+	using SafetySharp.Modeling;
 
-	/// <summary>
-	///   When a state field or type is marked as <c>[NonSerializable]</c>, its state is not preserved between different system
-	///   steps. The marked state is also completely ignored at model initialization time.
-	///   Hiding state variables potentially increases simulation and model checking performance, but is only possible
-	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
-	///   written value could be read.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Event,
-		AllowMultiple = false, Inherited = false)]
-	public sealed class NonSerializableAttribute : Attribute
+	[Diagnostic(DiagnosticIdentifier.EventFaultEffect, 43, 42, 1,
+		 "Tests.Diagnostics.FaultEffects.Invalid.Events.E.P", "Tests.Diagnostics.FaultEffects.Invalid.Events.P")]
+	public class Events : Component
 	{
+		public virtual event Action P;
+
+		public Events()
+		{
+			P();
+		}
+
+		[FaultEffect]
+		public class E : Events
+		{
+			public override event Action P
+			{
+				add { base.P += value; }
+				remove { base.P -= value; }
+			}
+		}
 	}
 }

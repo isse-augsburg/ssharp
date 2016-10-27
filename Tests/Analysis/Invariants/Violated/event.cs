@@ -20,20 +20,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace Tests.Analysis.Invariants.Violated
 {
 	using System;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	/// <summary>
-	///   When a state field or type is marked as <c>[NonSerializable]</c>, its state is not preserved between different system
-	///   steps. The marked state is also completely ignored at model initialization time.
-	///   Hiding state variables potentially increases simulation and model checking performance, but is only possible
-	///   if the state variable is always written before it is read in the next system step. Otherwise, any previously
-	///   written value could be read.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Event,
-		AllowMultiple = false, Inherited = false)]
-	public sealed class NonSerializableAttribute : Attribute
+	internal class Event : AnalysisTestObject
 	{
+		protected override void Check()
+		{
+			var d = new D();
+			var c = new C(d);
+
+			CheckInvariant(c.F != 2, d).ShouldBe(false);
+		}
+
+		private class C : Component
+		{
+			public int F;
+
+			public C(D d)
+			{
+				d.E += f => F = f;
+			}
+		}
+
+		private class D : Component
+		{
+			[Range(0, 3, OverflowBehavior.Clamp)]
+			private int _f;
+
+			public event Action<int> E;
+
+			public override void Update()
+			{
+				_f++;
+
+				if (_f == 2)
+					E(_f);
+			}
+		}
 	}
 }

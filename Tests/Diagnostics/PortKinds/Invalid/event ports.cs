@@ -26,24 +26,23 @@ namespace Tests.Diagnostics.PortKinds.Invalid
 	using SafetySharp.Compiler.Analyzers;
 	using SafetySharp.Modeling;
 
-	[Diagnostic(DiagnosticIdentifier.EventPort, 34, 37, 1, "Tests.Diagnostics.PortKinds.Invalid.EventPort.A")]
-	[Diagnostic(DiagnosticIdentifier.EventPort, 35, 30, 1, "Tests.Diagnostics.PortKinds.Invalid.EventPort.B")]
-	[Diagnostic(DiagnosticIdentifier.EventPort, 37, 30, 1, "Tests.Diagnostics.PortKinds.Invalid.EventPort.C")]
-	internal abstract class EventPort : Component
+	[Diagnostic(DiagnosticIdentifier.EventPort, 36, 37, 1, "Tests.Diagnostics.PortKinds.Invalid.EventPorts.A")]
+	[Diagnostic(DiagnosticIdentifier.EventPort, 39, 37, 1, "Tests.Diagnostics.PortKinds.Invalid.EventPorts.B")]
+	[Diagnostic(DiagnosticIdentifier.EventPort, 42, 30, 1, "Tests.Diagnostics.PortKinds.Invalid.EventPorts.C")]
+	[Diagnostic(DiagnosticIdentifier.EventPort, 48, 22, 1, "Tests.Diagnostics.PortKinds.Invalid.IEventPorts.A")]
+	[Diagnostic(DiagnosticIdentifier.EventPort, 51, 22, 1, "Tests.Diagnostics.PortKinds.Invalid.IEventPorts.B")]
+	internal abstract class EventPorts : Component
 	{
 		private extern event Action A;
-		private event Action B;
 
-		private event Action C
-		{
-			add { }
-			remove { }
-		}
+		[Required]
+		private extern event Action B;
+
+		[Provided]
+		private event Action C;
 	}
 
-	[Diagnostic(DiagnosticIdentifier.EventPort, 49, 22, 1, "Tests.Diagnostics.PortKinds.Invalid.IEventPort.A")]
-	[Diagnostic(DiagnosticIdentifier.EventPort, 52, 22, 1, "Tests.Diagnostics.PortKinds.Invalid.IEventPort.B")]
-	internal interface IEventPort : IComponent
+	internal interface IEventPorts : IComponent
 	{
 		[Required]
 		event Action A;
