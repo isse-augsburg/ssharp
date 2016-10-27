@@ -310,6 +310,7 @@
     <Compile Include="Execution\Simulation\event.cs" />
     <Compile Include="Execution\Simulation\variable ranges.cs" />
     <Compile Include="Execution\Simulation\steps.cs" />
+    <Compile Include="Execution\Simulation\microstep parallelism.cs" />
     <Compile Include="FaultActivationTests.cs" />
     <Compile Include="AnalysisTests.Helpers.cs">
       <DependentUpon>AnalysisTests.cs</DependentUpon>
