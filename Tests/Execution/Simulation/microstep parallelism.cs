@@ -34,7 +34,7 @@ namespace Tests.Execution.Simulation
 		{
 			var simulator = new Simulator(TestModel.InitializeModel(new C(), new C()));
 			simulator.SimulateStep();
-			C.counter.ShouldBe(4);
+			C.counter.ShouldBe(6);
 		}
 
 		private class C : Component
@@ -49,6 +49,11 @@ namespace Tests.Execution.Simulation
 			private async Task AsyncMethod()
 			{
 				int _ctr = ++counter;
+				await Task.Yield();
+
+				if (counter - _ctr == 1)
+					_ctr = ++counter;
+
 				await Task.Yield();
 
 				if (counter - _ctr == 1)
