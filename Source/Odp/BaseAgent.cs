@@ -331,7 +331,7 @@ namespace SafetySharp.Odp
 
 		public delegate IEnumerable<ITask> InvariantPredicate(BaseAgent agent);
 
-		protected virtual InvariantPredicate[] MonitoringPredicates => new InvariantPredicate[] {
+		protected virtual InvariantPredicate[] MonitoringPredicates { get; } = new InvariantPredicate[] {
 			Invariant.IOConsistency,
 			Invariant.NeighborsAliveGuarantee,
 			Invariant.ResourceConsistency,
@@ -339,7 +339,7 @@ namespace SafetySharp.Odp
 		};
 
 		// TODO: use to verify configuration
-		protected virtual InvariantPredicate[] ConsistencyPredicates => new InvariantPredicate[] {
+		protected virtual InvariantPredicate[] ConsistencyPredicates { get; } = new InvariantPredicate[] {
 			Invariant.PrePostConditionConsistency,
 			Invariant.TaskEquality,
 			Invariant.StateConsistency
