@@ -40,13 +40,19 @@ namespace SafetySharp.Modeling
 		/// Schedules a callback for simulated asynchronous execution.
 		/// </summary>
 		/// <param name="action">The scheduled callback, which may be marked as <c>async</c>.</param>
+		public static void Schedule(Action action)
+		{
+			_context.Post(o => action(), null);
+		}
+
 		public static void Schedule(Func<Task> action)
 		{
-			var _oldContext = SynchronizationContext.Current;
-			SynchronizationContext.SetSynchronizationContext(_context);
-			var task = action();
-			SynchronizationContext.SetSynchronizationContext(_oldContext);
-			_context.Post(o => task.Wait(), null);
+			Schedule(() => { action(); });
+		}
+
+		public static void Schedule<T>(Func<Task<T>> action)
+		{
+			Schedule(() => { action(); });
 		}
 
 		/// <summary>
@@ -68,11 +74,16 @@ namespace SafetySharp.Modeling
 
 			public void Run()
 			{
+				var oldContext = Current;
+				SetSynchronizationContext(this);
+
 				while (_queue.Count > 0)
 				{
 					var job = _queue.Dequeue();
 					job.Item1(job.Item2);
 				}
+
+				SetSynchronizationContext(oldContext);
 			}
 		}
 	}
