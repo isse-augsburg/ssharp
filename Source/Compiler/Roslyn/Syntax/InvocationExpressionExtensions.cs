@@ -104,6 +104,9 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 						if (property.SetMethod != null)
 							set.Add(property.SetMethod);
 						break;
+					case SymbolKind.Event:
+						// Events are not treated as ports, hence they can never be resolved by a port reference
+						break;
 					default:
 						Assert.NotReached($"Unsupported port symbol kind: '{candidate.Kind}'.");
 						break;

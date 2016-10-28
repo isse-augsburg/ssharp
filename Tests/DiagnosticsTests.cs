@@ -28,37 +28,37 @@ namespace Tests
 
 	public partial class DiagnosticsTests : Tests
 	{
-		[Theory, MemberData("DiscoverTests", "Diagnostics/CustomComponents")]
+		[Theory, MemberData(nameof(DiscoverTests), "Diagnostics/CustomComponents")]
 		public void CustomComponents(string test, string file)
 		{
 			CheckDiagnostics<CustomComponentAnalyzer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortKinds")]
+		[Theory, MemberData(nameof(DiscoverTests), "Diagnostics/PortKinds")]
 		public void PortKinds(string test, string file)
 		{
 			CheckDiagnostics<PortKindAnalyzer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/PortImplementation")]
+		[Theory, MemberData(nameof(DiscoverTests), "Diagnostics/PortImplementation")]
 		public void PortImplementation(string test, string file)
 		{
 			CheckDiagnostics<PortImplementationAnalyzer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/FaultEffects")]
+		[Theory, MemberData(nameof(DiscoverTests), "Diagnostics/FaultEffects")]
 		public void FaultEffects(string test, string file)
 		{
 			CheckDiagnostics<FaultEffectAnalyzer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/Faults")]
+		[Theory, MemberData(nameof(DiscoverTests), "Diagnostics/Faults")]
 		public void Faults(string test, string file)
 		{
 			CheckDiagnostics<FaultAnalyzer>(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Diagnostics/Bindings")]
+		[Theory, MemberData(nameof(DiscoverTests), "Diagnostics/Bindings")]
 		public void Bindings(string test, string file)
 		{
 			CheckDiagnostics<BindingsAnalyzer>(file);

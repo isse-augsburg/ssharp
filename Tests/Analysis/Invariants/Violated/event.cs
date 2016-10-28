@@ -20,38 +20,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Normalization.LiftedExpressions.Lifted
+namespace Tests.Analysis.Invariants.Violated
 {
 	using System;
-	using System.Linq.Expressions;
-	using SafetySharp.CompilerServices;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	internal class Test1
+	internal class Event : AnalysisTestObject
 	{
-		protected void N([LiftExpression] int i)
+		protected override void Check()
 		{
+			var d = new D();
+			var c = new C(d);
+
+			CheckInvariant(c.F != 2, d).ShouldBe(false);
 		}
 
-		protected void N(Expression<Func<int>> i)
+		private class C : Component
 		{
-		}
-	}
+			public int F;
 
-	internal class In1 : Test1
-	{
-		private void Q()
-		{
-			N(1);
-			N(1 + 3 / 54 + (true == false ? 17 : 33 + 1));
+			public C(D d)
+			{
+				d.E += f => F = f;
+			}
 		}
-	}
 
-	internal class Out1 : Test1
-	{
-		private void Q()
+		private class D : Component
 		{
-			N(() => 1);
-			N(() => 1 + 3 / 54 + (true == false ? 17 : 33 + 1));
+			[Range(0, 3, OverflowBehavior.Clamp)]
+			private int _f;
+
+			public event Action<int> E;
+
+			public override void Update()
+			{
+				_f++;
+
+				if (_f == 2)
+					E(_f);
+			}
 		}
 	}
 }

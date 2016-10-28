@@ -154,7 +154,6 @@
     <Compile Include="CompilerServices\FaultHelper.cs" />
     <Compile Include="CompilerServices\PortBinding.cs" />
     <Compile Include="CompilerServices\BindingMetadataAttribute.cs" />
-    <Compile Include="CompilerServices\LiftExpressionAttribute.cs" />
     <Compile Include="CompilerServices\PortReference.cs" />
     <Compile Include="CompilerServices\StateFormulaFactory.cs" />
     <Compile Include="Modeling\Component.Update.cs">

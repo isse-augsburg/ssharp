@@ -26,49 +26,49 @@ namespace Tests
 
 	public partial class SerializationTests
 	{
-		[Theory, MemberData("DiscoverTests", "Serialization/PrimitiveTypes")]
+		[Theory, MemberData(nameof(DiscoverTests), "Serialization/PrimitiveTypes")]
 		public void PrimitiveTypes(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Serialization/Enumerations")]
+		[Theory, MemberData(nameof(DiscoverTests), "Serialization/Enumerations")]
 		public void Enumerations(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Serialization/Misc")]
+		[Theory, MemberData(nameof(DiscoverTests), "Serialization/Misc")]
 		public void Misc(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Serialization/Objects")]
+		[Theory, MemberData(nameof(DiscoverTests), "Serialization/Objects")]
 		public void Objects(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Serialization/RuntimeModels")]
+		[Theory, MemberData(nameof(DiscoverTests), "Serialization/RuntimeModels")]
 		public void RuntimeModels(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Serialization/StateLabels")]
+		[Theory, MemberData(nameof(DiscoverTests), "Serialization/StateLabels")]
 		public void StateLabels(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Serialization/Ranges")]
+		[Theory, MemberData(nameof(DiscoverTests), "Serialization/Ranges")]
 		public void Ranges(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Serialization/Compaction")]
+		[Theory, MemberData(nameof(DiscoverTests), "Serialization/Compaction")]
 		public void Compaction(string test, string file)
 		{
 			ExecuteDynamicTests(file);

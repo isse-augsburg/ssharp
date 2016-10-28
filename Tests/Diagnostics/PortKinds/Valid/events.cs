@@ -20,54 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Normalization.LiftedExpressions.Lifted
+namespace Tests.Diagnostics.PortKinds.Valid
 {
 	using System;
-	using System.Linq.Expressions;
-	using SafetySharp.CompilerServices;
-
-	internal class Test3
+	using SafetySharp.Modeling;
+	
+	internal abstract class Events : Component
 	{
-		protected void N([LiftExpression] int i, [LiftExpression] bool j, [LiftExpression] int k)
-		{
-		}
+		private event Action B;
 
-		protected void N(Expression<Func<int>> i, Expression<Func<bool>> j, Expression<Func<int>> k)
+		private event Action C
 		{
-		}
-
-		protected void P(int i, [LiftExpression] bool j, int k)
-		{
-		}
-
-		protected void P(int i, Expression<Func<bool>> j, int k)
-		{
+			add { }
+			remove { }
 		}
 	}
 
-	internal class In3 : Test3
+	internal interface IEvents : IComponent
 	{
-		private void Q(int x)
-		{
-			N(1, true, 4);
-			N(1 + x / 54 + (true == false ? 17 : 33 + 1), 3 > 5 ? true : false, 33 + 11 / x);
-
-			P(1, true, 17);
-			P(1, true || false, 33 << 2);
-			P(1 - 0, false, 22 / 2);
-		}
-	}
-
-	internal class Out3 : Test3
-	{
-		private void Q(int x)
-		{
-			N(() => 1, () => true, () => 4);
-			N(() => 1 + x / 54 + (true == false ? 17 : 33 + 1), () => 3 > 5 ? true : false, () => 33 + 11 / x);
-
-			P(1, () => true, 17);
-			P(1, () => true || false, 33 << 2);
-			P(1 - 0, () => false, 22 / 2);
-		}
+		event Action B;
 	}
 }

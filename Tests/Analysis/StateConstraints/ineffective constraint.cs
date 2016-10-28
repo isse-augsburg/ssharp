@@ -42,7 +42,7 @@ namespace Tests.Analysis.StateConstraints
 
 			public C()
 			{
-				AddStateConstraint(X < 100);
+				AddStateConstraint(() => X < 100);
 			}
 
 			public override void Update()

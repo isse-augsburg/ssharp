@@ -20,18 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Normalization.LiftedExpressions.Unlifted
+namespace Tests.Diagnostics.FaultEffects.Invalid
 {
 	using System;
+	using SafetySharp.Compiler.Analyzers;
 	using SafetySharp.Modeling;
 
-	internal class In3 : Component
+	[Diagnostic(DiagnosticIdentifier.EventFaultEffect, 43, 42, 1,
+		 "Tests.Diagnostics.FaultEffects.Invalid.Events.E.P", "Tests.Diagnostics.FaultEffects.Invalid.Events.P")]
+	public class Events : Component
 	{
-		public In3()
+		public virtual event Action P;
+
+		public Events()
 		{
-			var x = $"{"".Substring(nameof(Component).Length)}";
-			var s = nameof(x);
-			Console.WriteLine($"{nameof(s)} {s}");
+			P();
+		}
+
+		[FaultEffect]
+		public class E : Events
+		{
+			public override event Action P
+			{
+				add { base.P += value; }
+				remove { base.P -= value; }
+			}
 		}
 	}
 }

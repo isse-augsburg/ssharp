@@ -125,7 +125,7 @@ namespace SafetySharp.Compiler.Analyzers
 		/// </summary>
 		public PortKindAnalyzer()
 			: base(_externProvidedPort, _nonExternRequiredPort, _ambiguousPortKind, _updateMethodMarkedAsPort, _staticPort,
-				_externUpdateMethod, _portPropertyAccessor, _unmarkedInterfacePort, _genericPort, _eventPort, _indexerPort)
+				_externUpdateMethod, _portPropertyAccessor, _unmarkedInterfacePort, _genericPort, _indexerPort, _eventPort)
 		{
 		}
 
@@ -192,7 +192,7 @@ namespace SafetySharp.Compiler.Analyzers
 
 			if (symbol.ContainingType.TypeKind == TypeKind.Interface)
 			{
-				if (!hasRequiredAttribute && !hasProvidedAttribute)
+				if (!hasRequiredAttribute && !hasProvidedAttribute && (symbol is IMethodSymbol || symbol is IPropertySymbol))
 					_unmarkedInterfacePort.Emit(context, symbol, symbol.ToDisplayString());
 			}
 			else
@@ -203,7 +203,7 @@ namespace SafetySharp.Compiler.Analyzers
 					_nonExternRequiredPort.Emit(context, symbol, symbol.ToDisplayString());
 			}
 
-			if (symbol is IEventSymbol)
+			if (symbol is IEventSymbol && (hasRequiredAttribute || hasProvidedAttribute || symbol.IsExtern))
 				_eventPort.Emit(context, symbol, symbol);
 		}
 	}

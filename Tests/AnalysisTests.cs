@@ -28,25 +28,25 @@ namespace Tests
 
 	public partial class DccaTests
 	{
-		[Theory, MemberData("DiscoverTests", "Analysis/Dcca")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Dcca")]
 		public void FaultRemovalDcca(string test, string file)
 		{
 			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedOnTheFly);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Analysis/Dcca")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Dcca")]
 		public void StateGraphDcca(string test, string file)
 		{
 			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedStateGraph);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Analysis/Heuristics")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Heuristics")]
 		public void Heuristics(string test, string file)
 		{
 			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedOnTheFly);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Analysis/Ordering")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Ordering")]
 		public void Ordering(string test, string file)
 		{
 			ExecuteDynamicTests(file, SafetyAnalysisBackend.FaultOptimizedOnTheFly);
@@ -55,19 +55,19 @@ namespace Tests
 
 	public partial class InvariantTests
 	{
-		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/CounterExamples")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/CounterExamples")]
 		public void CounterExamples(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/NotViolated")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/NotViolated")]
 		public void NotViolated(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/Violated")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/Violated")]
 		public void Violated(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
@@ -76,7 +76,7 @@ namespace Tests
 
 	public partial class StateConstraintTests
 	{
-		[Theory, MemberData("DiscoverTests", "Analysis/StateConstraints")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/StateConstraints")]
 		public void StateConstraints(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
@@ -85,25 +85,25 @@ namespace Tests
 
 	public partial class StateGraphInvariantTests
 	{
-		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/CounterExamples")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/CounterExamples")]
 		public void CounterExamples(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/NotViolated")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/NotViolated")]
 		public void NotViolated(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/Violated")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/Violated")]
 		public void Violated(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/MultipleInvariants")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/MultipleInvariants")]
 		public void MultipleInvariants(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
@@ -112,13 +112,13 @@ namespace Tests
 
 	public partial class LtsMinInvariantTests
 	{
-		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/NotViolated")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/NotViolated")]
 		public void NotViolated(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(LtsMin));
 		}
 
-		[Theory, MemberData("DiscoverTests", "Analysis/Invariants/Violated")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/Violated")]
 		public void Violated(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(LtsMin));
@@ -127,13 +127,13 @@ namespace Tests
 
 	public partial class LtlTests
 	{
-		[Theory, MemberData("DiscoverTests", "Analysis/Ltl/Violated")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Ltl/Violated")]
 		public void Violated(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(LtsMin));
 		}
 
-		[Theory, MemberData("DiscoverTests", "Analysis/Ltl/NotViolated")]
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Ltl/NotViolated")]
 		public void NotViolated(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(LtsMin));

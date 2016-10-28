@@ -20,19 +20,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Normalization.LiftedExpressions.Unlifted
+namespace Tests.Execution.Simulation
 {
+	using System;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	internal class In2 : Component
+	internal class Event : TestObject
 	{
-		private In2(int i)
+		protected override void Check()
 		{
+			var simulator = new Simulator(TestModel.InitializeModel(new C { X = 1 }));
+			var c = (C)simulator.Model.Roots[0];
+
+			var y = 0;
+			c.Y += x => y = x;
+
+			c.X.ShouldBe(1);
+			y.ShouldBe(0);
+
+			simulator.SimulateStep();
+			y.ShouldBe(0);
+
+			simulator.SimulateStep();
+			y.ShouldBe(3);
+
+			y = 0;
+			simulator.SimulateStep();
+			y.ShouldBe(0);
 		}
 
-		private void M()
+		private class C : Component
 		{
-			new In2(1);
+			public int X;
+
+			[Hidden]
+			public event Action<int> Y;
+
+			public override void Update()
+			{
+				++X;
+
+				if (X == 3)
+					Y(X);
+			}
 		}
 	}
 }
