@@ -33,26 +33,19 @@ namespace SafetySharp.Modeling
 	public static class MicrostepScheduler
 	{
 		[ThreadStatic]
-		private static SingleThreadSynchronizationContext _context
+		private static readonly SingleThreadSynchronizationContext _context
 			= new SingleThreadSynchronizationContext();
+
+		[ThreadStatic]
+		private static readonly List<Task> _tasks = new List<Task>();
 
 		/// <summary>
 		/// Schedules a callback for simulated asynchronous execution.
 		/// </summary>
-		/// <param name="action">The scheduled callback, which may be marked as <c>async</c>.</param>
-		public static void Schedule(Action action)
-		{
-			_context.Post(o => action(), null);
-		}
-
+		/// <param name="action">The scheduled callback, which may use <c>await</c> statements.</param>
 		public static void Schedule(Func<Task> action)
 		{
-			Schedule(() => { action(); });
-		}
-
-		public static void Schedule<T>(Func<Task<T>> action)
-		{
-			Schedule(() => { action(); });
+			_context.Post(o => _tasks.Add(action()), null);
 		}
 
 		/// <summary>
@@ -60,7 +53,15 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		internal static void CompleteSchedule()
 		{
-			_context.Run();
+			try
+			{
+				_context.Run();
+				Task.WhenAll(_tasks).GetAwaiter().GetResult();
+			}
+			finally
+			{
+				_tasks.Clear();
+			}
 		}
 
 		private class SingleThreadSynchronizationContext : SynchronizationContext
@@ -77,13 +78,18 @@ namespace SafetySharp.Modeling
 				var oldContext = Current;
 				SetSynchronizationContext(this);
 
-				while (_queue.Count > 0)
+				try
 				{
-					var job = _queue.Dequeue();
-					job.Item1(job.Item2);
+					while (_queue.Count > 0)
+					{
+						var job = _queue.Dequeue();
+						job.Item1(job.Item2);
+					}
 				}
-
-				SetSynchronizationContext(oldContext);
+				finally
+				{
+					SetSynchronizationContext(oldContext);
+				}
 			}
 		}
 	}

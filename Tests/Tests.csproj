@@ -302,6 +302,7 @@
     <Compile Include="Execution\Simulation\linq.cs" />
     <Compile Include="Execution\Simulation\faults.cs" />
     <Compile Include="Execution\Simulation\bindings.cs" />
+    <Compile Include="Execution\Simulation\microstep parallelism with exception.cs" />
     <Compile Include="Execution\Simulation\nondeterminism.cs" />
     <Compile Include="Execution\Simulation\formulas.cs" />
     <Compile Include="Execution\Simulation\stepping.cs" />
