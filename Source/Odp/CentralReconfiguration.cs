@@ -40,9 +40,12 @@ namespace SafetySharp.Odp
 		{
 			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
 
-			RemoveConfigurations(tasks);
 			var configs = _controller.CalculateConfigurations(tasks);
-			ApplyConfigurations(configs);
+			if (configs != null)
+			{
+				RemoveConfigurations(tasks);
+				ApplyConfigurations(configs);
+			}
 		}
 
 		protected virtual void RemoveConfigurations(params ITask[] tasks)

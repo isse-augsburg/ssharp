@@ -55,7 +55,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
 			public override Dictionary<BaseAgent, IEnumerable<Role>> CalculateConfigurations(params ITask[] tasks)
 			{
-				return new Dictionary<BaseAgent, IEnumerable<Role>>();
+				return null;
 			}
 		}
 	}

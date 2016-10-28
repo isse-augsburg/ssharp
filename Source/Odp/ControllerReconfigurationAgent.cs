@@ -144,6 +144,7 @@ namespace SafetySharp.Odp
 				_stateMachine.Transition(
 					from: State.CalculateRoles,
 					to: State.AllocateRoles,
+					guard: configs != null,
 					action: () => {
 						var emptyRoles = new Role[0];
 						foreach (var agent in _functioningAgents)
