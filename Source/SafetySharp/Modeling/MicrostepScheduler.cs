@@ -24,6 +24,7 @@ namespace SafetySharp.Modeling
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Runtime.Remoting.Messaging;
 	using System.Threading;
 	using System.Threading.Tasks;
 
@@ -32,12 +33,21 @@ namespace SafetySharp.Modeling
 	/// </summary>
 	public static class MicrostepScheduler
 	{
-		[ThreadStatic]
-		private static readonly SingleThreadSynchronizationContext _context
-			= new SingleThreadSynchronizationContext();
+		private static readonly string _contextName = Guid.NewGuid().ToString();
+		private static SingleThreadSynchronizationContext Context
+			=> GetTaskData<SingleThreadSynchronizationContext>(_contextName);
 
-		[ThreadStatic]
-		private static readonly List<Task> _tasks = new List<Task>();
+		private static readonly string _tasksName = Guid.NewGuid().ToString();
+		private static List<Task> Tasks => GetTaskData<List<Task>>(_tasksName);
+
+		// TODO: in .NET 4.6, this can be replaced by AsyncLocal<T>
+		private static T GetTaskData<T>(string name) where T : class, new()
+		{
+			var value = CallContext.LogicalGetData(name) as T;
+			if (value == null)
+				CallContext.LogicalSetData(name, value = new T());
+			return value;
+		}
 
 		/// <summary>
 		/// Schedules a callback for simulated asynchronous execution.
@@ -45,7 +55,7 @@ namespace SafetySharp.Modeling
 		/// <param name="action">The scheduled callback, which may use <c>await</c> statements.</param>
 		public static void Schedule(Func<Task> action)
 		{
-			_context.Post(o => _tasks.Add(action()), null);
+			Context.Post(o => Tasks.Add(action()), null);
 		}
 
 		/// <summary>
@@ -55,12 +65,12 @@ namespace SafetySharp.Modeling
 		{
 			try
 			{
-				_context.Run();
-				Task.WhenAll(_tasks).GetAwaiter().GetResult();
+				Context.Run();
+				Task.WhenAll(Tasks).GetAwaiter().GetResult();
 			}
 			finally
 			{
-				_tasks.Clear();
+				Tasks.Clear();
 			}
 		}
 

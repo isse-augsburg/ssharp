@@ -132,6 +132,7 @@
     <Compile Include="Analysis\Dcca\all faults suppressed.cs" />
     <Compile Include="Analysis\Dcca\empty set.cs" />
     <Compile Include="Analysis\Dcca\exception suppressed counter examples.cs" />
+    <Compile Include="Analysis\Dcca\microstep parallelism.cs" />
     <Compile Include="Analysis\Dcca\multiple singleton cut sets.cs" />
     <Compile Include="Analysis\Dcca\exception.cs" />
     <Compile Include="Analysis\Dcca\multiple forced faults.cs" />
