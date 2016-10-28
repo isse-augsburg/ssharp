@@ -39,46 +39,11 @@ namespace SafetySharp.Analysis
 	using Runtime.Serialization;
 	using Utilities;
 	using ModelChecking;
+	
+
+
 	public class ProbabilityChecker : IDisposable
 	{
-		public struct ProbabilityCalculator
-		{
-			public ProbabilityCalculator(Func<Probability> useDefaultChecker,Func<DtmcModelChecker,Probability> useCustomChecker)
-			{
-				Calculate = useDefaultChecker;
-				CalculateWithChecker = useCustomChecker;
-			}
-
-			// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
-			public Func<Probability> Calculate { get; }
-			public Func<DtmcModelChecker,Probability> CalculateWithChecker { get; }
-		}
-
-		public struct FormulaCalculator
-		{
-			public FormulaCalculator(Func<bool> useDefaultChecker, Func<DtmcModelChecker, bool> useCustomChecker)
-			{
-				Calculate = useDefaultChecker;
-				CalculateWithChecker = useCustomChecker;
-			}
-
-			// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
-			public Func<bool> Calculate { get; }
-			public Func<DtmcModelChecker, bool> CalculateWithChecker { get; }
-		}
-
-		public struct RewardCalculator
-		{
-			public RewardCalculator(Func<RewardResult> useDefaultChecker, Func<DtmcModelChecker, RewardResult> useCustomChecker)
-			{
-				Calculate = useDefaultChecker;
-				CalculateWithChecker = useCustomChecker;
-			}
-
-			// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
-			public Func<RewardResult> Calculate { get; }
-			public Func<DtmcModelChecker, RewardResult> CalculateWithChecker { get; }
-		}
 
 
 		/// <summary>
@@ -89,7 +54,7 @@ namespace SafetySharp.Analysis
 		private object _probabilityMatrixCreationStarted = false;
 		private bool _probabilityMatrixWasCreated = false;
 
-		internal MarkovChain MarkovChain { get; private set; }
+		internal DiscreteTimeMarkovChain MarkovChain { get; private set; }
 
 		private ModelBase _model;
 		private readonly ConcurrentBag<Formula> _formulasToCheck = new ConcurrentBag<Formula>();
@@ -144,7 +109,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Generates a <see cref="StateGraph" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal MarkovChain GenerateMarkovChain(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas)
+		internal DiscreteTimeMarkovChain GenerateMarkovChain(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas)
 		{
 			Requires.That(IntPtr.Size == 8, "State graph generation is only supported in 64bit processes.");
 
@@ -154,9 +119,9 @@ namespace SafetySharp.Analysis
 			Configuration.CpuCount = 4;
 
 
-			using (var checker = new LabeledTransitionMarkovChainGenerator(createModel, terminateEarlyCondition, stateFormulas, OutputWritten, Configuration))
+			using (var checker = new LtmcGenerator(createModel, terminateEarlyCondition, stateFormulas, OutputWritten, Configuration))
 			{
-				var markovChain = default(MarkovChain);
+				var markovChain = default(DiscreteTimeMarkovChain);
 				var initializationTime = stopwatch.Elapsed;
 				var markovChainGenerationTime= stopwatch.Elapsed;
 				stopwatch.Restart();
@@ -166,7 +131,7 @@ namespace SafetySharp.Analysis
 					var labeledTransitionMarkovChain = checker.GenerateStateGraph();
 					markovChainGenerationTime = stopwatch.Elapsed;
 					stopwatch.Restart();
-					var ltmcToMc = new LtmcToMc(labeledTransitionMarkovChain);
+					var ltmcToMc = new LtmcToDtmc(labeledTransitionMarkovChain);
 					markovChain = ltmcToMc.MarkovChain;
 					return markovChain;
 				}
@@ -199,9 +164,9 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Generates a <see cref="MarkovChain" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal MarkovChain GenerateMarkovChain(Func<RuntimeModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas)
+		internal DiscreteTimeMarkovChain GenerateMarkovChain(Func<RuntimeModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas)
 		{
-			return GenerateMarkovChain(() => new ProbabilisticExecutedModel(createModel, Configuration.SuccessorCapacity), terminateEarlyCondition, stateFormulas);
+			return GenerateMarkovChain(() => new LtmcExecutedModel(createModel, Configuration.SuccessorCapacity), terminateEarlyCondition, stateFormulas);
 		}
 
 		/// <summary>
@@ -209,7 +174,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model the state graph should be generated for.</param>
 		/// <param name="stateFormulas">The state formulas that should be evaluated during state graph generation.</param>
-		internal MarkovChain GenerateMarkovChain(ModelBase model, Formula terminateEarlyCondition, params StateFormula[] stateFormulas)
+		internal DiscreteTimeMarkovChain GenerateMarkovChain(ModelBase model, Formula terminateEarlyCondition, params StateFormula[] stateFormulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(stateFormulas, nameof(stateFormulas));

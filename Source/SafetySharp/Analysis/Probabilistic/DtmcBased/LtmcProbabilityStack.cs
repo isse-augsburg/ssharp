@@ -30,7 +30,7 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Represents a stack that uses a <see cref="MemoryBuffer" /> for its underlying storage.
 	/// </summary>
-	internal sealed unsafe class ProbabilityStack : DisposableObject
+	internal sealed unsafe class LtmcProbabilityStack : DisposableObject
 	{
 		/// <summary>
 		///   The underlying memory of the stack.
@@ -46,7 +46,7 @@ namespace SafetySharp.Runtime
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="initialCapacity">The initial capacity of the stack.</param>
-		public ProbabilityStack(int initialCapacity)
+		public LtmcProbabilityStack(int initialCapacity)
 		{
 			_memoryBuffer.Resize(initialCapacity * sizeof(Probability), zeroMemory: true);
 			_buffer = (Probability*)_memoryBuffer.Pointer;

@@ -20,44 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
+
 namespace SafetySharp.Analysis
 {
-	using System;
-	using Utilities;
-	using System.IO;
-	using System.Globalization;
-	using System.Text;
 	using Modeling;
-	using Runtime.Serialization;
-	using FormulaVisitors;
-	using Runtime;
 
-	// Mrmc is in file ProbabilisticModelChecker.Mrmc.cs which is nested in ProbabilisticModelChecker.cs.
-	// Open arrow of ProbabilisticModelChecker.cs in Solution Explorer to see nested files.
-	
 
-	/// <summary>
-	///   Represents a base class for external probabilistic model checker tools.
-	/// </summary>
-	public abstract class MdpModelChecker : IDisposable
+	public struct RewardCalculator
 	{
-		public ProbabilityChecker ProbabilityChecker { get; }
-
-		internal MarkovChain MarkovChain => ProbabilityChecker.MarkovChain;
-
-		protected MdpModelChecker(ProbabilityChecker probabilityChecker)
+		public RewardCalculator(Func<RewardResult> useDefaultChecker, Func<DtmcModelChecker, RewardResult> useCustomChecker)
 		{
-			ProbabilityChecker = probabilityChecker;
+			Calculate = useDefaultChecker;
+			CalculateWithChecker = useCustomChecker;
 		}
 
-		public abstract void Dispose();
-
-		internal abstract Probability CalculateMinimalProbability(Formula formulaToCheck);
-
-		internal abstract Probability CalculateMaximalProbability(Formula formulaToCheck);
-
-		internal abstract bool CalculateFormula(Formula formulaToCheck);
-
-		internal abstract RewardResult CalculateReward(Formula formulaToCheck);
+		// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
+		public Func<RewardResult> Calculate { get; }
+		public Func<DtmcModelChecker, RewardResult> CalculateWithChecker { get; }
 	}
 }

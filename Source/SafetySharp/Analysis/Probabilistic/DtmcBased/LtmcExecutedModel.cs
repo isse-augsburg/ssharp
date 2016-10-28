@@ -34,7 +34,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="RuntimeModel" /> with
 	///   probabilistic transitions.
 	/// </summary>
-	internal sealed class ProbabilisticExecutedModel : ExecutedModel
+	internal sealed class LtmcExecutedModel : ExecutedModel
 	{
 
 		internal enum EffectlessFaultsMinimizationMode
@@ -45,20 +45,20 @@ namespace SafetySharp.Analysis.ModelChecking
 
 		private readonly EffectlessFaultsMinimizationMode _minimalizationMode = EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults;
 
-		private readonly ProbabilisticTransitionSetBuilder _transitions;
+		private readonly LtmcTransitionSetBuilder _transitions;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ProbabilisticExecutedModel(Func<RuntimeModel> runtimeModelCreator, long successorStateCapacity)
+		internal LtmcExecutedModel(Func<RuntimeModel> runtimeModelCreator, long successorStateCapacity)
 			: base(runtimeModelCreator)
 		{
 			var formulas = RuntimeModel.Formulas.Select(CompilationVisitor.Compile).ToArray();
-			_transitions = new ProbabilisticTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
+			_transitions = new LtmcTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
 
-			ChoiceResolver = new ProbabilisticChoiceResolver(RuntimeModel.Objects.OfType<Choice>());
+			ChoiceResolver = new LtmcChoiceResolver(RuntimeModel.Objects.OfType<Choice>());
 		}
 
 		/// <summary>
@@ -66,16 +66,16 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		/// <param name="runtimeModel">The model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ProbabilisticExecutedModel(RuntimeModel runtimeModel, int successorStateCapacity)
+		internal LtmcExecutedModel(RuntimeModel runtimeModel, int successorStateCapacity)
 			: base(runtimeModel)
 		{
-			_transitions = new ProbabilisticTransitionSetBuilder(RuntimeModel, successorStateCapacity);
+			_transitions = new LtmcTransitionSetBuilder(RuntimeModel, successorStateCapacity);
 		}
 
 		/// <summary>
 		///   Gets the size of a single transition of the model in bytes.
 		/// </summary>
-		public override unsafe int TransitionSize => sizeof(ProbabilisticTransition);
+		public override unsafe int TransitionSize => sizeof(LtmcTransition);
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.

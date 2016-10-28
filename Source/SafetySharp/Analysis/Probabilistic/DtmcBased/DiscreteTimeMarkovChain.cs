@@ -40,7 +40,7 @@ namespace SafetySharp.Runtime
 	using Utilities;
 
 	
-	internal class MarkovChain : IFormalismWithStateLabeling
+	internal class DiscreteTimeMarkovChain : IFormalismWithStateLabeling
 	{
 		// TODO: Optimization potential for custom model checker: Add every state only once. Save the transitions and evaluate reachability formulas more efficient by only expanding "states" to "states x stateformulaset" where the state labels of interests are in "stateformulaset"
 
@@ -53,7 +53,7 @@ namespace SafetySharp.Runtime
 		
 		public LabelVector StateLabeling { get; }
 		
-		public MarkovChain(int maxNumberOfStates= 1 << 21, int maxNumberOfTransitions=0)
+		public DiscreteTimeMarkovChain(int maxNumberOfStates= 1 << 21, int maxNumberOfTransitions=0)
 		{
 			if (maxNumberOfTransitions <= 0)
 			{
@@ -232,7 +232,7 @@ namespace SafetySharp.Runtime
 		{
 			public BidirectionalGraph Graph { get; private set; }
 
-			public UnderlyingDigraph(MarkovChain markovChain)
+			public UnderlyingDigraph(DiscreteTimeMarkovChain markovChain)
 			{
 				//Assumption "every node is reachable" is fulfilled due to the construction
 				Graph = new BidirectionalGraph();
@@ -257,14 +257,14 @@ namespace SafetySharp.Runtime
 		// a nested class can access private members
 		internal class MarkovChainEnumerator
 		{
-			private MarkovChain _markovChain;
+			private DiscreteTimeMarkovChain _markovChain;
 			private SparseDoubleMatrix.SparseDoubleMatrixEnumerator _enumerator;
 
 			public int CurrentState { get; private set; }
 
 			public SparseDoubleMatrix.ColumnValue CurrentTransition => _enumerator.CurrentColumnValue.Value;
 
-			public MarkovChainEnumerator(MarkovChain markovChain)
+			public MarkovChainEnumerator(DiscreteTimeMarkovChain markovChain)
 			{
 				_markovChain = markovChain;
 				_enumerator = markovChain.ProbabilityMatrix.GetEnumerator();

@@ -119,7 +119,7 @@ namespace SafetySharp.Runtime
 			// Search for place to append is linear in number of existing transitions of state linearly => O(n^2) 
 			foreach (var transition in transitions)
 			{
-				var probTransition = (ProbabilisticTransition*)transition;
+				var probTransition = (LtmcTransition*)transition;
 				Assert.That(probTransition->IsValid, "Attempted to add an invalid transition.");
 
 				int currentElementIndex;

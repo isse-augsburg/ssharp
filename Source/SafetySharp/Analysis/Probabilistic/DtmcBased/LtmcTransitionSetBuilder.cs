@@ -31,14 +31,14 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 	/// <summary>
 	///   Creates an activation-minimal set of <see cref="CandidateTransition"/> instances.
 	/// </summary>
-	internal sealed unsafe class ProbabilisticTransitionSetBuilder : DisposableObject
+	internal sealed unsafe class LtmcTransitionSetBuilder : DisposableObject
 	{
 		private readonly Func<bool>[] _formulas;
 		private readonly int _stateVectorSize;
 		private readonly MemoryBuffer _targetStateBuffer = new MemoryBuffer();
 		private readonly byte* _targetStateMemory;
 		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
-		private readonly ProbabilisticTransition* _transitions;
+		private readonly LtmcTransition* _transitions;
 		private int _count;
 
 		/// <summary>
@@ -47,7 +47,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// <param name="model">The model the successors are computed for.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public ProbabilisticTransitionSetBuilder(RuntimeModel model, long capacity, params Func<bool>[] formulas)
+		public LtmcTransitionSetBuilder(RuntimeModel model, long capacity, params Func<bool>[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
@@ -57,8 +57,8 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 			_stateVectorSize = model.StateVectorSize;
 			_formulas = formulas;
 
-			_transitionBuffer.Resize(capacity * sizeof(ProbabilisticTransition), zeroMemory: false);
-			_transitions = (ProbabilisticTransition*)_transitionBuffer.Pointer;
+			_transitionBuffer.Resize(capacity * sizeof(LtmcTransition), zeroMemory: false);
+			_transitions = (LtmcTransition*)_transitionBuffer.Pointer;
 
 			_targetStateBuffer.Resize(capacity * model.StateVectorSize, zeroMemory: true);
 			_targetStateMemory = _targetStateBuffer.Pointer;
@@ -82,7 +82,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 
 			// 3. Store the transition
 			var activatedFaults = FaultSet.FromActivatedFaults(model.NondeterministicFaults);
-			_transitions[_count] = new ProbabilisticTransition
+			_transitions[_count] = new LtmcTransition
 			{
 				TargetState = successorState,
 				Formulas = new StateFormulaSet(_formulas),
@@ -120,7 +120,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// </summary>
 		public TransitionCollection ToCollection()
 		{
-			return new TransitionCollection((Transition*)_transitions, _count, _count, sizeof(ProbabilisticTransition));
+			return new TransitionCollection((Transition*)_transitions, _count, _count, sizeof(LtmcTransition));
 		}
 	}
 }

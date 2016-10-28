@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,44 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.Transitions
+namespace SafetySharp.Analysis
 {
-	using System.Runtime.InteropServices;
+	using System;
+	using Utilities;
+	using System.IO;
+	using System.Globalization;
+	using System.Text;
+	using Modeling;
+	using Runtime.Serialization;
+	using FormulaVisitors;
+	using Runtime;
+
+	// Mrmc is in file ProbabilisticModelChecker.Mrmc.cs which is nested in ProbabilisticModelChecker.cs.
+	// Open arrow of ProbabilisticModelChecker.cs in Solution Explorer to see nested files.
+	
 
 	/// <summary>
-	///   Represents a candidate transition of an <see cref="AnalysisModel" />.
+	///   Represents a base class for external probabilistic model checker tools.
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit, Size = 32)]
-	internal unsafe struct ProbabilisticTransition
+	public abstract class DtmcModelChecker : IDisposable
 	{
-		/// <summary>
-		///   A pointer to the transition's target state.
-		/// </summary>
-		[FieldOffset(0)]
-		public byte* TargetState;
+		public ProbabilityChecker ProbabilityChecker { get; }
 
-		/// <summary>
-		///   The faults that are activated by the transition.
-		/// </summary>
-		[FieldOffset(8)]
-		public FaultSet ActivatedFaults;
+		internal DiscreteTimeMarkovChain MarkovChain => ProbabilityChecker.MarkovChain;
 
-		/// <summary>
-		///   The state formulas holding in the target state.
-		/// </summary>
-		[FieldOffset(16)]
-		public StateFormulaSet Formulas;
+		protected DtmcModelChecker(ProbabilityChecker probabilityChecker)
+		{
+			ProbabilityChecker = probabilityChecker;
+		}
 
-		/// <summary>
-		///   Indicates whether the transition is valid or should be ignored.
-		/// </summary>
-		[FieldOffset(20)]
-		public bool IsValid;
+		public abstract void Dispose();
 
-		/// <summary>
-		///   The probability of the transition.
-		/// </summary>
-		[FieldOffset(24)]
-		public double Probability;
+		internal abstract Probability CalculateProbability(Formula formulaToCheck);
+
+		internal abstract bool CalculateFormula(Formula formulaToCheck);
+
+		internal abstract RewardResult CalculateReward(Formula formulaToCheck);
 	}
 }

@@ -31,7 +31,7 @@ namespace SafetySharp.Runtime
 	///   Represents a stack that is used to resolve nondeterministic choices during state space enumeration.
 	/// </summary>
 	[NonSerializable]
-	internal sealed class ProbabilisticChoiceResolver : ChoiceResolver
+	internal sealed class LtmcChoiceResolver : ChoiceResolver
 	{
 		/// <summary>
 		///   The number of nondeterministic choices that can be stored initially.
@@ -45,7 +45,7 @@ namespace SafetySharp.Runtime
 
 		/// <summary>
 		/// </summary>
-		private readonly ProbabilityStack _probabilitiesOfChosenValues = new ProbabilityStack(InitialCapacity);
+		private readonly LtmcProbabilityStack _probabilitiesOfChosenValues = new LtmcProbabilityStack(InitialCapacity);
 
 		/// <summary>
 		///   The stack that stores the number of possible values of all encountered choices along the current path.
@@ -66,7 +66,7 @@ namespace SafetySharp.Runtime
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="choices">The choices that potentially require access to the choice resolver.</param>
-		public ProbabilisticChoiceResolver(IEnumerable<Choice> choices)
+		public LtmcChoiceResolver(IEnumerable<Choice> choices)
 				: base(choices)
 		{
 		}

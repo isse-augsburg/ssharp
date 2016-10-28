@@ -30,7 +30,7 @@ namespace SafetySharp.Runtime
 {
 	using Analysis;
 
-	internal sealed class LtmcToMc
+	internal sealed class LtmcToDtmc
 	{
 		internal struct StateStorageEntry
 		{
@@ -69,7 +69,7 @@ namespace SafetySharp.Runtime
 		public int States = 0;
 
 
-		public MarkovChain MarkovChain { get; private set; }
+		public DiscreteTimeMarkovChain MarkovChain { get; private set; }
 
 		private readonly Dictionary<StateStorageEntry, int> _mapper = new Dictionary<StateStorageEntry, int>();
 		private readonly AutoResizeVector<StateStorageEntry> _backMapper = new AutoResizeVector<StateStorageEntry>();
@@ -128,12 +128,12 @@ namespace SafetySharp.Runtime
 			MarkovChain.FinishInitialDistribution();
 		}
 
-		public LtmcToMc(LabeledTransitionMarkovChain ltmc)
+		public LtmcToDtmc(LabeledTransitionMarkovChain ltmc)
 		{
 			Console.Error.WriteLine("Starting to convert labeled transition Markov chain to Markov chain");
 			Console.Error.WriteLine($"Ltmc: States {ltmc.SourceStates.Count}, Transitions {ltmc.Transitions}");
 			CreateStates(ltmc);
-			MarkovChain=new MarkovChain(States);
+			MarkovChain=new DiscreteTimeMarkovChain(States);
 			MarkovChain.StateFormulaLabels = ltmc.StateFormulaLabels;
 			SetStateLabeling();
 			ConvertInitialStates(ltmc);

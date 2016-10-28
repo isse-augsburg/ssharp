@@ -43,14 +43,14 @@ namespace Tests.DataStructures
 		/// </summary>
 		public TestTraceOutput Output { get; }
 
-		private MarkovChain _markovChain;
+		private DiscreteTimeMarkovChain _markovChain;
 
 		private void CreateExemplaryMarkovChain1()
 		{
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			_markovChain = new MarkovChain();
+			_markovChain = new DiscreteTimeMarkovChain();
 			_markovChain.StateFormulaLabels = new string[] { "label1" , "label2" };
 			_markovChain.StateRewardRetrieverLabels = new string[] { };
 			_markovChain.StartWithInitialDistribution();
@@ -73,7 +73,7 @@ namespace Tests.DataStructures
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			_markovChain = new MarkovChain();
+			_markovChain = new DiscreteTimeMarkovChain();
 			_markovChain.StateFormulaLabels = new string[] { "label1", "label2" };
 			_markovChain.StateRewardRetrieverLabels = new string[] { };
 			_markovChain.StartWithInitialDistribution();
