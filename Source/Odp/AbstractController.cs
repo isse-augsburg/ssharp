@@ -25,7 +25,7 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using Modeling;
 
-	public abstract class AbstractController : Component, IController
+	public abstract class AbstractController : IController
 	{
 		[Hidden(HideElements = true)]
 		public BaseAgent[] Agents { get; }

@@ -27,7 +27,7 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-	public class CentralReconfiguration : Component, IReconfigurationStrategy
+	public class CentralReconfiguration : IReconfigurationStrategy
 	{
 		protected readonly IController _controller;
 
@@ -59,11 +59,6 @@ namespace SafetySharp.Odp
 		{
 			foreach (var agent in configurations.Keys)
 				agent.AllocateRoles(configurations[agent].ToArray());
-		}
-
-		public override void Update()
-		{
-			_controller.Update();
 		}
 	}
 }

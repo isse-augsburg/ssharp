@@ -26,7 +26,7 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using Modeling;
 
-	public class ReconfigurationAgentHandler : Component, IReconfigurationStrategy
+	public class ReconfigurationAgentHandler : IReconfigurationStrategy
 	{
 		private readonly BaseAgent _baseAgent;
 		private readonly Func<BaseAgent, ReconfigurationAgentHandler, ITask, IReconfigurationAgent> _createReconfAgent;

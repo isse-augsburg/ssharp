@@ -26,7 +26,7 @@ namespace SafetySharp.Odp
 	using SafetySharp.Modeling;
 
 	// TODO: naming is ambiguous between "controller" (vs. "observer") and "controller" (vs. "plant")
-	public interface IController : IComponent
+	public interface IController
 	{
 		[Provided]
 		BaseAgent[] Agents { get; }
