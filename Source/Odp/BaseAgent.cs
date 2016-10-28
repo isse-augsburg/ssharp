@@ -329,8 +329,6 @@ namespace SafetySharp.Odp
 		[Hidden]
 		public IReconfigurationStrategy ReconfigurationStrategy { get; set; }
 
-		public delegate IEnumerable<ITask> InvariantPredicate(BaseAgent agent);
-
 		protected virtual InvariantPredicate[] MonitoringPredicates { get; } = new InvariantPredicate[] {
 			Invariant.IOConsistency,
 			Invariant.NeighborsAliveGuarantee,
