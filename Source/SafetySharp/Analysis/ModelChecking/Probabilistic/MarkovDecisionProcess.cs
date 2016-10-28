@@ -160,7 +160,7 @@ namespace SafetySharp.Runtime
 		{
 			_rowCountOfCurrentState = 0;
 			_currentMarkovChainState = markovChainState;
-			StateToRowsL[markovChainState+1] = RowsWithDistributions.Rows; //set beginning row of state to the next free row
+			StateToRowsL[_currentMarkovChainState + 1] = RowsWithDistributions.Rows; //set beginning row of state to the next free row
 		}
 
 		internal void StartWithNewDistribution()

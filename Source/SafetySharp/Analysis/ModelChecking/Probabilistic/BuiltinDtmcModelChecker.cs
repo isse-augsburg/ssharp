@@ -34,7 +34,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 	using System.Globalization;
 	using Utilities;
 
-	class BuiltinProbabilisticModelChecker : ProbabilisticModelChecker
+	class BuiltinDtmcModelChecker : DtmcModelChecker
 	{
 		private SparseDoubleMatrix CreateDerivedMatrix(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates)
 		{
@@ -108,7 +108,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return complement;
 		}
 
-		public BuiltinProbabilisticModelChecker(ProbabilityChecker probabilityChecker) : base(probabilityChecker)
+		public BuiltinDtmcModelChecker(ProbabilityChecker probabilityChecker) : base(probabilityChecker)
 		{
 		}
 

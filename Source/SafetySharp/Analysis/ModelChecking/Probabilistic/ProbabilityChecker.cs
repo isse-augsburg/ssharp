@@ -43,7 +43,7 @@ namespace SafetySharp.Analysis
 	{
 		public struct ProbabilityCalculator
 		{
-			public ProbabilityCalculator(Func<Probability> useDefaultChecker,Func<ProbabilisticModelChecker,Probability> useCustomChecker)
+			public ProbabilityCalculator(Func<Probability> useDefaultChecker,Func<DtmcModelChecker,Probability> useCustomChecker)
 			{
 				Calculate = useDefaultChecker;
 				CalculateWithChecker = useCustomChecker;
@@ -51,12 +51,12 @@ namespace SafetySharp.Analysis
 
 			// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
 			public Func<Probability> Calculate { get; }
-			public Func<ProbabilisticModelChecker,Probability> CalculateWithChecker { get; }
+			public Func<DtmcModelChecker,Probability> CalculateWithChecker { get; }
 		}
 
 		public struct FormulaCalculator
 		{
-			public FormulaCalculator(Func<bool> useDefaultChecker, Func<ProbabilisticModelChecker, bool> useCustomChecker)
+			public FormulaCalculator(Func<bool> useDefaultChecker, Func<DtmcModelChecker, bool> useCustomChecker)
 			{
 				Calculate = useDefaultChecker;
 				CalculateWithChecker = useCustomChecker;
@@ -64,12 +64,12 @@ namespace SafetySharp.Analysis
 
 			// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
 			public Func<bool> Calculate { get; }
-			public Func<ProbabilisticModelChecker, bool> CalculateWithChecker { get; }
+			public Func<DtmcModelChecker, bool> CalculateWithChecker { get; }
 		}
 
 		public struct RewardCalculator
 		{
-			public RewardCalculator(Func<RewardResult> useDefaultChecker, Func<ProbabilisticModelChecker, RewardResult> useCustomChecker)
+			public RewardCalculator(Func<RewardResult> useDefaultChecker, Func<DtmcModelChecker, RewardResult> useCustomChecker)
 			{
 				Calculate = useDefaultChecker;
 				CalculateWithChecker = useCustomChecker;
@@ -77,7 +77,7 @@ namespace SafetySharp.Analysis
 
 			// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
 			public Func<RewardResult> Calculate { get; }
-			public Func<ProbabilisticModelChecker, RewardResult> CalculateWithChecker { get; }
+			public Func<DtmcModelChecker, RewardResult> CalculateWithChecker { get; }
 		}
 
 
@@ -94,7 +94,7 @@ namespace SafetySharp.Analysis
 		private ModelBase _model;
 		private readonly ConcurrentBag<Formula> _formulasToCheck = new ConcurrentBag<Formula>();
 
-		public ProbabilisticModelChecker DefaultChecker { get; set; }
+		public DtmcModelChecker DefaultChecker { get; set; }
 
 		public void InitializeDefaultChecker()
 		{
@@ -270,7 +270,7 @@ namespace SafetySharp.Analysis
 			var formulaToCheck = formula;
 
 			Func<Probability> useDefaultChecker = () => CalculateProbabilityWithDefaultChecker(formulaToCheck);
-			Func<ProbabilisticModelChecker,Probability> useCustomChecker = customChecker => customChecker.CalculateProbability(formulaToCheck);
+			Func<DtmcModelChecker,Probability> useCustomChecker = customChecker => customChecker.CalculateProbability(formulaToCheck);
 
 			var checker = new ProbabilityCalculator(useDefaultChecker, useCustomChecker);
 			return checker;
@@ -290,7 +290,7 @@ namespace SafetySharp.Analysis
 			var formulaToCheck = formula;
 
 			Func<bool> useDefaultChecker = () => CalculateFormulaWithDefaultChecker(formulaToCheck);
-			Func<ProbabilisticModelChecker, bool> useCustomChecker = customChecker => customChecker.CalculateFormula(formulaToCheck);
+			Func<DtmcModelChecker, bool> useCustomChecker = customChecker => customChecker.CalculateFormula(formulaToCheck);
 
 			var checker = new FormulaCalculator(useDefaultChecker, useCustomChecker);
 			return checker;
@@ -316,7 +316,7 @@ namespace SafetySharp.Analysis
 			
 
 			Func<RewardResult> useDefaultChecker = () => CalculateRewardWithDefaultChecker(formulaToCheck);
-			Func<ProbabilisticModelChecker, RewardResult> useCustomChecker = customChecker => customChecker.CalculateReward(formulaToCheck);
+			Func<DtmcModelChecker, RewardResult> useCustomChecker = customChecker => customChecker.CalculateReward(formulaToCheck);
 
 			var checker = new RewardCalculator(useDefaultChecker, useCustomChecker);
 			return checker;

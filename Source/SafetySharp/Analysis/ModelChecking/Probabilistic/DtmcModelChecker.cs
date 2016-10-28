@@ -20,45 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Probabilistic
+namespace SafetySharp.Analysis
 {
 	using System;
-	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
-	using Shouldly;
 	using Utilities;
+	using System.IO;
+	using System.Globalization;
+	using System.Text;
+	using Modeling;
+	using Runtime.Serialization;
+	using FormulaVisitors;
+	using Runtime;
 
-	internal class MultipleInitialStates : ProbabilisticAnalysisTestObject
+	// Mrmc is in file ProbabilisticModelChecker.Mrmc.cs which is nested in ProbabilisticModelChecker.cs.
+	// Open arrow of ProbabilisticModelChecker.cs in Solution Explorer to see nested files.
+	
+
+	/// <summary>
+	///   Represents a base class for external probabilistic model checker tools.
+	/// </summary>
+	public abstract class DtmcModelChecker : IDisposable
 	{
-		protected override void Check()
+		public ProbabilityChecker ProbabilityChecker { get; }
+
+		internal MarkovChain MarkovChain => ProbabilityChecker.MarkovChain;
+
+		protected DtmcModelChecker(ProbabilityChecker probabilityChecker)
 		{
-			var c = new C();
-			Probability probabilityOfFinally2;
-
-			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
-			{
-				var typeOfModelChecker = (Type)Arguments[0];
-				var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, probabilityChecker);
-
-				Formula stateIs2 = c.F == 2;
-				var checkProbabilityOfFinally2 = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(stateIs2));
-				probabilityChecker.CreateMarkovChain();
-				probabilityChecker.DefaultChecker = modelChecker;
-				probabilityOfFinally2 = checkProbabilityOfFinally2.Calculate();
-				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);
-			}
-
-			probabilityOfFinally2.Between(0.33, 0.34).ShouldBe(true);
+			ProbabilityChecker = probabilityChecker;
 		}
 
-		private class C : Component
-		{
-			public int F;
+		public abstract void Dispose();
 
-			protected internal override void Initialize()
-			{
-				F = Choose(1, 2, 3);
-			}
-		}
+		internal abstract Probability CalculateProbability(Formula formulaToCheck);
+
+		internal abstract bool CalculateFormula(Formula formulaToCheck);
+
+		internal abstract RewardResult CalculateReward(Formula formulaToCheck);
 	}
 }

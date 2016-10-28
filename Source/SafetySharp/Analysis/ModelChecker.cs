@@ -80,7 +80,7 @@ namespace SafetySharp.Analysis
 				probabilityChecker.CreateMarkovChain(stateFormula);
 				//probabilityChecker.CreateMarkovChain(); //no early termination
 				//probabilityChecker.DefaultChecker = new Mrmc(probabilityChecker);
-				probabilityChecker.DefaultChecker = new BuiltinProbabilisticModelChecker(probabilityChecker);
+				probabilityChecker.DefaultChecker = new BuiltinDtmcModelChecker(probabilityChecker);
 				probabilityToReachState = checkProbabilityToReachState.Calculate();
 			}
 			return probabilityToReachState;

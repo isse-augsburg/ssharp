@@ -147,15 +147,6 @@ namespace SafetySharp.Runtime
 		[Conditional("DEBUG")]
 		public void ValidateStates()
 		{
-			if (ProbabilityMatrix.Rows+1 != States)
-			{
-				throw new Exception("Number of states should be one less than the number of rows in the matrix"); //the initial distribution also occupies one row
-			}
-			//if (_matrix.ColumnEntries != Transitions)
-			//{
-			//	throw new Exception("Number of transitions should be equal to the number of ColumnEntries in the matrix");
-			//}
-
 			var enumerator = ProbabilityMatrix.GetEnumerator();
 
 			//every row contains one probability distribution (also the initial distribution)

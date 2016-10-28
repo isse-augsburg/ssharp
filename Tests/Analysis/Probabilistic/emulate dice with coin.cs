@@ -58,7 +58,7 @@ namespace Tests.Analysis.Probabilistic
 			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
 			{
 				var typeOfModelChecker = (Type)Arguments[0];
-				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker,probabilityChecker);
+				var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker,probabilityChecker);
 
 				var checkProbabilityOf1 = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(c.IsInStateFinal1()));
 				probabilityChecker.CreateMarkovChain();

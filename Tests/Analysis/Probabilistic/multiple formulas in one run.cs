@@ -40,7 +40,7 @@ namespace Tests.Analysis.Probabilistic
 			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
 			{
 				var typeOfModelChecker = (Type)Arguments[0];
-				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker,probabilityChecker);
+				var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker,probabilityChecker);
 
 				Formula final2 = c.Value == 2;
 				Formula final3 = c.Value == 3;

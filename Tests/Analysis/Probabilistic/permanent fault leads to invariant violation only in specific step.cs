@@ -38,7 +38,7 @@ namespace Tests.Analysis.Probabilistic
 			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
 			{
 				var typeOfModelChecker = (Type)Arguments[0];
-				var modelChecker = (ProbabilisticModelChecker)Activator.CreateInstance(typeOfModelChecker, probabilityChecker);
+				var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, probabilityChecker);
 
 				Formula invariantViolated = c.ViolateInvariant;
 				var checkProbabilityOfInvariantViolation = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(invariantViolated));

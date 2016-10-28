@@ -36,7 +36,7 @@ namespace SafetySharp.Analysis
 	using Runtime.Serialization;
 	using Utilities;
 
-	public class Mrmc : ProbabilisticModelChecker
+	public class Mrmc : DtmcModelChecker
 	{
 
 		private TemporaryFile _fileTransitions;
