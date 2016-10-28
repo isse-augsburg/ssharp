@@ -20,50 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
+namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 {
-	using System;
 	using System.Collections.Generic;
-	using SafetySharp.Modeling;
 	using Odp;
 
-	class CentralRobotReconfiguration : CentralReconfiguration
+	class TolerableAnalysisController : IController
 	{
-		public bool UnsuccessfulReconfiguration { get; private set; }
-		public const int MaxSteps = 350;
+		private readonly IController _controller;
 
-		[Range(0, MaxSteps, OverflowBehavior.Clamp)]
-		public int StepCount { get; private set; }
 		private bool _hasReconfed;
-		[Hidden]
-		public AnalysisMode Mode = AnalysisMode.AllFaults;
 
-		public CentralRobotReconfiguration(IController controller) : base(controller) { }
-
-		public override void Update()
+		public TolerableAnalysisController(IController controller)
 		{
-			++StepCount;
-			base.Update();
+			_controller = controller;
 		}
 
-		public override void Reconfigure(IEnumerable<Tuple<ITask, Agent.State>> deficientTasks)
+		public BaseAgent[] Agents => _controller.Agents;
+		public bool ReconfigurationFailure => _controller.ReconfigurationFailure;
+		public Dictionary<BaseAgent, IEnumerable<Role>> CalculateConfigurations(params ITask[] tasks)
 		{
-			if (Mode == AnalysisMode.IntolerableFaults && StepCount >= MaxSteps)
-				return;
+			if (ReconfigurationFailure)
+				return null;
 
-			if (UnsuccessfulReconfiguration)
-				return;
-
-			if (Mode == AnalysisMode.TolerableFaults && _hasReconfed)
+			if (_hasReconfed)
 			{
 				// This speeds up analyses when checking for reconf failures with DCCA, but is otherwise
 				// unacceptable for other kinds of analyses
-				return;
+				return null;
 			}
 
-			base.Reconfigure(deficientTasks);
-			UnsuccessfulReconfiguration = _controller.ReconfigurationFailure;
 			_hasReconfed = true;
+			return _controller.CalculateConfigurations(tasks);
 		}
 	}
 }
