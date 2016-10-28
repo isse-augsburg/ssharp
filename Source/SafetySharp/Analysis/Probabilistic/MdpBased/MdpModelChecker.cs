@@ -41,13 +41,13 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public abstract class MdpModelChecker : IDisposable
 	{
-		public ProbabilityChecker ProbabilityChecker { get; }
+		public ProbabilityRangeChecker ProbabilityRangeChecker { get; }
 
-		internal DiscreteTimeMarkovChain MarkovChain => ProbabilityChecker.MarkovChain;
+		internal MarkovDecisionProcess MarkovDecisionProcess => ProbabilityRangeChecker.MarkovDecisionProcess;
 
-		protected MdpModelChecker(ProbabilityChecker probabilityChecker)
+		protected MdpModelChecker(ProbabilityRangeChecker probabilityRangeChecker)
 		{
-			ProbabilityChecker = probabilityChecker;
+			ProbabilityRangeChecker = probabilityRangeChecker;
 		}
 
 		public abstract void Dispose();
@@ -55,6 +55,8 @@ namespace SafetySharp.Analysis
 		internal abstract Probability CalculateMinimalProbability(Formula formulaToCheck);
 
 		internal abstract Probability CalculateMaximalProbability(Formula formulaToCheck);
+
+		internal abstract Probability CalculateProbabilityRange(Formula formulaToCheck);
 
 		internal abstract bool CalculateFormula(Formula formulaToCheck);
 

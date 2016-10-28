@@ -221,17 +221,19 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				loops++;
 				for (var i = 0; i < stateCount; i++)
 				{
-					enumerator.SelectSourceState(i);
 					if (directlySatisfiedStates.ContainsKey(i))
 					{
+						//we could remove this line, because already set by CreateDerivedVector and never changed when we initialize xold with CreateDerivedVector(directlySatisfiedStates)
 						xnew[i] = 1.0;
 					}
 					else if (directlyUnsatisfiedStates.ContainsKey(i))
 					{
+						//we could remove this line, because already set by CreateDerivedVector and never changed when we initialize xold with CreateDerivedVector(directlySatisfiedStates)
 						xnew[i] = 0.0;
 					}
 					else
 					{
+						enumerator.SelectSourceState(i);
 						var sum = 0.0;
 						while (enumerator.MoveNextTransition())
 						{
@@ -266,13 +268,13 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 			var psiEvaluator = MarkovChain.CreateFormulaEvaluator(psi);
 
-			// calculate probabilityExactlyZero
+			// calculate probabilityExactlyZero (prob0)
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
 			var nodesToIgnore=new Dictionary<int,bool>();  // change for \phi Until \psi
 			var probabilityGreaterThanZero = underlyingDigraph.Graph.GetAncestors(directlySatisfiedStates, nodesToIgnore);
 			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
 
-			// calculate probabilityExactlyOne
+			// calculate probabilityExactlyOne (prob1)
 			nodesToIgnore = directlySatisfiedStates; // change for \phi Until \psi
 			var probabilitySmallerThanOne = underlyingDigraph.Graph.GetAncestors(probabilityExactlyZero, nodesToIgnore); ;
 			var probabilityExactlyOne = CreateComplement(probabilitySmallerThanOne); ;

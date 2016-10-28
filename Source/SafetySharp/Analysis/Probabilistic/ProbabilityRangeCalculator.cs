@@ -26,21 +26,23 @@ namespace SafetySharp.Analysis
 {
 	using Modeling;
 
-	public interface IProbabilityCalculatingCapability
+	/*
+	public interface IProbabilityRangeCalculatingCapability
 	{
 
 	}
+	*/
 
-	public struct ProbabilityCalculator
+	public struct ProbabilityRangeCalculator
 	{
-		public ProbabilityCalculator(Func<Probability> useDefaultChecker) //, Func<IFormulaCalculatingCapability, Probability> useCustomChecker
+		public ProbabilityRangeCalculator(Func<ProbabilityRange> useDefaultChecker) //, Func<IFormulaCalculatingCapability, Probability> useCustomChecker
 		{
 			Calculate = useDefaultChecker;
 			//CalculateWithChecker = useCustomChecker;
 		}
 
 		// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
-		public Func<Probability> Calculate { get; }
+		public Func<ProbabilityRange> Calculate { get; }
 		//public Func<DtmcModelChecker, Probability> CalculateWithChecker { get; }
 	}
 }

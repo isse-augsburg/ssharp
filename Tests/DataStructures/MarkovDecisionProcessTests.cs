@@ -159,7 +159,7 @@ namespace Tests.DataStructures
 		{
 			CreateExemplaryMdp1();
 
-			var underlyingDigraph = _mdp.CreateUnderlyingDigraph();
+			var underlyingDigraph = _mdp.CreateUnderlyingDigraphAllDistributions();
 			var nodesToIgnore = new Dictionary<int,bool>();
 			var selectedNodes1 = new Dictionary<int,bool>();
 			selectedNodes1.Add(1,true);
@@ -179,7 +179,7 @@ namespace Tests.DataStructures
 		{
 			CreateExemplaryMdp2();
 
-			var underlyingDigraph = _mdp.CreateUnderlyingDigraph();
+			var underlyingDigraph = _mdp.CreateUnderlyingDigraphAllDistributions();
 			var nodesToIgnore = new Dictionary<int, bool>();
 			var selectedNodes1 = new Dictionary<int, bool>();
 			selectedNodes1.Add(1, true);

@@ -22,25 +22,45 @@
 
 using System;
 
-namespace SafetySharp.Analysis
+namespace SafetySharp.Modeling
 {
 	using Modeling;
-
-	public interface IProbabilityCalculatingCapability
+	
+	public struct ProbabilityRange
 	{
+		public static ProbabilityRange Zero = new ProbabilityRange(0.0, 0.0);
 
-	}
+		public static ProbabilityRange One = new ProbabilityRange(1.0, 1.0);
 
-	public struct ProbabilityCalculator
-	{
-		public ProbabilityCalculator(Func<Probability> useDefaultChecker) //, Func<IFormulaCalculatingCapability, Probability> useCustomChecker
+		public static ProbabilityRange ZeroToOne = new ProbabilityRange(0.0, 1.0);
+
+
+		public double MinValue { get; }
+
+		public double MaxValue { get; }
+
+		public ProbabilityRange(Probability minProbability, Probability maxProbability)
 		{
-			Calculate = useDefaultChecker;
-			//CalculateWithChecker = useCustomChecker;
+			MinValue = minProbability.Value;
+			MaxValue = maxProbability.Value;
 		}
 
-		// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
-		public Func<Probability> Calculate { get; }
-		//public Func<DtmcModelChecker, Probability> CalculateWithChecker { get; }
+		public ProbabilityRange(double minProbability, Probability maxProbability)
+		{
+			MinValue = minProbability;
+			MaxValue = maxProbability.Value;
+		}
+
+		public ProbabilityRange(Probability minProbability, double maxProbability)
+		{
+			MinValue = minProbability.Value;
+			MaxValue = maxProbability;
+		}
+
+		public ProbabilityRange(double minProbability, double maxProbability)
+		{
+			MinValue = minProbability;
+			MaxValue = maxProbability;
+		}
 	}
 }

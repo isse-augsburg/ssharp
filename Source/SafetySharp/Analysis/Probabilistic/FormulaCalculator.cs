@@ -26,17 +26,23 @@ namespace SafetySharp.Analysis
 {
 	using Modeling;
 
+	/*
+	public interface IFormulaCalculatingCapability
+	{
+
+	}
+	*/
 
 	public struct FormulaCalculator
 	{
-		public FormulaCalculator(Func<bool> useDefaultChecker, Func<DtmcModelChecker, bool> useCustomChecker)
+		public FormulaCalculator(Func<bool> useDefaultChecker) //, Func<IFormulaCalculatingCapability, bool> useCustomChecker
 		{
 			Calculate = useDefaultChecker;
-			CalculateWithChecker = useCustomChecker;
+			//CalculateWithChecker = useCustomChecker;
 		}
 
 		// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
 		public Func<bool> Calculate { get; }
-		public Func<DtmcModelChecker, bool> CalculateWithChecker { get; }
+		//public Func<IFormulaCalculatingCapability, bool> CalculateWithChecker { get; }
 	}
 }

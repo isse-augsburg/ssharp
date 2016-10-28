@@ -20,27 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-
-namespace SafetySharp.Analysis
+namespace SafetySharp.Analysis.Probabilistic
 {
-	using Modeling;
-
-	public interface IProbabilityCalculatingCapability
+	public enum BoundsToCalculate
 	{
-
-	}
-
-	public struct ProbabilityCalculator
-	{
-		public ProbabilityCalculator(Func<Probability> useDefaultChecker) //, Func<IFormulaCalculatingCapability, Probability> useCustomChecker
-		{
-			Calculate = useDefaultChecker;
-			//CalculateWithChecker = useCustomChecker;
-		}
-
-		// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
-		public Func<Probability> Calculate { get; }
-		//public Func<DtmcModelChecker, Probability> CalculateWithChecker { get; }
+		Minimum, // "Infimum", greatest lower bound
+		Maximum, // "Supremum", least upper bound
+		Both
 	}
 }

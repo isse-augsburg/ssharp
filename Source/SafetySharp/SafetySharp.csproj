@@ -56,7 +56,11 @@
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\DeadlockChecker.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultOrderModifier.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultSuppressionModifier.cs" />
+    <Compile Include="Analysis\Probabilistic\BoundsToCalculate.cs" />
     <Compile Include="Analysis\Probabilistic\FormulaCalculator.cs" />
+    <Compile Include="Analysis\Probabilistic\MdpBased\ProbabilityRangeChecker.cs" />
+    <Compile Include="Modeling\ProbabilityRange.cs" />
+    <Compile Include="Analysis\Probabilistic\ProbabilityRangeCalculator.cs" />
     <Compile Include="Analysis\Probabilistic\RewardCalculator.cs" />
     <Compile Include="Analysis\Probabilistic\ProbabilityCalculator.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\BuiltinMdpModelChecker.cs" />

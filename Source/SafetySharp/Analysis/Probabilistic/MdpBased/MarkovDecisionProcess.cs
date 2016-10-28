@@ -309,33 +309,101 @@ namespace SafetySharp.Runtime
 			return Analysis.FormulaVisitors.FormulaEvaluatorCompilationVisitor.Compile(this, formula);
 		}
 		
-		public UnderlyingDigraph CreateUnderlyingDigraph()
+		public UnderlyingDigraph CreateUnderlyingDigraphAllDistributions()
 		{
-			return new UnderlyingDigraph(this);
+			return UnderlyingDigraph.EdgeWhenAllDistributionsContainTransition(this);
 		}
-		
+
+		public UnderlyingDigraph CreateUnderlyingDigraphAnyDistribution()
+		{
+			return UnderlyingDigraph.EdgeWhenAnyDistributionContainsTransition(this);
+		}
+
 		internal class UnderlyingDigraph
 		{
-			public BidirectionalGraph Graph { get; private set; }
+			public BidirectionalGraph Graph { get; }
 
-			public UnderlyingDigraph(MarkovDecisionProcess markovChain)
+			public UnderlyingDigraph(BidirectionalGraph graph)
+			{
+				Graph = graph;
+			}
+
+			public static UnderlyingDigraph EdgeWhenAllDistributionsContainTransition(MarkovDecisionProcess markovChain)
 			{
 				//Assumption "every node is reachable" is fulfilled due to the construction
-				Graph = new BidirectionalGraph();
+				var graph = new BidirectionalGraph();
+				
+				var enumerator = markovChain.GetEnumerator();
+				while (enumerator.MoveNextState())
+				{
+					// select targets of first distribution as candidates
+					enumerator.MoveNextDistribution();
+					var possibleSuccessors = new HashSet<int>();
+					while (enumerator.MoveNextTransition())
+					{
+						if (enumerator.CurrentTransition.Value > 0.0)
+							possibleSuccessors.Add(enumerator.CurrentTransition.Column);
+					}
+
+					while (enumerator.MoveNextDistribution())
+					{
+						//find targets of this distribution and create the intersection. Some possibleSuccessors may be removed
+						var successorsOfTransition = new HashSet<int>();
+						while (enumerator.MoveNextTransition())
+						{
+							if (enumerator.CurrentTransition.Value > 0.0)
+								successorsOfTransition.Add(enumerator.CurrentTransition.Column);
+						}
+						possibleSuccessors.IntersectWith(successorsOfTransition);
+					}
+
+					// add all possibleSuccessors
+					foreach (var successor in possibleSuccessors)
+					{
+						graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(enumerator.CurrentState, successor));
+					}
+				}
+				return new UnderlyingDigraph(graph);
+			}
+
+			public static UnderlyingDigraph EdgeWhenAnyDistributionContainsTransition(MarkovDecisionProcess markovChain)
+			{
+				//Assumption "every node is reachable" is fulfilled due to the construction
+				var graph = new BidirectionalGraph();
 
 				var enumerator = markovChain.GetEnumerator();
 				while (enumerator.MoveNextState())
 				{
+					// select targets of first distribution as candidates
+					enumerator.MoveNextDistribution();
+					var foundSuccessors = new HashSet<int>();
+					while (enumerator.MoveNextTransition())
+					{
+						if (enumerator.CurrentTransition.Value > 0.0)
+							foundSuccessors.Add(enumerator.CurrentTransition.Column);
+					}
+
 					while (enumerator.MoveNextDistribution())
 					{
+						//find targets of this distribution and create the union. Some possibleSuccessors may be added
+						var successorsOfTransition = new HashSet<int>();
 						while (enumerator.MoveNextTransition())
 						{
 							if (enumerator.CurrentTransition.Value > 0.0)
-								Graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(enumerator.CurrentState, enumerator.CurrentTransition.Column));
+								successorsOfTransition.Add(enumerator.CurrentTransition.Column);
 						}
+						foundSuccessors.UnionWith(successorsOfTransition);
+					}
+
+					// add all possibleSuccessors
+					foreach (var successor in foundSuccessors)
+					{
+						graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(enumerator.CurrentState, successor));
 					}
 				}
+				return new UnderlyingDigraph(graph);
 			}
+
 		}
 
 		internal MarkovDecisionProcessEnumerator GetEnumerator()

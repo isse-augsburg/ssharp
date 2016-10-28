@@ -26,17 +26,21 @@ namespace SafetySharp.Analysis
 {
 	using Modeling;
 
+	public interface IRewardCalculatingCapability
+	{
+	
+	}
 
 	public struct RewardCalculator
 	{
-		public RewardCalculator(Func<RewardResult> useDefaultChecker, Func<DtmcModelChecker, RewardResult> useCustomChecker)
+		public RewardCalculator(Func<RewardResult> useDefaultChecker) //, Func<IRewardCalculatingCapability, RewardResult> useCustomChecker
 		{
 			Calculate = useDefaultChecker;
-			CalculateWithChecker = useCustomChecker;
+			//CalculateWithChecker = useCustomChecker;
 		}
 
 		// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in
 		public Func<RewardResult> Calculate { get; }
-		public Func<DtmcModelChecker, RewardResult> CalculateWithChecker { get; }
+		//public Func<DtmcModelChecker, RewardResult> CalculateWithChecker { get; }
 	}
 }
