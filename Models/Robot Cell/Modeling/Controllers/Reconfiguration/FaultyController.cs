@@ -20,50 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
+namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 {
-	using System;
 	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 	using Odp;
 
-	class CentralRobotReconfiguration : CentralReconfiguration
+	class FaultyController : Component, IController
 	{
-		public bool UnsuccessfulReconfiguration { get; private set; }
-		public const int MaxSteps = 350;
+		private readonly IController _controller;
 
-		[Range(0, MaxSteps, OverflowBehavior.Clamp)]
-		public int StepCount { get; private set; }
-		private bool _hasReconfed;
-		[Hidden]
-		public AnalysisMode Mode = AnalysisMode.AllFaults;
-
-		public CentralRobotReconfiguration(IController controller) : base(controller) { }
-
-		public override void Update()
+		public FaultyController(IController controller)
 		{
-			++StepCount;
-			base.Update();
+			_controller = controller;
 		}
 
-		public override void Reconfigure(IEnumerable<Tuple<ITask, Agent.State>> deficientTasks)
+		protected FaultyController() { }
+
+		// composition
+		public BaseAgent[] Agents => _controller.Agents;
+		public virtual bool ReconfigurationFailure =>_controller.ReconfigurationFailure;
+		public virtual Dictionary<BaseAgent, IEnumerable<Role>> CalculateConfigurations(params ITask[] tasks)
 		{
-			if (Mode == AnalysisMode.IntolerableFaults && StepCount >= MaxSteps)
-				return;
+			return _controller.CalculateConfigurations(tasks);
+		}
 
-			if (UnsuccessfulReconfiguration)
-				return;
+		// fault & effect
+		public readonly Fault ReconfigurationFault = new TransientFault();
 
-			if (Mode == AnalysisMode.TolerableFaults && _hasReconfed)
+		[FaultEffect(Fault = nameof(ReconfigurationFault))]
+		public abstract class ReconfigurationFailureEffect : FaultyController
+		{
+			public override bool ReconfigurationFailure => true;
+
+			public override Dictionary<BaseAgent, IEnumerable<Role>> CalculateConfigurations(params ITask[] tasks)
 			{
-				// This speeds up analyses when checking for reconf failures with DCCA, but is otherwise
-				// unacceptable for other kinds of analyses
-				return;
+				return new Dictionary<BaseAgent, IEnumerable<Role>>();
 			}
-
-			base.Reconfigure(deficientTasks);
-			UnsuccessfulReconfiguration = _controller.ReconfigurationFailure;
-			_hasReconfed = true;
 		}
 	}
 }

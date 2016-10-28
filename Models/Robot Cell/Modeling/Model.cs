@@ -191,7 +191,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 					Workpieces.Select(workpiece => workpiece.ToolApplicationFailed).SuppressActivations();
 					Robots.Select(robot => robot.SwitchToWrongToolFault).SuppressActivations();
 					Carts.Select(cart => cart.Lost).SuppressActivations();
-					ReconfigurationStrategy.ReconfigurationFailure.SuppressActivation();
 					break;
 				case AnalysisMode.IntolerableFaults:
 					Faults.SuppressActivations();
@@ -200,7 +199,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 					Workpieces.Select(workpiece => workpiece.ToolApplicationFailed).MakeNondeterministic();
 					Robots.Select(robot => robot.SwitchToWrongToolFault).MakeNondeterministic();
 					Carts.Select(cart => cart.Lost).MakeNondeterministic();
-					ReconfigurationStrategy.ReconfigurationFailure.MakeNondeterministic();
 					break;
 				case AnalysisMode.AllFaults:
 					return;

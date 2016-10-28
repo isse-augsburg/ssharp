@@ -72,6 +72,7 @@
     <Compile Include="Modeling\Controllers\ProcessCapability.cs" />
     <Compile Include="Modeling\Controllers\Resource.cs" />
     <Compile Include="Modeling\Controllers\Task.cs" />
+    <Compile Include="Modeling\Controllers\Reconfiguration\FaultyController.cs" />
     <Compile Include="Modeling\Model.cs" />
     <Compile Include="Modeling\Plants\Cart.cs" />
     <Compile Include="Modeling\Controllers\CartAgent.cs" />
