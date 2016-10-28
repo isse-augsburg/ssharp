@@ -27,8 +27,8 @@ namespace SafetySharp.Odp
 	using System.Linq;
 	using Modeling;
 
-    public abstract partial class BaseAgent : Component, IAgent
-    {
+	public abstract partial class BaseAgent : Component, IAgent
+	{
 		// configuration options
 		public static int MaximumAgentCount = 20;
 		public static int MaximumResourceCount = 30;
@@ -42,10 +42,9 @@ namespace SafetySharp.Odp
 		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
 		public List<Role> AllocatedRoles { get; } = new List<Role>(MaximumRoleCount);
-		private readonly List<uint> _applicationTimes = new List<uint>(MaximumRoleCount);
 
-		private uint _timeStamp = 0;
-		private uint _roleApplications = 0;
+		[Hidden]
+		public IRoleSelector RoleSelector { get; protected set; } = new FairRoleSelector();
 
 		protected BaseAgent()
 		{
@@ -54,7 +53,6 @@ namespace SafetySharp.Odp
 
 		public override void Update()
 		{
-			_timeStamp++;
 			Observe();
 			Work();
 		}
@@ -109,7 +107,7 @@ namespace SafetySharp.Odp
 					to: States.ExecuteRole,
 					guard: _currentRole != null && _currentRole?.PreCondition.Port == null)
 				.Transition( // actual work on resource
-					from : States.ExecuteRole,
+					from: States.ExecuteRole,
 					to: States.ExecuteRole,
 					guard: !_currentRole.Value.IsCompleted,
 					action: () => _currentRole?.ExecuteStep(this))
@@ -139,70 +137,11 @@ namespace SafetySharp.Odp
 
 		public abstract void ApplyCapability(ICapability capability);
 
-		#region role selection algorithm
-
-		// fair role selection algorithm
-		// (Konstruktion selbst-organisierender Softwaresysteme, section 6.3)
-		//
-		// TODO: deadlock avoidance
-		// (Konstruktion selbst-organisierender Softwaresysteme, section 6.4)
-
 		private void ChooseRole()
 		{
-			// producer roles and roles with open resource requests can be chosen, unless they're locked
-			var candidateRoles = AllocatedRoles.Where(role => !role.IsLocked
-				&& (role.PreCondition.Port == null || _resourceRequests.Any(req => role.Equals(req.Role))));
-
-			if (candidateRoles.Any())
-			{
-				// fair role selection
-				_currentRole = candidateRoles.Aggregate(ChooseRole);
-
-				// update data
-				_roleApplications++;
-				_applicationTimes[AllocatedRoles.IndexOf(_currentRole.Value)] = _roleApplications;
+			_currentRole = RoleSelector.ChooseRole(AllocatedRoles, _resourceRequests);
+			if (_currentRole != null)
 				_resourceRequests.RemoveAll(request => request.Source == _currentRole?.PreCondition.Port);
-			}
-		}
-
-		private Role ChooseRole(Role role1, Role role2)
-		{
-			var fitness1 = Fitness(role1);
-			var fitness2 = Fitness(role2);
-
-			// role with higher fitness wins
-			if (fitness1 > fitness2)
-				return role1;
-			else if (fitness1 < fitness2)
-				return role2;
-			else
-			{
-				// same fitness => older resource request wins
-				var timeStamp1 = GetTimeStamp(role1);
-				var timeStamp2 = GetTimeStamp(role2);
-
-				if (timeStamp1 <= timeStamp2)
-					return role1;
-				return role2;
-			}
-		}
-
-		private const uint alpha = 1;
-		private const uint beta = 1;
-		private uint Fitness(Role role)
-		{
-			var applicationTime = _applicationTimes[AllocatedRoles.IndexOf(role)];
-			return alpha * (_roleApplications - applicationTime)
-				+ beta * (uint)(role.Task.RequiredCapabilities.Length - role.PreCondition.State.Count());
-		}
-
-		private uint GetTimeStamp(Role role)
-		{
-			// for roles without request (production roles) use current time
-			return (from request in _resourceRequests
-					where role.Equals(request.Role)
-					select request.TimeStamp
-				).DefaultIfEmpty(_timeStamp).Single();
 		}
 
 		private Role[] GetRoles(BaseAgent source, Condition condition)
@@ -211,8 +150,6 @@ namespace SafetySharp.Odp
 				role.PreCondition.Port == source && role.PreCondition.StateMatches(condition)
 			).ToArray();
 		}
-
-		#endregion
 
 		#region resource flow
 
@@ -252,18 +189,16 @@ namespace SafetySharp.Odp
 		private readonly List<ResourceRequest> _resourceRequests
 			= new List<ResourceRequest>(MaximumResourceCount);
 
-		private struct ResourceRequest
+		public struct ResourceRequest
 		{
-			public ResourceRequest(BaseAgent source, Role role, uint timeStamp)
+			internal ResourceRequest(BaseAgent source, Role role)
 			{
 				Source = source;
 				Role = role;
-				TimeStamp = timeStamp;
 			}
 
 			public BaseAgent Source { get; }
 			public Role Role { get; }
-			public uint TimeStamp { get; }
 		}
 
 		protected virtual void InitiateResourceTransfer(BaseAgent source)
@@ -279,7 +214,7 @@ namespace SafetySharp.Odp
 
 			foreach (var role in roles)
 			{
-				_resourceRequests.Add(new ResourceRequest(agent, role, _timeStamp));
+				_resourceRequests.Add(new ResourceRequest(agent, role));
 			}
 		}
 
@@ -389,22 +324,14 @@ namespace SafetySharp.Odp
 			});
 		}
 
-		public virtual void RemoveAllocatedRoles(ITask task)
-		{
-			for (int i = 0; i < AllocatedRoles.Count; ++i)
-			{
-				if (AllocatedRoles[i].Task == task)
-				{
-					AllocatedRoles.RemoveAt(i);
-					_applicationTimes.RemoveAt(i);
-				}
-			}
-		}
-
 		public virtual void AllocateRoles(params Role[] roles)
 		{
 			AllocatedRoles.AddRange(roles);
-			_applicationTimes.AddRange(Enumerable.Repeat(0u, roles.Length));
+		}
+
+		public virtual void RemoveAllocatedRoles(ITask task)
+		{
+			AllocatedRoles.RemoveAll(role => role.Task == task);
 		}
 
 		#endregion
