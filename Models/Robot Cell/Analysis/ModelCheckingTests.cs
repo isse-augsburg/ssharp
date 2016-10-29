@@ -22,7 +22,6 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
-	using System;
 	using System.Linq;
 	using Modeling;
 	using Modeling.Controllers;
@@ -35,9 +34,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void EnumerateStateSpace()
 		{
-			var model = new Model();
-			model.InitializeDefaultInstance();
-			model.CreateController<FastController>();
+			var model = SampleModels.DefaultInstance<FastController>();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
@@ -49,9 +46,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void NoDamagedWorkpieces()
 		{
-			var model = new Model();
-			model.InitializeDefaultInstance();
-			model.CreateController<FastController>();
+			var model = SampleModels.DefaultInstance<FastController>();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
@@ -63,9 +58,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void AllWorkpiecesCompleteEventually()
 		{
-			var model = new Model();
-			model.InitializeDefaultInstance();
-			model.CreateController<FastController>();
+			var model = SampleModels.DefaultInstance<FastController>();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
@@ -77,9 +70,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void HasResourceAndHasWorkpieceMatch()
 		{
-			var model = new Model();
-			model.InitializeDefaultInstance();
-			model.CreateController<FastController>();
+			var model = SampleModels.DefaultInstance<FastController>();
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };

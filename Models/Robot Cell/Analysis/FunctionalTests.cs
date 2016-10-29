@@ -42,10 +42,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void DepthFirstSearch()
 		{
-			var model = new Model();
-			model.InitializeDefaultInstance();
-			model.CreateController<MiniZincController>();
-			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
+			var model = SampleModels.DefaultInstance<MiniZincController>(AnalysisMode.TolerableFaults);
 
 			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 20 } };
 			var result = modelChecker.CheckInvariant(model, true);
@@ -73,7 +70,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				Heuristics = { RedundancyHeuristic(model), new SubsumptionHeuristic(model) }
 			};
 		
-			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ReconfigurationStrategy.UnsuccessfulReconfiguration);
+			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.Controller.ReconfigurationFailure);
 			Console.WriteLine(result);
 		}
 
@@ -89,13 +86,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 		private static IEnumerable CreateConfigurationsMiniZinc()
 		{
-			return Model.CreateConfigurations<MiniZincController>(AnalysisMode.TolerableFaults)
+			return SampleModels.CreateConfigurations<MiniZincController>(AnalysisMode.TolerableFaults)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 
 		private static IEnumerable CreateConfigurationsFast()
 		{
-			return Model.CreateConfigurations<FastController>(AnalysisMode.TolerableFaults)
+			return SampleModels.CreateConfigurations<FastController>(AnalysisMode.TolerableFaults)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 	}

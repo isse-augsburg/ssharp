@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,12 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
+namespace SafetySharp.CaseStudies.RobotCell.Modeling
 {
-	public enum AnalysisMode
+	using System;
+	using Odp;
+	using Controllers;
+
+	public static class ModelBuilderHelper
 	{
-		AllFaults,
-		TolerableFaults,
-		IntolerableFaults
+		public static ICapability Produce => null; // HACK: ProduceCapability has model-specific constructor parameters, so use null as symbol
+		public static ICapability Insert => new ProcessCapability(ProductionAction.Insert);
+		public static ICapability Drill => new ProcessCapability(ProductionAction.Drill);
+		public static ICapability Tighten => new ProcessCapability(ProductionAction.Tighten);
+		public static ICapability Polish => new ProcessCapability(ProductionAction.Polish);
+		public static ICapability Consume => new ConsumeCapability();
+
+		public static Tuple<int, int> Route(int from, int to) => Tuple.Create(from, to);
 	}
 }

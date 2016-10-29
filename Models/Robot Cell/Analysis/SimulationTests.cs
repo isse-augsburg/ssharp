@@ -22,7 +22,6 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
-	using System;
 	using System.Diagnostics;
 	using Modeling;
 	using Modeling.Controllers;
@@ -35,9 +34,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void Simulate()
 		{
-			var model = new Model();
-			model.InitializeDefaultInstance();
-			model.CreateController<FastController>();
+			var model = SampleModels.DefaultInstance<FastController>();
 			model.Faults.SuppressActivations();
 
 			var simulator = new Simulator(model);
@@ -52,7 +49,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			{
 				WriteLine($"=================  Step: {i}  =====================================");
 
-				if (model.ReconfigurationStrategy.UnsuccessfulReconfiguration)
+				if (model.Controller.ReconfigurationFailure)
 					WriteLine("Reconfiguration failed.");
 				else
 				{

@@ -27,6 +27,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using System.Linq;
 	using Modeling;
 	using Modeling.Controllers;
+	using Modeling.Controllers.Reconfiguration;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 
@@ -45,8 +46,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		public void AllWorkpiecesCompleteEventually(Model model)
 		{
 			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
+
+			Formula stepCountExceeded =
+				(model.Controller as IntolerableAnalysisController)?.StepCount >= IntolerableAnalysisController.MaxSteps;
+
 			var result = modelChecker.ComputeMinimalCriticalSets(model,
-				model.ReconfigurationStrategy.StepCount >= CentralRobotReconfiguration.MaxSteps &&
+				stepCountExceeded &&
 				!model.Workpieces.All(w => w.IsDamaged || w.IsDiscarded || w.IsComplete), maxCardinality: 2);
 
 			Console.WriteLine(result);
@@ -54,7 +59,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 		private static IEnumerable CreateConfigurations()
 		{
-			return Model.CreateConfigurations<FastController>(AnalysisMode.IntolerableFaults)
+			return SampleModels.CreateConfigurations<FastController>(AnalysisMode.IntolerableFaults)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 	}
