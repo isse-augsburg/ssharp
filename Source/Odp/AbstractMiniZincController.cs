@@ -131,6 +131,8 @@ namespace SafetySharp.Odp
 				if (!configs.ContainsKey(agent))
 					configs.Add(agent, new HashSet<Role>());
 				(configs[agent] as HashSet<Role>).Add(role);
+
+				lastAgent = agent;
 			}
 		}
 
