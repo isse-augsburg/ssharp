@@ -41,11 +41,23 @@ namespace SafetySharp.Odp
 
 		public static IEnumerable<ITask> ResourceConsistency(BaseAgent agent)
 		{
-			if (agent.Resource != null
+			/* if (agent.Resource != null
 				&& !agent.AllocatedRoles.Any(role => role.PreCondition.Task == agent.Resource.Task
-					&& role.PreCondition.State.SequenceEqual(agent.Resource.State)))
+					&& role.PreCondition.State.SequenceEqual(agent.Resource.State)))*/
+			if (agent.Resource != null
+				&& !agent.AllocatedRoles.Any(role =>
+					role.PreCondition.Task == agent.Resource.Task
+					&& role.PreCondition.State.IsPrefixOf(agent.Resource.State)
+					&& agent.Resource.State.IsPrefixOf(role.PostCondition.State)))
 				return new[] { agent.Resource.Task };
+
 			return Enumerable.Empty<ITask>();
+		}
+
+		private static bool IsPrefixOf<T>(this IEnumerable<T> prefix, IEnumerable<T> sequence)
+		{
+			return prefix.Count() <= sequence.Count()
+				   && prefix.Zip(sequence, (a, b) => Equals(a, b)).All(b => b);
 		}
 
 		public static IEnumerable<ITask> CapabilityConsistency(BaseAgent agent)
