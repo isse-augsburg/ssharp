@@ -67,6 +67,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return false;
 		}
 
+		internal Queue<Task> TaskQueue;
+
 		protected readonly List<ICapability> _availableCapabilities;
 		public override IEnumerable<ICapability> AvailableCapabilities => _availableCapabilities;
 
@@ -77,6 +79,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		public override void Update()
 		{
 			CheckAllocatedCapabilities();
+			if (TaskQueue?.Count > 0)
+				PerformReconfiguration(new[] {
+					Tuple.Create(TaskQueue.Dequeue() as ITask, new State(this))
+				});
 			base.Update();
 		}
 
@@ -107,7 +113,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				Process(capability as ProcessCapability);
 			else if (capability is ConsumeCapability)
 				Consume(capability as ConsumeCapability);
-			throw new InvalidOperationException();
+			else
+				throw new InvalidOperationException();
 		}
 
 		public void CheckAllocatedCapabilities()

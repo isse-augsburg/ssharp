@@ -59,6 +59,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 			var task = new Task(capabilities);
 			_model.Tasks.Add(task);
+			_model.TaskQueue.Enqueue(task);
 
 			for (var i = 0; i < count; ++i)
 			{
@@ -90,7 +91,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		{
 			capabilities = SanitizeCapabilities(capabilities);
 			var robot = CreateRobot(capabilities);
-			var agent = new RobotAgent(capabilities.Distinct().ToArray(), robot);
+			var agent = new RobotAgent(capabilities.Distinct().ToArray(), robot) { TaskQueue = _model.TaskQueue };
 
 			_model.RobotAgents.Add(agent);
 			robot?.SetNames(agent.ID);
@@ -120,7 +121,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			routeSpecifications = RouteHelper.ComputeRoutes(routeSpecifications);
 
 			var cart = _usePlants ? CreateCart(RouteHelper.ToRoutes(routeSpecifications, _model)) : null;
-			var agent = new CartAgent(cart);
+			var agent = new CartAgent(cart) { TaskQueue = _model.TaskQueue };
 			_model.CartAgents.Add(agent);
 			cart?.SetNames(agent.ID);
 

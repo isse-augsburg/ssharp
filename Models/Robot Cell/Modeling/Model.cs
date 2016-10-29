@@ -45,6 +45,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		public string Name { get; }
 
+		internal readonly Queue<Task> TaskQueue = new Queue<Task>();
+
 		/* PLANTS */
 
 		[Root(RootKind.Plant), Hidden(HideElements = true)]
