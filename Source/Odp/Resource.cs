@@ -29,7 +29,7 @@ namespace SafetySharp.Odp
 
 	public abstract class Resource : Component
 	{
-		private int _statePrefixLength = 0;
+		private byte _statePrefixLength = 0;
 
 		public ITask Task { get; protected set; }
 

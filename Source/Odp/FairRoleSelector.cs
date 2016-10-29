@@ -41,10 +41,10 @@ namespace SafetySharp.Odp
 	/// </remarks>
 	public class FairRoleSelector : IRoleSelector
 	{
-		[Hidden(HideElements = true)]
+		[NonDiscoverable, Hidden(HideElements = true)]
 		private readonly Dictionary<Role, uint> _roleOrder = new Dictionary<Role, uint>();
 
-		[Hidden(HideElements = true)]
+		[NonDiscoverable, Hidden(HideElements = true)]
 		private readonly Dictionary<BaseAgent.ResourceRequest, uint> _timeStamps
 			= new Dictionary<BaseAgent.ResourceRequest, uint>();
 

@@ -47,30 +47,33 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		/* PLANTS */
 
-		[Root(RootKind.Plant)]
+		[Root(RootKind.Plant), Hidden(HideElements = true)]
 		public List<Workpiece> Workpieces { get; } = new List<Workpiece>();
 
-		[Root(RootKind.Plant)]
+		[Root(RootKind.Plant), Hidden(HideElements = true)]
 		public List<Robot> Robots { get; } = new List<Robot>();
 
-		[Root(RootKind.Plant)]
+		[Root(RootKind.Plant), Hidden(HideElements = true)]
 		public List<Cart> Carts { get; } = new List<Cart>();
 
 		/* CONTROLLERS */
 
-		[Root(RootKind.Controller)]
+		[Root(RootKind.Controller), Hidden(HideElements = true)]
 		public List<RobotAgent> RobotAgents { get; } = new List<RobotAgent>();
 
-		[Root(RootKind.Controller)]
+		[Root(RootKind.Controller), Hidden(HideElements = true)]
 		public List<CartAgent> CartAgents { get; } = new List<CartAgent>();
 
-		[Root(RootKind.Controller)]
+		[Root(RootKind.Controller), Hidden(HideElements = true)]
 		public readonly List<IComponent> AdditionaComponents = new List<IComponent>();
 
+		// TODO: move to ModelBuilder?
 		public List<Resource> Resources { get; } = new List<Resource>();
 
+		[Hidden(HideElements = true)]
 		public List<Task> Tasks { get; } = new List<Task>();
 
+		[Hidden]
 		public IController Controller { get; set; }
 	}
 }

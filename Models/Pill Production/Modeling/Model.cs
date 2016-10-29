@@ -46,7 +46,6 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[Root(RootKind.Controller)]
 		public Station[] Stations { get; }
 
-		[Root(RootKind.Controller)]
 		public IController Controller { get; }
 
 		private readonly Queue<Recipe> _scheduledRecipes = new Queue<Recipe>();

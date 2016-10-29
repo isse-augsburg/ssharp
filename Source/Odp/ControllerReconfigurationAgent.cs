@@ -96,6 +96,7 @@ namespace SafetySharp.Odp
 			private readonly BaseAgent[] _functioningAgents;
 			private readonly IController _controller;
 
+			[NonDiscoverable, Hidden(HideElements = true)]
 			private readonly Dictionary<uint, ControllerReconfigurationAgent> _reconfAgents
 				= new Dictionary<uint, ControllerReconfigurationAgent>();
 

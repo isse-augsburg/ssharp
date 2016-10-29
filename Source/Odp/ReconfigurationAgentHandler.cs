@@ -24,6 +24,7 @@ namespace SafetySharp.Odp
 {
 	using System;
 	using System.Collections.Generic;
+	using Modeling;
 
 	public class ReconfigurationAgentHandler : IReconfigurationStrategy
 	{
@@ -39,6 +40,10 @@ namespace SafetySharp.Odp
 			_createReconfAgent = createReconfAgent;
 		}
 
+		// Reconfiguration always completes within one step, hence the dictionary should
+		// always be empty during serialization. Thus there is no need to include space
+		// for the elements in the state vector, or to set a predefined capacity.
+		[NonDiscoverable, Hidden(HideElements = true)]
 		protected readonly Dictionary<ITask, IReconfigurationAgent> _tasksUnderReconstruction
 			= new Dictionary<ITask, IReconfigurationAgent>();
 

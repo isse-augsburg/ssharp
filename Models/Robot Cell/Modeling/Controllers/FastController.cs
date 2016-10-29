@@ -36,7 +36,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	{
 		protected override bool PreferCapabilityAccumulation => false;
 
-		[Hidden(HideElements = true)]
+		[NonDiscoverable, Hidden(HideElements = true)]
 		private readonly HashSet<CartAgent> _usedCarts = new HashSet<CartAgent>();
 
 		public FastController(IEnumerable<BaseAgent> agents) : base(agents.ToArray()) { }

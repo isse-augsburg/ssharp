@@ -30,10 +30,9 @@ namespace SafetySharp.Odp
 	public abstract partial class BaseAgent : Component, IAgent
 	{
 		// configuration options
-		public static int MaximumAgentCount = 20;
-		public static int MaximumResourceCount = 30;
-		public static int MaximumReconfigurationRequests = 30;
-		public static int MaximumRoleCount = 100;
+		public static int MaximumAgentCount = 10;
+		public static int MaximumResourceCount = 7;
+		public static int MaximumRoleCount = 20;
 
 		private static uint _maxID = 0;
 		public uint ID { get; }
@@ -152,8 +151,8 @@ namespace SafetySharp.Odp
 
 		#region resource flow
 
-		public List<BaseAgent> Inputs { get; } = new List<BaseAgent>();
-		public List<BaseAgent> Outputs { get; } = new List<BaseAgent>();
+		public List<BaseAgent> Inputs { get; } = new List<BaseAgent>(MaximumAgentCount);
+		public List<BaseAgent> Outputs { get; } = new List<BaseAgent>(MaximumAgentCount);
 
 		public void Connect(BaseAgent successor)
 		{
