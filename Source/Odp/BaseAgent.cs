@@ -290,6 +290,8 @@ namespace SafetySharp.Odp
 		protected void PerformReconfiguration(IEnumerable<Tuple<ITask, State>> reconfigurations)
 		{
 			var deficientTasks = new HashSet<ITask>(reconfigurations.Select(t => t.Item1));
+			if (deficientTasks.Count == 0)
+				return;
 
 			// stop work on deficient tasks
 			_resourceRequests.RemoveAll(request => deficientTasks.Contains(request.Role.Task));

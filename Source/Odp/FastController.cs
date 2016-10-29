@@ -148,7 +148,7 @@ namespace SafetySharp.Odp
 				for (int next = 0; next < _availableAgents.Length; ++next) // go through all agents
 				{
 					// if connected to last agent and can fulfill next capability
-					if (_pathMatrix[last, next] != -1 && CanSatisfyNext(task, path, prefixLength, next) && next != last)
+					if (_pathMatrix[last, next] != -1 && CanSatisfyNext(task, path, prefixLength, next))
 					{
 						path[prefixLength] = next; // try a path over next
 						if (FindAgentPath(task, path, prefixLength + 1)) // if there is such a path, return true
