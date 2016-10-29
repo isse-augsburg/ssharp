@@ -23,7 +23,7 @@
 namespace SafetySharp.Odp
 {
 	using System.Collections.Generic;
-	using SafetySharp.Modeling;
+	using Modeling;
 
 	// TODO: naming is ambiguous between "controller" (vs. "observer") and "controller" (vs. "plant")
 	public interface IController

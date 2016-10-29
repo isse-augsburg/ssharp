@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
+	using System;
 	using System.Diagnostics;
 	using Modeling;
 	using Modeling.Controllers;

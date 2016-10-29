@@ -124,7 +124,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				input.Disconnect(this);
 
 			foreach (var output in Outputs.ToArray())
-				this.Disconnect(output);
+				Disconnect(output);
 		}
 
 		public override void Produce(ProduceCapability capability)
@@ -144,14 +144,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (Resource == null)
 				return;
 
-			if (_currentCapability != capability)
+			if (!_currentCapability.Equals(capability))
 			{
 				// Switch the capability; if we fail to do so, remove all other capabilities from the available ones
 				if (SwitchCapability(capability))
 					_currentCapability = capability;
 				else
 				{
-					_availableCapabilities.RemoveAll(c => c != _currentCapability);
+					_availableCapabilities.RemoveAll(c => !c.Equals(_currentCapability));
 					return;
 				}
 			}

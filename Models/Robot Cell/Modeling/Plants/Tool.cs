@@ -22,7 +22,6 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 {
-	using Controllers;
 	using SafetySharp.Modeling;
 
 	internal class Tool : Component

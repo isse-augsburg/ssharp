@@ -30,7 +30,7 @@ namespace SafetySharp.Odp
 		[Hidden(HideElements = true)]
 		public BaseAgent[] Agents { get; }
 
-		public AbstractController(BaseAgent[] agents)
+		protected AbstractController(BaseAgent[] agents)
 		{
 			Agents = agents;
 		}
@@ -45,19 +45,17 @@ namespace SafetySharp.Odp
 
 		protected Role GetRole(ITask recipe, BaseAgent input, Condition? previous)
 		{
-			var role = new Role();
+			var role = new Role()
+			{
+				PreCondition = { Task = recipe, Port = input },
+				PostCondition = { Task = recipe, Port = null }
+			};
 
-			// update precondition
-			role.PreCondition.Task = recipe;
-			role.PreCondition.Port = input;
 			role.PreCondition.ResetState();
+			role.PostCondition.ResetState();
+
 			if (previous != null)
 				role.PreCondition.CopyStateFrom(previous.Value);
-
-			// update postcondition
-			role.PostCondition.Task = recipe;
-			role.PostCondition.Port = null;
-			role.PostCondition.ResetState();
 			role.PostCondition.CopyStateFrom(role.PreCondition);
 
 			role.Clear();

@@ -32,7 +32,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	{
 		public readonly Fault ConfigurationUpdateFailed = new TransientFault();
 
-		public Agent(params ICapability[] capabilities)
+		protected Agent(params ICapability[] capabilities)
 		{
 			if (HasDuplicates(capabilities))
 				throw new InvalidOperationException("Duplicate capabilities have no effect.");
@@ -132,7 +132,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			foreach (var output in Outputs.ToArray())
 			{
 				if (!CheckOutput((Agent)output))
-					this.Disconnect(output);
+					Disconnect(output);
 			}
 		}
 
@@ -154,7 +154,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		[FaultEffect(Fault = nameof(ConfigurationUpdateFailed))]
 		public abstract class ConfigurationUpdateFailedEffect : Agent
 		{
-			public ConfigurationUpdateFailedEffect(params ICapability[] capabilities)
+			protected ConfigurationUpdateFailedEffect(params ICapability[] capabilities)
 				: base(capabilities) { }
 
 			public override void RemoveAllocatedRoles(ITask task) { }

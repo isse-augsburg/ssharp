@@ -38,7 +38,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		private static int _instanceCounter;
 		protected readonly string Name;
 
-		protected Station() : base()
+		protected Station()
 		{
 			Name = $"Station#{++_instanceCounter}";
 			FaultHelper.PrefixFaultNames(this, Name);

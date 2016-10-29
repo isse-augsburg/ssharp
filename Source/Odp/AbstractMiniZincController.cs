@@ -40,7 +40,7 @@ namespace SafetySharp.Odp
 		public static string MiniZinc = "minizinc.exe";
 		private static int _counter = 0;
 
-		public AbstractMiniZincController(string constraintsModel, BaseAgent[] agents) : base(agents)
+		protected AbstractMiniZincController(string constraintsModel, BaseAgent[] agents) : base(agents)
 		{
 			_constraintsModel = constraintsModel;
 		}

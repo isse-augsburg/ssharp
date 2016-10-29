@@ -36,8 +36,7 @@ namespace SafetySharp.Odp
 		public static int MaximumRoleCount = 100;
 
 		private static uint _maxID = 0;
-		private readonly uint _id;
-		public uint ID => _id;
+		public uint ID { get; }
 
 		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
@@ -48,7 +47,7 @@ namespace SafetySharp.Odp
 
 		protected BaseAgent()
 		{
-			_id = _maxID++;
+			ID = _maxID++;
 		}
 
 		public override void Update()

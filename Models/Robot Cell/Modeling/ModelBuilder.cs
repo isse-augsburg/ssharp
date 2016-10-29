@@ -177,7 +177,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             _model.Controller = new IntolerableAnalysisController(_model.Controller);
             _model.Faults.MakeNondeterministic();
             TolerableFaults().SuppressActivations();
-            _model.AdditionaComponents.Add(_model.Controller as IComponent);
+            _model.AdditionaComponents.Add((IComponent)_model.Controller);
 	        return this;
 	    }
 

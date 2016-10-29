@@ -53,7 +53,7 @@ namespace SafetySharp.Odp
 		{
 			if (_statePrefixLength >= Task.RequiredCapabilities.Length)
 				throw new InvalidOperationException("Condition already has maximum state.");
-			if (Task.RequiredCapabilities[_statePrefixLength] != capability)
+			if (!Task.RequiredCapabilities[_statePrefixLength].Equals(capability))
 				throw new InvalidOperationException("Invalid capability order in Condition state.");
 
 			_statePrefixLength++;

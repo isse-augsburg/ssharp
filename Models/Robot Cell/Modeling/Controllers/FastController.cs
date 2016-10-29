@@ -29,7 +29,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using Odp;
 
 	/// <summary>
-	///   An <see cref="Odp.IController{Agent, Task}" /> implementation that is much faster than
+	///   An <see cref="IController" /> implementation that is much faster than
 	///   the MiniZinc implementation.
 	/// </summary>
 	internal class FastController : Odp.FastController
@@ -61,13 +61,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		private int GetPreferredCart(int suggestion, int previous, int destination)
 		{
-			var cart = _availableAgents[suggestion] as CartAgent;
 			var nextRobot = (RobotAgent)_availableAgents[_pathMatrix[suggestion, destination]];
 
 			var unusedCart = _availableAgents[previous].Outputs
 				.OfType<CartAgent>()
-				.Where(candidate => !_usedCarts.Contains(candidate) && candidate.Outputs.Contains(nextRobot))
-				.FirstOrDefault();
+				.FirstOrDefault(candidate => !_usedCarts.Contains(candidate) && candidate.Outputs.Contains(nextRobot));
 
 			if (unusedCart != null)
 			{

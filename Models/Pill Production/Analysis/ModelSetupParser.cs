@@ -20,12 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.PillProduction.Modeling
+namespace SafetySharp.CaseStudies.PillProduction.Analysis
 {
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Text.RegularExpressions;
+	using Modeling;
 
 	internal class ModelSetupParser
 	{
