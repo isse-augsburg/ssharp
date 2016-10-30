@@ -44,7 +44,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		protected override void TransferResource()
 		{
-			var agent = (RobotAgent)_currentRole?.PostCondition.Port;
+			var agent = (RobotAgent)_currentRole.PostCondition.Port;
 
 			// If we fail to move to the robot, the cart loses its route
 			if (MoveTo(agent.Robot))

@@ -58,7 +58,8 @@ namespace SafetySharp.Odp
 
 		#region functional part
 
-		protected Role? _currentRole;
+		protected Role _currentRole;
+		protected bool _hasRole;
 
 		public Resource Resource { get; protected set; }
 
@@ -79,11 +80,11 @@ namespace SafetySharp.Odp
 			_stateMachine.Transition( // abort work if current task has configuration issues
 				from: new[] { States.ChooseRole, States.WaitingForResource, States.ExecuteRole, States.Output, States.ResourceGiven },
 				to: States.Idle,
-				guard: _currentRole != null && _deficientConfiguration,
+				guard: _hasRole && _deficientConfiguration,
 				action: () =>
 				{
 					DropResource();
-					_currentRole = null;
+					_hasRole = false;
 					_deficientConfiguration = false;
 				});
 
@@ -95,37 +96,37 @@ namespace SafetySharp.Odp
 				.Transition( // no work found (or deadlock avoidance or similar reasons)
 					from: States.ChooseRole,
 					to: States.Idle,
-					guard: _currentRole == null)
+					guard: !_hasRole)
 				.Transition( // going to work on pre-existing resource (first transfer it)
 					from: States.ChooseRole,
 					to: States.WaitingForResource,
-					guard: _currentRole?.PreCondition.Port != null,
-					action: () => InitiateResourceTransfer(_currentRole?.PreCondition.Port))
+					guard: _hasRole && _currentRole.PreCondition.Port != null,
+					action: () => InitiateResourceTransfer(_currentRole.PreCondition.Port))
 				.Transition( // going to produce new resource (no transfer necessary)
 					from: States.ChooseRole,
 					to: States.ExecuteRole,
-					guard: _currentRole != null && _currentRole?.PreCondition.Port == null)
+					guard: _hasRole && _currentRole.PreCondition.Port == null)
 				.Transition( // actual work on resource
 					from: States.ExecuteRole,
 					to: States.ExecuteRole,
-					guard: !_currentRole.Value.IsCompleted,
-					action: () => _currentRole?.ExecuteStep(this))
+					guard: !_currentRole.IsCompleted,
+					action: () => _currentRole.ExecuteStep(this))
 				.Transition( // work is done -- pass resource on
 					from: States.ExecuteRole,
 					to: States.Output,
-					guard: _currentRole.Value.IsCompleted && _currentRole?.PostCondition.Port != null,
+					guard: _currentRole.IsCompleted && _currentRole.PostCondition.Port != null,
 					action: () =>
 					{
-						_currentRole?.PostCondition.Port.ResourceReady(this, _currentRole.Value.PostCondition);
-						_currentRole?.Reset();
+						_currentRole.PostCondition.Port.ResourceReady(this, _currentRole.PostCondition);
+						_currentRole.Reset();
 					})
 				.Transition( // resource has been consumed
 					from: States.ExecuteRole,
 					to: States.Idle,
-					guard: _currentRole.Value.IsCompleted && Resource == null && _currentRole?.PostCondition.Port == null,
+					guard: _currentRole.IsCompleted && Resource == null && _currentRole.PostCondition.Port == null,
 					action: () => {
-						_currentRole?.Reset();
-						_currentRole = null;
+						_currentRole.Reset();
+						_hasRole = false;
 					});
 		}
 
@@ -138,9 +139,13 @@ namespace SafetySharp.Odp
 
 		private void ChooseRole()
 		{
-			_currentRole = RoleSelector.ChooseRole(AllocatedRoles, _resourceRequests);
-			if (_currentRole != null)
-				_resourceRequests.RemoveAll(request => request.Source == _currentRole?.PreCondition.Port);
+			var role = RoleSelector.ChooseRole(AllocatedRoles, _resourceRequests);
+			_hasRole = role.HasValue;
+			if (_hasRole)
+			{
+				_currentRole = role.Value;
+				_resourceRequests.RemoveAll(request => request.Source == _currentRole.PreCondition.Port);
+			}
 		}
 
 		public virtual bool CanExecute(Role role)
@@ -229,7 +234,7 @@ namespace SafetySharp.Odp
 			_stateMachine.Transition(
 				from: States.Output,
 				to: States.ResourceGiven,
-				action: () => _currentRole?.PostCondition.Port.TakeResource(Resource)
+				action: () => _currentRole.PostCondition.Port.TakeResource(Resource)
 			);
 		}
 
@@ -241,7 +246,7 @@ namespace SafetySharp.Odp
 			_stateMachine.Transition(
 				from: States.WaitingForResource,
 				to: States.ExecuteRole,
-				action: _currentRole.Value.PreCondition.Port.ResourcePickedUp
+				action: _currentRole.PreCondition.Port.ResourcePickedUp
 			);
 		}
 
@@ -252,7 +257,7 @@ namespace SafetySharp.Odp
 			_stateMachine.Transition(
 				from: States.ResourceGiven,
 				to: States.Idle,
-				action: () => _currentRole = null
+				action: () => _hasRole = false
 			);
 		}
 
@@ -304,7 +309,7 @@ namespace SafetySharp.Odp
 			// stop work on deficient tasks
 			_resourceRequests.RemoveAll(request => deficientTasks.Contains(request.Role.Task));
 			// abort execution of current role if necessary
-			_deficientConfiguration = deficientTasks.Contains(_currentRole?.Task);
+			_deficientConfiguration = _hasRole && deficientTasks.Contains(_currentRole.Task);
 
 			// initiate reconfiguration to fix violations
 			ReconfigurationStrategy.Reconfigure(reconfigurations);

@@ -88,7 +88,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		protected override void TakeResource(Odp.Resource resource)
 		{
-			var agent = (CartAgent)_currentRole?.PreCondition.Port;
+			var agent = (CartAgent)_currentRole.PreCondition.Port;
 
 			// If we fail to transfer the resource, the robot loses all of its connections
 			if (TakeResource(agent.Cart))
@@ -103,7 +103,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		protected override void TransferResource()
 		{
-			var agent = (CartAgent)_currentRole?.PostCondition.Port;
+			var agent = (CartAgent)_currentRole.PostCondition.Port;
 
 			// If we fail to transfer the resource, the robot loses all of its connections
 			if (PlaceResource(agent.Cart))

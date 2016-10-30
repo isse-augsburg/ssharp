@@ -49,8 +49,9 @@ namespace SafetySharp.Odp
 			if (IsCompleted)
 				throw new InvalidOperationException("The role has already been completely executed and must be reset.");
 
-			var capability = Task.RequiredCapabilities[_capabilitiesToApplyStart + _current++];
+			var capability = Task.RequiredCapabilities[_capabilitiesToApplyStart + _current];
 			agent.ApplyCapability(capability);
+			_current++;
 		}
 
 		public void Reset()
