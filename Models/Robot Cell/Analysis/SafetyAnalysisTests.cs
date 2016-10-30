@@ -49,6 +49,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			var result = modelChecker.ComputeMinimalCriticalSets(model, model.Workpieces.Any(w => w.IsDamaged), maxCardinality: 2);
 
 			Console.WriteLine(result);
+			Assert.AreEqual(0, result.Exceptions.Count, "unhandled exceptions!");
 		}
 
 		[TestCaseSource(nameof(CreateConfigurations))]
@@ -64,6 +65,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				!model.Workpieces.All(w => w.IsDamaged || w.IsDiscarded || w.IsComplete), maxCardinality: 2);
 
 			Console.WriteLine(result);
+			Assert.AreEqual(0, result.Exceptions.Count, "unhandled exceptions!");
 		}
 
 		private static IEnumerable CreateConfigurations()

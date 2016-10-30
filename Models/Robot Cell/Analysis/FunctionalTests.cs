@@ -72,6 +72,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.Controller.ReconfigurationFailure);
 			Console.WriteLine(result);
+			Assert.AreEqual(0, result.Exceptions.Count, "unhandled exceptions!");
 		}
 
 		private static IFaultSetHeuristic RedundancyHeuristic(Model model)
