@@ -71,6 +71,13 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			base.DropResource();
 		}
 
+		public override bool CanExecute(Role role)
+		{
+			if (role.CapabilitiesToApply.FirstOrDefault() is ProduceCapability)
+				return ((Recipe)role.Task).RemainingAmount > 0 && base.CanExecute(role);
+			return base.CanExecute(role);
+		}
+
 		protected override InvariantPredicate[] MonitoringPredicates => new[] {
 			Invariant.IOConsistency,
 			Invariant.NeighborsAliveGuarantee,

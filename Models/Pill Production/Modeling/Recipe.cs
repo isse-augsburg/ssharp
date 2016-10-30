@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 
@@ -79,6 +80,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		/// </summary>
 		public void AddContainer(PillContainer container)
 		{
+			if (RemainingAmount <= 0)
+				throw new InvalidOperationException("producing too many pill containers");
 			_producedAmount++;
 			_activeContainers.Add(container);
 		}

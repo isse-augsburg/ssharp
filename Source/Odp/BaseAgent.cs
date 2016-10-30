@@ -42,11 +42,12 @@ namespace SafetySharp.Odp
 		public List<Role> AllocatedRoles { get; } = new List<Role>(MaximumRoleCount);
 
 		[Hidden]
-		public IRoleSelector RoleSelector { get; protected set; } = new FairRoleSelector();
+		public IRoleSelector RoleSelector { get; protected set; }
 
 		protected BaseAgent()
 		{
 			ID = _maxID++;
+			RoleSelector = new FairRoleSelector(this);
 		}
 
 		public override void Update()
@@ -140,6 +141,13 @@ namespace SafetySharp.Odp
 			_currentRole = RoleSelector.ChooseRole(AllocatedRoles, _resourceRequests);
 			if (_currentRole != null)
 				_resourceRequests.RemoveAll(request => request.Source == _currentRole?.PreCondition.Port);
+		}
+
+		public virtual bool CanExecute(Role role)
+		{
+			// producer roles and roles with open resource requests can be executed, unless they're locked
+			return !role.IsLocked
+				   && (role.PreCondition.Port == null || _resourceRequests.Any(req => role.Equals(req.Role)));
 		}
 
 		private Role[] GetRoles(BaseAgent source, Condition condition)

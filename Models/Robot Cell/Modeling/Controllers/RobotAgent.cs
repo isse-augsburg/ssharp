@@ -127,11 +127,19 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				Disconnect(output);
 		}
 
+		public override bool CanExecute(Role role)
+		{
+			if (role.CapabilitiesToApply.FirstOrDefault() is ProduceCapability)
+			{
+				var capability = (ProduceCapability)role.CapabilitiesToApply.First();
+				return (capability.Resources.Count > 0 && !capability.Tasks.Any(task => task.IsResourceInProduction))
+					   && base.CanExecute(role);
+			}
+			return base.CanExecute(role);
+		}
+
 		public override void Produce(ProduceCapability capability)
 		{
-			if (Resource != null || capability.Resources.Count == 0 || capability.Tasks.Any(task => task.IsResourceInProduction))
-				return;
-
 			Resource = capability.Resources[0];
 			capability.Resources.RemoveAt(0);
 			(Resource.Task as Task).IsResourceInProduction = true;

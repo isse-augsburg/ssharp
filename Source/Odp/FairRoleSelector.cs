@@ -51,12 +51,16 @@ namespace SafetySharp.Odp
 		[Hidden]
 		private uint _currentTime;
 
+		protected BaseAgent Agent { get; }
+
+		public FairRoleSelector(BaseAgent agent)
+		{
+			Agent = agent;
+		}
+
 		public Role? ChooseRole(List<Role> roles, IEnumerable<BaseAgent.ResourceRequest> resourceRequests)
 		{
-			// producer roles and roles with open resource requests can be chosen, unless they're locked
-			var candidateRoles = roles.Where(role => !role.IsLocked
-				&& (role.PreCondition.Port == null || resourceRequests.Any(req => role.Equals(req.Role))));
-
+			var candidateRoles = roles.Where(CanExecute).ToArray();
 			if (!candidateRoles.Any())
 				return null;
 
@@ -66,6 +70,8 @@ namespace SafetySharp.Odp
 
 			return chosenRole;
 		}
+
+		protected virtual bool CanExecute(Role role) => Agent.CanExecute(role);
 
 		private void ComputePriorities(List<Role> roles, IEnumerable<BaseAgent.ResourceRequest> resourceRequests)
 		{
