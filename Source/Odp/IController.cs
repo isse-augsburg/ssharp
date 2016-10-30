@@ -22,18 +22,13 @@
 
 namespace SafetySharp.Odp
 {
-	using Modeling;
-
 	// TODO: naming is ambiguous between "controller" (vs. "observer") and "controller" (vs. "plant")
 	public interface IController
 	{
-		[Provided]
 		BaseAgent[] Agents { get; }
 
-		[Provided]
 		ConfigurationUpdate CalculateConfigurations(params ITask[] tasks);
 
-		[Provided]
 		bool ReconfigurationFailure { get; }
 	}
 }
