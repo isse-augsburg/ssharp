@@ -45,7 +45,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[TestCaseSource(nameof(CreateConfigurations))]
 		public void NoDamagedWorkpieces(Model model)
 		{
-			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
+			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 12, GenerateCounterExample = false } };
 			var result = modelChecker.ComputeMinimalCriticalSets(model, model.Workpieces.Any(w => w.IsDamaged), maxCardinality: 2);
 
 			Console.WriteLine(result);
@@ -54,7 +54,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[TestCaseSource(nameof(CreateConfigurations))]
 		public void AllWorkpiecesCompleteEventually(Model model)
 		{
-			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
+			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 12, GenerateCounterExample = false } };
 
 			Formula stepCountExceeded =
 				(model.Controller as IntolerableAnalysisController)?.StepCount >= IntolerableAnalysisController.MaxSteps;
