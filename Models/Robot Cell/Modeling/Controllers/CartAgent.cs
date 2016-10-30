@@ -100,9 +100,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		private void AddTolerableFaultEffects()
 		{
 			if (Cart != null)
-				Broken.AddEffect<BrokenEffect>(this);
-			else
 				Cart.AddTolerableFaultEffects(Broken);
+			else
+				Broken.AddEffect<BrokenEffect>(this);
 		}
 
 		[FaultEffect, Priority(2)]
