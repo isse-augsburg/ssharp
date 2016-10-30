@@ -273,7 +273,7 @@ namespace SafetySharp.Odp
 		private bool _deficientConfiguration = false;
 
 		[Hidden]
-		public IReconfigurationStrategy ReconfigurationStrategy { get; set; }
+		public Reconfiguration.IReconfigurationStrategy ReconfigurationStrategy { get; set; }
 
 		protected virtual InvariantPredicate[] MonitoringPredicates { get; } = new InvariantPredicate[] {
 			Invariant.IOConsistency,

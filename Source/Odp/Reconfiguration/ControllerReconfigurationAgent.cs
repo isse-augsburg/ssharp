@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp
+namespace SafetySharp.Odp.Reconfiguration
 {
 	using System.Collections.Generic;
 	using System.Linq;

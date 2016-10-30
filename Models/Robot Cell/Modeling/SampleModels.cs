@@ -24,7 +24,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 {
     using System.Collections.Generic;
     using Analysis;
-    using Odp;
+    using Odp.Reconfiguration;
     using static ModelBuilderHelper;
 
     internal static class SampleModels

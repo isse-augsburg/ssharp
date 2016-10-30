@@ -20,13 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp
+namespace SafetySharp.Odp.Reconfiguration
 {
-	using System;
-	using System.Collections.Generic;
-
-	public interface IReconfigurationStrategy
+	public interface IReconfigurationAgent : IAgent
 	{
-		void Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations);
+		void StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState);
+		void Acknowledge();
 	}
 }

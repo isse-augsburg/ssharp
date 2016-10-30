@@ -20,47 +20,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp
+namespace SafetySharp.Odp.Reconfiguration
 {
+	using System;
 	using System.Collections.Generic;
-	using Modeling;
+	using System.Linq;
 
-	public abstract class AbstractController : IController
+	public class CentralReconfiguration : IReconfigurationStrategy
 	{
-		[Hidden(HideElements = true)]
-		public BaseAgent[] Agents { get; }
+		protected readonly IController _controller;
 
-		protected AbstractController(BaseAgent[] agents)
+		public CentralReconfiguration(IController controller)
 		{
-			Agents = agents;
+			_controller = controller;
 		}
 
-		public virtual bool ReconfigurationFailure
+		public virtual void Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
 		{
-			get;
-			protected set;
-		}
+			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
 
-		public abstract ConfigurationUpdate CalculateConfigurations(params ITask[] tasks);
-
-		protected Role GetRole(ITask recipe, BaseAgent input, Condition? previous)
-		{
-			var role = new Role()
-			{
-				PreCondition = { Task = recipe, Port = input },
-				PostCondition = { Task = recipe, Port = null }
-			};
-
-			role.PreCondition.ResetState();
-			role.PostCondition.ResetState();
-
-			if (previous != null)
-				role.PreCondition.CopyStateFrom(previous.Value);
-			role.PostCondition.CopyStateFrom(role.PreCondition);
-
-			role.Clear();
-
-			return role;
+			var configs = _controller.CalculateConfigurations(tasks);
+			configs?.Apply(_controller.Agents);
 		}
 	}
 }

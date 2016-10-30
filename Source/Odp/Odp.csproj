@@ -37,31 +37,31 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbstractController.cs" />
-    <Compile Include="AbstractMiniZincController.cs" />
+    <Compile Include="Reconfiguration\AbstractController.cs" />
+    <Compile Include="Reconfiguration\AbstractMiniZincController.cs" />
     <Compile Include="BaseAgent.cs" />
     <Compile Include="BaseAgent.State.cs" />
-    <Compile Include="CentralReconfiguration.cs" />
-    <Compile Include="CoalitionReconfigurationAgent.cs" />
+    <Compile Include="Reconfiguration\CentralReconfiguration.cs" />
+    <Compile Include="Reconfiguration\CoalitionReconfigurationAgent.cs" />
     <Compile Include="Condition.cs" />
-    <Compile Include="Configuration.cs" />
-    <Compile Include="ControllerReconfigurationAgent.cs" />
+    <Compile Include="Reconfiguration\Configuration.cs" />
+    <Compile Include="Reconfiguration\ControllerReconfigurationAgent.cs" />
     <Compile Include="FairRoleSelector.cs" />
-    <Compile Include="FastController.cs" />
+    <Compile Include="Reconfiguration\FastController.cs" />
     <Compile Include="IAgent.cs" />
     <Compile Include="ICapability.cs" />
-    <Compile Include="IController.cs" />
+    <Compile Include="Reconfiguration\IController.cs" />
     <Compile Include="Invariant.cs" />
-    <Compile Include="IReconfigurationStrategy.cs" />
+    <Compile Include="Reconfiguration\IReconfigurationStrategy.cs" />
     <Compile Include="IRoleSelector.cs" />
     <Compile Include="ITask.cs" />
-    <Compile Include="OptimalController.cs" />
+    <Compile Include="Reconfiguration\OptimalController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="IReconfigurationAgent.cs" />
-    <Compile Include="ReconfigurationAgentHandler.cs" />
+    <Compile Include="Reconfiguration\IReconfigurationAgent.cs" />
+    <Compile Include="Reconfiguration\ReconfigurationAgentHandler.cs" />
     <Compile Include="Resource.cs" />
     <Compile Include="Role.cs" />
   </ItemGroup>

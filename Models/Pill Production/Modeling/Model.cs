@@ -24,7 +24,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using System.Collections.Generic;
 	using SafetySharp.Modeling;
-	using Odp;
+	using Odp.Reconfiguration;
 
 	public class Model : ModelBase
 	{

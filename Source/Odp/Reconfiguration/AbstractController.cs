@@ -20,15 +20,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp
+namespace SafetySharp.Odp.Reconfiguration
 {
-	// TODO: naming is ambiguous between "controller" (vs. "observer") and "controller" (vs. "plant")
-	public interface IController
+	using Modeling;
+
+	public abstract class AbstractController : IController
 	{
-		BaseAgent[] Agents { get; }
+		[Hidden(HideElements = true)]
+		public BaseAgent[] Agents { get; }
 
-		ConfigurationUpdate CalculateConfigurations(params ITask[] tasks);
+		protected AbstractController(BaseAgent[] agents)
+		{
+			Agents = agents;
+		}
 
-		bool ReconfigurationFailure { get; }
+		public virtual bool ReconfigurationFailure
+		{
+			get;
+			protected set;
+		}
+
+		public abstract ConfigurationUpdate CalculateConfigurations(params ITask[] tasks);
+
+		protected Role GetRole(ITask recipe, BaseAgent input, Condition? previous)
+		{
+			var role = new Role()
+			{
+				PreCondition = { Task = recipe, Port = input },
+				PostCondition = { Task = recipe, Port = null }
+			};
+
+			role.PreCondition.ResetState();
+			role.PostCondition.ResetState();
+
+			if (previous != null)
+				role.PreCondition.CopyStateFrom(previous.Value);
+			role.PostCondition.CopyStateFrom(role.PreCondition);
+
+			role.Clear();
+
+			return role;
+		}
 	}
 }

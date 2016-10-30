@@ -25,7 +25,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using System.Linq;
 	using Odp;
 
-	internal class FastController : Odp.FastController
+	internal class FastController : Odp.Reconfiguration.FastController
 	{
 		public FastController(params Station[] stations) : base(stations) { }
 

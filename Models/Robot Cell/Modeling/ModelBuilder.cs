@@ -28,6 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
     using SafetySharp.Modeling;
     using Odp;
+	using Odp.Reconfiguration;
 
     using Controllers;
     using Controllers.Reconfiguration;
