@@ -1,0 +1,70 @@
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+namespace SafetySharp.Odp
+{
+	using System.Collections.Generic;
+	using System.Linq;
+
+	public class ConfigurationUpdate
+	{
+		private readonly Dictionary<uint, HashSet<Role>> _addedRoles = new Dictionary<uint, HashSet<Role>>();
+		private readonly Dictionary<uint, HashSet<Role>> _removedRoles = new Dictionary<uint, HashSet<Role>>();
+
+		public void RemoveAllRoles(ITask task, params BaseAgent[] agents)
+		{
+			foreach (var agent in agents)
+				RemoveRoles(agent, agent.AllocatedRoles.Where(role => role.Task == task).ToArray());
+		}
+
+		public void RemoveRoles(BaseAgent agent, params Role[] rolesToRemove)
+		{
+			if (!_removedRoles.ContainsKey(agent.ID))
+				_removedRoles[agent.ID] = new HashSet<Role>();
+			_removedRoles[agent.ID].UnionWith(rolesToRemove);
+		}
+
+		public void AddRoles(BaseAgent agent, params Role[] rolesToAdd)
+		{
+			if (!_addedRoles.ContainsKey(agent.ID))
+				_addedRoles[agent.ID] = new HashSet<Role>();
+			_addedRoles[agent.ID].UnionWith(rolesToAdd);
+		}
+
+		public void LockAddedRoles()
+		{
+			foreach (var id in _addedRoles.Keys)
+				_addedRoles[id] = new HashSet<Role>(_addedRoles[id].Select(role => role.Lock()));
+		}
+
+		public void Apply(params BaseAgent[] agents)
+		{
+			foreach (var agent in agents)
+			{
+				if (_removedRoles.ContainsKey(agent.ID))
+					agent.AllocatedRoles.RemoveAll(_removedRoles[agent.ID].Contains);
+				if (_addedRoles.ContainsKey(agent.ID))
+					agent.AllocateRoles(_addedRoles[agent.ID]);
+			}
+		}
+	}
+}

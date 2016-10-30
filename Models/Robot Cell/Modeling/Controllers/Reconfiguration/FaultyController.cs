@@ -40,7 +40,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		// composition
 		public BaseAgent[] Agents => _controller.Agents;
 		public virtual bool ReconfigurationFailure =>_controller.ReconfigurationFailure;
-		public virtual Dictionary<BaseAgent, IEnumerable<Role>> CalculateConfigurations(params ITask[] tasks)
+		public virtual ConfigurationUpdate CalculateConfigurations(params ITask[] tasks)
 		{
 			return _controller.CalculateConfigurations(tasks);
 		}
@@ -53,7 +53,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		{
 			public override bool ReconfigurationFailure => true;
 
-			public override Dictionary<BaseAgent, IEnumerable<Role>> CalculateConfigurations(params ITask[] tasks)
+			public override ConfigurationUpdate CalculateConfigurations(params ITask[] tasks)
 			{
 				return null;
 			}

@@ -164,8 +164,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			protected ConfigurationUpdateFailedEffect(params ICapability[] capabilities)
 				: base(capabilities) { }
 
-			public override void RemoveAllocatedRoles(ITask task) { }
-			public override void AllocateRoles(params Role[] roles) { }
+			public override void AllocateRoles(IEnumerable<Role> roles) { }
+			public override void RemoveAllocatedRoles(IEnumerable<Role> roles) { }
 		}
 	}
 }

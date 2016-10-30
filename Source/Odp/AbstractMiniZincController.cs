@@ -23,7 +23,6 @@
 namespace SafetySharp.Odp
 {
 	using System;
-	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
 	using Modeling;
@@ -45,11 +44,12 @@ namespace SafetySharp.Odp
 			_constraintsModel = constraintsModel;
 		}
 
-		public override Dictionary<BaseAgent, IEnumerable<Role>> CalculateConfigurations(params ITask[] tasks)
+		public override ConfigurationUpdate CalculateConfigurations(params ITask[] tasks)
 		{
-			var configs = new Dictionary<BaseAgent, IEnumerable<Role>>();
+			var configs = new ConfigurationUpdate();
 			foreach (var task in tasks)
 			{
+				configs.RemoveAllRoles(task);
 				lock(MiniZinc)
 				{
 					CreateDataFile(task);
@@ -98,7 +98,7 @@ namespace SafetySharp.Odp
 			}
 		}
 
-		private void ParseConfigurations(Dictionary<BaseAgent, IEnumerable<Role>> configs, ITask task)
+		private void ParseConfigurations(ConfigurationUpdate configs, ITask task)
 		{
 			var lines = File.ReadAllLines(_outputFile);
 			if (lines[0].Contains("UNSATISFIABLE"))
@@ -128,10 +128,7 @@ namespace SafetySharp.Odp
 						role.AddCapability(task.RequiredCapabilities[capabilityIds[i]]);
 				}
 
-				if (!configs.ContainsKey(agent))
-					configs.Add(agent, new HashSet<Role>());
-				(configs[agent] as HashSet<Role>).Add(role);
-
+				configs.AddRoles(agent, role);
 				lastAgent = agent;
 			}
 		}

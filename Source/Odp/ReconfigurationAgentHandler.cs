@@ -44,7 +44,7 @@ namespace SafetySharp.Odp
 		// always be empty during serialization. Thus there is no need to include space
 		// for the elements in the state vector, or to set a predefined capacity.
 		[NonDiscoverable, Hidden(HideElements = true)]
-		protected readonly Dictionary<ITask, IReconfigurationAgent> _tasksUnderReconstruction
+		private readonly Dictionary<ITask, IReconfigurationAgent> _tasksUnderReconstruction
 			= new Dictionary<ITask, IReconfigurationAgent>();
 
 		public void Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
@@ -56,33 +56,24 @@ namespace SafetySharp.Odp
 				var agent = baseAgentState.ReconfRequestSource ?? _baseAgent;
 
 				LockAllocatedRoles(task);
-				if (!_tasksUnderReconstruction.ContainsKey(task))
-				{
-					_tasksUnderReconstruction.Add(task, _createReconfAgent(_baseAgent, this, task));
-				}
 
+				if (!_tasksUnderReconstruction.ContainsKey(task))
+					_tasksUnderReconstruction[task] = _createReconfAgent(_baseAgent, this, task);
 				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, baseAgentState);
 			}
 		}
 
 		#region interface presented to reconfiguration agent
-		public virtual void UpdateAllocatedRoles(ITask task, Role[] newRoles)
+		public virtual void UpdateAllocatedRoles(ConfigurationUpdate config)
 		{
 			// new roles must be locked
-			for (int i = 0; i < newRoles.Length; ++i)
-			{
-				var role = newRoles[i];
-				role.IsLocked = true;
-				newRoles[i] = role;
-			}
-
-			_baseAgent.RemoveAllocatedRoles(task);
-			_baseAgent.AllocateRoles(newRoles);
+			config.LockAddedRoles();
+			config.Apply(_baseAgent);
 		}
 
 		public virtual void Go(ITask task)
 		{
-			UnlockRoleAllocations(task);
+			LockAllocatedRoles(task, false);
 		}
 
 		public virtual void Done(ITask task)
@@ -91,31 +82,14 @@ namespace SafetySharp.Odp
 		}
 		#endregion
 
-		protected virtual void LockAllocatedRoles(ITask task)
+		private void LockAllocatedRoles(ITask task, bool locked = true)
 		{
 			for (int i = 0; i < _baseAgent.AllocatedRoles.Count; ++i)
 			{
 				// necessary as long as roles are structs
 				var role = _baseAgent.AllocatedRoles[i];
 				if (role.Task == task)
-				{
-					role.IsLocked = true;
-					_baseAgent.AllocatedRoles[i] = role;
-				}
-			}
-		}
-
-		protected virtual void UnlockRoleAllocations(ITask task)
-		{
-			for (int i = 0; i < _baseAgent.AllocatedRoles.Count; ++i)
-			{
-				// necessary as long as roles are structs
-				var role = _baseAgent.AllocatedRoles[i];
-				if (role.Task == task)
-				{
-					role.IsLocked = false;
-					_baseAgent.AllocatedRoles[i] = role;
-				}
+					_baseAgent.AllocatedRoles[i] = role.Lock(locked);
 			}
 		}
 	}

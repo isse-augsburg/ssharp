@@ -337,14 +337,15 @@ namespace SafetySharp.Odp
 			});
 		}
 
-		public virtual void AllocateRoles(params Role[] roles)
+		public virtual void AllocateRoles(IEnumerable<Role> roles)
 		{
 			AllocatedRoles.AddRange(roles);
 		}
 
-		public virtual void RemoveAllocatedRoles(ITask task)
+		public virtual void RemoveAllocatedRoles(IEnumerable<Role> roles)
 		{
-			AllocatedRoles.RemoveAll(role => role.Task == task);
+			foreach (var role in roles)
+				AllocatedRoles.Remove(role);
 		}
 
 		#endregion

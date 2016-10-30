@@ -41,7 +41,7 @@ namespace SafetySharp.Odp
 			protected set;
 		}
 
-		public abstract Dictionary<BaseAgent, IEnumerable<Role>> CalculateConfigurations(params ITask[] tasks);
+		public abstract ConfigurationUpdate CalculateConfigurations(params ITask[] tasks);
 
 		protected Role GetRole(ITask recipe, BaseAgent input, Condition? previous)
 		{

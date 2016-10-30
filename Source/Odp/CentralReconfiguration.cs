@@ -40,24 +40,7 @@ namespace SafetySharp.Odp
 			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
 
 			var configs = _controller.CalculateConfigurations(tasks);
-			if (configs != null)
-			{
-				RemoveConfigurations(tasks);
-				ApplyConfigurations(configs);
-			}
-		}
-
-		protected virtual void RemoveConfigurations(params ITask[] tasks)
-		{
-			foreach (var agent in _controller.Agents)
-				foreach (var task in tasks)
-					agent.RemoveAllocatedRoles(task);
-		}
-
-		protected virtual void ApplyConfigurations(Dictionary<BaseAgent, IEnumerable<Role>> configurations)
-		{
-			foreach (var agent in configurations.Keys)
-				agent.AllocateRoles(configurations[agent].ToArray());
+			configs?.Apply(_controller.Agents);
 		}
 	}
 }

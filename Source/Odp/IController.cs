@@ -22,7 +22,6 @@
 
 namespace SafetySharp.Odp
 {
-	using System.Collections.Generic;
 	using Modeling;
 
 	// TODO: naming is ambiguous between "controller" (vs. "observer") and "controller" (vs. "plant")
@@ -32,7 +31,7 @@ namespace SafetySharp.Odp
 		BaseAgent[] Agents { get; }
 
 		[Provided]
-		Dictionary<BaseAgent, IEnumerable<Role>> CalculateConfigurations(params ITask[] tasks);
+		ConfigurationUpdate CalculateConfigurations(params ITask[] tasks);
 
 		[Provided]
 		bool ReconfigurationFailure { get; }

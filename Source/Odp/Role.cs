@@ -28,7 +28,7 @@ namespace SafetySharp.Odp
 
 	public struct Role
 	{
-		public bool IsLocked { get; set; }
+		public bool IsLocked { get; private set; }
 
 		public Condition PreCondition;
 		public Condition PostCondition;
@@ -77,6 +77,13 @@ namespace SafetySharp.Odp
 		public bool IsEmpty()
 		{
 			return _capabilitiesToApplyCount == 0;
+		}
+
+		public Role Lock(bool locked = true)
+		{
+			var role = this;
+			role.IsLocked = locked;
+			return role;
 		}
 	}
 }

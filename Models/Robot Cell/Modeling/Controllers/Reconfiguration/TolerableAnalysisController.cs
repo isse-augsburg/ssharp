@@ -38,7 +38,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
 		public BaseAgent[] Agents => _controller.Agents;
 		public bool ReconfigurationFailure => _controller.ReconfigurationFailure;
-		public Dictionary<BaseAgent, IEnumerable<Role>> CalculateConfigurations(params ITask[] tasks)
+		public ConfigurationUpdate CalculateConfigurations(params ITask[] tasks)
 		{
 			if (ReconfigurationFailure)
 				return null;

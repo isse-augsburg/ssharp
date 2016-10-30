@@ -40,15 +40,16 @@ namespace SafetySharp.Odp
 
 		public FastController(BaseAgent[] agents) : base(agents) { }
 
-		public override Dictionary<BaseAgent, IEnumerable<Role>> CalculateConfigurations(params ITask[] tasks)
+		public override ConfigurationUpdate CalculateConfigurations(params ITask[] tasks)
 		{
 			_availableAgents = GetAvailableAgents();
-			var configs = new Dictionary<BaseAgent, IEnumerable<Role>>();
+			var configs = new ConfigurationUpdate();
 
 			CalculateShortestPaths();
 
 			foreach (var task in tasks)
 			{
+				configs.RemoveAllRoles(task);
 				var path = FindAgentPath(task);
 				if (path == null)
 					ReconfigurationFailure = true;
@@ -165,14 +166,8 @@ namespace SafetySharp.Odp
 			return _availableAgents[agent].AvailableCapabilities.Contains(task.RequiredCapabilities[prefixLength]);
 		}
 
-		private void ExtractConfigurations(Dictionary<BaseAgent, IEnumerable<Role>> configs, ITask task, int[] agentPath)
+		private void ExtractConfigurations(ConfigurationUpdate configs, ITask task, int[] agentPath)
 		{
-			Action<BaseAgent, Role> addRole = (agent, addedRole) => {
-				if (!configs.ContainsKey(agent))
-					configs.Add(agent, new HashSet<Role>());
-				(configs[agent] as HashSet<Role>).Add(addedRole);
-			};
-
 			var role = GetRole(task, null, null);
 			for (var i = 0; i < agentPath.Length; ++i)
 			{
@@ -186,11 +181,11 @@ namespace SafetySharp.Odp
 				{
 					// configure the connecting agents
 					BaseAgent first, last;
-					ConfigureConnection(agentPath[i], agentPath[i + 1], task, role.PostCondition, addRole, out first, out last);
+					ConfigureConnection(agentPath[i], agentPath[i + 1], task, role.PostCondition, configs, out first, out last);
 
 					// complete the current role
 					role.PostCondition.Port = first;
-					addRole(_availableAgents[agentPath[i]], role);
+					configs.AddRoles(_availableAgents[agentPath[i]], role);
 
 					// create a new role, referencing the last connection agent
 					// (role.PostCondition has the same state as the last transport role's PostCondition)
@@ -198,12 +193,12 @@ namespace SafetySharp.Odp
 				}
 			}
 			// the last role was not yet saved, do it now
-			addRole(_availableAgents[agentPath[agentPath.Length - 1]], role);
+			configs.AddRoles(_availableAgents[agentPath[agentPath.Length - 1]], role);
 		}
 
 		private void ConfigureConnection(
 			int from, int to,
-			ITask task, Condition initialCondition, Action<BaseAgent, Role> addRole,
+			ITask task, Condition initialCondition, ConfigurationUpdate configs,
 			out BaseAgent first, out BaseAgent last
 		)
 		{
@@ -224,7 +219,7 @@ namespace SafetySharp.Odp
 				// (initialCondition has the same state as the previous transport role's PostCondition)
 				var linkRole = GetRole(task, previous, initialCondition);
 				linkRole.PostCondition.Port = _availableAgents[connection[i + 1]];
-				addRole(link, linkRole);
+				configs.AddRoles(link, linkRole);
 
 				previous = link;
 			}
