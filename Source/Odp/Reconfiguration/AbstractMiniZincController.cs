@@ -57,6 +57,8 @@ namespace SafetySharp.Odp.Reconfiguration
 					ParseConfigurations(configs, task);
 				}
 			}
+
+			OnConfigurationsCalculated(configs);
 			return configs;
 		}
 

@@ -22,6 +22,8 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
+	using System;
+
 	// TODO: naming is ambiguous between "controller" (vs. "observer") and "controller" (vs. "plant")
 	public interface IController
 	{
@@ -30,5 +32,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		ConfigurationUpdate CalculateConfigurations(params ITask[] tasks);
 
 		bool ReconfigurationFailure { get; }
+
+		event Action<BaseAgent[]> ConfigurationsCalculated;
 	}
 }

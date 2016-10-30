@@ -27,8 +27,11 @@ namespace SafetySharp.Odp.Reconfiguration
 
 	public class ConfigurationUpdate
 	{
-		private readonly Dictionary<uint, HashSet<Role>> _addedRoles = new Dictionary<uint, HashSet<Role>>();
-		private readonly Dictionary<uint, HashSet<Role>> _removedRoles = new Dictionary<uint, HashSet<Role>>();
+		private readonly Dictionary<BaseAgent, HashSet<Role>> _addedRoles = new Dictionary<BaseAgent, HashSet<Role>>();
+		private readonly Dictionary<BaseAgent, HashSet<Role>> _removedRoles = new Dictionary<BaseAgent, HashSet<Role>>();
+
+		public BaseAgent[] AffectedAgents
+			=> _addedRoles.Keys.Concat(_removedRoles.Keys).Distinct().ToArray();
 
 		public void RemoveAllRoles(ITask task, params BaseAgent[] agents)
 		{
@@ -38,16 +41,16 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public void RemoveRoles(BaseAgent agent, params Role[] rolesToRemove)
 		{
-			if (!_removedRoles.ContainsKey(agent.ID))
-				_removedRoles[agent.ID] = new HashSet<Role>();
-			_removedRoles[agent.ID].UnionWith(rolesToRemove);
+			if (!_removedRoles.ContainsKey(agent))
+				_removedRoles[agent] = new HashSet<Role>();
+			_removedRoles[agent].UnionWith(rolesToRemove);
 		}
 
 		public void AddRoles(BaseAgent agent, params Role[] rolesToAdd)
 		{
-			if (!_addedRoles.ContainsKey(agent.ID))
-				_addedRoles[agent.ID] = new HashSet<Role>();
-			_addedRoles[agent.ID].UnionWith(rolesToAdd);
+			if (!_addedRoles.ContainsKey(agent))
+				_addedRoles[agent] = new HashSet<Role>();
+			_addedRoles[agent].UnionWith(rolesToAdd);
 		}
 
 		public void LockAddedRoles()
@@ -60,10 +63,10 @@ namespace SafetySharp.Odp.Reconfiguration
 		{
 			foreach (var agent in agents)
 			{
-				if (_removedRoles.ContainsKey(agent.ID))
-					agent.AllocatedRoles.RemoveAll(_removedRoles[agent.ID].Contains);
-				if (_addedRoles.ContainsKey(agent.ID))
-					agent.AllocateRoles(_addedRoles[agent.ID]);
+				if (_removedRoles.ContainsKey(agent))
+					agent.AllocatedRoles.RemoveAll(_removedRoles[agent].Contains);
+				if (_addedRoles.ContainsKey(agent))
+					agent.AllocateRoles(_addedRoles[agent]);
 			}
 		}
 	}

@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 {
+	using System;
 	using SafetySharp.Modeling;
 	using Odp;
 	using Odp.Reconfiguration;
@@ -43,6 +44,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		public override void Update()
 		{
 			StepCount++;
+		}
+
+		public event Action<BaseAgent[]> ConfigurationsCalculated
+		{
+			add { _controller.ConfigurationsCalculated += value; }
+			remove { _controller.ConfigurationsCalculated -= value; }
 		}
 
 		public BaseAgent[] Agents => _controller.Agents;

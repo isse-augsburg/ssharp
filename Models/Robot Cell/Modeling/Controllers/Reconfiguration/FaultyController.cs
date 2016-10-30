@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 {
+	using System;
 	using SafetySharp.Modeling;
 	using Odp;
 	using Odp.Reconfiguration;
@@ -38,6 +39,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		protected FaultyController() { }
 
 		// composition
+		public event Action<BaseAgent[]> ConfigurationsCalculated
+		{
+			add { _controller.ConfigurationsCalculated += value; }
+			remove { _controller.ConfigurationsCalculated -= value; }
+		}
 		public BaseAgent[] Agents => _controller.Agents;
 		public virtual bool ReconfigurationFailure =>_controller.ReconfigurationFailure;
 		public virtual ConfigurationUpdate CalculateConfigurations(params ITask[] tasks)

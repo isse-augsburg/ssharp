@@ -22,12 +22,15 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
+	using System;
 	using Modeling;
 
 	public abstract class AbstractController : IController
 	{
 		[Hidden(HideElements = true)]
 		public BaseAgent[] Agents { get; }
+
+		public event Action<BaseAgent[]> ConfigurationsCalculated;
 
 		protected AbstractController(BaseAgent[] agents)
 		{
@@ -60,6 +63,11 @@ namespace SafetySharp.Odp.Reconfiguration
 			role.Clear();
 
 			return role;
+		}
+
+		protected void OnConfigurationsCalculated(ConfigurationUpdate config)
+		{
+			ConfigurationsCalculated?.Invoke(config.AffectedAgents);
 		}
 	}
 }
