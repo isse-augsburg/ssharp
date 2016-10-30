@@ -30,9 +30,9 @@ namespace SafetySharp.Odp
 	public abstract partial class BaseAgent : Component, IAgent
 	{
 		// configuration options
-		public static int MaximumAgentCount = 10;
-		public static int MaximumResourceCount = 7;
-		public static int MaximumRoleCount = 20;
+		public static int MaximumAgentCount = 20;
+		public static int MaximumResourceCount = 20;
+		public static int MaximumRoleCount = 40;
 
 		private static uint _maxID = 0;
 		public uint ID { get; }

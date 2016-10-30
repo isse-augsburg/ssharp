@@ -34,9 +34,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 	internal class Model : ModelBase
 	{
+		public const int MaxAgentCount = 10;
+		public const int MaxResourceCount = 7;
 		public const int MaxRoleCount = 8;
-		public const int MaxAgentRequests = 2;
-		public const int MaxProductionSteps = 8;
+
+		static Model()
+		{
+			BaseAgent.MaximumAgentCount = MaxAgentCount;
+			BaseAgent.MaximumResourceCount = MaxResourceCount;
+			BaseAgent.MaximumRoleCount = MaxRoleCount;
+		}
 
 		public Model(string name = "")
 		{

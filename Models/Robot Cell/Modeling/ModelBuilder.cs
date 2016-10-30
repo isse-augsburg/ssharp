@@ -54,8 +54,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		public ModelBuilder DefineTask(int count, params ICapability[] capabilities)
 		{
 			capabilities = SanitizeCapabilities(capabilities);
-			if (capabilities.Length > Model.MaxProductionSteps)
-				throw new InvalidOperationException($"Too many production steps; increase '{Model.MaxProductionSteps}'.");
 
 			var task = new Task(capabilities);
 			_model.Tasks.Add(task);
