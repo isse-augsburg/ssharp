@@ -34,6 +34,15 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	internal class SafetyAnalysisTests
 	{
 		[TestCaseSource(nameof(CreateConfigurations))]
+		public void ComputeStateVectorLayout(Model model)
+		{
+			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 12 } };
+			var result = modelChecker.CheckInvariant(model, false);
+
+			Console.WriteLine(result.StateVectorLayout);
+		}
+
+		[TestCaseSource(nameof(CreateConfigurations))]
 		public void NoDamagedWorkpieces(Model model)
 		{
 			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
