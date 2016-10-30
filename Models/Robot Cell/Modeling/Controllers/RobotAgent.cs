@@ -152,7 +152,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (Resource == null)
 				return;
 
-			if (!_currentCapability.Equals(capability))
+			if (!Equals(_currentCapability, capability))
 			{
 				// Switch the capability; if we fail to do so, remove all other capabilities from the available ones
 				if (SwitchCapability(capability))
