@@ -344,7 +344,7 @@ namespace SafetySharp.Odp
 
 		public virtual void RemoveAllocatedRoles(IEnumerable<Role> roles)
 		{
-			foreach (var role in roles)
+			foreach (var role in roles.ToArray())
 				AllocatedRoles.Remove(role);
 		}
 
