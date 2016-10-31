@@ -38,6 +38,9 @@ namespace SafetySharp.Odp
 		public IEnumerable<ICapability> CapabilitiesToApply =>
 			Task.RequiredCapabilities.Skip(_capabilitiesToApplyStart).Take(_capabilitiesToApplyCount);
 
+		public IEnumerable<ICapability> ExecutionState =>
+			Task.RequiredCapabilities.Take(_capabilitiesToApplyStart + _current);
+
 		private byte _capabilitiesToApplyStart;
 		private byte _capabilitiesToApplyCount;
 		private byte _current;
