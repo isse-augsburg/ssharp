@@ -76,14 +76,16 @@ namespace SafetySharp.Odp
 					// consistent input:
 					(role.PreCondition.Port == null // no input...
 					|| role.PreCondition.Port.AllocatedRoles.Exists( // ... or there's a matching role at the input
-						sendingRole => sendingRole.PostCondition.StateMatches(role.PreCondition)
+						sendingRole => !sendingRole.IsLocked
+							&& sendingRole.PostCondition.StateMatches(role.PreCondition)
 							&& sendingRole.PostCondition.Port == agent
 						)
 					)
 					// consistent output:
 					&& (role.PostCondition.Port == null // no output...
 					|| role.PostCondition.Port.AllocatedRoles.Exists( // ... or there's a matching role at the output
-						receivingRole => receivingRole.PreCondition.StateMatches(role.PostCondition)
+						receivingRole => !receivingRole.IsLocked
+							&& receivingRole.PreCondition.StateMatches(role.PostCondition)
 							&& receivingRole.PreCondition.Port == agent
 						)
 					)
