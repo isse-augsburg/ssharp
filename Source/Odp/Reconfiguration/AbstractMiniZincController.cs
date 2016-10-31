@@ -49,7 +49,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			var configs = new ConfigurationUpdate();
 			foreach (var task in tasks)
 			{
-				configs.RemoveAllRoles(task);
+				configs.RemoveAllRoles(task, Agents);
 				lock(MiniZinc)
 				{
 					CreateDataFile(task);

@@ -49,7 +49,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 			foreach (var task in tasks)
 			{
-				configs.RemoveAllRoles(task);
+				configs.RemoveAllRoles(task, Agents);
 				var path = FindAgentPath(task);
 				if (path == null)
 					ReconfigurationFailure = true;
