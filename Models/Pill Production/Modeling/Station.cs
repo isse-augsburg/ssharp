@@ -101,7 +101,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 				.Distinct()
 				.Where(neighbour => neighbour != null);
 
-			RemoveAllocatedRoles(AllocatedRoles.Where(role => role.Task == recipe));
+			RemoveAllocatedRoles(obsoleteRoles);
 
 			foreach (var neighbour in affectedNeighbours)
 				(neighbour as Station).RemoveRecipeConfigurations(recipe);
