@@ -44,7 +44,7 @@
     <Compile Include="Reconfiguration\CentralReconfiguration.cs" />
     <Compile Include="Reconfiguration\CoalitionReconfigurationAgent.cs" />
     <Compile Include="Condition.cs" />
-    <Compile Include="Reconfiguration\Configuration.cs" />
+    <Compile Include="Reconfiguration\ConfigurationUpdate.cs" />
     <Compile Include="Reconfiguration\ControllerReconfigurationAgent.cs" />
     <Compile Include="FairRoleSelector.cs" />
     <Compile Include="Reconfiguration\FastController.cs" />
