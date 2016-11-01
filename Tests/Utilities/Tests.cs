@@ -183,6 +183,7 @@ namespace Tests.Utilities
 				.AddReferences(_assemblies.Select(assembly => MetadataReference.CreateFromFile(assembly)))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Tests).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Component).Assembly.Location))
+				.AddReferences(MetadataReference.CreateFromFile(typeof(SafetySharp.Odp.BaseAgent).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Compiler).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Should).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(ImmutableArray).Assembly.Location));

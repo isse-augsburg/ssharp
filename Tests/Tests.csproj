@@ -615,6 +615,11 @@
     <Compile Include="Execution\Models\Subcomponents\generic.cs" />
     <Compile Include="Execution\Models\Subcomponents\multiple.cs" />
     <Compile Include="Execution\Models\Subcomponents\single.cs" />
+    <Compile Include="OdpTests.cs" />
+    <Compile Include="OdpTests.Helpers.cs">
+      <DependentUpon>OdpTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OrganicDesignPattern\role execution.cs" />
     <Compile Include="Serialization\Compaction\alignment.cs" />
     <Compile Include="Serialization\Compaction\Boolean 1 byte.cs" />
     <Compile Include="Serialization\Compaction\faults.cs" />
@@ -750,6 +755,10 @@
     <ProjectReference Include="..\Source\Compiler\Compiler.csproj">
       <Project>{8823091c-387f-4f4d-abcd-8f71d1528cbb}</Project>
       <Name>Compiler</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Source\Odp\Odp.csproj">
+      <Project>{56f7aec6-842d-4dfc-a217-51623facf1f0}</Project>
+      <Name>Odp</Name>
     </ProjectReference>
     <ProjectReference Include="..\Source\SafetySharp\SafetySharp.csproj">
       <Project>{9b6c1fb4-3f1b-43ac-a0e0-eaed4088bf37}</Project>
