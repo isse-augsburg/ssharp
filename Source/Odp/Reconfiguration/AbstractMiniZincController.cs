@@ -124,10 +124,14 @@ namespace SafetySharp.Odp.Reconfiguration
 				role = GetRole(task, lastAgent, lastAgent == null ? null : (Condition?)role.PostCondition);
 
 				// collect capabilities for the current agent into one role
-				for (var current = agentIds[i]; current == agentIds[i]; ++i)
+				for (var current = agentIds[i]; i < agentIds.Length && current == agentIds[i]; ++i)
 				{
 					if (capabilityIds[i] >= 0)
-						role.AddCapability(task.RequiredCapabilities[capabilityIds[i]]);
+					{
+						var capability = task.RequiredCapabilities[capabilityIds[i]];
+						role.AddCapability(capability);
+						role.PostCondition.AppendToState(capability);
+					}
 				}
 
 				configs.AddRoles(agent, role);
