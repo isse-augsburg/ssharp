@@ -76,25 +76,22 @@ namespace SafetySharp.Modeling
 
 		private class SingleThreadSynchronizationContext : SynchronizationContext
 		{
-			private readonly Queue<Tuple<SendOrPostCallback, object>> _queue = new Queue<Tuple<SendOrPostCallback, object>>();
+			private readonly Queue<Action> _queue = new Queue<Action>();
 
 			public override void Post(SendOrPostCallback d, object state)
 			{
-				_queue.Enqueue(Tuple.Create(d, state));
+				_queue.Enqueue(() => d(state));
 			}
 
 			public void Run()
 			{
 				var oldContext = Current;
-				SetSynchronizationContext(this);
 
 				try
 				{
+					SetSynchronizationContext(this);
 					while (_queue.Count > 0)
-					{
-						var job = _queue.Dequeue();
-						job.Item1(job.Item2);
-					}
+						_queue.Dequeue().Invoke();
 				}
 				finally
 				{
