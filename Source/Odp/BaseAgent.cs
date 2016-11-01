@@ -83,7 +83,8 @@ namespace SafetySharp.Odp
 				guard: _hasRole && _deficientConfiguration,
 				action: () =>
 				{
-					DropResource();
+					if (Resource != null)
+						DropResource();
 					_hasRole = false;
 					_deficientConfiguration = false;
 				});

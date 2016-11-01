@@ -60,11 +60,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		protected override void DropResource()
 		{
-			_currentCapability = null;
-			base.DropResource();
-
 			// For now, the resource disappears magically...
 			Robot?.DiscardWorkpiece();
+
+			base.DropResource();
 		}
 
 		protected override bool CheckInput(Agent agent)
