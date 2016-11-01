@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
+	using System;
 	using System.Linq;
 	using Plants;
 	using SafetySharp.Modeling;
@@ -131,7 +132,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (role.CapabilitiesToApply.FirstOrDefault() is ProduceCapability)
 			{
 				var capability = (ProduceCapability)role.CapabilitiesToApply.First();
-				return (capability.Resources.Count > 0 && !capability.Tasks.Any(task => task.IsResourceInProduction))
+				var availableResourceCount = capability.Resources.Count(resource => resource.Task == role.Task);
+				return availableResourceCount > 0
+					   && !capability.Tasks.Any(task => task.IsResourceInProduction)
 					   && base.CanExecute(role);
 			}
 			return base.CanExecute(role);
@@ -139,8 +142,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public override void Produce(ProduceCapability capability)
 		{
-			Resource = capability.Resources[0];
-			capability.Resources.RemoveAt(0);
+			var index = capability.Resources.FindIndex(resource => resource.Task == _currentRole.Task);
+			if (index == -1)
+				throw new InvalidOperationException("All resources for this task have already been produced");
+
+			Resource = capability.Resources[index];
+			capability.Resources.RemoveAt(index);
+
 			(Resource.Task as Task).IsResourceInProduction = true;
 			Robot?.ProduceWorkpiece((Resource as Resource).Workpiece);
 			Resource.OnCapabilityApplied(capability);
