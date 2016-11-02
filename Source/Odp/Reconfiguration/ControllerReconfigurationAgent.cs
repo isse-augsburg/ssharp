@@ -62,20 +62,15 @@ namespace SafetySharp.Odp.Reconfiguration
 		public void StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
 		{
 			_task = task;
-			if (_roleCalculationAgent != null) // a configuration is already under way
-			{
-				_roleCalculationAgent.AcknowledgeReconfigurationRequest(task, this, baseAgentState);
-				return;
-			}
 
-			if (agent == _baseAgent) // no previous reconf agent exists
+			if (agent == _baseAgent) // invariant violation detected
 			{
 				_roleCalculationAgent = new RoleCalculationAgent(_allBaseAgents, _controller);
 				_roleCalculationAgent.StartCentralReconfiguration(task, _baseAgent, baseAgentState);
 			}
-			else // a previous reconf agent already exists
+			else // a reconfiguration has already been already started
 			{
-				_roleCalculationAgent = (RoleCalculationAgent)agent;
+				_roleCalculationAgent = (RoleCalculationAgent)agent; // may already have this value, if reconfiguration initiated by this instance
 				_roleCalculationAgent.AcknowledgeReconfigurationRequest(task, this, baseAgentState);
 			}
 		}
