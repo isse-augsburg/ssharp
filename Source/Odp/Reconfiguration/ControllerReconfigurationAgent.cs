@@ -139,7 +139,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 			private void CalculateRoles(ITask task)
 			{
-				var t = _controller.CalculateConfigurations(task);
+				var t = _controller.CalculateConfigurations(null, task);
 				Debug.Assert(t.IsCompleted); // assume synchronous controller
 				var configs = t.Result;
 

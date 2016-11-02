@@ -47,9 +47,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		}
 		public BaseAgent[] Agents => _controller.Agents;
 		public virtual bool ReconfigurationFailure =>_controller.ReconfigurationFailure;
-		public virtual Task<ConfigurationUpdate> CalculateConfigurations(params ITask[] tasks)
+		public virtual Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
 		{
-			return _controller.CalculateConfigurations(tasks);
+			return _controller.CalculateConfigurations(context, tasks);
 		}
 
 		// fault & effect
@@ -60,7 +60,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		{
 			public override bool ReconfigurationFailure => true;
 
-			public override Task<ConfigurationUpdate> CalculateConfigurations(params ITask[] tasks)
+			public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
 			{
 				return Task.FromResult<ConfigurationUpdate>(null);
 			}

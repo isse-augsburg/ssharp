@@ -46,7 +46,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		}
 
 		// synchronous implementation
-		public override Task<ConfigurationUpdate> CalculateConfigurations(params ITask[] tasks)
+		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
 		{
 			var configs = new ConfigurationUpdate();
 			foreach (var task in tasks)

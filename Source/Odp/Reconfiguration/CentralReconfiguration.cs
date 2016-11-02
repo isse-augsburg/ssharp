@@ -40,7 +40,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		{
 			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
 
-			var configs = await _controller.CalculateConfigurations(tasks);
+			var configs = await _controller.CalculateConfigurations(null, tasks);
 			configs?.Apply(_controller.Agents);
 		}
 	}
