@@ -136,8 +136,6 @@ namespace SafetySharp.Odp
 			Resource = null;
 		}
 
-		public abstract void ApplyCapability(ICapability capability);
-
 		private void ChooseRole()
 		{
 			var role = RoleSelector.ChooseRole(AllocatedRoles, _resourceRequests);

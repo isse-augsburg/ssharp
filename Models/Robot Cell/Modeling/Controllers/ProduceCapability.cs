@@ -22,20 +22,23 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
 	using SafetySharp.Modeling;
 	using Odp;
 
-	[DebuggerDisplay("Produce")]
-	internal class ProduceCapability : ICapability
+	[DebuggerDisplay("Produce"), Obsolete("use Odp.ProduceCapability once Resources, Tasks references removed")]
+	internal class ProduceCapability : Capability<ProduceCapability>
 	{
 		public ProduceCapability(List<Resource> resources, List<Task> tasks)
 		{
 			Resources = resources;
 			Tasks = tasks;
 		}
+
+		public override CapabilityType CapabilityType => CapabilityType.Produce;
 
 		public List<Resource> Resources { get; }
 

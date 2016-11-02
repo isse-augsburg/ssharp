@@ -58,47 +58,17 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	}
 
 	/// <summary>
-	///   Represents the loading of empty pill containers on the conveyor belt.
-	/// </summary>
-	public sealed class ProduceCapability : ICapability
-	{
-		public override bool Equals(object obj)
-		{
-			return obj is ProduceCapability;
-		}
-
-		public override int GetHashCode()
-		{
-			return 17;
-		}
-	}
-
-	/// <summary>
-	///   Represents the removal of pill containers from the conveyor belt, labeling and palletization.
-	/// </summary>
-	public sealed class ConsumeCapability : ICapability
-	{
-		public override bool Equals(object obj)
-		{
-			return obj is ConsumeCapability;
-		}
-
-		public override int GetHashCode()
-		{
-			return 31;
-		}
-	}
-
-	/// <summary>
 	///   Represents the addition of a specified amount of a certain ingredient to the container.
 	/// </summary>
-	public class Ingredient : ICapability
+	public class Ingredient : Capability<Ingredient>
 	{
 		public Ingredient(IngredientType type, uint amount)
 		{
 			Type = type;
 			Amount = amount;
 		}
+
+		public override CapabilityType CapabilityType => CapabilityType.Process;
 
 		public IngredientType Type { get; }
 

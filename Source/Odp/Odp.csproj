@@ -37,6 +37,11 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Capability.cs" />
+    <Compile Include="CapabilityType.cs" />
+    <Compile Include="ConsumeCapability.cs" />
+    <Compile Include="ICapabilityHandler.cs" />
+    <Compile Include="ProduceCapability.cs" />
     <Compile Include="Reconfiguration\AbstractController.cs" />
     <Compile Include="Reconfiguration\AbstractMiniZincController.cs" />
     <Compile Include="BaseAgent.cs" />

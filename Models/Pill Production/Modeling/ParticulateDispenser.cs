@@ -30,7 +30,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	/// <summary>
 	///   A production station that adds ingredients to the containers.
 	/// </summary>
-	public partial class ParticulateDispenser : Station
+	public partial class ParticulateDispenser : Station, ICapabilityHandler<Ingredient>
 	{
 		public readonly Fault DispenserDefect = new PermanentFault();
 
@@ -60,12 +60,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			_ingredientTanks[(int)ingredientType].Amount = amount;
 		}
 
-		public override void ApplyCapability(ICapability capability)
+		public void ApplyCapability(Ingredient ingredient)
 		{
-			var ingredient = capability as Ingredient;
-			if (ingredient == null)
-				throw new InvalidOperationException($"Invalid capability in ParticulateDispenser: {capability}");
-
 			_ingredientTanks[(int)ingredient.Type].Dispense(Container, ingredient);
 		}
 

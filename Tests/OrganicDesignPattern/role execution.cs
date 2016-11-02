@@ -68,19 +68,20 @@ namespace Tests.OrganicDesignPattern
 			a.LastAction.ShouldBe(capabilities[2].Action);
 		}
 
-		private class A : Agent
+		private class A : Agent, ICapabilityHandler<C>
 		{
 			public int LastAction = 0;
 
-			public override void ApplyCapability(ICapability capability)
+			public void ApplyCapability(C capability)
 			{
-				LastAction = ((C)capability).Action;
+				LastAction = capability.Action;
 			}
 		}
 
-		private class C : ICapability
+		private class C : Capability<C>
 		{
 			public int Action;
+			public override CapabilityType CapabilityType => CapabilityType.Process;
 		}
 	}
 }

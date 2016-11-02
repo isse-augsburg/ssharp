@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,15 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
+namespace SafetySharp.Odp
 {
-	using System.Diagnostics;
-	using Odp;
-
-	[DebuggerDisplay("Consume")]
-	internal class ConsumeCapability : ICapability
+	public sealed class ProduceCapability : Capability<ProduceCapability>
 	{
-		public override bool Equals(object obj) => obj is ConsumeCapability;
-		public override int GetHashCode() => 7;
+		public override CapabilityType CapabilityType => CapabilityType.Produce;
+
+		public override bool Equals(object obj) => obj is ProduceCapability;
+
+		public override int GetHashCode() => 17;
 	}
 }

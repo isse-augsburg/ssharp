@@ -22,7 +22,6 @@
 
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
-	using System;
 	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 	using Odp;
@@ -30,7 +29,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	/// <summary>
 	///   A production station that removes containers from the conveyor belt, closes, labels and stores them on pallets.
 	/// </summary>
-	public class PalletisationStation : Station
+	public class PalletisationStation : Station, ICapabilityHandler<ConsumeCapability>
 	{
 		public readonly Fault PalletisationDefect = new PermanentFault();
 
@@ -41,19 +40,12 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 
 		public override IEnumerable<ICapability> AvailableCapabilities { get; } = new[] { new ConsumeCapability() };
 
-		public override void ApplyCapability(ICapability capability)
+		public void ApplyCapability(ConsumeCapability capability)
 		{
-			if (capability is ConsumeCapability)
-			{
-				Container.Recipe.RemoveContainer(Container);
-				if (Container.Recipe.ProcessingComplete)
-				{
-					RemoveRecipeConfigurations(Container.Recipe);
-				}
-				Container = null;
-			}
-			else
-				throw new InvalidOperationException();
+			Container.Recipe.RemoveContainer(Container);
+			if (Container.Recipe.ProcessingComplete)
+				RemoveRecipeConfigurations(Container.Recipe);
+			Container = null;
 		}
 
 		[FaultEffect(Fault = nameof(PalletisationDefect))]

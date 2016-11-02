@@ -22,8 +22,10 @@
 
 namespace SafetySharp.Odp
 {
-	// only a marker interface (?) / common base type
 	public interface ICapability
 	{
+		void Execute(BaseAgent agent);
+
+		CapabilityType CapabilityType { get; }
 	}
 }

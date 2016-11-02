@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using SafetySharp.Modeling;
 	using Odp;
 
-	internal class RobotAgent : Agent
+	internal class RobotAgent : Agent, ICapabilityHandler<ProduceCapability>, ICapabilityHandler<ProcessCapability>, ICapabilityHandler<ConsumeCapability>
 	{
 		public readonly Fault Broken = new TransientFault();
 		public readonly Fault ResourceTransportFault = new TransientFault();
@@ -140,7 +140,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return base.CanExecute(role);
 		}
 
-		public override void Produce(ProduceCapability capability)
+		public void ApplyCapability(ProduceCapability capability)
 		{
 			var index = capability.Resources.FindIndex(resource => resource.Task == _currentRole.Task);
 			if (index == -1)
@@ -154,10 +154,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Resource.OnCapabilityApplied(capability);
 		}
 
-		public override void Process(ProcessCapability capability)
+		public void ApplyCapability(ProcessCapability capability)
 		{
 			if (Resource == null)
-				return;
+				throw new InvalidOperationException("Cannot process when no resource available");
 
 			if (!Equals(_currentCapability, capability))
 			{
@@ -182,10 +182,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			}
 		}
 
-		public override void Consume(ConsumeCapability capability)
+		public void ApplyCapability(ConsumeCapability capability)
 		{
 			if (Resource == null)
-				return;
+				throw new InvalidOperationException("Cannot consume when no resource available");
 
 			Resource.OnCapabilityApplied(capability);
 			Robot?.ConsumeWorkpiece();

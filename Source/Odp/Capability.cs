@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,29 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
+namespace SafetySharp.Odp
 {
-	using System.Diagnostics;
-	using Odp;
+	using System;
 
-	[DebuggerDisplay("Process: {ProductionAction}")]
-	internal class ProcessCapability : Capability<ProcessCapability>
+	public abstract class Capability<T> : ICapability
+		where T : Capability<T>
 	{
-		public ProcessCapability(ProductionAction productionAction)
+		public void Execute(BaseAgent agent)
 		{
-			ProductionAction = productionAction;
+			var handler = agent as ICapabilityHandler<T>;
+			if (handler == null)
+				throw new InvalidOperationException($"Agent of type {agent.GetType().Name} cannot handle capability of type {typeof(T).Name}");
+			handler.ApplyCapability((T)this);
 		}
 
-		public override CapabilityType CapabilityType => CapabilityType.Process;
-
-		public ProductionAction ProductionAction { get; }
-
-		public override bool Equals(object obj)
-		{
-			var process = obj as ProcessCapability;
-			return ProductionAction == process?.ProductionAction;
-		}
-
-		public override int GetHashCode() => 79 + 13 * (int)ProductionAction;
+		public abstract CapabilityType CapabilityType { get; }
 	}
 }

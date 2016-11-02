@@ -92,31 +92,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			base.DropResource();
 		}
 
-		public virtual void Produce(ProduceCapability capability)
-		{
-		}
-
-		public virtual void Process(ProcessCapability capability)
-		{
-		}
-
-		public virtual void Consume(ConsumeCapability capability)
-		{
-		}
-
-		// TODO: switch to original robot cell approach (Capability.Execute()) in ODP core?
-		public override void ApplyCapability(ICapability capability)
-		{
-			if (capability is ProduceCapability)
-				Produce(capability as ProduceCapability);
-			else if (capability is ProcessCapability)
-				Process(capability as ProcessCapability);
-			else if (capability is ConsumeCapability)
-				Consume(capability as ConsumeCapability);
-			else
-				throw new InvalidOperationException();
-		}
-
 		public void CheckAllocatedCapabilities()
 		{
 			// We ignore faults for unused capabilities that are currently not used to improve general model checking efficiency

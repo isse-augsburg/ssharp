@@ -22,7 +22,6 @@
 
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
-	using System;
 	using System.Collections.Generic;
 	using SafetySharp.Modeling;
 	using Odp;
@@ -30,10 +29,10 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	/// <summary>
 	///   A production station that loads containers on the conveyor belt.
 	/// </summary>
-	public class ContainerLoader : Station
+	public class ContainerLoader : Station, ICapabilityHandler<ProduceCapability>
 	{
-		private static readonly ICapability[] _produceCapabilities = new[] { new ProduceCapability() };
-		private static readonly ICapability[] _emptyCapabilities = new ICapability[0];
+		private static readonly ICapability[] _produceCapabilities = { new ProduceCapability() };
+		private static readonly ICapability[] _emptyCapabilities = { };
 
 		public override IEnumerable<ICapability> AvailableCapabilities =>
 			_containerCount > 0 ? _produceCapabilities : _emptyCapabilities;
@@ -48,19 +47,14 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			CompleteStationFailure.Subsumes(NoContainersLeft);
 		}
 
-		public override void ApplyCapability(ICapability capability)
+		public void ApplyCapability(ProduceCapability capability)
 		{
-			if (capability is ProduceCapability)
-			{
-				Container = _containerStorage.Allocate();
-				_containerCount--;
+			Container = _containerStorage.Allocate();
+			_containerCount--;
 
-				var recipe = (Recipe)_currentRole.Task;
-				Container.OnLoaded(recipe);
-				recipe.AddContainer(Container);
-			}
-			else
-				throw new InvalidOperationException();
+			var recipe = (Recipe)_currentRole.Task;
+			Container.OnLoaded(recipe);
+			recipe.AddContainer(Container);
 		}
 
 		[FaultEffect(Fault = nameof(NoContainersLeft))]

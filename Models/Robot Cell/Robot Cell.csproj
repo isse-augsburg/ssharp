@@ -65,7 +65,6 @@
     <Compile Include="Analysis\FunctionalTests.cs" />
     <Compile Include="Modeling\Controllers\Agent.cs" />
     <Compile Include="Analysis\AnalysisMode.cs" />
-    <Compile Include="Modeling\Controllers\ConsumeCapability.cs" />
     <Compile Include="Modeling\Controllers\FastController.cs" />
     <Compile Include="Modeling\Controllers\Reconfiguration\IntolerableAnalysisController.cs" />
     <Compile Include="Modeling\Controllers\MiniZincController.cs" />

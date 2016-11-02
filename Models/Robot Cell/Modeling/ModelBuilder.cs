@@ -153,7 +153,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		private ICapability[] SanitizeCapabilities(ICapability[] capabilities)
 		{
-			return capabilities.Select(cap => cap ?? new ProduceCapability(_model.Resources, _model.Tasks)).ToArray();
+			return capabilities.Select(cap => cap ?? new Controllers.ProduceCapability(_model.Resources, _model.Tasks)).ToArray();
 		}
 
 	    public ModelBuilder ChooseController<T>() where T : IController

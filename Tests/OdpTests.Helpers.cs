@@ -27,7 +27,6 @@ namespace Tests
 	using Utilities;
 	using Xunit.Abstractions;
 	using JetBrains.Annotations;
-	using System;
 
 	public partial class OdpTests : Tests
 	{
@@ -49,8 +48,6 @@ namespace Tests
 		public readonly List<ICapability> Capabilities = new List<ICapability>(20);
 
 		public override IEnumerable<ICapability> AvailableCapabilities => Capabilities;
-
-		public override void ApplyCapability(ICapability capability) { }
 	}
 
 	internal class Task : ITask
