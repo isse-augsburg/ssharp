@@ -37,20 +37,17 @@ namespace SafetySharp.Odp.Reconfiguration
 		private ITask _task;
 
 		// passed on to RoleCalculationAgent
-		private readonly BaseAgent[] _allBaseAgents;
 		private readonly IController _controller;
 
 		public ControllerReconfigurationAgent(
 			BaseAgent baseAgent,
 			ReconfigurationAgentHandler reconfAgentHandler,
-			BaseAgent[] allBaseAgents,
 			IController controller
 		)
 		{
 			_baseAgent = baseAgent;
 			_reconfAgentHandler = reconfAgentHandler;
 
-			_allBaseAgents = allBaseAgents;
 			_controller = controller;
 		}
 
@@ -65,7 +62,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 			if (agent == _baseAgent) // invariant violation detected
 			{
-				_roleCalculationAgent = new RoleCalculationAgent(_allBaseAgents, _controller);
+				_roleCalculationAgent = new RoleCalculationAgent(_controller);
 				_roleCalculationAgent.StartCentralReconfiguration(task, _baseAgent, baseAgentState);
 			}
 			else // a reconfiguration has already been already started
@@ -102,9 +99,9 @@ namespace SafetySharp.Odp.Reconfiguration
 			private enum State { Idle, GatherGlobalKnowledge, CalculateRoles, AllocateRoles }
 			private readonly StateMachine<State> _stateMachine = State.Idle;
 
-			public RoleCalculationAgent(BaseAgent[] allBaseAgents, IController controller)
+			public RoleCalculationAgent(IController controller)
 			{
-				_functioningAgents = allBaseAgents.Where(agent => agent.IsAlive).ToArray();
+				_functioningAgents = _controller.Agents.Where(agent => agent.IsAlive).ToArray();
 				_controller = controller;
 			}
 
