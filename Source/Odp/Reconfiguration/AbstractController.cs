@@ -23,6 +23,7 @@
 namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
+	using System.Threading.Tasks;
 	using Modeling;
 
 	public abstract class AbstractController : IController
@@ -43,7 +44,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			protected set;
 		}
 
-		public abstract ConfigurationUpdate CalculateConfigurations(params ITask[] tasks);
+		public abstract Task<ConfigurationUpdate> CalculateConfigurations(params ITask[] tasks);
 
 		protected Role GetRole(ITask recipe, BaseAgent input, Condition? previous)
 		{

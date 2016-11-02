@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 {
 	using System;
+	using System.Threading.Tasks;
 	using SafetySharp.Modeling;
 	using Odp;
 	using Odp.Reconfiguration;
@@ -54,7 +55,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
 		public BaseAgent[] Agents => _controller.Agents;
 		public bool ReconfigurationFailure => _controller.ReconfigurationFailure;
-		public ConfigurationUpdate CalculateConfigurations(params ITask[] tasks)
+		public async Task<ConfigurationUpdate> CalculateConfigurations(params ITask[] tasks)
 		{
 			if (ReconfigurationFailure)
 				return null;
@@ -62,7 +63,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			if (StepCount >= MaxSteps)
 				return null;
 
-			return _controller.CalculateConfigurations(tasks);
+			return await _controller.CalculateConfigurations(tasks);
 		}
 	}
 }

@@ -25,6 +25,7 @@ namespace SafetySharp.Odp.Reconfiguration
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Modeling;
 
 	public class ControllerReconfigurationAgent : IReconfigurationAgent
@@ -146,7 +147,9 @@ namespace SafetySharp.Odp.Reconfiguration
 
 			private void CalculateRoles(ITask task)
 			{
-				var configs = _controller.CalculateConfigurations(task);
+				var t = _controller.CalculateConfigurations(task);
+				Debug.Assert(t.IsCompleted); // assume synchronous controller
+				var configs = t.Result;
 
 				_stateMachine.Transition(
 					from: State.CalculateRoles,
