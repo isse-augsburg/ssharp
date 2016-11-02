@@ -25,6 +25,7 @@ namespace SafetySharp.Odp
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Modeling;
 
 	public abstract partial class BaseAgent : Component, IAgent
@@ -52,7 +53,12 @@ namespace SafetySharp.Odp
 
 		public override void Update()
 		{
-			Observe();
+			MicrostepScheduler.Schedule(UpdateAsync);
+		}
+
+		private async Task UpdateAsync()
+		{
+			await Observe();
 			Work();
 		}
 
@@ -288,18 +294,18 @@ namespace SafetySharp.Odp
 			Invariant.StateConsistency
 		};
 
-		private void Observe()
+		private async Task Observe()
 		{
 			var violations = FindInvariantViolations();
 
-			PerformReconfiguration(
+			await PerformReconfiguration(
 				from vio in violations
 				let state = new State(this, null, vio.Value.ToArray())
 				select Tuple.Create(vio.Key, state)
 			);
 		}
 
-		protected void PerformReconfiguration(IEnumerable<Tuple<ITask, State>> reconfigurations)
+		protected async Task PerformReconfiguration(IEnumerable<Tuple<ITask, State>> reconfigurations)
 		{
 			var deficientTasks = new HashSet<ITask>(reconfigurations.Select(t => t.Item1));
 			if (deficientTasks.Count == 0)
@@ -311,7 +317,9 @@ namespace SafetySharp.Odp
 			_deficientConfiguration = _hasRole && deficientTasks.Contains(_currentRole.Task);
 
 			// initiate reconfiguration to fix violations
-			ReconfigurationStrategy.Reconfigure(reconfigurations);
+			await ReconfigurationStrategy.Reconfigure(reconfigurations);
+
+			// TODO: verify new configuration
 		}
 
 		private Dictionary<ITask, IEnumerable<InvariantPredicate>> FindInvariantViolations()

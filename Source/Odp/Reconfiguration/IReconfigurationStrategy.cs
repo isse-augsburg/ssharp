@@ -24,9 +24,10 @@ namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 
 	public interface IReconfigurationStrategy
 	{
-		void Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations);
+		Task Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations);
 	}
 }

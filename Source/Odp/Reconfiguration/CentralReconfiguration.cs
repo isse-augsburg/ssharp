@@ -25,6 +25,7 @@ namespace SafetySharp.Odp.Reconfiguration
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Threading.Tasks;
 
 	public class CentralReconfiguration : IReconfigurationStrategy
 	{
@@ -35,7 +36,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			_controller = controller;
 		}
 
-		public virtual void Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
+		public virtual async Task Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
 		{
 			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
 

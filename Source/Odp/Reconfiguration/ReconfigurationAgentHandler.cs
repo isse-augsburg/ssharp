@@ -24,6 +24,7 @@ namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 	using Modeling;
 
 	public class ReconfigurationAgentHandler : IReconfigurationStrategy
@@ -47,7 +48,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		private readonly Dictionary<ITask, IReconfigurationAgent> _tasksUnderReconstruction
 			= new Dictionary<ITask, IReconfigurationAgent>();
 
-		public void Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
+		public async Task Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
 		{
 			foreach (var tuple in reconfigurations)
 			{
