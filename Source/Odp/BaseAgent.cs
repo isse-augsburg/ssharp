@@ -337,9 +337,9 @@ namespace SafetySharp.Odp
 			return violations;
 		}
 
-		public virtual void RequestReconfiguration(IAgent agent, ITask task)
+		public virtual Task RequestReconfiguration(IAgent agent, ITask task)
 		{
-			PerformReconfiguration(new[] {
+			return PerformReconfiguration(new[] {
 				Tuple.Create(task, new State(this, agent))
 			});
 		}

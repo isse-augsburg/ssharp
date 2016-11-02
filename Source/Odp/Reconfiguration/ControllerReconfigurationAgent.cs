@@ -23,6 +23,7 @@
 namespace SafetySharp.Odp.Reconfiguration
 {
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using Modeling;
 
@@ -118,7 +119,12 @@ namespace SafetySharp.Odp.Reconfiguration
 					to: State.GatherGlobalKnowledge,
 					action: () => {
 						foreach (var baseAgent in _functioningAgents)
-							baseAgent.RequestReconfiguration(this, task);
+						{
+							var t = baseAgent.RequestReconfiguration(this, task);
+							// since baseAgent must use a ControllerReconfigurationAgent,
+							// RequestReconfiguration() is synchronous.
+							Debug.Assert(t.IsCompleted);
+						}
 					}
 				);
 			}
