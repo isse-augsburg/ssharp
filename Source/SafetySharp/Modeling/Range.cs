@@ -24,6 +24,7 @@ namespace SafetySharp.Modeling
 {
 	using System;
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using System.Linq;
 	using System.Linq.Expressions;
 	using System.Reflection;
@@ -69,22 +70,6 @@ namespace SafetySharp.Modeling
 
 			var metadata = model.RangeMetadata.FirstOrDefault(m => m.DescribesField(obj, field));
 			return metadata ?? CreateDefaultRange(obj, field);
-		}
-
-		/// <summary>
-		///   Restricts values that can be stored in the field referenced by the <paramref name="fieldExpression" /> to the range of
-		///   <paramref name="lowerBound" /> and <paramref name="upperBound" />, both inclusive, using the
-		///   <paramref name="overflowBehavior" /> to handle range overflows.
-		/// </summary>
-		/// <typeparam name="T">The type of the field that is restricted.</typeparam>
-		/// <param name="fieldExpression">The expression referencing the field whose range should be restricted.</param>
-		/// <param name="lowerBound">The inclusive lower bound.</param>
-		/// <param name="upperBound">The inclusive upper bound.</param>
-		/// <param name="overflowBehavior">The overflow behavior.</param>
-		public static void Restrict<T>([LiftExpression] T fieldExpression, object lowerBound, object upperBound, OverflowBehavior overflowBehavior)
-			where T : struct, IComparable
-		{
-			Requires.CompilationTransformation();
 		}
 
 		/// <summary>

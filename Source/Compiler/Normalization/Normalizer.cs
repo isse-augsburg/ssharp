@@ -71,7 +71,6 @@ namespace SafetySharp.Compiler.Normalization
 			compilation = ApplyNormalizer<LineDirectiveNormalizer>(compilation, syntaxGenerator);
 			compilation = ApplyNormalizer<PartialNormalizer>(compilation, syntaxGenerator);
 			compilation = ApplyNormalizer<FormulaNormalizer>(compilation, syntaxGenerator);
-			compilation = ApplyNormalizer<LiftedExpressionNormalizer>(compilation, syntaxGenerator);
 			compilation = ApplyNormalizer<BindingNormalizer>(compilation, syntaxGenerator);
 			compilation = ApplyNormalizer<TransitionNormalizer>(compilation, syntaxGenerator);
 			compilation = ApplyNormalizer<ExpressionBodyNormalizer>(compilation, syntaxGenerator);

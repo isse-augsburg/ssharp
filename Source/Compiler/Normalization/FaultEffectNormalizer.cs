@@ -24,7 +24,6 @@ namespace SafetySharp.Compiler.Normalization
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using CompilerServices;
@@ -368,8 +367,9 @@ namespace SafetySharp.Compiler.Normalization
 				return classDeclaration;
 
 			var baseType = Syntax.TypeExpression(faults[faults.Length - 1]).WithTrivia(classDeclaration.BaseList.Types[0]);
-			var baseTypes = SyntaxFactory.SingletonSeparatedList((BaseTypeSyntax)SyntaxFactory.SimpleBaseType((TypeSyntax)baseType));
-			var baseList = SyntaxFactory.BaseList(classDeclaration.BaseList.ColonToken, baseTypes).WithTrivia(classDeclaration.BaseList);
+			var baseTypeSyntax = (BaseTypeSyntax)SyntaxFactory.SimpleBaseType((TypeSyntax)baseType);
+
+			var baseList = classDeclaration.BaseList.ReplaceNode(classDeclaration.BaseList.Types[0], baseTypeSyntax);
 			return classDeclaration.WithBaseList(baseList);
 		}
 

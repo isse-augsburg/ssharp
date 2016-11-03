@@ -114,7 +114,6 @@
     <Compile Include="Normalization\FaultEffectNormalizer.cs" />
     <Compile Include="Normalization\TransitionNormalizer.cs" />
     <Compile Include="Normalization\FormulaNormalizer.cs" />
-    <Compile Include="Normalization\LiftedExpressionNormalizer.cs" />
     <Compile Include="Normalization\LineDirectiveNormalizer.cs" />
     <Compile Include="Normalization\PartialNormalizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

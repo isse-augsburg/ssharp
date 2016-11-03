@@ -43,11 +43,6 @@ namespace SafetySharp.Compiler.Normalization
 	public class RequiredPortNormalizer : Normalizer
 	{
 		/// <summary>
-		///   The name of the synthesized result variable.
-		/// </summary>
-		private readonly string _resultVariable = "result".ToSynthesized();
-
-		/// <summary>
 		///   The method symbol that is being normalized.
 		/// </summary>
 		private IMethodSymbol _methodSymbol;

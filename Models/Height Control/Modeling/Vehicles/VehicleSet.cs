@@ -90,7 +90,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// </summary>
 		private void AddSensorConstraint(Vehicle vehicle1, Vehicle vehicle2, int position)
 		{
-			AddStateConstraint(!vehicle1.IsAtPosition(position) || !vehicle2.IsAtPosition(position) || vehicle1.Lane != vehicle2.Lane);
+			AddStateConstraint(() => !vehicle1.IsAtPosition(position) || !vehicle2.IsAtPosition(position) || vehicle1.Lane != vehicle2.Lane);
 		}
 
 		/// <summary>
