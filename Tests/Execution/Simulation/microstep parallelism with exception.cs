@@ -68,7 +68,9 @@ namespace Tests.Execution.Simulation
 				MicrostepScheduler.Schedule(AsyncMethod);
 			}
 
+#pragma warning disable 1998
 			private async Task AsyncMethod()
+#pragma warning restore 1998
 			{
 				throw new E();
 			}
