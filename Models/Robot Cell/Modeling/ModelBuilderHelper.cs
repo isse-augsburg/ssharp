@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 	public static class ModelBuilderHelper
 	{
-		public static ICapability Produce => null; // HACK: ProduceCapability has model-specific constructor parameters, so use null as symbol
+		public static ICapability Produce => new ProduceCapability();
 		public static ICapability Insert => new ProcessCapability(ProductionAction.Insert);
 		public static ICapability Drill => new ProcessCapability(ProductionAction.Drill);
 		public static ICapability Tighten => new ProcessCapability(ProductionAction.Tighten);

@@ -79,7 +79,6 @@
     <Compile Include="Modeling\ModelBuilderHelper.cs" />
     <Compile Include="Modeling\Plants\Cart.cs" />
     <Compile Include="Modeling\Controllers\CartAgent.cs" />
-    <Compile Include="Modeling\Controllers\ProduceCapability.cs" />
     <Compile Include="Modeling\ProductionAction.cs" />
     <Compile Include="Modeling\Plants\Robot.cs" />
     <Compile Include="Modeling\Controllers\RobotAgent.cs" />

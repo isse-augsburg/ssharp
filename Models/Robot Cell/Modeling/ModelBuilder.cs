@@ -54,8 +54,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		public ModelBuilder DefineTask(int count, params ICapability[] capabilities)
 		{
-			capabilities = SanitizeCapabilities(capabilities);
-
 			var task = new Task(capabilities);
 			_model.Tasks.Add(task);
 			_model.TaskQueue.Enqueue(task);
@@ -88,9 +86,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		public ModelBuilder AddRobot(params ICapability[] capabilities)
 		{
-			capabilities = SanitizeCapabilities(capabilities);
 			var robot = CreateRobot(capabilities);
-			var agent = new RobotAgent(capabilities.Distinct().ToArray(), robot) { TaskQueue = _model.TaskQueue };
+			var agent = new RobotAgent(capabilities.Distinct().ToArray(), robot, _model.Tasks, _model.Resources) { TaskQueue = _model.TaskQueue };
 
 			_model.RobotAgents.Add(agent);
 			robot?.SetNames(agent.ID);
@@ -150,11 +147,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	    {
 	        return _model;
 	    }
-
-		private ICapability[] SanitizeCapabilities(ICapability[] capabilities)
-		{
-			return capabilities.Select(cap => cap ?? new Controllers.ProduceCapability(_model.Resources, _model.Tasks)).ToArray();
-		}
 
 	    public ModelBuilder ChooseController<T>() where T : IController
 	    {
