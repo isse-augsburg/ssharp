@@ -299,6 +299,8 @@
     <Compile Include="Execution\RootDiscovery\properties.cs" />
     <Compile Include="Execution\RootDiscovery\none.cs" />
     <Compile Include="Execution\RootDiscovery\fields.cs" />
+    <Compile Include="Execution\Simulation\component implements interface.cs" />
+    <Compile Include="Execution\Simulation\unused faults and effect.cs" />
     <Compile Include="Execution\Simulation\linq.cs" />
     <Compile Include="Execution\Simulation\faults.cs" />
     <Compile Include="Execution\Simulation\bindings.cs" />
@@ -550,17 +552,6 @@
     <Compile Include="Normalization\FaultNames\Unchanged\has name.cs" />
     <Compile Include="Normalization\FaultNames\Unchanged\uninitialized fault.cs" />
     <Compile Include="Normalization\FaultNames\Unchanged\no fault.cs" />
-    <Compile Include="Normalization\LiftedExpressions\Lifted\method chaining.cs" />
-    <Compile Include="Normalization\LiftedExpressions\Lifted\named parameters.cs" />
-    <Compile Include="Normalization\LiftedExpressions\Lifted\line break preservation.cs" />
-    <Compile Include="Normalization\LiftedExpressions\Lifted\method invocation, multiple arguments.cs" />
-    <Compile Include="Normalization\LiftedExpressions\Lifted\method invocation, single argument.cs" />
-    <Compile Include="Normalization\LiftedExpressions\Lifted\nested invocations.cs" />
-    <Compile Include="Normalization\LiftedExpressions\Lifted\indexer.cs" />
-    <Compile Include="Normalization\LiftedExpressions\Lifted\object creation.cs" />
-    <Compile Include="Normalization\LiftedExpressions\Unlifted\method invocation.cs" />
-    <Compile Include="Normalization\LiftedExpressions\Unlifted\nameof.cs" />
-    <Compile Include="Normalization\LiftedExpressions\Unlifted\object creation.cs" />
     <Compile Include="NormalizationTests.cs" />
     <Compile Include="NormalizationTests.Helpers.cs">
       <DependentUpon>NormalizationTests.cs</DependentUpon>

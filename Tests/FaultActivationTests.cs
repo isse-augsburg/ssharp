@@ -27,13 +27,13 @@ namespace Tests
 
 	public partial class FaultActivationTests
 	{
-		[Theory, MemberData("DiscoverTests", "FaultActivation/StateGraph")]
+		[Theory, MemberData(nameof(DiscoverTests), "FaultActivation/StateGraph")]
 		public void StateGraph(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "FaultActivation/Formulas")]
+		[Theory, MemberData(nameof(DiscoverTests), "FaultActivation/Formulas")]
 		public void Formulas(string test, string file)
 		{
 			ExecuteDynamicTests(file, typeof(SSharpChecker));

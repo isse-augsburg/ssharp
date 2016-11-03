@@ -54,7 +54,7 @@ namespace SafetySharp.CompilerServices
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void UndoActivation(Fault fault)
 		{
-			fault.UndoActivation();
+			fault?.UndoActivation();
 		}
 	}
 }

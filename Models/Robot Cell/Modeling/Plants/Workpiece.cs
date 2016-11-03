@@ -38,7 +38,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 		public Workpiece(params ProductionAction[] productionActions)
 		{
 			_productionActions = productionActions;
-			Range.Restrict(_productionStep, 0, _productionActions.Length, OverflowBehavior.Error);
+			Range.Restrict(() => _productionStep, 0, _productionActions.Length, OverflowBehavior.Error);
 		}
 
 		[Hidden]

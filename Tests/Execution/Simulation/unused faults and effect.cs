@@ -20,54 +20,54 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Normalization.LiftedExpressions.Lifted
+namespace Tests.Execution.Simulation
 {
-	using System;
-	using System.Linq.Expressions;
-	using SafetySharp.CompilerServices;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	internal class Test3
+	internal class UnusedFaultsAndEffects : TestObject
 	{
-		protected void N([LiftExpression] int i, [LiftExpression] bool j, [LiftExpression] int k)
+		protected override void Check()
 		{
+			var simulator = new Simulator(TestModel.InitializeModel(new C()));
+			var c = (C)simulator.Model.Roots[0];
+
+			c.F.Activation = Activation.Forced;
+			simulator.SimulateStep();
+			c.X.ShouldBe(1);
+
+			c.F.Activation = Activation.Suppressed;
+			simulator.SimulateStep();
+			c.X.ShouldBe(1);
+
+			simulator.Model.Faults.ShouldBeEmpty();
 		}
 
-		protected void N(Expression<Func<int>> i, Expression<Func<bool>> j, Expression<Func<int>> k)
+		private class C : Component
 		{
-		}
+			public readonly Fault F = new TransientFault();
+			public int X;
 
-		protected void P(int i, [LiftExpression] bool j, int k)
-		{
-		}
+			public virtual int Y => 1;
 
-		protected void P(int i, Expression<Func<bool>> j, int k)
-		{
-		}
-	}
+			public override void Update()
+			{
+				X = Y;
+			}
 
-	internal class In3 : Test3
-	{
-		private void Q(int x)
-		{
-			N(1, true, 4);
-			N(1 + x / 54 + (true == false ? 17 : 33 + 1), 3 > 5 ? true : false, 33 + 11 / x);
+			[FaultEffect, Priority(1)]
+			public class E1 : C
+			{
+				public override int Y => 71;
+			}
 
-			P(1, true, 17);
-			P(1, true || false, 33 << 2);
-			P(1 - 0, false, 22 / 2);
-		}
-	}
-
-	internal class Out3 : Test3
-	{
-		private void Q(int x)
-		{
-			N(() => 1, () => true, () => 4);
-			N(() => 1 + x / 54 + (true == false ? 17 : 33 + 1), () => 3 > 5 ? true : false, () => 33 + 11 / x);
-
-			P(1, () => true, 17);
-			P(1, () => true || false, 33 << 2);
-			P(1 - 0, () => false, 22 / 2);
+			[FaultEffect, Priority(2)]
+			public class E2 : C
+			{
+				public override int Y => 1;
+			}
 		}
 	}
 }

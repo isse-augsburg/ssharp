@@ -47,7 +47,7 @@ namespace Tests.Serialization.Ranges
 
 			public C()
 			{
-				Should.Throw<ArgumentException>(() => Range.Restrict(F, true, false, OverflowBehavior.Error));
+				Should.Throw<ArgumentException>(() => Range.Restrict(() => F, true, false, OverflowBehavior.Error));
 			}
 		}
 	}
