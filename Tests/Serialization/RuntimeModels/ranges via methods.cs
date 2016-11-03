@@ -65,10 +65,10 @@ namespace Tests.Serialization.RuntimeModels
 			{
 				_hasConstructorRun = true;
 
-				Range.Restrict(F1, 0, 5, OverflowBehavior.Clamp);
-				Range.Restrict(F2, 0, 5, OverflowBehavior.Clamp);
-				Range.Restrict(F3, 0, 5, OverflowBehavior.Clamp);
-				Range.Restrict(F4, 0, 5, OverflowBehavior.Clamp);
+				Range.Restrict(() => F1, 0, 5, OverflowBehavior.Clamp);
+				Range.Restrict(() => F2, 0, 5, OverflowBehavior.Clamp);
+				Range.Restrict(() => F3, 0, 5, OverflowBehavior.Clamp);
+				Range.Restrict(() => F4, 0, 5, OverflowBehavior.Clamp);
 			}
 		}
 	}

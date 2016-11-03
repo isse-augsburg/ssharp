@@ -137,8 +137,8 @@ namespace Tests.Serialization.Ranges
 
 			public C()
 			{
-				Range.Restrict(G, 1, 3, OverflowBehavior.Clamp);
-				Range.Restrict(H, 2, 6, OverflowBehavior.WrapClamp);
+				Range.Restrict(() => G, 1, 3, OverflowBehavior.Clamp);
+				Range.Restrict(() => H, 2, 6, OverflowBehavior.WrapClamp);
 			}
 		}
 	}

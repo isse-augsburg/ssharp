@@ -134,10 +134,10 @@ namespace Tests.Serialization.Ranges
 		{
 			public C()
 			{
-				Range.Restrict(F, -1, 5, OverflowBehavior.Error);
-				Range.Restrict(G, -1, 3, OverflowBehavior.Clamp);
-				Range.Restrict(H, -2, 6, OverflowBehavior.WrapClamp);
-				Range.Restrict(R, -2, 6, OverflowBehavior.WrapClamp);
+				Range.Restrict(() => F, -1, 5, OverflowBehavior.Error);
+				Range.Restrict(() => G, -1, 3, OverflowBehavior.Clamp);
+				Range.Restrict(() => H, -2, 6, OverflowBehavior.WrapClamp);
+				Range.Restrict(() => R, -2, 6, OverflowBehavior.WrapClamp);
 
 				Should.Throw<ArgumentException>(() => InvalidRange());
 			}
@@ -151,7 +151,7 @@ namespace Tests.Serialization.Ranges
 
 			private void InvalidRange()
 			{
-				Range.Restrict(S, 0, 2, OverflowBehavior.Clamp);
+				Range.Restrict(() => S, 0, 2, OverflowBehavior.Clamp);
 			}
 		}
 	}

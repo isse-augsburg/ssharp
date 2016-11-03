@@ -20,18 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Normalization.LiftedExpressions.Unlifted
+namespace Tests.Execution.Simulation
 {
-	using System;
+	using Shouldly;
+	using Utilities;
 	using SafetySharp.Modeling;
 
-	internal class In3 : Component
+	public class ImplementsInterface : TestObject
 	{
-		public In3()
+		protected override void Check()
 		{
-			var x = $"{"".Substring(nameof(Component).Length)}";
-			var s = nameof(x);
-			Console.WriteLine($"{nameof(s)} {s}");
+			var c = new C();
+			c.ShouldBeAssignableTo<I>();
+
+			var e = new E();
+			e.ShouldBeAssignableTo<I>();
 		}
+
+		private interface I { }
+
+		private class C : Component, I { }
+
+		private class D : Component
+		{
+			public readonly Fault F = new PermanentFault();
+
+			[FaultEffect(Fault = nameof(F))]
+			public class FEffect : D { }
+		}
+
+		// class that "inherits from fault effect" and implements interface
+		// compiled version should still implement interface
+		private class E : D, I { }
 	}
 }

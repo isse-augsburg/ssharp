@@ -120,17 +120,6 @@ namespace SafetySharp.Modeling
 		///   transitions; such states are reported as errors during model checking.
 		/// </summary>
 		/// <param name="constraint">The state constraint that should be added.</param>
-		protected void AddStateConstraint([LiftExpression] bool constraint)
-		{
-			Requires.CompilationTransformation();
-		}
-
-		/// <summary>
-		///   Adds the state <paramref name="constraint" /> to the model. All states in which the constraint is violated, i.e.,
-		///   <c>false</c>, are not considered during model checking. State constraints can lead to deadlock states with no outgoing
-		///   transitions; such states are reported as errors during model checking.
-		/// </summary>
-		/// <param name="constraint">The state constraint that should be added.</param>
 		protected void AddStateConstraint(Func<bool> constraint)
 		{
 			Requires.NotNull(constraint, nameof(constraint));

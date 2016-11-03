@@ -26,73 +26,73 @@ namespace Tests
 
 	public partial class ExecutionTests
 	{
-		[Theory, MemberData("DiscoverTests", "Execution/StateMachines")]
+		[Theory, MemberData(nameof(DiscoverTests), "Execution/StateMachines")]
 		public void StateMachines(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ProvidedPorts")]
+		[Theory, MemberData(nameof(DiscoverTests), "Execution/ProvidedPorts")]
 		public void ProvidedPorts(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Bindings")]
+		[Theory, MemberData(nameof(DiscoverTests), "Execution/Bindings")]
 		public void Bindings(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/RequiredPorts")]
+		[Theory, MemberData(nameof(DiscoverTests), "Execution/RequiredPorts")]
 		public void RequiredPorts(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/UpdateMethods")]
+		[Theory, MemberData(nameof(DiscoverTests), "Execution/UpdateMethods")]
 		public void UpdateMethods(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Faults")]
+		[Theory, MemberData(nameof(DiscoverTests), "Execution/Faults")]
 		public void Faults(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Scheduling")]
+		[Theory, MemberData(nameof(DiscoverTests), "Execution/Scheduling")]
 		public void Scheduling(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Simulation")]
+		[Theory, MemberData(nameof(DiscoverTests), "Execution/Simulation")]
 		public void Simulation(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Components")]
+		[Theory, MemberData(nameof(DiscoverTests), "Execution/Components")]
 		public void Components(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/Models")]
+		[Theory, MemberData(nameof(DiscoverTests), "Execution/Models")]
 		public void Models(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/ModelCopy")]
+		[Theory, MemberData(nameof(DiscoverTests), "Execution/ModelCopy")]
 		public void ModelCopy(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}
 
-		[Theory, MemberData("DiscoverTests", "Execution/RootDiscovery")]
+		[Theory, MemberData(nameof(DiscoverTests), "Execution/RootDiscovery")]
 		public void RootDiscovery(string test, string file)
 		{
 			ExecuteDynamicTests(file);

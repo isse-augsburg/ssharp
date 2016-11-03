@@ -181,7 +181,9 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private ExpressionSyntax ReplaceImplicitConversion(ExpressionSyntax expression)
 		{
-			if (SemanticModel.GetTypeInfo(expression).Type.IsDerivedFrom(_formulaType))
+			var expressionType = SemanticModel.GetTypeInfo(expression).Type;
+
+			if (expressionType == null || expressionType.IsDerivedFrom(_formulaType))
 				return (ExpressionSyntax)Visit(expression);
 
 			var conversion = SemanticModel.ClassifyConversion(expression, _formulaType);

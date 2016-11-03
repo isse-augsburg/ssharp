@@ -70,7 +70,7 @@ namespace Tests.Serialization.Ranges
 
 			public C()
 			{
-				Range.Restrict(F, 'a', 'q', OverflowBehavior.Clamp);
+				Range.Restrict(() => F, 'a', 'q', OverflowBehavior.Clamp);
 			}
 		}
 	}
