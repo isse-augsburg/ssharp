@@ -30,23 +30,29 @@ namespace SafetySharp.Runtime
 {
 	using Utilities;
 
-	public struct Edge
+
+
+
+	public struct Edge<TEdgeData>
 	{
 		public int Source;
 		public int Target;
+		public TEdgeData Data;
 
-		public Edge(int source, int target)
+		public Edge(int source, int target, TEdgeData data)
 		{
 			Source = source;
 			Target = target;
+			Data = data;
 		}
 	}
 
-	internal abstract class BidirectionalGraphDirectNodeAccess
+	internal abstract class BidirectionalGraphDirectNodeAccess<TEdgeData>
 	{
-		public abstract IEnumerable<Edge> OutEdges(int vertex);
-		public abstract IEnumerable<Edge> InEdges(int vertex);
-		public Dictionary<int, bool> GetAncestors(Dictionary<int, bool> toNodes, Func<int, bool> ignoreNodeFunc = null, Func<Edge, bool> ignoreEdgeFunc = null)
+		public abstract IEnumerable<Edge<TEdgeData>> OutEdges(int vertex);
+		public abstract IEnumerable<Edge<TEdgeData>> InEdges(int vertex);
+
+		public Dictionary<int, bool> GetAncestors(Dictionary<int, bool> toNodes, Func<int, bool> ignoreNodeFunc = null, Func<Edge<TEdgeData>, bool> ignoreEdgeFunc = null)
 		{
 			// standard behavior: do not ignore node or edge
 			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
@@ -77,38 +83,39 @@ namespace SafetySharp.Runtime
 		}
 	}
 
-	internal sealed class BidirectionalGraph : BidirectionalGraphDirectNodeAccess
+
+	internal sealed class BidirectionalGraph<TEdgeData> : BidirectionalGraphDirectNodeAccess<TEdgeData>
 	{
 
-		private Dictionary<int, List<Edge>> _outEdges = new Dictionary<int, List<Edge>>();
-		private Dictionary<int, List<Edge>> _inEdges = new Dictionary<int, List<Edge>>();
+		private Dictionary<int, List<Edge<TEdgeData>>> _outEdges = new Dictionary<int, List<Edge<TEdgeData>>>();
+		private Dictionary<int, List<Edge<TEdgeData>>> _inEdges = new Dictionary<int, List<Edge<TEdgeData>>>();
 
-		public override IEnumerable<Edge> OutEdges(int vertex) => _outEdges[vertex];
-		public override IEnumerable<Edge> InEdges(int vertex) => _inEdges[vertex];
+		public override IEnumerable<Edge<TEdgeData>> OutEdges(int vertex) => _outEdges[vertex];
+		public override IEnumerable<Edge<TEdgeData>> InEdges(int vertex) => _inEdges[vertex];
 
-		public List<Edge> GetOrCreateOutEdges(int vertex)
+		public List<Edge<TEdgeData>> GetOrCreateOutEdges(int vertex)
 		{
 			if (_outEdges.ContainsKey(vertex))
 			{
 				return _outEdges[vertex];
 			}
-			var dictionary = new List<Edge>();
+			var dictionary = new List<Edge<TEdgeData>>();
 			_outEdges.Add(vertex, dictionary);
 			return dictionary;
 		}
 
-		public List<Edge> GetOrCreateInEdges(int vertex)
+		public List<Edge<TEdgeData>> GetOrCreateInEdges(int vertex)
 		{
 			if (_inEdges.ContainsKey(vertex))
 			{
 				return _inEdges[vertex];
 			}
-			var dictionary = new List<Edge>();
+			var dictionary = new List<Edge<TEdgeData>>();
 			_inEdges.Add(vertex, dictionary);
 			return dictionary;
 		}
 
-		public void AddVerticesAndEdge(Edge edge)
+		public void AddVerticesAndEdge(Edge<TEdgeData> edge)
 		{
 			GetOrCreateOutEdges(edge.Source).Add(edge);
 			GetOrCreateInEdges(edge.Target).Add(edge);
@@ -116,17 +123,19 @@ namespace SafetySharp.Runtime
 			GetOrCreateInEdges(edge.Source);
 			GetOrCreateOutEdges(edge.Target);
 		}
+
+
 	}
 
-	internal sealed class BidirectionalGraphSubViewDecorator : BidirectionalGraphDirectNodeAccess
+	internal sealed class BidirectionalGraphSubViewDecorator<TEdgeData> : BidirectionalGraphDirectNodeAccess<TEdgeData>
 	{
-		private BidirectionalGraphDirectNodeAccess _baseGraph;
+		private BidirectionalGraphDirectNodeAccess<TEdgeData> _baseGraph;
 		private Func<int, bool> _ignoreNodeFunc;
-		private Func<Edge, bool> _ignoreEdgeFunc;
+		private Func<Edge<TEdgeData>, bool> _ignoreEdgeFunc;
 
-		public override IEnumerable<Edge> OutEdges(int vertex)
+		public override IEnumerable<Edge<TEdgeData>> OutEdges(int vertex)
 		{
-			if (_ignoreNodeFunc==null && _ignoreEdgeFunc==null)
+			if (_ignoreNodeFunc == null && _ignoreEdgeFunc == null)
 			{
 				return _baseGraph.OutEdges(vertex);
 			}
@@ -136,12 +145,12 @@ namespace SafetySharp.Runtime
 			}
 			if (_ignoreNodeFunc != null && _ignoreNodeFunc(vertex))
 			{
-				return new Edge[0];
+				return new Edge<TEdgeData>[0];
 			}
 			return FilteredOutEdges(vertex);
 		}
 
-		private IEnumerable<Edge> FilteredOutEdges(int vertex)
+		private IEnumerable<Edge<TEdgeData>> FilteredOutEdges(int vertex)
 		{
 			// only use inside OutEdges(int vertex)
 			foreach (var edge in _baseGraph.OutEdges(vertex))
@@ -153,7 +162,7 @@ namespace SafetySharp.Runtime
 			}
 		}
 
-		public override IEnumerable<Edge> InEdges(int vertex)
+		public override IEnumerable<Edge<TEdgeData>> InEdges(int vertex)
 		{
 			if (_ignoreNodeFunc == null && _ignoreEdgeFunc == null)
 			{
@@ -165,12 +174,12 @@ namespace SafetySharp.Runtime
 			}
 			if (_ignoreNodeFunc != null && _ignoreNodeFunc(vertex))
 			{
-				return new Edge[0];
+				return new Edge<TEdgeData>[0];
 			}
 			return FilteredInEdges(vertex);
 		}
 
-		private IEnumerable<Edge> FilteredInEdges(int vertex)
+		private IEnumerable<Edge<TEdgeData>> FilteredInEdges(int vertex)
 		{
 			// only use inside InEdges(int vertex)
 			foreach (var edge in _baseGraph.InEdges(vertex))
@@ -182,7 +191,7 @@ namespace SafetySharp.Runtime
 			}
 		}
 
-		public BidirectionalGraphSubViewDecorator(BidirectionalGraphDirectNodeAccess baseGraph, Func<int, bool> ignoreNodeFunc = null, Func<Edge, bool> ignoreEdgeFunc = null)
+		public BidirectionalGraphSubViewDecorator(BidirectionalGraphDirectNodeAccess<TEdgeData> baseGraph, Func<int, bool> ignoreNodeFunc = null, Func<Edge<TEdgeData>, bool> ignoreEdgeFunc = null)
 		{
 			_baseGraph = baseGraph;
 			_ignoreNodeFunc = ignoreNodeFunc;

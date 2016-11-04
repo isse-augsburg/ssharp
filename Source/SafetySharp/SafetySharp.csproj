@@ -56,6 +56,7 @@
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\DeadlockChecker.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultOrderModifier.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultSuppressionModifier.cs" />
+    <Compile Include="Analysis\Probabilistic\BidirectionalGraphT.cs" />
     <Compile Include="Analysis\Probabilistic\BoundsToCalculate.cs" />
     <Compile Include="Analysis\Probabilistic\FormulaCalculator.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\ProbabilityRangeChecker.cs" />
