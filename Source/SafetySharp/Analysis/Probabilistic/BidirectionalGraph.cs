@@ -83,8 +83,10 @@ namespace SafetySharp.Runtime
 
 
 
-		public Dictionary<int, bool> GetAncestors(Dictionary<int, bool> toNodes, Dictionary<int, bool> nodesToIgnore)
+		public Dictionary<int, bool> GetAncestors(Dictionary<int, bool> toNodes, Func<int, bool> ignoreNodeFunc=null, Func<Edge,bool> ignoreEdgeFunc=null)
 		{
+			// standard behavior: do not ignore node or edge
+			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
 			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
 			var nodesAdded = new Dictionary<int, bool>();
 			var nodesToTraverse = new Stack<int>();
@@ -96,14 +98,100 @@ namespace SafetySharp.Runtime
 			while (nodesToTraverse.Count > 0)
 			{
 				var currentNode = nodesToTraverse.Pop();
-				var isIgnored = nodesToIgnore.ContainsKey(currentNode);
+				var isIgnored = (ignoreNodeFunc!=null && ignoreNodeFunc(currentNode));
 				var alreadyDiscovered = nodesAdded.ContainsKey(currentNode);
 				if (!(isIgnored || alreadyDiscovered))
 				{
 					nodesAdded.Add(currentNode, true);
 					foreach (var inEdge in InEdges(currentNode))
 					{
-						nodesToTraverse.Push(inEdge.Source);
+						if (ignoreEdgeFunc==null || !ignoreEdgeFunc(inEdge))
+							nodesToTraverse.Push(inEdge.Source);
+					}
+				}
+			}
+			return nodesAdded;
+		}
+	}
+
+	internal sealed class BidirectionalGraph<TEdgeData>
+	{
+		public struct Edge
+		{
+			public int Source;
+			public int Target;
+			public TEdgeData Data;
+
+			public Edge(int source, int target, TEdgeData data)
+			{
+				Source = source;
+				Target = target;
+				Data = data;
+			}
+		}
+
+		private Dictionary<int, List<Edge>> _outEdges = new Dictionary<int, List<Edge>>();
+		private Dictionary<int, List<Edge>> _inEdges = new Dictionary<int, List<Edge>>();
+
+		public IEnumerable<Edge> OutEdges(int vertex) => _outEdges[vertex];
+		public IEnumerable<Edge> InEdges(int vertex) => _inEdges[vertex];
+
+		public List<Edge> GetOrCreateOutEdges(int vertex)
+		{
+			if (_outEdges.ContainsKey(vertex))
+			{
+				return _outEdges[vertex];
+			}
+			var dictionary = new List<Edge>();
+			_outEdges.Add(vertex, dictionary);
+			return dictionary;
+		}
+
+		public List<Edge> GetOrCreateInEdges(int vertex)
+		{
+			if (_inEdges.ContainsKey(vertex))
+			{
+				return _inEdges[vertex];
+			}
+			var dictionary = new List<Edge>();
+			_inEdges.Add(vertex, dictionary);
+			return dictionary;
+		}
+
+		public void AddVerticesAndEdge(Edge edge)
+		{
+			GetOrCreateOutEdges(edge.Source).Add(edge);
+			GetOrCreateInEdges(edge.Target).Add(edge);
+			//Ensure that data structures are initialized even for states without incoming/outgoing edges
+			GetOrCreateInEdges(edge.Source);
+			GetOrCreateOutEdges(edge.Target);
+		}
+
+
+		public Dictionary<int, bool> GetAncestors(Dictionary<int, bool> toNodes, Func<int, bool> ignoreNodeFunc = null, Func<Edge, bool> ignoreEdgeFunc = null)
+		{
+			// standard behavior: do not ignore node or edge
+			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
+			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
+			var nodesAdded = new Dictionary<int, bool>();
+			var nodesToTraverse = new Stack<int>();
+			foreach (var node in toNodes)
+			{
+				nodesToTraverse.Push(node.Key);
+			}
+
+			while (nodesToTraverse.Count > 0)
+			{
+				var currentNode = nodesToTraverse.Pop();
+				var isIgnored = (ignoreNodeFunc != null && ignoreNodeFunc(currentNode));
+				var alreadyDiscovered = nodesAdded.ContainsKey(currentNode);
+				if (!(isIgnored || alreadyDiscovered))
+				{
+					nodesAdded.Add(currentNode, true);
+					foreach (var inEdge in InEdges(currentNode))
+					{
+						if (ignoreEdgeFunc == null || !ignoreEdgeFunc(inEdge))
+							nodesToTraverse.Push(inEdge.Source);
 					}
 				}
 			}

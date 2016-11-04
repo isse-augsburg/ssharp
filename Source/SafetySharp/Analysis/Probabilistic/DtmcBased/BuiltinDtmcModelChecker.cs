@@ -271,12 +271,12 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			// calculate probabilityExactlyZero (prob0)
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
 			var nodesToIgnore=new Dictionary<int,bool>();  // change for \phi Until \psi
-			var probabilityGreaterThanZero = underlyingDigraph.Graph.GetAncestors(directlySatisfiedStates, nodesToIgnore);
+			var probabilityGreaterThanZero = underlyingDigraph.Graph.GetAncestors(directlySatisfiedStates, nodesToIgnore.ContainsKey);
 			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
 
 			// calculate probabilityExactlyOne (prob1)
 			nodesToIgnore = directlySatisfiedStates; // change for \phi Until \psi
-			var probabilitySmallerThanOne = underlyingDigraph.Graph.GetAncestors(probabilityExactlyZero, nodesToIgnore); ;
+			var probabilitySmallerThanOne = underlyingDigraph.Graph.GetAncestors(probabilityExactlyZero, nodesToIgnore.ContainsKey); ;
 			var probabilityExactlyOne = CreateComplement(probabilitySmallerThanOne); ;
 
 			//TODO: Do not calculate exact state probabilities, when _every_ initial state>0 is either in probabilityExactlyZero or in probabilityExactlyOne

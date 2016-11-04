@@ -163,11 +163,11 @@ namespace Tests.DataStructures
 			var nodesToIgnore = new Dictionary<int,bool>();
 			var selectedNodes1 = new Dictionary<int,bool>();
 			selectedNodes1.Add(1,true);
-			var result1 = underlyingDigraph.Graph.GetAncestors(selectedNodes1,nodesToIgnore);
+			var result1 = underlyingDigraph.Graph.GetAncestors(selectedNodes1,nodesToIgnore.ContainsKey);
 			
 			var selectedNodes2 = new Dictionary<int, bool>();
 			selectedNodes2.Add(0, true);
-			var result2 = underlyingDigraph.Graph.GetAncestors(selectedNodes2, nodesToIgnore);
+			var result2 = underlyingDigraph.Graph.GetAncestors(selectedNodes2, nodesToIgnore.ContainsKey);
 
 			Assert.Equal(2, result1.Count);
 			Assert.Equal(1, result2.Count);
@@ -183,11 +183,11 @@ namespace Tests.DataStructures
 			var nodesToIgnore = new Dictionary<int, bool>();
 			var selectedNodes1 = new Dictionary<int, bool>();
 			selectedNodes1.Add(1, true);
-			var result1 = underlyingDigraph.Graph.GetAncestors(selectedNodes1, nodesToIgnore);
+			var result1 = underlyingDigraph.Graph.GetAncestors(selectedNodes1, nodesToIgnore.ContainsKey);
 
 			var selectedNodes2 = new Dictionary<int, bool>();
 			selectedNodes2.Add(0, true);
-			var result2 = underlyingDigraph.Graph.GetAncestors(selectedNodes2, nodesToIgnore);
+			var result2 = underlyingDigraph.Graph.GetAncestors(selectedNodes2, nodesToIgnore.ContainsKey);
 
 			Assert.Equal(2, result1.Count);
 			Assert.Equal(1, result2.Count);
