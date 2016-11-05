@@ -24,4 +24,4 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 [assembly: AssemblyTitle("S# ODP Core Library")]
-[assembly: InternalsVisibleTo("SafetySharp.Tests")]
+[assembly: InternalsVisibleTo("SafetySharp.Odp")]
