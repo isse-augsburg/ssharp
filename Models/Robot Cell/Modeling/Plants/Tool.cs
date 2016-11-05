@@ -33,9 +33,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			ProductionAction = productionAction;
 		}
 
-		public Tool()
-		{
-		}
+		protected Tool() { }
 
 		public ProductionAction ProductionAction { get; }
 

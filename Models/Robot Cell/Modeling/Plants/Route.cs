@@ -36,9 +36,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			Robot2 = robot2;
 		}
 
-		public Route()
-		{
-		}
+		protected Route() { }
 
 		public Robot Robot1 { get; }
 		public Robot Robot2 { get; }
