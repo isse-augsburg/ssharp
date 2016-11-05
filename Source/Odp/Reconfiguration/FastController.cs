@@ -175,7 +175,6 @@ namespace SafetySharp.Odp.Reconfiguration
 				// add the capability to the current role
 				var capability = task.RequiredCapabilities[i];
 				role.AddCapability(capability);
-				role.PostCondition.AppendToState(capability);
 
 				// if this concludes the current role, prepare the next one
 				if (i + 1 < agentPath.Length && agentPath[i] != agentPath[i+1])

@@ -49,7 +49,7 @@ namespace SafetySharp.Odp
 				   && _statePrefixLength == other._statePrefixLength;
 		}
 
-		public void AppendToState(ICapability capability)
+		internal void AppendToState(ICapability capability)
 		{
 			if (_statePrefixLength >= Task.RequiredCapabilities.Length)
 				throw new InvalidOperationException("Condition already has maximum state.");
@@ -59,12 +59,7 @@ namespace SafetySharp.Odp
 			_statePrefixLength++;
 		}
 
-		public void ResetState()
-		{
-			_statePrefixLength = 0;
-		}
-
-		public void CopyStateFrom(Condition other)
+		internal void CopyStateFrom(Condition other)
 		{
 			if (other.Task != Task)
 				throw new InvalidOperationException("Invalid task: cannot copy Condition state");

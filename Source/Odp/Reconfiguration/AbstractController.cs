@@ -53,14 +53,8 @@ namespace SafetySharp.Odp.Reconfiguration
 				PostCondition = { Task = recipe, Port = null }
 			};
 
-			role.PreCondition.ResetState();
-			role.PostCondition.ResetState();
-
 			if (previous != null)
-				role.PreCondition.CopyStateFrom(previous.Value);
-			role.PostCondition.CopyStateFrom(role.PreCondition);
-
-			role.Clear();
+				role.Initialize(previous.Value);
 
 			return role;
 		}

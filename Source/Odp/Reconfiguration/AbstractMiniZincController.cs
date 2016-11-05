@@ -130,7 +130,6 @@ namespace SafetySharp.Odp.Reconfiguration
 					{
 						var capability = task.RequiredCapabilities[capabilityIds[i]];
 						role.AddCapability(capability);
-						role.PostCondition.AppendToState(capability);
 					}
 				}
 

@@ -62,10 +62,11 @@ namespace SafetySharp.Odp
 			_current = 0;
 		}
 
-		public void Clear()
+		public void Initialize(Condition initialCondition)
 		{
+			PreCondition.CopyStateFrom(initialCondition);
+			PostCondition.CopyStateFrom(initialCondition);
 			_capabilitiesToApplyStart = checked((byte)PreCondition.State.Count());
-			_capabilitiesToApplyCount = 0;
 		}
 
 		public void AddCapability(ICapability capability)
@@ -75,6 +76,7 @@ namespace SafetySharp.Odp
 			if (!capability.Equals(Task.RequiredCapabilities[_capabilitiesToApplyStart + _capabilitiesToApplyCount]))
 				throw new InvalidOperationException("Cannot apply capability that is not required.");
 			_capabilitiesToApplyCount++;
+			PostCondition.AppendToState(capability);
 		}
 
 		public bool IsEmpty()
