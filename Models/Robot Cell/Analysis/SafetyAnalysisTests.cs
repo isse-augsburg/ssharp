@@ -55,7 +55,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[TestCaseSource(nameof(CreateConfigurations))]
 		public void AllWorkpiecesCompleteEventually(Model model)
 		{
-			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 12, GenerateCounterExample = false } };
+			var modelChecker = new SafetyAnalysis { Configuration = { StateCapacity = 1 << 18, GenerateCounterExample = false } };
 
 			Formula stepCountExceeded =
 				(model.Controller as IntolerableAnalysisController)?.StepCount >= IntolerableAnalysisController.MaxSteps;

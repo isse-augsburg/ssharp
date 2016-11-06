@@ -37,7 +37,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			var model = SampleModels.DefaultInstance<FastController>();
 			model.Faults.SuppressActivations();
 
-			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
+			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 10 } };
 			var result = modelChecker.CheckInvariant(model, true);
 
 			Assert.IsTrue(result.FormulaHolds);
@@ -49,7 +49,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			var model = SampleModels.DefaultInstance<FastController>();
 			model.Faults.SuppressActivations();
 
-			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
+			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 10 } };
 			var result = modelChecker.CheckInvariant(model, !model.Workpieces.Any(w => w.IsDamaged));
 
 			Assert.IsTrue(result.FormulaHolds);
@@ -61,7 +61,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			var model = SampleModels.DefaultInstance<FastController>();
 			model.Faults.SuppressActivations();
 
-			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
+			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 10 } };
 			var result = modelChecker.CheckInvariant(model, !model.Workpieces.All(w => w.IsComplete));
 
 			Assert.IsFalse(result.FormulaHolds);
@@ -73,7 +73,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			var model = SampleModels.DefaultInstance<FastController>();
 			model.Faults.SuppressActivations();
 
-			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 22 } };
+			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 10 } };
 			var result = modelChecker.CheckInvariant(model,
 				model.RobotAgents.All(a => a.HasResource == a.Robot.HasWorkpiece) &&
 				model.CartAgents.All(a => a.HasResource == a.Cart.HasWorkpiece));
