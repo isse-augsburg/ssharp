@@ -610,6 +610,7 @@
     <Compile Include="OdpTests.Helpers.cs">
       <DependentUpon>OdpTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="OrganicDesignPattern\resource handover.cs" />
     <Compile Include="OrganicDesignPattern\role execution.cs" />
     <Compile Include="Serialization\Compaction\alignment.cs" />
     <Compile Include="Serialization\Compaction\Boolean 1 byte.cs" />

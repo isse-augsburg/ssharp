@@ -23,6 +23,7 @@
 namespace Tests
 {
 	using System.Collections.Generic;
+	using System.Reflection;
 	using SafetySharp.Odp;
 	using Utilities;
 	using Xunit.Abstractions;
@@ -58,5 +59,16 @@ namespace Tests
 		}
 
 		public ICapability[] RequiredCapabilities { get; }
+	}
+
+	internal static class BaseAgentExtensions
+	{
+		private static readonly FieldInfo _machineField = typeof(BaseAgent).GetField("_stateMachine", BindingFlags.Instance | BindingFlags.NonPublic);
+
+		public static string GetState(this BaseAgent agent)
+		{
+			var machine = _machineField.GetValue(agent);
+			return machine.GetType().GetProperty("State").GetValue(machine).ToString();
+		}
 	}
 }
