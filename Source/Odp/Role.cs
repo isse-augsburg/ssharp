@@ -57,11 +57,6 @@ namespace SafetySharp.Odp
 			_current++;
 		}
 
-		public void Reset()
-		{
-			_current = 0;
-		}
-
 		public void Initialize(Condition initialCondition)
 		{
 			PreCondition.CopyStateFrom(initialCondition);

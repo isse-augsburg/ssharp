@@ -57,12 +57,20 @@ namespace SafetySharp.Odp
 					&& role.PreCondition.Task == agent.Resource.Task
 					&& role.PreCondition.State.IsPrefixOf(agent.Resource.State)
 					&& agent.Resource.State.IsPrefixOf(role.PostCondition.State))
+			 *
+			 * a little stronger:
+			 *
+			 agent.Resource != null
+			    && !agent.AllocatedRoles.Any(role =>
+				   !role.IsLocked
+				   && role.Task == agent.Resource.Task
+				   && role.ExecutionState.SequenceEqual(agent.Resource.State))
 			 * */
+			// refer to current role explicitly -- execution state is not saved in AllocatedRoles due to roles being structs
 			if (agent.Resource != null
-				&& !agent.AllocatedRoles.Any(role =>
-					!role.IsLocked
-					&& role.Task == agent.Resource.Task
-					&& role.ExecutionState.SequenceEqual(agent.Resource.State)))
+				&& (agent.CurrentRole == null
+				    || agent.CurrentRole.Value.Task != agent.Resource.Task
+					|| !agent.CurrentRole.Value.ExecutionState.SequenceEqual(agent.Resource.State)))
 				return new[] { agent.Resource.Task };
 
 			return Enumerable.Empty<ITask>();

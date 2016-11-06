@@ -95,7 +95,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		protected override void TakeResource(Odp.Resource resource)
 		{
-			var agent = (CartAgent)_currentRole.PreCondition.Port;
+			var agent = (CartAgent)CurrentRole?.PreCondition.Port;
 
 			// If we fail to transfer the resource, the robot loses all of its connections
 			if (TakeResource(agent.Cart))
@@ -110,7 +110,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		protected override void TransferResource()
 		{
-			var agent = (CartAgent)_currentRole.PostCondition.Port;
+			var agent = (CartAgent)CurrentRole?.PostCondition.Port;
 
 			// If we fail to transfer the resource, the robot loses all of its connections
 			if (PlaceResource(agent.Cart))
@@ -148,7 +148,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public void ApplyCapability(ProduceCapability capability)
 		{
-			var index = _resources.FindIndex(resource => resource.Task == _currentRole.Task);
+			var index = _resources.FindIndex(resource => resource.Task == CurrentRole?.Task);
 			if (index == -1)
 				throw new InvalidOperationException("All resources for this task have already been produced");
 

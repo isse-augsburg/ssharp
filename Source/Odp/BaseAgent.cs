@@ -58,8 +58,10 @@ namespace SafetySharp.Odp
 
 		#region functional part
 
-		protected Role _currentRole;
-		protected bool _hasRole;
+		private Role _currentRole;
+		private bool _hasRole;
+
+		protected internal Role? CurrentRole => _hasRole ? (Role?)_currentRole : null;
 
 		public Resource Resource { get; protected set; }
 
@@ -116,19 +118,12 @@ namespace SafetySharp.Odp
 					from: States.ExecuteRole,
 					to: States.Output,
 					guard: _currentRole.IsCompleted && _currentRole.PostCondition.Port != null,
-					action: () =>
-					{
-						_currentRole.PostCondition.Port.ResourceReady(this, _currentRole.PostCondition);
-						_currentRole.Reset();
-					})
+					action: () => _currentRole.PostCondition.Port.ResourceReady(this, _currentRole.PostCondition))
 				.Transition( // resource has been consumed
 					from: States.ExecuteRole,
 					to: States.Idle,
 					guard: _currentRole.IsCompleted && Resource == null && _currentRole.PostCondition.Port == null,
-					action: () => {
-						_currentRole.Reset();
-						_hasRole = false;
-					});
+					action: () => _hasRole = false);
 		}
 
 		protected virtual void DropResource()
