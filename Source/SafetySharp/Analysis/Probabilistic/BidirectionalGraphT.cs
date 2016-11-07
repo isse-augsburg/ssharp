@@ -28,11 +28,6 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.Runtime
 {
-	using Utilities;
-
-
-
-
 	public struct Edge<TEdgeData>
 	{
 		public int Source;
@@ -51,50 +46,30 @@ namespace SafetySharp.Runtime
 	{
 		public abstract IEnumerable<Edge<TEdgeData>> OutEdges(int vertex);
 		public abstract IEnumerable<Edge<TEdgeData>> InEdges(int vertex);
-
-		public Dictionary<int, bool> GetAncestors(Dictionary<int, bool> toNodes, Func<int, bool> ignoreNodeFunc = null, Func<Edge<TEdgeData>, bool> ignoreEdgeFunc = null)
-		{
-			// standard behavior: do not ignore node or edge
-			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
-			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
-			var nodesAdded = new Dictionary<int, bool>();
-			var nodesToTraverse = new Stack<int>();
-			foreach (var node in toNodes)
-			{
-				nodesToTraverse.Push(node.Key);
-			}
-
-			while (nodesToTraverse.Count > 0)
-			{
-				var currentNode = nodesToTraverse.Pop();
-				var isIgnored = (ignoreNodeFunc != null && ignoreNodeFunc(currentNode));
-				var alreadyDiscovered = nodesAdded.ContainsKey(currentNode);
-				if (!(isIgnored || alreadyDiscovered))
-				{
-					nodesAdded.Add(currentNode, true);
-					foreach (var inEdge in InEdges(currentNode))
-					{
-						if (ignoreEdgeFunc == null || !ignoreEdgeFunc(inEdge))
-							nodesToTraverse.Push(inEdge.Source);
-					}
-				}
-			}
-			return nodesAdded;
-		}
+		public abstract IEnumerable<int> GetNodes();
 	}
 
 
 	internal sealed class BidirectionalGraph<TEdgeData> : BidirectionalGraphDirectNodeAccess<TEdgeData>
 	{
-
 		private Dictionary<int, List<Edge<TEdgeData>>> _outEdges = new Dictionary<int, List<Edge<TEdgeData>>>();
 		private Dictionary<int, List<Edge<TEdgeData>>> _inEdges = new Dictionary<int, List<Edge<TEdgeData>>>();
+		private Dictionary<int, bool> _nodes = new Dictionary<int, bool>();
 
 		public override IEnumerable<Edge<TEdgeData>> OutEdges(int vertex) => _outEdges[vertex];
 		public override IEnumerable<Edge<TEdgeData>> InEdges(int vertex) => _inEdges[vertex];
 
+		public override IEnumerable<int> GetNodes()
+		{
+			foreach (var node in _nodes)
+			{
+				yield return node.Key;
+			}
+		}
+
 		public List<Edge<TEdgeData>> GetOrCreateOutEdges(int vertex)
 		{
+			_nodes.Add(vertex,true);
 			if (_outEdges.ContainsKey(vertex))
 			{
 				return _outEdges[vertex];
@@ -106,6 +81,7 @@ namespace SafetySharp.Runtime
 
 		public List<Edge<TEdgeData>> GetOrCreateInEdges(int vertex)
 		{
+			_nodes.Add(vertex, true);
 			if (_inEdges.ContainsKey(vertex))
 			{
 				return _inEdges[vertex];
@@ -132,6 +108,15 @@ namespace SafetySharp.Runtime
 		private BidirectionalGraphDirectNodeAccess<TEdgeData> _baseGraph;
 		private Func<int, bool> _ignoreNodeFunc;
 		private Func<Edge<TEdgeData>, bool> _ignoreEdgeFunc;
+
+		public override IEnumerable<int> GetNodes()
+		{
+			foreach (var node in _baseGraph.GetNodes())
+			{
+				if (!_ignoreNodeFunc(node))
+					yield return node;
+			}
+		}
 
 		public override IEnumerable<Edge<TEdgeData>> OutEdges(int vertex)
 		{
@@ -184,18 +169,109 @@ namespace SafetySharp.Runtime
 			// only use inside InEdges(int vertex)
 			foreach (var edge in _baseGraph.InEdges(vertex))
 			{
-				if (!_ignoreNodeFunc(edge.Target) && !_ignoreEdgeFunc(edge))
+				if (!_ignoreNodeFunc(edge.Source) && !_ignoreEdgeFunc(edge))
 				{
 					yield return edge;
 				}
 			}
 		}
 
-		public BidirectionalGraphSubViewDecorator(BidirectionalGraphDirectNodeAccess<TEdgeData> baseGraph, Func<int, bool> ignoreNodeFunc = null, Func<Edge<TEdgeData>, bool> ignoreEdgeFunc = null)
+		public BidirectionalGraphSubViewDecorator(BidirectionalGraphDirectNodeAccess<TEdgeData> baseGraph, Func<int, bool> ignoreNodeFunc = null,
+												  Func<Edge<TEdgeData>, bool> ignoreEdgeFunc = null)
 		{
 			_baseGraph = baseGraph;
 			_ignoreNodeFunc = ignoreNodeFunc;
 			_ignoreEdgeFunc = ignoreEdgeFunc;
+		}
+	}
+
+	public static class BidirectionalGraphTAlgorithmExtensions
+	{
+		internal static Dictionary<int, bool> GetAncestors<TEdgeData>(this BidirectionalGraphDirectNodeAccess<TEdgeData> graph,
+																	  Dictionary<int, bool> toNodes)
+		{
+			// standard behavior: do not ignore node or edge
+			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
+			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
+			var nodesAdded = new Dictionary<int, bool>();
+			var nodesToTraverse = new Stack<int>();
+			foreach (var node in toNodes)
+			{
+				nodesToTraverse.Push(node.Key);
+			}
+
+			while (nodesToTraverse.Count > 0)
+			{
+				var currentNode = nodesToTraverse.Pop();
+				var alreadyDiscovered = nodesAdded.ContainsKey(currentNode);
+				if (!alreadyDiscovered)
+				{
+					nodesAdded.Add(currentNode, true);
+					foreach (var inEdge in graph.InEdges(currentNode))
+					{
+						nodesToTraverse.Push(inEdge.Source);
+					}
+				}
+			}
+			return nodesAdded;
+		}
+
+		internal static Dictionary<int, bool> GetAncestors<TEdgeData>(this BidirectionalGraphDirectNodeAccess<TEdgeData> graph,
+																	  Dictionary<int, bool> toNodes, Func<int, bool> ignoreNodeFunc,
+																	  Func<Edge<TEdgeData>, bool> ignoreEdgeFunc)
+		{
+			// standard behavior: do not ignore node or edge
+			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
+			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
+			var nodesAdded = new Dictionary<int, bool>();
+			var nodesToTraverse = new Stack<int>();
+			foreach (var node in toNodes)
+			{
+				nodesToTraverse.Push(node.Key);
+			}
+
+			while (nodesToTraverse.Count > 0)
+			{
+				var currentNode = nodesToTraverse.Pop();
+				var isIgnored = (ignoreNodeFunc != null && ignoreNodeFunc(currentNode));
+				var alreadyDiscovered = nodesAdded.ContainsKey(currentNode);
+				if (!(isIgnored || alreadyDiscovered))
+				{
+					nodesAdded.Add(currentNode, true);
+					foreach (var inEdge in graph.InEdges(currentNode))
+					{
+						if (ignoreEdgeFunc == null || !ignoreEdgeFunc(inEdge))
+							nodesToTraverse.Push(inEdge.Source);
+					}
+				}
+			}
+			return nodesAdded;
+		}
+
+		internal static BidirectionalGraph<TEdgeData> CreateSubGraph<TEdgeData>(this BidirectionalGraphDirectNodeAccess<TEdgeData> graph,
+																						 Dictionary<int, bool> nodesOfSubGraph)
+		{
+			var newGraph = new BidirectionalGraph<TEdgeData>();
+			foreach (var node in nodesOfSubGraph)
+			{
+				var newInEdges = newGraph.GetOrCreateInEdges(node.Key);
+				foreach (var inEdge in graph.InEdges(node.Key))
+				{
+					if (nodesOfSubGraph.ContainsKey(inEdge.Source))
+					{
+						newInEdges.Add(inEdge);
+					}
+				}
+				var newOutEdges = newGraph.GetOrCreateOutEdges(node.Key);
+				foreach (var outEdge in graph.OutEdges(node.Key))
+				{
+					if (nodesOfSubGraph.ContainsKey(outEdge.Target))
+					{
+						newOutEdges.Add(outEdge);
+					}
+				}
+			}
+			return newGraph;
 		}
 	}
 }
