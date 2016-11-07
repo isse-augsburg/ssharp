@@ -22,6 +22,8 @@
 
 namespace SafetySharp.Odp
 {
+	using System.Linq;
+
 	public partial class BaseAgent
 	{
 		public class State

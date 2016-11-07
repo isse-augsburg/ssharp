@@ -64,7 +64,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			foreach (var agent in agents)
 			{
 				if (_removedRoles.ContainsKey(agent))
-					agent.AllocatedRoles.RemoveAll(_removedRoles[agent].Contains);
+					agent.RemoveAllocatedRoles(_removedRoles[agent]);
 				if (_addedRoles.ContainsKey(agent))
 					agent.AllocateRoles(_addedRoles[agent]);
 			}

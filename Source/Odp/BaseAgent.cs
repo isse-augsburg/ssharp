@@ -39,7 +39,9 @@ namespace SafetySharp.Odp
 
 		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
-		public List<Role> AllocatedRoles { get; } = new List<Role>(MaximumRoleCount);
+		private readonly List<Role> _allocatedRoles = new List<Role>(MaximumRoleCount);
+
+		public IEnumerable<Role> AllocatedRoles => _allocatedRoles;
 
 		[Hidden]
 		public IRoleSelector RoleSelector { get; protected set; }
@@ -333,15 +335,25 @@ namespace SafetySharp.Odp
 
 		public virtual void AllocateRoles(IEnumerable<Role> roles)
 		{
-			AllocatedRoles.AddRange(roles);
+			_allocatedRoles.AddRange(roles);
 			RoleSelector.OnRoleAllocationsChanged();
 		}
 
 		public virtual void RemoveAllocatedRoles(IEnumerable<Role> roles)
 		{
 			foreach (var role in roles.ToArray())
-				AllocatedRoles.Remove(role);
+				_allocatedRoles.Remove(role);
 			RoleSelector.OnRoleAllocationsChanged();
+		}
+
+		public void LockRoles(IEnumerable<Role> roles, bool locked = true)
+		{
+			var set = new HashSet<Role>(roles);
+			for (var i = 0; i < _allocatedRoles.Count; ++i)
+			{
+				if (set.Contains(_allocatedRoles[i]))
+					_allocatedRoles[i] = _allocatedRoles[i].Lock(locked);
+			}
 		}
 
 		#endregion

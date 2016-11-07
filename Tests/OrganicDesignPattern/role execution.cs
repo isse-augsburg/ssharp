@@ -46,7 +46,7 @@ namespace Tests.OrganicDesignPattern
 
 			var a = new A();
 			a.Capabilities.AddRange(capabilities);
-			a.AllocatedRoles.Add(r);
+			a.AllocateRoles(new[] { r });
 
 			var simulator = new Simulator(TestModel.InitializeModel(a));
 			simulator.Model.Faults.SuppressActivations();

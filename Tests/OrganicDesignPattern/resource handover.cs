@@ -23,6 +23,7 @@
 namespace Tests.OrganicDesignPattern
 {
 	using System;
+	using System.Linq;
 	using SafetySharp.Analysis;
 	using SafetySharp.Odp;
 	using Shouldly;
@@ -66,7 +67,7 @@ namespace Tests.OrganicDesignPattern
 				PostCondition = { Task = task, Port = agent2 }
 			};
 			producerRole.AddCapability(produce);
-			agent1.AllocatedRoles.Add(producerRole);
+			agent1.AllocateRoles(new[] { producerRole });
 
 			var consumerRole = new Role
 			{
@@ -75,7 +76,7 @@ namespace Tests.OrganicDesignPattern
 			};
 			consumerRole.Initialize(producerRole.PostCondition);
 			consumerRole.AddCapability(consume);
-			agent2.AllocatedRoles.Add(consumerRole);
+			agent2.AllocateRoles(new [] { consumerRole });
 			/* end model setup */
 
 			var simulator = new Simulator(TestModel.InitializeModel(agent1, agent2));
@@ -110,7 +111,7 @@ namespace Tests.OrganicDesignPattern
 			simulator.SimulateStep();
 			checkResourceTransfer("Idle", "ExecuteRole", null, resource);
 
-			agent1.AllocatedRoles[0] = agent1.AllocatedRoles[0].Lock(); // don't produce further resources
+			agent1.LockRoles(agent1.AllocatedRoles); // don't produce further resources
 
 			simulator.SimulateStep();
 			checkResourceTransfer("ChooseRole", "ExecuteRole", null, null);

@@ -24,6 +24,7 @@ namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using Modeling;
 
 	public class ReconfigurationAgentHandler : IReconfigurationStrategy
@@ -84,13 +85,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		private void LockAllocatedRoles(ITask task, bool locked = true)
 		{
-			for (int i = 0; i < _baseAgent.AllocatedRoles.Count; ++i)
-			{
-				// necessary as long as roles are structs
-				var role = _baseAgent.AllocatedRoles[i];
-				if (role.Task == task)
-					_baseAgent.AllocatedRoles[i] = role.Lock(locked);
-			}
+			_baseAgent.LockRoles(_baseAgent.AllocatedRoles.Where(role => role.Task == task));
 		}
 	}
 }
