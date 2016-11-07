@@ -22,34 +22,36 @@
 
 namespace SafetySharp.Odp
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 
 	using Modeling;
 
 	/// <summary>
-	/// A fair role selection algorithm
-	/// (Konstruktion selbst-organisierender Softwaresysteme, section 6.3).
+	///  A fair role selection algorithm
+	///  (cf. Konstruktion selbst-organisierender Softwaresysteme, section 6.3)
 	/// </summary>
 	/// <remarks>
-	/// The implementation slightly deviates from the original algorithm:
-	/// Counting up the current time (for timestamps) and number of role applications
-	/// results in an infinite (or very large) number of states.
-	/// Instead, the list of roles is treated as round-robin priority queue:
-	/// The first applicable role is chosen, and moved to the end of the list.
-	/// Similarly, the (insertion) order of resource requests is used in place of timestamps.
+	///  The implementation slightly deviates from the original algorithm:
+	///  Counting up the current time (for timestamps) and number of role
+	///  applications results in an infinite (or very large) number of states.
+	///  Instead, the order in which the roles were last applied is used as
+	///  pseudo-application times. Similarly, the (insertion) order of resource
+	///  requests is used in place of timestamps.
 	/// </remarks>
 	public class FairRoleSelector : IRoleSelector
 	{
 		[NonDiscoverable, Hidden(HideElements = true)]
-		private readonly Dictionary<Role, uint> _roleOrder = new Dictionary<Role, uint>();
+		private readonly Dictionary<Role, int> _roleIndex = new Dictionary<Role, int>();
 
 		[NonDiscoverable, Hidden(HideElements = true)]
-		private readonly Dictionary<BaseAgent.ResourceRequest, uint> _timeStamps
-			= new Dictionary<BaseAgent.ResourceRequest, uint>();
+		private readonly Dictionary<BaseAgent.ResourceRequest, uint> _timeStamps = new Dictionary<BaseAgent.ResourceRequest, uint>();
 
 		[Hidden]
 		private uint _currentTime;
+
+		private readonly byte[] _applicationTimes = new byte[BaseAgent.MaximumRoleCount];
 
 		protected BaseAgent Agent { get; }
 
@@ -58,41 +60,50 @@ namespace SafetySharp.Odp
 			Agent = agent;
 		}
 
-		public Role? ChooseRole(List<Role> roles, IEnumerable<BaseAgent.ResourceRequest> resourceRequests)
+		public virtual Role? ChooseRole(IEnumerable<BaseAgent.ResourceRequest> resourceRequests)
 		{
-			var candidateRoles = roles.Where(CanExecute).ToArray();
+			var candidateRoles = Agent.AllocatedRoles.Where(CanExecute).ToArray();
 			if (!candidateRoles.Any())
 				return null;
 
-			ComputePriorities(roles, resourceRequests);
+			ComputeCachedData(resourceRequests);
+
 			var chosenRole = candidateRoles.Aggregate((r, s) => ChooseRole(r, s, resourceRequests));
-			UpdateRoleOrder(roles, chosenRole);
+			UpdateRoleOrder(chosenRole, Agent.AllocatedRoles.Count());
+
+			// cleanup
+			_roleIndex.Clear();
+			_timeStamps.Clear();
 
 			return chosenRole;
 		}
 
 		protected virtual bool CanExecute(Role role) => Agent.CanExecute(role);
 
-		private void ComputePriorities(List<Role> roles, IEnumerable<BaseAgent.ResourceRequest> resourceRequests)
+		private void UpdateRoleOrder(Role chosenRole, int roleCount)
 		{
-			// cache role order to avoid multiple IndexOf() calls
-			_roleOrder.Clear();
-			uint i = (uint)roles.Count;
-			foreach (var role in roles)
-				_roleOrder[role] = i--;
+			var oldPosition = _applicationTimes[_roleIndex[chosenRole]];
+			// move the roles which were previously behind chosenRole in the list up one slot
+			for (var i = 0; i < roleCount; ++i)
+			{
+				if (_applicationTimes[i] > oldPosition)
+					_applicationTimes[i]--;
+			}
+			// move chosenRole to the back of the list
+			_applicationTimes[_roleIndex[chosenRole]] = checked((byte)roleCount);
+		}
+
+		private void ComputeCachedData(IEnumerable<BaseAgent.ResourceRequest> resourceRequests)
+		{
+			// cache role index to avoid multiple IndexOf() calls
+			var j = 0;
+			foreach (var role in Agent.AllocatedRoles)
+				_roleIndex[role] = j++;
 
 			// compute pseudo-timestamps for resource requests
-			_timeStamps.Clear();
 			_currentTime = 0;
 			foreach (var request in resourceRequests)
 				_timeStamps[request] = _currentTime++;
-		}
-
-		private void UpdateRoleOrder(List<Role> roles, Role chosenRole)
-		{
-			int index = roles.Count - (int)_roleOrder[chosenRole];
-			roles.RemoveAt(index);
-			roles.Add(chosenRole);
 		}
 
 		private Role ChooseRole(Role role1, Role role2, IEnumerable<BaseAgent.ResourceRequest> resourceRequests)
@@ -126,9 +137,9 @@ namespace SafetySharp.Odp
 				).DefaultIfEmpty(_currentTime).Single();
 		}
 
-		protected virtual uint Fitness(Role role)
+		private int Fitness(Role role)
 		{
-			return _roleOrder[role];
+			return -_applicationTimes[_roleIndex[role]]; // prefer roles with lower (earlier) application time
 		}
 	}
 }

@@ -133,7 +133,7 @@ namespace SafetySharp.Odp
 
 		private void ChooseRole()
 		{
-			var role = RoleSelector.ChooseRole(AllocatedRoles, _resourceRequests);
+			var role = RoleSelector.ChooseRole(_resourceRequests);
 			_hasRole = role.HasValue;
 			if (_hasRole)
 			{

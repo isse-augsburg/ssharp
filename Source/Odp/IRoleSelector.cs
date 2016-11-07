@@ -26,6 +26,6 @@ namespace SafetySharp.Odp
 
 	public interface IRoleSelector
 	{
-		Role? ChooseRole(List<Role> roles, IEnumerable<BaseAgent.ResourceRequest> resourceRequests);
+		Role? ChooseRole(IEnumerable<BaseAgent.ResourceRequest> resourceRequests);
 	}
 }
