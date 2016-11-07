@@ -60,6 +60,11 @@ namespace SafetySharp.Odp
 			Agent = agent;
 		}
 
+		public virtual void OnRoleAllocationsChanged()
+		{
+			Array.Clear(_applicationTimes, 0, _applicationTimes.Length);
+		}
+
 		public virtual Role? ChooseRole(IEnumerable<BaseAgent.ResourceRequest> resourceRequests)
 		{
 			var candidateRoles = Agent.AllocatedRoles.Where(CanExecute).ToArray();

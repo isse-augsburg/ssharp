@@ -334,12 +334,14 @@ namespace SafetySharp.Odp
 		public virtual void AllocateRoles(IEnumerable<Role> roles)
 		{
 			AllocatedRoles.AddRange(roles);
+			RoleSelector.OnRoleAllocationsChanged();
 		}
 
 		public virtual void RemoveAllocatedRoles(IEnumerable<Role> roles)
 		{
 			foreach (var role in roles.ToArray())
 				AllocatedRoles.Remove(role);
+			RoleSelector.OnRoleAllocationsChanged();
 		}
 
 		#endregion
