@@ -231,13 +231,13 @@ namespace SafetySharp.Runtime
 		
 		internal class UnderlyingDigraph
 		{
-			public BidirectionalGraphDirectNodeAccess Graph { get; private set; }
+			public BidirectionalGraphDirectNodeAccess BaseGraph { get; private set; }
 
 			public UnderlyingDigraph(DiscreteTimeMarkovChain markovChain)
 			{
 				//Assumption "every node is reachable" is fulfilled due to the construction
 				var newGraph = new BidirectionalGraph();
-				Graph = newGraph;
+				BaseGraph = newGraph;
 
 				var enumerator = markovChain.GetEnumerator();
 				while (enumerator.MoveNextState())

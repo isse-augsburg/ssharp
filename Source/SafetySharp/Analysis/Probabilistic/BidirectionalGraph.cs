@@ -217,8 +217,20 @@ namespace SafetySharp.Utilities.Graph
 		{
 			// standard behavior: do not ignore node or edge
 			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
-			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
 			var nodesAdded = new Dictionary<int, bool>();
+			graph.UpdateAncestors(nodesAdded, targetNodes,ignoreNodeFunc, ignoreEdgeFunc);
+			return nodesAdded;
+		}
+
+		internal static void UpdateAncestors(this BidirectionalGraphDirectNodeAccess graph,
+																	  Dictionary<int, bool> ancestors,
+																	  Dictionary<int, bool> targetNodes, Func<int, bool> ignoreNodeFunc,
+																	  Func<Edge, bool> ignoreEdgeFunc = null)
+		{
+			// standard behavior: do not ignore node or edge
+			// ancestors must be initialized
+			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
+			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
 			var nodesToTraverse = new Stack<int>();
 			foreach (var node in targetNodes)
 			{
@@ -229,10 +241,10 @@ namespace SafetySharp.Utilities.Graph
 			{
 				var currentNode = nodesToTraverse.Pop();
 				var isIgnored = (ignoreNodeFunc != null && ignoreNodeFunc(currentNode));
-				var alreadyDiscovered = nodesAdded.ContainsKey(currentNode);
+				var alreadyDiscovered = ancestors.ContainsKey(currentNode);
 				if (!(isIgnored || alreadyDiscovered))
 				{
-					nodesAdded.Add(currentNode, true);
+					ancestors.Add(currentNode, true);
 					foreach (var inEdge in graph.InEdges(currentNode))
 					{
 						if (ignoreEdgeFunc == null || !ignoreEdgeFunc(inEdge))
@@ -240,7 +252,6 @@ namespace SafetySharp.Utilities.Graph
 					}
 				}
 			}
-			return nodesAdded;
 		}
 
 		internal static BidirectionalGraph CreateSubGraph(this BidirectionalGraphDirectNodeAccess graph,

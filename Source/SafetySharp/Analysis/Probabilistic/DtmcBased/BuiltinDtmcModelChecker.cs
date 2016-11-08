@@ -37,6 +37,8 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 	class BuiltinDtmcModelChecker : DtmcModelChecker
 	{
+		private DiscreteTimeMarkovChain.UnderlyingDigraph _underlyingDigraph;
+
 		private SparseDoubleMatrix CreateDerivedMatrix(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates)
 		{
 			//Derived matrix is 0-based. Row i is equivalent to the probability distribution of state i (this is not the case for the Markov Chain). 
@@ -111,6 +113,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 		public BuiltinDtmcModelChecker(ProbabilityChecker probabilityChecker) : base(probabilityChecker)
 		{
+			_underlyingDigraph = MarkovChain.CreateUnderlyingDigraph();
 		}
 
 		internal Dictionary<int,bool> CalculateSatisfiedStates(Func<int,bool> formulaEvaluator)
@@ -261,24 +264,38 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			
 		}
 
+		private Dictionary<int, bool> ProbabilityExactlyZero(Dictionary<int, bool> directlySatisfiedStates , Dictionary<int, bool> excludedStates)
+		{
+			// calculate probabilityExactlyZero (prob0)
+			Func<int, bool> nodesToIgnore =
+				excludedStates.ContainsKey;
+			var probabilityGreaterThanZero = _underlyingDigraph.BaseGraph.GetAncestors(directlySatisfiedStates, nodesToIgnore);
+			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
+			return probabilityExactlyZero;
+		}
+
+		private Dictionary<int, bool> ProbabilityExactlyOne(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates, Dictionary<int, bool> probabilityExactlyZero)
+		{
+			// calculate probabilityExactlyOne (prob1)
+			Func<int, bool> nodesToIgnore =
+				node => excludedStates.ContainsKey(node) || directlySatisfiedStates.ContainsKey(node);
+			var probabilitySmallerThanOne = _underlyingDigraph.BaseGraph.GetAncestors(probabilityExactlyZero, nodesToIgnore); ;
+			var probabilityExactlyOne = CreateComplement(probabilitySmallerThanOne);
+			return probabilityExactlyOne;
+		}
+
 		private double CalculateProbabilityToReachStateFormula(Formula psi)
 		{
 			// calculate P [true U psi]
-
-			var underlyingDigraph = MarkovChain.CreateUnderlyingDigraph();
-
 			var psiEvaluator = MarkovChain.CreateFormulaEvaluator(psi);
+			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
+			var excludedStates = new Dictionary<int,bool>();  // change for \phi Until \psi. For classical "Finally", no states are excluded
 
 			// calculate probabilityExactlyZero (prob0)
-			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
-			var nodesToIgnore=new Dictionary<int,bool>();  // change for \phi Until \psi
-			var probabilityGreaterThanZero = underlyingDigraph.Graph.GetAncestors(directlySatisfiedStates, nodesToIgnore.ContainsKey);
-			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
+			var probabilityExactlyZero = ProbabilityExactlyZero(directlySatisfiedStates, excludedStates );
 
 			// calculate probabilityExactlyOne (prob1)
-			nodesToIgnore = directlySatisfiedStates; // change for \phi Until \psi
-			var probabilitySmallerThanOne = underlyingDigraph.Graph.GetAncestors(probabilityExactlyZero, nodesToIgnore.ContainsKey); ;
-			var probabilityExactlyOne = CreateComplement(probabilitySmallerThanOne); ;
+			var probabilityExactlyOne = ProbabilityExactlyOne(probabilityExactlyZero, excludedStates , probabilityExactlyZero);
 
 			//TODO: Do not calculate exact state probabilities, when _every_ initial state>0 is either in probabilityExactlyZero or in probabilityExactlyOne
 

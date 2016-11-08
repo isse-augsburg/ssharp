@@ -34,9 +34,19 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 	using System.Globalization;
 	using Analysis.Probabilistic;
 	using Utilities;
+	using Utilities.Graph;
 
 	class BuiltinMdpModelChecker : MdpModelChecker
 	{
+		private MarkovDecisionProcess.UnderlyingDigraph _underlyingDigraph;
+
+		private enum NodeStatus
+		{
+			Contained,
+			Excluded,
+			Unknown
+		}
+
 		/*
 		private SparseDoubleMatrix CreateDerivedMatrix(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates)
 		{
@@ -84,6 +94,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			}
 			return derivedMatrix;
 		}*/
+		
 
 		private double[] CreateDerivedVector(Dictionary<int, bool> exactlyOneStates)
 		{
@@ -112,6 +123,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 		public BuiltinMdpModelChecker(ProbabilityRangeChecker probabilityRangeChecker) : base(probabilityRangeChecker)
 		{
+			_underlyingDigraph = MarkovDecisionProcess.CreateUnderlyingDigraph();
 		}
 
 		internal Dictionary<int,bool> CalculateSatisfiedStates(Func<int,bool> formulaEvaluator)
@@ -395,6 +407,97 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return finalProbability;
 		}
 
+		private Dictionary<int, bool> ProbabilityExactlyZeroWithAllAdversaries(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates)
+		{
+			// calculate probabilityExactlyZero (prob0a). No matter which adversary is selected, the probability
+			// of the resulting states is zero.
+
+			// The idea of the algorithm is to calculate probabilityGreaterThanZero
+			//     all states where there _exists_ an adversary such that a directlySatisfiedState
+			//     might be reached with a probability > 0.
+			//     This is simply the set of all ancestors of directlySatisfiedStates.
+			// The complement of probabilityGreaterThanZero is the set of states where _all_ adversaries have a probability
+			// to reach a directlySatisfiedState is exactly 0.
+			Func<int, bool> nodesToIgnore =
+				excludedStates.ContainsKey;
+			var probabilityGreaterThanZero = _underlyingDigraph.BaseGraph.GetAncestors(directlySatisfiedStates, nodesToIgnore);
+			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
+			return probabilityExactlyZero;
+		}
+		
+
+		private Dictionary<int, bool> ProbabilityExactlyZeroExistsAdversary(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates)
+		{
+			// calculate probabilityExactlyZero (prob0e). There exists an adversary, for which the probability of
+			// the resulting states is zero. The result may be different for another adversary, but at least there exists one.
+
+			Dictionary<int, bool> ancestorsFoundInCurrentIteration=null;
+			var probabilityGreaterThanZero = directlySatisfiedStates; //we know initially this is satisfied
+
+			var mdpEnumerator = MarkovDecisionProcess.GetEnumerator();
+			// The idea of the algorithm is to calculate probabilityGreaterThanZero:
+			//     all states where a directlySatisfiedState is reached with a probability > 0
+			//     no matter which adversary is selected (valid for _all_ adversaries).
+			// The complement of probabilityGreaterThanZero is the set of states where an adversary _exists_ for
+			//     which the probability to reach a directlySatisfiedState is exactly 0.
+			Func<int, bool> nodesToIgnore = source =>
+			{
+				//nodes found by UpdateAncestors are always SourceNodes of a edge to an ancestor in ancestorsFoundInCurrentIteration
+				if (excludedStates.ContainsKey(source))
+					return false;
+				if (directlySatisfiedStates.ContainsKey(source))
+					return false;
+				// check if _all_ distributions of source contain at least transition to a ancestor in ancestorsFoundInCurrentIteration
+				mdpEnumerator.SelectSourceState(source);
+				while (mdpEnumerator.MoveNextDistribution())
+				{
+					var foundInDistribution = false;
+					while (mdpEnumerator.MoveNextTransition() && !foundInDistribution)
+					{
+						if (ancestorsFoundInCurrentIteration.ContainsKey(mdpEnumerator.CurrentTransition.Column))
+							foundInDistribution = true;
+					}
+					if (!foundInDistribution)
+						return true; // the distribution does not have a targetState in ancestorsFoundInCurrentIteration
+				}
+				return false;
+			};
+			
+			// initialize probabilityGreaterThanZero to the states where we initially know the probability is greater than zero
+			var fixpointReached = false;
+
+			while (!fixpointReached)
+			{
+				// Calculate fix point of probabilityGreaterThanZero
+				// Should be finished in one iteration, but I do have not proved it yet, so repeat it until fixpoint is reached for sure.
+				// (The proof relies on details of the algorithm GetAncestors. Intuition: When a state s was not added to the set of
+				//  ancestors it is because one distribution d' has no target state in the ancestors found yet. If the state is in the
+				//  final set of ancestors, the reason is that the state s' of the distribution d', which was responsible for declining
+				//  s has not yet been added to ancestors. When s' is added all its ancestors are traversed again and s is found.)
+				// Note:
+				//   UpdateAncestors must be used, because nodesToIgnore requires access to the current information about the ancestors
+				//   (ancestorsFoundInCurrentIteration), if it should work in one iteration.
+				ancestorsFoundInCurrentIteration = new Dictionary<int, bool>();
+				_underlyingDigraph.BaseGraph.UpdateAncestors(ancestorsFoundInCurrentIteration, probabilityGreaterThanZero, nodesToIgnore);
+				if (probabilityGreaterThanZero.Count == ancestorsFoundInCurrentIteration.Count)
+					fixpointReached = true;
+				probabilityGreaterThanZero = ancestorsFoundInCurrentIteration;
+			}
+			
+			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
+			return probabilityExactlyZero;
+		}
+
+		/*
+		private Dictionary<int, bool> ProbabilityExactlyOne(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates, Dictionary<int, bool> probabilityExactlyZero)
+		{
+			// calculate probabilityExactlyOne (prob1)
+			Func<int, bool> nodesToIgnore =
+				node => excludedStates.ContainsKey(node) || directlySatisfiedStates.ContainsKey(node);
+			var probabilitySmallerThanOne = _underlyingDigraph.BaseGraph.GetAncestors(probabilityExactlyZero, nodesToIgnore); ;
+			var probabilityExactlyOne = CreateComplement(probabilitySmallerThanOne);
+			return probabilityExactlyOne;
+		}*/
 
 
 		/*
