@@ -33,6 +33,7 @@ namespace Tests.DataStructures
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
+	using SafetySharp.Utilities.Graph;
 
 	public class BidirectionalGraphTests
 	{
@@ -50,16 +51,16 @@ namespace Tests.DataStructures
 		private void CreateExemplaryGraphChain1()
 		{
 			_graph = new BidirectionalGraph();
-			_graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(0, 0));
-			_graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(0, 1));
-			_graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(1, 1));
+			_graph.AddVerticesAndEdge(new Edge(0, 0));
+			_graph.AddVerticesAndEdge(new Edge(0, 1));
+			_graph.AddVerticesAndEdge(new Edge(1, 1));
 		}
 
 		private void CreateExemplaryGraphChain2()
 		{
 			_graph = new BidirectionalGraph();
-			_graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(0, 1));
-			_graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(1, 1));
+			_graph.AddVerticesAndEdge(new Edge(0, 1));
+			_graph.AddVerticesAndEdge(new Edge(1, 1));
 		}
 
 		[Fact]

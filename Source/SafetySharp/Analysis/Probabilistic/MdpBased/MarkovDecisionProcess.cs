@@ -38,6 +38,7 @@ namespace SafetySharp.Runtime
 	using Modeling;
 	using Serialization;
 	using Utilities;
+	using SafetySharp.Utilities.Graph;
 
 
 	internal class MarkovDecisionProcess : IFormalismWithStateLabeling
@@ -309,29 +310,50 @@ namespace SafetySharp.Runtime
 			return Analysis.FormulaVisitors.FormulaEvaluatorCompilationVisitor.Compile(this, formula);
 		}
 		
-		public UnderlyingDigraph CreateUnderlyingDigraphAllDistributions()
+		public UnderlyingDigraph CreateUnderlyingDigraph()
 		{
-			return UnderlyingDigraph.EdgeWhenAllDistributionsContainTransition(this);
+			return new UnderlyingDigraph(this);
 		}
-
-		public UnderlyingDigraph CreateUnderlyingDigraphAnyDistribution()
-		{
-			return UnderlyingDigraph.EdgeWhenAnyDistributionContainsTransition(this);
-		}
-
+		
 		internal class UnderlyingDigraph
 		{
-			public BidirectionalGraph Graph { get; }
-
-			public UnderlyingDigraph(BidirectionalGraph graph)
+			internal struct EdgeData
 			{
-				Graph = graph;
+				internal EdgeData(int rowOfDistribution)
+				{
+					RowOfDistribution = rowOfDistribution;
+				}
+
+				public int RowOfDistribution;
 			}
 
+			public BidirectionalGraph<EdgeData> BaseGraph { get; }
+
+			public UnderlyingDigraph(MarkovDecisionProcess mdp)
+			{
+				//Assumption "every node is reachable" is fulfilled due to the construction
+				BaseGraph = new BidirectionalGraph<EdgeData>();
+
+				var enumerator = mdp.GetEnumerator();
+				while (enumerator.MoveNextState())
+				{
+					while (enumerator.MoveNextDistribution())
+					{
+						//find targets of this distribution and create the union. Some possibleSuccessors may be added
+						while (enumerator.MoveNextTransition())
+						{
+							if (enumerator.CurrentTransition.Value > 0.0)
+								BaseGraph.AddVerticesAndEdge(new Edge<EdgeData>(enumerator.CurrentState, enumerator.CurrentTransition.Column,new EdgeData(enumerator.RowOfCurrentDistribution)));
+						}
+					}
+				}
+			}
+			
+			/*
 			public static UnderlyingDigraph EdgeWhenAllDistributionsContainTransition(MarkovDecisionProcess markovChain)
 			{
 				//Assumption "every node is reachable" is fulfilled due to the construction
-				var graph = new BidirectionalGraph();
+				var graph = new BidirectionalGraph<EdgeData>();
 				
 				var enumerator = markovChain.GetEnumerator();
 				while (enumerator.MoveNextState())
@@ -360,7 +382,7 @@ namespace SafetySharp.Runtime
 					// add all possibleSuccessors
 					foreach (var successor in possibleSuccessors)
 					{
-						graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(enumerator.CurrentState, successor));
+						graph.AddVerticesAndEdge(new Edge(enumerator.CurrentState, successor));
 					}
 				}
 				return new UnderlyingDigraph(graph);
@@ -398,11 +420,11 @@ namespace SafetySharp.Runtime
 					// add all possibleSuccessors
 					foreach (var successor in foundSuccessors)
 					{
-						graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(enumerator.CurrentState, successor));
+						graph.AddVerticesAndEdge(new Edge(enumerator.CurrentState, successor));
 					}
 				}
 				return new UnderlyingDigraph(graph);
-			}
+			}*/
 
 		}
 
@@ -425,7 +447,7 @@ namespace SafetySharp.Runtime
 			private int _rowLOfCurrentState; //inclusive
 			private int _rowHOfCurrentState; //exclusive
 			//the current row of the enumerator
-			public int _currentRow;
+			public int RowOfCurrentDistribution { get; private set; }
 
 
 			public SparseDoubleMatrix.ColumnValue CurrentTransition => _matrixEnumerator.CurrentColumnValue.Value;
@@ -449,7 +471,7 @@ namespace SafetySharp.Runtime
 				CurrentState = -1;
 				_rowLOfCurrentState = _mdp.InitialDistributionsRowL();
 				_rowHOfCurrentState = _mdp.InitialDistributionsRowH();
-				_currentRow = _rowLOfCurrentState-1; //select 1 entry before the actual first entry. So MoveNextDistribution can move to the right entry.
+				RowOfCurrentDistribution = _rowLOfCurrentState-1; //select 1 entry before the actual first entry. So MoveNextDistribution can move to the right entry.
 			}
 
 			public bool SelectSourceState(int state)
@@ -459,7 +481,7 @@ namespace SafetySharp.Runtime
 				CurrentState = state;
 				_rowLOfCurrentState = _mdp.StateToRowL(state);
 				_rowHOfCurrentState = _mdp.StateToRowH(state);
-				_currentRow = _rowLOfCurrentState-1; //select 1 entry before the actual first entry. So MoveNextDistribution can move to the right entry.
+				RowOfCurrentDistribution = _rowLOfCurrentState-1; //select 1 entry before the actual first entry. So MoveNextDistribution can move to the right entry.
 				return true;
 			}
 			
@@ -485,10 +507,20 @@ namespace SafetySharp.Runtime
 			/// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
 			public bool MoveNextDistribution()
 			{
-				_currentRow++;
-				if (_currentRow >= _rowHOfCurrentState)
+				RowOfCurrentDistribution++;
+				if (RowOfCurrentDistribution >= _rowHOfCurrentState)
 					return false;
-				return _matrixEnumerator.MoveRow(_currentRow);
+				return _matrixEnumerator.MoveRow(RowOfCurrentDistribution);
+			}
+
+
+			public void MoveToDistribution(int distribution)
+			{
+				// WARNING: Has side effects on internal data. Do not use in conjunction with MoveNextDistribution and MoveNextState.
+				// Only with MoveNextTransition. Create separate enumerator for these cases.
+				// TODO: Refactor Enumerator. Create separate enumerators for States, Distributions, and Transitions. One
+				RowOfCurrentDistribution = distribution;
+				_matrixEnumerator.MoveRow(RowOfCurrentDistribution);
 			}
 
 

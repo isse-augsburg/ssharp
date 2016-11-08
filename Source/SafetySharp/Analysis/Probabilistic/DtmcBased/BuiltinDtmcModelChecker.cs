@@ -33,6 +33,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 	using System.Diagnostics;
 	using System.Globalization;
 	using Utilities;
+	using SafetySharp.Utilities.Graph;
 
 	class BuiltinDtmcModelChecker : DtmcModelChecker
 	{

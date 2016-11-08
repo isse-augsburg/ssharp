@@ -26,10 +26,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SafetySharp.Runtime
+namespace SafetySharp.Utilities.Graph
 {
-	using Utilities;
-
 	public struct Edge
 	{
 		public int Source;
@@ -185,14 +183,14 @@ namespace SafetySharp.Runtime
 	public static class BidirectionalGraphAlgorithmExtensions
 	{
 		internal static Dictionary<int, bool> GetAncestors(this BidirectionalGraphDirectNodeAccess graph,
-																	  Dictionary<int, bool> toNodes)
+																	  Dictionary<int, bool> targetNodes)
 		{
 			// standard behavior: do not ignore node or edge
 			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
 			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
 			var nodesAdded = new Dictionary<int, bool>();
 			var nodesToTraverse = new Stack<int>();
-			foreach (var node in toNodes)
+			foreach (var node in targetNodes)
 			{
 				nodesToTraverse.Push(node.Key);
 			}
@@ -214,15 +212,15 @@ namespace SafetySharp.Runtime
 		}
 
 		internal static Dictionary<int, bool> GetAncestors(this BidirectionalGraphDirectNodeAccess graph,
-																	  Dictionary<int, bool> toNodes, Func<int, bool> ignoreNodeFunc,
-																	  Func<Edge, bool> ignoreEdgeFunc)
+																	  Dictionary<int, bool> targetNodes, Func<int, bool> ignoreNodeFunc,
+																	  Func<Edge, bool> ignoreEdgeFunc = null)
 		{
 			// standard behavior: do not ignore node or edge
 			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
 			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
 			var nodesAdded = new Dictionary<int, bool>();
 			var nodesToTraverse = new Stack<int>();
-			foreach (var node in toNodes)
+			foreach (var node in targetNodes)
 			{
 				nodesToTraverse.Push(node.Key);
 			}

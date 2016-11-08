@@ -35,6 +35,7 @@ namespace Tests.DataStructures
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
+	using SafetySharp.Utilities.Graph;
 
 	public class MarkovChainTests
 	{

@@ -38,8 +38,9 @@ namespace SafetySharp.Runtime
 	using Modeling;
 	using Serialization;
 	using Utilities;
+	using SafetySharp.Utilities.Graph;
 
-	
+
 	internal class DiscreteTimeMarkovChain : IFormalismWithStateLabeling
 	{
 		// TODO: Optimization potential for custom model checker: Add every state only once. Save the transitions and evaluate reachability formulas more efficient by only expanding "states" to "states x stateformulaset" where the state labels of interests are in "stateformulaset"
@@ -230,12 +231,13 @@ namespace SafetySharp.Runtime
 		
 		internal class UnderlyingDigraph
 		{
-			public BidirectionalGraph Graph { get; private set; }
+			public BidirectionalGraphDirectNodeAccess Graph { get; private set; }
 
 			public UnderlyingDigraph(DiscreteTimeMarkovChain markovChain)
 			{
 				//Assumption "every node is reachable" is fulfilled due to the construction
-				Graph = new BidirectionalGraph();
+				var newGraph = new BidirectionalGraph();
+				Graph = newGraph;
 
 				var enumerator = markovChain.GetEnumerator();
 				while (enumerator.MoveNextState())
@@ -243,7 +245,7 @@ namespace SafetySharp.Runtime
 					while (enumerator.MoveNextTransition())
 					{
 						if (enumerator.CurrentTransition.Value>0.0)
-							Graph.AddVerticesAndEdge(new BidirectionalGraph.Edge(enumerator.CurrentState, enumerator.CurrentTransition.Column));
+							newGraph.AddVerticesAndEdge(new Edge(enumerator.CurrentState, enumerator.CurrentTransition.Column));
 					}
 				}
 			}
