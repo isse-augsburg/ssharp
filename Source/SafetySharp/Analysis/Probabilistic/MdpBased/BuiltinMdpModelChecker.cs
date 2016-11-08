@@ -40,12 +40,6 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 	{
 		private MarkovDecisionProcess.UnderlyingDigraph _underlyingDigraph;
 
-		private enum NodeStatus
-		{
-			Contained,
-			Excluded,
-			Unknown
-		}
 
 		/*
 		private SparseDoubleMatrix CreateDerivedMatrix(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates)
@@ -420,7 +414,33 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			// to reach a directlySatisfiedState is exactly 0.
 			Func<int, bool> nodesToIgnore =
 				excludedStates.ContainsKey;
-			var probabilityGreaterThanZero = _underlyingDigraph.BaseGraph.GetAncestors(directlySatisfiedStates, nodesToIgnore);
+			
+			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
+			var ancestors = new Dictionary<int, bool>();
+			var nodesToTraverse = new Stack<int>();
+			foreach (var node in directlySatisfiedStates)
+			{
+				nodesToTraverse.Push(node.Key);
+			}
+
+			while (nodesToTraverse.Count > 0)
+			{
+				var currentNode = nodesToTraverse.Pop();
+				var isIgnored = nodesToIgnore(currentNode);
+				var alreadyDiscovered = ancestors.ContainsKey(currentNode);
+				if (!(isIgnored || alreadyDiscovered))
+				{
+					ancestors.Add(currentNode, true);
+					foreach (var inEdge in _underlyingDigraph.BaseGraph.InEdges(currentNode))
+					{
+						nodesToTraverse.Push(inEdge.Source);
+					}
+				}
+			}
+			var probabilityGreaterThanZero = ancestors;
+			// alternatively: var probabilityGreaterThanZero = _underlyingDigraph.BaseGraph.GetAncestors(directlySatisfiedStates, nodesToIgnore);
+
+
 			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
 			return probabilityExactlyZero;
 		}
@@ -431,7 +451,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			// calculate probabilityExactlyZero (prob0e). There exists an adversary, for which the probability of
 			// the resulting states is zero. The result may be different for another adversary, but at least there exists one.
 
-			Dictionary<int, bool> ancestorsFoundInCurrentIteration=null;
+			Dictionary<int, bool> ancestorsFound=null;
 			var probabilityGreaterThanZero = directlySatisfiedStates; //we know initially this is satisfied
 
 			var mdpEnumerator = MarkovDecisionProcess.GetEnumerator();
@@ -454,7 +474,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 					var foundInDistribution = false;
 					while (mdpEnumerator.MoveNextTransition() && !foundInDistribution)
 					{
-						if (ancestorsFoundInCurrentIteration.ContainsKey(mdpEnumerator.CurrentTransition.Column))
+						if (ancestorsFound.ContainsKey(mdpEnumerator.CurrentTransition.Column))
 							foundInDistribution = true;
 					}
 					if (!foundInDistribution)
@@ -477,27 +497,116 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				// Note:
 				//   UpdateAncestors must be used, because nodesToIgnore requires access to the current information about the ancestors
 				//   (ancestorsFoundInCurrentIteration), if it should work in one iteration.
-				ancestorsFoundInCurrentIteration = new Dictionary<int, bool>();
-				_underlyingDigraph.BaseGraph.UpdateAncestors(ancestorsFoundInCurrentIteration, probabilityGreaterThanZero, nodesToIgnore);
-				if (probabilityGreaterThanZero.Count == ancestorsFoundInCurrentIteration.Count)
+				ancestorsFound = new Dictionary<int, bool>(); //Note: We reuse ancestorsFound, which is also known and used by nodesToIgnore. The side effects are on purpose.
+				// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
+				var nodesToTraverse = new Stack<int>();
+				foreach (var node in probabilityGreaterThanZero)
+				{
+					nodesToTraverse.Push(node.Key);
+				}
+
+				while (nodesToTraverse.Count > 0)
+				{
+					var currentNode = nodesToTraverse.Pop();
+					var isIgnored = nodesToIgnore(currentNode);
+					var alreadyDiscovered = ancestorsFound.ContainsKey(currentNode);
+					if (!(isIgnored || alreadyDiscovered))
+					{
+						ancestorsFound.Add(currentNode, true);
+						foreach (var inEdge in _underlyingDigraph.BaseGraph.InEdges(currentNode))
+						{
+							nodesToTraverse.Push(inEdge.Source);
+						}
+					}
+				}
+
+				if (probabilityGreaterThanZero.Count == ancestorsFound.Count)
 					fixpointReached = true;
-				probabilityGreaterThanZero = ancestorsFoundInCurrentIteration;
+				probabilityGreaterThanZero = ancestorsFound;
 			}
 			
 			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
 			return probabilityExactlyZero;
 		}
-
-		/*
-		private Dictionary<int, bool> ProbabilityExactlyOne(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates, Dictionary<int, bool> probabilityExactlyZero)
+		
+		private Dictionary<int, bool> ProbabilityExactlyOneExistsAdversary(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates, Dictionary<int, bool> probabilityExactlyZero)
 		{
-			// calculate probabilityExactlyOne (prob1)
-			Func<int, bool> nodesToIgnore =
-				node => excludedStates.ContainsKey(node) || directlySatisfiedStates.ContainsKey(node);
-			var probabilitySmallerThanOne = _underlyingDigraph.BaseGraph.GetAncestors(probabilityExactlyZero, nodesToIgnore); ;
-			var probabilityExactlyOne = CreateComplement(probabilitySmallerThanOne);
-			return probabilityExactlyOne;
-		}*/
+			// calculate probabilityExactlyOne (prob1e). There exists an adversary, for which the probability of
+			// the resulting states is exactly 1. The result may be different for another adversary, but at least there exists one.
+
+			// The algorithm works this way: It looks at a set of states probabilityMightBeExactlyOne which are initially all states.
+			// Then it iterates until a fixpoint is found. In each iteration states are removed from probabilityMightBeExactlyOne for
+			// which an adversary _must_ switch to a state where the probability is < 1.
+			// The removal process works this way: In each iteration a backwards search is started.
+			// A distribution from a predecessor is removed, if not every transition of the distribution leads to a
+			// state in probabilityMightBeExactlyOne (Reason: It is possible from there to go to a state where probability < 1).
+			// The fixpoint is the result.
+
+			Func<int, bool> nodesToIgnore = excludedStates.ContainsKey;
+			var probabilityMightBeExactlyOne = CreateComplement(new Dictionary<int, bool>()); //all states
+			
+			var _isDistributionIncludedCache = new Dictionary<int, bool>();
+			var mdpEnumerator = MarkovDecisionProcess.GetEnumerator();
+			Action resetDistributionIncludedCacheForNewIteration = () =>
+			{
+				// One possible optimization.
+				// Only true entries must be deleted because the eligible distributions get less and less each iteration
+				// On the other hand: Clearing the whole data structure makes the dictionary smaller and access faster.
+				_isDistributionIncludedCache.Clear();
+			};
+			Func<int, bool> isDistributionIncluded = rowOfDistribution =>
+			{
+				if (_isDistributionIncludedCache.ContainsKey(rowOfDistribution))
+					return _isDistributionIncludedCache[rowOfDistribution];
+
+				mdpEnumerator.MoveToDistribution(rowOfDistribution);
+				var includeDistribution = true;
+				while (includeDistribution && mdpEnumerator.MoveNextTransition())
+				{
+					var targetState = mdpEnumerator.CurrentTransition.Column;
+					// if targetstate is not found in probabilityMightBeExactlyOne then the complete distribution has to be removed
+					if (!probabilityMightBeExactlyOne.ContainsKey(targetState))
+						includeDistribution = false;
+				}
+				return includeDistribution;
+			};
+
+			var fixpointReached = false;
+			while (!fixpointReached)
+			{
+				resetDistributionIncludedCacheForNewIteration();
+				var ancestorsFound = new Dictionary<int, bool>(); //Note: ancestorsFound must not be reused
+				
+				// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
+				var nodesToTraverse = new Stack<int>();
+				foreach (var node in directlySatisfiedStates)
+				{
+					nodesToTraverse.Push(node.Key);
+				}
+
+				while (nodesToTraverse.Count > 0)
+				{
+					var currentNode = nodesToTraverse.Pop();
+					var isIgnored = nodesToIgnore(currentNode);
+					var alreadyDiscovered = ancestorsFound.ContainsKey(currentNode);
+					if (!(isIgnored || alreadyDiscovered))
+					{
+						ancestorsFound.Add(currentNode, true);
+						foreach (var inEdge in _underlyingDigraph.BaseGraph.InEdges(currentNode))
+						{
+							if (isDistributionIncluded(inEdge.Data.RowOfDistribution))
+								nodesToTraverse.Push(inEdge.Source);
+						}
+					}
+				}
+				
+				if (probabilityMightBeExactlyOne.Count == ancestorsFound.Count)
+					fixpointReached = true;
+				probabilityMightBeExactlyOne = ancestorsFound;
+			}
+			
+			return probabilityMightBeExactlyOne;
+		}
 
 
 		/*

@@ -222,19 +222,8 @@ namespace SafetySharp.Utilities.Graph
 		{
 			// standard behavior: do not ignore node or edge
 			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
-			var nodesAdded = new Dictionary<int, bool>();
-			graph.UpdateAncestors(nodesAdded, targetNodes, ignoreNodeFunc, ignoreEdgeFunc);
-			return nodesAdded;
-		}
-
-		internal static void UpdateAncestors<TEdgeData>(this BidirectionalGraphDirectNodeAccess<TEdgeData> graph,
-																	  Dictionary<int, bool> ancestors,
-																	  Dictionary<int, bool> targetNodes, Func<int, bool> ignoreNodeFunc,
-																	  Func<Edge<TEdgeData>, bool> ignoreEdgeFunc = null)
-		{
-			// standard behavior: do not ignore node or edge
-			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
 			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
+			var ancestors = new Dictionary<int, bool>();
 			var nodesToTraverse = new Stack<int>();
 			foreach (var node in targetNodes)
 			{
@@ -256,7 +245,9 @@ namespace SafetySharp.Utilities.Graph
 					}
 				}
 			}
+			return ancestors;
 		}
+		
 
 		internal static BidirectionalGraph<TEdgeData> CreateSubGraph<TEdgeData>(this BidirectionalGraphDirectNodeAccess<TEdgeData> graph,
 																						 Dictionary<int, bool> nodesOfSubGraph)
