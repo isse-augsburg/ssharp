@@ -28,6 +28,7 @@ namespace Tests
 	using Utilities;
 	using Xunit.Abstractions;
 	using JetBrains.Annotations;
+	using System;
 
 	public partial class OdpTests : Tests
 	{
@@ -43,12 +44,21 @@ namespace Tests
 		}
 	}
 
-	internal abstract class Agent : BaseAgent
+	internal abstract class OdpTestObject : TestObject
+	{
+	}
+
+	internal class Agent : BaseAgent
 	{
 		public const int MaxCapabilityCount = 20;
 		public readonly List<ICapability> Capabilities = new List<ICapability>(20);
 
 		public override IEnumerable<ICapability> AvailableCapabilities => Capabilities;
+
+		internal void ConfigureTask(ITask task)
+		{
+			PerformReconfiguration(new [] { Tuple.Create(task, new State(this)) });
+		}
 	}
 
 	internal class Task : ITask
