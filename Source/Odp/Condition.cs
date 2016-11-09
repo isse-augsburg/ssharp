@@ -28,13 +28,6 @@ namespace SafetySharp.Odp
 
 	public struct Condition
 	{
-		public Condition(BaseAgent port, ITask task, int statePrefixLength)
-		{
-			Port = port;
-			Task = task;
-			_statePrefixLength = checked((byte)statePrefixLength);
-		}
-
 		public BaseAgent Port { get; set; }
 		public ITask Task { get; set; }
 
