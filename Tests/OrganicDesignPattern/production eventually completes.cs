@@ -30,6 +30,8 @@ namespace Tests.OrganicDesignPattern
 	using Utilities;
 
 	using static SafetySharp.Analysis.Operators;
+	using System.Collections.Generic;
+	using System;
 
 	internal class ProductionEventuallyCompletes : OdpTestObject
 	{
@@ -56,13 +58,12 @@ namespace Tests.OrganicDesignPattern
 					agent.ReconfigurationStrategy = new CentralReconfiguration(controller);
 				var model = TestModel.InitializeModel(agents);
 
-				var modelChecker = new SSharpChecker();
-				var result = modelChecker.CheckInvariant(model, ctx.Completed < ctx.Total);
+				var modelChecker = new SSharpChecker() { Configuration = { StateCapacity = 1024 } };
+				var result = modelChecker.CheckInvariant(model, ctx.Completed != ctx.Total);
 				result.FormulaHolds.ShouldBeFalse();
 
-				var analysis = new SafetyAnalysis();
-				var result2 = analysis.ComputeMinimalCriticalSets(model, F(ctx.Completed == ctx.Total));
-				result2.MinimalCriticalSets.ShouldBeEmpty();
+				var result2 = ModelChecker.Check(model, F(ctx.Completed == ctx.Total));
+				result2.FormulaHolds.ShouldBeTrue();
 			}
 		}
 
@@ -74,6 +75,19 @@ namespace Tests.OrganicDesignPattern
 		}
 
 		private class R : Resource { }
+
+		internal class Agent : BaseAgent
+		{
+			public const int MaxCapabilityCount = 20;
+			public readonly List<ICapability> Capabilities = new List<ICapability>(20);
+
+			public override IEnumerable<ICapability> AvailableCapabilities => Capabilities;
+
+			internal void ConfigureTask(ITask task)
+			{
+				PerformReconfiguration(new[] { Tuple.Create(task, new State(this)) });
+			}
+		}
 
 		private class Producer : Agent, ICapabilityHandler<ProduceCapability>
 		{
