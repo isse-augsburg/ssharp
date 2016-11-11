@@ -36,6 +36,7 @@ namespace Tests.DataStructures
 	using Xunit;
 	using Xunit.Abstractions;
 	using SafetySharp.Utilities.Graph;
+	using SafetySharp.Analysis.Probabilistic.DtmcBased.ExportToGv;
 
 	public class MarkovChainTests
 	{
@@ -94,6 +95,22 @@ namespace Tests.DataStructures
 		public MarkovChainTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
+		}
+
+		[Fact]
+		public void PrintExamplesAsGraphviz()
+		{
+			var sb = new StringBuilder();
+			CreateExemplaryMarkovChain1();
+			_markovChain.ExportToGv(sb);
+			sb.AppendLine();
+
+
+			CreateExemplaryMarkovChain2();
+			_markovChain.ExportToGv(sb);
+			sb.AppendLine();
+
+			var message = sb.ToString();
 		}
 
 		[Fact]

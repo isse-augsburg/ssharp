@@ -36,6 +36,7 @@ namespace Tests.DataStructures
 	using Xunit;
 	using Xunit.Abstractions;
 	using SafetySharp.Utilities.Graph;
+	using SafetySharp.Analysis.Probabilistic.MdpBased.ExportToGv;
 
 	public class MarkovDecisionProcessTests
 	{
@@ -403,6 +404,43 @@ namespace Tests.DataStructures
 		{
 			Output = new TestTraceOutput(output);
 		}
+
+		[Fact]
+		public void PrintExamplesAsGraphviz()
+		{
+			var sb = new StringBuilder();
+			CreateExemplaryMdp1();
+			_mdp.ExportToGv(sb);
+			sb.AppendLine();
+
+
+			CreateExemplaryMdp2();
+			_mdp.ExportToGv(sb);
+			sb.AppendLine();
+
+			CreateExemplaryMdp3();
+			_mdp.ExportToGv(sb);
+			sb.AppendLine();
+
+			CreateExemplaryMdp4();
+			_mdp.ExportToGv(sb);
+			sb.AppendLine();
+
+			CreateExemplaryMdp5();
+			_mdp.ExportToGv(sb);
+			sb.AppendLine();
+
+			CreateExemplaryMdp6();
+			_mdp.ExportToGv(sb);
+			sb.AppendLine();
+
+			CreateExemplaryMdp7();
+			_mdp.ExportToGv(sb);
+			sb.AppendLine();
+
+			var message = sb.ToString();
+		}
+
 
 		[Fact]
 		public void PassingTest()
