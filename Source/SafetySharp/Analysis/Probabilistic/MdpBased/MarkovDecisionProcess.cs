@@ -398,7 +398,7 @@ namespace SafetySharp.Runtime
 
 			public bool SelectSourceState(int state)
 			{
-				if (state > _mdp.States)
+				if (state >= _mdp.States)
 					return false;
 				CurrentState = state;
 				_rowLOfCurrentState = _mdp.StateToRowL(state);
