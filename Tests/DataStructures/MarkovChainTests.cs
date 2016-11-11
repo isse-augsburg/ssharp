@@ -57,14 +57,14 @@ namespace Tests.DataStructures
 			_markovChain.StartWithInitialDistribution();
 			_markovChain.AddInitialTransition(0,1.0);
 			_markovChain.FinishInitialDistribution();
+			_markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { returnTrue, returnFalse }));
 			_markovChain.StartWithNewDistribution(1);
 			_markovChain.AddTransition(1, 1.0);
-			_markovChain.SetStateLabeling(1, new StateFormulaSet(new []{ returnTrue, returnFalse }));
 			_markovChain.FinishDistribution();
+			_markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
 			_markovChain.StartWithNewDistribution(0);
 			_markovChain.AddTransition(1, 0.6);
 			_markovChain.AddTransition(0, 0.4);
-			_markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
 			_markovChain.FinishDistribution();
 			//_markovChain.ProbabilityMatrix.OptimizeAndSeal();
 		}
@@ -80,13 +80,13 @@ namespace Tests.DataStructures
 			_markovChain.StartWithInitialDistribution();
 			_markovChain.AddInitialTransition(0, 1.0);
 			_markovChain.FinishInitialDistribution();
+			_markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { returnTrue, returnFalse }));
 			_markovChain.StartWithNewDistribution(1);
 			_markovChain.AddTransition(1, 1.0);
-			_markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { returnTrue, returnFalse }));
 			_markovChain.FinishDistribution();
+			_markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
 			_markovChain.StartWithNewDistribution(0);
 			_markovChain.AddTransition(1, 0.1);
-			_markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
 			_markovChain.FinishDistribution();
 			//_markovChain.ProbabilityMatrix.OptimizeAndSeal();
 		}
