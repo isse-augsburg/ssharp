@@ -23,7 +23,9 @@
 namespace SafetySharp.Odp.Reconfiguration
 {
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Modeling;
 
 	public class ControllerReconfigurationAgent : IReconfigurationAgent
@@ -35,20 +37,17 @@ namespace SafetySharp.Odp.Reconfiguration
 		private ITask _task;
 
 		// passed on to RoleCalculationAgent
-		private readonly BaseAgent[] _allBaseAgents;
 		private readonly IController _controller;
 
 		public ControllerReconfigurationAgent(
 			BaseAgent baseAgent,
 			ReconfigurationAgentHandler reconfAgentHandler,
-			BaseAgent[] allBaseAgents,
 			IController controller
 		)
 		{
 			_baseAgent = baseAgent;
 			_reconfAgentHandler = reconfAgentHandler;
 
-			_allBaseAgents = allBaseAgents;
 			_controller = controller;
 		}
 
@@ -60,20 +59,15 @@ namespace SafetySharp.Odp.Reconfiguration
 		public void StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
 		{
 			_task = task;
-			if (_roleCalculationAgent != null) // a configuration is already under way
-			{
-				_roleCalculationAgent.AcknowledgeReconfigurationRequest(task, this, baseAgentState);
-				return;
-			}
 
-			if (agent == _baseAgent) // no previous reconf agent exists
+			if (agent == _baseAgent) // invariant violation detected
 			{
-				_roleCalculationAgent = new RoleCalculationAgent(_allBaseAgents, _controller);
+				_roleCalculationAgent = new RoleCalculationAgent(_controller);
 				_roleCalculationAgent.StartCentralReconfiguration(task, _baseAgent, baseAgentState);
 			}
-			else // a previous reconf agent already exists
+			else // a reconfiguration has already been already started
 			{
-				_roleCalculationAgent = (RoleCalculationAgent)agent;
+				_roleCalculationAgent = (RoleCalculationAgent)agent; // may already have this value, if reconfiguration initiated by this instance
 				_roleCalculationAgent.AcknowledgeReconfigurationRequest(task, this, baseAgentState);
 			}
 		}
@@ -105,9 +99,9 @@ namespace SafetySharp.Odp.Reconfiguration
 			private enum State { Idle, GatherGlobalKnowledge, CalculateRoles, AllocateRoles }
 			private readonly StateMachine<State> _stateMachine = State.Idle;
 
-			public RoleCalculationAgent(BaseAgent[] allBaseAgents, IController controller)
+			public RoleCalculationAgent(IController controller)
 			{
-				_functioningAgents = allBaseAgents.Where(agent => agent.IsAlive).ToArray();
+				_functioningAgents = _controller.Agents.Where(agent => agent.IsAlive).ToArray();
 				_controller = controller;
 			}
 
@@ -118,7 +112,12 @@ namespace SafetySharp.Odp.Reconfiguration
 					to: State.GatherGlobalKnowledge,
 					action: () => {
 						foreach (var baseAgent in _functioningAgents)
-							baseAgent.RequestReconfiguration(this, task);
+						{
+							var t = baseAgent.RequestReconfiguration(this, task);
+							// since baseAgent must use a ControllerReconfigurationAgent,
+							// RequestReconfiguration() is synchronous.
+							Debug.Assert(t.IsCompleted);
+						}
 					}
 				);
 			}
@@ -140,7 +139,9 @@ namespace SafetySharp.Odp.Reconfiguration
 
 			private void CalculateRoles(ITask task)
 			{
-				var configs = _controller.CalculateConfigurations(task);
+				var t = _controller.CalculateConfigurations(null, task);
+				Debug.Assert(t.IsCompleted); // assume synchronous controller
+				var configs = t.Result;
 
 				_stateMachine.Transition(
 					from: State.CalculateRoles,

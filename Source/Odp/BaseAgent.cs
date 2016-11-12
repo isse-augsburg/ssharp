@@ -25,6 +25,7 @@ namespace SafetySharp.Odp
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Modeling;
 
 	public abstract partial class BaseAgent : Component, IAgent
@@ -54,7 +55,12 @@ namespace SafetySharp.Odp
 
 		public override void Update()
 		{
-			Observe();
+			MicrostepScheduler.Schedule(UpdateAsync);
+		}
+
+		private async Task UpdateAsync()
+		{
+			await Observe();
 			Work();
 		}
 
@@ -278,25 +284,27 @@ namespace SafetySharp.Odp
 			Invariant.CapabilityConsistency
 		};
 
-		// TODO: use to verify configuration
 		protected virtual InvariantPredicate[] ConsistencyPredicates { get; } = new InvariantPredicate[] {
 			Invariant.PrePostConditionConsistency,
 			Invariant.TaskEquality,
 			Invariant.StateConsistency
 		};
 
-		private void Observe()
+		private async Task Observe()
 		{
 			var violations = FindInvariantViolations();
 
-			PerformReconfiguration(
+			await PerformReconfiguration(
 				from vio in violations
 				let state = new State(this, null, vio.Value.ToArray())
 				select Tuple.Create(vio.Key, state)
 			);
 		}
 
-		protected void PerformReconfiguration(IEnumerable<Tuple<ITask, State>> reconfigurations)
+		[Hidden]
+		private int _runningReconfigurations = 0;
+
+		protected async Task PerformReconfiguration(IEnumerable<Tuple<ITask, State>> reconfigurations)
 		{
 			var deficientTasks = new HashSet<ITask>(reconfigurations.Select(t => t.Item1));
 			if (deficientTasks.Count == 0)
@@ -308,7 +316,20 @@ namespace SafetySharp.Odp
 			_deficientConfiguration = _hasRole && deficientTasks.Contains(_currentRole.Task);
 
 			// initiate reconfiguration to fix violations
-			ReconfigurationStrategy.Reconfigure(reconfigurations);
+			_runningReconfigurations++;
+			await ReconfigurationStrategy.Reconfigure(reconfigurations);
+			_runningReconfigurations--;
+
+			// no reconfigurations currently running -- verify correctness of new configuration
+			if (_runningReconfigurations == 0)
+				VerifyInvariants();
+		}
+
+		private void VerifyInvariants()
+		{
+			foreach (var predicate in MonitoringPredicates.Concat(ConsistencyPredicates))
+				if (predicate(this).Any())
+					throw new InvalidOperationException("New configuration violates invariant.");
 		}
 
 		private Dictionary<ITask, IEnumerable<InvariantPredicate>> FindInvariantViolations()
@@ -326,9 +347,9 @@ namespace SafetySharp.Odp
 			return violations;
 		}
 
-		public virtual void RequestReconfiguration(IAgent agent, ITask task)
+		public virtual Task RequestReconfiguration(IAgent agent, ITask task)
 		{
-			PerformReconfiguration(new[] {
+			return PerformReconfiguration(new[] {
 				Tuple.Create(task, new State(this, agent))
 			});
 		}

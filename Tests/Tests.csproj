@@ -132,6 +132,7 @@
     <Compile Include="Analysis\Dcca\all faults suppressed.cs" />
     <Compile Include="Analysis\Dcca\empty set.cs" />
     <Compile Include="Analysis\Dcca\exception suppressed counter examples.cs" />
+    <Compile Include="Analysis\Dcca\microstep parallelism.cs" />
     <Compile Include="Analysis\Dcca\multiple singleton cut sets.cs" />
     <Compile Include="Analysis\Dcca\exception.cs" />
     <Compile Include="Analysis\Dcca\multiple forced faults.cs" />
@@ -304,6 +305,7 @@
     <Compile Include="Execution\Simulation\linq.cs" />
     <Compile Include="Execution\Simulation\faults.cs" />
     <Compile Include="Execution\Simulation\bindings.cs" />
+    <Compile Include="Execution\Simulation\microstep parallelism with exception.cs" />
     <Compile Include="Execution\Simulation\nondeterminism.cs" />
     <Compile Include="Execution\Simulation\formulas.cs" />
     <Compile Include="Execution\Simulation\stepping.cs" />
@@ -312,6 +314,7 @@
     <Compile Include="Execution\Simulation\event.cs" />
     <Compile Include="Execution\Simulation\variable ranges.cs" />
     <Compile Include="Execution\Simulation\steps.cs" />
+    <Compile Include="Execution\Simulation\microstep parallelism.cs" />
     <Compile Include="FaultActivationTests.cs" />
     <Compile Include="AnalysisTests.Helpers.cs">
       <DependentUpon>AnalysisTests.cs</DependentUpon>

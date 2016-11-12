@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 {
 	using System;
+	using System.Threading.Tasks;
 	using SafetySharp.Modeling;
 	using Odp;
 	using Odp.Reconfiguration;
@@ -46,9 +47,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		}
 		public BaseAgent[] Agents => _controller.Agents;
 		public virtual bool ReconfigurationFailure =>_controller.ReconfigurationFailure;
-		public virtual ConfigurationUpdate CalculateConfigurations(params ITask[] tasks)
+		public virtual Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
 		{
-			return _controller.CalculateConfigurations(tasks);
+			return _controller.CalculateConfigurations(context, tasks);
 		}
 
 		// fault & effect
@@ -59,9 +60,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		{
 			public override bool ReconfigurationFailure => true;
 
-			public override ConfigurationUpdate CalculateConfigurations(params ITask[] tasks)
+			public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
 			{
-				return null;
+				return Task.FromResult<ConfigurationUpdate>(null);
 			}
 		}
 	}

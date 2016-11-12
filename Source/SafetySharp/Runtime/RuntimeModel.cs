@@ -274,6 +274,8 @@ namespace SafetySharp.Runtime
 			foreach (var component in RootComponents)
 				component.Update();
 
+			MicrostepScheduler.CompleteSchedule();
+
 			_restrictRanges();
 		}
 

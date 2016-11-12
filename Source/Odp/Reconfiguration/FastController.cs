@@ -25,6 +25,7 @@ namespace SafetySharp.Odp.Reconfiguration
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Modeling;
 
 	public class FastController : AbstractController
@@ -40,7 +41,8 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public FastController(BaseAgent[] agents) : base(agents) { }
 
-		public override ConfigurationUpdate CalculateConfigurations(params ITask[] tasks)
+		// synchronous implementation
+		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
 		{
 			_availableAgents = GetAvailableAgents();
 			var configs = new ConfigurationUpdate();
@@ -58,7 +60,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			}
 
 			OnConfigurationsCalculated(configs);
-			return configs;
+			return Task.FromResult(configs);
 		}
 
 		protected virtual bool PreferCapabilityAccumulation => true;

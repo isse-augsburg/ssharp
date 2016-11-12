@@ -24,9 +24,22 @@ namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
+	using Modeling;
 
 	public class CoalitionReconfigurationAgent : IReconfigurationAgent
 	{
+		private readonly BaseAgent _baseAgent;
+		private readonly ReconfigurationAgentHandler _reconfAgentHandler;
+		private readonly IController _controller;
+
+		public CoalitionReconfigurationAgent(BaseAgent baseAgent, ReconfigurationAgentHandler reconfAgentHandler, IController controller)
+		{
+			_baseAgent = baseAgent;
+			_reconfAgentHandler = reconfAgentHandler;
+			_controller = controller;
+		}
+
 		protected Coalition CurrentCoalition { get; set; }
 
 		public void Acknowledge()
@@ -36,38 +49,13 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public void StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
 		{
-			//if (state.isRequest) // also handle (IsRequest && IsLocalViolation)
-			{
-				// if CurrentCoalition == null
-				//	join
-				// else
-				//	merge
-			}
-			//else if (state.isLocalViolation)
-			{
-				// determine required capabilities
-				// start coalition
-				// invite coalition neighbors until required capabilities are satisfied
-				// calculate TFR
-				// invite edge agents where necessary
-				// calculate new role assignment
-				// all coalition members update base agent configurations
-				// (synchronize)
-				// all coalition members send Go() to base agents
-				// coalition disbanded, reconf agents forgotten
-			}
-			//else // agent breakdown
-			{
-				// question (not invite) non-neighbors until successor/predecessor of failed agent discovered
-				// (this requires knowledge of non-neighboring agents, or maybe a broadcast?)
-				// follow resource flow until closest living neighbor of failed agent found
-				// coalition clash -> merge, select new leader
-				// continue as described above
+			MicrostepScheduler.Schedule(() => ReconfigureAsync(task, agent, baseAgentState));
+		}
 
-				// idea: predecessor/successor search can also be achieved by broadcast ONLY among
-				// instances of this class (easier to implement as well)
-			}
-			throw new NotImplementedException();
+		public async Task ReconfigureAsync(ITask task, IAgent agent, BaseAgent.State baseAgentState)
+		{
+			var configs = await _controller.CalculateConfigurations(this, task);
+			// TODO: distribute configs
 		}
 
 		protected class Coalition

@@ -20,28 +20,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp.Reconfiguration
+namespace Tests.Analysis.Dcca
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
 	using System.Threading.Tasks;
+	using SafetySharp.Modeling;
+	using Shouldly;
 
-	public class CentralReconfiguration : IReconfigurationStrategy
+	internal class MicrostepParallelism : AnalysisTestObject
 	{
-		protected readonly IController _controller;
-
-		public CentralReconfiguration(IController controller)
+		protected override void Check()
 		{
-			_controller = controller;
+			var result = Dcca(C.X != 0, new C(), new C());
+			result.MinimalCriticalSets.ShouldBeEmpty();
 		}
 
-		public virtual async Task Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
+		class C : Component
 		{
-			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
+			public static int X = 0;
 
-			var configs = await _controller.CalculateConfigurations(null, tasks);
-			configs?.Apply(_controller.Agents);
+			public readonly Fault F1 = new PermanentFault();
+			public readonly Fault F2 = new PermanentFault();
+
+			public override void Update()
+			{
+				MicrostepScheduler.Schedule(WorkAsync);
+			}
+
+			protected virtual async Task WorkAsync()
+			{
+				++X;
+				await Task.Yield();
+
+				++X;
+				await Task.Yield();
+
+				X -= 2;
+			}
+
+			[FaultEffect(Fault = nameof(F1))]
+			private class F1Effect : C
+			{
+			}
+
+			[FaultEffect(Fault = nameof(F2))]
+			private class F2Effect : C
+			{
+			}
 		}
 	}
 }

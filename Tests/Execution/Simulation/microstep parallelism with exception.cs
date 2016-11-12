@@ -20,28 +20,61 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp.Reconfiguration
+namespace Tests.Execution.Simulation
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
 	using System.Threading.Tasks;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	public class CentralReconfiguration : IReconfigurationStrategy
+	internal class MicrostepParallelismWithException : TestObject
 	{
-		protected readonly IController _controller;
-
-		public CentralReconfiguration(IController controller)
+		protected override void Check()
 		{
-			_controller = controller;
+			var simulator = new Simulator(TestModel.InitializeModel(new C()));
+			Should.Throw<E>(() =>  simulator.SimulateStep());
+			C.X.ShouldBe(3);
+
+			simulator = new Simulator(TestModel.InitializeModel(new D()));
+			Should.Throw<E>(() => simulator.SimulateStep());
 		}
 
-		public virtual async Task Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
+		private class C : Component
 		{
-			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
+			public static int X { get; set; } = 0;
 
-			var configs = await _controller.CalculateConfigurations(null, tasks);
-			configs?.Apply(_controller.Agents);
+			public override void Update()
+			{
+				X++;
+				MicrostepScheduler.Schedule(AsyncMethod);
+			}
+
+			private async Task AsyncMethod()
+			{
+				X++;
+				await Task.Yield();
+
+				X++;
+				throw new E();
+			}
 		}
+
+		private class D : Component
+		{
+			public override void Update()
+			{
+				MicrostepScheduler.Schedule(AsyncMethod);
+			}
+
+			private async Task AsyncMethod()
+			{
+				throw new E();
+			}
+		}
+
+		private class E : Exception
+		{ }
 	}
 }

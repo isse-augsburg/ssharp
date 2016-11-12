@@ -1,4 +1,5 @@
-﻿// The MIT License (MIT)
+﻿
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -25,6 +26,7 @@ namespace SafetySharp.Odp.Reconfiguration
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Modeling;
 
 	public class ReconfigurationAgentHandler : IReconfigurationStrategy
@@ -41,15 +43,21 @@ namespace SafetySharp.Odp.Reconfiguration
 			_createReconfAgent = createReconfAgent;
 		}
 
-		// Reconfiguration always completes within one step, hence the dictionary should
+		// Reconfiguration always completes within one step, hence the dictionaries should
 		// always be empty during serialization. Thus there is no need to include space
 		// for the elements in the state vector, or to set a predefined capacity.
 		[NonDiscoverable, Hidden(HideElements = true)]
-		private readonly Dictionary<ITask, IReconfigurationAgent> _tasksUnderReconstruction
-			= new Dictionary<ITask, IReconfigurationAgent>();
+		private readonly Dictionary<ITask, IReconfigurationAgent> _tasksUnderReconstruction = new Dictionary<ITask, IReconfigurationAgent>();
 
-		public void Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
+		[NonDiscoverable, Hidden(HideElements = true)]
+		private readonly Dictionary<ITask, TaskCompletionSource<object>> _reconfigurationProcesses =
+			new Dictionary<ITask, TaskCompletionSource<object>>();
+
+
+		public async Task Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
 		{
+			var newReconfigurations = new List<Task>();
+
 			foreach (var tuple in reconfigurations)
 			{
 				var task = tuple.Item1;
@@ -59,9 +67,15 @@ namespace SafetySharp.Odp.Reconfiguration
 				LockAllocatedRoles(task);
 
 				if (!_tasksUnderReconstruction.ContainsKey(task))
+				{
 					_tasksUnderReconstruction[task] = _createReconfAgent(_baseAgent, this, task);
+					_reconfigurationProcesses[task] = new TaskCompletionSource<object>();
+					newReconfigurations.Add(_reconfigurationProcesses[task].Task);
+				}
 				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, baseAgentState);
 			}
+
+			await Task.WhenAll(newReconfigurations);
 		}
 
 		#region interface presented to reconfiguration agent
@@ -80,6 +94,8 @@ namespace SafetySharp.Odp.Reconfiguration
 		public virtual void Done(ITask task)
 		{
 			_tasksUnderReconstruction.Remove(task);
+			_reconfigurationProcesses[task].SetResult(null);
+			_reconfigurationProcesses.Remove(task);
 		}
 		#endregion
 

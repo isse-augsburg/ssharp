@@ -87,6 +87,7 @@
     <Compile Include="Analysis\SafetyAnalysisResults.cs" />
     <Compile Include="Analysis\SafetyChecking\StateGraphBackend.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
+    <Compile Include="Modeling\MicrostepScheduler.cs" />
     <Compile Include="Modeling\ObjectPool.cs" />
     <Compile Include="Modeling\SubcomponentAttribute.cs" />
     <Compile Include="Modeling\RootKind.cs" />

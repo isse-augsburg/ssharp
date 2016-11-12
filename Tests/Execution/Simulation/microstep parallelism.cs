@@ -20,28 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp.Reconfiguration
+namespace Tests.Execution.Simulation
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
 	using System.Threading.Tasks;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	public class CentralReconfiguration : IReconfigurationStrategy
+	internal class MicrostepParallelism : TestObject
 	{
-		protected readonly IController _controller;
-
-		public CentralReconfiguration(IController controller)
+		protected override void Check()
 		{
-			_controller = controller;
+			var simulator = new Simulator(TestModel.InitializeModel(new C(), new C()));
+			simulator.SimulateStep();
+			C.counter.ShouldBe(6);
 		}
 
-		public virtual async Task Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
+		private class C : Component
 		{
-			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
+			public static int counter = 0;
 
-			var configs = await _controller.CalculateConfigurations(null, tasks);
-			configs?.Apply(_controller.Agents);
+			public override void Update()
+			{
+				MicrostepScheduler.Schedule(AsyncMethod);
+			}
+
+			private async Task AsyncMethod()
+			{
+				int _ctr = ++counter;
+				await Task.Yield();
+
+				if (counter - _ctr == 1)
+					_ctr = ++counter;
+
+				await Task.Yield();
+
+				if (counter - _ctr == 1)
+					_ctr = ++counter;
+			}
 		}
 	}
 }

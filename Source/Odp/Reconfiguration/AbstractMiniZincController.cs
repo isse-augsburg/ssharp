@@ -23,10 +23,11 @@
 namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Modeling;
-	using System.Diagnostics;
 
 	public abstract class AbstractMiniZincController : AbstractController
 	{
@@ -44,7 +45,8 @@ namespace SafetySharp.Odp.Reconfiguration
 			_constraintsModel = constraintsModel;
 		}
 
-		public override ConfigurationUpdate CalculateConfigurations(params ITask[] tasks)
+		// synchronous implementation
+		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
 		{
 			var configs = new ConfigurationUpdate();
 			foreach (var task in tasks)
@@ -59,7 +61,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			}
 
 			OnConfigurationsCalculated(configs);
-			return configs;
+			return Task.FromResult(configs);
 		}
 
 		private void CreateDataFile(ITask task)

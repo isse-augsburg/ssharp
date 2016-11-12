@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 {
 	using System;
+	using System.Threading.Tasks;
 	using Odp;
 	using Odp.Reconfiguration;
 
@@ -45,7 +46,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
 		public BaseAgent[] Agents => _controller.Agents;
 		public bool ReconfigurationFailure => _controller.ReconfigurationFailure;
-		public ConfigurationUpdate CalculateConfigurations(params ITask[] tasks)
+		public async Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
 		{
 			if (ReconfigurationFailure)
 				return null;
@@ -58,7 +59,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			}
 
 			_hasReconfed = true;
-			return _controller.CalculateConfigurations(tasks);
+			return await _controller.CalculateConfigurations(context, tasks);
 		}
 	}
 }
