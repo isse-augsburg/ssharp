@@ -75,7 +75,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		public List<CartAgent> CartAgents { get; } = new List<CartAgent>();
 
 		[Root(RootKind.Controller), Hidden(HideElements = true)]
-		public readonly List<IComponent> AdditionaComponents = new List<IComponent>();
+		public readonly List<IComponent> AdditionalComponents = new List<IComponent>();
 
 		// TODO: move to ModelBuilder?
 		public List<Resource> Resources { get; } = new List<Resource>();
