@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
+namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 {
 	using System;
 	using System.Collections.Generic;

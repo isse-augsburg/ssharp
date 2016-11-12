@@ -26,7 +26,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using System.Collections;
 	using System.Linq;
 	using Modeling;
-	using Modeling.Controllers;
+	using Modeling.Controllers.Reconfiguration;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Analysis.Heuristics;
