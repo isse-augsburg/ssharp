@@ -69,6 +69,7 @@
     <Compile Include="Modeling\Controllers\Reconfiguration\IntolerableAnalysisController.cs" />
     <Compile Include="Modeling\Controllers\Reconfiguration\MiniZincController.cs" />
     <Compile Include="Modeling\Controllers\ProcessCapability.cs" />
+    <Compile Include="Modeling\Controllers\Reconfiguration\VerifyingController.cs" />
     <Compile Include="Modeling\Controllers\Resource.cs" />
     <Compile Include="Modeling\Controllers\Task.cs" />
     <Compile Include="Modeling\Controllers\Reconfiguration\FaultyController.cs" />

@@ -156,6 +156,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	        return this;
 	    }
 
+		public ModelBuilder EnableControllerVerification(bool verify)
+		{
+			if (verify)
+				_model.Controller = new VerifyingController(_model.Controller);
+			return this;
+		}
+
 	    public ModelBuilder TolerableFaultsAnalysis()
 	    {
 	        _model.Controller = new TolerableAnalysisController(_model.Controller);

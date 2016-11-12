@@ -35,19 +35,19 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             return Ictss1<T>(mode);
         }
 
-        public static IEnumerable<Model> CreateConfigurations<T>(AnalysisMode mode)
+        public static IEnumerable<Model> CreateConfigurations<T>(AnalysisMode mode, bool verify = false)
             where T : IController
         {
-            yield return Ictss1<T>(mode);
-            yield return Ictss2<T>(mode);
-            yield return Ictss3<T>(mode);
-            yield return Ictss4<T>(mode);
-            yield return Ictss5<T>(mode);
-            yield return Ictss6<T>(mode);
-            yield return Ictss7<T>(mode);
+            yield return Ictss1<T>(mode, verify);
+            yield return Ictss2<T>(mode, verify);
+            yield return Ictss3<T>(mode, verify);
+            yield return Ictss4<T>(mode, verify);
+            yield return Ictss5<T>(mode, verify);
+            yield return Ictss6<T>(mode, verify);
+            yield return Ictss7<T>(mode, verify);
         }
 
-        public static Model Ictss1<T>(AnalysisMode mode) where T : IController
+        public static Model Ictss1<T>(AnalysisMode mode, bool verify = false) where T : IController
         {
             return ChooseAnalysisMode(
                 new ModelBuilder(nameof(Ictss1))
@@ -63,11 +63,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     .AddCart(Route(2, 3))
 
                     .ChooseController<T>()
+					.EnableControllerVerification(verify)
                     .CentralReconfiguration()
                 , mode);
         }
 
-        public static Model Ictss2<T>(AnalysisMode mode) where T : IController
+        public static Model Ictss2<T>(AnalysisMode mode, bool verify = false) where T : IController
         {
             return ChooseAnalysisMode(
                 new ModelBuilder(nameof(Ictss2))
@@ -81,11 +82,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     .AddCart(Route(1, 2), Route(0, 1))
 
                     .ChooseController<T>()
-                    .CentralReconfiguration()
+					.EnableControllerVerification(verify)
+					.CentralReconfiguration()
                 , mode);
         }
 
-        public static Model Ictss3<T>(AnalysisMode mode) where T : IController
+        public static Model Ictss3<T>(AnalysisMode mode, bool verify = false) where T : IController
         {
             return ChooseAnalysisMode(
                 new ModelBuilder(nameof(Ictss3))
@@ -99,11 +101,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     .AddCart(Route(1, 2), Route(0, 1))
 
                     .ChooseController<T>()
-                    .CentralReconfiguration()
+					.EnableControllerVerification(verify)
+					.CentralReconfiguration()
                 , mode);
         }
 
-        public static Model Ictss4<T>(AnalysisMode mode) where T : IController
+        public static Model Ictss4<T>(AnalysisMode mode, bool verify = false) where T : IController
         {
             return ChooseAnalysisMode(
                 new ModelBuilder(nameof(Ictss4))
@@ -117,11 +120,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     .AddCart(Route(1, 2), Route(0, 1), Route(0, 2))
 
                     .ChooseController<T>()
-                    .CentralReconfiguration()
+					.EnableControllerVerification(verify)
+					.CentralReconfiguration()
                 , mode);
         }
 
-        public static Model Ictss5<T>(AnalysisMode mode) where T : IController
+        public static Model Ictss5<T>(AnalysisMode mode, bool verify = false) where T : IController
         {
             return ChooseAnalysisMode(
                 new ModelBuilder(nameof(Ictss5))
@@ -135,11 +139,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     .AddCart(Route(1, 2), Route(0, 1))
 
                     .ChooseController<T>()
-                    .CentralReconfiguration()
+					.EnableControllerVerification(verify)
+					.CentralReconfiguration()
                 , mode);
         }
 
-        public static Model Ictss6<T>(AnalysisMode mode) where T : IController
+        public static Model Ictss6<T>(AnalysisMode mode, bool verify = false) where T : IController
         {
             return ChooseAnalysisMode(
                 new ModelBuilder(nameof(Ictss6))
@@ -155,11 +160,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     .AddCart(Route(1, 3), Route(1, 4), Route(1, 2))
 
                     .ChooseController<T>()
-                    .CentralReconfiguration()
+					.EnableControllerVerification(verify)
+					.CentralReconfiguration()
                 , mode);
         }
 
-        public static Model Ictss7<T>(AnalysisMode mode) where T : IController
+        public static Model Ictss7<T>(AnalysisMode mode, bool verify = false) where T : IController
         {
             return ChooseAnalysisMode(
                 new ModelBuilder(nameof(Ictss7))
@@ -175,7 +181,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     .AddCart(Route(1, 2))
 
                     .ChooseController<T>()
-                    .CentralReconfiguration()
+					.EnableControllerVerification(verify)
+					.CentralReconfiguration()
                 , mode);
         }
 
