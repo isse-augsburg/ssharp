@@ -22,20 +22,20 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 
-    using SafetySharp.Modeling;
-    using Odp;
+	using SafetySharp.Modeling;
+	using Odp;
 	using Odp.Reconfiguration;
 
-    using Controllers;
-    using Controllers.Reconfiguration;
-    using Plants;
-    using Resource = Controllers.Resource;
+	using Controllers;
+	using Controllers.Reconfiguration;
+	using Plants;
+	using Resource = Controllers.Resource;
 
-    internal partial class ModelBuilder
+	internal partial class ModelBuilder
 	{
 		private readonly Model _model;
 
@@ -143,18 +143,18 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			return this;
 		}
 
-	    public Model Build()
-	    {
-	        return _model;
-	    }
+		public Model Build()
+		{
+			return _model;
+		}
 
-	    public ModelBuilder ChooseController<T>() where T : IController
-	    {
-            _model.Controller = (IController)Activator.CreateInstance(typeof(T), Agents);
-	        if (_model.Controller is IComponent)
-	            _model.AdditionaComponents.Add(_model.Controller as IComponent);
-	        return this;
-	    }
+		public ModelBuilder ChooseController<T>() where T : IController
+		{
+			_model.Controller = (IController)Activator.CreateInstance(typeof(T), Agents);
+			if (_model.Controller is IComponent)
+				_model.AdditionaComponents.Add(_model.Controller as IComponent);
+			return this;
+		}
 
 		public ModelBuilder EnableControllerVerification(bool verify)
 		{
@@ -163,48 +163,48 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			return this;
 		}
 
-	    public ModelBuilder TolerableFaultsAnalysis()
-	    {
-	        _model.Controller = new TolerableAnalysisController(_model.Controller);
-            _model.Faults.MakeNondeterministic();
-	        IntolerableFaults().SuppressActivations();
-	        return this;
-	    }
+		public ModelBuilder TolerableFaultsAnalysis()
+		{
+			_model.Controller = new TolerableAnalysisController(_model.Controller);
+			_model.Faults.MakeNondeterministic();
+			IntolerableFaults().SuppressActivations();
+			return this;
+		}
 
-	    public ModelBuilder IntolerableFaultsAnalysis()
-	    {
-            _model.Controller = new IntolerableAnalysisController(_model.Controller);
-            _model.Faults.MakeNondeterministic();
-            TolerableFaults().SuppressActivations();
-            _model.AdditionaComponents.Add((IComponent)_model.Controller);
-	        return this;
-	    }
+		public ModelBuilder IntolerableFaultsAnalysis()
+		{
+			_model.Controller = new IntolerableAnalysisController(_model.Controller);
+			_model.Faults.MakeNondeterministic();
+			TolerableFaults().SuppressActivations();
+			_model.AdditionaComponents.Add((IComponent)_model.Controller);
+			return this;
+		}
 
-	    private IEnumerable<Fault> TolerableFaults()
-	    {
-	        return _model.Faults.Except(IntolerableFaults());
-	    }
+		private IEnumerable<Fault> TolerableFaults()
+		{
+			return _model.Faults.Except(IntolerableFaults());
+		}
 
-	    private IEnumerable<Fault> IntolerableFaults()
-	    {
-	        var agents = _model.CartAgents.Cast<Agent>().Concat(_model.RobotAgents);
+		private IEnumerable<Fault> IntolerableFaults()
+		{
+			var agents = _model.CartAgents.Cast<Agent>().Concat(_model.RobotAgents);
 
-	        return agents.Select(ag => ag.ConfigurationUpdateFailed)
-	                     .Concat(_model.Workpieces.Select(w => w.IncorrectlyPositionedFault))
-	                     .Concat(_model.Workpieces.Select(w => w.ToolApplicationFailed))
-	                     .Concat(_model.Robots.Select(r => r.SwitchToWrongToolFault))
-	                     .Concat(_model.Carts.Select(c => c.Lost));
-	    }
+			return agents.Select(ag => ag.ConfigurationUpdateFailed)
+						 .Concat(_model.Workpieces.Select(w => w.IncorrectlyPositionedFault))
+						 .Concat(_model.Workpieces.Select(w => w.ToolApplicationFailed))
+						 .Concat(_model.Robots.Select(r => r.SwitchToWrongToolFault))
+						 .Concat(_model.Carts.Select(c => c.Lost));
+		}
 
-	    public ModelBuilder CentralReconfiguration()
-	    {
-	        foreach (var agent in Agents)
-	            agent.ReconfigurationStrategy = new CentralReconfiguration(_model.Controller);
-	        return this;
-	    }
+		public ModelBuilder CentralReconfiguration()
+		{
+			foreach (var agent in Agents)
+				agent.ReconfigurationStrategy = new CentralReconfiguration(_model.Controller);
+			return this;
+		}
 
 		// TODO: methods for other reconfiguration strategies
 
-	    private IEnumerable<Agent> Agents => _model.CartAgents.Cast<Agent>().Concat(_model.RobotAgents);
+		private IEnumerable<Agent> Agents => _model.CartAgents.Cast<Agent>().Concat(_model.RobotAgents);
 	}
 }
