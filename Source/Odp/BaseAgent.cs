@@ -160,7 +160,7 @@ namespace SafetySharp.Odp
 		private Role[] GetRoles(BaseAgent source, Condition condition)
 		{
 			return AllocatedRoles.Where(role =>
-				role.PreCondition.Port == source && role.PreCondition.StateMatches(condition)
+				!role.IsLocked && role.PreCondition.Port == source && role.PreCondition.StateMatches(condition)
 			).ToArray();
 		}
 
