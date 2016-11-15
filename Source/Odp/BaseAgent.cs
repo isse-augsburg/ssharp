@@ -58,7 +58,7 @@ namespace SafetySharp.Odp
 			MicrostepScheduler.Schedule(UpdateAsync);
 		}
 
-		private async Task UpdateAsync()
+		protected virtual async Task UpdateAsync()
 		{
 			await Observe();
 			Work();

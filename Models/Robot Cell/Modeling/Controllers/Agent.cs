@@ -76,14 +76,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public bool HasResource => Resource != null;
 
-		public override void Update()
+		protected override async System.Threading.Tasks.Task UpdateAsync()
 		{
 			CheckAllocatedCapabilities();
 			if (TaskQueue?.Count > 0)
-				PerformReconfiguration(new[] {
+				await PerformReconfiguration(new[] {
 					Tuple.Create(TaskQueue.Dequeue() as ITask, new State(this))
 				});
-			base.Update();
+			await base.UpdateAsync();
 		}
 
 		protected override void DropResource()

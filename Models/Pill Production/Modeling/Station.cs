@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using SafetySharp.Modeling;
 	using Odp;
 
@@ -47,14 +48,14 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		[Hidden]
 		internal Queue<Recipe> RecipeQueue { get; set; }
 
-		public override void Update()
+		protected override async Task UpdateAsync()
 		{
 			if (RecipeQueue.Count > 0)
-				PerformReconfiguration(new[] {
+				await PerformReconfiguration(new[] {
 					Tuple.Create((ITask)RecipeQueue.Dequeue(), new State(this))
 				});
 
-			base.Update();
+			await base.UpdateAsync();
 		}
 
 		/// <summary>
