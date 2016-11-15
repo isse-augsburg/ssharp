@@ -301,9 +301,6 @@ namespace SafetySharp.Odp
 			);
 		}
 
-		[Hidden]
-		private int _runningReconfigurations = 0;
-
 		protected async Task PerformReconfiguration(IEnumerable<Tuple<ITask, State>> reconfigurations)
 		{
 			var deficientTasks = new HashSet<ITask>(reconfigurations.Select(t => t.Item1));
@@ -316,13 +313,9 @@ namespace SafetySharp.Odp
 			_deficientConfiguration = _hasRole && deficientTasks.Contains(_currentRole.Task);
 
 			// initiate reconfiguration to fix violations
-			_runningReconfigurations++;
 			await ReconfigurationStrategy.Reconfigure(reconfigurations);
-			_runningReconfigurations--;
-
-			// no reconfigurations currently running -- verify correctness of new configuration
-			if (_runningReconfigurations == 0)
-				VerifyInvariants();
+			// verify correctness of new configuration
+			VerifyInvariants();
 		}
 
 		private void VerifyInvariants()
