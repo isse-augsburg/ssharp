@@ -277,14 +277,14 @@ namespace SafetySharp.Odp
 		[Hidden]
 		public Reconfiguration.IReconfigurationStrategy ReconfigurationStrategy { get; set; }
 
-		protected virtual InvariantPredicate[] MonitoringPredicates { get; } = new InvariantPredicate[] {
+		protected virtual InvariantPredicate[] MonitoringPredicates { get; } = {
 			Invariant.IOConsistency,
 			Invariant.NeighborsAliveGuarantee,
 			Invariant.ResourceConsistency,
 			Invariant.CapabilityConsistency
 		};
 
-		protected virtual InvariantPredicate[] ConsistencyPredicates { get; } = new InvariantPredicate[] {
+		protected virtual InvariantPredicate[] ConsistencyPredicates { get; } = {
 			Invariant.PrePostConditionConsistency,
 			Invariant.TaskEquality,
 			Invariant.StateConsistency
