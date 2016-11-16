@@ -37,18 +37,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// States for response time
 		/// </summary>
-		public enum EProxyRespStates
+		public enum EProxyStates
 		{
 			ResponseTimeHigh,
 			ResponseTimeNormal,
-			ResponseTimeLow
-		}
-
-		/// <summary>
-		/// States for total server costs
-		/// </summary>
-		public enum EProxyCostsStates
-		{
+			ResponseTimeLow,
 			CostsOverLimit,
 			CostsNearLimit,
 			CostsLow
@@ -89,7 +82,10 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public int TotalServerCosts => ConnectedServers.Sum(s => s.Cost);
 
-		public StateMachine<EProxyRespStates> RespStateMachine = EProxyRespStates.ResponseTimeLow;
+		/// <summary>
+		/// State Machine
+		/// </summary>
+		public StateMachine<EProxyStates> ProxyStateMachine = new[] { EProxyStates.ResponseTimeLow, EProxyStates.CostsLow };
 
 		/// <summary>
 		/// Activates a new server
