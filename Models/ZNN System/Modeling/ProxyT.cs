@@ -1,0 +1,171 @@
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using SafetySharp.Modeling;
+
+namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
+{
+	/// <summary>
+	/// Represents the Proxy of the ZNN.com News System
+	/// </summary>
+	public class ProxyT : Component
+	{
+		/// <summary>
+		/// States for response time
+		/// </summary>
+		public enum EProxyRespStates
+		{
+			ResponseTimeHigh,
+			ResponseTimeNormal,
+			ResponseTimeLow
+		}
+
+		/// <summary>
+		/// States for total server costs
+		/// </summary>
+		public enum EProxyCostsStates
+		{
+			CostsOverLimit,
+			CostsNearLimit,
+			CostsLow
+		}
+
+		/// <summary>
+		/// The connected Clients
+		/// </summary>
+		private List<ClientT> _ConnectedClients;
+
+		/// <summary>
+		/// The connected Servers
+		/// </summary>
+		private List<ServerT> _ConnectedServers;
+
+		/// <summary>
+		/// Average response time of the servers from the last querys.
+		/// </summary>
+		private int _AvgRespnoseTime = 0;
+
+		/// <summary>
+		/// The connected Clients
+		/// </summary>
+		public List<ClientT> ConnectedClients => _ConnectedClients;
+
+		/// <summary>
+		/// The connected Servers
+		/// </summary>
+		public List<ServerT> ConnectedServers => _ConnectedServers;
+
+		/// <summary>
+		/// Number of active servers
+		/// </summary>
+		public int ActiveServerCount => ConnectedServers.Where(s => s.Cost > 0).Count();
+
+		/// <summary>
+		/// Total costs of all Server
+		/// </summary>
+		public int TotalServerCosts => ConnectedServers.Sum(s => s.Cost);
+
+		public StateMachine<EProxyRespStates> RespStateMachine = EProxyRespStates.ResponseTimeLow;
+
+		/// <summary>
+		/// Activates a new server
+		/// </summary>
+		private void IncrementServerPool()
+		{
+			ConnectedServers.Add(ServerT.Activate());
+		}
+
+		/// <summary>
+		/// Dectivates the server with the lowest load
+		/// </summary>
+		private void DecrementServerPool()
+		{
+			if(ConnectedServers.Count > 1)
+			{
+				var server = ConnectedServers.Aggregate((currMin, x) => ((currMin == null || x.Load < currMin.Load) ? x : currMin));
+				server.Deactivate(ConnectedServers);
+			}
+		}
+
+		/// <summary>
+		/// Switches the servers to text mode
+		/// </summary>
+		private void SwitchServerToTextMode()
+		{
+			foreach(var server in ConnectedServers)
+				server.SetFidelity(ServerT.EFidelity.Low);
+		}
+
+		/// <summary>
+		/// Switches the servers to multimedia mode
+		/// </summary>
+		private void SwitchServerToMultiMode()
+		{
+			foreach(var server in ConnectedServers)
+				server.SetFidelity(ServerT.EFidelity.High);
+		}
+
+		public void GetQuery()
+		{
+
+			if(_AvgRespnoseTime > Model.HighResponseimeValue)
+			{
+				if(TotalServerCosts < Model.MaxBudget)
+					IncrementServerPool();
+				else
+					// Switch Server to text mode
+					foreach(var server in ConnectedServers)
+						server.SetFidelity(ServerT.EFidelity.Low);
+			}
+
+			else
+			{
+				if(_AvgRespnoseTime < Model.LowResponseTimeValue)
+				{
+					// Server costs near limit
+					if(TotalServerCosts > (Model.MaxBudget * 0.75))
+						DecrementServerPool();
+				}
+
+				// Random increment or decrement server pool
+				if(new Random().Next(0, 2) < 1)
+					IncrementServerPool();
+				else
+					DecrementServerPool();
+
+				SwitchServerToMultiMode();
+			}
+
+			// Select Server
+		}
+
+		public override void Update()
+		{
+			base.Update();
+		}
+	}
+}
