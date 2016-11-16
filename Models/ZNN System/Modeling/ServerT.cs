@@ -71,11 +71,6 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private int _MaxServerUnits;
 
 		/// <summary>
-		/// Current content fidelity level of the server.
-		/// </summary>
-		private EFidelity _Fidelity;
-
-		/// <summary>
 		/// The connected Proxy
 		/// </summary>
 		private ProxyT _ConnectedProxy;
@@ -94,7 +89,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Current content fidelity level of the server.
 		/// </summary>
-		public EFidelity Fidelity => _Fidelity;
+		public StateMachine<EFidelity> FidelityStateMachine = EFidelity.High;
 
 		/// <summary>
 		/// The connected Proxy
@@ -137,7 +132,18 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public void SetFidelity(EFidelity level)
 		{
-			_Fidelity = level;
+			FidelityStateMachine.Transition(
+					from: new[] { EFidelity.Medium, EFidelity.Low },
+					to: EFidelity.High,
+					guard: level == EFidelity.High)
+				.Transition(
+					from: new[] { EFidelity.High, EFidelity.Low },
+					to: EFidelity.Medium,
+					guard: level == EFidelity.Medium)
+				.Transition(
+					from: new[] { EFidelity.Medium, EFidelity.High },
+					to: EFidelity.Low,
+					guard: level == EFidelity.Low);
 		}
 
 		public override void Update()
