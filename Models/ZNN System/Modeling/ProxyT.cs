@@ -63,6 +63,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private int _AvgRespnoseTime = 0;
 
 		/// <summary>
+		/// Gets the last round robin selected server for queries
+		/// </summary>
+		private int _LastSelectedServer = -1;
+
+		/// <summary>
 		/// The connected Clients
 		/// </summary>
 		public List<ClientT> ConnectedClients => _ConnectedClients;
@@ -125,9 +130,21 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 				server.SetFidelity(ServerT.EFidelity.High);
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public void GetQuery()
 		{
+			AdjustServers();
+			
+			SelectServer();
+		}
 
+		/// <summary>
+		/// Adjust the server pool (size and fidelity)
+		/// </summary>
+		private void AdjustServers()
+		{
 			if(_AvgRespnoseTime > Model.HighResponseimeValue)
 			{
 				if(TotalServerCosts < Model.MaxBudget)
@@ -155,8 +172,19 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 
 				SwitchServerToMultiMode();
 			}
+		}
 
-			// Select Server
+		/// <summary>
+		/// Selects the Server by round robin
+		/// </summary>
+		/// <returns>Selected Server</returns>
+		private ServerT SelectServer()
+		{
+			if(ConnectedServers.Count > _LastSelectedServer - 1)
+				_LastSelectedServer = -1;
+
+			var selected = ConnectedServers[++_LastSelectedServer];
+			return selected;
 		}
 
 		public override void Update()
