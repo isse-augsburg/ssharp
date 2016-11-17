@@ -32,7 +32,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	/// <summary>
 	/// Represents the ZNN.com News System case study.
 	/// </summary>
-	class Model:ModelBase
+	class Model : ModelBase
 	{
 		/// <summary>
 		/// The cost of one server unit.
@@ -53,6 +53,27 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// Available Budget for server costs.
 		/// </summary>
 		public const int MaxBudget = 100;
+		
+		[Root(RootKind.Controller)]
+		public ProxyT Proxy;
+
+		public List<ClientT> Clients => Proxy.ConnectedClients;
+
+		public List<ServerT> Servers => Proxy.ConnectedServers;
+
+		/// <summary>
+		/// Initializes a new instance
+		/// </summary>
+		public Model()
+		{
+			Proxy = new ProxyT();
+
+			// Add a few clients
+			for(int i = 0; i < 50; i++)
+			{
+				Clients.Add(new ClientT(Proxy));
+			}
+		}
 
 	}
 }

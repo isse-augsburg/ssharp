@@ -92,6 +92,12 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public StateMachine<EProxyStates> ProxyStateMachine = new[] { EProxyStates.ResponseTimeLow, EProxyStates.CostsLow };
 
+		public ProxyT()
+		{
+			_ConnectedClients = new List<ClientT>();
+			_ConnectedServers = new List<ServerT>();
+		}
+
 		/// <summary>
 		/// Activates a new server
 		/// </summary>
