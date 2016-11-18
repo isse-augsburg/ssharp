@@ -39,15 +39,13 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents a base class for external probabilistic model checker tools.
 	/// </summary>
-	public abstract class MdpModelChecker : IDisposable
+	internal abstract class MdpModelChecker : IDisposable
 	{
-		public ProbabilityRangeChecker ProbabilityRangeChecker { get; }
+		internal MarkovDecisionProcess MarkovDecisionProcess { get; }
 
-		internal MarkovDecisionProcess MarkovDecisionProcess => ProbabilityRangeChecker.MarkovDecisionProcess;
-
-		protected MdpModelChecker(ProbabilityRangeChecker probabilityRangeChecker)
+		protected MdpModelChecker(MarkovDecisionProcess mdp)
 		{
-			ProbabilityRangeChecker = probabilityRangeChecker;
+			MarkovDecisionProcess = mdp;
 		}
 
 		public abstract void Dispose();

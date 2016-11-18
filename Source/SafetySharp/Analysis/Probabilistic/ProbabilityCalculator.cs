@@ -36,7 +36,6 @@ namespace SafetySharp.Analysis
 		public ProbabilityCalculator(Func<Probability> useDefaultChecker) //, Func<IFormulaCalculatingCapability, Probability> useCustomChecker
 		{
 			Calculate = useDefaultChecker;
-			//CalculateWithChecker = useCustomChecker;
 		}
 
 		// Check with the DefaultChecker of ProbabilityChecker this FormulaChecker was built in

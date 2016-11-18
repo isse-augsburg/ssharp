@@ -33,6 +33,7 @@ namespace SafetySharp.Analysis
 	using System.IO;
 	using FormulaVisitors;
 	using Modeling;
+	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;
 
@@ -42,7 +43,7 @@ namespace SafetySharp.Analysis
 		private TemporaryFile _fileTransitions;
 		private TemporaryFile _fileStateLabelings;
 		
-		public Mrmc(ProbabilityChecker probabilityChecker) : base(probabilityChecker)
+		public Mrmc(DiscreteTimeMarkovChain markovChain) : base(markovChain)
 		{
 		}
 		
@@ -157,7 +158,6 @@ namespace SafetySharp.Analysis
 
 		private TemporaryFile WriteFilesAndExecuteMrmc(Formula formulaToCheck,bool outputExactResult) //returns result file
 		{
-			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
 			WriteMarkovChainToDisk();
 			
 			var transformationVisitor = new MrmcTransformer();

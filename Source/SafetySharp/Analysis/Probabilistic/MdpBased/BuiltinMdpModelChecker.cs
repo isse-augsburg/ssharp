@@ -114,8 +114,8 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			}
 			return complement;
 		}
-
-		public BuiltinMdpModelChecker(ProbabilityRangeChecker probabilityRangeChecker) : base(probabilityRangeChecker)
+		
+		public BuiltinMdpModelChecker(MarkovDecisionProcess mdp) : base(mdp)
 		{
 			_underlyingDigraph = MarkovDecisionProcess.CreateUnderlyingDigraph();
 		}
@@ -187,7 +187,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return finalProbability;
 		}*/
 
-		private double CalculateMinimumFinalProbability(double[] initialStateProbabilities)
+		public double CalculateMinimumFinalProbability(double[] initialStateProbabilities)
 		{
 			var enumerator = MarkovDecisionProcess.GetEnumerator();
 			enumerator.SelectInitialDistributions();
@@ -216,7 +216,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return finalProbability;
 		}
 
-		private double CalculateMaximumFinalProbability(double[] initialStateProbabilities)
+		internal double CalculateMaximumFinalProbability(double[] initialStateProbabilities)
 		{
 			var enumerator = MarkovDecisionProcess.GetEnumerator();
 			enumerator.SelectInitialDistributions();
@@ -245,7 +245,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return finalProbability;
 		}
 
-		private double CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
+		internal double CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
 		{
 
 			var stopwatch = new Stopwatch();
@@ -323,7 +323,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return finalProbability;
 		}
 
-		private double CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
+		internal double CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
 		{
 
 			var stopwatch = new Stopwatch();
@@ -401,13 +401,13 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return finalProbability;
 		}
 
-		private Dictionary<int, bool> ProbabilityExactlyZeroWithAllAdversaries(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates)
+		public Dictionary<int, bool> StatesReachableWithProbabilityExactlyZeroWithAllSchedulers(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates)
 		{
-			// calculate probabilityExactlyZero (prob0a). No matter which adversary is selected, the probability
+			// calculate probabilityExactlyZero (prob0a). No matter which scheduler is selected, the probability
 			// of the resulting states is zero.
 
 			// The idea of the algorithm is to calculate probabilityGreaterThanZero
-			//     all states where there _exists_ an adversary such that a directlySatisfiedState
+			//     all states where there _exists_ a scheduler such that a directlySatisfiedState
 			//     might be reached with a probability > 0.
 			//     This is simply the set of all ancestors of directlySatisfiedStates.
 			// The complement of probabilityGreaterThanZero is the set of states where _all_ adversaries have a probability
@@ -444,12 +444,12 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
 			return probabilityExactlyZero;
 		}
-		
 
-		private Dictionary<int, bool> ProbabilityExactlyZeroExistsAdversary(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates)
+
+		public Dictionary<int, bool> StatesReachableWithProbabilityExactlyZeroForAtLeastOneScheduler(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates)
 		{
-			// calculate probabilityExactlyZero (prob0e). There exists an adversary, for which the probability of
-			// the resulting states is zero. The result may be different for another adversary, but at least there exists one.
+			// calculate probabilityExactlyZero (prob0e). There exists a scheduler, for which the probability of
+			// the resulting states is zero. The result may be different for another scheduler, but at least there exists one.
 
 			Dictionary<int, bool> ancestorsFound=null;
 			var probabilityGreaterThanZero = directlySatisfiedStates; //we know initially this is satisfied
@@ -457,8 +457,8 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var mdpEnumerator = MarkovDecisionProcess.GetEnumerator();
 			// The idea of the algorithm is to calculate probabilityGreaterThanZero:
 			//     all states where a directlySatisfiedState is reached with a probability > 0
-			//     no matter which adversary is selected (valid for _all_ adversaries).
-			// The complement of probabilityGreaterThanZero is the set of states where an adversary _exists_ for
+			//     no matter which scheduler is selected (valid for _all_ adversaries).
+			// The complement of probabilityGreaterThanZero is the set of states where a scheduler _exists_ for
 			//     which the probability to reach a directlySatisfiedState is exactly 0.
 			Func<int, bool> nodesToIgnore = source =>
 			{
@@ -528,15 +528,15 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
 			return probabilityExactlyZero;
 		}
-		
-		private Dictionary<int, bool> ProbabilityExactlyOneExistsAdversary(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates, Dictionary<int, bool> probabilityExactlyZero)
+
+		public Dictionary<int, bool> StatesReachableWithProbabilityExactlyOneForAtLeastOneScheduler(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates)
 		{
-			// calculate probabilityExactlyOne (prob1e). There exists an adversary, for which the probability of
-			// the resulting states is exactly 1. The result may be different for another adversary, but at least there exists one.
+			// calculate probabilityExactlyOne (prob1e). There exists a scheduler, for which the probability of
+			// the resulting states is exactly 1. The result may be different for another scheduler, but at least there exists one.
 
 			// The algorithm works this way: It looks at a set of states probabilityMightBeExactlyOne which are initially all states.
 			// Then it iterates until a fixpoint is found. In each iteration states are removed from probabilityMightBeExactlyOne for
-			// which an adversary _must_ switch to a state where the probability is < 1.
+			// which a scheduler _must_ switch to a state where the probability is < 1.
 			// The removal process works this way: In each iteration a backwards search is started.
 			// A distribution from a predecessor is removed, if not every transition of the distribution leads to a
 			// state in probabilityMightBeExactlyOne (Reason: It is possible from there to go to a state where probability < 1).

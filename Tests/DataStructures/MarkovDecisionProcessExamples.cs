@@ -1,0 +1,492 @@
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Tests.DataStructures.MarkovDecisionProcessExamples
+{
+	using System.Diagnostics;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
+	using Utilities;
+	using Xunit;
+	using Xunit.Abstractions;
+	using SafetySharp.Utilities.Graph;
+	using SafetySharp.Analysis.Probabilistic.MdpBased.ExportToGv;
+
+	internal abstract class MarkovDecisionProcessExample
+	{
+		public MarkovDecisionProcess Mdp { get; protected set; }
+
+		public Dictionary<int, bool> NoState = new Dictionary<int, bool>() { };
+
+		public Dictionary<int, bool> StatesSatisfyDirectlyCondition1;
+		public Dictionary<int, bool> StatesProb1ACondition1;
+		public Dictionary<int, bool> StatesProb1ECondition1;
+		public Dictionary<int, bool> StatesProb0ECondition1;
+		public Dictionary<int, bool> StatesAncestorsCondition1;
+
+		public Dictionary<int, bool> StatesSatisfyDirectlyCondition2;
+		public Dictionary<int, bool> StatesAncestorsCondition2;
+
+		[Fact]
+		public string ToGraphvizString()
+		{
+			var sb = new StringBuilder();
+			Mdp.ExportToGv(sb);
+			sb.AppendLine();
+			return sb.ToString();
+		}
+	}
+
+	internal class Example1 : MarkovDecisionProcessExample
+	{
+		private MarkovDecisionProcess Create()
+		{
+			// Just a simple MDP with no nondeterministic choices
+			//   ⟳0⟶1⟲
+			Func<bool> returnTrue = () => true;
+			Func<bool> returnFalse = () => false;
+
+			var mdp = new MarkovDecisionProcess();
+			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateRewardRetrieverLabels = new string[] { };
+			mdp.StartWithInitialDistributions();
+			mdp.StartWithNewInitialDistribution();
+			mdp.AddTransitionToInitialDistribution(0, 1.0);
+			mdp.FinishInitialDistribution();
+			mdp.FinishInitialDistributions();
+			mdp.SetStateLabeling(1, new StateFormulaSet(new[] { returnTrue, returnFalse }));
+			mdp.StartWithNewDistributions(1);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
+			mdp.StartWithNewDistributions(0);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 0.6);
+			mdp.AddTransition(0, 0.4);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			return mdp;
+		}
+		
+		internal Example1()
+		{
+			Mdp = Create();
+
+			// Condition 1 is here label1
+			StatesSatisfyDirectlyCondition1 = new Dictionary<int, bool>() { {1,true} };
+			StatesProb1ACondition1 = new Dictionary<int, bool>() { {1,true} };
+			StatesProb1ECondition1 = new Dictionary<int, bool>() { {1,true} };
+			StatesProb0ECondition1 = new Dictionary<int, bool>() { { 1, true } };
+			StatesAncestorsCondition1 = new Dictionary<int, bool>() { { 1, true } };
+
+			StatesSatisfyDirectlyCondition1 = new Dictionary<int, bool>() { { 1, true } };
+			StatesAncestorsCondition2 = new Dictionary<int, bool>() { { 1, true } };
+		}
+
+	}
+
+	internal class Example2 : MarkovDecisionProcessExample
+	{
+		public MarkovDecisionProcess Create()
+		{
+			// Just another simple MDP with no nondeterministic choices
+			//   0⟶1⟲
+			Func<bool> returnTrue = () => true;
+			Func<bool> returnFalse = () => false;
+
+			var mdp = new MarkovDecisionProcess();
+			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateRewardRetrieverLabels = new string[] { };
+			mdp.StartWithInitialDistributions();
+			mdp.StartWithNewInitialDistribution();
+			mdp.AddTransitionToInitialDistribution(0, 1.0);
+			mdp.FinishInitialDistribution();
+			mdp.FinishInitialDistributions();
+			mdp.SetStateLabeling(1, new StateFormulaSet(new[] { returnTrue, returnFalse }));
+			mdp.StartWithNewDistributions(1);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
+			mdp.StartWithNewDistributions(0);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			return mdp;
+		}
+
+		internal Example2()
+		{
+			Mdp = Create();
+		}
+	}
+
+	internal class Example3 : MarkovDecisionProcessExample
+	{
+		public static MarkovDecisionProcess Create()
+		{
+			// A MDP which was designed to test prob1e
+			//   0⟶0.5⟼1⟲    0.5⇢0
+			//       0.5⟼3⟶4➞0.5⟲
+			//             ↘2⟲
+			Func<bool> returnTrue = () => true;
+			Func<bool> returnFalse = () => false;
+
+			var mdp = new MarkovDecisionProcess();
+			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateRewardRetrieverLabels = new string[] { };
+			mdp.StartWithInitialDistributions();
+			mdp.StartWithNewInitialDistribution();
+			mdp.AddTransitionToInitialDistribution(0, 1.0);
+			mdp.FinishInitialDistribution();
+			mdp.FinishInitialDistributions();
+
+			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(0);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 0.5);
+			mdp.AddTransition(3, 0.5);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(1, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(1);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(2, new StateFormulaSet(new[] { returnTrue, returnFalse }));
+			mdp.StartWithNewDistributions(2);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(2, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(3, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(3);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(2, 1.0);
+			mdp.FinishDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(4, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(4, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(4);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 0.5);
+			mdp.AddTransition(4, 0.5);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			return mdp;
+		}
+
+		internal Example3()
+		{
+			Mdp = Create();
+		}
+	}
+
+	internal class Example4 : MarkovDecisionProcessExample
+	{
+		private MarkovDecisionProcess Create()
+		{
+			// A MDP which was designed to test prob1e
+			//   0⇢3
+			//    ↘0.5⟼1⟲    0.5⇢0
+			//      0.5⟼3⟶4➞0.5⟲
+			//            ↘2⟲
+			Func<bool> returnTrue = () => true;
+			Func<bool> returnFalse = () => false;
+
+			var mdp = new MarkovDecisionProcess();
+			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateRewardRetrieverLabels = new string[] { };
+			mdp.StartWithInitialDistributions();
+			mdp.StartWithNewInitialDistribution();
+			mdp.AddTransitionToInitialDistribution(0, 1.0);
+			mdp.FinishInitialDistribution();
+			mdp.FinishInitialDistributions();
+
+			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(0);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 0.5);
+			mdp.AddTransition(3, 0.5);
+			mdp.FinishDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(3, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(1, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(1);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(2, new StateFormulaSet(new[] { returnTrue, returnFalse }));
+			mdp.StartWithNewDistributions(2);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(2, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(3, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(3);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(2, 1.0);
+			mdp.FinishDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(4, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(4, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(4);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 0.5);
+			mdp.AddTransition(4, 0.5);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			return mdp;
+		}
+
+		internal Example4()
+		{
+			Mdp = Create();
+		}
+	}
+
+	internal class Example5 : MarkovDecisionProcessExample
+	{
+		public static MarkovDecisionProcess Create()
+		{
+			// A MDP which was designed to test prob0e
+			//   0⟼1↘
+			//    ↘2⟼3⟲
+			Func<bool> returnTrue = () => true;
+			Func<bool> returnFalse = () => false;
+
+			var mdp = new MarkovDecisionProcess();
+			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateRewardRetrieverLabels = new string[] { };
+			mdp.StartWithInitialDistributions();
+			mdp.StartWithNewInitialDistribution();
+			mdp.AddTransitionToInitialDistribution(0, 1.0);
+			mdp.FinishInitialDistribution();
+			mdp.FinishInitialDistributions();
+
+			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(0);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 1.0);
+			mdp.FinishDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(2, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(1, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(1);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(3, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(2, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(2);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(3, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(3, new StateFormulaSet(new[] { returnTrue, returnFalse }));
+			mdp.StartWithNewDistributions(3);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(3, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			return mdp;
+		}
+
+		internal Example5()
+		{
+			Mdp = Create();
+		}
+	}
+
+	internal class Example6 : MarkovDecisionProcessExample
+	{
+		public static MarkovDecisionProcess Create()
+		{
+			// A MDP which was designed to test prob0e
+			//   4
+			//   ⇅
+			//   0⟼1↘
+			//    ↘2⟼3⟲
+			Func<bool> returnTrue = () => true;
+			Func<bool> returnFalse = () => false;
+
+			var mdp = new MarkovDecisionProcess();
+			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateRewardRetrieverLabels = new string[] { };
+			mdp.StartWithInitialDistributions();
+			mdp.StartWithNewInitialDistribution();
+			mdp.AddTransitionToInitialDistribution(0, 1.0);
+			mdp.FinishInitialDistribution();
+			mdp.FinishInitialDistributions();
+
+			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(0);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 1.0);
+			mdp.FinishDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(2, 1.0);
+			mdp.FinishDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(4, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(1, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(1);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(3, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(2, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(2);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(3, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(3, new StateFormulaSet(new[] { returnTrue, returnFalse }));
+			mdp.StartWithNewDistributions(3);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(3, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(4, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(4);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			return mdp;
+		}
+
+		internal Example6()
+		{
+			Mdp = Create();
+		}
+	}
+
+	internal class Example7 : MarkovDecisionProcessExample
+	{
+		public static MarkovDecisionProcess Create()
+		{
+			// A MDP which was designed to test prob0e
+			//   0⟼1↘
+			//    ↘2⟶3⟲
+			//       ⟶0.5⇢3
+			//        ↘0.5⟶4⇢0
+			Func<bool> returnTrue = () => true;
+			Func<bool> returnFalse = () => false;
+
+			var mdp = new MarkovDecisionProcess();
+			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateRewardRetrieverLabels = new string[] { };
+			mdp.StartWithInitialDistributions();
+			mdp.StartWithNewInitialDistribution();
+			mdp.AddTransitionToInitialDistribution(0, 1.0);
+			mdp.FinishInitialDistribution();
+			mdp.FinishInitialDistributions();
+
+			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(0);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 1.0);
+			mdp.FinishDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(2, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(1, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(1);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(3, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(2, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(2);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(3, 1.0);
+			mdp.FinishDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(3, 0.5);
+			mdp.AddTransition(4, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(3, new StateFormulaSet(new[] { returnTrue, returnFalse }));
+			mdp.StartWithNewDistributions(3);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(3, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+
+			mdp.SetStateLabeling(4, new StateFormulaSet(new[] { returnFalse, returnFalse }));
+			mdp.StartWithNewDistributions(4);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			return mdp;
+		}
+
+		internal Example7()
+		{
+			Mdp = Create();
+		}
+	}
+}

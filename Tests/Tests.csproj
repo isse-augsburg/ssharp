@@ -229,6 +229,8 @@
     <Compile Include="Analysis\StateConstraints\single removed state.cs" />
     <Compile Include="Analysis\StateConstraints\deterministic through constraints.cs" />
     <Compile Include="Analysis\StateConstraints\deadlock.cs" />
+    <Compile Include="DataStructures\MarkovChainExamples.cs" />
+    <Compile Include="DataStructures\MarkovDecisionProcessExamples.cs" />
     <Compile Include="Diagnostics\Bindings\Invalid\events.cs" />
     <Compile Include="Analysis\Probabilistic\custom probability of transient fault.cs" />
     <Compile Include="Analysis\Probabilistic\emulate dice with coin.cs" />
@@ -619,6 +621,7 @@
     <Compile Include="Execution\Models\Subcomponents\generic.cs" />
     <Compile Include="Execution\Models\Subcomponents\multiple.cs" />
     <Compile Include="Execution\Models\Subcomponents\single.cs" />
+    <Compile Include="ProbabilisticAlgorithms\BuiltinMdpModelCheckerTests.cs" />
     <Compile Include="Serialization\Compaction\alignment.cs" />
     <Compile Include="Serialization\Compaction\Boolean 1 byte.cs" />
     <Compile Include="Serialization\Compaction\faults.cs" />

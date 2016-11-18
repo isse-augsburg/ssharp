@@ -26,7 +26,7 @@ namespace Tests.Analysis.Probabilistic
 				Formula falseFormula = !true;
 				var checkProbabilityOfFinally2 = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(falseFormula));
 				probabilityChecker.CreateMarkovChain();
-				probabilityChecker.DefaultChecker = modelChecker;
+				probabilityChecker.ModelChecker = modelChecker;
 				probabilityOfFalse = checkProbabilityOfFinally2.Calculate();
 			}
 

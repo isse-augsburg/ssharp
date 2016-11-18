@@ -57,13 +57,14 @@ namespace SafetySharp.Analysis
 		private ModelBase _model;
 		private readonly ConcurrentBag<Formula> _formulasToCheck = new ConcurrentBag<Formula>();
 
-		public DtmcModelChecker DefaultChecker { get; set; }
+		public DtmcModelChecker ModelChecker { get; set; }
 
 		public void InitializeDefaultChecker()
 		{
-			if (DefaultChecker == null)
+			AssertProbabilityMatrixWasCreated();
+			if (ModelChecker == null)
 			{
-				DefaultChecker = new Mrmc(this);
+				ModelChecker = new Mrmc(MarkovChain);
 			}
 		}
 
@@ -85,20 +86,20 @@ namespace SafetySharp.Analysis
 		private Probability CalculateProbabilityWithDefaultChecker(Formula formulaToCheck)
 		{
 			InitializeDefaultChecker();
-			return DefaultChecker.CalculateProbability(formulaToCheck);
+			return ModelChecker.CalculateProbability(formulaToCheck);
 		}
 
 		private bool CalculateFormulaWithDefaultChecker(Formula formulaToCheck)
 		{
 			InitializeDefaultChecker();
-			return DefaultChecker.CalculateFormula(formulaToCheck);
+			return ModelChecker.CalculateFormula(formulaToCheck);
 		}
 
 
 		private RewardResult CalculateRewardWithDefaultChecker(Formula formulaToCheck)
 		{
 			InitializeDefaultChecker();
-			return DefaultChecker.CalculateReward(formulaToCheck);
+			return ModelChecker.CalculateReward(formulaToCheck);
 		}
 
 
@@ -287,7 +288,7 @@ namespace SafetySharp.Analysis
 
 		public void Dispose()
 		{
-			DefaultChecker?.Dispose();
+			ModelChecker?.Dispose();
 		}
 	}
 }

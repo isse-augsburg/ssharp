@@ -169,7 +169,7 @@ namespace SafetySharp.Runtime
 		}
 	}
 
-	internal class LabelVector : AutoResizeVector<StateFormulaSet>
+	public class LabelVector : AutoResizeVector<StateFormulaSet>
 	{
 		public LabelVector()
 			: base()

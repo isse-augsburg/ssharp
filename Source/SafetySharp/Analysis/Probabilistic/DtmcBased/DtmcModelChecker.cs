@@ -41,13 +41,11 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public abstract class DtmcModelChecker : IDisposable
 	{
-		public ProbabilityChecker ProbabilityChecker { get; }
+		internal DiscreteTimeMarkovChain MarkovChain { get; }
 
-		internal DiscreteTimeMarkovChain MarkovChain => ProbabilityChecker.MarkovChain;
-
-		protected DtmcModelChecker(ProbabilityChecker probabilityChecker)
+		internal DtmcModelChecker(DiscreteTimeMarkovChain markovChain)
 		{
-			ProbabilityChecker = probabilityChecker;
+			MarkovChain = markovChain;
 		}
 
 		public abstract void Dispose();

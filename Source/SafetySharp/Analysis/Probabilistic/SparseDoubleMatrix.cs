@@ -362,7 +362,7 @@ namespace SafetySharp.Runtime
 
 			private int _currentColumnValueL; //inclusive
 			private int _currentColumnValueH; //exclusive
-			public int _currentColumnValueIndex;
+			private int _currentColumnValueIndex;
 
 			public ColumnValue? CurrentColumnValue { get; private set; }
 

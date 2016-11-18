@@ -111,10 +111,11 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return complement;
 		}
 
-		public BuiltinDtmcModelChecker(ProbabilityChecker probabilityChecker) : base(probabilityChecker)
+		public BuiltinDtmcModelChecker(DiscreteTimeMarkovChain markovChain) : base(markovChain)
 		{
 			_underlyingDigraph = MarkovChain.CreateUnderlyingDigraph();
 		}
+		
 
 		internal Dictionary<int,bool> CalculateSatisfiedStates(Func<int,bool> formulaEvaluator)
 		{
@@ -309,7 +310,6 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 		internal override Probability CalculateProbability(Formula formulaToCheck)
 		{
-			ProbabilityChecker.AssertProbabilityMatrixWasCreated();
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 

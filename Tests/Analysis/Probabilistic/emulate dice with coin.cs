@@ -62,7 +62,7 @@ namespace Tests.Analysis.Probabilistic
 
 				var checkProbabilityOf1 = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(c.IsInStateFinal1()));
 				probabilityChecker.CreateMarkovChain();
-				probabilityChecker.DefaultChecker = modelChecker;
+				probabilityChecker.ModelChecker = modelChecker;
 				probabilityOfFinal1 = checkProbabilityOf1.Calculate();
 				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);
 			}

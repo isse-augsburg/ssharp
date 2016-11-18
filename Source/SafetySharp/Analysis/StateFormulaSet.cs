@@ -29,7 +29,7 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   An efficient representation of a state formula set, indicating whether the state formulas hold in a state.
 	/// </summary>
-	internal struct StateFormulaSet : IEquatable<StateFormulaSet>
+	public struct StateFormulaSet : IEquatable<StateFormulaSet>
 	{
 		private readonly int _formulas;
 

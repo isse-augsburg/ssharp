@@ -56,11 +56,11 @@ namespace SafetySharp.Analysis
 		private ModelBase _model;
 		private readonly ConcurrentBag<Formula> _formulasToCheck = new ConcurrentBag<Formula>();
 
-		public DtmcModelChecker DefaultChecker { get; set; }
+		public DtmcModelChecker ModelChecker { get; set; }
 
 		public void InitializeDefaultChecker()
 		{
-			if (DefaultChecker == null)
+			if (ModelChecker == null)
 			{
 				//DefaultChecker = new Mrmc(this);
 			}
@@ -287,7 +287,7 @@ namespace SafetySharp.Analysis
 		*/
 		public void Dispose()
 		{
-			DefaultChecker?.Dispose();
+			ModelChecker?.Dispose();
 		}
 	}
 }
