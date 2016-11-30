@@ -96,6 +96,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public StateMachine<EFidelity> FidelityStateMachine = EFidelity.High;
 
 		/// <summary>
+		/// The current executing queries
+		/// </summary>
+		private List<Query> ExecutingQueries { get; set; }
+
+		/// <summary>
 		/// Initialize a new server instance
 		/// </summary>
 		/// <param name="maxServerUnits">Max Server capacity units</param>
@@ -150,11 +155,33 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 					guard: level == EFidelity.Low);
 		}
 
-		
-
-		public override void Update()
+		/// <summary>
+		/// Adds the query to the list to be executing
+		/// </summary>
+		/// <param name="query">The query</param>
+		public void AddQuery(Query query)
 		{
-			base.Update();
+			ExecutingQueries.Add(query);
 		}
+
+		/// <summary>
+		/// Simulates an execution step of the query and returns true if the query was executed
+		/// </summary>
+		/// <param name="query">The query</param>
+		/// <returns>True if the query was executed</returns>
+		public bool ExecuteQueryStep(Query query)
+		{
+			return ExecutingQueries.IndexOf(query) < _AvailableServerUnits;
+		}
+
+		/// <summary>
+		/// Remove a completly executed query from the list
+		/// </summary>
+		/// <param name="query"></param>
+		public void QueryComplete(Query query)
+		{
+			ExecutingQueries.Remove(query);
+		}
+		
 	}
 }

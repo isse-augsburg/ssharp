@@ -55,6 +55,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private bool _IsResponseWaiting;
 
 		/// <summary>
+		/// The current query
+		/// </summary>
+		public Query CurrentQuery { get; set; }
+
+		/// <summary>
 		/// Response time of the last query to the server in ms
 		/// </summary>
 		public int LastResponseTime => _LastResponseTime;
@@ -64,15 +69,32 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public ProxyT ConnectedProxy => _ConnectedProxy;
 
+		/// <summary>
+		/// Creates a new client instance
+		/// </summary>
+		/// <param name="proxy">Connected Proxy</param>
 		public ClientT(ProxyT proxy)
 		{
 			_ConnectedProxy = proxy;
 		}
 
+		/// <summary>
+		/// Initialize a new Query
+		/// </summary>
 		public void StartQuery()
 		{
 			_IsResponseWaiting = true;
 			_CurrentResponseTime = 0;
+			CurrentQuery = new Query();
+		}
+
+		/// <summary>
+		/// Finalize a query
+		/// </summary>
+		public void GetResponse()
+		{
+			_LastResponseTime = _CurrentResponseTime;
+			_IsResponseWaiting = false;
 		}
 
 		/// <summary>
@@ -83,10 +105,6 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			if(_IsResponseWaiting)
 			{
 				_CurrentResponseTime++;
-			}
-			else
-			{
-				StartQuery();
 			}
 		}
 

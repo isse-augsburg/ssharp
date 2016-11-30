@@ -155,13 +155,15 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		}
 
 		/// <summary>
-		/// 
+		/// Executes the query
 		/// </summary>
-		public void GetQuery()
+		/// <param name="query">The query</param>
+		public void SelectServerForQuery(Query query)
 		{
 			AdjustServers();
 			
-			SelectServer();
+			query.SelectedServer = RoundRobinServerSelection();
+
 		}
 
 		/// <summary>
@@ -202,7 +204,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// Selects the Server by round robin
 		/// </summary>
 		/// <returns>Selected Server</returns>
-		private ServerT SelectServer()
+		private ServerT RoundRobinServerSelection()
 		{
 			if(ConnectedServers.Count > _LastSelectedServer - 1)
 				_LastSelectedServer = -1;
@@ -213,7 +215,62 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 
 		public override void Update()
 		{
-			base.Update();
+			foreach(var client in ConnectedClients)
+			{
+				Query query = client.CurrentQuery;
+				query.StateMachine.Transition(
+						from: Query.State.Idle,
+						to: Query.State.QueryToProxy,
+						guard: true,
+						action: client.StartQuery)
+					.Transition(
+						from: Query.State.QueryToProxy,
+						to: Query.State.QueryToServer,
+						guard: true,
+						action: null)
+					.Transition(
+						from: Query.State.QueryToServer,
+						to: Query.State.OnServer,
+						guard: true,
+						action: null)
+					.Transition(
+						from: Query.State.OnServer,
+						to: Query.State.LowFidelityComplete,
+						guard: query.SelectedServer.ExecuteQueryStep(query),
+						action: null)
+					.Transition(
+						from: Query.State.LowFidelityComplete,
+						to: Query.State.MediumFidelityComplete,
+						guard: query.SelectedServer.FidelityStateMachine.State != ServerT.EFidelity.Low && query.SelectedServer.ExecuteQueryStep(query),
+						action: null)
+					.Transition(
+						from: Query.State.MediumFidelityComplete,
+						to: Query.State.HighFidelityComplete,
+						guard: query.SelectedServer.FidelityStateMachine.State != ServerT.EFidelity.Medium && query.SelectedServer.ExecuteQueryStep(query),
+						action: null)
+					.Transition(
+						from: new[] { Query.State.LowFidelityComplete, Query.State.MediumFidelityComplete, Query.State.HighFidelityComplete },
+						to: Query.State.ResToProxy,
+						guard: query.SelectedServer.ExecuteQueryStep(query),
+						action: () => 
+						{
+							query.SelectedServer.QueryComplete(query);
+						})
+					.Transition(
+						from: Query.State.ResToProxy,
+						to: Query.State.ResToClient,
+						guard: true,
+						action: null)
+					.Transition(
+						from: Query.State.ResToClient,
+						to: Query.State.Idle,
+						guard: true,
+						action: () =>
+						{
+							client.GetResponse();
+							UpdateAvgResponseTime(client.LastResponseTime);
+						});
+			}
 		}
 	}
 }

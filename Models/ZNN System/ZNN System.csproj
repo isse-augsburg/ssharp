@@ -62,6 +62,7 @@
     <Compile Include="Modeling\ClientT.cs" />
     <Compile Include="Modeling\Model.cs" />
     <Compile Include="Modeling\ProxyT.cs" />
+    <Compile Include="Modeling\Query.cs" />
     <Compile Include="Modeling\ServerT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
