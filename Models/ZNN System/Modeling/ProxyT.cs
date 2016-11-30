@@ -58,9 +58,9 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private List<ServerT> _ConnectedServers;
 
 		/// <summary>
-		/// Average response time of the servers from the last querys.
+		/// Latest Response Times, use <see cref="UpdateAvgResponseTime"/> to add new times!
 		/// </summary>
-		private int _AvgRespnoseTime = 0;
+		private List<int> _LatestResponeTimes;
 
 		/// <summary>
 		/// Gets the last round robin selected server for queries
@@ -76,6 +76,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// The connected Servers
 		/// </summary>
 		public List<ServerT> ConnectedServers => _ConnectedServers;
+
+		/// <summary>
+		/// Average response time of the servers from the last querys.
+		/// </summary>
+		public int AvgResponseTime => (int) _LatestResponeTimes.Average();
 
 		/// <summary>
 		/// Number of active servers
@@ -96,25 +101,28 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		{
 			_ConnectedClients = new List<ClientT>();
 			_ConnectedServers = new List<ServerT>();
+			_LatestResponeTimes = new List<int>(Model.LastResponseCountForAvgTime);
+
+			IncrementServerPool();
 		}
 
 		/// <summary>
 		/// Activates a new server
 		/// </summary>
-		private void IncrementServerPool()
+		public void IncrementServerPool()
 		{
-			ConnectedServers.Add(ServerT.Activate());
+			ConnectedServers.Add(ServerT.GetNewServer());
 		}
 
 		/// <summary>
 		/// Dectivates the server with the lowest load
 		/// </summary>
-		private void DecrementServerPool()
+		public void DecrementServerPool()
 		{
 			if(ConnectedServers.Count > 1)
 			{
 				var server = ConnectedServers.Aggregate((currMin, x) => ((currMin == null || x.Load < currMin.Load) ? x : currMin));
-				server.Deactivate(ConnectedServers);
+				ConnectedServers.Remove(server);
 			}
 		}
 
@@ -137,6 +145,16 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		}
 
 		/// <summary>
+		/// Updates the averange response time
+		/// </summary>
+		/// <param name="lastTime">last response time</param>
+		internal void UpdateAvgResponseTime(int lastTime)
+		{
+			_LatestResponeTimes.RemoveAt(0);
+			_LatestResponeTimes.Add(lastTime);
+		}
+
+		/// <summary>
 		/// 
 		/// </summary>
 		public void GetQuery()
@@ -149,9 +167,9 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Adjust the server pool (size and fidelity)
 		/// </summary>
-		private void AdjustServers()
+		internal void AdjustServers()
 		{
-			if(_AvgRespnoseTime > Model.HighResponseimeValue)
+			if(AvgResponseTime > Model.HighResponseTimeValue)
 			{
 				if(TotalServerCosts < Model.MaxBudget)
 					IncrementServerPool();
@@ -163,7 +181,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 
 			else
 			{
-				if(_AvgRespnoseTime < Model.LowResponseTimeValue)
+				if(AvgResponseTime < Model.LowResponseTimeValue)
 				{
 					// Server costs near limit
 					if(TotalServerCosts > (Model.MaxBudget * 0.75))

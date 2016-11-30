@@ -40,9 +40,14 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public const int ServerUnitCost = 5;
 
 		/// <summary>
+		/// Available units per server
+		/// </summary>
+		public const int DefaultAvailableServerUnits = 10;
+
+		/// <summary>
 		/// Defines the value for high response time
 		/// </summary>
-		public const int HighResponseimeValue = 20;
+		public const int HighResponseTimeValue = 20;
 
 		/// <summary>
 		/// Defines the value for low response time
@@ -52,7 +57,12 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Available Budget for server costs.
 		/// </summary>
-		public const int MaxBudget = 100;
+		public const int MaxBudget = 125;
+
+		/// <summary>
+		/// Count of latest response times to be used for calculating averange response time
+		/// </summary>
+		public const int LastResponseCountForAvgTime = 10;
 		
 		[Root(RootKind.Controller)]
 		public ProxyT Proxy;

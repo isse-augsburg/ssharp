@@ -71,20 +71,24 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private int _MaxServerUnits;
 
 		/// <summary>
-		/// The connected Proxy
-		/// </summary>
-		private ProxyT _ConnectedProxy;
-
-		/// <summary>
 		/// Current costs of the Server. 0 means the server is inactive.
 		/// </summary>
 		public int Cost => _AvailableServerUnits * Model.ServerUnitCost;
 
 		/// <summary>
+		/// Currently units under use of the server.
+		/// </summary>
+		public int UsedServerUnits
+		{
+			get { return _UsedServerUnits; }
+			internal set { _UsedServerUnits = (value <= _MaxServerUnits) ? value : _MaxServerUnits; }
+		}
+
+		/// <summary>
 		/// Current load of the Server in %.
 		/// </summary>
 		[Range(0, 100, OverflowBehavior.Clamp)]
-		public int Load => _UsedServerUnits / _AvailableServerUnits * 100;
+		public int Load => UsedServerUnits / _AvailableServerUnits * 100;
 
 		/// <summary>
 		/// Current content fidelity level of the server.
@@ -92,40 +96,40 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public StateMachine<EFidelity> FidelityStateMachine = EFidelity.High;
 
 		/// <summary>
-		/// The connected Proxy
+		/// Initialize a new server instance
 		/// </summary>
-		public ProxyT ConnectedProxy => _ConnectedProxy;
-
+		/// <param name="maxServerUnits">Max Server capacity units</param>
 		private ServerT(int maxServerUnits)
 		{
 			_MaxServerUnits = maxServerUnits;
 		}
 
 		/// <summary>
-		/// Activates a server
+		/// Gets a new server
 		/// </summary>
 		/// <returns>New Server Instance or null if errors occurs</returns>
-		public static ServerT Activate()
+		public static ServerT GetNewServer()
 		{
 			ServerT server = null;
 			try
 			{
-				server = new ServerT(new Random().Next(20, 50));
+				//server = new ServerT(new Random().Next(20, 50));
+				server = new ServerT(Model.DefaultAvailableServerUnits);
 				server._AvailableServerUnits = server._MaxServerUnits;
 			}
 			catch { }
 			return server;
 		}
 
-		/// <summary>
-		/// Deactivates the server
-		/// </summary>
-		/// <param name="serverList">The server pool the server is inside</param>
-		/// <returns>True if successfull</returns>
-		public bool Deactivate(List<ServerT> serverList)
-		{
-			return serverList.Remove(this);
-		}
+		///// <summary>
+		///// Deactivates the server
+		///// </summary>
+		///// <param name="serverList">The server pool the server is inside</param>
+		///// <returns>True if successfull</returns>
+		//public bool Deactivate(List<ServerT> serverList)
+		//{
+		//	return serverList.Remove(this);
+		//}
 
 		/// <summary>
 		/// Sets the content fidelity level of the server
@@ -145,6 +149,8 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 					to: EFidelity.Low,
 					guard: level == EFidelity.Low);
 		}
+
+		
 
 		public override void Update()
 		{

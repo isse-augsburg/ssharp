@@ -35,9 +35,14 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	public class ClientT : Component
 	{
 		/// <summary>
-		/// Response time of the last query to the server in steps. -1 means the last query was not successfully.
+		/// Response time of the last query to the server in steps
 		/// </summary>
-		private int _ResponseTime;
+		private int _LastResponseTime;
+
+		/// <summary>
+		/// Response time of the current query to the server in steps
+		/// </summary>
+		private int _CurrentResponseTime;
 
 		/// <summary>
 		/// The connected Proxy
@@ -50,9 +55,9 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private bool _IsResponseWaiting;
 
 		/// <summary>
-		/// Response time of the last query to the server in ms. -1 means the last query was not successfully.
+		/// Response time of the last query to the server in ms
 		/// </summary>
-		public int ResponseTime => _ResponseTime;
+		public int LastResponseTime => _LastResponseTime;
 
 		/// <summary>
 		/// The connected Proxy
@@ -67,7 +72,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public void StartQuery()
 		{
 			_IsResponseWaiting = true;
-			_ResponseTime = 0;
+			_CurrentResponseTime = 0;
 		}
 
 		/// <summary>
@@ -76,7 +81,13 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public override void Update()
 		{
 			if(_IsResponseWaiting)
-				_ResponseTime++;
+			{
+				_CurrentResponseTime++;
+			}
+			else
+			{
+				StartQuery();
+			}
 		}
 
 	}
