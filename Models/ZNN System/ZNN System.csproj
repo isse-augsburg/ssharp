@@ -58,6 +58,7 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analysis\ProxyTTest.cs" />
     <Compile Include="Modeling\ClientT.cs" />
     <Compile Include="Modeling\Model.cs" />
     <Compile Include="Modeling\ProxyT.cs" />
@@ -75,7 +76,7 @@
     <Analyzer Include="$(OutDir)\SafetySharp.Compiler.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Analysis\" />
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="../../Source/SafetySharp.targets" />
