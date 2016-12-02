@@ -109,7 +109,7 @@ namespace Tests.DataStructures.MarkovChainExamples
 			markovChain.FinishDistribution();
 			markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
 			markovChain.StartWithNewDistribution(0);
-			markovChain.AddTransition(1, 0.1);
+			markovChain.AddTransition(1, 1.0);
 			markovChain.FinishDistribution();
 			//markovChain.ProbabilityMatrix.OptimizeAndSeal();
 			return markovChain;

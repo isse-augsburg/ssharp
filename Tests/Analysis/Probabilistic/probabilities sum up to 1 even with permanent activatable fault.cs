@@ -37,30 +37,33 @@ namespace Tests.Analysis.Probabilistic
 			Probability probabilityOfStep11FrozenValue3AndInvariantViolated;
 			Probability probabilityOfStep11FrozenValue2AndInvariantNotViolated;
 			Probability probabilityOfStep11FrozenValue3AndInvariantNotViolated;
+			
 
-			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
-			{
-				var typeOfModelChecker = (Type)Arguments[0];
-				var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, probabilityChecker);
+			Formula formulaProbabilityOfStep11FrozenValue2AndInvariantViolated = c._timestep == 11 && c._frozenValue == 2 && c.ViolateInvariant;
+			Formula formulaProbabilityOfStep11FrozenValue3AndInvariantViolated = c._timestep == 11 && c._frozenValue == 3 && c.ViolateInvariant;
+			Formula formulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated = c._timestep == 11 && c._frozenValue == 2 && !c.ViolateInvariant;
+			Formula formulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated = c._timestep == 11 && c._frozenValue == 3 && !c.ViolateInvariant;
 
-				Formula formulaProbabilityOfStep11FrozenValue2AndInvariantViolated = c._timestep==11 && c._frozenValue==2 && c.ViolateInvariant;
-				Formula formulaProbabilityOfStep11FrozenValue3AndInvariantViolated = c._timestep == 11 && c._frozenValue == 3 && c.ViolateInvariant;
-				Formula formulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated = c._timestep == 11 && c._frozenValue == 2 && !c.ViolateInvariant;
-				Formula formulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated = c._timestep == 11 && c._frozenValue == 3 && !c.ViolateInvariant;
+			var checkProbabilityOfStep11FrozenValue2AndInvariantViolated = new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue2AndInvariantViolated);
+			var checkProbabilityOfStep11FrozenValue3AndInvariantViolated = new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue3AndInvariantViolated);
+			var checkProbabilityOfStep11FrozenValue2AndInvariantNotViolated = new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated);
+			var checkProbabilityOfStep11FrozenValue3AndInvariantNotViolated = new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated);
 
-				var checkProbabilityOfStep11FrozenValue2AndInvariantViolated = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue2AndInvariantViolated));
-				var checkProbabilityOfStep11FrozenValue3AndInvariantViolated = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue3AndInvariantViolated));
-				var checkProbabilityOfStep11FrozenValue2AndInvariantNotViolated = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated));
-				var checkProbabilityOfStep11FrozenValue3AndInvariantNotViolated = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(formulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated));
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			markovChainGenerator.AddFormulaToCheck(checkProbabilityOfStep11FrozenValue2AndInvariantViolated);
+			markovChainGenerator.AddFormulaToCheck(checkProbabilityOfStep11FrozenValue3AndInvariantViolated);
+			markovChainGenerator.AddFormulaToCheck( checkProbabilityOfStep11FrozenValue2AndInvariantNotViolated);
+			markovChainGenerator.AddFormulaToCheck( checkProbabilityOfStep11FrozenValue3AndInvariantNotViolated);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
 
-				probabilityChecker.CreateMarkovChain();
-				probabilityChecker.ModelChecker = modelChecker;
+			var typeOfModelChecker = (Type)Arguments[0];
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc);
 
-				probabilityOfStep11FrozenValue2AndInvariantViolated = checkProbabilityOfStep11FrozenValue2AndInvariantViolated.Calculate();
-				probabilityOfStep11FrozenValue3AndInvariantViolated = checkProbabilityOfStep11FrozenValue3AndInvariantViolated.Calculate();
-				probabilityOfStep11FrozenValue2AndInvariantNotViolated = checkProbabilityOfStep11FrozenValue2AndInvariantNotViolated.Calculate();
-				probabilityOfStep11FrozenValue3AndInvariantNotViolated = checkProbabilityOfStep11FrozenValue3AndInvariantNotViolated.Calculate();
-			}
+			probabilityOfStep11FrozenValue2AndInvariantViolated = modelChecker.CalculateProbability (checkProbabilityOfStep11FrozenValue2AndInvariantViolated);
+			probabilityOfStep11FrozenValue3AndInvariantViolated = modelChecker.CalculateProbability (checkProbabilityOfStep11FrozenValue3AndInvariantViolated);
+			probabilityOfStep11FrozenValue2AndInvariantNotViolated = modelChecker.CalculateProbability ( checkProbabilityOfStep11FrozenValue2AndInvariantNotViolated);
+			probabilityOfStep11FrozenValue3AndInvariantNotViolated = modelChecker.CalculateProbability ( checkProbabilityOfStep11FrozenValue3AndInvariantNotViolated);
+			
 			var probabilitiesSummedUp =
 				probabilityOfStep11FrozenValue2AndInvariantViolated +
 				probabilityOfStep11FrozenValue3AndInvariantViolated +

@@ -24,6 +24,7 @@
 namespace Tests.Analysis.Probabilistic
 {
 	using System;
+	using System.Diagnostics;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
@@ -35,19 +36,19 @@ namespace Tests.Analysis.Probabilistic
 		{
 			var c = new C();
 			Probability probabilityOfFinal1;
-
-			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
-			{
-				var typeOfModelChecker = (Type)Arguments[0];
-				var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, probabilityChecker);
-
-				Formula final1 = c.Result==1;
-				var checkProbabilityOfFinal1 = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(final1));
-				probabilityChecker.CreateMarkovChain();
-				probabilityChecker.ModelChecker = modelChecker;
-				probabilityOfFinal1 = checkProbabilityOfFinal1.Calculate();
-			}
 			
+
+			Formula final1 = c.Result == 1;
+			var checkProbabilityOfFinal1 = new CalculateProbabilityToReachStateFormula(final1);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			markovChainGenerator.AddFormulaToCheck(checkProbabilityOfFinal1);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
+			var typeOfModelChecker = (Type)Arguments[0];
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc);
+			
+			probabilityOfFinal1 = modelChecker.CalculateProbability(checkProbabilityOfFinal1);
+
 			probabilityOfFinal1.Is(0.65, 0.000001).ShouldBe(true);
 		}
 

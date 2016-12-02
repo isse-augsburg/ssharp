@@ -13,22 +13,22 @@ namespace Tests.Analysis.Probabilistic
 
 	internal class FormulaWhichIsAlwaysFalse : ProbabilisticAnalysisTestObject
 	{
+
+
 		protected override void Check()
 		{
 			var c = new C();
 			Probability probabilityOfFalse;
-
-			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
-			{
-				var typeOfModelChecker = (Type)Arguments[0];
-				var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, probabilityChecker);
-
-				Formula falseFormula = !true;
-				var checkProbabilityOfFinally2 = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(falseFormula));
-				probabilityChecker.CreateMarkovChain();
-				probabilityChecker.ModelChecker = modelChecker;
-				probabilityOfFalse = checkProbabilityOfFinally2.Calculate();
-			}
+			
+			Formula falseFormula = false;
+			var probabilityFinallyFalseFormula = new CalculateProbabilityToReachStateFormula(falseFormula);
+			
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			markovChainGenerator.AddFormulaToCheck(probabilityFinallyFalseFormula);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
+			var typeOfModelChecker = (Type)Arguments[0];
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc);
+			probabilityOfFalse = modelChecker.CalculateProbability(probabilityFinallyFalseFormula);
 
 			probabilityOfFalse.Is(0.0, 0.001).ShouldBe(true);
 		}

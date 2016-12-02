@@ -23,7 +23,6 @@
 namespace SafetySharp.Analysis
 {
 	using System;
-	using System.Collections.Concurrent;
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Diagnostics;
@@ -40,75 +39,40 @@ namespace SafetySharp.Analysis
 	using Utilities;
 	using ModelChecking;
 	
-
-
-	public class ProbabilityChecker : IDisposable
+	
+	public class MarkovChainFromExecutableModelGenerator
 	{
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
 		/// </summary>
 		public event Action<string> OutputWritten = Console.WriteLine;
-
-		private object _probabilityMatrixCreationStarted = false;
-		private bool _probabilityMatrixWasCreated = false;
-
-		internal DiscreteTimeMarkovChain MarkovChain { get; private set; }
-
+		
 		private ModelBase _model;
-		private readonly ConcurrentBag<Formula> _formulasToCheck = new ConcurrentBag<Formula>();
+		private readonly List<Formula> _formulasToCheck = new List<Formula>();
 
-		public DtmcModelChecker ModelChecker { get; set; }
-
-		public void InitializeDefaultChecker()
-		{
-			AssertProbabilityMatrixWasCreated();
-			if (ModelChecker == null)
-			{
-				ModelChecker = new Mrmc(MarkovChain);
-			}
-		}
-
+		public IEnumerable<Formula> FormulasToCheck => _formulasToCheck;
 
 		/// <summary>
 		///   The model checker's configuration that determines certain model checker settings.
 		/// </summary>
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
-		
+
+		public bool ProbabilityMatrixCreationStarted { get; private set; }= false;
 
 		// Create Tasks which make the checks (workers)
 		// First formulas to check are collected (thus, the probability matrix only has to be calculated once)
-		public ProbabilityChecker(ModelBase model)
+		public MarkovChainFromExecutableModelGenerator(ModelBase model)
 		{
 			Requires.NotNull(model, nameof(model));
 			_model = model;
 		}
-		
-		private Probability CalculateProbabilityWithDefaultChecker(Formula formulaToCheck)
-		{
-			InitializeDefaultChecker();
-			return ModelChecker.CalculateProbability(formulaToCheck);
-		}
-
-		private bool CalculateFormulaWithDefaultChecker(Formula formulaToCheck)
-		{
-			InitializeDefaultChecker();
-			return ModelChecker.CalculateFormula(formulaToCheck);
-		}
-
-
-		private RewardResult CalculateRewardWithDefaultChecker(Formula formulaToCheck)
-		{
-			InitializeDefaultChecker();
-			return ModelChecker.CalculateReward(formulaToCheck);
-		}
 
 
 
-		
 		/// <summary>
 		///   Generates a <see cref="StateGraph" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal DiscreteTimeMarkovChain GenerateMarkovChain(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas)
+		private DiscreteTimeMarkovChain GenerateMarkovChain(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas)
 		{
 			Requires.That(IntPtr.Size == 8, "State graph generation is only supported in 64bit processes.");
 
@@ -163,7 +127,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Generates a <see cref="MarkovChain" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal DiscreteTimeMarkovChain GenerateMarkovChain(Func<RuntimeModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas)
+		private DiscreteTimeMarkovChain GenerateMarkovChain(Func<RuntimeModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas)
 		{
 			return GenerateMarkovChain(() => new LtmcExecutedModel(createModel, Configuration.SuccessorCapacity), terminateEarlyCondition, stateFormulas);
 		}
@@ -173,7 +137,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model the state graph should be generated for.</param>
 		/// <param name="stateFormulas">The state formulas that should be evaluated during state graph generation.</param>
-		internal DiscreteTimeMarkovChain GenerateMarkovChain(ModelBase model, Formula terminateEarlyCondition, params StateFormula[] stateFormulas)
+		private DiscreteTimeMarkovChain GenerateMarkovChain(ModelBase model, Formula terminateEarlyCondition, params StateFormula[] stateFormulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(stateFormulas, nameof(stateFormulas));
@@ -183,112 +147,33 @@ namespace SafetySharp.Analysis
 
 			return GenerateMarkovChain((Func<RuntimeModel>)serializer.Load, terminateEarlyCondition, stateFormulas);
 		}
+		
 
-
-
-
-
-		public void CreateMarkovChain(Formula terminateEarlyCondition = null)
+		public DiscreteTimeMarkovChain GenerateMarkovChain(Formula terminateEarlyCondition = null)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
-			var alreadyStarted = Interlocked.CompareExchange(ref _probabilityMatrixCreationStarted, true, false);
-			if ((bool)alreadyStarted)
-				return;
 
+			ProbabilityMatrixCreationStarted = true;
 
 			var stateFormulaCollector = new CollectStateFormulasVisitor();
 			foreach (var stateFormula in _formulasToCheck)
 			{
 				stateFormulaCollector.Visit(stateFormula);
 			}
-
-			//StateFormulaSetEvaluatorCompilationVisitor
-
-			MarkovChain = GenerateMarkovChain(_model, terminateEarlyCondition, stateFormulaCollector.StateFormulas.ToArray());
-
-			_probabilityMatrixWasCreated = true;
-			Interlocked.MemoryBarrier();
+			return GenerateMarkovChain(_model, terminateEarlyCondition, stateFormulaCollector.StateFormulas.ToArray());
 		}
+		
 
-		public void AssertProbabilityMatrixWasCreated()
-		{
-			Requires.That(_probabilityMatrixWasCreated, nameof(CreateMarkovChain) + "must be called before");
-		}
-
-		public ProbabilityCalculator CalculateProbability(Formula formula)
-		{
-			Requires.NotNull(formula, nameof(formula));
-
-			var visitor = new IsFormulaReturningProbabilityVisitor();
-			visitor.Visit(formula);
-			if (!visitor.IsReturningProbability)
-				throw new InvalidOperationException("Formula must return probability.");
-			
-			Interlocked.MemoryBarrier();
-			if ((bool)_probabilityMatrixCreationStarted)
-			{
-				throw new Exception(nameof(CalculateProbability) + " must be called before " + nameof(CreateMarkovChain));
-			}
-
-			_formulasToCheck.Add(formula);
-			var formulaToCheck = formula;
-
-			Func<Probability> useDefaultChecker = () => CalculateProbabilityWithDefaultChecker(formulaToCheck);
-			Func<DtmcModelChecker,Probability> useCustomChecker = customChecker => customChecker.CalculateProbability(formulaToCheck);
-
-			var checker = new ProbabilityCalculator(useDefaultChecker);
-			return checker;
-		}
-
-		public FormulaCalculator CalculateFormula(Formula formula)
+		public void AddFormulaToCheck(Formula formula)
 		{
 			Requires.NotNull(formula, nameof(formula));
 
 			Interlocked.MemoryBarrier();
-			if ((bool)_probabilityMatrixCreationStarted)
+			if ((bool)ProbabilityMatrixCreationStarted)
 			{
-				throw new Exception(nameof(CalculateFormula) + " must be called before " + nameof(CreateMarkovChain));
+				throw new Exception(nameof(AddFormulaToCheck) + " must be called before " + nameof(GenerateMarkovChain));
 			}
-
 			_formulasToCheck.Add(formula);
-			var formulaToCheck = formula;
-
-			Func<bool> useDefaultChecker = () => CalculateFormulaWithDefaultChecker(formulaToCheck);
-			Func<DtmcModelChecker, bool> useCustomChecker = customChecker => customChecker.CalculateFormula(formulaToCheck);
-
-			var checker = new FormulaCalculator(useDefaultChecker);
-			return checker;
-		}
-
-		public RewardCalculator CalculateReward(Formula formula)
-		{
-			Requires.NotNull(formula, nameof(formula));
-
-			var visitor = new IsFormulaReturningRewardResultVisitor();
-			visitor.Visit(formula);
-			if (!visitor.IsReturningRewardResult)
-				throw new InvalidOperationException("Formula must return reward.");
-
-			_formulasToCheck.Add(formula);
-			var formulaToCheck = formula;
-
-			Interlocked.MemoryBarrier();
-			if ((bool)_probabilityMatrixCreationStarted)
-			{
-				throw new Exception(nameof(CalculateReward) + " must be called before " + nameof(CreateMarkovChain));
-			}
-			
-
-			Func<RewardResult> useDefaultChecker = () => CalculateRewardWithDefaultChecker(formulaToCheck);
-			Func<DtmcModelChecker, RewardResult> useCustomChecker = customChecker => customChecker.CalculateReward(formulaToCheck);
-
-			var checker = new RewardCalculator(useDefaultChecker);
-			return checker;
-		}
-
-		public void Dispose()
-		{
-			ModelChecker?.Dispose();
 		}
 	}
 }

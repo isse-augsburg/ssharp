@@ -34,19 +34,16 @@ namespace Tests.Analysis.Probabilistic
 		{
 			var c = new C();
 			Probability probabilityOfInvariantViolation;
+			
+			Formula invariantViolated = c.ViolateInvariant;
+			var checkProbabilityOfInvariantViolation = new CalculateProbabilityToReachStateFormula(invariantViolated);
 
-			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
-			{
-				var typeOfModelChecker = (Type)Arguments[0];
-				var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, probabilityChecker);
-
-				Formula invariantViolated = c.ViolateInvariant;
-				var checkProbabilityOfInvariantViolation = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(invariantViolated));
-				probabilityChecker.CreateMarkovChain();
-				probabilityChecker.ModelChecker = modelChecker;
-				probabilityOfInvariantViolation = checkProbabilityOfInvariantViolation.Calculate();
-				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);
-			}
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			markovChainGenerator.AddFormulaToCheck(checkProbabilityOfInvariantViolation);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
+			var typeOfModelChecker = (Type)Arguments[0];
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc);
+			probabilityOfInvariantViolation = modelChecker.CalculateProbability(checkProbabilityOfInvariantViolation);
 
 			// 1.0-(1.0-0.1)^11 = 0.68618940391
 			probabilityOfInvariantViolation.Is(0.68618940391, 0.00001).ShouldBe(true);

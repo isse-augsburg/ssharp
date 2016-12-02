@@ -286,7 +286,7 @@ namespace SafetySharp.Analysis
 			}
 		}
 
-		internal override bool CalculateFormula(Formula formulaToCheck)
+		internal override bool CalculateBoolean(Formula formulaToCheck)
 		{
 			var isFormulaReturningBoolValueVisitor = new IsFormulaReturningBoolValueVisitor();
 			isFormulaReturningBoolValueVisitor.Visit(formulaToCheck);

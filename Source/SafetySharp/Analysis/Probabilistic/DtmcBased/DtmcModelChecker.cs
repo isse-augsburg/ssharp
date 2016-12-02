@@ -52,7 +52,7 @@ namespace SafetySharp.Analysis
 
 		internal abstract Probability CalculateProbability(Formula formulaToCheck);
 
-		internal abstract bool CalculateFormula(Formula formulaToCheck);
+		internal abstract bool CalculateBoolean(Formula formulaToCheck);
 
 		internal abstract RewardResult CalculateReward(Formula formulaToCheck);
 	}

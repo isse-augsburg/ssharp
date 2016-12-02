@@ -54,18 +54,15 @@ namespace Tests.Analysis.Probabilistic
 		{
 			var c = new C();
 			Probability probabilityOfFinal1;
+			
+			var probabilityOfFinal1Formula =new CalculateProbabilityToReachStateFormula(c.IsInStateFinal1());
 
-			using (var probabilityChecker = new ProbabilityChecker(TestModel.InitializeModel(c)))
-			{
-				var typeOfModelChecker = (Type)Arguments[0];
-				var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker,probabilityChecker);
-
-				var checkProbabilityOf1 = probabilityChecker.CalculateProbability(new CalculateProbabilityToReachStateFormula(c.IsInStateFinal1()));
-				probabilityChecker.CreateMarkovChain();
-				probabilityChecker.ModelChecker = modelChecker;
-				probabilityOfFinal1 = checkProbabilityOf1.Calculate();
-				//probabilityOfFinal1 = checkProbabilityOf1.CheckWithChecker(modelChecker);
-			}
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			markovChainGenerator.AddFormulaToCheck(new CalculateProbabilityToReachStateFormula(probabilityOfFinal1Formula));
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
+			var typeOfModelChecker = (Type)Arguments[0];
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc);
+			probabilityOfFinal1 = modelChecker.CalculateProbability(probabilityOfFinal1Formula);
 
 			probabilityOfFinal1.Between(0.1, 0.2).ShouldBe(true);
 		}

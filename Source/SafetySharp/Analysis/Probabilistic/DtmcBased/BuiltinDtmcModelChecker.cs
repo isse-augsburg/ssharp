@@ -342,7 +342,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			Console.WriteLine(epsilon);
 		}
 
-		internal override bool CalculateFormula(Formula formulaToCheck)
+		internal override bool CalculateBoolean(Formula formulaToCheck)
 		{
 			throw new NotImplementedException();
 		}
