@@ -37,10 +37,16 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 	using Xunit.Abstractions;
 	using SafetySharp.Utilities.Graph;
 	using SafetySharp.Analysis.Probabilistic.MdpBased.ExportToGv;
+	using SafetySharp.Utilities;
 
-	internal abstract class MarkovDecisionProcessExample
+	public static class AllExamples
 	{
-		public MarkovDecisionProcess Mdp { get; protected set; }
+		internal static MarkovDecisionProcessExample[] Examples = {new Example1(), new Example2(), new Example3(), new Example4(), new Example5(), new Example6(), new Example7()};
+	}
+
+	public abstract class MarkovDecisionProcessExample
+	{
+		internal MarkovDecisionProcess Mdp { get;  set; } //TODO: When C# supports it, make setter "internal and protected"
 
 		public Dictionary<int, bool> NoState = new Dictionary<int, bool>() { };
 
@@ -63,7 +69,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 		}
 	}
 
-	internal class Example1 : MarkovDecisionProcessExample
+	public class Example1 : MarkovDecisionProcessExample
 	{
 		private MarkovDecisionProcess Create()
 		{
@@ -72,7 +78,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			var mdp = new MarkovDecisionProcess();
+			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
 			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -95,8 +101,8 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			mdp.FinishDistributions();
 			return mdp;
 		}
-		
-		internal Example1()
+
+		public Example1()
 		{
 			Mdp = Create();
 
@@ -113,16 +119,16 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 	}
 
-	internal class Example2 : MarkovDecisionProcessExample
+	public class Example2 : MarkovDecisionProcessExample
 	{
-		public MarkovDecisionProcess Create()
+		internal MarkovDecisionProcess Create()
 		{
 			// Just another simple MDP with no nondeterministic choices
 			//   0⟶1⟲
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			var mdp = new MarkovDecisionProcess();
+			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
 			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -145,15 +151,15 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			return mdp;
 		}
 
-		internal Example2()
+		public Example2()
 		{
 			Mdp = Create();
 		}
 	}
 
-	internal class Example3 : MarkovDecisionProcessExample
+	public class Example3 : MarkovDecisionProcessExample
 	{
-		public static MarkovDecisionProcess Create()
+		internal static MarkovDecisionProcess Create()
 		{
 			// A MDP which was designed to test prob1e
 			//   0⟶0.5⟼1⟲    0.5⇢0
@@ -162,7 +168,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			var mdp = new MarkovDecisionProcess();
+			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
 			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -213,15 +219,15 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			return mdp;
 		}
 
-		internal Example3()
+		public Example3()
 		{
 			Mdp = Create();
 		}
 	}
 
-	internal class Example4 : MarkovDecisionProcessExample
+	public class Example4 : MarkovDecisionProcessExample
 	{
-		private MarkovDecisionProcess Create()
+		internal MarkovDecisionProcess Create()
 		{
 			// A MDP which was designed to test prob1e
 			//   0⇢3
@@ -231,7 +237,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			var mdp = new MarkovDecisionProcess();
+			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
 			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -285,15 +291,15 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			return mdp;
 		}
 
-		internal Example4()
+		public Example4()
 		{
 			Mdp = Create();
 		}
 	}
 
-	internal class Example5 : MarkovDecisionProcessExample
+	public class Example5 : MarkovDecisionProcessExample
 	{
-		public static MarkovDecisionProcess Create()
+		internal static MarkovDecisionProcess Create()
 		{
 			// A MDP which was designed to test prob0e
 			//   0⟼1↘
@@ -301,7 +307,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			var mdp = new MarkovDecisionProcess();
+			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
 			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -343,15 +349,15 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			return mdp;
 		}
 
-		internal Example5()
+		public Example5()
 		{
 			Mdp = Create();
 		}
 	}
 
-	internal class Example6 : MarkovDecisionProcessExample
+	public class Example6 : MarkovDecisionProcessExample
 	{
-		public static MarkovDecisionProcess Create()
+		internal static MarkovDecisionProcess Create()
 		{
 			// A MDP which was designed to test prob0e
 			//   4
@@ -361,7 +367,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			var mdp = new MarkovDecisionProcess();
+			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
 			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -413,15 +419,15 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			return mdp;
 		}
 
-		internal Example6()
+		public Example6()
 		{
 			Mdp = Create();
 		}
 	}
 
-	internal class Example7 : MarkovDecisionProcessExample
+	public class Example7 : MarkovDecisionProcessExample
 	{
-		public static MarkovDecisionProcess Create()
+		internal static MarkovDecisionProcess Create()
 		{
 			// A MDP which was designed to test prob0e
 			//   0⟼1↘
@@ -431,7 +437,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			var mdp = new MarkovDecisionProcess();
+			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
 			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -484,7 +490,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			return mdp;
 		}
 
-		internal Example7()
+		public Example7()
 		{
 			Mdp = Create();
 		}

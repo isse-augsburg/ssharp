@@ -53,22 +53,38 @@ namespace SafetySharp.Runtime
 		internal SparseDoubleMatrix ProbabilityMatrix { get; }
 		
 		public LabelVector StateLabeling { get; }
-		
-		public DiscreteTimeMarkovChain(int maxNumberOfStates= 1 << 21, int maxNumberOfTransitions=0)
-		{
-			if (maxNumberOfTransitions <= 0)
-			{
-				maxNumberOfTransitions = maxNumberOfStates << 12;
-				var limit = 5 * 1024 / 16 * 1024 * 1024; // 5 gb / 16 bytes (for entries)
 
-				if (maxNumberOfTransitions < maxNumberOfStates || maxNumberOfTransitions > limit)
-					maxNumberOfTransitions = limit;
-			}
-			
+		private const int _sizeOfState = sizeof(int);
+		private const int _sizeOfTransition = sizeof(int) + sizeof(double);  //sizeof(SparseDoubleMatrix.ColumnValue)
+
+		/*
+		public DiscreteTimeMarkovChain()
+			: this(ModelSize.CreateHugeModel(_sizeOfState, _sizeOfTransition))
+		{
+		}
+		*/
+		
+		public DiscreteTimeMarkovChain(long numberOfStates, ModelDensity density)
+		{
+			var modelSize = ModelSize.CreateModelSizeFromStateNumberDensityStateAndTransitionSize(numberOfStates, density, _sizeOfState, _sizeOfTransition);
+
 			StateLabeling = new LabelVector();
-			ProbabilityMatrix = new SparseDoubleMatrix(maxNumberOfStates+1, maxNumberOfTransitions); // one additional row for row of initial distribution
+			ProbabilityMatrix = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for row of initial distribution
 		}
 
+		public DiscreteTimeMarkovChain(ModelDensity density, ByteSize availableMemory)
+		{
+			var modelSize = ModelSize.CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(density, availableMemory,_sizeOfState, _sizeOfTransition);
+
+			StateLabeling = new LabelVector();
+			ProbabilityMatrix = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for row of initial distribution
+		}
+
+		public DiscreteTimeMarkovChain(ModelSize modelSize)
+		{
+			StateLabeling = new LabelVector();
+			ProbabilityMatrix = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for row of initial distribution
+		}
 
 		// Retrieving matrix phase
 

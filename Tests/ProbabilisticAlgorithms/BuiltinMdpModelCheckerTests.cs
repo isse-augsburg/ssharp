@@ -29,6 +29,8 @@ using System.Threading.Tasks;
 namespace Tests.DataStructures
 {
 	using System.Diagnostics;
+	using JetBrains.Annotations;
+	using MarkovDecisionProcessExamples;
 	using SafetySharp.Analysis;
 	using SafetySharp.Analysis.ModelChecking.Probabilistic;
 	using SafetySharp.Modeling;
@@ -45,17 +47,26 @@ namespace Tests.DataStructures
 		///   Gets the output that writes to the test output stream.
 		/// </summary>
 		public TestTraceOutput Output { get; }
-		
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests()
+		{
+			foreach (var example in AllExamples.Examples)
+			{
+				yield return new object[] { example };// only one parameter
+			}
+		}
+
 		public BuiltinMdpModelCheckerTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 		}
 
 
-		[Fact]
-		public void Prob1ETest_Mdp1()
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void Prob1ETest_Mdp1(MarkovDecisionProcessExample example)
 		{
-			var mdp = (new MarkovDecisionProcessExamples.Example1()).Mdp;
+			var mdp = example.Mdp;
 
 			var excludedStates = new Dictionary<int, bool>() { };
 			var directlySatisfiedStates = new Dictionary<int, bool>() { { 1, true } };
@@ -67,10 +78,11 @@ namespace Tests.DataStructures
 		}
 
 
-		[Fact]
-		public void Prob0ATest_Mdp1()
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void Prob0ATest_Mdp1(MarkovDecisionProcessExample example)
 		{
-			var mdp = (new MarkovDecisionProcessExamples.Example1()).Mdp;
+			var mdp = example.Mdp;
+
 			var excludedStates = new Dictionary<int, bool>() { };
 			var directlySatisfiedStates = new Dictionary<int, bool>() { { 1, true } };
 
@@ -81,10 +93,11 @@ namespace Tests.DataStructures
 			
 		}
 
-		[Fact]
-		public void Prob0ETest_Mdp1()
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void Prob0ETest_Mdp1(MarkovDecisionProcessExample example)
 		{
-			var mdp = (new MarkovDecisionProcessExamples.Example1()).Mdp;
+			var mdp = example.Mdp;
+
 			var excludedStates = new Dictionary<int, bool>() { };
 			var directlySatisfiedStates = new Dictionary<int, bool>() { { 1, true } };
 

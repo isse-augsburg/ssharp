@@ -37,11 +37,16 @@ namespace Tests.DataStructures.MarkovChainExamples
 	using Xunit.Abstractions;
 	using SafetySharp.Utilities.Graph;
 	using SafetySharp.Analysis.Probabilistic.DtmcBased.ExportToGv;
+	using SafetySharp.Utilities;
 
-
-	internal abstract class MarkovChainExample
+	public static class AllExamples
 	{
-		public DiscreteTimeMarkovChain MarkovChain { get; protected set; }
+		internal static MarkovChainExample[] Examples = { new Example1(), new Example2()};
+	}
+
+	public abstract class MarkovChainExample
+	{
+		internal DiscreteTimeMarkovChain MarkovChain { get; set; } //TODO: When C# supports it, make setter "internal and protected"
 
 		[Fact]
 		public string ToGraphvizString()
@@ -53,14 +58,14 @@ namespace Tests.DataStructures.MarkovChainExamples
 		}
 	}
 
-	internal class Example1 : MarkovChainExample
+	public class Example1 : MarkovChainExample
 	{
-		public  DiscreteTimeMarkovChain Create()
+		internal  DiscreteTimeMarkovChain Create()
 		{
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			var markovChain = new DiscreteTimeMarkovChain();
+			var markovChain = new DiscreteTimeMarkovChain(ModelDensity.Medium,ByteSize.MebiByte);
 			markovChain.StateFormulaLabels = new string[] { "label1", "label2" };
 			markovChain.StateRewardRetrieverLabels = new string[] { };
 			markovChain.StartWithInitialDistribution();
@@ -85,14 +90,14 @@ namespace Tests.DataStructures.MarkovChainExamples
 		}
 	}
 
-	internal class Example2 : MarkovChainExample
+	public class Example2 : MarkovChainExample
 	{
-		public DiscreteTimeMarkovChain Create()
+		internal DiscreteTimeMarkovChain Create()
 		{
 			Func<bool> returnTrue = () => true;
 			Func<bool> returnFalse = () => false;
 
-			var markovChain = new DiscreteTimeMarkovChain();
+			var markovChain = new DiscreteTimeMarkovChain(ModelDensity.Medium, ByteSize.MebiByte);
 			markovChain.StateFormulaLabels = new string[] { "label1", "label2" };
 			markovChain.StateRewardRetrieverLabels = new string[] { };
 			markovChain.StartWithInitialDistribution();

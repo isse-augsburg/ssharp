@@ -67,7 +67,8 @@ namespace SafetySharp.Utilities.Graph
 
 		public List<Edge> GetOrCreateOutEdges(int vertex)
 		{
-			_nodes.Add(vertex, true);
+			if (!_nodes.ContainsKey(vertex))
+				_nodes.Add(vertex, true);
 			if (_outEdges.ContainsKey(vertex))
 			{
 				return _outEdges[vertex];
@@ -79,7 +80,8 @@ namespace SafetySharp.Utilities.Graph
 
 		public List<Edge> GetOrCreateInEdges(int vertex)
 		{
-			_nodes.Add(vertex, true);
+			if (!_nodes.ContainsKey(vertex))
+				_nodes.Add(vertex, true);
 			if (_inEdges.ContainsKey(vertex))
 			{
 				return _inEdges[vertex];

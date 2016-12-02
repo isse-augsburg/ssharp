@@ -239,6 +239,7 @@
     <Compile Include="Analysis\ModelChecking\Transitions\ActivationMinimalTransitionSetBuilder.cs" />
     <Compile Include="Runtime\UnboundPortException.cs" />
     <Compile Include="Utilities\ConsoleHelpers.cs" />
+    <Compile Include="Utilities\ModelByteSize.cs" />
     <Compile Include="Utilities\InterlockedExtensions.cs" />
     <Compile Include="Utilities\MemoryBuffer.cs" />
     <Compile Include="Utilities\CodeWriter.cs" />

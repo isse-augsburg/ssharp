@@ -56,30 +56,45 @@ namespace SafetySharp.Runtime
 		private int _rowCountOfCurrentState = 0;
 		public int[] StateToRowsL;
 		public int[] StateToRowsRowCount;
-		
+
+		private const int _sizeOfState = sizeof(int);
+		private const int _sizeOfTransition = sizeof(int) + sizeof(double);  //sizeof(SparseDoubleMatrix.ColumnValue)
 
 		public SparseDoubleMatrix RowsWithDistributions { get; }
 
 		public LabelVector StateLabeling { get; }
 
-		public MarkovDecisionProcess(int maxNumberOfStates = 1 << 21, int maxNumberOfTransitions = 0)
+		public MarkovDecisionProcess(long numberOfStates, ModelDensity density)
 		{
-			if (maxNumberOfTransitions <= 0)
-			{
-				maxNumberOfTransitions = maxNumberOfStates << 12;
-				var limit = 5 * 1024 / 16 * 1024 * 1024; // 5 gb / 16 bytes (for entries)
-
-				if (maxNumberOfTransitions < maxNumberOfStates || maxNumberOfTransitions > limit)
-					maxNumberOfTransitions = limit;
-			}
+			var modelSize = ModelSize.CreateModelSizeFromStateNumberDensityStateAndTransitionSize(numberOfStates, density, _sizeOfState, _sizeOfTransition);
 
 			StateLabeling = new LabelVector();
-			RowsWithDistributions = new SparseDoubleMatrix(maxNumberOfStates + 1, maxNumberOfTransitions); // one additional row for initial distributions (more might be necessary)
-			StateToRowsL = new int[maxNumberOfStates+1]; // one additional row for initial distributions
-			StateToRowsRowCount = new int[maxNumberOfStates+1]; // one additional row for initial distributions
+			RowsWithDistributions = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for initial distributions (more might be necessary)
+			StateToRowsL = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions
+			StateToRowsRowCount = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions
 			SetRowOfStateEntriesToInvalid();
 		}
 
+		public MarkovDecisionProcess(ModelDensity density, ByteSize availableMemory)
+		{
+			var modelSize = ModelSize.CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(density, availableMemory, _sizeOfState, _sizeOfTransition);
+
+			StateLabeling = new LabelVector();
+			RowsWithDistributions = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for initial distributions (more might be necessary)
+			StateToRowsL = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions
+			StateToRowsRowCount = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions
+			SetRowOfStateEntriesToInvalid();
+		}
+
+		public MarkovDecisionProcess(ModelSize modelSize)
+		{
+			StateLabeling = new LabelVector();
+			RowsWithDistributions = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for initial distributions (more might be necessary)
+			StateToRowsL = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions
+			StateToRowsRowCount = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions
+			SetRowOfStateEntriesToInvalid();
+		}
+		
 		private void SetRowOfStateEntriesToInvalid()
 		{
 			for (var i = 0; i < StateToRowsL.Length; i++)

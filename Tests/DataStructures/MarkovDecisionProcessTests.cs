@@ -29,6 +29,8 @@ using System.Threading.Tasks;
 namespace Tests.DataStructures
 {
 	using System.Diagnostics;
+	using JetBrains.Annotations;
+	using MarkovDecisionProcessExamples;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
@@ -45,15 +47,24 @@ namespace Tests.DataStructures
 		/// </summary>
 		public TestTraceOutput Output { get; }
 		
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests()
+		{
+			foreach (var example in AllExamples.Examples)
+			{
+				yield return new object[] { example };// only one parameter
+			}
+		}
+
 		public MarkovDecisionProcessTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 		}
-		
-		[Fact]
-		public void PassingTest()
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void PassingTest(MarkovDecisionProcessExample example)
 		{
-			var mdp= (new MarkovDecisionProcessExamples.Example1()).Mdp;
+			var mdp= example.Mdp;
 			mdp.RowsWithDistributions.PrintMatrix(Output.Log);
 			mdp.ValidateStates();
 			mdp.PrintPathWithStepwiseHighestProbability(10);
@@ -72,10 +83,10 @@ namespace Tests.DataStructures
 			Assert.Equal(2.0, counter);
 		}
 
-		[Fact]
-		public void MarkovChainFormulaEvaluatorTest()
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void FormulaEvaluatorTest(MarkovDecisionProcessExample example)
 		{
-			var mdp= (new MarkovDecisionProcessExamples.Example1()).Mdp;
+			var mdp= example.Mdp;
 
 			Func<bool> returnTrue = () => true;
 			var stateFormulaLabel1 = new StateFormula(returnTrue, "label1");
@@ -96,11 +107,11 @@ namespace Tests.DataStructures
 			Assert.Equal(evaluateStateFormulaBoth(1), false);
 			Assert.Equal(evaluateStateFormulaAny(1), true);
 		}
-		
-		[Fact]
-		public void CalculateAncestorsTest()
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void CalculateAncestorsTest(MarkovDecisionProcessExample example)
 		{
-			var mdp= (new MarkovDecisionProcessExamples.Example1()).Mdp;
+			var mdp= example.Mdp;
 
 			var underlyingDigraph = mdp.CreateUnderlyingDigraph();
 			var nodesToIgnore = new Dictionary<int,bool>();
@@ -108,26 +119,6 @@ namespace Tests.DataStructures
 			selectedNodes1.Add(1,true);
 			var result1 = underlyingDigraph.BaseGraph.GetAncestors(selectedNodes1,nodesToIgnore.ContainsKey);
 			
-			var selectedNodes2 = new Dictionary<int, bool>();
-			selectedNodes2.Add(0, true);
-			var result2 = underlyingDigraph.BaseGraph.GetAncestors(selectedNodes2, nodesToIgnore.ContainsKey);
-
-			Assert.Equal(2, result1.Count);
-			Assert.Equal(1, result2.Count);
-		}
-
-
-		[Fact]
-		public void CalculateAncestors2Test()
-		{
-			var mdp= (new MarkovDecisionProcessExamples.Example2()).Mdp;
-
-			var underlyingDigraph = mdp.CreateUnderlyingDigraph();
-			var nodesToIgnore = new Dictionary<int, bool>();
-			var selectedNodes1 = new Dictionary<int, bool>();
-			selectedNodes1.Add(1, true);
-			var result1 = underlyingDigraph.BaseGraph.GetAncestors(selectedNodes1, nodesToIgnore.ContainsKey);
-
 			var selectedNodes2 = new Dictionary<int, bool>();
 			selectedNodes2.Add(0, true);
 			var result2 = underlyingDigraph.BaseGraph.GetAncestors(selectedNodes2, nodesToIgnore.ContainsKey);

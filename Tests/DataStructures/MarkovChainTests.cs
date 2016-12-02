@@ -29,6 +29,8 @@ using System.Threading.Tasks;
 namespace Tests.DataStructures
 {
 	using System.Diagnostics;
+	using JetBrains.Annotations;
+	using MarkovChainExamples;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
@@ -37,6 +39,7 @@ namespace Tests.DataStructures
 	using Xunit.Abstractions;
 	using SafetySharp.Utilities.Graph;
 	using SafetySharp.Analysis.Probabilistic.DtmcBased.ExportToGv;
+	using AllExamples = MarkovChainExamples.AllExamples;
 
 	public class MarkovChainTests
 	{
@@ -44,16 +47,25 @@ namespace Tests.DataStructures
 		///   Gets the output that writes to the test output stream.
 		/// </summary>
 		public TestTraceOutput Output { get; }
-		
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests()
+		{
+			foreach (var example in AllExamples.Examples)
+			{
+				yield return new object[] { example };// only one parameter
+			}
+		}
+
 		public MarkovChainTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 		}
 
-		[Fact]
-		public void PassingTest()
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void PassingTest(MarkovChainExample example)
 		{
-			var markovChain= (new MarkovChainExamples.Example1()).MarkovChain;
+			var markovChain= example.MarkovChain;
 			markovChain.ProbabilityMatrix.PrintMatrix(Output.Log);
 			markovChain.ValidateStates();
 			markovChain.PrintPathWithStepwiseHighestProbability(10);
@@ -69,10 +81,10 @@ namespace Tests.DataStructures
 			Assert.Equal(2.0, counter);
 		}
 
-		[Fact]
-		public void MarkovChainFormulaEvaluatorTest()
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void FormulaEvaluatorTest(MarkovChainExample example)
 		{
-			var markovChain = (new MarkovChainExamples.Example1()).MarkovChain;
+			var markovChain = example.MarkovChain;
 
 			Func<bool> returnTrue = () => true;
 			var stateFormulaLabel1 = new StateFormula(returnTrue, "label1");
@@ -95,10 +107,10 @@ namespace Tests.DataStructures
 		}
 
 
-		[Fact]
-		public void CalculateAncestorsTest()
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void CalculateAncestorsTest(MarkovChainExample example)
 		{
-			var markovChain = (new MarkovChainExamples.Example1()).MarkovChain;
+			var markovChain = example.MarkovChain;
 
 			var underlyingDigraph = markovChain.CreateUnderlyingDigraph();
 			var nodesToIgnore = new Dictionary<int,bool>();
