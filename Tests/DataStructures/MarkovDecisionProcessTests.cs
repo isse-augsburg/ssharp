@@ -98,17 +98,17 @@ namespace Tests.DataStructures
 			var formula2 = new BinaryFormula(stateFormulaLabel1, BinaryOperator.Or, stateFormulaLabel2);
 			var evaluateStateFormulaLabel1 = mdp.CreateFormulaEvaluator(stateFormulaLabel1);
 			var evaluateStateFormulaLabel2 = mdp.CreateFormulaEvaluator(stateFormulaLabel2);
-			var evaluateStateFormulaBoth = mdp.CreateFormulaEvaluator(stateFormulaBoth);
-			var evaluateStateFormulaAny = mdp.CreateFormulaEvaluator(stateFormulaAny);
+			//var evaluateStateFormulaBoth = mdp.CreateFormulaEvaluator(stateFormulaBoth);
+			//var evaluateStateFormulaAny = mdp.CreateFormulaEvaluator(stateFormulaAny);
 			
 			Assert.Equal(evaluateStateFormulaLabel1(0), false);
 			Assert.Equal(evaluateStateFormulaLabel2(0), true);
-			Assert.Equal(evaluateStateFormulaBoth(0), false);
-			Assert.Equal(evaluateStateFormulaAny(0), true);
+			//Assert.Equal(evaluateStateFormulaBoth(0), false);
+			//Assert.Equal(evaluateStateFormulaAny(0), true);
 			Assert.Equal(evaluateStateFormulaLabel1(1), true);
 			Assert.Equal(evaluateStateFormulaLabel2(1), false);
-			Assert.Equal(evaluateStateFormulaBoth(1), false);
-			Assert.Equal(evaluateStateFormulaAny(1), true);
+			//Assert.Equal(evaluateStateFormulaBoth(1), false);
+			//Assert.Equal(evaluateStateFormulaAny(1), true);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests))]

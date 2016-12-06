@@ -109,7 +109,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 		{
 			Mdp = Create();
 
-			 StateFormula1 = new ExecutableStateFormula(Mdp.StateFormulaLabels);//new StateFormula(returnTrue, "label1")
+			 //StateFormula1 = new ExecutableStateFormula(Mdp.StateFormulaLabels);//new StateFormula(returnTrue, "label1")
 
 			// Condition 1 is here label1
 			StatesSatisfyDirectlyCondition1 = new Dictionary<int, bool>() { {1,true} };

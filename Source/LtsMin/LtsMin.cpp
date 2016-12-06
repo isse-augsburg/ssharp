@@ -130,7 +130,7 @@ void LoadModel(model_t model, const char* modelFile)
 		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel(gcnew Func<RuntimeModel^>(&CreateModel), gcnew array<Func<bool>^>(0), 1 << 16);
 
 		auto stateSlotCount = (int32_t)(Globals::RuntimeModel->StateVectorSize / sizeof(int32_t));
-		auto stateLabelCount = Globals::RuntimeModel->StateFormulas->Length;
+		auto stateLabelCount = Globals::RuntimeModel->ExecutableStateFormulas->Length;
 		auto transitionGroupCount = 1;
 
 		// Create the LTS type and set the state vector size
@@ -165,7 +165,7 @@ void LoadModel(model_t model, const char* modelFile)
 
 		for (auto i = 0; i < stateLabelCount; ++i)
 		{
-			auto stateLabel = Marshal::StringToHGlobalAnsi(Globals::RuntimeModel->StateFormulas[i]->Label);
+			auto stateLabel = Marshal::StringToHGlobalAnsi(Globals::RuntimeModel->ExecutableStateFormulas[i]->Label);
 			lts_type_set_state_label_name(ltsType, i, (char*)stateLabel.ToPointer());
 			lts_type_set_state_label_typeno(ltsType, i, boolType);
 			Marshal::FreeHGlobal(stateLabel);
@@ -271,7 +271,7 @@ int32_t StateLabelCallback(model_t model, int32_t label, int32_t* state)
 	try
 	{
 		Globals::RuntimeModel->Deserialize((unsigned char*)state);
-		return Globals::RuntimeModel->StateFormulas[label]->Expression() ? 1 : 0;
+		return Globals::RuntimeModel->ExecutableStateFormulas[label]->Expression() ? 1 : 0;
 	}
 	catch (Exception^ e)
 	{

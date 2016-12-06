@@ -53,7 +53,7 @@ namespace SafetySharp.Analysis
 		/// <param name="visitor">The visitor that should be executed.</param>
 		internal override void Visit(FormulaVisitor visitor)
 		{
-			visitor.VisitStateFormula(this);
+			//visitor.VisitStateFormula(this);
 		}
 	}
 }
