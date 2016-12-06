@@ -296,7 +296,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var probabilityExactlyZero = ProbabilityExactlyZero(directlySatisfiedStates, excludedStates );
 
 			// calculate probabilityExactlyOne (prob1)
-			var probabilityExactlyOne = ProbabilityExactlyOne(probabilityExactlyZero, excludedStates , probabilityExactlyZero);
+			var probabilityExactlyOne = ProbabilityExactlyOne(directlySatisfiedStates, excludedStates , probabilityExactlyZero);
 
 			//TODO: Do not calculate exact state probabilities, when _every_ initial state>0 is either in probabilityExactlyZero or in probabilityExactlyOne
 
