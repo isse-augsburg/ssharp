@@ -23,6 +23,7 @@
 namespace SafetySharp.Analysis
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Runtime.CompilerServices;
 	using Utilities;
 
@@ -43,6 +44,19 @@ namespace SafetySharp.Analysis
 
 			for (var i = 0; i < formulas.Length; ++i)
 				_formulas |= formulas[i]() ? 1 << i : 0;
+		}
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="formulas">The state formulas the set should contain.</param>
+		internal StateFormulaSet(IReadOnlyList<bool> formulas)
+		{
+			CheckFormulaCount(formulas.Count);
+			_formulas = 0;
+
+			for (var i = 0; i < formulas.Count; ++i)
+				_formulas |= formulas[i] ? 1 << i : 0;
 		}
 
 		/// <summary>

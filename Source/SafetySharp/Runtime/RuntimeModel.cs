@@ -96,7 +96,7 @@ namespace SafetySharp.Runtime
 			Model = serializedData.Model;
 			SerializedModel = buffer;
 			RootComponents = rootComponents.Cast<Component>().ToArray();
-			StateFormulas = objectTable.OfType<StateFormula>().ToArray();
+			ExecutableStateFormulas = objectTable.OfType<ExecutableStateFormula>().ToArray();
 			Formulas = formulas;
 
 			// Create a local object table just for the objects referenced by the model; only these objects
@@ -124,7 +124,7 @@ namespace SafetySharp.Runtime
 			}
 
 			FaultSet.CheckFaultCount(_faults.Length);
-			StateFormulaSet.CheckFormulaCount(StateFormulas.Length);
+			StateFormulaSet.CheckFormulaCount(ExecutableStateFormulas.Length);
 		}
 
 		/// <summary>
@@ -181,7 +181,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the state formulas of the model.
 		/// </summary>
-		internal StateFormula[] StateFormulas { get; }
+		internal ExecutableStateFormula[] ExecutableStateFormulas { get; }
 
 		/// <summary>
 		///   Updates the activation states of the model's faults.

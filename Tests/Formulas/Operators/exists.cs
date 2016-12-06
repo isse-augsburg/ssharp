@@ -34,7 +34,7 @@ namespace Tests.Formulas.Operators
 			{
 				var actual = E(intValue < 7);
 				var expected = new UnaryFormula(
-					new StateFormula(() => intValue < 7),
+					new ExecutableStateFormula(() => intValue < 7),
 					UnaryOperator.Exists);
 
 				Check(actual, expected);
@@ -44,7 +44,7 @@ namespace Tests.Formulas.Operators
 				var actual = E(E(intValue >= 7));
 				var expected = new UnaryFormula(
 					new UnaryFormula(
-						new StateFormula(() => intValue >= 7),
+						new ExecutableStateFormula(() => intValue >= 7),
 						UnaryOperator.Exists),
 					UnaryOperator.Exists);
 

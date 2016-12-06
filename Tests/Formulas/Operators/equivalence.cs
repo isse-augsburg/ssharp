@@ -35,9 +35,9 @@ namespace Tests.Formulas.Operators
 			{
 				var actual = ((Formula)false).EquivalentTo(intValue < 7);
 				var expected = new BinaryFormula(
-					new StateFormula(() => false),
+					new ExecutableStateFormula(() => false),
 					BinaryOperator.Equivalence,
-					new StateFormula(() => intValue < 7));
+					new ExecutableStateFormula(() => intValue < 7));
 
 				Check(actual, expected);
 			}
@@ -45,16 +45,16 @@ namespace Tests.Formulas.Operators
 			{
 				var actual = ((Formula)false).EquivalentTo(F(intValue < 7));
 				var expected = new BinaryFormula(
-					new StateFormula(() => false),
+					new ExecutableStateFormula(() => false),
 					BinaryOperator.Equivalence,
-					new UnaryFormula(new StateFormula(() => intValue < 7), UnaryOperator.Finally));
+					new UnaryFormula(new ExecutableStateFormula(() => intValue < 7), UnaryOperator.Finally));
 
 				Check(actual, expected);
 			}
 
 			{
 				Formula actual = false.EquivalentTo(intValue < 7);
-				var expected = new StateFormula(() => (false && intValue < 7) || (true && intValue >= 7));
+				var expected = new ExecutableStateFormula(() => (false && intValue < 7) || (true && intValue >= 7));
 
 				Check(actual, expected);
 			}
@@ -62,9 +62,9 @@ namespace Tests.Formulas.Operators
 			{
 				var actual = false.EquivalentTo(F(intValue < 7));
 				var expected = new BinaryFormula(
-					new StateFormula(() => false),
+					new ExecutableStateFormula(() => false),
 					BinaryOperator.Equivalence,
-					new UnaryFormula(new StateFormula(() => intValue < 7), UnaryOperator.Finally));
+					new UnaryFormula(new ExecutableStateFormula(() => intValue < 7), UnaryOperator.Finally));
 
 				Check(actual, expected);
 			}

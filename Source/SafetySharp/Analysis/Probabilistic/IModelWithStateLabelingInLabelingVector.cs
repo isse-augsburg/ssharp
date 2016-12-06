@@ -20,32 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+
+namespace SafetySharp.Runtime
 {
-	using SafetySharp.Analysis;
-
-	internal class Fields : FormulaTestObject
+	interface IModelWithStateLabelingInLabelingVector
 	{
-		private static int x;
+		string[] StateFormulaLabels { get; }
 
-		private readonly Formula f = x == 2;
-		private readonly Formula f1 = x == 3, f2 = x == 4;
-		private readonly Formula f3 = (Formula)(x == 5);
-
-		protected override void Check()
-		{
-			for (var i = 0; i < 6; ++i)
-				Check(i);
-		}
-
-		private void Check(int value)
-		{
-			x = value;
-
-			Check(f, () => x == 2);
-			Check(f1, () => x == 3);
-			Check(f2, () => x == 4);
-			Check(f3, () => x == 5);
-		}
+		LabelVector StateLabeling { get; }
 	}
 }

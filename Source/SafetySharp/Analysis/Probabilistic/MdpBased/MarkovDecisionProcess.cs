@@ -41,7 +41,7 @@ namespace SafetySharp.Runtime
 	using SafetySharp.Utilities.Graph;
 
 
-	internal class MarkovDecisionProcess : IFormalismWithStateLabeling
+	internal class MarkovDecisionProcess : IModelWithStateLabelingInLabelingVector
 	{
 		// Distributions here are Probability Distributions
 
@@ -322,7 +322,7 @@ namespace SafetySharp.Runtime
 
 		public Func<int, bool> CreateFormulaEvaluator(Analysis.Formula formula)
 		{
-			return Analysis.FormulaVisitors.FormulaEvaluatorCompilationVisitor.Compile(this, formula);
+			return Analysis.FormulaVisitors.LabelingVectorFormulaEvaluatorCompilationVisitor.Compile(this, formula);
 		}
 		
 		public UnderlyingDigraph CreateUnderlyingDigraph()

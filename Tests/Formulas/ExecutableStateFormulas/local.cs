@@ -20,32 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Formulas.ExecutableStateFormulas
 {
-	using System;
 	using SafetySharp.Analysis;
 
-	internal class Parameters : FormulaTestObject
+	internal class Local : FormulaTestObject
 	{
-		private bool this[Formula actual, Func<bool> expected]
-		{
-			get
-			{
-				Check(actual, expected);
-				return true;
-			}
-		}
-
 		protected override void Check()
 		{
-			var x = 2;
-			Check(x == 2, () => x == 2);
-			var ignored = this[x == 3, () => x == 3];
+			var x = 0;
+			Formula f = x == 2;
+			Formula f1 = x == 3, f2 = x == 4;
+
+			Check(f, () => x == 2);
+			Check(f1, () => x == 3);
+			Check(f2, () => x == 4);
+
+			x = 2;
+			Check(f, () => x == 2);
+			Check(f1, () => x == 3);
+			Check(f2, () => x == 4);
 
 			x = 3;
-			Check(x == 2, () => x == 2);
-			Check(x == 2, () => x == 2);
-			ignored = this[x == 3, () => x == 3];
+			Check(f, () => x == 2);
+			Check(f1, () => x == 3);
+			Check(f2, () => x == 4);
+
+			x = 4;
+			Check(f, () => x == 2);
+			Check(f1, () => x == 3);
+			Check(f2, () => x == 4);
 		}
 	}
 }

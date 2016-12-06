@@ -36,7 +36,7 @@ namespace Tests.Serialization.RuntimeModels
 
 			Create(m);
 
-			StateFormulas.ShouldBeEmpty();
+			ExecutableStateFormulas.ShouldBeEmpty();
 			RootComponents.Length.ShouldBe(1);
 			StateSlotCount.ShouldBe(1);
 

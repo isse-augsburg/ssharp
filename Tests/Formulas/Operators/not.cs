@@ -32,7 +32,7 @@ namespace Tests.Formulas.Operators
 			{
 				var actual = !(X(true));
 				var expected = new UnaryFormula(
-					new UnaryFormula(new StateFormula(() => true), UnaryOperator.Next),
+					new UnaryFormula(new ExecutableStateFormula(() => true), UnaryOperator.Next),
 					UnaryOperator.Not);
 
 				Check(actual, expected);
@@ -41,7 +41,7 @@ namespace Tests.Formulas.Operators
 			{
 				var actual = !X(true);
 				var expected = new UnaryFormula(
-					new UnaryFormula(new StateFormula(() => true), UnaryOperator.Next),
+					new UnaryFormula(new ExecutableStateFormula(() => true), UnaryOperator.Next),
 					UnaryOperator.Not);
 
 				Check(actual, expected);

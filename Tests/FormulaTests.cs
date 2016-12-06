@@ -26,8 +26,8 @@ namespace Tests
 
 	public partial class FormulaTests
 	{
-		[Theory, MemberData(nameof(DiscoverTests), "Formulas/StateFormulas")]
-		public void StateFormulas(string test, string file)
+		[Theory, MemberData(nameof(DiscoverTests), "Formulas/ExecutableStateFormulas")]
+		public void ExecutableStateFormulas(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}

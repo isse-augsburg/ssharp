@@ -40,21 +40,21 @@ namespace Tests.Serialization.StateLabels
 
 			Create(m, f1, f2, f3);
 
-			StateFormulas.Length.ShouldBe(3);
+			ExecutableStateFormulas.Length.ShouldBe(3);
 			Formulas.Length.ShouldBe(3);
 			RootComponents.Length.ShouldBe(1);
 
 			var root = RootComponents[0];
 			root.ShouldBeOfType<C>();
 
-			StateFormulas[0].Expression().ShouldBe(true);
-			StateFormulas[1].Expression().ShouldBe(false);
-			StateFormulas[2].Expression().ShouldBe(true);
+			ExecutableStateFormulas[0].Expression().ShouldBe(true);
+			ExecutableStateFormulas[1].Expression().ShouldBe(false);
+			ExecutableStateFormulas[2].Expression().ShouldBe(true);
 
 			((C)root).F = 7;
-			StateFormulas[0].Expression().ShouldBe(false);
-			StateFormulas[1].Expression().ShouldBe(true);
-			StateFormulas[2].Expression().ShouldBe(false);
+			ExecutableStateFormulas[0].Expression().ShouldBe(false);
+			ExecutableStateFormulas[1].Expression().ShouldBe(true);
+			ExecutableStateFormulas[2].Expression().ShouldBe(false);
 		}
 
 		private class C : Component

@@ -20,32 +20,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Formulas.ExecutableStateFormulas
 {
-	using SafetySharp.Analysis;
+	using System;
+	using SafetySharp.Modeling;
 
-	internal class BinaryExpressions : FormulaTestObject
+	internal class Nameof : FormulaTestObject
 	{
 		protected override void Check()
 		{
-			var x = 0;
-			var f = ((Formula)(x == 2) && x == 3) || x == 4;
-
-			var expected = new BinaryFormula(
-				new BinaryFormula(new StateFormula(() => x == 2), BinaryOperator.And, new StateFormula(() => x == 3)),
-				BinaryOperator.Or,
-				new StateFormula(() => x == 4));
-
-			Check(f, expected);
-
-			x = 2;
-			Check(f, expected);
-
-			x = 3;
-			Check(f, expected);
-
-			x = 4;
-			Check(f, expected);
+			var x = $"{"abcdefghijklm".Substring(nameof(Component).Length)}";
+			var s = nameof(x);
+			Console.WriteLine($"{nameof(s)} {s}");
 		}
 	}
 }

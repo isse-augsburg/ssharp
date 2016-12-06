@@ -35,7 +35,7 @@ namespace Tests
 	{
 		protected void Check(Formula actual, Func<bool> expected)
 		{
-			Check(actual, new StateFormula(expected));
+			Check(actual, new ExecutableStateFormula(expected));
 		}
 
 		protected void Check(Formula actual, Formula expected)
@@ -55,8 +55,8 @@ namespace Tests
 
 		private static bool IsStructurallyEquivalent(Formula f1, Formula f2)
 		{
-			var stateFormula1 = f1 as StateFormula;
-			var stateFormula2 = f2 as StateFormula;
+			var stateFormula1 = f1 as ExecutableStateFormula;
+			var stateFormula2 = f2 as ExecutableStateFormula;
 			var unaryFormula1 = f1 as UnaryFormula;
 			var unaryFormula2 = f2 as UnaryFormula;
 			var binaryFormula1 = f1 as BinaryFormula;

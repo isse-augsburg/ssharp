@@ -39,15 +39,15 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="createModel">Creates the model that should be checked.</param>
-		/// <param name="stateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
+		/// <param name="executableStateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal LtmcGenerator(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas,
+		internal LtmcGenerator(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] executableStateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration)
 		{
 			_markovChain = new LabeledTransitionMarkovChain(configuration.StateCapacity);
-			_markovChain.StateFormulaLabels = stateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
+			_markovChain.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
 			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LtmcBuilder(_markovChain));
 			if (terminateEarlyCondition != null)

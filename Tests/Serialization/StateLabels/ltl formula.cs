@@ -39,7 +39,7 @@ namespace Tests.Serialization.StateLabels
 
 			Create(m, f);
 
-			StateFormulas.Length.ShouldBe(4);
+			ExecutableStateFormulas.Length.ShouldBe(4);
 			Formulas.Length.ShouldBe(1);
 			RootComponents.Length.ShouldBe(1);
 
@@ -47,28 +47,28 @@ namespace Tests.Serialization.StateLabels
 			root.ShouldBeOfType<C>();
 
 			((C)root).F = 0;
-			StateFormulas[0].Expression().ShouldBe(true);
-			StateFormulas[1].Expression().ShouldBe(false);
-			StateFormulas[2].Expression().ShouldBe(false);
-			StateFormulas[3].Expression().ShouldBe(false);
+			ExecutableStateFormulas[0].Expression().ShouldBe(true);
+			ExecutableStateFormulas[1].Expression().ShouldBe(false);
+			ExecutableStateFormulas[2].Expression().ShouldBe(false);
+			ExecutableStateFormulas[3].Expression().ShouldBe(false);
 
 			((C)root).F = 3;
-			StateFormulas[0].Expression().ShouldBe(true);
-			StateFormulas[1].Expression().ShouldBe(false);
-			StateFormulas[2].Expression().ShouldBe(false);
-			StateFormulas[3].Expression().ShouldBe(true);
+			ExecutableStateFormulas[0].Expression().ShouldBe(true);
+			ExecutableStateFormulas[1].Expression().ShouldBe(false);
+			ExecutableStateFormulas[2].Expression().ShouldBe(false);
+			ExecutableStateFormulas[3].Expression().ShouldBe(true);
 
 			((C)root).F = -3;
-			StateFormulas[0].Expression().ShouldBe(true);
-			StateFormulas[1].Expression().ShouldBe(false);
-			StateFormulas[2].Expression().ShouldBe(true);
-			StateFormulas[3].Expression().ShouldBe(false);
+			ExecutableStateFormulas[0].Expression().ShouldBe(true);
+			ExecutableStateFormulas[1].Expression().ShouldBe(false);
+			ExecutableStateFormulas[2].Expression().ShouldBe(true);
+			ExecutableStateFormulas[3].Expression().ShouldBe(false);
 
 			((C)root).F = 7;
-			StateFormulas[0].Expression().ShouldBe(true);
-			StateFormulas[1].Expression().ShouldBe(true);
-			StateFormulas[2].Expression().ShouldBe(false);
-			StateFormulas[3].Expression().ShouldBe(true);
+			ExecutableStateFormulas[0].Expression().ShouldBe(true);
+			ExecutableStateFormulas[1].Expression().ShouldBe(true);
+			ExecutableStateFormulas[2].Expression().ShouldBe(false);
+			ExecutableStateFormulas[3].Expression().ShouldBe(true);
 		}
 
 		private class C : Component

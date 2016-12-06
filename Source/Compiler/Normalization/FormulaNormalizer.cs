@@ -32,12 +32,12 @@ namespace SafetySharp.Compiler.Normalization
 
 	/// <summary>
 	///   Normalizes all implicit conversions from a Boolean expression to a <see cref="Formula" /> by explicitly invoking the
-	///   <see cref="StateFormulaFactory.Create" /> method.
+	///   <see cref="ExecutableStateFormulaFactory.Create" /> method.
 	/// </summary>
 	public sealed class FormulaNormalizer : Normalizer
 	{
 		/// <summary>
-		///   Represents the <see cref="StateFormulaFactory" /> type.
+		///   Represents the <see cref="ExecutableStateFormulaFactory" /> type.
 		/// </summary>
 		private INamedTypeSymbol _factoryType;
 
@@ -51,7 +51,7 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		protected override Compilation Normalize()
 		{
-			_factoryType = Compilation.GetTypeSymbol(typeof(StateFormulaFactory));
+			_factoryType = Compilation.GetTypeSymbol(typeof(ExecutableStateFormulaFactory));
 			_formulaType = Compilation.GetTypeSymbol<Formula>();
 
 			return base.Normalize();
@@ -197,7 +197,7 @@ namespace SafetySharp.Compiler.Normalization
 		private ExpressionSyntax CreateInvocation(ExpressionSyntax expression)
 		{
 			var type = Syntax.TypeExpression(_factoryType);
-			var memberAccess = Syntax.MemberAccessExpression(type, Syntax.IdentifierName(nameof(StateFormulaFactory.Create)));
+			var memberAccess = Syntax.MemberAccessExpression(type, Syntax.IdentifierName(nameof(ExecutableStateFormulaFactory.Create)));
 			var lambdaExpression = Syntax.ValueReturningLambdaExpression(expression);
 			var invocation = Syntax.InvocationExpression(memberAccess, lambdaExpression);
 			return (ExpressionSyntax)invocation;

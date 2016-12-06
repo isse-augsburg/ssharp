@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,60 +20,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.FormulaVisitors
+namespace SafetySharp.Analysis
 {
-	using System.Collections.Generic;
-	using Runtime.Serialization;
+	using System;
+	using FormulaVisitors;
 	using Utilities;
 
 	/// <summary>
-	///   Collects all <see cref="ExecutableStateFormula" /> instances contained in a <see cref="Formula" />.
+	///   Represents a state formula, i.e., a Boolean expression that is evaluated in a single system state.
 	/// </summary>
-	internal class RewardRetrieverCollector : FormulaVisitor
+	internal sealed class ExecutableStateFormula : Formula
 	{
 		/// <summary>
-		///   Gets the collected state formulas.
+		///   Initializes a new instance of the <see cref="ExecutableStateFormula" /> class.
 		/// </summary>
-		public HashSet<string> RewardRetrievers { get; } = new HashSet<string>();
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitUnaryFormula(UnaryFormula formula)
+		/// <param name="expression">The expression that represents the state formula.</param>
+		/// <param name="label">
+		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
+		/// </param>
+		internal ExecutableStateFormula(Func<bool> expression, string label = null)
 		{
-			Visit(formula.Operand);
+			Requires.NotNull(expression, nameof(expression));
+
+			Expression = expression;
+			Label = label ?? "StateFormula" + Guid.NewGuid().ToString().Replace("-", String.Empty);
 		}
 
 		/// <summary>
-		///   Visits the <paramref name="formula." />
+		///   Gets the expression that represents the state formula.
 		/// </summary>
-		public override void VisitBinaryFormula(BinaryFormula formula)
-		{
-			Visit(formula.LeftOperand);
-			Visit(formula.RightOperand);
-		}
+		public Func<bool> Expression { get; }
 
 		/// <summary>
-		///   Visits the <paramref name="formula." />
+		///   Gets the state label that a model checker can use to determine whether the state formula holds.
 		/// </summary>
-		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
-		{
-		}
+		public string Label { get; }
 
 		/// <summary>
-		///   Visits the <paramref name="formula." />
+		///   Executes the <paramref name="visitor" /> for this formula.
 		/// </summary>
-		public override void VisitRewardFormula(RewardFormula formula)
+		/// <param name="visitor">The visitor that should be executed.</param>
+		internal override void Visit(FormulaVisitor visitor)
 		{
-			RewardRetrievers.Add(formula.RewardRetriever.Label);
-		}
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
-		{
-			Visit(formula.Operand);
+			visitor.VisitExecutableStateFormula(this);
 		}
 	}
 }

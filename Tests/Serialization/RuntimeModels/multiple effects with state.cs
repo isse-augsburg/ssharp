@@ -45,7 +45,7 @@ namespace Tests.Serialization.RuntimeModels
 
 			Create(m);
 
-			StateFormulas.ShouldBeEmpty();
+			ExecutableStateFormulas.ShouldBeEmpty();
 			RootComponents.Length.ShouldBe(1);
 
 			var root = RootComponents[0];

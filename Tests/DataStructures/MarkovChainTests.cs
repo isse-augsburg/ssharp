@@ -87,8 +87,8 @@ namespace Tests.DataStructures
 			var markovChain = example.MarkovChain;
 
 			Func<bool> returnTrue = () => true;
-			var stateFormulaLabel1 = new StateFormula(returnTrue, "label1");
-			var stateFormulaLabel2 = new StateFormula(returnTrue, "label2");
+			var stateFormulaLabel1 = new ExecutableStateFormula(returnTrue, "label1");
+			var stateFormulaLabel2 = new ExecutableStateFormula(returnTrue, "label2");
 			var stateFormulaBoth = new BinaryFormula(stateFormulaLabel1,BinaryOperator.And, stateFormulaLabel2);
 			var stateFormulaAny = new BinaryFormula(stateFormulaLabel1, BinaryOperator.Or, stateFormulaLabel2);
 			var evaluateStateFormulaLabel1 = markovChain.CreateFormulaEvaluator(stateFormulaLabel1);

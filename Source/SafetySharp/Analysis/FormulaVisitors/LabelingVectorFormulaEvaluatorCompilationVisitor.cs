@@ -36,7 +36,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 	/// <summary>
 	///   Compiles a <see cref="Formula" /> if it does not contain any temporal operators.
 	/// </summary>
-	internal class FormulaEvaluatorCompilationVisitor : FormulaVisitor
+	internal class LabelingVectorFormulaEvaluatorCompilationVisitor : FormulaVisitor
 	{
 		/// <summary>
 		///   The evaluator that is being generated.
@@ -48,22 +48,19 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		private Expression _expression;
 
-		public ParameterExpression MarkovChainStateExpr { get; }
+		public ParameterExpression StateNumberParameterExpr { get; }
 
 		public ConstantExpression LabelingVectorExpr { get; }
 
-		public ConstantExpression MarkovChainExpr { get; }
-
 		public ParameterExpression LabelsOfCurrentStateExpr { get; }
 
-		private readonly IFormalismWithStateLabeling _formalism;
+		private readonly IModelWithStateLabelingInLabelingVector _modelWithStateLabeling;
 
-		public FormulaEvaluatorCompilationVisitor(IFormalismWithStateLabeling formalism)
+		public LabelingVectorFormulaEvaluatorCompilationVisitor(IModelWithStateLabelingInLabelingVector model)
 		{
-			_formalism = formalism;
-			MarkovChainStateExpr = Expression.Parameter(typeof(int), "state");
-			LabelingVectorExpr = Expression.Constant(_formalism.StateLabeling);
-			MarkovChainExpr = Expression.Constant(_formalism);
+			_modelWithStateLabeling = model;
+			StateNumberParameterExpr = Expression.Parameter(typeof(int), "state");
+			LabelingVectorExpr = Expression.Constant(_modelWithStateLabeling.StateLabeling);
 			LabelsOfCurrentStateExpr = Expression.Parameter(typeof(StateFormulaSet), "labelsOfCurrentState");
 		}
 
@@ -72,22 +69,22 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		/// <param name="formalism"></param>
 		/// <param name="formula">The formula that should be compiled.</param>
-		public static Func<int, bool> Compile(IFormalismWithStateLabeling formalism, Formula formula)
+		public static Func<int, bool> Compile(IModelWithStateLabelingInLabelingVector formalism, Formula formula)
 		{
 			Requires.NotNull(formula, nameof(formula));
 
-			var visitor = new FormulaEvaluatorCompilationVisitor(formalism);
+			var visitor = new LabelingVectorFormulaEvaluatorCompilationVisitor(formalism);
 			visitor.Visit(formula);
 			
 			//var getMarkovChainState = visitor.MarkovChainExpr.Type.GetMethod("GetMarkovChainState", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 			//var markovChainStateExpr = Expression.Call(visitor.MarkovChainExpr, getMarkovChainState, visitor.StateStorageStateExpr); // = GetMarkovChainState(stateStorageState);
 			var indexer = visitor.LabelingVectorExpr.Type.GetProperty("Item", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-			var labelsOfCurrentStateExpr = Expression.Property(visitor.LabelingVectorExpr, indexer, visitor.MarkovChainStateExpr);
+			var labelsOfCurrentStateExpr = Expression.Property(visitor.LabelingVectorExpr, indexer, visitor.StateNumberParameterExpr);
 			var setLabelsOfCurrentStateExpr = Expression.Assign(visitor.LabelsOfCurrentStateExpr, labelsOfCurrentStateExpr);
 
 			var codeOfLambda = Expression.Block(new[] { visitor.LabelsOfCurrentStateExpr }, setLabelsOfCurrentStateExpr, visitor._expression);
 
-			var lambda = Expression.Lambda<Func<int, bool>>(codeOfLambda, visitor.MarkovChainStateExpr).Compile();
+			var lambda = Expression.Lambda<Func<int, bool>>(codeOfLambda, visitor.StateNumberParameterExpr).Compile();
 
 			return lambda;
 		}
@@ -150,13 +147,13 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public override void VisitStateFormula(StateFormula formula)
+		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
 		{
 			// Idea:
 			//  var indexOfStateFormula = Array.IndexOf(_markovChain.StateFormulaLabels, formula.Label);
 			//  var result = _markovChain.StateLabeling[StateParameter][indexOfStateFormula];
 
-			var indexOfStateFormula = Array.IndexOf(_formalism.StateFormulaLabels, formula.Label);
+			var indexOfStateFormula = Array.IndexOf(_modelWithStateLabeling.StateFormulaLabels, formula.Label);
 			var indexOfStateFormulaExpr = Expression.Constant(indexOfStateFormula);
 
 			var indexer = LabelsOfCurrentStateExpr.Type.GetProperty("Item",BindingFlags.Instance| BindingFlags.NonPublic| BindingFlags.Public);

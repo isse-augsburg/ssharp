@@ -34,23 +34,14 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Initializes a new instance of the <see cref="StateFormula" /> class.
 		/// </summary>
-		/// <param name="expression">The expression that represents the state formula.</param>
 		/// <param name="label">
 		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
 		/// </param>
-		internal StateFormula(Func<bool> expression, string label = null)
+		internal StateFormula(string label = null)
 		{
-			Requires.NotNull(expression, nameof(expression));
-
-			Expression = expression;
 			Label = label ?? "StateFormula" + Guid.NewGuid().ToString().Replace("-", String.Empty);
 		}
-
-		/// <summary>
-		///   Gets the expression that represents the state formula.
-		/// </summary>
-		public Func<bool> Expression { get; }
-
+		
 		/// <summary>
 		///   Gets the state label that a model checker can use to determine whether the state formula holds.
 		/// </summary>

@@ -20,36 +20,58 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Formulas.ExecutableStateFormulas
 {
 	using SafetySharp.Analysis;
 
-	internal class Properties : FormulaTestObject
+	internal class Return : FormulaTestObject
 	{
 		private static int x;
-		public Formula f2;
+		private readonly X1 x1 = new X1();
+		private readonly X2 x2 = new X2();
 
-		public Properties()
+		private Formula P1
 		{
-			f2 = x == 4;
+			get { return x == 2; }
 		}
 
-		public Formula f { get; } = x == 2;
-		public Formula f1 { get; set; } = x == 3;
+		private Formula P2 => x == 4;
+
+		private Formula M1()
+		{
+			return x == 1;
+		}
+
+		private Formula M2() => x == 3;
 
 		protected override void Check()
 		{
-			for (var i = 0; i < 6; ++i)
+			for (var i = 0; i < 7; ++i)
 				Check(i);
 		}
 
 		private void Check(int value)
 		{
 			x = value;
+			Check(M1(), () => x == 1);
+			Check(P1, () => x == 2);
+			Check(M2(), () => x == 3);
+			Check(P2, () => x == 4);
+			Check(x1[0], () => x == 5);
+			Check(x2[0], () => x == 6);
+		}
 
-			Check(f, () => x == 2);
-			Check(f1, () => x == 3);
-			Check(f2, () => x == 4);
+		private class X1
+		{
+			public Formula this[int i] => x == 5;
+		}
+
+		private class X2
+		{
+			public Formula this[int i]
+			{
+				get { return x == 6; }
+			}
 		}
 	}
 }

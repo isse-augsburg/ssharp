@@ -62,20 +62,17 @@ namespace Tests.DataStructures.MarkovChainExamples
 	{
 		internal  DiscreteTimeMarkovChain Create()
 		{
-			Func<bool> returnTrue = () => true;
-			Func<bool> returnFalse = () => false;
-
 			var markovChain = new DiscreteTimeMarkovChain(ModelDensity.Medium,ByteSize.MebiByte);
 			markovChain.StateFormulaLabels = new string[] { "label1", "label2" };
 			markovChain.StateRewardRetrieverLabels = new string[] { };
 			markovChain.StartWithInitialDistribution();
 			markovChain.AddInitialTransition(0, 1.0);
 			markovChain.FinishInitialDistribution();
-			markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { returnTrue, returnFalse }));
+			markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { true, false }));
 			markovChain.StartWithNewDistribution(1);
 			markovChain.AddTransition(1, 1.0);
 			markovChain.FinishDistribution();
-			markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
+			markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { false, true }));
 			markovChain.StartWithNewDistribution(0);
 			markovChain.AddTransition(1, 0.6);
 			markovChain.AddTransition(0, 0.4);
@@ -94,20 +91,17 @@ namespace Tests.DataStructures.MarkovChainExamples
 	{
 		internal DiscreteTimeMarkovChain Create()
 		{
-			Func<bool> returnTrue = () => true;
-			Func<bool> returnFalse = () => false;
-
 			var markovChain = new DiscreteTimeMarkovChain(ModelDensity.Medium, ByteSize.MebiByte);
 			markovChain.StateFormulaLabels = new string[] { "label1", "label2" };
 			markovChain.StateRewardRetrieverLabels = new string[] { };
 			markovChain.StartWithInitialDistribution();
 			markovChain.AddInitialTransition(0, 1.0);
 			markovChain.FinishInitialDistribution();
-			markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { returnTrue, returnFalse }));
+			markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { true, false }));
 			markovChain.StartWithNewDistribution(1);
 			markovChain.AddTransition(1, 1.0);
 			markovChain.FinishDistribution();
-			markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { returnFalse, returnTrue }));
+			markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { false, true }));
 			markovChain.StartWithNewDistribution(0);
 			markovChain.AddTransition(1, 1.0);
 			markovChain.FinishDistribution();

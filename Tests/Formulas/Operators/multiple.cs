@@ -37,16 +37,16 @@ namespace Tests.Formulas.Operators
 				new UnaryFormula(
 					new UnaryFormula(
 						new BinaryFormula(
-							new StateFormula(() => intValue > 7 && boolValue),
+							new ExecutableStateFormula(() => intValue > 7 && boolValue),
 							BinaryOperator.And,
 							new BinaryFormula(
-								new UnaryFormula(new StateFormula(() => !boolValue), UnaryOperator.Next),
+								new UnaryFormula(new ExecutableStateFormula(() => !boolValue), UnaryOperator.Next),
 								BinaryOperator.Or,
-								new StateFormula(() => intValue < 4))),
+								new ExecutableStateFormula(() => intValue < 4))),
 						UnaryOperator.Finally),
 					UnaryOperator.All),
 				BinaryOperator.And,
-				new UnaryFormula(new UnaryFormula(new StateFormula(() => boolValue), UnaryOperator.Finally), UnaryOperator.All));
+				new UnaryFormula(new UnaryFormula(new ExecutableStateFormula(() => boolValue), UnaryOperator.Finally), UnaryOperator.All));
 
 			Check(actual, expected);
 		}

@@ -20,13 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
-namespace SafetySharp.Runtime
+namespace Tests.Formulas.ExecutableStateFormulas
 {
-	interface IFormalismWithStateLabeling
-	{
-		string[] StateFormulaLabels { get; }
+	using System;
+	using SafetySharp.Analysis;
 
-		LabelVector StateLabeling { get; }
+	internal class Parameters : FormulaTestObject
+	{
+		private bool this[Formula actual, Func<bool> expected]
+		{
+			get
+			{
+				Check(actual, expected);
+				return true;
+			}
+		}
+
+		protected override void Check()
+		{
+			var x = 2;
+			Check(x == 2, () => x == 2);
+			var ignored = this[x == 3, () => x == 3];
+
+			x = 3;
+			Check(x == 2, () => x == 2);
+			Check(x == 2, () => x == 2);
+			ignored = this[x == 3, () => x == 3];
+		}
 	}
 }

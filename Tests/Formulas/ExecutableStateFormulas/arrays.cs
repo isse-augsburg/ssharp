@@ -20,58 +20,56 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Formulas.ExecutableStateFormulas
 {
 	using SafetySharp.Analysis;
 
-	internal class Return : FormulaTestObject
+	internal class Arrays : FormulaTestObject
 	{
 		private static int x;
-		private readonly X1 x1 = new X1();
-		private readonly X2 x2 = new X2();
+		private readonly Formula[] _f = new Formula[2];
+		private readonly Formula[] _i = new Formula[2];
+		private Formula[] F { get; } = new Formula[2];
 
-		private Formula P1
+		private Formula this[int index]
 		{
-			get { return x == 2; }
+			set { _i[index] = value; }
 		}
-
-		private Formula P2 => x == 4;
-
-		private Formula M1()
-		{
-			return x == 1;
-		}
-
-		private Formula M2() => x == 3;
 
 		protected override void Check()
 		{
-			for (var i = 0; i < 7; ++i)
-				Check(i);
+			var g = new Formula[2];
+
+			g[0] = x == 2;
+			g[1] = x == 3;
+			_f[0] = x == 3;
+			F[0] = x == 4;
+			this[0] = x == 5;
+
+			Check(2, g);
+			CheckParams(2, x == 2, x == 3);
 		}
 
-		private void Check(int value)
+		private void Check(int value, Formula[] g)
 		{
 			x = value;
-			Check(M1(), () => x == 1);
-			Check(P1, () => x == 2);
-			Check(M2(), () => x == 3);
-			Check(P2, () => x == 4);
-			Check(x1[0], () => x == 5);
-			Check(x2[0], () => x == 6);
+			
+			Check(g[0], () => x == 2);
+			Check(g[1], () => x == 3);
+			Check(_f[0], () => x == 3);
+			Check(F[0], () => x == 4);
+			Check(_i[0], () => x == 5);
 		}
 
-		private class X1
+		private void CheckParams(int value, params Formula[] g)
 		{
-			public Formula this[int i] => x == 5;
-		}
+			x = value;
 
-		private class X2
-		{
-			public Formula this[int i]
-			{
-				get { return x == 6; }
-			}
+			Check(g[0], () => x == 2);
+			Check(g[1], () => x == 3);
+			Check(_f[0], () => x == 3);
+			Check(F[0], () => x == 4);
+			Check(_i[0], () => x == 5);
 		}
 	}
 }

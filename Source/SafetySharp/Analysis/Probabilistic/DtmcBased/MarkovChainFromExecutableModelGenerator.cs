@@ -72,7 +72,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Generates a <see cref="StateGraph" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		private DiscreteTimeMarkovChain GenerateMarkovChain(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas)
+		private DiscreteTimeMarkovChain GenerateMarkovChain(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] executableStateFormulas)
 		{
 			Requires.That(IntPtr.Size == 8, "State graph generation is only supported in 64bit processes.");
 
@@ -82,7 +82,7 @@ namespace SafetySharp.Analysis
 			Configuration.CpuCount = 4;
 
 
-			using (var checker = new LtmcGenerator(createModel, terminateEarlyCondition, stateFormulas, OutputWritten, Configuration))
+			using (var checker = new LtmcGenerator(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
 			{
 				var markovChain = default(DiscreteTimeMarkovChain);
 				var initializationTime = stopwatch.Elapsed;
@@ -127,7 +127,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Generates a <see cref="MarkovChain" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		private DiscreteTimeMarkovChain GenerateMarkovChain(Func<RuntimeModel> createModel, Formula terminateEarlyCondition, StateFormula[] stateFormulas)
+		private DiscreteTimeMarkovChain GenerateMarkovChain(Func<RuntimeModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] stateFormulas)
 		{
 			return GenerateMarkovChain(() => new LtmcExecutedModel(createModel, Configuration.SuccessorCapacity), terminateEarlyCondition, stateFormulas);
 		}
@@ -137,7 +137,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model the state graph should be generated for.</param>
 		/// <param name="stateFormulas">The state formulas that should be evaluated during state graph generation.</param>
-		private DiscreteTimeMarkovChain GenerateMarkovChain(ModelBase model, Formula terminateEarlyCondition, params StateFormula[] stateFormulas)
+		private DiscreteTimeMarkovChain GenerateMarkovChain(ModelBase model, Formula terminateEarlyCondition, params ExecutableStateFormula[] stateFormulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(stateFormulas, nameof(stateFormulas));
@@ -155,12 +155,12 @@ namespace SafetySharp.Analysis
 
 			ProbabilityMatrixCreationStarted = true;
 
-			var stateFormulaCollector = new CollectStateFormulasVisitor();
+			var stateFormulaCollector = new CollectExecutableStateFormulasVisitor();
 			foreach (var stateFormula in _formulasToCheck)
 			{
 				stateFormulaCollector.Visit(stateFormula);
 			}
-			return GenerateMarkovChain(_model, terminateEarlyCondition, stateFormulaCollector.StateFormulas.ToArray());
+			return GenerateMarkovChain(_model, terminateEarlyCondition, stateFormulaCollector.ExecutableStateFormulas.ToArray());
 		}
 		
 

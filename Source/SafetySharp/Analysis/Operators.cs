@@ -50,7 +50,7 @@ namespace SafetySharp.Analysis
 		/// <param name="rightOperand">The formula representing the succedent of the implication.</param>
 		public static Formula Implies(this bool leftOperand, Formula rightOperand)
 		{
-			return Implies(new StateFormula(() => leftOperand), rightOperand);
+			return Implies(new ExecutableStateFormula(() => leftOperand), rightOperand);
 		}
 
 		/// <summary>
@@ -87,7 +87,7 @@ namespace SafetySharp.Analysis
 		/// <param name="rightOperand">The formula on the right-hand side that should be equivalent.</param>
 		public static Formula EquivalentTo(this bool leftOperand, Formula rightOperand)
 		{
-			return EquivalentTo(new StateFormula(() => leftOperand), rightOperand);
+			return EquivalentTo(new ExecutableStateFormula(() => leftOperand), rightOperand);
 		}
 
 		/// <summary>

@@ -20,18 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Formulas.ExecutableStateFormulas
 {
-	using System;
-	using SafetySharp.Modeling;
+	using SafetySharp.Analysis;
 
-	internal class Nameof : FormulaTestObject
+	internal class Fields : FormulaTestObject
 	{
+		private static int x;
+
+		private readonly Formula f = x == 2;
+		private readonly Formula f1 = x == 3, f2 = x == 4;
+		private readonly Formula f3 = (Formula)(x == 5);
+
 		protected override void Check()
 		{
-			var x = $"{"abcdefghijklm".Substring(nameof(Component).Length)}";
-			var s = nameof(x);
-			Console.WriteLine($"{nameof(s)} {s}");
+			for (var i = 0; i < 6; ++i)
+				Check(i);
+		}
+
+		private void Check(int value)
+		{
+			x = value;
+
+			Check(f, () => x == 2);
+			Check(f1, () => x == 3);
+			Check(f2, () => x == 4);
+			Check(f3, () => x == 5);
 		}
 	}
 }

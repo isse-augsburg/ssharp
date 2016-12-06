@@ -41,7 +41,7 @@ namespace SafetySharp.Runtime
 	using SafetySharp.Utilities.Graph;
 
 
-	public class DiscreteTimeMarkovChain : IFormalismWithStateLabeling
+	public class DiscreteTimeMarkovChain : IModelWithStateLabelingInLabelingVector
 	{
 		// TODO: Optimization potential for custom model checker: Add every state only once. Save the transitions and evaluate reachability formulas more efficient by only expanding "states" to "states x stateformulaset" where the state labels of interests are in "stateformulaset"
 
@@ -237,7 +237,7 @@ namespace SafetySharp.Runtime
 		
 		public Func<int, bool> CreateFormulaEvaluator(Analysis.Formula formula)
 		{
-			return Analysis.FormulaVisitors.FormulaEvaluatorCompilationVisitor.Compile(this,formula);
+			return Analysis.FormulaVisitors.LabelingVectorFormulaEvaluatorCompilationVisitor.Compile(this,formula);
 		}
 
 		internal UnderlyingDigraph CreateUnderlyingDigraph()

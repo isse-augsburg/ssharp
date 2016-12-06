@@ -42,7 +42,7 @@ namespace Tests.Serialization.RuntimeModels
 			var m = InitializeModel(d);
 			Create(m);
 
-			StateFormulas.ShouldBeEmpty();
+			ExecutableStateFormulas.ShouldBeEmpty();
 			RootComponents.Length.ShouldBe(1);
 			RuntimeModel.StateVectorLayout.Groups.ShouldBeEmpty();
 

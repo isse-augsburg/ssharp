@@ -29,7 +29,7 @@ namespace SafetySharp.CompilerServices
 	/// <summary>
 	///   Provides factory methods for the creation of <see cref="Formula" /> instances from C# expressions.
 	/// </summary>
-	public static class StateFormulaFactory
+	public static class ExecutableStateFormulaFactory
 	{
 		/// <summary>
 		///   Returns a <see cref="Formula" /> that evaluates <paramref name="expression" /> within a system state.
@@ -38,7 +38,7 @@ namespace SafetySharp.CompilerServices
 		public static Formula Create(Func<bool> expression)
 		{
 			Requires.NotNull(expression, nameof(expression));
-			return new StateFormula(expression);
+			return new ExecutableStateFormula(expression);
 		}
 	}
 }

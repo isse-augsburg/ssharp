@@ -62,7 +62,7 @@ namespace Tests.DataStructures
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests))]
-		public void PassingTest(MarkovDecisionProcessExample example)
+		public void SumOfAllDistributionsOk(MarkovDecisionProcessExample example)
 		{
 			var mdp= example.Mdp;
 			mdp.RowsWithDistributions.PrintMatrix(Output.Log);
@@ -74,13 +74,16 @@ namespace Tests.DataStructures
 			{
 				while (enumerator.MoveNextDistribution())
 				{
+					var counterOfTransition = 0.0;
 					while (enumerator.MoveNextTransition())
 					{
-						counter += enumerator.CurrentTransition.Value;
+						counterOfTransition += enumerator.CurrentTransition.Value;
 					}
+					Assert.Equal(1.0, counterOfTransition);
+					counter += counterOfTransition;
 				}
 			}
-			Assert.Equal(2.0, counter);
+			Assert.Equal(example.StateDistributions*1.0, counter);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests))]
@@ -89,10 +92,10 @@ namespace Tests.DataStructures
 			var mdp= example.Mdp;
 
 			Func<bool> returnTrue = () => true;
-			var stateFormulaLabel1 = new StateFormula(returnTrue, "label1");
-			var stateFormulaLabel2 = new StateFormula(returnTrue, "label2");
-			var stateFormulaBoth = new BinaryFormula(stateFormulaLabel1,BinaryOperator.And, stateFormulaLabel2);
-			var stateFormulaAny = new BinaryFormula(stateFormulaLabel1, BinaryOperator.Or, stateFormulaLabel2);
+			var stateFormulaLabel1 = new ExecutableStateFormula(returnTrue, "label1");
+			var stateFormulaLabel2 = new ExecutableStateFormula(returnTrue, "label2");
+			var formula1= new BinaryFormula(stateFormulaLabel1,BinaryOperator.And, stateFormulaLabel2);
+			var formula2 = new BinaryFormula(stateFormulaLabel1, BinaryOperator.Or, stateFormulaLabel2);
 			var evaluateStateFormulaLabel1 = mdp.CreateFormulaEvaluator(stateFormulaLabel1);
 			var evaluateStateFormulaLabel2 = mdp.CreateFormulaEvaluator(stateFormulaLabel2);
 			var evaluateStateFormulaBoth = mdp.CreateFormulaEvaluator(stateFormulaBoth);

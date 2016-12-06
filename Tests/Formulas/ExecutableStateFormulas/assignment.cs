@@ -20,36 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Formulas.ExecutableStateFormulas
 {
 	using SafetySharp.Analysis;
 
-	internal class Local : FormulaTestObject
+	internal class Assignment : FormulaTestObject
 	{
+		private Formula f;
+		private Formula P { get; set; }
+
 		protected override void Check()
 		{
 			var x = 0;
-			Formula f = x == 2;
-			Formula f1 = x == 3, f2 = x == 4;
+			Formula g = null;
 
-			Check(f, () => x == 2);
-			Check(f1, () => x == 3);
-			Check(f2, () => x == 4);
+			f = x == 2 || x == 3;
+			g = x == 3;
+			P = x == 4;
+
+			Check(f, () => x == 2 || x == 3);
+			Check(g, () => x == 3);
+			Check(P, () => x == 4);
 
 			x = 2;
-			Check(f, () => x == 2);
-			Check(f1, () => x == 3);
-			Check(f2, () => x == 4);
+			Check(f, () => x == 2 || x == 3);
+			Check(g, () => x == 3);
+			Check(P, () => x == 4);
 
 			x = 3;
-			Check(f, () => x == 2);
-			Check(f1, () => x == 3);
-			Check(f2, () => x == 4);
+			Check(f, () => x == 2 || x == 3);
+			Check(g, () => x == 3);
+			Check(P, () => x == 4);
 
 			x = 4;
-			Check(f, () => x == 2);
-			Check(f1, () => x == 3);
-			Check(f2, () => x == 4);
+			Check(f, () => x == 2 || x == 3);
+			Check(g, () => x == 3);
+			Check(P, () => x == 4);
 		}
 	}
 }

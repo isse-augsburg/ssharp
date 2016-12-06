@@ -20,56 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Formulas.StateFormulas
+namespace Tests.Formulas.ExecutableStateFormulas
 {
 	using SafetySharp.Analysis;
 
-	internal class Arrays : FormulaTestObject
+	internal class BinaryExpressions : FormulaTestObject
 	{
-		private static int x;
-		private readonly Formula[] _f = new Formula[2];
-		private readonly Formula[] _i = new Formula[2];
-		private Formula[] F { get; } = new Formula[2];
-
-		private Formula this[int index]
-		{
-			set { _i[index] = value; }
-		}
-
 		protected override void Check()
 		{
-			var g = new Formula[2];
+			var x = 0;
+			var f = ((Formula)(x == 2) && x == 3) || x == 4;
 
-			g[0] = x == 2;
-			g[1] = x == 3;
-			_f[0] = x == 3;
-			F[0] = x == 4;
-			this[0] = x == 5;
+			var expected = new BinaryFormula(
+				new BinaryFormula(new ExecutableStateFormula(() => x == 2), BinaryOperator.And, new ExecutableStateFormula(() => x == 3)),
+				BinaryOperator.Or,
+				new ExecutableStateFormula(() => x == 4));
 
-			Check(2, g);
-			CheckParams(2, x == 2, x == 3);
-		}
+			Check(f, expected);
 
-		private void Check(int value, Formula[] g)
-		{
-			x = value;
-			
-			Check(g[0], () => x == 2);
-			Check(g[1], () => x == 3);
-			Check(_f[0], () => x == 3);
-			Check(F[0], () => x == 4);
-			Check(_i[0], () => x == 5);
-		}
+			x = 2;
+			Check(f, expected);
 
-		private void CheckParams(int value, params Formula[] g)
-		{
-			x = value;
+			x = 3;
+			Check(f, expected);
 
-			Check(g[0], () => x == 2);
-			Check(g[1], () => x == 3);
-			Check(_f[0], () => x == 3);
-			Check(F[0], () => x == 4);
-			Check(_i[0], () => x == 5);
+			x = 4;
+			Check(f, expected);
 		}
 	}
 }

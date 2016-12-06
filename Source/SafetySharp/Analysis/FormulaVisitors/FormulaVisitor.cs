@@ -40,7 +40,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public abstract void VisitStateFormula(StateFormula formula);
+		public abstract void VisitExecutableStateFormula(ExecutableStateFormula formula);
 
 		/// <summary>
 		///   Visits the <paramref name="formula." />

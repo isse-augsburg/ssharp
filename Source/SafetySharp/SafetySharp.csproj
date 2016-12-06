@@ -66,11 +66,12 @@
     <Compile Include="Analysis\Probabilistic\DtmcBased\DtmcToGv.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\MdpToGv.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\ProbabilityRangeChecker.cs" />
+    <Compile Include="Analysis\ExecutableStateFormula.cs" />
     <Compile Include="Modeling\ProbabilityRange.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\BuiltinMdpModelChecker.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\BuiltinDtmcModelChecker.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\MdpModelChecker.cs" />
-    <Compile Include="Analysis\Probabilistic\IFormalismWithStateLabeling.cs" />
+    <Compile Include="Analysis\Probabilistic\IModelWithStateLabelingInLabelingVector.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\LabeledTransitionMarkovChain2.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\MarkovDecisionProcess.cs" />
     <Compile Include="Analysis\OrderAnalysis.cs" />
@@ -96,7 +97,7 @@
     <Compile Include="Analysis\Probabilistic\AutoResizeVector.cs" />
     <Compile Include="Analysis\Probabilistic\BidirectionalGraph.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\DiscreteTimeMarkovChain.cs" />
-    <Compile Include="Analysis\Probabilistic\FormulaEvaluatorCompilationVisitor.cs" />
+    <Compile Include="Analysis\FormulaVisitors\LabelingVectorFormulaEvaluatorCompilationVisitor.cs" />
     <Compile Include="Analysis\Probabilistic\ProbabilitisticFormula.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\MarkovChainFromExecutableModelGenerator.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\LtmcProbabilityStack.cs" />
@@ -163,7 +164,7 @@
     <Compile Include="CompilerServices\PortBinding.cs" />
     <Compile Include="CompilerServices\BindingMetadataAttribute.cs" />
     <Compile Include="CompilerServices\PortReference.cs" />
-    <Compile Include="CompilerServices\StateFormulaFactory.cs" />
+    <Compile Include="CompilerServices\ExecutableStateFormulaFactory.cs" />
     <Compile Include="Modeling\Component.Update.cs">
       <DependentUpon>Component.cs</DependentUpon>
     </Compile>

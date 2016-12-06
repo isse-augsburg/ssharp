@@ -48,7 +48,7 @@ namespace Tests.Serialization.StateLabels
 			RootComponents.Length.ShouldBe(1);
 
 			Formulas.Length.ShouldBe(6);
-			StateFormulas.Length.ShouldBe(3);
+			ExecutableStateFormulas.Length.ShouldBe(3);
 
 			var root = RootComponents[0];
 			root.ShouldBeOfType<C>();

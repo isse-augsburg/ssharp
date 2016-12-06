@@ -46,7 +46,7 @@ namespace Tests.Utilities
 		/// <summary>
 		///   Gets the state formulas the model was instantiated with.
 		/// </summary>
-		protected StateFormula[] StateFormulas => RuntimeModel.StateFormulas;
+		protected ExecutableStateFormula[] ExecutableStateFormulas => RuntimeModel.ExecutableStateFormulas;
 
 		/// <summary>
 		///   Gets the formulas the model was instantiated with.
