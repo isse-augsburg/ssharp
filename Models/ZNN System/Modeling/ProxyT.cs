@@ -129,8 +129,8 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		private void SwitchServerToTextMode()
 		{
-			foreach(var server in ConnectedServers)
-				server.SetFidelity(EServerFidelity.Low);
+			foreach (var server in ConnectedServers)
+				server.Fidelity = EServerFidelity.Low;
 		}
 
 		/// <summary>
@@ -139,7 +139,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private void SwitchServerToMultiMode()
 		{
 			foreach(var server in ConnectedServers)
-				server.SetFidelity(EServerFidelity.High);
+				server.Fidelity = EServerFidelity.High;
 		}
 
 		/// <summary>
@@ -177,9 +177,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 				if(TotalServerCosts < Model.MaxBudget)
 					IncrementServerPool();
 				else
-					// Switch Server to text mode
-					foreach(var server in ConnectedServers)
-						server.SetFidelity(EServerFidelity.Low);
+					SwitchServerToTextMode();
 			}
 
 			else

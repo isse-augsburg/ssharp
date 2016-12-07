@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
 using NUnit.Framework;
 using SafetySharp.CaseStudies.ZNNSystem.Modeling;
 
@@ -70,7 +69,6 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		public void TestAdjustServers()
 		{
 			var proxy = new ProxyT();
-			var ran = new Random();
 
 			// High Time, low costs
 			for(int i = 0; i < Model.LastResponseCountForAvgTime; i++)
@@ -85,7 +83,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			proxy.AdjustServers();
 			proxy.AdjustServers();
 			Assert.AreEqual(3, proxy.ActiveServerCount);
-			Assert.AreEqual(EServerFidelity.Low, proxy.ConnectedServers[0].FidelityStateMachine.State);
+			Assert.AreEqual(EServerFidelity.Low, proxy.ConnectedServers[0].Fidelity);
 
 			// Low Time, High costs
 			for(int i = 0; i < Model.LastResponseCountForAvgTime; i++)
@@ -95,7 +93,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 
 			proxy.AdjustServers();
 			Assert.AreEqual(2, proxy.ActiveServerCount);
-			Assert.AreEqual(EServerFidelity.High, proxy.ConnectedServers[0].FidelityStateMachine.State);
+			Assert.AreEqual(EServerFidelity.High, proxy.ConnectedServers[0].Fidelity);
 		}
 	}
 }

@@ -68,7 +68,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Current content fidelity level of the server.
 		/// </summary>
-		public StateMachine<EServerFidelity> FidelityStateMachine = EServerFidelity.High;
+		public EServerFidelity Fidelity { get; set; }
 
 		/// <summary>
 		/// The current executing queries
@@ -84,6 +84,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			_MaxServerUnits = maxServerUnits;
 			ExecutingQueries = new List<Query>(_MaxServerUnits);
 			AvailableServerUnits = _MaxServerUnits;
+			Fidelity = EServerFidelity.High;
 		}
 
 		/// <summary>
@@ -101,25 +102,6 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			}
 			catch { }
 			return server;
-		}
-
-		/// <summary>
-		/// Sets the content fidelity level of the server
-		/// </summary>
-		public void SetFidelity(EServerFidelity level)
-		{
-			FidelityStateMachine.Transition(
-					from: new[] { EServerFidelity.Medium, EServerFidelity.Low },
-					to: EServerFidelity.High,
-					guard: level == EServerFidelity.High)
-				.Transition(
-					from: new[] { EServerFidelity.High, EServerFidelity.Low },
-					to: EServerFidelity.Medium,
-					guard: level == EServerFidelity.Medium)
-				.Transition(
-					from: new[] { EServerFidelity.Medium, EServerFidelity.High },
-					to: EServerFidelity.Low,
-					guard: level == EServerFidelity.Low);
 		}
 
 		/// <summary>

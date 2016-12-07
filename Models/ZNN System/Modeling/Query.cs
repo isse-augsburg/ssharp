@@ -32,7 +32,12 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// State machine for query states
 		/// </summary>
-		public StateMachine<EQueryState> StateMachine = EQueryState.Idle;
+		private StateMachine<EQueryState> _StateMachine = EQueryState.Idle;
+
+		/// <summary>
+		/// Gets the current state of the Query
+		/// </summary>
+		public EQueryState State => _StateMachine.State;
 
 		/// <summary>
 		/// The server to execute the query
@@ -59,7 +64,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public override void Update()
 		{
-			StateMachine.Transition(
+			_StateMachine.Transition(
 					from: EQueryState.Idle,
 					to: EQueryState.QueryToProxy,
 					action: Client.StartQuery)
@@ -81,11 +86,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 				.Transition(
 					from: EQueryState.LowFidelityComplete,
 					to: EQueryState.MediumFidelityComplete,
-					guard: SelectedServer.FidelityStateMachine.State != EServerFidelity.Low && SelectedServer.ExecuteQueryStep(this))
+					guard: SelectedServer.Fidelity != EServerFidelity.Low && SelectedServer.ExecuteQueryStep(this))
 				.Transition(
 					from: EQueryState.MediumFidelityComplete,
 					to: EQueryState.HighFidelityComplete,
-					guard: SelectedServer.FidelityStateMachine.State != EServerFidelity.Medium && SelectedServer.ExecuteQueryStep(this))
+					guard: SelectedServer.Fidelity != EServerFidelity.Medium && SelectedServer.ExecuteQueryStep(this))
 				.Transition(
 					from: new[] { EQueryState.LowFidelityComplete, EQueryState.MediumFidelityComplete, EQueryState.HighFidelityComplete },
 					to: EQueryState.ResToProxy,

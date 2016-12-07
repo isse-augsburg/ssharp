@@ -41,14 +41,14 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		{
 			var server = ServerT.GetNewServer();
 
-			server.SetFidelity(EServerFidelity.High);
-			Assert.AreEqual(EServerFidelity.High, server.FidelityStateMachine.State);
+			server.Fidelity=EServerFidelity.High;
+			Assert.AreEqual(EServerFidelity.High, server.Fidelity);
 
-			server.SetFidelity(EServerFidelity.Medium);
-			Assert.AreEqual(EServerFidelity.Medium, server.FidelityStateMachine.State);
+			server.Fidelity=EServerFidelity.Medium;
+			Assert.AreEqual(EServerFidelity.Medium, server.Fidelity);
 
-			server.SetFidelity(EServerFidelity.Low);
-			Assert.AreEqual(EServerFidelity.Low, server.FidelityStateMachine.State);
+			server.Fidelity=EServerFidelity.Low;
+			Assert.AreEqual(EServerFidelity.Low, server.Fidelity);
 		}
 
 		/// <summary>
