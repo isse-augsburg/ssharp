@@ -30,30 +30,19 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	public class Query : Component
 	{
 		/// <summary>
-		/// States for query states
-		/// </summary>
-		public enum State
-		{
-			Idle,
-			QueryToProxy,
-			QueryToServer,
-			OnServer,
-			LowFidelityComplete,
-			MediumFidelityComplete,
-			HighFidelityComplete,
-			ResToProxy,
-			ResToClient
-		}
-
-		/// <summary>
 		/// State machine for query states
 		/// </summary>
-		public StateMachine<State> StateMachine = State.Idle;
+		public StateMachine<EQueryState> StateMachine = EQueryState.Idle;
 
 		/// <summary>
 		/// The server to execute the query
 		/// </summary>
 		public ServerT SelectedServer { get; set; }
+
+		/// <summary>
+		/// The client to request the query
+		/// </summary>
+		public ClientT Client { get; private set; }
 
 		/// <summary>
 		/// Creates a new query instance
@@ -65,6 +54,59 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			SelectedServer = null;
 		}
 
-		public override void Update() { }
+		/// <summary>
+		/// Update Method
+		/// </summary>
+		public override void Update()
+		{
+			StateMachine.Transition(
+					from: EQueryState.Idle,
+					to: EQueryState.QueryToProxy,
+					action: Client.StartQuery)
+				.Transition(
+					from: EQueryState.QueryToProxy,
+					to: EQueryState.QueryToServer,
+					action: () =>
+					{
+						SelectedServer = Client.ConnectedProxy.SelectServer(this);
+					})
+				.Transition(
+					from: EQueryState.QueryToServer,
+					to: EQueryState.OnServer,
+					guard: SelectedServer != null)
+				.Transition(
+					from: EQueryState.OnServer,
+					to: EQueryState.LowFidelityComplete,
+					guard: SelectedServer.ExecuteQueryStep(this))
+				.Transition(
+					from: EQueryState.LowFidelityComplete,
+					to: EQueryState.MediumFidelityComplete,
+					guard: SelectedServer.FidelityStateMachine.State != EServerFidelity.Low && SelectedServer.ExecuteQueryStep(this))
+				.Transition(
+					from: EQueryState.MediumFidelityComplete,
+					to: EQueryState.HighFidelityComplete,
+					guard: SelectedServer.FidelityStateMachine.State != EServerFidelity.Medium && SelectedServer.ExecuteQueryStep(this))
+				.Transition(
+					from: new[] { EQueryState.LowFidelityComplete, EQueryState.MediumFidelityComplete, EQueryState.HighFidelityComplete },
+					to: EQueryState.ResToProxy,
+					guard: SelectedServer.ExecuteQueryStep(this),
+					action: () =>
+					{
+						SelectedServer.QueryComplete(this);
+					})
+				.Transition(
+					from: EQueryState.ResToProxy,
+					to: EQueryState.ResToClient)
+				.Transition(
+					from: EQueryState.ResToClient,
+					to: EQueryState.Idle,
+					action: () =>
+					{
+						Client.GetResponse();
+						Client.ConnectedProxy.UpdateAvgResponseTime(Client.LastResponseTime);
+						SelectedServer = null;
+					});
+
+		}
 	}
 }
