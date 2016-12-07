@@ -103,22 +103,22 @@ namespace Tests.DataStructures
 			{
 				if (evaluateStateFormulaLabel1(i))
 				{
-					Assert.True(example.StatesSatisfyDirectlyLabel1Formula.ContainsKey(i));
+					Assert.True(example.StatesSatisfyDirectlyLabel1Formula.ContainsKey(i), $"Formula is satisfied in state {i}, which is not expected (label1)");
 					satisfyStateFormulaLabel1++;
 				}
 				if (evaluateStateFormulaLabel2(i))
 				{
-					Assert.True(example.StatesSatisfyDirectlyLabel2Formula.ContainsKey(i));
+					Assert.True(example.StatesSatisfyDirectlyLabel2Formula.ContainsKey(i), $"Formula is satisfied in state {i}, which is not expected (label2)");
 					satisfyStateFormulaLabel2++;
 				}
 				if (evaluateStateFormulaExample1(i))
 				{
-					Assert.True(example.StatesSatisfyDirectlyExampleFormula1.ContainsKey(i));
+					Assert.True(example.StatesSatisfyDirectlyExampleFormula1.ContainsKey(i), $"Formula is satisfied in state {i}, which is not expected (exampleformula1)");
 					satisfyStateFormulaExample1++;
 				}
 				if (evaluateStateFormulaExample2(i))
 				{
-					Assert.True(example.StatesSatisfyDirectlyExampleFormula2.ContainsKey(i));
+					Assert.True(example.StatesSatisfyDirectlyExampleFormula2.ContainsKey(i), $"Formula is satisfied in state {i}, which is not expected (exampleformula2)");
 					satisfyStateFormulaExample2++;
 				}
 			}

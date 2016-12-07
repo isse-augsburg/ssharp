@@ -61,14 +61,12 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 		public Dictionary<int, bool> StatesSatisfyDirectlyExampleFormula1;
 		public Dictionary<int, bool> StatesSatisfyDirectlyExampleFormula2;
 
-
-		public Dictionary<int, bool> StatesProb1ACondition1;
-		public Dictionary<int, bool> StatesProb1ECondition1;
-		public Dictionary<int, bool> StatesProb0ECondition1;
-		public Dictionary<int, bool> StatesAncestorsCondition1;
-
-		public Dictionary<int, bool> StatesSatisfyDirectlyCondition2;
-		public Dictionary<int, bool> StatesAncestorsCondition2;
+		public Dictionary<int, bool> AncestorsOfStatesWithLabel1;
+		public Dictionary<int, bool> AncestorsOfStatesWithLabel2;
+		
+		public Dictionary<int, bool> StatesProb1ALabel1;
+		public Dictionary<int, bool> StatesProb1ELabel1;
+		public Dictionary<int, bool> StatesProb0ELabel1;
 
 		public int States;
 		public int StateDistributions;
@@ -118,25 +116,24 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 		{
 			Mdp = Create();
 
+			States = 2;
+			StateDistributions = 2;
+			InitialDistributions = 1;
+
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
 			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 1, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 1, true } };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { { 1, true } };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 0, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
 
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
 
-			StatesProb1ACondition1 = new Dictionary<int, bool>() { {1,true} };
-			StatesProb1ECondition1 = new Dictionary<int, bool>() { {1,true} };
-			StatesProb0ECondition1 = new Dictionary<int, bool>() { { 1, true } };
-			StatesAncestorsCondition1 = new Dictionary<int, bool>() { { 1, true } };
-			
-			StatesAncestorsCondition2 = new Dictionary<int, bool>() { { 1, true } };
-
-			States = 2;
-			StateDistributions = 2;
-			InitialDistributions = 1;
+			StatesProb1ALabel1 = new Dictionary<int, bool>() { {1,true} };
+			StatesProb1ELabel1 = new Dictionary<int, bool>() { {1,true} };
+			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 1, true } };
 		}
 
 	}
@@ -177,6 +174,17 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			States = 2;
 			StateDistributions = 2;
 			InitialDistributions = 1;
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 0, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
 		}
 	}
 
@@ -246,6 +254,17 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			States = 5;
 			StateDistributions = 6;
 			InitialDistributions = 1;
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 2, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 2, true } };
+
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
 		}
 	}
 
@@ -319,6 +338,17 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			States = 5;
 			StateDistributions = 7;
 			InitialDistributions = 1;
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 2, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() {  };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 2, true } };
+
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
 		}
 	}
 
@@ -378,6 +408,17 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			States = 4;
 			StateDistributions = 5;
 			InitialDistributions = 1;
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 3, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() {  };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 3, true } };
+
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
 		}
 	}
 
@@ -449,6 +490,17 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			States = 4;
 			StateDistributions = 7;
 			InitialDistributions = 1;
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 3, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() {  };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 3, true } };
+
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
 		}
 	}
 
@@ -522,6 +574,17 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			States = 5;
 			StateDistributions = 7;
 			InitialDistributions = 1;
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 3, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 3, true } };
+
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
 		}
 	}
 }
