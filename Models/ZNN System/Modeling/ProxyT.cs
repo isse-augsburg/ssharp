@@ -100,6 +100,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			_ConnectedClients = new List<ClientT>();
 			_ConnectedServers = new List<ServerT>();
 			_LatestResponeTimes = new List<int>(Model.LastResponseCountForAvgTime);
+			UpdateAvgResponseTime(0); // Default start value
 
 			IncrementServerPool();
 		}
@@ -216,10 +217,6 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 
 		public override void Update()
 		{
-			foreach(var client in ConnectedClients)
-			{
-				Query query = client.CurrentQuery;
-			}
 		}
 	}
 }

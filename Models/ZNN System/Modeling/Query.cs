@@ -65,53 +65,68 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public override void Update()
 		{
 			_StateMachine.Transition(
-					from: EQueryState.Idle,
-					to: EQueryState.QueryToProxy,
-					action: Client.StartQuery)
-				.Transition(
-					from: EQueryState.QueryToProxy,
-					to: EQueryState.QueryToServer,
-					action: () =>
-					{
-						SelectedServer = Client.ConnectedProxy.SelectServer(this);
-					})
-				.Transition(
-					from: EQueryState.QueryToServer,
-					to: EQueryState.OnServer,
-					guard: SelectedServer != null)
-				.Transition(
-					from: EQueryState.OnServer,
-					to: EQueryState.LowFidelityComplete,
-					guard: SelectedServer.ExecuteQueryStep(this))
-				.Transition(
-					from: EQueryState.LowFidelityComplete,
-					to: EQueryState.MediumFidelityComplete,
-					guard: SelectedServer.Fidelity != EServerFidelity.Low && SelectedServer.ExecuteQueryStep(this))
-				.Transition(
-					from: EQueryState.MediumFidelityComplete,
-					to: EQueryState.HighFidelityComplete,
-					guard: SelectedServer.Fidelity != EServerFidelity.Medium && SelectedServer.ExecuteQueryStep(this))
-				.Transition(
-					from: new[] { EQueryState.LowFidelityComplete, EQueryState.MediumFidelityComplete, EQueryState.HighFidelityComplete },
-					to: EQueryState.ResToProxy,
-					guard: SelectedServer.ExecuteQueryStep(this),
-					action: () =>
-					{
-						SelectedServer.QueryComplete(this);
-					})
-				.Transition(
-					from: EQueryState.ResToProxy,
-					to: EQueryState.ResToClient)
-				.Transition(
-					from: EQueryState.ResToClient,
-					to: EQueryState.Idle,
-					action: () =>
-					{
-						Client.GetResponse();
-						Client.ConnectedProxy.UpdateAvgResponseTime(Client.LastResponseTime);
-						SelectedServer = null;
-					});
-
+							 from: EQueryState.Idle,
+							 to: EQueryState.QueryToProxy,
+							 action: Client.StartQuery)
+						 .Transition(
+							 from: EQueryState.QueryToProxy,
+							 to: EQueryState.QueryToServer,
+							 action: () =>
+							 {
+								 SelectedServer = Client.ConnectedProxy.SelectServer(this);
+							 })
+						 .Transition(
+							 from: EQueryState.QueryToServer,
+							 to: EQueryState.OnServer,
+							 guard: SelectedServer != null)
+						 .Transition(
+							 from: EQueryState.OnServer,
+							 to: EQueryState.LowFidelityComplete,
+							 guard: SelectedServer.ExecuteQueryStep(this))
+						 .Transition(
+							 from: EQueryState.LowFidelityComplete,
+							 to: EQueryState.MediumFidelityComplete,
+							 guard: SelectedServer.Fidelity != EServerFidelity.Low && SelectedServer.ExecuteQueryStep(this))
+						 .Transition(
+							 from: EQueryState.MediumFidelityComplete,
+							 to: EQueryState.HighFidelityComplete,
+							 guard: SelectedServer.Fidelity != EServerFidelity.Medium && SelectedServer.ExecuteQueryStep(this))
+						 .Transition(
+							 from: EQueryState.LowFidelityComplete,
+							 to: EQueryState.ResToProxy,
+							 guard: SelectedServer.Fidelity == EServerFidelity.Low && SelectedServer.ExecuteQueryStep(this),
+							 action: () =>
+							 {
+								 SelectedServer.QueryComplete(this);
+							 })
+						 .Transition(
+							 from: EQueryState.MediumFidelityComplete,
+							 to: EQueryState.ResToProxy,
+							 guard: SelectedServer.Fidelity == EServerFidelity.Medium && SelectedServer.ExecuteQueryStep(this),
+							 action: () =>
+							 {
+								 SelectedServer.QueryComplete(this);
+							 })
+						 .Transition(
+							 from: EQueryState.HighFidelityComplete,
+							 to: EQueryState.ResToProxy,
+							 guard: SelectedServer.ExecuteQueryStep(this),
+							 action: () =>
+							 {
+								 SelectedServer.QueryComplete(this);
+							 })
+						 .Transition(
+							 from: EQueryState.ResToProxy,
+							 to: EQueryState.ResToClient)
+						 .Transition(
+							 from: EQueryState.ResToClient,
+							 to: EQueryState.Idle,
+							 action: () =>
+							 {
+								 Client.GetResponse();
+								 Client.ConnectedProxy.UpdateAvgResponseTime(Client.LastResponseTime);
+								 SelectedServer = null;
+							 });
 		}
 	}
 }
