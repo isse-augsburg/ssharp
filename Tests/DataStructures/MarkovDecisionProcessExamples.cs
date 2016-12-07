@@ -41,7 +41,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 	public static class AllExamples
 	{
-		internal static MarkovDecisionProcessExample[] Examples = {new Example1(), new Example2(), new Example3(), new Example4(), new Example5(), new Example6(), new Example7()};
+		internal static MarkovDecisionProcessExample[] Examples = {new Example1(), new Example2(), new Example3(), new Example4(), new Example5(), new Example6(), new Example7(), new Example8() };
 	}
 
 	public abstract class MarkovDecisionProcessExample
@@ -64,7 +64,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 		public Dictionary<int, bool> AncestorsOfStatesWithLabel1;
 		public Dictionary<int, bool> AncestorsOfStatesWithLabel2;
 		
-		public Dictionary<int, bool> StatesProb1ALabel1;
+		public Dictionary<int, bool> StatesProb0ALabel1;
 		public Dictionary<int, bool> StatesProb1ELabel1;
 		public Dictionary<int, bool> StatesProb0ELabel1;
 
@@ -131,9 +131,9 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
 			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
 
-			StatesProb1ALabel1 = new Dictionary<int, bool>() { {1,true} };
-			StatesProb1ELabel1 = new Dictionary<int, bool>() { {1,true} };
-			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 1, true } };
+			StatesProb0ALabel1 = new Dictionary<int, bool>() {  };
+			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true } , { 1, true } };
+			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
 		}
 
 	}
@@ -185,6 +185,10 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
 			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
+
+			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
+			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
 		}
 	}
 
@@ -265,6 +269,10 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };
 			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
+
+			StatesProb0ALabel1 = new Dictionary<int, bool>() { { 1, true } };
+			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 2, true }, { 3, true } }; //Explanation: 1st iteration removes 1. 2nd 0 and 4
+			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 3, true }, { 4, true } };
 		}
 	}
 
@@ -349,6 +357,10 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };
 			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
+
+			StatesProb0ALabel1 = new Dictionary<int, bool>() { { 1, true } };
+			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };  //Explanation: 1st iteration removes 1.
+			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 3, true }, { 4, true } };
 		}
 	}
 
@@ -419,6 +431,10 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true } };
 			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
+
+			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
+			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true } };
+			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
 		}
 	}
 
@@ -501,6 +517,10 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
 			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
+
+			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
+			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
+			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 4, true } };
 		}
 	}
 
@@ -585,6 +605,69 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
 			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
+
+			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
+			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
+			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
 		}
+	}
+
+
+	public class Example8 : MarkovDecisionProcessExample
+	{
+		internal static MarkovDecisionProcess Create()
+		{
+			// Just a simple MDP with simple nondeterministic choices
+			//   ⟳0⟶1⟲
+			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
+			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
+			mdp.StateRewardRetrieverLabels = new string[] { };
+			mdp.StartWithInitialDistributions();
+			mdp.StartWithNewInitialDistribution();
+			mdp.AddTransitionToInitialDistribution(0, 1.0);
+			mdp.FinishInitialDistribution();
+			mdp.FinishInitialDistributions();
+			mdp.SetStateLabeling(1, new StateFormulaSet(new[] { true, false }));
+			mdp.StartWithNewDistributions(1);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { false, true }));
+			mdp.StartWithNewDistributions(0);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 1.0);
+			mdp.FinishDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			return mdp;
+		}
+
+		public Example8()
+		{
+			Mdp = Create();
+
+			States = 2;
+			StateDistributions = 3;
+			InitialDistributions = 1;
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 0, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
+
+			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
+			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true } , { 1, true } };
+			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true } };
+		}
+
 	}
 }

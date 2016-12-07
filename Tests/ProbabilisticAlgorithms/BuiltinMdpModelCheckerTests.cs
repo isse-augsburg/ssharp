@@ -64,47 +64,67 @@ namespace Tests.DataStructures
 
 
 		[Theory, MemberData(nameof(DiscoverTests))]
-		public void Prob1ETest_Mdp1(MarkovDecisionProcessExample example)
+		public void Prob1ETest_Label1(MarkovDecisionProcessExample example)
 		{
 			var mdp = example.Mdp;
 
 			var excludedStates = new Dictionary<int, bool>() { };
-			var directlySatisfiedStates = new Dictionary<int, bool>() { { 1, true } };
+			var directlySatisfiedStates = example.StatesSatisfyDirectlyLabel1Formula;
 
 			var checker = new BuiltinMdpModelChecker(mdp);
 			var results = checker.StatesReachableWithProbabilityExactlyOneForAtLeastOneScheduler(directlySatisfiedStates, excludedStates);
 
-			Assert.True(results.ContainsKey(1));
+			foreach (var result in results.Keys)
+			{
+				Assert.True(example.StatesProb1ELabel1.ContainsKey(result), $"state {result} not found in expected results");
+			}
+			foreach (var result in example.StatesProb1ELabel1.Keys)
+			{
+				Assert.True(results.ContainsKey(result), $"state {result} not found in calculated results");
+			}
 		}
 
 
 		[Theory, MemberData(nameof(DiscoverTests))]
-		public void Prob0ATest_Mdp1(MarkovDecisionProcessExample example)
+		public void Prob0ATest_Label1(MarkovDecisionProcessExample example)
 		{
 			var mdp = example.Mdp;
 
 			var excludedStates = new Dictionary<int, bool>() { };
-			var directlySatisfiedStates = new Dictionary<int, bool>() { { 1, true } };
+			var directlySatisfiedStates = example.StatesSatisfyDirectlyLabel1Formula;
 
 			var checker = new BuiltinMdpModelChecker(mdp);
 			var results = checker.StatesReachableWithProbabilityExactlyZeroWithAllSchedulers(directlySatisfiedStates, excludedStates);
 
-			Assert.True(results.ContainsKey(1));
-			
+			foreach (var result in results.Keys)
+			{
+				Assert.True(example.StatesProb0ALabel1.ContainsKey(result), $"state {result} not found in expected results");
+			}
+			foreach (var result in example.StatesProb0ALabel1.Keys)
+			{
+				Assert.True(results.ContainsKey(result), $"state {result} not found in calculated results");
+			}
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests))]
-		public void Prob0ETest_Mdp1(MarkovDecisionProcessExample example)
+		public void Prob0ETest_Label1(MarkovDecisionProcessExample example)
 		{
 			var mdp = example.Mdp;
 
 			var excludedStates = new Dictionary<int, bool>() { };
-			var directlySatisfiedStates = new Dictionary<int, bool>() { { 1, true } };
+			var directlySatisfiedStates = example.StatesSatisfyDirectlyLabel1Formula;
 
 			var checker = new BuiltinMdpModelChecker(mdp);
 			var results = checker.StatesReachableWithProbabilityExactlyZeroForAtLeastOneScheduler(directlySatisfiedStates, excludedStates);
 
-			Assert.True(results.ContainsKey(1));
+			foreach (var result in results.Keys)
+			{
+				Assert.True(example.StatesProb0ELabel1.ContainsKey(result), $"state {result} not found in expected results");
+			}
+			foreach (var result in example.StatesProb0ELabel1.Keys)
+			{
+				Assert.True(results.ContainsKey(result), $"state {result} not found in calculated results");
+			}
 		}
 	}
 }

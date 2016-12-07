@@ -462,12 +462,14 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			//     which the probability to reach a directlySatisfiedState is exactly 0.
 			Func<int, bool> nodesToIgnore = source =>
 			{
-				//nodes found by UpdateAncestors are always SourceNodes of a edge to an ancestor in ancestorsFoundInCurrentIteration
+				//nodes found by UpdateAncestors are always SourceNodes of a edge to an ancestor in ancestorsFound
 				if (excludedStates.ContainsKey(source))
-					return false;
+					return false; //source must not be ignored
 				if (directlySatisfiedStates.ContainsKey(source))
-					return false;
-				// check if _all_ distributions of source contain at least transition to a ancestor in ancestorsFoundInCurrentIteration
+					return false; //source must not be ignored
+
+				// must not be cached (, because ancestorsFound might change, even in the same iteration)!!!
+				// check if _all_ distributions of source contain at least transition to a ancestor in ancestorsFound
 				mdpEnumerator.SelectSourceState(source);
 				while (mdpEnumerator.MoveNextDistribution())
 				{
@@ -478,9 +480,9 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 							foundInDistribution = true;
 					}
 					if (!foundInDistribution)
-						return true; // the distribution does not have a targetState in ancestorsFoundInCurrentIteration
+						return true; // the distribution does not have a targetState in ancestorsFound, so source must be ignored
 				}
-				return false;
+				return false; //source must not be ignored
 			};
 			
 			// initialize probabilityGreaterThanZero to the states where we initially know the probability is greater than zero
@@ -496,7 +498,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				//  s has not yet been added to ancestors. When s' is added all its ancestors are traversed again and s is found.)
 				// Note:
 				//   UpdateAncestors must be used, because nodesToIgnore requires access to the current information about the ancestors
-				//   (ancestorsFoundInCurrentIteration), if it should work in one iteration.
+				//   (ancestorsFound), if it should work in one iteration.
 				ancestorsFound = new Dictionary<int, bool>(); //Note: We reuse ancestorsFound, which is also known and used by nodesToIgnore. The side effects are on purpose.
 				// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
 				var nodesToTraverse = new Stack<int>();
