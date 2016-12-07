@@ -39,11 +39,6 @@ namespace SafetySharp.Analysis.FormulaVisitors
 	internal class StateFormulaSetEvaluatorCompilationVisitor : FormulaVisitor
 	{
 		/// <summary>
-		///   The evaluator that is being generated.
-		/// </summary>
-		//private FormulaEvaluator _evaluator;
-
-		/// <summary>
 		///   The expression that is being generated.
 		/// </summary>
 		private Expression _expression;
@@ -133,13 +128,21 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
+		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
 			var indexOfStateFormula = Array.IndexOf(_stateFormulaLabels, formula.Label);
 			var indexOfStateFormulaExpr = Expression.Constant(indexOfStateFormula);
 
-			var indexer = LabelsOfCurrentStateExpr.Type.GetProperty("Item",BindingFlags.Instance| BindingFlags.NonPublic| BindingFlags.Public);
+			var indexer = LabelsOfCurrentStateExpr.Type.GetProperty("Item", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 			_expression = Expression.Property(LabelsOfCurrentStateExpr, indexer, indexOfStateFormulaExpr);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
+		{
+			VisitAtomarPropositionFormula(formula);
 		}
 
 		/// <summary>

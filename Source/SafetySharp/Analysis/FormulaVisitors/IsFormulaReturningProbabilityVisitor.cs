@@ -32,6 +32,14 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
+		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
+		{
+			IsReturningProbability = false;
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
 		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
 		{
 			IsReturningProbability = false;

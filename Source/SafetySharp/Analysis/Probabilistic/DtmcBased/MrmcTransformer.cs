@@ -97,9 +97,17 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
+		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
 			_builder.Append(formula.Label);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
+		{
+			VisitAtomarPropositionFormula(formula);
 		}
 
 		/// <summary>

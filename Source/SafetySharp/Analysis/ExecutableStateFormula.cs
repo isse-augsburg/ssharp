@@ -29,7 +29,7 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents a state formula, i.e., a Boolean expression that is evaluated in a single system state.
 	/// </summary>
-	internal sealed class ExecutableStateFormula : Formula
+	internal sealed class ExecutableStateFormula : AtomarPropositionFormula
 	{
 		/// <summary>
 		///   Initializes a new instance of the <see cref="ExecutableStateFormula" /> class.
@@ -39,22 +39,17 @@ namespace SafetySharp.Analysis
 		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
 		/// </param>
 		internal ExecutableStateFormula(Func<bool> expression, string label = null)
+			: base(label)
 		{
 			Requires.NotNull(expression, nameof(expression));
 
 			Expression = expression;
-			Label = label ?? "StateFormula" + Guid.NewGuid().ToString().Replace("-", String.Empty);
 		}
 
 		/// <summary>
 		///   Gets the expression that represents the state formula.
 		/// </summary>
 		public Func<bool> Expression { get; }
-
-		/// <summary>
-		///   Gets the state label that a model checker can use to determine whether the state formula holds.
-		/// </summary>
-		public string Label { get; }
 
 		/// <summary>
 		///   Executes the <paramref name="visitor" /> for this formula.

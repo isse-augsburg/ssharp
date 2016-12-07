@@ -52,7 +52,7 @@
     <Compile Include="Analysis\FaultActivationBehavior.cs" />
     <Compile Include="Analysis\FaultSetCollection.cs" />
     <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
-    <Compile Include="Analysis\FormulaVisitors\CollectStateFormulasVisitor.cs" />
+    <Compile Include="Analysis\FormulaVisitors\CollectExecutableStateFormulasVisitor.cs" />
     <Compile Include="Analysis\Heuristics\IFaultSetHeuristic.cs" />
     <Compile Include="Analysis\Heuristics\MaximalSafeSetHeuristic.cs" />
     <Compile Include="Analysis\Heuristics\MinimalRedundancyHeuristic.cs" />
@@ -197,7 +197,7 @@
     <Compile Include="Analysis\Formula.cs" />
     <Compile Include="Analysis\FormulaVisitors\FormulaVisitor.cs" />
     <Compile Include="Analysis\Operators.cs" />
-    <Compile Include="Analysis\StateFormula.cs" />
+    <Compile Include="Analysis\AtomarPropositionFormula.cs" />
     <Compile Include="Analysis\UnaryFormula.cs" />
     <Compile Include="Analysis\UnaryOperator.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsLtlFormulaVisitor.cs" />

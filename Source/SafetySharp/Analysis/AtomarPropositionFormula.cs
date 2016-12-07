@@ -29,15 +29,15 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents a state formula, i.e., a Boolean expression that is evaluated in a single system state.
 	/// </summary>
-	internal sealed class StateFormula : Formula
+	internal class AtomarPropositionFormula : Formula
 	{
 		/// <summary>
-		///   Initializes a new instance of the <see cref="StateFormula" /> class.
+		///   Initializes a new instance of the <see cref="AtomarPropositionFormula" /> class.
 		/// </summary>
 		/// <param name="label">
 		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
 		/// </param>
-		internal StateFormula(string label = null)
+		internal AtomarPropositionFormula(string label = null)
 		{
 			Label = label ?? "StateFormula" + Guid.NewGuid().ToString().Replace("-", String.Empty);
 		}
@@ -53,7 +53,7 @@ namespace SafetySharp.Analysis
 		/// <param name="visitor">The visitor that should be executed.</param>
 		internal override void Visit(FormulaVisitor visitor)
 		{
-			//visitor.VisitStateFormula(this);
+			visitor.VisitAtomarPropositionFormula(this);
 		}
 	}
 }

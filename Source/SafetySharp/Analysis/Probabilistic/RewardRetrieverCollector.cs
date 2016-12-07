@@ -52,6 +52,12 @@ namespace SafetySharp.Analysis.FormulaVisitors
 			Visit(formula.LeftOperand);
 			Visit(formula.RightOperand);
 		}
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
+		{
+		}
 
 		/// <summary>
 		///   Visits the <paramref name="formula." />

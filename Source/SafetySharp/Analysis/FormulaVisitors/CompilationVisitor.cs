@@ -108,6 +108,14 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
+		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
+		{
+			throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use ExecutableStateFormula instead.");
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
 		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
 		{
 			_expression = Expression.Invoke(Expression.Constant(formula.Expression));
