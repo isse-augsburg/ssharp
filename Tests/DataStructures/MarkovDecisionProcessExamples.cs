@@ -50,9 +50,18 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 		public Dictionary<int, bool> NoState = new Dictionary<int, bool>() { };
 
-		internal ExecutableStateFormula StateFormula1;
+		internal static AtomarPropositionFormula Label1Formula = new AtomarPropositionFormula("label1");
+		internal static AtomarPropositionFormula Label2Formula = new AtomarPropositionFormula("label2");
 
-		public Dictionary<int, bool> StatesSatisfyDirectlyCondition1;
+		internal Formula ExampleFormula1;
+		internal Formula ExampleFormula2;
+
+		public Dictionary<int, bool> StatesSatisfyDirectlyLabel1Formula;
+		public Dictionary<int, bool> StatesSatisfyDirectlyLabel2Formula;
+		public Dictionary<int, bool> StatesSatisfyDirectlyExampleFormula1;
+		public Dictionary<int, bool> StatesSatisfyDirectlyExampleFormula2;
+
+
 		public Dictionary<int, bool> StatesProb1ACondition1;
 		public Dictionary<int, bool> StatesProb1ECondition1;
 		public Dictionary<int, bool> StatesProb0ECondition1;
@@ -77,12 +86,12 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 	public class Example1 : MarkovDecisionProcessExample
 	{
-		private MarkovDecisionProcess Create()
+		internal static MarkovDecisionProcess Create()
 		{
 			// Just a simple MDP with no nondeterministic choices
 			//   ⟳0⟶1⟲
 			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
-			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
 			mdp.StartWithNewInitialDistribution();
@@ -109,16 +118,20 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 		{
 			Mdp = Create();
 
-			 //StateFormula1 = new ExecutableStateFormula(Mdp.StateFormulaLabels);//new StateFormula(returnTrue, "label1")
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			// Condition 1 is here label1
-			StatesSatisfyDirectlyCondition1 = new Dictionary<int, bool>() { {1,true} };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 1, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { { 1, true } };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 1, true } };
+
+
 			StatesProb1ACondition1 = new Dictionary<int, bool>() { {1,true} };
 			StatesProb1ECondition1 = new Dictionary<int, bool>() { {1,true} };
 			StatesProb0ECondition1 = new Dictionary<int, bool>() { { 1, true } };
 			StatesAncestorsCondition1 = new Dictionary<int, bool>() { { 1, true } };
-
-			StatesSatisfyDirectlyCondition1 = new Dictionary<int, bool>() { { 1, true } };
+			
 			StatesAncestorsCondition2 = new Dictionary<int, bool>() { { 1, true } };
 
 			States = 2;
@@ -130,12 +143,12 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 	public class Example2 : MarkovDecisionProcessExample
 	{
-		internal MarkovDecisionProcess Create()
+		internal static MarkovDecisionProcess Create()
 		{
 			// Just another simple MDP with no nondeterministic choices
 			//   0⟶1⟲
 			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
-			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
 			mdp.StartWithNewInitialDistribution();
@@ -176,7 +189,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			//       0.5⟼3⟶4➞0.5⟲
 			//             ↘2⟲
 			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
-			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
 			mdp.StartWithNewInitialDistribution();
@@ -238,7 +251,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 	public class Example4 : MarkovDecisionProcessExample
 	{
-		internal MarkovDecisionProcess Create()
+		internal static MarkovDecisionProcess Create()
 		{
 			// A MDP which was designed to test prob1e
 			//   0⇢3
@@ -246,7 +259,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			//      0.5⟼3⟶4➞0.5⟲
 			//            ↘2⟲
 			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
-			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
 			mdp.StartWithNewInitialDistribution();
@@ -317,7 +330,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			//   0⟼1↘
 			//    ↘2⟼3⟲
 			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
-			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
 			mdp.StartWithNewInitialDistribution();
@@ -378,7 +391,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			//   0⟼1↘
 			//    ↘2⟼3⟲
 			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
-			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
 			mdp.StartWithNewInitialDistribution();
@@ -450,7 +463,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			//        ↘0.5⟶4⇢0
 
 			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
-			mdp.StateFormulaLabels = new string[] { "label1", "label2" };
+			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
 			mdp.StartWithNewInitialDistribution();

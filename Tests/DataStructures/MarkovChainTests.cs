@@ -63,7 +63,7 @@ namespace Tests.DataStructures
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests))]
-		public void PassingTest(MarkovChainExample example)
+		public void SumOfAllDistributionsOk(MarkovChainExample example)
 		{
 			var markovChain= example.MarkovChain;
 			markovChain.ProbabilityMatrix.PrintMatrix(Output.Log);
@@ -73,37 +73,59 @@ namespace Tests.DataStructures
 			var counter = 0.0;
 			while (enumerator.MoveNextState())
 			{
+				var counterOfTransition = 0.0;
 				while (enumerator.MoveNextTransition())
 				{
-					counter += enumerator.CurrentTransition.Value;
+					counterOfTransition += enumerator.CurrentTransition.Value;
 				}
+				counter += counterOfTransition;
+				Assert.Equal(1.0, counterOfTransition);
 			}
-			Assert.Equal(2.0, counter);
+			Assert.Equal(1.0*markovChain.States, counter);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests))]
 		public void FormulaEvaluatorTest(MarkovChainExample example)
 		{
 			var markovChain = example.MarkovChain;
-
-			Func<bool> returnTrue = () => true;
-			var stateFormulaLabel1 = new ExecutableStateFormula(returnTrue, "label1");
-			var stateFormulaLabel2 = new ExecutableStateFormula(returnTrue, "label2");
-			var stateFormulaBoth = new BinaryFormula(stateFormulaLabel1,BinaryOperator.And, stateFormulaLabel2);
-			var stateFormulaAny = new BinaryFormula(stateFormulaLabel1, BinaryOperator.Or, stateFormulaLabel2);
-			var evaluateStateFormulaLabel1 = markovChain.CreateFormulaEvaluator(stateFormulaLabel1);
-			var evaluateStateFormulaLabel2 = markovChain.CreateFormulaEvaluator(stateFormulaLabel2);
-			var evaluateStateFormulaBoth = markovChain.CreateFormulaEvaluator(stateFormulaBoth);
-			var evaluateStateFormulaAny = markovChain.CreateFormulaEvaluator(stateFormulaAny);
 			
-			Assert.Equal(evaluateStateFormulaLabel1(0), false);
-			Assert.Equal(evaluateStateFormulaLabel2(0), true);
-			Assert.Equal(evaluateStateFormulaBoth(0), false);
-			Assert.Equal(evaluateStateFormulaAny(0), true);
-			Assert.Equal(evaluateStateFormulaLabel1(1), true);
-			Assert.Equal(evaluateStateFormulaLabel2(1), false);
-			Assert.Equal(evaluateStateFormulaBoth(1), false);
-			Assert.Equal(evaluateStateFormulaAny(1), true);
+			var evaluateStateFormulaLabel1 = markovChain.CreateFormulaEvaluator(MarkovChainExample.Label1Formula);
+			var evaluateStateFormulaLabel2 = markovChain.CreateFormulaEvaluator(MarkovChainExample.Label2Formula);
+			var evaluateStateFormulaExample1 = markovChain.CreateFormulaEvaluator(example.ExampleFormula1);
+			var evaluateStateFormulaExample2 = markovChain.CreateFormulaEvaluator(example.ExampleFormula2);
+
+			var satisfyStateFormulaLabel1 = 0;
+			var satisfyStateFormulaLabel2 = 0;
+			var satisfyStateFormulaExample1 = 0;
+			var satisfyStateFormulaExample2 = 0;
+
+			for (var i = 0; i < markovChain.States; i++)
+			{
+				if (evaluateStateFormulaLabel1(i))
+				{
+					Assert.True(example.StatesSatisfyDirectlyLabel1Formula.ContainsKey(i));
+					satisfyStateFormulaLabel1++;
+				}
+				if (evaluateStateFormulaLabel2(i))
+				{
+					Assert.True(example.StatesSatisfyDirectlyLabel2Formula.ContainsKey(i));
+					satisfyStateFormulaLabel2++;
+				}
+				if (evaluateStateFormulaExample1(i))
+				{
+					Assert.True(example.StatesSatisfyDirectlyExampleFormula1.ContainsKey(i));
+					satisfyStateFormulaExample1++;
+				}
+				if (evaluateStateFormulaExample2(i))
+				{
+					Assert.True(example.StatesSatisfyDirectlyExampleFormula2.ContainsKey(i));
+					satisfyStateFormulaExample2++;
+				}
+			}
+			Assert.Equal(example.StatesSatisfyDirectlyLabel1Formula.Count, satisfyStateFormulaLabel1);
+			Assert.Equal(example.StatesSatisfyDirectlyLabel2Formula.Count, satisfyStateFormulaLabel2);
+			Assert.Equal(example.StatesSatisfyDirectlyExampleFormula1.Count, satisfyStateFormulaExample1);
+			Assert.Equal(example.StatesSatisfyDirectlyExampleFormula2.Count, satisfyStateFormulaExample2);
 		}
 
 
@@ -114,36 +136,28 @@ namespace Tests.DataStructures
 
 			var underlyingDigraph = markovChain.CreateUnderlyingDigraph();
 			var nodesToIgnore = new Dictionary<int,bool>();
-			var selectedNodes1 = new Dictionary<int,bool>();
-			selectedNodes1.Add(1,true);
-			var result1 = underlyingDigraph.BaseGraph.GetAncestors(selectedNodes1,nodesToIgnore.ContainsKey);
-			
-			var selectedNodes2 = new Dictionary<int, bool>();
-			selectedNodes2.Add(0, true);
-			var result2 = underlyingDigraph.BaseGraph.GetAncestors(selectedNodes2, nodesToIgnore.ContainsKey);
 
-			Assert.Equal(2, result1.Count);
-			Assert.Equal(1, result2.Count);
-		}
+			var result1 = underlyingDigraph.BaseGraph.GetAncestors(example.StatesSatisfyDirectlyLabel1Formula,nodesToIgnore.ContainsKey);
+			foreach (var result in result1.Keys)
+			{
+				Assert.True(example.AncestorsOfStatesWithLabel1.ContainsKey(result), $"state {result} not found in expected results (label1)");
+			}
+			foreach (var result in example.AncestorsOfStatesWithLabel1.Keys)
+			{
+				Assert.True(result1.ContainsKey(result),$"state {result} not found in calculated results (label1)");
+			}
 
 
-		[Fact]
-		public void CalculateAncestors2Test()
-		{
-			var markovChain = (new MarkovChainExamples.Example2()).MarkovChain;
+			var result2 = underlyingDigraph.BaseGraph.GetAncestors(example.StatesSatisfyDirectlyLabel2Formula, nodesToIgnore.ContainsKey);
 
-			var underlyingDigraph = markovChain.CreateUnderlyingDigraph();
-			var nodesToIgnore = new Dictionary<int, bool>();
-			var selectedNodes1 = new Dictionary<int, bool>();
-			selectedNodes1.Add(1, true);
-			var result1 = underlyingDigraph.BaseGraph.GetAncestors(selectedNodes1, nodesToIgnore.ContainsKey);
-
-			var selectedNodes2 = new Dictionary<int, bool>();
-			selectedNodes2.Add(0, true);
-			var result2 = underlyingDigraph.BaseGraph.GetAncestors(selectedNodes2, nodesToIgnore.ContainsKey);
-
-			Assert.Equal(2, result1.Count);
-			Assert.Equal(1, result2.Count);
+			foreach (var result in result2.Keys)
+			{
+				Assert.True(example.AncestorsOfStatesWithLabel2.ContainsKey(result), $"state {result} not found in expected results (label2)");
+			}
+			foreach (var result in example.AncestorsOfStatesWithLabel2.Keys)
+			{
+				Assert.True(result2.ContainsKey(result), $"state {result} not found in calculated results (label2)");
+			}
 		}
 	}
 }

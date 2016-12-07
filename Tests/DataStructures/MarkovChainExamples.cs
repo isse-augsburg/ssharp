@@ -48,6 +48,20 @@ namespace Tests.DataStructures.MarkovChainExamples
 	{
 		internal DiscreteTimeMarkovChain MarkovChain { get; set; } //TODO: When C# supports it, make setter "internal and protected"
 
+		internal static AtomarPropositionFormula Label1Formula = new AtomarPropositionFormula("label1");
+		internal static AtomarPropositionFormula Label2Formula = new AtomarPropositionFormula("label2");
+
+		internal Formula ExampleFormula1;
+		internal Formula ExampleFormula2;
+
+		public Dictionary<int, bool> StatesSatisfyDirectlyLabel1Formula;
+		public Dictionary<int, bool> StatesSatisfyDirectlyLabel2Formula;
+		public Dictionary<int, bool> StatesSatisfyDirectlyExampleFormula1;
+		public Dictionary<int, bool> StatesSatisfyDirectlyExampleFormula2;
+
+		public Dictionary<int, bool> AncestorsOfStatesWithLabel1;
+		public Dictionary<int, bool> AncestorsOfStatesWithLabel2;
+
 		[Fact]
 		public string ToGraphvizString()
 		{
@@ -60,10 +74,12 @@ namespace Tests.DataStructures.MarkovChainExamples
 
 	public class Example1 : MarkovChainExample
 	{
-		internal  DiscreteTimeMarkovChain Create()
+		internal static DiscreteTimeMarkovChain Create()
 		{
+			// Just a simple DTMC
+			//   ⟳0⟶1⟲
 			var markovChain = new DiscreteTimeMarkovChain(ModelDensity.Medium,ByteSize.MebiByte);
-			markovChain.StateFormulaLabels = new string[] { "label1", "label2" };
+			markovChain.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			markovChain.StateRewardRetrieverLabels = new string[] { };
 			markovChain.StartWithInitialDistribution();
 			markovChain.AddInitialTransition(0, 1.0);
@@ -84,15 +100,28 @@ namespace Tests.DataStructures.MarkovChainExamples
 		public Example1()
 		{
 			MarkovChain = Create();
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+			
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 0, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() {  };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
 		}
 	}
 
 	public class Example2 : MarkovChainExample
 	{
-		internal DiscreteTimeMarkovChain Create()
+		internal static DiscreteTimeMarkovChain Create()
 		{
+			// Just a simple DTMC
+			//   0⟶1⟲
 			var markovChain = new DiscreteTimeMarkovChain(ModelDensity.Medium, ByteSize.MebiByte);
-			markovChain.StateFormulaLabels = new string[] { "label1", "label2" };
+			markovChain.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			markovChain.StateRewardRetrieverLabels = new string[] { };
 			markovChain.StartWithInitialDistribution();
 			markovChain.AddInitialTransition(0, 1.0);
@@ -112,6 +141,20 @@ namespace Tests.DataStructures.MarkovChainExamples
 		public Example2()
 		{
 			MarkovChain = Create();
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 0, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
 		}
 	}
 }
