@@ -20,66 +20,57 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Collections.Generic;
-using SafetySharp.Modeling;
+using System.Linq;
+using NUnit.Framework;
+using SafetySharp.CaseStudies.ZNNSystem.Modeling;
 
-namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
+namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 {
+
 	/// <summary>
-	/// Represents the ZNN.com News System case study.
+	/// Privides Unit Tests for <see cref="ServerT"/>
 	/// </summary>
-	class Model : ModelBase
+	[TestFixture]
+	public class ServerTTest
 	{
 		/// <summary>
-		/// The cost of one server unit.
+		/// Tests the setting of the content fidelity
 		/// </summary>
-		public const int ServerUnitCost = 5;
-
-		/// <summary>
-		/// Available units per server
-		/// </summary>
-		public const int DefaultAvailableServerUnits = 10;
-
-		/// <summary>
-		/// Defines the value for high response time
-		/// </summary>
-		public const int HighResponseTimeValue = 20;
-
-		/// <summary>
-		/// Defines the value for low response time
-		/// </summary>
-		public const int LowResponseTimeValue = 10;
-
-		/// <summary>
-		/// Available Budget for server costs.
-		/// </summary>
-		public const int MaxBudget = 125;
-
-		/// <summary>
-		/// Count of latest response times to be used for calculating averange response time
-		/// </summary>
-		public const int LastResponseCountForAvgTime = 10;
-
-		[Root(RootKind.Controller)]
-		public ProxyT Proxy;
-
-		public List<ClientT> Clients => Proxy.ConnectedClients;
-
-		public List<ServerT> Servers => Proxy.ConnectedServers;
-
-		/// <summary>
-		/// Initializes a new instance
-		/// </summary>
-		public Model()
+		[Test]
+		public void TestSetFidelity()
 		{
-			Proxy = new ProxyT();
+			var server = ServerT.GetNewServer();
 
-			// Add a few clients
-			for(int i = 0; i < 50; i++)
-			{
-				Clients.Add(new ClientT(Proxy));
-			}
+			server.SetFidelity(EServerFidelity.High);
+			Assert.AreEqual(EServerFidelity.High, server.FidelityStateMachine.State);
+
+			server.SetFidelity(EServerFidelity.Medium);
+			Assert.AreEqual(EServerFidelity.Medium, server.FidelityStateMachine.State);
+
+			server.SetFidelity(EServerFidelity.Low);
+			Assert.AreEqual(EServerFidelity.Low, server.FidelityStateMachine.State);
 		}
 
+		/// <summary>
+		/// Tests the query execution
+		/// </summary>
+		[Test]
+		public void TestExecuteQuery()
+		{
+			var proxy = new ProxyT();
+			var server = ServerT.GetNewServer();
+			for (int i = 0; i < server.AvailableServerUnits + 1; i++)
+			{
+				var client = new ClientT(proxy);
+				var query = new Query(client);
+				server.AddQuery(query);
+			}
+
+			var isExecutedFirst = server.ExecuteQueryStep(server.ExecutingQueries.First());
+			var isExecutedLast = server.ExecuteQueryStep(server.ExecutingQueries.Last());
+
+			Assert.True(isExecutedFirst);
+			Assert.False(isExecutedLast);
+		}
 	}
 }

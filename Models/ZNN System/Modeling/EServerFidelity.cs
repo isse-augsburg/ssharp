@@ -20,66 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Collections.Generic;
-using SafetySharp.Modeling;
-
 namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 {
 	/// <summary>
-	/// Represents the ZNN.com News System case study.
+	/// Content fidelity level
 	/// </summary>
-	class Model : ModelBase
+	public enum EServerFidelity
 	{
 		/// <summary>
-		/// The cost of one server unit.
+		/// Static Text
 		/// </summary>
-		public const int ServerUnitCost = 5;
+		Low = 1,
 
 		/// <summary>
-		/// Available units per server
+		/// Text and a bit multimedia
 		/// </summary>
-		public const int DefaultAvailableServerUnits = 10;
+		Medium =2,
 
 		/// <summary>
-		/// Defines the value for high response time
+		/// Full multimedia
 		/// </summary>
-		public const int HighResponseTimeValue = 20;
-
-		/// <summary>
-		/// Defines the value for low response time
-		/// </summary>
-		public const int LowResponseTimeValue = 10;
-
-		/// <summary>
-		/// Available Budget for server costs.
-		/// </summary>
-		public const int MaxBudget = 125;
-
-		/// <summary>
-		/// Count of latest response times to be used for calculating averange response time
-		/// </summary>
-		public const int LastResponseCountForAvgTime = 10;
-
-		[Root(RootKind.Controller)]
-		public ProxyT Proxy;
-
-		public List<ClientT> Clients => Proxy.ConnectedClients;
-
-		public List<ServerT> Servers => Proxy.ConnectedServers;
-
-		/// <summary>
-		/// Initializes a new instance
-		/// </summary>
-		public Model()
-		{
-			Proxy = new ProxyT();
-
-			// Add a few clients
-			for(int i = 0; i < 50; i++)
-			{
-				Clients.Add(new ClientT(Proxy));
-			}
-		}
-
+		High = 3
 	}
 }

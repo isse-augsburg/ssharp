@@ -20,11 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
@@ -35,30 +31,9 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	public class ServerT : Component
 	{
 		/// <summary>
-		/// Content fidelity level
-		/// </summary>
-		public enum EFidelity
-		{
-			/// <summary>
-			/// Static Text
-			/// </summary>
-			Low = 1,
-
-			/// <summary>
-			/// Text and a bit multimedia
-			/// </summary>
-			Medium =2,
-
-			/// <summary>
-			/// Full multimedia
-			/// </summary>
-			High = 3
-		}
-
-		/// <summary>
 		/// Currently available units of the server. 0 Means the server is inactive.
 		/// </summary>
-		private int _AvailableServerUnits;
+		public int AvailableServerUnits { get; private set; }
 
 		/// <summary>
 		/// Currently units under use of the server.
@@ -73,7 +48,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Current costs of the Server. 0 means the server is inactive.
 		/// </summary>
-		public int Cost => _AvailableServerUnits * Model.ServerUnitCost;
+		public int Cost => AvailableServerUnits * Model.ServerUnitCost;
 
 		/// <summary>
 		/// Currently units under use of the server.
@@ -88,17 +63,17 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// Current load of the Server in %.
 		/// </summary>
 		[Range(0, 100, OverflowBehavior.Clamp)]
-		public int Load => UsedServerUnits / _AvailableServerUnits * 100;
+		public int Load => UsedServerUnits / AvailableServerUnits * 100;
 
 		/// <summary>
 		/// Current content fidelity level of the server.
 		/// </summary>
-		public StateMachine<EFidelity> FidelityStateMachine = EFidelity.High;
+		public StateMachine<EServerFidelity> FidelityStateMachine = EServerFidelity.High;
 
 		/// <summary>
 		/// The current executing queries
 		/// </summary>
-		private List<Query> ExecutingQueries { get; set; }
+		internal List<Query> ExecutingQueries { get; private set; }
 
 		/// <summary>
 		/// Initialize a new server instance
@@ -107,6 +82,8 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private ServerT(int maxServerUnits)
 		{
 			_MaxServerUnits = maxServerUnits;
+			ExecutingQueries = new List<Query>(_MaxServerUnits);
+			AvailableServerUnits = _MaxServerUnits;
 		}
 
 		/// <summary>
@@ -120,39 +97,29 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			{
 				//server = new ServerT(new Random().Next(20, 50));
 				server = new ServerT(Model.DefaultAvailableServerUnits);
-				server._AvailableServerUnits = server._MaxServerUnits;
+
 			}
 			catch { }
 			return server;
 		}
 
-		///// <summary>
-		///// Deactivates the server
-		///// </summary>
-		///// <param name="serverList">The server pool the server is inside</param>
-		///// <returns>True if successfull</returns>
-		//public bool Deactivate(List<ServerT> serverList)
-		//{
-		//	return serverList.Remove(this);
-		//}
-
 		/// <summary>
 		/// Sets the content fidelity level of the server
 		/// </summary>
-		public void SetFidelity(EFidelity level)
+		public void SetFidelity(EServerFidelity level)
 		{
 			FidelityStateMachine.Transition(
-					from: new[] { EFidelity.Medium, EFidelity.Low },
-					to: EFidelity.High,
-					guard: level == EFidelity.High)
+					from: new[] { EServerFidelity.Medium, EServerFidelity.Low },
+					to: EServerFidelity.High,
+					guard: level == EServerFidelity.High)
 				.Transition(
-					from: new[] { EFidelity.High, EFidelity.Low },
-					to: EFidelity.Medium,
-					guard: level == EFidelity.Medium)
+					from: new[] { EServerFidelity.High, EServerFidelity.Low },
+					to: EServerFidelity.Medium,
+					guard: level == EServerFidelity.Medium)
 				.Transition(
-					from: new[] { EFidelity.Medium, EFidelity.High },
-					to: EFidelity.Low,
-					guard: level == EFidelity.Low);
+					from: new[] { EServerFidelity.Medium, EServerFidelity.High },
+					to: EServerFidelity.Low,
+					guard: level == EServerFidelity.Low);
 		}
 
 		/// <summary>
@@ -171,7 +138,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <returns>True if the query was executed</returns>
 		public bool ExecuteQueryStep(Query query)
 		{
-			return ExecutingQueries.IndexOf(query) < _AvailableServerUnits;
+			return ExecutingQueries.IndexOf(query) < AvailableServerUnits;
 		}
 
 		/// <summary>
@@ -182,6 +149,6 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		{
 			ExecutingQueries.Remove(query);
 		}
-		
+
 	}
 }

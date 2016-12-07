@@ -21,10 +21,6 @@
 // THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using SafetySharp.CaseStudies.ZNNSystem.Modeling;
 
@@ -45,7 +41,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			var proxy = new ProxyT();
 			proxy.IncrementServerPool();
 
-			Assert.AreEqual(1, proxy.ActiveServerCount);
+			Assert.AreEqual(2, proxy.ActiveServerCount);
 			Assert.IsInstanceOf(typeof(ServerT), proxy.ConnectedServers[0]);
 		}
 
@@ -56,7 +52,6 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		public void TestDecrementServerPool()
 		{
 			var proxy = new ProxyT();
-			proxy.ConnectedServers.Add(ServerT.GetNewServer());
 			proxy.ConnectedServers.Add(ServerT.GetNewServer());
 
 			proxy.DecrementServerPool();
@@ -76,7 +71,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		{
 			var proxy = new ProxyT();
 			var ran = new Random();
-			
+
 			// High Time, low costs
 			for(int i = 0; i < Model.LastResponseCountForAvgTime; i++)
 			{
@@ -90,8 +85,8 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			proxy.AdjustServers();
 			proxy.AdjustServers();
 			Assert.AreEqual(3, proxy.ActiveServerCount);
-			Assert.AreSame(ServerT.EFidelity.Low, proxy.ConnectedServers[0].FidelityStateMachine.State);
-			
+			Assert.AreEqual(EServerFidelity.Low, proxy.ConnectedServers[0].FidelityStateMachine.State);
+
 			// Low Time, High costs
 			for(int i = 0; i < Model.LastResponseCountForAvgTime; i++)
 			{
@@ -100,7 +95,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 
 			proxy.AdjustServers();
 			Assert.AreEqual(2, proxy.ActiveServerCount);
-			Assert.AreSame(ServerT.EFidelity.High, proxy.ConnectedServers[0].FidelityStateMachine.State);
+			Assert.AreEqual(EServerFidelity.High, proxy.ConnectedServers[0].FidelityStateMachine.State);
 		}
 	}
 }

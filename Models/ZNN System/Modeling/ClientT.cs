@@ -20,11 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
@@ -85,7 +80,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		{
 			_IsResponseWaiting = true;
 			_CurrentResponseTime = 0;
-			CurrentQuery = new Query();
+			CurrentQuery = new Query(this);
 		}
 
 		/// <summary>

@@ -20,51 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using SafetySharp.Modeling;
-
 namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 {
 	/// <summary>
-	/// Class for Query and Response
+	/// States for query states
 	/// </summary>
-	public class Query : Component
+	public enum EQueryState
 	{
-		/// <summary>
-		/// States for query states
-		/// </summary>
-		public enum State
-		{
-			Idle,
-			QueryToProxy,
-			QueryToServer,
-			OnServer,
-			LowFidelityComplete,
-			MediumFidelityComplete,
-			HighFidelityComplete,
-			ResToProxy,
-			ResToClient
-		}
-
-		/// <summary>
-		/// State machine for query states
-		/// </summary>
-		public StateMachine<State> StateMachine = State.Idle;
-
-		/// <summary>
-		/// The server to execute the query
-		/// </summary>
-		public ServerT SelectedServer { get; set; }
-
-		/// <summary>
-		/// Creates a new query instance
-		/// </summary>
-		/// <param name="client">The client to request the query</param>
-		public Query(ClientT client)
-		{
-			Client = client;
-			SelectedServer = null;
-		}
-
-		public override void Update() { }
+		Idle,
+		QueryToProxy,
+		QueryToServer,
+		OnServer,
+		LowFidelityComplete,
+		MediumFidelityComplete,
+		HighFidelityComplete,
+		ResToProxy,
+		ResToClient
 	}
 }

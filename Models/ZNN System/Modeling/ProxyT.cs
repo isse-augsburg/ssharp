@@ -23,8 +23,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
@@ -132,7 +130,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private void SwitchServerToTextMode()
 		{
 			foreach(var server in ConnectedServers)
-				server.SetFidelity(ServerT.EFidelity.Low);
+				server.SetFidelity(EServerFidelity.Low);
 		}
 
 		/// <summary>
@@ -141,7 +139,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private void SwitchServerToMultiMode()
 		{
 			foreach(var server in ConnectedServers)
-				server.SetFidelity(ServerT.EFidelity.High);
+				server.SetFidelity(EServerFidelity.High);
 		}
 
 		/// <summary>
@@ -150,20 +148,23 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <param name="lastTime">last response time</param>
 		internal void UpdateAvgResponseTime(int lastTime)
 		{
-			_LatestResponeTimes.RemoveAt(0);
+			if(_LatestResponeTimes.Count >= Model.LastResponseCountForAvgTime)
+				_LatestResponeTimes.RemoveAt(0);
+
 			_LatestResponeTimes.Add(lastTime);
 		}
 
 		/// <summary>
-		/// Executes the query
+		/// Selects a server
 		/// </summary>
 		/// <param name="query">The query</param>
-		public void SelectServerForQuery(Query query)
+		public ServerT SelectServer(Query query)
 		{
 			AdjustServers();
-			
-			query.SelectedServer = RoundRobinServerSelection();
 
+			var server = RoundRobinServerSelection();
+			server.AddQuery(query);
+			return server;
 		}
 
 		/// <summary>
@@ -178,7 +179,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 				else
 					// Switch Server to text mode
 					foreach(var server in ConnectedServers)
-						server.SetFidelity(ServerT.EFidelity.Low);
+						server.SetFidelity(EServerFidelity.Low);
 			}
 
 			else
@@ -189,12 +190,14 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 					if(TotalServerCosts > (Model.MaxBudget * 0.75))
 						DecrementServerPool();
 				}
-
-				// Random increment or decrement server pool
-				if(new Random().Next(0, 2) < 1)
-					IncrementServerPool();
 				else
-					DecrementServerPool();
+				{
+					// Random increment or decrement server pool
+					if(new Random().Next(0, 2) < 1)
+						IncrementServerPool();
+					else
+						DecrementServerPool();
+				}
 
 				SwitchServerToMultiMode();
 			}
@@ -218,58 +221,6 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			foreach(var client in ConnectedClients)
 			{
 				Query query = client.CurrentQuery;
-				query.StateMachine.Transition(
-						from: Query.State.Idle,
-						to: Query.State.QueryToProxy,
-						guard: true,
-						action: client.StartQuery)
-					.Transition(
-						from: Query.State.QueryToProxy,
-						to: Query.State.QueryToServer,
-						guard: true,
-						action: null)
-					.Transition(
-						from: Query.State.QueryToServer,
-						to: Query.State.OnServer,
-						guard: true,
-						action: null)
-					.Transition(
-						from: Query.State.OnServer,
-						to: Query.State.LowFidelityComplete,
-						guard: query.SelectedServer.ExecuteQueryStep(query),
-						action: null)
-					.Transition(
-						from: Query.State.LowFidelityComplete,
-						to: Query.State.MediumFidelityComplete,
-						guard: query.SelectedServer.FidelityStateMachine.State != ServerT.EFidelity.Low && query.SelectedServer.ExecuteQueryStep(query),
-						action: null)
-					.Transition(
-						from: Query.State.MediumFidelityComplete,
-						to: Query.State.HighFidelityComplete,
-						guard: query.SelectedServer.FidelityStateMachine.State != ServerT.EFidelity.Medium && query.SelectedServer.ExecuteQueryStep(query),
-						action: null)
-					.Transition(
-						from: new[] { Query.State.LowFidelityComplete, Query.State.MediumFidelityComplete, Query.State.HighFidelityComplete },
-						to: Query.State.ResToProxy,
-						guard: query.SelectedServer.ExecuteQueryStep(query),
-						action: () => 
-						{
-							query.SelectedServer.QueryComplete(query);
-						})
-					.Transition(
-						from: Query.State.ResToProxy,
-						to: Query.State.ResToClient,
-						guard: true,
-						action: null)
-					.Transition(
-						from: Query.State.ResToClient,
-						to: Query.State.Idle,
-						guard: true,
-						action: () =>
-						{
-							client.GetResponse();
-							UpdateAvgResponseTime(client.LastResponseTime);
-						});
 			}
 		}
 	}
