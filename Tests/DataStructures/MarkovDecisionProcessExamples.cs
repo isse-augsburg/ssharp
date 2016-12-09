@@ -41,7 +41,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 
 	public static class AllExamples
 	{
-		internal static MarkovDecisionProcessExample[] Examples = {new Example1(), new Example2(), new Example3(), new Example4(), new Example5(), new Example6(), new Example7(), new Example8() };
+		internal static MarkovDecisionProcessExample[] Examples = {new Example1(), new Example2(), new Example3(), new Example4(), new Example5(), new Example6(), new Example7(), new Example8(), new Example9() };
 	}
 
 	public abstract class MarkovDecisionProcessExample
@@ -668,6 +668,78 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true } , { 1, true } };
 			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true } };
 		}
+	}
 
+	public class Example9 : MarkovDecisionProcessExample
+	{
+		internal static MarkovDecisionProcess Create()
+		{
+			// MDP of [Parker02, page 36]
+			//   0
+			//   ⇅
+			//   1➞0.6⟼2⟲
+			//      0.4⟼3⟲
+			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
+			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
+			mdp.StateRewardRetrieverLabels = new string[] { };
+			mdp.StartWithInitialDistributions();
+			mdp.StartWithNewInitialDistribution();
+			mdp.AddTransitionToInitialDistribution(0, 1.0);
+			mdp.FinishInitialDistribution();
+			mdp.FinishInitialDistributions();
+			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { false, false }));
+			mdp.StartWithNewDistributions(0);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(1, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			mdp.SetStateLabeling(1, new StateFormulaSet(new[] { false, false }));
+			mdp.StartWithNewDistributions(1);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(2, 0.6);
+			mdp.AddTransition(3, 0.4);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			mdp.SetStateLabeling(2, new StateFormulaSet(new[] { true, false }));
+			mdp.StartWithNewDistributions(2);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(2, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			mdp.SetStateLabeling(3, new StateFormulaSet(new[] { false, true }));
+			mdp.StartWithNewDistributions(3);
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(3, 1.0);
+			mdp.FinishDistribution();
+			mdp.FinishDistributions();
+			return mdp;
+		}
+
+		public Example9()
+		{
+			Mdp = Create();
+
+			States = 4;
+			StateDistributions = 5;
+			InitialDistributions = 1;
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 2, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 3, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 2, true }, { 3, true } };
+
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 3, true } };
+
+			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
+			StatesProb1ELabel1 = new Dictionary<int, bool>() { };
+			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+		}
 	}
 }
