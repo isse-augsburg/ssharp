@@ -128,7 +128,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return satisfiedStates;
 		}
 		
-		private double GaussSeidel(SparseDoubleMatrix derivedMatrix, double[] derivedVector, int iterationsLeft)
+		private double[] GaussSeidel(SparseDoubleMatrix derivedMatrix, double[] derivedVector, int iterationsLeft)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -179,9 +179,8 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 					fixPointReached = true;
 			}
 			stopwatch.Stop();
-			var finalProbability = CalculateFinalProbability(resultVector);
 
-			return finalProbability;
+			return resultVector;
 		}
 
 		private double CalculateFinalProbability(double[] initialStateProbabilities)
@@ -210,7 +209,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var stateCount = MarkovChain.States;
 
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
-			var directlyUnsatisfiedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
+			var excludedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
 			
 			var enumerator = MarkovChain.GetEnumerator();
 
@@ -231,7 +230,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 						//we could remove this line, because already set by CreateDerivedVector and never changed when we initialize xold with CreateDerivedVector(directlySatisfiedStates)
 						xnew[i] = 1.0;
 					}
-					else if (directlyUnsatisfiedStates.ContainsKey(i))
+					else if (excludedStates.ContainsKey(i))
 					{
 						//we could remove this line, because already set by CreateDerivedVector and never changed when we initialize xold with CreateDerivedVector(directlySatisfiedStates)
 						xnew[i] = 0.0;
@@ -303,8 +302,9 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var derivedMatrix = CreateDerivedMatrix(probabilityExactlyOne, probabilityExactlyZero);
 			var derivedVector = CreateDerivedVector(probabilityExactlyOne);
 
-			var finalProbability = GaussSeidel(derivedMatrix, derivedVector, 50);
-			
+			var resultVector = GaussSeidel(derivedMatrix, derivedVector, 50);
+			var finalProbability = CalculateFinalProbability(resultVector);
+
 			return finalProbability;
 		}
 

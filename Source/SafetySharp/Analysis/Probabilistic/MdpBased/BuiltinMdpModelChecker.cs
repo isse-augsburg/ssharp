@@ -39,57 +39,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 	class BuiltinMdpModelChecker : MdpModelChecker
 	{
 		private MarkovDecisionProcess.UnderlyingDigraph _underlyingDigraph;
-
-
-		/*
-		private SparseDoubleMatrix CreateDerivedMatrix(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates)
-		{
-			//Derived matrix is 0-based. Row i is equivalent to the probability distribution of state i (this is not the case for the Markov Chain). 
-
-			var derivedMatrix = new SparseDoubleMatrix(MarkovChain.States, MarkovChain.Transitions+ MarkovChain.States); //Transitions+States is a upper limit
-
-			var enumerator = MarkovChain.GetEnumerator();
-
-			for (var sourceState = 0; sourceState < MarkovChain.States; sourceState++)
-			{
-				enumerator.SelectSourceState(sourceState);
-				derivedMatrix.SetRow(sourceState);
-				if (exactlyOneStates.ContainsKey(sourceState) || exactlyZeroStates.ContainsKey(sourceState))
-				{
-					// only add a self reference entry
-					derivedMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(sourceState,1.0));
-				}
-				else
-				{
-					// if state is neither exactlyOneStates nor exactlyZeroStates, it is a toCalculateState
-					var selfReferenceAdded = false;
-					while (enumerator.MoveNextTransition())
-					{
-						var columnValueEntry = enumerator.CurrentTransition;
-						var targetState = columnValueEntry.Column;
-						if (targetState == sourceState)
-						{
-							//this implements the removal of the identity matrix
-							derivedMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(sourceState, columnValueEntry.Value - 1.0));
-							selfReferenceAdded = true;
-						}
-						else
-						{
-							derivedMatrix.AddColumnValueToCurrentRow(columnValueEntry);
-						}
-					}
-					if (!selfReferenceAdded)
-					{
-						//this implements the removal of the identity matrix (if not already done)
-						derivedMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(sourceState, -1.0));
-					}
-				}
-				derivedMatrix.FinishRow();
-			}
-			return derivedMatrix;
-		}*/
 		
-
 		private double[] CreateDerivedVector(Dictionary<int, bool> exactlyOneStates)
 		{
 			var derivedVector = new double[MarkovDecisionProcess.States];
@@ -130,63 +80,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			}
 			return satisfiedStates;
 		}
-		/*
-		private double GaussSeidelLike(SparseDoubleMatrix derivedMatrix, double[] derivedVector, int iterationsLeft)
-		{
-			var stopwatch = new Stopwatch();
-			stopwatch.Start();
-
-			var stateCount = MarkovChain.States;
-			var resultVector = new double[stateCount];
-			var fixPointReached = iterationsLeft <= 0;
-			var iterations = 0;
-
-			//Derived matrix is 0-based. Row i is equivalent to the probability distribution of state i (this is not the case for the Markov Chain). 
-			var enumerator = derivedMatrix.GetEnumerator();
-
-			for (var i = 0; i < stateCount; i++)
-			{
-				resultVector[i] = 0.0;
-			}
-			while (!fixPointReached)
-			{
-				for (var i = 0; i < stateCount; i++)
-				{
-					var reflexiveEntry = 0.0;
-					var temporaryValue = derivedVector[i];
-
-					enumerator.MoveRow(i);
-					while (enumerator.MoveNextColumn())
-					{
-						var currentEntry = enumerator.CurrentColumnValue.Value;
-						if (currentEntry.Column == i)
-							reflexiveEntry = currentEntry.Value;
-						else
-							temporaryValue -= currentEntry.Value * resultVector[currentEntry.Column];
-					}
-					Assert.That(reflexiveEntry != 0.0, "entry must not be 0.0");
-
-					resultVector[i] = temporaryValue/ reflexiveEntry;
-				}
-
-				iterationsLeft--;
-				iterations++;
-				if (iterations % 10 == 0)
-				{
-					stopwatch.Stop();
-					var currentProbability = CalculateFinalProbability(resultVector);
-					Console.WriteLine($"Completed {iterations} Gauss-Seidel iterations in {stopwatch.Elapsed}.  Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
-					stopwatch.Start();
-				}
-				if (iterationsLeft <= 0)
-					fixPointReached = true;
-			}
-			stopwatch.Stop();
-			var finalProbability = CalculateFinalProbability(resultVector);
-
-			return finalProbability;
-		}*/
-
+		
 		public double CalculateMinimumFinalProbability(double[] initialStateProbabilities)
 		{
 			var enumerator = MarkovDecisionProcess.GetEnumerator();
@@ -245,22 +139,16 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return finalProbability;
 		}
 
-		internal double CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
+		internal double[] MinimumIterator(Dictionary<int, bool>  exactlyOneStates, Dictionary<int, bool>  exactlyZeroStates, int steps)
 		{
-
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 			var stateCount = MarkovDecisionProcess.States;
-
-			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
-			var directlyUnsatisfiedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
-
 			var enumerator = MarkovDecisionProcess.GetEnumerator();
 
 			var xold = new double[stateCount];
-			var xnew = CreateDerivedVector(directlySatisfiedStates);
+			var xnew = CreateDerivedVector(exactlyOneStates);
 			var loops = 0;
 			while (loops < steps)
 			{
@@ -271,12 +159,12 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				loops++;
 				for (var i = 0; i < stateCount; i++)
 				{
-					if (directlySatisfiedStates.ContainsKey(i))
+					if (exactlyOneStates.ContainsKey(i))
 					{
 						//we could remove this line, because already set by CreateDerivedVector and never changed when we initialize xold with CreateDerivedVector(directlySatisfiedStates)
 						xnew[i] = 1.0;
 					}
-					else if (directlyUnsatisfiedStates.ContainsKey(i))
+					else if (exactlyZeroStates.ContainsKey(i))
 					{
 						//we could remove this line, because already set by CreateDerivedVector and never changed when we initialize xold with CreateDerivedVector(directlySatisfiedStates)
 						xnew[i] = 0.0;
@@ -316,29 +204,36 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 					stopwatch.Start();
 				}
 			}
+			stopwatch.Stop();
+			return xnew;
+		}
+
+
+		internal double CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
+		{
+			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
+
+			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
+			var excludedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
+
+			var xnew = MinimumIterator(directlySatisfiedStates, excludedStates, steps);
 
 			var finalProbability = CalculateMinimumFinalProbability(xnew);
 
-			stopwatch.Stop();
 			return finalProbability;
 		}
 
-		internal double CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
-		{
 
+		internal double[] MaximumIterator(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
+		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 			var stateCount = MarkovDecisionProcess.States;
-
-			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
-			var directlyUnsatisfiedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
-
 			var enumerator = MarkovDecisionProcess.GetEnumerator();
 
 			var xold = new double[stateCount];
-			var xnew = CreateDerivedVector(directlySatisfiedStates);
+			var xnew = CreateDerivedVector(exactlyOneStates);
 			var loops = 0;
 			while (loops < steps)
 			{
@@ -349,12 +244,12 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				loops++;
 				for (var i = 0; i < stateCount; i++)
 				{
-					if (directlySatisfiedStates.ContainsKey(i))
+					if (exactlyOneStates.ContainsKey(i))
 					{
 						//we could remove this line, because already set by CreateDerivedVector and never changed when we initialize xold with CreateDerivedVector(directlySatisfiedStates)
 						xnew[i] = 1.0;
 					}
-					else if (directlyUnsatisfiedStates.ContainsKey(i))
+					else if (exactlyZeroStates.ContainsKey(i))
 					{
 						//we could remove this line, because already set by CreateDerivedVector and never changed when we initialize xold with CreateDerivedVector(directlySatisfiedStates)
 						xnew[i] = 0.0;
@@ -394,10 +289,22 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 					stopwatch.Start();
 				}
 			}
+			stopwatch.Stop();
+			return xnew;
+		}
+
+		internal double CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
+		{
+			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
+
+			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
+			var excludedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
+
+
+			var xnew = MaximumIterator(directlySatisfiedStates, excludedStates, steps);
 
 			var finalProbability = CalculateMaximumFinalProbability(xnew);
 
-			stopwatch.Stop();
 			return finalProbability;
 		}
 
@@ -609,37 +516,45 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			
 			return probabilityMightBeExactlyOne;
 		}
-
-
-		/*
-		private double CalculateProbabilityToReachStateFormula(Formula psi)
+		
+		private double CalculateMaximumProbabilityToReachStateFormula(Formula psi, int maxSteps)
 		{
-			// calculate P [true U psi]
+			// same algorithm as CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps with different
+			// directlySatisfiedStates and excludedStates
+			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
-			var underlyingDigraph = MarkovChain.CreateUnderlyingDigraph();
-
-			var psiEvaluator = MarkovChain.CreateFormulaEvaluator(psi);
-
-			// calculate probabilityExactlyZero
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
-			var nodesToIgnore=new Dictionary<int,bool>();  // change for \phi Until \psi
-			var probabilityGreaterThanZero = underlyingDigraph.Graph.GetAncestors(directlySatisfiedStates, nodesToIgnore);
-			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
+			var excludedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
 
-			// calculate probabilityExactlyOne
-			nodesToIgnore = directlySatisfiedStates; // change for \phi Until \psi
-			var probabilitySmallerThanOne = underlyingDigraph.Graph.GetAncestors(probabilityExactlyZero, nodesToIgnore); ;
-			var probabilityExactlyOne = CreateComplement(probabilitySmallerThanOne); ;
+			var exactlyZeroStates = StatesReachableWithProbabilityExactlyZeroWithAllSchedulers(directlySatisfiedStates,excludedStates);
+			var exactlyOneStates = StatesReachableWithProbabilityExactlyOneForAtLeastOneScheduler(directlySatisfiedStates, excludedStates); //cannot perform a better pre calculation
 
-			//TODO: Do not calculate exact state probabilities, when _every_ initial state>0 is either in probabilityExactlyZero or in probabilityExactlyOne
+			var xnew = MaximumIterator(exactlyOneStates, exactlyZeroStates, maxSteps);
 
-			var derivedMatrix = CreateDerivedMatrix(probabilityExactlyOne, probabilityExactlyZero);
-			var derivedVector = CreateDerivedVector(probabilityExactlyOne);
+			var finalProbability = CalculateMaximumFinalProbability(xnew);
 
-			var finalProbability = GaussSeidel(derivedMatrix, derivedVector, 50);
-			
 			return finalProbability;
-		}*/
+		}
+
+
+		internal double CalculateMinimumProbabilityToReachStateFormula(Formula psi, int maxSteps)
+		{
+			// same algorithm as CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps with different
+			// directlySatisfiedStates and excludedStates
+			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
+
+			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
+			var excludedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
+
+			var exactlyZeroStates = StatesReachableWithProbabilityExactlyZeroForAtLeastOneScheduler(directlySatisfiedStates, excludedStates);
+			var exactlyOneStates = directlySatisfiedStates; //cannot perform a better pre calculation
+
+			var xnew = MinimumIterator(exactlyOneStates, exactlyZeroStates, maxSteps);
+
+			var finalProbability = CalculateMinimumFinalProbability(xnew);
+
+			return finalProbability;
+		}
 
 		/*
 		internal override Probability CalculateProbability(Formula formulaToCheck)
