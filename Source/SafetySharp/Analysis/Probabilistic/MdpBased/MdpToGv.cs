@@ -31,40 +31,41 @@ using SafetySharp.Runtime;
 namespace SafetySharp.Analysis.Probabilistic.MdpBased.ExportToGv
 {
 	using System.Globalization;
+	using System.IO;
 
 	internal static class MdpToGv
 	{
-		public static void ExportToGv(this MarkovDecisionProcess mdp,StringBuilder sb)
+		public static void ExportToGv(this MarkovDecisionProcess mdp,TextWriter sb)
 		{
-			sb.AppendLine("digraph S {");
-			sb.AppendLine("size = \"8,5\"");
-			sb.AppendLine("node [shape=box];");
+			sb.WriteLine("digraph S {");
+			sb.WriteLine("size = \"8,5\"");
+			sb.WriteLine("node [shape=box];");
 			var enumerator = mdp.GetEnumerator();
 			while (enumerator.MoveNextState())
 			{
 				var state = enumerator.CurrentState;
-				sb.Append($" {state} [label=\"{state}\\n(");
+				sb.Write($" {state} [label=\"{state}\\n(");
 				for (int i = 0; i < mdp.StateFormulaLabels.Length; i++)
 				{
 					if (i>0)
-						sb.Append(",");
-					sb.Append(mdp.StateLabeling[state][i]);
+						sb.Write(",");
+					sb.Write(mdp.StateLabeling[state][i]);
 				}
-				sb.AppendLine(")\"];");
+				sb.WriteLine(")\"];");
 				var distributionCounter = 0;
 				while (enumerator.MoveNextDistribution())
 				{
 					var distributionNode = $"n{state}_{distributionCounter}";
-					sb.AppendLine($"{distributionNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
-					sb.AppendLine($"{state} -> {distributionNode};");
+					sb.WriteLine($"{distributionNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
+					sb.WriteLine($"{state} -> {distributionNode};");
 					while (enumerator.MoveNextTransition())
 					{
-						sb.AppendLine($"{distributionNode} -> {enumerator.CurrentTransition.Column} [label=\"{enumerator.CurrentTransition.Value.ToString(CultureInfo.InvariantCulture)}\"];");
+						sb.WriteLine($"{distributionNode} -> {enumerator.CurrentTransition.Column} [label=\"{enumerator.CurrentTransition.Value.ToString(CultureInfo.InvariantCulture)}\"];");
 					}
 					distributionCounter++;
 				}
 			}
-			sb.AppendLine("}");
+			sb.WriteLine("}");
 		}
 	}
 }

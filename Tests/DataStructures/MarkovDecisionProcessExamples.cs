@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 namespace Tests.DataStructures.MarkovDecisionProcessExamples
 {
 	using System.Diagnostics;
+	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
@@ -71,16 +72,47 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 		public int States;
 		public int StateDistributions;
 		public int InitialDistributions;
+		
+	}
 
-		[Fact]
-		public string ToGraphvizString()
+	public class MarkovDecisionProcessToStringTests
+	{
+		/// <summary>
+		///   Gets the output that writes to the test output stream.
+		/// </summary>
+		public TestTraceOutput Output { get; }
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests()
 		{
-			var sb = new StringBuilder();
-			Mdp.ExportToGv(sb);
-			sb.AppendLine();
-			return sb.ToString();
+			foreach (var example in AllExamples.Examples)
+			{
+				yield return new object[] { example }; // only one parameter
+			}
+		}
+
+		public MarkovDecisionProcessToStringTests(ITestOutputHelper output)
+		{
+			Output = new TestTraceOutput(output);
+		}
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void ToGraphvizString(MarkovDecisionProcessExample example)
+		{
+			var textWriter = Output.TextWriterAdapter();
+			example.Mdp.ExportToGv(textWriter);
+			textWriter.WriteLine();
+		}
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void ToPrismString(MarkovDecisionProcessExample example)
+		{
+			var textWriter = Output.TextWriterAdapter();
+			example.Mdp.ExportToPrism(textWriter);
+			textWriter.WriteLine();
 		}
 	}
+
 
 	public class Example1 : MarkovDecisionProcessExample
 	{
@@ -737,9 +769,9 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true } };
 			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 3, true } };
 
-			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
-			StatesProb1ELabel1 = new Dictionary<int, bool>() { };
-			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			StatesProb0ALabel1 = new Dictionary<int, bool>() { { 3, true } };
+			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 2, true } };
+			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 3, true } };
 		}
 	}
 }

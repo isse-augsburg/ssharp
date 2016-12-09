@@ -22,6 +22,8 @@
 
 namespace Tests.Utilities
 {
+	using System;
+	using System.Text;
 	using JetBrains.Annotations;
 	using SafetySharp.Utilities;
 	using Xunit.Abstractions;
@@ -74,6 +76,71 @@ namespace Tests.Utilities
 
 			if (EnableTracing)
 				_output.WriteLine(message, args);
+		}
+
+		public System.IO.TextWriter TextWriterAdapter(bool trace=false)
+		{
+			return new TestTraceOutputTextWriterAdapter(this,trace);
+		}
+	}
+
+	internal class TestTraceOutputTextWriterAdapter : System.IO.TextWriter
+	{
+		private TestTraceOutput _adaptTo;
+		private bool _trace;
+
+		private StringBuilder buffer = new StringBuilder();
+
+		private bool _newLineCandidate = false;
+
+		internal TestTraceOutputTextWriterAdapter(TestTraceOutput adaptTo, bool trace)
+		{
+			_adaptTo = adaptTo;
+			_trace = trace;
+		}
+
+
+		public override Encoding Encoding => Encoding.Unicode;
+
+		public override void Write(char a)
+		{
+			if (a == '\n')
+			{
+				_newLineCandidate = false;
+				var stringToWrite = buffer.ToString();
+				buffer.Clear();
+				if (_trace)
+					_adaptTo.Trace("{0}",stringToWrite);
+				else
+					_adaptTo.Log("{0}", stringToWrite);
+			}
+			else if (a == '\r' && !_newLineCandidate)
+			{
+				_newLineCandidate = true;
+			}
+			else
+			{
+				buffer.Append(a);
+			}
+		}
+
+		public override void WriteLine(string a)
+		{
+			buffer.Append(a);
+			WriteLine();
+		}
+
+		public override void WriteLine()
+		{
+			if (_trace)
+			{
+				_adaptTo.Trace("{0}", buffer.ToString());
+			}
+			else
+			{
+				_adaptTo.Log("{0}", buffer.ToString());
+			}
+			buffer.Clear();
 		}
 	}
 }

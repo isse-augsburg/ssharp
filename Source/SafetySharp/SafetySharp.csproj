@@ -65,6 +65,7 @@
     <Compile Include="Analysis\Probabilistic\DtmcBased\ProbabilityCheckerFacade.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\DtmcToGv.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\MdpToGv.cs" />
+    <Compile Include="Analysis\Probabilistic\MdpBased\MdpToPrism.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\ProbabilityRangeChecker.cs" />
     <Compile Include="Analysis\ExecutableStateFormula.cs" />
     <Compile Include="Modeling\ProbabilityRange.cs" />
