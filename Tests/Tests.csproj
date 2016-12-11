@@ -613,6 +613,7 @@
     <Compile Include="OdpTests.Helpers.cs">
       <DependentUpon>OdpTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="OrganicDesignPattern\LocalReconfiguration\capability lost.cs" />
     <Compile Include="OrganicDesignPattern\only one possible configuration.cs" />
     <Compile Include="OrganicDesignPattern\production eventually completes.cs" />
     <Compile Include="OrganicDesignPattern\resource flow.cs" />
