@@ -40,16 +40,9 @@ namespace SafetySharp.Odp.Reconfiguration
 	{
 		public CoalitionFormationController(BaseAgent[] agents) : base(agents) { }
 
-		public override async Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
 		{
-			Debug.Assert(tasks.Length == 1);
-			var task = tasks[0];
-
-			var leader = (CoalitionReconfigurationAgent)context;
-			var config = new ConfigurationUpdate();
-			var coalition = new Coalition(leader, task);
-
-			try
+			//if (state.isRequest) // also handle (IsRequest && IsLocalViolation)
 			{
 				foreach (var predicate in leader.BaseAgentState.ViolatedPredicates)
 					await SolveInvariantViolation(coalition, predicate, task, config);
