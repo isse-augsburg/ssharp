@@ -22,7 +22,6 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
-	using System.Collections.Generic;
 	using System.Linq;
 
 	public class OptimalController : FastController
@@ -57,30 +56,12 @@ namespace SafetySharp.Odp.Reconfiguration
 					return null;
 			}
 
-			return MinimumPath(paths);
+			return paths.MinBy(PathCosts);
 		}
 
 		protected virtual int PathCosts(int[] path)
 		{
 			return path.Zip(path.Skip(1), (from, to) => _costMatrix[from, to]).Sum();
-		}
-
-		private int[] MinimumPath(IEnumerable<int[]> paths)
-		{
-			var minPath = paths.First();
-			int minCost = PathCosts(minPath);
-
-			foreach (var path in paths)
-			{
-				int cost = PathCosts(path);
-				if (cost < minCost)
-				{
-					minCost = cost;
-					minPath = path;
-				}
-			}
-
-			return minPath;
 		}
 	}
 }

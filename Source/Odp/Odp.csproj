@@ -40,6 +40,7 @@
     <Compile Include="Capability.cs" />
     <Compile Include="CapabilityType.cs" />
     <Compile Include="ConsumeCapability.cs" />
+    <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="ICapabilityHandler.cs" />
     <Compile Include="ProduceCapability.cs" />
     <Compile Include="Reconfiguration\AbstractController.cs" />
