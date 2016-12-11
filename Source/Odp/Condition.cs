@@ -36,6 +36,8 @@ namespace SafetySharp.Odp
 		public IEnumerable<ICapability> State =>
 			Task?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
 
+		public int StateLength => _statePrefixLength;
+
 		public bool StateMatches(Condition other)
 		{
 			return Task == other.Task

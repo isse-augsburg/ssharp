@@ -61,7 +61,7 @@ namespace SafetySharp.Odp
 		{
 			PreCondition.CopyStateFrom(initialCondition);
 			PostCondition.CopyStateFrom(initialCondition);
-			_capabilitiesToApplyStart = checked((byte)PreCondition.State.Count());
+			_capabilitiesToApplyStart = checked((byte)PreCondition.StateLength);
 		}
 
 		public void AddCapability(ICapability capability)
