@@ -48,6 +48,7 @@
     <Compile Include="BaseAgent.cs" />
     <Compile Include="BaseAgent.State.cs" />
     <Compile Include="Reconfiguration\CentralReconfiguration.cs" />
+    <Compile Include="Reconfiguration\Coalition.cs" />
     <Compile Include="Reconfiguration\CoalitionFormationController.cs" />
     <Compile Include="Reconfiguration\CoalitionReconfigurationAgent.cs" />
     <Compile Include="Condition.cs" />

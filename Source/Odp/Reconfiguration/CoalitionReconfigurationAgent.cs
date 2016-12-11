@@ -24,23 +24,25 @@ namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Threading.Tasks;
 	using Modeling;
 
 	public class CoalitionReconfigurationAgent : IReconfigurationAgent
 	{
-		private readonly BaseAgent _baseAgent;
+		public BaseAgent BaseAgent { get; }
 		private readonly ReconfigurationAgentHandler _reconfAgentHandler;
 		private readonly IController _controller;
 
 		public CoalitionReconfigurationAgent(BaseAgent baseAgent, ReconfigurationAgentHandler reconfAgentHandler, IController controller)
 		{
-			_baseAgent = baseAgent;
+			BaseAgent = baseAgent;
 			_reconfAgentHandler = reconfAgentHandler;
 			_controller = controller;
 		}
 
 		protected Coalition CurrentCoalition { get; set; }
+		public BaseAgent.State BaseAgentState { get; private set; }
 
 		public void Acknowledge()
 		{
@@ -54,33 +56,38 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public async Task ReconfigureAsync(ITask task, IAgent agent, BaseAgent.State baseAgentState)
 		{
+			BaseAgentState = baseAgentState;
+
+			if (baseAgentState.ReconfRequestSource != null)
+			{
+				// TODO: if no reconf process previously started, join coalition
+				// TODO: else notify controller to merge coalitions (how?)
+			}
+
 			var configs = await _controller.CalculateConfigurations(this, task);
 			// TODO: distribute configs
 		}
 
-		protected class Coalition
+		private bool IsConfiguredFor(ITask task)
 		{
-			public CoalitionReconfigurationAgent Leader { get; }
+			return BaseAgent.AllocatedRoles.Any(role => role.Task == task);
+		}
 
-			public List<CoalitionReconfigurationAgent> Members { get; }
-				= new List<CoalitionReconfigurationAgent>();
+		public bool GetConfigurationBounds(ITask task, out Role firstRole, out Role lastRole)
+		{
+			firstRole = default(Role);
+			lastRole = default(Role);
 
-			private int _ctfStart = -1;
-			private int _ctfEnd = -1;
+			if (!IsConfiguredFor(task))
+				return false;
 
-			private int _tfrStart = -1;
-			private int _tfrEnd = -1;
-
-			public Coalition(CoalitionReconfigurationAgent leader)
-			{
-				Leader = leader;
-				Members.Add(leader);
-			}
-
-			public void Join(CoalitionReconfigurationAgent newMember)
-			{
-				Members.Add(newMember);
-			}
+			firstRole = BaseAgent.AllocatedRoles
+								 .Where(role => role.Task == task)
+								 .MinBy(role => role.PreCondition.StateLength);
+			lastRole = BaseAgent.AllocatedRoles
+								.Where(role => role.Task == task)
+								.MaxBy(role => role.PostCondition.StateLength);
+			return true;
 		}
 	}
 }
