@@ -38,6 +38,7 @@ namespace SafetySharp.Odp
 				Inputs = agent.Inputs.ToArray();
 				Outputs = agent.Outputs.ToArray();
 				AllocatedRoles = agent.AllocatedRoles.ToArray();
+				AvailableCapabilities = agent.AvailableCapabilities.ToArray();
 			}
 
 			public IAgent ReconfRequestSource { get; }
@@ -48,6 +49,7 @@ namespace SafetySharp.Odp
 			public BaseAgent[] Inputs { get; }
 			public BaseAgent[] Outputs { get; }
 			public Role[] AllocatedRoles { get; }
+			public ICapability[] AvailableCapabilities { get; }
 		}
 	}
 }
