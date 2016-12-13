@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 namespace SafetySharp.Analysis.Probabilistic
 {
 	using System.Globalization;
+	using System.IO;
 	using Utilities;
 
 	class PrismProcess
@@ -67,7 +68,10 @@ namespace SafetySharp.Analysis.Probabilistic
 			//public string Iterations;
 			public string TimeMc;
 			public double ResultingProbability;
+			public IEnumerable<string> CompleteOutput;
 		}
+
+		private TextWriter _output;
 
 		private PrismOutput ParseOutput(List<string> inputLines)
 		{
@@ -231,10 +235,16 @@ namespace SafetySharp.Analysis.Probabilistic
 				//Iterations = iterations,
 				TimeMc = timeMc,
 				ResultingProbability = resultingProbability,
+				CompleteOutput = inputLines
 			};
 		}
 
 		private readonly List<string> _prismProcessOutput = new List<string>();
+
+		public PrismProcess(TextWriter output)
+		{
+			_output = output;
+		}
 
 		private string FindJava()
 		{
@@ -290,7 +300,11 @@ namespace SafetySharp.Analysis.Probabilistic
 
 			var argument = $"-Djava.library.path=\"{prismDir}\\lib\" -classpath \"{classpath}\" prism.PrismCL {prismArguments}";
 
-			Action<string> addToOutput = (output) => _prismProcessOutput.Add(output);
+			Action<string> addToOutput;
+			if (_output==null)
+				addToOutput = (output) => _prismProcessOutput.Add(output);
+			else
+				addToOutput = (output) => { _output.WriteLine(output); _prismProcessOutput.Add(output); };
 
 			var process = new ExternalProcess(javaExe, argument, addToOutput);
 			return process;

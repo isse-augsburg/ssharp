@@ -70,7 +70,7 @@ namespace Tests.DataStructures
 
 			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
 
-			var prismChecker = new ExternalMdpModelCheckerPrism(mdp);
+			var prismChecker = new ExternalMdpModelCheckerPrism(mdp, Output.TextWriterAdapter());
 			var result = prismChecker.CalculateMaximalProbability(finallyLabel1);
 			result.Is(0.01, 0.0001).ShouldBe(true);
 		}

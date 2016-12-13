@@ -37,9 +37,9 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 	//Not very mature! Use only as oracle for tests of the builtin model checker!
 
-	class ExternalMdpModelCheckerPrism : MdpModelChecker
+	class ExternalMdpModelCheckerPrism : MdpModelChecker, IDisposable
 	{
-		public ExternalMdpModelCheckerPrism(MarkovDecisionProcess mdp) : base(mdp)
+		public ExternalMdpModelCheckerPrism(MarkovDecisionProcess mdp, TextWriter output=null) : base(mdp, output)
 		{
 			WriteMarkovChainToDisk();
 		}
@@ -73,7 +73,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var transformationVisitor = new PrismTransformer();
 			transformationVisitor.Visit(formulaToCheck);
 			var formulaToCheckInnerString = transformationVisitor.TransformedFormula;
-			var formulaToCheckString = "P=? [ " + formulaToCheckInnerString + "]";
+			var formulaToCheckString = "Pmax=? [ " + formulaToCheckInnerString + "]";
 
 			using (var fileProperties = new TemporaryFile("props"))
 			{
@@ -81,9 +81,9 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 				var prismArguments = _filePrism.FilePath + " " + fileProperties.FilePath;
 
-				var prismProcess = new PrismProcess();
+				var prismProcess = new PrismProcess(_output);
 				var quantitativeResult = prismProcess.ExecutePrismAndParseResult(prismArguments);
-
+				
 				return new Probability(quantitativeResult.ResultingProbability);
 			}
 		}
@@ -105,6 +105,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 		
 		public override void Dispose()
 		{
+			_filePrism.SafeDispose();
 		}
 	}
 }

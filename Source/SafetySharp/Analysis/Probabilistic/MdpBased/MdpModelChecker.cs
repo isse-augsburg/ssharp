@@ -41,11 +41,14 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	internal abstract class MdpModelChecker : IDisposable
 	{
-		internal MarkovDecisionProcess MarkovDecisionProcess { get; }
+		protected TextWriter _output;
 
-		protected MdpModelChecker(MarkovDecisionProcess mdp)
+		internal MarkovDecisionProcess MarkovDecisionProcess { get; }
+		
+		protected MdpModelChecker(MarkovDecisionProcess mdp,TextWriter output =null)
 		{
 			MarkovDecisionProcess = mdp;
+			_output = output;
 		}
 
 		public abstract void Dispose();

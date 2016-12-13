@@ -124,16 +124,12 @@ namespace SafetySharp.Analysis
 
 			// From artificial initial state to real initial states
 			var artificialSourceState = -1;
-			WriteCommandSourcePart(streamPrism, artificialSourceState);
 			
 			enumerator.SelectInitialDistributions();
-
-			var firstDistributionOfCommand = true;
+			
 			while (enumerator.MoveNextDistribution())
 			{
-				if (firstDistributionOfCommand)
-					streamPrism.Write(" + ");
-				firstDistributionOfCommand = false;
+				WriteCommandSourcePart(streamPrism, artificialSourceState);
 				var firstTransitionOfDistribution = true;
 				while (enumerator.MoveNextTransition())
 				{
@@ -144,19 +140,15 @@ namespace SafetySharp.Analysis
 						firstTransitionOfDistribution = false;
 					}
 				}
+				WriteCommandEnd(streamPrism);
 			}
 
-			WriteCommandEnd(streamPrism);
 			while (enumerator.MoveNextState())
 			{
-				firstDistributionOfCommand = true;
 				var sourceState = enumerator.CurrentState;
-				WriteCommandSourcePart(streamPrism, sourceState);
 				while (enumerator.MoveNextDistribution())
 				{
-					if (firstDistributionOfCommand)
-						streamPrism.Write(" + ");
-					firstDistributionOfCommand = false;
+					WriteCommandSourcePart(streamPrism, sourceState);
 					var firstTransitionOfDistribution = true;
 					while (enumerator.MoveNextTransition())
 					{
@@ -167,8 +159,8 @@ namespace SafetySharp.Analysis
 							firstTransitionOfDistribution = false;
 						}
 					}
+					WriteCommandEnd(streamPrism);
 				}
-				WriteCommandEnd(streamPrism);
 			}
 
 			streamPrism.WriteLine("endmodule");

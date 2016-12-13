@@ -32,6 +32,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 	using Runtime;
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.IO;
 	using Analysis.Probabilistic;
 	using Utilities;
 	using Utilities.Graph;
@@ -65,7 +66,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return complement;
 		}
 		
-		public BuiltinMdpModelChecker(MarkovDecisionProcess mdp) : base(mdp)
+		public BuiltinMdpModelChecker(MarkovDecisionProcess mdp,TextWriter output=null) : base(mdp,output)
 		{
 			_underlyingDigraph = MarkovDecisionProcess.CreateUnderlyingDigraph();
 		}

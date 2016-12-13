@@ -71,7 +71,7 @@ namespace Tests.DataStructures
 			var excludedStates = new Dictionary<int, bool>() { };
 			var directlySatisfiedStates = example.StatesSatisfyDirectlyLabel1Formula;
 
-			var checker = new BuiltinMdpModelChecker(mdp);
+			var checker = new BuiltinMdpModelChecker(mdp,Output.TextWriterAdapter());
 			var results = checker.StatesReachableWithProbabilityExactlyOneForAtLeastOneScheduler(directlySatisfiedStates, excludedStates);
 
 			foreach (var result in results.Keys)
@@ -93,7 +93,7 @@ namespace Tests.DataStructures
 			var excludedStates = new Dictionary<int, bool>() { };
 			var directlySatisfiedStates = example.StatesSatisfyDirectlyLabel1Formula;
 
-			var checker = new BuiltinMdpModelChecker(mdp);
+			var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter());
 			var results = checker.StatesReachableWithProbabilityExactlyZeroWithAllSchedulers(directlySatisfiedStates, excludedStates);
 
 			foreach (var result in results.Keys)
@@ -114,7 +114,7 @@ namespace Tests.DataStructures
 			var excludedStates = new Dictionary<int, bool>() { };
 			var directlySatisfiedStates = example.StatesSatisfyDirectlyLabel1Formula;
 
-			var checker = new BuiltinMdpModelChecker(mdp);
+			var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter());
 			var results = checker.StatesReachableWithProbabilityExactlyZeroForAtLeastOneScheduler(directlySatisfiedStates, excludedStates);
 
 			foreach (var result in results.Keys)

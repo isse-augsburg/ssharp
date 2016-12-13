@@ -44,7 +44,6 @@ namespace Tests.Analysis.Probabilistic
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = (Type)Arguments[0];
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc);
-			Debugger.Break();
 			probabilityOfInvariantViolation = modelChecker.CalculateProbability(finallyInvariantViolated);
 
 			probabilityOfInvariantViolation.Is(0.01, 0.0001).ShouldBe(true);
