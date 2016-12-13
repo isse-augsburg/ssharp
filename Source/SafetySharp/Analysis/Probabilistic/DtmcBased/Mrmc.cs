@@ -247,13 +247,9 @@ namespace SafetySharp.Analysis
 
 		internal override Probability CalculateProbability(Formula formulaToCheck)
 		{
-			var isFormulaReturningProbabilityVisitor = new IsFormulaReturningProbabilityVisitor();
-			isFormulaReturningProbabilityVisitor.Visit(formulaToCheck);
-			if (!isFormulaReturningProbabilityVisitor.IsReturningProbability)
-			{
-				throw new Exception("expected formula which returns a probability");
-			}
-			using (var fileResults = WriteFilesAndExecuteMrmc(formulaToCheck,true))
+			var workaroundFormula = new ProbabilitisticFormula(formulaToCheck, ProbabilisticComparator.BiggerThan, 0.0);
+
+			using (var fileResults = WriteFilesAndExecuteMrmc(workaroundFormula, true))
 			{
 				var resultEnumerator = File.ReadLines(fileResults.FilePath).GetEnumerator();
 				

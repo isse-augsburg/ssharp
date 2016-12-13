@@ -36,14 +36,14 @@ namespace Tests.Analysis.Probabilistic
 			Probability probabilityOfFinally2;
 			
 			Formula stateIs2 = c.F == 2;
-			var checkProbabilityOfFinally2 = new CalculateProbabilityToReachStateFormula(stateIs2);
+			var finally2 = new UnaryFormula(stateIs2, UnaryOperator.Finally);
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
-			markovChainGenerator.AddFormulaToCheck(checkProbabilityOfFinally2);
+			markovChainGenerator.AddFormulaToCheck(finally2);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = (Type)Arguments[0];
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc);
-			probabilityOfFinally2 = modelChecker.CalculateProbability(checkProbabilityOfFinally2);
+			probabilityOfFinally2 = modelChecker.CalculateProbability(finally2);
 
 			probabilityOfFinally2.Between(0.33, 0.34).ShouldBe(true);
 		}

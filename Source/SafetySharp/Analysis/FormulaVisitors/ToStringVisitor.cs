@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis.FormulaVisitors
 {
+	using System;
 	using System.Globalization;
 	using System.Text;
 	using Utilities;
@@ -173,20 +174,28 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
 		{
-			if (formula is CalculateProbabilityToReachStateFormula)
+			_builder.Append("P { ");
+			switch (formula.Comparator)
 			{
-				_builder.Append("ProbabilityToReach(?,");
-				Visit(formula.Operand);
-				_builder.Append(")");
+				case ProbabilisticComparator.LowerThan:
+					_builder.Append("<");
+					break;
+				case ProbabilisticComparator.LowerEqual:
+					_builder.Append("<=");
+					break;
+				case ProbabilisticComparator.BiggerThan:
+					_builder.Append(">");
+					break;
+				case ProbabilisticComparator.BiggerEqual:
+					_builder.Append(">=");
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
-			else if (formula is ProbabilityToReachStateFormula)
-			{
-				Assert.NotReached("Not supported, yet");
-			}
-			else
-			{
-				Assert.NotReached("Not supported, yet");
-			}
+			_builder.Append(formula.CompareToValue.ToString(CultureInfo.InvariantCulture));
+			_builder.Append(" } [ ");
+			Visit(formula.Operand);
+			_builder.Append(" ]");
 		}
 	}
 }

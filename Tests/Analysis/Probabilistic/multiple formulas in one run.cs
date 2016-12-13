@@ -37,19 +37,19 @@ namespace Tests.Analysis.Probabilistic
 			Probability probabilityOfFinal2;
 			Probability probabilityOfFinal3;
 			
-			Formula final2 = c.Value == 2;
-			Formula final3 = c.Value == 3;
-			var checkProbabilityOfFinal2 = new CalculateProbabilityToReachStateFormula(final2);
-			var checkProbabilityOfFinal3 = new CalculateProbabilityToReachStateFormula(final3);
+			Formula valueIs2 = c.Value == 2;
+			Formula valueIs3 = c.Value == 3;
+			var final2 = new UnaryFormula(valueIs2, UnaryOperator.Finally);
+			var final3 = new UnaryFormula(valueIs3, UnaryOperator.Finally);
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
-			markovChainGenerator.AddFormulaToCheck(checkProbabilityOfFinal2);
-			markovChainGenerator.AddFormulaToCheck(checkProbabilityOfFinal3);
+			markovChainGenerator.AddFormulaToCheck(final2);
+			markovChainGenerator.AddFormulaToCheck(final3);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = (Type)Arguments[0];
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc);
-			probabilityOfFinal2 = modelChecker.CalculateProbability(checkProbabilityOfFinal2);
-			probabilityOfFinal3 = modelChecker.CalculateProbability(checkProbabilityOfFinal3);
+			probabilityOfFinal2 = modelChecker.CalculateProbability(final2);
+			probabilityOfFinal3 = modelChecker.CalculateProbability(final3);
 
 			probabilityOfFinal2.Is(0.3, tolerance: 0.0001).ShouldBe(true);
 			probabilityOfFinal3.Is(0.6, tolerance: 0.0001).ShouldBe(true);

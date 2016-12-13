@@ -21,14 +21,14 @@ namespace Tests.Analysis.Probabilistic
 			Probability probabilityOfFalse;
 			
 			Formula falseFormula = false;
-			var probabilityFinallyFalseFormula = new CalculateProbabilityToReachStateFormula(falseFormula);
-			
+			var finallyFalseFormula = new UnaryFormula(falseFormula, UnaryOperator.Finally);
+
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
-			markovChainGenerator.AddFormulaToCheck(probabilityFinallyFalseFormula);
+			markovChainGenerator.AddFormulaToCheck(finallyFalseFormula);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = (Type)Arguments[0];
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc);
-			probabilityOfFalse = modelChecker.CalculateProbability(probabilityFinallyFalseFormula);
+			probabilityOfFalse = modelChecker.CalculateProbability(finallyFalseFormula);
 
 			probabilityOfFalse.Is(0.0, 0.001).ShouldBe(true);
 		}

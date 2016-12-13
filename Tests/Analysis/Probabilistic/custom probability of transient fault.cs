@@ -23,6 +23,7 @@
 namespace Tests.Analysis.Probabilistic
 {
 	using System;
+	using System.Diagnostics;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
@@ -36,14 +37,15 @@ namespace Tests.Analysis.Probabilistic
 			Probability probabilityOfInvariantViolation;
 
 			Formula invariantViolated = c.ViolateInvariant;
-			var probabilityFinallyInvariantViolated = new CalculateProbabilityToReachStateFormula(invariantViolated);
+			var finallyInvariantViolated = new UnaryFormula(invariantViolated,UnaryOperator.Finally);
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
-			markovChainGenerator.AddFormulaToCheck(probabilityFinallyInvariantViolated);
+			markovChainGenerator.AddFormulaToCheck(finallyInvariantViolated);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = (Type)Arguments[0];
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc);
-			probabilityOfInvariantViolation = modelChecker.CalculateProbability(probabilityFinallyInvariantViolated);
+			Debugger.Break();
+			probabilityOfInvariantViolation = modelChecker.CalculateProbability(finallyInvariantViolated);
 
 			probabilityOfInvariantViolation.Is(0.01, 0.0001).ShouldBe(true);
 		}

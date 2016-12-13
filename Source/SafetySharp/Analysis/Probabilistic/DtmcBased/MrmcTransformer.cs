@@ -47,18 +47,20 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitUnaryFormula(UnaryFormula formula)
 		{
-			_builder.Append("(");
-
 			switch (formula.Operator)
 			{
 				case UnaryOperator.Not:
 					_builder.Append(" ! ");
+					break;
+				case UnaryOperator.Finally:
+					_builder.Append(" tt U ");
 					break;
 				default:
 					Assert.NotReached($"Unknown or unsupported unary operator '{formula.Operator}'.");
 					break;
 			}
 
+			_builder.Append("(");
 			Visit(formula.Operand);
 			_builder.Append(")");
 		}
@@ -70,6 +72,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		{
 			_builder.Append("(");
 			Visit(formula.LeftOperand);
+			_builder.Append(")");
 
 			switch (formula.Operator)
 			{
@@ -90,6 +93,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 					break;
 			}
 
+			_builder.Append("(");
 			Visit(formula.RightOperand);
 			_builder.Append(")");
 		}
@@ -152,20 +156,28 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
 		{
-			if (formula is CalculateProbabilityToReachStateFormula)
+			_builder.Append("P { ");
+			switch (formula.Comparator)
 			{
-				_builder.Append("P { > 0 } [ tt U ");
-				Visit(formula.Operand);
-				_builder.Append(" ]");
+				case ProbabilisticComparator.LowerThan:
+					_builder.Append("< ");
+					break;
+				case ProbabilisticComparator.LowerEqual:
+					_builder.Append("<= ");
+					break;
+				case ProbabilisticComparator.BiggerThan:
+					_builder.Append("> ");
+					break;
+				case ProbabilisticComparator.BiggerEqual:
+					_builder.Append(">= ");
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
-			else if (formula is ProbabilityToReachStateFormula)
-			{
-				throw new Exception("Not supported, yet");
-			}
-			else
-			{
-				throw new Exception("Not supported, yet");
-			}
+			_builder.Append(formula.CompareToValue.ToString(CultureInfo.InvariantCulture));
+			_builder.Append(" } [ ");
+			Visit(formula.Operand);
+			_builder.Append(" ]");
 		}
 	}
 }

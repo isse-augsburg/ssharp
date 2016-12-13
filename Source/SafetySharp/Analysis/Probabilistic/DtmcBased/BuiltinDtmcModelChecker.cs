@@ -313,13 +313,12 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var reachStateFormula = formulaToCheck as CalculateProbabilityToReachStateFormula;
-			if (reachStateFormula == null)
+			var finallyFormula = formulaToCheck as UnaryFormula;
+			if (finallyFormula == null || finallyFormula.Operator!=UnaryOperator.Finally)
 				throw new NotImplementedException();
-			var result=CalculateProbabilityToReachStateFormula(reachStateFormula.Operand);
+			var result=CalculateProbabilityToReachStateFormula(finallyFormula.Operand);
 			//var result = CalculateProbabilityToReachStateFormulaInBoundedSteps(reachStateFormula.Operand, 200);
-
-
+			
 			stopwatch.Stop();
 
 			Console.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");

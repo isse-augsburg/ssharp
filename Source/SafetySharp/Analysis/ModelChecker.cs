@@ -72,7 +72,7 @@ namespace SafetySharp.Analysis
 		{
 			Probability probabilityToReachState;
 
-			var probabilityToReachStateFormula = new CalculateProbabilityToReachStateFormula(stateFormula);
+			var probabilityToReachStateFormula = new UnaryFormula(stateFormula,UnaryOperator.Finally);
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(model);
 			markovChainGenerator.AddFormulaToCheck(probabilityToReachStateFormula);

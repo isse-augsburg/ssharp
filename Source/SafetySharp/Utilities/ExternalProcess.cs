@@ -23,6 +23,7 @@
 namespace SafetySharp.Utilities
 {
 	using System;
+	using System.CodeDom;
 	using System.Diagnostics;
 	using System.IO;
 	using System.Threading.Tasks;
@@ -131,5 +132,41 @@ namespace SafetySharp.Utilities
 					_outputCallback?.Invoke(text);
 			}
 		}
+
+		public static MachineType GetDllMachineType(string dllPath)
+		{
+			// Idea: http://stackoverflow.com/questions/1001404/check-if-unmanaged-dll-is-32-bit-or-64-bit/1002672#1002672
+			// See also http://www.microsoft.com/whdc/system/platform/firmware/PECOFF.mspx
+			var fs = new FileStream(dllPath, FileMode.Open, FileAccess.Read);
+			var br = new BinaryReader(fs);
+
+			fs.Seek(0x3c, SeekOrigin.Begin);
+			var peOffset = br.ReadInt32();
+			fs.Seek(peOffset, SeekOrigin.Begin);
+			var peHead = br.ReadUInt32();
+			if (peHead != (0x00004550))
+				// "PE\0\0", little-endian
+				throw new Exception("Can't find PE header");
+			var machineTypeAsUint16 = br.ReadUInt16();
+			br.Close();
+			fs.Close();
+
+			switch (machineTypeAsUint16)
+			{
+				case 0x8664:
+					return MachineType.MachineTypeAmd64;
+				case 0x14c:
+					return MachineType.MachineTypeAmd64;
+				default:
+					return MachineType.MachineTypeOther;
+			}
+		}
+	}
+
+	public enum MachineType
+	{
+		MachineTypeAmd64,
+		MachineTypeI386,
+		MachineTypeOther
 	}
 }

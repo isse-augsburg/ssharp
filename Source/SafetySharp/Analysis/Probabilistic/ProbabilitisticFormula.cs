@@ -26,13 +26,31 @@ namespace SafetySharp.Analysis
 	using FormulaVisitors;
 	using Utilities;
 
-	public abstract class ProbabilitisticFormula : Formula
+	public enum ProbabilisticComparator
+	{
+		LowerThan,
+		LowerEqual,
+		BiggerThan,
+		BiggerEqual
+	}
+
+	public class ProbabilitisticFormula : Formula
 	{
 		public Formula Operand { get; }
 
-		protected ProbabilitisticFormula(Formula operand)
+		/// <summary>
+		///   Gets the operator of the unary formula.
+		/// </summary>
+		public ProbabilisticComparator Comparator { get; }
+
+		public double CompareToValue { get; }
+
+		public ProbabilitisticFormula(Formula operand, ProbabilisticComparator comparator, double compareToValue)
 		{
+			//P_{comparator value}(operand)
 			Operand = operand;
+			Comparator = comparator;
+			CompareToValue = compareToValue;
 		}
 
 		/// <summary>
@@ -44,69 +62,4 @@ namespace SafetySharp.Analysis
 			visitor.VisitProbabilisticFormula(this);
 		}
 	}
-
-	public sealed class ProbabilityToReachStateFormula : ProbabilitisticFormula
-	{
-		//TODO: enum >= <= > <
-		public ProbabilityToReachStateFormula(Formula operand)
-			:base(operand)
-		{
-		}
-	}
-
-	public sealed class CalculateProbabilityToReachStateFormula : ProbabilitisticFormula
-	{
-		public CalculateProbabilityToReachStateFormula(Formula operand)
-			: base(operand)
-		{
-		}
-	}
-
-	/*
-	/// <summary>
-	///   Represents the application of a <see cref="BinaryOperator" /> to two <see cref="Formula" /> instances.
-	/// </summary>
-	internal sealed class BinaryFormula : Formula
-	{
-		/// <summary>
-		///   Initializes a new instance of the <see cref="BinaryFormula" /> class.
-		/// </summary>
-		/// <param name="leftOperand">The formula on the left-hand side of the binary operator.</param>
-		/// <param name="binaryOperator">The operator of the binary formula.</param>
-		/// <param name="rightOperand">The formula on the right-hand side of the binary operator.</param>
-		internal BinaryFormula(Formula leftOperand, BinaryOperator binaryOperator, Formula rightOperand)
-		{
-			Requires.NotNull(leftOperand, nameof(leftOperand));
-			Requires.InRange(binaryOperator, nameof(binaryOperator));
-			Requires.NotNull(rightOperand, nameof(rightOperand));
-
-			LeftOperand = leftOperand;
-			Operator = binaryOperator;
-			RightOperand = rightOperand;
-		}
-
-		/// <summary>
-		///   Gets the formula on the left-hand side of the binary operator.
-		/// </summary>
-		public Formula LeftOperand { get; }
-
-		/// <summary>
-		///   Gets the operator of the binary formula.
-		/// </summary>
-		public BinaryOperator Operator { get; }
-
-		/// <summary>
-		///   Gets the formula on the right-hand side of the binary operator.
-		/// </summary>
-		public Formula RightOperand { get; }
-
-		/// <summary>
-		///   Executes the <paramref name="visitor" /> for this formula.
-		/// </summary>
-		/// <param name="visitor">The visitor that should be executed.</param>
-		internal override void Visit(FormulaVisitor visitor)
-		{
-			visitor.VisitBinaryFormula(this);
-		}
-	}*/
 }

@@ -112,10 +112,10 @@ namespace SafetySharp.Analysis.Probabilistic.DtmcBased
 		{
 			Requires.NotNull(formula, nameof(formula));
 
-			var visitor = new IsFormulaReturningProbabilityVisitor();
+			var visitor = new IsFormulaReturningBoolValueVisitor();
 			visitor.Visit(formula);
-			if (!visitor.IsReturningProbability)
-				throw new InvalidOperationException("Formula must return probability.");
+			if (!visitor.IsFormulaReturningBoolValue)
+				throw new InvalidOperationException("Formula must return bool.");
 			
 			_generator.AddFormulaToCheck(formula);
 			_booleanFormulas.Add(formula);
@@ -125,10 +125,10 @@ namespace SafetySharp.Analysis.Probabilistic.DtmcBased
 		{
 			Requires.NotNull(formula, nameof(formula));
 
-			var visitor = new IsFormulaReturningProbabilityVisitor();
+			var visitor = new IsFormulaReturningBoolValueVisitor();
 			visitor.Visit(formula);
-			if (!visitor.IsReturningProbability)
-				throw new InvalidOperationException("Formula must return probability.");
+			if (!visitor.IsFormulaReturningBoolValue)
+				throw new InvalidOperationException("Formula must return bool.");
 
 			_generator.AddFormulaToCheck(formula);
 			_probabilityFormulas.Add(formula);
@@ -162,12 +162,7 @@ namespace SafetySharp.Analysis.Probabilistic.DtmcBased
 			Requires.NotNull(formula, nameof(formula));
 			if (!_generator.ProbabilityMatrixCreationStarted)
 				throw new InvalidOperationException(nameof(GetProbabilityResult) + " must be called after " + nameof(StartChecking));
-
-			var visitor = new IsFormulaReturningProbabilityVisitor();
-			visitor.Visit(formula);
-			if (!visitor.IsReturningProbability)
-				throw new InvalidOperationException("Formula must return probability.");
-
+			
 			return _probabilityFormulaResults[formula];
 		}
 
@@ -176,12 +171,7 @@ namespace SafetySharp.Analysis.Probabilistic.DtmcBased
 			Requires.NotNull(formula, nameof(formula));
 			if (!_generator.ProbabilityMatrixCreationStarted)
 				throw new InvalidOperationException(nameof(GetRewardResult) + " must be called after " + nameof(StartChecking));
-
-			var visitor = new IsFormulaReturningRewardResultVisitor();
-			visitor.Visit(formula);
-			if (!visitor.IsReturningRewardResult)
-				throw new InvalidOperationException("Formula must return reward.");
-
+			
 			return _rewardFormulaResults[formula];
 		}
 

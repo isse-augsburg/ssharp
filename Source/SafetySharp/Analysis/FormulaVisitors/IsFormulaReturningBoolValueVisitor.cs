@@ -71,18 +71,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
 		{
-			if (formula is CalculateProbabilityToReachStateFormula)
-			{
-				IsFormulaReturningBoolValue = false;
-			}
-			else if (formula is ProbabilityToReachStateFormula)
-			{
-				IsFormulaReturningBoolValue = true;
-			}
-			else
-			{
-				throw new Exception("Not supported, yet");
-			}
+			IsFormulaReturningBoolValue = true;
 		}
 	}
 }

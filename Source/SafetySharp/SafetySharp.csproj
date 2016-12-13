@@ -64,10 +64,13 @@
     <Compile Include="Analysis\Probabilistic\BoundsToCalculate.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\ProbabilityCheckerFacade.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\DtmcToGv.cs" />
+    <Compile Include="Analysis\Probabilistic\MdpBased\ExternalMdpModelCheckerPrism.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\MdpToGv.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\MdpToPrism.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\ProbabilityRangeChecker.cs" />
     <Compile Include="Analysis\ExecutableStateFormula.cs" />
+    <Compile Include="Analysis\Probabilistic\PrismProcess.cs" />
+    <Compile Include="Analysis\FormulaVisitors\PrismTransformer.cs" />
     <Compile Include="Modeling\ProbabilityRange.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\BuiltinMdpModelChecker.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\BuiltinDtmcModelChecker.cs" />
@@ -79,7 +82,6 @@
     <Compile Include="Analysis\OrderAnalysisResults.cs" />
     <Compile Include="Analysis\OrderRelationshipKind.cs" />
     <Compile Include="Analysis\OrderRelationship.cs" />
-    <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningProbabilityVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningRewardResultVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsFormulaReturningBoolValueVisitor.cs" />
     <Compile Include="Analysis\Probabilistic\EarlyTerminationModifier.cs" />

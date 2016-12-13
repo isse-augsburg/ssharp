@@ -23,6 +23,7 @@
 namespace SafetySharp.Analysis.FormulaVisitors
 {
 	using System;
+	using System.Globalization;
 	using System.Text;
 	using Utilities;
 
@@ -52,6 +53,9 @@ namespace SafetySharp.Analysis.FormulaVisitors
 			{
 				case UnaryOperator.Not:
 					_builder.Append(" ! ");
+					break;
+				case UnaryOperator.Finally:
+					_builder.Append(" F ");
 					break;
 				default:
 					Assert.NotReached($"Unknown or unsupported unary operator '{formula.Operator}'.");
@@ -96,9 +100,17 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public override void VisitStateFormula(StateFormula formula)
+		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
 			_builder.Append(formula.Label);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
+		{
+			VisitAtomarPropositionFormula(formula);
 		}
 		
 		/// <summary>
@@ -133,20 +145,28 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
 		{
-			if (formula is CalculateProbabilityToReachStateFormula)
+			_builder.Append("P");
+			switch (formula.Comparator)
 			{
-				_builder.Append("P=? [ F ");
-				Visit(formula.Operand);
-				_builder.Append("=true ]");
+				case ProbabilisticComparator.LowerThan:
+					_builder.Append("<");
+					break;
+				case ProbabilisticComparator.LowerEqual:
+					_builder.Append("<=");
+					break;
+				case ProbabilisticComparator.BiggerThan:
+					_builder.Append(">");
+					break;
+				case ProbabilisticComparator.BiggerEqual:
+					_builder.Append(">=");
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
-			else if (formula is ProbabilityToReachStateFormula)
-			{
-				throw new Exception("Not supported, yet");
-			}
-			else
-			{
-				throw new Exception("Not supported, yet");
-			}
+			_builder.Append(formula.CompareToValue.ToString(CultureInfo.InvariantCulture));
+			_builder.Append(" [ ");
+			Visit(formula.Operand);
+			_builder.Append(" ]");
 		}
 	}
 }
