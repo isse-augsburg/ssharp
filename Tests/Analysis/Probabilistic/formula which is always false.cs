@@ -28,7 +28,10 @@ namespace Tests.Analysis.Probabilistic
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = (Type)Arguments[0];
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
-			probabilityOfFalse = modelChecker.CalculateProbability(finallyFalseFormula);
+			using (modelChecker)
+			{
+				probabilityOfFalse = modelChecker.CalculateProbability(finallyFalseFormula);
+			}
 
 			probabilityOfFalse.Is(0.0, 0.001).ShouldBe(true);
 		}

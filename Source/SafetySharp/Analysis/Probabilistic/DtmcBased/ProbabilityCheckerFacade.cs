@@ -40,6 +40,8 @@ namespace SafetySharp.Analysis.Probabilistic.DtmcBased
 	// Facade for easier use
 	public class ProbabilityCheckerFacade
 	{
+		//TODO: Safe disposal of BuiltinDtmcModelChecker
+
 		private MarkovChainFromExecutableModelGenerator _generator;
 
 		private HashSet<Formula> _booleanFormulas;

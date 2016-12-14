@@ -42,7 +42,10 @@ namespace SafetySharp.Analysis
 
 		private TemporaryFile _fileTransitions;
 		private TemporaryFile _fileStateLabelings;
-		
+
+		// Note: Should be used with using(var modelchecker = new ...), otherwise the disposed method may be
+		// executed by the .net framework directly after using _fileTransitions.FilePath the last time and the
+		// file deleted before it could be used by the prism process
 		public ExternalDtmcModelCheckerMrmc(DiscreteTimeMarkovChain markovChain, TextWriter output = null) : base(markovChain,output)
 		{
 		}

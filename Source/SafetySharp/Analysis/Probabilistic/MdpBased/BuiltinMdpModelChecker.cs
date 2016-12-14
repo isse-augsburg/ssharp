@@ -65,7 +65,8 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			}
 			return complement;
 		}
-		
+
+		// Note: Should be used with using(var modelchecker = new ...)
 		public BuiltinMdpModelChecker(MarkovDecisionProcess mdp,TextWriter output=null) : base(mdp,output)
 		{
 			_underlyingDigraph = MarkovDecisionProcess.CreateUnderlyingDigraph();

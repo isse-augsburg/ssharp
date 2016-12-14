@@ -45,6 +45,7 @@ namespace SafetySharp.Analysis
 
 		internal DiscreteTimeMarkovChain MarkovChain { get; }
 
+		// Note: Should be used with using(var modelchecker = new ...)
 		internal DtmcModelChecker(DiscreteTimeMarkovChain markovChain, TextWriter output = null)
 		{
 			MarkovChain = markovChain;

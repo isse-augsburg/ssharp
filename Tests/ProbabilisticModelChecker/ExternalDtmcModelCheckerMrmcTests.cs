@@ -71,9 +71,11 @@ namespace Tests.DataStructures
 
 			var finallyLabel1 = new UnaryFormula(MarkovChainExample.Label1Formula, UnaryOperator.Finally);
 
-			var prismChecker = new ExternalDtmcModelCheckerMrmc(dtmc, Output.TextWriterAdapter());
-			var result = prismChecker.CalculateProbability(finallyLabel1);
-			result.Is(0.01, 0.0001).ShouldBe(true);
+			using (var checker = new ExternalDtmcModelCheckerMrmc(dtmc, Output.TextWriterAdapter()))
+			{
+				var result = checker.CalculateProbability(finallyLabel1);
+				result.Is(example.ProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
+			}
 		}
 	}
 }

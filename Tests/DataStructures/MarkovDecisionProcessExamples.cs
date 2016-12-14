@@ -72,7 +72,10 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 		public int States;
 		public int StateDistributions;
 		public int InitialDistributions;
-		
+
+		public double MinimalProbabilityFinallyLabel1;
+		public double MaximalProbabilityFinallyLabel1;
+
 	}
 
 	public class MarkovDecisionProcessToStringTests
@@ -166,6 +169,9 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			StatesProb0ALabel1 = new Dictionary<int, bool>() {  };
 			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true } , { 1, true } };
 			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
+
+			MinimalProbabilityFinallyLabel1 = 1.0;
+			MaximalProbabilityFinallyLabel1 = 1.0;
 		}
 
 	}

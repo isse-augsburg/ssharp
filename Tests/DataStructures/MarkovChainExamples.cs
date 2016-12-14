@@ -102,6 +102,8 @@ namespace Tests.DataStructures.MarkovChainExamples
 
 		public Dictionary<int, bool> AncestorsOfStatesWithLabel1;
 		public Dictionary<int, bool> AncestorsOfStatesWithLabel2;
+
+		public double ProbabilityFinallyLabel1;
 	}
 
 	public class Example1 : MarkovChainExample
@@ -143,6 +145,8 @@ namespace Tests.DataStructures.MarkovChainExamples
 
 			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
 			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
+
+			ProbabilityFinallyLabel1 = 1.0;
 		}
 	}
 
@@ -187,6 +191,8 @@ namespace Tests.DataStructures.MarkovChainExamples
 
 			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
 			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
+
+			ProbabilityFinallyLabel1 = 1.0;
 		}
 	}
 }

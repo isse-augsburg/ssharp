@@ -48,8 +48,11 @@ namespace Tests.Analysis.Probabilistic
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = (Type)Arguments[0];
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
-			probabilityOfFinal2 = modelChecker.CalculateProbability(final2);
-			probabilityOfFinal3 = modelChecker.CalculateProbability(final3);
+			using (modelChecker)
+			{
+				probabilityOfFinal2 = modelChecker.CalculateProbability(final2);
+				probabilityOfFinal3 = modelChecker.CalculateProbability(final3);
+			}
 
 			probabilityOfFinal2.Is(0.3, tolerance: 0.0001).ShouldBe(true);
 			probabilityOfFinal3.Is(0.6, tolerance: 0.0001).ShouldBe(true);

@@ -57,12 +57,13 @@ namespace Tests.Analysis.Probabilistic
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 
 			var typeOfModelChecker = (Type)Arguments[0];
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
-
-			probabilityOfStep11FrozenValue2AndInvariantViolated = modelChecker.CalculateProbability (finallyFormulaProbabilityOfStep11FrozenValue2AndInvariantViolated);
-			probabilityOfStep11FrozenValue3AndInvariantViolated = modelChecker.CalculateProbability (finallyFormulaProbabilityOfStep11FrozenValue3AndInvariantViolated);
-			probabilityOfStep11FrozenValue2AndInvariantNotViolated = modelChecker.CalculateProbability (finallyFormulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated);
-			probabilityOfStep11FrozenValue3AndInvariantNotViolated = modelChecker.CalculateProbability (finallyFormulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated);
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter()); using (modelChecker)
+			{
+				probabilityOfStep11FrozenValue2AndInvariantViolated = modelChecker.CalculateProbability (finallyFormulaProbabilityOfStep11FrozenValue2AndInvariantViolated);
+				probabilityOfStep11FrozenValue3AndInvariantViolated = modelChecker.CalculateProbability (finallyFormulaProbabilityOfStep11FrozenValue3AndInvariantViolated);
+				probabilityOfStep11FrozenValue2AndInvariantNotViolated = modelChecker.CalculateProbability (finallyFormulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated);
+				probabilityOfStep11FrozenValue3AndInvariantNotViolated = modelChecker.CalculateProbability (finallyFormulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated);
+			}
 			
 			var probabilitiesSummedUp =
 				probabilityOfStep11FrozenValue2AndInvariantViolated +

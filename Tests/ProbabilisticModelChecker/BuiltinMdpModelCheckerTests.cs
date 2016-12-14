@@ -72,16 +72,18 @@ namespace Tests.DataStructures
 			var excludedStates = new Dictionary<int, bool>() { };
 			var directlySatisfiedStates = example.StatesSatisfyDirectlyLabel1Formula;
 
-			var checker = new BuiltinMdpModelChecker(mdp,Output.TextWriterAdapter());
-			var results = checker.StatesReachableWithProbabilityExactlyOneForAtLeastOneScheduler(directlySatisfiedStates, excludedStates);
+			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))
+			{
+				var results = checker.StatesReachableWithProbabilityExactlyOneForAtLeastOneScheduler(directlySatisfiedStates, excludedStates);
 
-			foreach (var result in results.Keys)
-			{
-				Assert.True(example.StatesProb1ELabel1.ContainsKey(result), $"state {result} not found in expected results");
-			}
-			foreach (var result in example.StatesProb1ELabel1.Keys)
-			{
-				Assert.True(results.ContainsKey(result), $"state {result} not found in calculated results");
+				foreach (var result in results.Keys)
+				{
+					Assert.True(example.StatesProb1ELabel1.ContainsKey(result), $"state {result} not found in expected results");
+				}
+				foreach (var result in example.StatesProb1ELabel1.Keys)
+				{
+					Assert.True(results.ContainsKey(result), $"state {result} not found in calculated results");
+				}
 			}
 		}
 
@@ -94,16 +96,18 @@ namespace Tests.DataStructures
 			var excludedStates = new Dictionary<int, bool>() { };
 			var directlySatisfiedStates = example.StatesSatisfyDirectlyLabel1Formula;
 
-			var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter());
-			var results = checker.StatesReachableWithProbabilityExactlyZeroWithAllSchedulers(directlySatisfiedStates, excludedStates);
+			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))
+			{
+				var results = checker.StatesReachableWithProbabilityExactlyZeroWithAllSchedulers(directlySatisfiedStates, excludedStates);
 
-			foreach (var result in results.Keys)
-			{
-				Assert.True(example.StatesProb0ALabel1.ContainsKey(result), $"state {result} not found in expected results");
-			}
-			foreach (var result in example.StatesProb0ALabel1.Keys)
-			{
-				Assert.True(results.ContainsKey(result), $"state {result} not found in calculated results");
+				foreach (var result in results.Keys)
+				{
+					Assert.True(example.StatesProb0ALabel1.ContainsKey(result), $"state {result} not found in expected results");
+				}
+				foreach (var result in example.StatesProb0ALabel1.Keys)
+				{
+					Assert.True(results.ContainsKey(result), $"state {result} not found in calculated results");
+				}
 			}
 		}
 
@@ -115,16 +119,18 @@ namespace Tests.DataStructures
 			var excludedStates = new Dictionary<int, bool>() { };
 			var directlySatisfiedStates = example.StatesSatisfyDirectlyLabel1Formula;
 
-			var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter());
-			var results = checker.StatesReachableWithProbabilityExactlyZeroForAtLeastOneScheduler(directlySatisfiedStates, excludedStates);
+			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))
+			{
+				var results = checker.StatesReachableWithProbabilityExactlyZeroForAtLeastOneScheduler(directlySatisfiedStates, excludedStates);
 
-			foreach (var result in results.Keys)
-			{
-				Assert.True(example.StatesProb0ELabel1.ContainsKey(result), $"state {result} not found in expected results");
-			}
-			foreach (var result in example.StatesProb0ELabel1.Keys)
-			{
-				Assert.True(results.ContainsKey(result), $"state {result} not found in calculated results");
+				foreach (var result in results.Keys)
+				{
+					Assert.True(example.StatesProb0ELabel1.ContainsKey(result), $"state {result} not found in expected results");
+				}
+				foreach (var result in example.StatesProb0ELabel1.Keys)
+				{
+					Assert.True(results.ContainsKey(result), $"state {result} not found in calculated results");
+				}
 			}
 		}
 
@@ -135,9 +141,11 @@ namespace Tests.DataStructures
 
 			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
 
-			var prismChecker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter());
-			var result = prismChecker.CalculateMaximalProbability(finallyLabel1);
-			result.Is(0.01, 0.0001).ShouldBe(true);
+			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))
+			{
+				var result = checker.CalculateMaximalProbability(finallyLabel1);
+				result.Is(example.MaximalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
+			}
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests))]
@@ -147,9 +155,11 @@ namespace Tests.DataStructures
 
 			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
 
-			var prismChecker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter());
-			var result = prismChecker.CalculateMinimalProbability(finallyLabel1);
-			result.Is(0.01, 0.0001).ShouldBe(true);
+			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))
+			{
+				var result = checker.CalculateMinimalProbability(finallyLabel1);
+				result.Is(example.MinimalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
+			}
 		}
 	}
 }

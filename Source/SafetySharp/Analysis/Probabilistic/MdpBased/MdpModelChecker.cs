@@ -45,6 +45,7 @@ namespace SafetySharp.Analysis
 
 		internal MarkovDecisionProcess MarkovDecisionProcess { get; }
 		
+		// Note: Should be used with using(var modelchecker = new ...)
 		protected MdpModelChecker(MarkovDecisionProcess mdp,TextWriter output =null)
 		{
 			MarkovDecisionProcess = mdp;

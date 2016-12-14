@@ -39,6 +39,9 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 	class ExternalMdpModelCheckerPrism : MdpModelChecker, IDisposable
 	{
+		// Note: Should be used with using(var modelchecker = new ...), otherwise the disposed method may be
+		// executed by the .net framework directly after using _filePrism.FilePath the last time and the
+		// file deleted before it could be used by the prism process
 		public ExternalMdpModelCheckerPrism(MarkovDecisionProcess mdp, TextWriter output=null) : base(mdp, output)
 		{
 			WriteMarkovChainToDisk();
@@ -83,7 +86,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 				var prismProcess = new PrismProcess(_output);
 				var quantitativeResult = prismProcess.ExecutePrismAndParseResult(prismArguments);
-				
+
 				return new Probability(quantitativeResult.ResultingProbability);
 			}
 		}

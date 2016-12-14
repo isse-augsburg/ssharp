@@ -70,9 +70,11 @@ namespace Tests.DataStructures
 
 			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
 
-			var prismChecker = new ExternalMdpModelCheckerPrism(mdp, Output.TextWriterAdapter());
-			var result = prismChecker.CalculateMaximalProbability(finallyLabel1);
-			result.Is(0.01, 0.0001).ShouldBe(true);
+			using (var prismChecker = new ExternalMdpModelCheckerPrism(mdp, Output.TextWriterAdapter()))
+			{
+				var result = prismChecker.CalculateMaximalProbability(finallyLabel1);
+				result.Is(example.MaximalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
+			}
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests))]
@@ -81,10 +83,12 @@ namespace Tests.DataStructures
 			var mdp = example.Mdp;
 
 			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
-
-			var prismChecker = new ExternalMdpModelCheckerPrism(mdp, Output.TextWriterAdapter());
-			var result = prismChecker.CalculateMinimalProbability(finallyLabel1);
-			result.Is(0.01, 0.0001).ShouldBe(true);
+			
+			using (var prismChecker = new ExternalMdpModelCheckerPrism(mdp, Output.TextWriterAdapter()))
+			{
+				var result = prismChecker.CalculateMinimalProbability(finallyLabel1);
+				result.Is(example.MinimalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
+			}
 		}
 	}
 }

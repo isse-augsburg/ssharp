@@ -112,6 +112,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return complement;
 		}
 
+		// Note: Should be used with using(var modelchecker = new ...)
 		public BuiltinDtmcModelChecker(DiscreteTimeMarkovChain markovChain, TextWriter output = null) : base(markovChain, output)
 		{
 			_underlyingDigraph = MarkovChain.CreateUnderlyingDigraph();
