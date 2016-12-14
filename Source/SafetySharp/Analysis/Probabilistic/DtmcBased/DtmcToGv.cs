@@ -31,32 +31,33 @@ using SafetySharp.Runtime;
 namespace SafetySharp.Analysis.Probabilistic.DtmcBased.ExportToGv
 {
 	using System.Globalization;
+	using System.IO;
 
 	internal static class DtmcToGv
 	{
-		public static void ExportToGv(this DiscreteTimeMarkovChain markovChain,StringBuilder sb)
+		public static void ExportToGv(this DiscreteTimeMarkovChain markovChain, TextWriter sb)
 		{
-			sb.AppendLine("digraph S {");
-			sb.AppendLine("size = \"8,5\"");
-			sb.AppendLine("node [shape=box];");
+			sb.WriteLine("digraph S {");
+			sb.WriteLine("size = \"8,5\"");
+			sb.WriteLine("node [shape=box];");
 			var enumerator = markovChain.GetEnumerator();
 			while (enumerator.MoveNextState())
 			{
 				var state = enumerator.CurrentState;
-				sb.Append($" {state} [label=\"{state}\\n(");
+				sb.Write($" {state} [label=\"{state}\\n(");
 				for (int i = 0; i < markovChain.StateFormulaLabels.Length; i++)
 				{
 					if (i>0)
-						sb.Append(",");
-					sb.Append(markovChain.StateLabeling[state][i]);
+						sb.Write(",");
+					sb.Write(markovChain.StateLabeling[state][i]);
 				}
-				sb.AppendLine(")\"];");
+				sb.WriteLine(")\"];");
 				while (enumerator.MoveNextTransition())
 				{
-					sb.AppendLine($"{enumerator.CurrentState} -> {enumerator.CurrentTransition.Column} [label=\"{enumerator.CurrentTransition.Value.ToString(CultureInfo.InvariantCulture)}\"];");
+					sb.WriteLine($"{enumerator.CurrentState} -> {enumerator.CurrentTransition.Column} [label=\"{enumerator.CurrentTransition.Value.ToString(CultureInfo.InvariantCulture)}\"];");
 				}
 			}
-			sb.AppendLine("}");
+			sb.WriteLine("}");
 		}
 	}
 }

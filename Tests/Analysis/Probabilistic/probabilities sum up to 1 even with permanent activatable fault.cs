@@ -57,7 +57,7 @@ namespace Tests.Analysis.Probabilistic
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 
 			var typeOfModelChecker = (Type)Arguments[0];
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc);
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
 
 			probabilityOfStep11FrozenValue2AndInvariantViolated = modelChecker.CalculateProbability (finallyFormulaProbabilityOfStep11FrozenValue2AndInvariantViolated);
 			probabilityOfStep11FrozenValue3AndInvariantViolated = modelChecker.CalculateProbability (finallyFormulaProbabilityOfStep11FrozenValue3AndInvariantViolated);

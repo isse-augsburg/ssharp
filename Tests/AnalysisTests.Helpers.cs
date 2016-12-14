@@ -297,7 +297,7 @@ namespace Tests
 		public static IEnumerable<object[]> AllProbabilisticModelCheckerTests(string directory)
 		{
 			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
-				yield return new object[] { typeof(Mrmc) }.Concat(testCase).ToArray();
+				yield return new object[] { typeof(ExternalDtmcModelCheckerMrmc) }.Concat(testCase).ToArray();
 
 			foreach (var testCase in EnumerateTestCases(GetAbsoluteTestsDirectory(directory)))
 				yield return new object[] { typeof(SafetySharp.Analysis.ModelChecking.Probabilistic.BuiltinDtmcModelChecker) }.Concat(testCase).ToArray();

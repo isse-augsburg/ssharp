@@ -37,13 +37,13 @@ namespace SafetySharp.Analysis
 	using Runtime.Serialization;
 	using Utilities;
 
-	public class Mrmc : DtmcModelChecker
+	public class ExternalDtmcModelCheckerMrmc : DtmcModelChecker
 	{
 
 		private TemporaryFile _fileTransitions;
 		private TemporaryFile _fileStateLabelings;
 		
-		public Mrmc(DiscreteTimeMarkovChain markovChain) : base(markovChain)
+		public ExternalDtmcModelCheckerMrmc(DiscreteTimeMarkovChain markovChain, TextWriter output = null) : base(markovChain,output)
 		{
 		}
 		
@@ -55,53 +55,9 @@ namespace SafetySharp.Analysis
 			_fileStateLabelings = new TemporaryFile("lab");
 
 			var streamTransitions = new StreamWriter(_fileTransitions.FilePath);
-			streamTransitions.NewLine = "\n";
 			var streamStateLabelings = new StreamWriter(_fileStateLabelings.FilePath);
-			streamStateLabelings.NewLine = "\n";
 
-			streamTransitions.WriteLine("STATES " + MarkovChain.States);
-			streamTransitions.WriteLine("TRANSITIONS " + MarkovChain.Transitions);
-
-			var enumerator = MarkovChain.GetEnumerator();
-			while(enumerator.MoveNextState())
-			{
-				while (enumerator.MoveNextTransition())
-				{
-					var currentColumnValue = enumerator.CurrentTransition;
-					streamTransitions.WriteLine((enumerator.CurrentState + 1) + " " + (currentColumnValue.Column+1) + " " + currentColumnValue.Value.ToString(CultureInfo.InvariantCulture)); //index in mrmc is 1-based
-				}
-			}
-			streamTransitions.Flush();
-			streamTransitions.Close();
-
-			streamStateLabelings.WriteLine("#DECLARATION");
-			//bool firstElement = true;
-			var noStateFormulaLabels = MarkovChain.StateFormulaLabels.Length;
-			for (var i = 0; i < noStateFormulaLabels; i++)
-			{
-				var label = MarkovChain.StateFormulaLabels[i];
-				if (i > 0)
-				{
-					streamStateLabelings.Write(" ");
-				}
-				streamStateLabelings.Write(label);
-			}
-			streamStateLabelings.WriteLine();
-			streamStateLabelings.WriteLine("#END");
-			var stateLabeling = MarkovChain.StateLabeling;
-			for (var state = 0; state < MarkovChain.States; state++)
-			{
-				streamStateLabelings.Write(state+1); //index in mrmc is 1-based
-				for (var i = 0; i < noStateFormulaLabels; i++)
-				{
-					var label = MarkovChain.StateFormulaLabels[i];
-					if (stateLabeling[state][i])
-						streamStateLabelings.Write(" " + label);
-				}
-				streamStateLabelings.WriteLine();
-			}
-			streamStateLabelings.Flush();
-			streamStateLabelings.Close();
+			MarkovChain.ExportToMrmc(streamTransitions,streamStateLabelings);
 		}
 
 		/*
@@ -109,40 +65,6 @@ namespace SafetySharp.Analysis
 		{
 			var fileStateRewards = new TemporaryFile("rew");
 			var streamRewards = new StreamWriter(fileStateRewards.FilePath);
-			streamRewards.NewLine = "\n";
-
-			var rewardRetrieverCollector = new RewardRetrieverCollector();
-			formulaToCheck.Visit(rewardRetrieverCollector);
-
-			if (rewardRetrieverCollector.RewardRetrievers.Count == 0)
-			{
-				useRewards = false;
-				return null;
-			}
-			if (rewardRetrieverCollector.RewardRetrievers.Count > 1)
-				throw new Exception("Mrmc can currently only handle one reward in each formula");
-
-			var labelOfReward = rewardRetrieverCollector.RewardRetrievers.Single();
-			var indexOfLabel = Array.FindIndex(MarkovChain.StateRewardRetrieverLabels,label => label.Equals(labelOfReward));
-
-			if (indexOfLabel == 0)
-			{
-				for (int i = 0; i < MarkovChain.States; i++)
-				{
-					streamRewards.WriteLine($" {i+1} {MarkovChain.StateRewards0[i].Value()}"); //index in mrmc is 1-based
-				}
-			}
-			if (indexOfLabel == 1)
-			{
-				for (int i = 0; i < MarkovChain.States; i++)
-				{
-					streamRewards.WriteLine($" {i+1} {MarkovChain.StateRewards1[i].Value()}"); //index in mrmc is 1-based
-				}
-			}
-			streamRewards.Flush();
-			streamRewards.Close();
-			useRewards = true;
-			return fileStateRewards;
 		}
 		*/
 
@@ -238,9 +160,9 @@ namespace SafetySharp.Analysis
 				mrmc.Run();
 				stopwatch.Stop();
 
-				Console.WriteLine(iterations);
-				Console.WriteLine(pureModelCheckingTime);
-				Console.WriteLine($"MRMC total model checking time: {stopwatch.Elapsed}");
+				_output?.WriteLine(iterations);
+				_output?.WriteLine(pureModelCheckingTime);
+				_output?.WriteLine($"MRMC total model checking time: {stopwatch.Elapsed}");
 			}
 			return fileResults;
 		}

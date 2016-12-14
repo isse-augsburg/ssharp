@@ -62,6 +62,8 @@
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultSuppressionModifier.cs" />
     <Compile Include="Analysis\Probabilistic\BidirectionalGraphT.cs" />
     <Compile Include="Analysis\Probabilistic\BoundsToCalculate.cs" />
+    <Compile Include="Analysis\Probabilistic\DtmcBased\ExternalDtmcModelCheckerMrmc.cs" />
+    <Compile Include="Analysis\Probabilistic\DtmcBased\DtmcToMrmc.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\ProbabilityCheckerFacade.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\DtmcToGv.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\ExternalMdpModelCheckerPrism.cs" />
@@ -94,7 +96,6 @@
     <Compile Include="Analysis\Probabilistic\DtmcBased\LtmcChoiceResolver.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\LtmcExecutedModel.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\DtmcModelChecker.cs" />
-    <Compile Include="Analysis\Probabilistic\DtmcBased\Mrmc.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\LtmcTransition.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\LtmcTransitionSetBuilder.cs" />
     <Compile Include="Analysis\Probabilistic\AutoResizeVector.cs" />
@@ -244,7 +245,7 @@
     <Compile Include="Analysis\ModelChecking\Transitions\ActivationMinimalTransitionSetBuilder.cs" />
     <Compile Include="Runtime\UnboundPortException.cs" />
     <Compile Include="Utilities\ConsoleHelpers.cs" />
-    <Compile Include="Utilities\ModelByteSize.cs" />
+    <Compile Include="Analysis\ModelByteSize.cs" />
     <Compile Include="Utilities\InterlockedExtensions.cs" />
     <Compile Include="Utilities\MemoryBuffer.cs" />
     <Compile Include="Utilities\CodeWriter.cs" />

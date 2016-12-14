@@ -40,6 +40,7 @@ namespace Tests.DataStructures
 	using Xunit.Abstractions;
 	using SafetySharp.Utilities.Graph;
 	using SafetySharp.Analysis.Probabilistic.MdpBased.ExportToGv;
+	using Shouldly;
 
 	public class BuiltinMdpModelCheckerTests
 	{
@@ -125,6 +126,30 @@ namespace Tests.DataStructures
 			{
 				Assert.True(results.ContainsKey(result), $"state {result} not found in calculated results");
 			}
+		}
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void MaximalProbabilityToReach_Label1(MarkovDecisionProcessExample example)
+		{
+			var mdp = example.Mdp;
+
+			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
+
+			var prismChecker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter());
+			var result = prismChecker.CalculateMaximalProbability(finallyLabel1);
+			result.Is(0.01, 0.0001).ShouldBe(true);
+		}
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void MinimalProbabilityToReach_Label1(MarkovDecisionProcessExample example)
+		{
+			var mdp = example.Mdp;
+
+			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
+
+			var prismChecker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter());
+			var result = prismChecker.CalculateMinimalProbability(finallyLabel1);
+			result.Is(0.01, 0.0001).ShouldBe(true);
 		}
 	}
 }

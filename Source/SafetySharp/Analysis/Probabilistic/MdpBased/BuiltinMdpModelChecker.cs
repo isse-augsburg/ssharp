@@ -201,7 +201,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				{
 					stopwatch.Stop();
 					var currentProbability = CalculateMinimumFinalProbability(xnew);
-					Console.WriteLine($"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
+					_output?.WriteLine($"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
 					stopwatch.Start();
 				}
 			}
@@ -286,7 +286,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				{
 					stopwatch.Stop();
 					var currentProbability = CalculateMaximumFinalProbability(xnew);
-					Console.WriteLine($"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
+					_output?.WriteLine($"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
 					stopwatch.Start();
 				}
 			}
@@ -573,7 +573,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 			stopwatch.Stop();
 
-			Console.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
+			_output?.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
 			return new Probability(result);
 		}*/
 
@@ -584,12 +584,34 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 		
 		internal override Probability CalculateMinimalProbability(Formula formulaToCheck)
 		{
-			throw new NotImplementedException();
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
+			var finallyFormula = formulaToCheck as UnaryFormula;
+			if (finallyFormula == null || finallyFormula.Operator != UnaryOperator.Finally)
+				throw new NotImplementedException();
+			var result = CalculateMinimumProbabilityToReachStateFormula(finallyFormula.Operand,50);
+
+			stopwatch.Stop();
+
+			_output?.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
+			return new Probability(result);
 		}
 
 		internal override Probability CalculateMaximalProbability(Formula formulaToCheck)
 		{
-			throw new NotImplementedException();
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
+			var finallyFormula = formulaToCheck as UnaryFormula;
+			if (finallyFormula == null || finallyFormula.Operator != UnaryOperator.Finally)
+				throw new NotImplementedException();
+			var result = CalculateMaximumProbabilityToReachStateFormula(finallyFormula.Operand, 50);
+
+			stopwatch.Stop();
+
+			_output?.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
+			return new Probability(result);
 		}
 
 

@@ -42,7 +42,7 @@ namespace Tests.Analysis.Probabilistic
 			markovChainGenerator.AddFormulaToCheck(finallyInvariantViolated);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = (Type)Arguments[0];
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc);
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
 			probabilityOfInvariantViolation = modelChecker.CalculateProbability(finallyInvariantViolated);
 
 			// 1.0-(1.0-0.1)^11 = 0.68618940391

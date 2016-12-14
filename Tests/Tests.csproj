@@ -621,6 +621,8 @@
     <Compile Include="Execution\Models\Subcomponents\generic.cs" />
     <Compile Include="Execution\Models\Subcomponents\multiple.cs" />
     <Compile Include="Execution\Models\Subcomponents\single.cs" />
+    <Compile Include="ProbabilisticModelChecker\ExternalDtmcModelCheckerMrmcTests.cs" />
+    <Compile Include="ProbabilisticModelChecker\BuiltinDtmcModelCheckerTests.cs" />
     <Compile Include="ProbabilisticModelChecker\ExternalMdpModelCheckerPrismTests.cs" />
     <Compile Include="ProbabilisticModelChecker\BuiltinMdpModelCheckerTests.cs" />
     <Compile Include="Serialization\Compaction\alignment.cs" />

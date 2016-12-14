@@ -90,7 +90,30 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 		internal override Probability CalculateMinimalProbability(Formula formulaToCheck)
 		{
-			throw new NotImplementedException();
+			var isFormulaReturningBoolVisitor = new IsFormulaReturningBoolValueVisitor();
+
+			isFormulaReturningBoolVisitor.Visit(formulaToCheck);
+			if (!isFormulaReturningBoolVisitor.IsFormulaReturningBoolValue)
+			{
+				throw new Exception("expected formula which returns a bool");
+			}
+
+			var transformationVisitor = new PrismTransformer();
+			transformationVisitor.Visit(formulaToCheck);
+			var formulaToCheckInnerString = transformationVisitor.TransformedFormula;
+			var formulaToCheckString = "Pmin=? [ " + formulaToCheckInnerString + "]";
+
+			using (var fileProperties = new TemporaryFile("props"))
+			{
+				File.WriteAllText(fileProperties.FilePath, formulaToCheckString);
+
+				var prismArguments = _filePrism.FilePath + " " + fileProperties.FilePath;
+
+				var prismProcess = new PrismProcess(_output);
+				var quantitativeResult = prismProcess.ExecutePrismAndParseResult(prismArguments);
+
+				return new Probability(quantitativeResult.ResultingProbability);
+			}
 		}
 
 		internal override Probability CalculateProbabilityRange(Formula formulaToCheck)

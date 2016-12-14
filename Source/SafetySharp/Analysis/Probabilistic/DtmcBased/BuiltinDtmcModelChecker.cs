@@ -32,6 +32,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 	using Runtime;
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.IO;
 	using Utilities;
 	using SafetySharp.Utilities.Graph;
 
@@ -111,7 +112,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return complement;
 		}
 
-		public BuiltinDtmcModelChecker(DiscreteTimeMarkovChain markovChain) : base(markovChain)
+		public BuiltinDtmcModelChecker(DiscreteTimeMarkovChain markovChain, TextWriter output = null) : base(markovChain, output)
 		{
 			_underlyingDigraph = MarkovChain.CreateUnderlyingDigraph();
 		}
@@ -172,7 +173,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				{
 					stopwatch.Stop();
 					var currentProbability = CalculateFinalProbability(resultVector);
-					Console.WriteLine($"Completed {iterations} Gauss-Seidel iterations in {stopwatch.Elapsed}.  Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
+					_output?.WriteLine($"Completed {iterations} Gauss-Seidel iterations in {stopwatch.Elapsed}.  Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
 					stopwatch.Start();
 				}
 				if (iterationsLeft <= 0)
@@ -252,7 +253,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				{
 					stopwatch.Stop();
 					var currentProbability = CalculateFinalProbability(xnew);
-					Console.WriteLine($"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
+					_output?.WriteLine($"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
 					stopwatch.Start();
 				}
 			}
@@ -321,7 +322,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			
 			stopwatch.Stop();
 
-			Console.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
+			_output?.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
 			return new Probability(result);
 		}
 
@@ -338,7 +339,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			while ((target + (epsilon / 2.0)) != target)
 				epsilon /= 2.0;
 
-			Console.WriteLine(epsilon);
+			_output?.WriteLine(epsilon);
 		}
 
 		internal override bool CalculateBoolean(Formula formulaToCheck)

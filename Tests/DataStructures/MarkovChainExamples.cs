@@ -29,6 +29,8 @@ using System.Threading.Tasks;
 namespace Tests.DataStructures.MarkovChainExamples
 {
 	using System.Diagnostics;
+	using JetBrains.Annotations;
+	using MarkovDecisionProcessExamples;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
@@ -42,6 +44,45 @@ namespace Tests.DataStructures.MarkovChainExamples
 	public static class AllExamples
 	{
 		internal static MarkovChainExample[] Examples = { new Example1(), new Example2()};
+	}
+
+
+	public class MarkovChainToStringTests
+	{
+		/// <summary>
+		///   Gets the output that writes to the test output stream.
+		/// </summary>
+		public TestTraceOutput Output { get; }
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests()
+		{
+			foreach (var example in MarkovChainExamples.AllExamples.Examples)
+			{
+				yield return new object[] { example }; // only one parameter
+			}
+		}
+
+		public MarkovChainToStringTests(ITestOutputHelper output)
+		{
+			Output = new TestTraceOutput(output);
+		}
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void ToGraphvizString(MarkovChainExample example)
+		{
+			var textWriter = Output.TextWriterAdapter();
+			example.MarkovChain.ExportToGv(textWriter);
+			textWriter.WriteLine();
+		}
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void ToMrmcString(MarkovChainExample example)
+		{
+			var textWriter = Output.TextWriterAdapter();
+			example.MarkovChain.ExportToMrmc(textWriter,textWriter);
+			textWriter.WriteLine();
+		}
 	}
 
 	public abstract class MarkovChainExample
@@ -61,15 +102,6 @@ namespace Tests.DataStructures.MarkovChainExamples
 
 		public Dictionary<int, bool> AncestorsOfStatesWithLabel1;
 		public Dictionary<int, bool> AncestorsOfStatesWithLabel2;
-
-		[Fact]
-		public string ToGraphvizString()
-		{
-			var sb = new StringBuilder();
-			MarkovChain.ExportToGv(sb);
-			sb.AppendLine();
-			return sb.ToString();
-		}
 	}
 
 	public class Example1 : MarkovChainExample

@@ -30,7 +30,7 @@ namespace Tests.DataStructures
 {
 	using System.Diagnostics;
 	using JetBrains.Annotations;
-	using MarkovDecisionProcessExamples;
+	using MarkovChainExamples;
 	using SafetySharp.Analysis;
 	using SafetySharp.Analysis.ModelChecking.Probabilistic;
 	using SafetySharp.Modeling;
@@ -42,7 +42,7 @@ namespace Tests.DataStructures
 	using SafetySharp.Analysis.Probabilistic.MdpBased.ExportToGv;
 	using Shouldly;
 
-	public class ExternalMdpModelCheckerPrismTests
+	public class BuiltinDtmcModelCheckerTests
 	{
 		/// <summary>
 		///   Gets the output that writes to the test output stream.
@@ -58,32 +58,21 @@ namespace Tests.DataStructures
 			}
 		}
 
-		public ExternalMdpModelCheckerPrismTests(ITestOutputHelper output)
+		public BuiltinDtmcModelCheckerTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 		}
+		
 
 		[Theory, MemberData(nameof(DiscoverTests))]
-		public void MaximalProbabilityToReach_Label1(MarkovDecisionProcessExample example)
+		public void ProbabilityToReach_Label1(MarkovChainExample example)
 		{
-			var mdp = example.Mdp;
+			var dtmc = example.MarkovChain;
 
-			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
+			var finallyLabel1 = new UnaryFormula(MarkovChainExample.Label1Formula, UnaryOperator.Finally);
 
-			var prismChecker = new ExternalMdpModelCheckerPrism(mdp, Output.TextWriterAdapter());
-			var result = prismChecker.CalculateMaximalProbability(finallyLabel1);
-			result.Is(0.01, 0.0001).ShouldBe(true);
-		}
-
-		[Theory, MemberData(nameof(DiscoverTests))]
-		public void MinimalProbabilityToReach_Label1(MarkovDecisionProcessExample example)
-		{
-			var mdp = example.Mdp;
-
-			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
-
-			var prismChecker = new ExternalMdpModelCheckerPrism(mdp, Output.TextWriterAdapter());
-			var result = prismChecker.CalculateMinimalProbability(finallyLabel1);
+			var prismChecker = new BuiltinDtmcModelChecker(dtmc, Output.TextWriterAdapter());
+			var result = prismChecker.CalculateProbability(finallyLabel1);
 			result.Is(0.01, 0.0001).ShouldBe(true);
 		}
 	}
