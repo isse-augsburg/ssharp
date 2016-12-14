@@ -28,37 +28,37 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	/// <summary>
 	/// Represents the ZNN.com News System case study.
 	/// </summary>
-	class Model : ModelBase
+	public class Model : ModelBase
 	{
 		/// <summary>
 		/// The cost of one server unit.
 		/// </summary>
-		public const int ServerUnitCost = 5;
+		public static int ServerUnitCost = 5;
 
 		/// <summary>
 		/// Available units per server
 		/// </summary>
-		public const int DefaultAvailableServerUnits = 10;
+		public static int DefaultAvailableServerUnits = 10;
 
 		/// <summary>
 		/// Defines the value for high response time
 		/// </summary>
-		public const int HighResponseTimeValue = 20;
+		public static int HighResponseTimeValue = 20;
 
 		/// <summary>
 		/// Defines the value for low response time
 		/// </summary>
-		public const int LowResponseTimeValue = 10;
+		public static int LowResponseTimeValue = 10;
 
 		/// <summary>
 		/// Available Budget for server costs.
 		/// </summary>
-		public const int MaxBudget = 125;
+		public static int MaxBudget = 125;
 
 		/// <summary>
 		/// Count of latest response times to be used for calculating averange response time
 		/// </summary>
-		public const int LastResponseCountForAvgTime = 10;
+		public static int LastResponseCountForAvgTime = 10;
 
 		[Root(RootKind.Controller)]
 		public ProxyT Proxy;
@@ -75,7 +75,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			Proxy = new ProxyT();
 
 			// Add a few clients
-			for(int i = 0; i < 50; i++)
+			for(int i = 0; i < 20; i++)
 			{
 				Clients.Add(new ClientT(Proxy));
 			}

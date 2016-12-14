@@ -38,7 +38,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		/// <summary>
 		/// Test setup
 		/// </summary>
-		[TestFixtureSetUp]
+		[SetUp]
 		public void Prepare()
 		{
 			_Proxy = new ProxyT();

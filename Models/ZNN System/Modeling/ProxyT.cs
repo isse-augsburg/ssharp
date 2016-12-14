@@ -110,7 +110,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public void IncrementServerPool()
 		{
-			ConnectedServers.Add(ServerT.GetNewServer());
+			ConnectedServers.Add(ServerT.GetNewServer(this));
 		}
 
 		/// <summary>

@@ -31,17 +31,27 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 	[TestFixture]
 	public class ProxyTTest
 	{
+		private ProxyT _Proxy;
+
+		/// <summary>
+		/// Setups the tests
+		/// </summary>
+		[SetUp]
+		public void Prepare()
+		{
+			_Proxy = new ProxyT();
+		}
+
 		/// <summary>
 		/// Tests the server activation
 		/// </summary>
 		[Test]
 		public void TestIncrementServerPool()
 		{
-			var proxy = new ProxyT();
-			proxy.IncrementServerPool();
+			_Proxy.IncrementServerPool();
 
-			Assert.AreEqual(2, proxy.ActiveServerCount);
-			Assert.IsInstanceOf(typeof(ServerT), proxy.ConnectedServers[0]);
+			Assert.AreEqual(2, _Proxy.ActiveServerCount);
+			Assert.IsInstanceOf(typeof(ServerT), _Proxy.ConnectedServers[0]);
 		}
 
 		/// <summary>
@@ -50,16 +60,15 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		[Test]
 		public void TestDecrementServerPool()
 		{
-			var proxy = new ProxyT();
-			proxy.ConnectedServers.Add(ServerT.GetNewServer());
+			_Proxy.ConnectedServers.Add(ServerT.GetNewServer());
 
-			proxy.DecrementServerPool();
+			_Proxy.DecrementServerPool();
 
-			Assert.AreEqual(1, proxy.ActiveServerCount);
+			Assert.AreEqual(1, _Proxy.ActiveServerCount);
 
-			proxy.DecrementServerPool(); // Note: Cannot deactivate last server
+			_Proxy.DecrementServerPool(); // Note: Cannot deactivate last server
 
-			Assert.AreEqual(1, proxy.ActiveServerCount);
+			Assert.AreEqual(1, _Proxy.ActiveServerCount);
 		}
 
 		/// <summary>
@@ -68,32 +77,30 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		[Test]
 		public void TestAdjustServers()
 		{
-			var proxy = new ProxyT();
-
 			// High Time, low costs
 			for(int i = 0; i < Model.LastResponseCountForAvgTime; i++)
 			{
-				proxy.UpdateAvgResponseTime(Model.HighResponseTimeValue + 5);
+				_Proxy.UpdateAvgResponseTime(Model.HighResponseTimeValue + 5);
 			}
 
-			proxy.AdjustServers();
-			Assert.AreEqual(2, proxy.ActiveServerCount);
+			_Proxy.AdjustServers();
+			Assert.AreEqual(2, _Proxy.ActiveServerCount);
 
 			// High Time, Max Costs
-			proxy.AdjustServers();
-			proxy.AdjustServers();
-			Assert.AreEqual(3, proxy.ActiveServerCount);
-			Assert.AreEqual(EServerFidelity.Low, proxy.ConnectedServers[0].Fidelity);
+			_Proxy.AdjustServers();
+			_Proxy.AdjustServers();
+			Assert.AreEqual(3, _Proxy.ActiveServerCount);
+			Assert.AreEqual(EServerFidelity.Low, _Proxy.ConnectedServers[0].Fidelity);
 
 			// Low Time, High costs
 			for(int i = 0; i < Model.LastResponseCountForAvgTime; i++)
 			{
-				proxy.UpdateAvgResponseTime(Model.LowResponseTimeValue - 5);
+				_Proxy.UpdateAvgResponseTime(Model.LowResponseTimeValue - 5);
 			}
 
-			proxy.AdjustServers();
-			Assert.AreEqual(2, proxy.ActiveServerCount);
-			Assert.AreEqual(EServerFidelity.High, proxy.ConnectedServers[0].Fidelity);
+			_Proxy.AdjustServers();
+			Assert.AreEqual(2, _Proxy.ActiveServerCount);
+			Assert.AreEqual(EServerFidelity.High, _Proxy.ConnectedServers[0].Fidelity);
 		}
 	}
 }

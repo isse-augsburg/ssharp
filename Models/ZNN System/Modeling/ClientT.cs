@@ -65,12 +65,13 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public ProxyT ConnectedProxy => _ConnectedProxy;
 
 		/// <summary>
-		/// Creates a new client instance
+		/// Creates a new client instance and connects it to the proxy
 		/// </summary>
 		/// <param name="proxy">Connected Proxy</param>
 		public ClientT(ProxyT proxy)
 		{
 			_ConnectedProxy = proxy;
+			proxy.ConnectedClients.Add(this);
 		}
 
 		/// <summary>

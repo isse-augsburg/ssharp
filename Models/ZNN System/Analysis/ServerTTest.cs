@@ -33,22 +33,33 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 	[TestFixture]
 	public class ServerTTest
 	{
+		private ServerT _Server;
+		private ProxyT _Proxy;
+
+		/// <summary>
+		/// Test setup
+		/// </summary>
+		[SetUp]
+		public void Prepare()
+		{
+			_Proxy = new ProxyT();
+			_Server = ServerT.GetNewServer(_Proxy);
+		}
+
 		/// <summary>
 		/// Tests the setting of the content fidelity
 		/// </summary>
 		[Test]
 		public void TestSetFidelity()
 		{
-			var server = ServerT.GetNewServer();
+			_Server.Fidelity=EServerFidelity.High;
+			Assert.AreEqual(EServerFidelity.High, _Server.Fidelity);
 
-			server.Fidelity=EServerFidelity.High;
-			Assert.AreEqual(EServerFidelity.High, server.Fidelity);
+			_Server.Fidelity=EServerFidelity.Medium;
+			Assert.AreEqual(EServerFidelity.Medium, _Server.Fidelity);
 
-			server.Fidelity=EServerFidelity.Medium;
-			Assert.AreEqual(EServerFidelity.Medium, server.Fidelity);
-
-			server.Fidelity=EServerFidelity.Low;
-			Assert.AreEqual(EServerFidelity.Low, server.Fidelity);
+			_Server.Fidelity=EServerFidelity.Low;
+			Assert.AreEqual(EServerFidelity.Low, _Server.Fidelity);
 		}
 
 		/// <summary>
@@ -57,17 +68,15 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		[Test]
 		public void TestExecuteQuery()
 		{
-			var proxy = new ProxyT();
-			var server = ServerT.GetNewServer();
-			for (int i = 0; i < server.AvailableServerUnits + 1; i++)
+			for (int i = 0; i < _Server.AvailableServerUnits + 1; i++)
 			{
-				var client = new ClientT(proxy);
+				var client = new ClientT(_Proxy);
 				var query = new Query(client);
-				server.AddQuery(query);
+				_Server.AddQuery(query);
 			}
 
-			var isExecutedFirst = server.ExecuteQueryStep(server.ExecutingQueries.First());
-			var isExecutedLast = server.ExecuteQueryStep(server.ExecutingQueries.Last());
+			var isExecutedFirst = _Server.ExecuteQueryStep(_Server.ExecutingQueries.First());
+			var isExecutedLast = _Server.ExecuteQueryStep(_Server.ExecutingQueries.Last());
 
 			Assert.True(isExecutedFirst);
 			Assert.False(isExecutedLast);

@@ -76,6 +76,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		internal List<Query> ExecutingQueries { get; private set; }
 
 		/// <summary>
+		/// The connected Proxy
+		/// </summary>
+		public ProxyT ConnectedProxy { get; private set; }
+
+		/// <summary>
 		/// Initialize a new server instance
 		/// </summary>
 		/// <param name="maxServerUnits">Max Server capacity units</param>
@@ -90,17 +95,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Gets a new server
 		/// </summary>
-		/// <returns>New Server Instance or null if errors occurs</returns>
-		public static ServerT GetNewServer()
+		/// <param name="proxy">The connected Proxy</param>
+		/// <returns>New Server Instance</returns>
+		public static ServerT GetNewServer(ProxyT proxy = null)
 		{
-			ServerT server = null;
-			try
-			{
-				//server = new ServerT(new Random().Next(20, 50));
-				server = new ServerT(Model.DefaultAvailableServerUnits);
-
-			}
-			catch { }
+			var server = new ServerT(Model.DefaultAvailableServerUnits) { ConnectedProxy = proxy };
 			return server;
 		}
 
