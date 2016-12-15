@@ -33,17 +33,12 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Currently available units of the server. 0 Means the server is inactive.
 		/// </summary>
-		public int AvailableServerUnits { get; private set; }
-
-		/// <summary>
-		/// Currently units under use of the server.
-		/// </summary>
-		private int _UsedServerUnits;
+		public int AvailableServerUnits { get; }
 
 		/// <summary>
 		/// Maximum available units of the server.
 		/// </summary>
-		private int _MaxServerUnits;
+		private readonly int _MaxServerUnits;
 
 		/// <summary>
 		/// Current costs of the Server. 0 means the server is inactive.
@@ -53,11 +48,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Currently units under use of the server.
 		/// </summary>
-		public int UsedServerUnits
-		{
-			get { return _UsedServerUnits; }
-			internal set { _UsedServerUnits = (value <= _MaxServerUnits) ? value : _MaxServerUnits; }
-		}
+		public int UsedServerUnits => ExecutingQueries.Count;
 
 		/// <summary>
 		/// Current load of the Server in %.
@@ -68,12 +59,12 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Current content fidelity level of the server.
 		/// </summary>
-		public EServerFidelity Fidelity { get; set; }
+		public EServerFidelity Fidelity { get; internal set; }
 
 		/// <summary>
 		/// The current executing queries
 		/// </summary>
-		internal List<Query> ExecutingQueries { get; private set; }
+		internal List<Query> ExecutingQueries { get; }
 
 		/// <summary>
 		/// The connected Proxy

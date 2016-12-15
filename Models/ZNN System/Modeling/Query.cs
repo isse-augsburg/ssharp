@@ -32,7 +32,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// State machine for query states
 		/// </summary>
-		private StateMachine<EQueryState> _StateMachine = EQueryState.Idle;
+		private readonly StateMachine<EQueryState> _StateMachine = EQueryState.Idle;
 
 		/// <summary>
 		/// Gets the current state of the Query
@@ -47,7 +47,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// The client to request the query
 		/// </summary>
-		public ClientT Client { get; private set; }
+		public ClientT Client { get; }
 
 		/// <summary>
 		/// Creates a new query instance

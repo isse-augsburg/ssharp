@@ -46,19 +46,9 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		}
 
 		/// <summary>
-		/// The connected Clients
-		/// </summary>
-		private List<ClientT> _ConnectedClients;
-
-		/// <summary>
-		/// The connected Servers
-		/// </summary>
-		private List<ServerT> _ConnectedServers;
-
-		/// <summary>
 		/// Latest Response Times, use <see cref="UpdateAvgResponseTime"/> to add new times!
 		/// </summary>
-		private List<int> _LatestResponeTimes;
+		private readonly List<int> _LatestResponeTimes;
 
 		/// <summary>
 		/// Gets the last round robin selected server for queries
@@ -68,12 +58,12 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// The connected Clients
 		/// </summary>
-		public List<ClientT> ConnectedClients => _ConnectedClients;
+		public List<ClientT> ConnectedClients { get; }
 
 		/// <summary>
 		/// The connected Servers
 		/// </summary>
-		public List<ServerT> ConnectedServers => _ConnectedServers;
+		public List<ServerT> ConnectedServers { get; }
 
 		/// <summary>
 		/// Average response time of the servers from the last querys.
@@ -83,7 +73,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Number of active servers
 		/// </summary>
-		public int ActiveServerCount => ConnectedServers.Where(s => s.Cost > 0).Count();
+		public int ActiveServerCount => ConnectedServers.Count(s => s.Cost > 0);
 
 		/// <summary>
 		/// Total costs of all Server
@@ -97,8 +87,8 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 
 		public ProxyT()
 		{
-			_ConnectedClients = new List<ClientT>();
-			_ConnectedServers = new List<ServerT>();
+			ConnectedClients = new List<ClientT>();
+			ConnectedServers = new List<ServerT>();
 			_LatestResponeTimes = new List<int>(Model.LastResponseCountForAvgTime);
 			UpdateAvgResponseTime(0); // Default start value
 
