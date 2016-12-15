@@ -40,7 +40,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 	class BuiltinMdpModelChecker : MdpModelChecker
 	{
 		private MarkovDecisionProcess.UnderlyingDigraph _underlyingDigraph;
-		
+
 		private double[] CreateDerivedVector(Dictionary<int, bool> exactlyOneStates)
 		{
 			var derivedVector = new double[MarkovDecisionProcess.States];
@@ -67,22 +67,23 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 		}
 
 		// Note: Should be used with using(var modelchecker = new ...)
-		public BuiltinMdpModelChecker(MarkovDecisionProcess mdp,TextWriter output=null) : base(mdp,output)
+		public BuiltinMdpModelChecker(MarkovDecisionProcess mdp, TextWriter output = null)
+			: base(mdp, output)
 		{
 			_underlyingDigraph = MarkovDecisionProcess.CreateUnderlyingDigraph();
 		}
 
-		internal Dictionary<int,bool> CalculateSatisfiedStates(Func<int,bool> formulaEvaluator)
+		internal Dictionary<int, bool> CalculateSatisfiedStates(Func<int, bool> formulaEvaluator)
 		{
-			var satisfiedStates = new Dictionary<int,bool>();
+			var satisfiedStates = new Dictionary<int, bool>();
 			for (var i = 0; i < MarkovDecisionProcess.States; i++)
 			{
 				if (formulaEvaluator(i))
-					satisfiedStates.Add(i,true);
+					satisfiedStates.Add(i, true);
 			}
 			return satisfiedStates;
 		}
-		
+
 		public double CalculateMinimumFinalProbability(double[] initialStateProbabilities)
 		{
 			var enumerator = MarkovDecisionProcess.GetEnumerator();
@@ -141,7 +142,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return finalProbability;
 		}
 
-		internal double[] MinimumIterator(Dictionary<int, bool>  exactlyOneStates, Dictionary<int, bool>  exactlyZeroStates, int steps)
+		internal double[] MinimumIterator(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -202,7 +203,8 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				{
 					stopwatch.Stop();
 					var currentProbability = CalculateMinimumFinalProbability(xnew);
-					_output?.WriteLine($"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
+					_output?.WriteLine(
+						$"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
 					stopwatch.Start();
 				}
 			}
@@ -216,7 +218,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
-			var excludedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
+			var excludedStates = new Dictionary<int, bool>(); // change for \phi Until \psi
 
 			var xnew = MinimumIterator(directlySatisfiedStates, excludedStates, steps);
 
@@ -287,7 +289,8 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				{
 					stopwatch.Stop();
 					var currentProbability = CalculateMaximumFinalProbability(xnew);
-					_output?.WriteLine($"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
+					_output?.WriteLine(
+						$"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
 					stopwatch.Start();
 				}
 			}
@@ -300,7 +303,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
-			var excludedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
+			var excludedStates = new Dictionary<int, bool>(); // change for \phi Until \psi
 
 
 			var xnew = MaximumIterator(directlySatisfiedStates, excludedStates, steps);
@@ -310,10 +313,12 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			return finalProbability;
 		}
 
-		public Dictionary<int, bool> StatesReachableWithProbabilityExactlyZeroWithAllSchedulers(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates)
+		public Dictionary<int, bool> StatesReachableWithProbabilityExactlyZeroWithAllSchedulers(Dictionary<int, bool> directlySatisfiedStates,
+																								Dictionary<int, bool> excludedStates)
 		{
 			// calculate probabilityExactlyZero (prob0a). No matter which scheduler is selected, the probability
 			// of the resulting states is zero.
+			// This is exact
 
 			// The idea of the algorithm is to calculate probabilityGreaterThanZero
 			//     all states where there _exists_ a scheduler such that a directlySatisfiedState
@@ -323,7 +328,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			// to reach a directlySatisfiedState is exactly 0.
 			Func<int, bool> nodesToIgnore =
 				excludedStates.ContainsKey;
-			
+
 			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
 			var ancestors = new Dictionary<int, bool>();
 			var nodesToTraverse = new Stack<int>();
@@ -355,12 +360,14 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 		}
 
 
-		public Dictionary<int, bool> StatesReachableWithProbabilityExactlyZeroForAtLeastOneScheduler(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates)
+		public Dictionary<int, bool> StatesReachableWithProbabilityExactlyZeroForAtLeastOneScheduler(
+			Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates)
 		{
 			// calculate probabilityExactlyZero (prob0e). There exists a scheduler, for which the probability of
 			// the resulting states is zero. The result may be different for another scheduler, but at least there exists one.
+			// This is exact
 
-			Dictionary<int, bool> ancestorsFound=null;
+			Dictionary<int, bool> ancestorsFound = null;
 			var probabilityGreaterThanZero = directlySatisfiedStates; //we know initially this is satisfied
 
 			var mdpEnumerator = MarkovDecisionProcess.GetEnumerator();
@@ -393,7 +400,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				}
 				return false; //source must not be ignored
 			};
-			
+
 			// initialize probabilityGreaterThanZero to the states where we initially know the probability is greater than zero
 			var fixpointReached = false;
 
@@ -408,7 +415,8 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 				// Note:
 				//   UpdateAncestors must be used, because nodesToIgnore requires access to the current information about the ancestors
 				//   (ancestorsFound), if it should work in one iteration.
-				ancestorsFound = new Dictionary<int, bool>(); //Note: We reuse ancestorsFound, which is also known and used by nodesToIgnore. The side effects are on purpose.
+				ancestorsFound = new Dictionary<int, bool>();
+					//Note: We reuse ancestorsFound, which is also known and used by nodesToIgnore. The side effects are on purpose.
 				// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
 				var nodesToTraverse = new Stack<int>();
 				foreach (var node in probabilityGreaterThanZero)
@@ -435,15 +443,17 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 					fixpointReached = true;
 				probabilityGreaterThanZero = ancestorsFound;
 			}
-			
+
 			var probabilityExactlyZero = CreateComplement(probabilityGreaterThanZero);
 			return probabilityExactlyZero;
 		}
 
-		public Dictionary<int, bool> StatesReachableWithProbabilityExactlyOneForAtLeastOneScheduler(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates)
+		public Dictionary<int, bool> StatesReachableWithProbabilityExactlyOneForAtLeastOneScheduler(Dictionary<int, bool> directlySatisfiedStates,
+																									Dictionary<int, bool> excludedStates)
 		{
 			// calculate probabilityExactlyOne (prob1e). There exists a scheduler, for which the probability of
 			// the resulting states is exactly 1. The result may be different for another scheduler, but at least there exists one.
+			// This is exact
 
 			// The algorithm works this way: It looks at a set of states probabilityMightBeExactlyOne which are initially all states.
 			// Then it iterates until a fixpoint is found. In each iteration states are removed from probabilityMightBeExactlyOne for
@@ -455,7 +465,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 
 			Func<int, bool> nodesToIgnore = excludedStates.ContainsKey;
 			var probabilityMightBeExactlyOne = CreateComplement(new Dictionary<int, bool>()); //all states
-			
+
 			var _isDistributionIncludedCache = new Dictionary<int, bool>();
 			var mdpEnumerator = MarkovDecisionProcess.GetEnumerator();
 			Action resetDistributionIncludedCacheForNewIteration = () =>
@@ -487,7 +497,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			{
 				resetDistributionIncludedCacheForNewIteration();
 				var ancestorsFound = new Dictionary<int, bool>(); //Note: ancestorsFound must not be reused
-				
+
 				// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
 				var nodesToTraverse = new Stack<int>();
 				foreach (var node in directlySatisfiedStates)
@@ -510,15 +520,25 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 						}
 					}
 				}
-				
+
 				if (probabilityMightBeExactlyOne.Count == ancestorsFound.Count)
 					fixpointReached = true;
 				probabilityMightBeExactlyOne = ancestorsFound;
 			}
-			
+
 			return probabilityMightBeExactlyOne;
 		}
-		
+
+		public Dictionary<int, bool> SubsetOfStatesReachableWithProbabilityExactlyOneWithAllSchedulers(Dictionary<int, bool> directlySatisfiedStates, Dictionary<int, bool> excludedStates)
+		{
+			// calculate probabilityExactlyOne (prob1a). No matter which scheduler is selected, the probability
+			// of the resulting states is exactly 1.
+			// This is only a subset. More states with this property may be possible
+			//better precalculation for mtbdds: https://github.com/prismmodelchecker/prism-svn/blob/master/prism/src/mtbdd/PM_Prob1A.cc
+			var exactlyOneStates = directlySatisfiedStates;
+			return exactlyOneStates;
+		}
+
 		private double CalculateMaximumProbabilityToReachStateFormula(Formula psi, int maxSteps)
 		{
 			// same algorithm as CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps with different
@@ -539,6 +559,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 		}
 
 
+
 		internal double CalculateMinimumProbabilityToReachStateFormula(Formula psi, int maxSteps)
 		{
 			// same algorithm as CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps with different
@@ -549,7 +570,7 @@ namespace SafetySharp.Analysis.ModelChecking.Probabilistic
 			var excludedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
 
 			var exactlyZeroStates = StatesReachableWithProbabilityExactlyZeroForAtLeastOneScheduler(directlySatisfiedStates, excludedStates);
-			var exactlyOneStates = directlySatisfiedStates; //cannot perform a better pre calculation
+			var exactlyOneStates = SubsetOfStatesReachableWithProbabilityExactlyOneWithAllSchedulers(directlySatisfiedStates, excludedStates); // this algorithm is only an approximation
 
 			var xnew = MinimumIterator(exactlyOneStates, exactlyZeroStates, maxSteps);
 
