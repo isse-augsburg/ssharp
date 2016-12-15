@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
 using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
@@ -30,19 +31,9 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	public class ClientT : Component
 	{
 		/// <summary>
-		/// Response time of the last query to the server in steps
-		/// </summary>
-		private int _LastResponseTime;
-
-		/// <summary>
 		/// Response time of the current query to the server in steps
 		/// </summary>
 		private int _CurrentResponseTime;
-
-		/// <summary>
-		/// The connected Proxy
-		/// </summary>
-		private ProxyT _ConnectedProxy;
 
 		/// <summary>
 		/// Indicates if the client waits for a response.
@@ -57,12 +48,17 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Response time of the last query to the server in ms
 		/// </summary>
-		public int LastResponseTime => _LastResponseTime;
+		public int LastResponseTime { get; private set; }
 
 		/// <summary>
 		/// The connected Proxy
 		/// </summary>
-		public ProxyT ConnectedProxy => _ConnectedProxy;
+		public ProxyT ConnectedProxy { get; }
+
+		/// <summary>
+		/// Random generator
+		/// </summary>
+		private Random Random { get; }
 
 		/// <summary>
 		/// Creates a new client instance and connects it to the proxy
@@ -70,8 +66,9 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <param name="proxy">Connected Proxy</param>
 		public ClientT(ProxyT proxy)
 		{
-			_ConnectedProxy = proxy;
+			ConnectedProxy = proxy;
 			proxy.ConnectedClients.Add(this);
+			Random = new Random();
 		}
 
 		/// <summary>
@@ -89,18 +86,22 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public void GetResponse()
 		{
-			_LastResponseTime = _CurrentResponseTime;
+			LastResponseTime = _CurrentResponseTime;
 			_IsResponseWaiting = false;
 		}
 
 		/// <summary>
-		/// Waits for a query
+		/// Waits for a query or propaply starts a query
 		/// </summary>
 		public override void Update()
 		{
 			if(_IsResponseWaiting)
 			{
 				_CurrentResponseTime++;
+			}
+			else if(Random.Next(100) < 50)
+			{
+				StartQuery();
 			}
 		}
 

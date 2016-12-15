@@ -93,7 +93,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			Assert.True(_Query.State == EQueryState.ResToClient);
 
 			_Query.Update();
-			Assert.True(_Query.State == EQueryState.Idle);
+			Assert.True(_Query.State == EQueryState.Completed);
 			Assert.Null(_Query.SelectedServer);
 		}
 	}

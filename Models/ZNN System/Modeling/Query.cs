@@ -120,7 +120,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 							 to: EQueryState.ResToClient)
 						 .Transition(
 							 from: EQueryState.ResToClient,
-							 to: EQueryState.Idle,
+							 to: EQueryState.Completed,
 							 action: () =>
 							 {
 								 Client.GetResponse();

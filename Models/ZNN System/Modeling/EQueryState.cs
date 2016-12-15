@@ -35,6 +35,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		MediumFidelityComplete,
 		HighFidelityComplete,
 		ResToProxy,
-		ResToClient
+		ResToClient,
+		Completed
 	}
 }
