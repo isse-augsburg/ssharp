@@ -42,7 +42,7 @@ namespace Tests.Analysis.Probabilistic
 			var final2 = new UnaryFormula(valueIs2, UnaryOperator.Finally);
 			var final3 = new UnaryFormula(valueIs3, UnaryOperator.Finally);
 
-			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			var markovChainGenerator = new DtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
 			markovChainGenerator.AddFormulaToCheck(final2);
 			markovChainGenerator.AddFormulaToCheck(final3);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();

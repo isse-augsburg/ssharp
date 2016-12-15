@@ -38,7 +38,7 @@ namespace Tests.Analysis.Probabilistic
 			Formula invariantViolated = c.ViolateInvariant;
 			var finallyInvariantViolated = new UnaryFormula(invariantViolated, UnaryOperator.Finally);
 
-			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			var markovChainGenerator = new DtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
 			markovChainGenerator.AddFormulaToCheck(finallyInvariantViolated);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = (Type)Arguments[0];

@@ -74,7 +74,7 @@ namespace SafetySharp.Analysis
 
 			var probabilityToReachStateFormula = new UnaryFormula(stateFormula,UnaryOperator.Finally);
 
-			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(model);
+			var markovChainGenerator = new DtmcFromExecutableModelGenerator(model);
 			markovChainGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
 			var markovChain=markovChainGenerator.GenerateMarkovChain(stateFormula);
 			using (var modelChecker = new BuiltinDtmcModelChecker(markovChain, System.Console.Out))

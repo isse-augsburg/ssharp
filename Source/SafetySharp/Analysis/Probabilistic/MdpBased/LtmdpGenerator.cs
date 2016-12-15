@@ -31,9 +31,9 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// <summary>
 	///   Generates a <see cref="StateGraph" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal class LtmcGenerator : ModelTraverser
+	internal class LtmdpGenerator : ModelTraverser
 	{
-		private readonly LabeledTransitionMarkovChain _markovChain;
+		private readonly LabeledTransitionMarkovDecisionProcess _mdp;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -42,17 +42,17 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="executableStateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal LtmcGenerator(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] executableStateFormulas,
+		internal LtmdpGenerator(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] executableStateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration)
 		{
-			_markovChain = new LabeledTransitionMarkovChain(configuration.StateCapacity);
-			_markovChain.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
+			_mdp = new LabeledTransitionMarkovDecisionProcess(configuration.StateCapacity);
+			_mdp.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LtmcBuilder(_markovChain));
+			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LtmdpBuilder(_mdp));
 			if (terminateEarlyCondition != null)
 			{
-				var terminalteEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_markovChain.StateFormulaLabels, terminateEarlyCondition);
+				var terminalteEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_mdp.StateFormulaLabels, terminateEarlyCondition);
 				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminalteEarlyFunc));
 			}
 		}
@@ -60,11 +60,11 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <summary>
 		///   Generates the state graph.
 		/// </summary>
-		internal LabeledTransitionMarkovChain GenerateStateGraph()
+		internal LabeledTransitionMarkovDecisionProcess GenerateStateGraph()
 		{
 			if (!Context.Configuration.ProgressReportsOnly)
 			{
-				Context.Output($"Generating labeled transition markov chain using {AnalyzedModels.Count()} CPU cores.");
+				Context.Output($"Generating labeled transition markov decision process using {AnalyzedModels.Count()} CPU cores.");
 				Context.Output($"State vector has {AnalyzedModels.First().StateVectorSize} bytes.");
 			}
 
@@ -75,7 +75,7 @@ namespace SafetySharp.Analysis.ModelChecking
 
 			RethrowTraversalException();
 
-			return _markovChain;
+			return _mdp;
 		}
 	}
 }

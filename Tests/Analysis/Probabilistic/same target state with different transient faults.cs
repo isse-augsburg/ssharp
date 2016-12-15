@@ -39,7 +39,7 @@ namespace Tests.Analysis.Probabilistic
 			Formula valueIs1 = c.Result == 1;
 			var finally1 = new UnaryFormula(valueIs1, UnaryOperator.Finally);
 
-			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			var markovChainGenerator = new DtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
 			markovChainGenerator.AddFormulaToCheck(finally1);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = (Type)Arguments[0];

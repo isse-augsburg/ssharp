@@ -1,4 +1,4 @@
-﻿// The MIT License (MIT)
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,45 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Probabilistic
+namespace SafetySharp.Analysis.ModelChecking.Transitions
 {
-	using System;
-	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
-	using Shouldly;
-	using Utilities;
+	using System.Runtime.InteropServices;
 
-	internal class MultipleInitialStates : ProbabilisticAnalysisTestObject
+	/// <summary>
+	///   Represents a candidate transition of an <see cref="AnalysisModel" />.
+	/// </summary>
+	[StructLayout(LayoutKind.Explicit, Size = 32)]
+	internal unsafe struct LtmdpTransition
 	{
-		protected override void Check()
-		{
-			var c = new C();
-			Probability probabilityOfFinally2;
-			
-			Formula stateIs2 = c.F == 2;
-			var finally2 = new UnaryFormula(stateIs2, UnaryOperator.Finally);
+		/// <summary>
+		///   A pointer to the transition's target state.
+		/// </summary>
+		[FieldOffset(0)]
+		public byte* TargetState;
 
-			var markovChainGenerator = new DtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
-			markovChainGenerator.AddFormulaToCheck(finally2);
-			var dtmc = markovChainGenerator.GenerateMarkovChain();
-			var typeOfModelChecker = (Type)Arguments[0];
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
-			using (modelChecker)
-			{
-				probabilityOfFinally2 = modelChecker.CalculateProbability(finally2);
-			}
+		/// <summary>
+		///   The faults that are activated by the transition.
+		/// </summary>
+		[FieldOffset(8)]
+		public FaultSet ActivatedFaults;
 
-			probabilityOfFinally2.Between(0.33, 0.34).ShouldBe(true);
-		}
+		/// <summary>
+		///   The state formulas holding in the target state.
+		/// </summary>
+		[FieldOffset(16)]
+		public StateFormulaSet Formulas;
 
-		private class C : Component
-		{
-			public int F;
+		/// <summary>
+		///   Indicates whether the transition is valid or should be ignored.
+		/// </summary>
+		[FieldOffset(20)]
+		public bool IsValid;
 
-			protected internal override void Initialize()
-			{
-				F = Choose(1, 2, 3);
-			}
-		}
+		/// <summary>
+		///   The probability of the transition.
+		/// </summary>
+		[FieldOffset(24)]
+		public double Probability;
 	}
 }

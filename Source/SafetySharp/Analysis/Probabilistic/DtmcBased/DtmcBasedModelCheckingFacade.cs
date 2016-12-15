@@ -38,11 +38,11 @@ namespace SafetySharp.Analysis.Probabilistic.DtmcBased
 	using Runtime;
 
 	// Facade for easier use
-	public class ProbabilityCheckerFacade
+	public class DtmcBasedModelCheckingFacade
 	{
 		//TODO: Safe disposal of BuiltinDtmcModelChecker
 
-		private MarkovChainFromExecutableModelGenerator _generator;
+		private DtmcFromExecutableModelGenerator _generator;
 
 		private HashSet<Formula> _booleanFormulas;
 		private HashSet<Formula> _probabilityFormulas;
@@ -54,9 +54,9 @@ namespace SafetySharp.Analysis.Probabilistic.DtmcBased
 
 		private BufferBlock<DtmcModelChecker> _modelCheckers;
 
-		public ProbabilityCheckerFacade(ModelBase model)
+		public DtmcBasedModelCheckingFacade(ModelBase model)
 		{
-			_generator=new MarkovChainFromExecutableModelGenerator(model);
+			_generator=new DtmcFromExecutableModelGenerator(model);
 		}
 
 		private async Task<bool> CheckBoolean(Formula booleanFormula)

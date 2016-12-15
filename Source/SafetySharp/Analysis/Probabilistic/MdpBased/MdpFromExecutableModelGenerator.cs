@@ -40,7 +40,7 @@ namespace SafetySharp.Analysis
 	using ModelChecking;
 	
 	
-	public class MarkovChainFromExecutableModelGenerator
+	public class MdpFromExecutableModelGenerator
 	{
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
@@ -61,7 +61,7 @@ namespace SafetySharp.Analysis
 
 		// Create Tasks which make the checks (workers)
 		// First formulas to check are collected (thus, the probability matrix only has to be calculated once)
-		public MarkovChainFromExecutableModelGenerator(ModelBase model)
+		public MdpFromExecutableModelGenerator(ModelBase model)
 		{
 			Requires.NotNull(model, nameof(model));
 			_model = model;
@@ -72,7 +72,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Generates a <see cref="StateGraph" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		private DiscreteTimeMarkovChain GenerateMarkovChain(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] executableStateFormulas)
+		private MarkovDecisionProcess GenerateMarkovDecisionProcess(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] executableStateFormulas)
 		{
 			Requires.That(IntPtr.Size == 8, "State graph generation is only supported in 64bit processes.");
 
@@ -82,21 +82,21 @@ namespace SafetySharp.Analysis
 			Configuration.CpuCount = 4;
 
 
-			using (var checker = new LtmcGenerator(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
+			using (var checker = new LtmdpGenerator(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
 			{
-				var markovChain = default(DiscreteTimeMarkovChain);
+				var mdp = default(MarkovDecisionProcess);
 				var initializationTime = stopwatch.Elapsed;
-				var markovChainGenerationTime= stopwatch.Elapsed;
+				var mdpGenerationTime= stopwatch.Elapsed;
 				stopwatch.Restart();
 
 				try
 				{
-					var labeledTransitionMarkovChain = checker.GenerateStateGraph();
-					markovChainGenerationTime = stopwatch.Elapsed;
+					var ltmdp = checker.GenerateStateGraph();
+					mdpGenerationTime = stopwatch.Elapsed;
 					stopwatch.Restart();
-					var ltmcToMc = new LtmcToDtmc(labeledTransitionMarkovChain);
-					markovChain = ltmcToMc.MarkovChain;
-					return markovChain;
+					var ltmdpToMdp = new LtmdpToMdp(ltmdp);
+					mdp = ltmdpToMdp.MarkovDecisionProcess;
+					return mdp;
 				}
 				finally
 				{
@@ -107,10 +107,10 @@ namespace SafetySharp.Analysis
 						OutputWritten?.Invoke(String.Empty);
 						OutputWritten?.Invoke("===============================================");
 						OutputWritten?.Invoke($"Initialization time: {initializationTime}");
-						OutputWritten?.Invoke($"Labeled Transition Markov chain generation time: {markovChainGenerationTime}");
-						OutputWritten?.Invoke($"Markov chain conversion time: {stopwatch.Elapsed}");
+						OutputWritten?.Invoke($"Labeled Transition Markov Decision Process generation time: {mdpGenerationTime}");
+						OutputWritten?.Invoke($"Markov Decision Process conversion time: {stopwatch.Elapsed}");
 
-						if (markovChain != null)
+						if (mdp != null)
 						{
 							//TODO: OutputWritten?.Invoke($"{(int)(markovChain.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
 							//TODO: OutputWritten?.Invoke($"{(int)(markovChain.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
@@ -125,19 +125,19 @@ namespace SafetySharp.Analysis
 
 
 		/// <summary>
-		///   Generates a <see cref="MarkovChain" /> for the model created by <paramref name="createModel" />.
+		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		private DiscreteTimeMarkovChain GenerateMarkovChain(Func<RuntimeModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] stateFormulas)
+		private MarkovDecisionProcess GenerateMarkovDecisionProcess(Func<RuntimeModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] stateFormulas)
 		{
-			return GenerateMarkovChain(() => new LtmcExecutedModel(createModel, Configuration.SuccessorCapacity), terminateEarlyCondition, stateFormulas);
+			return GenerateMarkovDecisionProcess(() => new LtmdpExecutedModel(createModel, Configuration.SuccessorCapacity), terminateEarlyCondition, stateFormulas);
 		}
 
 		/// <summary>
-		///   Generates a <see cref="MarkovChain" /> for the <paramref name="model" />.
+		///   Generates a <see cref="MarkovDecisionProcess" /> for the <paramref name="model" />.
 		/// </summary>
 		/// <param name="model">The model the state graph should be generated for.</param>
 		/// <param name="stateFormulas">The state formulas that should be evaluated during state graph generation.</param>
-		private DiscreteTimeMarkovChain GenerateMarkovChain(ModelBase model, Formula terminateEarlyCondition, params ExecutableStateFormula[] stateFormulas)
+		private MarkovDecisionProcess GenerateMarkovDecisionProcess(ModelBase model, Formula terminateEarlyCondition, params ExecutableStateFormula[] stateFormulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(stateFormulas, nameof(stateFormulas));
@@ -145,11 +145,11 @@ namespace SafetySharp.Analysis
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, stateFormulas);
 
-			return GenerateMarkovChain((Func<RuntimeModel>)serializer.Load, terminateEarlyCondition, stateFormulas);
+			return GenerateMarkovDecisionProcess((Func<RuntimeModel>)serializer.Load, terminateEarlyCondition, stateFormulas);
 		}
 		
 
-		public DiscreteTimeMarkovChain GenerateMarkovChain(Formula terminateEarlyCondition = null)
+		public MarkovDecisionProcess GenerateMarkovDecisionProcess(Formula terminateEarlyCondition = null)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
 
@@ -160,7 +160,7 @@ namespace SafetySharp.Analysis
 			{
 				stateFormulaCollector.Visit(stateFormula);
 			}
-			return GenerateMarkovChain(_model, terminateEarlyCondition, stateFormulaCollector.ExecutableStateFormulas.ToArray());
+			return GenerateMarkovDecisionProcess(_model, terminateEarlyCondition, stateFormulaCollector.ExecutableStateFormulas.ToArray());
 		}
 		
 
@@ -171,7 +171,7 @@ namespace SafetySharp.Analysis
 			Interlocked.MemoryBarrier();
 			if ((bool)ProbabilityMatrixCreationStarted)
 			{
-				throw new Exception(nameof(AddFormulaToCheck) + " must be called before " + nameof(GenerateMarkovChain));
+				throw new Exception(nameof(AddFormulaToCheck) + " must be called before " + nameof(GenerateMarkovDecisionProcess));
 			}
 			_formulasToCheck.Add(formula);
 		}

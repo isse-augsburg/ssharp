@@ -41,7 +41,7 @@ namespace SafetySharp.Runtime
 	using SafetySharp.Utilities.Graph;
 
 
-	internal class MarkovDecisionProcess : IModelWithStateLabelingInLabelingVector
+	public class MarkovDecisionProcess : IModelWithStateLabelingInLabelingVector
 	{
 		// Distributions here are Probability Distributions
 
@@ -60,7 +60,7 @@ namespace SafetySharp.Runtime
 		private const int _sizeOfState = sizeof(int);
 		private const int _sizeOfTransition = sizeof(int) + sizeof(double);  //sizeof(SparseDoubleMatrix.ColumnValue)
 
-		public SparseDoubleMatrix RowsWithDistributions { get; }
+		internal SparseDoubleMatrix RowsWithDistributions { get; }
 
 		public LabelVector StateLabeling { get; }
 
@@ -325,7 +325,7 @@ namespace SafetySharp.Runtime
 			return Analysis.FormulaVisitors.LabelingVectorFormulaEvaluatorCompilationVisitor.Compile(this, formula);
 		}
 		
-		public UnderlyingDigraph CreateUnderlyingDigraph()
+		internal UnderlyingDigraph CreateUnderlyingDigraph()
 		{
 			return new UnderlyingDigraph(this);
 		}
