@@ -49,8 +49,10 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		/// <summary>
 		/// Tests the <see cref="Query.Update"/> method
 		/// </summary>
-		[Test]
-		public void TestUpdateServerMultiMode()
+		[TestCase(EServerFidelity.High, TestName = "TestUpdateServerMultiMode")]
+		[TestCase(EServerFidelity.Medium, TestName = "TestUpdateServerMixedMode")]
+		[TestCase(EServerFidelity.Low, TestName = "TestUpdateServerTextMode")]
+		public void TestUpdate(EServerFidelity serverMode)
 		{
 			Assert.True(_Query.State == EQueryState.Idle);
 
@@ -60,7 +62,10 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			_Query.Update();
 			Assert.True(_Query.State == EQueryState.QueryToServer);
 			Assert.NotNull(_Query.SelectedServer);
+			Assert.AreEqual(EServerFidelity.High, _Query.SelectedServer.Fidelity);
 			Assert.GreaterOrEqual(_Query.SelectedServer.ExecutingQueries.IndexOf(_Query), 0);
+
+			_Proxy.SetAllServerFidelity(serverMode); // Correct fidelity for test
 
 			_Query.Update();
 			Assert.True(_Query.State == EQueryState.OnServer);
@@ -68,11 +73,17 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			_Query.Update();
 			Assert.True(_Query.State == EQueryState.LowFidelityComplete);
 
-			_Query.Update();
-			Assert.True(_Query.State == EQueryState.MediumFidelityComplete);
+			if(serverMode == EServerFidelity.High || serverMode == EServerFidelity.Medium)
+			{
+				_Query.Update();
+				Assert.True(_Query.State == EQueryState.MediumFidelityComplete);
+			}
 
-			_Query.Update();
-			Assert.True(_Query.State == EQueryState.HighFidelityComplete);
+			if(serverMode == EServerFidelity.High)
+			{
+				_Query.Update();
+				Assert.True(_Query.State == EQueryState.HighFidelityComplete);
+			}
 
 			_Query.Update();
 			Assert.True(_Query.State == EQueryState.ResToProxy);

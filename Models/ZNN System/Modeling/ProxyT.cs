@@ -128,19 +128,27 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Switches the servers to text mode
 		/// </summary>
-		private void SwitchServerToTextMode()
+		internal void SwitchServerToTextMode()
 		{
-			foreach (var server in ConnectedServers)
-				server.Fidelity = EServerFidelity.Low;
+			SetAllServerFidelity(EServerFidelity.Low);
 		}
 
 		/// <summary>
 		/// Switches the servers to multimedia mode
 		/// </summary>
-		private void SwitchServerToMultiMode()
+		internal void SwitchServerToMultiMode()
+		{
+			SetAllServerFidelity(EServerFidelity.High);
+		}
+
+		/// <summary>
+		/// Sets the fidelity for each server
+		/// </summary>
+		/// <param name="fidelity">The server fidelity</param>
+		internal void SetAllServerFidelity(EServerFidelity fidelity)
 		{
 			foreach(var server in ConnectedServers)
-				server.Fidelity = EServerFidelity.High;
+				server.Fidelity = fidelity;
 		}
 
 		/// <summary>
