@@ -227,6 +227,9 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
 			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
 			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
+
+			MinimalProbabilityFinallyLabel1 = 1.0;
+			MaximalProbabilityFinallyLabel1 = 1.0;
 		}
 	}
 
@@ -311,6 +314,9 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			StatesProb0ALabel1 = new Dictionary<int, bool>() { { 1, true } };
 			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 2, true }, { 3, true } }; //Explanation: 1st iteration removes 1. 2nd 0 and 4
 			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 3, true }, { 4, true } };
+
+			MinimalProbabilityFinallyLabel1 = 0.0;
+			MaximalProbabilityFinallyLabel1 = 0.5;
 		}
 	}
 
@@ -399,6 +405,9 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			StatesProb0ALabel1 = new Dictionary<int, bool>() { { 1, true } };
 			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };  //Explanation: 1st iteration removes 1.
 			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 3, true }, { 4, true } };
+
+			MinimalProbabilityFinallyLabel1 = 0.0;
+			MaximalProbabilityFinallyLabel1 = 1.0;
 		}
 	}
 
@@ -473,6 +482,9 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
 			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true } };
 			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
+
+			MinimalProbabilityFinallyLabel1 = 1.0;
+			MaximalProbabilityFinallyLabel1 = 1.0;
 		}
 	}
 
@@ -559,6 +571,9 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
 			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
 			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 4, true } };
+
+			MinimalProbabilityFinallyLabel1 = 0.0;
+			MaximalProbabilityFinallyLabel1 = 1.0;
 		}
 	}
 
@@ -647,6 +662,9 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
 			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
 			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
+
+			MinimalProbabilityFinallyLabel1 = 1.0;
+			MaximalProbabilityFinallyLabel1 = 1.0;
 		}
 	}
 
@@ -705,6 +723,9 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
 			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true } , { 1, true } };
 			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true } };
+
+			MinimalProbabilityFinallyLabel1 = 0.0;
+			MaximalProbabilityFinallyLabel1 = 1.0;
 		}
 	}
 
@@ -778,6 +799,9 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			StatesProb0ALabel1 = new Dictionary<int, bool>() { { 3, true } };
 			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 2, true } };
 			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 3, true } };
+
+			MinimalProbabilityFinallyLabel1 = 0.0;
+			MaximalProbabilityFinallyLabel1 = 0.6;
 		}
 	}
 }
