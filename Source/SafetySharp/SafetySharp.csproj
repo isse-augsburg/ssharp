@@ -253,21 +253,9 @@
     <Compile Include="Analysis\ModelChecking\ModelTraversal\StateStorage.cs" />
     <Compile Include="Analysis\ModelChecking\Transitions\ActivationMinimalTransitionSetBuilder.cs" />
     <Compile Include="Runtime\UnboundPortException.cs" />
-    <Compile Include="Utilities\ConsoleHelpers.cs" />
     <Compile Include="Analysis\ModelByteSize.cs" />
-    <Compile Include="Utilities\InterlockedExtensions.cs" />
-    <Compile Include="Utilities\MemoryBuffer.cs" />
-    <Compile Include="Utilities\CodeWriter.cs" />
-    <Compile Include="Utilities\DisposableExtensions.cs" />
-    <Compile Include="Utilities\DisposableObject.cs" />
-    <Compile Include="Utilities\ExternalProcess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\Assert.cs" />
-    <Compile Include="Utilities\PinnedPointer.cs" />
-    <Compile Include="Utilities\ReferenceEqualityComparer.cs" />
     <Compile Include="Utilities\ReflectionExtensions.cs" />
-    <Compile Include="Utilities\Requires.cs" />
-    <Compile Include="Utilities\TemporaryFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Properties\InternalsVisibleTo.tt">
@@ -280,6 +268,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ModelChecking\ModelChecking.csproj">
+      <Project>{a91cb8af-8a4c-4f69-848e-b3962f9a94f9}</Project>
+      <Name>ModelChecking</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -147,6 +147,10 @@
     <Compile Include="NormalizationTask.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ModelChecking\ModelChecking.csproj">
+      <Project>{a91cb8af-8a4c-4f69-848e-b3962f9a94f9}</Project>
+      <Name>ModelChecking</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SafetySharp\SafetySharp.csproj">
       <Project>{9b6c1fb4-3f1b-43ac-a0e0-eaed4088bf37}</Project>
       <Name>SafetySharp</Name>
