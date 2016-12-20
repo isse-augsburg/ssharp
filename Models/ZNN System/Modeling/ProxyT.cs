@@ -32,6 +32,10 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	/// </summary>
 	public class ProxyT : Component
 	{
+		/// <summary>
+		/// This faults prevents the server deactivation to remove a server
+		/// </summary>
+		public readonly Fault ServerCannotDeactivated = new TransientFault();
 
 		/// <summary>
 		/// Latest Response Times, use <see cref="UpdateAvgResponseTime"/> to add new times!
@@ -68,6 +72,9 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public int TotalServerCosts => ConnectedServers.Sum(s => s.Cost);
 
+		/// <summary>
+		/// Creates a new ProxyT instance
+		/// </summary>
 		public ProxyT()
 		{
 			ConnectedClients = new List<ClientT>();
@@ -89,7 +96,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Dectivates the server with the lowest load
 		/// </summary>
-		public void DecrementServerPool()
+		public virtual void DecrementServerPool()
 		{
 			if(ConnectedServers.Count > 1)
 			{
@@ -196,8 +203,16 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			return selected;
 		}
 
-		public override void Update()
+		/// <summary>
+		/// Prevents the server deactivation to remove a server
+		/// </summary>
+		[FaultEffect(Fault = "ServerCannotDeactivated")]
+		public class ServerCannotDeactivatedEffect : ProxyT
 		{
+			/// <summary>
+			/// Dectivates the server with the lowest load
+			/// </summary>
+			public override void DecrementServerPool() { }
 		}
 	}
 }
