@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 using System.Collections.Generic;
+using System.Linq;
 using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
@@ -60,12 +61,26 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public static int LastResponseCountForAvgTime = 10;
 
+		/// <summary>
+		/// The Proxy
+		/// </summary>
 		[Root(RootKind.Controller)]
 		public ProxyT Proxy;
 
+		/// <summary>
+		/// All connected Clients
+		/// </summary>
 		public List<ClientT> Clients => Proxy.ConnectedClients;
 
+		/// <summary>
+		/// All connected Servers
+		/// </summary>
 		public List<ServerT> Servers => Proxy.ConnectedServers;
+
+		/// <summary>
+		/// All Queries
+		/// </summary>
+		public List<Query> Queries => Proxy.ConnectedClients.Select(x => x.CurrentQuery).ToList();
 
 		/// <summary>
 		/// Initializes a new instance
