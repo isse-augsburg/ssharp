@@ -31,14 +31,19 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	public class ServerT : Component
 	{
 		/// <summary>
+		/// This faults prevents the server activation to return a new server
+		/// </summary>
+		public readonly Fault ServerCannotActivated = new TransientFault();
+
+		/// <summary>
 		/// Currently available units of the server. 0 Means the server is inactive.
 		/// </summary>
-		public int AvailableServerUnits { get; }
+		public int AvailableServerUnits { get; private set; }
 
 		/// <summary>
 		/// Maximum available units of the server.
 		/// </summary>
-		private readonly int _MaxServerUnits;
+		private int MaxServerUnits { get; set; }
 
 		/// <summary>
 		/// Current costs of the Server. 0 means the server is inactive.
@@ -64,7 +69,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// The current executing queries
 		/// </summary>
-		internal List<Query> ExecutingQueries { get; }
+		internal List<Query> ExecutingQueries { get; private set; }
 
 		/// <summary>
 		/// The connected Proxy
@@ -72,15 +77,28 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public ProxyT ConnectedProxy { get; private set; }
 
 		/// <summary>
+		/// Indicates if the server is initialized
+		/// </summary>
+		public virtual bool IsInitialized { get; private set; }
+
+		/// <summary>
+		/// Creates a new server instance
+		/// </summary>
+		private ServerT() { }
+
+		/// <summary>
 		/// Initialize a new server instance
 		/// </summary>
 		/// <param name="maxServerUnits">Max Server capacity units</param>
-		private ServerT(int maxServerUnits)
+		/// <param name="proxy">The connected Proxy</param>
+		private void Initialize(int maxServerUnits, ProxyT proxy)
 		{
-			_MaxServerUnits = maxServerUnits;
-			ExecutingQueries = new List<Query>(_MaxServerUnits);
-			AvailableServerUnits = _MaxServerUnits;
+			MaxServerUnits = maxServerUnits;
+			ExecutingQueries = new List<Query>(MaxServerUnits);
+			AvailableServerUnits = MaxServerUnits;
 			Fidelity = EServerFidelity.High;
+			ConnectedProxy = proxy;
+			IsInitialized = true;
 		}
 
 		/// <summary>
@@ -90,8 +108,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <returns>New Server Instance</returns>
 		public static ServerT GetNewServer(ProxyT proxy = null)
 		{
-			var server = new ServerT(Model.DefaultAvailableServerUnits) { ConnectedProxy = proxy };
-			return server;
+			var server = new ServerT();
+			server.Initialize(Model.DefaultAvailableServerUnits, proxy);
+			if(server.IsInitialized)
+				return server;
+			return null;
 		}
 
 		/// <summary>
@@ -122,5 +143,16 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			ExecutingQueries.Remove(query);
 		}
 
+		/// <summary>
+		/// Prevents the server activation to return a new server
+		/// </summary>
+		[FaultEffect(Fault = "ServerCannotActivated")]
+		public class ServerCannotActivatedEffect : ServerT
+		{
+			/// <summary>
+			/// Indicates if the server is initialized
+			/// </summary>
+			public override bool IsInitialized => false;
+		}
 	}
 }
