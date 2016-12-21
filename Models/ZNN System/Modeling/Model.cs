@@ -80,7 +80,12 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// All Queries
 		/// </summary>
-		public List<Query> Queries => Proxy.ConnectedClients.Select(x => x.CurrentQuery).ToList();
+		public IEnumerable<Query> Queries => Proxy.ConnectedClients.Select(x => x.CurrentQuery);
+
+		/// <summary>
+		/// All active Queries
+		/// </summary>
+		public IEnumerable<Query> ActiveQueries => Queries.Where(x => x.State != EQueryState.Idle && x.State != EQueryState.Completed);
 
 		/// <summary>
 		/// Initializes a new instance
@@ -92,7 +97,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			// Add a few clients
 			for(int i = 0; i < 20; i++)
 			{
-				Clients.Add(new ClientT(Proxy));
+				Clients.Add(ClientT.GetNewClient(Proxy));
 			}
 		}
 

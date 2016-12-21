@@ -36,6 +36,16 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public readonly Fault ServerCannotActivated = new TransientFault();
 
 		/// <summary>
+		/// This faults prevents the server to change the fidelity
+		/// </summary>
+		public readonly Fault SetServerFidelityFails = new TransientFault();
+
+		/// <summary>
+		/// This faults prevents the server to execute a query
+		/// </summary>
+		public readonly Fault CannotExecuteQueries = new TransientFault();
+
+		/// <summary>
 		/// Currently available units of the server. 0 Means the server is inactive.
 		/// </summary>
 		public int AvailableServerUnits { get; private set; }
@@ -61,10 +71,16 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		[Range(0, 100, OverflowBehavior.Clamp)]
 		public int Load => UsedServerUnits / AvailableServerUnits * 100;
 
+		private EServerFidelity _Fidelity;
+
 		/// <summary>
 		/// Current content fidelity level of the server.
 		/// </summary>
-		public EServerFidelity Fidelity { get; internal set; }
+		public virtual EServerFidelity Fidelity
+		{
+			get { return _Fidelity;}
+			internal set { _Fidelity = value; }
+		}
 
 		/// <summary>
 		/// The current executing queries
@@ -129,7 +145,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		/// <param name="query">The query</param>
 		/// <returns>True if the query was executed</returns>
-		public bool ExecuteQueryStep(Query query)
+		public virtual bool ExecuteQueryStep(Query query)
 		{
 			return ExecutingQueries.IndexOf(query) < AvailableServerUnits;
 		}
@@ -149,10 +165,40 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		[FaultEffect(Fault = "ServerCannotActivated")]
 		public class ServerCannotActivatedEffect : ServerT
 		{
+
 			/// <summary>
 			/// Indicates if the server is initialized
 			/// </summary>
 			public override bool IsInitialized => false;
+		}
+
+		/// <summary>
+		/// Prevents the server to change the fidelity
+		/// </summary>
+		[FaultEffect(Fault = "SetServerFidelityFails")]
+		public class SetServerFidelityFailsEffect : ServerT
+		{
+			/// <summary>
+			/// Current content fidelity level of the server.
+			/// </summary>
+			public override EServerFidelity Fidelity => _Fidelity;
+		}
+
+		/// <summary>
+		/// Prevents the server to execute a query
+		/// </summary>
+		[FaultEffect(Fault = "CannotExecuteQueries")]
+		public class CannotExecuteQueriesEffect : ServerT
+		{
+			/// <summary>
+			/// Simulates an execution step of the query and returns true if the query was executed
+			/// </summary>
+			/// <param name="query">The query</param>
+			/// <returns>True if the query was executed</returns>
+			public override bool ExecuteQueryStep(Query query)
+			{
+				return false;
+			}
 		}
 	}
 }

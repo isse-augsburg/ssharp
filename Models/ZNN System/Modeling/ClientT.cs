@@ -31,6 +31,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	public class ClientT : Component
 	{
 		/// <summary>
+		/// This faults prevents the server to connect to the proxy
+		/// </summary>
+		public readonly Fault ConnectionToProxyFails = new TransientFault();
+
+		/// <summary>
 		/// Response time of the current query to the server in steps
 		/// </summary>
 		private int _CurrentResponseTime;
@@ -53,7 +58,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// The connected Proxy
 		/// </summary>
-		public ProxyT ConnectedProxy { get; }
+		public ProxyT ConnectedProxy { get; protected set; }
 
 		/// <summary>
 		/// Random generator
@@ -61,14 +66,34 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private Random Random { get; }
 
 		/// <summary>
-		/// Creates a new client instance and connects it to the proxy
+		/// Creates a new client instance
+		/// </summary>
+		private ClientT()
+		{
+			Random = new Random();
+		}
+
+		/// <summary>
+		/// Creates a new Client and connect it to the proxy
 		/// </summary>
 		/// <param name="proxy">Connected Proxy</param>
-		public ClientT(ProxyT proxy)
+		public static ClientT GetNewClient(ProxyT proxy)
+		{
+			var client = new ClientT();
+			client.Connect(proxy);
+			if(client.ConnectedProxy != null)
+				return client;
+			return null;
+		}
+
+		/// <summary>
+		/// Initialize the Client and connect it to the proxy
+		/// </summary>
+		/// <param name="proxy">Connected Proxy</param>
+		protected virtual void Connect(ProxyT proxy)
 		{
 			ConnectedProxy = proxy;
 			proxy.ConnectedClients.Add(this);
-			Random = new Random();
 		}
 
 		/// <summary>
@@ -105,5 +130,20 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			}
 		}
 
+		/// <summary>
+		/// Prevents the server to connect to the proxy
+		/// </summary>
+		[FaultEffect(Fault = "ConnectionToProxyFails")]
+		public class ConnectionToProxyFailsEffect : ClientT
+		{
+			/// <summary>
+			/// Initialize the Proxy and connect it to the proxy
+			/// </summary>
+			/// <param name="proxy">Connected Proxy</param>
+			protected override void Connect(ProxyT proxy)
+			{
+				// Cannot connect
+			}
+		}
 	}
 }

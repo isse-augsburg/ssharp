@@ -33,9 +33,14 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	public class ProxyT : Component
 	{
 		/// <summary>
-		/// This faults prevents the server deactivation to remove a server
+		/// This fault prevents the server deactivation to remove a server
 		/// </summary>
 		public readonly Fault ServerCannotDeactivated = new TransientFault();
+
+		/// <summary>
+		/// In this fault, the server selection for a query fails
+		/// </summary>
+		public readonly Fault ServerSelectionFails = new TransientFault();
 
 		/// <summary>
 		/// Latest Response Times, use <see cref="UpdateAvgResponseTime"/> to add new times!
@@ -159,7 +164,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Adjust the server pool (size and fidelity)
 		/// </summary>
-		internal void AdjustServers()
+		internal virtual void AdjustServers()
 		{
 			if(AvgResponseTime > Model.HighResponseTimeValue)
 			{
@@ -194,7 +199,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// Selects the Server by round robin
 		/// </summary>
 		/// <returns>Selected Server</returns>
-		private ServerT RoundRobinServerSelection()
+		protected virtual ServerT RoundRobinServerSelection()
 		{
 			if(ConnectedServers.Count > _LastSelectedServer - 1)
 				_LastSelectedServer = -1;
@@ -213,6 +218,22 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			/// Dectivates the server with the lowest load
 			/// </summary>
 			public override void DecrementServerPool() { }
+		}
+
+		/// <summary>
+		/// In this fault, the server selection for a query fails
+		/// </summary>
+		[FaultEffect(Fault = "ServerSelectionFails")]
+		public class ServerSelectionFailsEffect : ProxyT
+		{
+			/// <summary>
+			/// Selects the Server by round robin
+			/// </summary>
+			/// <returns>Selected Server</returns>
+			protected override ServerT RoundRobinServerSelection()
+			{
+				return null;
+			}
 		}
 	}
 }
