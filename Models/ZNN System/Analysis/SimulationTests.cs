@@ -21,65 +21,33 @@
 // THE SOFTWARE.
 
 using System.Linq;
+using FluentAssertions;
 using NUnit.Framework;
+using SafetySharp.Analysis;
 using SafetySharp.CaseStudies.ZNNSystem.Modeling;
+using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 {
-
 	/// <summary>
-	/// Privides Unit Tests for <see cref="ServerT"/>
+	/// Contains a set of tests that simulate the case study to validate certain aspects of its behavior.
 	/// </summary>
-	[TestFixture]
-	public class ServerTTest
+	public class SimulationTests
 	{
-		private ServerT _Server;
-		private ProxyT _Proxy;
-
 		/// <summary>
-		/// Test setup
-		/// </summary>
-		[SetUp]
-		public void Prepare()
-		{
-			_Proxy = new ProxyT();
-			_Server = ServerT.GetNewServer(_Proxy);
-		}
-
-		/// <summary>
-		/// Tests the setting of the content fidelity
+		/// Tests the model without occuring faults
 		/// </summary>
 		[Test]
-		public void TestSetFidelity()
+		public void TestModelWithoutFaults()
 		{
-			_Server.Fidelity=EServerFidelity.High;
-			Assert.AreEqual(EServerFidelity.High, _Server.Fidelity);
+			var model = new Model();
+			model.Faults.SuppressActivations();
 
-			_Server.Fidelity=EServerFidelity.Medium;
-			Assert.AreEqual(EServerFidelity.Medium, _Server.Fidelity);
+			var simulator = new Simulator(model);
+			model = (Model) simulator.Model;
+			simulator.FastForward(steps: 120);
 
-			_Server.Fidelity=EServerFidelity.Low;
-			Assert.AreEqual(EServerFidelity.Low, _Server.Fidelity);
-		}
-
-		/// <summary>
-		/// Tests the query execution
-		/// </summary>
-		[Test]
-		public void TestExecuteQuery()
-		{
-			for (int i = 0; i < _Server.AvailableServerUnits + 1; i++)
-			{
-				var client = ClientT.GetNewClient(_Proxy);
-				var query = new Query(client);
-				_Server.AddQuery(query);
-			}
-
-			var isExecutedFirst = _Server.ExecuteQueryStep(_Server.ExecutingQueries.First());
-			var isExecutedLast = _Server.ExecuteQueryStep(_Server.ExecutingQueries.Last());
-
-			Assert.True(isExecutedFirst);
-			Assert.False(isExecutedLast);
+			model.Servers.First().QueryCompleteCount.Should().BeGreaterOrEqualTo(1);
 		}
 	}
 }

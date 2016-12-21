@@ -61,6 +61,7 @@
     <Compile Include="Analysis\ProxyTTest.cs" />
     <Compile Include="Analysis\QueryTest.cs" />
     <Compile Include="Analysis\ServerTTest.cs" />
+    <Compile Include="Analysis\SimulationTests.cs" />
     <Compile Include="Modeling\ClientT.cs" />
     <Compile Include="Modeling\EServerFidelity.cs" />
     <Compile Include="Modeling\Model.cs" />

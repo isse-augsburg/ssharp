@@ -98,6 +98,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public virtual bool IsInitialized { get; private set; }
 
 		/// <summary>
+		/// Counts the completed queries
+		/// </summary>
+		public int QueryCompleteCount { get; protected set; }
+
+		/// <summary>
 		/// Creates a new server instance
 		/// </summary>
 		private ServerT() { }
@@ -156,6 +161,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <param name="query"></param>
 		public void QueryComplete(Query query)
 		{
+			QueryCompleteCount++;
 			ExecutingQueries.Remove(query);
 		}
 

@@ -42,7 +42,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		public void Prepare()
 		{
 			_Proxy = new ProxyT();
-			_Client = new ClientT(_Proxy);
+			_Client = ClientT.GetNewClient(_Proxy);
 			_Query = new Query(_Client);
 		}
 
