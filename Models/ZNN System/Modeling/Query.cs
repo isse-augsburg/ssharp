@@ -56,6 +56,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public Query(ClientT client)
 		{
 			Client = client;
+			client.ConnectedProxy.Queries.Add(this);
 			SelectedServer = null;
 		}
 
@@ -66,8 +67,9 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		{
 			_StateMachine.Transition(
 							 from: EQueryState.Idle,
-							 to: EQueryState.QueryToProxy,
-							 action: Client.StartQuery)
+							 to: EQueryState.QueryToProxy
+							 //,action: Client.StartQuery
+							 )
 						 .Transition(
 							 from: EQueryState.QueryToProxy,
 							 to: EQueryState.QueryToServer,

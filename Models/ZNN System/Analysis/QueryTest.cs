@@ -43,7 +43,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		{
 			_Proxy = new ProxyT();
 			_Client = ClientT.GetNewClient(_Proxy);
-			_Query = new Query(_Client);
+			//_Query = new Query(_Client);
 		}
 
 		/// <summary>
@@ -54,6 +54,8 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		[TestCase(EServerFidelity.Low, TestName = "TestUpdateServerTextMode")]
 		public void TestUpdate(EServerFidelity serverMode)
 		{
+			_Client.StartQuery();
+			_Query = _Client.CurrentQuery;
 			Assert.True(_Query.State == EQueryState.Idle);
 
 			_Query.Update();

@@ -53,14 +53,34 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private int _LastSelectedServer = -1;
 
 		/// <summary>
+		/// Helper for connected Clients
+		/// </summary>
+		public ComponentListHelper<ClientT> ClientHelper { get; }
+
+		/// <summary>
 		/// The connected Clients
 		/// </summary>
-		public List<ClientT> ConnectedClients { get; }
+		public List<ClientT> ConnectedClients => ClientHelper.Components;
+
+		/// <summary>
+		/// Helper for connected Clients
+		/// </summary>
+		public ComponentListHelper<Query> QueryHelper { get; }
+
+		/// <summary>
+		/// The connected Clients
+		/// </summary>
+		public List<Query> Queries => QueryHelper.Components;
+
+		/// <summary>
+		/// Helper for connected Servers
+		/// </summary>
+		public ComponentListHelper<ServerT> ServerHelper { get; }
 
 		/// <summary>
 		/// The connected Servers
 		/// </summary>
-		public List<ServerT> ConnectedServers { get; }
+		public List<ServerT> ConnectedServers => ServerHelper.Components;
 
 		/// <summary>
 		/// Average response time of the servers from the last querys.
@@ -82,8 +102,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public ProxyT()
 		{
-			ConnectedClients = new List<ClientT>();
-			ConnectedServers = new List<ServerT>();
+			//ConnectedClients = new List<ClientT>();
+			//ConnectedServers = new List<ServerT>();
+			ClientHelper = new ComponentListHelper<ClientT>();
+			ServerHelper = new ComponentListHelper<ServerT>();
+			QueryHelper = new ComponentListHelper<Query>();
 			_LatestResponeTimes = new List<int>(Model.LastResponseCountForAvgTime);
 			UpdateAvgResponseTime(0); // Default start value
 

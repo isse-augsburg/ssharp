@@ -64,8 +64,26 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// The Proxy
 		/// </summary>
-		[Root(RootKind.Controller)]
-		public ProxyT Proxy;
+		//[Root(RootKind.Controller)]
+		public ProxyT Proxy { get; set; }
+
+		/// <summary>
+		/// Helper for connected Clients
+		/// </summary>
+		[Root(RootKind.Plant)]
+		public ComponentListHelper<ClientT> ClientHelper => Proxy.ClientHelper;
+
+		/// <summary>
+		/// Helper for connected Servers
+		/// </summary>
+		[Root(RootKind.Plant)]
+		public ComponentListHelper<ServerT> ServerHelper => Proxy.ServerHelper;
+
+		/// <summary>
+		/// Helper for Queries
+		/// </summary>
+		[Root(RootKind.Plant)]
+		public ComponentListHelper<Query> QueryHelper => Proxy.QueryHelper;
 
 		/// <summary>
 		/// All connected Clients
@@ -80,12 +98,17 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// All Queries
 		/// </summary>
-		public IEnumerable<Query> Queries => Proxy.ConnectedClients.Select(x => x.CurrentQuery);
+		public List<Query> Queries => Proxy.Queries;
+
+		///// <summary>
+		///// All Queries
+		///// </summary>
+		//public IEnumerable<Query> Queries => Proxy.ConnectedClients.Select(x => x.CurrentQuery);
 
 		/// <summary>
 		/// All active Queries
 		/// </summary>
-		public IEnumerable<Query> ActiveQueries => Queries.Where(x => x.State != EQueryState.Idle && x.State != EQueryState.Completed);
+		public List<Query> ActiveQueries => Queries.Where(x => x.State != EQueryState.Idle && x.State != EQueryState.Completed).ToList();
 
 		/// <summary>
 		/// Initializes a new instance
