@@ -56,7 +56,7 @@ combinator.CommitFlow();
 				FlowElements = new IComponent[] { supply, pump, drain, combinator }
 			};
 			
-			var simulator = new Simulator(model); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(model); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var modelAfterStep = (DialyzingFluidFlowModel) simulator.Model;

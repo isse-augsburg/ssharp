@@ -20,56 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Execution.Simulation
+
+namespace SafetySharp.Analysis
 {
-	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
-	using Shouldly;
-	using Utilities;
-
-	internal class Faults : TestObject
+	public interface IAnalysisResultExtension
 	{
-		protected override void Check()
-		{
-			var simulator = new SafetySharpSimulator(TestModel.InitializeModel(new C()));
-			var c = (C)simulator.Model.Roots[0];
-
-			c.F.Activation = Activation.Forced;
-			simulator.SimulateStep();
-			c.X.ShouldBe(7);
-
-			c.F.Activation = Activation.Suppressed;
-			simulator.SimulateStep();
-			c.X.ShouldBe(1);
-
-			c.F.Activation = Activation.Forced;
-			simulator.SimulateStep();
-			c.X.ShouldBe(7);
-
-			c.F.Activation = Activation.Nondeterministic;
-			simulator.SimulateStep();
-			c.X.ShouldBe(1);
-
-			simulator.Model.Faults.ShouldBe(new[] { ((C)simulator.Model.Roots[0]).F });
-		}
-
-		private class C : Component
-		{
-			public readonly Fault F = new TransientFault();
-			public int X;
-
-			public virtual int Y => 1;
-
-			public override void Update()
-			{
-				X = Y;
-			}
-
-			[FaultEffect(Fault = nameof(F))]
-			public class E : C
-			{
-				public override int Y => 7;
-			}
-		}
 	}
 }

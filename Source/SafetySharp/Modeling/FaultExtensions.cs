@@ -23,6 +23,7 @@
 namespace SafetySharp.Modeling
 {
 	using System.Collections.Generic;
+	using System.Linq;
 	using Utilities;
 
 	/// <summary>
@@ -99,6 +100,69 @@ namespace SafetySharp.Modeling
 		public static void ToggleActivationMode(this Fault fault)
 		{
 			fault.Activation = fault.Activation == Activation.Forced ? Activation.Suppressed : Activation.Forced;
+		}
+
+		/// <summary>
+		///   Adds fault effects to <paramref name="fault" /> for the <paramref name="components" /> that are enabled when the fault is activated.
+		/// </summary>
+		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
+		/// <param name="components">The components the fault effects are added for.</param>
+		/// <param name="fault">The fault.</param>
+		public static void AddEffects<TFaultEffect>(this Fault fault, params IComponent[] components)
+			where TFaultEffect : Component, new()
+		{
+			fault.AddEffects<TFaultEffect>((IEnumerable<IComponent>)components);
+		}
+
+		/// <summary>
+		///   Adds fault effects to <paramref name="fault" /> for the <paramref name="components" /> that are enabled when the fault is activated.
+		/// </summary>
+		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
+		/// <param name="components">The components the fault effects are added for.</param>
+		/// <param name="fault">The fault.</param>
+		public static void AddEffects<TFaultEffect>(this Fault fault, IEnumerable<IComponent> components)
+			where TFaultEffect : Component, new()
+		{
+			foreach (var component in components)
+				fault.AddEffect<TFaultEffect>(component);
+		}
+
+		/// <summary>
+		///   Adds a fault effect to <paramref name="fault" /> for the <paramref name="component" /> that is enabled when the fault is activated. Returns the fault
+		///   effect instance that was added.
+		/// </summary>
+		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
+		/// <param name="component">The component the fault effect is added for.</param>
+		/// <param name="fault">The fault.</param>
+		public static TFaultEffect AddEffect<TFaultEffect>(this Fault fault, IComponent component)
+			where TFaultEffect : Component, new()
+		{
+			return (TFaultEffect)fault.AddEffect(component, typeof(TFaultEffect));
+		}
+
+		/// <summary>
+		///   Adds a fault effect to <paramref name="fault" /> for the <paramref name="component" /> that is enabled when the fault is activated. Returns the fault
+		///   effect instance that was added.
+		/// </summary>
+		/// <param name="component">The component the fault effect is added for.</param>
+		/// <param name="faultEffectType">The type of the fault effect that should be added.</param>
+		/// <param name="fault">The fault.</param>
+		public static IComponent AddEffect(this Fault fault, IComponent component, System.Type faultEffectType)
+		{
+			Requires.NotNull(component, nameof(component));
+			Requires.That(faultEffectType.HasAttribute<FaultEffectAttribute>(),
+				$"Expected fault effect '{faultEffectType.FullName}' to be marked with '{typeof(FaultEffectAttribute).FullName}'.");
+			Requires.That(((Component)component).FaultEffectTypes.SingleOrDefault(type => type == faultEffectType) == null,
+				$"A fault effect of type '{faultEffectType.FullName}' has already been added.");
+
+			var faultEffect = (Component)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(component.GetRuntimeType());
+
+			faultEffect.FaultEffectType = faultEffectType;
+			faultEffect.SetFault(fault);
+			((Component)component).FaultEffects.Add(faultEffect);
+			((Component)component).FaultEffectTypes.Add(faultEffectType);
+
+			return faultEffect;
 		}
 	}
 }

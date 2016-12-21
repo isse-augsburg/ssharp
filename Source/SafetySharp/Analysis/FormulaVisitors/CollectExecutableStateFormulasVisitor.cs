@@ -22,7 +22,9 @@
 
 namespace SafetySharp.Analysis.FormulaVisitors
 {
+	using System;
 	using System.Collections.Generic;
+	using System.Linq.Expressions;
 
 	/// <summary>
 	///   Determines whether a <see cref="Formula" /> is a formula that can be evaluted in a single state.
@@ -57,15 +59,16 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
-		}
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
-		{
-			if (formula.Label != null)
-				ExecutableStateFormulas.Add(formula);
+			var executableStateFormula = formula as ExecutableStateFormula;
+			if (executableStateFormula)
+			{
+				if (formula.Label != null)
+					ExecutableStateFormulas.Add(executableStateFormula);
+			}
+			else
+			{
+				throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use ExecutableStateFormula instead.");
+			}
 		}
 
 		/// <summary>

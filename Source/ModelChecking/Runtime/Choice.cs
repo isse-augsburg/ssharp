@@ -26,10 +26,21 @@ namespace SafetySharp.Modeling
 	using System.Runtime.CompilerServices;
 	using Runtime;
 
+	public struct Option<T> //Probabilistic Option. Use it until we have real Tuples in C#
+	{
+		public Probability Probability;
+		public T Result;
+
+		public Option(Probability probability, T result)
+		{
+			Probability = probability;
+			Result = result;
+		}
+	}
+
 	/// <summary>
 	///   Represents a nondeterministic choice.
 	/// </summary>
-	[Hidden, NonDiscoverable]
 	public sealed class Choice
 	{
 		/// <summary>
@@ -227,6 +238,7 @@ namespace SafetySharp.Modeling
 
 			return values[Resolver.HandleChoice(values.Length)];
 		}
+
 
 
 		/// <summary>

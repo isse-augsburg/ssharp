@@ -66,8 +66,8 @@ namespace SafetySharp.Runtime
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="choices">The choices that potentially require access to the choice resolver.</param>
-		public LtmdpChoiceResolver(IEnumerable<Choice> choices)
-				: base(choices)
+		public LtmdpChoiceResolver()
+				: base()
 		{
 		}
 

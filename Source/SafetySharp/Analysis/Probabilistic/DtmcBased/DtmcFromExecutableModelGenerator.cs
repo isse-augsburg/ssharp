@@ -127,7 +127,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Generates a <see cref="MarkovChain" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		private DiscreteTimeMarkovChain GenerateMarkovChain(Func<RuntimeModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] stateFormulas)
+		private DiscreteTimeMarkovChain GenerateMarkovChain(Func<SafetySharpRuntimeModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] stateFormulas)
 		{
 			return GenerateMarkovChain(() => new LtmcExecutedModel(createModel, Configuration.SuccessorCapacity), terminateEarlyCondition, stateFormulas);
 		}
@@ -145,7 +145,7 @@ namespace SafetySharp.Analysis
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, stateFormulas);
 
-			return GenerateMarkovChain((Func<RuntimeModel>)serializer.Load, terminateEarlyCondition, stateFormulas);
+			return GenerateMarkovChain((Func<SafetySharpRuntimeModel>)serializer.Load, terminateEarlyCondition, stateFormulas);
 		}
 		
 

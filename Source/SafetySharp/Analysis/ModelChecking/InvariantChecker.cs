@@ -23,6 +23,7 @@
 namespace SafetySharp.Analysis.ModelChecking
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using ModelTraversal.TraversalModifiers;
 	using Utilities;
@@ -56,6 +57,10 @@ namespace SafetySharp.Analysis.ModelChecking
 				Context.Output($"State vector has {AnalyzedModels.First().StateVectorSize} bytes.");
 			}
 
+			throw new Exception();
+			var bonusInfo=new AnalysisResultSafetySharpExtension();
+			//bonusInfo.StateVectorLayout = model.StateVectorLayout;
+
 			TraverseModel();
 
 			if (!Context.Configuration.ProgressReportsOnly)
@@ -74,6 +79,7 @@ namespace SafetySharp.Analysis.ModelChecking
 				TransitionCount = Context.TransitionCount,
 				ComputedTransitionCount = Context.ComputedTransitionCount,
 				LevelCount = Context.LevelCount,
+				Extensions = new List<IAnalysisResultExtension>() { bonusInfo }
 			};
 		}
 

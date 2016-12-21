@@ -115,14 +115,6 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
-		{
-			VisitAtomarPropositionFormula(formula);
-		}
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
 		public override void VisitRewardFormula(RewardFormula formula)
 		{
 			Assert.NotReached("Rewards are currently not supported");

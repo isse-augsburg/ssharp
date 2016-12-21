@@ -36,7 +36,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void Simulate_1Step()
 		{
 			var testModel = new Model();
-			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (DialyzingFluidFlowCombinator)simulator.Model.Roots[0];
@@ -46,7 +46,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void Simulate_10_Step()
 		{
 			var testModel = new Model();
-			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 			simulator.SimulateStep();
 			simulator.SimulateStep();
@@ -66,7 +66,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		{
 			var testModel = new Model();
 
-			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(testModel); //Important: Call after all objects have been created
 			var patient = simulator.Model.Roots.OfType<Patient>().First();
 			var hdMachine = simulator.Model.Roots.OfType<HdMachine>().First();
 			hdMachine.Dialyzer.DialyzerMembraneRupturesFault.Activation = Activation.Forced;
@@ -90,7 +90,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		{
 			var testModel = new Model();
 
-			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(testModel); //Important: Call after all objects have been created
 			var patient = simulator.Model.Roots.OfType<Patient>().First();
 			var hdMachine = simulator.Model.Roots.OfType<HdMachine>().First();
 			hdMachine.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefect.Activation = Activation.Forced;

@@ -42,7 +42,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			var model = Model.CreateOriginal();
 			model.Faults.SuppressActivations();
 
-			var simulator = new Simulator(model);
+			var simulator = new SafetySharpSimulator(model);
 			simulator.FastForward(steps: 20);
 
 			foreach (var vehicle in ((Model)simulator.Model).Vehicles)

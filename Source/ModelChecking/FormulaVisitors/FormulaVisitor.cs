@@ -41,12 +41,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		///   Visits the <paramref name="formula." />
 		/// </summary>
 		public abstract void VisitAtomarPropositionFormula(AtomarPropositionFormula formula);
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public abstract void VisitExecutableStateFormula(ExecutableStateFormula formula);
-
+		
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>

@@ -63,13 +63,13 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
 		/// </summary>
-		public override RuntimeModel RuntimeModel => _stateGraph.RuntimeModel;
+		public override ExecutableModel RuntimeModel => _stateGraph.RuntimeModel;
 
 		/// <summary>
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
 		///   <see cref="AnalysisModel" />.
 		/// </summary>
-		public override Func<RuntimeModel> RuntimeModelCreator => _stateGraph.RuntimeModelCreator;
+		public override Func<ExecutableModel> RuntimeModelCreator => _stateGraph.RuntimeModelCreator;
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.

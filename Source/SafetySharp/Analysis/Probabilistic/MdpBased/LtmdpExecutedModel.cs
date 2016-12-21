@@ -31,7 +31,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using Utilities;
 
 	/// <summary>
-	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="RuntimeModel" /> with
+	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="SafetySharpRuntimeModel" /> with
 	///   probabilistic transitions.
 	/// </summary>
 	internal sealed class LtmdpExecutedModel : ExecutedModel
@@ -52,13 +52,18 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal LtmdpExecutedModel(Func<RuntimeModel> runtimeModelCreator, long successorStateCapacity)
+		internal LtmdpExecutedModel(Func<SafetySharpRuntimeModel> runtimeModelCreator, long successorStateCapacity)
 			: base(runtimeModelCreator)
 		{
-			var formulas = RuntimeModel.Formulas.Select(CompilationVisitor.Compile).ToArray();
+			var formulas = RuntimeModel.Formulas.Select(SafetySharpCompilationVisitor.Compile).ToArray();
 			_transitions = new LtmdpTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
 
-			ChoiceResolver = new LtmdpChoiceResolver(RuntimeModel.Objects.OfType<Choice>());
+			ChoiceResolver = new LtmdpChoiceResolver();
+
+			throw new Exception();
+			//foreach (var choice in RuntimeModel.Objects.OfType<Choice>())
+			//	choice.Resolver = choiceResolver;
+
 		}
 
 		/// <summary>
@@ -66,7 +71,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		/// <param name="runtimeModel">The model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal LtmdpExecutedModel(RuntimeModel runtimeModel, int successorStateCapacity)
+		internal LtmdpExecutedModel(SafetySharpRuntimeModel runtimeModel, int successorStateCapacity)
 			: base(runtimeModel)
 		{
 			_transitions = new LtmdpTransitionSetBuilder(RuntimeModel, successorStateCapacity);
@@ -186,22 +191,6 @@ namespace SafetySharp.Analysis.ModelChecking
 		protected override TransitionCollection EndExecution()
 		{
 			return _transitions.ToCollection();
-		}
-
-		/// <summary>
-		///   Creates a counter example from the <paramref name="path" />.
-		/// </summary>
-		/// <param name="path">
-		///   The path the counter example should be generated from. A value of <c>null</c> indicates that no
-		///   transitions could be generated for the model.
-		/// </param>
-		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		public override CounterExample CreateCounterExample(byte[][] path, bool endsWithException)
-		{
-			if (RuntimeModelCreator == null)
-				throw new InvalidOperationException("Counter example generation is not supported in this context.");
-
-			return RuntimeModel.CreateCounterExample(RuntimeModelCreator, path, endsWithException);
 		}
 	}
 }

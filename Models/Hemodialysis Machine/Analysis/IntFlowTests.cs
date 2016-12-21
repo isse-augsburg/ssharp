@@ -91,7 +91,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			testModel.Combinator.ConnectOutWithIn(direct, sink);
 			testModel.Combinator.CommitFlow();
 
-			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
@@ -129,7 +129,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			testModel.Combinator.ConnectOutWithIn(direct2, sink);
 			testModel.Combinator.CommitFlow();
 
-			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
@@ -157,7 +157,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			testModel.Combinator.ConnectOutWithIn(del, sink);
 			testModel.Combinator.CommitFlow();
 
-			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
@@ -197,7 +197,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			testModel.Combinator.ConnectOutWithIn(composite, sink);
 			testModel.Combinator.CommitFlow();
 
-			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
@@ -238,7 +238,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			testModel.Combinator.ConnectOutWithIn(way2Direct, way2Sink);
 			testModel.Combinator.CommitFlow();
 
-			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
@@ -273,7 +273,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			testModel.Combinator.ConnectOutsWithIn(new IFlowComponentUniqueOutgoing<Int, Int>[] { way1Direct, way2Direct }, sink);
 			testModel.Combinator.CommitFlow();
 
-			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
@@ -311,7 +311,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			testModel.Combinator.ConnectOutWithIn(composite, sinkOutside);
 			testModel.Combinator.CommitFlow();
 
-			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];
@@ -349,7 +349,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			testModel.Combinator.ConnectOutWithIn(composite, sink);
 			testModel.Combinator.CommitFlow();
 
-			var simulator = new Simulator(testModel); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(testModel); //Important: Call after all objects have been created
 			simulator.SimulateStep();
 
 			var flowCombinatorAfterStep = (IntFlowCombinator)simulator.Model.Roots[0];

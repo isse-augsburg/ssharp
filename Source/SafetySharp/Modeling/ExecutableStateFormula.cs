@@ -50,14 +50,5 @@ namespace SafetySharp.Analysis
 		///   Gets the expression that represents the state formula.
 		/// </summary>
 		public Func<bool> Expression { get; }
-
-		/// <summary>
-		///   Executes the <paramref name="visitor" /> for this formula.
-		/// </summary>
-		/// <param name="visitor">The visitor that should be executed.</param>
-		internal override void Visit(FormulaVisitor visitor)
-		{
-			visitor.VisitExecutableStateFormula(this);
-		}
 	}
 }

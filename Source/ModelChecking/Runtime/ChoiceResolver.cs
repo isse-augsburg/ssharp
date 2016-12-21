@@ -32,17 +32,8 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Represents a stack that is used to resolve nondeterministic choices during state space enumeration.
 	/// </summary>
-	[NonSerializable]
 	internal abstract class ChoiceResolver : DisposableObject
-	{	/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="choices">The choices that potentially require access to the choice resolver.</param>
-		protected ChoiceResolver(IEnumerable<Choice> choices)
-		{
-			foreach (var choice in choices)
-				choice.Resolver = this;
-		}
+	{
 		/// <summary>
 		///   Gets the index of the last choice that has been made.
 		/// </summary>

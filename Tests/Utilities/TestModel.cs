@@ -36,7 +36,7 @@ namespace Tests.Utilities
 		/// <summary>
 		///   Gets the instantiated runtime model.
 		/// </summary>
-		protected RuntimeModel RuntimeModel { get; private set; }
+		protected SafetySharpRuntimeModel RuntimeModel { get; private set; }
 
 		/// <summary>
 		///   Gets the model's root components once it has been instantiated.
@@ -78,7 +78,7 @@ namespace Tests.Utilities
 		/// <param name="formulas">The formulas the runtime model should be instantiated with.</param>
 		protected void Create(ModelBase model, params Formula[] formulas)
 		{
-			RuntimeModel = RuntimeModel.Create(model, formulas);
+			RuntimeModel = SafetySharpRuntimeModel.Create(model, formulas);
 		}
 
 		/// <summary>

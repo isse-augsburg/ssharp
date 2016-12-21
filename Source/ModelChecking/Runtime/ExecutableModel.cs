@@ -23,10 +23,11 @@
 namespace SafetySharp.Runtime
 {
 	using System;
+	using System.Collections.Generic;
+	using System.IO;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Analysis;
-	using CompilerServices;
 	using Modeling;
 	using Serialization;
 	using Utilities;
@@ -34,7 +35,7 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Represents a runtime model that can be used for model checking or simulation.
 	/// </summary>
-	internal sealed unsafe class RuntimeModel : DisposableObject
+	public abstract unsafe class ExecutableModel : DisposableObject
 	{
 		/// <summary>
 		///   The unique name of the construction state.
@@ -44,32 +45,32 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Deserializes a state of the model.
 		/// </summary>
-		private readonly SerializationDelegate _deserialize;
+		protected SerializationDelegate _deserialize;
 
 		/// <summary>
 		///   The faults contained in the model.
 		/// </summary>
-		private readonly Fault[] _faults;
+		public Fault[] Faults { get; protected set; }
 
 		/// <summary>
 		///   Restricts the ranges of the model's state variables.
 		/// </summary>
-		private readonly Action _restrictRanges;
+		protected Action _restrictRanges;
 
 		/// <summary>
 		///   Serializes a state of the model.
 		/// </summary>
-		private readonly SerializationDelegate _serialize;
-
-		/// <summary>
-		///   The objects referenced by the model that participate in state serialization.
-		/// </summary>
-		private readonly ObjectTable _serializedObjects;
+		protected SerializationDelegate _serialize;
 
 		/// <summary>
 		///   The number of bytes reserved at the beginning of each state vector by the model checker.
 		/// </summary>
-		private readonly int _stateHeaderBytes;
+		protected int StateHeaderBytes { get; }
+
+		/// <summary>
+		///   The state constraints which describe allowed states. When any stateConstraint returns false the state is deleted.
+		/// </summary>
+		public Func<bool>[] StateConstraints { protected set; get; }
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -78,95 +79,49 @@ namespace SafetySharp.Runtime
 		/// <param name="stateHeaderBytes">
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
-		internal RuntimeModel(SerializedRuntimeModel serializedData, int stateHeaderBytes = 0)
+		internal ExecutableModel(int stateHeaderBytes = 0)
 		{
-			Requires.That(serializedData.Model != null, "Expected a valid model instance.");
+			Requires.That(stateHeaderBytes % 4 == 0, nameof(stateHeaderBytes), "Expected a multiple of 4.");			
+			StateHeaderBytes = stateHeaderBytes;
+		}
 
-			var buffer = serializedData.Buffer;
-			var rootComponents = serializedData.Model.Roots;
-			var objectTable = serializedData.ObjectTable;
-			var formulas = serializedData.Formulas;
+		protected void CheckConsistencyAfterInitialization()
+		{
+			FaultSet.CheckFaultCount(Faults.Length);
+			StateFormulaSet.CheckFormulaCount(AtomarPropositionFormulas.Length);
+		}
 
-			Requires.NotNull(buffer, nameof(buffer));
-			Requires.NotNull(rootComponents, nameof(rootComponents));
-			Requires.NotNull(objectTable, nameof(objectTable));
-			Requires.NotNull(formulas, nameof(formulas));
-			Requires.That(stateHeaderBytes % 4 == 0, nameof(stateHeaderBytes), "Expected a multiple of 4.");
-
-			Model = serializedData.Model;
-			SerializedModel = buffer;
-			RootComponents = rootComponents.Cast<Component>().ToArray();
-			ExecutableStateFormulas = objectTable.OfType<ExecutableStateFormula>().ToArray();
-			Formulas = formulas;
-
-			// Create a local object table just for the objects referenced by the model; only these objects
-			// have to be serialized and deserialized. The local object table does not contain, for instance,
-			// the closure types of the state formulas.
-			_faults = objectTable.OfType<Fault>().Where(fault => fault.IsUsed).ToArray();
-			_serializedObjects = new ObjectTable(Model.ReferencedObjects);
-
-			Objects = objectTable;
-			StateVectorLayout = SerializationRegistry.Default.GetStateVectorLayout(Model, _serializedObjects, SerializationMode.Optimized);
-			UpdateFaultSets();
-
-			_deserialize = StateVectorLayout.CreateDeserializer(_serializedObjects);
-			_serialize = StateVectorLayout.CreateSerializer(_serializedObjects);
-			_restrictRanges = StateVectorLayout.CreateRangeRestrictor(_serializedObjects);
-			_stateHeaderBytes = stateHeaderBytes;
-
-			PortBinding.BindAll(objectTable);
-
+		protected void InitializeConstructionState()
+		{
 			ConstructionState = new byte[StateVectorSize];
 			fixed (byte* state = ConstructionState)
 			{
 				Serialize(state);
 				_restrictRanges();
 			}
-
-			FaultSet.CheckFaultCount(_faults.Length);
-			StateFormulaSet.CheckFormulaCount(ExecutableStateFormulas.Length);
 		}
-
-		/// <summary>
-		///   Gets a copy of the original model the runtime model was generated from.
-		/// </summary>
-		internal ModelBase Model { get; }
-
+		
 		/// <summary>
 		///   Gets the construction state of the model.
 		/// </summary>
-		internal byte[] ConstructionState { get; }
-
-		/// <summary>
-		///   Gets all of the objects referenced by the model, including those that do not take part in state serialization.
-		/// </summary>
-		internal ObjectTable Objects { get; }
+		public byte[] ConstructionState { get; private set; }
+		
 
 		/// <summary>
 		///   Gets the buffer the model was deserialized from.
 		/// </summary>
-		internal byte[] SerializedModel { get; }
-
-		/// <summary>
-		///   Gets the model's <see cref="StateVectorLayout" />.
-		/// </summary>
-		internal StateVectorLayout StateVectorLayout { get; }
-
+		public byte[] SerializedModel { get; set; }
+		
 		/// <summary>
 		///   The formulas that are checked on the model.
 		/// </summary>
-		public Formula[] Formulas { get; }
+		public Formula[] Formulas { get; protected set; }
 
 		/// <summary>
 		///   Gets the size of the state vector in bytes. The size is always a multiple of 4.
 		/// </summary>
-		internal int StateVectorSize => StateVectorLayout.SizeInBytes + _stateHeaderBytes;
-
-		/// <summary>
-		///   Gets the root components of the model.
-		/// </summary>
-		public Component[] RootComponents { get; }
-
+		public abstract int StateVectorSize { get; }
+		
 		/// <summary>
 		///   Gets the faults contained in the model that can be activated nondeterministically.
 		/// </summary>
@@ -181,7 +136,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the state formulas of the model.
 		/// </summary>
-		internal ExecutableStateFormula[] ExecutableStateFormulas { get; }
+		internal AtomarPropositionFormula[] AtomarPropositionFormulas { get; }
 
 		/// <summary>
 		///   Updates the activation states of the model's faults.
@@ -189,7 +144,7 @@ namespace SafetySharp.Runtime
 		/// <param name="getActivation">The callback that should be used to determine a fault's activation state.</param>
 		internal void ChangeFaultActivations(Func<Fault, Activation> getActivation)
 		{
-			foreach (var fault in _faults)
+			foreach (var fault in Faults)
 				fault.Activation = getActivation(fault);
 
 			UpdateFaultSets();
@@ -200,17 +155,17 @@ namespace SafetySharp.Runtime
 		/// </summary>
 		internal void UpdateFaultSets()
 		{
-			NondeterministicFaults = _faults.Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
+			NondeterministicFaults = Faults.Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
 			ActivationSensitiveFaults = NondeterministicFaults.Where(fault => fault.RequiresActivationNotification).ToArray();
 		}
 
 		/// <summary>
 		///   Copies the fault activation states of this instance to <paramref name="target" />.
 		/// </summary>
-		private void CopyFaultActivationStates(RuntimeModel target)
+		protected void CopyFaultActivationStates(ExecutableModel target)
 		{
-			for (var i = 0; i < _faults.Length; ++i)
-				target._faults[i].Activation = _faults[i].Activation;
+			for (var i = 0; i < Faults.Length; ++i)
+				target.Faults[i].Activation = Faults[i].Activation;
 
 			target.UpdateFaultSets();
 		}
@@ -222,7 +177,7 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void Deserialize(byte* serializedState)
 		{
-			_deserialize(serializedState + _stateHeaderBytes);
+			_deserialize(serializedState + StateHeaderBytes);
 		}
 
 		/// <summary>
@@ -232,7 +187,7 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void Serialize(byte* serializedState)
 		{
-			_serialize(serializedState + _stateHeaderBytes);
+			_serialize(serializedState + StateHeaderBytes);
 		}
 
 		/// <summary>
@@ -251,31 +206,13 @@ namespace SafetySharp.Runtime
 		///   Computes an initial state of the model.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal void ExecuteInitialStep()
-		{
-			foreach (var fault in NondeterministicFaults)
-				fault.Reset();
-
-			foreach (var obj in _serializedObjects.OfType<IInitializable>())
-				obj.Initialize();
-
-			_restrictRanges();
-		}
+		public abstract void ExecuteInitialStep();
 
 		/// <summary>
 		///   Updates the state of the model by executing a single step.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal void ExecuteStep()
-		{
-			foreach (var fault in NondeterministicFaults)
-				fault.Reset();
-
-			foreach (var component in RootComponents)
-				component.Update();
-
-			_restrictRanges();
-		}
+		public abstract void ExecuteStep();
 
 		/// <summary>
 		///   Creates a counter example from the <paramref name="path" />.
@@ -286,7 +223,7 @@ namespace SafetySharp.Runtime
 		///   transitions could be generated for the model.
 		/// </param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		public CounterExample CreateCounterExample(Func<RuntimeModel> createModel, byte[][] path,bool endsWithException)
+		public CounterExample CreateCounterExample(Func<ExecutableModel> createModel, byte[][] path, bool endsWithException)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 
@@ -294,8 +231,10 @@ namespace SafetySharp.Runtime
 			// state variables might prevent us from doing so if they somehow influence the state
 			var replayModel = createModel();
 			var counterExampleModel = createModel();
-			var choiceResolver = new NondeterministicChoiceResolver(replayModel.Objects.OfType<Choice>());
+			var choiceResolver = new NondeterministicChoiceResolver();
 
+			replayModel.SetChoiceResolver(choiceResolver);
+			
 			CopyFaultActivationStates(replayModel);
 			CopyFaultActivationStates(counterExampleModel);
 
@@ -311,6 +250,8 @@ namespace SafetySharp.Runtime
 			var replayInfo = replayModel.GenerateReplayInformation(choiceResolver, path, endsWithException);
 			return new CounterExample(counterExampleModel, path, replayInfo, endsWithException);
 		}
+
+		internal abstract void SetChoiceResolver(ChoiceResolver choiceResolver);
 
 		/// <summary>
 		///   Generates the replay information for the <paramref name="trace" />.
@@ -362,7 +303,7 @@ namespace SafetySharp.Runtime
 
 					// Compare the target states; if they match, we've found the correct transition
 					var areEqual = true;
-					for (var j = _stateHeaderBytes; j < StateVectorSize; ++j)
+					for (var j = StateHeaderBytes; j < StateVectorSize; ++j)
 						areEqual &= targetState[j] == trace[i + 1][j];
 
 					if (!areEqual)
@@ -399,28 +340,14 @@ namespace SafetySharp.Runtime
 			return notificationsSent;
 		}
 
+		public abstract void WriteInternalStateStructureToFile(BinaryWriter writer);
+
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
-			if (disposing)
-				Objects.OfType<IDisposable>().SafeDisposeAll();
-		}
-
-		/// <summary>
-		///   Creates a <see cref="RuntimeModel" /> instance from the <paramref name="model" /> and the <paramref name="formulas" />.
-		/// </summary>
-		/// <param name="model">The model the runtime model should be created for.</param>
-		/// <param name="formulas">The formulas the model should be able to check.</param>
-		internal static RuntimeModel Create(ModelBase model, params Formula[] formulas)
-		{
-			Requires.NotNull(formulas, nameof(formulas));
-
-			var serializer = new RuntimeModelSerializer();
-			serializer.Serialize(model, formulas);
-			return serializer.Load();
 		}
 	}
 }

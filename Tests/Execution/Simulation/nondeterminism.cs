@@ -31,7 +31,7 @@ namespace Tests.Execution.Simulation
 	{
 		protected override void Check()
 		{
-			var simulator = new Simulator(TestModel.InitializeModel(new C { X = 44 }));
+			var simulator = new SafetySharpSimulator(TestModel.InitializeModel(new C { X = 44 }));
 			var c = (C)simulator.Model.Roots[0];
 
 			c.X.ShouldBe(44);

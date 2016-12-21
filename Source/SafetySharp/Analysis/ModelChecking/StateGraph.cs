@@ -60,7 +60,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   the state graph is generated for.
 		/// </param>
 		internal StateGraph(TraversalContext context, Formula[] stateFormulas, int transitionSizeInBytes,
-							RuntimeModel model, Func<RuntimeModel> createModel)
+							ExecutableModel model, Func<ExecutableModel> createModel)
 		{
 			Requires.NotNull(context, nameof(context));
 
@@ -82,13 +82,13 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly represented by this <see cref="StateGraph" />.
 		/// </summary>
-		public RuntimeModel RuntimeModel { get; }
+		public ExecutableModel RuntimeModel { get; }
 
 		/// <summary>
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly represented by this
 		///   <see cref="StateGraph" />.
 		/// </summary>
-		public Func<RuntimeModel> RuntimeModelCreator { get; }
+		public Func<ExecutableModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   The state formulas that can be evaluated over the model.

@@ -30,12 +30,12 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Simulates a S# model for visualization purposes or hardware-in-the-loop tests.
 	/// </summary>
-	public sealed class RealTimeSimulator
+	public sealed class RealTimeSafetySharpSimulator
 	{
 		/// <summary>
 		///   The simulator that is used to simulate the model.
 		/// </summary>
-		private readonly Simulator _simulator;
+		private readonly SafetySharpSimulator _simulator;
 
 		/// <summary>
 		///   The synchronization context that is used to marshal back to the main thread.
@@ -57,7 +57,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="simulator">The simulator that should be used to simulate the model.</param>
 		/// <param name="stepDelay">The step delay in milliseconds, i.e., time to wait between two steps in running mode.</param>
-		public RealTimeSimulator(Simulator simulator, int stepDelay)
+		public RealTimeSafetySharpSimulator(SafetySharpSimulator simulator, int stepDelay)
 		{
 			Requires.NotNull(simulator, nameof(simulator));
 			Requires.That(SynchronizationContext.Current != null, "The simulator requires a valid synchronization context to be set.");

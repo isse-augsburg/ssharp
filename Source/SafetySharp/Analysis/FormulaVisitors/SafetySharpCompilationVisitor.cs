@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 namespace SafetySharp.Analysis.FormulaVisitors
 {
 	using System;
@@ -29,7 +30,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 	/// <summary>
 	///   Compiles a <see cref="Formula" /> if it does not contain any temporal operators.
 	/// </summary>
-	internal class CompilationVisitor : FormulaVisitor
+	internal class SafetySharpCompilationVisitor : FormulaVisitor
 	{
 		/// <summary>
 		///   The expression that is being generated.
@@ -44,7 +45,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		{
 			Requires.NotNull(formula, nameof(formula));
 
-			var visitor = new CompilationVisitor();
+			var visitor = new SafetySharpCompilationVisitor();
 			visitor.Visit(formula);
 
 			return Expression.Lambda<Func<bool>>(visitor._expression).Compile();
@@ -110,15 +111,15 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
-			throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use ExecutableStateFormula instead.");
-		}
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
-		{
-			_expression = Expression.Invoke(Expression.Constant(formula.Expression));
+			var executableStateFormula = formula as ExecutableStateFormula;
+			if (executableStateFormula)
+			{
+				_expression = Expression.Invoke(Expression.Constant(executableStateFormula.Expression));
+			}
+			else
+			{
+				throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use ExecutableStateFormula instead.");
+			}
 		}
 
 		/// <summary>
@@ -135,6 +136,25 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
 		{
 			throw new InvalidOperationException("Only state formulas can be evaluated.");
+		}
+	}
+}
+
+namespace SafetySharp.Analysis
+{
+	using SafetySharp.Analysis.FormulaVisitors;
+	using System;
+
+	public static class SafetySharpFormulaEvaluationExtension
+	{
+		public static bool Evaluate(this Formula formula)
+		{
+			return formula.Compile()();
+		}
+
+		public static Func<bool> Compile(this Formula formula)
+		{
+			return SafetySharpCompilationVisitor.Compile(formula);
 		}
 	}
 }

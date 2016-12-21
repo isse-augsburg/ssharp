@@ -30,6 +30,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using CaseStudies.RailroadCrossing.Modeling.Controllers;
 	using Infrastructure;
 	using Modeling;
+	using Analysis;
 
 	public partial class RailroadCrossing
 	{

@@ -127,7 +127,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		private MarkovDecisionProcess GenerateMarkovDecisionProcess(Func<RuntimeModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] stateFormulas)
+		private MarkovDecisionProcess GenerateMarkovDecisionProcess(Func<SafetySharpRuntimeModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] stateFormulas)
 		{
 			return GenerateMarkovDecisionProcess(() => new LtmdpExecutedModel(createModel, Configuration.SuccessorCapacity), terminateEarlyCondition, stateFormulas);
 		}
@@ -145,7 +145,7 @@ namespace SafetySharp.Analysis
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, stateFormulas);
 
-			return GenerateMarkovDecisionProcess((Func<RuntimeModel>)serializer.Load, terminateEarlyCondition, stateFormulas);
+			return GenerateMarkovDecisionProcess((Func<SafetySharpRuntimeModel>)serializer.Load, terminateEarlyCondition, stateFormulas);
 		}
 		
 

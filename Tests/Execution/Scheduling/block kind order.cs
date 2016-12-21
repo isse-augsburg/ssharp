@@ -32,7 +32,7 @@ namespace Tests.Execution.Scheduling
 		protected override void Check()
 		{
 			var m = new S();
-			var r = RuntimeModel.Create(m);
+			var r = SafetySharpRuntimeModel.Create(m);
 
 			r.RootComponents.Length.ShouldBe(4);
 			r.RootComponents[0].ShouldBeOfType<D>();

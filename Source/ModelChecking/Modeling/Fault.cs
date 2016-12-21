@@ -28,37 +28,28 @@ namespace SafetySharp.Modeling
 	using System.Linq;
 	using System.Runtime.Serialization;
 	using Analysis;
-	using CompilerServices;
 	using Utilities;
 
 	/// <summary>
 	///   Represents a base class for all faults affecting the behavior of <see cref="Component" />s.
 	/// </summary>
 	[DebuggerDisplay("{Name} (#{Identifier}) [{Activation}]")]
-	[Hidden]
 	public abstract class Fault
 	{
 		private readonly Choice _choice = new Choice();
-
-		[Hidden]
+		
 		private Activation _activation = Activation.Nondeterministic;
-
-		[NonSerializable]
+		
 		private bool _activationIsUnknown;
-
-		[NonSerializable]
+		
 		private bool _canUndoActivation;
-
-		[NonSerializable]
+		
 		private int _choiceIndex;
-
-		[NonSerializable]
+		
 		private bool _isSubsumedFaultSetCached;
-
-		[NonSerializable]
+		
 		private FaultSet _subsumedFaultSet;
-
-		[Hidden]
+		
 		public Probability ProbabilityOfOccurrence = new Probability(0.5);
 
 		/// <summary>
@@ -73,19 +64,16 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Gets the <see cref="Fault" /> instances subsumed by this fault.
 		/// </summary>
-		[NonSerializable]
 		internal ISet<Fault> SubsumedFaults { get; } = new HashSet<Fault>();
 
 		/// <summary>
 		///   Gets a value indicating whether the fault must be notified about its activation.
 		/// </summary>
-		[Hidden]
 		internal bool RequiresActivationNotification { get; private set; }
 
 		/// <summary>
 		///   Gets or sets an identifier for the fault.
 		/// </summary>
-		[Hidden]
 		internal int Identifier { get; set; } = -1;
 
 		/// <summary>
@@ -97,13 +85,11 @@ namespace SafetySharp.Modeling
 		///   Gets a value indicating whether the fault is activated and has some effect on the state of the system, therefore inducing
 		///   an error or possibly a failure.
 		/// </summary>
-		[Hidden]
 		public bool IsActivated { get; private set; }
 
 		/// <summary>
 		///   Gets or sets the fault's name.
 		/// </summary>
-		[Hidden, NonDiscoverable]
 		public string Name { get; set; } = "UnnamedFault";
 
 		/// <summary>
@@ -156,66 +142,7 @@ namespace SafetySharp.Modeling
 
 			return subsumed;
 		}
-
-		/// <summary>
-		///   Adds fault effects for the <paramref name="components" /> that are enabled when the fault is activated.
-		/// </summary>
-		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
-		/// <param name="components">The components the fault effects are added for.</param>
-		public void AddEffects<TFaultEffect>(params IComponent[] components)
-			where TFaultEffect : Component, new()
-		{
-			AddEffects<TFaultEffect>((IEnumerable<IComponent>)components);
-		}
-
-		/// <summary>
-		///   Adds fault effects for the <paramref name="components" /> that are enabled when the fault is activated.
-		/// </summary>
-		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
-		/// <param name="components">The components the fault effects are added for.</param>
-		public void AddEffects<TFaultEffect>(IEnumerable<IComponent> components)
-			where TFaultEffect : Component, new()
-		{
-			foreach (var component in components)
-				AddEffect<TFaultEffect>(component);
-		}
-
-		/// <summary>
-		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault is activated. Returns the fault
-		///   effect instance that was added.
-		/// </summary>
-		/// <typeparam name="TFaultEffect">The type of the fault effect that should be added.</typeparam>
-		/// <param name="component">The component the fault effect is added for.</param>
-		public TFaultEffect AddEffect<TFaultEffect>(IComponent component)
-			where TFaultEffect : Component, new()
-		{
-			return (TFaultEffect)AddEffect(component, typeof(TFaultEffect));
-		}
-
-		/// <summary>
-		///   Adds a fault effect for the <paramref name="component" /> that is enabled when the fault is activated. Returns the fault
-		///   effect instance that was added.
-		/// </summary>
-		/// <param name="component">The component the fault effect is added for.</param>
-		/// <param name="faultEffectType">The type of the fault effect that should be added.</param>
-		public IComponent AddEffect(IComponent component, Type faultEffectType)
-		{
-			Requires.NotNull(component, nameof(component));
-			Requires.That(faultEffectType.HasAttribute<FaultEffectAttribute>(),
-				$"Expected fault effect '{faultEffectType.FullName}' to be marked with '{typeof(FaultEffectAttribute).FullName}'.");
-			Requires.That(((Component)component).FaultEffectTypes.SingleOrDefault(type => type == faultEffectType) == null,
-				$"A fault effect of type '{faultEffectType.FullName}' has already been added.");
-
-			var faultEffect = (Component)FormatterServices.GetUninitializedObject(component.GetRuntimeType());
-
-			faultEffect.FaultEffectType = faultEffectType;
-			faultEffect.SetFault(this);
-			((Component)component).FaultEffects.Add(faultEffect);
-			((Component)component).FaultEffectTypes.Add(faultEffectType);
-
-			return faultEffect;
-		}
-
+		
 		/// <summary>
 		///   Declares the given <paramref name="faults" /> to be subsumed by this instance. Subsumption metadata does
 		///   not change the fault's effects and is only used by heuristics.

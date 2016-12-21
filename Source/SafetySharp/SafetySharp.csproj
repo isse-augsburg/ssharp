@@ -46,17 +46,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Analysis\AnalysisConfiguration.cs" />
+    <Compile Include="AnalysisResultSafetySharpExtension.cs" />
     <Compile Include="Analysis\AnalysisException.cs" />
     <Compile Include="Analysis\AnalysisResult.cs" />
+    <Compile Include="Analysis\SafetySharpCounterExample.cs" />
     <Compile Include="Analysis\FaultActivationBehavior.cs" />
-    <Compile Include="Analysis\FaultSetCollection.cs" />
-    <Compile Include="Analysis\FormulaVisitors\CompilationVisitor.cs" />
+    <Compile Include="Analysis\FormulaVisitors\SafetySharpCompilationVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\CollectExecutableStateFormulasVisitor.cs" />
     <Compile Include="Analysis\Heuristics\IFaultSetHeuristic.cs" />
     <Compile Include="Analysis\Heuristics\MaximalSafeSetHeuristic.cs" />
     <Compile Include="Analysis\Heuristics\MinimalRedundancyHeuristic.cs" />
     <Compile Include="Analysis\Heuristics\SubsumptionHeuristic.cs" />
+    <Compile Include="Analysis\IAnalysisResultExtension.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\DeadlockChecker.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultOrderModifier.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultSuppressionModifier.cs" />
@@ -79,10 +80,8 @@
     <Compile Include="Analysis\Probabilistic\MdpBased\MdpFromExecutableModelGenerator.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\MdpToGv.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\MdpToPrism.cs" />
-    <Compile Include="Analysis\ExecutableStateFormula.cs" />
     <Compile Include="Analysis\Probabilistic\PrismProcess.cs" />
     <Compile Include="Analysis\FormulaVisitors\PrismTransformer.cs" />
-    <Compile Include="Modeling\ProbabilityRange.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\BuiltinMdpModelChecker.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\BuiltinDtmcModelChecker.cs" />
     <Compile Include="Analysis\Probabilistic\MdpBased\MdpModelChecker.cs" />
@@ -111,44 +110,30 @@
     <Compile Include="Analysis\Probabilistic\BidirectionalGraph.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\DiscreteTimeMarkovChain.cs" />
     <Compile Include="Analysis\FormulaVisitors\LabelingVectorFormulaEvaluatorCompilationVisitor.cs" />
-    <Compile Include="Analysis\Probabilistic\ProbabilitisticFormula.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\DtmcFromExecutableModelGenerator.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\LtmcProbabilityStack.cs" />
-    <Compile Include="Analysis\Probabilistic\RewardFormula.cs" />
-    <Compile Include="Analysis\Probabilistic\RewardRetriever.cs" />
     <Compile Include="Analysis\Probabilistic\SparseDoubleMatrix.cs" />
     <Compile Include="Analysis\Probabilistic\DtmcBased\LtmcGenerator.cs" />
     <Compile Include="Analysis\SafetyAnalysisBackend.cs" />
     <Compile Include="Analysis\SafetyChecking\FaultOptimizationBackend.cs" />
     <Compile Include="Analysis\SafetyChecking\AnalysisBackend.cs" />
-    <Compile Include="Analysis\ModelChecking\AnalysisModel.cs" />
     <Compile Include="Analysis\ModelChecking\ActivationMinimalExecutedModel.cs" />
-    <Compile Include="Analysis\ModelChecking\ModelTraversal\LoadBalancer.cs" />
-    <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalContext.cs" />
-    <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\IBatchedTransitionAction.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\InvariantViolationAction.cs" />
-    <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\IStateAction.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\StateGraphBuilder.cs" />
-    <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalParameters.cs" />
-    <Compile Include="Analysis\ModelChecking\ModelTraversal\Worker.cs" />
-    <Compile Include="Analysis\ModelChecking\ExecutedModel.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraverser.cs" />
     <Compile Include="Analysis\ModelChecking\StateGraph.cs" />
     <Compile Include="Analysis\ModelChecking\StateGraphGenerator.cs" />
     <Compile Include="Analysis\ModelChecking\StateGraphModel.cs" />
-    <Compile Include="Analysis\ModelChecking\Transitions\TransitionSet.cs" />
-    <Compile Include="Analysis\ModelChecking\Transitions\CandidateTransition.cs" />
-    <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\ITransitionAction.cs" />
-    <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\ITransitionModifier.cs" />
-    <Compile Include="Analysis\ModelChecking\Transitions\Transition.cs" />
-    <Compile Include="Analysis\ModelChecking\Transitions\TransitionCollection.cs" />
-    <Compile Include="Analysis\ModelChecking\Transitions\TransitionEnumerator.cs" />
     <Compile Include="Analysis\SafetyAnalysisResults.cs" />
     <Compile Include="Analysis\SafetyChecking\StateGraphBackend.cs" />
+    <Compile Include="Analysis\SafetySharpSimulator.cs" />
     <Compile Include="Analysis\SSharpChecker.cs" />
+    <Compile Include="Modeling\ExecutableStateFormula.cs" />
+    <Compile Include="Modeling\HiddenAttribute.cs" />
+    <Compile Include="Modeling\IComponent.cs" />
+    <Compile Include="Modeling\NonDiscoverableAttribute.cs" />
+    <Compile Include="Modeling\NonSerializableAttribute.cs" />
     <Compile Include="Modeling\ObjectPool.cs" />
-    <Compile Include="Modeling\Probability.cs" />
-    <Compile Include="Modeling\Reward.cs" />
     <Compile Include="Modeling\SubcomponentAttribute.cs" />
     <Compile Include="Modeling\RootKind.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsStateFormulaVisitor.cs" />
@@ -159,9 +144,6 @@
     <Compile Include="Modeling\ModelBase.cs" />
     <Compile Include="Modeling\RootAttribute.cs" />
     <Compile Include="Analysis\SafetyAnalysis.cs" />
-    <Compile Include="Analysis\FaultSet.cs" />
-    <Compile Include="Runtime\NondeterministicChoiceResolver.cs" />
-    <Compile Include="Runtime\NondeterminismException.cs" />
     <Compile Include="Runtime\RangeMetadata`1.cs" />
     <Compile Include="Runtime\RangeMetadata.cs" />
     <Compile Include="Runtime\Serialization\DelegateMetadata.cs" />
@@ -182,16 +164,12 @@
       <DependentUpon>Component.cs</DependentUpon>
     </Compile>
     <Compile Include="Modeling\IInitializable.cs" />
-    <Compile Include="Modeling\NonDiscoverableAttribute.cs" />
-    <Compile Include="Analysis\CounterExample.cs" />
-    <Compile Include="Modeling\Activation.cs" />
     <Compile Include="Modeling\Range.cs" />
     <Compile Include="Analysis\ModelChecking\InvariantChecker.cs" />
     <Compile Include="Runtime\RangeViolationException.cs" />
-    <Compile Include="Analysis\RealTimeSimulator.cs" />
+    <Compile Include="Analysis\RealTimeSafetySharpSimulator.cs" />
     <Compile Include="Modeling\ComponentExtensions.cs" />
     <Compile Include="CompilerServices\StateMachineHelpers.cs" />
-    <Compile Include="Modeling\Choice.cs" />
     <Compile Include="Modeling\Component.Choose.cs">
       <DependentUpon>Component.cs</DependentUpon>
     </Compile>
@@ -199,25 +177,13 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Modeling\Component.cs" />
-    <Compile Include="Modeling\Fault.cs" />
     <Compile Include="Modeling\FaultEffectAttribute.cs" />
     <Compile Include="Modeling\StateMachine.cs" />
-    <Compile Include="Modeling\NonSerializableAttribute.cs" />
     <Compile Include="Modeling\PermanentFault.cs" />
     <Compile Include="Modeling\TransientFault.cs" />
-    <Compile Include="Analysis\BinaryFormula.cs" />
-    <Compile Include="Analysis\BinaryOperator.cs" />
-    <Compile Include="Analysis\Formula.cs" />
-    <Compile Include="Analysis\FormulaVisitors\FormulaVisitor.cs" />
     <Compile Include="Analysis\Operators.cs" />
-    <Compile Include="Analysis\AtomarPropositionFormula.cs" />
-    <Compile Include="Analysis\UnaryFormula.cs" />
-    <Compile Include="Analysis\UnaryOperator.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsLtlFormulaVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\LtsMinLtlTransformer.cs" />
-    <Compile Include="Analysis\FormulaVisitors\ToStringVisitor.cs" />
-    <Compile Include="Modeling\HiddenAttribute.cs" />
-    <Compile Include="Modeling\IComponent.cs" />
     <Compile Include="Modeling\OverflowBehavior.cs" />
     <Compile Include="Modeling\PriorityAttribute.cs" />
     <Compile Include="Modeling\ProvidedAttribute.cs" />
@@ -228,9 +194,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>InternalsVisibleTo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Runtime\ChoiceResolver.cs" />
-    <Compile Include="Runtime\ChoiceStack.cs" />
-    <Compile Include="Runtime\RuntimeModel.cs" />
+    <Compile Include="Runtime\SafetySharpRuntimeModel.cs" />
     <Compile Include="Runtime\Serialization\CompactedStateGroup.cs" />
     <Compile Include="Runtime\Serialization\Serializers\ListSerializer.cs" />
     <Compile Include="Runtime\Serialization\Serializers\FaultEffectSerializer.cs" />
@@ -248,9 +212,6 @@
     <Compile Include="Runtime\Serialization\StateSlotMetadata.cs" />
     <Compile Include="Runtime\Serialization\StateVectorLayout.cs" />
     <Compile Include="Analysis\Simulator.cs" />
-    <Compile Include="Analysis\StateFormulaSet.cs" />
-    <Compile Include="Analysis\ModelChecking\ModelTraversal\StateStack.cs" />
-    <Compile Include="Analysis\ModelChecking\ModelTraversal\StateStorage.cs" />
     <Compile Include="Analysis\ModelChecking\Transitions\ActivationMinimalTransitionSetBuilder.cs" />
     <Compile Include="Runtime\UnboundPortException.cs" />
     <Compile Include="Analysis\ModelByteSize.cs" />

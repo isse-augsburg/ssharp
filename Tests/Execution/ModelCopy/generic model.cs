@@ -32,7 +32,7 @@ namespace Tests.Execution.ModelCopy
 		protected override void Check()
 		{
 			var m1 = new M<C>();
-			var s = new Simulator(m1);
+			var s = new SafetySharpSimulator(m1);
 			var m2 = (M<C>)s.Model;
 
 			m2.A.I.ShouldBe(m1.A.I);

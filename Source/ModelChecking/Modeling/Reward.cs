@@ -30,15 +30,12 @@ namespace SafetySharp.Modeling
 			_value = 0;
 			MightBeNegative = mightBeNegative;
 		}
-
-		[Hidden]
+		
 		public readonly bool MightBeNegative;
-
-		[NonSerializable]
+		
 		//TODO: Change to [AutoReset] (NotImplementedYet) which we may introduce for value types. Values are reseted after each time step. Makes behavior more deterministic compared to [NonSerializable] when a value is read before written even if it is permitted.
 		private int _value;
-
-		[NonSerializable]
+		
 		//TODO: Change to [AutoReset] (NotImplementedYet) which we may introduce for value types. Values are reseted after each time step. Makes behavior more deterministic compared to [NonSerializable] when a value is read before written even if it is permitted.
 		private int _valueNegative;
 

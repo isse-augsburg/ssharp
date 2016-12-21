@@ -152,7 +152,10 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			var checker = new SSharpChecker { Configuration = { StateCapacity = 1 << 18 } };
 			var result = checker.CheckInvariant(model, true);
 
-			Console.WriteLine(result.StateVectorLayout);
+			foreach (var analysisResultExtension in result.Extensions)
+			{
+				Console.WriteLine(analysisResultExtension);
+			}
 		}
 
 		[Test]

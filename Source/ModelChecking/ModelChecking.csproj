@@ -45,6 +45,51 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnalysisConfiguration.cs" />
+    <Compile Include="AnalysisModel.cs" />
+    <Compile Include="AtomarPropositionFormula.cs" />
+    <Compile Include="BinaryFormula.cs" />
+    <Compile Include="BinaryOperator.cs" />
+    <Compile Include="Modeling\Activation.cs" />
+    <Compile Include="Modeling\Fault.cs" />
+    <Compile Include="Modeling\Reward.cs" />
+    <Compile Include="Runtime\Choice.cs" />
+    <Compile Include="Runtime\ChoiceResolver.cs" />
+    <Compile Include="Runtime\ChoiceStack.cs" />
+    <Compile Include="CounterExample.cs" />
+    <Compile Include="FaultSet.cs" />
+    <Compile Include="FaultSetCollection.cs" />
+    <Compile Include="Formula.cs" />
+    <Compile Include="FormulaVisitors\FormulaVisitor.cs" />
+    <Compile Include="FormulaVisitors\ToStringVisitor.cs" />
+    <Compile Include="Modeling\Probability.cs" />
+    <Compile Include="Modeling\ProbabilityRange.cs" />
+    <Compile Include="ModelTraversal\LoadBalancer.cs" />
+    <Compile Include="ModelTraversal\StateStack.cs" />
+    <Compile Include="ModelTraversal\StateStorage.cs" />
+    <Compile Include="ModelTraversal\TraversalContext.cs" />
+    <Compile Include="ModelTraversal\TraversalModifiers\IBatchedTransitionAction.cs" />
+    <Compile Include="ModelTraversal\TraversalModifiers\IStateAction.cs" />
+    <Compile Include="ModelTraversal\TraversalModifiers\ITransitionAction.cs" />
+    <Compile Include="ModelTraversal\TraversalModifiers\ITransitionModifier.cs" />
+    <Compile Include="ModelTraversal\TraversalParameters.cs" />
+    <Compile Include="ModelTraversal\Worker.cs" />
+    <Compile Include="ProbabilitisticFormula.cs" />
+    <Compile Include="RewardFormula.cs" />
+    <Compile Include="RewardRetriever.cs" />
+    <Compile Include="Runtime\ExecutableModel.cs" />
+    <Compile Include="Runtime\ExecutedModel.cs" />
+    <Compile Include="Runtime\NondeterminismException.cs" />
+    <Compile Include="Runtime\NondeterministicChoiceResolver.cs" />
+    <Compile Include="Runtime\SerializationDelegate.cs" />
+    <Compile Include="StateFormulaSet.cs" />
+    <Compile Include="Transitions\CandidateTransition.cs" />
+    <Compile Include="Transitions\Transition.cs" />
+    <Compile Include="Transitions\TransitionCollection.cs" />
+    <Compile Include="Transitions\TransitionEnumerator.cs" />
+    <Compile Include="Transitions\TransitionSet.cs" />
+    <Compile Include="UnaryFormula.cs" />
+    <Compile Include="UnaryOperator.cs" />
     <Compile Include="Utilities\Assert.cs" />
     <Compile Include="Utilities\CodeWriter.cs" />
     <Compile Include="Utilities\ConsoleHelpers.cs" />
@@ -65,6 +110,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

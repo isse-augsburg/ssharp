@@ -67,7 +67,7 @@ namespace SafetySharp.Analysis
 			transformationVisitor.Visit(invariant);
 
 			return Check(model, invariant,
-				$"--invariant=\"({RuntimeModel.ConstructionStateName} == 1) || ({transformationVisitor.TransformedFormula})\"");
+				$"--invariant=\"({SafetySharpRuntimeModel.ConstructionStateName} == 1) || ({transformationVisitor.TransformedFormula})\"");
 		}
 
 		/// <summary>

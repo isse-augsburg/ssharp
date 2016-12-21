@@ -58,7 +58,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// <param name="model">The model the successors are computed for.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public ActivationMinimalTransitionSetBuilder(RuntimeModel model, long capacity, params Func<bool>[] formulas)
+		public ActivationMinimalTransitionSetBuilder(ExecutableModel model, long capacity, params Func<bool>[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
@@ -93,7 +93,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		///   Adds a transition to the <paramref name="model" />'s current state.
 		/// </summary>
 		/// <param name="model">The model the transition should be added for.</param>
-		public void Add(RuntimeModel model)
+		public void Add(ExecutableModel model)
 		{
 			if (_count >= _capacity)
 				throw new OutOfMemoryException("Unable to store an additional transition. Try increasing the successor state capacity.");

@@ -42,16 +42,16 @@ namespace Tests
 		protected IFaultSetHeuristic[] Heuristics { get; set; }
 		protected AnalysisResult Result { get; private set; }
 
-		protected void SimulateCounterExample(CounterExample counterExample, Action<Simulator> action)
+		protected void SimulateCounterExample(SafetySharpCounterExample counterExample, Action<SafetySharpSimulator> action)
 		{
 			// Test directly
-			action(new Simulator(counterExample));
+			action(new SafetySharpSimulator(counterExample));
 
 			// Test persisted
 			using (var file = new TemporaryFile(".ssharp"))
 			{
 				counterExample.Save(file.FilePath);
-				action(new Simulator(CounterExample.Load(file.FilePath)));
+				action(new SafetySharpSimulator(SafetySharpCounterExample.Load(file.FilePath)));
 			}
 		}
 

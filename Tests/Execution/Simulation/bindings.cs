@@ -35,7 +35,7 @@ namespace Tests.Execution.Simulation
 			var d = new D();
 			Component.Bind(nameof(c.Y), nameof(d.Z));
 
-			var simulator = new Simulator(TestModel.InitializeModel(c, d));
+			var simulator = new SafetySharpSimulator(TestModel.InitializeModel(c, d));
 			c = (C)simulator.Model.Roots[0];
 
 			simulator.SimulateStep();

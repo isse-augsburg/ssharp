@@ -107,7 +107,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		{
 			var specification = new DialyzingFluidDeliverySystemTestEnvironment();
 
-			var simulator = new Simulator(specification); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(specification); //Important: Call after all objects have been created
 			var dialyzerAfterStep0 = simulator.Model.Roots.OfType<DialyzingFluidDeliverySystemTestEnvironmentDialyzer>().First();
 			var dialyzingFluidDeliverySystemAfterStep0 = simulator.Model.Roots.OfType<DialyzingFluidDeliverySystem>().First();
 			Console.Out.WriteLine("Initial");

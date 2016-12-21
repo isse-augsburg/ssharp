@@ -47,7 +47,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// <param name="model">The model the successors are computed for.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public LtmdpTransitionSetBuilder(RuntimeModel model, long capacity, params Func<bool>[] formulas)
+		public LtmdpTransitionSetBuilder(ExecutableModel model, long capacity, params Func<bool>[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
@@ -69,7 +69,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// </summary>
 		/// <param name="model">The model the transition should be added for.</param>
 		/// <param name="probability">The probability of the transition.</param>
-		public void Add(RuntimeModel model, double probability)
+		public void Add(ExecutableModel model, double probability)
 		{
 			// 1. Notify all fault activations, so that the correct activation is set in the run time model
 			//    (Needed to persist persistent faults)

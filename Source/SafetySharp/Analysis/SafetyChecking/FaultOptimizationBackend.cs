@@ -66,7 +66,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// <summary>
 		///   Gets a function that initializes the runtime model.
 		/// </summary>
-		private Func<RuntimeModel> CreateModel(Formula hazard)
+		private Func<SafetySharpRuntimeModel> CreateModel(Formula hazard)
 		{
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(Model, !hazard);
@@ -74,7 +74,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 			return () =>
 			{
 				var serializedData = serializer.LoadSerializedData();
-				return new RuntimeModel(serializedData, _stateHeaderBytes);
+				return new SafetySharpRuntimeModel(serializedData, _stateHeaderBytes);
 			};
 		}
 

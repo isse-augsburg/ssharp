@@ -34,7 +34,9 @@ namespace SafetySharp.Runtime.Serialization
 	/// <summary>
 	///   Maps objects to unique identifiers and vice versa for serialization.
 	/// </summary>
-	internal sealed class ObjectTable : IEnumerable<object>
+	internal sealed class 
+		
+		ObjectTable : IEnumerable<object>
 	{
 		/// <summary>
 		///   Gets the objects contained in the table.

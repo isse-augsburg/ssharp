@@ -30,7 +30,7 @@ namespace SafetySharp.Runtime.Serialization
 	using Utilities;
 
 	/// <summary>
-	///   Serializes a <see cref="RuntimeModel" /> instance into a <see cref="Stream" />.
+	///   Serializes a <see cref="SafetySharpRuntimeModel" /> instance into a <see cref="Stream" />.
 	/// </summary>
 	internal class RuntimeModelSerializer
 	{
@@ -169,15 +169,15 @@ namespace SafetySharp.Runtime.Serialization
 		}
 
 		/// <summary>
-		///   Loads a <see cref="RuntimeModel" /> instance.
+		///   Loads a <see cref="SafetySharpRuntimeModel" /> instance.
 		/// </summary>
-		public RuntimeModel Load()
+		public SafetySharpRuntimeModel Load()
 		{
-			return new RuntimeModel(LoadSerializedData());
+			return new SafetySharpRuntimeModel(LoadSerializedData());
 		}
 
 		/// <summary>
-		///   Deserializes a <see cref="RuntimeModel" /> from the <paramref name="reader" />.
+		///   Deserializes a <see cref="SafetySharpRuntimeModel" /> from the <paramref name="reader" />.
 		/// </summary>
 		private unsafe SerializedRuntimeModel DeserializeModel(byte[] buffer, BinaryReader reader)
 		{

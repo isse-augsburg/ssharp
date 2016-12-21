@@ -22,16 +22,18 @@
 
 namespace SafetySharp.Runtime
 {
+	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Modeling;
+	using Serialization;
 	using Utilities;
 
 	/// <summary>
 	///   Represents a stack that is used to resolve nondeterministic choices during state space enumeration.
 	/// </summary>
-	[NonSerializable]
-	internal sealed class LtmcChoiceResolver : ChoiceResolver
+	internal sealed class NondeterministicChoiceResolver : ChoiceResolver
 	{
 		/// <summary>
 		///   The number of nondeterministic choices that can be stored initially.
@@ -42,10 +44,6 @@ namespace SafetySharp.Runtime
 		///   The stack that indicates the chosen values for the current path.
 		/// </summary>
 		private readonly ChoiceStack _chosenValues = new ChoiceStack(InitialCapacity);
-
-		/// <summary>
-		/// </summary>
-		private readonly LtmcProbabilityStack _probabilitiesOfChosenValues = new LtmcProbabilityStack(InitialCapacity);
 
 		/// <summary>
 		///   The stack that stores the number of possible values of all encountered choices along the current path.
@@ -66,7 +64,7 @@ namespace SafetySharp.Runtime
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="choices">The choices that potentially require access to the choice resolver.</param>
-		public LtmcChoiceResolver()
+		public NondeterministicChoiceResolver()
 				: base()
 		{
 		}
@@ -85,7 +83,6 @@ namespace SafetySharp.Runtime
 		{
 			_firstPath = true;
 		}
-
 
 		/// <summary>
 		///   Prepares the resolver for the next path. Returns <c>true</c> to indicate that all paths have been enumerated.
@@ -121,7 +118,6 @@ namespace SafetySharp.Runtime
 
 				// Otherwise, we've chosen all values of the last choice, so we're done with it
 				_valueCount.Remove();
-				_probabilitiesOfChosenValues.Remove();
 			}
 
 			// If we reach this point, we know that we've chosen all values of all choices, so there are no further paths
@@ -138,18 +134,15 @@ namespace SafetySharp.Runtime
 			++_choiceIndex;
 
 			// If we have a preselected value that we should choose for the current path, return it
-			var chosenValuesMaxIndex = _chosenValues.Count - 1;
-			if (_choiceIndex <= chosenValuesMaxIndex)
+			if (_choiceIndex < _chosenValues.Count)
 				return _chosenValues[_choiceIndex];
 
 			// We haven't encountered this choice before; store the value count and return the first value
 			_valueCount.Push(valueCount);
 			_chosenValues.Push(0);
-			_probabilitiesOfChosenValues.Push(Probability.One / valueCount); //placeholder value
 
 			return 0;
 		}
-
 
 		/// <summary>
 		///   Handles a probabilistic choice that chooses between <paramref name="valueCount" /> options.
@@ -161,24 +154,12 @@ namespace SafetySharp.Runtime
 			return HandleChoice(valueCount);
 		}
 
-
 		/// <summary>
+		///   Sets the probability of the taken option of the last taken probabilistic choice.
 		/// </summary>
-		/// <param name="valueCount">The number of values that can be chosen.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		/// <param name="probability">The probability of the last probabilistic choice.</param>
 		public override void SetProbabilityOfLastChoice(Probability probability)
 		{
-			var probabilitiesOfChosenValuesMaxIndex = _probabilitiesOfChosenValues.Count - 1;
-			// If this part of the path has previously been visited we do not change the value
-			// because this value has already been set by a previous call of SetProbabilityOfLastChoice.
-			// Further, this value might have been overridden by an Undo. Only if we explore
-			// a new part of the path the probability should be written.
-			// A new part of the path is explored, iff the previous HandleChoice pushed a new placeholder
-			// value onto the three stacks).
-			if (_choiceIndex == probabilitiesOfChosenValuesMaxIndex)
-			{
-				_probabilitiesOfChosenValues[_choiceIndex] = probability;
-			}
 		}
 
 		/// <summary>
@@ -207,16 +188,13 @@ namespace SafetySharp.Runtime
 				_valueCount.Push(0);
 			}
 		}
-		
+
 		/// <summary>
 		///	  The probability of the current path
 		/// </summary>
 		internal override Probability CalculateProbabilityOfPath()
 		{
-			var probability = Probability.One;
-			for (var i = 0; i < _probabilitiesOfChosenValues.Count; ++i)
-				probability *= _probabilitiesOfChosenValues[i];
-			return probability;
+			throw new Exception("Path in nondeterministic model has no probability");
 		}
 
 		/// <summary>
@@ -225,7 +203,6 @@ namespace SafetySharp.Runtime
 		internal override void Clear()
 		{
 			_chosenValues.Clear();
-			_probabilitiesOfChosenValues.Clear();
 			_valueCount.Clear();
 			_choiceIndex = -1;
 		}
@@ -249,7 +226,6 @@ namespace SafetySharp.Runtime
 				return;
 
 			_chosenValues.SafeDispose();
-			_probabilitiesOfChosenValues.SafeDispose();
 			_valueCount.SafeDispose();
 		}
 	}

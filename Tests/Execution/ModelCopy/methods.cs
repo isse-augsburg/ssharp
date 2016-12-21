@@ -34,7 +34,7 @@ namespace Tests.Execution.ModelCopy
 		protected override void Check()
 		{
 			var m1 = new M();
-			var s = new Simulator(m1);
+			var s = new SafetySharpSimulator(m1);
 			var m2 = (M)s.Model;
 
 			var c1 = m1.GetRoots().OfType<C>().ToArray();

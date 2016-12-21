@@ -26,7 +26,7 @@ namespace SafetySharp.Runtime.Serialization
 	using Modeling;
 
 	/// <summary>
-	///   Represents a serialized <see cref="RuntimeModel" />.
+	///   Represents a serialized <see cref="SafetySharpRuntimeModel" />.
 	/// </summary>
 	internal struct SerializedRuntimeModel
 	{

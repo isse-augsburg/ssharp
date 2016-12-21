@@ -45,13 +45,13 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
 		/// </summary>
-		public abstract RuntimeModel RuntimeModel { get; }
+		public abstract ExecutableModel RuntimeModel { get; }
 
 		/// <summary>
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
 		///   <see cref="AnalysisModel" />.
 		/// </summary>
-		public abstract Func<RuntimeModel> RuntimeModelCreator { get; }
+		public abstract Func<ExecutableModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   Gets all initial transitions of the model.

@@ -218,7 +218,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		{
 			var specification = new DialyzerTestEnvironment();
 
-			var simulator = new Simulator(specification); //Important: Call after all objects have been created
+			var simulator = new SafetySharpSimulator(specification); //Important: Call after all objects have been created
 			var dialyzerAfterStep0 = (Dialyzer)simulator.Model.Roots.OfType<Dialyzer>().First();
 			var patientAfterStep0 =
 				(DialyzerTestEnvironmentPatient)

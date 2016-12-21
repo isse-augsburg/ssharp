@@ -40,14 +40,6 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public override void VisitExecutableStateFormula(ExecutableStateFormula formula)
-		{
-			IsFormulaReturningBoolValue = true;
-		}
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
 		public override void VisitRewardFormula(RewardFormula formula)
 		{
 			if (formula is CalculateExpectedAccumulatedRewardFormula ||

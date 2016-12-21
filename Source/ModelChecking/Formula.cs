@@ -62,23 +62,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="visitor">The visitor that should be executed.</param>
 		internal abstract void Visit(FormulaVisitor visitor);
-
-		/// <summary>
-		///   Evaluates the formula if it does not contain any temporal operators.
-		/// </summary>
-		internal bool Evaluate()
-		{
-			return Compile()();
-		}
-
-		/// <summary>
-		///   Compiles the formula if it does not contain any temporal operators.
-		/// </summary>
-		public Func<bool> Compile()
-		{
-			return CompilationVisitor.Compile(this);
-		}
-
+		
 		/// <summary>
 		///   Returns a string that represents the current object.
 		/// </summary>

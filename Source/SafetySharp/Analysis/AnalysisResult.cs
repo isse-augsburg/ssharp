@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis
 {
+	using System.Collections.Generic;
 	using Runtime.Serialization;
 
 	/// <summary>
@@ -60,8 +61,8 @@ namespace SafetySharp.Analysis
 		public int LevelCount { get; internal set; }
 
 		/// <summary>
-		///   Gets the state vector's layout metadata.
+		///   Adds bonus information.
 		/// </summary>
-		public StateVectorLayout StateVectorLayout { get; internal set; }
+		public ICollection<IAnalysisResultExtension> Extensions { get; internal set; }
 	}
 }

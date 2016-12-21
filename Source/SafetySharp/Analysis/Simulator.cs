@@ -34,61 +34,30 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Simulates a S# model for debugging or testing purposes.
 	/// </summary>
-	public sealed unsafe class Simulator : DisposableObject
+	public abstract unsafe class Simulator : DisposableObject
 	{
-		private readonly CounterExample _counterExample;
-		private readonly RuntimeModel _runtimeModel;
+		internal abstract CounterExample CounterExample { get; }
+		internal abstract ExecutableModel RuntimeModel { get; }
+
 		private readonly List<byte[]> _states = new List<byte[]>();
-		private ChoiceResolver _choiceResolver;
+		internal abstract ChoiceResolver ChoiceResolver { get; }
 		private int _stateIndex;
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="model">The model that should be simulated.</param>
-		/// <param name="formulas">The formulas that can be evaluated on the model.</param>
-		public Simulator(ModelBase model, params Formula[] formulas)
-		{
-			Requires.NotNull(model, nameof(model));
-			Requires.NotNull(formulas, nameof(formulas));
-
-			_runtimeModel = RuntimeModel.Create(model, formulas);
-			Reset();
-		}
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="counterExample">The counter example that should be simulated.</param>
-		public Simulator(CounterExample counterExample)
-		{
-			Requires.NotNull(counterExample, nameof(counterExample));
-
-			_counterExample = counterExample;
-			_runtimeModel = counterExample.RuntimeModel;
-
-			Reset();
-		}
-
-		/// <summary>
-		///   Gets the model that is simulated, i.e., a copy of the original model passed to the simulator.
-		/// </summary>
-		public ModelBase Model => _runtimeModel.Model;
-
+		
+		
 		/// <summary>
 		///   Gets a value indicating whether the simulator is replaying a counter example.
 		/// </summary>
-		public bool IsReplay => _counterExample != null;
+		public bool IsReplay => CounterExample != null;
 
 		/// <summary>
 		///   Gets a value indicating whether the simulation is completed.
 		/// </summary>
-		public bool IsCompleted => _counterExample != null && _stateIndex + 1 >= _counterExample.StepCount;
+		public bool IsCompleted => CounterExample != null && _stateIndex + 1 >= CounterExample.StepCount;
 
 		/// <summary>
 		///   Gets a value indicating whether the simulation can be fast-forwarded.
 		/// </summary>
-		public bool CanFastForward => _counterExample == null || !IsCompleted;
+		public bool CanFastForward => CounterExample == null || !IsCompleted;
 
 		/// <summary>
 		///   Gets a value indicating whether the simulation can be rewound.
@@ -105,21 +74,21 @@ namespace SafetySharp.Analysis
 
 			Prune();
 
-			var state = stackalloc byte[_runtimeModel.StateVectorSize];
+			var state = stackalloc byte[RuntimeModel.StateVectorSize];
 
-			if (_counterExample == null)
+			if (CounterExample == null)
 			{
-				_runtimeModel.ExecuteStep();
+				RuntimeModel.ExecuteStep();
 
-				_runtimeModel.Serialize(state);
+				RuntimeModel.Serialize(state);
 				AddState(state);
 			}
 			else
 			{
-				_counterExample.DeserializeState(_stateIndex + 1);
-				_runtimeModel.Serialize(state);
+				CounterExample.DeserializeState(_stateIndex + 1);
+				RuntimeModel.Serialize(state);
 
-				EnsureStatesMatch(state, _counterExample.GetState(_stateIndex + 1));
+				EnsureStatesMatch(state, CounterExample.GetState(_stateIndex + 1));
 
 				AddState(state);
 				Replay();
@@ -173,36 +142,19 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Resets the model to its initial state.
 		/// </summary>
-		public void Reset()
-		{
-			if (_choiceResolver == null)
-				_choiceResolver = new NondeterministicChoiceResolver(_runtimeModel.Objects.OfType<Choice>());
-
-			var state = stackalloc byte[_runtimeModel.StateVectorSize];
-
-			_states.Clear();
-			_stateIndex = -1;
-
-			if (_counterExample == null)
-				_runtimeModel.Reset();
-			else
-				_counterExample.Replay(_choiceResolver, 0);
-
-			_runtimeModel.Serialize(state);
-			AddState(state);
-		}
+		public abstract void Reset();
 
 		/// <summary>
 		///   Replays the next transition of the simulated counter example.
 		/// </summary>
 		private void Replay()
 		{
-			_counterExample.Replay(_choiceResolver, _stateIndex);
+			CounterExample.Replay(ChoiceResolver, _stateIndex);
 
-			var actualState = stackalloc byte[_runtimeModel.StateVectorSize];
-			_runtimeModel.Serialize(actualState);
+			var actualState = stackalloc byte[RuntimeModel.StateVectorSize];
+			RuntimeModel.Serialize(actualState);
 
-			if (IsCompleted && _counterExample.EndsWithException)
+			if (IsCompleted && CounterExample.EndsWithException)
 			{
 				throw new InvalidOperationException(
 					"The path the counter example was generated for ended with an exception that could not be reproduced by the replay.");
@@ -218,11 +170,11 @@ namespace SafetySharp.Analysis
 		{
 			fixed (byte* state = expectedState)
 			{
-				if (MemoryBuffer.AreEqual(actualState, state, _runtimeModel.StateVectorSize))
+				if (MemoryBuffer.AreEqual(actualState, state, RuntimeModel.StateVectorSize))
 					return;
 
 				var builder = new StringBuilder();
-				for (var i = 0; i < _runtimeModel.StateVectorSize; ++i)
+				for (var i = 0; i < RuntimeModel.StateVectorSize; ++i)
 					builder.AppendLine($"@{i}: {actualState[i]} vs. {_states[_stateIndex][i]}");
 
 				throw new InvalidOperationException($"Invalid replay of counter example: Unexpected state difference.\n\n{builder}");
@@ -232,10 +184,10 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Adds the state to the simulator.
 		/// </summary>
-		private void AddState(byte* state)
+		protected void AddState(byte* state)
 		{
-			var newState = new byte[_runtimeModel.StateVectorSize];
-			Marshal.Copy(new IntPtr(state), newState, 0, _runtimeModel.StateVectorSize);
+			var newState = new byte[RuntimeModel.StateVectorSize];
+			Marshal.Copy(new IntPtr(state), newState, 0, RuntimeModel.StateVectorSize);
 
 			_states.Add(newState);
 			++_stateIndex;
@@ -244,10 +196,10 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Restores a previously discovered state.
 		/// </summary>
-		private void RestoreState(int stateNumber)
+		protected void RestoreState(int stateNumber)
 		{
 			fixed (byte* state = _states[stateNumber])
-				_runtimeModel.Deserialize(state);
+				RuntimeModel.Deserialize(state);
 		}
 
 		/// <summary>
@@ -259,8 +211,8 @@ namespace SafetySharp.Analysis
 			if (!disposing)
 				return;
 
-			_counterExample.SafeDispose();
-			_choiceResolver.SafeDispose();
+			CounterExample.SafeDispose();
+			ChoiceResolver.SafeDispose();
 		}
 	}
 }

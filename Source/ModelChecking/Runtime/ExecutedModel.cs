@@ -38,7 +38,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="createModel">A factory function that creates the model instance that should be executed.</param>
-		internal ExecutedModel(Func<RuntimeModel> createModel)
+		internal ExecutedModel(Func<ExecutableModel> createModel)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 
@@ -50,7 +50,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="runtimeModel">The model instance that should be executed.</param>
-		internal ExecutedModel(RuntimeModel runtimeModel)
+		internal ExecutedModel(ExecutableModel runtimeModel)
 		{
 			Requires.NotNull(runtimeModel, nameof(runtimeModel));
 			RuntimeModel = runtimeModel;
@@ -59,13 +59,13 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
 		/// </summary>
-		public sealed override RuntimeModel RuntimeModel { get; }
+		public sealed override ExecutableModel RuntimeModel { get; }
 
 		/// <summary>
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
 		///   <see cref="AnalysisModel" />.
 		/// </summary>
-		public sealed override Func<RuntimeModel> RuntimeModelCreator { get; }
+		public sealed override Func<ExecutableModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   Gets or sets the choice resolver that is used to resolve choices within the model.
@@ -73,15 +73,10 @@ namespace SafetySharp.Analysis.ModelChecking
 		protected ChoiceResolver ChoiceResolver { get; set; }
 
 		/// <summary>
-		///   Gets the model's state vector layout.
-		/// </summary>
-		public StateVectorLayout StateVectorLayout => RuntimeModel.StateVectorLayout;
-
-		/// <summary>
 		///   Gets the size of the model's state vector in bytes.
 		/// </summary>
 		public sealed override int StateVectorSize => RuntimeModel.StateVectorSize;
-
+		
 		/// <summary>
 		///   Updates the activation states of the worker's faults.
 		/// </summary>
@@ -171,6 +166,22 @@ namespace SafetySharp.Analysis.ModelChecking
 			}
 
 			return EndExecution();
+		}
+		
+		/// <summary>
+		///   Creates a counter example from the <paramref name="path" />.
+		/// </summary>
+		/// <param name="path">
+		///   The path the counter example should be generated from. A value of <c>null</c> indicates that no
+		///   transitions could be generated for the model.
+		/// </param>
+		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
+		public override CounterExample CreateCounterExample(byte[][] path, bool endsWithException)
+		{
+			if (RuntimeModelCreator == null)
+				throw new InvalidOperationException("Counter example generation is not supported in this context.");
+
+			return RuntimeModel.CreateCounterExample(RuntimeModelCreator, path, endsWithException);
 		}
 
 		/// <summary>

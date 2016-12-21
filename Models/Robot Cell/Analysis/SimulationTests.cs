@@ -40,11 +40,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
-			var simulator = new Simulator(model);
+			var simulator = new SafetySharpSimulator(model);
 			PrintTrace(simulator, steps: 120);
 		}
 
-		public static void PrintTrace(Simulator simulator, int steps)
+		public static void PrintTrace(SafetySharpSimulator simulator, int steps)
 		{
 			var model = (Model)simulator.Model;
 

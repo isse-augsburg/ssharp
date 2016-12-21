@@ -138,7 +138,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal AnalysisResult CheckInvariant(Func<RuntimeModel> createModel, int formulaIndex)
+		internal AnalysisResult CheckInvariant(Func<ExecutableModel> createModel, int formulaIndex)
 		{
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care
@@ -147,7 +147,6 @@ namespace SafetySharp.Analysis
 				model = new ActivationMinimalExecutedModel(createModel, Configuration.SuccessorCapacity);
 
 			var result = CheckInvariant(createAnalysisModel, formulaIndex);
-			result.StateVectorLayout = model.StateVectorLayout;
 
 			return result;
 		}
@@ -155,7 +154,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Generates a <see cref="StateGraph" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal StateGraph GenerateStateGraph(Func<RuntimeModel> createModel, Formula[] stateFormulas)
+		internal StateGraph GenerateStateGraph(Func<ExecutableModel> createModel, Formula[] stateFormulas)
 		{
 			return GenerateStateGraph(() => new ActivationMinimalExecutedModel(createModel, Configuration.SuccessorCapacity), stateFormulas);
 		}
@@ -173,7 +172,7 @@ namespace SafetySharp.Analysis
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, invariant);
 
-			return CheckInvariant((Func<RuntimeModel>)serializer.Load, formulaIndex: 0);
+			return CheckInvariant((Func<SafetySharpRuntimeModel>)serializer.Load, formulaIndex: 0);
 		}
 
 		/// <summary>
@@ -228,7 +227,7 @@ namespace SafetySharp.Analysis
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, stateFormulas);
 
-			return GenerateStateGraph((Func<RuntimeModel>)serializer.Load, stateFormulas);
+			return GenerateStateGraph((Func<SafetySharpRuntimeModel>)serializer.Load, stateFormulas);
 		}
 	}
 }

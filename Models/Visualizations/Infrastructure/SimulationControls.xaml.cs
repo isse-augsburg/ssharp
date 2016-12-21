@@ -43,7 +43,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 			CloseCounterExampleButton.Visibility = Visibility.Hidden;
 		}
 
-		public RealTimeSimulator Simulator { get; private set; }
+		public RealTimeSafetySharpSimulator Simulator { get; private set; }
 		public ModelBase Model => Simulator.Model;
 
 		public int StepDelay { get; set; } = 1000;
@@ -53,7 +53,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 		public event EventHandler Rewound;
 		public event EventHandler ModelStateChanged;
 
-		private void SetSimulator(Simulator simulator)
+		private void SetSimulator(SafetySharpSimulator simulator)
 		{
 			if (Simulator != null)
 			{
@@ -61,7 +61,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 				Simulator.Pause();
 			}
 
-			Simulator = new RealTimeSimulator(simulator, (int)Math.Round(1000 / _speed));
+			Simulator = new RealTimeSafetySharpSimulator(simulator, (int)Math.Round(1000 / _speed));
 			Simulator.ModelStateChanged += OnModelStateChanged;
 			UpdateSimulationButtonVisibilities();
 
@@ -76,7 +76,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 			foreach (var fault in _model.Faults)
 				fault.Activation = Activation.Suppressed;
 
-			SetSimulator(new Simulator(_model, formulas));
+			SetSimulator(new SafetySharpSimulator(_model, formulas));
 		}
 
 		private void OnModelStateChanged(object sender, EventArgs e)
@@ -195,7 +195,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 
 			try
 			{
-				var simulator = new Simulator(CounterExample.Load(dialog.FileName));
+				var simulator = new SafetySharpSimulator(SafetySharpCounterExample.Load(dialog.FileName));
 
 				SetSimulator(simulator);
 				CloseCounterExampleButton.Visibility = Visibility.Visible;
@@ -210,7 +210,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 
 		private void OnCounterExampleClosed(object sender, RoutedEventArgs e)
 		{
-			SetSimulator(new Simulator(_model, _formulas));
+			SetSimulator(new SafetySharpSimulator(_model, _formulas));
 			CloseCounterExampleButton.Visibility = Visibility.Hidden;
 		}
 	}

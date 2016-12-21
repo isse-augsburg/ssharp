@@ -98,7 +98,7 @@ matrix_t StateLabelMatrix;
 ref struct Globals
 {
 	static ActivationMinimalExecutedModel^ ExecutedModel;
-	static RuntimeModel^ RuntimeModel;
+	static SafetySharpRuntimeModel^ RuntimeModel;
 	static const char* ModelFile;
 };
 
@@ -118,7 +118,7 @@ void PrepareLoadModel(model_t model, const char* modelFile)
 	LoadModel(model, modelFile);
 }
 
-RuntimeModel^ CreateModel()
+ExecutableModel^ CreateModel()
 {
 	return Globals::RuntimeModel;
 }
@@ -128,8 +128,8 @@ void LoadModel(model_t model, const char* modelFile)
 	try
 	{
 		auto modelData = RuntimeModelSerializer::LoadSerializedData(File::ReadAllBytes(gcnew String(modelFile)));
-		Globals::RuntimeModel = gcnew RuntimeModel(modelData, sizeof(int32_t));
-		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel(gcnew Func<RuntimeModel^>(&CreateModel), gcnew array<Func<bool>^>(0), 1 << 16);
+		Globals::RuntimeModel = gcnew SafetySharpRuntimeModel(modelData, sizeof(int32_t));
+		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel(gcnew Func<ExecutableModel^>(&CreateModel), gcnew array<Func<bool>^>(0), 1 << 16);
 
 		auto stateSlotCount = (int32_t)(Globals::RuntimeModel->StateVectorSize / sizeof(int32_t));
 		auto stateLabelCount = Globals::RuntimeModel->ExecutableStateFormulas->Length;
@@ -149,7 +149,7 @@ void LoadModel(model_t model, const char* modelFile)
 			// Slot 0 is the special pseudo construction slot
 			if (i == 0)
 			{
-				auto name = Marshal::StringToHGlobalAnsi(RuntimeModel::ConstructionStateName);
+				auto name = Marshal::StringToHGlobalAnsi(ExecutableModel::ConstructionStateName);
 				lts_type_set_state_name(ltsType, i, (char*)name.ToPointer());
 				Marshal::FreeHGlobal(name);
 			}
