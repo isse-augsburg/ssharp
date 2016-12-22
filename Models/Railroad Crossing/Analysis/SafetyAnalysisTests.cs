@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 {
 	using System;
 	using FluentAssertions;
+	using ModelChecking;
 	using Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
@@ -35,10 +36,10 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
 			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.PossibleCollision, backend: backend);
+			var result = SafetySharpSafetyAnalysis.AnalyzeHazard(model, model.PossibleCollision, backend: backend);
 			result.SaveCounterExamples("counter examples/railroad crossing/dcca/collision");
 
-			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
+			var orderResult = SafetySharpOrderAnalysis.ComputeOrderRelationships(result);
 			Console.WriteLine(orderResult);
 
 			result.IsComplete.Should().BeTrue();

@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 	using System;
 	using System.Linq;
 	using FluentAssertions;
+	using ModelChecking;
 	using Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
@@ -42,10 +43,10 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 		public void TankRupture()
 		{
 			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Tank.IsRuptured);
+			var result = SafetySharpSafetyAnalysis.AnalyzeHazard(model, model.Tank.IsRuptured);
 			result.SaveCounterExamples("counter examples/pressure tank/dcca/tank rupture");
 
-			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
+			var orderResult = SafetySharpOrderAnalysis.ComputeOrderRelationships(result);
 			Console.WriteLine(orderResult);
 
 			result.IsComplete.Should().BeTrue();
@@ -67,7 +68,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 		public void TankDepleted()
 		{
 			var model = new Model();
-			var result = SafetyAnalysis.AnalyzeHazard(model, model.Tank.IsDepleted);
+			var result = SafetySharpSafetyAnalysis.AnalyzeHazard(model, model.Tank.IsDepleted);
 
 			result.SaveCounterExamples("counter examples/pressure tank/dcca/tank depleted");
 			Console.WriteLine(result);

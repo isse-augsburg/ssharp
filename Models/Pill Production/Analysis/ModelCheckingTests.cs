@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 {
 	using System;
 	using System.Linq;
+	using ModelChecking;
 	using Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
@@ -114,7 +115,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 
 		private void Dcca(Model model, FaultActivationBehavior activation, params IFaultSetHeuristic[] heuristics)
 		{
-			var modelChecker = new SafetyAnalysis
+			var modelChecker = new SafetySharpSafetyAnalysis
 			{
 				Configuration =
 				{
@@ -149,13 +150,10 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			var model = new ModelSetupParser().Parse("Analysis/medium_setup.model");
 			model.Faults.SuppressActivations();
 
-			var checker = new QualitativeChecker { Configuration = { StateCapacity = 1 << 18 } };
+			var checker = new SafetySharpQualitativeChecker { Configuration = { StateCapacity = 1 << 18 } };
 			var result = checker.CheckInvariant(model, true);
-
-			foreach (var analysisResultExtension in result.Extensions)
-			{
-				Console.WriteLine(analysisResultExtension);
-			}
+			
+			Console.WriteLine(result);
 		}
 
 		[Test]

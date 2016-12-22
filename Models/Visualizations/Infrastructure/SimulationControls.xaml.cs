@@ -179,13 +179,14 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 
 		private void OnCounterExample(object sender, RoutedEventArgs e)
 		{
+			var counterExampleSerialization = new SafetySharpCounterExampleSerialization();
 			var dialog = new OpenFileDialog
 			{
 				AddExtension = true,
 				CheckFileExists = true,
 				CheckPathExists = true,
 				DefaultExt = ".ltsmin",
-				Filter = $"S# Counter Examples (*{CounterExample.FileExtension})|*{CounterExample.FileExtension}",
+				Filter = $"S# Counter Examples (*{counterExampleSerialization.FileExtension})|*{counterExampleSerialization.FileExtension}",
 				Title = "Open S# Counter Example",
 				Multiselect = false
 			};
@@ -195,7 +196,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 
 			try
 			{
-				var simulator = new SafetySharpSimulator(SafetySharpCounterExample.Load(dialog.FileName));
+				var simulator = new SafetySharpSimulator(counterExampleSerialization.Load(dialog.FileName));
 
 				SetSimulator(simulator);
 				CloseCounterExampleButton.Visibility = Visibility.Visible;

@@ -38,6 +38,11 @@ namespace SafetySharp.Analysis
 	public class LtsMin
 	{
 		/// <summary>
+		///   The unique name of the construction state.
+		/// </summary>
+		internal const string ConstructionStateName = "constructionState259C2EE0D9884B92989DF442BA268E8E";
+
+		/// <summary>
 		///   Represents the LtsMin process that is currently running.
 		/// </summary>
 		private ExternalProcess _ltsMin;
@@ -67,7 +72,7 @@ namespace SafetySharp.Analysis
 			transformationVisitor.Visit(invariant);
 
 			return Check(model, invariant,
-				$"--invariant=\"({SafetySharpRuntimeModel.ConstructionStateName} == 1) || ({transformationVisitor.TransformedFormula})\"");
+				$"--invariant=\"({ConstructionStateName} == 1) || ({transformationVisitor.TransformedFormula})\"");
 		}
 
 		/// <summary>

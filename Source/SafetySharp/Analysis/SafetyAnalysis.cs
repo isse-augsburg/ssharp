@@ -36,7 +36,7 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Performs safety analyses on a model.
 	/// </summary>
-	public sealed class SafetyAnalysis<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	public class SafetyAnalysis<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly HashSet<FaultSet> _checkedSets = new HashSet<FaultSet>();
 		private readonly Dictionary<FaultSet, CounterExample<TExecutableModel>> _counterExamples = new Dictionary<FaultSet, CounterExample<TExecutableModel>>();

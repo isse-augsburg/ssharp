@@ -211,11 +211,9 @@ namespace SafetySharp.Analysis
 				var fileName = String.Join("_", pair.Key.Select(f => f.Name));
 				if (String.IsNullOrWhiteSpace(fileName))
 					fileName = "emptyset";
-
-				var counterExampleSerialization = RuntimeModel.CounterExampleSerialization;
-				var fullFileName = Path.Combine(directory, $"{fileName}{counterExampleSerialization.FileExtension}");
-
-				counterExampleSerialization.Save(pair.Value, fullFileName);
+				
+				var fullFileName = Path.Combine(directory, fileName);
+				pair.Value.Save(fullFileName);
 			}
 		}
 

@@ -165,5 +165,14 @@ namespace SafetySharp.Analysis
 			if (disposing)
 				RuntimeModel.SafeDispose();
 		}
+
+		/// <summary>
+		///   Saves the counter example to the <paramref name="file" />.
+		/// </summary>
+		/// <param name="file">The file the counter example should be saved to.</param>
+		public void Save(string file)
+		{
+			RuntimeModel.CounterExampleSerialization.Save(this,file);
+		}
 	}
 }

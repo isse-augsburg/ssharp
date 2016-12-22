@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 {
 	using FluentAssertions;
+	using ModelChecking;
 	using Modeling;
 	using SafetySharp.Modeling;
 	using NUnit.Framework;
@@ -157,7 +158,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void ExtracorporealBloodCircuitWorks_ModelChecking()
 		{
 			var specification = new ExtracorporealBloodCircuitTestEnvironment();
-			var analysis = new SafetyAnalysis();
+			var analysis = new SafetySharpSafetyAnalysis();
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.Dialyzer.MembraneIntact == false);
 			result.SaveCounterExamples("counter examples/hdmachine");

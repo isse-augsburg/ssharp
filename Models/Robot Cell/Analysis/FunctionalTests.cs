@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using System;
 	using System.Collections;
 	using System.Linq;
+	using ModelChecking;
 	using Modeling;
 	using Modeling.Controllers;
 	using NUnit.Framework;
@@ -47,7 +48,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<MiniZincObserverController>();
 			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
 
-			var modelChecker = new QualitativeChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 20 } };
+			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 20 } };
 			var result = modelChecker.CheckInvariant(model, true);
 
 			Console.WriteLine(result);
@@ -61,7 +62,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 		private static void Dcca(Model model)
 		{
-			var safetyAnalysis = new SafetyAnalysis
+			var safetyAnalysis = new SafetySharpSafetyAnalysis
 			{
 				Configuration =
 				{

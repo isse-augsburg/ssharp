@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
 	using System.Linq;
+	using ModelChecking;
 	using Modeling;
 	using Modeling.Controllers;
 	using NUnit.Framework;
@@ -40,7 +41,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
-			var modelChecker = new QualitativeChecker { Configuration = { StateCapacity = 1 << 22 } };
+			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { StateCapacity = 1 << 22 } };
 			var result = modelChecker.CheckInvariant(model, true);
 
 			Assert.IsTrue(result.FormulaHolds);
@@ -54,7 +55,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
-			var modelChecker = new QualitativeChecker { Configuration = { StateCapacity = 1 << 22 } };
+			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { StateCapacity = 1 << 22 } };
 			var result = modelChecker.CheckInvariant(model, !model.Workpieces.Any(w => w.IsDamaged));
 
 			Assert.IsTrue(result.FormulaHolds);
@@ -68,7 +69,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
-			var modelChecker = new QualitativeChecker { Configuration = { StateCapacity = 1 << 22 } };
+			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { StateCapacity = 1 << 22 } };
 			var result = modelChecker.CheckInvariant(model, !model.Workpieces.All(w => w.IsComplete));
 
 			Assert.IsFalse(result.FormulaHolds);
@@ -82,7 +83,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
-			var modelChecker = new QualitativeChecker { Configuration = { StateCapacity = 1 << 22 } };
+			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { StateCapacity = 1 << 22 } };
 			var result = modelChecker.CheckInvariant(model,
 				model.RobotAgents.All(a => a.HasResource == a.Robot.HasWorkpiece) &&
 				model.CartAgents.All(a => a.HasResource == a.Cart.HasWorkpiece));

@@ -30,6 +30,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 	using SafetySharp.Analysis.Heuristics;
 	using SafetySharp.Modeling;
 	using FluentAssertions;
+	using ModelChecking;
+
 	public class ModelTests
 	{
 		[Test]
@@ -116,7 +118,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
 			var specification = new Model();
-			var analysis = new SafetyAnalysis
+			var analysis = new SafetySharpSafetyAnalysis
 			{
 				Configuration = { StateCapacity = 1310720 },
 				Backend = backend,
@@ -126,7 +128,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.IncomingBloodWasNotOk);
 			result.SaveCounterExamples("counter examples/hdmachine_contamination");
 
-			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
+			var orderResult = SafetySharpOrderAnalysis.ComputeOrderRelationships(result);
 			Console.WriteLine(orderResult);
 		}
 
@@ -135,12 +137,12 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
 			var specification = new Model();
-			var analysis = new SafetyAnalysis { Configuration = { StateCapacity = 1310720 }, Backend = backend };
+			var analysis = new SafetySharpSafetyAnalysis { Configuration = { StateCapacity = 1310720 }, Backend = backend };
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.BloodNotCleanedAndDialyzingFinished);
 			result.SaveCounterExamples("counter examples/hdmachine_unsuccessful");
 
-			var orderResult = OrderAnalysis.ComputeOrderRelationships(result);
+			var orderResult = SafetySharpOrderAnalysis.ComputeOrderRelationships(result);
 			Console.WriteLine(orderResult);
 		}
 
@@ -158,7 +160,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			for (var i = 0; i < faults.Length; ++i)
 				faults[i].Activation = Activation.Nondeterministic;
 
-			var checker = new QualitativeChecker { Configuration = { StateCapacity = 1310720 } };
+			var checker = new SafetySharpQualitativeChecker { Configuration = { StateCapacity = 1310720 } };
 			checker.CheckInvariant(model, true);
 		}
 		

@@ -126,6 +126,7 @@
     <Compile Include="Analysis\SafetyChecking\StateGraphBackend.cs" />
     <Compile Include="Analysis\SafetySharpSimulator.cs" />
     <Compile Include="Analysis\QualitativeChecker.cs" />
+    <Compile Include="ModelChecking\ModelChecking.cs" />
     <Compile Include="Modeling\ExecutableStateFormula.cs" />
     <Compile Include="Modeling\HiddenAttribute.cs" />
     <Compile Include="Modeling\IComponent.cs" />

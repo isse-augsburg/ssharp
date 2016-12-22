@@ -60,6 +60,7 @@ using namespace System::IO;
 using namespace System::Reflection;
 using namespace System::Runtime::InteropServices;
 using namespace System::Threading;
+using namespace SafetySharp::Analysis;
 using namespace SafetySharp::Analysis::ModelChecking;
 using namespace SafetySharp::Analysis::ModelChecking::Transitions;
 using namespace SafetySharp::Runtime;
@@ -97,8 +98,9 @@ matrix_t StateLabelMatrix;
 // Global variables of managed types must be wrapped in a class...
 ref struct Globals
 {
-	static ActivationMinimalExecutedModel^ ExecutedModel;
+	static ActivationMinimalExecutedModel<SafetySharpRuntimeModel^>^ ExecutedModel;
 	static SafetySharpRuntimeModel^ RuntimeModel;
+	static LtsMin^ LtsMin;
 	static const char* ModelFile;
 };
 
@@ -118,7 +120,7 @@ void PrepareLoadModel(model_t model, const char* modelFile)
 	LoadModel(model, modelFile);
 }
 
-ExecutableModel^ CreateModel()
+SafetySharpRuntimeModel^ CreateModel()
 {
 	return Globals::RuntimeModel;
 }
@@ -129,7 +131,7 @@ void LoadModel(model_t model, const char* modelFile)
 	{
 		auto modelData = RuntimeModelSerializer::LoadSerializedData(File::ReadAllBytes(gcnew String(modelFile)));
 		Globals::RuntimeModel = gcnew SafetySharpRuntimeModel(modelData, sizeof(int32_t));
-		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel(gcnew Func<ExecutableModel^>(&CreateModel), gcnew array<Func<bool>^>(0), 1 << 16);
+		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel<SafetySharpRuntimeModel^>(gcnew Func<SafetySharpRuntimeModel^>(&CreateModel), gcnew array<Func<bool>^>(0), 1 << 16);
 
 		auto stateSlotCount = (int32_t)(Globals::RuntimeModel->StateVectorSize / sizeof(int32_t));
 		auto stateLabelCount = Globals::RuntimeModel->ExecutableStateFormulas->Length;
@@ -149,7 +151,7 @@ void LoadModel(model_t model, const char* modelFile)
 			// Slot 0 is the special pseudo construction slot
 			if (i == 0)
 			{
-				auto name = Marshal::StringToHGlobalAnsi(ExecutableModel::ConstructionStateName);
+				auto name = Marshal::StringToHGlobalAnsi(LtsMin::ConstructionStateName);
 				lts_type_set_state_name(ltsType, i, (char*)name.ToPointer());
 				Marshal::FreeHGlobal(name);
 			}

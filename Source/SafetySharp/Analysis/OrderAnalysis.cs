@@ -34,7 +34,7 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Performs order analyses for minimal critical fault sets.
 	/// </summary>
-	public sealed class OrderAnalysis<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	public class OrderAnalysis<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly FaultOptimizationBackend<TExecutableModel> _backend = new FaultOptimizationBackend<TExecutableModel>(stateHeaderBytes: 4);
 		private readonly SafetyAnalysisResults<TExecutableModel> _results;

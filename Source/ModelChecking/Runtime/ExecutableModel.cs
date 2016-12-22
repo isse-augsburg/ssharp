@@ -38,11 +38,6 @@ namespace SafetySharp.Runtime
 	public abstract unsafe class ExecutableModel<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
-		///   The unique name of the construction state.
-		/// </summary>
-		internal const string ConstructionStateName = "constructionState259C2EE0D9884B92989DF442BA268E8E";
-
-		/// <summary>
 		///   Deserializes a state of the model.
 		/// </summary>
 		protected SerializationDelegate _deserialize;
