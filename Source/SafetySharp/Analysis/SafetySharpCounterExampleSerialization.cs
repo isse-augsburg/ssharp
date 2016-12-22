@@ -35,35 +35,44 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents a model checking counter example.
 	/// </summary>
-	public class SafetySharpCounterExample : CounterExample
+	public class SafetySharpCounterExampleSerialization : CounterExampleSerialization<SafetySharpRuntimeModel>
 	{
 		internal SafetySharpRuntimeModel SafetySharpRuntimeModel { get; }
 
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="runtimeModel">The runtime model the counter example was generated for.</param>
-		/// <param name="states">The serialized counter example.</param>
-		/// <param name="replayInfo">The replay information of the counter example.</param>
-		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		internal SafetySharpCounterExample(SafetySharpRuntimeModel runtimeModel, byte[][] states, int[][] replayInfo, bool endsWithException) : 
-			base(runtimeModel, states, replayInfo, endsWithException)
+		public override void WriteInternalStateStructure(CounterExample<SafetySharpRuntimeModel> counterExample, BinaryWriter writer)
 		{
-			SafetySharpRuntimeModel = runtimeModel;
+			var formatter = new BinaryFormatter();
+			var memoryStream = new MemoryStream();
+			formatter.Serialize(memoryStream, counterExample.RuntimeModel.StateVectorLayout.ToArray());
+
+			var metadata = memoryStream.ToArray();
+			writer.Write(metadata.Length);
+			writer.Write(metadata);
 		}
-		
+
+		public override void ReadInternalStateStructure(BinaryReader reader)
+		{
+			var serializedRuntimeModel = reader.ReadBytes(reader.ReadInt32());
+			var modelData = RuntimeModelSerializer.LoadSerializedData(serializedRuntimeModel);
+
+			foreach (var fault in modelData.ObjectTable.OfType<Fault>())
+				fault.Activation = (Activation)reader.ReadInt32();
+
+			var runtimeModel = new SafetySharpRuntimeModel(modelData);
+			runtimeModel.UpdateFaultSets();
+		}
 		
 		/// <summary>
 		///   Loads a counter example from the <paramref name="file" />.
 		/// </summary>
 		/// <param name="file">The path to the file the counter example should be loaded from.</param>
-		public static SafetySharpCounterExample Load(string file)
+		public override CounterExample<SafetySharpRuntimeModel> Load(string file)
 		{
 			Requires.NotNullOrWhitespace(file, nameof(file));
 
 			using (var reader = new BinaryReader(File.OpenRead(file), Encoding.UTF8))
 			{
-				if (reader.ReadInt32() != CounterExample.FileHeader)
+				if (reader.ReadInt32() != FileHeader)
 					throw new InvalidOperationException("The file does not contain a counter example that is compatible with this version of S#.");
 
 				var endsWithException = reader.ReadBoolean();
@@ -119,18 +128,8 @@ namespace SafetySharp.Analysis
 						replayInfo[i][j] = reader.ReadInt32();
 				}
 
-				return new SafetySharpCounterExample(runtimeModel, counterExample, replayInfo, endsWithException);
+				return new CounterExample<SafetySharpRuntimeModel>(runtimeModel, counterExample, replayInfo, endsWithException);
 			}
-		}
-
-		/// <summary>
-		///   Disposes the object, releasing all managed and unmanaged resources.
-		/// </summary>
-		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
-		protected override void OnDisposing(bool disposing)
-		{
-			if (disposing)
-				RuntimeModel.SafeDispose();
 		}
 	}
 }

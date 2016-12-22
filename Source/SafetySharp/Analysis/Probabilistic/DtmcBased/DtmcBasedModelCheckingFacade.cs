@@ -42,7 +42,7 @@ namespace SafetySharp.Analysis.Probabilistic.DtmcBased
 	{
 		//TODO: Safe disposal of BuiltinDtmcModelChecker
 
-		private DtmcFromExecutableModelGenerator _generator;
+		private DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel> _generator;
 
 		private HashSet<Formula> _booleanFormulas;
 		private HashSet<Formula> _probabilityFormulas;
@@ -56,7 +56,9 @@ namespace SafetySharp.Analysis.Probabilistic.DtmcBased
 
 		public DtmcBasedModelCheckingFacade(ModelBase model)
 		{
-			_generator=new DtmcFromExecutableModelGenerator(model);
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			_generator =new DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
 		}
 
 		private async Task<bool> CheckBoolean(Formula booleanFormula)

@@ -158,7 +158,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			for (var i = 0; i < faults.Length; ++i)
 				faults[i].Activation = Activation.Nondeterministic;
 
-			var checker = new SSharpChecker { Configuration = { StateCapacity = 1310720 } };
+			var checker = new QualitativeChecker { Configuration = { StateCapacity = 1310720 } };
 			checker.CheckInvariant(model, true);
 		}
 		
@@ -167,7 +167,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		{
 			var specification = new Model();
 			var model = specification;
-			var result = ModelChecker.CheckInvariants(model, !specification.IncomingBloodWasNotOk, !specification.BloodNotCleanedAndDialyzingFinished);
+			var result = SafetySharpModelChecker.CheckInvariants(model, !specification.IncomingBloodWasNotOk, !specification.BloodNotCleanedAndDialyzingFinished);
 
 			result[0].FormulaHolds.Should().BeFalse();
 			result[1].FormulaHolds.Should().BeFalse();

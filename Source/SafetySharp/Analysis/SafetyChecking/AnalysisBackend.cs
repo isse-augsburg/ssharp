@@ -25,29 +25,30 @@ namespace SafetySharp.Analysis.SafetyChecking
 	using System;
 	using System.Linq;
 	using Modeling;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   Represents a back end for safety analyses, encapsulating the way that the individual checks are carried out on the
 	///   analyzed model.
 	/// </summary>
-	internal abstract class AnalysisBackend
+	internal abstract class AnalysisBackend<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		protected FaultSet ForcedFaults { get; private set; }
-		protected ModelBase Model { get; private set; }
+		protected TExecutableModel RuntimeModel { get; private set; }
 		protected FaultSet SuppressedFaults { get; private set; }
 
 		/// <summary>
 		///   Initizializes the model that should be analyzed.
 		/// </summary>
 		/// <param name="configuration">The configuration that should be used for the analyses.</param>
-		/// <param name="model">The model that should be analyzed.</param>
+		/// <param name="runtimeModel">The model that should be analyzed.</param>
 		/// <param name="hazard">The hazard that should be analyzed.</param>
-		internal void InitializeModel(AnalysisConfiguration configuration, ModelBase model, Formula hazard)
+		internal void InitializeModel(AnalysisConfiguration configuration, TExecutableModel runtimeModel, Formula hazard)
 		{
-			Model = model;
-			ForcedFaults = new FaultSet(Model.Faults.Where(fault => fault.Activation == Activation.Forced));
-			SuppressedFaults = new FaultSet(Model.Faults.Where(fault => fault.Activation == Activation.Suppressed));
+			RuntimeModel = runtimeModel;
+			ForcedFaults = new FaultSet(RuntimeModel.Faults.Where(fault => fault.Activation == Activation.Forced));
+			SuppressedFaults = new FaultSet(RuntimeModel.Faults.Where(fault => fault.Activation == Activation.Suppressed));
 
 			InitializeModel(configuration, hazard);
 		}
@@ -64,7 +65,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// </summary>
 		/// <param name="faults">The fault set that should be checked for criticality.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
-		internal abstract AnalysisResult CheckCriticality(FaultSet faults, Activation activation);
+		internal abstract AnalysisResult<TExecutableModel> CheckCriticality(FaultSet faults, Activation activation);
 
 		/// <summary>
 		///   Checks the order of <see cref="firstFault" /> and <see cref="secondFault" /> for the
@@ -75,7 +76,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// <param name="minimalCriticalFaultSet">The minimal critical fault set that should be checked.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
 		/// <param name="forceSimultaneous">Indicates whether both faults must occur simultaneously.</param>
-		internal abstract AnalysisResult CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
+		internal abstract AnalysisResult<TExecutableModel> CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
 													Activation activation, bool forceSimultaneous);
 
 		/// <summary>

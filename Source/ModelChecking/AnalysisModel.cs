@@ -30,7 +30,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// <summary>
 	///   Represents a common interface for models that can be analyzed with the model checking infrastructure.
 	/// </summary>
-	internal abstract unsafe class AnalysisModel : DisposableObject
+	internal abstract unsafe class AnalysisModel<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Gets the size of the model's state vector in bytes.
@@ -45,13 +45,13 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
 		/// </summary>
-		public abstract ExecutableModel RuntimeModel { get; }
+		public abstract TExecutableModel RuntimeModel { get; }
 
 		/// <summary>
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
 		///   <see cref="AnalysisModel" />.
 		/// </summary>
-		public abstract Func<ExecutableModel> RuntimeModelCreator { get; }
+		public abstract Func<TExecutableModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   Gets all initial transitions of the model.
@@ -77,6 +77,6 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   transitions could be generated for the model.
 		/// </param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		public abstract CounterExample CreateCounterExample(byte[][] path, bool endsWithException);
+		public abstract CounterExample<TExecutableModel> CreateCounterExample(byte[][] path, bool endsWithException);
 	}
 }

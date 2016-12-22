@@ -39,7 +39,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		public void EnumerateAllStatesOriginalDesign()
 		{
 			var model = Model.CreateOriginal();
-			var result = ModelChecker.CheckInvariant(model, true);
+			var result = SafetySharpModelChecker.CheckInvariant(model, true);
 
 			result.FormulaHolds.Should().BeTrue();
 		}
@@ -49,7 +49,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		{
 			var model = Model.CreateOriginal();
 
-			var result = ModelChecker.CheckInvariants(model, true, false, true);
+			var result = SafetySharpModelChecker.CheckInvariants(model, true, false, true);
 			result[0].FormulaHolds.Should().BeTrue();
 			result[1].FormulaHolds.Should().BeFalse();
 			result[2].FormulaHolds.Should().BeTrue();
@@ -89,7 +89,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		[TestCaseSource(nameof(CreateModelVariants))]
 		public void EnumerateAllStates(Model model, string variantName)
 		{
-			var result = ModelChecker.CheckInvariant(model, true);
+			var result = SafetySharpModelChecker.CheckInvariant(model, true);
 			result.FormulaHolds.Should().BeTrue();
 		}
 

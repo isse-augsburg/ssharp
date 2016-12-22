@@ -34,7 +34,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		{
 			var model = new Model();
 
-			var result = ModelChecker.CheckInvariant(model, true);
+			var result = SafetySharpModelChecker.CheckInvariant(model, true);
 			result.FormulaHolds.Should().BeTrue();
 		}
 
@@ -43,7 +43,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		{
 			var model = new Model();
 
-			var result = ModelChecker.CheckInvariants(model, true, false, true);
+			var result = SafetySharpModelChecker.CheckInvariants(model, true, false, true);
 			result[0].FormulaHolds.Should().BeTrue();
 			result[1].FormulaHolds.Should().BeFalse();
 			result[2].FormulaHolds.Should().BeTrue();
@@ -54,7 +54,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		{
 			var model = new Model();
 
-			var result = ModelChecker.CheckInvariant(model, !(model.Train.Position < Model.CrossingPosition && model.Train.Speed == 0));
+			var result = SafetySharpModelChecker.CheckInvariant(model, !(model.Train.Position < Model.CrossingPosition && model.Train.Speed == 0));
 			result.FormulaHolds.Should().BeFalse();
 			result.CounterExample.Should().NotBeNull();
 			result.CounterExample.Save("counter examples/railroad crossing/train can stop before crossing");
@@ -65,7 +65,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		{
 			var model = new Model();
 
-			var result = ModelChecker.CheckInvariant(model, !(model.TrainIsAtCrossing && model.CrossingIsSecured));
+			var result = SafetySharpModelChecker.CheckInvariant(model, !(model.TrainIsAtCrossing && model.CrossingIsSecured));
 			result.FormulaHolds.Should().BeFalse();
 			result.CounterExample.Should().NotBeNull();
 			result.CounterExample.Save("counter examples/railroad crossing/train can pass secured crossing");
@@ -76,7 +76,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		{
 			var model = new Model();
 
-			var result = ModelChecker.CheckInvariant(model, !(model.TrainIsAtCrossing && !model.CrossingIsSecured));
+			var result = SafetySharpModelChecker.CheckInvariant(model, !(model.TrainIsAtCrossing && !model.CrossingIsSecured));
 			result.FormulaHolds.Should().BeFalse();
 			result.CounterExample.Should().NotBeNull();
 			result.CounterExample.Save("counter examples/railroad crossing/train can pass unsecured crossing");

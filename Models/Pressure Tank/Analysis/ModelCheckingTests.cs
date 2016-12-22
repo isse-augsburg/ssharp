@@ -44,7 +44,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 		{
 			var model = new Model();
 
-			var result = ModelChecker.CheckInvariant(model, true);
+			var result = SafetySharpModelChecker.CheckInvariant(model, true);
 			result.FormulaHolds.Should().BeTrue();
 		}
 
@@ -55,7 +55,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 		public void StateGraphAllStates()
 		{
 			var model = new Model();
-			var result = ModelChecker.CheckInvariants(model, model.Tank.PressureLevel < 100, model.Tank.PressureLevel < 40);
+			var result = SafetySharpModelChecker.CheckInvariants(model, model.Tank.PressureLevel < 100, model.Tank.PressureLevel < 40);
 
 			result[0].FormulaHolds.Should().BeTrue();
 			result[1].FormulaHolds.Should().BeFalse();
@@ -76,7 +76,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 				!model.Pump.SuppressPumping.IsActivated &&
 				!model.Timer.SuppressTimeout.IsActivated;
 
-			var result = ModelChecker.Check(model, G(noFaults).Implies(!F(model.Tank.IsRuptured)));
+			var result = SafetySharpModelChecker.Check(model, G(noFaults).Implies(!F(model.Tank.IsRuptured)));
 			result.FormulaHolds.Should().BeTrue();
 		}
 
@@ -90,7 +90,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			var model = new Model();
 			model.Faults.SuppressActivations();
 
-			var result = ModelChecker.CheckInvariant(model, !model.Tank.IsRuptured);
+			var result = SafetySharpModelChecker.CheckInvariant(model, !model.Tank.IsRuptured);
 			result.FormulaHolds.Should().BeTrue();
 		}
 
@@ -111,7 +111,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			// can be checked more efficiently. This optimization is made purely for reasons of illustration, 
 			// of course, as the case study is so simple that model checking times are completely irrelevant.
 
-			var result = ModelChecker.CheckInvariant(model, !model.Tank.IsRuptured);
+			var result = SafetySharpModelChecker.CheckInvariant(model, !model.Tank.IsRuptured);
 			result.FormulaHolds.Should().BeTrue();
 		}
 
@@ -128,7 +128,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			model.Sensor.SuppressIsFull.Activation = Activation.Forced;
 			model.Timer.SuppressTimeout.Activation = Activation.Forced;
 
-			var result = ModelChecker.CheckInvariant(model, !model.Tank.IsRuptured);
+			var result = SafetySharpModelChecker.CheckInvariant(model, !model.Tank.IsRuptured);
 
 			result.FormulaHolds.Should().BeFalse();
 			result.CounterExample.Should().NotBeNull();
@@ -143,7 +143,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 		public void TankRupturesShouldBePossible()
 		{
 			var model = new Model();
-			var result = ModelChecker.CheckInvariant(model, !model.Tank.IsRuptured);
+			var result = SafetySharpModelChecker.CheckInvariant(model, !model.Tank.IsRuptured);
 
 			result.FormulaHolds.Should().BeFalse();
 			result.CounterExample.Should().NotBeNull();
@@ -159,7 +159,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			var model = new Model();
 			model.Faults.SuppressActivations();
 
-			var result = ModelChecker.CheckInvariant(model, !model.Timer.HasElapsed);
+			var result = SafetySharpModelChecker.CheckInvariant(model, !model.Timer.HasElapsed);
 			result.FormulaHolds.Should().BeTrue();
 		}
 
@@ -175,7 +175,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			model.Faults.SuppressActivations();
 			model.Sensor.SuppressIsFull.Activation = Activation.Forced;
 
-			var result = ModelChecker.CheckInvariant(model, !model.Timer.HasElapsed);
+			var result = SafetySharpModelChecker.CheckInvariant(model, !model.Timer.HasElapsed);
 
 			result.FormulaHolds.Should().BeFalse();
 			result.CounterExample.Should().NotBeNull();

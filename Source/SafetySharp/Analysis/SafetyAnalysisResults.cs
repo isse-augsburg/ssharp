@@ -29,27 +29,28 @@ namespace SafetySharp.Analysis
 	using System.Text;
 	using Heuristics;
 	using Modeling;
+	using Runtime;
 	using Utilities;
-
+	using Analysis;
 	/// <summary>
 	///   Represents the result of a <see cref="SafetyAnalysis" />.
 	/// </summary>
-	public sealed class SafetyAnalysisResults
+	public sealed class SafetyAnalysisResults<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="model">The <see cref="Model" /> instance the safety analysis was conducted for.</param>
+		/// <param name="runtimeModel">The <see cref="TExecutableModel" /> instance the safety analysis was conducted for.</param>
 		/// <param name="hazard">The hazard the analysis was conducated for.</param>
 		/// <param name="suppressedFaults">The faults whose activations have been completely suppressed during analysis.</param>
 		/// <param name="forcedFaults">The faults whose activations have been forced during analysis.</param>
 		/// <param name="heuristics">The heuristics that are used during the analysis.</param>
 		/// <param name="activationBehavior">The fault acitvation behavior used during the analysis.</param>
-		internal SafetyAnalysisResults(ModelBase model, Formula hazard, IEnumerable<Fault> suppressedFaults,
+		internal SafetyAnalysisResults(TExecutableModel runtimeModel, Formula hazard, IEnumerable<Fault> suppressedFaults,
 									  IEnumerable<Fault> forcedFaults, IEnumerable<IFaultSetHeuristic> heuristics,
 									  FaultActivationBehavior activationBehavior)
 		{
-			Model = model;
+			RuntimeModel = runtimeModel;
 			Hazard = hazard;
 			SuppressedFaults = suppressedFaults;
 			ForcedFaults = forcedFaults;
@@ -92,12 +93,12 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Gets the faults that have been checked.
 		/// </summary>
-		public IEnumerable<Fault> Faults => Model.Faults;
+		public IEnumerable<Fault> Faults => RuntimeModel.Faults;
 
 		/// <summary>
 		///   Gets the counter examples that were generated for the critical fault sets.
 		/// </summary>
-		public IDictionary<ISet<Fault>, CounterExample> CounterExamples { get; private set; }
+		public IDictionary<ISet<Fault>, CounterExample<TExecutableModel>> CounterExamples { get; private set; }
 
 		/// <summary>
 		///   Gets a value indicating whether the analysis might is complete, i.e., all fault sets have been checked for criticality.
@@ -105,9 +106,9 @@ namespace SafetySharp.Analysis
 		public bool IsComplete { get; internal set; }
 
 		/// <summary>
-		///   Gets the <see cref="Model" /> instance the safety analysis was conducted for.
+		///   Gets the <see cref="RuntimeModel" /> instance the safety analysis was conducted for.
 		/// </summary>
-		public ModelBase Model { get; }
+		public TExecutableModel RuntimeModel { get; }
 
 		/// <summary>
 		///   Gets the time it took to complete the analysis.
@@ -152,7 +153,7 @@ namespace SafetySharp.Analysis
 		/// <param name="counterExamples">The counter examples that were generated for the critical fault sets.</param>
 		/// <param name="exceptions">The exceptions that have been thrown during the analysis.</param>
 		internal void SetResult(HashSet<FaultSet> criticalSets, HashSet<FaultSet> checkedSets,
-								Dictionary<FaultSet, CounterExample> counterExamples, Dictionary<FaultSet, Exception> exceptions)
+								Dictionary<FaultSet, CounterExample<TExecutableModel>> counterExamples, Dictionary<FaultSet, Exception> exceptions)
 		{
 			var knownFaultSets = new Dictionary<FaultSet, ISet<Fault>>();
 
@@ -184,7 +185,7 @@ namespace SafetySharp.Analysis
 			if (knownSets.TryGetValue(set, out faultSet))
 				return faultSet;
 
-			faultSet = new HashSet<Fault>(set.ToFaultSequence(Model.Faults));
+			faultSet = new HashSet<Fault>(set.ToFaultSequence(RuntimeModel.Faults));
 			knownSets.Add(set, faultSet);
 
 			return faultSet;
@@ -211,7 +212,10 @@ namespace SafetySharp.Analysis
 				if (String.IsNullOrWhiteSpace(fileName))
 					fileName = "emptyset";
 
-				pair.Value.Save(Path.Combine(directory, $"{fileName}{CounterExample.FileExtension}"));
+				var counterExampleSerialization = RuntimeModel.CounterExampleSerialization;
+				var fullFileName = Path.Combine(directory, $"{fileName}{counterExampleSerialization.FileExtension}");
+
+				counterExampleSerialization.Save(pair.Value, fullFileName);
 			}
 		}
 

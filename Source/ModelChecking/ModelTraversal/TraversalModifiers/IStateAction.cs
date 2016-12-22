@@ -22,10 +22,12 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using Runtime;
+
 	/// <summary>
 	///   Represents an action that is executed when a new, reachable state is found during model traversal.
 	/// </summary>
-	internal unsafe interface IStateAction
+	internal unsafe interface IStateAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Processes the new <paramref name="state" /> discovered by the <paramref name="worker " /> within the traversal
@@ -36,6 +38,6 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// <param name="state">The new state that should be handled.</param>
 		/// <param name="stateIndex">The unique index of the new state.</param>
 		/// <param name="isInitial">Indicates whether the state is an initial state.</param>
-		void ProcessState(TraversalContext context, Worker worker, byte* state, int stateIndex, bool isInitial);
+		void ProcessState(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, byte* state, int stateIndex, bool isInitial);
 	}
 }

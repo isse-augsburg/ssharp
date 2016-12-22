@@ -36,7 +36,7 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Represents a runtime model that can be used for model checking or simulation.
 	/// </summary>
-	internal sealed unsafe class SafetySharpRuntimeModel : ExecutableModel
+	public sealed unsafe class SafetySharpRuntimeModel : ExecutableModel<SafetySharpRuntimeModel>
 	{
 		/// <summary>
 		///   The objects referenced by the model that participate in state serialization.
@@ -121,7 +121,13 @@ namespace SafetySharp.Runtime
 		///   Gets the state formulas of the model.
 		/// </summary>
 		internal ExecutableStateFormula[] ExecutableStateFormulas { get; }
-		
+
+
+		/// <summary>
+		///   Gets the state formulas of the model.
+		/// </summary>
+		protected override AtomarPropositionFormula[] AtomarPropositionFormulas => ExecutableStateFormulas;
+
 		/// <summary>
 		///   Computes an initial state of the model.
 		/// </summary>
@@ -240,18 +246,7 @@ namespace SafetySharp.Runtime
 			return notificationsSent;
 		}
 
-		public override void WriteInternalStateStructureToFile(BinaryWriter writer)
-		{
-			var formatter = new BinaryFormatter();
-			var memoryStream = new MemoryStream();
-			formatter.Serialize(memoryStream, StateVectorLayout.ToArray());
-
-			var metadata = memoryStream.ToArray();
-			writer.Write(metadata.Length);
-			writer.Write(metadata);
-
-		}
-
+		
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>
@@ -282,5 +277,38 @@ namespace SafetySharp.Runtime
 			foreach (var choice in Objects.OfType<Choice>())
 				choice.Resolver = choiceResolver;
 		}
+
+		public override CounterExampleSerialization<SafetySharpRuntimeModel> CounterExampleSerialization { get; } = new SafetySharpCounterExampleSerialization();
+
+		// Can create a fresh <see cref= "TExecutableModel" /> instance for further safety analysis.
+		public override Func<SafetySharpRuntimeModel> DeriveExecutableModelGenerator(params Formula[] formulas)
+		{
+			return CreateExecutedModelCreator(Model, formulas);
+		}
+
+		public static Func<SafetySharpRuntimeModel> CreateExecutedModelCreator(ModelBase model, params Formula[] stateFormulas)
+		{
+			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(stateFormulas, nameof(stateFormulas));
+
+			var serializer = new RuntimeModelSerializer();
+			serializer.Serialize(model, stateFormulas);
+			return serializer.Load;
+		}
+
+		public static Func<Formula[], Func<SafetySharpRuntimeModel>> CreateExecutedModelFromFormulasCreator(ModelBase model)
+		{
+			Requires.NotNull(model, nameof(model));
+
+			var serializer = new RuntimeModelSerializer();
+			Func<Formula[], Func<SafetySharpRuntimeModel>> loader = stateFormulas =>
+			{
+				Requires.NotNull(stateFormulas, nameof(stateFormulas));
+				serializer.Serialize(model, stateFormulas);
+				return serializer.Load;
+			};
+			return loader;
+		}
+
 	}
 }

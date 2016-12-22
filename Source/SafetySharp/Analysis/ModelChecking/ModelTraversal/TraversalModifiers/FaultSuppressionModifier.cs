@@ -22,12 +22,13 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using Runtime;
 	using Transitions;
 
 	/// <summary>
 	///   Removes all candidate transition that activate one or more of certain suppressed faults.
 	/// </summary>
-	internal sealed unsafe class FaultSuppressionModifier : ITransitionModifier
+	internal sealed unsafe class FaultSuppressionModifier<TExecutableModel> : ITransitionModifier<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly FaultSet _suppressedFaults;
 
@@ -52,7 +53,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// <param name="sourceState">The source state of the transitions.</param>
 		/// <param name="sourceStateIndex">The unique index of the transition's source state.</param>
 		/// <param name="isInitial">Indicates whether the transitions are initial transitions not starting in any valid source state.</param>
-		public void ModifyTransitions(TraversalContext context, Worker worker, TransitionCollection transitions, byte* sourceState,
+		public void ModifyTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, TransitionCollection transitions, byte* sourceState,
 									  int sourceStateIndex, bool isInitial)
 		{
 			foreach (CandidateTransition* transition in transitions)

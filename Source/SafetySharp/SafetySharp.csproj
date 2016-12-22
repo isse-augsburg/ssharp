@@ -46,10 +46,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnalysisResultSafetySharpExtension.cs" />
     <Compile Include="Analysis\AnalysisException.cs" />
     <Compile Include="Analysis\AnalysisResult.cs" />
-    <Compile Include="Analysis\SafetySharpCounterExample.cs" />
+    <Compile Include="Analysis\SafetySharpCounterExampleSerialization.cs" />
     <Compile Include="Analysis\FaultActivationBehavior.cs" />
     <Compile Include="Analysis\FormulaVisitors\SafetySharpCompilationVisitor.cs" />
     <Compile Include="Analysis\FormulaVisitors\CollectExecutableStateFormulasVisitor.cs" />
@@ -57,7 +56,6 @@
     <Compile Include="Analysis\Heuristics\MaximalSafeSetHeuristic.cs" />
     <Compile Include="Analysis\Heuristics\MinimalRedundancyHeuristic.cs" />
     <Compile Include="Analysis\Heuristics\SubsumptionHeuristic.cs" />
-    <Compile Include="Analysis\IAnalysisResultExtension.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\DeadlockChecker.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultOrderModifier.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultSuppressionModifier.cs" />
@@ -127,7 +125,7 @@
     <Compile Include="Analysis\SafetyAnalysisResults.cs" />
     <Compile Include="Analysis\SafetyChecking\StateGraphBackend.cs" />
     <Compile Include="Analysis\SafetySharpSimulator.cs" />
-    <Compile Include="Analysis\SSharpChecker.cs" />
+    <Compile Include="Analysis\QualitativeChecker.cs" />
     <Compile Include="Modeling\ExecutableStateFormula.cs" />
     <Compile Include="Modeling\HiddenAttribute.cs" />
     <Compile Include="Modeling\IComponent.cs" />
@@ -137,7 +135,7 @@
     <Compile Include="Modeling\SubcomponentAttribute.cs" />
     <Compile Include="Modeling\RootKind.cs" />
     <Compile Include="Analysis\FormulaVisitors\IsStateFormulaVisitor.cs" />
-    <Compile Include="Analysis\ModelChecker.cs" />
+    <Compile Include="Analysis\SafetySharpModelChecker.cs" />
     <Compile Include="Analysis\LtsMin.cs" />
     <Compile Include="Modeling\FaultExtensions.cs" />
     <Compile Include="Modeling\ModelBinder.cs" />

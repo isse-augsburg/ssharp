@@ -29,7 +29,7 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents a state formula, i.e., a Boolean expression that is evaluated in a single system state.
 	/// </summary>
-	internal class AtomarPropositionFormula : Formula
+	public class AtomarPropositionFormula : Formula
 	{
 		/// <summary>
 		///   Initializes a new instance of the <see cref="AtomarPropositionFormula" /> class.

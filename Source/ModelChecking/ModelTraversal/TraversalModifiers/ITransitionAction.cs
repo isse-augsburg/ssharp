@@ -22,12 +22,13 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using Runtime;
 	using Transitions;
 
 	/// <summary>
 	///   Represents an action that is executed when a new, valid transition is found during model traversal.
 	/// </summary>
-	internal unsafe interface ITransitionAction
+	internal unsafe interface ITransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Processes the new <paramref name="transition" /> discovered by the <paramref name="worker " /> within the traversal
@@ -39,6 +40,6 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// <param name="isInitialTransition">
 		///   Indicates whether the transition is an initial transition not starting in any valid source state.
 		/// </param>
-		void ProcessTransition(TraversalContext context, Worker worker, Transition* transition, bool isInitialTransition);
+		void ProcessTransition(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, Transition* transition, bool isInitialTransition);
 	}
 }

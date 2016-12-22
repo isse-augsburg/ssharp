@@ -32,13 +32,13 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// <summary>
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="Runtime.RuntimeModel" />.
 	/// </summary>
-	internal abstract unsafe class ExecutedModel : AnalysisModel
+	internal abstract unsafe class ExecutedModel<TExecutableModel> : AnalysisModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="createModel">A factory function that creates the model instance that should be executed.</param>
-		internal ExecutedModel(Func<ExecutableModel> createModel)
+		internal ExecutedModel(Func<TExecutableModel> createModel)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 
@@ -50,7 +50,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="runtimeModel">The model instance that should be executed.</param>
-		internal ExecutedModel(ExecutableModel runtimeModel)
+		internal ExecutedModel(TExecutableModel runtimeModel)
 		{
 			Requires.NotNull(runtimeModel, nameof(runtimeModel));
 			RuntimeModel = runtimeModel;
@@ -59,13 +59,13 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
 		/// </summary>
-		public sealed override ExecutableModel RuntimeModel { get; }
+		public sealed override TExecutableModel RuntimeModel { get; }
 
 		/// <summary>
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
 		///   <see cref="AnalysisModel" />.
 		/// </summary>
-		public sealed override Func<ExecutableModel> RuntimeModelCreator { get; }
+		public sealed override Func<TExecutableModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   Gets or sets the choice resolver that is used to resolve choices within the model.
@@ -167,7 +167,7 @@ namespace SafetySharp.Analysis.ModelChecking
 
 			return EndExecution();
 		}
-		
+
 		/// <summary>
 		///   Creates a counter example from the <paramref name="path" />.
 		/// </summary>
@@ -176,7 +176,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   transitions could be generated for the model.
 		/// </param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		public override CounterExample CreateCounterExample(byte[][] path, bool endsWithException)
+		public override CounterExample<TExecutableModel> CreateCounterExample(byte[][] path, bool endsWithException)
 		{
 			if (RuntimeModelCreator == null)
 				throw new InvalidOperationException("Counter example generation is not supported in this context.");

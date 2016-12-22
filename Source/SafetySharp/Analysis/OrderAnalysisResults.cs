@@ -27,17 +27,18 @@ namespace SafetySharp.Analysis
 	using System.Linq;
 	using System.Text;
 	using Modeling;
+	using Runtime;
 
 	/// <summary>
 	///   Represents the result of an <see cref="OrderAnalysis" />.
 	/// </summary>
-	public sealed class OrderAnalysisResults
+	public sealed class OrderAnalysisResults<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		internal OrderAnalysisResults(SafetyAnalysisResults safetyAnalysisResults, TimeSpan time,
-									  IDictionary<ISet<Fault>, IEnumerable<OrderRelationship>> orderRelationships)
+		internal OrderAnalysisResults(SafetyAnalysisResults<TExecutableModel> safetyAnalysisResults, TimeSpan time,
+									  IDictionary<ISet<Fault>, IEnumerable<OrderRelationship<TExecutableModel>>> orderRelationships)
 		{
 			SafetyAnalysisResults = safetyAnalysisResults;
 			Time = time;
@@ -52,12 +53,12 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Gets the results of the <see cref="SafetyAnalysis" /> conducted to find the minimal critical fault sets.
 		/// </summary>
-		public SafetyAnalysisResults SafetyAnalysisResults { get; }
+		public SafetyAnalysisResults<TExecutableModel> SafetyAnalysisResults { get; }
 
 		/// <summary>
 		///   Gets the order relationships that were found for the minimal critical fault sets.
 		/// </summary>
-		public IDictionary<ISet<Fault>, IEnumerable<OrderRelationship>> OrderRelationships { get; }
+		public IDictionary<ISet<Fault>, IEnumerable<OrderRelationship<TExecutableModel>>> OrderRelationships { get; }
 
 		/// <summary>
 		///   Returns a string representation of the minimal critical fault sets.

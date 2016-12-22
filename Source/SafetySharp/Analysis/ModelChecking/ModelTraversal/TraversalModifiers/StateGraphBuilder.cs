@@ -22,21 +22,22 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using Runtime;
 	using Transitions;
 	using Utilities;
 
 	/// <summary>
 	///   Builds up a <see cref="StateGraph" /> instance during model traversal.
 	/// </summary>
-	internal sealed class StateGraphBuilder : IBatchedTransitionAction
+	internal sealed class StateGraphBuilder<TExecutableModel> : IBatchedTransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private readonly StateGraph _stateGraph;
+		private readonly StateGraph<TExecutableModel> _stateGraph;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="stateGraph">The state graph that should be built up.</param>
-		public StateGraphBuilder(StateGraph stateGraph)
+		public StateGraphBuilder(StateGraph<TExecutableModel> stateGraph)
 		{
 			Requires.NotNull(stateGraph, nameof(stateGraph));
 			_stateGraph = stateGraph;
@@ -55,7 +56,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// <param name="areInitialTransitions">
 		///   Indicates whether the transitions are an initial transitions not starting in any valid source state.
 		/// </param>
-		public void ProcessTransitions(TraversalContext context, Worker worker, int sourceState,
+		public void ProcessTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, int sourceState,
 									   TransitionCollection transitions, int transitionCount, bool areInitialTransitions)
 		{
 			_stateGraph.AddStateInfo(sourceState, areInitialTransitions, transitions, transitionCount);

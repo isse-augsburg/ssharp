@@ -29,13 +29,15 @@ namespace SafetySharp.Analysis.ModelChecking
 	using Transitions;
 	using Utilities;
 
+
 	/// <summary>
 	///   Represents the state graph of an <see cref="AnalysisModel" />.
 	/// </summary>
 	/// <remarks>
 	///   Transitions are untyped as C# unfortunately does not support generic type arguments of pointer types.
 	/// </remarks>
-	internal sealed unsafe class StateGraph : DisposableObject
+
+	internal sealed unsafe class StateGraph<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly TransitionRange* _stateMap;
 		private readonly MemoryBuffer _stateMapBuffer = new MemoryBuffer();
@@ -59,8 +61,8 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   The factory function that should be used to create instances of the <see cref="RuntimeModel" />
 		///   the state graph is generated for.
 		/// </param>
-		internal StateGraph(TraversalContext context, Formula[] stateFormulas, int transitionSizeInBytes,
-							ExecutableModel model, Func<ExecutableModel> createModel)
+		internal StateGraph(TraversalContext<TExecutableModel> context, Formula[] stateFormulas, int transitionSizeInBytes,
+							TExecutableModel model, Func<TExecutableModel> createModel)
 		{
 			Requires.NotNull(context, nameof(context));
 
@@ -82,13 +84,13 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly represented by this <see cref="StateGraph" />.
 		/// </summary>
-		public ExecutableModel RuntimeModel { get; }
+		public TExecutableModel RuntimeModel { get; }
 
 		/// <summary>
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly represented by this
 		///   <see cref="StateGraph" />.
 		/// </summary>
-		public Func<ExecutableModel> RuntimeModelCreator { get; }
+		public Func<TExecutableModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   The state formulas that can be evaluated over the model.
@@ -189,14 +191,14 @@ namespace SafetySharp.Analysis.ModelChecking
 			_transitionsBuffer.SafeDispose();
 			_stateMapBuffer.SafeDispose();
 		}
+	}
 
-		/// <summary>
-		///   Represents a range within the <see cref="_transitions" /> buffer.
-		/// </summary>
-		private struct TransitionRange
-		{
-			public long StartIndex;
-			public int Count;
-		}
+	/// <summary>
+	///   Represents a range within the <see cref="_transitions" /> buffer.
+	/// </summary>
+	internal struct TransitionRange
+	{
+		public long StartIndex;
+		public int Count;
 	}
 }

@@ -35,7 +35,7 @@ namespace SafetySharp.Runtime
 	/// <summary>
 	///   Represents a runtime model that can be used for model checking or simulation.
 	/// </summary>
-	public abstract unsafe class ExecutableModel : DisposableObject
+	public abstract unsafe class ExecutableModel<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   The unique name of the construction state.
@@ -136,7 +136,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the state formulas of the model.
 		/// </summary>
-		internal AtomarPropositionFormula[] AtomarPropositionFormulas { get; }
+		protected abstract AtomarPropositionFormula[] AtomarPropositionFormulas { get; }
 
 		/// <summary>
 		///   Updates the activation states of the model's faults.
@@ -162,7 +162,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Copies the fault activation states of this instance to <paramref name="target" />.
 		/// </summary>
-		protected void CopyFaultActivationStates(ExecutableModel target)
+		protected void CopyFaultActivationStates(TExecutableModel target)
 		{
 			for (var i = 0; i < Faults.Length; ++i)
 				target.Faults[i].Activation = Faults[i].Activation;
@@ -223,7 +223,7 @@ namespace SafetySharp.Runtime
 		///   transitions could be generated for the model.
 		/// </param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		public CounterExample CreateCounterExample(Func<ExecutableModel> createModel, byte[][] path, bool endsWithException)
+		public CounterExample<TExecutableModel> CreateCounterExample(Func<TExecutableModel> createModel, byte[][] path, bool endsWithException)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 
@@ -248,7 +248,7 @@ namespace SafetySharp.Runtime
 
 			path = new[] { ConstructionState }.Concat(path).ToArray();
 			var replayInfo = replayModel.GenerateReplayInformation(choiceResolver, path, endsWithException);
-			return new CounterExample(counterExampleModel, path, replayInfo, endsWithException);
+			return new CounterExample<TExecutableModel>(counterExampleModel, path, replayInfo, endsWithException);
 		}
 
 		internal abstract void SetChoiceResolver(ChoiceResolver choiceResolver);
@@ -340,7 +340,10 @@ namespace SafetySharp.Runtime
 			return notificationsSent;
 		}
 
-		public abstract void WriteInternalStateStructureToFile(BinaryWriter writer);
+		public abstract CounterExampleSerialization<TExecutableModel> CounterExampleSerialization { get; }
+
+		// Can create a fresh <see cref= "TExecutableModel" /> instance for further safety analysis.
+		public abstract Func<TExecutableModel> DeriveExecutableModelGenerator(params Formula[] formulas);
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.

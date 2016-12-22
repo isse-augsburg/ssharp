@@ -24,11 +24,12 @@ namespace SafetySharp.Analysis
 {
 	using ModelChecking.Probabilistic;
 	using Modeling;
+	using Runtime;
 
 	/// <summary>
 	///   Provides convienent methods for model checking S# models.
 	/// </summary>
-	public static class ModelChecker
+	public static class SafetySharpModelChecker
 	{
 		/// <summary>
 		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />. The appropriate model
@@ -36,7 +37,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public static AnalysisResult Check(ModelBase model, Formula formula)
+		public static AnalysisResult<SafetySharpRuntimeModel> Check(ModelBase model, Formula formula)
 		{
 			return new LtsMin().Check(model, formula);
 		}
@@ -47,9 +48,10 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public static AnalysisResult CheckInvariant(ModelBase model, Formula invariant)
+		public static AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(ModelBase model, Formula invariant)
 		{
-			return new SSharpChecker().CheckInvariant(model, invariant);
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelCreator(model, invariant);
+			return new QualitativeChecker<SafetySharpRuntimeModel>().CheckInvariant(createModel, formulaIndex:0);
 		}
 
 		/// <summary>
@@ -58,9 +60,10 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariants">The invariants that should be checked.</param>
-		public static AnalysisResult[] CheckInvariants(ModelBase model, params Formula[] invariants)
+		public static AnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ModelBase model, params Formula[] invariants)
 		{
-			return new SSharpChecker().CheckInvariants(model, invariants);
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelCreator(model, invariants);
+			return new QualitativeChecker<SafetySharpRuntimeModel>().CheckInvariants(createModel, invariants);
 		}
 
 		/// <summary>
@@ -74,7 +77,9 @@ namespace SafetySharp.Analysis
 
 			var probabilityToReachStateFormula = new UnaryFormula(stateFormula,UnaryOperator.Finally);
 
-			var markovChainGenerator = new DtmcFromExecutableModelGenerator(model);
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
 			markovChainGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
 			var markovChain=markovChainGenerator.GenerateMarkovChain(stateFormula);
 			using (var modelChecker = new BuiltinDtmcModelChecker(markovChain, System.Console.Out))

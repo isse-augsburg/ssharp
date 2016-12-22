@@ -34,20 +34,12 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Simulates a S# model for debugging or testing purposes.
 	/// </summary>
-	public sealed unsafe class SafetySharpSimulator : Simulator
+	public sealed class SafetySharpSimulator : Simulator<SafetySharpRuntimeModel>
 	{
-		internal SafetySharpCounterExample SafetySharpCounterExample { get; }
-		internal override CounterExample CounterExample => SafetySharpCounterExample;
-
-
-		internal SafetySharpRuntimeModel SafetySharpRuntimeModel { get; }
-		internal override ExecutableModel RuntimeModel => SafetySharpRuntimeModel;
-
-		private ChoiceResolver _choiceResolver;
-		internal override ChoiceResolver ChoiceResolver => _choiceResolver;
-
-		private readonly List<byte[]> _states = new List<byte[]>();
-		private int _stateIndex;
+		/// <summary>
+		///   Gets the model that is simulated, i.e., a copy of the original model passed to the simulator.
+		/// </summary>
+		public ModelBase Model => RuntimeModel.Model;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -55,75 +47,13 @@ namespace SafetySharp.Analysis
 		/// <param name="model">The model that should be simulated.</param>
 		/// <param name="formulas">The formulas that can be evaluated on the model.</param>
 		public SafetySharpSimulator(ModelBase model, params Formula[] formulas)
+			: base(SafetySharpRuntimeModel.Create(model, formulas))
 		{
-			Requires.NotNull(model, nameof(model));
-			Requires.NotNull(formulas, nameof(formulas));
-
-			SafetySharpRuntimeModel = SafetySharpRuntimeModel.Create(model, formulas);
-			Reset();
 		}
 
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="counterExample">The counter example that should be simulated.</param>
-		public SafetySharpSimulator(SafetySharpCounterExample counterExample)
+		public SafetySharpSimulator(CounterExample<SafetySharpRuntimeModel> counterExample)
+			: base(counterExample)
 		{
-			Requires.NotNull(counterExample, nameof(counterExample));
-
-			SafetySharpCounterExample = counterExample;
-			SafetySharpRuntimeModel = SafetySharpCounterExample.SafetySharpRuntimeModel;
-
-			Reset();
-		}
-
-		/// <summary>
-		///   Gets the model that is simulated, i.e., a copy of the original model passed to the simulator.
-		/// </summary>
-		public ModelBase Model => SafetySharpRuntimeModel.Model;
-
-
-		/// <summary>
-		///   Resets the model to its initial state.
-		/// </summary>
-		public override void Reset()
-		{
-			if (ChoiceResolver == null)
-			{
-				_choiceResolver = new NondeterministicChoiceResolver();
-				throw new Exception();
-				//foreach (var choice in _runtimeModel.Objects.OfType<Choice>())
-				//	choice.Resolver = choiceResolver;
-			}
-
-
-
-			var state = stackalloc byte[RuntimeModel.StateVectorSize];
-
-			_states.Clear();
-			_stateIndex = -1;
-
-			if (CounterExample == null)
-				RuntimeModel.Reset();
-			else
-				CounterExample.Replay(ChoiceResolver, 0);
-
-			RuntimeModel.Serialize(state);
-			AddState(state);
-		}
-
-
-		/// <summary>
-		///   Disposes the object, releasing all managed and unmanaged resources.
-		/// </summary>
-		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
-		protected override void OnDisposing(bool disposing)
-		{
-			if (!disposing)
-				return;
-
-			CounterExample.SafeDispose();
-			ChoiceResolver.SafeDispose();
 		}
 	}
 }

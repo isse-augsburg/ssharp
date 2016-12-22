@@ -24,35 +24,36 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 {
 	using System;
 	using System.Collections.Generic;
+	using Runtime;
 	using TraversalModifiers;
 
 	/// <summary>
 	///   Provides parameters for the model traversal process.
 	/// </summary>
-	internal sealed class TraversalParameters
+	internal sealed class TraversalParameters<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Factory methods for <see cref="ITransitionAction" /> instances that should be executed by all <see cref="Worker" />
 		///   instances.
 		/// </summary>
-		internal readonly List<Func<ITransitionAction>> TransitionActions = new List<Func<ITransitionAction>>();
+		internal readonly List<Func<ITransitionAction<TExecutableModel>>> TransitionActions = new List<Func<ITransitionAction<TExecutableModel>>>();
 
 		/// <summary>
 		///   Factory methods for <see cref="IBatchedTransitionAction" /> instances that should be executed by all
 		///   <see cref="Worker" /> instances.
 		/// </summary>
-		internal readonly List<Func<IBatchedTransitionAction>> BatchedTransitionActions = new List<Func<IBatchedTransitionAction>>();
+		internal readonly List<Func<IBatchedTransitionAction<TExecutableModel>>> BatchedTransitionActions = new List<Func<IBatchedTransitionAction<TExecutableModel>>>();
 
 		/// <summary>
 		///   Factory methods for <see cref="ITransitionModifier" /> instances that should be executed by all <see cref="Worker" />
 		///   instances.
 		/// </summary>
-		internal readonly List<Func<ITransitionModifier>> TransitionModifiers = new List<Func<ITransitionModifier>>();
+		internal readonly List<Func<ITransitionModifier<TExecutableModel>>> TransitionModifiers = new List<Func<ITransitionModifier<TExecutableModel>>>();
 
 		/// <summary>
 		///   Factory methods for <see cref="IStateAction" /> instances that should be executed by all <see cref="Worker" />
 		///   instances.
 		/// </summary>
-		internal readonly List<Func<IStateAction>> StateActions = new List<Func<IStateAction>>();
+		internal readonly List<Func<IStateAction<TExecutableModel>>> StateActions = new List<Func<IStateAction<TExecutableModel>>>();
 	}
 }

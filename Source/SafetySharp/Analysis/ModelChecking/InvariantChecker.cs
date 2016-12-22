@@ -26,12 +26,13 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System.Collections.Generic;
 	using System.Linq;
 	using ModelTraversal.TraversalModifiers;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   Checks whether an invariant holds for all states of an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal sealed class InvariantChecker : ModelTraverser
+	internal sealed class InvariantChecker<TExecutableModel> : ModelTraverser<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Initializes a new instance.
@@ -40,48 +41,35 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="formulaIndex">The zero-based index of the analyzed formula.</param>
-		internal InvariantChecker(Func<AnalysisModel> createModel, Action<string> output, AnalysisConfiguration configuration, int formulaIndex)
+		internal InvariantChecker(Func<AnalysisModel<TExecutableModel>> createModel, Action<string> output, AnalysisConfiguration configuration, int formulaIndex)
 			: base(createModel, output, configuration)
 		{
-			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationAction(formulaIndex));
+			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationAction<TExecutableModel>(formulaIndex));
 		}
 
 		/// <summary>
 		///   Checks whether the model's invariant holds for all states.
 		/// </summary>
-		internal AnalysisResult Check()
+		internal AnalysisResult<TExecutableModel> Check()
 		{
-			if (!Context.Configuration.ProgressReportsOnly)
-			{
-				Context.Output($"Performing invariant check using {AnalyzedModels.Count()} CPU cores.");
-				Context.Output($"State vector has {AnalyzedModels.First().StateVectorSize} bytes.");
-			}
-
-			throw new Exception();
-			var bonusInfo=new AnalysisResultSafetySharpExtension();
-			//bonusInfo.StateVectorLayout = model.StateVectorLayout;
-
-			TraverseModel();
-
-			if (!Context.Configuration.ProgressReportsOnly)
-				Context.Report();
-
-			RethrowTraversalException();
+			Context.Output($"Performing invariant check.");
+			TraverseModelAndReport();
+			
 
 			if (!Context.FormulaIsValid && !Context.Configuration.ProgressReportsOnly)
 				Context.Output("Invariant violation detected.");
 
-			return new AnalysisResult
+			return new AnalysisResult<TExecutableModel>
 			{
 				FormulaHolds = Context.FormulaIsValid,
 				CounterExample = Context.CounterExample,
 				StateCount = Context.StateCount,
 				TransitionCount = Context.TransitionCount,
 				ComputedTransitionCount = Context.ComputedTransitionCount,
-				LevelCount = Context.LevelCount,
-				Extensions = new List<IAnalysisResultExtension>() { bonusInfo }
+				LevelCount = Context.LevelCount
 			};
 		}
+
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.

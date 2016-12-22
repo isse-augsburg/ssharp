@@ -47,7 +47,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<MiniZincObserverController>();
 			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
 
-			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 20 } };
+			var modelChecker = new QualitativeChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 20 } };
 			var result = modelChecker.CheckInvariant(model, true);
 
 			Console.WriteLine(result);

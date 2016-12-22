@@ -34,7 +34,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="SafetySharpRuntimeModel" /> with
 	///   probabilistic transitions.
 	/// </summary>
-	internal sealed class LtmdpExecutedModel : ExecutedModel
+	internal sealed class LtmdpExecutedModel<TExecutableModel> : ExecutedModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 
 		internal enum EffectlessFaultsMinimizationMode
@@ -45,24 +45,21 @@ namespace SafetySharp.Analysis.ModelChecking
 
 		private readonly EffectlessFaultsMinimizationMode _minimalizationMode = EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults;
 
-		private readonly LtmdpTransitionSetBuilder _transitions;
+		private readonly LtmdpTransitionSetBuilder<TExecutableModel> _transitions;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal LtmdpExecutedModel(Func<SafetySharpRuntimeModel> runtimeModelCreator, long successorStateCapacity)
+		internal LtmdpExecutedModel(Func<TExecutableModel> runtimeModelCreator, long successorStateCapacity)
 			: base(runtimeModelCreator)
 		{
 			var formulas = RuntimeModel.Formulas.Select(SafetySharpCompilationVisitor.Compile).ToArray();
-			_transitions = new LtmdpTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
+			_transitions = new LtmdpTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
 
 			ChoiceResolver = new LtmdpChoiceResolver();
-
-			throw new Exception();
-			//foreach (var choice in RuntimeModel.Objects.OfType<Choice>())
-			//	choice.Resolver = choiceResolver;
+			RuntimeModel.SetChoiceResolver(ChoiceResolver);
 
 		}
 
@@ -71,10 +68,10 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		/// <param name="runtimeModel">The model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal LtmdpExecutedModel(SafetySharpRuntimeModel runtimeModel, int successorStateCapacity)
+		internal LtmdpExecutedModel(TExecutableModel runtimeModel, int successorStateCapacity)
 			: base(runtimeModel)
 		{
-			_transitions = new LtmdpTransitionSetBuilder(RuntimeModel, successorStateCapacity);
+			_transitions = new LtmdpTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity);
 		}
 
 		/// <summary>

@@ -22,12 +22,13 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using Runtime;
 	using Transitions;
 
 	/// <summary>
 	///   Represents an action that is executed when a batch of new, valid transitions is found during model traversal.
 	/// </summary>
-	internal interface IBatchedTransitionAction
+	internal interface IBatchedTransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Processes the new <paramref name="transitions" /> discovered by the <paramref name="worker " /> within the traversal
@@ -42,7 +43,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// <param name="areInitialTransitions">
 		///   Indicates whether the transitions are an initial transitions not starting in any valid source state.
 		/// </param>
-		void ProcessTransitions(TraversalContext context, Worker worker, int sourceState,
+		void ProcessTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, int sourceState,
 								TransitionCollection transitions, int transitionCount, bool areInitialTransitions);
 	}
 }

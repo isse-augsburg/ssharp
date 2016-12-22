@@ -24,20 +24,23 @@ namespace SafetySharp.Analysis.ModelChecking
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using ModelTraversal;
+	using Runtime;
 	using Transitions;
 	using Utilities;
 
 	/// <summary>
 	///   A base class for model traversers that travserse an <see cref="AnalysisModel" /> to carry out certain actions.
 	/// </summary>
-	internal abstract class ModelTraverser : DisposableObject
+	internal abstract class ModelTraverser<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly LoadBalancer _loadBalancer;
 		private readonly StateStorage _states;
-		private readonly Worker[] _workers;
+		private readonly Worker<TExecutableModel>[] _workers;
+		private readonly TimeSpan _initializationTime;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -45,18 +48,21 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="createModel">Creates the model that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal ModelTraverser(Func<AnalysisModel> createModel, Action<string> output, AnalysisConfiguration configuration)
+		internal ModelTraverser(Func<AnalysisModel<TExecutableModel>> createModel, Action<string> output, AnalysisConfiguration configuration)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(output, nameof(output));
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
 			TransitionCollection.ValidateTransitionSizes();
 
 			var tasks = new Task[configuration.CpuCount];
 			var stacks = new StateStack[configuration.CpuCount];
 
 			_loadBalancer = new LoadBalancer(stacks);
-			Context = new TraversalContext(_loadBalancer, configuration, output);
-			_workers = new Worker[configuration.CpuCount];
+			Context = new TraversalContext<TExecutableModel>(_loadBalancer, configuration, output);
+			_workers = new Worker<TExecutableModel>[configuration.CpuCount];
 
 			for (var i = 0; i < configuration.CpuCount; ++i)
 			{
@@ -64,7 +70,7 @@ namespace SafetySharp.Analysis.ModelChecking
 				tasks[i] = Task.Factory.StartNew(() =>
 				{
 					stacks[index] = new StateStack(configuration.StackCapacity);
-					_workers[index] = new Worker(index, Context, stacks[index], createModel());
+					_workers[index] = new Worker<TExecutableModel>(index, Context, stacks[index], createModel());
 				});
 			}
 
@@ -72,17 +78,19 @@ namespace SafetySharp.Analysis.ModelChecking
 
 			_states = new StateStorage(_workers[0].Model.StateVectorSize, configuration.StateCapacity);
 			Context.States = _states;
+			_initializationTime = stopwatch.Elapsed;
+			stopwatch.Stop();
 		}
 
 		/// <summary>
 		///   Gets the context of the traversal.
 		/// </summary>
-		public TraversalContext Context { get; }
+		public TraversalContext<TExecutableModel> Context { get; }
 
 		/// <summary>
 		///   Gets the <see cref="AnalysisModel" /> instances analyzed by the checker's <see cref="Worker" /> instances.
 		/// </summary>
-		public IEnumerable<AnalysisModel> AnalyzedModels => _workers.Select(worker => worker.Model);
+		public IEnumerable<AnalysisModel<TExecutableModel>> AnalyzedModels => _workers.Select(worker => worker.Model);
 
 		/// <summary>
 		///   Traverses the model.
@@ -102,13 +110,60 @@ namespace SafetySharp.Analysis.ModelChecking
 			Task.WaitAll(tasks);
 		}
 
+
+		/// <summary>
+		///   Traverses the model.
+		/// </summary>
+		public void TraverseModelAndReport()
+		{
+			Requires.That(IntPtr.Size == 8, "Model traversal is only supported in 64bit processes.");
+
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
+			if (!Context.Configuration.ProgressReportsOnly)
+			{
+				Context.Output($"Traverse model using {AnalyzedModels.Count()} CPU cores.");
+				Context.Output($"State vector has {AnalyzedModels.First().StateVectorSize} bytes.");
+			}
+
+			try
+			{
+				TraverseModel();
+				RethrowTraversalException();
+
+				if (!Context.Configuration.ProgressReportsOnly)
+					Context.Report();
+			}
+			finally
+			{
+				stopwatch.Stop();
+
+				if (!Context.Configuration.ProgressReportsOnly)
+				{
+					Context.Output?.Invoke(String.Empty);
+					Context.Output?.Invoke("===============================================");
+					Context.Output?.Invoke($"Initialization time: {_initializationTime}");
+					Context.Output?.Invoke($"Model traversal time: {stopwatch.Elapsed}");
+					
+					Context.Output?.Invoke($"{(long)(Context.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
+					Context.Output?.Invoke($"{(long)(Context.StateCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+
+					Context.Output?.Invoke("===============================================");
+					Context.Output?.Invoke(String.Empty);
+				}
+			}
+		}
+
+
+
 		/// <summary>
 		///   Rethrows any exception thrown during the traversal process, if any.
 		/// </summary>
 		protected void RethrowTraversalException()
 		{
 			if (Context.Exception != null)
-				throw new AnalysisException(Context.Exception, Context.CounterExample);
+				throw new AnalysisException<TExecutableModel>(Context.Exception, Context.CounterExample);
 		}
 
 		/// <summary>

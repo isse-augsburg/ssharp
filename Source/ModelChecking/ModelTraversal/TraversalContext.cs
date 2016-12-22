@@ -23,12 +23,13 @@
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 {
 	using System;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   Provides context information for the traversal of a model.
 	/// </summary>
-	internal sealed class TraversalContext
+	internal sealed class TraversalContext<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   The number of states that have to be found between two progress reports.
@@ -53,7 +54,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		/// <summary>
 		///   The parameters influencing the traversal process.
 		/// </summary>
-		public readonly TraversalParameters TraversalParameters = new TraversalParameters();
+		public readonly TraversalParameters<TExecutableModel> TraversalParameters = new TraversalParameters<TExecutableModel>();
 
 		/// <summary>
 		///   The number of computed transitions checked by the model checker.
@@ -63,7 +64,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		/// <summary>
 		///   The counter example that has been generated for the traversal, if any.
 		/// </summary>
-		public CounterExample CounterExample;
+		public CounterExample<TExecutableModel> CounterExample;
 
 		/// <summary>
 		///   The exception that has been generated during the traversal, if any.
@@ -130,7 +131,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		{
 			FormulaIsValid = true;
 			ComputedTransitionCount = 0;
-			CounterExample = null;
+			//CounterExample = null;
 			Exception = null;
 			GeneratingCounterExample = -1;
 			LevelCount = 0;

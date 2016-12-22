@@ -25,13 +25,14 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System;
 	using System.Linq;
 	using ModelTraversal.TraversalModifiers;
+	using Runtime;
 
 	/// <summary>
 	///   Generates a <see cref="StateGraph" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal sealed class StateGraphGenerator : ModelTraverser
+	internal sealed class StateGraphGenerator<TExecutableModel> : ModelTraverser<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private readonly StateGraph _stateGraph;
+		private readonly StateGraph<TExecutableModel> _stateGraph;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -40,36 +41,26 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="stateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal StateGraphGenerator(Func<AnalysisModel> createModel, Formula[] stateFormulas,
+		internal StateGraphGenerator(Func<AnalysisModel<TExecutableModel>> createModel, Formula[] stateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration)
 		{
 			var analyzedModel = AnalyzedModels.First();
 
-			_stateGraph = new StateGraph(
+			_stateGraph = new StateGraph<TExecutableModel>(
 				Context, stateFormulas, analyzedModel.TransitionSize,
 				analyzedModel.RuntimeModel, analyzedModel.RuntimeModelCreator);
 
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new StateGraphBuilder(_stateGraph));
+			Context.TraversalParameters.BatchedTransitionActions.Add(() => new StateGraphBuilder<TExecutableModel>(_stateGraph));
 		}
 
 		/// <summary>
 		///   Generates the state graph.
 		/// </summary>
-		internal StateGraph GenerateStateGraph()
+		internal StateGraph<TExecutableModel> GenerateStateGraph()
 		{
-			if (!Context.Configuration.ProgressReportsOnly)
-			{
-				Context.Output($"Generating state graph using {AnalyzedModels.Count()} CPU cores.");
-				Context.Output($"State vector has {AnalyzedModels.First().StateVectorSize} bytes.");
-			}
-
-			TraverseModel();
-
-			if (!Context.Configuration.ProgressReportsOnly)
-				Context.Report();
-
-			RethrowTraversalException();
+			Context.Output($"Generating state graph.");
+			TraverseModelAndReport();
 
 			return _stateGraph;
 		}

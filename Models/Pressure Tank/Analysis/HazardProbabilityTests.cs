@@ -45,7 +45,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			model.Sensor.SuppressIsEmpty.ProbabilityOfOccurrence = new Probability(0.0);
 			model.Timer.SuppressTimeout.ProbabilityOfOccurrence = new Probability(0.0001);
 
-			var result = ModelChecker.CalculateProbabilityToReachState(model, model.Tank.IsRuptured);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.Tank.IsRuptured);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
 
@@ -58,7 +58,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			model.Sensor.SuppressIsFull.ProbabilityOfOccurrence = Probability.Zero;
 			model.Timer.SuppressTimeout.ProbabilityOfOccurrence = Probability.Zero;
 
-			var result = ModelChecker.CalculateProbabilityToReachState(model, model.Tank.IsDepleted);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.Tank.IsDepleted);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
 	}

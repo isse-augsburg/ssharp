@@ -34,30 +34,55 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Simulates a S# model for debugging or testing purposes.
 	/// </summary>
-	public abstract unsafe class Simulator : DisposableObject
+	public unsafe class Simulator<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		internal abstract CounterExample CounterExample { get; }
-		internal abstract ExecutableModel RuntimeModel { get; }
-
+		private readonly CounterExample<TExecutableModel> _counterExample;
+		public readonly TExecutableModel RuntimeModel;
 		private readonly List<byte[]> _states = new List<byte[]>();
-		internal abstract ChoiceResolver ChoiceResolver { get; }
+		private ChoiceResolver _choiceResolver;
 		private int _stateIndex;
-		
-		
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="model">The model that should be simulated.</param>
+		/// <param name="formulas">The formulas that can be evaluated on the model.</param>
+		public Simulator(TExecutableModel runtimeModel)
+		{
+			Requires.NotNull(runtimeModel, nameof(runtimeModel));
+
+			RuntimeModel = runtimeModel;
+			Reset();
+		}
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="counterExample">The counter example that should be simulated.</param>
+		public Simulator(CounterExample<TExecutableModel> counterExample)
+		{
+			Requires.NotNull(counterExample, nameof(counterExample));
+
+			_counterExample = counterExample;
+			RuntimeModel = counterExample.RuntimeModel;
+
+			Reset();
+		}
+
 		/// <summary>
 		///   Gets a value indicating whether the simulator is replaying a counter example.
 		/// </summary>
-		public bool IsReplay => CounterExample != null;
+		public bool IsReplay => _counterExample != null;
 
 		/// <summary>
 		///   Gets a value indicating whether the simulation is completed.
 		/// </summary>
-		public bool IsCompleted => CounterExample != null && _stateIndex + 1 >= CounterExample.StepCount;
+		public bool IsCompleted => _counterExample != null && _stateIndex + 1 >= _counterExample.StepCount;
 
 		/// <summary>
 		///   Gets a value indicating whether the simulation can be fast-forwarded.
 		/// </summary>
-		public bool CanFastForward => CounterExample == null || !IsCompleted;
+		public bool CanFastForward => _counterExample == null || !IsCompleted;
 
 		/// <summary>
 		///   Gets a value indicating whether the simulation can be rewound.
@@ -76,7 +101,7 @@ namespace SafetySharp.Analysis
 
 			var state = stackalloc byte[RuntimeModel.StateVectorSize];
 
-			if (CounterExample == null)
+			if (_counterExample == null)
 			{
 				RuntimeModel.ExecuteStep();
 
@@ -85,10 +110,10 @@ namespace SafetySharp.Analysis
 			}
 			else
 			{
-				CounterExample.DeserializeState(_stateIndex + 1);
+				_counterExample.DeserializeState(_stateIndex + 1);
 				RuntimeModel.Serialize(state);
 
-				EnsureStatesMatch(state, CounterExample.GetState(_stateIndex + 1));
+				EnsureStatesMatch(state, _counterExample.GetState(_stateIndex + 1));
 
 				AddState(state);
 				Replay();
@@ -142,19 +167,38 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Resets the model to its initial state.
 		/// </summary>
-		public abstract void Reset();
+		public void Reset()
+		{
+			if (_choiceResolver == null)
+			{
+				RuntimeModel.SetChoiceResolver(new NondeterministicChoiceResolver());
+			}
+
+			var state = stackalloc byte[RuntimeModel.StateVectorSize];
+
+			_states.Clear();
+			_stateIndex = -1;
+
+			if (_counterExample == null)
+				RuntimeModel.Reset();
+			else
+				_counterExample.Replay(_choiceResolver, 0);
+
+			RuntimeModel.Serialize(state);
+			AddState(state);
+		}
 
 		/// <summary>
 		///   Replays the next transition of the simulated counter example.
 		/// </summary>
 		private void Replay()
 		{
-			CounterExample.Replay(ChoiceResolver, _stateIndex);
+			_counterExample.Replay(_choiceResolver, _stateIndex);
 
 			var actualState = stackalloc byte[RuntimeModel.StateVectorSize];
 			RuntimeModel.Serialize(actualState);
 
-			if (IsCompleted && CounterExample.EndsWithException)
+			if (IsCompleted && _counterExample.EndsWithException)
 			{
 				throw new InvalidOperationException(
 					"The path the counter example was generated for ended with an exception that could not be reproduced by the replay.");
@@ -184,7 +228,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Adds the state to the simulator.
 		/// </summary>
-		protected void AddState(byte* state)
+		private void AddState(byte* state)
 		{
 			var newState = new byte[RuntimeModel.StateVectorSize];
 			Marshal.Copy(new IntPtr(state), newState, 0, RuntimeModel.StateVectorSize);
@@ -196,7 +240,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Restores a previously discovered state.
 		/// </summary>
-		protected void RestoreState(int stateNumber)
+		private void RestoreState(int stateNumber)
 		{
 			fixed (byte* state = _states[stateNumber])
 				RuntimeModel.Deserialize(state);
@@ -211,8 +255,8 @@ namespace SafetySharp.Analysis
 			if (!disposing)
 				return;
 
-			CounterExample.SafeDispose();
-			ChoiceResolver.SafeDispose();
+			_counterExample.SafeDispose();
+			_choiceResolver.SafeDispose();
 		}
 	}
 }

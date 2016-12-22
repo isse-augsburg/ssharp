@@ -31,7 +31,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// <summary>
 	///   Generates a <see cref="StateGraph" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal class LtmcGenerator : ModelTraverser
+	internal class LtmcGenerator<TExecutableModel> : ModelTraverser<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly LabeledTransitionMarkovChain _markovChain;
 
@@ -42,18 +42,18 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="executableStateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal LtmcGenerator(Func<AnalysisModel> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] executableStateFormulas,
+		internal LtmcGenerator(Func<AnalysisModel<TExecutableModel>> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] executableStateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration)
 		{
 			_markovChain = new LabeledTransitionMarkovChain(configuration.StateCapacity);
 			_markovChain.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LtmcBuilder(_markovChain));
+			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LtmcBuilder<TExecutableModel>(_markovChain));
 			if (terminateEarlyCondition != null)
 			{
 				var terminalteEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_markovChain.StateFormulaLabels, terminateEarlyCondition);
-				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminalteEarlyFunc));
+				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier<TExecutableModel>(terminalteEarlyFunc));
 			}
 		}
 
@@ -62,19 +62,8 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		internal LabeledTransitionMarkovChain GenerateStateGraph()
 		{
-			if (!Context.Configuration.ProgressReportsOnly)
-			{
-				Context.Output($"Generating labeled transition markov chain using {AnalyzedModels.Count()} CPU cores.");
-				Context.Output($"State vector has {AnalyzedModels.First().StateVectorSize} bytes.");
-			}
-
-			TraverseModel();
-
-			if (!Context.Configuration.ProgressReportsOnly)
-				Context.Report();
-
-			RethrowTraversalException();
-
+			Context.Output($"Generating labeled transition markov chain.");
+			TraverseModelAndReport();
 			return _markovChain;
 		}
 	}

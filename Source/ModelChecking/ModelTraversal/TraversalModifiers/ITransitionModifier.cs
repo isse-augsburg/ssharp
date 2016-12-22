@@ -22,12 +22,13 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using Runtime;
 	using Transitions;
 
 	/// <summary>
 	///   Represents a modifier that is executed when new transitions are found during model traversal.
 	/// </summary>
-	internal unsafe interface ITransitionModifier
+	internal unsafe interface ITransitionModifier<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Optionally modifies the <paramref name="transitions" />, changing any of their values. However, no new transitions can be
@@ -41,6 +42,6 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// <param name="sourceState">The source state of the transitions.</param>
 		/// <param name="sourceStateIndex">The unique index of the transition's source state.</param>
 		/// <param name="isInitial">Indicates whether the transitions are initial transitions not starting in any valid source state.</param>
-		void ModifyTransitions(TraversalContext context, Worker worker, TransitionCollection transitions, byte* sourceState, int sourceStateIndex, bool isInitial);
+		void ModifyTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, TransitionCollection transitions, byte* sourceState, int sourceStateIndex, bool isInitial);
 	}
 }

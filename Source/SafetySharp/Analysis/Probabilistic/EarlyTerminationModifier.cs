@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using Runtime;
 	using System;
 	using Transitions;
 	using Utilities;
@@ -31,7 +32,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 	///   (To keep all other assumptions about the transitions, the transitions are not replaced by
 	///   only one transition).
 	/// </summary>
-	internal sealed unsafe class EarlyTerminationModifier : ITransitionModifier
+	internal sealed unsafe class EarlyTerminationModifier<TExecutableModel> : ITransitionModifier<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly Func<StateFormulaSet, bool> _terminateEarlyCondition;
 
@@ -56,7 +57,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// <param name="sourceState">The source state of the transitions.</param>
 		/// <param name="sourceStateIndex">The unique index of the transition's source state.</param>
 		/// <param name="isInitial">Indicates whether the transitions are initial transitions not starting in any valid source state.</param>
-		public void ModifyTransitions(TraversalContext context, Worker worker, TransitionCollection transitions, byte* sourceState, int sourceStateIndex, bool isInitial)
+		public void ModifyTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, TransitionCollection transitions, byte* sourceState, int sourceStateIndex, bool isInitial)
 		{
 			foreach (CandidateTransition* transition in transitions)
 			{

@@ -50,6 +50,7 @@
     <Compile Include="AtomarPropositionFormula.cs" />
     <Compile Include="BinaryFormula.cs" />
     <Compile Include="BinaryOperator.cs" />
+    <Compile Include="CounterExampleSerialization.cs" />
     <Compile Include="Modeling\Activation.cs" />
     <Compile Include="Modeling\Fault.cs" />
     <Compile Include="Modeling\Reward.cs" />

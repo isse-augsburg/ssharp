@@ -26,29 +26,30 @@ namespace SafetySharp.Analysis.SafetyChecking
 	using ModelChecking;
 	using ModelChecking.ModelTraversal.TraversalModifiers;
 	using Modeling;
+	using Runtime;
 
 	/// <summary>
 	///   Pre-builts the model's entire state graph, subsequently taking advantage of the fault-removal optimization.
 	/// </summary>
-	internal class StateGraphBackend : AnalysisBackend
+	internal class StateGraphBackend<TExecutableModel> : AnalysisBackend<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private InvariantChecker _checker;
+		private InvariantChecker<TExecutableModel> _checker;
 
 		/// <summary>
-		///   Initizializes the model that should be analyzed.
+		///   Initializes the model that should be analyzed.
 		/// </summary>
 		/// <param name="configuration">The configuration that should be used for the analyses.</param>
 		/// <param name="hazard">The hazard that should be analyzed.</param>
 		protected override void InitializeModel(AnalysisConfiguration configuration, Formula hazard)
 		{
-			var checker = new SSharpChecker { Configuration = configuration };
+			var checker = new QualitativeChecker<TExecutableModel> { Configuration = configuration };
 			checker.Configuration.ProgressReportsOnly = false;
 			checker.OutputWritten += OnOutputWritten;
 
-			var stateGraph = checker.GenerateStateGraph(Model, !hazard);
+			var stateGraph = checker.GenerateStateGraph(RuntimeModel.DeriveExecutableModelGenerator(!hazard), !hazard);
 
 			configuration.StateCapacity = Math.Max(1024, (int)(stateGraph.StateCount * 1.5));
-			_checker = new InvariantChecker(() => new StateGraphModel(stateGraph, configuration.SuccessorCapacity), OnOutputWritten,
+			_checker = new InvariantChecker<TExecutableModel>(() => new StateGraphModel<TExecutableModel>(stateGraph, configuration.SuccessorCapacity), OnOutputWritten,
 				configuration, formulaIndex: 0);
 		}
 
@@ -57,17 +58,17 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// </summary>
 		/// <param name="faults">The fault set that should be checked for criticality.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
-		internal override AnalysisResult CheckCriticality(FaultSet faults, Activation activation)
+		internal override AnalysisResult<TExecutableModel> CheckCriticality(FaultSet faults, Activation activation)
 		{
 			var suppressedFaults = new FaultSet();
-			foreach (var fault in Model.Faults)
+			foreach (var fault in RuntimeModel.Faults)
 			{
 				if (GetEffectiveActivation(fault, faults, activation) == Activation.Suppressed)
 					suppressedFaults = suppressedFaults.Add(fault);
 			}
 
 			_checker.Context.TraversalParameters.TransitionModifiers.Clear();
-			_checker.Context.TraversalParameters.TransitionModifiers.Add(() => new FaultSuppressionModifier(suppressedFaults));
+			_checker.Context.TraversalParameters.TransitionModifiers.Add(() => new FaultSuppressionModifier<TExecutableModel>(suppressedFaults));
 
 			return _checker.Check();
 		}
@@ -81,7 +82,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// <param name="minimalCriticalFaultSet">The minimal critical fault set that should be checked.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
 		/// <param name="forceSimultaneous">Indicates whether both faults must occur simultaneously.</param>
-		internal override AnalysisResult CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
+		internal override AnalysisResult<TExecutableModel> CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
 													Activation activation, bool forceSimultaneous)
 		{
 			throw new NotImplementedException();

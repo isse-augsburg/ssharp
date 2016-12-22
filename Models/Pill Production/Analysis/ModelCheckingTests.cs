@@ -149,7 +149,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			var model = new ModelSetupParser().Parse("Analysis/medium_setup.model");
 			model.Faults.SuppressActivations();
 
-			var checker = new SSharpChecker { Configuration = { StateCapacity = 1 << 18 } };
+			var checker = new QualitativeChecker { Configuration = { StateCapacity = 1 << 18 } };
 			var result = checker.CheckInvariant(model, true);
 
 			foreach (var analysisResultExtension in result.Extensions)
@@ -171,7 +171,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			model.ScheduleProduction(recipe);
 			model.Faults.SuppressActivations();
 
-			var result = ModelChecker.Check(model, F(recipe.ProcessingComplete));
+			var result = SafetySharpModelChecker.Check(model, F(recipe.ProcessingComplete));
 			Assert.That(result.FormulaHolds, "Recipe production never finishes");
 		}
 	}

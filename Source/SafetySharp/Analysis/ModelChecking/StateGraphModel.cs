@@ -32,9 +32,9 @@ namespace SafetySharp.Analysis.ModelChecking
 	/// <summary>
 	///   Represents an <see cref="AnalysisModel" /> for <see cref="StateGraph" /> instances.
 	/// </summary>
-	internal sealed unsafe class StateGraphModel : AnalysisModel
+	internal sealed unsafe class StateGraphModel<TExecutableModel> : AnalysisModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private readonly StateGraph _stateGraph;
+		private readonly StateGraph<TExecutableModel> _stateGraph;
 		private readonly TransitionSetBuilder _transitions;
 
 		/// <summary>
@@ -42,7 +42,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		/// <param name="stateGraph">The state graph that should be analyzed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		public StateGraphModel(StateGraph stateGraph, long successorStateCapacity)
+		public StateGraphModel(StateGraph<TExecutableModel> stateGraph, long successorStateCapacity)
 		{
 			Requires.NotNull(stateGraph, nameof(stateGraph));
 
@@ -63,13 +63,13 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
 		/// </summary>
-		public override ExecutableModel RuntimeModel => _stateGraph.RuntimeModel;
+		public override TExecutableModel RuntimeModel => _stateGraph.RuntimeModel;
 
 		/// <summary>
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
 		///   <see cref="AnalysisModel" />.
 		/// </summary>
-		public override Func<ExecutableModel> RuntimeModelCreator => _stateGraph.RuntimeModelCreator;
+		public override Func<TExecutableModel> RuntimeModelCreator => _stateGraph.RuntimeModelCreator;
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
@@ -126,7 +126,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   transitions could be generated for the model.
 		/// </param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		public override CounterExample CreateCounterExample(byte[][] path, bool endsWithException)
+		public override CounterExample<TExecutableModel> CreateCounterExample(byte[][] path, bool endsWithException)
 		{
 			var modelPath = path?.Select(state =>
 			{

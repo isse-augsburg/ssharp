@@ -23,12 +23,13 @@
 namespace SafetySharp.Analysis
 {
 	using Modeling;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   Indicates that the <see cref="FirstFault" /> must be activated before or at the same time as <see cref="SecondFault" />.
 	/// </summary>
-	public sealed class OrderRelationship
+	public sealed class OrderRelationship<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   The fault that must be activated first for the hazard to occur.
@@ -49,7 +50,7 @@ namespace SafetySharp.Analysis
 		///   A witness showing how the activation of <see cref="FirstFault" /> before or at the same time as <see cref="SecondFault" />
 		///   causes the hazard.
 		/// </summary>
-		public readonly CounterExample Witness;
+		public readonly CounterExample<TExecutableModel> Witness;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -58,7 +59,7 @@ namespace SafetySharp.Analysis
 		/// <param name="firstFault">The fault that must be activated first.</param>
 		/// <param name="secondFault">The fault that must be activated subsequently.</param>
 		/// <param name="kind">Determines the kind of the order relationship.</param>
-		internal OrderRelationship(AnalysisResult result, Fault firstFault, Fault secondFault, OrderRelationshipKind kind)
+		internal OrderRelationship(AnalysisResult<TExecutableModel> result, Fault firstFault, Fault secondFault, OrderRelationshipKind kind)
 		{
 			Requires.NotNull(result, nameof(result));
 			Requires.NotNull(firstFault, nameof(firstFault));

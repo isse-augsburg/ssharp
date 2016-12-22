@@ -34,17 +34,17 @@ namespace SafetySharp.Analysis.ModelChecking
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="SafetySharpRuntimeModel" /> with
 	///   activation-minimal transitions.
 	/// </summary>
-	internal sealed class ActivationMinimalExecutedModel : ExecutedModel
+	internal sealed class ActivationMinimalExecutedModel<TExecutableModel> : ExecutedModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly Func<bool>[] _stateConstraints;
-		private readonly ActivationMinimalTransitionSetBuilder _transitions;
+		private readonly ActivationMinimalTransitionSetBuilder<TExecutableModel> _transitions;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ActivationMinimalExecutedModel(Func<ExecutableModel> runtimeModelCreator, long successorStateCapacity)
+		internal ActivationMinimalExecutedModel(Func<TExecutableModel> runtimeModelCreator, long successorStateCapacity)
 			: this(runtimeModelCreator, null, successorStateCapacity)
 		{
 		}
@@ -55,19 +55,17 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="formulas">The formulas that should be evaluated for each state.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ActivationMinimalExecutedModel(Func<ExecutableModel> runtimeModelCreator, Func<bool>[] formulas, long successorStateCapacity)
+		internal ActivationMinimalExecutedModel(Func<TExecutableModel> runtimeModelCreator, Func<bool>[] formulas, long successorStateCapacity)
 			: base(runtimeModelCreator)
 		{
 			formulas = formulas ?? RuntimeModel.Formulas.Select(SafetySharpCompilationVisitor.Compile).ToArray();
 
-			_transitions = new ActivationMinimalTransitionSetBuilder(RuntimeModel, successorStateCapacity, formulas);
+			_transitions = new ActivationMinimalTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
 			_stateConstraints = RuntimeModel.StateConstraints;
 
 			ChoiceResolver = new NondeterministicChoiceResolver();
-
-			throw new Exception();
-			//foreach (var choice in RuntimeModel.Objects.OfType<Choice>())
-			//	choice.Resolver = choiceResolver;
+			
+			RuntimeModel.SetChoiceResolver(ChoiceResolver);
 		}
 
 		/// <summary>

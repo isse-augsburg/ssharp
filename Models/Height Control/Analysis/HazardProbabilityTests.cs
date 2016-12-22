@@ -54,7 +54,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			model.HeightControl.EndControl.LeftDetector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
 			model.HeightControl.EndControl.LeftDetector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
 
-			var result = ModelChecker.CalculateProbabilityToReachState(model, model.Collision);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.Collision);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
 	}

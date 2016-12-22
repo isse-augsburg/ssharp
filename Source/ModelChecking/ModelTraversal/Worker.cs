@@ -26,6 +26,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 	using System.Linq;
 	using System.Runtime.InteropServices;
 	using System.Threading;
+	using Runtime;
 	using Transitions;
 	using TraversalModifiers;
 	using Utilities;
@@ -33,15 +34,15 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 	/// <summary>
 	///   Represents a thread that checks for invariant violations.
 	/// </summary>
-	internal sealed unsafe class Worker : DisposableObject
+	internal sealed unsafe class Worker<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private readonly TraversalContext _context;
+		private readonly TraversalContext<TExecutableModel> _context;
 		private readonly int _index;
 		private readonly StateStack _stateStack;
-		private IBatchedTransitionAction[] _batchedTransitionActions;
-		private IStateAction[] _stateActions;
-		private ITransitionAction[] _transitionActions;
-		private ITransitionModifier[] _transitionModifiers;
+		private IBatchedTransitionAction<TExecutableModel>[] _batchedTransitionActions;
+		private IStateAction<TExecutableModel>[] _stateActions;
+		private ITransitionAction<TExecutableModel>[] _transitionActions;
+		private ITransitionModifier<TExecutableModel>[] _transitionModifiers;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -50,7 +51,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		/// <param name="context">The context the model is traversed in.</param>
 		/// <param name="stateStack">The state stack that should be used by the worker.</param>
 		/// <param name="model">The model that the worker should analyze.</param>
-		public Worker(int index, TraversalContext context, StateStack stateStack, AnalysisModel model)
+		public Worker(int index, TraversalContext<TExecutableModel> context, StateStack stateStack, AnalysisModel<TExecutableModel> model)
 		{
 			Requires.NotNull(context, nameof(context));
 			Requires.NotNull(stateStack, nameof(stateStack));
@@ -66,7 +67,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		/// <summary>
 		///   Gets the model that is analyzed by the worker.
 		/// </summary>
-		public AnalysisModel Model { get; }
+		public AnalysisModel<TExecutableModel> Model { get; }
 
 		/// <summary>
 		///   Computes the model's initial states.

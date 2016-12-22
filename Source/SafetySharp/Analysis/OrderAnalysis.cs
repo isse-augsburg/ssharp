@@ -27,28 +27,29 @@ namespace SafetySharp.Analysis
 	using System.Diagnostics;
 	using System.Linq;
 	using Modeling;
+	using Runtime;
 	using SafetyChecking;
 	using Utilities;
 
 	/// <summary>
 	///   Performs order analyses for minimal critical fault sets.
 	/// </summary>
-	public sealed class OrderAnalysis
+	public sealed class OrderAnalysis<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private readonly FaultOptimizationBackend _backend = new FaultOptimizationBackend(stateHeaderBytes: 4);
-		private readonly SafetyAnalysisResults _results;
+		private readonly FaultOptimizationBackend<TExecutableModel> _backend = new FaultOptimizationBackend<TExecutableModel>(stateHeaderBytes: 4);
+		private readonly SafetyAnalysisResults<TExecutableModel> _results;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="results">The result of the safety analysis the order analysis should be conducted for.</param>
 		/// <param name="configuration">The model checker's configuration that determines certain model checker settings.</param>
-		internal OrderAnalysis(SafetyAnalysisResults results, AnalysisConfiguration configuration)
+		internal OrderAnalysis(SafetyAnalysisResults<TExecutableModel> results, AnalysisConfiguration configuration)
 		{
 			Requires.NotNull(results, nameof(results));
 
 			_results = results;
-			_backend.InitializeModel(configuration, results.Model, results.Hazard);
+			_backend.InitializeModel(configuration, results.RuntimeModel, results.Hazard);
 		}
 
 		/// <summary>
@@ -56,7 +57,7 @@ namespace SafetySharp.Analysis
 		///   <paramref name="safetyAnalysisResults" />.
 		/// </summary>
 		/// <param name="safetyAnalysisResults">The results of the safety analysis the order relationships should be computed for.</param>
-		public static OrderAnalysisResults ComputeOrderRelationships(SafetyAnalysisResults safetyAnalysisResults)
+		public static OrderAnalysisResults<TExecutableModel> ComputeOrderRelationships(SafetyAnalysisResults<TExecutableModel> safetyAnalysisResults)
 		{
 			return ComputeOrderRelationships(safetyAnalysisResults, AnalysisConfiguration.Default);
 		}
@@ -76,17 +77,17 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="safetyAnalysisResults">The results of the safety analysis the order relationships should be computed for.</param>
 		/// <param name="configuration">The configuration settings of the model checker that should be used.</param>
-		public static OrderAnalysisResults ComputeOrderRelationships(SafetyAnalysisResults safetyAnalysisResults,
+		public static OrderAnalysisResults<TExecutableModel> ComputeOrderRelationships(SafetyAnalysisResults<TExecutableModel> safetyAnalysisResults,
 																	 AnalysisConfiguration configuration)
 		{
-			var analysis = new OrderAnalysis(safetyAnalysisResults, configuration);
+			var analysis = new OrderAnalysis<TExecutableModel>(safetyAnalysisResults, configuration);
 			return analysis.ComputeOrderRelationships();
 		}
 
 		/// <summary>
 		///   Computes the order relationships for all minimal critical fault sets.
 		/// </summary>
-		internal OrderAnalysisResults ComputeOrderRelationships()
+		internal OrderAnalysisResults<TExecutableModel> ComputeOrderRelationships()
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -94,9 +95,9 @@ namespace SafetySharp.Analysis
 			var relationships = _results
 				.MinimalCriticalSets
 				.Where(set => set.Count >= 2)
-				.ToDictionary(faultSet => faultSet, faultSet => (IEnumerable<OrderRelationship>)GetOrderRelationships(faultSet).ToArray());
+				.ToDictionary(faultSet => faultSet, faultSet => (IEnumerable<OrderRelationship<TExecutableModel>>)GetOrderRelationships(faultSet).ToArray());
 
-			return new OrderAnalysisResults(_results, stopwatch.Elapsed, relationships);
+			return new OrderAnalysisResults<TExecutableModel>(_results, stopwatch.Elapsed, relationships);
 		}
 
 		/// <summary>
@@ -104,7 +105,7 @@ namespace SafetySharp.Analysis
 		///   <paramref name="minimalCriticalFaultSet" />, if any.
 		/// </summary>
 		/// <param name="minimalCriticalFaultSet">The minimal critical fault set the order should be returned for.</param>
-		private IEnumerable<OrderRelationship> GetOrderRelationships(ISet<Fault> minimalCriticalFaultSet)
+		private IEnumerable<OrderRelationship<TExecutableModel>> GetOrderRelationships(ISet<Fault> minimalCriticalFaultSet)
 		{
 			var checkedSet = new FaultSet(minimalCriticalFaultSet);
 			var activation = _results.FaultActivationBehavior == FaultActivationBehavior.ForceOnly ? Activation.Forced : Activation.Nondeterministic;
@@ -132,23 +133,23 @@ namespace SafetySharp.Analysis
 
 					// f1 == f2
 					if (!simultaneous.FormulaHolds && fault1BeforeFault2.FormulaHolds && fault2BeforeFault1.FormulaHolds)
-						yield return new OrderRelationship(simultaneous, fault1, fault2, OrderRelationshipKind.Simultaneously);
+						yield return new OrderRelationship<TExecutableModel>(simultaneous, fault1, fault2, OrderRelationshipKind.Simultaneously);
 
 					// f1 <= f2
 					else if (!fault1BeforeFault2.FormulaHolds && !simultaneous.FormulaHolds)
-						yield return new OrderRelationship(simultaneous, fault1, fault2, OrderRelationshipKind.Precedes);
+						yield return new OrderRelationship<TExecutableModel>(simultaneous, fault1, fault2, OrderRelationshipKind.Precedes);
 
 					// f1 < f2
 					else if (!fault1BeforeFault2.FormulaHolds && simultaneous.FormulaHolds)
-						yield return new OrderRelationship(simultaneous, fault1, fault2, OrderRelationshipKind.StrictlyPrecedes);
+						yield return new OrderRelationship<TExecutableModel>(simultaneous, fault1, fault2, OrderRelationshipKind.StrictlyPrecedes);
 
 					// f2 <= f1
 					else if (!fault2BeforeFault1.FormulaHolds && !simultaneous.FormulaHolds)
-						yield return new OrderRelationship(simultaneous, fault2, fault1, OrderRelationshipKind.Precedes);
+						yield return new OrderRelationship<TExecutableModel>(simultaneous, fault2, fault1, OrderRelationshipKind.Precedes);
 
 					// f2 < f1
 					else if (!fault2BeforeFault1.FormulaHolds && simultaneous.FormulaHolds)
-						yield return new OrderRelationship(simultaneous, fault2, fault1, OrderRelationshipKind.StrictlyPrecedes);
+						yield return new OrderRelationship<TExecutableModel>(simultaneous, fault2, fault1, OrderRelationshipKind.StrictlyPrecedes);
 				}
 			}
 		}

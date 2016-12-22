@@ -33,10 +33,10 @@ namespace SafetySharp.Analysis.SafetyChecking
 	/// <summary>
 	///   Checks all formulas individually on the model taking advantage of the fault-removal optimization.
 	/// </summary>
-	internal class FaultOptimizationBackend : AnalysisBackend
+	internal class FaultOptimizationBackend<TExecutableModel> : AnalysisBackend<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly int _stateHeaderBytes;
-		private InvariantChecker _invariantChecker;
+		private InvariantChecker<TExecutableModel> _invariantChecker;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -54,28 +54,10 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// <param name="hazard">The hazard that should be analyzed.</param>
 		protected override void InitializeModel(AnalysisConfiguration configuration, Formula hazard)
 		{
-			var serializer = new RuntimeModelSerializer();
-			serializer.Serialize(Model, !hazard);
+			Func<AnalysisModel<TExecutableModel>> createModel = () =>
+				new ActivationMinimalExecutedModel<TExecutableModel>(RuntimeModel.DeriveExecutableModelGenerator(hazard), configuration.SuccessorCapacity);
 
-			Func<AnalysisModel> createModel = () =>
-				new ActivationMinimalExecutedModel(CreateModel(hazard), configuration.SuccessorCapacity);
-
-			_invariantChecker = new InvariantChecker(createModel, OnOutputWritten, configuration, formulaIndex: 0);
-		}
-
-		/// <summary>
-		///   Gets a function that initializes the runtime model.
-		/// </summary>
-		private Func<SafetySharpRuntimeModel> CreateModel(Formula hazard)
-		{
-			var serializer = new RuntimeModelSerializer();
-			serializer.Serialize(Model, !hazard);
-
-			return () =>
-			{
-				var serializedData = serializer.LoadSerializedData();
-				return new SafetySharpRuntimeModel(serializedData, _stateHeaderBytes);
-			};
+			_invariantChecker = new InvariantChecker<TExecutableModel>(createModel, OnOutputWritten, configuration, formulaIndex: 0);
 		}
 
 		/// <summary>
@@ -83,7 +65,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// </summary>
 		/// <param name="faults">The fault set that should be checked for criticality.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
-		internal override AnalysisResult CheckCriticality(FaultSet faults, Activation activation)
+		internal override AnalysisResult<TExecutableModel> CheckCriticality(FaultSet faults, Activation activation)
 		{
 			ChangeFaultActivations(faults, activation);
 			return _invariantChecker.Check();
@@ -98,14 +80,14 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// <param name="minimalCriticalFaultSet">The minimal critical fault set that should be checked.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
 		/// <param name="forceSimultaneous">Indicates whether both faults must occur simultaneously.</param>
-		internal override AnalysisResult CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
+		internal override AnalysisResult<TExecutableModel> CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
 													Activation activation, bool forceSimultaneous)
 		{
 			ChangeFaultActivations(minimalCriticalFaultSet, activation);
 
 			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Clear();
 			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Add(
-				() => new FaultOrderModifier(firstFault, secondFault, forceSimultaneous));
+				() => new FaultOrderModifier<TExecutableModel>(firstFault, secondFault, forceSimultaneous));
 
 			return _invariantChecker.Check();
 		}
@@ -115,7 +97,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// </summary>
 		private void ChangeFaultActivations(FaultSet faults, Activation activation)
 		{
-			foreach (var model in _invariantChecker.AnalyzedModels.Cast<ExecutedModel>())
+			foreach (var model in _invariantChecker.AnalyzedModels.Cast<ExecutedModel<TExecutableModel>>())
 				model.ChangeFaultActivations(GetUpdateFaultActivations(faults, activation));
 		}
 

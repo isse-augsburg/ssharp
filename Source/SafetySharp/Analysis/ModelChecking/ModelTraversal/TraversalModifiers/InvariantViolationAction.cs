@@ -22,12 +22,13 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
+	using Runtime;
 	using Transitions;
 
 	/// <summary>
 	///   Checks for invariant violations during model traversal.
 	/// </summary>
-	internal sealed class InvariantViolationAction : ITransitionAction
+	internal sealed class InvariantViolationAction<TExecutableModel> : ITransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly int _formulaIndex;
 
@@ -50,7 +51,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// <param name="isInitialTransition">
 		///   Indicates whether the transition is an initial transition not starting in any valid source state.
 		/// </param>
-		public unsafe void ProcessTransition(TraversalContext context, Worker worker, Transition* transition, bool isInitialTransition)
+		public unsafe void ProcessTransition(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, Transition* transition, bool isInitialTransition)
 		{
 			if (transition->Formulas[_formulaIndex])
 				return;

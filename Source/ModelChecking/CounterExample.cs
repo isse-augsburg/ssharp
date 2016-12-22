@@ -35,7 +35,7 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents a model checking counter example.
 	/// </summary>
-	public class CounterExample : DisposableObject
+	public class CounterExample<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   The file extension used by counter example files.
@@ -47,8 +47,8 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		public const int FileHeader = 0x3FE0DD04;
 
-		protected int[][] ReplayInfo { get; }
-		protected byte[][] States { get; }
+		public int[][] ReplayInfo { get; }
+		public byte[][] States { get; }
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -57,7 +57,7 @@ namespace SafetySharp.Analysis
 		/// <param name="states">The serialized counter example.</param>
 		/// <param name="replayInfo">The replay information of the counter example.</param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		internal CounterExample(ExecutableModel runtimeModel, byte[][] states, int[][] replayInfo, bool endsWithException)
+		internal CounterExample(TExecutableModel runtimeModel, byte[][] states, int[][] replayInfo, bool endsWithException)
 		{
 			Requires.NotNull(runtimeModel, nameof(runtimeModel));
 			Requires.NotNull(states, nameof(states));
@@ -79,7 +79,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Gets the runtime model the counter example was generated for.
 		/// </summary>
-		internal ExecutableModel RuntimeModel { get; }
+		internal TExecutableModel RuntimeModel { get; }
 
 		/// <summary>
 		///   Gets the model the counter example was generated for.
@@ -107,7 +107,7 @@ namespace SafetySharp.Analysis
 		///   Deserializes the state at the <paramref name="position" /> of the counter example.
 		/// </summary>
 		/// <param name="position">The position of the state within the counter example that should be deserialized.</param>
-		public unsafe ExecutableModel DeserializeState(int position)
+		public unsafe ExecutableModel<TExecutableModel> DeserializeState(int position)
 		{
 			Requires.That(States != null, "No counter example has been loaded.");
 			Requires.InRange(position, nameof(position), 0, StepCount);
@@ -155,122 +155,7 @@ namespace SafetySharp.Analysis
 			for (var i = 1; i < StepCount + 1; ++i)
 				action(States[i]);
 		}
-
-		/// <summary>
-		///   Saves the counter example to the <paramref name="file" />.
-		/// </summary>
-		/// <param name="file">The file the counter example should be saved to.</param>
-		public void Save(string file)
-		{
-			Requires.NotNullOrWhitespace(file, nameof(file));
-
-			if (!file.EndsWith(FileExtension))
-				file += FileExtension;
-
-			var directory = Path.GetDirectoryName(file);
-			if (!String.IsNullOrWhiteSpace(directory))
-				Directory.CreateDirectory(directory);
-
-			using (var writer = new BinaryWriter(File.OpenWrite(file), Encoding.UTF8))
-			{
-				writer.Write(FileHeader);
-				writer.Write(EndsWithException);
-				writer.Write(RuntimeModel.SerializedModel.Length);
-				writer.Write(RuntimeModel.SerializedModel);
-
-				foreach (var fault in RuntimeModel.Faults)
-					writer.Write((int)fault.Activation);
-
-				RuntimeModel.WriteInternalStateStructureToFile(writer);
-
-				writer.Write(StepCount + 1);
-				writer.Write(RuntimeModel.StateVectorSize);
-
-				foreach (var slot in States.SelectMany(step => step))
-					writer.Write(slot);
-
-				writer.Write(ReplayInfo.Length);
-				foreach (var choices in ReplayInfo)
-				{
-					writer.Write(choices.Length);
-					foreach (var choice in choices)
-						writer.Write(choice);
-				}
-			}
-		}
-
-		/*
-		/// <summary>
-		///   Loads a counter example from the <paramref name="file" />.
-		/// </summary>
-		/// <param name="file">The path to the file the counter example should be loaded from.</param>
-		public static CounterExample<Internal Load(string file)
-		{
-			Requires.NotNullOrWhitespace(file, nameof(file));
-
-			using (var reader = new BinaryReader(File.OpenRead(file), Encoding.UTF8))
-			{
-				if (reader.ReadInt32() != CounterExample.FileHeader)
-					throw new InvalidOperationException("The file does not contain a counter example that is compatible with this version of S#.");
-
-				var endsWithException = reader.ReadBoolean();
-				var serializedRuntimeModel = reader.ReadBytes(reader.ReadInt32());
-				var modelData = RuntimeModelSerializer.LoadSerializedData(serializedRuntimeModel);
-
-				foreach (var fault in modelData.ObjectTable.OfType<Fault>())
-					fault.Activation = (Activation)reader.ReadInt32();
-
-				var runtimeModel = new SafetySharpRuntimeModel(modelData);
-				runtimeModel.UpdateFaultSets();
-
-				var metadataStream = new MemoryStream(reader.ReadBytes(reader.ReadInt32()));
-				var formatter = new BinaryFormatter();
-				var slotMetadata = new StateVectorLayout((StateSlotMetadata[])formatter.Deserialize(metadataStream));
-				var modelMetadata = runtimeModel.StateVectorLayout;
-
-				var counterExample = new byte[reader.ReadInt32()][];
-				var slotCount = reader.ReadInt32();
-
-				if (slotCount != runtimeModel.StateVectorSize)
-				{
-					throw new InvalidOperationException(
-						$"State slot count mismatch; the instantiated model requires {runtimeModel.StateVectorSize} state slots, " +
-						$"whereas the counter example uses {slotCount} state slots.");
-				}
-
-				if (slotMetadata.SlotCount != modelMetadata.SlotCount)
-				{
-					throw new InvalidOperationException(
-						$"State slot metadata count mismatch; the instantiated model has {modelMetadata.SlotCount} state slot metadata entries, " +
-						$"whereas the counter example has {slotMetadata.SlotCount} state slot entries.");
-				}
-
-				for (var i = 0; i < slotMetadata.SlotCount; ++i)
-				{
-					if (modelMetadata[i] != slotMetadata[i])
-						throw new StateVectorMismatchException(slotMetadata, modelMetadata);
-				}
-
-				for (var i = 0; i < counterExample.Length; ++i)
-				{
-					counterExample[i] = new byte[runtimeModel.StateVectorSize];
-					for (var j = 0; j < runtimeModel.StateVectorSize; ++j)
-						counterExample[i][j] = reader.ReadByte();
-				}
-
-				var replayInfo = new int[reader.ReadInt32()][];
-				for (var i = 0; i < replayInfo.Length; ++i)
-				{
-					replayInfo[i] = new int[reader.ReadInt32()];
-					for (var j = 0; j < replayInfo[i].Length; ++j)
-						replayInfo[i][j] = reader.ReadInt32();
-				}
-
-				return new SafetySharpCounterExample(runtimeModel, counterExample, replayInfo, endsWithException);
-			}
-		}*/
-
-
+		
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>

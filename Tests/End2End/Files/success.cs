@@ -44,7 +44,7 @@ namespace Tests.End2End.Files
 		public static int Main(string[] args)
 		{
 			var s = new S3();
-			var modelChecker = new SSharpChecker();
+			var modelChecker = new QualitativeChecker();
 
 			return modelChecker.CheckInvariant(s, s.C.X < 10).FormulaHolds ? 0 : -1;
 		}
