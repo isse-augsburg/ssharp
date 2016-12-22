@@ -41,7 +41,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 
 				throw new InvalidOperationException("should not be reached");
 			}
-			catch (AnalysisException e)
+			catch (AnalysisException<SafetySharpRuntimeModel> e)
 			{
 				e.CounterExample.ShouldBeNull();
 				e.InnerException.ShouldBeOfType<RangeViolationException>();

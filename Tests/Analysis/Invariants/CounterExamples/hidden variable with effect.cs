@@ -33,7 +33,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 		protected override void Check()
 		{
 			var c = new C();
-			var e = Should.Throw<AnalysisException>(() => CheckInvariant(true, c));
+			var e = Should.Throw<AnalysisException<SafetySharpRuntimeModel>>(() => CheckInvariant(true, c));
 			e.InnerException.ShouldBeOfType<NondeterminismException>();
 
 			SimulateCounterExample(e.CounterExample, simulator =>

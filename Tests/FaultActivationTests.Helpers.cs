@@ -27,6 +27,7 @@ namespace Tests
 	using SafetySharp.Analysis;
 	using SafetySharp.Analysis.ModelChecking;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 	using Utilities;
@@ -34,8 +35,8 @@ namespace Tests
 
 	public abstract class FaultActivationTestObject : TestObject
 	{
-		private AnalysisResult _result;
-		protected CounterExample CounterExample => _result.CounterExample;
+		private AnalysisResult<SafetySharpRuntimeModel> _result;
+		protected CounterExample<SafetySharpRuntimeModel> CounterExample => _result.CounterExample;
 		protected int StateCount => _result.StateCount;
 		protected long TransitionCount => _result.TransitionCount;
 		protected long ComputedTransitionCount => _result.ComputedTransitionCount;
@@ -50,8 +51,8 @@ namespace Tests
 			configuration.StackCapacity = 10000;
 			configuration.CpuCount = 1;
 
-			var checker = new InvariantChecker(
-				() => new ActivationMinimalExecutedModel(serializer.Load, configuration.SuccessorCapacity),
+			var checker = new InvariantChecker<SafetySharpRuntimeModel>(
+				() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(serializer.Load, configuration.SuccessorCapacity),
 				s => Output.Log("{0}", s),
 				configuration,
 				formulaIndex: 0);

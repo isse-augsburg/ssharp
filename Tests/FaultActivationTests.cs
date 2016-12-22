@@ -23,6 +23,7 @@
 namespace Tests
 {
 	using SafetySharp.Analysis;
+	using SafetySharp.Runtime;
 	using Xunit;
 
 	public partial class FaultActivationTests
@@ -36,7 +37,7 @@ namespace Tests
 		[Theory, MemberData(nameof(DiscoverTests), "FaultActivation/Formulas")]
 		public void Formulas(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker));
+			ExecuteDynamicTests(file, typeof(QualitativeChecker<SafetySharpRuntimeModel>));
 		}
 	}
 }

@@ -25,6 +25,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using Shouldly;
 
 	internal class InitialStateException : AnalysisTestObject
@@ -38,7 +39,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 
 		private void Check(Component c)
 		{
-			var e = Should.Throw<AnalysisException>(() => CheckInvariant(true, c));
+			var e = Should.Throw<AnalysisException<SafetySharpRuntimeModel>>(() => CheckInvariant(true, c));
 			e.CounterExample.StepCount.ShouldBe(1);
 
 			Should.Throw<InvalidOperationException>(() => SimulateCounterExample(e.CounterExample, simulator => { })).Message.ShouldBe("test");

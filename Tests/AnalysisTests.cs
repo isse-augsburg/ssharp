@@ -24,6 +24,7 @@ namespace Tests
 {
 	using System;
 	using SafetySharp.Analysis;
+	using SafetySharp.ModelChecking;
 	using Xunit;
 
 	public partial class DccaTests
@@ -58,19 +59,19 @@ namespace Tests
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/CounterExamples")]
 		public void CounterExamples(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
+			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), false);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/NotViolated")]
 		public void NotViolated(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
+			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), false);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/Violated")]
 		public void Violated(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
+			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), false);
 		}
 	}
 
@@ -79,7 +80,7 @@ namespace Tests
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/StateConstraints")]
 		public void StateConstraints(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker), false);
+			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), false);
 		}
 	}
 
@@ -88,25 +89,25 @@ namespace Tests
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/CounterExamples")]
 		public void CounterExamples(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
+			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), true);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/NotViolated")]
 		public void NotViolated(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
+			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), true);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/Violated")]
 		public void Violated(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
+			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), true);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/MultipleInvariants")]
 		public void MultipleInvariants(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SSharpChecker), true);
+			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), true);
 		}
 	}
 

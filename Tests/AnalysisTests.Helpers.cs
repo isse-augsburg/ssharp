@@ -28,7 +28,9 @@ namespace Tests
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
 	using SafetySharp.Analysis.Heuristics;
+	using SafetySharp.ModelChecking;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using SafetySharp.Utilities;
 	using Shouldly;
 	using Utilities;
@@ -36,13 +38,13 @@ namespace Tests
 
 	public abstract class AnalysisTestObject : TestObject
 	{
-		protected CounterExample CounterExample { get; private set; }
-		protected CounterExample[] CounterExamples { get; private set; }
+		protected CounterExample<SafetySharpRuntimeModel> CounterExample { get; private set; }
+		protected CounterExample<SafetySharpRuntimeModel>[] CounterExamples { get; private set; }
 		protected bool SuppressCounterExampleGeneration { get; set; }
 		protected IFaultSetHeuristic[] Heuristics { get; set; }
-		protected AnalysisResult Result { get; private set; }
+		protected AnalysisResult<SafetySharpRuntimeModel> Result { get; private set; }
 
-		protected void SimulateCounterExample(SafetySharpCounterExample counterExample, Action<SafetySharpSimulator> action)
+		protected void SimulateCounterExample(CounterExample<SafetySharpRuntimeModel> counterExample, Action<SafetySharpSimulator> action)
 		{
 			// Test directly
 			action(new SafetySharpSimulator(counterExample));
@@ -51,7 +53,8 @@ namespace Tests
 			using (var file = new TemporaryFile(".ssharp"))
 			{
 				counterExample.Save(file.FilePath);
-				action(new SafetySharpSimulator(SafetySharpCounterExample.Load(file.FilePath)));
+				var counterExampleSerialization = new SafetySharpCounterExampleSerialization();
+				action(new SafetySharpSimulator(counterExampleSerialization.Load(file.FilePath)));
 			}
 		}
 
@@ -74,7 +77,7 @@ namespace Tests
 		protected bool[] CheckInvariants(IComponent component, params Formula[] invariants)
 		{
 			var modelChecker = CreateModelChecker();
-			var results = (AnalysisResult[])modelChecker.CheckInvariants(TestModel.InitializeModel(component), invariants);
+			var results = (AnalysisResult<SafetySharpRuntimeModel>[])modelChecker.CheckInvariants(TestModel.InitializeModel(component), invariants);
 			CounterExamples = results.Select(result => result.CounterExample).ToArray();
 			return results.Select(result => result.FormulaHolds).ToArray();
 		}
@@ -88,17 +91,17 @@ namespace Tests
 			return result.FormulaHolds;
 		}
 
-		protected SafetyAnalysisResults DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
+		protected SafetyAnalysisResults<SafetySharpRuntimeModel> DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
 		{
 			return DccaWithMaxCardinality(TestModel.InitializeModel(components), hazard, maxCardinality);
 		}
 
-		protected SafetyAnalysisResults Dcca(Formula hazard, params IComponent[] components)
+		protected SafetyAnalysisResults<SafetySharpRuntimeModel> Dcca(Formula hazard, params IComponent[] components)
 		{
 			return DccaWithMaxCardinality(hazard, Int32.MaxValue, components);
 		}
 
-		protected OrderAnalysisResults AnalyzeOrder(Formula hazard, params IComponent[] components)
+		protected OrderAnalysisResults<SafetySharpRuntimeModel> AnalyzeOrder(Formula hazard, params IComponent[] components)
 		{
 			var configuration = AnalysisConfiguration.Default;
 			configuration.StateCapacity = 1 << 10;
@@ -106,7 +109,7 @@ namespace Tests
 			configuration.GenerateCounterExample = !SuppressCounterExampleGeneration;
 			configuration.ProgressReportsOnly = true;
 
-			var analysis = new OrderAnalysis(DccaWithMaxCardinality(hazard, Int32.MaxValue, components), configuration);
+			var analysis = new SafetySharpOrderAnalysis(DccaWithMaxCardinality(hazard, Int32.MaxValue, components), configuration);
 			analysis.OutputWritten += message => Output.Log("{0}", message);
 
 			var result = analysis.ComputeOrderRelationships();
@@ -115,9 +118,9 @@ namespace Tests
 			return result;
 		}
 
-		protected SafetyAnalysisResults DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality)
+		protected SafetyAnalysisResults<SafetySharpRuntimeModel> DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality)
 		{
-			var analysis = new SafetyAnalysis
+			var analysis = new SafetySharpSafetyAnalysis
 			{
 				Backend = (SafetyAnalysisBackend)Arguments[0],
 				Configuration =
@@ -135,11 +138,11 @@ namespace Tests
 			var result = analysis.ComputeMinimalCriticalSets(model, hazard, maxCardinality);
 			Output.Log("{0}", result);
 
-			result.Model.ShouldBe(model);
+			result.RuntimeModel.Model.ShouldBe(model);
 			return result;
 		}
 
-		protected SafetyAnalysisResults Dcca(ModelBase model, Formula hazard)
+		protected SafetyAnalysisResults<SafetySharpRuntimeModel> Dcca(ModelBase model, Formula hazard)
 		{
 			return DccaWithMaxCardinality(model, hazard, Int32.MaxValue);
 		}
@@ -149,7 +152,7 @@ namespace Tests
 			dynamic modelChecker = Activator.CreateInstance((Type)Arguments[0]);
 			modelChecker.OutputWritten += (Action<string>)(message => Output.Log("{0}", message));
 
-			var ssharpChecker = modelChecker as SSharpChecker;
+			var ssharpChecker = modelChecker as QualitativeChecker<SafetySharpRuntimeModel>;
 			if (ssharpChecker != null)
 			{
 				ssharpChecker.Configuration.StateCapacity = 1 << 14;
@@ -173,7 +176,7 @@ namespace Tests
 			throw new TestException("Fault set is not contained in set.");
 		}
 
-		protected void ShouldContain(OrderRelationship[] relationships, Fault fault1, Fault fault2, OrderRelationshipKind kind)
+		protected void ShouldContain(OrderRelationship<SafetySharpRuntimeModel>[] relationships, Fault fault1, Fault fault2, OrderRelationshipKind kind)
 		{
 			foreach (var relationship in relationships)
 			{

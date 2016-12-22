@@ -24,6 +24,7 @@ namespace Tests.Analysis.Probabilistic
 {
 	using System;
 	using SafetySharp.Analysis;
+	using SafetySharp.ModelChecking;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
@@ -49,7 +50,7 @@ namespace Tests.Analysis.Probabilistic
 			var finallyFormulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated = new UnaryFormula(formulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated, UnaryOperator.Finally);
 			var finallyFormulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated = new UnaryFormula(formulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated, UnaryOperator.Finally);
 
-			var markovChainGenerator = new DtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			var markovChainGenerator = new SafetySharpDtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
 			markovChainGenerator.AddFormulaToCheck(finallyFormulaProbabilityOfStep11FrozenValue2AndInvariantViolated);
 			markovChainGenerator.AddFormulaToCheck(finallyFormulaProbabilityOfStep11FrozenValue3AndInvariantViolated);
 			markovChainGenerator.AddFormulaToCheck(finallyFormulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated);

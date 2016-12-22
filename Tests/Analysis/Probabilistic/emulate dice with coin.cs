@@ -24,6 +24,7 @@ namespace Tests.Analysis.Probabilistic
 {
 	using System;
 	using SafetySharp.Analysis;
+	using SafetySharp.ModelChecking;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
@@ -57,7 +58,7 @@ namespace Tests.Analysis.Probabilistic
 			
 			var final1Formula =new UnaryFormula(c.IsInStateFinal1(), UnaryOperator.Finally);
 
-			var markovChainGenerator = new DtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			var markovChainGenerator = new SafetySharpDtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
 			markovChainGenerator.AddFormulaToCheck(final1Formula);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = (Type)Arguments[0];

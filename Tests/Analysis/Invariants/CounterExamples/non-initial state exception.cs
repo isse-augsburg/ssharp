@@ -25,6 +25,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using Shouldly;
 
 	internal class NonInitialStateException : AnalysisTestObject
@@ -32,7 +33,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 		protected override void Check()
 		{
 			var c = new C();
-			var e = Should.Throw<AnalysisException>(() => CheckInvariant(true, c));
+			var e = Should.Throw<AnalysisException<SafetySharpRuntimeModel>>(() => CheckInvariant(true, c));
 			e.CounterExample.StepCount.ShouldBe(4);
 
 			SimulateCounterExample(e.CounterExample, simulator =>
@@ -51,7 +52,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 			});
 
 			var d = new D();
-			e = Should.Throw<AnalysisException>(() => CheckInvariant(true, d));
+			e = Should.Throw<AnalysisException<SafetySharpRuntimeModel>>(() => CheckInvariant(true, d));
 			e.CounterExample.StepCount.ShouldBe(2);
 
 			SimulateCounterExample(e.CounterExample, simulator =>

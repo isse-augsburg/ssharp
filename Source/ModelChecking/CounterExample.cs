@@ -35,7 +35,7 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents a model checking counter example.
 	/// </summary>
-	public class CounterExample<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
+	public sealed class CounterExample<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   The file extension used by counter example files.
