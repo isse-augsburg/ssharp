@@ -22,8 +22,6 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
-	using System;
-	using System.Collections.Generic;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using Modeling;
@@ -41,15 +39,20 @@ namespace SafetySharp.Odp.Reconfiguration
 			_controller = controller;
 		}
 
-		protected Coalition CurrentCoalition { get; set; }
+		public Coalition CurrentCoalition { get; set; }
 		public BaseAgent.State BaseAgentState { get; private set; }
 
-		public void Acknowledge()
+		private TaskCompletionSource<object> _acknowledgment;
+
+		void IReconfigurationAgent.Acknowledge()
 		{
-			throw new NotImplementedException();
+			_reconfAgentHandler.Go(CurrentCoalition.Task);
+			_acknowledgment?.SetResult(null);
+			_acknowledgment = null;
+			_reconfAgentHandler.Done(CurrentCoalition.Task);
 		}
 
-		public void StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
+		void IReconfigurationAgent.StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
 		{
 			MicrostepScheduler.Schedule(() => ReconfigureAsync(task, agent, baseAgentState));
 		}
@@ -62,6 +65,10 @@ namespace SafetySharp.Odp.Reconfiguration
 				((CoalitionReconfigurationAgent)agent).Respond(this);
 			else
 			{
+				var configs = await _controller.CalculateConfigurations(this, task);
+				if (configs != null)
+					await Task.WhenAll(CurrentCoalition.Members
+						.Select(member => member.UpdateConfiguration(configs)));
 			}
 		}
 
@@ -77,7 +84,16 @@ namespace SafetySharp.Odp.Reconfiguration
 					CurrentCoalition.Join(agent);
 				// TODO: else merge coalitions (how?)
 			}
+		}
 
+		/// <summary>
+		/// Distributes the calculated configuration to the coalition members.
+		/// </summary>
+		private Task UpdateConfiguration(ConfigurationUpdate configs)
+		{
+			_acknowledgment = new TaskCompletionSource<object>();
+			_reconfAgentHandler.UpdateAllocatedRoles(configs);
+			return _acknowledgment.Task;
 		}
 
 		private bool IsConfiguredFor(ITask task)
