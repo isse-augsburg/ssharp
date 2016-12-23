@@ -111,21 +111,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		private async Task EnlargeCoalitionUntil(Func<bool> condition, Coalition coalition, IEnumerable<BaseAgent> possibleMembers)
 		{
 			foreach (var agent in possibleMembers.TakeWhile(a => !condition()))
-				await Invite(agent, coalition);
-		}
-
-		/// <summary>
-		/// Invites a new member into the coalition. The returned task completes when the invite has been answered.
-		/// </summary>
-		protected async Task<CoalitionReconfigurationAgent> Invite(BaseAgent agent, Coalition coalition)
-		{
-			await agent.RequestReconfiguration(coalition.Leader, coalition.Task);
-
-			// TODO: wait for invite reply - how? invitee might use await as well (TaskCompletionSource?)
-			// TODO: invitation might lead to coalition merge -- if no longer leader, stop here!?
-			// TODO: (implementation: cancellation token?)
-
-			throw new NotImplementedException();
+				await coalition.Invite(agent);
 		}
 
 		/// <summary>

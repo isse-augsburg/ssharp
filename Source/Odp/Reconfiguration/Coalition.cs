@@ -22,8 +22,10 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Threading.Tasks;
 
 	public class Coalition
 	{
@@ -37,9 +39,15 @@ namespace SafetySharp.Odp.Reconfiguration
 		public HashSet<ICapability> AvailableCapabilities { get; } = new HashSet<ICapability>();
 		public HashSet<ICapability> NeededCapabilities { get; } = new HashSet<ICapability>();
 
+		private Dictionary<BaseAgent, TaskCompletionSource<object>> _invitations
+			= new Dictionary<BaseAgent, TaskCompletionSource<object>>();
+
 		// TODO: hide or make readonly properties
 		internal int _ctfStart = -1;
 		internal int _ctfEnd = -1; // exclusive
+		public bool CapabilitiesSatisfied() => NeededCapabilities.IsSubsetOf(AvailableCapabilities);
+
+		public bool IsInvited(CoalitionReconfigurationAgent agent) => _invitations.ContainsKey(agent.BaseAgent);
 
 		public Coalition(CoalitionReconfigurationAgent leader, ITask task)
 		{
@@ -47,11 +55,35 @@ namespace SafetySharp.Odp.Reconfiguration
 			Join(Leader = leader);
 		}
 
+		public async Task Invite(BaseAgent agent)
+		{
+			if (Members.Any(member => member.BaseAgent == agent))
+				return;
+
+			_invitations[agent] = new TaskCompletionSource<object>();
+
+			// do not await, await invitation response (next line) instead (otherwise a deadlock occurs)
+			agent.RequestReconfiguration(Leader, Task);
+
+			await _invitations[agent].Task;
+			_invitations.Remove(agent);
+		}
+
 		public void Join(CoalitionReconfigurationAgent newMember)
 		{
 			Members.Add(newMember);
 			AvailableCapabilities.UnionWith(newMember.BaseAgentState.AvailableCapabilities);
 			UpdateCTF(newMember);
+			newMember.CurrentCoalition = this;
+
+			if (IsInvited(newMember))
+			{
+				_invitations[newMember.BaseAgent].SetResult(null);
+				_invitations.Remove(newMember.BaseAgent);
+			}
+
+			// TODO: invitation might lead to coalition merge -- if no longer leader, stop here!?
+			// TODO: (implementation: cancellation token?)
 		}
 
 		private void UpdateCTF(CoalitionReconfigurationAgent newMember)
@@ -96,7 +128,5 @@ namespace SafetySharp.Odp.Reconfiguration
 				_ctfEnd = lastRole.PostCondition.StateLength;
 			}
 		}
-
-		public bool CapabilitiesSatisfied() => NeededCapabilities.IsSubsetOf(AvailableCapabilities);
 	}
 }
