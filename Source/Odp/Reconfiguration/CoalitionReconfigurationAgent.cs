@@ -59,13 +59,25 @@ namespace SafetySharp.Odp.Reconfiguration
 			BaseAgentState = baseAgentState;
 
 			if (baseAgentState.ReconfRequestSource != null)
+				((CoalitionReconfigurationAgent)agent).Respond(this);
+			else
 			{
-				// TODO: if no reconf process previously started, join coalition
-				// TODO: else notify controller to merge coalitions (how?)
+			}
+		}
+
+		/// <summary>
+		/// Receives a response from an agent that received a reconfiguration request from this instance.
+		/// </summary>
+		/// <param name="agent">The agent responding to the reconfiguration request</param>
+		private void Respond(CoalitionReconfigurationAgent agent)
+		{
+			if (CurrentCoalition.IsInvited(agent))
+			{
+				if (agent.CurrentCoalition == null)
+					CurrentCoalition.Join(agent);
+				// TODO: else merge coalitions (how?)
 			}
 
-			var configs = await _controller.CalculateConfigurations(this, task);
-			// TODO: distribute configs
 		}
 
 		private bool IsConfiguredFor(ITask task)
