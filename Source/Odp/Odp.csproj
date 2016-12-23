@@ -70,6 +70,7 @@
     </Compile>
     <Compile Include="Reconfiguration\IReconfigurationAgent.cs" />
     <Compile Include="Reconfiguration\ReconfigurationAgentHandler.cs" />
+    <Compile Include="Reconfiguration\TaskFragment.cs" />
     <Compile Include="Resource.cs" />
     <Compile Include="Role.cs" />
   </ItemGroup>

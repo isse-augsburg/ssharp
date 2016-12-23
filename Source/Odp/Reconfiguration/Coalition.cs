@@ -42,15 +42,17 @@ namespace SafetySharp.Odp.Reconfiguration
 		private Dictionary<BaseAgent, TaskCompletionSource<object>> _invitations
 			= new Dictionary<BaseAgent, TaskCompletionSource<object>>();
 
-		// TODO: hide or make readonly properties
-		internal int _ctfStart = -1;
-		internal int _ctfEnd = -1; // exclusive
+		public BaseAgent[] RecoveredDistribution { get; }
+
 		public bool CapabilitiesSatisfied() => NeededCapabilities.IsSubsetOf(AvailableCapabilities);
 
 		public bool IsInvited(CoalitionReconfigurationAgent agent) => _invitations.ContainsKey(agent.BaseAgent);
 
+		public TaskFragment CTF { get; private set; }
+
 		public Coalition(CoalitionReconfigurationAgent leader, ITask task)
 		{
+			RecoveredDistribution = new BaseAgent[task.RequiredCapabilities.Length];
 			Task = task;
 			Join(Leader = leader);
 		}
@@ -73,7 +75,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		{
 			Members.Add(newMember);
 			AvailableCapabilities.UnionWith(newMember.BaseAgentState.AvailableCapabilities);
-			UpdateCTF(newMember);
+			UpdateCTF(newMember.BaseAgent);
 			newMember.CurrentCoalition = this;
 
 			if (IsInvited(newMember))
@@ -86,46 +88,38 @@ namespace SafetySharp.Odp.Reconfiguration
 			// TODO: (implementation: cancellation token?)
 		}
 
-		private void UpdateCTF(CoalitionReconfigurationAgent newMember)
+		private void UpdateCTF(BaseAgent newAgent)
 		{
-			Role firstRole, lastRole;
-			if (!newMember.GetConfigurationBounds(Task, out firstRole, out lastRole))
-				return;
+			var minPreState = -1;
+			var maxPostState = -1;
 
-			if (_ctfStart == -1) // && _ctfEnd == -1
+			foreach (var role in newAgent.AllocatedRoles)
 			{
-				// first initialization
-				_ctfStart = firstRole.PreCondition.StateLength;
-				_ctfEnd = lastRole.PostCondition.StateLength;
+				if (role.Task != Task)
+					continue;
 
-				NeededCapabilities.UnionWith(
-					Task.RequiredCapabilities.Skip(_ctfStart).Take(_ctfEnd - _ctfStart)
-				);
-				return;
+				for (var i = role.PreCondition.StateLength; i < role.PostCondition.StateLength; ++i)
+				{
+					if (RecoveredDistribution[i] != null)
+						throw new InvalidOperationException("Branches in the resource flow are currently unsupported by the coalition-formation based reconfiguration algorithm.");
+					RecoveredDistribution[i] = newAgent;
+				}
+
+				if (minPreState == -1 || role.PreCondition.StateLength < minPreState)
+					minPreState = role.PreCondition.StateLength;
+				maxPostState = Math.Max(maxPostState, role.PostCondition.StateLength - 1); // if StateLength = n, the first n capabilities (0, ..., n - 1) are applied => subtract 1
 			}
 
-			// interval is enlarged
-			if (firstRole.PreCondition.StateLength < _ctfStart)
+			// newAgent is not configured for this.Task
+			if (minPreState == -1) // && maxPostState == -1
+				return;
+
+			if (CTF == null) // first initialization
+				CTF = new TaskFragment(Task, minPreState, maxPostState);
+			else // enlarge fragment
 			{
-				//  add [firstRole.PreCondition.StateLength, _ctfStart)
-				NeededCapabilities.UnionWith(
-					Task.RequiredCapabilities.Skip(firstRole.PreCondition.StateLength)
-						 .Take(_ctfStart - firstRole.PreCondition.StateLength)
-				);
-
-				_ctfStart = firstRole.PreCondition.StateLength;
-			}
-
-			// interval is enlarged
-			if (lastRole.PostCondition.StateLength > _ctfEnd || _ctfEnd == -1)
-			{
-				// add [_ctfEnd, lastRole.PostCondition.StateLength)
-				NeededCapabilities.UnionWith(
-					Task.RequiredCapabilities.Skip(_ctfEnd)
-						 .Take(lastRole.PostCondition.StateLength - _ctfEnd)
-				);
-
-				_ctfEnd = lastRole.PostCondition.StateLength;
+				CTF.Prepend(minPreState);
+				CTF.Append(maxPostState);
 			}
 		}
 	}

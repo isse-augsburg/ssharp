@@ -100,22 +100,5 @@ namespace SafetySharp.Odp.Reconfiguration
 		{
 			return BaseAgent.AllocatedRoles.Any(role => role.Task == task);
 		}
-
-		public bool GetConfigurationBounds(ITask task, out Role firstRole, out Role lastRole)
-		{
-			firstRole = default(Role);
-			lastRole = default(Role);
-
-			if (!IsConfiguredFor(task))
-				return false;
-
-			firstRole = BaseAgent.AllocatedRoles
-								 .Where(role => role.Task == task)
-								 .MinBy(role => role.PreCondition.StateLength);
-			lastRole = BaseAgent.AllocatedRoles
-								.Where(role => role.Task == task)
-								.MaxBy(role => role.PostCondition.StateLength);
-			return true;
-		}
 	}
 }

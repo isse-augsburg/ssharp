@@ -115,11 +115,11 @@ namespace SafetySharp.Odp.Reconfiguration
 		}
 
 		/// <summary>
-		/// Lazily calculates all possible distributions on the capabilities in CTF between the members of the coalition.
+		/// Lazily calculates all possible distributions of the capabilities in CTF between the members of the coalition.
 		/// </summary>
 		protected IEnumerable<BaseAgent[]> CalculateCapabilityDistributions(Coalition coalition)
 		{
-			var distribution = new BaseAgent[coalition._ctfEnd - coalition._ctfStart];
+			var distribution = new BaseAgent[coalition.CTF.Length];
 			return CalculateCapabilityDistributions(coalition, distribution, 0);
 		}
 
@@ -150,7 +150,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		// TODO: override for pill production
 		protected virtual bool CanSatisfyNext(BaseAgent agent, Coalition coalition, BaseAgent[] distribution, int prefixLength)
 		{
-			var capability = coalition.Task.RequiredCapabilities[coalition._ctfStart + prefixLength];
+			var capability = coalition.Task.RequiredCapabilities[coalition.CTF.Start + prefixLength];
 			return agent.AvailableCapabilities.Contains(capability);
 		}
 
