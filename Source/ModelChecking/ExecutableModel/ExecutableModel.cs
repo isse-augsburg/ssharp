@@ -26,6 +26,7 @@ namespace SafetySharp.Runtime
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using System.Linq.Expressions;
 	using System.Runtime.CompilerServices;
 	using Analysis;
 	using Modeling;
@@ -340,6 +341,8 @@ namespace SafetySharp.Runtime
 		// Can create a fresh <see cref= "TExecutableModel" /> instance for further safety analysis.
 		public abstract Func<TExecutableModel> DeriveExecutableModelGenerator(params Formula[] formulas);
 
+		public abstract Expression CreateExecutableExpressionFromAtomarPropositionFormula(AtomarPropositionFormula formula);
+		
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>

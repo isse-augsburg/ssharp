@@ -58,7 +58,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		internal ActivationMinimalExecutedModel(Func<TExecutableModel> runtimeModelCreator, Func<bool>[] formulas, long successorStateCapacity)
 			: base(runtimeModelCreator)
 		{
-			formulas = formulas ?? RuntimeModel.Formulas.Select(SafetySharpCompilationVisitor.Compile).ToArray();
+			formulas = formulas ?? RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel,formula)).ToArray();
 
 			_transitions = new ActivationMinimalTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
 			_stateConstraints = RuntimeModel.StateConstraints;

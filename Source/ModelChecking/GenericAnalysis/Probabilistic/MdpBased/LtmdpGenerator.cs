@@ -42,7 +42,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="executableStateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal LtmdpGenerator(Func<AnalysisModel<TExecutableModel>> createModel, Formula terminateEarlyCondition, ExecutableStateFormula[] executableStateFormulas,
+		internal LtmdpGenerator(Func<AnalysisModel<TExecutableModel>> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration)
 		{

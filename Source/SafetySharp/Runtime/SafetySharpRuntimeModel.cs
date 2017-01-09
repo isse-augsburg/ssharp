@@ -25,6 +25,7 @@ namespace SafetySharp.Runtime
 	using System;
 	using System.IO;
 	using System.Linq;
+	using System.Linq.Expressions;
 	using System.Runtime.CompilerServices;
 	using System.Runtime.Serialization.Formatters.Binary;
 	using Analysis;
@@ -310,5 +311,14 @@ namespace SafetySharp.Runtime
 			return loader;
 		}
 
+		public override Expression CreateExecutableExpressionFromAtomarPropositionFormula(AtomarPropositionFormula formula)
+		{
+			var executableStateFormula = formula as ExecutableStateFormula;
+			if (executableStateFormula)
+			{
+				return Expression.Invoke(Expression.Constant(executableStateFormula.Expression));
+			}
+			throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use ExecutableStateFormula instead.");
+		}
 	}
 }

@@ -171,7 +171,8 @@ namespace SafetySharp.Analysis
 		{
 			if (_choiceResolver == null)
 			{
-				RuntimeModel.SetChoiceResolver(new NondeterministicChoiceResolver());
+				_choiceResolver = new NondeterministicChoiceResolver();
+				RuntimeModel.SetChoiceResolver(_choiceResolver);
 			}
 
 			var state = stackalloc byte[RuntimeModel.StateVectorSize];

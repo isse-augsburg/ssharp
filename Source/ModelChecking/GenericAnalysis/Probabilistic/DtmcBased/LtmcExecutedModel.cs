@@ -34,7 +34,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="SafetySharpRuntimeModel" /> with
 	///   probabilistic transitions.
 	/// </summary>
-	internal sealed class LtmdpExecutedModel<TExecutableModel> : ExecutedModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed class LtmcExecutedModel<TExecutableModel> : ExecutedModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 
 		internal enum EffectlessFaultsMinimizationMode
@@ -45,22 +45,21 @@ namespace SafetySharp.Analysis.ModelChecking
 
 		private readonly EffectlessFaultsMinimizationMode _minimalizationMode = EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults;
 
-		private readonly LtmdpTransitionSetBuilder<TExecutableModel> _transitions;
+		private readonly LtmcTransitionSetBuilder<TExecutableModel> _transitions;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal LtmdpExecutedModel(Func<TExecutableModel> runtimeModelCreator, long successorStateCapacity)
+		internal LtmcExecutedModel(Func<TExecutableModel> runtimeModelCreator, long successorStateCapacity)
 			: base(runtimeModelCreator)
 		{
-			var formulas = RuntimeModel.Formulas.Select(SafetySharpCompilationVisitor.Compile).ToArray();
-			_transitions = new LtmdpTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
-
-			ChoiceResolver = new LtmdpChoiceResolver();
+			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
+			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
+			
+			ChoiceResolver = new LtmcChoiceResolver();
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
-
 		}
 
 		/// <summary>
@@ -68,16 +67,16 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		/// <param name="runtimeModel">The model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal LtmdpExecutedModel(TExecutableModel runtimeModel, int successorStateCapacity)
+		internal LtmcExecutedModel(TExecutableModel runtimeModel, int successorStateCapacity)
 			: base(runtimeModel)
 		{
-			_transitions = new LtmdpTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity);
+			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity);
 		}
 
 		/// <summary>
 		///   Gets the size of a single transition of the model in bytes.
 		/// </summary>
-		public override unsafe int TransitionSize => sizeof(LtmdpTransition);
+		public override unsafe int TransitionSize => sizeof(LtmcTransition);
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
@@ -114,8 +113,9 @@ namespace SafetySharp.Analysis.ModelChecking
 					// Activate all non-transient faults
 					foreach (var fault in RuntimeModel.NondeterministicFaults)
 					{
-						if (!(fault is Modeling.TransientFault))
-							fault.TryActivate();
+						throw new Exception("Not implemented yet");
+						//if (!(fault is Modeling.TransientFault))
+						//	fault.TryActivate();
 					}
 					break;
 				default:
@@ -147,8 +147,9 @@ namespace SafetySharp.Analysis.ModelChecking
 					// Activate all non-transient faults
 					foreach (var fault in RuntimeModel.NondeterministicFaults)
 					{
-						if (!(fault is Modeling.TransientFault))
-							fault.TryActivate();
+						throw new Exception("Not implemented yet");
+						//if (!(fault is Modeling.TransientFault))
+						//	fault.TryActivate();
 					}
 					break;
 				default:

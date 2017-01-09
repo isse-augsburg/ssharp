@@ -29,12 +29,12 @@ namespace SafetySharp.Analysis.FormulaVisitors
 	/// <summary>
 	///   Determines whether a <see cref="Formula" /> is a formula that can be evaluted in a single state.
 	/// </summary>
-	internal class CollectExecutableStateFormulasVisitor : FormulaVisitor
+	internal class CollectAtomarPropositionFormulasVisitor : FormulaVisitor
 	{
 		/// <summary>
 		///   Indicates whether the visited formula contains any invalid operators.
 		/// </summary>
-		public HashSet<ExecutableStateFormula> ExecutableStateFormulas { get; } = new HashSet<ExecutableStateFormula>();
+		public HashSet<AtomarPropositionFormula> AtomarPropositionFormulas { get; } = new HashSet<AtomarPropositionFormula>();
 
 
 		/// <summary>
@@ -59,16 +59,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
-			var executableStateFormula = formula as ExecutableStateFormula;
-			if (executableStateFormula)
-			{
-				if (formula.Label != null)
-					ExecutableStateFormulas.Add(executableStateFormula);
-			}
-			else
-			{
-				throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use ExecutableStateFormula instead.");
-			}
+			AtomarPropositionFormulas.Add(formula);
 		}
 
 		/// <summary>

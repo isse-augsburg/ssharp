@@ -25,12 +25,13 @@ namespace SafetySharp.Analysis.Heuristics
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   A heuristic that tries to determine the minimal redundancy necessary in the system so the hazard does not occur.
 	/// </summary>
-	public sealed class MinimalRedundancyHeuristic : IFaultSetHeuristic
+	public sealed class MinimalRedundancyHeuristic<TExecutableModel> : IFaultSetHeuristic where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private const double DefaultMinFaultSetSizeRelative = 0.5;
 		private readonly Fault[] _allFaults;
@@ -47,7 +48,7 @@ namespace SafetySharp.Analysis.Heuristics
 		/// <param name="faultGroups">
 		///   Different groups of faults. Suggested fault sets never contain all faults of any group.
 		/// </param>
-		public MinimalRedundancyHeuristic(ModelBase model, params IEnumerable<Fault>[] faultGroups)
+		public MinimalRedundancyHeuristic(TExecutableModel model, params IEnumerable<Fault>[] faultGroups)
 			: this(model, DefaultMinFaultSetSizeRelative, faultGroups)
 		{
 		}
@@ -60,7 +61,7 @@ namespace SafetySharp.Analysis.Heuristics
 		/// <param name="faultGroups">
 		///   Different groups of faults. Suggested fault sets never contain all faults of any group.
 		/// </param>
-		public MinimalRedundancyHeuristic(ModelBase model, double minSetSizeRelative, params IEnumerable<Fault>[] faultGroups)
+		public MinimalRedundancyHeuristic(TExecutableModel model, double minSetSizeRelative, params IEnumerable<Fault>[] faultGroups)
 			: this(model, (int)(model.Faults.Length * minSetSizeRelative), faultGroups)
 		{
 		}
@@ -73,7 +74,7 @@ namespace SafetySharp.Analysis.Heuristics
 		/// <param name="faultGroups">
 		///   Different groups of faults. Suggested fault sets never contain all faults of any group.
 		/// </param>
-		public MinimalRedundancyHeuristic(ModelBase model, int minSetSize, params IEnumerable<Fault>[] faultGroups)
+		public MinimalRedundancyHeuristic(TExecutableModel model, int minSetSize, params IEnumerable<Fault>[] faultGroups)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(faultGroups, nameof(faultGroups));

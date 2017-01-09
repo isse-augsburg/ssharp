@@ -25,16 +25,17 @@ namespace SafetySharp.Analysis.Heuristics
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   A heuristic that suggests maximally safe fault sets based on the currently known minimal critical ones.
 	/// </summary>
-	public sealed class MaximalSafeSetHeuristic : IFaultSetHeuristic
+	public sealed class MaximalSafeSetHeuristic<TExecutableModel> : IFaultSetHeuristic where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly uint _cardinalityLevel;
 		private readonly List<Fault[]> _minimalCriticalSets = new List<Fault[]>();
-		private readonly ModelBase _model;
+		private readonly TExecutableModel _model;
 		private readonly List<FaultSet> _suggestedSets = new List<FaultSet>();
 		private FaultSet _allFaults;
 		private bool _hasNewMinimalCriticalSets;
@@ -44,7 +45,7 @@ namespace SafetySharp.Analysis.Heuristics
 		/// </summary>
 		/// <param name="model">The model the heuristic is created for.</param>
 		/// <param name="cardinalityLevel">The cardinality level where the first suggestions should be made.</param>
-		public MaximalSafeSetHeuristic(ModelBase model, uint cardinalityLevel = 3)
+		public MaximalSafeSetHeuristic(TExecutableModel model, uint cardinalityLevel = 3)
 		{
 			Requires.NotNull(model, nameof(model));
 
@@ -58,7 +59,7 @@ namespace SafetySharp.Analysis.Heuristics
 		/// </summary>
 		/// <param name="model">The model the heuristic is created for.</param>
 		/// <param name="minimalCriticalFaultSets">The minimal critical fault sets known from a previous analysis.</param>
-		public MaximalSafeSetHeuristic(ModelBase model, ISet<ISet<Fault>> minimalCriticalFaultSets)
+		public MaximalSafeSetHeuristic(TExecutableModel model, ISet<ISet<Fault>> minimalCriticalFaultSets)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(minimalCriticalFaultSets, nameof(minimalCriticalFaultSets));

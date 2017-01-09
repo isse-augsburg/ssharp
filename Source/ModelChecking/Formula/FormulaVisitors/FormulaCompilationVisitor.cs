@@ -25,27 +25,35 @@ namespace SafetySharp.Analysis.FormulaVisitors
 {
 	using System;
 	using System.Linq.Expressions;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
 	///   Compiles a <see cref="Formula" /> if it does not contain any temporal operators.
 	/// </summary>
-	internal class SafetySharpCompilationVisitor : FormulaVisitor
+	internal class FormulaCompilationVisitor<TExecutableModel> : FormulaVisitor where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   The expression that is being generated.
 		/// </summary>
 		private Expression _expression;
 
+		private readonly TExecutableModel _exectutableModel;
+
+		public FormulaCompilationVisitor(TExecutableModel exectutableModel)
+		{
+			_exectutableModel = exectutableModel;
+		}
+
 		/// <summary>
 		///   Compiles the <paramref name="formula" />.
 		/// </summary>
 		/// <param name="formula">The formula that should be compiled.</param>
-		public static Func<bool> Compile(Formula formula)
+		public static Func<bool> Compile(TExecutableModel exectutableModel,Formula formula)
 		{
 			Requires.NotNull(formula, nameof(formula));
 
-			var visitor = new SafetySharpCompilationVisitor();
+			var visitor = new FormulaCompilationVisitor<TExecutableModel>(exectutableModel);
 			visitor.Visit(formula);
 
 			return Expression.Lambda<Func<bool>>(visitor._expression).Compile();
@@ -111,15 +119,7 @@ namespace SafetySharp.Analysis.FormulaVisitors
 		/// </summary>
 		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
-			var executableStateFormula = formula as ExecutableStateFormula;
-			if (executableStateFormula)
-			{
-				_expression = Expression.Invoke(Expression.Constant(executableStateFormula.Expression));
-			}
-			else
-			{
-				throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use ExecutableStateFormula instead.");
-			}
+			_expression = _exectutableModel.CreateExecutableExpressionFromAtomarPropositionFormula(formula);
 		}
 
 		/// <summary>
@@ -142,19 +142,20 @@ namespace SafetySharp.Analysis.FormulaVisitors
 
 namespace SafetySharp.Analysis
 {
+	using Runtime;
 	using SafetySharp.Analysis.FormulaVisitors;
 	using System;
 
 	public static class SafetySharpFormulaEvaluationExtension
 	{
-		public static bool Evaluate(this Formula formula)
+		public static bool Evaluate<TExecutableModel>(this TExecutableModel executableModel, Formula formula) where TExecutableModel : ExecutableModel<TExecutableModel>
 		{
-			return formula.Compile()();
+			return executableModel.Compile(formula)();
 		}
 
-		public static Func<bool> Compile(this Formula formula)
+		public static Func<bool> Compile<TExecutableModel>(this TExecutableModel executableModel, Formula formula) where TExecutableModel : ExecutableModel<TExecutableModel>
 		{
-			return SafetySharpCompilationVisitor.Compile(formula);
+			return FormulaCompilationVisitor<TExecutableModel>.Compile(executableModel,formula);
 		}
 	}
 }
