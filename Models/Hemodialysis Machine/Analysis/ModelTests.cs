@@ -122,7 +122,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			{
 				Configuration = { StateCapacity = 1310720 },
 				Backend = backend,
-				Heuristics = { new MaximalSafeSetHeuristic(specification) }
+				Heuristics = { new MaximalSafeSetHeuristic(specification.Faults) }
 			};
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.IncomingBloodWasNotOk);

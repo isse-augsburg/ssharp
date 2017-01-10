@@ -25,6 +25,7 @@ namespace SafetySharp.Analysis
 	using System;
 	using System.Threading;
 	using Modeling;
+	using Runtime;
 	using Utilities;
 
 	/// <summary>
@@ -92,6 +93,12 @@ namespace SafetySharp.Analysis
 		///   Gets the model that is simulated, i.e., a copy of the original model passed to the simulator.
 		/// </summary>
 		public ModelBase Model => _simulator.Model;
+
+
+		/// <summary>
+		///   Gets the runtime model that is simulated.
+		/// </summary>
+		public SafetySharpRuntimeModel RuntimeModel => _simulator.RuntimeModel;
 
 		/// <summary>
 		///   Gets a value indicating whether the simulation is completed.

@@ -45,6 +45,7 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 
 		public RealTimeSafetySharpSimulator Simulator { get; private set; }
 		public ModelBase Model => Simulator.Model;
+		public SafetySharpRuntimeModel RuntimeModel => Simulator.RuntimeModel;
 
 		public int StepDelay { get; set; } = 1000;
 		public bool ReplayingCounterExample => Simulator?.IsReplay ?? false;

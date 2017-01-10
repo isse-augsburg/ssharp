@@ -71,7 +71,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 					GenerateCounterExample = false
 				},
 				FaultActivationBehavior = FaultActivationBehavior.ForceOnly,
-				Heuristics = { RedundancyHeuristic(model), new SubsumptionHeuristic(model) }
+				Heuristics = { RedundancyHeuristic(model), new SubsumptionHeuristic(model.Faults) }
 			};
 		
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
@@ -81,7 +81,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		private static IFaultSetHeuristic RedundancyHeuristic(Model model)
 		{
 			return new MinimalRedundancyHeuristic(
-				model,
+				model.Faults,
 				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Drill).Select(t => t.Broken)),
 				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Insert).Select(t => t.Broken)),
 				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Tighten).Select(t => t.Broken)),

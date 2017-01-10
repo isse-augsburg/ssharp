@@ -63,7 +63,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 		private void OnModelStateReset()
 		{
 			OnRewound();
-			_hazardFormula = ((Model)SimulationControls.Model).PossibleCollision.Compile();
+			_hazardFormula = SimulationControls.RuntimeModel.Compile(((Model)SimulationControls.Model).PossibleCollision);
 
 			if (SimulationControls.Simulator.IsReplay)
 				return;

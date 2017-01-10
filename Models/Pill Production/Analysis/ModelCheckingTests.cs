@@ -101,14 +101,14 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 					heuristics = new IFaultSetHeuristic[0];
 					break;
 				case HeuristicsUsage.Subsumption:
-					heuristics = new[] { new SubsumptionHeuristic(model) };
+					heuristics = new[] { new SubsumptionHeuristic(model.Faults) };
 					break;
 				case HeuristicsUsage.Redundancy:
 					heuristics = new[] { RedundancyHeuristic(model) };
 					break;
 				default:
 				case HeuristicsUsage.Both:
-					heuristics = new[] { new SubsumptionHeuristic(model), RedundancyHeuristic(model) };
+					heuristics = new[] { new SubsumptionHeuristic(model.Faults), RedundancyHeuristic(model) };
 					break;
 			}
 			Dcca(model, faultActivation, heuristics);
@@ -136,8 +136,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 
 		private IFaultSetHeuristic RedundancyHeuristic(Model model)
 		{
-			return new MinimalRedundancyHeuristic<SafetySharpRuntimeModel>(
-				model,
+			return new MinimalRedundancyHeuristic(
+				model.Faults,
 				model.Stations.OfType<ContainerLoader>().Select(c => c.NoContainersLeft),
 				model.Stations.OfType<ParticulateDispenser>().Select(d => d.BlueTankDepleted),
 				model.Stations.OfType<ParticulateDispenser>().Select(d => d.RedTankDepleted),
