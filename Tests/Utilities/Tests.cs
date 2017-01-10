@@ -39,6 +39,7 @@ namespace Tests.Utilities
 	using SafetySharp.Compiler.Roslyn.Symbols;
 	using SafetySharp.Compiler.Roslyn.Syntax;
 	using SafetySharp.Modeling;
+	using SafetySharp.Runtime;
 	using SafetySharp.Utilities;
 	using Shouldly;
 	using Xunit.Abstractions;
@@ -182,6 +183,7 @@ namespace Tests.Utilities
 				.AddReferences(MetadataReference.CreateFromFile(typeof(ISet<>).Assembly.Location))
 				.AddReferences(_assemblies.Select(assembly => MetadataReference.CreateFromFile(assembly)))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Tests).Assembly.Location))
+				.AddReferences(MetadataReference.CreateFromFile(typeof(ExecutableModel<>).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Component).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Compiler).Assembly.Location))
 				.AddReferences(MetadataReference.CreateFromFile(typeof(Should).Assembly.Location))

@@ -22,11 +22,13 @@
 		<file src="..\Binaries\Release\System.*.dll" target="tools" />
 		
 		<!-- Analyzers: S# DLLs and install/uninstall scripts -->
+		<file src="..\Binaries\Release\ISSE.ModelChecking.dll" target="analyzers/dotnet/cs" />
 		<file src="..\Binaries\Release\SafetySharp.Modeling.dll" target="analyzers/dotnet/cs" />
 		<file src="..\Binaries\Release\SafetySharp.Compiler.dll" target="analyzers/dotnet/cs" />
 		<file src="*.ps1" target="tools\" />
 		
 		<!-- Reference to S# assembly -->
+		<file src="..\Binaries\Release\ISSE.ModelChecking.dll" target="lib/net45" />
 		<file src="..\Binaries\Release\SafetySharp.Modeling.dll" target="lib/net45" />
 		
 		<!-- Build scripts -->
