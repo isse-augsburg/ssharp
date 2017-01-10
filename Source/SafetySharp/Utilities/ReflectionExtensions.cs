@@ -290,6 +290,60 @@ namespace SafetySharp.Utilities
 		}
 
 		/// <summary>
+		///   Checks whether the <paramref name="member" /> is hidden in the serialization <paramref name="mode" />,
+		///   because it is a irrelevant field of ISSE.ModelChecking, which might appear in the model.
+		/// </summary>
+		private static bool IsHiddenClassOfModelChecking(this MemberInfo member, SerializationMode mode, bool discoveringObjects)
+		{
+			var type = member as Type;
+			if (type!=null)
+			{
+				if (type == typeof(Choice))
+					return true;
+				if (type == typeof(Fault) && mode == SerializationMode.Optimized && !discoveringObjects)
+					return true;
+			}
+			else
+			{
+				var fieldInfo = member as FieldInfo;
+				if (member != null)
+				{
+					if (member.DeclaringType == typeof(Fault))
+					{
+						// Hidden or readonly
+						if ((mode == SerializationMode.Optimized && !discoveringObjects) && (
+							member.Name == "_activation" ||
+							member.Name == "ProbabilityOfOccurrence" ||
+							member.Name == "<Identifier>k__BackingField" ||
+							member.Name == "<IsActivated>k__BackingField" ||
+							member.Name == "<Name>k__BackingField" ||
+							member.Name == "_choice" ||
+							member.Name == "<RequiresActivationNotification>k__BackingField"
+							))
+							return true;
+
+						//NonDiscoverable
+						if ((mode == SerializationMode.Optimized && discoveringObjects) && (
+							member.Name == "<Name>k__BackingField"
+							))
+							return true;
+
+						//NonSerializable
+						if (member.Name == "_activationIsUnknown" ||
+							 member.Name == "_canUndoActivation" ||
+							 member.Name == "_choiceIndex" ||
+							 member.Name == "_isSubsumedFaultSetCached" ||
+							 member.Name == "_subsumedFaultSet" ||
+							 member.Name == "<SubsumedFaults>k__BackingField" ||
+							 member.Name == "_subsumedFaultSet")
+							return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		/// <summary>
 		///   Checks whether the <paramref name="member" /> is hidden in the serialization <paramref name="mode" />, depending on
 		///   whether <paramref name="discoveringObjects" /> is <c>true</c>.
 		/// </summary>
@@ -301,7 +355,8 @@ namespace SafetySharp.Utilities
 			Requires.NotNull(member, nameof(member));
 			Requires.InRange(mode, nameof(mode));
 
-			var fieldInfo = member as FieldInfo;
+			if (IsHiddenClassOfModelChecking(member, mode, discoveringObjects))
+				return true;
 
 			// Don't try to serialize members that are explicitly marked as non-serializable
 			if (member.HasAttributeTransitive<NonSerializableAttribute>() || member.HasAttributeTransitive<NonSerializedAttribute>())
@@ -310,6 +365,8 @@ namespace SafetySharp.Utilities
 			// If we're discovering objects in optimized mode and the member is explicitly marked as non-discoverable, it is hidden
 			if (mode == SerializationMode.Optimized && discoveringObjects && member.HasAttributeTransitive<NonDiscoverableAttribute>())
 				return true;
+
+			var fieldInfo = member as FieldInfo;
 
 			// Read-only fields are implicitly marked with [Hidden]; except for read-only fields of structs,
 			// as structs can be reinitialized at any time
