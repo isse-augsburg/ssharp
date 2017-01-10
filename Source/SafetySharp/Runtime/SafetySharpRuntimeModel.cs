@@ -314,7 +314,7 @@ namespace SafetySharp.Runtime
 		public override Expression CreateExecutableExpressionFromAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
 			var executableStateFormula = formula as ExecutableStateFormula;
-			if (executableStateFormula)
+			if (executableStateFormula!=null)
 			{
 				return Expression.Invoke(Expression.Constant(executableStateFormula.Expression));
 			}

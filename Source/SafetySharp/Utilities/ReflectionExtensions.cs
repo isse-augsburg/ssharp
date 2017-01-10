@@ -30,6 +30,7 @@ namespace SafetySharp.Utilities
 	using System.Runtime.CompilerServices;
 	using System.Runtime.InteropServices;
 	using Modeling;
+	using Runtime;
 	using Runtime.Serialization;
 
 	/// <summary>
@@ -289,6 +290,11 @@ namespace SafetySharp.Utilities
 			return property.DeclaringType.GetField(fieldName, Flags);
 		}
 
+		private static bool IsEqualOrSubclassOf(this Type type, Type otherType)
+		{
+			return type == otherType || type.IsSubclassOf(otherType);
+		}
+
 		/// <summary>
 		///   Checks whether the <paramref name="member" /> is hidden in the serialization <paramref name="mode" />,
 		///   because it is a irrelevant field of ISSE.ModelChecking, which might appear in the model.
@@ -298,17 +304,30 @@ namespace SafetySharp.Utilities
 			var type = member as Type;
 			if (type!=null)
 			{
-				if (type == typeof(Choice))
+				// Hidden or readonly
+				if (mode == SerializationMode.Optimized && !discoveringObjects && (
+					type.IsEqualOrSubclassOf(typeof(Fault)) ||
+					type.IsEqualOrSubclassOf(typeof(Choice)) 
+					))
 					return true;
-				if (type == typeof(Fault) && mode == SerializationMode.Optimized && !discoveringObjects)
+
+				// NonDiscoverable
+				if (mode == SerializationMode.Optimized && discoveringObjects && (
+					type.IsEqualOrSubclassOf(typeof(Choice))
+					))
+					return true;
+
+				// NonSerializable
+				if (type.IsEqualOrSubclassOf(typeof(ChoiceResolver))
+					)
 					return true;
 			}
 			else
 			{
 				var fieldInfo = member as FieldInfo;
-				if (member != null)
+				if (fieldInfo != null)
 				{
-					if (member.DeclaringType == typeof(Fault))
+					if (member.DeclaringType.IsEqualOrSubclassOf(typeof(Fault)))
 					{
 						// Hidden or readonly
 						if ((mode == SerializationMode.Optimized && !discoveringObjects) && (
@@ -322,13 +341,13 @@ namespace SafetySharp.Utilities
 							))
 							return true;
 
-						//NonDiscoverable
+						// NonDiscoverable
 						if ((mode == SerializationMode.Optimized && discoveringObjects) && (
 							member.Name == "<Name>k__BackingField"
 							))
 							return true;
 
-						//NonSerializable
+						// NonSerializable
 						if (member.Name == "_activationIsUnknown" ||
 							 member.Name == "_canUndoActivation" ||
 							 member.Name == "_choiceIndex" ||
