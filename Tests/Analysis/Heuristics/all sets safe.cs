@@ -36,7 +36,7 @@ namespace Tests.Analysis.Heuristics
 			var c = new C();
 			var model = TestModel.InitializeModel(c);
 
-			Heuristics = new[] { new SubsumptionHeuristic(model) };
+			Heuristics = new[] { new SubsumptionHeuristic(model.Faults) };
 
 			var result = Dcca(model, false);
 			result.Exceptions.ShouldBeEmpty();

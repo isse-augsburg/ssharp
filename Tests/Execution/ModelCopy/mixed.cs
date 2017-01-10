@@ -44,8 +44,8 @@ namespace Tests.Execution.ModelCopy
 			m1.F.I.ShouldBe(m2.F.I);
 			m1.G.I.ShouldBe(m2.G.I);
 			m1.H().I.ShouldBe(m2.H().I);
-
-			m2.Formula.Evaluate().ShouldBe(false);
+			
+			s.RuntimeModel.Evaluate(m2.Formula).ShouldBe(false);
 
 			m2.Roots.ShouldBe(new IComponent[] { m2.A, m2.B, m2.C, m2.D() }, ignoreOrder: true);
 			m2.Components.ShouldBe(new IComponent[] { m2.A, m2.B, m2.C, m2.D() }, ignoreOrder: true);

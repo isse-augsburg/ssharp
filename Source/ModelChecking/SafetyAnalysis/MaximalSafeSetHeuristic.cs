@@ -31,42 +31,42 @@ namespace SafetySharp.Analysis.Heuristics
 	/// <summary>
 	///   A heuristic that suggests maximally safe fault sets based on the currently known minimal critical ones.
 	/// </summary>
-	public sealed class MaximalSafeSetHeuristic<TExecutableModel> : IFaultSetHeuristic where TExecutableModel : ExecutableModel<TExecutableModel>
+	public sealed class MaximalSafeSetHeuristic : IFaultSetHeuristic
 	{
 		private readonly uint _cardinalityLevel;
 		private readonly List<Fault[]> _minimalCriticalSets = new List<Fault[]>();
-		private readonly TExecutableModel _model;
 		private readonly List<FaultSet> _suggestedSets = new List<FaultSet>();
 		private FaultSet _allFaults;
+		private readonly Fault[] _modelFaults;
 		private bool _hasNewMinimalCriticalSets;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="model">The model the heuristic is created for.</param>
+		/// <param name="modelFaults">All faults in the model the heuristic is created for.</param>
 		/// <param name="cardinalityLevel">The cardinality level where the first suggestions should be made.</param>
-		public MaximalSafeSetHeuristic(TExecutableModel model, uint cardinalityLevel = 3)
+		public MaximalSafeSetHeuristic(Fault[] modelFaults, uint cardinalityLevel = 3)
 		{
-			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(modelFaults, nameof(modelFaults));
 
-			_model = model;
+			_modelFaults = modelFaults;
 			_cardinalityLevel = cardinalityLevel;
-			_allFaults = new FaultSet(model.Faults.Where(fault => fault.Activation != Activation.Suppressed).ToArray());
+			_allFaults = new FaultSet(modelFaults.Where(fault => fault.Activation != Activation.Suppressed).ToArray());
 		}
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="model">The model the heuristic is created for.</param>
+		/// <param name="modelFaults">All faults in the model the heuristic is created for.</param>
 		/// <param name="minimalCriticalFaultSets">The minimal critical fault sets known from a previous analysis.</param>
-		public MaximalSafeSetHeuristic(TExecutableModel model, ISet<ISet<Fault>> minimalCriticalFaultSets)
+		public MaximalSafeSetHeuristic(Fault[] modelFaults, ISet<ISet<Fault>> minimalCriticalFaultSets)
 		{
-			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(modelFaults, nameof(modelFaults));
 			Requires.NotNull(minimalCriticalFaultSets, nameof(minimalCriticalFaultSets));
 
-			_model = model;
+			_modelFaults = modelFaults;
 			_hasNewMinimalCriticalSets = true;
-			_allFaults = new FaultSet(model.Faults.Where(fault => fault.Activation != Activation.Suppressed).ToArray());
+			_allFaults = new FaultSet(modelFaults.Where(fault => fault.Activation != Activation.Suppressed).ToArray());
 
 			foreach (var set in minimalCriticalFaultSets)
 				_minimalCriticalSets.Add(set.Select(MapFault).ToArray());
@@ -104,7 +104,7 @@ namespace SafetySharp.Analysis.Heuristics
 				return;
 
 			_hasNewMinimalCriticalSets = true;
-			_minimalCriticalSets.Add(checkedSet.ToFaultSequence(_model.Faults).ToArray());
+			_minimalCriticalSets.Add(checkedSet.ToFaultSequence(_modelFaults).ToArray());
 		}
 
 		/// <summary>
@@ -112,7 +112,7 @@ namespace SafetySharp.Analysis.Heuristics
 		/// </summary>
 		private Fault MapFault(Fault fault)
 		{
-			var candidates = _model.Faults.Where(f => f.Name == fault.Name).ToArray();
+			var candidates = _modelFaults.Where(f => f.Name == fault.Name).ToArray();
 
 			Requires.That(candidates.Length == 1, $"Failed to map fault {fault.Name} to its corresponding instance in the new model.");
 			return candidates[0];

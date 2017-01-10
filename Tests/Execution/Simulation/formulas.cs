@@ -34,12 +34,12 @@ namespace Tests.Execution.Simulation
 			var m = new M();
 			var simulator = new SafetySharpSimulator(m, m.F);
 			m = (M)simulator.Model;
-			var f = m.F.Compile();
-			var g = m.G.Compile();
+			var f = simulator.RuntimeModel.Compile(m.F);
+			var g = simulator.RuntimeModel.Compile(m.G);
 			
 			m.C.X.ShouldBe(0);
-			m.F.Evaluate().ShouldBe(true);
-			m.G.Evaluate().ShouldBe(true);
+			simulator.RuntimeModel.Evaluate(m.F).ShouldBe(true);
+			simulator.RuntimeModel.Evaluate(m.G).ShouldBe(true);
 
 			f().ShouldBe(true);
 			g().ShouldBe(true);
@@ -47,8 +47,8 @@ namespace Tests.Execution.Simulation
 			simulator.SimulateStep();
 
 			m.C.X.ShouldBe(1);
-			m.F.Evaluate().ShouldBe(false);
-			m.G.Evaluate().ShouldBe(false);
+			simulator.RuntimeModel.Evaluate(m.F).ShouldBe(false);
+			simulator.RuntimeModel.Evaluate(m.G).ShouldBe(false);
 
 			f().ShouldBe(false);
 			g().ShouldBe(false);

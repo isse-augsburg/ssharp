@@ -38,7 +38,7 @@ namespace Tests.Analysis.Heuristics
 			var components = Enumerable.Range(0, 5).Select(i => new C()).ToArray();
 			var model = TestModel.InitializeModel(components);
 
-			IFaultSetHeuristic heuristic = new MinimalRedundancyHeuristic(model,
+			IFaultSetHeuristic heuristic = new MinimalRedundancyHeuristic(model.Faults,
 				components.Select(c => c.F1),
 				components.Select(c => c.F2),
 				components.Select(c => c.F3)

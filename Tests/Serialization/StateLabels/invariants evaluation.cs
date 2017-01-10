@@ -54,33 +54,33 @@ namespace Tests.Serialization.StateLabels
 			root.ShouldBeOfType<C>();
 			c = (C)root;
 
-			Formulas[0].Evaluate().ShouldBe(true);
-			Formulas[1].Evaluate().ShouldBe(true);
-			Formulas[2].Evaluate().ShouldBe(true);
-			Formulas[3].Evaluate().ShouldBe(true);
-			Formulas[4].Evaluate().ShouldBe(true);
-			Formulas[5].Evaluate().ShouldBe(true);
+			RuntimeModel.Evaluate(Formulas[0]).ShouldBe(true);
+			RuntimeModel.Evaluate(Formulas[1]).ShouldBe(true);
+			RuntimeModel.Evaluate(Formulas[2]).ShouldBe(true);
+			RuntimeModel.Evaluate(Formulas[3]).ShouldBe(true);
+			RuntimeModel.Evaluate(Formulas[4]).ShouldBe(true);
+			RuntimeModel.Evaluate(Formulas[5]).ShouldBe(true);
 			
 			c.X = 9;
-			Formulas[2].Evaluate().ShouldBe(false);
-			Formulas[3].Evaluate().ShouldBe(false);
-			Formulas[4].Evaluate().ShouldBe(true);
-			Formulas[5].Evaluate().ShouldBe(false);
+			RuntimeModel.Evaluate(Formulas[2]).ShouldBe(false);
+			RuntimeModel.Evaluate(Formulas[3]).ShouldBe(false);
+			RuntimeModel.Evaluate(Formulas[4]).ShouldBe(true);
+			RuntimeModel.Evaluate(Formulas[5]).ShouldBe(false);
 
 			c.X = 3;
 			c.G = 8;
 
-			Formulas[0].Evaluate().ShouldBe(true);
-			Formulas[1].Evaluate().ShouldBe(false);
+			RuntimeModel.Evaluate(Formulas[0]).ShouldBe(true);
+			RuntimeModel.Evaluate(Formulas[1]).ShouldBe(false);
 
 			c.F = 9;
 
-			Formulas[0].Evaluate().ShouldBe(false);
-			Formulas[1].Evaluate().ShouldBe(false);
-			Formulas[2].Evaluate().ShouldBe(true);
-			Formulas[3].Evaluate().ShouldBe(true);
-			Formulas[4].Evaluate().ShouldBe(true);
-			Formulas[5].Evaluate().ShouldBe(false);
+			RuntimeModel.Evaluate(Formulas[0]).ShouldBe(false);
+			RuntimeModel.Evaluate(Formulas[1]).ShouldBe(false);
+			RuntimeModel.Evaluate(Formulas[2]).ShouldBe(true);
+			RuntimeModel.Evaluate(Formulas[3]).ShouldBe(true);
+			RuntimeModel.Evaluate(Formulas[4]).ShouldBe(true);
+			RuntimeModel.Evaluate(Formulas[5]).ShouldBe(false);
 
 		}
 

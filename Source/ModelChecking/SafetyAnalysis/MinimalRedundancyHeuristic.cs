@@ -31,7 +31,7 @@ namespace SafetySharp.Analysis.Heuristics
 	/// <summary>
 	///   A heuristic that tries to determine the minimal redundancy necessary in the system so the hazard does not occur.
 	/// </summary>
-	public sealed class MinimalRedundancyHeuristic<TExecutableModel> : IFaultSetHeuristic where TExecutableModel : ExecutableModel<TExecutableModel>
+	public sealed class MinimalRedundancyHeuristic : IFaultSetHeuristic
 	{
 		private const double DefaultMinFaultSetSizeRelative = 0.5;
 		private readonly Fault[] _allFaults;
@@ -44,42 +44,42 @@ namespace SafetySharp.Analysis.Heuristics
 		/// <summary>
 		///   Creates a new instance of the heuristic.
 		/// </summary>
-		/// <param name="model">The model for which the heuristic is created.</param>
+		/// <param name="modelFaults">All faults in the model the heuristic is created for.</param>
 		/// <param name="faultGroups">
 		///   Different groups of faults. Suggested fault sets never contain all faults of any group.
 		/// </param>
-		public MinimalRedundancyHeuristic(TExecutableModel model, params IEnumerable<Fault>[] faultGroups)
-			: this(model, DefaultMinFaultSetSizeRelative, faultGroups)
+		public MinimalRedundancyHeuristic(Fault[] modelFaults, params IEnumerable<Fault>[] faultGroups)
+			: this(modelFaults, DefaultMinFaultSetSizeRelative, faultGroups)
 		{
 		}
 
 		/// <summary>
 		///   Creates a new instance of the heuristic.
 		/// </summary>
-		/// <param name="model">The model for which the heuristic is created.</param>
+		/// <param name="modelFaults">All faults in the model the heuristic is created for.</param>
 		/// <param name="minSetSizeRelative">The relative minimum size of fault sets to check.</param>
 		/// <param name="faultGroups">
 		///   Different groups of faults. Suggested fault sets never contain all faults of any group.
 		/// </param>
-		public MinimalRedundancyHeuristic(TExecutableModel model, double minSetSizeRelative, params IEnumerable<Fault>[] faultGroups)
-			: this(model, (int)(model.Faults.Length * minSetSizeRelative), faultGroups)
+		public MinimalRedundancyHeuristic(Fault[] modelFaults, double minSetSizeRelative, params IEnumerable<Fault>[] faultGroups)
+			: this(modelFaults, (int)(modelFaults.Length * minSetSizeRelative), faultGroups)
 		{
 		}
 
 		/// <summary>
 		///   Creates a new instance of the heuristic.
 		/// </summary>
-		/// <param name="model">The model for which the heuristic is created.</param>
+		/// <param name="modelFaults">All faults in the model the heuristic is created for.</param>
 		/// <param name="minSetSize">The minimum size of fault sets to check.</param>
 		/// <param name="faultGroups">
 		///   Different groups of faults. Suggested fault sets never contain all faults of any group.
 		/// </param>
-		public MinimalRedundancyHeuristic(TExecutableModel model, int minSetSize, params IEnumerable<Fault>[] faultGroups)
+		public MinimalRedundancyHeuristic(Fault[] modelFaults, int minSetSize, params IEnumerable<Fault>[] faultGroups)
 		{
-			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(modelFaults, nameof(modelFaults));
 			Requires.NotNull(faultGroups, nameof(faultGroups));
 
-			_allFaults = model.Faults.Where(fault => fault.Activation != Activation.Suppressed).ToArray();
+			_allFaults = modelFaults.Where(fault => fault.Activation != Activation.Suppressed).ToArray();
 			_minSetSize = minSetSize;
 
 			CollectSuggestions(faultGroups);

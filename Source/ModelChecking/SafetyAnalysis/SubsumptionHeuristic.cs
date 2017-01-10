@@ -30,7 +30,7 @@ namespace SafetySharp.Analysis.Heuristics
 	/// <summary>
 	///   A heuristic taking the subsumption relation between different <see cref="Fault" /> instances into account.
 	/// </summary>
-	public sealed class SubsumptionHeuristic<TExecutableModel> : IFaultSetHeuristic where TExecutableModel : ExecutableModel<TExecutableModel>
+	public sealed class SubsumptionHeuristic : IFaultSetHeuristic
 	{
 		private readonly Fault[] _allFaults;
 		private readonly HashSet<FaultSet> _subsumedSets = new HashSet<FaultSet>();
@@ -39,12 +39,12 @@ namespace SafetySharp.Analysis.Heuristics
 		/// <summary>
 		///   Creates a new instance of the heuristic.
 		/// </summary>
-		/// <param name="model">The model for which the heuristic is created.</param>
-		public SubsumptionHeuristic(TExecutableModel model)
+		/// <param name="modelFaults">All faults in the model the heuristic is created for.</param>
+		public SubsumptionHeuristic(Fault[] modelFaults)
 		{
-			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(modelFaults, nameof(modelFaults));
 
-			_allFaults = model.Faults;
+			_allFaults = modelFaults;
 		}
 
 		void IFaultSetHeuristic.Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck)

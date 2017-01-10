@@ -24,6 +24,7 @@ namespace SafetySharp.ModelChecking
 {
 	using System;
 	using Analysis;
+	using Analysis.Heuristics;
 	using Modeling;
 	using Runtime;
 
@@ -70,6 +71,10 @@ namespace SafetySharp.ModelChecking
 		{
 		}
 	}
+
+	//public sealed class SafetySharpMinimalRedundancyHeuristic : MinimalRedundancyHeuristic<SafetySharpRuntimeModel>
+	//{
+	//}
 
 	/*
 	public sealed class SafetySharp : <SafetySharpRuntimeModel>

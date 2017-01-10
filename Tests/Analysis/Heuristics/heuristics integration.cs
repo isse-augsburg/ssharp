@@ -53,7 +53,7 @@ namespace Tests.Analysis.Heuristics
 
 			// redundancy heuristic works properly
 			Heuristics = new[] { new MinimalRedundancyHeuristic(
-				model,
+				model.Faults,
 					components.Select(c => c.F1),
 					components.Select(c => c.F2)
 				)
@@ -67,7 +67,7 @@ namespace Tests.Analysis.Heuristics
 			((ulong)result.CheckedSets.Count).ShouldBeLessThan(counter.setCounter);
 
 			// subsumption heuristic is effective
-			Heuristics = new[] { new SubsumptionHeuristic(model) };
+			Heuristics = new[] { new SubsumptionHeuristic(model.Faults) };
 
 			foreach (var c in components)
 				c.F1.Subsumes(c.F2);
@@ -81,7 +81,7 @@ namespace Tests.Analysis.Heuristics
 
 			// heuristics are called appropriately when combined
 			counter = new CountingHeuristic();
-			Heuristics = new IFaultSetHeuristic[] { counter, new SubsumptionHeuristic(model) };
+			Heuristics = new IFaultSetHeuristic[] { counter, new SubsumptionHeuristic(model.Faults) };
 
 			result = Dcca(model, false);
 			result.IsComplete.ShouldBe(true);

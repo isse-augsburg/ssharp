@@ -27,6 +27,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 	using ModelChecking;
 	using Modeling;
 	using NUnit.Framework;
+	using Runtime;
 	using SafetySharp.Analysis;
 	using SafetySharp.Analysis.Heuristics;
 	using SafetySharp.Modeling;
@@ -135,7 +136,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 
 		private IFaultSetHeuristic RedundancyHeuristic(Model model)
 		{
-			return new MinimalRedundancyHeuristic(
+			return new MinimalRedundancyHeuristic<SafetySharpRuntimeModel>(
 				model,
 				model.Stations.OfType<ContainerLoader>().Select(c => c.NoContainersLeft),
 				model.Stations.OfType<ParticulateDispenser>().Select(d => d.BlueTankDepleted),

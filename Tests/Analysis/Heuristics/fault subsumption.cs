@@ -38,38 +38,38 @@ namespace Tests.Analysis.Heuristics
 			var model = TestModel.InitializeModel(c);
 
 			// no subsumption declared
-			IFaultSetHeuristic heuristic = new SubsumptionHeuristic(model);
+			IFaultSetHeuristic heuristic = new SubsumptionHeuristic(model.Faults);
 			var setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F4), new FaultSet(c.F5) });
 			heuristic.Augment(0, setsToCheck);
 			setsToCheck.Count.ShouldBe(2);
 
 			// simple subsumption
-			heuristic = new SubsumptionHeuristic(model);
+			heuristic = new SubsumptionHeuristic(model.Faults);
 			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F3), new FaultSet(c.F5) });
 			heuristic.Augment(0, setsToCheck);
 			setsToCheck.ShouldBe(new[] { new FaultSet(c.F3, c.F4), new FaultSet(c.F3), new FaultSet(c.F5) });
 
 			// transitive subsumption
-			heuristic = new SubsumptionHeuristic(model);
+			heuristic = new SubsumptionHeuristic(model.Faults);
 			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F2), new FaultSet(c.F3) });
 			heuristic.Augment(0, setsToCheck);
 			setsToCheck.ShouldBe(new[] { new FaultSet(c.F2, c.F3, c.F4), new FaultSet(c.F2),
 				new FaultSet(c.F3, c.F4), new FaultSet(c.F3) });
 
 			// reflexive subsumption (nonsensical, but should be handled without endless loop)
-			heuristic = new SubsumptionHeuristic(model);
+			heuristic = new SubsumptionHeuristic(model.Faults);
 			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F1) });
 			heuristic.Augment(0, setsToCheck);
 			setsToCheck.ShouldBe(new[] { new FaultSet(c.F1) });
 
 			// circular subsumption
-			heuristic = new SubsumptionHeuristic(model);
+			heuristic = new SubsumptionHeuristic(model.Faults);
 			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet(c.F6) });
 			heuristic.Augment(0, setsToCheck);
 			setsToCheck.ShouldBe(new[] { new FaultSet(c.F6, c.F7, c.F8), new FaultSet(c.F6) });
 
 			// empty set subsumes nothing
-			heuristic = new SubsumptionHeuristic(model);
+			heuristic = new SubsumptionHeuristic(model.Faults);
 			setsToCheck = new LinkedList<FaultSet>(new[] { new FaultSet() });
 			heuristic.Augment(0, setsToCheck);
 			setsToCheck.Count.ShouldBe(1);

@@ -24,12 +24,16 @@ namespace Tests.Formulas.Operators
 {
 	using System;
 	using SafetySharp.Analysis;
+	using SafetySharp.Runtime;
 	using Shouldly;
+	using Utilities;
 
 	internal class Compilation : FormulaTestObject
 	{
 		private int _i;
 		private int _j;
+		
+		private readonly SafetySharpRuntimeModel _model = SafetySharpRuntimeModel.Create(TestModel.InitializeModel());
 
 		protected override void Check()
 		{
@@ -142,7 +146,7 @@ namespace Tests.Formulas.Operators
 				return second;
 			};
 
-			return new BinaryFormula(left(), op, right()).Compile()();
+			return _model.Compile(new BinaryFormula(left(), op, right()))();
 		}
 
 		private bool Check(bool value)
@@ -156,7 +160,7 @@ namespace Tests.Formulas.Operators
 				return value;
 			};
 
-			return new UnaryFormula(formula(), UnaryOperator.Not).Compile()();
+			return _model.Compile(new UnaryFormula(formula(), UnaryOperator.Not))();
 		}
 	}
 }
