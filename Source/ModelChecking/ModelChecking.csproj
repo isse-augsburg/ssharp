@@ -133,6 +133,11 @@
     <Compile Include="BinaryFormula.cs" />
     <Compile Include="BinaryOperator.cs" />
     <Compile Include="CounterExampleSerialization.cs" />
+    <Compile Include="Properties\InternalsVisibleTo.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InternalsVisibleTo.tt</DependentUpon>
+    </Compile>
     <Compile Include="SafetyAnalysis\IFaultSetHeuristic.cs" />
     <Compile Include="SafetyAnalysis\MaximalSafeSetHeuristic.cs" />
     <Compile Include="SafetyAnalysis\MinimalRedundancyHeuristic.cs" />
@@ -203,6 +208,15 @@
     <Folder Include="LabeledTransitionDiscreteTimeMarkovChain\" />
     <Folder Include="LabeledTransitionMarkovDecisionProcess\" />
     <Folder Include="MarkovDecisionProcess\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Properties\InternalsVisibleTo.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>InternalsVisibleTo.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
