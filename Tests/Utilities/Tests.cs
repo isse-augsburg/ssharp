@@ -101,7 +101,8 @@ namespace Tests.Utilities
 		///   <see cref="ITestableObject" />, and returns them.
 		/// </summary>
 		/// <param name="syntaxTree">The syntax tree that should be compiled.</param>
-		protected IEnumerable<ITestableObject> GetTestableObjects(SyntaxTree syntaxTree)
+		/// <param name="output">The output that should be used to write test output.</param>
+		protected static IEnumerable<ITestableObject> GetTestableObjects(SyntaxTree syntaxTree, TestTraceOutput output)
 		{
 			var compilation = CreateCompilation(syntaxTree);
 			var semanticModel = compilation.GetSemanticModel(syntaxTree);
@@ -117,8 +118,70 @@ namespace Tests.Utilities
 			if (testableTypes.Length == 0)
 				throw new TestException("Unable to find any testable class declarations.");
 
-			var assembly = CompileSafetySharp(compilation);
+			var assembly = CompileSafetySharp(compilation, output);
 			return testableTypes.Select(testableType => (ITestableObject)Activator.CreateInstance(assembly.GetType(testableType)));
+		}
+
+		/// <summary>
+		///   Compiles the <paramref name="syntaxTree" />, instantiates all non-abstract classes implementing
+		///   <see cref="ITestableObject" />, and returns them.
+		/// </summary>
+		/// <param name="syntaxTree">The syntax tree that should be compiled.</param>
+		protected IEnumerable<ITestableObject> GetTestableObjects(SyntaxTree syntaxTree)
+		{
+			return GetTestableObjects(syntaxTree, Output);
+		}
+
+
+		/// <summary>
+		///   Compiles the <paramref name="code" />, instantiates all non-abstract classes implementing
+		///   <see cref="ITestableObject" />, and returns them.
+		/// </summary>
+		/// <param name="code">The code that should be compiled.</param>
+		/// <param name="output">The output that should be used to write test output.</param>
+		public static IEnumerable<ITestableObject> GetTestableObjects(string code, TestTraceOutput output)
+		{
+			var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, encoding: Encoding.UTF8);
+			return GetTestableObjects(syntaxTree, output);
+		}
+
+
+		/// <summary>
+		///   Compiles the <paramref name="syntaxTree" />, instantiates all non-abstract classes implementing
+		///   <see cref="ModelBase" />, and returns them.
+		/// </summary>
+		/// <param name="syntaxTree">The syntax tree that should be compiled.</param>
+		/// <param name="output">The output that should be used to write test output.</param>
+		protected static IEnumerable<ModelBase> GetModelBases(SyntaxTree syntaxTree, TestTraceOutput output)
+		{
+			var compilation = CreateCompilation(syntaxTree);
+			var semanticModel = compilation.GetSemanticModel(syntaxTree);
+
+			var testableTypes = syntaxTree
+				.Descendants<ClassDeclarationSyntax>()
+				.Select(declaration => declaration.GetTypeSymbol(semanticModel))
+				.Where(symbol => !symbol.IsGenericType && !symbol.IsAbstract && symbol.ContainingType == null)
+				.Where(symbol => symbol.IsDerivedFrom(semanticModel.GetTypeSymbol<ModelBase>()))
+				.Select(symbol => symbol.ToDisplayString())
+				.ToArray();
+
+			if (testableTypes.Length == 0)
+				throw new TestException("Unable to find any ModelBase declarations.");
+
+			var assembly = CompileSafetySharp(compilation, output);
+			return testableTypes.Select(testableType => (ModelBase)Activator.CreateInstance(assembly.GetType(testableType)));
+		}
+
+		/// <summary>
+		///   Compiles the <paramref name="code" />, instantiates all non-abstract classes implementing
+		///   <see cref="ModelBase" />, and returns them.
+		/// </summary>
+		/// <param name="code">The code that should be compiled.</param>
+		/// <param name="output">The output that should be used to write test output.</param>
+		public static IEnumerable<ModelBase> GetModelBases(string code, TestTraceOutput output)
+		{
+			var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, path: ".",encoding: Encoding.UTF8);
+			return GetModelBases(syntaxTree, output);
 		}
 
 		/// <summary>

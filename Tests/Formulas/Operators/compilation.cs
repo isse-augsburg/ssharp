@@ -33,8 +33,6 @@ namespace Tests.Formulas.Operators
 		private int _i;
 		private int _j;
 		
-		private readonly SafetySharpRuntimeModel _model = SafetySharpRuntimeModel.Create(TestModel.InitializeModel());
-
 		protected override void Check()
 		{
 			Not();
@@ -146,7 +144,9 @@ namespace Tests.Formulas.Operators
 				return second;
 			};
 
-			return _model.Compile(new BinaryFormula(left(), op, right()))();
+			var model = EmptyTestModelFactory.CreateRuntimeModel(Output);
+
+			return model.Compile(new BinaryFormula(left(), op, right()))();
 		}
 
 		private bool Check(bool value)
@@ -160,7 +160,9 @@ namespace Tests.Formulas.Operators
 				return value;
 			};
 
-			return _model.Compile(new UnaryFormula(formula(), UnaryOperator.Not))();
+			var model = EmptyTestModelFactory.CreateRuntimeModel(Output);
+
+			return model.Compile(new UnaryFormula(formula(), UnaryOperator.Not))();
 		}
 	}
 }

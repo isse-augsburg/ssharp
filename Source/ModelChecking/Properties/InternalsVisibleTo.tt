@@ -1,4 +1,10 @@
-﻿// The MIT License (MIT)
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,20 +26,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
-{
-	/// <summary>
-	///   Represents the operator of a <see cref="BinaryFormula" />.
-	/// </summary>
-	public enum BinaryOperator
-	{
-		// Non-temporal operators
-		And,
-		Or,
-		Implication,
-		Equivalence,
+using System.Runtime.CompilerServices;
 
-		// Temporal operators
-		Until
-	}
-}
+// The following is annoying... the problem is that we dynamically generate a large amount of assemblies
+// when executing the tests; some of these tests need access to internals, and all of the assemblies
+// must have unique identifies for all tests to work. Hence, we make our internals visible to a large
+// amount of dynamically generated test assemblies.
+
+<# for (var i = 0; i < 1000; ++i) { #>
+[assembly: InternalsVisibleTo("TestAssembly<#= i #>")]
+<# } #>

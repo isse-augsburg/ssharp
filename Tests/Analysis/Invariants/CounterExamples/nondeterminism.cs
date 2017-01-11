@@ -22,6 +22,7 @@
 
 namespace Tests.Analysis.Invariants.CounterExamples
 {
+	using System.Diagnostics;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
@@ -58,6 +59,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 
 			public override void Update()
 			{
+				Debugger.Break();
 				X = Choose(1, 2, 3);
 			}
 		}

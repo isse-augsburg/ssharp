@@ -25,7 +25,7 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents the operator of a <see cref="UnaryFormula" />.
 	/// </summary>
-	internal enum UnaryOperator
+	public enum UnaryOperator
 	{
 		// Non-temporal operators
 		Not,

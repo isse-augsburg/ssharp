@@ -28,14 +28,14 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents the application of a <see cref="UnaryOperator" /> to a <see cref="Formula" /> instance.
 	/// </summary>
-	internal sealed class UnaryFormula : Formula
+	public sealed class UnaryFormula : Formula
 	{
 		/// <summary>
 		///   Initializes a new instance of the <see cref="UnaryFormula" /> class.
 		/// </summary>
 		/// <param name="operand">The operand of the unary formula.</param>
 		/// <param name="unaryOperator">The operator of the unary formula.</param>
-		internal UnaryFormula(Formula operand, UnaryOperator unaryOperator)
+		public UnaryFormula(Formula operand, UnaryOperator unaryOperator)
 		{
 			Requires.NotNull(operand, nameof(operand));
 			Requires.InRange(unaryOperator, nameof(unaryOperator));

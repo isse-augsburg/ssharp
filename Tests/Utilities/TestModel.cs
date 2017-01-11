@@ -23,6 +23,7 @@
 namespace Tests.Utilities
 {
 	using System;
+	using System.Linq;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
@@ -107,6 +108,37 @@ namespace Tests.Utilities
 		/// </summary>
 		private class Model : ModelBase
 		{
+		}
+	}
+	
+	public static class EmptyTestModelFactory
+	{
+		private const string EmptyTestModel = @"
+namespace Tests.Utilities.EmptyModel
+{
+	using SafetySharp.Analysis;
+	using SafetySharp.Runtime;
+	using SafetySharp.Modeling;
+	
+	public class EmptyComponent : Component
+	{
+	}
+
+	public class EmptyModel : ModelBase
+	{
+		[Root(RootKind.Controller)]
+		public readonly EmptyComponent X = new EmptyComponent();
+	}
+}
+";
+		public static ModelBase CreateEmptyModel(TestTraceOutput output)
+		{
+			return Tests.GetModelBases(EmptyTestModel, output).First();
+		}
+
+		public static SafetySharpRuntimeModel CreateRuntimeModel(TestTraceOutput output)
+		{
+			return SafetySharpRuntimeModel.Create(CreateEmptyModel(output));
 		}
 	}
 }

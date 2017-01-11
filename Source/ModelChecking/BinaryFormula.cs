@@ -28,7 +28,7 @@ namespace SafetySharp.Analysis
 	/// <summary>
 	///   Represents the application of a <see cref="BinaryOperator" /> to two <see cref="Formula" /> instances.
 	/// </summary>
-	internal sealed class BinaryFormula : Formula
+	public sealed class BinaryFormula : Formula
 	{
 		/// <summary>
 		///   Initializes a new instance of the <see cref="BinaryFormula" /> class.
@@ -36,7 +36,7 @@ namespace SafetySharp.Analysis
 		/// <param name="leftOperand">The formula on the left-hand side of the binary operator.</param>
 		/// <param name="binaryOperator">The operator of the binary formula.</param>
 		/// <param name="rightOperand">The formula on the right-hand side of the binary operator.</param>
-		internal BinaryFormula(Formula leftOperand, BinaryOperator binaryOperator, Formula rightOperand)
+		public BinaryFormula(Formula leftOperand, BinaryOperator binaryOperator, Formula rightOperand)
 		{
 			Requires.NotNull(leftOperand, nameof(leftOperand));
 			Requires.InRange(binaryOperator, nameof(binaryOperator));
