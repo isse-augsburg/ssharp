@@ -71,7 +71,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			for (int i = 0; i < _Server.AvailableServerUnits + 1; i++)
 			{
 				var client = ClientT.GetNewClient(_Proxy);
-				var query = new Query(client);
+				var query = Query.GetNewQuery(client);
 				_Server.AddQuery(query);
 			}
 

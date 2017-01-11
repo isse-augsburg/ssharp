@@ -31,9 +31,14 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	public class ServerT : Component
 	{
 		/// <summary>
-		/// This faults prevents the server activation to return a new server
+		/// This faults prevents the server activation to activate a server
 		/// </summary>
 		public readonly Fault ServerCannotActivated = new TransientFault();
+
+		/// <summary>
+		/// This fault prevents the server deactivation to deactivate a server
+		/// </summary>
+		public readonly Fault ServerCannotDeactivated = new TransientFault();
 
 		/// <summary>
 		/// This faults prevents the server to change the fidelity
@@ -49,6 +54,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// Currently available units of the server. 0 Means the server is inactive.
 		/// </summary>
 		public int AvailableServerUnits { get; private set; }
+
+		/// <summary>
+		/// Is the server active and can execute queries
+		/// </summary>
+		public bool IsServerActive => AvailableServerUnits > 0;
 
 		/// <summary>
 		/// Maximum available units of the server.
@@ -116,14 +126,14 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		{
 			MaxServerUnits = maxServerUnits;
 			ExecutingQueries = new List<Query>(MaxServerUnits);
-			AvailableServerUnits = MaxServerUnits;
 			Fidelity = EServerFidelity.High;
 			ConnectedProxy = proxy;
+			proxy.ConnectedServers.Add(this);
 			IsInitialized = true;
 		}
 
 		/// <summary>
-		/// Gets a new server
+		/// Gets a new server and connects it to the proxy
 		/// </summary>
 		/// <param name="proxy">The connected Proxy</param>
 		/// <returns>New Server Instance</returns>
@@ -134,6 +144,26 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			if(server.IsInitialized)
 				return server;
 			return null;
+		}
+
+		/// <summary>
+		/// Activates the server
+		/// </summary>
+		/// <returns></returns>
+		public virtual bool Activate()
+		{
+			AvailableServerUnits = MaxServerUnits;
+			return true;
+		}
+
+		/// <summary>
+		/// Deactivates the server
+		/// </summary>
+		/// <returns></returns>
+		public virtual bool Deactivate()
+		{
+			AvailableServerUnits = 0;
+			return true;
 		}
 
 		/// <summary>
@@ -166,16 +196,35 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		}
 
 		/// <summary>
-		/// Prevents the server activation to return a new server
+		/// Prevents the server activation to activate a server
 		/// </summary>
 		[FaultEffect(Fault = "ServerCannotActivated")]
 		public class ServerCannotActivatedEffect : ServerT
 		{
-
 			/// <summary>
-			/// Indicates if the server is initialized
+			/// Activates the server
 			/// </summary>
-			public override bool IsInitialized => false;
+			/// <returns></returns>
+			public override bool Activate()
+			{
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Prevents the server activation to deactivate a server
+		/// </summary>
+		[FaultEffect(Fault = "ServerCannotDeactivated")]
+		public class ServerCannotDeactivatedEffect : ServerT
+		{
+			/// <summary>
+			/// Deactivates the server
+			/// </summary>
+			/// <returns></returns>
+			public override bool Deactivate()
+			{
+				return false;
+			}
 		}
 
 		/// <summary>

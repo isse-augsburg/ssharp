@@ -64,46 +64,26 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// The Proxy
 		/// </summary>
-		//[Root(RootKind.Controller)]
+		[Root(RootKind.Controller)]
 		public ProxyT Proxy { get; set; }
-
-		/// <summary>
-		/// Helper for connected Clients
-		/// </summary>
-		[Root(RootKind.Plant)]
-		public ComponentListHelper<ClientT> ClientHelper => Proxy.ClientHelper;
-
-		/// <summary>
-		/// Helper for connected Servers
-		/// </summary>
-		[Root(RootKind.Plant)]
-		public ComponentListHelper<ServerT> ServerHelper => Proxy.ServerHelper;
-
-		/// <summary>
-		/// Helper for Queries
-		/// </summary>
-		[Root(RootKind.Plant)]
-		public ComponentListHelper<Query> QueryHelper => Proxy.QueryHelper;
 
 		/// <summary>
 		/// All connected Clients
 		/// </summary>
+		[Root(RootKind.Plant)]
 		public List<ClientT> Clients => Proxy.ConnectedClients;
 
 		/// <summary>
 		/// All connected Servers
 		/// </summary>
+		[Root(RootKind.Plant)]
 		public List<ServerT> Servers => Proxy.ConnectedServers;
 
 		/// <summary>
 		/// All Queries
 		/// </summary>
+		[Root(RootKind.Plant)]
 		public List<Query> Queries => Proxy.Queries;
-
-		///// <summary>
-		///// All Queries
-		///// </summary>
-		//public IEnumerable<Query> Queries => Proxy.ConnectedClients.Select(x => x.CurrentQuery);
 
 		/// <summary>
 		/// All active Queries
@@ -117,10 +97,17 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		{
 			Proxy = new ProxyT();
 
-			// Add a few clients
-			for(int i = 0; i < 20; i++)
+			// Add a few clients with Queries
+			for(int i = 0; i < 10; i++)
 			{
-				Clients.Add(ClientT.GetNewClient(Proxy));
+				var client = ClientT.GetNewClient(Proxy);
+				Query.GetNewQuery(client);
+			}
+
+			// Add a few server
+			for(int i = 0; i < 5; i++)
+			{
+				ServerT.GetNewServer(Proxy);
 			}
 		}
 

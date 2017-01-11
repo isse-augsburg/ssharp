@@ -47,17 +47,35 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// The client to request the query
 		/// </summary>
-		public ClientT Client { get; }
+		public ClientT Client { get; private set; }
+
+		/// <summary>
+		/// Indicates if the query is in execution
+		/// </summary>
+		public bool IsExecute { get; set; }
 
 		/// <summary>
 		/// Creates a new query instance
 		/// </summary>
-		/// <param name="client">The client to request the query</param>
-		public Query(ClientT client)
+		private Query()
 		{
-			Client = client;
-			client.ConnectedProxy.Queries.Add(this);
-			SelectedServer = null;
+			//Client = client;
+			//client.ConnectedProxy.Queries.Add(this);
+			//SelectedServer = null;
+		}
+
+		/// <summary>
+		/// Creates a new Query on the given client
+		/// </summary>
+		/// <param name="client">Client</param>
+		public static Query GetNewQuery(ClientT client)
+		{
+			var query = new Query();
+			client.CurrentQuery = query;
+			query.Client = client;
+			client.ConnectedProxy.Queries.Add(query);
+			query.IsExecute = false;
+			return query;
 		}
 
 		/// <summary>
@@ -65,8 +83,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public override void Update()
 		{
+			if(!IsExecute)
+				return;
+			// else
 			_StateMachine.Transition(
-							 from: EQueryState.Idle,
+							 from: new [] { EQueryState.Completed,EQueryState.Idle },
 							 to: EQueryState.QueryToProxy
 							 //,action: Client.StartQuery
 							 )
@@ -128,6 +149,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 								 Client.GetResponse();
 								 Client.ConnectedProxy.UpdateAvgResponseTime(Client.LastResponseTime);
 								 SelectedServer = null;
+								 IsExecute = false;
 							 });
 		}
 	}

@@ -70,7 +70,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		private ClientT()
 		{
-			Random = new Random();
+			Random = new Random(0);
 		}
 
 		/// <summary>
@@ -97,13 +97,19 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		}
 
 		/// <summary>
-		/// Initialize a new Query
+		/// Starts new Query
 		/// </summary>
-		public void StartQuery()
+		public bool StartQuery()
 		{
-			_IsResponseWaiting = true;
-			_CurrentResponseTime = 0;
-			CurrentQuery = new Query(this);
+			if(CurrentQuery.State == EQueryState.Idle || CurrentQuery.State == EQueryState.Completed)
+			{
+				_IsResponseWaiting = true;
+				_CurrentResponseTime = 0;
+				//CurrentQuery = new Query(this);
+				CurrentQuery.IsExecute = true;
+				return true;
+			}
+			return false;
 		}
 
 		/// <summary>

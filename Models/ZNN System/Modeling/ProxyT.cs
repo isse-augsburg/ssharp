@@ -32,10 +32,6 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	/// </summary>
 	public class ProxyT : Component
 	{
-		/// <summary>
-		/// This fault prevents the server deactivation to remove a server
-		/// </summary>
-		public readonly Fault ServerCannotDeactivated = new TransientFault();
 
 		/// <summary>
 		/// In this fault, the server selection for a query fails
@@ -53,34 +49,19 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		private int _LastSelectedServer = -1;
 
 		/// <summary>
-		/// Helper for connected Clients
+		/// The connected Clients
 		/// </summary>
-		public ComponentListHelper<ClientT> ClientHelper { get; }
+		public List<ClientT> ConnectedClients { get; }
 
 		/// <summary>
 		/// The connected Clients
 		/// </summary>
-		public List<ClientT> ConnectedClients => ClientHelper.Components;
-
-		/// <summary>
-		/// Helper for connected Clients
-		/// </summary>
-		public ComponentListHelper<Query> QueryHelper { get; }
-
-		/// <summary>
-		/// The connected Clients
-		/// </summary>
-		public List<Query> Queries => QueryHelper.Components;
-
-		/// <summary>
-		/// Helper for connected Servers
-		/// </summary>
-		public ComponentListHelper<ServerT> ServerHelper { get; }
+		public List<Query> Queries { get; }
 
 		/// <summary>
 		/// The connected Servers
 		/// </summary>
-		public List<ServerT> ConnectedServers => ServerHelper.Components;
+		public List<ServerT> ConnectedServers { get; }
 
 		/// <summary>
 		/// Average response time of the servers from the last querys.
@@ -90,7 +71,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Number of active servers
 		/// </summary>
-		public int ActiveServerCount => ConnectedServers.Count(s => s.Cost > 0);
+		public int ActiveServerCount => ConnectedServers.Count(s => s.IsServerActive);
 
 		/// <summary>
 		/// Total costs of all Server
@@ -102,15 +83,13 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public ProxyT()
 		{
-			//ConnectedClients = new List<ClientT>();
-			//ConnectedServers = new List<ServerT>();
-			ClientHelper = new ComponentListHelper<ClientT>();
-			ServerHelper = new ComponentListHelper<ServerT>();
-			QueryHelper = new ComponentListHelper<Query>();
+			ConnectedClients = new List<ClientT>();
+			ConnectedServers = new List<ServerT>();
+			Queries = new List<Query>();
 			_LatestResponeTimes = new List<int>(Model.LastResponseCountForAvgTime);
 			UpdateAvgResponseTime(0); // Default start value
 
-			IncrementServerPool();
+			//IncrementServerPool();
 		}
 
 		/// <summary>
@@ -118,18 +97,22 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public void IncrementServerPool()
 		{
-			ConnectedServers.Add(ServerT.GetNewServer(this));
+			var inactiveServer = ConnectedServers.FirstOrDefault(s => !s.IsServerActive);
+			inactiveServer?.Activate();
 		}
 
 		/// <summary>
-		/// Dectivates the server with the lowest load
+		/// Dectivates the server with the lowest load and adds the queries to the first active server
 		/// </summary>
 		public virtual void DecrementServerPool()
 		{
-			if(ConnectedServers.Count > 1)
+			if(ActiveServerCount > 1)
 			{
 				var server = ConnectedServers.Aggregate((currMin, x) => ((currMin == null || x.Load < currMin.Load) ? x : currMin));
-				ConnectedServers.Remove(server);
+				server.Deactivate();
+
+				// Add queries to active server
+				ConnectedServers.First(s => s.IsServerActive).ExecutingQueries.AddRange(server.ExecutingQueries);
 			}
 		}
 
@@ -189,6 +172,9 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		internal virtual void AdjustServers()
 		{
+			if(ActiveServerCount < 1)
+				IncrementServerPool();
+
 			if(AvgResponseTime > Model.HighResponseTimeValue)
 			{
 				if(TotalServerCosts < Model.MaxBudget)
@@ -227,20 +213,13 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			if(ConnectedServers.Count > _LastSelectedServer - 1)
 				_LastSelectedServer = -1;
 
-			var selected = ConnectedServers[++_LastSelectedServer];
-			return selected;
-		}
+			ServerT selected;
+			do
+			{
+				selected = ConnectedServers[++_LastSelectedServer];
+			} while(!ConnectedServers[_LastSelectedServer].IsServerActive);
 
-		/// <summary>
-		/// Prevents the server deactivation to remove a server
-		/// </summary>
-		[FaultEffect(Fault = "ServerCannotDeactivated")]
-		public class ServerCannotDeactivatedEffect : ProxyT
-		{
-			/// <summary>
-			/// Dectivates the server with the lowest load
-			/// </summary>
-			public override void DecrementServerPool() { }
+			return selected;
 		}
 
 		/// <summary>
