@@ -289,16 +289,24 @@ namespace SafetySharp.Runtime
 
 		public static Func<SafetySharpRuntimeModel> CreateExecutedModelCreator(ModelBase model, params Formula[] stateFormulas)
 		{
+			// Note: If a model created by the returned delegate is used, old "stateFormulas" cannot be used anymore, because they
+			// might have parts of the "old" model (the one for which formulas have been instantiated in) in their closure.
+			// Use "model.ExecutableStateFormulas" instead!
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(stateFormulas, nameof(stateFormulas));
 
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, stateFormulas);
 			return serializer.Load;
+
+
 		}
 
 		public static Func<Formula[], Func<SafetySharpRuntimeModel>> CreateExecutedModelFromFormulasCreator(ModelBase model)
 		{
+			// Note: If a model created by the returned delegate is used, old "stateFormulas" cannot be used anymore, because they
+			// might have parts of the "old" model (the one for which formulas have been instantiated in) in their closure.
+			// Use "model.ExecutableStateFormulas" instead!
 			Requires.NotNull(model, nameof(model));
 
 			var serializer = new RuntimeModelSerializer();
