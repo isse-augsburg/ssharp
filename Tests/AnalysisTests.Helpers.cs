@@ -61,7 +61,7 @@ namespace Tests
 		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components), invariant);
+			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(TestModel.InitializeModel(components));
 
 			if (Arguments.Length > 1 && (bool)Arguments[1])
 			{
@@ -70,7 +70,7 @@ namespace Tests
 				return results[0].FormulaHolds;
 			}
 
-			Result = modelChecker.CheckInvariant(modelCreator,0);
+			Result = modelChecker.CheckInvariant(modelCreator, invariant);
 			CounterExample = Result.CounterExample;
 			return Result.FormulaHolds;
 		}
@@ -78,7 +78,8 @@ namespace Tests
 		protected bool[] CheckInvariants(IComponent component, params Formula[] invariants)
 		{
 			var modelChecker = CreateModelChecker();
-			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(component), invariants);
+			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(TestModel.InitializeModel(component));
+			//var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(component), invariants);
 			var results = (AnalysisResult<SafetySharpRuntimeModel>[])modelChecker.CheckInvariants(modelCreator, invariants);
 			CounterExamples = results.Select(result => result.CounterExample).ToArray();
 			return results.Select(result => result.FormulaHolds).ToArray();
@@ -87,8 +88,8 @@ namespace Tests
 		protected bool Check(Formula formula, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components), formula);
-			var result = modelChecker.Check(modelCreator, 0);
+			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(TestModel.InitializeModel(components));
+			var result = modelChecker.Check(modelCreator, formula);
 
 			CounterExample = result.CounterExample;
 			return result.FormulaHolds;
@@ -152,6 +153,9 @@ namespace Tests
 
 		private dynamic CreateModelChecker()
 		{
+			// QualitativeChecker<SafetySharpRuntimeModel>
+			// LtsMin<SafetySharpRuntimeModel>
+
 			dynamic modelChecker = Activator.CreateInstance((Type)Arguments[0]);
 			modelChecker.OutputWritten += (Action<string>)(message => Output.Log("{0}", message));
 

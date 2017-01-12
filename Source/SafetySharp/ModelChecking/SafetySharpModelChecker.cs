@@ -39,7 +39,7 @@ namespace SafetySharp.Analysis
 		/// <param name="formula">The formula that should be checked.</param>
 		public static AnalysisResult<SafetySharpRuntimeModel> Check(ModelBase model, Formula formula)
 		{
-			return new LtsMin().Check(model, formula);
+			return new LtsMin().Check(SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model), formula);
 		}
 
 		/// <summary>
@@ -62,7 +62,7 @@ namespace SafetySharp.Analysis
 		/// <param name="invariants">The invariants that should be checked.</param>
 		public static AnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ModelBase model, params Formula[] invariants)
 		{
-			var createModel = SafetySharpRuntimeModel.CreateExecutedModelCreator(model, invariants);
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 			return new QualitativeChecker<SafetySharpRuntimeModel>().CheckInvariants(createModel, invariants);
 		}
 
