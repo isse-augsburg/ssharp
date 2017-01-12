@@ -43,10 +43,14 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
-	  <Reference Include="SafetySharp.Modelingn">
-		  <HintPath>../SafetySharp.Modeling.dll</HintPath>
-      <Private>True</Private>
-	  </Reference>
+    <Reference Include="ISSE.ModelChecking">
+        <HintPath>../ISSE.ModelChecking.dll</HintPath>
+        <Private>True</Private>
+	</Reference>
+    <Reference Include="SafetySharp.Modeling">
+        <HintPath>../SafetySharp.Modeling.dll</HintPath>
+        <Private>True</Private>
+	</Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="TestCode.cs" />
@@ -54,6 +58,7 @@
   <ItemGroup>
     <Analyzer Include="../SafetySharp.Modeling.dll" />
     <Analyzer Include="../SafetySharp.Compiler.dll" />
+    <Analyzer Include="../ISSE.ModelChecking.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="../../../Source/SafetySharp.targets" />

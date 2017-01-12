@@ -61,15 +61,16 @@ namespace Tests
 		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
+			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components), invariant);
 
 			if (Arguments.Length > 1 && (bool)Arguments[1])
 			{
-				var results = modelChecker.CheckInvariants(TestModel.InitializeModel(components), invariant);
+				var results = modelChecker.CheckInvariants(modelCreator, invariant);
 				CounterExample = results[0].CounterExample;
 				return results[0].FormulaHolds;
 			}
 
-			Result = modelChecker.CheckInvariant(TestModel.InitializeModel(components), invariant);
+			Result = modelChecker.CheckInvariant(modelCreator,0);
 			CounterExample = Result.CounterExample;
 			return Result.FormulaHolds;
 		}
@@ -77,7 +78,8 @@ namespace Tests
 		protected bool[] CheckInvariants(IComponent component, params Formula[] invariants)
 		{
 			var modelChecker = CreateModelChecker();
-			var results = (AnalysisResult<SafetySharpRuntimeModel>[])modelChecker.CheckInvariants(TestModel.InitializeModel(component), invariants);
+			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(component), invariants);
+			var results = (AnalysisResult<SafetySharpRuntimeModel>[])modelChecker.CheckInvariants(modelCreator, invariants);
 			CounterExamples = results.Select(result => result.CounterExample).ToArray();
 			return results.Select(result => result.FormulaHolds).ToArray();
 		}
@@ -85,7 +87,8 @@ namespace Tests
 		protected bool Check(Formula formula, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var result = modelChecker.Check(TestModel.InitializeModel(components), formula);
+			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components), formula);
+			var result = modelChecker.Check(modelCreator, 0);
 
 			CounterExample = result.CounterExample;
 			return result.FormulaHolds;

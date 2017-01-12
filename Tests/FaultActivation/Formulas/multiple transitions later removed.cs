@@ -22,6 +22,7 @@
 
 namespace Tests.FaultActivation.Formulas
 {
+	using System.Diagnostics;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
@@ -30,6 +31,7 @@ namespace Tests.FaultActivation.Formulas
 		protected override void Check()
 		{
 			var c = new C();
+			Debugger.Break();
 			CheckInvariant(!c.F1.IsActivated && !c.F2.IsActivated && !c.F3.IsActivated, c).ShouldBe(true);
 		}
 

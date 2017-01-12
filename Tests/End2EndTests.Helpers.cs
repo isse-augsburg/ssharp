@@ -72,6 +72,7 @@ namespace Tests
 		protected bool Execute()
 		{
 			File.Copy("SafetySharp.Modeling.dll", Path.Combine(_directory, "Binaries/Release/SafetySharp.Modeling.dll"), overwrite: true);
+			File.Copy("ISSE.ModelChecking.dll", Path.Combine(_directory, "Binaries/Release/ISSE.ModelChecking.dll"), overwrite: true);
 
 			var process = new ExternalProcess(Path.Combine(_directory, "Binaries/Release/Test.exe"), "");
 			process.Run();
