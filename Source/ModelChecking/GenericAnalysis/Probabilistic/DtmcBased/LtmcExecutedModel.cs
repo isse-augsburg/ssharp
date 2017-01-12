@@ -113,9 +113,8 @@ namespace SafetySharp.Analysis.ModelChecking
 					// Activate all non-transient faults
 					foreach (var fault in RuntimeModel.NondeterministicFaults)
 					{
-						throw new Exception("Not implemented yet");
-						//if (!(fault is Modeling.TransientFault))
-						//	fault.TryActivate();
+						if (!(fault is Modeling.TransientFault))
+							fault.TryActivate();
 					}
 					break;
 				default:
@@ -147,9 +146,8 @@ namespace SafetySharp.Analysis.ModelChecking
 					// Activate all non-transient faults
 					foreach (var fault in RuntimeModel.NondeterministicFaults)
 					{
-						throw new Exception("Not implemented yet");
-						//if (!(fault is Modeling.TransientFault))
-						//	fault.TryActivate();
+						if (!(fault is Modeling.TransientFault))
+							fault.TryActivate();
 					}
 					break;
 				default:

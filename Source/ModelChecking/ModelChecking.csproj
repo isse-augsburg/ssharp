@@ -133,6 +133,8 @@
     <Compile Include="BinaryFormula.cs" />
     <Compile Include="BinaryOperator.cs" />
     <Compile Include="CounterExampleSerialization.cs" />
+    <Compile Include="GenericModelingArtifacts\PermanentFault.cs" />
+    <Compile Include="GenericModelingArtifacts\TransientFault.cs" />
     <Compile Include="Properties\InternalsVisibleTo.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

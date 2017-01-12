@@ -306,7 +306,7 @@ namespace SafetySharp.Utilities
 			{
 				// Hidden or readonly
 				if (mode == SerializationMode.Optimized && !discoveringObjects && (
-					type.IsEqualOrSubclassOf(typeof(Fault)) ||
+					type==typeof(Fault) ||
 					type.IsEqualOrSubclassOf(typeof(Choice)) 
 					))
 					return true;

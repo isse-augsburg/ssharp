@@ -99,8 +99,6 @@
     <Compile Include="Modeling\Component.cs" />
     <Compile Include="Modeling\FaultEffectAttribute.cs" />
     <Compile Include="Modeling\StateMachine.cs" />
-    <Compile Include="Modeling\PermanentFault.cs" />
-    <Compile Include="Modeling\TransientFault.cs" />
     <Compile Include="Modeling\OverflowBehavior.cs" />
     <Compile Include="Modeling\PriorityAttribute.cs" />
     <Compile Include="Modeling\ProvidedAttribute.cs" />
