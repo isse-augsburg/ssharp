@@ -93,6 +93,18 @@ namespace SafetySharp.Runtime
 			CheckConsistencyAfterInitialization();
 		}
 
+
+		/// <summary>
+		///   Initializes a new instance, which encapsulates ModelBase. It does not work on its own. The resulting
+		///   class only provides a working DeriveExecutableModelGenerator. Other methods should not be executed!
+		/// </summary>
+		private SafetySharpRuntimeModel(ModelBase model)
+			: base(0)
+		{
+			Model = model;
+			RootComponents = model.Roots.Cast<Component>().ToArray();
+		}
+
 		/// <summary>
 		///   Gets a copy of the original model the runtime model was generated from.
 		/// </summary>
@@ -271,6 +283,17 @@ namespace SafetySharp.Runtime
 			var serializer = new RuntimeModelSerializer();
 			serializer.Serialize(model, formulas);
 			return serializer.Load();
+		}
+
+		/// <summary>
+		///   Initializes a new instance, which encapsulates ModelBase. It does not work on its own. The resulting
+		///   class only provides a working DeriveExecutableModelGenerator. Other methods should not be executed!
+		/// </summary>
+		internal static SafetySharpRuntimeModel CreateEncapsulateModelBase(ModelBase model)
+		{
+			Requires.NotNull(model, nameof(model));
+
+			return new SafetySharpRuntimeModel(model);
 		}
 
 		internal override void SetChoiceResolver(ChoiceResolver choiceResolver)

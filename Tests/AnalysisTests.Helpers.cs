@@ -61,16 +61,16 @@ namespace Tests
 		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(TestModel.InitializeModel(components));
+			var model = SafetySharpRuntimeModel.CreateEncapsulateModelBase(TestModel.InitializeModel(components));
 
 			if (Arguments.Length > 1 && (bool)Arguments[1])
 			{
-				var results = modelChecker.CheckInvariants(modelCreator, invariant);
+				var results = modelChecker.CheckInvariants(model, invariant);
 				CounterExample = results[0].CounterExample;
 				return results[0].FormulaHolds;
 			}
 
-			Result = modelChecker.CheckInvariant(modelCreator, invariant);
+			Result = modelChecker.CheckInvariant(model, invariant);
 			CounterExample = Result.CounterExample;
 			return Result.FormulaHolds;
 		}
@@ -88,7 +88,7 @@ namespace Tests
 		protected bool Check(Formula formula, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(TestModel.InitializeModel(components));
+			var modelCreator = SafetySharpRuntimeModel.CreateEncapsulateModelBase(TestModel.InitializeModel(components));
 			var result = modelChecker.Check(modelCreator, formula);
 
 			CounterExample = result.CounterExample;
@@ -154,8 +154,7 @@ namespace Tests
 		private dynamic CreateModelChecker()
 		{
 			// QualitativeChecker<SafetySharpRuntimeModel>
-			// LtsMin<SafetySharpRuntimeModel>
-
+			// LtsMin
 			dynamic modelChecker = Activator.CreateInstance((Type)Arguments[0]);
 			modelChecker.OutputWritten += (Action<string>)(message => Output.Log("{0}", message));
 

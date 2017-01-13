@@ -54,13 +54,13 @@ namespace SafetySharp.Analysis
 		public event Action<string> OutputWritten = Console.WriteLine;
 
 		/// <summary>
-		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
+		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		internal AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(Func<Formula[], Func<SafetySharpRuntimeModel>> createModel, Formula invariant)
+		internal AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(SafetySharpRuntimeModel model, Formula invariant)
 		{
-			Requires.NotNull(createModel, nameof(createModel));
+			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(invariant, nameof(invariant));
 
 			var visitor = new IsStateFormulaVisitor();
@@ -72,13 +72,7 @@ namespace SafetySharp.Analysis
 			var transformationVisitor = new LtsMinLtlTransformer();
 			transformationVisitor.Visit(invariant);
 
-			var collectStateFormulasVisitor = new CollectAtomarPropositionFormulasVisitor();
-			collectStateFormulasVisitor.Visit(invariant);
-
-			var formulas = collectStateFormulasVisitor.AtomarPropositionFormulas.ToArray();
-			var model = createModel(formulas)();
-
-			return Check(model,
+			return Check(model, invariant,
 				$"--invariant=\"({ConstructionStateName} == 1) || ({transformationVisitor.TransformedFormula})\"");
 		}
 		
@@ -88,9 +82,9 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public AnalysisResult<SafetySharpRuntimeModel> Check(Func<Formula[], Func<SafetySharpRuntimeModel>> createModel, Formula formula)
+		public AnalysisResult<SafetySharpRuntimeModel> Check(SafetySharpRuntimeModel model, Formula formula)
 		{
-			Requires.NotNull(createModel, nameof(createModel));
+			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formula, nameof(formula));
 
 			var visitor = new IsLtlFormulaVisitor();
@@ -101,14 +95,8 @@ namespace SafetySharp.Analysis
 
 			var transformationVisitor = new LtsMinLtlTransformer();
 			transformationVisitor.Visit(new UnaryFormula(formula, UnaryOperator.Next));
-
-			var collectStateFormulasVisitor = new CollectAtomarPropositionFormulasVisitor();
-			collectStateFormulasVisitor.Visit(new UnaryFormula(formula, UnaryOperator.Next));
-
-			var formulas = collectStateFormulasVisitor.AtomarPropositionFormulas.ToArray();
-			var model = createModel(formulas)();
-
-			return Check(model, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
+			
+			return Check(model,  formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
 		}
 
 		/// <summary>
@@ -135,13 +123,13 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="checkArgument">The argument passed to LtsMin that indicates which kind of check to perform.</param>
-		private AnalysisResult<SafetySharpRuntimeModel> Check(SafetySharpRuntimeModel model, string checkArgument)
+		private AnalysisResult<SafetySharpRuntimeModel> Check(SafetySharpRuntimeModel model, Formula formula, string checkArgument)
 		{
 			try
 			{
 				using (var modelFile = new TemporaryFile("ssharp"))
 				{
-					File.WriteAllBytes(modelFile.FilePath, RuntimeModelSerializer.Save(model.Model, model.Formulas));
+					File.WriteAllBytes(modelFile.FilePath, RuntimeModelSerializer.Save(model.Model, formula));
 
 					try
 					{

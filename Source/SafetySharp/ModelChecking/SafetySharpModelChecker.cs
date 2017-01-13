@@ -39,7 +39,7 @@ namespace SafetySharp.Analysis
 		/// <param name="formula">The formula that should be checked.</param>
 		public static AnalysisResult<SafetySharpRuntimeModel> Check(ModelBase model, Formula formula)
 		{
-			return new LtsMin().Check(SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model), formula);
+			return new LtsMin().Check(SafetySharpRuntimeModel.CreateEncapsulateModelBase(model), formula);
 		}
 
 		/// <summary>
