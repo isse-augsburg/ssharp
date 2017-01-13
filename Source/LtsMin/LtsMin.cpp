@@ -166,6 +166,8 @@ void LoadModel(model_t model, const char* modelFile)
 		for (auto i = 0; i < stateLabelCount; ++i)
 		{
 			auto stateLabel = Marshal::StringToHGlobalAnsi(Globals::RuntimeModel->StateFormulas[i]->Label);
+			auto name = (char*)stateLabel.ToPointer();
+			Console::WriteLine("State Label " + i + ": " + (gcnew System::String(name)));
 			lts_type_set_state_label_name(ltsType, i, (char*)stateLabel.ToPointer());
 			lts_type_set_state_label_typeno(ltsType, i, boolType);
 			Marshal::FreeHGlobal(stateLabel);
