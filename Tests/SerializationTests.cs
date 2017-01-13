@@ -73,5 +73,11 @@ namespace Tests
 		{
 			ExecuteDynamicTests(file);
 		}
+
+		[Theory(Skip = "unsolved, but known bug"), MemberData(nameof(DiscoverTests), "Serialization/UnsolvedBugs")]
+		public void UnsolvedBugs(string test, string file)
+		{
+			ExecuteDynamicTests(file);
+		}
 	}
 }
