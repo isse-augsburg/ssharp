@@ -138,7 +138,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the state formulas of the model.
 		/// </summary>
-		protected override AtomarPropositionFormula[] AtomarPropositionFormulas => ExecutableStateFormulas;
+		public override AtomarPropositionFormula[] AtomarPropositionFormulas => ExecutableStateFormulas;
 
 		/// <summary>
 		///   Computes an initial state of the model.
@@ -302,12 +302,7 @@ namespace SafetySharp.Runtime
 		}
 
 		public override CounterExampleSerialization<SafetySharpRuntimeModel> CounterExampleSerialization { get; } = new SafetySharpCounterExampleSerialization();
-
-		// Can create a fresh <see cref= "TExecutableModel" /> instance for further safety analysis.
-		public override Func<SafetySharpRuntimeModel> DeriveExecutableModelGenerator(params Formula[] formulas)
-		{
-			return CreateExecutedModelCreator(Model, formulas);
-		}
+		
 
 		public static Func<SafetySharpRuntimeModel> CreateExecutedModelCreator(ModelBase model, params Formula[] formulas)
 		{
@@ -317,11 +312,7 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
 
-			var serializer = new RuntimeModelSerializer();
-			serializer.Serialize(model, formulas);
-			return serializer.Load;
-
-
+			return CreateExecutedModelFromFormulasCreator(model)(formulas);
 		}
 
 		public static Func<Formula[], Func<SafetySharpRuntimeModel>> CreateExecutedModelFromFormulasCreator(ModelBase model)
@@ -339,7 +330,7 @@ namespace SafetySharp.Runtime
 				Requires.NotNull(formulas, nameof(formulas));
 				Requires.That(!alreadyCreated, $"{nameof(CreateExecutedModelFromFormulasCreator)} may only be called once, because the first run of serializer binds the model");
 				alreadyCreated = true;
-				serializer.Serialize(model, formulas);
+				serializer.Serialize(model, formulas); //has a side effect: Model binding!
 				return serializer.Load;
 			};
 			return loader;

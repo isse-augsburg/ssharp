@@ -33,14 +33,14 @@ namespace SafetySharp.ModelChecking
 		public SafetyAnalysisResults<SafetySharpRuntimeModel> ComputeMinimalCriticalSets(ModelBase model, Formula collision, int maxCardinality = Int32.MaxValue)
 		{
 			var modelCreator=SafetySharpRuntimeModel.CreateExecutedModelCreator(model, collision);
-			return ComputeMinimalCriticalSets(modelCreator(),collision, maxCardinality);
+			return ComputeMinimalCriticalSets(modelCreator,collision, maxCardinality);
 		}
 
 		public static SafetyAnalysisResults<SafetySharpRuntimeModel> AnalyzeHazard(ModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue,
 														  SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
 		{
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(model, hazard);
-			return AnalyzeHazard(modelCreator(),hazard,maxCardinality,backend);
+			return AnalyzeHazard(modelCreator,hazard,maxCardinality,backend);
 		}
 	}
 

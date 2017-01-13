@@ -63,33 +63,12 @@ namespace SafetySharp.Analysis
 				return result;
 			}
 		}
-
-		/// <summary>
-		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="model" />.
-		/// <param name="invariant">The invariant that should be checked.</param>
-		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
-		/// <param name="invariant">The invariant that should be checked.</param>
-		public AnalysisResult<TExecutableModel> CheckInvariant(TExecutableModel model, Formula invariant)
-		{
-			var modelCreator = model.DeriveExecutableModelGenerator(invariant);
-			// We have to track the state vector layout here; this will nondeterministically store some model instance of
-			// one of the workers; but since all state vectors are the same, we don't care
-			ExecutedModel<TExecutableModel> executedModel = null;
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
-				executedModel = new ActivationMinimalExecutedModel<TExecutableModel>(modelCreator, Configuration.SuccessorCapacity);
-
-			using (var checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration, 0))
-			{
-				var result = checker.Check();
-				return result;
-			}
-		}
+		
 
 		/// <summary>
 		///   Generates a <see cref="StateGraph{TExecutableModel}" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal StateGraph<TExecutableModel> GenerateStateGraph(Func<TExecutableModel> createModel, params Formula[] stateFormulas)
+		internal StateGraph<TExecutableModel> GenerateStateGraph(Func<TExecutableModel> createModel)
 		{
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care
@@ -97,7 +76,7 @@ namespace SafetySharp.Analysis
 			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
 				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, Configuration.SuccessorCapacity);
 
-			using (var checker = new StateGraphGenerator<TExecutableModel>(createAnalysisModel, stateFormulas, OutputWritten, Configuration))
+			using (var checker = new StateGraphGenerator<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration))
 			{
 				var stateGraph = checker.GenerateStateGraph();
 				return stateGraph;
@@ -118,7 +97,7 @@ namespace SafetySharp.Analysis
 
 			var modelGenerator = createModel(invariants);
 
-			var stateGraph = GenerateStateGraph(modelGenerator, invariants);
+			var stateGraph = GenerateStateGraph(modelGenerator);
 			var results = new AnalysisResult<TExecutableModel>[invariants.Length];
 
 			for (var i = 0; i < invariants.Length; ++i)
@@ -126,28 +105,7 @@ namespace SafetySharp.Analysis
 
 			return results;
 		}
-		/// <summary>
-		///   Checks whether the <paramref name="invariants" /> holds in all states of the <paramref name="model" />.
-		/// <param name="invariant">The invariant that should be checked.</param>
-		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
-		/// <param name="invariants">The invariants that should be checked.</param>
-		public AnalysisResult<TExecutableModel>[] CheckInvariants(TExecutableModel model, params Formula[] invariants)
-		{
-			Requires.NotNull(model, nameof(model));
-			Requires.NotNull(invariants, nameof(invariants));
-			Requires.That(invariants.Length > 0, nameof(invariants), "Expected at least one invariant.");
-
-			var modelGenerator = model.DeriveExecutableModelGenerator(invariants);
-
-			var stateGraph = GenerateStateGraph(modelGenerator, invariants);
-			var results = new AnalysisResult<TExecutableModel>[invariants.Length];
-
-			for (var i = 0; i < invariants.Length; ++i)
-				results[i] = CheckInvariant(stateGraph, invariants[i]);
-
-			return results;
-		}
+		
 
 		/// <summary>
 		///   Checks whether the <paramref name="invariant" /> holds in all states of the <paramref name="stateGraph" />.
@@ -158,21 +116,14 @@ namespace SafetySharp.Analysis
 		{
 			Requires.NotNull(stateGraph, nameof(stateGraph));
 			Requires.NotNull(invariant, nameof(invariant));
-
-			var formulaIndex = Array.IndexOf(stateGraph.StateFormulas, invariant);
-
-			Requires.That(formulaIndex != -1, nameof(invariant),
-				"The invariant cannot be analyzed over the state graph. Use the same " +
-				$"'{typeof(Formula).FullName}' instance as during the construction of the state graph.");
-
-
+			
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care
 			AnalysisModel<TExecutableModel> model = null;
 			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
 					model = new StateGraphModel<TExecutableModel>(stateGraph, Configuration.SuccessorCapacity);
 
-			using (var checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration, formulaIndex))
+			using (var checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration, invariant))
 			{
 				var result = checker.Check();
 				return result;

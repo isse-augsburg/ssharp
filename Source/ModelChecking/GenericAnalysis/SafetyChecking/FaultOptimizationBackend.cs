@@ -55,9 +55,10 @@ namespace SafetySharp.Analysis.SafetyChecking
 		protected override void InitializeModel(AnalysisConfiguration configuration, Formula hazard)
 		{
 			Func<AnalysisModel<TExecutableModel>> createModel = () =>
-				new ActivationMinimalExecutedModel<TExecutableModel>(RuntimeModel.DeriveExecutableModelGenerator(hazard), configuration.SuccessorCapacity);
+				new ActivationMinimalExecutedModel<TExecutableModel>(RuntimeModelCreator, configuration.SuccessorCapacity);
+			var invariant = new UnaryFormula(hazard,UnaryOperator.Not);
 
-			_invariantChecker = new InvariantChecker<TExecutableModel>(createModel, OnOutputWritten, configuration, formulaIndex: 0);
+			_invariantChecker = new InvariantChecker<TExecutableModel>(createModel, OnOutputWritten, configuration, invariant);
 		}
 
 		/// <summary>

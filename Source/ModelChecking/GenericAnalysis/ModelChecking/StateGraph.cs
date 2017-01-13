@@ -54,19 +54,17 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="context">The context of the traversal process.</param>
-		/// <param name="stateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="transitionSizeInBytes">The size of a transition in bytes.</param>
 		/// <param name="model">The runtime model the state graph is generated for.</param>
 		/// <param name="createModel">
 		///   The factory function that should be used to create instances of the <see cref="RuntimeModel" />
 		///   the state graph is generated for.
 		/// </param>
-		internal StateGraph(TraversalContext<TExecutableModel> context, Formula[] stateFormulas, int transitionSizeInBytes,
+		internal StateGraph(TraversalContext<TExecutableModel> context, int transitionSizeInBytes,
 							TExecutableModel model, Func<TExecutableModel> createModel)
 		{
 			Requires.NotNull(context, nameof(context));
-
-			StateFormulas = stateFormulas;
+			
 			TransitionSize = transitionSizeInBytes;
 			RuntimeModel = model;
 			RuntimeModelCreator = createModel;
@@ -91,11 +89,6 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   <see cref="StateGraph" />.
 		/// </summary>
 		public Func<TExecutableModel> RuntimeModelCreator { get; }
-
-		/// <summary>
-		///   The state formulas that can be evaluated over the model.
-		/// </summary>
-		public Formula[] StateFormulas { get; set; }
 
 		/// <summary>
 		///   Gets the size of a single transition of the state graph in bytes.

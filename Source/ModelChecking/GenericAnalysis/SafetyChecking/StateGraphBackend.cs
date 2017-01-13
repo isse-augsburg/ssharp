@@ -46,11 +46,13 @@ namespace SafetySharp.Analysis.SafetyChecking
 			checker.Configuration.ProgressReportsOnly = false;
 			checker.OutputWritten += OnOutputWritten;
 
-			var stateGraph = checker.GenerateStateGraph(RuntimeModel.DeriveExecutableModelGenerator(!hazard), !hazard);
+			var invariant = new UnaryFormula(hazard, UnaryOperator.Not);
+
+			var stateGraph = checker.GenerateStateGraph(RuntimeModelCreator);
 
 			configuration.StateCapacity = Math.Max(1024, (int)(stateGraph.StateCount * 1.5));
 			_checker = new InvariantChecker<TExecutableModel>(() => new StateGraphModel<TExecutableModel>(stateGraph, configuration.SuccessorCapacity), OnOutputWritten,
-				configuration, formulaIndex: 0);
+				configuration, invariant);
 		}
 
 		/// <summary>

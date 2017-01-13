@@ -27,6 +27,7 @@ namespace SafetySharp.Analysis
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
+	using FormulaVisitors;
 	using Heuristics;
 	using Modeling;
 	using Runtime;
@@ -84,31 +85,31 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Computes the minimal critical sets for the <paramref name="hazard" />.
 		/// </summary>
-		/// <param name="model">The model the safety analysis should be conducted for.</param>
+		/// <param name="createModel">The creator for the model that should be checked.</param>
 		/// <param name="hazard">The hazard the minimal critical sets should be computed for.</param>
 		/// <param name="maxCardinality">
 		///   The maximum cardinality of the fault sets that should be checked. By default, all minimal
 		///   critical fault sets are determined.
 		/// </param>
 		/// <param name="backend">Determines the safety analysis backend that is used during the analysis.</param>
-		public static SafetyAnalysisResults<TExecutableModel> AnalyzeHazard(TExecutableModel runtimeModel, Formula hazard, int maxCardinality = Int32.MaxValue,
+		public static SafetyAnalysisResults<TExecutableModel> AnalyzeHazard(Func<TExecutableModel> createModel, Formula hazard, int maxCardinality = Int32.MaxValue,
 														  SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
 		{
-			return new SafetyAnalysis<TExecutableModel> { Backend = backend }.ComputeMinimalCriticalSets(runtimeModel, hazard, maxCardinality);
+			return new SafetyAnalysis<TExecutableModel> { Backend = backend }.ComputeMinimalCriticalSets(createModel, hazard, maxCardinality);
 		}
 
 		/// <summary>
 		///   Computes the minimal critical sets for the <paramref name="hazard" />.
 		/// </summary>
-		/// <param name="runtimeModel">The model the safety analysis should be conducted for.</param>
+		/// <param name="createModel">The creator for the model that should be checked.</param>
 		/// <param name="hazard">The hazard the minimal critical sets should be computed for.</param>
 		/// <param name="maxCardinality">
 		///   The maximum cardinality of the fault sets that should be checked. By default, all minimal
 		///   critical fault sets are determined.
 		/// </param>
-		public SafetyAnalysisResults<TExecutableModel> ComputeMinimalCriticalSets(TExecutableModel runtimeModel, Formula hazard, int maxCardinality = Int32.MaxValue)
+		public SafetyAnalysisResults<TExecutableModel> ComputeMinimalCriticalSets(Func<TExecutableModel> createModel, Formula hazard, int maxCardinality = Int32.MaxValue)
 		{
-			Requires.NotNull(runtimeModel, nameof(runtimeModel));
+			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(hazard, nameof(hazard));
 
 			ConsoleHelpers.WriteLine("Running Deductive Cause Consequence Analysis.");
@@ -116,6 +117,9 @@ namespace SafetySharp.Analysis
 			var heuristicWatch = new Stopwatch();
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
+
+			var runtimeModel = createModel();
+			hazard = TransferFormulaToNewExecutedModelInstanceVisitor.Transfer(runtimeModel,hazard);
 
 			var allFaults = runtimeModel.Faults;
 			FaultSet.CheckFaultCount(allFaults.Length);
@@ -154,8 +158,8 @@ namespace SafetySharp.Analysis
 			}
 
 			_backend.OutputWritten += output => OutputWritten?.Invoke(output);
-			_backend.InitializeModel(Configuration, runtimeModel, hazard);
-			_results = new SafetyAnalysisResults<TExecutableModel>(runtimeModel, hazard, suppressedFaults, forcedFaults, Heuristics, FaultActivationBehavior);
+			_backend.InitializeModel(Configuration, createModel, runtimeModel, hazard);
+			_results = new SafetyAnalysisResults<TExecutableModel>(createModel, runtimeModel, hazard, suppressedFaults, forcedFaults, Heuristics, FaultActivationBehavior);
 
 			// Remember all safe sets of current cardinality - we need them to generate the next power set level
 			var currentSafe = new HashSet<FaultSet>();

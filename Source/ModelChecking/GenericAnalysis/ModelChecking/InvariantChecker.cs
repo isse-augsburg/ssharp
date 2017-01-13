@@ -44,7 +44,23 @@ namespace SafetySharp.Analysis.ModelChecking
 		internal InvariantChecker(Func<AnalysisModel<TExecutableModel>> createModel, Action<string> output, AnalysisConfiguration configuration, int formulaIndex)
 			: base(createModel, output, configuration)
 		{
-			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationAction<TExecutableModel>(formulaIndex));
+			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationByIndexAction<TExecutableModel>(formulaIndex));
+		}
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="createModel">Creates the model that should be checked.</param>
+		/// <param name="output">The callback that should be used to output messages.</param>
+		/// <param name="configuration">The analysis configuration that should be used.</param>
+		/// <param name="stateFormula">The analyzed stateFormula.</param>
+		internal InvariantChecker(Func<AnalysisModel<TExecutableModel>> createModel, Action<string> output, AnalysisConfiguration configuration, Formula stateFormula)
+			: base(createModel, output, configuration)
+		{
+			// TODO: This only works, when all Formulas in the model are AtomarPropositionFormula
+			var labelsOfFormulas = AnalyzedModels.First().RuntimeModel.Formulas.Cast<AtomarPropositionFormula>().Select(formula => formula.Label).ToArray();
+
+			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationAction<TExecutableModel>(labelsOfFormulas,stateFormula));
 		}
 
 		/// <summary>

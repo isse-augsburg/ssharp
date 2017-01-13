@@ -22,26 +22,23 @@
 
 namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 {
-	using System;
-	using System.Linq;
-	using FormulaVisitors;
 	using Runtime;
 	using Transitions;
 
 	/// <summary>
 	///   Checks for invariant violations during model traversal.
 	/// </summary>
-	internal sealed class InvariantViolationAction<TExecutableModel> : ITransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed class InvariantViolationByIndexAction<TExecutableModel> : ITransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private readonly Func<StateFormulaSet, bool> _evaluator;
+		private readonly int _formulaIndex;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="formula">The analyzed formula.</param>
-		public InvariantViolationAction(string[] labels, Formula formula)
+		/// <param name="formulaIndex">The zero-based index of the analyzed formula.</param>
+		public InvariantViolationByIndexAction(int formulaIndex)
 		{
-			_evaluator= StateFormulaSetEvaluatorCompilationVisitor.Compile(labels, formula);
+			_formulaIndex = formulaIndex;
 		}
 
 		/// <summary>
@@ -56,7 +53,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		/// </param>
 		public unsafe void ProcessTransition(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, Transition* transition, bool isInitialTransition)
 		{
-			if (_evaluator(transition->Formulas))
+			if (transition->Formulas[_formulaIndex])
 				return;
 
 			context.FormulaIsValid = false;

@@ -132,7 +132,7 @@ namespace SafetySharp.Runtime
 		/// <summary>
 		///   Gets the state formulas of the model.
 		/// </summary>
-		protected abstract AtomarPropositionFormula[] AtomarPropositionFormulas { get; }
+		public abstract AtomarPropositionFormula[] AtomarPropositionFormulas { get; }
 
 		/// <summary>
 		///   Updates the activation states of the model's faults.
@@ -337,9 +337,7 @@ namespace SafetySharp.Runtime
 		}
 
 		public abstract CounterExampleSerialization<TExecutableModel> CounterExampleSerialization { get; }
-
-		// Can create a fresh <see cref= "TExecutableModel" /> instance for further safety analysis.
-		public abstract Func<TExecutableModel> DeriveExecutableModelGenerator(params Formula[] formulas);
+		
 
 		public abstract Expression CreateExecutableExpressionFromAtomarPropositionFormula(AtomarPropositionFormula formula);
 		

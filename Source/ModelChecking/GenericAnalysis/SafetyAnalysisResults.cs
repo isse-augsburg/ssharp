@@ -40,16 +40,18 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
+		/// <param name="createModel">The creator for the model that should be checked.</param>
 		/// <param name="runtimeModel">The <see cref="TExecutableModel" /> instance the safety analysis was conducted for.</param>
 		/// <param name="hazard">The hazard the analysis was conducated for.</param>
 		/// <param name="suppressedFaults">The faults whose activations have been completely suppressed during analysis.</param>
 		/// <param name="forcedFaults">The faults whose activations have been forced during analysis.</param>
 		/// <param name="heuristics">The heuristics that are used during the analysis.</param>
 		/// <param name="activationBehavior">The fault acitvation behavior used during the analysis.</param>
-		internal SafetyAnalysisResults(TExecutableModel runtimeModel, Formula hazard, IEnumerable<Fault> suppressedFaults,
-									  IEnumerable<Fault> forcedFaults, IEnumerable<IFaultSetHeuristic> heuristics,
-									  FaultActivationBehavior activationBehavior)
+		internal SafetyAnalysisResults(Func<TExecutableModel> createModel, TExecutableModel runtimeModel, Formula hazard,
+									  IEnumerable<Fault> suppressedFaults, IEnumerable<Fault> forcedFaults,
+									  IEnumerable<IFaultSetHeuristic> heuristics, FaultActivationBehavior activationBehavior)
 		{
+			RuntimeModelCreator = createModel;
 			RuntimeModel = runtimeModel;
 			Hazard = hazard;
 			SuppressedFaults = suppressedFaults;
@@ -104,6 +106,11 @@ namespace SafetySharp.Analysis
 		///   Gets a value indicating whether the analysis might is complete, i.e., all fault sets have been checked for criticality.
 		/// </summary>
 		public bool IsComplete { get; internal set; }
+
+		/// <summary>
+		///    The creator for the model that should be checked.
+		/// </summary>
+		public Func<TExecutableModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   Gets the <see cref="RuntimeModel" /> instance the safety analysis was conducted for.

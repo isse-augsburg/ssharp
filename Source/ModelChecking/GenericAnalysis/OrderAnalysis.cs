@@ -49,7 +49,7 @@ namespace SafetySharp.Analysis
 			Requires.NotNull(results, nameof(results));
 
 			_results = results;
-			_backend.InitializeModel(configuration, results.RuntimeModel, results.Hazard);
+			_backend.InitializeModel(configuration, results.RuntimeModelCreator, results.RuntimeModel, results.Hazard);
 		}
 
 		/// <summary>
