@@ -719,6 +719,7 @@
     <Compile Include="Serialization\RuntimeModels\objects in struct.cs" />
     <Compile Include="Serialization\RuntimeModels\reference to model.cs" />
     <Compile Include="Serialization\RuntimeModels\delegates in array.cs" />
+    <Compile Include="Serialization\RuntimeModels\double serialization with single fault.cs" />
     <Compile Include="Serialization\RuntimeModels\unbound.cs" />
     <Compile Include="Serialization\RuntimeModels\binding.cs" />
     <Compile Include="Serialization\RuntimeModels\deterministic faults.cs" />

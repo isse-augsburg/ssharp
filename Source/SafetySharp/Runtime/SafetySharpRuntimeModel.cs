@@ -287,16 +287,16 @@ namespace SafetySharp.Runtime
 			return CreateExecutedModelCreator(Model, formulas);
 		}
 
-		public static Func<SafetySharpRuntimeModel> CreateExecutedModelCreator(ModelBase model, params Formula[] stateFormulas)
+		public static Func<SafetySharpRuntimeModel> CreateExecutedModelCreator(ModelBase model, params Formula[] formulas)
 		{
 			// Note: If a model created by the returned delegate is used, old "stateFormulas" cannot be used anymore, because they
 			// might have parts of the "old" model (the one for which formulas have been instantiated in) in their closure.
-			// Use "model.ExecutableStateFormulas" instead!
+			// Use "model.Formulas" instead! The order should be preserved.
 			Requires.NotNull(model, nameof(model));
-			Requires.NotNull(stateFormulas, nameof(stateFormulas));
+			Requires.NotNull(formulas, nameof(formulas));
 
 			var serializer = new RuntimeModelSerializer();
-			serializer.Serialize(model, stateFormulas);
+			serializer.Serialize(model, formulas);
 			return serializer.Load;
 
 
@@ -306,14 +306,14 @@ namespace SafetySharp.Runtime
 		{
 			// Note: If a model created by the returned delegate is used, old "stateFormulas" cannot be used anymore, because they
 			// might have parts of the "old" model (the one for which formulas have been instantiated in) in their closure.
-			// Use "model.ExecutableStateFormulas" instead!
+			// Use "model.Formulas" instead! The order should be preserved.
 			Requires.NotNull(model, nameof(model));
 
 			var serializer = new RuntimeModelSerializer();
-			Func<Formula[], Func<SafetySharpRuntimeModel>> loader = stateFormulas =>
+			Func<Formula[], Func<SafetySharpRuntimeModel>> loader = formulas =>
 			{
-				Requires.NotNull(stateFormulas, nameof(stateFormulas));
-				serializer.Serialize(model, stateFormulas);
+				Requires.NotNull(formulas, nameof(formulas));
+				serializer.Serialize(model, formulas);
 				return serializer.Load;
 			};
 			return loader;

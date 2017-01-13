@@ -141,7 +141,7 @@ namespace SafetySharp.Analysis
 			{
 				using (var modelFile = new TemporaryFile("ssharp"))
 				{
-					File.WriteAllBytes(modelFile.FilePath, RuntimeModelSerializer.Save(model.Model, model.ExecutableStateFormulas));
+					File.WriteAllBytes(modelFile.FilePath, RuntimeModelSerializer.Save(model.Model, model.Formulas));
 
 					try
 					{
