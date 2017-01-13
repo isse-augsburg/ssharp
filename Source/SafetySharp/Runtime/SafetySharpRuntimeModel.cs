@@ -102,7 +102,6 @@ namespace SafetySharp.Runtime
 			: base(0)
 		{
 			Model = model;
-			RootComponents = model.Roots.Cast<Component>().ToArray();
 		}
 
 		/// <summary>
@@ -333,9 +332,13 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(model, nameof(model));
 
 			var serializer = new RuntimeModelSerializer();
+			var alreadyCreated = false;
+
 			Func<Formula[], Func<SafetySharpRuntimeModel>> loader = formulas =>
 			{
 				Requires.NotNull(formulas, nameof(formulas));
+				Requires.That(!alreadyCreated, $"{nameof(CreateExecutedModelFromFormulasCreator)} may only be called once, because the first run of serializer binds the model");
+				alreadyCreated = true;
 				serializer.Serialize(model, formulas);
 				return serializer.Load;
 			};

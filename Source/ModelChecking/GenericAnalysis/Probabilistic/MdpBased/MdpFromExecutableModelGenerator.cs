@@ -105,8 +105,9 @@ namespace SafetySharp.Analysis
 			var stateFormulas = stateFormulaCollector.AtomarPropositionFormulas.ToArray();
 
 			ExecutedModel<TExecutableModel> model = null;
+			Func<TExecutableModel> modelCreator = _runtimeModelCreator(stateFormulas);
 			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
-				model = new LtmdpExecutedModel<TExecutableModel>(_runtimeModelCreator(stateFormulas), Configuration.SuccessorCapacity);
+				model = new LtmdpExecutedModel<TExecutableModel>(modelCreator, Configuration.SuccessorCapacity);
 
 			return GenerateMarkovDecisionProcess(createAnalysisModel, terminateEarlyCondition, stateFormulas);
 		}
