@@ -32,7 +32,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		private Robot _position;
 
-		public Workpiece LoadedWorkpiece;
+        [Reliability(120)]
+        public Fault Broken = new TransientFault();
+
+        public Workpiece LoadedWorkpiece;
 		public Fault Lost = new TransientFault(); // intolerable fault
 
 		public Cart(Robot startPosition, params Route[] routes)
@@ -91,7 +94,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			broken.AddEffect<BrokenEffect>(this);
 		}
 
-		[FaultEffect, Priority(2)]
+		[FaultEffect(Fault = nameof(Broken)), Priority(2)]
 		internal class BrokenEffect : Cart
 		{
 			public override bool MoveTo(Robot robot) => false;
