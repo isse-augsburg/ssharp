@@ -23,16 +23,73 @@
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Linq;
+	using System.Reflection;
 	using Modeling;
 	using Modeling.Controllers.Reconfiguration;
+	using Modeling.Plants;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 
 	public class SimulationTests
 	{
-		[Test]
+
+        internal class ProfileBasedSimulator
+        {
+            private Model model { get; set; }
+            Tuple<Fault, ReliabilityAttribute>[] faults;
+            private Simulator Simulator;
+
+            public ProfileBasedSimulator(Model model)
+            {
+                Simulator = new Simulator(model);
+                this.model = (Model)Simulator.Model;
+                CollectFaults();
+            }
+
+            private void CollectFaults()
+            {
+                var faultInfo = new HashSet<Tuple<Fault, ReliabilityAttribute>>();
+                model.VisitPostOrder(component =>
+                {
+                    var faultFields =
+                        from faultField in component.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
+                        where typeof(Fault).IsAssignableFrom(faultField.FieldType)
+                        select Tuple.Create((Fault)faultField.GetValue(component), faultField.GetCustomAttribute<ReliabilityAttribute>());
+
+                    foreach (var info in faultFields)
+                        faultInfo.Add(info);
+                });
+
+                faults = faultInfo.ToArray();
+            }
+
+            public void Simulate(int numberOfSteps)
+            {
+                var rd = new Random();
+                for (var x = 0; x < numberOfSteps; x++)
+                {
+                    foreach (var fault in this.faults)
+                    {
+                        if (fault.Item2?.Lambda > 0 && !fault.Item1.IsActivated && rd.NextDouble() <= 1 - Math.Exp(-1 * fault.Item2.Lambda * x))
+                        {
+                            fault.Item1.ForceActivation();
+                        }
+                    }
+                    Simulator.SimulateStep();
+
+                }
+               
+            }
+
+
+        }
+
+
+        [Test]
 		public void Simulate()
 		{
 			var model = SampleModels.DefaultInstance<FastController>();
@@ -42,7 +99,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			PrintTrace(simulator, steps: 120);
 		}
 
-		public static void PrintTrace(Simulator simulator, int steps)
+        [Test]
+        public void SimulateProfileBased()
+        {
+            var model = SampleModels.DefaultInstance<FastController>();
+            model.Faults.SuppressActivations();
+            var profileBasedSimulator = new ProfileBasedSimulator(model);
+            profileBasedSimulator.Simulate(numberOfSteps: 10000);
+        }
+
+        public static void PrintTrace(Simulator simulator, int steps)
 		{
 			var model = (Model)simulator.Model;
 
