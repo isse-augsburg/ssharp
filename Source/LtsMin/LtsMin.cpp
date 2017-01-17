@@ -65,6 +65,7 @@ using namespace SafetySharp::Analysis::ModelChecking;
 using namespace SafetySharp::Analysis::ModelChecking::Transitions;
 using namespace SafetySharp::Runtime;
 using namespace SafetySharp::Runtime::Serialization;
+using namespace ISSE::ModelChecking::ExecutableModel;
 
 //---------------------------------------------------------------------------------------------------------------------------
 // Assembly metadata
@@ -125,13 +126,23 @@ SafetySharpRuntimeModel^ CreateModel()
 	return Globals::RuntimeModel;
 }
 
+CoupledExecutableModelCreator<SafetySharpRuntimeModel^>^ CreateModelCreator()
+{
+	auto createModelFunc = gcnew Func<SafetySharpRuntimeModel^>(&CreateModel);
+	auto model = Globals::RuntimeModel->Model;
+	auto formulas = Globals::RuntimeModel->Formulas;
+	auto creator = gcnew CoupledExecutableModelCreator<SafetySharpRuntimeModel^>(createModelFunc,model,formulas);
+	return creator;
+}
+
+
 void LoadModel(model_t model, const char* modelFile)
 {
 	try
 	{
 		auto modelData = RuntimeModelSerializer::LoadSerializedData(File::ReadAllBytes(gcnew String(modelFile)));
 		Globals::RuntimeModel = gcnew SafetySharpRuntimeModel(modelData, sizeof(int32_t));
-		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel<SafetySharpRuntimeModel^>(gcnew Func<SafetySharpRuntimeModel^>(&CreateModel), gcnew array<Func<bool>^>(0), 1 << 16);
+		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel<SafetySharpRuntimeModel^>(CreateModelCreator(), gcnew array<Func<bool>^>(0), 1 << 16);
 
 		auto stateSlotCount = (int32_t)(Globals::RuntimeModel->StateVectorSize / sizeof(int32_t));
 		auto stateLabelCount = Globals::RuntimeModel->ExecutableStateFormulas->Length;

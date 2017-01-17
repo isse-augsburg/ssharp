@@ -23,6 +23,7 @@
 namespace SafetySharp.Analysis.ModelChecking
 {
 	using System;
+	using ISSE.ModelChecking.ExecutableModel;
 	using Runtime;
 	using Transitions;
 	using Utilities;
@@ -51,7 +52,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
 		///   <see cref="AnalysisModel" />.
 		/// </summary>
-		public abstract Func<TExecutableModel> RuntimeModelCreator { get; }
+		public abstract CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   Gets all initial transitions of the model.

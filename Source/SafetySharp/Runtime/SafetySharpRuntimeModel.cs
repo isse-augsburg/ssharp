@@ -30,6 +30,7 @@ namespace SafetySharp.Runtime
 	using System.Runtime.Serialization.Formatters.Binary;
 	using Analysis;
 	using CompilerServices;
+	using ISSE.ModelChecking.ExecutableModel;
 	using Modeling;
 	using Serialization;
 	using Utilities;
@@ -91,17 +92,6 @@ namespace SafetySharp.Runtime
 			
 			InitializeConstructionState();
 			CheckConsistencyAfterInitialization();
-		}
-
-
-		/// <summary>
-		///   Initializes a new instance, which encapsulates ModelBase. It does not work on its own. The resulting
-		///   class only provides a working DeriveExecutableModelGenerator. Other methods should not be executed!
-		/// </summary>
-		private SafetySharpRuntimeModel(ModelBase model)
-			: base(0)
-		{
-			Model = model;
 		}
 
 		/// <summary>
@@ -283,17 +273,7 @@ namespace SafetySharp.Runtime
 			serializer.Serialize(model, formulas);
 			return serializer.Load();
 		}
-
-		/// <summary>
-		///   Initializes a new instance, which encapsulates ModelBase. It does not work on its own. The resulting
-		///   class only provides a working DeriveExecutableModelGenerator. Other methods should not be executed!
-		/// </summary>
-		internal static SafetySharpRuntimeModel CreateEncapsulateModelBase(ModelBase model)
-		{
-			Requires.NotNull(model, nameof(model));
-
-			return new SafetySharpRuntimeModel(model);
-		}
+		
 
 		internal override void SetChoiceResolver(ChoiceResolver choiceResolver)
 		{
@@ -304,36 +284,35 @@ namespace SafetySharp.Runtime
 		public override CounterExampleSerialization<SafetySharpRuntimeModel> CounterExampleSerialization { get; } = new SafetySharpCounterExampleSerialization();
 		
 
-		public static Func<SafetySharpRuntimeModel> CreateExecutedModelCreator(ModelBase model, params Formula[] formulas)
+		public static CoupledExecutableModelCreator<SafetySharpRuntimeModel> CreateExecutedModelCreator(ModelBase model, params Formula[] formulasToCheckInBaseModel)
 		{
-			// Note: If a model created by the returned delegate is used, old "stateFormulas" cannot be used anymore, because they
-			// might have parts of the "old" model (the one for which formulas have been instantiated in) in their closure.
-			// Use "model.Formulas" instead! The order should be preserved.
 			Requires.NotNull(model, nameof(model));
-			Requires.NotNull(formulas, nameof(formulas));
+			Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
 
-			return CreateExecutedModelFromFormulasCreator(model)(formulas);
+			Func<SafetySharpRuntimeModel> creatorFunc;
+
+			// serializer.Serialize has potentially a side effect: Model binding. The model gets bound when it isn't
+			// bound already. The lock ensures that this binding is only made by one thread.
+			lock (model)
+			{
+				var serializer = new RuntimeModelSerializer();
+				serializer.Serialize(model, formulasToCheckInBaseModel); //has a side effect: Model binding!
+				creatorFunc = serializer.Load;
+			}
+
+			return new CoupledExecutableModelCreator<SafetySharpRuntimeModel>(creatorFunc, model, formulasToCheckInBaseModel);
 		}
 
-		public static Func<Formula[], Func<SafetySharpRuntimeModel>> CreateExecutedModelFromFormulasCreator(ModelBase model)
+		public static ExecutableModelCreator<SafetySharpRuntimeModel> CreateExecutedModelFromFormulasCreator(ModelBase model)
 		{
-			// Note: If a model created by the returned delegate is used, old "stateFormulas" cannot be used anymore, because they
-			// might have parts of the "old" model (the one for which formulas have been instantiated in) in their closure.
-			// Use "model.Formulas" instead! The order should be preserved.
 			Requires.NotNull(model, nameof(model));
-
-			var serializer = new RuntimeModelSerializer();
-			var alreadyCreated = false;
-
-			Func<Formula[], Func<SafetySharpRuntimeModel>> loader = formulas =>
+			
+			Func<Formula[],CoupledExecutableModelCreator <SafetySharpRuntimeModel>> creator = formulasToCheckInBaseModel =>
 			{
-				Requires.NotNull(formulas, nameof(formulas));
-				Requires.That(!alreadyCreated, $"{nameof(CreateExecutedModelFromFormulasCreator)} may only be called once, because the first run of serializer binds the model");
-				alreadyCreated = true;
-				serializer.Serialize(model, formulas); //has a side effect: Model binding!
-				return serializer.Load;
+				Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
+				return CreateExecutedModelCreator(model, formulasToCheckInBaseModel);
 			};
-			return loader;
+			return new ExecutableModelCreator<SafetySharpRuntimeModel>(creator, model);
 		}
 
 		public override Expression CreateExecutableExpressionFromAtomarPropositionFormula(AtomarPropositionFormula formula)

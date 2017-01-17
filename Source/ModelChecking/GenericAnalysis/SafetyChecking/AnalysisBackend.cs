@@ -24,6 +24,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 {
 	using System;
 	using System.Linq;
+	using ISSE.ModelChecking.ExecutableModel;
 	using Modeling;
 	using Runtime;
 	using Utilities;
@@ -36,7 +37,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 	{
 		protected FaultSet ForcedFaults { get; private set; }
 		protected TExecutableModel RuntimeModel { get; private set; }
-		protected Func<TExecutableModel> RuntimeModelCreator { get; private set; }
+		protected CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator { get; private set; }
 		protected FaultSet SuppressedFaults { get; private set; }
 
 		/// <summary>
@@ -46,7 +47,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// <param name="createFreshModel">The creator for the model that should be checked.</param>
 		/// <param name="runtimeModel">The concrete model instance that should be analyzed (shared with caller).</param>
 		/// <param name="hazard">The hazard that should be analyzed.</param>
-		internal void InitializeModel(AnalysisConfiguration configuration, Func<TExecutableModel> createFreshModel, TExecutableModel runtimeModel, Formula hazard)
+		internal void InitializeModel(AnalysisConfiguration configuration, CoupledExecutableModelCreator<TExecutableModel> createFreshModel, TExecutableModel runtimeModel, Formula hazard)
 		{
 			RuntimeModel = runtimeModel;
 			RuntimeModelCreator = createFreshModel;

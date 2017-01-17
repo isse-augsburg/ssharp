@@ -24,6 +24,7 @@ namespace SafetySharp.Analysis.ModelChecking
 {
 	using System;
 	using System.Threading;
+	using ISSE.ModelChecking.ExecutableModel;
 	using ModelTraversal;
 	using Runtime;
 	using Transitions;
@@ -61,7 +62,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   the state graph is generated for.
 		/// </param>
 		internal StateGraph(TraversalContext<TExecutableModel> context, int transitionSizeInBytes,
-							TExecutableModel model, Func<TExecutableModel> createModel)
+							TExecutableModel model, CoupledExecutableModelCreator<TExecutableModel> createModel)
 		{
 			Requires.NotNull(context, nameof(context));
 			
@@ -88,7 +89,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly represented by this
 		///   <see cref="StateGraph" />.
 		/// </summary>
-		public Func<TExecutableModel> RuntimeModelCreator { get; }
+		public CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   Gets the size of a single transition of the state graph in bytes.

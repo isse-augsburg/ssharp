@@ -33,9 +33,9 @@ namespace SafetySharp.Analysis
 	using Runtime.Serialization;
 	using Utilities;
 	using ModelChecking;
-	/// <summary>
-	///   Represents the LtsMin model checker.
-	/// </summary>
+	using ISSE.ModelChecking.ExecutableModel;   /// <summary>
+												///   Represents the LtsMin model checker.
+												/// </summary>
 	public class LtsMin
 	{
 		/// <summary>
@@ -56,11 +56,11 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />.
 		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
+		/// <param name="createModel">The creator for the model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		internal AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(SafetySharpRuntimeModel model, Formula invariant)
+		internal AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula invariant)
 		{
-			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(invariant, nameof(invariant));
 
 			var visitor = new IsStateFormulaVisitor();
@@ -72,19 +72,19 @@ namespace SafetySharp.Analysis
 			var transformationVisitor = new LtsMinLtlTransformer();
 			transformationVisitor.Visit(invariant);
 
-			return Check(model, invariant,
+			return Check(createModel,
 				$"--invariant=\"({ConstructionStateName} == 1) || ({transformationVisitor.TransformedFormula})\"");
 		}
-		
+
 
 		/// <summary>
 		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />.
 		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
+		/// <param name="createModel">The creator for the model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public AnalysisResult<SafetySharpRuntimeModel> Check(SafetySharpRuntimeModel model, Formula formula)
+		public AnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
-			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(formula, nameof(formula));
 
 			var visitor = new IsLtlFormulaVisitor();
@@ -96,7 +96,7 @@ namespace SafetySharp.Analysis
 			var transformationVisitor = new LtsMinLtlTransformer();
 			transformationVisitor.Visit(new UnaryFormula(formula, UnaryOperator.Next));
 			
-			return Check(model,  formula, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
+			return Check(createModel, $"--ltl=\"{transformationVisitor.TransformedFormula}\"");
 		}
 
 		/// <summary>
@@ -121,15 +121,15 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />.
 		/// </summary>
-		/// <param name="model">The model that should be checked.</param>
+		/// <param name="createModel">The creator for the model that should be checked.</param>
 		/// <param name="checkArgument">The argument passed to LtsMin that indicates which kind of check to perform.</param>
-		private AnalysisResult<SafetySharpRuntimeModel> Check(SafetySharpRuntimeModel model, Formula formula, string checkArgument)
+		private AnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, string checkArgument)
 		{
 			try
 			{
 				using (var modelFile = new TemporaryFile("ssharp"))
 				{
-					File.WriteAllBytes(modelFile.FilePath, RuntimeModelSerializer.Save(model.Model, formula));
+					File.WriteAllBytes(modelFile.FilePath, RuntimeModelSerializer.Save((ModelBase)createModel.SourceModel, createModel.StateFormulasToCheckInBaseModel));
 
 					try
 					{

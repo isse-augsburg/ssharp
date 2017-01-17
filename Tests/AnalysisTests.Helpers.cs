@@ -61,16 +61,18 @@ namespace Tests
 		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var model = SafetySharpRuntimeModel.CreateEncapsulateModelBase(TestModel.InitializeModel(components));
+			var model = TestModel.InitializeModel(components);
 
 			if (Arguments.Length > 1 && (bool)Arguments[1])
 			{
-				var results = modelChecker.CheckInvariants(model, invariant);
+				var modelFromFormulasGenerator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+				var results = modelChecker.CheckInvariants(modelFromFormulasGenerator, invariant);
 				CounterExample = results[0].CounterExample;
 				return results[0].FormulaHolds;
 			}
 
-			Result = modelChecker.CheckInvariant(model, invariant);
+			var modelGenerator = SafetySharpRuntimeModel.CreateExecutedModelCreator(model,invariant);
+			Result = modelChecker.CheckInvariant(modelGenerator, 0);
 			CounterExample = Result.CounterExample;
 			return Result.FormulaHolds;
 		}
@@ -88,7 +90,7 @@ namespace Tests
 		protected bool Check(Formula formula, params IComponent[] components)
 		{
 			var modelChecker = CreateModelChecker();
-			var modelCreator = SafetySharpRuntimeModel.CreateEncapsulateModelBase(TestModel.InitializeModel(components));
+			var modelCreator = TestModel.InitializeModel(components);
 			var result = modelChecker.Check(modelCreator, formula);
 
 			CounterExample = result.CounterExample;
@@ -151,7 +153,7 @@ namespace Tests
 			return DccaWithMaxCardinality(model, hazard, Int32.MaxValue);
 		}
 
-		private dynamic CreateModelChecker()
+		private LtsMin CreateModelChecker()
 		{
 			// QualitativeChecker<SafetySharpRuntimeModel>
 			// LtsMin

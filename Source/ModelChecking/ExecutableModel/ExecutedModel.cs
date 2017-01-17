@@ -23,6 +23,7 @@
 namespace SafetySharp.Analysis.ModelChecking
 {
 	using System;
+	using ISSE.ModelChecking.ExecutableModel;
 	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
@@ -38,12 +39,12 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="createModel">A factory function that creates the model instance that should be executed.</param>
-		internal ExecutedModel(Func<TExecutableModel> createModel)
+		internal ExecutedModel(CoupledExecutableModelCreator<TExecutableModel> createModel)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 
 			RuntimeModelCreator = createModel;
-			RuntimeModel = createModel();
+			RuntimeModel = createModel.Create();
 		}
 
 		/// <summary>
@@ -65,7 +66,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
 		///   <see cref="AnalysisModel" />.
 		/// </summary>
-		public sealed override Func<TExecutableModel> RuntimeModelCreator { get; }
+		public sealed override CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   Gets or sets the choice resolver that is used to resolve choices within the model.

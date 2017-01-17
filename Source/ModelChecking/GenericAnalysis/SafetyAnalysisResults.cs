@@ -32,6 +32,8 @@ namespace SafetySharp.Analysis
 	using Runtime;
 	using Utilities;
 	using Analysis;
+	using ISSE.ModelChecking.ExecutableModel;
+
 	/// <summary>
 	///   Represents the result of a <see cref="SafetyAnalysis" />.
 	/// </summary>
@@ -47,7 +49,7 @@ namespace SafetySharp.Analysis
 		/// <param name="forcedFaults">The faults whose activations have been forced during analysis.</param>
 		/// <param name="heuristics">The heuristics that are used during the analysis.</param>
 		/// <param name="activationBehavior">The fault acitvation behavior used during the analysis.</param>
-		internal SafetyAnalysisResults(Func<TExecutableModel> createModel, TExecutableModel runtimeModel, Formula hazard,
+		internal SafetyAnalysisResults(CoupledExecutableModelCreator<TExecutableModel> createModel, TExecutableModel runtimeModel, Formula hazard,
 									  IEnumerable<Fault> suppressedFaults, IEnumerable<Fault> forcedFaults,
 									  IEnumerable<IFaultSetHeuristic> heuristics, FaultActivationBehavior activationBehavior)
 		{
@@ -110,7 +112,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///    The creator for the model that should be checked.
 		/// </summary>
-		public Func<TExecutableModel> RuntimeModelCreator { get; }
+		public CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   Gets the <see cref="RuntimeModel" /> instance the safety analysis was conducted for.

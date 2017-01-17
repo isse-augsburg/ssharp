@@ -25,6 +25,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System;
 	using System.Linq;
 	using System.Runtime.InteropServices;
+	using ISSE.ModelChecking.ExecutableModel;
 	using Runtime;
 	using Transitions;
 	using Utilities;
@@ -69,7 +70,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
 		///   <see cref="AnalysisModel" />.
 		/// </summary>
-		public override Func<TExecutableModel> RuntimeModelCreator => _stateGraph.RuntimeModelCreator;
+		public override CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator => _stateGraph.RuntimeModelCreator;
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.

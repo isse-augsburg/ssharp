@@ -29,6 +29,7 @@ namespace SafetySharp.Analysis
 	using System.Runtime.CompilerServices;
 	using FormulaVisitors;
 	using Heuristics;
+	using ISSE.ModelChecking.ExecutableModel;
 	using Modeling;
 	using Runtime;
 	using SafetyChecking;
@@ -92,7 +93,7 @@ namespace SafetySharp.Analysis
 		///   critical fault sets are determined.
 		/// </param>
 		/// <param name="backend">Determines the safety analysis backend that is used during the analysis.</param>
-		public static SafetyAnalysisResults<TExecutableModel> AnalyzeHazard(Func<TExecutableModel> createModel, Formula hazard, int maxCardinality = Int32.MaxValue,
+		public static SafetyAnalysisResults<TExecutableModel> AnalyzeHazard(CoupledExecutableModelCreator<TExecutableModel> createModel, Formula hazard, int maxCardinality = Int32.MaxValue,
 														  SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
 		{
 			return new SafetyAnalysis<TExecutableModel> { Backend = backend }.ComputeMinimalCriticalSets(createModel, hazard, maxCardinality);
@@ -107,7 +108,7 @@ namespace SafetySharp.Analysis
 		///   The maximum cardinality of the fault sets that should be checked. By default, all minimal
 		///   critical fault sets are determined.
 		/// </param>
-		public SafetyAnalysisResults<TExecutableModel> ComputeMinimalCriticalSets(Func<TExecutableModel> createModel, Formula hazard, int maxCardinality = Int32.MaxValue)
+		public SafetyAnalysisResults<TExecutableModel> ComputeMinimalCriticalSets(CoupledExecutableModelCreator<TExecutableModel> createModel, Formula hazard, int maxCardinality = Int32.MaxValue)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(hazard, nameof(hazard));
@@ -118,7 +119,7 @@ namespace SafetySharp.Analysis
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var runtimeModel = createModel();
+			var runtimeModel = createModel.Create();
 			hazard = TransferFormulaToNewExecutedModelInstanceVisitor.Transfer(runtimeModel,hazard);
 
 			var allFaults = runtimeModel.Faults;

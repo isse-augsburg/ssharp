@@ -25,6 +25,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System;
 	using System.Linq;
 	using FormulaVisitors;
+	using ISSE.ModelChecking.ExecutableModel;
 	using Modeling;
 	using Runtime;
 	using Transitions;
@@ -52,7 +53,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal LtmcExecutedModel(Func<TExecutableModel> runtimeModelCreator, long successorStateCapacity)
+		internal LtmcExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, long successorStateCapacity)
 			: base(runtimeModelCreator)
 		{
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();

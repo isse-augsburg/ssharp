@@ -29,6 +29,7 @@ namespace SafetySharp.Runtime
 	using System.Linq.Expressions;
 	using System.Runtime.CompilerServices;
 	using Analysis;
+	using ISSE.ModelChecking.ExecutableModel;
 	using Modeling;
 	using Serialization;
 	using Utilities;
@@ -219,14 +220,14 @@ namespace SafetySharp.Runtime
 		///   transitions could be generated for the model.
 		/// </param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		public CounterExample<TExecutableModel> CreateCounterExample(Func<TExecutableModel> createModel, byte[][] path, bool endsWithException)
+		public CounterExample<TExecutableModel> CreateCounterExample(CoupledExecutableModelCreator<TExecutableModel> createModel, byte[][] path, bool endsWithException)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 
 			// We have to create new model instances to generate and initialize the counter example, otherwise hidden
 			// state variables might prevent us from doing so if they somehow influence the state
-			var replayModel = createModel();
-			var counterExampleModel = createModel();
+			var replayModel = createModel.Create();
+			var counterExampleModel = createModel.Create();
 			var choiceResolver = new NondeterministicChoiceResolver();
 
 			replayModel.SetChoiceResolver(choiceResolver);

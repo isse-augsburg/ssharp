@@ -33,6 +33,7 @@ namespace SafetySharp.Analysis
 	using System.Threading;
 	using System.Threading.Tasks;
 	using FormulaVisitors;
+	using ISSE.ModelChecking.ExecutableModel;
 	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
@@ -47,7 +48,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		public event Action<string> OutputWritten = Console.WriteLine;
 
-		private readonly Func<Formula[], Func<TExecutableModel>> _runtimeModelCreator;
+		private readonly ExecutableModelCreator<TExecutableModel> _runtimeModelCreator;
 		private readonly List<Formula> _formulasToCheck = new List<Formula>();
 
 		public IEnumerable<Formula> FormulasToCheck => _formulasToCheck;
@@ -61,7 +62,7 @@ namespace SafetySharp.Analysis
 
 		// Create Tasks which make the checks (workers)
 		// First formulas to check are collected (thus, the probability matrix only has to be calculated once)
-		public MdpFromExecutableModelGenerator(Func<Formula[], Func<TExecutableModel>> runtimeModelCreator)
+		public MdpFromExecutableModelGenerator(ExecutableModelCreator<TExecutableModel> runtimeModelCreator)
 		{
 			Requires.NotNull(runtimeModelCreator, nameof(runtimeModelCreator));
 			_runtimeModelCreator = runtimeModelCreator;
@@ -105,7 +106,7 @@ namespace SafetySharp.Analysis
 			var stateFormulas = stateFormulaCollector.AtomarPropositionFormulas.ToArray();
 
 			ExecutedModel<TExecutableModel> model = null;
-			Func<TExecutableModel> modelCreator = _runtimeModelCreator(stateFormulas);
+			var modelCreator = _runtimeModelCreator.CreateCoupledModelCreator(stateFormulas);
 			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
 				model = new LtmdpExecutedModel<TExecutableModel>(modelCreator, Configuration.SuccessorCapacity);
 

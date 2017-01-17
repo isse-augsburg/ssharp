@@ -25,6 +25,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System;
 	using System.Linq;
 	using FormulaVisitors;
+	using ISSE.ModelChecking.ExecutableModel;
 	using Modeling;
 	using Runtime;
 	using Transitions;
@@ -44,7 +45,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ActivationMinimalExecutedModel(Func<TExecutableModel> runtimeModelCreator, long successorStateCapacity)
+		internal ActivationMinimalExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, long successorStateCapacity)
 			: this(runtimeModelCreator, null, successorStateCapacity)
 		{
 		}
@@ -55,7 +56,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="formulas">The formulas that should be evaluated for each state.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ActivationMinimalExecutedModel(Func<TExecutableModel> runtimeModelCreator, Func<bool>[] formulas, long successorStateCapacity)
+		internal ActivationMinimalExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, Func<bool>[] formulas, long successorStateCapacity)
 			: base(runtimeModelCreator)
 		{
 			formulas = formulas ?? RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel,formula)).ToArray();
