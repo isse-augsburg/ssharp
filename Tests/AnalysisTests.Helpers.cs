@@ -91,8 +91,8 @@ namespace Tests
 			analysisTestsVariant.CreateModelChecker(SuppressCounterExampleGeneration, logAction);
 
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(TestModel.InitializeModel(component));
-			//var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(component), invariants);
-			var results = (AnalysisResult<SafetySharpRuntimeModel>[])analysisTestsVariant.CheckInvariants(modelCreator, invariants);
+
+			var results = analysisTestsVariant.CheckInvariants(modelCreator, invariants);
 			CounterExamples = results.Select(result => result.CounterExample).ToArray();
 			return results.Select(result => result.FormulaHolds).ToArray();
 		}

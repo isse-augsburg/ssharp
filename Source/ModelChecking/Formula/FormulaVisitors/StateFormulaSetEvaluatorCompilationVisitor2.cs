@@ -56,8 +56,21 @@ namespace SafetySharp.Analysis.FormulaVisitors
 			for (var i=0;i<_formulasToCheck.Length;i++)
 			{
 				var formulaAsString = ToStringVisitor.FormulaToString(_formulasToCheck[i]);
-				_formulasToCheckIndex.Add(formulaAsString,i);
+				if (!_formulasToCheckIndex.ContainsKey(formulaAsString))
+				{
+					_formulasToCheckIndex.Add(formulaAsString, i);
+				}
+				else
+				{
+					SameFormulaGetsEvaluatedMoreOften();
+				}
 			}
+		}
+
+		[System.Diagnostics.Conditional("DEBUG")]
+		public void SameFormulaGetsEvaluatedMoreOften()
+		{
+			Console.WriteLine("A state formula gets evaluated more than once. This might be inefficient.");
 		}
 
 		/// <summary>
