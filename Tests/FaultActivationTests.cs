@@ -37,7 +37,7 @@ namespace Tests
 		[Theory, MemberData(nameof(DiscoverTests), "FaultActivation/Formulas")]
 		public void Formulas(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(QualitativeChecker<SafetySharpRuntimeModel>));
+			ExecuteDynamicTests(file, new AnalysisTestsWithQualitative());
 		}
 	}
 }

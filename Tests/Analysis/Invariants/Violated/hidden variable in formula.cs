@@ -34,7 +34,7 @@ namespace Tests.Analysis.Invariants.Violated
 			var c = new C();
 			Formula fUnequalZero = c.F != 0;
 
-			if ((Type)Arguments[0] != typeof(LtsMin))
+			if (Arguments[0].GetType() != typeof(AnalysisTestsWithLtsMin))
 				CheckInvariant(fUnequalZero, c).ShouldBe(false);
 		}
 

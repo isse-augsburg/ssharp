@@ -49,6 +49,7 @@
     <Compile Include="AnalysisConfiguration.cs" />
     <Compile Include="AnalysisModel.cs" />
     <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
+    <Compile Include="Formula\FormulaVisitors\IsFormulasStructurallyEquivalentVisitor.cs" />
     <Compile Include="Formula\FormulaVisitors\TransferFormulaToNewExecutedModelInstanceVisitor .cs" />
     <Compile Include="Formula\FormulaVisitors\CollectAtomarPropositionFormulasVisitor.cs" />
     <Compile Include="GenericAnalysis\AnalysisException.cs" />

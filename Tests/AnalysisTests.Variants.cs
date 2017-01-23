@@ -27,6 +27,7 @@ namespace Tests
 	using System.Linq;
 	using ISSE.ModelChecking.ExecutableModel;
 	using SafetySharp.Analysis;
+	using SafetySharp.Analysis.FormulaVisitors;
 	using SafetySharp.ModelChecking;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
@@ -126,27 +127,14 @@ namespace Tests
 
 		public override AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
-			var invariantExecutableStateFormula = formula as ExecutableStateFormula;
-			var label = "";
-			if (invariantExecutableStateFormula != null)
-			{
-				label = invariantExecutableStateFormula.Label;
-			}
-			else
-			{
-				throw new Exception($"Input formula is not checked directly. Use {nameof(AnalysisTestsWithQualitative)} instead");
-			}
 			var formulaIndex = Array.FindIndex(createModel.StateFormulasToCheckInBaseModel, stateFormula =>
 				{
-					var executableStateFormula = stateFormula as ExecutableStateFormula;
-					if (executableStateFormula != null)
-					{
-						if (executableStateFormula.Label == label)
-							return true;
-					}
-					return false;
+					var isEqual=IsFormulasStructurallyEquivalentVisitor.Compare(stateFormula, formula);
+					return isEqual;
 				}
 			);
+			if (formulaIndex==-1)
+				throw new Exception($"Input formula is not checked directly. Use {nameof(AnalysisTestsWithQualitative)} instead");
 
 			return modelChecker.CheckInvariant(createModel, formulaIndex);
 		}
