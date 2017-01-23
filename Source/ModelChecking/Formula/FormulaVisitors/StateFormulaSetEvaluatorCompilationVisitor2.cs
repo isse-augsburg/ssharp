@@ -36,53 +36,74 @@ namespace SafetySharp.Analysis.FormulaVisitors
 	/// <summary>
 	///   Compiles a <see cref="Formula" /> if it does not contain any temporal operators.
 	/// </summary>
-	
-internal class LabelingVectorFormulaEvaluatorCompilationVisitor : FormulaVisitor
+	internal class StateFormulaSetEvaluatorCompilationVisitor2 : FormulaVisitor
 	{
 		/// <summary>
 		///   The expression that is being generated.
 		/// </summary>
 		private Expression _expression;
 
-		public ParameterExpression StateNumberParameterExpr { get; }
-
-		public ConstantExpression LabelingVectorExpr { get; }
+		private readonly Formula[] _formulasToCheck;
+		private readonly Dictionary<string, int> _formulasToCheckIndex=new Dictionary<string, int>();
 
 		public ParameterExpression LabelsOfCurrentStateExpr { get; }
-
-		private readonly IModelWithStateLabelingInLabelingVector _modelWithStateLabeling;
-
-		public LabelingVectorFormulaEvaluatorCompilationVisitor(IModelWithStateLabelingInLabelingVector model)
+		
+		public StateFormulaSetEvaluatorCompilationVisitor2(Formula[] formulasToCheck)
 		{
-			_modelWithStateLabeling = model;
-			StateNumberParameterExpr = Expression.Parameter(typeof(int), "state");
-			LabelingVectorExpr = Expression.Constant(_modelWithStateLabeling.StateLabeling);
+			_formulasToCheck = formulasToCheck;
 			LabelsOfCurrentStateExpr = Expression.Parameter(typeof(StateFormulaSet), "labelsOfCurrentState");
+
+			for (var i=0;i<_formulasToCheck.Length;i++)
+			{
+				var formulaAsString = ToStringVisitor.FormulaToString(_formulasToCheck[i]);
+				_formulasToCheckIndex.Add(formulaAsString,i);
+			}
 		}
 
 		/// <summary>
-		///   Compiles the <paramref name="formula" /> of the <paramref name="formalism" />.
+		///   Compiles the <paramref name="formula" /> for <paramref name="formulasToCheck" />.
 		/// </summary>
-		/// <param name="formalism"></param>
+		/// <param name="formulasToCheck"></param>
 		/// <param name="formula">The formula that should be compiled.</param>
-		public static Func<int, bool> Compile(IModelWithStateLabelingInLabelingVector formalism, Formula formula)
+		public static Func<StateFormulaSet,bool> Compile(Formula[] formulasToCheck, Formula formula)
 		{
 			Requires.NotNull(formula, nameof(formula));
 
-			var visitor = new LabelingVectorFormulaEvaluatorCompilationVisitor(formalism);
+			var visitor = new StateFormulaSetEvaluatorCompilationVisitor2(formulasToCheck);
 			visitor.Visit(formula);
 			
-			//var getMarkovChainState = visitor.MarkovChainExpr.Type.GetMethod("GetMarkovChainState", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-			//var markovChainStateExpr = Expression.Call(visitor.MarkovChainExpr, getMarkovChainState, visitor.StateStorageStateExpr); // = GetMarkovChainState(stateStorageState);
-			var indexer = visitor.LabelingVectorExpr.Type.GetProperty("Item", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-			var labelsOfCurrentStateExpr = Expression.Property(visitor.LabelingVectorExpr, indexer, visitor.StateNumberParameterExpr);
-			var setLabelsOfCurrentStateExpr = Expression.Assign(visitor.LabelsOfCurrentStateExpr, labelsOfCurrentStateExpr);
-
-			var codeOfLambda = Expression.Block(new[] { visitor.LabelsOfCurrentStateExpr }, setLabelsOfCurrentStateExpr, visitor._expression);
-
-			var lambda = Expression.Lambda<Func<int, bool>>(codeOfLambda, visitor.StateNumberParameterExpr).Compile();
+			var lambda = Expression.Lambda<Func<StateFormulaSet,bool>>(visitor._expression, visitor.LabelsOfCurrentStateExpr).Compile();
 
 			return lambda;
+		}
+
+		private void SetExpressionToIndex(int indexOfStateFormula)
+		{
+			var indexOfStateFormulaExpr = Expression.Constant(indexOfStateFormula);
+
+			var indexer = LabelsOfCurrentStateExpr.Type.GetProperty("Item", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+			_expression = Expression.Property(LabelsOfCurrentStateExpr, indexer, indexOfStateFormulaExpr);
+		}
+
+		private bool TryToFindFormulaInFormulasToCheck(Formula formula)
+		{
+			var formulaAsString = ToStringVisitor.FormulaToString(formula);
+			if (_formulasToCheckIndex.ContainsKey(formulaAsString))
+			{
+				var indexOfStateFormula = _formulasToCheckIndex[formulaAsString];
+				CheckIfIndexIsCorrect(formula, indexOfStateFormula);
+				SetExpressionToIndex(indexOfStateFormula);
+				return true;
+			}
+			return false;
+		}
+
+		[System.Diagnostics.Conditional("DEBUG")]
+		private void CheckIfIndexIsCorrect(Formula formula,int indexOfStateFormula)
+		{
+			var isequal=IsFormulasStructurallyEquivalentVisitor.Compare(formula, _formulasToCheck[indexOfStateFormula]);
+			if (!isequal)
+				throw new Exception("Should be equivalent. the index seems to be corrupt");
 		}
 
 		/// <summary>
@@ -90,6 +111,10 @@ internal class LabelingVectorFormulaEvaluatorCompilationVisitor : FormulaVisitor
 		/// </summary>
 		public override void VisitUnaryFormula(UnaryFormula formula)
 		{
+			if (TryToFindFormulaInFormulasToCheck(formula))
+			{
+				return;
+			}
 			switch (formula.Operator)
 			{
 				case UnaryOperator.Not:
@@ -106,6 +131,11 @@ internal class LabelingVectorFormulaEvaluatorCompilationVisitor : FormulaVisitor
 		/// </summary>
 		public override void VisitBinaryFormula(BinaryFormula formula)
 		{
+			if (TryToFindFormulaInFormulasToCheck(formula))
+			{
+				return;
+			}
+
 			Visit(formula.LeftOperand);
 			var left = _expression;
 
@@ -140,21 +170,18 @@ internal class LabelingVectorFormulaEvaluatorCompilationVisitor : FormulaVisitor
 			}
 		}
 
+
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
 		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
-			// Idea:
-			//  var indexOfStateFormula = Array.IndexOf(_markovChain.StateFormulaLabels, formula.Label);
-			//  var result = _markovChain.StateLabeling[StateParameter][indexOfStateFormula];
+			if (TryToFindFormulaInFormulasToCheck(formula))
+			{
+				return;
+			}
 
-			var indexOfStateFormula = Array.IndexOf(_modelWithStateLabeling.StateFormulaLabels, formula.Label);
-			var indexOfStateFormulaExpr = Expression.Constant(indexOfStateFormula);
-
-			var indexer = LabelsOfCurrentStateExpr.Type.GetProperty("Item", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-			_expression = Expression.Property(LabelsOfCurrentStateExpr, indexer, indexOfStateFormulaExpr);
-			//_expression = Expression.ArrayAccess(LabelsOfCurrentStateExpr, indexOfStateFormulaExpr);
+			throw new Exception($"Neither formula nor any of its parents could be found in {nameof(_formulasToCheck)}");
 		}
 
 		/// <summary>

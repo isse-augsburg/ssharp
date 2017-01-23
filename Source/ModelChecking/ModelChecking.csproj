@@ -50,6 +50,7 @@
     <Compile Include="AnalysisModel.cs" />
     <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
     <Compile Include="Formula\FormulaVisitors\IsFormulasStructurallyEquivalentVisitor.cs" />
+    <Compile Include="Formula\FormulaVisitors\StateFormulaSetEvaluatorCompilationVisitor2.cs" />
     <Compile Include="Formula\FormulaVisitors\TransferFormulaToNewExecutedModelInstanceVisitor .cs" />
     <Compile Include="Formula\FormulaVisitors\CollectAtomarPropositionFormulasVisitor.cs" />
     <Compile Include="GenericAnalysis\AnalysisException.cs" />
@@ -124,7 +125,7 @@
     <Compile Include="GenericAnalysis\Probabilistic\PrismProcess.cs" />
     <Compile Include="GenericAnalysis\Probabilistic\RewardRetrieverCollector.cs" />
     <Compile Include="GenericAnalysis\Probabilistic\SparseDoubleMatrix.cs" />
-    <Compile Include="GenericAnalysis\Probabilistic\StateFormulaSetEvaluatorCompilationVisitor.cs" />
+    <Compile Include="Formula\FormulaVisitors\StateFormulaSetEvaluatorCompilationVisitor.cs" />
     <Compile Include="GenericAnalysis\QualitativeChecker.cs" />
     <Compile Include="GenericAnalysis\SafetyAnalysis.cs" />
     <Compile Include="GenericAnalysis\SafetyAnalysisBackend.cs" />

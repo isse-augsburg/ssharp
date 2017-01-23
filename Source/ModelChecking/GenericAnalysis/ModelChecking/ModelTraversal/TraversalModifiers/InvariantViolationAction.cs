@@ -39,9 +39,9 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="formula">The analyzed formula.</param>
-		public InvariantViolationAction(string[] labels, Formula formula)
+		public InvariantViolationAction(Formula[] formulasToCheck, Formula formula)
 		{
-			_evaluator= StateFormulaSetEvaluatorCompilationVisitor.Compile(labels, formula);
+			_evaluator = StateFormulaSetEvaluatorCompilationVisitor2.Compile(formulasToCheck, formula);
 		}
 
 		/// <summary>

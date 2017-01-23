@@ -33,6 +33,16 @@ namespace SafetySharp.Analysis.FormulaVisitors
 	internal class ToStringVisitor : FormulaVisitor
 	{
 		/// <summary>
+		///   Gets the string representation of the formula.
+		/// </summary>
+		public static string FormulaToString(Formula formula)
+		{
+			var visitor=new ToStringVisitor();
+			visitor.Visit(formula);
+			return visitor.FormulaString;
+		}
+
+		/// <summary>
 		///   The string builder that is used to construct the string representation.
 		/// </summary>
 		private readonly StringBuilder _builder = new StringBuilder();
