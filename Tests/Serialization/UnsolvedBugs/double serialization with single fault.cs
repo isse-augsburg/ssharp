@@ -41,7 +41,7 @@ namespace Tests.Serialization.RuntimeModels
 
 			_hasConstructorRun = false;
 
-			var newModelInstanceBySerializeDeserialize = SafetySharpRuntimeModel.CreateExecutedModelCreator(directModel)();
+			var newModelInstanceBySerializeDeserialize = SafetySharpRuntimeModel.CreateExecutedModelCreator(directModel).Create();
 
 			//"Create" serializes and deserializes again (second time)
 			Create(newModelInstanceBySerializeDeserialize.Model);

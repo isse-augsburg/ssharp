@@ -330,6 +330,9 @@
     <Compile Include="AnalysisTests.Helpers.cs">
       <DependentUpon>AnalysisTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="AnalysisTests.Variants.cs" >
+      <DependentUpon>AnalysisTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="DiagnosticsTests.cs" />
     <Compile Include="DiagnosticsTests.Helpers.cs">
       <DependentUpon>DiagnosticsTests.cs</DependentUpon>

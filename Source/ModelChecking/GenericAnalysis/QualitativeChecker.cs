@@ -46,6 +46,23 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		public event Action<string> OutputWritten = Console.WriteLine;
 
+		/// <summary>
+		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
+		/// </summary>
+		internal AnalysisResult<TExecutableModel> CheckInvariant(CoupledExecutableModelCreator<TExecutableModel> createModel, Formula formula)
+		{
+			// We have to track the state vector layout here; this will nondeterministically store some model instance of
+			// one of the workers; but since all state vectors are the same, we don't care
+			ExecutedModel<TExecutableModel> model = null;
+			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
+				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, Configuration.SuccessorCapacity);
+
+			using (var checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration, formula))
+			{
+				var result = checker.Check();
+				return result;
+			}
+		}
 
 		/// <summary>
 		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.

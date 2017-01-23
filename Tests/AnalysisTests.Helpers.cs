@@ -60,38 +60,52 @@ namespace Tests
 
 		protected bool CheckInvariant(Formula invariant, params IComponent[] components)
 		{
-			var modelChecker = CreateModelChecker();
+			var analysisTestsVariant = (AnalysisTestsVariant)Arguments[0];
+
+			var logAction = (Action<string>)(message => Output.Log("{0}", message));
+			analysisTestsVariant.CreateModelChecker(SuppressCounterExampleGeneration,logAction);
+			
 			var model = TestModel.InitializeModel(components);
 
-			if (Arguments.Length > 1 && (bool)Arguments[1])
+			var useCheckInvariantsInsteadOfCheckInvariant = Arguments.Length > 1 && (bool)Arguments[1];
+
+			if (useCheckInvariantsInsteadOfCheckInvariant)
 			{
 				var modelFromFormulasGenerator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
-				var results = modelChecker.CheckInvariants(modelFromFormulasGenerator, invariant);
+				var results = analysisTestsVariant.CheckInvariants(modelFromFormulasGenerator, invariant);
 				CounterExample = results[0].CounterExample;
 				return results[0].FormulaHolds;
 			}
 
 			var modelGenerator = SafetySharpRuntimeModel.CreateExecutedModelCreator(model,invariant);
-			Result = modelChecker.CheckInvariant(modelGenerator, 0);
+			Result = analysisTestsVariant.CheckInvariant(modelGenerator, invariant);
 			CounterExample = Result.CounterExample;
 			return Result.FormulaHolds;
 		}
 
 		protected bool[] CheckInvariants(IComponent component, params Formula[] invariants)
 		{
-			var modelChecker = CreateModelChecker();
+			var analysisTestsVariant = (AnalysisTestsVariant)Arguments[0];
+
+			var logAction = (Action<string>)(message => Output.Log("{0}", message));
+			analysisTestsVariant.CreateModelChecker(SuppressCounterExampleGeneration, logAction);
+
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(TestModel.InitializeModel(component));
 			//var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(component), invariants);
-			var results = (AnalysisResult<SafetySharpRuntimeModel>[])modelChecker.CheckInvariants(modelCreator, invariants);
+			var results = (AnalysisResult<SafetySharpRuntimeModel>[])analysisTestsVariant.CheckInvariants(modelCreator, invariants);
 			CounterExamples = results.Select(result => result.CounterExample).ToArray();
 			return results.Select(result => result.FormulaHolds).ToArray();
 		}
 
 		protected bool Check(Formula formula, params IComponent[] components)
 		{
-			var modelChecker = CreateModelChecker();
-			var modelCreator = TestModel.InitializeModel(components);
-			var result = modelChecker.Check(modelCreator, formula);
+			var analysisTestsVariant = (AnalysisTestsVariant)Arguments[0];
+
+			var logAction = (Action<string>)(message => Output.Log("{0}", message));
+			analysisTestsVariant.CreateModelChecker(SuppressCounterExampleGeneration, logAction);
+
+			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components),formula);
+			var result = analysisTestsVariant.Check(modelCreator, formula);
 
 			CounterExample = result.CounterExample;
 			return result.FormulaHolds;
@@ -152,25 +166,7 @@ namespace Tests
 		{
 			return DccaWithMaxCardinality(model, hazard, Int32.MaxValue);
 		}
-
-		private LtsMin CreateModelChecker()
-		{
-			// QualitativeChecker<SafetySharpRuntimeModel>
-			// LtsMin
-			dynamic modelChecker = Activator.CreateInstance((Type)Arguments[0]);
-			modelChecker.OutputWritten += (Action<string>)(message => Output.Log("{0}", message));
-
-			var ssharpChecker = modelChecker as QualitativeChecker<SafetySharpRuntimeModel>;
-			if (ssharpChecker != null)
-			{
-				ssharpChecker.Configuration.StateCapacity = 1 << 14;
-				ssharpChecker.Configuration.TransitionCapacity = 1 << 16;
-				ssharpChecker.Configuration.GenerateCounterExample = !SuppressCounterExampleGeneration;
-			}
-
-			return modelChecker;
-		}
-
+		
 		protected void ShouldContain(ISet<ISet<Fault>> sets, params Fault[] faults)
 		{
 			foreach (var set in sets)
@@ -215,6 +211,20 @@ namespace Tests
 	public partial class InvariantTests : Tests
 	{
 		public InvariantTests(ITestOutputHelper output)
+			: base(output)
+		{
+		}
+
+		[UsedImplicitly]
+		public static IEnumerable<object[]> DiscoverTests(string directory)
+		{
+			return EnumerateTestCases(GetAbsoluteTestsDirectory(directory));
+		}
+	}
+
+	public partial class InvariantWithIndexTests : Tests
+	{
+		public InvariantWithIndexTests(ITestOutputHelper output)
 			: base(output)
 		{
 		}

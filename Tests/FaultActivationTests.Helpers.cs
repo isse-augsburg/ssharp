@@ -43,8 +43,7 @@ namespace Tests
 
 		protected void GenerateStateSpace(params IComponent[] components)
 		{
-			var serializer = new RuntimeModelSerializer();
-			serializer.Serialize(TestModel.InitializeModel(components), new ExecutableStateFormula(() => true));
+			var modelCreator=SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components), new ExecutableStateFormula(() => true));
 
 			var configuration = AnalysisConfiguration.Default;
 			configuration.StateCapacity = 10000;
@@ -52,7 +51,7 @@ namespace Tests
 			configuration.CpuCount = 1;
 
 			var checker = new InvariantChecker<SafetySharpRuntimeModel>(
-				() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(serializer.Load, configuration.SuccessorCapacity),
+				() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(modelCreator, configuration.SuccessorCapacity),
 				s => Output.Log("{0}", s),
 				configuration,
 				formulaIndex: 0);

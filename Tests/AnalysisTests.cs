@@ -56,88 +56,129 @@ namespace Tests
 
 	public partial class InvariantTests
 	{
+		private bool _useCheckInvariantsInsteadOfCheckInvariant = false;
+
+		private readonly AnalysisTestsVariant _analysisTestVariant = new AnalysisTestsWithQualitative();
+
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/CounterExamples")]
 		public void CounterExamples(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), false);
+			ExecuteDynamicTests(file, _analysisTestVariant, _useCheckInvariantsInsteadOfCheckInvariant);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/NotViolated")]
 		public void NotViolated(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), false);
+			ExecuteDynamicTests(file, _analysisTestVariant, _useCheckInvariantsInsteadOfCheckInvariant);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/Violated")]
 		public void Violated(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), false);
+			ExecuteDynamicTests(file, _analysisTestVariant, _useCheckInvariantsInsteadOfCheckInvariant);
+		}
+	}
+
+	public partial class InvariantWithIndexTests
+	{
+		private bool _useCheckInvariantsInsteadOfCheckInvariant = false;
+
+		private readonly AnalysisTestsVariant _analysisTestVariant = new AnalysisTestsWithQualitativeWithIndex();
+
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/CounterExamples")]
+		public void CounterExamples(string test, string file)
+		{
+			ExecuteDynamicTests(file, _analysisTestVariant, _useCheckInvariantsInsteadOfCheckInvariant);
+		}
+
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/NotViolated")]
+		public void NotViolated(string test, string file)
+		{
+			ExecuteDynamicTests(file, _analysisTestVariant, _useCheckInvariantsInsteadOfCheckInvariant);
+		}
+
+		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/Violated")]
+		public void Violated(string test, string file)
+		{
+			ExecuteDynamicTests(file, _analysisTestVariant, _useCheckInvariantsInsteadOfCheckInvariant);
 		}
 	}
 
 	public partial class StateConstraintTests
 	{
+		private bool _useCheckInvariantsInsteadOfCheckInvariant = false;
+
+		private readonly AnalysisTestsVariant _analysisTestVariant = new AnalysisTestsWithQualitative();
+
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/StateConstraints")]
 		public void StateConstraints(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), false);
+			ExecuteDynamicTests(file, _analysisTestVariant, _useCheckInvariantsInsteadOfCheckInvariant);
 		}
 	}
 
 	public partial class StateGraphInvariantTests
 	{
+		private bool _useCheckInvariantsInsteadOfCheckInvariant = true;
+
+		private readonly AnalysisTestsVariant _analysisTestVariant = new AnalysisTestsWithQualitative();
+
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/CounterExamples")]
 		public void CounterExamples(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), true);
+			ExecuteDynamicTests(file, _analysisTestVariant, _useCheckInvariantsInsteadOfCheckInvariant);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/NotViolated")]
 		public void NotViolated(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), true);
+			ExecuteDynamicTests(file, _analysisTestVariant, _useCheckInvariantsInsteadOfCheckInvariant);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/Violated")]
 		public void Violated(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), true);
+			ExecuteDynamicTests(file, _analysisTestVariant, _useCheckInvariantsInsteadOfCheckInvariant);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/MultipleInvariants")]
 		public void MultipleInvariants(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(SafetySharpQualitativeChecker), true);
+			ExecuteDynamicTests(file, _analysisTestVariant, _useCheckInvariantsInsteadOfCheckInvariant);
 		}
 	}
 
 	public partial class LtsMinInvariantTests
 	{
+		private readonly AnalysisTestsVariant _analysisTestVariant = new AnalysisTestsWithLtsMin();
+
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/NotViolated")]
 		public void NotViolated(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(LtsMin));
+			ExecuteDynamicTests(file, _analysisTestVariant);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Invariants/Violated")]
 		public void Violated(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(LtsMin));
+			ExecuteDynamicTests(file, _analysisTestVariant);
 		}
 	}
 
 	public partial class LtlTests
 	{
+		private readonly AnalysisTestsVariant _analysisTestVariant = new AnalysisTestsWithLtsMin();
+
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Ltl/Violated")]
 		public void Violated(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(LtsMin));
+			ExecuteDynamicTests(file, _analysisTestVariant);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests), "Analysis/Ltl/NotViolated")]
 		public void NotViolated(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(LtsMin));
+			ExecuteDynamicTests(file, _analysisTestVariant);
 		}
 	}
 
