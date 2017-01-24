@@ -63,7 +63,7 @@ namespace Tests.DataStructures
 			Output = new TestTraceOutput(output);
 		}
 
-		[Theory, MemberData(nameof(DiscoverTests))]
+		[Theory(Skip = "Requires external tools"), MemberData(nameof(DiscoverTests))]
 		public void MaximalProbabilityToReach_Label1(MarkovDecisionProcessExample example)
 		{
 			var mdp = example.Mdp;
@@ -77,7 +77,7 @@ namespace Tests.DataStructures
 			}
 		}
 
-		[Theory, MemberData(nameof(DiscoverTests))]
+		[Theory(Skip = "Requires external tools"), MemberData(nameof(DiscoverTests))]
 		public void MinimalProbabilityToReach_Label1(MarkovDecisionProcessExample example)
 		{
 			var mdp = example.Mdp;

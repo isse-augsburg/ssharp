@@ -24,6 +24,7 @@ namespace Tests
 {
 	using System;
 	using SafetySharp.Analysis;
+	using SafetySharp.Analysis.ModelChecking.Probabilistic;
 	using SafetySharp.ModelChecking;
 	using Xunit;
 
@@ -184,10 +185,16 @@ namespace Tests
 
 	public partial class ProbabilisticTests
 	{
-		[Theory, MemberData("AllProbabilisticModelCheckerTests", "Analysis/Probabilistic")]
-		public void Probabilistic(Type modelCheckerType, string test, string file)
+		[Theory(Skip = "Requires external tools"), MemberData("AllProbabilisticModelCheckerTests", "Analysis/Probabilistic")]
+		public void ProbabilisticMrmc(string test, string file)
 		{
-			ExecuteDynamicTests(file, modelCheckerType);
+			ExecuteDynamicTests(file, typeof(ExternalDtmcModelCheckerMrmc));
+		}
+
+		[Theory, MemberData("AllProbabilisticModelCheckerTests", "Analysis/Probabilistic")]
+		public void ProbabilisticBuiltin(string test, string file)
+		{
+			ExecuteDynamicTests(file, typeof(BuiltinDtmcModelChecker));
 		}
 	}
 }

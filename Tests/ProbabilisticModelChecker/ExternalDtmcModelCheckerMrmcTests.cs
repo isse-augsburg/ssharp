@@ -64,7 +64,7 @@ namespace Tests.DataStructures
 		}
 		
 
-		[Theory, MemberData(nameof(DiscoverTests))]
+		[Theory(Skip = "Requires external tools"), MemberData(nameof(DiscoverTests))]
 		public void ProbabilityToReach_Label1(MarkovChainExample example)
 		{
 			var dtmc = example.MarkovChain;
