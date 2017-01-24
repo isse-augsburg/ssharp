@@ -301,8 +301,8 @@ namespace SafetySharp.Runtime
 
 				creatorFunc = serializer.Load;
 			}
-
-			return new CoupledExecutableModelCreator<SafetySharpRuntimeModel>(creatorFunc, model, formulasToCheckInBaseModel, model.Faults);
+			var faults = model.Faults;
+			return new CoupledExecutableModelCreator<SafetySharpRuntimeModel>(creatorFunc, model, formulasToCheckInBaseModel, faults);
 		}
 
 		public static ExecutableModelCreator<SafetySharpRuntimeModel> CreateExecutedModelFromFormulasCreator(ModelBase model)

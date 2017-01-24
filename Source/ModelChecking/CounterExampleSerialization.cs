@@ -52,9 +52,7 @@ namespace SafetySharp.Analysis
 		}
 
 		public abstract void WriteInternalStateStructure(CounterExample<TExecutableModel> counterExample, BinaryWriter writer);
-
-		public abstract void ReadInternalStateStructure(BinaryReader reader);
-
+		
 		/// <summary>
 		///   Saves the counter example to the <paramref name="file" />.
 		/// </summary>

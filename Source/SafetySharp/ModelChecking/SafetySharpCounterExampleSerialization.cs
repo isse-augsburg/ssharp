@@ -47,18 +47,6 @@ namespace SafetySharp.Analysis
 			writer.Write(metadata.Length);
 			writer.Write(metadata);
 		}
-
-		public override void ReadInternalStateStructure(BinaryReader reader)
-		{
-			var serializedRuntimeModel = reader.ReadBytes(reader.ReadInt32());
-			var modelData = RuntimeModelSerializer.LoadSerializedData(serializedRuntimeModel);
-
-			foreach (var fault in modelData.ObjectTable.OfType<Fault>())
-				fault.Activation = (Activation)reader.ReadInt32();
-
-			var runtimeModel = new SafetySharpRuntimeModel(modelData);
-			runtimeModel.UpdateFaultSets();
-		}
 		
 		/// <summary>
 		///   Loads a counter example from the <paramref name="file" />.
@@ -77,7 +65,7 @@ namespace SafetySharp.Analysis
 				var serializedRuntimeModel = reader.ReadBytes(reader.ReadInt32());
 				var modelData = RuntimeModelSerializer.LoadSerializedData(serializedRuntimeModel);
 
-				foreach (var fault in modelData.ObjectTable.OfType<Fault>())
+				foreach (var fault in modelData.ObjectTable.OfType<Fault>().Where(fault => fault.IsUsed))
 					fault.Activation = (Activation)reader.ReadInt32();
 
 				var runtimeModel = new SafetySharpRuntimeModel(modelData);
