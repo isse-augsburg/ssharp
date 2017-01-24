@@ -157,8 +157,7 @@ namespace Tests
 
 			var result = analysis.ComputeMinimalCriticalSets(model, hazard, maxCardinality);
 			Output.Log("{0}", result);
-
-			result.RuntimeModel.Model.ShouldBe(model);
+			
 			return result;
 		}
 

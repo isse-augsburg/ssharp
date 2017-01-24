@@ -63,7 +63,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 		internal override AnalysisResult<TExecutableModel> CheckCriticality(FaultSet faults, Activation activation)
 		{
 			var suppressedFaults = new FaultSet();
-			foreach (var fault in RuntimeModel.Faults)
+			foreach (var fault in RuntimeModelCreator.FaultsInBaseModel)
 			{
 				if (GetEffectiveActivation(fault, faults, activation) == Activation.Suppressed)
 					suppressedFaults = suppressedFaults.Add(fault);

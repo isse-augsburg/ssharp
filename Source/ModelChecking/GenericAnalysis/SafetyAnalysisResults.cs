@@ -43,18 +43,16 @@ namespace SafetySharp.Analysis
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="createModel">The creator for the model that should be checked.</param>
-		/// <param name="runtimeModel">The <see cref="TExecutableModel" /> instance the safety analysis was conducted for.</param>
 		/// <param name="hazard">The hazard the analysis was conducated for.</param>
 		/// <param name="suppressedFaults">The faults whose activations have been completely suppressed during analysis.</param>
 		/// <param name="forcedFaults">The faults whose activations have been forced during analysis.</param>
 		/// <param name="heuristics">The heuristics that are used during the analysis.</param>
 		/// <param name="activationBehavior">The fault acitvation behavior used during the analysis.</param>
-		internal SafetyAnalysisResults(CoupledExecutableModelCreator<TExecutableModel> createModel, TExecutableModel runtimeModel, Formula hazard,
+		internal SafetyAnalysisResults(CoupledExecutableModelCreator<TExecutableModel> createModel, Formula hazard,
 									  IEnumerable<Fault> suppressedFaults, IEnumerable<Fault> forcedFaults,
 									  IEnumerable<IFaultSetHeuristic> heuristics, FaultActivationBehavior activationBehavior)
 		{
 			RuntimeModelCreator = createModel;
-			RuntimeModel = runtimeModel;
 			Hazard = hazard;
 			SuppressedFaults = suppressedFaults;
 			ForcedFaults = forcedFaults;
@@ -97,7 +95,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Gets the faults that have been checked.
 		/// </summary>
-		public IEnumerable<Fault> Faults => RuntimeModel.Faults;
+		public IEnumerable<Fault> Faults => RuntimeModelCreator.FaultsInBaseModel;
 
 		/// <summary>
 		///   Gets the counter examples that were generated for the critical fault sets.
@@ -113,11 +111,6 @@ namespace SafetySharp.Analysis
 		///    The creator for the model that should be checked.
 		/// </summary>
 		public CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator { get; }
-
-		/// <summary>
-		///   Gets the <see cref="RuntimeModel" /> instance the safety analysis was conducted for.
-		/// </summary>
-		public TExecutableModel RuntimeModel { get; }
 
 		/// <summary>
 		///   Gets the time it took to complete the analysis.
@@ -194,7 +187,7 @@ namespace SafetySharp.Analysis
 			if (knownSets.TryGetValue(set, out faultSet))
 				return faultSet;
 
-			faultSet = new HashSet<Fault>(set.ToFaultSequence(RuntimeModel.Faults));
+			faultSet = new HashSet<Fault>(set.ToFaultSequence(RuntimeModelCreator.FaultsInBaseModel));
 			knownSets.Add(set, faultSet);
 
 			return faultSet;

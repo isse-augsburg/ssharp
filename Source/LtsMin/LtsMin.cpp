@@ -131,7 +131,8 @@ CoupledExecutableModelCreator<SafetySharpRuntimeModel^>^ CreateModelCreator()
 	auto createModelFunc = gcnew Func<SafetySharpRuntimeModel^>(&CreateModel);
 	auto model = Globals::RuntimeModel->Model;
 	auto formulas = Globals::RuntimeModel->Formulas;
-	auto creator = gcnew CoupledExecutableModelCreator<SafetySharpRuntimeModel^>(createModelFunc,model,formulas);
+	auto faults = Globals::RuntimeModel->Faults;
+	auto creator = gcnew CoupledExecutableModelCreator<SafetySharpRuntimeModel^>(createModelFunc,model,formulas, faults);
 	return creator;
 }
 

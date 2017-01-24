@@ -171,7 +171,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		///   Ensures that the model has been bound.
 		/// </summary>
-		private void EnsureIsBound()
+		internal void EnsureIsBound()
 		{
 			if (_roots != null)
 				return;

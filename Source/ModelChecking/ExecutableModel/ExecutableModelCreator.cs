@@ -24,6 +24,7 @@ namespace ISSE.ModelChecking.ExecutableModel
 {
 	using System;
 	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 
 	public class CoupledExecutableModelCreator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
@@ -40,15 +41,21 @@ namespace ISSE.ModelChecking.ExecutableModel
 		// Code in ISSE.ModelChecking does not depend on it.
 		public object SourceModel{ get; }
 
+
+		// Note: FaultsInBaseModel are coupled to the model instance this.ModelBase and not the (future) instance created by this.Create().
+		// A transfer might be necessary!
+		public Fault[] FaultsInBaseModel;
+
 		// Note: FormulasToCheckInBaseModel are coupled to the model instance this.ModelBase and not the (future) instance created by this.Create().
 		// A transfer with TransferFormulaToNewExecutedModelInstanceVisitor might be necessary!
 		public Formula[] StateFormulasToCheckInBaseModel;
 
-		public CoupledExecutableModelCreator(Func<TExecutableModel> creator, object sourceModel, Formula[] stateFormulasToCheckInBaseModel)
+		public CoupledExecutableModelCreator(Func<TExecutableModel> creator, object sourceModel, Formula[] stateFormulasToCheckInBaseModel, Fault[] faultsInBaseModel)
 		{
 			Create = creator;
 			SourceModel = sourceModel;
 			StateFormulasToCheckInBaseModel = stateFormulasToCheckInBaseModel;
+			FaultsInBaseModel = faultsInBaseModel;
 		}
 	}
 

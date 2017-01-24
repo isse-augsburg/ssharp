@@ -292,15 +292,17 @@ namespace SafetySharp.Runtime
 			Func<SafetySharpRuntimeModel> creatorFunc;
 
 			// serializer.Serialize has potentially a side effect: Model binding. The model gets bound when it isn't
-			// bound already. The lock ensures that this binding is only made by one thread.
+			// bound already. The lock ensures that this binding is only made by one thread because model.EnsureIsBound 
+			// is not reentrant.
 			lock (model)
 			{
 				var serializer = new RuntimeModelSerializer();
-				serializer.Serialize(model, formulasToCheckInBaseModel); //has a side effect: Model binding!
+				model.EnsureIsBound(); // Bind the model explicitly. Otherwise serialize.Serializer makes it implicitly.
+				serializer.Serialize(model, formulasToCheckInBaseModel);
 				creatorFunc = serializer.Load;
 			}
 
-			return new CoupledExecutableModelCreator<SafetySharpRuntimeModel>(creatorFunc, model, formulasToCheckInBaseModel);
+			return new CoupledExecutableModelCreator<SafetySharpRuntimeModel>(creatorFunc, model, formulasToCheckInBaseModel, model.Faults);
 		}
 
 		public static ExecutableModelCreator<SafetySharpRuntimeModel> CreateExecutedModelFromFormulasCreator(ModelBase model)

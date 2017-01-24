@@ -118,11 +118,8 @@ namespace SafetySharp.Analysis
 			var heuristicWatch = new Stopwatch();
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
-
-			var runtimeModel = createModel.Create();
-			hazard = TransferFormulaToNewExecutedModelInstanceVisitor.Transfer(runtimeModel,hazard);
-
-			var allFaults = runtimeModel.Faults;
+			
+			var allFaults = createModel.FaultsInBaseModel;
 			FaultSet.CheckFaultCount(allFaults.Length);
 
 			var forcedFaults = allFaults.Where(fault => fault.Activation == Activation.Forced).ToArray();
@@ -143,7 +140,7 @@ namespace SafetySharp.Analysis
 			var isComplete = true;
 
 			// Remove information from previous analyses
-			Reset(runtimeModel);
+			Reset(createModel.FaultsInBaseModel);
 
 			// Initialize the backend, the model, and the analysis results
 			switch (Backend)
@@ -159,8 +156,8 @@ namespace SafetySharp.Analysis
 			}
 
 			_backend.OutputWritten += output => OutputWritten?.Invoke(output);
-			_backend.InitializeModel(Configuration, createModel, runtimeModel, hazard);
-			_results = new SafetyAnalysisResults<TExecutableModel>(createModel, runtimeModel, hazard, suppressedFaults, forcedFaults, Heuristics, FaultActivationBehavior);
+			_backend.InitializeModel(Configuration, createModel, hazard);
+			_results = new SafetyAnalysisResults<TExecutableModel>(createModel, hazard, suppressedFaults, forcedFaults, Heuristics, FaultActivationBehavior);
 
 			// Remember all safe sets of current cardinality - we need them to generate the next power set level
 			var currentSafe = new HashSet<FaultSet>();
@@ -256,10 +253,10 @@ namespace SafetySharp.Analysis
 			return _results;
 		}
 
-		private void Reset(TExecutableModel runtimeModel)
+		private void Reset(Fault[] faultsInBaseModel)
 		{
-			_safeSets = new FaultSetCollection(runtimeModel.Faults.Length);
-			_criticalSets = new FaultSetCollection(runtimeModel.Faults.Length);
+			_safeSets = new FaultSetCollection(faultsInBaseModel.Length);
+			_criticalSets = new FaultSetCollection(faultsInBaseModel.Length);
 			_checkedSets.Clear();
 			_counterExamples.Clear();
 			_exceptions.Clear();

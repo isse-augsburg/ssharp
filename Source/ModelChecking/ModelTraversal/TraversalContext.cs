@@ -131,7 +131,7 @@ namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
 		{
 			FormulaIsValid = true;
 			ComputedTransitionCount = 0;
-			//CounterExample = null;
+			CounterExample = null;
 			Exception = null;
 			GeneratingCounterExample = -1;
 			LevelCount = 0;

@@ -36,7 +36,6 @@ namespace SafetySharp.Analysis.SafetyChecking
 	internal abstract class AnalysisBackend<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		protected FaultSet ForcedFaults { get; private set; }
-		protected TExecutableModel RuntimeModel { get; private set; }
 		protected CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator { get; private set; }
 		protected FaultSet SuppressedFaults { get; private set; }
 
@@ -45,14 +44,12 @@ namespace SafetySharp.Analysis.SafetyChecking
 		/// </summary>
 		/// <param name="configuration">The configuration that should be used for the analyses.</param>
 		/// <param name="createFreshModel">The creator for the model that should be checked.</param>
-		/// <param name="runtimeModel">The concrete model instance that should be analyzed (shared with caller).</param>
 		/// <param name="hazard">The hazard that should be analyzed.</param>
-		internal void InitializeModel(AnalysisConfiguration configuration, CoupledExecutableModelCreator<TExecutableModel> createFreshModel, TExecutableModel runtimeModel, Formula hazard)
+		internal void InitializeModel(AnalysisConfiguration configuration, CoupledExecutableModelCreator<TExecutableModel> createFreshModel, Formula hazard)
 		{
-			RuntimeModel = runtimeModel;
 			RuntimeModelCreator = createFreshModel;
-			ForcedFaults = new FaultSet(RuntimeModel.Faults.Where(fault => fault.Activation == Activation.Forced));
-			SuppressedFaults = new FaultSet(RuntimeModel.Faults.Where(fault => fault.Activation == Activation.Suppressed));
+			ForcedFaults = new FaultSet(createFreshModel.FaultsInBaseModel.Where(fault => fault.Activation == Activation.Forced));
+			SuppressedFaults = new FaultSet(createFreshModel.FaultsInBaseModel.Where(fault => fault.Activation == Activation.Suppressed));
 
 			InitializeModel(configuration, hazard);
 		}
