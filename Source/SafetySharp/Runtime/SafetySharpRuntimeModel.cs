@@ -269,9 +269,8 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
 
-			var serializer = new RuntimeModelSerializer();
-			serializer.Serialize(model, formulas);
-			return serializer.Load();
+			var creator = CreateExecutedModelCreator(model, formulas);
+			return creator.Create(0);
 		}
 		
 
@@ -289,7 +288,7 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
 
-			Func<SafetySharpRuntimeModel> creatorFunc;
+			Func<int,SafetySharpRuntimeModel> creatorFunc;
 
 			// serializer.Serialize has potentially a side effect: Model binding. The model gets bound when it isn't
 			// bound already. The lock ensures that this binding is only made by one thread because model.EnsureIsBound 
@@ -299,6 +298,7 @@ namespace SafetySharp.Runtime
 				var serializer = new RuntimeModelSerializer();
 				model.EnsureIsBound(); // Bind the model explicitly. Otherwise serialize.Serializer makes it implicitly.
 				serializer.Serialize(model, formulasToCheckInBaseModel);
+
 				creatorFunc = serializer.Load;
 			}
 

@@ -39,24 +39,17 @@ namespace SafetySharp.Analysis.ModelChecking
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="createModel">A factory function that creates the model instance that should be executed.</param>
-		internal ExecutedModel(CoupledExecutableModelCreator<TExecutableModel> createModel)
+		/// <param name="stateHeaderBytes">
+		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
+		/// </param>
+		internal ExecutedModel(CoupledExecutableModelCreator<TExecutableModel> createModel, int stateHeaderBytes)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 
 			RuntimeModelCreator = createModel;
-			RuntimeModel = createModel.Create();
+			RuntimeModel = createModel.Create(stateHeaderBytes);
 		}
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="runtimeModel">The model instance that should be executed.</param>
-		internal ExecutedModel(TExecutableModel runtimeModel)
-		{
-			Requires.NotNull(runtimeModel, nameof(runtimeModel));
-			RuntimeModel = runtimeModel;
-		}
-
+		
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
 		/// </summary>

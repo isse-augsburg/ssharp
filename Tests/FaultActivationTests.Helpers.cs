@@ -51,7 +51,7 @@ namespace Tests
 			configuration.CpuCount = 1;
 
 			var checker = new InvariantChecker<SafetySharpRuntimeModel>(
-				() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(modelCreator, configuration.SuccessorCapacity),
+				() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(modelCreator, 0, configuration.SuccessorCapacity),
 				s => Output.Log("{0}", s),
 				configuration,
 				formulaIndex: 0);

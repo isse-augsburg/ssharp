@@ -37,8 +37,6 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public class SafetySharpCounterExampleSerialization : CounterExampleSerialization<SafetySharpRuntimeModel>
 	{
-		internal SafetySharpRuntimeModel SafetySharpRuntimeModel { get; }
-
 		public override void WriteInternalStateStructure(CounterExample<SafetySharpRuntimeModel> counterExample, BinaryWriter writer)
 		{
 			var formatter = new BinaryFormatter();

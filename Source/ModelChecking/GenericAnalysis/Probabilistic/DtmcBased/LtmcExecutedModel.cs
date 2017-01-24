@@ -53,25 +53,17 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal LtmcExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, long successorStateCapacity)
-			: base(runtimeModelCreator)
+		/// <param name="stateHeaderBytes">
+		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
+		/// </param>
+		internal LtmcExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, long successorStateCapacity)
+			: base(runtimeModelCreator, stateHeaderBytes)
 		{
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
 			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
 			
 			ChoiceResolver = new LtmcChoiceResolver();
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
-		}
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="runtimeModel">The model instance that should be executed.</param>
-		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal LtmcExecutedModel(TExecutableModel runtimeModel, int successorStateCapacity)
-			: base(runtimeModel)
-		{
-			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity);
 		}
 
 		/// <summary>

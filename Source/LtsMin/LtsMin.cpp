@@ -121,14 +121,15 @@ void PrepareLoadModel(model_t model, const char* modelFile)
 	LoadModel(model, modelFile);
 }
 
-SafetySharpRuntimeModel^ CreateModel()
+SafetySharpRuntimeModel^ CreateModel(int dummyStateHeaderBytes)
 {
+	// dummyStateHeaderBytes are just ignored
 	return Globals::RuntimeModel;
 }
 
 CoupledExecutableModelCreator<SafetySharpRuntimeModel^>^ CreateModelCreator()
 {
-	auto createModelFunc = gcnew Func<SafetySharpRuntimeModel^>(&CreateModel);
+	auto createModelFunc = gcnew Func<int,SafetySharpRuntimeModel^>(&CreateModel);
 	auto model = Globals::RuntimeModel->Model;
 	auto formulas = Globals::RuntimeModel->Formulas;
 	auto faults = Globals::RuntimeModel->Faults;
@@ -141,9 +142,10 @@ void LoadModel(model_t model, const char* modelFile)
 {
 	try
 	{
+		int stateHeaderBytes = sizeof(int32_t);
 		auto modelData = RuntimeModelSerializer::LoadSerializedData(File::ReadAllBytes(gcnew String(modelFile)));
-		Globals::RuntimeModel = gcnew SafetySharpRuntimeModel(modelData, sizeof(int32_t));
-		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel<SafetySharpRuntimeModel^>(CreateModelCreator(), gcnew array<Func<bool>^>(0), 1 << 16);
+		Globals::RuntimeModel = gcnew SafetySharpRuntimeModel(modelData, stateHeaderBytes);
+		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel<SafetySharpRuntimeModel^>(CreateModelCreator(), stateHeaderBytes, gcnew array<Func<bool>^>(0), 1 << 16);
 
 		auto stateSlotCount = (int32_t)(Globals::RuntimeModel->StateVectorSize / sizeof(int32_t));
 		auto stateLabelCount = Globals::RuntimeModel->ExecutableStateFormulas->Length;

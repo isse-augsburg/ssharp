@@ -35,7 +35,8 @@ namespace ISSE.ModelChecking.ExecutableModel
 		// Note: If a model created by the returned delegate is used, old "stateFormulas" cannot be used anymore, because they
 		// might have parts of the "old" model (the one for which formulas have been instantiated in) in their closure.
 		// Use "model.Formulas" instead! The order should be preserved.
-		public Func<TExecutableModel> Create { get; }
+		// The parameter of Create are the stateHeaderBytes (the number of reserved bytes at the beginning of each state vector)
+		public Func<int,TExecutableModel> Create { get; }
 
 		// Contains the source model. Depending on TExecutableModel, it might be a class instance or a string to a file name, or whatever.
 		// Code in ISSE.ModelChecking does not depend on it.
@@ -50,7 +51,7 @@ namespace ISSE.ModelChecking.ExecutableModel
 		// A transfer with TransferFormulaToNewExecutedModelInstanceVisitor might be necessary!
 		public Formula[] StateFormulasToCheckInBaseModel;
 
-		public CoupledExecutableModelCreator(Func<TExecutableModel> creator, object sourceModel, Formula[] stateFormulasToCheckInBaseModel, Fault[] faultsInBaseModel)
+		public CoupledExecutableModelCreator(Func<int, TExecutableModel> creator, object sourceModel, Formula[] stateFormulasToCheckInBaseModel, Fault[] faultsInBaseModel)
 		{
 			Create = creator;
 			SourceModel = sourceModel;

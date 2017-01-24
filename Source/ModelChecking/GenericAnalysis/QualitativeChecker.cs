@@ -55,7 +55,7 @@ namespace SafetySharp.Analysis
 			// one of the workers; but since all state vectors are the same, we don't care
 			ExecutedModel<TExecutableModel> model = null;
 			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
-				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, Configuration.SuccessorCapacity);
+				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, 0, Configuration.SuccessorCapacity);
 
 			using (var checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration, formula))
 			{
@@ -73,7 +73,7 @@ namespace SafetySharp.Analysis
 			// one of the workers; but since all state vectors are the same, we don't care
 			ExecutedModel<TExecutableModel> model = null;
 			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
-				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, Configuration.SuccessorCapacity);
+				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, 0, Configuration.SuccessorCapacity);
 
 			using (var checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration, formulaIndex))
 			{
@@ -92,7 +92,7 @@ namespace SafetySharp.Analysis
 			// one of the workers; but since all state vectors are the same, we don't care
 			ExecutedModel<TExecutableModel> model = null;
 			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
-				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, Configuration.SuccessorCapacity);
+				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, 0, Configuration.SuccessorCapacity);
 
 			using (var checker = new StateGraphGenerator<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration))
 			{

@@ -108,7 +108,7 @@ namespace SafetySharp.Analysis
 			ExecutedModel<TExecutableModel> model = null;
 			var modelCreator = _runtimeModelCreator.CreateCoupledModelCreator(stateFormulas);
 			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
-				model = new LtmdpExecutedModel<TExecutableModel>(modelCreator, Configuration.SuccessorCapacity);
+				model = new LtmdpExecutedModel<TExecutableModel>(modelCreator, 0, Configuration.SuccessorCapacity);
 
 			return GenerateMarkovDecisionProcess(createAnalysisModel, terminateEarlyCondition, stateFormulas);
 		}

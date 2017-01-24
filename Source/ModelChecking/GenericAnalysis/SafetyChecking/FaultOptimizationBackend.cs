@@ -29,6 +29,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
+	using Utilities;
 
 	/// <summary>
 	///   Checks all formulas individually on the model taking advantage of the fault-removal optimization.
@@ -55,7 +56,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 		protected override void InitializeModel(AnalysisConfiguration configuration, Formula hazard)
 		{
 			Func<AnalysisModel<TExecutableModel>> createModel = () =>
-				new ActivationMinimalExecutedModel<TExecutableModel>(RuntimeModelCreator, configuration.SuccessorCapacity);
+				new ActivationMinimalExecutedModel<TExecutableModel>(RuntimeModelCreator, _stateHeaderBytes, configuration.SuccessorCapacity);
 			var invariant = new UnaryFormula(hazard,UnaryOperator.Not);
 
 			_invariantChecker = new InvariantChecker<TExecutableModel>(createModel, OnOutputWritten, configuration, invariant);
@@ -84,9 +85,11 @@ namespace SafetySharp.Analysis.SafetyChecking
 		internal override AnalysisResult<TExecutableModel> CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
 													Activation activation, bool forceSimultaneous)
 		{
+			Assert.That(_stateHeaderBytes==4, "The first 4 bytes must be reserved for the FaultOrderModifier");
 			ChangeFaultActivations(minimalCriticalFaultSet, activation);
 
 			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Clear();
+			// Note: The faultOrderModifier reserves the first 4 bytes of the state vector
 			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Add(
 				() => new FaultOrderModifier<TExecutableModel>(firstFault, secondFault, forceSimultaneous));
 

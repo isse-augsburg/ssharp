@@ -171,9 +171,9 @@ namespace SafetySharp.Runtime.Serialization
 		/// <summary>
 		///   Loads a <see cref="SafetySharpRuntimeModel" /> instance.
 		/// </summary>
-		public SafetySharpRuntimeModel Load()
+		public SafetySharpRuntimeModel Load(int stateHeaderBytes)
 		{
-			return new SafetySharpRuntimeModel(LoadSerializedData());
+			return new SafetySharpRuntimeModel(LoadSerializedData(), stateHeaderBytes);
 		}
 
 		/// <summary>
