@@ -315,6 +315,8 @@
     <Compile Include="Execution\RootDiscovery\properties.cs" />
     <Compile Include="Execution\RootDiscovery\none.cs" />
     <Compile Include="Execution\RootDiscovery\fields.cs" />
+    <Compile Include="Execution\Simulation\component implements interface.cs" />
+    <Compile Include="Execution\Simulation\unused faults and effect.cs" />
     <Compile Include="Execution\Simulation\linq.cs" />
     <Compile Include="Execution\Simulation\faults.cs" />
     <Compile Include="Execution\Simulation\bindings.cs" />

@@ -20,41 +20,54 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CompilerServices
+namespace Tests.Execution.Simulation
 {
-	using System.Runtime.CompilerServices;
-	using Modeling;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using Shouldly;
+	using Utilities;
 
-	/// <summary>
-	///   Allows the compiler to check whether a fault is activated while avoiding activation of faults that are known to have no
-	///   effect.
-	/// </summary>
-	public static class FaultHelper
+	internal class UnusedFaultsAndEffects : TestObject
 	{
-		/// <summary>
-		///   Tries to activate the <paramref name="fault" />, if possible, returning <c>true</c> to indicate that the fault is indeed
-		///   activated.
-		/// </summary>
-		/// <param name="fault">The fault that should be activated.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool Activate(Fault fault)
+		protected override void Check()
 		{
-			if (fault == null)
-				return false;
+			var simulator = new Simulator(TestModel.InitializeModel(new C()));
+			var c = (C)simulator.Model.Roots[0];
 
-			fault.TryActivate();
-			return fault.IsActivated;
+			c.F.Activation = Activation.Forced;
+			simulator.SimulateStep();
+			c.X.ShouldBe(1);
+
+			c.F.Activation = Activation.Suppressed;
+			simulator.SimulateStep();
+			c.X.ShouldBe(1);
+
+			simulator.Model.Faults.ShouldBeEmpty();
 		}
 
-		/// <summary>
-		///   Undoes the activation of the <paramref name="fault" /> when the activation is known to have no observable effect and fault
-		///   activation was nondeterministic in the current step.
-		/// </summary>
-		/// <param name="fault">The fault whose activation should be undone.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void UndoActivation(Fault fault)
+		private class C : Component
 		{
-			fault?.UndoActivation();
+			public readonly Fault F = new TransientFault();
+			public int X;
+
+			public virtual int Y => 1;
+
+			public override void Update()
+			{
+				X = Y;
+			}
+
+			[FaultEffect, Priority(1)]
+			public class E1 : C
+			{
+				public override int Y => 71;
+			}
+
+			[FaultEffect, Priority(2)]
+			public class E2 : C
+			{
+				public override int Y => 1;
+			}
 		}
 	}
 }
