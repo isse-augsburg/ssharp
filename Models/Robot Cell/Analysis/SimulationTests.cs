@@ -92,7 +92,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
         [Test]
 		public void Simulate()
 		{
-			var model = SampleModels.DefaultInstance<FastController>();
+			var model = SampleModels.DefaultInstance<PerformanceMeasurementController<FastController>>();
 			model.Faults.SuppressActivations();
 
 			var simulator = new Simulator(model);
@@ -102,7 +102,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
         [Test]
         public void SimulateProfileBased()
         {
-            var model = SampleModels.DefaultInstance<FastController>();
+            var model = SampleModels.DefaultInstance<PerformanceMeasurementController<FastController>>();
             model.Faults.SuppressActivations();
             var profileBasedSimulator = new ProfileBasedSimulator(model);
             profileBasedSimulator.Simulate(numberOfSteps: 10000);
@@ -147,5 +147,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Console.WriteLine(line.ToString());
 #endif
 		}
-	}
+        
+    }
 }
