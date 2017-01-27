@@ -62,7 +62,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			BaseAgentState = baseAgentState;
 
 			if (baseAgentState.ReconfRequestSource != null)
-				((CoalitionReconfigurationAgent)agent).Respond(this);
+				((CoalitionReconfigurationAgent)agent).ReceiveResponse(respondingAgent: this);
 			else
 			{
 				var configs = await _controller.CalculateConfigurations(this, task);
@@ -76,14 +76,12 @@ namespace SafetySharp.Odp.Reconfiguration
 		/// Receives a response from an agent that received a reconfiguration request from this instance.
 		/// </summary>
 		/// <param name="agent">The agent responding to the reconfiguration request</param>
-		private void Respond(CoalitionReconfigurationAgent agent)
+		private void ReceiveResponse(CoalitionReconfigurationAgent respondingAgent)
 		{
-			if (CurrentCoalition.IsInvited(agent))
-			{
-				if (agent.CurrentCoalition == null)
-					CurrentCoalition.Join(agent);
-				// TODO: else merge coalitions (how?)
-			}
+			if (respondingAgent.CurrentCoalition == null)
+				CurrentCoalition.Join(respondingAgent);
+			else
+				CurrentCoalition.MergeInto(respondingAgent.CurrentCoalition);
 		}
 
 		/// <summary>
@@ -94,11 +92,6 @@ namespace SafetySharp.Odp.Reconfiguration
 			_acknowledgment = new TaskCompletionSource<object>();
 			_reconfAgentHandler.UpdateAllocatedRoles(configs);
 			return _acknowledgment.Task;
-		}
-
-		private bool IsConfiguredFor(ITask task)
-		{
-			return BaseAgent.AllocatedRoles.Any(role => role.Task == task);
 		}
 	}
 }
