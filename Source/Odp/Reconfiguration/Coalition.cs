@@ -39,8 +39,8 @@ namespace SafetySharp.Odp.Reconfiguration
 		public HashSet<ICapability> AvailableCapabilities { get; } = new HashSet<ICapability>();
 		public HashSet<ICapability> NeededCapabilities { get; } = new HashSet<ICapability>();
 
-		private Dictionary<BaseAgent, TaskCompletionSource<object>> _invitations
-			= new Dictionary<BaseAgent, TaskCompletionSource<object>>();
+		private Dictionary<BaseAgent, TaskCompletionSource<CoalitionReconfigurationAgent>> _invitations
+			= new Dictionary<BaseAgent, TaskCompletionSource<CoalitionReconfigurationAgent>>();
 
 		public BaseAgent[] RecoveredDistribution { get; }
 
@@ -57,18 +57,24 @@ namespace SafetySharp.Odp.Reconfiguration
 			Join(Leader = leader);
 		}
 
-		public async Task Invite(BaseAgent agent)
+		public async Task<CoalitionReconfigurationAgent> Invite(BaseAgent agent)
 		{
-			if (Members.Any(member => member.BaseAgent == agent))
-				return;
+			{
+				var existingMember = Members.FirstOrDefault(member => member.BaseAgent == agent);
+				if (existingMember != null)
+					return existingMember;
+			}
 
-			_invitations[agent] = new TaskCompletionSource<object>();
+			_invitations[agent] = new TaskCompletionSource<CoalitionReconfigurationAgent>();
 
-			// do not await, await invitation response (next line) instead (otherwise a deadlock occurs)
+			// do NOT await; await invitation response (see below) instead (otherwise a deadlock occurs)
 			agent.RequestReconfiguration(Leader, Task);
 
-			await _invitations[agent].Task;
+			// wait for the invited agent to respond
+			var newMember = await _invitations[agent].Task;
 			_invitations.Remove(agent);
+
+			return newMember;
 		}
 
 		public void Join(CoalitionReconfigurationAgent newMember)
@@ -79,10 +85,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			newMember.CurrentCoalition = this;
 
 			if (IsInvited(newMember))
-			{
-				_invitations[newMember.BaseAgent].SetResult(null);
-				_invitations.Remove(newMember.BaseAgent);
-			}
+				_invitations[newMember.BaseAgent].SetResult(newMember);
 
 			// TODO: invitation might lead to coalition merge -- if no longer leader, stop here!?
 			// TODO: (implementation: cancellation token?)
