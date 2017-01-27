@@ -33,8 +33,8 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public CoalitionReconfigurationAgent Leader { get; }
 
-		public List<CoalitionReconfigurationAgent> Members { get; }
-			= new List<CoalitionReconfigurationAgent>();
+		public HashSet<CoalitionReconfigurationAgent> Members { get; }
+			= new HashSet<CoalitionReconfigurationAgent>();
 
 		public HashSet<ICapability> AvailableCapabilities { get; } = new HashSet<ICapability>();
 		public HashSet<ICapability> NeededCapabilities { get; } = new HashSet<ICapability>();
@@ -50,6 +50,9 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public bool IsInvited(CoalitionReconfigurationAgent agent) => _invitations.ContainsKey(agent.BaseAgent);
 
+		/// <summary>
+		/// The connected task fragment handled by coalition memnbers
+		/// </summary>
 		public TaskFragment CTF { get; private set; }
 
 		public Coalition(CoalitionReconfigurationAgent leader, ITask task)
@@ -57,6 +60,11 @@ namespace SafetySharp.Odp.Reconfiguration
 			RecoveredDistribution = new BaseAgent[task.RequiredCapabilities.Length];
 			Task = task;
 			Join(Leader = leader);
+		}
+
+		public bool Contains(BaseAgent baseAgent)
+		{
+			return Members.Any(member => member.BaseAgent == baseAgent); // TODO: consider implementing more efficiently
 		}
 
 		public async Task<CoalitionReconfigurationAgent> Invite(BaseAgent agent)
@@ -108,6 +116,9 @@ namespace SafetySharp.Odp.Reconfiguration
 				otherCoalition.Join(member);
 		}
 
+		/// <summary>
+		/// Updates the CTF when <paramref name="newAgent"/> is added to the coalition
+		/// </summary>
 		private void UpdateCTF(BaseAgent newAgent)
 		{
 			var minPreState = -1;
@@ -118,6 +129,7 @@ namespace SafetySharp.Odp.Reconfiguration
 				if (role.Task != Task)
 					continue;
 
+				// discover which capabilities were previously applied by newAgent
 				for (var i = role.PreCondition.StateLength; i < role.PostCondition.StateLength; ++i)
 				{
 					if (RecoveredDistribution[i] != null)
