@@ -49,8 +49,16 @@ namespace SafetySharp.Odp.Reconfiguration
 			var config = new ConfigurationUpdate();
 			var coalition = new Coalition(leader, task);
 
-			foreach (var predicate in  leader.BaseAgentState.ViolatedPredicates)
-				await SolveInvariantViolation(coalition, predicate, task, config);
+			try
+			{
+				foreach (var predicate in leader.BaseAgentState.ViolatedPredicates)
+					await SolveInvariantViolation(coalition, predicate, task, config);
+			}
+			catch (OperationCanceledException)
+			{
+				// operation was canceled (e.g. because coalition was merged into another coalition), so produce no updates
+				return null;
+			}
 
 			return config;
 		}
