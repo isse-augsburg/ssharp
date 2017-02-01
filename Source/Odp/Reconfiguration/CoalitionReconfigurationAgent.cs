@@ -22,65 +22,83 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
-	using System;
-	using System.Collections.Generic;
+	using System.Linq;
 	using System.Threading.Tasks;
 	using Modeling;
 
 	public class CoalitionReconfigurationAgent : IReconfigurationAgent
 	{
-		private readonly BaseAgent _baseAgent;
+		public BaseAgent BaseAgent { get; }
 		private readonly ReconfigurationAgentHandler _reconfAgentHandler;
 		private readonly IController _controller;
 
 		public CoalitionReconfigurationAgent(BaseAgent baseAgent, ReconfigurationAgentHandler reconfAgentHandler, IController controller)
 		{
-			_baseAgent = baseAgent;
+			BaseAgent = baseAgent;
 			_reconfAgentHandler = reconfAgentHandler;
 			_controller = controller;
 		}
 
-		protected Coalition CurrentCoalition { get; set; }
+		public Coalition CurrentCoalition { get; set; }
+		public BaseAgent.State BaseAgentState { get; private set; }
 
-		public void Acknowledge()
+		private TaskCompletionSource<object> _acknowledgment;
+
+		void IReconfigurationAgent.Acknowledge()
 		{
-			throw new NotImplementedException();
+			_reconfAgentHandler.Go(CurrentCoalition.Task);
+			_acknowledgment?.SetResult(null);
+			_acknowledgment = null;
+			_reconfAgentHandler.Done(CurrentCoalition.Task);
 		}
 
-		public void StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
+		void IReconfigurationAgent.StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
 		{
 			MicrostepScheduler.Schedule(() => ReconfigureAsync(task, agent, baseAgentState));
 		}
 
 		public async Task ReconfigureAsync(ITask task, IAgent agent, BaseAgent.State baseAgentState)
 		{
-			var configs = await _controller.CalculateConfigurations(this, task);
-			// TODO: distribute configs
+			BaseAgentState = baseAgentState;
+
+			if (baseAgentState.ReconfRequestSource != null)
+				((CoalitionReconfigurationAgent)agent).Respond(this);
+			else
+			{
+				var configs = await _controller.CalculateConfigurations(this, task);
+				if (configs != null)
+					await Task.WhenAll(CurrentCoalition.Members
+						.Select(member => member.UpdateConfiguration(configs)));
+			}
 		}
 
-		protected class Coalition
+		/// <summary>
+		/// Receives a response from an agent that received a reconfiguration request from this instance.
+		/// </summary>
+		/// <param name="agent">The agent responding to the reconfiguration request</param>
+		private void Respond(CoalitionReconfigurationAgent agent)
 		{
-			public CoalitionReconfigurationAgent Leader { get; }
-
-			public List<CoalitionReconfigurationAgent> Members { get; }
-				= new List<CoalitionReconfigurationAgent>();
-
-			private int _ctfStart = -1;
-			private int _ctfEnd = -1;
-
-			private int _tfrStart = -1;
-			private int _tfrEnd = -1;
-
-			public Coalition(CoalitionReconfigurationAgent leader)
+			if (CurrentCoalition.IsInvited(agent))
 			{
-				Leader = leader;
-				Members.Add(leader);
+				if (agent.CurrentCoalition == null)
+					CurrentCoalition.Join(agent);
+				// TODO: else merge coalitions (how?)
 			}
+		}
 
-			public void Join(CoalitionReconfigurationAgent newMember)
-			{
-				Members.Add(newMember);
-			}
+		/// <summary>
+		/// Distributes the calculated configuration to the coalition members.
+		/// </summary>
+		private Task UpdateConfiguration(ConfigurationUpdate configs)
+		{
+			_acknowledgment = new TaskCompletionSource<object>();
+			_reconfAgentHandler.UpdateAllocatedRoles(configs);
+			return _acknowledgment.Task;
+		}
+
+		private bool IsConfiguredFor(ITask task)
+		{
+			return BaseAgent.AllocatedRoles.Any(role => role.Task == task);
 		}
 	}
 }

@@ -57,5 +57,13 @@ namespace SafetySharp.Odp
 						   .Aggregate(seed, (tuple1, tuple2) => (tuple2.cost >= tuple1.cost) ? tuple2 : tuple1)
 						   .elem;
 		}
+
+		public static IEnumerable<T> Slice<T>(this IEnumerable<T> elements, int startIndex, int endIndex)
+		{
+			if (startIndex > endIndex || startIndex < 0 || endIndex < 0)
+				return Enumerable.Empty<T>();
+
+			return elements.Skip(startIndex).Take(endIndex - startIndex + 1);
+		}
 	}
 }
