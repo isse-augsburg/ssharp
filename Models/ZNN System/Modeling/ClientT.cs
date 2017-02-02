@@ -68,18 +68,20 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Creates a new client instance
 		/// </summary>
-		private ClientT()
+		/// <param name="seed">Seed for random query start</param>
+		private ClientT(int seed = 0)
 		{
-			Random = new Random(0);
+			Random = new Random(seed);
 		}
 
 		/// <summary>
 		/// Creates a new Client and connect it to the proxy
 		/// </summary>
 		/// <param name="proxy">Connected Proxy</param>
-		public static ClientT GetNewClient(ProxyT proxy)
+		/// <param name="seed">Seed for random query start</param>
+		public static ClientT GetNewClient(ProxyT proxy, int seed = 0)
 		{
-			var client = new ClientT();
+			var client = new ClientT(seed);
 			client.Connect(proxy);
 			if(client.ConnectedProxy != null)
 				return client;
