@@ -68,6 +68,7 @@
     <Compile Include="Modeling\ProxyT.cs" />
     <Compile Include="Modeling\Query.cs" />
     <Compile Include="Modeling\EQueryState.cs" />
+    <Compile Include="Modeling\ReconfStates.cs" />
     <Compile Include="Modeling\ServerT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

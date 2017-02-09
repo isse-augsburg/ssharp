@@ -1,6 +1,6 @@
 ﻿// The MIT License (MIT)
 // 
-// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
+// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -79,6 +79,17 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public int TotalServerCosts => ConnectedServers.Sum(s => s.Cost);
 
 		/// <summary>
+		/// Sets if a server adjustment is possible
+		/// </summary>
+		public ReconfStates ReconfigurationState = ReconfStates.NotSet;
+
+		/// <summary>
+		/// Constraints for server adjustment
+		/// </summary>
+		[Hidden(HideElements = true)]
+		public List<Func<bool>> Constraints { get; set; }
+
+		/// <summary>
 		/// Creates a new ProxyT instance
 		/// </summary>
 		public ProxyT()
@@ -89,7 +100,35 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			_LatestResponeTimes = new List<int>(Model.LastResponseCountForAvgTime);
 			UpdateAvgResponseTime(0); // Default start value
 
+			GenerateConstraints();
 			//IncrementServerPool();
+		}
+
+		/// <summary>
+		/// Generate reconfiguration constraints
+		/// </summary>
+		private void GenerateConstraints()
+		{
+			Constraints = new List<Func<bool>>
+			{
+				() => ConnectedServers.Count > 0,
+				() => ActiveServerCount < ConnectedServers.Count,
+				() => Model.MaxBudget > 0
+			};
+		}
+
+		/// <summary>
+		/// Checks if a reconfiguration is possible
+		/// </summary>
+		/// <returns></returns>
+		public bool CheckConstraints()
+		{
+			var constraints = Constraints.Select(constraint => constraint());
+			if(constraints.Any(constraint => !constraint))
+			{
+				return false;
+			}
+			return true;
 		}
 
 		/// <summary>
@@ -155,16 +194,16 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		}
 
 		/// <summary>
-		/// Selects a server
+		/// Selects a server, adds the query to its queue and sets <see cref="Query.SelectedServer"/>
 		/// </summary>
 		/// <param name="query">The query</param>
-		public ServerT SelectServer(Query query)
+		public void SelectServer(Query query)
 		{
-			AdjustServers();
+			//AdjustServers();
 
 			var server = RoundRobinServerSelection();
 			server.AddQuery(query);
-			return server;
+			query.SelectedServer = server;
 		}
 
 		/// <summary>
@@ -205,13 +244,16 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		}
 
 		/// <summary>
-		/// Selects the Server by round robin
+		/// Selects the Server by round robin and returns it, or null if no server available
 		/// </summary>
-		/// <returns>Selected Server</returns>
+		/// <returns>Selected Server or null if no server available</returns>
 		protected virtual ServerT RoundRobinServerSelection()
 		{
 			if(ConnectedServers.Count > _LastSelectedServer - 1)
 				_LastSelectedServer = -1;
+
+			if(ActiveServerCount < 1)
+				return null;
 
 			ServerT selected;
 			do
@@ -223,9 +265,18 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		}
 
 		/// <summary>
+		/// Update Method
+		/// </summary>
+		public override void Update()
+		{
+			if(CheckConstraints())
+				AdjustServers();
+		}
+
+		/// <summary>
 		/// In this fault, the server selection for a query fails
 		/// </summary>
-		[FaultEffect(Fault = "ServerSelectionFails")]
+		[FaultEffect(Fault = nameof(ServerSelectionFails))]
 		public class ServerSelectionFailsEffect : ProxyT
 		{
 			/// <summary>
