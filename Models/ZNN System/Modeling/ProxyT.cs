@@ -151,7 +151,13 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 				server.Deactivate();
 
 				// Add queries to active server
-				ConnectedServers.First(s => s.IsServerActive).ExecutingQueries.AddRange(server.ExecutingQueries);
+				var queries = server.ExecutingQueries;
+				var newServer = ConnectedServers.First(s => s.IsServerActive);
+				foreach(var query in queries)
+				{
+					newServer.ExecutingQueries.Add(query);
+					query.SelectedServer = newServer;
+				}
 			}
 		}
 

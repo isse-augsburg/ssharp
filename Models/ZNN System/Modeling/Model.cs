@@ -91,21 +91,24 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public List<Query> ActiveQueries => Queries.Where(x => x.State != EQueryState.Idle && x.State != EQueryState.Completed).ToList();
 
 		/// <summary>
-		/// Initializes a new instance
+		/// Initializes a new instance with default values
 		/// </summary>
 		public Model()
+			: this(10, 5) { }
+
+		public Model(int clientCount, int serverCount)
 		{
 			Proxy = new ProxyT();
 
 			// Add a few clients with Queries
-			for(int i = 0; i < 10; i++)
+			for(int i = 0; i < clientCount; i++)
 			{
-				var client = ClientT.GetNewClient(Proxy);
+				var client = ClientT.GetNewClient(Proxy, i);
 				Query.GetNewQuery(client);
 			}
 
 			// Add a few server
-			for(int i = 0; i < 5; i++)
+			for(int i = 0; i < serverCount; i++)
 			{
 				ServerT.GetNewServer(Proxy);
 			}
