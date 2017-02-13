@@ -23,7 +23,7 @@
 namespace Tests.OrganicDesignPattern.LocalReconfiguration
 {
 	using System;
-	using System.Linq;
+	using System.Collections.Generic;
 	using SafetySharp.Analysis;
 	using SafetySharp.Odp;
 	using SafetySharp.Odp.Reconfiguration;
@@ -50,6 +50,11 @@ namespace Tests.OrganicDesignPattern.LocalReconfiguration
 			consumer.Capabilities.Add(process);
 			consumer.Capabilities.Add(consume);
 
+			var controller = new CoalitionFormationController(new [] { producer, processor, consumer });
+			CreateReconfAgentHandler(producer, controller);
+			CreateReconfAgentHandler(processor, controller);
+			CreateReconfAgentHandler(consumer, controller);
+
 			producer.Connect(processor);
 			processor.Connect(consumer);
 
@@ -60,7 +65,7 @@ namespace Tests.OrganicDesignPattern.LocalReconfiguration
 			var processorRole = new Role() { PreCondition = { Task = task, Port = producer }, PostCondition = { Port = consumer, Task = task } };
 			processorRole.Initialize(producerRole.PostCondition);
 			processorRole.AddCapability(process);
-			producer.AllocateRoles(new[] { processorRole });
+			processor.AllocateRoles(new[] { processorRole });
 
 			var consumerRole = new Role() { PreCondition = { Task = task, Port = processor }, PostCondition = { Task = task } };
 			consumerRole.Initialize(processorRole.PostCondition);
@@ -91,6 +96,25 @@ namespace Tests.OrganicDesignPattern.LocalReconfiguration
 			consumer.AllocatedRoles.ShouldBe(new[] { processConsumerRole });
 		}
 
+		private void CreateReconfAgentHandler(Agent agent, IController controller)
+		{
+			agent.ReconfigurationStrategy = new ReconfigurationAgentHandler(agent,
+				(ag, handler, task) => new CoalitionReconfigurationAgent(ag, handler, controller));
+		}
+
+		private class Agent : BaseAgent
+		{
+			public const int MaxCapabilityCount = 20;
+			public readonly List<ICapability> Capabilities = new List<ICapability>(20);
+
+			public override IEnumerable<ICapability> AvailableCapabilities => Capabilities;
+
+			internal void ConfigureTask(ITask task)
+			{
+				PerformReconfiguration(new[] { Tuple.Create(task, new State(this)) });
+			}
+		}
+
 		private class Producer : Agent, ICapabilityHandler<ProduceCapability>
 		{
 			public Resource _res;
@@ -98,6 +122,7 @@ namespace Tests.OrganicDesignPattern.LocalReconfiguration
 			public void ApplyCapability(ProduceCapability capability)
 			{
 				Resource = _res;
+				Resource.OnCapabilityApplied(capability);
 			}
 		}
 

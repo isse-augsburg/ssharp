@@ -33,14 +33,16 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public CoalitionReconfigurationAgent Leader { get; }
 
-		public List<CoalitionReconfigurationAgent> Members { get; }
-			= new List<CoalitionReconfigurationAgent>();
+		public HashSet<CoalitionReconfigurationAgent> Members { get; }
+			= new HashSet<CoalitionReconfigurationAgent>();
 
 		public HashSet<ICapability> AvailableCapabilities { get; } = new HashSet<ICapability>();
 		public HashSet<ICapability> NeededCapabilities { get; } = new HashSet<ICapability>();
 
-		private Dictionary<BaseAgent, TaskCompletionSource<object>> _invitations
-			= new Dictionary<BaseAgent, TaskCompletionSource<object>>();
+		private Dictionary<BaseAgent, TaskCompletionSource<CoalitionReconfigurationAgent>> _invitations
+			= new Dictionary<BaseAgent, TaskCompletionSource<CoalitionReconfigurationAgent>>();
+
+		private bool _hasBeenMerged = false;
 
 		public BaseAgent[] RecoveredDistribution { get; }
 
@@ -48,6 +50,9 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public bool IsInvited(CoalitionReconfigurationAgent agent) => _invitations.ContainsKey(agent.BaseAgent);
 
+		/// <summary>
+		/// The connected task fragment handled by coalition memnbers
+		/// </summary>
 		public TaskFragment CTF { get; private set; }
 
 		public Coalition(CoalitionReconfigurationAgent leader, ITask task)
@@ -57,37 +62,63 @@ namespace SafetySharp.Odp.Reconfiguration
 			Join(Leader = leader);
 		}
 
-		public async Task Invite(BaseAgent agent)
+		public bool Contains(BaseAgent baseAgent)
 		{
-			if (Members.Any(member => member.BaseAgent == agent))
-				return;
+			return Members.Any(member => member.BaseAgent == baseAgent); // TODO: consider implementing more efficiently
+		}
 
-			_invitations[agent] = new TaskCompletionSource<object>();
+		public async Task<CoalitionReconfigurationAgent> Invite(BaseAgent agent)
+		{
+			{
+				var existingMember = Members.FirstOrDefault(member => member.BaseAgent == agent);
+				if (existingMember != null)
+					return existingMember;
+			}
 
-			// do not await, await invitation response (next line) instead (otherwise a deadlock occurs)
+			_invitations[agent] = new TaskCompletionSource<CoalitionReconfigurationAgent>();
+
+			// do NOT await; await invitation response (see below) instead (otherwise a deadlock occurs)
 			agent.RequestReconfiguration(Leader, Task);
 
-			await _invitations[agent].Task;
+			// wait for the invited agent to respond
+			var newMember = await _invitations[agent].Task;
 			_invitations.Remove(agent);
+
+			// invitation might have lead to coalition merge
+			if (_hasBeenMerged)
+				throw new OperationCanceledException();
+
+			return newMember;
 		}
 
 		public void Join(CoalitionReconfigurationAgent newMember)
 		{
 			Members.Add(newMember);
-			AvailableCapabilities.UnionWith(newMember.BaseAgentState.AvailableCapabilities);
-			UpdateCTF(newMember.BaseAgent);
 			newMember.CurrentCoalition = this;
 
-			if (IsInvited(newMember))
-			{
-				_invitations[newMember.BaseAgent].SetResult(null);
-				_invitations.Remove(newMember.BaseAgent);
-			}
+			AvailableCapabilities.UnionWith(newMember.BaseAgentState.AvailableCapabilities);
+			UpdateCTF(newMember.BaseAgent);
 
-			// TODO: invitation might lead to coalition merge -- if no longer leader, stop here!?
-			// TODO: (implementation: cancellation token?)
+			if (IsInvited(newMember))
+				_invitations[newMember.BaseAgent].SetResult(newMember);
 		}
 
+		public void MergeInto(Coalition otherCoalition)
+		{
+			_hasBeenMerged = true;
+
+			// cancel invitations
+			foreach (var invitation in _invitations.Values)
+				invitation.SetResult(null);
+
+			// actual merge
+			foreach (var member in Members)
+				otherCoalition.Join(member);
+		}
+
+		/// <summary>
+		/// Updates the CTF when <paramref name="newAgent"/> is added to the coalition
+		/// </summary>
 		private void UpdateCTF(BaseAgent newAgent)
 		{
 			var minPreState = -1;
@@ -98,6 +129,7 @@ namespace SafetySharp.Odp.Reconfiguration
 				if (role.Task != Task)
 					continue;
 
+				// discover which capabilities were previously applied by newAgent
 				for (var i = role.PreCondition.StateLength; i < role.PostCondition.StateLength; ++i)
 				{
 					if (RecoveredDistribution[i] != null)

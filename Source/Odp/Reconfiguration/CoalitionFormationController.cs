@@ -49,8 +49,16 @@ namespace SafetySharp.Odp.Reconfiguration
 			var config = new ConfigurationUpdate();
 			var coalition = new Coalition(leader, task);
 
-			foreach (var predicate in  leader.BaseAgentState.ViolatedPredicates)
-				await SolveInvariantViolation(coalition, predicate, task, config);
+			try
+			{
+				foreach (var predicate in leader.BaseAgentState.ViolatedPredicates)
+					await SolveInvariantViolation(coalition, predicate, task, config);
+			}
+			catch (OperationCanceledException)
+			{
+				// operation was canceled (e.g. because coalition was merged into another coalition), so produce no updates
+				return null;
+			}
 
 			return config;
 		}
@@ -72,25 +80,32 @@ namespace SafetySharp.Odp.Reconfiguration
 		/// </summary>
 		protected async Task RestoreCapabilityConsistency(Coalition coalition, ITask task, ConfigurationUpdate config)
 		{
+			await EnlargeCoalitionUntil(coalition.CapabilitiesSatisfied, coalition, RecruitableMembers(coalition));
+
 			while (true)
 			{
-				await EnlargeCoalitionUntil(coalition.CapabilitiesSatisfied, coalition, RecrutableMembers(coalition));
-
 				foreach (var distribution in CalculateCapabilityDistributions(coalition))
 				{
-					var resourceFlow = CalculateResourceFlow(coalition, distribution);
+					var reconfSuggestion = new ConfigurationSuggestion(coalition, distribution);
+
+					reconfSuggestion.ComputeTFR();
+					foreach (var edgeAgent in reconfSuggestion.EdgeAgents)
+						await coalition.Invite(edgeAgent);
+
+					var resourceFlow = await ComputeResourceFlow(reconfSuggestion);
 					if (resourceFlow != null)
 					{
-						await CalculateRoleAllocations(coalition, distribution, resourceFlow, config);
+						// TODO: use TFR to calculate role allocations
+						await ComputeRoleAllocations(reconfSuggestion, resourceFlow, config);
 						return;
 					}
 				}
 
-				// TODO: enlarge coalition to allow resource flow (?)
+				// TODO if still no path found: recruit additional agents (if further exist)
 			}
 		}
 
-		private IEnumerable<BaseAgent> RecrutableMembers(Coalition coalition)
+		private IEnumerable<BaseAgent> RecruitableMembers(Coalition coalition)
 		{
 			var memberBaseAgents = coalition.Members.Select(member => member.BaseAgent);
 
@@ -119,6 +134,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		/// </summary>
 		protected IEnumerable<BaseAgent[]> CalculateCapabilityDistributions(Coalition coalition)
 		{
+			// TODO: prefer distributions with minimal changes to previous distribution
 			var distribution = new BaseAgent[coalition.CTF.Length];
 			return CalculateCapabilityDistributions(coalition, distribution, 0);
 		}
@@ -154,16 +170,220 @@ namespace SafetySharp.Odp.Reconfiguration
 			return agent.AvailableCapabilities.Contains(capability);
 		}
 
-		protected BaseAgent[] CalculateResourceFlow(Coalition coalition, BaseAgent[] distribution)
+		protected async Task<IEnumerable<BaseAgent>> ComputeResourceFlow(ConfigurationSuggestion configurationSuggestion)
 		{
-			throw new NotImplementedException();
+			var resourceFlow = new List<BaseAgent>();
+			var agents = configurationSuggestion.AgentsToReconfigure;
+
+			for (var i = 1; i < configurationSuggestion.AgentsToReconfigure.Length; ++i)
+			{
+				var shortestPaths = ComputeShortestPaths(configurationSuggestion, agents[i - 1]);
+				IEnumerable<BaseAgent> connection = shortestPaths.GetPathFromSource(agents[i]);
+
+				if (connection == null)
+				{
+					var canFindConnection = await RecruitResourceFlowAgentsForPath(configurationSuggestion.Coalition, shortestPaths, agents[i]);
+					if (!canFindConnection)
+						return null;
+
+					connection = ComputeShortestPaths(configurationSuggestion, agents[i - 1]).GetPathFromSource(agents[i]);
+					Debug.Assert(connection != null);
+				}
+
+				if (resourceFlow.Count > 0)
+					connection = connection.Skip(1); // connection.first == resourceFlow.last => don't duplicate it
+				resourceFlow.AddRange(connection);
+				configurationSuggestion.AddResourceFlowAgents(connection);
+			}
+
+			return resourceFlow;
 		}
 
-		protected async Task CalculateRoleAllocations(Coalition coalition, BaseAgent[] distribution, BaseAgent[] resourceFlow,
+		private static ShortestPaths<BaseAgent> ComputeShortestPaths(ConfigurationSuggestion configurationSuggestion, BaseAgent source)
+		{
+			return ShortestPaths<BaseAgent>.Compute(
+				source,
+				agent => agent.Outputs.Where(neighbour => neighbour.Inputs.Contains(agent) && configurationSuggestion.Coalition.Contains(neighbour)),
+				configurationSuggestion.EdgeWeight
+			);
+		}
+
+		private async Task<bool> RecruitResourceFlowAgentsForPath(Coalition coalition, ShortestPaths<BaseAgent> shortestPathsFromSource , BaseAgent destination)
+		{
+			var visited = new HashSet<BaseAgent>();
+			var stack = new Stack<BaseAgent>();
+			stack.Push(destination);
+
+			while (stack.Count > 0)
+			{
+				var agent = stack.Pop();
+				if (visited.Contains(agent)) // avoid cycles
+					continue;
+
+				// recruit agent if not yet member
+				if (!coalition.Contains(agent))
+					await coalition.Invite(agent);
+
+				// Destination can be reached from agent (it was found by a depth-first search starting from agent).
+				// Agents reachable from node were not affected as long as recruited agents were not themselves reachable from source.
+				// Hence, once a recruited agent is reachable from source a path from source to destination exists.
+				if (shortestPathsFromSource.IsReachable(agent))
+					return true;
+
+				// push neighbours on stack
+				foreach (var neighbour in agent.Inputs)
+				{
+					// TODO: prioritize agents participating in current task
+					if (neighbour.Outputs.Contains(agent))
+						stack.Push(neighbour);
+				}
+
+				visited.Add(agent);
+			}
+
+			return false;
+		}
+
+		protected async Task ComputeRoleAllocations(Coalition coalition, BaseAgent[] distribution, BaseAgent[] resourceFlow,
 												ConfigurationUpdate config)
 		{
 			await Task.Yield();
 			throw new NotImplementedException();
+		}
+
+		protected class ConfigurationSuggestion
+		{
+			public Coalition Coalition { get; }
+			private readonly BaseAgent[] _ctfDistribution;
+
+			private TaskFragment _tfr;
+			private Role _firstRole;
+			private Role _lastRole;
+
+			public ISet<BaseAgent> EdgeAgents { get; private set; }
+			private BaseAgent _startEdgeAgent;
+			private BaseAgent _endEdgeAgent;
+			private HashSet<BaseAgent> _coreAgents;
+			private readonly HashSet<BaseAgent> _resourceFlowAgents = new HashSet<BaseAgent>();
+
+			private List<BaseAgent> _resourceFlow;
+
+			public BaseAgent[] AgentsToReconfigure { get; private set; }
+
+			public ConfigurationSuggestion(Coalition coalition, BaseAgent[] ctfDistribution)
+			{
+				Coalition = coalition;
+				_ctfDistribution = ctfDistribution;
+			}
+
+			/// <summary>
+			/// Identifies the task fragment to reconfigure, i.e. the minimal subfragment of CTF
+			/// where old and suggested new capability distribution differ.
+			/// </summary>
+			public void ComputeTFR()
+			{
+				// TODO: handle branches in resource flow (non-unique distribution, TFR start & end, edge agents)
+				// TODO: handle TFR = []
+
+				var ctf = Coalition.CTF;
+				var oldDistribution = Coalition.RecoveredDistribution;
+
+				// find first modified capability allocation (inside CTF)
+				var tfrStart = ctf.Start;
+				while (tfrStart < ctf.End && _ctfDistribution[tfrStart - ctf.Start] == oldDistribution[tfrStart])
+					tfrStart++;
+
+				// find last modified capability allocation (inside CTF)
+				var tfrEnd = ctf.End;
+				while (tfrEnd > ctf.Start && _ctfDistribution[tfrEnd - ctf.Start] == oldDistribution[tfrEnd])
+					tfrEnd--;
+
+				// find role containing the first and modified capability, respectively
+				_firstRole = FindRoleForCapability(tfrStart);
+				_lastRole = FindRoleForCapability(tfrEnd);
+
+				_tfr = new TaskFragment(Coalition.Task, tfrStart, tfrEnd);
+
+				FindCoreAgents();
+				FindEdgeAgents();
+
+				AgentsToReconfigure = new[] { _startEdgeAgent } // edge agent preceeding TFR
+					.Concat(_ctfDistribution.Skip(_tfr.Start - Coalition.CTF.Start).Take(_tfr.Length)) // core agents
+					.Concat(new[] { _endEdgeAgent }) // edge agent following TFR
+					.Distinct()
+					.Where(agent => agent != null)
+					.ToArray();
+
+			}
+
+			private Role FindRoleForCapability(int capabilityIndex)
+			{
+				var agent = Coalition.RecoveredDistribution[capabilityIndex];
+				return Enumerable.Range(0, capabilityIndex + 1) // possible start indices of the role
+					.SelectMany(roleStart =>
+								agent.AllocatedRoles.Where(role => role.PreCondition.StateLength == roleStart) // roles starting at the given index
+					).Single(); // since branches in the resource flow are not permitted, there should be exactly one
+			}
+
+			private void FindCoreAgents()
+			{
+				// core agents are:
+				//  (1) agents that will receive new roles, as indicated in _ctfDistribution (restricted to TFR)
+				//  (2) agents that will lose roles, because they either previously applied a capability in TFR
+				//     or transported resources between such agents
+				_coreAgents = new HashSet<BaseAgent>(
+					_ctfDistribution.Skip(_tfr.Start - Coalition.CTF.Start).Take(_tfr.Length) // (1)
+				);
+
+				// (2): go along the resource flow path, fron _tfr.Start to _tfr.End
+				var current = Coalition.RecoveredDistribution[_tfr.Start];
+				var currentPos = _tfr.Start;
+				while (currentPos < _tfr.End)
+				{
+					_coreAgents.Add(current);
+					var currentRole = current.AllocatedRoles
+											 .First(role => role.Task == Coalition.Task && role.PreCondition.StateLength == currentPos);
+					currentPos = currentRole.PostCondition.StateLength;
+					current = currentRole.PostCondition.Port;
+				}
+			}
+
+			private void FindEdgeAgents()
+			{
+				// edge agents are agents that send/receive resources to/from the first/last role
+				EdgeAgents = new HashSet<BaseAgent>();
+
+				if (_tfr.Start != 0)
+				{
+					_startEdgeAgent = _firstRole.PreCondition.Port;
+					EdgeAgents.Add(_startEdgeAgent);
+				}
+
+				if (_tfr.End != Coalition.Task.RequiredCapabilities.Length - 1)
+				{
+					_endEdgeAgent = _lastRole.PostCondition.Port;
+					EdgeAgents.Add(_endEdgeAgent);
+				}
+			}
+
+			/// <summary>
+			/// Adds agents in <paramref name="connection"/> which are neither core nor edge agents to the set of resource flow agents.
+			/// </summary>
+			public void AddResourceFlowAgents(IEnumerable<BaseAgent> connection)
+			{
+				foreach (var agent in connection)
+				{
+					if (!_coreAgents.Contains(agent) && !EdgeAgents.Contains(agent))
+						_resourceFlowAgents.Add(agent);
+				}
+			}
+
+			internal int EdgeWeight(BaseAgent from, BaseAgent to)
+			{
+				if (_coreAgents.Contains(to) || EdgeAgents.Contains(to) || _resourceFlowAgents.Contains(to))
+					return 1;
+				return 2 * Coalition.Members.Count;
+			}
 		}
 	}
 }
