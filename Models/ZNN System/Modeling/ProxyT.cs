@@ -84,10 +84,15 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public ReconfStates ReconfigurationState = ReconfStates.NotSet;
 
 		/// <summary>
-		/// Constraints for server adjustment
+		/// Constraints for reconfiguration and server adjustment
 		/// </summary>
 		[Hidden(HideElements = true)]
 		public List<Func<bool>> Constraints { get; set; }
+
+		/// <summary>
+		/// The current server fidelity set by <see cref="SetAllServerFidelity"/>
+		/// </summary>
+		private EServerFidelity CurrentServerFidelity { get; set; }
 
 		/// <summary>
 		/// Creates a new ProxyT instance
@@ -102,6 +107,8 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 
 			GenerateConstraints();
 			//IncrementServerPool();
+			
+			CurrentServerFidelity = EServerFidelity.High;
 		}
 
 		/// <summary>
@@ -111,14 +118,21 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		{
 			Constraints = new List<Func<bool>>
 			{
+				// Reconfiguration Possible, returns true if possible
 				() => ConnectedServers.Count > 0,
-				() => ActiveServerCount < ConnectedServers.Count,
-				() => Model.MaxBudget > 0
+				() => Model.MaxBudget > 0,
+				() => ConnectedServers.Count(s => s is ServerT.ServerDeathEffect) < ConnectedServers.Count,
+
+				// Adjustment needed, returns false if not needed
+				() => AvgResponseTime > Model.HighResponseTimeValue ||
+					  AvgResponseTime < Model.LowResponseTimeValue ||
+					  TotalServerCosts < Model.MaxBudget ||
+					  TotalServerCosts > (Model.MaxBudget * 0.75)
 			};
 		}
 
 		/// <summary>
-		/// Checks if a reconfiguration is possible
+		/// Checks if a reconfiguration is possible and needed
 		/// </summary>
 		/// <returns></returns>
 		public bool CheckConstraints()
@@ -185,6 +199,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		{
 			foreach(var server in ConnectedServers)
 				server.Fidelity = fidelity;
+			CurrentServerFidelity = fidelity;
 		}
 
 		/// <summary>
@@ -275,8 +290,21 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		public override void Update()
 		{
-			if(CheckConstraints())
+			var isReconfNeeded = CheckConstraints();
+			var oldActiveServerCount = ActiveServerCount;
+			var oldServerFidelity = CurrentServerFidelity;
+
+			if(isReconfNeeded)
+			{
 				AdjustServers();
+				ReconfigurationState = ReconfStates.Succedded;
+			}
+
+			if(isReconfNeeded && (oldActiveServerCount == ActiveServerCount && oldServerFidelity == CurrentServerFidelity))
+			{
+				ReconfigurationState = ReconfStates.Failed;
+				throw new Exception("Not reconfigurated");
+			}
 		}
 
 		/// <summary>
