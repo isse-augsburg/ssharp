@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using SafetySharp.Modeling;
 
@@ -51,6 +52,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public readonly Fault CannotExecuteQueries = new TransientFault();
 
 		/// <summary>
+		/// This faults prevents the server to do anything
+		/// </summary>
+		public readonly Fault ServerDeath = new TransientFault();
+
+		/// <summary>
 		/// Currently available units of the server. 0 Means the server is inactive.
 		/// </summary>
 		public int AvailableServerUnits { get; private set; }
@@ -58,7 +64,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Is the server active and can execute queries
 		/// </summary>
-		public bool IsServerActive => AvailableServerUnits > 0;
+		public virtual bool IsServerActive => AvailableServerUnits > 0;
 
 		/// <summary>
 		/// Maximum available units of the server.
@@ -170,9 +176,10 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// Adds the query to the list to be executing
 		/// </summary>
 		/// <param name="query">The query</param>
-		public void AddQuery(Query query)
+		public virtual bool AddQuery(Query query)
 		{
 			ExecutingQueries.Add(query);
+			return true;
 		}
 
 		/// <summary>
@@ -198,7 +205,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Prevents the server activation to activate a server
 		/// </summary>
-		[FaultEffect(Fault = "ServerCannotActivated")]
+		[FaultEffect(Fault = nameof(ServerCannotActivated))]
 		public class ServerCannotActivatedEffect : ServerT
 		{
 			/// <summary>
@@ -214,7 +221,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Prevents the server activation to deactivate a server
 		/// </summary>
-		[FaultEffect(Fault = "ServerCannotDeactivated")]
+		[FaultEffect(Fault = nameof(ServerCannotDeactivated))]
 		public class ServerCannotDeactivatedEffect : ServerT
 		{
 			/// <summary>
@@ -230,7 +237,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Prevents the server to change the fidelity
 		/// </summary>
-		[FaultEffect(Fault = "SetServerFidelityFails")]
+		[FaultEffect(Fault = nameof(SetServerFidelityFails))]
 		public class SetServerFidelityFailsEffect : ServerT
 		{
 			/// <summary>
@@ -242,7 +249,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Prevents the server to execute a query
 		/// </summary>
-		[FaultEffect(Fault = "CannotExecuteQueries")]
+		[FaultEffect(Fault = nameof(CannotExecuteQueries))]
 		public class CannotExecuteQueriesEffect : ServerT
 		{
 			/// <summary>
@@ -251,6 +258,60 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			/// <param name="query">The query</param>
 			/// <returns>True if the query was executed</returns>
 			public override bool ExecuteQueryStep(Query query)
+			{
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Prevents the server to do anything
+		/// </summary>
+		[FaultEffect(Fault = nameof(ServerDeath))]
+		public class ServerDeathEffect : ServerT
+		{
+			/// <summary>
+			/// Current content fidelity level of the server.
+			/// </summary>
+			public override EServerFidelity Fidelity => _Fidelity;
+
+			/// <summary>
+			/// Is the server active and can execute queries
+			/// </summary>
+			public override bool IsServerActive => false;
+
+			/// <summary>
+			/// Simulates an execution step of the query and returns true if the query was executed
+			/// </summary>
+			/// <param name="query">The query</param>
+			/// <returns>True if the query was executed</returns>
+			public override bool ExecuteQueryStep(Query query)
+			{
+				return false;
+			}
+
+			/// <summary>
+			/// Activates the server
+			/// </summary>
+			/// <returns></returns>
+			public override bool Activate()
+			{
+				return false;
+			}
+
+			/// <summary>
+			/// Deactivates the server
+			/// </summary>
+			/// <returns></returns>
+			public override bool Deactivate()
+			{
+				return false;
+			}
+
+			/// <summary>
+			/// Adds the query to the list to be executing
+			/// </summary>
+			/// <param name="query">The query</param>
+			public override bool AddQuery(Query query)
 			{
 				return false;
 			}
