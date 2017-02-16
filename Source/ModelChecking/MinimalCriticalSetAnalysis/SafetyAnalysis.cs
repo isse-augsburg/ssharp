@@ -29,7 +29,7 @@ namespace SafetySharp.Analysis
 	using System.Runtime.CompilerServices;
 	using FormulaVisitors;
 	using Heuristics;
-	using ISSE.ModelChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutableModel;
 	using Modeling;
 	using Runtime;
 	using SafetyChecking;

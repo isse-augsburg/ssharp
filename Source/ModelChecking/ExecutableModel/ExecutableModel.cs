@@ -29,7 +29,7 @@ namespace SafetySharp.Runtime
 	using System.Linq.Expressions;
 	using System.Runtime.CompilerServices;
 	using Analysis;
-	using ISSE.ModelChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutableModel;
 	using Modeling;
 	using Serialization;
 	using Utilities;

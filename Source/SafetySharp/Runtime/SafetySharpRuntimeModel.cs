@@ -30,7 +30,7 @@ namespace SafetySharp.Runtime
 	using System.Runtime.Serialization.Formatters.Binary;
 	using Analysis;
 	using CompilerServices;
-	using ISSE.ModelChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutableModel;
 	using Modeling;
 	using Serialization;
 	using Utilities;

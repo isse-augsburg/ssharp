@@ -24,7 +24,7 @@ namespace SafetySharp.Analysis.ModelChecking
 {
 	using System;
 	using System.Threading;
-	using ISSE.ModelChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutableModel;
 	using ModelTraversal;
 	using Runtime;
 	using Transitions;

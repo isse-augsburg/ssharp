@@ -25,7 +25,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System;
 	using System.Linq;
 	using FormulaVisitors;
-	using ISSE.ModelChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutableModel;
 	using Modeling;
 	using Runtime;
 	using Transitions;
@@ -35,7 +35,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="SafetySharpRuntimeModel" /> with
 	///   probabilistic transitions.
 	/// </summary>
-	internal sealed class LtmdpExecutedModel<TExecutableModel> : ExecutedModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed class LtmcExecutedModel<TExecutableModel> : ExecutedModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 
 		internal enum EffectlessFaultsMinimizationMode
@@ -46,7 +46,7 @@ namespace SafetySharp.Analysis.ModelChecking
 
 		private readonly EffectlessFaultsMinimizationMode _minimalizationMode = EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults;
 
-		private readonly LtmdpTransitionSetBuilder<TExecutableModel> _transitions;
+		private readonly LtmcTransitionSetBuilder<TExecutableModel> _transitions;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -56,21 +56,20 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// <param name="stateHeaderBytes">
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
-		internal LtmdpExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, long successorStateCapacity)
-			: base(runtimeModelCreator,stateHeaderBytes)
+		internal LtmcExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, long successorStateCapacity)
+			: base(runtimeModelCreator, stateHeaderBytes)
 		{
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
-			_transitions = new LtmdpTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
-
-			ChoiceResolver = new LtmdpChoiceResolver();
+			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
+			
+			ChoiceResolver = new LtmcChoiceResolver();
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
-
 		}
 
 		/// <summary>
 		///   Gets the size of a single transition of the model in bytes.
 		/// </summary>
-		public override unsafe int TransitionSize => sizeof(LtmdpTransition);
+		public override unsafe int TransitionSize => sizeof(LtmcTransition);
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.

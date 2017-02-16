@@ -1,0 +1,230 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A91CB8AF-8A4C-4F69-848E-B3962F9A94F9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ISSE.SafetyChecking</RootNamespace>
+    <AssemblyName>ISSE.SafetyChecking</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Binaries\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Binaries\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="JetBrains.Annotations, Version=10.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\JetBrains.Annotations.10.0.0\lib\net20\JetBrains.Annotations.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AnalysisModelTraverser\AnalysisConfiguration.cs" />
+    <Compile Include="AnalysisModel\AnalysisModel.cs" />
+    <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
+    <Compile Include="Formula\FormulaVisitors\IsFormulasStructurallyEquivalentVisitor.cs" />
+    <Compile Include="Formula\FormulaVisitors\StateFormulaSetEvaluatorCompilationVisitor2.cs" />
+    <Compile Include="Formula\FormulaVisitors\TransferFormulaToNewExecutedModelInstanceVisitor .cs" />
+    <Compile Include="Formula\FormulaVisitors\CollectAtomarPropositionFormulasVisitor.cs" />
+    <Compile Include="AnalysisModelTraverser\AnalysisException.cs" />
+    <Compile Include="AnalysisModel\AnalysisResult.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\FaultActivationBehavior.cs" />
+    <Compile Include="Formula\FormulaVisitors\IsFormulaReturningBoolValueVisitor.cs" />
+    <Compile Include="Formula\FormulaVisitors\IsFormulaReturningRewardResultVisitor.cs" />
+    <Compile Include="Formula\FormulaVisitors\IsLtlFormulaVisitor.cs" />
+    <Compile Include="Formula\FormulaVisitors\IsStateFormulaVisitor.cs" />
+    <Compile Include="Formula\FormulaVisitors\LabelingVectorFormulaEvaluatorCompilationVisitor.cs" />
+    <Compile Include="Formula\FormulaVisitors\LtsMinLtlTransformer.cs" />
+    <Compile Include="Formula\FormulaVisitors\PrismTransformer.cs" />
+    <Compile Include="Formula\FormulaVisitors\FormulaCompilationVisitor.cs" />
+    <Compile Include="ExecutedModel\ModelByteSize.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\ActivationMinimalExecutedModel.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\InvariantChecker.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\DeadlockChecker.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\FaultOrderModifier.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\FaultSuppressionModifier.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\InvariantViolationAction.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\InvariantViolationByIndexAction.cs" />
+    <Compile Include="StateGraphModel\TraversalModifiers\StateGraphBuilder.cs" />
+    <Compile Include="AnalysisModelTraverser\ModelTraverser.cs" />
+    <Compile Include="StateGraphModel\StateGraph.cs" />
+    <Compile Include="StateGraphModel\StateGraphGenerator.cs" />
+    <Compile Include="StateGraphModel\StateGraphModel.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\ActivationMinimalTransitionSetBuilder.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\OrderAnalysis.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\OrderAnalysisResults.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\OrderRelationship.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\OrderRelationshipKind.cs" />
+    <Compile Include="GenericDataStructures\AutoResizeVector.cs" />
+    <Compile Include="GenericDataStructures\BidirectionalGraph.cs" />
+    <Compile Include="GenericDataStructures\BidirectionalGraphT.cs" />
+    <Compile Include="MarkovDecisionProcess\BoundsToCalculate.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\BuiltinDtmcModelChecker.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\DiscreteTimeMarkovChain.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\DtmcFromExecutableModelGenerator.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\DtmcModelChecker.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\DtmcToGv.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\DtmcToMrmc.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\ExternalDtmcModelCheckerMrmc.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LabeledTransitionMarkovChain.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LabeledTransitionMarkovChain2.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\TraversalModifiers\LtmcBuilder.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcChoiceResolver.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcExecutedModel.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcGenerator.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcProbabilityStack.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcToDtmc.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcTransition.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcTransitionSetBuilder.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\MrmcTransformer.cs" />
+    <Compile Include="AnalysisModelTraverser\TraversalModifiers\EarlyTerminationModifier.cs" />
+    <Compile Include="AnalysisModelTraverser\IModelWithStateLabelingInLabelingVector.cs" />
+    <Compile Include="MarkovDecisionProcess\BuiltinMdpModelChecker.cs" />
+    <Compile Include="MarkovDecisionProcess\ExternalMdpModelCheckerPrism.cs" />
+    <Compile Include="MarkovDecisionProcess\LabeledTransitionMarkovDecisionProcess.cs" />
+    <Compile Include="MarkovDecisionProcess\TraversalModifiers\LtmdpBuilder.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpChoiceResolver.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpExecutedModel.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpGenerator.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpProbabilityStack.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpToMdp.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpTransition.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpTransitionSetBuilder.cs" />
+    <Compile Include="MarkovDecisionProcess\MarkovDecisionProcess.cs" />
+    <Compile Include="MarkovDecisionProcess\MdpFromExecutableModelGenerator.cs" />
+    <Compile Include="MarkovDecisionProcess\MdpModelChecker.cs" />
+    <Compile Include="MarkovDecisionProcess\MdpToGv.cs" />
+    <Compile Include="MarkovDecisionProcess\MdpToPrism.cs" />
+    <Compile Include="MarkovDecisionProcess\PrismProcess.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\RewardRetrieverCollector.cs" />
+    <Compile Include="GenericDataStructures\SparseDoubleMatrix.cs" />
+    <Compile Include="Formula\FormulaVisitors\StateFormulaSetEvaluatorCompilationVisitor.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\QualitativeChecker.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\SafetyAnalysis.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\SafetyAnalysisBackend.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\SafetyAnalysisResults.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\AnalysisBackend.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\FaultOptimizationBackend.cs" />
+    <Compile Include="StateGraphModel\StateGraphBackend.cs" />
+    <Compile Include="Simulator\Simulator.cs" />
+    <Compile Include="Formula\AtomarPropositionFormula.cs" />
+    <Compile Include="Formula\BinaryFormula.cs" />
+    <Compile Include="Formula\BinaryOperator.cs" />
+    <Compile Include="ExecutableModel\CounterExampleSerialization.cs" />
+    <Compile Include="ModelingArtifacts\PermanentFault.cs" />
+    <Compile Include="ModelingArtifacts\TransientFault.cs" />
+    <Compile Include="Properties\InternalsVisibleTo.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InternalsVisibleTo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MinimalCriticalSetAnalysis\IFaultSetHeuristic.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\MaximalSafeSetHeuristic.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\MinimalRedundancyHeuristic.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\SubsumptionHeuristic.cs" />
+    <Compile Include="ModelingArtifacts\Activation.cs" />
+    <Compile Include="ModelingArtifacts\Fault.cs" />
+    <Compile Include="ModelingArtifacts\Reward.cs" />
+    <Compile Include="ExecutableModel\Choice.cs" />
+    <Compile Include="ExecutableModel\ChoiceResolver.cs" />
+    <Compile Include="AnalysisModelTraverser\ChoiceStack.cs" />
+    <Compile Include="ExecutableModel\CounterExample.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\FaultSet.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\FaultSetCollection.cs" />
+    <Compile Include="Formula\Formula.cs" />
+    <Compile Include="Formula\FormulaVisitor.cs" />
+    <Compile Include="Formula\ToStringVisitor.cs" />
+    <Compile Include="ModelingArtifacts\Probability.cs" />
+    <Compile Include="ModelingArtifacts\ProbabilityRange.cs" />
+    <Compile Include="AnalysisModelTraverser\LoadBalancer.cs" />
+    <Compile Include="AnalysisModelTraverser\StateStack.cs" />
+    <Compile Include="AnalysisModelTraverser\StateStorage.cs" />
+    <Compile Include="AnalysisModelTraverser\TraversalContext.cs" />
+    <Compile Include="AnalysisModelTraverser\TraversalModifiers\IBatchedTransitionAction.cs" />
+    <Compile Include="AnalysisModelTraverser\TraversalModifiers\IStateAction.cs" />
+    <Compile Include="AnalysisModelTraverser\TraversalModifiers\ITransitionAction.cs" />
+    <Compile Include="AnalysisModelTraverser\TraversalModifiers\ITransitionModifier.cs" />
+    <Compile Include="AnalysisModelTraverser\TraversalParameters.cs" />
+    <Compile Include="AnalysisModelTraverser\Worker.cs" />
+    <Compile Include="Formula\ProbabilitisticFormula.cs" />
+    <Compile Include="Formula\RewardFormula.cs" />
+    <Compile Include="Formula\RewardRetriever.cs" />
+    <Compile Include="ExecutableModel\ExecutableModel.cs" />
+    <Compile Include="ExecutedModel\ExecutedModel.cs" />
+    <Compile Include="AnalysisModelTraverser\NondeterminismException.cs" />
+    <Compile Include="ExecutableModel\NondeterministicChoiceResolver.cs" />
+    <Compile Include="ExecutableModel\SerializationDelegate.cs" />
+    <Compile Include="AnalysisModel\StateFormulaSet.cs" />
+    <Compile Include="AnalysisModel\CandidateTransition.cs" />
+    <Compile Include="AnalysisModel\Transition.cs" />
+    <Compile Include="AnalysisModel\TransitionCollection.cs" />
+    <Compile Include="AnalysisModel\TransitionEnumerator.cs" />
+    <Compile Include="StateGraphModel\StateGraphTransitionSetBuilder.cs" />
+    <Compile Include="Formula\UnaryFormula.cs" />
+    <Compile Include="Formula\UnaryOperator.cs" />
+    <Compile Include="Utilities\Assert.cs" />
+    <Compile Include="Utilities\CodeWriter.cs" />
+    <Compile Include="Utilities\ConsoleHelpers.cs" />
+    <Compile Include="Utilities\DisposableExtensions.cs" />
+    <Compile Include="Utilities\DisposableObject.cs" />
+    <Compile Include="Utilities\ExternalProcess.cs" />
+    <Compile Include="Utilities\InterlockedExtensions.cs" />
+    <Compile Include="Utilities\MemoryBuffer.cs" />
+    <Compile Include="Utilities\PinnedPointer.cs" />
+    <Compile Include="Utilities\ReferenceEqualityComparer.cs" />
+    <Compile Include="Utilities\Requires.cs" />
+    <Compile Include="Utilities\TemporaryFile.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Properties\InternalsVisibleTo.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>InternalsVisibleTo.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

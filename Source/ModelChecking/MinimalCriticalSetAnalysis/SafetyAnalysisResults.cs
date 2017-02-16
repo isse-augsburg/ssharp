@@ -32,7 +32,7 @@ namespace SafetySharp.Analysis
 	using Runtime;
 	using Utilities;
 	using Analysis;
-	using ISSE.ModelChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutableModel;
 
 	/// <summary>
 	///   Represents the result of a <see cref="SafetyAnalysis" />.

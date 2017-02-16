@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace ISSE.ModelChecking.ExecutableModel
+namespace ISSE.SafetyChecking.ExecutableModel
 {
 	using System;
 	using SafetySharp.Analysis;
@@ -39,7 +39,7 @@ namespace ISSE.ModelChecking.ExecutableModel
 		public Func<int,TExecutableModel> Create { get; }
 
 		// Contains the source model. Depending on TExecutableModel, it might be a class instance or a string to a file name, or whatever.
-		// Code in ISSE.ModelChecking does not depend on it.
+		// Code in ISSE.SafetyChecking does not depend on it.
 		public object SourceModel{ get; }
 
 
@@ -76,7 +76,7 @@ namespace ISSE.ModelChecking.ExecutableModel
 		}
 
 		// Contains the source model. Depending on TExecutableModel, it might be a class instance or a string to a file name, or whatever.
-		// Code in ISSE.ModelChecking does not depend on it.
+		// Code in ISSE.SafetyChecking does not depend on it.
 		public object SourceModel { get; private set; }
 
 

@@ -25,7 +25,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System;
 	using System.Linq;
 	using FormulaVisitors;
-	using ISSE.ModelChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutableModel;
 	using Modeling;
 	using Runtime;
 	using Transitions;
@@ -33,52 +33,44 @@ namespace SafetySharp.Analysis.ModelChecking
 
 	/// <summary>
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="SafetySharpRuntimeModel" /> with
-	///   activation-minimal transitions.
+	///   probabilistic transitions.
 	/// </summary>
-	internal sealed class ActivationMinimalExecutedModel<TExecutableModel> : ExecutedModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed class LtmdpExecutedModel<TExecutableModel> : ExecutedModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private readonly Func<bool>[] _stateConstraints;
-		private readonly ActivationMinimalTransitionSetBuilder<TExecutableModel> _transitions;
 
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
-		/// <param name="stateHeaderBytes">
-		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
-		/// </param>
-		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ActivationMinimalExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, long successorStateCapacity)
-			: this(runtimeModelCreator, stateHeaderBytes, null, successorStateCapacity)
+		internal enum EffectlessFaultsMinimizationMode
 		{
+			DontActivateEffectlessTransientFaults, //only restrict to transient faults
+			Disable
 		}
 
+		private readonly EffectlessFaultsMinimizationMode _minimalizationMode = EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults;
+
+		private readonly LtmdpTransitionSetBuilder<TExecutableModel> _transitions;
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
-		/// <param name="formulas">The formulas that should be evaluated for each state.</param>
 		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
 		/// <param name="stateHeaderBytes">
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
-		internal ActivationMinimalExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, Func<bool>[] formulas, long successorStateCapacity)
-			: base(runtimeModelCreator, stateHeaderBytes)
+		internal LtmdpExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, long successorStateCapacity)
+			: base(runtimeModelCreator,stateHeaderBytes)
 		{
-			formulas = formulas ?? RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel,formula)).ToArray();
+			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
+			_transitions = new LtmdpTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
 
-			_transitions = new ActivationMinimalTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
-			_stateConstraints = RuntimeModel.StateConstraints;
-
-			ChoiceResolver = new NondeterministicChoiceResolver();
-			
+			ChoiceResolver = new LtmdpChoiceResolver();
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
+
 		}
 
 		/// <summary>
 		///   Gets the size of a single transition of the model in bytes.
 		/// </summary>
-		public override unsafe int TransitionSize => sizeof(CandidateTransition);
+		public override unsafe int TransitionSize => sizeof(LtmdpTransition);
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
@@ -97,7 +89,31 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		protected override void ExecuteInitialTransition()
 		{
+			//TODO: _resetRewards();
+
 			RuntimeModel.ExecuteInitialStep();
+
+			switch (_minimalizationMode)
+			{
+				case EffectlessFaultsMinimizationMode.Disable:
+					// Activate all faults
+					// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
+					foreach (var fault in RuntimeModel.NondeterministicFaults)
+					{
+						fault.TryActivate();
+					}
+					break;
+				case EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults:
+					// Activate all non-transient faults
+					foreach (var fault in RuntimeModel.NondeterministicFaults)
+					{
+						if (!(fault is Modeling.TransientFault))
+							fault.TryActivate();
+					}
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 
 		/// <summary>
@@ -105,7 +121,40 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		protected override void ExecuteTransition()
 		{
+			//TODO: _resetRewards();
+
 			RuntimeModel.ExecuteStep();
+
+
+			switch (_minimalizationMode)
+			{
+				case EffectlessFaultsMinimizationMode.Disable:
+					// Activate all faults
+					// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
+					foreach (var fault in RuntimeModel.NondeterministicFaults)
+					{
+						fault.TryActivate();
+					}
+					break;
+				case EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults:
+					// Activate all non-transient faults
+					foreach (var fault in RuntimeModel.NondeterministicFaults)
+					{
+						if (!(fault is Modeling.TransientFault))
+							fault.TryActivate();
+					}
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+		
+		/// <summary>
+		///	  The probability to reach the current state from its predecessor from the last transition.
+		/// </summary>
+		public Probability GetProbability()
+		{
+			return ChoiceResolver.CalculateProbabilityOfPath();
 		}
 
 		/// <summary>
@@ -113,14 +162,7 @@ namespace SafetySharp.Analysis.ModelChecking
 		/// </summary>
 		protected override void GenerateTransition()
 		{
-			// Ignore transitions leading to a state with one or more violated state constraints
-			foreach (var constraint in _stateConstraints)
-			{
-				if (!constraint())
-					return;
-			}
-
-			_transitions.Add(RuntimeModel);
+			_transitions.Add(RuntimeModel, GetProbability().Value);
 		}
 
 		/// <summary>

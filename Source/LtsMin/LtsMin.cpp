@@ -49,7 +49,7 @@ extern "C"
 // S# includes
 //---------------------------------------------------------------------------------------------------------------------------
 #using "SafetySharp.Modeling.dll" as_friend
-#using "ISSE.ModelChecking.dll" as_friend
+#using "ISSE.SafetyChecking.dll" as_friend
 
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ using namespace SafetySharp::Analysis::ModelChecking;
 using namespace SafetySharp::Analysis::ModelChecking::Transitions;
 using namespace SafetySharp::Runtime;
 using namespace SafetySharp::Runtime::Serialization;
-using namespace ISSE::ModelChecking::ExecutableModel;
+using namespace ISSE::SafetyChecking::ExecutableModel;
 
 //---------------------------------------------------------------------------------------------------------------------------
 // Assembly metadata

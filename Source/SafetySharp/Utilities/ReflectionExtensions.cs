@@ -297,7 +297,7 @@ namespace SafetySharp.Utilities
 
 		/// <summary>
 		///   Checks whether the <paramref name="member" /> is hidden in the serialization <paramref name="mode" />,
-		///   because it is a irrelevant field of ISSE.ModelChecking, which might appear in the model.
+		///   because it is a irrelevant field of ISSE.SafetyChecking, which might appear in the model.
 		/// </summary>
 		private static bool IsHiddenClassOfModelChecking(this MemberInfo member, SerializationMode mode, bool discoveringObjects)
 		{

@@ -33,7 +33,7 @@ namespace SafetySharp.Analysis
 	using System.Threading;
 	using System.Threading.Tasks;
 	using FormulaVisitors;
-	using ISSE.ModelChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutableModel;
 	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
@@ -41,13 +41,13 @@ namespace SafetySharp.Analysis
 	using ModelChecking;
 	
 	
-	public class DtmcFromExecutableModelGenerator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	public class MdpFromExecutableModelGenerator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
 		/// </summary>
 		public event Action<string> OutputWritten = Console.WriteLine;
-		
+
 		private readonly ExecutableModelCreator<TExecutableModel> _runtimeModelCreator;
 		private readonly List<Formula> _formulasToCheck = new List<Formula>();
 
@@ -58,33 +58,37 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
 
-		public bool ProbabilityMatrixCreationStarted { get; private set; } = false;
+		public bool ProbabilityMatrixCreationStarted { get; private set; }= false;
 
 		// Create Tasks which make the checks (workers)
 		// First formulas to check are collected (thus, the probability matrix only has to be calculated once)
-		public DtmcFromExecutableModelGenerator(ExecutableModelCreator<TExecutableModel> runtimeModelCreator)
+		public MdpFromExecutableModelGenerator(ExecutableModelCreator<TExecutableModel> runtimeModelCreator)
 		{
 			Requires.NotNull(runtimeModelCreator, nameof(runtimeModelCreator));
 			_runtimeModelCreator = runtimeModelCreator;
 		}
-		
+
+
 
 		/// <summary>
 		///   Generates a <see cref="StateGraph" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		private DiscreteTimeMarkovChain GenerateMarkovChain(Func<AnalysisModel<TExecutableModel>> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas)
+		private MarkovDecisionProcess GenerateMarkovDecisionProcess(Func<AnalysisModel<TExecutableModel>> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas)
 		{
-			using (var checker = new LtmcGenerator<TExecutableModel>(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
+			using (var checker = new LtmdpGenerator<TExecutableModel>(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
 			{
-				var labeledTransitionMarkovChain = checker.GenerateStateGraph();
-				var ltmcToMc = new LtmcToDtmc(labeledTransitionMarkovChain);
-				var markovChain = ltmcToMc.MarkovChain;
-				return markovChain;
+				var ltmdp = checker.GenerateStateGraph();
+				var ltmdpToMdp = new LtmdpToMdp(ltmdp);
+				var mdp = ltmdpToMdp.MarkovDecisionProcess;
+				return mdp;
 			}
 		}
-		
 
-		public DiscreteTimeMarkovChain GenerateMarkovChain(Formula terminateEarlyCondition = null)
+
+		/// <summary>
+		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
+		/// </summary>
+		public MarkovDecisionProcess GenerateMarkovDecisionProcess(Formula terminateEarlyCondition = null)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
 
@@ -104,10 +108,11 @@ namespace SafetySharp.Analysis
 			ExecutedModel<TExecutableModel> model = null;
 			var modelCreator = _runtimeModelCreator.CreateCoupledModelCreator(stateFormulas);
 			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
-				model = new LtmcExecutedModel<TExecutableModel>(modelCreator, 0, Configuration.SuccessorCapacity);
-			
-			return GenerateMarkovChain(createAnalysisModel,terminateEarlyCondition, stateFormulas);
+				model = new LtmdpExecutedModel<TExecutableModel>(modelCreator, 0, Configuration.SuccessorCapacity);
+
+			return GenerateMarkovDecisionProcess(createAnalysisModel, terminateEarlyCondition, stateFormulas);
 		}
+
 
 
 		public void AddFormulaToCheck(Formula formula)
@@ -117,7 +122,7 @@ namespace SafetySharp.Analysis
 			Interlocked.MemoryBarrier();
 			if ((bool)ProbabilityMatrixCreationStarted)
 			{
-				throw new Exception(nameof(AddFormulaToCheck) + " must be called before " + nameof(GenerateMarkovChain));
+				throw new Exception(nameof(AddFormulaToCheck) + " must be called before " + nameof(GenerateMarkovDecisionProcess));
 			}
 			_formulasToCheck.Add(formula);
 		}

@@ -28,7 +28,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 	/// <summary>
 	///   Creates a set of <see cref="CandidateTransition" /> instances.
 	/// </summary>
-	internal sealed unsafe class TransitionSetBuilder : DisposableObject
+	internal sealed unsafe class StateGraphTransitionSetBuilder : DisposableObject
 	{
 		private readonly int _stateVectorSize;
 		private readonly MemoryBuffer _targetStateBuffer = new MemoryBuffer();
@@ -42,7 +42,7 @@ namespace SafetySharp.Analysis.ModelChecking.Transitions
 		/// </summary>
 		/// <param name="stateVectorSize">The size of the state vector in bytes.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
-		public TransitionSetBuilder(int stateVectorSize, long capacity)
+		public StateGraphTransitionSetBuilder(int stateVectorSize, long capacity)
 		{
 			Requires.That(capacity <= (1 << 30), nameof(capacity), $"Maximum supported capacity is {1 << 30}.");
 

@@ -143,9 +143,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ModelChecking\ModelChecking.csproj">
+    <ProjectReference Include="..\ModelChecking\SafetyChecking.csproj">
       <Project>{a91cb8af-8a4c-4f69-848e-b3962f9a94f9}</Project>
-      <Name>ModelChecking</Name>
+      <Name>SafetyChecking</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -33,7 +33,7 @@ namespace SafetySharp.Analysis
 	using Runtime.Serialization;
 	using Utilities;
 	using ModelChecking;
-	using ISSE.ModelChecking.ExecutableModel;   /// <summary>
+	using ISSE.SafetyChecking.ExecutableModel;   /// <summary>
 												///   Represents the LtsMin model checker.
 												/// </summary>
 	public class LtsMin

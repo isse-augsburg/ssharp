@@ -23,7 +23,7 @@
 namespace SafetySharp.Analysis.ModelChecking
 {
 	using System;
-	using ISSE.ModelChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutableModel;
 	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;

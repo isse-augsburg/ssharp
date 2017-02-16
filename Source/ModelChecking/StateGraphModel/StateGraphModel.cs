@@ -25,7 +25,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	using System;
 	using System.Linq;
 	using System.Runtime.InteropServices;
-	using ISSE.ModelChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutableModel;
 	using Runtime;
 	using Transitions;
 	using Utilities;
@@ -36,7 +36,7 @@ namespace SafetySharp.Analysis.ModelChecking
 	internal sealed unsafe class StateGraphModel<TExecutableModel> : AnalysisModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly StateGraph<TExecutableModel> _stateGraph;
-		private readonly TransitionSetBuilder _transitions;
+		private readonly StateGraphTransitionSetBuilder _transitions;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -48,7 +48,7 @@ namespace SafetySharp.Analysis.ModelChecking
 			Requires.NotNull(stateGraph, nameof(stateGraph));
 
 			_stateGraph = stateGraph;
-			_transitions = new TransitionSetBuilder(StateVectorSize, successorStateCapacity);
+			_transitions = new StateGraphTransitionSetBuilder(StateVectorSize, successorStateCapacity);
 		}
 
 		/// <summary>

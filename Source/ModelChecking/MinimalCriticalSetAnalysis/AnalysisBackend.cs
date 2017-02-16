@@ -24,7 +24,7 @@ namespace SafetySharp.Analysis.SafetyChecking
 {
 	using System;
 	using System.Linq;
-	using ISSE.ModelChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutableModel;
 	using Modeling;
 	using Runtime;
 	using Utilities;
