@@ -58,6 +58,7 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analysis\FunctionalTests.cs" />
     <Compile Include="Analysis\ProxyTTest.cs" />
     <Compile Include="Analysis\QueryTest.cs" />
     <Compile Include="Analysis\ServerTTest.cs" />
