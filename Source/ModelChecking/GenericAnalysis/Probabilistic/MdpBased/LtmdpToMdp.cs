@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.Runtime
 {
+	using System.Diagnostics;
 	using Analysis;
 	using Utilities;
 
@@ -137,15 +138,19 @@ namespace SafetySharp.Runtime
 
 		public LtmdpToMdp(LabeledTransitionMarkovDecisionProcess ltmc)
 		{
-			Console.Error.WriteLine("Starting to convert labeled transition Markov Decision Process to Markov Decision Process");
-			Console.Error.WriteLine($"Ltmdp: States {ltmc.SourceStates.Count}, Transitions {ltmc.Transitions}");
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+			Console.Out.WriteLine("Starting to convert labeled transition Markov Decision Process to Markov Decision Process");
+			Console.Out.WriteLine($"Ltmdp: States {ltmc.SourceStates.Count}, Transitions {ltmc.Transitions}");
 			CreateStates(ltmc);
 			MarkovDecisionProcess=new MarkovDecisionProcess(States,ModelDensity.Medium);
 			MarkovDecisionProcess.StateFormulaLabels = ltmc.StateFormulaLabels;
 			SetStateLabeling();
 			ConvertInitialStates(ltmc);
 			ConvertTransitions(ltmc);
-			Console.Error.WriteLine($"Mc: States {MarkovDecisionProcess.States}, Transitions {MarkovDecisionProcess.Transitions}");
+			stopwatch.Stop();
+			Console.Out.WriteLine($"Completed transformation in {stopwatch.Elapsed}");
+			Console.Out.WriteLine($"Mc: States {MarkovDecisionProcess.States}, Transitions {MarkovDecisionProcess.Transitions}");
 		}
 	}
 }

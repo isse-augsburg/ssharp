@@ -106,3 +106,8 @@ Minimal Critical Sets: 1
 
    (1) { SuppressIsFull, SuppressTimeout }
 ```
+
+Publications
+-------------------------
+
+Please see [Wiki page with our S# related publications](https://github.com/isse-augsburg/ssharp/wiki/Publications)

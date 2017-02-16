@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.Runtime
 {
+	using System.Diagnostics;
 	using Analysis;
 	using Utilities;
 
@@ -131,15 +132,19 @@ namespace SafetySharp.Runtime
 
 		public LtmcToDtmc(LabeledTransitionMarkovChain ltmc)
 		{
-			Console.Error.WriteLine("Starting to convert labeled transition Markov chain to Markov chain");
-			Console.Error.WriteLine($"Ltmc: States {ltmc.SourceStates.Count}, Transitions {ltmc.Transitions}");
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+			Console.Out.WriteLine("Starting to convert labeled transition Markov chain to Markov chain");
+			Console.Out.WriteLine($"Ltmc: States {ltmc.SourceStates.Count}, Transitions {ltmc.Transitions}");
 			CreateStates(ltmc);
 			MarkovChain=new DiscreteTimeMarkovChain(States,ModelDensity.Medium);
 			MarkovChain.StateFormulaLabels = ltmc.StateFormulaLabels;
 			SetStateLabeling();
 			ConvertInitialStates(ltmc);
 			ConvertTransitions(ltmc);
-			Console.Error.WriteLine($"Mc: States {MarkovChain.States}, Transitions {MarkovChain.Transitions}");
+			stopwatch.Stop();
+			Console.Out.WriteLine($"Completed transformation in {stopwatch.Elapsed}");
+			Console.Out.WriteLine($"Mc: States {MarkovChain.States}, Transitions {MarkovChain.Transitions}");
 		}
 	}
 }
