@@ -20,13 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.Formula
 {
 	using System;
-	using FormulaVisitors;
 	using Modeling;
-	using Runtime.Serialization;
-	using Utilities;
 
 	public abstract class RewardFormula : Formula
 	{

@@ -26,7 +26,7 @@ namespace SafetySharp.Compiler
 	using Microsoft.Build.Framework;
 	using Microsoft.Build.Utilities;
 	using Microsoft.CodeAnalysis;
-	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Reports errors to MSBuild.

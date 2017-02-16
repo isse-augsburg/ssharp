@@ -27,7 +27,7 @@ namespace SafetySharp.Compiler
 	using System.Diagnostics;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
-	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   A base class for reporting compilation errors; by default, errors are reported to the standard console.

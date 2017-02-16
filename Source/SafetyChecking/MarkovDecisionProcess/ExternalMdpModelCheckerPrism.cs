@@ -21,19 +21,13 @@
 // THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SafetySharp.Modeling;
 
-namespace SafetySharp.Analysis.ModelChecking.Probabilistic
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
-	using FormulaVisitors;
-	using Runtime;
 	using System.IO;
-	using Analysis.Probabilistic;
 	using Utilities;
+	using Formula;
+	using Modeling;
 
 	//Not very mature! Use only as oracle for tests of the builtin model checker!
 

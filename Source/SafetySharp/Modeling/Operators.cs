@@ -23,6 +23,8 @@
 namespace SafetySharp.Analysis
 {
 	using System.Diagnostics.CodeAnalysis;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Utilities;
 	using Utilities;
 
 	/// <summary>

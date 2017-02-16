@@ -20,15 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.ModelTraversal
+namespace ISSE.SafetyChecking.AnalysisModelTraverser
 {
 	using System;
 	using System.Linq;
 	using System.Runtime.InteropServices;
 	using System.Threading;
-	using Runtime;
-	using Transitions;
-	using TraversalModifiers;
+	using ExecutableModel;
+	using AnalysisModel;
 	using Utilities;
 
 	/// <summary>

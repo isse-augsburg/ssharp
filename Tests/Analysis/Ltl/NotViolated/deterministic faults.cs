@@ -25,6 +25,7 @@ namespace Tests.Analysis.Ltl.NotViolated
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using static SafetySharp.Analysis.Operators;
+	using ISSE.SafetyChecking.Modeling;
 
 	internal class DeterministicFaults : AnalysisTestObject
 	{

@@ -24,6 +24,8 @@ namespace SafetySharp.Modeling
 {
 	using System.Collections.Generic;
 	using System.Linq;
+	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Utilities;
 	using Utilities;
 
 	/// <summary>

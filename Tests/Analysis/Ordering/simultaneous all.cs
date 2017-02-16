@@ -23,6 +23,8 @@
 namespace Tests.Analysis.Ordering
 {
 	using System.Linq;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;

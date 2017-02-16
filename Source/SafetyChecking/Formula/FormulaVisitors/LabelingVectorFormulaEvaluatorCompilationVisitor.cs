@@ -20,24 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using SafetySharp.Runtime;
-using SafetySharp.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SafetySharp.Analysis.FormulaVisitors
+namespace ISSE.SafetyChecking.Formula
 {
 	using System.Reflection;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
+	using Utilities;
 
 	/// <summary>
 	///   Compiles a <see cref="Formula" /> if it does not contain any temporal operators.
 	/// </summary>
-	
-internal class LabelingVectorFormulaEvaluatorCompilationVisitor : FormulaVisitor
+
+	internal class LabelingVectorFormulaEvaluatorCompilationVisitor : FormulaVisitor
 	{
 		/// <summary>
 		///   The expression that is being generated.

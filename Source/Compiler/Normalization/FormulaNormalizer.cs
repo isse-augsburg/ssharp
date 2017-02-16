@@ -22,13 +22,13 @@
 
 namespace SafetySharp.Compiler.Normalization
 {
-	using Analysis;
 	using CompilerServices;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
+	using ISSE.SafetyChecking.Formula;
 
 	/// <summary>
 	///   Normalizes all implicit conversions from a Boolean expression to a <see cref="Formula" /> by explicitly invoking the

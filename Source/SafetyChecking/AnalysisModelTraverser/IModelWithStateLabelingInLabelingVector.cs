@@ -21,8 +21,10 @@
 // THE SOFTWARE.
 
 
-namespace SafetySharp.Runtime
+namespace ISSE.SafetyChecking.AnalysisModelTraverser
 {
+	using GenericDataStructures;
+
 	interface IModelWithStateLabelingInLabelingVector
 	{
 		string[] StateFormulaLabels { get; }

@@ -20,14 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.SafetyChecking
+namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 {
 	using System;
 	using System.Linq;
-	using ISSE.SafetyChecking.ExecutableModel;
+	using ExecutableModel;
 	using Modeling;
-	using Runtime;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
 	using Utilities;
+	using Formula;
 
 	/// <summary>
 	///   Represents a back end for safety analyses, encapsulating the way that the individual checks are carried out on the

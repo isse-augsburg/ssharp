@@ -20,12 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.Formula
 {
-	using System;
-	using FormulaVisitors;
-	using Utilities;
-
 	public enum ProbabilisticComparator
 	{
 		LowerThan,

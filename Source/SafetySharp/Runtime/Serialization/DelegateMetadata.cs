@@ -26,6 +26,7 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Linq;
 	using System.Reflection;
 	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Provides metadata about <see cref="Delegate" /> instances for serialization.

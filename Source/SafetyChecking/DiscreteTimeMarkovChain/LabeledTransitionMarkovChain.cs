@@ -21,25 +21,16 @@
 // THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SafetySharp.Runtime
+namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
-	using System.Collections;
 	using System.Collections.Concurrent;
 	using System.Diagnostics;
 	using System.Globalization;
-	using System.Runtime.CompilerServices;
-	using System.Threading;
-	using Analysis;
-	using Analysis.ModelChecking.Transitions;
 	using Modeling;
-	using Serialization;
 	using Utilities;
-	
+	using AnalysisModel;
+
 
 	internal unsafe class LabeledTransitionMarkovChain
 	{

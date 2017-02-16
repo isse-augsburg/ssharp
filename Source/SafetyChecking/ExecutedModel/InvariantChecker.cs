@@ -20,14 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking
+namespace ISSE.SafetyChecking.ExecutedModel
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-	using ModelTraversal.TraversalModifiers;
-	using Runtime;
+	using ExecutableModel;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
+	using FaultMinimalKripkeStructure;
 	using Utilities;
+	using Formula;
 
 	/// <summary>
 	///   Checks whether an invariant holds for all states of an <see cref="AnalysisModel" />.

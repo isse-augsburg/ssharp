@@ -20,14 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Text;
 	using Modeling;
-	using Runtime;
+	using ExecutableModel;
 
 	/// <summary>
 	///   Represents the result of an <see cref="OrderAnalysis" />.

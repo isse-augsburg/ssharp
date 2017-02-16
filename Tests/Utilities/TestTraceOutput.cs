@@ -24,6 +24,7 @@ namespace Tests.Utilities
 {
 	using System;
 	using System.Text;
+	using ISSE.SafetyChecking.Utilities;
 	using JetBrains.Annotations;
 	using SafetySharp.Utilities;
 	using Xunit.Abstractions;

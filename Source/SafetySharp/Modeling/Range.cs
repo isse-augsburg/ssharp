@@ -33,6 +33,7 @@ namespace SafetySharp.Modeling
 	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Manages the allowed ranges and overflow behaviors of <see cref="Component" /> fields.

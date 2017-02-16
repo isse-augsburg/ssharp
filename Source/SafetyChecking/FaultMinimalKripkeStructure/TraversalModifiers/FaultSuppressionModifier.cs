@@ -20,10 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
+namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 {
-	using Runtime;
-	using Transitions;
+	using ExecutableModel;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
 
 	/// <summary>
 	///   Removes all candidate transition that activate one or more of certain suppressed faults.

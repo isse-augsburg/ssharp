@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.Formula
 {
 	/// <summary>
 	///   Represents the operator of a <see cref="UnaryFormula" />.

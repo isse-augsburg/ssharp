@@ -24,6 +24,7 @@ namespace SafetySharp.Runtime
 {
 	using System;
 	using System.Reflection;
+	using ISSE.SafetyChecking.Utilities;
 	using Modeling;
 	using Utilities;
 

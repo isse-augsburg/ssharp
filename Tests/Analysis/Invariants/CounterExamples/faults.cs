@@ -22,6 +22,7 @@
 
 namespace Tests.Analysis.Invariants.CounterExamples
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using Shouldly;
 

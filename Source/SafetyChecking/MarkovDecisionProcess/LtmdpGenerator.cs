@@ -20,16 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System;
 	using System.Linq;
-	using FormulaVisitors;
-	using ModelTraversal.TraversalModifiers;
-	using Runtime;
-
+	using AnalysisModelTraverser;
+	using Formula;
+	using ExecutableModel;
+	using AnalysisModel;
 	/// <summary>
-	///   Generates a <see cref="StateGraph" /> for an <see cref="AnalysisModel" />.
+	///   Generates a <see cref="StateGraph{TExecutableModel}" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
 	internal class LtmdpGenerator<TExecutableModel> : ModelTraverser<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{

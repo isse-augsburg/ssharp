@@ -20,14 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
-	using Runtime;
-	using Transitions;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
+	using ExecutableModel;
 	using Utilities;
-
-
-
 
 	/// <summary>
 	///   Builds up a <see cref="LabeledTransitionMarkovDecisionProcess" /> instance during model traversal.

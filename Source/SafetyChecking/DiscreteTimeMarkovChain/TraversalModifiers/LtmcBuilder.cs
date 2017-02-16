@@ -20,15 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
+namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
-	using Runtime;
-	using Transitions;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
+	using ExecutableModel;
 	using Utilities;
-
-
-
-
 	/// <summary>
 	///   Builds up a <see cref="LabeledTransitionMarkovChain" /> instance during model traversal.
 	///   Note: This only works single threaded

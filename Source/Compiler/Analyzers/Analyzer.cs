@@ -26,9 +26,8 @@ namespace SafetySharp.Compiler.Analyzers
 	using System.Linq;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
-	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.Diagnostics;
-	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   A base class for S# code analyzers.

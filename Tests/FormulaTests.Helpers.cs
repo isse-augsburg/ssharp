@@ -25,6 +25,7 @@ namespace Tests
 	using System;
 	using System.Collections.Generic;
 	using System.Text;
+	using ISSE.SafetyChecking.Formula;
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
 	using Shouldly;

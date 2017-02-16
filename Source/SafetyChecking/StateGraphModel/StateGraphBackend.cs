@@ -20,13 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.SafetyChecking
+namespace ISSE.SafetyChecking.StateGraphModel
 {
 	using System;
-	using ModelChecking;
-	using ModelChecking.ModelTraversal.TraversalModifiers;
+	using ExecutableModel;
 	using Modeling;
-	using Runtime;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
+	using ExecutedModel;
+	using FaultMinimalKripkeStructure;
+	using Formula;
+	using MinimalCriticalSetAnalysis;
 
 	/// <summary>
 	///   Pre-builts the model's entire state graph, subsequently taking advantage of the fault-removal optimization.

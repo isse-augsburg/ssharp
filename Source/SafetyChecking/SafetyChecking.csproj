@@ -66,9 +66,9 @@
     <Compile Include="Formula\FormulaVisitors\FormulaCompilationVisitor.cs" />
     <Compile Include="ExecutedModel\ModelByteSize.cs" />
     <Compile Include="FaultMinimalKripkeStructure\ActivationMinimalExecutedModel.cs" />
-    <Compile Include="FaultMinimalKripkeStructure\InvariantChecker.cs" />
+    <Compile Include="ExecutedModel\InvariantChecker.cs" />
     <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\DeadlockChecker.cs" />
-    <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\FaultOrderModifier.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\TraversalModifiers\FaultOrderModifier.cs" />
     <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\FaultSuppressionModifier.cs" />
     <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\InvariantViolationAction.cs" />
     <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\InvariantViolationByIndexAction.cs" />
@@ -78,10 +78,10 @@
     <Compile Include="StateGraphModel\StateGraphGenerator.cs" />
     <Compile Include="StateGraphModel\StateGraphModel.cs" />
     <Compile Include="FaultMinimalKripkeStructure\ActivationMinimalTransitionSetBuilder.cs" />
-    <Compile Include="FaultMinimalKripkeStructure\OrderAnalysis.cs" />
-    <Compile Include="FaultMinimalKripkeStructure\OrderAnalysisResults.cs" />
-    <Compile Include="FaultMinimalKripkeStructure\OrderRelationship.cs" />
-    <Compile Include="FaultMinimalKripkeStructure\OrderRelationshipKind.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\OrderAnalysis.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\OrderAnalysisResults.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\OrderRelationship.cs" />
+    <Compile Include="MinimalCriticalSetAnalysis\OrderRelationshipKind.cs" />
     <Compile Include="GenericDataStructures\AutoResizeVector.cs" />
     <Compile Include="GenericDataStructures\BidirectionalGraph.cs" />
     <Compile Include="GenericDataStructures\BidirectionalGraphT.cs" />
@@ -138,8 +138,8 @@
     <Compile Include="Formula\BinaryFormula.cs" />
     <Compile Include="Formula\BinaryOperator.cs" />
     <Compile Include="ExecutableModel\CounterExampleSerialization.cs" />
-    <Compile Include="ModelingArtifacts\PermanentFault.cs" />
-    <Compile Include="ModelingArtifacts\TransientFault.cs" />
+    <Compile Include="Modeling\PermanentFault.cs" />
+    <Compile Include="Modeling\TransientFault.cs" />
     <Compile Include="Properties\InternalsVisibleTo.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -149,20 +149,20 @@
     <Compile Include="MinimalCriticalSetAnalysis\MaximalSafeSetHeuristic.cs" />
     <Compile Include="MinimalCriticalSetAnalysis\MinimalRedundancyHeuristic.cs" />
     <Compile Include="MinimalCriticalSetAnalysis\SubsumptionHeuristic.cs" />
-    <Compile Include="ModelingArtifacts\Activation.cs" />
-    <Compile Include="ModelingArtifacts\Fault.cs" />
-    <Compile Include="ModelingArtifacts\Reward.cs" />
-    <Compile Include="ExecutableModel\Choice.cs" />
+    <Compile Include="Modeling\Activation.cs" />
+    <Compile Include="Modeling\Fault.cs" />
+    <Compile Include="Modeling\Reward.cs" />
+    <Compile Include="Modeling\Choice.cs" />
     <Compile Include="ExecutableModel\ChoiceResolver.cs" />
     <Compile Include="AnalysisModelTraverser\ChoiceStack.cs" />
     <Compile Include="ExecutableModel\CounterExample.cs" />
-    <Compile Include="MinimalCriticalSetAnalysis\FaultSet.cs" />
+    <Compile Include="AnalysisModel\FaultSet.cs" />
     <Compile Include="MinimalCriticalSetAnalysis\FaultSetCollection.cs" />
     <Compile Include="Formula\Formula.cs" />
     <Compile Include="Formula\FormulaVisitor.cs" />
     <Compile Include="Formula\ToStringVisitor.cs" />
-    <Compile Include="ModelingArtifacts\Probability.cs" />
-    <Compile Include="ModelingArtifacts\ProbabilityRange.cs" />
+    <Compile Include="Modeling\Probability.cs" />
+    <Compile Include="Modeling\ProbabilityRange.cs" />
     <Compile Include="AnalysisModelTraverser\LoadBalancer.cs" />
     <Compile Include="AnalysisModelTraverser\StateStack.cs" />
     <Compile Include="AnalysisModelTraverser\StateStorage.cs" />
@@ -179,7 +179,7 @@
     <Compile Include="ExecutableModel\ExecutableModel.cs" />
     <Compile Include="ExecutedModel\ExecutedModel.cs" />
     <Compile Include="AnalysisModelTraverser\NondeterminismException.cs" />
-    <Compile Include="ExecutableModel\NondeterministicChoiceResolver.cs" />
+    <Compile Include="ExecutedModel\NondeterministicChoiceResolver.cs" />
     <Compile Include="ExecutableModel\SerializationDelegate.cs" />
     <Compile Include="AnalysisModel\StateFormulaSet.cs" />
     <Compile Include="AnalysisModel\CandidateTransition.cs" />
@@ -209,7 +209,9 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="QualitativeChecker\" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Properties\InternalsVisibleTo.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

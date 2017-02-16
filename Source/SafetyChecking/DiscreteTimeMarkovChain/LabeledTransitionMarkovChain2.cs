@@ -22,23 +22,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SafetySharp.Runtime
+namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
-	using System.Collections;
 	using System.Diagnostics;
-	using System.Globalization;
-	using System.Runtime.CompilerServices;
-	using System.Threading;
-	using Analysis;
-	using Analysis.ModelChecking.Transitions;
+	using AnalysisModel;
 	using Modeling;
-	using Serialization;
 	using Utilities;
-	
+
 	//Dictionary-based
 	internal unsafe class LabeledTransitionMarkovChain2
 	{

@@ -36,6 +36,7 @@ namespace SafetySharp.Compiler.Normalization
 	using Roslyn.Syntax;
 	using Runtime;
 	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Normalizes required component ports, adding the necessary infrastructure code to support bindings.

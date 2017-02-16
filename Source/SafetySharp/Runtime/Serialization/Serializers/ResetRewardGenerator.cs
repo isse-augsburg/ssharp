@@ -29,11 +29,12 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Linq;
 	using System.Reflection;
 	using System.Reflection.Emit;
+	using ISSE.SafetyChecking.Modeling;
 	using Modeling;
 	using Utilities;
-	// Currently Rewards are value types and not reference types.
-	// They never get serialized. Thus, they do not contribute any data or meta-data.
-	// During deserialization their fields are reseted to zero.
+	using ISSE.SafetyChecking.Utilities;
+
+	
 
 	/// <summary>
 	///   Serializes <see cref="Reward" /> instances.

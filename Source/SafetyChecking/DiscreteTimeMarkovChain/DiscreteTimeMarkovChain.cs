@@ -26,20 +26,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SafetySharp.Runtime
+namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
-	using System.Collections;
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.Runtime.CompilerServices;
-	using System.Threading;
-	using Analysis;
-	using Analysis.ModelChecking.Transitions;
 	using Modeling;
-	using Serialization;
-	using Utilities;
-	using SafetySharp.Utilities.Graph;
-
+	using AnalysisModelTraverser;
+	using AnalysisModel;
+	using ExecutedModel;
+	using Formula;
+	using GenericDataStructures;
 
 	public class DiscreteTimeMarkovChain : IModelWithStateLabelingInLabelingVector
 	{
@@ -235,9 +232,9 @@ namespace SafetySharp.Runtime
 			}
 		}
 		
-		public Func<int, bool> CreateFormulaEvaluator(Analysis.Formula formula)
+		public Func<int, bool> CreateFormulaEvaluator(Formula formula)
 		{
-			return Analysis.FormulaVisitors.LabelingVectorFormulaEvaluatorCompilationVisitor.Compile(this,formula);
+			return LabelingVectorFormulaEvaluatorCompilationVisitor.Compile(this,formula);
 		}
 
 		internal UnderlyingDigraph CreateUnderlyingDigraph()

@@ -20,12 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.FormulaVisitors
+namespace ISSE.SafetyChecking.Formula
 {
-	using Runtime;
+	using ExecutableModel;
 	using System;
 	using System.Collections.Generic;
-	using System.Linq.Expressions;
 
 	/// <summary>
 	///   Transfers a <see cref="Formula" /> which was created for one instance of an executable model to another

@@ -24,6 +24,7 @@ namespace Tests.Diagnostics.Faults.Valid
 {
 	using System;
 	using System.Collections.Generic;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	public class NonComponent

@@ -29,6 +29,7 @@ namespace SafetySharp.Runtime.Serialization
 	using Modeling;
 	using Serializers;
 	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Represents a registry of <see cref="Serializer" />s.

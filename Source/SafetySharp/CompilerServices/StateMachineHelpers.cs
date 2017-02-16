@@ -24,6 +24,8 @@ namespace SafetySharp.CompilerServices
 {
 	using System.Runtime.CompilerServices;
 	using Modeling;
+	using ISSE.SafetyChecking.ExecutableModel;
+	using ISSE.SafetyChecking.Modeling;
 
 	/// <summary>
 	///   Provides access to additional methods for <see cref="StateMachine{TState}" /> instances.

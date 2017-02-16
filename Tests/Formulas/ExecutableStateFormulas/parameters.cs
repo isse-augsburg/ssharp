@@ -23,6 +23,7 @@
 namespace Tests.Formulas.ExecutableStateFormulas
 {
 	using System;
+	using ISSE.SafetyChecking.Formula;
 	using SafetySharp.Analysis;
 
 	internal class Parameters : FormulaTestObject

@@ -22,6 +22,7 @@
 
 namespace Tests.Diagnostics.Faults.Valid
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	public class ComponentConstructor

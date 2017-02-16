@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace ISSE.SafetyChecking.Modeling
 {
 	/// <summary>
 	///   Determines the activation mode of a <see cref="Fault" />.

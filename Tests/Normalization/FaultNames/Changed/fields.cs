@@ -22,6 +22,7 @@
 
 namespace Tests.Normalization.FaultNames.Changed
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	public class In2

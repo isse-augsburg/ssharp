@@ -20,9 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.Heuristics
+namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 {
 	using System.Collections.Generic;
+	using AnalysisModel;
 
 	/// <summary>
 	///   Represents a heuristic for finding large safe fault sets.

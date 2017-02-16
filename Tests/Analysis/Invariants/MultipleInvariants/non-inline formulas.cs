@@ -22,7 +22,7 @@
 
 namespace Tests.Analysis.Invariants.StateGraph
 {
-	using SafetySharp.Analysis;
+	using ISSE.SafetyChecking.Formula;
 	using SafetySharp.Modeling;
 	using Shouldly;
 

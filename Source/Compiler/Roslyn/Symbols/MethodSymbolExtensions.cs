@@ -27,6 +27,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 	using Microsoft.CodeAnalysis;
 	using Modeling;
 	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Provides extension methods for working with <see cref="IMethodSymbol" /> instances.

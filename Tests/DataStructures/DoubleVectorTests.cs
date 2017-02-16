@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace Tests.DataStructures
 {
+	using ISSE.SafetyChecking.GenericDataStructures;
 	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;

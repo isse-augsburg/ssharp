@@ -22,7 +22,11 @@
 
 namespace SafetySharp.Analysis
 {
-	using ModelChecking.Probabilistic;
+	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Modeling;
 	using Modeling;
 	using Runtime;
 

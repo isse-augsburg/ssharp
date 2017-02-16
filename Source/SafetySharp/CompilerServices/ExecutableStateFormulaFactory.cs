@@ -24,7 +24,8 @@ namespace SafetySharp.CompilerServices
 {
 	using System;
 	using Analysis;
-	using Utilities;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Provides factory methods for the creation of <see cref="Formula" /> instances from C# expressions.

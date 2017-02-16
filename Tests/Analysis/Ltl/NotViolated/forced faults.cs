@@ -25,6 +25,8 @@ namespace Tests.Analysis.Ltl.NotViolated
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using static SafetySharp.Analysis.Operators;
+	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Formula;
 
 	internal class ForcedFaults : AnalysisTestObject
 	{

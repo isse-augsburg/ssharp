@@ -20,39 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace ISSE.SafetyChecking.Modeling
 {
-	/// <summary>
-	///   Represents a permanent fault that can be activated completely nondeterministically; once activated, it is always
-	///   activated when an activation is possible.
-	/// </summary>
-	public sealed class PermanentFault : Fault
+	using Modeling;
+	
+	public struct ProbabilityRange
 	{
-		private bool _isActive;
+		public static ProbabilityRange Zero = new ProbabilityRange(0.0, 0.0);
 
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		public PermanentFault()
-			: base(requiresActivationNotification: true)
+		public static ProbabilityRange One = new ProbabilityRange(1.0, 1.0);
+
+		public static ProbabilityRange ZeroToOne = new ProbabilityRange(0.0, 1.0);
+
+
+		public double MinValue { get; }
+
+		public double MaxValue { get; }
+
+		public ProbabilityRange(Probability minProbability, Probability maxProbability)
 		{
+			MinValue = minProbability.Value;
+			MaxValue = maxProbability.Value;
 		}
 
-		/// <summary>
-		///   Checks whether the fault can be activated nondeterministically, or whether it has to be or cannot be activated. This
-		///   method has no side effects, as otherwise S#'s fault activation mechanism would be completely broken.
-		/// </summary>
-		protected override Activation CheckActivation()
+		public ProbabilityRange(double minProbability, Probability maxProbability)
 		{
-			return _isActive ? Activation.Forced : Activation.Nondeterministic;
+			MinValue = minProbability;
+			MaxValue = maxProbability.Value;
 		}
 
-		/// <summary>
-		///   Invoked when the fault was activated.
-		/// </summary>
-		public override void OnActivated()
+		public ProbabilityRange(Probability minProbability, double maxProbability)
 		{
-			_isActive = true;
+			MinValue = minProbability.Value;
+			MaxValue = maxProbability;
+		}
+
+		public ProbabilityRange(double minProbability, double maxProbability)
+		{
+			MinValue = minProbability;
+			MaxValue = maxProbability;
 		}
 	}
 }

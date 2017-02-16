@@ -29,6 +29,10 @@ using System.Threading.Tasks;
 namespace Tests.DataStructures.MarkovChainExamples
 {
 	using System.Diagnostics;
+	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.ExecutedModel;
+	using ISSE.SafetyChecking.Formula;
 	using JetBrains.Annotations;
 	using MarkovDecisionProcessExamples;
 	using SafetySharp.Analysis;
@@ -37,8 +41,6 @@ namespace Tests.DataStructures.MarkovChainExamples
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
-	using SafetySharp.Utilities.Graph;
-	using SafetySharp.Analysis.Probabilistic.DtmcBased.ExportToGv;
 	using SafetySharp.Utilities;
 
 	public static class AllExamples

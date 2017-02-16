@@ -23,10 +23,14 @@
 namespace Tests
 {
 	using System;
-	using SafetySharp.Analysis;
-	using SafetySharp.Analysis.ModelChecking.Probabilistic;
+	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.ModelChecking;
 	using Xunit;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 
 	public partial class DccaTests
 	{

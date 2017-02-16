@@ -23,6 +23,7 @@
 namespace Tests.Serialization.Compaction
 {
 	using System.Reflection;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;

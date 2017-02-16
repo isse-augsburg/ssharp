@@ -61,11 +61,12 @@ using namespace System::Reflection;
 using namespace System::Runtime::InteropServices;
 using namespace System::Threading;
 using namespace SafetySharp::Analysis;
-using namespace SafetySharp::Analysis::ModelChecking;
-using namespace SafetySharp::Analysis::ModelChecking::Transitions;
 using namespace SafetySharp::Runtime;
 using namespace SafetySharp::Runtime::Serialization;
 using namespace ISSE::SafetyChecking::ExecutableModel;
+using namespace ISSE::SafetyChecking::ExecutedModel;
+using namespace ISSE::SafetyChecking::AnalysisModel;
+using namespace ISSE::SafetyChecking::FaultMinimalKripkeStructure;
 
 //---------------------------------------------------------------------------------------------------------------------------
 // Assembly metadata

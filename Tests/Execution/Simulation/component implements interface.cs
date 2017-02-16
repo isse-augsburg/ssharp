@@ -22,6 +22,7 @@
 
 namespace Tests.Execution.Simulation
 {
+	using ISSE.SafetyChecking.Modeling;
 	using Shouldly;
 	using Utilities;
 	using SafetySharp.Modeling;

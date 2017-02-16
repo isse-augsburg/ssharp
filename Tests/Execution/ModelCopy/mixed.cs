@@ -22,6 +22,7 @@
 
 namespace Tests.Execution.ModelCopy
 {
+	using ISSE.SafetyChecking.Formula;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;

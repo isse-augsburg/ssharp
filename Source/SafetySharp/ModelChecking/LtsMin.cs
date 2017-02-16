@@ -26,16 +26,17 @@ namespace SafetySharp.Analysis
 	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.IO;
-	using System.Linq;
-	using FormulaVisitors;
 	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;
-	using Utilities;
-	using ModelChecking;
-	using ISSE.SafetyChecking.ExecutableModel;   /// <summary>
-												///   Represents the LtsMin model checker.
-												/// </summary>
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Utilities;
+	using ISSE.SafetyChecking.ExecutableModel;
+	using ISSE.SafetyChecking.AnalysisModel;
+
+	/// <summary>
+	///   Represents the LtsMin model checker.
+	/// </summary>
 	public class LtsMin
 	{
 		/// <summary>

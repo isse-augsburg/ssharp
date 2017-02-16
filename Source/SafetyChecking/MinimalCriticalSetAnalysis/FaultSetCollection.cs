@@ -20,10 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 {
 	using System.Collections;
 	using System.Collections.Generic;
+	using AnalysisModel;
 
 	/// <summary>
 	///   Represents a collection of <see cref="FaultSet" /> ordered by cardinality.

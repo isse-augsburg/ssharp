@@ -29,7 +29,8 @@ namespace SafetySharp.Modeling
 	using Runtime;
 	using Runtime.Serialization;
 	using Utilities;
-
+	using ISSE.SafetyChecking.Utilities;
+	using ISSE.SafetyChecking.Modeling;
 	/// <summary>
 	///   A helper type that discovers the <see cref="IComponent" /> instances within a <see cref="ModelBase" /> that are
 	///   marked with <see cref="RootAttribute" /> and binds the model.

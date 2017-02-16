@@ -25,6 +25,8 @@ namespace Tests
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using ISSE.SafetyChecking.ExecutableModel;
+	using ISSE.SafetyChecking.Utilities;
 	using JetBrains.Annotations;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;

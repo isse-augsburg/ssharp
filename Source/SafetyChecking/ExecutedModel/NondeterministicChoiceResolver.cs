@@ -20,15 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace ISSE.SafetyChecking.ExecutedModel
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Modeling;
-	using Serialization;
 	using Utilities;
+	using ExecutableModel;
+	using AnalysisModelTraverser;
 
 	/// <summary>
 	///   Represents a stack that is used to resolve nondeterministic choices during state space enumeration.

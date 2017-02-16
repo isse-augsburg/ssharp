@@ -20,16 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 {
 	using System;
-	using System.Diagnostics;
-	using ISSE.SafetyChecking.ExecutableModel;
-	using ModelChecking;
-	using Modeling;
-	using Runtime;
-	using Runtime.Serialization;
+	using ExecutableModel;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
 	using Utilities;
+	using Formula;
+	using ExecutedModel;
+	using StateGraphModel;
 
 	/// <summary>
 	///   Represents a model checker specifically created to check S# models.

@@ -22,6 +22,7 @@
 
 namespace Tests.Formulas.Operators
 {
+	using ISSE.SafetyChecking.Formula;
 	using SafetySharp.Analysis;
 	using Shouldly;
 	using static SafetySharp.Analysis.Operators;

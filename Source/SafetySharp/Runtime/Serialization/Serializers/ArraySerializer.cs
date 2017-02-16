@@ -28,6 +28,7 @@ namespace SafetySharp.Runtime.Serialization.Serializers
 	using System.IO;
 	using Modeling;
 	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Serializes arrays of all types.

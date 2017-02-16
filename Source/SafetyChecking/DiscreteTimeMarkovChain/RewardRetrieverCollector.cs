@@ -20,11 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.FormulaVisitors
+namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using System.Collections.Generic;
-	using Runtime.Serialization;
-	using Utilities;
+	using Formula;
 
 	/// <summary>
 	///   Collects all <see cref="ExecutableStateFormula" /> instances contained in a <see cref="Formula" />.

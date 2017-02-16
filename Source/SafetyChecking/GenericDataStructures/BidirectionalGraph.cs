@@ -26,7 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SafetySharp.Utilities.Graph
+namespace ISSE.SafetyChecking.GenericDataStructures
 {
 	public struct Edge
 	{

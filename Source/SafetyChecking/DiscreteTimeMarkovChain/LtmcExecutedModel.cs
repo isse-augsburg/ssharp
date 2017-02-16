@@ -20,16 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking
+namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using System;
-	using System.Linq;
-	using FormulaVisitors;
-	using ISSE.SafetyChecking.ExecutableModel;
+	using ExecutableModel;
 	using Modeling;
-	using Runtime;
-	using Transitions;
 	using Utilities;
+	using ExecutedModel;
+	using System.Linq;
+	using Formula;
+	using AnalysisModel;
 
 	/// <summary>
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="SafetySharpRuntimeModel" /> with

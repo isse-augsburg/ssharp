@@ -26,7 +26,9 @@ namespace SafetySharp.Analysis
 	using System.Threading;
 	using Modeling;
 	using Runtime;
-	using Utilities;
+	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Simulates a S# model for visualization purposes or hardware-in-the-loop tests.

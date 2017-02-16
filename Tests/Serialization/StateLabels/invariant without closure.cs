@@ -22,6 +22,7 @@
 
 namespace Tests.Serialization.StateLabels
 {
+	using ISSE.SafetyChecking.Formula;
 	using SafetySharp.Modeling;
 	using SafetySharp.Analysis;
 	using Shouldly;

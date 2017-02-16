@@ -22,6 +22,7 @@
 
 namespace Tests.Analysis.Ltl.Violated
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using static SafetySharp.Analysis.Operators;

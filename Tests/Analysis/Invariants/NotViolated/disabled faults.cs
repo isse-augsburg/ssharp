@@ -24,6 +24,7 @@ namespace Tests.Analysis.Invariants.NotViolated
 {
 	using System;
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Modeling;
 	using Shouldly;
 
 	internal class DisabledFaults : AnalysisTestObject

@@ -20,9 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.Transitions
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System.Runtime.InteropServices;
+	using AnalysisModel;
 
 	/// <summary>
 	///   Represents a candidate transition of an <see cref="AnalysisModel" />.

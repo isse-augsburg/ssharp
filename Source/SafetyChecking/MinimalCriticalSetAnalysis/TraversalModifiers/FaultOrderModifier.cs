@@ -20,12 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
+namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 {
+	using AnalysisModel;
+	using AnalysisModelTraverser;
+	using ExecutableModel;
 	using Modeling;
-	using Runtime;
-	using Transitions;
 	using Utilities;
+
 
 	/// <summary>
 	///   Removes all candidate transition that activate one or more faults in an incorrect order.

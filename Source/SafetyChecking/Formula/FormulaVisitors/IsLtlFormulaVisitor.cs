@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.FormulaVisitors
+namespace ISSE.SafetyChecking.Formula
 {
 	/// <summary>
 	///   Determines whether a <see cref="Formula" /> is a LTL formula.

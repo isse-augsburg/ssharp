@@ -23,6 +23,7 @@
 namespace Tests.Analysis.Invariants.CounterExamples
 {
 	using System;
+	using ISSE.SafetyChecking.AnalysisModelTraverser;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;

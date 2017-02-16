@@ -25,7 +25,8 @@ namespace Tests.Analysis.Heuristics
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using SafetySharp.Analysis.Heuristics;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;

@@ -26,7 +26,8 @@ namespace SafetySharp.Modeling
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
-	using Utilities;
+	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Represents a state machine that transitions between various states.

@@ -28,19 +28,14 @@ using System.Threading.Tasks;
 
 namespace Tests.DataStructures
 {
-	using System.Diagnostics;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.Formula;
 	using JetBrains.Annotations;
 	using MarkovChainExamples;
-	using SafetySharp.Analysis;
-	using SafetySharp.Analysis.ModelChecking.Probabilistic;
-	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
+	using Shouldly;
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
-	using SafetySharp.Utilities.Graph;
-	using SafetySharp.Analysis.Probabilistic.MdpBased.ExportToGv;
-	using Shouldly;
 
 	public class ExternalDtmcModelCheckerMrmcTests
 	{

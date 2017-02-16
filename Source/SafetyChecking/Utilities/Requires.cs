@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Utilities
+namespace ISSE.SafetyChecking.Utilities
 {
 	using System;
 	using System.Collections;

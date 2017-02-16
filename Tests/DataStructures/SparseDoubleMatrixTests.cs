@@ -28,9 +28,7 @@ using System.Threading.Tasks;
 
 namespace Tests.DataStructures
 {
-	using System.Diagnostics;
-	using SafetySharp.Analysis;
-	using SafetySharp.Runtime;
+	using ISSE.SafetyChecking.GenericDataStructures;
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;

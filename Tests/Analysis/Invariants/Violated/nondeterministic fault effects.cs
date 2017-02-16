@@ -24,6 +24,8 @@ namespace Tests.Analysis.Invariants.Violated
 {
 	using SafetySharp.Modeling;
 	using Shouldly;
+	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Formula;
 
 	internal class NonDeterministicFaultEffects : AnalysisTestObject
 	{

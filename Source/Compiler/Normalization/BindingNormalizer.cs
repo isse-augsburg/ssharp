@@ -28,10 +28,10 @@ namespace SafetySharp.Compiler.Normalization
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
-	using Modeling;
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
 	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Normalizes all calls of <see cref="Component.Bind(string,string)" /> and <see cref="Component.Bind{T}(string,string)" />.

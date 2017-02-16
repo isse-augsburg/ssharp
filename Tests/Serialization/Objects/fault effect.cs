@@ -23,6 +23,7 @@
 // ReSharper disable SuspiciousTypeConversion.Global
 namespace Tests.Serialization.Objects
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime.Serialization;
 	using Shouldly;

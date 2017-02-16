@@ -20,15 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
 	using Modeling;
-	using Runtime;
-	using SafetyChecking;
+	using ExecutableModel;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
 	using Utilities;
 
 	/// <summary>

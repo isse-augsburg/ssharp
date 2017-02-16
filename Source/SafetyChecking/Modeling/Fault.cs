@@ -20,15 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace ISSE.SafetyChecking.Modeling
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
-	using System.Runtime.Serialization;
-	using Analysis;
-	using Utilities;
+	using ExecutableModel;
+	using AnalysisModel;
 
 	/// <summary>
 	///   Represents a base class for all faults affecting the behavior of <see cref="Component" />s.

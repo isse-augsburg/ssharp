@@ -26,6 +26,7 @@ namespace Tests.Analysis.Dcca
 	using System.Collections.Generic;
 	using System.Linq;
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Modeling;
 	using Shouldly;
 
 	internal class X1 : AnalysisTestObject

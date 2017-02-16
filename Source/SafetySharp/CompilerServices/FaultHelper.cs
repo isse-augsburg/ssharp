@@ -23,7 +23,7 @@
 namespace SafetySharp.CompilerServices
 {
 	using System.Runtime.CompilerServices;
-	using Modeling;
+	using ISSE.SafetyChecking.Modeling;
 
 	/// <summary>
 	///   Allows the compiler to check whether a fault is activated while avoiding activation of faults that are known to have no

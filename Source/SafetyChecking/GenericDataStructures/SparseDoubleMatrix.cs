@@ -26,7 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SafetySharp.Runtime
+namespace ISSE.SafetyChecking.GenericDataStructures
 {
 	using System.Diagnostics;
 	using System.Globalization;

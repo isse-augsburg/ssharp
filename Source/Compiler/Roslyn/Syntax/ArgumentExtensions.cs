@@ -24,6 +24,7 @@ namespace SafetySharp.Compiler.Roslyn.Syntax
 {
 	using System;
 	using System.Linq;
+	using ISSE.SafetyChecking.Utilities;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;

@@ -20,21 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using SafetySharp.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SafetySharp.Analysis.Probabilistic.DtmcBased
 {
 	using System.Collections.Concurrent;
-	using FormulaVisitors;
-	using ModelChecking.Probabilistic;
+	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Utilities;
 	using Modeling;
 	using System.Threading.Tasks.Dataflow;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using Runtime;
 
 	// Facade for easier use

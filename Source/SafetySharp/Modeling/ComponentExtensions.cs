@@ -27,6 +27,8 @@ namespace SafetySharp.Modeling
 	using System.Linq;
 	using System.Reflection;
 	using CompilerServices;
+	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Utilities;
 	using Runtime.Serialization;
 	using Utilities;
 

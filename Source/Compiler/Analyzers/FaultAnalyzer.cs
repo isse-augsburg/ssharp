@@ -28,9 +28,9 @@ namespace SafetySharp.Compiler.Analyzers
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Microsoft.CodeAnalysis.Diagnostics;
-	using Modeling;
+	using ISSE.SafetyChecking.Modeling;
 	using Roslyn.Symbols;
-
+	using Modeling;
 	/// <summary>
 	///   Ensures that <see cref="Component" />-derived classes do not access certain<see cref="Fault" /> members.
 	/// </summary>

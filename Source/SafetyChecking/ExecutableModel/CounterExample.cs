@@ -20,16 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.ExecutableModel
 {
 	using System;
-	using System.IO;
-	using System.Linq;
-	using System.Runtime.Serialization.Formatters.Binary;
-	using System.Text;
-	using Modeling;
-	using Runtime;
-	using Runtime.Serialization;
 	using Utilities;
 
 	/// <summary>

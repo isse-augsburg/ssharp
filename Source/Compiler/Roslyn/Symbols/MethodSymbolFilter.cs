@@ -26,6 +26,7 @@ namespace SafetySharp.Compiler.Roslyn.Symbols
 	using System.Linq;
 	using Microsoft.CodeAnalysis;
 	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Filters <see cref="IMethodSymbol" /> instances.

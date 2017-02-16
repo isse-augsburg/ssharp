@@ -23,6 +23,7 @@
 namespace Tests.Analysis.Invariants.NotViolated
 {
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Modeling;
 	using Shouldly;
 
 	internal class UndoNestedChoice : AnalysisTestObject

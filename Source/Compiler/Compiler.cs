@@ -35,7 +35,7 @@ namespace SafetySharp.Compiler
 	using Microsoft.CodeAnalysis.Diagnostics;
 	using Microsoft.CodeAnalysis.Text;
 	using Normalization;
-	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Compiles a S# modeling project authored in C# to a S# modeling assembly.

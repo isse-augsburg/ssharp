@@ -24,7 +24,7 @@ namespace SafetySharp.CompilerServices
 {
 	using System;
 	using System.Reflection;
-	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   When applied to a required port, indicates the fields that the S# compiler used to implement the port.

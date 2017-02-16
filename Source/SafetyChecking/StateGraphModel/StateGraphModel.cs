@@ -20,14 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking
+namespace ISSE.SafetyChecking.StateGraphModel
 {
 	using System;
 	using System.Linq;
 	using System.Runtime.InteropServices;
-	using ISSE.SafetyChecking.ExecutableModel;
-	using Runtime;
-	using Transitions;
+	using ExecutableModel;
+	using AnalysisModel;
 	using Utilities;
 
 	/// <summary>

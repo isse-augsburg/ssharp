@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -20,27 +20,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.Modeling
 {
 	/// <summary>
-	///   Determines the kind of an <see cref="OrderRelationship" />.
+	///   Represents a transient fault that can be activated completely nondeterministically.
 	/// </summary>
-	public enum OrderRelationshipKind
+	public sealed class TransientFault : Fault
 	{
 		/// <summary>
-		///   Indicates that both faults can only be activated simultaneously.
+		///   Initializes a new instance.
 		/// </summary>
-		Simultaneously,
+		public TransientFault()
+			: base(requiresActivationNotification: false)
+		{
+		}
 
 		/// <summary>
-		///   Indicates that the first activation of the first fault strictly precedes all activations of the other.
+		///   Checks whether the fault can be activated nondeterministically, or whether it has to be or cannot be activated. This
+		///   method has no side effects, as otherwise S#'s fault activation mechanism would be completely broken.
 		/// </summary>
-		Precedes,
-
-		/// <summary>
-		///   Indicates that the first activation of the first fault can precede all activations of the other, or they
-		///   can be activated simultaneously.
-		/// </summary>
-		StrictlyPrecedes
+		protected override Activation CheckActivation()
+		{
+			return Activation.Nondeterministic;
+		}
 	}
 }

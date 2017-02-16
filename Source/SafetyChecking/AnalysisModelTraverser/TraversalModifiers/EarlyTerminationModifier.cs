@@ -20,11 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
+namespace ISSE.SafetyChecking.AnalysisModelTraverser
 {
-	using Runtime;
 	using System;
-	using Transitions;
+	using AnalysisModel;
+	using ExecutableModel;
 	using Utilities;
 
 	/// <summary>

@@ -26,15 +26,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SafetySharp.Analysis.ModelChecking.Probabilistic
+namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using Modeling;
-	using Runtime;
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
 	using Utilities;
-	using SafetySharp.Utilities.Graph;
+	using Formula;
+	using GenericDataStructures;
 
 	class BuiltinDtmcModelChecker : DtmcModelChecker
 	{

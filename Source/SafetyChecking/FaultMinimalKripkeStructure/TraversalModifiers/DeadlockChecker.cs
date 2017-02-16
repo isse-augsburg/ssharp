@@ -20,11 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
+namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 {
 	using System;
-	using Runtime;
-	using Transitions;
+	using ExecutableModel;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
 
 	/// <summary>
 	///   Checks for deadlock states, raising an exception if one is found.

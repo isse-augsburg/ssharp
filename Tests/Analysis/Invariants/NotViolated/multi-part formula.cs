@@ -22,6 +22,7 @@
 
 namespace Tests.Analysis.Invariants.NotViolated
 {
+	using ISSE.SafetyChecking.Formula;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;

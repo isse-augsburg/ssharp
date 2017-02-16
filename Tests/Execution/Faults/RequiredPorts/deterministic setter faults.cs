@@ -22,6 +22,7 @@
 
 namespace Tests.Execution.Faults.RequiredPorts
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;

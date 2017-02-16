@@ -26,6 +26,8 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Linq;
 	using System.Text;
 	using Analysis;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Utilities;
 	using Modeling;
 	using Utilities;
 

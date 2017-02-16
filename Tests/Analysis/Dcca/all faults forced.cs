@@ -25,6 +25,7 @@ namespace Tests.Analysis.Dcca
 	using System.Linq;
 	using SafetySharp.Modeling;
 	using Shouldly;
+	using ISSE.SafetyChecking.Modeling;
 
 	internal class AllFaultsForced : AnalysisTestObject
 	{

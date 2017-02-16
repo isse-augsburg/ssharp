@@ -33,6 +33,7 @@ namespace SafetySharp.Compiler.Normalization
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
 	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Normalizes transition chains <c>stateMachine.Transition(...).Transition(...)...</c>.

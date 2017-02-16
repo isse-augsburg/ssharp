@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.Probabilistic
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	public enum BoundsToCalculate
 	{

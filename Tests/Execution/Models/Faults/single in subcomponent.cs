@@ -22,6 +22,7 @@
 
 namespace Tests.Execution.Models.Faults
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;

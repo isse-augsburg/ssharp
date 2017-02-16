@@ -20,13 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.Transitions
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Runtime.CompilerServices;
-	using Runtime;
+	using AnalysisModel;
 	using Utilities;
+	using ExecutableModel;
 
 	/// <summary>
 	///   Creates an activation-minimal set of <see cref="CandidateTransition"/> instances.

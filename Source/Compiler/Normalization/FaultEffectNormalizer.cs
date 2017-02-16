@@ -31,11 +31,12 @@ namespace SafetySharp.Compiler.Normalization
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Microsoft.CodeAnalysis.Editing;
-	using Modeling;
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
+	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Utilities;
+	using Modeling;
 	using Utilities;
-
 	/// <summary>
 	///   Normalizes classes marked with <see cref="FaultEffectAttribute" />.
 	/// </summary>

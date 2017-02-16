@@ -20,13 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
+namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 {
 	using System;
-	using System.Linq;
-	using FormulaVisitors;
-	using Runtime;
-	using Transitions;
+	using ExecutableModel;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
+	using Formula;
 
 	/// <summary>
 	///   Checks for invariant violations during model traversal.

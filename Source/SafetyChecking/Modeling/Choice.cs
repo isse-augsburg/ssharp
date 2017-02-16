@@ -20,11 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Modeling
+namespace ISSE.SafetyChecking.Modeling
 {
 	using System;
 	using System.Runtime.CompilerServices;
-	using Runtime;
+	using ExecutableModel;
 
 	public struct Option<T> //Probabilistic Option. Use it until we have real Tuples in C#
 	{

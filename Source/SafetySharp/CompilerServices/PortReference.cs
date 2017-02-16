@@ -27,6 +27,7 @@ namespace SafetySharp.CompilerServices
 	using System.Reflection;
 	using Modeling;
 	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Represents a reference to a <see cref="TargetObject" /> port.

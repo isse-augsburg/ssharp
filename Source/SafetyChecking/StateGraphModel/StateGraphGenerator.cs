@@ -20,12 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking
+namespace ISSE.SafetyChecking.StateGraphModel
 {
 	using System;
+	using ExecutableModel;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
 	using System.Linq;
-	using ModelTraversal.TraversalModifiers;
-	using Runtime;
 
 	/// <summary>
 	///   Generates a <see cref="StateGraph" /> for an <see cref="AnalysisModel" />.

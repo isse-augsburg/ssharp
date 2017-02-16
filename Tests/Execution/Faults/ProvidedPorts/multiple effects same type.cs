@@ -23,6 +23,7 @@
 namespace Tests.Execution.Faults.ProvidedPorts
 {
 	using System;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;

@@ -25,8 +25,7 @@ namespace SafetySharp.CompilerServices
 	using System.Collections.Generic;
 	using System.Linq;
 	using Modeling;
-	using Runtime;
-	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Used by the S# compiler to establish bindings between <see cref="Component" /> ports.

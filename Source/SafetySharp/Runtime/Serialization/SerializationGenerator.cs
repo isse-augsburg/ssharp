@@ -26,6 +26,7 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Linq;
 	using System.Reflection;
 	using System.Reflection.Emit;
+	using ISSE.SafetyChecking.Utilities;
 	using Utilities;
 
 	/// <summary>

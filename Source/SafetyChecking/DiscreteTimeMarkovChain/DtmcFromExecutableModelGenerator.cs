@@ -20,27 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using System;
 	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Diagnostics;
-	using System.Globalization;
-	using System.IO;
-	using System.Linq;
-	using System.Text;
 	using System.Threading;
-	using System.Threading.Tasks;
-	using FormulaVisitors;
-	using ISSE.SafetyChecking.ExecutableModel;
-	using Modeling;
-	using Runtime;
-	using Runtime.Serialization;
+	using ExecutableModel;
 	using Utilities;
-	using ModelChecking;
-	
-	
+	using AnalysisModel;
+	using Formula;
+	using AnalysisModelTraverser;
+	using System.Linq;
+	using ExecutedModel;
+
 	public class DtmcFromExecutableModelGenerator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>

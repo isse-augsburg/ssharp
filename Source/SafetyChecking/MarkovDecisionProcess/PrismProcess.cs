@@ -22,11 +22,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace SafetySharp.Analysis.Probabilistic
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System.Globalization;
 	using System.IO;

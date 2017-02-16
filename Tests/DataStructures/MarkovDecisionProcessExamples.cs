@@ -29,6 +29,10 @@ using System.Threading.Tasks;
 namespace Tests.DataStructures.MarkovDecisionProcessExamples
 {
 	using System.Diagnostics;
+	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.ExecutedModel;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.MarkovDecisionProcess;
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
@@ -36,8 +40,6 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
-	using SafetySharp.Utilities.Graph;
-	using SafetySharp.Analysis.Probabilistic.MdpBased.ExportToGv;
 	using SafetySharp.Utilities;
 
 	public static class AllExamples

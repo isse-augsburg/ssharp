@@ -20,12 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Runtime
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System.Collections.Generic;
 	using System.Runtime.CompilerServices;
+	using AnalysisModelTraverser;
+	using ExecutableModel;
 	using Modeling;
 	using Utilities;
+
 
 	/// <summary>
 	///   Represents a stack that is used to resolve nondeterministic choices during state space enumeration.

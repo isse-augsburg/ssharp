@@ -28,17 +28,12 @@ using System.Threading.Tasks;
 
 namespace Tests.DataStructures
 {
-	using System.Diagnostics;
+	using ISSE.SafetyChecking.GenericDataStructures;
 	using JetBrains.Annotations;
 	using MarkovChainExamples;
-	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
-	using SafetySharp.Utilities.Graph;
-	using SafetySharp.Analysis.Probabilistic.DtmcBased.ExportToGv;
 	using AllExamples = MarkovChainExamples.AllExamples;
 
 	public class MarkovChainTests

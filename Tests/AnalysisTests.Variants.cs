@@ -27,11 +27,15 @@ namespace Tests
 	using System.Linq;
 	using ISSE.SafetyChecking.ExecutableModel;
 	using SafetySharp.Analysis;
-	using SafetySharp.Analysis.FormulaVisitors;
 	using SafetySharp.ModelChecking;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 	using Utilities;
+	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
+	using ISSE.SafetyChecking.Modeling;
 
 	public abstract class AnalysisTestsVariant
 	{

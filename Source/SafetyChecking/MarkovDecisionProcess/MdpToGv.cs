@@ -21,14 +21,8 @@
 // THE SOFTWARE.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SafetySharp.Runtime;
 
-namespace SafetySharp.Analysis.Probabilistic.MdpBased.ExportToGv
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System.Globalization;
 	using System.IO;

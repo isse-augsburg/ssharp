@@ -22,20 +22,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
-	using FormulaVisitors;
 	using Modeling;
-	using Runtime;
-	using Runtime.Serialization;
 	using Utilities;
+	using Formula;
 
 	public class ExternalDtmcModelCheckerMrmc : DtmcModelChecker
 	{

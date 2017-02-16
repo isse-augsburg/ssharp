@@ -27,6 +27,9 @@ namespace SafetySharp.Analysis
 	using System.Linq;
 	using System.Runtime.InteropServices;
 	using System.Text;
+	using ISSE.SafetyChecking.ExecutableModel;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Simulator;
 	using Modeling;
 	using Runtime;
 	using Utilities;

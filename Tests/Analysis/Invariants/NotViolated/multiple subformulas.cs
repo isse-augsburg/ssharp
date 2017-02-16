@@ -22,8 +22,8 @@
 
 namespace Tests.Analysis.Invariants.NotViolated
 {
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Formula;
 	using Shouldly;
 
 	internal class MultipleSubformulas : AnalysisTestObject

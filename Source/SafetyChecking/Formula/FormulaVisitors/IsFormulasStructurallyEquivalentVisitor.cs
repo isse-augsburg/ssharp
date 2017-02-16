@@ -21,11 +21,9 @@
 // THE SOFTWARE.
 
 
-namespace SafetySharp.Analysis.FormulaVisitors
+namespace ISSE.SafetyChecking.Formula
 {
 	using System;
-	using System.Linq.Expressions;
-	using Runtime;
 	using Utilities;
 
 	/// <summary>

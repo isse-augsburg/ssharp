@@ -26,8 +26,7 @@ namespace SafetySharp.Modeling
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
-
-
+	using ISSE.SafetyChecking.Modeling;
 
 	public abstract partial class Component
 	{

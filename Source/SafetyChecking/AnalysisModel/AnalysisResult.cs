@@ -20,11 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.AnalysisModel
 {
-	using System.Collections.Generic;
-	using Runtime;
-	using Runtime.Serialization;
+	using ExecutableModel;
 
 	/// <summary>
 	///   Describes the result of a model checking based analysis.

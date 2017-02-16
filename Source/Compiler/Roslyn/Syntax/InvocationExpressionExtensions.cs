@@ -23,6 +23,7 @@
 namespace SafetySharp.Compiler.Roslyn.Syntax
 {
 	using System.Collections.Generic;
+	using ISSE.SafetyChecking.Utilities;
 	using JetBrains.Annotations;
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;

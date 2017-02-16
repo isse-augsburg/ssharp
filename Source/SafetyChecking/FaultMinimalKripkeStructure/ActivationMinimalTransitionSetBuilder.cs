@@ -20,12 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.Transitions
+namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Runtime.CompilerServices;
-	using Runtime;
+	using ExecutableModel;
+	using AnalysisModel;
 	using Utilities;
 
 	/// <summary>

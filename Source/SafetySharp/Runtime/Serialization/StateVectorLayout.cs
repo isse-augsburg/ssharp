@@ -27,6 +27,8 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Text;
+	using ISSE.SafetyChecking.ExecutableModel;
+	using ISSE.SafetyChecking.Utilities;
 	using Modeling;
 	using Utilities;
 

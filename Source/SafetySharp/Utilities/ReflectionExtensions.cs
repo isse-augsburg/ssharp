@@ -29,6 +29,9 @@ namespace SafetySharp.Utilities
 	using System.Reflection.Emit;
 	using System.Runtime.CompilerServices;
 	using System.Runtime.InteropServices;
+	using ISSE.SafetyChecking.ExecutableModel;
+	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Utilities;
 	using Modeling;
 	using Runtime;
 	using Runtime.Serialization;

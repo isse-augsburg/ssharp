@@ -20,16 +20,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.SafetyChecking
+namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 {
 	using System;
 	using System.Linq;
-	using ModelChecking;
-	using ModelChecking.ModelTraversal.TraversalModifiers;
+	using ExecutableModel;
 	using Modeling;
-	using Runtime;
-	using Runtime.Serialization;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
+	using ExecutedModel;
+	using FaultMinimalKripkeStructure;
 	using Utilities;
+	using Formula;
 
 	/// <summary>
 	///   Checks all formulas individually on the model taking advantage of the fault-removal optimization.

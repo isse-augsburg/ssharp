@@ -25,9 +25,9 @@ namespace SafetySharp.Compiler.Normalization
 	using Microsoft.CodeAnalysis;
 	using Microsoft.CodeAnalysis.CSharp;
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
-	using Modeling;
 	using Roslyn.Symbols;
 	using Roslyn.Syntax;
+	using ISSE.SafetyChecking.Modeling;
 
 	/// <summary>
 	///   Assigns default name to fault instantiations.

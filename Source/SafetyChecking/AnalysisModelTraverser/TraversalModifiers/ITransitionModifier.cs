@@ -20,10 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
+namespace ISSE.SafetyChecking.AnalysisModelTraverser
 {
-	using Runtime;
-	using Transitions;
+	using AnalysisModel;
+	using ExecutableModel;
 
 	/// <summary>
 	///   Represents a modifier that is executed when new transitions are found during model traversal.

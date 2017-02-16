@@ -26,9 +26,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SafetySharp.Runtime
+namespace ISSE.SafetyChecking.GenericDataStructures
 {
-	using Analysis;
+	using AnalysisModel;
 	using System.Collections;
 	using System.Runtime.CompilerServices;
 

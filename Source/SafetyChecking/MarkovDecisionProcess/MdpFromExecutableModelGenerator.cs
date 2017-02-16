@@ -20,27 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System;
 	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Diagnostics;
-	using System.Globalization;
-	using System.IO;
 	using System.Linq;
-	using System.Text;
 	using System.Threading;
-	using System.Threading.Tasks;
-	using FormulaVisitors;
-	using ISSE.SafetyChecking.ExecutableModel;
-	using Modeling;
-	using Runtime;
-	using Runtime.Serialization;
+	using AnalysisModelTraverser;
+	using ExecutableModel;
+	using Formula;
 	using Utilities;
-	using ModelChecking;
-	
-	
+	using AnalysisModel;
+	using ExecutedModel;
+
 	public class MdpFromExecutableModelGenerator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
@@ -71,7 +63,7 @@ namespace SafetySharp.Analysis
 
 
 		/// <summary>
-		///   Generates a <see cref="StateGraph" /> for the model created by <paramref name="createModel" />.
+		///   Generates a <see cref="StateGraph{TExecutableModel}" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
 		private MarkovDecisionProcess GenerateMarkovDecisionProcess(Func<AnalysisModel<TExecutableModel>> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas)
 		{

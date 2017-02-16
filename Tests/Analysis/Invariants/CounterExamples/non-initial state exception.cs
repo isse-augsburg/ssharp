@@ -27,6 +27,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 	using Shouldly;
+	using ISSE.SafetyChecking.AnalysisModelTraverser;
 
 	internal class NonInitialStateException : AnalysisTestObject
 	{

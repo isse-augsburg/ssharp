@@ -25,8 +25,10 @@ namespace Tests.Analysis.Invariants.CounterExamples
 	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Runtime;
 	using Shouldly;
+	using ISSE.SafetyChecking.AnalysisModelTraverser;
 
 	internal class InitialStateException : AnalysisTestObject
 	{

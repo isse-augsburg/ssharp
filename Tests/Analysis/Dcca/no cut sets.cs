@@ -23,6 +23,7 @@
 namespace Tests.Analysis.Dcca
 {
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Modeling;
 	using Shouldly;
 
 	internal class X3 : AnalysisTestObject

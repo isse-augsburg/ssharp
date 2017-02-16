@@ -26,11 +26,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SafetySharp.Runtime
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System.Diagnostics;
-	using Analysis;
-	using Utilities;
+	using AnalysisModel;
+	using ExecutedModel;
+	using GenericDataStructures;
 
 	internal sealed class LtmdpToMdp
 	{

@@ -20,17 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using System;
-	using Utilities;
 	using System.IO;
-	using System.Globalization;
-	using System.Text;
+	using Formula;
 	using Modeling;
-	using Runtime.Serialization;
-	using FormulaVisitors;
-	using Runtime;
 
 	// Mrmc is in file ProbabilisticModelChecker.Mrmc.cs which is nested in ProbabilisticModelChecker.cs.
 	// Open arrow of ProbabilisticModelChecker.cs in Solution Explorer to see nested files.

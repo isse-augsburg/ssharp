@@ -23,12 +23,15 @@
 namespace Tests
 {
 	using System.Collections.Generic;
+	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.AnalysisModelTraverser;
+	using ISSE.SafetyChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutedModel;
+	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
-	using SafetySharp.Analysis.ModelChecking;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
-	using SafetySharp.Runtime.Serialization;
 	using Shouldly;
 	using Utilities;
 	using Xunit.Abstractions;

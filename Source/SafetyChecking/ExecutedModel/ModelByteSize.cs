@@ -20,10 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Utilities
+namespace ISSE.SafetyChecking.ExecutedModel
 {
 	using System;
-	using System.Diagnostics;
 
 	public struct ByteSize
 	{

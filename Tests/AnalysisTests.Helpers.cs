@@ -25,14 +25,18 @@ namespace Tests
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.AnalysisModelTraverser;
+	using ISSE.SafetyChecking.ExecutableModel;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
+	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Utilities;
 	using JetBrains.Annotations;
 	using SafetySharp.Analysis;
-	using SafetySharp.Analysis.Heuristics;
 	using SafetySharp.ModelChecking;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
-	using SafetySharp.Utilities;
-	using Shouldly;
 	using Utilities;
 	using Xunit.Abstractions;
 

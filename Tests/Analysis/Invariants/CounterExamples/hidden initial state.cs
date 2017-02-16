@@ -23,6 +23,7 @@
 namespace Tests.Analysis.Invariants.CounterExamples
 {
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Modeling;
 	using Shouldly;
 
 	internal class HiddenInitialState : AnalysisTestObject

@@ -25,6 +25,9 @@ namespace Tests.Analysis.Ordering
 	using System.Linq;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using Shouldly;
 
 	internal class StrictlyPrecedesAll : AnalysisTestObject

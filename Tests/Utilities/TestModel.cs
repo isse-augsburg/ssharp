@@ -27,8 +27,8 @@ namespace Tests.Utilities
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
-	using SafetySharp.Utilities;
-
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Utilities;
 	/// <summary>
 	///   Represents a base class for testable runtime models that are compiled and instantiated dynamically during test execution.
 	/// </summary>

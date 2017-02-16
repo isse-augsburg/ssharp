@@ -31,7 +31,7 @@ namespace SafetySharp.Compiler.Normalization
 	using Microsoft.CodeAnalysis.CSharp.Syntax;
 	using Microsoft.CodeAnalysis.Editing;
 	using Roslyn.Syntax;
-	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   A base class for C# normalizers that normalize certain C# language features.

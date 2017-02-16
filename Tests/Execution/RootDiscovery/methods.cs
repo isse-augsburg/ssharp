@@ -24,6 +24,7 @@ namespace Tests.Execution.RootDiscovery
 {
 	using System.Collections.Generic;
 	using System.Linq;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;

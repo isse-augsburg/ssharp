@@ -20,16 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking
+namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 {
 	using System;
-	using System.Linq;
-	using FormulaVisitors;
-	using ISSE.SafetyChecking.ExecutableModel;
-	using Modeling;
-	using Runtime;
-	using Transitions;
+	using ExecutableModel;
+	using AnalysisModel;
 	using Utilities;
+	using ExecutedModel;
+	using System.Linq;
+	using Formula;
 
 	/// <summary>
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="SafetySharpRuntimeModel" /> with

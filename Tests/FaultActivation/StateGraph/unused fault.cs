@@ -22,6 +22,7 @@
 
 namespace Tests.FaultActivation.StateGraph
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using Shouldly;
 

@@ -24,6 +24,7 @@ namespace Tests.Analysis.Dcca
 {
 	using System.Linq;
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Modeling;
 	using Shouldly;
 
 	internal class X2 : AnalysisTestObject

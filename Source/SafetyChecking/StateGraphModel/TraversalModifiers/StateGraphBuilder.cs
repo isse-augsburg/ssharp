@@ -20,11 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis.ModelChecking.ModelTraversal.TraversalModifiers
+namespace ISSE.SafetyChecking.StateGraphModel
 {
-	using Runtime;
-	using Transitions;
+	using ExecutableModel;
+	using AnalysisModel;
+	using AnalysisModelTraverser;
 	using Utilities;
+
 
 	/// <summary>
 	///   Builds up a <see cref="StateGraph" /> instance during model traversal.

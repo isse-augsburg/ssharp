@@ -20,16 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.Simulator
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 	using System.Runtime.InteropServices;
 	using System.Text;
-	using Modeling;
-	using Runtime;
+	using ExecutableModel;
 	using Utilities;
+	using ExecutedModel;
 
 	/// <summary>
 	///   Simulates a S# model for debugging or testing purposes.

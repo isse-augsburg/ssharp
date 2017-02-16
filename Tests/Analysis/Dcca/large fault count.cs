@@ -23,8 +23,10 @@
 namespace Tests.Analysis.Dcca
 {
 	using System.Linq;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Modeling;
 	using Shouldly;
 
 	internal class LargeFaultCount : AnalysisTestObject

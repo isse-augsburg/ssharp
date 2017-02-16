@@ -22,6 +22,7 @@
 
 namespace Tests.FaultActivation.Formulas
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using Shouldly;
 

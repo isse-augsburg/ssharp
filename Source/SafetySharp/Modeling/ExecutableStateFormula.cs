@@ -23,8 +23,8 @@
 namespace SafetySharp.Analysis
 {
 	using System;
-	using FormulaVisitors;
-	using Utilities;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Represents a state formula, i.e., a Boolean expression that is evaluated in a single system state.

@@ -23,9 +23,9 @@
 namespace ISSE.SafetyChecking.ExecutableModel
 {
 	using System;
-	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
+	using Formula;
+	using Modeling;
+
 
 	public class CoupledExecutableModelCreator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{

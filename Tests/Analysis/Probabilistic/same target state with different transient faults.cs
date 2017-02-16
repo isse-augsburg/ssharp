@@ -26,6 +26,9 @@ namespace Tests.Analysis.Probabilistic
 	using System;
 	using SafetySharp.Analysis;
 	using SafetySharp.ModelChecking;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;

@@ -24,8 +24,11 @@ namespace Tests.Analysis.Dcca
 {
 	using System;
 	using System.Linq;
+	using ISSE.SafetyChecking.AnalysisModelTraverser;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Runtime;
 	using Shouldly;
 

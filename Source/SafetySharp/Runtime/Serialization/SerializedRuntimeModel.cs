@@ -23,6 +23,7 @@
 namespace SafetySharp.Runtime.Serialization
 {
 	using Analysis;
+	using ISSE.SafetyChecking.Formula;
 	using Modeling;
 
 	/// <summary>

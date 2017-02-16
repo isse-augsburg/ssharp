@@ -23,6 +23,7 @@
 namespace Tests.Execution.Faults.Binding
 {
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Runtime;
 	using Shouldly;
 	using Utilities;

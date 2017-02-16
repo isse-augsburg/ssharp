@@ -22,6 +22,7 @@
 
 namespace Tests.Diagnostics.Faults.Invalid
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Compiler.Analyzers;
 	using SafetySharp.Modeling;
 

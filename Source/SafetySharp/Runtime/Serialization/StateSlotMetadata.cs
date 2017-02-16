@@ -27,6 +27,7 @@ namespace SafetySharp.Runtime.Serialization
 	using System.Linq;
 	using System.Reflection;
 	using Utilities;
+	using ISSE.SafetyChecking.Utilities;
 
 	/// <summary>
 	///   Describes the contents stored in a state slot of a state vector.

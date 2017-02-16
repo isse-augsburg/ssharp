@@ -28,7 +28,7 @@ namespace Tests.Execution.RootDiscovery
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
-
+	using ISSE.SafetyChecking.Modeling;
 	internal class Properties : TestObject
 	{
 		protected override void Check()

@@ -23,6 +23,7 @@
 namespace Tests.Analysis.Invariants.StateGraph
 {
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Modeling;
 	using Shouldly;
 
 	internal class FaultActivation : AnalysisTestObject

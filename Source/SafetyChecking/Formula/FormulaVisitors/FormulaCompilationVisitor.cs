@@ -21,11 +21,11 @@
 // THE SOFTWARE.
 
 
-namespace SafetySharp.Analysis.FormulaVisitors
+namespace ISSE.SafetyChecking.Formula
 {
 	using System;
 	using System.Linq.Expressions;
-	using Runtime;
+	using ExecutableModel;
 	using Utilities;
 
 	/// <summary>
@@ -140,10 +140,9 @@ namespace SafetySharp.Analysis.FormulaVisitors
 	}
 }
 
-namespace SafetySharp.Analysis
+namespace ISSE.SafetyChecking.Formula
 {
-	using Runtime;
-	using SafetySharp.Analysis.FormulaVisitors;
+	using ExecutableModel;
 	using System;
 
 	public static class SafetySharpFormulaEvaluationExtension

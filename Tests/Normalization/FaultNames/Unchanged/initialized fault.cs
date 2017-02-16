@@ -22,6 +22,7 @@
 
 namespace Tests.Normalization.FaultNames.Unchanged
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	public class In3
