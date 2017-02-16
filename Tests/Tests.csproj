@@ -332,7 +332,7 @@
     <Compile Include="AnalysisTests.Helpers.cs">
       <DependentUpon>AnalysisTests.cs</DependentUpon>
     </Compile>
-    <Compile Include="AnalysisTests.Variants.cs" >
+    <Compile Include="AnalysisTests.Variants.cs">
       <DependentUpon>AnalysisTests.cs</DependentUpon>
     </Compile>
     <Compile Include="DiagnosticsTests.cs" />
@@ -768,9 +768,9 @@
       <Project>{8823091c-387f-4f4d-abcd-8f71d1528cbb}</Project>
       <Name>Compiler</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Source\ModelChecking\ModelChecking.csproj">
+    <ProjectReference Include="..\Source\SafetyChecking\SafetyChecking.csproj">
       <Project>{a91cb8af-8a4c-4f69-848e-b3962f9a94f9}</Project>
-      <Name>ModelChecking</Name>
+      <Name>SafetyChecking</Name>
     </ProjectReference>
     <ProjectReference Include="..\Source\SafetySharp\SafetySharp.csproj">
       <Project>{9b6c1fb4-3f1b-43ac-a0e0-eaed4088bf37}</Project>

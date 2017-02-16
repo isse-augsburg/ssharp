@@ -62,7 +62,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robot Cell", "Models\Robot 
 		{96F3A853-B30A-4413-98C8-C9AAA4C084DE} = {96F3A853-B30A-4413-98C8-C9AAA4C084DE}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelChecking", "Source\ModelChecking\ModelChecking.csproj", "{A91CB8AF-8A4C-4F69-848E-B3962F9A94F9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafetyChecking", "Source\SafetyChecking\SafetyChecking.csproj", "{A91CB8AF-8A4C-4F69-848E-B3962F9A94F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -25,7 +25,7 @@ namespace Tests
 {
 	using System;
 	using System.Linq;
-	using ISSE.ModelChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutableModel;
 	using SafetySharp.Analysis;
 	using SafetySharp.Analysis.FormulaVisitors;
 	using SafetySharp.ModelChecking;
