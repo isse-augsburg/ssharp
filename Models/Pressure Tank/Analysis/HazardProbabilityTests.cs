@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 namespace SafetySharp.CaseStudies.PressureTank.Analysis
 {
 	using FluentAssertions;
+	using ISSE.SafetyChecking.Modeling;
 	using Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;

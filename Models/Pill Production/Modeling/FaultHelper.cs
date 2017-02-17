@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using System.Linq;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	internal static class FaultHelper

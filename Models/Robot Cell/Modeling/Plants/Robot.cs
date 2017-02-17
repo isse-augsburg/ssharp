@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 	using System;
 	using System.Linq;
 	using Controllers;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	internal class Robot : Component

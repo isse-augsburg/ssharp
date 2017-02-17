@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 {
 	using System.Windows;
+	using ISSE.SafetyChecking.Modeling;
 	using Modeling;
 
 	/// <summary>

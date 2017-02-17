@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBloodCircuit
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	public class BloodPump : Component

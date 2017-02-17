@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 {
 	using System;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	internal class Workpiece : Component

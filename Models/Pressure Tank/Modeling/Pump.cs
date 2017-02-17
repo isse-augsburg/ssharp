@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.PressureTank.Modeling
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	/// <summary>

@@ -23,6 +23,8 @@
 namespace SafetySharp.CaseStudies.PressureTank.Analysis
 {
 	using FluentAssertions;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Modeling;
 	using Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;

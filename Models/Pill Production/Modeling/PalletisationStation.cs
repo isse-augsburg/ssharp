@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	/// <summary>

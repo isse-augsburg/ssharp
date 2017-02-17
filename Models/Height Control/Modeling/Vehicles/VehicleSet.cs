@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 {
 	using System.Linq;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using Sensors;
 

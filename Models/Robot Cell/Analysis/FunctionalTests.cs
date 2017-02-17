@@ -25,12 +25,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using System;
 	using System.Collections;
 	using System.Linq;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ModelChecking;
 	using Modeling;
 	using Modeling.Controllers;
 	using NUnit.Framework;
-	using SafetySharp.Analysis;
-	using SafetySharp.Analysis.Heuristics;
 
 	internal class FunctionalTests
 	{

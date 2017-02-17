@@ -26,13 +26,13 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 	using System.Collections;
 	using System.Linq;
 	using FluentAssertions;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
+	using ISSE.SafetyChecking.Modeling;
 	using ModelChecking;
 	using Modeling;
 	using Modeling.Controllers;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
-	using SafetySharp.Analysis.Heuristics;
-	using SafetySharp.Modeling;
 
 	public class ModelCheckingTests
 	{

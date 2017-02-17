@@ -32,6 +32,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using HemodialysisMachine.Modeling;
 	using HemodialysisMachine.Utilities.BidirectionalFlow;
 	using Infrastructure;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 	using SafetySharp.Runtime;
 

@@ -36,6 +36,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using HeightControl.Modeling.Sensors;
 	using HeightControl.Modeling.Vehicles;
 	using Infrastructure;
+	using ISSE.SafetyChecking.Modeling;
 	using Modeling;
 
 	public partial class HeightControlSystem

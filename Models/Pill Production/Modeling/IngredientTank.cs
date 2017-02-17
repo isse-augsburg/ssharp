@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.PillProduction.Modeling
 {
 	using System;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	public partial class ParticulateDispenser

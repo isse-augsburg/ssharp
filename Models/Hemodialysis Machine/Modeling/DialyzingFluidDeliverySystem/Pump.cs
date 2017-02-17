@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDeliverySystem
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	public class Pump : Component

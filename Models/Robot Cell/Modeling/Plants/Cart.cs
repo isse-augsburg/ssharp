@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 {
 	using System.Linq;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	internal class Cart : Component

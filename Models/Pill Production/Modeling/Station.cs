@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	/// <summary>

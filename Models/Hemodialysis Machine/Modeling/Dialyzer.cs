@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	public class Dialyzer : Component

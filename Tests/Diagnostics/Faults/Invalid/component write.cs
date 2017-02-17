@@ -26,7 +26,7 @@ namespace Tests.Diagnostics.Faults.Invalid
 	using SafetySharp.Compiler.Analyzers;
 	using SafetySharp.Modeling;
 
-	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 35, 16, 10, "SafetySharp.Modeling.Fault.Activation")]
+	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 36, 16, 10, "ISSE.SafetyChecking.Modeling.Fault.Activation")]
 	public class Write : Component
 	{
 		private Fault _f;

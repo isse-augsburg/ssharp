@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 {
 	using System;
 	using FluentAssertions;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ModelChecking;
 	using Modeling;
 	using NUnit.Framework;

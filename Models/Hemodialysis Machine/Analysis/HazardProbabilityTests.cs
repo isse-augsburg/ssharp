@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 {
 	using FluentAssertions;
+	using ISSE.SafetyChecking.Modeling;
 	using Modeling;
 	using SafetySharp.Modeling;
 	using NUnit.Framework;

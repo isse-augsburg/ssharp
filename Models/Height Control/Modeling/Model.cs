@@ -26,6 +26,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 	using System.Collections.Generic;
 	using System.Linq;
 	using Controllers;
+	using ISSE.SafetyChecking.Formula;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Sensors;

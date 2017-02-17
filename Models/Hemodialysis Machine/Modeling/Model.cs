@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 {
+	using ISSE.SafetyChecking.Formula;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 

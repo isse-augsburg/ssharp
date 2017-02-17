@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Plants
 {
 	using Controllers;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	/// <summary>

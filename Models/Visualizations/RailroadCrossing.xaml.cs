@@ -31,6 +31,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 	using Infrastructure;
 	using Modeling;
 	using Analysis;
+	using ISSE.SafetyChecking.Formula;
 
 	public partial class RailroadCrossing
 	{

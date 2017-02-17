@@ -24,12 +24,12 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 {
 	using System;
 	using System.Linq;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ModelChecking;
 	using Modeling;
 	using NUnit.Framework;
 	using Runtime;
 	using SafetySharp.Analysis;
-	using SafetySharp.Analysis.Heuristics;
 	using SafetySharp.Modeling;
 	using static SafetySharp.Analysis.Operators;
 

@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 {
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	public class TrainSensor : Component

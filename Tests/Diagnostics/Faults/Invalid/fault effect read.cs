@@ -27,8 +27,8 @@ namespace Tests.Diagnostics.Faults.Invalid
 	using SafetySharp.Modeling;
 
 	[FaultEffect]
-	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 37, 20, 11, "SafetySharp.Modeling.Fault.IsActivated")]
-	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 44, 23, 10, "SafetySharp.Modeling.Fault.Activation")]
+	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 38, 20, 11, "ISSE.SafetyChecking.Modeling.Fault.IsActivated")]
+	[Diagnostic(DiagnosticIdentifier.InvalidFaultMemberAccess, 45, 23, 10, "ISSE.SafetyChecking.Modeling.Fault.Activation")]
 	public class ReadFaultEffect : Component
 	{
 		private Fault _f;

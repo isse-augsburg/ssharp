@@ -26,6 +26,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.Collections.Generic;
 	using System.Linq;
 	using CompilerServices;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	internal class Agent : Component

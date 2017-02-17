@@ -25,6 +25,8 @@ namespace SafetySharp.CaseStudies.Visualizations.Infrastructure
 	using System;
 	using System.Windows;
 	using Analysis;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Modeling;
 	using Microsoft.Win32;
 	using Modeling;
 	using Runtime;

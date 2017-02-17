@@ -27,9 +27,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 	using Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
-	using SafetySharp.Analysis.Heuristics;
-	using SafetySharp.Modeling;
 	using FluentAssertions;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
+	using ISSE.SafetyChecking.Modeling;
 	using ModelChecking;
 
 	public class ModelTests

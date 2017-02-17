@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 {
 	using System.Diagnostics;
+	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
 
 	[DebuggerDisplay("{Robot1.Name} -> {Robot2.Name}")]
