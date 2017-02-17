@@ -63,7 +63,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		
 		public DiscreteTimeMarkovChain(long numberOfStates, ModelDensity density)
 		{
-			var modelSize = ModelSize.CreateModelSizeFromStateNumberDensityStateAndTransitionSize(numberOfStates, density, _sizeOfState, _sizeOfTransition);
+			var modelSize = ModelByteSize.CreateModelSizeFromStateNumberDensityStateAndTransitionSize(numberOfStates, density, _sizeOfState, _sizeOfTransition);
 
 			StateLabeling = new LabelVector();
 			ProbabilityMatrix = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for row of initial distribution
@@ -71,13 +71,13 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		public DiscreteTimeMarkovChain(ModelDensity density, ByteSize availableMemory)
 		{
-			var modelSize = ModelSize.CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(density, availableMemory,_sizeOfState, _sizeOfTransition);
+			var modelSize = ModelByteSize.CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(density, availableMemory,_sizeOfState, _sizeOfTransition);
 
 			StateLabeling = new LabelVector();
 			ProbabilityMatrix = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for row of initial distribution
 		}
 
-		public DiscreteTimeMarkovChain(ModelSize modelSize)
+		public DiscreteTimeMarkovChain(ModelByteSize modelSize)
 		{
 			StateLabeling = new LabelVector();
 			ProbabilityMatrix = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for row of initial distribution

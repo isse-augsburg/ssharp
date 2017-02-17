@@ -59,7 +59,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		public MarkovDecisionProcess(long numberOfStates, ModelDensity density)
 		{
-			var modelSize = ModelSize.CreateModelSizeFromStateNumberDensityStateAndTransitionSize(numberOfStates, density, _sizeOfState, _sizeOfTransition);
+			var modelSize = ModelByteSize.CreateModelSizeFromStateNumberDensityStateAndTransitionSize(numberOfStates, density, _sizeOfState, _sizeOfTransition);
 
 			StateLabeling = new LabelVector();
 			RowsWithDistributions = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for initial distributions (more might be necessary)
@@ -70,7 +70,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		public MarkovDecisionProcess(ModelDensity density, ByteSize availableMemory)
 		{
-			var modelSize = ModelSize.CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(density, availableMemory, _sizeOfState, _sizeOfTransition);
+			var modelSize = ModelByteSize.CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(density, availableMemory, _sizeOfState, _sizeOfTransition);
 
 			StateLabeling = new LabelVector();
 			RowsWithDistributions = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for initial distributions (more might be necessary)
@@ -79,7 +79,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			SetRowOfStateEntriesToInvalid();
 		}
 
-		public MarkovDecisionProcess(ModelSize modelSize)
+		public MarkovDecisionProcess(ModelByteSize modelSize)
 		{
 			StateLabeling = new LabelVector();
 			RowsWithDistributions = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for initial distributions (more might be necessary)

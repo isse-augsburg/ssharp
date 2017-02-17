@@ -38,6 +38,13 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		public static ByteSize GibiByte = new ByteSize(1024L * 1024L * 1024L);
 	}
 
+	public enum ModelMemoryDemand
+	{
+		Tiny,   // needs 10 KibiBytes
+		Small,  // needs 10 MebiBytes
+		Huge    // needs 5 GibiBytes
+	}
+
 	public enum ModelDensity
 	{
 		Dense, //Transition per State is limited to State
@@ -45,7 +52,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		Sparse //Transition per State is limited to  50
 	}
 
-	public struct ModelSize
+	public struct ModelByteSize
 	{
 		public ByteSize ByteSize { get; }
 		public int SizeOfState { get; }
@@ -53,7 +60,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		public long NumberOfStates { get; }
 		public long NumberOfTransitions { get; }
 
-		public static ModelSize CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(ModelDensity density, ByteSize availableMemory, int sizeOfState, int sizeOfTransition)
+		public static ModelByteSize CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(ModelDensity density, ByteSize availableMemory, int sizeOfState, int sizeOfTransition)
 		{
 			const long limit = 5L * 1024L * 1024L * 1024L;
 			var availableMemoryValue = availableMemory.Value;
@@ -94,11 +101,11 @@ namespace ISSE.SafetyChecking.ExecutedModel
 			var numberOfTransitions = numberOfStates * densityInNumbers;
 			
 
-			return new ModelSize(availableMemory,sizeOfState,sizeOfTransition,numberOfStates, numberOfTransitions);
+			return new ModelByteSize(availableMemory,sizeOfState,sizeOfTransition,numberOfStates, numberOfTransitions);
 		}
 
 
-		public static ModelSize CreateModelSizeFromStateNumberDensityStateAndTransitionSize(long numberOfStates,ModelDensity density, int sizeOfState, int sizeOfTransition)
+		public static ModelByteSize CreateModelSizeFromStateNumberDensityStateAndTransitionSize(long numberOfStates,ModelDensity density, int sizeOfState, int sizeOfTransition)
 		{
 			// Equation:
 			//     (1) sizeOfState * numberOfStates + sizeOfTransition * numberOfTransitions = ByteSize
@@ -122,26 +129,26 @@ namespace ISSE.SafetyChecking.ExecutedModel
 
 			var availableMemoryValue = numberOfTransitions * sizeOfTransition + numberOfStates * sizeOfState;
 
-			return new ModelSize(new ByteSize(availableMemoryValue), sizeOfState, sizeOfTransition, numberOfStates, numberOfTransitions);
+			return new ModelByteSize(new ByteSize(availableMemoryValue), sizeOfState, sizeOfTransition, numberOfStates, numberOfTransitions);
 		}
 
-		public static ModelSize CreateTinyModel(int sizeOfState, int sizeOfTransition)
+		public static ModelByteSize CreateTinyModel(int sizeOfState, int sizeOfTransition)
 		{
 			return CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(ModelDensity.Medium, new ByteSize(10L * 1024L), sizeOfState, sizeOfTransition);
 		}
 
-		public static ModelSize CreateSmallModel(int sizeOfState, int sizeOfTransition)
+		public static ModelByteSize CreateSmallModel(int sizeOfState, int sizeOfTransition)
 		{
-			return CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(ModelDensity.Medium, new ByteSize(10L * 1024L), sizeOfState, sizeOfTransition);
+			return CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(ModelDensity.Medium, new ByteSize(10L * 1024L * 1024L), sizeOfState, sizeOfTransition);
 		}
 
-		public static ModelSize CreateHugeModel(int sizeOfState, int sizeOfTransition)
+		public static ModelByteSize CreateHugeModel(int sizeOfState, int sizeOfTransition)
 		{
 			return CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(ModelDensity.Medium, new ByteSize(5L * 1024L * 1024L * 1024), sizeOfState, sizeOfTransition);
 		}
 
 
-		public ModelSize(ByteSize byteSize, int sizeOfState, int sizeOfTransition, long numberOfStates, long numberOfTransitions)
+		public ModelByteSize(ByteSize byteSize, int sizeOfState, int sizeOfTransition, long numberOfStates, long numberOfTransitions)
 		{
 			ByteSize = byteSize;
 			SizeOfState = sizeOfState;
