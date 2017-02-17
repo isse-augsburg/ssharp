@@ -89,7 +89,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		//[Hidden]
 		//public Timer Timer;
 
-		public int TimeStepsLeft = 7; // hard code 7 time steps
+		public int TimeStepsLeft = 6; // hard code 6 time steps
 
 		//references to components
 		private readonly WaterPreparation WaterPreparation;

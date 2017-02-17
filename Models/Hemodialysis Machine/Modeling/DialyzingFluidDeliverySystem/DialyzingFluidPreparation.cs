@@ -75,7 +75,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 			Concentrate.ReceivedForward=ReceivedConcentrate;
 		}
 
-		public readonly Fault DialyzingFluidPreparationPumpDefect = new TransientFault();
+		public readonly Fault DialyzingFluidPreparationPumpDefect = new PermanentFault();
 
 		[FaultEffect(Fault = nameof(DialyzingFluidPreparationPumpDefect))]
 		public class DialyzingFluidPreparationPumpDefectEffect : DialyzingFluidPreparation

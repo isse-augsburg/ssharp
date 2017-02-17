@@ -75,7 +75,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 			MainFlow.UpdateForward=SetMainFlow;
 		}
 
-		public readonly Fault ValveDoesNotClose = new TransientFault();
+		public readonly Fault ValveDoesNotClose = new PermanentFault();
 
 		[FaultEffect(Fault = nameof(ValveDoesNotClose))]
 		public class ValveDoesNotCloseEffect : VenousTubingValve

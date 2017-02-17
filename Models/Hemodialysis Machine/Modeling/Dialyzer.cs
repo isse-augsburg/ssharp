@@ -144,7 +144,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		}
 
 
-		public readonly Fault DialyzerMembraneRupturesFault = new TransientFault();
+		public readonly Fault DialyzerMembraneRupturesFault = new PermanentFault();
 
 		[FaultEffect(Fault = nameof(DialyzerMembraneRupturesFault))]
 		public class DialyzerMembraneRupturesFaultEffect : Dialyzer

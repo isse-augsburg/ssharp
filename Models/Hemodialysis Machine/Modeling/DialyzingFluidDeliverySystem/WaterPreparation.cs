@@ -55,7 +55,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 			MainFlow.UpdateForward=SetMainFlow;
 		}
 
-		public readonly Fault WaterHeaterDefect = new TransientFault();
+		public readonly Fault WaterHeaterDefect = new PermanentFault();
 
 		[FaultEffect(Fault = nameof(WaterHeaterDefect))]
 		public class WaterHeaterDefectEffect : WaterPreparation

@@ -53,7 +53,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 			MainFlow.UpdateForward=SetMainFlow;
 		}
 
-		public readonly Fault BloodPumpDefect = new TransientFault();
+		public readonly Fault BloodPumpDefect = new PermanentFault();
 
 		[FaultEffect(Fault = nameof(BloodPumpDefect))]
 		public class BloodPumpDefectEffect : BloodPump

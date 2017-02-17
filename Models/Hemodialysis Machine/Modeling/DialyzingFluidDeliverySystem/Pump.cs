@@ -48,11 +48,14 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		{
 			Suction toPredecessor;
 			toPredecessor.SuctionType = SuctionType.CustomSuction;
-			toPredecessor.CustomSuctionValue = PumpSpeed;
+			if (fromSuccessor.SuctionType == SuctionType.SourceDependentSuction)
+				toPredecessor.CustomSuctionValue = PumpSpeed;
+			else
+				toPredecessor.CustomSuctionValue = fromSuccessor.CustomSuctionValue + PumpSpeed;
 			return toPredecessor;
 		}
 		
-		public readonly Fault PumpDefect = new TransientFault();
+		public readonly Fault PumpDefect = new PermanentFault();
 
 		[FaultEffect(Fault = nameof(PumpDefect))]
 		public class PumpDefectEffect : Pump
