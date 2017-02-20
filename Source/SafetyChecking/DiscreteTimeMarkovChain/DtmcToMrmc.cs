@@ -66,7 +66,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			streamTransitions.Close();
 
 			streamStateLabelings.WriteLine("#DECLARATION");
-			//bool firstElement = true;
+
 			var noStateFormulaLabels = _markovChain.StateFormulaLabels.Length;
 			for (var i = 0; i < noStateFormulaLabels; i++)
 			{
