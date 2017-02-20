@@ -61,24 +61,10 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		}
 		*/
 		
-		public DiscreteTimeMarkovChain(long numberOfStates, ModelDensity density)
+		public DiscreteTimeMarkovChain(ModelCapacity modelCapacity)
 		{
-			var modelSize = ModelByteSize.CreateModelSizeFromStateNumberDensityStateAndTransitionSize(numberOfStates, density, _sizeOfState, _sizeOfTransition);
+			var modelSize = modelCapacity.DeriveModelByteSize(_sizeOfState, _sizeOfTransition);
 
-			StateLabeling = new LabelVector();
-			ProbabilityMatrix = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for row of initial distribution
-		}
-
-		public DiscreteTimeMarkovChain(ModelDensity density, ByteSize availableMemory)
-		{
-			var modelSize = ModelByteSize.CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(density, availableMemory,_sizeOfState, _sizeOfTransition);
-
-			StateLabeling = new LabelVector();
-			ProbabilityMatrix = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for row of initial distribution
-		}
-
-		public DiscreteTimeMarkovChain(ModelByteSize modelSize)
-		{
 			StateLabeling = new LabelVector();
 			ProbabilityMatrix = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for row of initial distribution
 		}

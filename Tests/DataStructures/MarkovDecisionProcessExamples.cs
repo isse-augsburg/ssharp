@@ -125,7 +125,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 		{
 			// Just a simple MDP with no nondeterministic choices
 			//   ⟳0⟶1⟲
-			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
+			var mdp = new MarkovDecisionProcess(ModelCapacityByMemorySize.Tiny);
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -184,7 +184,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 		{
 			// Just another simple MDP with no nondeterministic choices
 			//   0⟶1⟲
-			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
+			var mdp = new MarkovDecisionProcess(ModelCapacityByMemorySize.Tiny);
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -243,7 +243,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			//   0⟶0.5⟼1⟲    0.5⇢0
 			//       0.5⟼3⟶4➞0.5⟲
 			//             ↘2⟲
-			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
+			var mdp = new MarkovDecisionProcess(ModelCapacityByMemorySize.Tiny);
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -331,7 +331,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			//    ↘0.5⟼1⟲    0.5⇢0
 			//      0.5⟼3⟶4➞0.5⟲
 			//            ↘2⟲
-			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
+			var mdp = new MarkovDecisionProcess(ModelCapacityByMemorySize.Tiny);
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -420,7 +420,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			// A MDP which was designed to test prob0e
 			//   0⟼1↘
 			//    ↘2⟼3⟲
-			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
+			var mdp = new MarkovDecisionProcess(ModelCapacityByMemorySize.Tiny);
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -499,7 +499,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			//   ⇅
 			//   0⟼1↘
 			//    ↘2⟼3⟲
-			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
+			var mdp = new MarkovDecisionProcess(ModelCapacityByMemorySize.Tiny);
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -589,7 +589,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			//       ⟶0.5⇢3
 			//        ↘0.5⟶4⇢0
 
-			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
+			var mdp = new MarkovDecisionProcess(ModelCapacityByMemorySize.Tiny);
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -677,7 +677,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 		{
 			// Just a simple MDP with simple nondeterministic choices
 			//   ⟳0⟶1⟲
-			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
+			var mdp = new MarkovDecisionProcess(ModelCapacityByMemorySize.Tiny);
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
@@ -740,7 +740,7 @@ namespace Tests.DataStructures.MarkovDecisionProcessExamples
 			//   ⇅
 			//   1➞0.6⟼2⟲
 			//      0.4⟼3⟲
-			var mdp = new MarkovDecisionProcess(ModelDensity.Medium, ByteSize.MebiByte);
+			var mdp = new MarkovDecisionProcess(ModelCapacityByMemorySize.Tiny);
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();

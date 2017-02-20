@@ -144,7 +144,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			Console.Out.WriteLine("Starting to convert labeled transition Markov Decision Process to Markov Decision Process");
 			Console.Out.WriteLine($"Ltmdp: States {ltmc.SourceStates.Count}, Transitions {ltmc.Transitions}");
 			CreateStates(ltmc);
-			MarkovDecisionProcess=new MarkovDecisionProcess(States,ModelDensity.Medium);
+			var modelCapacity = new ModelCapacityByModelSize(States, ModelDensityLimit.Medium);
+			MarkovDecisionProcess =new MarkovDecisionProcess(modelCapacity);
 			MarkovDecisionProcess.StateFormulaLabels = ltmc.StateFormulaLabels;
 			SetStateLabeling();
 			ConvertInitialStates(ltmc);

@@ -57,30 +57,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		public LabelVector StateLabeling { get; }
 
-		public MarkovDecisionProcess(long numberOfStates, ModelDensity density)
+		public MarkovDecisionProcess(ModelCapacity modelCapacity)
 		{
-			var modelSize = ModelByteSize.CreateModelSizeFromStateNumberDensityStateAndTransitionSize(numberOfStates, density, _sizeOfState, _sizeOfTransition);
+			var modelSize = modelCapacity.DeriveModelByteSize(_sizeOfState, _sizeOfTransition);
 
-			StateLabeling = new LabelVector();
-			RowsWithDistributions = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for initial distributions (more might be necessary)
-			StateToRowsL = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions
-			StateToRowsRowCount = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions
-			SetRowOfStateEntriesToInvalid();
-		}
-
-		public MarkovDecisionProcess(ModelDensity density, ByteSize availableMemory)
-		{
-			var modelSize = ModelByteSize.CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(density, availableMemory, _sizeOfState, _sizeOfTransition);
-
-			StateLabeling = new LabelVector();
-			RowsWithDistributions = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for initial distributions (more might be necessary)
-			StateToRowsL = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions
-			StateToRowsRowCount = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions
-			SetRowOfStateEntriesToInvalid();
-		}
-
-		public MarkovDecisionProcess(ModelByteSize modelSize)
-		{
 			StateLabeling = new LabelVector();
 			RowsWithDistributions = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for initial distributions (more might be necessary)
 			StateToRowsL = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions

@@ -23,6 +23,7 @@
 namespace ISSE.SafetyChecking.ExecutedModel
 {
 	using System;
+	using Utilities;
 
 	public struct ByteSize
 	{
@@ -37,33 +38,161 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		public static ByteSize MebiByte = new ByteSize(1024L * 1024L);
 		public static ByteSize GibiByte = new ByteSize(1024L * 1024L * 1024L);
 	}
-
-	public enum ModelMemoryDemand
+	
+	public enum ModelDensityLimit
 	{
-		Tiny,   // needs 10 KibiBytes
-		Small,  // needs 10 MebiBytes
-		Huge    // needs 5 GibiBytes
+		Dense = -1, //Transitions per State is limited to State
+		High = 16384, //Average Transitions per State is limited to 16384
+		Medium = 4096, //Average Transitions per State is limited to 4096
+		Sparse = 64, //Average Transitions per State is limited to 64
+		VerySparse = 16 //Average Transitions per State is limited to 16
 	}
 
-	public enum ModelDensity
+	public abstract class ModelCapacity
 	{
-		Dense, //Transition per State is limited to State
-		Medium, //Transition per State is limited to 4096
-		Sparse //Transition per State is limited to  50
+		protected const long MinCapacity = 1024;
+		protected const long DefaultStateCapacity = 1 << 24;
+		protected const ModelDensityLimit DefaultDensityLimit = ModelDensityLimit.High;
+
+		public abstract ModelByteSize DeriveModelByteSize(int sizeOfState, int sizeOfTransition);
+	}
+	
+	public class ModelCapacityByModelSize : ModelCapacity
+	{
+		private long _stateCapacity;
+
+		public ModelDensityLimit DensityLimit { get; set; }
+
+		private ModelCapacityByModelSize()
+		{
+		}
+
+		public ModelCapacityByModelSize(long stateCapacity, ModelDensityLimit densityLimit = ModelDensityLimit.Dense)
+		{
+			StateCapacity = stateCapacity;
+			DensityLimit = densityLimit;
+		}
+
+		public static readonly ModelCapacityByModelSize Default = new ModelCapacityByModelSize
+		{
+			StateCapacity = DefaultStateCapacity,
+			DensityLimit = DefaultDensityLimit
+		};
+
+		public static readonly ModelCapacityByModelSize Tiny = new ModelCapacityByModelSize
+		{
+			StateCapacity = 1024,
+			DensityLimit = ModelDensityLimit.Dense
+		};
+
+		public static readonly ModelCapacityByModelSize Small = new ModelCapacityByModelSize
+		{
+			StateCapacity = 1<<20,
+			DensityLimit = ModelDensityLimit.Medium
+		};
+
+		public static readonly ModelCapacityByModelSize Big = new ModelCapacityByModelSize
+		{
+			StateCapacity = 1 << 24,
+			DensityLimit = ModelDensityLimit.High
+		};
+
+		public static readonly ModelCapacityByModelSize Large = new ModelCapacityByModelSize
+		{
+			StateCapacity = 1 << 28,
+			DensityLimit = ModelDensityLimit.High
+		};
+		
+		public long StateCapacity
+		{
+			get { return Math.Max(_stateCapacity, MinCapacity); }
+			private set
+			{
+				Requires.That(value >= MinCapacity, $"{nameof(StateCapacity)} must be at least {MinCapacity}.");
+				_stateCapacity = value;
+			}
+		}
+		
+		public override ModelByteSize DeriveModelByteSize(int sizeOfState, int sizeOfTransition)
+		{
+			// Equation:
+			//     (1) sizeOfState * numberOfStates + sizeOfTransition * numberOfTransitions = ByteSize
+			//     (2) numberOfTransitions = numberOfStates * density
+			//  => sizeOfState * numberOfStates + sizeOfTransition * numberOfStates * density = ByteSize
+			//  => numberOfStates = ByteSize / (sizeOfState  + sizeOfTransition * density)
+			var densityInNumbers = 0L;
+			switch (DensityLimit)
+			{
+				case ModelDensityLimit.Dense:
+					densityInNumbers = StateCapacity;
+					break;
+				case ModelDensityLimit.Medium:
+					densityInNumbers = 4096;
+					break;
+				case ModelDensityLimit.Sparse:
+					densityInNumbers = 50;
+					break;
+			}
+			var numberOfTransitions = StateCapacity * densityInNumbers;
+
+			var availableMemoryValue = numberOfTransitions * sizeOfTransition + StateCapacity * sizeOfState;
+
+			return new ModelByteSize(new ByteSize(availableMemoryValue), sizeOfState, sizeOfTransition, StateCapacity, numberOfTransitions);
+		}
 	}
 
-	public struct ModelByteSize
+	public class ModelCapacityByMemorySize : ModelCapacity
 	{
-		public ByteSize ByteSize { get; }
-		public int SizeOfState { get; }
-		public int SizeOfTransition { get; }
-		public long NumberOfStates { get; }
-		public long NumberOfTransitions { get; }
+		private static readonly ByteSize _defaultMemoryLimit = new ByteSize(10L * 1024L * 1024L);
 
-		public static ModelByteSize CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(ModelDensity density, ByteSize availableMemory, int sizeOfState, int sizeOfTransition)
+		public ByteSize MemoryLimit { get; set; }
+		public ModelDensityLimit DensityLimit { get; set; }
+
+
+		private ModelCapacityByMemorySize()
+		{
+		}
+
+		public ModelCapacityByMemorySize(ByteSize memoryLimit, ModelDensityLimit densityLimit = ModelDensityLimit.Dense)
+		{
+			MemoryLimit = memoryLimit;
+			DensityLimit = densityLimit;
+		}
+
+		public static readonly ModelCapacityByMemorySize Default = new ModelCapacityByMemorySize
+		{
+			MemoryLimit = _defaultMemoryLimit,
+			DensityLimit = DefaultDensityLimit
+		};
+
+		public static readonly ModelCapacityByMemorySize Tiny = new ModelCapacityByMemorySize
+		{
+			MemoryLimit = new ByteSize(1024L * 1024L),
+			DensityLimit = ModelDensityLimit.Sparse
+		};
+
+		public static readonly ModelCapacityByMemorySize Small = new ModelCapacityByMemorySize
+		{
+			MemoryLimit = new ByteSize(16L * 1024L * 1024L),
+			DensityLimit = ModelDensityLimit.Medium
+		};
+
+		public static readonly ModelCapacityByMemorySize Big = new ModelCapacityByMemorySize
+		{
+			MemoryLimit = new ByteSize(512L * 1024L * 1024L),
+			DensityLimit = ModelDensityLimit.High
+		};
+
+		public static readonly ModelCapacityByMemorySize Large = new ModelCapacityByMemorySize
+		{
+			MemoryLimit = new ByteSize(5L * 1024L * 1024L * 1024),
+			DensityLimit = ModelDensityLimit.High
+		};
+
+		public override ModelByteSize DeriveModelByteSize(int sizeOfState, int sizeOfTransition)
 		{
 			const long limit = 5L * 1024L * 1024L * 1024L;
-			var availableMemoryValue = availableMemory.Value;
+			var availableMemoryValue = MemoryLimit.Value;
 			if (availableMemoryValue <= 0 || availableMemoryValue > limit)
 				availableMemoryValue = limit;
 
@@ -74,80 +203,43 @@ namespace ISSE.SafetyChecking.ExecutedModel
 			//  => numberOfStates = ByteSize / (sizeOfState  + sizeOfTransition * density)
 			var numberOfStates = 0L;
 			var densityInNumbers = 0L;
-			switch (density)
+			switch (DensityLimit)
 			{
-				case ModelDensity.Dense:
+				case ModelDensityLimit.Dense:
 					// (3) density = numberOfStates
 					// => sizeOfState * numberOfStates + sizeOfTransition * numberOfStates * numberOfStates = ByteSize
 					// => sizeOfTransition * numberOfStates^2 + sizeOfState * numberOfStates - ByteSize = 0
 					// => (school) quadratic equation
 					// exact: (var numberOfStatesEstimate = (- sizeOfState + (Math.Sqrt(4.0*ByteSize + sizeOfState*sizeOfState)) )/ (2.0*sizeOfTransition);)
 					// estimate: 
-					var numberOfStatesEstimate = Math.Sqrt(availableMemoryValue/ ((double)sizeOfTransition));
+					var numberOfStatesEstimate = Math.Sqrt(availableMemoryValue / ((double)sizeOfTransition));
 					numberOfStates = Convert.ToInt64(Math.Floor(numberOfStatesEstimate));
 					if (numberOfStates < 4)
 						numberOfStates = 4;
 					densityInNumbers = numberOfStates;
 					break;
-				case ModelDensity.Medium:
-					densityInNumbers = 4096;
-					numberOfStates = availableMemoryValue / (sizeOfState + sizeOfTransition * densityInNumbers);
-					break;
-				case ModelDensity.Sparse:
-					densityInNumbers = 50;
+				default:
+					densityInNumbers = (long)DensityLimit;
+					Requires.That(densityInNumbers > 0, "There must be memory for at least one transition per state in average.");
 					numberOfStates = availableMemoryValue / (sizeOfState + sizeOfTransition * densityInNumbers);
 					break;
 			}
 			var numberOfTransitions = numberOfStates * densityInNumbers;
-			
 
-			return new ModelByteSize(availableMemory,sizeOfState,sizeOfTransition,numberOfStates, numberOfTransitions);
+
+			return new ModelByteSize(MemoryLimit, sizeOfState, sizeOfTransition, numberOfStates, numberOfTransitions);
 		}
 
+	}
 
-		public static ModelByteSize CreateModelSizeFromStateNumberDensityStateAndTransitionSize(long numberOfStates,ModelDensity density, int sizeOfState, int sizeOfTransition)
-		{
-			// Equation:
-			//     (1) sizeOfState * numberOfStates + sizeOfTransition * numberOfTransitions = ByteSize
-			//     (2) numberOfTransitions = numberOfStates * density
-			//  => sizeOfState * numberOfStates + sizeOfTransition * numberOfStates * density = ByteSize
-			//  => numberOfStates = ByteSize / (sizeOfState  + sizeOfTransition * density)
-			var densityInNumbers = 0L;
-			switch (density)
-			{
-				case ModelDensity.Dense:
-					densityInNumbers = numberOfStates;
-					break;
-				case ModelDensity.Medium:
-					densityInNumbers = 4096;
-					break;
-				case ModelDensity.Sparse:
-					densityInNumbers = 50;
-					break;
-			}
-			var numberOfTransitions = numberOfStates * densityInNumbers;
-
-			var availableMemoryValue = numberOfTransitions * sizeOfTransition + numberOfStates * sizeOfState;
-
-			return new ModelByteSize(new ByteSize(availableMemoryValue), sizeOfState, sizeOfTransition, numberOfStates, numberOfTransitions);
-		}
-
-		public static ModelByteSize CreateTinyModel(int sizeOfState, int sizeOfTransition)
-		{
-			return CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(ModelDensity.Medium, new ByteSize(10L * 1024L), sizeOfState, sizeOfTransition);
-		}
-
-		public static ModelByteSize CreateSmallModel(int sizeOfState, int sizeOfTransition)
-		{
-			return CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(ModelDensity.Medium, new ByteSize(10L * 1024L * 1024L), sizeOfState, sizeOfTransition);
-		}
-
-		public static ModelByteSize CreateHugeModel(int sizeOfState, int sizeOfTransition)
-		{
-			return CreateModelSizeFromAvailableMemoryDensityStateAndTransitionSize(ModelDensity.Medium, new ByteSize(5L * 1024L * 1024L * 1024), sizeOfState, sizeOfTransition);
-		}
-
-
+	public class ModelByteSize : ModelCapacity
+	{
+		public ByteSize ByteSize { get; set; }
+		public int SizeOfState { get; set; }
+		public int SizeOfTransition { get; set; }
+		public long NumberOfStates { get; set; }
+		public long NumberOfTransitions { get; set; }
+		
 		public ModelByteSize(ByteSize byteSize, int sizeOfState, int sizeOfTransition, long numberOfStates, long numberOfTransitions)
 		{
 			ByteSize = byteSize;
@@ -155,6 +247,11 @@ namespace ISSE.SafetyChecking.ExecutedModel
 			SizeOfTransition = sizeOfTransition;
 			NumberOfStates = numberOfStates;
 			NumberOfTransitions = numberOfTransitions;
+		}
+		
+		public override ModelByteSize DeriveModelByteSize(int sizeOfState, int sizeOfTransition)
+		{
+			return this;
 		}
 	}
 }

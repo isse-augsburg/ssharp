@@ -114,7 +114,7 @@ namespace Tests.DataStructures.MarkovChainExamples
 		{
 			// Just a simple DTMC
 			//   ⟳0⟶1⟲
-			var markovChain = new DiscreteTimeMarkovChain(ModelDensity.Medium,ByteSize.MebiByte);
+			var markovChain = new DiscreteTimeMarkovChain(ModelCapacityByMemorySize.Tiny);
 			markovChain.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			markovChain.StateRewardRetrieverLabels = new string[] { };
 			markovChain.StartWithInitialDistribution();
@@ -158,7 +158,7 @@ namespace Tests.DataStructures.MarkovChainExamples
 		{
 			// Just a simple DTMC
 			//   0⟶1⟲
-			var markovChain = new DiscreteTimeMarkovChain(ModelDensity.Medium, ByteSize.MebiByte);
+			var markovChain = new DiscreteTimeMarkovChain(ModelCapacityByMemorySize.Tiny);
 			markovChain.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			markovChain.StateRewardRetrieverLabels = new string[] { };
 			markovChain.StartWithInitialDistribution();
