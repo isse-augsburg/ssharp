@@ -59,18 +59,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		private readonly long _maxNumberOfTransitions;
 
 
-		public LabeledTransitionMarkovDecisionProcess(long maxNumberOfStates= 1 << 21, long maxNumberOfTransitions=0)
+		public LabeledTransitionMarkovDecisionProcess(long maxNumberOfStates, long maxNumberOfTransitions)
 		{
 			Requires.InRange(maxNumberOfStates, nameof(maxNumberOfStates), 1024, Int32.MaxValue - 1);
-			if (maxNumberOfTransitions <= 0)
-			{
-				maxNumberOfTransitions = maxNumberOfStates << 10;
-				var limit = 8 * 1024 / 32 * 1024 * 1024; // 6 gb / 32 bytes (for entries)
 
-				if (maxNumberOfTransitions < maxNumberOfStates || maxNumberOfTransitions > limit)
-					maxNumberOfTransitions = limit;
-
-			}
 			_maxNumberOfTransitions = maxNumberOfTransitions;
 
 			_stateStorageStateToFirstTransitionChainElementBuffer.Resize((long)maxNumberOfStates * sizeof(int), zeroMemory: false);

@@ -46,7 +46,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration, LabeledTransitionMarkovDecisionProcess.TransitionSize)
 		{
-			_mdp = new LabeledTransitionMarkovDecisionProcess(Context.ModelCapacity.NumberOfStates);
+			_mdp = new LabeledTransitionMarkovDecisionProcess(Context.ModelCapacity.NumberOfStates, Context.ModelCapacity.NumberOfTransitions);
 			_mdp.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
 			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LtmdpBuilder<TExecutableModel>(_mdp));

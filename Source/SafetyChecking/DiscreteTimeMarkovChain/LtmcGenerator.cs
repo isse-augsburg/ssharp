@@ -47,7 +47,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration, LabeledTransitionMarkovChain.TransitionSize)
 		{
-			_markovChain = new LabeledTransitionMarkovChain(Context.ModelCapacity.NumberOfStates);
+			_markovChain = new LabeledTransitionMarkovChain(Context.ModelCapacity.NumberOfStates,Context.ModelCapacity.NumberOfTransitions);
 			_markovChain.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
 			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LtmcBuilder<TExecutableModel>(_markovChain));

@@ -43,11 +43,12 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			{
 				return false;
 			}
-			if (model == "bidirectional_circle.model" || model == "complex_setup.model")
+			if (model == "simple_setup.model" || model == "trivial_setup.model")
 			{
-				if (faultActivation != FaultActivationBehavior.ForceOnly)
-					return false;
+				return true;
 			}
+			if (faultActivation != FaultActivationBehavior.ForceOnly)
+				return false;
 			return true;
 		}
 
