@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 	using System;
 	using System.Collections;
 	using System.Linq;
+	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ModelChecking;
 	using Modeling;
@@ -170,7 +171,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			{
 				Configuration =
 				{
-					StateCapacity = 1 << 16,
+					ModelCapacity = new ModelCapacityByModelSize(1 << 16, ModelDensityLimit.Medium),
 					CpuCount = 4,
 					GenerateCounterExample = false
 				}
@@ -201,7 +202,9 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			var model = new ModelSetupParser().Parse("Analysis/medium_setup.model");
 			model.Faults.SuppressActivations();
 
-			var checker = new SafetySharpQualitativeChecker { Configuration = { StateCapacity = 1 << 18 } };
+			var checker = new SafetySharpQualitativeChecker { Configuration = {
+					ModelCapacity = new ModelCapacityByModelSize(1 << 18, ModelDensityLimit.Medium)}
+			};
 			var result = checker.CheckInvariant(model, true);
 			
 			Console.WriteLine(result);

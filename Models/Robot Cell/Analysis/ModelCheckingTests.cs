@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
 	using System.Linq;
+	using ISSE.SafetyChecking.ExecutedModel;
 	using ModelChecking;
 	using Modeling;
 	using Modeling.Controllers;
@@ -41,7 +42,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
-			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { StateCapacity = 1 << 22 } };
+			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { ModelCapacity = new ModelCapacityByModelSize(1 << 22, ModelDensityLimit.Medium) } };
 			var result = modelChecker.CheckInvariant(model, true);
 
 			Assert.IsTrue(result.FormulaHolds);
@@ -55,7 +56,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
-			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { StateCapacity = 1 << 22 } };
+			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { ModelCapacity = new ModelCapacityByModelSize(1 << 22, ModelDensityLimit.Medium) } };
 			var result = modelChecker.CheckInvariant(model, !model.Workpieces.Any(w => w.IsDamaged));
 
 			Assert.IsTrue(result.FormulaHolds);
@@ -69,7 +70,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
-			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { StateCapacity = 1 << 22 } };
+			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { ModelCapacity = new ModelCapacityByModelSize(1 << 22, ModelDensityLimit.Medium) } };
 			var result = modelChecker.CheckInvariant(model, !model.Workpieces.All(w => w.IsComplete));
 
 			Assert.IsFalse(result.FormulaHolds);
@@ -83,7 +84,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<FastObserverController>();
 			model.Faults.SuppressActivations();
 
-			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { StateCapacity = 1 << 22 } };
+			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { ModelCapacity = new ModelCapacityByModelSize(1 << 22, ModelDensityLimit.Medium) } };
 			var result = modelChecker.CheckInvariant(model,
 				model.RobotAgents.All(a => a.HasResource == a.Robot.HasWorkpiece) &&
 				model.CartAgents.All(a => a.HasResource == a.Cart.HasWorkpiece));

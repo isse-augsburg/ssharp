@@ -28,6 +28,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using FluentAssertions;
+	using FluentAssertions.Common;
+	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ISSE.SafetyChecking.Modeling;
 	using ModelChecking;
@@ -120,9 +122,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			var specification = new Model();
 			var analysis = new SafetySharpSafetyAnalysis
 			{
-				Configuration = { StateCapacity = 1310720 },
 				Backend = backend,
-				Heuristics = { new MaximalSafeSetHeuristic(specification.Faults) }
+				Heuristics = { new MaximalSafeSetHeuristic(specification.Faults) },
+				Configuration = { ModelCapacity = new ModelCapacityByModelSize(1310720, ModelDensityLimit.Medium) }
 			};
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.IncomingBloodWasNotOk);
@@ -137,7 +139,11 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			[Values(SafetyAnalysisBackend.FaultOptimizedStateGraph, SafetyAnalysisBackend.FaultOptimizedOnTheFly)] SafetyAnalysisBackend backend)
 		{
 			var specification = new Model();
-			var analysis = new SafetySharpSafetyAnalysis { Configuration = { StateCapacity = 1310720 }, Backend = backend };
+			var analysis = new SafetySharpSafetyAnalysis
+			{
+				Backend = backend,
+				Configuration = { ModelCapacity = new ModelCapacityByModelSize(1310720, ModelDensityLimit.Medium) }
+			};
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.BloodNotCleanedAndDialyzingFinished);
 			result.SaveCounterExamples("counter examples/hdmachine_unsuccessful");
@@ -160,7 +166,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			for (var i = 0; i < faults.Length; ++i)
 				faults[i].Activation = Activation.Nondeterministic;
 
-			var checker = new SafetySharpQualitativeChecker { Configuration = { StateCapacity = 1310720 } };
+			var checker = new SafetySharpQualitativeChecker
+			{
+				Configuration = { ModelCapacity = new ModelCapacityByModelSize(1310720, ModelDensityLimit.High) }
+			};
 			checker.CheckInvariant(model, true);
 		}
 		

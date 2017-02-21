@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using System;
 	using System.Collections;
 	using System.Linq;
+	using ISSE.SafetyChecking.ExecutedModel;
 	using ModelChecking;
 	using Modeling;
 	using Modeling.Controllers;
@@ -36,7 +37,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[TestCaseSource(nameof(CreateConfigurations))]
 		public void NoDamagedWorkpieces(Model model)
 		{
-			var modelChecker = new SafetySharpSafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
+			var modelChecker = new SafetySharpSafetyAnalysis { Configuration = { ModelCapacity = new ModelCapacityByModelSize(1 << 22, ModelDensityLimit.Medium), GenerateCounterExample = false } };
 			var result = modelChecker.ComputeMinimalCriticalSets(model, model.Workpieces.Any(w => w.IsDamaged), maxCardinality: 2);
 
 			Console.WriteLine(result);
@@ -45,7 +46,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[TestCaseSource(nameof(CreateConfigurations))]
 		public void AllWorkpiecesCompleteEventually(Model model)
 		{
-			var modelChecker = new SafetySharpSafetyAnalysis { Configuration = { StateCapacity = 1 << 22, GenerateCounterExample = false } };
+			var modelChecker = new SafetySharpSafetyAnalysis { Configuration = { ModelCapacity = new ModelCapacityByModelSize(1 << 22, ModelDensityLimit.Medium), GenerateCounterExample = false } };
 			var result = modelChecker.ComputeMinimalCriticalSets(model,
 				model.ObserverController._stepCount >= ObserverController.MaxSteps &&
 				!model.Workpieces.All(w => w.IsDamaged || w.IsDiscarded || w.IsComplete), maxCardinality: 2);

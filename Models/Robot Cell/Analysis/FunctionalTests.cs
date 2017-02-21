@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using System;
 	using System.Collections;
 	using System.Linq;
+	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ModelChecking;
 	using Modeling;
@@ -47,7 +48,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			model.CreateObserverController<MiniZincObserverController>();
 			model.SetAnalysisMode(AnalysisMode.TolerableFaults);
 
-			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 20 } };
+			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { CpuCount = 1, ModelCapacity = new ModelCapacityByModelSize(1 << 20, ModelDensityLimit.Medium) } };
 			var result = modelChecker.CheckInvariant(model, true);
 
 			Console.WriteLine(result);
@@ -66,7 +67,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				Configuration =
 				{
 					CpuCount = 1,
-					StateCapacity = 1 << 20,
+					ModelCapacity = new ModelCapacityByModelSize(1 << 20, ModelDensityLimit.Medium),
 					GenerateCounterExample = false
 				},
 				FaultActivationBehavior = FaultActivationBehavior.ForceOnly,
