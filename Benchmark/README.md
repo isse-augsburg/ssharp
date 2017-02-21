@@ -1,4 +1,4 @@
-Here you can find batch files for PowerScript to automatically execute all relevant benchmarks and summarize them in a .csv-File.
+Here you can find batch files for PowerScript to automatically execute all relevant benchmarks and summarize them in a .csv-file.
 
 These scripts are highly platform dependent. It depends on the local system settings such as system language and system paths.
 To use them you have to adjust the paths and the system separator (delimiter) in the script files to your local environment.
@@ -13,8 +13,8 @@ To use them you have to adjust the paths and the system separator (delimiter) in
 Note: You must run the following command first
   ```Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser```
 
-To Undo
+To undo
   ```Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser```
 
-
-[System Separator (Delimiter)](https://answers.microsoft.com/en-us/msoffice/forum/msoffice_excel-mso_other/how-do-i-change-the-system-separator-delimiter-to/9f8d5f2c-940f-4418-b952-bfeac867c03e)
+References
+* [System Separator (Delimiter)](https://answers.microsoft.com/en-us/msoffice/forum/msoffice_excel-mso_other/how-do-i-change-the-system-separator-delimiter-to/9f8d5f2c-940f-4418-b952-bfeac867c03e)

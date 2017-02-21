@@ -58,5 +58,5 @@ Foreach ($test in $tests) {
 
 $resultsFile="$PSScriptRoot\"+"summarizedBenchmarkResults.csv"
 
-$results | Export-Csv -Path $resultsFile -Encoding ascii -NoTypeInformation -Delimiter ';' #delimineter ';' for german excel
+$results | Export-Csv -Path $resultsFile -Encoding ascii -NoTypeInformation -UseCulture
 

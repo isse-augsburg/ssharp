@@ -21,6 +21,11 @@ To get started with S#, please consult the [Wiki](http://safetysharp.isse.de/wik
 the case studies are available under the 
 [MIT License](https://github.com/isse-augsburg/ssharp/blob/master/LICENSE.md).
 
+Publications
+-------------------------
+
+Please see [Wiki page with our S# related publications](https://github.com/isse-augsburg/ssharp/wiki/Publications)
+
 Example: Modeling with S#
 -------------------------
 
@@ -106,8 +111,3 @@ Minimal Critical Sets: 1
 
    (1) { SuppressIsFull, SuppressTimeout }
 ```
-
-Publications
--------------------------
-
-Please see [Wiki page with our S# related publications](https://github.com/isse-augsburg/ssharp/wiki/Publications)
