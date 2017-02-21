@@ -49,12 +49,13 @@ namespace Tests
 			var modelCreator=SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components), new ExecutableStateFormula(() => true));
 
 			var configuration = AnalysisConfiguration.Default;
-			configuration.StateCapacity = 10000;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.StackCapacity = 10000;
 			configuration.CpuCount = 1;
 
-			var checker = new InvariantChecker<SafetySharpRuntimeModel>(
-				() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(modelCreator, 0, configuration.SuccessorCapacity),
+			var analysisModelCreator=new AnalysisModelCreator<SafetySharpRuntimeModel>(() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(modelCreator, 0, configuration.SuccessorCapacity));
+
+			var checker = new InvariantChecker<SafetySharpRuntimeModel>(analysisModelCreator,
 				s => Output.Log("{0}", s),
 				configuration,
 				formulaIndex: 0);

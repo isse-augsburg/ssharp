@@ -34,8 +34,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 	internal unsafe class LabeledTransitionMarkovChain
 	{
+		public static readonly int TransitionSize = sizeof(TransitionChainElement);
+
 		// TODO: Optimization potential for custom model checker: Add every state only once. Save the transitions and evaluate reachability formulas more efficient by only expanding "states" to "states x stateformulaset" where the state labels of interests are in "stateformulaset"
 		
+
 		public string[] StateFormulaLabels;
 
 		public string[] StateRewardRetrieverLabels;

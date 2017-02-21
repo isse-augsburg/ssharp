@@ -28,6 +28,7 @@ namespace Tests
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
 	using ISSE.SafetyChecking.ExecutableModel;
+	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ISSE.SafetyChecking.Modeling;
@@ -128,8 +129,7 @@ namespace Tests
 		protected OrderAnalysisResults<SafetySharpRuntimeModel> AnalyzeOrder(Formula hazard, params IComponent[] components)
 		{
 			var configuration = AnalysisConfiguration.Default;
-			configuration.StateCapacity = 1 << 10;
-			configuration.TransitionCapacity = 1 << 12;
+			configuration.ModelCapacity=ModelCapacityByMemorySize.Tiny;
 			configuration.GenerateCounterExample = !SuppressCounterExampleGeneration;
 			configuration.ProgressReportsOnly = true;
 
@@ -149,8 +149,7 @@ namespace Tests
 				Backend = (SafetyAnalysisBackend)Arguments[0],
 				Configuration =
 				{
-					StateCapacity = 1 << 10,
-					TransitionCapacity = 1 << 12,
+					ModelCapacity=ModelCapacityByMemorySize.Small,
 					GenerateCounterExample = !SuppressCounterExampleGeneration
 				}
 			};

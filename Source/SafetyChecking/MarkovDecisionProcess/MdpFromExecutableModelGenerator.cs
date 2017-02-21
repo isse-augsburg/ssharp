@@ -65,7 +65,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <summary>
 		///   Generates a <see cref="StateGraph{TExecutableModel}" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		private MarkovDecisionProcess GenerateMarkovDecisionProcess(Func<AnalysisModel<TExecutableModel>> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas)
+		private MarkovDecisionProcess GenerateMarkovDecisionProcess(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas)
 		{
 			using (var checker = new LtmdpGenerator<TExecutableModel>(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
 			{
@@ -99,8 +99,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			ExecutedModel<TExecutableModel> model = null;
 			var modelCreator = _runtimeModelCreator.CreateCoupledModelCreator(stateFormulas);
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
+			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
 				model = new LtmdpExecutedModel<TExecutableModel>(modelCreator, 0, Configuration.SuccessorCapacity);
+			var createAnalysisModel=new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
 
 			return GenerateMarkovDecisionProcess(createAnalysisModel, terminateEarlyCondition, stateFormulas);
 		}

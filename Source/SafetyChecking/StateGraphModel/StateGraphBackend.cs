@@ -54,9 +54,16 @@ namespace ISSE.SafetyChecking.StateGraphModel
 
 			var stateGraph = checker.GenerateStateGraph(RuntimeModelCreator);
 
-			configuration.StateCapacity = Math.Max(1024, (int)(stateGraph.StateCount * 1.5));
-			_checker = new InvariantChecker<TExecutableModel>(() => new StateGraphModel<TExecutableModel>(stateGraph, configuration.SuccessorCapacity), OnOutputWritten,
-				configuration, invariant);
+			var oldStateCapacity = configuration.ModelCapacity;
+			
+
+
+			var stateCapacity = Math.Max(1024, (int)(stateGraph.StateCount * 1.5));
+			var newModelCapacity = new ModelCapacityByModelSize(stateCapacity, ModelDensityLimit.High);
+			configuration.ModelCapacity=newModelCapacity;
+			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () => new StateGraphModel<TExecutableModel>(stateGraph, configuration.SuccessorCapacity);
+			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
+			_checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OnOutputWritten, configuration, invariant);
 		}
 
 		/// <summary>

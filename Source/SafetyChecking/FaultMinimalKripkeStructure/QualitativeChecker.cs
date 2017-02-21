@@ -54,8 +54,9 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care
 			ExecutedModel<TExecutableModel> model = null;
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
+			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
 				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, 0, Configuration.SuccessorCapacity);
+			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
 
 			using (var checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration, formula))
 			{
@@ -72,8 +73,9 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care
 			ExecutedModel<TExecutableModel> model = null;
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
+			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
 				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, 0, Configuration.SuccessorCapacity);
+			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
 
 			using (var checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration, formulaIndex))
 			{
@@ -91,8 +93,9 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care
 			ExecutedModel<TExecutableModel> model = null;
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
+			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
 				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, 0, Configuration.SuccessorCapacity);
+			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
 
 			using (var checker = new StateGraphGenerator<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration))
 			{
@@ -138,8 +141,9 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care
 			AnalysisModel<TExecutableModel> model = null;
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModel = () =>
+			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
 					model = new StateGraphModel<TExecutableModel>(stateGraph, Configuration.SuccessorCapacity);
+			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
 
 			using (var checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration, invariant))
 			{

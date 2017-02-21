@@ -30,7 +30,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using AnalysisModel;
 
 	/// <summary>
-	///   Generates a <see cref="StateGraph{TExecutableModel}" /> for an <see cref="AnalysisModel" />.
+	///   Generates a <see cref="LabeledTransitionMarkovChain" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
 	internal class LtmcGenerator<TExecutableModel> : ModelTraverser<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
@@ -43,11 +43,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <param name="executableStateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal LtmcGenerator(Func<AnalysisModel<TExecutableModel>> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas,
+		internal LtmcGenerator(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
-			: base(createModel, output, configuration)
+			: base(createModel, output, configuration, LabeledTransitionMarkovChain.TransitionSize)
 		{
-			_markovChain = new LabeledTransitionMarkovChain(configuration.StateCapacity);
+			_markovChain = new LabeledTransitionMarkovChain(Context.ModelCapacity.NumberOfStates);
 			_markovChain.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
 			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LtmcBuilder<TExecutableModel>(_markovChain));

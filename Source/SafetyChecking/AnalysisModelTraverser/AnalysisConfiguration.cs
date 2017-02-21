@@ -23,6 +23,7 @@
 namespace ISSE.SafetyChecking.AnalysisModelTraverser
 {
 	using System;
+	using ExecutedModel;
 	using Utilities;
 
 	/// <summary>
@@ -30,16 +31,13 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	/// </summary>
 	public struct AnalysisConfiguration
 	{
-		private const long DefaultStateCapacity = 1 << 24;
-		private const long DefaultTransitionCapacity = 1 << 28;
 		private const long DefaultStackCapacity = 1 << 20;
 		private const long DefaultSuccessorStateCapacity = 1 << 14;
 		private const long MinCapacity = 1024;
+		private static readonly ModelCapacity _defaultModelCapacity = ModelCapacityByModelSize.Normal;
 
 		private int _cpuCount;
 		private long _stackCapacity;
-		private long _stateCapacity;
-		private long _transitionCapacity;
 		private long _successorStateCapacity;
 
 		/// <summary>
@@ -60,39 +58,17 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		{
 			CpuCount = Int32.MaxValue,
 			ProgressReportsOnly = false,
+			ModelCapacity = _defaultModelCapacity,
 			StackCapacity = DefaultStackCapacity,
-			StateCapacity = DefaultStateCapacity,
 			SuccessorCapacity = DefaultSuccessorStateCapacity,
-			TransitionCapacity = DefaultTransitionCapacity,
 			GenerateCounterExample = true
 		};
 
 		/// <summary>
-		///   Gets or sets the number of transitions that can be stored during model checking.
+		///   Gets or sets the number of states and transitions that can be stored during model checking.
 		/// </summary>
-		public long TransitionCapacity
-		{
-			get { return Math.Max(_transitionCapacity, MinCapacity); }
-			set
-			{
-				Requires.That(value >= MinCapacity, $"{nameof(TransitionCapacity)} must be at least {MinCapacity}.");
-				_transitionCapacity = value;
-			}
-		}
-
-		/// <summary>
-		///   Gets or sets the number of states that can be stored during model checking.
-		/// </summary>
-		public long StateCapacity
-		{
-			get { return Math.Max(_stateCapacity, MinCapacity); }
-			set
-			{
-				Requires.That(value >= MinCapacity, $"{nameof(StateCapacity)} must be at least {MinCapacity}.");
-				_stateCapacity = value;
-			}
-		}
-
+		public ModelCapacity ModelCapacity { get; set; }
+		
 		/// <summary>
 		///   Gets or sets the number of states that can be stored on the stack during model checking.
 		/// </summary>

@@ -43,8 +43,8 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="formulaIndex">The zero-based index of the analyzed formula.</param>
-		internal InvariantChecker(Func<AnalysisModel<TExecutableModel>> createModel, Action<string> output, AnalysisConfiguration configuration, int formulaIndex)
-			: base(createModel, output, configuration)
+		internal InvariantChecker(AnalysisModelCreator<TExecutableModel> createModel, Action<string> output, AnalysisConfiguration configuration, int formulaIndex)
+			: base(createModel, output, configuration, 0)
 		{
 			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationByIndexAction<TExecutableModel>(formulaIndex));
 		}
@@ -56,8 +56,8 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="stateFormula">The analyzed stateFormula.</param>
-		internal InvariantChecker(Func<AnalysisModel<TExecutableModel>> createModel, Action<string> output, AnalysisConfiguration configuration, Formula stateFormula)
-			: base(createModel, output, configuration)
+		internal InvariantChecker(AnalysisModelCreator<TExecutableModel> createModel, Action<string> output, AnalysisConfiguration configuration, Formula stateFormula)
+			: base(createModel, output, configuration,0)
 		{
 			var formulasToCheck = AnalyzedModels.First().RuntimeModel.Formulas;
 

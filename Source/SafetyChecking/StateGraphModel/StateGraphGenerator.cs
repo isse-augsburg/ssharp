@@ -41,9 +41,9 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// <param name="createModel">Creates the model that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal StateGraphGenerator(Func<AnalysisModel<TExecutableModel>> createModel, 
+		internal StateGraphGenerator(AnalysisModelCreator<TExecutableModel> createModel, 
 									 Action<string> output, AnalysisConfiguration configuration)
-			: base(createModel, output, configuration)
+			: base(createModel, output, configuration, DeriveTransitionSizeFromModel)
 		{
 			var analyzedModel = AnalyzedModels.First();
 

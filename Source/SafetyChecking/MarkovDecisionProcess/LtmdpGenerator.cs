@@ -29,7 +29,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using ExecutableModel;
 	using AnalysisModel;
 	/// <summary>
-	///   Generates a <see cref="StateGraph{TExecutableModel}" /> for an <see cref="AnalysisModel" />.
+	///   Generates a <see cref="LabeledTransitionMarkovDecisionProcess" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
 	internal class LtmdpGenerator<TExecutableModel> : ModelTraverser<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
@@ -42,11 +42,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <param name="executableStateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal LtmdpGenerator(Func<AnalysisModel<TExecutableModel>> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas,
+		internal LtmdpGenerator(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
-			: base(createModel, output, configuration)
+			: base(createModel, output, configuration, LabeledTransitionMarkovDecisionProcess.TransitionSize)
 		{
-			_mdp = new LabeledTransitionMarkovDecisionProcess(configuration.StateCapacity);
+			_mdp = new LabeledTransitionMarkovDecisionProcess(Context.ModelCapacity.NumberOfStates);
 			_mdp.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
 			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LtmdpBuilder<TExecutableModel>(_mdp));

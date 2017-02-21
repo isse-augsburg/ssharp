@@ -27,6 +27,7 @@ namespace Tests.Analysis.Probabilistic
 	using SafetySharp.Analysis;
 	using SafetySharp.ModelChecking;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
@@ -47,6 +48,7 @@ namespace Tests.Analysis.Probabilistic
 			var final3 = new UnaryFormula(valueIs3, UnaryOperator.Finally);
 
 			var markovChainGenerator = new SafetySharpDtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(final2);
 			markovChainGenerator.AddFormulaToCheck(final3);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();

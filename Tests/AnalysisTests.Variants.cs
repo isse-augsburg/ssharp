@@ -32,6 +32,7 @@ namespace Tests
 	using SafetySharp.Runtime;
 	using Utilities;
 	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
@@ -87,8 +88,7 @@ namespace Tests
 			modelChecker = new SafetySharpQualitativeChecker();
 			modelChecker.OutputWritten += logAction;
 			
-			modelChecker.Configuration.StateCapacity = 1 << 14;
-			modelChecker.Configuration.TransitionCapacity = 1 << 16;
+			modelChecker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			modelChecker.Configuration.GenerateCounterExample = !suppressCounterExampleGeneration;
 		}
 
@@ -119,8 +119,7 @@ namespace Tests
 			modelChecker = new SafetySharpQualitativeChecker();
 			modelChecker.OutputWritten += logAction;
 
-			modelChecker.Configuration.StateCapacity = 1 << 14;
-			modelChecker.Configuration.TransitionCapacity = 1 << 16;
+			modelChecker.Configuration.ModelCapacity=ModelCapacityByMemorySize.Small;
 			modelChecker.Configuration.GenerateCounterExample = !suppressCounterExampleGeneration;
 		}
 

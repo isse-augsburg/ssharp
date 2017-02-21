@@ -49,6 +49,7 @@
     <Compile Include="AnalysisModelTraverser\AnalysisConfiguration.cs" />
     <Compile Include="AnalysisModel\AnalysisModel.cs" />
     <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
+    <Compile Include="AnalysisModel\AnalysisModelCreator.cs" />
     <Compile Include="Formula\FormulaVisitors\IsFormulasStructurallyEquivalentVisitor.cs" />
     <Compile Include="Formula\FormulaVisitors\StateFormulaSetEvaluatorCompilationVisitor2.cs" />
     <Compile Include="Formula\FormulaVisitors\TransferFormulaToNewExecutedModelInstanceVisitor .cs" />
@@ -64,7 +65,7 @@
     <Compile Include="Formula\FormulaVisitors\LtsMinLtlTransformer.cs" />
     <Compile Include="Formula\FormulaVisitors\PrismTransformer.cs" />
     <Compile Include="Formula\FormulaVisitors\FormulaCompilationVisitor.cs" />
-    <Compile Include="ExecutedModel\ModelByteSize.cs" />
+    <Compile Include="ExecutedModel\ModelCapacity.cs" />
     <Compile Include="FaultMinimalKripkeStructure\ActivationMinimalExecutedModel.cs" />
     <Compile Include="ExecutedModel\InvariantChecker.cs" />
     <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\DeadlockChecker.cs" />

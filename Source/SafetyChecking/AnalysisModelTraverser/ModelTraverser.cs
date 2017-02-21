@@ -29,6 +29,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	using System.Threading.Tasks;
 	using ExecutableModel;
 	using AnalysisModel;
+	using ExecutedModel;
 	using Utilities;
 
 	/// <summary>
@@ -36,6 +37,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	/// </summary>
 	internal abstract class ModelTraverser<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
+		public const int DeriveTransitionSizeFromModel = -1;
+
 		private readonly LoadBalancer _loadBalancer;
 		private readonly StateStorage _states;
 		private readonly Worker<TExecutableModel>[] _workers;
@@ -47,7 +50,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <param name="createModel">Creates the model that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal ModelTraverser(Func<AnalysisModel<TExecutableModel>> createModel, Action<string> output, AnalysisConfiguration configuration)
+		internal ModelTraverser(AnalysisModelCreator<TExecutableModel> createModel, Action<string> output, AnalysisConfiguration configuration, int transitionSize)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(output, nameof(output));
@@ -69,13 +72,21 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 				tasks[i] = Task.Factory.StartNew(() =>
 				{
 					stacks[index] = new StateStack(configuration.StackCapacity);
-					_workers[index] = new Worker<TExecutableModel>(index, Context, stacks[index], createModel());
+					_workers[index] = new Worker<TExecutableModel>(index, Context, stacks[index], createModel.Create());
 				});
 			}
 
 			Task.WaitAll(tasks);
 
-			_states = new StateStorage(_workers[0].Model.StateVectorSize, configuration.StateCapacity);
+			var firstModel = _workers[0].Model;
+			if (transitionSize == DeriveTransitionSizeFromModel)
+			{
+				transitionSize = firstModel.TransitionSize;
+			}
+
+			var modelCapacity = configuration.ModelCapacity.DeriveModelByteSize(firstModel.StateVectorSize, transitionSize);
+			Context.ModelCapacity = modelCapacity;
+			_states = new StateStorage(modelCapacity.SizeOfState, modelCapacity.NumberOfStates);
 			Context.States = _states;
 			_initializationTime = stopwatch.Elapsed;
 			stopwatch.Stop();

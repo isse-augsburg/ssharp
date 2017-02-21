@@ -70,10 +70,10 @@ namespace ISSE.SafetyChecking.StateGraphModel
 			RuntimeModelCreator = createModel;
 
 			_stateStorage = context.States;
-			_transitionCapacity = context.Configuration.TransitionCapacity;
+			_transitionCapacity = context.ModelCapacity.MemoryLimitTransitions.Value;
 
-			_transitionsBuffer.Resize(TransitionSize * _transitionCapacity, zeroMemory: false);
-			_stateMapBuffer.Resize(context.Configuration.StateCapacity * sizeof(TransitionRange), zeroMemory: false);
+			_transitionsBuffer.Resize(_transitionCapacity, zeroMemory: false);
+			_stateMapBuffer.Resize(context.ModelCapacity.NumberOfStates * sizeof(TransitionRange), zeroMemory: false);
 
 			_transitions = _transitionsBuffer.Pointer;
 			_stateMap = (TransitionRange*)_stateMapBuffer.Pointer;

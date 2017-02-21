@@ -25,7 +25,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	using System;
 	using ExecutableModel;
 	using Utilities;
-
+	using ExecutedModel;
 	/// <summary>
 	///   Provides context information for the traversal of a model.
 	/// </summary>
@@ -40,6 +40,11 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		///   The configuration values for the analysis.
 		/// </summary>
 		public readonly AnalysisConfiguration Configuration;
+
+		/// <summary>
+		///   The size of the model to be analyzed.
+		/// </summary>
+		public ModelByteSize ModelCapacity;
 
 		/// <summary>
 		///   The load balancer that balances the work of multiple <see cref="Worker" /> instances.
@@ -112,6 +117,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <param name="loadBalancer">The load balancer that balances the work of multiple <see cref="Worker" /> instances.</param>
 		/// <param name="configuration">The configuration values for the analysis.</param>
 		/// <param name="output">The action that should be invoked when output is generated.</param>
+		/// <param name="modelCapacity">The necessary memory for the state space of a model.</param>
 		public TraversalContext(LoadBalancer loadBalancer, AnalysisConfiguration configuration, Action<string> output)
 		{
 			Requires.NotNull(loadBalancer, nameof(loadBalancer));

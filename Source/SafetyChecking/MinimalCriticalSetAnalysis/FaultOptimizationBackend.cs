@@ -57,11 +57,12 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// <param name="hazard">The hazard that should be analyzed.</param>
 		protected override void InitializeModel(AnalysisConfiguration configuration, Formula hazard)
 		{
-			Func<AnalysisModel<TExecutableModel>> createModel = () =>
+			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
 				new ActivationMinimalExecutedModel<TExecutableModel>(RuntimeModelCreator, _stateHeaderBytes, configuration.SuccessorCapacity);
+			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
 			var invariant = new UnaryFormula(hazard,UnaryOperator.Not);
 
-			_invariantChecker = new InvariantChecker<TExecutableModel>(createModel, OnOutputWritten, configuration, invariant);
+			_invariantChecker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OnOutputWritten, configuration, invariant);
 		}
 
 		/// <summary>
