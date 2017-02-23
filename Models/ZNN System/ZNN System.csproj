@@ -66,6 +66,7 @@
     <Compile Include="Modeling\ClientT.cs" />
     <Compile Include="Modeling\EServerFidelity.cs" />
     <Compile Include="Modeling\Model.cs" />
+    <Compile Include="Modeling\ProxyObserver.cs" />
     <Compile Include="Modeling\ProxyT.cs" />
     <Compile Include="Modeling\Query.cs" />
     <Compile Include="Modeling\EQueryState.cs" />

@@ -68,6 +68,12 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		public ProxyT Proxy { get; set; }
 
 		/// <summary>
+		/// Proxy observer
+		/// </summary>
+		[Root(RootKind.Controller)]
+		public ProxyObserver ProxyObserver { get; set; }
+
+		/// <summary>
 		/// All connected Clients
 		/// </summary>
 		[Root(RootKind.Plant)]
@@ -94,11 +100,12 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// Initializes a new instance with default values
 		/// </summary>
 		public Model()
-			: this(10, 5) { }
+			: this(10, 5) {}
 
 		public Model(int clientCount, int serverCount)
 		{
 			Proxy = new ProxyT();
+			ProxyObserver = new ProxyObserver(Proxy);
 
 			// Add a few clients with Queries
 			for(int i = 0; i < clientCount; i++)
