@@ -72,7 +72,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 				// Reconfiguration Possible
 				() => Proxy.ConnectedServers.Count > 0,
 				() => Model.MaxBudget > 0,
-				() => Proxy.ConnectedServers.Count(s => s is ServerT.ServerDeathEffect) < Proxy.ConnectedServers.Count,
+				() => Proxy.ConnectedServers.Count(s => s.IsServerDead) < Proxy.ConnectedServers.Count,
 			};
 
 
@@ -119,7 +119,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 				Proxy.AdjustServers();
 				ReconfigurationState=ReconfStates.Succedded;
 
-				if(oldActiveServerCount == Proxy.ActiveServerCount && oldServerFidelity == Proxy.CurrentServerFidelity)
+				if(oldActiveServerCount == Proxy.ActiveServerCount && oldServerFidelity == Proxy.CurrentServerFidelity && Proxy.AvgResponseTime > Model.LowResponseTimeValue)
 				{
 					ReconfigurationState = ReconfStates.Failed;
 					throw new Exception("Not reconfigured although it was possible");

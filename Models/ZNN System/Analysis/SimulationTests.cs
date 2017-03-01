@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
@@ -48,6 +49,8 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			simulator.FastForward(steps: 120);
 
 			model.Servers.First().QueryCompleteCount.Should().BeGreaterOrEqualTo(1);
+			for(int i = 0; i < model.Servers.Count; i++)
+				Console.WriteLine("Completed Queries of server " + i + ": " + model.Servers[i].QueryCompleteCount);
 		}
 	}
 }

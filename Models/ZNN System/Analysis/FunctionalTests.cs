@@ -31,6 +31,16 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 {
 	public class FunctionalTests
 	{
+		[Test]
+		public void DepthFirstSearch()
+		{
+			var model = new Model();
+
+			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 20 } };
+			var result = modelChecker.CheckInvariant(model, true);
+
+			Console.WriteLine(result);
+		}
 
 		[Test]
 		public void Evaluation()
@@ -40,7 +50,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			{
 				Configuration =
 				{
-					CpuCount = 1,
+					CpuCount = 4,
 					StateCapacity = 1 << 20,
 					GenerateCounterExample = false
 				},
@@ -48,7 +58,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 				Heuristics = { new SubsumptionHeuristic(model) }
 			};
 
-			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.Proxy.ReconfigurationState == ReconfStates.Failed);
+			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ProxyObserver.ReconfigurationState == ReconfStates.Failed);
 			Console.WriteLine(result);
 		}
 	}
