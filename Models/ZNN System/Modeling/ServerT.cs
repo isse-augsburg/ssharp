@@ -59,7 +59,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// Currently available units of the server. 0 Means the server is inactive.
 		/// </summary>
-		public int AvailableServerUnits { get; private set; }
+		public virtual int AvailableServerUnits { get; private set; }
 
 		/// <summary>
 		/// Is the server active and can execute queries
@@ -117,6 +117,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// Counts the completed queries
 		/// </summary>
 		public int QueryCompleteCount { get; protected set; }
+
+		/// <summary>
+		/// Indicates if server is dead
+		/// </summary>
+		public virtual bool IsServerDead => false;
 
 		/// <summary>
 		/// Creates a new server instance
@@ -269,6 +274,12 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		[FaultEffect(Fault = nameof(ServerDeath))]
 		public class ServerDeathEffect : ServerT
 		{
+
+			/// <summary>
+			/// Currently available units of the server. 0 Means the server is inactive.
+			/// </summary>
+			public override int AvailableServerUnits => 0;
+
 			/// <summary>
 			/// Current content fidelity level of the server.
 			/// </summary>
@@ -278,6 +289,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			/// Is the server active and can execute queries
 			/// </summary>
 			public override bool IsServerActive => false;
+
+			/// <summary>
+			/// Indicates if server is dead
+			/// </summary>
+			public override bool IsServerDead => true;
 
 			/// <summary>
 			/// Simulates an execution step of the query and returns true if the query was executed

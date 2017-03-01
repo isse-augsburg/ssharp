@@ -42,8 +42,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		public void Prepare()
 		{
 			_Proxy = new ProxyT();
+			ServerT.GetNewServer(_Proxy);
+			_Proxy.IncrementServerPool();
+
 			_Client = ClientT.GetNewClient(_Proxy);
-			//_Query = new Query(_Client);
+			Query.GetNewQuery(_Client);
 		}
 
 		/// <summary>

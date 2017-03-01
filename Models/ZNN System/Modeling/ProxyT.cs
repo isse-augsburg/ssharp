@@ -116,7 +116,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		{
 			if(ActiveServerCount > 1)
 			{
-				var server = ConnectedServers.Aggregate((currMin, x) => ((currMin == null || x.Load < currMin.Load) ? x : currMin));
+				var server = ConnectedServers.Where(s => s.IsServerActive).Aggregate((currMin, x) => ((currMin == null || x.Load < currMin.Load) ? x : currMin));
 				server.Deactivate();
 
 				// Add queries to active server
@@ -178,6 +178,8 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			//AdjustServers();
 
 			var server = RoundRobinServerSelection();
+			if(server == null)
+				throw new Exception("Cannot select a server");
 			server.AddQuery(query);
 			query.SelectedServer = server;
 		}

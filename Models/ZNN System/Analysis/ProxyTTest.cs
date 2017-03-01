@@ -40,6 +40,10 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		public void Prepare()
 		{
 			_Proxy = new ProxyT();
+			ServerT.GetNewServer(_Proxy);
+			ServerT.GetNewServer(_Proxy);
+			ServerT.GetNewServer(_Proxy);
+			ServerT.GetNewServer(_Proxy);
 		}
 
 		/// <summary>
@@ -50,7 +54,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		{
 			_Proxy.IncrementServerPool();
 
-			Assert.AreEqual(2, _Proxy.ActiveServerCount);
+			Assert.AreEqual(1, _Proxy.ActiveServerCount);
 			Assert.IsInstanceOf(typeof(ServerT), _Proxy.ConnectedServers[0]);
 		}
 
@@ -60,7 +64,8 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		[Test]
 		public void TestDecrementServerPool()
 		{
-			_Proxy.ConnectedServers.Add(ServerT.GetNewServer());
+			_Proxy.IncrementServerPool();
+			_Proxy.IncrementServerPool();
 
 			_Proxy.DecrementServerPool();
 
