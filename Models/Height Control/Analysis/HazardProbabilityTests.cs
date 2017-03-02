@@ -34,29 +34,85 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using System.Collections;
+	using Modeling.Controllers;
+	using Modeling.Sensors;
 
 	class HazardProbabilityTests
 	{
-		[Test]
-		public void CalculateHazardInOriginalDesign()
+		public static void SetProbabilities(Model model)
 		{
-			var model = Model.CreateOriginal();
+			foreach (var detector in model.Components.OfType<LightBarrier>())
+			{
+				detector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
+				detector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
+			}
+
+			foreach (var detector in model.Components.OfType<OverheadDetector>())
+			{
+				detector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
+				detector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
+			}
+			foreach (var detector in model.Components.OfType<SmallLightBarrier>())
+			{
+				detector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
+				detector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
+			}
 			model.VehicleSet.LeftHV.ProbabilityOfOccurrence = new Probability(0.01);
 			model.VehicleSet.LeftOHV.ProbabilityOfOccurrence = new Probability(0.001);
 			model.VehicleSet.SlowTraffic.ProbabilityOfOccurrence = new Probability(0.1);
-			model.HeightControl.PreControl.PositionDetector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
-			model.HeightControl.PreControl.PositionDetector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
-			model.HeightControl.MainControl.PositionDetector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
-			model.HeightControl.MainControl.PositionDetector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
-			model.HeightControl.MainControl.LeftDetector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
-			model.HeightControl.MainControl.LeftDetector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
-			model.HeightControl.MainControl.RightDetector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
-			model.HeightControl.MainControl.RightDetector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
-			model.HeightControl.EndControl.LeftDetector.Misdetection.ProbabilityOfOccurrence = new Probability(0.0001);
-			model.HeightControl.EndControl.LeftDetector.FalseDetection.ProbabilityOfOccurrence = new Probability(0.005);
+		}
+
+		[Test]
+		public void CalculateCollisionInOriginalDesign()
+		{
+			var model = Model.CreateOriginal();
+			SetProbabilities(model);
 
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.Collision);
 			Console.Write($"Probability of hazard: {result.Value}");
+		}
+
+		[Test]
+		public void CalculateFalseAlarmInOriginalDesign()
+		{
+			var model = Model.CreateOriginal();
+			SetProbabilities(model);
+
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.FalseAlarm);
+			Console.Write($"Probability of hazard: {result.Value}");
+		}
+
+
+		[TestCaseSource(nameof(CreateModelVariants))]
+		[Category("CollisionProbability")]
+		public void CalculateCollision(Model model, string variantName)
+		{
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.Collision);
+			Console.Write($"Probability of hazard: {result.Value}");
+		}
+
+		[TestCaseSource(nameof(CreateModelVariants))]
+		[Category("FalseAlarmProbability")]
+		public void CalculateFalseAlarm(Model model, string variantName)
+		{
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.FalseAlarm);
+			Console.Write($"Probability of hazard: {result.Value}");
+		}
+
+
+		private static IEnumerable CreateModelVariants()
+		{
+			var modelVariants = Model.CreateVariants();
+			foreach (var modelVariant in modelVariants)
+			{
+				SetProbabilities(modelVariant);
+			}
+			return from model in modelVariants
+				   let name = $"{model.HeightControl.PreControl.GetType().Name.Substring(nameof(PreControl).Length)}-" +
+							  $"{model.HeightControl.MainControl.GetType().Name.Substring(nameof(MainControl).Length)}-" +
+							  $"{model.HeightControl.EndControl.GetType().Name.Substring(nameof(EndControl).Length)}"
+				   select new TestCaseData(model, name).SetName(name);
 		}
 	}
 }

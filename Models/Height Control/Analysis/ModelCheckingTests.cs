@@ -95,6 +95,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		}
 
 		[TestCaseSource(nameof(CreateModelVariants))]
+		[Category("CollisionDCCA")]
 		public void Collision(Model model, string variantName)
 		{
 			// As collisions cannot occur without any overheight vehicles driving on the left lane, we 
@@ -109,6 +110,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		}
 
 		[TestCaseSource(nameof(CreateModelVariants))]
+		[Category("FalseAlarmDCCA")]
 		public void FalseAlarm(Model model, string variantName)
 		{
 			var analysis = new SafetySharpSafetyAnalysis { Heuristics = { new MaximalSafeSetHeuristic(model.Faults) } };

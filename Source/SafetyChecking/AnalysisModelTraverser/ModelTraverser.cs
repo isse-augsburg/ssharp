@@ -157,7 +157,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 					Context.Output?.Invoke($"Model traversal time: {stopwatch.Elapsed}");
 					
 					Context.Output?.Invoke($"{(long)(Context.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
-					Context.Output?.Invoke($"{(long)(Context.StateCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+					Context.Output?.Invoke($"{(long)(Context.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
 
 					Context.Output?.Invoke("===============================================");
 					Context.Output?.Invoke(String.Empty);

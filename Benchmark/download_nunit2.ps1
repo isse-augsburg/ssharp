@@ -44,10 +44,11 @@ function ExpandZipFile($file, $destination)
 $url = "https://launchpad.net/nunitv2/trunk/2.6.3/+download/NUnit-2.6.3.zip"
 $output = "$PSScriptRoot\NUnit-2.6.3.zip"
 $extract_dir = "$PSScriptRoot\Extract"
+$output_dir = "$PSScriptRoot\NUnit2"
 $start_time = Get-Date
 
 $wc = New-Object System.Net.WebClient
-#$wc.DownloadFile($url, $output)
+$wc.DownloadFile($url, $output)
 #OR (New-Object System.Net.WebClient).DownloadFile($url, $output)
 
 Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
@@ -57,5 +58,4 @@ New-Item -ItemType directory -Path $extract_dir
 
 ExpandZipFile –File $output –Destination $extract_dir
 
-Get-ChildItem -Path $extract_dir\NUnit-2.6.3\bin |
-  Move-Item -destination $output_dir
+Get-ChildItem -Path $extract_dir\NUnit-2.6.3\bin | Move-Item -destination $output_dir

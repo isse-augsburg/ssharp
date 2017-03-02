@@ -39,15 +39,19 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 	{
 		private static bool IsTestCaseFast(string model, ModelCheckingTests.HeuristicsUsage heuristicsUsage, FaultActivationBehavior faultActivation)
 		{
-			if (model == "complete_network.model")
+			if (model == "complete_network.model" || model == "complex_setup.model" || model == "medium_setup.model")
 			{
 				return false;
 			}
-			if (model == "simple_setup.model" || model == "trivial_setup.model")
+			if (model == "medium_setup.model" && heuristicsUsage!=ModelCheckingTests.HeuristicsUsage.None)
 			{
 				return true;
 			}
-			if (faultActivation != FaultActivationBehavior.ForceOnly)
+			if (model == "simple_setup.model" || model == "duplicate_dispenser.model" || model == "trivial_setup.model" || model == "simple_circle.model")
+			{
+				return true;
+			}
+			if (faultActivation != FaultActivationBehavior.ForceOnly || heuristicsUsage == ModelCheckingTests.HeuristicsUsage.None)
 				return false;
 			return true;
 		}
