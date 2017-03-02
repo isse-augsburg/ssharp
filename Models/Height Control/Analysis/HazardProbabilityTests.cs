@@ -88,6 +88,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		[Category("CollisionProbability")]
 		public void CalculateCollision(Model model, string variantName)
 		{
+			SetProbabilities(model);
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.Collision);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
@@ -96,6 +97,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		[Category("FalseAlarmProbability")]
 		public void CalculateFalseAlarm(Model model, string variantName)
 		{
+			SetProbabilities(model);
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.FalseAlarm);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
@@ -103,12 +105,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 
 		private static IEnumerable CreateModelVariants()
 		{
-			var modelVariants = Model.CreateVariants();
-			foreach (var modelVariant in modelVariants)
-			{
-				SetProbabilities(modelVariant);
-			}
-			return from model in modelVariants
+			return from model in Model.CreateVariants()
 				   let name = $"{model.HeightControl.PreControl.GetType().Name.Substring(nameof(PreControl).Length)}-" +
 							  $"{model.HeightControl.MainControl.GetType().Name.Substring(nameof(MainControl).Length)}-" +
 							  $"{model.HeightControl.EndControl.GetType().Name.Substring(nameof(EndControl).Length)}"
