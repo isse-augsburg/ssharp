@@ -39,6 +39,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		private readonly byte* _targetStateMemory;
 		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
 		private readonly LtmcTransition* _transitions;
+		private readonly long _capacity;
 		private int _count;
 
 		/// <summary>
@@ -56,6 +57,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			_stateVectorSize = model.StateVectorSize;
 			_formulas = formulas;
+			_capacity = capacity;
 
 			_transitionBuffer.Resize(capacity * sizeof(LtmcTransition), zeroMemory: false);
 			_transitions = (LtmcTransition*)_transitionBuffer.Pointer;
@@ -71,6 +73,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <param name="probability">The probability of the transition.</param>
 		public void Add(ExecutableModel<TExecutableModel> model, double probability)
 		{
+			if (_count >= _capacity)
+				throw new OutOfMemoryException("Unable to store an additional transition. Try increasing the successor state capacity.");
+
 			// 1. Notify all fault activations, so that the correct activation is set in the run time model
 			//    (Needed to persist persistent faults)
 			model.NotifyFaultActivations();
