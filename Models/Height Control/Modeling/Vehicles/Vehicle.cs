@@ -35,7 +35,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// <summary>
 		///   Gets the current lane of the vehicle.
 		/// </summary>
-		public Lane Lane { get; protected set; } = Lane.Right;
+		public Lane Lane { get; set; } = Lane.Right;
 
 		/// <summary>
 		///   Gets the kind the vehicle.
@@ -58,7 +58,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		///   Gets the vehicle's position.
 		/// </summary>
 		[Range(0, Model.TunnelPosition, OverflowBehavior.Clamp)]
-		public int Position { get; private set; }
+		public int Position { get; set; }
 
 		/// <summary>
 		///   Chooses the lane the vehicle drives on. By default, vehicles always drive on the right lane.

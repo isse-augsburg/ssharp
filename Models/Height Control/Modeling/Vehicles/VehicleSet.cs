@@ -22,6 +22,7 @@
 
 namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 {
+	using System;
 	using System.Linq;
 	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Modeling;
@@ -32,6 +33,16 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 	/// </summary>
 	public sealed class VehicleSet : Component
 	{
+		/// <summary>
+		///   Use state constraint to prevent overlapping. State constraints cannot be used
+		///   with probabilistic models!
+		/// </summary>
+		[Hidden]
+		public bool PreventOverlappingWithStateConstraint = false;
+
+		[Hidden(HideElements=true)]
+		private readonly Vehicle[] _orderedVehicles;
+
 		/// <summary>
 		///   Allows high vehicles to drive on the left lane.
 		/// </summary>
@@ -53,6 +64,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		public VehicleSet(Vehicle[] vehicles)
 		{
 			Vehicles = vehicles;
+			_orderedVehicles=new Vehicle[Vehicles.Length];
 
 			foreach (var vehicle in Vehicles)
 				Bind(nameof(vehicle.IsTunnelClosed), nameof(ForwardIsTunnelClosed));
@@ -61,13 +73,16 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 			LeftHV.AddEffects<Vehicle.DriveLeftEffect>(vehicles.Where(vehicle => vehicle.Kind == VehicleKind.HighVehicle));
 			SlowTraffic.AddEffects<Vehicle.SlowTrafficEffect>(vehicles);
 
-			for (var i = 0; i < Vehicles.Length; ++i)
+			if (PreventOverlappingWithStateConstraint)
 			{
-				for (var j = i + 1; j < Vehicles.Length; ++j)
+				for (var i = 0; i < Vehicles.Length; ++i)
 				{
-					AddSensorConstraint(Vehicles[i], Vehicles[j], Model.PreControlPosition);
-					AddSensorConstraint(Vehicles[i], Vehicles[j], Model.MainControlPosition);
-					AddSensorConstraint(Vehicles[i], Vehicles[j], Model.EndControlPosition);
+					for (var j = i + 1; j < Vehicles.Length; ++j)
+					{
+						AddSensorConstraint(Vehicles[i], Vehicles[j], Model.PreControlPosition);
+						AddSensorConstraint(Vehicles[i], Vehicles[j], Model.MainControlPosition);
+						AddSensorConstraint(Vehicles[i], Vehicles[j], Model.EndControlPosition);
+					}
 				}
 			}
 		}
@@ -99,7 +114,60 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// </summary>
 		public override void Update()
 		{
-			Update(Vehicles);
+			if (PreventOverlappingWithStateConstraint)
+				Update(Vehicles);
+			else
+				UpdateWhichPreventsOverlappingExplicitly();
+		}
+
+		/// <summary>
+		///   When no state constraint is used, overlapping must be prevented explicitly!
+		/// </summary>
+		private void UpdateWhichPreventsOverlappingExplicitly()
+		{
+			// Copy vehicle set. Order should be deterministic
+			for (var i = 0; i < Vehicles.Length; i++)
+				_orderedVehicles[i] = Vehicles[i];
+
+			// Perform insertion sort (https://en.wikipedia.org/wiki/Insertion_sort). Try not to make garbage
+			for (var i = 1; i < _orderedVehicles.Length; i++)
+			{
+				var x = _orderedVehicles[i];
+				var j = i - 1;
+				while (j >= 0 && _orderedVehicles[j].Position < x.Position)
+				{
+					_orderedVehicles[j + 1] = _orderedVehicles[j];
+					j--;
+				}
+				_orderedVehicles[j + 1] = x;
+			}
+
+			// Now the first vehicle in _orderedVehicles is the vehicle with the highest position
+			for (var i = 0; i < _orderedVehicles.Length; i++)
+			{
+				var oldPosition = _orderedVehicles[i].Position;
+				var oldLane = _orderedVehicles[i].Lane;
+				
+				// Update the position of the vehicle
+				_orderedVehicles[i].Update();
+
+				// Check, if the position overlaps with another vehicle
+				var updated = false;
+				for (var j = 0; j < i && !updated; j++)
+				{
+					if (_orderedVehicles[j].Position != 0 &&
+						_orderedVehicles[i].Position == _orderedVehicles[j].Position &&
+						_orderedVehicles[i].Lane == _orderedVehicles[j].Lane)
+					{
+						// Found an overlap. So reset the old vehicle to its old position.
+						updated = true;
+						_orderedVehicles[i].Position = oldPosition;
+						_orderedVehicles[i].Lane = oldLane;
+					}
+
+
+				}
+			}
 		}
 
 		/// <summary>

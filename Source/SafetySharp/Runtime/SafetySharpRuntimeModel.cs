@@ -163,73 +163,7 @@ namespace SafetySharp.Runtime
 			_restrictRanges();
 		}
 		
-
-		/// <summary>
-		///   Generates the replay information for the <paramref name="trace" />.
-		/// </summary>
-		/// <param name="choiceResolver">The choice resolver that should be used to resolve nondeterministic choices.</param>
-		/// <param name="trace">The trace the replay information should be generated for.</param>
-		/// <param name="endsWithException">Indicates whether the trace ends with an exception being thrown.</param>
-		private int[][] GenerateReplayInformation(ChoiceResolver choiceResolver, byte[][] trace, bool endsWithException)
-		{
-			var info = new int[trace.Length - 1][];
-			var targetState = stackalloc byte[StateVectorSize];
-
-			// We have to generate the replay info for all transitions
-			for (var i = 0; i < trace.Length - 1; ++i)
-			{
-				choiceResolver.Clear();
-				choiceResolver.PrepareNextState();
-
-				// Try all transitions until we find the one that leads to the desired state
-				while (true)
-				{
-					try
-					{
-						if (!choiceResolver.PrepareNextPath())
-							break;
-
-						fixed (byte* sourceState = trace[i])
-						Deserialize(sourceState);
-
-						if (i == 0)
-							ExecuteInitialStep();
-						else
-							ExecuteStep();
-
-						if (endsWithException && i == trace.Length - 2)
-							continue;
-					}
-					catch (Exception)
-					{
-						Requires.That(endsWithException, "Unexpected exception.");
-						Requires.That(i == trace.Length - 2, "Unexpected exception.");
-
-						info[i] = choiceResolver.GetChoices().ToArray();
-						break;
-					}
-
-					NotifyFaultActivations();
-					Serialize(targetState);
-
-					// Compare the target states; if they match, we've found the correct transition
-					var areEqual = true;
-					for (var j = StateHeaderBytes; j < StateVectorSize; ++j)
-						areEqual &= targetState[j] == trace[i + 1][j];
-
-					if (!areEqual)
-						continue;
-
-					info[i] = choiceResolver.GetChoices().ToArray();
-					break;
-				}
-
-				Requires.That(info[i] != null, $"Unable to generate replay information for step {i + 1} of {trace.Length}.");
-			}
-
-			return info;
-		}
-
+		
 		/// <summary>
 		///   Notifies all activated faults of their activation. Returns <c>false</c> to indicate that no notifications were necessary.
 		/// </summary>
