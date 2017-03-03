@@ -32,7 +32,6 @@
 # include test cases per Dot-Sourcing
 . $PSScriptRoot\testCases.ps1
 
-New-Variable -Force -Name resultDirs -Option AllScope -Value @()
 New-Variable -Force -Name results -Option AllScope -Value @()
 
 $resultdir= "$PSScriptRoot\Ergebnisse1"
@@ -83,8 +82,8 @@ function LoadResult($test)
     else
     {
         $reasonError = "unknown"
-        $parsedLine = $output | Where-Object {$_ -match 'Probability of hazard[:] (?<match>.*)' }
-        $reasonError = $matches['reason']
+        #$parsedLine = $output | Where-Object {$_ -match 'Probability of hazard[:] (?<match>.*)' }
+        #$reasonError = $matches['reason']
     }
     
     $newResult | Add-Member -type NoteProperty -name Probability -Value $probability
@@ -102,7 +101,7 @@ Foreach ($test in $tests) {
     LoadResult($test)
 }
 
-$resultsFile="$PSScriptRoot\"+"summarizedBenchmarkResults.csv"
+$resultsFile="$resultdir\"+"summarizedBenchmarkResults.csv"
 
 $results | Export-Csv -Path $resultsFile -Encoding ascii -NoTypeInformation -UseCulture
 

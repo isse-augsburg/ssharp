@@ -44,7 +44,9 @@ $compilate_directory = "D:\Repositories\Universität\ssharp\Binaries\Release"
 Set-Location -Path $compilate_directory
 $env:Path += ";$PSScriptRoot\NUnit2"
 
-$resultdir= "$PSScriptRoot"
+$resultdir= "$PSScriptRoot\Ergebnisse1"
+New-Item -ItemType directory -Path $resultdir
+
 
 function ExecuteTest($test)
 {
