@@ -59,10 +59,10 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			Requires.NotNull(runtimeModelCreator, nameof(runtimeModelCreator));
 			_runtimeModelCreator = runtimeModelCreator;
 		}
-		
+
 
 		/// <summary>
-		///   Generates a <see cref="StateGraph" /> for the model created by <paramref name="createModel" />.
+		///   Generates a <see cref="DiscreteTimeMarkovChain" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
 		private DiscreteTimeMarkovChain GenerateMarkovChain(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas)
 		{

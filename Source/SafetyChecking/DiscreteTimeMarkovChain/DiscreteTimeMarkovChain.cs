@@ -66,14 +66,14 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			var modelSize = modelCapacity.DeriveModelByteSize(_sizeOfState, _sizeOfTransition);
 
 			StateLabeling = new LabelVector();
-			ProbabilityMatrix = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for row of initial distribution
+			ProbabilityMatrix = new SparseDoubleMatrix(modelSize.NumberOfStates + 1, modelSize.NumberOfTransitions); // one additional row for row of initial distribution
 		}
 
 		// Retrieving matrix phase
 
-		public int States => ProbabilityMatrix.Rows-1; //Note: returns 0 if initial distribution added and -1 if nothing was added. So check for 0 is not enough
+		public long States => ProbabilityMatrix.Rows-1; //Note: returns 0 if initial distribution added and -1 if nothing was added. So check for 0 is not enough
 
-		public int Transitions { get; private set; } = 0; //without entries of initial distribution
+		public long Transitions { get; private set; } = 0; //without entries of initial distribution
 
 		public int RowOfInitialStates = 0;
 

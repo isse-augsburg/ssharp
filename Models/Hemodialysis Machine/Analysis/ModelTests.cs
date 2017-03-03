@@ -124,7 +124,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			{
 				Backend = backend,
 				Heuristics = { new MaximalSafeSetHeuristic(specification.Faults) },
-				Configuration = { ModelCapacity = new ModelCapacityByModelSize(1310720, ModelDensityLimit.Medium) }
+				Configuration = { ModelCapacity = new ModelCapacityByModelDensity(1310720, ModelDensityLimit.Medium) }
 			};
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.IncomingBloodWasNotOk);
@@ -142,7 +142,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			var analysis = new SafetySharpSafetyAnalysis
 			{
 				Backend = backend,
-				Configuration = { ModelCapacity = new ModelCapacityByModelSize(1310720, ModelDensityLimit.Medium) }
+				Configuration = { ModelCapacity = new ModelCapacityByModelDensity(1310720, ModelDensityLimit.Medium) }
 			};
 
 			var result = analysis.ComputeMinimalCriticalSets(specification, specification.BloodNotCleanedAndDialyzingFinished);
@@ -168,7 +168,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 			var checker = new SafetySharpQualitativeChecker
 			{
-				Configuration = { ModelCapacity = new ModelCapacityByModelSize(1310720, ModelDensityLimit.High) }
+				Configuration = { ModelCapacity = new ModelCapacityByModelDensity(1310720, ModelDensityLimit.High) }
 			};
 			checker.CheckInvariant(model, true);
 		}

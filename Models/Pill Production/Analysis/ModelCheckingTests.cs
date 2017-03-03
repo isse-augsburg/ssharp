@@ -176,7 +176,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			{
 				Configuration =
 				{
-					ModelCapacity = new ModelCapacityByModelSize(1 << 16, ModelDensityLimit.Medium),
+					ModelCapacity = new ModelCapacityByModelDensity(1 << 16, ModelDensityLimit.Medium),
 					CpuCount = 4,
 					GenerateCounterExample = false
 				}
@@ -208,7 +208,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			model.Faults.SuppressActivations();
 
 			var checker = new SafetySharpQualitativeChecker { Configuration = {
-					ModelCapacity = new ModelCapacityByModelSize(1 << 18, ModelDensityLimit.Medium)}
+					ModelCapacity = new ModelCapacityByModelDensity(1 << 18, ModelDensityLimit.Medium)}
 			};
 			var result = checker.CheckInvariant(model, true);
 			

@@ -34,7 +34,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		private const long DefaultStackCapacity = 1 << 20;
 		private const long DefaultSuccessorStateCapacity = 1 << 14;
 		private const long MinCapacity = 1024;
-		private static readonly ModelCapacity _defaultModelCapacity = ModelCapacityByModelSize.Normal;
+		private static readonly ModelCapacity _defaultModelCapacity = ModelCapacityByModelDensity.Normal;
 
 		private int _cpuCount;
 		private long _stackCapacity;

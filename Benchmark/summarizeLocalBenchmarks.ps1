@@ -35,50 +35,65 @@
 New-Variable -Force -Name resultDirs -Option AllScope -Value @()
 New-Variable -Force -Name results -Option AllScope -Value @()
 
+$resultdir= "$PSScriptRoot\Ergebnisse1"
+
 function LoadResult($test)
 {
     $newResult = New-Object System.Object
     $newResult | Add-Member -type NoteProperty -name TestName -Value $test.TestName
-    $outputfilename = "$PSScriptRoot\"+$test.TestName+".out"
-    $errorfilename = "$PSScriptRoot\"+$test.TestName+".err"
+    $outputfilename = "$resultdir\"+$test.TestName+".out"
+    $errorfilename = "$resultdir\"+$test.TestName+".err"
     $output = Get-Content -Path $outputfilename
 
     #extract TotalTime
-    $lineWithTotalTime = $output | Where-Object {$_ -like 'Tests run: 1, Errors: 0, Failures: 0, Inconclusive: 0, Time*' }
-    #$lineWithTotalTime = $linesWithTotalTime[0]
-    $lineWithTotalTime -match ".*Time[:] (?<time>.*)" 
+    $parsedLine = $output | Where-Object {$_ -match 'Tests run[:] 1, Errors[:] (?<hasError>.), Failures[:] 0, Inconclusive[:] 0, Time[:] (?<time>.*)' }
     $totalTime= $matches['time']
-    Write-Output($totalTime)    
     $newResult | Add-Member -type NoteProperty -name TotalTime -Value $totalTime
+    $wasSuccessful = $matches['hasError'] -eq "0"
+    $newResult | Add-Member -type NoteProperty -name Successful -Value $wasSuccessful
 
-    #extract probability stuff
-    if($test.TestCategory.EndsWith("Probability")){
-        $relevantLine = $output | Where-Object {$_ -like 'Probability of hazard:*' }
-        $relevantLine -match "Probability of hazard[:] (?<match>.*)" 
-        $probability= $matches['match']
-        $newResult | Add-Member -type NoteProperty -name Probability -Value $probability
+    $probability = "-"
+    $states = "-"
+    $transitions = "-"
+    $levels = "-"
+    $mcssize = "-"
+    $avgSizeOfMcs = "-"
+    $reasonError = "-"
+    
+    if ($wasSuccessful) {
+        #extract probability stuff
+        if($test.TestCategory.EndsWith("Probability")){
+            $parsedLine = $output | Where-Object {$_ -match 'Probability of hazard[:] (?<match>.*)' }
+            $probability= $matches['match']
         
-        $relevantLine = $output | Where-Object {$_ -like 'Discovered * states, * transitions, * levels*' }  | Select-Object -Last 1
-        $relevantLine -match "Discovered (?<states>.*?) states, (?<transitions>.*?) transitions, (?<levels>.*?) levels*.*"
-        $states= $matches['states']
-        $newResult | Add-Member -type NoteProperty -name States -Value $states
-        $transitions= $matches['transitions']
-        $newResult | Add-Member -type NoteProperty -name Transitions -Value $transitions
-        $levels= $matches['levels']
-        $newResult | Add-Member -type NoteProperty -name Levels -Value $levels
-    }
+            $parsedLine = $output | Where-Object {$_ -match 'Discovered (?<states>.*?) states, (?<transitions>.*?) transitions, (?<levels>.*?) levels*.*' }  | Select-Object -Last 1
+            $states= $matches['states']
+            $transitions= $matches['transitions']
+            $levels= $matches['levels']
+        }
 
-    if($test.TestCategory.EndsWith("DCCA")){
-        $relevantLine = $output | Where-Object {$_ -like 'Minimal Critical Sets:*' }
-        $relevantLine -match "Minimal Critical Sets[:] (?<mcssize>.*)" 
-        $mcssize= $matches['mcssize']
-        $newResult | Add-Member -type NoteProperty -name MinimalCriticalSets -Value $mcssize
+        if($test.TestCategory.EndsWith("DCCA")){
+            $parsedLine = $output | Where-Object {$_ -match 'Minimal Critical Sets[:] (?<mcssize>.*)' }
+            $mcssize= $matches['mcssize']
         
-        $relevantLine = $output | Where-Object {$_ -like 'Average Minimal Critical Set Cardinality:*' }
-        $relevantLine -match "Average Minimal Critical Set Cardinality[:] (?<avgSizeOfMcs>.*)" 
-        $avgSizeOfMcs= $matches['avgSizeOfMcs']
-        $newResult | Add-Member -type NoteProperty -name AvgSizeOfMcs -Value $avgSizeOfMcs
+            $parsedLine = $output | Where-Object {$_ -match 'Average Minimal Critical Set Cardinality[:] (?<avgSizeOfMcs>.*)' }
+            $avgSizeOfMcs= $matches['avgSizeOfMcs']
+        }
     }
+    else
+    {
+        $reasonError = "unknown"
+        $parsedLine = $output | Where-Object {$_ -match 'Probability of hazard[:] (?<match>.*)' }
+        $reasonError = $matches['reason']
+    }
+    
+    $newResult | Add-Member -type NoteProperty -name Probability -Value $probability
+    $newResult | Add-Member -type NoteProperty -name States -Value $states
+    $newResult | Add-Member -type NoteProperty -name Transitions -Value $transitions
+    $newResult | Add-Member -type NoteProperty -name Levels -Value $levels
+    $newResult | Add-Member -type NoteProperty -name MinimalCriticalSets -Value $mcssize
+    $newResult | Add-Member -type NoteProperty -name AvgSizeOfMcs -Value $avgSizeOfMcs
+    $newResult | Add-Member -type NoteProperty -name ReasonForError -Value $reasonError
 
     $results += $newResult
 }

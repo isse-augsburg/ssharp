@@ -62,7 +62,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			var modelSize = modelCapacity.DeriveModelByteSize(_sizeOfState, _sizeOfTransition);
 
 			StateLabeling = new LabelVector();
-			RowsWithDistributions = new SparseDoubleMatrix((int)modelSize.NumberOfStates + 1, (int)modelSize.NumberOfTransitions); // one additional row for initial distributions (more might be necessary)
+			RowsWithDistributions = new SparseDoubleMatrix(modelSize.NumberOfStates + 1, modelSize.NumberOfTransitions); // one additional row for initial distributions (more might be necessary)
 			StateToRowsL = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions
 			StateToRowsRowCount = new int[modelSize.NumberOfStates + 1]; // one additional row for initial distributions
 			SetRowOfStateEntriesToInvalid();

@@ -57,54 +57,54 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		public abstract ModelByteSize DeriveModelByteSize(int sizeOfState, int sizeOfTransition);
 	}
 	
-	public class ModelCapacityByModelSize : ModelCapacity
+	public class ModelCapacityByModelDensity : ModelCapacity
 	{
 		private long _stateCapacity;
 
 		public int DensityLimit { get; private set; }
 
-		private ModelCapacityByModelSize()
+		private ModelCapacityByModelDensity()
 		{
 		}
 
-		public ModelCapacityByModelSize(long stateCapacity, ModelDensityLimit densityLimit = ModelDensityLimit.Dense)
+		public ModelCapacityByModelDensity(long stateCapacity, ModelDensityLimit densityLimit = ModelDensityLimit.Dense)
 		{
 			StateCapacity = stateCapacity;
 			DensityLimit = (int)densityLimit;
 		}
 
-		public ModelCapacityByModelSize(long stateCapacity, int densityLimit)
+		public ModelCapacityByModelDensity(long stateCapacity, int densityLimit)
 		{
 			Requires.That(densityLimit > 0, "Density must be greater 0");
 			StateCapacity = stateCapacity;
 			DensityLimit = densityLimit;
 		}
 
-		public static readonly ModelCapacityByModelSize Default = new ModelCapacityByModelSize
+		public static readonly ModelCapacityByModelDensity Default = new ModelCapacityByModelDensity
 		{
 			StateCapacity = DefaultStateCapacity,
 			DensityLimit = (int) DefaultDensityLimit
 		};
 
-		public static readonly ModelCapacityByModelSize Tiny = new ModelCapacityByModelSize
+		public static readonly ModelCapacityByModelDensity Tiny = new ModelCapacityByModelDensity
 		{
 			StateCapacity = 1024,
 			DensityLimit = (int) ModelDensityLimit.Dense
 		};
 
-		public static readonly ModelCapacityByModelSize Small = new ModelCapacityByModelSize
+		public static readonly ModelCapacityByModelDensity Small = new ModelCapacityByModelDensity
 		{
 			StateCapacity = 1<<20,
 			DensityLimit = (int) ModelDensityLimit.Medium
 		};
 
-		public static readonly ModelCapacityByModelSize Normal = new ModelCapacityByModelSize
+		public static readonly ModelCapacityByModelDensity Normal = new ModelCapacityByModelDensity
 		{
 			StateCapacity = 1 << 24,
 			DensityLimit = (int)ModelDensityLimit.Medium
 		};
 
-		public static readonly ModelCapacityByModelSize Large = new ModelCapacityByModelSize
+		public static readonly ModelCapacityByModelDensity Large = new ModelCapacityByModelDensity
 		{
 			StateCapacity = 1 << 28,
 			DensityLimit = (int) ModelDensityLimit.High
@@ -141,6 +141,70 @@ namespace ISSE.SafetyChecking.ExecutedModel
 			var numberOfTransitions = StateCapacity * densityInNumbers;
 			
 			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, numberOfTransitions);
+		}
+	}
+
+	public class ModelCapacityByModelSize : ModelCapacity
+	{
+		private long _stateCapacity;
+
+		public long _transitionCapacity { get; private set; }
+
+		private ModelCapacityByModelSize()
+		{
+		}
+
+		public ModelCapacityByModelSize(long stateCapacity, long transitionCapacity)
+		{
+			Requires.That(stateCapacity > 0, "must be greater 0");
+			Requires.That(transitionCapacity > 0, "must be greater 0");
+			StateCapacity = stateCapacity;
+			_transitionCapacity = transitionCapacity;
+		}
+
+		public static readonly ModelCapacityByModelSize Default = new ModelCapacityByModelSize
+		{
+			StateCapacity = DefaultStateCapacity,
+			_transitionCapacity = (int)DefaultDensityLimit* DefaultStateCapacity
+		};
+
+		public static readonly ModelCapacityByModelSize Tiny = new ModelCapacityByModelSize
+		{
+			StateCapacity = 1024,
+			_transitionCapacity = 1024 * 1024
+		};
+
+		public static readonly ModelCapacityByModelSize Small = new ModelCapacityByModelSize
+		{
+			StateCapacity = 1 << 20,
+			_transitionCapacity = 1 << 25
+		};
+
+		public static readonly ModelCapacityByModelSize Normal = new ModelCapacityByModelSize
+		{
+			StateCapacity = 1 << 24,
+			_transitionCapacity = 1 << 29
+		};
+
+		public static readonly ModelCapacityByModelSize Large = new ModelCapacityByModelSize
+		{
+			StateCapacity = 1 << 28,
+			_transitionCapacity = 1 << 30
+		};
+
+		public long StateCapacity
+		{
+			get { return Math.Max(_stateCapacity, MinCapacity); }
+			private set
+			{
+				Requires.That(value >= MinCapacity, $"{nameof(StateCapacity)} must be at least {MinCapacity}.");
+				_stateCapacity = value;
+			}
+		}
+
+		public override ModelByteSize DeriveModelByteSize(int sizeOfState, int sizeOfTransition)
+		{
+			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, _transitionCapacity);
 		}
 	}
 

@@ -49,8 +49,8 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			public double Value; //Probability of outgoing state
 		}
 
-		private readonly int _spaceLimitNumberOfRows; //pessimistic limit
-		private readonly int _spaceLimitNumberOfEntries; //pessimistic limit
+		private readonly long _spaceLimitNumberOfRows; //pessimistic limit
+		private readonly long _spaceLimitNumberOfEntries; //pessimistic limit
 
 		private readonly MemoryBuffer _rowBufferUnoptimized = new MemoryBuffer();
 		private readonly MemoryBuffer _rowBufferOptimized = new MemoryBuffer();
@@ -75,7 +75,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 		// _columnValueMemory[_rowMemory[s]] and _columnValueMemory[_rowMemory[s]+_rowColumnCountMemory[s]]
 		// or when optimized and sealed between
 		// _columnValueMemory[_rowMemory[s]] and _columnValueMemory[_rowMemory[s+1]]
-		public SparseDoubleMatrix(int spaceLimitNumberOfRows, int spaceLimitNumberOfEntries)
+		public SparseDoubleMatrix(long spaceLimitNumberOfRows, long spaceLimitNumberOfEntries)
 		{
 			Requires.InRange(spaceLimitNumberOfRows, nameof(spaceLimitNumberOfRows), 1, Int32.MaxValue-1);
 			Requires.InRange(spaceLimitNumberOfEntries, nameof(spaceLimitNumberOfEntries), 1, Int32.MaxValue);
