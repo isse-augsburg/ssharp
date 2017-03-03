@@ -44,7 +44,7 @@ $compilate_directory = "D:\Repositories\Universität\ssharp\Binaries\Release"
 Set-Location -Path $compilate_directory
 $env:Path += ";$PSScriptRoot\NUnit2"
 
-$resultdir= "$PSScriptRoot\Ergebnisse1"
+$resultdir= "$PSScriptRoot\Ergebnisse4"
 New-Item -ItemType directory -Path $resultdir
 
 
@@ -69,4 +69,5 @@ Foreach ($test in $tests) {
     ExecuteTest($test)
 }
 
+git log -1 > $resultdir\version
 

@@ -46,7 +46,9 @@ function AddResultDir($name,$resultDir)
     $resultDirs += $newDir
 }
 
-AddResultDir -Name "Ergebnisse1" -ResultDir "$PSScriptRoot\Ergebnisse1"
+#AddResultDir -Name "vor" -ResultDir "$PSScriptRoot\Ergebnisse3"
+AddResultDir -Name "nach" -ResultDir "$PSScriptRoot\Ergebnisse2"
+AddResultDir -Name "neu" -ResultDir "$PSScriptRoot\Ergebnisse4"
 
 function LoadResults($counter)
 {

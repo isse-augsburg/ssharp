@@ -155,9 +155,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 				var updated = false;
 				for (var j = 0; j < i && !updated; j++)
 				{
-					if (_orderedVehicles[j].Position != 0 &&
-						_orderedVehicles[i].Position == _orderedVehicles[j].Position &&
-						_orderedVehicles[i].Lane == _orderedVehicles[j].Lane)
+					if ((_orderedVehicles[j].Position != 0 || _orderedVehicles[j]. Position > Model.EndControlPosition) &&
+						 _orderedVehicles[i].Position == _orderedVehicles[j].Position &&
+						 _orderedVehicles[i].Lane == _orderedVehicles[j].Lane)
 					{
 						// Found an overlap. So reset the old vehicle to its old position.
 						updated = true;
