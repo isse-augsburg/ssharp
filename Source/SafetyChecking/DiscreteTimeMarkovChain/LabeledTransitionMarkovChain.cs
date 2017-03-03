@@ -97,8 +97,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		{
 			Assert.That(transitionCount > 0, "Cannot add deadlock state.");
 
+			// Need to reserve the memory for the transitions
 			var upperBoundaryForTransitions = _transitionChainElementCount + transitionCount;
-			if (upperBoundaryForTransitions > _maxNumberOfTransitions || upperBoundaryForTransitions<0)
+			if (upperBoundaryForTransitions<0)
 				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
 
 
@@ -118,6 +119,10 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				{
 					// Add new chain start
 					var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
+					if (locationOfNewEntry >= _maxNumberOfTransitions)
+						throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
+
+
 					_transitionChainElementsMemory[locationOfNewEntry] =
 						new TransitionChainElement
 						{
@@ -160,6 +165,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 						{
 							//Case 2: Append
 							var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
+							if (locationOfNewEntry >= _maxNumberOfTransitions)
+								throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
 							mergedOrAppended = true;
 							_transitionChainElementsMemory[currentElementIndex] =
 								new TransitionChainElement
