@@ -55,10 +55,8 @@ function AddTestValuation($name,$script="",$resultDir="$PSScriptRoot\Results")
     $testValuations += $testValuation
 }
 
-#AddTestValuation -Name "HeightControlLow" -Script "copy -Force $PSScriptRoot\HeightControlLow.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLow"
+AddTestValuation -Name "HeightControlLow" -Script "copy -Force $PSScriptRoot\HeightControlLow.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLow"
 AddTestValuation -Name "HeightControlHigh"  -Script "copy -Force $PSScriptRoot\HeightControlHigh.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLow"
-
-# Invoke-Expression
 
 function ExecuteTest($test,$resultDir)
 {
@@ -77,6 +75,7 @@ function ExecuteTest($test,$resultDir)
 function ExecuteTestValuation($testvaluation)
 {
     $resultDir = $testvaluation.ResultDir
+    Invoke-Expression $testvaluation.Script
     New-Item -ItemType directory -Force -Path $resultDir
 
     Foreach ($test in $tests) {
