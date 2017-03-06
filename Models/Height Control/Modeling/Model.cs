@@ -98,7 +98,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 				Formula vehiclesAtEnd = CheckOnlyUntilVehiclesCompleted && VehicleSet.AllVehiclesCompleted;
 				return
 					!vehiclesAtEnd &&
-					!Vehicles.Any(vehicle =>
+					Vehicles.Any(vehicle =>
 						vehicle.Position == TunnelPosition &&
 						vehicle.Lane == Lane.Left &&
 						vehicle.Kind == VehicleKind.OverheightVehicle);
