@@ -34,7 +34,7 @@
 
 New-Variable -Force -Name results -Option AllScope -Value @()
 
-$resultdir= "$PSScriptRoot\Ergebnisse1"
+$resultdir= "$PSScriptRoot\Ergebnisse-Elbtunnel-2017-03"
 
 function LoadResult($test)
 {
@@ -55,6 +55,7 @@ function LoadResult($test)
     $states = "-"
     $transitions = "-"
     $levels = "-"
+	$faults = "-"
     $mcssize = "-"
     $avgSizeOfMcs = "-"
     $reasonError = "-"
@@ -72,7 +73,10 @@ function LoadResult($test)
         }
 
         if($test.TestCategory.EndsWith("DCCA")){
-            $parsedLine = $output | Where-Object {$_ -match 'Minimal Critical Sets[:] (?<mcssize>.*)' }
+            $parsedLine = $output | Where-Object {$_ -match 'Of the (?<faults>\d*) faults contained in the model[,]' }
+            $faults= $matches['faults']			
+			
+			$parsedLine = $output | Where-Object {$_ -match 'Minimal Critical Sets[:] (?<mcssize>.*)' }
             $mcssize= $matches['mcssize']
         
             $parsedLine = $output | Where-Object {$_ -match 'Average Minimal Critical Set Cardinality[:] (?<avgSizeOfMcs>.*)' }
@@ -82,14 +86,25 @@ function LoadResult($test)
     else
     {
         $reasonError = "unknown"
-        #$parsedLine = $output | Where-Object {$_ -match 'Probability of hazard[:] (?<match>.*)' }
-        #$reasonError = $matches['reason']
+
+        # Error: An unhandled exception of type 'System.OutOfMemoryException' was thrown during model checking: Unable to store an additional transition. Try increasing the successor state capacity.
+        $parsedLine = $output | Where-Object {$_ -match '.*Unable to store an additional transition.*' }
+        if($parsedLine.Length -gt 0){
+            $reasonError = "successor_state_capacity"            
+        }
+
+        #  Error: An unhandled exception of type 'System.OutOfMemoryException' was thrown during model checking: Unable to store transitions. Try increasing the transition capacity.
+        $parsedLine = $output | Where-Object {$_ -match '.*Unable to store transitions.*' }
+        if($parsedLine.Length -gt 0){
+            $reasonError = "transition_capacity"            
+        }
     }
     
     $newResult | Add-Member -type NoteProperty -name Probability -Value $probability
     $newResult | Add-Member -type NoteProperty -name States -Value $states
     $newResult | Add-Member -type NoteProperty -name Transitions -Value $transitions
     $newResult | Add-Member -type NoteProperty -name Levels -Value $levels
+    $newResult | Add-Member -type NoteProperty -name Faults -Value $faults
     $newResult | Add-Member -type NoteProperty -name MinimalCriticalSets -Value $mcssize
     $newResult | Add-Member -type NoteProperty -name AvgSizeOfMcs -Value $avgSizeOfMcs
     $newResult | Add-Member -type NoteProperty -name ReasonForError -Value $reasonError
