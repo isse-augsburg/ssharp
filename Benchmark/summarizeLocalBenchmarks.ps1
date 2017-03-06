@@ -98,6 +98,12 @@ function LoadResult($test)
         if($parsedLine.Length -gt 0){
             $reasonError = "transition_capacity"            
         }
+
+        # try to get last printed states and transitions, which lead to a fault
+        $parsedLine = $output | Where-Object {$_ -match 'Discovered (?<states>.*?) states, (?<transitions>.*?) transitions, (?<levels>.*?) levels*.*' }  | Select-Object -Last 1
+        $states= $matches['states']
+        $transitions= $matches['transitions']
+        $levels= $matches['levels']
     }
     
     $newResult | Add-Member -type NoteProperty -name Probability -Value $probability

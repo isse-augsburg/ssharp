@@ -46,6 +46,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		public const int MinSpeed = 1;
 		public const int MaxVehicles = 3;
 
+		[Hidden]
+		public bool CheckOnlyUntilVehiclesCompleted = true;
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
@@ -88,18 +91,34 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		/// <summary>
 		///   Represents the hazard of an overheight vehicle colliding with the tunnel entrance on the left lane.
 		/// </summary>
-		public Formula Collision =>
-			Vehicles.Any(vehicle =>
-				vehicle.Position == TunnelPosition &&
-				vehicle.Lane == Lane.Left &&
-				vehicle.Kind == VehicleKind.OverheightVehicle);
+		public Formula Collision
+		{
+			get
+			{
+				Formula vehiclesAtEnd = CheckOnlyUntilVehiclesCompleted && VehicleSet.AllVehiclesCompleted;
+				return
+					!vehiclesAtEnd &&
+					!Vehicles.Any(vehicle =>
+						vehicle.Position == TunnelPosition &&
+						vehicle.Lane == Lane.Left &&
+						vehicle.Kind == VehicleKind.OverheightVehicle);
+			}
+		}
 
 		/// <summary>
 		///   Represents the hazard of an alarm even when no overheight vehicle is on the right lane.
 		/// </summary>
-		public Formula FalseAlarm =>
-			HeightControl.TrafficLights.IsRed &&
-			!Vehicles.Any(vehicle => vehicle.Lane == Lane.Left && vehicle.Kind == VehicleKind.OverheightVehicle);
+		public Formula FalseAlarm
+		{
+			get
+			{
+				Formula vehiclesAtEnd = CheckOnlyUntilVehiclesCompleted && VehicleSet.AllVehiclesCompleted;
+				return
+					! vehiclesAtEnd &&
+					HeightControl.TrafficLights.IsRed &&
+					!Vehicles.Any(vehicle => vehicle.Lane == Lane.Left && vehicle.Kind == VehicleKind.OverheightVehicle);
+			}
+		}
 
 		/// <summary>
 		///   Initializes a model of the original design.

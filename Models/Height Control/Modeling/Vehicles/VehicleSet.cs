@@ -59,6 +59,25 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		public readonly Fault SlowTraffic = new TransientFault();
 
 		/// <summary>
+		///   Checks whether all vehicles are at the end position.
+		/// </summary>
+		public bool AllVehiclesCompleted
+		{
+			get
+			{
+				var oneVehicleNotAtEnd = false;
+				var vehicleId = 0;
+				while (!oneVehicleNotAtEnd && vehicleId < Vehicles.Length)
+				{
+					if (Vehicles[vehicleId].Position < Model.TunnelPosition)
+						oneVehicleNotAtEnd = true;
+					vehicleId++;
+				}
+				return !oneVehicleNotAtEnd;
+			}
+		}
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		public VehicleSet(Vehicle[] vehicles)
@@ -152,20 +171,19 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 				_orderedVehicles[i].Update();
 
 				// Check, if the position overlaps with another vehicle
-				var updated = false;
-				for (var j = 0; j < i && !updated; j++)
+				var fixedOverlap = false;
+				for (var j = 0; j < i && !fixedOverlap; j++)
 				{
-					if ((_orderedVehicles[j].Position != 0 || _orderedVehicles[j]. Position > Model.EndControlPosition) &&
+					if (_orderedVehicles[j].Position != 0 &&
+						 _orderedVehicles[j]. Position < Model.EndControlPosition &&
 						 _orderedVehicles[i].Position == _orderedVehicles[j].Position &&
 						 _orderedVehicles[i].Lane == _orderedVehicles[j].Lane)
 					{
 						// Found an overlap. So reset the old vehicle to its old position.
-						updated = true;
+						fixedOverlap = true;
 						_orderedVehicles[i].Position = oldPosition;
 						_orderedVehicles[i].Lane = oldLane;
 					}
-
-
 				}
 			}
 		}

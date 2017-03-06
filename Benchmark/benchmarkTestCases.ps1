@@ -44,11 +44,23 @@ $compilate_directory = "D:\Repositories\Universität\ssharp\Binaries\Release"
 Set-Location -Path $compilate_directory
 $env:Path += ";$PSScriptRoot\NUnit2"
 
-$resultdir= "$PSScriptRoot\Ergebnisse4"
-New-Item -ItemType directory -Path $resultdir
+New-Variable -Force -Name testValuations -Option AllScope -Value @()
 
+function AddTestValuation($name,$script="",$resultDir="$PSScriptRoot\Results")
+{
+    $testValuation = New-Object System.Object
+    $testValuation | Add-Member -type NoteProperty -name Name -Value $name
+    $testValuation | Add-Member -type NoteProperty -name Script -Value $script
+    $testValuation | Add-Member -type NoteProperty -name ResultDir -Value $resultDir
+    $testValuations += $testValuation
+}
 
-function ExecuteTest($test)
+#AddTestValuation -Name "HeightControlLow" -Script "copy -Force $PSScriptRoot\HeightControlLow.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLow"
+AddTestValuation -Name "HeightControlHigh"  -Script "copy -Force $PSScriptRoot\HeightControlHigh.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLow"
+
+# Invoke-Expression
+
+function ExecuteTest($test,$resultDir)
 {
     Write-Output("Testing " +  $test.TestMethod + "`n")
     $arguments = @($test.TestAssembly,"/run",$test.TestMethod)
@@ -58,16 +70,23 @@ function ExecuteTest($test)
     
     $outputfilename = $resultdir + "\" +$test.TestName+".out"
     $errorfilename = $resultdir + "\"+$test.TestName+".err"
+    echo $outputfilename
     Start-Process -FilePath $nunit -ArgumentList $arguments -WorkingDirectory $compilate_directory -NoNewWindow -RedirectStandardError $errorfilename -RedirectStandardOutput $outputfilename -Wait
 }
 
+function ExecuteTestValuation($testvaluation)
+{
+    $resultDir = $testvaluation.ResultDir
+    New-Item -ItemType directory -Force -Path $resultDir
 
-#New-Item -ItemType directory -Path
-#Remove-Item "foldertodelete\*" -Force -Recurse
+    Foreach ($test in $tests) {
+        ExecuteTest -Test $test -ResultDir $resultDir
+    }
 
-Foreach ($test in $tests) {
-    ExecuteTest($test)
+    git log -1 > $resultDir\version
 }
 
-git log -1 > $resultdir\version
 
+Foreach ($testvaluation in $testValuations) {
+    ExecuteTestValuation($testvaluation)
+}
