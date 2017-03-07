@@ -207,6 +207,81 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			}
 		}
 
+		#region oracle for back-to-back testing
+
+		protected bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<Task> tasks)
+		{
+			var isReconfPossible = true;
+			var matrix = GetConnectionMatrix(robotsAgents);
+
+			foreach (var task in tasks)
+			{
+				isReconfPossible &=
+					task.Capabilities.All(capability => robotsAgents.Any(agent => ContainsCapability(agent.AvailableCapabilities, capability)));
+				if (!isReconfPossible)
+					break;
+
+				var candidates = robotsAgents.Where(agent => ContainsCapability(agent.AvailableCapabilities, task.Capabilities.First())).ToArray();
+
+				for (var i = 0; i < task.Capabilities.Length - 1; i++)
+				{
+					candidates =
+						candidates.SelectMany(r => matrix[r])
+								  .Where(r => ContainsCapability(r.AvailableCapabilities, task.Capabilities[i + 1]))
+								  .ToArray();
+					if (candidates.Length == 0)
+					{
+						isReconfPossible = false;
+					}
+				}
+			}
+
+			return isReconfPossible;
+		}
+
+		private Dictionary<RobotAgent, List<RobotAgent>> GetConnectionMatrix(IEnumerable<RobotAgent> robotAgents)
+		{
+			var matrix = new Dictionary<RobotAgent, List<RobotAgent>>();
+
+			foreach (var robot in robotAgents)
+			{
+				var list = new List<RobotAgent>(robotAgents.Where(r => IsConnected(robot, r, new HashSet<RobotAgent>())));
+				matrix.Add(robot, list);
+			}
+
+			return matrix;
+		}
+
+		private static bool IsConnected(RobotAgent source, RobotAgent target, HashSet<RobotAgent> seenRobots)
+		{
+			if (source == target)
+				return true;
+
+			if (!seenRobots.Add(source))
+				return false;
+
+			foreach (var output in source.Outputs)
+			{
+				foreach (var output2 in output.Outputs)
+				{
+					if (output2 == target)
+						return true;
+
+					if (IsConnected((RobotAgent)output2, target, seenRobots))
+						return true;
+				}
+			}
+
+			return false;
+		}
+
+		private bool ContainsCapability(IEnumerable<Capability> capabilities, Capability capability)
+		{
+			return capabilities.Any(c => c.IsEquivalentTo(capability));
+		}
+
+		#endregion
+
 		[FaultEffect(Fault = nameof(ReconfigurationFailure))]
 		public abstract class ReconfigurationFailureEffect : ObserverController
 		{

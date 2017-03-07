@@ -50,14 +50,25 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		protected override void Reconfigure()
 		{
+			var isReconfPossible = IsReconfPossible(_availableRobots, Tasks);
+
 			// find optimal path that satisfies the required capabilities
 			CalculateShortestPaths();
 			var path = FindPath(Tasks[0]);
 
 			if (path == null)
+			{
 				ReconfigurationState = ReconfStates.Failed;
+				if (isReconfPossible)
+					throw new Exception("Reconfiguration failed even though there is a solution.");
+			}
 			else
+			{
 				ApplyConfiguration(Convert(Tasks[0], path).ToArray());
+				ReconfigurationState = ReconfStates.Succedded;
+				if (!isReconfPossible)
+					throw new Exception("Reconfiguration successful even though there is no valid configuration.");
+			}
 		}
 
 		/// <summary>
