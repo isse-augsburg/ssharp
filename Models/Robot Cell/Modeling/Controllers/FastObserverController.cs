@@ -190,6 +190,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			{
 				var current = path[i];
 
+#if !ENABLE_KNOWN_ERRORS // error F1: transitive routes interpreted as direct ones
 				if (previous != -1)
 				{
 					// Find a cart that connects both robots, the path matrix contains the next robot we have to go to
@@ -203,6 +204,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 						previous = nextRobot;
 					}
 				}
+#endif
 
 				// Collect the capabilities that this robot should apply
 				var capabilities = 
