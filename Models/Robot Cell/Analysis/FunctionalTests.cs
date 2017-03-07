@@ -80,8 +80,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 		private static IFaultSetHeuristic RedundancyHeuristic(Model model)
 		{
+			var cartFaults = model.Carts.Select(cart => cart.Broken)
+				.Concat(model.Carts.Select(cart => cart.Lost))
+				.Concat(model.CartAgents.Select(cartAgent => cartAgent.ConfigurationUpdateFailed));
+
 			return new MinimalRedundancyHeuristic(
-				model.Faults,
+				model.Faults.Except(cartFaults).ToArray(),
 				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Drill).Select(t => t.Broken)),
 				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Insert).Select(t => t.Broken)),
 				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Tighten).Select(t => t.Broken)),
