@@ -77,9 +77,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		{
 			agent.Constraints = new List<Func<bool>>
 			{
+#if !ENABLE_KNOWN_ERRORS
 				// I/O Consistency
 				() => agent.AllocatedRoles.All(role => role.PreCondition.Port == null || agent.Inputs.Contains(role.PreCondition.Port)),
 				() => agent.AllocatedRoles.All(role => role.PostCondition.Port == null || agent.Outputs.Contains(role.PostCondition.Port)),
+#endif
 				// Capability Consistency
 				() =>
 					agent.AllocatedRoles.All(
