@@ -198,6 +198,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 					{
 						yield return Transport(previous, nextRobot, usedCarts);
 
+						// what happens here? for each robot between previous and current, we assign an empty role to current??
+						// intention probably to assign it to nextRobot
+						// TODO: find test to detect this & fix
 						if (nextRobot != current)
 							yield return Tuple.Create(Agents[path[i]], new Capability[0]);
 
