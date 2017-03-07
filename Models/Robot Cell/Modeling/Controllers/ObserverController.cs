@@ -181,6 +181,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 			_lastRoleAllocations = roleAllocations;
 			var allocatedCapabilities = 0;
+			var remainingCapabilities = Tasks[0].Capabilities.Length;
 
 			for (var i = 0; i < roleAllocations.Length; i++)
 			{
@@ -190,11 +191,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				var preAgent = i == 0 ? null : roleAllocations[i - 1].Item1;
 				var postAgent = i == roleAllocations.Length - 1 ? null : roleAllocations[i + 1].Item1;
 
+#if ENABLE_KNOWN_ERRORS
+				var preCondition = new Condition(Tasks[0], preAgent, remainingCapabilities);
+				var postCondition = new Condition(Tasks[0], postAgent, remainingCapabilities - capabilities.Length;
+#else
 				var preCondition = new Condition(Tasks[0], preAgent, allocatedCapabilities);
 				var postCondition = new Condition(Tasks[0], postAgent, allocatedCapabilities + capabilities.Length);
+#endif
 				var role = new Role(preCondition, postCondition, allocatedCapabilities, capabilities.Length);
 
 				allocatedCapabilities += capabilities.Length;
+				remainingCapabilities -= capabilities.Length;
 
 				agent.Configure(role);
 			}

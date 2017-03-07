@@ -39,8 +39,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Task = task;
 		}
 
+#if ENABLE_KNOWN_ERRORS
+		public IEnumerable<Capability> State =>
+			Task?.Capabilities.Skip(Task.Capabilities.Length - _statePrefixLength) ?? Enumerable.Empty<Capability>();
+#else
 		public IEnumerable<Capability> State =>
 			Task?.Capabilities.Take(_statePrefixLength) ?? Enumerable.Empty<Capability>();
+#endif
 
 		[Pure]
 		public bool StateMatches(IEnumerable<Capability> other)
