@@ -193,7 +193,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 #if ENABLE_KNOWN_ERRORS
 				var preCondition = new Condition(Tasks[0], preAgent, remainingCapabilities);
-				var postCondition = new Condition(Tasks[0], postAgent, remainingCapabilities - capabilities.Length;
+				var postCondition = new Condition(Tasks[0], postAgent, remainingCapabilities - capabilities.Length);
 #else
 				var preCondition = new Condition(Tasks[0], preAgent, allocatedCapabilities);
 				var postCondition = new Condition(Tasks[0], postAgent, allocatedCapabilities + capabilities.Length);
