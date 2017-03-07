@@ -288,8 +288,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			{
 				Agent.Connect(from: RobotAgents.Single(a => route.Robot1 == a.Robot), to: agent);
 				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.Robot2 == a.Robot));
+#if !ENABLE_KNOWN_ERRORS
+				// error F2: routes are bidirectional
 				Agent.Connect(from: RobotAgents.Single(a => route.Robot2 == a.Robot), to: agent);
 				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.Robot1 == a.Robot));
+#endif
 			}
 		}
 
