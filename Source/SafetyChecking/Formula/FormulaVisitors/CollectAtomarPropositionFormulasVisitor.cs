@@ -65,6 +65,23 @@ namespace ISSE.SafetyChecking.Formula
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
+		public override void VisitBoundedUnaryFormula(BoundedUnaryFormula formula)
+		{
+			Visit(formula.Operand);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBoundedBinaryFormula(BoundedBinaryFormula formula)
+		{
+			Visit(formula.LeftOperand);
+			Visit(formula.RightOperand);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
 		public override void VisitRewardFormula(RewardFormula formula)
 		{
 		}

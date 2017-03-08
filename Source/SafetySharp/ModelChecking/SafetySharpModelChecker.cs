@@ -92,5 +92,30 @@ namespace SafetySharp.Analysis
 			}
 			return probabilityToReachState;
 		}
+
+
+		/// <summary>
+		///   Calculates the probability to reach a state whether <paramref name="stateFormula" /> holds.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="stateFormula">The state formula to be checked.</param>
+		/// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
+		public static Probability CalculateProbabilityToReachStateBounded(ModelBase model, Formula stateFormula, int bound)
+		{
+			Probability probabilityToReachState;
+
+			var probabilityToReachStateFormula = new BoundedUnaryFormula(stateFormula, UnaryOperator.Finally, bound);
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
+			markovChainGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
+			var markovChain = markovChainGenerator.GenerateMarkovChain(stateFormula);
+			using (var modelChecker = new BuiltinDtmcModelChecker(markovChain, System.Console.Out))
+			{
+				probabilityToReachState = modelChecker.CalculateProbability(probabilityToReachStateFormula);
+			}
+			return probabilityToReachState;
+		}
 	}
 }

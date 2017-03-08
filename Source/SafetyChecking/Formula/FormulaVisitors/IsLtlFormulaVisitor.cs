@@ -22,6 +22,8 @@
 
 namespace ISSE.SafetyChecking.Formula
 {
+	using System;
+
 	/// <summary>
 	///   Determines whether a <see cref="Formula" /> is a LTL formula.
 	/// </summary>
@@ -64,6 +66,22 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBoundedUnaryFormula(BoundedUnaryFormula formula)
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBoundedBinaryFormula(BoundedBinaryFormula formula)
+		{
+			throw new NotImplementedException();
 		}
 
 		/// <summary>

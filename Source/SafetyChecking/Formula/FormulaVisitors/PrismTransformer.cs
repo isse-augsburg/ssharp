@@ -104,7 +104,23 @@ namespace ISSE.SafetyChecking.Formula
 		{
 			_builder.Append(formula.Label);
 		}
-		
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBoundedUnaryFormula(BoundedUnaryFormula formula)
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBoundedBinaryFormula(BoundedBinaryFormula formula)
+		{
+			throw new NotImplementedException();
+		}
+
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>

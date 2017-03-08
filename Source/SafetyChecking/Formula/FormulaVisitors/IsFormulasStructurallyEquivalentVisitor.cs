@@ -128,6 +128,66 @@ namespace ISSE.SafetyChecking.Formula
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
+		public override void VisitBoundedUnaryFormula(BoundedUnaryFormula formula)
+		{
+			var referenceFormula = _referenceFormula as BoundedUnaryFormula;
+			if (referenceFormula == null)
+			{
+				IsEqual = false;
+			}
+			else
+			{
+				if (formula.Operator != referenceFormula.Operator)
+				{
+					IsEqual = false;
+				}
+				else if (formula.Bound != referenceFormula.Bound)
+				{
+					IsEqual = false;
+				}
+				else
+				{
+					_referenceFormula = referenceFormula.Operand;
+					Visit(formula.Operand);
+				}
+			}
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBoundedBinaryFormula(BoundedBinaryFormula formula)
+		{
+			var referenceFormula = _referenceFormula as BoundedBinaryFormula;
+			if (referenceFormula == null)
+			{
+				IsEqual = false;
+			}
+			else
+			{
+				if (formula.Operator != referenceFormula.Operator)
+				{
+					IsEqual = false;
+				}
+				else if (formula.Bound != referenceFormula.Bound)
+				{
+					IsEqual = false;
+				}
+				else
+				{
+					_referenceFormula = referenceFormula.LeftOperand;
+					Visit(formula.LeftOperand);
+					if (!IsEqual)
+						return;
+					_referenceFormula = referenceFormula.RightOperand;
+					Visit(formula.RightOperand);
+				}
+			}
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
 		public override void VisitRewardFormula(RewardFormula formula)
 		{
 			var referenceFormula = _referenceFormula as RewardFormula;

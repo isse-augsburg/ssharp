@@ -82,6 +82,27 @@ namespace ISSE.SafetyChecking.Formula
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
+		public override void VisitBoundedUnaryFormula(BoundedUnaryFormula formula)
+		{
+			Visit(formula.Operand);
+			CurrentFormula = new BoundedUnaryFormula(CurrentFormula, formula.Operator, formula.Bound);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBoundedBinaryFormula(BoundedBinaryFormula formula)
+		{
+			Visit(formula.LeftOperand);
+			var left = CurrentFormula;
+			Visit(formula.RightOperand);
+			var right = CurrentFormula;
+			CurrentFormula = new BoundedBinaryFormula(left, formula.Operator, right, formula.Bound);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
 		public override void VisitRewardFormula(RewardFormula formula)
 		{
 			throw new NotImplementedException();

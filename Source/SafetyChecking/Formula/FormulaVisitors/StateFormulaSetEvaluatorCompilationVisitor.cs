@@ -136,6 +136,22 @@ namespace ISSE.SafetyChecking.Formula
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
+		public override void VisitBoundedUnaryFormula(BoundedUnaryFormula formula)
+		{
+			throw new InvalidOperationException("Only state formulas can be evaluated.");
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBoundedBinaryFormula(BoundedBinaryFormula formula)
+		{
+			throw new InvalidOperationException("Only state formulas can be evaluated.");
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
 		public override void VisitRewardFormula(RewardFormula formula)
 		{
 			throw new InvalidOperationException("Only state formulas can be evaluated.");

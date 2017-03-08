@@ -50,6 +50,8 @@
     <Compile Include="AnalysisModel\AnalysisModel.cs" />
     <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
     <Compile Include="AnalysisModel\AnalysisModelCreator.cs" />
+    <Compile Include="Formula\BoundedBinaryFormula.cs" />
+    <Compile Include="Formula\BoundedUnaryFormula.cs" />
     <Compile Include="Formula\FormulaVisitors\IsFormulasStructurallyEquivalentVisitor.cs" />
     <Compile Include="Formula\FormulaVisitors\StateFormulaSetEvaluatorCompilationVisitor2.cs" />
     <Compile Include="Formula\FormulaVisitors\TransferFormulaToNewExecutedModelInstanceVisitor .cs" />

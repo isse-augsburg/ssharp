@@ -315,11 +315,23 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var finallyFormula = formulaToCheck as UnaryFormula;
-			if (finallyFormula == null || finallyFormula.Operator!=UnaryOperator.Finally)
+			var finallyUnboundFormula = formulaToCheck as UnaryFormula;
+			var finallyBoundedFormula = formulaToCheck as BoundedUnaryFormula;
+
+			double result;
+
+			if (finallyUnboundFormula != null && finallyUnboundFormula.Operator == UnaryOperator.Finally)
+			{
+				result = CalculateProbabilityToReachStateFormula(finallyUnboundFormula.Operand);
+			}
+			else if (finallyBoundedFormula != null && finallyBoundedFormula.Operator == UnaryOperator.Finally)
+			{
+				result = CalculateProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
+			}
+			else
+			{
 				throw new NotImplementedException();
-			var result=CalculateProbabilityToReachStateFormula(finallyFormula.Operand);
-			//var result = CalculateProbabilityToReachStateFormulaInBoundedSteps(reachStateFormula.Operand, 200);
+			}
 			
 			stopwatch.Stop();
 

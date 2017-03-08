@@ -110,6 +110,22 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
+		public override void VisitBoundedUnaryFormula(BoundedUnaryFormula formula)
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBoundedBinaryFormula(BoundedBinaryFormula formula)
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
 		public override void VisitRewardFormula(RewardFormula formula)
 		{
 			if (formula is CalculateLongRunExpectedRewardFormula)

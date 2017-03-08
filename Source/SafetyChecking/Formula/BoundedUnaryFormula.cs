@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2017, Institute for Software & Systems Engineering
 // 
@@ -22,52 +22,51 @@
 
 namespace ISSE.SafetyChecking.Formula
 {
+	using Utilities;
+
 	/// <summary>
-	///   Represents the base class of <see cref="Formula" /> visitors.
+	///   Represents the application of a <see cref="UnaryOperator" /> to a <see cref="Formula" /> instance with a step bound.
 	/// </summary>
-	internal abstract class FormulaVisitor
+	public sealed class BoundedUnaryFormula : Formula
 	{
 		/// <summary>
-		///   Visits the <paramref name="formula." />
+		///   Initializes a new instance of the <see cref="UnaryFormula" /> class.
 		/// </summary>
-		public abstract void VisitUnaryFormula(UnaryFormula formula);
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public abstract void VisitBinaryFormula(BinaryFormula formula);
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public abstract void VisitAtomarPropositionFormula(AtomarPropositionFormula formula);
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public abstract void VisitBoundedUnaryFormula(BoundedUnaryFormula formula);
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public abstract void VisitBoundedBinaryFormula(BoundedBinaryFormula formula);
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public abstract void VisitRewardFormula(RewardFormula formula);
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public abstract void VisitProbabilisticFormula(ProbabilitisticFormula formula);
-
-		/// <summary>
-		///   Visits the <paramref name="formula." />
-		/// </summary>
-		public void Visit(Formula formula)
+		/// <param name="operand">The operand of the unary formula.</param>
+		/// <param name="unaryOperator">The operator of the unary formula.</param>
+		/// <param name="bound">The maximal number of steps.</param>
+		public BoundedUnaryFormula(Formula operand, UnaryOperator unaryOperator, int bound)
 		{
-			formula.Visit(this);
+			Requires.NotNull(operand, nameof(operand));
+			Requires.InRange(unaryOperator, nameof(unaryOperator));
+
+			Operand = operand;
+			Operator = unaryOperator;
+			Bound = bound;
+		}
+
+		/// <summary>
+		///   Gets the operand of the unary formula.
+		/// </summary>
+		public Formula Operand { get; }
+
+		/// <summary>
+		///   Gets the maximal number of steps.
+		/// </summary>
+		public int Bound { get; }
+
+		/// <summary>
+		///   Gets the operator of the unary formula.
+		/// </summary>
+		public UnaryOperator Operator { get; }
+
+		/// <summary>
+		///   Executes the <paramref name="visitor" /> for this formula.
+		/// </summary>
+		/// <param name="visitor">The visitor that should be executed.</param>
+		internal override void Visit(FormulaVisitor visitor)
+		{
+			visitor.VisitBoundedUnaryFormula(this);
 		}
 	}
 }

@@ -133,6 +133,51 @@ namespace ISSE.SafetyChecking.Formula
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
+		public override void VisitBoundedUnaryFormula(BoundedUnaryFormula formula)
+		{
+			_builder.Append("(");
+
+			switch (formula.Operator)
+			{
+				case UnaryOperator.Finally:
+					_builder.Append(" F");
+					break;
+				default:
+					Assert.NotReached($"Unknown or unsupported unary operator '{formula.Operator}'.");
+					break;
+			}
+			_builder.Append($"<={formula.Bound} ");
+
+			Visit(formula.Operand);
+			_builder.Append(")");
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBoundedBinaryFormula(BoundedBinaryFormula formula)
+		{
+			_builder.Append("(");
+			Visit(formula.LeftOperand);
+
+			switch (formula.Operator)
+			{
+				case BinaryOperator.Until:
+					_builder.Append(" U");
+					break;
+				default:
+					Assert.NotReached($"Unknown or unsupported binary operator '{formula.Operator}'.");
+					break;
+			}
+			_builder.Append($"<={formula.Bound} ");
+
+			Visit(formula.RightOperand);
+			_builder.Append(")");
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
 		public override void VisitRewardFormula(RewardFormula formula)
 		{
 			if (formula is CalculateLongRunExpectedRewardFormula)

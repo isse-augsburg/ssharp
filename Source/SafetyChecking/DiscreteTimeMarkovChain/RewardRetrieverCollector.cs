@@ -22,6 +22,7 @@
 
 namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
+	using System;
 	using System.Collections.Generic;
 	using Formula;
 
@@ -57,7 +58,23 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
 		}
+		
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBoundedUnaryFormula(BoundedUnaryFormula formula)
+		{
+			throw new NotImplementedException();
+		}
 
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitBoundedBinaryFormula(BoundedBinaryFormula formula)
+		{
+			throw new NotImplementedException();
+		}
+		
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
