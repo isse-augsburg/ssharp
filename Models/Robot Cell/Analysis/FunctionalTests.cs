@@ -68,7 +68,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Console.WriteLine("== Running tests with DCCA and heuristics ==");
 			Console.WriteLine("============================================");
 
-			Dcca(model);
+			Dcca(model, multiCore: true);
 		}
 
 		[Test, TestCaseSource(nameof(CreateConfigurationsFast)), Category("TestEvaluationFast")]
@@ -78,7 +78,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Console.WriteLine("== Running tests with DCCA, NO heuristics ==");
 			Console.WriteLine("============================================");
 
-			Dcca(model, enableHeuristics: false);
+			Dcca(model, enableHeuristics: false, multiCore: true);
 		}
 
 		[Test,TestCaseSource(nameof(CreateConfigurationsFast)), Category("TestEvaluationFast")]
@@ -94,13 +94,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Console.WriteLine(result);
 		}
 
-		private static void Dcca(Model model, bool enableHeuristics = true)
+		private static void Dcca(Model model, bool enableHeuristics = true, bool multiCore = false)
 		{
 			var safetyAnalysis = new SafetySharpSafetyAnalysis
 			{
 				Configuration =
 				{
-					CpuCount = 1,
+					CpuCount = multiCore ? 4 : 1,
 					ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium),
 					GenerateCounterExample = false
 				},
