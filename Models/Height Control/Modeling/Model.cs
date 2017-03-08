@@ -47,7 +47,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		public const int MaxVehicles = 3;
 
 		[Hidden]
-		public bool CheckOnlyUntilVehiclesCompleted = true;
+		public bool CheckOnlyUntilVehiclesCompleted = false;
 
 		/// <summary>
 		///   Initializes a new instance.

@@ -86,7 +86,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			var model = Model.CreateOriginal();
 			SetProbabilities(model);
 
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.Collision);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Collision,50);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
 
@@ -96,7 +96,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			var model = Model.CreateOriginal();
 			SetProbabilities(model);
 
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.FalseAlarm);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.FalseAlarm, 50);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
 
@@ -106,7 +106,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		public void CalculateCollision(Model model, string variantName)
 		{
 			SetProbabilities(model);
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.Collision);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Collision, 50);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
 
@@ -115,7 +115,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		public void CalculateFalseAlarm(Model model, string variantName)
 		{
 			SetProbabilities(model);
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.FalseAlarm);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.FalseAlarm, 50);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
 

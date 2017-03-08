@@ -55,8 +55,10 @@ function AddTestValuation($name,$script="",$resultDir="$PSScriptRoot\Results")
     $testValuations += $testValuation
 }
 
-AddTestValuation -Name "HeightControlLow" -Script "copy -Force $PSScriptRoot\HeightControlLow.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLow"
-AddTestValuation -Name "HeightControlHigh"  -Script "copy -Force $PSScriptRoot\HeightControlHigh.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLow"
+AddTestValuation -Name "HeightControlLowerLightBarriers" -Script "copy -Force $PSScriptRoot\HeightControlLowerLightBarriers.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerLightBarriers"
+AddTestValuation -Name "HeightControlNormal"  -Script "copy -Force $PSScriptRoot\HeightControlNormal.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlNormal"
+AddTestValuation -Name "HeightControlLowerAllSensors"  -Script "copy -Force $PSScriptRoot\HeightControlLowerAllSensors.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerAllSensors"
+AddTestValuation -Name "HeightControlLowerDrivers"  -Script "copy -Force $PSScriptRoot\HeightControlLowerDrivers.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerDrivers"
 
 function ExecuteTest($test,$resultDir)
 {

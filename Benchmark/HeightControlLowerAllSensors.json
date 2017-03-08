@@ -1,0 +1,11 @@
+﻿{
+  "LightBarrierFalseDetection": "0.000005",
+  "LightBarrierMisdetection": "0.000001",
+  "OverheadDetectorFalseDetection": "0.000005",
+  "OverheadDetectorMisdetection": "0.000001",
+  "SmallLightBarrierFalseDetection": "0.000005",
+  "SmallLightBarrierMisdetection": "0.000001",
+  "LeftHV": "0.01",
+  "LeftOHV": "0.001",
+  "SlowTraffic": "0.01"
+}
