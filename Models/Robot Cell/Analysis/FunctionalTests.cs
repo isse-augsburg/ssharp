@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
 	using System.Collections;
+	using System.Collections.Generic;
 	using System.Linq;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
@@ -60,7 +61,28 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Dcca(model);
 		}
 
-		private static void Dcca(Model model)
+		[Test,TestCaseSource(nameof(CreateConfigurationsFast)), Category("TestEvaluationFast")]
+		public void EvaluationFastController(Model model)
+		{
+			Dcca(model);
+		}
+
+		[Test, TestCaseSource(nameof(CreateConfigurationsFast)), Category("TestEvaluationFast")]
+		public void EvaluationFastControllerNoHeuristics(Model model)
+		{
+			Dcca(model, enableHeuristics: false);
+		}
+
+		[Test,TestCaseSource(nameof(CreateConfigurationsFast)), Category("TestEvaluationFast")]
+		public void DepthFirstSearchFastController(Model model)
+		{
+			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { CpuCount = 1, ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium) } };
+			var result = modelChecker.CheckInvariant(model, true);
+
+			Console.WriteLine(result);
+		}
+
+		private static void Dcca(Model model, bool enableHeuristics = true)
 		{
 			var safetyAnalysis = new SafetySharpSafetyAnalysis
 			{
@@ -70,9 +92,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 					ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium),
 					GenerateCounterExample = false
 				},
-				FaultActivationBehavior = FaultActivationBehavior.ForceOnly,
-				Heuristics = { RedundancyHeuristic(model), new SubsumptionHeuristic(model.Faults) }
+				FaultActivationBehavior = FaultActivationBehavior.ForceOnly
 			};
+
+			if (enableHeuristics)
+			{
+				safetyAnalysis.Heuristics.Add(RedundancyHeuristic(model));
+				safetyAnalysis.Heuristics.Add(new SubsumptionHeuristic(model.Faults));
+			}
 		
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
 			Console.WriteLine(result);
@@ -95,13 +122,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		private static IEnumerable CreateConfigurationsMiniZinc()
 		{
 			return Model.CreateConfigurations<MiniZincObserverController>(AnalysisMode.TolerableFaults)
-						.Select(model => new TestCaseData(model).SetName(model.Name));
+						.Select(model => new TestCaseData(model).SetName(model.Name + " (MiniZinc)"));
 		}
 
 		private static IEnumerable CreateConfigurationsFast()
 		{
 			return Model.CreateConfigurations<FastObserverController>(AnalysisMode.TolerableFaults)
-						.Select(model => new TestCaseData(model).SetName(model.Name));
+						.Select(model => new TestCaseData(model).SetName(model.Name + " (Fast)"));
 		}
 	}
 }
