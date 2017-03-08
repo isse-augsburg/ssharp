@@ -88,7 +88,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Console.WriteLine("== Running tests with depth-first search  ==");
 			Console.WriteLine("============================================");
 
-			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { CpuCount = 1, ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium) } };
+			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { CpuCount = 4, ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium) } };
 			var result = modelChecker.CheckInvariant(model, true);
 
 			Console.WriteLine(result);
