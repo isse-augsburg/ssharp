@@ -64,18 +64,30 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test,TestCaseSource(nameof(CreateConfigurationsFast)), Category("TestEvaluationFast")]
 		public void EvaluationFastController(Model model)
 		{
+			Console.WriteLine("============================================");
+			Console.WriteLine("== Running tests with DCCA and heuristics ==");
+			Console.WriteLine("============================================");
+
 			Dcca(model);
 		}
 
 		[Test, TestCaseSource(nameof(CreateConfigurationsFast)), Category("TestEvaluationFast")]
 		public void EvaluationFastControllerNoHeuristics(Model model)
 		{
+			Console.WriteLine("============================================");
+			Console.WriteLine("== Running tests with DCCA, NO heuristics ==");
+			Console.WriteLine("============================================");
+
 			Dcca(model, enableHeuristics: false);
 		}
 
 		[Test,TestCaseSource(nameof(CreateConfigurationsFast)), Category("TestEvaluationFast")]
 		public void DepthFirstSearchFastController(Model model)
 		{
+			Console.WriteLine("============================================");
+			Console.WriteLine("== Running tests with depth-first search  ==");
+			Console.WriteLine("============================================");
+
 			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { CpuCount = 1, ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium) } };
 			var result = modelChecker.CheckInvariant(model, true);
 
