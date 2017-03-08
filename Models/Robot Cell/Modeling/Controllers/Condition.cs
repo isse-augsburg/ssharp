@@ -39,7 +39,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Task = task;
 		}
 
-#if ENABLE_KNOWN_ERRORS
+#if ENABLE_F4 // error F4: incorrect Condition.State format
 		public IEnumerable<Capability> State =>
 			Task?.Capabilities.Skip(Task.Capabilities.Length - _statePrefixLength) ?? Enumerable.Empty<Capability>();
 #else

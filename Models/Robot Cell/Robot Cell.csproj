@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\Binaries\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ENABLE_KNOWN_ERRORS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;ENABLE_F1;ENABLE_F2;ENABLE_F4;ENABLE_F5;ENABLE_F6;ENABLE_F7</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x64</PlatformTarget>

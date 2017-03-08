@@ -203,7 +203,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 				if (previous != -1)
 				{
-#if ENABLE_KNOWN_ERRORS // error F1: transitive routes interpreted as direct ones
+#if ENABLE_F1 // error F1: transitive routes interpreted as direct ones
 					yield return Transport(previous, current, usedCarts);
 #else
 					// Find a cart that connects both robots, the path matrix contains the next robot we have to go to
@@ -211,16 +211,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 					{
 						yield return Transport(previous, nextRobot, usedCarts);
 
-						// what happens here? for each robot between previous and current, we assign an empty role to current??
-						// intention probably to assign it to nextRobot
-						// TODO: find test to detect this & fix
 						if (nextRobot != current)
+#if ENABLE_F7 // new error F7: intermediate transport-only roles assigned to path[i] == current; meant for nextRobot
 							yield return Tuple.Create(Agents[path[i]], new Capability[0]);
+#else
+							yield return Tuple.Create(Agents[nextRobot], new Capability[0]);
+#endif
 
-						previous = nextRobot;
+							previous = nextRobot;
 					}
 #endif
-				}
+					}
 
 				// Collect the capabilities that this robot should apply
 				var capabilities = 

@@ -77,7 +77,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		{
 			agent.Constraints = new List<Func<bool>>
 			{
-#if !ENABLE_KNOWN_ERRORS
+#if !ENABLE_F6
 				// I/O Consistency
 				() => agent.AllocatedRoles.All(role => role.PreCondition.Port == null || agent.Inputs.Contains(role.PreCondition.Port)),
 				() => agent.AllocatedRoles.All(role => role.PostCondition.Port == null || agent.Outputs.Contains(role.PostCondition.Port)),
@@ -191,7 +191,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				var preAgent = i == 0 ? null : roleAllocations[i - 1].Item1;
 				var postAgent = i == roleAllocations.Length - 1 ? null : roleAllocations[i + 1].Item1;
 
-#if ENABLE_KNOWN_ERRORS
+#if ENABLE_F4 // error F4: incorrect Condition.State format
 				var preCondition = new Condition(Tasks[0], preAgent, remainingCapabilities);
 				var postCondition = new Condition(Tasks[0], postAgent, remainingCapabilities - capabilities.Length);
 #else
