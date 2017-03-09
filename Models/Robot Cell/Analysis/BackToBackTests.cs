@@ -37,10 +37,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 	using NUnit.Framework;
 
-	[Category("Back2BackTesting"), TestFixture]
+	[TestFixture]
 	internal class BackToBackTests : DccaTestsBase
 	{
-		[Category("Back2BackTesting")]
+		[Category("Back2BackTestingSlow")]
 		[TestCaseSource(nameof(CreateConfigurationsFast))]
 		public void BreadthFirstSearch(Model model)
 		{
@@ -49,7 +49,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				enableHeuristics: false);
 		}
 
-		[Category("Back2BackTesting")]
+		[Category("Back2BackTestingDcca")]
 		[TestCaseSource(nameof(CreateConfigurationsFast))]
 		public void DccaOnly(Model model)
 		{
@@ -58,7 +58,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				enableHeuristics: false);
 		}
 
-		[Category("Back2BackTesting")]
+		[Category("Back2BackTestingHeuristics")]
 		[TestCaseSource(nameof(CreateConfigurationsFast))]
 		public void DccaWithHeuristics(Model model)
 		{
@@ -76,8 +76,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 					CpuCount = 4,
 					ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium),
 					GenerateCounterExample = false
-				},
-				FaultActivationBehavior = FaultActivationBehavior.ForceOnly
+				}
 			};
 
 			if (enableHeuristics)
@@ -98,7 +97,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[TestFixtureSetUp]
 		public void Setup()
 		{
-			_csv = new StreamWriter(File.OpenWrite("evaluation_results.csv"));
+			var file = File.Open("evaluation_results.csv", FileMode.Append, FileAccess.Write, FileShare.Read);
+			_csv = new StreamWriter(file);
 		}
 
 		private void LogResult(Model model, SafetyAnalysisResults<SafetySharpRuntimeModel> result, string mode)

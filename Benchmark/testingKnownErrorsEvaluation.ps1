@@ -52,7 +52,7 @@ if (Test-Path -Path $csv_path)
 	rm $csv_path
 }
 
-$symbols=@("NO_ERRORS", "ENABLE_F1", "ENABLE_F3", "ENABLE_F4", "ENABLE_F5", "ENABLE_F6", "ENABLE_F7")
+$symbols=@("ENABLE_F1", "ENABLE_F2", "ENABLE_F4", "ENABLE_F5", "ENABLE_F6", "ENABLE_F7", "NO_ERRORS")
 
 function CompileProject($symbol)
 {
@@ -62,7 +62,7 @@ function CompileProject($symbol)
 	Start-Process -FilePath $msbuild -ArgumentList $arguments -WorkingDirectory $tmp_dir -NoNewWindow -RedirectStandardOutput $outputfile -Wait
 }
 
-function ExecuteTest($symbol)
+function ExecuteTest($symbol, $category)
 {
     Write-Output("Testing with symbol " + $symbol + "`n")
 	Write-Output("===================================`n")
@@ -70,7 +70,7 @@ function ExecuteTest($symbol)
 	CompileProject($symbol)
 
 	Write-Output("Testing...`n")
-    $arguments = @("/labels","/config:Release","/include:Back2BackTesting",$test_assembly)
+    $arguments = @("/labels","/config:Release","/include:Back2BackTesting$category",$test_assembly)
     
     $outputfilename = $resultdir + "\" +$symbol+".out"
     $errorfilename = $resultdir + "\"+$symbol+".err"
@@ -78,7 +78,13 @@ function ExecuteTest($symbol)
 }
 
 Foreach ($symbol in $symbols) {
-    ExecuteTest($symbol)
+    ExecuteTest $symbol "Heuristics"
+}
+Foreach ($symbol in $symbols) {
+    ExecuteTest $symbol "Dcca"
+}
+Foreach ($symbol in $symbols) {
+    ExecuteTest $symbol "Slow"
 }
 
 Set-Location -Path $PSScriptRoot\..\
