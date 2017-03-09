@@ -35,16 +35,13 @@
 
 # Example nunit-console.exe D:\Repositories\Universität\ssharp\Binaries\Release\SafetySharp.CaseStudies.PressureTank.dll /run=SafetySharp.CaseStudies.PressureTank.Analysis.HazardProbabilityTests.CalculateHazardIsDepleted"
 
-# include test cases per Dot-Sourcing
-. $PSScriptRoot\testCases.ps1
+# include paths per Dot-Sourcing
+. $PSScriptRoot\paths.ps1
 
-
-$nunit = "$PSScriptRoot\NUnit2\nunit-console.exe"
-$compilate_directory = "D:\Repositories\Universität\ssharp\Binaries\Release"
-Set-Location -Path $compilate_directory
+Set-Location -Path $global_compilate_directory
 $env:Path += ";$PSScriptRoot\NUnit2"
 
-New-Variable -Force -Name testValuations -Option AllScope -Value @()
+New-Variable -Force -Name global_testValuations -Option AllScope -Value @()
 
 function AddTestValuation($name,$script="",$resultDir="$PSScriptRoot\Results")
 {
@@ -52,32 +49,53 @@ function AddTestValuation($name,$script="",$resultDir="$PSScriptRoot\Results")
     $testValuation | Add-Member -type NoteProperty -name Name -Value $name
     $testValuation | Add-Member -type NoteProperty -name Script -Value $script
     $testValuation | Add-Member -type NoteProperty -name ResultDir -Value $resultDir
-    $testValuations += $testValuation
+    $global_testValuations += $testValuation
 }
 
-AddTestValuation -Name "HeightControlLowerLightBarriers" -Script "copy -Force $PSScriptRoot\HeightControlLowerLightBarriers.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerLightBarriers"
-AddTestValuation -Name "HeightControlNormal"  -Script "copy -Force $PSScriptRoot\HeightControlNormal.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlNormal"
-AddTestValuation -Name "HeightControlLowerAllSensors"  -Script "copy -Force $PSScriptRoot\HeightControlLowerAllSensors.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerAllSensors"
-AddTestValuation -Name "HeightControlLowerDrivers"  -Script "copy -Force $PSScriptRoot\HeightControlLowerDrivers.json $compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerDrivers"
+function UpdateValueInJsonFile($sourceFile,$targetFile,$variableToUpdate,$newValue)
+{
+    $sourceFileContent = Get-Content $sourceFile
+    $sourceJson = ConvertFrom-Json "$sourceFileContent"
+    $newValueString = $newValue.ToString([System.Globalization.CultureInfo]::InvariantCulture)
+    $sourceJson.$variableToUpdate=$newValueString
+    $targetFileContent = ConvertTo-Json $sourceJson
+    $targetFileContent | Set-Content $targetFile -Force
+}
+
+function AddParameterizedJsonTestValuations($namePrefix,$sourceFile,$targetFile,$variableToUpdate,$minValue,$maxValue,$steps)
+{
+    if ($steps -le 1) {
+        echo "steps must be greater than 1"
+    }
+    $stepsize = ($maxValue - $minValue) / ($steps-1)
+    $currentValue = $minValue
+    for ($i=0; $i -lt $steps; $i++)
+    {
+        $newname = $namePrefix + "_" + $i
+        $scriptString = "UpdateValueInJsonFile -SourceFile "+ $sourceFile + " -TargetFile " + $targetFile + " -VariableToUpdate " + $variableToUpdate + " -NewValue " + $currentValue 
+        AddTestValuation -Name $newname -Script $scriptString -ResultDir "$PSScriptRoot\$newname"
+        $currentValue = $currentValue + $stepsize
+    }
+}
 
 function ExecuteTest($test,$resultDir)
 {
     Write-Output("Testing " +  $test.TestMethod + "`n")
     $arguments = @($test.TestAssembly,"/run",$test.TestMethod)
-    if($test.TestCategory){
-        $arguments=$arguments+@("/include:"+$test.TestCategory)
+    if($test.TestNunitCategory){
+        $arguments=$arguments+@("/include:"+$test.TestNunitCategory)
     }
     
     $outputfilename = $resultdir + "\" +$test.TestName+".out"
     $errorfilename = $resultdir + "\"+$test.TestName+".err"
     echo $outputfilename
-    Start-Process -FilePath $nunit -ArgumentList $arguments -WorkingDirectory $compilate_directory -NoNewWindow -RedirectStandardError $errorfilename -RedirectStandardOutput $outputfilename -Wait
+    Start-Process -FilePath $global_nunit -ArgumentList $arguments -WorkingDirectory $global_compilate_directory -NoNewWindow -RedirectStandardError $errorfilename -RedirectStandardOutput $outputfilename -Wait
 }
 
-function ExecuteTestValuation($testvaluation)
+function ExecuteTestValuation($testValuation,$tests)
 {
-    $resultDir = $testvaluation.ResultDir
-    Invoke-Expression $testvaluation.Script
+    $resultDir = $testValuation.ResultDir
+    Invoke-Expression $testValuation.Script
     New-Item -ItemType directory -Force -Path $resultDir
 
     Foreach ($test in $tests) {
@@ -85,9 +103,4 @@ function ExecuteTestValuation($testvaluation)
     }
 
     git log -1 > $resultDir\version
-}
-
-
-Foreach ($testvaluation in $testValuations) {
-    ExecuteTestValuation($testvaluation)
 }

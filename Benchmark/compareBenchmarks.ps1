@@ -52,7 +52,7 @@ AddResultDir -Name "neu" -ResultDir "$PSScriptRoot\Ergebnisse4"
 
 function LoadResults($counter)
 {
-    $test = $tests[$counter]
+    $test = $global_tests[$counter]
     $newResult = New-Object System.Object
     $newResult | Add-Member -type NoteProperty -name TestName -Value $test.TestName
 
@@ -69,7 +69,7 @@ function LoadResults($counter)
     $results += $newResult
 }
 
-for ($counter=0; $counter -lt $tests.Length; $counter++) {
+for ($counter=0; $counter -lt $global_tests.Length; $counter++) {
     LoadResults($counter)
 }
 

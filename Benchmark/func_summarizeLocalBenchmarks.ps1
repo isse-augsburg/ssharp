@@ -30,11 +30,11 @@
 #  Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser
 
 # include test cases per Dot-Sourcing
-. $PSScriptRoot\testCases.ps1
+. $PSScriptRoot\func_testCases.ps1
 
 New-Variable -Force -Name results -Option AllScope -Value @()
 
-$resultdir= "$PSScriptRoot\Ergebnisse-Elbtunnel-2017-03"
+$resultdir= "$PSScriptRoot\HeightControlVeryLow"
 
 function LoadResult($test)
 {
