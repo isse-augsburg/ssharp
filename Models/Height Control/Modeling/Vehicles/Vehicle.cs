@@ -30,7 +30,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 	public class Vehicle : Component
 	{
 		[Hidden]
-		private int _speed;
+		public int Speed { get; set; }
 
 		/// <summary>
 		///   Gets the current lane of the vehicle.
@@ -74,7 +74,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		///   Checks whether the vehicle is at the <paramref name="position" />.
 		/// </summary>
 		/// <param name="position">The position that should be checked.</param>
-		public bool IsAtPosition(int position) => Position - _speed < position && Position >= position;
+		public bool IsAtPosition(int position) => Position - Speed < position && Position >= position;
 
 		/// <summary>
 		///   Moves the vehicle.
@@ -89,8 +89,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 				return;
 
 			// The vehicle's speed is irrelevant once the end control has been passed
-			_speed = Position >= Model.EndControlPosition ? Model.MaxSpeed : ChooseSpeed();
-			Position += _speed;
+			Speed = Position >= Model.EndControlPosition ? Model.MaxSpeed : ChooseSpeed();
+			Position += Speed;
 
 			// The road layout makes lane changes impossible when the end control has been reached
 			if (Position < Model.EndControlPosition)

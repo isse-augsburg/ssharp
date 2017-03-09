@@ -86,7 +86,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			var model = Model.CreateOriginal();
 			SetProbabilities(model);
 
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Collision,50);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Collision, 50);
 			Console.Write($"Probability of hazard: {result.Value}");
 		}
 

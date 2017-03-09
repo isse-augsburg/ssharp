@@ -45,10 +45,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		public const int MaxSpeed = 2;
 		public const int MinSpeed = 1;
 		public const int MaxVehicles = 3;
-
-		[Hidden]
-		public bool CheckOnlyUntilVehiclesCompleted = false;
-
+		
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
@@ -62,6 +59,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 			};
 
 			VehicleSet = new VehicleSet(vehicles);
+			VehicleSet.FinishedObserver =  new FinishedObserverDisabled();
 
 			SetupController(preControl);
 			SetupController(mainControl);
@@ -76,7 +74,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		/// </summary>
 		[Root(RootKind.Controller)]
 		public HeightControl HeightControl { get; }
-
+		
 		/// <summary>
 		///   Gets the set of monitored vehicles.
 		/// </summary>
@@ -95,7 +93,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		{
 			get
 			{
-				Formula vehiclesAtEnd = CheckOnlyUntilVehiclesCompleted && VehicleSet.AllVehiclesCompleted;
+				Formula vehiclesAtEnd = VehicleSet.FinishedObserver.Finished;
 				return
 					!vehiclesAtEnd &&
 					Vehicles.Any(vehicle =>
@@ -112,9 +110,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		{
 			get
 			{
-				Formula vehiclesAtEnd = CheckOnlyUntilVehiclesCompleted && VehicleSet.AllVehiclesCompleted;
+				Formula vehiclesAtEnd = VehicleSet.FinishedObserver.Finished;
 				return
-					! vehiclesAtEnd &&
+					!vehiclesAtEnd &&
 					HeightControl.TrafficLights.IsRed &&
 					!Vehicles.Any(vehicle => vehicle.Lane == Lane.Left && vehicle.Kind == VehicleKind.OverheightVehicle);
 			}

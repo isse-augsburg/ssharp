@@ -44,6 +44,12 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		private readonly Vehicle[] _orderedVehicles;
 
 		/// <summary>
+		///   Checks if all vehicles have finished.
+		/// </summary>
+		[Hidden]
+		public FinishedObserver FinishedObserver;
+
+		/// <summary>
 		///   Allows high vehicles to drive on the left lane.
 		/// </summary>
 		public readonly Fault LeftHV = new TransientFault();
@@ -57,26 +63,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		///   Allows all kinds of vehicles to drive slower than expected.
 		/// </summary>
 		public readonly Fault SlowTraffic = new TransientFault();
-
-		/// <summary>
-		///   Checks whether all vehicles are at the end position.
-		/// </summary>
-		public bool AllVehiclesCompleted
-		{
-			get
-			{
-				var oneVehicleNotAtEnd = false;
-				var vehicleId = 0;
-				while (!oneVehicleNotAtEnd && vehicleId < Vehicles.Length)
-				{
-					if (Vehicles[vehicleId].Position < Model.TunnelPosition)
-						oneVehicleNotAtEnd = true;
-					vehicleId++;
-				}
-				return !oneVehicleNotAtEnd;
-			}
-		}
-
+		
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
@@ -133,6 +120,11 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		/// </summary>
 		public override void Update()
 		{
+			FinishedObserver.Update(); //must be called before the update
+
+			if (FinishedObserver.Finished)
+				return;
+
 			if (PreventOverlappingWithStateConstraint)
 				Update(Vehicles);
 			else
@@ -170,12 +162,15 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 				// Update the position of the vehicle
 				_orderedVehicles[i].Update();
 
+				if (oldPosition == Model.TunnelPosition)
+					continue;
+
 				// Check, if the position overlaps with another vehicle
 				var fixedOverlap = false;
 				for (var j = 0; j < i && !fixedOverlap; j++)
 				{
 					if (_orderedVehicles[j].Position != 0 &&
-						 _orderedVehicles[j]. Position < Model.EndControlPosition &&
+						 _orderedVehicles[j].Position < Model.TunnelPosition &&
 						 _orderedVehicles[i].Position == _orderedVehicles[j].Position &&
 						 _orderedVehicles[i].Lane == _orderedVehicles[j].Lane)
 					{
@@ -183,6 +178,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 						fixedOverlap = true;
 						_orderedVehicles[i].Position = oldPosition;
 						_orderedVehicles[i].Lane = oldLane;
+						_orderedVehicles[i].Speed = 0;
 					}
 				}
 			}

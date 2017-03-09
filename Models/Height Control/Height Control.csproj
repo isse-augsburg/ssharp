@@ -84,6 +84,7 @@
     <Compile Include="Modeling\Controllers\MainControlOriginal.cs" />
     <Compile Include="Modeling\Controllers\PreControlOverheadDetectors.cs" />
     <Compile Include="Modeling\Controllers\PreControlOriginal.cs" />
+    <Compile Include="Modeling\FinishedObserver.cs" />
     <Compile Include="Modeling\TrafficLights.cs" />
     <Compile Include="Modeling\Controllers\Timer.cs" />
     <Compile Include="Modeling\Vehicles\VisualizationVehicle.cs" />
