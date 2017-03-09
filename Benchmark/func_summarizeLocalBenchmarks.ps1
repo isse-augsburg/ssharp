@@ -32,16 +32,14 @@
 # include test cases per Dot-Sourcing
 . $PSScriptRoot\func_testCases.ps1
 
-New-Variable -Force -Name results -Option AllScope -Value @()
+New-Variable -Force -Name resultsOfValuation -Option AllScope -Value @()
 
-$resultdir= "$PSScriptRoot\HeightControlVeryLow"
-
-function LoadResult($test)
+function LoadResultOfTest($test,$resultDir)
 {
     $newResult = New-Object System.Object
     $newResult | Add-Member -type NoteProperty -name TestName -Value $test.TestName
-    $outputfilename = "$resultdir\"+$test.TestName+".out"
-    $errorfilename = "$resultdir\"+$test.TestName+".err"
+    $outputfilename = "$resultDir\"+$test.TestName+".out"
+    $errorfilename = "$resultDir\"+$test.TestName+".err"
     $output = Get-Content -Path $outputfilename
 
     #extract TotalTime
@@ -62,7 +60,7 @@ function LoadResult($test)
     
     if ($wasSuccessful) {
         #extract probability stuff
-        if($test.TestCategory.EndsWith("Probability")){
+        if($test.TestCategories.Contains("Probability")){
             $parsedLine = $output | Where-Object {$_ -match 'Probability of hazard[:] (?<match>.*)' }
             $probability= $matches['match']
         
@@ -72,7 +70,7 @@ function LoadResult($test)
             $levels= $matches['levels']
         }
 
-        if($test.TestCategory.EndsWith("DCCA")){
+        if($test.TestCategories.Contains("DCCA")){
             $parsedLine = $output | Where-Object {$_ -match 'Of the (?<faults>\d*) faults contained in the model[,]' }
             $faults= $matches['faults']			
 			
@@ -115,14 +113,18 @@ function LoadResult($test)
     $newResult | Add-Member -type NoteProperty -name AvgSizeOfMcs -Value $avgSizeOfMcs
     $newResult | Add-Member -type NoteProperty -name ReasonForError -Value $reasonError
 
-    $results += $newResult
+    $resultsOfValuation += $newResult
 }
 
-Foreach ($test in $tests) {
-    LoadResult($test)
+
+
+function SummarizeDirectory($tests,$resultDir) {
+    $resultsOfValuation=@()
+
+    $resultsFile="$resultDir\"+"summarizedBenchmarkResults.csv"
+    Foreach ($test in $tests) {
+        LoadResultOfTest -Test $test -ResultDir $resultDir
+    }
+
+    $resultsOfValuation | Export-Csv -Path $resultsFile -Encoding ascii -NoTypeInformation -UseCulture
 }
-
-$resultsFile="$resultdir\"+"summarizedBenchmarkResults.csv"
-
-$results | Export-Csv -Path $resultsFile -Encoding ascii -NoTypeInformation -UseCulture
-
