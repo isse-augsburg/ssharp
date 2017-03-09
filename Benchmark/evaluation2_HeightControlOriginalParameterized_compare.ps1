@@ -45,4 +45,8 @@ $tests = $global_tests | Where { $_.TestCategories.Contains("Variant-Original-Or
 
 AddParameterizedJsonTestValuations -NamePrefix "HeightControlOriginal_Paramererized" -SourceFile $PSScriptRoot\HeightControlNormal.json -TargetFile $global_compilate_directory\Analysis\heightcontrol_probabilities.json -VariableToUpdate "OverheadDetectorFalseDetection" -MinValue 0.000005 -MaxValue 0.005 -Steps 10
 
+Foreach ($testvaluation in $global_testValuations) {
+    AddResultDir -Name $testvaluation.Name -ResultDir $testvaluation.ResultDir
+}
+
 CompareSummarized -Tests $tests -InterestingValues @("Probability")

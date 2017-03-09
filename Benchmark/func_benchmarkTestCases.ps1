@@ -60,8 +60,12 @@ function ExecuteTest($test,$resultDir)
 function ExecuteTestValuation($testValuation,$tests)
 {
     $resultDir = $testValuation.ResultDir
-    Invoke-Expression $testValuation.Script
     New-Item -ItemType directory -Force -Path $resultDir
+    Invoke-Expression $testValuation.Script
+
+    Foreach ($file in $testValuation.FilesOfTestValuation) {
+        copy $file -Destination $resultDir -Force
+    }
 
     Foreach ($test in $tests) {
         ExecuteTest -Test $test -ResultDir $resultDir
