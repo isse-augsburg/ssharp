@@ -23,9 +23,6 @@
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.Linq;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ModelChecking;
@@ -33,7 +30,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using Modeling.Controllers;
 	using NUnit.Framework;
 
-	internal class FunctionalTests
+	internal class FunctionalTests : DccaTestsBase
 	{
 		[TestCaseSource(nameof(CreateConfigurationsFast))]
 		public void ReconfigurationFailed(Model model)
@@ -61,86 +58,22 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Dcca(model);
 		}
 
-		[Test,TestCaseSource(nameof(CreateConfigurationsFast)), Category("TestEvaluationFast")]
-		public void EvaluationFastController(Model model)
-		{
-			Console.WriteLine("============================================");
-			Console.WriteLine("== Running tests with DCCA and heuristics ==");
-			Console.WriteLine("============================================");
-
-			Dcca(model, multiCore: true);
-		}
-
-		[Test, TestCaseSource(nameof(CreateConfigurationsFast)), Category("TestEvaluationFast")]
-		public void EvaluationFastControllerNoHeuristics(Model model)
-		{
-			Console.WriteLine("============================================");
-			Console.WriteLine("== Running tests with DCCA, NO heuristics ==");
-			Console.WriteLine("============================================");
-
-			Dcca(model, enableHeuristics: false, multiCore: true);
-		}
-
-		[Test,TestCaseSource(nameof(CreateConfigurationsFast)), Category("TestEvaluationFast")]
-		public void DepthFirstSearchFastController(Model model)
-		{
-			Console.WriteLine("============================================");
-			Console.WriteLine("== Running tests with depth-first search  ==");
-			Console.WriteLine("============================================");
-
-			var modelChecker = new SafetySharpQualitativeChecker { Configuration = { CpuCount = 4, ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium) } };
-			var result = modelChecker.CheckInvariant(model, true);
-
-			Console.WriteLine(result);
-		}
-
-		private static void Dcca(Model model, bool enableHeuristics = true, bool multiCore = false)
+		private static void Dcca(Model model)
 		{
 			var safetyAnalysis = new SafetySharpSafetyAnalysis
 			{
 				Configuration =
 				{
-					CpuCount = multiCore ? 4 : 1,
+					CpuCount = 1,
 					ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium),
 					GenerateCounterExample = false
 				},
-				FaultActivationBehavior = FaultActivationBehavior.ForceOnly
+				FaultActivationBehavior = FaultActivationBehavior.ForceOnly,
+				Heuristics = { RedundancyHeuristic(model), new SubsumptionHeuristic(model.Faults) }
 			};
-
-			if (enableHeuristics)
-			{
-				safetyAnalysis.Heuristics.Add(RedundancyHeuristic(model));
-				safetyAnalysis.Heuristics.Add(new SubsumptionHeuristic(model.Faults));
-			}
 		
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
 			Console.WriteLine(result);
-		}
-
-		private static IFaultSetHeuristic RedundancyHeuristic(Model model)
-		{
-			var cartFaults = model.Carts.Select(cart => cart.Broken)
-				.Concat(model.Carts.Select(cart => cart.Lost))
-				.Concat(model.CartAgents.Select(cartAgent => cartAgent.ConfigurationUpdateFailed));
-
-			return new MinimalRedundancyHeuristic(
-				model.Faults.Except(cartFaults).ToArray(),
-				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Drill).Select(t => t.Broken)),
-				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Insert).Select(t => t.Broken)),
-				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Tighten).Select(t => t.Broken)),
-				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Polish).Select(t => t.Broken)));
-		}
-
-		private static IEnumerable CreateConfigurationsMiniZinc()
-		{
-			return Model.CreateConfigurations<MiniZincObserverController>(AnalysisMode.TolerableFaults)
-						.Select(model => new TestCaseData(model).SetName(model.Name + " (MiniZinc)"));
-		}
-
-		private static IEnumerable CreateConfigurationsFast()
-		{
-			return Model.CreateConfigurations<FastObserverController>(AnalysisMode.TolerableFaults)
-						.Select(model => new TestCaseData(model).SetName(model.Name + " (Fast)"));
 		}
 	}
 }

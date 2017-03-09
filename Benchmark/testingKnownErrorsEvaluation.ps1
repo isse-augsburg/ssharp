@@ -42,17 +42,23 @@ $resultdir = "$PSScriptRoot\..\TestEvaluationResults\"
 $tmp_dir = "$PSScriptRoot\tmp\"
 
 $env:Path += ";$PSScriptRoot\NUnit2"
-New-Item -ItemType directory -Path $resultdir
-New-Item -ItemType directory -Path $tmp_dir
+New-Item -ItemType directory -Path $resultdir -Force
+New-Item -ItemType directory -Path $tmp_dir -Force
 Set-Location -Path $compilate_directory
 
-$symbols=@("ENABLE_F1", "ENABLE_F3", "ENABLE_F4", "ENABLE_F5", "ENABLE_F6", "ENABLE_F7")
+$csv_path = Join-Path $compilate_directory "evaluation_results.csv"
+if (Test-Path -Path $csv_path)
+{
+	rm $csv_path
+}
+
+$symbols=@("NO_ERRORS", "ENABLE_F1", "ENABLE_F3", "ENABLE_F4", "ENABLE_F5", "ENABLE_F6", "ENABLE_F7")
 
 function CompileProject($symbol)
 {
 	Write-Output("Compiling...`n")
-	$arguments = @("/t:Rebuild","/p:Configuration=Release","/p:DefineConstants=`"TRACE,"+$symbol+"`"","`"$project_file`"")
 	$outputfile = $resultdir + "\" + $symbol + ".compile"
+	$arguments = @("/t:Rebuild","/p:Configuration=Release","/p:DefineConstants=`"TRACE,"+$symbol+"`"","`"$project_file`"")
 	Start-Process -FilePath $msbuild -ArgumentList $arguments -WorkingDirectory $tmp_dir -NoNewWindow -RedirectStandardOutput $outputfile -Wait
 }
 
@@ -64,7 +70,7 @@ function ExecuteTest($symbol)
 	CompileProject($symbol)
 
 	Write-Output("Testing...`n")
-    $arguments = @("/labels","/config:Release","/include:TestEvaluationFast",$test_assembly)
+    $arguments = @("/labels","/config:Release","/include:Back2BackTesting",$test_assembly)
     
     $outputfilename = $resultdir + "\" +$symbol+".out"
     $errorfilename = $resultdir + "\"+$symbol+".err"
@@ -77,4 +83,12 @@ Foreach ($symbol in $symbols) {
 
 Set-Location -Path $PSScriptRoot\..\
 
-#git log -1 > $resultdir\version
+# move results file
+$csv_name = "evaluation_results.csv"
+$num = 0
+while (Test-Path -Path (Join-Path $resultdir $csv_name))
+{
+	$num += 1
+	$csv_name = "evaluation_results" + $num + ".csv"
+}
+$csv_path | Move-Item -Destination (Join-Path $resultdir $csv_name)
