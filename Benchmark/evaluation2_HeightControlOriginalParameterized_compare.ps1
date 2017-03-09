@@ -33,23 +33,16 @@
 # To Undo
 #  Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser
 
-# Example nunit-console.exe D:\Repositories\Universität\ssharp\Binaries\Release\SafetySharp.CaseStudies.PressureTank.dll /run=SafetySharp.CaseStudies.PressureTank.Analysis.HazardProbabilityTests.CalculateHazardIsDepleted"
-
 # include functionality per Dot-Sourcing
-. $PSScriptRoot\func_benchmarkTestCases.ps1
+. $PSScriptRoot\func_compareBenchmarks.ps1
 # include test cases per Dot-Sourcing
 . $PSScriptRoot\func_testCases.ps1
 
 $global_testValuations = @()
 $global_resultDirs = @()
 
-$tests = $global_tests
+$tests = $global_tests | Where { $_.TestCategories.Contains("Variant-Original-Original-Original") -and $_.TestCategories.Contains("Probability") }
 
-AddTestValuation -Name "HeightControlLowerLightBarriers" -Script "copy -Force $PSScriptRoot\HeightControlLowerLightBarriers.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerLightBarriers"
-AddTestValuation -Name "HeightControlNormal"  -Script "copy -Force $PSScriptRoot\HeightControlNormal.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlNormal"
-AddTestValuation -Name "HeightControlLowerAllSensors"  -Script "copy -Force $PSScriptRoot\HeightControlLowerAllSensors.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerAllSensors"
-AddTestValuation -Name "HeightControlLowerDrivers"  -Script "copy -Force $PSScriptRoot\HeightControlLowerDrivers.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerDrivers"
+AddParameterizedJsonTestValuations -NamePrefix "HeightControlOriginal_Paramererized" -SourceFile $PSScriptRoot\HeightControlNormal.json -TargetFile $global_compilate_directory\Analysis\heightcontrol_probabilities.json -VariableToUpdate "OverheadDetectorFalseDetection" -MinValue 0.000005 -MaxValue 0.005 -Steps 10
 
-Foreach ($testvaluation in $tests) {
-    ExecuteTestValuation -TestValuation $testvaluation -Tests $global_tests
-}
+CompareSummarized -Tests $tests -InterestingValues @("Probability")

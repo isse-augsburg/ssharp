@@ -29,11 +29,8 @@
 # To Undo
 #  Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser
 
-# include test cases per Dot-Sourcing
-. $PSScriptRoot\testCases.ps1
-
-New-Variable -Force -Name resultDirs -Option AllScope -Value @()
-New-Variable -Force -Name results -Option AllScope -Value @()
+New-Variable -Force -Name global_resultDirs -Option AllScope -Value @()
+New-Variable -Force -Name global_compareResults -Option AllScope -Value @()
 
 function AddResultDir($name,$resultDir)
 {
@@ -43,37 +40,35 @@ function AddResultDir($name,$resultDir)
     $resultsFile="$resultDir\"+"summarizedBenchmarkResults.csv"
     $oldresults = Import-Csv $resultsFile -Encoding ascii -UseCulture
     $newDir | Add-Member -type NoteProperty -name Results -Value $oldresults
-    $resultDirs += $newDir
+    $global_resultDirs += $newDir
 }
 
-#AddResultDir -Name "vor" -ResultDir "$PSScriptRoot\Ergebnisse3"
-AddResultDir -Name "nach" -ResultDir "$PSScriptRoot\Ergebnisse2"
-AddResultDir -Name "neu" -ResultDir "$PSScriptRoot\Ergebnisse4"
-
-function LoadResults($counter)
+function LoadResults($tests,$counter,$interestingValues )
 {
-    $test = $global_tests[$counter]
+    $test = $tests[$counter]
     $newResult = New-Object System.Object
     $newResult | Add-Member -type NoteProperty -name TestName -Value $test.TestName
+    
+    Foreach ($interestingValue in $interestingValues) {
+        #$newResult | Add-Member -type NoteProperty -name $interestingValue -Value $mcssize
 
-    Foreach ($resultDir in $resultDirs){
-        $mcssizename=$resultDir.Name+"MinimalCriticalSets"
-        $mcssize = $resultDir.Results[$counter].MinimalCriticalSets
-        $avgSizeOfMcsName=$resultDir.Name+"AvgSizeOfMcs"
-        $avgSizeOfMcs = $resultDir.Results[$counter].AvgSizeOfMcs
-
-        $newResult | Add-Member -type NoteProperty -name $mcssizename -Value $mcssize
-        $newResult | Add-Member -type NoteProperty -name $avgSizeOfMcsName -Value $avgSizeOfMcs
+        Foreach ($resultDir in $global_resultDirs){
+            echo $resultDir
+            $entryname=$resultDir.Name+$interestingValue
+            $entryvalue= $resultDir.Results[$counter].$interestingValue
+            $newResult | Add-Member -type NoteProperty -name $entryname -Value $entryvalue
+        }
     }
-
-    $results += $newResult
+    $global_compareResults += $newResult
 }
 
-for ($counter=0; $counter -lt $global_tests.Length; $counter++) {
-    LoadResults($counter)
+function CompareSummarized($tests, $interestingValues) {
+    $global_compareResults = @()
+
+    for ($counter=0; $counter -lt $tests.Length; $counter++) {
+        LoadResults -Tests $tests -Counter $counter -InterestingValues $interestingValues
+    }
+    
+    $resultsFile="$PSScriptRoot\"+"compareBenchmarks.csv"
+    $global_compareResults | Export-Csv -Path $resultsFile -Encoding ascii -NoTypeInformation -UseCulture
 }
-
-$resultsFile="$PSScriptRoot\"+"compareBenchmarks.csv"
-
-$results | Export-Csv -Path $resultsFile -Encoding ascii -NoTypeInformation -UseCulture
-

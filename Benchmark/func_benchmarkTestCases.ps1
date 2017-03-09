@@ -43,41 +43,6 @@ $env:Path += ";$PSScriptRoot\NUnit2"
 
 New-Variable -Force -Name global_testValuations -Option AllScope -Value @()
 
-function AddTestValuation($name,$script="",$resultDir="$PSScriptRoot\Results")
-{
-    $testValuation = New-Object System.Object
-    $testValuation | Add-Member -type NoteProperty -name Name -Value $name
-    $testValuation | Add-Member -type NoteProperty -name Script -Value $script
-    $testValuation | Add-Member -type NoteProperty -name ResultDir -Value $resultDir
-    $global_testValuations += $testValuation
-}
-
-function UpdateValueInJsonFile($sourceFile,$targetFile,$variableToUpdate,$newValue)
-{
-    $sourceFileContent = Get-Content $sourceFile
-    $sourceJson = ConvertFrom-Json "$sourceFileContent"
-    $newValueString = $newValue.ToString([System.Globalization.CultureInfo]::InvariantCulture)
-    $sourceJson.$variableToUpdate=$newValueString
-    $targetFileContent = ConvertTo-Json $sourceJson
-    $targetFileContent | Set-Content $targetFile -Force
-}
-
-function AddParameterizedJsonTestValuations($namePrefix,$sourceFile,$targetFile,$variableToUpdate,$minValue,$maxValue,$steps)
-{
-    if ($steps -le 1) {
-        echo "steps must be greater than 1"
-    }
-    $stepsize = ($maxValue - $minValue) / ($steps-1)
-    $currentValue = $minValue
-    for ($i=0; $i -lt $steps; $i++)
-    {
-        $newname = $namePrefix + "_" + $i
-        $scriptString = "UpdateValueInJsonFile -SourceFile "+ $sourceFile + " -TargetFile " + $targetFile + " -VariableToUpdate " + $variableToUpdate + " -NewValue " + $currentValue 
-        AddTestValuation -Name $newname -Script $scriptString -ResultDir "$PSScriptRoot\$newname"
-        $currentValue = $currentValue + $stepsize
-    }
-}
-
 function ExecuteTest($test,$resultDir)
 {
     Write-Output("Testing " +  $test.TestMethod + "`n")

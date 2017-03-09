@@ -41,6 +41,9 @@
 . $PSScriptRoot\func_testCases.ps1
 
 $global_testValuations = @()
+$global_resultDirs = @()
+
+$tests = $global_tests
 
 AddTestValuation -Name "HeightControlLowerLightBarriers" -Script "copy -Force $PSScriptRoot\HeightControlLowerLightBarriers.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerLightBarriers"
 AddTestValuation -Name "HeightControlNormal"  -Script "copy -Force $PSScriptRoot\HeightControlNormal.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlNormal"
@@ -48,6 +51,6 @@ AddTestValuation -Name "HeightControlLowerAllSensors"  -Script "copy -Force $PSS
 AddTestValuation -Name "HeightControlLowerDrivers"  -Script "copy -Force $PSScriptRoot\HeightControlLowerDrivers.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerDrivers"
 
 
-Foreach ($testvaluation in $global_testValuations) {
+Foreach ($testvaluation in $tests) {
     SummarizeDirectory -Tests $global_tests -ResultDir $testvaluation.ResultDir
 }

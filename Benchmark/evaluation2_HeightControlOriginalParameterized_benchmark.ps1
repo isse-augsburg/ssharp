@@ -33,8 +33,6 @@
 # To Undo
 #  Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser
 
-# Example nunit-console.exe D:\Repositories\Universität\ssharp\Binaries\Release\SafetySharp.CaseStudies.PressureTank.dll /run=SafetySharp.CaseStudies.PressureTank.Analysis.HazardProbabilityTests.CalculateHazardIsDepleted"
-
 # include functionality per Dot-Sourcing
 . $PSScriptRoot\func_benchmarkTestCases.ps1
 # include test cases per Dot-Sourcing
