@@ -33,11 +33,20 @@
 # To Undo
 #  Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser
 
+# Example nunit-console.exe D:\Repositories\Universität\ssharp\Binaries\Release\SafetySharp.CaseStudies.PressureTank.dll /run=SafetySharp.CaseStudies.PressureTank.Analysis.HazardProbabilityTests.CalculateHazardIsDepleted"
+
 # include functionality per Dot-Sourcing
 . $PSScriptRoot\func_benchmarkTestCases.ps1
 # include test cases per Dot-Sourcing
-. $PSScriptRoot\evaluation2_HeightControlOriginalParameterized_tests.ps1
+. $PSScriptRoot\func_testCases.ps1
 
-Foreach ($testvaluation in $global_testValuations) {
-    ExecuteTestValuation -TestValuation $testvaluation -Tests $global_selected_tests
-}
+New-Variable -Force -Name global_selected_tests -Option AllScope -Value @()
+$global_testValuations = @()
+
+$global_selected_tests = $global_tests
+
+
+AddTestValuation -Name "HeightControlLowerLightBarriers" -Script "copy -Force $PSScriptRoot\HeightControlLowerLightBarriers.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerLightBarriers" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
+AddTestValuation -Name "HeightControlNormal"  -Script "copy -Force $PSScriptRoot\HeightControlNormal.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlNormal" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
+AddTestValuation -Name "HeightControlLowerAllSensors"  -Script "copy -Force $PSScriptRoot\HeightControlLowerAllSensors.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerAllSensors" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
+AddTestValuation -Name "HeightControlLowerDrivers"  -Script "copy -Force $PSScriptRoot\HeightControlLowerDrivers.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerDrivers" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")

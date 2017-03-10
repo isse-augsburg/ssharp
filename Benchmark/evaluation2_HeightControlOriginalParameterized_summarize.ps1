@@ -36,12 +36,8 @@
 # include functionality per Dot-Sourcing
 . $PSScriptRoot\func_summarizeLocalBenchmarks.ps1
 # include test cases per Dot-Sourcing
-. $PSScriptRoot\func_testCases.ps1
-
-$tests = $global_tests | Where { $_.TestCategories.Contains("Variant-Original-Original-Original") -and $_.TestCategories.Contains("Probability") }
-
-AddParameterizedJsonTestValuations -NamePrefix "HeightControlOriginal_Paramererized" -SourceFile $PSScriptRoot\HeightControlNormal.json -TargetFile $global_compilate_directory\Analysis\heightcontrol_probabilities.json -VariableToUpdate "OverheadDetectorFalseDetection" -MinValue 0.000005 -MaxValue 0.005 -Steps 10
+. $PSScriptRoot\evaluation2_HeightControlOriginalParameterized_tests.ps1
 
 Foreach ($testvaluation in $global_testValuations) {
-    SummarizeDirectory -Tests $tests -ResultDir $testvaluation.ResultDir
+    SummarizeDirectory -Tests $global_selected_tests -ResultDir $testvaluation.ResultDir
 }

@@ -38,19 +38,8 @@
 # include functionality per Dot-Sourcing
 . $PSScriptRoot\func_summarizeLocalBenchmarks.ps1
 # include test cases per Dot-Sourcing
-. $PSScriptRoot\func_testCases.ps1
+. $PSScriptRoot\evaluation1_HeightControlAll_tests.ps1
 
-$global_testValuations = @()
-$global_resultDirs = @()
-
-$tests = $global_tests
-
-AddTestValuation -Name "HeightControlLowerLightBarriers" -Script "copy -Force $PSScriptRoot\HeightControlLowerLightBarriers.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerLightBarriers" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
-AddTestValuation -Name "HeightControlNormal"  -Script "copy -Force $PSScriptRoot\HeightControlNormal.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlNormal" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
-AddTestValuation -Name "HeightControlLowerAllSensors"  -Script "copy -Force $PSScriptRoot\HeightControlLowerAllSensors.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerAllSensors" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
-AddTestValuation -Name "HeightControlLowerDrivers"  -Script "copy -Force $PSScriptRoot\HeightControlLowerDrivers.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerDrivers" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
-
-
-Foreach ($testvaluation in $tests) {
-    SummarizeDirectory -Tests $global_tests -ResultDir $testvaluation.ResultDir
+Foreach ($testvaluation in $global_testValuations) {
+    SummarizeDirectory -Tests $global_selected_tests -ResultDir $testvaluation.ResultDir
 }
