@@ -50,6 +50,6 @@ AddTestValuation -Name "HeightControlNormal"  -Script "copy -Force $PSScriptRoot
 AddTestValuation -Name "HeightControlLowerAllSensors"  -Script "copy -Force $PSScriptRoot\HeightControlLowerAllSensors.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerAllSensors" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
 AddTestValuation -Name "HeightControlLowerDrivers"  -Script "copy -Force $PSScriptRoot\HeightControlLowerDrivers.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerDrivers" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
 
-Foreach ($testvaluation in $tests) {
-    ExecuteTestValuation -TestValuation $testvaluation -Tests $global_tests
+Foreach ($testvaluation in $global_testValuations) {
+    ExecuteTestValuation -TestValuation $testvaluation -Tests $tests
 }

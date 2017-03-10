@@ -119,6 +119,21 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling
 		}
 
 		/// <summary>
+		///   Represents the situation that an overheight vehicle has been prevented to collide with the tunnel entrance on the left lane.
+		/// </summary>
+		public Formula PreventedCollision
+		{
+			get
+			{
+				Formula vehiclesAtEnd = VehicleSet.FinishedObserver.Finished;
+				return
+					!vehiclesAtEnd &&
+					HeightControl.TrafficLights.IsRed &&
+					Vehicles.Any(vehicle => vehicle.Lane == Lane.Left && vehicle.Kind == VehicleKind.OverheightVehicle);
+			}
+		}
+
+		/// <summary>
 		///   Initializes a model of the original design.
 		/// </summary>
 		public static Model CreateOriginal(Vehicle[] vehicles = null) =>
