@@ -72,8 +72,8 @@ function ExecuteTest($symbol, $category)
 	Write-Output("Testing...`n")
     $arguments = @("/labels","/config:Release","/include:Back2BackTesting$category",$test_assembly)
     
-    $outputfilename = $resultdir + "\" +$symbol+".out"
-    $errorfilename = $resultdir + "\"+$symbol+".err"
+    $outputfilename = $resultdir + "\" +$symbol+"_"+$category+".out"
+    $errorfilename = $resultdir + "\"+$symbol+"_"+$category+".err"
     Start-Process -FilePath $nunit -ArgumentList $arguments -WorkingDirectory $compilate_directory -NoNewWindow -RedirectStandardError $errorfilename -RedirectStandardOutput $outputfilename -Wait
 }
 

@@ -66,6 +66,11 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		public FaultActivationBehavior FaultActivationBehavior = FaultActivationBehavior.Nondeterministic;
 
 		/// <summary>
+		///   If set to <c>true</c>, analysis is stopped when the first exception occurs.
+		/// </summary>
+		public bool StopOnFirstException { get; set; } = false;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		public SafetyAnalysis()
@@ -228,6 +233,9 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 					// inform heuristics about result and give them the opportunity to add further sets
 					foreach (var heuristic in Heuristics)
 						heuristic.Update(setsToCheck, set, isSafe);
+
+					if (StopOnFirstException && _exceptions.Count > 0)
+						goto returnResult;
 				}
 
 				// in case heuristics removed a set (they shouldn't)
@@ -236,8 +244,13 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 					var isSafe = CheckSet(set, allFaults, false);
 					if (isSafe)
 						currentSafe.Add(set);
+
+					if (StopOnFirstException && _exceptions.Count > 0)
+						goto returnResult;
 				}
 			}
+
+			returnResult:
 
 			// Reset the nondeterministic faults so as to not influence subsequent analyses
 			foreach (var fault in nondeterministicFaults)

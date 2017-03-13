@@ -76,7 +76,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 					CpuCount = 4,
 					ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium),
 					GenerateCounterExample = false
-				}
+				},
+				FaultActivationBehavior = FaultActivationBehavior.ForceOnly,
+				StopOnFirstException = true
 			};
 
 			if (enableHeuristics)
