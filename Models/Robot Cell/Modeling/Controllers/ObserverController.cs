@@ -252,24 +252,30 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return matrix;
 		}
 
-		private static bool IsConnected(RobotAgent source, RobotAgent target, HashSet<RobotAgent> seenRobots)
+		private static bool IsConnected(RobotAgent sourceRobot, RobotAgent targetRobot, HashSet<RobotAgent> seenRobots)
 		{
-			if (source == target)
+			if (sourceRobot == targetRobot)
 				return true;
 
-			if (!seenRobots.Add(source))
+			if (!seenRobots.Add(sourceRobot))
 				return false;
 
-			foreach (var output in source.Outputs)
-			{
-				foreach (var output2 in output.Outputs)
-				{
-					if (output2 == target)
-						return true;
+#if ENABLE_F2 // F2: routes are assumed to be unidirectional, while they are in fact bidirectional.
+			  // Since this is reflected by incorrect assignments to agents' Inputs and Outputs,
+			  // the oracle must be fixed to account for this.
+			var neighbouringRobots = sourceRobot.Outputs.Concat(sourceRobot.Inputs)
+				.SelectMany(cart => cart.Outputs.Concat(cart.Inputs));
+#else
+			var neighbouringRobots = sourceRobot.Outputs.SelectMany(cart => cart.Outputs);
+#endif
 
-					if (IsConnected((RobotAgent)output2, target, seenRobots))
-						return true;
-				}
+			foreach (var neighbouringRobot in neighbouringRobots)
+			{
+				if (neighbouringRobot == targetRobot)
+					return true;
+
+				if (IsConnected((RobotAgent)neighbouringRobot, targetRobot, seenRobots))
+					return true;
 			}
 
 			return false;
@@ -280,7 +286,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return capabilities.Any(c => c.IsEquivalentTo(capability));
 		}
 
-		#endregion
+#endregion
 
 		[FaultEffect(Fault = nameof(ReconfigurationFailure))]
 		public abstract class ReconfigurationFailureEffect : ObserverController

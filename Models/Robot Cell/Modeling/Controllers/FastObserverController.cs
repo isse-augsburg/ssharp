@@ -64,16 +64,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (roles == null)
 #endif
 			{
-				ReconfigurationState = ReconfStates.Failed;
 				if (isReconfPossible)
 					throw new Exception("Reconfiguration failed even though there is a solution.");
+				ReconfigurationState = ReconfStates.Failed;
 			}
 			else
 			{
 				ApplyConfiguration(roles);
-				ReconfigurationState = ReconfStates.Succedded;
 				if (!isReconfPossible)
 					throw new Exception("Reconfiguration successful even though there is no valid configuration.");
+				ReconfigurationState = ReconfStates.Succedded;
 			}
 		}
 
