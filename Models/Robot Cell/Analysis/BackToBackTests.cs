@@ -109,10 +109,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			var cardinalitySum = result.MinimalCriticalSets.Sum(set => set.Count);
 			var minimalSetCardinalityAverage = cardinalitySum == 0 ? 0 : cardinalitySum / (double)result.MinimalCriticalSets.Count;
 
+			var exception = result.Exceptions.Values.FirstOrDefault();
+			var exceptionText = exception == null ? null : exception.GetType().Name + " (" + exception.Message + ")";
+
 			object[] columns = {
 				GetCurrentFault(),										// tested fault
 				mode,													// testing mode
 				model.Name,												// model name
+				exceptionText,											// thrown exception (if any)
 				faultCount,												// # faults
 				(int)result.Time.TotalMilliseconds,						// required time
 				result.CheckedSets.Count,								// # checked sets
