@@ -55,8 +55,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			// find optimal path that satisfies the required capabilities
 			CalculateShortestPaths();
 			var path = FindPath(Tasks[0]);
+			var roles = path == null ? null : Convert(Tasks[0], path).ToArray();
 
-			if (path == null)
+#if ENABLE_F5
+			var length = roles?.Sum(role => Math.Max(role.Item2.Length, 1));
+			if (roles == null || length > 2 * Tasks[0].Capabilities.Length)
+#else
+			if (roles == null)
+#endif
 			{
 				ReconfigurationState = ReconfStates.Failed;
 				if (isReconfPossible)
@@ -64,7 +70,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			}
 			else
 			{
-				ApplyConfiguration(Convert(Tasks[0], path).ToArray());
+				ApplyConfiguration(roles);
 				ReconfigurationState = ReconfStates.Succedded;
 				if (!isReconfPossible)
 					throw new Exception("Reconfiguration successful even though there is no valid configuration.");
