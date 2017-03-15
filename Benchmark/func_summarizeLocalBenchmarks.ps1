@@ -61,7 +61,7 @@ function LoadResultOfTest($test,$resultDir)
     if ($wasSuccessful) {
         #extract probability stuff
         if($test.TestCategories.Contains("Probability")){
-            $parsedLine = $output | Where-Object {$_ -match 'Probability of hazard[:] (?<match>.*)' }
+            $parsedLine = $output | Where-Object {$_ -match 'Probability of (\w+)[:] (?<match>.*)' }
             $probability= $matches['match']
         
             $parsedLine = $output | Where-Object {$_ -match 'Discovered (?<states>.*?) states, (?<transitions>.*?) transitions, (?<levels>.*?) levels*.*' }  | Select-Object -Last 1

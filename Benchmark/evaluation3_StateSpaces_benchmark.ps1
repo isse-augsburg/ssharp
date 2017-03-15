@@ -38,18 +38,8 @@
 # include functionality per Dot-Sourcing
 . $PSScriptRoot\func_benchmarkTestCases.ps1
 # include test cases per Dot-Sourcing
-. $PSScriptRoot\func_testCases.ps1
+. $PSScriptRoot\evaluation3_StateSpaces_tests.ps1
 
-New-Variable -Force -Name global_selected_tests -Option AllScope -Value @()
-$global_testValuations = @()
-
-#$global_selected_tests = $global_tests
-
-# only fast
-$global_selected_tests = $global_tests | Where { (-not $_.TestCategories.Contains("Exceeds-Memory-Limit")) -and ($_.TestCategories.Contains("Probability") -or $_.TestCategories.Contains("DCCA"))}
-
-
-AddTestValuation -Name "HeightControlLowerLightBarriers" -Script "copy -Force $PSScriptRoot\HeightControlLowerLightBarriers.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerLightBarriers" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
-AddTestValuation -Name "HeightControlNormal"  -Script "copy -Force $PSScriptRoot\HeightControlNormal.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlNormal" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
-AddTestValuation -Name "HeightControlLowerAllSensors"  -Script "copy -Force $PSScriptRoot\HeightControlLowerAllSensors.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerAllSensors" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
-AddTestValuation -Name "HeightControlLowerDrivers"  -Script "copy -Force $PSScriptRoot\HeightControlLowerDrivers.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerDrivers" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
+Foreach ($testvaluation in $global_testValuations) {
+    ExecuteTestValuation -TestValuation $testvaluation -Tests $global_selected_tests
+}
