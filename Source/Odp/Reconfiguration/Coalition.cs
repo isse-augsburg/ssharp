@@ -27,36 +27,41 @@ namespace SafetySharp.Odp.Reconfiguration
 	using System.Linq;
 	using System.Threading.Tasks;
 
-	public class Coalition
+	public partial class Coalition
 	{
+		// task & configuration
 		public ITask Task { get; }
 
+		public BaseAgent[] RecoveredDistribution { get; }
+
+		/// <summary>
+		/// The connected task fragment handled by coalition members
+		/// </summary>
+		public TaskFragment CTF { get; private set; }
+
+		// members & invitations
 		public CoalitionReconfigurationAgent Leader { get; }
 
 		public HashSet<CoalitionReconfigurationAgent> Members { get; }
 			= new HashSet<CoalitionReconfigurationAgent>();
 
-		public HashSet<ICapability> AvailableCapabilities { get; } = new HashSet<ICapability>();
-		public HashSet<ICapability> NeededCapabilities { get; } = new HashSet<ICapability>();
-
-		private Dictionary<BaseAgent, TaskCompletionSource<CoalitionReconfigurationAgent>> _invitations
+		private readonly Dictionary<BaseAgent, TaskCompletionSource<CoalitionReconfigurationAgent>> _invitations
 			= new Dictionary<BaseAgent, TaskCompletionSource<CoalitionReconfigurationAgent>>();
-
-		private bool _hasBeenMerged = false;
-
-		public BaseAgent[] RecoveredDistribution { get; }
-
-		public bool CapabilitiesSatisfied() => NeededCapabilities.IsSubsetOf(AvailableCapabilities);
 
 		public bool IsInvited(CoalitionReconfigurationAgent agent) => _invitations.ContainsKey(agent.BaseAgent);
 
-		/// <summary>
-		/// The connected task fragment handled by coalition memnbers
-		/// </summary>
-		public TaskFragment CTF { get; private set; }
+		private MergeSupervisor Merger { get; }
+
+		// capabilities
+		public HashSet<ICapability> AvailableCapabilities { get; } = new HashSet<ICapability>();
+
+		public HashSet<ICapability> NeededCapabilities { get; } = new HashSet<ICapability>();
+
+		public bool CapabilitiesSatisfied() => NeededCapabilities.IsSubsetOf(AvailableCapabilities);
 
 		public Coalition(CoalitionReconfigurationAgent leader, ITask task)
 		{
+			Merger = new MergeSupervisor(this);
 			RecoveredDistribution = new BaseAgent[task.RequiredCapabilities.Length];
 			Task = task;
 			Join(Leader = leader);
@@ -67,30 +72,52 @@ namespace SafetySharp.Odp.Reconfiguration
 			return Members.Any(member => member.BaseAgent == baseAgent); // TODO: consider implementing more efficiently
 		}
 
+		/// <summary>
+		/// Invites a new agent into the coalition. Merge requests from other coalitions are handled first.
+		/// </summary>
+		/// <param name="agent">The <see cref="BaseAgent"/> that is invited.</param>
+		/// <returns>The <see cref="CoalitionReconfigurationAgent"/> belonging to <paramref name="agent"/>.</returns>
+		/// <exception cref="OperationCanceledException">Thrown if processing of pre-existing merge requests or the invite lead to a coalition merge,
+		/// and the coalitions is disbanded (merged into another coalition).</exception>
 		public async Task<CoalitionReconfigurationAgent> Invite(BaseAgent agent)
 		{
-			{
-				var existingMember = Members.FirstOrDefault(member => member.BaseAgent == agent);
-				if (existingMember != null)
-					return existingMember;
-			}
+			// If members were invited by other coalitions, process the merge requests.
+			// If this coalition is disbanded during that process, execution of this method is cancelled.
+			Merger.ProcessMergeRequests();
 
+			// Do not re-invite current members.
+			var existingMember = Members.FirstOrDefault(member => member.BaseAgent == agent);
+			if (existingMember != null)
+				return existingMember;
+
+			// Invite the agent.
 			_invitations[agent] = new TaskCompletionSource<CoalitionReconfigurationAgent>();
+			agent.RequestReconfiguration(Leader, Task); // do NOT await; await invitation response (see below) instead (otherwise a deadlock occurs)
+			var newMember = await _invitations[agent].Task; // wait for the invited agent to respond
 
-			// do NOT await; await invitation response (see below) instead (otherwise a deadlock occurs)
-			agent.RequestReconfiguration(Leader, Task);
-
-			// wait for the invited agent to respond
-			var newMember = await _invitations[agent].Task;
-			_invitations.Remove(agent);
-
-			// invitation might have lead to coalition merge
-			if (_hasBeenMerged)
-				throw new OperationCanceledException();
+			// If the invited agent already belongs to a coalition, a merge was initiated.
+			// Wait for such a merge to complete, but avoid deadlocks when two leaders invite each other.
+			await Merger.WaitForMergeCompletion();
 
 			return newMember;
 		}
 
+		private void ReceiveInvitationResponse(CoalitionReconfigurationAgent invitedAgent)
+		{
+			_invitations[invitedAgent.BaseAgent].SetResult(invitedAgent);
+			_invitations.Remove(invitedAgent.BaseAgent);
+		}
+
+		private void CancelInvitations()
+		{
+			foreach (var invitation in _invitations.Values)
+				invitation.SetResult(null);
+			_invitations.Clear();
+		}
+
+		/// <summary>
+		/// Adds the given <paramref name="newMember"/> to the coalition, completing an open invitation if there is one.
+		/// </summary>
 		public void Join(CoalitionReconfigurationAgent newMember)
 		{
 			Members.Add(newMember);
@@ -100,20 +127,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			UpdateCTF(newMember.BaseAgent);
 
 			if (IsInvited(newMember))
-				_invitations[newMember.BaseAgent].SetResult(newMember);
-		}
-
-		public void MergeInto(Coalition otherCoalition)
-		{
-			_hasBeenMerged = true;
-
-			// cancel invitations
-			foreach (var invitation in _invitations.Values)
-				invitation.SetResult(null);
-
-			// actual merge
-			foreach (var member in Members)
-				otherCoalition.Join(member);
+				ReceiveInvitationResponse(newMember);
 		}
 
 		/// <summary>
@@ -153,6 +167,25 @@ namespace SafetySharp.Odp.Reconfiguration
 				CTF.Prepend(minPreState);
 				CTF.Append(maxPostState);
 			}
+		}
+
+		/// <summary>
+		/// Called by members to notify the coalition they have been invited by another coalition.
+		/// </summary>
+		/// <param name="source">The agent that invited a member, i.e. the leader of the other coalition.</param>
+		public void MergeCoalition(CoalitionReconfigurationAgent source)
+		{
+			Merger.MergeCoalition(source);
+		}
+
+		/// <summary>
+		/// Notifies the coalition an invited agent already belongs to a different coalition,
+		/// and that it will receive a <see cref="RendezvousRequest(Coalition, CoalitionReconfigurationAgent)"/> from
+		/// the opposing <paramref name="leader"/>.
+		/// </summary>
+		public void AwaitRendezvous(CoalitionReconfigurationAgent invitedAgent, CoalitionReconfigurationAgent leader)
+		{
+			Merger.AwaitRendezvous(invitedAgent, leader);
 		}
 	}
 }

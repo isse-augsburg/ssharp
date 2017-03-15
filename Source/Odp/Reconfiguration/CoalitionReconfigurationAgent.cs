@@ -22,9 +22,12 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
+	using System.Collections.Generic;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using Modeling;
+	using System.Diagnostics;
+	using System;
 
 	public class CoalitionReconfigurationAgent : IReconfigurationAgent
 	{
@@ -62,7 +65,16 @@ namespace SafetySharp.Odp.Reconfiguration
 			BaseAgentState = baseAgentState;
 
 			if (baseAgentState.ReconfRequestSource != null)
-				((CoalitionReconfigurationAgent)agent).ReceiveResponse(respondingAgent: this);
+			{
+				var source = (CoalitionReconfigurationAgent)baseAgentState.ReconfRequestSource;
+				if (CurrentCoalition != null && CurrentCoalition.Leader != source)
+				{
+					CurrentCoalition.MergeCoalition(source);
+					source.CurrentCoalition.AwaitRendezvous(invitedAgent: this, leader: CurrentCoalition.Leader);
+				}
+				else
+					source.ReceiveResponse(respondingAgent: this);
+			}
 			else
 			{
 				var configs = await _controller.CalculateConfigurations(this, task);
@@ -78,10 +90,8 @@ namespace SafetySharp.Odp.Reconfiguration
 		/// <param name="agent">The agent responding to the reconfiguration request</param>
 		private void ReceiveResponse(CoalitionReconfigurationAgent respondingAgent)
 		{
-			if (respondingAgent.CurrentCoalition == null)
-				CurrentCoalition.Join(respondingAgent);
-			else
-				CurrentCoalition.MergeInto(respondingAgent.CurrentCoalition);
+			Debug.Assert(respondingAgent.CurrentCoalition == null);
+			CurrentCoalition.Join(respondingAgent);
 		}
 
 		/// <summary>
