@@ -36,7 +36,7 @@ namespace SafetySharp.Odp.Reconfiguration
 	/// 
 	/// (cf. Konstruktion selbst-organisierender Softwaresysteme, chapter 8)
 	/// </summary>
-	public class CoalitionFormationController : AbstractController
+	public partial class CoalitionFormationController : AbstractController
 	{
 		public CoalitionFormationController(BaseAgent[] agents) : base(agents) { }
 
@@ -72,6 +72,8 @@ namespace SafetySharp.Odp.Reconfiguration
 			if (invariant == Invariant.CapabilityConsistency)
 				return RestoreCapabilityConsistency(coalition, task, config);
 
+			// TODO: if another coalition is merged: restart reconfiguration (?)
+
 			throw new NotImplementedException(); // TODO: strategies for other invariant predicates
 		}
 
@@ -100,26 +102,13 @@ namespace SafetySharp.Odp.Reconfiguration
 					}
 				}
 
-				// TODO if still no path found: recruit additional agents (if further exist)
+				// TODO: if still no path found: recruit additional agents (if further exist)
 			}
 		}
 
 		private IEnumerable<BaseAgent> RecruitableMembers(Coalition coalition)
 		{
-			var memberBaseAgents = coalition.Members.Select(member => member.BaseAgent);
-
-			// TODO: prioritize already participating agents (inputs/outputs of member roles for task)
-			var queueIn = new Queue<BaseAgent>(coalition.Members.SelectMany(member => member.BaseAgentState.Inputs).Except(memberBaseAgents));
-			var queueOut = new Queue<BaseAgent>(coalition.Members.SelectMany(member => member.BaseAgentState.Outputs).Except(memberBaseAgents));
-
-			while (queueOut.Count > 0 || queueIn.Count > 0)
-			{
-				// TODO: update BOTH queues (remove nextMember, add nextMember's neighbours, prioritize participating agents)
-				if (queueIn.Count > 0)
-					yield return queueIn.Dequeue();
-				if (queueOut.Count > 0)
-					yield return queueOut.Dequeue();
-			}
+			return new AgentQueue(coalition);
 		}
 
 		private async Task EnlargeCoalitionUntil(Func<bool> condition, Coalition coalition, IEnumerable<BaseAgent> possibleMembers)

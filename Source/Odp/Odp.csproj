@@ -55,6 +55,9 @@
       <DependentUpon>Coalition.cs</DependentUpon>
     </Compile>
     <Compile Include="Reconfiguration\CoalitionFormationController.cs" />
+    <Compile Include="Reconfiguration\CoalitionFormationController.AgentQueue.cs">
+      <DependentUpon>CoalitionFormationController.cs</DependentUpon>
+    </Compile>
     <Compile Include="Reconfiguration\CoalitionReconfigurationAgent.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="Reconfiguration\ConfigurationUpdate.cs" />
