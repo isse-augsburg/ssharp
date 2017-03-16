@@ -22,7 +22,7 @@
 
 namespace SafetySharp.Odp
 {
-	public interface ICapabilityHandler<T> where T : ICapability
+	public interface ICapabilityHandler<in T> where T : ICapability
 	{
 		void ApplyCapability(T capability);
 	}
