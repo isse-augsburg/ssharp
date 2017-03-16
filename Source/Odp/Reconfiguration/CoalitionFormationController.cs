@@ -174,7 +174,7 @@ namespace SafetySharp.Odp.Reconfiguration
 					if (!canFindConnection)
 						return null;
 
-					connection = ComputeShortestPaths(configurationSuggestion, agents[i - 1]).GetPathFromSource(agents[i]);
+					connection = ComputeShortestPaths(configurationSuggestion, source: agents[i - 1]).GetPathFromSource(destination: agents[i]);
 					Debug.Assert(connection != null);
 				}
 
