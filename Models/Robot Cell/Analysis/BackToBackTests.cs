@@ -70,6 +70,26 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				mode: "heuristics");
 		}
 
+		[Category("Back2BackTestingDccaOracle")]
+		[TestCaseSource(nameof(CreateConfigurationsFast))]
+		public void OracleDccaOnly(Model model)
+		{
+			Dcca(model,
+				hazard: model.ObserverController.OracleState == ReconfStates.Failed,
+				enableHeuristics: false,
+				mode: "dcca-oracle");
+		}
+
+		[Category("Back2BackTestingHeuristicsOracle")]
+		[TestCaseSource(nameof(CreateConfigurationsFast))]
+		public void OracleDccaWithHeuristics(Model model)
+		{
+			Dcca(model,
+				hazard: model.ObserverController.OracleState == ReconfStates.Failed,
+				enableHeuristics: true,
+				mode: "heuristics-oracle");
+		}
+
 		private void Dcca(Model model, Formula hazard, bool enableHeuristics, string mode)
 		{
 			var safetyAnalysis = new SafetySharpSafetyAnalysis

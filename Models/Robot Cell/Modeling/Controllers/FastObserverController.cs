@@ -51,6 +51,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		protected override void Reconfigure()
 		{
 			var isReconfPossible = IsReconfPossible(_availableRobots, Tasks);
+			if (!isReconfPossible && OracleState != ReconfStates.Failed)
+				OracleState = ReconfStates.Failed;
 
 			// find optimal path that satisfies the required capabilities
 			CalculateShortestPaths();
@@ -73,7 +75,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				ApplyConfiguration(roles);
 				if (!isReconfPossible)
 					throw new Exception("Reconfiguration successful even though there is no valid configuration.");
-				ReconfigurationState = ReconfStates.Succedded;
+				if (ReconfigurationState != ReconfStates.Failed)
+					ReconfigurationState = ReconfStates.Succedded;
 			}
 		}
 

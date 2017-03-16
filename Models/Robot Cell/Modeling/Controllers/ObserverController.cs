@@ -66,6 +66,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public ReconfStates ReconfigurationState { get; protected set; } = ReconfStates.NotSet;
 
+		public ReconfStates OracleState { get; protected set; } = ReconfStates.NotSet;
+
 		protected abstract void Reconfigure();
 
 		public void ScheduleReconfiguration()
