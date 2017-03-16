@@ -193,7 +193,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				var preAgent = i == 0 ? null : roleAllocations[i - 1].Item1;
 				var postAgent = i == roleAllocations.Length - 1 ? null : roleAllocations[i + 1].Item1;
 
-#if ENABLE_F4 // error F4: incorrect Condition.State format
+#if ENABLE_F4 || ENABLE_F4b // error F4: incorrect Condition.State format
 				var preCondition = new Condition(Tasks[0], preAgent, remainingCapabilities);
 				var postCondition = new Condition(Tasks[0], postAgent, remainingCapabilities - capabilities.Length);
 #else
