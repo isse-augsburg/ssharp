@@ -82,7 +82,13 @@ Foreach ($symbol in $symbols) {
     ExecuteTest $symbol "Heuristics"
 }
 Foreach ($symbol in $symbols) {
+    ExecuteTest $symbol "HeuristicsOracle"
+}
+Foreach ($symbol in $symbols) {
     ExecuteTest $symbol "Dcca"
+}
+Foreach ($symbol in $symbols) {
+    ExecuteTest $symbol "DccaOracle"
 }
 Foreach ($symbol in $symbols) {
     ExecuteTest $symbol "Slow"
