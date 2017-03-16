@@ -42,11 +42,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	{
 		[Category("Back2BackTestingSlow")]
 		[TestCaseSource(nameof(CreateConfigurationsFast))]
-		public void BreadthFirstSearch(Model model)
+		public void DepthFirstSearch(Model model)
 		{
 			Dcca(model,
 				hazard: false,
-				enableHeuristics: false);
+				enableHeuristics: false,
+				mode: "depth-first");
 		}
 
 		[Category("Back2BackTestingDcca")]
@@ -55,7 +56,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			Dcca(model,
 				hazard: model.ObserverController.ReconfigurationState == ReconfStates.Failed,
-				enableHeuristics: false);
+				enableHeuristics: false,
+				mode: "dcca");
 		}
 
 		[Category("Back2BackTestingHeuristics")]
@@ -64,10 +66,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			Dcca(model,
 				hazard: model.ObserverController.ReconfigurationState == ReconfStates.Failed,
-				enableHeuristics: true);
+				enableHeuristics: true,
+				mode: "heuristics");
 		}
 
-		private void Dcca(Model model, Formula hazard, bool enableHeuristics)
+		private void Dcca(Model model, Formula hazard, bool enableHeuristics, string mode)
 		{
 			var safetyAnalysis = new SafetySharpSafetyAnalysis
 			{
@@ -90,7 +93,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, hazard);
 			Console.WriteLine(result);
 
-			string mode = enableHeuristics ? "heuristics" : (hazard.ToString() == "false" ? "breadth-first" : "dcca");
 			LogResult(model, result, mode);
 		}
 
@@ -107,7 +109,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			var faultCount = result.Faults.Count() - result.SuppressedFaults.Count();
 			var cardinalitySum = result.MinimalCriticalSets.Sum(set => set.Count);
-			var minimalSetCardinalityAverage = cardinalitySum == 0 ? 0 : cardinalitySum / (double)result.MinimalCriticalSets.Count;
+			var minimalSetCardinalityAverage = cardinalitySum == 0 ? -1 : cardinalitySum / (double)result.MinimalCriticalSets.Count;
+			var minimalSetCardinalityMinimum = result.MinimalCriticalSets.Count == 0 ? -1 : result.MinimalCriticalSets.Min(set => set.Count);
+			var minimalSetCardinalityMaximum = result.MinimalCriticalSets.Count == 0 ? -1 : result.MinimalCriticalSets.Max(set => set.Count);
 
 			var exception = result.Exceptions.Values.FirstOrDefault();
 			var exceptionText = exception == null ? null : exception.GetType().Name + " (" + exception.Message + ")";
@@ -119,8 +123,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				exceptionText,											// thrown exception (if any)
 				faultCount,												// # faults
 				(int)result.Time.TotalMilliseconds,						// required time
-				result.CheckedSets.Count,								// # checked sets
-				result.CheckedSets.Count * 100.0 / (1L << faultCount),	// % checked sets
+				result.CheckedSetCount,									// # checked sets
+				result.CheckedSetCount * 100.0 / (1L << faultCount),	// % checked sets
 				result.TrivialChecksCount,								// # trivial checks
 				result.HeuristicSuggestionCount,						// # suggestions
 				result.HeuristicNonTrivialSafeCount * 100.0				// % good suggestions
@@ -129,10 +133,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 					- result.HeuristicTrivialCount - result.HeuristicNonTrivialSafeCount) * 100.0 / result.HeuristicSuggestionCount,
 				result.MinimalCriticalSets.Count,						// # minimal-critical sets
 				minimalSetCardinalityAverage,							// avg. cardinality of minimal-critical sets
-				result.MinimalCriticalSets.Min(set => set.Count),		// min. cardinality of minimal-critical sets
-				result.MinimalCriticalSets.Max(set => set.Count)		// max. cardinality of minimal-critical sets
+				minimalSetCardinalityMinimum,							// min. cardinality of minimal-critical sets
+				minimalSetCardinalityMaximum							// max. cardinality of minimal-critical sets
 			};
 			_csv.WriteLine(string.Join(",", columns));
+			_csv.Flush();
 		}
 
 		private string GetCurrentFault()
