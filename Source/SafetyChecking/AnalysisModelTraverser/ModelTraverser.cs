@@ -172,8 +172,12 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// </summary>
 		protected void RethrowTraversalException()
 		{
-			if (Context.Exception != null)
-				throw new AnalysisException<TExecutableModel>(Context.Exception, Context.CounterExample);
+			if (Context.Exception == null)
+				return;
+
+			if (Context.Exception is ModelException)
+				throw new AnalysisException<TExecutableModel>(Context.Exception.InnerException, Context.CounterExample);
+			throw new AggregateException(Context.Exception);
 		}
 
 		/// <summary>

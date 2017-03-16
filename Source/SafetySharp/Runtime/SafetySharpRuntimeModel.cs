@@ -157,8 +157,15 @@ namespace SafetySharp.Runtime
 			foreach (var fault in NondeterministicFaults)
 				fault.Reset();
 
-			foreach (var component in RootComponents)
-				component.Update();
+			try
+			{
+				foreach (var component in RootComponents)
+					component.Update();
+			}
+			catch (Exception e)
+			{
+				throw new ModelException(e);
+			}
 
 			_restrictRanges();
 		}
