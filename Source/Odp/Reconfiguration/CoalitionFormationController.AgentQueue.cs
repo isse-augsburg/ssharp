@@ -97,17 +97,15 @@ namespace SafetySharp.Odp.Reconfiguration
 					if (_outputQueue.Count > 0)
 					{
 						var next = GetNext(_outputQueue, _inputQueue, ref _firstOutputParticipant);
-						if (next == null)
-							yield break;
-						yield return next;
+						if (next != null)
+							yield return next;
 					}
 
 					if (_inputQueue.Count > 0)
 					{
 						var next = GetNext(_inputQueue, _outputQueue, ref _firstInputParticipant);
-						if (next == null)
-							yield break;
-						yield return next;
+						if (next != null)
+							yield return next;
 					}
 				}
 			}
