@@ -164,6 +164,18 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			CreateCart(new Route(Robots[1], Robots[2]));
 		}
 
+		public void TransitiveRoute()
+		{
+			CreateWorkpieces(1, Produce, Drill, Consume);
+
+			CreateRobot(Produce);
+			CreateRobot(Drill);
+			CreateRobot(Consume);
+
+			CreateCart(new Route(Robots[0], Robots[2]));
+			CreateCart(new Route(Robots[1], Robots[2]));
+		}
+
 		public void CreateObserverController<T>()
 			where T : ObserverController
 		{
@@ -211,6 +223,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			yield return CreateConfiguration<T>(m => m.Ictss5(), nameof(Ictss5), mode);
 			yield return CreateConfiguration<T>(m => m.Ictss6(), nameof(Ictss6), mode);
 			yield return CreateConfiguration<T>(m => m.Ictss7(), nameof(Ictss7), mode);
+			yield return CreateConfiguration<T>(m => m.TransitiveRoute(), nameof(TransitiveRoute), mode);
 		}
 
 		private static Model CreateConfiguration<T>(Action<Model> initializer, string name, AnalysisMode mode)
