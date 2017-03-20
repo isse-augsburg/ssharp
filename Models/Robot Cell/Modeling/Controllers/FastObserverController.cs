@@ -78,6 +78,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				if (ReconfigurationState != ReconfStates.Failed)
 					ReconfigurationState = ReconfStates.Succedded;
 			}
+
+			// validate invariant
+			if (!Agents.All(agent => agent.ValidateConstraints()))
+				throw new Exception("Reconfiguration violated constraints");
 		}
 
 		/// <summary>
@@ -221,16 +225,18 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 						yield return Transport(previous, nextRobot, usedCarts);
 
 						if (nextRobot != current)
+						{
 #if ENABLE_F7 // new error F7: intermediate transport-only roles assigned to path[i] == current; meant for nextRobot
 							yield return Tuple.Create(Agents[path[i]], new Capability[0]);
 #else
 							yield return Tuple.Create(Agents[nextRobot], new Capability[0]);
 #endif
+						}
 
-							previous = nextRobot;
+						previous = nextRobot;
 					}
 #endif
-					}
+				}
 
 				// Collect the capabilities that this robot should apply
 				var capabilities = 
