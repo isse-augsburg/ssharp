@@ -1,0 +1,146 @@
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
+{
+	using System;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.ExecutedModel;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Modeling;
+	using Shouldly;
+	using Utilities;
+	using Xunit;
+	using Xunit.Abstractions;
+
+	// Knuth's die. Described e.g. on http://wwwhome.cs.utwente.nl/~timmer/scoop/casestudies/knuth/knuth.html
+
+	public class EmulateDiceWithCoin
+	{
+		private enum S
+		{
+			InitialThrow = 0,
+			Throw1To3 = 1,
+			Throw4To6 = 2,
+			Throw1Or2 = 3,
+			Throw3OrRethrow = 4,
+			Throw4Or5 = 5,
+			Throw6OrRethrow = 6,
+			Final1 = 7,
+			Final2 = 8,
+			Final3 = 9,
+			Final4 = 10,
+			Final5 = 11,
+			Final6 = 12,
+		}
+
+		public class Model : SimpleModelBase
+		{
+			public override SimpleModelBase CreateDeepCopy()
+			{
+				var m = new Model();
+				m.State = State;
+				return m;
+			}
+
+			public override void Update()
+			{
+				var s = (S)State;
+				switch (s)
+				{
+					case S.InitialThrow:
+						s = Choice.Choose(S.Throw1To3, S.Throw4To6);
+						break;
+					case S.Throw1To3:
+						s = Choice.Choose(S.Throw1Or2, S.Throw3OrRethrow);
+						break;
+					case S.Throw4To6:
+						s = Choice.Choose(S.Throw4Or5, S.Throw6OrRethrow);
+						break;
+					case S.Throw1Or2:
+						s = Choice.Choose(S.Final1, S.Final2);
+						break;
+					case S.Throw3OrRethrow:
+						s = Choice.Choose(S.Final3, S.Throw1To3);
+						break;
+					case S.Throw4Or5:
+						s = Choice.Choose(S.Final4, S.Final5);
+						break;
+					case S.Throw6OrRethrow:
+						s = Choice.Choose(S.Final6, S.Throw4To6);
+						break;
+					case S.Final1:
+						break;
+					case S.Final2:
+						break;
+					case S.Final3:
+						break;
+					case S.Final4:
+						break;
+					case S.Final5:
+						break;
+					case S.Final6:
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+				State = (int)s;
+			}
+
+			public override void SetInitialState()
+			{
+				State = (int) S.InitialThrow;
+			}
+
+			public Formula IsInStateFinal1 = new SimpleExecutableFormula((int) S.Final1);
+		}
+
+		protected TestTraceOutput Output { get; }
+
+		public EmulateDiceWithCoin(ITestOutputHelper output = null)
+		{
+			Output = new TestTraceOutput(output);
+		}
+
+		[Fact]
+		public void Check()
+		{
+			var m = new Model();
+			Probability probabilityOfFinal1;
+			
+			var final1Formula = new UnaryFormula(m.IsInStateFinal1, UnaryOperator.Finally);
+
+			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
+			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.AddFormulaToCheck(final1Formula);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
+			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
+			using (modelChecker)
+			{
+				probabilityOfFinal1 = modelChecker.CalculateProbability(final1Formula);
+			}
+
+			probabilityOfFinal1.Between(0.1, 0.2).ShouldBe(true);
+		}
+	}
+}
