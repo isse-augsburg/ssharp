@@ -168,6 +168,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			return "F2";
 #elif ENABLE_F4
 			return "F4";
+#elif ENABLE_F4b
+			return "F4b";
 #elif ENABLE_F5
 			return "F5";
 #elif ENABLE_F6
