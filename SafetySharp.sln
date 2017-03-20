@@ -1,14 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler", "Source\Compiler\Compiler.csproj", "{8823091C-387F-4F4D-ABCD-8F71D1528CBB}"
 	ProjectSection(ProjectDependencies) = postProject
 		{96F3A853-B30A-4413-98C8-C9AAA4C084DE} = {96F3A853-B30A-4413-98C8-C9AAA4C084DE}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{EC9C05C6-0E59-4DE3-AFE4-1D44B5A512A1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafetySharpTests", "SafetySharpTests\SafetySharpTests.csproj", "{EC9C05C6-0E59-4DE3-AFE4-1D44B5A512A1}"
 	ProjectSection(ProjectDependencies) = postProject
 		{96F3A853-B30A-4413-98C8-C9AAA4C084DE} = {96F3A853-B30A-4413-98C8-C9AAA4C084DE}
 	EndProjectSection
