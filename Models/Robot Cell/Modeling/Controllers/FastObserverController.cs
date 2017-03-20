@@ -51,8 +51,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		protected override void Reconfigure()
 		{
 			var isReconfPossible = IsReconfPossible(_availableRobots, Tasks);
-			if (!isReconfPossible && OracleState != ReconfStates.Failed)
+			if (!isReconfPossible)
 				OracleState = ReconfStates.Failed;
+			else if (OracleState != ReconfStates.Failed)
+				OracleState = ReconfStates.Succedded;
 
 			// find optimal path that satisfies the required capabilities
 			CalculateShortestPaths();
