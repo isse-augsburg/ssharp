@@ -46,15 +46,6 @@ New-Item -ItemType directory -Path $resultdir -Force
 New-Item -ItemType directory -Path $tmp_dir -Force
 Set-Location -Path $compilate_directory
 
-$csv_path = Join-Path $compilate_directory "evaluation_results.csv"
-if (Test-Path -Path $csv_path)
-{
-	rm $csv_path
-}
-Add-Content $csv_path "fault,analysis mode,model name,thrown exception,# faults,required time (ms),# checked sets,% checked sets,# trivial checks,# suggestions,% good suggestions,% bad suggestions,# mininal-critical sets,avg. cardinality,min. cardinality,max. cardinality`r`n"
-
-$symbols=@("ENABLE_F1", "ENABLE_F2", "ENABLE_F4", "ENABLE_F4b", "ENABLE_F5", "ENABLE_F6", "ENABLE_F7", "NO_ERRORS")
-
 function CompileProject($symbol)
 {
 	Write-Output("Compiling...`n")
@@ -77,6 +68,23 @@ function ExecuteTest($symbol, $category)
     $errorfilename = $resultdir + "\"+$symbol+"_"+$category+".err"
     Start-Process -FilePath $nunit -ArgumentList $arguments -WorkingDirectory $compilate_directory -NoNewWindow -RedirectStandardError $errorfilename -RedirectStandardOutput $outputfilename -Wait
 }
+
+############## Analysis 1: remove detected faults ##############
+ExecuteTest "ENABLE_F1,ENABLE_F2,ENABLE_F4,ENABLE_F4b,ENABLE_F5,ENABLE_F6,ENABLE_F7" "HeuristicsOracle" # detects F2
+ExecuteTest "ENABLE_F1,ENABLE_F4,ENABLE_F4b,ENABLE_F5,ENABLE_F6,ENABLE_F7" "HeuristicsOracle" # detects F1 and F6
+ExecuteTest "ENABLE_F4,ENABLE_F4b,ENABLE_F5,ENABLE_F7" "HeuristicsOracle" # detects F5 and F7
+ExecuteTest "ENABLE_F4,ENABLE_F4b" "HeuristicsOracle" # detects nothing
+
+# cleanup from previous runs & above
+$csv_path = Join-Path $compilate_directory "evaluation_results.csv"
+if (Test-Path -Path $csv_path)
+{
+	rm $csv_path
+}
+Add-Content $csv_path "fault,analysis mode,model name,thrown exception,# faults,required time (ms),# checked sets,% checked sets,# trivial checks,# suggestions,% good suggestions,% bad suggestions,# mininal-critical sets,avg. cardinality,min. cardinality,max. cardinality`r`n"
+
+############## Analysis 2: test individual faults ##############
+$symbols=@("ENABLE_F1", "ENABLE_F2", "ENABLE_F4", "ENABLE_F4b", "ENABLE_F5", "ENABLE_F6", "ENABLE_F7", "NO_ERRORS")
 
 Foreach ($symbol in $symbols) {
     ExecuteTest $symbol "Heuristics"
