@@ -53,7 +53,7 @@ if (Test-Path -Path $csv_path)
 }
 Add-Content $csv_path "fault,analysis mode,model name,thrown exception,# faults,required time (ms),# checked sets,% checked sets,# trivial checks,# suggestions,% good suggestions,% bad suggestions,# mininal-critical sets,avg. cardinality,min. cardinality,max. cardinality`r`n"
 
-$symbols=@("ENABLE_F1", "ENABLE_F2", "ENABLE_F4", , "ENABLE_F4b", "ENABLE_F5", "ENABLE_F6", "ENABLE_F7", "NO_ERRORS")
+$symbols=@("ENABLE_F1", "ENABLE_F2", "ENABLE_F4", "ENABLE_F4b", "ENABLE_F5", "ENABLE_F6", "ENABLE_F7", "NO_ERRORS")
 
 function CompileProject($symbol)
 {
