@@ -35,13 +35,9 @@ namespace Tests.DataStructures.MarkovChainExamples
 	using ISSE.SafetyChecking.Formula;
 	using JetBrains.Annotations;
 	using MarkovDecisionProcessExamples;
-	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
-	using SafetySharp.Utilities;
 
 	public static class AllExamples
 	{

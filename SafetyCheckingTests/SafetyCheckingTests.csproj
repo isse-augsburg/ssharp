@@ -37,6 +37,14 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JetBrains.Annotations, Version=10.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\Dependencies\JetBrains.Annotations.10.0.0\lib\net20\JetBrains.Annotations.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Shouldly, Version=2.7.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
+      <HintPath>..\Dependencies\Shouldly.2.7.0\lib\net40\Shouldly.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -66,7 +74,19 @@
     <Compile Include="..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="DataStructures\BidirectionalGraphTests.cs" />
+    <Compile Include="DataStructures\DoubleVectorTests.cs" />
+    <Compile Include="DataStructures\MarkovChainExamples.cs" />
+    <Compile Include="DataStructures\MarkovChainTests.cs" />
+    <Compile Include="DataStructures\MarkovDecisionProcessExamples.cs" />
+    <Compile Include="DataStructures\MarkovDecisionProcessTests.cs" />
+    <Compile Include="DataStructures\SparseDoubleMatrixTests.cs" />
+    <Compile Include="ProbabilisticModelChecker\BuiltinDtmcModelCheckerTests.cs" />
+    <Compile Include="ProbabilisticModelChecker\BuiltinMdpModelCheckerTests.cs" />
+    <Compile Include="ProbabilisticModelChecker\ExternalDtmcModelCheckerMrmcTests.cs" />
+    <Compile Include="ProbabilisticModelChecker\ExternalMdpModelCheckerPrismTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\TestTraceOutput.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

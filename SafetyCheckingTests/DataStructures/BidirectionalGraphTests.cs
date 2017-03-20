@@ -29,59 +29,59 @@ using System.Threading.Tasks;
 namespace Tests.DataStructures
 {
 	using ISSE.SafetyChecking.GenericDataStructures;
-	using SafetySharp.Runtime;
-	using Shouldly;
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
 
-	public class DoubleVectorTests
+	public class BidirectionalGraphTests
 	{
-		/// <summary>
-		///   Gets the output that writes to the test output stream.
-		/// </summary>
+
 		public TestTraceOutput Output { get; }
 
-		public DoubleVectorTests(ITestOutputHelper output)
+		private BidirectionalGraph _graph;
+
+
+		public BidirectionalGraphTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 		}
 
-		[Fact]
-		public void PassingTest()
+		private void CreateExemplaryGraphChain1()
 		{
-			var vec = new DoubleVector();
-			vec[0] = 1.0;
-			vec[7] = 2.0;
-			vec[0].ShouldBe(1.0);
-			vec[7].ShouldBe(2.0);
-			vec.Count.ShouldBe(8);
-			var sum = 0.0;
-			for (int i = 0; i < vec.Count; i++)
-			{
-				sum += vec[i];
-			}
-			sum.ShouldBe(3.0);
-			vec[1] = 3.0;
-			vec[2] = 4.0;
-			vec[4] = 5.0;
-			vec[3] = 6.0;
-			vec[6] = 7.0;
-			vec[5] = 8.0;
-			vec[0].ShouldBe(1.0);
-			vec[1].ShouldBe(3.0);
-			vec[2].ShouldBe(4.0);
-			vec[3].ShouldBe(6.0);
-			vec[4].ShouldBe(5.0);
-			vec[5].ShouldBe(8.0);
-			vec[6].ShouldBe(7.0);
-			vec[7].ShouldBe(2.0);
-			sum = 0.0;
-			for (int i = 0; i < vec.Count; i++)
-			{
-				sum += vec[i];
-			}
-			sum.ShouldBe(36.0);
+			_graph = new BidirectionalGraph();
+			_graph.AddVerticesAndEdge(new Edge(0, 0));
+			_graph.AddVerticesAndEdge(new Edge(0, 1));
+			_graph.AddVerticesAndEdge(new Edge(1, 1));
+		}
+
+		private void CreateExemplaryGraphChain2()
+		{
+			_graph = new BidirectionalGraph();
+			_graph.AddVerticesAndEdge(new Edge(0, 1));
+			_graph.AddVerticesAndEdge(new Edge(1, 1));
+		}
+
+		[Fact]
+		public void CalculateAncestorsTest()
+		{
+			CreateExemplaryGraphChain1();
+			
+			Assert.Equal(1, _graph.InEdges(0).Count());
+			Assert.Equal(2, _graph.InEdges(1).Count());
+			Assert.Equal(2, _graph.OutEdges(0).Count());
+			Assert.Equal(1, _graph.OutEdges(1).Count());
+		}
+
+
+		[Fact]
+		public void CalculateAncestors2Test()
+		{
+			CreateExemplaryGraphChain2();
+
+			Assert.Equal(0, _graph.InEdges(0).Count());
+			Assert.Equal(2, _graph.InEdges(1).Count());
+			Assert.Equal(1, _graph.OutEdges(0).Count());
+			Assert.Equal(1, _graph.OutEdges(1).Count());
 		}
 	}
 }
