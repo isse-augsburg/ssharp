@@ -34,8 +34,34 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 	// Knuth's die. Described e.g. on http://wwwhome.cs.utwente.nl/~timmer/scoop/casestudies/knuth/knuth.html
 
-	public class EmulateDiceWithCoin
+	public class EmulateDiceWithCoin : AnalysisTest
 	{
+		public EmulateDiceWithCoin(ITestOutputHelper output = null) : base(output)
+		{
+		}
+
+		[Fact]
+		public void Check()
+		{
+			var m = new Model();
+			Probability probabilityOfFinal1;
+
+			var final1Formula = new UnaryFormula(Model.IsInStateFinal1, UnaryOperator.Finally);
+
+			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
+			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.AddFormulaToCheck(final1Formula);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
+			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
+			using (modelChecker)
+			{
+				probabilityOfFinal1 = modelChecker.CalculateProbability(final1Formula);
+			}
+
+			probabilityOfFinal1.Between(0.1, 0.2).ShouldBe(true);
+		}
+
 		private enum S
 		{
 			InitialThrow = 0,
@@ -55,13 +81,6 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 		public class Model : SimpleModelBase
 		{
-			public override SimpleModelBase CreateDeepCopy()
-			{
-				var m = new Model();
-				m.State = State;
-				return m;
-			}
-
 			public override void Update()
 			{
 				var s = (S)State;
@@ -106,41 +125,16 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 				State = (int)s;
 			}
 
+			public override Fault[] Faults { get; } = new Fault[0];
+			public override bool[] LocalBools { get; } = new bool[0];
+			public override int[] LocalInts { get; } = new int[0];
+
 			public override void SetInitialState()
 			{
 				State = (int) S.InitialThrow;
 			}
 
-			public Formula IsInStateFinal1 = new SimpleExecutableFormula((int) S.Final1);
-		}
-
-		protected TestTraceOutput Output { get; }
-
-		public EmulateDiceWithCoin(ITestOutputHelper output = null)
-		{
-			Output = new TestTraceOutput(output);
-		}
-
-		[Fact]
-		public void Check()
-		{
-			var m = new Model();
-			Probability probabilityOfFinal1;
-			
-			var final1Formula = new UnaryFormula(m.IsInStateFinal1, UnaryOperator.Finally);
-
-			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
-			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			markovChainGenerator.AddFormulaToCheck(final1Formula);
-			var dtmc = markovChainGenerator.GenerateMarkovChain();
-			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
-			using (modelChecker)
-			{
-				probabilityOfFinal1 = modelChecker.CalculateProbability(final1Formula);
-			}
-
-			probabilityOfFinal1.Between(0.1, 0.2).ShouldBe(true);
+			public static Formula IsInStateFinal1 = new SimpleStateInRangeFormula((int) S.Final1);
 		}
 	}
 }

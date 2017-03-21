@@ -114,7 +114,7 @@ namespace Tests.SimpleExecutableModel
                 return simpleExecutableModel;
             };
             
-            var faults = new Fault[0];
+            var faults = inputModel.Faults;
             return new CoupledExecutableModelCreator<SimpleExecutableModel>(creatorFunc, inputModel, formulasToCheckInBaseModel, faults);
         }
 
@@ -132,14 +132,14 @@ namespace Tests.SimpleExecutableModel
 
         public override Expression CreateExecutableExpressionFromAtomarPropositionFormula(AtomarPropositionFormula formula)
         {
-            var executableStateFormula = formula as SimpleExecutableFormula;
-            if (executableStateFormula != null)
+            var atomarProposition = formula as SimpleAtomarProposition;
+            if (atomarProposition != null)
             {
-                Func<bool> formulaEvaluatesToTrue = () => executableStateFormula.Evaluate(Model.State);
+                Func<bool> formulaEvaluatesToTrue = () => atomarProposition.Evaluate(Model);
                 return Expression.Invoke(Expression.Constant(formulaEvaluatesToTrue));
             }
 
-            throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use SimpleExecutableFormula instead.");
+            throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use SimpleAtomarProposition instead.");
         }
     }
 }

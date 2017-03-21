@@ -20,33 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
-namespace Tests.SimpleExecutableModel
+namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 {
+    using System;
+    using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+    using ISSE.SafetyChecking.ExecutedModel;
     using ISSE.SafetyChecking.Formula;
-
-    public class SimpleExecutableFormula : AtomarPropositionFormula
+    using ISSE.SafetyChecking.Modeling;
+    using Shouldly;
+    using Utilities;
+    using Xunit;
+    using Xunit.Abstractions;
+    
+    public abstract class AnalysisTest
     {
-        public int From { get; }
-        public int To { get; }
+        protected TestTraceOutput Output { get; }
 
-        public SimpleExecutableFormula(int from, int to)
+        protected AnalysisTest(ITestOutputHelper output = null)
         {
-            From = from;
-            To = to;
-        }
-
-        public SimpleExecutableFormula(int exact)
-        {
-            From = exact;
-            To = exact;
-        }
-
-        public bool Evaluate(int state)
-        {
-            if (state >= From && state <= To)
-                return true;
-            return false;
+            Output = new TestTraceOutput(output);
         }
     }
 }

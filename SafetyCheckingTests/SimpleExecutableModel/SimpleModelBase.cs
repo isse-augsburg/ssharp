@@ -30,9 +30,11 @@ namespace Tests.SimpleExecutableModel
         
         internal Choice Choice { get; set; } = new Choice();
 
-        public Fault[] Faults = new Fault[0];
+        public abstract Fault[] Faults { get; }
 
-        public abstract SimpleModelBase CreateDeepCopy();
+        public abstract bool[] LocalBools { get; }
+
+        public abstract int[] LocalInts { get; }
 
         public virtual void SetInitialState()
         {

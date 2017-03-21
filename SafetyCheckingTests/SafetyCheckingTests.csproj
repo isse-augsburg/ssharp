@@ -87,9 +87,11 @@
     <Compile Include="ProbabilisticModelChecker\ExternalMdpModelCheckerPrismTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\emulate dice with coin.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\permanent fault leads to invariant violation only in specific step.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\AnalysisTest.cs" />
     <Compile Include="SimpleExecutableModel\SimpleModelBase.cs" />
     <Compile Include="SimpleExecutableModel\SimpleCounterExampleSerialization.cs" />
-    <Compile Include="SimpleExecutableModel\SimpleExecutableFormula.cs" />
+    <Compile Include="SimpleExecutableModel\SimpleAtomarProposition.cs" />
     <Compile Include="SimpleExecutableModel\SimpleExecutableModel.cs" />
     <Compile Include="SimpleExecutableModel\SimpleModelChecking.cs" />
     <Compile Include="SimpleExecutableModel\SimpleModelSerializer.cs" />
