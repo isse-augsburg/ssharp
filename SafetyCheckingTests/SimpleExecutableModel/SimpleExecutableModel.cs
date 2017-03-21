@@ -28,11 +28,7 @@ using ISSE.SafetyChecking.Utilities;
 
 namespace Tests.SimpleExecutableModel
 {
-	using System.ComponentModel;
-	using System.IO;
 	using System.Linq;
-	using System.Text;
-	using ISSE.SafetyChecking.Modeling;
 
 	public unsafe class SimpleExecutableModel :  ExecutableModel<SimpleExecutableModel>
 	{
@@ -46,17 +42,18 @@ namespace Tests.SimpleExecutableModel
 
 		public override CounterExampleSerialization<SimpleExecutableModel> CounterExampleSerialization => new SimpleExecutableModelCounterExampleSerialization();
 		
-		public SimpleExecutableModel(byte[] serializedModel, Formula[] formulas)
+		public SimpleExecutableModel(byte[] serializedModel)
 		{
 			SerializedModel = serializedModel;
-			Formulas = formulas;
 			InitializeFromSerializedModel();
 		}
 
 		private void InitializeFromSerializedModel()
 		{
-			Model = SimpleModelSerializer.DeserializeFromByteArray(SerializedModel);
-			
+			var modelWithFormula = SimpleModelSerializer.DeserializeFromByteArray(SerializedModel);
+			Model = modelWithFormula.Item1;
+			Formulas = modelWithFormula.Item2;
+
 			var atomarPropositionVisitor = new CollectAtomarPropositionFormulasVisitor();
 			_atomarPropositionFormulas = atomarPropositionVisitor.AtomarPropositionFormulas.ToArray();
 			foreach (var stateFormula in Formulas)
@@ -69,8 +66,8 @@ namespace Tests.SimpleExecutableModel
 			Faults = Model.Faults;
 			UpdateFaultSets();
 
-			_deserialize = SimpleModelSerializer.DeserializeFastInPlace(Model);
-			_serialize = SimpleModelSerializer.SerializeFastInPlace(Model);
+			_deserialize = SimpleModelSerializer.CreateFastInPlaceDeserializer(Model);
+			_serialize = SimpleModelSerializer.CreateFastInPlaceSerializer(Model);
 			_restrictRanges = () => { };
 			
 			InitializeConstructionState();
@@ -114,8 +111,8 @@ namespace Tests.SimpleExecutableModel
 				// Each model checking thread gets its own SimpleExecutableModel.
 				// Thus, we serialize the C# model and load this file again.
 				// The serialization can also be used for saving counter examples
-				var serializedModel = SimpleModelSerializer.SerializeToByteArray(inputModel);
-				var simpleExecutableModel=new SimpleExecutableModel(serializedModel,formulasToCheckInBaseModel);
+				var serializedModelWithFormulas = SimpleModelSerializer.SerializeToByteArray(inputModel, formulasToCheckInBaseModel);
+				var simpleExecutableModel=new SimpleExecutableModel(serializedModelWithFormulas);
 				return simpleExecutableModel;
 			};
 			

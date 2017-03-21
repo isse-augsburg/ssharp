@@ -23,98 +23,83 @@
 
 namespace Tests.SimpleExecutableModel
 {
-    using System;
-    using ISSE.SafetyChecking.Formula;
-    using System.Reflection;
+	using ISSE.SafetyChecking.Formula;
 
-    public abstract class SimpleAtomarProposition : AtomarPropositionFormula
-    {
-        public abstract bool Evaluate(SimpleModelBase model);
-    }
+	public abstract class SimpleAtomarProposition : AtomarPropositionFormula
+	{
+		protected SimpleAtomarProposition(string label)
+			: base(label)
+		{
+			
+		}
 
-    /*
-    public class SimpleFieldOfModelIsTrue : SimpleAtomarProposition
-    {
-        public string FieldName { get; }
-        public FieldInfo Field { get; }
+		public abstract bool Evaluate(SimpleModelBase model);
+	}
 
-        public SimpleFieldOfModelIsTrue(Type type, string fieldName)
-        {
-            FieldName = fieldName;
-            Field = type.GetField(FieldName);
-        }
-        public override bool Evaluate(SimpleModelBase model)
-        {
-            var value = (bool) Field.GetValue(model);
-            return value;
-        }
-    }
-    */
+	public class SimpleLocalVarIsTrue : SimpleAtomarProposition
+	{
+		public int Index { get; }
 
-    public class SimpleLocalVarIsTrue : SimpleAtomarProposition
-    {
-        public int Index { get; }
+		public SimpleLocalVarIsTrue(int index, string label = null) : base(label)
+		{
+			Index = index;
+		}
+		public override bool Evaluate(SimpleModelBase model)
+		{
+			return model.LocalBools[Index];
+		}
+	}
 
-        public SimpleLocalVarIsTrue(int index)
-        {
-            Index = index;
-        }
-        public override bool Evaluate(SimpleModelBase model)
-        {
-            return model.LocalBools[Index];
-        }
-    }
+	public class SimpleLocalVarInRangeFormula : SimpleAtomarProposition
+	{
+		public int Index { get; }
+		public int From { get; }
+		public int To { get; }
 
-    public class SimpleLocalVarInRangeFormula : SimpleAtomarProposition
-    {
-        public int Index { get; }
-        public int From { get; }
-        public int To { get; }
+		public SimpleLocalVarInRangeFormula(int index, int from, int to, string label = null) : base(label)
+		{
+			Index = index;
+			From = from;
+			To = to;
+		}
 
-        public SimpleLocalVarInRangeFormula(int index, int from, int to)
-        {
-            Index = index;
-            From = from;
-            To = to;
-        }
+		public SimpleLocalVarInRangeFormula(int index, int exact, string label = null) : base(label)
+		{
+			Index = index;
+			From = exact;
+			To = exact;
+		}
 
-        public SimpleLocalVarInRangeFormula(int index, int exact)
-        {
-            Index = index;
-            From = exact;
-            To = exact;
-        }
+		public override bool Evaluate(SimpleModelBase model)
+		{
+			if (model.LocalInts[Index] >= From && model.LocalInts[Index] <= To)
+				return true;
+			return false;
+		}
+	}
 
-        public override bool Evaluate(SimpleModelBase model)
-        {
-            if (model.LocalInts[Index] >= From && model.LocalInts[Index] <= To)
-                return true;
-            return false;
-        }
-    }
+	public class SimpleStateInRangeFormula : SimpleAtomarProposition
+	{
+		public int From { get; }
+		public int To { get; }
 
-    public class SimpleStateInRangeFormula : SimpleAtomarProposition
-    {
-        public int From { get; }
-        public int To { get; }
+		public SimpleStateInRangeFormula(int from, int to, string label=null) : base(label)
+		{
+			From = from;
+			To = to;
+		}
 
-        public SimpleStateInRangeFormula(int from, int to)
-        {
-            From = from;
-            To = to;
-        }
+		public SimpleStateInRangeFormula(int exact, string label = null) : base(label)
+		{
+			From = exact;
+			To = exact;
+		}
 
-        public SimpleStateInRangeFormula(int exact)
-        {
-            From = exact;
-            To = exact;
-        }
-
-        public override bool Evaluate(SimpleModelBase model)
-        {
-            if (model.State >= From && model.State <= To)
-                return true;
-            return false;
-        }
-    }
+		public override bool Evaluate(SimpleModelBase model)
+		{
+			if (model.State >= From && model.State <= To)
+				return true;
+			return false;
+		}
+	}
 }

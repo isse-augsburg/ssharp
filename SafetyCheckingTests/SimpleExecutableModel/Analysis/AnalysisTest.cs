@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
+namespace Tests.SimpleExecutableModel.Analysis
 {
     using System;
     using ISSE.SafetyChecking.DiscreteTimeMarkovChain;

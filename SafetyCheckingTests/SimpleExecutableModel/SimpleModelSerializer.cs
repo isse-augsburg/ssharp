@@ -26,50 +26,150 @@ namespace Tests.SimpleExecutableModel
 	using System.Text;
 	using ISSE.SafetyChecking.Utilities;
 	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Linq;
 	using System.Reflection;
-	using ISSE.SafetyChecking.AnalysisModel;
+	using System.Runtime.Serialization.Formatters.Binary;
 	using ISSE.SafetyChecking.ExecutableModel;
 	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Formula;
 
 	public static unsafe class SimpleModelSerializer
 	{
-		public static byte[] SerializeToByteArray(SimpleModelBase model)
+		public static void WriteFormula(BinaryWriter writer, Formula formula)
+		{
+			if (formula is SimpleStateInRangeFormula)
+			{
+				var innerFormula = (SimpleStateInRangeFormula)formula;
+				writer.Write(1);
+				writer.Write(innerFormula.Label);
+				writer.Write(innerFormula.From);
+				writer.Write(innerFormula.To);
+			}
+			else if (formula is SimpleLocalVarInRangeFormula)
+			{
+				var innerFormula = (SimpleLocalVarInRangeFormula)formula;
+				writer.Write(2);
+				writer.Write(innerFormula.Label);
+				writer.Write(innerFormula.Index);
+				writer.Write(innerFormula.From);
+				writer.Write(innerFormula.To);
+			}
+			else if (formula is SimpleLocalVarIsTrue)
+			{
+				var innerFormula = (SimpleLocalVarIsTrue)formula;
+				writer.Write(3);
+				writer.Write(innerFormula.Label);
+				writer.Write(innerFormula.Index);
+			}
+			else if (formula is UnaryFormula)
+			{
+				var innerFormula = (UnaryFormula)formula;
+				writer.Write(4);
+				writer.Write((int)innerFormula.Operator);
+				WriteFormula(writer, innerFormula.Operand);
+			}
+			else
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		public static Formula ReadFormula(BinaryReader reader)
+		{
+			var type = reader.ReadInt32();
+			if (type==1)
+			{
+				var label = reader.ReadString();
+				var from = reader.ReadInt32();
+				var to = reader.ReadInt32();
+				return new SimpleStateInRangeFormula(from,to,label);
+
+			}
+			else if (type == 2)
+			{
+				var label = reader.ReadString();
+				var index = reader.ReadInt32();
+				var from = reader.ReadInt32();
+				var to = reader.ReadInt32();
+				return new SimpleLocalVarInRangeFormula(index,from, to, label);
+			}
+			else if (type == 3)
+			{
+				var label = reader.ReadString();
+				var index = reader.ReadInt32();
+				return new SimpleLocalVarIsTrue(index, label);
+			}
+			else if (type == 4)
+			{
+				var @operator = (UnaryOperator)reader.ReadInt32();
+				var operand = ReadFormula(reader);
+				return new UnaryFormula(operand,@operator);
+			}
+			else
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		public static byte[] SerializeToByteArray(SimpleModelBase model, Formula[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 
 			using (var buffer = new MemoryStream())
 			using (var writer = new BinaryWriter(buffer, Encoding.UTF8, leaveOpen: true))
 			{
+				// write C# type of model
 				var exactTypeOfModel = model.GetType();
 				var exactTypeOfModelName = exactTypeOfModel.AssemblyQualifiedName;
 				Requires.NotNull(exactTypeOfModelName, $"{exactTypeOfModelName} != null");
 				writer.Write(exactTypeOfModelName);
+
+				// write state
 				writer.Write(model.State);
+
+				// write formulas
+				writer.Write((uint) formulas.Length);
+				foreach (var formula in formulas)
+				{
+					WriteFormula(writer, formula);
+				}
+
+				// return result as array
 				return buffer.ToArray();
 			}
 		}
 
-		public static SimpleModelBase DeserializeFromByteArray(byte[] serializedModel)
+		public static Tuple<SimpleModelBase,Formula[]> DeserializeFromByteArray(byte[] serializedModel)
 		{
 			Requires.NotNull(serializedModel, nameof(serializedModel));
 
 			using (var buffer = new MemoryStream(serializedModel))
 			using (var reader = new BinaryReader(buffer, Encoding.UTF8, leaveOpen: true))
 			{
+				// read C# type of model
 				var exactTypeOfModelName = reader.ReadString();
+
+				// read state and instantiate model
 				var state = reader.ReadInt32();
 				var exactTypeOfModel = Type.GetType(exactTypeOfModelName);
 				Requires.NotNull(exactTypeOfModel, $"{exactTypeOfModel} != null");
 				var deserializedModel = (SimpleModelBase)Activator.CreateInstance(exactTypeOfModel);
 				deserializedModel.State = state;
-				return deserializedModel;
+
+				// read formulas
+				var formulaNumber = reader.ReadUInt32();
+				var formulas = new Formula[formulaNumber];
+				for (var i = 0; i < formulaNumber; ++i)
+				{
+					formulas[i] = ReadFormula(reader);
+				}
+
+				//return tuple of model and formulas
+				return new Tuple<SimpleModelBase, Formula[]>(deserializedModel,formulas);
 			}
 		}
 
-		public static SerializationDelegate DeserializeFastInPlace(SimpleModelBase model)
+		public static SerializationDelegate CreateFastInPlaceDeserializer(SimpleModelBase model)
 		{
 			var permanentFaults = model.Faults.OfType<PermanentFault>().ToArray();
 
@@ -99,7 +199,7 @@ namespace Tests.SimpleExecutableModel
 		}
 
 
-		public static SerializationDelegate SerializeFastInPlace(SimpleModelBase model)
+		public static SerializationDelegate CreateFastInPlaceSerializer(SimpleModelBase model)
 		{
 			var permanentFaults = model.Faults.OfType<PermanentFault>().ToArray();
 
