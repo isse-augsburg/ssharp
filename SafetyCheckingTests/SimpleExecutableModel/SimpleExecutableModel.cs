@@ -28,118 +28,123 @@ using ISSE.SafetyChecking.Utilities;
 
 namespace Tests.SimpleExecutableModel
 {
-    using System.ComponentModel;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using ISSE.SafetyChecking.Modeling;
+	using System.ComponentModel;
+	using System.IO;
+	using System.Linq;
+	using System.Text;
+	using ISSE.SafetyChecking.Modeling;
 
-    public unsafe class SimpleExecutableModel :  ExecutableModel<SimpleExecutableModel>
-    {
-        internal SimpleModelBase Model { get; private set; }
-        
-        public override int StateVectorSize { get; } = sizeof(int);
+	public unsafe class SimpleExecutableModel :  ExecutableModel<SimpleExecutableModel>
+	{
+		internal SimpleModelBase Model { get; private set; }
+		
+		public override int StateVectorSize { get; } = sizeof(int) + sizeof(long);
 
-        private AtomarPropositionFormula[] _atomarPropositionFormulas;
+		private AtomarPropositionFormula[] _atomarPropositionFormulas;
 
-        public override AtomarPropositionFormula[] AtomarPropositionFormulas => _atomarPropositionFormulas;
+		public override AtomarPropositionFormula[] AtomarPropositionFormulas => _atomarPropositionFormulas;
 
-        public override CounterExampleSerialization<SimpleExecutableModel> CounterExampleSerialization => new SimpleExecutableModelCounterExampleSerialization();
-        
-        public SimpleExecutableModel(byte[] serializedModel, Formula[] formulas)
-        {
-            SerializedModel = serializedModel;
-            Formulas = formulas;
-            InitializeFromSerializedModel();
-        }
+		public override CounterExampleSerialization<SimpleExecutableModel> CounterExampleSerialization => new SimpleExecutableModelCounterExampleSerialization();
+		
+		public SimpleExecutableModel(byte[] serializedModel, Formula[] formulas)
+		{
+			SerializedModel = serializedModel;
+			Formulas = formulas;
+			InitializeFromSerializedModel();
+		}
 
-        private void InitializeFromSerializedModel()
-        {
-            Model = SimpleModelSerializer.Deserialize(SerializedModel);
-            
-            var atomarPropositionVisitor = new CollectAtomarPropositionFormulasVisitor();
-            _atomarPropositionFormulas = atomarPropositionVisitor.AtomarPropositionFormulas.ToArray();
-            foreach (var stateFormula in Formulas)
-            {
-                atomarPropositionVisitor.Visit(stateFormula);
-            }
+		private void InitializeFromSerializedModel()
+		{
+			Model = SimpleModelSerializer.DeserializeFromByteArray(SerializedModel);
+			
+			var atomarPropositionVisitor = new CollectAtomarPropositionFormulasVisitor();
+			_atomarPropositionFormulas = atomarPropositionVisitor.AtomarPropositionFormulas.ToArray();
+			foreach (var stateFormula in Formulas)
+			{
+				atomarPropositionVisitor.Visit(stateFormula);
+			}
 
-            StateConstraints = new Func<bool>[0];
-            
-            Faults = new Fault[0];
-            UpdateFaultSets();
+			StateConstraints = new Func<bool>[0];
+			
+			Faults = Model.Faults;
+			UpdateFaultSets();
 
-            _deserialize = state =>
-            {
-                Model.State = *((int*)state);
-            };
-            _serialize = state =>
-            {
-                *((int*)state) = Model.State;
-            };
-            _restrictRanges = () => { };
-            
-            InitializeConstructionState();
-            CheckConsistencyAfterInitialization();
-        }
+			_deserialize = SimpleModelSerializer.DeserializeFastInPlace(Model);
+			_serialize = SimpleModelSerializer.SerializeFastInPlace(Model);
+			_restrictRanges = () => { };
+			
+			InitializeConstructionState();
+			CheckConsistencyAfterInitialization();
+		}
 
-        public override void ExecuteInitialStep()
-        {
-            Model.SetInitialState();
-        }
+		public override void ExecuteInitialStep()
+		{
+			foreach (var fault in NondeterministicFaults)
+				fault.Reset();
 
-        public override void ExecuteStep()
-        {
-            Model.Update();
-        }
+			Model.SetInitialState();
+		}
 
-        internal override void SetChoiceResolver(ChoiceResolver choiceResolver)
-        {
-            Model.Choice.Resolver = choiceResolver;
-        }
-        
-        public static CoupledExecutableModelCreator<SimpleExecutableModel> CreateExecutedModelCreator(SimpleModelBase inputModel, params Formula[] formulasToCheckInBaseModel)
-        {
-            Requires.NotNull(inputModel, nameof(inputModel));
-            Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
-            
+		public override void ExecuteStep()
+		{
+			foreach (var fault in NondeterministicFaults)
+				fault.Reset();
 
-            Func<int, SimpleExecutableModel> creatorFunc = (reservedBytes) =>
-            {
-                // Each model checking thread gets its own SimpleExecutableModel.
-                // Thus, we serialize the C# model and load this file again.
-                // The serialization can also be used for saving counter examples
-                var serializedModel = SimpleModelSerializer.Serialize(inputModel);
-                var simpleExecutableModel=new SimpleExecutableModel(serializedModel,formulasToCheckInBaseModel);
-                return simpleExecutableModel;
-            };
-            
-            var faults = inputModel.Faults;
-            return new CoupledExecutableModelCreator<SimpleExecutableModel>(creatorFunc, inputModel, formulasToCheckInBaseModel, faults);
-        }
+			Model.Update();
+		}
 
-        public static ExecutableModelCreator<SimpleExecutableModel> CreateExecutedModelFromFormulasCreator(SimpleModelBase model)
-        {
-            Requires.NotNull(model, nameof(model));
+		internal override void SetChoiceResolver(ChoiceResolver choiceResolver)
+		{
+			Model.Choice.Resolver = choiceResolver;
 
-            Func<Formula[], CoupledExecutableModelCreator<SimpleExecutableModel>> creator = formulasToCheckInBaseModel =>
-            {
-                Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
-                return CreateExecutedModelCreator(model, formulasToCheckInBaseModel);
-            };
-            return new ExecutableModelCreator<SimpleExecutableModel>(creator, model);
-        }
+			foreach (var fault in Model.Faults)
+			{
+				fault.Choice.Resolver = choiceResolver;
+			}
+		}
+		
+		public static CoupledExecutableModelCreator<SimpleExecutableModel> CreateExecutedModelCreator(SimpleModelBase inputModel, params Formula[] formulasToCheckInBaseModel)
+		{
+			Requires.NotNull(inputModel, nameof(inputModel));
+			Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
+			
 
-        public override Expression CreateExecutableExpressionFromAtomarPropositionFormula(AtomarPropositionFormula formula)
-        {
-            var atomarProposition = formula as SimpleAtomarProposition;
-            if (atomarProposition != null)
-            {
-                Func<bool> formulaEvaluatesToTrue = () => atomarProposition.Evaluate(Model);
-                return Expression.Invoke(Expression.Constant(formulaEvaluatesToTrue));
-            }
+			Func<int, SimpleExecutableModel> creatorFunc = (reservedBytes) =>
+			{
+				// Each model checking thread gets its own SimpleExecutableModel.
+				// Thus, we serialize the C# model and load this file again.
+				// The serialization can also be used for saving counter examples
+				var serializedModel = SimpleModelSerializer.SerializeToByteArray(inputModel);
+				var simpleExecutableModel=new SimpleExecutableModel(serializedModel,formulasToCheckInBaseModel);
+				return simpleExecutableModel;
+			};
+			
+			var faults = inputModel.Faults;
+			return new CoupledExecutableModelCreator<SimpleExecutableModel>(creatorFunc, inputModel, formulasToCheckInBaseModel, faults);
+		}
 
-            throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use SimpleAtomarProposition instead.");
-        }
-    }
+		public static ExecutableModelCreator<SimpleExecutableModel> CreateExecutedModelFromFormulasCreator(SimpleModelBase model)
+		{
+			Requires.NotNull(model, nameof(model));
+
+			Func<Formula[], CoupledExecutableModelCreator<SimpleExecutableModel>> creator = formulasToCheckInBaseModel =>
+			{
+				Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
+				return CreateExecutedModelCreator(model, formulasToCheckInBaseModel);
+			};
+			return new ExecutableModelCreator<SimpleExecutableModel>(creator, model);
+		}
+
+		public override Expression CreateExecutableExpressionFromAtomarPropositionFormula(AtomarPropositionFormula formula)
+		{
+			var atomarProposition = formula as SimpleAtomarProposition;
+			if (atomarProposition != null)
+			{
+				Func<bool> formulaEvaluatesToTrue = () => atomarProposition.Evaluate(Model);
+				return Expression.Invoke(Expression.Constant(formulaEvaluatesToTrue));
+			}
+
+			throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use SimpleAtomarProposition instead.");
+		}
+	}
 }

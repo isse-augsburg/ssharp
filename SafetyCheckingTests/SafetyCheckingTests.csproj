@@ -89,6 +89,7 @@
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\emulate dice with coin.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\permanent fault leads to invariant violation only in specific step.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\AnalysisTest.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\transient fault leads to invariant violation only in specific step.cs" />
     <Compile Include="SimpleExecutableModel\SimpleModelBase.cs" />
     <Compile Include="SimpleExecutableModel\SimpleCounterExampleSerialization.cs" />
     <Compile Include="SimpleExecutableModel\SimpleAtomarProposition.cs" />

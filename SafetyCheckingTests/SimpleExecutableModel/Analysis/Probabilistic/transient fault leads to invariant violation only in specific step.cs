@@ -31,9 +31,9 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 	using Xunit;
 	using Xunit.Abstractions;
 
-	public class PermanentFaultLeadsToInvariantViolationOnlyInSpecificStep : AnalysisTest
+	public class TransientFaultLeadsToInvariantViolationOnlyInSpecificStep : AnalysisTest
 	{
-		public PermanentFaultLeadsToInvariantViolationOnlyInSpecificStep(ITestOutputHelper output = null) : base(output)
+		public TransientFaultLeadsToInvariantViolationOnlyInSpecificStep(ITestOutputHelper output = null) : base(output)
 		{
 		}
 
@@ -42,7 +42,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		{
 			var m = new Model();
 			Probability probabilityOfInvariantViolation;
-			
+
 			var finallyInvariantViolated = new UnaryFormula(Model.InvariantViolated, UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
@@ -57,8 +57,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 				probabilityOfInvariantViolation = modelChecker.CalculateProbability(finallyInvariantViolated);
 			}
 
-			// 1.0-(1.0-0.1)^11 = 0.68618940391
-			probabilityOfInvariantViolation.Is(0.68618940391, 0.00001).ShouldBe(true);
+			probabilityOfInvariantViolation.Is(0.1, 0.00001).ShouldBe(true);
 		}
 
 		private class Model : SimpleModelBase
@@ -68,16 +67,17 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			private bool ViolateInvariant
 			{
 				get { return LocalBools[0]; }
-				set { LocalBools[0]=value; }
+				set { LocalBools[0] = value; }
 			}
 
-			public override Fault[] Faults { get; } = { new PermanentFault { Identifier=0, ProbabilityOfOccurrence = new Probability(0.1) } };
-			public override bool[] LocalBools { get; } = new bool[] {false};
+			public override Fault[] Faults { get; } = { new TransientFault() { Identifier = 0, ProbabilityOfOccurrence = new Probability(0.1) } };
+			public override bool[] LocalBools { get; } = new bool[] { false };
 			public override int[] LocalInts { get; } = new int[0];
-			
+
 			private void CriticalStep()
 			{
 				F1.TryActivate();
+
 				if (F1.IsActivated)
 					ViolateInvariant = true;
 				else
@@ -93,9 +93,8 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 				if (State == 10)
 					CriticalStep();
 			}
-			
+
 			public static readonly Formula InvariantViolated = new SimpleLocalVarIsTrue(0);
 		}
 	}
-
 }

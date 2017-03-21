@@ -35,7 +35,7 @@ namespace ISSE.SafetyChecking.Modeling
 	[DebuggerDisplay("{Name} (#{Identifier}) [{Activation}]")]
 	public abstract class Fault
 	{
-		private readonly Choice _choice = new Choice();
+		public Choice Choice { get; } = new Choice();
 		
 		private Activation _activation = Activation.Nondeterministic;
 		
@@ -177,7 +177,7 @@ namespace ISSE.SafetyChecking.Modeling
 
 			_canUndoActivation = false;
 			_activationIsUnknown = true;
-			_choice.Resolver.Undo(_choiceIndex);
+			Choice.Resolver.Undo(_choiceIndex);
 		}
 
 		/// <summary>
@@ -204,8 +204,8 @@ namespace ISSE.SafetyChecking.Modeling
 						_canUndoActivation = false;
 						break;
 					case Activation.Nondeterministic:
-						IsActivated = _choice.Choose(new Option<bool>(ProbabilityOfOccurrence.Complement(), false), new Option<bool>(ProbabilityOfOccurrence, true));
-						_choiceIndex = _choice.Resolver.LastChoiceIndex;
+						IsActivated = Choice.Choose(new Option<bool>(ProbabilityOfOccurrence.Complement(), false), new Option<bool>(ProbabilityOfOccurrence, true));
+						_choiceIndex = Choice.Resolver.LastChoiceIndex;
 						_canUndoActivation = true;
 						break;
 					default:

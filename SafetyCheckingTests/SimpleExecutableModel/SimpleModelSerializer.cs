@@ -22,45 +22,108 @@
 
 namespace Tests.SimpleExecutableModel
 {
-    using System.IO;
-    using System.Text;
-    using ISSE.SafetyChecking.Utilities;
-    using System;
-    using System.Diagnostics;
+	using System.IO;
+	using System.Text;
+	using ISSE.SafetyChecking.Utilities;
+	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
+	using System.Linq;
+	using System.Reflection;
+	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.ExecutableModel;
+	using ISSE.SafetyChecking.Modeling;
 
-    public static class SimpleModelSerializer
-    {
-        public static byte[] Serialize(SimpleModelBase model)
-        {
-            Requires.NotNull(model, nameof(model));
+	public static unsafe class SimpleModelSerializer
+	{
+		public static byte[] SerializeToByteArray(SimpleModelBase model)
+		{
+			Requires.NotNull(model, nameof(model));
 
-            using (var buffer = new MemoryStream())
-            using (var writer = new BinaryWriter(buffer, Encoding.UTF8, leaveOpen: true))
-            {
-                var exactTypeOfModel = model.GetType();
-                var exactTypeOfModelName = exactTypeOfModel.AssemblyQualifiedName;
-                Requires.NotNull(exactTypeOfModelName, $"{exactTypeOfModelName} != null");
-                writer.Write(exactTypeOfModelName);
-                writer.Write(model.State);
-                return buffer.ToArray();
-            }
-        }
+			using (var buffer = new MemoryStream())
+			using (var writer = new BinaryWriter(buffer, Encoding.UTF8, leaveOpen: true))
+			{
+				var exactTypeOfModel = model.GetType();
+				var exactTypeOfModelName = exactTypeOfModel.AssemblyQualifiedName;
+				Requires.NotNull(exactTypeOfModelName, $"{exactTypeOfModelName} != null");
+				writer.Write(exactTypeOfModelName);
+				writer.Write(model.State);
+				return buffer.ToArray();
+			}
+		}
 
-        public static SimpleModelBase Deserialize(byte[] serializedModel)
-        {
-            Requires.NotNull(serializedModel, nameof(serializedModel));
+		public static SimpleModelBase DeserializeFromByteArray(byte[] serializedModel)
+		{
+			Requires.NotNull(serializedModel, nameof(serializedModel));
 
-            using (var buffer = new MemoryStream(serializedModel))
-            using (var reader = new BinaryReader(buffer, Encoding.UTF8, leaveOpen: true))
-            {
-                var exactTypeOfModelName = reader.ReadString();
-                var state = reader.ReadInt32();
-                var exactTypeOfModel = Type.GetType(exactTypeOfModelName);
-                Requires.NotNull(exactTypeOfModel, $"{exactTypeOfModel} != null");
-                var deserializedModel = (SimpleModelBase)Activator.CreateInstance(exactTypeOfModel);
-                deserializedModel.State = state;
-                return deserializedModel;
-            }
-        }
-    }
+			using (var buffer = new MemoryStream(serializedModel))
+			using (var reader = new BinaryReader(buffer, Encoding.UTF8, leaveOpen: true))
+			{
+				var exactTypeOfModelName = reader.ReadString();
+				var state = reader.ReadInt32();
+				var exactTypeOfModel = Type.GetType(exactTypeOfModelName);
+				Requires.NotNull(exactTypeOfModel, $"{exactTypeOfModel} != null");
+				var deserializedModel = (SimpleModelBase)Activator.CreateInstance(exactTypeOfModel);
+				deserializedModel.State = state;
+				return deserializedModel;
+			}
+		}
+
+		public static SerializationDelegate DeserializeFastInPlace(SimpleModelBase model)
+		{
+			var permanentFaults = model.Faults.OfType<PermanentFault>().ToArray();
+
+			var isActiveField = typeof(PermanentFault).GetField("_isActive", BindingFlags.NonPublic | BindingFlags.Instance);
+
+			SerializationDelegate deserialize = state =>
+			{
+				// States
+				model.State = *((int*)state+0);
+
+				// Faults
+				var faultsSerialized = *(long*)(state+sizeof(int));
+				for (var i = 0; i < permanentFaults.Length; ++i)
+				{
+					var fault = permanentFaults[i];
+					if ((faultsSerialized & (1L << i)) != 0)
+					{
+						isActiveField.SetValue(fault,true);
+					}
+					else
+					{
+						isActiveField.SetValue(fault, false);
+					}
+				}
+			};
+			return deserialize;
+		}
+
+
+		public static SerializationDelegate SerializeFastInPlace(SimpleModelBase model)
+		{
+			var permanentFaults = model.Faults.OfType<PermanentFault>().ToArray();
+
+			var isActiveField = typeof(PermanentFault).GetField("_isActive", BindingFlags.NonPublic | BindingFlags.Instance);
+
+			SerializationDelegate serialize = state =>
+			{
+				// States
+				*((int*)state) = model.State;
+
+				// Faults
+				var faultsSerialized = 0L;
+				for (var i = 0; i < permanentFaults.Length; ++i)
+				{
+					var fault = permanentFaults[i];
+					var isActive = (bool) isActiveField.GetValue(fault);
+					if (isActive)
+					{
+						faultsSerialized |= 1L << i;
+					}
+				}
+				*(long*)(state + sizeof(int)) = faultsSerialized;
+			};
+			return serialize;
+		}
+	}
 }
