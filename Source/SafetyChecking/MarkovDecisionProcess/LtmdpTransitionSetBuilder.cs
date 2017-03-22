@@ -92,7 +92,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				TargetState = successorState,
 				Formulas = new StateFormulaSet(_formulas),
 				ActivatedFaults = activatedFaults,
-				IsValid = true,
+				Flags = TransitionFlags.IsValidFlag,
 				Probability = probability
 			};
 			++_count;

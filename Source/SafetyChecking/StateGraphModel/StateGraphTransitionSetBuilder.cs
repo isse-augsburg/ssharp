@@ -72,7 +72,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 				TargetState = targetState,
 				Formulas = formulas,
 				ActivatedFaults = activatedFaults,
-				IsValid = true,
+				Flags = TransitionFlags.IsValidFlag,
 			};
 
 			++_count;

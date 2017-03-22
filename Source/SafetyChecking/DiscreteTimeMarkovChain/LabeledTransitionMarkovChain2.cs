@@ -119,7 +119,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			foreach (var transition in transitions)
 			{
 				var probTransition = (LtmcTransition*)transition;
-				Assert.That(probTransition->IsValid, "Attempted to add an invalid transition.");
+				Assert.That( TransitionFlags.IsValid(probTransition->Flags), "Attempted to add an invalid transition.");
 
 				var enrichedTargetState = new EnrichedTargetState(transition->TargetState, transition->Formulas);
 				

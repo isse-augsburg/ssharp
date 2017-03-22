@@ -23,7 +23,7 @@
 namespace ISSE.SafetyChecking.AnalysisModel
 {
 	using System.Runtime.InteropServices;
-
+	
 	/// <summary>
 	///   Represents a candidate transition of an <see cref="AnalysisModel" />.
 	/// </summary>
@@ -49,9 +49,10 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		public StateFormulaSet Formulas;
 
 		/// <summary>
-		///   Indicates whether the transition is valid or should be ignored.
+		///   Contains flags which indicate certain individual properties during the
+		///   traversal. 
 		/// </summary>
 		[FieldOffset(20)]
-		public bool IsValid;
+		public uint Flags;
 	}
 }

@@ -53,7 +53,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		///   Indicates whether the transition is valid or should be ignored.
 		/// </summary>
 		[FieldOffset(20)]
-		public bool IsValid;
+		public uint Flags;
 
 		/// <summary>
 		///   The probability of the transition.

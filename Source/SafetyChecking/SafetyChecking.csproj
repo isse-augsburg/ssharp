@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="AnalysisModelTraverser\AnalysisConfiguration.cs" />
     <Compile Include="AnalysisModel\AnalysisModel.cs" />
+    <Compile Include="AnalysisModel\TransitionFlags.cs" />
     <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
     <Compile Include="AnalysisModel\AnalysisModelCreator.cs" />
     <Compile Include="Formula\BoundedBinaryFormula.cs" />

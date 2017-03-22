@@ -47,9 +47,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		public ConcurrentBag<int> SourceStates { get; } = new ConcurrentBag<int>();
 
-		private readonly MemoryBuffer _stateStorageStateToFirstTransitionChainElementBuffer = new MemoryBuffer();
-		private readonly int* _stateStorageStateToFirstTransitionChainElementMemory;
+		private readonly MemoryBuffer _stateStorageStateToRowsLBuffer = new MemoryBuffer();
+		private readonly int* _stateStorageStateToRowsLMemory;
 		
+		private readonly MemoryBuffer _stateStorageStateToRowsRowCountBuffer = new MemoryBuffer();
+		private readonly int* _stateStorageStateToRowsRowCountMemory;
+		
+
 		private readonly MemoryBuffer _transitionChainElementsBuffer = new MemoryBuffer();
 		private readonly TransitionChainElement* _transitionChainElementsMemory;
 		private int _transitionChainElementCount = 0;
@@ -65,8 +69,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			_maxNumberOfTransitions = maxNumberOfTransitions;
 
-			_stateStorageStateToFirstTransitionChainElementBuffer.Resize((long)maxNumberOfStates * sizeof(int), zeroMemory: false);
-			_stateStorageStateToFirstTransitionChainElementMemory = (int*)_stateStorageStateToFirstTransitionChainElementBuffer.Pointer;
+			_stateStorageStateToRowsLBuffer.Resize((long)maxNumberOfStates * sizeof(int), zeroMemory: false);
+			_stateStorageStateToRowsLMemory = (int*)_stateStorageStateToRowsLBuffer.Pointer;
+
+			_stateStorageStateToRowsRowCountBuffer.Resize((long)maxNumberOfStates * sizeof(int), zeroMemory: false);
+			_stateStorageStateToRowsRowCountMemory = (int*)_stateStorageStateToRowsRowCountBuffer.Pointer;
 
 			_transitionChainElementsBuffer.Resize((long)maxNumberOfTransitions * sizeof(TransitionChainElement), zeroMemory: false);
 			_transitionChainElementsMemory = (TransitionChainElement*)_transitionChainElementsBuffer.Pointer;
@@ -74,7 +81,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			for (var i = 0; i < maxNumberOfStates; i++)
 			{
-				_stateStorageStateToFirstTransitionChainElementMemory[i] = -1;
+				_stateStorageStateToRowsLMemory[i] = -1;
+				_stateStorageStateToRowsRowCountMemory[i] = -1;
 			}
 		}
 
@@ -106,13 +114,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			foreach (var transition in transitions)
 			{
 				var probTransition = (LtmdpTransition*)transition;
-				Assert.That(probTransition->IsValid, "Attempted to add an invalid transition.");
+				Assert.That(TransitionFlags.IsValid(probTransition->Flags), "Attempted to add an invalid transition.");
 
 				int currentElementIndex;
 				if (isInitial)
 					currentElementIndex = _indexOfFirstInitialTransition;
 				else
-					currentElementIndex = _stateStorageStateToFirstTransitionChainElementMemory[sourceState];
+					currentElementIndex = _stateStorageStateToRowsLMemory[sourceState];
 
 				if (currentElementIndex == -1)
 				{
@@ -135,7 +143,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 					else
 					{
 						SourceStates.Add(sourceState);
-						_stateStorageStateToFirstTransitionChainElementMemory[sourceState] = locationOfNewEntry;
+						_stateStorageStateToRowsLMemory[sourceState] = locationOfNewEntry;
 					}
 				}
 				else
@@ -276,7 +284,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		internal LabeledTransitionEnumerator GetTransitionEnumerator(int stateStorageState)
 		{
-			var firstElement = _stateStorageStateToFirstTransitionChainElementMemory[stateStorageState];
+			var firstElement = _stateStorageStateToRowsLMemory[stateStorageState];
 			return new LabeledTransitionEnumerator(this, firstElement);
 		}
 
