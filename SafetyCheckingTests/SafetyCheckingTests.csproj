@@ -87,6 +87,11 @@
     <Compile Include="ProbabilisticModelChecker\ExternalMdpModelCheckerPrismTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Invariants\CounterExamples\formulas.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\multiple formulas in one run.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\multiple initial states.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\same target state on different ways.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\simple example 1a.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\simple example 1b.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\custom probability of transient fault.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\formula which is always false.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\multiple formulas in one run.cs" />
@@ -123,9 +128,7 @@
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

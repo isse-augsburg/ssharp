@@ -22,52 +22,60 @@
 
 namespace Tests.SimpleExecutableModel
 {
-    using System;
-    using ISSE.SafetyChecking.AnalysisModel;
-    using ISSE.SafetyChecking.AnalysisModelTraverser;
-    using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
-    using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
-    using ISSE.SafetyChecking.Formula;
-    using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
+	using System;
+	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.AnalysisModelTraverser;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
+	using ISSE.SafetyChecking.MarkovDecisionProcess;
 
-    public sealed class SimpleSafetyAnalysis : SafetyAnalysis<SimpleExecutableModel>
-    {
-        public SafetyAnalysisResults<SimpleExecutableModel> ComputeMinimalCriticalSets(SimpleModelBase model, Formula collision, int maxCardinality = Int32.MaxValue)
-        {
-            var modelCreator = SimpleExecutableModel.CreateExecutedModelCreator(model, collision);
-            return ComputeMinimalCriticalSets(modelCreator, collision, maxCardinality);
-        }
+	public sealed class SimpleSafetyAnalysis : SafetyAnalysis<SimpleExecutableModel>
+	{
+		public SafetyAnalysisResults<SimpleExecutableModel> ComputeMinimalCriticalSets(SimpleModelBase model, Formula collision, int maxCardinality = Int32.MaxValue)
+		{
+			var modelCreator = SimpleExecutableModel.CreateExecutedModelCreator(model, collision);
+			return ComputeMinimalCriticalSets(modelCreator, collision, maxCardinality);
+		}
 
-        public static SafetyAnalysisResults<SimpleExecutableModel> AnalyzeHazard(SimpleModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue,
-                                                          SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
-        {
-            var modelCreator = SimpleExecutableModel.CreateExecutedModelCreator(model, hazard);
-            return AnalyzeHazard(modelCreator, hazard, maxCardinality, backend);
-        }
-    }
+		public static SafetyAnalysisResults<SimpleExecutableModel> AnalyzeHazard(SimpleModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue,
+														  SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
+		{
+			var modelCreator = SimpleExecutableModel.CreateExecutedModelCreator(model, hazard);
+			return AnalyzeHazard(modelCreator, hazard, maxCardinality, backend);
+		}
+	}
 
 
-    public sealed class SimpleOrderAnalysis : OrderAnalysis<SimpleExecutableModel>
-    {
-        public SimpleOrderAnalysis(SafetyAnalysisResults<SimpleExecutableModel> results, AnalysisConfiguration configuration)
-            : base(results, configuration)
-        {
-        }
-    }
+	public sealed class SimpleOrderAnalysis : OrderAnalysis<SimpleExecutableModel>
+	{
+		public SimpleOrderAnalysis(SafetyAnalysisResults<SimpleExecutableModel> results, AnalysisConfiguration configuration)
+			: base(results, configuration)
+		{
+		}
+	}
 
-    public sealed class SimpleQualitativeChecker : QualitativeChecker<SimpleExecutableModel>
-    {
-        public AnalysisResult<SimpleExecutableModel> CheckInvariant(SimpleModelBase model, Formula invariant)
-        {
-            var modelCreator = SimpleExecutableModel.CreateExecutedModelCreator(model, invariant);
-            return CheckInvariant(modelCreator, formulaIndex: 0);
-        }
-    }
+	public sealed class SimpleQualitativeChecker : QualitativeChecker<SimpleExecutableModel>
+	{
+		public AnalysisResult<SimpleExecutableModel> CheckInvariant(SimpleModelBase model, Formula invariant)
+		{
+			var modelCreator = SimpleExecutableModel.CreateExecutedModelCreator(model, invariant);
+			return CheckInvariant(modelCreator, formulaIndex: 0);
+		}
+	}
 
-    public sealed class SimpleDtmcFromExecutableModelGenerator : DtmcFromExecutableModelGenerator<SimpleExecutableModel>
-    {
-        public SimpleDtmcFromExecutableModelGenerator(SimpleModelBase model) : base(SimpleExecutableModel.CreateExecutedModelFromFormulasCreator(model))
-        {
-        }
-    }
+	public sealed class SimpleDtmcFromExecutableModelGenerator : DtmcFromExecutableModelGenerator<SimpleExecutableModel>
+	{
+		public SimpleDtmcFromExecutableModelGenerator(SimpleModelBase model) : base(SimpleExecutableModel.CreateExecutedModelFromFormulasCreator(model))
+		{
+		}
+	}
+
+	public sealed class SimpleMdpFromExecutableModelGenerator : MdpFromExecutableModelGenerator<SimpleExecutableModel>
+	{
+		public SimpleMdpFromExecutableModelGenerator(SimpleModelBase model) : base(SimpleExecutableModel.CreateExecutedModelFromFormulasCreator(model))
+		{
+		}
+	}
 }

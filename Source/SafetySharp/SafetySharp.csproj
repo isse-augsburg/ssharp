@@ -46,7 +46,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ModelChecking\DtmcBasedModelCheckingFacade.cs" />
     <Compile Include="ModelChecking\SafetySharpCounterExampleSerialization.cs" />
     <Compile Include="ModelChecking\SafetySharpSimulator.cs" />
     <Compile Include="ModelChecking\ModelChecking.cs" />
