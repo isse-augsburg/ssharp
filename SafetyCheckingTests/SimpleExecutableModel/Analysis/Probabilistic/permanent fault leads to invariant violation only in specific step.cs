@@ -63,6 +63,10 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 		private class Model : SimpleModelBase
 		{
+			public override Fault[] Faults { get; } = { new PermanentFault { Identifier = 0, ProbabilityOfOccurrence = new Probability(0.1) } };
+			public override bool[] LocalBools { get; } = new bool[] { false };
+			public override int[] LocalInts { get; } = new int[0];
+
 			private Fault F1 => Faults[0];
 
 			private bool ViolateInvariant
@@ -70,18 +74,13 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 				get { return LocalBools[0]; }
 				set { LocalBools[0]=value; }
 			}
-
-			public override Fault[] Faults { get; } = { new PermanentFault { Identifier=0, ProbabilityOfOccurrence = new Probability(0.1) } };
-			public override bool[] LocalBools { get; } = new bool[] {false};
-			public override int[] LocalInts { get; } = new int[0];
 			
 			private void CriticalStep()
 			{
 				F1.TryActivate();
+
 				if (F1.IsActivated)
 					ViolateInvariant = true;
-				else
-					ViolateInvariant = false;
 			}
 
 			public override void Update()

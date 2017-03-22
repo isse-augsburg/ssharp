@@ -31,25 +31,25 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 	using Xunit;
 	using Xunit.Abstractions;
 
-	public class TransientFaultLeadsToInvariantViolationOnlyInSpecificStep : AnalysisTest
+	public class CustomProbabilityOfTransientFault  : AnalysisTest
 	{
-		public TransientFaultLeadsToInvariantViolationOnlyInSpecificStep(ITestOutputHelper output = null) : base(output)
+		public CustomProbabilityOfTransientFault(ITestOutputHelper output = null) : base(output)
 		{
 		}
 
 		[Fact]
-		protected void Check()
+		public void Check()
 		{
 			var m = new Model();
 			Probability probabilityOfInvariantViolation;
 
-			var finallyInvariantViolated = new UnaryFormula(Model.InvariantViolated, UnaryOperator.Finally);
+			Formula invariantViolated = new SimpleLocalVarIsTrue(0);
+			var finallyInvariantViolated = new UnaryFormula(invariantViolated,UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
-			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration.ModelCapacity=ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(finallyInvariantViolated);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
-			dtmc.ExportToGv(Output.TextWriterAdapter());
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
 			using (modelChecker)
@@ -57,27 +57,26 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 				probabilityOfInvariantViolation = modelChecker.CalculateProbability(finallyInvariantViolated);
 			}
 
-			probabilityOfInvariantViolation.Is(0.1, 0.00001).ShouldBe(true);
+			probabilityOfInvariantViolation.Is(0.01, 0.0001).ShouldBe(true);
 		}
 
 		private class Model : SimpleModelBase
 		{
-			public override Fault[] Faults { get; } = { new TransientFault() { Identifier = 0, ProbabilityOfOccurrence = new Probability(0.1) } };
+			public override Fault[] Faults { get; } = new Fault[] { new TransientFault { Identifier = 0, ProbabilityOfOccurrence = new Probability(0.01) } };
 			public override bool[] LocalBools { get; } = new bool[] { false };
 			public override int[] LocalInts { get; } = new int[0];
 
 			private Fault F1 => Faults[0];
-
+			
 			private bool ViolateInvariant
 			{
 				get { return LocalBools[0]; }
 				set { LocalBools[0] = value; }
 			}
-			
-			private void CriticalStep()
+
+			protected virtual void CriticalStep()
 			{
 				F1.TryActivate();
-
 				if (F1.IsActivated)
 					ViolateInvariant = true;
 			}
@@ -85,14 +84,12 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			public override void Update()
 			{
 				ViolateInvariant = false;
-				if (State == 11)
-					return;
-				State++;
-				if (State == 10)
+				if (State == 0)
+				{
 					CriticalStep();
+				}
+				State = 1;
 			}
-
-			public static readonly Formula InvariantViolated = new SimpleLocalVarIsTrue(0);
 		}
 	}
 }

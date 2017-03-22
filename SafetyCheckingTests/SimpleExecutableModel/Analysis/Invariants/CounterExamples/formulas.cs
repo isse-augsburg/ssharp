@@ -101,13 +101,6 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 
 		public class Model : SimpleModelBase
 		{
-			public override void Update()
-			{
-				if (State >= 100)
-					return;
-				++State;
-			}
-
 			public override Fault[] Faults { get; } = new Fault[0];
 			public override bool[] LocalBools { get; } = new bool[0];
 			public override int[] LocalInts { get; } = new int[0];
@@ -115,6 +108,13 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 			public override void SetInitialState()
 			{
 				State = 0;
+			}
+
+			public override void Update()
+			{
+				if (State >= 100)
+					return;
+				++State;
 			}
 
 			public static Formula StateIsTwo = new SimpleStateInRangeFormula(2);

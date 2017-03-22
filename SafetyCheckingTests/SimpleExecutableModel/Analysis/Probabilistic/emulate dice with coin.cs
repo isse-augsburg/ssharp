@@ -81,6 +81,15 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 		public class Model : SimpleModelBase
 		{
+			public override Fault[] Faults { get; } = new Fault[0];
+			public override bool[] LocalBools { get; } = new bool[0];
+			public override int[] LocalInts { get; } = new int[0];
+
+			public override void SetInitialState()
+			{
+				State = (int)S.InitialThrow;
+			}
+
 			public override void Update()
 			{
 				var s = (S)State;
@@ -124,16 +133,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 				}
 				State = (int)s;
 			}
-
-			public override Fault[] Faults { get; } = new Fault[0];
-			public override bool[] LocalBools { get; } = new bool[0];
-			public override int[] LocalInts { get; } = new int[0];
-
-			public override void SetInitialState()
-			{
-				State = (int) S.InitialThrow;
-			}
-
+			
 			public static Formula IsInStateFinal1 = new SimpleStateInRangeFormula((int) S.Final1);
 		}
 	}

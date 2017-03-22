@@ -28,71 +28,85 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.Modeling;
 	using Shouldly;
+	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
+	
 
-	public class TransientFaultLeadsToInvariantViolationOnlyInSpecificStep : AnalysisTest
+	public class SimpleExample1b : AnalysisTest
 	{
-		public TransientFaultLeadsToInvariantViolationOnlyInSpecificStep(ITestOutputHelper output = null) : base(output)
+		public SimpleExample1b(ITestOutputHelper output = null) : base(output)
 		{
 		}
 
 		[Fact]
-		protected void Check()
+		public void Check()
 		{
 			var m = new Model();
-			Probability probabilityOfInvariantViolation;
+			Probability probabilityOfFinal1;
+			Probability probabilityOfFinal2;
+			Probability probabilityOfFinal3;
 
-			var finallyInvariantViolated = new UnaryFormula(Model.InvariantViolated, UnaryOperator.Finally);
+			var final1Formula = new UnaryFormula(new SimpleStateInRangeFormula(1), UnaryOperator.Finally);
+			var final2Formula = new UnaryFormula(new SimpleStateInRangeFormula(2), UnaryOperator.Finally);
+			var final3Formula = new UnaryFormula(new SimpleStateInRangeFormula(3), UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			markovChainGenerator.AddFormulaToCheck(finallyInvariantViolated);
+			markovChainGenerator.AddFormulaToCheck(final1Formula);
+			markovChainGenerator.AddFormulaToCheck(final2Formula);
+			markovChainGenerator.AddFormulaToCheck(final3Formula);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
-			dtmc.ExportToGv(Output.TextWriterAdapter());
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
-				probabilityOfInvariantViolation = modelChecker.CalculateProbability(finallyInvariantViolated);
+				probabilityOfFinal1 = modelChecker.CalculateProbability(final1Formula);
+				probabilityOfFinal2 = modelChecker.CalculateProbability(final2Formula);
+				probabilityOfFinal3 = modelChecker.CalculateProbability(final3Formula);
 			}
 
-			probabilityOfInvariantViolation.Is(0.1, 0.00001).ShouldBe(true);
+			probabilityOfFinal1.Is(0.4, 0.000001).ShouldBe(true);
+			probabilityOfFinal2.Is(0.3, 0.000001).ShouldBe(true);
+			probabilityOfFinal3.Is(0.3, 0.000001).ShouldBe(true);
 		}
 
-		private class Model : SimpleModelBase
+		public class Model : SimpleModelBase
 		{
-			public override Fault[] Faults { get; } = { new TransientFault() { Identifier = 0, ProbabilityOfOccurrence = new Probability(0.1) } };
-			public override bool[] LocalBools { get; } = new bool[] { false };
+			public override Fault[] Faults { get; } = new Fault[0];
+			public override bool[] LocalBools { get; } = { false };
 			public override int[] LocalInts { get; } = new int[0];
 
-			private Fault F1 => Faults[0];
-
-			private bool ViolateInvariant
+			private bool L
 			{
 				get { return LocalBools[0]; }
 				set { LocalBools[0] = value; }
 			}
-			
-			private void CriticalStep()
-			{
-				F1.TryActivate();
 
-				if (F1.IsActivated)
-					ViolateInvariant = true;
+			private int Y
+			{
+				get { return State; }
+				set { State = value; }
+			}
+
+			public override void SetInitialState()
+			{
+				State = 0;
 			}
 
 			public override void Update()
 			{
-				ViolateInvariant = false;
-				if (State == 11)
+				if (Y != 0)
 					return;
-				State++;
-				if (State == 10)
-					CriticalStep();
+				L = Choice.Choose(
+					new Option<bool>(new Probability(0.6), true),
+					new Option<bool>(new Probability(0.4), false));
+				Y = 1;
+				if (L)
+				{
+					Y = Choice.Choose(2, 3);
+				}
 			}
-
-			public static readonly Formula InvariantViolated = new SimpleLocalVarIsTrue(0);
 		}
 	}
 }

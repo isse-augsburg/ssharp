@@ -28,7 +28,6 @@ namespace Tests.SimpleExecutableModel
 	using System;
 	using System.Linq;
 	using System.Reflection;
-	using System.Runtime.Serialization.Formatters.Binary;
 	using ISSE.SafetyChecking.ExecutableModel;
 	using ISSE.SafetyChecking.Modeling;
 	using ISSE.SafetyChecking.Formula;
@@ -68,6 +67,14 @@ namespace Tests.SimpleExecutableModel
 				writer.Write((int)innerFormula.Operator);
 				WriteFormula(writer, innerFormula.Operand);
 			}
+			else if (formula is BinaryFormula)
+			{
+				var innerFormula = (BinaryFormula)formula;
+				writer.Write(5);
+				writer.Write((int)innerFormula.Operator);
+				WriteFormula(writer, innerFormula.LeftOperand);
+				WriteFormula(writer, innerFormula.RightOperand);
+			}
 			else
 			{
 				throw new NotImplementedException();
@@ -103,7 +110,14 @@ namespace Tests.SimpleExecutableModel
 			{
 				var @operator = (UnaryOperator)reader.ReadInt32();
 				var operand = ReadFormula(reader);
-				return new UnaryFormula(operand,@operator);
+				return new UnaryFormula(operand, @operator);
+			}
+			else if (type == 5)
+			{
+				var @operator = (BinaryOperator)reader.ReadInt32();
+				var leftOperand = ReadFormula(reader);
+				var rightOperand = ReadFormula(reader);
+				return new BinaryFormula(leftOperand, @operator, rightOperand);
 			}
 			else
 			{

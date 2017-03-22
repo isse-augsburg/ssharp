@@ -254,7 +254,7 @@ namespace ISSE.SafetyChecking.Modeling
 		}
 
 		/// <summary>
-		///   Returns either <paramref name="value1" /> or <paramref name="value2" /> nondeterministically.
+		///   Returns either <paramref name="value1" /> or <paramref name="value2" /> probabilistically.
 		/// </summary>
 		/// <param name="value1">The first value to choose.</param>
 		/// <param name="value2">The second value to choose.</param>
@@ -274,7 +274,7 @@ namespace ISSE.SafetyChecking.Modeling
 		}
 
 		/// <summary>
-		///   Returns either <paramref name="value1" />, <paramref name="value2" />, or <paramref name="value3" /> nondeterministically.
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, or <paramref name="value3" /> probabilistically.
 		/// </summary>
 		/// <param name="value1">The firsOption< T> value to choose.</param>
 		/// <param name="value2">The second value to choose.</param>
@@ -299,7 +299,7 @@ namespace ISSE.SafetyChecking.Modeling
 
 		/// <summary>
 		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />, or
-		///   <paramref name="value4" /> nondeterministically.
+		///   <paramref name="value4" /> probabilistically.
 		/// </summary>
 		/// <param name="value1">The firsOption< T> value to choose.</param>
 		/// <param name="value2">The second value to choose.</param>
@@ -328,7 +328,7 @@ namespace ISSE.SafetyChecking.Modeling
 
 		/// <summary>
 		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />,
-		///   <paramref name="value4" />, or <paramref name="value5" /> nondeterministically.
+		///   <paramref name="value4" />, or <paramref name="value5" /> probabilistically.
 		/// </summary>
 		/// <param name="value1">The firsOption< T> value to choose.</param>
 		/// <param name="value2">The second value to choose.</param>
@@ -361,7 +361,7 @@ namespace ISSE.SafetyChecking.Modeling
 
 		/// <summary>
 		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />,
-		///   <paramref name="value4" />, <paramref name="value5" />, or <paramref name="value6" /> nondeterministically.
+		///   <paramref name="value4" />, <paramref name="value5" />, or <paramref name="value6" /> probabilistically.
 		/// </summary>
 		/// <param name="value1">The firsOption< T> value to choose.</param>
 		/// <param name="value2">The second value to choose.</param>
@@ -397,7 +397,7 @@ namespace ISSE.SafetyChecking.Modeling
 		}
 
 		/// <summary>
-		///   Returns one of the <paramref name="values" /> nondeterministically.
+		///   Returns one of the <paramref name="values" /> probabilistically.
 		/// </summary>
 		/// <param name="values">The values to choose from.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
