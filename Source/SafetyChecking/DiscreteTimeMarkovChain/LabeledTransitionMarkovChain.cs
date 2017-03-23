@@ -32,7 +32,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using AnalysisModel;
 
 
-	internal unsafe class LabeledTransitionMarkovChain
+	internal unsafe partial class LabeledTransitionMarkovChain
 	{
 		public static readonly int TransitionSize = sizeof(TransitionChainElement);
 
@@ -57,8 +57,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public int Transitions => _transitionChainElementCount;
 
 		private readonly long _maxNumberOfTransitions;
-
-
+		
 		public LabeledTransitionMarkovChain(long maxNumberOfStates, long maxNumberOfTransitions)
 		{
 			Requires.InRange(maxNumberOfStates, nameof(maxNumberOfStates), 1024, Int32.MaxValue - 1);
@@ -105,116 +104,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			SourceStates.Add(stutteringStateIndex);
 			_stateStorageStateToFirstTransitionChainElementMemory[stutteringStateIndex] = locationOfNewEntry;
 		}
-
-		/// <summary>
-		///   Adds the <paramref name="sourceState" /> and all of its <see cref="transitions" /> to the state graph.
-		/// </summary>
-		/// <param name="sourceState">The state that should be added.</param>
-		/// <param name="isInitial">Indicates whether the state is an initial state.</param>
-		/// <param name="transitions">The transitions leaving the state.</param>
-		/// <param name="transitionCount">The number of valid transitions leaving the state.</param>
-		internal void AddStateInfo(int sourceState, bool isInitial, TransitionCollection transitions, int transitionCount)
-		{
-			Assert.That(transitionCount > 0, "Cannot add deadlock state.");
-
-			// Need to reserve the memory for the transitions
-			var upperBoundaryForTransitions = _transitionChainElementCount + transitionCount;
-			if (upperBoundaryForTransitions<0)
-				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
-
-
-			// Search for place to append is linear in number of existing transitions of state linearly => O(n^2) 
-			foreach (var transition in transitions)
-			{
-				var probTransition = (LtmcTransition*)transition;
-				Assert.That(TransitionFlags.IsValid(probTransition->Flags), "Attempted to add an invalid transition.");
-
-				int currentElementIndex;
-				if (isInitial)
-					currentElementIndex = _indexOfFirstInitialTransition;
-				else
-					currentElementIndex = _stateStorageStateToFirstTransitionChainElementMemory[sourceState];
-
-				if (currentElementIndex == -1)
-				{
-					// Add new chain start
-					var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
-					if (locationOfNewEntry >= _maxNumberOfTransitions)
-						throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
-
-
-					_transitionChainElementsMemory[locationOfNewEntry] =
-						new TransitionChainElement
-						{
-							Formulas = transition->Formulas,
-							NextElementIndex = -1,
-							Probability = probTransition->Probability,
-							TargetState = transition->TargetState
-						};
-					if (isInitial)
-					{
-						_indexOfFirstInitialTransition = locationOfNewEntry;
-					}
-					else
-					{
-						SourceStates.Add(sourceState);
-						_stateStorageStateToFirstTransitionChainElementMemory[sourceState] = locationOfNewEntry;
-					}
-				}
-				else
-				{
-					// merge or append
-					bool mergedOrAppended = false;
-					while (!mergedOrAppended)
-					{
-						var currentElement = _transitionChainElementsMemory[currentElementIndex];
-						if (currentElement.TargetState == transition->TargetState && currentElement.Formulas == transition->Formulas)
-						{
-							//Case 1: Merge
-							_transitionChainElementsMemory[currentElementIndex] =
-								new TransitionChainElement
-								{
-									Formulas = currentElement.Formulas,
-									NextElementIndex = currentElement.NextElementIndex,
-									Probability = probTransition->Probability+ currentElement.Probability,
-									TargetState = currentElement.TargetState
-								};
-							mergedOrAppended = true;
-						}
-						else if (currentElement.NextElementIndex == -1)
-						{
-							//Case 2: Append
-							var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
-							if (locationOfNewEntry >= _maxNumberOfTransitions)
-								throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
-							mergedOrAppended = true;
-							_transitionChainElementsMemory[currentElementIndex] =
-								new TransitionChainElement
-								{
-									Formulas = currentElement.Formulas,
-									NextElementIndex = locationOfNewEntry,
-									Probability = currentElement.Probability,
-									TargetState = currentElement.TargetState
-								};
-							_transitionChainElementsMemory[locationOfNewEntry] =
-								new TransitionChainElement
-								{
-									Formulas = transition->Formulas,
-									NextElementIndex = -1,
-									Probability = probTransition->Probability,
-									TargetState = transition->TargetState
-								};
-						}
-						else
-						{
-							//else continue iteration
-							currentElementIndex = currentElement.NextElementIndex;
-						}
-					}
-				}
-			}
-		}
-
+		
 		// Validation
 
 		[Conditional("DEBUG")]

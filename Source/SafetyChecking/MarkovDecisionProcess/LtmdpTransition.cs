@@ -28,7 +28,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	/// <summary>
 	///   Represents a candidate transition of an <see cref="AnalysisModel" />.
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit, Size = 32)]
+	[StructLayout(LayoutKind.Explicit, Size = 36)]
 	internal unsafe struct LtmdpTransition
 	{
 		/// <summary>
@@ -59,6 +59,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		///   The probability of the transition.
 		/// </summary>
 		[FieldOffset(24)]
+		public int Distribution;
+
+		/// <summary>
+		///   The probability of the transition.
+		/// </summary>
+		[FieldOffset(28)]
 		public double Probability;
 	}
 }
