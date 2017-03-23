@@ -52,6 +52,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LtmdpBuilder<TExecutableModel>(_mdp));
 			if (terminateEarlyCondition != null)
 			{
+				_mdp.CreateStutteringState(Context.StutteringStateIndex);
 				var terminalteEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_mdp.StateFormulaLabels, terminateEarlyCondition);
 				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier<TExecutableModel>(terminalteEarlyFunc));
 			}

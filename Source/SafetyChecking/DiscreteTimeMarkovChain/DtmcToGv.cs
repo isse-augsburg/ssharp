@@ -47,7 +47,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				sb.WriteLine(")\"];");
 				while (enumerator.MoveNextTransition())
 				{
-					sb.WriteLine($"{enumerator.CurrentState} -> {enumerator.CurrentTransition.Column} [label=\"{enumerator.CurrentTransition.Value.ToString(CultureInfo.InvariantCulture)}\"];");
+					sb.WriteLine($"{enumerator.CurrentState} -> {enumerator.CurrentTransition.Column} [label=\"{enumerator.CurrentTransition.Value.ToString("#.00e+0",CultureInfo.InvariantCulture)}\"];");
 				}
 			}
 			sb.WriteLine("}");

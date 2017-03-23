@@ -31,57 +31,58 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 	using Xunit;
 	using Xunit.Abstractions;
 
-	public class MultipleInitialStates : AnalysisTest
+	public class TerminateEarly : AnalysisTest
 	{
-		public MultipleInitialStates(ITestOutputHelper output = null) : base(output)
+		public TerminateEarly(ITestOutputHelper output = null) : base(output)
 		{
 		}
 
 		[Fact]
-		public void Check()
+		public void CheckWithoutEarlyTermination()
 		{
 			var m = new Model();
-			Probability probabilityOfFinally2;
-			
-			var finally2 = new UnaryFormula(new SimpleStateInRangeFormula(2), UnaryOperator.Finally);
+			Probability probabilityOfFinally3;
+
+			var stateIs3 = new SimpleStateInRangeFormula(3);
+			var finally3 = new UnaryFormula(stateIs3, UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			markovChainGenerator.AddFormulaToCheck(finally2);
+			markovChainGenerator.AddFormulaToCheck(finally3);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			dtmc.ExportToGv(Output.TextWriterAdapter());
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
-				probabilityOfFinally2 = modelChecker.CalculateProbability(finally2);
+				probabilityOfFinally3 = modelChecker.CalculateProbability(finally3);
 			}
 
-			probabilityOfFinally2.Between(0.33, 0.34).ShouldBe(true);
+			probabilityOfFinally3.Between(0.66, 0.67).ShouldBe(true);
 		}
 
 		[Fact]
-		public void CheckTerminateEarly()
+		public void CheckWithEarlyTermination()
 		{
 			var m = new Model();
-			Probability probabilityOfFinally2;
+			Probability probabilityOfFinally3;
 
-			var stateIs2 = new SimpleStateInRangeFormula(2);
-			var finally2 = new UnaryFormula(stateIs2, UnaryOperator.Finally);
+			var stateIs3 = new SimpleStateInRangeFormula(3);
+			var finally3 = new UnaryFormula(stateIs3, UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			markovChainGenerator.AddFormulaToCheck(finally2);
-			var dtmc = markovChainGenerator.GenerateMarkovChain(stateIs2);
+			markovChainGenerator.AddFormulaToCheck(finally3);
+			var dtmc = markovChainGenerator.GenerateMarkovChain(stateIs3);
 			dtmc.ExportToGv(Output.TextWriterAdapter());
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
-				probabilityOfFinally2 = modelChecker.CalculateProbability(finally2);
+				probabilityOfFinally3 = modelChecker.CalculateProbability(finally3);
 			}
 
-			probabilityOfFinally2.Between(0.33, 0.34).ShouldBe(true);
+			probabilityOfFinally3.Between(0.66, 0.67).ShouldBe(true);
 		}
 
 		private class Model : SimpleModelBase
@@ -92,11 +93,15 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			
 			public override void SetInitialState()
 			{
-				State = Choice.Choose(1, 2, 3);
+				State = Choice.Choose(1, 3, 7);
 			}
 
 			public override void Update()
 			{
+				if (State<1 || State > 7)
+					throw new Exception("Bug: State must be between 1 and 5 in this example");
+				if (State < 7)
+					State++;
 			}
 		}
 	}

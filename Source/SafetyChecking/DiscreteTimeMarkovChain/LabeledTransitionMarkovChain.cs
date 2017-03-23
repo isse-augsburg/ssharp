@@ -77,7 +77,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				_stateStorageStateToFirstTransitionChainElementMemory[i] = -1;
 			}
 		}
-
+		
 		private struct TransitionChainElement
 		{
 			public int NextElementIndex;
@@ -85,7 +85,27 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			public StateFormulaSet Formulas;
 			public double Probability;
 		}
-		
+
+		public void CreateStutteringState(int stutteringStateIndex)
+		{
+			// The stuttering state might not be reached at all.
+			// Make sure, that all used algorithms to not require a connected state graph.
+			var currentElementIndex = _stateStorageStateToFirstTransitionChainElementMemory[stutteringStateIndex];
+			Assert.That(currentElementIndex == -1, "Stuttering state has already been created");
+			var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
+			_transitionChainElementsMemory[locationOfNewEntry] =
+					new TransitionChainElement
+					{
+						Formulas = new StateFormulaSet(),
+						NextElementIndex = -1,
+						Probability = 1.0,
+						TargetState = stutteringStateIndex
+					};
+
+			SourceStates.Add(stutteringStateIndex);
+			_stateStorageStateToFirstTransitionChainElementMemory[stutteringStateIndex] = locationOfNewEntry;
+		}
+
 		/// <summary>
 		///   Adds the <paramref name="sourceState" /> and all of its <see cref="transitions" /> to the state graph.
 		/// </summary>

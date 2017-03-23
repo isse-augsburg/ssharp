@@ -78,5 +78,14 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		{
 			return (flag & ToStutteringStateFlag) != 0;
 		}
+
+		/// <summary>
+		///   Sets bit of ToStutteringStateFlag to true
+		/// </summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint SetToStutteringStateFlag(uint flag)
+		{
+			return flag | ToStutteringStateFlag;
+		}
 	}
 }

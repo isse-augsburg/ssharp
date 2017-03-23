@@ -102,7 +102,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		public void ConvertTransitions(LabeledTransitionMarkovDecisionProcess ltmc)
 		{
-			throw new Exception("Not implemented yet");
 			/*
 			for (var i = 0; i < States; i++)
 			{
@@ -117,15 +116,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 					MarkovDecisionProcess.AddTransition(targetState,enumerator.CurrentProbability);
 				}
 				MarkovDecisionProcess.FinishDistribution();
-			}
-			*/
+			}*/
 		}
 
 		public void ConvertInitialStates(LabeledTransitionMarkovDecisionProcess ltmc)
-		{
-			throw new Exception("Not implemented yet");
-			/*
-			MarkovDecisionProcess.StartWithInitialDistribution();
+		{/*
+			MarkovDecisionProcess.StartWithInitialDistributions();
+			MarkovDecisionProcess.StartWithNewInitialDistribution();
 			var enumerator = ltmc.GetInitialDistributionEnumerator();
 			while (enumerator.MoveNext())
 			{
@@ -134,7 +131,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				MarkovDecisionProcess.AddInitialTransition(targetState, enumerator.CurrentProbability);
 			}
 			MarkovDecisionProcess.FinishInitialDistribution();
-			*/
+			MarkovDecisionProcess.FinishInitialDistributions();*/
 		}
 
 		public LtmdpToMdp(LabeledTransitionMarkovDecisionProcess ltmc)

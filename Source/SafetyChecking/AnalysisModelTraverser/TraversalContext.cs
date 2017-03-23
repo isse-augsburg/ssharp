@@ -107,6 +107,11 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		public StateStorage States;
 
 		/// <summary>
+		///   The index of the stuttering state.
+		/// </summary>
+		public int StutteringStateIndex;
+
+		/// <summary>
 		///   The number of activation-minimal transitions checked by the model checker.
 		/// </summary>
 		public long TransitionCount;

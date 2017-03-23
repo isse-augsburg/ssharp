@@ -95,6 +95,7 @@
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\custom probability of transient fault.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\formula which is always false.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\multiple formulas in one run.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\terminate early.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\multiple initial states.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\probabilities sum up to 1 even with permanent activatable fault.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\probabilities sum up to 1 even with transient activatable fault.cs" />

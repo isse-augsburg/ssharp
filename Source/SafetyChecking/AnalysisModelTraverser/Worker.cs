@@ -151,7 +151,17 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 				foreach (var transition in transitions)
 				{
 					int targetState;
-					var isNewState = _context.States.AddState(((CandidateTransition*)transition)->TargetState, out targetState);
+					bool isNewState;
+
+					if (TransitionFlags.IsToStutteringState(((CandidateTransition*)transition)->Flags))
+					{
+						isNewState = false;
+						targetState = _context.StutteringStateIndex;
+					}
+					else
+					{
+						isNewState = _context.States.AddState(((CandidateTransition*)transition)->TargetState, out targetState);
+					}
 
 					// Replace the CandidateTransition.TargetState pointer with the hash values of the transition's source and target states
 					transition->TargetState = targetState;
