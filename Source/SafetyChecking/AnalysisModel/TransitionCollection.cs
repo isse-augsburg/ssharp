@@ -99,6 +99,7 @@ namespace ISSE.SafetyChecking.AnalysisModel
 
 			Requires.That(&t.ActivatedFaults == &c->ActivatedFaults, $"Invalid offset of standard transition field '{nameof(t.ActivatedFaults)}.");
 			Requires.That(&t.Formulas == &c->Formulas, $"Invalid offset of standard transition field '{nameof(t.Formulas)}.");
+			Requires.That(&t.Flags == &c->Flags, $"Invalid offset of standard transition field '{nameof(t.Flags)}.");
 		}
 	}
 }

@@ -89,7 +89,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			var activatedFaults = FaultSet.FromActivatedFaults(model.NondeterministicFaults);
 			_transitions[_count] = new LtmdpTransition
 			{
-				TargetState = successorState,
+				TargetStatePointer = successorState,
 				Formulas = new StateFormulaSet(_formulas),
 				ActivatedFaults = activatedFaults,
 				Flags = TransitionFlags.IsValidFlag,

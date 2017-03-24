@@ -34,7 +34,7 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		///   A pointer to the transition's target state.
 		/// </summary>
 		[FieldOffset(0)]
-		public byte* TargetState;
+		public byte* TargetStatePointer;
 
 		/// <summary>
 		///   The faults that are activated by the transition.

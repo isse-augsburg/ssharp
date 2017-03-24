@@ -56,7 +56,7 @@ namespace ISSE.SafetyChecking.AnalysisModel
 
 			while (_current < _count)
 			{
-				if (TransitionFlags.IsValid(((CandidateTransition*)Current)->Flags))
+				if (TransitionFlags.IsValid(Current->Flags))
 					return true;
 
 				++_current;

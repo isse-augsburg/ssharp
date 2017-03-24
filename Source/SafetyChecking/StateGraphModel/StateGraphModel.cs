@@ -105,7 +105,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 			_transitions.Clear();
 
 			foreach (var transition in transitions)
-				_transitions.Add((byte*)&transition->TargetState, transition->ActivatedFaults, transition->Formulas);
+				_transitions.Add((byte*)&transition->TargetStateIndex, transition->ActivatedFaults, transition->Formulas);
 
 			return _transitions.ToCollection();
 		}

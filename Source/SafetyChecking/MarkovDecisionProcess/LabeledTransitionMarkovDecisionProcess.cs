@@ -101,6 +101,17 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			public double Probability;
 		}
 
+		private int GetPlaceForNewTransitionChainElement()
+		{
+			return InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
+		}
+
+
+		private int GetPlaceForNewDistributionChainElement()
+		{
+			return InterlockedExtensions.IncrementReturnOld(ref _distributionChainElementCount);
+		}
+
 		public void CreateStutteringState(int stutteringStateIndex)
 		{
 			// The stuttering state might not be reached at all.
@@ -108,8 +119,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			var currentElementIndex = _stateStorageStateToFirstDistributionMemory[stutteringStateIndex];
 			Assert.That(currentElementIndex == -1, "Stuttering state has already been created");
 
-			var locationOfNewDistributionEntry = InterlockedExtensions.IncrementReturnOld(ref _distributionChainElementCount);
-			var locationOfNewTransitionEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
+			var locationOfNewDistributionEntry = GetPlaceForNewDistributionChainElement();
+			var locationOfNewTransitionEntry = GetPlaceForNewTransitionChainElement();
 
 			_distributionChainElementsMemory[locationOfNewDistributionEntry] =
 					new DistributionChainElement

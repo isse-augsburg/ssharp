@@ -34,13 +34,13 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		///   The index of the transition's source state.
 		/// </summary>
 		[FieldOffset(0)]
-		public int SourceState;
+		public int SourceStateIndex;
 
 		/// <summary>
 		///   The index of the transition's target state.
 		/// </summary>
 		[FieldOffset(4)]
-		public int TargetState;
+		public int TargetStateIndex;
 
 		/// <summary>
 		///   The faults that are activated by the transition.
@@ -53,5 +53,12 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		/// </summary>
 		[FieldOffset(16)]
 		public StateFormulaSet Formulas;
+
+		/// <summary>
+		///   Contains flags which indicate certain individual properties during the
+		///   traversal. 
+		/// </summary>
+		[FieldOffset(20)]
+		public uint Flags;
 	}
 }

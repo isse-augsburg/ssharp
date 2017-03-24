@@ -118,7 +118,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			// 4. Store the transition
 			_transitions[_count] = new CandidateTransition
 			{
-				TargetState = successorState,
+				TargetStatePointer = successorState,
 				Formulas = new StateFormulaSet(_formulas),
 				ActivatedFaults = activatedFaults,
 				Flags = TransitionFlags.IsValidFlag,

@@ -160,12 +160,13 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 					}
 					else
 					{
-						isNewState = _context.States.AddState(((CandidateTransition*)transition)->TargetState, out targetState);
+						isNewState = _context.States.AddState(((CandidateTransition*)transition)->TargetStatePointer, out targetState);
 					}
 
-					// Replace the CandidateTransition.TargetState pointer with the hash values of the transition's source and target states
-					transition->TargetState = targetState;
-					transition->SourceState = sourceState;
+					// Replace the CandidateTransition.TargetState pointer with the unique indexes of the transition's source and target states
+					transition->TargetStateIndex = targetState;
+					transition->SourceStateIndex = sourceState;
+					transition->Flags = TransitionFlags.SetIsStateTransformedToIndexFlag(transition->Flags);
 
 					if (isNewState)
 					{

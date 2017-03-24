@@ -27,19 +27,44 @@ namespace ISSE.SafetyChecking.AnalysisModel
 	public static class TransitionFlags
 	{
 		/// <summary>
+		///   If set, indicates that [FieldOffset(0)] of the transition contains the index of source state
+		///   and [FieldOffset(4)] contains the index of the target state.
+		///   If unset, [FieldOffset(0)] contains a pointer to the state in StateStorage.
+		/// </summary>
+		public const uint IsStateTransformedToIndexFlag = 1;
+
+		/// <summary>
 		///   Indicates whether the transition is valid or should be ignored.
 		/// </summary>
-		public const uint IsValidFlag = 1;
+		public const uint IsValidFlag = 2;
 
 		/// <summary>
 		///   Indicates whether the transition should lead to the stuttering state.
 		/// </summary>
-		public const uint ToStutteringStateFlag = 2;
+		public const uint ToStutteringStateFlag = 4;
 
 		/// <summary>
 		///   First bit which is free for use
 		/// </summary>
-		public const uint FirstUnspecifiedBit = 4;
+		public const uint FirstUnspecifiedBit = 8;
+
+		/// <summary>
+		///   Returns true, if IsStateTransformedToIndexFlag is set
+		/// </summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsStateTransformedToIndex(uint flag)
+		{
+			return (flag & IsStateTransformedToIndexFlag) != 0;
+		}
+
+		/// <summary>
+		///   Sets bit of IsStateTransformedToIndexFlag to true
+		/// </summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint SetIsStateTransformedToIndexFlag(uint flag)
+		{
+			return flag | IsStateTransformedToIndexFlag;
+		}
 
 		/// <summary>
 		///   Returns true, if IsUsedFlag is set
