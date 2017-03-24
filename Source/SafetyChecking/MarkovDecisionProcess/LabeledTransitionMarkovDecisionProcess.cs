@@ -150,43 +150,57 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		{
 			foreach (var sourceState in SourceStates)
 			{
-				var enumerator = GetTransitionEnumerator(sourceState);
-				var probability = 0.0;
-				while (enumerator.MoveNext())
+				var distEnumerator = GetDistributionsEnumerator(sourceState);
+				while (distEnumerator.MoveNext())
 				{
-					probability += enumerator.CurrentProbability;
+					var transitionEnumerator = distEnumerator.GetLabeledTransitionEnumerator();
+					var probability = 0.0;
+					while (transitionEnumerator.MoveNext())
+					{
+						probability += transitionEnumerator.CurrentProbability;
+					}
+					if (!Probability.IsOne(probability, 0.000000001))
+						throw new Exception("Probabilities should sum up to 1");
 				}
-				if (!Probability.IsOne(probability, 0.000000001))
-					throw new Exception("Probabilities should sum up to 1");
 			}
 		}
 
 		[Conditional("DEBUG")]
 		public void ValidateInitialDistribution()
 		{
-			var enumerator = GetInitialDistributionEnumerator();
-			var probability = 0.0;
-			while (enumerator.MoveNext())
+			var distEnumerator = GetInitialDistributionsEnumerator();
+			while (distEnumerator.MoveNext())
 			{
-				probability += enumerator.CurrentProbability;
+				var transitionEnumerator = distEnumerator.GetLabeledTransitionEnumerator();
+				var probability = 0.0;
+				while (transitionEnumerator.MoveNext())
+				{
+					probability += transitionEnumerator.CurrentProbability;
+				}
+				if (!Probability.IsOne(probability, 0.000000001))
+					throw new Exception("Probabilities should sum up to 1");
 			}
-			if (!Probability.IsOne(probability, 0.000000001))
-				throw new Exception("Probabilities should sum up to 1");
 		}
 
 
 		[Conditional("DEBUG")]
 		internal void PrintPathWithStepwiseHighestProbability(int steps)
 		{
-			Func<LabeledTransitionEnumerator, int> selectEntryWithHighestProbability =
-				enumerator =>
+			Func<DistributionsEnumerator, int> selectEntryWithHighestProbability =
+				distEnumerator =>
 				{
-					enumerator.MoveNext(); //at least one element must exist
-					var candidate = enumerator.CurrentIndex;
-					var probabilityOfCandidate = enumerator.CurrentProbability;
-					while (enumerator.MoveNext())
-						if (probabilityOfCandidate < enumerator.CurrentProbability)
-							candidate = enumerator.CurrentIndex;
+					var candidate = -1;
+					var probabilityOfCandidate = -1.0;
+
+					while (distEnumerator.MoveNext())
+					{
+						var transitionEnumerator = distEnumerator.GetLabeledTransitionEnumerator();
+						while (transitionEnumerator.MoveNext())
+						{
+							if (probabilityOfCandidate < transitionEnumerator.CurrentProbability)
+								candidate = transitionEnumerator.CurrentIndex;
+						}
+					}
 					return candidate;
 				};
 			Action<int> printTransition =
@@ -213,29 +227,66 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				Console.Write(" " + label );
 			}
 
-			var initialTransitionWithHighestProbability = selectEntryWithHighestProbability(GetInitialDistributionEnumerator());
+			var initialTransitionWithHighestProbability = selectEntryWithHighestProbability(GetInitialDistributionsEnumerator());
 			printTransition(initialTransitionWithHighestProbability);
 
 			var lastState = _transitionChainElementsMemory[initialTransitionWithHighestProbability].TargetState;
 			for (var i = 0; i < steps; i++)
 			{
-				var currentTransition = selectEntryWithHighestProbability(GetTransitionEnumerator(lastState));
+				var currentTransition = selectEntryWithHighestProbability(GetDistributionsEnumerator(lastState));
 				printTransition(currentTransition);
 				lastState = _transitionChainElementsMemory[currentTransition].TargetState;
 			}
 		}
 
-		internal LabeledTransitionEnumerator GetTransitionEnumerator(int stateStorageState)
+		internal DistributionsEnumerator GetDistributionsEnumerator(int stateStorageState)
 		{
 			var firstElement = _stateStorageStateToFirstDistributionChainElementMemory[stateStorageState];
-			return new LabeledTransitionEnumerator(this, firstElement);
+			return new DistributionsEnumerator(this, firstElement);
 		}
 
-		internal LabeledTransitionEnumerator GetInitialDistributionEnumerator()
+		internal DistributionsEnumerator GetInitialDistributionsEnumerator()
 		{
-			return new LabeledTransitionEnumerator(this, _indexOfFirstInitialDistribution);
+			return new DistributionsEnumerator(this, _indexOfFirstInitialDistribution);
 		}
 
+		internal struct DistributionsEnumerator
+		{
+			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
+
+			public int CurrentIndex { get; private set; }
+
+			private int _nextElementIndex;
+			
+			public int CurrentDistribution => _ltmdp._distributionChainElementsMemory[CurrentIndex].Distribution;
+
+			public LabeledTransitionEnumerator GetLabeledTransitionEnumerator()
+			{
+				return new LabeledTransitionEnumerator(_ltmdp, _ltmdp._distributionChainElementsMemory[CurrentIndex].FirstTransitionIndex);
+			}
+
+			public DistributionsEnumerator(LabeledTransitionMarkovDecisionProcess ltmdp, int firstElement)
+			{
+				_ltmdp = ltmdp;
+				CurrentIndex = -1;
+				_nextElementIndex = firstElement;
+			}
+
+			/// <summary>
+			/// Advances the enumerator to the next element of the collection.
+			/// </summary>
+			/// <returns>
+			/// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
+			/// </returns>
+			public bool MoveNext()
+			{
+				if (_nextElementIndex == -1)
+					return false;
+				CurrentIndex = _nextElementIndex;
+				_nextElementIndex = _ltmdp._distributionChainElementsMemory[CurrentIndex].NextElementIndex;
+				return true;
+			}
+		}
 		internal struct LabeledTransitionEnumerator
 		{
 			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
@@ -244,22 +295,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			private int _nextElementIndex;
 
-			public double CurrentProbability {
-				get { return _ltmdp._transitionChainElementsMemory[CurrentIndex].Probability; }
-				//set { _ltmdp._transitionChainElementsMemory[CurrentIndex].Probability = value; }
-			}
+			public double CurrentProbability => _ltmdp._transitionChainElementsMemory[CurrentIndex].Probability;
 
-			public int CurrentTargetState
-			{
-				get { return _ltmdp._transitionChainElementsMemory[CurrentIndex].TargetState; }
-				//set { _ltmdp._transitionChainElementsMemory[CurrentIndex].TargetState = value; }
-			}
+			public int CurrentTargetState => _ltmdp._transitionChainElementsMemory[CurrentIndex].TargetState;
 
-			public StateFormulaSet CurrentFormulas
-			{
-				get { return _ltmdp._transitionChainElementsMemory[CurrentIndex].Formulas; }
-				//set { _ltmdp._transitionChainElementsMemory[CurrentIndex].Formulas = value; }
-			}
+			public StateFormulaSet CurrentFormulas => _ltmdp._transitionChainElementsMemory[CurrentIndex].Formulas;
 
 			public LabeledTransitionEnumerator(LabeledTransitionMarkovDecisionProcess ltmdp, int firstElement)
 			{
@@ -283,6 +323,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				return true;
 			}
 		}
+
 
 		internal TransitionChainEnumerator GetTransitionChainEnumerator()
 		{

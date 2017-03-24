@@ -153,9 +153,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			Func<LabeledTransitionEnumerator, int> selectEntryWithHighestProbability =
 				enumerator =>
 				{
-					enumerator.MoveNext(); //at least one element must exist
-					var candidate = enumerator.CurrentIndex;
-					var probabilityOfCandidate = enumerator.CurrentProbability;
+					var candidate = -1;
+					var probabilityOfCandidate = -1.0;
 					while (enumerator.MoveNext())
 						if (probabilityOfCandidate < enumerator.CurrentProbability)
 							candidate = enumerator.CurrentIndex;
@@ -216,22 +215,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			private int _nextElementIndex;
 
-			public double CurrentProbability {
-				get { return _ltmc._transitionChainElementsMemory[CurrentIndex].Probability; }
-				//set { _ltmc._transitionChainElementsMemory[CurrentIndex].Probability = value; }
-			}
+			public double CurrentProbability => _ltmc._transitionChainElementsMemory[CurrentIndex].Probability;
 
-			public int CurrentTargetState
-			{
-				get { return _ltmc._transitionChainElementsMemory[CurrentIndex].TargetState; }
-				//set { _ltmc._transitionChainElementsMemory[CurrentIndex].TargetState = value; }
-			}
+			public int CurrentTargetState => _ltmc._transitionChainElementsMemory[CurrentIndex].TargetState;
 
-			public StateFormulaSet CurrentFormulas
-			{
-				get { return _ltmc._transitionChainElementsMemory[CurrentIndex].Formulas; }
-				//set { _ltmc._transitionChainElementsMemory[CurrentIndex].Formulas = value; }
-			}
+			public StateFormulaSet CurrentFormulas => _ltmc._transitionChainElementsMemory[CurrentIndex].Formulas;
 
 			public LabeledTransitionEnumerator(LabeledTransitionMarkovChain ltmc, int firstElement)
 			{
