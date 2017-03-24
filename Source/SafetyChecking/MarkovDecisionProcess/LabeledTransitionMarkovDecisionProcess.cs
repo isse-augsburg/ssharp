@@ -47,8 +47,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		public ConcurrentBag<int> SourceStates { get; } = new ConcurrentBag<int>();
 
-		private readonly MemoryBuffer _stateStorageStateToFirstDistributionBuffer = new MemoryBuffer();
-		private readonly int* _stateStorageStateToFirstDistributionMemory;
+		private readonly MemoryBuffer _stateStorageStateToFirstDistributionChainElementBuffer = new MemoryBuffer();
+		private readonly int* _stateStorageStateToFirstDistributionChainElementMemory;
 		
 		private readonly MemoryBuffer _distributionChainElementsBuffer = new MemoryBuffer();
 		private readonly DistributionChainElement* _distributionChainElementsMemory;
@@ -70,8 +70,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			_maxNumberOfTransitions = maxNumberOfTransitions;
 
-			_stateStorageStateToFirstDistributionBuffer.Resize((long)maxNumberOfStates * sizeof(int), zeroMemory: false);
-			_stateStorageStateToFirstDistributionMemory = (int*)_stateStorageStateToFirstDistributionBuffer.Pointer;
+			_stateStorageStateToFirstDistributionChainElementBuffer.Resize((long)maxNumberOfStates * sizeof(int), zeroMemory: false);
+			_stateStorageStateToFirstDistributionChainElementMemory = (int*)_stateStorageStateToFirstDistributionChainElementBuffer.Pointer;
 
 			_distributionChainElementsBuffer.Resize((long)maxNumberOfStates * sizeof(DistributionChainElement), zeroMemory: false);
 			_distributionChainElementsMemory = (DistributionChainElement*)_distributionChainElementsBuffer.Pointer;
@@ -82,7 +82,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			for (var i = 0; i < maxNumberOfStates; i++)
 			{
-				_stateStorageStateToFirstDistributionMemory[i] = -1;
+				_stateStorageStateToFirstDistributionChainElementMemory[i] = -1;
 			}
 		}
 
@@ -90,6 +90,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		private struct DistributionChainElement
 		{
 			public int NextElementIndex;
+			public int Distribution;
 			public int FirstTransitionIndex;
 		}
 
@@ -116,7 +117,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		{
 			// The stuttering state might not be reached at all.
 			// Make sure, that all used algorithms to not require a connected state graph.
-			var currentElementIndex = _stateStorageStateToFirstDistributionMemory[stutteringStateIndex];
+			var currentElementIndex = _stateStorageStateToFirstDistributionChainElementMemory[stutteringStateIndex];
 			Assert.That(currentElementIndex == -1, "Stuttering state has already been created");
 
 			var locationOfNewDistributionEntry = GetPlaceForNewDistributionChainElement();
@@ -139,7 +140,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 					};
 
 			SourceStates.Add(stutteringStateIndex);
-			_stateStorageStateToFirstDistributionMemory[stutteringStateIndex] = locationOfNewDistributionEntry;
+			_stateStorageStateToFirstDistributionChainElementMemory[stutteringStateIndex] = locationOfNewDistributionEntry;
 		}
 
 		// Validation
@@ -226,7 +227,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		internal LabeledTransitionEnumerator GetTransitionEnumerator(int stateStorageState)
 		{
-			var firstElement = _stateStorageStateToFirstDistributionMemory[stateStorageState];
+			var firstElement = _stateStorageStateToFirstDistributionChainElementMemory[stateStorageState];
 			return new LabeledTransitionEnumerator(this, firstElement);
 		}
 

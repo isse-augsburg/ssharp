@@ -93,7 +93,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 
 			[Conditional("DEBUG")]
-			private void CheckIfTransitionIsValid(Transition* transition)
+			private void CheckIfTransitionIsValid(LtmdpTransition* transition)
 			{
 				Assert.That(TransitionFlags.IsValid(transition->Flags), "Attempted to add an invalid transition.");
 			}
@@ -103,58 +103,99 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			{
 				if (areInitialTransitions)
 					return _ltmdp._indexOfFirstInitialDistribution;
-				return _ltmdp._stateStorageStateToFirstDistributionMemory[sourceState];
+				return _ltmdp._stateStorageStateToFirstDistributionChainElementMemory[sourceState];
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private void CreateNewTransitionChainStartWithTransition(int sourceState, bool areInitialTransitions, Transition* transition)
+			private DistributionChainElement GetDistributionChainElement(int index)
 			{
-				/*
-				var probTransition = (LtmdpTransition*)transition;
-				var locationOfNewEntry = _ltmdp.GetPlaceForNewTransitionChainElement();
+				return _ltmdp._distributionChainElementsMemory[index];
+			}
 
-				_ltmdp._transitionChainElementsMemory[locationOfNewEntry] =
-					new TransitionChainElement
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int FindOrCreateDistributionChainElementInExistingDistributionChain(int startPositionOfDistributionChain, int distribution)
+			{
+				// Search for place to append is linear in number of existing distributions of state
+				var currentDistributionElementIndex = startPositionOfDistributionChain;
+				
+				while (true)
+				{
+					var currentElement = GetDistributionChainElement(currentDistributionElementIndex);
+					if (currentElement.Distribution == distribution)
 					{
-						Formulas = transition->Formulas,
-						NextElementIndex = -1,
-						Probability = probTransition->Probability,
-						TargetState = transition->TargetStateIndex
-					};
+						//Case 1: Found
+						return currentElement.FirstTransitionIndex;
+					}
+					if (currentElement.NextElementIndex == -1)
+					{
+						//Case 2: Append
+						var locationOfNewEntry = _ltmdp.GetPlaceForNewDistributionChainElement();
+						_ltmdp._distributionChainElementsMemory[currentDistributionElementIndex].NextElementIndex =
+							locationOfNewEntry;
+						_ltmdp._distributionChainElementsMemory[locationOfNewEntry] =
+							new DistributionChainElement
+							{
+								FirstTransitionIndex = -1,
+								Distribution = distribution,
+								NextElementIndex = -1,
+							};
+						return locationOfNewEntry;
+					}
+					//else continue iteration
+					currentDistributionElementIndex = currentElement.NextElementIndex;
+				}
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int CreateNewDistributionChainStartWithDistribution(int sourceState, bool areInitialTransitions, int distribution)
+			{
+				var locationOfNewEntry = _ltmdp.GetPlaceForNewDistributionChainElement();
+
 				if (areInitialTransitions)
 				{
-					_ltmdp._indexOfFirstInitialTransition = locationOfNewEntry;
+					_ltmdp._indexOfFirstInitialDistribution = locationOfNewEntry;
 				}
 				else
 				{
 					_ltmdp.SourceStates.Add(sourceState);
-					_ltmdp._stateStorageStateToFirstTransitionChainElementMemory[sourceState] = locationOfNewEntry;
-				}*/
+					_ltmdp._stateStorageStateToFirstDistributionChainElementMemory[sourceState] = locationOfNewEntry;
+				}
+
+				_ltmdp._distributionChainElementsMemory[locationOfNewEntry] =
+					new DistributionChainElement
+					{
+						FirstTransitionIndex = -1,
+						Distribution = distribution,
+						NextElementIndex = -1,
+					};
+				return locationOfNewEntry;
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private void CreateNewDistributionsChainWithDistribution(int sourceState, bool areInitialTransitions, int distribution)
+			private int FindOrCreateDistributionChainElementWithDistribution(int sourceState, bool areInitialTransitions, int distribution)
 			{
-				/*
-				var locationOfNewEntry = _ltmdp.GetPlaceForNewTransitionChainElement();
+				var startPositionOfDistributionChain = GetStartPositionOfDistributionChain(sourceState, areInitialTransitions);
 
-				_ltmdp._transitionChainElementsMemory[locationOfNewEntry] =
-					new TransitionChainElement
-					{
-						Formulas = transition->Formulas,
-						NextElementIndex = -1,
-						Probability = probTransition->Probability,
-						TargetState = transition->TargetState
-					};
-				if (areInitialTransitions)
+				// now we select the correct distribution
+				// startPositionOfDistributionChain == -1 indicates that no distribution chain for state exists
+				if (startPositionOfDistributionChain == -1)
 				{
-					_ltmdp._indexOfFirstInitialTransition = locationOfNewEntry;
+					var positionOfDistributionChain = CreateNewDistributionChainStartWithDistribution(sourceState, areInitialTransitions, distribution);
+					return positionOfDistributionChain;
 				}
 				else
 				{
-					_ltmdp.SourceStates.Add(sourceState);
-					_ltmdp._stateStorageStateToFirstTransitionChainElementMemory[sourceState] = locationOfNewEntry;
-				}*/
+					var positionOfDistributionChain = FindOrCreateDistributionChainElementInExistingDistributionChain(startPositionOfDistributionChain, distribution);
+					return positionOfDistributionChain;
+				}
+			}
+
+
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private int GetStartPositionOfTransitionChain(int positionOfDistributionElementChain)
+			{
+				return _ltmdp._distributionChainElementsMemory[positionOfDistributionElementChain].FirstTransitionIndex;
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -164,66 +205,77 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private DistributionChainElement GetDistributionChainElement(int index)
+			private void CreateNewTransitionChainStartWithTransition(int positionOfDistributionElementChain, LtmdpTransition* transition)
 			{
-				return _ltmdp._distributionChainElementsMemory[index];
+				var locationOfNewEntry = _ltmdp.GetPlaceForNewTransitionChainElement();
+				
+				_ltmdp._distributionChainElementsMemory[positionOfDistributionElementChain].FirstTransitionIndex =
+					locationOfNewEntry;
+
+				_ltmdp._transitionChainElementsMemory[locationOfNewEntry] =
+					new TransitionChainElement
+					{
+						Formulas = transition->Formulas,
+						NextElementIndex = -1,
+						Probability = transition->Probability,
+						TargetState = transition->GetTargetStateIndex()
+					};
 			}
 
-
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private void AddTransitionToTransitionChain(int startPositionOfChain, Transition* transition)
+			private void AddTransitionToExistingTransitionChain(int startPositionOfTransitionChain, LtmdpTransition* transition)
 			{
 				// Search for place to append is linear in number of existing transitions of state => O(n^2) 
-				var currentElementIndex = startPositionOfChain;
+				var currentTransitionElementIndex = startPositionOfTransitionChain;
 
-				var probTransition = (LtmdpTransition*)transition;
 				// merge or append
-				bool mergedOrAppended = false;
-				while (!mergedOrAppended)
+				while (true)
 				{
-					var currentElement = GetTransitionChainElement(currentElementIndex);
-					if (currentElement.TargetState == transition->TargetStateIndex && currentElement.Formulas == transition->Formulas)
+					var currentElement = GetTransitionChainElement(currentTransitionElementIndex);
+					if (currentElement.TargetState == transition->GetTargetStateIndex() && currentElement.Formulas == transition->Formulas)
 					{
 						//Case 1: Merge
-						_ltmdp._transitionChainElementsMemory[currentElementIndex] =
-							new TransitionChainElement
-							{
-								Formulas = currentElement.Formulas,
-								NextElementIndex = currentElement.NextElementIndex,
-								Probability = probTransition->Probability + currentElement.Probability,
-								TargetState = currentElement.TargetState
-							};
-						mergedOrAppended = true;
+						_ltmdp._transitionChainElementsMemory[currentTransitionElementIndex].Probability =
+							transition->Probability + currentElement.Probability;
+						return;
 					}
-					else if (currentElement.NextElementIndex == -1)
+					if (currentElement.NextElementIndex == -1)
 					{
 						//Case 2: Append
 						var locationOfNewEntry = _ltmdp.GetPlaceForNewTransitionChainElement();
-						mergedOrAppended = true;
-						_ltmdp._transitionChainElementsMemory[currentElementIndex] =
-							new TransitionChainElement
-							{
-								Formulas = currentElement.Formulas,
-								NextElementIndex = locationOfNewEntry,
-								Probability = currentElement.Probability,
-								TargetState = currentElement.TargetState
-							};
+						_ltmdp._transitionChainElementsMemory[currentTransitionElementIndex].NextElementIndex =
+							locationOfNewEntry;
 						_ltmdp._transitionChainElementsMemory[locationOfNewEntry] =
 							new TransitionChainElement
 							{
 								Formulas = transition->Formulas,
 								NextElementIndex = -1,
-								Probability = probTransition->Probability,
-								TargetState = transition->TargetStateIndex
+								Probability = transition->Probability,
+								TargetState = transition->GetTargetStateIndex()
 							};
+						return;
 					}
-					else
-					{
-						//else continue iteration
-						currentElementIndex = currentElement.NextElementIndex;
-					}
+					//else continue iteration
+					currentTransitionElementIndex = currentElement.NextElementIndex;
 				}
 			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private void AddTransitionToTransitionChain(int positionOfDistributionElementChain, LtmdpTransition* probTransition)
+			{
+				var startPositionOfTransitionChain = GetStartPositionOfTransitionChain(positionOfDistributionElementChain);
+
+				// startPositionOfChain == -1 indicates that no transition chain for state exists
+				if (startPositionOfTransitionChain == -1)
+				{
+					CreateNewTransitionChainStartWithTransition(positionOfDistributionElementChain, probTransition);
+				}
+				else
+				{
+					AddTransitionToExistingTransitionChain(startPositionOfTransitionChain, probTransition);
+				}
+			}
+
 
 			/// <summary>
 			///   Processes the new <paramref name="transitions" /> discovered by the <paramref name="worker " /> within the traversal
@@ -248,18 +300,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 				foreach (var transition in transitions)
 				{
-					CheckIfTransitionIsValid(transition);
-					var startPositionOfDistributionChain = GetStartPositionOfDistributionChain(sourceState, areInitialTransitions);
+					var probTransition = (LtmdpTransition*)transition;
 
-					// startPositionOfDistributionChain == -1 indicates that no distribution chain exists
-					if (startPositionOfDistributionChain == -1)
-					{
-						//CreateNewDistributionsChainWithDistribution(sourceState, areInitialTransitions, transition);
-					}
-					else
-					{
-						AddTransitionToTransitionChain(startPositionOfDistributionChain, transition);
-					}
+					CheckIfTransitionIsValid(probTransition);
+
+					var positionOfDistributionElementChain = FindOrCreateDistributionChainElementWithDistribution(sourceState, areInitialTransitions, probTransition->Distribution);
+
+					AddTransitionToTransitionChain(positionOfDistributionElementChain, probTransition);
 				}
 			}
 		}

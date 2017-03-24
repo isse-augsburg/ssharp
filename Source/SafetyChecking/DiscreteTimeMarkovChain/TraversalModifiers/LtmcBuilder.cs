@@ -66,7 +66,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			}
 
 			[Conditional("DEBUG")]
-			private void CheckIfTransitionIsValid(Transition* transition)
+			private void CheckIfTransitionIsValid(LtmcTransition* transition)
 			{
 				Assert.That(TransitionFlags.IsValid(transition->Flags), "Attempted to add an invalid transition.");
 			}
@@ -80,19 +80,16 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private void CreateNewTransitionChainStartWithTransition(int sourceState, bool areInitialTransitions, Transition* transition)
+			private TransitionChainElement GetTransitionChainElement(int index)
 			{
-				var probTransition = (LtmcTransition*)transition;
+				return _markovChain._transitionChainElementsMemory[index];
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private void CreateNewTransitionChainStartWithTransition(int sourceState, bool areInitialTransitions, LtmcTransition* transition)
+			{
 				var locationOfNewEntry = _markovChain.GetPlaceForNewTransitionChainElement();
 
-				_markovChain._transitionChainElementsMemory[locationOfNewEntry] =
-					new TransitionChainElement
-					{
-						Formulas = probTransition->Formulas,
-						NextElementIndex = -1,
-						Probability = probTransition->Probability,
-						TargetState = probTransition->GetTargetStateIndex()
-					};
 				if (areInitialTransitions)
 				{
 					_markovChain._indexOfFirstInitialTransition = locationOfNewEntry;
@@ -102,67 +99,69 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					_markovChain.SourceStates.Add(sourceState);
 					_markovChain._stateStorageStateToFirstTransitionChainElementMemory[sourceState] = locationOfNewEntry;
 				}
+
+				_markovChain._transitionChainElementsMemory[locationOfNewEntry] =
+					new TransitionChainElement
+					{
+						Formulas = transition->Formulas,
+						NextElementIndex = -1,
+						Probability = transition->Probability,
+						TargetState = transition->GetTargetStateIndex()
+					};
 			}
 
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private TransitionChainElement GetTransitionChainElement(int index)
-			{
-				return _markovChain._transitionChainElementsMemory[index];
-			}
-
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private void AddTransitionToTransitionChain(int startPositionOfChain, Transition* transition)
+			private void AddTransitionToExistingTransitionChain(int startPositionOfTransitionChain, LtmcTransition* transition)
 			{
 				// Search for place to append is linear in number of existing transitions of state => O(n^2) 
-				var currentElementIndex = startPositionOfChain;
+				var currentTransitionElementIndex = startPositionOfTransitionChain;
 
-				var probTransition = (LtmcTransition*)transition;
 				// merge or append
-				bool mergedOrAppended = false;
-				while (!mergedOrAppended)
+				while (true)
 				{
-					var currentElement = GetTransitionChainElement(currentElementIndex);
-					if (currentElement.TargetState == probTransition->GetTargetStateIndex() && currentElement.Formulas == transition->Formulas)
+					var currentElement = GetTransitionChainElement(currentTransitionElementIndex);
+					if (currentElement.TargetState == transition->GetTargetStateIndex() && currentElement.Formulas == transition->Formulas)
 					{
 						//Case 1: Merge
-						_markovChain._transitionChainElementsMemory[currentElementIndex] =
-							new TransitionChainElement
-							{
-								Formulas = currentElement.Formulas,
-								NextElementIndex = currentElement.NextElementIndex,
-								Probability = probTransition->Probability + currentElement.Probability,
-								TargetState = currentElement.TargetState
-							};
-						mergedOrAppended = true;
+						_markovChain._transitionChainElementsMemory[currentTransitionElementIndex].Probability =
+							transition->Probability + currentElement.Probability;
+						return;
 					}
-					else if (currentElement.NextElementIndex == -1)
+					if (currentElement.NextElementIndex == -1)
 					{
 						//Case 2: Append
 						var locationOfNewEntry = _markovChain.GetPlaceForNewTransitionChainElement();
-						mergedOrAppended = true;
-						_markovChain._transitionChainElementsMemory[currentElementIndex] =
-							new TransitionChainElement
-							{
-								Formulas = currentElement.Formulas,
-								NextElementIndex = locationOfNewEntry,
-								Probability = currentElement.Probability,
-								TargetState = currentElement.TargetState
-							};
+						_markovChain._transitionChainElementsMemory[currentTransitionElementIndex].NextElementIndex =
+							locationOfNewEntry;
 						_markovChain._transitionChainElementsMemory[locationOfNewEntry] =
 							new TransitionChainElement
 							{
 								Formulas = transition->Formulas,
 								NextElementIndex = -1,
-								Probability = probTransition->Probability,
-								TargetState = probTransition->GetTargetStateIndex()
+								Probability = transition->Probability,
+								TargetState = transition->GetTargetStateIndex()
 							};
+						return;
 					}
-					else
-					{
-						//else continue iteration
-						currentElementIndex = currentElement.NextElementIndex;
-					}
+					//else continue iteration
+					currentTransitionElementIndex = currentElement.NextElementIndex;
+				}
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			private void AddTransitionToTransitionChain(int sourceState, bool areInitialTransitions, LtmcTransition* probTransition)
+			{
+				var startPositionOfTransitionChain = GetStartPositionOfTransitionChain(sourceState, areInitialTransitions);
+
+				// startPositionOfTransitionChain == -1 indicates that no transition chain for state exists
+				if (startPositionOfTransitionChain == -1)
+				{
+					CreateNewTransitionChainStartWithTransition(sourceState, areInitialTransitions, probTransition);
+				}
+				else
+				{
+					AddTransitionToExistingTransitionChain(startPositionOfTransitionChain, probTransition);
 				}
 			}
 
@@ -186,18 +185,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				CheckIfTransitionsCanBeProcessed(transitionCount);
 				foreach (var transition in transitions)
 				{
-					CheckIfTransitionIsValid(transition);
-					var startPositionOfTransitionChain = GetStartPositionOfTransitionChain(sourceState, areInitialTransitions);
+					var probTransition = (LtmcTransition*)transition;
 
-					// startPositionOfChain == -1 indicates that no chain exists
-					if (startPositionOfTransitionChain == -1)
-					{
-						CreateNewTransitionChainStartWithTransition(sourceState, areInitialTransitions, transition);
-					}
-					else
-					{
-						AddTransitionToTransitionChain(startPositionOfTransitionChain, transition);
-					}
+					CheckIfTransitionIsValid(probTransition);
+
+					AddTransitionToTransitionChain(sourceState, areInitialTransitions, probTransition);
 				}
 			}
 		}
