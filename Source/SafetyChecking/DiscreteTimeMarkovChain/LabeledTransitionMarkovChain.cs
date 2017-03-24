@@ -27,6 +27,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using System.Collections.Concurrent;
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.Runtime.CompilerServices;
 	using Modeling;
 	using Utilities;
 	using AnalysisModel;
@@ -85,13 +86,22 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			public double Probability;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private int GetPlaceForNewTransitionChainElement()
+		{
+			var locationOfNewEntry= InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
+			if (locationOfNewEntry >= _maxNumberOfTransitions)
+				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
+			return locationOfNewEntry;
+		}
+
 		public void CreateStutteringState(int stutteringStateIndex)
 		{
 			// The stuttering state might not be reached at all.
 			// Make sure, that all used algorithms to not require a connected state graph.
 			var currentElementIndex = _stateStorageStateToFirstTransitionChainElementMemory[stutteringStateIndex];
 			Assert.That(currentElementIndex == -1, "Stuttering state has already been created");
-			var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
+			var locationOfNewEntry = GetPlaceForNewTransitionChainElement();
 			_transitionChainElementsMemory[locationOfNewEntry] =
 					new TransitionChainElement
 					{
