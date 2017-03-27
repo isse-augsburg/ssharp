@@ -102,36 +102,45 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		public void ConvertTransitions(LabeledTransitionMarkovDecisionProcess ltmc)
 		{
-			/*
 			for (var i = 0; i < States; i++)
 			{
 				var sourceEntry = _backMapper[i];
-				MarkovDecisionProcess.StartWithNewDistribution(i);
+				MarkovDecisionProcess.StartWithNewDistributions(i);
 
-				var enumerator = ltmc.GetTransitionEnumerator(sourceEntry.StateStorageState);
-				while (enumerator.MoveNext())
+				var distEnumerator = ltmc.GetDistributionsEnumerator(sourceEntry.StateStorageState);
+				while (distEnumerator.MoveNext())
 				{
-					var targetEntry = new StateStorageEntry(enumerator.CurrentFormulas, enumerator.CurrentTargetState);
-					var targetState = _mapper[targetEntry];
-					MarkovDecisionProcess.AddTransition(targetState,enumerator.CurrentProbability);
+					MarkovDecisionProcess.StartWithNewDistribution();
+					var transEnumerator = distEnumerator.GetLabeledTransitionEnumerator();
+					while (transEnumerator.MoveNext())
+					{
+						var targetEntry = new StateStorageEntry(transEnumerator.CurrentFormulas, transEnumerator.CurrentTargetState);
+						var targetState = _mapper[targetEntry];
+						MarkovDecisionProcess.AddTransition(targetState, transEnumerator.CurrentProbability);
+					}
+					MarkovDecisionProcess.FinishDistribution();
 				}
-				MarkovDecisionProcess.FinishDistribution();
-			}*/
+				MarkovDecisionProcess.FinishDistributions();
+			}
 		}
 
 		public void ConvertInitialStates(LabeledTransitionMarkovDecisionProcess ltmc)
-		{/*
+		{
 			MarkovDecisionProcess.StartWithInitialDistributions();
-			MarkovDecisionProcess.StartWithNewInitialDistribution();
-			var enumerator = ltmc.GetInitialDistributionEnumerator();
-			while (enumerator.MoveNext())
+			var distEnumerator = ltmc.GetInitialDistributionsEnumerator();
+			while (distEnumerator.MoveNext())
 			{
-				var targetEntry = new StateStorageEntry(enumerator.CurrentFormulas, enumerator.CurrentTargetState);
-				var targetState = _mapper[targetEntry];
-				MarkovDecisionProcess.AddInitialTransition(targetState, enumerator.CurrentProbability);
+				MarkovDecisionProcess.StartWithNewInitialDistribution();
+				var transEnumerator = distEnumerator.GetLabeledTransitionEnumerator();
+				while (transEnumerator.MoveNext())
+				{
+					var targetEntry = new StateStorageEntry(transEnumerator.CurrentFormulas, transEnumerator.CurrentTargetState);
+					var targetState = _mapper[targetEntry];
+					MarkovDecisionProcess.AddTransition(targetState, transEnumerator.CurrentProbability);
+				}
+				MarkovDecisionProcess.FinishInitialDistribution();
 			}
-			MarkovDecisionProcess.FinishInitialDistribution();
-			MarkovDecisionProcess.FinishInitialDistributions();*/
+			MarkovDecisionProcess.FinishInitialDistributions();
 		}
 
 		public LtmdpToMdp(LabeledTransitionMarkovDecisionProcess ltmc)

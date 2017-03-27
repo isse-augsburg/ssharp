@@ -38,7 +38,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 		{
 		}
 
-		[Fact(Skip="Not implemented, yet")]
+		[Fact]
 		public void Check()
 		{
 			var m = new Model();

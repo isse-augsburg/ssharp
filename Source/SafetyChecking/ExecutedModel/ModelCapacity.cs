@@ -138,9 +138,10 @@ namespace ISSE.SafetyChecking.ExecutedModel
 					Requires.That(densityInNumbers > 0, "There must be memory for at least one transition per state in average.");
 					break;
 			}
+			var numberOfDistributions = StateCapacity * (long)Math.Ceiling(Math.Sqrt(densityInNumbers));
 			var numberOfTransitions = StateCapacity * densityInNumbers;
-			
-			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, numberOfTransitions);
+
+			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, numberOfDistributions, numberOfTransitions);
 		}
 	}
 
@@ -148,48 +149,52 @@ namespace ISSE.SafetyChecking.ExecutedModel
 	{
 		private long _stateCapacity;
 
-		public long _transitionCapacity { get; private set; }
+		public long DistributionsCapacity { get; private set; }
+
+		public long TransitionCapacity { get; private set; }
 
 		private ModelCapacityByModelSize()
 		{
 		}
 
-		public ModelCapacityByModelSize(long stateCapacity, long transitionCapacity)
+		public ModelCapacityByModelSize(long stateCapacity, long distributionsCapacity, long transitionCapacity)
 		{
 			Requires.That(stateCapacity > 0, "must be greater 0");
+			Requires.That(distributionsCapacity > 0, "must be greater 0");
 			Requires.That(transitionCapacity > 0, "must be greater 0");
 			StateCapacity = stateCapacity;
-			_transitionCapacity = transitionCapacity;
+			DistributionsCapacity = distributionsCapacity;
+			TransitionCapacity = transitionCapacity;
 		}
 
 		public static readonly ModelCapacityByModelSize Default = new ModelCapacityByModelSize
 		{
 			StateCapacity = DefaultStateCapacity,
-			_transitionCapacity = (int)DefaultDensityLimit* DefaultStateCapacity
+			TransitionCapacity = (int)DefaultDensityLimit* DefaultStateCapacity
 		};
 
 		public static readonly ModelCapacityByModelSize Tiny = new ModelCapacityByModelSize
 		{
 			StateCapacity = 1024,
-			_transitionCapacity = 1024 * 1024
+			TransitionCapacity = 1024 * 1024
 		};
 
 		public static readonly ModelCapacityByModelSize Small = new ModelCapacityByModelSize
 		{
 			StateCapacity = 1 << 20,
-			_transitionCapacity = 1 << 25
+			TransitionCapacity = 1 << 25
 		};
 
 		public static readonly ModelCapacityByModelSize Normal = new ModelCapacityByModelSize
 		{
 			StateCapacity = 1 << 24,
-			_transitionCapacity = 1 << 29
+			TransitionCapacity = 1 << 29
 		};
 
 		public static readonly ModelCapacityByModelSize Large = new ModelCapacityByModelSize
 		{
 			StateCapacity = 1 << 28,
-			_transitionCapacity = 1 << 30
+			TransitionCapacity = 1 << 30
 		};
 
 		public long StateCapacity
@@ -204,7 +209,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 
 		public override ModelByteSize DeriveModelByteSize(int sizeOfState, int sizeOfTransition)
 		{
-			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, _transitionCapacity);
+			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, DistributionsCapacity, TransitionCapacity);
 		}
 	}
 
@@ -299,9 +304,10 @@ namespace ISSE.SafetyChecking.ExecutedModel
 						numberOfStates = availableMemoryValue / (sizeOfState + sizeOfTransition * densityInNumbers);
 						break;
 				}
+				var numberOfDistributions = numberOfStates * (long)Math.Ceiling(Math.Sqrt(densityInNumbers));
 				var numberOfTransitions = numberOfStates * densityInNumbers;
-				
-				return new ModelByteSize(sizeOfState, sizeOfTransition, numberOfStates, numberOfTransitions);
+
+				return new ModelByteSize(sizeOfState, sizeOfTransition, numberOfStates, numberOfDistributions, numberOfTransitions);
 			}
 			else
 			{
@@ -317,9 +323,10 @@ namespace ISSE.SafetyChecking.ExecutedModel
 						break;
 				}
 				numberOfStates = availableMemoryValue / sizeOfState;
+				var numberOfDistributions = numberOfStates * (long)Math.Ceiling(Math.Sqrt(densityInNumbers));
 				var numberOfTransitions = numberOfStates * densityInNumbers;
 
-				return new ModelByteSize(sizeOfState, sizeOfTransition, numberOfStates, numberOfTransitions);
+				return new ModelByteSize(sizeOfState, sizeOfTransition, numberOfStates, numberOfDistributions, numberOfTransitions);
 			}
 		}
 
@@ -333,12 +340,14 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		public int SizeOfState { get; }
 		public int SizeOfTransition { get; }
 		public long NumberOfStates { get; }
+		public long NumberOfDistributions { get; }
 		public long NumberOfTransitions { get; }
 
-		public ModelByteSize(int sizeOfState, int sizeOfTransition, long numberOfStates, long numberOfTransitions)
+		public ModelByteSize(int sizeOfState, int sizeOfTransition, long numberOfStates, long numberOfDistributions, long numberOfTransitions)
 		{
-			Requires.That(numberOfStates > 0,"At least one state is necessary");
+			Requires.That(numberOfStates > 0, "At least one state is necessary");
 			Requires.That(sizeOfState > 0, "Size of state must be at least 1");
+			Requires.That(numberOfDistributions >= numberOfStates + 1, "At least one more distribution than states necessary");
 			var memoryLimitForStates = numberOfStates * sizeOfState;
 			var memoryLimitForTransitions = numberOfTransitions * sizeOfTransition;
 			TotalMemoryLimit = new ByteSize(memoryLimitForStates + memoryLimitForTransitions);
@@ -347,6 +356,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 			SizeOfState = sizeOfState;
 			SizeOfTransition = sizeOfTransition;
 			NumberOfStates = numberOfStates;
+			NumberOfDistributions = numberOfDistributions;
 			NumberOfTransitions = numberOfTransitions;
 		}
 		

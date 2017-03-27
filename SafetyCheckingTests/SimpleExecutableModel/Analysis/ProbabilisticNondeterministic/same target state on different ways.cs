@@ -37,8 +37,8 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 		public SameTargetStateOnDifferentWays(ITestOutputHelper output = null) : base(output)
 		{
 		}
-		
-		[Fact(Skip = "Not implemented, yet")]
+
+		[Fact]
 		protected void Check()
 		{
 			var m = new Model();
