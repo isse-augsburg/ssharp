@@ -65,6 +65,7 @@
     <Compile Include="Analysis\SimulationTests.cs" />
     <Compile Include="Modeling\ClientT.cs" />
     <Compile Include="Modeling\EServerFidelity.cs" />
+    <Compile Include="Modeling\FaultActivationAttribute.cs" />
     <Compile Include="Modeling\Model.cs" />
     <Compile Include="Modeling\ProxyObserver.cs" />
     <Compile Include="Modeling\ProxyT.cs" />
