@@ -39,7 +39,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 	using Modeling.Sensors;
 	using Newtonsoft.Json;
 
-	class HazardProbabilityTests
+	class HazardProbabilityRangeTests
 	{
 		public class ModelProbabilities
 		{
@@ -90,7 +90,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			var model = Model.CreateOriginal();
 			SetProbabilities(model);
 
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Collision, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.Collision, 50);
 			Console.Write($"Probability of hazard: {result}");
 		}
 
@@ -100,7 +100,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			var model = Model.CreateOriginal();
 			SetProbabilities(model);
 
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.FalseAlarm, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.FalseAlarm, 50);
 			Console.Write($"Probability of hazard: {result}");
 		}
 
@@ -110,7 +110,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			var model = Model.CreateOriginal();
 			SetProbabilities(model);
 
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PreventedCollision, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.PreventedCollision, 50);
 			Console.Write($"Probability of prevention: {result}");
 		}
 
@@ -120,7 +120,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		public void CalculateCollision(Model model, string variantName)
 		{
 			SetProbabilities(model);
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Collision, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.Collision, 50);
 			Console.Write($"Probability of hazard: {result}");
 		}
 
@@ -129,7 +129,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		public void CalculateFalseAlarm(Model model, string variantName)
 		{
 			SetProbabilities(model);
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.FalseAlarm, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.FalseAlarm, 50);
 			Console.Write($"Probability of hazard: {result}");
 		}
 
@@ -138,7 +138,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		public void CalculatePrevention(Model model, string variantName)
 		{
 			SetProbabilities(model);
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PreventedCollision, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.PreventedCollision, 50);
 			Console.Write($"Probability of prevention: {result}");
 		}
 

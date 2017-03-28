@@ -113,7 +113,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 		}
 
-		internal override Probability CalculateProbabilityRange(Formula formulaToCheck)
+		internal override ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck)
 		{
 			throw new NotImplementedException();
 		}

@@ -26,6 +26,7 @@ namespace SafetySharp.Analysis
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
 	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.MarkovDecisionProcess;
 	using ISSE.SafetyChecking.Modeling;
 	using Modeling;
 	using Runtime;
@@ -116,6 +117,53 @@ namespace SafetySharp.Analysis
 				probabilityToReachState = modelChecker.CalculateProbability(probabilityToReachStateFormula);
 			}
 			return probabilityToReachState;
+		}
+
+		/// <summary>
+		///   Calculates the probability to reach a state whether <paramref name="stateFormula" /> holds.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="stateFormula">The state formula to be checked.</param>
+		public static ProbabilityRange CalculateProbabilityRangeToReachState(ModelBase model, Formula stateFormula)
+		{
+			ProbabilityRange probabilityRangeToReachState;
+
+			var probabilityToReachStateFormula = new UnaryFormula(stateFormula, UnaryOperator.Finally);
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovDecisionProcessGenerator = new MdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
+			markovDecisionProcessGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
+			var mdp = markovDecisionProcessGenerator.GenerateMarkovDecisionProcess(stateFormula);
+			using (var modelChecker = new BuiltinMdpModelChecker(mdp, System.Console.Out))
+			{
+				probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(probabilityToReachStateFormula);
+			}
+			return probabilityRangeToReachState;
+		}
+
+		/// <summary>
+		///   Calculates the probability to reach a state whether <paramref name="stateFormula" /> holds.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="stateFormula">The state formula to be checked.</param>
+		/// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
+		public static ProbabilityRange CalculateProbabilityRangeToReachStateBounded(ModelBase model, Formula stateFormula, int bound)
+		{
+			ProbabilityRange probabilityRangeToReachState;
+
+			var probabilityToReachStateFormula = new BoundedUnaryFormula(stateFormula, UnaryOperator.Finally, bound);
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovDecisionProcessGenerator = new MdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
+			markovDecisionProcessGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
+			var mdp = markovDecisionProcessGenerator.GenerateMarkovDecisionProcess(stateFormula);
+			using (var modelChecker = new BuiltinMdpModelChecker(mdp, System.Console.Out))
+			{
+				probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(probabilityToReachStateFormula);
+			}
+			return probabilityRangeToReachState;
 		}
 	}
 }

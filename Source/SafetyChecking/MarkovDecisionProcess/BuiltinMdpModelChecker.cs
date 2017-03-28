@@ -533,10 +533,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			return exactlyOneStates;
 		}
 
-		private double CalculateMaximumProbabilityToReachStateFormula(Formula psi, int maxSteps)
+		private double CalculateMaximumProbabilityToReachStateFormula(Formula psi)
 		{
 			// same algorithm as CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps with different
 			// directlySatisfiedStates and excludedStates
+			var maxSteps = 50;
+
 			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
@@ -554,10 +556,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 
 
-		internal double CalculateMinimumProbabilityToReachStateFormula(Formula psi, int maxSteps)
+		internal double CalculateMinimumProbabilityToReachStateFormula(Formula psi)
 		{
 			// same algorithm as CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps with different
 			// directlySatisfiedStates and excludedStates
+			var maxSteps = 50;
+
 			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
@@ -593,9 +597,36 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			return new Probability(result);
 		}*/
 
-		internal override Probability CalculateProbabilityRange(Formula formulaToCheck)
+		internal override ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck)
 		{
-			throw new NotImplementedException();
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
+			var finallyUnboundFormula = formulaToCheck as UnaryFormula;
+			var finallyBoundedFormula = formulaToCheck as BoundedUnaryFormula;
+
+			double minResult;
+			double maxResult;
+
+			if (finallyUnboundFormula != null && finallyUnboundFormula.Operator == UnaryOperator.Finally)
+			{
+				minResult = CalculateMinimumProbabilityToReachStateFormula(finallyUnboundFormula.Operand);
+				maxResult = CalculateMaximumProbabilityToReachStateFormula(finallyUnboundFormula.Operand);
+			}
+			else if (finallyBoundedFormula != null && finallyBoundedFormula.Operator == UnaryOperator.Finally)
+			{
+				minResult = CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
+				maxResult = CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
+			}
+			else
+			{
+				throw new NotImplementedException();
+			}
+
+			stopwatch.Stop();
+
+			_output?.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
+			return new ProbabilityRange(minResult, maxResult);
 		}
 		
 		internal override Probability CalculateMinimalProbability(Formula formulaToCheck)
@@ -603,15 +634,28 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var finallyFormula = formulaToCheck as UnaryFormula;
-			if (finallyFormula == null || finallyFormula.Operator != UnaryOperator.Finally)
+			var finallyUnboundFormula = formulaToCheck as UnaryFormula;
+			var finallyBoundedFormula = formulaToCheck as BoundedUnaryFormula;
+
+			double minResult;
+
+			if (finallyUnboundFormula != null && finallyUnboundFormula.Operator == UnaryOperator.Finally)
+			{
+				minResult = CalculateMinimumProbabilityToReachStateFormula(finallyUnboundFormula.Operand);
+			}
+			else if (finallyBoundedFormula != null && finallyBoundedFormula.Operator == UnaryOperator.Finally)
+			{
+				minResult = CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
+			}
+			else
+			{
 				throw new NotImplementedException();
-			var result = CalculateMinimumProbabilityToReachStateFormula(finallyFormula.Operand,50);
+			}
 
 			stopwatch.Stop();
 
 			_output?.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
-			return new Probability(result);
+			return new Probability(minResult);
 		}
 
 		internal override Probability CalculateMaximalProbability(Formula formulaToCheck)
@@ -619,15 +663,28 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var finallyFormula = formulaToCheck as UnaryFormula;
-			if (finallyFormula == null || finallyFormula.Operator != UnaryOperator.Finally)
+			var finallyUnboundFormula = formulaToCheck as UnaryFormula;
+			var finallyBoundedFormula = formulaToCheck as BoundedUnaryFormula;
+			
+			double maxResult;
+
+			if (finallyUnboundFormula != null && finallyUnboundFormula.Operator == UnaryOperator.Finally)
+			{
+				maxResult = CalculateMaximumProbabilityToReachStateFormula(finallyUnboundFormula.Operand);
+			}
+			else if (finallyBoundedFormula != null && finallyBoundedFormula.Operator == UnaryOperator.Finally)
+			{
+				maxResult = CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
+			}
+			else
+			{
 				throw new NotImplementedException();
-			var result = CalculateMaximumProbabilityToReachStateFormula(finallyFormula.Operand, 50);
+			}
 
 			stopwatch.Stop();
 
 			_output?.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
-			return new Probability(result);
+			return new Probability(maxResult);
 		}
 
 

@@ -136,7 +136,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				{
 					var targetEntry = new StateStorageEntry(transEnumerator.CurrentFormulas, transEnumerator.CurrentTargetState);
 					var targetState = _mapper[targetEntry];
-					MarkovDecisionProcess.AddTransition(targetState, transEnumerator.CurrentProbability);
+					MarkovDecisionProcess.AddTransitionToInitialDistribution(targetState, transEnumerator.CurrentProbability);
 				}
 				MarkovDecisionProcess.FinishInitialDistribution();
 			}
@@ -150,7 +150,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			Console.Out.WriteLine("Starting to convert labeled transition Markov Decision Process to Markov Decision Process");
 			Console.Out.WriteLine($"Ltmdp: States {ltmc.SourceStates.Count}, Transitions {ltmc.Transitions}");
 			CreateStates(ltmc);
-			var modelCapacity = new ModelCapacityByModelDensity(States, ModelDensityLimit.High);
+			var modelCapacity = new ModelCapacityByModelSize(States, ltmc.Distributions * 8L, ltmc.Transitions * 8L);
 			MarkovDecisionProcess =new MarkovDecisionProcess(modelCapacity);
 			MarkovDecisionProcess.StateFormulaLabels = ltmc.StateFormulaLabels;
 			SetStateLabeling();

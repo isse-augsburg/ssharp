@@ -22,6 +22,7 @@
 
 namespace ISSE.SafetyChecking.Modeling
 {
+	using System.Globalization;
 	using Modeling;
 	
 	public struct ProbabilityRange
@@ -59,6 +60,17 @@ namespace ISSE.SafetyChecking.Modeling
 		{
 			MinValue = minProbability;
 			MaxValue = maxProbability;
+		}
+
+		/// <summary>
+		/// Returns the fully qualified type name of this instance.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.String"/> containing a fully qualified type name.
+		/// </returns>
+		public override string ToString()
+		{
+			return $"[{MinValue.ToString(CultureInfo.InvariantCulture)},{MaxValue.ToString(CultureInfo.InvariantCulture)}]";
 		}
 	}
 }
