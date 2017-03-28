@@ -222,6 +222,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		}
 
 		/// <summary>
+		///   Gets the continuation id of the current path.
+		/// </summary>
+		internal override int GetContinuationId()
+		{
+			//TODO: Replace lastChoiceIndex by continuation id
+			return 0;
+		}
+
+		/// <summary>
 		///   Clears all choice information.
 		/// </summary>
 		internal override void Clear()

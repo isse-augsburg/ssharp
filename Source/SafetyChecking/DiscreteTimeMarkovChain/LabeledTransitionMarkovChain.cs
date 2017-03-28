@@ -202,6 +202,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
+			if (!disposing)
+				return;
+
 			_stateStorageStateToFirstTransitionChainElementBuffer.SafeDispose();
 			_transitionChainElementsBuffer.SafeDispose();
 		}

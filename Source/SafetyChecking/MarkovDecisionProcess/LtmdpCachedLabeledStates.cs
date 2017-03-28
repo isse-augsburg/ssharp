@@ -23,6 +23,7 @@
 namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Runtime.CompilerServices;
 	using AnalysisModel;
 	using Utilities;
@@ -31,16 +32,24 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	/// <summary>
 	///   Creates an activation-minimal set of <see cref="CandidateTransition"/> instances.
 	/// </summary>
-	internal sealed unsafe class LtmdpTransitionSetBuilder<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed unsafe class LtmdpCachedLabeledStates<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly Func<bool>[] _formulas;
 		private readonly int _stateVectorSize;
 		private readonly MemoryBuffer _targetStateBuffer = new MemoryBuffer();
 		private readonly byte* _targetStateMemory;
-		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
-		private readonly LtmdpTransition* _transitions;
+
+		private readonly MemoryBuffer _transitionsWithContinuationIdBuffer = new MemoryBuffer();
+		private readonly LtmdpTransition* _transitionsWithContinuationIdMemory;
+		private int _transitionsWithContinuationIdCount;
+
+		private readonly MemoryBuffer _transitionsWithDistributionIdBuffer = new MemoryBuffer();
+		private readonly LtmdpTransition* _transitionsWithDistributionIdMemory;
+		private int _transitionsWithDistributionIdCount;
+
 		private readonly long _capacity;
-		private int _count;
+
+		private bool _continuationIdMode = true;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -48,7 +57,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <param name="model">The model the successors are computed for.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public LtmdpTransitionSetBuilder(ExecutableModel<TExecutableModel> model, long capacity, params Func<bool>[] formulas)
+		public LtmdpCachedLabeledStates(ExecutableModel<TExecutableModel> model, long capacity, params Func<bool>[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
@@ -59,8 +68,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_formulas = formulas;
 			_capacity = capacity;
 
-			_transitionBuffer.Resize(capacity * sizeof(LtmdpTransition), zeroMemory: false);
-			_transitions = (LtmdpTransition*)_transitionBuffer.Pointer;
+			_transitionsWithContinuationIdBuffer.Resize(capacity * sizeof(LtmdpTransition), zeroMemory: false);
+			_transitionsWithContinuationIdMemory = (LtmdpTransition*)_transitionsWithContinuationIdBuffer.Pointer;
+
+			_transitionsWithDistributionIdBuffer.Resize(capacity * sizeof(LtmdpTransition), zeroMemory: false);
+			_transitionsWithDistributionIdMemory = (LtmdpTransition*)_transitionsWithDistributionIdBuffer.Pointer;
 
 			_targetStateBuffer.Resize(capacity * model.StateVectorSize, zeroMemory: true);
 			_targetStateMemory = _targetStateBuffer.Pointer;
@@ -71,9 +83,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// </summary>
 		/// <param name="model">The model the transition should be added for.</param>
 		/// <param name="probability">The probability of the transition.</param>
-		public void Add(ExecutableModel<TExecutableModel> model, double probability)
+		/// <param name="continuationId">The id of the transition.</param>
+		public void Add(ExecutableModel<TExecutableModel> model, double probability, int continuationId)
 		{
-			if (_count >= _capacity)
+			if (_transitionsWithContinuationIdCount >= _capacity)
 				throw new OutOfMemoryException("Unable to store an additional transition. Try increasing the successor state capacity.");
 
 			// 1. Notify all fault activations, so that the correct activation is set in the run time model
@@ -82,21 +95,21 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			
 			// 2. Serialize the model's computed state; that is the successor state of the transition's source state
 			//    _including_ any changes resulting from notifications of fault activations
-			var successorState = _targetStateMemory + _stateVectorSize * _count;
+			var successorState = _targetStateMemory + _stateVectorSize * _transitionsWithContinuationIdCount;
 			model.Serialize(successorState);
 
 			// 3. Store the transition
 			var activatedFaults = FaultSet.FromActivatedFaults(model.NondeterministicFaults);
-			_transitions[_count] = new LtmdpTransition
+			_transitionsWithContinuationIdMemory[_transitionsWithContinuationIdCount] = new LtmdpTransition
 			{
 				TargetStatePointer = successorState,
 				Formulas = new StateFormulaSet(_formulas),
 				ActivatedFaults = activatedFaults,
 				Flags = TransitionFlags.IsValidFlag,
-				Distribution = 0,
+				Distribution = continuationId, //temporarily insert the continuation id here. Will be replaced by distribution id
 				Probability = probability
 			};
-			++_count;
+			++_transitionsWithContinuationIdCount;
 		}
 
 		/// <summary>
@@ -105,7 +118,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Clear()
 		{
-			_count = 0;
+			_transitionsWithContinuationIdCount = 0;
+			_transitionsWithDistributionIdCount = 0;
+			_continuationIdMode = true;
 		}
 		
 		/// <summary>
@@ -117,8 +132,21 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			if (!disposing)
 				return;
 
-			_transitionBuffer.SafeDispose();
+			_transitionsWithContinuationIdBuffer.SafeDispose();
+			_transitionsWithDistributionIdBuffer.SafeDispose();
 			_targetStateBuffer.SafeDispose();
+		}
+
+		public void TransformContinuationIdsToDistributions(Dictionary<int, List<int>> continuationIdToDistributions)
+		{
+			_continuationIdMode = false;
+			for (var i = 0; i < _transitionsWithContinuationIdCount; i++)
+			{
+				var newTransitionWithDistributionIndex = _transitionsWithDistributionIdCount;
+				_transitionsWithDistributionIdMemory[newTransitionWithDistributionIndex] =
+					_transitionsWithContinuationIdMemory[i]; // for now, just copy
+				_transitionsWithDistributionIdCount++;
+			}
 		}
 
 		/// <summary>
@@ -126,7 +154,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// </summary>
 		public TransitionCollection ToCollection()
 		{
-			return new TransitionCollection((Transition*)_transitions, _count, _count, sizeof(LtmdpTransition));
+			Assert.That(!_continuationIdMode,"Must transform continuation ids in transitions to distributions first");
+			return new TransitionCollection((Transition*)_transitionsWithDistributionIdMemory, _transitionsWithDistributionIdCount, _transitionsWithContinuationIdCount, sizeof(LtmdpTransition));
 		}
 	}
 }

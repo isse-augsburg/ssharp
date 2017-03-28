@@ -46,7 +46,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		private readonly EffectlessFaultsMinimizationMode _minimalizationMode = EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults;
 
-		private readonly LtmdpTransitionSetBuilder<TExecutableModel> _transitions;
+		private readonly LtmdpCachedLabeledStates<TExecutableModel> _cachedLabeledStates;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -60,7 +60,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			: base(runtimeModelCreator,stateHeaderBytes)
 		{
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
-			_transitions = new LtmdpTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
+			_cachedLabeledStates = new LtmdpCachedLabeledStates<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
 
 			ChoiceResolver = new LtmdpChoiceResolver();
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
@@ -79,7 +79,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		protected override void OnDisposing(bool disposing)
 		{
 			if (disposing)
-				_transitions.SafeDispose();
+				_cachedLabeledStates.SafeDispose();
 
 			base.OnDisposing(disposing);
 		}
@@ -158,11 +158,19 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		}
 
 		/// <summary>
+		///	  Get the continuation id of the current path from the choice resolver.
+		/// </summary>
+		public int GetContinuationId()
+		{
+			return ChoiceResolver.GetContinuationId();
+		}
+
+		/// <summary>
 		///   Generates a transition from the model's current state.
 		/// </summary>
 		protected override void GenerateTransition()
 		{
-			_transitions.Add(RuntimeModel, GetProbability().Value);
+			_cachedLabeledStates.Add(RuntimeModel, GetProbability().Value, GetContinuationId());
 		}
 
 		/// <summary>
@@ -171,7 +179,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// </summary>
 		protected override void BeginExecution()
 		{
-			_transitions.Clear();
+			_cachedLabeledStates.Clear();
 		}
 
 		/// <summary>
@@ -180,7 +188,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// </summary>
 		protected override TransitionCollection EndExecution()
 		{
-			return _transitions.ToCollection();
+			_cachedLabeledStates.TransformContinuationIdsToDistributions(null);
+			var transitions = _cachedLabeledStates.ToCollection();
+			return transitions;
 		}
 	}
 }

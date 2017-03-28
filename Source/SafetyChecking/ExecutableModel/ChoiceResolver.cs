@@ -97,5 +97,10 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		///   Gets the choices that were made to generate the last transitions.
 		/// </summary>
 		internal abstract IEnumerable<int> GetChoices();
+
+		/// <summary>
+		///   Gets the continuation id of the current path.
+		/// </summary>
+		internal abstract int GetContinuationId();
 	}
 }

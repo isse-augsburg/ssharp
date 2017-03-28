@@ -28,6 +28,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using ExecutableModel;
 	using Modeling;
 	using Utilities;
+	using System;
 
 	/// <summary>
 	///   Represents a stack that is used to resolve nondeterministic choices during state space enumeration.
@@ -160,6 +161,15 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public override int HandleProbabilisticChoice(int valueCount)
 		{
 			return HandleChoice(valueCount);
+		}
+
+		/// <summary>
+		///   Gets the continuation id of the current path.
+		/// </summary>
+		internal override int GetContinuationId()
+		{
+			//TODO: Replace lastChoiceIndex by continuation id
+			throw new NotImplementedException();
 		}
 
 

@@ -198,6 +198,15 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		}
 
 		/// <summary>
+		///   Gets the continuation id of the current path.
+		/// </summary>
+		internal override int GetContinuationId()
+		{
+			//TODO: Replace lastChoiceIndex by continuation id
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
 		///   Clears all choice information.
 		/// </summary>
 		internal override void Clear()
