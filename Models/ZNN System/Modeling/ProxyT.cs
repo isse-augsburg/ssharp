@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SafetySharp.Analysis;
 using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
@@ -254,8 +255,14 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// In this fault, the server selection for a query fails
 		/// </summary>
 		[FaultEffect(Fault = nameof(ServerSelectionFails))]
+		[FaultActivation(typeof(ServerSelectionFailsEffect), "CanActiviate")]
 		public class ServerSelectionFailsEffect : ProxyT
 		{
+			public bool CanActivate()
+			{
+				return ActiveServerCount > 1;
+			}
+
 			/// <summary>
 			/// Selects the Server by round robin
 			/// </summary>

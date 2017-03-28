@@ -21,11 +21,6 @@
 // THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SafetySharp.Analysis;
 using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
@@ -37,9 +32,14 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	public class FaultActivationAttribute : Attribute
 	{
 
-		public Formula CanActivateFault { get; set; }
+		public delegate bool ActivationDelegate();
 
-		//public bool CanActivateFault { get; set; }
+		public ActivationDelegate Activation { get; private set; }
+
+		public FaultActivationAttribute(Type delegateType, string delegateName = "CanActivate")
+		{
+			Activation = (ActivationDelegate) Delegate.CreateDelegate(delegateType, delegateType.GetMethod(delegateName));
+		}
 
 	}
 }
