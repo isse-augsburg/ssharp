@@ -56,11 +56,11 @@ namespace Tests.MarkovDecisionProcess
 			_transitions = (LtmdpTransition*)_transitionBuffer.Pointer;
 		}
 
-		private void CreateTransition(bool isFormulaSatisfied, int targetStateIndex, double p)
+		private void CreateTransition(bool isFormulaSatisfied, int targetStateIndex, int distribution, double p)
 		{
 			var transition = _transitionCount;
 			_transitionCount++;
-			_transitions[_transitionCount] = new LtmdpTransition { Probability = p };
+			_transitions[transition] = new LtmdpTransition { Probability = p, Distribution = distribution };
 			var t = (Transition*)(_transitions + transition);
 			t->SourceStateIndex = 0;
 			t->TargetStateIndex = targetStateIndex;
@@ -87,12 +87,12 @@ namespace Tests.MarkovDecisionProcess
 
 			// add initial state
 			ClearTransitions();
-			CreateTransition(false, 5, 1.0);
+			CreateTransition(false, 5, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
 			ClearTransitions();
 
 			// add reflexive state 5
-			CreateTransition(false, 5, 1.0);
+			CreateTransition(false, 5, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
 
 			ltmdp.Transitions.ShouldBe(2);
@@ -138,24 +138,24 @@ namespace Tests.MarkovDecisionProcess
 
 			// add initial state
 			ClearTransitions();
-			CreateTransition(false, 5, 0.3);
-			CreateTransition(false, 7, 0.3);
-			CreateTransition(false, 2, 0.4);
+			CreateTransition(false, 5, 0, 0.3);
+			CreateTransition(false, 7, 0, 0.3);
+			CreateTransition(false, 2, 0, 0.4);
 			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
 
 			// add reflexive state 5
 			ClearTransitions();
-			CreateTransition(false, 5, 1.0);
+			CreateTransition(false, 5, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
 			
 			// add reflexive state 7
 			ClearTransitions();
-			CreateTransition(false, 5, 1.0);
+			CreateTransition(false, 5, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 7, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 2
 			ClearTransitions();
-			CreateTransition(false, 2, 1.0);
+			CreateTransition(false, 2, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 2, CreateTransitionCollection(), _transitionCount, false);
 
 
@@ -204,29 +204,29 @@ namespace Tests.MarkovDecisionProcess
 
 			// add initial state
 			ClearTransitions();
-			CreateTransition(false, 5, 1.0);
+			CreateTransition(false, 5, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
 
 			// add state 5
 			ClearTransitions();
-			CreateTransition(false, 7, 0.3);
-			CreateTransition(false, 2, 0.3);
-			CreateTransition(false, 1, 0.4);
+			CreateTransition(false, 7, 0, 0.3);
+			CreateTransition(false, 2, 0, 0.3);
+			CreateTransition(false, 1, 0, 0.4);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 7
 			ClearTransitions();
-			CreateTransition(false, 7, 1.0);
+			CreateTransition(false, 7, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 7, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 2
 			ClearTransitions();
-			CreateTransition(false, 2, 1.0);
+			CreateTransition(false, 2, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 2, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 1
 			ClearTransitions();
-			CreateTransition(false, 1, 1.0);
+			CreateTransition(false, 1, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 1, CreateTransitionCollection(), _transitionCount, false);
 
 

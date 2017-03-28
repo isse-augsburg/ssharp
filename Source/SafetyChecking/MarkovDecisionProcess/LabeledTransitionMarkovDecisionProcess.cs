@@ -104,13 +104,19 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		private int GetPlaceForNewTransitionChainElement()
 		{
-			return InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
+			var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
+			if (locationOfNewEntry >= _maxNumberOfTransitions)
+				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
+			return locationOfNewEntry;
 		}
 
 
 		private int GetPlaceForNewDistributionChainElement()
 		{
-			return InterlockedExtensions.IncrementReturnOld(ref _distributionChainElementCount);
+			var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _distributionChainElementCount);
+			if (locationOfNewEntry >= _maxNumberOfTransitions)
+				throw new OutOfMemoryException("Unable to store distribution.");
+			return locationOfNewEntry;
 		}
 
 		public void CreateStutteringState(int stutteringStateIndex)

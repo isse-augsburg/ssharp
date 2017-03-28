@@ -124,7 +124,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 					if (currentElement.Distribution == distribution)
 					{
 						//Case 1: Found
-						return currentElement.FirstTransitionIndex;
+						return currentDistributionElementIndex;
 					}
 					if (currentElement.NextElementIndex == -1)
 					{
