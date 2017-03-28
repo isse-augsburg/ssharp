@@ -33,7 +33,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using AnalysisModel;
 
 
-	internal unsafe partial class LabeledTransitionMarkovChain
+	internal unsafe partial class LabeledTransitionMarkovChain : DisposableObject
 	{
 		public static readonly int TransitionSize = sizeof(TransitionChainElement);
 
@@ -194,6 +194,16 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				printTransition(currentTransition);
 				lastState = _transitionChainElementsMemory[currentTransition].TargetState;
 			}
+		}
+
+		/// <summary>
+		///   Disposes the object, releasing all managed and unmanaged resources.
+		/// </summary>
+		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
+		protected override void OnDisposing(bool disposing)
+		{
+			_stateStorageStateToFirstTransitionChainElementBuffer.SafeDispose();
+			_transitionChainElementsBuffer.SafeDispose();
 		}
 
 		internal LabeledTransitionEnumerator GetTransitionEnumerator(int stateStorageState)

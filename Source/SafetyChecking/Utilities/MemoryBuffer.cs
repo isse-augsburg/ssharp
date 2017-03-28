@@ -23,6 +23,8 @@
 namespace ISSE.SafetyChecking.Utilities
 {
 	using System;
+	using System.Reflection;
+	using System.Reflection.Emit;
 	using System.Runtime.InteropServices;
 
 	/// <summary>
@@ -266,5 +268,37 @@ namespace ISSE.SafetyChecking.Utilities
 
 		[DllImport("Kernel32.dll", EntryPoint = "RtlZeroMemory", SetLastError = false)]
 		private static extern void ZeroMemory(IntPtr memory, IntPtr size);
+		
+
+		internal static class ZeroMemoryWithInitblk
+		{
+			// see https://msdn.microsoft.com/de-de/library/system.reflection.emit.opcodes.ldc_i4_0(v=vs.110).aspx
+
+			// parameters are "IntPtr memory" and "int size"
+			internal static readonly Action<IntPtr,int> ZeroMemoryWithInitBlk;
+
+			static ZeroMemoryWithInitblk()
+			{
+				var method = new DynamicMethod(
+					name: "ZeroMemoryWithInitBlk",
+					returnType: typeof(void),
+					parameterTypes: new[] { typeof(IntPtr), typeof(int) },
+					m: typeof(object).Assembly.ManifestModule,
+					skipVisibility: true);
+
+				method.DefineParameter(1, ParameterAttributes.In, "memory");
+				method.DefineParameter(2, ParameterAttributes.In, "size");
+
+				var il = method.GetILGenerator();
+				il.Emit(OpCodes.Ldarg_0); // push address on stack
+				il.Emit(OpCodes.Ldc_I4_0); // push "0" on stack
+				il.Emit(OpCodes.Ldarg_1); // number of bytes as integer
+				il.Emit(OpCodes.Initblk);
+				il.Emit(OpCodes.Ret);
+
+				//compile
+				ZeroMemoryWithInitBlk = (Action<IntPtr, int>)method.CreateDelegate(typeof(Action<IntPtr, int>));
+			}
+		}
 	}
 }

@@ -33,7 +33,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using ExecutableModel;
 
 
-	internal unsafe partial class LabeledTransitionMarkovDecisionProcess
+	internal unsafe partial class LabeledTransitionMarkovDecisionProcess : DisposableObject
 	{
 		public static readonly int TransitionSize = sizeof(TransitionChainElement);
 
@@ -328,6 +328,17 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				_nextElementIndex = _ltmdp._transitionChainElementsMemory[CurrentIndex].NextElementIndex;
 				return true;
 			}
+		}
+
+		/// <summary>
+		///   Disposes the object, releasing all managed and unmanaged resources.
+		/// </summary>
+		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
+		protected override void OnDisposing(bool disposing)
+		{
+			_stateStorageStateToFirstDistributionChainElementBuffer.SafeDispose();
+			_distributionChainElementsBuffer.SafeDispose();
+			_transitionChainElementsBuffer.SafeDispose();
 		}
 
 
