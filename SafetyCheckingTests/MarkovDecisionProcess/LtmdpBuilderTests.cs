@@ -194,8 +194,6 @@ namespace Tests.MarkovDecisionProcess
 			transCount = 0;
 		}
 
-
-
 		[Fact]
 		public void ThreeReflexiveStatesFromNonInitialState()
 		{
@@ -263,6 +261,79 @@ namespace Tests.MarkovDecisionProcess
 			}
 			distCount.ShouldBe(1);
 			transCount.ShouldBe(3);
+		}
+
+		[Fact]
+		public void StatesFromNonInitialStateWithMoreDistributions()
+		{
+			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp);
+
+			// add initial state
+			ClearTransitions();
+			CreateTransition(false, 5, 0, 1.0);
+			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
+
+			// add state 5
+			ClearTransitions();
+			CreateTransition(false, 1, 0, 1.0);
+			CreateTransition(false, 7, 1, 0.3);
+			CreateTransition(false, 2, 1, 0.3);
+			CreateTransition(false, 1, 1, 0.4);
+			CreateTransition(false, 7, 2, 1.0);
+			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
+
+			// add reflexive state 7
+			ClearTransitions();
+			CreateTransition(false, 7, 0, 0.2);
+			CreateTransition(false, 2, 0, 0.8);
+			CreateTransition(false, 1, 1, 1.0);
+			ltmdpBuilder.ProcessTransitions(null, null, 7, CreateTransitionCollection(), _transitionCount, false);
+
+			// add reflexive state 2
+			ClearTransitions();
+			CreateTransition(false, 2, 0, 1.0);
+			ltmdpBuilder.ProcessTransitions(null, null, 2, CreateTransitionCollection(), _transitionCount, false);
+
+			// add reflexive state 1
+			ClearTransitions();
+			CreateTransition(false, 1, 0, 1.0);
+			ltmdpBuilder.ProcessTransitions(null, null, 1, CreateTransitionCollection(), _transitionCount, false);
+
+
+			ltmdp.Transitions.ShouldBe(11);
+			ltmdp.SourceStates.Count.ShouldBe(4);
+			ltmdp.SourceStates.First(state => state == 5).ShouldBe(5);
+
+			var initialDistEnumerator = ltmdp.GetInitialDistributionsEnumerator();
+			var distCount = 0;
+			var transCount = 0;
+			while (initialDistEnumerator.MoveNext())
+			{
+				distCount++;
+				var transEnumerator = initialDistEnumerator.GetLabeledTransitionEnumerator();
+				while (transEnumerator.MoveNext())
+				{
+					transCount++;
+				}
+			}
+			distCount.ShouldBe(1);
+			transCount.ShouldBe(1);
+
+			distCount = 0;
+			transCount = 0;
+			var state5DistEnumerator = ltmdp.GetDistributionsEnumerator(5);
+			while (state5DistEnumerator.MoveNext())
+			{
+				distCount++;
+				var transEnumerator = state5DistEnumerator.GetLabeledTransitionEnumerator();
+				while (transEnumerator.MoveNext())
+				{
+					transCount++;
+				}
+			}
+			distCount.ShouldBe(3);
+			transCount.ShouldBe(5);
 		}
 	}
 }
