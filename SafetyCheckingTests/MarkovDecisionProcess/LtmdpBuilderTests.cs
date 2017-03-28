@@ -126,8 +126,6 @@ namespace Tests.MarkovDecisionProcess
 			}
 			distCount.ShouldBe(1);
 			transCount.ShouldBe(1);
-			distCount = 0;
-			transCount = 0;
 		}
 
 		[Fact]
@@ -190,8 +188,6 @@ namespace Tests.MarkovDecisionProcess
 			}
 			distCount.ShouldBe(1);
 			transCount.ShouldBe(1);
-			distCount = 0;
-			transCount = 0;
 		}
 
 		[Fact]

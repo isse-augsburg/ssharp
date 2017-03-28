@@ -35,7 +35,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 
-	class HazardProbabilityTests
+	class HazardProbabilityRangeTests
 	{
 		[Test]
 		public void Calculate()
@@ -49,7 +49,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 			model.TrainController.Odometer.OdometerPositionOffset.ProbabilityOfOccurrence = new Probability(0.02);
 			model.TrainController.Odometer.OdometerSpeedOffset.ProbabilityOfOccurrence = new Probability(0.02);
 
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.PossibleCollision);
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachState(model, model.PossibleCollision);
 			Console.Write($"Probability of hazard: {result}");
 		}
 	}

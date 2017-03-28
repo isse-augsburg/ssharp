@@ -60,7 +60,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			model.Timer.SuppressTimeout.ProbabilityOfOccurrence = Probability.Zero;
 
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.Tank.IsDepleted);
-			Console.Write($"Probability of hazard: {result.Value}");
+			Console.Write($"Probability of hazard: {result}");
 		}
 	}
 }
