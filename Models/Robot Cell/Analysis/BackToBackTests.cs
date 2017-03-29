@@ -90,7 +90,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				mode: "heuristics-oracle");
 		}
 
-		[Test, Category("CompleteAnalysis")]
+		[Test, Category("Back2BackTestingCompleteAnalysis")]
 		public void CompleteAnalysisOracle()
 		{
 			var model = Model.CreateConfiguration<FastObserverController>(m => m.Ictss1(), "Ictss1", AnalysisMode.TolerableFaults);
