@@ -78,12 +78,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			_transitionChainElementsBuffer.Resize((long)maxNumberOfTransitions * sizeof(TransitionChainElement), zeroMemory: false);
 			_transitionChainElementsMemory = (TransitionChainElement*)_transitionChainElementsBuffer.Pointer;
-
-
-			for (var i = 0; i < maxNumberOfStates; i++)
-			{
-				_stateStorageStateToFirstDistributionChainElementMemory[i] = -1;
-			}
+			
+			MemoryBuffer.SetAllBitsMemoryWithInitblk.ClearWithMinus1(_stateStorageStateToFirstDistributionChainElementMemory, maxNumberOfStates);
 		}
 
 

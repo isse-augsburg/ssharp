@@ -71,11 +71,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_transitionChainElementsBuffer.Resize((long)maxNumberOfTransitions * sizeof(TransitionChainElement), zeroMemory: false);
 			_transitionChainElementsMemory = (TransitionChainElement*)_transitionChainElementsBuffer.Pointer;
 
-
-			for (var i = 0; i < maxNumberOfStates; i++)
-			{
-				_stateStorageStateToFirstTransitionChainElementMemory[i] = -1;
-			}
+			MemoryBuffer.SetAllBitsMemoryWithInitblk.ClearWithMinus1(_stateStorageStateToFirstTransitionChainElementMemory,maxNumberOfStates);
 		}
 		
 		private struct TransitionChainElement

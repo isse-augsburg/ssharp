@@ -299,6 +299,23 @@ namespace ISSE.SafetyChecking.Utilities
 				//compile
 				Delegate = (Action<IntPtr, int>)method.CreateDelegate(typeof(Action<IntPtr, int>));
 			}
+
+			public static void ClearWithZero(int* memoryStart, long elements)
+			{
+				var bytesToErase = elements * sizeof(int);
+				if (bytesToErase <= Int32.MaxValue)
+				{
+					Delegate(new IntPtr(memoryStart), (int)bytesToErase);
+				}
+				else
+				{
+					Console.WriteLine($"{nameof(MemoryBuffer)}: Using slow memory clearing");
+					for (var i = 0; i < elements; i++)
+					{
+						memoryStart[i] = -1;
+					}
+				}
+			}
 		}
 
 		internal static class SetAllBitsMemoryWithInitblk
@@ -329,6 +346,23 @@ namespace ISSE.SafetyChecking.Utilities
 
 				//compile
 				Delegate = (Action<IntPtr, int>)method.CreateDelegate(typeof(Action<IntPtr, int>));
+			}
+
+			public static void ClearWithMinus1(int* memoryStart, long elements)
+			{
+				var bytesToErase = elements * sizeof(int);
+				if (bytesToErase <= Int32.MaxValue)
+				{
+					Delegate(new IntPtr(memoryStart), (int)bytesToErase);
+				}
+				else
+				{
+					Console.WriteLine($"{nameof(MemoryBuffer)}: Using slow memory clearing");
+					for (var i = 0; i < elements; i++)
+					{
+						memoryStart[i] = -1;
+					}
+				}
 			}
 		}
 	}
