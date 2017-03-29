@@ -69,6 +69,12 @@ function ExecuteTest($symbol, $category)
     Start-Process -FilePath $nunit -ArgumentList $arguments -WorkingDirectory $compilate_directory -NoNewWindow -RedirectStandardError $errorfilename -RedirectStandardOutput $outputfilename -Wait
 }
 
+############## Analysis 0: failure near boundary? ##############
+$symbols=@("ENABLE_F1","ENABLE_F2","ENABLE_F5","ENABLE_F6","ENABLE_F7")
+Foreach ($symbol in $symbols) {
+	ExecuteTest $symbol "CompleteAnalysis"
+}
+
 ############## Analysis 1: remove detected faults ##############
 ExecuteTest "ENABLE_F1,ENABLE_F2,ENABLE_F4,ENABLE_F4b,ENABLE_F5,ENABLE_F6,ENABLE_F7" "HeuristicsOracle" # detects F2
 ExecuteTest "ENABLE_F1,ENABLE_F4,ENABLE_F4b,ENABLE_F5,ENABLE_F6,ENABLE_F7" "HeuristicsOracle" # detects F1 and F6

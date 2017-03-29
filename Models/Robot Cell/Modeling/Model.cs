@@ -213,7 +213,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			yield return CreateConfiguration<T>(m => m.Ictss7(), nameof(Ictss7), mode);
 		}
 
-		private static Model CreateConfiguration<T>(Action<Model> initializer, string name, AnalysisMode mode)
+		public static Model CreateConfiguration<T>(Action<Model> initializer, string name, AnalysisMode mode)
 			where T : ObserverController
 		{
 			var model = new Model(name);

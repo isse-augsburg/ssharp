@@ -90,7 +90,26 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				mode: "heuristics-oracle");
 		}
 
+		[Test, Category("CompleteAnalysis")]
+		public void CompleteAnalysisOracle()
+		{
+			var model = Model.CreateConfiguration<FastObserverController>(m => m.Ictss1(), "Ictss1", AnalysisMode.TolerableFaults);
+			var result = Dcca(model,
+				hazard: model.ObserverController.OracleState == ReconfStates.Failed,
+				enableHeuristics: true,
+				stopOnFirstException: false);
+			Console.WriteLine(result);
+		}
+
 		private void Dcca(Model model, Formula hazard, bool enableHeuristics, string mode)
+		{
+			var result = Dcca(model, hazard, enableHeuristics, true);
+			Console.WriteLine(result);
+
+			LogResult(model, result, mode);
+		}
+
+		private SafetyAnalysisResults<SafetySharpRuntimeModel> Dcca(Model model, Formula hazard, bool enableHeuristics, bool stopOnFirstException)
 		{
 			var safetyAnalysis = new SafetySharpSafetyAnalysis
 			{
@@ -101,7 +120,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 					GenerateCounterExample = false
 				},
 				FaultActivationBehavior = FaultActivationBehavior.ForceOnly,
-				StopOnFirstException = true
+				StopOnFirstException = stopOnFirstException
 			};
 
 			if (enableHeuristics)
@@ -110,10 +129,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				safetyAnalysis.Heuristics.Add(new SubsumptionHeuristic(model.Faults));
 			}
 
-			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, hazard);
-			Console.WriteLine(result);
-
-			LogResult(model, result, mode);
+			return safetyAnalysis.ComputeMinimalCriticalSets(model, hazard);
 		}
 
 		private StreamWriter _csv;
