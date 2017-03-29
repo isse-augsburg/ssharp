@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.Reflection;
 using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
@@ -31,15 +32,16 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	public class FaultActivationAttribute : Attribute
 	{
+		public PropertyInfo ActivationProperty { get; private set; }
 
-		public delegate bool ActivationDelegate();
-
-		public ActivationDelegate Activation { get; private set; }
-
-		public FaultActivationAttribute(Type delegateType, string delegateName = "CanActivate")
+		/// <summary>
+		/// Defines the attribute
+		/// </summary>
+		/// <param name="type">Fault type</param>
+		/// <param name="propertyName">Property name which defines the activation criteria of the fault</param>
+		public FaultActivationAttribute(Type type, string propertyName = "CanActivate")
 		{
-			Activation = (ActivationDelegate) Delegate.CreateDelegate(delegateType, delegateType.GetMethod(delegateName));
+			ActivationProperty =  type.GetProperty(propertyName);
 		}
-
 	}
 }

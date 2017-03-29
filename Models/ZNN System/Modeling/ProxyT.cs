@@ -258,10 +258,11 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		[FaultActivation(typeof(ServerSelectionFailsEffect), "CanActiviate")]
 		public class ServerSelectionFailsEffect : ProxyT
 		{
-			public bool CanActivate()
-			{
-				return ActiveServerCount > 1;
-			}
+			//public bool CanActivate()
+			//{
+			//	return ActiveServerCount > 1;
+			//}
+			public bool CanActiviate => ActiveServerCount > 1;
 
 			/// <summary>
 			/// Selects the Server by round robin

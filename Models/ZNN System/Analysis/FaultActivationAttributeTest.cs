@@ -39,12 +39,12 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 
 			var attribute =
 				(FaultActivationAttribute)Attribute.GetCustomAttribute(typeof(ProxyT.ServerSelectionFailsEffect), typeof(FaultActivationAttribute));
-			Assert.IsFalse(attribute.Activation.Invoke());
+			Assert.IsFalse((bool) attribute.ActivationProperty.GetValue(failure));
 
 			failure.IncrementServerPool();
 			failure.IncrementServerPool();
 			Assert.AreEqual(2, failure.ActiveServerCount);
-			Assert.IsTrue(attribute.Activation.Invoke());
+			Assert.IsTrue((bool) attribute.ActivationProperty.GetValue(failure));
 		}
 	}
 }
