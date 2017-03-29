@@ -29,19 +29,19 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 	/// <summary>
 	/// Indicates the activation of a fault of a <see cref="Component" />-derived class
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Property, Inherited = false)]
 	public class FaultActivationAttribute : Attribute
 	{
-		public PropertyInfo ActivationProperty { get; private set; }
+		//public PropertyInfo ActivationProperty { get; private set; }
 
-		/// <summary>
-		/// Defines the attribute
-		/// </summary>
-		/// <param name="type">Fault type</param>
-		/// <param name="propertyName">Property name which defines the activation criteria of the fault</param>
-		public FaultActivationAttribute(Type type, string propertyName = "CanActivate")
-		{
-			ActivationProperty =  type.GetProperty(propertyName);
-		}
+		///// <summary>
+		///// Defines the attribute
+		///// </summary>
+		///// <param name="type">Fault type</param>
+		///// <param name="propertyName">Property name which defines the activation criteria of the fault</param>
+		//public FaultActivationAttribute(Type type, string propertyName = "CanActivate")
+		//{
+		//	ActivationProperty =  type.GetProperty(propertyName);
+		//}
 	}
 }

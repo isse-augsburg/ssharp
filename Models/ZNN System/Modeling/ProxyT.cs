@@ -255,13 +255,14 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// In this fault, the server selection for a query fails
 		/// </summary>
 		[FaultEffect(Fault = nameof(ServerSelectionFails))]
-		[FaultActivation(typeof(ServerSelectionFailsEffect), "CanActiviate")]
+		//[FaultActivation(typeof(ServerSelectionFailsEffect), "CanActiviate")]
 		public class ServerSelectionFailsEffect : ProxyT
 		{
 			//public bool CanActivate()
 			//{
 			//	return ActiveServerCount > 1;
 			//}
+			[FaultActivation]
 			public bool CanActiviate => ActiveServerCount > 1;
 
 			/// <summary>

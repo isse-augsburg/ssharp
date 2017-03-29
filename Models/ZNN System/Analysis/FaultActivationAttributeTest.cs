@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.Linq;
 using NUnit.Framework;
 using SafetySharp.CaseStudies.ZNNSystem.Modeling;
 
@@ -37,14 +38,19 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			ServerT.GetNewServer(failure);
 			Assert.AreEqual(0, failure.ActiveServerCount);
 
-			var attribute =
-				(FaultActivationAttribute)Attribute.GetCustomAttribute(typeof(ProxyT.ServerSelectionFailsEffect), typeof(FaultActivationAttribute));
-			Assert.IsFalse((bool) attribute.ActivationProperty.GetValue(failure));
+			//var attribute =
+			//(FaultActivationAttribute)Attribute.GetCustomAttribute(typeof(ProxyT.ServerSelectionFailsEffect), typeof(FaultActivationAttribute));
+			//Assert.IsFalse((bool) attribute.ActivationProperty.GetValue(failure));
+			var properties = failure.GetType().GetProperties().Where(prop => prop.IsDefined(typeof(FaultActivationAttribute), false));
+			var canActivate = properties.Count(v => (bool)v.GetValue(failure)) > 0;
+			Assert.IsFalse(canActivate);
 
 			failure.IncrementServerPool();
 			failure.IncrementServerPool();
 			Assert.AreEqual(2, failure.ActiveServerCount);
-			Assert.IsTrue((bool) attribute.ActivationProperty.GetValue(failure));
+			//Assert.IsTrue((bool) attribute.ActivationProperty.GetValue(failure));
+			canActivate = properties.Count(v => (bool) v.GetValue(failure)) > 0;
+			Assert.IsTrue(canActivate);
 		}
 	}
 }
