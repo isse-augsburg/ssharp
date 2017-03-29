@@ -108,38 +108,56 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test, Category("Back2BackTestingBoundary")]
 		public void BoundaryCloseness()
 		{
-			// determined by above test
-			var critical = new HashSet<FaultSet>(
-				new[] { 1024, 4096, 1048576, 4194304, 134217728, 536870912, 49152, 147456, 278528, 41943040, 1090519040, 70866960384, 277025390592, 551903297536, 2201170739200, 8798240505856, 2207613190144, 8804682956800, 67149824, 67248128, 67641344, 103079231488, 94489280512, 300647710720, 2284922601472, 8881992368128, 2491081031680, 9088150798336, 103146332160, 858993475584, 575525650432, 2765958971392, 9363028738048, 575525748736, 2765959069696, 9363028836352, 609885356032, 2800318676992, 9397388443648, 859060576256 }
-				.Select(v => new FaultSet(v))
-			);
+			var minimalCritical =
+				new[]
+					{
+						// determined by above test
+						1024, 4096, 1048576, 4194304, 134217728, 536870912, 49152, 147456, 278528, 41943040, 1090519040, 70866960384, 277025390592,
+						551903297536, 2201170739200, 8798240505856, 2207613190144, 8804682956800, 67149824, 67248128, 67641344, 103079231488, 94489280512,
+						300647710720, 2284922601472, 8881992368128, 2491081031680, 9088150798336, 103146332160, 858993475584, 575525650432, 2765958971392,
+						9363028738048, 575525748736, 2765959069696, 9363028836352, 609885356032, 2800318676992, 9397388443648, 859060576256
+					}
+					.Select(v => new FaultSet(v))
+					.ToArray();
 
 			var model = Model.CreateConfiguration<FastObserverController>(m => m.Ictss1(), "Ictss1", AnalysisMode.TolerableFaults);
-			Console.WriteLine(("Fault: " + GetCurrentFault()));
-
 			var result = Dcca(model,
 				hazard: model.ObserverController.OracleState == ReconfStates.Failed,
 				enableHeuristics: false,
 				stopOnFirstException: false);
 
-			Console.WriteLine("Failed tests: " + result.Exceptions.Count);
-			var criticalFailedTests = 0;
-			var criticalSubsets = 0;
-			var criticalSupersets = 0;
+			var belowBoundary = 0;
+			var aboveBoundary = 0;
 			foreach (var testCase in result.Exceptions.Keys)
 			{
 				var t = new FaultSet(testCase);
-				if (critical.Contains(t))
-					criticalFailedTests++;
-				else if (model.Faults.Any(f => !t.Contains(f) && critical.Contains(t.Remove(f))))
-						criticalSubsets++;
-				else if (model.Faults.Any(f => !t.Contains(f) && critical.Contains(t.Add(f))))
-						criticalSupersets++;
+				if (IsAboveBoundary(t, model, minimalCritical))
+					aboveBoundary++;
+				else if (IsBelowBoundary(t, model, minimalCritical))
+					belowBoundary++;
 			}
 
-			Console.WriteLine("Critical failed tests: " + criticalFailedTests);
-			Console.WriteLine("Critical direct subsets: " + criticalSubsets);
-			Console.WriteLine("Critical direct supersets: " + criticalSupersets);
+			Console.WriteLine("Fault: " + GetCurrentFault());
+			Console.WriteLine("Failed tests: " + result.Exceptions.Count);
+			Console.WriteLine("below boundary: " + belowBoundary);
+			Console.WriteLine("above boundary: " + aboveBoundary);
+		}
+
+		private bool IsAboveBoundary(FaultSet set, Model model, IEnumerable<FaultSet> minCrit)
+		{
+			var subsets = model.Faults.Where(set.Contains).Select(set.Remove);
+			return IsCritical(set, minCrit) && subsets.Any(s => !IsCritical(s, minCrit));
+		}
+
+		private bool IsBelowBoundary(FaultSet set, Model model, IEnumerable<FaultSet> minCrit)
+		{
+			var supersets = model.Faults.Where(f => !set.Contains(f)).Select(set.Add);
+			return !IsCritical(set, minCrit) && supersets.Any(s => IsCritical(s, minCrit));
+		}
+
+		private bool IsCritical(FaultSet set, IEnumerable<FaultSet> minCrit)
+		{
+			return minCrit.Any(m => m.IsSubsetOf(set));
 		}
 
 		private void Dcca(Model model, Formula hazard, bool enableHeuristics, string mode)
