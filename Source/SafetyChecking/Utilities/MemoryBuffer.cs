@@ -274,8 +274,8 @@ namespace ISSE.SafetyChecking.Utilities
 		{
 			// see https://msdn.microsoft.com/de-de/library/system.reflection.emit.opcodes.ldc_i4_0(v=vs.110).aspx
 
-			// parameters are "IntPtr memory" and "int size"
-			internal static readonly Action<IntPtr,int> ZeroMemoryWithInitBlk;
+			// parameters are "IntPtr memoryPtr" and "int size"
+			internal static readonly Action<IntPtr,int> Delegate;
 
 			static ZeroMemoryWithInitblk()
 			{
@@ -286,18 +286,49 @@ namespace ISSE.SafetyChecking.Utilities
 					m: typeof(object).Assembly.ManifestModule,
 					skipVisibility: true);
 
-				method.DefineParameter(1, ParameterAttributes.In, "memory");
+				method.DefineParameter(1, ParameterAttributes.In, "memoryPtr");
 				method.DefineParameter(2, ParameterAttributes.In, "size");
 
 				var il = method.GetILGenerator();
 				il.Emit(OpCodes.Ldarg_0); // push address on stack
 				il.Emit(OpCodes.Ldc_I4_0); // push "0" on stack
 				il.Emit(OpCodes.Ldarg_1); // number of bytes as integer
-				il.Emit(OpCodes.Initblk);
+				il.Emit(OpCodes.Initblk); //do the magic
 				il.Emit(OpCodes.Ret);
 
 				//compile
-				ZeroMemoryWithInitBlk = (Action<IntPtr, int>)method.CreateDelegate(typeof(Action<IntPtr, int>));
+				Delegate = (Action<IntPtr, int>)method.CreateDelegate(typeof(Action<IntPtr, int>));
+			}
+		}
+
+		internal static class SetAllBitsMemoryWithInitblk
+		{
+			// see https://msdn.microsoft.com/de-de/library/system.reflection.emit.opcodes.ldc_i4_0(v=vs.110).aspx
+
+			// parameters are "IntPtr memoryPtr" and "int size"
+			internal static readonly Action<IntPtr, int> Delegate;
+
+			static SetAllBitsMemoryWithInitblk()
+			{
+				var method = new DynamicMethod(
+					name: "SetAllBitsMemoryWithInitblk",
+					returnType: typeof(void),
+					parameterTypes: new[] { typeof(IntPtr), typeof(int) },
+					m: typeof(object).Assembly.ManifestModule,
+					skipVisibility: true);
+
+				method.DefineParameter(1, ParameterAttributes.In, "memoryPtr");
+				method.DefineParameter(2, ParameterAttributes.In, "size");
+
+				var il = method.GetILGenerator();
+				il.Emit(OpCodes.Ldarg_0); // push address on stack
+				il.Emit(OpCodes.Ldc_I4_M1); // push "-1" on stack
+				il.Emit(OpCodes.Ldarg_1); // number of bytes as integer
+				il.Emit(OpCodes.Initblk); //do the magic
+				il.Emit(OpCodes.Ret);
+
+				//compile
+				Delegate = (Action<IntPtr, int>)method.CreateDelegate(typeof(Action<IntPtr, int>));
 			}
 		}
 	}
