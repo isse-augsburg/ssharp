@@ -52,5 +52,23 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			for(int i = 0; i < model.Servers.Count; i++)
 				Console.WriteLine("Completed Queries of server " + i + ": " + model.Servers[i].QueryCompleteCount);
 		}
+
+		/// <summary>
+		/// Tests the model with occuring fault based on activation criteria
+		/// </summary>
+		[Test]
+		public void TestModelWithFaults()
+		{
+			var model = new Model();
+			// Fault activation criteria?
+
+			var simulator = new Simulator(model);
+			model = (Model) simulator.Model;
+			simulator.FastForward(steps: 120);
+
+			model.Servers.First().QueryCompleteCount.Should().BeGreaterOrEqualTo(1);
+			for(int i = 0; i < model.Servers.Count; i++)
+				Console.WriteLine("Completed Queries of server " + i + ": " + model.Servers[i].QueryCompleteCount);
+		}
 	}
 }
