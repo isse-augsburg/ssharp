@@ -72,7 +72,7 @@ function ExecuteTest($symbol, $category)
 ############## Analysis 0: failure near boundary? ##############
 $symbols=@("ENABLE_F1","ENABLE_F2","ENABLE_F5","ENABLE_F6","ENABLE_F7")
 Foreach ($symbol in $symbols) {
-	ExecuteTest $symbol "CompleteAnalysis"
+	ExecuteTest $symbol "Boundary"
 }
 
 ############## Analysis 1: remove detected faults ##############

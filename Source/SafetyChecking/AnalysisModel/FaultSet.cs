@@ -36,7 +36,7 @@ namespace ISSE.SafetyChecking.AnalysisModel
 	[DebuggerDisplay("{_faults}")]
 	public struct FaultSet : IEquatable<FaultSet>
 	{
-		private readonly long _faults;
+		public readonly long _faults;
 
 		/// <summary>
 		///   Gets the cardinality of the fault set.
@@ -58,7 +58,7 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		/// </summary>
 		/// <param name="faults">The faults the set should contain.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private FaultSet(long faults)
+		public FaultSet(long faults)
 		{
 			_faults = faults;
 		}

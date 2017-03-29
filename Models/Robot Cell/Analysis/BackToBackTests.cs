@@ -23,9 +23,10 @@
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
-
+	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
@@ -90,15 +91,55 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				mode: "heuristics-oracle");
 		}
 
-		[Test, Category("Back2BackTestingCompleteAnalysis")]
-		public void CompleteAnalysisOracle()
+		[Test]
+		// run without errors
+		public void BoundaryClosenessBaseline()
 		{
 			var model = Model.CreateConfiguration<FastObserverController>(m => m.Ictss1(), "Ictss1", AnalysisMode.TolerableFaults);
 			var result = Dcca(model,
 				hazard: model.ObserverController.OracleState == ReconfStates.Failed,
 				enableHeuristics: true,
 				stopOnFirstException: false);
-			Console.WriteLine(result);
+			Assert.AreEqual(0, result.Exceptions.Count);
+
+			Console.WriteLine(string.Join(",", result.MinimalCriticalSets.Select(s => new FaultSet(s)._faults)));
+		}
+
+		[Test, Category("Back2BackTestingBoundary")]
+		public void BoundaryCloseness()
+		{
+			// determined by above test
+			var critical = new HashSet<FaultSet>(
+				new[] { 1024, 4096, 1048576, 4194304, 134217728, 536870912, 49152, 147456, 278528, 41943040, 1090519040, 70866960384, 277025390592, 551903297536, 2201170739200, 8798240505856, 2207613190144, 8804682956800, 67149824, 67248128, 67641344, 103079231488, 94489280512, 300647710720, 2284922601472, 8881992368128, 2491081031680, 9088150798336, 103146332160, 858993475584, 575525650432, 2765958971392, 9363028738048, 575525748736, 2765959069696, 9363028836352, 609885356032, 2800318676992, 9397388443648, 859060576256 }
+				.Select(v => new FaultSet(v))
+			);
+
+			var model = Model.CreateConfiguration<FastObserverController>(m => m.Ictss1(), "Ictss1", AnalysisMode.TolerableFaults);
+			Console.WriteLine(("Fault: " + GetCurrentFault()));
+
+			var result = Dcca(model,
+				hazard: model.ObserverController.OracleState == ReconfStates.Failed,
+				enableHeuristics: false,
+				stopOnFirstException: false);
+
+			Console.WriteLine("Failed tests: " + result.Exceptions.Count);
+			var criticalFailedTests = 0;
+			var criticalSubsets = 0;
+			var criticalSupersets = 0;
+			foreach (var testCase in result.Exceptions.Keys)
+			{
+				var t = new FaultSet(testCase);
+				if (critical.Contains(t))
+					criticalFailedTests++;
+				else if (model.Faults.Any(f => !t.Contains(f) && critical.Contains(t.Remove(f))))
+						criticalSubsets++;
+				else if (model.Faults.Any(f => !t.Contains(f) && critical.Contains(t.Add(f))))
+						criticalSupersets++;
+			}
+
+			Console.WriteLine("Critical failed tests: " + criticalFailedTests);
+			Console.WriteLine("Critical direct subsets: " + criticalSubsets);
+			Console.WriteLine("Critical direct supersets: " + criticalSupersets);
 		}
 
 		private void Dcca(Model model, Formula hazard, bool enableHeuristics, string mode)
