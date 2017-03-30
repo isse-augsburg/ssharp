@@ -117,5 +117,76 @@ namespace Tests.MarkovDecisionProcess
 			existingDistributions.Count.ShouldBe(1);
 			existingDistributions.ShouldContainKey(0);
 		}
+
+
+
+		[Fact]
+		public void OneDistributionWithFiveContinuationsAfterTwoSplits()
+		{
+			var mapper = new LtmdpContinuationDistributionMapper();
+			var existingDistributions = new Dictionary<int, bool>();
+
+			mapper.AddInitialDistributionAndContinuation();
+			mapper.ProbabilisticSplit(0, 1, 3);
+			mapper.ProbabilisticSplit(1, 4, 5);
+
+
+			var enumerator = mapper.GetDistributionsOfContinuationEnumerator(0);
+			var entries = 0;
+			while (enumerator.MoveNext())
+			{
+				entries++;
+			}
+			entries.ShouldBe(0);
+
+			enumerator = mapper.GetDistributionsOfContinuationEnumerator(1);
+			entries = 0;
+			while (enumerator.MoveNext())
+			{
+				entries++;
+				existingDistributions[enumerator.CurrentDistributionId] = true;
+			}
+			entries.ShouldBe(0);
+
+			enumerator = mapper.GetDistributionsOfContinuationEnumerator(2);
+			entries = 0;
+			while (enumerator.MoveNext())
+			{
+				entries++;
+				existingDistributions[enumerator.CurrentDistributionId] = true;
+			}
+			entries.ShouldBe(1);
+
+			enumerator = mapper.GetDistributionsOfContinuationEnumerator(3);
+			entries = 0;
+			while (enumerator.MoveNext())
+			{
+				entries++;
+				existingDistributions[enumerator.CurrentDistributionId] = true;
+			}
+			entries.ShouldBe(1);
+			
+			enumerator = mapper.GetDistributionsOfContinuationEnumerator(4);
+			entries = 0;
+			while (enumerator.MoveNext())
+			{
+				entries++;
+				existingDistributions[enumerator.CurrentDistributionId] = true;
+			}
+			entries.ShouldBe(1);
+
+
+			enumerator = mapper.GetDistributionsOfContinuationEnumerator(5);
+			entries = 0;
+			while (enumerator.MoveNext())
+			{
+				entries++;
+				existingDistributions[enumerator.CurrentDistributionId] = true;
+			}
+			entries.ShouldBe(1);
+
+			existingDistributions.Count.ShouldBe(1);
+			existingDistributions.ShouldContainKey(0);
+		}
 	}
 }
