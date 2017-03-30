@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
+namespace Tests.SimpleExecutableModel.Analysis.Invariants.NotViolated
 {
 	using System;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
@@ -34,14 +34,14 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 	using Xunit;
 	using Xunit.Abstractions;
 	
-	public class Formulas : AnalysisTest
+	public class UndoNestedFaults : AnalysisTest
 	{
-		public Formulas(ITestOutputHelper output = null) : base(output)
+		public UndoNestedFaults(ITestOutputHelper output = null) : base(output)
 		{
 		}
 
 		[Fact]
-		public void CheckDirect()
+		public void Check()
 		{
 			var m = new Model();
 			var formulaNotTwo = new UnaryFormula(Model.StateIsTwo,UnaryOperator.Not);
@@ -53,67 +53,72 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 			checker.OutputWritten += output => Output.Log(output);
 
 			var result = checker.CheckInvariant(m, formulaNotTwo);
-
-			var simulator = new Simulator<SimpleExecutableModel>(result.CounterExample);
-			var simulatedModel = simulator.RuntimeModel.Model;
-			simulatedModel.State.ShouldBe(0);
-			simulator.IsCompleted.ShouldBe(false);
-			simulator.SimulateStep();
-			simulatedModel.State.ShouldBe(1);
-			simulator.IsCompleted.ShouldBe(false);
-			simulator.SimulateStep();
-			simulatedModel.State.ShouldBe(2);
-			simulator.IsCompleted.ShouldBe(true);
-		}
-
-		[Fact]
-		public void CheckSaved()
-		{
-			var m = new Model();
-			var formulaNotTwo = new UnaryFormula(Model.StateIsTwo, UnaryOperator.Not);
-			var checker = new SimpleQualitativeChecker
-			{
-				Configuration = AnalysisConfiguration.Default
-			};
-			checker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			checker.OutputWritten += output => Output.Log(output);
-
-			var result = checker.CheckInvariant(m, formulaNotTwo);
-
-			// save and load counterexample
-			using (var file = new TemporaryFile(".ssharp"))
-			{
-				result.CounterExample.Save(file.FilePath);
-				var counterExampleSerialization = new SimpleExecutableModelCounterExampleSerialization();
-				var simulator = new Simulator<SimpleExecutableModel>(counterExampleSerialization.Load(file.FilePath));
-				var simulatedModel = simulator.RuntimeModel.Model;
-				simulatedModel.State.ShouldBe(0);
-				simulator.IsCompleted.ShouldBe(false);
-				simulator.SimulateStep();
-				simulatedModel.State.ShouldBe(1);
-				simulator.IsCompleted.ShouldBe(false);
-				simulator.SimulateStep();
-				simulatedModel.State.ShouldBe(2);
-				simulator.IsCompleted.ShouldBe(true);
-			}
+			result.FormulaHolds.ShouldBe(true);
 		}
 
 		public class Model : SimpleModelBase
 		{
-			public override Fault[] Faults { get; } = new Fault[0];
+			public override Fault[] Faults { get; } = new Fault[]
+			{
+				new TransientFault { Identifier = 0, ProbabilityOfOccurrence = new Probability(0.5) },
+				new TransientFault { Identifier = 1, ProbabilityOfOccurrence = new Probability(0.5) }
+			};
+
 			public override bool[] LocalBools { get; } = new bool[0];
 			public override int[] LocalInts { get; } = new int[0];
+
+
+			private Fault F1 => Faults[0];
+			private Fault F2 => Faults[1];
 
 			public override void SetInitialState()
 			{
 				State = 0;
 			}
 
+			public bool BaseMethod()
+			{
+				return Choice.Choose(true, false);
+			}
+
+			public bool InnerPossibleFaultMethod()
+			{
+				F1.TryActivate();
+				if (!F1.IsActivated)
+				{
+					var __tmp__ = BaseMethod();
+					if (__tmp__ == false)
+					{
+						F1.UndoActivation();
+					}
+					return __tmp__;
+				}
+				return false;
+			}
+
+			public bool OuterPossibleFaultMethod()
+			{
+				F2.TryActivate();
+				if (!F2.IsActivated)
+				{
+					var __tmp__ = InnerPossibleFaultMethod();
+					if (__tmp__ == true)
+					{
+						F2.UndoActivation();
+					}
+					return __tmp__;
+				}
+				return true;
+			}
+
 			public override void Update()
 			{
-				if (State >= 100)
+				if (State != 0)
 					return;
-				++State;
+				if (OuterPossibleFaultMethod())
+					State = 100;
+				else
+					State = 200;
 			}
 
 			public static Formula StateIsTwo = new SimpleStateInRangeFormula(2);

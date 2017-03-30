@@ -90,6 +90,8 @@
     <Compile Include="ProbabilisticModelChecker\ExternalMdpModelCheckerPrismTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Invariants\CounterExamples\formulas.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\undo nested faults.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\undo nested choices.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\multiple formulas in one run.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\multiple initial states.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\same target state on different ways.cs" />

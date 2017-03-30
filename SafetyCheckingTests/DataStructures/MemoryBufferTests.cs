@@ -57,7 +57,6 @@ namespace Tests.DataStructures
 			}
 		}
 
-
 		[Fact]
 		public void SetAllBitsMemoryCheck()
 		{
@@ -66,6 +65,21 @@ namespace Tests.DataStructures
 			for (var i = 0; i < NumberOfElements; i++)
 			{
 				_memoryPointer[i].ShouldBe(-1);
+			}
+		}
+
+		[Fact]
+		public void MixedCheck()
+		{
+			MemoryBuffer.ZeroMemoryWithInitblk.Delegate(new IntPtr(_memoryPointer), sizeof(int) * NumberOfElements);
+			MemoryBuffer.SetAllBitsMemoryWithInitblk.Delegate(new IntPtr(_memoryPointer), sizeof(int) * NumberOfElements / 2);
+			for (var i = 0; i < NumberOfElements/2; i++)
+			{
+				_memoryPointer[i].ShouldBe(-1);
+			}
+			for (var i = NumberOfElements / 2; i < NumberOfElements; i++)
+			{
+				_memoryPointer[i].ShouldBe(0);
 			}
 		}
 	}

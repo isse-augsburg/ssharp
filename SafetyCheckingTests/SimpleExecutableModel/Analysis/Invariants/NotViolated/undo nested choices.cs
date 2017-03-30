@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
+namespace Tests.SimpleExecutableModel.Analysis.Invariants.NotViolated
 {
 	using System;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
@@ -34,17 +34,25 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 	using Xunit;
 	using Xunit.Abstractions;
 	
-	public class Formulas : AnalysisTest
+	public class UndoNestedChoices : AnalysisTest
 	{
-		public Formulas(ITestOutputHelper output = null) : base(output)
+		public UndoNestedChoices(ITestOutputHelper output = null) : base(output)
 		{
 		}
 
 		[Fact]
-		public void CheckDirect()
+		public void Check()
 		{
 			var m = new Model();
-			var formulaNotTwo = new UnaryFormula(Model.StateIsTwo,UnaryOperator.Not);
+
+			//F != 2 && F != 3 && (G == 0 || G == 7 || G == 8
+			var formulaGIs078 =
+				new BinaryFormula(new BinaryFormula(Model.GIs0, BinaryOperator.Or, Model.GIs7), BinaryOperator.Or, Model.GIs8);
+			var formulaFNot2 = new UnaryFormula(Model.FIs2, UnaryOperator.Not);
+			var formulaFNot3 = new UnaryFormula(Model.FIs3, UnaryOperator.Not);
+			var formula =
+				new BinaryFormula(new BinaryFormula(formulaFNot2, BinaryOperator.And, formulaFNot3), BinaryOperator.And, formulaGIs078);
+
 			var checker = new SimpleQualitativeChecker
 			{
 				Configuration = AnalysisConfiguration.Default
@@ -52,71 +60,50 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 			checker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			checker.OutputWritten += output => Output.Log(output);
 
-			var result = checker.CheckInvariant(m, formulaNotTwo);
-
-			var simulator = new Simulator<SimpleExecutableModel>(result.CounterExample);
-			var simulatedModel = simulator.RuntimeModel.Model;
-			simulatedModel.State.ShouldBe(0);
-			simulator.IsCompleted.ShouldBe(false);
-			simulator.SimulateStep();
-			simulatedModel.State.ShouldBe(1);
-			simulator.IsCompleted.ShouldBe(false);
-			simulator.SimulateStep();
-			simulatedModel.State.ShouldBe(2);
-			simulator.IsCompleted.ShouldBe(true);
-		}
-
-		[Fact]
-		public void CheckSaved()
-		{
-			var m = new Model();
-			var formulaNotTwo = new UnaryFormula(Model.StateIsTwo, UnaryOperator.Not);
-			var checker = new SimpleQualitativeChecker
-			{
-				Configuration = AnalysisConfiguration.Default
-			};
-			checker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			checker.OutputWritten += output => Output.Log(output);
-
-			var result = checker.CheckInvariant(m, formulaNotTwo);
-
-			// save and load counterexample
-			using (var file = new TemporaryFile(".ssharp"))
-			{
-				result.CounterExample.Save(file.FilePath);
-				var counterExampleSerialization = new SimpleExecutableModelCounterExampleSerialization();
-				var simulator = new Simulator<SimpleExecutableModel>(counterExampleSerialization.Load(file.FilePath));
-				var simulatedModel = simulator.RuntimeModel.Model;
-				simulatedModel.State.ShouldBe(0);
-				simulator.IsCompleted.ShouldBe(false);
-				simulator.SimulateStep();
-				simulatedModel.State.ShouldBe(1);
-				simulator.IsCompleted.ShouldBe(false);
-				simulator.SimulateStep();
-				simulatedModel.State.ShouldBe(2);
-				simulator.IsCompleted.ShouldBe(true);
-			}
+			var result = checker.CheckInvariant(m, formula);
+			result.FormulaHolds.ShouldBe(true);
 		}
 
 		public class Model : SimpleModelBase
 		{
 			public override Fault[] Faults { get; } = new Fault[0];
 			public override bool[] LocalBools { get; } = new bool[0];
-			public override int[] LocalInts { get; } = new int[0];
+			public override int[] LocalInts { get; } = new int[] {0,0};
 
 			public override void SetInitialState()
 			{
 				State = 0;
 			}
 
-			public override void Update()
+			private int F
 			{
-				if (State >= 100)
-					return;
-				++State;
+				get { return LocalInts[0]; }
+				set { LocalInts[0] = value; }
 			}
 
-			public static Formula StateIsTwo = new SimpleStateInRangeFormula(2);
+			private int G
+			{
+				get { return LocalInts[1]; }
+				set { LocalInts[1] = value; }
+			}
+
+			public override void Update()
+			{
+				G = Choice.Choose(3, 5);
+				F = Choice.Choose(1, 2, 3);
+
+				var index = Choice.Resolver.LastChoiceIndex;
+
+				G = Choice.Choose(7, 8);
+
+				Choice.Resolver.Undo(index);
+			}
+
+			public static Formula FIs2 = new SimpleLocalVarInRangeFormula(0,2);
+			public static Formula FIs3 = new SimpleLocalVarInRangeFormula(0,3);
+			public static Formula GIs0 = new SimpleLocalVarInRangeFormula(1,0);
+			public static Formula GIs7 = new SimpleLocalVarInRangeFormula(1,7);
+			public static Formula GIs8 = new SimpleLocalVarInRangeFormula(1,8);
 		}
 	}
 }
