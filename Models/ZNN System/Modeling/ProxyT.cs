@@ -37,6 +37,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// In this fault, the server selection for a query fails
 		/// </summary>
+		[FaultActivation(typeof(ServerSelectionFailsEffect), "CanActiviate")]
 		public readonly Fault ServerSelectionFails = new TransientFault();
 
 		/// <summary>
@@ -262,7 +263,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			//{
 			//	return ActiveServerCount > 1;
 			//}
-			[FaultActivation]
+			//[FaultActivation]
 			public bool CanActiviate => ActiveServerCount > 1;
 
 			/// <summary>

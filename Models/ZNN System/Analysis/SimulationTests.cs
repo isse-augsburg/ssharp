@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using FluentAssertions;
 using NUnit.Framework;
 using SafetySharp.Analysis;
@@ -60,7 +61,19 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		public void TestModelWithFaults()
 		{
 			var model = new Model();
-			// Fault activation criteria?
+			var members = model.Proxy.GetType().GetFields().Where(prop => prop.IsDefined(typeof(FaultActivationAttribute), false));
+			foreach(var m in members)
+			{
+				var attr = (FaultActivationAttribute) m.GetCustomAttribute(typeof(FaultActivationAttribute), false);
+				var mVal = (Fault) m.GetValue(model.Proxy);
+				//var act = (bool)attr.ActivationProperty.GetValue(mVal.);
+				
+			}
+
+			foreach(var fault in model.Faults)
+			{
+				var b = fault == model.Proxy.ServerSelectionFails;
+			}
 
 			var simulator = new Simulator(model);
 			model = (Model) simulator.Model;
