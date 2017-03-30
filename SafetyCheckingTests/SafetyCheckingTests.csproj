@@ -84,13 +84,16 @@
     <Compile Include="DataStructures\SparseDoubleMatrixTests.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcBuilderTests.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpBuilderTests.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpContinuationDistributionMapperTests.cs" />
     <Compile Include="ProbabilisticModelChecker\BuiltinDtmcModelCheckerTests.cs" />
     <Compile Include="ProbabilisticModelChecker\BuiltinMdpModelCheckerTests.cs" />
     <Compile Include="ProbabilisticModelChecker\ExternalDtmcModelCheckerMrmcTests.cs" />
     <Compile Include="ProbabilisticModelChecker\ExternalMdpModelCheckerPrismTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Invariants\CounterExamples\formulas.cs" />
-    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\undo nested faults.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\undo nested choices2.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\nested side effect free methods with faults.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\undo nested choices emerging from faults.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\undo nested choices.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\multiple formulas in one run.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\multiple initial states.cs" />

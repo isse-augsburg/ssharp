@@ -190,9 +190,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal override void Undo(int choiceIndex)
 		{
-			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
-			// turning the choice into a deterministic selection of the value at index 0
-			_valueCount[choiceIndex] = 0;
+			// Not yet implemented, so ignore this feature for now
 		}
 
 		/// <summary>

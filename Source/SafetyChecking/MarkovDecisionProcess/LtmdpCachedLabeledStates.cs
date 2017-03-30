@@ -137,7 +137,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_targetStateBuffer.SafeDispose();
 		}
 
-		public void TransformContinuationIdsToDistributions(Dictionary<int, List<int>> continuationIdToDistributions)
+		public void TransformContinuationIdsToDistributions(LtmdpContinuationDistributionMapper cidToDidMapper)
 		{
 			_continuationIdMode = false;
 			for (var i = 0; i < _transitionsWithContinuationIdCount; i++)

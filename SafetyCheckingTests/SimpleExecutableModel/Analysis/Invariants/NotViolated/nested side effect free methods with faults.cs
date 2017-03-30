@@ -34,9 +34,9 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.NotViolated
 	using Xunit;
 	using Xunit.Abstractions;
 	
-	public class UndoNestedFaults : AnalysisTest
+	public class NestedSideEffectFreeMethodsWithFaults : AnalysisTest
 	{
-		public UndoNestedFaults(ITestOutputHelper output = null) : base(output)
+		public NestedSideEffectFreeMethodsWithFaults(ITestOutputHelper output = null) : base(output)
 		{
 		}
 
@@ -83,32 +83,30 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.NotViolated
 
 			public bool InnerPossibleFaultMethod()
 			{
+				var myConstantResult = false;
+				var baseResult = BaseMethod();
+				if (baseResult == myConstantResult)
+					return baseResult;
+
+				//If F1.IsActivated has no effect, it is not even activated.
 				F1.TryActivate();
 				if (!F1.IsActivated)
-				{
-					var __tmp__ = BaseMethod();
-					if (__tmp__ == false)
-					{
-						F1.UndoActivation();
-					}
-					return __tmp__;
-				}
-				return false;
+					return baseResult;
+				return myConstantResult;
 			}
 
 			public bool OuterPossibleFaultMethod()
 			{
+				var myConstantResult = true;
+				var baseResult = InnerPossibleFaultMethod();
+				if (baseResult == myConstantResult)
+					return baseResult;
+
+				//If F2.IsActivated has no effect, it is not even activated.
 				F2.TryActivate();
 				if (!F2.IsActivated)
-				{
-					var __tmp__ = InnerPossibleFaultMethod();
-					if (__tmp__ == true)
-					{
-						F2.UndoActivation();
-					}
-					return __tmp__;
-				}
-				return true;
+					return baseResult;
+				return myConstantResult;
 			}
 
 			public override void Update()
