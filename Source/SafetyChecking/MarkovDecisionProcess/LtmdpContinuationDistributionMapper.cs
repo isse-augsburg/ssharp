@@ -62,7 +62,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_firstDistributionOfContinuationChainElement = new AutoResizeVector<int>
 			{
 				DefaultValue = -1
-			}; ;
+			};
 			_distributionOfContinuationChain = new AutoResizeVector<DistributionOfContinuationChainElement>();
 		}
 		
@@ -134,19 +134,19 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			return indexOfNewCofDChainEntry;
 		}
 
-		private int StartDofCChain(int distribution, int cid, int indexInDtoCChain)
+		private int StartDofCChain(int cid, int distribution, int indexInCofDChain)
 		{
-			Assert.That(_firstDistributionOfContinuationChainElement[distribution] == -1, "Chain should be empty");
+			Assert.That(_firstDistributionOfContinuationChainElement[cid] == -1, "Chain should be empty");
 
 			var indexOfNewDofCChainEntry = _distributionOfContinuationChain.Count;
 
-			_firstDistributionOfContinuationChainElement[distribution] = indexOfNewDofCChainEntry;
+			_firstDistributionOfContinuationChainElement[cid] = indexOfNewDofCChainEntry;
 
 			_distributionOfContinuationChain[indexOfNewDofCChainEntry] =
 				new DistributionOfContinuationChainElement
 				{
 					DistributionId = distribution,
-					IndexInContinuationOfDistributionChain = indexInDtoCChain,
+					IndexInContinuationOfDistributionChain = indexInCofDChain,
 					NextElementIndex = -1
 				};
 			return indexOfNewDofCChainEntry;
@@ -234,7 +234,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				var newCofDChainIndex = AppendCofDChainElement(oldDofCChainElement.IndexInContinuationOfDistributionChain, newCid);
 
 				if (currentNewDofCChainIndex == -1)
-					currentNewDofCChainIndex = StartDofCChain(oldDofCChainElement.DistributionId, newCid, newCofDChainIndex);
+					currentNewDofCChainIndex = StartDofCChain(newCid, oldDofCChainElement.DistributionId, newCofDChainIndex);
 				else
 					currentNewDofCChainIndex = AppendDofCChainElement(currentNewDofCChainIndex, oldDofCChainElement.DistributionId, newCofDChainIndex);
 				
@@ -267,6 +267,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 
 
+		/// <summary>
+		///   Makes an probabilistic split.
+		/// </summary>
+		/// <param name="sourceCid">The source continuation id that is split..</param>
+		/// <param name="fromCid">The new beginning of the range. Includes fromCid.</param>
+		/// <param name="toCid">The new end of the range. Includes toCid.</param>
 		public void ProbabilisticSplit(int sourceCid, int fromCid, int toCid)
 		{
 			// replace sourceCid in every distribution by the range [fromCid...toCid].
@@ -277,10 +283,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			// reuse sourceCid for fromCid
 			ChangeCid(sourceCid, fromCid);
 
-			// For all others, create a clone
-			for (var newCid = fromCid; newCid < toCid; newCid++)
+			// For all others, create a clone. The cloned element is directly appended after the sourceCid in the
+			// _distributionOfContinuationChain Thus, we always use the previously cloned element as basis to preserve
+			// the order in _distributionOfContinuationChain. 
+			var cloneSourceCid = fromCid;
+			for (var newCid = fromCid+1 ; newCid <= toCid; newCid++)
 			{
-				CloneCid(fromCid, newCid);
+				CloneCid(cloneSourceCid, newCid);
+				cloneSourceCid = newCid;
 			}
 		}
 

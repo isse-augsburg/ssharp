@@ -60,13 +60,13 @@ namespace Tests.MarkovDecisionProcess
 			entries.ShouldBe(1);
 		}
 		
-		[Fact(Skip="Bug")]
+		[Fact]
 		public void ProbabilisticSplitRemovesInitialContinuation()
 		{
 			var mapper = new LtmdpContinuationDistributionMapper();
 
 			mapper.AddInitialDistributionAndContinuation();
-			mapper.NonDeterministicSplit(0, 1, 3);
+			mapper.ProbabilisticSplit(0, 1, 3);
 
 			var enumerator = mapper.GetDistributionsOfContinuationEnumerator(0);
 			var entries = 0;
@@ -76,15 +76,15 @@ namespace Tests.MarkovDecisionProcess
 			}
 			entries.ShouldBe(0);
 		}
-
-		[Fact(Skip = "Bug")]
+		
+		[Fact]
 		public void OneDistributionWithThreeContinuations()
 		{
 			var mapper = new LtmdpContinuationDistributionMapper();
 			var existingDistributions = new Dictionary<int, bool>();
 
 			mapper.AddInitialDistributionAndContinuation();
-			mapper.NonDeterministicSplit(0, 1, 3);
+			mapper.ProbabilisticSplit(0, 1, 3);
 
 			var enumerator = mapper.GetDistributionsOfContinuationEnumerator(1);
 			var entries = 0;
