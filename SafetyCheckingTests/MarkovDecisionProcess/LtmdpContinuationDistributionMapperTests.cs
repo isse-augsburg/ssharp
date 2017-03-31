@@ -203,7 +203,7 @@ namespace Tests.MarkovDecisionProcess
 			existingDistributions.ShouldContainKey(1);
 		}
 
-		[Fact(Skip = "Not implemented, yet")]
+		[Fact]
 		public void TwoDistributionWithFiveContinuationsAfterTwoSplitsWithRemove2()
 		{
 			_mapper.AddInitialDistributionAndContinuation();

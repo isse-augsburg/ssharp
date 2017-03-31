@@ -34,12 +34,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		{
 			public int ContinuationId;
 			public int NextElementIndex;
+			public int PreviousElementIndex;
 		}
 
 		private struct DistributionOfContinuationChainElement
 		{
 			public int DistributionId;
 			public int NextElementIndex;
+			public int PreviousElementIndex;
 		}
 
 		// Note, _distributionOfContinuationChain[i] and _continuationOfDistributionChain[i] are always associated.
@@ -120,7 +122,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				new ContinuationOfDistributionChainElement
 				{
 					ContinuationId = cid,
-					NextElementIndex = -1
+					NextElementIndex = -1,
+					PreviousElementIndex = -1
 				};
 		}
 
@@ -130,27 +133,45 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				new ContinuationOfDistributionChainElement
 				{
 					ContinuationId = newCid,
-					NextElementIndex = _continuationOfDistributionChain[indexOfChainEntry].NextElementIndex
+					NextElementIndex = _continuationOfDistributionChain[indexOfChainEntry].NextElementIndex,
+					PreviousElementIndex = _continuationOfDistributionChain[indexOfChainEntry].PreviousElementIndex
 				};
 		}
 
 		private void InsertCofDChainElement(int indexOfNewChainEntry, int indexOfPreviousChainElement, int newCid)
 		{
 			var previousNextElement = _continuationOfDistributionChain[indexOfPreviousChainElement].NextElementIndex;
+			var previousPreviousElement = _continuationOfDistributionChain[indexOfPreviousChainElement].PreviousElementIndex;
 
 			_continuationOfDistributionChain[indexOfNewChainEntry] =
 				new ContinuationOfDistributionChainElement
 				{
 					ContinuationId = newCid,
-					NextElementIndex = previousNextElement
+					NextElementIndex = previousNextElement,
+					PreviousElementIndex = indexOfPreviousChainElement
 				};
 
 			_continuationOfDistributionChain[indexOfPreviousChainElement] =
 				new ContinuationOfDistributionChainElement
 				{
 					ContinuationId = _continuationOfDistributionChain[indexOfPreviousChainElement].ContinuationId,
-					NextElementIndex = indexOfNewChainEntry
+					NextElementIndex = indexOfNewChainEntry,
+					PreviousElementIndex = previousPreviousElement
 				};
+
+			if (previousNextElement == -1)
+			{
+			}
+			else
+			{
+				_continuationOfDistributionChain[previousNextElement] =
+					new ContinuationOfDistributionChainElement
+					{
+						ContinuationId = _continuationOfDistributionChain[previousNextElement].ContinuationId,
+						NextElementIndex = _distributionOfContinuationChain[previousNextElement].NextElementIndex,
+						PreviousElementIndex = indexOfNewChainEntry
+					};
+			}
 		}
 
 		private void StartDofCChain(int indexOfNewChainEntry, int cid, int distribution)
@@ -164,7 +185,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				new DistributionOfContinuationChainElement
 				{
 					DistributionId = distribution,
-					NextElementIndex = -1
+					NextElementIndex = -1,
+					PreviousElementIndex = -1
 				};
 		}
 
@@ -174,31 +196,45 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				new DistributionOfContinuationChainElement
 				{
 					DistributionId = newDid,
-					NextElementIndex = _distributionOfContinuationChain[indexOfChainEntry].NextElementIndex
+					NextElementIndex = _distributionOfContinuationChain[indexOfChainEntry].NextElementIndex,
+					PreviousElementIndex = _distributionOfContinuationChain[indexOfChainEntry].PreviousElementIndex
 				};
 		}
 
 		private void InsertDofCChainElement(int indexOfNewChainEntry, int cid, int indexOfPreviousChainElement, int distribution)
 		{
 			var previousNextElement = _distributionOfContinuationChain[indexOfPreviousChainElement].NextElementIndex;
+			var previousPreviousElement = _distributionOfContinuationChain[indexOfPreviousChainElement].PreviousElementIndex;
 
 			_distributionOfContinuationChain[indexOfNewChainEntry] =
 				new DistributionOfContinuationChainElement
 				{
 					DistributionId = distribution,
-					NextElementIndex = previousNextElement
+					NextElementIndex = previousNextElement,
+					PreviousElementIndex = indexOfPreviousChainElement
 				};
 
 			_distributionOfContinuationChain[indexOfPreviousChainElement] =
 				new DistributionOfContinuationChainElement
 				{
 					DistributionId = _distributionOfContinuationChain[indexOfPreviousChainElement].DistributionId,
-					NextElementIndex = indexOfNewChainEntry
+					NextElementIndex = indexOfNewChainEntry,
+					PreviousElementIndex = previousPreviousElement
 				};
 
 			if (previousNextElement == -1)
 			{
 				_lastDistributionOfContinuationChainElement[cid] = indexOfNewChainEntry;
+			}
+			else
+			{
+				_distributionOfContinuationChain[previousNextElement] =
+					new DistributionOfContinuationChainElement
+					{
+						DistributionId = _distributionOfContinuationChain[previousNextElement].DistributionId,
+						NextElementIndex = _distributionOfContinuationChain[previousNextElement].NextElementIndex,
+						PreviousElementIndex = indexOfNewChainEntry
+					};
 			}
 		}
 
@@ -215,8 +251,59 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 
 			Assert.That(_distributionOfContinuationChain[indexOfChainElement].NextElementIndex==-1,"New element should not have any successor");
+		}
 
-			_lastDistributionOfContinuationChainElement[cid] = indexOfChainElement;
+		private bool RemoveDofCChainElement(int cid, int indexOfChainEntry)
+		{
+			// returns true, if indexOfChainEntry is the only element in the chain.
+
+			var dofCChainElement = _distributionOfContinuationChain[indexOfChainEntry];
+
+			if (dofCChainElement.PreviousElementIndex == -1 && dofCChainElement.NextElementIndex == -1)
+			{
+				// this is the only element
+				_firstDistributionOfContinuationChainElement[cid] = -1;
+				_lastDistributionOfContinuationChainElement[cid] = -1;
+				return true;
+			}
+
+			var indexOfNextChainElement = dofCChainElement.NextElementIndex;
+			var indexOfPreviousChainElement = dofCChainElement.PreviousElementIndex;
+
+			if (indexOfNextChainElement != -1)
+			{
+				// the current element has a successor
+				_distributionOfContinuationChain[indexOfNextChainElement] =
+					new DistributionOfContinuationChainElement
+					{
+						DistributionId = _distributionOfContinuationChain[indexOfNextChainElement].DistributionId,
+						NextElementIndex = _distributionOfContinuationChain[indexOfNextChainElement].NextElementIndex,
+						PreviousElementIndex = indexOfPreviousChainElement
+					};
+			}
+			else
+			{
+				//removed the last element
+				_lastDistributionOfContinuationChainElement[cid] = indexOfPreviousChainElement;
+			}
+
+			if (indexOfPreviousChainElement != -1)
+			{
+				// the current element has a predecessor
+				_distributionOfContinuationChain[indexOfPreviousChainElement] =
+					new DistributionOfContinuationChainElement
+					{
+						DistributionId = _distributionOfContinuationChain[indexOfPreviousChainElement].DistributionId,
+						NextElementIndex = indexOfNextChainElement,
+						PreviousElementIndex = _distributionOfContinuationChain[indexOfPreviousChainElement].PreviousElementIndex
+					};
+			}
+			else
+			{
+				//removed the first element
+				_firstDistributionOfContinuationChainElement[cid] = indexOfNextChainElement;
+			}
+			return false;
 		}
 
 		private void ChangeCid(int sourceCid, int newCid)
@@ -397,16 +484,40 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 		}
 		
+		private void RemoveDistribution(int did)
+		{
+			var currentChainIndex = _firstContinuationOfDistributionChainElement[did];
+			
+			while (currentChainIndex != -1)
+			{
+				_freedChainIndexes.Add(currentChainIndex);
+
+				var currentCofDChainElement = _continuationOfDistributionChain[currentChainIndex];
+
+				Assert.That(_distributionOfContinuationChain[currentChainIndex].DistributionId == did, "entry in _distributionOfContinuationChain is wrong");
+
+				RemoveDofCChainElement(currentCofDChainElement.ContinuationId, currentChainIndex);
+				
+				currentChainIndex = currentCofDChainElement.NextElementIndex;
+			}
+			_firstContinuationOfDistributionChainElement[did] = -1;
+		}
+
 		public void RemoveCidInDistributions(int cid)
 		{
-			// useful to undo a probabilistic split
+			// Useful to undo a probabilistic split.
+			// Assume, that the element with cid is not the last element in any distribution.
 			throw new NotImplementedException();
 		}
 
 		public void RemoveDistributionsWithCid(int cid)
 		{
-			// useful to undo a non deterministic split
-			throw new NotImplementedException();
+			var distributionEnumerator = GetDistributionsOfContinuationEnumerator(cid);
+
+			while (distributionEnumerator.MoveNext())
+			{
+				RemoveDistribution(distributionEnumerator.CurrentDistributionId);
+			}
 		}
 
 
