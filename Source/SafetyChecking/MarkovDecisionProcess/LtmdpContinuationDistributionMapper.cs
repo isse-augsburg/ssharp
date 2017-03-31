@@ -48,6 +48,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		// We call this property chain-congruence in the remainder of this file.
 
 		private readonly AutoResizeVector<int> _firstContinuationOfDistributionChainElement;
+		private readonly AutoResizeVector<int> _lastContinuationOfDistributionChainElement;
 		private readonly AutoResizeVector<ContinuationOfDistributionChainElement> _continuationOfDistributionChain;
 
 		private readonly AutoResizeVector<int> _firstDistributionOfContinuationChainElement;
@@ -59,6 +60,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		public LtmdpContinuationDistributionMapper()
 		{
 			_firstContinuationOfDistributionChainElement = new AutoResizeVector<int>
+			{
+				DefaultValue = -1
+			};
+			_lastContinuationOfDistributionChainElement = new AutoResizeVector<int>
 			{
 				DefaultValue = -1
 			};
@@ -79,6 +84,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		public void Clear()
 		{
 			_firstContinuationOfDistributionChainElement.Clear();
+			_lastContinuationOfDistributionChainElement.Clear();
 			_continuationOfDistributionChain.Clear();
 
 			_firstDistributionOfContinuationChainElement.Clear();
@@ -117,6 +123,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			Assert.That(_firstContinuationOfDistributionChainElement[distribution] == -1, "Chain should be empty");
 			
 			_firstContinuationOfDistributionChainElement[distribution] = indexOfNewChainEntry;
+			_lastContinuationOfDistributionChainElement[distribution] = indexOfNewChainEntry;
 
 			_continuationOfDistributionChain[indexOfNewChainEntry] =
 				new ContinuationOfDistributionChainElement
@@ -138,7 +145,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				};
 		}
 
-		private void InsertCofDChainElement(int indexOfNewChainEntry, int indexOfPreviousChainElement, int newCid)
+		private void InsertCofDChainElement(int indexOfNewChainEntry, int did, int indexOfPreviousChainElement, int newCid)
 		{
 			var previousNextElement = _continuationOfDistributionChain[indexOfPreviousChainElement].NextElementIndex;
 			var previousPreviousElement = _continuationOfDistributionChain[indexOfPreviousChainElement].PreviousElementIndex;
@@ -161,6 +168,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			if (previousNextElement == -1)
 			{
+				_lastContinuationOfDistributionChainElement[did] = indexOfNewChainEntry;
 			}
 			else
 			{
@@ -351,7 +359,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				var indexOfNewChainElements = GetUnusedChainIndex();
 
 				// Create entry in _continuationOfDistributionChain. Because we clone, we know there is already a element
-				InsertCofDChainElement(indexOfNewChainElements, currentOldChainIndex, newCid);
+				InsertCofDChainElement(indexOfNewChainElements, oldDofCChainElement.DistributionId, currentOldChainIndex, newCid);
 
 				// Create entry in _distributionOfContinuationChain
 				if (currentNewDofCChainIndex == -1)
@@ -432,7 +440,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				if (currentNewCofDChainIndex == -1)
 					StartCofDChain(indexOfNewChainElements, newDistributionId, cidOfNewElement);
 				else
-					InsertCofDChainElement(indexOfNewChainElements, currentNewCofDChainIndex, cidOfNewElement);
+					InsertCofDChainElement(indexOfNewChainElements, newDistributionId, currentNewCofDChainIndex, cidOfNewElement);
 				
 				// Append entry in _distributionOfContinuationChain. May be a new chain
 				AppendDofCChainElement(indexOfNewChainElements, cidOfNewElement, newDistributionId);
@@ -503,13 +511,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_firstContinuationOfDistributionChainElement[did] = -1;
 		}
 
-		public void RemoveCidInDistributions(int cid)
-		{
-			// Useful to undo a probabilistic split.
-			// Assume, that the element with cid is not the last element in any distribution.
-			throw new NotImplementedException();
-		}
-
 		public void RemoveDistributionsWithCid(int cid)
 		{
 			var distributionEnumerator = GetDistributionsOfContinuationEnumerator(cid);
@@ -518,6 +519,26 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			{
 				RemoveDistribution(distributionEnumerator.CurrentDistributionId);
 			}
+		}
+
+
+		public void RemoveCidInDistributions(int cid)
+		{
+			// Useful to undo a probabilistic split.
+			// Assume, that the element with cid is not the last element in any distribution.
+
+			var currentChainIndex = _firstDistributionOfContinuationChainElement[cid];
+			while (currentChainIndex != -1)
+			{
+				_freedChainIndexes.Add(currentChainIndex);
+
+				var currentDofCChainElement = _distributionOfContinuationChain[currentChainIndex];
+				
+				RemoveDofCChainElement(cid, currentChainIndex);
+
+				currentChainIndex = currentDofCChainElement.NextElementIndex;
+			}
+			_firstDistributionOfContinuationChainElement[cid] = -1;
 		}
 
 
