@@ -166,5 +166,74 @@ namespace Tests.MarkovDecisionProcess
 			existingDistributions.ShouldContainKey(0);
 			existingDistributions.ShouldContainKey(1);
 		}
+		
+		[Fact(Skip = "Not implemented, yet")]
+		public void TwoDistributionWithFiveContinuationsAfterTwoSplitsWithRemove()
+		{
+			_mapper.AddInitialDistributionAndContinuation();
+			_mapper.ProbabilisticSplit(0, 1, 3);
+			_mapper.NonDeterministicSplit(1, 4, 5);
+
+			// simulate undo of probabilistic split (2 and 3 should not be executed anymore)
+			_mapper.RemoveCidInDistributions(2);
+			_mapper.RemoveCidInDistributions(3);
+
+
+			var existingDistributions = new Dictionary<int, bool>();
+			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(1, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(2, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(3, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(4, existingDistributions);
+			entries.ShouldBe(1);
+
+			entries = CountEntriesAndAddDistributionsToMap(5, existingDistributions);
+			entries.ShouldBe(1);
+
+			existingDistributions.Count.ShouldBe(2);
+			existingDistributions.ShouldContainKey(0);
+			existingDistributions.ShouldContainKey(1);
+		}
+
+		[Fact(Skip = "Not implemented, yet")]
+		public void TwoDistributionWithFiveContinuationsAfterTwoSplitsWithRemove2()
+		{
+			_mapper.AddInitialDistributionAndContinuation();
+			_mapper.ProbabilisticSplit(0, 1, 3);
+			_mapper.NonDeterministicSplit(1, 4, 5);
+
+			// simulate undo of nondeterministic split (5 should not be executed anymore)
+			_mapper.RemoveDistributionsWithCid(5);
+
+			var existingDistributions = new Dictionary<int, bool>();
+			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(1, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(2, existingDistributions);
+			entries.ShouldBe(1);
+
+			entries = CountEntriesAndAddDistributionsToMap(3, existingDistributions);
+			entries.ShouldBe(1);
+
+			entries = CountEntriesAndAddDistributionsToMap(4, existingDistributions);
+			entries.ShouldBe(1);
+
+			entries = CountEntriesAndAddDistributionsToMap(5, existingDistributions);
+			entries.ShouldBe(0);
+
+			existingDistributions.Count.ShouldBe(1);
+			existingDistributions.ShouldContainKey(0);
+		}
 	}
 }
