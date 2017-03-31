@@ -22,6 +22,7 @@
 
 namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
+	using System;
 	using System.Diagnostics;
 	using GenericDataStructures;
 	using Utilities;
@@ -47,11 +48,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		private readonly AutoResizeVector<ContinuationOfDistributionChainElement> _continuationOfDistributionChain;
 
 		private readonly AutoResizeVector<int> _firstDistributionOfContinuationChainElement;
+		private readonly AutoResizeVector<int> _lastDistributionOfContinuationChainElement;
 		private readonly AutoResizeVector<DistributionOfContinuationChainElement> _distributionOfContinuationChain;
-
-		private int ContinuationOfDistributionChainElementCount => _continuationOfDistributionChain.Count;
-		private int DistributionOfContinuationChainElementCount => _distributionOfContinuationChain.Count;
-
+		
 		public LtmdpContinuationDistributionMapper()
 		{
 			_firstContinuationOfDistributionChainElement = new AutoResizeVector<int>
@@ -64,6 +63,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			{
 				DefaultValue = -1
 			};
+			_lastDistributionOfContinuationChainElement = new AutoResizeVector<int>
+			{
+				DefaultValue = -1
+			};
 			_distributionOfContinuationChain = new AutoResizeVector<DistributionOfContinuationChainElement>();
 		}
 		
@@ -73,6 +76,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_continuationOfDistributionChain.Clear();
 
 			_firstDistributionOfContinuationChainElement.Clear();
+			_lastDistributionOfContinuationChainElement.Clear();
 			_distributionOfContinuationChain.Clear();
 		}
 
@@ -94,13 +98,18 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			return indexOfNewChainEntries;
 		}
 
+		private int GetUnusedDistributionId()
+		{
+			return _firstContinuationOfDistributionChainElement.Count;
+		}
+
 
 		private void StartCofDChain(int indexOfNewChainEntry, int distribution, int cid)
 		{
 			Assert.That(_firstContinuationOfDistributionChainElement[distribution] == -1, "Chain should be empty");
 			
 			_firstContinuationOfDistributionChainElement[distribution] = indexOfNewChainEntry;
-			
+
 			_continuationOfDistributionChain[indexOfNewChainEntry] =
 				new ContinuationOfDistributionChainElement
 				{
@@ -119,13 +128,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				};
 		}
 
-		private void AppendCofDChainElement(int indexOfNewChainEntry, int indexOfPreviousChainElement, int newCid)
+		private void InsertCofDChainElement(int indexOfNewChainEntry, int indexOfPreviousChainElement, int newCid)
 		{
+			var previousNextElement = _continuationOfDistributionChain[indexOfPreviousChainElement].NextElementIndex;
+
 			_continuationOfDistributionChain[indexOfNewChainEntry] =
 				new ContinuationOfDistributionChainElement
 				{
 					ContinuationId = newCid,
-					NextElementIndex = _continuationOfDistributionChain[indexOfPreviousChainElement].NextElementIndex
+					NextElementIndex = previousNextElement
 				};
 
 			_continuationOfDistributionChain[indexOfPreviousChainElement] =
@@ -141,6 +152,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			Assert.That(_firstDistributionOfContinuationChainElement[cid] == -1, "Chain should be empty");
 			
 			_firstDistributionOfContinuationChainElement[cid] = indexOfNewChainEntry;
+			_lastDistributionOfContinuationChainElement[cid] = indexOfNewChainEntry;
 
 			_distributionOfContinuationChain[indexOfNewChainEntry] =
 				new DistributionOfContinuationChainElement
@@ -160,13 +172,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				};
 		}
 
-		private void AppendDofCChainElement(int indexOfNewChainEntry, int indexOfPreviousChainElement, int distribution)
+		private void InsertDofCChainElement(int indexOfNewChainEntry, int cid, int indexOfPreviousChainElement, int distribution)
 		{
+			var previousNextElement = _distributionOfContinuationChain[indexOfPreviousChainElement].NextElementIndex;
+
 			_distributionOfContinuationChain[indexOfNewChainEntry] =
 				new DistributionOfContinuationChainElement
 				{
 					DistributionId = distribution,
-					NextElementIndex = _distributionOfContinuationChain[indexOfPreviousChainElement].NextElementIndex
+					NextElementIndex = previousNextElement
 				};
 
 			_distributionOfContinuationChain[indexOfPreviousChainElement] =
@@ -175,8 +189,30 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 					DistributionId = _distributionOfContinuationChain[indexOfPreviousChainElement].DistributionId,
 					NextElementIndex = indexOfNewChainEntry
 				};
+
+			if (previousNextElement == -1)
+			{
+				_lastDistributionOfContinuationChainElement[cid] = indexOfNewChainEntry;
+			}
 		}
-		
+
+		private void AppendDofCChainElement(int indexOfChainElement, int cid, int distribution)
+		{
+			var indexOfPreviousElement = _lastDistributionOfContinuationChainElement[cid];
+			if (indexOfPreviousElement == -1)
+			{
+				StartDofCChain(indexOfChainElement, cid, distribution);
+			}
+			else
+			{
+				InsertDofCChainElement(indexOfChainElement, cid, indexOfPreviousElement, distribution);
+			}
+
+			Assert.That(_distributionOfContinuationChain[indexOfChainElement].NextElementIndex==-1,"New element should not have any successor");
+
+			_lastDistributionOfContinuationChainElement[cid] = indexOfChainElement;
+		}
+
 		private void ChangeCid(int sourceCid, int newCid)
 		{
 			// Change entry in _firstDistributionOfContinuationChainElement.
@@ -202,7 +238,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 		}
 
-		private void CloneCid(int sourceCid, int newCid)
+		private void CloneCidWithinDistributions(int sourceCid, int newCid)
 		{
 			// Get entry in _firstDistributionOfContinuationChainElement.
 			var currentOldChainIndex = _firstDistributionOfContinuationChainElement[sourceCid];
@@ -222,14 +258,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				var indexOfNewChainElements = GetUnusedChainIndex();
 
 				// Create entry in _continuationOfDistributionChain. Because we clone, we know there is already a element
-				AppendCofDChainElement(indexOfNewChainElements, currentOldChainIndex, newCid);
+				InsertCofDChainElement(indexOfNewChainElements, currentOldChainIndex, newCid);
 
 				// Create entry in _distributionOfContinuationChain
 				if (currentNewDofCChainIndex == -1)
 					StartDofCChain(indexOfNewChainElements,newCid, oldDofCChainElement.DistributionId);
 				else
-					AppendDofCChainElement(indexOfNewChainElements,currentNewDofCChainIndex, oldDofCChainElement.DistributionId);
-				
+					InsertDofCChainElement(indexOfNewChainElements, newCid, currentNewDofCChainIndex, oldDofCChainElement.DistributionId);
+
+				currentNewDofCChainIndex = indexOfNewChainElements;
 				currentOldChainIndex = oldDofCChainElement.NextElementIndex;
 			}
 		}
@@ -244,21 +281,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			Requires.That(indexOfNewChainElements == 0, "Data structures must be empty");
 		}
 
-		public void NonDeterministicSplit(int sourceCid, int fromCid, int toCid)
-		{
-			// For every distribution which contains sourceCid, a range of clones gets created
-			// where sourceId is replaced by a different element of [fromCid..toCid].
-			// Every distribution which contains sourceCid does not exist anymore after the method call.
-			// For every distribution with sourceCid, there should exist #[fromCid..toCid] distributions
-			// afterwards.
-
-			RequiresThatCidExistent(sourceCid);
-			AssertThatCidNonExistent(fromCid);
-			Assert.That(fromCid <= toCid, "range [fromCid..toCid] must be ascending and contain at least one element");
-		}
-
-
-
 		/// <summary>
 		///   Makes an probabilistic split.
 		/// </summary>
@@ -267,7 +289,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <param name="toCid">The new end of the range. Includes toCid.</param>
 		public void ProbabilisticSplit(int sourceCid, int fromCid, int toCid)
 		{
-			// replace sourceCid in every distribution by the range [fromCid...toCid].
+			// Replace sourceCid in every distribution by the range [fromCid...toCid].
+
 			RequiresThatCidExistent(sourceCid);
 			AssertThatCidNonExistent(fromCid);
 			Assert.That(fromCid <= toCid, "range [fromCid..toCid] must be ascending and contain at least one element");
@@ -281,8 +304,90 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			var cloneSourceCid = fromCid;
 			for (var newCid = fromCid+1 ; newCid <= toCid; newCid++)
 			{
-				CloneCid(cloneSourceCid, newCid);
+				CloneCidWithinDistributions(cloneSourceCid, newCid);
 				cloneSourceCid = newCid;
+			}
+		}
+
+		private void CloneDistributionWithDid(int sourceDid, int replaceCid, int replacedByCid)
+		{
+			// In the cloned distributions replaceCid is replaced by replacedByCid.
+
+			// Get entry in _firstContinuationOfDistributionChainElement.
+			var currentOldChainIndex = _firstContinuationOfDistributionChainElement[sourceDid];
+
+			// Now every entry in the _continuationOfDistributionChain needs to be traversed and cloned.
+			// During the traversal, a _distributionOfContinuationChain element needs to be added for every new
+			// entry. We can reuse the pointer IndexInContinuationOfDistributionChain to find the insertion point.
+
+			var currentNewCofDChainIndex = -1;
+			var newDistributionId = GetUnusedDistributionId();
+
+			while (currentOldChainIndex != -1)
+			{
+				var oldCofDChainElement = _continuationOfDistributionChain[currentOldChainIndex];
+
+				Assert.That(_distributionOfContinuationChain[currentOldChainIndex].DistributionId == sourceDid, "entry in _distributionOfContinuationChain is wrong");
+
+				var indexOfNewChainElements = GetUnusedChainIndex();
+
+				var cidOfNewElement = oldCofDChainElement.ContinuationId;
+				if (cidOfNewElement == replaceCid)
+					cidOfNewElement = replacedByCid;
+
+				// Create entry in _continuationOfDistributionChain
+				if (currentNewCofDChainIndex == -1)
+					StartCofDChain(indexOfNewChainElements, newDistributionId, cidOfNewElement);
+				else
+					InsertCofDChainElement(indexOfNewChainElements, currentNewCofDChainIndex, cidOfNewElement);
+				
+				// Append entry in _distributionOfContinuationChain. May be a new chain
+				AppendDofCChainElement(indexOfNewChainElements, cidOfNewElement, newDistributionId);
+
+				currentNewCofDChainIndex = indexOfNewChainElements;
+				currentOldChainIndex = oldCofDChainElement.NextElementIndex;
+			}
+		}
+
+		private void CloneDistributionsContainingCid(int sourceCid, int newCid)
+		{
+			// Clone every _distributionOfContinuationChain, which contains an element with sourceCid.
+			// In the cloned distributions sourceCid is replaced by newCid.
+			
+			var distributionEnumerator = GetDistributionsOfContinuationEnumerator(sourceCid);
+
+			while (distributionEnumerator.MoveNext())
+			{
+				CloneDistributionWithDid(distributionEnumerator.CurrentDistributionId, sourceCid, newCid);
+			}
+		}
+		
+		/// <summary>
+		///   Makes an non deterministic split.
+		/// </summary>
+		/// <param name="sourceCid">The source continuation id that is split..</param>
+		/// <param name="fromCid">The new beginning of the range. Includes fromCid.</param>
+		/// <param name="toCid">The new end of the range. Includes toCid.</param>
+		public void NonDeterministicSplit(int sourceCid, int fromCid, int toCid)
+		{
+			// For every distribution which contains sourceCid, a range of clones gets created
+			// where sourceId is replaced by a different element of [fromCid..toCid].
+			// Every distribution which contains sourceCid does not exist anymore after the method call.
+			// For every distribution with sourceCid, there should exist #[fromCid..toCid] distributions
+			// afterwards.
+
+			RequiresThatCidExistent(sourceCid);
+			AssertThatCidNonExistent(fromCid);
+			Assert.That(fromCid <= toCid, "range [fromCid..toCid] must be ascending and contain at least one element");
+
+			// Reuse sourceCid for the first distribution to create
+			ChangeCid(sourceCid, fromCid);
+
+			// For all others, create a clone. 
+			var cloneSourceCid = fromCid;
+			for (var newCid = fromCid + 1; newCid <= toCid; newCid++)
+			{
+				CloneDistributionsContainingCid(cloneSourceCid, newCid);
 			}
 		}
 
