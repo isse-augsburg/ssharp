@@ -43,75 +43,58 @@ namespace Tests.MarkovDecisionProcess
 			Output = new TestTraceOutput(output);
 		}
 
-		[Fact]
-		public void OnlyOneInitialDistribution()
+		private LtmdpContinuationDistributionMapper _mapper = new LtmdpContinuationDistributionMapper();
+
+
+		private int CountEntriesAndAddDistributionsToMap(int cid, Dictionary<int, bool> existingDistributions)
 		{
-			var mapper = new LtmdpContinuationDistributionMapper();
-
-			mapper.AddInitialDistributionAndContinuation();
-
-			var enumerator = mapper.GetDistributionsOfContinuationEnumerator(0);
+			var enumerator = _mapper.GetDistributionsOfContinuationEnumerator(cid);
 			var entries = 0;
 			while (enumerator.MoveNext())
 			{
 				entries++;
+				existingDistributions[enumerator.CurrentDistributionId] = true;
 			}
+			return entries;
+		}
 
+		[Fact]
+		public void OnlyOneInitialDistribution()
+		{
+			_mapper.AddInitialDistributionAndContinuation();
+
+			var existingDistributions = new Dictionary<int, bool>();
+
+			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
 			entries.ShouldBe(1);
 		}
 		
 		[Fact]
 		public void ProbabilisticSplitRemovesInitialContinuation()
 		{
-			var mapper = new LtmdpContinuationDistributionMapper();
+			_mapper.AddInitialDistributionAndContinuation();
+			_mapper.ProbabilisticSplit(0, 1, 3);
 
-			mapper.AddInitialDistributionAndContinuation();
-			mapper.ProbabilisticSplit(0, 1, 3);
-
-			var enumerator = mapper.GetDistributionsOfContinuationEnumerator(0);
-			var entries = 0;
-			while (enumerator.MoveNext())
-			{
-				entries++;
-			}
+			var existingDistributions = new Dictionary<int, bool>();
+			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
 			entries.ShouldBe(0);
 		}
 		
 		[Fact]
 		public void OneDistributionWithThreeContinuations()
 		{
-			var mapper = new LtmdpContinuationDistributionMapper();
+			_mapper.AddInitialDistributionAndContinuation();
+			_mapper.ProbabilisticSplit(0, 1, 3);
+
 			var existingDistributions = new Dictionary<int, bool>();
 
-			mapper.AddInitialDistributionAndContinuation();
-			mapper.ProbabilisticSplit(0, 1, 3);
-
-			var enumerator = mapper.GetDistributionsOfContinuationEnumerator(1);
-			var entries = 0;
-			while (enumerator.MoveNext())
-			{
-				entries++;
-				existingDistributions[enumerator.CurrentDistributionId] = true;
-			}
+			var entries = CountEntriesAndAddDistributionsToMap(1, existingDistributions);
 			entries.ShouldBe(1);
 
-			enumerator = mapper.GetDistributionsOfContinuationEnumerator(2);
-			entries = 0;
-			while (enumerator.MoveNext())
-			{
-				entries++;
-				existingDistributions[enumerator.CurrentDistributionId] = true;
-			}
+			entries = CountEntriesAndAddDistributionsToMap(2, existingDistributions);
 			entries.ShouldBe(1);
 
-
-			enumerator = mapper.GetDistributionsOfContinuationEnumerator(3);
-			entries = 0;
-			while (enumerator.MoveNext())
-			{
-				entries++;
-				existingDistributions[enumerator.CurrentDistributionId] = true;
-			}
+			entries = CountEntriesAndAddDistributionsToMap(3, existingDistributions);
 			entries.ShouldBe(1);
 
 			existingDistributions.Count.ShouldBe(1);
@@ -123,70 +106,65 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void OneDistributionWithFiveContinuationsAfterTwoSplits()
 		{
-			var mapper = new LtmdpContinuationDistributionMapper();
+			_mapper.AddInitialDistributionAndContinuation();
+			_mapper.ProbabilisticSplit(0, 1, 3);
+			_mapper.ProbabilisticSplit(1, 4, 5);
+
+
 			var existingDistributions = new Dictionary<int, bool>();
 
-			mapper.AddInitialDistributionAndContinuation();
-			mapper.ProbabilisticSplit(0, 1, 3);
-			mapper.ProbabilisticSplit(1, 4, 5);
-
-
-			var enumerator = mapper.GetDistributionsOfContinuationEnumerator(0);
-			var entries = 0;
-			while (enumerator.MoveNext())
-			{
-				entries++;
-			}
+			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
 			entries.ShouldBe(0);
 
-			enumerator = mapper.GetDistributionsOfContinuationEnumerator(1);
-			entries = 0;
-			while (enumerator.MoveNext())
-			{
-				entries++;
-				existingDistributions[enumerator.CurrentDistributionId] = true;
-			}
+			entries = CountEntriesAndAddDistributionsToMap(1, existingDistributions);
 			entries.ShouldBe(0);
 
-			enumerator = mapper.GetDistributionsOfContinuationEnumerator(2);
-			entries = 0;
-			while (enumerator.MoveNext())
-			{
-				entries++;
-				existingDistributions[enumerator.CurrentDistributionId] = true;
-			}
+			entries = CountEntriesAndAddDistributionsToMap(2, existingDistributions);
 			entries.ShouldBe(1);
 
-			enumerator = mapper.GetDistributionsOfContinuationEnumerator(3);
-			entries = 0;
-			while (enumerator.MoveNext())
-			{
-				entries++;
-				existingDistributions[enumerator.CurrentDistributionId] = true;
-			}
+			entries = CountEntriesAndAddDistributionsToMap(3, existingDistributions);
+			entries.ShouldBe(1);
+
+			entries = CountEntriesAndAddDistributionsToMap(4, existingDistributions);
 			entries.ShouldBe(1);
 			
-			enumerator = mapper.GetDistributionsOfContinuationEnumerator(4);
-			entries = 0;
-			while (enumerator.MoveNext())
-			{
-				entries++;
-				existingDistributions[enumerator.CurrentDistributionId] = true;
-			}
-			entries.ShouldBe(1);
-
-
-			enumerator = mapper.GetDistributionsOfContinuationEnumerator(5);
-			entries = 0;
-			while (enumerator.MoveNext())
-			{
-				entries++;
-				existingDistributions[enumerator.CurrentDistributionId] = true;
-			}
+			entries = CountEntriesAndAddDistributionsToMap(5, existingDistributions);
 			entries.ShouldBe(1);
 
 			existingDistributions.Count.ShouldBe(1);
 			existingDistributions.ShouldContainKey(0);
+		}
+
+		[Fact]
+		public void TwoDistributionWithFiveContinuationsAfterTwoSplits()
+		{
+			_mapper.AddInitialDistributionAndContinuation();
+			_mapper.ProbabilisticSplit(0, 1, 3);
+			_mapper.NonDeterministicSplit(1, 4, 5);
+
+
+			var existingDistributions = new Dictionary<int, bool>();
+			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(1, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(2, existingDistributions);
+			entries.ShouldBe(2);
+
+			entries = CountEntriesAndAddDistributionsToMap(3, existingDistributions);
+			entries.ShouldBe(2);
+
+			entries = CountEntriesAndAddDistributionsToMap(4, existingDistributions);
+			entries.ShouldBe(1);
+
+			entries = CountEntriesAndAddDistributionsToMap(5, existingDistributions);
+			entries.ShouldBe(1);
+
+			existingDistributions.Count.ShouldBe(2);
+			existingDistributions.ShouldContainKey(0);
+			existingDistributions.ShouldContainKey(1);
 		}
 	}
 }

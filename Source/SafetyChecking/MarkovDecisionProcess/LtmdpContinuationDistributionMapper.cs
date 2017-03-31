@@ -23,6 +23,7 @@
 namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using GenericDataStructures;
 	using Utilities;
@@ -50,6 +51,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		private readonly AutoResizeVector<int> _firstDistributionOfContinuationChainElement;
 		private readonly AutoResizeVector<int> _lastDistributionOfContinuationChainElement;
 		private readonly AutoResizeVector<DistributionOfContinuationChainElement> _distributionOfContinuationChain;
+
+		private readonly List<int> _freedChainIndexes;
 		
 		public LtmdpContinuationDistributionMapper()
 		{
@@ -68,6 +71,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				DefaultValue = -1
 			};
 			_distributionOfContinuationChain = new AutoResizeVector<DistributionOfContinuationChainElement>();
+			_freedChainIndexes = new List<int>();
 		}
 		
 		public void Clear()
@@ -78,6 +82,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_firstDistributionOfContinuationChainElement.Clear();
 			_lastDistributionOfContinuationChainElement.Clear();
 			_distributionOfContinuationChain.Clear();
+
+			_freedChainIndexes.Clear();
 		}
 
 		[Conditional("DEBUG")]
@@ -389,6 +395,18 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			{
 				CloneDistributionsContainingCid(cloneSourceCid, newCid);
 			}
+		}
+		
+		public void RemoveCidInDistributions(int cid)
+		{
+			// useful to undo a probabilistic split
+			throw new NotImplementedException();
+		}
+
+		public void RemoveDistributionsWithCid(int cid)
+		{
+			// useful to undo a non deterministic split
+			throw new NotImplementedException();
 		}
 
 
