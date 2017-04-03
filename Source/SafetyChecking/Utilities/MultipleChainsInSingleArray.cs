@@ -29,7 +29,9 @@ using ISSE.SafetyChecking.GenericDataStructures;
 
 namespace ISSE.SafetyChecking.Utilities
 {
-	public class IndexedMultiList<T> where T : struct
+	using System.Diagnostics;
+
+	public class MultipleChainsInSingleArray<T> where T : struct
 	{
 		// This list is deterministic
 
@@ -40,20 +42,20 @@ namespace ISSE.SafetyChecking.Utilities
 			public int PreviousElementIndex;
 		}
 
-		private readonly AutoResizeVector<int> _firstChainElement;
-		private readonly AutoResizeVector<int> _lastChainElement;
+		private readonly AutoResizeVector<int> _firstChainElementOfChainNumber;
+		private readonly AutoResizeVector<int> _lastChainElementOfChainNumber;
 		private readonly AutoResizeVector<ListChainElement> _chain;
 
 
 		private readonly List<int> _freedChainIndexes;
 
-		public IndexedMultiList()
+		public MultipleChainsInSingleArray()
 		{
-			_firstChainElement = new AutoResizeVector<int>
+			_firstChainElementOfChainNumber = new AutoResizeVector<int>
 			{
 				DefaultValue = -1
 			};
-			_lastChainElement = new AutoResizeVector<int>
+			_lastChainElementOfChainNumber = new AutoResizeVector<int>
 			{
 				DefaultValue = -1
 			};
@@ -64,49 +66,81 @@ namespace ISSE.SafetyChecking.Utilities
 
 		public void Clear()
 		{
-			_firstChainElement.Clear();
-			_lastChainElement.Clear();
+			_firstChainElementOfChainNumber.Clear();
+			_lastChainElementOfChainNumber.Clear();
 			_chain.Clear();
 
 			_freedChainIndexes.Clear();
 		}
 
-		private int GetUnusedChainIndex()
+		public int GetUnusedChainIndex()
 		{
-			// Due to chain-congruence, _distributionOfContinuationChain.Count could also be used. 
 			var indexOfNewChainEntries = _chain.Count;
 			return indexOfNewChainEntries;
 		}
-		
 
-		public void StartChain(int indexOfNewChainEntry, int number, T cid)
+		public int GetUnusedChainNumber()
 		{
-			Assert.That(_firstChainElement[number] == -1, "Chain should be empty");
+			return _firstChainElementOfChainNumber.Count;
+		}
 
-			_firstChainElement[number] = indexOfNewChainEntry;
-			_lastChainElement[number] = indexOfNewChainEntry;
+		public T GetElementAtChainIndex(int chainIndex)
+		{
+			return _chain[chainIndex].Element;
+		}
+
+		public void RenameChain(int fromNumber, int toNumber)
+		{
+			var firstChainIndex = _firstChainElementOfChainNumber[fromNumber];
+			_firstChainElementOfChainNumber[fromNumber] = -1;
+			_firstChainElementOfChainNumber[toNumber] = firstChainIndex;
+
+			var lastChainIndex = _lastChainElementOfChainNumber[fromNumber];
+			_lastChainElementOfChainNumber[fromNumber] = -1;
+			_lastChainElementOfChainNumber[toNumber] = lastChainIndex;
+		}
+
+
+		[Conditional("DEBUG")]
+		public void AssertThatChainNumberNonExistent(int number)
+		{
+			Assert.That(_firstChainElementOfChainNumber[number] == -1, "number must not exist");
+		}
+
+		public void RequiresThatChainNumberExistent(int number)
+		{
+			Requires.That(_firstChainElementOfChainNumber[number] != -1, "number must exist");
+		}
+
+
+		public void StartChain(int indexOfNewChainEntry, int number, T newElement)
+		{
+			Assert.That(_firstChainElementOfChainNumber[number] == -1, "Chain should be empty");
+
+			_firstChainElementOfChainNumber[number] = indexOfNewChainEntry;
+			_lastChainElementOfChainNumber[number] = indexOfNewChainEntry;
 
 			_chain[indexOfNewChainEntry] =
 				new ListChainElement
 				{
-					Element = cid,
+					Element = newElement,
 					NextElementIndex = -1,
 					PreviousElementIndex = -1
 				};
 		}
 
-		public void ReplaceChainElement(int indexOfChainEntry, T newCid)
+		public void ReplaceChainElement(int indexOfChainEntry, T newElement)
 		{
 			_chain[indexOfChainEntry] =
 				new ListChainElement
 				{
-					Element = newCid,
+					Element = newElement,
 					NextElementIndex = _chain[indexOfChainEntry].NextElementIndex,
 					PreviousElementIndex = _chain[indexOfChainEntry].PreviousElementIndex
 				};
 		}
 
-		public void InsertChainElement(int indexOfNewChainEntry, int number, int indexOfPreviousChainElement, T newCid)
+		public void InsertChainElement(int indexOfNewChainEntry, int number, int indexOfPreviousChainElement, T newElement)
 		{
 			var previousNextElement = _chain[indexOfPreviousChainElement].NextElementIndex;
 			var previousPreviousElement = _chain[indexOfPreviousChainElement].PreviousElementIndex;
@@ -114,7 +148,7 @@ namespace ISSE.SafetyChecking.Utilities
 			_chain[indexOfNewChainEntry] =
 				new ListChainElement
 				{
-					Element = newCid,
+					Element = newElement,
 					NextElementIndex = previousNextElement,
 					PreviousElementIndex = indexOfPreviousChainElement
 				};
@@ -129,7 +163,7 @@ namespace ISSE.SafetyChecking.Utilities
 
 			if (previousNextElement == -1)
 			{
-				_lastChainElement[number] = indexOfNewChainEntry;
+				_lastChainElementOfChainNumber[number] = indexOfNewChainEntry;
 			}
 			else
 			{
@@ -137,7 +171,7 @@ namespace ISSE.SafetyChecking.Utilities
 					new ListChainElement
 					{
 						Element = _chain[previousNextElement].Element,
-						NextElementIndex = _distributionOfContinuationChain[previousNextElement].NextElementIndex,
+						NextElementIndex = _chain[previousNextElement].NextElementIndex,
 						PreviousElementIndex = indexOfNewChainEntry
 					};
 			}
@@ -145,7 +179,7 @@ namespace ISSE.SafetyChecking.Utilities
 
 		public void AppendChainElement(int indexOfChainElement, int number, T element)
 		{
-			var indexOfPreviousElement = _lastChainElement[number];
+			var indexOfPreviousElement = _lastChainElementOfChainNumber[number];
 			if (indexOfPreviousElement == -1)
 			{
 				StartChain(indexOfChainElement, number, element);
@@ -161,14 +195,15 @@ namespace ISSE.SafetyChecking.Utilities
 		public bool RemoveChainElement(int number, int indexOfChainEntry)
 		{
 			// returns true, if indexOfChainEntry is the only element in the chain.
+			_freedChainIndexes.Add(indexOfChainEntry);
 
 			var chainElement = _chain[indexOfChainEntry];
 
 			if (chainElement.PreviousElementIndex == -1 && chainElement.NextElementIndex == -1)
 			{
 				// this is the only element
-				_firstChainElement[number] = -1;
-				_lastChainElement[number] = -1;
+				_firstChainElementOfChainNumber[number] = -1;
+				_lastChainElementOfChainNumber[number] = -1;
 				return true;
 			}
 
@@ -189,7 +224,7 @@ namespace ISSE.SafetyChecking.Utilities
 			else
 			{
 				//removed the last element
-				_lastChainElement[number] = indexOfPreviousChainElement;
+				_lastChainElementOfChainNumber[number] = indexOfPreviousChainElement;
 			}
 
 			if (indexOfPreviousChainElement != -1)
@@ -198,7 +233,7 @@ namespace ISSE.SafetyChecking.Utilities
 				_chain[indexOfPreviousChainElement] =
 					new ListChainElement
 					{
-						Element = _chain[indexOfNextChainElement].Element,
+						Element = _chain[indexOfPreviousChainElement].Element,
 						NextElementIndex = indexOfNextChainElement,
 						PreviousElementIndex = _chain[indexOfPreviousChainElement].PreviousElementIndex
 					};
@@ -206,9 +241,66 @@ namespace ISSE.SafetyChecking.Utilities
 			else
 			{
 				//removed the first element
-				_firstChainElement[number] = indexOfNextChainElement;
+				_firstChainElementOfChainNumber[number] = indexOfNextChainElement;
 			}
 			return false;
+		}
+
+		public void RemoveChainNumber(int number)
+		{
+			var codEnumerator = GetEnumerator(number);
+			
+			while (codEnumerator.MoveNext())
+			{
+				_freedChainIndexes.Add(codEnumerator.CurrentChainIndex);
+			}
+			_firstChainElementOfChainNumber[number] = -1;
+			_lastChainElementOfChainNumber[number] = -1;
+		}
+
+		public IndexedMulitListEnumerator GetEnumerator(int number)
+		{
+			return new IndexedMulitListEnumerator(this, number);
+		}
+
+		public struct IndexedMulitListEnumerator
+		{
+			private bool _isFirst;
+
+			public T CurrentElement { get; private set; }
+
+			public int CurrentChainIndex { get; private set; }
+
+			public int Number { get; }
+
+			private readonly AutoResizeVector<ListChainElement> _distributionOfContinuationChain;
+
+			public IndexedMulitListEnumerator(MultipleChainsInSingleArray<T> list, int continuationId)
+			{
+				_distributionOfContinuationChain = list._chain;
+				Number = continuationId;
+				CurrentChainIndex = list._firstChainElementOfChainNumber[continuationId];
+				CurrentElement = default(T);
+				_isFirst = true;
+			}
+
+			public bool MoveNext()
+			{
+				if (_isFirst)
+				{
+					_isFirst = false;
+				}
+				else
+				{
+					CurrentChainIndex = _distributionOfContinuationChain[CurrentChainIndex].NextElementIndex;
+				}
+				if (CurrentChainIndex == -1)
+				{
+					return false;
+				}
+				CurrentElement = _distributionOfContinuationChain[CurrentChainIndex].Element;
+				return true;
+			}
 		}
 	}
 }

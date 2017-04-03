@@ -75,6 +75,7 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="DataStructures\BidirectionalGraphTests.cs" />
+    <Compile Include="DataStructures\MultipleChainsInSingleArrayTests.cs" />
     <Compile Include="DataStructures\DoubleVectorTests.cs" />
     <Compile Include="DataStructures\MarkovChainExamples.cs" />
     <Compile Include="DataStructures\MarkovChainTests.cs" />
