@@ -176,7 +176,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 					new ContinuationOfDistributionChainElement
 					{
 						ContinuationId = _continuationOfDistributionChain[previousNextElement].ContinuationId,
-						NextElementIndex = _distributionOfContinuationChain[previousNextElement].NextElementIndex,
+						NextElementIndex = _continuationOfDistributionChain[previousNextElement].NextElementIndex,
 						PreviousElementIndex = indexOfNewChainEntry
 					};
 			}

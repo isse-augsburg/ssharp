@@ -200,6 +200,7 @@
     <Compile Include="Utilities\DisposableExtensions.cs" />
     <Compile Include="Utilities\DisposableObject.cs" />
     <Compile Include="Utilities\ExternalProcess.cs" />
+    <Compile Include="Utilities\IndexedMultiList.cs" />
     <Compile Include="Utilities\InterlockedExtensions.cs" />
     <Compile Include="Utilities\MemoryBuffer.cs" />
     <Compile Include="Utilities\PinnedPointer.cs" />
