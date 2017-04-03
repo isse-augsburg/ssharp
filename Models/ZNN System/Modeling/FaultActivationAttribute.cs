@@ -39,7 +39,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// </summary>
 		/// <param name="type">Fault type</param>
 		/// <param name="propertyName">Property name which defines the activation criteria of the fault</param>
-		public FaultActivationAttribute(Type type, string propertyName = "CanActivate")
+		public FaultActivationAttribute(Type type, string propertyName)
 		{
 			ActivationProperty = type.GetProperty(propertyName);
 		}

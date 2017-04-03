@@ -37,8 +37,10 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 		/// <summary>
 		/// In this fault, the server selection for a query fails
 		/// </summary>
-		[FaultActivation(typeof(ServerSelectionFailsEffect), "CanActiviate")]
+		[FaultActivation(typeof(ProxyT), "ServerSelectionFailsActiviate")]
 		public readonly Fault ServerSelectionFails = new TransientFault();
+
+		public bool ServerSelectionFailsActiviate => ActiveServerCount > 1;
 
 		/// <summary>
 		/// Latest Response Times, use <see cref="UpdateAvgResponseTime"/> to add new times!
@@ -264,7 +266,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
 			//	return ActiveServerCount > 1;
 			//}
 			//[FaultActivation]
-			public bool CanActiviate => ActiveServerCount > 1;
+			//public bool CanActiviate => ActiveServerCount > 1;
 
 			/// <summary>
 			/// Selects the Server by round robin

@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using NUnit.Framework;
 using SafetySharp.CaseStudies.ZNNSystem.Modeling;
 
@@ -33,7 +34,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		[Test]
 		public void TestCanFaultActivate()
 		{
-			var failure = new ProxyT.ServerSelectionFailsEffect();
+			var failure = new ProxyT();
 			ServerT.GetNewServer(failure);
 			ServerT.GetNewServer(failure);
 			Assert.AreEqual(0, failure.ActiveServerCount);
@@ -41,16 +42,20 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			//var attribute =
 			//(FaultActivationAttribute)Attribute.GetCustomAttribute(typeof(ProxyT.ServerSelectionFailsEffect), typeof(FaultActivationAttribute));
 			//Assert.IsFalse((bool) attribute.ActivationProperty.GetValue(failure));
-			var properties = failure.GetType().GetProperties().Where(prop => prop.IsDefined(typeof(FaultActivationAttribute), false));
-			var canActivate = properties.Count(v => (bool)v.GetValue(failure)) > 0;
-			Assert.IsFalse(canActivate);
+			var properties = failure.GetType().GetFields().Where(p => p.IsDefined(typeof(FaultActivationAttribute), false));
+			var prop = properties.First(p => p.Name == "ServerSelectionFails");
+			var attr = (FaultActivationAttribute)prop.GetCustomAttribute(typeof(FaultActivationAttribute), false);
+			var canAct = (bool)attr.ActivationProperty.GetValue(failure);
+			//var canActivate = properties.Count(v => (bool) v.GetValue(failure)) > 0;
+			Assert.IsFalse(canAct);
 
 			failure.IncrementServerPool();
 			failure.IncrementServerPool();
 			Assert.AreEqual(2, failure.ActiveServerCount);
 			//Assert.IsTrue((bool) attribute.ActivationProperty.GetValue(failure));
-			canActivate = properties.Count(v => (bool) v.GetValue(failure)) > 0;
-			Assert.IsTrue(canActivate);
+			//canActivate = properties.Count(v => (bool) v.GetValue(failure)) > 0;
+			canAct = (bool)attr.ActivationProperty.GetValue(failure);
+			Assert.IsTrue(canAct);
 		}
 	}
 }

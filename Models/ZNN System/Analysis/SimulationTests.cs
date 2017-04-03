@@ -61,19 +61,18 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		public void TestModelWithFaults()
 		{
 			var model = new Model();
-			var members = model.Proxy.GetType().GetFields().Where(prop => prop.IsDefined(typeof(FaultActivationAttribute), false));
-			foreach(var m in members)
+
+			// Get faults of proxy
+			var proxyFaults = model.Proxy.GetType().GetFields().Where(prop => prop.IsDefined(typeof(FaultActivationAttribute), false));
+			foreach(var pFault in proxyFaults)
 			{
-				var attr = (FaultActivationAttribute) m.GetCustomAttribute(typeof(FaultActivationAttribute), false);
-				var mVal = (Fault) m.GetValue(model.Proxy);
-				//var act = (bool)attr.ActivationProperty.GetValue(mVal.);
-				
+				var attr = (FaultActivationAttribute) pFault.GetCustomAttribute(typeof(FaultActivationAttribute), false);
+				var canAct = (bool) attr.ActivationProperty.GetValue(model.Proxy);
+				var fault = (Fault)pFault.GetValue(model.Proxy);
+				fault.Activation = canAct ? Activation.Forced : Activation.Suppressed;
 			}
 
-			foreach(var fault in model.Faults)
-			{
-				var b = fault == model.Proxy.ServerSelectionFails;
-			}
+
 
 			var simulator = new Simulator(model);
 			model = (Model) simulator.Model;
