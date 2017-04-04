@@ -92,10 +92,10 @@
     <Compile Include="ProbabilisticModelChecker\ExternalMdpModelCheckerPrismTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Invariants\CounterExamples\formulas.cs" />
-    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\undo nested choices2.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\make choice deterministic2.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\nested side effect free methods with faults.cs" />
-    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\undo nested choices emerging from faults.cs" />
-    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\undo nested choices.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\undo fault activation of nested faults.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\make choice deterministic.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\multiple formulas in one run.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\multiple initial states.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\same target state on different ways.cs" />
@@ -103,6 +103,7 @@
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\simple example 1b.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\custom probability of transient fault.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\formula which is always false.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\make choice deterministic.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\multiple formulas in one run.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\terminate early.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\multiple initial states.cs" />

@@ -34,9 +34,9 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.NotViolated
 	using Xunit;
 	using Xunit.Abstractions;
 	
-	public class UndoNestedChoices : AnalysisTest
+	public class MakeChoiceDeterministic : AnalysisTest
 	{
-		public UndoNestedChoices(ITestOutputHelper output = null) : base(output)
+		public MakeChoiceDeterministic(ITestOutputHelper output = null) : base(output)
 		{
 		}
 

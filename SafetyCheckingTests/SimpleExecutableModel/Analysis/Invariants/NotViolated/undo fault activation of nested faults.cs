@@ -34,11 +34,11 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.NotViolated
 	using Xunit;
 	using Xunit.Abstractions;
 	
-	public class UndoNestedChoices2 : AnalysisTest
+	public class UndoFaultActivationOfNestedFaults : AnalysisTest
 	{
 		// This test case resembles the optimization done by S#'s FaultEffectNormalizer
 
-		public UndoNestedChoices2(ITestOutputHelper output = null) : base(output)
+		public UndoFaultActivationOfNestedFaults(ITestOutputHelper output = null) : base(output)
 		{
 		}
 
@@ -60,38 +60,68 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.NotViolated
 
 		public class Model : SimpleModelBase
 		{
-			public override Fault[] Faults { get; } = new Fault[0];
+			public override Fault[] Faults { get; } = new Fault[]
+			{
+				new TransientFault { Identifier = 0, ProbabilityOfOccurrence = new Probability(0.5) },
+				new TransientFault { Identifier = 1, ProbabilityOfOccurrence = new Probability(0.5) }
+			};
+
 			public override bool[] LocalBools { get; } = new bool[0];
 			public override int[] LocalInts { get; } = new int[0];
-			
+
+
+			private Fault F1 => Faults[0];
+			private Fault F2 => Faults[1];
 
 			public override void SetInitialState()
 			{
 				State = 0;
 			}
-			
-			public bool Method()
+
+			public bool BaseMethod()
 			{
-				var outer = Choice.Choose(false, true);
-				var outerChoiceIndex = Choice.Resolver.LastChoiceIndex;
+				return Choice.Choose(true, false);
+			}
 
-				if (outer)
-					return true;
-
-				var inner = Choice.Choose(true, false);
-				if (inner)
+			public bool InnerPossibleFaultMethod()
+			{
+				F1.TryActivate();
+				//!F1.IsActivated is checked first in traversal
+				if (!F1.IsActivated)
 				{
-					// No need to analyze the case outer==true, because the same result will be returned as now.
-					Choice.Resolver.MakeChoiceAtIndexDeterministic(outerChoiceIndex);
+					var __tmp__ = BaseMethod();
+					if (__tmp__ == false)
+					{
+						//If F1.IsActivated has no effect, do not try it.
+						F1.UndoActivation();
+					}
+					return __tmp__;
 				}
-				return inner;
+				return false;
+			}
+
+			public bool OuterPossibleFaultMethod()
+			{
+				F2.TryActivate();
+				//!F2.IsActivated is checked first in traversal 
+				if (!F2.IsActivated)
+				{
+					var __tmp__ = InnerPossibleFaultMethod();
+					if (__tmp__ == true)
+					{
+						//If F2.IsActivated has no effect, do not try it.
+						F2.UndoActivation();
+					}
+					return __tmp__;
+				}
+				return true;
 			}
 
 			public override void Update()
 			{
 				if (State != 0)
 					return;
-				if (Method())
+				if (OuterPossibleFaultMethod())
 					State = 100;
 				else
 					State = 200;
