@@ -28,7 +28,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 	internal struct LtmdpChosenValue
 	{
-		public int Value;
+		public int Index;
+		public int ContinuationId;
 		public Probability Probability;
 	}
 

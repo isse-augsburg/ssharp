@@ -112,12 +112,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				var chosenValue = _chosenValues.Remove();
 
 				// If we have at least one other value to choose, let's do that next
-				if (_valueCount.Peek() > chosenValue.Value + 1)
+				if (_valueCount.Peek() > chosenValue.Index + 1)
 				{
 					var newChosenValue =
 						new LtmdpChosenValue
 						{
-							Value = chosenValue.Value + 1,
+							Index = chosenValue.Index + 1,
 							Probability = chosenValue.Probability //placeholder value
 						};
 					_chosenValues.Push(newChosenValue);
@@ -144,14 +144,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			// If we have a preselected value that we should choose for the current path, return it
 			var chosenValuesMaxIndex = _chosenValues.Count - 1;
 			if (_choiceIndex <= chosenValuesMaxIndex)
-				return _chosenValues[_choiceIndex].Value;
+				return _chosenValues[_choiceIndex].Index;
 
 			// We haven't encountered this choice before; store the value count and return the first value
 			_valueCount.Push(valueCount);
 			var newChosenValue =
 				new LtmdpChosenValue
 				{
-					Value = 0,
+					Index = 0,
 					Probability = Probability.One / valueCount //placeholder value
 				};
 			_chosenValues.Push(newChosenValue);
@@ -199,7 +199,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				_chosenValues[_choiceIndex] =
 					new LtmdpChosenValue
 					{
-						Value = _chosenValues[_choiceIndex].Value,
+						Index = _chosenValues[_choiceIndex].Index,
 						Probability = probability
 					};
 			}
@@ -212,14 +212,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal override void MakeChoiceAtIndexDeterministic(int choiceIndex)
 		{
-			Assert.That(_chosenValues[choiceIndex].Value == 0, "Only first choice can be made deterministic.");
+			Assert.That(_chosenValues[choiceIndex].Index == 0, "Only first choice can be made deterministic.");
 			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
 			// turning the choice into a deterministic selection of the value at index 0
 			_valueCount[choiceIndex] = 0;
 			_chosenValues[choiceIndex] =
 				new LtmdpChosenValue
 				{
-					Value = _chosenValues[_choiceIndex].Value,
+					Index = _chosenValues[_choiceIndex].Index,
 					Probability = Probability.One
 				};
 		}
@@ -238,7 +238,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 					new LtmdpChosenValue
 					{
 						Probability = Probability.One,
-						Value = choice
+						Index = choice
 					};
 				_chosenValues.Push(newChosenValue);
 				_valueCount.Push(0);
@@ -272,7 +272,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		internal override IEnumerable<int> GetChoices()
 		{
 			for (var i = 0; i < _chosenValues.Count; ++i)
-				yield return _chosenValues[i].Value;
+				yield return _chosenValues[i].Index;
 		}
 
 		/// <summary>

@@ -110,6 +110,7 @@ namespace SafetySharp.Analysis
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
 			var markovChainGenerator = new DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
 			var markovChain = markovChainGenerator.GenerateMarkovChain(stateFormula);
 			using (var modelChecker = new BuiltinDtmcModelChecker(markovChain, System.Console.Out))

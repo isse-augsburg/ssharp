@@ -210,6 +210,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal override void MakeChoiceAtIndexDeterministic(int choiceIndex)
 		{
+			return;
 			Assert.That(_chosenValues[choiceIndex].Value==0, "Only first choice can be made deterministic.");
 			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
 			// turning the choice into a deterministic selection of the value at index 0

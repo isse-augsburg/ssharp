@@ -119,6 +119,8 @@
     <Compile Include="SimpleExecutableModel\Analysis\AnalysisTest.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\same target state on different ways.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\transient fault leads to invariant violation only in specific step.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\undo fault activation of fault.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\undo fault activation of nested faults.cs" />
     <Compile Include="SimpleExecutableModel\SimpleModelBase.cs" />
     <Compile Include="SimpleExecutableModel\SimpleCounterExampleSerialization.cs" />
     <Compile Include="SimpleExecutableModel\SimpleAtomarProposition.cs" />
