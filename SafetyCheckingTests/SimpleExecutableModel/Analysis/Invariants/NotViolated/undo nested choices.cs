@@ -96,7 +96,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.NotViolated
 
 				G = Choice.Choose(7, 8);
 
-				Choice.Resolver.Undo(index);
+				Choice.Resolver.MakeChoiceAtIndexDeterministic(index);
 			}
 
 			public static Formula FIs2 = new SimpleLocalVarInRangeFormula(0,2);

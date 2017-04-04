@@ -20,16 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System.Runtime.CompilerServices;
 	using Modeling;
 	using Utilities;
 
+	internal struct LtmdpChosenValue
+	{
+		public int Value;
+		public Probability Probability;
+	}
+
 	/// <summary>
 	///   Represents a stack that uses a <see cref="MemoryBuffer" /> for its underlying storage.
 	/// </summary>
-	internal sealed unsafe class LtmcProbabilityStack : DisposableObject
+	internal sealed unsafe class LtmdpChosenValueStack : DisposableObject
 	{
 		/// <summary>
 		///   The underlying memory of the stack.
@@ -39,16 +45,16 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <summary>
 		///   The pointer to the stack's memory.
 		/// </summary>
-		private Probability* _buffer;
+		private LtmdpChosenValue* _buffer;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="initialCapacity">The initial capacity of the stack.</param>
-		public LtmcProbabilityStack(int initialCapacity)
+		public LtmdpChosenValueStack(int initialCapacity)
 		{
-			_memoryBuffer.Resize(initialCapacity * sizeof(Probability), zeroMemory: true);
-			_buffer = (Probability*)_memoryBuffer.Pointer;
+			_memoryBuffer.Resize(initialCapacity * sizeof(LtmdpChosenValue), zeroMemory: true);
+			_buffer = (LtmdpChosenValue*)_memoryBuffer.Pointer;
 		}
 
 		/// <summary>
@@ -59,7 +65,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <summary>
 		///   Gets the element at <paramref name="index" /> from the stack.
 		/// </summary>
-		public Probability this[int index]
+		public LtmdpChosenValue this[int index]
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get { return _buffer[index]; }
@@ -71,7 +77,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		///   Returns the element at the top of the stack without removing it.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Probability Peek()
+		public LtmdpChosenValue Peek()
 		{
 			return _buffer[Count - 1];
 		}
@@ -80,7 +86,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		///   Removes the topmost element from the stack.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Probability Remove()
+		public LtmdpChosenValue Remove()
 		{
 			return _buffer[--Count];
 		}
@@ -90,12 +96,12 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		/// <param name="value">The value that should be pushed.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void Push(Probability value)
+		public void Push(LtmdpChosenValue value)
 		{
-			if (_memoryBuffer.SizeInBytes <= Count * sizeof(Probability))
+			if (_memoryBuffer.SizeInBytes <= Count * sizeof(LtmdpChosenValue))
 			{
 				_memoryBuffer.Resize(_memoryBuffer.SizeInBytes * 2, zeroMemory: true);
-				_buffer = (Probability*)_memoryBuffer.Pointer;
+				_buffer = (LtmdpChosenValue*)_memoryBuffer.Pointer;
 			}
 
 			_buffer[Count++] = value;

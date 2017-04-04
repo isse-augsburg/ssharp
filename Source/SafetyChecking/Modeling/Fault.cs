@@ -177,7 +177,7 @@ namespace ISSE.SafetyChecking.Modeling
 
 			_canUndoActivation = false;
 			_activationIsUnknown = true;
-			Choice.Resolver.Undo(_choiceIndex);
+			Choice.Resolver.MakeChoiceAtIndexDeterministic(_choiceIndex);
 		}
 
 		/// <summary>

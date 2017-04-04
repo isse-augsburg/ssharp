@@ -163,12 +163,13 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		}
 
 		/// <summary>
-		///   Undoes the choice identified by the <paramref name="choiceIndex" />.
+		///   Makes taken choice identified by the <paramref name="choiceIndex" /> deterministic.
 		/// </summary>
 		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override void Undo(int choiceIndex)
+		internal override void MakeChoiceAtIndexDeterministic(int choiceIndex)
 		{
+			Assert.That(_chosenValues[choiceIndex] == 0, "Only first choice can be made deterministic.");
 			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
 			// turning the choice into a deterministic selection of the value at index 0
 			_valueCount[choiceIndex] = 0;

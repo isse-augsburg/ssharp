@@ -49,7 +49,7 @@ namespace Tests.Analysis.Invariants.NotViolated
 
 				G = _choice.Choose(7, 8);
 
-				_choice.Resolver.Undo(index);
+				_choice.Resolver.MakeChoiceAtIndexDeterministic(index);
 			}
 		}
 	}

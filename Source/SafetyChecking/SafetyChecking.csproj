@@ -104,7 +104,7 @@
     <Compile Include="DiscreteTimeMarkovChain\LtmcChoiceResolver.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcExecutedModel.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcGenerator.cs" />
-    <Compile Include="DiscreteTimeMarkovChain\LtmcProbabilityStack.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcChosenValueStack.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcToDtmc.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcTransition.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcTransitionSetBuilder.cs" />
@@ -118,7 +118,7 @@
     <Compile Include="MarkovDecisionProcess\LtmdpChoiceResolver.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpExecutedModel.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpGenerator.cs" />
-    <Compile Include="MarkovDecisionProcess\LtmdpProbabilityStack.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpChosenValueStack.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpToMdp.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpTransition.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpCachedLabeledStates.cs" />

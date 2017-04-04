@@ -39,15 +39,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		///   The number of nondeterministic choices that can be stored initially.
 		/// </summary>
 		private const int InitialCapacity = 64;
-
+		
 		/// <summary>
 		///   The stack that indicates the chosen values for the current path.
 		/// </summary>
-		private readonly ChoiceStack _chosenValues = new ChoiceStack(InitialCapacity);
-
-		/// <summary>
-		/// </summary>
-		private readonly LtmcProbabilityStack _probabilitiesOfChosenValues = new LtmcProbabilityStack(InitialCapacity);
+		private readonly LtmcChosenValueStack _chosenValues = new LtmcChosenValueStack(InitialCapacity);
 
 		/// <summary>
 		///   The stack that stores the number of possible values of all encountered choices along the current path.
@@ -115,15 +111,20 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				var chosenValue = _chosenValues.Remove();
 
 				// If we have at least one other value to choose, let's do that next
-				if (_valueCount.Peek() > chosenValue + 1)
+				if (_valueCount.Peek() > chosenValue.Value + 1)
 				{
-					_chosenValues.Push(chosenValue + 1);
+					var newChosenValue =
+						new LtmcChosenValue
+						{
+							Value = chosenValue.Value + 1,
+							Probability = chosenValue.Probability //placeholder value
+						};
+					_chosenValues.Push(newChosenValue);
 					return true;
 				}
 
 				// Otherwise, we've chosen all values of the last choice, so we're done with it
 				_valueCount.Remove();
-				_probabilitiesOfChosenValues.Remove();
 			}
 
 			// If we reach this point, we know that we've chosen all values of all choices, so there are no further paths
@@ -142,12 +143,17 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			// If we have a preselected value that we should choose for the current path, return it
 			var chosenValuesMaxIndex = _chosenValues.Count - 1;
 			if (_choiceIndex <= chosenValuesMaxIndex)
-				return _chosenValues[_choiceIndex];
+				return _chosenValues[_choiceIndex].Value;
 
 			// We haven't encountered this choice before; store the value count and return the first value
 			_valueCount.Push(valueCount);
-			_chosenValues.Push(0);
-			_probabilitiesOfChosenValues.Push(Probability.One / valueCount); //placeholder value
+			var newChosenValue =
+				new LtmcChosenValue
+				{
+					Value = 0,
+					Probability = Probability.One / valueCount //placeholder value
+				};
+			_chosenValues.Push(newChosenValue);
 
 			return 0;
 		}
@@ -179,29 +185,41 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override void SetProbabilityOfLastChoice(Probability probability)
 		{
-			var probabilitiesOfChosenValuesMaxIndex = _probabilitiesOfChosenValues.Count - 1;
+			var probabilitiesOfChosenValuesMaxIndex = _chosenValues.Count - 1;
 			// If this part of the path has previously been visited we do not change the value
 			// because this value has already been set by a previous call of SetProbabilityOfLastChoice.
-			// Further, this value might have been overridden by an Undo. Only if we explore
+			// Further, this value might have been set by MakeChoiceAtIndexDeterministic. Only if we explore
 			// a new part of the path the probability should be written.
 			// A new part of the path is explored, iff the previous HandleChoice pushed a new placeholder
 			// value onto the three stacks).
 			if (_choiceIndex == probabilitiesOfChosenValuesMaxIndex)
 			{
-				_probabilitiesOfChosenValues[_choiceIndex] = probability;
+				_chosenValues[_choiceIndex] =
+					new LtmcChosenValue
+					{
+						Value = _chosenValues[_choiceIndex].Value,
+						Probability = probability
+					};
 			}
 		}
 
 		/// <summary>
-		///   Undoes the choice identified by the <paramref name="choiceIndex" />.
+		///   Makes taken choice identified by the <paramref name="choiceIndex" /> deterministic.
 		/// </summary>
 		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override void Undo(int choiceIndex)
+		internal override void MakeChoiceAtIndexDeterministic(int choiceIndex)
 		{
+			Assert.That(_chosenValues[choiceIndex].Value==0, "Only first choice can be made deterministic.");
 			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
 			// turning the choice into a deterministic selection of the value at index 0
 			_valueCount[choiceIndex] = 0;
+			_chosenValues[choiceIndex] =
+				new LtmcChosenValue
+				{
+					Value = _chosenValues[choiceIndex].Value,
+					Probability = Probability.One
+				};
 		}
 
 		/// <summary>
@@ -214,7 +232,13 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			foreach (var choice in choices)
 			{
-				_chosenValues.Push(choice);
+				var newChosenValue =
+					new LtmcChosenValue
+					{
+						Probability = Probability.One,
+						Value = choice
+					};
+				_chosenValues.Push(newChosenValue);
 				_valueCount.Push(0);
 			}
 		}
@@ -225,8 +249,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		internal override Probability CalculateProbabilityOfPath()
 		{
 			var probability = Probability.One;
-			for (var i = 0; i < _probabilitiesOfChosenValues.Count; ++i)
-				probability *= _probabilitiesOfChosenValues[i];
+			for (var i = 0; i < _chosenValues.Count; ++i)
+				probability *= _chosenValues[i].Probability;
 			return probability;
 		}
 
@@ -236,7 +260,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		internal override void Clear()
 		{
 			_chosenValues.Clear();
-			_probabilitiesOfChosenValues.Clear();
 			_valueCount.Clear();
 			_choiceIndex = -1;
 		}
@@ -247,7 +270,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		internal override IEnumerable<int> GetChoices()
 		{
 			for (var i = 0; i < _chosenValues.Count; ++i)
-				yield return _chosenValues[i];
+				yield return _chosenValues[i].Value;
 		}
 
 		/// <summary>
@@ -260,7 +283,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				return;
 
 			_chosenValues.SafeDispose();
-			_probabilitiesOfChosenValues.SafeDispose();
 			_valueCount.SafeDispose();
 		}
 	}

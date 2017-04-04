@@ -28,6 +28,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using ExecutableModel;
 	using Modeling;
 	using Utilities;
+	using System;
 
 
 	/// <summary>
@@ -43,11 +44,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <summary>
 		///   The stack that indicates the chosen values for the current path.
 		/// </summary>
-		private readonly ChoiceStack _chosenValues = new ChoiceStack(InitialCapacity);
-
-		/// <summary>
-		/// </summary>
-		private readonly LtmdpProbabilityStack _probabilitiesOfChosenValues = new LtmdpProbabilityStack(InitialCapacity);
+		private readonly LtmdpChosenValueStack _chosenValues = new LtmdpChosenValueStack(InitialCapacity);
 
 		/// <summary>
 		///   The stack that stores the number of possible values of all encountered choices along the current path.
@@ -115,15 +112,20 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				var chosenValue = _chosenValues.Remove();
 
 				// If we have at least one other value to choose, let's do that next
-				if (_valueCount.Peek() > chosenValue + 1)
+				if (_valueCount.Peek() > chosenValue.Value + 1)
 				{
-					_chosenValues.Push(chosenValue + 1);
+					var newChosenValue =
+						new LtmdpChosenValue
+						{
+							Value = chosenValue.Value + 1,
+							Probability = chosenValue.Probability //placeholder value
+						};
+					_chosenValues.Push(newChosenValue);
 					return true;
 				}
 
 				// Otherwise, we've chosen all values of the last choice, so we're done with it
 				_valueCount.Remove();
-				_probabilitiesOfChosenValues.Remove();
 			}
 
 			// If we reach this point, we know that we've chosen all values of all choices, so there are no further paths
@@ -142,12 +144,17 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			// If we have a preselected value that we should choose for the current path, return it
 			var chosenValuesMaxIndex = _chosenValues.Count - 1;
 			if (_choiceIndex <= chosenValuesMaxIndex)
-				return _chosenValues[_choiceIndex];
+				return _chosenValues[_choiceIndex].Value;
 
 			// We haven't encountered this choice before; store the value count and return the first value
 			_valueCount.Push(valueCount);
-			_chosenValues.Push(0);
-			_probabilitiesOfChosenValues.Push(Probability.One / valueCount); //placeholder value
+			var newChosenValue =
+				new LtmdpChosenValue
+				{
+					Value = 0,
+					Probability = Probability.One / valueCount //placeholder value
+				};
+			_chosenValues.Push(newChosenValue);
 
 			return 0;
 		}
@@ -163,6 +170,16 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			return HandleChoice(valueCount);
 		}
 
+		/// <summary>
+		///   Gets the continuation id of the current path.
+		/// </summary>
+		internal override int GetContinuationId()
+		{
+			return 0;
+			//TODO: Replace lastChoiceIndex by continuation id
+			throw new NotImplementedException();
+		}
+
 
 		/// <summary>
 		/// </summary>
@@ -170,27 +187,41 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override void SetProbabilityOfLastChoice(Probability probability)
 		{
-			var probabilitiesOfChosenValuesMaxIndex = _probabilitiesOfChosenValues.Count - 1;
+			var probabilitiesOfChosenValuesMaxIndex = _chosenValues.Count - 1;
 			// If this part of the path has previously been visited we do not change the value
 			// because this value has already been set by a previous call of SetProbabilityOfLastChoice.
-			// Further, this value might have been overridden by an Undo. Only if we explore
+			// Further, this value might have been set by MakeChoiceAtIndexDeterministic. Only if we explore
 			// a new part of the path the probability should be written.
 			// A new part of the path is explored, iff the previous HandleChoice pushed a new placeholder
 			// value onto the three stacks).
 			if (_choiceIndex == probabilitiesOfChosenValuesMaxIndex)
 			{
-				_probabilitiesOfChosenValues[_choiceIndex] = probability;
+				_chosenValues[_choiceIndex] =
+					new LtmdpChosenValue
+					{
+						Value = _chosenValues[_choiceIndex].Value,
+						Probability = probability
+					};
 			}
 		}
 
 		/// <summary>
-		///   Undoes the choice identified by the <paramref name="choiceIndex" />.
+		///   Makes taken choice identified by the <paramref name="choiceIndex" /> deterministic.
 		/// </summary>
 		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override void Undo(int choiceIndex)
+		internal override void MakeChoiceAtIndexDeterministic(int choiceIndex)
 		{
-			// Not yet implemented, so ignore this feature for now
+			Assert.That(_chosenValues[choiceIndex].Value == 0, "Only first choice can be made deterministic.");
+			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
+			// turning the choice into a deterministic selection of the value at index 0
+			_valueCount[choiceIndex] = 0;
+			_chosenValues[choiceIndex] =
+				new LtmdpChosenValue
+				{
+					Value = _chosenValues[_choiceIndex].Value,
+					Probability = Probability.One
+				};
 		}
 
 		/// <summary>
@@ -203,29 +234,26 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			foreach (var choice in choices)
 			{
-				_chosenValues.Push(choice);
+				var newChosenValue =
+					new LtmdpChosenValue
+					{
+						Probability = Probability.One,
+						Value = choice
+					};
+				_chosenValues.Push(newChosenValue);
 				_valueCount.Push(0);
 			}
 		}
-		
+
 		/// <summary>
 		///	  The probability of the current path
 		/// </summary>
 		internal override Probability CalculateProbabilityOfPath()
 		{
 			var probability = Probability.One;
-			for (var i = 0; i < _probabilitiesOfChosenValues.Count; ++i)
-				probability *= _probabilitiesOfChosenValues[i];
+			for (var i = 0; i < _chosenValues.Count; ++i)
+				probability *= _chosenValues[i].Probability;
 			return probability;
-		}
-
-		/// <summary>
-		///   Gets the continuation id of the current path.
-		/// </summary>
-		internal override int GetContinuationId()
-		{
-			//TODO: Replace lastChoiceIndex by continuation id
-			return 0;
 		}
 
 		/// <summary>
@@ -234,7 +262,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		internal override void Clear()
 		{
 			_chosenValues.Clear();
-			_probabilitiesOfChosenValues.Clear();
 			_valueCount.Clear();
 			_choiceIndex = -1;
 		}
@@ -245,7 +272,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		internal override IEnumerable<int> GetChoices()
 		{
 			for (var i = 0; i < _chosenValues.Count; ++i)
-				yield return _chosenValues[i];
+				yield return _chosenValues[i].Value;
 		}
 
 		/// <summary>
@@ -258,7 +285,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				return;
 
 			_chosenValues.SafeDispose();
-			_probabilitiesOfChosenValues.SafeDispose();
 			_valueCount.SafeDispose();
 		}
 	}

@@ -40,7 +40,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			public int DistributionId;
 		}
 
-		// Note, _distributionOfContinuationChain[i] and _continuationOfDistributionChain[i] are always associated.
+		// Note, _distributionOfContinuationChain.GetElementAtChainIndex(i) and
+		// _continuationOfDistributionChain.GetElementAtChainIndex(i) are always associated.
 		// We call this property chain-congruence in the remainder of this file.
 
 		private readonly MultipleChainsInSingleArray<ContinuationElement> _continuationOfDistributionChain;
@@ -76,30 +77,28 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		private void ChangeCid(int sourceCid, int newCid)
 		{
-			// Change entry in _firstDistributionOfContinuationChainElement.
+			// Change entry in _distributionOfContinuationChain.
+			// Entries inside _distributionOfContinuationChain can be preserved. Nothing needs to be changed there.
 			_distributionOfContinuationChain.RenameChain(sourceCid, newCid);
-
-			// Entries in _distributionOfContinuationChain can be preserved. Nothing needs to be changed there.
-
+			
 			// Change entry in _continuationOfDistributionChain from sourceCid to newCid.
 			// We do not need to iterate through the whole data structure because the necessary entries
 			// are pointed at by the entries in _continuationOfDistributionChain.
-			
+
 			var docEnumerator = _distributionOfContinuationChain.GetEnumerator(newCid);
 
 			while (docEnumerator.MoveNext())
 			{
+				// Note, chain-congruence!
 				Assert.That(_continuationOfDistributionChain.GetElementAtChainIndex(docEnumerator.CurrentChainIndex).ContinuationId == sourceCid, "entry in _continuationOfDistributionChain is wrong");
 
-				// Note, chain-congruence!
 				_continuationOfDistributionChain.ReplaceChainElement(docEnumerator.CurrentChainIndex, new ContinuationElement {ContinuationId = newCid });
 			}
 		}
 
 		private void CloneCidWithinDistributions(int sourceCid, int newCid)
 		{
-			// Get entry in _firstDistributionOfContinuationChainElement.
-			//var currentOldChainIndex = _firstDistributionOfContinuationChainElement[sourceCid];
+			// Get entry in _distributionOfContinuationChain.
 
 			var oldChainEnumerator = _distributionOfContinuationChain.GetEnumerator(sourceCid);
 
@@ -111,6 +110,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			
 			while (oldChainEnumerator.MoveNext())
 			{
+				// Note, chain congruence
 				Assert.That(_continuationOfDistributionChain.GetElementAtChainIndex(oldChainEnumerator.CurrentChainIndex).ContinuationId == sourceCid, "entry in _continuationOfDistributionChain is wrong");
 
 				var indexOfNewChainElements = GetUnusedChainIndex();
@@ -171,13 +171,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			// In the cloned distributions replaceCid is replaced by replacedByCid.
 
 			// Get entry in _firstContinuationOfDistributionChainElement.
-			//var currentOldChainIndex = _firstContinuationOfDistributionChainElement[sourceDid];
 			var codEnumerator = _continuationOfDistributionChain.GetEnumerator(sourceDid);
-
-
+			
 			// Now every entry in the _continuationOfDistributionChain needs to be traversed and cloned.
 			// During the traversal, a _distributionOfContinuationChain element needs to be added for every new
-			// entry. We can reuse the pointer IndexInContinuationOfDistributionChain to find the insertion point.
+			// entry.
 
 			var currentNewCofDChainIndex = -1;
 			var newDistributionId = GetUnusedDistributionId();
@@ -204,7 +202,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				_distributionOfContinuationChain.AppendChainElement(indexOfNewChainElements, cidOfNewElement, newDistributionElement);
 
 				currentNewCofDChainIndex = indexOfNewChainElements;
-				//currentOldChainIndex = oldCofDChainElement.NextElementIndex;
 			}
 		}
 
