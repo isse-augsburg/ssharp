@@ -210,6 +210,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal override void MakeChoiceAtIndexDeterministic(int choiceIndex)
 		{
+			// This method is called when it is assumed, that choosing anything different at choiceIndex
+			// leads to the same state as the path until the last choice.
+			// Thus, we can simply revert this unnecessary choice and add the probability of the unmade alternatives
+			// of the reverted choice to the last choice.
+
 			if (_valueCount[choiceIndex] == 0)
 				return; //Nothing to do
 

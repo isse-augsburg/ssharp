@@ -81,7 +81,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			probabilityOfFinal1.Is(0.0, tolerance: 0.0001).ShouldBe(true);
 			probabilityOfFinal2.Is(1.0, tolerance: 0.0001).ShouldBe(true);
 			probabilityOfFinal3.Is(1.0, tolerance: 0.0001).ShouldBe(true);
-			probabilityOfFinal4.Is(0.5, tolerance: 0.0001).ShouldBe(true);
+			probabilityOfFinal4.Is(0.8333333333, tolerance: 0.0001).ShouldBe(true);
 		}
 
 		public class Model : SimpleModelBase
