@@ -210,17 +210,46 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal override void MakeChoiceAtIndexDeterministic(int choiceIndex)
 		{
-			return;
+			if (_valueCount[choiceIndex] == 0)
+				return; //Nothing to do
+
 			Assert.That(_chosenValues[choiceIndex].Value==0, "Only first choice can be made deterministic.");
+
 			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
 			// turning the choice into a deterministic selection of the value at index 0
-			_valueCount[choiceIndex] = 0;
-			_chosenValues[choiceIndex] =
+
+			var oldProbabilityOfDeterministicChoice = _chosenValues[choiceIndex].Probability;
+			var complementProbabilityToAdd = oldProbabilityOfDeterministicChoice.Complement().Value;
+
+			// oldProbability.Complement() needs to be assigned to some transition.
+			// We add it to the last choice made.
+
+			// For that, we first calculate the probability from the choice made deterministic to the last choice (excluding).
+			var probabilityFromDeterministicChoiceToLastChoice = 1.0;
+			for (var i = choiceIndex; i < LastChoiceIndex; i++)
+			{
+				probabilityFromDeterministicChoiceToLastChoice *= _chosenValues[i].Probability.Value;
+			}
+
+			// Setting the probability of the last choice to makePathNeutralValue (which is >= 1.0)
+			// makes the sub path neutral when calculating CalculateProbabilityOfPath()
+			var makeSubPathNeutralValue = 1.0/probabilityFromDeterministicChoiceToLastChoice;
+
+			var probabilityOfLastChoicePath = probabilityFromDeterministicChoiceToLastChoice * _chosenValues[LastChoiceIndex].Probability.Value;
+
+			// the value of the last choice is set to
+			var newValueOfLastChoice = (probabilityOfLastChoicePath + complementProbabilityToAdd) * makeSubPathNeutralValue;
+
+			// set the calculated value
+			_chosenValues[LastChoiceIndex] =
 				new LtmcChosenValue
 				{
-					Value = _chosenValues[choiceIndex].Value,
-					Probability = Probability.One
+					Value = _chosenValues[LastChoiceIndex].Value,
+					Probability = new Probability(newValueOfLastChoice)
 				};
+
+			// set the alternatives to zero.
+			_valueCount[choiceIndex] = 0;
 		}
 
 		/// <summary>
