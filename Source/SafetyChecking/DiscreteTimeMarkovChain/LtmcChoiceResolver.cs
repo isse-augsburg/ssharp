@@ -214,6 +214,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			// leads to the same state as the path until the last choice.
 			// Thus, we can simply revert this unnecessary choice and add the probability of the unmade alternatives
 			// of the reverted choice to the last choice.
+			// Note, very small numbers get multiplied and summarized. Maybe type double is too imprecise.
 
 			if (_valueCount[choiceIndex] == 0)
 				return; //Nothing to do
@@ -253,7 +254,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					Probability = new Probability(newValueOfLastChoice)
 				};
 
-			// set the alternatives to zero.
+			// Set the alternatives to zero.
 			_valueCount[choiceIndex] = 0;
 		}
 
