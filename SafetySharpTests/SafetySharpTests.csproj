@@ -223,6 +223,7 @@
     <Compile Include="Analysis\Ordering\precedes all.cs" />
     <Compile Include="Analysis\Ordering\strictly precedes some.cs" />
     <Compile Include="Analysis\Ordering\strictly precedes all.cs" />
+    <Compile Include="Analysis\Probabilistic\undo activation of permanent fault in certain steps.cs" />
     <Compile Include="Analysis\StateConstraints\no initial state.cs" />
     <Compile Include="Analysis\StateConstraints\ineffective constraint.cs" />
     <Compile Include="Analysis\StateConstraints\additional object.cs" />
