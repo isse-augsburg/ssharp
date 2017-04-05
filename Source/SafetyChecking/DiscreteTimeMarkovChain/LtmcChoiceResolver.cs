@@ -84,6 +84,20 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_firstPath = true;
 		}
 
+		private Probability GetProbabilityOfPreviousPath()
+		{
+			if (_choiceIndex==-1 || _choiceIndex==0)
+				return Probability.One;
+			return _chosenValues[_choiceIndex - 1].Probability;
+		}
+
+		private Probability GetProbabilityUntilIndex(int index)
+		{
+			if (index == -1)
+				return Probability.One;
+			return _chosenValues[index].Probability;
+		}
+
 
 		/// <summary>
 		///   Prepares the resolver for the next path. Returns <c>true</c> to indicate that all paths have been enumerated.
@@ -113,11 +127,14 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				// If we have at least one other value to choose, let's do that next
 				if (_valueCount.Peek() > chosenValue.Value + 1)
 				{
+					var previousProbability = GetProbabilityUntilIndex(_valueCount.Count - 2);
+					var valueCount = _valueCount.Peek();
+
 					var newChosenValue =
 						new LtmcChosenValue
 						{
 							Value = chosenValue.Value + 1,
-							Probability = chosenValue.Probability //placeholder value
+							Probability = previousProbability / valueCount //placeholder value (for non deterministic choice)
 						};
 					_chosenValues.Push(newChosenValue);
 					return true;
@@ -151,7 +168,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				new LtmcChosenValue
 				{
 					Value = 0,
-					Probability = Probability.One / valueCount //placeholder value
+					Probability = GetProbabilityOfPreviousPath() / valueCount //placeholder value (for non deterministic choice)
 				};
 			_chosenValues.Push(newChosenValue);
 
@@ -188,8 +205,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			var probabilitiesOfChosenValuesMaxIndex = _chosenValues.Count - 1;
 			// If this part of the path has previously been visited we do not change the value
 			// because this value has already been set by a previous call of SetProbabilityOfLastChoice.
-			// Further, this value might have been set by MakeChoiceAtIndexDeterministic. Only if we explore
-			// a new part of the path the probability should be written.
+			// Only if we explore a new part of the path the probability needs to be written.
 			// A new part of the path is explored, iff the previous HandleChoice pushed a new placeholder
 			// value onto the three stacks).
 			if (_choiceIndex == probabilitiesOfChosenValuesMaxIndex)
@@ -198,7 +214,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					new LtmcChosenValue
 					{
 						Value = _chosenValues[_choiceIndex].Value,
-						Probability = probability
+						Probability = GetProbabilityOfPreviousPath() * probability
 					};
 			}
 		}
@@ -224,27 +240,13 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
 			// turning the choice into a deterministic selection of the value at index 0
 
-			var oldProbabilityOfDeterministicChoice = _chosenValues[choiceIndex].Probability;
-			var complementProbabilityToAdd = oldProbabilityOfDeterministicChoice.Complement().Value;
-
-			// oldProbability.Complement() needs to be assigned to some transition.
-			// We add it to the last choice made.
-
-			// For that, we first calculate the probability from the choice made deterministic to the last choice (excluding).
-			var probabilityFromDeterministicChoiceToLastChoice = 1.0;
-			for (var i = choiceIndex; i < LastChoiceIndex; i++)
-			{
-				probabilityFromDeterministicChoiceToLastChoice *= _chosenValues[i].Probability.Value;
-			}
-
-			// Setting the probability of the last choice to makePathNeutralValue (which is >= 1.0)
-			// makes the sub path neutral when calculating CalculateProbabilityOfPath()
-			var makeSubPathNeutralValue = 1.0/probabilityFromDeterministicChoiceToLastChoice;
-
-			var probabilityOfLastChoicePath = probabilityFromDeterministicChoiceToLastChoice * _chosenValues[LastChoiceIndex].Probability.Value;
-
-			// the value of the last choice is set to
-			var newValueOfLastChoice = (probabilityOfLastChoicePath + complementProbabilityToAdd) * makeSubPathNeutralValue;
+			var oldProbabilityUntilDeterministicChoice = GetProbabilityUntilIndex(choiceIndex-1).Value;
+			var oldProbabilityOfDeterministicChoice = GetProbabilityUntilIndex(choiceIndex).Value;
+			var differenceProbabilityToAdd = oldProbabilityUntilDeterministicChoice - oldProbabilityOfDeterministicChoice;
+			
+			var probabilityOfLastChoicePath = GetProbabilityUntilIndex(LastChoiceIndex).Value;
+			
+			var newValueOfLastChoice = (probabilityOfLastChoicePath + differenceProbabilityToAdd);
 
 			// set the calculated value
 			_chosenValues[LastChoiceIndex] =
@@ -284,10 +286,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		internal override Probability CalculateProbabilityOfPath()
 		{
-			var probability = Probability.One;
-			for (var i = 0; i < _chosenValues.Count; ++i)
-				probability *= _chosenValues[i].Probability;
-			return probability;
+			if (_choiceIndex == -1)
+				return Probability.One;
+			return _chosenValues[_choiceIndex].Probability;
 		}
 
 		/// <summary>
