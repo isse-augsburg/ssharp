@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2017, Institute for Software & Systems Engineering
 // 
@@ -261,20 +261,56 @@ namespace SafetySharp.Compiler.Normalization
 
 			if (body == null)
 			{
+				var signatureAllowsOptimization =
+						!method.ReturnsVoid && CanBeCompared(method.ReturnType) && method.Parameters.All(parameter => parameter.RefKind == RefKind.None);
+				var faultEffectReturn = originalBody.Statements.Count == 1 ? originalBody.Statements[0] as ReturnStatementSyntax : null;
+				var isConstantValue = faultEffectReturn != null && SemanticModel.GetConstantValue(faultEffectReturn.Expression).HasValue;
+
+				// Optimization: If we're normalizing a non-void returning method without ref/out parameters and
+				// the fault effect simply returns a constant value of primitive type, we generate code to check whether the non-fault
+				// value for the case that the fault is not activated (which is always the first case) actually differs 
+				// from the constant value returned by the fault effect when the fault is activated. If both values are
+				// the same, the activation of the fault will have no effect, so we can undo it, reducing the number
+				// of transitions that have to be checked
+				// ┌──────────────────────────────────────────
+				// │ New idea of target code for optimized code:
+				// │   if (baseEffectIsSideEffectFree )
+				// │   {
+				// │      var baseResult = base.Method();
+				// │      if (baseResult==faultResult)
+				// │          return baseResult;
+				// │      else
+				// │      {
+				// │          if (fault.TryActivate())
+				// │              return faultResult;
+				// │          else
+				// │              return baseResult;
+				// │      }
+				// │   }
+				// │   unoptimized code...
+				// │
+				// └──────────────────────────────────────────
 				var writer = new CodeWriter();
+
+				//TODO: Check if base fault effect is side effect free
+				var baseEffectIsSideEffectFree = true;
+
+				if (signatureAllowsOptimization && isConstantValue)
+				{
+					writer.AppendLine($"var {"tmp".ToSynthesized()} = {baseEffect.ToFullString()};");
+					writer.AppendLine($"if ({"tmp".ToSynthesized()} == {faultEffectReturn.Expression.ToFullString()})");
+					writer.AppendBlockStatement(() => { writer.AppendLine($"{_undoActivation}(this.{"fault".ToSynthesized()});"); });
+					writer.AppendLine($"return {"tmp".ToSynthesized()};");
+				}
+
+				// Default case
+
+
+
+
 				writer.AppendLine($"if (!{_tryActivate}(this.{"fault".ToSynthesized()}))");
 				writer.AppendBlockStatement(() =>
 				{
-					// Optimization: If we're normalizing a non-void returning method without ref/out parameters and
-					// the fault effect simply returns a constant value of primitive type, we generate code to check whether the non-fault
-					// value for the case that the fault is not activated (which is always the first case) actually differs 
-					// from the constant value returned by the fault effect when the fault is activated. If both values are
-					// the same, the activation of the fault will have no effect, so we can undo it, reducing the number
-					// of transitions that have to be checked
-					var signatureAllowsOptimization =
-						!method.ReturnsVoid && CanBeCompared(method.ReturnType) && method.Parameters.All(parameter => parameter.RefKind == RefKind.None);
-					var faultEffectReturn = originalBody.Statements.Count == 1 ? originalBody.Statements[0] as ReturnStatementSyntax : null;
-					var isConstantValue = faultEffectReturn != null && SemanticModel.GetConstantValue(faultEffectReturn.Expression).HasValue;
 
 					if (signatureAllowsOptimization && isConstantValue)
 					{
