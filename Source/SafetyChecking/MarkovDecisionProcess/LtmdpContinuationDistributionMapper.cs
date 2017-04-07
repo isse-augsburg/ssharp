@@ -54,12 +54,24 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_continuationOfDistributionChain = new MultipleChainsInSingleArray<ContinuationElement>();
 			
 			_distributionOfContinuationChain = new MultipleChainsInSingleArray<DistributionElement>();
+
+			Clear();
 		}
 		
 		public void Clear()
 		{
 			_continuationOfDistributionChain.Clear();
 			_distributionOfContinuationChain.Clear();
+			AddInitialDistributionAndContinuation();
+		}
+
+		private void AddInitialDistributionAndContinuation()
+		{
+			var indexOfNewChainElements = GetUnusedChainIndex();
+			Requires.That(indexOfNewChainElements == 0, "Data structures must be empty");
+
+			_continuationOfDistributionChain.StartChain(indexOfNewChainElements, 0, new ContinuationElement { ContinuationId = 0 });
+			_distributionOfContinuationChain.StartChain(indexOfNewChainElements, 0, new DistributionElement { DistributionId = 0 });
 		}
 
 		private int GetUnusedChainIndex()
@@ -130,14 +142,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		}
 
 
-		public void AddInitialDistributionAndContinuation()
-		{
-			var indexOfNewChainElements = GetUnusedChainIndex();
-			Requires.That(indexOfNewChainElements == 0, "Data structures must be empty");
-
-			_continuationOfDistributionChain.StartChain(indexOfNewChainElements, 0, new ContinuationElement {ContinuationId = 0});
-			_distributionOfContinuationChain.StartChain(indexOfNewChainElements, 0, new DistributionElement { DistributionId = 0 });
-		}
 
 		/// <summary>
 		///   Makes an probabilistic split.

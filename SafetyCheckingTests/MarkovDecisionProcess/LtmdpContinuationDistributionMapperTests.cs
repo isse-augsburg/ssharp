@@ -61,8 +61,6 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void OnlyOneInitialDistribution()
 		{
-			_mapper.AddInitialDistributionAndContinuation();
-
 			var existingDistributions = new Dictionary<int, bool>();
 
 			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
@@ -72,7 +70,6 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void ProbabilisticSplitRemovesInitialContinuation()
 		{
-			_mapper.AddInitialDistributionAndContinuation();
 			_mapper.ProbabilisticSplit(0, 1, 3);
 
 			var existingDistributions = new Dictionary<int, bool>();
@@ -83,7 +80,6 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void OneDistributionWithThreeContinuations()
 		{
-			_mapper.AddInitialDistributionAndContinuation();
 			_mapper.ProbabilisticSplit(0, 1, 3);
 
 			var existingDistributions = new Dictionary<int, bool>();
@@ -106,7 +102,6 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void OneDistributionWithFiveContinuationsAfterTwoSplits()
 		{
-			_mapper.AddInitialDistributionAndContinuation();
 			_mapper.ProbabilisticSplit(0, 1, 3);
 			_mapper.ProbabilisticSplit(1, 4, 5);
 
@@ -138,7 +133,6 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void TwoDistributionWithFiveContinuationsAfterTwoSplits()
 		{
-			_mapper.AddInitialDistributionAndContinuation();
 			_mapper.ProbabilisticSplit(0, 1, 3);
 			_mapper.NonDeterministicSplit(1, 4, 5);
 
@@ -170,7 +164,6 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void TwoDistributionWithFiveContinuationsAfterTwoSplitsWithRemove()
 		{
-			_mapper.AddInitialDistributionAndContinuation();
 			_mapper.ProbabilisticSplit(0, 1, 3);
 			_mapper.NonDeterministicSplit(1, 4, 5);
 
@@ -206,7 +199,6 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void TwoDistributionWithFiveContinuationsAfterTwoSplitsWithRemove2()
 		{
-			_mapper.AddInitialDistributionAndContinuation();
 			_mapper.ProbabilisticSplit(0, 1, 3);
 			_mapper.NonDeterministicSplit(1, 4, 5);
 

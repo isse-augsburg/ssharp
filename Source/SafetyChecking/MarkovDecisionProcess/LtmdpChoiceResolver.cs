@@ -211,7 +211,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_chosenValues.Push(newChosenValue);
 
 			_nextFreeContinuationId = _nextFreeContinuationId + valueCount;
-			CidToDidMapper.NonDeterministicSplit(oldContinuationId, _continuationId, _continuationId + valueCount);
+			CidToDidMapper.NonDeterministicSplit(oldContinuationId, _continuationId, oldContinuationId + valueCount);
 
 			return 0;
 		}
@@ -247,7 +247,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_chosenValues.Push(newChosenValue);
 
 			_nextFreeContinuationId = _nextFreeContinuationId + valueCount;
-			CidToDidMapper.ProbabilisticSplit(oldContinuationId, _continuationId, _continuationId + valueCount);
+			CidToDidMapper.ProbabilisticSplit(oldContinuationId, _continuationId, oldContinuationId + valueCount);
 
 			return 0;
 		}
