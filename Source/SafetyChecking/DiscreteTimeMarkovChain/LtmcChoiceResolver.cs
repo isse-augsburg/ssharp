@@ -125,7 +125,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				var chosenValue = _chosenValues.Remove();
 
 				// If we have at least one other value to choose, let's do that next
-				if (_valueCount.Peek() > chosenValue.Value + 1)
+				if (_valueCount.Peek() > chosenValue.OptionIndex + 1)
 				{
 					var previousProbability = GetProbabilityUntilIndex(_valueCount.Count - 2);
 					var valueCount = _valueCount.Peek();
@@ -133,7 +133,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					var newChosenValue =
 						new LtmcChosenValue
 						{
-							Value = chosenValue.Value + 1,
+							OptionIndex = chosenValue.OptionIndex + 1,
 							Probability = previousProbability / valueCount //placeholder value (for non deterministic choice)
 						};
 					_chosenValues.Push(newChosenValue);
@@ -160,14 +160,14 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			// If we have a preselected value that we should choose for the current path, return it
 			var chosenValuesMaxIndex = _chosenValues.Count - 1;
 			if (_choiceIndex <= chosenValuesMaxIndex)
-				return _chosenValues[_choiceIndex].Value;
+				return _chosenValues[_choiceIndex].OptionIndex;
 
 			// We haven't encountered this choice before; store the value count and return the first value
 			_valueCount.Push(valueCount);
 			var newChosenValue =
 				new LtmcChosenValue
 				{
-					Value = 0,
+					OptionIndex = 0,
 					Probability = GetProbabilityOfPreviousPath() / valueCount //placeholder value (for non deterministic choice)
 				};
 			_chosenValues.Push(newChosenValue);
@@ -213,7 +213,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				_chosenValues[_choiceIndex] =
 					new LtmcChosenValue
 					{
-						Value = _chosenValues[_choiceIndex].Value,
+						OptionIndex = _chosenValues[_choiceIndex].OptionIndex,
 						Probability = GetProbabilityOfPreviousPath() * probability
 					};
 			}
@@ -235,7 +235,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			if (_valueCount[choiceIndex] == 0)
 				return; //Nothing to do
 
-			Assert.That(_chosenValues[choiceIndex].Value==0, "Only first choice can be made deterministic.");
+			Assert.That(_chosenValues[choiceIndex].OptionIndex==0, "Only first choice can be made deterministic.");
 
 			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
 			// turning the choice into a deterministic selection of the value at index 0
@@ -252,7 +252,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_chosenValues[LastChoiceIndex] =
 				new LtmcChosenValue
 				{
-					Value = _chosenValues[LastChoiceIndex].Value,
+					OptionIndex = _chosenValues[LastChoiceIndex].OptionIndex,
 					Probability = new Probability(newValueOfLastChoice)
 				};
 
@@ -274,7 +274,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					new LtmcChosenValue
 					{
 						Probability = Probability.One,
-						Value = choice
+						OptionIndex = choice
 					};
 				_chosenValues.Push(newChosenValue);
 				_valueCount.Push(0);
@@ -307,7 +307,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		internal override IEnumerable<int> GetChoices()
 		{
 			for (var i = 0; i < _chosenValues.Count; ++i)
-				yield return _chosenValues[i].Value;
+				yield return _chosenValues[i].OptionIndex;
 		}
 
 		/// <summary>

@@ -46,6 +46,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		private readonly EffectlessFaultsMinimizationMode _minimalizationMode = EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults;
 
+		private readonly LtmdpChoiceResolver _ltmdpChoiceResolver;
+
 		private readonly LtmdpCachedLabeledStates<TExecutableModel> _cachedLabeledStates;
 
 		/// <summary>
@@ -62,7 +64,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
 			_cachedLabeledStates = new LtmdpCachedLabeledStates<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
 
-			ChoiceResolver = new LtmdpChoiceResolver();
+			_ltmdpChoiceResolver = new LtmdpChoiceResolver();
+			ChoiceResolver = _ltmdpChoiceResolver;
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
 
 		}
@@ -188,7 +191,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// </summary>
 		protected override TransitionCollection EndExecution()
 		{
-			_cachedLabeledStates.TransformContinuationIdsToDistributions(null);
+			_cachedLabeledStates.TransformContinuationIdsToDistributions(_ltmdpChoiceResolver.CidToDidMapper);
 			var transitions = _cachedLabeledStates.ToCollection();
 			return transitions;
 		}

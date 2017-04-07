@@ -28,7 +28,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 	internal struct LtmcChosenValue
 	{
-		public int Value;
+		public int OptionIndex;
 		public Probability Probability;
 	}
 
