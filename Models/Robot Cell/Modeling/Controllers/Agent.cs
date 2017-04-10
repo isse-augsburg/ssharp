@@ -92,12 +92,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		protected void CheckConstraints()
 		{
-			var constraints = Constraints.Select(constraint => constraint());
-			if (constraints.Any(constraint => !constraint))
-			{
+			if (!ValidateConstraints())
 				ObserverController.ScheduleReconfiguration();
-				return;
-			}
+		}
+
+		public bool ValidateConstraints()
+		{
+			return Constraints.All(constraint => constraint());
 		}
 
 		public virtual void Produce(ProduceCapability capability)

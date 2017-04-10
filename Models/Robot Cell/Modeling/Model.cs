@@ -213,7 +213,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			yield return CreateConfiguration<T>(m => m.Ictss7(), nameof(Ictss7), mode);
 		}
 
-		private static Model CreateConfiguration<T>(Action<Model> initializer, string name, AnalysisMode mode)
+		public static Model CreateConfiguration<T>(Action<Model> initializer, string name, AnalysisMode mode)
 			where T : ObserverController
 		{
 			var model = new Model(name);
@@ -288,8 +288,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			{
 				Agent.Connect(from: RobotAgents.Single(a => route.Robot1 == a.Robot), to: agent);
 				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.Robot2 == a.Robot));
+#if !ENABLE_F2 // error F2: routes are bidirectional
 				Agent.Connect(from: RobotAgents.Single(a => route.Robot2 == a.Robot), to: agent);
 				Agent.Connect(from: agent, to: RobotAgents.Single(a => route.Robot1 == a.Robot));
+#endif
 			}
 		}
 

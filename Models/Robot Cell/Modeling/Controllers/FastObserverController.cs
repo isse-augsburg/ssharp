@@ -50,14 +50,40 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		protected override void Reconfigure()
 		{
+			var isReconfPossible = IsReconfPossible(_availableRobots, Tasks);
+			if (!isReconfPossible)
+				OracleState = ReconfStates.Failed;
+			else if (OracleState != ReconfStates.Failed)
+				OracleState = ReconfStates.Succedded;
+
 			// find optimal path that satisfies the required capabilities
 			CalculateShortestPaths();
 			var path = FindPath(Tasks[0]);
+			var roles = path == null ? null : Convert(Tasks[0], path).ToArray();
 
-			if (path == null)
+#if ENABLE_F5
+			var length = roles?.Sum(role => Math.Max(role.Item2.Length, 1));
+			if (roles == null || length > 2 * Tasks[0].Capabilities.Length)
+#else
+			if (roles == null)
+#endif
+			{
+				if (isReconfPossible)
+					throw new Exception("Reconfiguration failed even though there is a solution.");
 				ReconfigurationState = ReconfStates.Failed;
+			}
 			else
-				ApplyConfiguration(Convert(Tasks[0], path).ToArray());
+			{
+				ApplyConfiguration(roles);
+				if (!isReconfPossible)
+					throw new Exception("Reconfiguration successful even though there is no valid configuration.");
+				if (ReconfigurationState != ReconfStates.Failed)
+					ReconfigurationState = ReconfStates.Succedded;
+			}
+
+			// validate invariant
+			if (!Agents.All(agent => agent.ValidateConstraints()))
+				throw new Exception("Reconfiguration violated constraints");
 		}
 
 		/// <summary>
@@ -192,16 +218,26 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 				if (previous != -1)
 				{
+#if ENABLE_F1 // error F1: transitive routes interpreted as direct ones
+					yield return Transport(previous, current, usedCarts);
+#else
 					// Find a cart that connects both robots, the path matrix contains the next robot we have to go to
 					foreach (var nextRobot in GetShortestPath(previous, current))
 					{
 						yield return Transport(previous, nextRobot, usedCarts);
 
 						if (nextRobot != current)
+						{
+#if ENABLE_F7 // new error F7: intermediate transport-only roles assigned to path[i] == current; meant for nextRobot
 							yield return Tuple.Create(Agents[path[i]], new Capability[0]);
+#else
+							yield return Tuple.Create(Agents[nextRobot], new Capability[0]);
+#endif
+						}
 
 						previous = nextRobot;
 					}
+#endif
 				}
 
 				// Collect the capabilities that this robot should apply
