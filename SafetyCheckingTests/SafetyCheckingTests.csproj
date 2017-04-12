@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\Dependencies\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\Dependencies\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props')" />
+  <Import Project="..\Dependencies\xunit.runner.msbuild.2.2.0\build\net452\xunit.runner.msbuild.props" Condition="Exists('..\Dependencies\xunit.runner.msbuild.2.2.0\build\net452\xunit.runner.msbuild.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BDCD5EA9-61C8-415D-ADDA-F3A70D3EFA1D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Tests</RootNamespace>
+    <AssemblyName>ISSE.SafetyChecking.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Binaries\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>0626; 0649; 0414; 0162; 1522</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\Binaries\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="JetBrains.Annotations, Version=10.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\Dependencies\JetBrains.Annotations.10.0.0\lib\net20\JetBrains.Annotations.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Shouldly, Version=2.7.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
+      <HintPath>..\Dependencies\Shouldly.2.7.0\lib\net40\Shouldly.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\Dependencies\xunit.abstractions.2.0.1\lib\net35\xunit.abstractions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.assert, Version=2.2.0.3545, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\Dependencies\xunit.assert.2.2.0\lib\netstandard1.1\xunit.assert.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.core, Version=2.2.0.3545, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\Dependencies\xunit.extensibility.core.2.2.0\lib\netstandard1.1\xunit.core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.execution.desktop, Version=2.2.0.3545, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\Dependencies\xunit.extensibility.execution.2.2.0\lib\net452\xunit.execution.desktop.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Source\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="DataStructures\BidirectionalGraphTests.cs" />
+    <Compile Include="DataStructures\MultipleChainsInSingleArrayTests.cs" />
+    <Compile Include="DataStructures\DoubleVectorTests.cs" />
+    <Compile Include="DataStructures\MarkovChainExamples.cs" />
+    <Compile Include="DataStructures\MarkovChainTests.cs" />
+    <Compile Include="DataStructures\MarkovDecisionProcessExamples.cs" />
+    <Compile Include="DataStructures\MarkovDecisionProcessTests.cs" />
+    <Compile Include="DataStructures\MemoryBufferTests.cs" />
+    <Compile Include="DataStructures\SparseDoubleMatrixTests.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcBuilderTests.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpBuilderTests.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpContinuationDistributionMapperTests.cs" />
+    <Compile Include="ProbabilisticModelChecker\BuiltinDtmcModelCheckerTests.cs" />
+    <Compile Include="ProbabilisticModelChecker\BuiltinMdpModelCheckerTests.cs" />
+    <Compile Include="ProbabilisticModelChecker\ExternalDtmcModelCheckerMrmcTests.cs" />
+    <Compile Include="ProbabilisticModelChecker\ExternalMdpModelCheckerPrismTests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\CounterExamples\formulas.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\make choice deterministic2.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\nested side effect free methods with faults.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\undo fault activation of nested faults.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\make choice deterministic.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\multiple formulas in one run.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\multiple initial states.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\same target state on different ways.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\simple example 1a.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\simple example 1b.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\custom probability of transient fault.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\formula which is always false.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\make choice deterministic.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\multiple formulas in one run.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\terminate early.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\multiple initial states.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\probabilities sum up to 1 even with permanent activatable fault.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\probabilities sum up to 1 even with transient activatable fault.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\same target state with different transient faults.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\simple example 2b.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\simple example 2a.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\simple example 1b.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\simple example 1a.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\emulate dice with coin.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\permanent fault leads to invariant violation only in specific step.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\AnalysisTest.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\same target state on different ways.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\transient fault leads to invariant violation only in specific step.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\undo fault activation of fault3.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\undo fault activation of fault2.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\undo fault activation of fault.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\undo fault activation of nested faults.cs" />
+    <Compile Include="SimpleExecutableModel\SimpleModelBase.cs" />
+    <Compile Include="SimpleExecutableModel\SimpleCounterExampleSerialization.cs" />
+    <Compile Include="SimpleExecutableModel\SimpleAtomarProposition.cs" />
+    <Compile Include="SimpleExecutableModel\SimpleExecutableModel.cs" />
+    <Compile Include="SimpleExecutableModel\SimpleModelChecking.cs" />
+    <Compile Include="SimpleExecutableModel\SimpleModelSerializer.cs" />
+    <Compile Include="Utilities\TestTraceOutput.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Source\SafetyChecking\SafetyChecking.csproj">
+      <Project>{a91cb8af-8a4c-4f69-848e-b3962f9a94f9}</Project>
+      <Name>SafetyChecking</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Dieses Projekt verweist auf mindestens ein NuGet-Paket, das auf diesem Computer fehlt. Verwenden Sie die Wiederherstellung von NuGet-Paketen, um die fehlenden Dateien herunterzuladen. Weitere Informationen finden Sie unter "http://go.microsoft.com/fwlink/?LinkID=322105". Die fehlende Datei ist "{0}".</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\Dependencies\xunit.runner.msbuild.2.2.0\build\net452\xunit.runner.msbuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\Dependencies\xunit.runner.msbuild.2.2.0\build\net452\xunit.runner.msbuild.props'))" />
+    <Error Condition="!Exists('..\Dependencies\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props')" Text="$([System.String]::Format('$(ErrorText)', '..\Dependencies\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -57,7 +57,12 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public HashSet<ICapability> NeededCapabilities { get; } = new HashSet<ICapability>();
 
+<<<<<<< Updated upstream
 		public bool CapabilitiesSatisfied() => NeededCapabilities.IsSubsetOf(AvailableCapabilities);
+=======
+		private Dictionary<BaseAgent, TaskCompletionSource<object>> _invitations
+			= new Dictionary<BaseAgent, TaskCompletionSource<object>>();
+>>>>>>> Stashed changes
 
 		public Coalition(CoalitionReconfigurationAgent leader, ITask task)
 		{
@@ -67,6 +72,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			Join(Leader = leader);
 		}
 
+<<<<<<< Updated upstream
 		public bool Contains(BaseAgent baseAgent)
 		{
 			return Members.Any(member => member.BaseAgent == baseAgent); // TODO: consider implementing more efficiently
@@ -100,6 +106,20 @@ namespace SafetySharp.Odp.Reconfiguration
 			await Merger.WaitForMergeCompletion();
 
 			return newMember;
+=======
+		public async Task Invite(BaseAgent agent)
+		{
+			if (Members.Any(member => member.BaseAgent == agent))
+				return;
+
+			_invitations[agent] = new TaskCompletionSource<object>();
+
+			// do not await, await invitation response (next line) instead (otherwise a deadlock occurs)
+			agent.RequestReconfiguration(Leader, Task);
+
+			await _invitations[agent].Task;
+			_invitations.Remove(agent);
+>>>>>>> Stashed changes
 		}
 
 		private void ReceiveInvitationResponse(CoalitionReconfigurationAgent invitedAgent)
@@ -108,6 +128,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			_invitations.Remove(invitedAgent.BaseAgent);
 		}
 
+<<<<<<< Updated upstream
 		private void CancelInvitations()
 		{
 			foreach (var invitation in _invitations.Values)
@@ -125,6 +146,13 @@ namespace SafetySharp.Odp.Reconfiguration
 
 			AvailableCapabilities.UnionWith(newMember.BaseAgentState.AvailableCapabilities);
 			UpdateCTF(newMember.BaseAgent);
+=======
+			if (IsInvited(newMember))
+			{
+				_invitations[newMember.BaseAgent].SetResult(null);
+				_invitations.Remove(newMember.BaseAgent);
+			}
+>>>>>>> Stashed changes
 
 			if (IsInvited(newMember))
 				ReceiveInvitationResponse(newMember);
