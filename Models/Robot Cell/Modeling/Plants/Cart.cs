@@ -32,7 +32,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		private Robot _position;
 
-        [Reliability(120)]
+        [Reliability(mttf:120, mttr:10)]
         public Fault Broken = new TransientFault();
 
         public Workpiece LoadedWorkpiece;
