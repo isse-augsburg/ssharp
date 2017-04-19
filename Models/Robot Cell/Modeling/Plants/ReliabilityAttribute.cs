@@ -13,7 +13,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
         /// Mean time to failure in simulation steps
         /// </summary>
         public double MTTF { get; set; }
-        public double Lambda { get; }
 
         /// <summary>
         /// Mean time to repair in simulation steps
@@ -24,10 +23,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
         /// <summary>Initializes a new instance of the <see cref="T:System.Attribute" /> class.</summary>
         public ReliabilityAttribute(double mttf, double mttr)
         {
-            if (mttf <= 0)
+            if (mttf <= 0 || mttr <= 0)
                 throw new ArgumentOutOfRangeException();
             this.MTTF = mttf;
-            Lambda = 1 / mttf;
             this.MTTR = mttr;
         }
 

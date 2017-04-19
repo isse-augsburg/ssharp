@@ -50,7 +50,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
                 
             }
             
-            //            CollectedTimeValues.Add(new Tuple<TimeSpan, TimeSpan>(_stopwatchReconf.Elapsed, _stopwatchLastReconf.Elapsed));
             return resultingTasks;
         }
 

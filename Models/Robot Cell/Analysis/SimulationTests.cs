@@ -74,9 +74,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 {
                     foreach (var fault in this.faults)
                     {
-                        if (fault.Item2?.Lambda > 0 && !fault.Item1.IsActivated && rd.NextDouble() <= 1 - Math.Exp(-1 * fault.Item2.Lambda * x))
+                        if (fault.Item2?.MTTF > 0 && !fault.Item1.IsActivated && rd.NextDouble() <= 1 - Math.Exp(-1 * (1 / fault.Item2.MTTF) * x))
                         {
                             fault.Item1.ForceActivation();
+                        }
+                        if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rd.NextDouble() <= 1 - Math.Exp((-1 * (1 / fault.Item2.MTTR) * x)))
+                        {
+                            fault.Item1.SuppressActivation();
                         }
                     }
                     Simulator.SimulateStep();
