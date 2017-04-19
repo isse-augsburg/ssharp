@@ -18,28 +18,39 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
         public BaseAgent[] Agents { get; }
         [NonDiscoverable, Hidden]
         private readonly IController _actingController;
-        [NonDiscoverable, Hidden]
-        private readonly Stopwatch _stopwatchReconf = new Stopwatch();
         [NonDiscoverable, Hidden(HideElements = true)]
-        public List<Tuple<TimeSpan,TimeSpan>> CollectedTimeValues { get; } = new List<Tuple<TimeSpan, TimeSpan>>();
+        public Dictionary<uint, List<Tuple<TimeSpan,TimeSpan>>> CollectedTimeValues { get; } = new Dictionary<uint, List<Tuple<TimeSpan, TimeSpan>>>();
+
         [NonDiscoverable, Hidden]
-        private readonly  Stopwatch _stopwatchLastReconf = new Stopwatch();
+        private readonly Stopwatch _stopwatch;
 
         public PerformanceMeasurementController(IEnumerable<Agent> agents)
         {
-            this._actingController = (IController)Activator.CreateInstance(typeof(T), agents);
+            this._actingController = (IController)Activator.CreateInstance(typeof(T), agents.Cast<BaseAgent>());
             this.Agents = this._actingController.Agents;
-            _stopwatchLastReconf.Start();
+            _stopwatch = Stopwatch.StartNew();
+            foreach (var agent in Agents)
+            {
+                CollectedTimeValues.Add(agent.ID, new List<Tuple<TimeSpan, TimeSpan>>());
+            }
         }
 
         public Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
         {
-            _stopwatchLastReconf.Stop();
-            _stopwatchReconf.Start();
+            _stopwatch.Stop();
+            Console.WriteLine(_stopwatch.ElapsedMilliseconds);
+            MicrostepScheduler.StartPerformanceMeasurement(_actingController);
             var resultingTasks = this._actingController.CalculateConfigurations(context, tasks);
-            _stopwatchReconf.Stop(); 
-            CollectedTimeValues.Add(new Tuple<TimeSpan, TimeSpan>(_stopwatchReconf.Elapsed, _stopwatchLastReconf.Elapsed));
-            _stopwatchLastReconf.Start();
+            var reconfTime = MicrostepScheduler.StopPerformanceMeasurement(_actingController).Elapsed;
+            _stopwatch.Restart();
+            
+            foreach (var agent in Agents)
+            {
+                CollectedTimeValues[agent.ID].Add(new Tuple<TimeSpan, TimeSpan>(_stopwatch.Elapsed, reconfTime));
+                
+            }
+            
+            //            CollectedTimeValues.Add(new Tuple<TimeSpan, TimeSpan>(_stopwatchReconf.Elapsed, _stopwatchLastReconf.Elapsed));
             return resultingTasks;
         }
 
