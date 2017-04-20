@@ -95,7 +95,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return Cart?.CanMove(((RobotAgent)agent).Robot) ?? true;
 		}
 
-		protected virtual bool MoveTo(Robot robot) => Cart?.MoveTo(robot) ?? true;
+	    ///<summary> 
+	    /// Enable to revaluate the currently available  capabilities
+	    /// Thus, it is possible to add tools to an Agent at run time or repair defects 
+	    ///</summary>
+	    public override void EvaluateCurrentlyAvailableCapabilites()
+	    {
+	        throw new System.NotImplementedException();
+	    }
+
+	    protected virtual bool MoveTo(Robot robot) => Cart?.MoveTo(robot) ?? true;
 
 		private void AddTolerableFaultEffects()
 		{
@@ -112,5 +121,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			protected override bool CheckOutput(Agent agent) => false;
 			protected override bool MoveTo(Robot robot) => false;
 		}
-	}
+        
+
+    }
 }

@@ -35,6 +35,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             return Ictss1<T>(mode);
         }
 
+        public static Model DefaultInstanceWithoutPlant<T>(AnalysisMode mode = AnalysisMode.AllFaults)
+            where T : IController
+        {
+            return Ictss1WithoutPlant<T>(mode);
+        }
+
         public static IEnumerable<Model> CreateConfigurations<T>(AnalysisMode mode, bool verify = false)
             where T : IController
         {
@@ -45,6 +51,28 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             yield return Ictss5<T>(mode, verify);
             yield return Ictss6<T>(mode, verify);
             yield return Ictss7<T>(mode, verify);
+        }
+
+        public static Model Ictss1WithoutPlant<T>(AnalysisMode mode, bool verify = false) where T : IController
+        {
+            return ChooseAnalysisMode(
+                new ModelBuilder(nameof(Ictss1))
+                    .DisablePlants()
+                    .DefineTask(5, Produce, Drill, Insert, Tighten, Polish, Consume)
+
+                    .AddRobot(Produce, Drill, Insert)
+                    .AddRobot(Insert, Drill)
+                    .AddRobot(Tighten, Polish, Tighten, Drill)
+                    .AddRobot(Polish, Consume)
+
+                    .AddCart(Route(0, 1), Route(0, 2), Route(0, 3))
+                    .AddCart(Route(1, 2), Route(0, 1))
+                    .AddCart(Route(2, 3))
+
+                    .ChooseController<T>()
+                    .EnableControllerVerification(verify)
+                    .CentralReconfiguration()
+                , mode);
         }
 
         public static Model Ictss1<T>(AnalysisMode mode, bool verify = false) where T : IController

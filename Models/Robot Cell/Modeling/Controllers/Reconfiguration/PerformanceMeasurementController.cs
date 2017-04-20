@@ -49,8 +49,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
                 CollectedTimeValues[agent.ID].Add(new Tuple<TimeSpan, TimeSpan>(_stopwatch.Elapsed, reconfTime));
                 
             }
-            
             return resultingTasks;
+            
+
         }
 
         public bool ReconfigurationFailure => _actingController.ReconfigurationFailure;

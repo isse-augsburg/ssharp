@@ -32,11 +32,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		private Robot _position;
 
-        [Reliability(mttf:120, mttr:10)]
+        [Reliability(mttf:50, mttr:10)]
         public Fault Broken = new TransientFault();
 
         public Workpiece LoadedWorkpiece;
-		public Fault Lost = new TransientFault(); // intolerable fault
+        [Reliability(mttf: 50, mttr: 10)]
+        public Fault Lost = new TransientFault(); // intolerable fault
 
 		public Cart(Robot startPosition, params Route[] routes)
 		{

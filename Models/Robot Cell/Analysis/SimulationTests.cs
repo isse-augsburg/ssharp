@@ -28,6 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using System.Linq;
 	using System.Reflection;
 	using Modeling;
+	using Modeling.Controllers;
 	using Modeling.Controllers.Reconfiguration;
 	using Modeling.Plants;
 	using NUnit.Framework;
@@ -40,7 +41,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
         internal class ProfileBasedSimulator
         {
             private Model model { get; set; }
-            Tuple<Fault, ReliabilityAttribute>[] faults;
+            Tuple<Fault, ReliabilityAttribute, IComponent>[] faults;
             private Simulator Simulator;
 
             public ProfileBasedSimulator(Model model)
@@ -52,13 +53,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
             private void CollectFaults()
             {
-                var faultInfo = new HashSet<Tuple<Fault, ReliabilityAttribute>>();
+                var faultInfo = new HashSet<Tuple<Fault, ReliabilityAttribute, IComponent>>();
                 model.VisitPostOrder(component =>
                 {
                     var faultFields =
                         from faultField in component.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
                         where typeof(Fault).IsAssignableFrom(faultField.FieldType)
-                        select Tuple.Create((Fault)faultField.GetValue(component), faultField.GetCustomAttribute<ReliabilityAttribute>());
+                        select Tuple.Create((Fault)faultField.GetValue(component), faultField.GetCustomAttribute<ReliabilityAttribute>(), component);
 
                     foreach (var info in faultFields)
                         faultInfo.Add(info);
@@ -77,10 +78,15 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                         if (fault.Item2?.MTTF > 0 && !fault.Item1.IsActivated && rd.NextDouble() <= 1 - Math.Exp(-1 * (1 / fault.Item2.MTTF) * x))
                         {
                             fault.Item1.ForceActivation();
+                            Console.WriteLine("Activation of: " + fault.Item1.Name);
                         }
-                        if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rd.NextDouble() <= 1 - Math.Exp((-1 * (1 / fault.Item2.MTTR) * x)))
-                        {
-                            fault.Item1.SuppressActivation();
+                        else { 
+                            if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rd.NextDouble() <= 1 - Math.Exp((-1 * (1 / fault.Item2.MTTR) * x)))
+                            {
+                                fault.Item1.SuppressActivation();
+                                (fault.Item3 as RobotAgent)?.RestoreRobot();
+                                Console.WriteLine("Deactivation of: " + fault.Item1.Name);
+                            }
                         }
                     }
                     Simulator.SimulateStep();
@@ -96,7 +102,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
         [Test]
 		public void Simulate()
 		{
-			var model = SampleModels.DefaultInstance<PerformanceMeasurementController<FastController>>();
+			var model = SampleModels.DefaultInstanceWithoutPlant<PerformanceMeasurementController<FastController>>();
 			model.Faults.SuppressActivations();
 
 			var simulator = new Simulator(model);
@@ -106,10 +112,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
         [Test]
         public void SimulateProfileBased()
         {
-            var model = SampleModels.DefaultInstance<PerformanceMeasurementController<FastController>>();
+            var model = SampleModels.DefaultInstanceWithoutPlant<PerformanceMeasurementController<FastController>>();
             model.Faults.SuppressActivations();
             var profileBasedSimulator = new ProfileBasedSimulator(model);
-            profileBasedSimulator.Simulate(numberOfSteps: 10000);
+            profileBasedSimulator.Simulate(numberOfSteps: 100000);
         }
 
         public static void PrintTrace(Simulator simulator, int steps)

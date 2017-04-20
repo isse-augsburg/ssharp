@@ -142,5 +142,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			public override void AllocateRoles(IEnumerable<Role> roles) { }
 			public override void RemoveAllocatedRoles(IEnumerable<Role> roles) { }
 		}
+
+        ///<summary> 
+        /// Enable to revaluate the currently available  capabilities
+        /// Thus, it is possible to add tools to an Agent at run time or repair defects 
+        ///</summary>
+        public abstract void EvaluateCurrentlyAvailableCapabilites();
+
+
 	}
 }

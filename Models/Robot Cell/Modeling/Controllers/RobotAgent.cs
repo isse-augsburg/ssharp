@@ -31,15 +31,22 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 	internal class RobotAgent : Agent, ICapabilityHandler<ProduceCapability>, ICapabilityHandler<ProcessCapability>, ICapabilityHandler<ConsumeCapability>
 	{
-		public readonly Fault Broken = new TransientFault();
-		public readonly Fault ResourceTransportFault = new TransientFault();
 
-		// In analyses without hardware components, these replace the Tool.Broken faults.
-		// When hardware components are included, these faults are ignored.
-		public readonly Fault DrillBroken = new TransientFault();
-		public readonly Fault InsertBroken = new TransientFault();
-		public readonly Fault TightenBroken = new TransientFault();
-		public readonly Fault PolishBroken = new TransientFault();
+        [Reliability(mttf: 10000, mttr: 10)]
+        public readonly Fault Broken = new TransientFault();
+        [Reliability(mttf: 1000, mttr: 10)]
+        public readonly Fault ResourceTransportFault = new TransientFault();
+
+        // In analyses without hardware components, these replace the Tool.Broken faults.
+        // When hardware components are included, these faults are ignored.
+        [Reliability(mttf: 1000, mttr: 10)]
+        public readonly Fault DrillBroken = new TransientFault();
+        [Reliability(mttf: 1000, mttr: 10)]
+        public readonly Fault InsertBroken = new TransientFault();
+        [Reliability(mttf: 1000, mttr: 10)]
+        public readonly Fault TightenBroken = new TransientFault();
+        [Reliability(mttf: 1000, mttr: 10)]
+        public readonly Fault PolishBroken = new TransientFault();
 
 		private ICapability _currentCapability;
 
@@ -47,7 +54,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		private readonly List<Task> _tasks;
 		private readonly List<Resource> _resources;
 
-		public RobotAgent(ICapability[] capabilities, Robot robot, List<Task> tasks, List<Resource> resources)
+	    [Hidden(HideElements = true)]
+	    private Dictionary<ProductionAction, List<ICapability>> unusedProductionCapabilites = new Dictionary<ProductionAction, List<ICapability>>();
+
+        public RobotAgent(ICapability[] capabilities, Robot robot, List<Task> tasks, List<Resource> resources)
 			: base(capabilities)
 		{
 			Robot = robot;
@@ -58,6 +68,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			ResourceTransportFault.Name = $"{Name}.{nameof(ResourceTransportFault)}";
 
 			AddTolerableFaultEffects();
+
+            foreach (ProductionAction type in Enum.GetValues(typeof(ProductionAction)))
+            {
+                unusedProductionCapabilites.Add(type, new List<ICapability>());
+            }
 		}
 
 		protected RobotAgent() { } // for fault effects
@@ -84,7 +99,37 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return Robot?.CanTransfer() ?? true;
 		}
 
-		protected override bool CheckAllocatedCapability(ICapability capability)
+	    ///<summary> 
+	    /// Enable to revaluate the currently available  capabilities
+	    /// Thus, it is possible to add tools to an Agent at run time or repair defects 
+	    ///</summary>
+	    public override void EvaluateCurrentlyAvailableCapabilites()
+	    {
+	        throw  new NotImplementedException();
+	    }
+
+	    public void AddTool(ProcessCapability newCapability)
+	    {
+            _availableCapabilities.Add(newCapability);   
+	    }
+
+	    public void AddTools(IEnumerable<ProcessCapability> newCapabilities)
+	    {
+	        foreach (var capability in newCapabilities)
+	        {
+	            AddTool(capability);
+	        }
+	    }
+
+        /// <summary>
+        /// Adds all Capabilites that have been removed before
+        /// </summary>
+	    public void RestoreRobot()
+	    {
+            _availableCapabilities.AddRange(unusedProductionCapabilites.Values.SelectMany(x => x));   
+	    }
+
+	    protected override bool CheckAllocatedCapability(ICapability capability)
 		{
 			if (!CanSwitchTools())
 				return false;
@@ -172,8 +217,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 					_currentCapability = capability;
 				else
 				{
-					_availableCapabilities.RemoveAll(c => !c.Equals(_currentCapability));
-					return;
+				    foreach (var capa in _availableCapabilities.Where(c => !c.Equals(_currentCapability)))
+				    {
+                        if (capa.GetType() != typeof(ProcessCapability))
+                            continue;
+                        unusedProductionCapabilites[((ProcessCapability)capa).ProductionAction].Add(capa);
+                    }
+                    _availableCapabilities.RemoveAll(c => !c.Equals(_currentCapability));
+                    return;
 				}
 			}
 
@@ -181,6 +232,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (!ApplyCurrentCapability())
 			{
 				_availableCapabilities.Remove(capability);
+                unusedProductionCapabilites[capability.ProductionAction].Add(capability);
 			}
 			else
 			{

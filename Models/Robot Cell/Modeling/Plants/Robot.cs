@@ -33,7 +33,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		private Workpiece _workpiece;
 
-		//public Fault SwitchFault = new TransientFault();
+        [Reliability(mttf:100, mttr:10)]
+        public Fault BrokenFault = new TransientFault();
+
+        [Reliability(mttf: 50, mttr: 10)]
+        public Fault SwitchFault = new TransientFault();
 
 		// intolerable fault
 		public Fault SwitchToWrongToolFault = new TransientFault();
@@ -150,7 +154,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			broken.Subsumes(Tools.Select(tool => tool.Broken));
 		}
 
-		[FaultEffect, Priority(2)]
+		[FaultEffect(Fault = nameof(BrokenFault)), Priority(2)]
 		internal class BrokenEffect : Robot
 		{
 			public override bool ApplyCapability() => false;
@@ -160,12 +164,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			public override bool CanTransfer() => false;
 		}
 
-		//[FaultEffect(Fault = nameof(SwitchFault)), Priority(1)]
-		//internal class SwitchEffect : Robot
-		//{
-		//	public override bool SwitchCapability(ProcessCapability capability) => false;
-		//	public override bool CanSwitch() => false;
-		//}
+		[FaultEffect(Fault = nameof(SwitchFault)), Priority(1)]
+		internal class SwitchEffect : Robot
+		{
+			public override bool SwitchCapability(ProcessCapability capability) => false;
+			public override bool CanSwitch() => false;
+		}
 
 		[FaultEffect(Fault = nameof(SwitchToWrongToolFault)), Priority(1)]
 		internal class SwitchToWrongToolEffect : Robot
