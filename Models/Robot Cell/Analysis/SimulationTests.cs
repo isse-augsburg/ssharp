@@ -84,7 +84,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                             if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rd.NextDouble() <= 1 - Math.Exp((-1 * (1 / fault.Item2.MTTR) * x)))
                             {
                                 fault.Item1.SuppressActivation();
-                                (fault.Item3 as RobotAgent)?.RestoreRobot();
+                                (fault.Item3 as RobotAgent)?.RestoreRobot(fault.Item1);
                                 Console.WriteLine("Deactivation of: " + fault.Item1.Name);
                             }
                         }
@@ -115,7 +115,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             var model = SampleModels.DefaultInstanceWithoutPlant<PerformanceMeasurementController<FastController>>();
             model.Faults.SuppressActivations();
             var profileBasedSimulator = new ProfileBasedSimulator(model);
-            profileBasedSimulator.Simulate(numberOfSteps: 100000);
+            profileBasedSimulator.Simulate(numberOfSteps: 1000);
         }
 
         public static void PrintTrace(Simulator simulator, int steps)

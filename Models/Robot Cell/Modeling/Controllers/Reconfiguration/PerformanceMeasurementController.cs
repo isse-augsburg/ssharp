@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 {
     using System.Diagnostics;
+    using System.IO;
     using Odp;
     using Odp.Reconfiguration;
     using SafetySharp.Modeling;
@@ -42,13 +43,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
             MicrostepScheduler.StartPerformanceMeasurement(_actingController);
             var resultingTasks = this._actingController.CalculateConfigurations(context, tasks);
             var reconfTime = MicrostepScheduler.StopPerformanceMeasurement(_actingController).Elapsed;
-            _stopwatch.Restart();
-            
+            using (StreamWriter sw = new StreamWriter(@"C:\Users\Eberhardinger\Documents\test.csv", true))
+            {
+                sw.WriteLine(_stopwatch.ElapsedMilliseconds.ToString() + "; " + reconfTime.Milliseconds.ToString());
+            }
             foreach (var agent in Agents)
             {
                 CollectedTimeValues[agent.ID].Add(new Tuple<TimeSpan, TimeSpan>(_stopwatch.Elapsed, reconfTime));
-                
+
             }
+            _stopwatch.Restart();
             return resultingTasks;
             
 
