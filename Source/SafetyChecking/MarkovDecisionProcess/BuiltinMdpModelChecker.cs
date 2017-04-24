@@ -674,7 +674,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 			else if (finallyBoundedFormula != null && finallyBoundedFormula.Operator == UnaryOperator.Finally)
 			{
-				maxResult = CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
+				maxResult = CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
 			}
 			else
 			{

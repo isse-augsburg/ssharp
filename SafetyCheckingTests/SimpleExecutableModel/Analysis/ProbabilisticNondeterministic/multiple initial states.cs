@@ -51,6 +51,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			mdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			mdpGenerator.AddFormulaToCheck(finally2);
 			var mdp = mdpGenerator.GenerateMarkovDecisionProcess();
+			mdp.ExportToGv(Output.TextWriterAdapter());
 			var typeOfModelChecker = typeof(BuiltinMdpModelChecker);
 			var modelChecker = (MdpModelChecker)Activator.CreateInstance(typeOfModelChecker, mdp, Output.TextWriterAdapter());
 			using (modelChecker)
@@ -59,8 +60,8 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 				maxProbabilityOfFinally2 = modelChecker.CalculateMaximalProbability(finally2);
 			}
 
-			minProbabilityOfFinally2.Between(0.33, 0.34).ShouldBe(true);
-			maxProbabilityOfFinally2.Between(0.33, 0.34).ShouldBe(true);
+			minProbabilityOfFinally2.Between(0.0, 0.0).ShouldBe(true);
+			maxProbabilityOfFinally2.Between(1.0, 1.0).ShouldBe(true);
 		}
 
 		private class Model : SimpleModelBase

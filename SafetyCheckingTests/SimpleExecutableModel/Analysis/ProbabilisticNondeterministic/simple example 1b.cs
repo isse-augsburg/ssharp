@@ -41,7 +41,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 		[Fact]
 		public void Check()
 		{
-			var m = new SimpleExample1a.Model();
+			var m = new Model();
 			Probability minProbabilityOfFinal1;
 			Probability minProbabilityOfFinal2;
 			Probability minProbabilityOfFinal3;
@@ -71,12 +71,12 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 				maxProbabilityOfFinal3 = modelChecker.CalculateMaximalProbability(final3Formula);
 			}
 
-			minProbabilityOfFinal1.Is(1.0, 0.000001).ShouldBe(true);
-			minProbabilityOfFinal2.Is(1.0, 0.000001).ShouldBe(true);
-			minProbabilityOfFinal3.Is(1.0, 0.000001).ShouldBe(true);
-			maxProbabilityOfFinal1.Is(1.0, 0.000001).ShouldBe(true);
-			maxProbabilityOfFinal2.Is(1.0, 0.000001).ShouldBe(true);
-			maxProbabilityOfFinal3.Is(1.0, 0.000001).ShouldBe(true);
+			minProbabilityOfFinal1.Is(0.4, 0.000001).ShouldBe(true);
+			minProbabilityOfFinal2.Is(0.0, 0.000001).ShouldBe(true);
+			minProbabilityOfFinal3.Is(0.0, 0.000001).ShouldBe(true);
+			maxProbabilityOfFinal1.Is(0.4, 0.000001).ShouldBe(true);
+			maxProbabilityOfFinal2.Is(0.6, 0.000001).ShouldBe(true);
+			maxProbabilityOfFinal3.Is(0.6, 0.000001).ShouldBe(true);
 		}
 
 		public class Model : SimpleModelBase

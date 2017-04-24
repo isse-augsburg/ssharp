@@ -166,12 +166,17 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 					_continuationId = chosenValue.ContinuationId + 1;
 
+					var nextProbability = previousProbability;
+
+					if (_choiceType.Peek()==ChoiceTypeProbabilitstic)
+						nextProbability = previousProbability / valueCount; //placeholder value (for non probabilistic choice)
+
 					var newChosenValue =
 						new LtmdpChosenValue
 						{
 							OptionIndex = chosenValue.OptionIndex + 1,
 							ContinuationId = _continuationId,
-							Probability = previousProbability / valueCount //placeholder value (for non deterministic choice)
+							Probability = nextProbability
 						};
 					_chosenValues.Push(newChosenValue);
 					return true;

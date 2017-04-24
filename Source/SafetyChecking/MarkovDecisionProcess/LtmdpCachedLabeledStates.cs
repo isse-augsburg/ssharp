@@ -140,12 +140,27 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		public void TransformContinuationIdsToDistributions(LtmdpContinuationDistributionMapper cidToDidMapper)
 		{
 			_continuationIdMode = false;
+			
 			for (var i = 0; i < _transitionsWithContinuationIdCount; i++)
 			{
-				var newTransitionWithDistributionIndex = _transitionsWithDistributionIdCount;
-				_transitionsWithDistributionIdMemory[newTransitionWithDistributionIndex] =
-					_transitionsWithContinuationIdMemory[i]; // for now, just copy
-				_transitionsWithDistributionIdCount++;
+				var currentTransition = _transitionsWithContinuationIdMemory[i];
+				// currentTransition.Distribution contains the continuationId as placeholder. Must be replaced
+				var enumerator = cidToDidMapper.GetDistributionsOfContinuationEnumerator(currentTransition.Distribution);
+				while (enumerator.MoveNext())
+				{
+					_transitionsWithDistributionIdMemory[_transitionsWithDistributionIdCount] =
+						new LtmdpTransition
+						{
+							TargetStatePointer = currentTransition.TargetStatePointer,
+							Formulas = currentTransition.Formulas,
+							ActivatedFaults = currentTransition.ActivatedFaults,
+							Flags = currentTransition.Flags,
+							Distribution = enumerator.CurrentDistributionId, // insert correct distribution id
+							Probability = currentTransition.Probability
+
+						};
+					_transitionsWithDistributionIdCount++;
+				}
 			}
 		}
 

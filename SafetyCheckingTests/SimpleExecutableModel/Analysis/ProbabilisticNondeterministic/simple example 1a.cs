@@ -73,8 +73,8 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			}
 
 			minProbabilityOfFinal1.Is(1.0, 0.000001).ShouldBe(true);
-			minProbabilityOfFinal2.Is(1.0, 0.000001).ShouldBe(true);
-			minProbabilityOfFinal3.Is(1.0, 0.000001).ShouldBe(true);
+			minProbabilityOfFinal2.Is(0.0, 0.000001).ShouldBe(true);
+			minProbabilityOfFinal3.Is(0.0, 0.000001).ShouldBe(true);
 			maxProbabilityOfFinal1.Is(1.0, 0.000001).ShouldBe(true);
 			maxProbabilityOfFinal2.Is(1.0, 0.000001).ShouldBe(true);
 			maxProbabilityOfFinal3.Is(1.0, 0.000001).ShouldBe(true);
