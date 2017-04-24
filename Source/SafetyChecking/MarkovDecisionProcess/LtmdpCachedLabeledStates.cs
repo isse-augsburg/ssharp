@@ -148,6 +148,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				var enumerator = cidToDidMapper.GetDistributionsOfContinuationEnumerator(currentTransition.Distribution);
 				while (enumerator.MoveNext())
 				{
+
+					if (_transitionsWithDistributionIdCount >= _capacity)
+						throw new OutOfMemoryException("Unable to store an additional transition. Try increasing the successor state capacity.");
+
 					_transitionsWithDistributionIdMemory[_transitionsWithDistributionIdCount] =
 						new LtmdpTransition
 						{
