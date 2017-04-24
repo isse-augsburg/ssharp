@@ -93,7 +93,8 @@ namespace Tests.Analysis.Probabilistic
 			{
 				protected override bool ReturnFalseInStep4()
 				{
-					return true;
+					var test = true;
+					return test;
 				}
 			}
 		}

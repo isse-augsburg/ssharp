@@ -112,6 +112,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		public override void PrepareNextState()
 		{
 			_firstPath = true;
+			_choiceIndex = -1;
+			_continuationId = 0;
+			_nextFreeContinuationId = 1;
+			CidToDidMapper.Clear();
 		}
 
 		private Probability GetProbabilityOfPreviousPath()
@@ -211,7 +215,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_chosenValues.Push(newChosenValue);
 
 			_nextFreeContinuationId = _nextFreeContinuationId + valueCount;
-			CidToDidMapper.NonDeterministicSplit(oldContinuationId, _continuationId, oldContinuationId + valueCount);
+			CidToDidMapper.NonDeterministicSplit(oldContinuationId, _continuationId, _continuationId + valueCount - 1);
 
 			return 0;
 		}
@@ -247,7 +251,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_chosenValues.Push(newChosenValue);
 
 			_nextFreeContinuationId = _nextFreeContinuationId + valueCount;
-			CidToDidMapper.ProbabilisticSplit(oldContinuationId, _continuationId, oldContinuationId + valueCount);
+			CidToDidMapper.ProbabilisticSplit(oldContinuationId, _continuationId, _continuationId + valueCount - 1);
 
 			return 0;
 		}

@@ -85,6 +85,7 @@
     <Compile Include="DataStructures\SparseDoubleMatrixTests.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcBuilderTests.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpBuilderTests.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpChoiceResolverTests.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpContinuationDistributionMapperTests.cs" />
     <Compile Include="ProbabilisticModelChecker\BuiltinDtmcModelCheckerTests.cs" />
     <Compile Include="ProbabilisticModelChecker\BuiltinMdpModelCheckerTests.cs" />
