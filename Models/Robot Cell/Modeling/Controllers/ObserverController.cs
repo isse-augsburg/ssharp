@@ -66,6 +66,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public ReconfStates ReconfigurationState { get; protected set; } = ReconfStates.NotSet;
 
+		public ReconfStates OracleState { get; protected set; } = ReconfStates.NotSet;
+
 		protected abstract void Reconfigure();
 
 		public void ScheduleReconfiguration()
@@ -77,9 +79,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		{
 			agent.Constraints = new List<Func<bool>>
 			{
+#if !ENABLE_F6 // missing Observer constraint
 				// I/O Consistency
 				() => agent.AllocatedRoles.All(role => role.PreCondition.Port == null || agent.Inputs.Contains(role.PreCondition.Port)),
 				() => agent.AllocatedRoles.All(role => role.PostCondition.Port == null || agent.Outputs.Contains(role.PostCondition.Port)),
+#endif
 				// Capability Consistency
 				() =>
 					agent.AllocatedRoles.All(
@@ -179,6 +183,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 			_lastRoleAllocations = roleAllocations;
 			var allocatedCapabilities = 0;
+			var remainingCapabilities = Tasks[0].Capabilities.Length;
 
 			for (var i = 0; i < roleAllocations.Length; i++)
 			{
@@ -188,15 +193,102 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				var preAgent = i == 0 ? null : roleAllocations[i - 1].Item1;
 				var postAgent = i == roleAllocations.Length - 1 ? null : roleAllocations[i + 1].Item1;
 
+#if ENABLE_F4 || ENABLE_F4b // error F4: incorrect Condition.State format
+				var preCondition = new Condition(Tasks[0], preAgent, remainingCapabilities);
+				var postCondition = new Condition(Tasks[0], postAgent, remainingCapabilities - capabilities.Length);
+#else
 				var preCondition = new Condition(Tasks[0], preAgent, allocatedCapabilities);
 				var postCondition = new Condition(Tasks[0], postAgent, allocatedCapabilities + capabilities.Length);
+#endif
 				var role = new Role(preCondition, postCondition, allocatedCapabilities, capabilities.Length);
 
 				allocatedCapabilities += capabilities.Length;
+				remainingCapabilities -= capabilities.Length;
 
 				agent.Configure(role);
 			}
 		}
+
+		#region oracle for back-to-back testing
+
+		protected bool IsReconfPossible(IEnumerable<RobotAgent> robotsAgents, IEnumerable<Task> tasks)
+		{
+			var isReconfPossible = true;
+			var matrix = GetConnectionMatrix(robotsAgents);
+
+			foreach (var task in tasks)
+			{
+				isReconfPossible &=
+					task.Capabilities.All(capability => robotsAgents.Any(agent => ContainsCapability(agent.AvailableCapabilities, capability)));
+				if (!isReconfPossible)
+					break;
+
+				var candidates = robotsAgents.Where(agent => ContainsCapability(agent.AvailableCapabilities, task.Capabilities.First())).ToArray();
+
+				for (var i = 0; i < task.Capabilities.Length - 1; i++)
+				{
+					candidates =
+						candidates.SelectMany(r => matrix[r])
+								  .Where(r => ContainsCapability(r.AvailableCapabilities, task.Capabilities[i + 1]))
+								  .ToArray();
+					if (candidates.Length == 0)
+					{
+						isReconfPossible = false;
+					}
+				}
+			}
+
+			return isReconfPossible;
+		}
+
+		private Dictionary<RobotAgent, List<RobotAgent>> GetConnectionMatrix(IEnumerable<RobotAgent> robotAgents)
+		{
+			var matrix = new Dictionary<RobotAgent, List<RobotAgent>>();
+
+			foreach (var robot in robotAgents)
+			{
+				var list = new List<RobotAgent>(robotAgents.Where(r => IsConnected(robot, r, new HashSet<RobotAgent>())));
+				matrix.Add(robot, list);
+			}
+
+			return matrix;
+		}
+
+		private static bool IsConnected(RobotAgent sourceRobot, RobotAgent targetRobot, HashSet<RobotAgent> seenRobots)
+		{
+			if (sourceRobot == targetRobot)
+				return true;
+
+			if (!seenRobots.Add(sourceRobot))
+				return false;
+
+#if ENABLE_F2 // F2: routes are assumed to be unidirectional, while they are in fact bidirectional.
+			  // Since this is reflected by incorrect assignments to agents' Inputs and Outputs,
+			  // the oracle must be fixed to account for this.
+			var neighbouringRobots = sourceRobot.Outputs.Concat(sourceRobot.Inputs)
+				.SelectMany(cart => cart.Outputs.Concat(cart.Inputs));
+#else
+			var neighbouringRobots = sourceRobot.Outputs.SelectMany(cart => cart.Outputs);
+#endif
+
+			foreach (var neighbouringRobot in neighbouringRobots)
+			{
+				if (neighbouringRobot == targetRobot)
+					return true;
+
+				if (IsConnected((RobotAgent)neighbouringRobot, targetRobot, seenRobots))
+					return true;
+			}
+
+			return false;
+		}
+
+		private bool ContainsCapability(IEnumerable<Capability> capabilities, Capability capability)
+		{
+			return capabilities.Any(c => c.IsEquivalentTo(capability));
+		}
+
+#endregion
 
 		[FaultEffect(Fault = nameof(ReconfigurationFailure))]
 		public abstract class ReconfigurationFailureEffect : ObserverController
