@@ -49,7 +49,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_mdp = new LabeledTransitionMarkovDecisionProcess(Context.ModelCapacity.NumberOfStates, Context.ModelCapacity.NumberOfTransitions);
 			_mdp.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<TExecutableModel>(_mdp));
+			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<TExecutableModel>(_mdp, configuration));
 			if (terminateEarlyCondition != null)
 			{
 				_mdp.CreateStutteringState(Context.StutteringStateIndex);

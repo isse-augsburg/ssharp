@@ -40,7 +40,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// </summary>
 		internal class LtmdpBuilder<TExecutableModel> : IBatchedTransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 		{
-			private const int MaxNumberOfDistributionsPerState = 1024;
+			private int _maxNumberOfDistributionsPerState;
 
 			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
 
@@ -48,37 +48,44 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			///   Initializes a new instance.
 			/// </summary>
 			/// <param name="ltmdp">The Markov chain that should be built up.</param>
-			public LtmdpBuilder(LabeledTransitionMarkovDecisionProcess ltmdp)
+			public LtmdpBuilder(LabeledTransitionMarkovDecisionProcess ltmdp, AnalysisConfiguration configuration)
 			{
 				Requires.NotNull(ltmdp, nameof(ltmdp));
 				_ltmdp = ltmdp;
-
-				InitializeDistributionIndexes();
+				
+				InitializeDistributionChainIndexCache(configuration.SuccessorCapacity);
 			}
 
 			// Each worker has its own LtmdpBuilder. Thus, we can add a buffer here
 			// We create this index here in this class to avoid garbage.
-			private int[] _distributionIndexes;
-			private int _distributionMaxNumber;
+			private readonly MemoryBuffer _distributionChainIndexCacheBuffer = new MemoryBuffer();
+			private int* _distributionChainIndexCache;
 
-			private void InitializeDistributionIndexes()
+			private void InitializeDistributionChainIndexCache(long maxNumberOfDistributionsPerState)
 			{
+				Assert.That(maxNumberOfDistributionsPerState<=int.MaxValue, "maxNumberOfDistributionsPerState must fit into an integer");
+
+				_maxNumberOfDistributionsPerState = (int)maxNumberOfDistributionsPerState;
+				_distributionChainIndexCacheBuffer.Resize((long)_maxNumberOfDistributionsPerState * sizeof(int), zeroMemory: false);
+				_distributionChainIndexCache = (int*)_distributionChainIndexCacheBuffer.Pointer;
 				
-				_distributionIndexes = new int[MaxNumberOfDistributionsPerState];
-				for (var i = 0; i < MaxNumberOfDistributionsPerState; i++)
-				{
-					_distributionIndexes[i] = -1;
-				}
-				_distributionMaxNumber = -1;
+				ResetDistributionChainIndexCache();
 			}
 
-			private void ResetDistributionIndexes()
+			private void ResetDistributionChainIndexCache()
 			{
-				for (var i = 0; i < _distributionMaxNumber; i++)
-				{
-					_distributionIndexes[i] = -1;
-				}
-				_distributionMaxNumber = -1;
+				MemoryBuffer.SetAllBitsMemoryWithInitblk.ClearWithMinus1(_distributionChainIndexCache, _maxNumberOfDistributionsPerState);
+			}
+
+			private int TryToFindDistributionChainIndexInCache(int distribution)
+			{
+				return _distributionChainIndexCache[distribution];
+			}
+
+			private void UpdateDistributionChainIndexCache(int distribution, int locationOfEntry)
+			{
+				Assert.That(distribution < _maxNumberOfDistributionsPerState, "distribution exceeds _maxNumberOfDistributionsPerState.");
+				_distributionChainIndexCache[distribution] = locationOfEntry;
 			}
 
 			[Conditional("DEBUG")]
@@ -139,6 +146,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 								Distribution = distribution,
 								NextElementIndex = -1,
 							};
+						UpdateDistributionChainIndexCache(distribution, locationOfNewEntry);
 						return locationOfNewEntry;
 					}
 					//else continue iteration
@@ -168,12 +176,18 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 						Distribution = distribution,
 						NextElementIndex = -1,
 					};
+				UpdateDistributionChainIndexCache(distribution, locationOfNewEntry);
 				return locationOfNewEntry;
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			private int FindOrCreateDistributionChainElementWithDistribution(int sourceState, bool areInitialTransitions, int distribution)
 			{
+				//try to find in cache
+				var valueInCache = TryToFindDistributionChainIndexInCache(distribution);
+				if (valueInCache!=-1)
+					return valueInCache;
+
 				var startPositionOfDistributionChain = GetStartPositionOfDistributionChain(sourceState, areInitialTransitions);
 
 				// now we select the correct distribution
@@ -293,7 +307,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			public void ProcessTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, int sourceState,
 									   TransitionCollection transitions, int transitionCount, bool areInitialTransitions)
 			{
-				ResetDistributionIndexes();
+				ResetDistributionChainIndexCache();
 
 				// Note, other threads might access _ltmdp at the same time
 				CheckIfTransitionsCanBeProcessed(transitionCount);

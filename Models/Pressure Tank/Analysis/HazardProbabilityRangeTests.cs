@@ -35,7 +35,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 
-	class HazardProbabilityTests
+	class HazardProbabilityRangeTests
 	{
 		[Test]
 		public void CalculateHazardIsRuptured()
@@ -46,7 +46,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			model.Sensor.SuppressIsEmpty.ProbabilityOfOccurrence = new Probability(0.0);
 			model.Timer.SuppressTimeout.ProbabilityOfOccurrence = new Probability(0.0001);
 
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Tank.IsRuptured,200);
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.Tank.IsRuptured,200);
 			Console.Write($"Probability of hazard: {result}");
 		}
 
@@ -59,7 +59,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			model.Sensor.SuppressIsFull.ProbabilityOfOccurrence = Probability.Zero;
 			model.Timer.SuppressTimeout.ProbabilityOfOccurrence = Probability.Zero;
 
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Tank.IsDepleted,200);
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.Tank.IsDepleted,200);
 			Console.Write($"Probability of hazard: {result}");
 		}
 	}

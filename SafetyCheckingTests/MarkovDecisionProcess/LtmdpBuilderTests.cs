@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 namespace Tests.MarkovDecisionProcess
 {
 	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.AnalysisModelTraverser;
 	using ISSE.SafetyChecking.GenericDataStructures;
 	using ISSE.SafetyChecking.MarkovDecisionProcess;
 	using ISSE.SafetyChecking.Utilities;
@@ -83,7 +84,7 @@ namespace Tests.MarkovDecisionProcess
 		public void OneReflexiveTransition()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp,AnalysisConfiguration.Default);
 
 			// add initial state
 			ClearTransitions();
@@ -132,7 +133,7 @@ namespace Tests.MarkovDecisionProcess
 		public void ThreeReflexiveStatesFromInitialState()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
 
 			// add initial state
 			ClearTransitions();
@@ -194,7 +195,7 @@ namespace Tests.MarkovDecisionProcess
 		public void ThreeReflexiveStatesFromNonInitialState()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
 
 			// add initial state
 			ClearTransitions();
@@ -263,7 +264,7 @@ namespace Tests.MarkovDecisionProcess
 		public void StatesFromNonInitialStateWithMoreDistributions()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
 
 			// add initial state
 			ClearTransitions();
