@@ -29,6 +29,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using Modeling;
 	using Utilities;
 	using System;
+	using System.Diagnostics;
 
 	/// <summary>
 	///   Represents a stack that is used to resolve nondeterministic choices during state space enumeration.
@@ -178,7 +179,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 				// Otherwise, we've chosen all values of the last choice, so we're done with it
 				_valueCount.Remove();
+				_choiceType.Remove();
 			}
+
+			AssertThatDatastructureIsIntact();
 
 			// If we reach this point, we know that we've chosen all values of all choices, so there are no further paths
 			return false;
@@ -228,6 +232,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		public override int HandleProbabilisticChoice(int valueCount)
 		{
 			++_choiceIndex;
+
+			if (_nextFreeContinuationId >= 185 - valueCount)
+			{
+
+			}
 
 			// If we have a preselected value that we should choose for the current path, return it
 			var chosenValuesMaxIndex = _chosenValues.Count - 1;
@@ -409,6 +418,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			_chosenValues.SafeDispose();
 			_valueCount.SafeDispose();
+		}
+
+		[Conditional("DEBUG")]
+		public void AssertThatDatastructureIsIntact()
+		{
+			Assert.That(_valueCount.Count == _chosenValues.Count, "All stacks must have the same size");
+			Assert.That(_choiceType.Count == _chosenValues.Count, "All stacks must have the same size");
 		}
 	}
 }
