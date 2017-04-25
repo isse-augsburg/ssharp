@@ -162,21 +162,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				if (_valueCount.Peek() > chosenValue.OptionIndex + 1)
 				{
 					var previousProbability = GetProbabilityUntilIndex(_valueCount.Count - 2);
-					var valueCount = _valueCount.Peek();
 
 					_continuationId = chosenValue.ContinuationId + 1;
-
-					var nextProbability = previousProbability;
-
-					if (_choiceType.Peek()==ChoiceTypeProbabilitstic)
-						nextProbability = previousProbability / valueCount; //placeholder value (for non probabilistic choice)
-
+					
 					var newChosenValue =
 						new LtmdpChosenValue
 						{
 							OptionIndex = chosenValue.OptionIndex + 1,
 							ContinuationId = _continuationId,
-							Probability = nextProbability
+							Probability = previousProbability
 						};
 					_chosenValues.Push(newChosenValue);
 					return true;

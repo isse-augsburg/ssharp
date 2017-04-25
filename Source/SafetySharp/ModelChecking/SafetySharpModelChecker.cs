@@ -135,6 +135,7 @@ namespace SafetySharp.Analysis
 
 			var markovDecisionProcessGenerator = new MdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
 			markovDecisionProcessGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
+			markovDecisionProcessGenerator.Configuration.SuccessorCapacity *= 8;
 			var mdp = markovDecisionProcessGenerator.GenerateMarkovDecisionProcess(stateFormula);
 			using (var modelChecker = new BuiltinMdpModelChecker(mdp, System.Console.Out))
 			{
