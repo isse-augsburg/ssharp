@@ -40,7 +40,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 	/// </summary>
 	public class SafetyAnalysis<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		//private readonly HashSet<FaultSet> _checkedSets = new HashSet<FaultSet>();
+		private readonly HashSet<FaultSet> _checkedSets = new HashSet<FaultSet>();
 		private uint _checkedSetCount = 0;
 		private readonly Dictionary<FaultSet, CounterExample<TExecutableModel>> _counterExamples = new Dictionary<FaultSet, CounterExample<TExecutableModel>>();
 		private readonly Dictionary<FaultSet, Exception> _exceptions = new Dictionary<FaultSet, Exception>();
@@ -262,7 +262,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 
 			_results.IsComplete = isComplete;
 			_results.Time = stopwatch.Elapsed;
-			_results.SetResult(minimalCritical, _checkedSetCount, _counterExamples, _exceptions);
+			_results.SetResult(minimalCritical, _checkedSetCount, _checkedSets, _counterExamples, _exceptions);
 
 			return _results;
 		}
@@ -271,7 +271,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		{
 			_safeSets = new FaultSetCollection(faultsInBaseModel.Length);
 			_criticalSets = new FaultSetCollection(faultsInBaseModel.Length);
-			//_checkedSets.Clear();
+			_checkedSets.Clear();
 			_counterExamples.Clear();
 			_exceptions.Clear();
 		}
@@ -349,19 +349,23 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 			{
 				var result = _backend.CheckCriticality(set, activationMode);
 
-				if (!result.FormulaHolds)
+				if (Configuration.CollectFaultSets)
 				{
-					//if (!isHeuristicSuggestion)
-						//ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
+					if (!result.FormulaHolds)
+					{
+						if (!isHeuristicSuggestion)
+							ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }}", ConsoleColor.DarkRed);
 
-					_criticalSets.Add(set);
-				}
-				else if (isHeuristicSuggestion)
-				{
-					//ConsoleHelpers.WriteLine($"    safe:      {{ {set.ToString(allFaults)} }}  [heuristic]", ConsoleColor.Blue);
+						_criticalSets.Add(set);
+					}
+					else if (isHeuristicSuggestion)
+					{
+						ConsoleHelpers.WriteLine($"    safe:      {{ {set.ToString(allFaults)} }}  [heuristic]", ConsoleColor.Blue);
+					}
+
+					_checkedSets.Add(set);
 				}
 
-				//_checkedSets.Add(set);
 				_checkedSetCount++;
 
 				if (result.CounterExample != null)
@@ -375,7 +379,10 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 				ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }} {heuristic} [exception thrown]", ConsoleColor.DarkRed);
 				Console.WriteLine(e.InnerException);
 
-				//_checkedSets.Add(set);
+				if (Configuration.CollectFaultSets)
+				{
+					_checkedSets.Add(set);
+				}
 				_checkedSetCount++;
 				_criticalSets.Add(set);
 				_exceptions.Add(set, e.InnerException);

@@ -47,6 +47,11 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		public bool GenerateCounterExample { get; set; }
 
 		/// <summary>
+		///   Collect fault sets when conducting a MinimalCriticalSetAnalysis.
+		/// </summary>
+		public bool CollectFaultSets { get; set; }
+
+		/// <summary>
 		///   Gets or sets a value indicating whether only progress reports should be output.
 		/// </summary>
 		internal bool ProgressReportsOnly { get; set; }
@@ -61,7 +66,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			ModelCapacity = _defaultModelCapacity,
 			StackCapacity = DefaultStackCapacity,
 			SuccessorCapacity = DefaultSuccessorStateCapacity,
-			GenerateCounterExample = true
+			GenerateCounterExample = true,
+			CollectFaultSets = true
 		};
 
 		/// <summary>

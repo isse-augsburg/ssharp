@@ -84,7 +84,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		///   Gets all of the fault sets that were checked for criticality. Some sets might not have been checked as they were known to
 		///   be critical sets due to the monotonicity of the critical set property.
 		/// </summary>
-		//public ISet<ISet<Fault>> CheckedSets { get; private set; }
+		public ISet<ISet<Fault>> CheckedSets { get; private set; }
 		public uint CheckedSetCount { get; private set; }
 
 		/// <summary>
@@ -154,13 +154,13 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// <param name="checkedSets">The sets that have been checked.</param>
 		/// <param name="counterExamples">The counter examples that were generated for the critical fault sets.</param>
 		/// <param name="exceptions">The exceptions that have been thrown during the analysis.</param>
-		internal void SetResult(HashSet<FaultSet> criticalSets, uint checkedSetCount, //HashSet<FaultSet> checkedSets,
+		internal void SetResult(HashSet<FaultSet> criticalSets, uint checkedSetCount, HashSet<FaultSet> checkedSets,
 								Dictionary<FaultSet, CounterExample<TExecutableModel>> counterExamples, Dictionary<FaultSet, Exception> exceptions)
 		{
 			var knownFaultSets = new Dictionary<FaultSet, ISet<Fault>>();
 
 			MinimalCriticalSets = Convert(knownFaultSets, criticalSets);
-			//CheckedSets = Convert(knownFaultSets, checkedSets);
+			CheckedSets = Convert(knownFaultSets, checkedSets);
 			CheckedSetCount = checkedSetCount;
 			CounterExamples = counterExamples.ToDictionary(pair => Convert(knownFaultSets, pair.Key), pair => pair.Value);
 			Exceptions = exceptions.ToDictionary(pair => Convert(knownFaultSets, pair.Key), pair => pair.Value);
