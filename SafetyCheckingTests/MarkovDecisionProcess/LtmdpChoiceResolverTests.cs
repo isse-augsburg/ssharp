@@ -250,6 +250,55 @@ namespace Tests.MarkovDecisionProcess
 			existingDistributions.ShouldContainKey(0);
 		}
 
+
+
+		[Fact]
+		public void MakeProabilisticChoiceDeterministicWhichWasPreviouslyNondeterministic()
+		{
+			_choiceResolver.PrepareNextState();
+			_choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleChoice(2);
+			_choiceResolver.HandleChoice(2);
+			_choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleChoice(2);
+			_choiceResolver.HandleChoice(2);
+			_choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleChoice(2);
+			_choiceResolver.HandleProbabilisticChoice(2);
+			var choiceToMakeDeterministic = _choiceResolver.LastChoiceIndex;
+			_choiceResolver.MakeChoiceAtIndexDeterministic(choiceToMakeDeterministic);
+			_choiceResolver.PrepareNextPath();
+			
+
+
+			var existingDistributions = new Dictionary<int, bool>();
+			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(1, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(2, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(3, existingDistributions);
+			entries.ShouldBe(1);
+
+			entries = CountEntriesAndAddDistributionsToMap(4, existingDistributions);
+			entries.ShouldBe(1);
+
+			entries = CountEntriesAndAddDistributionsToMap(5, existingDistributions);
+			entries.ShouldBe(1);
+
+			entries = CountEntriesAndAddDistributionsToMap(6, existingDistributions);
+			entries.ShouldBe(0);
+
+			existingDistributions.Count.ShouldBe(3);
+			existingDistributions.ShouldContainKey(0);
+			existingDistributions.ShouldContainKey(1);
+			existingDistributions.ShouldContainKey(2);
+		}
+
 		[Fact]
 		public void SimpleExample1b()
 		{
