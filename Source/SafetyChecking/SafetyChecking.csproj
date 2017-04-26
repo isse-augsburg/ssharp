@@ -60,6 +60,8 @@
     <Compile Include="AnalysisModelTraverser\AnalysisException.cs" />
     <Compile Include="AnalysisModel\AnalysisResult.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpContinuationDistributionMapper.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpStepGraph.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpStepGraphToContinuationDistributionMapper.cs" />
     <Compile Include="MinimalCriticalSetAnalysis\FaultActivationBehavior.cs" />
     <Compile Include="Formula\FormulaVisitors\IsFormulaReturningBoolValueVisitor.cs" />
     <Compile Include="Formula\FormulaVisitors\IsFormulaReturningRewardResultVisitor.cs" />

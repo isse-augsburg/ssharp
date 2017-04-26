@@ -47,7 +47,7 @@ namespace ISSE.SafetyChecking.Utilities
 		private readonly AutoResizeVector<ListChainElement> _chain;
 
 
-		private readonly List<int> _freedChainIndexes;
+		private readonly Stack<int> _freedChainIndexes;
 
 		public MultipleChainsInSingleArray()
 		{
@@ -61,7 +61,7 @@ namespace ISSE.SafetyChecking.Utilities
 			};
 			_chain = new AutoResizeVector<ListChainElement>();
 
-			_freedChainIndexes = new List<int>();
+			_freedChainIndexes = new Stack<int>();
 		}
 
 		public void Clear()
@@ -75,6 +75,11 @@ namespace ISSE.SafetyChecking.Utilities
 
 		public int GetUnusedChainIndex()
 		{
+			if (_freedChainIndexes.Count>0)
+			{
+				return _freedChainIndexes.Pop();
+			}
+
 			var indexOfNewChainEntries = _chain.Count;
 			return indexOfNewChainEntries;
 		}
@@ -127,6 +132,20 @@ namespace ISSE.SafetyChecking.Utilities
 					NextElementIndex = -1,
 					PreviousElementIndex = -1
 				};
+		}
+
+		public bool IsChainExisting(int number)
+		{
+			return _firstChainElementOfChainNumber[number] != -1;
+		}
+
+		public T GetFirstChainElement(int number)
+		{
+			Assert.That(_firstChainElementOfChainNumber[number] != -1, "Chain should be empty");
+
+			var indexOfNewChainEntry = _firstChainElementOfChainNumber[number];
+
+			return _chain[indexOfNewChainEntry].Element;
 		}
 
 		public void ReplaceChainElement(int indexOfChainEntry, T newElement)
@@ -195,7 +214,7 @@ namespace ISSE.SafetyChecking.Utilities
 		public bool RemoveChainElement(int number, int indexOfChainEntry)
 		{
 			// returns true, if indexOfChainEntry is the only element in the chain.
-			_freedChainIndexes.Add(indexOfChainEntry);
+			_freedChainIndexes.Push(indexOfChainEntry);
 
 			var chainElement = _chain[indexOfChainEntry];
 
@@ -246,13 +265,35 @@ namespace ISSE.SafetyChecking.Utilities
 			return false;
 		}
 
+		public void RemoveSuccessors(int number, int indexOfChainEntryToKeep)
+		{
+			Assert.That(indexOfChainEntryToKeep!=-1,"ChainElement must exist");
+			
+			var indexOfChainEntryToDelete = _chain[indexOfChainEntryToKeep].NextElementIndex;
+
+			_lastChainElementOfChainNumber[number] = indexOfChainEntryToKeep;
+			_chain[indexOfChainEntryToKeep] =
+				new ListChainElement
+				{
+					Element = _chain[indexOfChainEntryToKeep].Element,
+					NextElementIndex = -1,
+					PreviousElementIndex = _chain[indexOfChainEntryToKeep].PreviousElementIndex
+				};
+
+			while (indexOfChainEntryToDelete != -1)
+			{
+				_freedChainIndexes.Push(indexOfChainEntryToDelete);
+				indexOfChainEntryToDelete = _chain[indexOfChainEntryToDelete].NextElementIndex;
+			}
+		}
+
 		public void RemoveChainNumber(int number)
 		{
-			var codEnumerator = GetEnumerator(number);
+			var enumerator = GetEnumerator(number);
 			
-			while (codEnumerator.MoveNext())
+			while (enumerator.MoveNext())
 			{
-				_freedChainIndexes.Add(codEnumerator.CurrentChainIndex);
+				_freedChainIndexes.Push(enumerator.CurrentChainIndex);
 			}
 			_firstChainElementOfChainNumber[number] = -1;
 			_lastChainElementOfChainNumber[number] = -1;
@@ -273,11 +314,11 @@ namespace ISSE.SafetyChecking.Utilities
 
 			public int Number { get; }
 
-			private readonly AutoResizeVector<ListChainElement> _distributionOfContinuationChain;
+			private readonly AutoResizeVector<ListChainElement> _chain;
 
 			public IndexedMulitListEnumerator(MultipleChainsInSingleArray<T> list, int continuationId)
 			{
-				_distributionOfContinuationChain = list._chain;
+				_chain = list._chain;
 				Number = continuationId;
 				CurrentChainIndex = list._firstChainElementOfChainNumber[continuationId];
 				CurrentElement = default(T);
@@ -292,13 +333,13 @@ namespace ISSE.SafetyChecking.Utilities
 				}
 				else
 				{
-					CurrentChainIndex = _distributionOfContinuationChain[CurrentChainIndex].NextElementIndex;
+					CurrentChainIndex = _chain[CurrentChainIndex].NextElementIndex;
 				}
 				if (CurrentChainIndex == -1)
 				{
 					return false;
 				}
-				CurrentElement = _distributionOfContinuationChain[CurrentChainIndex].Element;
+				CurrentElement = _chain[CurrentChainIndex].Element;
 				return true;
 			}
 		}
