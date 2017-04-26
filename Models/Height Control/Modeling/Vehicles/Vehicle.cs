@@ -103,7 +103,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		[FaultEffect]
 		public class DriveLeftEffect : Vehicle
 		{
-			protected override Lane ChooseLane() => Choose(Lane.Right, Lane.Left);
+			protected override Lane ChooseLane() => ChooseWithUniformDistribution(Lane.Right, Lane.Left);
 		}
 
 		/// <summary>
@@ -112,7 +112,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Modeling.Vehicles
 		[FaultEffect]
 		public class SlowTrafficEffect : Vehicle
 		{
-			protected override int ChooseSpeed() => ChooseFromRange(Model.MinSpeed, Model.MaxSpeed);
+			protected override int ChooseSpeed() => ChooseFromRangeWithUniformDistribution(Model.MinSpeed, Model.MaxSpeed);
 		}
 	}
 }
