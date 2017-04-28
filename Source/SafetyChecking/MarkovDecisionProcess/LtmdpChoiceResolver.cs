@@ -62,11 +62,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		private readonly ChoiceStack _valueCount = new ChoiceStack(InitialCapacity);
 
 		/// <summary>
-		///   The stack that stores the kind of choice on the current path.
-		/// </summary>
-		private readonly ChoiceStack _choiceType = new ChoiceStack(InitialCapacity);
-
-		/// <summary>
 		///   The number of choices that have been encountered for the current path.
 		/// </summary>
 		private int _choiceIndex = -1;
@@ -87,14 +82,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		private bool _firstPath;
 
 		/// <summary>
-		///   Maps continuations to distributions.
+		///   Contains the graph of the taken decisions.
 		/// </summary>
-		public LtmdpContinuationDistributionMapper CidToDidMapper { get; } = new LtmdpContinuationDistributionMapper();
+		public LtmdpStepGraph LtmdpStepGraph { get; } = new LtmdpStepGraph();
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="choices">The choices that potentially require access to the choice resolver.</param>
 		public LtmdpChoiceResolver()
 				: base()
 		{
@@ -116,7 +110,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_choiceIndex = -1;
 			_continuationId = 0;
 			_nextFreeContinuationId = 1;
-			CidToDidMapper.Clear();
+			LtmdpStepGraph.Clear();
 		}
 
 		private Probability GetProbabilityOfPreviousPath()
@@ -179,7 +173,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 				// Otherwise, we've chosen all values of the last choice, so we're done with it
 				_valueCount.Remove();
-				_choiceType.Remove();
 			}
 
 			AssertThatDatastructureIsIntact();
@@ -204,7 +197,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			// We haven't encountered this choice before; store the value count and return the first value
 			_valueCount.Push(valueCount);
-			_choiceType.Push(ChoiceTypeNondeterministic);
 			var oldContinuationId = _continuationId;
 			_continuationId = _nextFreeContinuationId;
 
@@ -218,7 +210,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_chosenValues.Push(newChosenValue);
 
 			_nextFreeContinuationId = _nextFreeContinuationId + valueCount;
-			CidToDidMapper.NonDeterministicSplit(oldContinuationId, _continuationId, _continuationId + valueCount - 1);
+			LtmdpStepGraph.NonDeterministicSplit(oldContinuationId, _continuationId, _continuationId + valueCount - 1);
 
 			return 0;
 		}
@@ -245,7 +237,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			// We haven't encountered this choice before; store the value count and return the first value
 			_valueCount.Push(valueCount);
-			_choiceType.Push(ChoiceTypeProbabilitstic);
 			var oldContinuationId = _continuationId;
 			_continuationId = _nextFreeContinuationId;
 
@@ -259,7 +250,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_chosenValues.Push(newChosenValue);
 
 			_nextFreeContinuationId = _nextFreeContinuationId + valueCount;
-			CidToDidMapper.ProbabilisticSplit(oldContinuationId, _continuationId, _continuationId + valueCount - 1);
+			LtmdpStepGraph.ProbabilisticSplit(oldContinuationId, _continuationId, _continuationId + valueCount - 1);
 
 			return 0;
 		}
@@ -335,18 +326,19 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 					Probability = new Probability(newValueOfLastChoice)
 				};
 
-			if (_choiceType[choiceIndex] == ChoiceTypeProbabilitstic)
+			var parentOfLastChoice = choiceIndex - 1;
+			int parentContinuationId;
+			if (parentOfLastChoice == -1)
 			{
-				var cidOfChoiceWhoseSiblingsToDelete = _chosenValues[choiceIndex].ContinuationId;
-				for (var i = 1; i <  _valueCount[choiceIndex]; i++ )
-					CidToDidMapper.RemoveCidInDistributions(cidOfChoiceWhoseSiblingsToDelete + i);
+				// first choice was undone. The continuationId of its parent is 0
+				parentContinuationId = 0;
 			}
 			else
 			{
-				var cidOfChoiceWhoseSiblingsToDelete = _chosenValues[choiceIndex].ContinuationId;
-				for (var i = 1; i < _valueCount[choiceIndex]; i++)
-					CidToDidMapper.RemoveDistributionsWithCid(cidOfChoiceWhoseSiblingsToDelete + i);
+				parentContinuationId = _chosenValues[parentOfLastChoice].ContinuationId;
 			}
+
+			LtmdpStepGraph.MakeChoiceOfCidDeterministic(parentContinuationId);
 
 			// Set the alternatives to zero.
 			_valueCount[choiceIndex] = 0;
@@ -390,12 +382,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		internal override void Clear()
 		{
 			_chosenValues.Clear();
-			_choiceType.Clear();
 			_valueCount.Clear();
 			_choiceIndex = -1;
 			_continuationId = 0;
 			_nextFreeContinuationId = 1;
-			CidToDidMapper.Clear();
+			 LtmdpStepGraph.Clear();
 		}
 
 		/// <summary>
@@ -424,7 +415,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		public void AssertThatDatastructureIsIntact()
 		{
 			Assert.That(_valueCount.Count == _chosenValues.Count, "All stacks must have the same size");
-			Assert.That(_choiceType.Count == _chosenValues.Count, "All stacks must have the same size");
 		}
 	}
 }

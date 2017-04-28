@@ -33,68 +33,69 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 	internal class LtmdpStepGraph
 	{
-		/// <summary>
-		///   A continuationId has either been finished or is
-		/// </summary>
-		private const int ChoiceTypeUnsplitOrFinal = 0;
+		public enum ChoiceType
+		{
+			///   A continuationId has either been finished or is
+			ChoiceTypeUnsplitOrFinal = 0,
+			///   Represents a deterministic choice in _choiceTypeOfContinuationId (only one choice available)
+			ChoiceTypeDeterministic = 1,
+			///   Represents a non deterministic choice in _choiceTypeOfContinuationId
+			ChoiceTypeNondeterministic = 2,
+			///   Represents a probabilistic choice in _choiceTypeOfContinuationId
+			ChoiceTypeProbabilitstic = 3
+		}
 
-		/// <summary>
-		///   Represents a deterministic choice in _choiceTypeOfContinuationId (only one choice available)
-		/// </summary>
-		private const int ChoiceTypeDeterministic = 1;
+		public struct Choice
+		{
+			public readonly int From;
+			public readonly int To;
+			public readonly ChoiceType ChoiceType;
+			
+			public Choice(int from, int to, ChoiceType choiceType)
+			{
+				From=from;
+				To=to;
+				ChoiceType=choiceType;
+			}
 
-		/// <summary>
-		///   Represents a non deterministic choice in _choiceTypeOfContinuationId
-		/// </summary>
-		private const int ChoiceTypeNondeterministic = 2;
+			public Choice DeriveDeterministic()
+			{
+				return new Choice(From,From,ChoiceType.ChoiceTypeDeterministic);
+			}
 
-		/// <summary>
-		///   Represents a probabilistic choice in _choiceTypeOfContinuationId
-		/// </summary>
-		private const int ChoiceTypeProbabilitstic = 4;
+			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == ChoiceType.ChoiceTypeUnsplitOrFinal;
 
-		private readonly AutoResizeVector<int> _choiceTypeOfContinuationId = new AutoResizeVector<int>();
+			public bool IsChoiceTypeDeterministic => ChoiceType == ChoiceType.ChoiceTypeDeterministic;
 
-		private readonly MultipleChainsInSingleArray<int> _internalGraph = new MultipleChainsInSingleArray<int>();
+			public bool IsChoiceTypeNondeterministic => ChoiceType == ChoiceType.ChoiceTypeNondeterministic;
+
+			public bool IsChoiceTypeProbabilitstic => ChoiceType == ChoiceType.ChoiceTypeProbabilitstic;
+		}
+		
+		private readonly AutoResizeVector<Choice> _internalGraph = new AutoResizeVector<Choice>();
 
 		public void Clear()
 		{
-			_choiceTypeOfContinuationId.Clear();
 			_internalGraph.Clear();
 			AddInitialContinuation();
 		}
 
+		public Choice GetChoiceOfCid(int cid)
+		{
+			return _internalGraph[cid];
+		}
+
 		private void AddInitialContinuation()
 		{
-			Requires.That(_choiceTypeOfContinuationId.Count == 0, "Data structures must be empty");
-			_choiceTypeOfContinuationId[0] = ChoiceTypeUnsplitOrFinal;
+			Requires.That(_internalGraph.Count == 0, "Data structure must be empty");
+			_internalGraph[0] = new Choice(0,0,ChoiceType.ChoiceTypeUnsplitOrFinal);
 		}
 
 		public void MakeChoiceOfCidDeterministic(int cid)
 		{
-			_choiceTypeOfContinuationId[cid] = ChoiceTypeDeterministic;
-			var firstChild = _internalGraph.GetFirstChainElement(cid);
-			_internalGraph.RemoveSuccessors(cid,firstChild);
+			_internalGraph[cid] = _internalGraph[cid].DeriveDeterministic();
 		}
-
-		private void CreateNodeWithChildrenInGraph(int sourceCid, int fromCid, int toCid)
-		{
-			Assert.That(_choiceTypeOfContinuationId[sourceCid]== ChoiceTypeUnsplitOrFinal, "Children have already been declared.");
-			Assert.That(!_internalGraph.IsChainExisting(sourceCid), "Children have already been declared.");
-
-			for (var i = fromCid; i <= toCid; i++)
-			{
-				var chainNumberInGraph = _internalGraph.GetUnusedChainNumber();
-				_internalGraph.AppendChainElement(chainNumberInGraph, sourceCid, i);
-			}
-		}
-
-		private void CreateFreshContinuations(int fromCid, int toCid)
-		{
-			for (var i = fromCid; i <= toCid; i++)
-				_choiceTypeOfContinuationId[i] = ChoiceTypeUnsplitOrFinal;
-		}
-
+		
 		/// <summary>
 		///   Makes an non deterministic split.
 		/// </summary>
@@ -103,16 +104,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <param name="toCid">The new end of the range. Includes toCid.</param>
 		public void NonDeterministicSplit(int sourceCid, int fromCid, int toCid)
 		{
-			_internalGraph.RequiresThatChainNumberExistent(sourceCid);
-			_internalGraph.AssertThatChainNumberNonExistent(fromCid);
+			Assert.That(_internalGraph.Count - 1 < fromCid, "fromCid has already been declared.");
 			Assert.That(sourceCid < fromCid && sourceCid < toCid, "sourceCid must be smaller than childrenCids");
 			Assert.That(fromCid <= toCid, "range [fromCid..toCid] must be ascending and contain at least one element");
 
-			_choiceTypeOfContinuationId[sourceCid] = ChoiceTypeNondeterministic;
-
-			CreateNodeWithChildrenInGraph(sourceCid, fromCid, toCid);
-
-			CreateFreshContinuations(fromCid, toCid);
+			_internalGraph[sourceCid] = new Choice(fromCid,toCid,ChoiceType.ChoiceTypeNondeterministic);
 		}
 
 
@@ -124,16 +120,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <param name="toCid">The new end of the range. Includes toCid.</param>
 		public void ProbabilisticSplit(int sourceCid, int fromCid, int toCid)
 		{
-			_internalGraph.RequiresThatChainNumberExistent(sourceCid);
-			_internalGraph.AssertThatChainNumberNonExistent(fromCid);
+			Assert.That(_internalGraph.Count -1 < fromCid, "fromCid has already been declared.");
 			Assert.That(sourceCid < fromCid && sourceCid < toCid, "sourceCid must be smaller than childrenCids");
 			Assert.That(fromCid <= toCid, "range [fromCid..toCid] must be ascending and contain at least one element");
 
-			_choiceTypeOfContinuationId[sourceCid] = ChoiceTypeProbabilitstic;
-
-			CreateNodeWithChildrenInGraph(sourceCid, fromCid, toCid);
-
-			CreateFreshContinuations(fromCid, toCid);
+			_internalGraph[sourceCid] = new Choice(fromCid, toCid, ChoiceType.ChoiceTypeProbabilitstic);
 		}
 
 
@@ -144,32 +135,25 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		internal struct DirectChildrenEnumerator
 		{
-			public int ChildContinuationId => _chainEnumerator.CurrentElement;
-
 			public int ParentContinuationId { get; }
 
-			public int ChoiceType { get; }
+			public int CurrentChildContinuationId { private set; get; }
 
-			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == ChoiceTypeUnsplitOrFinal;
-
-			public bool IsChoiceTypeDeterministic => ChoiceType == ChoiceTypeDeterministic;
-
-			public bool IsChoiceTypeNondeterministic => ChoiceType == ChoiceTypeNondeterministic;
-
-			public bool IsChoiceTypeProbabilitstic => ChoiceType == ChoiceTypeProbabilitstic;
-
-			private MultipleChainsInSingleArray<int>.IndexedMulitListEnumerator _chainEnumerator;
+			public Choice Choice { get; }
 
 			public DirectChildrenEnumerator(LtmdpStepGraph ltmdpStepGraph, int parentContinuationId)
 			{
-				ChoiceType = ltmdpStepGraph._choiceTypeOfContinuationId[parentContinuationId];
-				_chainEnumerator = ltmdpStepGraph._internalGraph.GetEnumerator(parentContinuationId);
+				Choice = ltmdpStepGraph.GetChoiceOfCid(parentContinuationId);
+				CurrentChildContinuationId = Choice.From;
 				ParentContinuationId = parentContinuationId;
 			}
 
 			public bool MoveNext()
 			{
-				return _chainEnumerator.MoveNext();
+				CurrentChildContinuationId++;
+				if (CurrentChildContinuationId <= Choice.To)
+					return true;
+				return false;
 			}
 		}
 	}

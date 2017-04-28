@@ -42,17 +42,22 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		private void DeriveChoice(int cidOfChoice)
 		{
-			var childrenEnumerator = CurrentGraph.GetDirectChildrenEnumerator(cidOfChoice);
-			while (childrenEnumerator.MoveNext())
+			var choice = CurrentGraph.GetChoiceOfCid(cidOfChoice);
+			if (choice.IsChoiceTypeUnsplitOrFinal)
+				return;
+			if (choice.IsChoiceTypeDeterministic ||
+				choice.IsChoiceTypeNondeterministic)
 			{
-				if (childrenEnumerator.IsChoiceTypeDeterministic ||
-					childrenEnumerator.IsChoiceTypeNondeterministic)
-				{
-				}
-				else if (childrenEnumerator.IsChoiceTypeProbabilitstic)
-				{
-				}
+				LtmdpContinuationDistributionMapper.NonDeterministicSplit(cidOfChoice,choice.From,choice.To);
+			}
+			else if (choice.IsChoiceTypeProbabilitstic)
+			{
+				LtmdpContinuationDistributionMapper.ProbabilisticSplit(cidOfChoice, choice.From, choice.To);
+			}
 
+			for (var i = choice.From; i <= choice.To; i++)
+			{
+				DeriveChoice(i);
 			}
 		}
 

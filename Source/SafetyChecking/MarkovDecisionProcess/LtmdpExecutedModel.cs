@@ -185,13 +185,17 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_cachedLabeledStates.Clear();
 		}
 
+		private readonly LtmdpStepGraphToContinuationDistributionMapper _converter = new LtmdpStepGraphToContinuationDistributionMapper();
+
 		/// <summary>
 		///   Invoked after the execution of a step is completed on the model, i.e., after a set of initial
 		///   states or successor states have been computed.
 		/// </summary>
 		protected override TransitionCollection EndExecution()
 		{
-			_cachedLabeledStates.TransformContinuationIdsToDistributions(_ltmdpChoiceResolver.CidToDidMapper);
+			_converter.Clear();
+			_converter.Derive(_ltmdpChoiceResolver.LtmdpStepGraph);
+			_cachedLabeledStates.TransformContinuationIdsToDistributions(_converter.LtmdpContinuationDistributionMapper);
 			var transitions = _cachedLabeledStates.ToCollection();
 			return transitions;
 		}
