@@ -43,13 +43,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		private readonly LtmdpTransition* _transitionsWithContinuationIdMemory;
 		private int _transitionsWithContinuationIdCount;
 
-		private readonly MemoryBuffer _transitionsWithDistributionIdBuffer = new MemoryBuffer();
-		private readonly LtmdpTransition* _transitionsWithDistributionIdMemory;
-		private int _transitionsWithDistributionIdCount;
-
 		private readonly long _capacity;
 
-		private bool _continuationIdMode = true;
+		private LtmdpStepGraph LtmdpStepGraph { get; }
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -57,7 +53,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <param name="model">The model the successors are computed for.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public LtmdpCachedLabeledStates(ExecutableModel<TExecutableModel> model, long capacity, params Func<bool>[] formulas)
+		public LtmdpCachedLabeledStates(ExecutableModel<TExecutableModel> model, long capacity, LtmdpStepGraph ltmdpStepGraph, params Func<bool>[] formulas)
 		{
 			Requires.NotNull(model, nameof(model));
 			Requires.NotNull(formulas, nameof(formulas));
@@ -68,11 +64,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_formulas = formulas;
 			_capacity = capacity;
 
+			LtmdpStepGraph = ltmdpStepGraph;
+
 			_transitionsWithContinuationIdBuffer.Resize(capacity * sizeof(LtmdpTransition), zeroMemory: false);
 			_transitionsWithContinuationIdMemory = (LtmdpTransition*)_transitionsWithContinuationIdBuffer.Pointer;
-
-			_transitionsWithDistributionIdBuffer.Resize(capacity * sizeof(LtmdpTransition), zeroMemory: false);
-			_transitionsWithDistributionIdMemory = (LtmdpTransition*)_transitionsWithDistributionIdBuffer.Pointer;
 
 			_targetStateBuffer.Resize(capacity * model.StateVectorSize, zeroMemory: true);
 			_targetStateMemory = _targetStateBuffer.Pointer;
@@ -119,8 +114,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		public void Clear()
 		{
 			_transitionsWithContinuationIdCount = 0;
-			_transitionsWithDistributionIdCount = 0;
-			_continuationIdMode = true;
 		}
 		
 		/// <summary>
@@ -133,48 +126,16 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				return;
 
 			_transitionsWithContinuationIdBuffer.SafeDispose();
-			_transitionsWithDistributionIdBuffer.SafeDispose();
 			_targetStateBuffer.SafeDispose();
 		}
 
-		public void TransformContinuationIdsToDistributions(LtmdpContinuationDistributionMapper cidToDidMapper)
-		{
-			_continuationIdMode = false;
-			
-			for (var i = 0; i < _transitionsWithContinuationIdCount; i++)
-			{
-				var currentTransition = _transitionsWithContinuationIdMemory[i];
-				// currentTransition.ContinuationId contains the continuationId. This is replaced by the DistributionId
-				var enumerator = cidToDidMapper.GetDistributionsOfContinuationEnumerator(currentTransition.ContinuationId);
-				while (enumerator.MoveNext())
-				{
-
-					if (_transitionsWithDistributionIdCount >= _capacity)
-						throw new OutOfMemoryException("Unable to store an additional transition. Try increasing the successor state capacity.");
-
-					_transitionsWithDistributionIdMemory[_transitionsWithDistributionIdCount] =
-						new LtmdpTransition
-						{
-							TargetStatePointer = currentTransition.TargetStatePointer,
-							Formulas = currentTransition.Formulas,
-							ActivatedFaults = currentTransition.ActivatedFaults,
-							Flags = currentTransition.Flags,
-							ContinuationId = enumerator.CurrentDistributionId, // insert correct distribution id
-							Probability = currentTransition.Probability
-
-						};
-					_transitionsWithDistributionIdCount++;
-				}
-			}
-		}
 
 		/// <summary>
 		///   Creates a <see cref="TransitionCollection" /> instance for all transitions contained in the set.
 		/// </summary>
 		public TransitionCollection ToCollection()
 		{
-			Assert.That(!_continuationIdMode,"Must transform continuation ids in transitions to distributions first");
-			return new TransitionCollection((Transition*)_transitionsWithDistributionIdMemory, _transitionsWithDistributionIdCount, _transitionsWithContinuationIdCount, sizeof(LtmdpTransition));
+			return new TransitionCollection((Transition*)_transitionsWithContinuationIdMemory, _transitionsWithContinuationIdCount, _transitionsWithContinuationIdCount, sizeof(LtmdpTransition), LtmdpStepGraph);
 		}
 	}
 }

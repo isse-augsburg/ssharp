@@ -50,6 +50,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		private readonly LtmdpCachedLabeledStates<TExecutableModel> _cachedLabeledStates;
 
+		private readonly LtmdpStepGraph _stepGraph;
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
@@ -62,9 +64,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			: base(runtimeModelCreator,stateHeaderBytes)
 		{
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
-			_cachedLabeledStates = new LtmdpCachedLabeledStates<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
 
-			_ltmdpChoiceResolver = new LtmdpChoiceResolver();
+			_stepGraph = new LtmdpStepGraph();
+
+			_cachedLabeledStates = new LtmdpCachedLabeledStates<TExecutableModel>(RuntimeModel, successorStateCapacity, _stepGraph, formulas);
+
+			_ltmdpChoiceResolver = new LtmdpChoiceResolver(_stepGraph);
 			ChoiceResolver = _ltmdpChoiceResolver;
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
 
@@ -183,9 +188,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		protected override void BeginExecution()
 		{
 			_cachedLabeledStates.Clear();
+			_stepGraph.Clear();
 		}
 
-		private readonly LtmdpStepGraphToContinuationDistributionMapper _converter = new LtmdpStepGraphToContinuationDistributionMapper();
 
 		/// <summary>
 		///   Invoked after the execution of a step is completed on the model, i.e., after a set of initial
@@ -193,9 +198,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// </summary>
 		protected override TransitionCollection EndExecution()
 		{
-			_converter.Clear();
-			_converter.Derive(_ltmdpChoiceResolver.LtmdpStepGraph);
-			_cachedLabeledStates.TransformContinuationIdsToDistributions(_converter.LtmdpContinuationDistributionMapper);
 			var transitions = _cachedLabeledStates.ToCollection();
 			return transitions;
 		}

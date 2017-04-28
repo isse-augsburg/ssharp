@@ -63,7 +63,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 
 		/// <summary>
-		///   Generates a <see cref="StateGraph{TExecutableModel}" /> for the model created by <paramref name="createModel" />.
+		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
 		private MarkovDecisionProcess GenerateMarkovDecisionProcess(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas)
 		{

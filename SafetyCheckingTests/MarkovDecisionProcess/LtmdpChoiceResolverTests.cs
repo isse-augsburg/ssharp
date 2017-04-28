@@ -41,13 +41,16 @@ namespace Tests.MarkovDecisionProcess
 		public LtmdpChoiceResolverTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
+			_stepGraph = new LtmdpStepGraph();
+			_choiceResolver = new LtmdpChoiceResolver(_stepGraph);
 		}
 
-		private readonly LtmdpChoiceResolver _choiceResolver = new LtmdpChoiceResolver();
+		private readonly LtmdpStepGraph _stepGraph;
+		private readonly LtmdpChoiceResolver _choiceResolver;
 
 		private int CountEntries (int cid)
 		{
-			var enumerator = _choiceResolver.LtmdpStepGraph.GetDirectChildrenEnumerator(cid);
+			var enumerator = _stepGraph.GetDirectChildrenEnumerator(cid);
 			var entries = 0;
 			while (enumerator.MoveNext())
 			{
@@ -61,6 +64,7 @@ namespace Tests.MarkovDecisionProcess
 		public void NoSplit()
 		{
 			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 			var path1Exists = _choiceResolver.PrepareNextPath();
 			var path2Exists = _choiceResolver.PrepareNextPath();
 
@@ -75,6 +79,7 @@ namespace Tests.MarkovDecisionProcess
 		{
 			// Only first path tested, yet.
 			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
 			_choiceResolver.HandleProbabilisticChoice(2);
 
@@ -91,6 +96,7 @@ namespace Tests.MarkovDecisionProcess
 		{
 			// Only first path tested, yet.
 			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
 			_choiceResolver.HandleProbabilisticChoice(3);
 
@@ -111,6 +117,7 @@ namespace Tests.MarkovDecisionProcess
 		{
 			// Only first path tested, yet.
 			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
 			_choiceResolver.HandleProbabilisticChoice(3);
 			_choiceResolver.HandleProbabilisticChoice(2);
@@ -134,6 +141,7 @@ namespace Tests.MarkovDecisionProcess
 		{
 			// Only first path tested, yet.
 			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
 			_choiceResolver.HandleProbabilisticChoice(3);
 			_choiceResolver.HandleChoice(2);
@@ -157,6 +165,7 @@ namespace Tests.MarkovDecisionProcess
 		{
 			// Only first path tested, yet.
 			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
 			_choiceResolver.HandleProbabilisticChoice(3);
 			var choiceToMakeDeterministic = _choiceResolver.LastChoiceIndex;
@@ -180,6 +189,7 @@ namespace Tests.MarkovDecisionProcess
 		{
 			// Only first path tested, yet.
 			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
 			_choiceResolver.HandleProbabilisticChoice(3);
 			_choiceResolver.HandleChoice(2);
@@ -206,6 +216,7 @@ namespace Tests.MarkovDecisionProcess
 		public void MakeProabilisticChoiceDeterministicWhichWasPreviouslyNondeterministic()
 		{
 			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
 			_choiceResolver.HandleChoice(2);
 			_choiceResolver.HandleChoice(2);
@@ -238,6 +249,7 @@ namespace Tests.MarkovDecisionProcess
 		{
 			// Act
 			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 			var state1Path1Exists = _choiceResolver.PrepareNextPath();
 			var state1Path1Choice1 = _choiceResolver.HandleProbabilisticChoice(2);
 			var state1Path1Choice2 = _choiceResolver.HandleChoice(2);
@@ -255,14 +267,17 @@ namespace Tests.MarkovDecisionProcess
 			var state1EntriesOfCid4 = CountEntries(4);
 
 			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 			var state2Path1Exists = _choiceResolver.PrepareNextPath();
 			var state2Path2Exists = _choiceResolver.PrepareNextPath();
 			
 			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 			var state3Path1Exists = _choiceResolver.PrepareNextPath();
 			var state3Path2Exists = _choiceResolver.PrepareNextPath();
 
 			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 			var state4Path1Exists = _choiceResolver.PrepareNextPath();
 			var state4Path2Exists = _choiceResolver.PrepareNextPath();
 			// Collect data

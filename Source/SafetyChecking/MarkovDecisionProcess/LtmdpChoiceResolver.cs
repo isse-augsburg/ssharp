@@ -84,14 +84,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <summary>
 		///   Contains the graph of the taken decisions.
 		/// </summary>
-		public LtmdpStepGraph LtmdpStepGraph { get; } = new LtmdpStepGraph();
+		private LtmdpStepGraph LtmdpStepGraph { get; }
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public LtmdpChoiceResolver()
+		public LtmdpChoiceResolver(LtmdpStepGraph ltmdpStepGraph)
 				: base()
 		{
+			LtmdpStepGraph = ltmdpStepGraph;
 		}
 
 		/// <summary>
@@ -110,7 +111,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_choiceIndex = -1;
 			_continuationId = 0;
 			_nextFreeContinuationId = 1;
-			LtmdpStepGraph.Clear();
 		}
 
 		private Probability GetProbabilityOfPreviousPath()
@@ -386,7 +386,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_choiceIndex = -1;
 			_continuationId = 0;
 			_nextFreeContinuationId = 1;
-			 LtmdpStepGraph.Clear();
 		}
 
 		/// <summary>

@@ -48,6 +48,7 @@ namespace Tests.MarkovDecisionProcess
 		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
 		private readonly LtmdpTransition* _transitions;
 		private int _transitionCount = 0;
+		private readonly LtmdpStepGraph _stepGraph;
 
 		public LtmdpBuilderDuringTraversalOldTests(ITestOutputHelper output)
 		{
@@ -55,6 +56,8 @@ namespace Tests.MarkovDecisionProcess
 			
 			_transitionBuffer.Resize(TransitionCapacity * sizeof(LtmdpTransition), zeroMemory: false);
 			_transitions = (LtmdpTransition*)_transitionBuffer.Pointer;
+
+			_stepGraph = new LtmdpStepGraph();
 		}
 
 		private void CreateTransition(bool isFormulaSatisfied, int targetStateIndex, int distribution, double p)
@@ -72,7 +75,7 @@ namespace Tests.MarkovDecisionProcess
 
 		private TransitionCollection CreateTransitionCollection()
 		{
-			return new TransitionCollection((Transition*)_transitions, _transitionCount, _transitionCount, sizeof(LtmdpTransition));
+			return new TransitionCollection((Transition*)_transitions, _transitionCount, _transitionCount, sizeof(LtmdpTransition), _stepGraph);
 		}
 
 		private void ClearTransitions()

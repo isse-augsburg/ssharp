@@ -30,41 +30,30 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using DiscreteTimeMarkovChain;
 	using ExecutableModel;
 	using Utilities;
-
+	/*
 	//The LtmdpBuilder is tightly coupled to LabeledTransitionMarkovDecisionProcess, so we make it a nested class
-	internal unsafe partial class LabeledTransitionMarkovDecisionProcessOld
+	internal unsafe partial class LabeledTransitionMarkovDecisionProcess
 	{
 		/// <summary>
-		///   Builds up a <see cref="LabeledTransitionMarkovDecisionProcessOld" /> instance during model traversal.
+		///   Builds up a <see cref="LabeledTransitionMarkovDecisionProcess" /> instance during model traversal.
 		///   Note: This only works single threaded
 		/// </summary>
-		internal class LtmdpBuilderDuringTraversalOld<TExecutableModel> : IBatchedTransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+		internal class LtmdpBuilderDuringTraversal<TExecutableModel> : IBatchedTransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 		{
 			private int _maxNumberOfDistributionsPerState;
 
-			private readonly LabeledTransitionMarkovDecisionProcessOld _ltmdp;
-
-			private readonly LtmdpStepGraphToContinuationDistributionMapper _converter = new LtmdpStepGraphToContinuationDistributionMapper();
-
-			private readonly long _capacity;
-			private readonly MemoryBuffer _transitionsWithDistributionIdBuffer = new MemoryBuffer();
-			private readonly LtmdpTransition* _transitionsWithDistributionIdMemory;
-			private int _transitionsWithDistributionIdCount;
+			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
 
 			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
 			/// <param name="ltmdp">The Markov chain that should be built up.</param>
-			public LtmdpBuilderDuringTraversalOld(LabeledTransitionMarkovDecisionProcessOld ltmdp, AnalysisConfiguration configuration)
+			public LtmdpBuilderDuringTraversal(LabeledTransitionMarkovDecisionProcess ltmdp, AnalysisConfiguration configuration)
 			{
 				Requires.NotNull(ltmdp, nameof(ltmdp));
 				_ltmdp = ltmdp;
 				
 				InitializeDistributionChainIndexCache(configuration.SuccessorCapacity);
-
-				_capacity = configuration.SuccessorCapacity;
-				_transitionsWithDistributionIdBuffer.Resize(_capacity * sizeof(LtmdpTransition), zeroMemory: false);
-				_transitionsWithDistributionIdMemory = (LtmdpTransition*)_transitionsWithDistributionIdBuffer.Pointer;
 			}
 
 			// Each worker has its own LtmdpBuilder. Thus, we can add a buffer here
@@ -302,37 +291,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 
 
-
-			public void TransformContinuationIdsToDistributions(LtmdpContinuationDistributionMapper cidToDidMapper, TransitionCollection transitions)
-			{
-				foreach (var transition in transitions)
-				{
-					var currentTransition = (LtmdpTransition*) transition;
-					// currentTransition.ContinuationId contains the continuationId. This is replaced by the DistributionId
-					var enumerator = cidToDidMapper.GetDistributionsOfContinuationEnumerator(currentTransition->ContinuationId);
-					while (enumerator.MoveNext())
-					{
-
-						if (_transitionsWithDistributionIdCount >= _capacity)
-							throw new OutOfMemoryException("Unable to store an additional transition. Try increasing the successor state capacity.");
-
-						_transitionsWithDistributionIdMemory[_transitionsWithDistributionIdCount] =
-							new LtmdpTransition
-							{
-								TargetStatePointer = currentTransition->TargetStatePointer,
-								Formulas = currentTransition->Formulas,
-								ActivatedFaults = currentTransition->ActivatedFaults,
-								Flags = currentTransition->Flags,
-								ContinuationId = enumerator.CurrentDistributionId, // insert correct distribution id
-							Probability = currentTransition->Probability
-
-							};
-						_transitionsWithDistributionIdCount++;
-					}
-				}
-			}
-
-
 			/// <summary>
 			///   Processes the new <paramref name="transitions" /> discovered by the <paramref name="worker " /> within the traversal
 			///   <paramref name="context" />. Only transitions with <see cref="CandidateTransition.IsValid" /> set to <c>true</c> are
@@ -349,21 +307,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			public void ProcessTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, int sourceState,
 									   TransitionCollection transitions, int transitionCount, bool areInitialTransitions)
 			{
-				_transitionsWithDistributionIdCount = 0;
-				_converter.Clear();
-				var stepgraph = (LtmdpStepGraph) transitions.StructuralInformation;
-				_converter.Derive(stepgraph);
-				TransformContinuationIdsToDistributions(_converter.LtmdpContinuationDistributionMapper, transitions);
-
-				var newTransitions =
-					new TransitionCollection((Transition*)_transitionsWithDistributionIdMemory, _transitionsWithDistributionIdCount, _transitionsWithDistributionIdCount, sizeof(LtmdpTransition));
-
 				ResetDistributionChainIndexCache();
 
 				// Note, other threads might access _ltmdp at the same time
-				CheckIfTransitionsCanBeProcessed(_transitionsWithDistributionIdCount);
+				CheckIfTransitionsCanBeProcessed(transitionCount);
 
-				foreach (var transition in newTransitions)
+				foreach (var transition in transitions)
 				{
 					var probTransition = (LtmdpTransition*)transition;
 
@@ -375,5 +324,5 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				}
 			}
 		}
-	}
+	}*/
 }
