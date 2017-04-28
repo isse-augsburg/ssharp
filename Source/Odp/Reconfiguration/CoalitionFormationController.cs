@@ -71,10 +71,94 @@ namespace SafetySharp.Odp.Reconfiguration
 		{
 			if (invariant == Invariant.CapabilityConsistency)
 				return RestoreCapabilityConsistency(coalition, task, config);
+			else if (invariant == Invariant.IOConsistency)
+				return RestoreIoConsistency(coalition, task, config);
+			else if (invariant == Invariant.NeighborsAliveGuarantee)
+				return ReplaceDeadNeighbours(coalition, task, config);
 
-			// TODO: if another coalition is merged: restart reconfiguration (?)
+			// TODO: remember violated predicates (+ respective agents) in coalition, merge info on coalition merge, restart config
 
 			throw new NotImplementedException(); // TODO: strategies for other invariant predicates
+		}
+
+		protected async Task RestoreIoConsistency(Coalition coalition, ITask task, ConfigurationUpdate config)
+		{
+			var affectedRoles = await FindDisconnectedRoles(coalition);
+
+			// 3. if affected role empty: find predecessor / successor roles with at least one capability, invite along the way
+			foreach (var entry in affectedRoles)
+			{
+				var agent = entry.Item1;
+				var role = entry.Item2;
+
+				// 3.1 predecessor
+				var currentRole = role;
+				var currentAgent = agent;
+				var previousAgent = currentRole.PreCondition.Port;
+
+				while (previousAgent != null && currentRole.CapabilitiesToApply.Count() == 0)
+				{
+					await coalition.Invite(previousAgent);
+					currentRole = previousAgent.AllocatedRoles.Single(otherRole =>
+						otherRole.PostCondition.StateMatches(currentRole.PreCondition) && otherRole.PostCondition.Port == currentAgent
+					);
+					currentAgent = previousAgent;
+					previousAgent = currentRole.PreCondition.Port;
+				}
+
+				// 3.2 successor
+				currentRole = role;
+				currentAgent = agent;
+				var nextAgent = currentRole.PostCondition.Port;
+
+				while (nextAgent != null && currentRole.CapabilitiesToApply.Count() == 0)
+				{
+					await coalition.Invite(nextAgent);
+					currentRole = nextAgent.AllocatedRoles.Single(otherRole =>
+						otherRole.PreCondition.StateMatches(currentRole.PostCondition) && otherRole.PreCondition.Port == currentAgent
+					);
+					currentAgent = nextAgent;
+					nextAgent = currentRole.PostCondition.Port;
+				}
+			}
+
+			// TODO: eliminate duplication between code below and RestoreCapabilityConsistency()
+			// TODO: invite missing CTF agents (?) or only compute distribution that modify roles of member agents
+
+			while (true)
+			{
+				// 4. select distribution
+				foreach (var distribution in CalculateCapabilityDistributions(coalition))
+				{
+					var reconfSuggestion = new ConfigurationSuggestion(coalition, distribution);
+
+					// 5. compute tfr, edge, core agents
+					reconfSuggestion.ComputeTFR();
+					foreach (var edgeAgent in reconfSuggestion.EdgeAgents)
+						await coalition.Invite(edgeAgent);
+
+					// 6. use dijkstra to connect
+					var resourceFlow = await ComputeResourceFlow(reconfSuggestion);
+					if (resourceFlow != null)
+					{
+						ComputeRoleAllocations(reconfSuggestion, resourceFlow.ToArray(), config);
+						return;
+					}
+				}
+
+				// TODO: if still no path found: recruit additional agents (if further exist)
+			}
+		}
+
+		protected async Task ReplaceDeadNeighbours(Coalition coalition, ITask task, ConfigurationUpdate config)
+		{
+			// collect dead neighbours, affected roles
+			// for each role, must find predecessor / successor role
+			// to do so, recruit agents until found (prefer agents at end of queue)
+			// then fill in gaps (following resource flow) until dead agent encountered (from both sides); recruit respective agents
+			// surround empty roles
+			// ensure all capabilities in CTF are present (otherwise recruit)
+			// choose distribution, TFR, core, edge, dijkstra, ...
 		}
 
 		/// <summary>
@@ -83,6 +167,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		protected async Task RestoreCapabilityConsistency(Coalition coalition, ITask task, ConfigurationUpdate config)
 		{
 			await EnlargeCoalitionUntil(coalition.CapabilitiesSatisfied, coalition, RecruitableMembers(coalition));
+			// TODO: invite missing CTF agents (?)
 
 			while (true)
 			{
@@ -104,6 +189,46 @@ namespace SafetySharp.Odp.Reconfiguration
 
 				// TODO: if still no path found: recruit additional agents (if further exist)
 			}
+		}
+
+		private async Task<Tuple<BaseAgent, Role>[]> FindDisconnectedRoles(Coalition coalition)
+		{
+			var affectedRoles = new List<Tuple<BaseAgent, Role>>();
+
+			var members = coalition.Members.ToList(); // use list because coalition.Members is modified during iteration
+			for (int i = 0; i < members.Count; ++i)
+			{
+				var agent = members[i].BaseAgent;
+				foreach (var role in agent.AllocatedRoles)
+				{
+					// 1. invite disconnected agents (so their roles can be removed / updated)
+					var affected = false;
+					if (role.PreCondition.Port != null && !agent.Inputs.Contains(role.PreCondition.Port))
+					{
+						affected = true;
+						if (!coalition.Contains(role.PreCondition.Port))
+						{
+							var newMember = await coalition.Invite(role.PreCondition.Port);
+							members.Add(newMember);
+						}
+					}
+					if (role.PostCondition.Port != null && !agent.Outputs.Contains(role.PostCondition.Port))
+					{
+						affected = true;
+						if (!coalition.Contains(role.PostCondition.Port))
+						{
+							var newMember = await coalition.Invite(role.PostCondition.Port);
+							members.Add(newMember);
+						}
+					}
+
+					// 2. collect affected roles
+					if (affected)
+						affectedRoles.Add(Tuple.Create(agent, role));
+				}
+			}
+
+			return affectedRoles.ToArray();
 		}
 
 		private IEnumerable<BaseAgent> RecruitableMembers(Coalition coalition)
