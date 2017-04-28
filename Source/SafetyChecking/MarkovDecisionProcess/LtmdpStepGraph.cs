@@ -144,12 +144,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			public DirectChildrenEnumerator(LtmdpStepGraph ltmdpStepGraph, int parentContinuationId)
 			{
 				Choice = ltmdpStepGraph.GetChoiceOfCid(parentContinuationId);
-				CurrentChildContinuationId = Choice.From;
+				CurrentChildContinuationId = Choice.From - 1;
 				ParentContinuationId = parentContinuationId;
 			}
 
 			public bool MoveNext()
 			{
+				if (Choice.IsChoiceTypeUnsplitOrFinal)
+					return false;
 				CurrentChildContinuationId++;
 				if (CurrentChildContinuationId <= Choice.To)
 					return true;

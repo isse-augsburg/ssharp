@@ -33,22 +33,24 @@ namespace Tests.MarkovDecisionProcess
 	using Xunit;
 	using Xunit.Abstractions;
 
-	public class LtmdpContinuationDistributionMapperTests
+	public class LtmdpStepGraphToContinuationDistributionMapperTests
 	{
 		public TestTraceOutput Output { get; }
 
 
-		public LtmdpContinuationDistributionMapperTests(ITestOutputHelper output)
+		public LtmdpStepGraphToContinuationDistributionMapperTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 		}
 
-		private readonly LtmdpContinuationDistributionMapper _mapper = new LtmdpContinuationDistributionMapper();
+		private readonly LtmdpChoiceResolver _choiceResolver = new LtmdpChoiceResolver();
+
+		private readonly LtmdpStepGraphToContinuationDistributionMapper _converter = new LtmdpStepGraphToContinuationDistributionMapper();
 
 
 		private int CountEntriesAndAddDistributionsToMap(int cid, Dictionary<int, bool> existingDistributions)
 		{
-			var enumerator = _mapper.GetDistributionsOfContinuationEnumerator(cid);
+			var enumerator = _converter.LtmdpContinuationDistributionMapper.GetDistributionsOfContinuationEnumerator(cid);
 			var entries = 0;
 			while (enumerator.MoveNext())
 			{
@@ -61,17 +63,26 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void OnlyOneInitialDistribution()
 		{
+			_choiceResolver.PrepareNextState();
+			var path1Exists = _choiceResolver.PrepareNextPath();
+			var path2Exists = _choiceResolver.PrepareNextPath();
 			var existingDistributions = new Dictionary<int, bool>();
 
 			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
+			path1Exists.ShouldBe(true);
+			path2Exists.ShouldBe(false);
 			entries.ShouldBe(1);
 		}
 		
 		[Fact]
 		public void ProbabilisticSplitRemovesInitialContinuation()
 		{
-			_mapper.ProbabilisticSplit(0, 1, 3);
-
+			// Only first path tested, yet.
+			_choiceResolver.PrepareNextState();
+			_choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleProbabilisticChoice(2);
+			
+			_converter.Derive(_choiceResolver.LtmdpStepGraph);
 			var existingDistributions = new Dictionary<int, bool>();
 			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
 			entries.ShouldBe(0);
@@ -80,8 +91,13 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void OneDistributionWithThreeContinuations()
 		{
-			_mapper.ProbabilisticSplit(0, 1, 3);
+			// Only first path tested, yet.
+			_choiceResolver.PrepareNextState();
+			_choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleProbabilisticChoice(3);
 
+			_converter.Clear();
+			_converter.Derive(_choiceResolver.LtmdpStepGraph);
 			var existingDistributions = new Dictionary<int, bool>();
 
 			var entries = CountEntriesAndAddDistributionsToMap(1, existingDistributions);
@@ -102,10 +118,14 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void OneDistributionWithFiveContinuationsAfterTwoSplits()
 		{
-			_mapper.ProbabilisticSplit(0, 1, 3);
-			_mapper.ProbabilisticSplit(1, 4, 5);
+			// Only first path tested, yet.
+			_choiceResolver.PrepareNextState();
+			_choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.HandleProbabilisticChoice(2);
 
-
+			_converter.Clear();
+			_converter.Derive(_choiceResolver.LtmdpStepGraph);
 			var existingDistributions = new Dictionary<int, bool>();
 
 			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
@@ -133,10 +153,14 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void TwoDistributionWithFiveContinuationsAfterTwoSplits()
 		{
-			_mapper.ProbabilisticSplit(0, 1, 3);
-			_mapper.NonDeterministicSplit(1, 4, 5);
+			// Only first path tested, yet.
+			_choiceResolver.PrepareNextState();
+			_choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.HandleChoice(2);
 
-
+			_converter.Clear();
+			_converter.Derive(_choiceResolver.LtmdpStepGraph);
 			var existingDistributions = new Dictionary<int, bool>();
 			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
 			entries.ShouldBe(0);
@@ -164,14 +188,19 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void TwoDistributionWithFiveContinuationsAfterTwoSplitsWithRemove()
 		{
-			_mapper.ProbabilisticSplit(0, 1, 3);
-			_mapper.NonDeterministicSplit(1, 4, 5);
+			// Only first path tested, yet.
+			_choiceResolver.PrepareNextState();
+			_choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleProbabilisticChoice(3);
+			var choiceToMakeDeterministic = _choiceResolver.LastChoiceIndex;
+			_choiceResolver.HandleChoice(2);
 
-			// simulate undo of probabilistic split (2 and 3 should not be executed anymore)
-			_mapper.RemoveCidInDistributions(2);
-			_mapper.RemoveCidInDistributions(3);
+			// MakeChoiceAtIndexDeterministic of probabilistic split
+			_choiceResolver.MakeChoiceAtIndexDeterministic(choiceToMakeDeterministic);
 
 
+			_converter.Clear();
+			_converter.Derive(_choiceResolver.LtmdpStepGraph);
 			var existingDistributions = new Dictionary<int, bool>();
 			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
 			entries.ShouldBe(0);
@@ -199,11 +228,18 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void TwoDistributionWithFiveContinuationsAfterTwoSplitsWithRemove2()
 		{
-			_mapper.ProbabilisticSplit(0, 1, 3);
-			_mapper.NonDeterministicSplit(1, 4, 5);
+			// Only first path tested, yet.
+			_choiceResolver.PrepareNextState();
+			_choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.HandleChoice(2);
+			var choiceToMakeDeterministic = _choiceResolver.LastChoiceIndex;
 
-			// simulate undo of nondeterministic split (5 should not be executed anymore)
-			_mapper.RemoveDistributionsWithCid(5);
+			// MakeChoiceAtIndexDeterministic of nondeterministic split
+			_choiceResolver.MakeChoiceAtIndexDeterministic(choiceToMakeDeterministic);
+
+			_converter.Clear();
+			_converter.Derive(_choiceResolver.LtmdpStepGraph);
 
 			var existingDistributions = new Dictionary<int, bool>();
 			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
@@ -227,22 +263,29 @@ namespace Tests.MarkovDecisionProcess
 			existingDistributions.Count.ShouldBe(1);
 			existingDistributions.ShouldContainKey(0);
 		}
-		
-		[Fact]
-		public void SimpleExample1a()
-		{
-			_mapper.ProbabilisticSplit(0, 1, 2);
-			_mapper.NonDeterministicSplit(1, 3, 4);
-			_mapper.Clear();
-			_mapper.ProbabilisticSplit(0, 1, 2);
-			_mapper.NonDeterministicSplit(1, 3, 4);
-			_mapper.Clear();
-			_mapper.ProbabilisticSplit(0, 1, 2);
-			_mapper.NonDeterministicSplit(1, 3, 4);
-			_mapper.Clear();
-			_mapper.ProbabilisticSplit(0, 1, 2);
-			_mapper.NonDeterministicSplit(1, 3, 4);
 
+
+
+		[Fact]
+		public void MakeProabilisticChoiceDeterministicWhichWasPreviouslyNondeterministic()
+		{
+			_choiceResolver.PrepareNextState();
+			_choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleChoice(2);
+			_choiceResolver.HandleChoice(2);
+			_choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleChoice(2);
+			_choiceResolver.HandleChoice(2);
+			_choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleChoice(2);
+			_choiceResolver.HandleProbabilisticChoice(2);
+			var choiceToMakeDeterministic = _choiceResolver.LastChoiceIndex;
+			_choiceResolver.MakeChoiceAtIndexDeterministic(choiceToMakeDeterministic);
+			_choiceResolver.PrepareNextPath();
+
+			
+			_converter.Clear();
+			_converter.Derive(_choiceResolver.LtmdpStepGraph);
 			var existingDistributions = new Dictionary<int, bool>();
 			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
 			entries.ShouldBe(0);
@@ -251,7 +294,7 @@ namespace Tests.MarkovDecisionProcess
 			entries.ShouldBe(0);
 
 			entries = CountEntriesAndAddDistributionsToMap(2, existingDistributions);
-			entries.ShouldBe(2);
+			entries.ShouldBe(0);
 
 			entries = CountEntriesAndAddDistributionsToMap(3, existingDistributions);
 			entries.ShouldBe(1);
@@ -259,36 +302,90 @@ namespace Tests.MarkovDecisionProcess
 			entries = CountEntriesAndAddDistributionsToMap(4, existingDistributions);
 			entries.ShouldBe(1);
 
-			existingDistributions.Count.ShouldBe(2);
+			entries = CountEntriesAndAddDistributionsToMap(5, existingDistributions);
+			entries.ShouldBe(1);
+
+			entries = CountEntriesAndAddDistributionsToMap(6, existingDistributions);
+			entries.ShouldBe(0);
+
+			existingDistributions.Count.ShouldBe(3);
 			existingDistributions.ShouldContainKey(0);
 			existingDistributions.ShouldContainKey(1);
+			existingDistributions.ShouldContainKey(2);
 		}
 
 		[Fact]
 		public void SimpleExample1b()
 		{
-			_mapper.ProbabilisticSplit(0, 1, 2);
-			_mapper.NonDeterministicSplit(1, 3, 4);
+			// Act
+			_choiceResolver.PrepareNextState();
+			var state1Path1Exists = _choiceResolver.PrepareNextPath();
+			var state1Path1Choice1 = _choiceResolver.HandleProbabilisticChoice(2);
+			var state1Path1Choice2 = _choiceResolver.HandleChoice(2);
+			var state1Path2Exists = _choiceResolver.PrepareNextPath();
+			var state1Path2Choice1 = _choiceResolver.HandleProbabilisticChoice(2);
+			var state1Path2Choice2 = _choiceResolver.HandleChoice(2);
+			var state1Path3Exists = _choiceResolver.PrepareNextPath();
+			var state1Path3Choice1 = _choiceResolver.HandleProbabilisticChoice(2);
+			var state1Path4Exists = _choiceResolver.PrepareNextPath();
+			// Collect data
+			_converter.Clear();
+			_converter.Derive(_choiceResolver.LtmdpStepGraph);
+			var state1ExistingDistributions = new Dictionary<int, bool>();
+			var state1DidsOfCid0 = CountEntriesAndAddDistributionsToMap(0, state1ExistingDistributions);
+			var state1DidsOfCid1 = CountEntriesAndAddDistributionsToMap(1, state1ExistingDistributions);
+			var state1DidsOfCid2 = CountEntriesAndAddDistributionsToMap(2, state1ExistingDistributions);
+			var state1DidsOfCid3 = CountEntriesAndAddDistributionsToMap(3, state1ExistingDistributions);
+			var state1DidsOfCid4 = CountEntriesAndAddDistributionsToMap(4, state1ExistingDistributions);
 
-			var existingDistributions = new Dictionary<int, bool>();
-			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
-			entries.ShouldBe(0);
+			_choiceResolver.PrepareNextState();
+			var state2Path1Exists = _choiceResolver.PrepareNextPath();
+			var state2Path2Exists = _choiceResolver.PrepareNextPath();
+			
+			_choiceResolver.PrepareNextState();
+			var state3Path1Exists = _choiceResolver.PrepareNextPath();
+			var state3Path2Exists = _choiceResolver.PrepareNextPath();
 
-			entries = CountEntriesAndAddDistributionsToMap(1, existingDistributions);
-			entries.ShouldBe(0);
+			_choiceResolver.PrepareNextState();
+			var state4Path1Exists = _choiceResolver.PrepareNextPath();
+			var state4Path2Exists = _choiceResolver.PrepareNextPath();
+			// Collect data
+			_converter.Clear();
+			_converter.Derive(_choiceResolver.LtmdpStepGraph);
+			var state4ExistingDistributions = new Dictionary<int, bool>();
+			var state4DidsOfCid0 = CountEntriesAndAddDistributionsToMap(0, state4ExistingDistributions);
 
-			entries = CountEntriesAndAddDistributionsToMap(2, existingDistributions);
-			entries.ShouldBe(2);
 
-			entries = CountEntriesAndAddDistributionsToMap(3, existingDistributions);
-			entries.ShouldBe(1);
+			// Assert
+			state1Path1Exists.ShouldBe(true);
+			state1Path1Choice1.ShouldBe(0);
+			state1Path1Choice2.ShouldBe(0);
+			state1Path2Exists.ShouldBe(true);
+			state1Path2Choice1.ShouldBe(0);
+			state1Path2Choice2.ShouldBe(1);
+			state1Path3Exists.ShouldBe(true);
+			state1Path3Choice1.ShouldBe(1);
+			state1Path4Exists.ShouldBe(false);
+			state1DidsOfCid0.ShouldBe(0);
+			state1DidsOfCid1.ShouldBe(0);
+			state1DidsOfCid2.ShouldBe(2);
+			state1DidsOfCid3.ShouldBe(1);
+			state1DidsOfCid4.ShouldBe(1);
+			state1ExistingDistributions.Count.ShouldBe(2);
+			state1ExistingDistributions.ShouldContainKey(0);
+			state1ExistingDistributions.ShouldContainKey(1);
 
-			entries = CountEntriesAndAddDistributionsToMap(4, existingDistributions);
-			entries.ShouldBe(1);
+			state2Path1Exists.ShouldBe(true);
+			state2Path2Exists.ShouldBe(false);
 
-			existingDistributions.Count.ShouldBe(2);
-			existingDistributions.ShouldContainKey(0);
-			existingDistributions.ShouldContainKey(1);
+			state3Path1Exists.ShouldBe(true);
+			state3Path2Exists.ShouldBe(false);
+
+			state4Path1Exists.ShouldBe(true);
+			state4Path2Exists.ShouldBe(false);
+			state4DidsOfCid0.ShouldBe(1);
+			state4ExistingDistributions.Count.ShouldBe(1);
+			state4ExistingDistributions.ShouldContainKey(0);
 		}
 	}
 }
