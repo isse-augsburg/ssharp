@@ -46,12 +46,12 @@ namespace SafetySharp.Odp.Reconfiguration
 			var task = tasks[0];
 
 			var leader = (CoalitionReconfigurationAgent)context;
+			var coalition = new Coalition(leader, task, leader.BaseAgentState.ViolatedPredicates);
 			var config = new ConfigurationUpdate();
-			var coalition = new Coalition(leader, task);
 
 			try
 			{
-				foreach (var predicate in leader.BaseAgentState.ViolatedPredicates)
+				foreach (var predicate in coalition.ViolatedPredicates)
 					await SolveInvariantViolation(coalition, predicate, task, config);
 			}
 			catch (OperationCanceledException)

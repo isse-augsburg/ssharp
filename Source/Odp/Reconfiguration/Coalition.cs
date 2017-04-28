@@ -32,6 +32,8 @@ namespace SafetySharp.Odp.Reconfiguration
 		// task & configuration
 		public ITask Task { get; }
 
+		public InvariantPredicate[] ViolatedPredicates { get; private set; }
+
 		public BaseAgent[] RecoveredDistribution { get; }
 
 		/// <summary>
@@ -59,11 +61,12 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public bool CapabilitiesSatisfied() => NeededCapabilities.IsSubsetOf(AvailableCapabilities);
 
-		public Coalition(CoalitionReconfigurationAgent leader, ITask task)
+		public Coalition(CoalitionReconfigurationAgent leader, ITask task, InvariantPredicate[] violatedPredicates)
 		{
 			Merger = new MergeSupervisor(this);
 			RecoveredDistribution = new BaseAgent[task.RequiredCapabilities.Length];
 			Task = task;
+			ViolatedPredicates = violatedPredicates;
 			Join(Leader = leader);
 		}
 
