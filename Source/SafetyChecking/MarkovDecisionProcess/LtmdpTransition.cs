@@ -57,10 +57,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		public uint Flags;
 
 		/// <summary>
-		///   The probability of the transition.
+		///   The continuation id of the transition.
 		/// </summary>
 		[FieldOffset(24)]
-		public int Distribution;
+		public int ContinuationId;
 
 		/// <summary>
 		///   The probability of the transition.

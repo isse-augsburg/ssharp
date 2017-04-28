@@ -116,12 +116,12 @@
     <Compile Include="MarkovDecisionProcess\BuiltinMdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\ExternalMdpModelCheckerPrism.cs" />
     <Compile Include="MarkovDecisionProcess\LabeledTransitionMarkovDecisionProcess.cs" />
-    <Compile Include="MarkovDecisionProcess\TraversalModifiers\LtmdpBuilder.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpBuilderDuringTraversalOld.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpChoiceResolver.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpExecutedModel.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpGenerator.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpChosenValueStack.cs" />
-    <Compile Include="MarkovDecisionProcess\LtmdpToMdp.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpOldToMdp.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpTransition.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpCachedLabeledStates.cs" />
     <Compile Include="MarkovDecisionProcess\MarkovDecisionProcess.cs" />

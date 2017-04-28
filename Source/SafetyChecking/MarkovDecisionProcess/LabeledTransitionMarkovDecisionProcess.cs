@@ -33,7 +33,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using ExecutableModel;
 
 
-	internal unsafe partial class LabeledTransitionMarkovDecisionProcess : DisposableObject
+	internal unsafe partial class LabeledTransitionMarkovDecisionProcessOld : DisposableObject
 	{
 		public static readonly int TransitionSize = sizeof(TransitionChainElement);
 
@@ -64,7 +64,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		private readonly long _maxNumberOfTransitions;
 
 
-		public LabeledTransitionMarkovDecisionProcess(long maxNumberOfStates, long maxNumberOfTransitions)
+		public LabeledTransitionMarkovDecisionProcessOld(long maxNumberOfStates, long maxNumberOfTransitions)
 		{
 			Requires.InRange(maxNumberOfStates, nameof(maxNumberOfStates), 1024, Int32.MaxValue - 1);
 
@@ -254,7 +254,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		internal struct DistributionsEnumerator
 		{
-			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
+			private readonly LabeledTransitionMarkovDecisionProcessOld _ltmdp;
 
 			public int CurrentIndex { get; private set; }
 
@@ -267,7 +267,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				return new LabeledTransitionEnumerator(_ltmdp, _ltmdp._distributionChainElementsMemory[CurrentIndex].FirstTransitionIndex);
 			}
 
-			public DistributionsEnumerator(LabeledTransitionMarkovDecisionProcess ltmdp, int firstElement)
+			public DistributionsEnumerator(LabeledTransitionMarkovDecisionProcessOld ltmdp, int firstElement)
 			{
 				_ltmdp = ltmdp;
 				CurrentIndex = -1;
@@ -291,7 +291,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		}
 		internal struct LabeledTransitionEnumerator
 		{
-			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
+			private readonly LabeledTransitionMarkovDecisionProcessOld _ltmdp;
 
 			public int CurrentIndex { get; private set; }
 
@@ -303,7 +303,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			public StateFormulaSet CurrentFormulas => _ltmdp._transitionChainElementsMemory[CurrentIndex].Formulas;
 
-			public LabeledTransitionEnumerator(LabeledTransitionMarkovDecisionProcess ltmdp, int firstElement)
+			public LabeledTransitionEnumerator(LabeledTransitionMarkovDecisionProcessOld ltmdp, int firstElement)
 			{
 				_ltmdp = ltmdp;
 				CurrentIndex = -1;
@@ -348,7 +348,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		internal struct TransitionChainEnumerator
 		{
-			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
+			private readonly LabeledTransitionMarkovDecisionProcessOld _ltmdp;
 
 			public int CurrentIndex { get; private set; }
 			
@@ -364,7 +364,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				get { return _ltmdp._transitionChainElementsMemory[CurrentIndex].Formulas; }
 			}
 
-			public TransitionChainEnumerator(LabeledTransitionMarkovDecisionProcess ltmdp)
+			public TransitionChainEnumerator(LabeledTransitionMarkovDecisionProcessOld ltmdp)
 			{
 				_ltmdp = ltmdp;
 				CurrentIndex = -1;

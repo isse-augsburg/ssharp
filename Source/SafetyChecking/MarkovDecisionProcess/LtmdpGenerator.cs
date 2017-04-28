@@ -29,11 +29,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using ExecutableModel;
 	using AnalysisModel;
 	/// <summary>
-	///   Generates a <see cref="LabeledTransitionMarkovDecisionProcess" /> for an <see cref="AnalysisModel" />.
+	///   Generates a <see cref="LabeledTransitionMarkovDecisionProcessOld" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
 	internal class LtmdpGenerator<TExecutableModel> : ModelTraverser<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private readonly LabeledTransitionMarkovDecisionProcess _mdp;
+		private readonly LabeledTransitionMarkovDecisionProcessOld _mdp;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -44,12 +44,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		internal LtmdpGenerator(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
-			: base(createModel, output, configuration, LabeledTransitionMarkovDecisionProcess.TransitionSize)
+			: base(createModel, output, configuration, LabeledTransitionMarkovDecisionProcessOld.TransitionSize)
 		{
-			_mdp = new LabeledTransitionMarkovDecisionProcess(Context.ModelCapacity.NumberOfStates, Context.ModelCapacity.NumberOfTransitions);
+			_mdp = new LabeledTransitionMarkovDecisionProcessOld(Context.ModelCapacity.NumberOfStates, Context.ModelCapacity.NumberOfTransitions);
 			_mdp.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<TExecutableModel>(_mdp, configuration));
+			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovDecisionProcessOld.LtmdpBuilderDuringTraversalOld<TExecutableModel>(_mdp, configuration));
 			if (terminateEarlyCondition != null)
 			{
 				_mdp.CreateStutteringState(Context.StutteringStateIndex);
@@ -61,7 +61,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <summary>
 		///   Generates the state graph.
 		/// </summary>
-		internal LabeledTransitionMarkovDecisionProcess GenerateStateGraph()
+		internal LabeledTransitionMarkovDecisionProcessOld GenerateStateGraph()
 		{
 			Context.Output($"Generating labeled transition markov decision process.");
 			TraverseModelAndReport();

@@ -39,7 +39,7 @@ namespace Tests.MarkovDecisionProcess
 	using Xunit;
 	using Xunit.Abstractions;
 
-	public unsafe class LtmdpBuilderTests
+	public unsafe class LtmdpBuilderDuringTraversalOldTests
 	{
 		private const int StateCapacity = 1024;
 		private const int TransitionCapacity = 4096;
@@ -49,7 +49,7 @@ namespace Tests.MarkovDecisionProcess
 		private readonly LtmdpTransition* _transitions;
 		private int _transitionCount = 0;
 
-		public LtmdpBuilderTests(ITestOutputHelper output)
+		public LtmdpBuilderDuringTraversalOldTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 			
@@ -61,7 +61,7 @@ namespace Tests.MarkovDecisionProcess
 		{
 			var transition = _transitionCount;
 			_transitionCount++;
-			_transitions[transition] = new LtmdpTransition { Probability = p, Distribution = distribution };
+			_transitions[transition] = new LtmdpTransition { Probability = p, ContinuationId = distribution };
 			var t = (Transition*)(_transitions + transition);
 			t->SourceStateIndex = 0;
 			t->TargetStateIndex = targetStateIndex;
@@ -83,8 +83,8 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void OneReflexiveTransition()
 		{
-			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp,AnalysisConfiguration.Default);
+			var ltmdp = new LabeledTransitionMarkovDecisionProcessOld(StateCapacity, TransitionCapacity);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcessOld.LtmdpBuilderDuringTraversalOld<SimpleExecutableModel>(ltmdp,AnalysisConfiguration.Default);
 
 			// add initial state
 			ClearTransitions();
@@ -132,8 +132,8 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void ThreeReflexiveStatesFromInitialState()
 		{
-			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
+			var ltmdp = new LabeledTransitionMarkovDecisionProcessOld(StateCapacity, TransitionCapacity);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcessOld.LtmdpBuilderDuringTraversalOld<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
 
 			// add initial state
 			ClearTransitions();
@@ -194,8 +194,8 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void ThreeReflexiveStatesFromNonInitialState()
 		{
-			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
+			var ltmdp = new LabeledTransitionMarkovDecisionProcessOld(StateCapacity, TransitionCapacity);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcessOld.LtmdpBuilderDuringTraversalOld<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
 
 			// add initial state
 			ClearTransitions();
@@ -263,8 +263,8 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void StatesFromNonInitialStateWithMoreDistributions()
 		{
-			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilder<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
+			var ltmdp = new LabeledTransitionMarkovDecisionProcessOld(StateCapacity, TransitionCapacity);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcessOld.LtmdpBuilderDuringTraversalOld<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
 
 			// add initial state
 			ClearTransitions();

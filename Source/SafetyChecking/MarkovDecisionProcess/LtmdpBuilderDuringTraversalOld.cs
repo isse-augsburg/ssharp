@@ -32,23 +32,23 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using Utilities;
 
 	//The LtmdpBuilder is tightly coupled to LabeledTransitionMarkovDecisionProcess, so we make it a nested class
-	internal unsafe partial class LabeledTransitionMarkovDecisionProcess
+	internal unsafe partial class LabeledTransitionMarkovDecisionProcessOld
 	{
 		/// <summary>
-		///   Builds up a <see cref="LabeledTransitionMarkovDecisionProcess" /> instance during model traversal.
+		///   Builds up a <see cref="LabeledTransitionMarkovDecisionProcessOld" /> instance during model traversal.
 		///   Note: This only works single threaded
 		/// </summary>
-		internal class LtmdpBuilder<TExecutableModel> : IBatchedTransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+		internal class LtmdpBuilderDuringTraversalOld<TExecutableModel> : IBatchedTransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 		{
 			private int _maxNumberOfDistributionsPerState;
 
-			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
+			private readonly LabeledTransitionMarkovDecisionProcessOld _ltmdp;
 
 			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
 			/// <param name="ltmdp">The Markov chain that should be built up.</param>
-			public LtmdpBuilder(LabeledTransitionMarkovDecisionProcess ltmdp, AnalysisConfiguration configuration)
+			public LtmdpBuilderDuringTraversalOld(LabeledTransitionMarkovDecisionProcessOld ltmdp, AnalysisConfiguration configuration)
 			{
 				Requires.NotNull(ltmdp, nameof(ltmdp));
 				_ltmdp = ltmdp;
@@ -318,7 +318,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 					CheckIfTransitionIsValid(probTransition);
 
-					var positionOfDistributionElementChain = FindOrCreateDistributionChainElementWithDistribution(sourceState, areInitialTransitions, probTransition->Distribution);
+					var positionOfDistributionElementChain = FindOrCreateDistributionChainElementWithDistribution(sourceState, areInitialTransitions, probTransition->ContinuationId);
 
 					AddTransitionToTransitionChain(positionOfDistributionElementChain, probTransition);
 				}

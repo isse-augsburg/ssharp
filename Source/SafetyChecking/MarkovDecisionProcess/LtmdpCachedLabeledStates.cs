@@ -106,7 +106,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				Formulas = new StateFormulaSet(_formulas),
 				ActivatedFaults = activatedFaults,
 				Flags = TransitionFlags.IsValidFlag,
-				Distribution = continuationId, //temporarily insert the continuation id here. Will be replaced by distribution id
+				ContinuationId = continuationId,
 				Probability = probability
 			};
 			++_transitionsWithContinuationIdCount;
@@ -144,8 +144,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			for (var i = 0; i < _transitionsWithContinuationIdCount; i++)
 			{
 				var currentTransition = _transitionsWithContinuationIdMemory[i];
-				// currentTransition.Distribution contains the continuationId as placeholder. Must be replaced
-				var enumerator = cidToDidMapper.GetDistributionsOfContinuationEnumerator(currentTransition.Distribution);
+				// currentTransition.ContinuationId contains the continuationId. This is replaced by the DistributionId
+				var enumerator = cidToDidMapper.GetDistributionsOfContinuationEnumerator(currentTransition.ContinuationId);
 				while (enumerator.MoveNext())
 				{
 
@@ -159,7 +159,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 							Formulas = currentTransition.Formulas,
 							ActivatedFaults = currentTransition.ActivatedFaults,
 							Flags = currentTransition.Flags,
-							Distribution = enumerator.CurrentDistributionId, // insert correct distribution id
+							ContinuationId = enumerator.CurrentDistributionId, // insert correct distribution id
 							Probability = currentTransition.Probability
 
 						};

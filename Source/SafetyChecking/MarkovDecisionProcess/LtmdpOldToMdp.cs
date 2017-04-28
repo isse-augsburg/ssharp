@@ -33,7 +33,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using ExecutedModel;
 	using GenericDataStructures;
 
-	internal sealed class LtmdpToMdp
+	internal sealed class LtmdpOldToMdp
 	{
 		internal struct StateStorageEntry
 		{
@@ -77,7 +77,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		private readonly Dictionary<StateStorageEntry, int> _mapper = new Dictionary<StateStorageEntry, int>();
 		private readonly AutoResizeVector<StateStorageEntry> _backMapper = new AutoResizeVector<StateStorageEntry>();
 
-		private void CreateStates(LabeledTransitionMarkovDecisionProcess ltmdp)
+		private void CreateStates(LabeledTransitionMarkovDecisionProcessOld ltmdp)
 		{
 			var enumerator = ltmdp.GetTransitionChainEnumerator();
 			while (enumerator.MoveNext())
@@ -100,7 +100,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 		}
 
-		public void ConvertTransitions(LabeledTransitionMarkovDecisionProcess ltmc)
+		public void ConvertTransitions(LabeledTransitionMarkovDecisionProcessOld ltmc)
 		{
 			for (var i = 0; i < States; i++)
 			{
@@ -124,7 +124,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 		}
 
-		public void ConvertInitialStates(LabeledTransitionMarkovDecisionProcess ltmc)
+		public void ConvertInitialStates(LabeledTransitionMarkovDecisionProcessOld ltmc)
 		{
 			MarkovDecisionProcess.StartWithInitialDistributions();
 			var distEnumerator = ltmc.GetInitialDistributionsEnumerator();
@@ -143,7 +143,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			MarkovDecisionProcess.FinishInitialDistributions();
 		}
 
-		public LtmdpToMdp(LabeledTransitionMarkovDecisionProcess ltmc)
+		public LtmdpOldToMdp(LabeledTransitionMarkovDecisionProcessOld ltmc)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();

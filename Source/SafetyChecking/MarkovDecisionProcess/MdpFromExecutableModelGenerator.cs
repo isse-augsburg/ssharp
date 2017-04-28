@@ -70,7 +70,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			using (var checker = new LtmdpGenerator<TExecutableModel>(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
 			{
 				var ltmdp = checker.GenerateStateGraph();
-				var ltmdpToMdp = new LtmdpToMdp(ltmdp);
+				var ltmdpToMdp = new LtmdpOldToMdp(ltmdp);
 				var mdp = ltmdpToMdp.MarkovDecisionProcess;
 				return mdp;
 			}
