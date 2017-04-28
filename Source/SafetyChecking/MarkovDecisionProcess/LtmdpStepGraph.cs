@@ -33,25 +33,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 	internal class LtmdpStepGraph
 	{
-		public enum ChoiceType
-		{
-			///   A continuationId has either been finished or is
-			ChoiceTypeUnsplitOrFinal = 0,
-			///   Represents a deterministic choice in _choiceTypeOfContinuationId (only one choice available)
-			ChoiceTypeDeterministic = 1,
-			///   Represents a non deterministic choice in _choiceTypeOfContinuationId
-			ChoiceTypeNondeterministic = 2,
-			///   Represents a probabilistic choice in _choiceTypeOfContinuationId
-			ChoiceTypeProbabilitstic = 3
-		}
-
 		public struct Choice
 		{
 			public readonly int From;
 			public readonly int To;
-			public readonly ChoiceType ChoiceType;
+			public readonly LtmdpChoiceType ChoiceType;
 			
-			public Choice(int from, int to, ChoiceType choiceType)
+			public Choice(int from, int to, LtmdpChoiceType choiceType)
 			{
 				From=from;
 				To=to;
@@ -60,16 +48,16 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			public Choice DeriveDeterministic()
 			{
-				return new Choice(From,From,ChoiceType.ChoiceTypeDeterministic);
+				return new Choice(From,From,LtmdpChoiceType.Deterministic);
 			}
 
-			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == ChoiceType.ChoiceTypeUnsplitOrFinal;
+			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == LtmdpChoiceType.UnsplitOrFinal;
 
-			public bool IsChoiceTypeDeterministic => ChoiceType == ChoiceType.ChoiceTypeDeterministic;
+			public bool IsChoiceTypeDeterministic => ChoiceType == LtmdpChoiceType.Deterministic;
 
-			public bool IsChoiceTypeNondeterministic => ChoiceType == ChoiceType.ChoiceTypeNondeterministic;
+			public bool IsChoiceTypeNondeterministic => ChoiceType == LtmdpChoiceType.Nondeterministic;
 
-			public bool IsChoiceTypeProbabilitstic => ChoiceType == ChoiceType.ChoiceTypeProbabilitstic;
+			public bool IsChoiceTypeProbabilitstic => ChoiceType == LtmdpChoiceType.Probabilitstic;
 		}
 		
 		private readonly AutoResizeVector<Choice> _internalGraph = new AutoResizeVector<Choice>();
@@ -88,7 +76,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		private void AddInitialContinuation()
 		{
 			Requires.That(_internalGraph.Count == 0, "Data structure must be empty");
-			_internalGraph[0] = new Choice(0,0,ChoiceType.ChoiceTypeUnsplitOrFinal);
+			_internalGraph[0] = new Choice(0,0,LtmdpChoiceType.UnsplitOrFinal);
 		}
 
 		public void MakeChoiceOfCidDeterministic(int cid)
@@ -108,7 +96,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			Assert.That(sourceCid < fromCid && sourceCid < toCid, "sourceCid must be smaller than childrenCids");
 			Assert.That(fromCid <= toCid, "range [fromCid..toCid] must be ascending and contain at least one element");
 
-			_internalGraph[sourceCid] = new Choice(fromCid,toCid,ChoiceType.ChoiceTypeNondeterministic);
+			_internalGraph[sourceCid] = new Choice(fromCid,toCid,LtmdpChoiceType.Nondeterministic);
 		}
 
 
@@ -124,7 +112,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			Assert.That(sourceCid < fromCid && sourceCid < toCid, "sourceCid must be smaller than childrenCids");
 			Assert.That(fromCid <= toCid, "range [fromCid..toCid] must be ascending and contain at least one element");
 
-			_internalGraph[sourceCid] = new Choice(fromCid, toCid, ChoiceType.ChoiceTypeProbabilitstic);
+			_internalGraph[sourceCid] = new Choice(fromCid, toCid, LtmdpChoiceType.Probabilitstic);
 		}
 
 

@@ -33,9 +33,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using ExecutableModel;
 
 
-	internal unsafe partial class LabeledTransitionMarkovDecisionProcessOld : DisposableObject
+	internal unsafe partial class LabeledTransitionMarkovDecisionProcess : DisposableObject
 	{
-		public static readonly int TransitionSize = sizeof(TransitionChainElement);
+		public static readonly int TransitionSize = sizeof(TransitionTargetElement);
+		private const int AvgGraphNodesPerSucceedingState = 99;
 
 		// TODO: Optimization potential for custom model checker: Add every state only once. Save the transitions and evaluate reachability formulas more efficient by only expanding "states" to "states x stateformulaset" where the state labels of interests are in "stateformulaset"
 
@@ -47,70 +48,70 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		public ConcurrentBag<int> SourceStates { get; } = new ConcurrentBag<int>();
 
-		private readonly MemoryBuffer _stateStorageStateToFirstDistributionChainElementBuffer = new MemoryBuffer();
-		private readonly int* _stateStorageStateToFirstDistributionChainElementMemory;
+		private readonly MemoryBuffer _stateStorageStateToRootOfContinuationGraphBuffer = new MemoryBuffer();
+		private readonly long* _stateStorageStateToRootOfContinuationGraphMemory;
 		
-		private readonly MemoryBuffer _distributionChainElementsBuffer = new MemoryBuffer();
-		private readonly DistributionChainElement* _distributionChainElementsMemory;
-		private int _distributionChainElementCount = 0;
+		private readonly MemoryBuffer _continuationGraphBuffer = new MemoryBuffer();
+		private readonly ContinuationGraphElement* _continuationGraph;
+		private long _continuationGraphElementCount = 0;
 
-		private readonly MemoryBuffer _transitionChainElementsBuffer = new MemoryBuffer();
-		private readonly TransitionChainElement* _transitionChainElementsMemory;
-		private int _transitionChainElementCount = 0;
+		private readonly long _maxNumberOfContinuationGraphElements;
 
-		public int Distributions => _distributionChainElementCount;
-		public int Transitions => _transitionChainElementCount;
+		private readonly MemoryBuffer _transitionTargetBuffer = new MemoryBuffer();
+		private readonly TransitionTargetElement* _transitionTarget;
+		private int _transitionTargetCount = 0;
 
-		private readonly long _maxNumberOfTransitions;
+		private readonly long _maxNumberOfTransitionTargets;
 
 
-		public LabeledTransitionMarkovDecisionProcessOld(long maxNumberOfStates, long maxNumberOfTransitions)
+		public LabeledTransitionMarkovDecisionProcess(long maxNumberOfStates, long maxNumberOfTransitions)
 		{
 			Requires.InRange(maxNumberOfStates, nameof(maxNumberOfStates), 1024, Int32.MaxValue - 1);
 
-			_maxNumberOfTransitions = maxNumberOfTransitions;
+			_maxNumberOfTransitionTargets = maxNumberOfTransitions/(AvgGraphNodesPerSucceedingState+1);
+			_maxNumberOfContinuationGraphElements = _maxNumberOfTransitionTargets * AvgGraphNodesPerSucceedingState;
 
-			_stateStorageStateToFirstDistributionChainElementBuffer.Resize((long)maxNumberOfStates * sizeof(int), zeroMemory: false);
-			_stateStorageStateToFirstDistributionChainElementMemory = (int*)_stateStorageStateToFirstDistributionChainElementBuffer.Pointer;
+			Requires.InRange(_maxNumberOfTransitionTargets, nameof(_maxNumberOfTransitionTargets), 1024, Int32.MaxValue - 1);
+			Requires.InRange(_maxNumberOfContinuationGraphElements, nameof(_maxNumberOfContinuationGraphElements), 1024, Int32.MaxValue - 1);
 
-			_distributionChainElementsBuffer.Resize((long)maxNumberOfStates * sizeof(DistributionChainElement), zeroMemory: false);
-			_distributionChainElementsMemory = (DistributionChainElement*)_distributionChainElementsBuffer.Pointer;
+			_stateStorageStateToRootOfContinuationGraphBuffer.Resize((long)maxNumberOfStates * sizeof(long), zeroMemory: false);
+			_stateStorageStateToRootOfContinuationGraphMemory = (long*)_stateStorageStateToRootOfContinuationGraphBuffer.Pointer;
 
-			_transitionChainElementsBuffer.Resize((long)maxNumberOfTransitions * sizeof(TransitionChainElement), zeroMemory: false);
-			_transitionChainElementsMemory = (TransitionChainElement*)_transitionChainElementsBuffer.Pointer;
+			_continuationGraphBuffer.Resize((long)_maxNumberOfContinuationGraphElements * sizeof(ContinuationGraphElement), zeroMemory: false);
+			_continuationGraph = (ContinuationGraphElement*)_continuationGraphBuffer.Pointer;
+
+			_transitionTargetBuffer.Resize((long)_maxNumberOfTransitionTargets * sizeof(TransitionTargetElement), zeroMemory: false);
+			_transitionTarget = (TransitionTargetElement*)_transitionTargetBuffer.Pointer;
 			
-			MemoryBuffer.SetAllBitsMemoryWithInitblk.ClearWithMinus1(_stateStorageStateToFirstDistributionChainElementMemory, maxNumberOfStates);
+			MemoryBuffer.SetAllBitsMemoryWithInitblk.ClearWithMinus1(_stateStorageStateToRootOfContinuationGraphMemory, maxNumberOfStates);
+		}
+		
+		private struct ContinuationGraphElement
+		{
+			public LtmdpChoiceType ChoiceType;
+			public int From;
+			public int To;
 		}
 
-
-		private struct DistributionChainElement
+		private struct TransitionTargetElement
 		{
-			public int NextElementIndex;
-			public int Distribution;
-			public int FirstTransitionIndex;
-		}
-
-		private struct TransitionChainElement
-		{
-			public int NextElementIndex;
 			public int TargetState;
 			public StateFormulaSet Formulas;
 			public double Probability;
 		}
 
-		private int GetPlaceForNewTransitionChainElement()
+		private long GetPlaceForNewContinuationGraphElements(int number)
 		{
-			var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
-			if (locationOfNewEntry >= _maxNumberOfTransitions)
+			var locationOfFirstNewEntry = InterlockedExtensions.IncrementReturnOld(ref _continuationGraphElementCount);
+			if (locationOfFirstNewEntry >= _maxNumberOfContinuationGraphElements)
 				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
-			return locationOfNewEntry;
+			return locationOfFirstNewEntry;
 		}
 
-
-		private int GetPlaceForNewDistributionChainElement()
+		private int GetPlaceForNewTransitionTargetElement()
 		{
-			var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _distributionChainElementCount);
-			if (locationOfNewEntry >= _maxNumberOfTransitions)
+			var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionTargetCount);
+			if (locationOfNewEntry >= _maxNumberOfTransitionTargets)
 				throw new OutOfMemoryException("Unable to store distribution.");
 			return locationOfNewEntry;
 		}
@@ -119,211 +120,29 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		{
 			// The stuttering state might not be reached at all.
 			// Make sure, that all used algorithms to not require a connected state graph.
-			var currentElementIndex = _stateStorageStateToFirstDistributionChainElementMemory[stutteringStateIndex];
+			var currentElementIndex = _stateStorageStateToRootOfContinuationGraphMemory[stutteringStateIndex];
 			Assert.That(currentElementIndex == -1, "Stuttering state has already been created");
 
-			var locationOfNewDistributionEntry = GetPlaceForNewDistributionChainElement();
-			var locationOfNewTransitionEntry = GetPlaceForNewTransitionChainElement();
+			var locationOfNewContinuationGraphElement = GetPlaceForNewContinuationGraphElements(1);
+			var locationOfNewTransitionTargetElement = GetPlaceForNewTransitionTargetElement();
 
-			_distributionChainElementsMemory[locationOfNewDistributionEntry] =
-					new DistributionChainElement
+			_continuationGraph[locationOfNewContinuationGraphElement] =
+					new ContinuationGraphElement
 					{
-						NextElementIndex = -1,
-						FirstTransitionIndex = locationOfNewTransitionEntry
+						ChoiceType=LtmdpChoiceType.UnsplitOrFinal,
+						To = locationOfNewTransitionTargetElement
 					};
 
-			_transitionChainElementsMemory[locationOfNewTransitionEntry] =
-					new TransitionChainElement
+			_transitionTarget[locationOfNewTransitionTargetElement] =
+					new TransitionTargetElement
 					{
 						Formulas = new StateFormulaSet(),
-						NextElementIndex = -1,
 						Probability = 1.0,
 						TargetState = stutteringStateIndex
 					};
 
 			SourceStates.Add(stutteringStateIndex);
-			_stateStorageStateToFirstDistributionChainElementMemory[stutteringStateIndex] = locationOfNewDistributionEntry;
-		}
-
-		// Validation
-
-		[Conditional("DEBUG")]
-		public void ValidateStates()
-		{
-			foreach (var sourceState in SourceStates)
-			{
-				var distEnumerator = GetDistributionsEnumerator(sourceState);
-				while (distEnumerator.MoveNext())
-				{
-					var transitionEnumerator = distEnumerator.GetLabeledTransitionEnumerator();
-					var probability = 0.0;
-					while (transitionEnumerator.MoveNext())
-					{
-						probability += transitionEnumerator.CurrentProbability;
-					}
-					if (!Probability.IsOne(probability, 0.000000001))
-						throw new Exception("Probabilities should sum up to 1");
-				}
-			}
-		}
-
-		[Conditional("DEBUG")]
-		public void ValidateInitialDistribution()
-		{
-			var distEnumerator = GetInitialDistributionsEnumerator();
-			while (distEnumerator.MoveNext())
-			{
-				var transitionEnumerator = distEnumerator.GetLabeledTransitionEnumerator();
-				var probability = 0.0;
-				while (transitionEnumerator.MoveNext())
-				{
-					probability += transitionEnumerator.CurrentProbability;
-				}
-				if (!Probability.IsOne(probability, 0.000000001))
-					throw new Exception("Probabilities should sum up to 1");
-			}
-		}
-
-
-		[Conditional("DEBUG")]
-		internal void PrintPathWithStepwiseHighestProbability(int steps)
-		{
-			Func<DistributionsEnumerator, int> selectEntryWithHighestProbability =
-				distEnumerator =>
-				{
-					var candidate = -1;
-					var probabilityOfCandidate = -1.0;
-
-					while (distEnumerator.MoveNext())
-					{
-						var transitionEnumerator = distEnumerator.GetLabeledTransitionEnumerator();
-						while (transitionEnumerator.MoveNext())
-						{
-							if (probabilityOfCandidate < transitionEnumerator.CurrentProbability)
-								candidate = transitionEnumerator.CurrentIndex;
-						}
-					}
-					return candidate;
-				};
-			Action<int> printTransition =
-				index =>
-				{
-					var transition = _transitionChainElementsMemory[index];
-					var stateLabeling = "";
-					for (var i = 0; i < StateFormulaLabels.Length; i++)
-					{
-						var label = StateFormulaLabels[i];
-						//Console.Write(" " + label + "=");
-						if (transition.Formulas[i])
-							Console.Write("true");
-						else
-							Console.Write("false");
-					}
-					Console.Write($"--- {transition.Probability.ToString(CultureInfo.InvariantCulture)} {stateLabeling}--> {transition.TargetState}");
-					
-					Console.WriteLine();
-				};
-
-			foreach (var label in StateFormulaLabels)
-			{
-				Console.Write(" " + label );
-			}
-
-			var initialTransitionWithHighestProbability = selectEntryWithHighestProbability(GetInitialDistributionsEnumerator());
-			printTransition(initialTransitionWithHighestProbability);
-
-			var lastState = _transitionChainElementsMemory[initialTransitionWithHighestProbability].TargetState;
-			for (var i = 0; i < steps; i++)
-			{
-				var currentTransition = selectEntryWithHighestProbability(GetDistributionsEnumerator(lastState));
-				printTransition(currentTransition);
-				lastState = _transitionChainElementsMemory[currentTransition].TargetState;
-			}
-		}
-
-		internal DistributionsEnumerator GetDistributionsEnumerator(int stateStorageState)
-		{
-			var firstElement = _stateStorageStateToFirstDistributionChainElementMemory[stateStorageState];
-			return new DistributionsEnumerator(this, firstElement);
-		}
-
-		internal DistributionsEnumerator GetInitialDistributionsEnumerator()
-		{
-			return new DistributionsEnumerator(this, _indexOfFirstInitialDistribution);
-		}
-
-		internal struct DistributionsEnumerator
-		{
-			private readonly LabeledTransitionMarkovDecisionProcessOld _ltmdp;
-
-			public int CurrentIndex { get; private set; }
-
-			private int _nextElementIndex;
-			
-			public int CurrentDistribution => _ltmdp._distributionChainElementsMemory[CurrentIndex].Distribution;
-
-			public LabeledTransitionEnumerator GetLabeledTransitionEnumerator()
-			{
-				return new LabeledTransitionEnumerator(_ltmdp, _ltmdp._distributionChainElementsMemory[CurrentIndex].FirstTransitionIndex);
-			}
-
-			public DistributionsEnumerator(LabeledTransitionMarkovDecisionProcessOld ltmdp, int firstElement)
-			{
-				_ltmdp = ltmdp;
-				CurrentIndex = -1;
-				_nextElementIndex = firstElement;
-			}
-
-			/// <summary>
-			/// Advances the enumerator to the next element of the collection.
-			/// </summary>
-			/// <returns>
-			/// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
-			/// </returns>
-			public bool MoveNext()
-			{
-				if (_nextElementIndex == -1)
-					return false;
-				CurrentIndex = _nextElementIndex;
-				_nextElementIndex = _ltmdp._distributionChainElementsMemory[CurrentIndex].NextElementIndex;
-				return true;
-			}
-		}
-		internal struct LabeledTransitionEnumerator
-		{
-			private readonly LabeledTransitionMarkovDecisionProcessOld _ltmdp;
-
-			public int CurrentIndex { get; private set; }
-
-			private int _nextElementIndex;
-
-			public double CurrentProbability => _ltmdp._transitionChainElementsMemory[CurrentIndex].Probability;
-
-			public int CurrentTargetState => _ltmdp._transitionChainElementsMemory[CurrentIndex].TargetState;
-
-			public StateFormulaSet CurrentFormulas => _ltmdp._transitionChainElementsMemory[CurrentIndex].Formulas;
-
-			public LabeledTransitionEnumerator(LabeledTransitionMarkovDecisionProcessOld ltmdp, int firstElement)
-			{
-				_ltmdp = ltmdp;
-				CurrentIndex = -1;
-				_nextElementIndex = firstElement;
-			}
-
-			/// <summary>
-			/// Advances the enumerator to the next element of the collection.
-			/// </summary>
-			/// <returns>
-			/// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
-			/// </returns>
-			public bool MoveNext()
-			{
-				if (_nextElementIndex == -1)
-					return false;
-				CurrentIndex = _nextElementIndex;
-				_nextElementIndex = _ltmdp._transitionChainElementsMemory[CurrentIndex].NextElementIndex;
-				return true;
-			}
+			_stateStorageStateToRootOfContinuationGraphMemory[stutteringStateIndex] = locationOfNewContinuationGraphElement;
 		}
 
 		/// <summary>
@@ -335,54 +154,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			if (!disposing)
 				return;
 
-			_stateStorageStateToFirstDistributionChainElementBuffer.SafeDispose();
-			_distributionChainElementsBuffer.SafeDispose();
-			_transitionChainElementsBuffer.SafeDispose();
-		}
-
-
-		internal TransitionChainEnumerator GetTransitionChainEnumerator()
-		{
-			return new TransitionChainEnumerator(this);
-		}
-
-		internal struct TransitionChainEnumerator
-		{
-			private readonly LabeledTransitionMarkovDecisionProcessOld _ltmdp;
-
-			public int CurrentIndex { get; private set; }
-			
-			public double CurrentProbability => _ltmdp._transitionChainElementsMemory[CurrentIndex].Probability;
-
-			public int CurrentTargetState
-			{
-				get { return _ltmdp._transitionChainElementsMemory[CurrentIndex].TargetState; }
-			}
-
-			public StateFormulaSet CurrentFormulas
-			{
-				get { return _ltmdp._transitionChainElementsMemory[CurrentIndex].Formulas; }
-			}
-
-			public TransitionChainEnumerator(LabeledTransitionMarkovDecisionProcessOld ltmdp)
-			{
-				_ltmdp = ltmdp;
-				CurrentIndex = -1;
-			}
-
-			/// <summary>
-			/// Advances the enumerator to the next element of the collection.
-			/// </summary>
-			/// <returns>
-			/// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
-			/// </returns>
-			public bool MoveNext()
-			{
-				CurrentIndex++;
-				if (CurrentIndex >= _ltmdp._transitionChainElementCount)
-					return false;
-				return true;
-			}
+			_stateStorageStateToRootOfContinuationGraphBuffer.SafeDispose();
+			_continuationGraphBuffer.SafeDispose();
+			_transitionTargetBuffer.SafeDispose();
 		}
 	}
 }

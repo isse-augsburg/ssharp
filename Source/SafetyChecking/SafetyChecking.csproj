@@ -59,6 +59,8 @@
     <Compile Include="Formula\FormulaVisitors\CollectAtomarPropositionFormulasVisitor.cs" />
     <Compile Include="AnalysisModelTraverser\AnalysisException.cs" />
     <Compile Include="AnalysisModel\AnalysisResult.cs" />
+    <Compile Include="MarkovDecisionProcess\LabeledTransitionMarkovDecisionProcessOld.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpChoiceType.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpContinuationDistributionMapper.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpStepGraph.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpStepGraphToContinuationDistributionMapper.cs" />
