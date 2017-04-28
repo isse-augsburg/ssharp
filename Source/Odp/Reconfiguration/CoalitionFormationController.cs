@@ -303,9 +303,8 @@ namespace SafetySharp.Odp.Reconfiguration
 				if (visited.Contains(agent)) // avoid cycles
 					continue;
 
-				// recruit agent if not yet member
-				if (!coalition.Contains(agent))
-					await coalition.Invite(agent);
+				// recruit agent
+				await coalition.Invite(agent);
 
 				// Destination can be reached from agent (it was found by a depth-first search starting from agent).
 				// Agents reachable from source were not affected, unless recruited agents were themselves reachable from source.

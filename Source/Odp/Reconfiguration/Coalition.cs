@@ -47,6 +47,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public HashSet<CoalitionReconfigurationAgent> Members { get; }
 			= new HashSet<CoalitionReconfigurationAgent>();
+		private readonly HashSet<BaseAgent> _baseAgents = new HashSet<BaseAgent>();
 
 		private readonly Dictionary<BaseAgent, TaskCompletionSource<CoalitionReconfigurationAgent>> _invitations
 			= new Dictionary<BaseAgent, TaskCompletionSource<CoalitionReconfigurationAgent>>();
@@ -73,7 +74,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public bool Contains(BaseAgent baseAgent)
 		{
-			return Members.Any(member => member.BaseAgent == baseAgent); // TODO: consider implementing more efficiently
+			return _baseAgents.Contains(baseAgent);
 		}
 
 		public async Task InviteCtfAgents()
@@ -150,6 +151,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		public void Join(CoalitionReconfigurationAgent newMember)
 		{
 			Members.Add(newMember);
+			_baseAgents.Add(newMember.BaseAgent);
 			newMember.CurrentCoalition = this;
 
 			AvailableCapabilities.UnionWith(newMember.BaseAgentState.AvailableCapabilities);
