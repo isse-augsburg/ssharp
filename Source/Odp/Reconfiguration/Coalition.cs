@@ -24,6 +24,7 @@ namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
 
@@ -73,6 +74,31 @@ namespace SafetySharp.Odp.Reconfiguration
 		public bool Contains(BaseAgent baseAgent)
 		{
 			return Members.Any(member => member.BaseAgent == baseAgent); // TODO: consider implementing more efficiently
+		}
+
+		public async Task InviteCtfAgents()
+		{
+			var previous = RecoveredDistribution[CTF.Start];
+			Debug.Assert(Contains(previous));
+
+			int ctfStart;
+			do
+			{
+				ctfStart = CTF.Start;
+				for (int i = CTF.Start + 1; i < CTF.End; ++i)
+				{
+					var current = RecoveredDistribution[i];
+
+					if (current == null)
+					{
+						var role = previous.AllocatedRoles.Single(r => r.Task == Task && r.PreCondition.StateLength < i && r.PostCondition.StateLength >= i);
+						current = role.PostCondition.Port;
+						await Invite(current);
+					}
+
+					previous = current;
+				}
+			} while (ctfStart > CTF.Start); // loop because invitations might have enlarged CTF
 		}
 
 		/// <summary>

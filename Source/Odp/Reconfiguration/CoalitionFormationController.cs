@@ -53,12 +53,32 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		protected async Task<ConfigurationUpdate> CalculateConfigurations(Coalition coalition)
 		{
-			var config = new ConfigurationUpdate();
-
 			try
 			{
 				foreach (var predicate in coalition.ViolatedPredicates)
-					await SolveInvariantViolation(coalition, predicate, task, config);
+					await RecruitNecessaryAgents(coalition, predicate);
+
+				await coalition.InviteCtfAgents();
+
+				do
+				{
+					foreach (var distribution in CalculateCapabilityDistributions(coalition))
+					{
+						var reconfSuggestion = new ConfigurationSuggestion(coalition, distribution);
+
+						// compute tfr, edge, core agents
+						reconfSuggestion.ComputeTFR();
+						foreach (var edgeAgent in reconfSuggestion.EdgeAgents)
+							await coalition.Invite(edgeAgent);
+
+						// use dijkstra to find resource flow
+						var resourceFlow = await ComputeResourceFlow(reconfSuggestion);
+						if (resourceFlow != null)
+							return ComputeRoleAllocations(reconfSuggestion, resourceFlow.ToArray());
+					}
+
+					// TODO: if still no path found: recruit additional agents (if further exist)
+				} while (true /* TODO: while further agents exist */);
 			}
 			catch (OperationCanceledException)
 			{
@@ -71,38 +91,36 @@ namespace SafetySharp.Odp.Reconfiguration
 				return await CalculateConfigurations(coalition);
 			}
 
-			return config;
+			// failed to find a solution
+			return null;
 		}
 
 		/// <summary>
 		/// Selects the strategy used to solve the occuring invariant violations based on the violated predicate.
 		/// </summary>
-		protected virtual Task SolveInvariantViolation(Coalition coalition, InvariantPredicate invariant,
-																			 ITask task, ConfigurationUpdate config)
+		protected virtual Task RecruitNecessaryAgents(Coalition coalition, InvariantPredicate invariant)
 		{
 			if (invariant == Invariant.CapabilityConsistency)
-				return RestoreCapabilityConsistency(coalition, task, config);
+				return RecruitMissingCapabilities(coalition);
 			else if (invariant == Invariant.IOConsistency)
-				return RestoreIoConsistency(coalition, task, config);
+				return RecruitIOReplacements(coalition);
 			else if (invariant == Invariant.NeighborsAliveGuarantee)
-				return ReplaceDeadNeighbours(coalition, task, config);
-
-			// TODO: remember violated predicates (+ respective agents) in coalition, merge info on coalition merge, restart config
+				return ReplaceDeadNeighbours(coalition);
 
 			throw new NotImplementedException(); // TODO: strategies for other invariant predicates
 		}
 
-		protected async Task RestoreIoConsistency(Coalition coalition, ITask task, ConfigurationUpdate config)
+		protected async Task RecruitIOReplacements(Coalition coalition)
 		{
 			var affectedRoles = await FindDisconnectedRoles(coalition);
 
-			// 3. if affected role empty: find predecessor / successor roles with at least one capability, invite along the way
+			// if affected role empty: find predecessor / successor roles with at least one capability, invite along the way
 			foreach (var entry in affectedRoles)
 			{
 				var agent = entry.Item1;
 				var role = entry.Item2;
 
-				// 3.1 predecessor
+				// predecessor
 				var currentRole = role;
 				var currentAgent = agent;
 				var previousAgent = currentRole.PreCondition.Port;
@@ -117,7 +135,7 @@ namespace SafetySharp.Odp.Reconfiguration
 					previousAgent = currentRole.PreCondition.Port;
 				}
 
-				// 3.2 successor
+				// successor
 				currentRole = role;
 				currentAgent = agent;
 				var nextAgent = currentRole.PostCondition.Port;
@@ -132,74 +150,26 @@ namespace SafetySharp.Odp.Reconfiguration
 					nextAgent = currentRole.PostCondition.Port;
 				}
 			}
-
-			// TODO: eliminate duplication between code below and RestoreCapabilityConsistency()
-			// TODO: invite missing CTF agents (?) or only compute distribution that modify roles of member agents
-
-			while (true)
-			{
-				// 4. select distribution
-				foreach (var distribution in CalculateCapabilityDistributions(coalition))
-				{
-					var reconfSuggestion = new ConfigurationSuggestion(coalition, distribution);
-
-					// 5. compute tfr, edge, core agents
-					reconfSuggestion.ComputeTFR();
-					foreach (var edgeAgent in reconfSuggestion.EdgeAgents)
-						await coalition.Invite(edgeAgent);
-
-					// 6. use dijkstra to connect
-					var resourceFlow = await ComputeResourceFlow(reconfSuggestion);
-					if (resourceFlow != null)
-					{
-						ComputeRoleAllocations(reconfSuggestion, resourceFlow.ToArray(), config);
-						return;
-					}
-				}
-
-				// TODO: if still no path found: recruit additional agents (if further exist)
-			}
 		}
 
-		protected async Task ReplaceDeadNeighbours(Coalition coalition, ITask task, ConfigurationUpdate config)
+		protected async Task ReplaceDeadNeighbours(Coalition coalition)
 		{
 			// collect dead neighbours, affected roles
 			// for each role, must find predecessor / successor role
 			// to do so, recruit agents until found (prefer agents at end of queue)
 			// then fill in gaps (following resource flow) until dead agent encountered (from both sides); recruit respective agents
 			// surround empty roles
-			// ensure all capabilities in CTF are present (otherwise recruit)
-			// choose distribution, TFR, core, edge, dijkstra, ...
+			// RecruitMissingCapabilities()
 		}
 
 		/// <summary>
 		/// Reconfiguration strategy for violations of the <see cref="Invariant.CapabilityConsistency"/> invariant predicate.
 		/// </summary>
-		protected async Task RestoreCapabilityConsistency(Coalition coalition, ITask task, ConfigurationUpdate config)
+		protected async Task RecruitMissingCapabilities(Coalition coalition)
 		{
-			await EnlargeCoalitionUntil(coalition.CapabilitiesSatisfied, coalition, RecruitableMembers(coalition));
-			// TODO: invite missing CTF agents (?)
-
-			while (true)
-			{
-				foreach (var distribution in CalculateCapabilityDistributions(coalition))
-				{
-					var reconfSuggestion = new ConfigurationSuggestion(coalition, distribution);
-
-					reconfSuggestion.ComputeTFR();
-					foreach (var edgeAgent in reconfSuggestion.EdgeAgents)
-						await coalition.Invite(edgeAgent);
-
-					var resourceFlow = await ComputeResourceFlow(reconfSuggestion);
-					if (resourceFlow != null)
-					{
-						ComputeRoleAllocations(reconfSuggestion, resourceFlow.ToArray(), config);
-						return;
-					}
-				}
-
-				// TODO: if still no path found: recruit additional agents (if further exist)
-			}
+			var recruitableAgents = new AgentQueue(coalition);
+			foreach (var agent in recruitableAgents.TakeWhile(a => !coalition.CapabilitiesSatisfied()))
+				await coalition.Invite(agent);
 		}
 
 		private async Task<Tuple<BaseAgent, Role>[]> FindDisconnectedRoles(Coalition coalition)
@@ -240,17 +210,6 @@ namespace SafetySharp.Odp.Reconfiguration
 			}
 
 			return affectedRoles.ToArray();
-		}
-
-		private IEnumerable<BaseAgent> RecruitableMembers(Coalition coalition)
-		{
-			return new AgentQueue(coalition);
-		}
-
-		private async Task EnlargeCoalitionUntil(Func<bool> condition, Coalition coalition, IEnumerable<BaseAgent> possibleMembers)
-		{
-			foreach (var agent in possibleMembers.TakeWhile(a => !condition()))
-				await coalition.Invite(agent);
 		}
 
 		/// <summary>
@@ -368,10 +327,10 @@ namespace SafetySharp.Odp.Reconfiguration
 			return false;
 		}
 
-		protected void ComputeRoleAllocations(ConfigurationSuggestion suggestion, BaseAgent[] resourceFlow,
-												ConfigurationUpdate config)
+		protected ConfigurationUpdate ComputeRoleAllocations(ConfigurationSuggestion suggestion, BaseAgent[] resourceFlow)
 		{
 			Debug.Assert(resourceFlow.Length >= 2);
+			var config = new ConfigurationUpdate();
 			var task = suggestion.Coalition.Task;
 
 			// clear old roles from core agents
@@ -414,6 +373,8 @@ namespace SafetySharp.Odp.Reconfiguration
 			config.RemoveRoles(exitEdgeAgent); // remove old role
 			lastRole.PreCondition.Port = resourceFlow[resourceFlow.Length - 2];
 			config.AddRoles(exitEdgeAgent, lastRole); // re-add updated role
+
+			return config;
 		}
 
 		protected class ConfigurationSuggestion
