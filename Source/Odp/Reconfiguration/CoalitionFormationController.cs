@@ -40,13 +40,19 @@ namespace SafetySharp.Odp.Reconfiguration
 	{
 		public CoalitionFormationController(BaseAgent[] agents) : base(agents) { }
 
-		public override async Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
 		{
 			Debug.Assert(tasks.Length == 1);
 			var task = tasks[0];
 
 			var leader = (CoalitionReconfigurationAgent)context;
 			var coalition = new Coalition(leader, task, leader.BaseAgentState.ViolatedPredicates);
+
+			return CalculateConfigurations(coalition);
+		}
+
+		protected async Task<ConfigurationUpdate> CalculateConfigurations(Coalition coalition)
+		{
 			var config = new ConfigurationUpdate();
 
 			try
@@ -58,6 +64,11 @@ namespace SafetySharp.Odp.Reconfiguration
 			{
 				// operation was canceled (e.g. because coalition was merged into another coalition), so produce no updates
 				return null;
+			}
+			catch (RestartReconfigurationException)
+			{
+				// restart reconfiguration, e.g. because another coalition was just merged into the current one
+				return await CalculateConfigurations(coalition);
 			}
 
 			return config;

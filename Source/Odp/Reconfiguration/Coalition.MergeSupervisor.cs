@@ -164,6 +164,8 @@ namespace SafetySharp.Odp.Reconfiguration
 				foreach (var request in mergeRequests)
 					_mergeRequests.AddLast(request);
 				_coalition.ViolatedPredicates = _coalition.ViolatedPredicates.Concat(violatedPredicates).ToArray();
+
+				throw new RestartReconfigurationException();
 			}
 
 			/// <summary>

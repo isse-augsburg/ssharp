@@ -78,6 +78,7 @@
     </Compile>
     <Compile Include="Reconfiguration\IReconfigurationAgent.cs" />
     <Compile Include="Reconfiguration\ReconfigurationAgentHandler.cs" />
+    <Compile Include="Reconfiguration\RestartReconfigurationException.cs" />
     <Compile Include="Reconfiguration\ShortestPaths.cs" />
     <Compile Include="Reconfiguration\TaskFragment.cs" />
     <Compile Include="Resource.cs" />
