@@ -56,13 +56,6 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		private MergeSupervisor Merger { get; }
 
-		// capabilities
-		public HashSet<ICapability> AvailableCapabilities { get; } = new HashSet<ICapability>();
-
-		public HashSet<ICapability> NeededCapabilities { get; } = new HashSet<ICapability>();
-
-		public bool CapabilitiesSatisfied() => NeededCapabilities.IsSubsetOf(AvailableCapabilities);
-
 		public Coalition(CoalitionReconfigurationAgent leader, ITask task, InvariantPredicate[] violatedPredicates)
 		{
 			Merger = new MergeSupervisor(this);
@@ -154,7 +147,6 @@ namespace SafetySharp.Odp.Reconfiguration
 			_baseAgents.Add(newMember.BaseAgent);
 			newMember.CurrentCoalition = this;
 
-			AvailableCapabilities.UnionWith(newMember.BaseAgentState.AvailableCapabilities);
 			UpdateCTF(newMember.BaseAgent);
 
 			if (IsInvited(newMember))

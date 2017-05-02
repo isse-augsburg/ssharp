@@ -167,9 +167,18 @@ namespace SafetySharp.Odp.Reconfiguration
 		/// </summary>
 		protected async Task RecruitMissingCapabilities(Coalition coalition)
 		{
-			var recruitableAgents = new AgentQueue(coalition);
-			foreach (var agent in recruitableAgents.TakeWhile(a => !coalition.CapabilitiesSatisfied()))
-				await coalition.Invite(agent);
+			var availableCapabilities = new HashSet<ICapability>(
+				coalition.Members.SelectMany(member => member.BaseAgentState.AvailableCapabilities)
+			);
+
+			foreach (var agent in new AgentQueue(coalition))
+			{
+				if (coalition.CTF.Capabilities.IsSubsetOf(availableCapabilities))
+					break;
+
+				var newMember = await coalition.Invite(agent);
+				availableCapabilities.UnionWith(newMember.BaseAgentState.AvailableCapabilities);
+			}
 		}
 
 		private async Task<Tuple<BaseAgent, Role>[]> FindDisconnectedRoles(Coalition coalition)
