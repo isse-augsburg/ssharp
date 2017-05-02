@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
+	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
@@ -148,6 +149,72 @@ namespace SafetySharp.Odp.Reconfiguration
 			IEnumerator IEnumerable.GetEnumerator()
 			{
 				return GetEnumerator();
+			}
+
+			public IEnumerable<BaseAgent> Reverse()
+			{
+				while (_inputQueue.Count > 0 || _outputQueue.Count > 0)
+				{
+					if (_outputQueue.Count > 0)
+					{
+						var next = GetNextReverse(_outputQueue, ref _firstOutputParticipant);
+						if (next != null)
+							yield return next;
+					}
+
+					if (_inputQueue.Count > 0)
+					{
+						var next = GetNextReverse(_inputQueue, ref _firstInputParticipant);
+						if (next != null)
+							yield return next;
+					}
+				}
+			}
+
+			private BaseAgent GetNextReverse(LinkedList<BaseAgent> source, ref LinkedListNode<BaseAgent> firstParticipant)
+			{
+				// try finding agent not participating and not in coalition, if not found settle for not in coalition
+				var next = FindLast(source, agent => !_knownParticipants.Contains(agent) && !_coalition.Contains(agent))
+					?? FindLast(source, agent => !_coalition.Contains(agent));
+				if (next == null)
+					return null;
+
+				if (next == firstParticipant)
+				{
+					firstParticipant = FindSubsequentParticipant(next);
+				}
+				source.Remove(next);
+
+				foreach (var input in next.Value.Inputs)
+					_inputQueue.AddLast(input);
+
+				foreach (var output in next.Value.Outputs)
+					_outputQueue.AddLast(output);
+
+				_knownParticipants.UnionWith(GetNeighbouringParticipants(next.Value));
+
+				// update first participants based on new information about known participants
+				_firstInputParticipant = FindPreviousParticipant(_inputQueue, _firstInputParticipant);
+				_firstOutputParticipant = FindPreviousParticipant(_outputQueue, _firstOutputParticipant);
+
+				return next.Value;
+			}
+
+			private LinkedListNode<BaseAgent> FindLast(LinkedList<BaseAgent> source, Predicate<BaseAgent> condition)
+			{
+				if (source.Count == 0)
+					return null;
+
+				LinkedListNode<BaseAgent> current;
+				for (current = source.Last; current != null && !condition(current.Value); current = current.Previous)
+				{
+					if (_coalition.Contains(current.Value))
+					{
+						source.Remove(current);
+					}
+				}
+
+				return current;
 			}
 		}
 	}
