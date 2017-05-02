@@ -38,7 +38,19 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 	/// </summary>
 	public partial class CoalitionFormationController : AbstractController
 	{
-		public CoalitionFormationController(BaseAgent[] agents) : base(agents) { }
+		private readonly Dictionary<InvariantPredicate, IRecruitingStrategy> _strategies = new Dictionary<InvariantPredicate, IRecruitingStrategy>();
+
+		public CoalitionFormationController(BaseAgent[] agents) : base(agents)
+		{
+			Register(Invariant.CapabilityConsistency, MissingCapabilitiesStrategy.Instance);
+			Register(Invariant.IOConsistency, BrokenIoStrategy.Instance);
+			Register(Invariant.NeighborsAliveGuarantee, DeadNeighbourStrategy.Instance);
+		}
+
+		public void Register(InvariantPredicate predicate, IRecruitingStrategy strategy)
+		{
+			_strategies[predicate] = strategy;
+		}
 
 		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
 		{
@@ -98,199 +110,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// <summary>
 		/// Selects the strategy used to solve the occuring invariant violations based on the violated predicate.
 		/// </summary>
-		protected virtual Task RecruitNecessaryAgents(Coalition coalition, InvariantPredicate invariant)
+		private Task RecruitNecessaryAgents(Coalition coalition, InvariantPredicate invariant)
 		{
-			if (invariant == Invariant.CapabilityConsistency)
-				return RecruitMissingCapabilities(coalition);
-			else if (invariant == Invariant.IOConsistency)
-				return RecruitIOReplacements(coalition);
-			else if (invariant == Invariant.NeighborsAliveGuarantee)
-				return ReplaceDeadNeighbours(coalition);
-
-			throw new NotImplementedException(); // TODO: strategies for other invariant predicates
-		}
-
-		protected async Task RecruitIOReplacements(Coalition coalition)
-		{
-			var affectedRoles = await FindDisconnectedRoles(coalition);
-
-			// if affected role empty: find predecessor / successor roles with at least one capability, invite along the way
-			foreach (var entry in affectedRoles)
-			{
-				var agent = entry.Item1;
-				var role = entry.Item2;
-
-				// predecessor
-				var currentRole = role;
-				var currentAgent = agent;
-				var previousAgent = currentRole.PreCondition.Port;
-
-				while (previousAgent != null && currentRole.CapabilitiesToApply.Count() == 0)
-				{
-					await coalition.Invite(previousAgent);
-					currentRole = previousAgent.AllocatedRoles.Single(otherRole =>
-						otherRole.PostCondition.StateMatches(currentRole.PreCondition) && otherRole.PostCondition.Port == currentAgent
-					);
-					currentAgent = previousAgent;
-					previousAgent = currentRole.PreCondition.Port;
-				}
-
-				// successor
-				currentRole = role;
-				currentAgent = agent;
-				var nextAgent = currentRole.PostCondition.Port;
-
-				while (nextAgent != null && currentRole.CapabilitiesToApply.Count() == 0)
-				{
-					await coalition.Invite(nextAgent);
-					currentRole = nextAgent.AllocatedRoles.Single(otherRole =>
-						otherRole.PreCondition.StateMatches(currentRole.PostCondition) && otherRole.PreCondition.Port == currentAgent
-					);
-					currentAgent = nextAgent;
-					nextAgent = currentRole.PostCondition.Port;
-				}
-			}
-		}
-
-		protected async Task ReplaceDeadNeighbours(Coalition coalition)
-		{
-			var affectedRoles = from member in coalition.Members
-								let agent = member.BaseAgent
-								from role in agent.AllocatedRoles
-								where role.Task == coalition.Task && (role.PreCondition.Port?.IsAlive == false || role.PostCondition.Port?.IsAlive == false)
-								select role;
-
-			var taggedRoles = coalition.Members.SelectMany(member =>
-				member.BaseAgent.AllocatedRoles.Select(r => Tuple.Create(member.BaseAgent, r))
-			);
-			// for each role, must find predecessor / successor role
-			foreach (var role in affectedRoles)
-			{
-				if (role.PreCondition.Port?.IsAlive == false) // find predecessor
-					await RecruitConnectedAgent(role, coalition, FindLastPredecessor);
-
-				if (role.PostCondition.Port?.IsAlive == false) // find successor
-					await RecruitConnectedAgent(role, coalition, FindFirstSuccessor);
-			}
-
-			// once predecessor / successor are in the coalition,
-			// Coalition.InviteCtf() will fill the gaps in the CTF
-			// (called in CalculateConfigurations()).
-
-			// TODO surround empty predecessors/successors ?
-
-			// coalition might have lost capabilities due to dead agents
-			await RecruitMissingCapabilities(coalition);
-		}
-
-		/// <summary>
-		/// Reconfiguration strategy for violations of the <see cref="Invariant.CapabilityConsistency"/> invariant predicate.
-		/// </summary>
-		protected async Task RecruitMissingCapabilities(Coalition coalition)
-		{
-			var availableCapabilities = new HashSet<ICapability>(
-				coalition.Members.SelectMany(member => member.BaseAgentState.AvailableCapabilities)
-			);
-
-			foreach (var agent in new AgentQueue(coalition))
-			{
-				if (coalition.CTF.Capabilities.IsSubsetOf(availableCapabilities))
-					break;
-
-				var newMember = await coalition.Invite(agent);
-				availableCapabilities.UnionWith(newMember.BaseAgentState.AvailableCapabilities);
-			}
-		}
-
-		private async Task<Tuple<BaseAgent, Role>[]> FindDisconnectedRoles(Coalition coalition)
-		{
-			var affectedRoles = new List<Tuple<BaseAgent, Role>>();
-
-			var members = coalition.Members.ToList(); // use list because coalition.Members is modified during iteration
-			for (int i = 0; i < members.Count; ++i)
-			{
-				var agent = members[i].BaseAgent;
-				foreach (var role in agent.AllocatedRoles)
-				{
-					// 1. invite disconnected agents (so their roles can be removed / updated)
-					var affected = false;
-					if (role.PreCondition.Port != null && !agent.Inputs.Contains(role.PreCondition.Port))
-					{
-						affected = true;
-						if (!coalition.Contains(role.PreCondition.Port))
-						{
-							var newMember = await coalition.Invite(role.PreCondition.Port);
-							members.Add(newMember);
-						}
-					}
-					if (role.PostCondition.Port != null && !agent.Outputs.Contains(role.PostCondition.Port))
-					{
-						affected = true;
-						if (!coalition.Contains(role.PostCondition.Port))
-						{
-							var newMember = await coalition.Invite(role.PostCondition.Port);
-							members.Add(newMember);
-						}
-					}
-
-					// 2. collect affected roles
-					if (affected)
-						affectedRoles.Add(Tuple.Create(agent, role));
-				}
-			}
-
-			return affectedRoles.ToArray();
-		}
-
-		// used to recruit predecessor / successor of a role connected to a dead agent
-		private async Task RecruitConnectedAgent(Role role, Coalition coalition,
-			Func<Role, IEnumerable<Tuple<BaseAgent, Role>>, Tuple<BaseAgent, Role>> getConnectedRole)
-		{
-			var taggedRoles = coalition.Members.SelectMany(member =>
-				member.BaseAgent.AllocatedRoles.Select(r => Tuple.Create(member.BaseAgent, r))
-			);
-
-			// 1) in coalition
-			var agent = getConnectedRole(role, taggedRoles);
-			if (agent == null)
-			{
-				// 2) by recruitment
-				foreach (var newAgent in new AgentQueue(coalition).Reverse())
-				{
-					await coalition.Invite(newAgent);
-					agent = getConnectedRole(role,
-						newAgent.AllocatedRoles.Select(r => Tuple.Create(newAgent, r))
-					);
-					if (agent != null)
-						break;
-				}
-
-				if (agent != null)
-					await coalition.Invite(agent.Item1);
-				// TODO: if agent still null (real successor/predecessor is unreachable) ?
-			}
-		}
-
-		private Tuple<BaseAgent, Role> FindLastPredecessor(Role role, IEnumerable<Tuple<BaseAgent, Role>> possiblePredecessors)
-		{
-			return (from predecessor in possiblePredecessors
-					let predRole = predecessor.Item2
-					where predRole.Task == role.Task
-						&& (predRole.PreCondition.StateLength < role.PreCondition.StateLength
-								|| (role.CapabilitiesToApply.Count() > 0 && predRole.PreCondition.StateLength == role.PreCondition.StateLength))
-					orderby predRole.PreCondition.StateLength descending
-					select predecessor).FirstOrDefault();
-		}
-
-		private Tuple<BaseAgent, Role> FindFirstSuccessor(Role role, IEnumerable<Tuple<BaseAgent, Role>> possibleSuccessors)
-		{
-			return (from successor in possibleSuccessors
-					let succRole = successor.Item2
-					where succRole.Task == role.Task
-						&& (succRole.PostCondition.StateLength > role.PostCondition.StateLength
-							|| (role.CapabilitiesToApply.Count() > 0 && succRole.PostCondition.StateLength == role.PostCondition.StateLength))
-					orderby succRole.PostCondition.StateLength ascending
-					select successor).FirstOrDefault();
+			if (!_strategies.ContainsKey(invariant))
+				throw new InvalidOperationException("no recruiting strategy specified for invariant predicate");
+			return _strategies[invariant].RecruitNecessaryAgents(coalition);
 		}
 
 		/// <summary>
