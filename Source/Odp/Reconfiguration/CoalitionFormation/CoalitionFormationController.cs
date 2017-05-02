@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp.Reconfiguration
+namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
 	using System;
 	using System.Collections.Generic;
@@ -176,6 +176,8 @@ namespace SafetySharp.Odp.Reconfiguration
 			// once predecessor / successor are in the coalition,
 			// Coalition.InviteCtf() will fill the gaps in the CTF
 			// (called in CalculateConfigurations()).
+
+			// TODO surround empty predecessors/successors ?
 
 			// coalition might have lost capabilities due to dead agents
 			await RecruitMissingCapabilities(coalition);
@@ -385,7 +387,7 @@ namespace SafetySharp.Odp.Reconfiguration
 				// recruit agent
 				await coalition.Invite(agent);
 
-				// Destination can be reached from agent (it was found by a depth-first search starting from agent).
+				// Destination can be reached from agent (it was found by a reverse depth-first search starting from destination).
 				// Agents reachable from source were not affected, unless recruited agents were themselves reachable from source.
 				// Hence, once a recruited agent is reachable from source, a path from source to destination exists.
 				if (shortestPathsFromSource.IsReachable(agent))

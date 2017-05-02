@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp.Reconfiguration
+namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
 	using System;
 	using System.Collections.Generic;
@@ -85,6 +85,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 					if (current == null)
 					{
+						// TODO: handle dead agents
 						var role = previous.AllocatedRoles.Single(r => r.Task == Task && r.PreCondition.StateLength < i && r.PostCondition.StateLength >= i);
 						current = role.PostCondition.Port;
 						await Invite(current);

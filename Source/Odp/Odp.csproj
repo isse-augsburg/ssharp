@@ -50,15 +50,15 @@
       <DependentUpon>BaseAgent.cs</DependentUpon>
     </Compile>
     <Compile Include="Reconfiguration\CentralReconfiguration.cs" />
-    <Compile Include="Reconfiguration\Coalition.cs" />
-    <Compile Include="Reconfiguration\Coalition.MergeSupervisor.cs">
+    <Compile Include="Reconfiguration\CoalitionFormation\Coalition.cs" />
+    <Compile Include="Reconfiguration\CoalitionFormation\Coalition.MergeSupervisor.cs">
       <DependentUpon>Coalition.cs</DependentUpon>
     </Compile>
-    <Compile Include="Reconfiguration\CoalitionFormationController.cs" />
-    <Compile Include="Reconfiguration\CoalitionFormationController.AgentQueue.cs">
+    <Compile Include="Reconfiguration\CoalitionFormation\CoalitionFormationController.cs" />
+    <Compile Include="Reconfiguration\CoalitionFormation\CoalitionFormationController.AgentQueue.cs">
       <DependentUpon>CoalitionFormationController.cs</DependentUpon>
     </Compile>
-    <Compile Include="Reconfiguration\CoalitionReconfigurationAgent.cs" />
+    <Compile Include="Reconfiguration\CoalitionFormation\CoalitionReconfigurationAgent.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="Reconfiguration\ConfigurationUpdate.cs" />
     <Compile Include="Reconfiguration\ControllerReconfigurationAgent.cs" />
@@ -78,9 +78,9 @@
     </Compile>
     <Compile Include="Reconfiguration\IReconfigurationAgent.cs" />
     <Compile Include="Reconfiguration\ReconfigurationAgentHandler.cs" />
-    <Compile Include="Reconfiguration\RestartReconfigurationException.cs" />
-    <Compile Include="Reconfiguration\ShortestPaths.cs" />
-    <Compile Include="Reconfiguration\TaskFragment.cs" />
+    <Compile Include="Reconfiguration\CoalitionFormation\RestartReconfigurationException.cs" />
+    <Compile Include="Reconfiguration\CoalitionFormation\ShortestPaths.cs" />
+    <Compile Include="Reconfiguration\CoalitionFormation\TaskFragment.cs" />
     <Compile Include="Resource.cs" />
     <Compile Include="Role.cs" />
   </ItemGroup>

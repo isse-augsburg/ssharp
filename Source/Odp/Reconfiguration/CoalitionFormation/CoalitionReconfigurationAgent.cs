@@ -20,14 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp.Reconfiguration
+namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
-	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using Modeling;
-	using System.Diagnostics;
-	using System;
 
 	public class CoalitionReconfigurationAgent : IReconfigurationAgent
 	{

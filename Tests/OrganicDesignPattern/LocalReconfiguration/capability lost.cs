@@ -27,6 +27,7 @@ namespace Tests.OrganicDesignPattern.LocalReconfiguration
 	using SafetySharp.Analysis;
 	using SafetySharp.Odp;
 	using SafetySharp.Odp.Reconfiguration;
+	using SafetySharp.Odp.Reconfiguration.CoalitionFormation;
 	using Shouldly;
 	using Utilities;
 

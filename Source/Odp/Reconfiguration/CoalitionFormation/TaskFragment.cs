@@ -20,11 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp.Reconfiguration
+namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
-	using System;
+	using System.Collections.Generic;
 
-	class RestartReconfigurationException : Exception
+	public class TaskFragment
 	{
+		public ITask Task { get; }
+		public int Start { get; private set; }
+		public int End { get; private set; }
+
+		public ISet<ICapability> Capabilities { get; } = new HashSet<ICapability>();
+
+		public int Length => End - Start + 1;
+
+		public TaskFragment(ITask task, int start, int end)
+		{
+			Task = task;
+			Start = start;
+			End = end;
+
+			Capabilities.UnionWith(task.RequiredCapabilities.Slice(start, end));
+		}
+
+		public bool Prepend(int newStart)
+		{
+			if (newStart >= Start)
+				return false;
+			
+			Capabilities.UnionWith(Task.RequiredCapabilities.Slice(newStart, Start - 1));
+			Start = newStart;
+			return true;
+		}
+
+		public bool Append(int newEnd)
+		{
+			if (newEnd <= End)
+				return false;
+
+			Capabilities.UnionWith(Task.RequiredCapabilities.Slice(End + 1, newEnd));
+			End = newEnd;
+			return true;
+		}
 	}
 }

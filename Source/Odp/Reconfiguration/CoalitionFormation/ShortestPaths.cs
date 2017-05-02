@@ -22,7 +22,7 @@
 
 using System.Collections.Generic;
 
-namespace SafetySharp.Odp.Reconfiguration
+namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
 	using System;
 
