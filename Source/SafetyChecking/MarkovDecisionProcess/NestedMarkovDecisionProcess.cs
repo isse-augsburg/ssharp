@@ -66,12 +66,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			var modelSize = modelCapacity.DeriveModelByteSize(StateSize, TransitionSize);
 
 			StateLabeling = new LabelVector();
-
-			Requires.InRange(modelSize.NumberOfStates, nameof(States), 1024, Int32.MaxValue - 1);
 			States = (int) modelSize.NumberOfStates;
 			
 			_maxNumberOfTransitionTargets = modelSize.NumberOfTransitions / (AvgGraphNodesPerSucceedingState + 1);
+			_maxNumberOfTransitionTargets = Math.Max(_maxNumberOfTransitionTargets, 1024);
 			_maxNumberOfContinuationGraphElements = _maxNumberOfTransitionTargets * AvgGraphNodesPerSucceedingState;
+			_maxNumberOfContinuationGraphElements = Math.Max(_maxNumberOfContinuationGraphElements, 1024);
 
 			Requires.InRange(_maxNumberOfTransitionTargets, nameof(_maxNumberOfTransitionTargets), 1024, Int32.MaxValue - 1);
 			Requires.InRange(_maxNumberOfContinuationGraphElements, nameof(_maxNumberOfContinuationGraphElements), 1024, Int32.MaxValue - 1);
