@@ -39,18 +39,19 @@ namespace Tests.MarkovDecisionProcess
 	using Xunit;
 	using Xunit.Abstractions;
 
-	public unsafe class LtmdpBuilderDuringTraversalOldTests
+	public unsafe class LtmdpBuilderDuringTraversalTests
 	{
 		private const int StateCapacity = 1024;
-		private const int TransitionCapacity = 4096;
+		private const int TransitionCapacity = 4096*100;
 		public TestTraceOutput Output { get; }
 
 		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
 		private readonly LtmdpTransition* _transitions;
 		private int _transitionCount = 0;
 		private readonly LtmdpStepGraph _stepGraph;
+		private readonly LtmdpChoiceResolver _choiceResolver;
 
-		public LtmdpBuilderDuringTraversalOldTests(ITestOutputHelper output)
+		public LtmdpBuilderDuringTraversalTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 			
@@ -58,13 +59,40 @@ namespace Tests.MarkovDecisionProcess
 			_transitions = (LtmdpTransition*)_transitionBuffer.Pointer;
 
 			_stepGraph = new LtmdpStepGraph();
+			_choiceResolver = new LtmdpChoiceResolver(_stepGraph);
+		}
+		
+		private int CountTargetStatesOfCid(LabeledTransitionMarkovDecisionProcess ltmdp,long cid)
+		{
+			var targetStatesCount = 0;
+			Action<LabeledTransitionMarkovDecisionProcess.ContinuationGraphElement> counter = cge =>
+			{
+				targetStatesCount++;
+			};
+			var traverser = ltmdp.GetTreeTraverser(cid);
+			traverser.ApplyActionWithStackBasedAlgorithm(counter);
+
+			return targetStatesCount;
 		}
 
-		private void CreateTransition(bool isFormulaSatisfied, int targetStateIndex, int distribution, double p)
+		private int CountTargetStatesOfInitialState(LabeledTransitionMarkovDecisionProcess ltmdp)
+		{
+			var cidRoot = ltmdp.GetRootContinuationGraphLocationOfInitialState();
+			return CountTargetStatesOfCid(ltmdp,cidRoot);
+		}
+
+		private int CountTargetStatesOfState(LabeledTransitionMarkovDecisionProcess ltmdp, int state)
+		{
+			var cidRoot = ltmdp.GetRootContinuationGraphLocationOfState(state);
+			return CountTargetStatesOfCid(ltmdp, cidRoot);
+		}
+
+
+		private void CreateTransition(bool isFormulaSatisfied, int targetStateIndex, int continuationId, double p)
 		{
 			var transition = _transitionCount;
 			_transitionCount++;
-			_transitions[transition] = new LtmdpTransition { Probability = p, ContinuationId = distribution };
+			_transitions[transition] = new LtmdpTransition { Probability = p, ContinuationId = continuationId };
 			var t = (Transition*)(_transitions + transition);
 			t->SourceStateIndex = 0;
 			t->TargetStateIndex = targetStateIndex;
@@ -78,69 +106,48 @@ namespace Tests.MarkovDecisionProcess
 			return new TransitionCollection((Transition*)_transitions, _transitionCount, _transitionCount, sizeof(LtmdpTransition), _stepGraph);
 		}
 
-		private void ClearTransitions()
+		private void Clear()
 		{
-			_stepGraph.Clear();
 			_transitionCount = 0;
+			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
 		}
+
 
 		[Fact]
 		public void OneReflexiveTransition()
 		{
-			var ltmdp = new LabeledTransitionMarkovDecisionProcessOld(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcessOld.LtmdpBuilderDuringTraversalOld<SimpleExecutableModel>(ltmdp,AnalysisConfiguration.Default);
+			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal<SimpleExecutableModel>(ltmdp,AnalysisConfiguration.Default);
 
 			// add initial state
-			ClearTransitions();
+			Clear();
 			CreateTransition(false, 5, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
-			ClearTransitions();
+			Clear();
 
 			// add reflexive state 5
 			CreateTransition(false, 5, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
 
-			ltmdp.Transitions.ShouldBe(2);
+			ltmdp.TransitionTargets.ShouldBe(2);
 			ltmdp.SourceStates.Count.ShouldBe(1);
 			ltmdp.SourceStates.First().ShouldBe(5);
-			var initialDistEnumerator = ltmdp.GetInitialDistributionsEnumerator();
-			var distCount = 0;
-			var transCount = 0;
-			while (initialDistEnumerator.MoveNext())
-			{
-				distCount++;
-				var transEnumerator = initialDistEnumerator.GetLabeledTransitionEnumerator();
-				while (transEnumerator.MoveNext())
-				{
-					transCount++;
-				}
-			}
-			distCount.ShouldBe(1);
-			transCount.ShouldBe(1);
-			distCount = 0;
-			transCount = 0;
-			var state5DistEnumerator = ltmdp.GetDistributionsEnumerator(5);
-			while (state5DistEnumerator.MoveNext())
-			{
-				distCount++;
-				var transEnumerator = state5DistEnumerator.GetLabeledTransitionEnumerator();
-				while (transEnumerator.MoveNext())
-				{
-					transCount++;
-				}
-			}
-			distCount.ShouldBe(1);
-			transCount.ShouldBe(1);
+			var initialTransitionTargets = CountTargetStatesOfInitialState(ltmdp);
+			initialTransitionTargets.ShouldBe(1);
+
+			var transitionTargetsOfState5 = CountTargetStatesOfState(ltmdp,5);
+			transitionTargetsOfState5.ShouldBe(1);
 		}
 
 		[Fact]
 		public void ThreeReflexiveStatesFromInitialState()
 		{
-			var ltmdp = new LabeledTransitionMarkovDecisionProcessOld(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcessOld.LtmdpBuilderDuringTraversalOld<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
+			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
 
 			// add initial state
-			ClearTransitions();
+			Clear();
 			_stepGraph.ProbabilisticSplit(0,1,3);
 			CreateTransition(false, 5, 1, 0.3);
 			CreateTransition(false, 7, 2, 0.3);
@@ -148,67 +155,45 @@ namespace Tests.MarkovDecisionProcess
 			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
 
 			// add reflexive state 5
-			ClearTransitions();
+			Clear();
 			CreateTransition(false, 5, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
-			
+
 			// add reflexive state 7
-			ClearTransitions();
+			Clear();
 			CreateTransition(false, 5, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 7, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 2
-			ClearTransitions();
+			Clear();
 			CreateTransition(false, 2, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 2, CreateTransitionCollection(), _transitionCount, false);
 
 
-			ltmdp.Transitions.ShouldBe(6);
+			ltmdp.TransitionTargets.ShouldBe(6);
 			ltmdp.SourceStates.Count.ShouldBe(3);
 			ltmdp.SourceStates.First(state => state==5).ShouldBe(5);
-			var initialDistEnumerator = ltmdp.GetInitialDistributionsEnumerator();
-			var distCount = 0;
-			var transCount = 0;
-			while (initialDistEnumerator.MoveNext())
-			{
-				distCount++;
-				var transEnumerator = initialDistEnumerator.GetLabeledTransitionEnumerator();
-				while (transEnumerator.MoveNext())
-				{
-					transCount++;
-				}
-			}
-			distCount.ShouldBe(1);
-			transCount.ShouldBe(3);
-			distCount = 0;
-			transCount = 0;
-			var state5DistEnumerator = ltmdp.GetDistributionsEnumerator(5);
-			while (state5DistEnumerator.MoveNext())
-			{
-				distCount++;
-				var transEnumerator = state5DistEnumerator.GetLabeledTransitionEnumerator();
-				while (transEnumerator.MoveNext())
-				{
-					transCount++;
-				}
-			}
-			distCount.ShouldBe(1);
-			transCount.ShouldBe(1);
-		}
 
+			var initialTransitionTargets = CountTargetStatesOfInitialState(ltmdp);
+			initialTransitionTargets.ShouldBe(3);
+
+			var transitionTargetsOfState5 = CountTargetStatesOfState(ltmdp, 5);
+			transitionTargetsOfState5.ShouldBe(1);
+		}
+		
 		[Fact]
 		public void ThreeReflexiveStatesFromNonInitialState()
 		{
-			var ltmdp = new LabeledTransitionMarkovDecisionProcessOld(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcessOld.LtmdpBuilderDuringTraversalOld<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
+			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
 
 			// add initial state
-			ClearTransitions();
+			Clear();
 			CreateTransition(false, 5, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
 
 			// add state 5
-			ClearTransitions();
+			Clear();
 			_stepGraph.ProbabilisticSplit(0, 1, 3);
 			CreateTransition(false, 7, 1, 0.3);
 			CreateTransition(false, 2, 2, 0.3);
@@ -216,69 +201,45 @@ namespace Tests.MarkovDecisionProcess
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 7
-			ClearTransitions();
+			Clear();
 			CreateTransition(false, 7, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 7, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 2
-			ClearTransitions();
+			Clear();
 			CreateTransition(false, 2, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 2, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 1
-			ClearTransitions();
+			Clear();
 			CreateTransition(false, 1, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 1, CreateTransitionCollection(), _transitionCount, false);
 
 
-			ltmdp.Transitions.ShouldBe(7);
+			ltmdp.TransitionTargets.ShouldBe(7);
 			ltmdp.SourceStates.Count.ShouldBe(4);
 			ltmdp.SourceStates.First(state => state == 5).ShouldBe(5);
 
-			var initialDistEnumerator = ltmdp.GetInitialDistributionsEnumerator();
-			var distCount = 0;
-			var transCount = 0;
-			while (initialDistEnumerator.MoveNext())
-			{
-				distCount++;
-				var transEnumerator = initialDistEnumerator.GetLabeledTransitionEnumerator();
-				while (transEnumerator.MoveNext())
-				{
-					transCount++;
-				}
-			}
-			distCount.ShouldBe(1);
-			transCount.ShouldBe(1);
+			var initialTransitionTargets = CountTargetStatesOfInitialState(ltmdp);
+			initialTransitionTargets.ShouldBe(1);
 
-			distCount = 0;
-			transCount = 0;
-			var state5DistEnumerator = ltmdp.GetDistributionsEnumerator(5);
-			while (state5DistEnumerator.MoveNext())
-			{
-				distCount++;
-				var transEnumerator = state5DistEnumerator.GetLabeledTransitionEnumerator();
-				while (transEnumerator.MoveNext())
-				{
-					transCount++;
-				}
-			}
-			distCount.ShouldBe(1);
-			transCount.ShouldBe(3);
+			var transitionTargetsOfState5 = CountTargetStatesOfState(ltmdp, 5);
+			transitionTargetsOfState5.ShouldBe(3);
 		}
 
 		[Fact]
 		public void StatesFromNonInitialStateWithMoreDistributions()
 		{
-			var ltmdp = new LabeledTransitionMarkovDecisionProcessOld(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcessOld.LtmdpBuilderDuringTraversalOld<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
+			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
 
 			// add initial state
-			ClearTransitions();
+			Clear();
 			CreateTransition(false, 5, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
 
 			// add state 5
-			ClearTransitions();
+			Clear();
 			_stepGraph.NonDeterministicSplit(0, 1, 3);
 			_stepGraph.ProbabilisticSplit(2, 4, 6);
 			CreateTransition(false, 1, 1, 1.0);
@@ -288,8 +249,11 @@ namespace Tests.MarkovDecisionProcess
 			CreateTransition(false, 7, 3, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
 
+			var transitionTargetsOfState51 = CountTargetStatesOfState(ltmdp, 5);
+			transitionTargetsOfState51.ShouldBe(5);
+
 			// add reflexive state 7
-			ClearTransitions();
+			Clear();
 			_stepGraph.NonDeterministicSplit(0, 1, 2);
 			_stepGraph.ProbabilisticSplit(1, 3, 4);
 			CreateTransition(false, 7, 3, 0.2);
@@ -297,50 +261,28 @@ namespace Tests.MarkovDecisionProcess
 			CreateTransition(false, 1, 2, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 7, CreateTransitionCollection(), _transitionCount, false);
 
+
+
 			// add reflexive state 2
-			ClearTransitions();
+			Clear();
 			CreateTransition(false, 2, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 2, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 1
-			ClearTransitions();
+			Clear();
 			CreateTransition(false, 1, 0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 1, CreateTransitionCollection(), _transitionCount, false);
 
 
-			ltmdp.Transitions.ShouldBe(11);
+			ltmdp.TransitionTargets.ShouldBe(11);
 			ltmdp.SourceStates.Count.ShouldBe(4);
 			ltmdp.SourceStates.First(state => state == 5).ShouldBe(5);
+			
+			var initialTransitionTargets = CountTargetStatesOfInitialState(ltmdp);
+			initialTransitionTargets.ShouldBe(1);
 
-			var initialDistEnumerator = ltmdp.GetInitialDistributionsEnumerator();
-			var distCount = 0;
-			var transCount = 0;
-			while (initialDistEnumerator.MoveNext())
-			{
-				distCount++;
-				var transEnumerator = initialDistEnumerator.GetLabeledTransitionEnumerator();
-				while (transEnumerator.MoveNext())
-				{
-					transCount++;
-				}
-			}
-			distCount.ShouldBe(1);
-			transCount.ShouldBe(1);
-
-			distCount = 0;
-			transCount = 0;
-			var state5DistEnumerator = ltmdp.GetDistributionsEnumerator(5);
-			while (state5DistEnumerator.MoveNext())
-			{
-				distCount++;
-				var transEnumerator = state5DistEnumerator.GetLabeledTransitionEnumerator();
-				while (transEnumerator.MoveNext())
-				{
-					transCount++;
-				}
-			}
-			distCount.ShouldBe(3);
-			transCount.ShouldBe(5);
+			var transitionTargetsOfState5 = CountTargetStatesOfState(ltmdp, 5);
+			transitionTargetsOfState5.ShouldBe(5);
 		}
 	}
 }

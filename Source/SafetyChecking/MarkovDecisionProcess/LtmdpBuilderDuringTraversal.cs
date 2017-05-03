@@ -30,7 +30,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using DiscreteTimeMarkovChain;
 	using ExecutableModel;
 	using Utilities;
-	/*
+	using GenericDataStructures;
+	using Modeling;
+
 	//The LtmdpBuilder is tightly coupled to LabeledTransitionMarkovDecisionProcess, so we make it a nested class
 	internal unsafe partial class LabeledTransitionMarkovDecisionProcess
 	{
@@ -40,9 +42,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// </summary>
 		internal class LtmdpBuilderDuringTraversal<TExecutableModel> : IBatchedTransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 		{
-			private int _maxNumberOfDistributionsPerState;
-
 			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
+
+			private readonly AutoResizeVector<int> _continuationIdToTransitionTarget = new AutoResizeVector<int>();
 
 			/// <summary>
 			///   Initializes a new instance.
@@ -52,41 +54,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			{
 				Requires.NotNull(ltmdp, nameof(ltmdp));
 				_ltmdp = ltmdp;
-				
-				InitializeDistributionChainIndexCache(configuration.SuccessorCapacity);
 			}
-
-			// Each worker has its own LtmdpBuilder. Thus, we can add a buffer here
-			// We create this index here in this class to avoid garbage.
-			private readonly MemoryBuffer _distributionChainIndexCacheBuffer = new MemoryBuffer();
-			private int* _distributionChainIndexCache;
-
-			private void InitializeDistributionChainIndexCache(long maxNumberOfDistributionsPerState)
-			{
-				Assert.That(maxNumberOfDistributionsPerState<=int.MaxValue, "maxNumberOfDistributionsPerState must fit into an integer");
-
-				_maxNumberOfDistributionsPerState = (int)maxNumberOfDistributionsPerState;
-				_distributionChainIndexCacheBuffer.Resize((long)_maxNumberOfDistributionsPerState * sizeof(int), zeroMemory: false);
-				_distributionChainIndexCache = (int*)_distributionChainIndexCacheBuffer.Pointer;
-				
-				ResetDistributionChainIndexCache();
-			}
-
-			private void ResetDistributionChainIndexCache()
-			{
-				MemoryBuffer.SetAllBitsMemoryWithInitblk.ClearWithMinus1(_distributionChainIndexCache, _maxNumberOfDistributionsPerState);
-			}
-
-			private int TryToFindDistributionChainIndexInCache(int distribution)
-			{
-				return _distributionChainIndexCache[distribution];
-			}
-
-			private void UpdateDistributionChainIndexCache(int distribution, int locationOfEntry)
-			{
-				Assert.That(distribution < _maxNumberOfDistributionsPerState, "distribution exceeds _maxNumberOfDistributionsPerState.");
-				_distributionChainIndexCache[distribution] = locationOfEntry;
-			}
+			
 
 			[Conditional("DEBUG")]
 			private void CheckIfTransitionsCanBeProcessed(int transitionCount)
@@ -94,8 +63,17 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				Assert.That(transitionCount > 0, "Cannot add deadlock state.");
 
 				// Need to reserve the memory for the transitions
-				var upperBoundaryForTransitions = _ltmdp._transitionChainElementCount + transitionCount;
-				if (upperBoundaryForTransitions < 0)
+				var upperBoundaryForTransitions = _ltmdp._transitionTargetCount + transitionCount;
+				if (upperBoundaryForTransitions < 0 || upperBoundaryForTransitions >= _ltmdp._maxNumberOfTransitionTargets)
+					throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
+			}
+
+			[Conditional("DEBUG")]
+			private void CheckIfStepGraphCanBeProcessed(LtmdpStepGraph stepGraph)
+			{
+				// Need to reserve the memory for the transitions
+				var upperBoundaryForStepGraph = _ltmdp._continuationGraphElementCount + stepGraph.Size;
+				if (upperBoundaryForStepGraph < 0 || upperBoundaryForStepGraph >= _ltmdp._maxNumberOfContinuationGraphElements)
 					throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
 			}
 
@@ -105,189 +83,84 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				Assert.That(TransitionFlags.IsValid(transition->Flags), "Attempted to add an invalid transition.");
 			}
 
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private int GetStartPositionOfDistributionChain(int sourceState, bool areInitialTransitions)
+			private void AddTransitions(TransitionCollection transitions)
 			{
-				if (areInitialTransitions)
-					return _ltmdp._indexOfFirstInitialDistribution;
-				return _ltmdp._stateStorageStateToFirstDistributionChainElementMemory[sourceState];
-			}
-
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private DistributionChainElement GetDistributionChainElement(int index)
-			{
-				return _ltmdp._distributionChainElementsMemory[index];
-			}
-
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private int FindOrCreateDistributionChainElementInExistingDistributionChain(int startPositionOfDistributionChain, int distribution)
-			{
-				// Search for place to append is linear in number of existing distributions of state
-				var currentDistributionElementIndex = startPositionOfDistributionChain;
-				
-				while (true)
+				foreach (var transition in transitions)
 				{
-					var currentElement = GetDistributionChainElement(currentDistributionElementIndex);
-					if (currentElement.Distribution == distribution)
-					{
-						//Case 1: Found
-						return currentDistributionElementIndex;
-					}
-					if (currentElement.NextElementIndex == -1)
-					{
-						//Case 2: Append
-						var locationOfNewEntry = _ltmdp.GetPlaceForNewDistributionChainElement();
-						_ltmdp._distributionChainElementsMemory[currentDistributionElementIndex].NextElementIndex =
-							locationOfNewEntry;
-						_ltmdp._distributionChainElementsMemory[locationOfNewEntry] =
-							new DistributionChainElement
-							{
-								FirstTransitionIndex = -1,
-								Distribution = distribution,
-								NextElementIndex = -1,
-							};
-						UpdateDistributionChainIndexCache(distribution, locationOfNewEntry);
-						return locationOfNewEntry;
-					}
-					//else continue iteration
-					currentDistributionElementIndex = currentElement.NextElementIndex;
+					var probTransition = (LtmdpTransition*)transition;
+
+					CheckIfTransitionIsValid(probTransition);
+
+					var place = _ltmdp.GetPlaceForNewTransitionTargetElement();
+					_ltmdp._transitionTarget[place] =
+						new TransitionTargetElement
+						{
+							TargetState = transition->TargetStateIndex,
+							Formulas = probTransition->Formulas,
+							Probability = probTransition->Probability
+						};
+					_continuationIdToTransitionTarget[probTransition->ContinuationId] = place;
 				}
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private int CreateNewDistributionChainStartWithDistribution(int sourceState, bool areInitialTransitions, int distribution)
+			private void AddFinalChoiceOfStepGraph(int continuationId, long locationForContinuationGraphElement)
 			{
-				var locationOfNewEntry = _ltmdp.GetPlaceForNewDistributionChainElement();
+				var transitionTarget = _continuationIdToTransitionTarget[continuationId];
 
+				_ltmdp._continuationGraph[locationForContinuationGraphElement] =
+					new ContinuationGraphElement
+					{
+						ChoiceType = LtmdpChoiceType.UnsplitOrFinal,
+						To = transitionTarget,
+					};
+			}
+
+			
+			private void AddChoiceOfStepGraph(LtmdpStepGraph stepGraph, int continuationId, long locationForContinuationGraphElement)
+			{
+				var choice = stepGraph.GetChoiceOfCid(continuationId);
+
+				if (choice.IsChoiceTypeUnsplitOrFinal)
+				{
+					AddFinalChoiceOfStepGraph(continuationId, locationForContinuationGraphElement);
+					return;
+				}
+
+				var offsetTo = choice.To - choice.From;
+				var numberOfChildren = offsetTo + 1;
+
+				var placesForChildren = _ltmdp.GetPlaceForNewContinuationGraphElements(numberOfChildren);
+
+				_ltmdp._continuationGraph[locationForContinuationGraphElement] =
+					new ContinuationGraphElement
+					{
+						ChoiceType = choice.ChoiceType,
+						From = placesForChildren,
+						To = placesForChildren + offsetTo,
+					};
+				
+				for (var currentChildNo = 0; currentChildNo < numberOfChildren; currentChildNo++)
+				{
+					var originalContinuationId = choice.From + currentChildNo;
+					var newLocation = placesForChildren + currentChildNo;
+					AddChoiceOfStepGraph(stepGraph, originalContinuationId, newLocation);
+				}
+			}
+
+			private void AddStepGraph(LtmdpStepGraph stepGraph, int sourceState, bool areInitialTransitions)
+			{
+				var place = _ltmdp.GetPlaceForNewContinuationGraphElements(1);
 				if (areInitialTransitions)
 				{
-					_ltmdp._indexOfFirstInitialDistribution = locationOfNewEntry;
+					_ltmdp._indexOfInitialContinuationGraph = place;
 				}
 				else
 				{
 					_ltmdp.SourceStates.Add(sourceState);
-					_ltmdp._stateStorageStateToFirstDistributionChainElementMemory[sourceState] = locationOfNewEntry;
+					_ltmdp._stateStorageStateToRootOfContinuationGraphMemory[sourceState] = place;
 				}
-
-				_ltmdp._distributionChainElementsMemory[locationOfNewEntry] =
-					new DistributionChainElement
-					{
-						FirstTransitionIndex = -1,
-						Distribution = distribution,
-						NextElementIndex = -1,
-					};
-				UpdateDistributionChainIndexCache(distribution, locationOfNewEntry);
-				return locationOfNewEntry;
-			}
-
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private int FindOrCreateDistributionChainElementWithDistribution(int sourceState, bool areInitialTransitions, int distribution)
-			{
-				//try to find in cache
-				var valueInCache = TryToFindDistributionChainIndexInCache(distribution);
-				if (valueInCache!=-1)
-					return valueInCache;
-
-				var startPositionOfDistributionChain = GetStartPositionOfDistributionChain(sourceState, areInitialTransitions);
-
-				// now we select the correct distribution
-				// startPositionOfDistributionChain == -1 indicates that no distribution chain for state exists
-				if (startPositionOfDistributionChain == -1)
-				{
-					var positionOfDistributionChain = CreateNewDistributionChainStartWithDistribution(sourceState, areInitialTransitions, distribution);
-					return positionOfDistributionChain;
-				}
-				else
-				{
-					var positionOfDistributionChain = FindOrCreateDistributionChainElementInExistingDistributionChain(startPositionOfDistributionChain, distribution);
-					return positionOfDistributionChain;
-				}
-			}
-
-
-
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private int GetStartPositionOfTransitionChain(int positionOfDistributionElementChain)
-			{
-				return _ltmdp._distributionChainElementsMemory[positionOfDistributionElementChain].FirstTransitionIndex;
-			}
-
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private TransitionChainElement GetTransitionChainElement(int index)
-			{
-				return _ltmdp._transitionChainElementsMemory[index];
-			}
-
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private void CreateNewTransitionChainStartWithTransition(int positionOfDistributionElementChain, LtmdpTransition* transition)
-			{
-				var locationOfNewEntry = _ltmdp.GetPlaceForNewTransitionChainElement();
-				
-				_ltmdp._distributionChainElementsMemory[positionOfDistributionElementChain].FirstTransitionIndex =
-					locationOfNewEntry;
-
-				_ltmdp._transitionChainElementsMemory[locationOfNewEntry] =
-					new TransitionChainElement
-					{
-						Formulas = transition->Formulas,
-						NextElementIndex = -1,
-						Probability = transition->Probability,
-						TargetState = transition->GetTargetStateIndex()
-					};
-			}
-
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private void AddTransitionToExistingTransitionChain(int startPositionOfTransitionChain, LtmdpTransition* transition)
-			{
-				// Search for place to append is linear in number of existing transitions of state => O(n^2) 
-				var currentTransitionElementIndex = startPositionOfTransitionChain;
-
-				// merge or append
-				while (true)
-				{
-					var currentElement = GetTransitionChainElement(currentTransitionElementIndex);
-					if (currentElement.TargetState == transition->GetTargetStateIndex() && currentElement.Formulas == transition->Formulas)
-					{
-						//Case 1: Merge
-						_ltmdp._transitionChainElementsMemory[currentTransitionElementIndex].Probability =
-							transition->Probability + currentElement.Probability;
-						return;
-					}
-					if (currentElement.NextElementIndex == -1)
-					{
-						//Case 2: Append
-						var locationOfNewEntry = _ltmdp.GetPlaceForNewTransitionChainElement();
-						_ltmdp._transitionChainElementsMemory[currentTransitionElementIndex].NextElementIndex =
-							locationOfNewEntry;
-						_ltmdp._transitionChainElementsMemory[locationOfNewEntry] =
-							new TransitionChainElement
-							{
-								Formulas = transition->Formulas,
-								NextElementIndex = -1,
-								Probability = transition->Probability,
-								TargetState = transition->GetTargetStateIndex()
-							};
-						return;
-					}
-					//else continue iteration
-					currentTransitionElementIndex = currentElement.NextElementIndex;
-				}
-			}
-
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private void AddTransitionToTransitionChain(int positionOfDistributionElementChain, LtmdpTransition* probTransition)
-			{
-				var startPositionOfTransitionChain = GetStartPositionOfTransitionChain(positionOfDistributionElementChain);
-
-				// startPositionOfChain == -1 indicates that no transition chain for state exists
-				if (startPositionOfTransitionChain == -1)
-				{
-					CreateNewTransitionChainStartWithTransition(positionOfDistributionElementChain, probTransition);
-				}
-				else
-				{
-					AddTransitionToExistingTransitionChain(startPositionOfTransitionChain, probTransition);
-				}
+				AddChoiceOfStepGraph(stepGraph, 0, place);
 			}
 
 
@@ -307,22 +180,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			public void ProcessTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, int sourceState,
 									   TransitionCollection transitions, int transitionCount, bool areInitialTransitions)
 			{
-				ResetDistributionChainIndexCache();
-
 				// Note, other threads might access _ltmdp at the same time
 				CheckIfTransitionsCanBeProcessed(transitionCount);
 
-				foreach (var transition in transitions)
-				{
-					var probTransition = (LtmdpTransition*)transition;
-
-					CheckIfTransitionIsValid(probTransition);
-
-					var positionOfDistributionElementChain = FindOrCreateDistributionChainElementWithDistribution(sourceState, areInitialTransitions, probTransition->ContinuationId);
-
-					AddTransitionToTransitionChain(positionOfDistributionElementChain, probTransition);
-				}
+				AddTransitions(transitions);
+				var stepgraph = (LtmdpStepGraph)transitions.StructuralInformation;
+				CheckIfStepGraphCanBeProcessed(stepgraph);
+				AddStepGraph(stepgraph, sourceState, areInitialTransitions);
 			}
 		}
-	}*/
+	}
 }

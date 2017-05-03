@@ -83,6 +83,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		{
 			_internalGraph[cid] = _internalGraph[cid].DeriveDeterministic();
 		}
+
+		public int Size => _internalGraph.Count;
 		
 		/// <summary>
 		///   Makes an non deterministic split.

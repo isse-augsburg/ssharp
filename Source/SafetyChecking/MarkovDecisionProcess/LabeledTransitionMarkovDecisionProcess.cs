@@ -25,6 +25,7 @@ using System;
 namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System.Collections.Concurrent;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Globalization;
 	using Modeling;
@@ -44,7 +45,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		public string[] StateRewardRetrieverLabels;
 		
-		private int _indexOfFirstInitialDistribution = -1;
+		private long _indexOfInitialContinuationGraph = -1;
 
 		public ConcurrentBag<int> SourceStates { get; } = new ConcurrentBag<int>();
 
@@ -86,23 +87,33 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			MemoryBuffer.SetAllBitsMemoryWithInitblk.ClearWithMinus1(_stateStorageStateToRootOfContinuationGraphMemory, maxNumberOfStates);
 		}
 		
-		private struct ContinuationGraphElement
+		public struct ContinuationGraphElement
 		{
 			public LtmdpChoiceType ChoiceType;
-			public int From;
-			public int To;
+			public long From;
+			public long To;
+
+			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == LtmdpChoiceType.UnsplitOrFinal;
+
+			public bool IsChoiceTypeDeterministic => ChoiceType == LtmdpChoiceType.Deterministic;
+
+			public bool IsChoiceTypeNondeterministic => ChoiceType == LtmdpChoiceType.Nondeterministic;
+
+			public bool IsChoiceTypeProbabilitstic => ChoiceType == LtmdpChoiceType.Probabilitstic;
 		}
 
-		private struct TransitionTargetElement
+		public struct TransitionTargetElement
 		{
 			public int TargetState;
 			public StateFormulaSet Formulas;
 			public double Probability;
 		}
 
+		public int TransitionTargets => _transitionTargetCount;
+
 		private long GetPlaceForNewContinuationGraphElements(int number)
 		{
-			var locationOfFirstNewEntry = InterlockedExtensions.IncrementReturnOld(ref _continuationGraphElementCount);
+			var locationOfFirstNewEntry = InterlockedExtensions.AddFetch(ref _continuationGraphElementCount,number);
 			if (locationOfFirstNewEntry >= _maxNumberOfContinuationGraphElements)
 				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
 			return locationOfFirstNewEntry;
@@ -157,6 +168,163 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_stateStorageStateToRootOfContinuationGraphBuffer.SafeDispose();
 			_continuationGraphBuffer.SafeDispose();
 			_transitionTargetBuffer.SafeDispose();
+		}
+
+		internal long GetRootContinuationGraphLocationOfState(int state)
+		{
+			return _stateStorageStateToRootOfContinuationGraphMemory[state];
+		}
+
+		internal ContinuationGraphElement GetRootContinuationGraphElementOfState(int state)
+		{
+			var location = GetRootContinuationGraphLocationOfState(state);
+			return _continuationGraph[location];
+		}
+
+		internal long GetRootContinuationGraphLocationOfInitialState()
+		{
+			return _indexOfInitialContinuationGraph;
+		}
+
+		public ContinuationGraphElement GetRootContinuationGraphElementOfInitialState()
+		{
+			var location = _indexOfInitialContinuationGraph;
+			return _continuationGraph[location];
+		}
+
+		public ContinuationGraphElement GetContinuationGraphElement(long position)
+		{
+			return _continuationGraph[position];
+		}
+
+
+		public TransitionTargetElement GetTransitionTarget(int position)
+		{
+			return _transitionTarget[position];
+		}
+
+		public TreeTraversal GetTreeTraverser(long parentContinuationId)
+		{
+			return new TreeTraversal(this, parentContinuationId);
+		}
+
+		internal struct TreeTraversal
+		{
+			public long ParentContinuationId { get; }
+
+			public LabeledTransitionMarkovDecisionProcess Ltmdp { get; }
+
+			public TreeTraversal(LabeledTransitionMarkovDecisionProcess ltmdp, long parentContinuationId)
+			{
+				ParentContinuationId = parentContinuationId;
+				Ltmdp = ltmdp;
+			}
+
+			public void ApplyActionWithStackBasedAlgorithm(Action<ContinuationGraphElement> action )
+			{
+				// also shows how to traverse a tree with stacks and without recursion
+				var fromDecisionStack = new Stack<long>();
+				var toDecisionStack = new Stack<long>();
+
+				fromDecisionStack.Push(ParentContinuationId);
+				toDecisionStack.Push(ParentContinuationId);
+
+				while (fromDecisionStack.Count > 0)
+				{
+					// go to next leaf in tree
+					var foundNextLeaf = false;
+					var cge = default(ContinuationGraphElement);
+					while (!foundNextLeaf)
+					{
+						// select current fromCid
+						var fromCid = fromDecisionStack.Peek();
+						cge = Ltmdp.GetContinuationGraphElement(fromCid);
+						if (cge.IsChoiceTypeUnsplitOrFinal)
+						{
+							foundNextLeaf = true;
+						}
+						else
+						{
+							fromDecisionStack.Push(cge.From);
+							toDecisionStack.Push(cge.To);
+						}
+					}
+
+					// here we can work with the next cge
+					action(cge);
+
+					// find next fromCid
+					var foundNextFromCid = false;
+					while (fromDecisionStack.Count > 0 && !foundNextFromCid)
+					{
+						var nextFromCid = fromDecisionStack.Pop() + 1;
+						var toCid = toDecisionStack.Peek();
+						if (nextFromCid > toCid)
+						{
+							toDecisionStack.Pop();
+						}
+						else
+						{
+							fromDecisionStack.Push(nextFromCid);
+							foundNextFromCid = true;
+						}
+					}
+					Assert.That(fromDecisionStack.Count == toDecisionStack.Count, "Stacks must have equal size");
+				}
+			}
+
+			private void ApplyActionWithRecursionBasedAlgorithmInnerRecursion(Action<ContinuationGraphElement> action, long currentCid)
+			{
+				ContinuationGraphElement cge = Ltmdp.GetContinuationGraphElement(currentCid);
+				if (cge.IsChoiceTypeUnsplitOrFinal)
+				{
+					action(cge);
+				}
+				else
+				{
+					for (var i = cge.From; i <= cge.To; i++)
+					{
+						ApplyActionWithRecursionBasedAlgorithmInnerRecursion(action, i);
+					}
+				}
+			}
+
+			public void ApplyActionWithRecursionBasedAlgorithm(Action<ContinuationGraphElement> action)
+			{
+				ApplyActionWithRecursionBasedAlgorithmInnerRecursion(action,ParentContinuationId);
+			}
+		}
+
+
+		public DirectChildrenEnumerator GetDirectChildrenEnumerator(long parentContinuationId)
+		{
+			return new DirectChildrenEnumerator(this, parentContinuationId);
+		}
+		
+		internal struct DirectChildrenEnumerator
+		{
+			public long ParentContinuationId { get; }
+
+			public long CurrentChildContinuationId { private set; get; }
+
+			public ContinuationGraphElement ContinuationGraphElement { get; }
+
+			public DirectChildrenEnumerator(LabeledTransitionMarkovDecisionProcess ltmdp, long parentContinuationId)
+			{
+				ContinuationGraphElement = ltmdp._continuationGraph[parentContinuationId];
+				CurrentChildContinuationId = ContinuationGraphElement.From - 1;
+				ParentContinuationId = parentContinuationId;
+			}
+
+			public bool MoveNext()
+			{
+				if (ContinuationGraphElement.IsChoiceTypeUnsplitOrFinal)
+					return false;
+				CurrentChildContinuationId++;
+				if (CurrentChildContinuationId <= ContinuationGraphElement.To)
+					return true;
+				return false;
+			}
 		}
 	}
 }

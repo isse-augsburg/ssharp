@@ -84,6 +84,7 @@
     <Compile Include="DataStructures\MemoryBufferTests.cs" />
     <Compile Include="DataStructures\SparseDoubleMatrixTests.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcBuilderTests.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpBuilderDuringTraversalTests.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpBuilderDuringTraversalOldTests.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpStepGraphToContinuationDistributionMapperTests.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpChoiceResolverTests.cs" />
