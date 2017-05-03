@@ -87,6 +87,32 @@ namespace Tests.MarkovDecisionProcess
 			return CountTargetStatesOfCid(ltmdp, cidRoot);
 		}
 
+		private double SumProbabilitiesOfCid(LabeledTransitionMarkovDecisionProcess ltmdp, long cid)
+		{
+			var probabilties = 0.0;
+			Action<LabeledTransitionMarkovDecisionProcess.ContinuationGraphElement> counter = cge =>
+			{
+				var probability = ltmdp.GetTransitionTarget((int)cge.To).Probability;
+				probabilties+= probability;
+			};
+			var traverser = ltmdp.GetTreeTraverser(cid);
+			traverser.ApplyActionWithStackBasedAlgorithm(counter);
+
+			return probabilties;
+		}
+
+		private double SumProbabilitiesOfInitialState(LabeledTransitionMarkovDecisionProcess ltmdp)
+		{
+			var cidRoot = ltmdp.GetRootContinuationGraphLocationOfInitialState();
+			return SumProbabilitiesOfCid(ltmdp, cidRoot);
+		}
+
+		private double SumProbabilitiesOfState(LabeledTransitionMarkovDecisionProcess ltmdp, int state)
+		{
+			var cidRoot = ltmdp.GetRootContinuationGraphLocationOfState(state);
+			return SumProbabilitiesOfCid(ltmdp, cidRoot);
+		}
+
 
 		private void CreateTransition(bool isFormulaSatisfied, int targetStateIndex, int continuationId, double p)
 		{
@@ -133,11 +159,16 @@ namespace Tests.MarkovDecisionProcess
 			ltmdp.TransitionTargets.ShouldBe(2);
 			ltmdp.SourceStates.Count.ShouldBe(1);
 			ltmdp.SourceStates.First().ShouldBe(5);
+
 			var initialTransitionTargets = CountTargetStatesOfInitialState(ltmdp);
 			initialTransitionTargets.ShouldBe(1);
+			var initialProbabilitySum = SumProbabilitiesOfInitialState(ltmdp);
+			initialProbabilitySum.ShouldBe(1.0);
 
 			var transitionTargetsOfState5 = CountTargetStatesOfState(ltmdp,5);
 			transitionTargetsOfState5.ShouldBe(1);
+			var probabilitySumOfState5 = SumProbabilitiesOfState(ltmdp, 5);
+			probabilitySumOfState5.ShouldBe(1.0);
 		}
 
 		[Fact]
@@ -176,9 +207,13 @@ namespace Tests.MarkovDecisionProcess
 
 			var initialTransitionTargets = CountTargetStatesOfInitialState(ltmdp);
 			initialTransitionTargets.ShouldBe(3);
+			var initialProbabilitySum = SumProbabilitiesOfInitialState(ltmdp);
+			initialProbabilitySum.ShouldBe(1.0);
 
 			var transitionTargetsOfState5 = CountTargetStatesOfState(ltmdp, 5);
 			transitionTargetsOfState5.ShouldBe(1);
+			var probabilitySumOfState5 = SumProbabilitiesOfState(ltmdp, 5);
+			probabilitySumOfState5.ShouldBe(1.0);
 		}
 		
 		[Fact]
@@ -222,9 +257,13 @@ namespace Tests.MarkovDecisionProcess
 
 			var initialTransitionTargets = CountTargetStatesOfInitialState(ltmdp);
 			initialTransitionTargets.ShouldBe(1);
+			var initialProbabilitySum = SumProbabilitiesOfInitialState(ltmdp);
+			initialProbabilitySum.ShouldBe(1.0);
 
 			var transitionTargetsOfState5 = CountTargetStatesOfState(ltmdp, 5);
 			transitionTargetsOfState5.ShouldBe(3);
+			var probabilitySumOfState5 = SumProbabilitiesOfState(ltmdp, 5);
+			probabilitySumOfState5.ShouldBe(1.0);
 		}
 
 		[Fact]
@@ -248,9 +287,6 @@ namespace Tests.MarkovDecisionProcess
 			CreateTransition(false, 1, 6, 0.4);
 			CreateTransition(false, 7, 3, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
-
-			var transitionTargetsOfState51 = CountTargetStatesOfState(ltmdp, 5);
-			transitionTargetsOfState51.ShouldBe(5);
 
 			// add reflexive state 7
 			Clear();
@@ -280,9 +316,13 @@ namespace Tests.MarkovDecisionProcess
 			
 			var initialTransitionTargets = CountTargetStatesOfInitialState(ltmdp);
 			initialTransitionTargets.ShouldBe(1);
+			var initialProbabilitySum = SumProbabilitiesOfInitialState(ltmdp);
+			initialProbabilitySum.ShouldBe(1.0);
 
 			var transitionTargetsOfState5 = CountTargetStatesOfState(ltmdp, 5);
 			transitionTargetsOfState5.ShouldBe(5);
+			var probabilitySumOfState5 = SumProbabilitiesOfState(ltmdp,5);
+			probabilitySumOfState5.ShouldBe(3.0);
 		}
 	}
 }
