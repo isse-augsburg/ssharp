@@ -303,7 +303,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 
 
-			public void TransformContinuationIdsToDistributions(LtmdpContinuationDistributionMapper cidToDidMapper, TransitionCollection transitions)
+			public void TransformContinuationIdsToDistributions(LtmdpContinuationDistributionMapperOld cidToDidMapper, TransitionCollection transitions)
 			{
 				foreach (var transition in transitions)
 				{

@@ -153,7 +153,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				var place = _ltmdp.GetPlaceForNewContinuationGraphElements(1);
 				if (areInitialTransitions)
 				{
-					_ltmdp._indexOfInitialContinuationGraph = place;
+					_ltmdp._indexOfInitialContinuationGraphRoot = place;
 				}
 				else
 				{

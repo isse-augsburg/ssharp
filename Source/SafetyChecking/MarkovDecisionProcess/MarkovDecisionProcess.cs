@@ -177,9 +177,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 
 
-		internal void SetStateLabeling(int markovChainState, StateFormulaSet formula)
+		internal void SetStateLabeling(int mdpState, StateFormulaSet formula)
 		{
-			StateLabeling[markovChainState] = formula;
+			StateLabeling[mdpState] = formula;
 		}
 
 		public void SealProbabilityMatrix()

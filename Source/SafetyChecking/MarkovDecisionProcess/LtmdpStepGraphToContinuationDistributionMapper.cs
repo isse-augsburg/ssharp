@@ -30,8 +30,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	internal class LtmdpStepGraphToContinuationDistributionMapper
 	{
-		public LtmdpContinuationDistributionMapper LtmdpContinuationDistributionMapper { get; } =
-			new LtmdpContinuationDistributionMapper();
+		public LtmdpContinuationDistributionMapperOld LtmdpContinuationDistributionMapper { get; } =
+			new LtmdpContinuationDistributionMapperOld();
 
 		private LtmdpStepGraph CurrentGraph { get; set; }
 

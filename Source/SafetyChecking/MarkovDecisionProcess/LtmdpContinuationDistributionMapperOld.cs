@@ -28,7 +28,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using GenericDataStructures;
 	using Utilities;
 
-	internal class LtmdpContinuationDistributionMapper
+	internal class LtmdpContinuationDistributionMapperOld
 	{
 		private struct ContinuationElement
 		{
@@ -47,28 +47,25 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		private readonly MultipleChainsInSingleArray<ContinuationElement> _continuationOfDistributionChain;
 		
 		private readonly MultipleChainsInSingleArray<DistributionElement> _distributionOfContinuationChain;
-
-		private int _offset;
 		
-		public LtmdpContinuationDistributionMapper()
+		
+		public LtmdpContinuationDistributionMapperOld()
 		{
 			_continuationOfDistributionChain = new MultipleChainsInSingleArray<ContinuationElement>();
 			
 			_distributionOfContinuationChain = new MultipleChainsInSingleArray<DistributionElement>();
 
-			_continuationOfDistributionChain.Clear();
-			_distributionOfContinuationChain.Clear();
+			Clear();
 		}
 		
-		public void Clear(int offset)
+		public void Clear()
 		{
-			_offset = offset;
 			_continuationOfDistributionChain.Clear();
 			_distributionOfContinuationChain.Clear();
-			AddInitialDistributionAndContinuation(offset);
+			AddInitialDistributionAndContinuation();
 		}
 
-		private void AddInitialDistributionAndContinuation(int offset)
+		private void AddInitialDistributionAndContinuation()
 		{
 			var indexOfNewChainElements = GetUnusedChainIndex();
 			Requires.That(indexOfNewChainElements == 0, "Data structures must be empty");
@@ -146,7 +143,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 
 
-		private void InternalProbabilisticSplit(int sourceCid, int fromCid, int toCid)
+		/// <summary>
+		///   Makes an probabilistic split.
+		/// </summary>
+		/// <param name="sourceCid">The source continuation id that is split..</param>
+		/// <param name="fromCid">The new beginning of the range. Includes fromCid.</param>
+		/// <param name="toCid">The new end of the range. Includes toCid.</param>
+		public void ProbabilisticSplit(int sourceCid, int fromCid, int toCid)
 		{
 			// Replace sourceCid in every distribution by the range [fromCid...toCid].
 			_distributionOfContinuationChain.AssertThatChainNumberNonExistent(fromCid);
@@ -165,17 +168,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				CloneCidWithinDistributions(cloneSourceCid, newCid);
 				cloneSourceCid = newCid;
 			}
-		}
-
-		/// <summary>
-		///   Makes an probabilistic split.
-		/// </summary>
-		/// <param name="sourceCid">The source continuation id that is split..</param>
-		/// <param name="fromCid">The new beginning of the range. Includes fromCid.</param>
-		/// <param name="toCid">The new end of the range. Includes toCid.</param>
-		public void ProbabilisticSplit(int sourceCid, int fromCid, int toCid)
-		{
-			InternalProbabilisticSplit(sourceCid-_offset, fromCid-_offset, toCid-_offset);
 		}
 
 		private void CloneDistributionWithDid(int sourceDid, int replaceCid, int replacedByCid)
@@ -222,15 +214,21 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			// Clone every _distributionOfContinuationChain, which contains an element with sourceCid.
 			// In the cloned distributions sourceCid is replaced by newCid.
 			
-			var distributionEnumerator = InternalGetDistributionsOfContinuationEnumerator(sourceCid);
+			var distributionEnumerator = GetDistributionsOfContinuationEnumerator(sourceCid);
 
 			while (distributionEnumerator.MoveNext())
 			{
 				CloneDistributionWithDid(distributionEnumerator.CurrentDistributionId, sourceCid, newCid);
 			}
 		}
-
-		public void InternalNonDeterministicSplit(int sourceCid, int fromCid, int toCid)
+		
+		/// <summary>
+		///   Makes an non deterministic split.
+		/// </summary>
+		/// <param name="sourceCid">The source continuation id that is split..</param>
+		/// <param name="fromCid">The new beginning of the range. Includes fromCid.</param>
+		/// <param name="toCid">The new end of the range. Includes toCid.</param>
+		public void NonDeterministicSplit(int sourceCid, int fromCid, int toCid)
 		{
 			// For every distribution which contains sourceCid, a range of clones gets created
 			// where sourceId is replaced by a different element of [fromCid..toCid].
@@ -240,7 +238,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			_distributionOfContinuationChain.RequiresThatChainNumberExistent(sourceCid);
 			_distributionOfContinuationChain.AssertThatChainNumberNonExistent(fromCid);
-
+			
 			Assert.That(fromCid <= toCid, "range [fromCid..toCid] must be ascending and contain at least one element");
 
 			// Reuse sourceCid for the first distribution to create
@@ -252,17 +250,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			{
 				CloneDistributionsContainingCid(cloneSourceCid, newCid);
 			}
-		}
-
-		/// <summary>
-		///   Makes an non deterministic split.
-		/// </summary>
-		/// <param name="sourceCid">The source continuation id that is split..</param>
-		/// <param name="fromCid">The new beginning of the range. Includes fromCid.</param>
-		/// <param name="toCid">The new end of the range. Includes toCid.</param>
-		public void NonDeterministicSplit(int sourceCid, int fromCid, int toCid)
-		{
-			InternalNonDeterministicSplit(sourceCid - _offset, fromCid - _offset, toCid - _offset);
 		}
 		
 		private void RemoveDistribution(int did)
@@ -284,7 +271,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_continuationOfDistributionChain.RemoveChainNumber(did);
 		}
 
-		private void InternalRemoveDistributionsWithCid(int cid)
+		public void RemoveDistributionsWithCid(int cid)
 		{
 			var docEnumerator = _distributionOfContinuationChain.GetEnumerator(cid);
 
@@ -294,7 +281,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 		}
 
-		private void InternalRemoveCidInDistributions(int cid)
+
+		public void RemoveCidInDistributions(int cid)
 		{
 			// Useful to undo a probabilistic split.
 			// Assume, that the element with cid is not the last element in any distribution.
@@ -314,25 +302,23 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		}
 
 
-		private DistributionsOfContinuationEnumerator InternalGetDistributionsOfContinuationEnumerator(int continuationId)
-		{
-			return new DistributionsOfContinuationEnumerator(this, continuationId);
-		}
-		
 		public DistributionsOfContinuationEnumerator GetDistributionsOfContinuationEnumerator(int continuationId)
 		{
-			return InternalGetDistributionsOfContinuationEnumerator(continuationId - _offset);
+			return new DistributionsOfContinuationEnumerator(this, continuationId);
 		}
 
 		internal struct DistributionsOfContinuationEnumerator
 		{
 			public int CurrentDistributionId => _distributionOfContinuationChainEnumerator.CurrentElement.DistributionId;
 
+			public int ContinuationId { get; }
+
 			private MultipleChainsInSingleArray<DistributionElement>.IndexedMulitListEnumerator _distributionOfContinuationChainEnumerator;
 
-			public DistributionsOfContinuationEnumerator(LtmdpContinuationDistributionMapper cidToDidMapper, int continuationId)
+			public DistributionsOfContinuationEnumerator(LtmdpContinuationDistributionMapperOld cidToDidMapper, int continuationId)
 			{
 				_distributionOfContinuationChainEnumerator = cidToDidMapper._distributionOfContinuationChain.GetEnumerator(continuationId);
+				ContinuationId = continuationId;
 			}
 
 			public bool MoveNext()

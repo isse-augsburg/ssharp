@@ -63,8 +63,12 @@
     <Compile Include="MarkovDecisionProcess\LtmdpBuilderDuringTraversal.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpChoiceType.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpContinuationDistributionMapper.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpContinuationDistributionMapperOld.cs" />
+    <Compile Include="MarkovDecisionProcess\LtmdpToNmdp.cs" />
+    <Compile Include="MarkovDecisionProcess\NmdpToMdp.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpStepGraph.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpStepGraphToContinuationDistributionMapper.cs" />
+    <Compile Include="MarkovDecisionProcess\NestedMarkovDecisionProcess.cs" />
     <Compile Include="MinimalCriticalSetAnalysis\FaultActivationBehavior.cs" />
     <Compile Include="Formula\FormulaVisitors\IsFormulaReturningBoolValueVisitor.cs" />
     <Compile Include="Formula\FormulaVisitors\IsFormulaReturningRewardResultVisitor.cs" />

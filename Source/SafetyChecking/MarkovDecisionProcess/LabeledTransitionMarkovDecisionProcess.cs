@@ -45,7 +45,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		public string[] StateRewardRetrieverLabels;
 		
-		private long _indexOfInitialContinuationGraph = -1;
+		private long _indexOfInitialContinuationGraphRoot = -1;
 
 		public ConcurrentBag<int> SourceStates { get; } = new ConcurrentBag<int>();
 
@@ -101,6 +101,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			public bool IsChoiceTypeProbabilitstic => ChoiceType == LtmdpChoiceType.Probabilitstic;
 		}
+
+		public long ContinuationGraphSize => _continuationGraphElementCount;
 
 		public struct TransitionTargetElement
 		{
@@ -183,12 +185,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		internal long GetRootContinuationGraphLocationOfInitialState()
 		{
-			return _indexOfInitialContinuationGraph;
+			return _indexOfInitialContinuationGraphRoot;
 		}
 
 		public ContinuationGraphElement GetRootContinuationGraphElementOfInitialState()
 		{
-			var location = _indexOfInitialContinuationGraph;
+			var location = _indexOfInitialContinuationGraphRoot;
 			return _continuationGraph[location];
 		}
 
@@ -324,6 +326,45 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				if (CurrentChildContinuationId <= ContinuationGraphElement.To)
 					return true;
 				return false;
+			}
+		}
+
+
+		internal TransitionTargetEnumerator GetTransitionTargetEnumerator()
+		{
+			return new TransitionTargetEnumerator(this);
+		}
+
+		internal struct TransitionTargetEnumerator
+		{
+			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
+
+			public int CurrentIndex { get; private set; }
+
+			public double CurrentProbability => _ltmdp._transitionTarget[CurrentIndex].Probability;
+
+			public int CurrentTargetState => _ltmdp._transitionTarget[CurrentIndex].TargetState;
+
+			public StateFormulaSet CurrentFormulas => _ltmdp._transitionTarget[CurrentIndex].Formulas;
+
+			public TransitionTargetEnumerator(LabeledTransitionMarkovDecisionProcess ltmdp)
+			{
+				_ltmdp = ltmdp;
+				CurrentIndex = -1;
+			}
+
+			/// <summary>
+			/// Advances the enumerator to the next element of the collection.
+			/// </summary>
+			/// <returns>
+			/// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
+			/// </returns>
+			public bool MoveNext()
+			{
+				CurrentIndex++;
+				if (CurrentIndex >= _ltmdp._transitionTargetCount)
+					return false;
+				return true;
 			}
 		}
 	}
