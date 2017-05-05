@@ -32,185 +32,162 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using AnalysisModel;
 	using ExecutedModel;
 	using GenericDataStructures;
-	/*
-	internal sealed class LtmdpToMdp
+	using Utilities;
+
+	internal sealed class NmdpToMdp
 	{
-		internal struct StateStorageEntry
-		{
-			internal StateStorageEntry(StateFormulaSet formula, int stateStorageState)
-			{
-				Formula = formula;
-				StateStorageState = stateStorageState;
-			}
-
-			public readonly StateFormulaSet Formula;
-			public readonly int StateStorageState;
-
-			public bool Equals(StateStorageEntry other)
-			{
-				return Formula.Equals(other.Formula) && StateStorageState == other.StateStorageState;
-			}
-			
-			public override bool Equals(object obj)
-			{
-				if (ReferenceEquals(null, obj))
-					return false;
-				return obj is StateStorageEntry && Equals((StateStorageEntry)obj);
-			}
-
-			public override int GetHashCode()
-			{
-				unchecked
-				{
-					return (Formula.GetHashCode() * 397) ^ StateStorageState;
-				}
-			}
-			
-
-		}
-
-		public int MdpStates = 0;
-
-		private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
+		private readonly NestedMarkovDecisionProcess _nmdp;
 		public MarkovDecisionProcess MarkovDecisionProcess { get; private set; }
 
-		private readonly Dictionary<StateStorageEntry, int> _mapper = new Dictionary<StateStorageEntry, int>();
-		private readonly AutoResizeVector<StateStorageEntry> _backMapper = new AutoResizeVector<StateStorageEntry>();
+		private long _currentOffset;
+		private AutoResizeVector<NestedMarkovDecisionProcess.ContinuationGraphLeaf> _continuationGraphLeafOfCid = new AutoResizeVector<NestedMarkovDecisionProcess.ContinuationGraphLeaf>();
 
-		private void CreateStates()
+		private readonly LtmdpContinuationDistributionMapper _ltmdpContinuationDistributionMapper = new LtmdpContinuationDistributionMapper();
+		
+
+		private void CopyStateLabeling()
 		{
-			var enumerator = _ltmdp.GetTransitionTargetEnumerator();
-			while (enumerator.MoveNext())
+			for (var i = 0; i < _nmdp.States; i++)
 			{
-				var entry = new StateStorageEntry(enumerator.CurrentFormulas, enumerator.CurrentTargetState);
-				if (!_mapper.ContainsKey(entry))
-				{
-					_mapper.Add(entry, MdpStates);
-					_backMapper[MdpStates] = entry;
-					MdpStates++;
-				}
+				MarkovDecisionProcess.SetStateLabeling(i, _nmdp.StateLabeling[i]);
 			}
 		}
 
-		private void SetStateLabeling()
+		private NestedMarkovDecisionProcess.ContinuationGraphLeaf GetLeafOfCid(long cid)
 		{
-			for (var i = 0; i < MdpStates; i++)
-			{
-				MarkovDecisionProcess.SetStateLabeling(i, _backMapper[i].Formula);
-			}
+			var internalCid = cid - _currentOffset;
+			Assert.That(internalCid <= int.MaxValue, "internalCid<=int.MaxValue");
+			return _continuationGraphLeafOfCid[(int)internalCid];
 		}
 
-		private void CreateFlattenedTransitionsRecursive(long currentCid)
+		private void SetLeafOfCid(long cid, NestedMarkovDecisionProcess.ContinuationGraphLeaf leaf)
 		{
-			LabeledTransitionMarkovDecisionProcess.ContinuationGraphElement cge = _ltmdp.GetContinuationGraphElement(currentCid);
+			var internalCid = cid - _currentOffset;
+			Assert.That(internalCid <= int.MaxValue, "internalCid<=int.MaxValue");
+			_continuationGraphLeafOfCid[(int)internalCid]= leaf;
+		}
+
+		private void UpdateContinuationDistributionMapperAndCollectLeafs(long currentCid)
+		{
+			var cge = _nmdp.GetContinuationGraphElement(currentCid);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
 			{
-				action(cge);
+				var cgl = _nmdp.GetContinuationGraphLeaf(currentCid);
+				SetLeafOfCid(currentCid, cgl);
 			}
 			else
 			{
-				for (var i = cge.From; i <= cge.To; i++)
+				var cgi = _nmdp.GetContinuationGraphInnerNode(currentCid);
+				if (cge.IsChoiceTypeDeterministic || cge.IsChoiceTypeNondeterministic)
 				{
-					ApplyActionWithRecursionBasedAlgorithmInnerRecursion(action, i);
+					_ltmdpContinuationDistributionMapper.NonDeterministicSplit(currentCid, cgi.FromCid, cgi.ToCid);
+				}
+				else if (cge.IsChoiceTypeProbabilitstic)
+				{
+					_ltmdpContinuationDistributionMapper.ProbabilisticSplit(currentCid, cgi.FromCid, cgi.ToCid);
+				}
+
+				for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
+				{
+					UpdateContinuationDistributionMapperAndCollectLeafs(i);
 				}
 			}
 		}
 
-		private void DeriveChoice(int cidOfChoice)
+		private void AddDistribution(int distribution)
 		{
-			var choice = CurrentGraph.GetChoiceOfCid(cidOfChoice);
-			if (choice.IsChoiceTypeUnsplitOrFinal)
+			if (_ltmdpContinuationDistributionMapper.IsDistributionEmpty(distribution))
 				return;
-			if (choice.IsChoiceTypeDeterministic ||
-				choice.IsChoiceTypeNondeterministic)
-			{
-				LtmdpContinuationDistributionMapper.NonDeterministicSplit(cidOfChoice, choice.From, choice.To);
-			}
-			else if (choice.IsChoiceTypeProbabilitstic)
-			{
-				LtmdpContinuationDistributionMapper.ProbabilisticSplit(cidOfChoice, choice.From, choice.To);
-			}
+			MarkovDecisionProcess.StartWithNewDistribution();
 
-			for (var i = choice.From; i <= choice.To; i++)
+			var enumerator = _ltmdpContinuationDistributionMapper.GetContinuationsOfDistributionEnumerator(distribution);
+			while (enumerator.MoveNext())
 			{
-				DeriveChoice(i);
+				var leaf = GetLeafOfCid(enumerator.CurrentContinuationId);
+				MarkovDecisionProcess.AddTransition(leaf.ToState, leaf.Probability);
 			}
+			
+			MarkovDecisionProcess.FinishDistribution();
 		}
 
-		public void CreateFlattenedTransitions(int mdpState)
+
+		private void AddInitialDistribution(int distribution)
 		{
-			CreateFlattenedTransitionsRecursive(action, ParentContinuationId);
+			if (_ltmdpContinuationDistributionMapper.IsDistributionEmpty(distribution))
+				return;
+
+			MarkovDecisionProcess.StartWithNewInitialDistribution();
+
+			var enumerator = _ltmdpContinuationDistributionMapper.GetContinuationsOfDistributionEnumerator(distribution);
+			while (enumerator.MoveNext())
+			{
+				var leaf = GetLeafOfCid(enumerator.CurrentContinuationId);
+				MarkovDecisionProcess.AddTransitionToInitialDistribution(leaf.ToState, leaf.Probability);
+			}
+			
+			MarkovDecisionProcess.FinishInitialDistribution();
 		}
 
-		public void ConvertFlattenedTransitions(int mdpState)
+		private void ConvertStateTransitions()
 		{
-			var sourceEntry = _backMapper[i];
-			MarkovDecisionProcess.StartWithNewDistributions(i);
-
-			var distEnumerator = _ltmdp.GetDistributionsEnumerator(sourceEntry.StateStorageState);
-			while (distEnumerator.MoveNext())
+			for (var state = 0; state < _nmdp.States; state++)
 			{
-				MarkovDecisionProcess.StartWithNewDistribution();
-				var transEnumerator = distEnumerator.GetLabeledTransitionEnumerator();
-				while (transEnumerator.MoveNext())
+				_ltmdpContinuationDistributionMapper.Clear();
+				var cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfState(state);
+				_currentOffset = cidOfStateRoot;
+				_ltmdpContinuationDistributionMapper.AddInitialDistributionAndContinuation(_currentOffset);
+
+				UpdateContinuationDistributionMapperAndCollectLeafs(cidOfStateRoot);
+
+				MarkovDecisionProcess.StartWithNewDistributions(state);
+
+				var numberOfDistributions = _ltmdpContinuationDistributionMapper.GetNumbersOfDistributions();
+				for (var distribution = 0; distribution < numberOfDistributions; distribution++)
 				{
-					var targetEntry = new StateStorageEntry(transEnumerator.CurrentFormulas, transEnumerator.CurrentTargetState);
-					var targetState = _mapper[targetEntry];
-					MarkovDecisionProcess.AddTransition(targetState, transEnumerator.CurrentProbability);
+					AddDistribution(distribution);
 				}
-				MarkovDecisionProcess.FinishDistribution();
-			}
-			MarkovDecisionProcess.FinishDistributions();
-		}
 
-		public void ConvertTransitions()
-		{
-			for (var mdpState = 0; mdpState < MdpStates; mdpState++)
-			{
-				CreateFlattenedTransitions(mdpState);
-				ConvertFlattenedTransitions(mdpState);
+				MarkovDecisionProcess.FinishDistributions();
 			}
 		}
-
-		public void ConvertInitialStates()
+		
+		public void ConvertInitialTransitions()
 		{
-			/*
+			_ltmdpContinuationDistributionMapper.Clear();
+			var cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfInitialState();
+			_currentOffset = cidOfStateRoot;
+			_ltmdpContinuationDistributionMapper.AddInitialDistributionAndContinuation(_currentOffset);
+
+			UpdateContinuationDistributionMapperAndCollectLeafs(cidOfStateRoot);
+
 			MarkovDecisionProcess.StartWithInitialDistributions();
-			var distEnumerator = ltmdp.GetInitialDistributionsEnumerator();
-			while (distEnumerator.MoveNext())
+
+			var numberOfDistributions = _ltmdpContinuationDistributionMapper.GetNumbersOfDistributions();
+			for (var distribution = 0; distribution < numberOfDistributions; distribution++)
 			{
-				MarkovDecisionProcess.StartWithNewInitialDistribution();
-				var transEnumerator = distEnumerator.GetLabeledTransitionEnumerator();
-				while (transEnumerator.MoveNext())
-				{
-					var targetEntry = new StateStorageEntry(transEnumerator.CurrentFormulas, transEnumerator.CurrentTargetState);
-					var targetState = _mapper[targetEntry];
-					MarkovDecisionProcess.AddTransitionToInitialDistribution(targetState, transEnumerator.CurrentProbability);
-				}
-				MarkovDecisionProcess.FinishInitialDistribution();
+				AddInitialDistribution(distribution);
 			}
+			
 			MarkovDecisionProcess.FinishInitialDistributions();
-			*//*
 		}
 
-		public LtmdpToMdp(LabeledTransitionMarkovDecisionProcess ltmdp)
+		public NmdpToMdp(NestedMarkovDecisionProcess nmdp)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
-			Console.Out.WriteLine("Starting to convert labeled transition Markov Decision Process to Markov Decision Process");
-			Console.Out.WriteLine($"Ltmdp: States {ltmdp.SourceStates.Count}, TransitionTargets {ltmdp.TransitionTargets}, ContinuationGraphSize {ltmdp.ContinuationGraphSize}");
-			_ltmdp = ltmdp;
-			CreateStates();
-			var modelCapacity = new ModelCapacityByModelSize(MdpStates, (ltmdp.ContinuationGraphSize + ltmdp.TransitionTargets) * 8L, (ltmdp.ContinuationGraphSize + ltmdp.TransitionTargets) * 8L);
+			Console.Out.WriteLine("Starting to convert Nested Markov Decision Process to Markov Decision Process");
+			Console.Out.WriteLine($"Nmdp: States {nmdp.States}, ContinuationGraphSize {nmdp.ContinuationGraphSize}");
+			_nmdp = nmdp;
+			var modelCapacity = new ModelCapacityByModelSize(nmdp.States, nmdp.ContinuationGraphSize * 8L, nmdp.ContinuationGraphSize * 8L);
 			MarkovDecisionProcess = new MarkovDecisionProcess(modelCapacity);
-			MarkovDecisionProcess.StateFormulaLabels = ltmdp.StateFormulaLabels;
-			SetStateLabeling();
-			ConvertInitialStates();
-			ConvertTransitions();
+			MarkovDecisionProcess.StateFormulaLabels = nmdp.StateFormulaLabels;
+			CopyStateLabeling();
+			ConvertInitialTransitions();
+			ConvertStateTransitions();
 			stopwatch.Stop();
-			_ltmdp = null;
+			_nmdp = null;
 			Console.Out.WriteLine($"Completed transformation in {stopwatch.Elapsed}");
-			Console.Out.WriteLine($"Mc: States {MarkovDecisionProcess.States}, Transitions {MarkovDecisionProcess.Transitions}");
+			Console.Out.WriteLine($"Mdp: States {MarkovDecisionProcess.States}, Transitions {MarkovDecisionProcess.Transitions}");
 		}
-	}*/
+	}
 }

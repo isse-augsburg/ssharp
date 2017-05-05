@@ -89,6 +89,11 @@ namespace ISSE.SafetyChecking.Utilities
 			return _firstChainElementOfChainNumber.Count;
 		}
 
+		public int GetNumbersOfChains()
+		{
+			return _firstChainElementOfChainNumber.Count;
+		}
+
 		public T GetElementAtChainIndex(int chainIndex)
 		{
 			return _chain[chainIndex].Element;
