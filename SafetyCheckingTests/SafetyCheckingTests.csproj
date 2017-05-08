@@ -75,6 +75,7 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="DataStructures\BidirectionalGraphTests.cs" />
+    <Compile Include="DataStructures\NestedMarkovDecisionProcessExamples.cs" />
     <Compile Include="DataStructures\MultipleChainsInSingleArrayTests.cs" />
     <Compile Include="DataStructures\DoubleVectorTests.cs" />
     <Compile Include="DataStructures\MarkovChainExamples.cs" />
@@ -86,8 +87,7 @@
     <Compile Include="DiscreteTimeMarkovChain\LtmcBuilderTests.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpToNmdpTests.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpBuilderDuringTraversalTests.cs" />
-    <Compile Include="MarkovDecisionProcess\LtmdpBuilderDuringTraversalOldTests.cs" />
-    <Compile Include="MarkovDecisionProcess\LtmdpStepGraphToContinuationDistributionMapperTests.cs" />
+    <Compile Include="MarkovDecisionProcess\NmdpToMdpTests.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpChoiceResolverTests.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpContinuationDistributionMapperTests.cs" />
     <Compile Include="ProbabilisticModelChecker\BuiltinDtmcModelCheckerTests.cs" />

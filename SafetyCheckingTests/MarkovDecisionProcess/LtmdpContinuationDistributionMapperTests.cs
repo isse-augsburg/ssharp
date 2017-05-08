@@ -43,7 +43,7 @@ namespace Tests.MarkovDecisionProcess
 			Output = new TestTraceOutput(output);
 		}
 
-		private readonly LtmdpContinuationDistributionMapperOld _mapper = new LtmdpContinuationDistributionMapperOld();
+		private readonly LtmdpContinuationDistributionMapper _mapper = new LtmdpContinuationDistributionMapper();
 
 
 		private int CountEntriesAndAddDistributionsToMap(int cid, Dictionary<int, bool> existingDistributions)

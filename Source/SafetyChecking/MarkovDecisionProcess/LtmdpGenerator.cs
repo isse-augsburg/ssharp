@@ -33,7 +33,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	/// </summary>
 	internal class LtmdpGenerator<TExecutableModel> : ModelTraverser<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private readonly LabeledTransitionMarkovDecisionProcessOld _mdp;
+		private readonly LabeledTransitionMarkovDecisionProcess _mdp;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -44,12 +44,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		internal LtmdpGenerator(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
-			: base(createModel, output, configuration, LabeledTransitionMarkovDecisionProcessOld.TransitionSize)
+			: base(createModel, output, configuration, LabeledTransitionMarkovDecisionProcess.TransitionSize)
 		{
-			_mdp = new LabeledTransitionMarkovDecisionProcessOld(Context.ModelCapacity.NumberOfStates, Context.ModelCapacity.NumberOfTransitions);
+			_mdp = new LabeledTransitionMarkovDecisionProcess(Context.ModelCapacity.NumberOfStates, Context.ModelCapacity.NumberOfTransitions);
 			_mdp.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovDecisionProcessOld.LtmdpBuilderDuringTraversalOld<TExecutableModel>(_mdp, configuration));
+			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal<TExecutableModel>(_mdp, configuration));
 			if (terminateEarlyCondition != null)
 			{
 				_mdp.CreateStutteringState(Context.StutteringStateIndex);
@@ -61,7 +61,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <summary>
 		///   Generates the state graph.
 		/// </summary>
-		internal LabeledTransitionMarkovDecisionProcessOld GenerateStateGraph()
+		internal LabeledTransitionMarkovDecisionProcess GenerateStateGraph()
 		{
 			Context.Output($"Generating labeled transition markov decision process.");
 			TraverseModelAndReport();

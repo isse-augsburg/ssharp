@@ -135,23 +135,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 		}
 
-		/*
-		private void AddStepGraph(int sourceState, bool areInitialTransitions)
-		{
-			var place = _ltmdp.GetPlaceForNewContinuationGraphElements(1);
-			if (areInitialTransitions)
-			{
-				_ltmdp._indexOfInitialContinuationGraphRoot = place;
-			}
-			else
-			{
-				_ltmdp.SourceStates.Add(sourceState);
-				_ltmdp._stateStorageStateToRootOfContinuationGraphMemory[sourceState] = place;
-			}
-			AddChoiceOfStepGraph(stepGraph, 0, place);
-		}*/
-		
-
 		public void ConvertTransitions()
 		{
 			for (var i = 0; i < MdpStates; i++)

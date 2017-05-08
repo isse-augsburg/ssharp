@@ -312,6 +312,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 		}
 
+
+		public void RemoveDistributionsWithCid(long cid)
+		{
+			var internalContinuationId = cid - _offset;
+			Assert.That(internalContinuationId <= int.MaxValue, "cid<=int.MaxValue");
+			InternalRemoveDistributionsWithCid((int)internalContinuationId);
+		}
+
 		private void InternalRemoveCidInDistributions(int cid)
 		{
 			// Useful to undo a probabilistic split.
@@ -330,6 +338,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			// remove chain
 			_distributionOfContinuationChain.RemoveChainNumber(cid);
 		}
+
+
+		public void RemoveCidInDistributions(long cid)
+		{
+			var internalContinuationId = cid - _offset;
+			Assert.That(internalContinuationId <= int.MaxValue, "cid<=int.MaxValue");
+			InternalRemoveCidInDistributions((int)internalContinuationId);
+		}
+
 
 
 		private DistributionsOfContinuationEnumerator InternalGetDistributionsOfContinuationEnumerator(int continuationId)
