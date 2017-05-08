@@ -76,7 +76,7 @@ namespace Tests.DataStructures.NestedMarkovDecisionProcessExamples
 
 		protected static NestedMarkovDecisionProcess InitializeNmdp(int states)
 		{
-			var modelCapacity = new ModelCapacityByModelSize(states, states * 5, states * 5);
+			var modelCapacity = new ModelCapacityByModelSize(states, states * 5);
 			return new NestedMarkovDecisionProcess(modelCapacity);
 		}
 	}

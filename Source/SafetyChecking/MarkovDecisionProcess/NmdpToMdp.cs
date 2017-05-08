@@ -178,7 +178,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			Console.Out.WriteLine("Starting to convert Nested Markov Decision Process to Markov Decision Process");
 			Console.Out.WriteLine($"Nmdp: States {nmdp.States}, ContinuationGraphSize {nmdp.ContinuationGraphSize}");
 			_nmdp = nmdp;
-			var modelCapacity = new ModelCapacityByModelSize(nmdp.States, nmdp.ContinuationGraphSize * 8L, nmdp.ContinuationGraphSize * 8L);
+			var modelCapacity = new ModelCapacityByModelSize(nmdp.States, nmdp.ContinuationGraphSize * 8L);
 			MarkovDecisionProcess = new MarkovDecisionProcess(modelCapacity);
 			MarkovDecisionProcess.StateFormulaLabels = nmdp.StateFormulaLabels;
 			CopyStateLabeling();

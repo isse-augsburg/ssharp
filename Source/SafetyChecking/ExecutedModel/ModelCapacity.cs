@@ -138,32 +138,27 @@ namespace ISSE.SafetyChecking.ExecutedModel
 					Requires.That(densityInNumbers > 0, "There must be memory for at least one transition per state in average.");
 					break;
 			}
-			var numberOfDistributions = StateCapacity * (long)Math.Ceiling(Math.Sqrt(densityInNumbers));
 			var numberOfTransitions = StateCapacity * densityInNumbers;
 
-			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, numberOfDistributions, numberOfTransitions);
+			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, numberOfTransitions);
 		}
 	}
 
 	public class ModelCapacityByModelSize : ModelCapacity
 	{
 		private long _stateCapacity;
-
-		public long DistributionsCapacity { get; private set; }
-
+		
 		public long TransitionCapacity { get; private set; }
 
 		private ModelCapacityByModelSize()
 		{
 		}
 
-		public ModelCapacityByModelSize(long stateCapacity, long distributionsCapacity, long transitionCapacity)
+		public ModelCapacityByModelSize(long stateCapacity, long transitionCapacity)
 		{
 			Requires.That(stateCapacity > 0, "must be greater 0");
-			Requires.That(distributionsCapacity > 0, "must be greater 0");
 			Requires.That(transitionCapacity > 0, "must be greater 0");
 			StateCapacity = stateCapacity;
-			DistributionsCapacity = distributionsCapacity;
 			TransitionCapacity = transitionCapacity;
 		}
 
@@ -209,7 +204,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 
 		public override ModelByteSize DeriveModelByteSize(int sizeOfState, int sizeOfTransition)
 		{
-			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, DistributionsCapacity, TransitionCapacity);
+			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, TransitionCapacity);
 		}
 	}
 
@@ -304,10 +299,9 @@ namespace ISSE.SafetyChecking.ExecutedModel
 						numberOfStates = availableMemoryValue / (sizeOfState + sizeOfTransition * densityInNumbers);
 						break;
 				}
-				var numberOfDistributions = numberOfStates * (long)Math.Ceiling(Math.Sqrt(densityInNumbers));
 				var numberOfTransitions = numberOfStates * densityInNumbers;
 
-				return new ModelByteSize(sizeOfState, sizeOfTransition, numberOfStates, numberOfDistributions, numberOfTransitions);
+				return new ModelByteSize(sizeOfState, sizeOfTransition, numberOfStates, numberOfTransitions);
 			}
 			else
 			{
@@ -323,10 +317,9 @@ namespace ISSE.SafetyChecking.ExecutedModel
 						break;
 				}
 				numberOfStates = availableMemoryValue / sizeOfState;
-				var numberOfDistributions = numberOfStates * (long)Math.Ceiling(Math.Sqrt(densityInNumbers));
 				var numberOfTransitions = numberOfStates * densityInNumbers;
 
-				return new ModelByteSize(sizeOfState, sizeOfTransition, numberOfStates, numberOfDistributions, numberOfTransitions);
+				return new ModelByteSize(sizeOfState, sizeOfTransition, numberOfStates, numberOfTransitions);
 			}
 		}
 
@@ -340,14 +333,12 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		public int SizeOfState { get; }
 		public int SizeOfTransition { get; }
 		public long NumberOfStates { get; }
-		public long NumberOfDistributions { get; }
 		public long NumberOfTransitions { get; }
 
-		public ModelByteSize(int sizeOfState, int sizeOfTransition, long numberOfStates, long numberOfDistributions, long numberOfTransitions)
+		public ModelByteSize(int sizeOfState, int sizeOfTransition, long numberOfStates, long numberOfTransitions)
 		{
 			Requires.That(numberOfStates > 0, "At least one state is necessary");
 			Requires.That(sizeOfState > 0, "Size of state must be at least 1");
-			Requires.That(numberOfDistributions >= numberOfStates + 1, "At least one more distribution than states necessary");
 			var memoryLimitForStates = numberOfStates * sizeOfState;
 			var memoryLimitForTransitions = numberOfTransitions * sizeOfTransition;
 			TotalMemoryLimit = new ByteSize(memoryLimitForStates + memoryLimitForTransitions);
@@ -356,7 +347,6 @@ namespace ISSE.SafetyChecking.ExecutedModel
 			SizeOfState = sizeOfState;
 			SizeOfTransition = sizeOfTransition;
 			NumberOfStates = numberOfStates;
-			NumberOfDistributions = numberOfDistributions;
 			NumberOfTransitions = numberOfTransitions;
 		}
 		
