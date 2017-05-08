@@ -39,7 +39,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 	public unsafe class NestedMarkovDecisionProcess : IModelWithStateLabelingInLabelingVector
 	{
-		public static readonly int TransitionSize = sizeof(TransitionTargetElement);
+		public static readonly int TransitionSize = sizeof(ContinuationGraphElement);
 		private const int StateSize = sizeof(int);
 
 		public string[] StateFormulaLabels { get; set; }
@@ -94,24 +94,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			public bool IsChoiceTypeNondeterministic => ChoiceType == LtmdpChoiceType.Nondeterministic;
 
 			public bool IsChoiceTypeProbabilitstic => ChoiceType == LtmdpChoiceType.Probabilitstic;
-			
-			public ContinuationGraphInnerNode GetInnerNode()
-			{
-				Assert.That(!IsChoiceTypeUnsplitOrFinal, "must be an inner node");
-				fixed (LtmdpChoiceType* addr = &ChoiceType)
-				{
-					return *((ContinuationGraphInnerNode*)addr);
-				}
-			}
-
-			public ContinuationGraphLeaf GetLeafNode()
-			{
-				Assert.That(IsChoiceTypeUnsplitOrFinal, "must be a leaf node");
-				fixed (LtmdpChoiceType* addr = &ChoiceType)
-				{
-					return *((ContinuationGraphLeaf*)addr);
-				}
-			}
 		}
 
 		[StructLayout(LayoutKind.Explicit, Size = 24)]
@@ -209,13 +191,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		}
 
 		public long ContinuationGraphSize => _continuationGraphElementCount;
-
-		public struct TransitionTargetElement
-		{
-			public int TargetState;
-			public double Probability;
-		}
-
+		
 		public int States { get; }
 		
 		public int StateToRowsEntryOfInitialDistributions = 0;

@@ -30,6 +30,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using System.Globalization;
 	using System.IO;
 	using Formula;
+	using Utilities;
 
 	class BuiltinMdpModelChecker : MdpModelChecker
 	{
@@ -517,6 +518,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 				if (probabilityMightBeExactlyOne.Count == ancestorsFound.Count)
 					fixpointReached = true;
+				Assert.That(probabilityMightBeExactlyOne.Count >= ancestorsFound.Count,"bug!");
 				probabilityMightBeExactlyOne = ancestorsFound;
 			}
 

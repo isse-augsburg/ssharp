@@ -163,7 +163,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			Console.Out.WriteLine($"Ltmdp: States {ltmdp.SourceStates.Count}, TransitionTargets {ltmdp.TransitionTargets}, ContinuationGraphSize {ltmdp.ContinuationGraphSize}");
 			_ltmdp = ltmdp;
 			CreateStates();
-			var modelCapacity = new ModelCapacityByModelSize(MdpStates, (ltmdp.ContinuationGraphSize + ltmdp.TransitionTargets * 100) * 8L);
+			var modelCapacity = new ModelCapacityByModelSize(MdpStates, ltmdp.ContinuationGraphSize * 8L);
 			NestedMarkovDecisionProcess = new NestedMarkovDecisionProcess(modelCapacity);
 			NestedMarkovDecisionProcess.StateFormulaLabels = ltmdp.StateFormulaLabels;
 			SetStateLabeling();

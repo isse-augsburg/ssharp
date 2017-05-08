@@ -37,7 +37,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	internal unsafe partial class LabeledTransitionMarkovDecisionProcess : DisposableObject
 	{
 		public static readonly int TransitionSize = sizeof(TransitionTargetElement);
-		private const int AvgGraphNodesPerSucceedingState = 31;
+		private const int AvgGraphNodesPerSucceedingState = 7;
 
 		// TODO: Optimization potential for custom model checker: Add every state only once. Save the transitions and evaluate reachability formulas more efficient by only expanding "states" to "states x stateformulaset" where the state labels of interests are in "stateformulaset"
 
