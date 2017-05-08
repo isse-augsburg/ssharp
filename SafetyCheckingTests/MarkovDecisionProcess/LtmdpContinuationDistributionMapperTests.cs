@@ -46,7 +46,7 @@ namespace Tests.MarkovDecisionProcess
 		private readonly LtmdpContinuationDistributionMapper _mapper = new LtmdpContinuationDistributionMapper();
 
 
-		private int CountEntriesAndAddDistributionsToMap(int cid, Dictionary<int, bool> existingDistributions)
+		private int CountEntriesAndAddDistributionsToMap(long cid, Dictionary<int, bool> existingDistributions)
 		{
 			var enumerator = _mapper.GetDistributionsOfContinuationEnumerator(cid);
 			var entries = 0;
@@ -61,6 +61,7 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void OnlyOneInitialDistribution()
 		{
+			_mapper.AddInitialDistributionAndContinuation(0);
 			var existingDistributions = new Dictionary<int, bool>();
 
 			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
@@ -70,6 +71,7 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void ProbabilisticSplitRemovesInitialContinuation()
 		{
+			_mapper.AddInitialDistributionAndContinuation(0);
 			_mapper.ProbabilisticSplit(0, 1, 3);
 
 			var existingDistributions = new Dictionary<int, bool>();
@@ -80,6 +82,7 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void OneDistributionWithThreeContinuations()
 		{
+			_mapper.AddInitialDistributionAndContinuation(0);
 			_mapper.ProbabilisticSplit(0, 1, 3);
 
 			var existingDistributions = new Dictionary<int, bool>();
@@ -102,6 +105,7 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void OneDistributionWithFiveContinuationsAfterTwoSplits()
 		{
+			_mapper.AddInitialDistributionAndContinuation(0);
 			_mapper.ProbabilisticSplit(0, 1, 3);
 			_mapper.ProbabilisticSplit(1, 4, 5);
 
@@ -133,6 +137,7 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void TwoDistributionWithFiveContinuationsAfterTwoSplits()
 		{
+			_mapper.AddInitialDistributionAndContinuation(0);
 			_mapper.ProbabilisticSplit(0, 1, 3);
 			_mapper.NonDeterministicSplit(1, 4, 5);
 
@@ -164,6 +169,7 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void TwoDistributionWithFiveContinuationsAfterTwoSplitsWithRemove()
 		{
+			_mapper.AddInitialDistributionAndContinuation(0);
 			_mapper.ProbabilisticSplit(0, 1, 3);
 			_mapper.NonDeterministicSplit(1, 4, 5);
 
@@ -199,6 +205,7 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void TwoDistributionWithFiveContinuationsAfterTwoSplitsWithRemove2()
 		{
+			_mapper.AddInitialDistributionAndContinuation(0);
 			_mapper.ProbabilisticSplit(0, 1, 3);
 			_mapper.NonDeterministicSplit(1, 4, 5);
 
@@ -231,15 +238,47 @@ namespace Tests.MarkovDecisionProcess
 		[Fact]
 		public void SimpleExample1a()
 		{
+			_mapper.AddInitialDistributionAndContinuation(0);
 			_mapper.ProbabilisticSplit(0, 1, 2);
 			_mapper.NonDeterministicSplit(1, 3, 4);
 			_mapper.Clear();
+			_mapper.AddInitialDistributionAndContinuation(0);
 			_mapper.ProbabilisticSplit(0, 1, 2);
 			_mapper.NonDeterministicSplit(1, 3, 4);
 			_mapper.Clear();
+			_mapper.AddInitialDistributionAndContinuation(0);
 			_mapper.ProbabilisticSplit(0, 1, 2);
 			_mapper.NonDeterministicSplit(1, 3, 4);
 			_mapper.Clear();
+			_mapper.AddInitialDistributionAndContinuation(0);
+			_mapper.ProbabilisticSplit(0, 1, 2);
+			_mapper.NonDeterministicSplit(1, 3, 4);
+
+			var existingDistributions = new Dictionary<int, bool>();
+			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(1, existingDistributions);
+			entries.ShouldBe(0);
+
+			entries = CountEntriesAndAddDistributionsToMap(2, existingDistributions);
+			entries.ShouldBe(2);
+
+			entries = CountEntriesAndAddDistributionsToMap(3, existingDistributions);
+			entries.ShouldBe(1);
+
+			entries = CountEntriesAndAddDistributionsToMap(4, existingDistributions);
+			entries.ShouldBe(1);
+
+			existingDistributions.Count.ShouldBe(2);
+			existingDistributions.ShouldContainKey(0);
+			existingDistributions.ShouldContainKey(1);
+		}
+		
+		[Fact]
+		public void SimpleExample1b()
+		{
+			_mapper.AddInitialDistributionAndContinuation(0);
 			_mapper.ProbabilisticSplit(0, 1, 2);
 			_mapper.NonDeterministicSplit(1, 3, 4);
 
@@ -264,26 +303,45 @@ namespace Tests.MarkovDecisionProcess
 			existingDistributions.ShouldContainKey(1);
 		}
 
+
+
 		[Fact]
-		public void SimpleExample1b()
+		public void WorksWithOffset()
 		{
-			_mapper.ProbabilisticSplit(0, 1, 2);
-			_mapper.NonDeterministicSplit(1, 3, 4);
+			var offset = int.MaxValue + 55L;
+			_mapper.AddInitialDistributionAndContinuation(offset);
+			_mapper.ProbabilisticSplit(offset + 0 , offset + 1, offset + 2);
+			_mapper.NonDeterministicSplit(offset + 1, offset + 3, offset + 4);
+			_mapper.Clear();
+			offset = 13L;
+			_mapper.AddInitialDistributionAndContinuation(offset);
+			_mapper.ProbabilisticSplit(offset + 0, offset + 1, offset + 2);
+			_mapper.NonDeterministicSplit(offset + 1, offset + 3, offset + 4);
+			_mapper.Clear();
+			offset = int.MaxValue * 2L;
+			_mapper.AddInitialDistributionAndContinuation(offset);
+			_mapper.ProbabilisticSplit(offset + 0, offset + 1, offset + 2);
+			_mapper.NonDeterministicSplit(offset + 1, offset + 3, offset + 4);
+			_mapper.Clear();
+			offset = int.MaxValue + 55L;
+			_mapper.AddInitialDistributionAndContinuation(offset);
+			_mapper.ProbabilisticSplit(offset + 0, offset + 1, offset + 2);
+			_mapper.NonDeterministicSplit(offset + 1, offset + 3, offset + 4);
 
 			var existingDistributions = new Dictionary<int, bool>();
-			var entries = CountEntriesAndAddDistributionsToMap(0, existingDistributions);
+			var entries = CountEntriesAndAddDistributionsToMap(offset+0, existingDistributions);
 			entries.ShouldBe(0);
 
-			entries = CountEntriesAndAddDistributionsToMap(1, existingDistributions);
+			entries = CountEntriesAndAddDistributionsToMap(offset + 1, existingDistributions);
 			entries.ShouldBe(0);
 
-			entries = CountEntriesAndAddDistributionsToMap(2, existingDistributions);
+			entries = CountEntriesAndAddDistributionsToMap(offset + 2, existingDistributions);
 			entries.ShouldBe(2);
 
-			entries = CountEntriesAndAddDistributionsToMap(3, existingDistributions);
+			entries = CountEntriesAndAddDistributionsToMap(offset + 3, existingDistributions);
 			entries.ShouldBe(1);
 
-			entries = CountEntriesAndAddDistributionsToMap(4, existingDistributions);
+			entries = CountEntriesAndAddDistributionsToMap(offset + 4, existingDistributions);
 			entries.ShouldBe(1);
 
 			existingDistributions.Count.ShouldBe(2);
