@@ -40,7 +40,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	public unsafe class NestedMarkovDecisionProcess : IModelWithStateLabelingInLabelingVector
 	{
 		public static readonly int TransitionSize = sizeof(TransitionTargetElement);
-		private const int AvgGraphNodesPerSucceedingState = 99;
 		private const int StateSize = sizeof(int);
 
 		public string[] StateFormulaLabels { get; set; }
@@ -57,8 +56,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		private readonly long _maxNumberOfContinuationGraphElements;
 
-		private readonly long _maxNumberOfTransitionTargets;
-
 		public LabelVector StateLabeling { get; }
 
 		public NestedMarkovDecisionProcess(ModelCapacity modelCapacity)
@@ -68,12 +65,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			StateLabeling = new LabelVector();
 			States = (int) modelSize.NumberOfStates;
 			
-			_maxNumberOfTransitionTargets = modelSize.NumberOfTransitions / (AvgGraphNodesPerSucceedingState + 1);
-			_maxNumberOfTransitionTargets = Math.Max(_maxNumberOfTransitionTargets, 1024);
-			_maxNumberOfContinuationGraphElements = _maxNumberOfTransitionTargets * AvgGraphNodesPerSucceedingState;
+			_maxNumberOfContinuationGraphElements = modelSize.NumberOfTransitions;
 			_maxNumberOfContinuationGraphElements = Math.Max(_maxNumberOfContinuationGraphElements, 1024);
-
-			Requires.InRange(_maxNumberOfTransitionTargets, nameof(_maxNumberOfTransitionTargets), 1024, Int32.MaxValue - 1);
+			
 			Requires.InRange(_maxNumberOfContinuationGraphElements, nameof(_maxNumberOfContinuationGraphElements), 1024, Int32.MaxValue - 1);
 
 			_stateToRootOfContinuationGraphBuffer.Resize(States * sizeof(long), zeroMemory: false);
