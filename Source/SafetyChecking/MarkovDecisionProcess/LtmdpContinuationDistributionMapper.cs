@@ -92,7 +92,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		internal bool IsDistributionEmpty(int distribution)
 		{
-			return _continuationOfDistributionChain.IsChainExisting(distribution);
+			return !_continuationOfDistributionChain.IsChainExisting(distribution);
 		}
 
 

@@ -121,9 +121,7 @@ namespace Tests.MarkovDecisionProcess
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(1);
 		}
-
-
-
+		
 		[Fact]
 		public void ExampleTwoInitialProbabilisticSplits()
 		{
@@ -157,6 +155,27 @@ namespace Tests.MarkovDecisionProcess
 			int initialTransitions;
 			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
 			initialDistributions.ShouldBe(2);
+			initialTransitions.ShouldBe(3);
+
+			int state0Distributions;
+			int state0Transitions;
+			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			state0Distributions.ShouldBe(1);
+			state0Transitions.ShouldBe(1);
+		}
+
+		[Fact]
+		public void ExampleTwoInitialSplitsProbabilisticThenNondeterministic()
+		{
+			NestedMarkovDecisionProcess = DataStructures.NestedMarkovDecisionProcessExamples.ExampleTwoInitialSplitsProbabilisticThenNondeterministic.Create();
+
+			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			MarkovDecisionProcess = converter.MarkovDecisionProcess;
+
+			int initialDistributions;
+			int initialTransitions;
+			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			initialDistributions.ShouldBe(2);
 			initialTransitions.ShouldBe(4);
 
 			int state0Distributions;
@@ -164,6 +183,90 @@ namespace Tests.MarkovDecisionProcess
 			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(1);
+		}
+		
+		[Fact]
+		public void ExampleOneStateProbabilisticSplit()
+		{
+			NestedMarkovDecisionProcess = DataStructures.NestedMarkovDecisionProcessExamples.ExampleOneStateProbabilisticSplit.Create();
+
+			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			MarkovDecisionProcess = converter.MarkovDecisionProcess;
+
+			int initialDistributions;
+			int initialTransitions;
+			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			initialDistributions.ShouldBe(1);
+			initialTransitions.ShouldBe(1);
+
+			int state0Distributions;
+			int state0Transitions;
+			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			state0Distributions.ShouldBe(1);
+			state0Transitions.ShouldBe(3);
+		}
+
+		[Fact]
+		public void ExampleTwoStateProbabilisticSplits()
+		{
+			NestedMarkovDecisionProcess = DataStructures.NestedMarkovDecisionProcessExamples.ExampleTwoStateProbabilisticSplits.Create();
+
+			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			MarkovDecisionProcess = converter.MarkovDecisionProcess;
+
+			int initialDistributions;
+			int initialTransitions;
+			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			initialDistributions.ShouldBe(1);
+			initialTransitions.ShouldBe(1);
+
+			int state0Distributions;
+			int state0Transitions;
+			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			state0Distributions.ShouldBe(1);
+			state0Transitions.ShouldBe(3);
+		}
+
+		[Fact]
+		public void ExampleTwoStateSplitsNondeterministicThenProbabilistic()
+		{
+			NestedMarkovDecisionProcess = DataStructures.NestedMarkovDecisionProcessExamples.ExampleTwoStateSplitsNondeterministicThenProbabilistic.Create();
+
+			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			MarkovDecisionProcess = converter.MarkovDecisionProcess;
+
+			int initialDistributions;
+			int initialTransitions;
+			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			initialDistributions.ShouldBe(1);
+			initialTransitions.ShouldBe(1);
+
+			int state0Distributions;
+			int state0Transitions;
+			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			state0Distributions.ShouldBe(2);
+			state0Transitions.ShouldBe(3);
+		}
+
+		[Fact]
+		public void ExampleTwoStateSplitsProbabilisticThenNondeterministic()
+		{
+			NestedMarkovDecisionProcess = DataStructures.NestedMarkovDecisionProcessExamples.ExampleTwoStateSplitsProbabilisticThenNondeterministic.Create();
+
+			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			MarkovDecisionProcess = converter.MarkovDecisionProcess;
+
+			int initialDistributions;
+			int initialTransitions;
+			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			initialDistributions.ShouldBe(1);
+			initialTransitions.ShouldBe(1);
+
+			int state0Distributions;
+			int state0Transitions;
+			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			state0Distributions.ShouldBe(2);
+			state0Transitions.ShouldBe(4);
 		}
 	}
 }
