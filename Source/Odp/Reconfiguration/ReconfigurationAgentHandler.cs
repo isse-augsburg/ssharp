@@ -103,7 +103,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		private void LockAllocatedRoles(ITask task, bool locked = true)
 		{
-			_baseAgent.LockRoles(_baseAgent.AllocatedRoles.Where(role => role.Task == task));
+			_baseAgent.LockRoles(_baseAgent.AllocatedRoles.Where(role => role.Task == task), locked);
 		}
 	}
 }

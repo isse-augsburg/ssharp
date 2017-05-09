@@ -47,9 +47,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		void IReconfigurationAgent.Acknowledge()
 		{
-			_reconfAgentHandler.Go(CurrentCoalition.Task);
 			_acknowledgment?.SetResult(null);
-			_reconfAgentHandler.Done(CurrentCoalition.Task);
 		}
 
 		void IReconfigurationAgent.StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
@@ -100,6 +98,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			_reconfAgentHandler.UpdateAllocatedRoles(CurrentCoalition.Task, configs);
 			await _acknowledgment.Task;
 			_acknowledgment = null;
+
+			_reconfAgentHandler.Go(CurrentCoalition.Task);
+			_reconfAgentHandler.Done(CurrentCoalition.Task);
 		}
 	}
 }
