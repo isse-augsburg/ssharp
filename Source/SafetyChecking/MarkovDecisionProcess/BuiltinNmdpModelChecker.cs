@@ -122,10 +122,59 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			return double.NaN;
 		}
 
+		private double CalculateMaximumProbabilityOfCid(double[] stateProbabilities, long currentCid)
+		{
+			NestedMarkovDecisionProcess.ContinuationGraphElement cge = Nmdp.GetContinuationGraphElement(currentCid);
+			if (cge.IsChoiceTypeUnsplitOrFinal)
+			{
+				var cgl = Nmdp.GetContinuationGraphLeaf(currentCid);
+				var transitionProbability = cgl.Probability;
+				var targetStateProbability = stateProbabilities[cgl.ToState];
+				var probabilityToSatisfyStateWithThisTransition = transitionProbability * targetStateProbability;
+				return probabilityToSatisfyStateWithThisTransition;
+			}
+			else
+			{
+				var cgi = Nmdp.GetContinuationGraphInnerNode(currentCid);
+				if (cge.IsChoiceTypeDeterministic)
+				{
+					return CalculateMinimumProbabilityOfCid(stateProbabilities, cgi.FromCid);
+				}
+				if (cge.IsChoiceTypeNondeterministic)
+				{
+					var biggest = double.NegativeInfinity;
+					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
+					{
+						var resultOfChild = CalculateMinimumProbabilityOfCid(stateProbabilities, i);
+						if (resultOfChild > biggest)
+							biggest = resultOfChild;
+					}
+					return biggest;
+				}
+				else if (cge.IsChoiceTypeProbabilitstic)
+				{
+					var sum = 0.0;
+					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
+					{
+						var resultOfChild = CalculateMinimumProbabilityOfCid(stateProbabilities, i);
+						sum += resultOfChild;
+					}
+					return sum;
+				}
+			}
+			return double.NaN;
+		}
+
 		public double CalculateMinimumFinalProbability(double[] initialStateProbabilities)
 		{
 			var cid = Nmdp.GetRootContinuationGraphLocationOfInitialState();
 			return CalculateMinimumProbabilityOfCid(initialStateProbabilities, cid);
+		}
+
+		internal double CalculateMaximumFinalProbability(double[] initialStateProbabilities)
+		{
+			var cid = Nmdp.GetRootContinuationGraphLocationOfInitialState();
+			return CalculateMaximumProbabilityOfCid(initialStateProbabilities, cid);
 		}
 
 		internal double[] MinimumIterator(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
@@ -177,6 +226,55 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			return xnew;
 		}
 
+		internal double[] MaximumIterator(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
+		{
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
+			var stateCount = Nmdp.States;
+
+			var xold = new double[stateCount];
+			var xnew = CreateDerivedVector(exactlyOneStates);
+			var loops = 0;
+			while (loops < steps)
+			{
+				// switch xold and xnew
+				var xtemp = xold;
+				xold = xnew;
+				xnew = xtemp;
+				loops++;
+				for (var i = 0; i < stateCount; i++)
+				{
+					if (exactlyOneStates.ContainsKey(i))
+					{
+						//we could remove this line, because already set by CreateDerivedVector and never changed when we initialize xold with CreateDerivedVector(directlySatisfiedStates)
+						xnew[i] = 1.0;
+					}
+					else if (exactlyZeroStates.ContainsKey(i))
+					{
+						//we could remove this line, because already set by CreateDerivedVector and never changed when we initialize xold with CreateDerivedVector(directlySatisfiedStates)
+						xnew[i] = 0.0;
+					}
+					else
+					{
+						var cid = Nmdp.GetRootContinuationGraphLocationOfState(i);
+						xnew[i] = CalculateMaximumProbabilityOfCid(xold, cid);
+					}
+				}
+
+				if (loops % 10 == 0)
+				{
+					stopwatch.Stop();
+					var currentProbability = CalculateMaximumFinalProbability(xnew);
+					_output?.WriteLine(
+						$"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
+					stopwatch.Start();
+				}
+			}
+			stopwatch.Stop();
+			return xnew;
+		}
+
 
 		internal double CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
 		{
@@ -191,8 +289,23 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			return finalProbability;
 		}
-		
-		
+
+		internal double CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
+		{
+			var psiEvaluator = Nmdp.CreateFormulaEvaluator(psi);
+
+			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
+			var excludedStates = new Dictionary<int, bool>(); // change for \phi Until \psi
+
+
+			var xnew = MaximumIterator(directlySatisfiedStates, excludedStates, steps);
+
+			var finalProbability = CalculateMaximumFinalProbability(xnew);
+
+			return finalProbability;
+		}
+
+
 		internal override ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck)
 		{
 			var stopwatch = new Stopwatch();
@@ -213,8 +326,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			else if (finallyBoundedFormula != null && finallyBoundedFormula.Operator == UnaryOperator.Finally)
 			{
 				minResult = CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
-				maxResult = double.NaN;
-				//maxResult = CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
+				maxResult = CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
 			}
 			else
 			{
@@ -274,8 +386,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 			else if (finallyBoundedFormula != null && finallyBoundedFormula.Operator == UnaryOperator.Finally)
 			{
-				//maxResult = CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
-				maxResult = double.NaN;
+				maxResult = CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
 			}
 			else
 			{

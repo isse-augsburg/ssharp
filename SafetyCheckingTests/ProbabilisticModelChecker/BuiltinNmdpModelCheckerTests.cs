@@ -72,5 +72,20 @@ namespace Tests.DataStructures
 				result.Is(example.MinimalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
 			}
 		}
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void MaximalProbabilityToReachIn50Steps_Label1(NestedMarkovDecisionProcessExample example)
+		{
+			var nmdp = example.Nmdp;
+			var steps = 50;
+
+			var finallyLabel1 = new BoundedUnaryFormula(NestedMarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally, steps);
+
+			using (var checker = new BuiltinNmdpModelChecker(nmdp, Output.TextWriterAdapter()))
+			{
+				var result = checker.CalculateMaximalProbability(finallyLabel1);
+				result.Is(example.MaximalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
+			}
+		}
 	}
 }

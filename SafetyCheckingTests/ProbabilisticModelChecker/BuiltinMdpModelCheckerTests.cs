@@ -130,20 +130,6 @@ namespace Tests.DataStructures
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests))]
-		public void MaximalProbabilityToReach_Label1(MarkovDecisionProcessExample example)
-		{
-			var mdp = example.Mdp;
-
-			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
-
-			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))
-			{
-				var result = checker.CalculateMaximalProbability(finallyLabel1);
-				result.Is(example.MaximalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
-			}
-		}
-
-		[Theory, MemberData(nameof(DiscoverTests))]
 		public void MinimalProbabilityToReach_Label1(MarkovDecisionProcessExample example)
 		{
 			var mdp = example.Mdp;
@@ -156,14 +142,13 @@ namespace Tests.DataStructures
 				result.Is(example.MinimalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
 			}
 		}
-		
+
 		[Theory, MemberData(nameof(DiscoverTests))]
-		public void MaximalProbabilityToReachIn50Steps_Label1(MarkovDecisionProcessExample example)
+		public void MaximalProbabilityToReach_Label1(MarkovDecisionProcessExample example)
 		{
 			var mdp = example.Mdp;
-			var steps = 50;
 
-			var finallyLabel1 = new BoundedUnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally, steps);
+			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
 
 			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))
 			{
@@ -184,6 +169,21 @@ namespace Tests.DataStructures
 			{
 				var result = checker.CalculateMinimalProbability(finallyLabel1);
 				result.Is(example.MinimalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
+			}
+		}
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void MaximalProbabilityToReachIn50Steps_Label1(MarkovDecisionProcessExample example)
+		{
+			var mdp = example.Mdp;
+			var steps = 50;
+
+			var finallyLabel1 = new BoundedUnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally, steps);
+
+			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))
+			{
+				var result = checker.CalculateMaximalProbability(finallyLabel1);
+				result.Is(example.MaximalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
 			}
 		}
 	}

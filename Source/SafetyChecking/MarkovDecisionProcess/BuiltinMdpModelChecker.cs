@@ -208,21 +208,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		}
 
 
-		internal double CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
-		{
-			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
-
-			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
-			var excludedStates = new Dictionary<int, bool>(); // change for \phi Until \psi
-
-			var xnew = MinimumIterator(directlySatisfiedStates, excludedStates, steps);
-
-			var finalProbability = CalculateMinimumFinalProbability(xnew);
-
-			return finalProbability;
-		}
-
-
 		internal double[] MaximumIterator(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
 		{
 			var stopwatch = new Stopwatch();
@@ -291,6 +276,21 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			}
 			stopwatch.Stop();
 			return xnew;
+		}
+
+
+		internal double CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
+		{
+			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
+
+			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
+			var excludedStates = new Dictionary<int, bool>(); // change for \phi Until \psi
+
+			var xnew = MinimumIterator(directlySatisfiedStates, excludedStates, steps);
+
+			var finalProbability = CalculateMinimumFinalProbability(xnew);
+
+			return finalProbability;
 		}
 
 		internal double CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
