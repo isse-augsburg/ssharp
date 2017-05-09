@@ -74,8 +74,13 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			{
 				var configs = await _controller.CalculateConfigurations(this, task);
 				if (configs != null)
+				{
 					await Task.WhenAll(CurrentCoalition.Members
-						.Select(member => member.UpdateConfiguration(configs)));
+													   .Select(member => member.UpdateConfiguration(configs)));
+
+					foreach (var member in CurrentCoalition.Members)
+						member.ConcludeReconfiguration();
+				}
 			}
 		}
 
@@ -100,6 +105,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			_acknowledgment = null;
 
 			_reconfAgentHandler.Go(CurrentCoalition.Task);
+		}
+
+		private void ConcludeReconfiguration()
+		{
 			_reconfAgentHandler.Done(CurrentCoalition.Task);
 		}
 	}
