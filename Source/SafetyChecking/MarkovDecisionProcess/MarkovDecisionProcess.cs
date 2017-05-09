@@ -36,6 +36,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 	public class MarkovDecisionProcess : IModelWithStateLabelingInLabelingVector
 	{
+
+		private bool _optimized = true;
+
 		// Distributions here are Probability Distributions
 
 		public string[] StateFormulaLabels { get; set; }
@@ -122,9 +125,22 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_rowCountOfCurrentState++;
 		}
 
-		internal void AddTransitionToInitialDistribution(int markovChainState, double probability)
+		private void AddTransitionToInitialDistributionUnoptimized(int markovChainState, double probability)
 		{
 			RowsWithDistributions.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(StateToColumn(markovChainState), probability));
+		}
+		
+		private void AddTransitionToInitialDistributionOptimized(int markovChainState, double probability)
+		{
+			RowsWithDistributions.MergeOrAddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(StateToColumn(markovChainState), probability));
+		}
+
+		internal void AddTransitionToInitialDistribution(int markovChainState, double probability)
+		{
+			if (_optimized)
+				AddTransitionToInitialDistributionOptimized(markovChainState, probability);
+			else
+				AddTransitionToInitialDistributionUnoptimized(markovChainState, probability);
 		}
 
 		internal void FinishInitialDistribution()
@@ -161,10 +177,24 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_rowCountOfCurrentState++;
 		}
 
-		internal void AddTransition(int markovChainState, double probability)
+		internal void AddTransitionUnoptimized(int markovChainState, double probability)
 		{
 			RowsWithDistributions.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(StateToColumn(markovChainState), probability));
 			Transitions++;
+		}
+
+		internal void AddTransitionOptimized(int markovChainState, double probability)
+		{
+			RowsWithDistributions.MergeOrAddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(StateToColumn(markovChainState), probability));
+			Transitions++;
+		}
+
+		internal void AddTransition(int markovChainState, double probability)
+		{
+			if (_optimized)
+				AddTransitionOptimized(markovChainState, probability);
+			else
+				AddTransitionUnoptimized(markovChainState, probability);
 		}
 		
 		internal void FinishDistribution()
