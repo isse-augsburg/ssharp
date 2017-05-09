@@ -24,7 +24,7 @@ namespace SafetySharp.Modeling
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Runtime.ExceptionServices;
+	using System.Linq;
 	using System.Runtime.Remoting.Messaging;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -68,16 +68,10 @@ namespace SafetySharp.Modeling
 			{
 				Context.Run();
 
-				// Task.WhenAll() fails *if* one of the tasks fails, but only *when* all are complete.
-				// This causes problems if tasks communicate and a task is waiting on the failed task
-				// (it will wait forever). Hence this loop to stop once a task has failed.
-				while (Tasks.Count > 0)
-				{
-					var completed = Task.WaitAny(Tasks.ToArray());
-					if (Tasks[completed].IsFaulted)
-						ExceptionDispatchInfo.Capture(Tasks[completed].Exception.InnerException).Throw();
-					Tasks.RemoveAt(completed);
-				}
+				// tasks should already be completed (faulted, cancelled, or successful) by now
+				if (!Tasks.All(task => task.IsCompleted))
+					throw new InvalidOperationException("Not all scheduled async tasks could be completed. This generally indicates a bug in the model.");
+				Task.WhenAll(Tasks).GetAwaiter().GetResult(); // propagates exceptions
 			}
 			finally
 			{
