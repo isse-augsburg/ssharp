@@ -68,10 +68,12 @@ namespace SafetySharp.Modeling
 			{
 				Context.Run();
 
+				// propagate exceptions
+				Task.WhenAll(Tasks.Where(task => task.IsFaulted)).GetAwaiter().GetResult();
+
 				// tasks should already be completed (faulted, cancelled, or successful) by now
 				if (!Tasks.All(task => task.IsCompleted))
 					throw new InvalidOperationException("Not all scheduled async tasks could be completed. This generally indicates a bug in the model.");
-				Task.WhenAll(Tasks).GetAwaiter().GetResult(); // propagates exceptions
 			}
 			finally
 			{
