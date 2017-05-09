@@ -260,7 +260,7 @@ namespace Tests.DataStructures.NestedMarkovDecisionProcessExamples
 			var cidRootState3 = nmdp.GetPlaceForNewContinuationGraphElements(1);
 			nmdp.SetRootContinuationGraphLocationOfState(3, cidRootState3);
 			var cidFirstInnerState3 = nmdp.GetPlaceForNewContinuationGraphElements(2);
-			nmdp.AddContinuationGraphInnerNode(cidRootState3, LtmdpChoiceType.Probabilitstic, cidFirstInnerState3, cidFirstInnerState3 + 1);
+			nmdp.AddContinuationGraphInnerNode(cidRootState3, LtmdpChoiceType.Nondeterministic, cidFirstInnerState3, cidFirstInnerState3 + 1);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState3 + 0, 2, 1.0);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState3 + 1, 4, 1.0);
 
@@ -343,7 +343,7 @@ namespace Tests.DataStructures.NestedMarkovDecisionProcessExamples
 			var cidRootState3 = nmdp.GetPlaceForNewContinuationGraphElements(1);
 			nmdp.SetRootContinuationGraphLocationOfState(3, cidRootState3);
 			var cidFirstInnerState3 = nmdp.GetPlaceForNewContinuationGraphElements(2);
-			nmdp.AddContinuationGraphInnerNode(cidRootState3, LtmdpChoiceType.Probabilitstic, cidFirstInnerState3, cidFirstInnerState3 + 1);
+			nmdp.AddContinuationGraphInnerNode(cidRootState3, LtmdpChoiceType.Nondeterministic, cidFirstInnerState3, cidFirstInnerState3 + 1);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState3 + 0, 2, 1.0);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState3 + 1, 4, 1.0);
 
@@ -403,7 +403,7 @@ namespace Tests.DataStructures.NestedMarkovDecisionProcessExamples
 			var cidRootState0 = nmdp.GetPlaceForNewContinuationGraphElements(1);
 			nmdp.SetRootContinuationGraphLocationOfState(0, cidRootState0);
 			var cidFirstInnerState0 = nmdp.GetPlaceForNewContinuationGraphElements(2);
-			nmdp.AddContinuationGraphInnerNode(cidRootState0, LtmdpChoiceType.Probabilitstic, cidFirstInnerState0, cidFirstInnerState0 + 1);
+			nmdp.AddContinuationGraphInnerNode(cidRootState0, LtmdpChoiceType.Nondeterministic, cidFirstInnerState0, cidFirstInnerState0 + 1);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState0 + 0, 1, 1.0);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState0 + 1, 2, 1.0);
 
@@ -472,7 +472,7 @@ namespace Tests.DataStructures.NestedMarkovDecisionProcessExamples
 			var cidRootState0 = nmdp.GetPlaceForNewContinuationGraphElements(1);
 			nmdp.SetRootContinuationGraphLocationOfState(0, cidRootState0);
 			var cidFirstInnerState0 = nmdp.GetPlaceForNewContinuationGraphElements(3);
-			nmdp.AddContinuationGraphInnerNode(cidRootState0, LtmdpChoiceType.Probabilitstic, cidFirstInnerState0, cidFirstInnerState0 + 2);
+			nmdp.AddContinuationGraphInnerNode(cidRootState0, LtmdpChoiceType.Nondeterministic, cidFirstInnerState0, cidFirstInnerState0 + 2);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState0 + 0, 1, 1.0);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState0 + 1, 2, 1.0);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState0 + 2, 4, 1.0);
@@ -548,7 +548,7 @@ namespace Tests.DataStructures.NestedMarkovDecisionProcessExamples
 			var cidRootState0 = nmdp.GetPlaceForNewContinuationGraphElements(1);
 			nmdp.SetRootContinuationGraphLocationOfState(0, cidRootState0);
 			var cidFirstInnerState0 = nmdp.GetPlaceForNewContinuationGraphElements(2);
-			nmdp.AddContinuationGraphInnerNode(cidRootState0, LtmdpChoiceType.Probabilitstic, cidFirstInnerState0, cidFirstInnerState0 + 1);
+			nmdp.AddContinuationGraphInnerNode(cidRootState0, LtmdpChoiceType.Nondeterministic, cidFirstInnerState0, cidFirstInnerState0 + 1);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState0 + 0, 1, 1.0);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState0 + 1, 2, 1.0);
 
@@ -576,7 +576,7 @@ namespace Tests.DataStructures.NestedMarkovDecisionProcessExamples
 			nmdp.SetStateLabeling(4, new StateFormulaSet(new[] { false, false }));
 			var cidRootState4 = nmdp.GetPlaceForNewContinuationGraphElements(1);
 			nmdp.SetRootContinuationGraphLocationOfState(4, cidRootState4);
-			nmdp.AddContinuationGraphLeaf(cidRootState4, 4, 1.0);
+			nmdp.AddContinuationGraphLeaf(cidRootState4, 0, 1.0);
 			return nmdp;
 		}
 
@@ -631,7 +631,7 @@ namespace Tests.DataStructures.NestedMarkovDecisionProcessExamples
 			var cidRootState0 = nmdp.GetPlaceForNewContinuationGraphElements(1);
 			nmdp.SetRootContinuationGraphLocationOfState(0, cidRootState0);
 			var cidFirstInnerState0 = nmdp.GetPlaceForNewContinuationGraphElements(2);
-			nmdp.AddContinuationGraphInnerNode(cidRootState0, LtmdpChoiceType.Probabilitstic, cidFirstInnerState0, cidFirstInnerState0 + 1);
+			nmdp.AddContinuationGraphInnerNode(cidRootState0, LtmdpChoiceType.Nondeterministic, cidFirstInnerState0, cidFirstInnerState0 + 1);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState0 + 0, 1, 1.0);
 			nmdp.AddContinuationGraphLeaf(cidFirstInnerState0 + 1, 0, 1.0);
 			return nmdp;

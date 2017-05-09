@@ -59,10 +59,12 @@
     <Compile Include="Formula\FormulaVisitors\CollectAtomarPropositionFormulasVisitor.cs" />
     <Compile Include="AnalysisModelTraverser\AnalysisException.cs" />
     <Compile Include="AnalysisModel\AnalysisResult.cs" />
+    <Compile Include="MarkovDecisionProcess\BuiltinNmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpBuilderDuringTraversal.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpChoiceType.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpContinuationDistributionMapper.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpToNmdp.cs" />
+    <Compile Include="MarkovDecisionProcess\NmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\NmdpToMdp.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpStepGraph.cs" />
     <Compile Include="MarkovDecisionProcess\NestedMarkovDecisionProcess.cs" />

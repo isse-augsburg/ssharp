@@ -20,34 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
+namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System;
 	using System.IO;
-	using Formula;
 	using Modeling;
+	using Formula;
 	
 	/// <summary>
 	///   Represents a base class for external probabilistic model checker tools.
 	/// </summary>
-	public abstract class DtmcModelChecker : IDisposable
+	internal abstract class NmdpModelChecker : IDisposable
 	{
 		protected TextWriter _output;
 
-		internal DiscreteTimeMarkovChain MarkovChain { get; }
-
+		internal NestedMarkovDecisionProcess Nmdp { get; }
+		
 		// Note: Should be used with using(var modelchecker = new ...)
-		internal DtmcModelChecker(DiscreteTimeMarkovChain markovChain, TextWriter output = null)
+		protected NmdpModelChecker(NestedMarkovDecisionProcess nmdp,TextWriter output =null)
 		{
-			MarkovChain = markovChain;
+			Nmdp = nmdp;
 			_output = output;
 		}
 
 		public abstract void Dispose();
 
-		internal abstract Probability CalculateProbability(Formula formulaToCheck);
+		internal abstract Probability CalculateMinimalProbability(Formula formulaToCheck);
 
-		internal abstract bool CalculateBoolean(Formula formulaToCheck);
+		internal abstract Probability CalculateMaximalProbability(Formula formulaToCheck);
+
+		internal abstract ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck);
+
+		internal abstract bool CalculateFormula(Formula formulaToCheck);
 
 		internal abstract RewardResult CalculateReward(Formula formulaToCheck);
 	}

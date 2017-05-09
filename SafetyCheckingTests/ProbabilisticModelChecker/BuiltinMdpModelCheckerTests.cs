@@ -156,5 +156,35 @@ namespace Tests.DataStructures
 				result.Is(example.MinimalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
 			}
 		}
+		
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void MaximalProbabilityToReachIn50Steps_Label1(MarkovDecisionProcessExample example)
+		{
+			var mdp = example.Mdp;
+			var steps = 50;
+
+			var finallyLabel1 = new BoundedUnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally, steps);
+
+			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))
+			{
+				var result = checker.CalculateMaximalProbability(finallyLabel1);
+				result.Is(example.MaximalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
+			}
+		}
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void MinimalProbabilityToReachIn50Steps_Label1(MarkovDecisionProcessExample example)
+		{
+			var mdp = example.Mdp;
+			var steps = 50;
+
+			var finallyLabel1 = new BoundedUnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally, steps);
+
+			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))
+			{
+				var result = checker.CalculateMinimalProbability(finallyLabel1);
+				result.Is(example.MinimalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
+			}
+		}
 	}
 }

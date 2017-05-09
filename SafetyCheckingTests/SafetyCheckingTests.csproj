@@ -91,6 +91,7 @@
     <Compile Include="MarkovDecisionProcess\LtmdpChoiceResolverTests.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpContinuationDistributionMapperTests.cs" />
     <Compile Include="ProbabilisticModelChecker\BuiltinDtmcModelCheckerTests.cs" />
+    <Compile Include="ProbabilisticModelChecker\BuiltinNmdpModelCheckerTests.cs" />
     <Compile Include="ProbabilisticModelChecker\BuiltinMdpModelCheckerTests.cs" />
     <Compile Include="ProbabilisticModelChecker\ExternalDtmcModelCheckerMrmcTests.cs" />
     <Compile Include="ProbabilisticModelChecker\ExternalMdpModelCheckerPrismTests.cs" />
