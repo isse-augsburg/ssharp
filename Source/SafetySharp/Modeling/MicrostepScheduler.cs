@@ -24,6 +24,7 @@ namespace SafetySharp.Modeling
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Runtime.ExceptionServices;
 	using System.Runtime.Remoting.Messaging;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -66,13 +67,25 @@ namespace SafetySharp.Modeling
 			try
 			{
 				Context.Run();
-				Task.WhenAll(Tasks).GetAwaiter().GetResult();
+
+				// Task.WhenAll() fails *if* one of the tasks fails, but only *when* all are complete.
+				// This causes problems if tasks communicate and a task is waiting on the failed task
+				// (it will wait forever). Hence this loop to stop once a task has failed.
+				while (Tasks.Count > 0)
+				{
+					var completed = Task.WaitAny(Tasks.ToArray());
+					if (Tasks[completed].IsFaulted)
+						ExceptionDispatchInfo.Capture(Tasks[completed].Exception.InnerException).Throw();
+					Tasks.RemoveAt(completed);
+				}
 			}
 			finally
 			{
 				Tasks.Clear();
 			}
 		}
+
+
 
 		private class SingleThreadSynchronizationContext : SynchronizationContext
 		{
