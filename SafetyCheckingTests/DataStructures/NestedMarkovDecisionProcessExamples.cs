@@ -81,7 +81,7 @@ namespace Tests.DataStructures.NestedMarkovDecisionProcessExamples
 		}
 	}
 
-	public class MarkovDecisionProcessToStringTests
+	public class NestedMarkovDecisionProcessToStringTests
 	{
 		/// <summary>
 		///   Gets the output that writes to the test output stream.
@@ -97,19 +97,18 @@ namespace Tests.DataStructures.NestedMarkovDecisionProcessExamples
 			}
 		}
 
-		public MarkovDecisionProcessToStringTests(ITestOutputHelper output)
+		public NestedMarkovDecisionProcessToStringTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 		}
 		
-		/*
 		[Theory, MemberData(nameof(DiscoverTests))]
 		public void ToGraphvizString(NestedMarkovDecisionProcessExample example)
 		{
 			var textWriter = Output.TextWriterAdapter();
 			example.Nmdp.ExportToGv(textWriter);
 			textWriter.WriteLine();
-		}*/
+		}
 	}
 
 

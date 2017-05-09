@@ -64,6 +64,7 @@
     <Compile Include="MarkovDecisionProcess\LtmdpChoiceType.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpContinuationDistributionMapper.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpToNmdp.cs" />
+    <Compile Include="MarkovDecisionProcess\NmdpToGv.cs" />
     <Compile Include="MarkovDecisionProcess\NmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\NmdpToMdp.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpStepGraph.cs" />
