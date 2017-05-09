@@ -25,6 +25,7 @@ using System.Collections.Generic;
 namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
 	using System;
+	using System.Linq;
 
 	internal class ShortestPaths<T>
 	{
@@ -57,14 +58,13 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			if (!_distance.ContainsKey(destination))
 				return null;
 
-			var path = new T[_distance[destination]];
-			var current = destination;
-			for (var i = path.Length - 1; i >= 0; --i)
-			{
-				path[i] = current;
-				current = _previous[current];
-			}
-			return path;
+			var path = new List<T>(_distance[destination]);
+			for (var current = destination; !Source.Equals(current); current = _previous[current])
+				path.Add(current);
+			path.Add(Source);
+
+			path.Reverse();
+			return path.ToArray();
 		}
 
 		public int GetDistance(T node)
@@ -98,6 +98,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					knownAgents.Add(neighbour);
 				}
 				visited.Add(current);
+				knownAgents.Remove(current); // TODO: will be done by minheap's deleteMin above
 			} while (knownAgents.Count > 0);
 
 			return shortestPaths;

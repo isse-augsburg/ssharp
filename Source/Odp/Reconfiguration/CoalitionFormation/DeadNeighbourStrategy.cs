@@ -58,7 +58,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			// Coalition.InviteCtf() will fill the gaps in the CTF
 			// (called in CalculateConfigurations()).
 
-			// TODO surround empty predecessors/successors ?
+			// TODO surround empty predecessors/successors
 
 			// coalition might have lost capabilities due to dead agents
 			await MissingCapabilitiesStrategy.Instance.RecruitNecessaryAgents(coalition);

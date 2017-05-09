@@ -79,7 +79,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			do
 			{
 				ctfStart = CTF.Start;
-				for (int i = CTF.Start + 1; i < CTF.End; ++i)
+				for (int i = CTF.Start + 1; i <= CTF.End; ++i)
 				{
 					var current = RecoveredDistribution[i];
 
