@@ -55,7 +55,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public void LockAddedRoles()
 		{
-			foreach (var id in _addedRoles.Keys)
+			foreach (var id in _addedRoles.Keys.ToArray())
 				_addedRoles[id] = new HashSet<Role>(_addedRoles[id].Select(role => role.Lock()));
 		}
 
