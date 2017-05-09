@@ -248,20 +248,41 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			var currentState = suggestion.TFR.Start;
 			var offset = suggestion.Coalition.CTF.Start;
 			var end = suggestion.TFR.End;
+			var previousRole = default(Role);
 
-			// handle entry edge agent: set output port
-			var previousRole = resourceFlow[0].AllocatedRoles
-				.Single(role => role.PostCondition.StateLength == suggestion.TFR.Start);
-			config.RemoveRoles(resourceFlow[0], previousRole); // remove old role
-			previousRole.PostCondition.Port = resourceFlow[1];
-			config.AddRoles(resourceFlow[0], previousRole); // re-add updated role
+			int firstCoreAgent = 0;
+			if (!suggestion.CoreAgents.Contains(resourceFlow[0]))
+			{
+				// handle entry edge agent: set output port
+				previousRole = resourceFlow[0].AllocatedRoles
+												  .Single(role => role.PostCondition.StateLength == suggestion.TFR.Start);
+				config.RemoveRoles(resourceFlow[0], previousRole); // remove old role
+				previousRole.PostCondition.Port = resourceFlow[1];
+				config.AddRoles(resourceFlow[0], previousRole); // re-add updated role
+
+				firstCoreAgent++;
+			}
+
+			int lastCoreAgent = resourceFlow.Length - 1;
+			if (!suggestion.CoreAgents.Contains(resourceFlow[resourceFlow.Length - 1]))
+			{
+				// handle exit edge agent: set input port
+				var exitEdgeAgent = resourceFlow[resourceFlow.Length - 1];
+				var lastRole = exitEdgeAgent.AllocatedRoles
+											.Single(role => role.PreCondition.StateLength == suggestion.TFR.End);
+				config.RemoveRoles(exitEdgeAgent, lastRole); // remove old role
+				lastRole.PreCondition.Port = resourceFlow[resourceFlow.Length - 2];
+				config.AddRoles(exitEdgeAgent, lastRole); // re-add updated role
+
+				lastCoreAgent--;
+			}
 
 			// handle core agents: set capabilities & connections
-			for (var i = 1; i < resourceFlow.Length - 1; ++i)
+			for (var i = firstCoreAgent; i <= lastCoreAgent; ++i)
 			{
 				var agent = resourceFlow[i];
-				var role = GetRole(task, resourceFlow[i - 1], previousRole.PostCondition);
-				role.PostCondition.Port = resourceFlow[i + 1];
+				var role = GetRole(task, i > 0 ? resourceFlow[i - 1] : null, i > 0 ? (Condition?)previousRole.PostCondition : null);
+				role.PostCondition.Port = i < resourceFlow.Length - 1 ? resourceFlow[i + 1] : null;
 
 				while (currentState <= end && suggestion.CtfDistribution[currentState] == agent)
 					role.AddCapability(task.RequiredCapabilities[offset + currentState++]);
@@ -269,14 +290,6 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				config.AddRoles(agent, role);
 				previousRole = role;
 			}
-
-			// handle exit edge agent: set input port
-			var exitEdgeAgent = resourceFlow[resourceFlow.Length - 1];
-			var lastRole = exitEdgeAgent.AllocatedRoles
-				.Single(role => role.PreCondition.StateLength == suggestion.TFR.End);
-			config.RemoveRoles(exitEdgeAgent); // remove old role
-			lastRole.PreCondition.Port = resourceFlow[resourceFlow.Length - 2];
-			config.AddRoles(exitEdgeAgent, lastRole); // re-add updated role
 
 			return config;
 		}
