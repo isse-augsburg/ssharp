@@ -25,7 +25,6 @@ namespace SafetySharp.Odp.Reconfiguration
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
-	using System.Threading.Tasks;
 	using Modeling;
 
 	public class ControllerReconfigurationAgent : IReconfigurationAgent
@@ -74,7 +73,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public void UpdateAllocatedRoles(ConfigurationUpdate config)
 		{
-			_reconfAgentHandler.UpdateAllocatedRoles(config);
+			_reconfAgentHandler.UpdateAllocatedRoles(_task, config);
 		}
 
 		public void Go(ITask task)

@@ -49,7 +49,6 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			_reconfAgentHandler.Go(CurrentCoalition.Task);
 			_acknowledgment?.SetResult(null);
-			_acknowledgment = null;
 			_reconfAgentHandler.Done(CurrentCoalition.Task);
 		}
 
@@ -95,11 +94,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// <summary>
 		/// Distributes the calculated configuration to the coalition members.
 		/// </summary>
-		private Task UpdateConfiguration(ConfigurationUpdate configs)
+		private async Task UpdateConfiguration(ConfigurationUpdate configs)
 		{
 			_acknowledgment = new TaskCompletionSource<object>();
-			_reconfAgentHandler.UpdateAllocatedRoles(configs);
-			return _acknowledgment.Task;
+			_reconfAgentHandler.UpdateAllocatedRoles(CurrentCoalition.Task, configs);
+			await _acknowledgment.Task;
+			_acknowledgment = null;
 		}
 	}
 }
