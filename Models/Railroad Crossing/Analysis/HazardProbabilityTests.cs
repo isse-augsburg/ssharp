@@ -49,8 +49,8 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 			model.TrainController.Odometer.OdometerPositionOffset.ProbabilityOfOccurrence = new Probability(0.02);
 			model.TrainController.Odometer.OdometerSpeedOffset.ProbabilityOfOccurrence = new Probability(0.02);
 
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.PossibleCollision);
-			Console.Write($"Probability of hazard: {result}");
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PossibleCollision,50);
+			Console.Write($"Probability of hazard in 50 steps: {result}");
 		}
 	}
 }

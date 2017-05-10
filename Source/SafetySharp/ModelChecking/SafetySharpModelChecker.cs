@@ -151,7 +151,10 @@ namespace SafetySharp.Analysis
 			}
 			else
 			{
-				probabilityRangeToReachState = new ProbabilityRange(double.NaN,double.NaN);
+				using (var modelChecker = new BuiltinNmdpModelChecker(nmdp, System.Console.Out))
+				{
+					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(probabilityToReachStateFormula);
+				}
 			}
 
 			return probabilityRangeToReachState;
@@ -187,7 +190,10 @@ namespace SafetySharp.Analysis
 			}
 			else
 			{
-				probabilityRangeToReachState = new ProbabilityRange(double.NaN, double.NaN);
+				using (var modelChecker = new BuiltinNmdpModelChecker(nmdp, System.Console.Out))
+				{
+					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(probabilityToReachStateFormula);
+				}
 			}
 			return probabilityRangeToReachState;
 		}
