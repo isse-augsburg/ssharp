@@ -38,7 +38,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 		}
 		
 		[Fact]
-		public void Check()
+		public void CheckMdp()
 		{
 			var m = new Model();
 			Probability minProbabilityOfFinal2;
@@ -49,14 +49,50 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			var final2 = new UnaryFormula(new SimpleStateInRangeFormula(2), UnaryOperator.Finally);
 			var final3 = new UnaryFormula(new SimpleStateInRangeFormula(3), UnaryOperator.Finally);
 
-			var mdpGenerator = new SimpleMdpFromExecutableModelGenerator(m);
-			mdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			mdpGenerator.AddFormulaToCheck(final2);
-			mdpGenerator.AddFormulaToCheck(final3);
-			var mdp = mdpGenerator.GenerateMarkovDecisionProcess();
-			mdp.ExportToGv(Output.TextWriterAdapter());
+			var nmdpGenerator = new SimpleNmdpFromExecutableModelGenerator(m);
+			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			nmdpGenerator.AddFormulaToCheck(final2);
+			nmdpGenerator.AddFormulaToCheck(final3);
+			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess();
+			nmdp.ExportToGv(Output.TextWriterAdapter());
+			var nmdpToMpd = new NmdpToMdp(nmdp);
+			var mdp = nmdpToMpd.MarkovDecisionProcess;
 			var typeOfModelChecker = typeof(BuiltinMdpModelChecker);
 			var modelChecker = (MdpModelChecker)Activator.CreateInstance(typeOfModelChecker, mdp, Output.TextWriterAdapter());
+			using (modelChecker)
+			{
+				minProbabilityOfFinal2 = modelChecker.CalculateMinimalProbability(final2);
+				minProbabilityOfFinal3 = modelChecker.CalculateMinimalProbability(final3);
+				maxProbabilityOfFinal2 = modelChecker.CalculateMaximalProbability(final2);
+				maxProbabilityOfFinal3 = modelChecker.CalculateMaximalProbability(final3);
+			}
+
+			minProbabilityOfFinal2.Is(0.3, tolerance: 0.0001).ShouldBe(true);
+			minProbabilityOfFinal3.Is(0.6, tolerance: 0.0001).ShouldBe(true);
+			maxProbabilityOfFinal2.Is(0.3, tolerance: 0.0001).ShouldBe(true);
+			maxProbabilityOfFinal3.Is(0.6, tolerance: 0.0001).ShouldBe(true);
+		}
+
+		[Fact(Skip="NotImplementedYet")]
+		public void CheckNmdp()
+		{
+			var m = new Model();
+			Probability minProbabilityOfFinal2;
+			Probability minProbabilityOfFinal3;
+			Probability maxProbabilityOfFinal2;
+			Probability maxProbabilityOfFinal3;
+
+			var final2 = new UnaryFormula(new SimpleStateInRangeFormula(2), UnaryOperator.Finally);
+			var final3 = new UnaryFormula(new SimpleStateInRangeFormula(3), UnaryOperator.Finally);
+
+			var nmdpGenerator = new SimpleNmdpFromExecutableModelGenerator(m);
+			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			nmdpGenerator.AddFormulaToCheck(final2);
+			nmdpGenerator.AddFormulaToCheck(final3);
+			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess();
+			nmdp.ExportToGv(Output.TextWriterAdapter());
+			var typeOfModelChecker = typeof(BuiltinNmdpModelChecker);
+			var modelChecker = (NmdpModelChecker)Activator.CreateInstance(typeOfModelChecker, nmdp, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
 				minProbabilityOfFinal2 = modelChecker.CalculateMinimalProbability(final2);

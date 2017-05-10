@@ -130,7 +130,7 @@
     <Compile Include="MarkovDecisionProcess\LtmdpTransition.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpCachedLabeledStates.cs" />
     <Compile Include="MarkovDecisionProcess\MarkovDecisionProcess.cs" />
-    <Compile Include="MarkovDecisionProcess\MdpFromExecutableModelGenerator.cs" />
+    <Compile Include="MarkovDecisionProcess\NmdpFromExecutableModelGenerator.cs" />
     <Compile Include="MarkovDecisionProcess\MdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\MdpToGv.cs" />
     <Compile Include="MarkovDecisionProcess\MdpToPrism.cs" />

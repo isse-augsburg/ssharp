@@ -72,9 +72,9 @@ namespace Tests.SimpleExecutableModel
 		}
 	}
 
-	public sealed class SimpleMdpFromExecutableModelGenerator : MdpFromExecutableModelGenerator<SimpleExecutableModel>
+	public sealed class SimpleNmdpFromExecutableModelGenerator : NmdpFromExecutableModelGenerator<SimpleExecutableModel>
 	{
-		public SimpleMdpFromExecutableModelGenerator(SimpleModelBase model) : base(SimpleExecutableModel.CreateExecutedModelFromFormulasCreator(model))
+		public SimpleNmdpFromExecutableModelGenerator(SimpleModelBase model) : base(SimpleExecutableModel.CreateExecutedModelFromFormulasCreator(model))
 		{
 		}
 	}

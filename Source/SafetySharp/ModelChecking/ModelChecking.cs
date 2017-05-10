@@ -77,9 +77,9 @@ namespace SafetySharp.ModelChecking
 		}
 	}
 
-	public sealed class SafetySharpMdpFromExecutableModelGenerator : MdpFromExecutableModelGenerator<SafetySharpRuntimeModel>
+	public sealed class SafetySharpNmdpFromExecutableModelGenerator : NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>
 	{
-		public SafetySharpMdpFromExecutableModelGenerator(ModelBase model) : base(SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model))
+		public SafetySharpNmdpFromExecutableModelGenerator(ModelBase model) : base(SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model))
 		{
 		}
 	}

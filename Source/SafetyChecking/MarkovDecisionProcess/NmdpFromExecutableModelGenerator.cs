@@ -33,7 +33,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using AnalysisModel;
 	using ExecutedModel;
 
-	public class MdpFromExecutableModelGenerator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	public class NmdpFromExecutableModelGenerator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
@@ -54,7 +54,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		// Create Tasks which make the checks (workers)
 		// First formulas to check are collected (thus, the probability matrix only has to be calculated once)
-		public MdpFromExecutableModelGenerator(ExecutableModelCreator<TExecutableModel> runtimeModelCreator)
+		public NmdpFromExecutableModelGenerator(ExecutableModelCreator<TExecutableModel> runtimeModelCreator)
 		{
 			Requires.NotNull(runtimeModelCreator, nameof(runtimeModelCreator));
 			_runtimeModelCreator = runtimeModelCreator;
@@ -65,16 +65,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <summary>
 		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		private MarkovDecisionProcess GenerateMarkovDecisionProcess(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas)
+		private NestedMarkovDecisionProcess GenerateMarkovDecisionProcess(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas)
 		{
 			using (var checker = new LtmdpGenerator<TExecutableModel>(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
 			{
 				var ltmdp = checker.GenerateStateGraph();
 				var ltmdpToNmdp = new LtmdpToNmdp(ltmdp);
 				var nmdp = ltmdpToNmdp.NestedMarkovDecisionProcess;
-				var nmdpToMpd = new NmdpToMdp(nmdp);
-				var mdp = nmdpToMpd.MarkovDecisionProcess;
-				return mdp;
+				return nmdp;
 			}
 		}
 
@@ -82,7 +80,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		/// <summary>
 		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		public MarkovDecisionProcess GenerateMarkovDecisionProcess(Formula terminateEarlyCondition = null)
+		public NestedMarkovDecisionProcess GenerateMarkovDecisionProcess(Formula terminateEarlyCondition = null)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
 

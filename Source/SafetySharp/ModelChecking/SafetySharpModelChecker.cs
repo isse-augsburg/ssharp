@@ -36,6 +36,8 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public static class SafetySharpModelChecker
 	{
+		public static bool _convertNmdpToMdp = true;
+
 		/// <summary>
 		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />. The appropriate model
 		///   checker is chosen automatically.
@@ -133,14 +135,25 @@ namespace SafetySharp.Analysis
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
-			var markovDecisionProcessGenerator = new MdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
-			markovDecisionProcessGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
-			markovDecisionProcessGenerator.Configuration.SuccessorCapacity *= 8;
-			var mdp = markovDecisionProcessGenerator.GenerateMarkovDecisionProcess(stateFormula);
-			using (var modelChecker = new BuiltinMdpModelChecker(mdp, System.Console.Out))
+			var nmdpGenerator = new NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
+			nmdpGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
+			nmdpGenerator.Configuration.SuccessorCapacity *= 8;
+			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess(stateFormula);
+
+			if (_convertNmdpToMdp)
 			{
-				probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(probabilityToReachStateFormula);
+				var nmdpToMpd = new NmdpToMdp(nmdp);
+				var mdp = nmdpToMpd.MarkovDecisionProcess;
+				using (var modelChecker = new BuiltinMdpModelChecker(mdp, System.Console.Out))
+				{
+					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(probabilityToReachStateFormula);
+				}
 			}
+			else
+			{
+				probabilityRangeToReachState = new ProbabilityRange(double.NaN,double.NaN);
+			}
+
 			return probabilityRangeToReachState;
 		}
 
@@ -158,12 +171,23 @@ namespace SafetySharp.Analysis
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
-			var markovDecisionProcessGenerator = new MdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
-			markovDecisionProcessGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
-			var mdp = markovDecisionProcessGenerator.GenerateMarkovDecisionProcess(stateFormula);
-			using (var modelChecker = new BuiltinMdpModelChecker(mdp, System.Console.Out))
+			var nmdpGenerator = new NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
+			nmdpGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
+			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess(stateFormula);
+
+
+			if (_convertNmdpToMdp)
 			{
-				probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(probabilityToReachStateFormula);
+				var nmdpToMpd = new NmdpToMdp(nmdp);
+				var mdp = nmdpToMpd.MarkovDecisionProcess;
+				using (var modelChecker = new BuiltinMdpModelChecker(mdp, System.Console.Out))
+				{
+					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(probabilityToReachStateFormula);
+				}
+			}
+			else
+			{
+				probabilityRangeToReachState = new ProbabilityRange(double.NaN, double.NaN);
 			}
 			return probabilityRangeToReachState;
 		}
