@@ -65,6 +65,17 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			return true;
 		}
 
+		public void Add(int index)
+		{
+			Append(index);
+			Prepend(index);
+		}
+
+		public TaskFragment Copy()
+		{
+			return new TaskFragment(Task, Start, End);
+		}
+
 		/// <summary>
 		/// Merges the given fragments into one.
 		/// </summary>

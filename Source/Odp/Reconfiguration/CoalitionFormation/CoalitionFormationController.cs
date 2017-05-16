@@ -36,7 +36,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 	/// 
 	/// (cf. Konstruktion selbst-organisierender Softwaresysteme, chapter 8)
 	/// </summary>
-	public partial class CoalitionFormationController : AbstractController
+	public class CoalitionFormationController : AbstractController
 	{
 		private readonly Dictionary<InvariantPredicate, IRecruitingStrategy> _strategies = new Dictionary<InvariantPredicate, IRecruitingStrategy>();
 
@@ -67,8 +67,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			try
 			{
-				var tfr = Task.WhenAll(from predicate in coalition.ViolatedPredicates
-									   select RecruitNecessaryAgents(coalition, predicate));
+				var minTfr = TaskFragment.Merge(await Task.WhenAll(from predicate in coalition.ViolatedPredicates
+																   select RecruitNecessaryAgents(coalition, predicate)));
 
 				await coalition.InviteCtfAgents();
 
@@ -79,7 +79,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						var reconfSuggestion = new ConfigurationSuggestion(coalition, distribution);
 
 						// compute tfr, edge, core agents
-						reconfSuggestion.ComputeTFR();
+						reconfSuggestion.ComputeTfr(minTfr);
 						foreach (var edgeAgent in reconfSuggestion.EdgeAgents)
 							await coalition.Invite(edgeAgent);
 
@@ -161,9 +161,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		protected async Task<IEnumerable<BaseAgent>> ComputeResourceFlow(ConfigurationSuggestion configurationSuggestion)
 		{
 			var resourceFlow = new List<BaseAgent>();
-			var agents = configurationSuggestion.AgentsToReconfigure;
+			var agents = configurationSuggestion.AgentsToConnect;
 
-			for (var i = 1; i < agents.Length; ++i)
+			for (var i = 1; i < agents.Count; ++i)
 			{
 				var shortestPaths = ComputeShortestPaths(configurationSuggestion, agents[i - 1]);
 				IEnumerable<BaseAgent> connection = shortestPaths.GetPathFromSource(destination: agents[i]);
@@ -300,16 +300,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			public BaseAgent[] CtfDistribution { get; }
 
 			public TaskFragment TFR { get; private set; }
-			private Role _firstRole;
-			private Role _lastRole;
 
-			public ISet<BaseAgent> EdgeAgents { get; private set; }
-			private BaseAgent _startEdgeAgent;
-			private BaseAgent _endEdgeAgent;
-			public ISet<BaseAgent> CoreAgents { get; private set; }
+			public ISet<BaseAgent> CoreAgents { get; } = new HashSet<BaseAgent>();
+			public ISet<BaseAgent> EdgeAgents { get; } = new HashSet<BaseAgent>();
 			private readonly HashSet<BaseAgent> _resourceFlowAgents = new HashSet<BaseAgent>();
 
-			public BaseAgent[] AgentsToReconfigure { get; private set; }
+			public List<BaseAgent> AgentsToConnect { get; } = new List<BaseAgent>();
 
 			public ConfigurationSuggestion(Coalition coalition, BaseAgent[] ctfDistribution)
 			{
@@ -321,48 +317,45 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// Identifies the task fragment to reconfigure, i.e. the minimal subfragment of CTF
 			/// where old and suggested new capability distribution differ.
 			/// </summary>
-			public void ComputeTFR()
+			public void ComputeTfr(TaskFragment minimalTfr)
 			{
 				// TODO: handle branches in resource flow (non-unique distribution, TFR start & end, edge agents)
-				// TODO: handle TFR = []
 
 				var ctf = Coalition.CTF;
+				var offset = ctf.Start;
 				var oldDistribution = Coalition.RecoveredDistribution;
 
-				// find first modified capability allocation (inside CTF)
-				var tfrStart = ctf.Start;
-				while (tfrStart < ctf.End && CtfDistribution[tfrStart - ctf.Start] == oldDistribution[tfrStart])
-					tfrStart++;
+				// extend TFR with modified capability allocations
+				TFR = minimalTfr.Copy();
+				for (var i = ctf.Start; i <= ctf.End; ++i)
+					if (CtfDistribution[i - ctf.Start] != oldDistribution[i])
+						TFR.Add(i);
 
-				// find last modified capability allocation (inside CTF)
-				var tfrEnd = ctf.End;
-				while (tfrEnd > ctf.Start && CtfDistribution[tfrEnd - ctf.Start] == oldDistribution[tfrEnd])
-					tfrEnd--;
+				// round TFR to role boundaries (include capabilities applied by same agent, either before or after reconfiguration)
+				var start = TFR.Start - offset;
+				while (start > 0 && (CtfDistribution[start - 1] == CtfDistribution[start] || oldDistribution[start - 1] == oldDistribution[start]))
+					start--;
+				TFR.Prepend(start + offset);
 
-				// find role containing the first and modified capability, respectively
-				_firstRole = FindRoleForCapability(tfrStart);
-				_lastRole = FindRoleForCapability(tfrEnd);
+				var end = TFR.End - offset;
+				while (end < ctf.Length && (CtfDistribution[end + 1] == CtfDistribution[end] || oldDistribution[end + 1] == oldDistribution[end]))
+					end++;
+				TFR.Append(end + offset);
 
-				TFR = new TaskFragment(Coalition.Task, tfrStart, tfrEnd);
-
+				// populate agent sets
+				BaseAgent startEdgeAgent, endEdgeAgent;
 				FindCoreAgents();
-				FindEdgeAgents();
+				FindEdgeAgents(out startEdgeAgent, out endEdgeAgent);
 
-				AgentsToReconfigure = new[] { _startEdgeAgent } // edge agent preceeding TFR
-					.Concat(CtfDistribution.Skip(TFR.Start - Coalition.CTF.Start).Take(TFR.Length)) // core agents
-					.Concat(new[] { _endEdgeAgent }) // edge agent following TFR
-					.Distinct()
-					.Where(agent => agent != null)
-					.ToArray();
-			}
+				// compute sequence of agents to be connected by resource flow
+				if (startEdgeAgent != null)
+					AgentsToConnect.Add(startEdgeAgent);
 
-			private Role FindRoleForCapability(int capabilityIndex)
-			{
-				var agent = Coalition.RecoveredDistribution[capabilityIndex];
-				return Enumerable.Range(0, capabilityIndex + 1) // possible start indices of the role
-					.SelectMany(roleStart =>
-								agent.AllocatedRoles.Where(role => role.PreCondition.StateLength == roleStart) // roles starting at the given index
-					).Single(); // since branches in the resource flow are not permitted, there should be exactly one
+				var coreAgents = CtfDistribution.Slice(TFR.Start - offset, TFR.End - offset).ToArray();
+				AgentsToConnect.AddRange(coreAgents.Where((t, i) => i == 0 || coreAgents[i - 1] != t));
+
+				if (endEdgeAgent != null)
+					AgentsToConnect.Add(endEdgeAgent);
 			}
 
 			private void FindCoreAgents()
@@ -370,9 +363,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				// core agents are:
 				//  (1) agents that will receive new roles, as indicated in CtfDistribution (restricted to TFR)
 				//  (2) agents that will lose roles, because they either previously applied a capability in TFR
-				//     or transported resources between such agents
-				CoreAgents = new HashSet<BaseAgent>(
-					CtfDistribution.Skip(TFR.Start - Coalition.CTF.Start).Take(TFR.Length) // (1)
+				//      or transported resources between such agents
+
+				CoreAgents.UnionWith(
+					CtfDistribution.Slice(TFR.Start - Coalition.CTF.Start, TFR.End - Coalition.CTF.Start) // (1)
 				);
 
 				// (2): go along the resource flow path, from TFR.Start to TFR.End
@@ -388,22 +382,33 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				}
 			}
 
-			private void FindEdgeAgents()
+			private void FindEdgeAgents(out BaseAgent startEdgeAgent, out BaseAgent endEdgeAgent)
 			{
-				// edge agents are agents that send/receive resources to/from the first/last role
-				EdgeAgents = new HashSet<BaseAgent>();
+				startEdgeAgent = endEdgeAgent = null;
 
-				if (TFR.Start != 0)
+				if (TFR.Start > 0)
 				{
-					_startEdgeAgent = _firstRole.PreCondition.Port;
-					EdgeAgents.Add(_startEdgeAgent);
+					// find first role in TFR (or after, if TFR is empty) in old distribution
+					var firstRole = FindRoleForCapability(TFR.Start);
+					startEdgeAgent = firstRole.PreCondition.Port;
+					EdgeAgents.Add(startEdgeAgent);
 				}
 
-				if (TFR.End != Coalition.Task.RequiredCapabilities.Length - 1)
+				if (TFR.End < Coalition.Task.RequiredCapabilities.Length - 1)
 				{
-					_endEdgeAgent = _lastRole.PostCondition.Port;
-					EdgeAgents.Add(_endEdgeAgent);
+					// find last role in TFR (or before, if TFR is empty) in old distribution
+					var lastRole = FindRoleForCapability(TFR.End);
+					endEdgeAgent = lastRole.PostCondition.Port;
+					EdgeAgents.Add(endEdgeAgent);
 				}
+			}
+
+			private Role FindRoleForCapability(int capabilityIndex)
+			{
+				return Coalition.RecoveredDistribution[capabilityIndex]
+								.AllocatedRoles.Single(role => role.Task == Coalition.Task &&
+															   role.PreCondition.StateLength <= capabilityIndex &&
+															   capabilityIndex <= role.PostCondition.StateLength);
 			}
 
 			/// <summary>
