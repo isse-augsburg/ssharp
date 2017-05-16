@@ -219,7 +219,7 @@ namespace ISSE.SafetyChecking.Modeling
 		/// <summary>
 		///   Resets the fault's activation state for the current step.
 		/// </summary>
-		internal void Reset()
+		public void Reset()
 		{
 			if (_activation != Activation.Nondeterministic)
 				return;

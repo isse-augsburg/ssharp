@@ -74,7 +74,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		/// <param name="stateHeaderBytes">
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
-		internal ExecutableModel(int stateHeaderBytes = 0)
+		protected ExecutableModel(int stateHeaderBytes = 0)
 		{
 			Requires.That(stateHeaderBytes % 4 == 0, nameof(stateHeaderBytes), "Expected a multiple of 4.");			
 			StateHeaderBytes = stateHeaderBytes;
@@ -148,7 +148,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		/// <summary>
 		///   Updates the fault sets in accordance with the fault's actual activation states.
 		/// </summary>
-		internal void UpdateFaultSets()
+		public void UpdateFaultSets()
 		{
 			NondeterministicFaults = Faults.Where(fault => fault.Activation == Activation.Nondeterministic).ToArray();
 			ActivationSensitiveFaults = NondeterministicFaults.Where(fault => fault.RequiresActivationNotification).ToArray();
@@ -246,7 +246,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 			return new CounterExample<TExecutableModel>(counterExampleModel, path, replayInfo, endsWithException);
 		}
 
-		internal abstract void SetChoiceResolver(ChoiceResolver choiceResolver);
+		public abstract void SetChoiceResolver(ChoiceResolver choiceResolver);
 
 		/// <summary>
 		///   Generates the replay information for the <paramref name="trace" />.

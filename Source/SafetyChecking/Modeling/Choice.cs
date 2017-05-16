@@ -52,7 +52,7 @@ namespace ISSE.SafetyChecking.Modeling
 		/// <summary>
 		///   Gets or sets the resolver that is used to resolve nondeterministic choices.
 		/// </summary>
-		internal ChoiceResolver Resolver { get; set; }
+		public ChoiceResolver Resolver { get; set; }
 
 		/// <summary>
 		///   Returns an index in the range of <paramref name="elementCount" />. Returns <c>-1</c> if <paramref name="elementCount" />

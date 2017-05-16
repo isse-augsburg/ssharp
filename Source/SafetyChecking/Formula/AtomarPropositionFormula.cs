@@ -35,7 +35,7 @@ namespace ISSE.SafetyChecking.Formula
 		/// <param name="label">
 		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
 		/// </param>
-		internal AtomarPropositionFormula(string label = null)
+		public AtomarPropositionFormula(string label = null)
 		{
 			Label = label ?? "StateFormula" + Guid.NewGuid().ToString().Replace("-", String.Empty);
 		}

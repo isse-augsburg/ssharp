@@ -90,7 +90,7 @@ namespace Tests.SimpleExecutableModel
 			Model.Update();
 		}
 
-		internal override void SetChoiceResolver(ChoiceResolver choiceResolver)
+		public override void SetChoiceResolver(ChoiceResolver choiceResolver)
 		{
 			Model.Choice.Resolver = choiceResolver;
 

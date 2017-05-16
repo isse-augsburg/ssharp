@@ -31,7 +31,7 @@ namespace ISSE.SafetyChecking.Utilities
 	/// <summary>
 	///   Defines a set of helper functions that should be used to assert preconditions of functions.
 	/// </summary>
-	internal static class Requires
+	public static class Requires
 	{
 		/// <summary>
 		///   Throws an <see cref="ArgumentNullException" /> if <paramref name="argument" /> of reference type
