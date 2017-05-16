@@ -28,10 +28,9 @@ using System.Threading.Tasks;
 
 namespace Tests.MarkovDecisionProcess
 {
+	using ISSE.SafetyChecking.MarkovDecisionProcess.Optimized;
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
-	using ISSE.SafetyChecking.GenericDataStructures;
-	using ISSE.SafetyChecking.MarkovDecisionProcess;
 	using ISSE.SafetyChecking.Utilities;
 	using Shouldly;
 	using SimpleExecutableModel;

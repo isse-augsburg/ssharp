@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace ISSE.SafetyChecking.MarkovDecisionProcess
+namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 {
 	using Modeling;
 	using System.Diagnostics;

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace ISSE.SafetyChecking.MarkovDecisionProcess
+namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 {
 	using System.Collections.Generic;
 	using System.Runtime.CompilerServices;

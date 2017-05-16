@@ -22,7 +22,7 @@
 
 using System;
 
-namespace ISSE.SafetyChecking.MarkovDecisionProcess
+namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 {
 	using System.Collections.Concurrent;
 	using System.Collections.Generic;

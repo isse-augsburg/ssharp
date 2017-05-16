@@ -22,6 +22,7 @@
 
 namespace Tests.SimpleExecutableModel
 {
+	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using System;
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;

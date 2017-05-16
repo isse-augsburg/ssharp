@@ -22,6 +22,7 @@
 
 namespace SafetySharp.ModelChecking
 {
+	using ISSE.SafetyChecking.MarkovDecisionProcess.Optimized;
 	using System;
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;

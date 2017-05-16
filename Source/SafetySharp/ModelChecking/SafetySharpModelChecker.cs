@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis
 {
+	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
@@ -36,7 +37,7 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public static class SafetySharpModelChecker
 	{
-		public static bool _convertNmdpToMdp = true;
+		public static bool _convertNmdpToMdp = false;
 
 		/// <summary>
 		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />. The appropriate model

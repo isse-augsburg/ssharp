@@ -22,6 +22,7 @@
 
 namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 {
+	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using System;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;

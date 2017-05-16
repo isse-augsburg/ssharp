@@ -22,6 +22,7 @@
 
 namespace Tests.MarkovDecisionProcess
 {
+	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using System.Collections.Generic;
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.GenericDataStructures;

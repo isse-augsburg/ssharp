@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace Tests.DataStructures
 {
+	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using System.Diagnostics;
 	using ISSE.SafetyChecking.Formula;
 	using JetBrains.Annotations;

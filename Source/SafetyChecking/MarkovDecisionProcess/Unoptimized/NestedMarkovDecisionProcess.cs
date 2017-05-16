@@ -22,7 +22,7 @@
 
 using System;
 
-namespace ISSE.SafetyChecking.MarkovDecisionProcess
+namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 {
 	using System.Diagnostics;
 	using System.Globalization;
