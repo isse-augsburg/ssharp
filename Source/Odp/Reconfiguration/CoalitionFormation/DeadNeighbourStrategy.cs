@@ -33,7 +33,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		public static DeadNeighbourStrategy Instance { get; } = new DeadNeighbourStrategy();
 
-		public async Task RecruitNecessaryAgents(Coalition coalition)
+		public async Task<TaskFragment> RecruitNecessaryAgents(Coalition coalition)
 		{
 			var affectedRoles = from member in coalition.Members
 								let agent = member.BaseAgent
@@ -62,6 +62,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			// coalition might have lost capabilities due to dead agents
 			await MissingCapabilitiesStrategy.Instance.RecruitNecessaryAgents(coalition);
+
+			throw new NotImplementedException(); // TODO: return fragment
 		}
 
 		// used to recruit predecessor / successor of a role connected to a dead agent
@@ -99,7 +101,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					let predRole = predecessor.Item2
 					where predRole.Task == role.Task
 						&& (predRole.PreCondition.StateLength < role.PreCondition.StateLength
-								|| (role.CapabilitiesToApply.Count() > 0 && predRole.PreCondition.StateLength == role.PreCondition.StateLength))
+								|| (role.CapabilitiesToApply.Any() && predRole.PreCondition.StateLength == role.PreCondition.StateLength))
 					orderby predRole.PreCondition.StateLength descending
 					select predecessor).FirstOrDefault();
 		}
@@ -110,7 +112,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					let succRole = successor.Item2
 					where succRole.Task == role.Task
 						&& (succRole.PostCondition.StateLength > role.PostCondition.StateLength
-							|| (role.CapabilitiesToApply.Count() > 0 && succRole.PostCondition.StateLength == role.PostCondition.StateLength))
+							|| (role.CapabilitiesToApply.Any() && succRole.PostCondition.StateLength == role.PostCondition.StateLength))
 					orderby succRole.PostCondition.StateLength ascending
 					select successor).FirstOrDefault();
 		}

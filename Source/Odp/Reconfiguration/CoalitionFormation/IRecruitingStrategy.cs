@@ -26,6 +26,6 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 	public interface IRecruitingStrategy
 	{
-		Task RecruitNecessaryAgents(Coalition coalition);
+		Task<TaskFragment> RecruitNecessaryAgents(Coalition coalition);
 	}
 }

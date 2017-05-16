@@ -23,6 +23,8 @@
 namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
 	using System.Collections.Generic;
+	using System.Diagnostics;
+	using System.Linq;
 
 	public class TaskFragment
 	{
@@ -61,6 +63,25 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			Capabilities.UnionWith(Task.RequiredCapabilities.Slice(End + 1, newEnd));
 			End = newEnd;
 			return true;
+		}
+
+		/// <summary>
+		/// Merges the given fragments into one.
+		/// </summary>
+		public static TaskFragment Merge(IEnumerable<TaskFragment> fragments)
+		{
+			var fragmentArray = fragments.ToArray();
+			Debug.Assert(fragmentArray.Length > 0);
+			Debug.Assert(fragmentArray.Select(f => f.Task).Distinct().Count() == 1);
+			return new TaskFragment(fragmentArray[0].Task, fragmentArray.Min(f => f.Start), fragmentArray.Max(f => f.End));
+		}
+
+		/// <summary>
+		/// Returns a task fragment that is the identity for the merge operation (among all fragments of the given <paramref name="task"/>).
+		/// </summary>
+		public static TaskFragment Identity(ITask task)
+		{
+			return new TaskFragment(task, task.RequiredCapabilities.Length - 1, 0);
 		}
 	}
 }

@@ -32,7 +32,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		public static MissingCapabilitiesStrategy Instance { get; } = new MissingCapabilitiesStrategy();
 
-		public async Task RecruitNecessaryAgents(Coalition coalition)
+		public async Task<TaskFragment> RecruitNecessaryAgents(Coalition coalition)
 		{
 			var availableCapabilities = new HashSet<ICapability>(
 				coalition.Members.SelectMany(member => member.BaseAgentState.AvailableCapabilities)
@@ -46,6 +46,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				var newMember = await coalition.Invite(agent);
 				availableCapabilities.UnionWith(newMember.BaseAgentState.AvailableCapabilities);
 			}
+
+			// return empty fragment - positions where capability allocations change are included anyway
+			return TaskFragment.Identity(coalition.Task);
 		}
 	}
 }

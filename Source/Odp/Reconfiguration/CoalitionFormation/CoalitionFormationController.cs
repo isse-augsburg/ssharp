@@ -67,8 +67,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			try
 			{
-				foreach (var predicate in coalition.ViolatedPredicates)
-					await RecruitNecessaryAgents(coalition, predicate);
+				var tfr = Task.WhenAll(from predicate in coalition.ViolatedPredicates
+									   select RecruitNecessaryAgents(coalition, predicate));
 
 				await coalition.InviteCtfAgents();
 
@@ -110,7 +110,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// <summary>
 		/// Selects the strategy used to solve the occuring invariant violations based on the violated predicate.
 		/// </summary>
-		private Task RecruitNecessaryAgents(Coalition coalition, InvariantPredicate invariant)
+		private Task<TaskFragment> RecruitNecessaryAgents(Coalition coalition, InvariantPredicate invariant)
 		{
 			if (!_strategies.ContainsKey(invariant))
 				throw new InvalidOperationException("no recruiting strategy specified for invariant predicate");
