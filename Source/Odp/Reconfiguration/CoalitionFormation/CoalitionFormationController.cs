@@ -245,11 +245,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				config.RemoveRoles(agent, obsoleteRoles.ToArray());
 			}
 
-			var currentState = suggestion.TFR.Start;
-			var offset = suggestion.Coalition.CTF.Start;
-			var end = suggestion.TFR.End;
 			var previousRole = default(Role);
-
 			int firstCoreAgent = 0;
 			if (!suggestion.CoreAgents.Contains(resourceFlow[0]))
 			{
@@ -278,6 +274,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			}
 
 			// handle core agents: set capabilities & connections
+			var currentState = suggestion.TFR.Start;
+			var offset = suggestion.CTF.Start;
+			var end = suggestion.TFR.End;
+
 			for (var i = firstCoreAgent; i <= lastCoreAgent; ++i)
 			{
 				var agent = resourceFlow[i];
@@ -299,6 +299,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			public Coalition Coalition { get; }
 			public BaseAgent[] CtfDistribution { get; }
 
+			public TaskFragment CTF { get; }
 			public TaskFragment TFR { get; private set; }
 
 			public ISet<BaseAgent> CoreAgents { get; } = new HashSet<BaseAgent>();
@@ -310,6 +311,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			public ConfigurationSuggestion(Coalition coalition, BaseAgent[] ctfDistribution)
 			{
 				Coalition = coalition;
+				CTF = coalition.CTF.Copy();
 				CtfDistribution = ctfDistribution;
 			}
 
@@ -321,26 +323,25 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			{
 				// TODO: handle branches in resource flow (non-unique distribution, TFR start & end, edge agents)
 
-				var ctf = Coalition.CTF;
-				var offset = ctf.Start;
+				var offset = CTF.Start;
 				var oldDistribution = Coalition.RecoveredDistribution;
 
 				// extend TFR with modified capability allocations
 				TFR = minimalTfr.Copy();
-				for (var i = ctf.Start; i <= ctf.End; ++i)
-					if (CtfDistribution[i - ctf.Start] != oldDistribution[i])
+				for (var i = CTF.Start; i <= CTF.End; ++i)
+					if (CtfDistribution[i - CTF.Start] != oldDistribution[i])
 						TFR.Add(i);
 
 				// round TFR to role boundaries (include capabilities applied by same agent, either before or after reconfiguration)
-				var start = TFR.Start - offset;
-				while (start > 0 && (CtfDistribution[start - 1] == CtfDistribution[start] || oldDistribution[start - 1] == oldDistribution[start]))
+				var start = TFR.Start;
+				while (start > CTF.Start && (CtfDistribution[start - 1 - offset] == CtfDistribution[start - offset] || oldDistribution[start - 1] == oldDistribution[start]))
 					start--;
-				TFR.Prepend(start + offset);
+				TFR.Prepend(start);
 
-				var end = TFR.End - offset;
-				while (end < ctf.Length && (CtfDistribution[end + 1] == CtfDistribution[end] || oldDistribution[end + 1] == oldDistribution[end]))
+				var end = TFR.End;
+				while (end < CTF.End && (CtfDistribution[end + 1 - offset] == CtfDistribution[end - offset] || oldDistribution[end + 1] == oldDistribution[end]))
 					end++;
-				TFR.Append(end + offset);
+				TFR.Append(end);
 
 				// populate agent sets
 				BaseAgent startEdgeAgent, endEdgeAgent;
@@ -366,7 +367,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				//      or transported resources between such agents
 
 				CoreAgents.UnionWith(
-					CtfDistribution.Slice(TFR.Start - Coalition.CTF.Start, TFR.End - Coalition.CTF.Start) // (1)
+					CtfDistribution.Slice(TFR.Start - CTF.Start, TFR.End - CTF.Start) // (1)
 				);
 
 				// (2): go along the resource flow path, from TFR.Start to TFR.End
