@@ -375,10 +375,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					CtfDistribution.Skip(TFR.Start - Coalition.CTF.Start).Take(TFR.Length) // (1)
 				);
 
-				// (2): go along the resource flow path, fron TFR.Start to TFR.End
+				// (2): go along the resource flow path, from TFR.Start to TFR.End
 				var current = Coalition.RecoveredDistribution[TFR.Start];
 				var currentPos = TFR.Start;
-				while (currentPos < TFR.End)
+				while (currentPos <= TFR.End)
 				{
 					CoreAgents.Add(current);
 					var currentRole = current.AllocatedRoles
