@@ -30,7 +30,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 	/// <summary>
 	///   Represents a stack that is used to resolve nondeterministic choices during state space enumeration.
 	/// </summary>
-	internal abstract class ChoiceResolver : DisposableObject
+	public abstract class ChoiceResolver : DisposableObject
 	{
 		/// <summary>
 		///   Gets the index of the last choice that has been made.

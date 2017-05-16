@@ -46,7 +46,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// </summary>
 		/// <param name="results">The result of the safety analysis the order analysis should be conducted for.</param>
 		/// <param name="configuration">The model checker's configuration that determines certain model checker settings.</param>
-		internal OrderAnalysis(SafetyAnalysisResults<TExecutableModel> results, AnalysisConfiguration configuration)
+		public OrderAnalysis(SafetyAnalysisResults<TExecutableModel> results, AnalysisConfiguration configuration)
 		{
 			Requires.NotNull(results, nameof(results));
 

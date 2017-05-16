@@ -25,7 +25,7 @@ namespace ISSE.SafetyChecking.Formula
 	/// <summary>
 	///   Represents the base class of <see cref="Formula" /> visitors.
 	/// </summary>
-	internal abstract class FormulaVisitor
+	public abstract class FormulaVisitor
 	{
 		/// <summary>
 		///   Visits the <paramref name="formula." />

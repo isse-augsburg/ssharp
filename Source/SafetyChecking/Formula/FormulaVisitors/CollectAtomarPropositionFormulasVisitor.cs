@@ -29,7 +29,7 @@ namespace ISSE.SafetyChecking.Formula
 	/// <summary>
 	///   Determines whether a <see cref="Formula" /> is a formula that can be evaluted in a single state.
 	/// </summary>
-	internal class CollectAtomarPropositionFormulasVisitor : FormulaVisitor
+	public class CollectAtomarPropositionFormulasVisitor : FormulaVisitor
 	{
 		/// <summary>
 		///   Indicates whether the visited formula contains any invalid operators.
