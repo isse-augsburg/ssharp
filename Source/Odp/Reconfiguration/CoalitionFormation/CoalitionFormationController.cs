@@ -285,7 +285,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				role.PostCondition.Port = i < resourceFlow.Length - 1 ? resourceFlow[i + 1] : null;
 
 				while (currentState <= end && suggestion.CtfDistribution[currentState - offset] == agent)
-					role.AddCapability(task.RequiredCapabilities[offset + currentState++]);
+					role.AddCapability(task.RequiredCapabilities[currentState++]);
 
 				config.AddRoles(agent, role);
 				previousRole = role;
