@@ -284,7 +284,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				var role = GetRole(task, i > 0 ? resourceFlow[i - 1] : null, i > 0 ? (Condition?)previousRole.PostCondition : null);
 				role.PostCondition.Port = i < resourceFlow.Length - 1 ? resourceFlow[i + 1] : null;
 
-				while (currentState <= end && suggestion.CtfDistribution[currentState] == agent)
+				while (currentState <= end && suggestion.CtfDistribution[currentState - offset] == agent)
 					role.AddCapability(task.RequiredCapabilities[offset + currentState++]);
 
 				config.AddRoles(agent, role);
