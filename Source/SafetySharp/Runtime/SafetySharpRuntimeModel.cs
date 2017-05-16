@@ -188,7 +188,7 @@ namespace SafetySharp.Runtime
 		}
 		
 
-		internal override void SetChoiceResolver(ChoiceResolver choiceResolver)
+		public override void SetChoiceResolver(ChoiceResolver choiceResolver)
 		{
 			foreach (var choice in Objects.OfType<Choice>())
 				choice.Resolver = choiceResolver;
