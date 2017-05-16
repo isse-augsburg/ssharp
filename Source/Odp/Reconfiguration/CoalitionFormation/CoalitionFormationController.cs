@@ -241,7 +241,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			foreach (var agent in suggestion.CoreAgents)
 			{
 				var obsoleteRoles = agent.AllocatedRoles.Where(role => suggestion.TFR.Start <= role.PreCondition.StateLength
-																	   && role.PostCondition.StateLength <= suggestion.TFR.End);
+																	   || role.PostCondition.StateLength <= suggestion.TFR.End);
 				config.RemoveRoles(agent, obsoleteRoles.ToArray());
 			}
 
