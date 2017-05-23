@@ -64,9 +64,10 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		private int CountTargetStatesOfCid(NestedMarkovDecisionProcess nmdp,long cid)
 		{
 			var targetStatesCount = 0;
-			Action<NestedMarkovDecisionProcess.ContinuationGraphLeaf> counter = cge =>
+			Action<NestedMarkovDecisionProcess.ContinuationGraphElement> counter = cge =>
 			{
-				targetStatesCount++;
+				if (cge.IsChoiceTypeUnsplitOrFinal)
+					targetStatesCount++;
 			};
 			var traverser = nmdp.GetTreeTraverser(cid);
 			traverser.ApplyActionWithStackBasedAlgorithm(counter);
@@ -89,10 +90,14 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		private double SumProbabilitiesOfCid(NestedMarkovDecisionProcess nmdp, long cid)
 		{
 			var probabilties = 0.0;
-			Action<NestedMarkovDecisionProcess.ContinuationGraphLeaf> counter = cge =>
+			Action<NestedMarkovDecisionProcess.ContinuationGraphElement> counter = cge =>
 			{
-				var probability = cge.Probability;
-				probabilties+= probability;
+				if (cge.IsChoiceTypeUnsplitOrFinal)
+				{
+					var cgl = cge.AsLeaf;
+					var probability = cgl.Probability;
+					probabilties += probability;
+				}
 			};
 			var traverser = nmdp.GetTreeTraverser(cid);
 			traverser.ApplyActionWithStackBasedAlgorithm(counter);
@@ -308,6 +313,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_stepGraph.SetProbabilityOfContinuationId(4, 0.3);
 			_stepGraph.SetProbabilityOfContinuationId(5, 0.3);
 			_stepGraph.SetProbabilityOfContinuationId(6, 0.4);
+			_stepGraph.SetProbabilityOfContinuationId(1, 1.0);
+			_stepGraph.SetProbabilityOfContinuationId(3, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 7

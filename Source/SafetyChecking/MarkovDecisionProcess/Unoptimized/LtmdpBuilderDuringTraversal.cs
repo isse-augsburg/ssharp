@@ -103,7 +103,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private void AddFinalChoiceOfStepGraph(int continuationId, long locationForContinuationGraphElement)
+			private void AddFinalChoiceOfStepGraph(int continuationId, long locationForContinuationGraphElement, double probability)
 			{
 				var transitionTarget = _continuationIdToTransitionTarget[continuationId];
 
@@ -112,6 +112,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					{
 						ChoiceType = LtmdpChoiceType.UnsplitOrFinal,
 						To = transitionTarget,
+						Probability = probability
 					};
 			}
 
@@ -122,7 +123,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 				if (choice.IsChoiceTypeUnsplitOrFinal)
 				{
-					AddFinalChoiceOfStepGraph(continuationId, locationForContinuationGraphElement);
+					AddFinalChoiceOfStepGraph(continuationId, locationForContinuationGraphElement,choice.Probability);
 					return;
 				}
 

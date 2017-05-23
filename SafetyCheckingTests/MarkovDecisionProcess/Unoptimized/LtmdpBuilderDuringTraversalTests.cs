@@ -68,7 +68,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			var targetStatesCount = 0;
 			Action<LabeledTransitionMarkovDecisionProcess.ContinuationGraphElement> counter = cge =>
 			{
-				targetStatesCount++;
+				if (cge.IsChoiceTypeUnsplitOrFinal)
+					targetStatesCount++;
 			};
 			var traverser = ltmdp.GetTreeTraverser(cid);
 			traverser.ApplyActionWithStackBasedAlgorithm(counter);
@@ -90,14 +91,23 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 		private double SumProbabilitiesOfCid(LabeledTransitionMarkovDecisionProcess ltmdp, long cid)
 		{
-			var probabilties = 0.0;
-			Action<LabeledTransitionMarkovDecisionProcess.ContinuationGraphElement> counter = cge =>
+			Func<LabeledTransitionMarkovDecisionProcess.ContinuationGraphElement, double> leafCounter = (cge) =>
 			{
-				var probability = cge.Probability;
-				probabilties+= probability;
+				var myProbability = cge.Probability;
+				return myProbability;
+			};
+			Func<LabeledTransitionMarkovDecisionProcess.ContinuationGraphElement,IEnumerable<double>, double> innerCounter = (cge,childProbabilities) =>
+			{
+				var myProbability = cge.Probability;
+				var childProbability = 0.0;
+				foreach (var p in childProbabilities)
+				{
+					childProbability += p;
+				}
+				return myProbability*childProbability;
 			};
 			var traverser = ltmdp.GetTreeTraverser(cid);
-			traverser.ApplyActionWithStackBasedAlgorithm(counter);
+			var probabilties=traverser.ApplyFuncWithRecursionBasedAlgorithm(innerCounter,leafCounter);
 
 			return probabilties;
 		}
@@ -306,6 +316,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_stepGraph.SetProbabilityOfContinuationId(4, 0.3);
 			_stepGraph.SetProbabilityOfContinuationId(5, 0.3);
 			_stepGraph.SetProbabilityOfContinuationId(6, 0.4);
+			_stepGraph.SetProbabilityOfContinuationId(1, 1.0);
+			_stepGraph.SetProbabilityOfContinuationId(3, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 7
@@ -346,7 +358,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			var transitionTargetsOfState5 = CountTargetStatesOfState(ltmdp, 5);
 			transitionTargetsOfState5.ShouldBe(5);
 			var probabilitySumOfState5 = SumProbabilitiesOfState(ltmdp,5);
-			probabilitySumOfState5.ShouldBe(3.0);
+			probabilitySumOfState5.ShouldBe(3.0,0.00000001);
 		}
 	}
 }

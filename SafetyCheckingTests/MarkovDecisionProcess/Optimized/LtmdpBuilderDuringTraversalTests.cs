@@ -68,7 +68,10 @@ namespace Tests.MarkovDecisionProcess.Optimized
 			var targetStatesCount = 0;
 			Action<LabeledTransitionMarkovDecisionProcess.ContinuationGraphElement> counter = cge =>
 			{
-				targetStatesCount++;
+				if (cge.IsChoiceTypeUnsplitOrFinal)
+				{
+					targetStatesCount++;
+				}
 			};
 			var traverser = ltmdp.GetTreeTraverser(cid);
 			traverser.ApplyActionWithStackBasedAlgorithm(counter);

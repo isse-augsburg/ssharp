@@ -64,9 +64,10 @@ namespace Tests.MarkovDecisionProcess.Optimized
 		private int CountTargetStatesOfCid(NestedMarkovDecisionProcess nmdp,long cid)
 		{
 			var targetStatesCount = 0;
-			Action<NestedMarkovDecisionProcess.ContinuationGraphLeaf> counter = cge =>
+			Action<NestedMarkovDecisionProcess.ContinuationGraphElement> counter = cge =>
 			{
-				targetStatesCount++;
+				if (cge.IsChoiceTypeUnsplitOrFinal)
+					targetStatesCount++;
 			};
 			var traverser = nmdp.GetTreeTraverser(cid);
 			traverser.ApplyActionWithStackBasedAlgorithm(counter);
@@ -89,10 +90,14 @@ namespace Tests.MarkovDecisionProcess.Optimized
 		private double SumProbabilitiesOfCid(NestedMarkovDecisionProcess nmdp, long cid)
 		{
 			var probabilties = 0.0;
-			Action<NestedMarkovDecisionProcess.ContinuationGraphLeaf> counter = cge =>
+			Action<NestedMarkovDecisionProcess.ContinuationGraphElement> counter = cge =>
 			{
-				var probability = cge.Probability;
-				probabilties+= probability;
+				if (cge.IsChoiceTypeUnsplitOrFinal)
+				{
+					var cgl = cge.AsLeaf;
+					var probability = cgl.Probability;
+					probabilties += probability;
+				}
 			};
 			var traverser = nmdp.GetTreeTraverser(cid);
 			traverser.ApplyActionWithStackBasedAlgorithm(counter);

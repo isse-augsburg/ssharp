@@ -132,7 +132,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		public void SetProbabilityOfContinuationId(int cid, double probability)
 		{
-			Assert.That(_internalGraph.Count > cid, "cid must be declared.");
 			var oldChoice = _internalGraph[cid];
 			_internalGraph[cid] = new Choice(oldChoice.From, oldChoice.To, oldChoice.ChoiceType, probability);
 		}

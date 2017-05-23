@@ -173,16 +173,22 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_choiceResolver.HandleChoice(2);
 
 			// MakeChoiceAtIndexDeterministic of probabilistic split
+			var cidToForwardTo = _choiceResolver.GetContinuationId();
 			_choiceResolver.ForwardUntakenChoicesAtIndex(choiceToMakeDeterministic);
+			var choiceOfCid2 = _stepGraph.GetChoiceOfCid(2);
 
 			var entries = CountEntries(0);
-			entries.ShouldBe(1);
+			entries.ShouldBe(2);
 			entries = CountEntries(1);
 			entries.ShouldBe(2);
 			entries = CountEntries(4);
 			entries.ShouldBe(0);
 			entries = CountEntries(5);
 			entries.ShouldBe(0);
+			entries = CountEntries(2);
+			entries.ShouldBe(1);
+			choiceOfCid2.ChoiceType.ShouldBe(LtmdpChoiceType.Deterministic);
+			choiceOfCid2.To.ShouldBe(cidToForwardTo);
 		}
 
 		[Fact]
@@ -197,18 +203,24 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			var choiceToMakeDeterministic = _choiceResolver.LastChoiceIndex;
 
 			// MakeChoiceAtIndexDeterministic of nondeterministic split
+			var cidToForwardTo = _choiceResolver.GetContinuationId();
 			_choiceResolver.ForwardUntakenChoicesAtIndex(choiceToMakeDeterministic);
+			var choiceOfCid5 = _stepGraph.GetChoiceOfCid(5);
 
 			var entries = CountEntries(0);
 			entries.ShouldBe(3);
 			entries = CountEntries(1);
-			entries.ShouldBe(1);
+			entries.ShouldBe(2);
 			entries = CountEntries(2);
 			entries.ShouldBe(0);
 			entries = CountEntries(3);
 			entries.ShouldBe(0);
 			entries = CountEntries(4);
 			entries.ShouldBe(0);
+			entries = CountEntries(5);
+			entries.ShouldBe(1);
+			choiceOfCid5.ChoiceType.ShouldBe(LtmdpChoiceType.Deterministic);
+			choiceOfCid5.To.ShouldBe(cidToForwardTo);
 		}
 
 
@@ -228,7 +240,9 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_choiceResolver.HandleChoice(2);
 			_choiceResolver.HandleProbabilisticChoice(2);
 			var choiceToMakeDeterministic = _choiceResolver.LastChoiceIndex;
+			var cidToForwardTo = _choiceResolver.GetContinuationId();
 			_choiceResolver.ForwardUntakenChoicesAtIndex(choiceToMakeDeterministic);
+			var choiceOfCid6 = _stepGraph.GetChoiceOfCid(6);
 			_choiceResolver.PrepareNextPath();
 
 			var entries = CountEntries(0);
@@ -236,13 +250,17 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			entries = CountEntries(1);
 			entries.ShouldBe(2);
 			entries = CountEntries(2);
-			entries.ShouldBe(1);
+			entries.ShouldBe(2);
 			entries = CountEntries(3);
 			entries.ShouldBe(0);
 			entries = CountEntries(4);
 			entries.ShouldBe(0);
 			entries = CountEntries(5);
 			entries.ShouldBe(0);
+			entries = CountEntries(6);
+			entries.ShouldBe(1);
+			choiceOfCid6.ChoiceType.ShouldBe(LtmdpChoiceType.Deterministic);
+			choiceOfCid6.To.ShouldBe(cidToForwardTo);
 		}
 
 		[Fact]

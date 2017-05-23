@@ -294,9 +294,40 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				}
 			}
 
+			public T ApplyFuncWithRecursionBasedAlgorithm<T>(Func<ContinuationGraphElement,IEnumerable<T>, T> innerFunc, Func<ContinuationGraphElement, T> leafFunc)
+			{
+				var cache = new Dictionary<long,T>();
+				return ApplyFuncWithRecursionBasedAlgorithmInnerRecursion(innerFunc, leafFunc, cache, ParentContinuationId);
+			}
+
+			private T ApplyFuncWithRecursionBasedAlgorithmInnerRecursion<T>(Func<ContinuationGraphElement, IEnumerable<T>, T> innerFunc, Func<ContinuationGraphElement, T> leafFunc, Dictionary<long,T> cachedElements, long currentCid)
+			{
+				if (cachedElements.ContainsKey(currentCid))
+					return cachedElements[currentCid];
+
+				ContinuationGraphElement cge = Ltmdp.GetContinuationGraphElement(currentCid);
+				if (cge.IsChoiceTypeUnsplitOrFinal)
+				{
+					var result = leafFunc(cge);
+					cachedElements[currentCid] = result;
+					return result;
+				}
+				else
+				{
+					var results = new T[cge.To - cge.From + 1];
+					for (var i = cge.From; i <= cge.To; i++)
+					{
+						results[i- cge.From] = ApplyFuncWithRecursionBasedAlgorithmInnerRecursion(innerFunc, leafFunc, cachedElements, i);
+					}
+					var result = innerFunc(cge, results);
+					cachedElements[currentCid] = result;
+					return result;
+				}
+			}
+
 			public void ApplyActionWithRecursionBasedAlgorithm(Action<ContinuationGraphElement> action)
 			{
-				ApplyActionWithRecursionBasedAlgorithmInnerRecursion(action,ParentContinuationId);
+				ApplyActionWithRecursionBasedAlgorithmInnerRecursion(action, ParentContinuationId);
 			}
 		}
 

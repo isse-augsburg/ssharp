@@ -94,6 +94,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 			public bool IsChoiceTypeNondeterministic => ChoiceType == LtmdpChoiceType.Nondeterministic;
 
 			public bool IsChoiceTypeProbabilitstic => ChoiceType == LtmdpChoiceType.Probabilitstic;
+
+			[FieldOffset(0)]
+			public ContinuationGraphLeaf AsLeaf;
 		}
 
 		[StructLayout(LayoutKind.Explicit, Size = 24)]
@@ -233,7 +236,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 				Nmdp = nmdp;
 			}
 
-			public void ApplyActionWithStackBasedAlgorithm(Action<ContinuationGraphLeaf> action)
+			public void ApplyActionWithStackBasedAlgorithm(Action<ContinuationGraphElement> action)
 			{
 				// also shows how to traverse a tree with stacks and without recursion
 				var fromDecisionStack = new Stack<long>();
@@ -252,6 +255,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 						// select current fromCid
 						var fromCid = fromDecisionStack.Peek();
 						var cge = Nmdp.GetContinuationGraphElement(fromCid);
+
+						// found new cge
+						action(cge);
+
 						if (cge.IsChoiceTypeUnsplitOrFinal)
 						{
 							foundNextLeaf = true;
@@ -265,8 +272,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 						}
 					}
 
-					// here we can work with the next cge
-					action(cgl);
+					// here we can work with the next leaf
 
 					// find next fromCid
 					var foundNextFromCid = false;
@@ -288,12 +294,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 				}
 			}
 
-			private void ApplyActionWithRecursionBasedAlgorithmInnerRecursion(Action<ContinuationGraphLeaf> action, long currentCid)
+			private void ApplyActionWithRecursionBasedAlgorithmInnerRecursion(Action<ContinuationGraphElement> action, long currentCid)
 			{
 				ContinuationGraphElement cge = Nmdp.GetContinuationGraphElement(currentCid);
+				action(cge);
 				if (cge.IsChoiceTypeUnsplitOrFinal)
 				{
-					action(Nmdp.GetContinuationGraphLeaf(currentCid));
 				}
 				else
 				{
@@ -305,7 +311,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 				}
 			}
 
-			public void ApplyActionWithRecursionBasedAlgorithm(Action<ContinuationGraphLeaf> action)
+			public void ApplyActionWithRecursionBasedAlgorithm(Action<ContinuationGraphElement> action)
 			{
 				ApplyActionWithRecursionBasedAlgorithmInnerRecursion(action, ParentContinuationId);
 			}
@@ -326,10 +332,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 				BaseGraph = new BidirectionalGraph();
 
 				var currentState = 0;
-				Action<ContinuationGraphLeaf> addTargetState = cgl =>
+				Action<ContinuationGraphElement> addTargetState = cge =>
 				{
-					if (cgl.Probability > 0.0)
-						BaseGraph.AddVerticesAndEdge(new Edge(currentState, cgl.ToState));
+					if (cge.IsChoiceTypeUnsplitOrFinal)
+					{
+						var cgl = cge.AsLeaf;
+						if (cgl.Probability > 0.0)
+							BaseGraph.AddVerticesAndEdge(new Edge(currentState, cgl.ToState));
+					}
 				};
 
 				for (currentState = 0; currentState < mdp.States; currentState++)
