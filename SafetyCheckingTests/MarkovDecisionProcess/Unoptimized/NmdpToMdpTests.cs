@@ -50,34 +50,38 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			Output = new TestTraceOutput(output);
 		}
 
-		private void CountDistributionsAndTransitionsOfInitialState(out int distributions, out int transitions)
+		private void CalculateMetricsOfInitialState(out int distributions, out int transitions, out double summedProbability)
 		{
 			var enumerator = MarkovDecisionProcess.GetEnumerator();
 			enumerator.SelectInitialDistributions();
 			distributions = 0;
 			transitions = 0;
+			summedProbability = 0.0;
 			while (enumerator.MoveNextDistribution())
 			{
 				distributions++;
 				while (enumerator.MoveNextTransition())
 				{
 					transitions++;
+					summedProbability += enumerator.CurrentTransition.Value;
 				}
 			}
 		}
 
-		private void CountDistributionsAndTransitionsOfState(int state, out int distributions, out int transitions)
+		private void CalculateMetricsOfState(int state, out int distributions, out int transitions, out double summedProbability)
 		{
 			var enumerator = MarkovDecisionProcess.GetEnumerator();
 			enumerator.SelectSourceState(state);
 			distributions = 0;
 			transitions = 0;
+			summedProbability = 0.0;
 			while (enumerator.MoveNextDistribution())
 			{
 				distributions++;
 				while (enumerator.MoveNextTransition())
 				{
 					transitions++;
+					summedProbability += enumerator.CurrentTransition.Value;
 				}
 			}
 		}
@@ -92,15 +96,19 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			int initialDistributions;
 			int initialTransitions;
-			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			double initialProbabilities;
+			CalculateMetricsOfInitialState(out initialDistributions, out initialTransitions, out initialProbabilities);
 			initialDistributions.ShouldBe(1);
 			initialTransitions.ShouldBe(1);
+			initialProbabilities.ShouldBe(1.0, 0.0000001);
 
 			int state0Distributions;
 			int state0Transitions;
-			CountDistributionsAndTransitionsOfState(0,out state0Distributions, out state0Transitions);
+			double state0Probabilities;
+			CalculateMetricsOfState(0,out state0Distributions, out state0Transitions, out state0Probabilities);
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(1);
+			state0Probabilities.ShouldBe(1.0, 0.0000001);
 		}
 
 		[Fact]
@@ -113,15 +121,19 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			int initialDistributions;
 			int initialTransitions;
-			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			double initialProbabilities;
+			CalculateMetricsOfInitialState(out initialDistributions, out initialTransitions, out initialProbabilities);
 			initialDistributions.ShouldBe(1);
 			initialTransitions.ShouldBe(3);
+			initialProbabilities.ShouldBe(1.0, 0.0000001);
 
 			int state0Distributions;
 			int state0Transitions;
-			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			double state0Probabilities;
+			CalculateMetricsOfState(0, out state0Distributions, out state0Transitions, out state0Probabilities);
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(1);
+			state0Probabilities.ShouldBe(1.0, 0.0000001);
 		}
 		
 		[Fact]
@@ -134,15 +146,19 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			int initialDistributions;
 			int initialTransitions;
-			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			double initialProbabilities;
+			CalculateMetricsOfInitialState(out initialDistributions, out initialTransitions, out initialProbabilities);
 			initialDistributions.ShouldBe(1);
 			initialTransitions.ShouldBe(3);
+			initialProbabilities.ShouldBe(1.0, 0.0000001);
 
 			int state0Distributions;
 			int state0Transitions;
-			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			double state0Probabilities;
+			CalculateMetricsOfState(0, out state0Distributions, out state0Transitions, out state0Probabilities);
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(1);
+			state0Probabilities.ShouldBe(1.0, 0.0000001);
 		}
 
 		[Fact]
@@ -155,15 +171,19 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			int initialDistributions;
 			int initialTransitions;
-			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			double initialProbabilities;
+			CalculateMetricsOfInitialState(out initialDistributions, out initialTransitions, out initialProbabilities);
 			initialDistributions.ShouldBe(2);
 			initialTransitions.ShouldBe(3);
+			initialProbabilities.ShouldBe(2.0, 0.0000001);
 
 			int state0Distributions;
 			int state0Transitions;
-			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			double state0Probabilities;
+			CalculateMetricsOfState(0, out state0Distributions, out state0Transitions, out state0Probabilities);
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(1);
+			state0Probabilities.ShouldBe(1.0, 0.0000001);
 		}
 
 		[Fact]
@@ -176,15 +196,19 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			int initialDistributions;
 			int initialTransitions;
-			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			double initialProbabilities;
+			CalculateMetricsOfInitialState(out initialDistributions, out initialTransitions, out initialProbabilities);
 			initialDistributions.ShouldBe(2);
 			initialTransitions.ShouldBe(4);
+			initialProbabilities.ShouldBe(2.0, 0.0000001);
 
 			int state0Distributions;
 			int state0Transitions;
-			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			double state0Probabilities;
+			CalculateMetricsOfState(0, out state0Distributions, out state0Transitions, out state0Probabilities);
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(1);
+			state0Probabilities.ShouldBe(1.0, 0.0000001);
 		}
 		
 		[Fact]
@@ -197,15 +221,19 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			int initialDistributions;
 			int initialTransitions;
-			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			double initialProbabilities;
+			CalculateMetricsOfInitialState(out initialDistributions, out initialTransitions, out initialProbabilities);
 			initialDistributions.ShouldBe(1);
 			initialTransitions.ShouldBe(1);
+			initialProbabilities.ShouldBe(1.0, 0.0000001);
 
 			int state0Distributions;
 			int state0Transitions;
-			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			double state0Probabilities;
+			CalculateMetricsOfState(0, out state0Distributions, out state0Transitions, out state0Probabilities);
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(3);
+			state0Probabilities.ShouldBe(1.0, 0.0000001);
 		}
 
 		[Fact]
@@ -218,15 +246,19 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			int initialDistributions;
 			int initialTransitions;
-			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			double initialProbabilities;
+			CalculateMetricsOfInitialState(out initialDistributions, out initialTransitions, out initialProbabilities);
 			initialDistributions.ShouldBe(1);
 			initialTransitions.ShouldBe(1);
+			initialProbabilities.ShouldBe(1.0, 0.0000001);
 
 			int state0Distributions;
 			int state0Transitions;
-			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			double state0Probabilities;
+			CalculateMetricsOfState(0, out state0Distributions, out state0Transitions, out state0Probabilities);
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(3);
+			state0Probabilities.ShouldBe(1.0, 0.0000001);
 		}
 
 		[Fact]
@@ -239,15 +271,19 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			int initialDistributions;
 			int initialTransitions;
-			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			double initialProbabilities;
+			CalculateMetricsOfInitialState(out initialDistributions, out initialTransitions, out initialProbabilities);
 			initialDistributions.ShouldBe(1);
 			initialTransitions.ShouldBe(1);
+			initialProbabilities.ShouldBe(1.0, 0.0000001);
 
 			int state0Distributions;
 			int state0Transitions;
-			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			double state0Probabilities;
+			CalculateMetricsOfState(0, out state0Distributions, out state0Transitions, out state0Probabilities);
 			state0Distributions.ShouldBe(2);
 			state0Transitions.ShouldBe(3);
+			state0Probabilities.ShouldBe(2.0, 0.0000001);
 		}
 
 		[Fact]
@@ -260,15 +296,19 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			int initialDistributions;
 			int initialTransitions;
-			CountDistributionsAndTransitionsOfInitialState(out initialDistributions, out initialTransitions);
+			double initialProbabilities;
+			CalculateMetricsOfInitialState(out initialDistributions, out initialTransitions, out initialProbabilities);
 			initialDistributions.ShouldBe(1);
 			initialTransitions.ShouldBe(1);
+			initialProbabilities.ShouldBe(1.0, 0.0000001);
 
 			int state0Distributions;
 			int state0Transitions;
-			CountDistributionsAndTransitionsOfState(0, out state0Distributions, out state0Transitions);
+			double state0Probabilities;
+			CalculateMetricsOfState(0, out state0Distributions, out state0Transitions, out state0Probabilities);
 			state0Distributions.ShouldBe(2);
 			state0Transitions.ShouldBe(4);
+			state0Probabilities.ShouldBe(2.0, 0.0000001);
 		}
 	}
 }

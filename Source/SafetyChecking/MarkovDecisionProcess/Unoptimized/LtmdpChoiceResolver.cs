@@ -236,18 +236,17 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		public override void SetProbabilityOfLastChoice(Probability probability)
 		{
 			var probabilitiesOfChosenValuesMaxIndex = _chosenValues.Count - 1;
-			// Optimization:
 			// If this part of the path has previously been visited we do not change the value
 			// because this value has already been set by a previous call of SetProbabilityOfLastChoice.
 			// Only if we explore a new part of the path the probability needs to be written.
 			// A new part of the path is explored, iff the previous HandleChoice pushed a new placeholder
 			// value onto the three stacks).
+			// Note, that _continuationId is the continuationId of the last choice of the complete prepared
+			// path!
 			if (_choiceIndex == probabilitiesOfChosenValuesMaxIndex)
 			{
 				LtmdpStepGraph.SetProbabilityOfContinuationId(_continuationId,probability.Value);
 			}
-			// ReSharper disable once CompareOfFloatsByEqualityOperator
-			Assert.That(LtmdpStepGraph.GetProbabilityOfContinuationId(_continuationId) == probability.Value, "bug");
 		}
 		
 		/// <summary>

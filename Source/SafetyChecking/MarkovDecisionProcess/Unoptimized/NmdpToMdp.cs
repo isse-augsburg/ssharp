@@ -41,6 +41,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private long _currentOffset;
 		private AutoResizeVector<NestedMarkovDecisionProcess.ContinuationGraphLeaf> _continuationGraphLeafOfCid = new AutoResizeVector<NestedMarkovDecisionProcess.ContinuationGraphLeaf>();
+		
+		private AutoResizeVector<double> _probabilityOfCid = new AutoResizeVector<double>();
 
 		private readonly LtmdpContinuationDistributionMapper _ltmdpContinuationDistributionMapper = new LtmdpContinuationDistributionMapper();
 		
@@ -67,18 +69,46 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			_continuationGraphLeafOfCid[(int)internalCid]= leaf;
 		}
 
+		private double GetProbabilityOfCid(long cid)
+		{
+			var internalCid = cid - _currentOffset;
+			Assert.That(internalCid <= int.MaxValue, "internalCid<=int.MaxValue");
+			return _probabilityOfCid[(int)internalCid];
+		}
+
+		private void SetProbabilityOfCid(long cid, double probability)
+		{
+			var internalCid = cid - _currentOffset;
+			Assert.That(internalCid <= int.MaxValue, "internalCid<=int.MaxValue");
+			_probabilityOfCid[(int)internalCid] = probability;
+		}
+
+		private void MultiplyProbabilityOfCid(long cid, double factor)
+		{
+			var internalCid = cid - _currentOffset;
+			Assert.That(internalCid <= int.MaxValue, "internalCid<=int.MaxValue");
+			_probabilityOfCid[(int)internalCid] *= factor;
+		}
+
 		private void UpdateContinuationDistributionMapperAndCollectLeafs(long currentCid)
 		{
 			var cge = _nmdp.GetContinuationGraphElement(currentCid);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
 			{
 				var cgl = _nmdp.GetContinuationGraphLeaf(currentCid);
+				MultiplyProbabilityOfCid(currentCid, cgl.Probability);
 				SetLeafOfCid(currentCid, cgl);
 			}
 			else
 			{
 				var cgi = _nmdp.GetContinuationGraphInnerNode(currentCid);
-				if (cge.IsChoiceTypeDeterministic || cge.IsChoiceTypeNondeterministic)
+				MultiplyProbabilityOfCid(currentCid, cgi.Probability);
+				if (cge.IsChoiceTypeDeterministic)
+				{
+					// This ChoiceType might be created by ForwardUntakenChoicesAtIndex in ChoiceResolver
+					throw new Exception("Forward transitions not supported");
+				}
+				else if (cge.IsChoiceTypeNondeterministic)
 				{
 					_ltmdpContinuationDistributionMapper.NonDeterministicSplit(currentCid, cgi.FromCid, cgi.ToCid);
 				}
@@ -86,9 +116,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				{
 					_ltmdpContinuationDistributionMapper.ProbabilisticSplit(currentCid, cgi.FromCid, cgi.ToCid);
 				}
-
+				var oldProbability = GetProbabilityOfCid(currentCid);
 				for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 				{
+					SetProbabilityOfCid(i, oldProbability);
 					UpdateContinuationDistributionMapperAndCollectLeafs(i);
 				}
 			}
@@ -104,7 +135,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			while (enumerator.MoveNext())
 			{
 				var leaf = GetLeafOfCid(enumerator.CurrentContinuationId);
-				MarkovDecisionProcess.AddTransition(leaf.ToState, leaf.Probability);
+				MarkovDecisionProcess.AddTransition(leaf.ToState, GetProbabilityOfCid(enumerator.CurrentContinuationId));
 			}
 			
 			MarkovDecisionProcess.FinishDistribution();
@@ -122,17 +153,25 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			while (enumerator.MoveNext())
 			{
 				var leaf = GetLeafOfCid(enumerator.CurrentContinuationId);
-				MarkovDecisionProcess.AddTransitionToInitialDistribution(leaf.ToState, leaf.Probability);
+				var probability = GetProbabilityOfCid(enumerator.CurrentContinuationId);
+				MarkovDecisionProcess.AddTransitionToInitialDistribution(leaf.ToState, probability);
 			}
 			
 			MarkovDecisionProcess.FinishInitialDistribution();
+		}
+
+		private void Clear()
+		{
+			_probabilityOfCid.Clear();
+			_probabilityOfCid[0] = 1.0;
+			_ltmdpContinuationDistributionMapper.Clear();
 		}
 
 		private void ConvertStateTransitions()
 		{
 			for (var state = 0; state < _nmdp.States; state++)
 			{
-				_ltmdpContinuationDistributionMapper.Clear();
+				Clear();
 				var cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfState(state);
 				_currentOffset = cidOfStateRoot;
 				_ltmdpContinuationDistributionMapper.AddInitialDistributionAndContinuation(_currentOffset);
@@ -153,7 +192,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		
 		public void ConvertInitialTransitions()
 		{
-			_ltmdpContinuationDistributionMapper.Clear();
+			Clear();
 			var cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfInitialState();
 			_currentOffset = cidOfStateRoot;
 			_ltmdpContinuationDistributionMapper.AddInitialDistributionAndContinuation(_currentOffset);
