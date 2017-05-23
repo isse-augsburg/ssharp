@@ -41,33 +41,44 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 								where role.Task == coalition.Task && (role.PreCondition.Port?.IsAlive == false || role.PostCondition.Port?.IsAlive == false)
 								select role;
 
-			var taggedRoles = coalition.Members.SelectMany(member =>
-				member.BaseAgent.AllocatedRoles.Select(r => Tuple.Create(member.BaseAgent, r))
-			);
+			var fragments = new List<TaskFragment>();
+
 			// for each role, must find predecessor / successor role
 			foreach (var role in affectedRoles)
 			{
+				var start = role.PreCondition.StateLength;
+				var end = role.PostCondition.StateLength;
+
 				if (role.PreCondition.Port?.IsAlive == false) // find predecessor
-					await RecruitConnectedAgent(role, coalition, FindLastPredecessor);
+				{
+					var predecessor = await RecruitConnectedAgent(role, coalition, FindLastPredecessor);
+					start = predecessor.Item2.PreCondition.StateLength;
+				}
 
 				if (role.PostCondition.Port?.IsAlive == false) // find successor
-					await RecruitConnectedAgent(role, coalition, FindFirstSuccessor);
+				{
+					var successor = await RecruitConnectedAgent(role, coalition, FindFirstSuccessor);
+					end = successor.Item2.PostCondition.StateLength;
+				}
+
+				fragments.Add(new TaskFragment(coalition.Task, start, end));
 			}
 
 			// once predecessor / successor are in the coalition,
 			// Coalition.InviteCtf() will fill the gaps in the CTF
 			// (called in CalculateConfigurations()).
 
-			// TODO surround empty predecessors/successors
+			// unclear: is it necessary to surround empty predecessors / successors by empty roles?
+			// ~> test such situations
 
 			// coalition might have lost capabilities due to dead agents
 			await MissingCapabilitiesStrategy.Instance.RecruitNecessaryAgents(coalition);
 
-			throw new NotImplementedException(); // TODO: return fragment
+			return TaskFragment.Merge(fragments);
 		}
 
 		// used to recruit predecessor / successor of a role connected to a dead agent
-		private async Task RecruitConnectedAgent(Role role, Coalition coalition,
+		private static async Task<Tuple<BaseAgent, Role>> RecruitConnectedAgent(Role role, Coalition coalition,
 			Func<Role, IEnumerable<Tuple<BaseAgent, Role>>, Tuple<BaseAgent, Role>> getConnectedRole)
 		{
 			var taggedRoles = coalition.Members.SelectMany(member =>
@@ -89,13 +100,16 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						break;
 				}
 
-				if (agent != null)
-					await coalition.Invite(agent.Item1);
-				// TODO: if agent still null (real successor/predecessor is unreachable) ?
+				if (agent == null)
+					throw new Exception("Successor / predecessor role is unreachable");
+
+				await coalition.Invite(agent.Item1);
 			}
+
+			return agent;
 		}
 
-		private Tuple<BaseAgent, Role> FindLastPredecessor(Role role, IEnumerable<Tuple<BaseAgent, Role>> possiblePredecessors)
+		private static Tuple<BaseAgent, Role> FindLastPredecessor(Role role, IEnumerable<Tuple<BaseAgent, Role>> possiblePredecessors)
 		{
 			return (from predecessor in possiblePredecessors
 					let predRole = predecessor.Item2
@@ -106,7 +120,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					select predecessor).FirstOrDefault();
 		}
 
-		private Tuple<BaseAgent, Role> FindFirstSuccessor(Role role, IEnumerable<Tuple<BaseAgent, Role>> possibleSuccessors)
+		private static Tuple<BaseAgent, Role> FindFirstSuccessor(Role role, IEnumerable<Tuple<BaseAgent, Role>> possibleSuccessors)
 		{
 			return (from successor in possibleSuccessors
 					let succRole = successor.Item2
