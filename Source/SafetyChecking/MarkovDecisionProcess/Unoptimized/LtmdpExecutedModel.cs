@@ -156,21 +156,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					throw new ArgumentOutOfRangeException();
 			}
 		}
-		
-		/// <summary>
-		///	  The probability to reach the current state from its predecessor from the last transition.
-		/// </summary>
-		public Probability GetProbability()
-		{
-			return ChoiceResolver.CalculateProbabilityOfPath();
-		}
 
 		/// <summary>
 		///	  Get the continuation id of the current path from the choice resolver.
 		/// </summary>
 		public int GetContinuationId()
 		{
-			return ChoiceResolver.GetContinuationId();
+			return _ltmdpChoiceResolver.GetContinuationId();
 		}
 
 		/// <summary>
@@ -178,7 +170,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// </summary>
 		protected override void GenerateTransition()
 		{
-			_cachedLabeledStates.Add(RuntimeModel, GetProbability().Value, GetContinuationId());
+			_cachedLabeledStates.Add(RuntimeModel, GetContinuationId());
 		}
 
 		/// <summary>

@@ -81,7 +81,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		// Retrieving matrix phase
 
-		[StructLayout(LayoutKind.Explicit, Size = 24)]
+		[StructLayout(LayoutKind.Explicit, Size = 32)]
 		public struct ContinuationGraphElement
 		{
 			[FieldOffset(0)]
@@ -96,20 +96,23 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			public bool IsChoiceTypeProbabilitstic => ChoiceType == LtmdpChoiceType.Probabilitstic;
 		}
 
-		[StructLayout(LayoutKind.Explicit, Size = 24)]
+		[StructLayout(LayoutKind.Explicit, Size = 32)]
 		public struct ContinuationGraphInnerNode
 		{
 			[FieldOffset(0)]
 			public LtmdpChoiceType ChoiceType;
 
 			[FieldOffset(8)]
-			public long FromCid;
+			public double Probability;
 
 			[FieldOffset(16)]
+			public long FromCid;
+
+			[FieldOffset(24)]
 			public long ToCid;
 		}
 
-		[StructLayout(LayoutKind.Explicit, Size = 24)]
+		[StructLayout(LayoutKind.Explicit, Size = 32)]
 		public struct ContinuationGraphLeaf
 		{
 			[FieldOffset(0)]
@@ -158,7 +161,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				};
 		}
 
-		public void AddContinuationGraphInnerNode(long locationForContinuationGraphElement, LtmdpChoiceType choiceType, long fromCid, long toCid)
+		public void AddContinuationGraphInnerNode(long locationForContinuationGraphElement, LtmdpChoiceType choiceType, long fromCid, long toCid, double probability)
 		{
 			Assert.That(choiceType!=LtmdpChoiceType.UnsplitOrFinal,"must not be final node");
 			((ContinuationGraphInnerNode*)_continuationGraph)[locationForContinuationGraphElement] =
@@ -166,7 +169,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				{
 					ChoiceType = choiceType,
 					FromCid = fromCid,
-					ToCid = toCid
+					ToCid = toCid,
+					Probability = probability,
 				};
 		}
 

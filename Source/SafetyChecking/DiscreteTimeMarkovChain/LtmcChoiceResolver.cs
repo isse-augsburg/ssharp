@@ -187,16 +187,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		}
 
 		/// <summary>
-		///   Gets the continuation id of the current path.
-		/// </summary>
-		internal override int GetContinuationId()
-		{
-			//TODO: Replace lastChoiceIndex by continuation id
-			throw new NotImplementedException();
-		}
-
-
-		/// <summary>
 		/// </summary>
 		/// <param name="valueCount">The number of values that can be chosen.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -224,7 +214,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override void MakeChoiceAtIndexDeterministic(int choiceIndex)
+		internal override void ForwardUntakenChoicesAtIndex(int choiceIndex)
 		{
 			// This method is called when it is assumed, that choosing anything different at choiceIndex
 			// leads to the same state as the path until the last choice.
@@ -284,7 +274,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <summary>
 		///	  The probability of the current path
 		/// </summary>
-		internal override Probability CalculateProbabilityOfPath()
+		internal Probability CalculateProbabilityOfPath()
 		{
 			if (_choiceIndex == -1)
 				return Probability.One;

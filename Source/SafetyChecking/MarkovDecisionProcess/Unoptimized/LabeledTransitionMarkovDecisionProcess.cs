@@ -92,6 +92,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			public LtmdpChoiceType ChoiceType;
 			public long From;
 			public long To;
+			public double Probability;
 
 			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == LtmdpChoiceType.UnsplitOrFinal;
 
@@ -108,7 +109,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			public int TargetState;
 			public StateFormulaSet Formulas;
-			public double Probability;
 		}
 
 		public int TransitionTargets => _transitionTargetCount;
@@ -143,14 +143,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					new ContinuationGraphElement
 					{
 						ChoiceType=LtmdpChoiceType.UnsplitOrFinal,
-						To = locationOfNewTransitionTargetElement
+						To = locationOfNewTransitionTargetElement,
+						Probability = 1.0,
 					};
 
 			_transitionTarget[locationOfNewTransitionTargetElement] =
 					new TransitionTargetElement
 					{
 						Formulas = new StateFormulaSet(),
-						Probability = 1.0,
 						TargetState = stutteringStateIndex
 					};
 
@@ -241,6 +241,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 						// select current fromCid
 						var fromCid = fromDecisionStack.Peek();
 						cge = Ltmdp.GetContinuationGraphElement(fromCid);
+
+						// found new cge
+						action(cge);
+
 						if (cge.IsChoiceTypeUnsplitOrFinal)
 						{
 							foundNextLeaf = true;
@@ -252,8 +256,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 						}
 					}
 
-					// here we can work with the next cge
-					action(cge);
+					// here we can work with the next leaf
 
 					// find next fromCid
 					var foundNextFromCid = false;
@@ -278,9 +281,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			private void ApplyActionWithRecursionBasedAlgorithmInnerRecursion(Action<ContinuationGraphElement> action, long currentCid)
 			{
 				ContinuationGraphElement cge = Ltmdp.GetContinuationGraphElement(currentCid);
+				action(cge);
 				if (cge.IsChoiceTypeUnsplitOrFinal)
 				{
-					action(cge);
 				}
 				else
 				{
@@ -340,9 +343,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
 
 			public int CurrentIndex { get; private set; }
-
-			public double CurrentProbability => _ltmdp._transitionTarget[CurrentIndex].Probability;
-
+			
 			public int CurrentTargetState => _ltmdp._transitionTarget[CurrentIndex].TargetState;
 
 			public StateFormulaSet CurrentFormulas => _ltmdp._transitionTarget[CurrentIndex].Formulas;

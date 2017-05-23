@@ -38,17 +38,20 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			public readonly int From;
 			public readonly int To;
 			public readonly LtmdpChoiceType ChoiceType;
+			public readonly double Probability;
 			
-			public Choice(int from, int to, LtmdpChoiceType choiceType)
+			public Choice(int from, int to, LtmdpChoiceType choiceType, double probability)
 			{
 				From=from;
 				To=to;
-				ChoiceType=choiceType;
+				ChoiceType = choiceType;
+				Probability = probability;
 			}
-
-			public Choice DeriveDeterministic()
+			
+			public Choice PruneTo2()
 			{
-				return new Choice(From,From,LtmdpChoiceType.Deterministic);
+				Assert.That(To>=From+1,"Existing choice must have at least 2 options");
+				return new Choice(From, From+1, LtmdpChoiceType.Deterministic,Probability);
 			}
 
 			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == LtmdpChoiceType.UnsplitOrFinal;
@@ -76,12 +79,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		private void AddInitialContinuation()
 		{
 			Requires.That(_internalGraph.Count == 0, "Data structure must be empty");
-			_internalGraph[0] = new Choice(0,0,LtmdpChoiceType.UnsplitOrFinal);
+			_internalGraph[0] = new Choice(0,0,LtmdpChoiceType.UnsplitOrFinal, 1.0);
 		}
 
-		public void MakeChoiceOfCidDeterministic(int cid)
+		public void PruneChoicesOfCidTo2(int cid)
 		{
-			_internalGraph[cid] = _internalGraph[cid].DeriveDeterministic();
+			_internalGraph[cid] = _internalGraph[cid].PruneTo2();
 		}
 
 		public int Size => _internalGraph.Count;
@@ -98,7 +101,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			Assert.That(sourceCid < fromCid && sourceCid < toCid, "sourceCid must be smaller than childrenCids");
 			Assert.That(fromCid <= toCid, "range [fromCid..toCid] must be ascending and contain at least one element");
 
-			_internalGraph[sourceCid] = new Choice(fromCid,toCid,LtmdpChoiceType.Nondeterministic);
+			_internalGraph[sourceCid] = new Choice(fromCid,toCid,LtmdpChoiceType.Nondeterministic, 1.0);
 		}
 
 
@@ -114,7 +117,30 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			Assert.That(sourceCid < fromCid && sourceCid < toCid, "sourceCid must be smaller than childrenCids");
 			Assert.That(fromCid <= toCid, "range [fromCid..toCid] must be ascending and contain at least one element");
 
-			_internalGraph[sourceCid] = new Choice(fromCid, toCid, LtmdpChoiceType.Probabilitstic);
+			_internalGraph[sourceCid] = new Choice(fromCid, toCid, LtmdpChoiceType.Probabilitstic, 1.0);
+		}
+		
+		/// <summary>
+		///   Create a deterministic choice to forward a sourceCid to toCid.
+		/// </summary>
+		/// <param name="sourceCid">The source continuation id that is split..</param>
+		/// <param name="toCid">The target of the .</param>
+		public void Forward(int sourceCid, int toCid)
+		{
+			_internalGraph[sourceCid] = new Choice(toCid, toCid, LtmdpChoiceType.Deterministic, 1.0);
+		}
+
+		public void SetProbabilityOfContinuationId(int cid, double probability)
+		{
+			Assert.That(_internalGraph.Count > cid, "cid must be declared.");
+			var oldChoice = _internalGraph[cid];
+			_internalGraph[cid] = new Choice(oldChoice.From, oldChoice.To, oldChoice.ChoiceType, probability);
+		}
+
+		public double GetProbabilityOfContinuationId(int cid)
+		{
+			Assert.That(_internalGraph.Count > cid, "cid must be declared.");
+			return _internalGraph[cid].Probability;
 		}
 
 

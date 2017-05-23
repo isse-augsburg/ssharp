@@ -42,16 +42,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		private const int InitialCapacity = 64;
 
 		/// <summary>
-		///   Represents a non deterministic choice in _choiceType
-		/// </summary>
-		private const int ChoiceTypeNondeterministic = 1;
-
-		/// <summary>
-		///   Represents a probabilistic choice in _choiceType
-		/// </summary>
-		private const int ChoiceTypeProbabilitstic = 2;
-
-		/// <summary>
 		///   The stack that indicates the chosen values for the current path.
 		/// </summary>
 		private readonly LtmdpChosenValueStack _chosenValues = new LtmdpChosenValueStack(InitialCapacity);
@@ -113,21 +103,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			_nextFreeContinuationId = 1;
 		}
 
-		private Probability GetProbabilityOfPreviousPath()
-		{
-			if (_choiceIndex == -1 || _choiceIndex == 0)
-				return Probability.One;
-			return _chosenValues[_choiceIndex - 1].Probability;
-		}
-
-		private Probability GetProbabilityUntilIndex(int index)
-		{
-			if (index == -1)
-				return Probability.One;
-			return _chosenValues[index].Probability;
-		}
-
-
 		/// <summary>
 		///   Prepares the resolver for the next path. Returns <c>true</c> to indicate that all paths have been enumerated.
 		/// </summary>
@@ -156,8 +131,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				// If we have at least one other value to choose, let's do that next
 				if (_valueCount.Peek() > chosenValue.OptionIndex + 1)
 				{
-					var previousProbability = GetProbabilityUntilIndex(_valueCount.Count - 2);
-
 					_continuationId = chosenValue.ContinuationId + 1;
 					
 					var newChosenValue =
@@ -165,7 +138,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 						{
 							OptionIndex = chosenValue.OptionIndex + 1,
 							ContinuationId = _continuationId,
-							Probability = previousProbability
 						};
 					_chosenValues.Push(newChosenValue);
 					return true;
@@ -205,7 +177,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				{
 					OptionIndex = 0,
 					ContinuationId = _continuationId,
-					Probability = GetProbabilityOfPreviousPath() // no probability is changed for this choice
 				};
 			_chosenValues.Push(newChosenValue);
 
@@ -224,12 +195,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		public override int HandleProbabilisticChoice(int valueCount)
 		{
 			++_choiceIndex;
-
-			if (_nextFreeContinuationId >= 185 - valueCount)
-			{
-
-			}
-
+			
 			// If we have a preselected value that we should choose for the current path, return it
 			var chosenValuesMaxIndex = _chosenValues.Count - 1;
 			if (_choiceIndex <= chosenValuesMaxIndex)
@@ -245,7 +211,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				{
 					OptionIndex = 0,
 					ContinuationId = _continuationId,
-					Probability = GetProbabilityOfPreviousPath() //placeholder value
 				};
 			_chosenValues.Push(newChosenValue);
 
@@ -258,7 +223,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// <summary>
 		///   Gets the continuation id of the current path.
 		/// </summary>
-		internal override int GetContinuationId()
+		internal int GetContinuationId()
 		{
 			return _continuationId;
 		}
@@ -271,6 +236,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		public override void SetProbabilityOfLastChoice(Probability probability)
 		{
 			var probabilitiesOfChosenValuesMaxIndex = _chosenValues.Count - 1;
+			// Optimization:
 			// If this part of the path has previously been visited we do not change the value
 			// because this value has already been set by a previous call of SetProbabilityOfLastChoice.
 			// Only if we explore a new part of the path the probability needs to be written.
@@ -278,53 +244,33 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			// value onto the three stacks).
 			if (_choiceIndex == probabilitiesOfChosenValuesMaxIndex)
 			{
-				_chosenValues[_choiceIndex] =
-					new LtmdpChosenValue
-					{
-						OptionIndex = _chosenValues[_choiceIndex].OptionIndex,
-						ContinuationId = _chosenValues[_choiceIndex].ContinuationId,
-						Probability = GetProbabilityOfPreviousPath() * probability
-					};
+				LtmdpStepGraph.SetProbabilityOfContinuationId(_continuationId,probability.Value);
 			}
+			// ReSharper disable once CompareOfFloatsByEqualityOperator
+			Assert.That(LtmdpStepGraph.GetProbabilityOfContinuationId(_continuationId) == probability.Value, "bug");
 		}
-
+		
 		/// <summary>
 		///   Makes taken choice identified by the <paramref name="choiceIndex" /> deterministic.
 		/// </summary>
 		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override void MakeChoiceAtIndexDeterministic(int choiceIndex)
+		internal override void ForwardUntakenChoicesAtIndex(int choiceIndex)
 		{
 			// This method is called when it is assumed, that choosing anything different at choiceIndex
 			// leads to the same state as the path until the last choice.
-			// Thus, we can simply revert this unnecessary choice and add the probability of the unmade alternatives
-			// of the reverted choice to the last choice.
-			// Note, very small numbers get multiplied and summarized. Maybe type double is too imprecise.
+			// Thus, we can simply forward the other choices to the current continuationId. The other choices
+			// can be merged into one transition.
 
-			if (_valueCount[choiceIndex] == 0)
+			var valueCountAtIndex = _valueCount[choiceIndex];
+
+			if (valueCountAtIndex <= 1)
 				return; //Nothing to do
 
 			Assert.That(_chosenValues[choiceIndex].OptionIndex == 0, "Only first choice can be made deterministic.");
-
-			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
-			// turning the choice into a deterministic selection of the value at index 0
-
-			var oldProbabilityUntilDeterministicChoice = GetProbabilityUntilIndex(choiceIndex - 1).Value;
-			var oldProbabilityOfDeterministicChoice = GetProbabilityUntilIndex(choiceIndex).Value;
-			var differenceProbabilityToAdd = oldProbabilityUntilDeterministicChoice - oldProbabilityOfDeterministicChoice;
-
-			var probabilityOfLastChoicePath = GetProbabilityUntilIndex(LastChoiceIndex).Value;
-
-			var newValueOfLastChoice = (probabilityOfLastChoicePath + differenceProbabilityToAdd);
-
-			// set the calculated value
-			_chosenValues[LastChoiceIndex] =
-				new LtmdpChosenValue
-				{
-					OptionIndex = _chosenValues[LastChoiceIndex].OptionIndex,
-					ContinuationId = _chosenValues[LastChoiceIndex].ContinuationId,
-					Probability = new Probability(newValueOfLastChoice)
-				};
+			
+			var chosenValueAtIndex = _chosenValues[choiceIndex];
+			var originalCidOfChoiceIndex = chosenValueAtIndex.ContinuationId;
 
 			var parentOfLastChoice = choiceIndex - 1;
 			int parentContinuationId;
@@ -337,10 +283,20 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			{
 				parentContinuationId = _chosenValues[parentOfLastChoice].ContinuationId;
 			}
+			
+			LtmdpStepGraph.PruneChoicesOfCidTo2(parentContinuationId); //only the original cid should be kept and _one_ sibling (its complement)
+						
+			var complementCidOfChoiceIndex = originalCidOfChoiceIndex + 1;
+			LtmdpStepGraph.Forward(complementCidOfChoiceIndex, _continuationId);
 
-			LtmdpStepGraph.MakeChoiceOfCidDeterministic(parentContinuationId);
+			var complementProbabilityOfChoiceIndex = 1.0;
+			if (LtmdpStepGraph.GetChoiceOfCid(parentContinuationId).IsChoiceTypeProbabilitstic)
+			{
+				complementProbabilityOfChoiceIndex = 1.0 - LtmdpStepGraph.GetProbabilityOfContinuationId(originalCidOfChoiceIndex);
+			}				
+			LtmdpStepGraph.SetProbabilityOfContinuationId(complementCidOfChoiceIndex, complementProbabilityOfChoiceIndex);
 
-			// Set the alternatives to zero.
+			// Set the alternatives used by PrepareNextPath to zero.
 			_valueCount[choiceIndex] = 0;
 		}
 
@@ -357,23 +313,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				var newChosenValue =
 					new LtmdpChosenValue
 					{
-						Probability = Probability.One,
 						ContinuationId = i,
 						OptionIndex = choices[i]
 					};
 				_chosenValues.Push(newChosenValue);
 				_valueCount.Push(0);
 			}
-		}
-
-		/// <summary>
-		///	  The probability of the current path
-		/// </summary>
-		internal override Probability CalculateProbabilityOfPath()
-		{
-			if (_choiceIndex == -1)
-				return Probability.One;
-			return _chosenValues[_choiceIndex].Probability;
 		}
 
 		/// <summary>

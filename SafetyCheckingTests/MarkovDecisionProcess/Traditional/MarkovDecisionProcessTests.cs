@@ -26,14 +26,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests.DataStructures
+namespace Tests.MarkovDecisionProcess.Traditional
 {
 	using ISSE.SafetyChecking.GenericDataStructures;
 	using JetBrains.Annotations;
-	using MarkovDecisionProcessExamples;
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
+	using Examples;
 
 	public class MarkovDecisionProcessTests
 	{

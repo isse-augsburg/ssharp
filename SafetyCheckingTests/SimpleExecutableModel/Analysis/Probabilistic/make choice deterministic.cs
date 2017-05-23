@@ -120,7 +120,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 				G = Choice.Choose(7, 8);
 
-				Choice.Resolver.MakeChoiceAtIndexDeterministic(index);
+				Choice.Resolver.ForwardUntakenChoicesAtIndex(index);
 			}
 
 			public static Formula FIs1 = new SimpleLocalVarInRangeFormula(0,1);

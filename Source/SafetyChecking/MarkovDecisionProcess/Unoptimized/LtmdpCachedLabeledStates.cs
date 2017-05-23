@@ -79,7 +79,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// <param name="model">The model the transition should be added for.</param>
 		/// <param name="probability">The probability of the transition.</param>
 		/// <param name="continuationId">The id of the transition.</param>
-		public void Add(ExecutableModel<TExecutableModel> model, double probability, int continuationId)
+		public void Add(ExecutableModel<TExecutableModel> model, int continuationId)
 		{
 			if (_transitionsWithContinuationIdCount >= _capacity)
 				throw new OutOfMemoryException("Unable to store an additional transition. Try increasing the successor state capacity.");
@@ -102,7 +102,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				ActivatedFaults = activatedFaults,
 				Flags = TransitionFlags.IsValidFlag,
 				ContinuationId = continuationId,
-				Probability = probability
 			};
 			++_transitionsWithContinuationIdCount;
 		}

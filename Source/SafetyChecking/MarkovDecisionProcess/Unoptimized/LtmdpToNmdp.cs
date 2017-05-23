@@ -114,9 +114,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				var transitionTarget = _ltmdp.GetTransitionTarget( (int) choice.To);
 				var targetEntry = new StateStorageEntry(transitionTarget.Formulas, transitionTarget.TargetState);
 				var targetState = _mapper[targetEntry];
-				var probability = transitionTarget.Probability;
 
-				NestedMarkovDecisionProcess.AddContinuationGraphLeaf(locationForContinuationGraphElement, targetState, probability);
+				NestedMarkovDecisionProcess.AddContinuationGraphLeaf(locationForContinuationGraphElement, targetState, choice.Probability);
 				return;
 			}
 
@@ -125,7 +124,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			var placesForChildren = NestedMarkovDecisionProcess.GetPlaceForNewContinuationGraphElements(numberOfChildren);
 
-			NestedMarkovDecisionProcess.AddContinuationGraphInnerNode(locationForContinuationGraphElement, choice.ChoiceType, placesForChildren,placesForChildren+offsetTo);
+			NestedMarkovDecisionProcess.AddContinuationGraphInnerNode(locationForContinuationGraphElement, choice.ChoiceType, placesForChildren,placesForChildren+offsetTo, choice.Probability);
 
 			for (var currentChildNo = 0; currentChildNo < numberOfChildren; currentChildNo++)
 			{

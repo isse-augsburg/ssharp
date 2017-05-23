@@ -97,7 +97,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 						{
 							TargetState = transition->TargetStateIndex,
 							Formulas = probTransition->Formulas,
-							Probability = probTransition->Probability
 						};
 					_continuationIdToTransitionTarget[probTransition->ContinuationId] = place;
 				}
@@ -138,6 +137,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 						ChoiceType = choice.ChoiceType,
 						From = placesForChildren,
 						To = placesForChildren + offsetTo,
+						Probability = choice.Probability
 					};
 				
 				for (var currentChildNo = 0; currentChildNo < numberOfChildren; currentChildNo++)

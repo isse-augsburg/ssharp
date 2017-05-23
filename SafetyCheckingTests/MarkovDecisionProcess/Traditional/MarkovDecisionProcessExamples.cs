@@ -26,7 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests.DataStructures.MarkovDecisionProcessExamples
+namespace Tests.MarkovDecisionProcess.Traditional.Examples
 {
 	using System.Diagnostics;
 	using ISSE.SafetyChecking.AnalysisModel;

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.MarkovDecisionProcess
+namespace Tests.MarkovDecisionProcess.Unoptimized
 {
 	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using System.Collections.Generic;
@@ -173,7 +173,7 @@ namespace Tests.MarkovDecisionProcess
 			_choiceResolver.HandleChoice(2);
 
 			// MakeChoiceAtIndexDeterministic of probabilistic split
-			_choiceResolver.MakeChoiceAtIndexDeterministic(choiceToMakeDeterministic);
+			_choiceResolver.ForwardUntakenChoicesAtIndex(choiceToMakeDeterministic);
 
 			var entries = CountEntries(0);
 			entries.ShouldBe(1);
@@ -197,7 +197,7 @@ namespace Tests.MarkovDecisionProcess
 			var choiceToMakeDeterministic = _choiceResolver.LastChoiceIndex;
 
 			// MakeChoiceAtIndexDeterministic of nondeterministic split
-			_choiceResolver.MakeChoiceAtIndexDeterministic(choiceToMakeDeterministic);
+			_choiceResolver.ForwardUntakenChoicesAtIndex(choiceToMakeDeterministic);
 
 			var entries = CountEntries(0);
 			entries.ShouldBe(3);
@@ -228,7 +228,7 @@ namespace Tests.MarkovDecisionProcess
 			_choiceResolver.HandleChoice(2);
 			_choiceResolver.HandleProbabilisticChoice(2);
 			var choiceToMakeDeterministic = _choiceResolver.LastChoiceIndex;
-			_choiceResolver.MakeChoiceAtIndexDeterministic(choiceToMakeDeterministic);
+			_choiceResolver.ForwardUntakenChoicesAtIndex(choiceToMakeDeterministic);
 			_choiceResolver.PrepareNextPath();
 
 			var entries = CountEntries(0);

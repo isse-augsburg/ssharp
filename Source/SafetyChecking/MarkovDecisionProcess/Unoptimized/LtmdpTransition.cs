@@ -29,7 +29,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	/// <summary>
 	///   Represents a candidate transition of an <see cref="AnalysisModel" />.
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit, Size = 36)]
+	[StructLayout(LayoutKind.Explicit, Size = 28)]
 	internal unsafe struct LtmdpTransition
 	{
 		/// <summary>
@@ -61,12 +61,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// </summary>
 		[FieldOffset(24)]
 		public int ContinuationId;
-
-		/// <summary>
-		///   The probability of the transition.
-		/// </summary>
-		[FieldOffset(28)]
-		public double Probability;
 
 		/// <summary>
 		///   Returns the source state if the transition has been transformed by Worker::HandleTransitions.

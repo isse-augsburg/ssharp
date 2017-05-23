@@ -26,9 +26,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests.DataStructures.NestedMarkovDecisionProcessExamples
+namespace Tests.MarkovDecisionProcess.Optimized.Examples
 {
-	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
+	using ISSE.SafetyChecking.MarkovDecisionProcess.Optimized;
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;

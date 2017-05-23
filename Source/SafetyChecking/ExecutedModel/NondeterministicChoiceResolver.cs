@@ -167,7 +167,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// </summary>
 		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override void MakeChoiceAtIndexDeterministic(int choiceIndex)
+		internal override void ForwardUntakenChoicesAtIndex(int choiceIndex)
 		{
 			Assert.That(_chosenValues[choiceIndex] == 0, "Only first choice can be made deterministic.");
 			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
@@ -188,23 +188,6 @@ namespace ISSE.SafetyChecking.ExecutedModel
 				_chosenValues.Push(choice);
 				_valueCount.Push(0);
 			}
-		}
-
-		/// <summary>
-		///	  The probability of the current path
-		/// </summary>
-		internal override Probability CalculateProbabilityOfPath()
-		{
-			throw new Exception("Path in nondeterministic model has no probability");
-		}
-
-		/// <summary>
-		///   Gets the continuation id of the current path.
-		/// </summary>
-		internal override int GetContinuationId()
-		{
-			//TODO: Replace lastChoiceIndex by continuation id
-			throw new NotImplementedException();
 		}
 
 		/// <summary>

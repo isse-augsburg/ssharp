@@ -31,6 +31,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 	using System;
 	using System.Diagnostics;
 
+	// https://github.com/isse-augsburg/ssharp/commit/06455a592d2e16e873c6c7232f94015444a739a3
+
 	/// <summary>
 	///   Represents a stack that is used to resolve nondeterministic choices during state space enumeration.
 	/// </summary>
@@ -40,16 +42,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		///   The number of nondeterministic choices that can be stored initially.
 		/// </summary>
 		private const int InitialCapacity = 64;
-
-		/// <summary>
-		///   Represents a non deterministic choice in _choiceType
-		/// </summary>
-		private const int ChoiceTypeNondeterministic = 1;
-
-		/// <summary>
-		///   Represents a probabilistic choice in _choiceType
-		/// </summary>
-		private const int ChoiceTypeProbabilitstic = 2;
 
 		/// <summary>
 		///   The stack that indicates the chosen values for the current path.
@@ -258,7 +250,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		/// <summary>
 		///   Gets the continuation id of the current path.
 		/// </summary>
-		internal override int GetContinuationId()
+		internal int GetContinuationId()
 		{
 			return _continuationId;
 		}
@@ -293,7 +285,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		/// </summary>
 		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override void MakeChoiceAtIndexDeterministic(int choiceIndex)
+		internal override void ForwardUntakenChoicesAtIndex(int choiceIndex)
 		{
 			// This method is called when it is assumed, that choosing anything different at choiceIndex
 			// leads to the same state as the path until the last choice.
@@ -369,7 +361,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		/// <summary>
 		///	  The probability of the current path
 		/// </summary>
-		internal override Probability CalculateProbabilityOfPath()
+		internal Probability CalculateProbabilityOfPath()
 		{
 			if (_choiceIndex == -1)
 				return Probability.One;

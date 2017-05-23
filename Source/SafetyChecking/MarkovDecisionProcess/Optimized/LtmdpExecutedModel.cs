@@ -162,7 +162,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		/// </summary>
 		public Probability GetProbability()
 		{
-			return ChoiceResolver.CalculateProbabilityOfPath();
+			return _ltmdpChoiceResolver.CalculateProbabilityOfPath();
 		}
 
 		/// <summary>
@@ -170,7 +170,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		/// </summary>
 		public int GetContinuationId()
 		{
-			return ChoiceResolver.GetContinuationId();
+			return _ltmdpChoiceResolver.GetContinuationId();
 		}
 
 		/// <summary>

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace ISSE.SafetyChecking.MarkovDecisionProcess
+namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 {
 	using System.Runtime.CompilerServices;
 	using Modeling;
@@ -30,7 +30,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	{
 		public int OptionIndex;
 		public int ContinuationId;
-		public Probability Probability;
 	}
 
 	/// <summary>

@@ -91,7 +91,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		{
 			public LtmdpChoiceType ChoiceType;
 			public long From;
-			public long To;
+			public long To; //int Offset/TargetState
 
 			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == LtmdpChoiceType.UnsplitOrFinal;
 
@@ -241,6 +241,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 						// select current fromCid
 						var fromCid = fromDecisionStack.Peek();
 						cge = Ltmdp.GetContinuationGraphElement(fromCid);
+
+						// found new cge
+						action(cge);
+
 						if (cge.IsChoiceTypeUnsplitOrFinal)
 						{
 							foundNextLeaf = true;
@@ -252,8 +256,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 						}
 					}
 
-					// here we can work with the next cge
-					action(cge);
+					// here we can work with the next leaf
 
 					// find next fromCid
 					var foundNextFromCid = false;
@@ -278,9 +281,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 			private void ApplyActionWithRecursionBasedAlgorithmInnerRecursion(Action<ContinuationGraphElement> action, long currentCid)
 			{
 				ContinuationGraphElement cge = Ltmdp.GetContinuationGraphElement(currentCid);
+				action(cge);
 				if (cge.IsChoiceTypeUnsplitOrFinal)
 				{
-					action(cge);
 				}
 				else
 				{

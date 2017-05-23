@@ -26,7 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests.MarkovDecisionProcess
+namespace Tests.MarkovDecisionProcess.Unoptimized
 {
 	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using ISSE.SafetyChecking.AnalysisModel;
@@ -93,7 +93,7 @@ namespace Tests.MarkovDecisionProcess
 			var probabilties = 0.0;
 			Action<LabeledTransitionMarkovDecisionProcess.ContinuationGraphElement> counter = cge =>
 			{
-				var probability = ltmdp.GetTransitionTarget((int)cge.To).Probability;
+				var probability = cge.Probability;
 				probabilties+= probability;
 			};
 			var traverser = ltmdp.GetTreeTraverser(cid);
@@ -115,11 +115,11 @@ namespace Tests.MarkovDecisionProcess
 		}
 
 
-		private void CreateTransition(bool isFormulaSatisfied, int targetStateIndex, int continuationId, double p)
+		private void CreateTransition(bool isFormulaSatisfied, int targetStateIndex, int continuationId)
 		{
 			var transition = _transitionCount;
 			_transitionCount++;
-			_transitions[transition] = new LtmdpTransition { Probability = p, ContinuationId = continuationId };
+			_transitions[transition] = new LtmdpTransition { ContinuationId = continuationId };
 			var t = (Transition*)(_transitions + transition);
 			t->SourceStateIndex = 0;
 			t->TargetStateIndex = targetStateIndex;
@@ -149,12 +149,14 @@ namespace Tests.MarkovDecisionProcess
 
 			// add initial state
 			Clear();
-			CreateTransition(false, 5, 0, 1.0);
+			CreateTransition(false, 5, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0,1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
 			Clear();
 
 			// add reflexive state 5
-			CreateTransition(false, 5, 0, 1.0);
+			CreateTransition(false, 5, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
 
 			ltmdp.TransitionTargets.ShouldBe(2);
@@ -181,24 +183,30 @@ namespace Tests.MarkovDecisionProcess
 			// add initial state
 			Clear();
 			_stepGraph.ProbabilisticSplit(0,1,3);
-			CreateTransition(false, 5, 1, 0.3);
-			CreateTransition(false, 7, 2, 0.3);
-			CreateTransition(false, 2, 3, 0.4);
+			_stepGraph.SetProbabilityOfContinuationId(1, 0.3);
+			_stepGraph.SetProbabilityOfContinuationId(2, 0.3);
+			_stepGraph.SetProbabilityOfContinuationId(3, 0.4);
+			CreateTransition(false, 5, 1);
+			CreateTransition(false, 7, 2);
+			CreateTransition(false, 2, 3);
 			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
 
 			// add reflexive state 5
 			Clear();
-			CreateTransition(false, 5, 0, 1.0);
+			CreateTransition(false, 5, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 7
 			Clear();
-			CreateTransition(false, 5, 0, 1.0);
+			CreateTransition(false, 5, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 7, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 2
 			Clear();
-			CreateTransition(false, 2, 0, 1.0);
+			CreateTransition(false, 2, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 2, CreateTransitionCollection(), _transitionCount, false);
 
 
@@ -225,30 +233,37 @@ namespace Tests.MarkovDecisionProcess
 
 			// add initial state
 			Clear();
-			CreateTransition(false, 5, 0, 1.0);
+			CreateTransition(false, 5, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
 
 			// add state 5
 			Clear();
 			_stepGraph.ProbabilisticSplit(0, 1, 3);
-			CreateTransition(false, 7, 1, 0.3);
-			CreateTransition(false, 2, 2, 0.3);
-			CreateTransition(false, 1, 3, 0.4);
+			_stepGraph.SetProbabilityOfContinuationId(1, 0.3);
+			_stepGraph.SetProbabilityOfContinuationId(2, 0.3);
+			_stepGraph.SetProbabilityOfContinuationId(3, 0.4);
+			CreateTransition(false, 7, 1);
+			CreateTransition(false, 2, 2);
+			CreateTransition(false, 1, 3);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 7
 			Clear();
-			CreateTransition(false, 7, 0, 1.0);
+			CreateTransition(false, 7, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 7, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 2
 			Clear();
-			CreateTransition(false, 2, 0, 1.0);
+			CreateTransition(false, 2, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 2, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 1
 			Clear();
-			CreateTransition(false, 1, 0, 1.0);
+			CreateTransition(false, 1, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 1, CreateTransitionCollection(), _transitionCount, false);
 
 
@@ -275,39 +290,47 @@ namespace Tests.MarkovDecisionProcess
 
 			// add initial state
 			Clear();
-			CreateTransition(false, 5, 0, 1.0);
+			CreateTransition(false, 5, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
 
 			// add state 5
 			Clear();
 			_stepGraph.NonDeterministicSplit(0, 1, 3);
 			_stepGraph.ProbabilisticSplit(2, 4, 6);
-			CreateTransition(false, 1, 1, 1.0);
-			CreateTransition(false, 7, 4, 0.3);
-			CreateTransition(false, 2, 5, 0.3);
-			CreateTransition(false, 1, 6, 0.4);
-			CreateTransition(false, 7, 3, 1.0);
+			CreateTransition(false, 1, 1 );
+			CreateTransition(false, 7, 4 );
+			CreateTransition(false, 2, 5 );
+			CreateTransition(false, 1, 6 );
+			CreateTransition(false, 7, 3 );
+			_stepGraph.SetProbabilityOfContinuationId(4, 0.3);
+			_stepGraph.SetProbabilityOfContinuationId(5, 0.3);
+			_stepGraph.SetProbabilityOfContinuationId(6, 0.4);
 			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 7
 			Clear();
 			_stepGraph.NonDeterministicSplit(0, 1, 2);
 			_stepGraph.ProbabilisticSplit(1, 3, 4);
-			CreateTransition(false, 7, 3, 0.2);
-			CreateTransition(false, 2, 4, 0.8);
-			CreateTransition(false, 1, 2, 1.0);
+			_stepGraph.SetProbabilityOfContinuationId(3, 0.2);
+			_stepGraph.SetProbabilityOfContinuationId(4, 0.8);
+			CreateTransition(false, 7, 3);
+			CreateTransition(false, 2, 4);
+			CreateTransition(false, 1, 2);
 			ltmdpBuilder.ProcessTransitions(null, null, 7, CreateTransitionCollection(), _transitionCount, false);
 
 
 
 			// add reflexive state 2
 			Clear();
-			CreateTransition(false, 2, 0, 1.0);
+			CreateTransition(false, 2, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 2, CreateTransitionCollection(), _transitionCount, false);
 
 			// add reflexive state 1
 			Clear();
-			CreateTransition(false, 1, 0, 1.0);
+			CreateTransition(false, 1, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			ltmdpBuilder.ProcessTransitions(null, null, 1, CreateTransitionCollection(), _transitionCount, false);
 
 

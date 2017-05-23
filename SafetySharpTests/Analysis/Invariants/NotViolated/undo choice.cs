@@ -42,7 +42,7 @@ namespace Tests.Analysis.Invariants.NotViolated
 			public override void Update()
 			{
 				F = _choice.Choose(1, 2, 3);
-				_choice.Resolver.MakeChoiceAtIndexDeterministic(_choice.Resolver.LastChoiceIndex);
+				_choice.Resolver.ForwardUntakenChoicesAtIndex(_choice.Resolver.LastChoiceIndex);
 			}
 		}
 	}

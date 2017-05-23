@@ -144,7 +144,7 @@
     <Compile Include="AnalysisModelTraverser\TraversalModifiers\EarlyTerminationModifier.cs" />
     <Compile Include="AnalysisModelTraverser\IModelWithStateLabelingInLabelingVector.cs" />
     <Compile Include="MarkovDecisionProcess\BuiltinMdpModelChecker.cs" />
-    <Compile Include="MarkovDecisionProcess\LtmdpChosenValueStack.cs" />
+    <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpChosenValueStack.cs" />
     <Compile Include="MarkovDecisionProcess\Traditional\MarkovDecisionProcess.cs" />
     <Compile Include="MarkovDecisionProcess\Traditional\MdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\Traditional\MdpToGv.cs" />

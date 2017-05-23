@@ -26,19 +26,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests.DataStructures
+namespace Tests.MarkovDecisionProcess.Traditional
 {
-	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
-	using System.Diagnostics;
 	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.MarkovDecisionProcess;
 	using JetBrains.Annotations;
-	using NestedMarkovDecisionProcessExamples;
+	using Shouldly;
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
-	using Shouldly;
-	using ISSE.SafetyChecking.MarkovDecisionProcess;
-	public class BuiltinNmdpModelCheckerTests
+	using Examples;
+
+	public class ExternalMdpModelCheckerPrismTests
 	{
 		/// <summary>
 		///   Gets the output that writes to the test output stream.
@@ -54,38 +53,36 @@ namespace Tests.DataStructures
 			}
 		}
 
-		public BuiltinNmdpModelCheckerTests(ITestOutputHelper output)
+		public ExternalMdpModelCheckerPrismTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 		}
 
-		[Theory, MemberData(nameof(DiscoverTests))]
-		public void MinimalProbabilityToReachIn50Steps_Label1(NestedMarkovDecisionProcessExample example)
+		[Theory(Skip = "Requires external tools"), MemberData(nameof(DiscoverTests))]
+		public void MaximalProbabilityToReach_Label1(MarkovDecisionProcessExample example)
 		{
-			var nmdp = example.Nmdp;
-			var steps = 50;
+			var mdp = example.Mdp;
 
-			var finallyLabel1 = new BoundedUnaryFormula(NestedMarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally, steps);
+			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
 
-			using (var checker = new BuiltinNmdpModelChecker(nmdp, Output.TextWriterAdapter()))
+			using (var prismChecker = new ExternalMdpModelCheckerPrism(mdp, Output.TextWriterAdapter()))
 			{
-				var result = checker.CalculateMinimalProbability(finallyLabel1);
-				result.Is(example.MinimalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
+				var result = prismChecker.CalculateMaximalProbability(finallyLabel1);
+				result.Is(example.MaximalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
 			}
 		}
 
-		[Theory, MemberData(nameof(DiscoverTests))]
-		public void MaximalProbabilityToReachIn50Steps_Label1(NestedMarkovDecisionProcessExample example)
+		[Theory(Skip = "Requires external tools"), MemberData(nameof(DiscoverTests))]
+		public void MinimalProbabilityToReach_Label1(MarkovDecisionProcessExample example)
 		{
-			var nmdp = example.Nmdp;
-			var steps = 50;
+			var mdp = example.Mdp;
 
-			var finallyLabel1 = new BoundedUnaryFormula(NestedMarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally, steps);
-
-			using (var checker = new BuiltinNmdpModelChecker(nmdp, Output.TextWriterAdapter()))
+			var finallyLabel1 = new UnaryFormula(MarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally);
+			
+			using (var prismChecker = new ExternalMdpModelCheckerPrism(mdp, Output.TextWriterAdapter()))
 			{
-				var result = checker.CalculateMaximalProbability(finallyLabel1);
-				result.Is(example.MaximalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
+				var result = prismChecker.CalculateMinimalProbability(finallyLabel1);
+				result.Is(example.MinimalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
 			}
 		}
 	}

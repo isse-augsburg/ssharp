@@ -75,18 +75,13 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		/// </summary>
 		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal abstract void MakeChoiceAtIndexDeterministic(int choiceIndex);
+		internal abstract void ForwardUntakenChoicesAtIndex(int choiceIndex);
 
 		/// <summary>
 		///   Sets the choices that should be made during the next step.
 		/// </summary>
 		/// <param name="choices">The choices that should be made.</param>
 		internal abstract void SetChoices(int[] choices);
-
-		/// <summary>
-		///	  The probability of the current path
-		/// </summary>
-		internal abstract Probability CalculateProbabilityOfPath();
 
 		/// <summary>
 		///   Clears all choice information.
@@ -97,10 +92,5 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		///   Gets the choices that were made to generate the last transitions.
 		/// </summary>
 		internal abstract IEnumerable<int> GetChoices();
-
-		/// <summary>
-		///   Gets the continuation id of the current path.
-		/// </summary>
-		internal abstract int GetContinuationId();
 	}
 }

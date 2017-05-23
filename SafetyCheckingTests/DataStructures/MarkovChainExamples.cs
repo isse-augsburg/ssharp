@@ -34,7 +34,6 @@ namespace Tests.DataStructures.MarkovChainExamples
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
 	using JetBrains.Annotations;
-	using MarkovDecisionProcessExamples;
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;

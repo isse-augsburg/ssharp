@@ -82,7 +82,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.NotViolated
 				if (inner)
 				{
 					// No need to analyze the case outer==true, because the same result will be returned as now.
-					Choice.Resolver.MakeChoiceAtIndexDeterministic(outerChoiceIndex);
+					Choice.Resolver.ForwardUntakenChoicesAtIndex(outerChoiceIndex);
 				}
 				return inner;
 			}

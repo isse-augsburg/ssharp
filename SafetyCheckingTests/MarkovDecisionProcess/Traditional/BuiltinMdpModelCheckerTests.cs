@@ -26,17 +26,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests.DataStructures
+namespace Tests.MarkovDecisionProcess.Traditional
 {
 	using System.Diagnostics;
 	using ISSE.SafetyChecking.Formula;
 	using JetBrains.Annotations;
-	using MarkovDecisionProcessExamples;
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
 	using Shouldly;
 	using ISSE.SafetyChecking.MarkovDecisionProcess;
+	using Examples;
 	public class BuiltinMdpModelCheckerTests
 	{
 		/// <summary>
