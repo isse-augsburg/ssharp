@@ -182,6 +182,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			_nextFreeContinuationId = _nextFreeContinuationId + valueCount;
 			LtmdpStepGraph.NonDeterministicSplit(oldContinuationId, _continuationId, _continuationId + valueCount - 1);
+			
+			// set default values
+			var defaultValue = 1.0;
+			for (var i = 0; i < valueCount; i++)
+			{
+				LtmdpStepGraph.SetProbabilityOfContinuationId(_continuationId + i, defaultValue);
+			}
 
 			return 0;
 		}
@@ -216,6 +223,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			_nextFreeContinuationId = _nextFreeContinuationId + valueCount;
 			LtmdpStepGraph.ProbabilisticSplit(oldContinuationId, _continuationId, _continuationId + valueCount - 1);
+
+			// set default values
+			var defaultValue = 1.0 / valueCount;
+			for (var i = 0; i < valueCount; i++)
+			{
+				LtmdpStepGraph.SetProbabilityOfContinuationId(_continuationId+i,defaultValue);
+			}
 
 			return 0;
 		}

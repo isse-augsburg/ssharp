@@ -29,12 +29,36 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 	internal static class MdpToGv
 	{
+		private static void ExportDistributionsOfEnumerator(MarkovDecisionProcess.MarkovDecisionProcessEnumerator enumerator, string stateName, TextWriter sb)
+		{
+			var distributionCounter = 0;
+			while (enumerator.MoveNextDistribution())
+			{
+				var distributionNode = $"n{stateName}_{distributionCounter}";
+				sb.WriteLine($"{distributionNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
+				sb.WriteLine($"{stateName} -> {distributionNode};");
+				while (enumerator.MoveNextTransition())
+				{
+					sb.WriteLine($"{distributionNode} -> {enumerator.CurrentTransition.Column} [label=\"{enumerator.CurrentTransition.Value.ToString(CultureInfo.InvariantCulture)}\"];");
+				}
+				distributionCounter++;
+			}
+		}
+
 		public static void ExportToGv(this MarkovDecisionProcess mdp,TextWriter sb)
 		{
 			sb.WriteLine("digraph S {");
 			sb.WriteLine("size = \"8,5\"");
 			sb.WriteLine("node [shape=box];");
 			var enumerator = mdp.GetEnumerator();
+
+			enumerator.SelectInitialDistributions();
+			var initialStateName = "initialState";
+			sb.WriteLine($" {initialStateName} [shape=point,width=0.0,height=0.0,label=\"\"]);");
+			ExportDistributionsOfEnumerator(enumerator, initialStateName, sb);
+
+
+			enumerator = mdp.GetEnumerator();
 			while (enumerator.MoveNextState())
 			{
 				var state = enumerator.CurrentState;
@@ -46,18 +70,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 					sb.Write(mdp.StateLabeling[state][i]);
 				}
 				sb.WriteLine(")\"];");
-				var distributionCounter = 0;
-				while (enumerator.MoveNextDistribution())
-				{
-					var distributionNode = $"n{state}_{distributionCounter}";
-					sb.WriteLine($"{distributionNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
-					sb.WriteLine($"{state} -> {distributionNode};");
-					while (enumerator.MoveNextTransition())
-					{
-						sb.WriteLine($"{distributionNode} -> {enumerator.CurrentTransition.Column} [label=\"{enumerator.CurrentTransition.Value.ToString(CultureInfo.InvariantCulture)}\"];");
-					}
-					distributionCounter++;
-				}
+				ExportDistributionsOfEnumerator(enumerator, state.ToString(), sb);
 			}
 			sb.WriteLine("}");
 		}

@@ -27,6 +27,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.GenericDataStructures;
 	using ISSE.SafetyChecking.MarkovDecisionProcess;
+	using ISSE.SafetyChecking.Modeling;
 	using ISSE.SafetyChecking.Utilities;
 	using Shouldly;
 	using SimpleExecutableModel;
@@ -328,6 +329,122 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			state4Path1Exists.ShouldBe(true);
 			state4Path2Exists.ShouldBe(false);
 			state4EntriesOfCid0.ShouldBe(0);
+		}
+		
+		[Fact]
+		public void NondeterministicChoiceSetsProbabilitiesCorrectly()
+		{
+			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
+			var state1Path1Exists = _choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleChoice(3);
+			var state1Path2Exists = _choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleChoice(3);
+			var state1Path3Exists = _choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleChoice(3);
+			var state1Path4Exists = _choiceResolver.PrepareNextPath();
+			
+			state1Path1Exists.ShouldBe(true);
+			state1Path2Exists.ShouldBe(true);
+			state1Path3Exists.ShouldBe(true);
+			state1Path4Exists.ShouldBe(false);
+
+			var pOfCid0 = _stepGraph.GetProbabilityOfContinuationId(0);
+			var pOfCid1 = _stepGraph.GetProbabilityOfContinuationId(1);
+			var pOfCid2 = _stepGraph.GetProbabilityOfContinuationId(2);
+			var pOfCid3 = _stepGraph.GetProbabilityOfContinuationId(3);
+
+			var entries = CountEntries(0);
+			entries.ShouldBe(3);
+			entries = CountEntries(1);
+			entries.ShouldBe(0);
+			entries = CountEntries(2);
+			entries.ShouldBe(0);
+			entries = CountEntries(3);
+			entries.ShouldBe(0);
+			pOfCid0.ShouldBe(1.0);
+			pOfCid1.ShouldBe(1.0);
+			pOfCid2.ShouldBe(1.0);
+			pOfCid3.ShouldBe(1.0);
+		}
+
+
+		[Fact]
+		public void ProbabilisticChoiceSetsProbabilitiesCorrectly()
+		{
+			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
+			var state1Path1Exists = _choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.SetProbabilityOfLastChoice(new Probability(0.3));
+			var state1Path2Exists = _choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.SetProbabilityOfLastChoice(new Probability(0.3));
+			var state1Path3Exists = _choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.SetProbabilityOfLastChoice(new Probability(0.4));
+			var state1Path4Exists = _choiceResolver.PrepareNextPath();
+
+			state1Path1Exists.ShouldBe(true);
+			state1Path2Exists.ShouldBe(true);
+			state1Path3Exists.ShouldBe(true);
+			state1Path4Exists.ShouldBe(false);
+
+			var pOfCid0 = _stepGraph.GetProbabilityOfContinuationId(0);
+			var pOfCid1 = _stepGraph.GetProbabilityOfContinuationId(1);
+			var pOfCid2 = _stepGraph.GetProbabilityOfContinuationId(2);
+			var pOfCid3 = _stepGraph.GetProbabilityOfContinuationId(3);
+
+			var entries = CountEntries(0);
+			entries.ShouldBe(3);
+			entries = CountEntries(1);
+			entries.ShouldBe(0);
+			entries = CountEntries(2);
+			entries.ShouldBe(0);
+			entries = CountEntries(3);
+			entries.ShouldBe(0);
+			pOfCid0.ShouldBe(1.0);
+			pOfCid1.ShouldBe(0.3);
+			pOfCid2.ShouldBe(0.3);
+			pOfCid3.ShouldBe(0.4);
+		}
+
+
+		[Fact]
+		public void ProbabilisticChoiceSetsProbabilitiesToDefaultsCorrectly()
+		{
+			_choiceResolver.PrepareNextState();
+			_stepGraph.Clear();
+			var state1Path1Exists = _choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleProbabilisticChoice(3);
+			var state1Path2Exists = _choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleProbabilisticChoice(3);
+			var state1Path3Exists = _choiceResolver.PrepareNextPath();
+			_choiceResolver.HandleProbabilisticChoice(3);
+			var state1Path4Exists = _choiceResolver.PrepareNextPath();
+
+			state1Path1Exists.ShouldBe(true);
+			state1Path2Exists.ShouldBe(true);
+			state1Path3Exists.ShouldBe(true);
+			state1Path4Exists.ShouldBe(false);
+
+			var pOfCid0 = _stepGraph.GetProbabilityOfContinuationId(0);
+			var pOfCid1 = _stepGraph.GetProbabilityOfContinuationId(1);
+			var pOfCid2 = _stepGraph.GetProbabilityOfContinuationId(2);
+			var pOfCid3 = _stepGraph.GetProbabilityOfContinuationId(3);
+
+			var entries = CountEntries(0);
+			entries.ShouldBe(3);
+			entries = CountEntries(1);
+			entries.ShouldBe(0);
+			entries = CountEntries(2);
+			entries.ShouldBe(0);
+			entries = CountEntries(3);
+			entries.ShouldBe(0);
+			pOfCid0.ShouldBe(1.0);
+			pOfCid1.ShouldBe(1.0 / 3);
+			pOfCid2.ShouldBe(1.0 / 3);
+			pOfCid3.ShouldBe(1.0 / 3);
 		}
 	}
 }

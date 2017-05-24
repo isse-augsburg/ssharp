@@ -135,7 +135,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			while (enumerator.MoveNext())
 			{
 				var leaf = GetLeafOfCid(enumerator.CurrentContinuationId);
-				MarkovDecisionProcess.AddTransition(leaf.ToState, GetProbabilityOfCid(enumerator.CurrentContinuationId));
+				var probability = GetProbabilityOfCid(enumerator.CurrentContinuationId);
+				MarkovDecisionProcess.AddTransition(leaf.ToState, probability);
 			}
 			
 			MarkovDecisionProcess.FinishDistribution();

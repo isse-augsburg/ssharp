@@ -184,10 +184,11 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
 			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
-
+			
 			// add initial state
 			Clear();
 			_stepGraph.ProbabilisticSplit(0, 1, 3);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			_stepGraph.SetProbabilityOfContinuationId(1, 0.3);
 			_stepGraph.SetProbabilityOfContinuationId(2, 0.3);
 			_stepGraph.SetProbabilityOfContinuationId(3, 0.4);
@@ -246,6 +247,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			// add state 5
 			Clear();
 			_stepGraph.ProbabilisticSplit(0, 1, 3);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			_stepGraph.SetProbabilityOfContinuationId(1, 0.3);
 			_stepGraph.SetProbabilityOfContinuationId(2, 0.3);
 			_stepGraph.SetProbabilityOfContinuationId(3, 0.4);
@@ -304,7 +306,9 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			// add state 5
 			Clear();
 			_stepGraph.NonDeterministicSplit(0, 1, 3);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			_stepGraph.ProbabilisticSplit(2, 4, 6);
+			_stepGraph.SetProbabilityOfContinuationId(2, 1.0);
 			CreateTransition(false, 1, 1);
 			CreateTransition(false, 7, 4);
 			CreateTransition(false, 2, 5);
@@ -320,7 +324,10 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			// add reflexive state 7
 			Clear();
 			_stepGraph.NonDeterministicSplit(0, 1, 2);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			_stepGraph.ProbabilisticSplit(1, 3, 4);
+			_stepGraph.SetProbabilityOfContinuationId(1, 1.0);
+			_stepGraph.SetProbabilityOfContinuationId(2, 1.0);
 			_stepGraph.SetProbabilityOfContinuationId(3, 0.2);
 			_stepGraph.SetProbabilityOfContinuationId(4, 0.8);
 			CreateTransition(false, 7, 3);
