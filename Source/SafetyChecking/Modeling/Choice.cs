@@ -278,7 +278,7 @@ namespace ISSE.SafetyChecking.Modeling
 			var range = upperBound - lowerBound + 1;
 			if (range <= 0)
 				throw new InvalidOperationException($"Invalid range [{lowerBound}, {upperBound}].");
-			return ChooseIndexWithUniformDistribution(range);
+			return lowerBound+ChooseIndexWithUniformDistribution(range);
 		}
 
 

@@ -111,9 +111,11 @@
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\same target state on different ways.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\simple example 1a.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\simple example 1b.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\choose from range.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\custom probability of transient fault.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\formula which is always false.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\make choice deterministic.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\choose from range with uniform distribution.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\multiple formulas in one run.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\terminate early.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\multiple initial states.cs" />
