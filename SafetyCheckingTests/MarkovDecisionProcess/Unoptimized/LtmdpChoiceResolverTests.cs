@@ -272,12 +272,14 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_stepGraph.Clear();
 			var state1Path1Exists = _choiceResolver.PrepareNextPath();
 			var state1Path1Choice1 = _choiceResolver.HandleProbabilisticChoice(2);
+			_choiceResolver.SetProbabilityOfLastChoice(new Probability(0.6));
 			var state1Path1Choice2 = _choiceResolver.HandleChoice(2);
 			var state1Path2Exists = _choiceResolver.PrepareNextPath();
 			var state1Path2Choice1 = _choiceResolver.HandleProbabilisticChoice(2);
 			var state1Path2Choice2 = _choiceResolver.HandleChoice(2);
 			var state1Path3Exists = _choiceResolver.PrepareNextPath();
 			var state1Path3Choice1 = _choiceResolver.HandleProbabilisticChoice(2);
+			_choiceResolver.SetProbabilityOfLastChoice(new Probability(0.4));
 			var state1Path4Exists = _choiceResolver.PrepareNextPath();
 			// Collect data
 			var state1EntriesOfCid0 = CountEntries(0);
@@ -285,6 +287,9 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			var state1EntriesOfCid2 = CountEntries(2);
 			var state1EntriesOfCid3 = CountEntries(3);
 			var state1EntriesOfCid4 = CountEntries(4);
+			var state1POfCid0 = _stepGraph.GetProbabilityOfContinuationId(0);
+			var state1POfCid1 = _stepGraph.GetProbabilityOfContinuationId(1);
+			var state1POfCid2 = _stepGraph.GetProbabilityOfContinuationId(2);
 
 			_choiceResolver.PrepareNextState();
 			_stepGraph.Clear();
@@ -319,6 +324,9 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			state1EntriesOfCid2.ShouldBe(0);
 			state1EntriesOfCid3.ShouldBe(0);
 			state1EntriesOfCid4.ShouldBe(0);
+			state1POfCid0.ShouldBe(1.0);
+			state1POfCid1.ShouldBe(0.6);
+			state1POfCid2.ShouldBe(0.4);
 
 			state2Path1Exists.ShouldBe(true);
 			state2Path2Exists.ShouldBe(false);

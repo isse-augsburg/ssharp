@@ -53,8 +53,8 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			nmdpGenerator.AddFormulaToCheck(finally2);
 			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess();
 			nmdp.ExportToGv(Output.TextWriterAdapter());
-			var nmdpToMpd = new NmdpToMdp(nmdp);
 			Output.Log("");
+			var nmdpToMpd = new NmdpToMdp(nmdp);
 			var mdp = nmdpToMpd.MarkovDecisionProcess;
 			mdp.ExportToGv(Output.TextWriterAdapter());
 			var typeOfModelChecker = typeof(BuiltinMdpModelChecker);

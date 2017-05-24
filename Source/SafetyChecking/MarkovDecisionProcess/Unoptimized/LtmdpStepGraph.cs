@@ -38,8 +38,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			public readonly int From;
 			public readonly int To;
 			public readonly LtmdpChoiceType ChoiceType;
-			public readonly double Probability;
-			
+			public readonly double Probability; //probability to reach this choice is not changed
+
 			public Choice(int from, int to, LtmdpChoiceType choiceType, double probability)
 			{
 				From=from;
@@ -101,7 +101,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			Assert.That(sourceCid < fromCid && sourceCid < toCid, "sourceCid must be smaller than childrenCids");
 			Assert.That(fromCid <= toCid, "range [fromCid..toCid] must be ascending and contain at least one element");
 
-			_internalGraph[sourceCid] = new Choice(fromCid,toCid,LtmdpChoiceType.Nondeterministic, 1.0);
+			var probability = _internalGraph[sourceCid].Probability; //probability to reach this choice is not changed
+			_internalGraph[sourceCid] = new Choice(fromCid,toCid,LtmdpChoiceType.Nondeterministic, probability);
 		}
 
 
@@ -117,7 +118,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			Assert.That(sourceCid < fromCid && sourceCid < toCid, "sourceCid must be smaller than childrenCids");
 			Assert.That(fromCid <= toCid, "range [fromCid..toCid] must be ascending and contain at least one element");
 
-			_internalGraph[sourceCid] = new Choice(fromCid, toCid, LtmdpChoiceType.Probabilitstic, 1.0);
+			var probability = _internalGraph[sourceCid].Probability; //probability to reach this choice is not changed
+			_internalGraph[sourceCid] = new Choice(fromCid, toCid, LtmdpChoiceType.Probabilitstic, probability);
 		}
 		
 		/// <summary>

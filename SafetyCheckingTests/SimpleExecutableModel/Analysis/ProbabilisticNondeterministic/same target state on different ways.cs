@@ -52,8 +52,11 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			nmdpGenerator.AddFormulaToCheck(finally1);
 			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess();
+			nmdp.ExportToGv(Output.TextWriterAdapter(),true);
+			Output.Log("");
 			var nmdpToMpd = new NmdpToMdp(nmdp);
 			var mdp = nmdpToMpd.MarkovDecisionProcess;
+			mdp.ExportToGv(Output.TextWriterAdapter());
 			var typeOfModelChecker = typeof(BuiltinMdpModelChecker);
 			var modelChecker = (MdpModelChecker)Activator.CreateInstance(typeOfModelChecker, mdp, Output.TextWriterAdapter());
 			using (modelChecker)

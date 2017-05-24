@@ -42,7 +42,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				// only forward node (no recursion)
 				var cgi = nmdp.GetContinuationGraphInnerNode(currentCid);
 				var toNode = $"cid{cgi.ToCid}";
-				sb.WriteLine($" {fromNode}->{toNode} [ style =\"dashed\"];");
+				sb.WriteLine($" {fromNode}->{toNode} [ style =\"dashed\", label=\"{cgi.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
 			}
 			else
 			{
@@ -55,7 +55,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				{
 					var toNode = $"cid{i}";
 					sb.WriteLine($" {toNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
-					sb.WriteLine($" {fromNode}->{toNode} [ arrowhead =\"{arrowhead}\"];");
+					sb.WriteLine($" {fromNode}->{toNode} [ arrowhead =\"{arrowhead}\", label=\"{cgi.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
 					ExportCid(nmdp,sb, toNode, i);
 				}
 			}
@@ -70,6 +70,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			var initialStateName = "initialState";
 			sb.WriteLine($" {initialStateName} [shape=point,width=0.0,height=0.0,label=\"\"]);");
 			var initialCid = nmdp.GetRootContinuationGraphLocationOfInitialState();
+			if (showRootCids)
+			{
+				var rootNode = $"cid{initialCid}";
+				sb.WriteLine($" {rootNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
+				sb.WriteLine($" {initialStateName}->{rootNode};");
+				initialStateName = rootNode;
+			}
 			ExportCid(nmdp, sb, initialStateName, initialCid);
 
 			for (var state=0; state < nmdp.States; state++)
