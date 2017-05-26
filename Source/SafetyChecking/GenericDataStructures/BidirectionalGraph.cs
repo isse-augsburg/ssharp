@@ -242,7 +242,39 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			}
 			return ancestors;
 		}
-		
+
+		internal static void GetAncestors(this BidirectionalGraphDirectNodeAccess graph,
+											Func<int,bool> nodeIsAncestor,
+											Action<int> nodeSetAncestor,
+											IEnumerable<int> targetNodes, Func<int, bool> ignoreNodeFunc,
+											Func<Edge, bool> ignoreEdgeFunc = null)
+		{
+			// standard behavior: do not ignore node or edge
+			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
+			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
+			var nodesToTraverse = new Stack<int>();
+			foreach (var node in targetNodes)
+			{
+				nodesToTraverse.Push(node);
+			}
+
+			while (nodesToTraverse.Count > 0)
+			{
+				var currentNode = nodesToTraverse.Pop();
+				var isIgnored = (ignoreNodeFunc != null && ignoreNodeFunc(currentNode));
+				var alreadyDiscovered = nodeIsAncestor(currentNode);
+				if (!(isIgnored || alreadyDiscovered))
+				{
+					nodeSetAncestor(currentNode);
+					foreach (var inEdge in graph.InEdges(currentNode))
+					{
+						if (ignoreEdgeFunc == null || !ignoreEdgeFunc(inEdge))
+							nodesToTraverse.Push(inEdge.Source);
+					}
+				}
+			}
+		}
+
 		internal static BidirectionalGraph CreateSubGraph(this BidirectionalGraphDirectNodeAccess graph,
 																						 Dictionary<int, bool> nodesOfSubGraph)
 		{
