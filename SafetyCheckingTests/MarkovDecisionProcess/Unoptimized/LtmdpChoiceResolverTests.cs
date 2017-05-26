@@ -188,7 +188,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			entries.ShouldBe(0);
 			entries = CountEntries(2);
 			entries.ShouldBe(1);
-			choiceOfCid2.ChoiceType.ShouldBe(LtmdpChoiceType.Deterministic);
+			choiceOfCid2.ChoiceType.ShouldBe(LtmdpChoiceType.Forward);
 			choiceOfCid2.To.ShouldBe(cidToForwardTo);
 		}
 
@@ -220,7 +220,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			entries.ShouldBe(0);
 			entries = CountEntries(5);
 			entries.ShouldBe(1);
-			choiceOfCid5.ChoiceType.ShouldBe(LtmdpChoiceType.Deterministic);
+			choiceOfCid5.ChoiceType.ShouldBe(LtmdpChoiceType.Forward);
 			choiceOfCid5.To.ShouldBe(cidToForwardTo);
 		}
 
@@ -260,7 +260,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			entries.ShouldBe(0);
 			entries = CountEntries(6);
 			entries.ShouldBe(1);
-			choiceOfCid6.ChoiceType.ShouldBe(LtmdpChoiceType.Deterministic);
+			choiceOfCid6.ChoiceType.ShouldBe(LtmdpChoiceType.Forward);
 			choiceOfCid6.To.ShouldBe(cidToForwardTo);
 		}
 

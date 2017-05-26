@@ -111,6 +111,9 @@
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\same target state on different ways.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\simple example 1a.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\simple example 1b.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\undo fault activation of fault.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\undo fault activation of fault2.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\undo fault activation of fault3.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\choose from range.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\custom probability of transient fault.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\formula which is always false.cs" />

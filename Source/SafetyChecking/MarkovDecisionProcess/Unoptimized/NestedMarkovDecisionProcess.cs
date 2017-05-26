@@ -89,7 +89,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == LtmdpChoiceType.UnsplitOrFinal;
 
-			public bool IsChoiceTypeDeterministic => ChoiceType == LtmdpChoiceType.Deterministic;
+			public bool IsChoiceTypeDeterministic => ChoiceType == LtmdpChoiceType.Forward;
 
 			public bool IsChoiceTypeNondeterministic => ChoiceType == LtmdpChoiceType.Nondeterministic;
 

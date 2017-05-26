@@ -27,7 +27,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		///   A continuationId has either been finished or is
 		UnsplitOrFinal = 0,
 		///   Represents a deterministic choice in _choiceTypeOfContinuationId (only one choice available)
-		Deterministic = 1,
+		Forward = 1,
 		///   Represents a non deterministic choice in _choiceTypeOfContinuationId
 		Nondeterministic = 2,
 		///   Represents a probabilistic choice in _choiceTypeOfContinuationId

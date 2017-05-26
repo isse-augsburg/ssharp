@@ -52,7 +52,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			nmdpGenerator.AddFormulaToCheck(finally1);
 			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess();
-			nmdp.ExportToGv(Output.TextWriterAdapter(),true);
+			nmdp.ExportToGv(Output.TextWriterAdapter());
 			Output.Log("");
 			var nmdpToMpd = new NmdpToMdp(nmdp);
 			var mdp = nmdpToMpd.MarkovDecisionProcess;

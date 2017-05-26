@@ -51,16 +51,16 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			public Choice PruneTo2()
 			{
 				Assert.That(To>=From+1,"Existing choice must have at least 2 options");
-				return new Choice(From, From+1, LtmdpChoiceType.Deterministic,Probability);
+				return new Choice(From, From+1, LtmdpChoiceType.Forward,Probability);
 			}
 
 			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == LtmdpChoiceType.UnsplitOrFinal;
 
-			public bool IsChoiceTypeDeterministic => ChoiceType == LtmdpChoiceType.Deterministic;
+			public bool IsChoiceTypeDeterministic => ChoiceType == LtmdpChoiceType.Forward;
 
 			public bool IsChoiceTypeNondeterministic => ChoiceType == LtmdpChoiceType.Nondeterministic;
 
-			public bool IsChoiceTypeProbabilitstic => ChoiceType == LtmdpChoiceType.Probabilitstic;
+			public bool IsChoiceTypeProbabilistic => ChoiceType == LtmdpChoiceType.Probabilitstic;
 		}
 		
 		private readonly AutoResizeVector<Choice> _internalGraph = new AutoResizeVector<Choice>();
@@ -129,7 +129,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// <param name="toCid">The target of the .</param>
 		public void Forward(int sourceCid, int toCid)
 		{
-			_internalGraph[sourceCid] = new Choice(toCid, toCid, LtmdpChoiceType.Deterministic, 1.0);
+			_internalGraph[sourceCid] = new Choice(toCid, toCid, LtmdpChoiceType.Forward, 1.0);
 		}
 
 		public void SetProbabilityOfContinuationId(int cid, double probability)

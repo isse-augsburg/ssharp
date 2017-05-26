@@ -48,12 +48,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 
 			public Choice DeriveDeterministic()
 			{
-				return new Choice(From,From,LtmdpChoiceType.Deterministic);
+				return new Choice(From,From,LtmdpChoiceType.Forward);
 			}
 
 			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == LtmdpChoiceType.UnsplitOrFinal;
 
-			public bool IsChoiceTypeDeterministic => ChoiceType == LtmdpChoiceType.Deterministic;
+			public bool IsChoiceTypeDeterministic => ChoiceType == LtmdpChoiceType.Forward;
 
 			public bool IsChoiceTypeNondeterministic => ChoiceType == LtmdpChoiceType.Nondeterministic;
 

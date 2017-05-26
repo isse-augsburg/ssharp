@@ -280,7 +280,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			if (valueCountAtIndex <= 1)
 				return; //Nothing to do
 
-			Assert.That(_chosenValues[choiceIndex].OptionIndex == 0, "Only first choice can be made deterministic.");
+			Assert.That(_chosenValues[choiceIndex].OptionIndex == 0, "Forward is only possible, if the current position is a directly successor of the first option at the step.");
 			
 			var chosenValueAtIndex = _chosenValues[choiceIndex];
 			var originalCidOfChoiceIndex = chosenValueAtIndex.ContinuationId;
@@ -303,7 +303,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			LtmdpStepGraph.Forward(complementCidOfChoiceIndex, _continuationId);
 
 			var complementProbabilityOfChoiceIndex = 1.0;
-			if (LtmdpStepGraph.GetChoiceOfCid(parentContinuationId).IsChoiceTypeProbabilitstic)
+			if (LtmdpStepGraph.GetChoiceOfCid(parentContinuationId).IsChoiceTypeProbabilistic)
 			{
 				complementProbabilityOfChoiceIndex = 1.0 - LtmdpStepGraph.GetProbabilityOfContinuationId(originalCidOfChoiceIndex);
 			}				

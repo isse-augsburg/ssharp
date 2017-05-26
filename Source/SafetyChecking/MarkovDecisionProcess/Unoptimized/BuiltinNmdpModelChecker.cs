@@ -29,7 +29,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
+	using System.Runtime.CompilerServices;
 	using Formula;
+	using GenericDataStructures;
 	using Utilities;
 
 	class BuiltinNmdpModelChecker : NmdpModelChecker
@@ -79,17 +81,25 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return satisfiedStates;
 		}
 
-		private double CalculateMinimumProbabilityOfCid(double[] stateProbabilities, long currentCid)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private bool HasCacheEntry(AutoResizeVector<double> cache, long entry)
 		{
-			//throw new Exception("TODO: Dynamic Programming");
+			Assert.That(entry < int.MaxValue, "index must be smaller than int.MaxValue");
+			return !double.IsNaN(cache[(int)entry]);
+		}
+
+		private double CalculateMinimumProbabilityOfCid(AutoResizeVector<double> cache, double[] stateProbabilities, long currentCid)
+		{
+			if (HasCacheEntry(cache,currentCid))
+				return cache[(int)currentCid];
+			var result = double.NaN;
 			NestedMarkovDecisionProcess.ContinuationGraphElement cge = Nmdp.GetContinuationGraphElement(currentCid);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
 			{
 				var cgl = Nmdp.GetContinuationGraphLeaf(currentCid);
 				var transitionProbability = cgl.Probability;
 				var targetStateProbability = stateProbabilities[cgl.ToState];
-				var probabilityToSatisfyStateWithThisTransition = transitionProbability * targetStateProbability;
-				return probabilityToSatisfyStateWithThisTransition;
+				result = transitionProbability * targetStateProbability;
 			}
 			else
 			{
@@ -97,44 +107,46 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				var transitionProbability = cgi.Probability;
 				if (cge.IsChoiceTypeDeterministic)
 				{
-					return transitionProbability * CalculateMinimumProbabilityOfCid(stateProbabilities, cgi.FromCid);
+					result = transitionProbability * CalculateMinimumProbabilityOfCid(cache, stateProbabilities, cgi.FromCid);
 				}
 				if (cge.IsChoiceTypeNondeterministic)
 				{
 					var smallest = double.PositiveInfinity;
 					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 					{
-						var resultOfChild = CalculateMinimumProbabilityOfCid(stateProbabilities, i);
+						var resultOfChild = CalculateMinimumProbabilityOfCid(cache, stateProbabilities, i);
 						if (resultOfChild < smallest)
 							smallest = resultOfChild;
 					}
-					return transitionProbability * smallest;
+					result = transitionProbability * smallest;
 				}
 				else if (cge.IsChoiceTypeProbabilitstic)
 				{
 					var sum = 0.0;
 					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 					{
-						var resultOfChild = CalculateMinimumProbabilityOfCid(stateProbabilities, i);
+						var resultOfChild = CalculateMinimumProbabilityOfCid(cache, stateProbabilities, i);
 						sum += resultOfChild;
 					}
-					return transitionProbability * sum;
+					result = transitionProbability * sum;
 				}
 			}
-			return double.NaN;
+			cache[(int)currentCid] = result;
+			return result;
 		}
 
-		private double CalculateMaximumProbabilityOfCid(double[] stateProbabilities, long currentCid)
+		private double CalculateMaximumProbabilityOfCid(AutoResizeVector<double> cache, double[] stateProbabilities, long currentCid)
 		{
-			//throw new Exception("TODO: Dynamic Programming");
+			if (HasCacheEntry(cache, currentCid))
+				return cache[(int)currentCid];
+			var result = double.NaN;
 			NestedMarkovDecisionProcess.ContinuationGraphElement cge = Nmdp.GetContinuationGraphElement(currentCid);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
 			{
 				var cgl = Nmdp.GetContinuationGraphLeaf(currentCid);
 				var transitionProbability = cgl.Probability;
 				var targetStateProbability = stateProbabilities[cgl.ToState];
-				var probabilityToSatisfyStateWithThisTransition = transitionProbability * targetStateProbability;
-				return probabilityToSatisfyStateWithThisTransition;
+				result = transitionProbability * targetStateProbability;
 			}
 			else
 			{
@@ -142,46 +154,49 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				var transitionProbability = cgi.Probability;
 				if (cge.IsChoiceTypeDeterministic)
 				{
-					return transitionProbability*CalculateMinimumProbabilityOfCid(stateProbabilities, cgi.FromCid);
+					result = transitionProbability *CalculateMinimumProbabilityOfCid(cache, stateProbabilities, cgi.FromCid);
 				}
 				if (cge.IsChoiceTypeNondeterministic)
 				{
 					var biggest = double.NegativeInfinity;
 					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 					{
-						var resultOfChild = CalculateMinimumProbabilityOfCid(stateProbabilities, i);
+						var resultOfChild = CalculateMinimumProbabilityOfCid(cache, stateProbabilities, i);
 						if (resultOfChild > biggest)
 							biggest = resultOfChild;
 					}
-					return transitionProbability * biggest;
+					result = transitionProbability * biggest;
 				}
 				else if (cge.IsChoiceTypeProbabilitstic)
 				{
 					var sum = 0.0;
 					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 					{
-						var resultOfChild = CalculateMinimumProbabilityOfCid(stateProbabilities, i);
+						var resultOfChild = CalculateMinimumProbabilityOfCid(cache, stateProbabilities, i);
 						sum += resultOfChild;
 					}
-					return transitionProbability * sum;
+					result = transitionProbability * sum;
 				}
 			}
-			return double.NaN;
+			cache[(int)currentCid] = result;
+			return result;
 		}
 
-		public double CalculateMinimumFinalProbability(double[] initialStateProbabilities)
+		public double CalculateMinimumFinalProbability(AutoResizeVector<double> cache, double[] initialStateProbabilities)
 		{
 			var cid = Nmdp.GetRootContinuationGraphLocationOfInitialState();
-			return CalculateMinimumProbabilityOfCid(initialStateProbabilities, cid);
+			cache.Clear();
+			return CalculateMinimumProbabilityOfCid(cache, initialStateProbabilities, cid);
 		}
 
-		internal double CalculateMaximumFinalProbability(double[] initialStateProbabilities)
+		internal double CalculateMaximumFinalProbability(AutoResizeVector<double> cache, double[] initialStateProbabilities)
 		{
 			var cid = Nmdp.GetRootContinuationGraphLocationOfInitialState();
-			return CalculateMaximumProbabilityOfCid(initialStateProbabilities, cid);
+			cache.Clear();
+			return CalculateMaximumProbabilityOfCid(cache, initialStateProbabilities, cid);
 		}
 
-		internal double[] MinimumIterator(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
+		internal double[] MinimumIterator(AutoResizeVector<double> cache, Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -213,14 +228,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					else
 					{
 						var cid = Nmdp.GetRootContinuationGraphLocationOfState(i);
-						xnew[i] = CalculateMinimumProbabilityOfCid(xold, cid);
+						cache.Clear();
+						xnew[i] = CalculateMinimumProbabilityOfCid(cache, xold, cid);
 					}
 				}
 
 				if (loops % 10 == 0)
 				{
 					stopwatch.Stop();
-					var currentProbability = CalculateMinimumFinalProbability(xnew);
+					var currentProbability = CalculateMinimumFinalProbability(cache, xnew);
 					_output?.WriteLine(
 						$"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
 					stopwatch.Start();
@@ -230,7 +246,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return xnew;
 		}
 
-		internal double[] MaximumIterator(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
+		internal double[] MaximumIterator(AutoResizeVector<double> cache, Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -262,14 +278,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					else
 					{
 						var cid = Nmdp.GetRootContinuationGraphLocationOfState(i);
-						xnew[i] = CalculateMaximumProbabilityOfCid(xold, cid);
+						cache.Clear();
+						xnew[i] = CalculateMaximumProbabilityOfCid(cache, xold, cid);
 					}
 				}
 
 				if (loops % 10 == 0)
 				{
 					stopwatch.Stop();
-					var currentProbability = CalculateMaximumFinalProbability(xnew);
+					var currentProbability = CalculateMaximumFinalProbability(cache, xnew);
 					_output?.WriteLine(
 						$"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
 					stopwatch.Start();
@@ -282,29 +299,32 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		internal double CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
 		{
+			var cache = new AutoResizeVector<double> {DefaultValue = double.NaN};
+
 			var psiEvaluator = Nmdp.CreateFormulaEvaluator(psi);
 
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
 			var excludedStates = new Dictionary<int, bool>(); // change for \phi Until \psi
+			
+			var xnew = MinimumIterator(cache,directlySatisfiedStates, excludedStates, steps);
 
-			var xnew = MinimumIterator(directlySatisfiedStates, excludedStates, steps);
-
-			var finalProbability = CalculateMinimumFinalProbability(xnew);
+			var finalProbability = CalculateMinimumFinalProbability(cache, xnew);
 
 			return finalProbability;
 		}
 
 		internal double CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
 		{
+			var cache = new AutoResizeVector<double> { DefaultValue = double.NaN };
+
 			var psiEvaluator = Nmdp.CreateFormulaEvaluator(psi);
 
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
 			var excludedStates = new Dictionary<int, bool>(); // change for \phi Until \psi
+			
+			var xnew = MaximumIterator(cache, directlySatisfiedStates, excludedStates, steps);
 
-
-			var xnew = MaximumIterator(directlySatisfiedStates, excludedStates, steps);
-
-			var finalProbability = CalculateMaximumFinalProbability(xnew);
+			var finalProbability = CalculateMaximumFinalProbability(cache, xnew);
 
 			return finalProbability;
 		}

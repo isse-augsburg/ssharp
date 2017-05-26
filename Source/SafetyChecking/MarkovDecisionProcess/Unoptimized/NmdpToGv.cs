@@ -29,39 +29,48 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 	internal static class NmdpToGv
 	{
-		private static void ExportCid(NestedMarkovDecisionProcess nmdp, TextWriter sb, string fromNode, long currentCid)
+		private static void ExportCid(NestedMarkovDecisionProcess nmdp, TextWriter sb, string fromNode, string fromArrowHead, long currentCid)
 		{
 			NestedMarkovDecisionProcess.ContinuationGraphElement cge = nmdp.GetContinuationGraphElement(currentCid);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
 			{
 				var cgl = nmdp.GetContinuationGraphLeaf(currentCid);
-				sb.WriteLine($" {fromNode} -> {cgl.ToState} [label=\"{cgl.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
+
+				var thisNode = $"cid{currentCid}";
+				sb.WriteLine($" {thisNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
+				sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"{fromArrowHead}\", label=\"{cgl.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
+
+				sb.WriteLine($" {thisNode} -> {cgl.ToState} [ arrowhead =\"normal\"];");
 			}
 			else if (cge.IsChoiceTypeDeterministic)
 			{
 				// only forward node (no recursion)
+				// do not print thisNode
 				var cgi = nmdp.GetContinuationGraphInnerNode(currentCid);
 				var toNode = $"cid{cgi.ToCid}";
 				sb.WriteLine($" {fromNode}->{toNode} [ style =\"dashed\", label=\"{cgi.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
 			}
 			else
 			{
+				// we print how we came to this node
 				var cgi = nmdp.GetContinuationGraphInnerNode(currentCid);
-				var arrowhead = "normal";
+
+				var thisNode = $"cid{currentCid}";
+				sb.WriteLine($" {thisNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
+				sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"{fromArrowHead}\", label=\"{cgi.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
+
+				var thisArrowhead = "normal";
 				if (cge.IsChoiceTypeProbabilitstic)
-					arrowhead = "onormal";
+					thisArrowhead = "onormal";
 
 				for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 				{
-					var toNode = $"cid{i}";
-					sb.WriteLine($" {toNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
-					sb.WriteLine($" {fromNode}->{toNode} [ arrowhead =\"{arrowhead}\", label=\"{cgi.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
-					ExportCid(nmdp,sb, toNode, i);
+					ExportCid(nmdp,sb, thisNode, thisArrowhead, i);
 				}
 			}
 		}
 
-		public static void ExportToGv(this NestedMarkovDecisionProcess nmdp,TextWriter sb, bool showRootCids=false)
+		public static void ExportToGv(this NestedMarkovDecisionProcess nmdp,TextWriter sb)
 		{
 			sb.WriteLine("digraph S {");
 			sb.WriteLine("size = \"8,5\"");
@@ -70,14 +79,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			var initialStateName = "initialState";
 			sb.WriteLine($" {initialStateName} [shape=point,width=0.0,height=0.0,label=\"\"]);");
 			var initialCid = nmdp.GetRootContinuationGraphLocationOfInitialState();
-			if (showRootCids)
-			{
-				var rootNode = $"cid{initialCid}";
-				sb.WriteLine($" {rootNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
-				sb.WriteLine($" {initialStateName}->{rootNode};");
-				initialStateName = rootNode;
-			}
-			ExportCid(nmdp, sb, initialStateName, initialCid);
+			ExportCid(nmdp, sb, initialStateName, "normal", initialCid);
 
 			for (var state=0; state < nmdp.States; state++)
 			{
@@ -92,15 +94,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 				var cid = nmdp.GetRootContinuationGraphLocationOfState(state);
 				var fromNode = state.ToString();
-				if (showRootCids)
-				{
-					var rootNode = $"cid{cid}";
-					sb.WriteLine($" {rootNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
-					sb.WriteLine($" {state}->{rootNode};");
-					fromNode = rootNode;
-				}
-				
-				ExportCid(nmdp, sb, fromNode, cid);
+				ExportCid(nmdp, sb, fromNode, "normal", cid);
 			}
 			sb.WriteLine("}");
 		}
