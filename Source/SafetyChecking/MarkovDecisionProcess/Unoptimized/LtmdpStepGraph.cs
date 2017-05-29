@@ -51,12 +51,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			public Choice PruneTo2()
 			{
 				Assert.That(To>=From+1,"Existing choice must have at least 2 options");
-				return new Choice(From, From+1, LtmdpChoiceType.Forward,Probability);
+				return new Choice(From, From+1, ChoiceType, Probability);
 			}
 
 			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == LtmdpChoiceType.UnsplitOrFinal;
 
-			public bool IsChoiceTypeDeterministic => ChoiceType == LtmdpChoiceType.Forward;
+			public bool IsChoiceTypeForward => ChoiceType == LtmdpChoiceType.Forward;
 
 			public bool IsChoiceTypeNondeterministic => ChoiceType == LtmdpChoiceType.Nondeterministic;
 

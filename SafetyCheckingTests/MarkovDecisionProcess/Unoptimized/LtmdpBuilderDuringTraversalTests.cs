@@ -367,5 +367,65 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			var probabilitySumOfState5 = SumProbabilitiesOfState(ltmdp,5);
 			probabilitySumOfState5.ShouldBe(3.0,0.00000001);
 		}
+
+
+		[Fact]
+		public void TwoDistributionWithFiveContinuationsAfterTwoSplitsWithRemove()
+		{
+			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
+
+			// add initial state
+			Clear();
+			CreateTransition(false, 5, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			ltmdpBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
+
+			// add state 5
+			Clear();
+			_stepGraph.ProbabilisticSplit(0, 1, 3);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			_stepGraph.SetProbabilityOfContinuationId(1, 0.3);
+			_stepGraph.NonDeterministicSplit(1, 4, 5);
+			_stepGraph.PruneChoicesOfCidTo2(0);
+			_stepGraph.Forward(2, 4);
+			_stepGraph.SetProbabilityOfContinuationId(2, 0.7);
+			_stepGraph.SetProbabilityOfContinuationId(4, 1.0);
+			_stepGraph.SetProbabilityOfContinuationId(5, 1.0);
+			CreateTransition(false, 7, 4);
+			CreateTransition(false, 2, 5);
+			ltmdpBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
+
+			// add reflexive state 7
+			Clear();
+			CreateTransition(false, 7, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			ltmdpBuilder.ProcessTransitions(null, null, 7, CreateTransitionCollection(), _transitionCount, false);
+
+			// add reflexive state 2
+			Clear();
+			CreateTransition(false, 2, 0);
+			_stepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			ltmdpBuilder.ProcessTransitions(null, null, 2, CreateTransitionCollection(), _transitionCount, false);
+
+			ltmdp.TransitionTargets.ShouldBe(5);
+			ltmdp.SourceStates.Count.ShouldBe(3);
+
+
+			// check that the transformed forward node (was 2) points to the correct target (was 4) and not to anything else.
+			var initialRootCidLocation = ltmdp.GetRootContinuationGraphLocationOfInitialState();
+			var initialTarget = ltmdp.GetContinuationGraphElement(initialRootCidLocation);
+			var state5Transformed = ltmdp.GetTransitionTarget((int)initialTarget.To);
+			var state5TransformedRootCidLocation = ltmdp.GetRootContinuationGraphLocationOfState(state5Transformed.TargetState);
+			var state5TransformedRootCid = ltmdp.GetContinuationGraphElement(state5TransformedRootCidLocation);
+			var state5Successors = state5TransformedRootCid.To - state5TransformedRootCid.From + 1;
+			state5Successors.ShouldBe(2);
+			var state5TransformedFirstSplitCidLocation = state5TransformedRootCid.From;
+			var state5TransformedFirstSplitCid = ltmdp.GetContinuationGraphElement(state5TransformedFirstSplitCidLocation);
+			var state5TransformedTargetOfForward = state5TransformedFirstSplitCid.From;
+			var state5ForwardNode = ltmdp.GetContinuationGraphElement(state5TransformedRootCid.To);
+			state5ForwardNode.ChoiceType.ShouldBe(LtmdpChoiceType.Forward);
+			state5ForwardNode.To.ShouldBe(state5TransformedTargetOfForward);
+		}
 	}
 }

@@ -89,7 +89,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			public bool IsChoiceTypeUnsplitOrFinal => ChoiceType == LtmdpChoiceType.UnsplitOrFinal;
 
-			public bool IsChoiceTypeDeterministic => ChoiceType == LtmdpChoiceType.Forward;
+			public bool IsChoiceTypeForward => ChoiceType == LtmdpChoiceType.Forward;
 
 			public bool IsChoiceTypeNondeterministic => ChoiceType == LtmdpChoiceType.Nondeterministic;
 
@@ -97,6 +97,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			[FieldOffset(0)]
 			public ContinuationGraphLeaf AsLeaf;
+			
+			[FieldOffset(8)]
+			public double Probability;
 		}
 
 		[StructLayout(LayoutKind.Explicit, Size = 32)]

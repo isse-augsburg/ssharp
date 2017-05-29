@@ -80,6 +80,32 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		private readonly Dictionary<StateStorageEntry, int> _mapper = new Dictionary<StateStorageEntry, int>();
 		private readonly AutoResizeVector<StateStorageEntry> _backMapper = new AutoResizeVector<StateStorageEntry>();
 
+		private readonly AutoResizeVector<long> _stepGraphMapper = new AutoResizeVector<long> {DefaultValue = -1};
+		private long _stepGraphMapperOffset;
+
+		private void ClearStepGraphMapper(long ltmdpRootCid)
+		{
+			_stepGraphMapper.Clear();
+			_stepGraphMapperOffset = ltmdpRootCid;
+		}
+
+		private void BufferCidMapping(long ltmdpCid, long nmdpCid)
+		{
+			var positionInArray = ltmdpCid - _stepGraphMapperOffset;
+			Requires.That(positionInArray <= int.MaxValue, "You encountered a limitation of ISSE.SafetyChecking. AutoResizeVector cannot handle bigger positions.");
+			Assert.That(_stepGraphMapper[(int)positionInArray] == -1, "Cid must _not_ have been buffered");
+
+			_stepGraphMapper[(int)positionInArray] = nmdpCid;
+		}
+
+		private long GetBufferedNmdpCid(long ltmdpCid)
+		{
+			var positionInArray = ltmdpCid - _stepGraphMapperOffset;
+			Requires.That(positionInArray <= int.MaxValue, "You encountered a limitation of ISSE.SafetyChecking. AutoResizeVector cannot handle bigger positions.");
+			Assert.That(_stepGraphMapper[(int)positionInArray] != -1, "Cid must have been buffered");
+			return _stepGraphMapper[(int)positionInArray];
+		}
+
 		private void CreateStates()
 		{
 			var enumerator = _ltmdp.GetTransitionTargetEnumerator();
@@ -105,6 +131,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private void AddNodesOfContinuationId(long continuationId, long locationForContinuationGraphElement)
 		{
+			BufferCidMapping(continuationId, locationForContinuationGraphElement);
+
 			var choice = _ltmdp.GetContinuationGraphElement(continuationId);
 
 			if (choice.IsChoiceTypeUnsplitOrFinal)
@@ -116,6 +144,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				var targetState = _mapper[targetEntry];
 
 				NestedMarkovDecisionProcess.AddContinuationGraphLeaf(locationForContinuationGraphElement, targetState, choice.Probability);
+				return;
+			}
+			if (choice.IsChoiceTypeForward)
+			{
+				// no recursive descent here
+				var bufferedTargetCid = GetBufferedNmdpCid(choice.To);
+				NestedMarkovDecisionProcess.AddContinuationGraphInnerNode(locationForContinuationGraphElement, choice.ChoiceType, bufferedTargetCid, bufferedTargetCid, choice.Probability);
 				return;
 			}
 
@@ -140,6 +175,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			{
 				var sourceEntry = _backMapper[i];
 				var cid = _ltmdp.GetRootContinuationGraphLocationOfState(sourceEntry.StateStorageState);
+				ClearStepGraphMapper(cid);
 				var locationOfStateRoot = NestedMarkovDecisionProcess.GetPlaceForNewContinuationGraphElements(1);
 				NestedMarkovDecisionProcess.SetRootContinuationGraphLocationOfState(i, locationOfStateRoot);
 				AddNodesOfContinuationId(cid, locationOfStateRoot);
@@ -149,6 +185,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		public void ConvertInitialStates()
 		{
 			var cid = _ltmdp.GetRootContinuationGraphLocationOfInitialState();
+			ClearStepGraphMapper(cid);
 			var locationOfStateRoot = NestedMarkovDecisionProcess.GetPlaceForNewContinuationGraphElements(1);
 			NestedMarkovDecisionProcess.SetRootContinuationGraphLocationOfInitialState(locationOfStateRoot);
 			AddNodesOfContinuationId(cid, locationOfStateRoot);

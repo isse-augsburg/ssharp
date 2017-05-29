@@ -103,7 +103,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			{
 				var cgi = _nmdp.GetContinuationGraphInnerNode(currentCid);
 				MultiplyProbabilityOfCid(currentCid, cgi.Probability);
-				if (cge.IsChoiceTypeDeterministic)
+				if (cge.IsChoiceTypeForward)
 				{
 					// This ChoiceType might be created by ForwardUntakenChoicesAtIndex in ChoiceResolver
 					throw new Exception("Forward transitions not supported");

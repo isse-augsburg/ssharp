@@ -46,6 +46,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			private readonly AutoResizeVector<int> _continuationIdToTransitionTarget = new AutoResizeVector<int>();
 
+			private readonly AutoResizeVector<long> _stepGraphMapper = new AutoResizeVector<long> { DefaultValue = -1 };
+
 			/// <summary>
 			///   Initializes a new instance.
 			/// </summary>
@@ -116,14 +118,42 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					};
 			}
 
-			
+			private void BufferCidMapping(int stepGraphCid, long ltmdpCid)
+			{
+				Assert.That(_stepGraphMapper[stepGraphCid] == -1, "Cid must _not_ have been buffered");
+
+				_stepGraphMapper[stepGraphCid] = ltmdpCid;
+			}
+
+			private long GetBufferedLtmdpCid(int stepGraphCid)
+			{
+				Assert.That(_stepGraphMapper[stepGraphCid] != -1, "Cid must have been buffered");
+				return _stepGraphMapper[stepGraphCid];
+			}
+
 			private void AddChoiceOfStepGraph(LtmdpStepGraph stepGraph, int continuationId, long locationForContinuationGraphElement)
 			{
+				BufferCidMapping(continuationId, locationForContinuationGraphElement);
+
 				var choice = stepGraph.GetChoiceOfCid(continuationId);
 
 				if (choice.IsChoiceTypeUnsplitOrFinal)
 				{
 					AddFinalChoiceOfStepGraph(continuationId, locationForContinuationGraphElement,choice.Probability);
+					return;
+				}
+				if (choice.IsChoiceTypeForward)
+				{
+					// no recursive descent here
+					var bufferedTargetCid = GetBufferedLtmdpCid(choice.To);
+					_ltmdp._continuationGraph[locationForContinuationGraphElement] =
+						new ContinuationGraphElement
+						{
+							ChoiceType = choice.ChoiceType,
+							From = bufferedTargetCid,
+							To = bufferedTargetCid,
+							Probability = choice.Probability
+						};
 					return;
 				}
 
@@ -151,6 +181,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			private void AddStepGraph(LtmdpStepGraph stepGraph, int sourceState, bool areInitialTransitions)
 			{
+				_stepGraphMapper.Clear();
 				var place = _ltmdp.GetPlaceForNewContinuationGraphElements(1);
 				if (areInitialTransitions)
 				{

@@ -176,6 +176,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			// MakeChoiceAtIndexDeterministic of probabilistic split
 			var cidToForwardTo = _choiceResolver.GetContinuationId();
 			_choiceResolver.ForwardUntakenChoicesAtIndex(choiceToMakeDeterministic);
+			var choiceOfCid0 = _stepGraph.GetChoiceOfCid(0);
+			var choiceOfCid1 = _stepGraph.GetChoiceOfCid(1);
 			var choiceOfCid2 = _stepGraph.GetChoiceOfCid(2);
 
 			var entries = CountEntries(0);
@@ -188,8 +190,18 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			entries.ShouldBe(0);
 			entries = CountEntries(2);
 			entries.ShouldBe(1);
+			cidToForwardTo.ShouldBe(4);
+			choiceOfCid0.ChoiceType.ShouldBe(LtmdpChoiceType.Probabilitstic);
+			choiceOfCid0.From.ShouldBe(1);
+			choiceOfCid0.To.ShouldBe(2);
+			choiceOfCid0.Probability.ShouldBe(1.0);
+			choiceOfCid1.ChoiceType.ShouldBe(LtmdpChoiceType.Nondeterministic);
+			choiceOfCid1.From.ShouldBe(4);
+			choiceOfCid1.To.ShouldBe(5);
+			choiceOfCid1.Probability.ShouldBe(1.0/3);
 			choiceOfCid2.ChoiceType.ShouldBe(LtmdpChoiceType.Forward);
-			choiceOfCid2.To.ShouldBe(cidToForwardTo);
+			choiceOfCid2.To.ShouldBe(4);
+			choiceOfCid2.Probability.ShouldBe(1.0 - (1.0 / 3));
 		}
 
 		[Fact]
@@ -206,6 +218,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			// MakeChoiceAtIndexDeterministic of nondeterministic split
 			var cidToForwardTo = _choiceResolver.GetContinuationId();
 			_choiceResolver.ForwardUntakenChoicesAtIndex(choiceToMakeDeterministic);
+			var choiceOfCid1 = _stepGraph.GetChoiceOfCid(1);
+			var choiceOfCid4 = _stepGraph.GetChoiceOfCid(4);
 			var choiceOfCid5 = _stepGraph.GetChoiceOfCid(5);
 
 			var entries = CountEntries(0);
@@ -220,8 +234,16 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			entries.ShouldBe(0);
 			entries = CountEntries(5);
 			entries.ShouldBe(1);
+			cidToForwardTo.ShouldBe(4);
+			choiceOfCid1.ChoiceType.ShouldBe(LtmdpChoiceType.Nondeterministic);
+			choiceOfCid1.From.ShouldBe(4);
+			choiceOfCid1.To.ShouldBe(5);
+			choiceOfCid1.Probability.ShouldBe(1.0/3);
+			choiceOfCid4.ChoiceType.ShouldBe(LtmdpChoiceType.UnsplitOrFinal);
+			choiceOfCid4.Probability.ShouldBe(1.0);
 			choiceOfCid5.ChoiceType.ShouldBe(LtmdpChoiceType.Forward);
-			choiceOfCid5.To.ShouldBe(cidToForwardTo);
+			choiceOfCid5.To.ShouldBe(4);
+			choiceOfCid5.Probability.ShouldBe(1.0);
 		}
 
 

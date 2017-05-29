@@ -97,16 +97,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			if (cge.IsChoiceTypeUnsplitOrFinal)
 			{
 				var cgl = Nmdp.GetContinuationGraphLeaf(currentCid);
-				var transitionProbability = cgl.Probability;
-				var targetStateProbability = stateProbabilities[cgl.ToState];
-				result = transitionProbability * targetStateProbability;
+				result = stateProbabilities[cgl.ToState];
 			}
 			else
 			{
 				var cgi = Nmdp.GetContinuationGraphInnerNode(currentCid);
-				var transitionProbability = cgi.Probability;
-				if (cge.IsChoiceTypeDeterministic)
+				if (cge.IsChoiceTypeForward)
 				{
+					var transitionProbability = cgi.Probability;
+					// use transitionProbability instead of target state probability
 					result = transitionProbability * CalculateMinimumProbabilityOfCid(cache, stateProbabilities, cgi.FromCid);
 				}
 				if (cge.IsChoiceTypeNondeterministic)
@@ -118,17 +117,18 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 						if (resultOfChild < smallest)
 							smallest = resultOfChild;
 					}
-					result = transitionProbability * smallest;
+					result = smallest;
 				}
 				else if (cge.IsChoiceTypeProbabilitstic)
 				{
 					var sum = 0.0;
 					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 					{
+						var transitionProbability = Nmdp.GetContinuationGraphElement(i).Probability;
 						var resultOfChild = CalculateMinimumProbabilityOfCid(cache, stateProbabilities, i);
-						sum += resultOfChild;
+						sum += transitionProbability*resultOfChild;
 					}
-					result = transitionProbability * sum;
+					result = sum;
 				}
 			}
 			cache[(int)currentCid] = result;
@@ -144,17 +144,16 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			if (cge.IsChoiceTypeUnsplitOrFinal)
 			{
 				var cgl = Nmdp.GetContinuationGraphLeaf(currentCid);
-				var transitionProbability = cgl.Probability;
-				var targetStateProbability = stateProbabilities[cgl.ToState];
-				result = transitionProbability * targetStateProbability;
+				result = stateProbabilities[cgl.ToState];
 			}
 			else
 			{
 				var cgi = Nmdp.GetContinuationGraphInnerNode(currentCid);
-				var transitionProbability = cgi.Probability;
-				if (cge.IsChoiceTypeDeterministic)
+				if (cge.IsChoiceTypeForward)
 				{
-					result = transitionProbability *CalculateMinimumProbabilityOfCid(cache, stateProbabilities, cgi.FromCid);
+					var transitionProbability = cgi.Probability;
+					// use transitionProbability instead of target state probability
+					result = transitionProbability * CalculateMinimumProbabilityOfCid(cache, stateProbabilities, cgi.FromCid);
 				}
 				if (cge.IsChoiceTypeNondeterministic)
 				{
@@ -165,17 +164,18 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 						if (resultOfChild > biggest)
 							biggest = resultOfChild;
 					}
-					result = transitionProbability * biggest;
+					result = biggest;
 				}
 				else if (cge.IsChoiceTypeProbabilitstic)
 				{
 					var sum = 0.0;
 					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 					{
+						var transitionProbability = Nmdp.GetContinuationGraphElement(i).Probability;
 						var resultOfChild = CalculateMinimumProbabilityOfCid(cache, stateProbabilities, i);
-						sum += resultOfChild;
+						sum += transitionProbability * resultOfChild;
 					}
-					result = transitionProbability * sum;
+					result = sum;
 				}
 			}
 			cache[(int)currentCid] = result;

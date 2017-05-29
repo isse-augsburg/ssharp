@@ -42,7 +42,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 				sb.WriteLine($" {thisNode} -> {cgl.ToState} [ arrowhead =\"normal\"];");
 			}
-			else if (cge.IsChoiceTypeDeterministic)
+			else if (cge.IsChoiceTypeForward)
 			{
 				// only forward node (no recursion)
 				// do not print thisNode
