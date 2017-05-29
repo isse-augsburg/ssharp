@@ -104,9 +104,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				var cgi = Nmdp.GetContinuationGraphInnerNode(currentCid);
 				if (cge.IsChoiceTypeForward)
 				{
-					var transitionProbability = cgi.Probability;
-					// use transitionProbability instead of target state probability
-					result = transitionProbability * CalculateMinimumProbabilityOfCid(cache, stateProbabilities, cgi.FromCid);
+					// Note, cgi.Probability is used in the branch "else if (cge.IsChoiceTypeProbabilitstic)"
+					result = CalculateMinimumProbabilityOfCid(cache, stateProbabilities, cgi.FromCid);
 				}
 				if (cge.IsChoiceTypeNondeterministic)
 				{
@@ -151,9 +150,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				var cgi = Nmdp.GetContinuationGraphInnerNode(currentCid);
 				if (cge.IsChoiceTypeForward)
 				{
-					var transitionProbability = cgi.Probability;
-					// use transitionProbability instead of target state probability
-					result = transitionProbability * CalculateMinimumProbabilityOfCid(cache, stateProbabilities, cgi.FromCid);
+					// Note, cgi.Probability is used in the branch "else if (cge.IsChoiceTypeProbabilitstic)"
+					result = CalculateMinimumProbabilityOfCid(cache, stateProbabilities, cgi.FromCid);
 				}
 				if (cge.IsChoiceTypeNondeterministic)
 				{
