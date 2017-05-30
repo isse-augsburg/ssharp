@@ -48,8 +48,21 @@ namespace ISSE.SafetyChecking.Modeling
 		private bool _isSubsumedFaultSetCached;
 		
 		private FaultSet _subsumedFaultSet;
-		
-		public Probability ProbabilityOfOccurrence = new Probability(0.5);
+
+		private Probability? _probabilityOfOccurrence;
+
+		private Probability _probabilityOfOccurrenceComplement;
+
+		public Probability? ProbabilityOfOccurrence
+		{
+			get { return _probabilityOfOccurrence; }
+			set
+			{
+				_probabilityOfOccurrence = value;
+				if (ProbabilityOfOccurrence != null)
+					_probabilityOfOccurrenceComplement = ProbabilityOfOccurrence.Value.Complement();
+			}
+		}
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -204,7 +217,14 @@ namespace ISSE.SafetyChecking.Modeling
 						_canUndoActivation = false;
 						break;
 					case Activation.Nondeterministic:
-						IsActivated = Choice.Choose(new Option<bool>(ProbabilityOfOccurrence.Complement(), false), new Option<bool>(ProbabilityOfOccurrence, true));
+						if (_probabilityOfOccurrence != null)
+						{
+							IsActivated = Choice.Choose(new Option<bool>(_probabilityOfOccurrenceComplement, false), new Option<bool>(_probabilityOfOccurrence.Value, true));
+						}
+						else
+						{
+							IsActivated = Choice.Choose(false,true);
+						}
 						_choiceIndex = Choice.Resolver.LastChoiceIndex;
 						_canUndoActivation = true;
 						break;

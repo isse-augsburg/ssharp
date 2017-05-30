@@ -335,7 +335,8 @@ namespace SafetySharp.Utilities
 						// Hidden or readonly
 						if ((mode == SerializationMode.Optimized && !discoveringObjects) && (
 							member.Name == "_activation" ||
-							member.Name == "ProbabilityOfOccurrence" ||
+							member.Name == "_probabilityOfOccurrence" ||
+							member.Name == "_probabilityOfOccurrenceComplement" ||
 							member.Name == "<Identifier>k__BackingField" ||
 							member.Name == "<IsActivated>k__BackingField" ||
 							member.Name == "<Name>k__BackingField" ||
