@@ -220,6 +220,7 @@
     <Compile Include="Utilities\Assert.cs" />
     <Compile Include="Utilities\CodeWriter.cs" />
     <Compile Include="Utilities\ConsoleHelpers.cs" />
+    <Compile Include="Utilities\CsvWriter.cs" />
     <Compile Include="Utilities\DisposableExtensions.cs" />
     <Compile Include="Utilities\DisposableObject.cs" />
     <Compile Include="Utilities\ExternalProcess.cs" />
