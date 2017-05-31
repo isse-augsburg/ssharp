@@ -34,7 +34,7 @@
 #  Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser
 
 # include functionality per Dot-Sourcing
-. $PSScriptRoot\func_compareBenchmarks.ps1
+. $PSScriptRoot\func_createGraphCsvFromSummarizedLocalBenchmarks.ps1
 # include test cases per Dot-Sourcing
 . $PSScriptRoot\evaluation2_HeightControlOriginalParameterized_tests.ps1
 
@@ -44,4 +44,4 @@ Foreach ($testvaluation in $global_testValuations) {
     AddResultDir -Name $testvaluation.Name -ResultDir $testvaluation.ResultDir
 }
 
-CompareSummarized -Tests $global_selected_tests -InterestingValues @("Probability")
+CompareSummarized -Tests $global_selected_tests -InterestingValue "Probability"

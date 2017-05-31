@@ -45,33 +45,43 @@ function AddResultDir($name,$resultDir)
     $global_resultDirs += $newDir
 }
 
-function LoadResults($tests,$counter,$interestingValues )
+function LoadAnnotations($tests)
 {
-    $test = $tests[$counter]
     $newResult = New-Object System.Object
-    $newResult | Add-Member -type NoteProperty -name TestName -Value $test.TestName
-    $newResult | Add-Member -type NoteProperty -name Annotation -Value $test.Annotation
+    $newResult | Add-Member -type NoteProperty -name Axis -Value "Annotation"
     
-    Foreach ($interestingValue in $interestingValues) {
-        #$newResult | Add-Member -type NoteProperty -name $interestingValue -Value $mcssize
-
-        Foreach ($resultDir in $global_resultDirs){
-            echo $resultDir
-            $entryname=$resultDir.Name+$interestingValue
-            $entryvalue= $resultDir.Results[$counter].$interestingValue
-            $newResult | Add-Member -type NoteProperty -name $entryname -Value $entryvalue
-        }
+    Foreach ($resultDir in $global_resultDirs){
+        echo $resultDir
+        $entryname=$resultDir.Name
+        $newResult | Add-Member -type NoteProperty -name $entryname -Value $resultDir.Annotation
     }
     $global_compareResults += $newResult
 }
 
-function CompareSummarized($tests, $interestingValues) {
+function LoadResults($tests,$counter,$interestingValue )
+{
+    $test = $tests[$counter]
+    $newResult = New-Object System.Object
+    $newResult | Add-Member -type NoteProperty -name Axis -Value $test.TestName
+    
+    Foreach ($resultDir in $global_resultDirs){
+        echo $resultDir
+        $entryname=$resultDir.Name
+        $entryvalue= $resultDir.Results[$counter].$interestingValue
+        $newResult | Add-Member -type NoteProperty -name $entryname -Value $entryvalue
+    }
+    $global_compareResults += $newResult
+}
+
+function CompareSummarized($tests, $interestingValue) {
     $global_compareResults = @()
+    
+    LoadAnnotations -Tests $tests -Counter $counter
 
     for ($counter=0; $counter -lt $tests.Length; $counter++) {
-        LoadResults -Tests $tests -Counter $counter -InterestingValues $interestingValues
+        LoadResults -Tests $tests -Counter $counter -InterestingValue $interestingValue
     }
     
-    $resultsFile="$PSScriptRoot\"+"compareBenchmarks.csv"
+    $resultsFile="$PSScriptRoot\"+"graphValues.csv"
     $global_compareResults | Export-Csv -Path $resultsFile -Encoding ascii -NoTypeInformation -UseCulture
 }

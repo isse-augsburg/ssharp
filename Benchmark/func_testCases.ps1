@@ -51,10 +51,11 @@ function AddTest($testName, $testAssembly, $testMethod, $testNunitCategory ="", 
 }
 
 
-function AddTestValuation($name,$script="",$resultDir="$PSScriptRoot\Results",$filesOfTestValuation=@())
+function AddTestValuation($name,$annotation="",$script="",$resultDir="$PSScriptRoot\Results",$filesOfTestValuation=@())
 {
     $testValuation = New-Object System.Object
     $testValuation | Add-Member -type NoteProperty -name Name -Value $name
+    $testValuation | Add-Member -type NoteProperty -name Annotation -Value $annotation
     $testValuation | Add-Member -type NoteProperty -name Script -Value $script
     $testValuation | Add-Member -type NoteProperty -name ResultDir -Value $resultDir
     $testValuation | Add-Member -type NoteProperty -name FilesOfTestValuation -Value $filesOfTestValuation
@@ -82,7 +83,7 @@ function AddParameterizedJsonTestValuations($namePrefix,$sourceFile,$targetFile,
     {
         $newname = $namePrefix + "_" + $i
         $scriptString = "UpdateValueInJsonFile -SourceFile "+ $sourceFile + " -TargetFile " + $targetFile + " -VariableToUpdate " + $variableToUpdate + " -NewValue " + $currentValue 
-        AddTestValuation -Name $newname -Script $scriptString -ResultDir "$PSScriptRoot\$newname" -FilesOfTestValuation @($targetFile)
+        AddTestValuation -Name $newname -Annotation $currentValue -Script $scriptString -ResultDir "$PSScriptRoot\$newname" -FilesOfTestValuation @($targetFile)
         $currentValue = $currentValue + $stepsize
     }
 }
