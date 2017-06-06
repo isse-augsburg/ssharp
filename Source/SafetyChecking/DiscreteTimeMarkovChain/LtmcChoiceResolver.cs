@@ -210,11 +210,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		}
 
 		/// <summary>
-		///   Makes taken choice identified by the <paramref name="choiceIndex" /> deterministic.
+		///   Makes taken choice identified by the <paramref name="choiceIndexToForward" /> deterministic.
 		/// </summary>
-		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
+		/// <param name="choiceIndexToForward">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override void ForwardUntakenChoicesAtIndex(int choiceIndex)
+		internal override void ForwardUntakenChoicesAtIndex(int choiceIndexToForward)
 		{
 			// This method is called when it is assumed, that choosing anything different at choiceIndex
 			// leads to the same state as the path until the last choice.
@@ -222,16 +222,16 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			// of the reverted choice to the last choice.
 			// Note, very small numbers get multiplied and summarized. Maybe type double is too imprecise.
 
-			if (_valueCount[choiceIndex] == 0)
+			if (_valueCount[choiceIndexToForward] == 0)
 				return; //Nothing to do
 
-			Assert.That(_chosenValues[choiceIndex].OptionIndex==0, "Only first choice can be made deterministic.");
+			Assert.That(_chosenValues[choiceIndexToForward].OptionIndex==0, "Only first choice can be made deterministic.");
 
 			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
 			// turning the choice into a deterministic selection of the value at index 0
 
-			var oldProbabilityUntilDeterministicChoice = GetProbabilityUntilIndex(choiceIndex-1).Value;
-			var oldProbabilityOfDeterministicChoice = GetProbabilityUntilIndex(choiceIndex).Value;
+			var oldProbabilityUntilDeterministicChoice = GetProbabilityUntilIndex(choiceIndexToForward-1).Value;
+			var oldProbabilityOfDeterministicChoice = GetProbabilityUntilIndex(choiceIndexToForward).Value;
 			var differenceProbabilityToAdd = oldProbabilityUntilDeterministicChoice - oldProbabilityOfDeterministicChoice;
 			
 			var probabilityOfLastChoicePath = GetProbabilityUntilIndex(LastChoiceIndex).Value;
@@ -247,7 +247,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				};
 
 			// Set the alternatives to zero.
-			_valueCount[choiceIndex] = 0;
+			_valueCount[choiceIndexToForward] = 0;
 		}
 
 		/// <summary>

@@ -163,16 +163,16 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		}
 
 		/// <summary>
-		///   Makes taken choice identified by the <paramref name="choiceIndex" /> deterministic.
+		///   Makes taken choice identified by the <paramref name="choiceIndexToForward" /> deterministic.
 		/// </summary>
-		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
+		/// <param name="choiceIndexToForward">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override void ForwardUntakenChoicesAtIndex(int choiceIndex)
+		internal override void ForwardUntakenChoicesAtIndex(int choiceIndexToForward)
 		{
-			Assert.That(_chosenValues[choiceIndex] == 0, "Only first choice can be made deterministic.");
+			Assert.That(_chosenValues[choiceIndexToForward] == 0, "Only first choice can be made deterministic.");
 			// We disable a choice by setting the number of values that we have yet to choose to 0, effectively
 			// turning the choice into a deterministic selection of the value at index 0
-			_valueCount[choiceIndex] = 0;
+			_valueCount[choiceIndexToForward] = 0;
 		}
 
 		/// <summary>

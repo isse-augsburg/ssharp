@@ -71,11 +71,11 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		public abstract void SetProbabilityOfLastChoice(Probability probability);
 
 		/// <summary>
-		///   Makes taken choice identified by the <paramref name="choiceIndex" /> deterministic.
+		///   Makes taken choice identified by the <paramref name="choiceIndexToForward" /> deterministic.
 		/// </summary>
-		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
+		/// <param name="choiceIndexToForward">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal abstract void ForwardUntakenChoicesAtIndex(int choiceIndex);
+		internal abstract void ForwardUntakenChoicesAtIndex(int choiceIndexToForward);
 
 		/// <summary>
 		///   Sets the choices that should be made during the next step.

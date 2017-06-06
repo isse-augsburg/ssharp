@@ -264,28 +264,28 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		}
 		
 		/// <summary>
-		///   Makes taken choice identified by the <paramref name="choiceIndex" /> deterministic.
+		///   Makes taken choice identified by the <paramref name="choiceIndexToForward" /> deterministic.
 		/// </summary>
-		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
+		/// <param name="choiceIndexToForward">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal override void ForwardUntakenChoicesAtIndex(int choiceIndex)
+		internal override void ForwardUntakenChoicesAtIndex(int choiceIndexToForward)
 		{
 			// This method is called when it is assumed, that choosing anything different at choiceIndex
 			// leads to the same state as the path until the last choice.
 			// Thus, we can simply forward the other choices to the current continuationId. The other choices
 			// can be merged into one transition.
 
-			var valueCountAtIndex = _valueCount[choiceIndex];
+			var valueCountAtIndex = _valueCount[choiceIndexToForward];
 
 			if (valueCountAtIndex <= 1)
 				return; //Nothing to do
 
-			Assert.That(_chosenValues[choiceIndex].OptionIndex == 0, "Forward is only possible, if the current position is a directly successor of the first option at the step.");
+			Assert.That(_chosenValues[choiceIndexToForward].OptionIndex == 0, "Forward is only possible, if the current position is a directly successor of the first option at the step.");
 			
-			var chosenValueAtIndex = _chosenValues[choiceIndex];
+			var chosenValueAtIndex = _chosenValues[choiceIndexToForward];
 			var originalCidOfChoiceIndex = chosenValueAtIndex.ContinuationId;
 
-			var parentOfLastChoice = choiceIndex - 1;
+			var parentOfLastChoice = choiceIndexToForward - 1;
 			int parentContinuationId;
 			if (parentOfLastChoice == -1)
 			{
@@ -310,7 +310,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			LtmdpStepGraph.SetProbabilityOfContinuationId(complementCidOfChoiceIndex, complementProbabilityOfChoiceIndex);
 
 			// Set the alternatives used by PrepareNextPath to zero.
-			_valueCount[choiceIndex] = 0;
+			_valueCount[choiceIndexToForward] = 0;
 		}
 
 		/// <summary>
