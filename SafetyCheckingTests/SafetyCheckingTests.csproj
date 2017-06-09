@@ -101,6 +101,8 @@
     <Compile Include="DiscreteTimeMarkovChain\ExternalDtmcModelCheckerMrmcTests.cs" />
     <Compile Include="MarkovDecisionProcess\Traditional\ExternalMdpModelCheckerPrismTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Dcca\SimpleHazard.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Dcca\HiddenHazard.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Invariants\CounterExamples\formulas.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\make choice deterministic2.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Invariants\NotViolated\nested side effect free methods with faults.cs" />
