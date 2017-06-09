@@ -22,6 +22,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+# Run under Windows using Python 3.6
+# c:\Python36\Scripts\pip.exe install numpy
+# c:\Python36\Scripts\pip.exe install matplotlib
+# c:\Python36\python.exe createGraphFigure.py
 
 import csv
 import numpy

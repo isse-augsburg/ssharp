@@ -91,11 +91,12 @@ namespace SafetySharp.CaseStudies.SmallModels.Model3
 
 		public SignalDetector ActiveSignalDetector;
 
-		[Hidden]
+		//[Hidden]
 		public bool HazardActive;
 
 		public override void Update()
 		{
+			HazardActive = false;
 			if (TimeStep == 0)
 			{
 				if (SignalDetector1.PerformSelfCheck())
@@ -106,8 +107,6 @@ namespace SafetySharp.CaseStudies.SmallModels.Model3
 
 			if (ActiveSignalDetector.MeasureSignal() == 4)
 				HazardActive = true;
-			else
-				HazardActive = false;
 			TimeStep++;
 		}
 	}

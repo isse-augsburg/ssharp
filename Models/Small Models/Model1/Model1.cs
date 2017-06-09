@@ -39,12 +39,12 @@ namespace SafetySharp.CaseStudies.SmallModels.Model1
 		}
 
 		public Fault F1;
-
-
+		
 		public bool HazardActive = false;
 
 		public override void Update()
 		{
+			HazardActive = false;
 		}
 
 
