@@ -26,7 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests.DataStructures
+namespace Tests.DiscreteTimeMarkovChain
 {
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.Formula;
@@ -70,6 +70,35 @@ namespace Tests.DataStructures
 			{
 				var result = prismChecker.CalculateProbability(finallyLabel1);
 				result.Is(example.ProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
+			}
+		}
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void ProbabilityToReachIn10Steps_Label1(MarkovChainExample example)
+		{
+			var dtmc = example.MarkovChain;
+
+			var finallyLabel1 = new BoundedUnaryFormula(MarkovChainExample.Label1Formula, UnaryOperator.Finally, 10);
+
+			using (var prismChecker = new BuiltinDtmcModelChecker(dtmc, Output.TextWriterAdapter()))
+			{
+				var result = prismChecker.CalculateProbability(finallyLabel1);
+				result.Is(example.ProbabilityFinally10Label1, 0.0001).ShouldBe(true);
+			}
+		}
+
+
+		[Theory, MemberData(nameof(DiscoverTests))]
+		public void ProbabilityIn10Steps_Label1UntilLabel2(MarkovChainExample example)
+		{
+			var dtmc = example.MarkovChain;
+
+			var label1UntilLabel2 = new BoundedBinaryFormula(MarkovChainExample.Label1Formula, BinaryOperator.Until, MarkovChainExample.Label2Formula, 10);
+
+			using (var prismChecker = new BuiltinDtmcModelChecker(dtmc, Output.TextWriterAdapter()))
+			{
+				var result = prismChecker.CalculateProbability(label1UntilLabel2);
+				result.Is(example.ProbabilityLabel1UntilLabel2, 0.0001).ShouldBe(true);
 			}
 		}
 	}

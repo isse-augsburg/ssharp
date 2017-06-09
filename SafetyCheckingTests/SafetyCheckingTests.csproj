@@ -82,8 +82,8 @@
     <Compile Include="MarkovDecisionProcess\Optimized\NestedMarkovDecisionProcessExamples.cs" />
     <Compile Include="DataStructures\MultipleChainsInSingleArrayTests.cs" />
     <Compile Include="DataStructures\DoubleVectorTests.cs" />
-    <Compile Include="DataStructures\MarkovChainExamples.cs" />
-    <Compile Include="DataStructures\MarkovChainTests.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\MarkovChainExamples.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\MarkovChainTests.cs" />
     <Compile Include="MarkovDecisionProcess\Traditional\MarkovDecisionProcessExamples.cs" />
     <Compile Include="MarkovDecisionProcess\Traditional\MarkovDecisionProcessTests.cs" />
     <Compile Include="DataStructures\MemoryBufferTests.cs" />

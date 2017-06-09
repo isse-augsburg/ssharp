@@ -75,7 +75,7 @@ namespace SafetySharp.Analysis
 		}
 
 		/// <summary>
-		///   Calculates the probability to reach a state whether <paramref name="stateFormula" /> holds.
+		///   Calculates the probability to reach a state where <paramref name="stateFormula" /> holds.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="stateFormula">The state formula to be checked.</param>
@@ -97,37 +97,63 @@ namespace SafetySharp.Analysis
 			return probabilityToReachState;
 		}
 
+		/// <summary>
+		///   Calculates the probability of formula.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="formula">The state formula to be checked.</param>
+		/// <param name="terminateEarlyFormula">When terminateEarlyFormula is satisfied stop building the state space.</param>
+		/// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
+		public static Probability CalculateProbabilityOfFormulaBounded(ModelBase model, Formula formula, Formula terminateEarlyFormula, int bound)
+		{
+			Probability probability;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.AddFormulaToCheck(formula);
+			var markovChain = markovChainGenerator.GenerateMarkovChain(terminateEarlyFormula);
+			using (var modelChecker = new BuiltinDtmcModelChecker(markovChain, System.Console.Out))
+			{
+				probability = modelChecker.CalculateProbability(formula);
+			}
+			return probability;
+		}
 
 		/// <summary>
-		///   Calculates the probability to reach a state whether <paramref name="stateFormula" /> holds.
+		///   Calculates the probability to reach a state where <paramref name="stateFormula" /> holds.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="stateFormula">The state formula to be checked.</param>
 		/// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
 		public static Probability CalculateProbabilityToReachStateBounded(ModelBase model, Formula stateFormula, int bound)
 		{
-			Probability probabilityToReachState;
+			var formula = new BoundedUnaryFormula(stateFormula, UnaryOperator.Finally, bound);
 
-			var probabilityToReachStateFormula = new BoundedUnaryFormula(stateFormula, UnaryOperator.Finally, bound);
-
-			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
-
-			var markovChainGenerator = new DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
-			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			markovChainGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
-			var markovChain = markovChainGenerator.GenerateMarkovChain(stateFormula);
-			using (var modelChecker = new BuiltinDtmcModelChecker(markovChain, System.Console.Out))
-			{
-				probabilityToReachState = modelChecker.CalculateProbability(probabilityToReachStateFormula);
-			}
-			return probabilityToReachState;
+			return CalculateProbabilityOfFormulaBounded(model, formula, stateFormula, bound);
 		}
 
 		/// <summary>
-		///   Calculates the probability to reach a state whether <paramref name="stateFormula" /> holds.
+		///   Calculates the probability to reach a state where <paramref name="stateFormula" /> holds and on its way
+		///   invariantFormula holds in every state, or more formally Pr[invariantFormula U stateFormula].
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
-		/// <param name="stateFormula">The state formula to be checked.</param>
+		/// <param name="stateFormula">The state formula which _must_ finally be true.</param>
+		/// <param name="invariantFormula">The state formulas which must hold until stateFormula is satisfied.</param>
+		/// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
+		public static Probability CalculateProbabilityToReachStateBounded(ModelBase model, Formula stateFormula, Formula invariantFormula, int bound)
+		{
+			var formula = new BoundedBinaryFormula(invariantFormula, BinaryOperator.Until, stateFormula, bound);
+			
+			return CalculateProbabilityOfFormulaBounded(model, formula, stateFormula, bound);
+		}
+
+		/// <summary>
+		///   Calculates the probability to reach a state where <paramref name="stateFormula" /> holds.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="stateFormula">The state formula which _must_ finally be true.</param>
 		public static ProbabilityRange CalculateProbabilityRangeToReachState(ModelBase model, Formula stateFormula)
 		{
 			ProbabilityRange probabilityRangeToReachState;
@@ -161,23 +187,24 @@ namespace SafetySharp.Analysis
 			return probabilityRangeToReachState;
 		}
 
+
+
 		/// <summary>
-		///   Calculates the probability to reach a state whether <paramref name="stateFormula" /> holds.
+		///   Calculates the probability of formula.
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
-		/// <param name="stateFormula">The state formula to be checked.</param>
+		/// <param name="formula">The state formula to be checked.</param>
+		/// <param name="terminateEarlyFormula">When terminateEarlyFormula is satisfied stop building the state space.</param>
 		/// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
-		public static ProbabilityRange CalculateProbabilityRangeToReachStateBounded(ModelBase model, Formula stateFormula, int bound)
+		public static ProbabilityRange CalculateProbabilityRangeOfFormulaBounded(ModelBase model, Formula formula, Formula terminateEarlyFormula, int bound)
 		{
 			ProbabilityRange probabilityRangeToReachState;
-
-			var probabilityToReachStateFormula = new BoundedUnaryFormula(stateFormula, UnaryOperator.Finally, bound);
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
 			var nmdpGenerator = new NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
-			nmdpGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
-			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess(stateFormula);
+			nmdpGenerator.AddFormulaToCheck(formula);
+			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess(terminateEarlyFormula);
 
 
 			if (_convertNmdpToMdp)
@@ -186,17 +213,46 @@ namespace SafetySharp.Analysis
 				var mdp = nmdpToMpd.MarkovDecisionProcess;
 				using (var modelChecker = new BuiltinMdpModelChecker(mdp, System.Console.Out))
 				{
-					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(probabilityToReachStateFormula);
+					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(formula);
 				}
 			}
 			else
 			{
 				using (var modelChecker = new BuiltinNmdpModelChecker(nmdp, System.Console.Out))
 				{
-					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(probabilityToReachStateFormula);
+					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(formula);
 				}
 			}
 			return probabilityRangeToReachState;
+		}
+
+		/// <summary>
+		///   Calculates the probability to reach a state whether <paramref name="stateFormula" /> holds.
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="stateFormula">The state formula which _must_ finally be true.</param>
+		/// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
+		public static ProbabilityRange CalculateProbabilityRangeToReachStateBounded(ModelBase model, Formula stateFormula, int bound)
+		{
+			var formula = new BoundedUnaryFormula(stateFormula, UnaryOperator.Finally, bound);
+			return CalculateProbabilityRangeOfFormulaBounded(model,formula, stateFormula, bound);
+		}
+
+
+
+		/// <summary>
+		///   Calculates the probability to reach a state where <paramref name="stateFormula" /> holds and on its way
+		///   invariantFormula holds in every state, or more formally Pr[invariantFormula U stateFormula].
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="stateFormula">The state formula which _must_ finally be true.</param>
+		/// <param name="invariantFormula">The state formulas which must hold until stateFormula is satisfied.</param>
+		/// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
+		public static ProbabilityRange CalculateProbabilityRangeToReachStateBounded(ModelBase model, Formula stateFormula, Formula invariantFormula, int bound)
+		{
+			var formula = new BoundedBinaryFormula(invariantFormula, BinaryOperator.Until, stateFormula, bound);
+
+			return CalculateProbabilityRangeOfFormulaBounded(model, formula, stateFormula, bound);
 		}
 	}
 }

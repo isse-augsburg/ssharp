@@ -199,10 +199,10 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return finalProbability;
 		}
 
-		private double CalculateProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
+		private double CalculateProbabilityToReachStateFormulaInBoundedSteps(Formula psi, Formula phi, int steps)
 		{
+			// Pr[phi U psi]
 			// calculate P [true U<=steps psi]
-
 
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -211,7 +211,22 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			var stateCount = MarkovChain.States;
 
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
-			var excludedStates = new Dictionary<int, bool>();  // change for \phi Until \psi
+			Dictionary<int, bool> excludedStates;
+			if (phi == null)
+			{
+				 excludedStates = new Dictionary<int, bool>();
+			}
+			else
+			{
+				// excludedStates = Sat(\phi) \Cup Sat(psi)
+				var phiEvaluator = MarkovChain.CreateFormulaEvaluator(phi);
+				var phiOrPsiStates = CalculateSatisfiedStates(phiEvaluator);
+				foreach (var directlySatisfiedState in directlySatisfiedStates)
+				{
+					phiOrPsiStates[directlySatisfiedState.Key]=true;
+				}
+				excludedStates = CreateComplement(phiOrPsiStates);
+			}
 			
 			var enumerator = MarkovChain.GetEnumerator();
 
@@ -315,18 +330,23 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var finallyUnboundFormula = formulaToCheck as UnaryFormula;
-			var finallyBoundedFormula = formulaToCheck as BoundedUnaryFormula;
+			var finallyUnboundUnaryFormula = formulaToCheck as UnaryFormula;
+			var finallyBoundedUnaryFormula = formulaToCheck as BoundedUnaryFormula;
+			var finallyBoundedBinaryFormula = formulaToCheck as BoundedBinaryFormula;
 
 			double result;
 
-			if (finallyUnboundFormula != null && finallyUnboundFormula.Operator == UnaryOperator.Finally)
+			if (finallyUnboundUnaryFormula != null && finallyUnboundUnaryFormula.Operator == UnaryOperator.Finally)
 			{
-				result = CalculateProbabilityToReachStateFormula(finallyUnboundFormula.Operand);
+				result = CalculateProbabilityToReachStateFormula(finallyUnboundUnaryFormula.Operand);
 			}
-			else if (finallyBoundedFormula != null && finallyBoundedFormula.Operator == UnaryOperator.Finally)
+			else if (finallyBoundedUnaryFormula != null && finallyBoundedUnaryFormula.Operator == UnaryOperator.Finally)
 			{
-				result = CalculateProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedFormula.Operand, finallyBoundedFormula.Bound);
+				result = CalculateProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedUnaryFormula.Operand, null, finallyBoundedUnaryFormula.Bound);
+			}
+			else if (finallyBoundedBinaryFormula != null && finallyBoundedBinaryFormula.Operator == BinaryOperator.Until)
+			{
+				result = CalculateProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedBinaryFormula.RightOperand, finallyBoundedBinaryFormula.LeftOperand, finallyBoundedBinaryFormula.Bound);
 			}
 			else
 			{

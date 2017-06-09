@@ -26,7 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests.DataStructures
+namespace Tests.DiscreteTimeMarkovChain
 {
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.Formula;
