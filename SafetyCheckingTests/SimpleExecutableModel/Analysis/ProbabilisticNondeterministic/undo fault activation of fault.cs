@@ -34,7 +34,6 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
-	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 
 	public class UndoFaultActivationOfFault : AnalysisTest
 	{

@@ -41,7 +41,9 @@ namespace Tests.SimpleExecutableModel.Analysis.Dcca
 		{
 		}
 
-		[Fact(Skip = "Bug")]
+		// Currently, ActivationMinimalTransitionSetBuilder only checks if a state has been reached with a smaller fault set,
+		// but the pair (formulas,state) must be used as reference.
+		[Fact(Skip = "Bug in ActivationMinimalTransitionSetBuilder")]
 		public void Check()
 		{
 			var m = new Model();
