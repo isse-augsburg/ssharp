@@ -32,20 +32,20 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	internal class RobotAgent : Agent, ICapabilityHandler<ProduceCapability>, ICapabilityHandler<ProcessCapability>, ICapabilityHandler<ConsumeCapability>
 	{
 
-        [Reliability(mttf: 10000, mttr: 10)]
+        [Reliability(mttf: 10000, mttr: 100)]
         public readonly Fault Broken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 10)]
+        [Reliability(mttf: 1000, mttr: 100)]
         public readonly Fault ResourceTransportFault = new TransientFault();
 
         // In analyses without hardware components, these replace the Tool.Broken faults.
         // When hardware components are included, these faults are ignored.
-        [Reliability(mttf: 1000, mttr: 10)]
+        [Reliability(mttf: 1000, mttr: 100)]
         public readonly Fault DrillBroken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 10)]
+        [Reliability(mttf: 1000, mttr: 100)]
         public readonly Fault InsertBroken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 10)]
+        [Reliability(mttf: 1000, mttr: 100)]
         public readonly Fault TightenBroken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 10)]
+        [Reliability(mttf: 1000, mttr: 100)]
         public readonly Fault PolishBroken = new TransientFault();
 
 		private ICapability _currentCapability;
@@ -122,14 +122,47 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	    }
 
         /// <summary>
+        /// Adds all Capabilites that have been removed by fault
+        /// </summary>
+	    public void RestoreRobot(Fault fault)
+        {
+            List<ICapability> capaToAdd; 
+            switch (fault.Name)
+            {
+                case "DrillBroken":
+                    capaToAdd = unusedProductionCapabilites[ProductionAction.Drill];
+                    break;
+                case "InsertBroken":
+                    capaToAdd = unusedProductionCapabilites[ProductionAction.Insert];
+                    break;
+                case "PolishBroken":
+                    capaToAdd = unusedProductionCapabilites[ProductionAction.Polish];
+                    break;
+                case "TightenBroken":
+                    capaToAdd = unusedProductionCapabilites[ProductionAction.Tighten];
+                    break;
+                case "NoneBroken":
+                    capaToAdd = unusedProductionCapabilites[ProductionAction.None];
+                    break;
+                case "Broken":
+                    RestoreRobot();
+                    return;
+                default:
+                    return;
+            }
+            _availableCapabilities.AddRange(capaToAdd);
+	    }
+
+        /// <summary>
         /// Adds all Capabilites that have been removed before
         /// </summary>
 	    public void RestoreRobot()
-	    {
-            _availableCapabilities.AddRange(unusedProductionCapabilites.Values.SelectMany(x => x));   
-	    }
+        {
+            _availableCapabilities.AddRange(unusedProductionCapabilites.Values.SelectMany(x => x));
+        }
 
-	    protected override bool CheckAllocatedCapability(ICapability capability)
+
+        protected override bool CheckAllocatedCapability(ICapability capability)
 		{
 			if (!CanSwitchTools())
 				return false;

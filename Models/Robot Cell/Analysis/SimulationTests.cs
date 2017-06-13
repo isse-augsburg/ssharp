@@ -25,6 +25,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.IO;
 	using System.Linq;
 	using System.Reflection;
 	using Modeling;
@@ -32,10 +33,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using Modeling.Controllers.Reconfiguration;
 	using Modeling.Plants;
 	using NUnit.Framework;
+	using Odp.Reconfiguration;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using FastController = Modeling.Controllers.Reconfiguration.FastController;
 
-	public class SimulationTests
+    public class SimulationTests
 	{
 
         internal class ProfileBasedSimulator
@@ -43,6 +46,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             private Model model { get; set; }
             Tuple<Fault, ReliabilityAttribute, IComponent>[] faults;
             private Simulator Simulator;
+            public int Throughput { get; set; } = 0; 
 
             public ProfileBasedSimulator(Model model)
             {
@@ -64,7 +68,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                     foreach (var info in faultFields)
                         faultInfo.Add(info);
                 });
-
                 faults = faultInfo.ToArray();
             }
 
@@ -73,28 +76,42 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 var rd = new Random();
                 for (var x = 0; x < numberOfSteps; x++)
                 {
+                    var rn = rd.NextDouble();
                     foreach (var fault in this.faults)
                     {
-                        if (fault.Item2?.MTTF > 0 && !fault.Item1.IsActivated && rd.NextDouble() <= 1 - Math.Exp(-1 * (1 / fault.Item2.MTTF) * x))
+                        
+//                        using (StreamWriter sw = new StreamWriter(@"C:\Users\Eberhardinger\Documents\testRD.csv", true))
+//                        {
+//                            sw.WriteLine(rn);
+//                        }
+                        if (fault.Item2?.MTTF > 0 && !fault.Item1.IsActivated && rn <= fault.Item2.DistributionValueToFail())
                         {
                             fault.Item1.ForceActivation();
                             Console.WriteLine("Activation of: " + fault.Item1.Name);
+                            fault.Item2.ResetDistributionToFail();
                         }
                         else { 
-                            if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rd.NextDouble() <= 1 - Math.Exp((-1 * (1 / fault.Item2.MTTR) * x)))
+                            if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rn <= fault.Item2.DistributionValueToRepair())
                             {
                                 fault.Item1.SuppressActivation();
                                 (fault.Item3 as RobotAgent)?.RestoreRobot(fault.Item1);
                                 Console.WriteLine("Deactivation of: " + fault.Item1.Name);
+                                fault.Item2.ResetDistributionToRepair();
                             }
                         }
                     }
                     Simulator.SimulateStep();
-
+                    Throughput = model.Workpieces.Select(w => w.IsComplete).Count();
+                    
                 }
-               
             }
 
+
+            private bool ReonfPossibleAfterFault(Fault item1)
+            {
+
+                throw new NotImplementedException();
+            }
 
         }
 
@@ -105,8 +122,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			var model = SampleModels.DefaultInstanceWithoutPlant<PerformanceMeasurementController<FastController>>();
 			model.Faults.SuppressActivations();
 
-			var simulator = new Simulator(model);
-			PrintTrace(simulator, steps: 120);
+			var simulator = new ModellessSimulator(model.Components);
+            /*simulator.SimulateStep();*/
+            PrintTrace(simulator, model, steps: 120);
 		}
 
         [Test]
@@ -118,10 +136,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             profileBasedSimulator.Simulate(numberOfSteps: 1000);
         }
 
-        public static void PrintTrace(Simulator simulator, int steps)
+        private static void PrintTrace(ModellessSimulator simulator, Model model, int steps)
 		{
-			var model = (Model)simulator.Model;
-
+			
 			for (var i = 0; i < steps; ++i)
 			{
 				WriteLine($"=================  Step: {i}  =====================================");
