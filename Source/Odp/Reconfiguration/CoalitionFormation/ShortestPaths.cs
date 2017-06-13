@@ -125,6 +125,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				_heap.RemoveAt(_heap.Count - 1);
 				_position.Remove(min);
 
+				if (IsEmpty)
+					return min;
+
 				var node = 0;
 				var child = 2 * node + 1;
 				var nodeWeight = _weight(_heap[node]);
