@@ -32,6 +32,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task);
 
+		[Obsolete]
 		bool ReconfigurationFailure { get; }
 
 		event Action<BaseAgent[]> ConfigurationsCalculated;
