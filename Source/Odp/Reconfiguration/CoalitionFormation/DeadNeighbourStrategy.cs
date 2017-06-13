@@ -96,12 +96,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					agent = getConnectedRole(role,
 						newAgent.AllocatedRoles.Select(r => Tuple.Create(newAgent, r))
 					);
-					if (agent != null)
+					if (agent != null && agent.Item1.IsAlive)
 						break;
 				}
 
 				if (agent == null)
-					throw new Exception("Successor / predecessor role is unreachable");
+					throw new Exception("Successor / predecessor role is unreachable or dead");
 
 				await coalition.Invite(agent.Item1);
 			}

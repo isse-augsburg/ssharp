@@ -221,7 +221,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				foreach (var neighbour in agent.Inputs)
 				{
 					// TODO: prioritize agents participating in current task
-					if (neighbour.Outputs.Contains(agent))
+					if (neighbour.IsAlive && neighbour.Outputs.Contains(agent))
 						stack.Push(neighbour);
 				}
 
@@ -329,7 +329,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				// extend TFR with modified capability allocations
 				TFR = minimalTfr.Copy();
 				for (var i = CTF.Start; i <= CTF.End; ++i)
-					if (CtfDistribution[i - CTF.Start] != oldDistribution[i])
+					if (CtfDistribution[i - CTF.Start] != oldDistribution[i]) // includes oldDistribution[i] == null because agent dead
 						TFR.Add(i);
 
 				// round TFR to role boundaries (include capabilities applied by same agent, either before or after reconfiguration)
@@ -375,9 +375,33 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				var currentPos = TFR.Start;
 				while (currentPos <= TFR.End)
 				{
+					Role currentRole;
+
+					if (current == null || !current.IsAlive)
+					{
+						// if agent is dead: find next known agent that isn't
+						while ((current == null || !current.IsAlive) && currentPos <= TFR.End)
+						{
+							currentPos++;
+							if (currentPos <= TFR.End)
+								current = Coalition.RecoveredDistribution[currentPos];
+						}
+						if (currentPos > TFR.End)
+							break; // all further agents are dead
+						
+						// otherwise, go back until just after dead agent
+						currentRole = current.AllocatedRoles.First(role => role.Task == Coalition.Task && role.PreCondition.StateLength == currentPos);
+						while (currentRole.PreCondition.Port != null && currentRole.PreCondition.Port.IsAlive)
+						{
+							current = currentRole.PreCondition.Port;
+							currentPos = currentRole.PreCondition.StateLength;
+							currentRole = current.AllocatedRoles.First(role => role.Task == Coalition.Task && role.PostCondition.StateLength == currentPos);
+						}
+						currentPos = currentRole.PreCondition.StateLength;
+					}
+
 					CoreAgents.Add(current);
-					var currentRole = current.AllocatedRoles
-											 .First(role => role.Task == Coalition.Task && role.PreCondition.StateLength == currentPos);
+					currentRole = current.AllocatedRoles.First(role => role.Task == Coalition.Task && role.PreCondition.StateLength == currentPos);
 					currentPos = currentRole.PostCondition.StateLength;
 					current = currentRole.PostCondition.Port;
 				}

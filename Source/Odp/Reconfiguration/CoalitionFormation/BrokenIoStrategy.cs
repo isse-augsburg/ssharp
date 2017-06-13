@@ -78,7 +78,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			var currentAgent = agent;
 			var previousAgent = currentRole.PreCondition.Port;
 
-			while (previousAgent != null && !currentRole.CapabilitiesToApply.Any())
+			while (previousAgent != null && previousAgent.IsAlive && !currentRole.CapabilitiesToApply.Any())
 			{
 				await coalition.Invite(previousAgent);
 				currentRole = previousAgent.AllocatedRoles.Single(otherRole =>
@@ -93,7 +93,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			currentAgent = agent;
 			var nextAgent = currentRole.PostCondition.Port;
 
-			while (nextAgent != null && !currentRole.CapabilitiesToApply.Any())
+			while (nextAgent != null && nextAgent.IsAlive && !currentRole.CapabilitiesToApply.Any())
 			{
 				await coalition.Invite(nextAgent);
 				currentRole = nextAgent.AllocatedRoles.Single(otherRole =>
@@ -127,7 +127,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					if (role.PreCondition.Port != null && !agent.Inputs.Contains(role.PreCondition.Port))
 					{
 						affected = true;
-						if (!coalition.Contains(role.PreCondition.Port))
+						if (!coalition.Contains(role.PreCondition.Port) && role.PreCondition.Port.IsAlive)
 						{
 							var newMember = await coalition.Invite(role.PreCondition.Port);
 							members.Add(newMember);
@@ -136,7 +136,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					if (role.PostCondition.Port != null && !agent.Outputs.Contains(role.PostCondition.Port))
 					{
 						affected = true;
-						if (!coalition.Contains(role.PostCondition.Port))
+						if (!coalition.Contains(role.PostCondition.Port) && role.PostCondition.Port.IsAlive)
 						{
 							var newMember = await coalition.Invite(role.PostCondition.Port);
 							members.Add(newMember);

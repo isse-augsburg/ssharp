@@ -48,8 +48,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			var baseAgents = coalition.Members.Select(reconfAgent => reconfAgent.BaseAgent);
 			_knownParticipants = new HashSet<BaseAgent>(baseAgents.SelectMany(GetNeighbouringParticipants));
-			_inputQueue = new LinkedList<BaseAgent>(baseAgents.SelectMany(agent => agent.Inputs));
-			_outputQueue = new LinkedList<BaseAgent>(baseAgents.SelectMany(agent => agent.Outputs));
+			_inputQueue = new LinkedList<BaseAgent>(baseAgents.SelectMany(agent => agent.Inputs).Where(agent => agent.IsAlive));
+			_outputQueue = new LinkedList<BaseAgent>(baseAgents.SelectMany(agent => agent.Outputs).Where(agent => agent.IsAlive));
 
 			_firstInputParticipant = FindSubsequentParticipant(_inputQueue.First);
 			_firstOutputParticipant = FindSubsequentParticipant(_outputQueue.First);
@@ -61,7 +61,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				.Where(role => role.Task == _coalition.Task)
 				.SelectMany(role => new[] { role.PreCondition.Port, role.PostCondition.Port })
 				.Distinct()
-				.Where(participant => participant != null);
+				.Where(participant => participant != null && participant.IsAlive);
 		}
 
 		// returns the first participant following startingPoint, or null if none found (or if startingPoint == null)
@@ -130,10 +130,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			} while (_coalition.Contains(next.Value)); // lazily filter members (e.g. returned previously and invited)
 
 			foreach (var input in next.Value.Inputs)
-				_inputQueue.AddLast(input);
+				if (input.IsAlive)
+					_inputQueue.AddLast(input);
 
 			foreach (var output in next.Value.Outputs)
-				_outputQueue.AddLast(output);
+				if (output.IsAlive)
+					_outputQueue.AddLast(output);
 
 			_knownParticipants.UnionWith(GetNeighbouringParticipants(next.Value));
 

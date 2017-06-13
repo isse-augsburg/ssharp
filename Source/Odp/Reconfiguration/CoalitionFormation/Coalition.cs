@@ -79,13 +79,13 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			do
 			{
 				ctfStart = CTF.Start;
-				for (int i = CTF.Start + 1; i <= CTF.End; ++i)
+				for (var i = CTF.Start + 1; i <= CTF.End; ++i)
 				{
 					var current = RecoveredDistribution[i];
 
 					if (current == null)
 					{
-						// TODO: handle dead agents
+						// TODO: handle dead agents (similarly to CoalitionFormationController.ConfigurationSuggestion.FindCoreAgents)
 						var role = previous.AllocatedRoles.Single(r => r.Task == Task && r.PreCondition.StateLength < i && r.PostCondition.StateLength >= i);
 						current = role.PostCondition.Port;
 						await Invite(current);
@@ -105,6 +105,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// and the coalitions is disbanded (merged into another coalition).</exception>
 		public async Task<CoalitionReconfigurationAgent> Invite(BaseAgent agent)
 		{
+			// sanity check: algorithm should never attempt to invite dead agents
+			if (!agent.IsAlive)
+				throw new InvalidOperationException("Cannot contact dead agents");
+
 			// If members were invited by other coalitions, process the merge requests.
 			// If this coalition is disbanded during that process, execution of this method is cancelled.
 			Merger.ProcessMergeRequests();
