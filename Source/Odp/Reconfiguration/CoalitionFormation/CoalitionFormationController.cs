@@ -122,9 +122,15 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// </summary>
 		protected IEnumerable<BaseAgent[]> CalculateCapabilityDistributions(Coalition coalition)
 		{
-			// TODO: prefer distributions with minimal changes to previous distribution
 			var distribution = new BaseAgent[coalition.CTF.Length];
-			return CalculateCapabilityDistributions(coalition, distribution, 0);
+			return CalculateCapabilityDistributions(coalition, distribution, 0)
+				.OrderBy(newDistribution =>
+				{
+					var changedPositions = Enumerable.Range(0, newDistribution.Length)
+													 .Where(i => newDistribution[i] != coalition.RecoveredDistribution[i])
+													 .ToArray();
+					return changedPositions.Max() - changedPositions.Min();
+				});
 		}
 
 		// enumerate all paths, but lazily! (depth-first search)
