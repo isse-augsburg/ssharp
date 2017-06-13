@@ -25,5 +25,7 @@ namespace SafetySharp.Odp
 	public interface ITask
 	{
 		ICapability[] RequiredCapabilities { get; }
+
+		bool IsCompleted { get; }
 	}
 }

@@ -43,7 +43,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		public void ApplyCapability(ConsumeCapability capability)
 		{
 			Container.Recipe.RemoveContainer(Container);
-			if (Container.Recipe.ProcessingComplete)
+			if (Container.Recipe.IsCompleted)
 				RemoveRecipeConfigurations(Container.Recipe);
 			Container = null;
 		}

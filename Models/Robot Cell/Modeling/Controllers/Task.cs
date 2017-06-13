@@ -33,6 +33,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public ICapability[] RequiredCapabilities { get; }
 
+		public bool IsCompleted { get; } = false; // never-ending tasks
+
 		// TODO: remove restriction once deadlock avoidance implemented
 		[System.Obsolete]
 		public bool IsResourceInProduction { get; set; }

@@ -168,7 +168,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			model.ScheduleProduction(recipe);
 			model.Faults.SuppressActivations();
 
-			var result = ModelChecker.Check(model, F(recipe.ProcessingComplete));
+			var result = ModelChecker.Check(model, F(recipe.IsCompleted));
 			Assert.That(result.FormulaHolds, "Recipe production never finishes");
 		}
 	}
