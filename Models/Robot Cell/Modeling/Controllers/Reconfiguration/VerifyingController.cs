@@ -49,12 +49,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		}
 
 		// delegate calculation to _controller, then verify result
-		public Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+		public Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
 			var previousFailure = _controller.ReconfigurationFailure;
-			var isPossible = IsReconfigurationPossible(tasks);
+			var isPossible = IsReconfigurationPossible(task);
 
-			var config = _controller.CalculateConfigurations(context, tasks);
+			var config = _controller.CalculateConfigurations(context, task);
 
 			if (!_controller.ReconfigurationFailure && !isPossible)
 				throw new Exception("Reconfiguration successful even though there is no valid configuration.");
@@ -64,32 +64,23 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			return config;
 		}
 
-		private bool IsReconfigurationPossible(IEnumerable<ITask> tasks)
+		private bool IsReconfigurationPossible(ITask task)
 		{
-			var isReconfPossible = true;
-
 			var robotsAgents = Agents.OfType<RobotAgent>();
 			var matrix = GetConnectionMatrix(robotsAgents);
 
-			foreach (var task in tasks)
+			var isReconfPossible = task.RequiredCapabilities.All(capability => robotsAgents.Any(agent => agent.AvailableCapabilities.Contains(capability)));
+			if (!isReconfPossible)
+				return false;
+
+			var candidates = robotsAgents.Where(agent => agent.AvailableCapabilities.Contains(task.RequiredCapabilities.First())).ToArray();
+
+			for (var i = 0; i < task.RequiredCapabilities.Length - 1 && isReconfPossible; i++)
 			{
-				isReconfPossible &= task.RequiredCapabilities.All(capability => robotsAgents.Any(agent => agent.AvailableCapabilities.Contains(capability)));
-				if (!isReconfPossible)
-					break;
-
-				var candidates = robotsAgents.Where(agent => agent.AvailableCapabilities.Contains(task.RequiredCapabilities.First())).ToArray();
-
-				for (var i = 0; i < task.RequiredCapabilities.Length - 1; i++)
-				{
-					candidates = candidates.SelectMany(r => matrix[r])
-						.Where(r => r.AvailableCapabilities.Contains(task.RequiredCapabilities[i + 1]))
-						.ToArray();
-					if (candidates.Length == 0)
-					{
-						isReconfPossible = false;
-						break;
-					}
-				}
+				candidates = candidates.SelectMany(r => matrix[r])
+					.Where(r => r.AvailableCapabilities.Contains(task.RequiredCapabilities[i + 1]))
+					.ToArray();
+				isReconfPossible &= candidates.Length > 0;
 			}
 
 			return isReconfPossible;

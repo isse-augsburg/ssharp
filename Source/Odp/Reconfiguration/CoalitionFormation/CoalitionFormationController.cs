@@ -52,11 +52,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			_strategies[predicate] = strategy;
 		}
 
-		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
-			Debug.Assert(tasks.Length == 1);
-			var task = tasks[0];
-
 			var leader = (CoalitionReconfigurationAgent)context;
 			var coalition = new Coalition(leader, task, leader.BaseAgentState.ViolatedPredicates);
 

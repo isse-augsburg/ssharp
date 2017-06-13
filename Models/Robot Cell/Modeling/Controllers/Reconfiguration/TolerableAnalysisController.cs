@@ -46,7 +46,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
 		public BaseAgent[] Agents => _controller.Agents;
 		public bool ReconfigurationFailure => _controller.ReconfigurationFailure;
-		public async Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+		public async Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
 			if (ReconfigurationFailure)
 				return null;
@@ -59,7 +59,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			}
 
 			_hasReconfed = true;
-			return await _controller.CalculateConfigurations(context, tasks);
+			return await _controller.CalculateConfigurations(context, task);
 		}
 	}
 }

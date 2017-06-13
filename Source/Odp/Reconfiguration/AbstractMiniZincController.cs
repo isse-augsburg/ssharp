@@ -46,18 +46,15 @@ namespace SafetySharp.Odp.Reconfiguration
 		}
 
 		// synchronous implementation
-		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
 			var configs = new ConfigurationUpdate();
-			foreach (var task in tasks)
+			configs.RemoveAllRoles(task, Agents);
+			lock(MiniZinc)
 			{
-				configs.RemoveAllRoles(task, Agents);
-				lock(MiniZinc)
-				{
-					CreateDataFile(task);
-					ExecuteMiniZinc();
-					ParseConfigurations(configs, task);
-				}
+				CreateDataFile(task);
+				ExecuteMiniZinc();
+				ParseConfigurations(configs, task);
 			}
 
 			OnConfigurationsCalculated(configs);

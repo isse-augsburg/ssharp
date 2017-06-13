@@ -43,10 +43,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
 		public FastController(IEnumerable<BaseAgent> agents) : base(agents.ToArray()) { }
 
-		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
 			_usedCarts.Clear();
-			return base.CalculateConfigurations(context, tasks);
+			return base.CalculateConfigurations(context, task);
 		}
 
 		protected override IEnumerable<int> GetShortestPath(int from, int to)

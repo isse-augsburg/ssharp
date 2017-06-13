@@ -44,7 +44,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			protected set;
 		}
 
-		public abstract Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks);
+		public abstract Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task);
 
 		protected Role GetRole(ITask recipe, BaseAgent input, Condition? previous)
 		{

@@ -42,21 +42,23 @@ namespace SafetySharp.Odp.Reconfiguration
 		public FastController(BaseAgent[] agents) : base(agents) { }
 
 		// synchronous implementation
-		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
 			_availableAgents = GetAvailableAgents();
 			var configs = new ConfigurationUpdate();
 
 			CalculateShortestPaths();
 
-			foreach (var task in tasks)
+			configs.RemoveAllRoles(task, Agents);
+			var path = FindAgentPath(task);
+			if (path == null)
 			{
-				configs.RemoveAllRoles(task, Agents);
-				var path = FindAgentPath(task);
-				if (path == null)
-					ReconfigurationFailure = true;
-				else
-					ExtractConfigurations(configs, task, path);
+			    ReconfigurationFailure = true;
+			}
+			else
+			{
+			    ExtractConfigurations(configs, task, path);
+			    ReconfigurationFailure = false;
 			}
 
 			OnConfigurationsCalculated(configs);

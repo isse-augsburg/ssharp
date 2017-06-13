@@ -30,7 +30,7 @@ namespace SafetySharp.Odp.Reconfiguration
 	{
 		BaseAgent[] Agents { get; }
 
-		Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks);
+		Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task);
 
 		bool ReconfigurationFailure { get; }
 
