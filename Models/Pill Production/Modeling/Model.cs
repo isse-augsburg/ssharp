@@ -30,6 +30,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	{
 		public const int ContainerStorageSize = 30;
 		public const uint InitialIngredientAmount = 100u;
+		public const int MaxNumberOfRecipes = 5;
 
 		public Model(Station[] stations, IController controller)
 		{
@@ -41,7 +42,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 				station.RecipeQueue = _scheduledRecipes;
 			}
 			Controller = controller;
-			ReconfigurationMonitor = new ReconfigurationMonitor { Controller = controller };
+			ReconfigurationMonitor = new ReconfigurationMonitor(MaxNumberOfRecipes) { Controller = controller };
 		}
 
 		[Root(RootKind.Controller)]

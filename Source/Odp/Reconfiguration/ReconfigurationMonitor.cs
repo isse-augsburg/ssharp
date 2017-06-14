@@ -22,8 +22,17 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
+	using System.Collections.Generic;
+
 	public class ReconfigurationMonitor
 	{
+		private readonly List<ITask> _failedTasks;
+
+		public ReconfigurationMonitor(int maxTaskCount)
+		{
+			_failedTasks = new List<ITask>(maxTaskCount);
+		}
+
 		private IController _controller;
 
 		public IController Controller
@@ -44,6 +53,9 @@ namespace SafetySharp.Odp.Reconfiguration
 		private void OnReconfiguration(ITask task, ConfigurationUpdate config)
 		{
 			ReconfigurationFailure |= config.Failed;
+
+			if (config.Failed && !_failedTasks.Contains(task))
+				_failedTasks.Add(task);
 		}
 	}
 }

@@ -38,6 +38,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		public const int MaxAgentCount = 10;
 		public const int MaxResourceCount = 7;
 		public const int MaxRoleCount = 8;
+		public const int MaxTaskCount = 3;
 
 		static Model()
 		{
@@ -96,6 +97,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			}
 		}
 
-		public ReconfigurationMonitor ReconfigurationMonitor { get; } = new ReconfigurationMonitor();
+		public ReconfigurationMonitor ReconfigurationMonitor { get; } = new ReconfigurationMonitor(MaxTaskCount);
 	}
 }
