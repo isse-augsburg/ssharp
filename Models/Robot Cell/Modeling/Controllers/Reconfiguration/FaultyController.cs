@@ -62,7 +62,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
 			public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 			{
-				return Task.FromResult<ConfigurationUpdate>(null);
+				var config = new ConfigurationUpdate();
+				config.Fail();
+				config.RemoveAllRoles(task, Agents);
+				return Task.FromResult(config);
 			}
 		}
 	}

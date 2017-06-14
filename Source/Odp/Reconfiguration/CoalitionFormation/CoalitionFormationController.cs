@@ -88,20 +88,31 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 					// TODO: if still no path found: recruit additional agents (if further exist)
 				} while (true /* TODO: while further agents exist */);
+
+				// failed to find a solution
+				return FailedReconfiguration(coalition);
 			}
 			catch (OperationCanceledException)
 			{
 				// operation was canceled (e.g. because coalition was merged into another coalition), so produce no updates
-				return null;
+				return new ConfigurationUpdate();
 			}
 			catch (RestartReconfigurationException)
 			{
 				// restart reconfiguration, e.g. because another coalition was just merged into the current one
 				return await CalculateConfigurations(coalition);
 			}
+		}
 
-			// failed to find a solution
-			return null;
+		private ConfigurationUpdate FailedReconfiguration(Coalition coalition)
+		{
+			// At this point, all reachable agents will be in the coalition.
+			// Otherwise the algorithm would try to recruit them instead of failing.
+
+			var config = new ConfigurationUpdate();
+			config.Fail();
+			config.RemoveAllRoles(coalition.Task, coalition.BaseAgents.ToArray());
+			return config;
 		}
 
 		/// <summary>

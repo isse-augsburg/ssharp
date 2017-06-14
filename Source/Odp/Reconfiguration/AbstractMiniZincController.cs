@@ -105,6 +105,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			if (lines[0].Contains("UNSATISFIABLE"))
 			{
 				ReconfigurationFailure = true;
+				configs.Fail();
 				return;
 			}
 

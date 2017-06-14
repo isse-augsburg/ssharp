@@ -54,6 +54,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			if (path == null)
 			{
 			    ReconfigurationFailure = true;
+				configs.Fail();
 			}
 			else
 			{
