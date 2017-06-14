@@ -35,6 +35,6 @@ namespace SafetySharp.Odp.Reconfiguration
 		[Obsolete]
 		bool ReconfigurationFailure { get; }
 
-		event Action<BaseAgent[]> ConfigurationsCalculated;
+		event Action<ConfigurationUpdate> ConfigurationsCalculated;
 	}
 }

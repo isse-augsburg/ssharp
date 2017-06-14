@@ -40,7 +40,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		protected FaultyController() { }
 
 		// composition
-		public event Action<BaseAgent[]> ConfigurationsCalculated
+		public event Action<ConfigurationUpdate> ConfigurationsCalculated
 		{
 			add { _controller.ConfigurationsCalculated += value; }
 			remove { _controller.ConfigurationsCalculated -= value; }
