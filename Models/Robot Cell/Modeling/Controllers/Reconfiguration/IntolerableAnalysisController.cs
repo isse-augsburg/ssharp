@@ -37,6 +37,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
 		private readonly IController _controller;
 
+		private bool _reconfHasFailed;
+
 		public IntolerableAnalysisController(IController controller)
 		{
 			_controller = controller;
@@ -54,16 +56,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		}
 
 		public BaseAgent[] Agents => _controller.Agents;
-		public bool ReconfigurationFailure => _controller.ReconfigurationFailure;
 		public async Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
-			if (ReconfigurationFailure)
+			if (_reconfHasFailed)
 				return null;
 
 			if (StepCount >= MaxSteps)
 				return null;
 
-			return await _controller.CalculateConfigurations(context, task);
+			var config = await _controller.CalculateConfigurations(context, task);
+			_reconfHasFailed |= config.Failed;
+			return config;
 		}
 	}
 }

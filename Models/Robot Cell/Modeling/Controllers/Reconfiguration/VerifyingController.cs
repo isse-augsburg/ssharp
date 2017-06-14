@@ -40,8 +40,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
 		// composition
 		public BaseAgent[] Agents => _controller.Agents;
-		public bool ReconfigurationFailure => _controller.ReconfigurationFailure;
-
 		public event Action<ConfigurationUpdate> ConfigurationsCalculated
 		{
 			add { _controller.ConfigurationsCalculated += value; }
@@ -49,16 +47,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		}
 
 		// delegate calculation to _controller, then verify result
-		public Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
+		public async Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
-			var previousFailure = _controller.ReconfigurationFailure;
 			var isPossible = IsReconfigurationPossible(task);
+			var config = await _controller.CalculateConfigurations(context, task);
 
-			var config = _controller.CalculateConfigurations(context, task);
-
-			if (!_controller.ReconfigurationFailure && !isPossible)
+			if (!config.Failed && !isPossible)
 				throw new Exception("Reconfiguration successful even though there is no valid configuration.");
-			if (!previousFailure && _controller.ReconfigurationFailure && isPossible)
+			if (config.Failed && isPossible)
 				throw new Exception("Reconfiguration failed even though there is a solution.");
 
 			return config;

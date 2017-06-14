@@ -41,12 +41,15 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 				station.RecipeQueue = _scheduledRecipes;
 			}
 			Controller = controller;
+			ReconfigurationMonitor = new ReconfigurationMonitor { Controller = controller };
 		}
 
 		[Root(RootKind.Controller)]
 		public Station[] Stations { get; }
 
 		public IController Controller { get; }
+
+		public ReconfigurationMonitor ReconfigurationMonitor { get; }
 
 		private readonly Queue<Recipe> _scheduledRecipes = new Queue<Recipe>();
 

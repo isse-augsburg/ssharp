@@ -127,7 +127,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			modelChecker.Heuristics.AddRange(heuristics);
 			modelChecker.FaultActivationBehavior = activation;
 
-			var result = modelChecker.ComputeMinimalCriticalSets(model, model.Controller.ReconfigurationFailure);
+			var result = modelChecker.ComputeMinimalCriticalSets(model, model.ReconfigurationMonitor.ReconfigurationFailure);
 			Console.WriteLine(result);
 			Assert.AreEqual(0, result.Exceptions.Count);
 		}

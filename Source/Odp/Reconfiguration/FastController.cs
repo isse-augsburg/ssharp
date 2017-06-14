@@ -52,15 +52,9 @@ namespace SafetySharp.Odp.Reconfiguration
 			configs.RemoveAllRoles(task, Agents);
 			var path = FindAgentPath(task);
 			if (path == null)
-			{
-			    ReconfigurationFailure = true;
 				configs.Fail();
-			}
 			else
-			{
 			    ExtractConfigurations(configs, task, path);
-			    ReconfigurationFailure = false;
-			}
 
 			OnConfigurationsCalculated(configs);
 			return Task.FromResult(configs);

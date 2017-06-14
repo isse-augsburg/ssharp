@@ -46,7 +46,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			remove { _controller.ConfigurationsCalculated -= value; }
 		}
 		public BaseAgent[] Agents => _controller.Agents;
-		public virtual bool ReconfigurationFailure =>_controller.ReconfigurationFailure;
 		public virtual Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
 			return _controller.CalculateConfigurations(context, task);
@@ -58,8 +57,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		[FaultEffect(Fault = nameof(ReconfigurationFault))]
 		public abstract class ReconfigurationFailureEffect : FaultyController
 		{
-			public override bool ReconfigurationFailure => true;
-
 			public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 			{
 				var config = new ConfigurationUpdate();

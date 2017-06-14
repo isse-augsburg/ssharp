@@ -50,7 +50,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			{
 				WriteLine($"=================  Step: {i}  =====================================");
 
-				if (model.Controller.ReconfigurationFailure)
+				if (model.ReconfigurationMonitor.ReconfigurationFailure)
 					WriteLine("Reconfiguration failed.");
 				else
 				{

@@ -84,6 +84,18 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		public List<Task> Tasks { get; } = new List<Task>();
 
 		[Hidden]
-		public IController Controller { get; set; }
+		private IController _controller;
+
+		public IController Controller
+		{
+			get { return _controller; }
+			set
+			{
+				_controller = value;
+				ReconfigurationMonitor.Controller = value;
+			}
+		}
+
+		public ReconfigurationMonitor ReconfigurationMonitor { get; } = new ReconfigurationMonitor();
 	}
 }

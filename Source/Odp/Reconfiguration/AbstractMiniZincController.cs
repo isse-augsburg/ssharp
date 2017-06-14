@@ -104,7 +104,6 @@ namespace SafetySharp.Odp.Reconfiguration
 			var lines = File.ReadAllLines(_outputFile);
 			if (lines[0].Contains("UNSATISFIABLE"))
 			{
-				ReconfigurationFailure = true;
 				configs.Fail();
 				return;
 			}

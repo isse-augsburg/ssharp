@@ -70,7 +70,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				Heuristics = { RedundancyHeuristic(model), new SubsumptionHeuristic(model) }
 			};
 		
-			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.Controller.ReconfigurationFailure);
+			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ReconfigurationMonitor.ReconfigurationFailure);
 			Console.WriteLine(result);
 			Assert.AreEqual(0, result.Exceptions.Count, "unhandled exceptions!");
 		}
