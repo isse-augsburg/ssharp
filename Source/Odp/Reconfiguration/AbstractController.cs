@@ -31,7 +31,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		[Hidden(HideElements = true)]
 		public BaseAgent[] Agents { get; }
 
-		public event Action<ConfigurationUpdate> ConfigurationsCalculated;
+		public event Action<ITask, ConfigurationUpdate> ConfigurationsCalculated;
 
 		protected AbstractController(BaseAgent[] agents)
 		{
@@ -60,9 +60,9 @@ namespace SafetySharp.Odp.Reconfiguration
 			return role;
 		}
 
-		protected void OnConfigurationsCalculated(ConfigurationUpdate config)
+		protected void OnConfigurationsCalculated(ITask task, ConfigurationUpdate config)
 		{
-			ConfigurationsCalculated?.Invoke(config);
+			ConfigurationsCalculated?.Invoke(task, config);
 		}
 	}
 }

@@ -83,7 +83,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						// use dijkstra to find resource flow
 						var resourceFlow = await ComputeResourceFlow(reconfSuggestion);
 						if (resourceFlow != null)
-							return ComputeRoleAllocations(reconfSuggestion, resourceFlow.ToArray());
+						{
+							var config = ComputeRoleAllocations(reconfSuggestion, resourceFlow.ToArray());
+							OnConfigurationsCalculated(coalition.Task, config);
+							return config;
+						}
 					}
 
 					// TODO: if still no path found: recruit additional agents (if further exist)

@@ -41,7 +41,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public bool ReconfigurationFailure { get; private set; }
 
-		private void OnReconfiguration(ConfigurationUpdate config)
+		private void OnReconfiguration(ITask task, ConfigurationUpdate config)
 		{
 			ReconfigurationFailure |= config.Failed;
 		}

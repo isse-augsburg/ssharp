@@ -32,6 +32,6 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task);
 
-		event Action<ConfigurationUpdate> ConfigurationsCalculated;
+		event Action<ITask, ConfigurationUpdate> ConfigurationsCalculated;
 	}
 }
