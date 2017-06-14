@@ -101,7 +101,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 			_stateVectorSize = stateVectorSize;
 			_totalCapacity = capacity;
-			_cachedStatesCapacity = capacity;
+			_cachedStatesCapacity = capacity - BucketsPerCacheLine; //offset returned by this.Add may be up to BucketsPerCacheLine-1 positions bigger than _cachedStatesCapacity
 
 			_stateBuffer.Resize(_totalCapacity * _stateVectorSize, zeroMemory: false);
 			_stateMemory = _stateBuffer.Pointer;
@@ -125,7 +125,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		{
 			get
 			{
-				Assert.InRange(index, 0, _totalCapacity * _stateVectorSize);
+				Assert.InRange(index, 0, _totalCapacity);
 				return _stateMemory + (long)index * _stateVectorSize;
 			}
 		}
@@ -138,8 +138,14 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			// Use the index pointing at the last possible element in the buffers and decrease the size.
 			_reservedStatesCapacity++;
 			_cachedStatesCapacity--;
-			var returnIndex = _cachedStatesCapacity;
+
+			// Add BucketsPerCacheLine so returnIndex does not interfere with the maximal possible index returned by AddState
+			// which is _cachedStatesCapacity+BucketsPerCacheLine-1.
+			// returnIndex is in range of capacityToReserve, so this is save.
+			var returnIndex = _cachedStatesCapacity + BucketsPerCacheLine;
+
 			Assert.InRange(returnIndex,0,Int32.MaxValue);
+			Assert.InRange(returnIndex, 0, _totalCapacity + BucketsPerCacheLine);
 			return (int)returnIndex;
 		}
 
