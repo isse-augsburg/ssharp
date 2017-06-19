@@ -69,8 +69,19 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			using (var checker = new LtmcGenerator<TExecutableModel>(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
 			{
 				var labeledTransitionMarkovChain = checker.GenerateStateGraph();
+				if (Configuration.WriteGraphvizModels)
+				{
+					Configuration.DefaultTraceOutput.WriteLine("Ltmc Model");
+					labeledTransitionMarkovChain.ExportToGv(Configuration.DefaultTraceOutput);
+				}
+
 				var ltmcToMc = new LtmcToDtmc(labeledTransitionMarkovChain);
 				var markovChain = ltmcToMc.MarkovChain;
+				if (Configuration.WriteGraphvizModels)
+				{
+					Configuration.DefaultTraceOutput.WriteLine("Dtmc Model");
+					markovChain.ExportToGv(Configuration.DefaultTraceOutput);
+				}
 				return markovChain;
 			}
 		}

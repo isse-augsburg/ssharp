@@ -70,8 +70,19 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			using (var checker = new LtmdpGenerator<TExecutableModel>(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
 			{
 				var ltmdp = checker.GenerateStateGraph();
+				if (Configuration.WriteGraphvizModels)
+				{
+					Configuration.DefaultTraceOutput.WriteLine("Ltmdp Model");
+					ltmdp.ExportToGv(Configuration.DefaultTraceOutput);
+				}
+					
 				var ltmdpToNmdp = new LtmdpToNmdp(ltmdp);
 				var nmdp = ltmdpToNmdp.NestedMarkovDecisionProcess;
+				if (Configuration.WriteGraphvizModels)
+				{
+					Configuration.DefaultTraceOutput.WriteLine("Nmdp Model");
+					nmdp.ExportToGv(Configuration.DefaultTraceOutput);
+				}
 				return nmdp;
 			}
 		}

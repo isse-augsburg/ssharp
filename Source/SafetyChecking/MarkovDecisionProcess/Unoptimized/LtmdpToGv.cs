@@ -29,17 +29,22 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 	internal static class LtmdpToGv
 	{
-		private static void ExportCid(LabeledTransitionMarkovDecisionProcess ltmdp, TextWriter sb, string fromNode, string fromArrowHead, long currentCid)
+		private static void ExportCid(LabeledTransitionMarkovDecisionProcess ltmdp, TextWriter sb, string fromNode, bool fromProbabilistic, long currentCid)
 		{
 			LabeledTransitionMarkovDecisionProcess.ContinuationGraphElement choice = ltmdp.GetContinuationGraphElement(currentCid);
 			if (choice.IsChoiceTypeUnsplitOrFinal)
 			{
 				var thisNode = $"cid{currentCid}";
 				sb.WriteLine($" {thisNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
-				sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"{fromArrowHead}\", label=\"{choice.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
+
+				if (fromProbabilistic)
+					sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"onormal\", label=\"{choice.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
+				else
+					sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"normal\"];");
 
 				var transitionTarget = ltmdp.GetTransitionTarget((int)choice.To);
 				sb.Write($" {thisNode} -> {transitionTarget.TargetState} [ arrowhead =\"normal\",");
+				sb.Write("label=\"");
 				for (int i = 0; i < ltmdp.StateFormulaLabels.Length; i++)
 				{
 					if (i > 0)
@@ -63,15 +68,17 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				// we print how we came to this node
 				var thisNode = $"cid{currentCid}";
 				sb.WriteLine($" {thisNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
-				sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"{fromArrowHead}\", label=\"{choice.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
 
-				var thisArrowhead = "normal";
-				if (choice.IsChoiceTypeProbabilitstic)
-					thisArrowhead = "onormal";
+				if (fromProbabilistic)
+					sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"onormal\", label=\"{choice.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
+				else
+					sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"normal\"];");
+
+
 
 				for (var i = choice.From; i <= choice.To; i++)
 				{
-					ExportCid(ltmdp,sb, thisNode, thisArrowhead, i);
+					ExportCid(ltmdp,sb, thisNode, choice.IsChoiceTypeProbabilitstic, i);
 				}
 			}
 		}
@@ -85,7 +92,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			var initialStateName = "initialState";
 			sb.WriteLine($" {initialStateName} [shape=point,width=0.0,height=0.0,label=\"\"];");
 			var initialCid = ltmdp.GetRootContinuationGraphLocationOfInitialState();
-			ExportCid(ltmdp, sb, initialStateName, "normal", initialCid);
+			ExportCid(ltmdp, sb, initialStateName, false, initialCid);
 
 			foreach (var state in ltmdp.SourceStates)
 			{
@@ -94,7 +101,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 				var cid = ltmdp.GetRootContinuationGraphLocationOfState(state);
 				var fromNode = state.ToString();
-				ExportCid(ltmdp, sb, fromNode, "normal", cid);
+				ExportCid(ltmdp, sb, fromNode, false, cid);
 			}
 			sb.WriteLine("}");
 		}

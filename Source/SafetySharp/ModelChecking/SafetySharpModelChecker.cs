@@ -24,6 +24,7 @@ namespace SafetySharp.Analysis
 {
 	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.AnalysisModelTraverser;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
 	using ISSE.SafetyChecking.Formula;
@@ -38,6 +39,8 @@ namespace SafetySharp.Analysis
 	public static class SafetySharpModelChecker
 	{
 		public static bool _convertNmdpToMdp = false;
+
+		public static AnalysisConfiguration TraversalConfiguration { get; set; } = AnalysisConfiguration.Default;
 
 		/// <summary>
 		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />. The appropriate model
@@ -59,7 +62,8 @@ namespace SafetySharp.Analysis
 		public static AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(ModelBase model, Formula invariant)
 		{
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelCreator(model, invariant);
-			return new QualitativeChecker<SafetySharpRuntimeModel>().CheckInvariant(createModel, formulaIndex:0);
+			var qualitativeChecker = new QualitativeChecker<SafetySharpRuntimeModel> { Configuration = TraversalConfiguration };
+			return qualitativeChecker.CheckInvariant(createModel, formulaIndex:0);
 		}
 
 		/// <summary>
@@ -71,7 +75,8 @@ namespace SafetySharp.Analysis
 		public static AnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ModelBase model, params Formula[] invariants)
 		{
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
-			return new QualitativeChecker<SafetySharpRuntimeModel>().CheckInvariants(createModel, invariants);
+			var qualitativeChecker = new QualitativeChecker<SafetySharpRuntimeModel> { Configuration = TraversalConfiguration };
+			return qualitativeChecker.CheckInvariants(createModel, invariants);
 		}
 
 		/// <summary>
@@ -87,7 +92,7 @@ namespace SafetySharp.Analysis
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 			
-			var markovChainGenerator = new DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
+			var markovChainGenerator = new DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
 			markovChainGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
 			var markovChain=markovChainGenerator.GenerateMarkovChain(stateFormula);
 			using (var modelChecker = new BuiltinDtmcModelChecker(markovChain, System.Console.Out))
@@ -110,7 +115,7 @@ namespace SafetySharp.Analysis
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
-			var markovChainGenerator = new DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
+			var markovChainGenerator = new DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.AddFormulaToCheck(formula);
 			var markovChain = markovChainGenerator.GenerateMarkovChain(terminateEarlyFormula);
@@ -162,7 +167,7 @@ namespace SafetySharp.Analysis
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
-			var nmdpGenerator = new NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
+			var nmdpGenerator = new NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
 			nmdpGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
 			nmdpGenerator.Configuration.SuccessorCapacity *= 8;
 			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess(stateFormula);
@@ -202,7 +207,7 @@ namespace SafetySharp.Analysis
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
-			var nmdpGenerator = new NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel);
+			var nmdpGenerator = new NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
 			nmdpGenerator.AddFormulaToCheck(formula);
 			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess(terminateEarlyFormula);
 

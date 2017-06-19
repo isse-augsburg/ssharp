@@ -33,12 +33,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		{
 			while (distribution.MoveNext())
 			{
-				sb.Write($"{sourceStateName} -> {distribution.CurrentTargetState} [label=\"{distribution.CurrentProbability.ToString("#.00e+0", CultureInfo.InvariantCulture)}\"];");
+				sb.Write($"{sourceStateName} -> {distribution.CurrentTargetState} [label=\"{distribution.CurrentProbability.ToString("#.00e+0", CultureInfo.InvariantCulture)}");
 
 				for (int i = 0; i < markovChain.StateFormulaLabels.Length; i++)
 				{
-					if (i > 0)
-						sb.Write(",");
+					sb.Write(",");
 					if (distribution.CurrentFormulas[i])
 						sb.Write("t");
 					else

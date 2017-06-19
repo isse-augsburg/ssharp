@@ -57,12 +57,24 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		internal bool ProgressReportsOnly { get; set; }
 
 		/// <summary>
+		///   The TextWriter used to log the process (when the event is not used explicitly).
+		/// </summary>
+		public System.IO.TextWriter DefaultTraceOutput { get; set; }
+
+		/// <summary>
+		///   Write GraphViz models of the state space to the DefaultTraceOutput when creating the models.
+		/// </summary>
+		public bool WriteGraphvizModels { get; set; }
+
+		/// <summary>
 		///   The default configuration.
 		/// </summary>
 		public static readonly AnalysisConfiguration Default = new AnalysisConfiguration
 		{
 			CpuCount = Int32.MaxValue,
 			ProgressReportsOnly = false,
+			DefaultTraceOutput = Console.Out,
+			WriteGraphvizModels = false,
 			ModelCapacity = _defaultModelCapacity,
 			StackCapacity = DefaultStackCapacity,
 			SuccessorCapacity = DefaultSuccessorStateCapacity,

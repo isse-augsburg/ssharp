@@ -72,8 +72,25 @@ namespace SafetySharp.CaseStudies.SmallModels.Model1
 		public void CalculateProbability()
 		{
 			var model = new ExampleModelBase();
-			
+
+			var tc = SafetySharpModelChecker.TraversalConfiguration;
+			tc.WriteGraphvizModels = true;
+			SafetySharpModelChecker.TraversalConfiguration = tc;
+
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.ModelComponent.HazardActive, 50);
+			Console.Write($"Probability of hazard: {result}");
+		}
+
+		[Test]
+		public void CalculateProbabilityRange()
+		{
+			var model = new ExampleModelBase();
+
+			var tc = SafetySharpModelChecker.TraversalConfiguration;
+			tc.WriteGraphvizModels = true;
+			SafetySharpModelChecker.TraversalConfiguration = tc;
+
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.ModelComponent.HazardActive, 50);
 			Console.Write($"Probability of hazard: {result}");
 		}
 

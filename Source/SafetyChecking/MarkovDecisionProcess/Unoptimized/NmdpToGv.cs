@@ -29,7 +29,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 	internal static class NmdpToGv
 	{
-		private static void ExportCid(NestedMarkovDecisionProcess nmdp, TextWriter sb, string fromNode, string fromArrowHead, long currentCid)
+		private static void ExportCid(NestedMarkovDecisionProcess nmdp, TextWriter sb, string fromNode, bool fromProbabilistic, long currentCid)
 		{
 			NestedMarkovDecisionProcess.ContinuationGraphElement cge = nmdp.GetContinuationGraphElement(currentCid);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
@@ -38,7 +38,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 				var thisNode = $"cid{currentCid}";
 				sb.WriteLine($" {thisNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
-				sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"{fromArrowHead}\", label=\"{cgl.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
+				if (fromProbabilistic)
+					sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"onormal\", label=\"{cgl.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
+				else
+					sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"normal\"];");
 
 				sb.WriteLine($" {thisNode} -> {cgl.ToState} [ arrowhead =\"normal\"];");
 			}
@@ -57,15 +60,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 				var thisNode = $"cid{currentCid}";
 				sb.WriteLine($" {thisNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
-				sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"{fromArrowHead}\", label=\"{cgi.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
-
-				var thisArrowhead = "normal";
-				if (cge.IsChoiceTypeProbabilitstic)
-					thisArrowhead = "onormal";
-
+				if (fromProbabilistic)
+					sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"onormal\", label=\"{cgi.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
+				else
+					sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"normal\"];");
+				
 				for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 				{
-					ExportCid(nmdp,sb, thisNode, thisArrowhead, i);
+					ExportCid(nmdp,sb, thisNode, cge.IsChoiceTypeProbabilitstic, i);
 				}
 			}
 		}
@@ -79,7 +81,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			var initialStateName = "initialState";
 			sb.WriteLine($" {initialStateName} [shape=point,width=0.0,height=0.0,label=\"\"];");
 			var initialCid = nmdp.GetRootContinuationGraphLocationOfInitialState();
-			ExportCid(nmdp, sb, initialStateName, "normal", initialCid);
+			ExportCid(nmdp, sb, initialStateName, false, initialCid);
 
 			for (var state=0; state < nmdp.States; state++)
 			{
@@ -94,7 +96,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 				var cid = nmdp.GetRootContinuationGraphLocationOfState(state);
 				var fromNode = state.ToString();
-				ExportCid(nmdp, sb, fromNode, "normal", cid);
+				ExportCid(nmdp, sb, fromNode, false, cid);
 			}
 			sb.WriteLine("}");
 		}
