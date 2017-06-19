@@ -77,7 +77,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			sb.WriteLine("node [shape=box];");
 
 			var initialStateName = "initialState";
-			sb.WriteLine($" {initialStateName} [shape=point,width=0.0,height=0.0,label=\"\"]);");
+			sb.WriteLine($" {initialStateName} [shape=point,width=0.0,height=0.0,label=\"\"];");
 			var initialCid = nmdp.GetRootContinuationGraphLocationOfInitialState();
 			ExportCid(nmdp, sb, initialStateName, "normal", initialCid);
 

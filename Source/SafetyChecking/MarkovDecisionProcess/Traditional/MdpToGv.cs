@@ -54,7 +54,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 			enumerator.SelectInitialDistributions();
 			var initialStateName = "initialState";
-			sb.WriteLine($" {initialStateName} [shape=point,width=0.0,height=0.0,label=\"\"]);");
+			sb.WriteLine($" {initialStateName} [shape=point,width=0.0,height=0.0,label=\"\"];");
 			ExportDistributionsOfEnumerator(enumerator, initialStateName, sb);
 
 

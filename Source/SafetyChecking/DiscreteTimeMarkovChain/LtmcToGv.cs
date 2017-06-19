@@ -55,7 +55,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			sb.WriteLine("node [shape=box];");
 
 			var initialStateName = "initialState";
-			sb.WriteLine($" {initialStateName} [shape=point,width=0.0,height=0.0,label=\"\"]);");
+			sb.WriteLine($" {initialStateName} [shape=point,width=0.0,height=0.0,label=\"\"];");
 			var initialDistribution = markovChain.GetInitialDistributionEnumerator();
 			ExportDistribution(markovChain, sb, initialStateName, initialDistribution);
 
