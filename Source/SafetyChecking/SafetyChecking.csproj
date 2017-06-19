@@ -50,6 +50,7 @@
     <Compile Include="AnalysisModel\AnalysisModel.cs" />
     <Compile Include="AnalysisModel\TransitionFlags.cs" />
     <Compile Include="DiscreteTimeMarkovChain\BuiltinDtmcModelCheckerWithoutDictionaries.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcToGv.cs" />
     <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
     <Compile Include="AnalysisModel\AnalysisModelCreator.cs" />
     <Compile Include="Formula\BoundedBinaryFormula.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="MarkovDecisionProcess\Unoptimized\NestedMarkovDecisionProcess.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpFromExecutableModelGenerator.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpModelChecker.cs" />
+    <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpToGv.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpToGv.cs" />
     <Compile Include="MarkovDecisionProcess\ExternalMdpModelCheckerPrism.cs" />
     <Compile Include="MarkovDecisionProcess\Optimized\LabeledTransitionMarkovDecisionProcess.cs" />
