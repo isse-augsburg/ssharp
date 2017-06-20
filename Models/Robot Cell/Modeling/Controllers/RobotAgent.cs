@@ -28,6 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using Plants;
 	using SafetySharp.Modeling;
 	using Odp;
+	using Odp.Reconfiguration;
 
 	internal class RobotAgent : Agent, ICapabilityHandler<ProduceCapability>, ICapabilityHandler<ProcessCapability>, ICapabilityHandler<ConsumeCapability>
 	{
@@ -198,6 +199,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			(Resource.Task as Task).IsResourceInProduction = false;
 			Resource = null;
 		}
+
+		public void RestoreRobot()
+		{
+			// ...
+			ReconfigurationMonitor.AttemptTaskContinuance(ReconfigurationStrategy, new State(this));
+		}
+
+		public ReconfigurationMonitor ReconfigurationMonitor { get; set; }
 
 		// robot delegation methods
 		// This enables tolerable faults to be analyzed both with and without hardware models.

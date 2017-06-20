@@ -22,15 +22,27 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
+	using System;
 	using System.Collections.Generic;
+	using System.Linq;
+	using Modeling;
 
 	public class ReconfigurationMonitor
 	{
 		private readonly List<ITask> _failedTasks;
 
+		[Hidden(HideElements = true)]
+		private readonly List<BaseAgent> _knownAgents = new List<BaseAgent>();
+
 		public ReconfigurationMonitor(int maxTaskCount)
 		{
 			_failedTasks = new List<ITask>(maxTaskCount);
+		}
+
+		// must only be called during model setup
+		public void AddAgent(BaseAgent agent)
+		{
+			_knownAgents.Add(agent);
 		}
 
 		private IController _controller;
@@ -56,6 +68,21 @@ namespace SafetySharp.Odp.Reconfiguration
 
 			if (config.Failed && !_failedTasks.Contains(task))
 				_failedTasks.Add(task);
+			else if (!config.Failed && _failedTasks.Contains(task))
+				_failedTasks.Remove(task);
+		}
+
+		public void AttemptTaskContinuance(IReconfigurationStrategy strategy, BaseAgent.State state)
+		{
+			var availableCapabilities = new HashSet<ICapability>(_knownAgents.SelectMany(b => b.AvailableCapabilities));
+			foreach (var task in _failedTasks)
+			{
+				var necessaryCapabilities = new HashSet<ICapability>(task.RequiredCapabilities);
+				if (necessaryCapabilities.IsSubsetOf(availableCapabilities))
+				{
+					strategy.Reconfigure(new List<Tuple<ITask, BaseAgent.State>>() { Tuple.Create(task, state) });
+				}
+			}
 		}
 	}
 }

@@ -34,15 +34,17 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 
 		public Model(Station[] stations, IController controller)
 		{
+			Controller = controller;
+			ReconfigurationMonitor = new ReconfigurationMonitor(MaxNumberOfRecipes) { Controller = controller };
+
 			Stations = stations;
 			foreach (var station in stations)
 			{
 				station.ReconfigurationStrategy =
 					new CentralReconfiguration(controller);
 				station.RecipeQueue = _scheduledRecipes;
+				ReconfigurationMonitor.AddAgent(station);
 			}
-			Controller = controller;
-			ReconfigurationMonitor = new ReconfigurationMonitor(MaxNumberOfRecipes) { Controller = controller };
 		}
 
 		[Root(RootKind.Controller)]
