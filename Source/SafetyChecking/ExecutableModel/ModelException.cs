@@ -23,9 +23,15 @@
 namespace ISSE.SafetyChecking.ExecutableModel
 {
     using System;
+    using System.Runtime.ExceptionServices;
 
     public class ModelException : Exception
     {
         public ModelException(Exception innerException) : base("An exception occured in the model.", innerException) {}
+
+	    public void RethrowInnerException()
+	    {
+		    ExceptionDispatchInfo.Capture(InnerException).Throw();
+	    }
     }
 }
