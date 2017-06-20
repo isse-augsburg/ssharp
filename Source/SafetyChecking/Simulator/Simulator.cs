@@ -188,7 +188,16 @@ namespace ISSE.SafetyChecking.Simulator
 			if (_counterExample == null)
 				RuntimeModel.Reset();
 			else
-				_counterExample.Replay(_choiceResolver, 0);
+			{
+				try
+				{
+					_counterExample.Replay(_choiceResolver, 0);
+				}
+				catch (ModelException me)
+				{
+					me.RethrowInnerException();
+				}
+			}
 
 			RuntimeModel.Serialize(state);
 			AddState(state);
