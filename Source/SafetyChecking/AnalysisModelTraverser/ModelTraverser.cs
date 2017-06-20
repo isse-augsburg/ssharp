@@ -26,6 +26,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
+	using System.Runtime.ExceptionServices;
 	using System.Threading.Tasks;
 	using ExecutableModel;
 	using AnalysisModel;
@@ -173,8 +174,12 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// </summary>
 		protected void RethrowTraversalException()
 		{
-			if (Context.Exception != null)
-				throw new AnalysisException<TExecutableModel>(Context.Exception, Context.CounterExample);
+			if (Context.Exception == null)
+				return;
+
+			if (Context.Exception is ModelException)
+				throw new AnalysisException<TExecutableModel>(Context.Exception.InnerException, Context.CounterExample);
+			ExceptionDispatchInfo.Capture(Context.Exception).Throw();
 		}
 
 		/// <summary>

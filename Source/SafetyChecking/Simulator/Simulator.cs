@@ -99,23 +99,29 @@ namespace ISSE.SafetyChecking.Simulator
 			Prune();
 
 			var state = stackalloc byte[RuntimeModel.StateVectorSize];
-
-			if (_counterExample == null)
+			try
 			{
-				RuntimeModel.ExecuteStep();
+				if (_counterExample == null)
+				{
+					RuntimeModel.ExecuteStep();
 
-				RuntimeModel.Serialize(state);
-				AddState(state);
+					RuntimeModel.Serialize(state);
+					AddState(state);
+				}
+				else
+				{
+					_counterExample.DeserializeState(_stateIndex + 1);
+					RuntimeModel.Serialize(state);
+
+					EnsureStatesMatch(state, _counterExample.GetState(_stateIndex + 1));
+
+					AddState(state);
+					Replay();
+				}
 			}
-			else
+			catch (ModelException me)
 			{
-				_counterExample.DeserializeState(_stateIndex + 1);
-				RuntimeModel.Serialize(state);
-
-				EnsureStatesMatch(state, _counterExample.GetState(_stateIndex + 1));
-
-				AddState(state);
-				Replay();
+				me.RethrowInnerException();
 			}
 
 			return true;
@@ -182,7 +188,16 @@ namespace ISSE.SafetyChecking.Simulator
 			if (_counterExample == null)
 				RuntimeModel.Reset();
 			else
-				_counterExample.Replay(_choiceResolver, 0);
+			{
+				try
+				{
+					_counterExample.Replay(_choiceResolver, 0);
+				}
+				catch (ModelException me)
+				{
+					me.RethrowInnerException();
+				}
+			}
 
 			RuntimeModel.Serialize(state);
 			AddState(state);

@@ -20,33 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.Analysis.Invariants.CounterExamples
+namespace Tests.Analysis.Dcca
 {
-	using ISSE.SafetyChecking.AnalysisModelTraverser;
+	using System;
+	using ISSE.SafetyChecking.ExecutedModel;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
-	internal class HiddenVariableWithEffect : AnalysisTestObject
+	internal class RuntimeExceptions : AnalysisTestObject
 	{
 		protected override void Check()
 		{
-			var c = new C();
-			var e = Should.Throw<NondeterminismException>(() => CheckInvariant(true, c));
+			// exception thrown in runtime should not be caught as model exceptions should
+			Should.Throw<OutOfMemoryException>(() =>
+				DccaWithMaxCardinality(false, int.MaxValue, ModelCapacityByModelSize.Tiny, new C())
+			);
 		}
 
 		private class C : Component
 		{
-			public int X;
-
-			[Hidden]
-			public int Y;
+			public int X = 0;
 
 			public override void Update()
 			{
-				if (Y != 1)
-					X = Choose(1, 2, 3);
-
-				Y = X;
+				X++; // infinite number of states will provoke OutOfMemoryException
 			}
 		}
 	}

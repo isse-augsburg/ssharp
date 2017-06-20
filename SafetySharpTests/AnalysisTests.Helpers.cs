@@ -116,9 +116,15 @@ namespace Tests
 			return result.FormulaHolds;
 		}
 
+
 		protected SafetyAnalysisResults<SafetySharpRuntimeModel> DccaWithMaxCardinality(Formula hazard, int maxCardinality, params IComponent[] components)
 		{
-			return DccaWithMaxCardinality(TestModel.InitializeModel(components), hazard, maxCardinality);
+			return DccaWithMaxCardinality(hazard, maxCardinality, ModelCapacityByMemorySize.Small, components);
+		}
+
+		protected SafetyAnalysisResults<SafetySharpRuntimeModel> DccaWithMaxCardinality(Formula hazard, int maxCardinality, ModelCapacity capacity, params IComponent[] components)
+		{
+			return DccaWithMaxCardinality(TestModel.InitializeModel(components), hazard, maxCardinality, capacity);
 		}
 
 		protected SafetyAnalysisResults<SafetySharpRuntimeModel> Dcca(Formula hazard, params IComponent[] components)
@@ -142,14 +148,14 @@ namespace Tests
 			return result;
 		}
 
-		protected SafetyAnalysisResults<SafetySharpRuntimeModel> DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality)
+		protected SafetyAnalysisResults<SafetySharpRuntimeModel> DccaWithMaxCardinality(ModelBase model, Formula hazard, int maxCardinality, ModelCapacity capacity)
 		{
 			var analysis = new SafetySharpSafetyAnalysis
 			{
 				Backend = (SafetyAnalysisBackend)Arguments[0],
 				Configuration =
 				{
-					ModelCapacity=ModelCapacityByMemorySize.Small,
+					ModelCapacity=capacity,
 					GenerateCounterExample = !SuppressCounterExampleGeneration
 				}
 			};
@@ -166,7 +172,7 @@ namespace Tests
 
 		protected SafetyAnalysisResults<SafetySharpRuntimeModel> Dcca(ModelBase model, Formula hazard)
 		{
-			return DccaWithMaxCardinality(model, hazard, Int32.MaxValue);
+			return DccaWithMaxCardinality(model, hazard, Int32.MaxValue, ModelCapacityByMemorySize.Small);
 		}
 		
 		protected void ShouldContain(ISet<ISet<Fault>> sets, params Fault[] faults)

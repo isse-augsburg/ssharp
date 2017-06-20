@@ -142,7 +142,16 @@ namespace SafetySharp.Runtime
 				fault.Reset();
 
 			foreach (var obj in _serializedObjects.OfType<IInitializable>())
-				obj.Initialize();
+			{
+				try
+				{
+					obj.Initialize();
+				}
+				catch (Exception e)
+				{
+					throw new ModelException(e);
+				}
+			}
 
 			_restrictRanges();
 		}
@@ -157,7 +166,16 @@ namespace SafetySharp.Runtime
 				fault.Reset();
 
 			foreach (var component in RootComponents)
-				component.Update();
+			{
+				try
+				{
+					component.Update();
+				}
+				catch (Exception e)
+				{
+					throw new ModelException(e);
+				}
+			}
 
 			_restrictRanges();
 		}
