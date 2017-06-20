@@ -23,9 +23,7 @@
 namespace Tests.Analysis.Invariants.CounterExamples
 {
 	using System;
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Runtime;
 	using Shouldly;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
@@ -44,7 +42,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 			var e = Should.Throw<AnalysisException<SafetySharpRuntimeModel>>(() => CheckInvariant(true, c));
 			e.CounterExample.StepCount.ShouldBe(1);
 
-			Should.Throw<InvalidOperationException>(() => SimulateCounterExample(e.CounterExample, simulator => { })).Message.ShouldBe("test");
+			Should.Throw<InvalidOperationException>(() => SimulateCounterExample(e.CounterExample, simulator => simulator.ToString())).Message.ShouldBe("test");
 		}
 
 		private class C : Component

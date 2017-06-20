@@ -34,19 +34,11 @@ namespace Tests.Analysis.Invariants.CounterExamples
 		protected override void Check()
 		{
 			SuppressCounterExampleGeneration = true;
-
-			try
+			Should.Throw<RangeViolationException>(() =>
 			{
 				var c = new C { X = 1 };
 				CheckInvariant(c.X != 20, c);
-
-				throw new InvalidOperationException("should not be reached");
-			}
-			catch (AnalysisException<SafetySharpRuntimeModel> e)
-			{
-				e.CounterExample.ShouldBeNull();
-				e.InnerException.ShouldBeOfType<RangeViolationException>();
-			}
+			});
 		}
 
 		private class C : Component

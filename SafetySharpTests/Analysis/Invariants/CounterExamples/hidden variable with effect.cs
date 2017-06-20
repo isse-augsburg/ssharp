@@ -22,11 +22,8 @@
 
 namespace Tests.Analysis.Invariants.CounterExamples
 {
-	using System;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using SafetySharp.Runtime;
 	using Shouldly;
 
 	internal class HiddenVariableWithEffect : AnalysisTestObject
@@ -34,20 +31,7 @@ namespace Tests.Analysis.Invariants.CounterExamples
 		protected override void Check()
 		{
 			var c = new C();
-			var e = Should.Throw<AnalysisException<SafetySharpRuntimeModel>>(() => CheckInvariant(true, c));
-			e.InnerException.ShouldBeOfType<NondeterminismException>();
-
-			SimulateCounterExample(e.CounterExample, simulator =>
-			{
-				c = (C)simulator.Model.Roots[0];
-
-				c.X.ShouldBe(0);
-				c.Y.ShouldBe(0);
-
-				Should.Throw<InvalidOperationException>(() => simulator.SimulateStep());
-				c.X.ShouldBe(2);
-				c.Y.ShouldBe(2);
-			});
+			var e = Should.Throw<NondeterminismException>(() => CheckInvariant(true, c));
 		}
 
 		private class C : Component
