@@ -43,10 +43,16 @@ namespace ISSE.SafetyChecking.Modeling
 	/// </summary>
 	public sealed class Choice
 	{
+		private static readonly Probability _probability1Div2 = new Probability(1.0 / 2.0);
+		private static readonly Probability _probability1Div3 = new Probability(1.0 / 3.0);
+		private static readonly Probability _probability1Div4 = new Probability(1.0 / 4.0);
+		private static readonly Probability _probability1Div5 = new Probability(1.0 / 5.0);
+		private static readonly Probability _probability1Div6 = new Probability(1.0 / 6.0);
+
 		/// <summary>
 		///   Gets or sets the resolver that is used to resolve nondeterministic choices.
 		/// </summary>
-		internal ChoiceResolver Resolver { get; set; }
+		public ChoiceResolver Resolver { get; set; }
 
 		/// <summary>
 		///   Returns an index in the range of <paramref name="elementCount" />. Returns <c>-1</c> if <paramref name="elementCount" />
@@ -239,6 +245,41 @@ namespace ISSE.SafetyChecking.Modeling
 			return values[Resolver.HandleChoice(values.Length)];
 		}
 
+		/// <summary>
+		///   Returns an index in the range of <paramref name="elementCount" />. Returns <c>-1</c> if <paramref name="elementCount" />
+		///   is 0.
+		/// </summary>
+		/// <param name="elementCount">The element count to choose the index from.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int ChooseIndexWithUniformDistribution(int elementCount)
+		{
+			switch (elementCount)
+			{
+				case 0:
+					return -1;
+				case 1:
+					return 0;
+				default:
+					var probability = new Probability(1.0 / elementCount);
+					var result = Resolver.HandleProbabilisticChoice(elementCount);
+					Resolver.SetProbabilityOfLastChoice(probability);
+					return result;
+			}
+		}
+
+		/// <summary>
+		///   Returns a value within the range of the given bounds.
+		/// </summary>
+		/// <param name="lowerBound">The inclusive lower bound of the range to choose from.</param>
+		/// <param name="upperBound">The inclusive upper bound of the range to choose from.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int ChooseFromRangeWithUniformDistribution(int lowerBound, int upperBound)
+		{
+			var range = upperBound - lowerBound + 1;
+			if (range <= 0)
+				throw new InvalidOperationException($"Invalid range [{lowerBound}, {upperBound}].");
+			return lowerBound+ChooseIndexWithUniformDistribution(range);
+		}
 
 
 		/// <summary>
@@ -254,7 +295,7 @@ namespace ISSE.SafetyChecking.Modeling
 		}
 
 		/// <summary>
-		///   Returns either <paramref name="value1" /> or <paramref name="value2" /> nondeterministically.
+		///   Returns either <paramref name="value1" /> or <paramref name="value2" /> probabilistically.
 		/// </summary>
 		/// <param name="value1">The first value to choose.</param>
 		/// <param name="value2">The second value to choose.</param>
@@ -274,7 +315,7 @@ namespace ISSE.SafetyChecking.Modeling
 		}
 
 		/// <summary>
-		///   Returns either <paramref name="value1" />, <paramref name="value2" />, or <paramref name="value3" /> nondeterministically.
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, or <paramref name="value3" /> probabilistically.
 		/// </summary>
 		/// <param name="value1">The firsOption< T> value to choose.</param>
 		/// <param name="value2">The second value to choose.</param>
@@ -299,7 +340,7 @@ namespace ISSE.SafetyChecking.Modeling
 
 		/// <summary>
 		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />, or
-		///   <paramref name="value4" /> nondeterministically.
+		///   <paramref name="value4" /> probabilistically.
 		/// </summary>
 		/// <param name="value1">The firsOption< T> value to choose.</param>
 		/// <param name="value2">The second value to choose.</param>
@@ -328,7 +369,7 @@ namespace ISSE.SafetyChecking.Modeling
 
 		/// <summary>
 		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />,
-		///   <paramref name="value4" />, or <paramref name="value5" /> nondeterministically.
+		///   <paramref name="value4" />, or <paramref name="value5" /> probabilistically.
 		/// </summary>
 		/// <param name="value1">The firsOption< T> value to choose.</param>
 		/// <param name="value2">The second value to choose.</param>
@@ -361,7 +402,7 @@ namespace ISSE.SafetyChecking.Modeling
 
 		/// <summary>
 		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />,
-		///   <paramref name="value4" />, <paramref name="value5" />, or <paramref name="value6" /> nondeterministically.
+		///   <paramref name="value4" />, <paramref name="value5" />, or <paramref name="value6" /> probabilistically.
 		/// </summary>
 		/// <param name="value1">The firsOption< T> value to choose.</param>
 		/// <param name="value2">The second value to choose.</param>
@@ -397,7 +438,7 @@ namespace ISSE.SafetyChecking.Modeling
 		}
 
 		/// <summary>
-		///   Returns one of the <paramref name="values" /> nondeterministically.
+		///   Returns one of the <paramref name="values" /> probabilistically.
 		/// </summary>
 		/// <param name="values">The values to choose from.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -406,6 +447,163 @@ namespace ISSE.SafetyChecking.Modeling
 			var chosen = Resolver.HandleProbabilisticChoice(values.Length);
 			Resolver.SetProbabilityOfLastChoice(values[chosen].Probability);
 			return values[chosen].Result;
+		}
+
+
+		/// <summary>
+		///   Returns either <paramref name="value1" /> or <paramref name="value2" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The first value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T ChooseWithUniformDistribution<T>(T value1, T value2)
+		{
+			switch (Resolver.HandleProbabilisticChoice(2))
+			{
+				case 0:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div2);
+					return value1;
+				default:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div2);
+					return value2;
+			}
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, or <paramref name="value3" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The first value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <param name="value3">The third value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T ChooseWithUniformDistribution<T>(T value1, T value2, T value3)
+		{
+			switch (Resolver.HandleProbabilisticChoice(3))
+			{
+				case 0:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div3);
+					return value1;
+				case 1:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div3);
+					return value2;
+				default:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div3);
+					return value3;
+			}
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />, or
+		///   <paramref name="value4" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The first value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <param name="value3">The third value to choose.</param>
+		/// <param name="value4">The fourth value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T ChooseWithUniformDistribution<T>(T value1, T value2, T value3, T value4)
+		{
+			switch (Resolver.HandleProbabilisticChoice(4))
+			{
+				case 0:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div4);
+					return value1;
+				case 1:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div4);
+					return value2;
+				case 2:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div4);
+					return value3;
+				default:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div4);
+					return value4;
+			}
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />,
+		///   <paramref name="value4" />, or <paramref name="value5" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The first value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <param name="value3">The third value to choose.</param>
+		/// <param name="value4">The fourth value to choose.</param>
+		/// <param name="value5">The fifth value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T ChooseWithUniformDistribution<T>(T value1, T value2, T value3, T value4, T value5)
+		{
+			switch (Resolver.HandleProbabilisticChoice(5))
+			{
+				case 0:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div5);
+					return value1;
+				case 1:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div5);
+					return value2;
+				case 2:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div5);
+					return value3;
+				case 3:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div5);
+					return value4;
+				default:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div5);
+					return value5;
+			}
+		}
+
+		/// <summary>
+		///   Returns either <paramref name="value1" />, <paramref name="value2" />, <paramref name="value3" />,
+		///   <paramref name="value4" />, <paramref name="value5" />, or <paramref name="value6" /> nondeterministically.
+		/// </summary>
+		/// <param name="value1">The first value to choose.</param>
+		/// <param name="value2">The second value to choose.</param>
+		/// <param name="value3">The third value to choose.</param>
+		/// <param name="value4">The fourth value to choose.</param>
+		/// <param name="value5">The fifth value to choose.</param>
+		/// <param name="value6">The sixth value to choose.</param>
+		/// <remarks>This method is a performance optimization.</remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T ChooseWithUniformDistribution<T>(T value1, T value2, T value3, T value4, T value5, T value6)
+		{
+			switch (Resolver.HandleProbabilisticChoice(6))
+			{
+				case 0:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div6);
+					return value1;
+				case 1:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div6);
+					return value2;
+				case 2:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div6);
+					return value3;
+				case 3:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div6);
+					return value4;
+				case 4:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div6);
+					return value5;
+				default:
+					Resolver.SetProbabilityOfLastChoice(_probability1Div6);
+					return value6;
+			}
+		}
+
+		/// <summary>
+		///   Returns one of the <paramref name="values" /> probabilistically.
+		/// </summary>
+		/// <param name="values">The values to choose from.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T ChooseWithUniformDistribution<T>(params T[] values)
+		{
+			var chosen = Resolver.HandleProbabilisticChoice(values.Length);
+			var probability = new Probability(1.0 / values.Length);
+			Resolver.SetProbabilityOfLastChoice(probability);
+			return values[chosen];
 		}
 	}
 }

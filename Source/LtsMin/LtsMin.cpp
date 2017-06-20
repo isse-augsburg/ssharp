@@ -265,7 +265,7 @@ int32_t NextStatesCallback(model_t model, int32_t group, int32_t* state, Transit
 
 		for each (auto transition in transitions)
 		{
-			auto stateMemory = (int32_t*)((CandidateTransition*)transition)->TargetState;
+			auto stateMemory = (int32_t*)((CandidateTransition*)transition)->TargetStatePointer;
 			stateMemory[0] = 0;
 			callback(context, &info, stateMemory, nullptr);
 

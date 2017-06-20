@@ -23,6 +23,8 @@
 namespace ISSE.SafetyChecking.Utilities
 {
 	using System;
+	using System.Reflection;
+	using System.Reflection.Emit;
 	using System.Runtime.InteropServices;
 
 	/// <summary>
@@ -266,5 +268,119 @@ namespace ISSE.SafetyChecking.Utilities
 
 		[DllImport("Kernel32.dll", EntryPoint = "RtlZeroMemory", SetLastError = false)]
 		private static extern void ZeroMemory(IntPtr memory, IntPtr size);
+		
+
+		internal static class ZeroMemoryWithInitblk
+		{
+			// see https://msdn.microsoft.com/de-de/library/system.reflection.emit.opcodes.ldc_i4_0(v=vs.110).aspx
+
+			// parameters are "IntPtr memoryPtr" and "int size"
+			internal static readonly Action<IntPtr,int> Delegate;
+
+			static ZeroMemoryWithInitblk()
+			{
+				var method = new DynamicMethod(
+					name: "ZeroMemoryWithInitBlk",
+					returnType: typeof(void),
+					parameterTypes: new[] { typeof(IntPtr), typeof(int) },
+					m: typeof(object).Assembly.ManifestModule,
+					skipVisibility: true);
+
+				method.DefineParameter(1, ParameterAttributes.In, "memoryPtr");
+				method.DefineParameter(2, ParameterAttributes.In, "size");
+
+				var il = method.GetILGenerator();
+				il.Emit(OpCodes.Ldarg_0); // push address on stack
+				il.Emit(OpCodes.Ldc_I4_0); // push "0" on stack
+				il.Emit(OpCodes.Ldarg_1); // number of bytes as integer
+				il.Emit(OpCodes.Initblk); //do the magic
+				il.Emit(OpCodes.Ret);
+
+				//compile
+				Delegate = (Action<IntPtr, int>)method.CreateDelegate(typeof(Action<IntPtr, int>));
+			}
+
+			public static void ClearWithZero(int* memoryStart, long elements)
+			{
+				var bytesToErase = elements * sizeof(int);
+				if (bytesToErase <= Int32.MaxValue)
+				{
+					Delegate(new IntPtr(memoryStart), (int)bytesToErase);
+				}
+				else
+				{
+					Console.WriteLine($"{nameof(MemoryBuffer)}: Using slow memory clearing");
+					for (var i = 0; i < elements; i++)
+					{
+						memoryStart[i] = -1;
+					}
+				}
+			}
+		}
+
+		internal static class SetAllBitsMemoryWithInitblk
+		{
+			// see https://msdn.microsoft.com/de-de/library/system.reflection.emit.opcodes.ldc_i4_0(v=vs.110).aspx
+
+			// parameters are "IntPtr memoryPtr" and "uint size"
+			internal static readonly Action<IntPtr, uint> Delegate;
+
+			static SetAllBitsMemoryWithInitblk()
+			{
+				var method = new DynamicMethod(
+					name: "SetAllBitsMemoryWithInitblk",
+					returnType: typeof(void),
+					parameterTypes: new[] { typeof(IntPtr), typeof(uint) },
+					m: typeof(object).Assembly.ManifestModule,
+					skipVisibility: true);
+
+				method.DefineParameter(1, ParameterAttributes.In, "memoryPtr");
+				method.DefineParameter(2, ParameterAttributes.In, "size");
+
+				var il = method.GetILGenerator();
+				il.Emit(OpCodes.Ldarg_0); // push address on stack
+				il.Emit(OpCodes.Ldc_I4_M1); // push "-1" on stack
+				il.Emit(OpCodes.Ldarg_1); // number of bytes as integer
+				il.Emit(OpCodes.Initblk); //do the magic
+				il.Emit(OpCodes.Ret);
+
+				//compile
+				Delegate = (Action<IntPtr, uint>)method.CreateDelegate(typeof(Action<IntPtr, uint>));
+			}
+
+			public static void ClearWithMinus1(int* memoryStart, long elements)
+			{
+				var bytesToErase = elements * sizeof(int);
+				if (bytesToErase <= uint.MaxValue)
+				{
+					Delegate(new IntPtr(memoryStart), (uint)bytesToErase);
+				}
+				else
+				{
+					Console.WriteLine($"{nameof(MemoryBuffer)}: Using slow memory clearing");
+					for (var i = 0; i < elements; i++)
+					{
+						memoryStart[i] = -1;
+					}
+				}
+			}
+
+			public static void ClearWithMinus1(long* memoryStart, long elements)
+			{
+				var bytesToErase = elements * sizeof(long);
+				if (bytesToErase <= uint.MaxValue)
+				{
+					Delegate(new IntPtr(memoryStart), (uint)bytesToErase);
+				}
+				else
+				{
+					Console.WriteLine($"{nameof(MemoryBuffer)}: Using slow memory clearing");
+					for (var i = 0; i < elements; i++)
+					{
+						memoryStart[i] = -1;
+					}
+				}
+			}
+		}
 	}
 }

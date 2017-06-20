@@ -22,12 +22,14 @@
 
 namespace SafetySharp.ModelChecking
 {
+	using ISSE.SafetyChecking.MarkovDecisionProcess.Optimized;
 	using System;
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
 	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.MarkovDecisionProcess;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using Modeling;
 	using Runtime;
@@ -76,13 +78,10 @@ namespace SafetySharp.ModelChecking
 		}
 	}
 
-	//public sealed class SafetySharpMinimalRedundancyHeuristic : MinimalRedundancyHeuristic<SafetySharpRuntimeModel>
-	//{
-	//}
-
-	/*
-	public sealed class SafetySharp : <SafetySharpRuntimeModel>
+	public sealed class SafetySharpNmdpFromExecutableModelGenerator : NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>
 	{
+		public SafetySharpNmdpFromExecutableModelGenerator(ModelBase model) : base(SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model))
+		{
+		}
 	}
-	*/
 }

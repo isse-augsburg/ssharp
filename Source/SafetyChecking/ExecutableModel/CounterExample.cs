@@ -50,7 +50,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		/// <param name="states">The serialized counter example.</param>
 		/// <param name="replayInfo">The replay information of the counter example.</param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		internal CounterExample(TExecutableModel runtimeModel, byte[][] states, int[][] replayInfo, bool endsWithException)
+		public CounterExample(TExecutableModel runtimeModel, byte[][] states, int[][] replayInfo, bool endsWithException)
 		{
 			Requires.NotNull(runtimeModel, nameof(runtimeModel));
 			Requires.NotNull(states, nameof(states));
@@ -72,7 +72,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		/// <summary>
 		///   Gets the runtime model the counter example was generated for.
 		/// </summary>
-		internal TExecutableModel RuntimeModel { get; }
+		public TExecutableModel RuntimeModel { get; }
 
 		/// <summary>
 		///   Gets the model the counter example was generated for.

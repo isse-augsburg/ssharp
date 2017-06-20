@@ -46,6 +46,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		private readonly EffectlessFaultsMinimizationMode _minimalizationMode = EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults;
 
+		private readonly LtmcChoiceResolver _ltmcChoiceResolver;
+
 		private readonly LtmcTransitionSetBuilder<TExecutableModel> _transitions;
 
 		/// <summary>
@@ -61,8 +63,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		{
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
 			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
-			
-			ChoiceResolver = new LtmcChoiceResolver();
+
+			_ltmcChoiceResolver = new LtmcChoiceResolver();
+			ChoiceResolver = _ltmcChoiceResolver;
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
 		}
 
@@ -153,7 +156,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		public Probability GetProbability()
 		{
-			return ChoiceResolver.CalculateProbabilityOfPath();
+			return _ltmcChoiceResolver.CalculateProbabilityOfPath();
 		}
 
 		/// <summary>

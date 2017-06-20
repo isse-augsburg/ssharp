@@ -21,10 +21,19 @@ To get started with S#, please consult the [Wiki](http://safetysharp.isse.de/wik
 the case studies are available under the 
 [MIT License](https://github.com/isse-augsburg/ssharp/blob/master/LICENSE.md).
 
-Publications
+Documents
 -------------------------
 
-Please see [Wiki page with our S# related publications](https://github.com/isse-augsburg/ssharp/wiki/Publications)
+- [Wiki page with our S# related publications](https://github.com/isse-augsburg/ssharp/wiki/Publications)
+
+- [Quickstart S# for developers (Visual Studio 2017)](https://github.com/isse-augsburg/ssharp/blob/master/Documents/Quickstart-Dev-VS2017.pdf)
+
+- [Review S# Case Studies (Visual Studio 2015)](https://github.com/isse-augsburg/ssharp/wiki/Installation-and-Setup#review-ss-case-studies)
+
+- [Model and conduct DCCA on your own Case Studies with S# (Visual Studio 2015)](https://github.com/isse-augsburg/ssharp/wiki/Installation-and-Setup#model-and-analyze-your-own-case-studies-with-s)
+
+
+
 
 Example: Modeling with S#
 -------------------------

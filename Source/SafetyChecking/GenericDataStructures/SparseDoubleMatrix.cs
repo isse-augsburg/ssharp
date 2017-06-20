@@ -71,6 +71,8 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 
 		public int Rows { get; private set; } = 0;
 
+		private double _smallDoubleGreater1;
+
 		// The outgoing transitions of state s are stored between
 		// _columnValueMemory[_rowMemory[s]] and _columnValueMemory[_rowMemory[s]+_rowColumnCountMemory[s]]
 		// or when optimized and sealed between
@@ -93,8 +95,24 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			_columnValueMemory = (ColumnValue*)_columnValueBufferUnoptimized.Pointer;
 
 			SetRowEntriesToInvalid();
+			CalculateSmallDoubleGreater1();
 		}
-		
+
+		private void CalculateSmallDoubleGreater1()
+		{
+			// https://en.wikipedia.org/wiki/Machine_epsilon
+			// Approximate the machine epsilon
+			var epsilon = 1.0;
+			var target = 1.0;
+
+			// ReSharper disable once CompareOfFloatsByEqualityOperator
+			while ((target + (epsilon / 2.0)) != target)
+				epsilon /= 2.0;
+			// epsilon is now one of the smallest numbers which can be added to 1.0 to make a difference
+			// we want to tolerate a slightly bigger value, so we multiply it with 100
+			_smallDoubleGreater1 = 1.0 + epsilon*100;
+		}
+
 		private void SetRowEntriesToInvalid()
 		{
 			for (var i = 0; i < _spaceLimitNumberOfRows; i++)
@@ -175,6 +193,49 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 
 			var nextColumnValueIndex = TotalColumnValueEntries;
 			_columnValueMemory[nextColumnValueIndex] = columnValue;
+			TotalColumnValueEntries++;
+			_columnCountOfCurrentRow++;
+		}
+
+		[Conditional("DEBUG")]
+		private void CheckIfRoundDownToOneIsTolerable(double value)
+		{
+			Assert.That(value <= _smallDoubleGreater1, "we do not tolerate the difference");
+		}
+
+		internal void MergeOrAddColumnValueToCurrentRow(ColumnValue columnValueToAdd)
+		{
+			AssertNotSealed();
+			var firstEntryOfRow = _rowMemory[_currentRow];
+			var nextColumnValueIndex = TotalColumnValueEntries;
+
+			// try to find existing column in current row
+			for (var i = firstEntryOfRow; i < nextColumnValueIndex; i++)
+			{
+				var existingColumnValue = _columnValueMemory[i];
+				if (existingColumnValue.Column == columnValueToAdd.Column)
+				{
+					//found it
+					var newProbability = existingColumnValue.Value + columnValueToAdd.Value;
+					if (newProbability > 1.0)
+					{
+						CheckIfRoundDownToOneIsTolerable(newProbability);
+						newProbability = 1.0;
+					}
+					Assert.That(!(newProbability>1.0),"newProbability must be smaller than 1.0");
+					var newColumnValue = new ColumnValue(existingColumnValue.Column, newProbability);
+					_columnValueMemory[i] = newColumnValue;
+					return;
+				}
+			}
+
+			// did not find it, so have to add a new entry
+			Assert.InRange(columnValueToAdd.Column, 0, _spaceLimitNumberOfRows);
+			Assert.InRange(TotalColumnValueEntries, 0, _spaceLimitNumberOfEntries);
+			if (TotalColumnValueEntries >= _spaceLimitNumberOfEntries || TotalColumnValueEntries < 0)
+				throw new OutOfMemoryException("Unable to store entry. Try increasing the transition capacity.");
+
+			_columnValueMemory[nextColumnValueIndex] = columnValueToAdd;
 			TotalColumnValueEntries++;
 			_columnCountOfCurrentRow++;
 		}

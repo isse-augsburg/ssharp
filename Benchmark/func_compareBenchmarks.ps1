@@ -40,6 +40,8 @@ function AddResultDir($name,$resultDir)
     $resultsFile="$resultDir\"+"summarizedBenchmarkResults.csv"
     $oldresults = Import-Csv $resultsFile -Encoding ascii -UseCulture
     $newDir | Add-Member -type NoteProperty -name Results -Value $oldresults
+    $annotation = Get-Content $resultDir\annotation
+    $newDir | Add-Member -type NoteProperty -name Annotation -Value $annotation
     $global_resultDirs += $newDir
 }
 
@@ -48,6 +50,7 @@ function LoadResults($tests,$counter,$interestingValues )
     $test = $tests[$counter]
     $newResult = New-Object System.Object
     $newResult | Add-Member -type NoteProperty -name TestName -Value $test.TestName
+    $newResult | Add-Member -type NoteProperty -name Annotation -Value $test.Annotation
     
     Foreach ($interestingValue in $interestingValues) {
         #$newResult | Add-Member -type NoteProperty -name $interestingValue -Value $mcssize

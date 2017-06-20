@@ -35,7 +35,7 @@ namespace ISSE.SafetyChecking.Modeling
 	[DebuggerDisplay("{Name} (#{Identifier}) [{Activation}]")]
 	public abstract class Fault
 	{
-		private readonly Choice _choice = new Choice();
+		public Choice Choice { get; } = new Choice();
 		
 		private Activation _activation = Activation.Nondeterministic;
 		
@@ -48,8 +48,21 @@ namespace ISSE.SafetyChecking.Modeling
 		private bool _isSubsumedFaultSetCached;
 		
 		private FaultSet _subsumedFaultSet;
-		
-		public Probability ProbabilityOfOccurrence = new Probability(0.5);
+
+		private Probability? _probabilityOfOccurrence;
+
+		private Probability _probabilityOfOccurrenceComplement;
+
+		public Probability? ProbabilityOfOccurrence
+		{
+			get { return _probabilityOfOccurrence; }
+			set
+			{
+				_probabilityOfOccurrence = value;
+				if (ProbabilityOfOccurrence != null)
+					_probabilityOfOccurrenceComplement = ProbabilityOfOccurrence.Value.Complement();
+			}
+		}
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -177,7 +190,7 @@ namespace ISSE.SafetyChecking.Modeling
 
 			_canUndoActivation = false;
 			_activationIsUnknown = true;
-			_choice.Resolver.Undo(_choiceIndex);
+			Choice.Resolver.ForwardUntakenChoicesAtIndex(_choiceIndex);
 		}
 
 		/// <summary>
@@ -204,8 +217,15 @@ namespace ISSE.SafetyChecking.Modeling
 						_canUndoActivation = false;
 						break;
 					case Activation.Nondeterministic:
-						IsActivated = _choice.Choose(new Option<bool>(ProbabilityOfOccurrence.Complement(), false), new Option<bool>(ProbabilityOfOccurrence, true));
-						_choiceIndex = _choice.Resolver.LastChoiceIndex;
+						if (_probabilityOfOccurrence != null)
+						{
+							IsActivated = Choice.Choose(new Option<bool>(_probabilityOfOccurrenceComplement, false), new Option<bool>(_probabilityOfOccurrence.Value, true));
+						}
+						else
+						{
+							IsActivated = Choice.Choose(false,true);
+						}
+						_choiceIndex = Choice.Resolver.LastChoiceIndex;
 						_canUndoActivation = true;
 						break;
 					default:
@@ -219,7 +239,7 @@ namespace ISSE.SafetyChecking.Modeling
 		/// <summary>
 		///   Resets the fault's activation state for the current step.
 		/// </summary>
-		internal void Reset()
+		public void Reset()
 		{
 			if (_activation != Activation.Nondeterministic)
 				return;

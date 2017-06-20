@@ -69,10 +69,10 @@ namespace ISSE.SafetyChecking.StateGraphModel
 
 			_transitions[_count] = new CandidateTransition
 			{
-				TargetState = targetState,
+				TargetStatePointer = targetState,
 				Formulas = formulas,
 				ActivatedFaults = activatedFaults,
-				IsValid = true,
+				Flags = TransitionFlags.IsValidFlag,
 			};
 
 			++_count;

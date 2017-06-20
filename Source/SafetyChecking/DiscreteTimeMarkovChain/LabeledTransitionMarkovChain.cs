@@ -27,12 +27,13 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using System.Collections.Concurrent;
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.Runtime.CompilerServices;
 	using Modeling;
 	using Utilities;
 	using AnalysisModel;
 
 
-	internal unsafe class LabeledTransitionMarkovChain
+	internal unsafe partial class LabeledTransitionMarkovChain : DisposableObject
 	{
 		public static readonly int TransitionSize = sizeof(TransitionChainElement);
 
@@ -57,8 +58,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public int Transitions => _transitionChainElementCount;
 
 		private readonly long _maxNumberOfTransitions;
-
-
+		
 		public LabeledTransitionMarkovChain(long maxNumberOfStates, long maxNumberOfTransitions)
 		{
 			Requires.InRange(maxNumberOfStates, nameof(maxNumberOfStates), 1024, Int32.MaxValue - 1);
@@ -71,13 +71,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_transitionChainElementsBuffer.Resize((long)maxNumberOfTransitions * sizeof(TransitionChainElement), zeroMemory: false);
 			_transitionChainElementsMemory = (TransitionChainElement*)_transitionChainElementsBuffer.Pointer;
 
-
-			for (var i = 0; i < maxNumberOfStates; i++)
-			{
-				_stateStorageStateToFirstTransitionChainElementMemory[i] = -1;
-			}
+			MemoryBuffer.SetAllBitsMemoryWithInitblk.ClearWithMinus1(_stateStorageStateToFirstTransitionChainElementMemory,maxNumberOfStates);
 		}
-
+		
 		private struct TransitionChainElement
 		{
 			public int NextElementIndex;
@@ -85,116 +81,36 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			public StateFormulaSet Formulas;
 			public double Probability;
 		}
-		
-		/// <summary>
-		///   Adds the <paramref name="sourceState" /> and all of its <see cref="transitions" /> to the state graph.
-		/// </summary>
-		/// <param name="sourceState">The state that should be added.</param>
-		/// <param name="isInitial">Indicates whether the state is an initial state.</param>
-		/// <param name="transitions">The transitions leaving the state.</param>
-		/// <param name="transitionCount">The number of valid transitions leaving the state.</param>
-		internal void AddStateInfo(int sourceState, bool isInitial, TransitionCollection transitions, int transitionCount)
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private int GetPlaceForNewTransitionChainElement()
 		{
-			Assert.That(transitionCount > 0, "Cannot add deadlock state.");
-
-			// Need to reserve the memory for the transitions
-			var upperBoundaryForTransitions = _transitionChainElementCount + transitionCount;
-			if (upperBoundaryForTransitions<0)
+			var locationOfNewEntry= InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
+			if (locationOfNewEntry >= _maxNumberOfTransitions)
 				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
-
-
-			// Search for place to append is linear in number of existing transitions of state linearly => O(n^2) 
-			foreach (var transition in transitions)
-			{
-				var probTransition = (LtmcTransition*)transition;
-				Assert.That(probTransition->IsValid, "Attempted to add an invalid transition.");
-
-				int currentElementIndex;
-				if (isInitial)
-					currentElementIndex = _indexOfFirstInitialTransition;
-				else
-					currentElementIndex = _stateStorageStateToFirstTransitionChainElementMemory[sourceState];
-
-				if (currentElementIndex == -1)
-				{
-					// Add new chain start
-					var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
-					if (locationOfNewEntry >= _maxNumberOfTransitions)
-						throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
-
-
-					_transitionChainElementsMemory[locationOfNewEntry] =
-						new TransitionChainElement
-						{
-							Formulas = transition->Formulas,
-							NextElementIndex = -1,
-							Probability = probTransition->Probability,
-							TargetState = transition->TargetState
-						};
-					if (isInitial)
-					{
-						_indexOfFirstInitialTransition = locationOfNewEntry;
-					}
-					else
-					{
-						SourceStates.Add(sourceState);
-						_stateStorageStateToFirstTransitionChainElementMemory[sourceState] = locationOfNewEntry;
-					}
-				}
-				else
-				{
-					// merge or append
-					bool mergedOrAppended = false;
-					while (!mergedOrAppended)
-					{
-						var currentElement = _transitionChainElementsMemory[currentElementIndex];
-						if (currentElement.TargetState == transition->TargetState && currentElement.Formulas == transition->Formulas)
-						{
-							//Case 1: Merge
-							_transitionChainElementsMemory[currentElementIndex] =
-								new TransitionChainElement
-								{
-									Formulas = currentElement.Formulas,
-									NextElementIndex = currentElement.NextElementIndex,
-									Probability = probTransition->Probability+ currentElement.Probability,
-									TargetState = currentElement.TargetState
-								};
-							mergedOrAppended = true;
-						}
-						else if (currentElement.NextElementIndex == -1)
-						{
-							//Case 2: Append
-							var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionChainElementCount);
-							if (locationOfNewEntry >= _maxNumberOfTransitions)
-								throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
-							mergedOrAppended = true;
-							_transitionChainElementsMemory[currentElementIndex] =
-								new TransitionChainElement
-								{
-									Formulas = currentElement.Formulas,
-									NextElementIndex = locationOfNewEntry,
-									Probability = currentElement.Probability,
-									TargetState = currentElement.TargetState
-								};
-							_transitionChainElementsMemory[locationOfNewEntry] =
-								new TransitionChainElement
-								{
-									Formulas = transition->Formulas,
-									NextElementIndex = -1,
-									Probability = probTransition->Probability,
-									TargetState = transition->TargetState
-								};
-						}
-						else
-						{
-							//else continue iteration
-							currentElementIndex = currentElement.NextElementIndex;
-						}
-					}
-				}
-			}
+			return locationOfNewEntry;
 		}
 
+		public void CreateStutteringState(int stutteringStateIndex)
+		{
+			// The stuttering state might not be reached at all.
+			// Make sure, that all used algorithms to not require a connected state graph.
+			var currentElementIndex = _stateStorageStateToFirstTransitionChainElementMemory[stutteringStateIndex];
+			Assert.That(currentElementIndex == -1, "Stuttering state has already been created");
+			var locationOfNewEntry = GetPlaceForNewTransitionChainElement();
+			_transitionChainElementsMemory[locationOfNewEntry] =
+					new TransitionChainElement
+					{
+						Formulas = new StateFormulaSet(),
+						NextElementIndex = -1,
+						Probability = 1.0,
+						TargetState = stutteringStateIndex
+					};
+
+			SourceStates.Add(stutteringStateIndex);
+			_stateStorageStateToFirstTransitionChainElementMemory[stutteringStateIndex] = locationOfNewEntry;
+		}
+		
 		// Validation
 
 		[Conditional("DEBUG")]
@@ -233,9 +149,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			Func<LabeledTransitionEnumerator, int> selectEntryWithHighestProbability =
 				enumerator =>
 				{
-					enumerator.MoveNext(); //at least one element must exist
-					var candidate = enumerator.CurrentIndex;
-					var probabilityOfCandidate = enumerator.CurrentProbability;
+					var candidate = -1;
+					var probabilityOfCandidate = -1.0;
 					while (enumerator.MoveNext())
 						if (probabilityOfCandidate < enumerator.CurrentProbability)
 							candidate = enumerator.CurrentIndex;
@@ -277,6 +192,19 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			}
 		}
 
+		/// <summary>
+		///   Disposes the object, releasing all managed and unmanaged resources.
+		/// </summary>
+		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
+		protected override void OnDisposing(bool disposing)
+		{
+			if (!disposing)
+				return;
+
+			_stateStorageStateToFirstTransitionChainElementBuffer.SafeDispose();
+			_transitionChainElementsBuffer.SafeDispose();
+		}
+
 		internal LabeledTransitionEnumerator GetTransitionEnumerator(int stateStorageState)
 		{
 			var firstElement = _stateStorageStateToFirstTransitionChainElementMemory[stateStorageState];
@@ -296,22 +224,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			private int _nextElementIndex;
 
-			public double CurrentProbability {
-				get { return _ltmc._transitionChainElementsMemory[CurrentIndex].Probability; }
-				//set { _ltmc._transitionChainElementsMemory[CurrentIndex].Probability = value; }
-			}
+			public double CurrentProbability => _ltmc._transitionChainElementsMemory[CurrentIndex].Probability;
 
-			public int CurrentTargetState
-			{
-				get { return _ltmc._transitionChainElementsMemory[CurrentIndex].TargetState; }
-				//set { _ltmc._transitionChainElementsMemory[CurrentIndex].TargetState = value; }
-			}
+			public int CurrentTargetState => _ltmc._transitionChainElementsMemory[CurrentIndex].TargetState;
 
-			public StateFormulaSet CurrentFormulas
-			{
-				get { return _ltmc._transitionChainElementsMemory[CurrentIndex].Formulas; }
-				//set { _ltmc._transitionChainElementsMemory[CurrentIndex].Formulas = value; }
-			}
+			public StateFormulaSet CurrentFormulas => _ltmc._transitionChainElementsMemory[CurrentIndex].Formulas;
 
 			public LabeledTransitionEnumerator(LabeledTransitionMarkovChain ltmc, int firstElement)
 			{

@@ -26,7 +26,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("S#")]
 [assembly: AssemblyCompany("Institute for Software & Systems Engineering")]
 [assembly: AssemblyProduct("S#")]
-[assembly: AssemblyCopyright("Copyright (c) 2014-2016, Institute for Software & Systems Engineering")]
+[assembly: AssemblyCopyright("Copyright (c) 2014-2017, Institute for Software & Systems Engineering")]
 [assembly: AssemblyCulture("")]
 [assembly: AssemblyVersion("1.2.3.0")]
 [assembly: AssemblyFileVersion("1.2.3.0")]

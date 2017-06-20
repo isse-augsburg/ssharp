@@ -26,6 +26,7 @@ namespace SafetySharp.Modeling
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using CompilerServices;
+	using ISSE.SafetyChecking.Modeling;
 	using ISSE.SafetyChecking.Utilities;
 	using Utilities;
 
@@ -69,6 +70,12 @@ namespace SafetySharp.Modeling
 #endif
 		[NonSerializable]
 		internal List<Type> FaultEffectTypes { get; } = new List<Type>();
+		
+		/// <summary>
+		///   The default <see cref="Choice" /> instance used by the component.
+		/// </summary>
+		[Hidden, DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private readonly Choice _defaultChoice = new Choice();
 
 		/// <summary>
 		///   Updates the state of the component.

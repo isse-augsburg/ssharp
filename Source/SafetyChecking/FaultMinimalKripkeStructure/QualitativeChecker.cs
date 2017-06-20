@@ -49,7 +49,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// <summary>
 		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal AnalysisResult<TExecutableModel> CheckInvariant(CoupledExecutableModelCreator<TExecutableModel> createModel, Formula formula)
+		public AnalysisResult<TExecutableModel> CheckInvariant(CoupledExecutableModelCreator<TExecutableModel> createModel, Formula formula)
 		{
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care
@@ -68,7 +68,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// <summary>
 		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal AnalysisResult<TExecutableModel> CheckInvariant(CoupledExecutableModelCreator<TExecutableModel> createModel, int formulaIndex)
+		public AnalysisResult<TExecutableModel> CheckInvariant(CoupledExecutableModelCreator<TExecutableModel> createModel, int formulaIndex)
 		{
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care

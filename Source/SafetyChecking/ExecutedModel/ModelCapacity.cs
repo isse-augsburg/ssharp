@@ -139,7 +139,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 					break;
 			}
 			var numberOfTransitions = StateCapacity * densityInNumbers;
-			
+
 			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, numberOfTransitions);
 		}
 	}
@@ -147,8 +147,8 @@ namespace ISSE.SafetyChecking.ExecutedModel
 	public class ModelCapacityByModelSize : ModelCapacity
 	{
 		private long _stateCapacity;
-
-		public long _transitionCapacity { get; private set; }
+		
+		public long TransitionCapacity { get; private set; }
 
 		private ModelCapacityByModelSize()
 		{
@@ -159,37 +159,37 @@ namespace ISSE.SafetyChecking.ExecutedModel
 			Requires.That(stateCapacity > 0, "must be greater 0");
 			Requires.That(transitionCapacity > 0, "must be greater 0");
 			StateCapacity = stateCapacity;
-			_transitionCapacity = transitionCapacity;
+			TransitionCapacity = transitionCapacity;
 		}
 
 		public static readonly ModelCapacityByModelSize Default = new ModelCapacityByModelSize
 		{
 			StateCapacity = DefaultStateCapacity,
-			_transitionCapacity = (int)DefaultDensityLimit* DefaultStateCapacity
+			TransitionCapacity = (int)DefaultDensityLimit* DefaultStateCapacity
 		};
 
 		public static readonly ModelCapacityByModelSize Tiny = new ModelCapacityByModelSize
 		{
 			StateCapacity = 1024,
-			_transitionCapacity = 1024 * 1024
+			TransitionCapacity = 1024 * 1024
 		};
 
 		public static readonly ModelCapacityByModelSize Small = new ModelCapacityByModelSize
 		{
 			StateCapacity = 1 << 20,
-			_transitionCapacity = 1 << 25
+			TransitionCapacity = 1 << 25
 		};
 
 		public static readonly ModelCapacityByModelSize Normal = new ModelCapacityByModelSize
 		{
 			StateCapacity = 1 << 24,
-			_transitionCapacity = 1 << 29
+			TransitionCapacity = 1 << 29
 		};
 
 		public static readonly ModelCapacityByModelSize Large = new ModelCapacityByModelSize
 		{
 			StateCapacity = 1 << 28,
-			_transitionCapacity = 1 << 30
+			TransitionCapacity = 1 << 30
 		};
 
 		public long StateCapacity
@@ -204,7 +204,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 
 		public override ModelByteSize DeriveModelByteSize(int sizeOfState, int sizeOfTransition)
 		{
-			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, _transitionCapacity);
+			return new ModelByteSize(sizeOfState, sizeOfTransition, StateCapacity, TransitionCapacity);
 		}
 	}
 
@@ -300,7 +300,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 						break;
 				}
 				var numberOfTransitions = numberOfStates * densityInNumbers;
-				
+
 				return new ModelByteSize(sizeOfState, sizeOfTransition, numberOfStates, numberOfTransitions);
 			}
 			else
@@ -337,7 +337,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 
 		public ModelByteSize(int sizeOfState, int sizeOfTransition, long numberOfStates, long numberOfTransitions)
 		{
-			Requires.That(numberOfStates > 0,"At least one state is necessary");
+			Requires.That(numberOfStates > 0, "At least one state is necessary");
 			Requires.That(sizeOfState > 0, "Size of state must be at least 1");
 			var memoryLimitForStates = numberOfStates * sizeOfState;
 			var memoryLimitForTransitions = numberOfTransitions * sizeOfTransition;

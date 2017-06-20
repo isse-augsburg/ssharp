@@ -58,7 +58,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 									  int sourceStateIndex, bool isInitial)
 		{
 			foreach (CandidateTransition* transition in transitions)
-				transition->IsValid = transition->ActivatedFaults.GetIntersection(_suppressedFaults).IsEmpty;
+				transition->Flags = TransitionFlags.SetIsValidIffCondition(transition->Flags,transition->ActivatedFaults.GetIntersection(_suppressedFaults).IsEmpty);
 		}
 	}
 }

@@ -40,7 +40,14 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 		[FaultEffect(Fault = nameof(BrakesFailure))]
 		public class UnresponsiveEffect : Brakes
 		{
-			public override int Acceleration => 0;
+			public override int Acceleration
+			{
+				get
+				{
+					var a = 0;
+					return a;
+				}
+			}
 		}
 	}
 }

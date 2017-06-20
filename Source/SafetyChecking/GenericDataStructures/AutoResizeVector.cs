@@ -39,6 +39,8 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 
 		public int Count => _backingArray.Count;
 
+		public T DefaultValue = default(T);
+
 		// auto resize
 		public AutoResizeVector()
 		{
@@ -62,7 +64,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 				_backingArray.Capacity = size*2;
 			for (var i = _backingArray.Count; i < size; i++)
 			{
-				_backingArray.Add(default(T));
+				_backingArray.Add(DefaultValue);
 			}
 		}
 

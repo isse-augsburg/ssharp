@@ -30,7 +30,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 	/// <summary>
 	///   Represents a stack that is used to resolve nondeterministic choices during state space enumeration.
 	/// </summary>
-	internal abstract class ChoiceResolver : DisposableObject
+	public abstract class ChoiceResolver : DisposableObject
 	{
 		/// <summary>
 		///   Gets the index of the last choice that has been made.
@@ -71,22 +71,17 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		public abstract void SetProbabilityOfLastChoice(Probability probability);
 
 		/// <summary>
-		///   Undoes the choice identified by the <paramref name="choiceIndex" />.
+		///   Makes taken choice identified by the <paramref name="choiceIndexToForward" /> deterministic.
 		/// </summary>
-		/// <param name="choiceIndex">The index of the choice that should be undone.</param>
+		/// <param name="choiceIndexToForward">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal abstract void Undo(int choiceIndex);
+		internal abstract void ForwardUntakenChoicesAtIndex(int choiceIndexToForward);
 
 		/// <summary>
 		///   Sets the choices that should be made during the next step.
 		/// </summary>
 		/// <param name="choices">The choices that should be made.</param>
 		internal abstract void SetChoices(int[] choices);
-
-		/// <summary>
-		///	  The probability of the current path
-		/// </summary>
-		internal abstract Probability CalculateProbabilityOfPath();
 
 		/// <summary>
 		///   Clears all choice information.

@@ -40,9 +40,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 	public class DiscreteTimeMarkovChain : IModelWithStateLabelingInLabelingVector
 	{
-		// TODO: Optimization potential for custom model checker: Add every state only once. Save the transitions and evaluate reachability formulas more efficient by only expanding "states" to "states x stateformulaset" where the state labels of interests are in "stateformulaset"
-
-
 		public string[] StateFormulaLabels { get; set; }
 
 		public string[] StateRewardRetrieverLabels;
@@ -52,14 +49,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public LabelVector StateLabeling { get; }
 
 		private const int _sizeOfState = sizeof(int);
-		private const int _sizeOfTransition = sizeof(int) + sizeof(double);  //sizeof(SparseDoubleMatrix.ColumnValue)
-
-		/*
-		public DiscreteTimeMarkovChain()
-			: this(ModelSize.CreateHugeModel(_sizeOfState, _sizeOfTransition))
-		{
-		}
-		*/
+		private const int _sizeOfTransition = sizeof(int) + sizeof(double);  
 		
 		public DiscreteTimeMarkovChain(ModelCapacity modelCapacity)
 		{

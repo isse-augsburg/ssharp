@@ -49,10 +49,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		{
 			_markovChain = new LabeledTransitionMarkovChain(Context.ModelCapacity.NumberOfStates,Context.ModelCapacity.NumberOfTransitions);
 			_markovChain.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
-
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LtmcBuilder<TExecutableModel>(_markovChain));
+			
+			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovChain.LtmcBuilder<TExecutableModel>(_markovChain));
 			if (terminateEarlyCondition != null)
 			{
+				_markovChain.CreateStutteringState(Context.StutteringStateIndex);
 				var terminalteEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_markovChain.StateFormulaLabels, terminateEarlyCondition);
 				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier<TExecutableModel>(terminalteEarlyFunc));
 			}

@@ -26,11 +26,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using System.IO;
 	using Formula;
 	using Modeling;
-
-	// Mrmc is in file ProbabilisticModelChecker.Mrmc.cs which is nested in ProbabilisticModelChecker.cs.
-	// Open arrow of ProbabilisticModelChecker.cs in Solution Explorer to see nested files.
 	
-
 	/// <summary>
 	///   Represents a base class for external probabilistic model checker tools.
 	/// </summary>

@@ -23,8 +23,6 @@
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
-	using System.Collections;
-	using System.Linq;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ModelChecking;
@@ -32,7 +30,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using Modeling.Controllers;
 	using NUnit.Framework;
 
-	internal class FunctionalTests
+	internal class FunctionalTests : DccaTestsBase
 	{
 		[TestCaseSource(nameof(CreateConfigurationsFast))]
 		public void ReconfigurationFailed(Model model)
@@ -76,28 +74,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ObserverController.ReconfigurationState == ReconfStates.Failed);
 			Console.WriteLine(result);
-		}
-
-		private static IFaultSetHeuristic RedundancyHeuristic(Model model)
-		{
-			return new MinimalRedundancyHeuristic(
-				model.Faults,
-				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Drill).Select(t => t.Broken)),
-				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Insert).Select(t => t.Broken)),
-				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Tighten).Select(t => t.Broken)),
-				model.Robots.SelectMany(d => d.Tools.Where(t => t.Capability.ProductionAction == ProductionAction.Polish).Select(t => t.Broken)));
-		}
-
-		private static IEnumerable CreateConfigurationsMiniZinc()
-		{
-			return Model.CreateConfigurations<MiniZincObserverController>(AnalysisMode.TolerableFaults)
-						.Select(model => new TestCaseData(model).SetName(model.Name));
-		}
-
-		private static IEnumerable CreateConfigurationsFast()
-		{
-			return Model.CreateConfigurations<FastObserverController>(AnalysisMode.TolerableFaults)
-						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 	}
 }

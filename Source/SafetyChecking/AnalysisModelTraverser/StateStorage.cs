@@ -51,9 +51,19 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		private const int BucketsPerCacheLine = CacheLineSize / sizeof(int);
 
 		/// <summary>
+		///   The number of states that can be cached and the number of reserved states.
+		/// </summary>
+		private readonly long _totalCapacity;
+
+		/// <summary>
 		///   The number of states that can be cached.
 		/// </summary>
-		private readonly long _capacity;
+		private long _cachedStatesCapacity;
+
+		/// <summary>
+		///   The number of reserved states
+		/// </summary>
+		private long _reservedStatesCapacity = 0;
 
 		/// <summary>
 		///   The buffer that stores the hash table information.
@@ -90,13 +100,14 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
 
 			_stateVectorSize = stateVectorSize;
-			_capacity = capacity;
+			_totalCapacity = capacity;
+			_cachedStatesCapacity = capacity - BucketsPerCacheLine; //offset returned by this.Add may be up to BucketsPerCacheLine-1 positions bigger than _cachedStatesCapacity
 
-			_stateBuffer.Resize(_capacity * _stateVectorSize, zeroMemory: false);
+			_stateBuffer.Resize(_totalCapacity * _stateVectorSize, zeroMemory: false);
 			_stateMemory = _stateBuffer.Pointer;
 
 			// We allocate enough space so that we can align the returned pointer such that index 0 is the start of a cache line
-			_hashBuffer.Resize(_capacity * sizeof(int) + CacheLineSize, zeroMemory: false);
+			_hashBuffer.Resize(_totalCapacity * sizeof(int) + CacheLineSize, zeroMemory: false);
 			_hashMemory = (int*)_hashBuffer.Pointer;
 
 			if ((ulong)_hashMemory % CacheLineSize != 0)
@@ -114,9 +125,28 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		{
 			get
 			{
-				Assert.InRange(index, 0, _capacity * _stateVectorSize);
+				Assert.InRange(index, 0, _totalCapacity);
 				return _stateMemory + (long)index * _stateVectorSize;
 			}
+		}
+		
+		/// <summary>
+		///   Reserve a state index in StateStorage. Must not be called after AddState has been called.
+		/// </summary>
+		internal int ReserveStateIndex()
+		{
+			// Use the index pointing at the last possible element in the buffers and decrease the size.
+			_reservedStatesCapacity++;
+			_cachedStatesCapacity--;
+
+			// Add BucketsPerCacheLine so returnIndex does not interfere with the maximal possible index returned by AddState
+			// which is _cachedStatesCapacity+BucketsPerCacheLine-1.
+			// returnIndex is in range of capacityToReserve, so this is save.
+			var returnIndex = _cachedStatesCapacity + BucketsPerCacheLine;
+
+			Assert.InRange(returnIndex,0,Int32.MaxValue);
+			Assert.InRange(returnIndex, 0, _totalCapacity + BucketsPerCacheLine);
+			return (int)returnIndex;
 		}
 
 		/// <summary>
@@ -137,7 +167,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 				// 'empty' is represented by 0 
 				// We ignore two most significant bits of the original hash, which has no influence on the
 				// correctness of the algorithm, but might result in more state comparisons
-				var hashedIndex = MemoryBuffer.Hash((byte*)&hash, sizeof(int), i * 8345723) % _capacity;
+				var hashedIndex = MemoryBuffer.Hash((byte*)&hash, sizeof(int), i * 8345723) % _cachedStatesCapacity;
 				var memoizedHash = hashedIndex & 0x3FFFFFFF;
 				var cacheLineStart = (hashedIndex / BucketsPerCacheLine) * BucketsPerCacheLine;
 

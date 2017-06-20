@@ -126,8 +126,7 @@ namespace SafetySharp.Runtime
 		///   Gets the state formulas of the model.
 		/// </summary>
 		internal ExecutableStateFormula[] ExecutableStateFormulas { get; }
-
-
+		
 		/// <summary>
 		///   Gets the state formulas of the model.
 		/// </summary>
@@ -174,28 +173,6 @@ namespace SafetySharp.Runtime
 		
 		
 		/// <summary>
-		///   Notifies all activated faults of their activation. Returns <c>false</c> to indicate that no notifications were necessary.
-		/// </summary>
-		internal bool NotifyFaultActivations()
-		{
-			if (ActivationSensitiveFaults.Length == 0)
-				return false;
-
-			var notificationsSent = false;
-			foreach (var fault in ActivationSensitiveFaults)
-			{
-				if (fault.IsActivated)
-				{
-					fault.OnActivated();
-					notificationsSent = true;
-				}
-			}
-
-			return notificationsSent;
-		}
-
-		
-		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
@@ -220,7 +197,7 @@ namespace SafetySharp.Runtime
 		}
 		
 
-		internal override void SetChoiceResolver(ChoiceResolver choiceResolver)
+		public override void SetChoiceResolver(ChoiceResolver choiceResolver)
 		{
 			foreach (var choice in Objects.OfType<Choice>())
 				choice.Resolver = choiceResolver;

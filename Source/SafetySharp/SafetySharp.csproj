@@ -46,7 +46,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ModelChecking\DtmcBasedModelCheckingFacade.cs" />
     <Compile Include="ModelChecking\SafetySharpCounterExampleSerialization.cs" />
     <Compile Include="ModelChecking\SafetySharpSimulator.cs" />
     <Compile Include="ModelChecking\ModelChecking.cs" />
@@ -90,7 +89,10 @@
     <Compile Include="ModelChecking\RealTimeSafetySharpSimulator.cs" />
     <Compile Include="Modeling\ComponentExtensions.cs" />
     <Compile Include="CompilerServices\StateMachineHelpers.cs" />
-    <Compile Include="Modeling\Component.Choose.cs">
+    <Compile Include="Modeling\Component.ChooseNondeterministic.cs">
+      <DependentUpon>Component.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Modeling\Component.ChooseProbabilistic.cs">
       <DependentUpon>Component.cs</DependentUpon>
     </Compile>
     <Compile Include="..\SharedAssemblyInfo.cs">

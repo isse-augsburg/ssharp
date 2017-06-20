@@ -118,10 +118,10 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			// 4. Store the transition
 			_transitions[_count] = new CandidateTransition
 			{
-				TargetState = successorState,
+				TargetStatePointer = successorState,
 				Formulas = new StateFormulaSet(_formulas),
 				ActivatedFaults = activatedFaults,
-				IsValid = true,
+				Flags = TransitionFlags.IsValidFlag,
 			};
 			++_count;
 		}
@@ -214,7 +214,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 				// Remove the fault set and the corresponding transition if it is a proper subset of the activated faults
 				if (activatedFaults.IsSubsetOf(faultSet->Transition->ActivatedFaults) && activatedFaults != faultSet->Transition->ActivatedFaults)
 				{
-					faultSet->Transition->IsValid = false;
+					faultSet->Transition->Flags = TransitionFlags.RemoveValid(faultSet->Transition->Flags);
 					*nextPointer = faultSet->NextSet;
 				}
 

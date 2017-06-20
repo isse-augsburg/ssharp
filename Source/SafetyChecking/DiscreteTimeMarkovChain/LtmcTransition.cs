@@ -24,6 +24,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using AnalysisModel;
 	using System.Runtime.InteropServices;
+	using Utilities;
 
 	/// <summary>
 	///   Represents a candidate transition of an <see cref="AnalysisModel" />.
@@ -35,7 +36,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		///   A pointer to the transition's target state.
 		/// </summary>
 		[FieldOffset(0)]
-		public byte* TargetState;
+		public byte* TargetStatePointer;
 
 		/// <summary>
 		///   The faults that are activated by the transition.
@@ -53,12 +54,36 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		///   Indicates whether the transition is valid or should be ignored.
 		/// </summary>
 		[FieldOffset(20)]
-		public bool IsValid;
+		public uint Flags;
 
 		/// <summary>
 		///   The probability of the transition.
 		/// </summary>
 		[FieldOffset(24)]
 		public double Probability;
+
+		/// <summary>
+		///   Returns the source state if the transition has been transformed by Worker::HandleTransitions.
+		/// </summary>
+		public int GetSourceStateIndex()
+		{
+			Assert.That(TransitionFlags.IsStateTransformedToIndex(Flags), "Transition must be transformed first");
+			fixed (byte** addr = &TargetStatePointer)
+			{
+				return *((int*)addr); //first four bytes of FieldOffset(0)
+			}
+		}
+
+		/// <summary>
+		///   Returns the target state if the transition has been transformed by Worker::HandleTransitions.
+		/// </summary>
+		public int GetTargetStateIndex()
+		{
+			Assert.That(TransitionFlags.IsStateTransformedToIndex(Flags), "Transition must be transformed first");
+			fixed (byte** addr = &TargetStatePointer)
+			{
+				return *((int*)addr + 1); //second four bytes of FieldOffset(0)
+			}
+		}
 	}
 }

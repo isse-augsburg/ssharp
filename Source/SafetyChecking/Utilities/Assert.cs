@@ -30,7 +30,7 @@ namespace ISSE.SafetyChecking.Utilities
 	/// <summary>
 	///   Defines a set of helper functions for assertions
 	/// </summary>
-	internal static class Assert
+	public static class Assert
 	{
 		/// <summary>
 		///   Throws an <see cref="InvalidOperationException" /> if <paramref name="obj" /> is not <c>null</c>.

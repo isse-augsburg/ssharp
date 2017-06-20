@@ -23,16 +23,21 @@
 namespace ISSE.SafetyChecking.AnalysisModel
 {
 	using Utilities;
-
+	
 	/// <summary>
-	///   Represents a collection of <see cref="CandidateTransition" /> instances.
-	/// </summary>
+		///   Represents a collection of <see cref="CandidateTransition" /> instances.
+		/// </summary>
 	internal unsafe struct TransitionCollection
 	{
 		/// <summary>
 		///   The transition instances stored in a contiguous array.
 		/// </summary>
 		private readonly Transition* _transitions;
+
+		/// <summary>
+		///   Structural information about the transitions (needed for some but not all formalisms)
+		/// </summary>
+		public object StructuralInformation { get; }
 
 		/// <summary>
 		///   The number of transitions contained in the set; not all of these transitions are valid.
@@ -68,12 +73,28 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		/// <param name="totalCount">The total number of all originally computed transitions.</param>
 		/// <param name="transitionSize">The size of a single transition in bytes.</param>
 		public TransitionCollection(Transition* transitions, int count, int totalCount, int transitionSize)
+			: this(transitions, count, totalCount, transitionSize, null)
+		{
+		}
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="transitions">The transition instances stored in a contiguous array.</param>
+		/// <param name="count">The number of transitions contained in the set; not all of these transitions are valid.</param>
+		/// <param name="totalCount">The total number of all originally computed transitions.</param>
+		/// <param name="transitionSize">The size of a single transition in bytes.</param>
+		/// <param name="structuralInformation">Structural information about the transitions (needed for some but not all formalisms).</param>
+		///   
+		public TransitionCollection(Transition* transitions, int count, int totalCount, int transitionSize, object structuralInformation)
 		{
 			_transitions = transitions;
 			_transitionSize = transitionSize;
 
 			Count = count;
 			TotalCount = totalCount;
+
+			StructuralInformation = structuralInformation;
 		}
 
 		/// <summary>
@@ -99,6 +120,7 @@ namespace ISSE.SafetyChecking.AnalysisModel
 
 			Requires.That(&t.ActivatedFaults == &c->ActivatedFaults, $"Invalid offset of standard transition field '{nameof(t.ActivatedFaults)}.");
 			Requires.That(&t.Formulas == &c->Formulas, $"Invalid offset of standard transition field '{nameof(t.Formulas)}.");
+			Requires.That(&t.Flags == &c->Flags, $"Invalid offset of standard transition field '{nameof(t.Flags)}.");
 		}
 	}
 }

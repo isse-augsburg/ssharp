@@ -107,8 +107,8 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 						break;
 				}
 
-				transition->IsValid = isValid;
-				*(State*)transition->TargetState = nextState;
+				transition->Flags = TransitionFlags.SetIsValidIffCondition(transition->Flags,isValid);
+				*(State*)transition->TargetStatePointer = nextState;
 			}
 		}
 

@@ -72,9 +72,18 @@ namespace ISSE.SafetyChecking.Utilities
 		/// <param name="location">The location that should be updated.</param>
 		public static int IncrementReturnOld(ref int location)
 		{
-			//Alternative:
 			var newValue = Interlocked.Increment(ref location);
 			return newValue-1;
+		}
+
+		/// <summary>
+		///   Atomically increments the <paramref name="location" /> and returns the value before the incrementation.
+		/// </summary>
+		/// <param name="location">The location that should be updated.</param>
+		public static long IncrementReturnOld(ref long location)
+		{
+			var newValue = Interlocked.Increment(ref location);
+			return newValue - 1;
 		}
 	}
 }

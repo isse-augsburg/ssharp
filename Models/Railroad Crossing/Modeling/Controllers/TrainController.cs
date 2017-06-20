@@ -68,7 +68,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Modeling.Controllers
 				.Transition(
 					from: State.WaitingForResponse,
 					to: State.Stopping,
-					guard: Odometer.Position > StopPosition,
+					guard: Radio.Receive() != Message.Closed && Odometer.Position > StopPosition,
 					action: Brakes.Engage);
 		}
 

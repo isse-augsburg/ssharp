@@ -61,7 +61,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = _prob1Eneg5;
 
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.IncomingBloodWasNotOk);
-			Console.Write($"Probability of hazard: {result.Value}");
+			Console.Write($"Probability of hazard: {result}");
 		}
 
 		[Test]
@@ -82,7 +82,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = _prob1Eneg5;
 
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.BloodNotCleanedAndDialyzingFinished);
-			Console.Write($"Probability of hazard: {result.Value}");
+			Console.Write($"Probability of hazard: {result}");
 		}
 	}
 }

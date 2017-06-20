@@ -61,9 +61,9 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		{
 			foreach (CandidateTransition* transition in transitions)
 			{
-				if (transition->IsValid && _terminateEarlyCondition(transition->Formulas))
+				if (TransitionFlags.IsValid(transition->Flags) && _terminateEarlyCondition(transition->Formulas))
 				{
-					MemoryBuffer.Copy(sourceState, transition->TargetState, worker.Model.StateVectorSize); //make reflexive
+					transition->Flags = TransitionFlags.SetToStutteringStateFlag(transition->Flags);
 				}
 			}
 		}

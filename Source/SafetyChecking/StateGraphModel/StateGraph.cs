@@ -140,7 +140,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 			// Copy the transitions into the buffer
 			foreach (var transition in transitions)
 			{
-				Assert.That(((CandidateTransition*)transition)->IsValid, "Attempted to add an invalid transition.");
+				Assert.That( TransitionFlags.IsValid(transition->Flags) , "Attempted to add an invalid transition.");
 
 				MemoryBuffer.Copy((byte*)transition, _transitions + offset * TransitionSize, TransitionSize);
 				++offset;

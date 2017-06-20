@@ -71,5 +71,7 @@ function ExecuteTestValuation($testValuation,$tests)
         ExecuteTest -Test $test -ResultDir $resultDir
     }
 
+    $testValuation.Annotation > $resultDir\annotation
+
     git log -1 > $resultDir\version
 }

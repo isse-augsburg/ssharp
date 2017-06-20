@@ -89,10 +89,10 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			var activatedFaults = FaultSet.FromActivatedFaults(model.NondeterministicFaults);
 			_transitions[_count] = new LtmcTransition
 			{
-				TargetState = successorState,
+				TargetStatePointer = successorState,
 				Formulas = new StateFormulaSet(_formulas),
 				ActivatedFaults = activatedFaults,
-				IsValid = true,
+				Flags = TransitionFlags.IsValidFlag,
 				Probability = probability
 			};
 			++_count;

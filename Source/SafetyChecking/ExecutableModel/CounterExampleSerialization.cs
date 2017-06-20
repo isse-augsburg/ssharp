@@ -43,7 +43,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		/// </summary>
 		public const int FileHeader = 0x3FE0DD04;
 		
-		internal CounterExampleSerialization()
+		protected CounterExampleSerialization()
 		{
 		}
 
