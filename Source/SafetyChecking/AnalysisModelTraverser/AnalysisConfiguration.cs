@@ -79,7 +79,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			StackCapacity = DefaultStackCapacity,
 			SuccessorCapacity = DefaultSuccessorStateCapacity,
 			GenerateCounterExample = true,
-			CollectFaultSets = true
+			CollectFaultSets = true,
+			StateDetected = null
 		};
 
 		/// <summary>
@@ -122,5 +123,15 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			get { return _cpuCount; }
 			set { _cpuCount = Math.Min(Environment.ProcessorCount, Math.Max(1, value)); }
 		}
+
+		/// <summary>
+		///   Useful for debugging purposes. When a state is detected the first time then call the associated action.
+		///   The delegate is only called in debug mode.
+		///   A great usage example is to set "StateDetected = (state) => { if (state==190292) Debugger.Break();};"
+		///   It makes sense to set CpuCount to 1 to omit races and ensure that a state always gets the same state
+		///   number.
+		/// </summary>
+		public Action<int> StateDetected { get; set; }
+
 	}
 }

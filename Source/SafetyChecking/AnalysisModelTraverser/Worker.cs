@@ -29,6 +29,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	using ExecutableModel;
 	using AnalysisModel;
 	using Utilities;
+	using System.Diagnostics;
 
 	/// <summary>
 	///   Represents a thread that checks for invariant violations.
@@ -100,6 +101,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 					if (!_stateStack.TryGetState(out state))
 						continue;
 
+					CallStateDetectionEventInDebugMode(state);
+
 					HandleTransitions(Model.GetSuccessorTransitions(_context.States[state]), state, isInitial: false);
 
 					InterlockedExtensions.ExchangeIfGreaterThan(ref _context.LevelCount, _stateStack.FrameCount, _stateStack.FrameCount);
@@ -114,6 +117,15 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 				if (!(e is OutOfMemoryException))
 					CreateCounterExample(endsWithException: true, addAdditionalState: true);
 			}
+		}
+		
+		/// <summary>
+		///   When a state is detected the associated delegate of the AnalysisConfiguration is called.
+		/// </summary>
+		[Conditional("DEBUG")]
+		internal void CallStateDetectionEventInDebugMode(int nextState)
+		{
+			_context.Configuration.StateDetected?.Invoke(nextState);
 		}
 
 		/// <summary>
