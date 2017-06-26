@@ -150,14 +150,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				if (cge.IsChoiceTypeForward)
 				{
 					// Note, cgi.Probability is used in the branch "else if (cge.IsChoiceTypeProbabilitstic)"
-					result = CalculateMinimumProbabilityOfCid(cache, stateProbabilities, cgi.FromCid);
+					result = CalculateMaximumProbabilityOfCid(cache, stateProbabilities, cgi.FromCid);
 				}
 				if (cge.IsChoiceTypeNondeterministic)
 				{
 					var biggest = double.NegativeInfinity;
 					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 					{
-						var resultOfChild = CalculateMinimumProbabilityOfCid(cache, stateProbabilities, i);
+						var resultOfChild = CalculateMaximumProbabilityOfCid(cache, stateProbabilities, i);
 						if (resultOfChild > biggest)
 							biggest = resultOfChild;
 					}
@@ -169,7 +169,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 					{
 						var transitionProbability = Nmdp.GetContinuationGraphElement(i).Probability;
-						var resultOfChild = CalculateMinimumProbabilityOfCid(cache, stateProbabilities, i);
+						var resultOfChild = CalculateMaximumProbabilityOfCid(cache, stateProbabilities, i);
 						sum += transitionProbability * resultOfChild;
 					}
 					result = sum;
