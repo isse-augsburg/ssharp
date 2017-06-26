@@ -129,7 +129,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			var transition = _transitionCount;
 			_transitionCount++;
-			_transitions[transition] = new LtmdpTransition { ContinuationId = continuationId };
+			_transitions[transition] = new LtmdpTransition { Index = transition };
 			var t = (Transition*)(_transitions + transition);
 			t->SourceStateIndex = 0;
 			t->TargetStateIndex = targetStateIndex;

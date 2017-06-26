@@ -144,6 +144,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return _internalGraph[cid].Probability;
 		}
 
+		public void SetTargetOfFinalOrUnsplitChoice(int cid, int target)
+		{
+			Assert.That(_internalGraph.Count > cid, "cid must be declared.");
+			Assert.That(_internalGraph[cid].IsChoiceTypeUnsplitOrFinal, "must be unsplit node.");
+			var oldChoice = _internalGraph[cid];
+			_internalGraph[cid] = new Choice(oldChoice.From, target, oldChoice.ChoiceType, oldChoice.Probability);
+		}
+
 
 		public DirectChildrenEnumerator GetDirectChildrenEnumerator(int parentContinuationId)
 		{

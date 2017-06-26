@@ -57,10 +57,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		public uint Flags;
 
 		/// <summary>
-		///   The continuation id of the transition.
+		///   The index of the transition.
 		/// </summary>
 		[FieldOffset(24)]
-		public int ContinuationId;
+		public int Index;
 
 		/// <summary>
 		///   Returns the source state if the transition has been transformed by Worker::HandleTransitions.

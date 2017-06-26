@@ -77,7 +77,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		///   Adds a transition to the <paramref name="model" />'s current state.
 		/// </summary>
 		/// <param name="model">The model the transition should be added for.</param>
-		/// <param name="probability">The probability of the transition.</param>
 		/// <param name="continuationId">The id of the transition.</param>
 		public void Add(ExecutableModel<TExecutableModel> model, int continuationId)
 		{
@@ -95,15 +94,17 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			// 3. Store the transition
 			var activatedFaults = FaultSet.FromActivatedFaults(model.NondeterministicFaults);
-			_transitionsWithContinuationIdMemory[_transitionsWithContinuationIdCount] = new LtmdpTransition
+			var positionOfTransition = _transitionsWithContinuationIdCount;
+			_transitionsWithContinuationIdMemory[positionOfTransition] = new LtmdpTransition
 			{
 				TargetStatePointer = successorState,
 				Formulas = new StateFormulaSet(_formulas),
 				ActivatedFaults = activatedFaults,
 				Flags = TransitionFlags.IsValidFlag,
-				ContinuationId = continuationId,
+				Index = positionOfTransition
 			};
 			++_transitionsWithContinuationIdCount;
+			LtmdpStepGraph.SetTargetOfFinalOrUnsplitChoice(continuationId, positionOfTransition);
 		}
 
 		/// <summary>

@@ -44,7 +44,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
 
-			private readonly AutoResizeVector<int> _continuationIdToTransitionTarget = new AutoResizeVector<int>();
+			private readonly AutoResizeVector<int> _transitionTargetMapper = new AutoResizeVector<int>();
 
 			private readonly AutoResizeVector<long> _stepGraphMapper = new AutoResizeVector<long> { DefaultValue = -1 };
 
@@ -100,14 +100,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 							TargetState = transition->TargetStateIndex,
 							Formulas = probTransition->Formulas,
 						};
-					_continuationIdToTransitionTarget[probTransition->ContinuationId] = place;
+					_transitionTargetMapper[probTransition->Index] = place;
 				}
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			private void AddFinalChoiceOfStepGraph(int continuationId, long locationForContinuationGraphElement, double probability)
+			private void AddFinalChoiceOfStepGraph(int oldIndexOfTransitionTarget, long locationForContinuationGraphElement, double probability)
 			{
-				var transitionTarget = _continuationIdToTransitionTarget[continuationId];
+				var transitionTarget = _transitionTargetMapper[oldIndexOfTransitionTarget];
 
 				_ltmdp._continuationGraph[locationForContinuationGraphElement] =
 					new ContinuationGraphElement
@@ -139,7 +139,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 				if (choice.IsChoiceTypeUnsplitOrFinal)
 				{
-					AddFinalChoiceOfStepGraph(continuationId, locationForContinuationGraphElement,choice.Probability);
+					AddFinalChoiceOfStepGraph(choice.To, locationForContinuationGraphElement,choice.Probability);
 					return;
 				}
 				if (choice.IsChoiceTypeForward)
