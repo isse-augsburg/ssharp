@@ -42,73 +42,33 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		[Fact]
 		public void Check()
 		{
-			var m = new Model();
+			var m = new SharedModels.SimpleExample2a();
+			Probability probabilityOfFinal0;
 			Probability probabilityOfFinal1;
 			Probability probabilityOfFinal2;
-			Probability probabilityOfFinal3;
 
+			var final0Formula = new UnaryFormula(new SimpleStateInRangeFormula(0), UnaryOperator.Finally);
 			var final1Formula = new UnaryFormula(new SimpleStateInRangeFormula(1), UnaryOperator.Finally);
 			var final2Formula = new UnaryFormula(new SimpleStateInRangeFormula(2), UnaryOperator.Finally);
-			var final3Formula = new UnaryFormula(new SimpleStateInRangeFormula(3), UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.AddFormulaToCheck(final0Formula);
 			markovChainGenerator.AddFormulaToCheck(final1Formula);
 			markovChainGenerator.AddFormulaToCheck(final2Formula);
-			markovChainGenerator.AddFormulaToCheck(final3Formula);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
+				probabilityOfFinal0 = modelChecker.CalculateProbability(final0Formula);
 				probabilityOfFinal1 = modelChecker.CalculateProbability(final1Formula);
 				probabilityOfFinal2 = modelChecker.CalculateProbability(final2Formula);
-				probabilityOfFinal3 = modelChecker.CalculateProbability(final3Formula);
 			}
 
-			probabilityOfFinal1.Is(1.0, 0.000001).ShouldBe(true);
-			probabilityOfFinal2.Is(1.0, 0.000001).ShouldBe(true);
-			probabilityOfFinal3.Is(1.0, 0.000001).ShouldBe(true);
-		}
-
-		public class Model : SimpleModelBase
-		{
-			public override Fault[] Faults { get; } = new Fault[0];
-			public override bool[] LocalBools { get; } = { false };
-			public override int[] LocalInts { get; } = new int[0];
-
-			private bool L
-			{
-				get { return LocalBools[0]; }
-				set { LocalBools[0] = value; }
-			}
-
-			private int Y
-			{
-				get { return State; }
-				set { State = value; }
-			}
-
-			public override void SetInitialState()
-			{
-				State = 0;
-			}
-
-			public override void Update()
-			{
-				Y = 1;
-				L = Choice.Choose(true, false);
-				if (L)
-				{
-					L = Choice.Choose(
-						new Option<bool>(new Probability(0.6), true),
-						new Option<bool>(new Probability(0.4), false));
-					if (L)
-					{
-						Y = Choice.Choose(2, 3);
-					}
-				}
-			}
+			probabilityOfFinal0.Is(1.0, 0.000001).ShouldBe(true);
+			probabilityOfFinal1.Is(0.5, 0.000001).ShouldBe(true);
+			probabilityOfFinal2.Is(0.5, 0.000001).ShouldBe(true);
 		}
 	}
 }
