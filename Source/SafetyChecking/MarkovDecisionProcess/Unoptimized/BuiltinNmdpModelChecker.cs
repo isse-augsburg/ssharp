@@ -82,13 +82,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private bool HasCacheEntry(AutoResizeVector<double> cache, long entry)
+		private bool HasCacheEntry(AutoResizeBigVector<double> cache, long entry)
 		{
-			Assert.That(entry < int.MaxValue, "index must be smaller than int.MaxValue");
 			return !double.IsNaN(cache[(int)entry]);
 		}
 
-		private double CalculateMinimumProbabilityOfCid(AutoResizeVector<double> cache, double[] stateProbabilities, long currentCid)
+		private double CalculateMinimumProbabilityOfCid(AutoResizeBigVector<double> cache, double[] stateProbabilities, long currentCid)
 		{
 			if (HasCacheEntry(cache,currentCid))
 				return cache[(int)currentCid];
@@ -134,7 +133,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return result;
 		}
 
-		private double CalculateMaximumProbabilityOfCid(AutoResizeVector<double> cache, double[] stateProbabilities, long currentCid)
+		private double CalculateMaximumProbabilityOfCid(AutoResizeBigVector<double> cache, double[] stateProbabilities, long currentCid)
 		{
 			if (HasCacheEntry(cache, currentCid))
 				return cache[(int)currentCid];
@@ -180,21 +179,21 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return result;
 		}
 
-		public double CalculateMinimumFinalProbability(AutoResizeVector<double> cache, double[] initialStateProbabilities)
+		public double CalculateMinimumFinalProbability(AutoResizeBigVector<double> cache, double[] initialStateProbabilities)
 		{
 			var cid = Nmdp.GetRootContinuationGraphLocationOfInitialState();
-			cache.Clear();
+			cache.Clear(cid); //use cid as offset, because it is the smallest element
 			return CalculateMinimumProbabilityOfCid(cache, initialStateProbabilities, cid);
 		}
 
-		internal double CalculateMaximumFinalProbability(AutoResizeVector<double> cache, double[] initialStateProbabilities)
+		internal double CalculateMaximumFinalProbability(AutoResizeBigVector<double> cache, double[] initialStateProbabilities)
 		{
 			var cid = Nmdp.GetRootContinuationGraphLocationOfInitialState();
-			cache.Clear();
+			cache.Clear(cid); //use cid as offset, because it is the smallest element
 			return CalculateMaximumProbabilityOfCid(cache, initialStateProbabilities, cid);
 		}
 
-		internal double[] MinimumIterator(AutoResizeVector<double> cache, Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
+		internal double[] MinimumIterator(AutoResizeBigVector<double> cache, Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -226,7 +225,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					else
 					{
 						var cid = Nmdp.GetRootContinuationGraphLocationOfState(i);
-						cache.Clear();
+						cache.Clear(cid); //use cid as offset, because it is the smallest element
 						xnew[i] = CalculateMinimumProbabilityOfCid(cache, xold, cid);
 					}
 				}
@@ -244,7 +243,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return xnew;
 		}
 
-		internal double[] MaximumIterator(AutoResizeVector<double> cache, Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
+		internal double[] MaximumIterator(AutoResizeBigVector<double> cache, Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates, int steps)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -276,7 +275,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					else
 					{
 						var cid = Nmdp.GetRootContinuationGraphLocationOfState(i);
-						cache.Clear();
+						cache.Clear(cid); //use cid as offset, because it is the smallest element
 						xnew[i] = CalculateMaximumProbabilityOfCid(cache, xold, cid);
 					}
 				}
@@ -297,7 +296,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		internal double CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
 		{
-			var cache = new AutoResizeVector<double> {DefaultValue = double.NaN};
+			var cache = new AutoResizeBigVector<double> {DefaultValue = double.NaN};
 
 			var psiEvaluator = Nmdp.CreateFormulaEvaluator(psi);
 
@@ -313,7 +312,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		internal double CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
 		{
-			var cache = new AutoResizeVector<double> { DefaultValue = double.NaN };
+			var cache = new AutoResizeBigVector<double> { DefaultValue = double.NaN };
 
 			var psiEvaluator = Nmdp.CreateFormulaEvaluator(psi);
 

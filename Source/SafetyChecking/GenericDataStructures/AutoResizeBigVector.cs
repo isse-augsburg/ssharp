@@ -31,41 +31,56 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 	using AnalysisModel;
 	using System.Collections;
 	using System.Runtime.CompilerServices;
+	using Utilities;
 
-	public class AutoResizeVector<T> : IEnumerable<T>
+	public class AutoResizeBigVector<T> : IEnumerable<T>
 		where T : struct
 	{
+		private long _currentOffset;
+
 		protected readonly List<T> _backingArray;
 
-		public int Count => _backingArray.Count;
+		public long Count => _backingArray.Count + _currentOffset;
 		
 		public T DefaultValue = default(T);
 
 		// auto resize
-		public AutoResizeVector()
+		public AutoResizeBigVector()
 		{
 			//_hasFixedSize = false;
 			_backingArray = new List<T>();
+			_currentOffset = 0;
 		}
 
 		// fixed size
-		public AutoResizeVector(int initialCapacity)
+		public AutoResizeBigVector(int initialCapacity)
 		{
 			//_hasFixedSize = true;
 			_backingArray = new List<T>(initialCapacity);
 			IncreaseSize(initialCapacity);
 		}
 
-		public void IncreaseSize(int size)
+		public void IncreaseSize(long size)
 		{
-			if (_backingArray.Count >= size)
+			var internalSizeL = size - _currentOffset;
+			Assert.That(internalSizeL < int.MaxValue, "too many elements");
+			var internalSize = (int)internalSizeL;
+
+			if (_backingArray.Count >= internalSize)
 				return;
-			if (_backingArray.Capacity < size)
-				_backingArray.Capacity = size*2;
-			for (var i = _backingArray.Count; i < size; i++)
+			if (_backingArray.Capacity < internalSize)
+				_backingArray.Capacity = internalSize * 2;
+			for (var i = _backingArray.Count; i < internalSize; i++)
 			{
 				_backingArray.Add(DefaultValue);
 			}
+		}
+
+		private int GetInternalIndex(long publicIndex)
+		{
+			var internalIndex = publicIndex - _currentOffset;
+			Assert.That(internalIndex < int.MaxValue, "too many elements");
+			return (int)internalIndex;
 		}
 
 		public IEnumerator<T> GetEnumerator()
@@ -85,42 +100,47 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 		/// <summary>
 		///   Gets the element at <paramref name="index" /> from the vector.
 		/// </summary>
-		public T this[int index]
+		public T this[long index]
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				IncreaseSize(index + 1);
-				return _backingArray[index];
+				var internalIndex = GetInternalIndex(index);
+				return _backingArray[internalIndex];
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				IncreaseSize(index + 1);
-				_backingArray[index] = value;
+				var internalIndex = GetInternalIndex(index);
+				_backingArray[internalIndex] = value;
 			}
 		}
 
-		public void Clear()
+		public void Clear(long offset)
 		{
+			_currentOffset = offset;
 			_backingArray.Clear();
 		}
 
 		// a nested class can access private members
 		internal struct AutoResizeVectorEnumerator : IEnumerator<T>
 		{
-			private readonly AutoResizeVector<T> _vector;
-
-			public int CurrentIndex { get; private set; }
+			private readonly AutoResizeBigVector<T> _vector;
+			
+			public int CurrentIndex => _vector.GetInternalIndex(InternalIndex);
+			
+			private int InternalIndex { get; set; }
 
 			public T Current => _vector[CurrentIndex];
 
 			object IEnumerator.Current => _vector[CurrentIndex];
 
-			public AutoResizeVectorEnumerator(AutoResizeVector<T> vector)
+			public AutoResizeVectorEnumerator(AutoResizeBigVector<T> vector)
 			{
 				_vector = vector;
-				CurrentIndex = -1;
+				InternalIndex = -1;
 			}
 
 			/// <summary>
@@ -140,8 +160,8 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			/// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
 			public bool MoveNext()
 			{
-				CurrentIndex++;
-				if (CurrentIndex >= _vector.Count)
+				InternalIndex++;
+				if (InternalIndex >= _vector.Count)
 					return false;
 				return true;
 			}
@@ -153,47 +173,8 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			/// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
 			public void Reset()
 			{
-				CurrentIndex = -1;;
+				InternalIndex = -1;;
 			}
-		}
-	}
-
-	internal class DoubleVector : AutoResizeVector<double>
-	{
-		public DoubleVector()
-			: base()
-		{
-		}
-		
-		public DoubleVector(int initialCapacity)
-			: base(initialCapacity)
-		{
-		}
-	}
-
-	public class LabelVector : AutoResizeVector<StateFormulaSet>
-	{
-		public LabelVector()
-			: base()
-		{
-		}
-		
-		public LabelVector(int initialCapacity)
-			: base(initialCapacity)
-		{
-		}
-	}
-
-	internal class RewardVector : AutoResizeVector<Modeling.Reward>
-	{
-		public RewardVector()
-			: base()
-		{
-		}
-		
-		public RewardVector(int initialCapacity)
-			: base(initialCapacity)
-		{
 		}
 	}
 }

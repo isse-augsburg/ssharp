@@ -38,11 +38,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	{
 		private readonly NestedMarkovDecisionProcess _nmdp;
 		public MarkovDecisionProcess MarkovDecisionProcess { get; private set; }
-
-		private long _currentOffset;
-		private AutoResizeVector<NestedMarkovDecisionProcess.ContinuationGraphLeaf> _continuationGraphLeafOfCid = new AutoResizeVector<NestedMarkovDecisionProcess.ContinuationGraphLeaf>();
 		
-		private AutoResizeVector<double> _probabilityOfCid = new AutoResizeVector<double>();
+		private AutoResizeBigVector<NestedMarkovDecisionProcess.ContinuationGraphLeaf> _continuationGraphLeafOfCid = new AutoResizeBigVector<NestedMarkovDecisionProcess.ContinuationGraphLeaf>();
+		
+		private AutoResizeBigVector<double> _probabilityOfCid = new AutoResizeBigVector<double>();
 
 		private readonly LtmdpContinuationDistributionMapper _ltmdpContinuationDistributionMapper = new LtmdpContinuationDistributionMapper();
 		
@@ -57,37 +56,27 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private NestedMarkovDecisionProcess.ContinuationGraphLeaf GetLeafOfCid(long cid)
 		{
-			var internalCid = cid - _currentOffset;
-			Assert.That(internalCid <= int.MaxValue, "internalCid<=int.MaxValue");
-			return _continuationGraphLeafOfCid[(int)internalCid];
+			return _continuationGraphLeafOfCid[cid];
 		}
 
 		private void SetLeafOfCid(long cid, NestedMarkovDecisionProcess.ContinuationGraphLeaf leaf)
 		{
-			var internalCid = cid - _currentOffset;
-			Assert.That(internalCid <= int.MaxValue, "internalCid<=int.MaxValue");
-			_continuationGraphLeafOfCid[(int)internalCid]= leaf;
+			_continuationGraphLeafOfCid[cid] = leaf;
 		}
 
 		private double GetProbabilityOfCid(long cid)
 		{
-			var internalCid = cid - _currentOffset;
-			Assert.That(internalCid <= int.MaxValue, "internalCid<=int.MaxValue");
-			return _probabilityOfCid[(int)internalCid];
+			return _probabilityOfCid[cid];
 		}
 
 		private void SetProbabilityOfCid(long cid, double probability)
 		{
-			var internalCid = cid - _currentOffset;
-			Assert.That(internalCid <= int.MaxValue, "internalCid<=int.MaxValue");
-			_probabilityOfCid[(int)internalCid] = probability;
+			_probabilityOfCid[cid] = probability;
 		}
 
 		private void MultiplyProbabilityOfCid(long cid, double factor)
 		{
-			var internalCid = cid - _currentOffset;
-			Assert.That(internalCid <= int.MaxValue, "internalCid<=int.MaxValue");
-			_probabilityOfCid[(int)internalCid] *= factor;
+			_probabilityOfCid[cid] *= factor;
 		}
 
 		private void UpdateContinuationDistributionMapperAndCollectLeafs(long currentCid)
@@ -161,10 +150,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			MarkovDecisionProcess.FinishInitialDistribution();
 		}
 
-		private void Clear()
+		private void Clear(long cidRoot)
 		{
-			_probabilityOfCid.Clear();
-			_probabilityOfCid[0] = 1.0;
+			_probabilityOfCid.Clear(cidRoot); // use cidRoot as offset, because it is the smallest element
+			_continuationGraphLeafOfCid.Clear(cidRoot);
+			_probabilityOfCid[cidRoot] = 1.0;
 			_ltmdpContinuationDistributionMapper.Clear();
 		}
 
@@ -172,10 +162,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			for (var state = 0; state < _nmdp.States; state++)
 			{
-				Clear();
 				var cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfState(state);
-				_currentOffset = cidOfStateRoot;
-				_ltmdpContinuationDistributionMapper.AddInitialDistributionAndContinuation(_currentOffset);
+				Clear(cidOfStateRoot);
+				_ltmdpContinuationDistributionMapper.AddInitialDistributionAndContinuation(cidOfStateRoot);
 
 				UpdateContinuationDistributionMapperAndCollectLeafs(cidOfStateRoot);
 
@@ -193,10 +182,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		
 		public void ConvertInitialTransitions()
 		{
-			Clear();
 			var cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfInitialState();
-			_currentOffset = cidOfStateRoot;
-			_ltmdpContinuationDistributionMapper.AddInitialDistributionAndContinuation(_currentOffset);
+			Clear(cidOfStateRoot);
+			_ltmdpContinuationDistributionMapper.AddInitialDistributionAndContinuation(cidOfStateRoot);
 
 			UpdateContinuationDistributionMapperAndCollectLeafs(cidOfStateRoot);
 

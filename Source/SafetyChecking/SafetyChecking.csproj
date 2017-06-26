@@ -62,6 +62,7 @@
     <Compile Include="Formula\FormulaVisitors\CollectAtomarPropositionFormulasVisitor.cs" />
     <Compile Include="AnalysisModelTraverser\AnalysisException.cs" />
     <Compile Include="AnalysisModel\AnalysisResult.cs" />
+    <Compile Include="GenericDataStructures\AutoResizeBigVector.cs" />
     <Compile Include="MarkovDecisionProcess\Optimized\BuiltinNmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\BuiltinNmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LabeledTransitionMarkovDecisionProcess.cs" />
