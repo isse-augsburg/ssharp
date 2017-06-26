@@ -40,7 +40,9 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 
 		protected readonly List<T> _backingArray;
 
-		public long Count => _backingArray.Count + _currentOffset;
+		private int _internalSize = 0;
+
+		public long Count => _internalSize + _currentOffset;
 		
 		public T DefaultValue = default(T);
 
@@ -64,9 +66,10 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 		{
 			var internalSizeL = size - _currentOffset;
 			Assert.That(internalSizeL < int.MaxValue, "too many elements");
+			Assert.That(internalSizeL >= 0, "offset is too small");
 			var internalSize = (int)internalSizeL;
 
-			if (_backingArray.Count >= internalSize)
+			if (_internalSize >= internalSize)
 				return;
 			if (_backingArray.Capacity < internalSize)
 				_backingArray.Capacity = internalSize * 2;
@@ -74,6 +77,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			{
 				_backingArray.Add(DefaultValue);
 			}
+			_internalSize = internalSize;
 		}
 
 		private int GetInternalIndex(long publicIndex)
@@ -121,7 +125,12 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 		public void Clear(long offset)
 		{
 			_currentOffset = offset;
-			_backingArray.Clear();
+			
+			for (var i = 0; i < _internalSize; i++)
+			{
+				_backingArray[i] = DefaultValue;
+			}
+			_internalSize = 0;
 		}
 
 		// a nested class can access private members
@@ -161,7 +170,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			public bool MoveNext()
 			{
 				InternalIndex++;
-				if (InternalIndex >= _vector.Count)
+				if (InternalIndex >= _vector._internalSize)
 					return false;
 				return true;
 			}
