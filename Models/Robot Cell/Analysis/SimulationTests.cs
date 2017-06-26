@@ -34,6 +34,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using Modeling.Plants;
 	using NUnit.Framework;
 	using Odp.Reconfiguration;
+	using RDotNet;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using FastController = Modeling.Controllers.Reconfiguration.FastController;
@@ -41,17 +42,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
     public class SimulationTests
 	{
 
-        internal class ProfileBasedSimulator
+        internal class ProfileBasedSimulator<T> where T : IPerformanceMeasurementController
         {
             private Model model { get; set; }
             Tuple<Fault, ReliabilityAttribute, IComponent>[] faults;
-            private Simulator Simulator;
-            public int Throughput { get; set; } = 0; 
+            private readonly ModellessSimulator Simulator;
+            public int Throughput { get; set; } = 0;
 
             public ProfileBasedSimulator(Model model)
             {
-                Simulator = new Simulator(model);
-                this.model = (Model)Simulator.Model;
+                Simulator = new ModellessSimulator(model.Components);
+                this.model = model;
                 CollectFaults();
             }
 
@@ -102,11 +103,67 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                     }
                     Simulator.SimulateStep();
                     Throughput = model.Workpieces.Select(w => w.IsComplete).Count();
-                    
                 }
+                CreateStats(Throughput, (T)model.Controller);
+
             }
 
+            private void CreateStats(int throughput, T modelController)
+            {
 
+                
+
+
+
+                REngine engine;
+                string fileName;
+
+                //init the R engine            
+                REngine.SetEnvironmentVariables();
+                engine = REngine.GetInstance();
+                engine.Initialize();
+
+                //prepare data
+                var timeValueData = modelController.CollectedTimeValues;
+                var reconfTimeOfAgents = timeValueData.Values.SelectMany(t => t.Select(a => (double)a.Item2.Ticks)).ToArray();
+                var productionTimeOfAgents = timeValueData.Values.SelectMany(t => t.Select(a => (double)a.Item1.Ticks)).ToArray();
+                var measurePoints = timeValueData.Values.SelectMany(t => t.Select(a => (double)a.Item3)).ToArray();
+                NumericVector measurePointsVector = engine.CreateNumericVector(reconfTimeOfAgents);
+                NumericVector reconfTimeOfAgentsNumericVector = engine.CreateNumericVector(reconfTimeOfAgents);
+                NumericVector productionTimeOfAgentsNumericVector = engine.CreateNumericVector(productionTimeOfAgents);
+                engine.SetSymbol("reconfTimeOfAgents", reconfTimeOfAgentsNumericVector);
+                engine.SetSymbol("productionTimeOfAgents", productionTimeOfAgentsNumericVector);
+                engine.SetSymbol("measurePoints", measurePointsVector);
+                IntegerVector throughputVector = engine.CreateIntegerVector(new int[] { throughput });
+                engine.SetSymbol("throughput", throughputVector);
+                engine.SetSymbol("maxThroughput", engine.CreateIntegerVector(new int[] { 10 }));
+
+                //prepare data
+                fileName = "C:\\Users\\Eberhardinger\\Desktop\\myplot.png";
+
+                //calculate
+                engine.Evaluate("perfomranceValueVector <- productionTimeOfAgents/reconfTimeOfAgents");
+                engine.Evaluate("overallPerformanceTimeValue <- mean(perfomranceValueVector)");
+                var overallPerformanceTimeValue = engine.GetSymbol("overallPerformanceTimeValue");
+                engine.Evaluate("relativeCostValue <- throughput/maxThroughput");
+
+                //calculate
+
+                CharacterVector fileNameVector = engine.CreateCharacterVector(new[] { fileName });
+                engine.SetSymbol("fileName", fileNameVector);
+
+                engine.Evaluate("reg <- lm(perfomranceValueVector~measurePoints)");
+                engine.Evaluate("png(filename=fileName, width=6, height=6, units='in', res=100)");
+                engine.Evaluate("plot(perfomranceValueVector~measurePoints)");
+//                engine.Evaluate("abline(reg)");
+                engine.Evaluate("dev.off()");
+
+                //clean up
+                engine.Dispose();
+
+            }
+
+       
             private bool ReonfPossibleAfterFault(Fault item1)
             {
 
@@ -132,7 +189,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
         {
             var model = SampleModels.DefaultInstanceWithoutPlant<PerformanceMeasurementController<FastController>>();
             model.Faults.SuppressActivations();
-            var profileBasedSimulator = new ProfileBasedSimulator(model);
+            var profileBasedSimulator = new ProfileBasedSimulator<PerformanceMeasurementController<FastController>>(model);
             profileBasedSimulator.Simulate(numberOfSteps: 1000);
         }
 

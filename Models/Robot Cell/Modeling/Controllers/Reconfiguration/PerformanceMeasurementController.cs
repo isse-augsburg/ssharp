@@ -12,7 +12,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
     using Odp.Reconfiguration;
     using SafetySharp.Modeling;
 
-    class PerformanceMeasurementController<T> : IController
+    internal interface IPerformanceMeasurementController
+    {
+        Dictionary<uint, List<Tuple<TimeSpan, TimeSpan, long>>> CollectedTimeValues { get; }
+    }
+
+    class PerformanceMeasurementController<T> : IController, IPerformanceMeasurementController
         where T : IController
     {
         [NonDiscoverable, Hidden(HideElements = true)]
@@ -20,7 +25,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
         [NonDiscoverable, Hidden]
         private readonly IController _actingController;
         [NonDiscoverable, Hidden(HideElements = true)]
-        public Dictionary<uint, List<Tuple<TimeSpan,TimeSpan>>> CollectedTimeValues { get; } = new Dictionary<uint, List<Tuple<TimeSpan, TimeSpan>>>();
+        public Dictionary<uint, List<Tuple<TimeSpan,TimeSpan, long>>> CollectedTimeValues { get; } = new Dictionary<uint, List<Tuple<TimeSpan, TimeSpan, long>>>();
 
         [NonDiscoverable, Hidden]
         private readonly Stopwatch _stopwatch;
@@ -32,7 +37,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
             _stopwatch = Stopwatch.StartNew();
             foreach (var agent in Agents)
             {
-                CollectedTimeValues.Add(agent.ID, new List<Tuple<TimeSpan, TimeSpan>>());
+                CollectedTimeValues.Add(agent.ID, new List<Tuple<TimeSpan, TimeSpan, long>>());
             }
         }
 
@@ -42,13 +47,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
             MicrostepScheduler.StartPerformanceMeasurement(_actingController);
             var resultingTasks = this._actingController.CalculateConfigurations(context, tasks);
             var reconfTime = MicrostepScheduler.StopPerformanceMeasurement(_actingController);
-            using (StreamWriter sw = new StreamWriter(@"C:\Users\Eberhardinger\Documents\test.csv", true))
+            using (var sw = new StreamWriter(@"C:\Users\Eberhardinger\Documents\test.csv", true))
             {
                 sw.WriteLine(_stopwatch.ElapsedMilliseconds.ToString() + "; " + reconfTime.ElapsedMilliseconds.ToString());
             }
             foreach (var agent in Agents)
             {
-                CollectedTimeValues[agent.ID].Add(new Tuple<TimeSpan, TimeSpan>(_stopwatch.Elapsed, reconfTime.Elapsed));
+                CollectedTimeValues[agent.ID].Add(new Tuple<TimeSpan, TimeSpan, long>(_stopwatch.Elapsed, reconfTime.Elapsed, DateTime.Now.Ticks));
 
             }
             _stopwatch.Restart();
