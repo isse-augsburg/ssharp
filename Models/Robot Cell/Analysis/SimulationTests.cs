@@ -139,7 +139,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 engine.SetSymbol("maxThroughput", engine.CreateIntegerVector(new int[] { 10 }));
 
                 //prepare data
-                fileName = "C:\\Users\\Eberhardinger\\Desktop\\myplot.png";
+                fileName = "C:\\Users\\Eberhardinger\\Desktop\\myplot.pdf";
 
                 //calculate
                 engine.Evaluate("perfomranceValueVector <- productionTimeOfAgents/reconfTimeOfAgents");
@@ -153,7 +153,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 engine.SetSymbol("fileName", fileNameVector);
 
                 engine.Evaluate("reg <- lm(perfomranceValueVector~measurePoints)");
-                engine.Evaluate("png(filename=fileName, width=6, height=6, units='in', res=100)");
+                engine.Evaluate("cairo_pdf(filename=fileName, width=6, height=6, bg='transparent')");
                 engine.Evaluate("plot(perfomranceValueVector~measurePoints)");
 //                engine.Evaluate("abline(reg)");
                 engine.Evaluate("dev.off()");
