@@ -44,16 +44,22 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		{
 			var m = new SharedModels.SimpleExample2a();
 			Probability probabilityOfFinal0;
+			Probability probabilityOfFinal0Lt;
 			Probability probabilityOfFinal1;
 			Probability probabilityOfFinal2;
 
 			var final0Formula = new UnaryFormula(new SimpleStateInRangeFormula(0), UnaryOperator.Finally);
+			var final0LtFormula =
+				new UnaryFormula(
+					new BinaryFormula(new SimpleStateInRangeFormula(0),BinaryOperator.And, new SimpleLocalVarIsTrue(0)),
+				UnaryOperator.Finally);
 			var final1Formula = new UnaryFormula(new SimpleStateInRangeFormula(1), UnaryOperator.Finally);
 			var final2Formula = new UnaryFormula(new SimpleStateInRangeFormula(2), UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(final0Formula);
+			markovChainGenerator.AddFormulaToCheck(final0LtFormula);
 			markovChainGenerator.AddFormulaToCheck(final1Formula);
 			markovChainGenerator.AddFormulaToCheck(final2Formula);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
@@ -62,11 +68,13 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			using (modelChecker)
 			{
 				probabilityOfFinal0 = modelChecker.CalculateProbability(final0Formula);
+				probabilityOfFinal0Lt = modelChecker.CalculateProbability(final0LtFormula);
 				probabilityOfFinal1 = modelChecker.CalculateProbability(final1Formula);
 				probabilityOfFinal2 = modelChecker.CalculateProbability(final2Formula);
 			}
 
 			probabilityOfFinal0.Is(1.0, 0.000001).ShouldBe(true);
+			probabilityOfFinal0Lt.Is(0.55/3.0*4.0, 0.000001).ShouldBe(true);
 			probabilityOfFinal1.Is(0.5, 0.000001).ShouldBe(true);
 			probabilityOfFinal2.Is(0.5, 0.000001).ShouldBe(true);
 		}

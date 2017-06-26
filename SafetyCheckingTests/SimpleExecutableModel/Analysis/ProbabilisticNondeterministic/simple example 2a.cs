@@ -44,13 +44,19 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 		{
 			var m = new SharedModels.SimpleExample2a();
 			Probability minProbabilityOfFinal0;
+			Probability minProbabilityOfFinal0Lt;
 			Probability minProbabilityOfFinal1;
 			Probability minProbabilityOfFinal2;
 			Probability maxProbabilityOfFinal0;
+			Probability maxProbabilityOfFinal0Lt;
 			Probability maxProbabilityOfFinal1;
 			Probability maxProbabilityOfFinal2;
 
 			var final0Formula = new BoundedUnaryFormula(new SimpleStateInRangeFormula(0), UnaryOperator.Finally, 4);
+			var final0LtFormula =
+				new BoundedUnaryFormula(
+					new BinaryFormula(new SimpleStateInRangeFormula(0), BinaryOperator.And, new SimpleLocalVarIsTrue(0)),
+				UnaryOperator.Finally, 4);
 			var final1Formula = new BoundedUnaryFormula(new SimpleStateInRangeFormula(1), UnaryOperator.Finally, 4);
 			var final2Formula = new BoundedUnaryFormula(new SimpleStateInRangeFormula(2), UnaryOperator.Finally, 4);
 
@@ -59,6 +65,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			nmdpGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			nmdpGenerator.AddFormulaToCheck(final0Formula);
+			nmdpGenerator.AddFormulaToCheck(final0LtFormula);
 			nmdpGenerator.AddFormulaToCheck(final1Formula);
 			nmdpGenerator.AddFormulaToCheck(final2Formula);
 			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess();
@@ -67,17 +74,21 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			using (modelChecker)
 			{
 				minProbabilityOfFinal0 = modelChecker.CalculateMinimalProbability(final0Formula);
+				minProbabilityOfFinal0Lt = modelChecker.CalculateMinimalProbability(final0LtFormula);
 				minProbabilityOfFinal1 = modelChecker.CalculateMinimalProbability(final1Formula);
 				minProbabilityOfFinal2 = modelChecker.CalculateMinimalProbability(final2Formula);
 				maxProbabilityOfFinal0 = modelChecker.CalculateMaximalProbability(final0Formula);
+				maxProbabilityOfFinal0Lt = modelChecker.CalculateMaximalProbability(final0LtFormula);
 				maxProbabilityOfFinal1 = modelChecker.CalculateMaximalProbability(final1Formula);
 				maxProbabilityOfFinal2 = modelChecker.CalculateMaximalProbability(final2Formula);
 			}
 
 			minProbabilityOfFinal0.Is(1.0, 0.000001).ShouldBe(true);
+			minProbabilityOfFinal0Lt.Is(0.0, 0.000001).ShouldBe(true);
 			minProbabilityOfFinal1.Is(0.0, 0.000001).ShouldBe(true);
 			minProbabilityOfFinal2.Is(0.0, 0.000001).ShouldBe(true);
 			maxProbabilityOfFinal0.Is(1.0, 0.000001).ShouldBe(true);
+			maxProbabilityOfFinal0Lt.Is(1.0, 0.000001).ShouldBe(true);
 			var maxProbabilityOf1And2Calculated = 1.0 - Math.Pow(0.6, 4);
 			maxProbabilityOfFinal1.Is(maxProbabilityOf1And2Calculated, 0.000001).ShouldBe(true);
 			maxProbabilityOfFinal2.Is(maxProbabilityOf1And2Calculated, 0.000001).ShouldBe(true);
