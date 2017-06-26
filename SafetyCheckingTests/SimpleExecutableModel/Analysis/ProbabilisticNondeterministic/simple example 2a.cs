@@ -52,13 +52,13 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			Probability maxProbabilityOfFinal1;
 			Probability maxProbabilityOfFinal2;
 
-			var final0Formula = new BoundedUnaryFormula(new SimpleStateInRangeFormula(0), UnaryOperator.Finally, 4);
+			var final0Formula = new BoundedUnaryFormula(SharedModels.SimpleExample2a.StateIs0, UnaryOperator.Finally, 4);
 			var final0LtFormula =
 				new BoundedUnaryFormula(
-					new BinaryFormula(new SimpleStateInRangeFormula(0), BinaryOperator.And, new SimpleLocalVarIsTrue(0)),
+					new BinaryFormula(SharedModels.SimpleExample2a.StateIs0, BinaryOperator.And, SharedModels.SimpleExample2a.LocalVarIsTrue),
 				UnaryOperator.Finally, 4);
-			var final1Formula = new BoundedUnaryFormula(new SimpleStateInRangeFormula(1), UnaryOperator.Finally, 4);
-			var final2Formula = new BoundedUnaryFormula(new SimpleStateInRangeFormula(2), UnaryOperator.Finally, 4);
+			var final1Formula = new BoundedUnaryFormula(SharedModels.SimpleExample2a.StateIs1, UnaryOperator.Finally, 4);
+			var final2Formula = new BoundedUnaryFormula(SharedModels.SimpleExample2a.StateIs2, UnaryOperator.Finally, 4);
 
 			var nmdpGenerator = new SimpleNmdpFromExecutableModelGenerator(m);
 			nmdpGenerator.Configuration.WriteGraphvizModels = true;

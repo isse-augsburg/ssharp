@@ -48,13 +48,13 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			Probability probabilityOfFinal1;
 			Probability probabilityOfFinal2;
 
-			var final0Formula = new UnaryFormula(new SimpleStateInRangeFormula(0), UnaryOperator.Finally);
+			var final0Formula = new UnaryFormula(SharedModels.SimpleExample2a.StateIs0, UnaryOperator.Finally);
 			var final0LtFormula =
 				new UnaryFormula(
-					new BinaryFormula(new SimpleStateInRangeFormula(0),BinaryOperator.And, new SimpleLocalVarIsTrue(0)),
+					new BinaryFormula(SharedModels.SimpleExample2a.StateIs0, BinaryOperator.And, SharedModels.SimpleExample2a.LocalVarIsTrue),
 				UnaryOperator.Finally);
-			var final1Formula = new UnaryFormula(new SimpleStateInRangeFormula(1), UnaryOperator.Finally);
-			var final2Formula = new UnaryFormula(new SimpleStateInRangeFormula(2), UnaryOperator.Finally);
+			var final1Formula = new UnaryFormula(SharedModels.SimpleExample2a.StateIs1, UnaryOperator.Finally);
+			var final2Formula = new UnaryFormula(SharedModels.SimpleExample2a.StateIs2, UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.WriteGraphvizModels = true;
