@@ -29,11 +29,11 @@ namespace ISSE.SafetyChecking.Formula
 	/// <summary>
 	///   Determines whether a <see cref="Formula" /> is a formula that can be evaluted in a single state.
 	/// </summary>
-	public class CollectAtomarPropositionFormulasVisitor : FormulaVisitor
+	public class CollectAtomarPropositionFormulasVisitor : CollectStateFormulasVisitor
 	{
 		public HashSet<AtomarPropositionFormula> AtomarPropositionFormulas { get; } = new HashSet<AtomarPropositionFormula>();
 
-		public IEnumerable<Formula> CollectedStateFormulas => AtomarPropositionFormulas;
+		public override IEnumerable<Formula> CollectedStateFormulas => AtomarPropositionFormulas;
 
 		/// <summary>
 		///   Visits the <paramref name="formula." />
@@ -90,6 +90,14 @@ namespace ISSE.SafetyChecking.Formula
 		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
 		{
 			Visit(formula.Operand);
+		}
+
+		/// <summary>
+		///   Visits the <paramref name="formula." />
+		/// </summary>
+		public override void VisitNewTopLevelFormula(Formula formula)
+		{
+			formula.Visit(this);
 		}
 	}
 }

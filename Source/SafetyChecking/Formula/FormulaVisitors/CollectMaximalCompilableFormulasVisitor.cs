@@ -27,11 +27,11 @@ namespace ISSE.SafetyChecking.Formula
 	/// <summary>
 	///   Determines whether a <see cref="Formula" /> is a formula that can be evaluted in a single state.
 	/// </summary>
-	public class CollectMaximalCompilableFormulasVisitor : FormulaVisitor
+	public class CollectMaximalCompilableFormulasVisitor : CollectStateFormulasVisitor
 	{
 		public HashSet<Formula> MaximalCompilableFormulas { get; } = new HashSet<Formula>();
 
-		public IEnumerable<Formula> CollectedStateFormulas => MaximalCompilableFormulas;
+		public override IEnumerable<Formula> CollectedStateFormulas => MaximalCompilableFormulas;
 
 		public bool IsCompilable; //information propagated from children to parents
 		
@@ -169,7 +169,7 @@ namespace ISSE.SafetyChecking.Formula
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public void VisitNewTopLevelFormula(Formula formula)
+		public override void VisitNewTopLevelFormula(Formula formula)
 		{
 			formula.Visit(this);
 			if (IsCompilable)

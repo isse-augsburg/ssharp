@@ -93,14 +93,19 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			ProbabilityMatrixCreationStarted = true;
 
-			var stateFormulaCollector = new CollectAtomarPropositionFormulasVisitor();
+			CollectStateFormulasVisitor stateFormulaCollector;
+			if (Configuration.UseAtomarPropositionsAsStateLabels)
+				stateFormulaCollector = new CollectAtomarPropositionFormulasVisitor();
+			else
+				stateFormulaCollector = new CollectMaximalCompilableFormulasVisitor();
+
 			foreach (var stateFormula in _formulasToCheck)
 			{
-				stateFormulaCollector.Visit(stateFormula);
+				stateFormulaCollector.VisitNewTopLevelFormula(stateFormula);
 			}
 			if (terminateEarlyCondition)
 			{
-				stateFormulaCollector.Visit(terminateEarlyCondition);
+				stateFormulaCollector.VisitNewTopLevelFormula(terminateEarlyCondition);
 			}
 			var stateFormulas = stateFormulaCollector.CollectedStateFormulas.ToArray();
 

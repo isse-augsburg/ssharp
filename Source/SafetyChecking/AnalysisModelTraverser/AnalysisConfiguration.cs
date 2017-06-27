@@ -80,7 +80,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			SuccessorCapacity = DefaultSuccessorStateCapacity,
 			GenerateCounterExample = true,
 			CollectFaultSets = true,
-			StateDetected = null
+			StateDetected = null,
+			UseAtomarPropositionsAsStateLabels = true
 		};
 
 		/// <summary>
@@ -133,5 +134,10 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// </summary>
 		public Action<int> StateDetected { get; set; }
 
+		/// <summary>
+		///   Determine if a formula like "Model.X==1 || Model.Y==true" should be split into the smaller parts
+		///   "Model.X==1" and "Model.Y==true". If set to false then the maximal possible expressions are used.
+		/// </summary>
+		public bool UseAtomarPropositionsAsStateLabels { get; set; }
 	}
 }
