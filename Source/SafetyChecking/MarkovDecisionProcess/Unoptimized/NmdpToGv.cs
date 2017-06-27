@@ -75,7 +75,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		public static void ExportToGv(this NestedMarkovDecisionProcess nmdp,TextWriter sb)
 		{
 			sb.WriteLine("digraph S {");
-			sb.WriteLine("size = \"8,5\"");
+			//sb.WriteLine("size = \"8,5\"");
 			sb.WriteLine("node [shape=box];");
 
 			var initialStateName = "initialState";

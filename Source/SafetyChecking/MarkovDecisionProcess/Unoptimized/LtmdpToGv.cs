@@ -86,7 +86,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		public static void ExportToGv(this LabeledTransitionMarkovDecisionProcess ltmdp,TextWriter sb)
 		{
 			sb.WriteLine("digraph S {");
-			sb.WriteLine("size = \"8,5\"");
+			//sb.WriteLine("size = \"8,5\"");
 			sb.WriteLine("node [shape=box];");
 
 			var initialStateName = "initialState";

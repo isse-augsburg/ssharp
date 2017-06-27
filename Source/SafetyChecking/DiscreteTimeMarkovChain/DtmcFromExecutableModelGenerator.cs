@@ -59,7 +59,17 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			Requires.NotNull(runtimeModelCreator, nameof(runtimeModelCreator));
 			_runtimeModelCreator = runtimeModelCreator;
 		}
-
+		
+		private void PrintStateFormulas(Formula[] stateFormulas)
+		{
+			if (!Configuration.WriteGraphvizModels)
+				return;
+			Configuration.DefaultTraceOutput?.WriteLine("Labels");
+			for (var i = 0; i < stateFormulas.Length; i++)
+			{
+				Configuration.DefaultTraceOutput?.WriteLine($"\t {i} {stateFormulas[i].Label}: {stateFormulas[i]}");
+			}
+		}
 
 		/// <summary>
 		///   Generates a <see cref="DiscreteTimeMarkovChain" /> for the model created by <paramref name="createModel" />.
@@ -68,7 +78,10 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		{
 			using (var checker = new LtmcGenerator<TExecutableModel>(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
 			{
+				PrintStateFormulas(executableStateFormulas);
+
 				var labeledTransitionMarkovChain = checker.GenerateStateGraph();
+				
 				if (Configuration.WriteGraphvizModels)
 				{
 					Configuration.DefaultTraceOutput.WriteLine("Ltmc Model");

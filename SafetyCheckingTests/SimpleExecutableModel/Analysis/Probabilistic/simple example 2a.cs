@@ -60,6 +60,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			markovChainGenerator.Configuration.WriteGraphvizModels = true;
 			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
 			markovChainGenerator.AddFormulaToCheck(final0Formula);
 			markovChainGenerator.AddFormulaToCheck(final0LtFormula);
 			markovChainGenerator.AddFormulaToCheck(final1Formula);

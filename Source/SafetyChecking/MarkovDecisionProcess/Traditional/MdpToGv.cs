@@ -48,7 +48,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		public static void ExportToGv(this MarkovDecisionProcess mdp,TextWriter sb)
 		{
 			sb.WriteLine("digraph S {");
-			sb.WriteLine("size = \"8,5\"");
+			//sb.WriteLine("size = \"8,5\"");
 			sb.WriteLine("node [shape=box];");
 			var enumerator = mdp.GetEnumerator();
 

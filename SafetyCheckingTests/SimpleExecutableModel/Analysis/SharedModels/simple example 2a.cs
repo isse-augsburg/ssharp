@@ -39,10 +39,10 @@ namespace Tests.SimpleExecutableModel.SharedModels
 		public override bool[] LocalBools { get; } = { false };
 		public override int[] LocalInts { get; } = new int[0];
 
-		public static Formula StateIs0 = new SimpleStateInRangeFormula(0);
-		public static Formula StateIs1 = new SimpleStateInRangeFormula(1);
-		public static Formula StateIs2 = new SimpleStateInRangeFormula(2);
-		public static Formula LocalVarIsTrue = new SimpleLocalVarIsTrue(0);
+		public static Formula StateIs0 = new SimpleStateInRangeFormula(0,"StateIs0");
+		public static Formula StateIs1 = new SimpleStateInRangeFormula(1, "StateIs1");
+		public static Formula StateIs2 = new SimpleStateInRangeFormula(2, "StateIs2");
+		public static Formula LocalVarIsTrue = new SimpleLocalVarIsTrue(0, "LIs0");
 
 		private bool L
 		{

@@ -31,7 +31,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public static void ExportToGv(this DiscreteTimeMarkovChain markovChain, TextWriter sb)
 		{
 			sb.WriteLine("digraph S {");
-			sb.WriteLine("size = \"8,5\"");
+			//sb.WriteLine("size = \"8,5\"");
 			sb.WriteLine("node [shape=box];");
 			var enumerator = markovChain.GetEnumerator();
 			while (enumerator.MoveNextState())

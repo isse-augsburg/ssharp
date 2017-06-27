@@ -64,6 +64,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			nmdpGenerator.Configuration.WriteGraphvizModels = true;
 			nmdpGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			nmdpGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
 			nmdpGenerator.AddFormulaToCheck(final0Formula);
 			nmdpGenerator.AddFormulaToCheck(final0LtFormula);
 			nmdpGenerator.AddFormulaToCheck(final1Formula);

@@ -60,7 +60,16 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			_runtimeModelCreator = runtimeModelCreator;
 		}
 
-
+		private void PrintStateFormulas(Formula[] stateFormulas)
+		{
+			if (!Configuration.WriteGraphvizModels)
+				return;
+			Configuration.DefaultTraceOutput?.WriteLine("Labels");
+			for (var i = 0; i < stateFormulas.Length; i++)
+			{
+				Configuration.DefaultTraceOutput?.WriteLine($"\t {i} {stateFormulas[i].Label}: {stateFormulas[i]}");
+			}
+		}
 
 		/// <summary>
 		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
@@ -69,7 +78,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			using (var checker = new LtmdpGenerator<TExecutableModel>(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
 			{
+				PrintStateFormulas(executableStateFormulas);
+
 				var ltmdp = checker.GenerateStateGraph();
+
 				if (Configuration.WriteGraphvizModels)
 				{
 					Configuration.DefaultTraceOutput.WriteLine("Ltmdp Model");
