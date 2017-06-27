@@ -25,6 +25,7 @@ namespace SafetySharp.Odp.Reconfiguration
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Modeling;
 
 	public class ReconfigurationMonitor
@@ -72,15 +73,15 @@ namespace SafetySharp.Odp.Reconfiguration
 				_failedTasks.Remove(task);
 		}
 
-		public void AttemptTaskContinuance(IReconfigurationStrategy strategy, BaseAgent.State state)
+		public async Task AttemptTaskContinuance(IReconfigurationStrategy strategy, BaseAgent.State state)
 		{
 			var availableCapabilities = new HashSet<ICapability>(_knownAgents.SelectMany(b => b.AvailableCapabilities));
-			foreach (var task in _failedTasks)
+			foreach (var task in _failedTasks.ToArray()) // copy collection since reconfiguration may modify collection
 			{
 				var necessaryCapabilities = new HashSet<ICapability>(task.RequiredCapabilities);
 				if (necessaryCapabilities.IsSubsetOf(availableCapabilities))
 				{
-					strategy.Reconfigure(new List<Tuple<ITask, BaseAgent.State>>() { Tuple.Create(task, state) });
+					await strategy.Reconfigure(new List<Tuple<ITask, BaseAgent.State>>() { Tuple.Create(task, state) });
 				}
 			}
 		}
