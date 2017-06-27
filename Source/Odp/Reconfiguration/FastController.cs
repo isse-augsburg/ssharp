@@ -33,10 +33,10 @@ namespace SafetySharp.Odp.Reconfiguration
 		[Hidden(HideElements = true)]
 		protected BaseAgent[] _availableAgents;
 
-		[Hidden(HideElements = true)]
+		[NonSerializable]
 		protected int[,] _costMatrix;
 
-		[Hidden(HideElements = true)]
+		[NonSerializable]
 		protected int[,] _pathMatrix;
 
 		public FastController(BaseAgent[] agents) : base(agents) { }
