@@ -55,11 +55,11 @@ namespace Tests.SimpleExecutableModel
 			Formulas = modelWithFormula.Item2;
 
 			var atomarPropositionVisitor = new CollectAtomarPropositionFormulasVisitor();
-			_atomarPropositionFormulas = atomarPropositionVisitor.AtomarPropositionFormulas.ToArray();
 			foreach (var stateFormula in Formulas)
 			{
 				atomarPropositionVisitor.Visit(stateFormula);
 			}
+			_atomarPropositionFormulas = atomarPropositionVisitor.AtomarPropositionFormulas.ToArray();
 
 			StateConstraints = new Func<bool>[0];
 			
