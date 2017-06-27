@@ -617,6 +617,7 @@
     <Compile Include="OrganicDesignPattern\LocalReconfiguration\capability lost.cs" />
     <Compile Include="OrganicDesignPattern\only one possible configuration.cs" />
     <Compile Include="OrganicDesignPattern\production eventually completes.cs" />
+    <Compile Include="OrganicDesignPattern\reconfigure after failure.cs" />
     <Compile Include="OrganicDesignPattern\resource flow.cs" />
     <Compile Include="OrganicDesignPattern\resource handover.cs" />
     <Compile Include="OrganicDesignPattern\role execution.cs" />

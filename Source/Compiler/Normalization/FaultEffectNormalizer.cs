@@ -419,8 +419,12 @@ namespace SafetySharp.Compiler.Normalization
 		/// </summary>
 		private void AddFaultField(INamedTypeSymbol classSymbol)
 		{
+			var fieldName = "fault".ToSynthesized();
+			if (classSymbol.MemberNames.Contains(fieldName))
+				return;
+
 			var faultField = Syntax.FieldDeclaration(
-				name: "fault".ToSynthesized(),
+				name: fieldName,
 				type: Syntax.TypeExpression<Fault>(SemanticModel),
 				accessibility: Accessibility.Internal);
 

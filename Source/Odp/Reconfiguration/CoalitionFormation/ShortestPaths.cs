@@ -22,7 +22,7 @@
 
 using System.Collections.Generic;
 
-namespace SafetySharp.Odp.Reconfiguration
+namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
 	using System;
 
@@ -57,14 +57,13 @@ namespace SafetySharp.Odp.Reconfiguration
 			if (!_distance.ContainsKey(destination))
 				return null;
 
-			var path = new T[_distance[destination]];
-			var current = destination;
-			for (var i = path.Length - 1; i >= 0; --i)
-			{
-				path[i] = current;
-				current = _previous[current];
-			}
-			return path;
+			var path = new List<T>(_distance[destination]);
+			for (var current = destination; !Source.Equals(current); current = _previous[current])
+				path.Add(current);
+			path.Add(Source);
+
+			path.Reverse();
+			return path.ToArray();
 		}
 
 		public int GetDistance(T node)
@@ -81,13 +80,13 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public static ShortestPaths<T> Compute(T source, Func<T, IEnumerable<T>> getSuccessors, Func<T, T, int> edgeWeight)
 		{
-			var visited = new HashSet<T>();
-			var knownAgents = new HashSet<T>() { source }; // TODO: replace by minHeap
 			var shortestPaths = new ShortestPaths<T>(source);
+			var visited = new HashSet<T>();
+			var knownAgents = new Heap(source, shortestPaths.GetDistance);
 
 			do
 			{
-				var current = knownAgents.MinBy(shortestPaths.GetDistance); // TODO: use minheap operation
+				var current = knownAgents.DeleteMin();
 				foreach (var neighbour in getSuccessors(current))
 				{
 					// already found shortest path to neighbour
@@ -95,12 +94,104 @@ namespace SafetySharp.Odp.Reconfiguration
 						continue;
 
 					shortestPaths.UpdateEdge(current, neighbour, edgeWeight(current, neighbour));
-					knownAgents.Add(neighbour);
+					knownAgents.InsertOrUpdate(neighbour);
 				}
 				visited.Add(current);
-			} while (knownAgents.Count > 0);
+			} while (!knownAgents.IsEmpty);
 
 			return shortestPaths;
+		}
+
+		private class Heap
+		{
+			private readonly List<T> _heap = new List<T>();
+			private readonly Func<T, int> _weight;
+			private readonly Dictionary<T, int> _position = new Dictionary<T, int>();
+
+			public Heap(T source, Func<T, int> weight)
+			{
+				_heap.Add(source);
+				_position.Add(source, 0);
+				_weight = weight;
+			}
+
+			public bool IsEmpty => _heap.Count == 0;
+
+			public T DeleteMin()
+			{
+				var min = _heap[0];
+
+				_heap[0] = _heap[_heap.Count - 1];
+				_heap.RemoveAt(_heap.Count - 1);
+				_position.Remove(min);
+
+				if (IsEmpty)
+					return min;
+
+				var node = 0;
+				var child = 2 * node + 1;
+				var nodeWeight = _weight(_heap[node]);
+
+				while (child < _heap.Count)
+				{
+					var childWeight = _weight(_heap[child]);
+
+					if (child + 1 < _heap.Count)
+					{
+						var rightChildWeight = _weight(_heap[child + 1]);
+						if (childWeight < rightChildWeight)
+						{
+							child++;
+							childWeight = rightChildWeight;
+						}
+					}
+					if (nodeWeight < childWeight)
+					{
+						Swap(node, child);
+
+						node = child;
+						nodeWeight = childWeight;
+						child = 2 * node + 1;
+					}
+				}
+
+				return min;
+			}
+
+			public void InsertOrUpdate(T element)
+			{
+				if (!_position.ContainsKey(element))
+				{
+					_heap.Add(element);
+					_position[element] = _heap.Count - 1;
+				}
+				Decrease(_position[element]);
+			}
+
+			private void Decrease(int node)
+			{
+				int parent = node / 2, nodeWeight = _weight(_heap[node]), parentWeight = _weight(_heap[parent]);
+				while (nodeWeight < parentWeight)
+				{
+					Swap(parent, node);
+
+					node = parent;
+					nodeWeight = parentWeight;
+					parent = node / 2;
+					parentWeight = _weight(_heap[parent]);
+				}
+			}
+
+			private void Swap(int a, int b)
+			{
+				var tmp = _heap[a];
+				_heap[a] = _heap[b];
+				_heap[b] = tmp;
+
+				var tmpPos = _position[_heap[a]];
+				_position[_heap[a]] = _position[_heap[b]];
+				_position[_heap[b]] = tmpPos;
+			}
 		}
 	}
 }

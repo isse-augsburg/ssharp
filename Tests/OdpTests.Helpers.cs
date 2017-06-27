@@ -69,6 +69,8 @@ namespace Tests
 		}
 
 		public ICapability[] RequiredCapabilities { get; }
+
+		public bool IsCompleted => false;
 	}
 
 	internal static class BaseAgentExtensions

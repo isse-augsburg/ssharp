@@ -33,38 +33,30 @@ namespace SafetySharp.Odp.Reconfiguration
 		[Hidden(HideElements = true)]
 		protected BaseAgent[] _availableAgents;
 
-		[Hidden(HideElements = true)]
+		[NonSerializable]
 		protected int[,] _costMatrix;
 
-		[Hidden(HideElements = true)]
+		[NonSerializable]
 		protected int[,] _pathMatrix;
 
 		public FastController(BaseAgent[] agents) : base(agents) { }
 
 		// synchronous implementation
-		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
 			_availableAgents = GetAvailableAgents();
 			var configs = new ConfigurationUpdate();
 
 			CalculateShortestPaths();
 
-			foreach (var task in tasks)
-			{
-				configs.RemoveAllRoles(task, Agents);
-				var path = FindAgentPath(task);
-			    if (path == null)
-			    {
-			        ReconfigurationFailure = true;
-			    }
-			    else
-			    {
-			        ExtractConfigurations(configs, task, path);
-			        ReconfigurationFailure = false;
-			    }
-			}
+			configs.RemoveAllRoles(task, Agents);
+			var path = FindAgentPath(task);
+			if (path == null)
+				configs.Fail();
+			else
+			    ExtractConfigurations(configs, task, path);
 
-			OnConfigurationsCalculated(configs);
+			OnConfigurationsCalculated(task, configs);
 			return Task.FromResult(configs);
 		}
 

@@ -20,53 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
+namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
 	using System;
-	using System.Threading.Tasks;
-	using SafetySharp.Modeling;
-	using Odp;
-	using Odp.Reconfiguration;
 
-	class IntolerableAnalysisController : Component, IController
+	class RestartReconfigurationException : Exception
 	{
-		public const int MaxSteps = 350;
-
-		[Range(0, MaxSteps, OverflowBehavior.Clamp)]
-		public int StepCount { get; private set; }
-
-		private readonly IController _controller;
-
-		private bool _reconfHasFailed;
-
-		public IntolerableAnalysisController(IController controller)
-		{
-			_controller = controller;
-		}
-
-		public override void Update()
-		{
-			StepCount++;
-		}
-
-		public event Action<ITask, ConfigurationUpdate> ConfigurationsCalculated
-		{
-			add { _controller.ConfigurationsCalculated += value; }
-			remove { _controller.ConfigurationsCalculated -= value; }
-		}
-
-		public BaseAgent[] Agents => _controller.Agents;
-		public async Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
-		{
-			if (_reconfHasFailed)
-				return null;
-
-			if (StepCount >= MaxSteps)
-				return null;
-
-			var config = await _controller.CalculateConfigurations(context, task);
-			_reconfHasFailed |= config.Failed;
-			return config;
-		}
 	}
 }

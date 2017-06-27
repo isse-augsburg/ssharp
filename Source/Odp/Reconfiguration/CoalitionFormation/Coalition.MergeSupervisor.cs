@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp.Reconfiguration
+namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
 	using System.Collections.Generic;
 	using System.Diagnostics;
@@ -148,7 +148,7 @@ namespace SafetySharp.Odp.Reconfiguration
 				// actual merge
 				foreach (var member in _coalition.Members)
 					chosenCoalition.Join(member);
-				chosenCoalition.Merger.ReceiveCoalitionInformation(_mergeRequests);
+				chosenCoalition.Merger.ReceiveCoalitionInformation(_mergeRequests, _coalition.ViolatedPredicates);
 
 				// stop controller from continuing
 				_pendingCoalitionMerge.SetResult(null);
@@ -159,10 +159,13 @@ namespace SafetySharp.Odp.Reconfiguration
 			/// <summary>
 			/// Passes meta-information from a coalition that is merged into this instance.
 			/// </summary>
-			private void ReceiveCoalitionInformation(IEnumerable<MergeRequest> mergeRequests)
+			private void ReceiveCoalitionInformation(IEnumerable<MergeRequest> mergeRequests, InvariantPredicate[] violatedPredicates)
 			{
 				foreach (var request in mergeRequests)
 					_mergeRequests.AddLast(request);
+				_coalition.ViolatedPredicates = _coalition.ViolatedPredicates.Concat(violatedPredicates).ToArray();
+
+				throw new RestartReconfigurationException();
 			}
 
 			/// <summary>

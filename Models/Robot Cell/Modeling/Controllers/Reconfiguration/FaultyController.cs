@@ -40,16 +40,15 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		protected FaultyController() { }
 
 		// composition
-		public event Action<BaseAgent[]> ConfigurationsCalculated
+		public event Action<ITask, ConfigurationUpdate> ConfigurationsCalculated
 		{
 			add { _controller.ConfigurationsCalculated += value; }
 			remove { _controller.ConfigurationsCalculated -= value; }
 		}
 		public BaseAgent[] Agents => _controller.Agents;
-		public virtual bool ReconfigurationFailure =>_controller.ReconfigurationFailure;
-		public virtual Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+		public virtual Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
-			return _controller.CalculateConfigurations(context, tasks);
+			return _controller.CalculateConfigurations(context, task);
 		}
 
 		// fault & effect
@@ -58,11 +57,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		[FaultEffect(Fault = nameof(ReconfigurationFault))]
 		public abstract class ReconfigurationFailureEffect : FaultyController
 		{
-			public override bool ReconfigurationFailure => true;
-
-			public override Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+			public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 			{
-				return Task.FromResult<ConfigurationUpdate>(null);
+				var config = new ConfigurationUpdate();
+				config.Fail();
+				config.RemoveAllRoles(task, Agents);
+				return Task.FromResult(config);
 			}
 		}
 	}

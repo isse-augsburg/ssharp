@@ -79,11 +79,13 @@ namespace SafetySharp.Odp.Reconfiguration
 		}
 
 		#region interface presented to reconfiguration agent
-		public virtual void UpdateAllocatedRoles(ConfigurationUpdate config)
+		public virtual void UpdateAllocatedRoles(ITask task, ConfigurationUpdate config)
 		{
 			// new roles must be locked
 			config.LockAddedRoles();
 			config.Apply(_baseAgent);
+
+			_tasksUnderReconstruction[task].Acknowledge();
 		}
 
 		public virtual void Go(ITask task)
@@ -101,7 +103,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		private void LockAllocatedRoles(ITask task, bool locked = true)
 		{
-			_baseAgent.LockRoles(_baseAgent.AllocatedRoles.Where(role => role.Task == task));
+			_baseAgent.LockRoles(_baseAgent.AllocatedRoles.Where(role => role.Task == task), locked);
 		}
 	}
 }

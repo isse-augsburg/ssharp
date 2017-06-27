@@ -38,19 +38,15 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			_controller = controller;
 		}
 
-		public event Action<BaseAgent[]> ConfigurationsCalculated
+		public event Action<ITask, ConfigurationUpdate> ConfigurationsCalculated
 		{
 			add { _controller.ConfigurationsCalculated += value; }
 			remove { _controller.ConfigurationsCalculated -= value; }
 		}
 
 		public BaseAgent[] Agents => _controller.Agents;
-		public bool ReconfigurationFailure => _controller.ReconfigurationFailure;
-		public async Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+		public Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
-			if (ReconfigurationFailure)
-				return null;
-
 			if (_hasReconfed)
 			{
 				// This speeds up analyses when checking for reconf failures with DCCA, but is otherwise
@@ -59,7 +55,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			}
 
 			_hasReconfed = true;
-			return await _controller.CalculateConfigurations(context, tasks);
+			return _controller.CalculateConfigurations(context, task);
 		}
 	}
 }

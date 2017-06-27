@@ -24,6 +24,7 @@ namespace SafetySharp.Modeling
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Diagnostics;
 	using System.Runtime.Remoting.Messaging;
 	using System.Threading;
@@ -67,7 +68,13 @@ namespace SafetySharp.Modeling
 			try
 			{
 				Context.Run();
-				Task.WhenAll(Tasks).GetAwaiter().GetResult();
+
+				// propagate exceptions
+				Task.WhenAll(Tasks.Where(task => task.IsFaulted)).GetAwaiter().GetResult();
+
+				// tasks should already be completed (faulted, cancelled, or successful) by now
+				if (!Tasks.All(task => task.IsCompleted))
+					throw new InvalidOperationException("Not all scheduled async tasks could be completed. This generally indicates a bug in the model.");
 			}
 			finally
 			{

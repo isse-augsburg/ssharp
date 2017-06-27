@@ -57,7 +57,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		///   True if the specified <see cref="Amount" /> of containers was produced
 		///   and completely processed for the recipe.
 		/// </summary>
-		public bool ProcessingComplete => _activeContainers.Count == 0 && _producedAmount == Amount;
+		public bool IsCompleted => _activeContainers.Count == 0 && _producedAmount == Amount;
 
 		/// <summary>
 		///   The sequence of capabilities defining this recipe.

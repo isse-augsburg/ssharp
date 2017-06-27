@@ -20,14 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp.Reconfiguration
+namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
-	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using Modeling;
-	using System.Diagnostics;
-	using System;
 
 	public class CoalitionReconfigurationAgent : IReconfigurationAgent
 	{
@@ -49,10 +47,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		void IReconfigurationAgent.Acknowledge()
 		{
-			_reconfAgentHandler.Go(CurrentCoalition.Task);
 			_acknowledgment?.SetResult(null);
-			_acknowledgment = null;
-			_reconfAgentHandler.Done(CurrentCoalition.Task);
 		}
 
 		void IReconfigurationAgent.StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
@@ -79,8 +74,13 @@ namespace SafetySharp.Odp.Reconfiguration
 			{
 				var configs = await _controller.CalculateConfigurations(this, task);
 				if (configs != null)
+				{
 					await Task.WhenAll(CurrentCoalition.Members
-						.Select(member => member.UpdateConfiguration(configs)));
+													   .Select(member => member.UpdateConfiguration(configs)));
+
+					foreach (var member in CurrentCoalition.Members)
+						member.ConcludeReconfiguration();
+				}
 			}
 		}
 
@@ -97,11 +97,19 @@ namespace SafetySharp.Odp.Reconfiguration
 		/// <summary>
 		/// Distributes the calculated configuration to the coalition members.
 		/// </summary>
-		private Task UpdateConfiguration(ConfigurationUpdate configs)
+		private async Task UpdateConfiguration(ConfigurationUpdate configs)
 		{
 			_acknowledgment = new TaskCompletionSource<object>();
-			_reconfAgentHandler.UpdateAllocatedRoles(configs);
-			return _acknowledgment.Task;
+			_reconfAgentHandler.UpdateAllocatedRoles(CurrentCoalition.Task, configs);
+			await _acknowledgment.Task;
+			_acknowledgment = null;
+
+			_reconfAgentHandler.Go(CurrentCoalition.Task);
+		}
+
+		private void ConcludeReconfiguration()
+		{
+			_reconfAgentHandler.Done(CurrentCoalition.Task);
 		}
 	}
 }

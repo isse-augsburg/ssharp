@@ -30,23 +30,29 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	{
 		public const int ContainerStorageSize = 30;
 		public const uint InitialIngredientAmount = 100u;
+		public const int MaxNumberOfRecipes = 5;
 
 		public Model(Station[] stations, IController controller)
 		{
+			Controller = controller;
+			ReconfigurationMonitor = new ReconfigurationMonitor(MaxNumberOfRecipes) { Controller = controller };
+
 			Stations = stations;
 			foreach (var station in stations)
 			{
 				station.ReconfigurationStrategy =
 					new CentralReconfiguration(controller);
 				station.RecipeQueue = _scheduledRecipes;
+				ReconfigurationMonitor.AddAgent(station);
 			}
-			Controller = controller;
 		}
 
 		[Root(RootKind.Controller)]
 		public Station[] Stations { get; }
 
 		public IController Controller { get; }
+
+		public ReconfigurationMonitor ReconfigurationMonitor { get; }
 
 		private readonly Queue<Recipe> _scheduledRecipes = new Queue<Recipe>();
 

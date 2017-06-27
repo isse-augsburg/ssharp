@@ -24,9 +24,11 @@ namespace Tests.OrganicDesignPattern.LocalReconfiguration
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using SafetySharp.Analysis;
 	using SafetySharp.Odp;
 	using SafetySharp.Odp.Reconfiguration;
+	using SafetySharp.Odp.Reconfiguration.CoalitionFormation;
 	using Shouldly;
 	using Utilities;
 
@@ -74,14 +76,19 @@ namespace Tests.OrganicDesignPattern.LocalReconfiguration
 
 			var model = TestModel.InitializeModel(producer, processor, consumer);
 			var simulator = new Simulator(model);
+
+			simulator.FastForward(steps: 6);
+			processor = (Agent)simulator.Model.Roots[1];
+			processor.Capabilities.Remove(process);
+			simulator.SimulateStep();
+
 			producer = (Producer)simulator.Model.Roots[0];
 			processor = (Agent)simulator.Model.Roots[1];
 			consumer = (Agent)simulator.Model.Roots[2];
+			task = producer.AllocatedRoles.First().Task as Task;
 
-			simulator.FastForward(steps: 6);
-
-			processor.Capabilities.Remove(process);
-			simulator.SimulateStep();
+			producerRole = new Role() { PreCondition = { Task = task }, PostCondition = { Port = processor, Task = task } };
+			producerRole.AddCapability(produce);
 
 			var transportRole = new Role() { PreCondition = { Port = producer, Task = task }, PostCondition = { Port = consumer, Task = task } };
 			transportRole.Initialize(producerRole.PostCondition);
@@ -104,15 +111,8 @@ namespace Tests.OrganicDesignPattern.LocalReconfiguration
 
 		private class Agent : BaseAgent
 		{
-			public const int MaxCapabilityCount = 20;
 			public readonly List<ICapability> Capabilities = new List<ICapability>(20);
-
 			public override IEnumerable<ICapability> AvailableCapabilities => Capabilities;
-
-			internal void ConfigureTask(ITask task)
-			{
-				PerformReconfiguration(new[] { Tuple.Create(task, new State(this)) });
-			}
 		}
 
 		private class Producer : Agent, ICapabilityHandler<ProduceCapability>

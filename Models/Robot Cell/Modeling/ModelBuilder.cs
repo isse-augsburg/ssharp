@@ -90,6 +90,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			var agent = new RobotAgent(capabilities.Distinct().ToArray(), robot, _model.Tasks, _model.Resources) { TaskQueue = _model.TaskQueue };
 
 			_model.RobotAgents.Add(agent);
+			_model.ReconfigurationMonitor.AddAgent(agent);
+			agent.ReconfigurationMonitor = _model.ReconfigurationMonitor;
 			robot?.SetNames(agent.ID);
 
 			return this;

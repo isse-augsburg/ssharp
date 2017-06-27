@@ -1,17 +1,17 @@
 ﻿// The MIT License (MIT)
-// 
+//
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,53 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
+namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
-	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 	using System.Threading.Tasks;
-	using SafetySharp.Modeling;
-	using Odp;
-	using Odp.Reconfiguration;
 
-	class IntolerableAnalysisController : Component, IController
+	class MissingCapabilitiesStrategy : IRecruitingStrategy
 	{
-		public const int MaxSteps = 350;
+		private MissingCapabilitiesStrategy() { }
 
-		[Range(0, MaxSteps, OverflowBehavior.Clamp)]
-		public int StepCount { get; private set; }
+		public static MissingCapabilitiesStrategy Instance { get; } = new MissingCapabilitiesStrategy();
 
-		private readonly IController _controller;
-
-		private bool _reconfHasFailed;
-
-		public IntolerableAnalysisController(IController controller)
+		public async Task<TaskFragment> RecruitNecessaryAgents(Coalition coalition)
 		{
-			_controller = controller;
-		}
+			var availableCapabilities = new HashSet<ICapability>(
+				coalition.Members.SelectMany(member => member.BaseAgentState.AvailableCapabilities)
+			);
 
-		public override void Update()
-		{
-			StepCount++;
-		}
+			foreach (var agent in new AgentQueue(coalition))
+			{
+				if (coalition.CTF.Capabilities.IsSubsetOf(availableCapabilities))
+					break;
 
-		public event Action<ITask, ConfigurationUpdate> ConfigurationsCalculated
-		{
-			add { _controller.ConfigurationsCalculated += value; }
-			remove { _controller.ConfigurationsCalculated -= value; }
-		}
+				var newMember = await coalition.Invite(agent);
+				availableCapabilities.UnionWith(newMember.BaseAgentState.AvailableCapabilities);
+			}
 
-		public BaseAgent[] Agents => _controller.Agents;
-		public async Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
-		{
-			if (_reconfHasFailed)
-				return null;
-
-			if (StepCount >= MaxSteps)
-				return null;
-
-			var config = await _controller.CalculateConfigurations(context, task);
-			_reconfHasFailed |= config.Failed;
-			return config;
+			// return empty fragment - positions where capability allocations change are included anyway
+			return TaskFragment.Identity(coalition.Task);
 		}
 	}
 }
