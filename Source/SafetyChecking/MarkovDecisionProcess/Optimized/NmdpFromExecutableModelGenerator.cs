@@ -65,7 +65,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		/// <summary>
 		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		private NestedMarkovDecisionProcess GenerateMarkovDecisionProcess(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, AtomarPropositionFormula[] executableStateFormulas)
+		private NestedMarkovDecisionProcess GenerateMarkovDecisionProcess(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas)
 		{
 			using (var checker = new LtmdpGenerator<TExecutableModel>(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
 			{
@@ -95,7 +95,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 			{
 				stateFormulaCollector.Visit(terminateEarlyCondition);
 			}
-			var stateFormulas = stateFormulaCollector.AtomarPropositionFormulas.ToArray();
+			var stateFormulas = stateFormulaCollector.CollectedStateFormulas.ToArray();
 
 			ExecutedModel<TExecutableModel> model = null;
 			var modelCreator = _runtimeModelCreator.CreateCoupledModelCreator(stateFormulas);
