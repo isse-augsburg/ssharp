@@ -22,8 +22,6 @@
 
 namespace ISSE.SafetyChecking.Formula
 {
-	using System;
-
 	/// <summary>
 	///   Represents a state formula, i.e., a Boolean expression that is evaluated in a single system state.
 	/// </summary>
@@ -35,15 +33,9 @@ namespace ISSE.SafetyChecking.Formula
 		/// <param name="label">
 		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
 		/// </param>
-		public AtomarPropositionFormula(string label = null)
+		public AtomarPropositionFormula(string label = null) : base(label)
 		{
-			Label = label ?? "StateFormula" + Guid.NewGuid().ToString().Replace("-", String.Empty);
 		}
-		
-		/// <summary>
-		///   Gets the state label that a model checker can use to determine whether the state formula holds.
-		/// </summary>
-		public string Label { get; }
 
 		/// <summary>
 		///   Executes the <paramref name="visitor" /> for this formula.

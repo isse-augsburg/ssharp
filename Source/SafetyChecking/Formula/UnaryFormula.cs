@@ -34,7 +34,10 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		/// <param name="operand">The operand of the unary formula.</param>
 		/// <param name="unaryOperator">The operator of the unary formula.</param>
-		public UnaryFormula(Formula operand, UnaryOperator unaryOperator)
+		/// <param name="label">
+		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
+		/// </param>
+		public UnaryFormula(Formula operand, UnaryOperator unaryOperator, string label = null) : base(label)
 		{
 			Requires.NotNull(operand, nameof(operand));
 			Requires.InRange(unaryOperator, nameof(unaryOperator));

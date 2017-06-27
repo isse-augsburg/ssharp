@@ -35,7 +35,10 @@ namespace ISSE.SafetyChecking.Formula
 		/// <param name="leftOperand">The formula on the left-hand side of the binary operator.</param>
 		/// <param name="binaryOperator">The operator of the binary formula.</param>
 		/// <param name="rightOperand">The formula on the right-hand side of the binary operator.</param>
-		public BinaryFormula(Formula leftOperand, BinaryOperator binaryOperator, Formula rightOperand)
+		/// <param name="label">
+		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
+		/// </param>
+		public BinaryFormula(Formula leftOperand, BinaryOperator binaryOperator, Formula rightOperand, string label=null) : base(label)
 		{
 			Requires.NotNull(leftOperand, nameof(leftOperand));
 			Requires.InRange(binaryOperator, nameof(binaryOperator));

@@ -41,7 +41,7 @@ namespace ISSE.SafetyChecking.Formula
 
 		public double CompareToValue { get; }
 
-		public ProbabilitisticFormula(Formula operand, ProbabilisticComparator comparator, double compareToValue)
+		public ProbabilitisticFormula(Formula operand, ProbabilisticComparator comparator, double compareToValue, string label = null) : base(label)
 		{
 			//P_{comparator value}(operand)
 			Operand = operand;

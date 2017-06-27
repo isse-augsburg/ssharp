@@ -23,12 +23,24 @@
 namespace ISSE.SafetyChecking.Formula
 {
 	using Utilities;
+	using System;
 
 	/// <summary>
 	///   Represents a CTL* formula.
 	/// </summary>
 	public abstract class Formula
 	{
+		/// <summary>
+		///   Initializes a new instance of the <see cref="Formula" /> class.
+		/// </summary>
+		/// <param name="label">
+		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
+		/// </param>
+		protected Formula(string label = null)
+		{
+			Label = label ?? "StateFormula" + Guid.NewGuid().ToString().Replace("-", String.Empty);
+		}
+
 		/// <summary>
 		///   Converts the <paramref name="expression" /> to an instance of <see cref="Formula" />.
 		/// </summary>
@@ -38,6 +50,11 @@ namespace ISSE.SafetyChecking.Formula
 			Requires.CompilationTransformation();
 			return null;
 		}
+		
+		/// <summary>
+		///   Gets the state label that a model checker can use to determine whether the state formula holds.
+		/// </summary>
+		public string Label { get; }
 
 		/// <summary>
 		///   Converts the <paramref name="formula" /> to a <see cref="bool" /> value.

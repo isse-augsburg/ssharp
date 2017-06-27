@@ -35,7 +35,10 @@ namespace ISSE.SafetyChecking.Formula
 		/// <param name="operand">The operand of the unary formula.</param>
 		/// <param name="unaryOperator">The operator of the unary formula.</param>
 		/// <param name="bound">The maximal number of steps.</param>
-		public BoundedUnaryFormula(Formula operand, UnaryOperator unaryOperator, int bound)
+		/// <param name="label">
+		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
+		/// </param>
+		public BoundedUnaryFormula(Formula operand, UnaryOperator unaryOperator, int bound, string label = null) : base(label)
 		{
 			Requires.NotNull(operand, nameof(operand));
 			Requires.InRange(unaryOperator, nameof(unaryOperator));

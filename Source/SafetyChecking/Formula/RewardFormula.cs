@@ -27,12 +27,12 @@ namespace ISSE.SafetyChecking.Formula
 
 	public abstract class RewardFormula : Formula
 	{
-		protected RewardFormula(RewardRetriever rewardRetriever)
+		protected RewardFormula(RewardRetriever rewardRetriever, string label = null) : base(label)
 		{
 			RewardRetriever = rewardRetriever;
 		}
 
-		protected RewardFormula(Func<Reward> rewardRetriever)
+		protected RewardFormula(Func<Reward> rewardRetriever, string label = null) : base(label)
 		{
 			RewardRetriever = rewardRetriever;
 		}

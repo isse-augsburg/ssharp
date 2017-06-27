@@ -36,7 +36,10 @@ namespace ISSE.SafetyChecking.Formula
 		/// <param name="binaryOperator">The operator of the binary formula.</param>
 		/// <param name="rightOperand">The formula on the right-hand side of the binary operator.</param>
 		/// <param name="bound">The maximal number of steps.</param>
-		public BoundedBinaryFormula(Formula leftOperand, BinaryOperator binaryOperator, Formula rightOperand, int bound)
+		/// <param name="label">
+		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
+		/// </param>
+		public BoundedBinaryFormula(Formula leftOperand, BinaryOperator binaryOperator, Formula rightOperand, int bound, string label = null) : base(label)
 		{
 			Requires.NotNull(leftOperand, nameof(leftOperand));
 			Requires.InRange(binaryOperator, nameof(binaryOperator));
