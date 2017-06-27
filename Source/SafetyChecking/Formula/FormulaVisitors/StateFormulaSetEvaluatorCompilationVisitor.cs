@@ -65,12 +65,27 @@ namespace ISSE.SafetyChecking.Formula
 
 			return lambda;
 		}
+		
+		private Expression TryToFindExpression(Formula formula)
+		{
+			var indexOfStateFormula = Array.IndexOf(_stateFormulaLabels, formula.Label);
+			if (indexOfStateFormula == -1)
+				return null;
+			var indexOfStateFormulaExpr = Expression.Constant(indexOfStateFormula);
+
+			var indexer = LabelsOfCurrentStateExpr.Type.GetProperty("Item", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+			return Expression.Property(LabelsOfCurrentStateExpr, indexer, indexOfStateFormulaExpr);
+		}
 
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
 		public override void VisitUnaryFormula(UnaryFormula formula)
 		{
+			_expression = TryToFindExpression(formula);
+			if (_expression != null)
+				return;
+
 			switch (formula.Operator)
 			{
 				case UnaryOperator.Not:
@@ -87,6 +102,10 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public override void VisitBinaryFormula(BinaryFormula formula)
 		{
+			_expression = TryToFindExpression(formula);
+			if (_expression != null)
+				return;
+
 			Visit(formula.LeftOperand);
 			var left = _expression;
 
@@ -126,11 +145,9 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
-			var indexOfStateFormula = Array.IndexOf(_stateFormulaLabels, formula.Label);
-			var indexOfStateFormulaExpr = Expression.Constant(indexOfStateFormula);
-
-			var indexer = LabelsOfCurrentStateExpr.Type.GetProperty("Item", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-			_expression = Expression.Property(LabelsOfCurrentStateExpr, indexer, indexOfStateFormulaExpr);
+			_expression = TryToFindExpression(formula);
+			if (_expression == null)
+				throw new Exception("stateFormula not found");
 		}
 
 		/// <summary>
