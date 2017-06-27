@@ -108,6 +108,27 @@ namespace ISSE.SafetyChecking.Modeling
 			return (value >= minimum && value <= maximum);
 		}
 
+		public static string PrettyPrint(double value)
+		{
+			if (value * 10.0 >= 1.0)
+			{
+				return value.ToString("0.###",CultureInfo.InvariantCulture);
+			}
+			var newValue = value;
+			for (var i = 0; i < 10; i++)
+			{
+				if (newValue >= 1.0)
+				{
+					return $"{value.ToString("0.00e+0",CultureInfo.InvariantCulture)} {'×'} 10E{i}";
+					// \uc397 == ×
+
+				}
+				newValue = value * 10.0;
+			}
+
+			return value.ToString("0.00e+0", CultureInfo.InvariantCulture);
+		}
+
 		/// <summary>
 		/// Returns the fully qualified type name of this instance.
 		/// </summary>

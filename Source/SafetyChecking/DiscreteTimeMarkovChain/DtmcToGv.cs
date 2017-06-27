@@ -25,6 +25,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using System.Globalization;
 	using System.IO;
+	using Modeling;
 
 	internal static class DtmcToGv
 	{
@@ -47,7 +48,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				sb.WriteLine(")\"];");
 				while (enumerator.MoveNextTransition())
 				{
-					sb.WriteLine($"{enumerator.CurrentState} -> {enumerator.CurrentTransition.Column} [label=\"{enumerator.CurrentTransition.Value.ToString("#.00e+0",CultureInfo.InvariantCulture)}\"];");
+					sb.WriteLine($"{enumerator.CurrentState} -> {enumerator.CurrentTransition.Column} [label=\"{Probability.PrettyPrint(enumerator.CurrentTransition.Value)}\"];");
 				}
 			}
 			sb.WriteLine("}");

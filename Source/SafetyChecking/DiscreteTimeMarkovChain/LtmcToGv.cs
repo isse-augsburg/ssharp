@@ -25,15 +25,16 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using System.Globalization;
 	using System.IO;
+	using ISSE.SafetyChecking.Modeling;
 
 	internal static class LtmcToGv
 	{
-
+		
 		private static void ExportDistribution(LabeledTransitionMarkovChain markovChain, TextWriter sb, string sourceStateName, LabeledTransitionMarkovChain.LabeledTransitionEnumerator distribution)
 		{
 			while (distribution.MoveNext())
 			{
-				sb.Write($"{sourceStateName} -> {distribution.CurrentTargetState} [label=\"{distribution.CurrentProbability.ToString("#.00e+0", CultureInfo.InvariantCulture)}");
+				sb.Write($"{sourceStateName} -> {distribution.CurrentTargetState} [label=\"{Probability.PrettyPrint(distribution.CurrentProbability)}");
 
 				for (int i = 0; i < markovChain.StateFormulaLabels.Length; i++)
 				{
@@ -50,7 +51,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public static void ExportToGv(this LabeledTransitionMarkovChain markovChain, TextWriter sb)
 		{
 			sb.WriteLine("digraph S {");
-			sb.WriteLine("size = \"8,5\"");
+			//sb.WriteLine("size = \"8,5\"");
 			sb.WriteLine("node [shape=box];");
 
 			var initialStateName = "initialState";

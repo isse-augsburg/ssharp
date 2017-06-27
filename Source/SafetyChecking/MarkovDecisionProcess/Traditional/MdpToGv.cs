@@ -26,6 +26,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 {
 	using System.Globalization;
 	using System.IO;
+	using Modeling;
 
 	internal static class MdpToGv
 	{
@@ -39,7 +40,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				sb.WriteLine($"{stateName} -> {distributionNode};");
 				while (enumerator.MoveNextTransition())
 				{
-					sb.WriteLine($"{distributionNode} -> {enumerator.CurrentTransition.Column} [label=\"{enumerator.CurrentTransition.Value.ToString(CultureInfo.InvariantCulture)}\"];");
+					sb.WriteLine($"{distributionNode} -> {enumerator.CurrentTransition.Column} [label=\"{Probability.PrettyPrint(enumerator.CurrentTransition.Value)}\"];");
 				}
 				distributionCounter++;
 			}

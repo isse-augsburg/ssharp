@@ -26,6 +26,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 {
 	using System.Globalization;
 	using System.IO;
+	using Modeling;
 
 	internal static class NmdpToGv
 	{
@@ -51,7 +52,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				// do not print thisNode
 				var cgi = nmdp.GetContinuationGraphInnerNode(currentCid);
 				var toNode = $"cid{cgi.ToCid}";
-				sb.WriteLine($" {fromNode}->{toNode} [ style =\"dashed\", label=\"{cgi.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
+				sb.WriteLine($" {fromNode}->{toNode} [ style =\"dashed\", label=\"{Probability.PrettyPrint(cgi.Probability)}\"];");
 			}
 			else
 			{
@@ -61,7 +62,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				var thisNode = $"cid{currentCid}";
 				sb.WriteLine($" {thisNode} [ shape=point,width=0.1,height=0.1,label=\"\" ];");
 				if (fromProbabilistic)
-					sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"onormal\", label=\"{cgi.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
+					sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"onormal\", label=\"{Probability.PrettyPrint(cgi.Probability)}\"];");
 				else
 					sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"normal\"];");
 				

@@ -24,6 +24,7 @@
 
 namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 {
+	using Modeling;
 	using System.Globalization;
 	using System.IO;
 
@@ -35,7 +36,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 			if (cge.IsChoiceTypeUnsplitOrFinal)
 			{
 				var cgl = nmdp.GetContinuationGraphLeaf(currentCid);
-				sb.WriteLine($" {fromNode} -> {cgl.ToState} [label=\"{cgl.Probability.ToString(CultureInfo.InvariantCulture)}\"];");
+				sb.WriteLine($" {fromNode} -> {cgl.ToState} [label=\"{Probability.PrettyPrint(cgl.Probability)}\"];");
 			}
 			else if (cge.IsChoiceTypeDeterministic)
 			{
