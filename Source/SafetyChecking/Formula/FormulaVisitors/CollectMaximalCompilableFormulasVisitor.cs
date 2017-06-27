@@ -22,9 +22,7 @@
 
 namespace ISSE.SafetyChecking.Formula
 {
-	using System;
 	using System.Collections.Generic;
-	using System.Linq.Expressions;
 
 	/// <summary>
 	///   Determines whether a <see cref="Formula" /> is a formula that can be evaluted in a single state.
@@ -36,15 +34,7 @@ namespace ISSE.SafetyChecking.Formula
 		public IEnumerable<Formula> CollectedStateFormulas => MaximalCompilableFormulas;
 
 		public bool IsCompilable; //information propagated from children to parents
-
-		public bool AddWhenPossible; //information propagated from parents to children
-
-		private void AddIfNecessary(Formula formula)
-		{
-			if (AddWhenPossible && IsCompilable)
-				MaximalCompilableFormulas.Add(formula);
-		}
-
+		
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
@@ -53,17 +43,15 @@ namespace ISSE.SafetyChecking.Formula
 			switch (formula.Operator)
 			{
 				case UnaryOperator.Not:
-					var addThis = AddWhenPossible;
-					AddWhenPossible = false;
 					Visit(formula.Operand);
-					AddWhenPossible = addThis;
-					//Value of IsCompilable is kept
-					AddIfNecessary(formula);
 					break;
 				default:
 					// formula itself is not compilable, so add child if possible
-					AddWhenPossible = true;
 					Visit(formula.Operand);
+					if (IsCompilable)
+					{
+						MaximalCompilableFormulas.Add(formula.Operand);
+					}
 					IsCompilable = false;
 					break;
 			}
@@ -80,40 +68,39 @@ namespace ISSE.SafetyChecking.Formula
 				case BinaryOperator.Or:
 				case BinaryOperator.Implication:
 				case BinaryOperator.Equivalence:
-					var addThis = AddWhenPossible;
-					AddWhenPossible = false;
 					Visit(formula.LeftOperand);
 					var leftIsCompilable = IsCompilable;
-					AddWhenPossible = false;
 					Visit(formula.RightOperand);
 					var rightIsCompilable = IsCompilable;
-					AddWhenPossible = addThis;
+
 					if (leftIsCompilable && rightIsCompilable)
 					{
 						IsCompilable = true;
-						AddIfNecessary(formula);
-					}
-					else if (!leftIsCompilable && rightIsCompilable)
-					{
-						IsCompilable = true;
-						AddIfNecessary(formula.RightOperand);
-						IsCompilable = false;
-					}
-					else if (leftIsCompilable && !rightIsCompilable)
-					{
-						IsCompilable = true;
-						AddIfNecessary(formula.LeftOperand);
-						IsCompilable = false;
 					}
 					else
 					{
+						if (leftIsCompilable)
+						{
+							MaximalCompilableFormulas.Add(formula.LeftOperand);
+						}
+						if (rightIsCompilable)
+						{
+							MaximalCompilableFormulas.Add(formula.RightOperand);
+						}
 						IsCompilable = false;
 					}
 					break;
 				case BinaryOperator.Until:
-					AddWhenPossible = true;
 					Visit(formula.LeftOperand);
+					if (IsCompilable)
+					{
+						MaximalCompilableFormulas.Add(formula.LeftOperand);
+					}
 					Visit(formula.RightOperand);
+					if (IsCompilable)
+					{
+						MaximalCompilableFormulas.Add(formula.RightOperand);
+					}
 					IsCompilable = false;
 					break;
 			}
@@ -125,7 +112,6 @@ namespace ISSE.SafetyChecking.Formula
 		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
 			IsCompilable = true;
-			AddIfNecessary(formula);
 		}
 
 		/// <summary>
@@ -133,8 +119,11 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public override void VisitBoundedUnaryFormula(BoundedUnaryFormula formula)
 		{
-			AddWhenPossible = true;
 			Visit(formula.Operand);
+			if (IsCompilable)
+			{
+				MaximalCompilableFormulas.Add(formula.Operand);
+			}
 			IsCompilable = false;
 		}
 
@@ -143,9 +132,16 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public override void VisitBoundedBinaryFormula(BoundedBinaryFormula formula)
 		{
-			AddWhenPossible = true;
 			Visit(formula.LeftOperand);
+			if (IsCompilable)
+			{
+				MaximalCompilableFormulas.Add(formula.LeftOperand);
+			}
 			Visit(formula.RightOperand);
+			if (IsCompilable)
+			{
+				MaximalCompilableFormulas.Add(formula.RightOperand);
+			}
 			IsCompilable = false;
 		}
 
@@ -154,7 +150,6 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public override void VisitRewardFormula(RewardFormula formula)
 		{
-			AddWhenPossible = true;
 			IsCompilable = false;
 		}
 
@@ -163,8 +158,11 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public override void VisitProbabilisticFormula(ProbabilitisticFormula formula)
 		{
-			AddWhenPossible = true;
 			Visit(formula.Operand);
+			if (IsCompilable)
+			{
+				MaximalCompilableFormulas.Add(formula.Operand);
+			}
 			IsCompilable = false;
 		}
 		
@@ -173,8 +171,11 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public void VisitNewTopLevelFormula(Formula formula)
 		{
-			AddWhenPossible = true;
 			formula.Visit(this);
+			if (IsCompilable)
+			{
+				MaximalCompilableFormulas.Add(formula);
+			}
 		}
 	}
 }
