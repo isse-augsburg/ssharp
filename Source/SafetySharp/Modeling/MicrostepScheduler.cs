@@ -63,7 +63,7 @@ namespace SafetySharp.Modeling
 		/// <summary>
 		/// Processes the scheduled callbacks.
 		/// </summary>
-		internal static void CompleteSchedule()
+		public static void CompleteSchedule()
 		{
 			try
 			{

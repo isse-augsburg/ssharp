@@ -95,7 +95,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                             if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rn <= fault.Item2.DistributionValueToRepair())
                             {
                                 fault.Item1.SuppressActivation();
-                                (fault.Item3 as RobotAgent)?.RestoreRobot(fault.Item1);
+                                MicrostepScheduler.Schedule(() => (fault.Item3 as RobotAgent)?.RestoreRobot(fault.Item1));
+                                MicrostepScheduler.CompleteSchedule();
                                 Console.WriteLine("Deactivation of: " + fault.Item1.Name);
                                 fault.Item2.ResetDistributionToRepair();
                             }

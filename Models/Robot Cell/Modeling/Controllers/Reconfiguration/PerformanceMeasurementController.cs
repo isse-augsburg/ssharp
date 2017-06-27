@@ -41,11 +41,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
             }
         }
 
-        public Task<ConfigurationUpdate> CalculateConfigurations(object context, params ITask[] tasks)
+        public Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
         {
             _stopwatch.Stop();
             MicrostepScheduler.StartPerformanceMeasurement(_actingController);
-            var resultingTasks = this._actingController.CalculateConfigurations(context, tasks);
+            var resultingTasks = this._actingController.CalculateConfigurations(context, task);
             var reconfTime = MicrostepScheduler.StopPerformanceMeasurement(_actingController);
             using (var sw = new StreamWriter(@"C:\Users\Eberhardinger\Documents\test.csv", true))
             {
@@ -62,8 +62,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
         }
 
-        public bool ReconfigurationFailure => _actingController.ReconfigurationFailure;
-        public event Action<BaseAgent[]> ConfigurationsCalculated
+        public event Action<ITask, ConfigurationUpdate> ConfigurationsCalculated
         {
             add { _actingController.ConfigurationsCalculated += value; }
             remove { _actingController.ConfigurationsCalculated -= value; }

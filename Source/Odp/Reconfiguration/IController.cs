@@ -26,8 +26,9 @@ namespace SafetySharp.Odp.Reconfiguration
 	using System.Threading.Tasks;
 
 
+    
 
-    public interface IController : IPerfomanceMeasurementController
+    public interface IController
     {
 		BaseAgent[] Agents { get; }
 

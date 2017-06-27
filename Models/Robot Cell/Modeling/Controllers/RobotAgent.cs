@@ -125,7 +125,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
         /// <summary>
         /// Adds all Capabilites that have been removed by fault
         /// </summary>
-	    public void RestoreRobot(Fault fault)
+	    public async System.Threading.Tasks.Task RestoreRobot(Fault fault)
         {
             List<ICapability> capaToAdd; 
             switch (fault.Name)
@@ -152,14 +152,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
                     return;
             }
             _availableCapabilities.AddRange(capaToAdd);
-	    }
+
+            await ReconfigurationMonitor.AttemptTaskContinuance(ReconfigurationStrategy, new State(this));
+        }
 
         /// <summary>
         /// Adds all Capabilites that have been removed before
         /// </summary>
-	    public void RestoreRobot()
+	    public async System.Threading.Tasks.Task RestoreRobot()
         {
             _availableCapabilities.AddRange(unusedProductionCapabilites.Values.SelectMany(x => x));
+            await ReconfigurationMonitor.AttemptTaskContinuance(ReconfigurationStrategy, new State(this));
         }
 
 
@@ -285,11 +288,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Resource = null;
 		}
 
-		public void RestoreRobot()
-		{
-			// ...
-			ReconfigurationMonitor.AttemptTaskContinuance(ReconfigurationStrategy, new State(this));
-		}
 
 		public ReconfigurationMonitor ReconfigurationMonitor { get; set; }
 
