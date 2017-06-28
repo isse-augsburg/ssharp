@@ -46,13 +46,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
         {
             private Model model { get; set; }
             Tuple<Fault, ReliabilityAttribute, IComponent>[] faults;
-            private readonly ModellessSimulator Simulator;
+            private readonly Simulator Simulator;
             public int Throughput { get; set; } = 0;
 
             public ProfileBasedSimulator(Model model)
             {
-                Simulator = new ModellessSimulator(model.Components);
-                this.model = model;
+                Simulator = new Simulator(model);
+	            this.model = Simulator.Model as Model;
                 CollectFaults();
             }
 
