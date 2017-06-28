@@ -77,7 +77,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 var rd = new Random();
                 for (var x = 0; x < numberOfSteps; x++)
                 {
-                    var rn = rd.NextDouble();
                     foreach (var fault in this.faults)
                     {
                         
@@ -85,14 +84,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 //                        {
 //                            sw.WriteLine(rn);
 //                        }
-                        if (fault.Item2?.MTTF > 0 && !fault.Item1.IsActivated && rn <= fault.Item2.DistributionValueToFail())
+                        if (fault.Item2?.MTTF > 0 && !fault.Item1.IsActivated && rd.NextDouble() <= fault.Item2.DistributionValueToFail())
                         {
                             fault.Item1.ForceActivation();
                             Console.WriteLine("Activation of: " + fault.Item1.Name);
                             fault.Item2.ResetDistributionToFail();
                         }
                         else { 
-                            if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rn <= fault.Item2.DistributionValueToRepair())
+                            if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rd.NextDouble() <= fault.Item2.DistributionValueToRepair())
                             {
                                 fault.Item1.SuppressActivation();
                                 MicrostepScheduler.Schedule(() => (fault.Item3 as RobotAgent)?.RestoreRobot(fault.Item1));
