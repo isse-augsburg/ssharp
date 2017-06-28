@@ -112,7 +112,7 @@ namespace ISSE.SafetyChecking.Modeling
 		{
 			if (value * 10.0 >= 1.0)
 			{
-				return value.ToString("0.###",CultureInfo.InvariantCulture);
+				return value.ToString("0.0##",CultureInfo.InvariantCulture);
 			}
 			var newValue = value;
 			for (var i = 0; i < 10; i++)

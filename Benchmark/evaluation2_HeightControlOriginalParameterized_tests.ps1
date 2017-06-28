@@ -41,4 +41,8 @@ $global_testValuations = @()
 
 $global_selected_tests = $global_tests | Where { $_.TestCategories.Contains("Variant-Original-Original-Original") -and $_.TestCategories.Contains("Probability") }
 
-AddParameterizedJsonTestValuations -NamePrefix "HeightControlOriginal_Paramererized" -SourceFile $PSScriptRoot\HeightControlNormal.json -TargetFile $global_compilate_directory\Analysis\heightcontrol_probabilities.json -VariableToUpdate "OverheadDetectorFalseDetection" -MinValue 0.000005 -MaxValue 0.005 -Steps 10
+#AddParameterizedJsonTestValuations -NamePrefix "HeightControlOriginal_Paramererized_OHD" -SourceFile $PSScriptRoot\HeightControlNormal.json -TargetFile $global_compilate_directory\Analysis\heightcontrol_probabilities.json -VariableToUpdate "OverheadDetectorFalseDetection" -MinValue 0.000001 -MaxValue 0.01 -Steps 25
+
+#AddParameterizedJsonTestValuations -NamePrefix "HeightControlOriginal_Paramererized_HV" -SourceFile $PSScriptRoot\HeightControlNormal.json -TargetFile $global_compilate_directory\Analysis\heightcontrol_probabilities.json -VariableToUpdate "LeftHV" -MinValue 0.000001 -MaxValue 0.1 -Steps 25
+
+AddParameterizedJsonTestValuations -NamePrefix "HeightControlOriginal_Paramererized_LB" -SourceFile $PSScriptRoot\HeightControlNormal.json -TargetFile $global_compilate_directory\Analysis\heightcontrol_probabilities.json -VariableToUpdate "LightBarrierFalseDetection" -MinValue 0.000001 -MaxValue 0.01 -Steps 25

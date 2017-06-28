@@ -73,11 +73,13 @@ namespace SafetySharp.CaseStudies.SmallModels.Model1
 		{
 			var model = new ExampleModelBase();
 
+			var isHazardActive = new ExecutableStateFormula(() => model.ModelComponent.HazardActive, "HazardActive");
+
 			var tc = SafetySharpModelChecker.TraversalConfiguration;
 			tc.WriteGraphvizModels = true;
 			SafetySharpModelChecker.TraversalConfiguration = tc;
 
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.ModelComponent.HazardActive, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, isHazardActive, 50);
 			Console.Write($"Probability of hazard: {result}");
 		}
 

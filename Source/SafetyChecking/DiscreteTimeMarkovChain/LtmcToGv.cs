@@ -38,7 +38,10 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 				for (int i = 0; i < markovChain.StateFormulaLabels.Length; i++)
 				{
-					sb.Write(",");
+					if (i==0)
+						sb.Write("\\n");
+					else
+						sb.Write(",");
 					if (distribution.CurrentFormulas[i])
 						sb.Write("t");
 					else
