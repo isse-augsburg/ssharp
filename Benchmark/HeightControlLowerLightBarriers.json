@@ -3,9 +3,9 @@
   "LightBarrierMisdetection": "0.0001",
   "OverheadDetectorFalseDetection": "0.005",
   "OverheadDetectorMisdetection": "0.0001",
-  "SmallLightBarrierFalseDetection": "0.005",
+  "SmallLightBarrierFalseDetection": "0.000005",
   "SmallLightBarrierMisdetection": "0.0001",
   "LeftHV": "0.01",
   "LeftOHV": "0.001",
-  "SlowTraffic": "0.01"
+  "SlowTraffic": "0.1"
 }

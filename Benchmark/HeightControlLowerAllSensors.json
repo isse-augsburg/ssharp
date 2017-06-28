@@ -7,5 +7,5 @@
   "SmallLightBarrierMisdetection": "0.000001",
   "LeftHV": "0.01",
   "LeftOHV": "0.001",
-  "SlowTraffic": "0.01"
+  "SlowTraffic": "0.1"
 }
