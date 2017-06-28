@@ -58,6 +58,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	    [Hidden(HideElements = true)]
 	    private Dictionary<ProductionAction, List<ICapability>> unusedProductionCapabilites = new Dictionary<ProductionAction, List<ICapability>>();
 
+
+
         public RobotAgent(ICapability[] capabilities, Robot robot, List<Task> tasks, List<Resource> resources)
 			: base(capabilities)
 		{
@@ -125,7 +127,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
         /// <summary>
         /// Adds all Capabilites that have been removed by fault
         /// </summary>
-	    public async System.Threading.Tasks.Task RestoreRobot(Fault fault)
+	    public override async System.Threading.Tasks.Task RestoreRobot(Fault fault)
         {
             List<ICapability> capaToAdd; 
             switch (fault.Name)
@@ -289,7 +291,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		}
 
 
-		public ReconfigurationMonitor ReconfigurationMonitor { get; set; }
+		
 
 		// robot delegation methods
 		// This enables tolerable faults to be analyzed both with and without hardware models.

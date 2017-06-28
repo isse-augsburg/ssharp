@@ -53,28 +53,27 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             yield return Ictss7<T>(mode, verify);
         }
 
-        public static Model PerformanceMeasurement1<T>(AnalysisMode mode, bool verify = false)
+        public static Model PerformanceMeasurement1<T>(AnalysisMode mode = AnalysisMode.AllFaults, bool verify = false)
             where T : IController
         {
             return ChooseAnalysisMode(
-                new ModelBuilder(nameof(Ictss1))
-                    .DefineTask(1000, Produce, Drill, Insert, Tighten, Polish, Consume)
+                new ModelBuilder(nameof(PerformanceMeasurement1))
+                    .DefineTask(5, Produce, Drill, Insert, Tighten, Polish, Consume)
 
+                    .AddRobot(Produce, Drill, Insert)
+                    .AddRobot(Insert, Drill, Tighten)
+                    .AddRobot(Polish, Consume)/*
                     .AddRobot(Produce, Drill, Insert)
                     .AddRobot(Insert, Drill)
                     .AddRobot(Tighten, Polish, Tighten, Drill)
-                    .AddRobot(Polish, Consume)
-                    .AddRobot(Produce, Drill, Insert)
-                    .AddRobot(Insert, Drill)
-                    .AddRobot(Tighten, Polish, Tighten, Drill)
-                    .AddRobot(Polish, Consume)
+                    .AddRobot(Polish, Consume)*/
 
-                    .AddCart(Route(0, 1), Route(0, 2), Route(0, 3))
+                    .AddCart(Route(0, 1), Route(0, 2))
                     .AddCart(Route(1, 2), Route(0, 1))
-                    .AddCart(Route(2, 3))
+                    /*.AddCart(Route(2, 3))
                     .AddCart(Route(3, 4), Route(3, 5), Route(3, 6))
                     .AddCart(Route(4, 5), Route(3, 4))
-                    .AddCart(Route(5, 6))
+                    .AddCart(Route(5, 6))*/
 
                     .ChooseController<T>()
                     .EnableControllerVerification(verify)

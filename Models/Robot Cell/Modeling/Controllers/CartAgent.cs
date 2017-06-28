@@ -114,7 +114,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				Broken.AddEffect<BrokenEffect>(this);
 		}
 
-		[FaultEffect, Priority(2)]
+	    public override async System.Threading.Tasks.Task RestoreRobot(Fault fault)
+	    {
+	        await ReconfigurationMonitor.AttemptTaskContinuance(ReconfigurationStrategy, new State(this));
+        }
+
+        [FaultEffect, Priority(2)]
 		public class BrokenEffect : CartAgent
 		{
 			protected override bool CheckInput(Agent agent) => false;

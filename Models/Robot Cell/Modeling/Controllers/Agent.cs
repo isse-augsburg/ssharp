@@ -27,12 +27,15 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.Linq;
 	using SafetySharp.Modeling;
 	using Odp;
+	using Odp.Reconfiguration;
 
-	internal abstract class Agent : BaseAgent
+    internal abstract class Agent : BaseAgent
 	{
 		public readonly Fault ConfigurationUpdateFailed = new TransientFault();
 
-		protected Agent(params ICapability[] capabilities)
+	    public ReconfigurationMonitor ReconfigurationMonitor { get; set; }
+
+        protected Agent(params ICapability[] capabilities)
 		{
 			if (HasDuplicates(capabilities))
 				throw new InvalidOperationException("Duplicate capabilities have no effect.");
@@ -74,7 +77,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		public abstract string Name { get; }
 
-		public bool HasResource => Resource != null;
+	    public abstract System.Threading.Tasks.Task RestoreRobot(Fault fault);
+
+
+        public bool HasResource => Resource != null;
 
 		protected override async System.Threading.Tasks.Task UpdateAsync()
 		{

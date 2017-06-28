@@ -33,10 +33,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
 		private Workpiece _workpiece;
 
-        [Reliability(mttf:100, mttr:10)]
+   
         public Fault BrokenFault = new TransientFault();
-
-        [Reliability(mttf: 50, mttr: 10)]
+        
         public Fault SwitchFault = new TransientFault();
 
 		// intolerable fault

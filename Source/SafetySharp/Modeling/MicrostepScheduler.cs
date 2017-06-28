@@ -29,8 +29,9 @@ namespace SafetySharp.Modeling
 	using System.Runtime.Remoting.Messaging;
 	using System.Threading;
 	using System.Threading.Tasks;
+	using Utilities;
 
-	/// <summary>
+    /// <summary>
 	/// This class can be used to simulate parallel execution within a microstep.
 	/// </summary>
 	public static class MicrostepScheduler
@@ -57,7 +58,12 @@ namespace SafetySharp.Modeling
 		/// <param name="action">The scheduled callback, which may use <c>await</c> statements.</param>
 		public static void Schedule(Func<Task> action)
 		{
-			Context.Post(o => Tasks.Add(action()), null);
+			Context.Post(o =>
+			{
+			    var res = action();
+                Debug.Assert(res != null);
+                Tasks.Add(res);
+            }, null);
 		}
 
 		/// <summary>
@@ -65,17 +71,18 @@ namespace SafetySharp.Modeling
 		/// </summary>
 		public static void CompleteSchedule()
 		{
-			try
-			{
-				Context.Run();
+		    try
+		    {
+		        Context.Run();
 
-				// propagate exceptions
-				Task.WhenAll(Tasks.Where(task => task.IsFaulted)).GetAwaiter().GetResult();
+		        // propagate exceptions
+		        Task.WhenAll(Tasks.Where(task => task.IsFaulted)).GetAwaiter().GetResult();
 
-				// tasks should already be completed (faulted, cancelled, or successful) by now
-				if (!Tasks.All(task => task.IsCompleted))
-					throw new InvalidOperationException("Not all scheduled async tasks could be completed. This generally indicates a bug in the model.");
-			}
+		        // tasks should already be completed (faulted, cancelled, or successful) by now
+		        if (!Tasks.All(task => task.IsCompleted))
+		            throw new InvalidOperationException(
+		                "Not all scheduled async tasks could be completed. This generally indicates a bug in the model.");
+		    }
 			finally
 			{
 				Tasks.Clear();

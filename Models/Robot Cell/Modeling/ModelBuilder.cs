@@ -165,6 +165,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			return this;
 		}
 
+
 		public ModelBuilder TolerableFaultsAnalysis()
 		{
 			_model.Controller = new TolerableAnalysisController(_model.Controller);

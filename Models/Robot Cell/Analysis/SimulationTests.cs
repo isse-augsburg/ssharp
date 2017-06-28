@@ -51,8 +51,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
             public ProfileBasedSimulator(Model model)
             {
-                Simulator = new Simulator(model);
-	            this.model = Simulator.Model as Model;
+                Simulator = new Simulator(model);//ModellessSimulator(model.Components);
+                this.model = model;
                 CollectFaults();
             }
 
@@ -63,7 +63,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 {
                     var faultFields =
                         from faultField in component.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
-                        where typeof(Fault).IsAssignableFrom(faultField.FieldType)
+                        where typeof(Fault).IsAssignableFrom(faultField.FieldType) && faultField.GetCustomAttribute<ReliabilityAttribute>() != null
                         select Tuple.Create((Fault)faultField.GetValue(component), faultField.GetCustomAttribute<ReliabilityAttribute>(), component);
 
                     foreach (var info in faultFields)
@@ -94,7 +94,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                             if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rd.NextDouble() <= fault.Item2.DistributionValueToRepair())
                             {
                                 fault.Item1.SuppressActivation();
-                                MicrostepScheduler.Schedule(() => (fault.Item3 as RobotAgent)?.RestoreRobot(fault.Item1));
+                                Debug.Assert(fault.Item3 is Agent);
+                                MicrostepScheduler.Schedule(() => (fault.Item3 as Agent)?.RestoreRobot(fault.Item1));
                                 MicrostepScheduler.CompleteSchedule();
                                 Console.WriteLine("Deactivation of: " + fault.Item1.Name);
                                 fault.Item2.ResetDistributionToRepair();
@@ -137,6 +138,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 IntegerVector throughputVector = engine.CreateIntegerVector(new int[] { throughput });
                 engine.SetSymbol("throughput", throughputVector);
                 engine.SetSymbol("maxThroughput", engine.CreateIntegerVector(new int[] { 10 }));
+                engine.SetSymbol("w", engine.CreateNumericVector(new double[] { 0.5 }));
 
                 //prepare data
                 fileName = "C:\\Users\\Eberhardinger\\Desktop\\myplot.pdf";
@@ -146,13 +148,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 engine.Evaluate("overallPerformanceTimeValue <- mean(perfomranceValueVector)");
                 var overallPerformanceTimeValue = engine.GetSymbol("overallPerformanceTimeValue");
                 engine.Evaluate("relativeCostValue <- throughput/maxThroughput");
-
-                //calculate
+                engine.Evaluate("overallPerformanceValue <- overallPerformanceTimeValue + w * relativeCostValue");
 
                 CharacterVector fileNameVector = engine.CreateCharacterVector(new[] { fileName });
                 engine.SetSymbol("fileName", fileNameVector);
 
-                engine.Evaluate("reg <- lm(perfomranceValueVector~measurePoints)");
+             //   engine.Evaluate("reg <- lm(perfomranceValueVector~measurePoints)");
                 engine.Evaluate("cairo_pdf(filename=fileName, width=6, height=6, bg='transparent')");
                 engine.Evaluate("plot(perfomranceValueVector~measurePoints)");
 //                engine.Evaluate("abline(reg)");
@@ -176,7 +177,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
         [Test]
 		public void Simulate()
 		{
-			var model = SampleModels.DefaultInstanceWithoutPlant<PerformanceMeasurementController<FastController>>();
+			var model = SampleModels.PerformanceMeasurement1<PerformanceMeasurementController<FastController>>();
 			model.Faults.SuppressActivations();
 
 			var simulator = new ModellessSimulator(model.Components);
@@ -187,7 +188,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
         [Test]
         public void SimulateProfileBased()
         {
-            var model = SampleModels.DefaultInstanceWithoutPlant<PerformanceMeasurementController<FastController>>();
+            var model = SampleModels.PerformanceMeasurement1<PerformanceMeasurementController<FastController>>();
             model.Faults.SuppressActivations();
             var profileBasedSimulator = new ProfileBasedSimulator<PerformanceMeasurementController<FastController>>(model);
             profileBasedSimulator.Simulate(numberOfSteps: 1000);
