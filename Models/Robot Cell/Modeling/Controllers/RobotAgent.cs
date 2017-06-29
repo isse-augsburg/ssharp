@@ -55,28 +55,58 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		private readonly List<Task> _tasks;
 		private readonly List<Resource> _resources;
 
-	    [Hidden(HideElements = true)]
-	    private Dictionary<ProductionAction, List<ICapability>> unusedProductionCapabilites = new Dictionary<ProductionAction, List<ICapability>>();
+        // All capabilities the robot can have, provided none are broken.
+        private readonly ICapability[] _capabilities;
+        // For each capability, remember if the hardware ever failed to apply it. If so, it is considered defect forever.
+        private readonly bool[] _plantCapabilityDefects;
+        // Actually available capabilities.
+        public override IEnumerable<ICapability> AvailableCapabilities => _capabilities.Where((c, i) => !_plantCapabilityDefects[i] && CheckAllocatedCapability(c));
 
         public RobotAgent(ICapability[] capabilities, Robot robot, List<Task> tasks, List<Resource> resources)
-			: base(capabilities)
-		{
+        {
 			Robot = robot;
 			_tasks = tasks;
 			_resources = resources;
 
-			Broken.Name = $"{Name}.{nameof(Broken)}";
+		    if (HasDuplicates(capabilities))
+		        throw new InvalidOperationException("Duplicate capabilities have no effect.");
+            _capabilities = capabilities;
+            _plantCapabilityDefects = new bool[capabilities.Length];
+
+            Broken.Name = $"{Name}.{nameof(Broken)}";
 			ResourceTransportFault.Name = $"{Name}.{nameof(ResourceTransportFault)}";
 
 			AddTolerableFaultEffects();
-
-            foreach (ProductionAction type in Enum.GetValues(typeof(ProductionAction)))
-            {
-                unusedProductionCapabilites.Add(type, new List<ICapability>());
-            }
 		}
+ 
+	    /* TODO: agents cannot have duplicate capabilities
+           *
+           * Adding duplicate capabilities to agents (RobotAgents) has no effect:
+           * a robot may have multiple tools that perform the same action (e.g. multiple drills),
+           * but the agent has just one corresponding capability (as long as any of the tools are
+           * functioning).
+           *
+           * In the future, multiple capabilities should be supported, each associated with one tool.
+           * This would allow for the selection of less-used tools etc.
+           * To support this, we need to distinguish between functional equivalence and reference equality
+           * of capabilities in SafetySharp.Odp. For example, add IsEquivalentTo(ICapability) to the
+           * ICapability interface. Adjust all configuration mechanisms, agents etc. to
+           * use the appropriate comparison.
+           *
+           * */
+	    private bool HasDuplicates(ICapability[] capabilities)
+	    {
+	        var set = new HashSet<ICapability>();
+	        foreach (var cap in capabilities)
+	        {
+	            if (set.Contains(cap))
+	                return true;
+	            set.Add(cap);
+	        }
+	        return false;
+	    }
 
-		protected RobotAgent() { } // for fault effects
+        protected RobotAgent() { } // for fault effects
 
 		public override string Name => $"R{ID}";
 
@@ -100,71 +130,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return Robot?.CanTransfer() ?? true;
 		}
 
-	    ///<summary> 
-	    /// Enable to revaluate the currently available  capabilities
-	    /// Thus, it is possible to add tools to an Agent at run time or repair defects 
-	    ///</summary>
-	    public override void EvaluateCurrentlyAvailableCapabilites()
-	    {
-	        throw  new NotImplementedException();
-	    }
-
-	    public void AddTool(ProcessCapability newCapability)
-	    {
-            _availableCapabilities.Add(newCapability);   
-	    }
-
-	    public void AddTools(IEnumerable<ProcessCapability> newCapabilities)
-	    {
-	        foreach (var capability in newCapabilities)
-	        {
-	            AddTool(capability);
-	        }
-	    }
-
         /// <summary>
-        /// Adds all Capabilites that have been removed by fault
+        /// Notifies the robot a fault has been restored.
         /// </summary>
 	    public async System.Threading.Tasks.Task RestoreRobot(Fault fault)
         {
-            List<ICapability> capaToAdd; 
-            switch (fault.Name)
-            {
-                case "DrillBroken":
-                    capaToAdd = unusedProductionCapabilites[ProductionAction.Drill];
-                    break;
-                case "InsertBroken":
-                    capaToAdd = unusedProductionCapabilites[ProductionAction.Insert];
-                    break;
-                case "PolishBroken":
-                    capaToAdd = unusedProductionCapabilites[ProductionAction.Polish];
-                    break;
-                case "TightenBroken":
-                    capaToAdd = unusedProductionCapabilites[ProductionAction.Tighten];
-                    break;
-                case "NoneBroken":
-                    capaToAdd = unusedProductionCapabilites[ProductionAction.None];
-                    break;
-                case "Broken":
-                    RestoreRobot();
-                    return;
-                default:
-                    return;
-            }
-            _availableCapabilities.AddRange(capaToAdd);
-
             await ReconfigurationMonitor.AttemptTaskContinuance(ReconfigurationStrategy, new State(this));
         }
-
-        /// <summary>
-        /// Adds all Capabilites that have been removed before
-        /// </summary>
-	    public async System.Threading.Tasks.Task RestoreRobot()
-        {
-            _availableCapabilities.AddRange(unusedProductionCapabilites.Values.SelectMany(x => x));
-            await ReconfigurationMonitor.AttemptTaskContinuance(ReconfigurationStrategy, new State(this));
-        }
-
 
         protected override bool CheckAllocatedCapability(ICapability capability)
 		{
@@ -250,31 +222,27 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			if (!Equals(_currentCapability, capability))
 			{
 				// Switch the capability; if we fail to do so, remove all other capabilities from the available ones
-				if (SwitchCapability(capability))
-					_currentCapability = capability;
-				else
+				if (!SwitchCapability(capability))
 				{
-				    foreach (var capa in _availableCapabilities.Where(c => !c.Equals(_currentCapability)))
+				    for (var i = 0; i < _capabilities.Length; ++i)
 				    {
-                        if (capa.GetType() != typeof(ProcessCapability))
-                            continue;
-                        unusedProductionCapabilites[((ProcessCapability)capa).ProductionAction].Add(capa);
-                    }
-                    _availableCapabilities.RemoveAll(c => !c.Equals(_currentCapability));
+				        if (_capabilities[i] is ProcessCapability && !_capabilities[i].Equals(_currentCapability))
+				            _plantCapabilityDefects[i] = true;
+				    }
                     return;
 				}
-			}
+
+			    _currentCapability = capability;
+            }
 
 			// Apply the capability; if we fail to do so, remove it from the available ones
 			if (!ApplyCurrentCapability())
 			{
-				_availableCapabilities.Remove(capability);
-                unusedProductionCapabilites[capability.ProductionAction].Add(capability);
+			    _plantCapabilityDefects[Array.IndexOf(_capabilities, capability)] = true;
+                return;
 			}
-			else
-			{
-				Resource.OnCapabilityApplied(capability);
-			}
+
+            Resource.OnCapabilityApplied(capability);
 		}
 
 		public void ApplyCapability(ConsumeCapability capability)
