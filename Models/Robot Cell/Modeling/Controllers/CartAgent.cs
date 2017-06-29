@@ -23,12 +23,17 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
+    using System.Collections.Generic;
+    using Odp;
 	using Plants;
 
 	internal class CartAgent : Agent
 	{
 		public Fault Broken = new TransientFault();
 
+	    public override IEnumerable<ICapability> AvailableCapabilities { get; } = new ICapability[0];
+
+        public CartAgent(Cart cart)
 		public CartAgent(Cart cart)
 		{
 			Cart = cart;
