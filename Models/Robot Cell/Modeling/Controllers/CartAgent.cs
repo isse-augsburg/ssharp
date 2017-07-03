@@ -23,11 +23,15 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
+    using System.Collections.Generic;
+    using Odp;
 	using Plants;
 
 	internal class CartAgent : Agent
 	{
 		public Fault Broken = new TransientFault();
+
+	    public override IEnumerable<ICapability> AvailableCapabilities { get; } = new ICapability[0];
 
 		public CartAgent(Cart cart)
 		{
@@ -94,15 +98,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		{
 			return Cart?.CanMove(((RobotAgent)agent).Robot) ?? true;
 		}
-
-	    ///<summary> 
-	    /// Enable to revaluate the currently available  capabilities
-	    /// Thus, it is possible to add tools to an Agent at run time or repair defects 
-	    ///</summary>
-	    public override void EvaluateCurrentlyAvailableCapabilites()
-	    {
-	        throw new System.NotImplementedException();
-	    }
 
 	    protected virtual bool MoveTo(Robot robot) => Cart?.MoveTo(robot) ?? true;
 
