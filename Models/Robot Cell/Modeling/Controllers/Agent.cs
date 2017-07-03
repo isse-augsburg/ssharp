@@ -62,16 +62,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			}
 			return false;
 		}
+        
 
-		internal Queue<Task> TaskQueue;
-=======
 	    protected Agent()
 	    {
 	        ConfigurationUpdateFailed.Name = $"{Name}.{nameof(ConfigurationUpdateFailed)}";
 	    }
->>>>>>> ReliabilityBasedSimulation
 
-	    internal Queue<Task> TaskQueue;
+
 
 		public abstract string Name { get; }
 
