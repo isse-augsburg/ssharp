@@ -76,14 +76,10 @@ namespace SafetySharp.Odp.Reconfiguration
 		public async Task AttemptTaskContinuance(IReconfigurationStrategy strategy, BaseAgent.State state)
 		{
 			var availableCapabilities = new HashSet<ICapability>(_knownAgents.SelectMany(b => b.AvailableCapabilities));
-			foreach (var task in _failedTasks.ToArray()) // copy collection since reconfiguration may modify collection
-			{
-				var necessaryCapabilities = new HashSet<ICapability>(task.RequiredCapabilities);
-				if (necessaryCapabilities.IsSubsetOf(availableCapabilities))
-				{
-					await strategy.Reconfigure(new List<Tuple<ITask, BaseAgent.State>>() { Tuple.Create(task, state) });
-				}
-			}
+		    await Task.WhenAll(from task in _failedTasks.ToArray()
+		                       let necessaryCapabilities = new HashSet<ICapability>(task.RequiredCapabilities)
+		                       where necessaryCapabilities.IsSubsetOf(availableCapabilities)
+		                       select strategy.Reconfigure(new[] { Tuple.Create(task, state) }));
 		}
 	}
 }
