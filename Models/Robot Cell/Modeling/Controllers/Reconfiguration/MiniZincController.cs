@@ -32,7 +32,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 	{
 		private const string MinizincModel = "ConstraintModel.mzn";
 
-		public MiniZincController(IEnumerable<Agent> agents) : base(MinizincModel, agents.ToArray()) { }
+		public MiniZincController(Agent[] agents) : base(MinizincModel, agents) { }
 
 		protected override void WriteInputData(ITask task, StreamWriter writer)
 		{

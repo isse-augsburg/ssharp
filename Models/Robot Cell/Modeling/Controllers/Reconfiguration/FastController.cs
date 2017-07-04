@@ -41,7 +41,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		[NonDiscoverable, Hidden(HideElements = true)]
 		private readonly HashSet<CartAgent> _usedCarts = new HashSet<CartAgent>();
 
-		public FastController(IEnumerable<BaseAgent> agents) : base(agents.ToArray()) { }
+		public FastController(Agent[] agents) : base(agents) { }
 
 		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{

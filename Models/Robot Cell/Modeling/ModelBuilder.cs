@@ -152,7 +152,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		public ModelBuilder ChooseController<T>() where T : IController
 		{
-			_model.Controller = (IController)Activator.CreateInstance(typeof(T), Agents);
+			_model.Controller = (IController)Activator.CreateInstance(typeof(T), new[] { Agents.ToArray() });
 			if (_model.Controller is IComponent)
 				_model.AdditionalComponents.Add(_model.Controller as IComponent);
 			return this;
