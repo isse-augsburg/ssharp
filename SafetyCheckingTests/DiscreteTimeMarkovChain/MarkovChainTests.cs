@@ -74,7 +74,8 @@ namespace Tests.DiscreteTimeMarkovChain
 					counterOfTransition += enumerator.CurrentTransition.Value;
 				}
 				counter += counterOfTransition;
-				Assert.Equal(1.0, counterOfTransition);
+				var resultIsNotFarFrom1 = counterOfTransition >= 1.0 - 1.0E-16 && counterOfTransition <= 1.0 + 1.0E-16;
+				Assert.Equal(resultIsNotFarFrom1, true);
 			}
 			Assert.Equal(1.0*markovChain.States, counter);
 		}

@@ -40,7 +40,7 @@ namespace Tests.DiscreteTimeMarkovChain.MarkovChainExamples
 
 	public static class AllExamples
 	{
-		internal static MarkovChainExample[] Examples = { new Example1(), new Example2(), new Example3()};
+		internal static MarkovChainExample[] Examples = { new Example1(), new Example2(), new Example3(), new Example4()};
 	}
 
 
@@ -256,11 +256,86 @@ namespace Tests.DiscreteTimeMarkovChain.MarkovChainExamples
 			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true } };
 
 			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } , { 2, true } , { 3, true }, { 4, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };
 
 			ProbabilityFinallyLabel1 = 1.0;
 			ProbabilityFinally10Label1 = 1.0;
 			ProbabilityLabel1UntilLabel2 = 0.2;
+		}
+	}
+	public class Example4 : MarkovChainExample
+	{
+		internal static DiscreteTimeMarkovChain Create()
+		{
+			// Transformed LabeledTransitionMarkovChain.Example4
+			//   0⟶0.6⟼1⟼0.9⟲
+			//                0.01⇢3
+			//                0.09⇢4
+			//       0.3⟼2⟼0.9⇢1
+			//                0.01⇢3
+			//                0.09⇢4
+			//       0.1⟼4⟼3⟲
+
+			var markovChain = new DiscreteTimeMarkovChain(ModelCapacityByMemorySize.Tiny);
+			markovChain.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
+			markovChain.StateRewardRetrieverLabels = new string[] { };
+			markovChain.StartWithInitialDistribution();
+			markovChain.AddInitialTransition(0, 1.0);
+			markovChain.FinishInitialDistribution();
+
+			markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { false, false }));
+			markovChain.StartWithNewDistribution(0);
+			markovChain.AddTransition(1, 0.6);
+			markovChain.AddTransition(2, 0.3);
+			markovChain.AddTransition(4, 0.1);
+			markovChain.FinishDistribution();
+
+			markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { false, false }));
+			markovChain.StartWithNewDistribution(1);
+			markovChain.AddTransition(1, 0.9);
+			markovChain.AddTransition(3, 0.01);
+			markovChain.AddTransition(4, 0.09);
+			markovChain.FinishDistribution();
+
+			markovChain.SetStateLabeling(2, new StateFormulaSet(new[] { true, false }));
+			markovChain.StartWithNewDistribution(2);
+			markovChain.AddTransition(1, 0.9);
+			markovChain.AddTransition(3, 0.01);
+			markovChain.AddTransition(4, 0.09);
+			markovChain.FinishDistribution();
+
+			markovChain.SetStateLabeling(3, new StateFormulaSet(new[] { false, false }));
+			markovChain.StartWithNewDistribution(3);
+			markovChain.AddTransition(3, 1.0);
+			markovChain.FinishDistribution();
+
+			markovChain.SetStateLabeling(4, new StateFormulaSet(new[] { false, true }));
+			markovChain.StartWithNewDistribution(4);
+			markovChain.AddTransition(3, 1.0);
+			markovChain.FinishDistribution();
+
+			//markovChain.ProbabilityMatrix.OptimizeAndSeal();
+			return markovChain;
+		}
+
+		public Example4()
+		{
+			MarkovChain = Create();
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 2, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 4, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 2, true }, { 4, true } };
+
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 4, true } };
+
+			ProbabilityFinallyLabel1 = 0.3;
+			ProbabilityFinally10Label1 = 0.3;
+			ProbabilityLabel1UntilLabel2 = 0.0;
 		}
 	}
 }

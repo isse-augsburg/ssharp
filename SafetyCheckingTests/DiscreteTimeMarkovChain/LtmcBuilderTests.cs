@@ -30,7 +30,6 @@ namespace Tests.DiscreteTimeMarkovChain
 {
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
-	using ISSE.SafetyChecking.GenericDataStructures;
 	using ISSE.SafetyChecking.Utilities;
 	using Shouldly;
 	using SimpleExecutableModel;
@@ -38,25 +37,28 @@ namespace Tests.DiscreteTimeMarkovChain
 	using Xunit;
 	using Xunit.Abstractions;
 
-	public unsafe class LtmcBuilderTests
+	public unsafe class LtmcTestBuilder
 	{
 		private const int StateCapacity = 1024;
 		private const int TransitionCapacity = 4096;
-		public TestTraceOutput Output { get; }
 
 		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
 		private readonly LtmcTransition* _transitions;
 		private int _transitionCount = 0;
 
-		public LtmcBuilderTests(ITestOutputHelper output)
+
+		internal LabeledTransitionMarkovChain Ltmc { get; }
+		internal LabeledTransitionMarkovChain.LtmcBuilder<SimpleExecutableModel> LtmcBuilder { get; }
+
+		public LtmcTestBuilder()
 		{
-			Output = new TestTraceOutput(output);
-			
 			_transitionBuffer.Resize(TransitionCapacity * sizeof(LtmcTransition), zeroMemory: false);
 			_transitions = (LtmcTransition*)_transitionBuffer.Pointer;
+			Ltmc = new LabeledTransitionMarkovChain(StateCapacity, TransitionCapacity);
+			LtmcBuilder = new LabeledTransitionMarkovChain.LtmcBuilder<SimpleExecutableModel>(Ltmc);
 		}
 
-		private void CreateTransition(bool isFormulaSatisfied, int targetStateIndex, int distribution, double p)
+		internal void CreateTransition(bool isFormulaSatisfied, int targetStateIndex, double p)
 		{
 			var transition = _transitionCount;
 			_transitionCount++;
@@ -66,34 +68,72 @@ namespace Tests.DiscreteTimeMarkovChain
 			t->TargetStateIndex = targetStateIndex;
 			t->Formulas = new StateFormulaSet(new Func<bool>[] { () => isFormulaSatisfied });
 			t->Flags = TransitionFlags.IsValidFlag | TransitionFlags.IsStateTransformedToIndexFlag;
-			t->ActivatedFaults=new FaultSet();
+			t->ActivatedFaults = new FaultSet();
 		}
 
-		private TransitionCollection CreateTransitionCollection()
+		internal void CreateTransition(bool[] isFormulaSatisfied, int targetStateIndex, double p)
+		{
+			var transition = _transitionCount;
+			_transitionCount++;
+			_transitions[transition] = new LtmcTransition { Probability = p };
+			var t = (Transition*)(_transitions + transition);
+			t->SourceStateIndex = 0;
+			t->TargetStateIndex = targetStateIndex;
+			t->Formulas = new StateFormulaSet(isFormulaSatisfied);
+			t->Flags = TransitionFlags.IsValidFlag | TransitionFlags.IsStateTransformedToIndexFlag;
+			t->ActivatedFaults = new FaultSet();
+		}
+
+		internal TransitionCollection CreateTransitionCollection()
 		{
 			return new TransitionCollection((Transition*)_transitions, _transitionCount, _transitionCount, sizeof(LtmcTransition));
 		}
 
-		private void ClearTransitions()
+		internal void ClearTransitions()
 		{
 			_transitionCount = 0;
 		}
 
+		internal void ProcessInitialTransitions()
+		{
+			LtmcBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
+		}
+
+		internal void ProcessStateTransitions(int sourceState)
+		{
+			LtmcBuilder.ProcessTransitions(null, null, sourceState, CreateTransitionCollection(), _transitionCount, false);
+		}
+
+
+	}
+
+
+	public unsafe class LtmcBuilderTests
+	{
+		public TestTraceOutput Output { get; }
+
+		public LtmcTestBuilder LtmcTestBuilder { get; } = new LtmcTestBuilder();
+
+		public LtmcBuilderTests(ITestOutputHelper output)
+		{
+			Output = new TestTraceOutput(output);
+		}
+		
+
 		[Fact]
 		public void OneReflexiveTransition()
 		{
-			var ltmc = new LabeledTransitionMarkovChain(StateCapacity, TransitionCapacity);
-			var ltmcBuilder = new LabeledTransitionMarkovChain.LtmcBuilder<SimpleExecutableModel>(ltmc);
-
 			// add initial state
-			ClearTransitions();
-			CreateTransition(false, 5, 0, 1.0);
-			ltmcBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
-			ClearTransitions();
+			LtmcTestBuilder.ClearTransitions();
+			LtmcTestBuilder.CreateTransition(false, 5, 1.0);
+			LtmcTestBuilder.ProcessInitialTransitions();
+			LtmcTestBuilder.ClearTransitions();
 
 			// add reflexive state 5
-			CreateTransition(false, 5, 0, 1.0);
-			ltmcBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
+			LtmcTestBuilder.CreateTransition(false, 5, 1.0);
+			LtmcTestBuilder.ProcessStateTransitions(5);
+
+			var ltmc = LtmcTestBuilder.Ltmc;
 
 			ltmc.Transitions.ShouldBe(2);
 			ltmc.SourceStates.Count.ShouldBe(1);
@@ -118,31 +158,29 @@ namespace Tests.DiscreteTimeMarkovChain
 		[Fact]
 		public void ThreeReflexiveStatesFromInitialState()
 		{
-			var ltmc = new LabeledTransitionMarkovChain(StateCapacity, TransitionCapacity);
-			var ltmcBuilder = new LabeledTransitionMarkovChain.LtmcBuilder<SimpleExecutableModel>(ltmc);
-
 			// add initial state
-			ClearTransitions();
-			CreateTransition(false, 5, 0, 0.3);
-			CreateTransition(false, 7, 0, 0.3);
-			CreateTransition(false, 2, 0, 0.4);
-			ltmcBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
+			LtmcTestBuilder.ClearTransitions();
+			LtmcTestBuilder.CreateTransition(false, 5, 0.3);
+			LtmcTestBuilder.CreateTransition(false, 7, 0.3);
+			LtmcTestBuilder.CreateTransition(false, 2, 0.4);
+			LtmcTestBuilder.ProcessInitialTransitions();
 
 			// add reflexive state 5
-			ClearTransitions();
-			CreateTransition(false, 5, 0, 1.0);
-			ltmcBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
+			LtmcTestBuilder.ClearTransitions();
+			LtmcTestBuilder.CreateTransition(false, 5, 1.0);
+			LtmcTestBuilder.ProcessStateTransitions(5);
 			
 			// add reflexive state 7
-			ClearTransitions();
-			CreateTransition(false, 5, 0, 1.0);
-			ltmcBuilder.ProcessTransitions(null, null, 7, CreateTransitionCollection(), _transitionCount, false);
+			LtmcTestBuilder.ClearTransitions();
+			LtmcTestBuilder.CreateTransition(false, 5, 1.0);
+			LtmcTestBuilder.ProcessStateTransitions(7);
 
 			// add reflexive state 2
-			ClearTransitions();
-			CreateTransition(false, 2, 0, 1.0);
-			ltmcBuilder.ProcessTransitions(null, null, 2, CreateTransitionCollection(), _transitionCount, false);
+			LtmcTestBuilder.ClearTransitions();
+			LtmcTestBuilder.CreateTransition(false, 2, 1.0);
+			LtmcTestBuilder.ProcessStateTransitions(2);
 
+			var ltmc = LtmcTestBuilder.Ltmc;
 
 			ltmc.Transitions.ShouldBe(6);
 			ltmc.SourceStates.Count.ShouldBe(3);
@@ -167,36 +205,34 @@ namespace Tests.DiscreteTimeMarkovChain
 		[Fact]
 		public void ThreeReflexiveStatesFromNonInitialState()
 		{
-			var ltmc = new LabeledTransitionMarkovChain(StateCapacity, TransitionCapacity);
-			var ltmcBuilder = new LabeledTransitionMarkovChain.LtmcBuilder<SimpleExecutableModel>(ltmc);
-
 			// add initial state
-			ClearTransitions();
-			CreateTransition(false, 5, 0, 1.0);
-			ltmcBuilder.ProcessTransitions(null, null, 0, CreateTransitionCollection(), _transitionCount, true);
+			LtmcTestBuilder.ClearTransitions();
+			LtmcTestBuilder.CreateTransition(false, 5, 1.0);
+			LtmcTestBuilder.ProcessInitialTransitions();
 
 			// add state 5
-			ClearTransitions();
-			CreateTransition(false, 7, 0, 0.3);
-			CreateTransition(false, 2, 0, 0.3);
-			CreateTransition(false, 1, 0, 0.4);
-			ltmcBuilder.ProcessTransitions(null, null, 5, CreateTransitionCollection(), _transitionCount, false);
+			LtmcTestBuilder.ClearTransitions();
+			LtmcTestBuilder.CreateTransition(false, 7, 0.3);
+			LtmcTestBuilder.CreateTransition(false, 2, 0.3);
+			LtmcTestBuilder.CreateTransition(false, 1, 0.4);
+			LtmcTestBuilder.ProcessStateTransitions(5);
 
 			// add reflexive state 7
-			ClearTransitions();
-			CreateTransition(false, 7, 0, 1.0);
-			ltmcBuilder.ProcessTransitions(null, null, 7, CreateTransitionCollection(), _transitionCount, false);
+			LtmcTestBuilder.ClearTransitions();
+			LtmcTestBuilder.CreateTransition(false, 7, 1.0);
+			LtmcTestBuilder.ProcessStateTransitions(7);
 
 			// add reflexive state 2
-			ClearTransitions();
-			CreateTransition(false, 2, 0, 1.0);
-			ltmcBuilder.ProcessTransitions(null, null, 2, CreateTransitionCollection(), _transitionCount, false);
+			LtmcTestBuilder.ClearTransitions();
+			LtmcTestBuilder.CreateTransition(false, 2, 1.0);
+			LtmcTestBuilder.ProcessStateTransitions(2);
 
 			// add reflexive state 1
-			ClearTransitions();
-			CreateTransition(false, 1, 0, 1.0);
-			ltmcBuilder.ProcessTransitions(null, null, 1, CreateTransitionCollection(), _transitionCount, false);
+			LtmcTestBuilder.ClearTransitions();
+			LtmcTestBuilder.CreateTransition(false, 1, 1.0);
+			LtmcTestBuilder.ProcessStateTransitions(1);
 
+			var ltmc = LtmcTestBuilder.Ltmc;
 
 			ltmc.Transitions.ShouldBe(7);
 			ltmc.SourceStates.Count.ShouldBe(4);
