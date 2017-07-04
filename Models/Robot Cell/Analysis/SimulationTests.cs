@@ -180,7 +180,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			var model = SampleModels.PerformanceMeasurement1<PerformanceMeasurementController<FastController>>();
 			model.Faults.SuppressActivations();
 
-			var simulator = new ModellessSimulator(model.Components);
+			var simulator = new Simulator(model);
             /*simulator.SimulateStep();*/
             PrintTrace(simulator, model, steps: 120);
 		}
@@ -194,7 +194,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             profileBasedSimulator.Simulate(numberOfSteps: 1000);
         }
 
-        private static void PrintTrace(ModellessSimulator simulator, Model model, int steps)
+        private static void PrintTrace(Simulator simulator, Model model, int steps)
 		{
 			
 			for (var i = 0; i < steps; ++i)
