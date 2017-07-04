@@ -64,7 +64,8 @@ namespace SafetySharp.Analysis.ModelChecking
 			_stateConstraints = RuntimeModel.Model.Components.Cast<Component>().SelectMany(component => component.StateConstraints).ToArray();
 
 			ChoiceResolver = new ChoiceResolver(RuntimeModel.Objects.OfType<Choice>());
-		}
+		    FaultSet.CheckFaultCount(RuntimeModel.Model.Faults.Length);
+        }
 
 		/// <summary>
 		///   Gets the size of a single transition of the model in bytes.

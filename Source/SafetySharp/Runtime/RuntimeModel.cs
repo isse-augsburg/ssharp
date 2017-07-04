@@ -123,8 +123,10 @@ namespace SafetySharp.Runtime
 				_restrictRanges();
 			}
 
-			FaultSet.CheckFaultCount(_faults.Length);
-			StateFormulaSet.CheckFormulaCount(StateFormulas.Length);
+            // move this check to ActivationMinimalExecutedModel:
+		    //FaultSet.CheckFaultCount(_faults.Length);
+
+            StateFormulaSet.CheckFormulaCount(StateFormulas.Length);
 		}
 
 		/// <summary>

@@ -62,18 +62,18 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
                     .AddRobot(Produce, Drill, Insert)
                     .AddRobot(Insert, Drill, Tighten)
-                    .AddRobot(Polish, Consume)/*
+                    .AddRobot(Polish, Consume)
                     .AddRobot(Produce, Drill, Insert)
                     .AddRobot(Insert, Drill)
                     .AddRobot(Tighten, Polish, Tighten, Drill)
-                    .AddRobot(Polish, Consume)*/
+                    .AddRobot(Polish, Consume)
 
                     .AddCart(Route(0, 1), Route(0, 2))
                     .AddCart(Route(1, 2), Route(0, 1))
-                    /*.AddCart(Route(2, 3))
+                    .AddCart(Route(2, 3))
                     .AddCart(Route(3, 4), Route(3, 5), Route(3, 6))
                     .AddCart(Route(4, 5), Route(3, 4))
-                    .AddCart(Route(5, 6))*/
+                    .AddCart(Route(5, 6))
 
                     .ChooseController<T>()
                     .EnableControllerVerification(verify)

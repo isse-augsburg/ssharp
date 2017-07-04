@@ -55,7 +55,6 @@
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\DeadlockChecker.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultOrderModifier.cs" />
     <Compile Include="Analysis\ModelChecking\ModelTraversal\TraversalModifiers\FaultSuppressionModifier.cs" />
-    <Compile Include="Analysis\ModellessSimulator.cs" />
     <Compile Include="Analysis\OrderAnalysis.cs" />
     <Compile Include="Analysis\OrderAnalysisResults.cs" />
     <Compile Include="Analysis\OrderRelationshipKind.cs" />
