@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 {
+    using System.Diagnostics;
     using System.IO;
 
     [AttributeUsage(AttributeTargets.Field)]
@@ -23,6 +24,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
         private int expDistributionXForRepair = 1;
         private int expDistributionXForFail = 1;
+        private double previousPropabilityToSucced;
+        private double previousPropabilityToNotRepair;
 
 
         /// <summary>Initializes a new instance of the <see cref="T:System.Attribute" /> class.</summary>
@@ -32,11 +35,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
                 throw new ArgumentOutOfRangeException();
             this.MTTF = mttf;
             this.MTTR = mttr;
+            previousPropabilityToSucced = Math.Exp(-1 * (0.0 / MTTF));
+            previousPropabilityToNotRepair = Math.Exp(-1 * (0.0 / MTTR));
         }
 
         public double DistributionValueToFail()
         {
-            return 1 - Math.Exp((-1 * (1 / MTTF) * expDistributionXForFail++));
+            var currentPropabilityToSucced = Math.Exp(-1 * (expDistributionXForFail++ / MTTF)) / previousPropabilityToSucced;
+            if (currentPropabilityToSucced > 1.0)
+                currentPropabilityToSucced = 1.0;
+            previousPropabilityToSucced = currentPropabilityToSucced;
+            return 1.0- currentPropabilityToSucced;
         }
 
         public void ResetDistributionToFail()
@@ -46,7 +55,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 
         public double DistributionValueToRepair()
         {
-            return 1 - Math.Exp((-1 * (1 / MTTR) * expDistributionXForRepair++));
+            var currentPropabilityToNotRepair = Math.Exp((-1 * (expDistributionXForRepair++ / MTTR))) / previousPropabilityToNotRepair;
+            if (currentPropabilityToNotRepair > 1.0)
+                currentPropabilityToNotRepair = 1.0;
+            previousPropabilityToNotRepair = currentPropabilityToNotRepair;
+            return 1.0-currentPropabilityToNotRepair;
         }
 
         public void ResetDistributionToRepair()

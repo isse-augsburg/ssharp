@@ -75,6 +75,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             public void Simulate(int numberOfSteps)
             {
                 var rd = new Random();
+                double currentRDFail;
+                double currentDistValueFail;
+                double currentRDRepair;
+                double currentDistValueRepair;
+                using (var sw = new StreamWriter(@"C:\Users\Eberhardinger\Documents\testRD.csv", true))
+                {
+                    sw.WriteLine("currentRDFail; currentDistValueFail; currentRDRepair; currentDistValueRepair; failed; repaired");
+                }
                 for (var x = 0; x < numberOfSteps; x++)
                 {
                     foreach (var fault in this.faults)
@@ -84,22 +92,35 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 //                        {
 //                            sw.WriteLine(rn);
 //                        }
+                        /*currentRDFail = rd.NextDouble();
+                        currentDistValueFail = fault.Item2.DistributionValueToFail();
+                        currentRDRepair = rd.NextDouble();
+                        currentDistValueRepair = fault.Item2.DistributionValueToRepair();
+                        var failed = currentRDFail <= currentDistValueFail;
+                        var repaired = currentRDRepair <= currentDistValueRepair;*/
                         if (fault.Item2?.MTTF > 0 && !fault.Item1.IsActivated && rd.NextDouble() <= fault.Item2.DistributionValueToFail())
+//                        if (fault.Item2?.MTTF > 0 && !fault.Item1.IsActivated && currentRDFail <= currentDistValueFail)
                         {
                             fault.Item1.ForceActivation();
-                            Console.WriteLine("Activation of: " + fault.Item1.Name);
+                            Console.WriteLine("Activation of: " + fault.Item1.Name + " at time " + x);
                             fault.Item2.ResetDistributionToFail();
                         }
-                        else { 
+                        else {
                             if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rd.NextDouble() <= fault.Item2.DistributionValueToRepair())
+//                            if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && currentRDRepair <= currentDistValueRepair)
                             {
                                 fault.Item1.SuppressActivation();
                                 Debug.Assert(fault.Item3 is Agent);
-                                (fault.Item3 as Agent)?.Restore(fault.Item1);
-                                Console.WriteLine("Deactivation of: " + fault.Item1.Name);
+                                MicrostepScheduler.Schedule(() => (fault.Item3 as Agent)?.RestoreRobot(fault.Item1));
+                                MicrostepScheduler.CompleteSchedule();
+                                Console.WriteLine("Deactivation of: " + fault.Item1.Name + " at time " + x);
                                 fault.Item2.ResetDistributionToRepair();
                             }
                         }
+                        /*using (var sw = new StreamWriter(@"C:\Users\Eberhardinger\Documents\testRD.csv", true))
+                        {
+                            sw.WriteLine(currentRDFail + "; " + currentDistValueFail + "; " + currentRDRepair + "; " + currentDistValueRepair + "; " + failed + "; " + repaired);
+                        }*/
                     }
                     Simulator.SimulateStep();
                     Throughput = model.Workpieces.Select(w => w.IsComplete).Count();
@@ -110,11 +131,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
             private void CreateStats(int throughput, T modelController)
             {
-
+                Debug.Assert(Throughput!=0);
+                Debug.Assert(modelController.CollectedTimeValues != null);
                 
-
-
-
                 REngine engine;
                 string fileName;
 
@@ -152,7 +171,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 CharacterVector fileNameVector = engine.CreateCharacterVector(new[] { fileName });
                 engine.SetSymbol("fileName", fileNameVector);
 
-             //   engine.Evaluate("reg <- lm(perfomranceValueVector~measurePoints)");
+//                engine.Evaluate("reg <- lm(perfomranceValueVector~measurePoints)");
                 engine.Evaluate("cairo_pdf(filename=fileName, width=6, height=6, bg='transparent')");
                 engine.Evaluate("plot(perfomranceValueVector~measurePoints)");
 //                engine.Evaluate("abline(reg)");
