@@ -132,14 +132,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			return Robot?.CanTransfer() ?? true;
 		}
 
-        /// <summary>
-        /// Notifies the robot a fault has been restored.
-        /// </summary>
-	    public override async System.Threading.Tasks.Task RestoreRobot(Fault fault)
-        {
-            await ReconfigurationMonitor.AttemptTaskContinuance(ReconfigurationStrategy, new State(this));
-        }
-
         protected override bool CheckAllocatedCapability(ICapability capability)
 		{
 			if (!CanSwitchTools())

@@ -36,51 +36,33 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 	    internal Queue<Task> TaskQueue;
 
-		/* TODO: agents cannot have duplicate capabilities
-		 *
-		 * Adding duplicate capabilities to agents (RobotAgents) has no effect:
-		 * a robot may have multiple tools that perform the same action (e.g. multiple drills),
-		 * but the agent has just one corresponding capability (as long as any of the tools are
-		 * functioning).
-		 *
-		 * In the future, multiple capabilities should be supported, each associated with one tool.
-		 * This would allow for the selection of less-used tools etc.
-		 * To support this, we need to distinguish between functional equivalence and reference equality
-		 * of capabilities in SafetySharp.Odp. For example, add IsEquivalentTo(ICapability) to the
-		 * ICapability interface. Adjust all configuration mechanisms, agents etc. to
-		 * use the appropriate comparison.
-		 *
-		 * */
-		private bool HasDuplicates(ICapability[] capabilities)
-		{
-			var set = new HashSet<ICapability>();
-			foreach (var cap in capabilities)
-			{
-				if (set.Contains(cap))
-					return true;
-				set.Add(cap);
-			}
-			return false;
-		}
-        
+	    public abstract string Name { get; }
 
-	    protected Agent()
+	    public bool HasResource => Resource != null;
+
+        protected Agent()
 	    {
 	        ConfigurationUpdateFailed.Name = $"{Name}.{nameof(ConfigurationUpdateFailed)}";
 	    }
 
-
-
-		public abstract string Name { get; }
-
-	    public abstract System.Threading.Tasks.Task RestoreRobot(Fault fault);
-
-
-        public bool HasResource => Resource != null;
+	    // TODO: Hack to reconfigure once tasks previously impossible might be possible again. Ideally, the component would monitor its own faults instead.
+        [Hidden]
+	    private bool _justRestored;
+        internal void Restore(Fault fault)
+	    {
+	        _justRestored = true;
+        }
 
 		protected override async System.Threading.Tasks.Task UpdateAsync()
 		{
 			CheckAllocatedCapabilities();
+
+		    if (_justRestored)
+		    {
+		        _justRestored = false;
+                await ReconfigurationMonitor.AttemptTaskContinuance(ReconfigurationStrategy, new State(this));
+		    }
+
 			if (TaskQueue?.Count > 0)
 				await PerformReconfiguration(new[] {
 					Tuple.Create(TaskQueue.Dequeue() as ITask, new State(this))

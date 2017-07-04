@@ -95,8 +95,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                             {
                                 fault.Item1.SuppressActivation();
                                 Debug.Assert(fault.Item3 is Agent);
-                                MicrostepScheduler.Schedule(() => (fault.Item3 as Agent)?.RestoreRobot(fault.Item1));
-                                MicrostepScheduler.CompleteSchedule();
+                                (fault.Item3 as Agent)?.Restore(fault.Item1);
                                 Console.WriteLine("Deactivation of: " + fault.Item1.Name);
                                 fault.Item2.ResetDistributionToRepair();
                             }
