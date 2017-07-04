@@ -52,7 +52,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             public ProfileBasedSimulator(Model model)
             {
                 Simulator = new Simulator(model);//ModellessSimulator(model.Components);
-                this.model = model;
+                this.model = (Model)Simulator.Model;
                 CollectFaults();
             }
 
@@ -111,8 +111,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                             {
                                 fault.Item1.SuppressActivation();
                                 Debug.Assert(fault.Item3 is Agent);
-                                MicrostepScheduler.Schedule(() => (fault.Item3 as Agent)?.RestoreRobot(fault.Item1));
-                                MicrostepScheduler.CompleteSchedule();
+                                (fault.Item3 as Agent)?.Restore(fault.Item1);
                                 Console.WriteLine("Deactivation of: " + fault.Item1.Name + " at time " + x);
                                 fault.Item2.ResetDistributionToRepair();
                             }
