@@ -90,10 +90,13 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						}
 					}
 
-					// TODO: if still no path found: recruit additional agents (if further exist)
-				} while (true /* TODO: while further agents exist */);
+                    // still no solution found: recruit an arbitrary known agent, try again
+				    if (coalition.HasNeighbours)
+				        await coalition.InviteNeighbour();
 
-				// failed to find a solution
+				} while (coalition.HasNeighbours);
+
+				// failed to find a solution; no more neighbours to recruit - give up
 				return FailedReconfiguration(coalition);
 			}
 			catch (OperationCanceledException)

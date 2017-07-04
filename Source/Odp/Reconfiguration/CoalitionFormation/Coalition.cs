@@ -44,11 +44,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		// members & invitations
 		public CoalitionReconfigurationAgent Leader { get; }
+	    public HashSet<CoalitionReconfigurationAgent> Members { get; }
+	        = new HashSet<CoalitionReconfigurationAgent>();
 
-		public HashSet<CoalitionReconfigurationAgent> Members { get; }
-			= new HashSet<CoalitionReconfigurationAgent>();
-		private readonly HashSet<BaseAgent> _baseAgents = new HashSet<BaseAgent>();
-
+	    private readonly HashSet<BaseAgent> _baseAgents = new HashSet<BaseAgent>();
 		public IEnumerable<BaseAgent> BaseAgents => _baseAgents;
 
 		private readonly Dictionary<BaseAgent, TaskCompletionSource<CoalitionReconfigurationAgent>> _invitations
@@ -56,7 +55,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		public bool IsInvited(CoalitionReconfigurationAgent agent) => _invitations.ContainsKey(agent.BaseAgent);
 
-		private MergeSupervisor Merger { get; }
+	    private readonly HashSet<BaseAgent> _neighbours = new HashSet<BaseAgent>();
+	    public bool HasNeighbours => _neighbours.Count > 0;
+
+        private MergeSupervisor Merger { get; }
 
 		public Coalition(CoalitionReconfigurationAgent leader, ITask task, InvariantPredicate[] violatedPredicates)
 		{
@@ -71,6 +73,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			return _baseAgents.Contains(baseAgent);
 		}
+
+	    public Task InviteNeighbour()
+	    {
+	        return Invite(_neighbours.First());
+	    }
 
 		public async Task InviteCtfAgents()
 		{
@@ -152,6 +159,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			Members.Add(newMember);
 			_baseAgents.Add(newMember.BaseAgent);
+
+            // update known neighbours
+            _neighbours.UnionWith(newMember.BaseAgent.Inputs.Concat(newMember.BaseAgent.Outputs));
+            _neighbours.ExceptWith(_baseAgents);
+
 			newMember.CurrentCoalition = this;
 
 			UpdateCTF(newMember.BaseAgent);
