@@ -103,6 +103,27 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                 , mode);
         }
 
+        public static Model Ictss1WithCoalition(AnalysisMode mode, bool verify = false)
+        {
+            return ChooseAnalysisMode(
+                new ModelBuilder(nameof(Ictss1))
+                    .DisablePlants()
+                    .DefineTask(5, Produce, Drill, Insert, Tighten, Polish, Consume)
+
+                    .AddRobot(Produce, Drill, Insert)
+                    .AddRobot(Insert, Drill)
+                    .AddRobot(Tighten, Polish, Tighten, Drill)
+                    .AddRobot(Polish, Consume)
+
+                    .AddCart(Route(0, 1), Route(0, 2), Route(0, 3))
+                    .AddCart(Route(1, 2), Route(0, 1))
+                    .AddCart(Route(2, 3))
+
+                    .UseCoalitionFormation()
+                    .EnableControllerVerification(verify)
+                , mode);
+        }
+
         public static Model Ictss1<T>(AnalysisMode mode, bool verify = false) where T : IController
         {
             return ChooseAnalysisMode(

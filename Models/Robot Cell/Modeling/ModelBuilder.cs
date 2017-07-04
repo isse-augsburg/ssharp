@@ -32,6 +32,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 	using Controllers;
 	using Controllers.Reconfiguration;
+	using Odp.Reconfiguration.CoalitionFormation;
 	using Plants;
 	using Resource = Controllers.Resource;
 
@@ -206,7 +207,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			return this;
 		}
 
-		// TODO: methods for other reconfiguration strategies
+	    public ModelBuilder UseCoalitionFormation()
+	    {
+	        ChooseController<CoalitionFormationController>();
+	        foreach (var agent in Agents)
+                agent.ReconfigurationStrategy = new ReconfigurationAgentHandler(agent, (b, h, t) => new CoalitionReconfigurationAgent(b, h, _model.Controller));
+	        return this;
+	    }
 
 		private IEnumerable<Agent> Agents => _model.CartAgents.Cast<Agent>().Concat(_model.RobotAgents);
 	}
