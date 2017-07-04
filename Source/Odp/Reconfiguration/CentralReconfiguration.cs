@@ -29,7 +29,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 	public class CentralReconfiguration : IReconfigurationStrategy
 	{
-		protected readonly IController _controller;
+		private readonly IController _controller;
 
 		public CentralReconfiguration(IController controller)
 		{
