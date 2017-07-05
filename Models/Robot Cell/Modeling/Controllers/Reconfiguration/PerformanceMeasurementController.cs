@@ -41,11 +41,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
             }
         }
 
-        public Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
+        public async Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
         {
             _stopwatch.Stop();
             MicrostepScheduler.StartPerformanceMeasurement(_actingController);
-            var resultingTasks = this._actingController.CalculateConfigurations(context, task);
+            var resultingTasks = await this._actingController.CalculateConfigurations(context, task);
             var reconfTime = MicrostepScheduler.StopPerformanceMeasurement(_actingController);
             using (var sw = new StreamWriter(@"C:\Users\Eberhardinger\Documents\test.csv", true))
             {
