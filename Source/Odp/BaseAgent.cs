@@ -303,20 +303,25 @@ namespace SafetySharp.Odp
 
 		protected async Task PerformReconfiguration(IEnumerable<Tuple<ITask, State>> reconfigurations)
 		{
-			var deficientTasks = new HashSet<ITask>(reconfigurations.Select(t => t.Item1));
-			if (deficientTasks.Count == 0)
-				return;
+            if (!reconfigurations.Any())
+                return;
 
-			// stop work on deficient tasks
-			_resourceRequests.RemoveAll(request => deficientTasks.Contains(request.Role.Task));
-			// abort execution of current role if necessary
-			_deficientConfiguration = _hasRole && deficientTasks.Contains(_currentRole.Task);
-
-			// initiate reconfiguration to fix violations
-			await ReconfigurationStrategy.Reconfigure(reconfigurations);
+            // initiate reconfiguration to fix violations
+            await ReconfigurationStrategy.Reconfigure(reconfigurations);
 			// verify correctness of new configuration
 			VerifyInvariants();
 		}
+
+        /// <summary>
+        /// Prepares the agent for reconfiguration of some given <paramref name="task"/>.
+        /// </summary>
+	    public void PrepareReconfiguration(ITask task)
+	    {
+	        // stop work on deficient tasks
+	        _resourceRequests.RemoveAll(request => request.Role.Task == task);
+	        // abort execution of current role if necessary
+	        _deficientConfiguration = _hasRole && _currentRole.Task == task;
+        }
 
 		private void VerifyInvariants()
 		{

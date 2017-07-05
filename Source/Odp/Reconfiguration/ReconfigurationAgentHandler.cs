@@ -81,6 +81,8 @@ namespace SafetySharp.Odp.Reconfiguration
 		#region interface presented to reconfiguration agent
 		public virtual void UpdateAllocatedRoles(ITask task, ConfigurationUpdate config)
 		{
+            _baseAgent.PrepareReconfiguration(task);
+
 			// new roles must be locked
 			config.LockAddedRoles();
 			config.Apply(_baseAgent);
