@@ -37,7 +37,7 @@ namespace Tests.OrganicDesignPattern
 	{
 		private static readonly ProduceCapability _produce = new ProduceCapability();
 		private static readonly ConsumeCapability _consume = new ConsumeCapability();
-		private static readonly ITask _task = new Task(_produce, _consume);
+	    private static readonly ITask _task = new Task(_produce, _consume);
 
 		protected override void Check()
 		{
@@ -51,9 +51,6 @@ namespace Tests.OrganicDesignPattern
 			monitor.Controller = controller;
 			producer.ReconfigurationStrategy = new CentralReconfiguration(controller);
 			consumer.ReconfigurationStrategy = new CentralReconfiguration(controller);
-
-			MicrostepScheduler.Schedule(() => producer.Init(_task));
-			MicrostepScheduler.CompleteSchedule();
 
 			// setup simulation
 			Debugger.Break();
@@ -74,8 +71,7 @@ namespace Tests.OrganicDesignPattern
 
 			// configuration possible again -> production resumes
 			producer.ProduceFailure.Activation = Activation.Suppressed;
-			MicrostepScheduler.Schedule(producer.Restore);
-			MicrostepScheduler.CompleteSchedule();
+		    producer.Restore();
 
 			// HACK: FastForward deserializes the last state, eliminating the changes mady by Restore() above
 			// To avoid this, use SimulateStep() repeatedly here.
@@ -92,8 +88,12 @@ namespace Tests.OrganicDesignPattern
 
 		private class Producer : BaseAgent, ICapabilityHandler<ProduceCapability>
 		{
-			private readonly Resource[] _resources = { new TestResource(), new TestResource(), new TestResource(), new TestResource(), new TestResource(), new TestResource() };
+		    private readonly ITask _task = ReconfigureAfterFailure._task;
+            private readonly Resource[] _resources = { new TestResource(), new TestResource(), new TestResource(), new TestResource(), new TestResource(), new TestResource() };
+
 			private int i = 0;
+		    private bool _justRestored;
+		    private bool _initialized;
 
 			public override IEnumerable<ICapability> AvailableCapabilities => new[] { _produce };
 
@@ -106,20 +106,31 @@ namespace Tests.OrganicDesignPattern
 				_monitor = monitor;
 			}
 
+		    protected override async System.Threading.Tasks.Task UpdateAsync()
+		    {
+		        if (!_initialized)
+		        {
+		            _initialized = true;
+		            await PerformReconfiguration(new[] { Tuple.Create(_task, new State(this)) });
+                }
+		        else if (_justRestored)
+		        {
+		            _justRestored = false;
+		            foreach (var task in _monitor.GetTasksToContinue())
+		                await PerformReconfiguration(new[] { Tuple.Create(task, new State(this)) });
+		        }
+		        await base.UpdateAsync();
+		    }
+
 			public void ApplyCapability(ProduceCapability capability)
 			{
 				Resource = _resources[i++];
 				Resource.OnCapabilityApplied(capability);
 			}
 
-			public async System.Threading.Tasks.Task Init(ITask task)
+			public void Restore()
 			{
-				await PerformReconfiguration(new[] { Tuple.Create(task, new State(this)) });
-			}
-
-			public async System.Threading.Tasks.Task Restore()
-			{
-				await _monitor.AttemptTaskContinuance(ReconfigurationStrategy, new State(this));
+			    _justRestored = true;
 			}
 
 			[FaultEffect(Fault = nameof(ProduceFailure))]

@@ -60,7 +60,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		    if (_justRestored)
 		    {
 		        _justRestored = false;
-                await ReconfigurationMonitor.AttemptTaskContinuance(ReconfigurationStrategy, new State(this));
+		        foreach (var task in ReconfigurationMonitor.GetTasksToContinue())
+		            TaskQueue.Enqueue((Task)task);
 		    }
 
 			if (TaskQueue?.Count > 0)
