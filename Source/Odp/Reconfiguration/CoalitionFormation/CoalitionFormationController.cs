@@ -39,6 +39,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 	public class CoalitionFormationController : AbstractController
 	{
 		private readonly Dictionary<InvariantPredicate, IRecruitingStrategy> _strategies = new Dictionary<InvariantPredicate, IRecruitingStrategy>();
+	    protected virtual IRecruitingStrategy NewTaskStrategy => CoalitionFormation.NewTaskStrategy.Instance;
 
 		public CoalitionFormationController(BaseAgent[] agents) : base(agents)
 		{
@@ -55,7 +56,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
 			var leader = (CoalitionReconfigurationAgent)context;
-			var coalition = new Coalition(leader, task, leader.BaseAgentState.ViolatedPredicates);
+			var coalition = new Coalition(leader, task, leader.BaseAgentState.ViolatedPredicates, leader.BaseAgentState.IsInitialConfiguration);
 
 			return CalculateConfigurations(coalition);
 		}
@@ -64,8 +65,17 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			try
 			{
-				var minTfr = TaskFragment.Merge(await Task.WhenAll(from predicate in coalition.ViolatedPredicates
-																   select RecruitNecessaryAgents(coalition, predicate)));
+                var fragmentComputations = new List<Task<TaskFragment>>();
+                // recruit for initial reconfigurations
+                if (coalition.IsInitialConfiguration)
+                    fragmentComputations.Add(NewTaskStrategy.RecruitNecessaryAgents(coalition));
+                // recruit for violated predicates
+			    fragmentComputations.AddRange(from predicate in coalition.ViolatedPredicates
+			                                  select RecruitNecessaryAgents(coalition, predicate));
+                // complete all recruitments
+			    var fragments = await Task.WhenAll(fragmentComputations);
+                // merge minimal fragments from all strategies
+                var minTfr = fragments.Length > 0 ? TaskFragment.Merge(fragments) : TaskFragment.Identity(coalition.Task);
 
 				await coalition.InviteCtfAgents();
 

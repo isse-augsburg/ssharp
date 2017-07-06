@@ -296,7 +296,7 @@ namespace SafetySharp.Odp
 
 			await PerformReconfiguration(
 				from vio in violations
-				let state = new State(this, null, vio.Value.ToArray())
+				let state = new State(this, null, false, vio.Value.ToArray())
 				select Tuple.Create(vio.Key, state)
 			);
 		}

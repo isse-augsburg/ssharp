@@ -148,7 +148,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				// actual merge
 				foreach (var member in _coalition.Members)
 					chosenCoalition.Join(member);
-				chosenCoalition.Merger.ReceiveCoalitionInformation(_mergeRequests, _coalition.ViolatedPredicates);
+				chosenCoalition.Merger.ReceiveCoalitionInformation(_mergeRequests, _coalition.ViolatedPredicates, _coalition.IsInitialConfiguration);
 
 				// stop controller from continuing
 				_pendingCoalitionMerge.SetResult(null);
@@ -159,11 +159,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// <summary>
 			/// Passes meta-information from a coalition that is merged into this instance.
 			/// </summary>
-			private void ReceiveCoalitionInformation(IEnumerable<MergeRequest> mergeRequests, InvariantPredicate[] violatedPredicates)
+			private void ReceiveCoalitionInformation(IEnumerable<MergeRequest> mergeRequests, InvariantPredicate[] violatedPredicates, bool initialConf)
 			{
 				foreach (var request in mergeRequests)
 					_mergeRequests.AddLast(request);
 				_coalition.ViolatedPredicates = _coalition.ViolatedPredicates.Concat(violatedPredicates).ToArray();
+			    _coalition.IsInitialConfiguration = initialConf;
 
 				throw new RestartReconfigurationException();
 			}

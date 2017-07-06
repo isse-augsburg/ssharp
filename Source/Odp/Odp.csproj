@@ -73,6 +73,7 @@
     <Compile Include="Reconfiguration\IReconfigurationStrategy.cs" />
     <Compile Include="IRoleSelector.cs" />
     <Compile Include="ITask.cs" />
+    <Compile Include="Reconfiguration\CoalitionFormation\NewTaskStrategy.cs" />
     <Compile Include="Reconfiguration\OptimalController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\SharedAssemblyInfo.cs">

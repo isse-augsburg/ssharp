@@ -34,13 +34,14 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		public ITask Task { get; }
 
 		public InvariantPredicate[] ViolatedPredicates { get; private set; }
+        public bool IsInitialConfiguration { get; private set; }
 
 		public BaseAgent[] RecoveredDistribution { get; }
 
 		/// <summary>
 		/// The connected task fragment handled by coalition members
 		/// </summary>
-		public TaskFragment CTF { get; private set; }
+		public TaskFragment CTF { get; }
 
 		// members & invitations
 		public CoalitionReconfigurationAgent Leader { get; }
@@ -60,12 +61,14 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
         private MergeSupervisor Merger { get; }
 
-		public Coalition(CoalitionReconfigurationAgent leader, ITask task, InvariantPredicate[] violatedPredicates)
+		public Coalition(CoalitionReconfigurationAgent leader, ITask task, InvariantPredicate[] violatedPredicates, bool initialConf)
 		{
 			Merger = new MergeSupervisor(this);
 			RecoveredDistribution = new BaseAgent[task.RequiredCapabilities.Length];
 			Task = task;
+            CTF = TaskFragment.Identity(task);
 			ViolatedPredicates = violatedPredicates;
+		    IsInitialConfiguration = initialConf;
 			Join(Leader = leader);
 		}
 
@@ -81,7 +84,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		public async Task InviteCtfAgents()
 		{
-			var previous = RecoveredDistribution[CTF.Start];
+		    var previous = RecoveredDistribution[CTF.Start];
 			Debug.Assert(Contains(previous));
 
 			int ctfStart;
@@ -202,13 +205,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			if (minPreState == -1) // && maxPostState == -1
 				return;
 
-			if (CTF == null) // first initialization
-				CTF = new TaskFragment(Task, minPreState, maxPostState);
-			else // enlarge fragment
-			{
-				CTF.Prepend(minPreState);
-				CTF.Append(maxPostState);
-			}
+			CTF.Prepend(minPreState);
+			CTF.Append(maxPostState);
 		}
 
 		/// <summary>
