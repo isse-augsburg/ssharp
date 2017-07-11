@@ -185,6 +185,9 @@ namespace ISSE.SafetyChecking.Modeling
 		/// </remarks>
 		internal void UndoActivation()
 		{
+			if (!Choice.Resolver.UseForwardOptimization)
+				return;
+
 			if (!_canUndoActivation)
 				return;
 

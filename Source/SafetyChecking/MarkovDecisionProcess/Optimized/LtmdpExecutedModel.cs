@@ -32,25 +32,18 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 	using Formula;
 
 	/// <summary>
-	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="SafetySharpRuntimeModel" /> with
+	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="ExecutedModel{TExecutableModel}" /> with
 	///   probabilistic transitions.
 	/// </summary>
 	internal sealed class LtmdpExecutedModel<TExecutableModel> : ExecutedModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-
-		internal enum EffectlessFaultsMinimizationMode
-		{
-			DontActivateEffectlessTransientFaults, //only restrict to transient faults
-			Disable
-		}
-
-		private readonly EffectlessFaultsMinimizationMode _minimalizationMode = EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults;
-
 		private readonly LtmdpChoiceResolver _ltmdpChoiceResolver;
 
 		private readonly LtmdpCachedLabeledStates<TExecutableModel> _cachedLabeledStates;
 
 		private readonly LtmdpStepGraph _stepGraph;
+
+		private readonly bool _activateIndependentFaultsAtStepBeginning;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -70,13 +63,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 			_cachedLabeledStates = new LtmdpCachedLabeledStates<TExecutableModel>(RuntimeModel, configuration.SuccessorCapacity, _stepGraph, formulas);
 			
 			bool useForwardOptimization;
-			switch (configuration.MomentOfFaultActivation)
+			switch (configuration.MomentOfIndependentFaultActivation)
 			{
-				case MomentOfFaultActivation.AtStepBeginning:
-				case MomentOfFaultActivation.OnFirstMethodWithoutUndo:
+				case MomentOfIndependentFaultActivation.AtStepBeginning:
+				case MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo:
 					useForwardOptimization = false;
 					break;
-				case MomentOfFaultActivation.OnFirstMethodWithUndo:
+				case MomentOfIndependentFaultActivation.OnFirstMethodWithUndo:
 					useForwardOptimization = true;
 					break;
 				default:
@@ -87,6 +80,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 			ChoiceResolver = _ltmdpChoiceResolver;
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
 
+			_activateIndependentFaultsAtStepBeginning =
+				configuration.MomentOfIndependentFaultActivation == MomentOfIndependentFaultActivation.AtStepBeginning;
 		}
 
 		/// <summary>
@@ -112,29 +107,26 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		protected override void ExecuteInitialTransition()
 		{
 			//TODO: _resetRewards();
+			
+			if (_activateIndependentFaultsAtStepBeginning)
+			{
+				// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					fault.TryActivate();
+				}
+			}
 
 			RuntimeModel.ExecuteInitialStep();
 
-			switch (_minimalizationMode)
+			if (!_activateIndependentFaultsAtStepBeginning)
 			{
-				case EffectlessFaultsMinimizationMode.Disable:
-					// Activate all faults
-					// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
-					foreach (var fault in RuntimeModel.NondeterministicFaults)
-					{
+				// force activation of non-transient faults
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					if (!(fault is Modeling.TransientFault))
 						fault.TryActivate();
-					}
-					break;
-				case EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults:
-					// Activate all non-transient faults
-					foreach (var fault in RuntimeModel.NondeterministicFaults)
-					{
-						if (!(fault is Modeling.TransientFault))
-							fault.TryActivate();
-					}
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
+				}
 			}
 		}
 
@@ -145,29 +137,25 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		{
 			//TODO: _resetRewards();
 
+			if (_activateIndependentFaultsAtStepBeginning)
+			{
+				// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					fault.TryActivate();
+				}
+			}
+
 			RuntimeModel.ExecuteStep();
 
-
-			switch (_minimalizationMode)
+			if (!_activateIndependentFaultsAtStepBeginning)
 			{
-				case EffectlessFaultsMinimizationMode.Disable:
-					// Activate all faults
-					// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
-					foreach (var fault in RuntimeModel.NondeterministicFaults)
-					{
+				// force activation of non-transient faults
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					if (!(fault is Modeling.TransientFault))
 						fault.TryActivate();
-					}
-					break;
-				case EffectlessFaultsMinimizationMode.DontActivateEffectlessTransientFaults:
-					// Activate all non-transient faults
-					foreach (var fault in RuntimeModel.NondeterministicFaults)
-					{
-						if (!(fault is Modeling.TransientFault))
-							fault.TryActivate();
-					}
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
+				}
 			}
 		}
 		

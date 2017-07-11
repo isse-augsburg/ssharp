@@ -70,13 +70,13 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			_stateConstraints = RuntimeModel.StateConstraints;
 
 			bool useForwardOptimization;
-			switch (configuration.MomentOfFaultActivation)
+			switch (configuration.MomentOfIndependentFaultActivation)
 			{
-				case MomentOfFaultActivation.AtStepBeginning:
-				case MomentOfFaultActivation.OnFirstMethodWithoutUndo:
+				case MomentOfIndependentFaultActivation.AtStepBeginning:
+				case MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo:
 					useForwardOptimization = false;
 					break;
-				case MomentOfFaultActivation.OnFirstMethodWithUndo:
+				case MomentOfIndependentFaultActivation.OnFirstMethodWithUndo:
 					useForwardOptimization = true;
 					break;
 				default:

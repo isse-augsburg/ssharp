@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.SmallModels.Model1
 {
 	using System;
 	using Analysis;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ISSE.SafetyChecking.Modeling;
 	using ModelChecking;
@@ -90,6 +91,7 @@ namespace SafetySharp.CaseStudies.SmallModels.Model1
 
 			var tc = SafetySharpModelChecker.TraversalConfiguration;
 			tc.WriteGraphvizModels = true;
+			tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.AtStepBeginning;
 			SafetySharpModelChecker.TraversalConfiguration = tc;
 
 			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.ModelComponent.HazardActive, 50);

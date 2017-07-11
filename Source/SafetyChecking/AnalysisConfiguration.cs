@@ -26,7 +26,7 @@ namespace ISSE.SafetyChecking
 	using ExecutedModel;
 	using Utilities;
 
-	public enum MomentOfFaultActivation
+	public enum MomentOfIndependentFaultActivation
 	{
 		AtStepBeginning,
 		OnFirstMethodWithoutUndo,
@@ -89,7 +89,7 @@ namespace ISSE.SafetyChecking
 			CollectFaultSets = true,
 			StateDetected = null,
 			UseAtomarPropositionsAsStateLabels = true,
-			MomentOfFaultActivation = MomentOfFaultActivation.OnFirstMethodWithUndo,
+			MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithUndo,
 			LimitOfActiveFaults = null
 		};
 
@@ -151,7 +151,7 @@ namespace ISSE.SafetyChecking
 
 		/// <summary>
 		/// </summary>
-		public MomentOfFaultActivation MomentOfFaultActivation { get; set; }
+		public MomentOfIndependentFaultActivation MomentOfIndependentFaultActivation { get; set; }
 		
 		/// <summary>
 		/// </summary>
