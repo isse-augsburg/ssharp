@@ -63,6 +63,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		protected async Task<ConfigurationUpdate> CalculateConfigurations(Coalition coalition)
 		{
+		    ConfigurationUpdate config;
 			try
 			{
                 var fragmentComputations = new List<Task<TaskFragment>>();
@@ -94,7 +95,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						var resourceFlow = await ComputeResourceFlow(reconfSuggestion);
 						if (resourceFlow != null)
 						{
-							var config = ComputeRoleAllocations(reconfSuggestion, resourceFlow.ToArray());
+							config = ComputeRoleAllocations(reconfSuggestion, resourceFlow.ToArray());
 							OnConfigurationsCalculated(coalition.Task, config);
 							return config;
 						}
@@ -107,7 +108,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				} while (coalition.HasNeighbours);
 
 				// failed to find a solution; no more neighbours to recruit - give up
-				return FailedReconfiguration(coalition);
+			    config = FailedReconfiguration(coalition);
+                OnConfigurationsCalculated(coalition.Task, config);
+				return config;
 			}
 			catch (OperationCanceledException)
 			{
