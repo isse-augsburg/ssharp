@@ -22,7 +22,8 @@
 
 namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
-	using System.Collections.Generic;
+    using System;
+    using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
 
@@ -34,7 +35,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		public ISet<ICapability> Capabilities { get; } = new HashSet<ICapability>();
 
-		public int Length => End - Start + 1;
+		public int Length => Math.Max(0, End - Start + 1);
 
 		public TaskFragment(ITask task, int start, int end)
 		{
