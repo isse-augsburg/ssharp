@@ -84,28 +84,56 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		public async Task InviteCtfAgents()
 		{
-		    var previous = RecoveredDistribution[CTF.Start];
-			Debug.Assert(Contains(previous));
-
-			int ctfStart;
+		    int ctfStart, ctfEnd;
 			do
 			{
 				ctfStart = CTF.Start;
-				for (var i = CTF.Start + 1; i <= CTF.End; ++i)
-				{
-					var current = RecoveredDistribution[i];
+			    ctfEnd = CTF.End;
 
-					if (current == null)
-					{
-						// TODO: handle dead agents (similarly to CoalitionFormationController.ConfigurationSuggestion.FindCoreAgents)
-						var role = previous.AllocatedRoles.Single(r => r.Task == Task && r.PreCondition.StateLength < i && r.PostCondition.StateLength >= i);
-						current = role.PostCondition.Port;
-						await Invite(current);
-					}
+			    BaseAgent previous = null;
+                var currentPos = ctfStart;
+			    var current = RecoveredDistribution[currentPos];
+			    var currentRole = default(Role);
+
+                while (currentPos <= CTF.End)
+                {
+                    // if we do not know current agent but know its predecessor, ask it
+                    if (current == null && previous != null && previous.IsAlive)
+				        current = currentRole.PostCondition.Port;
+
+                    // if we (still) cannot contact current agent because we do not know it or it is dead:
+                    if (current == null || !current.IsAlive)
+				    {
+				        // find next known & alive agent in CTF
+				        while ((current == null || !current.IsAlive) && currentPos <= CTF.End)
+				        {
+				            currentPos++;
+				            if (currentPos <= CTF.End)
+				                current = RecoveredDistribution[currentPos];
+				        }
+				        if (currentPos > CTF.End)
+				            break; // all further agents are dead
+
+                        // otherwise, go back as far as possible
+				        currentRole = current.AllocatedRoles.Single(role => role.Task == Task && role.PreCondition.StateLength == currentPos);
+				        while (currentRole.PreCondition.Port != null && currentRole.PreCondition.Port.IsAlive)
+				        {
+				            current = currentRole.PreCondition.Port;
+				            currentPos = currentRole.PreCondition.StateLength;
+				            currentRole = current.AllocatedRoles.Single(role => role.Task == Task && role.PostCondition.StateLength == currentPos);
+				        }
+				        currentPos = currentRole.PreCondition.StateLength;
+                    }
+
+                    if (!Contains(current))
+                        await Invite(current);
 
 					previous = current;
+                    currentRole = current.AllocatedRoles.Single(role => role.Task == Task && role.PreCondition.StateLength == currentPos);
+				    currentPos = currentRole.PostCondition.StateLength;
+				    current = currentRole.PostCondition.Port;
 				}
-			} while (ctfStart > CTF.Start); // loop because invitations might have enlarged CTF
+			} while (ctfStart > CTF.Start || ctfEnd < CTF.End); // loop because invitations might have enlarged CTF
 		}
 
 		/// <summary>
