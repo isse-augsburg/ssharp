@@ -40,8 +40,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
             Dcca(model,
 				hazard: model.ReconfigurationMonitor.ReconfigurationFailure,
-				enableHeuristics: true,
-				mode: "heuristics");
+				enableHeuristics: true);
 		}
 
 	    internal static IEnumerable CreateConfigurationsCoalition()
@@ -50,26 +49,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 .Select(model => new TestCaseData(model).SetName(model.Name + " (Coalition)"));
         }
 
-        private void Dcca(Model model, Formula hazard, bool enableHeuristics, string mode)
-		{
-			var result = Dcca(model, hazard, enableHeuristics, true);
-			Console.WriteLine(result);
-		    Assert.IsEmpty(result.Exceptions);
-		}
-
-		private SafetyAnalysisResults Dcca(Model model, Formula hazard, bool enableHeuristics, bool stopOnFirstException)
+		private void Dcca(Model model, Formula hazard, bool enableHeuristics)
 		{
 			var safetyAnalysis = new SafetyAnalysis
 			{
 				Configuration =
 				{
 					CpuCount = 4,
-					//ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium),
                     StateCapacity = 1 << 12,
 					GenerateCounterExample = false
 				},
-				FaultActivationBehavior = FaultActivationBehavior.ForceOnly,
-				//StopOnFirstException = stopOnFirstException
+				FaultActivationBehavior = FaultActivationBehavior.ForceOnly
 			};
 
 			if (enableHeuristics)
@@ -78,8 +68,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				safetyAnalysis.Heuristics.Add(new SubsumptionHeuristic(model));
 			}
 
-			return safetyAnalysis.ComputeMinimalCriticalSets(model, hazard);
-		}
+			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, hazard);
+		    Console.WriteLine(result);
+		    Assert.IsEmpty(result.Exceptions);
+        }
 
 	    internal static IFaultSetHeuristic RedundancyHeuristic(Model model)
 	    {
