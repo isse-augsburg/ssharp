@@ -155,6 +155,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						nodeWeight = childWeight;
 						child = 2 * node + 1;
 					}
+                    else break;
 				}
 
 				return min;
