@@ -23,244 +23,77 @@
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
-	using System.Collections.Generic;
-	using System.IO;
+	using System.Collections;
 	using System.Linq;
-	using ISSE.SafetyChecking.AnalysisModel;
-	using ISSE.SafetyChecking.ExecutedModel;
-	using ISSE.SafetyChecking.Formula;
-	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
-	using ModelChecking;
-	using Runtime;
 
-	using Modeling;
-	using Modeling.Controllers;
+	using SafetySharp.Analysis;
+	using SafetySharp.Analysis.Heuristics;
+    using Modeling;
 
 	using NUnit.Framework;
 
-	[TestFixture]
-	internal class BackToBackTests : DccaTestsBase
+	internal class BackToBackTests
 	{
-		[Category("Back2BackTestingSlow")]
-		[TestCaseSource(nameof(CreateConfigurationsFast))]
-		public void DepthFirstSearch(Model model)
-		{
-			Dcca(model,
-				hazard: false,
-				enableHeuristics: false,
-				mode: "depth-first");
-		}
-
-		[Category("Back2BackTestingDcca")]
-		[TestCaseSource(nameof(CreateConfigurationsFast))]
-		public void DccaOnly(Model model)
-		{
-			Dcca(model,
-				hazard: model.ObserverController.ReconfigurationState == ReconfStates.Failed,
-				enableHeuristics: false,
-				mode: "dcca");
-		}
-
-		[Category("Back2BackTestingHeuristics")]
-		[TestCaseSource(nameof(CreateConfigurationsFast))]
+		[Test, Category("Back2BackTestingHeuristicsCoalition")]
+		[TestCaseSource(nameof(CreateConfigurationsCoalition))]
 		public void DccaWithHeuristics(Model model)
 		{
-			Dcca(model,
-				hazard: model.ObserverController.ReconfigurationState == ReconfStates.Failed,
+            Dcca(model,
+				hazard: model.ReconfigurationMonitor.ReconfigurationFailure,
 				enableHeuristics: true,
 				mode: "heuristics");
 		}
 
-		[Category("Back2BackTestingDccaOracle")]
-		[TestCaseSource(nameof(CreateConfigurationsFast))]
-		public void OracleDccaOnly(Model model)
-		{
-			Dcca(model,
-				hazard: model.ObserverController.OracleState == ReconfStates.Failed,
-				enableHeuristics: false,
-				mode: "dcca-oracle");
-		}
+	    internal static IEnumerable CreateConfigurationsCoalition()
+        {
+            return SampleModels.CreateCoalitionConfigurations(verify: true)
+                .Select(model => new TestCaseData(model).SetName(model.Name + " (Coalition)"));
+        }
 
-		[Category("Back2BackTestingHeuristicsOracle")]
-		[TestCaseSource(nameof(CreateConfigurationsFast))]
-		public void OracleDccaWithHeuristics(Model model)
-		{
-			Dcca(model,
-				hazard: model.ObserverController.OracleState == ReconfStates.Failed,
-				enableHeuristics: true,
-				mode: "heuristics-oracle");
-		}
-
-		[Test]
-		// run without errors
-		public void BoundaryClosenessBaseline()
-		{
-			var model = Model.CreateConfiguration<FastObserverController>(m => m.Ictss1(), "Ictss1", AnalysisMode.TolerableFaults);
-			var result = Dcca(model,
-				hazard: model.ObserverController.OracleState == ReconfStates.Failed,
-				enableHeuristics: true,
-				stopOnFirstException: false);
-			Assert.AreEqual(0, result.Exceptions.Count);
-
-			Console.WriteLine(string.Join(",", result.MinimalCriticalSets.Select(s => new FaultSet(s)._faults)));
-		}
-
-		[Test, Category("Back2BackTestingBoundary")]
-		public void BoundaryCloseness()
-		{
-			var minimalCritical =
-				new[]
-					{
-						// determined by above test
-						1024, 4096, 1048576, 4194304, 134217728, 536870912, 49152, 147456, 278528, 41943040, 1090519040, 70866960384, 277025390592,
-						551903297536, 2201170739200, 8798240505856, 2207613190144, 8804682956800, 67149824, 67248128, 67641344, 103079231488, 94489280512,
-						300647710720, 2284922601472, 8881992368128, 2491081031680, 9088150798336, 103146332160, 858993475584, 575525650432, 2765958971392,
-						9363028738048, 575525748736, 2765959069696, 9363028836352, 609885356032, 2800318676992, 9397388443648, 859060576256
-					}
-					.Select(v => new FaultSet(v))
-					.ToArray();
-
-			var model = Model.CreateConfiguration<FastObserverController>(m => m.Ictss1(), "Ictss1", AnalysisMode.TolerableFaults);
-			var result = Dcca(model,
-				hazard: model.ObserverController.OracleState == ReconfStates.Failed,
-				enableHeuristics: false,
-				stopOnFirstException: false);
-
-			var belowBoundary = 0;
-			var aboveBoundary = 0;
-			foreach (var testCase in result.Exceptions.Keys)
-			{
-				var t = new FaultSet(testCase);
-				if (IsAboveBoundary(t, model, minimalCritical))
-					aboveBoundary++;
-				else if (IsBelowBoundary(t, model, minimalCritical))
-					belowBoundary++;
-			}
-
-			Console.WriteLine("Fault: " + GetCurrentFault());
-			Console.WriteLine("Failed tests: " + result.Exceptions.Count);
-			Console.WriteLine("below boundary: " + belowBoundary);
-			Console.WriteLine("above boundary: " + aboveBoundary);
-		}
-
-		private bool IsAboveBoundary(FaultSet set, Model model, IEnumerable<FaultSet> minCrit)
-		{
-			var subsets = model.Faults.Where(set.Contains).Select(set.Remove);
-			return IsCritical(set, minCrit) && subsets.Any(s => !IsCritical(s, minCrit));
-		}
-
-		private bool IsBelowBoundary(FaultSet set, Model model, IEnumerable<FaultSet> minCrit)
-		{
-			var supersets = model.Faults.Where(f => !set.Contains(f)).Select(set.Add);
-			return !IsCritical(set, minCrit) && supersets.Any(s => IsCritical(s, minCrit));
-		}
-
-		private bool IsCritical(FaultSet set, IEnumerable<FaultSet> minCrit)
-		{
-			return minCrit.Any(m => m.IsSubsetOf(set));
-		}
-
-		private void Dcca(Model model, Formula hazard, bool enableHeuristics, string mode)
+        private void Dcca(Model model, Formula hazard, bool enableHeuristics, string mode)
 		{
 			var result = Dcca(model, hazard, enableHeuristics, true);
 			Console.WriteLine(result);
-
-			LogResult(model, result, mode);
+		    Assert.IsEmpty(result.Exceptions);
 		}
 
-		private SafetyAnalysisResults<SafetySharpRuntimeModel> Dcca(Model model, Formula hazard, bool enableHeuristics, bool stopOnFirstException)
+		private SafetyAnalysisResults Dcca(Model model, Formula hazard, bool enableHeuristics, bool stopOnFirstException)
 		{
-			var safetyAnalysis = new SafetySharpSafetyAnalysis
+			var safetyAnalysis = new SafetyAnalysis
 			{
 				Configuration =
 				{
 					CpuCount = 4,
-					ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium),
+					//ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium),
+                    StateCapacity = 1 << 12,
 					GenerateCounterExample = false
 				},
 				FaultActivationBehavior = FaultActivationBehavior.ForceOnly,
-				StopOnFirstException = stopOnFirstException
+				//StopOnFirstException = stopOnFirstException
 			};
 
 			if (enableHeuristics)
 			{
 				safetyAnalysis.Heuristics.Add(RedundancyHeuristic(model));
-				safetyAnalysis.Heuristics.Add(new SubsumptionHeuristic(model.Faults));
+				safetyAnalysis.Heuristics.Add(new SubsumptionHeuristic(model));
 			}
 
 			return safetyAnalysis.ComputeMinimalCriticalSets(model, hazard);
 		}
 
-		private StreamWriter _csv;
+	    internal static IFaultSetHeuristic RedundancyHeuristic(Model model)
+	    {
+	        var cartFaults = model.Carts.Select(cart => cart.Broken)
+	                              .Concat(model.Carts.Select(cart => cart.Lost))
+	                              .Concat(model.CartAgents.Select(cartAgent => cartAgent.ConfigurationUpdateFailed));
 
-		[TestFixtureSetUp]
-		public void Setup()
-		{
-			var file = File.Open("evaluation_results.csv", FileMode.Append, FileAccess.Write, FileShare.Read);
-			_csv = new StreamWriter(file);
-		}
-
-		private void LogResult(Model model, SafetyAnalysisResults<SafetySharpRuntimeModel> result, string mode)
-		{
-			var faultCount = result.Faults.Count() - result.SuppressedFaults.Count();
-			var cardinalitySum = result.MinimalCriticalSets.Sum(set => set.Count);
-			var minimalSetCardinalityAverage = cardinalitySum == 0 ? -1 : cardinalitySum / (double)result.MinimalCriticalSets.Count;
-			var minimalSetCardinalityMinimum = result.MinimalCriticalSets.Count == 0 ? -1 : result.MinimalCriticalSets.Min(set => set.Count);
-			var minimalSetCardinalityMaximum = result.MinimalCriticalSets.Count == 0 ? -1 : result.MinimalCriticalSets.Max(set => set.Count);
-
-			var exception = result.Exceptions.Values.FirstOrDefault();
-			var exceptionText = exception == null ? null : exception.GetType().Name + " (" + exception.Message + ")";
-
-			object[] columns = {
-				GetCurrentFault(),										// tested fault
-				mode,													// testing mode
-				model.Name,												// model name
-				exceptionText,											// thrown exception (if any)
-				faultCount,												// # faults
-				(int)result.Time.TotalMilliseconds,						// required time
-				result.CheckedSetCount,									// # checked sets
-				result.CheckedSetCount * 100.0 / (1L << faultCount),	// % checked sets
-				result.TrivialChecksCount,								// # trivial checks
-				result.HeuristicSuggestionCount,						// # suggestions
-				result.HeuristicNonTrivialSafeCount * 100.0				// % good suggestions
-					/ result.HeuristicSuggestionCount,
-				(result.HeuristicSuggestionCount						// % non-trivially critical (bad) suggestions
-					- result.HeuristicTrivialCount - result.HeuristicNonTrivialSafeCount) * 100.0 / result.HeuristicSuggestionCount,
-				result.MinimalCriticalSets.Count,						// # minimal-critical sets
-				minimalSetCardinalityAverage,							// avg. cardinality of minimal-critical sets
-				minimalSetCardinalityMinimum,							// min. cardinality of minimal-critical sets
-				minimalSetCardinalityMaximum							// max. cardinality of minimal-critical sets
-			};
-			_csv.WriteLine(string.Join(",", columns));
-			_csv.Flush();
-		}
-
-		private string GetCurrentFault()
-		{
-#if ENABLE_F1
-			return "F1";
-#elif ENABLE_F2
-			return "F2";
-#elif ENABLE_F4
-			return "F4";
-#elif ENABLE_F4b
-			return "F4b";
-#elif ENABLE_F5
-			return "F5";
-#elif ENABLE_F6
-			return "F6";
-#elif ENABLE_F7
-			return "F7";
-#else
-			return "None";
-#endif
-		}
-
-		[TestFixtureTearDown]
-		public void Teardown()
-		{
-			_csv.Flush();
-			_csv.Close();
-		}
-	}
+	        return new MinimalRedundancyHeuristic(
+	            model.Faults.Except(cartFaults).ToArray(),
+                model.Faults.Length / 2,
+	            model.Robots.SelectMany(d => d.Tools.Where(t => t.ProductionAction == ProductionAction.Drill).Select(t => t.Broken)),
+	            model.Robots.SelectMany(d => d.Tools.Where(t => t.ProductionAction == ProductionAction.Insert).Select(t => t.Broken)),
+	            model.Robots.SelectMany(d => d.Tools.Where(t => t.ProductionAction == ProductionAction.Tighten).Select(t => t.Broken)),
+	            model.Robots.SelectMany(d => d.Tools.Where(t => t.ProductionAction == ProductionAction.Polish).Select(t => t.Broken)));
+	    }
+    }
 }

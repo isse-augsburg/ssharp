@@ -83,9 +83,20 @@ namespace SafetySharp.Analysis.Heuristics
 
 			CollectSuggestions(faultGroups);
 			_nextSuggestions = GetSubsets(_currentSuggestions);
-		}
+	    }
+	    public MinimalRedundancyHeuristic(Fault[] faults, int minSetSize, params IEnumerable<Fault>[] faultGroups)
+	    {
+	        //Requires.NotNull(model, nameof(model));
+	        Requires.NotNull(faultGroups, nameof(faultGroups));
 
-		void IFaultSetHeuristic.Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck)
+	        _allFaults = faults.Where(fault => fault.Activation != Activation.Suppressed).ToArray();
+	        _minSetSize = minSetSize;
+
+	        CollectSuggestions(faultGroups);
+	        _nextSuggestions = GetSubsets(_currentSuggestions);
+	    }
+
+        void IFaultSetHeuristic.Augment(uint cardinalityLevel, LinkedList<FaultSet> setsToCheck)
 		{
 			_successCounter = 0;
 			foreach (var suggestion in _currentSuggestions)

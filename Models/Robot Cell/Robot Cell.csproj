@@ -76,6 +76,7 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analysis\BackToBackTests.cs" />
     <Compile Include="Analysis\SafetyAnalysisTests.cs" />
     <Compile Include="Analysis\SimulationTests.cs" />
     <Compile Include="Analysis\ModelCheckingTests.cs" />
