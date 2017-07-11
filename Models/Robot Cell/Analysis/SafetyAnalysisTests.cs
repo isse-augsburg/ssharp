@@ -67,7 +67,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 		private static IEnumerable CreateConfigurations()
 		{
-			return SampleModels.CreateConfigurations<FastController>(AnalysisMode.IntolerableFaults)
+			return SampleModels.CreateDefaultConfigurations<FastController>(AnalysisMode.IntolerableFaults)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 	}

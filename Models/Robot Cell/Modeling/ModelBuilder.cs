@@ -166,13 +166,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			return this;
 		}
 
+	    public ModelBuilder DisableIntolerableFaults()
+	    {
+	        _model.Faults.MakeNondeterministic();
+	        IntolerableFaults().SuppressActivations();
+	        return this;
+        }
 
 		public ModelBuilder TolerableFaultsAnalysis()
 		{
 			_model.Controller = new TolerableAnalysisController(_model.Controller);
-			_model.Faults.MakeNondeterministic();
-			IntolerableFaults().SuppressActivations();
-			return this;
+		    return DisableIntolerableFaults();
 		}
 
 		public ModelBuilder IntolerableFaultsAnalysis()

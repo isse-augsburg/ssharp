@@ -22,7 +22,9 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Analysis;
     using Odp.Reconfiguration;
     using static ModelBuilderHelper;
@@ -32,25 +34,43 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
         public static Model DefaultInstance<T>(AnalysisMode mode = AnalysisMode.AllFaults)
             where T : IController
         {
-            return Ictss1<T>(mode);
+            return DefaultSetup<T>(mode, false).Invoke(new ModelBuilder(nameof(Ictss1)).Ictss1()).Build();
         }
 
-        public static Model DefaultInstanceWithoutPlant<T>(AnalysisMode mode = AnalysisMode.AllFaults)
+        public static IEnumerable<Model> CreateDefaultConfigurations<T>(AnalysisMode mode, bool verify = false)
             where T : IController
         {
-            return Ictss1WithoutPlant<T>(mode);
+            return CreateConfigurations(b => b, DefaultSetup<T>(mode, verify));
         }
 
-        public static IEnumerable<Model> CreateConfigurations<T>(AnalysisMode mode, bool verify = false)
+        public static IEnumerable<Model> CreateDefaultConfigurationsWithoutPlant<T>(AnalysisMode mode, bool verify = false)
             where T : IController
         {
-            yield return Ictss1<T>(mode, verify);
-            yield return Ictss2<T>(mode, verify);
-            yield return Ictss3<T>(mode, verify);
-            yield return Ictss4<T>(mode, verify);
-            yield return Ictss5<T>(mode, verify);
-            yield return Ictss6<T>(mode, verify);
-            yield return Ictss7<T>(mode, verify);
+            return CreateConfigurations(b => b.DisablePlants(), DefaultSetup<T>(mode, verify));
+        }
+
+        public static IEnumerable<Model> CreateCoalitionConfigurations(bool verify = false)
+        {
+            return CreateConfigurations(
+                b => b.DisablePlants(),
+                b => b.UseCoalitionFormation().EnableControllerVerification(verify).DisableIntolerableFaults()
+            );
+        }
+
+        private static IEnumerable<Model> CreateConfigurations(Func<ModelBuilder, ModelBuilder> preSetup,
+                                                              Func<ModelBuilder, ModelBuilder> postSetup)
+        {
+            return new Func<ModelBuilder, ModelBuilder>[] {
+                Ictss1, Ictss2, Ictss3, Ictss4, Ictss5, Ictss6, Ictss7
+            }
+            .Select(setup => postSetup(setup(preSetup(new ModelBuilder(setup.Method.Name)))).Build());
+        }
+
+        private static Func<ModelBuilder, ModelBuilder> DefaultSetup<T>(AnalysisMode mode, bool verify) where T : IController
+        {
+            return builder => ChooseAnalysisMode(builder.ChooseController<T>()
+                                                        .EnableControllerVerification(verify)
+                                                        .CentralReconfiguration(), mode);
         }
 
         public static Model PerformanceMeasurement1<T>(AnalysisMode mode = AnalysisMode.AllFaults, bool verify = false)
@@ -78,203 +98,112 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     .ChooseController<T>()
                     .EnableControllerVerification(verify)
                     .CentralReconfiguration()
-                , mode);
+                , mode).Build();
         }
 
-        public static Model Ictss1WithoutPlant<T>(AnalysisMode mode, bool verify = false) where T : IController
+        public static ModelBuilder Ictss1(this ModelBuilder builder)
         {
-            return ChooseAnalysisMode(
-                new ModelBuilder(nameof(Ictss1))
-                    .DisablePlants()
-                    .DefineTask(5, Produce, Drill, Insert, Tighten, Polish, Consume)
+            return builder.DefineTask(5, Produce, Drill, Insert, Tighten, Polish, Consume)
 
-                    .AddRobot(Produce, Drill, Insert)
-                    .AddRobot(Insert, Drill)
-                    .AddRobot(Tighten, Polish, Tighten, Drill)
-                    .AddRobot(Polish, Consume)
+                          .AddRobot(Produce, Drill, Insert)
+                          .AddRobot(Insert, Drill)
+                          .AddRobot(Tighten, Polish, Tighten, Drill)
+                          .AddRobot(Polish, Consume)
 
-                    .AddCart(Route(0, 1), Route(0, 2), Route(0, 3))
-                    .AddCart(Route(1, 2), Route(0, 1))
-                    .AddCart(Route(2, 3))
-
-                    .ChooseController<T>()
-                    .EnableControllerVerification(verify)
-                    .CentralReconfiguration()
-                , mode);
+                          .AddCart(Route(0, 1), Route(0, 2), Route(0, 3))
+                          .AddCart(Route(1, 2), Route(0, 1))
+                          .AddCart(Route(2, 3));
         }
 
-        public static Model Ictss1WithCoalition(AnalysisMode mode, bool verify = false)
+        public static ModelBuilder Ictss2(this ModelBuilder builder)
         {
-            return ChooseAnalysisMode(
-                new ModelBuilder(nameof(Ictss1))
-                    .DisablePlants()
-                    .DefineTask(5, Produce, Drill, Insert, Tighten, Polish, Consume)
+            return builder.DefineTask(5, Produce, Drill, Insert, Tighten, Consume)
 
-                    .AddRobot(Produce, Drill, Insert)
-                    .AddRobot(Insert, Drill)
-                    .AddRobot(Tighten, Polish, Tighten, Drill)
-                    .AddRobot(Polish, Consume)
+                          .AddRobot(Produce, Insert)
+                          .AddRobot(Tighten)
+                          .AddRobot(Drill, Consume)
 
-                    .AddCart(Route(0, 1), Route(0, 2), Route(0, 3))
-                    .AddCart(Route(1, 2), Route(0, 1))
-                    .AddCart(Route(2, 3))
-
-                    .UseCoalitionFormation()
-                    .EnableControllerVerification(verify)
-                , mode);
+                          .AddCart(Route(0, 1), Route(0, 2))
+                          .AddCart(Route(1, 2), Route(0, 1));
         }
 
-        public static Model Ictss1<T>(AnalysisMode mode, bool verify = false) where T : IController
+        public static ModelBuilder Ictss3(this ModelBuilder builder)
         {
-            return ChooseAnalysisMode(
-                new ModelBuilder(nameof(Ictss1))
-                    .DefineTask(5, Produce, Drill, Insert, Tighten, Polish, Consume)
+            return builder.DefineTask(5, Produce, Drill, Insert, Tighten, Consume)
 
-                    .AddRobot(Produce, Drill, Insert)
-                    .AddRobot(Insert, Drill)
-                    .AddRobot(Tighten, Polish, Tighten, Drill)
-                    .AddRobot(Polish, Consume)
+                          .AddRobot(Produce, Insert, Drill, Insert)
+                          .AddRobot(Insert, Tighten, Drill)
+                          .AddRobot(Tighten, Insert, Consume, Drill)
 
-                    .AddCart(Route(0, 1), Route(0, 2), Route(0, 3))
-                    .AddCart(Route(1, 2), Route(0, 1))
-                    .AddCart(Route(2, 3))
-
-                    .ChooseController<T>()
-					.EnableControllerVerification(verify)
-                    .CentralReconfiguration()
-                , mode);
+                          .AddCart(Route(0, 1), Route(0, 2))
+                          .AddCart(Route(1, 2), Route(0, 1));
         }
 
-        public static Model Ictss2<T>(AnalysisMode mode, bool verify = false) where T : IController
+        public static ModelBuilder Ictss4(this ModelBuilder builder)
         {
-            return ChooseAnalysisMode(
-                new ModelBuilder(nameof(Ictss2))
-                    .DefineTask(5, Produce, Drill, Insert, Tighten, Consume)
+            return builder.DefineTask(5, Produce, Drill, Insert, Tighten, Consume)
 
-                    .AddRobot(Produce, Insert)
-                    .AddRobot(Tighten)
-                    .AddRobot(Drill, Consume)
+                          .AddRobot(Produce, Insert)
+                          .AddRobot(Tighten)
+                          .AddRobot(Drill, Consume)
 
-                    .AddCart(Route(0, 1), Route(0, 2))
-                    .AddCart(Route(1, 2), Route(0, 1))
-
-                    .ChooseController<T>()
-					.EnableControllerVerification(verify)
-					.CentralReconfiguration()
-                , mode);
+                          .AddCart(Route(0, 1), Route(0, 2), Route(1, 2))
+                          .AddCart(Route(1, 2), Route(0, 1), Route(0, 2));
         }
 
-        public static Model Ictss3<T>(AnalysisMode mode, bool verify = false) where T : IController
+        public static ModelBuilder Ictss5(this ModelBuilder builder)
         {
-            return ChooseAnalysisMode(
-                new ModelBuilder(nameof(Ictss3))
-                    .DefineTask(5, Produce, Drill, Insert, Tighten, Consume)
+            return builder.DefineTask(5, Produce, Drill, Insert, Tighten, Drill, Insert, Tighten, Consume)
 
-                    .AddRobot(Produce, Insert, Drill, Insert)
-                    .AddRobot(Insert, Tighten, Drill)
-                    .AddRobot(Tighten, Insert, Consume, Drill)
+                          .AddRobot(Produce, Insert)
+                          .AddRobot(Tighten)
+                          .AddRobot(Drill, Consume)
 
-                    .AddCart(Route(0, 1), Route(0, 2))
-                    .AddCart(Route(1, 2), Route(0, 1))
-
-                    .ChooseController<T>()
-					.EnableControllerVerification(verify)
-					.CentralReconfiguration()
-                , mode);
+                          .AddCart(Route(0, 1), Route(0, 2))
+                          .AddCart(Route(1, 2), Route(0, 1));
         }
 
-        public static Model Ictss4<T>(AnalysisMode mode, bool verify = false) where T : IController
+        public static ModelBuilder Ictss6(this ModelBuilder builder)
         {
-            return ChooseAnalysisMode(
-                new ModelBuilder(nameof(Ictss4))
-                    .DefineTask(5, Produce, Drill, Insert, Tighten, Consume)
+            return builder.DefineTask(5, Produce, Drill, Insert, Tighten, Consume)
 
-                    .AddRobot(Produce, Insert)
-                    .AddRobot(Tighten)
-                    .AddRobot(Drill, Consume)
+                          .AddRobot(Produce, Insert)
+                          .AddRobot(Insert)
+                          .AddRobot(Drill, Tighten)
+                          .AddRobot(Tighten)
+                          .AddRobot(Drill, Consume)
 
-                    .AddCart(Route(0, 1), Route(0, 2), Route(1, 2))
-                    .AddCart(Route(1, 2), Route(0, 1), Route(0, 2))
-
-                    .ChooseController<T>()
-					.EnableControllerVerification(verify)
-					.CentralReconfiguration()
-                , mode);
+                          .AddCart(Route(0, 1), Route(0, 2))
+                          .AddCart(Route(1, 3), Route(1, 4), Route(1, 2));
         }
 
-        public static Model Ictss5<T>(AnalysisMode mode, bool verify = false) where T : IController
+        public static ModelBuilder Ictss7(this ModelBuilder builder)
         {
-            return ChooseAnalysisMode(
-                new ModelBuilder(nameof(Ictss5))
-                    .DefineTask(5, Produce, Drill, Insert, Tighten, Drill, Insert, Tighten, Consume)
+            return builder.DefineTask(5, Produce, Drill, Insert, Tighten, Consume)
 
-                    .AddRobot(Produce, Insert)
-                    .AddRobot(Tighten)
-                    .AddRobot(Drill, Consume)
+                          .AddRobot(Produce, Insert)
+                          .AddRobot(Tighten)
+                          .AddRobot(Drill, Consume)
 
-                    .AddCart(Route(0, 1), Route(0, 2))
-                    .AddCart(Route(1, 2), Route(0, 1))
-
-                    .ChooseController<T>()
-					.EnableControllerVerification(verify)
-					.CentralReconfiguration()
-                , mode);
+                          .AddCart(Route(0, 1))
+                          .AddCart(Route(1, 2), Route(0, 1))
+                          .AddCart(Route(0, 1))
+                          .AddCart(Route(1, 2));
         }
 
-        public static Model Ictss6<T>(AnalysisMode mode, bool verify = false) where T : IController
-        {
-            return ChooseAnalysisMode(
-                new ModelBuilder(nameof(Ictss6))
-                    .DefineTask(5, Produce, Drill, Insert, Tighten, Consume)
-
-                    .AddRobot(Produce, Insert)
-                    .AddRobot(Insert)
-                    .AddRobot(Drill, Tighten)
-                    .AddRobot(Tighten)
-                    .AddRobot(Drill, Consume)
-
-                    .AddCart(Route(0, 1), Route(0, 2))
-                    .AddCart(Route(1, 3), Route(1, 4), Route(1, 2))
-
-                    .ChooseController<T>()
-					.EnableControllerVerification(verify)
-					.CentralReconfiguration()
-                , mode);
-        }
-
-        public static Model Ictss7<T>(AnalysisMode mode, bool verify = false) where T : IController
-        {
-            return ChooseAnalysisMode(
-                new ModelBuilder(nameof(Ictss7))
-                    .DefineTask(5, Produce, Drill, Insert, Tighten, Consume)
-
-                    .AddRobot(Produce, Insert)
-                    .AddRobot(Tighten)
-                    .AddRobot(Drill, Consume)
-
-                    .AddCart(Route(0, 1))
-                    .AddCart(Route(1, 2), Route(0, 1))
-                    .AddCart(Route(0, 1))
-                    .AddCart(Route(1, 2))
-
-                    .ChooseController<T>()
-					.EnableControllerVerification(verify)
-					.CentralReconfiguration()
-                , mode);
-        }
-
-        private static Model ChooseAnalysisMode(ModelBuilder builder, AnalysisMode mode)
+        private static ModelBuilder ChooseAnalysisMode(ModelBuilder builder, AnalysisMode mode)
         {
             switch (mode)
             {
                 case AnalysisMode.IntolerableFaults:
-                    builder.IntolerableFaultsAnalysis();
-                    break;
+                    return builder.IntolerableFaultsAnalysis();
                 case AnalysisMode.TolerableFaults:
-                    builder.TolerableFaultsAnalysis();
-                    break;
+                    return builder.TolerableFaultsAnalysis();
+                case AnalysisMode.AllFaults:
+                    return builder;
+                default:
+                    throw new ArgumentException("Unknown analysis mode!", nameof(mode));
             }
-            return builder.Build();
         }
     }
 }

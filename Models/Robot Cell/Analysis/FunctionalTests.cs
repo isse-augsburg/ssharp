@@ -87,13 +87,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 		private static IEnumerable CreateConfigurationsMiniZinc()
 		{
-			return SampleModels.CreateConfigurations<MiniZincController>(AnalysisMode.TolerableFaults, verify: true)
+			return SampleModels.CreateDefaultConfigurations<MiniZincController>(AnalysisMode.TolerableFaults, verify: true)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 
 		private static IEnumerable CreateConfigurationsFast()
 		{
-			return SampleModels.CreateConfigurations<FastController>(AnalysisMode.TolerableFaults)
+			return SampleModels.CreateDefaultConfigurations<FastController>(AnalysisMode.TolerableFaults)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 	}
