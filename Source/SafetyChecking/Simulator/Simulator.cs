@@ -176,7 +176,7 @@ namespace ISSE.SafetyChecking.Simulator
 		{
 			if (_choiceResolver == null)
 			{
-				_choiceResolver = new NondeterministicChoiceResolver();
+				_choiceResolver = new NondeterministicChoiceResolver(true);
 				RuntimeModel.SetChoiceResolver(_choiceResolver);
 			}
 

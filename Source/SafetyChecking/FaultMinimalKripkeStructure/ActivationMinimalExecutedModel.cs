@@ -46,9 +46,9 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// <param name="stateHeaderBytes">
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
-		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
-		internal ActivationMinimalExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, long successorStateCapacity)
-			: this(runtimeModelCreator, stateHeaderBytes, null, successorStateCapacity)
+		/// <param name="configuration">The analysis configuration that should be used.</param>
+		internal ActivationMinimalExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, AnalysisConfiguration configuration)
+			: this(runtimeModelCreator, stateHeaderBytes, null, configuration)
 		{
 		}
 
@@ -57,19 +57,33 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="formulas">The formulas that should be evaluated for each state.</param>
-		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
+		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="stateHeaderBytes">
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
-		internal ActivationMinimalExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, Func<bool>[] formulas, long successorStateCapacity)
+		internal ActivationMinimalExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, Func<bool>[] formulas, AnalysisConfiguration configuration)
 			: base(runtimeModelCreator, stateHeaderBytes)
 		{
 			formulas = formulas ?? RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel,formula)).ToArray();
 
-			_transitions = new ActivationMinimalTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
+			_transitions = new ActivationMinimalTransitionSetBuilder<TExecutableModel>(RuntimeModel, configuration.SuccessorCapacity, formulas);
 			_stateConstraints = RuntimeModel.StateConstraints;
 
-			ChoiceResolver = new NondeterministicChoiceResolver();
+			bool useForwardOptimization;
+			switch (configuration.MomentOfFaultActivation)
+			{
+				case MomentOfFaultActivation.AtStepBeginning:
+				case MomentOfFaultActivation.OnFirstMethodWithoutUndo:
+					useForwardOptimization = false;
+					break;
+				case MomentOfFaultActivation.OnFirstMethodWithUndo:
+					useForwardOptimization = true;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+
+			ChoiceResolver = new NondeterministicChoiceResolver(useForwardOptimization);
 			
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
 		}

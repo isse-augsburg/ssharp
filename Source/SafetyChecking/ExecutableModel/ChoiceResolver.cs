@@ -37,6 +37,20 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		/// </summary>
 		// ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
 		internal abstract int LastChoiceIndex { get; }
+		
+		/// <summary>
+		///   Is ForwardOptimization enabled.
+		/// </summary>
+		internal bool UseForwardOptimization { get; }
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="useForwardOptimization">Use Forward Optimization.</param>
+		protected ChoiceResolver(bool useForwardOptimization)
+		{
+			UseForwardOptimization = useForwardOptimization;
+		}
 
 		/// <summary>
 		///   Prepares the resolver for resolving the choices of the next state.
@@ -71,7 +85,8 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		public abstract void SetProbabilityOfLastChoice(Probability probability);
 
 		/// <summary>
-		///   Makes taken choice identified by the <paramref name="choiceIndexToForward" /> deterministic.
+		///   Makes taken choice identified by the <paramref name="choiceIndexToForward" /> deterministic
+		///   when forward optimization is enabled.
 		/// </summary>
 		/// <param name="choiceIndexToForward">The index of the choice that should be undone.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

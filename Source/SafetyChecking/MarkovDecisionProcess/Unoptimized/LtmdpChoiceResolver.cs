@@ -79,8 +79,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public LtmdpChoiceResolver(LtmdpStepGraph ltmdpStepGraph)
-				: base()
+		/// <param name="useForwardOptimization">Use Forward Optimization.</param>
+		public LtmdpChoiceResolver(LtmdpStepGraph ltmdpStepGraph, bool useForwardOptimization)
+				: base(useForwardOptimization)
 		{
 			LtmdpStepGraph = ltmdpStepGraph;
 		}

@@ -58,7 +58,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		protected override void InitializeModel(AnalysisConfiguration configuration, Formula hazard)
 		{
 			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
-				new ActivationMinimalExecutedModel<TExecutableModel>(RuntimeModelCreator, _stateHeaderBytes, configuration.SuccessorCapacity);
+				new ActivationMinimalExecutedModel<TExecutableModel>(RuntimeModelCreator, _stateHeaderBytes, configuration);
 			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
 			var invariant = new UnaryFormula(hazard,UnaryOperator.Not);
 

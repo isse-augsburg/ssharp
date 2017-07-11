@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace Tests.MarkovDecisionProcess.Unoptimized
 {
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
@@ -59,7 +60,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_transitions = (LtmdpTransition*)_transitionBuffer.Pointer;
 
 			_stepGraph = new LtmdpStepGraph();
-			_choiceResolver = new LtmdpChoiceResolver(_stepGraph);
+			_choiceResolver = new LtmdpChoiceResolver(_stepGraph,true);
 		}
 		
 		private int CountTargetStatesOfCid(NestedMarkovDecisionProcess nmdp,long cid)

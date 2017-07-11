@@ -30,6 +30,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using System.Linq;
 	using Formula;
 	using AnalysisModel;
+	using AnalysisModelTraverser;
 
 	/// <summary>
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="SafetySharpRuntimeModel" /> with
@@ -54,17 +55,31 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
-		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
+		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="stateHeaderBytes">
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
-		internal LtmcExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, long successorStateCapacity)
+		internal LtmcExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, AnalysisConfiguration configuration)
 			: base(runtimeModelCreator, stateHeaderBytes)
 		{
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
-			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(RuntimeModel, successorStateCapacity, formulas);
+			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(RuntimeModel, configuration.SuccessorCapacity, formulas);
 
-			_ltmcChoiceResolver = new LtmcChoiceResolver();
+			bool useForwardOptimization;
+			switch (configuration.MomentOfFaultActivation)
+			{
+				case MomentOfFaultActivation.AtStepBeginning:
+				case MomentOfFaultActivation.OnFirstMethodWithoutUndo:
+					useForwardOptimization = false;
+					break;
+				case MomentOfFaultActivation.OnFirstMethodWithUndo:
+					useForwardOptimization = true;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+
+			_ltmcChoiceResolver = new LtmcChoiceResolver(useForwardOptimization);
 			ChoiceResolver = _ltmcChoiceResolver;
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
 		}

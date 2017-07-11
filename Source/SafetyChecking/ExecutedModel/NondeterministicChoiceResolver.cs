@@ -63,9 +63,9 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="choices">The choices that potentially require access to the choice resolver.</param>
-		public NondeterministicChoiceResolver()
-				: base()
+		/// <param name="useForwardOptimization">Use Forward Optimization.</param>
+		public NondeterministicChoiceResolver(bool useForwardOptimization)
+				: base(useForwardOptimization)
 		{
 		}
 

@@ -20,11 +20,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace ISSE.SafetyChecking.AnalysisModelTraverser
+namespace ISSE.SafetyChecking
 {
 	using System;
 	using ExecutedModel;
 	using Utilities;
+
+	public enum MomentOfFaultActivation
+	{
+		AtStepBeginning,
+		OnFirstMethodWithoutUndo,
+		OnFirstMethodWithUndo
+	}
 
 	/// <summary>
 	///   Configures S#'s model checker, determining the amount of CPU cores and memory to use.
@@ -81,7 +88,9 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			GenerateCounterExample = true,
 			CollectFaultSets = true,
 			StateDetected = null,
-			UseAtomarPropositionsAsStateLabels = true
+			UseAtomarPropositionsAsStateLabels = true,
+			MomentOfFaultActivation = MomentOfFaultActivation.OnFirstMethodWithUndo,
+			LimitOfActiveFaults = null
 		};
 
 		/// <summary>
@@ -139,5 +148,13 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		///   "Model.X==1" and "Model.Y==true". If set to false then the maximal possible expressions are used.
 		/// </summary>
 		public bool UseAtomarPropositionsAsStateLabels { get; set; }
+
+		/// <summary>
+		/// </summary>
+		public MomentOfFaultActivation MomentOfFaultActivation { get; set; }
+		
+		/// <summary>
+		/// </summary>
+		public int? LimitOfActiveFaults{ get; set; }
 	}
 }

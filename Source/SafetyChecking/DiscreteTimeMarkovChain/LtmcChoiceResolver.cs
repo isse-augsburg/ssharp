@@ -63,9 +63,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="choices">The choices that potentially require access to the choice resolver.</param>
-		public LtmcChoiceResolver()
-				: base()
+		/// <param name="useForwardOptimization">Use Forward Optimization.</param>
+		public LtmcChoiceResolver(bool useForwardOptimization)
+				: base(useForwardOptimization)
 		{
 		}
 

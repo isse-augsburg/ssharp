@@ -35,6 +35,7 @@ namespace Tests
 	using Shouldly;
 	using Utilities;
 	using Xunit.Abstractions;
+	using ISSE.SafetyChecking;
 
 	public abstract class FaultActivationTestObject : TestObject
 	{
@@ -53,7 +54,7 @@ namespace Tests
 			configuration.StackCapacity = 10000;
 			configuration.CpuCount = 1;
 
-			var analysisModelCreator=new AnalysisModelCreator<SafetySharpRuntimeModel>(() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(modelCreator, 0, configuration.SuccessorCapacity));
+			var analysisModelCreator=new AnalysisModelCreator<SafetySharpRuntimeModel>(() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(modelCreator, 0, configuration));
 
 			var checker = new InvariantChecker<SafetySharpRuntimeModel>(analysisModelCreator,
 				s => Output.Log("{0}", s),

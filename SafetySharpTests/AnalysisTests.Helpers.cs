@@ -25,6 +25,7 @@ namespace Tests
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
 	using ISSE.SafetyChecking.ExecutableModel;

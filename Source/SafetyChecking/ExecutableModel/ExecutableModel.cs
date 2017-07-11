@@ -226,7 +226,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 			// state variables might prevent us from doing so if they somehow influence the state
 			var replayModel = createModel.Create(StateHeaderBytes);
 			var counterExampleModel = createModel.Create(StateHeaderBytes);
-			var choiceResolver = new NondeterministicChoiceResolver();
+			var choiceResolver = new NondeterministicChoiceResolver(true);
 
 			replayModel.SetChoiceResolver(choiceResolver);
 			

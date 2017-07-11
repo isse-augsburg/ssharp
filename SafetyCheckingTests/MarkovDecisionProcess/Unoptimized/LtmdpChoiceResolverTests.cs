@@ -44,7 +44,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			Output = new TestTraceOutput(output);
 			_stepGraph = new LtmdpStepGraph();
-			_choiceResolver = new LtmdpChoiceResolver(_stepGraph);
+			_choiceResolver = new LtmdpChoiceResolver(_stepGraph,true);
 		}
 
 		private readonly LtmdpStepGraph _stepGraph;

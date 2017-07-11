@@ -56,20 +56,34 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
-		/// <param name="successorStateCapacity">The maximum number of successor states supported per state.</param>
+		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="stateHeaderBytes">
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
-		internal LtmdpExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, long successorStateCapacity)
+		internal LtmdpExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, AnalysisConfiguration configuration)
 			: base(runtimeModelCreator,stateHeaderBytes)
 		{
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
 
 			_stepGraph = new LtmdpStepGraph();
 
-			_cachedLabeledStates = new LtmdpCachedLabeledStates<TExecutableModel>(RuntimeModel, successorStateCapacity, _stepGraph, formulas);
+			_cachedLabeledStates = new LtmdpCachedLabeledStates<TExecutableModel>(RuntimeModel, configuration.SuccessorCapacity, _stepGraph, formulas);
+			
+			bool useForwardOptimization;
+			switch (configuration.MomentOfFaultActivation)
+			{
+				case MomentOfFaultActivation.AtStepBeginning:
+				case MomentOfFaultActivation.OnFirstMethodWithoutUndo:
+					useForwardOptimization = false;
+					break;
+				case MomentOfFaultActivation.OnFirstMethodWithUndo:
+					useForwardOptimization = true;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 
-			_ltmdpChoiceResolver = new LtmdpChoiceResolver(_stepGraph);
+			_ltmdpChoiceResolver = new LtmdpChoiceResolver(_stepGraph,useForwardOptimization);
 			ChoiceResolver = _ltmdpChoiceResolver;
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
 

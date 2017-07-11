@@ -125,7 +125,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			ExecutedModel<TExecutableModel> model = null;
 			var modelCreator = _runtimeModelCreator.CreateCoupledModelCreator(stateFormulas);
 			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
-				model = new LtmcExecutedModel<TExecutableModel>(modelCreator, 0, Configuration.SuccessorCapacity);
+				model = new LtmcExecutedModel<TExecutableModel>(modelCreator, 0, Configuration);
 			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
 
 			return GenerateMarkovChain(createAnalysisModel,terminateEarlyCondition, stateFormulas);

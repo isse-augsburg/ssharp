@@ -100,7 +100,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 			ExecutedModel<TExecutableModel> model = null;
 			var modelCreator = _runtimeModelCreator.CreateCoupledModelCreator(stateFormulas);
 			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
-				model = new LtmdpExecutedModel<TExecutableModel>(modelCreator, 0, Configuration.SuccessorCapacity);
+				model = new LtmdpExecutedModel<TExecutableModel>(modelCreator, 0, Configuration);
 			var createAnalysisModel=new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
 
 			return GenerateMarkovDecisionProcess(createAnalysisModel, terminateEarlyCondition, stateFormulas);

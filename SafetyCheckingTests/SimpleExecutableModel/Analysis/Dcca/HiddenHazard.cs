@@ -23,6 +23,7 @@
 namespace Tests.SimpleExecutableModel.Analysis.Dcca
 {
 	using System;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;

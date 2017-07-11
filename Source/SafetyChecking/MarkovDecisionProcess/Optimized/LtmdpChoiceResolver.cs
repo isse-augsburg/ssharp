@@ -79,12 +79,19 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		private LtmdpStepGraph LtmdpStepGraph { get; }
 
 		/// <summary>
+		///   Is ForwardOptimization enabled.
+		/// </summary>
+		private readonly bool _useForwardOptimization;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public LtmdpChoiceResolver(LtmdpStepGraph ltmdpStepGraph)
-				: base()
+		/// <param name="useForwardOptimization">Use Forward Optimization.</param>
+		public LtmdpChoiceResolver(LtmdpStepGraph ltmdpStepGraph, bool useForwardOptimization)
+				: base(useForwardOptimization)
 		{
 			LtmdpStepGraph = ltmdpStepGraph;
+			_useForwardOptimization = useForwardOptimization;
 		}
 
 		/// <summary>

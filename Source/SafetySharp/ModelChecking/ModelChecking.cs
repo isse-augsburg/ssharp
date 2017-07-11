@@ -24,6 +24,7 @@ namespace SafetySharp.ModelChecking
 {
 	using ISSE.SafetyChecking.MarkovDecisionProcess.Optimized;
 	using System;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;

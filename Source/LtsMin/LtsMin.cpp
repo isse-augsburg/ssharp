@@ -63,6 +63,7 @@ using namespace System::Threading;
 using namespace SafetySharp::Analysis;
 using namespace SafetySharp::Runtime;
 using namespace SafetySharp::Runtime::Serialization;
+using namespace ISSE::SafetyChecking;
 using namespace ISSE::SafetyChecking::ExecutableModel;
 using namespace ISSE::SafetyChecking::ExecutedModel;
 using namespace ISSE::SafetyChecking::AnalysisModel;
@@ -146,7 +147,11 @@ void LoadModel(model_t model, const char* modelFile)
 		int stateHeaderBytes = sizeof(int32_t);
 		auto modelData = RuntimeModelSerializer::LoadSerializedData(File::ReadAllBytes(gcnew String(modelFile)));
 		Globals::RuntimeModel = gcnew SafetySharpRuntimeModel(modelData, stateHeaderBytes);
-		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel<SafetySharpRuntimeModel^>(CreateModelCreator(), stateHeaderBytes, gcnew array<Func<bool>^>(0), 1 << 16);
+
+		auto configuration = AnalysisConfiguration::Default;
+		configuration.SuccessorCapacity = 1 << 16;
+
+		Globals::ExecutedModel = gcnew ActivationMinimalExecutedModel<SafetySharpRuntimeModel^>(CreateModelCreator(), stateHeaderBytes, gcnew array<Func<bool>^>(0), configuration);
 
 		auto stateSlotCount = (int32_t)(Globals::RuntimeModel->StateVectorSize / sizeof(int32_t));
 		auto stateLabelCount = Globals::RuntimeModel->ExecutableStateFormulas->Length;
