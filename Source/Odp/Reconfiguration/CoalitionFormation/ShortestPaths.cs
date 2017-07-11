@@ -106,7 +106,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			private readonly List<T> _heap = new List<T>();
 			private readonly Func<T, int> _weight;
-			private readonly Dictionary<T, int> _position = new Dictionary<T, int>();
+			private readonly Dictionary<T, int> _position = new Dictionary<T, int>(); // inverse function of _heap
 
 			public Heap(T source, Func<T, int> weight)
 			{
@@ -122,6 +122,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				var min = _heap[0];
 
 				_heap[0] = _heap[_heap.Count - 1];
+			    _position[_heap[0]] = 0;
+
 				_heap.RemoveAt(_heap.Count - 1);
 				_position.Remove(min);
 
