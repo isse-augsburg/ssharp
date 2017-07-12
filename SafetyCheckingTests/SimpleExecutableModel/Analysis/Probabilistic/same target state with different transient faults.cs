@@ -24,6 +24,7 @@
 namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 {
 	using System;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
@@ -44,10 +45,12 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var m = new Model();
 			Probability probabilityOfFinal1;
 			
-			var finally1 = new UnaryFormula(new SimpleStateInRangeFormula(1), UnaryOperator.Finally);
+			var finally1 = new BoundedUnaryFormula(new SimpleStateInRangeFormula(1), UnaryOperator.Finally, 1);
 
 			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration.WriteGraphvizModels = true;
+			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			markovChainGenerator.AddFormulaToCheck(finally1);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
@@ -58,6 +61,33 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			}
 
 			probabilityOfFinal1.Is(0.325, 0.000001).ShouldBe(true);
+		}
+
+		[Fact]
+		public void CheckWithFaultActivationInFormula()
+		{
+			var m = new Model();
+			Probability probabilityOfFinal1;
+
+			var state1WithFault1 = new BinaryFormula(new SimpleStateInRangeFormula(1), BinaryOperator.And, new FaultFormula(m.F1) );
+
+			var finallyState1WithFault1 = new BoundedUnaryFormula(state1WithFault1, UnaryOperator.Finally,1);
+
+			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
+			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.AtStepBeginning;
+			markovChainGenerator.Configuration.WriteGraphvizModels = true;
+			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			markovChainGenerator.AddFormulaToCheck(finallyState1WithFault1);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
+			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
+			using (modelChecker)
+			{
+				probabilityOfFinal1 = modelChecker.CalculateProbability(finallyState1WithFault1);
+			}
+
+			probabilityOfFinal1.Is(0.275, 0.000001).ShouldBe(true);
 		}
 
 		private class Model : SimpleModelBase
@@ -71,7 +101,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			public override bool[] LocalBools { get; } = new bool[0];
 			public override int[] LocalInts { get; } = new int[0];
 
-			private Fault F1 => Faults[0];
+			public Fault F1 => Faults[0];
 			private Fault F2 => Faults[1];
 			
 			public virtual void Helper1()

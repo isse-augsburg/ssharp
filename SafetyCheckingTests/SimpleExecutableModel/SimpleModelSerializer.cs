@@ -26,6 +26,7 @@ namespace Tests.SimpleExecutableModel
 	using System.Text;
 	using ISSE.SafetyChecking.Utilities;
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using System.Reflection;
 	using ISSE.SafetyChecking.ExecutableModel;
@@ -34,7 +35,7 @@ namespace Tests.SimpleExecutableModel
 
 	public static unsafe class SimpleModelSerializer
 	{
-		public static void WriteFormula(BinaryWriter writer, Formula formula)
+		public static void WriteFormula(BinaryWriter writer, Formula formula, Dictionary<Fault,int> faultToIndex)
 		{
 			if (formula is SimpleStateInRangeFormula)
 			{
@@ -60,20 +61,29 @@ namespace Tests.SimpleExecutableModel
 				writer.Write(innerFormula.Label);
 				writer.Write(innerFormula.Index);
 			}
+			else if (formula is FaultFormula)
+			{
+				var innerFormula = (FaultFormula)formula;
+				writer.Write(4);
+				writer.Write(innerFormula.Label);
+				writer.Write(faultToIndex[innerFormula.Fault]);
+			}
 			else if (formula is UnaryFormula)
 			{
 				var innerFormula = (UnaryFormula)formula;
-				writer.Write(4);
+				writer.Write(5);
+				writer.Write(innerFormula.Label);
 				writer.Write((int)innerFormula.Operator);
-				WriteFormula(writer, innerFormula.Operand);
+				WriteFormula(writer, innerFormula.Operand, faultToIndex);
 			}
 			else if (formula is BinaryFormula)
 			{
 				var innerFormula = (BinaryFormula)formula;
-				writer.Write(5);
+				writer.Write(6);
+				writer.Write(innerFormula.Label);
 				writer.Write((int)innerFormula.Operator);
-				WriteFormula(writer, innerFormula.LeftOperand);
-				WriteFormula(writer, innerFormula.RightOperand);
+				WriteFormula(writer, innerFormula.LeftOperand, faultToIndex);
+				WriteFormula(writer, innerFormula.RightOperand, faultToIndex);
 			}
 			else
 			{
@@ -81,7 +91,7 @@ namespace Tests.SimpleExecutableModel
 			}
 		}
 
-		public static Formula ReadFormula(BinaryReader reader)
+		public static Formula ReadFormula(BinaryReader reader, Dictionary<int,Fault> indexToFault)
 		{
 			var type = reader.ReadInt32();
 			if (type==1)
@@ -108,16 +118,24 @@ namespace Tests.SimpleExecutableModel
 			}
 			else if (type == 4)
 			{
-				var @operator = (UnaryOperator)reader.ReadInt32();
-				var operand = ReadFormula(reader);
-				return new UnaryFormula(operand, @operator);
+				var label = reader.ReadString();
+				var index = reader.ReadInt32();
+				return new FaultFormula(indexToFault[index], label);
 			}
 			else if (type == 5)
 			{
+				var label = reader.ReadString();
+				var @operator = (UnaryOperator)reader.ReadInt32();
+				var operand = ReadFormula(reader, indexToFault);
+				return new UnaryFormula(operand, @operator,label);
+			}
+			else if (type == 6)
+			{
+				var label = reader.ReadString();
 				var @operator = (BinaryOperator)reader.ReadInt32();
-				var leftOperand = ReadFormula(reader);
-				var rightOperand = ReadFormula(reader);
-				return new BinaryFormula(leftOperand, @operator, rightOperand);
+				var leftOperand = ReadFormula(reader, indexToFault);
+				var rightOperand = ReadFormula(reader, indexToFault);
+				return new BinaryFormula(leftOperand, @operator, rightOperand, label);
 			}
 			else
 			{
@@ -143,9 +161,10 @@ namespace Tests.SimpleExecutableModel
 
 				// write formulas
 				writer.Write((uint) formulas.Length);
+				var faultToIndex = Enumerable.Range(0, model.Faults.Length).ToDictionary(x => model.Faults[x], x => x);
 				foreach (var formula in formulas)
 				{
-					WriteFormula(writer, formula);
+					WriteFormula(writer, formula, faultToIndex);
 				}
 
 				// return result as array
@@ -173,9 +192,10 @@ namespace Tests.SimpleExecutableModel
 				// read formulas
 				var formulaNumber = reader.ReadUInt32();
 				var formulas = new Formula[formulaNumber];
+				var indexToFault = Enumerable.Range(0, deserializedModel.Faults.Length).ToDictionary(x => x, x => deserializedModel.Faults[x]);
 				for (var i = 0; i < formulaNumber; ++i)
 				{
-					formulas[i] = ReadFormula(reader);
+					formulas[i] = ReadFormula(reader, indexToFault);
 				}
 
 				//return tuple of model and formulas
