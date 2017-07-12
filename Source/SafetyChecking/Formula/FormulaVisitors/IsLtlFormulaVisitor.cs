@@ -44,7 +44,9 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public override void VisitUnaryFormula(UnaryFormula formula)
 		{
-			if (formula.Operator == UnaryOperator.All || formula.Operator == UnaryOperator.Exists)
+			if (formula.Operator == UnaryOperator.All ||
+				formula.Operator == UnaryOperator.Exists ||
+				formula.Operator == UnaryOperator.Once)
 				_containsInvalidOperators = true;
 			else
 				Visit(formula.Operand);

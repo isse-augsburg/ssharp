@@ -53,6 +53,7 @@
     <Compile Include="DiscreteTimeMarkovChain\LtmcToGv.cs" />
     <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
     <Compile Include="AnalysisModel\AnalysisModelCreator.cs" />
+    <Compile Include="Formula\FaultFormula.cs" />
     <Compile Include="Formula\BoundedBinaryFormula.cs" />
     <Compile Include="Formula\BoundedUnaryFormula.cs" />
     <Compile Include="ExecutableModel\ModelException.cs" />

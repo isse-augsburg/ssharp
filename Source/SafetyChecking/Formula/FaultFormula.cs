@@ -22,24 +22,26 @@
 
 namespace ISSE.SafetyChecking.Formula
 {
+	using Modeling;
+
 	/// <summary>
-	///   Represents the operator of a <see cref="UnaryFormula" />.
+	///   Represents a formula, which evaluates to true if a fault was activated in the step. Use
+	///   only with caution, when activating a fault optimization.
 	/// </summary>
-	public enum UnaryOperator
+	public class FaultFormula : AtomarPropositionFormula
 	{
-		// Non-temporal operators
-		Not,
+		public Fault Fault { get; }
 
-		// Temporal Future operators
-		Next,
-		Finally,
-		Globally,
-
-		// Temporal Past operator (see dx.doi.org/10.1007/3-540-15648-8_16)
-		Once,
-
-		// Path operators
-		All,
-		Exists
+		/// <summary>
+		///   Initializes a new instance of the <see cref="FaultFormula" /> class.
+		/// </summary>
+		/// <param name="fault"> The fault for which activation should be checked </param>
+		/// <param name="label">
+		///   The name that should be used for the state label of the formula. If <c>null</c>, a unique name is generated.
+		/// </param>
+		public FaultFormula(Fault fault, string label = null) : base(label)
+		{
+			Fault = fault;
+		}
 	}
 }

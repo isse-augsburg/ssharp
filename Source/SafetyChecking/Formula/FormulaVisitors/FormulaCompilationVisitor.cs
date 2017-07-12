@@ -119,7 +119,16 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
-			_expression = _exectutableModel.CreateExecutableExpressionFromAtomarPropositionFormula(formula);
+			var faultFormula = formula as FaultFormula;
+			if (faultFormula !=null)
+			{
+				Func<bool> formulaEvaluatesToTrue = () => faultFormula.Fault.IsActivated;
+				_expression = Expression.Invoke(Expression.Constant(formulaEvaluatesToTrue));
+			}
+			else
+			{
+				_expression = _exectutableModel.CreateExecutableExpressionFromAtomarPropositionFormula(formula);
+			}
 		}
 
 		/// <summary>
@@ -161,7 +170,7 @@ namespace ISSE.SafetyChecking.Formula
 	using ExecutableModel;
 	using System;
 
-	public static class SafetySharpFormulaEvaluationExtension
+	public static class FormulaEvaluationExtension
 	{
 		public static bool Evaluate<TExecutableModel>(this TExecutableModel executableModel, Formula formula) where TExecutableModel : ExecutableModel<TExecutableModel>
 		{
