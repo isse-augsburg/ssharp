@@ -127,6 +127,9 @@ namespace ISSE.SafetyChecking.ExecutableModel
 
 			fixed (byte* state = States[transitionIndex])
 				RuntimeModel.Deserialize(state);
+			
+			foreach (var fault in RuntimeModel.NondeterministicFaults)
+				fault.Reset();
 
 			if (transitionIndex == 0)
 				RuntimeModel.ExecuteInitialStep();

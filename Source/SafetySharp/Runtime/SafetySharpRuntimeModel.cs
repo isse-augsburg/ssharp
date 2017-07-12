@@ -138,9 +138,6 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override void ExecuteInitialStep()
 		{
-			foreach (var fault in NondeterministicFaults)
-				fault.Reset();
-
 			foreach (var obj in _serializedObjects.OfType<IInitializable>())
 			{
 				try
@@ -162,9 +159,6 @@ namespace SafetySharp.Runtime
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override void ExecuteStep()
 		{
-			foreach (var fault in NondeterministicFaults)
-				fault.Reset();
-
 			foreach (var component in RootComponents)
 			{
 				try

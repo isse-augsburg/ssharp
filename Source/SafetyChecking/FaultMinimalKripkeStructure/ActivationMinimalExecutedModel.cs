@@ -110,6 +110,9 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// </summary>
 		protected override void ExecuteInitialTransition()
 		{
+			foreach (var fault in RuntimeModel.NondeterministicFaults)
+				fault.Reset();
+
 			RuntimeModel.ExecuteInitialStep();
 		}
 
@@ -118,6 +121,9 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// </summary>
 		protected override void ExecuteTransition()
 		{
+			foreach (var fault in RuntimeModel.NondeterministicFaults)
+				fault.Reset();
+
 			RuntimeModel.ExecuteStep();
 		}
 

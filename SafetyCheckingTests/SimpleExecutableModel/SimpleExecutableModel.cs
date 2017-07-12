@@ -76,17 +76,11 @@ namespace Tests.SimpleExecutableModel
 
 		public override void ExecuteInitialStep()
 		{
-			foreach (var fault in NondeterministicFaults)
-				fault.Reset();
-
 			Model.SetInitialState();
 		}
 
 		public override void ExecuteStep()
 		{
-			foreach (var fault in NondeterministicFaults)
-				fault.Reset();
-
 			Model.Update();
 		}
 

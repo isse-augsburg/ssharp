@@ -107,6 +107,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			//TODO: _resetRewards();
 
+			foreach (var fault in RuntimeModel.NondeterministicFaults)
+				fault.Reset();
+
 			if (_activateIndependentFaultsAtStepBeginning)
 			{
 				// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
@@ -135,6 +138,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		protected override void ExecuteTransition()
 		{
 			//TODO: _resetRewards();
+
+			foreach (var fault in RuntimeModel.NondeterministicFaults)
+				fault.Reset();
 
 			if (_activateIndependentFaultsAtStepBeginning)
 			{

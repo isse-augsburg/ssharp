@@ -275,6 +275,9 @@ namespace ISSE.SafetyChecking.ExecutableModel
 
 						fixed (byte* sourceState = trace[i])
 						Deserialize(sourceState);
+						
+						foreach (var fault in NondeterministicFaults)
+							fault.Reset();
 
 						if (i == 0)
 							ExecuteInitialStep();
